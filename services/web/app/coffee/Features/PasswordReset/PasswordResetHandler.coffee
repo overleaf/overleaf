@@ -9,18 +9,25 @@ V1Api = require("../V1/V1Api")
 
 module.exports = PasswordResetHandler =
 
-	generateAndEmailResetToken:(email, callback = (error, exists) ->)->
+	generateAndEmailResetToken:(email, callback = (error, status) ->)->
 		PasswordResetHandler._getPasswordResetData email, (error, exists, data) ->
-			if error? or !exists
-				return callback(error, exists) 
-			OneTimeTokenHandler.getNewToken 'password', data, (err, token)->
-				if err then return callback(err)
-				emailOptions =
-					to : email
-					setNewPasswordUrl : "#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}&email=#{encodeURIComponent(email)}"
-				EmailHandler.sendEmail "passwordResetRequested", emailOptions, (error) ->
-					return callback(error) if error?
-					callback null, true
+			if error?
+				return callback(error, null)
+			else if exists
+				OneTimeTokenHandler.getNewToken 'password', data, (err, token)->
+					if err then return callback(err)
+					emailOptions =
+						to : email
+						setNewPasswordUrl : "#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}&email=#{encodeURIComponent(email)}"
+					EmailHandler.sendEmail "passwordResetRequested", emailOptions, (error) ->
+						return callback(error) if error?
+						callback null, 'primary'
+			else
+				UserGetter.getUserByAnyEmail email, (err, user) ->
+					if !user
+						return callback(error, null)
+					else
+						return callback(error, 'secondary')
 
 	setNewUserPassword: (token, password, callback = (error, found, user_id) ->)->
 		OneTimeTokenHandler.getValueFromTokenAndExpire 'password', token, (err, data)->

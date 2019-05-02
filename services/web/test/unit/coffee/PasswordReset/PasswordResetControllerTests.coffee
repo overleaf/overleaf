@@ -54,7 +54,7 @@ describe "PasswordResetController", ->
 	describe "requestReset", ->
 
 		it "should error if the rate limit is hit", (done)->
-			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, true)
+			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, 'primary')
 			@RateLimiter.addCount.callsArgWith(1, null, false)
 			@res.send = (code)=>
 				code.should.equal 429
@@ -65,7 +65,7 @@ describe "PasswordResetController", ->
 
 		it "should tell the handler to process that email", (done)->
 			@RateLimiter.addCount.callsArgWith(1, null, true)
-			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, true)
+			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, 'primary')
 			@res.send = (code)=>
 				code.should.equal 200
 				@PasswordResetHandler.generateAndEmailResetToken.calledWith(@email.trim()).should.equal true
@@ -82,7 +82,15 @@ describe "PasswordResetController", ->
 
 		it "should send a 404 if the email doesn't exist", (done)->
 			@RateLimiter.addCount.callsArgWith(1, null, true)
-			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, false)
+			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, null)
+			@res.send = (code)=>
+				code.should.equal 404
+				done()
+			@PasswordResetController.requestReset @req, @res
+
+		it "should send a 404 if the email is registered as a secondard email", (done)->
+			@RateLimiter.addCount.callsArgWith(1, null, true)
+			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, 'secondary')
 			@res.send = (code)=>
 				code.should.equal 404
 				done()
@@ -92,7 +100,7 @@ describe "PasswordResetController", ->
 			@email = "UPerCaseEMAIL@example.Com"
 			@req.body.email = @email
 			@RateLimiter.addCount.callsArgWith(1, null, true)
-			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, true)
+			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, 'primary')
 			@res.send = (code)=>
 				code.should.equal 200
 				@PasswordResetHandler.generateAndEmailResetToken.calledWith(@email.toLowerCase()).should.equal true

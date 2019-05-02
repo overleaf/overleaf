@@ -24,11 +24,13 @@ module.exports =
 		RateLimiter.addCount opts, (err, canContinue)->
 			if !canContinue
 				return res.send 429, { message: req.i18n.translate("rate_limit_hit_wait")}
-			PasswordResetHandler.generateAndEmailResetToken email, (err, exists)->
+			PasswordResetHandler.generateAndEmailResetToken email, (err, status)->
 				if err?
 					res.send 500, {message:err?.message}
-				else if exists
+				else if status == 'primary'
 					res.send 200, {message: {text: req.i18n.translate("password_reset_email_sent")}}
+				else if status == 'secondary'
+					res.send 404, {message: req.i18n.translate("secondary_email_password_reset")}
 				else
 					res.send 404, {message: req.i18n.translate("cant_find_email")}
 

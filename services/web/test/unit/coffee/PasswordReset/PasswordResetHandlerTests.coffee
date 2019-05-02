@@ -18,6 +18,7 @@ describe "PasswordResetHandler", ->
 		@UserGetter =
 			getUserByMainEmail:sinon.stub()
 			getUser: sinon.stub()
+			getUserByAnyEmail: sinon.stub()
 		@EmailHandler = 
 			sendEmail:sinon.stub()
 		@AuthenticationManager =
@@ -48,29 +49,31 @@ describe "PasswordResetHandler", ->
 		describe "when in ShareLaTeX", ->
 			it "should check the user exists", (done)->
 				@UserGetter.getUserByMainEmail.callsArgWith(1)
+				@UserGetter.getUserByAnyEmail.callsArgWith(1)
 				@OneTimeTokenHandler.getNewToken.yields()
-				@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, exists)=>
-					exists.should.equal false
+				@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, status)=>
+					should.equal(status, null)
 					done()
 
 			it "should send the email with the token", (done)->
 				@UserGetter.getUserByMainEmail.callsArgWith(1, null, @user)
 				@OneTimeTokenHandler.getNewToken.yields(null, @token)
 				@EmailHandler.sendEmail.callsArgWith(2)
-				@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, exists)=>
+				@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, status)=>
 					@EmailHandler.sendEmail.called.should.equal true
-					exists.should.equal true
+					status.should.equal 'primary'
 					args = @EmailHandler.sendEmail.args[0]
 					args[0].should.equal "passwordResetRequested"
 					args[1].setNewPasswordUrl.should.equal "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}&email=#{encodeURIComponent(@user.email)}"
 					done()
 
-			it "should return exists = false for a holdingAccount", (done) ->
+			it "should return exists == null for a holdingAccount", (done) ->
 				@user.holdingAccount = true
 				@UserGetter.getUserByMainEmail.callsArgWith(1, null, @user)
+				@UserGetter.getUserByAnyEmail.callsArgWith(1)
 				@OneTimeTokenHandler.getNewToken.yields()
-				@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, exists)=>
-					exists.should.equal false
+				@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, status)=>
+					should.equal(status, null)
 					done()
 
 		describe "when in overleaf", ->
@@ -105,12 +108,13 @@ describe "PasswordResetHandler", ->
 					args[0].should.equal "passwordResetRequested"
 					args[1].setNewPasswordUrl.should.equal "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}&email=#{encodeURIComponent(@user.email)}"
 
-				it 'should return exists == true', ->
-					@callback.calledWith(null, true).should.equal true
+				it 'should return status == true', ->
+					@callback.calledWith(null, 'primary').should.equal true
 
 			describe "when the email doesn't exist", ->
 				beforeEach ->
 					@V1Api.request = sinon.stub().yields(null, { statusCode: 404 }, {})
+					@UserGetter.getUserByAnyEmail.callsArgWith(1)
 					@PasswordResetHandler.generateAndEmailResetToken @email, @callback
 
 				it 'should not set the password token data', ->
@@ -120,9 +124,24 @@ describe "PasswordResetHandler", ->
 				it 'should send an email with the token', ->
 					@EmailHandler.sendEmail.called.should.equal false
 
-				it 'should return exists == false', ->
-					@callback.calledWith(null, false).should.equal true
+				it 'should return status == null', ->
+					@callback.calledWith(null, null).should.equal true
 
+			describe "when the email is a secondary email", ->
+				beforeEach ->
+					@V1Api.request = sinon.stub().yields(null, { statusCode: 404 }, {})
+					@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @user)
+					@PasswordResetHandler.generateAndEmailResetToken @email, @callback
+
+				it 'should not set the password token data', ->
+					@OneTimeTokenHandler.getNewToken
+						.called.should.equal false
+
+				it 'should not send an email with the token', ->
+					@EmailHandler.sendEmail.called.should.equal false
+
+				it 'should return status == secondary', ->
+					@callback.calledWith(null, 'secondary').should.equal true
 
 	describe "setNewUserPassword", ->
 		describe "when no data is found", ->
