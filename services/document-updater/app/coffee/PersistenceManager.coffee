@@ -50,7 +50,7 @@ module.exports = PersistenceManager =
 			else
 				return callback(new Error("error accessing web API: #{url} #{res.statusCode}"))
 
-	setDoc: (project_id, doc_id, lines, version, ranges, _callback = (error) ->) ->
+	setDoc: (project_id, doc_id, lines, version, ranges, lastUpdatedAt, lastUpdatedBy,_callback = (error) ->) ->
 		timer = new Metrics.Timer("persistenceManager.setDoc")
 		callback = (args...) ->
 			timer.done()
@@ -64,6 +64,8 @@ module.exports = PersistenceManager =
 				lines: lines
 				ranges: ranges
 				version: version
+				lastUpdatedBy: lastUpdatedBy
+				lastUpdatedAt: lastUpdatedAt
 			auth:
 				user: Settings.apis.web.user
 				pass: Settings.apis.web.pass

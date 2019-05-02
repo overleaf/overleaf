@@ -35,6 +35,8 @@ describe "DocumentManager", ->
 		@ranges = { comments: "mock", entries: "mock" }
 		@pathname = '/a/b/c.tex'
 		@unflushedTime = Date.now()
+		@lastUpdatedAt = Date.now()
+		@lastUpdatedBy = 'last-author-id'
 
 	afterEach ->
 		tk.reset()
@@ -70,7 +72,7 @@ describe "DocumentManager", ->
 	describe "flushDocIfLoaded", ->
 		describe "when the doc is in Redis", ->
 			beforeEach ->
-				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges)
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname, @projectHistoryId, @unflushedTime, @lastUpdatedAt, @lastUpdatedBy)
 				@RedisManager.clearUnflushedTime = sinon.stub().callsArgWith(1, null)
 				@PersistenceManager.setDoc = sinon.stub().yields()
 				@DocumentManager.flushDocIfLoaded @project_id, @doc_id, @callback
@@ -82,7 +84,7 @@ describe "DocumentManager", ->
 
 			it "should write the doc lines to the persistence layer", ->
 				@PersistenceManager.setDoc
-					.calledWith(@project_id, @doc_id, @lines, @version, @ranges)
+					.calledWith(@project_id, @doc_id, @lines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy)
 					.should.equal true
 
 			it "should call the callback without error", ->
@@ -324,7 +326,7 @@ describe "DocumentManager", ->
 
 			it "should save the updated ranges", ->
 				@RedisManager.updateDocument
-					.calledWith(@project_id, @doc_id, @lines, @version, [], @updated_ranges)
+					.calledWith(@project_id, @doc_id, @lines, @version, [], @updated_ranges, {})
 					.should.equal true
 
 			it "should call the callback", ->
@@ -378,7 +380,7 @@ describe "DocumentManager", ->
 
 			it "should save the updated ranges", ->
 				@RedisManager.updateDocument
-					.calledWith(@project_id, @doc_id, @lines, @version, [], @updated_ranges)
+					.calledWith(@project_id, @doc_id, @lines, @version, [], @updated_ranges, {})
 					.should.equal true
 
 			it "should call the callback", ->

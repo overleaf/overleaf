@@ -159,7 +159,8 @@ describe "UpdateManager", ->
 
 	describe "applyUpdate", ->
 		beforeEach ->
-			@update = {op: [{p: 42, i: "foo"}]}
+			@updateMeta = { user_id: 'last-author-fake-id' }
+			@update = {op: [{p: 42, i: "foo"}], meta: @updateMeta}
 			@updatedDocLines = ["updated", "lines"]
 			@version = 34
 			@lines = ["original", "lines"]
@@ -193,7 +194,7 @@ describe "UpdateManager", ->
 
 			it "should save the document", ->
 				@RedisManager.updateDocument
-					.calledWith(@project_id, @doc_id, @updatedDocLines, @version, @appliedOps, @updated_ranges)
+					.calledWith(@project_id, @doc_id, @updatedDocLines, @version, @appliedOps, @updated_ranges, @updateMeta)
 					.should.equal true
 
 			it "should add metadata to the ops" , ->

@@ -79,6 +79,8 @@ module.exports =
 				projectHistoryId: ({doc_id}) -> "ProjectHistoryId:{#{doc_id}}"
 				projectState: ({project_id}) -> "ProjectState:{#{project_id}}"
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
+				lastUpdatedBy: ({doc_id}) -> "lastUpdatedBy:{#{doc_id}}"
+				lastUpdatedAt: ({doc_id}) -> "lastUpdatedAt:{#{doc_id}}"
 			redisOptions:
 				keepAlive: 100
 	
