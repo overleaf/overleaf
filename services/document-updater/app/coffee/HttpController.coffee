@@ -184,9 +184,11 @@ module.exports = HttpController =
 
 	flushAllProjects: (req, res, next = (error)-> )->
 		res.setTimeout(5 * 60 * 1000)
-		limit = req.query.limit || 1000
-		concurrency = req.query.concurrency || 5
-		ProjectFlusher.flushAllProjects limit, concurrency, (err, project_ids)->
+		options = 
+			limit : req.query.limit || 1000
+			concurrency : req.query.concurrency || 5
+			dryRun : req.query.dryRun || false
+		ProjectFlusher.flushAllProjects options, (err, project_ids)->
 			if err?
 				logger.err err:err, "error bulk flushing projects"
 				res.send 500

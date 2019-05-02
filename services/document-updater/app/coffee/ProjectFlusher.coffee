@@ -45,16 +45,18 @@ ProjectFlusher =
 			m[1]
 		return ids
 
-	flushAllProjects: (limit, concurrency = 5, callback)->
-		ProjectFlusher._getKeys docUpdaterKeys.docsInProject({project_id:"*"}), limit, (error, project_keys) ->
+	flushAllProjects: (options, callback)->
+		ProjectFlusher._getKeys docUpdaterKeys.docsInProject({project_id:"*"}), options.limit, (error, project_keys) ->
 			if error?
 				logger.err err:error, "error getting keys for flushing"
 				return callback(error)
 			project_ids = ProjectFlusher._extractIds(project_keys)
+			if options.dryRun
+				return callback(null, project_ids)
 			jobs = _.map project_ids, (project_id)->
 				return (cb)->
 					ProjectManager.flushAndDeleteProjectWithLocks project_id, cb
-			async.parallelLimit jobs, concurrency, (error)->
+			async.parallelLimit jobs, options.concurrency, (error)->
 				return callback(error, project_ids)
 
 
