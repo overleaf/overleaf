@@ -48,10 +48,10 @@ module.exports =
     fs.open "#{location}/#{filteredName}", 'r', (err, fd) ->
       if err?
         logger.err err:err, location:location, filteredName:name, "Error reading from file"
-        if err.code == 'ENOENT'
-          return callback new Errors.NotFoundError(err.message), null
-        else
-          return callback err, null
+      if err.code == 'ENOENT'
+        return callback new Errors.NotFoundError(err.message), null
+      else
+        return callback err, null
       opts.fd = fd
       sourceStream = fs.createReadStream null, opts
       return callback null, sourceStream
