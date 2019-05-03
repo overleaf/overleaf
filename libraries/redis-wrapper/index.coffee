@@ -6,9 +6,6 @@ module.exports = RedisSharelatex =
 		if !opts.retry_max_delay?
 			opts.retry_max_delay = 5000 # ms
 		
-		if opts.password?
-			opts.auth_pass = opts.password
-			delete opts.password
 		if opts.endpoints?
 			standardOpts = _.clone(opts)
 			delete standardOpts.endpoints
@@ -25,9 +22,9 @@ module.exports = RedisSharelatex =
 			RedisSharelatex._monkeyPatchIoredisExec(client)
 		else
 			standardOpts = _.clone(opts)
-			delete standardOpts.port
-			delete standardOpts.host
-			client = require("redis").createClient opts.port, opts.host, standardOpts
+			ioredis = require("ioredis")
+			client = new ioredis(standardOpts)
+			RedisSharelatex._monkeyPatchIoredisExec(client)
 			client.healthCheck = RedisSharelatex.singleInstanceHealthCheckBuilder(client)
 		return client
 	
