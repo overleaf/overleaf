@@ -305,32 +305,16 @@ define(['ace/ace', 'ide/colors/ColorManager'], function(_, ColorManager) {
     }
 
     _drawCursor(annotation, colorScheme) {
-      return this.markerIds.push(
-        this.editor.getSession().addMarker(
-          new Range(
-            annotation.cursor.row,
-            annotation.cursor.column,
-            annotation.cursor.row,
-            annotation.cursor.column + 1
-          ),
-          'annotation remote-cursor',
-          function(html, range, left, top, config) {
-            const div = `\
-<div
-	class='remote-cursor custom ace_start'
-	style='height: ${
-    config.lineHeight
-  }px; top:${top}px; left:${left}px; border-color: ${colorScheme.cursor};'
->
-	<div class="nubbin" style="bottom: ${config.lineHeight}px; background-color: ${
-              colorScheme.cursor
-            };"></div>
-</div>\
-`
-            return html.push(div)
-          },
-          true
-        )
+      return this._addMarkerWithCustomStyle(
+        new Range(
+          annotation.cursor.row,
+          annotation.cursor.column,
+          annotation.cursor.row,
+          annotation.cursor.column + 1
+        ),
+        'annotation remote-cursor',
+        false,
+        `border-color: ${colorScheme.cursor};`
       )
     }
 
@@ -349,7 +333,6 @@ define(['ace/ace', 'ide/colors/ColorManager'], function(_, ColorManager) {
     }
 
     _drawStrikeThrough(annotation, colorScheme) {
-      const { lineHeight } = this.editor.renderer
       this._addMarkerWithCustomStyle(
         new Range(
           annotation.strikeThrough.start.row,
@@ -370,16 +353,13 @@ define(['ace/ace', 'ide/colors/ColorManager'], function(_, ColorManager) {
         ),
         'annotation strike-through-foreground',
         true,
-        `\
-height: ${Math.round(lineHeight / 2) + 2}px;
-border-bottom: 2px solid ${colorScheme.strikeThroughForegroundColor};\
-`
+        `color: ${colorScheme.strikeThroughForegroundColor};`
       )
     }
 
     _addMarkerWithCustomStyle(range, klass, foreground, style) {
       let markerLayer
-      if (foreground != null) {
+      if (!foreground) {
         markerLayer = this.editor.renderer.$markerBack
       } else {
         markerLayer = this.editor.renderer.$markerFront

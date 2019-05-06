@@ -241,11 +241,20 @@ Ace
 	.remote-cursor {
 		position: absolute;
 		border-left: 2px solid transparent;
-		.nubbin {
-			height: 5px;
-			width: 5px;
+		// Adds "nubbin" top right of cursor, which inherits the injected color
+		&::before {
+			content: '';
 			position: absolute;
 			left: -2px;
+			top: -5px;
+			height: 5px;
+			width: 5px;
+			border-top-width: 3px;
+			border-right-width: 3px;
+			border-bottom-width: 2px;
+			border-left-width: 2px;
+			border-style: solid;
+			border-color: inherit;
 		}
 	}
 	.annotation-label {
@@ -272,6 +281,16 @@ Ace
 	.highlights-after-label {
 		bottom: @line-height-computed / 2;
 	}
+}
+
+.strike-through-foreground::after {
+	content: '';
+	position: absolute;
+	width: 100%;
+	top: 50%;
+	margin-top: -1px;
+	height: 2px;
+	background: currentColor;
 }
 
 // Hack to solve an issue where scrollbars aren't visible in Safari.
