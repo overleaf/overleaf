@@ -3,19 +3,20 @@ chai = require('chai')
 should = chai.should()
 modulePath = "../../../../app/js/DispatchManager.js"
 SandboxedModule = require('sandboxed-module')
-
+Errors = require "../../../../app/js/Errors.js"
 
 describe "DispatchManager", ->
 	beforeEach ->
 		@timeout(3000)
 		@DispatchManager = SandboxedModule.require modulePath, requires:
 			"./UpdateManager" : @UpdateManager = {}
-			"logger-sharelatex": @logger = { log: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 			"settings-sharelatex": @settings =
 				redis:
 					realtime: {}
 			"redis-sharelatex": @redis = {}
 			"./RateLimitManager": {}
+			"./Errors": Errors
 			"./Metrics":
 				Timer: ->
 					done: ->
@@ -38,23 +39,51 @@ describe "DispatchManager", ->
 				@doc_id = "doc-id-123"
 				@doc_key = "#{@project_id}:#{@doc_id}"
 				@client.blpop = sinon.stub().callsArgWith(2, null, ["pending-updates-list", @doc_key])
-				@UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArg(2)
-				
-				@worker._waitForUpdateThenDispatchWorker @callback
-				
-			it "should call redis with BLPOP", ->
-				@client.blpop
-					.calledWith("pending-updates-list", 0)
-					.should.equal true
-					
-			it "should call processOutstandingUpdatesWithLock", ->
-				@UpdateManager.processOutstandingUpdatesWithLock
-					.calledWith(@project_id, @doc_id)
-					.should.equal true
-					
-			it "should call the callback", ->
-				@callback.called.should.equal true
-				
+
+			describe "in the normal case", ->
+				beforeEach ->
+					@UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArg(2)
+					@worker._waitForUpdateThenDispatchWorker @callback
+
+				it "should call redis with BLPOP", ->
+					@client.blpop
+						.calledWith("pending-updates-list", 0)
+						.should.equal true
+						
+				it "should call processOutstandingUpdatesWithLock", ->
+					@UpdateManager.processOutstandingUpdatesWithLock
+						.calledWith(@project_id, @doc_id)
+						.should.equal true
+
+				it "should not log any errors", ->
+					@logger.error.called.should.equal false
+					@logger.warn.called.should.equal false
+
+				it "should call the callback", ->
+					@callback.called.should.equal true
+
+			describe "with an error", ->
+				beforeEach ->
+					@UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArgWith(2, new Error("a generic error"))
+					@worker._waitForUpdateThenDispatchWorker @callback
+
+				it "should log an error", ->
+					@logger.error.called.should.equal true
+
+				it "should call the callback", ->
+					@callback.called.should.equal true
+
+			describe "with a 'Delete component' error", ->
+				beforeEach ->
+					@UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArgWith(2, new Errors.DeleteMismatchError())
+					@worker._waitForUpdateThenDispatchWorker @callback
+
+				it "should log a warning", ->
+					@logger.warn.called.should.equal true
+
+				it "should call the callback", ->
+					@callback.called.should.equal true
+
 		describe "run", ->
 			it "should call _waitForUpdateThenDispatchWorker until shutting down", (done) ->
 				callCount = 0

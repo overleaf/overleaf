@@ -19,7 +19,15 @@ ProjectStateChangedError = (message) ->
 	return error
 ProjectStateChangedError.prototype.__proto__ = Error.prototype
 
+DeleteMismatchError = (message) ->
+	error = new Error(message)
+	error.name = "DeleteMismatchError"
+	error.__proto__ = DeleteMismatchError.prototype
+	return error
+DeleteMismatchError.prototype.__proto__ = Error.prototype
+
 module.exports = Errors =
 	NotFoundError: NotFoundError
 	OpRangeNotAvailableError: OpRangeNotAvailableError
 	ProjectStateChangedError: ProjectStateChangedError
+	DeleteMismatchError: DeleteMismatchError

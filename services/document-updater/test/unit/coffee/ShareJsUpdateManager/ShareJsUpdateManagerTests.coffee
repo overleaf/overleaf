@@ -18,6 +18,7 @@ describe "ShareJsUpdateManager", ->
 				"redis-sharelatex" : createClient: () => @rclient = auth:->
 				"logger-sharelatex": @logger = { log: sinon.stub() }
 				"./RealTimeRedisManager": @RealTimeRedisManager = {}
+				"./Metrics": @metrics = { inc: sinon.stub() }
 			globals:
 				clearTimeout: @clearTimeout = sinon.stub()
 
