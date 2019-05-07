@@ -1,9 +1,7 @@
-clsi-sharelatex
+overleaf/clsi
 ===============
 
 A web api for compiling LaTeX documents in the cloud
-
-[![Build Status](https://travis-ci.org/sharelatex/clsi-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/clsi-sharelatex)
 
 The Common LaTeX Service Interface (CLSI) provides a RESTful interface to traditional LaTeX tools (or, more generally, any command line tool for composing marked-up documents into a display format such as PDF or HTML). The CLSI listens on the following ports by default:
 
@@ -32,9 +30,9 @@ The CLSI can be configured through the following environment variables:
 Installation
 ------------
 
-The CLSI can be installed and set up as part of the entire [ShareLaTeX stack](https://github.com/sharelatex/sharelatex) (complete with front end editor and document storage), or it can be run as a standalone service. To run is as a standalone service, first checkout this repository:
+The CLSI can be installed and set up as part of the entire [Overleaf stack](https://github.com/overleaf/overleaf) (complete with front end editor and document storage), or it can be run as a standalone service. To run is as a standalone service, first checkout this repository:
 
-    $ git clone git@github.com:sharelatex/clsi-sharelatex.git
+    $ git clone git@github.com:overleaf/clsi.git
     
 Then install the require npm modules:
 
@@ -116,4 +114,4 @@ License
 
 The code in this repository is released under the GNU AFFERO GENERAL PUBLIC LICENSE, version 3. A copy can be found in the `LICENSE` file.
 
-Copyright (c) ShareLaTeX, 2014.
+Copyright (c) Overleaf, 2014-2019.
