@@ -1,8 +1,8 @@
-settings-sharelatex
+overleaf/settings-module
 ===================
 
 A small module to allow global config settings to be set for all services
-within the ShareLaTeX architecture.
+within the Overleaf architecture.
 
 Settings file location
 ----------------------
