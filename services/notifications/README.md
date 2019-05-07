@@ -1,7 +1,7 @@
-notifications-sharelatex
+overleaf/notifications
 ===============
 
-An API for managing user notifications in ShareLaTeX
+An API for managing user notifications in Overleaf
 
 
 database indexes
