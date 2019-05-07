@@ -4,10 +4,10 @@ pipeline {
   agent any
 
   environment {
-    GIT_PROJECT = "real-time-sharelatex"
+    GIT_PROJECT = "real-time"
     JENKINS_WORKFLOW = "real-time-sharelatex"
     TARGET_URL = "${env.JENKINS_URL}blue/organizations/jenkins/${JENKINS_WORKFLOW}/detail/$BRANCH_NAME/$BUILD_NUMBER/pipeline"
-    GIT_API_URL = "https://api.github.com/repos/sharelatex/${GIT_PROJECT}/statuses/$GIT_COMMIT"
+    GIT_API_URL = "https://api.github.com/repos/overleaf/${GIT_PROJECT}/statuses/$GIT_COMMIT"
   }
 
   triggers {
