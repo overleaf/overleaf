@@ -106,7 +106,7 @@
     "temp": "^0.8.3",
     "underscore": "1.6.0",
     "uuid": "^3.0.1",
-    "v8-profiler": "^5.2.3",
+    "v8-profiler-node8": "^6.0.1",
     "valid-url": "^1.0.9",
     "xml2js": "0.2.0",
     "xregexp": "^4.2.4",

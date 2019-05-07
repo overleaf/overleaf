@@ -165,7 +165,7 @@ webRouter.use (req, res, next) ->
 		frameguard: false
 	})(req, res, next)
 
-profiler = require "v8-profiler"
+profiler = require "v8-profiler-node8"
 privateApiRouter.get "/profile", (req, res) ->
 	time = parseInt(req.query.time || "1000")
 	profiler.startProfiling("test")
