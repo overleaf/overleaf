@@ -13,6 +13,7 @@ describe "HttpController", ->
 				flushProjectChangesAsync: sinon.stub()
 			"./ProjectManager": @ProjectManager = {}
 			"logger-sharelatex" : @logger = { log: sinon.stub() }
+			"./ProjectFlusher": {flushAllProjects:->}
 			"./Metrics": @Metrics = {}
 			"./Errors" : Errors
 		@Metrics.Timer = class Timer

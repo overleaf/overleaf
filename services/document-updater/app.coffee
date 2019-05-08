@@ -59,6 +59,8 @@ app.post   '/project/:project_id/doc/:doc_id/change/:change_id/accept', HttpCont
 app.post   '/project/:project_id/doc/:doc_id/change/accept',            HttpController.acceptChanges
 app.del    '/project/:project_id/doc/:doc_id/comment/:comment_id',      HttpController.deleteComment
 
+app.get    '/flush_all_projects',                                       HttpController.flushAllProjects
+
 app.get '/total', (req, res)->
 	timer = new Metrics.Timer("http.allDocList")	
 	RedisManager.getCountOfDocsInMemory (err, count)->
