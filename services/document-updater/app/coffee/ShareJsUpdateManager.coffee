@@ -7,6 +7,8 @@ Keys = require "./UpdateKeys"
 util = require "util"
 RealTimeRedisManager = require "./RealTimeRedisManager"
 crypto = require "crypto"
+metrics = require('./Metrics')
+Errors = require("./Errors")
 
 ShareJsModel:: = {}
 util.inherits ShareJsModel, EventEmitter
@@ -36,9 +38,15 @@ module.exports = ShareJsUpdateManager =
 		model.applyOp doc_key, update, (error) ->
 			if error?
 				if error == "Op already submitted"
+					metrics.inc "sharejs.already-submitted"
 					logger.warn {project_id, doc_id, update}, "op has already been submitted"
 					update.dup = true
 					ShareJsUpdateManager._sendOp(project_id, doc_id, update)
+				else if /^Delete component/.test(error)
+					metrics.inc "sharejs.delete-mismatch"
+					logger.warn {project_id, doc_id, update, shareJsErr: error}, "sharejs delete does not match"
+					error = new Errors.DeleteMismatchError("Delete component does not match")
+					return callback(error)
 				else
 					return callback(error)
 			logger.log project_id: project_id, doc_id: doc_id, error: error, "applied update"

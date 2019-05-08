@@ -235,7 +235,7 @@ describe "Applying updates to a doc", ->
 			JSON.parse(message).should.deep.include {
 				project_id: @project_id,
 				doc_id: @doc_id,
-				error:'Delete component \'not the correct content\' does not match deleted text \'one\ntwo\nthree\''
+				error:'Delete component does not match'
 			}
 
 	describe "with enough updates to flush to the track changes api", ->
