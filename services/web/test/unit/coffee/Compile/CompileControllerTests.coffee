@@ -206,6 +206,20 @@ describe "CompileController", ->
 			it "should proxy the PDF from the CLSI", ->
 				@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/user/#{@user_id}/output/output.pdf", @req, @res, @next).should.equal true
 
+		describe "when the a build-id is provided", ->
+			beforeEach ->
+				@req.params.build_id = @buildId = '1234-5678'
+				@CompileController.proxyToClsi = sinon.stub()
+				@RateLimiter.addCount.callsArgWith(1, null, true)
+				@CompileController.downloadPdf(@req, @res, @next)
+
+			it "should proxy the PDF from the CLSI, with a build-id", ->
+				@CompileController.proxyToClsi.calledWith(
+					@project_id,
+					"/project/#{@project_id}/user/#{@user_id}/build/#{@buildId}/output/output.pdf",
+					@req, @res, @next
+				).should.equal true
+
 		describe "when the pdf is not going to be used in pdfjs viewer", ->
 
 			it "should check the rate limiter when pdfng is not set", (done)->

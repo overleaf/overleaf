@@ -503,12 +503,19 @@ define([
         }
         // convert the qs hash into a query string and append it
         $scope.pdf.url += createQueryString(qs)
+
         // Save all downloads as files
         qs.popupDownload = true
-        $scope.pdf.downloadUrl =
-          `/project/${$scope.project_id}/output/output.pdf` +
-          createQueryString(qs)
 
+        // Pass build id to download if we have it
+        let buildId = null
+        if (fileByPath['output.pdf'] && fileByPath['output.pdf'].build) {
+          buildId = fileByPath['output.pdf'].build
+        }
+        $scope.pdf.downloadUrl =
+          `/download/project/${$scope.project_id}${
+            buildId ? '/build/' + buildId : ''
+          }/output/output.pdf` + createQueryString(qs)
         fetchLogs(fileByPath, { pdfDownloadDomain })
       }
 
