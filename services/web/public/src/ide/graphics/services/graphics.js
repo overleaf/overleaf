@@ -22,7 +22,7 @@ define(['base'], App =>
             __guardMethod__(
               entity != null ? entity.name : undefined,
               'match',
-              o => o.match(/.*\.(png|jpg|jpeg|pdf|eps)/)
+              o => o.match(/.*\.(png|jpg|jpeg|pdf|eps)/i)
             )
           ) {
             const cloned = _.clone(entity)
