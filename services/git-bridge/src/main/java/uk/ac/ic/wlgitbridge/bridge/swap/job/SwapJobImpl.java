@@ -118,10 +118,11 @@ public class SwapJobImpl implements SwapJob {
                 (totalSize = repoStore.totalSize()) > lowWatermarkBytes &&
                 (numProjects = dbStore.getNumUnswappedProjects()) > minProjects
         ) {
+            String projectName = dbStore.getOldestUnswappedProject();
             try {
-                evict(dbStore.getOldestUnswappedProject());
+                evict(projectName);
             } catch (IOException e) {
-                Log.warn("Exception while swapping, giving up", e);
+                Log.warn("[{}] Exception while swapping, giving up", projectName, e);
             }
         }
         if (totalSize > lowWatermarkBytes) {
@@ -161,6 +162,7 @@ public class SwapJobImpl implements SwapJob {
         Preconditions.checkNotNull(projName, "projName was null");
         Log.info("Evicting project: {}", projName);
         try (LockGuard __ = lock.lockGuard(projName)) {
+            repoStore.gcProject(projName);
             long[] sizePtr = new long[1];
             try (InputStream blob = repoStore.bzip2Project(projName, sizePtr)) {
                 swapStore.upload(projName, blob, sizePtr[0]);
