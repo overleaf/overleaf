@@ -73,7 +73,11 @@ define(['base'], function(App) {
               if (isNaN(taxAmmount)) {
                 taxAmmount = 0
               }
-              resolve(`${currencySymbol}${totalPriceExTax + taxAmmount}`)
+              let total = totalPriceExTax + taxAmmount
+              if (total % 1 !== 0) {
+                total = total.toFixed(2)
+              }
+              resolve(`${currencySymbol}${total}`)
             })
         })
       }
