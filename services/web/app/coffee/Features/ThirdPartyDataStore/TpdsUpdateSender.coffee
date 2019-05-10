@@ -44,7 +44,7 @@ module.exports = TpdsUpdateSender =
 				logger.err err:err, "error queuing something in the tpdsworker, continuing anyway"
 				callback()
 			else
-				logger.log group:group, "successfully queued up job for tpdsworker"
+				logger.log group:group, job:job, "successfully queued up job for tpdsworker"
 				callback()
 
 	_addEntity: (options, callback = (err)->)->
