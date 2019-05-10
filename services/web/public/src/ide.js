@@ -158,8 +158,10 @@ define([
       return ($scope.ui.pdfWidth = layoutState.east.size)
     })
 
-    // Tracking code.
     $scope.$watch('ui.view', function(newView, oldView) {
+      if (newView !== oldView) {
+        $scope.$broadcast('layout:flat-screen:toggle')
+      }
       if (newView != null && newView !== 'editor' && newView !== 'pdf') {
         return event_tracking.sendMBOnce(`ide-open-view-${newView}-once`)
       }

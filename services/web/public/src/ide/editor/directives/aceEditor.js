@@ -390,16 +390,18 @@ define([
         if (attrs.resizeOn != null) {
           for (let event of Array.from(attrs.resizeOn.split(','))) {
             scope.$on(event, function() {
-              const previousScreenPosition = getCursorScreenPosition()
-              editor.resize()
-              // Put cursor back to same vertical position on screen
-              const newScreenPosition = getCursorScreenPosition()
-              const session = editor.getSession()
-              return session.setScrollTop(
-                session.getScrollTop() +
-                  newScreenPosition -
-                  previousScreenPosition
-              )
+              scope.$applyAsync(() => {
+                const previousScreenPosition = getCursorScreenPosition()
+                editor.resize()
+                // Put cursor back to same vertical position on screen
+                const newScreenPosition = getCursorScreenPosition()
+                const session = editor.getSession()
+                return session.setScrollTop(
+                  session.getScrollTop() +
+                    newScreenPosition -
+                    previousScreenPosition
+                )
+              })
             })
           }
         }
