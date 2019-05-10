@@ -13,7 +13,7 @@ describe "CompileManager", ->
 			"./ResourceWriter": @ResourceWriter = {}
 			"./OutputFileFinder": @OutputFileFinder = {}
 			"./OutputCacheManager": @OutputCacheManager = {}
-			"settings-sharelatex": @Settings = 
+			"settings-sharelatex": @Settings =
 				path:
 					compilesDir: "/compiles/dir"
 				synctexBaseDir: -> "/compile"
@@ -108,6 +108,7 @@ describe "CompileManager", ->
 				compiler: @compiler = "pdflatex"
 				timeout: @timeout = 42000
 				imageName: @image = "example.com/image"
+				flags: @flags = ["-file-line-error"]
 			@env = {}
 			@Settings.compileDir = "compiles"
 			@compileDir = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}"
@@ -117,7 +118,7 @@ describe "CompileManager", ->
 			@OutputCacheManager.saveOutputFiles = sinon.stub().callsArgWith(2, null, @build_files)
 			@DraftModeManager.injectDraftMode = sinon.stub().callsArg(1)
 			@TikzManager.checkMainFile = sinon.stub().callsArg(3, false)
-		
+
 		describe "normally", ->
 			beforeEach ->
 				@CompileManager.doCompile @request, @callback
@@ -135,6 +136,7 @@ describe "CompileManager", ->
 						compiler:  @compiler
 						timeout:   @timeout
 						image:     @image
+						flags:     @flags
 						environment: @env
 					})
 					.should.equal true
@@ -146,15 +148,15 @@ describe "CompileManager", ->
 
 			it "should return the output files", ->
 				@callback.calledWith(null, @build_files).should.equal true
-			
+
 			it "should not inject draft mode by default", ->
 				@DraftModeManager.injectDraftMode.called.should.equal false
-	
+
 		describe "with draft mode", ->
 			beforeEach ->
 				@request.draft = true
 				@CompileManager.doCompile @request, @callback
-			
+
 			it "should inject the draft mode header", ->
 				@DraftModeManager.injectDraftMode
 					.calledWith(@compileDir + "/" + @rootResourcePath)
@@ -173,6 +175,7 @@ describe "CompileManager", ->
 						compiler:  @compiler
 						timeout:   @timeout
 						image:     @image
+						flags:     @flags
 						environment: {'CHKTEX_OPTIONS': '-nall -e9 -e10 -w15 -w16', 'CHKTEX_EXIT_ON_ERROR':1, 'CHKTEX_ULIMIT_OPTIONS': '-t 5 -v 64000'}
 					})
 					.should.equal true
@@ -191,6 +194,7 @@ describe "CompileManager", ->
 						compiler:  @compiler
 						timeout:   @timeout
 						image:     @image
+						flags:     @flags
 						environment: @env
 					})
 					.should.equal true
@@ -297,7 +301,7 @@ describe "CompileManager", ->
 				@CommandRunner.run
 					.calledWith(
 						"#{@project_id}-#{@user_id}",
-						['/opt/synctex', "pdf", synctex_path, @page, @h, @v],				
+						['/opt/synctex', "pdf", synctex_path, @page, @h, @v],
 						"#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}",
 						@Settings.clsi.docker.image,
 						60000,
@@ -330,7 +334,7 @@ describe "CompileManager", ->
 			@directory = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}"
 			@file_path = "$COMPILE_DIR/#{@file_name}"
 			@command =[ "texcount", "-nocol", "-inc", @file_path, "-out=" + @file_path + ".wc"]
-			
+
 			@CommandRunner.run
 				.calledWith("#{@project_id}-#{@user_id}", @command, @directory, @image, @timeout, {})
 				.should.equal true

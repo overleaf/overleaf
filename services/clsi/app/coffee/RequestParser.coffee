@@ -12,7 +12,7 @@ module.exports = RequestParser =
 
 		compile = body.compile
 		compile.options ||= {}
-		
+
 		try
 			response.compiler = @_parseAttribute "compiler",
 				compile.options.compiler,
@@ -33,6 +33,10 @@ module.exports = RequestParser =
 			response.check = @_parseAttribute "check",
 				compile.options.check,
 				type: "string"
+			response.flags = @_parseAttribute "flags",
+				compile.options.flags,
+				default: [],
+				type: "object"
 
 			# The syncType specifies whether the request contains all
 			# resources (full) or only those resources to be updated
@@ -68,7 +72,7 @@ module.exports = RequestParser =
 			originalRootResourcePath = rootResourcePath
 			sanitizedRootResourcePath = RequestParser._sanitizePath(rootResourcePath)
 			response.rootResourcePath = RequestParser._checkPath(sanitizedRootResourcePath)
-			
+
 			for resource in response.resources
 				if resource.path == originalRootResourcePath
 					resource.path = sanitizedRootResourcePath

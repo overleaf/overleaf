@@ -8,27 +8,27 @@ ProcessTable = {}  # table of currently running jobs (pids or docker container n
 
 module.exports = LatexRunner =
 	runLatex: (project_id, options, callback = (error) ->) ->
-		{directory, mainFile, compiler, timeout, image, environment} = options
+		{directory, mainFile, compiler, timeout, image, environment, flags} = options
 		compiler ||= "pdflatex"
 		timeout  ||= 60000 # milliseconds
 
-		logger.log directory: directory, compiler: compiler, timeout: timeout, mainFile: mainFile, environment: environment, "starting compile"
+		logger.log directory: directory, compiler: compiler, timeout: timeout, mainFile: mainFile, environment: environment, flags:flags, "starting compile"
 
 		# We want to run latexmk on the tex file which we will automatically
 		# generate from the Rtex/Rmd/md file.
 		mainFile = mainFile.replace(/\.(Rtex|md|Rmd)$/, ".tex")
 
 		if compiler == "pdflatex"
-			command = LatexRunner._pdflatexCommand mainFile
+			command = LatexRunner._pdflatexCommand mainFile, flags
 		else if compiler == "latex"
-			command = LatexRunner._latexCommand mainFile
+			command = LatexRunner._latexCommand mainFile, flags
 		else if compiler == "xelatex"
-			command = LatexRunner._xelatexCommand mainFile
+			command = LatexRunner._xelatexCommand mainFile, flags
 		else if compiler == "lualatex"
-			command = LatexRunner._lualatexCommand mainFile
+			command = LatexRunner._lualatexCommand mainFile, flags
 		else
 			return callback new Error("unknown compiler: #{compiler}")
-		
+
 		if Settings.clsi?.strace
 			command = ["strace", "-o", "strace", "-ff"].concat(command)
 
@@ -63,31 +63,32 @@ module.exports = LatexRunner =
 		else
 			CommandRunner.kill ProcessTable[id], callback
 
-	_latexmkBaseCommand: (Settings?.clsi?.latexmkCommandPrefix || []).concat([
-		"latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR",
-		"-synctex=1","-interaction=batchmode"
-		])
+	_latexmkBaseCommand: (flags) ->
+		args = ["latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR", "-synctex=1","-interaction=batchmode"]
+		if flags
+			args = args.concat(flags)
+		(Settings?.clsi?.latexmkCommandPrefix || []).concat(args)
 
-	_pdflatexCommand: (mainFile) ->
-		LatexRunner._latexmkBaseCommand.concat [
+	_pdflatexCommand: (mainFile, flags) ->
+		LatexRunner._latexmkBaseCommand(flags).concat [
 			"-pdf",
 			Path.join("$COMPILE_DIR", mainFile)
 		]
-		
-	_latexCommand: (mainFile) ->
-		LatexRunner._latexmkBaseCommand.concat [
+
+	_latexCommand: (mainFile, flags) ->
+		LatexRunner._latexmkBaseCommand(flags).concat [
 			"-pdfdvi",
 			Path.join("$COMPILE_DIR", mainFile)
 		]
 
-	_xelatexCommand: (mainFile) ->
-		LatexRunner._latexmkBaseCommand.concat [
+	_xelatexCommand: (mainFile, flags) ->
+		LatexRunner._latexmkBaseCommand(flags).concat [
 			"-xelatex",
 			Path.join("$COMPILE_DIR", mainFile)
 		]
 
-	_lualatexCommand: (mainFile) ->
-		LatexRunner._latexmkBaseCommand.concat [
+	_lualatexCommand: (mainFile, flags) ->
+		LatexRunner._latexmkBaseCommand(flags).concat [
 			"-lualatex",
 			Path.join("$COMPILE_DIR", mainFile)
 		]
