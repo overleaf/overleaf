@@ -11,7 +11,7 @@ count = 0
 class User
 	constructor: (options = {}) ->
 		@emails = [
-			email: options.email || "acceptance-test-#{count}@example.com"
+			email: "acceptance-test-#{count}@example.com"
 			createdAt: new Date()
 		]
 		@email = @emails[0].email

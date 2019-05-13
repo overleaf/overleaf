@@ -8,8 +8,6 @@ UserStubSchema = new Schema
 	first_name : { type : String, default : '' }
 	last_name  : { type : String, default : '' }
 	overleaf   : { id: { type: Number } }
-	thirdPartyIdentifiers: { type: Array, default: [] }
-	confirmed_at: Date
 
 conn = mongoose.createConnection(Settings.mongo.url, {
 	server: {poolSize: Settings.mongo.poolSize || 10},
