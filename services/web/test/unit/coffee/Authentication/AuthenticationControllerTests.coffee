@@ -37,10 +37,6 @@ describe "AuthenticationController", ->
 				ipMatcherAffiliation: sinon.stub()
 			"../V1/V1Api": @V1Api = request: sinon.stub()
 			"../../models/User": { User: @UserModel }
-			"../../../../modules/oauth2-server/app/js/Oauth2Server": @Oauth2Server =
-				Request: sinon.stub()
-				Response: sinon.stub()
-				server: authenticate: sinon.stub()
 		@user =
 			_id: ObjectId()
 			email: @email = "USER@example.com"
@@ -406,115 +402,90 @@ describe "AuthenticationController", ->
 
 	describe "requireOauth", ->
 		beforeEach ->
-			@res.sendStatus = sinon.stub()
 			@res.send = sinon.stub()
 			@res.status = sinon.stub().returns(@res)
 			@middleware = @AuthenticationController.requireOauth()
 
-		describe "when Oauth2Server authenticates", ->
+		describe "when token not provided", ->
 			beforeEach ->
-				@token =
-					accessToken: "token"
-					user: "user"
-				@Oauth2Server.server.authenticate.yields null, @token
 				@middleware(@req, @res, @next)
 
-			it "should set oauth_token on request", ->
-				@req.oauth_token.should.equal @token
+			it "should return 401 error", ->
+				@res.status.should.have.been.calledWith 401
 
-			it "should set oauth on request", ->
-				@req.oauth.access_token.should.equal @token.accessToken
-
-			it "should set oauth_user on request", ->
-				@req.oauth_user.should.equal "user"
-
-			it "should call next", ->
-				@next.should.have.been.calledOnce
-
-		describe "when Oauth2Server does not authenticate", ->
+		describe "when token provided", ->
 			beforeEach ->
-				@Oauth2Server.server.authenticate.yields code: 401
+				@V1Api.request = sinon.stub().yields("error", {}, {})
+				@req.token = "foo"
+				@middleware(@req, @res, @next)
 
-			describe "when token not provided", ->
+			it "should make request to v1 api with token", ->
+				@V1Api.request.should.have.been.calledWith {
+					expectedStatusCodes: [401]
+					json: token: "foo"
+					method: "POST"
+					uri: "/api/v1/sharelatex/oauth_authorize"
+				}
+
+		describe "when v1 api returns error", ->
+			beforeEach ->
+				@V1Api.request = sinon.stub().yields("error", {}, {})
+				@req.token = "foo"
+				@middleware(@req, @res, @next)
+
+			it "should return status", ->
+				@next.should.have.been.calledWith "error"
+
+		describe "when v1 api status code is not 200", ->
+			beforeEach ->
+				@V1Api.request = sinon.stub().yields(null, {statusCode: 401}, {})
+				@req.token = "foo"
+				@middleware(@req, @res, @next)
+
+			it "should return status", ->
+				@res.status.should.have.been.calledWith 401
+
+		describe "when v1 api returns authorized profile and access token", ->
+			beforeEach ->
+				@oauth_authorize =
+					access_token: "access_token"
+					user_profile: id: "overleaf-id"
+				@V1Api.request = sinon.stub().yields(null, {statusCode: 200}, @oauth_authorize)
+				@req.token = "foo"
+
+			describe "in all cases", ->
 				beforeEach ->
 					@middleware(@req, @res, @next)
 
-				it "should return 401 error", ->
-					@res.sendStatus.should.have.been.calledWith 401
+				it "should find user", ->
+					@UserModel.findOne.should.have.been.calledWithMatch { "overleaf.id": "overleaf-id" }
 
-			describe "when token provided", ->
+			describe "when user find returns error", ->
 				beforeEach ->
-					@V1Api.request = sinon.stub().yields("error", {}, {})
-					@req.token = "foo"
+					@UserModel.findOne = sinon.stub().yields("error")
 					@middleware(@req, @res, @next)
 
-				it "should make request to v1 api with token", ->
-					@V1Api.request.should.have.been.calledWith {
-						expectedStatusCodes: [401]
-						json: token: "foo"
-						method: "POST"
-						uri: "/api/v1/sharelatex/oauth_authorize"
-					}
-
-			describe "when v1 api returns error", ->
-				beforeEach ->
-					@V1Api.request = sinon.stub().yields("error", {}, {})
-					@req.token = "foo"
-					@middleware(@req, @res, @next)
-
-				it "should return status", ->
+				it "should return error", ->
 					@next.should.have.been.calledWith "error"
 
-			describe "when v1 api status code is not 200", ->
+			describe "when user is not found", ->
 				beforeEach ->
-					@V1Api.request = sinon.stub().yields(null, {statusCode: 401}, {})
-					@req.token = "foo"
+					@UserModel.findOne = sinon.stub().yields(null, null)
 					@middleware(@req, @res, @next)
 
-				it "should return status", ->
+				it "should return unauthorized", ->
 					@res.status.should.have.been.calledWith 401
 
-			describe "when v1 api returns authorized profile and access token", ->
+			describe "when user is found", ->
 				beforeEach ->
-					@oauth_authorize =
-						access_token: "access_token"
-						user_profile: id: "overleaf-id"
-					@V1Api.request = sinon.stub().yields(null, {statusCode: 200}, @oauth_authorize)
-					@req.token = "foo"
+					@UserModel.findOne = sinon.stub().yields(null, "user")
+					@middleware(@req, @res, @next)
 
-				describe "in all cases", ->
-					beforeEach ->
-						@middleware(@req, @res, @next)
+				it "should add user to request", ->
+					@req.oauth_user.should.equal "user"
 
-					it "should find user", ->
-						@UserModel.findOne.should.have.been.calledWithMatch { "overleaf.id": "overleaf-id" }
-
-				describe "when user find returns error", ->
-					beforeEach ->
-						@UserModel.findOne = sinon.stub().yields("error")
-						@middleware(@req, @res, @next)
-
-					it "should return error", ->
-						@next.should.have.been.calledWith "error"
-
-				describe "when user is not found", ->
-					beforeEach ->
-						@UserModel.findOne = sinon.stub().yields(null, null)
-						@middleware(@req, @res, @next)
-
-					it "should return unauthorized", ->
-						@res.status.should.have.been.calledWith 401
-
-				describe "when user is found", ->
-					beforeEach ->
-						@UserModel.findOne = sinon.stub().yields(null, "user")
-						@middleware(@req, @res, @next)
-
-					it "should add user to request", ->
-						@req.oauth_user.should.equal "user"
-
-					it "should add access_token to request", ->
-						@req.oauth.access_token.should.equal "access_token"
+				it "should add access_token to request", ->
+					@req.oauth.access_token.should.equal "access_token"
 
 	describe "requireGlobalLogin", ->
 		beforeEach ->

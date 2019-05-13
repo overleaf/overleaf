@@ -2139,18 +2139,6 @@
       "resolved": "https://registry.npmjs.org/base64url/-/base64url-2.0.0.tgz",
       "integrity": "sha1-6sFuA+oUOO/5Qj1puqNiYu0fcLs="
     },
-    "basic-auth": {
-      "version": "2.0.1",
-      "from": "basic-auth@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/basic-auth/-/basic-auth-2.0.1.tgz",
-      "dependencies": {
-        "safe-buffer": {
-          "version": "5.1.2",
-          "from": "safe-buffer@5.1.2",
-          "resolved": "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.1.2.tgz"
-        }
-      }
-    },
     "basic-auth-connect": {
       "version": "1.0.0",
       "resolved": "https://registry.npmjs.org/basic-auth-connect/-/basic-auth-connect-1.0.0.tgz",
@@ -3561,16 +3549,6 @@
       "version": "4.6.0",
       "resolved": "https://registry.npmjs.org/co/-/co-4.6.0.tgz",
       "integrity": "sha1-bqa989hTrlTMuOR7+gvz+QMfsYQ="
-    },
-    "co-bluebird": {
-      "version": "1.1.0",
-      "from": "co-bluebird@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/co-bluebird/-/co-bluebird-1.1.0.tgz"
-    },
-    "co-use": {
-      "version": "1.1.0",
-      "from": "co-use@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/co-use/-/co-use-1.1.0.tgz"
     },
     "code-point-at": {
       "version": "1.1.0",
@@ -8453,11 +8431,6 @@
         "number-is-nan": "^1.0.0"
       }
     },
-    "is-generator": {
-      "version": "1.0.3",
-      "from": "is-generator@>=1.0.2 <2.0.0",
-      "resolved": "https://registry.npmjs.org/is-generator/-/is-generator-1.0.3.tgz"
-    },
     "is-glob": {
       "version": "2.0.1",
       "resolved": "https://registry.npmjs.org/is-glob/-/is-glob-2.0.1.tgz",
@@ -12603,43 +12576,6 @@
       "resolved": "https://registry.npmjs.org/oauth-sign/-/oauth-sign-0.8.2.tgz",
       "integrity": "sha1-Rqarfwrq2N6unsBWV4C31O/rnUM="
     },
-    "oauth2-server": {
-      "version": "3.0.1",
-      "from": "oauth2-server@latest",
-      "resolved": "https://registry.npmjs.org/oauth2-server/-/oauth2-server-3.0.1.tgz",
-      "dependencies": {
-        "bluebird": {
-          "version": "3.5.3",
-          "from": "bluebird@>=3.5.1 <4.0.0",
-          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.3.tgz"
-        },
-        "lodash": {
-          "version": "4.17.11",
-          "from": "lodash@>=4.17.10 <5.0.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.11.tgz"
-        },
-        "mime-db": {
-          "version": "1.38.0",
-          "from": "mime-db@>=1.38.0 <1.39.0",
-          "resolved": "https://registry.npmjs.org/mime-db/-/mime-db-1.38.0.tgz"
-        },
-        "mime-types": {
-          "version": "2.1.22",
-          "from": "mime-types@>=2.1.18 <2.2.0",
-          "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.22.tgz"
-        },
-        "statuses": {
-          "version": "1.5.0",
-          "from": "statuses@>=1.5.0 <2.0.0",
-          "resolved": "https://registry.npmjs.org/statuses/-/statuses-1.5.0.tgz"
-        },
-        "type-is": {
-          "version": "1.6.16",
-          "from": "type-is@>=1.6.16 <2.0.0",
-          "resolved": "https://registry.npmjs.org/type-is/-/type-is-1.6.16.tgz"
-        }
-      }
-    },
     "object-assign": {
       "version": "4.1.1",
       "resolved": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz",
@@ -14137,11 +14073,6 @@
       "requires": {
         "is-promise": "~1"
       }
-    },
-    "promisify-any": {
-      "version": "2.0.1",
-      "from": "promisify-any@>=2.0.1 <3.0.0",
-      "resolved": "https://registry.npmjs.org/promisify-any/-/promisify-any-2.0.1.tgz"
     },
     "promisify-call": {
       "version": "2.0.4",

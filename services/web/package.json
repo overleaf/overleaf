@@ -79,7 +79,6 @@
     "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemailer-ses-transport": "^1.3.0",
     "nvd3": "^1.8.6",
-    "oauth2-server": "^3.0.1",
     "optimist": "0.6.1",
     "overleaf-error-type": "git+https://github.com/overleaf/overleaf-error-type.git",
     "passport": "^0.3.2",
