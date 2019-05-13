@@ -208,6 +208,7 @@ module.exports = DocumentUpdaterHandler =
 					pathname: newEntity.path
 					docLines: newEntity.docLines
 					url: newEntity.url
+					hash: newEntity.file?.hash
 			else if newEntity.path != oldEntity.path
 				# entity renamed
 				updates.push

@@ -22,11 +22,23 @@ describe "FileStoreHandler", ->
 		@readStream = {my:"readStream", on: sinon.stub()}
 		@request = sinon.stub()
 		@settings = apis:{filestore:{url:"http//filestore.sharelatex.test"}}
+		@hashValue = "0123456789"
+		@FileModel = class File
+			constructor:(options)->
+				{@name,@hash} = options
+				@_id = "file_id_here"
+				@rev = 0
+				if options.linkedFileData?
+					@linkedFileData = options.linkedFileData
 		@handler = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"request":@request
 			"logger-sharelatex" : @logger = {log:sinon.stub(), err:sinon.stub()}
+			"./FileHashManager" : @FileHashManager = { computeHash: sinon.stub().callsArgWith(1, null, @hashValue)}
+			# FIXME: need to stub File object here
+			"../../models/File" : File: @FileModel
 			"fs" : @fs
+		@file_args = {name: "upload-filename"}
 		@file_id = "file_id_here"
 		@project_id = "1312312312"
 		@fsPath = "uploads/myfile.eps"
@@ -42,7 +54,7 @@ describe "FileStoreHandler", ->
 				on: (type, cb)->
 					if type == "open"
 						cb()
-			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
+			@handler.uploadFileFromDisk @project_id, @file_args, @fsPath, =>
 				@fs.createReadStream.calledWith(@fsPath).should.equal true
 				done()
 
@@ -55,7 +67,7 @@ describe "FileStoreHandler", ->
 				pipe:(o)=>
 					@writeStream.should.equal o
 					done()
-			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
+			@handler.uploadFileFromDisk @project_id, @file_args, @fsPath, =>
 
 		it "should pass the correct options to request", (done)->
 			@fs.createReadStream.returns
@@ -63,7 +75,7 @@ describe "FileStoreHandler", ->
 				on: (type, cb)->
 					if type == "open"
 						cb()
-			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
+			@handler.uploadFileFromDisk @project_id, @file_args, @fsPath, =>
 				@request.args[0][0].method.should.equal "post"
 				@request.args[0][0].uri.should.equal @handler._buildUrl()
 				done()
@@ -74,19 +86,21 @@ describe "FileStoreHandler", ->
 				on: (type, cb)->
 					if type == "open"
 						cb()
-			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
+			@handler.uploadFileFromDisk @project_id, @file_args, @fsPath, =>
 				@handler._buildUrl.calledWith(@project_id, @file_id).should.equal true
 				done()
 
-		it 'should callback with the url', (done) ->
+		it 'should callback with the url and fileRef', (done) ->
 			@fs.createReadStream.returns
 				pipe:->
 				on: (type, cb)->
 					if type == "open"
 						cb()
-			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, (err, url) =>
+			@handler.uploadFileFromDisk @project_id, @file_args, @fsPath, (err, url, fileRef) =>
 				expect(err).to.not.exist
 				expect(url).to.equal(@handler._buildUrl())
+				expect(fileRef._id).to.equal(@file_id)
+				expect(fileRef.hash).to.equal(@hashValue)
 				done()
 
 		describe "symlink", ->
@@ -97,14 +111,14 @@ describe "FileStoreHandler", ->
 				})
 
 			it "should not read file if it is symlink", (done)->
-				@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
+				@handler.uploadFileFromDisk @project_id, @file_args, @fsPath, =>
 					@fs.createReadStream.called.should.equal false
 					done()
 
 		describe "symlink", ->
 			it "should not read file stat returns nothing", (done)->
 				@fs.lstat = sinon.stub().callsArgWith(1, null, null)
-				@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
+				@handler.uploadFileFromDisk @project_id, @file_args, @fsPath, =>
 					@fs.createReadStream.called.should.equal false
 					done()
 
@@ -121,7 +135,7 @@ describe "FileStoreHandler", ->
 					on: (type, cb)->
 						if type == "open"
 							cb()
-				@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, (err) =>
+				@handler.uploadFileFromDisk @project_id, @file_args, @fsPath, (err) =>
 					expect(err).to.exist
 					expect(err).to.be.instanceof Error
 					expect(@fs.createReadStream.callCount).to.equal @handler.RETRY_ATTEMPTS

@@ -470,6 +470,7 @@ describe 'DocumentUpdaterHandler', ->
 						pathname: "/foo"
 						docLines: 'a\nb'
 						url: undefined
+						hash: undefined
 					]
 
 					@handler.updateProjectStructure @project_id, @projectHistoryId, @user_id, @changes, () =>
@@ -485,7 +486,7 @@ describe 'DocumentUpdaterHandler', ->
 					@fileId = new ObjectId()
 					@changes = {
 						newFiles: [
-							{ path: '/bar', url: 'filestore.example.com/file', file: _id: @fileId }
+							{ path: '/bar', url: 'filestore.example.com/file', file: {_id: @fileId, hash: "12345" }}
 						]
 						newProject: {version: @version}
 					}
@@ -495,6 +496,7 @@ describe 'DocumentUpdaterHandler', ->
 						pathname: "/bar"
 						url: 'filestore.example.com/file'
 						docLines: undefined
+						hash: "12345"
 					]
 
 					@handler.updateProjectStructure @project_id, @projectHistoryId, @user_id, @changes, () =>

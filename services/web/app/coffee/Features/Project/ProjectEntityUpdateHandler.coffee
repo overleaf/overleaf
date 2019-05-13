@@ -169,18 +169,17 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(error) if error?
 					callback null, doc, folder_id
 
-	_uploadFile: (project_id, folder_id, fileName, fsPath, linkedFileData, callback = (error, fileRef, fileStoreUrl) ->)->
+	_uploadFile: (project_id, folder_id, fileName, fsPath, linkedFileData, callback = (error, fileStoreUrl, fileRef) ->)->
 		if not SafePath.isCleanFilename fileName
 			return callback new Errors.InvalidNameError("invalid element name")
-		fileRef = new File(
+		fileArgs =
 			name: fileName
 			linkedFileData: linkedFileData
-		)
-		FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
+		FileStoreHandler.uploadFileFromDisk project_id, fileArgs, fsPath, (err, fileStoreUrl, fileRef)->
 			if err?
 				logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
 				return callback(err)
-			callback(null, fileRef, fileStoreUrl)
+			callback(null, fileStoreUrl, fileRef)
 
 	_addFileAndSendToTpds: (project_id, folder_id, fileRef, callback = (error) ->)->
 		ProjectEntityMongoUpdateHandler.addFile project_id, folder_id, fileRef, (err, result, project) ->
@@ -196,7 +195,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
 				if not SafePath.isCleanFilename fileName
 					return callback new Errors.InvalidNameError("invalid element name")
-				ProjectEntityUpdateHandler._uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, (error, fileRef, fileStoreUrl) ->
+				ProjectEntityUpdateHandler._uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, (error, fileStoreUrl, fileRef) ->
 					return callback(error) if error?
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
 		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id) ->)->
@@ -216,11 +215,10 @@ module.exports = ProjectEntityUpdateHandler = self =
 		beforeLock: (next) ->
 			(project_id, file_id, fsPath, linkedFileData, userId, callback)->
 				# create a new file
-				fileRef = new File(
+				fileArgs =
 					name: "dummy-upload-filename"
 					linkedFileData: linkedFileData
-				)
-				FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
+				FileStoreHandler.uploadFileFromDisk project_id, fileArgs, fsPath, (err, fileStoreUrl, fileRef)->
 					return callback(err) if err?
 					next project_id, file_id, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback
 		withLock: (project_id, file_id, fsPath, linkedFileData, userId, newFileRef, fileStoreUrl, callback)->
@@ -274,11 +272,10 @@ module.exports = ProjectEntityUpdateHandler = self =
 				if not SafePath.isCleanFilename fileName
 					return callback new Errors.InvalidNameError("invalid element name")
 				# create a new file
-				fileRef = new File(
+				fileArgs =
 					name: fileName
 					linkedFileData: linkedFileData
-				)
-				FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
+				FileStoreHandler.uploadFileFromDisk project_id, fileArgs, fsPath, (err, fileStoreUrl, fileRef)->
 					return callback(err) if err?
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
 		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, newFileRef, fileStoreUrl, callback = (err, file, isNewFile, existingFile)->)->
@@ -320,11 +317,10 @@ module.exports = ProjectEntityUpdateHandler = self =
 				fileName = path.basename(elementPath)
 				folderPath = path.dirname(elementPath)
 				# create a new file
-				fileRef = new File(
+				fileArgs =
 					name: fileName
 					linkedFileData: linkedFileData
-				)
-				FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
+				FileStoreHandler.uploadFileFromDisk project_id, fileArgs, fsPath, (err, fileStoreUrl, fileRef)->
 					return callback(err) if err?
 					next project_id, folderPath, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback
 		withLock: (project_id, folderPath, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback) ->

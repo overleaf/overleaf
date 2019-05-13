@@ -3,6 +3,8 @@ fs = require("fs")
 request = require("request")
 settings = require("settings-sharelatex")
 Async = require('async')
+FileHashManager = require("./FileHashManager")
+File = require('../../models/File').File
 
 oneMinInMs = 60 * 1000
 fiveMinsInMs = oneMinInMs * 5
@@ -11,53 +13,60 @@ module.exports = FileStoreHandler =
 
 	RETRY_ATTEMPTS: 3
 
-	uploadFileFromDisk: (project_id, file_id, fsPath, callback)->
+	uploadFileFromDisk: (project_id, file_args, fsPath, callback = (error, url, fileRef) ->)->
 		fs.lstat fsPath, (err, stat)->
 			if err?
-				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "error stating file"
+				logger.err err:err, project_id:project_id, file_args:file_args, fsPath:fsPath, "error stating file"
 				callback(err)
 			if !stat?
-				logger.err project_id:project_id, file_id:file_id, fsPath:fsPath, "stat is not available, can not check file from disk"
+				logger.err project_id:project_id, file_args:file_args, fsPath:fsPath, "stat is not available, can not check file from disk"
 				return callback(new Error("error getting stat, not available"))
 			if !stat.isFile()
-				logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "tried to upload symlink, not contining"
+				logger.log project_id:project_id, file_args:file_args, fsPath:fsPath, "tried to upload symlink, not contining"
 				return callback(new Error("can not upload symlink"))
-			Async.retry FileStoreHandler.RETRY_ATTEMPTS, (cb) ->
-				FileStoreHandler._doUploadFileFromDisk project_id, file_id, fsPath, cb
-			, (err, url) ->
+			Async.retry FileStoreHandler.RETRY_ATTEMPTS, (cb, results) ->
+				FileStoreHandler._doUploadFileFromDisk project_id, file_args, fsPath, cb
+			, (err, result) ->
 				if err?
-					logger.err {err, project_id, file_id}, "Error uploading file, retries failed"
-				callback(err, url)
+					logger.err {err, project_id, file_args}, "Error uploading file, retries failed"
+					return callback(err)
+				callback(err, result.url, result.fileRef)
 
-	_doUploadFileFromDisk: (project_id, file_id, fsPath, callback) ->
+	_doUploadFileFromDisk: (project_id, file_args, fsPath, callback = (err, result)->) ->
 			_cb = callback
-			callback = (err, url) ->
+			callback = (err, result...) ->
 				callback = ->	# avoid double callbacks
-				_cb(err, url)
+				_cb(err, result...)
 
-			logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "uploading file from disk"
-			readStream = fs.createReadStream(fsPath)
-			readStream.on "error", (err)->
-				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the read stream of uploadFileFromDisk"
-				callback err
-			readStream.on "open", () ->
-				url = FileStoreHandler._buildUrl(project_id, file_id)
-				opts =
-					method: "post"
-					uri: url
-					timeout:fiveMinsInMs
-				writeStream = request(opts)
-				writeStream.on "error", (err)->
-					logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the write stream of uploadFileFromDisk"
+			FileHashManager.computeHash fsPath, (err, hashValue) ->
+				return callback(err) if err?
+				fileRef = new File(Object.assign({}, file_args, {hash: hashValue}))
+				file_id = fileRef._id
+				logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, hash: hashValue, fileRef:fileRef, "uploading file from disk"
+				readStream = fs.createReadStream(fsPath)
+				readStream.on "error", (err)->
+					logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the read stream of uploadFileFromDisk"
 					callback err
-				writeStream.on 'response', (response) ->
-					if response.statusCode not in [200, 201]
-						err = new Error("non-ok response from filestore for upload: #{response.statusCode}")
-						logger.err {err, statusCode: response.statusCode}, "error uploading to filestore"
-						callback(err)
-					else
-						callback(null, url)
-				readStream.pipe writeStream
+				readStream.on "open", () ->
+					url = FileStoreHandler._buildUrl(project_id, file_id)
+					opts =
+						method: "post"
+						uri: url
+						timeout:fiveMinsInMs
+						headers:
+							"X-File-Hash-From-Web": hashValue  # send the hash to the filestore as a custom header so it can be checked
+					writeStream = request(opts)
+					writeStream.on "error", (err)->
+						logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the write stream of uploadFileFromDisk"
+						callback err
+					writeStream.on 'response', (response) ->
+						if response.statusCode not in [200, 201]
+							err = new Error("non-ok response from filestore for upload: #{response.statusCode}")
+							logger.err {err, statusCode: response.statusCode}, "error uploading to filestore"
+							callback(err)
+						else
+							callback(null, {url, fileRef})  # have to pass back an object because async.retry only accepts a single result argument
+					readStream.pipe writeStream
 
 	getFileStream: (project_id, file_id, query, callback)->
 		logger.log project_id:project_id, file_id:file_id, query:query, "getting file stream from file store"

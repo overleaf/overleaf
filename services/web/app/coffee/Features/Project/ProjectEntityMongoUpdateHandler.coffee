@@ -64,6 +64,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 					set["#{path.mongo}.created"] = new Date()
 					set["#{path.mongo}.linkedFileData"] = newFileRef.linkedFileData
 					inc["#{path.mongo}.rev"] = 1
+					set["#{path.mongo}.hash"] = newFileRef.hash
 					update =
 						"$inc": inc
 						"$set": set
@@ -377,6 +378,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 					_id:  fileRef._id
 					name: fileRef.name
 					linkedFileData: fileRef.linkedFileData
+					hash: fileRef.hash
 					deletedAt: new Date()
 				}
 			}
