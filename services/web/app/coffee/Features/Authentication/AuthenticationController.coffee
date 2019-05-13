@@ -194,12 +194,10 @@ module.exports = AuthenticationController =
 			response = new Oauth2Server.Response(res)
 			Oauth2Server.server.authenticate request, response, {}, (err, token) ->
 				if err?
-					# use a 401 status code for malformed header for git-bridge
-					err.code = 401 if err.code == 400 and err.message == 'Invalid request: malformed authorization header'
 					# fall back to v1 on invalid token
 					return AuthenticationController._requireOauthV1Fallback req, res, next if err.code == 401
-					# send all other errors
-					return res.status(err.code).json({error: err.name, error_description: err.message})
+					# bubble up all other errors
+					return next(err)
 				req.oauth =
 					access_token: token.accessToken
 				req.oauth_token = token
