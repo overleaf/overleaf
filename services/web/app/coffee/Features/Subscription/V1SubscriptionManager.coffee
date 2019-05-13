@@ -100,4 +100,4 @@ module.exports = V1SubscriptionManager =
 					if response.statusCode == 404
 						return callback new NotFoundError("v1 user not found: #{userId}")
 					else
-						return callback new Error("non-success code from v1: #{response.statusCode} #{options.method} #{options.url(v1Id)}")
+						return callback new Error("non-success code from v1: #{response.statusCode}")

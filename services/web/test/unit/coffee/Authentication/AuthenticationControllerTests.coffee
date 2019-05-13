@@ -409,7 +409,6 @@ describe "AuthenticationController", ->
 			@res.sendStatus = sinon.stub()
 			@res.send = sinon.stub()
 			@res.status = sinon.stub().returns(@res)
-			@res.sendStatus = sinon.stub()
 			@middleware = @AuthenticationController.requireOauth()
 
 		describe "when Oauth2Server authenticates", ->

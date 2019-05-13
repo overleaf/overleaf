@@ -186,10 +186,7 @@ module.exports = AuthenticationController =
 
 		return doRequest
 
-	# access tokens might be associated with user stubs if the user is
-	# not yet migrated to v2. if api can work with user stubs then set
-	# allowUserStub true when adding middleware to route.
-	requireOauth: (allowUserStub=false) ->
+	requireOauth: () ->
 		# require this here because module may not be included in some versions
 		Oauth2Server = require "../../../../modules/oauth2-server/app/js/Oauth2Server"
 		return (req, res, next = (error) ->) ->
@@ -203,7 +200,6 @@ module.exports = AuthenticationController =
 					return AuthenticationController._requireOauthV1Fallback req, res, next if err.code == 401
 					# send all other errors
 					return res.status(err.code).json({error: err.name, error_description: err.message})
-				return res.sendStatus 401 if token.user.constructor.modelName == "UserStub" and !allowUserStub
 				req.oauth =
 					access_token: token.accessToken
 				req.oauth_token = token
@@ -225,6 +221,7 @@ module.exports = AuthenticationController =
 				return res.status(401).json({error: "invalid_token"}) unless user?
 				req.oauth =
 					access_token: body.access_token
+				user.collabratec_id = body.collabratec_customer_id unless user.collabratec_id?
 				req.oauth_user = user
 				next()
 
