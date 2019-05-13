@@ -1560,9 +1560,9 @@
       "dev": true
     },
     "socket.io": {
-      "version": "0.9.16",
-      "from": "socket.io@0.9.16",
-      "resolved": "https://registry.npmjs.org/socket.io/-/socket.io-0.9.16.tgz",
+      "version": "0.9.19",
+      "from": "socket.io@0.9.19",
+      "resolved": "https://registry.npmjs.org/socket.io/-/socket.io-0.9.19.tgz",
       "dependencies": {
         "redis": {
           "version": "0.7.3",

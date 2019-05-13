@@ -45,7 +45,7 @@ io.configure ->
 	# gzip uses a Node 0.8.x method of calling the gzip program which
 	# doesn't work with 0.6.x
 	#io.enable('browser client gzip')
-	io.set('transports', ['websocket', 'flashsocket', 'htmlfile', 'xhr-polling', 'jsonp-polling'])
+	io.set('transports', ['websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling'])
 	io.set('log level', 1)
 
 app.get "/", (req, res, next) ->
