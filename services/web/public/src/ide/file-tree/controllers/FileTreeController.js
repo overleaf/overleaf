@@ -60,11 +60,17 @@ define(['base'], function(App) {
           controller: 'NewFileModalController',
           size: 'lg',
           resolve: {
+            projectFeatures() {
+              return ide.$scope.project.features
+            },
             parent_folder() {
               return ide.fileTreeManager.getCurrentFolder()
             },
             type() {
               return 'upload'
+            },
+            userFeatures() {
+              return ide.$scope.user.features
             }
           }
         })

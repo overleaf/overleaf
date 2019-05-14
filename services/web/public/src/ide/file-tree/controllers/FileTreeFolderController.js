@@ -99,8 +99,14 @@ define(['base'], App =>
           parent_folder() {
             return $scope.entity
           },
+          projectFeatures() {
+            return ide.$scope.project.features
+          },
           type() {
             return 'upload'
+          },
+          userFeatures() {
+            return ide.$scope.user.features
           }
         }
       }))
