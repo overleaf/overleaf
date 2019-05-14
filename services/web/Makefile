@@ -254,9 +254,9 @@ test_acceptance_modules_run:
 
 test_acceptance_module_run: $(MODULE_MAKEFILES)
 	@if [ -e $(MODULE)/test/acceptance ]; then \
-		COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE) $(DOCKER_COMPOSE) down -v -t 0; \
-		cd $(MODULE) && COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE) $(MAKE) test_acceptance; \
-		cd $(CURDIR) && COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE) $(DOCKER_COMPOSE) down -v -t 0; \
+		COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE) $(DOCKER_COMPOSE) down -v -t 0 \
+		&& cd $(MODULE) && COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE) $(MAKE) test_acceptance \
+		&& cd $(CURDIR) && COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE) $(DOCKER_COMPOSE) down -v -t 0; \
 	fi
 
 ci:

@@ -5,14 +5,20 @@ UserUpdater = require "./UserUpdater"
 _ = require "lodash"
 
 module.exports = ThirdPartyIdentityManager =
-	login: (providerId, externalUserId, externalData, callback) ->
+	getUser: (providerId, externalUserId, callback) ->
 		return callback(new Error "invalid arguments") unless providerId? and externalUserId?
-		query = ThirdPartyIdentityManager._loginQuery providerId, externalUserId
+		query = ThirdPartyIdentityManager._getUserQuery providerId, externalUserId
 		User.findOne query, (err, user) ->
 			return callback err if err?
 			return callback(new Errors.ThirdPartyUserNotFoundError()) unless user
+			callback null, user
+
+	login: (providerId, externalUserId, externalData, callback) ->
+		ThirdPartyIdentityManager.getUser providerId, externalUserId, (err, user) ->
+			return callback err if err?
 			return callback(null, user) unless externalData
-			update = ThirdPartyIdentityManager._loginUpdate user, providerId, externalUserId, externalData
+			query = ThirdPartyIdentityManager._getUserQuery providerId, externalUserId
+			update = ThirdPartyIdentityManager._thirdPartyIdentifierUpdate user, providerId, externalUserId, externalData
 			User.findOneAndUpdate query, update, {new: true}, callback
 
 	# attempt to login normally but check for user stub if user not found
@@ -20,15 +26,15 @@ module.exports = ThirdPartyIdentityManager =
 		ThirdPartyIdentityManager.login providerId, externalUserId, externalData, (err, user) ->
 			return callback null, user unless err?
 			return callback err unless err.name == "ThirdPartyUserNotFoundError"
-			query = ThirdPartyIdentityManager._loginQuery providerId, externalUserId
+			query = ThirdPartyIdentityManager._getUserQuery providerId, externalUserId
 			UserStub.findOne query, (err, userStub) ->
 				return callback err if err?
 				return callback(new Errors.ThirdPartyUserNotFoundError()) unless userStub
 				return callback(null, userStub) unless externalData
-				update = ThirdPartyIdentityManager._loginUpdate userStub, providerId, externalUserId, externalData
+				update = ThirdPartyIdentityManager._thirdPartyIdentifierUpdate userStub, providerId, externalUserId, externalData
 				UserStub.findOneAndUpdate query, update, {new: true}, callback
 
-	_loginQuery: (providerId, externalUserId) ->
+	_getUserQuery: (providerId, externalUserId) ->
 		externalUserId = externalUserId.toString()
 		providerId = providerId.toString()
 		query =
@@ -36,7 +42,7 @@ module.exports = ThirdPartyIdentityManager =
 			"thirdPartyIdentifiers.providerId": providerId
 		return query
 
-	_loginUpdate: (user, providerId, externalUserId, externalData) ->
+	_thirdPartyIdentifierUpdate: (user, providerId, externalUserId, externalData) ->
 		providerId = providerId.toString()
 		# get third party identifier object from array
 		thirdPartyIdentifier = user.thirdPartyIdentifiers.find (tpi) ->
@@ -74,3 +80,12 @@ module.exports = ThirdPartyIdentityManager =
 		update = $pull: thirdPartyIdentifiers:
 			providerId: providerId
 		UserUpdater.updateUser user_id, update, callback
+
+	# attempt to unlink user but unlink user stub if not linked to user
+	unlinkUserStub: (user_id, providerId, callback) ->
+		ThirdPartyIdentityManager.unlink user_id, providerId, (err, res) ->
+			return callback err if err?
+			return callback null, res if res.nModified == 1
+			update = $pull: thirdPartyIdentifiers:
+				providerId: providerId
+			UserStub.update { _id: user_id }, update, callback
