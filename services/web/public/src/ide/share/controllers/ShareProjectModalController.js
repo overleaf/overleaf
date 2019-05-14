@@ -58,6 +58,16 @@ define(['base'], App =>
     }
     $scope.refreshCanAddCollaborators()
 
+    $scope.$watch('canAddCollaborators', function() {
+      if (!$scope.canAddCollaborators) {
+        event_tracking.send(
+          'subscription-funnel',
+          'editor-click-feature',
+          'projectMembers'
+        )
+      }
+    })
+
     $scope.$watch(
       '(project.members.length + project.invites.length)',
       _noOfMembers => $scope.refreshCanAddCollaborators()
