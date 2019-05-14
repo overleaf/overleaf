@@ -31,8 +31,14 @@ define(['base'], function(App) {
             parent_folder() {
               return ide.fileTreeManager.getCurrentFolder()
             },
+            projectFeatures() {
+              return ide.$scope.project.features
+            },
             type() {
               return 'doc'
+            },
+            userFeatures() {
+              return ide.$scope.user.features
             }
           }
         })
@@ -120,7 +126,19 @@ define(['base'], function(App) {
     'type',
     'parent_folder',
     '$modalInstance',
-    function($scope, ide, type, parent_folder, $modalInstance) {
+    'event_tracking',
+    'projectFeatures',
+    'userFeatures',
+    function(
+      $scope,
+      ide,
+      type,
+      parent_folder,
+      $modalInstance,
+      event_tracking,
+      projectFeatures,
+      userFeatures
+    ) {
       $scope.type = type
       $scope.parent_folder = parent_folder
       $scope.state = {
@@ -129,6 +147,35 @@ define(['base'], function(App) {
       }
       $scope.cancel = () => $modalInstance.dismiss('cancel')
       $scope.create = () => $scope.$broadcast('create')
+
+      const hasMendeleyFeature =
+        (projectFeatures && projectFeatures.references) ||
+        (projectFeatures && projectFeatures.mendeley) ||
+        (userFeatures && userFeatures.references) ||
+        (userFeatures && userFeatures.mendeley)
+
+      const hasZoteroFeature =
+        (projectFeatures && projectFeatures.references) ||
+        (projectFeatures && projectFeatures.zotero) ||
+        (userFeatures && userFeatures.references) ||
+        (userFeatures && userFeatures.zotero)
+
+      $scope.$watch('type', function() {
+        if ($scope.type === 'mendeley' && !hasMendeleyFeature) {
+          event_tracking.send(
+            'subscription-funnel',
+            'editor-click-feature',
+            $scope.type
+          )
+        }
+        if ($scope.type === 'zotero' && !hasZoteroFeature) {
+          event_tracking.send(
+            'subscription-funnel',
+            'editor-click-feature',
+            $scope.type
+          )
+        }
+      })
       return $scope.$on('done', (e, opts = {}) => {
         isBibFile = opts.name && /^.*\.bib$/.test(opts.name)
         if (opts.shouldReindexReferences || isBibFile) {
