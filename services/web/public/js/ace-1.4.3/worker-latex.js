@@ -1690,6 +1690,21 @@ var readOptionalGeneric = function(TokeniseResult, k) {
     return null;
 };
 
+var readOptionalStar = function(TokeniseResult, k) {
+  var Tokens = TokeniseResult.tokens;
+  var text = TokeniseResult.text;
+
+  var params = Tokens[k + 1];
+
+  if (params && params[1] === "Text") {
+    var paramNum = text.substring(params[2], params[3]);
+    if (paramNum.match(/^(\*)+\s*$/)) {
+      return k + 1; // got it
+    }
+  }
+  return null;
+};
+
 var readOptionalDef = function (TokeniseResult, k) {
     var Tokens = TokeniseResult.tokens;
     var text = TokeniseResult.text;
@@ -1947,9 +1962,13 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
             } else if (seq === "input") {
                 newPos = read1filename(TokeniseResult, i);
                 if (newPos === null) { continue; } else {i = newPos;};
-            } else if (seq === "hbox" || seq === "text" || seq === "mbox" || seq === "footnote" || seq === "intertext" || seq === "shortintertext" || seq === "textnormal" || seq === "tag" || seq === "reflectbox" || seq === "textrm") {
+            } else if (seq === "hbox" || seq === "text" || seq === "mbox" || seq === "footnote" || seq === "intertext" || seq === "shortintertext" || seq === "textnormal" || seq === "reflectbox" || seq === "textrm") {
                 nextGroupMathMode = false;
-            } else if (seq === "rotatebox" || seq === "scalebox"  || seq == "feynmandiagram") {
+            } else if (seq === "tag") {
+                newPos = readOptionalStar(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                nextGroupMathMode = false;
+            } else if (seq === "rotatebox" || seq === "scalebox"  || seq == "feynmandiagram" || seq === "tikz") {
                 newPos = readOptionalGeneric(TokeniseResult, i);
                 if (newPos === null) { /* do nothing */ } else {i = newPos;};
                 newPos = readDefinition(TokeniseResult, i);
