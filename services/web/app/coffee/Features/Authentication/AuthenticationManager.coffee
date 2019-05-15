@@ -86,6 +86,9 @@ module.exports = AuthenticationManager =
 				return callback(new Error("Password Reset Attempt Failed"))
 
 	checkRounds: (user, hashedPassword, password, callback = (error) ->) ->
+		# Temporarily disable this function, TODO: re-enable this
+		if Settings?.security?.disableBcryptRoundsUpgrades
+			return callback()
 		# check current number of rounds and rehash if necessary
 		currentRounds = bcrypt.getRounds hashedPassword
 		if currentRounds < BCRYPT_ROUNDS

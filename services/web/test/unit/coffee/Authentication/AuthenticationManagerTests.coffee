@@ -148,6 +148,28 @@ describe "AuthenticationManager", ->
 				it "should return the user", ->
 					@callback.calledWith(null, @user).should.equal true
 
+			describe "when the hashed password matches but the number of rounds is too low, but upgrades disabled", ->
+				beforeEach (done) ->
+					@settings.security.disableBcryptRoundsUpgrades = true
+					@user.hashedPassword = @hashedPassword = "asdfjadflasdf"
+					@bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
+					@bcrypt.getRounds = sinon.stub().returns 7
+					@AuthenticationManager.setUserPassword = sinon.stub().callsArgWith(2, null)
+					@AuthenticationManager.authenticate email: @email, @unencryptedPassword, (error, user) =>
+						@callback(error, user)
+						done()
+
+				it "should not check the number of rounds", ->
+					@bcrypt.getRounds.called.should.equal false
+
+				it "should not set the users password (with a higher number of rounds)", ->
+					@AuthenticationManager.setUserPassword
+						.calledWith("user-id", @unencryptedPassword)
+						.should.equal false
+
+				it "should return the user", ->
+					@callback.calledWith(null, @user).should.equal true
+
 		describe "when the user does not exist in the database", ->
 			beforeEach ->
 				@User.findOne = sinon.stub().callsArgWith(1, null, null)
