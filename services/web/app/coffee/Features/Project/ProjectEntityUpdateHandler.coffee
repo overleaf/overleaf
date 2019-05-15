@@ -57,6 +57,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 					fileProperties = name : SafePath.clean(origonalFileRef.name)
 					if origonalFileRef.linkedFileData?
 						fileProperties.linkedFileData = origonalFileRef.linkedFileData
+					if origonalFileRef.hash?
+						fileProperties.hash = origonalFileRef.hash
 					fileRef = new File(fileProperties)
 					FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err, fileStoreUrl)->
 						if err?

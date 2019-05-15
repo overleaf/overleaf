@@ -44,7 +44,8 @@ describe 'ProjectEntityUpdateHandler', ->
 				@rev = 0
 				if options.linkedFileData?
 					@linkedFileData = options.linkedFileData
-
+				if options.hash?
+					@hash = options.hash
 		@docName = "doc-name"
 		@docLines = ['1234','abc']
 
@@ -121,7 +122,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				.calledWithMatch(project_id, projectHistoryId, userId, changesMatcher)
 				.should.equal true
 
-	describe 'copyFileFromExistingProjectWithProject, with linkedFileData', ->
+	describe 'copyFileFromExistingProjectWithProject, with linkedFileData and hash', ->
 
 		beforeEach ->
 			@oldProject_id = "123kljadas"
@@ -129,6 +130,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				_id:"oldFileRef",
 				name:@fileName,
 				linkedFileData: @linkedFileData
+				hash: "123456"
 			}
 			@ProjectEntityMongoUpdateHandler._confirmFolder = sinon.stub().yields(folder_id)
 			@ProjectEntityMongoUpdateHandler._putElement = sinon.stub().yields(null, {path:{fileSystem: @fileSystemPath}})
@@ -140,12 +142,12 @@ describe 'ProjectEntityUpdateHandler', ->
 				.calledWith(@oldProject_id, @oldFileRef._id, project_id, file_id)
 				.should.equal true
 
-		it 'should put file into folder by calling put element, with the linkedFileData', ->
+		it 'should put file into folder by calling put element, with the linkedFileData and hash', ->
 			@ProjectEntityMongoUpdateHandler._putElement
 				.calledWithMatch(
 					@project,
 					folder_id,
-					{ _id: file_id, name: @fileName, linkedFileData: @linkedFileData},
+					{ _id: file_id, name: @fileName, linkedFileData: @linkedFileData, hash: "123456"},
 					"file"
 				)
 				.should.equal true
