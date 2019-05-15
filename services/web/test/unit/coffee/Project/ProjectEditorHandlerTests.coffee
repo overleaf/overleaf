@@ -42,6 +42,7 @@ describe "ProjectEditorHandler", ->
 			deletedDocs: [{
 				_id: "deleted-doc-id"
 				name: "main.tex"
+				deletedAt: @deletedAt = new Date("2017-01-01")
 			}]
 		@members = [{
 			user: @owner = {

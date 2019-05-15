@@ -700,6 +700,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 						deletedDocs: {
 							_id: @doc._id
 							name: @doc.name
+							deletedAt: new Date()
 						}
 					}
 				})

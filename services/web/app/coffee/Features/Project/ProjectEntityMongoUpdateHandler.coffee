@@ -365,6 +365,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				deletedDocs: {
 					_id:  doc._id
 					name: doc.name
+					deletedAt: new Date()
 				}
 			}
 		}, {}, callback

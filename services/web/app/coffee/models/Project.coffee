@@ -11,6 +11,7 @@ ObjectId = Schema.ObjectId
 
 DeletedDocSchema = new Schema
 	name: String
+	deletedAt: {type: Date}
 
 DeletedFileSchema = new Schema
 	name           : String
