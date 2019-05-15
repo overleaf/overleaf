@@ -93,6 +93,7 @@ module.exports = CompileManager =
 					compiler:  request.compiler
 					timeout:   request.timeout
 					image:     request.imageName
+					flags:     request.flags
 					environment: env
 				}, (error, output, stats, timings) ->
 					# request was for validation only
@@ -130,7 +131,7 @@ module.exports = CompileManager =
 						return callback(error) if error?
 						OutputCacheManager.saveOutputFiles outputFiles, compileDir,  (error, newOutputFiles) ->
 							callback null, newOutputFiles
-	
+
 	stopCompile: (project_id, user_id, callback = (error) ->) ->
 		compileName = getCompileName(project_id, user_id)
 		LatexRunner.killLatex compileName, callback

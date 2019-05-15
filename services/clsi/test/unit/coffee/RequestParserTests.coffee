@@ -1,6 +1,7 @@
 SandboxedModule = require('sandboxed-module')
 sinon = require('sinon')
 require('chai').should()
+expect = require('chai').expect
 modulePath = require('path').join __dirname, '../../../app/js/RequestParser'
 tk = require("timekeeper")
 
@@ -22,7 +23,7 @@ describe "RequestParser", ->
 				resources: []
 		@RequestParser = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings = {}
-	
+
 	afterEach ->
 		tk.reset()
 
@@ -55,7 +56,7 @@ describe "RequestParser", ->
 		beforeEach ->
 			delete @validRequest.compile.options.compiler
 			@RequestParser.parse @validRequest, (error, @data) =>
-		
+
 		it "should set the compiler to pdflatex by default", ->
 			@data.compiler.should.equal "pdflatex"
 
@@ -65,6 +66,21 @@ describe "RequestParser", ->
 
 		it "should set the imageName", ->
 			@data.imageName.should.equal "basicImageName/here:2017-1"
+
+	describe "with flags set", ->
+		beforeEach ->
+			@validRequest.compile.options.flags = ["-file-line-error"]
+			@RequestParser.parse @validRequest, (error, @data) =>
+
+		it "should set the flags attribute", ->
+			expect(@data.flags).to.deep.equal ["-file-line-error"]
+
+	describe "with flags not specified", ->
+		beforeEach ->
+			@RequestParser.parse @validRequest, (error, @data) =>
+
+		it "it should have an empty flags list", ->
+			expect(@data.flags).to.deep.equal []
 
 	describe "without a timeout specified", ->
 		beforeEach ->
@@ -88,7 +104,7 @@ describe "RequestParser", ->
 
 		it "should set the timeout (in milliseconds)", ->
 			@data.timeout.should.equal @validRequest.compile.options.timeout * 1000
-	
+
 	describe "with a resource without a path", ->
 		beforeEach ->
 			delete @validResource.path
@@ -175,7 +191,7 @@ describe "RequestParser", ->
 
 		it "should return the url in the parsed response", ->
 			@data.resources[0].url.should.equal @url
-		
+
 	describe "with a resource with a content attribute", ->
 		beforeEach ->
 			@validResource.content = @content = "Hello world"
@@ -185,7 +201,7 @@ describe "RequestParser", ->
 
 		it "should return the content in the parsed response", ->
 			@data.resources[0].content.should.equal @content
-		
+
 	describe "without a root resource path", ->
 		beforeEach ->
 			delete @validRequest.compile.rootResourcePath
@@ -225,13 +241,13 @@ describe "RequestParser", ->
 			}
 			@RequestParser.parse @validRequest, @callback
 			@data = @callback.args[0][1]
-			
+
 		it "should return the escaped resource", ->
 			@data.rootResourcePath.should.equal @goodPath
-			
+
 		it "should also escape the resource path", ->
 			@data.resources[0].path.should.equal @goodPath
-		
+
 	describe "with a root resource path that has a relative path", ->
 		beforeEach ->
 			@validRequest.compile.rootResourcePath = "foo/../../bar.tex"
