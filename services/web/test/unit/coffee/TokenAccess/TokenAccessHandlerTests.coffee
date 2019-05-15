@@ -150,6 +150,20 @@ describe "TokenAccessHandler", ->
 					expect(projectExists).to.equal true
 					done()
 
+		describe 'when the tokens have different lengths', ->
+			beforeEach ->
+				@project.tokens = {
+					readOnly: 'atntntn'
+					readAndWrite: @token + "some-other-characters",
+					readAndWritePrefix: @tokenPrefix
+				}
+				@Project.findOne = sinon.stub().callsArgWith(2, null, @project)
+
+			it 'should not return a project', (done) ->
+				@TokenAccessHandler.findProjectWithReadAndWriteToken @token, (err, project) ->
+					expect(err).to.not.exist
+					expect(project).to.not.exist
+					done()	
 
 	describe 'findProjectWithHigherAccess', ->
 		describe 'when user does have higher access', ->

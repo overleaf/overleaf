@@ -5,6 +5,7 @@ PrivilegeLevels = require '../Authorization/PrivilegeLevels'
 UserGetter = require '../User/UserGetter'
 ObjectId = require("mongojs").ObjectId
 Settings = require('settings-sharelatex')
+logger = require('logger-sharelatex')
 V1Api = require "../V1/V1Api"
 crypto = require 'crypto'
 
@@ -41,10 +42,15 @@ module.exports = TokenAccessHandler =
 			return callback(err) if err?
 			if !project?
 				return callback(null, null)
-			if !crypto.timingSafeEqual(new Buffer(token), new Buffer(project.tokens.readAndWrite))
-				logger.err {token}, "read-and-write token match on numeric section, but not on full token"
+			try
+				if !crypto.timingSafeEqual(new Buffer(token), new Buffer(project.tokens.readAndWrite))
+					logger.err {token}, "read-and-write token match on numeric section, but not on full token"
+					return callback(null, null)
+				else
+					return callback(null, project)
+			catch err
+				logger.err {token, cryptoErr: err}, "error comparing tokens"
 				return callback(null, null)
-			callback(null, project)
 
 	findProjectWithReadOnlyToken: (token, callback=(err, project, projectExists)->) ->
 		TokenAccessHandler._getProjectByReadOnlyToken token, (err, project) ->
