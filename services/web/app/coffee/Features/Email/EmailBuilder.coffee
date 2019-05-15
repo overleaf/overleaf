@@ -130,6 +130,17 @@ templates.verifyEmailToJoinTeam = CTAEmailTemplate({
 	ctaURL: (opts) -> opts.acceptInviteUrl
 })
 
+templates.dropboxUnlinkedDuplicate = CTAEmailTemplate({
+	subject: () -> "Your Dropbox Account has been Unlinked - #{settings.appName}"
+	message: (opts) -> """
+Our automated systems have detected that your Dropbox account was linked to more than one Overleaf accounts. This should not have been allowed and might be causing issues with the Dropbox sync feature.
+
+We have now unlinked all your Dropbox and Overleaf Accounts. To ensure your project will keep syncing you can link your Dropbox account to the Overleaf account of your choice now.
+"""
+	ctaText: () -> "Link Dropbox Account"
+	ctaURL: (opts) -> "#{settings.siteUrl}/user/settings"
+})
+
 templates.testEmail = CTAEmailTemplate({
 	subject: () -> "A Test Email from #{settings.appName}"
 	title: () -> "A Test Email from #{settings.appName}"
