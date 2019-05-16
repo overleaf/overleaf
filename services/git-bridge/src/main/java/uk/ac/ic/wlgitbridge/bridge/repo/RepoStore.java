@@ -50,6 +50,8 @@ public interface RepoStore {
         return bzip2Project(projectName, null);
     }
 
+    void gcProject(String projectName) throws IOException;
+
     /**
      * Called after {@link #bzip2Project(String, long[])}'s has been safely
      * uploaded to the swap store. Removes all traces of the project from disk,
