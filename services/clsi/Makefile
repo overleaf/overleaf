@@ -1,7 +1,7 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.1.11
+# Version: 1.1.20
 
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
@@ -12,7 +12,6 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 	PROJECT_NAME=$(PROJECT_NAME) \
 	MOCHA_GREP=${MOCHA_GREP} \
 	docker-compose ${DOCKER_COMPOSE_FLAGS}
-
 
 clean:
 	docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
@@ -27,7 +26,9 @@ test: test_unit test_acceptance
 test_unit:
 	@[ ! -d test/unit ] && echo "clsi has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit
 
-test_acceptance: test_clean test_acceptance_pre_run # clear the database before each acceptance test run
+test_acceptance: test_clean test_acceptance_pre_run test_acceptance_run
+
+test_acceptance_run:
 	@[ ! -d test/acceptance ] && echo "clsi has no acceptance tests" || $(DOCKER_COMPOSE) run --rm test_acceptance
 
 test_clean:
@@ -39,6 +40,9 @@ build:
 	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		.
+
+tar:
+	$(DOCKER_COMPOSE) up tar
 
 publish:
 
