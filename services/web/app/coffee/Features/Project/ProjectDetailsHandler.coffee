@@ -47,8 +47,11 @@ module.exports = ProjectDetailsHandler =
 				logger.err err:err, "something went wrong setting project description"
 			callback(err)
 
-	transferOwnership: (project_id, user_id, callback)->
-		ProjectGetter.getProject project_id, {owner_ref: true, name: true}, (err, project)->
+	transferOwnership: (project_id, user_id, suffix = "", callback)->
+		if typeof suffix is 'function'
+			callback = suffix
+			suffix = ''
+		ProjectGetter.getProject project_id, {owner_ref: true}, (err, project)->
 			return callback(err) if err?
 			return callback(new Errors.NotFoundError("project not found")) unless project?
 			return callback() if project.owner_ref == user_id
@@ -57,7 +60,7 @@ module.exports = ProjectDetailsHandler =
 				return callback(err) if err?
 				return callback(new Errors.NotFoundError("user not found")) unless user?
 
-				ProjectDetailsHandler.generateUniqueName user_id, project.name, (err, name) ->
+				ProjectDetailsHandler.generateUniqueName user_id, project.name + suffix, (err, name) ->
 					return callback(err) if err?
 
 					Project.update {_id: project_id},

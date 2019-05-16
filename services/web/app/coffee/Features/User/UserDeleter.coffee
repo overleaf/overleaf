@@ -12,7 +12,7 @@ Errors = require("../Errors/Errors")
 
 module.exports = UserDeleter =
 
-	softDeleteUser: (user_id, callback = (err)->)->
+	softDeleteUserForMigration: (user_id, callback = (err)->)->
 		if !user_id?
 			logger.err "user_id is null when trying to delete user"
 			return callback(new Error("no user_id"))
@@ -23,10 +23,10 @@ module.exports = UserDeleter =
 				(cb) ->
 					UserDeleter._cleanupUser user, cb
 				(cb) ->
-					ProjectDeleter.softDeleteUsersProjects user._id, cb
+					ProjectDeleter.softDeleteUsersProjectsForMigration user._id, cb
 				(cb) ->
 					user.deletedAt = new Date()
-					db.deletedUsers.insert user, cb
+					db.usersDeletedByMigration.insert user, cb
 				(cb) ->
 					user.remove cb
 			], callback)

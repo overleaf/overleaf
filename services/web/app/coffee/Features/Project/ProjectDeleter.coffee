@@ -28,9 +28,9 @@ module.exports = ProjectDeleter =
 		logger.log {user_id}, "deleting users projects"
 		ProjectDeleter._deleteUsersProjectWithMethod user_id, ProjectDeleter.deleteProject, callback
 
-	softDeleteUsersProjects: (user_id, callback)->
+	softDeleteUsersProjectsForMigration: (user_id, callback)->
 		logger.log {user_id}, "soft-deleting users projects"
-		ProjectDeleter._deleteUsersProjectWithMethod user_id, ProjectDeleter.softDeleteProject, callback
+		ProjectDeleter._deleteUsersProjectWithMethod user_id, ProjectDeleter.softDeleteProjectForMigration, callback
 
 	_deleteUsersProjectWithMethod: (user_id, deleteMethod, callback) ->
 		Project.find {owner_ref: user_id}, (error, projects) ->
@@ -44,7 +44,7 @@ module.exports = ProjectDeleter =
 					CollaboratorsHandler.removeUserFromAllProjets user_id, callback
 			)
 
-	softDeleteProject: (project_id, callback) ->
+	softDeleteProjectForMigration: (project_id, callback) ->
 		logger.log project_id: project_id, "soft-deleting project"
 		async.waterfall [
 			(cb) ->
@@ -52,7 +52,7 @@ module.exports = ProjectDeleter =
 			(project, cb) ->
 				return callback(new Errors.NotFoundError("project not found")) unless project?
 				project.deletedAt = new Date()
-				db.deletedProjects.insert project, (err) -> cb(err)
+				db.projectsDeletedByMigration.insert project, (err) -> cb(err)
 			(cb) ->
 				ProjectDeleter.deleteProject project_id, cb
 		], callback

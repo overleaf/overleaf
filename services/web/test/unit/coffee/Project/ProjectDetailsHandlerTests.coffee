@@ -117,6 +117,10 @@ describe 'ProjectDetailsHandler', ->
 				sinon.assert.calledWith(@handler.generateUniqueName, '123', @project.name)
 				done()
 
+		it "should append the supplied suffix to the project name, if passed", (done) ->
+			@handler.transferOwnership 'abc', '123', ' wombat', () =>
+				sinon.assert.calledWith(@handler.generateUniqueName, '123', "#{@project.name} wombat")
+				done()
 
 	describe "getProjectDescription", ->
 
