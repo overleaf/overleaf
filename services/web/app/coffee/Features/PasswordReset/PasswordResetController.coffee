@@ -6,6 +6,7 @@ UserGetter = require("../User/UserGetter")
 UserUpdater = require("../User/UserUpdater")
 UserSessionsManager = require("../User/UserSessionsManager")
 logger = require "logger-sharelatex"
+Settings = require 'settings-sharelatex'
 
 module.exports =
 
@@ -31,6 +32,8 @@ module.exports =
 					res.send 200, {message: {text: req.i18n.translate("password_reset_email_sent")}}
 				else if status == 'secondary'
 					res.send 404, {message: req.i18n.translate("secondary_email_password_reset")}
+				else if status == 'sharelatex'
+					res.send 404, {message: "<a href=\"#{Settings.accountMerge.sharelatexHost}/user/password/reset\">#{req.i18n.translate("reset_from_sl")}</a>"}
 				else
 					res.send 404, {message: req.i18n.translate("cant_find_email")}
 

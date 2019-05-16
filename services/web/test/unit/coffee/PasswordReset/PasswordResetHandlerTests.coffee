@@ -127,9 +127,26 @@ describe "PasswordResetHandler", ->
 				it 'should return status == null', ->
 					@callback.calledWith(null, null).should.equal true
 
+			describe "when the user isn't on v2", ->
+				beforeEach ->
+					@V1Api.request = sinon.stub().yields(null, { statusCode: 404 }, {})
+					@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @user)
+					@PasswordResetHandler.generateAndEmailResetToken @email, @callback
+
+				it 'should not set the password token data', ->
+					@OneTimeTokenHandler.getNewToken
+						.called.should.equal false
+
+				it 'should not send an email with the token', ->
+					@EmailHandler.sendEmail.called.should.equal false
+
+				it 'should return status == sharelatex', ->
+					@callback.calledWith(null, 'sharelatex').should.equal true
+
 			describe "when the email is a secondary email", ->
 				beforeEach ->
 					@V1Api.request = sinon.stub().yields(null, { statusCode: 404 }, {})
+					@user.overleaf = {id: 101}
 					@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @user)
 					@PasswordResetHandler.generateAndEmailResetToken @email, @callback
 

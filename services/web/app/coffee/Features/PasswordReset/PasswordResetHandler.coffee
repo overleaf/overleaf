@@ -26,6 +26,8 @@ module.exports = PasswordResetHandler =
 				UserGetter.getUserByAnyEmail email, (err, user) ->
 					if !user
 						return callback(error, null)
+					else if !user.overleaf?.id?
+						return callback(error, 'sharelatex')
 					else
 						return callback(error, 'secondary')
 
