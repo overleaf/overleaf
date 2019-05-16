@@ -17,9 +17,12 @@ describe "UserEmailsConfirmationHandler", ->
 			"../Security/OneTimeTokenHandler": @OneTimeTokenHandler = {}
 			"../Errors/Errors": Errors
 			"./UserUpdater": @UserUpdater = {}
+			"./UserGetter": @UserGetter =
+				getUser: sinon.stub().yields(null, @mockUser)
 			"../Email/EmailHandler": @EmailHandler = {}
 			"../Helpers/EmailHelper": EmailHelper
-		@user_id = "mock-user-id"
+		@mockUser = _id:  "mock-user-id"
+		@user_id = @mockUser._id
 		@email = "mock@example.com"
 		@callback = sinon.stub()
 
@@ -119,6 +122,15 @@ describe "UserEmailsConfirmationHandler", ->
 					null, 
 					{@user_id}
 				)
+				@UserEmailsConfirmationHandler.confirmEmailFromToken @token = 'mock-token', @callback
+
+			it "should call the callback with a NotFoundError", ->
+				@callback.calledWith(sinon.match.instanceOf(Errors.NotFoundError)).should.equal true
+
+
+		describe 'with no user found', ->
+			beforeEach ->
+				@UserGetter.getUser.yields(null, null)
 				@UserEmailsConfirmationHandler.confirmEmailFromToken @token = 'mock-token', @callback
 
 			it "should call the callback with a NotFoundError", ->
