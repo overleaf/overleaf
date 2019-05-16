@@ -4,8 +4,10 @@ echo "Changing permissions of /var/run/docker.sock for sibling containers"
 ls -al /var/run/docker.sock
 docker --version
 cat /etc/passwd
-usermod -aG docker node
-chown root:docker /var/run/docker.sock
+
+DOCKER_GROUP=$(stat -c '%g' /var/run/docker.sock)
+groupadd --non-unique --gid ${DOCKER_GROUP} dockeronhost
+usermod -aG dockeronhost node
 
 mkdir -p /app/cache
 chown -R node:node /app/cache
