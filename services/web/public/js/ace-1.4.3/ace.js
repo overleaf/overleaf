@@ -36,22 +36,6 @@
 
 (function() {
 
-window.__log__measurements_ace_ = function () {
-    var aceEditor = document.querySelector('#editor .ace_editor');
-    var aceScroller = document.querySelector('#editor .ace_scroller');
-    var aceContent = document.querySelector('#editor .ace_content');
-
-    if (aceEditor) {
-        console.log("aceEditor", aceEditor.getBoundingClientRect(), aceEditor.offsetParent);
-    }
-    if (aceScroller) {
-        console.log("aceScroller", aceScroller.getBoundingClientRect(), aceScroller.offsetParent);
-    }
-    if (aceContent) {
-        console.log("aceContent", aceContent.getBoundingClientRect(), aceContent.offsetParent);
-    }
-}
-
 var ACE_NAMESPACE = "ace";
 
 var global = (function() { return this; })();
@@ -15206,8 +15190,6 @@ var Lines = function(element, canvasHeight) {
 (function() {
     
     this.moveContainer = function(config) {
-        console.log("this.moveContainer", this.element.className, 0, -((config.firstRowScreen * config.lineHeight) % this.canvasHeight) - config.offset * this.$offsetCoefficient);
-        __log__measurements_ace_();
         dom.translate(this.element, 0, -((config.firstRowScreen * config.lineHeight) % this.canvasHeight) - config.offset * this.$offsetCoefficient);
     };    
     
@@ -16750,8 +16732,6 @@ var Cursor = function(parentEl) {
                     dom.setStyle(style, "display", "none");
                 } else {
                     dom.setStyle(style, "display", "block");
-                    console.log("this.update", element.className, pixelPos.left, pixelPos.top);
-                    __log__measurements_ace_();
                     dom.translate(element, pixelPos.left, pixelPos.top);
                     dom.setStyle(style, "width", Math.round(config.characterWidth) + "px");
                     dom.setStyle(style, "height", config.lineHeight + "px");
@@ -17237,6 +17217,7 @@ cursor: text;\
 position: absolute;\
 box-sizing: border-box;\
 min-width: 100%;\
+contain: style size layout;\
 }\
 .ace_dragging .ace_scroller:before{\
 position: absolute;\
@@ -17267,6 +17248,7 @@ z-index: 4;\
 -moz-user-select: none;\
 -webkit-user-select: none;\
 user-select: none;\
+contain: style size layout;\
 }\
 .ace_gutter-active-line {\
 position: absolute;\
@@ -17302,6 +17284,7 @@ background-position: 2px center;\
 background-image: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAJFBMVEUAAAChoaGAgIAqKiq+vr6tra1ZWVmUlJSbm5s8PDxubm56enrdgzg3AAAAAXRSTlMAQObYZgAAAClJREFUeNpjYMAPdsMYHegyJZFQBlsUlMFVCWUYKkAZMxZAGdxlDMQBAG+TBP4B6RyJAAAAAElFTkSuQmCC\");\
 }\
 .ace_scrollbar {\
+contain: strict;\
 position: absolute;\
 right: 0;\
 bottom: 0;\
@@ -17343,6 +17326,7 @@ overflow: hidden;\
 font: inherit;\
 padding: 0 1px;\
 margin: 0 -1px;\
+contain: strict;\
 -ms-user-select: text;\
 -moz-user-select: text;\
 -webkit-user-select: text;\
@@ -17368,6 +17352,7 @@ filter: none!important;\
 perspective: none!important;\
 clip-path: none!important;\
 mask : none!important;\
+contain: none!important;\
 perspective: none!important;\
 mix-blend-mode: initial!important;\
 z-index: auto;\
@@ -17389,14 +17374,17 @@ width: auto;\
 text-align: right;\
 pointer-events: auto;\
 height: 1000000px;\
+contain: style size layout;\
 }\
 .ace_text-layer {\
 font: inherit !important;\
 position: absolute;\
 height: 1000000px;\
 width: 1000000px;\
+contain: style size layout;\
 }\
 .ace_text-layer > .ace_line, .ace_text-layer > .ace_line_group {\
+contain: style size layout;\
 position: absolute;\
 top: 0;\
 left: 0;\
@@ -17406,10 +17394,12 @@ right: 0;\
 .ace_hidpi .ace_gutter-layer,\
 .ace_hidpi .ace_content,\
 .ace_hidpi .ace_gutter {\
+contain: strict;\
 will-change: transform;\
 }\
 .ace_hidpi .ace_text-layer > .ace_line, \
 .ace_hidpi .ace_text-layer > .ace_line_group {\
+contain: strict;\
 }\
 .ace_cjk {\
 display: inline-block;\
@@ -18055,8 +18045,6 @@ var VirtualRenderer = function(container, theme) {
     this.$moveTextAreaToCursor = function() {
         var style = this.textarea.style;
         if (!this.$keepTextAreaAtCursor) {
-            console.log("this.$moveTextAreaToCursor-$keepTextAreaAtCursor", this.textarea.className, -100, 0);
-            __log__measurements_ace_();
             dom.translate(this.textarea, -100, 0);
             return;
         }
@@ -18074,8 +18062,6 @@ var VirtualRenderer = function(container, theme) {
 
         var h = composition && composition.useTextareaForIME ? this.lineHeight : HIDE_TEXTAREA ? 0 : 1;
         if (posTop < 0 || posTop > config.height - h) {
-            console.log("this.$moveTextAreaToCursor-if postop...", this.textarea.className, 0, 0);
-            __log__measurements_ace_();
             dom.translate(this.textarea, 0, 0);
             return;
         }
@@ -18103,8 +18089,6 @@ var VirtualRenderer = function(container, theme) {
 
         dom.setStyle(style, "height", h + "px");
         dom.setStyle(style, "width", w + "px");
-        console.log("this.$moveTextAreaToCursor-last one", this.textarea.className, Math.min(posLeft, this.$size.scrollerWidth - w), Math.min(posTop, this.$size.height - h));
-        __log__measurements_ace_();
         dom.translate(this.textarea, Math.min(posLeft, this.$size.scrollerWidth - w), Math.min(posTop, this.$size.height - h));
     };
     this.getFirstVisibleRow = function() {
@@ -18244,8 +18228,6 @@ var VirtualRenderer = function(container, theme) {
             if (changes & this.CHANGE_H_SCROLL)
                 this.$updateScrollBarH();
             
-            console.log("this.$renderChanges", this.content.className, -this.scrollLeft, -config.offset);
-            __log__measurements_ace_();
             dom.translate(this.content, -this.scrollLeft, -config.offset);
             
             var width = config.width + 2 * this.$padding + "px";
@@ -18255,8 +18237,6 @@ var VirtualRenderer = function(container, theme) {
             dom.setStyle(this.content.style, "height", height);
         }
         if (changes & this.CHANGE_H_SCROLL) {
-            console.log("this.$renderChanges-if changes", this.content.className, -this.scrollLeft, -config.offset);
-            __log__measurements_ace_();
             dom.translate(this.content, -this.scrollLeft, -config.offset);
             this.scroller.className = this.scrollLeft <= 0 ? "ace_scroller" : "ace_scroller ace_scroll-left";
         }
