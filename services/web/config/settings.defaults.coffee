@@ -542,5 +542,6 @@ module.exports = settings =
 					'span': [ 'class', 'id', 'style' ]
 					'table': [ 'border', 'class', 'id', 'style' ]
 					'td': [ 'colspan', 'rowspan', 'headers' ]
-					'th': [ 'abbr', 'headers', 'colspan', 'rowspan', 'scope', 'sorted' ]
+					'th': [ 'abbr', 'headers', 'colspan', 'rowspan', 'scope', 'sorted', 'style' ]
+					'tr': [ 'class' ]
 					'video': [ 'alt', 'class', 'controls', 'height', 'width' ]
