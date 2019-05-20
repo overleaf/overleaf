@@ -71,6 +71,8 @@ module.exports = UserPagesController =
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log user: user_id, "loading settings page"
 		shouldAllowEditingDetails = !(Settings?.ldap?.updateUserDetailsOnLogin) and !(Settings?.saml?.updateUserDetailsOnLogin)
+		oauthProviders = Settings.oauthProviders || {}
+
 		UserGetter.getUser user_id, (err, user)->
 			return next(err) if err?
 
@@ -83,7 +85,10 @@ module.exports = UserPagesController =
 					hasPassword: passwordPresent,
 					shouldAllowEditingDetails: shouldAllowEditingDetails
 					languages: Settings.languages,
-					accountSettingsTabActive: true
+					accountSettingsTabActive: true,
+					oauthProviders: UserPagesController._translateProviderDescriptions(oauthProviders, req),
+					thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
+					previewOauth: req.query.prvw?
 
 	sessionsPage: (req, res, next) ->
 		user = AuthenticationController.getSessionUser(req)
@@ -110,4 +115,21 @@ module.exports = UserPagesController =
 			else if body?.has_password
 				return callback(err, true)
 			return callback(err, false)
-     
+
+	_restructureThirdPartyIds: (user) ->
+		# 3rd party identifiers are an array of objects
+		# this turn them into a single object, which
+		# makes data easier to use in template
+		return null if !user.thirdPartyIdentifiers || user.thirdPartyIdentifiers.length == 0
+		user.thirdPartyIdentifiers.reduce (obj, identifier) ->
+			obj[identifier.providerId] = identifier.externalUserId
+			obj
+		, {}
+
+	_translateProviderDescriptions: (providers, req) ->
+		result = {}
+		if providers
+			for provider, data of providers
+				data.description = req.i18n.translate(data.descriptionKey, data.descriptionOptions)
+				result[provider] = data
+		return result

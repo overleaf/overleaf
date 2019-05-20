@@ -21,6 +21,12 @@ describe "UserPagesController", ->
 			_id: @user_id = "kwjewkl"
 			features:{}
 			email: "joe@example.com"
+			thirdPartyIdentifiers: [
+				{
+					"providerId": "google",
+					"externalUserId": "testId"
+				}
+			]
 
 		@UserGetter = getUser: sinon.stub()
 		@UserSessionsManager =
@@ -158,6 +164,15 @@ describe "UserPagesController", ->
 		it "should set 'shouldAllowEditingDetails' to true", (done)->
 			@res.render = (page, opts)=>
 				opts.shouldAllowEditingDetails.should.equal true
+				done()
+			@UserPagesController.settingsPage @req, @res
+
+		it "should restructure thirdPartyIdentifiers data for template use", (done)->
+			expectedResult = {
+				google: "testId"
+			}
+			@res.render = (page, opts)=>
+				expect(opts.thirdPartyIds).to.include expectedResult
 				done()
 			@UserPagesController.settingsPage @req, @res
 

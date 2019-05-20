@@ -168,14 +168,14 @@ block content
 							div
 								a(id="sessions-link", href="/user/sessions") #{translate("manage_sessions")}
 
-							if settings.overleaf && !hasFeature('oauth')
+							if settings.overleaf && !hasFeature('oauth') && !previewOauth
 								hr
 								p
 									| To manage your account's connection to Google, Twitter, ORCID and IEEE, please
 									|
 									a(href="/sign_in_to_v1?return_to=/users/edit#linked-accounts") click here
 									| .
-							else if hasFeature('oauth')
+							else if hasFeature('oauth') || previewOauth
 								hr
 								include settings/user-oauth
 

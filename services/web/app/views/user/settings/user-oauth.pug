@@ -1,35 +1,63 @@
-form.row(
+block scripts
+	script(type='text/javascript').
+		window.oauthFallback = #{oauthFallback}
+		window.oauthProviders = !{StringHelper.stringifyJsonForScript(oauthProviders)}
+		window.thirdPartyIds = !{StringHelper.stringifyJsonForScript(thirdPartyIds)}
+
+mixin providerList()
+	ul.list-like-table
+		li(ng-repeat="(key, provider) in providers")
+			.row(ng-if="key != 'collabratec' || (key == 'collabratec' && v2ThirdPartyIds[key])")
+				.col-xs-12.col-sm-8.col-md-10
+					h4 {{provider.name}}
+					p.small(ng-bind-html="provider.description")
+				.col-xs-2.col-sm-4.col-md-2.text-right
+					//- Unlink
+					button.btn.btn-default(
+						ng-click="unlink(key)"
+						ng-disabled="providers[key].ui.isProcessing"
+						ng-if="thirdPartyIds[key] || (key == 'collabratec' && v2ThirdPartyIds[key])"
+					)
+						span(ng-if="!providers[key].ui.isProcessing") #{translate("unlink")}
+						span(ng-if="providers[key].ui.isProcessing") #{translate("processing")}
+					//- Link
+					a.btn.btn-primary(
+						href="{{provider.linkPath}}?intent=link"
+						ng-if="!thirdPartyIds[key] && !provider.hideWhenNotLinked"
+					) #{translate("link")}
+			//- unlink error
+			.row(
+				ng-if="providers[key].ui.hasError"
+			)
+				.col-sm-12
+					//- to do: fix CSS so that we don't need inline styling
+					.alert.alert-danger(
+						ng-if="providers[key].ui.hasError"
+						style="display: block; margin-bottom: 10px;"
+					)
+						i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true") &nbsp;
+						| {{providers[key].ui.errorMessage}}
+.row(
 	ng-controller="UserOauthController"
-	name="oauthForm"
 	ng-cloak
 )
 	.col-xs-12
-		h3.text-capitalize #{translate("linked_accounts")}
+		h3.text-capitalize#linked-accounts #{translate("linked_accounts")}
 		p.small #{translate("linked_accounts_explained", {appName:'{{settings.appName}}'})}
 
-		div.text-center(ng-if="ui.isLoadingProviders") 
-			i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
-			| &nbsp;#{translate("loading")}...
+		if settings.oauthFallback
+			div.text-center(ng-if="ui.isLoadingV1Ids") 
+				i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
+				| &nbsp;#{translate("loading")}...
 
-		ul(
-			class="list-like-table"
-			ng-if="ui.isLoadingProviders == false && ui.hasError == false"
-		)
-			li(ng-repeat="provider in providers")
-				.row
-					.col-xs-12.col-sm-8.col-md-10
-						h4 {{provider.name}}
-						p.small(ng-if="provider.key != 'orcid'")
-							| #{translate("login_with_service", {service:'{{provider.name}}'})}
-						p.small(ng-if="provider.key == 'orcid'")
-							| !{translate('oauth_orcid_description', {link: '/blog/434'})}
-					.col-xs-2.col-sm-4.col-md-2.text-right
-						button.btn.btn-default(ng-if="userProviders[provider.key]") #{translate("unlink")}
-						button.btn.btn-primary(ng-if="!userProviders[provider.key]")  #{translate("link")}
+			div(ng-if="ui.isLoadingV1Ids == false && ui.hasError == false")
+				+providerList()
 
-		.alert.alert-danger(
-			ng-if="ui.hasError"
-		)
-			i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
-			span(ng-if="!ui.errorMessage") &nbsp;#{translate("error_performing_request")}
-			span(ng-if="ui.errorMessage") &nbsp;{{ui.errorMessage}}
+			.alert.alert-danger(
+				ng-if="ui.hasError"
+			)
+				i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
+				span(ng-if="!ui.errorMessage") &nbsp;#{translate("error_performing_request")}
+				span(ng-if="ui.errorMessage") &nbsp;{{ui.errorMessage}}
+		else
+			+providerList()
