@@ -9,6 +9,7 @@ UserGetter = require('../User/UserGetter')
 NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 SubscriptionLocator = require("../Subscription/SubscriptionLocator")
 Institution = require("../../models/Institution").Institution
+Subscription = require("../../models/Subscription").Subscription
 
 ASYNC_LIMIT = 10
 module.exports = InstitutionsManager =
@@ -32,6 +33,15 @@ module.exports = InstitutionsManager =
 				(error, users) -> 
 					callback(error, checkFeatures(users))
 				)
+
+	getInstitutionUsersSubscriptions: (institutionId, callback = (error, subscriptions) ->) ->
+		getInstitutionAffiliations institutionId, (error, affiliations) ->
+			return callback(error) if error?
+			userIds = affiliations.map (affiliation) -> ObjectId(affiliation.user_id)
+			Subscription
+				.find admin_id: userIds
+				.populate 'admin_id', 'email'
+				.exec callback
 
 fetchInstitutionAndAffiliations = (institutionId, callback) ->
 	async.waterfall [

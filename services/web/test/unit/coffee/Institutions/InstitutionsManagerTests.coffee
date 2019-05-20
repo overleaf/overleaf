@@ -29,6 +29,12 @@ describe "InstitutionsManager", ->
 		@InstitutionModel =
 			Institution:
 				findOne: sinon.stub().callsArgWith(1, null, @institution)
+		@subscriptionExec = sinon.stub().yields()
+		SubscriptionModel =
+			Subscription:
+				find: () =>
+					populate: () =>
+						exec: @subscriptionExec
 		@Mongo =
 			ObjectId: sinon.stub().returnsArg(0)
 
@@ -42,6 +48,7 @@ describe "InstitutionsManager", ->
 			'../Notifications/NotificationsBuilder': @NotificationsBuilder
 			'../Subscription/SubscriptionLocator': @SubscriptionLocator
 			'../../models/Institution': @InstitutionModel
+			"../../models/Subscription": SubscriptionModel
 			'../../infrastructure/mongojs': @Mongo
 
 	describe 'upgradeInstitutionUsers', ->
@@ -114,4 +121,17 @@ describe "InstitutionsManager", ->
 				usersSummary.totalConfirmedProUsers.should.equal 1
 				usersSummary.totalConfirmedNonProUsers.should.equal 2
 				expect(usersSummary.confirmedNonProUsers).to.deep.equal ['456def456def456def456def', '789def789def789def789def']
+				done()
+
+	describe 'getInstitutionUsersSubscriptions', ->
+		it 'returns all institution users subscriptions', (done) ->
+			stubbedUsers = [
+				{ user_id: '123abc123abc123abc123abc' }
+				{ user_id: '456def456def456def456def' }
+				{ user_id: '789def789def789def789def' }
+			]
+			@getInstitutionAffiliations.yields(null, stubbedUsers)
+			@InstitutionsManager.getInstitutionUsersSubscriptions @institutionId, (error, subscriptions) =>
+				should.not.exist(error)
+				sinon.assert.calledOnce(@subscriptionExec)
 				done()
