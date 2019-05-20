@@ -51,7 +51,7 @@ module.exports = ProjectDetailsHandler =
 		if typeof suffix is 'function'
 			callback = suffix
 			suffix = ''
-		ProjectGetter.getProject project_id, {owner_ref: true}, (err, project)->
+		ProjectGetter.getProject project_id, {owner_ref: true, name: true}, (err, project)->
 			return callback(err) if err?
 			return callback(new Errors.NotFoundError("project not found")) unless project?
 			return callback() if project.owner_ref == user_id

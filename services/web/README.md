@@ -43,13 +43,13 @@ Unit tests can be run in the `test_unit` container defined in `docker-compose.te
 The makefile contains a short cut to run these:
 
 ```
-make unit_test
+make test_unit
 ```
 
 During development it is often useful to only run a subset of tests, which can be configured with arguments to the mocha CLI:
 
 ```
-make unit_test MOCHA_ARGS='--grep=AuthorizationManager'
+make test_unit MOCHA_GREP='AuthorizationManager'
 ```
 
 ### Acceptance Tests

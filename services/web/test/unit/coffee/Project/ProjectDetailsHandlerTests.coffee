@@ -104,7 +104,7 @@ describe 'ProjectDetailsHandler', ->
 
 		it "should transfer ownership of the project", (done) ->
 			@handler.transferOwnership 'abc', '123', () =>
-				sinon.assert.calledWith(@ProjectModel.update, {_id: 'abc'})
+				sinon.assert.calledWith(@ProjectModel.update, {_id: 'abc'}, sinon.match({$set: {name: 'teapot'}}))
 				done()
 
 		it "should flush the project to tpds", (done) ->
