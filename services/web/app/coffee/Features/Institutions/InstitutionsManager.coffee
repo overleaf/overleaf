@@ -39,7 +39,7 @@ module.exports = InstitutionsManager =
 			return callback(error) if error?
 			userIds = affiliations.map (affiliation) -> ObjectId(affiliation.user_id)
 			Subscription
-				.find admin_id: userIds
+				.find admin_id: userIds, planCode: { $not: /trial/ }
 				.populate 'admin_id', 'email'
 				.exec callback
 
