@@ -11,19 +11,28 @@ describe "index", ->
 	beforeEach ->
 
 		@settings = {}
-		@sentinelClient = set:->
-		@normalRedisClient = get: ->
+		@sentinelClient = 
+			set: ->
+			on: ->
+		@normalRedisClient = 
+			get: ->
+			on: ->
+		@ioredisConstructor = ioredisConstructor = sinon.stub()
 
 		@sentinel =
 			createClient: sinon.stub().returns(@sentinelClient)
 		@normalRedis = 
 			createClient: sinon.stub().returns(@normalRedisClient)
+		@ioredis = class IoRedis
+			constructor: ioredisConstructor
+			on: sinon.stub()
+		@ioredis.Cluster = class Cluster
+			constructor: (@config, @options) ->
+			on: sinon.stub()
 		@redis = SandboxedModule.require modulePath, requires:
 			"redis-sentinel":@sentinel
 			"redis":@normalRedis
-			"ioredis": @ioredis =
-				Cluster: class Cluster
-					constructor: (@config, @options) ->
+			"ioredis": @ioredis
 		@auth_pass = "1234 pass"
 		@endpoints = [
 				{host: '127.0.0.1', port: 26379},
@@ -49,22 +58,22 @@ describe "index", ->
 			@sentinel.createClient.calledWith(@endpoints, @masterName, {auth_pass:@auth_pass, retry_max_delay: 5000}).should.equal true
 			client.should.equal @sentinelClient
 
-	describe "normal redis", ->
+	describe "single node redis", ->
 		beforeEach ->
 			@standardOpts =
 				auth_pass: @auth_pass
 				port: 1234
 				host: "redis.mysite.env"
 
-		it "should use the normal redis driver if a non array is passed", ->
+		it "should use the ioredis driver in single-instance mode if a non array is passed", ->
 			client = @redis.createClient @standardOpts
 			@sentinel.createClient.called.should.equal false
-			@normalRedis.createClient.called.should.equal true
-			client.should.equal @normalRedisClient
+			@normalRedis.createClient.called.should.equal false
+			assert.equal(client.constructor, @ioredis)
 
-		it "should use the normal redis driver if a non array is passed", ->
+		it "should call createClient for the ioredis driver in single-instance mode if a non array is passed", ->
 			client = @redis.createClient @standardOpts
-			@normalRedis.createClient.calledWith(@standardOpts.port, @standardOpts.host, {auth_pass:@auth_pass, retry_max_delay: 5000}).should.equal true
+			@ioredisConstructor.calledWith(@standardOpts).should.equal true
 
 	describe "cluster", ->
 		beforeEach ->
@@ -113,25 +122,4 @@ describe "index", ->
 			@results[1] = ["error", "foo"]
 			@multi.exec @callback
 			@callback.calledWith("error").should.equal true
-
-	describe "setting the password", ->
-		beforeEach ->
-			@standardOpts =
-				password: @auth_pass
-				port: 1234
-				host: "redis.mysite.env"
-
-			@sentinelOptions =
-				endpoints:@endpoints
-				masterName:@masterName
-				password: @auth_pass
-
-		it "should set the auth_pass from password if password exists for normal redis", ->
-			client = @redis.createClient @standardOpts
-			@normalRedis.createClient.calledWith(@standardOpts.port, @standardOpts.host, {auth_pass:@auth_pass, retry_max_delay: 5000}).should.equal true
-		
-		it "should set the auth_pass from password if password exists for sentinal", ->
-			client = @redis.createClient @sentinelOptions
-			@sentinel.createClient.calledWith(@endpoints, @masterName, {auth_pass:@auth_pass, retry_max_delay: 5000}).should.equal true
-
 
