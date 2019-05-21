@@ -35,7 +35,6 @@
 }
 
 .project-list-content when (@is-overleaf) {
-	.container-fluid;
 	margin: 0;
 	height: 100%;
 }
@@ -74,6 +73,7 @@
 			padding-top: @content-margin-vertical;
 			padding-bottom: @content-margin-vertical;
 			height: 100%;
+			margin-left: -(@grid-gutter-width / 2);
 		}
 
 .project-header {
@@ -100,6 +100,141 @@
 		text-overflow: ellipsis;
 	}
 }
+
+.project-list-table {
+	width: 100%;
+	table-layout: fixed;
+}
+	.project-list-table-header-row {
+		border-bottom: 1px solid @structured-list-border-color;
+	}
+
+	.project-list-table-row {
+		position: relative;
+		border-bottom: 1px solid @structured-list-border-color;
+		
+		&:last-child {
+			border-bottom: 0 none;
+		}
+		&:hover {
+			background-color: @structured-list-hover-color;
+		}
+		&:first-child {
+			border-bottom-color: @structured-header-border-color;
+			&:hover {
+				background-color: transparent;
+			}
+		}
+	}
+		.project-list-table-name-cell,
+		.project-list-table-owner-cell,
+		.project-list-table-lastupdated-cell,
+		.project-list-table-actions-cell,
+		.project-list-table-no-projects-cell {
+			padding: (@line-height-computed / 4) 0;
+			vertical-align: top;
+		}
+		
+		.project-list-table-no-projects-cell {
+			text-align: center;
+		}
+
+		.project-list-table-name-cell {
+			width: 50%;
+			padding-right: @line-height-computed / 2;
+
+			@media (min-width: @screen-md) {
+				width: 47%;
+			}
+
+			@media (min-width: @screen-lg) {
+				width: 50%;
+			}
+		}
+
+			.project-list-table-name-container {
+				position: relative;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+				// Extra specificity needed to override Bootstrap's own specificity.
+				input.project-list-table-select-item[type="checkbox"] {
+					position: absolute;
+					left: @line-height-computed - (@grid-gutter-width / 2);
+					margin-top: 5px;
+				}
+
+				.project-list-table-v1-badge-container {
+					position: absolute;
+				}
+
+				.project-list-table-name {
+					display: inline-block;
+					padding-left: @line-height-computed * 1.5;
+					vertical-align: top;
+				}
+
+					.project-list-table-name-link {
+						padding: 0;
+					}
+
+		.project-list-table-owner-cell {
+			width: 23%;
+			padding-right: @line-height-computed / 2;
+			overflow: hidden;
+			text-overflow: ellipsis;
+
+			@media (min-width: @screen-sm) {
+				width: 16%;
+			}
+
+			@media (min-width: @screen-md) {
+				width: 18%;
+			}
+
+			@media (min-width: @screen-lg) {
+				width: 16%;
+			}
+		}
+
+		.project-list-table-lastupdated-cell {
+			width: 27%;
+			padding-right: @line-height-computed / 2;
+			overflow: hidden;
+			text-overflow: ellipsis;
+
+			@media (min-width: @screen-sm) {
+				width: 19%;
+			}	
+
+			@media (min-width: @screen-md) {
+				width: 24%;
+			}
+		}
+
+		.project-list-table-actions-cell {
+			display: none;
+			padding-right: @line-height-computed - (@grid-gutter-width / 2);
+			text-align: right;
+			white-space: nowrap;
+
+			@media (min-width: @screen-sm) {
+				display: table-cell;
+				width: 18%;
+			}
+
+			@media (min-width: @screen-md) {
+				width: 11%;
+			}
+			
+			@media (min-width: @screen-lg) {
+				width: 10%;
+			}
+		}
+			.action-btn {
+				padding: 0 0.3em;
+				margin-left: 0.2em;
+			}
 
 .first-project {
 	width: 127px;
@@ -333,51 +468,8 @@ ul.project-list {
 			text-align: left;
 		}
 
-		.tag-label {
-			margin-left: @line-height-computed / 4;
-			position: relative;
-			display: inline-block;
-			white-space: nowrap;
-			top: @tag-top-adjustment;
-		}
-			.tag-label-name,
-			.tag-label-remove {
-				display: inline-block;
-				padding: 3px 4px;
-				border-radius: @tag-border-radius;
-				background-color: @tag-bg-color;
-				color: @tag-color;
-				vertical-align: text-bottom;
-				&:hover,
-				&:focus {
-					color: @tag-color;
-					background-color: @tag-bg-hover-color;
-				}
-			}
-			.tag-label-name {
-				padding-right: 2px;
-				border-top-right-radius: 0;
-				border-bottom-right-radius: 0;
-				max-width: @tag-max-width;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				> .fa {
-					margin-right: 0.3em;
-				}
-			}
-			.tag-label-remove {
-				padding-left: 2px;
-				border-top-left-radius: 0;
-				border-bottom-left-radius: 0;
-			}
-
 		.v1-badge {
 			margin-left: -4px;
-		}
-
-		.action-btn-row-header, .action-btn-row {
-			padding-right: 20px;
-			text-align: right;
 		}
 
 		.action-btn {
@@ -389,6 +481,48 @@ ul.project-list {
 		padding-left: 8px;
 	}
 }
+
+.tag-label {
+	margin-left: @line-height-computed / 4;
+	position: relative;
+	display: inline-block;
+	white-space: nowrap;
+	top: @tag-top-adjustment;
+}
+	// Extra specificity needed to override Bootstrap's own specificity.
+	.label.tag-label-name,
+	.label.tag-label-remove {
+		display: inline-block;
+		padding: 3px 4px;
+		border-radius: @tag-border-radius;
+		background-color: @tag-bg-color;
+		color: @tag-color;
+		vertical-align: text-bottom;
+		border-width: 0;
+		&:hover,
+		&:focus {
+			color: @tag-color;
+			background-color: @tag-bg-hover-color;
+			outline-width: 0;
+		}
+	}
+	.label.tag-label-name {
+		padding-right: 2px;
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
+		max-width: @tag-max-width;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		> .fa {
+			margin-right: 0.3em;
+		}
+	}
+	.label.tag-label-remove {
+		padding-left: 2px;
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
+	}
+
 
 .user_details_auto_complete {
 

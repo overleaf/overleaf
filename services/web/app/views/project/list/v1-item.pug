@@ -1,12 +1,12 @@
-.col-xs-6.col-sm-4.col-md-6
-	.select-item
-		span.v1-badge(
-			aria-label=translate("v1_badge")
-			tooltip-template="'v1ProjectTooltipTemplate'"
-			tooltip-append-to-body="true"
-		)
-	span
-		if settings.overleaf && settings.overleaf.host
+td.project-list-table-name-cell(ng-if-start="project.isV1Project")
+	.project-list-table-name-container
+		span.project-list-table-v1-badge-container
+			span.v1-badge(
+				aria-label=translate("v1_badge")
+				tooltip-template="'v1ProjectTooltipTemplate'"
+				tooltip-append-to-body="true"
+			)
+		span.project-list-table-name
 			if hasFeature('force-import-to-v2')
 				a.projectName(href='/{{project.id}}') {{project.name}}
 			else
@@ -21,8 +21,11 @@
 					ng-hide="project.accessLevel == 'owner'"
 				) {{project.name}}
 
-.col-xs-2
+td.project-list-table-owner-cell
 	span.owner {{ownerName(project)}}
 
-.col-xs-4.col-sm-3.col-md-2
+td.project-list-table-lastupdated-cell(
+	ng-if-end
+	colspan="2"
+)
 	span.last-modified(tooltip="{{project.lastUpdated | formatDate}}") {{project.lastUpdated | fromNowDate}}

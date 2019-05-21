@@ -81,8 +81,8 @@ block content
 			include ../translations/translation_message
 
 		.project-list-content(event-tracking=settings.overleaf ? "loads_v2_dash" : "", onboard=settings.overleaf ? "true" : "", event-tracking-trigger=settings.overleaf ? "load" : "", event-tracking-mb="true", event-segmentation="{location: 'dash', v2_onboard: true}")
-			.row.project-list-row(ng-cloak)
-				.project-list-container(ng-if="projects.length > 0")
+			.project-list-row(ng-cloak)
+				.project-list-container.row(ng-if="projects.length > 0")
 					.project-list-sidebar-wrapper.col-md-2.col-xs-3
 						aside.project-list-sidebar
 							include ./list/side-bar
@@ -114,7 +114,7 @@ block content
 						include ./list/notifications
 						include ./list/project-list
 				
-				.project-list-empty(ng-if="projects.length === 0")
+				.project-list-empty.row(ng-if="projects.length === 0")
 					.col-md-offset-2.col-md-8.col-md-offset-2.col-xs-8
 						include ./list/empty-project-list
 

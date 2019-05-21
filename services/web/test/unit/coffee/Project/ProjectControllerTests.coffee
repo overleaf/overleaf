@@ -125,6 +125,7 @@ describe "ProjectController", ->
 			"../BrandVariations/BrandVariationsHandler": @BrandVariationsHandler
 			'../Institutions/InstitutionsAPI':
 				getUserAffiliations: @getUserAffiliations
+			'../V1/V1Handler': {}
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
@@ -276,7 +277,7 @@ describe "ProjectController", ->
 			@notifications = [{_id:'1',user_id:'2',templateKey:'3',messageOpts:'4',key:'5'}]
 			@projects = [
 				{_id:1, lastUpdated:1, owner_ref: "user-1"},
-				{_id:2, lastUpdated:2, owner_ref: "user-2"}
+				{_id:2, lastUpdated:2, owner_ref: "user-2", lastUpdatedBy: "user-1"}
 			]
 			@collabertions = [
 				{_id:5, lastUpdated:5, owner_ref: "user-1"}
@@ -350,6 +351,7 @@ describe "ProjectController", ->
 			@res.render = (pageName, opts)=>
 				opts.projects[0].owner.should.equal (@users[@projects[0].owner_ref])
 				opts.projects[1].owner.should.equal (@users[@projects[1].owner_ref])
+				opts.projects[1].lastUpdatedBy.should.equal (@users[@projects[1].lastUpdatedBy])
 				done()
 			@ProjectController.projectListPage @req, @res
 

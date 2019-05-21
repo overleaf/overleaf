@@ -788,6 +788,8 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
 
     $scope.getOwnerName = ProjectListService.getOwnerName
 
+    $scope.getUserName = ProjectListService.getUserName
+
     $scope.isOwner = () => window.user_id === $scope.project.owner._id
 
     $scope.$watch('project.selected', function(value) {

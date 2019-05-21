@@ -22,7 +22,6 @@
 					ng-click="clearSearchText()"
 					ng-show="searchText.value.length > 0"
 				) #{translate('clear_search')}
-			//- i.fa.fa-remove
 
 		.project-tools(ng-cloak)
 			.btn-toolbar(ng-show="filter != 'archived'")
@@ -36,17 +35,15 @@
 						ng-click="downloadSelectedProjects()"
 					)
 						i.fa.fa-cloud-download(aria-hidden="true")
-					- var archiveButtonString = settings.overleaf ? translate("archive") : translate("delete")
-					- var archiveButtonIcon = settings.overleaf ? "fa-inbox" : "fa-trash-o"
 					a.btn.btn-default(
 						href,
-						aria-label=`{{ isArchiveableProjectSelected ? '${archiveButtonString}' : '${translate("leave")}' }}`,
-						tooltip=`{{ isArchiveableProjectSelected ? '${archiveButtonString}' : '${translate("leave")}' }}`,
+						aria-label=`{{ isArchiveableProjectSelected ? 'translate("archive")' : '${translate("leave")}' }}`,
+						tooltip=`{{ isArchiveableProjectSelected ? 'translate("archive")' : '${translate("leave")}' }}`,
 						tooltip-placement="bottom",
 						tooltip-append-to-body="true",
 						ng-click="openArchiveProjectsModal()"
 					)
-						i.fa(ng-class=`isArchiveableProjectSelected ? '${archiveButtonIcon}' : 'fa-sign-out'` aria-hidden="true")
+						i.fa(ng-class=`isArchiveableProjectSelected ? 'fa-inbox' : 'fa-sign-out'` aria-hidden="true")
 
 				.btn-group.dropdown(ng-hide="selectedProjects.length < 1", dropdown)
 					a.btn.btn-default.dropdown-toggle(
@@ -136,51 +133,41 @@
 				max-height="projectListHeight - 25",
 				ng-cloak
 			)
-				li.container-fluid
-					.row
-						- var titleClasses = settings.overleaf ? " col-xs-6 col-sm-4 col-md-6" : "col-xs-6"
-						- var lastUpdatedClasses = settings.overleaf ? " col-xs-4 col-sm-3 col-md-2" : "col-xs-4"
-
-						div(class=titleClasses)
-							input.select-all(
-								select-all,
-								type="checkbox"
-								aria-label=translate('select_all_projects')
-							)
-							span.header.clickable(ng-click="changePredicate('name')") #{translate("title")}
-								i.tablesort.fa(ng-class="getSortIconClass('name')" aria-hidden="true")
-							button.sr-only(ng-click="changePredicate('name')") Sort by #{translate("title")}
-						.col-xs-2
+				table.project-list-table
+					tr.project-list-table-header-row
+						th.project-list-table-name-cell
+							.project-list-table-name-container
+								input.project-list-table-select-item(
+									select-all,
+									type="checkbox"
+									aria-label=translate('select_all_projects')
+								)
+								span.header.clickable.project-list-table-name(ng-click="changePredicate('name')") #{translate("title")}
+									i.tablesort.fa(ng-class="getSortIconClass('name')" aria-hidden="true")
+								button.sr-only(ng-click="changePredicate('name')") Sort by #{translate("title")}
+						th.project-list-table-owner-cell
 							span.header.clickable(ng-click="changePredicate('ownerName')") #{translate("owner")}
 								i.tablesort.fa(ng-class="getSortIconClass('ownerName')" aria-hidden="true")
 							button.sr-only(ng-click="changePredicate('ownerName')") Sort by #{translate("owner")}
-						div(class=lastUpdatedClasses)
+						th.project-list-table-lastupdated-cell
 							span.header.clickable(ng-click="changePredicate('lastUpdated')") #{translate("last_modified")}
 								i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')" aria-hidden="true")
 							button.sr-only(ng-click="changePredicate('lastUpdated')") Sort by #{translate("last_modified")}
-						if settings.overleaf
-							.hidden-xs.col-sm-3.col-md-2.action-btn-row-header
-								span.header #{translate("actions")}
-				li.project_entry.container-fluid(
-					ng-repeat="project in visibleProjects | orderBy:getValueForCurrentPredicate:reverse:comparator",
-					ng-controller="ProjectListItemController"
-				)
-					.row(
-						ng-if="!project.isV1Project"
+						th.project-list-table-actions-cell
+							span.header #{translate("actions")}
+					tr.project-list-table-row(
+						ng-repeat="project in visibleProjects | orderBy:getValueForCurrentPredicate:reverse:comparator",
+						ng-controller="ProjectListItemController"
 						select-row
 					)
 						include ./item
-					.row(
-						ng-if="project.isV1Project"
-					)
 						include ./v1-item
-				li(
-					ng-if="visibleProjects.length == 0",
-					ng-cloak
-				)
-					.row
-						.col-xs-12.text-centered
-							small #{translate("no_projects")}
+					tr(
+						ng-if="visibleProjects.length == 0",
+						ng-cloak
+					)
+						td(colspan="4").project-list-table-no-projects-cell
+								span.small #{translate("no_projects")}
 
 			div.welcome.text-centered(ng-if="projects.length == 0", ng-cloak)
 				h2 #{translate("welcome_to_sl")}
