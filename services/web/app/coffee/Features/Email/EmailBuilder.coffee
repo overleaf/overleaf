@@ -166,7 +166,7 @@ When you next log in, you may be prompted to reconfirm your email address in ord
 If you have any questions, please contact our support team by reply.
 """
 	ctaText: () -> "Log in to #{ settings.appName }"
-	ctaURL: () -> settings.siteUrl + "login"
+	ctaURL: () -> settings.siteUrl + "/login"
 })
 
 templates.emailAddressPoachedEmail = CTAEmailTemplate({
@@ -211,7 +211,7 @@ If you have any questions, you can contact our support team by reply.
 """
 		return message
 	ctaText: () -> "Log in to #{ settings.appName }"
-	ctaURL: () -> settings.siteUrl + "login"
+	ctaURL: () -> settings.siteUrl + "/login"
 })
 
 module.exports =
