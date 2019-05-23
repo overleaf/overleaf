@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e;
+
+MOCHA="node_modules/.bin/mocha --exit --recursive --reporter spec"
+MODULE=$1
+
+shift
+
+$MOCHA "$@" modules/$MODULE/test/unit/js

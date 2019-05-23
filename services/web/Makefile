@@ -1,4 +1,4 @@
-DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
+DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml --log-level ERROR
 
 
 BUILD_NUMBER ?= local
@@ -14,6 +14,7 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
 MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
+MODULE_NAME=$(shell basename $(MODULE))
 
 COFFEE := node_modules/.bin/coffee -m $(COFFEE_OPTIONS)
 COFFEE := node_modules/.bin/coffee $(COFFEE_OPTIONS)
@@ -148,6 +149,9 @@ compile_full:
 compile_css_full:
 	$(MAKE) css_full
 
+compile_module:
+	cd modules/$(MODULE_NAME) && $(MAKE) compile
+
 compile_modules: $(MODULE_MAKEFILES)
 	@set -e; \
 	for dir in $(MODULE_DIRS); \
@@ -215,8 +219,15 @@ clean_ci:
 
 test: test_unit test_frontend test_acceptance
 
+test_module: compile_module test_unit_module_run test_acceptance_module_run
+
 test_unit:
 	@[ ! -d test/unit ] && echo "web has no unit tests" || COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
+
+test_unit_module: compile_module test_unit_module_run
+
+test_unit_module_run:
+	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit bin/unit_test_module $(MODULE_NAME) --grep=$(MOCHA_GREP)
 
 test_unit_app:
 	npm -q run test:unit:app -- ${MOCHA_ARGS}
@@ -234,7 +245,7 @@ test_acceptance: compile test_acceptance_app_run test_acceptance_modules_run
 
 test_acceptance_app: compile test_acceptance_app_run
 
-test_acceptance_module: compile test_acceptance_module_run
+test_acceptance_module: compile_module test_acceptance_module_run
 
 test_acceptance_run: test_acceptance_app_run test_acceptance_modules_run
 
@@ -253,10 +264,10 @@ test_acceptance_modules_run:
 	done
 
 test_acceptance_module_run: $(MODULE_MAKEFILES)
-	@if [ -e $(MODULE)/test/acceptance ]; then \
-		COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE) $(DOCKER_COMPOSE) down -v -t 0 \
-		&& cd $(MODULE) && COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE) $(MAKE) test_acceptance \
-		&& cd $(CURDIR) && COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE) $(DOCKER_COMPOSE) down -v -t 0; \
+	@if [ -e modules/$(MODULE_NAME)/test/acceptance ]; then \
+		COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) $(DOCKER_COMPOSE) down -v -t 0 \
+		&& cd modules/$(MODULE_NAME) && COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) $(MAKE) test_acceptance \
+		&& cd $(CURDIR) && COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) $(DOCKER_COMPOSE) down -v -t 0; \
 	fi
 
 ci:

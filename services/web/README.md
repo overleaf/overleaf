@@ -34,6 +34,18 @@ $ npm run start
 
 *Ideally the app would run in Docker like the tests below, but with host networking not supported in OS X, we need to run it natively until all services are Dockerised.*
 
+### Running Tests
+
+To run all tests run:
+```
+make test
+```
+
+To run both unit and acceptance tests for a module run:
+```
+make test_module MODULE=overleaf-integration
+```
+
 ### Unit Tests
 
 The test suites run in Docker.
@@ -50,6 +62,16 @@ During development it is often useful to only run a subset of tests, which can b
 
 ```
 make test_unit MOCHA_GREP='AuthorizationManager'
+```
+
+To run only the unit tests for a single module do:
+```
+make test_unit_module MODULE=overleaf-integration
+```
+
+Module tests can also use a MOCHA_GREP argument:
+```
+make test_unit_module MODULE=overleaf-integration MOCHA_GREP=SSO
 ```
 
 ### Acceptance Tests
@@ -76,6 +98,16 @@ During development it is often useful to only run a subset of tests, which can b
 
 ```
 make acceptance_test_run MOCHA_ARGS='--grep=AuthorizationManager'
+```
+
+To run only the acceptance tests for a single module do:
+```
+make test_acceptance_module MODULE=overleaf-integration
+```
+
+Module tests can also use a MOCHA_GREP argument:
+```
+make test_acceptance_module MODULE=overleaf-integration MOCHA_GREP=SSO
 ```
 
 Routes
