@@ -1,4 +1,5 @@
 request = require "request"
+_ = require "underscore"
 logger = require "logger-sharelatex"
 settings = require "settings-sharelatex"
 metrics = require("metrics-sharelatex")
@@ -53,6 +54,8 @@ module.exports = DocumentUpdaterManager =
 				return callback(err)
 				
 	queueChange: (project_id, doc_id, change, callback = ()->)->
+		allowedKeys = [ 'doc', 'op', 'v', 'dupIfSource', 'meta', 'lastV', 'hash']
+		change = _.pick change, allowedKeys
 		jsonChange = JSON.stringify change
 		if jsonChange.indexOf("\u0000") != -1
 			error = new Error("null bytes found in op")

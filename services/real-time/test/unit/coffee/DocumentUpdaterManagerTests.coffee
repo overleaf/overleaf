@@ -122,9 +122,9 @@ describe 'DocumentUpdaterManager', ->
 	describe 'queueChange', ->
 		beforeEach ->
 			@change = {
-				"action":"removeText",
-				"range":{"start":{"row":2,"column":2},"end":{"row":2,"column":3}},
-				"text":"e"
+				"doc":"1234567890",
+				"op":["d":"test", "p":345]
+				"v": 789
 			}
 			@rclient.rpush = sinon.stub().yields()
 			@callback = sinon.stub()
@@ -161,3 +161,16 @@ describe 'DocumentUpdaterManager', ->
 
 			it "should not push the change onto the pending-updates-list queue", ->
 				@rclient.rpush.called.should.equal false
+
+		describe "with invalid keys", ->
+			beforeEach ->
+				@change = {
+					"op":["d":"test", "p":345]
+					"version": 789 # not a valid key
+				}
+				@DocumentUpdaterManager.queueChange(@project_id, @doc_id, @change, @callback)
+
+			it "should remove the invalid keys from the change", ->
+				@rclient.rpush
+					.calledWith("PendingUpdates:#{@doc_id}", JSON.stringify({op:@change.op}))
+					.should.equal true
