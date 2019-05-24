@@ -15,7 +15,7 @@ module.exports = HttpApiController =
 	startDrain: (req, res, next) ->
 		io = req.app.get("io")
 		rate = req.query.rate or "4"
-		rate = parseInt(rate, 10)
+		rate = parseFloat(rate) || 0
 		logger.log {rate}, "setting client drain rate"
 		DrainManager.startDrain io, rate
 		res.send 204
