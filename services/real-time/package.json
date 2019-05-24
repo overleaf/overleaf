@@ -34,7 +34,7 @@
     "request": "^2.88.0",
     "session.socket.io": "^0.1.6",
     "settings-sharelatex": "^1.1.0",
-    "socket.io": "^0.9.19",
+    "socket.io": "0.9.16",
     "socket.io-client": "^0.9.16"
   },
   "devDependencies": {
