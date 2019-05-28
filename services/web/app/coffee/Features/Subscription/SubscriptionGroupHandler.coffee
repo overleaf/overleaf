@@ -18,11 +18,12 @@ module.exports = SubscriptionGroupHandler =
 		SubscriptionUpdater.removeUserFromGroup subscriptionId, userToRemove_id, callback
 
 	replaceUserReferencesInGroups: (oldId, newId, callback) ->
+		logger.log old_id: oldId, new_id: newId, "replacing user reference in groups"
 		Subscription.update {admin_id: oldId}, {admin_id: newId}, (error) ->
-			callback(error) if error?
+			return callback(error) if error?
 
 			replaceInArray Subscription, "manager_ids", oldId, newId, (error) ->
-				callback(error) if error?
+				return callback(error) if error?
 
 				replaceInArray Subscription, "member_ids", oldId, newId, callback
 
