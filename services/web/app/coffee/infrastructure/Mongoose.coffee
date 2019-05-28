@@ -16,4 +16,8 @@ mongoose.connection.on 'error', (err) ->
 mongoose.connection.on 'disconnected', () ->
 	logger.log 'mongoose default connection disconnected'
 
+if process.env.MONGOOSE_DEBUG
+	mongoose.set 'debug', (collectionName, method, query, doc) ->
+		logger.debug 'mongoose debug', collectionName: collectionName, method: method, query: query, doc: doc
+
 module.exports = mongoose
