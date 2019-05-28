@@ -20,6 +20,9 @@
 			color: @brand-danger;
 		}
 	}
+	.auto-compile-status when (@is-overleaf-light = true) {
+		color: @ol-blue-gray-3;
+	}
 }
 
 .pdf .toolbar.toolbar-pdf when (@is-overleaf = true) and (@is-overleaf-light = false) {
