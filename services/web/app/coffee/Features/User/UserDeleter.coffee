@@ -23,7 +23,7 @@ module.exports = UserDeleter =
 				(cb) ->
 					UserDeleter._cleanupUser user, cb
 				(cb) ->
-					ProjectDeleter.softDeleteUsersProjectsForMigration user._id, cb
+					ProjectDeleter.deleteUsersProjects user._id, cb
 				(cb) ->
 					user.deletedAt = new Date()
 					db.usersDeletedByMigration.insert user, cb

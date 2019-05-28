@@ -8,7 +8,7 @@ describe "UserDeleter", ->
 
 	beforeEach ->
 		@user = 
-			_id:"12390i"
+			_id: "12390i"
 			email: "bob@bob.com"
 			remove: sinon.stub().callsArgWith(0)
 
@@ -20,7 +20,6 @@ describe "UserDeleter", ->
 
 		@ProjectDeleter =
 			deleteUsersProjects: sinon.stub().callsArgWith(1)
-			softDeleteUsersProjectsForMigration: sinon.stub().callsArgWith(1)
 
 		@SubscriptionHandler = 
 			cancelSubscription: sinon.stub().callsArgWith(1)
@@ -85,9 +84,9 @@ describe "UserDeleter", ->
 				@deleteAffiliations.calledWith(@user._id).should.equal true
 				done()
 
-		it "should soft-delete all the projects of a user", (done)->
+		it "should delete all the projects of a user", (done)->
 			@UserDeleter.softDeleteUserForMigration @user._id, (err)=>
-				@ProjectDeleter.softDeleteUsersProjectsForMigration.calledWith(@user._id).should.equal true
+				@ProjectDeleter.deleteUsersProjects.calledWith(@user._id).should.equal true
 				done()
 
 		it "should remove user memberships", (done)->

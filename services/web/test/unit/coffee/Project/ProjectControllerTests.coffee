@@ -31,7 +31,7 @@ describe "ProjectController", ->
 		@token = 'some-token'
 		@ProjectDeleter =
 			archiveProject: sinon.stub().callsArg(1)
-			deleteProject: sinon.stub().callsArg(1)
+			deleteProject: sinon.stub().callsArg(2)
 			restoreProject: sinon.stub().callsArg(1)
 			findArchivedProjects: sinon.stub()
 		@ProjectDuplicator =
@@ -140,6 +140,7 @@ describe "ProjectController", ->
 				projectName: @projectName
 			i18n:
 				translate:->
+			ip: "192.170.18.1"
 		@res =
 			locals:
 				jsPath:"js path here"
@@ -230,7 +231,7 @@ describe "ProjectController", ->
 		it "should tell the project deleter to delete when forever=true", (done)->
 			@req.query = forever: "true"
 			@res.sendStatus = (code)=>
-				@ProjectDeleter.deleteProject.calledWith(@project_id).should.equal true
+				@ProjectDeleter.deleteProject.calledWith(@project_id, {deleterUser: @user, ipAddress:@req.ip}).should.equal true
 				code.should.equal 200
 				done()
 			@ProjectController.deleteProject @req, @res

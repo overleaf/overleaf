@@ -90,17 +90,17 @@ module.exports = ProjectController =
 		project_id = req.params.Project_id
 		forever    = req.query?.forever?
 		logger.log project_id: project_id, forever: forever, "received request to archive project"
-
-		if forever
-			doDelete = projectDeleter.deleteProject
-		else
-			doDelete = projectDeleter.archiveProject
-
-		doDelete project_id, (err)->
+		user = AuthenticationController.getSessionUser(req)
+		cb = (err)->
 			if err?
 				res.sendStatus 500
 			else
 				res.sendStatus 200
+
+		if forever
+			projectDeleter.deleteProject project_id, {deleterUser: user, ipAddress:req.ip} , cb
+		else
+			projectDeleter.archiveProject project_id, cb
 
 	restoreProject: (req, res) ->
 		project_id = req.params.Project_id
