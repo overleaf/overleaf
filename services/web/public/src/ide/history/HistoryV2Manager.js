@@ -161,6 +161,9 @@ define([
           hasVersioning => {
             if (hasVersioning != null) {
               this.$scope.history.userHasFullFeature = hasVersioning
+              if (this.$scope.user.isAdmin) {
+                this.$scope.history.userHasFullFeature = true
+              }
               _deregisterFeatureWatcher()
             }
           }

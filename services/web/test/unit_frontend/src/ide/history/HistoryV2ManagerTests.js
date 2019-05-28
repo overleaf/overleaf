@@ -146,6 +146,9 @@ define(['ide/history/HistoryV2Manager'], HistoryV2Manager =>
             versioning: true
           }
         }
+        this.$scope.user = {
+          isAdmin: false
+        }
         this.ide = {
           $q: $q,
           $http: $http
@@ -197,6 +200,18 @@ define(['ide/history/HistoryV2Manager'], HistoryV2Manager =>
       )
       this.$scope.$digest()
       expect(this.$scope.history.userHasFullFeature).to.equal(false)
+    })
+
+    it('should setup history with full access to the feature for admin users even if the project does not have versioning', function() {
+      this.$scope.project.features.versioning = false
+      this.$scope.user.isAdmin = true
+      this.historyManager = new HistoryV2Manager(
+        this.ide,
+        this.$scope,
+        this.localStorage
+      )
+      this.$scope.$digest()
+      expect(this.$scope.history.userHasFullFeature).to.equal(true)
     })
 
     describe('autoSelectFile', function() {

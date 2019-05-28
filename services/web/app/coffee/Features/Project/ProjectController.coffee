@@ -369,6 +369,7 @@ module.exports = ProjectController =
 						features: user.features
 						refProviders: user.refProviders
 						betaProgram: user.betaProgram
+						isAdmin: user.isAdmin
 					}
 					userSettings: {
 						mode  : user.ace.mode
