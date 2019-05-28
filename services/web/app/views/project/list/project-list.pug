@@ -37,8 +37,8 @@
 						i.fa.fa-cloud-download(aria-hidden="true")
 					a.btn.btn-default(
 						href,
-						aria-label=`{{ isArchiveableProjectSelected ? 'translate("archive")' : '${translate("leave")}' }}`,
-						tooltip=`{{ isArchiveableProjectSelected ? 'translate("archive")' : '${translate("leave")}' }}`,
+						aria-label=`{{ isArchiveableProjectSelected ? '${translate("archive")}' : '${translate("leave")}' }}`,
+						tooltip=`{{ isArchiveableProjectSelected ? '${translate("archive")}' : '${translate("leave")}' }}`,
 						tooltip-placement="bottom",
 						tooltip-append-to-body="true",
 						ng-click="openArchiveProjectsModal()"
