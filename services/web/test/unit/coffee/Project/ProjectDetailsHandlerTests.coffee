@@ -32,12 +32,15 @@ describe 'ProjectDetailsHandler', ->
 			moveEntity:sinon.stub().callsArgWith 1
 		@ProjectEntityHandler =
 			flushProjectToThirdPartyDataStore: sinon.stub().callsArg(1)
+		@CollaboratorsHandler =
+			removeUserFromProject: sinon.stub().callsArg(2)
 		@handler = SandboxedModule.require modulePath, requires:
 			"./ProjectGetter":@ProjectGetter
 			'../../models/Project': Project:@ProjectModel
 			"../User/UserGetter": @UserGetter
 			'../ThirdPartyDataStore/TpdsUpdateSender':@tpdsUpdateSender
 			"./ProjectEntityHandler": @ProjectEntityHandler
+			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler
 			'logger-sharelatex':
 				log:->
 				err:->
@@ -102,9 +105,22 @@ describe 'ProjectDetailsHandler', ->
 				err.name.should.equal "NotFoundError"
 				done()
 
+		it "should return an error if user cannot be removed as collaborator ", (done) ->
+			errorMessage = "user-cannot-be-removed"
+			@CollaboratorsHandler.removeUserFromProject.callsArgWith(2, errorMessage)
+			@handler.transferOwnership 'abc', '123', (err) ->
+				err.should.exist
+				err.should.equal errorMessage
+				done()
+
 		it "should transfer ownership of the project", (done) ->
 			@handler.transferOwnership 'abc', '123', () =>
 				sinon.assert.calledWith(@ProjectModel.update, {_id: 'abc'}, sinon.match({$set: {name: 'teapot'}}))
+				done()
+
+		it "should remove the user from the project's collaborators", (done) ->
+			@handler.transferOwnership 'abc', '123', () =>
+				sinon.assert.calledWith(@CollaboratorsHandler.removeUserFromProject, 'abc', '123')
 				done()
 
 		it "should flush the project to tpds", (done) ->

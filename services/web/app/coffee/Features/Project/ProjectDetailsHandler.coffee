@@ -10,6 +10,7 @@ Errors = require("../Errors/Errors")
 ProjectTokenGenerator = require('./ProjectTokenGenerator')
 ProjectEntityHandler = require('./ProjectEntityHandler')
 ProjectHelper = require('./ProjectHelper')
+CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 settings = require('settings-sharelatex')
 
 
@@ -60,23 +61,21 @@ module.exports = ProjectDetailsHandler =
 				return callback(err) if err?
 				return callback(new Errors.NotFoundError("user not found")) unless user?
 
-				ProjectDetailsHandler.generateUniqueName user_id, project.name + suffix, (err, name) ->
+				#	we make sure the user to which the project is transferred is not a collaborator for the project,
+				#	this prevents any conflict during unique name generation
+				CollaboratorsHandler.removeUserFromProject project_id, user_id, (err) ->
 					return callback(err) if err?
-
-					Project.update {_id: project_id},
-						{
-							$set: {
-								owner_ref: user_id,
-								name: name
-							},
-							$pull: {
-								readOnly_refs: user_id,
-								collaberator_refs: user_id,
-								tokenAccessReadAndWrite_refs: user_id,
-								tokenAccessReadOnly_refs: user_id
-						}}, (err) ->
-							return callback(err) if err?
-							ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, callback
+					ProjectDetailsHandler.generateUniqueName user_id, project.name + suffix, (err, name) ->
+						return callback(err) if err?
+						Project.update {_id: project_id},
+							{
+								$set: {
+									owner_ref: user_id,
+									name: name
+								}
+							}, (err) ->
+								return callback(err) if err?
+								ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, callback
 
 	renameProject: (project_id, newName, callback = ->)->
 		ProjectDetailsHandler.validateProjectName newName, (error) ->
