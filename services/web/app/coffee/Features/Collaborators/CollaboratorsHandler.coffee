@@ -302,4 +302,6 @@ module.exports = CollaboratorsHandler =
 				if error?
 					logger.err {err: error, project_ids, from_user_id, to_user_id}, "error flushing tranferred projects to TPDS"
 
-			async.series update_jobs, callback
+			async.series update_jobs, (err) ->
+				logger.log("flushed transferred projects to TPDS")
+				callback(err)
