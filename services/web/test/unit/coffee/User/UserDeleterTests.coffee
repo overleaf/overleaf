@@ -50,7 +50,7 @@ describe "UserDeleter", ->
 			"../Institutions/InstitutionsAPI":
 				deleteAffiliations: @deleteAffiliations
 			"../../infrastructure/mongojs": @mongojs
-			"logger-sharelatex": @logger = { log: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), err: sinon.stub() }
 
 	describe "softDeleteUserForMigration", ->
 
@@ -132,3 +132,24 @@ describe "UserDeleter", ->
 			@UserDeleter.deleteUser @user._id, (err)=>
 				@UserMembershipsHandler.removeUserFromAllEntities.calledWith(@user._id).should.equal true
 				done()
+
+		describe "when unsubscribing from mailchimp fails", ->
+			beforeEach ->
+				@NewsletterManager.unsubscribe = sinon.stub().callsArgWith(1, new Error("something went wrong"))
+
+			it "should not return an error", (done) ->
+				@UserDeleter.deleteUser @user._id, (err)=>
+					@NewsletterManager.unsubscribe.calledWith(@user).should.equal true
+					should.not.exist(err)
+					done()
+
+			it "should delete the user", (done) ->
+				@UserDeleter.deleteUser @user._id, (err)=>
+					@NewsletterManager.unsubscribe.calledWith(@user).should.equal true
+					@user.remove.called.should.equal true
+					done()
+
+			it "should log an error", (done) ->
+				@UserDeleter.deleteUser @user._id, (err)=>
+					sinon.assert.called(@logger.err)
+					done()

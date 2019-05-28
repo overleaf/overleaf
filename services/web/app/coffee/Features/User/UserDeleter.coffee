@@ -55,7 +55,9 @@ module.exports = UserDeleter =
 		return callback(new Error("no user supplied")) unless user?
 		async.series([
 			(cb)->
-				NewsletterManager.unsubscribe user, cb
+				NewsletterManager.unsubscribe user, (err) ->
+					logger.err("Failed to unsubscribe user from newsletter", user_id: user._id, error: err)
+					cb()
 			(cb)->
 				SubscriptionHandler.cancelSubscription user, cb
 			(cb)->
