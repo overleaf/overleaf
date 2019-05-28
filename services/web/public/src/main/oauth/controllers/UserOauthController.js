@@ -60,6 +60,7 @@ define(['base'], App =>
           }
           // Data for update
           const data = {
+            _csrf: window.csrfToken,
             link: false,
             providerId
           }
