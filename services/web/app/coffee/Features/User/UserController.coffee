@@ -39,8 +39,11 @@ module.exports = UserController =
 				return res.sendStatus(403)
 			deleteMethod user_id, (err) ->
 				if err?
-					logger.err {user_id}, "error while deleting user account"
-					return next(err)
+					if err instanceof Errors.SubscriptionAdminDeletionError
+						return res.status(422).json(error: err.name)
+					else
+						logger.err {user_id}, "error while deleting user account"
+						return next(err)
 				sessionId = req.sessionID
 				req.logout?()
 				req.session.destroy (err) ->

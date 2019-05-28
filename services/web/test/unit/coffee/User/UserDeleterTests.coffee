@@ -1,8 +1,10 @@
 sinon = require('sinon')
 chai = require('chai')
 should = chai.should()
+expect = chai.expect
 modulePath = "../../../../app/js/Features/User/UserDeleter.js"
 SandboxedModule = require('sandboxed-module')
+Errors = require('../../../../app/js/Features/Errors/Errors')
 
 describe "UserDeleter", ->
 
@@ -27,6 +29,9 @@ describe "UserDeleter", ->
 		@SubscriptionUpdater =
 			removeUserFromAllGroups: sinon.stub().callsArgWith(1)
 
+		@SubscriptionLocator =
+			getUsersSubscription: sinon.stub().yields(null, null)
+
 		@UserMembershipsHandler =
 			removeUserFromAllEntities: sinon.stub().callsArgWith(1)
 
@@ -44,14 +49,18 @@ describe "UserDeleter", ->
 			"../Newsletter/NewsletterManager":  @NewsletterManager
 			"../Subscription/SubscriptionHandler": @SubscriptionHandler
 			"../Subscription/SubscriptionUpdater": @SubscriptionUpdater
+			"../Subscription/SubscriptionLocator": @SubscriptionLocator
 			"../UserMembership/UserMembershipsHandler": @UserMembershipsHandler
 			"../Project/ProjectDeleter": @ProjectDeleter
 			"../Institutions/InstitutionsAPI":
 				deleteAffiliations: @deleteAffiliations
 			"../../infrastructure/mongojs": @mongojs
 			"logger-sharelatex": @logger = { log: sinon.stub(), err: sinon.stub() }
+			"../Errors/Errors": Errors
 
 	describe "softDeleteUserForMigration", ->
+		beforeEach ->
+			@UserDeleter._ensureCanDeleteUser = sinon.stub().yields(null)
 
 		it "should delete the user in mongo", (done)->
 			@UserDeleter.softDeleteUserForMigration @user._id, (err)=>
@@ -94,7 +103,19 @@ describe "UserDeleter", ->
 				@UserMembershipsHandler.removeUserFromAllEntities.calledWith(@user._id).should.equal true
 				done()
 
+		it "ensures user can be deleted first", (done)->
+			@UserDeleter._ensureCanDeleteUser.yields(
+				new Errors.SubscriptionAdminDeletionError()
+			)
+			@UserDeleter.softDeleteUserForMigration @user._id, (error) =>
+				sinon.assert.calledWith(@UserDeleter._ensureCanDeleteUser, @user)
+				sinon.assert.notCalled(@user.remove)
+				expect(error).to.be.instanceof Errors.SubscriptionAdminDeletionError
+				done()
+
 	describe "deleteUser", ->
+		beforeEach ->
+			@UserDeleter._ensureCanDeleteUser = sinon.stub().yields(null)
 
 		it "should delete the user in mongo", (done)->
 			@UserDeleter.deleteUser @user._id, (err)=>
@@ -132,6 +153,16 @@ describe "UserDeleter", ->
 				@UserMembershipsHandler.removeUserFromAllEntities.calledWith(@user._id).should.equal true
 				done()
 
+		it "ensures user can be deleted first", (done)->
+			@UserDeleter._ensureCanDeleteUser.yields(
+				new Errors.SubscriptionAdminDeletionError()
+			)
+			@UserDeleter.deleteUser @user._id, (error) =>
+				sinon.assert.calledWith(@UserDeleter._ensureCanDeleteUser, @user)
+				sinon.assert.notCalled(@user.remove)
+				expect(error).to.be.instanceof Errors.SubscriptionAdminDeletionError
+				done()
+
 		describe "when unsubscribing from mailchimp fails", ->
 			beforeEach ->
 				@NewsletterManager.unsubscribe = sinon.stub().callsArgWith(1, new Error("something went wrong"))
@@ -152,3 +183,22 @@ describe "UserDeleter", ->
 				@UserDeleter.deleteUser @user._id, (err)=>
 					sinon.assert.called(@logger.err)
 					done()
+
+	describe '_ensureCanDeleteUser', ->
+		it 'should not return error when user can be deleted', (done) ->
+			@SubscriptionLocator.getUsersSubscription.yields(null, null)
+			@UserDeleter._ensureCanDeleteUser @user, (error) ->
+				expect(error).to.not.exist
+				done()
+
+		it 'should return custom error when user is group admin', (done) ->
+			@SubscriptionLocator.getUsersSubscription.yields(null, { _id: '123abc' })
+			@UserDeleter._ensureCanDeleteUser @user, (error) ->
+				expect(error).to.be.instanceof Errors.SubscriptionAdminDeletionError
+				done()
+
+		it 'propagate errors', (done) ->
+			@SubscriptionLocator.getUsersSubscription.yields(new Error('Some error'))
+			@UserDeleter._ensureCanDeleteUser @user, (error) ->
+				expect(error).to.be.instanceof Error
+				done()

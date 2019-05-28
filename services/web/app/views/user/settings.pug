@@ -266,13 +266,15 @@ block content
 					label(style="display: inline") &nbsp;I understand this will delete all projects in my Overleaf v2 account (and ShareLaTeX account, if any) with email address #[em {{ userDefaultEmail }}]
 
 			div(ng-if="state.error")
-				div.alert.alert-danger
-					| #{translate('generic_something_went_wrong')}
-			div(ng-if="state.invalidCredentials")
-				div.alert.alert-danger
-					| #{translate('email_or_password_wrong_try_again')}
+				div.alert.alert-danger(ng-switch="state.error.code")
+					span(ng-switch-when="InvalidCredentialsError")
+						| #{translate('email_or_password_wrong_try_again')}
+					span(ng-switch-when="SubscriptionAdminDeletionError")
+						| #{translate('subscription_admins_cannot_be_deleted')}
+					span(ng-switch-default)
+						| #{translate('generic_something_went_wrong')}
 			if settings.createV1AccountOnLogin && settings.overleaf
-				div(ng-if="state.error || state.invalidCredentials")
+				div(ng-if="state.error && state.error.code == 'InvalidCredentialsError'")
 					div.alert.alert-info
 						| If you can't remember your password, or if you are using Single-Sign-On with another provider
 						| to sign in (such as Twitter or Google), please

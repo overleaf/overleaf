@@ -86,8 +86,7 @@ define(['base'], function(App) {
         confirmV1Purge: false,
         confirmSharelatexDelete: false,
         inflight: false,
-        error: false,
-        invalidCredentials: false
+        error: null
       }
 
       $scope.userDefaultEmail = userDefaultEmail
@@ -107,8 +106,7 @@ define(['base'], function(App) {
 
       $scope.delete = function() {
         $scope.state.inflight = true
-        $scope.state.error = false
-        $scope.state.invalidCredentials = false
+        $scope.state.error = null
         return $http({
           method: 'POST',
           url: '/user/delete',
@@ -124,17 +122,16 @@ define(['base'], function(App) {
           .then(function() {
             $modalInstance.close()
             $scope.state.inflight = false
-            $scope.state.error = false
-            $scope.state.invalidCredentials = false
+            $scope.state.error = null
             return setTimeout(() => (window.location = '/login'), 1000)
           })
           .catch(function(response) {
             const { data, status } = response
             $scope.state.inflight = false
             if (status === 403) {
-              return ($scope.state.invalidCredentials = true)
+              $scope.state.error = { code: 'InvalidCredentialsError' }
             } else {
-              return ($scope.state.error = true)
+              $scope.state.error = { code: data.error }
             }
           })
       }

@@ -4,6 +4,7 @@ ProjectDeleter = require("../Project/ProjectDeleter")
 logger = require("logger-sharelatex")
 SubscriptionHandler = require("../Subscription/SubscriptionHandler")
 SubscriptionUpdater = require("../Subscription/SubscriptionUpdater")
+SubscriptionLocator = require("../Subscription/SubscriptionLocator")
 UserMembershipsHandler = require("../UserMembership/UserMembershipsHandler")
 async = require("async")
 InstitutionsAPI = require("../Institutions/InstitutionsAPI")
@@ -20,6 +21,8 @@ module.exports = UserDeleter =
 			return callback(err) if err?
 			return callback(new Errors.NotFoundError("user not found")) unless user?
 			async.series([
+				(cb) ->
+					UserDeleter._ensureCanDeleteUser user, cb
 				(cb) ->
 					UserDeleter._cleanupUser user, cb
 				(cb) ->
@@ -40,6 +43,8 @@ module.exports = UserDeleter =
 				return callback(err)
 			logger.log user:user, "deleting user"
 			async.series [
+				(cb) ->
+					UserDeleter._ensureCanDeleteUser user, cb
 				(cb)->
 					UserDeleter._cleanupUser user, cb
 				(cb)->
@@ -67,3 +72,9 @@ module.exports = UserDeleter =
 			(cb)->
 				UserMembershipsHandler.removeUserFromAllEntities user._id, cb
 		], callback)
+
+	_ensureCanDeleteUser: (user, callback) ->
+		SubscriptionLocator.getUsersSubscription user, (error, subscription) ->
+			if subscription?
+				error ||= new Errors.SubscriptionAdminDeletionError()
+			callback(error)

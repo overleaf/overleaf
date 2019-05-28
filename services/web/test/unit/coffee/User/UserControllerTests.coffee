@@ -167,6 +167,20 @@ describe "UserController", ->
 					done()
 				@UserController.tryDeleteUser @req, @res, @next
 
+		describe 'when deleteUser produces a known error', ->
+
+			beforeEach ->
+				@UserDeleter.deleteUser = sinon.stub().yields(
+					new Errors.SubscriptionAdminDeletionError()
+				)
+
+			it 'should return a json error', (done) ->
+				@UserController.tryDeleteUser @req, status: (status) ->
+					expect(status).to.equal 422
+					json: (json) ->
+						expect(json.error).to.equal Errors.SubscriptionAdminDeletionError.name
+						done()
+
 		describe 'when session.destroy produces an error', ->
 
 			beforeEach ->
