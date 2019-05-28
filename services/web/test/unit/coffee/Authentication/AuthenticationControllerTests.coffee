@@ -1,7 +1,5 @@
 sinon = require('sinon')
 chai = require('chai')
-sinonChai = require "sinon-chai"
-chai.use sinonChai
 should = chai.should()
 expect = chai.expect
 modulePath = "../../../../app/js/Features/Authentication/AuthenticationController.js"

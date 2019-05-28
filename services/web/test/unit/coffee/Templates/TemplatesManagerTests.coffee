@@ -2,10 +2,8 @@ SandboxedModule = require('sandboxed-module')
 assert = require('assert')
 chai = require('chai')
 sinon = require('sinon')
-sinonChai = require('sinon-chai')
 
 should = require('chai').should()
-chai.use(sinonChai)
 
 modulePath = '../../../../app/js/Features/Templates/TemplatesManager'
 

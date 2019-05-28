@@ -4,9 +4,7 @@ SandboxedModule = require "sandboxed-module"
 assert = require "assert"
 chai = require "chai"
 sinon = require "sinon"
-sinonChai = require "sinon-chai"
 
-chai.use sinonChai
 expect = chai.expect
 
 modulePath = Path.join __dirname, "../../../../app/js/Features/Project/ProjectCollabratecDetailsHandler"
