@@ -756,7 +756,11 @@ define([
           // respect the readOnly setting, normally false
           editor.setReadOnly(scope.readOnly)
           triggerEditorInitEvent()
-          initSpellCheck()
+
+          if (!scope.readOnly) {
+            initSpellCheck()
+          }
+
           initTrackChanges()
           initUndo()
 
