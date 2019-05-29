@@ -3,12 +3,12 @@ set -e;
 
 MOCHA="node_modules/.bin/mocha --exit --recursive --reporter spec --require test/unit/bootstrap.js"
 
-$MOCHA "$@" test/unit/js
+$MOCHA "$@" test/unit/src
 
 for dir in modules/*;
 do
-	if [ -d $dir/test/unit/js ]; then
-		$MOCHA "$@" $dir/test/unit/js
+	if [ -d $dir/test/unit/src ]; then
+		$MOCHA "$@" $dir/test/unit/src
 	fi
 done
 

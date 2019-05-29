@@ -1,9 +1,4 @@
 {
-  "ignore": [
-    ".git",
-    "node_modules/"
-  ],
-  "verbose": true,
   "exec": "make compile || exit 1",
   "watch": [
     "public/src/",

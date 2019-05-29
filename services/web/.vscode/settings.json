@@ -2,7 +2,7 @@
   "files.exclude": {
     "app/js": true,
     "public/js": true,
-    "test/**/js": true,
+    "test/unit_frontend/js": true,
     "node_modules": true,
     "data": true
   }

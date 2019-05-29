@@ -1,22 +1,16 @@
 MODULE_NAME := $(notdir $(shell pwd))
 MODULE_DIR := modules/$(MODULE_NAME)
 PROJECT_NAME = web
-COFFEE := ../../node_modules/.bin/coffee
 BABEL := ../../node_modules/.bin/babel
 
-APP_COFFEE_FILES := $(shell [ -e app/coffee ] && find app/coffee -name '*.coffee') \
-	$(shell [ -e test/unit/coffee ] && find test/unit/coffee -name '*.coffee') \
-	$(shell [ -e test/acceptance/coffee ] && find test/acceptance/coffee -name '*.coffee')
-APP_JS_FILES := $(subst coffee,js,$(APP_COFFEE_FILES))
-
 IDE_SRC_FILES := $(shell [ -e public/src/ide ] && find public/src/ide -name '*.js')
-IDE_OUTPUT_FILES := $(subst public/src/ide,../../public/js/ide/$(MODULE_NAME),$(IDE_SRC_FILES))
+IDE_DIST_FILES := $(subst public/src/ide,../../public/js/ide/$(MODULE_NAME),$(IDE_SRC_FILES))
 
 IDE_TEST_SRC_FILES := $(shell [ -e test/unit_frontend/src/ide ] && find test/unit_frontend/src/ide -name '*.js')
-IDE_TEST_OUTPUT_FILES := $(subst test/unit_frontend/src/ide,../../test/unit_frontend/js/ide/$(MODULE_NAME),$(IDE_TEST_SRC_FILES))
+IDE_TEST_DIST_FILES := $(subst test/unit_frontend/src/ide,../../test/unit_frontend/js/ide/$(MODULE_NAME),$(IDE_TEST_SRC_FILES))
 
 MAIN_SRC_FILES := $(shell [ -e public/src/main ] && find public/src/main -name '*.js')
-MAIN_OUTPUT_FILES := $(subst public/src/main,../../public/js/main/$(MODULE_NAME),$(MAIN_SRC_FILES))
+MAIN_DIST_FILES := $(subst public/src/main,../../public/js/main/$(MODULE_NAME),$(MAIN_SRC_FILES))
 
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 DOCKER_COMPOSE_MODULE_FLAGS := ${DOCKER_COMPOSE_FLAGS} -f $(MODULE_DIR)/docker-compose.yml
@@ -27,18 +21,6 @@ DOCKER_COMPOSE := cd ../../ && \
 	PROJECT_NAME=$(PROJECT_NAME) \
 	MOCHA_GREP=${MOCHA_GREP} \
 	docker-compose ${DOCKER_COMPOSE_MODULE_FLAGS}
-
-app/js/%.js: app/coffee/%.coffee
-	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
-
-test/unit/js/%.js: test/unit/coffee/%.coffee
-	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
-
-test/acceptance/js/%.js: test/acceptance/coffee/%.coffee
-	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
 
 ../../test/unit_frontend/js/ide/$(MODULE_NAME)/%.js: test/unit_frontend/src/ide/%.js
 	@mkdir -p $(dir $@)
@@ -52,20 +34,14 @@ test/acceptance/js/%.js: test/acceptance/coffee/%.coffee
 	@mkdir -p $(dir $@)
 	$(BABEL) $< --out-file $@
 
-index.js: index.coffee
-	$(COFFEE) --compile --print $< > $@
-
-compile: $(APP_JS_FILES) $(IDE_OUTPUT_FILES) $(MAIN_OUTPUT_FILES) $(IDE_TEST_OUTPUT_FILES) index.js
+compile: $(IDE_DIST_FILES) $(MAIN_DIST_FILES) $(IDE_TEST_DIST_FILES)
 	@echo > /dev/null
 
 compile_full:
-	if [ -e app/coffee ]; then $(COFFEE) -o app/js -c app/coffee; fi
-	if [ -e test/unit/coffee ]; then $(COFFEE) -o test/unit/js -c test/unit/coffee; fi
-	if [ -e test/acceptance/coffee ]; then $(COFFEE) -o test/acceptance/js -c test/acceptance/coffee; fi
 	if [ -e public/src/ide ]; then $(BABEL) public/src/ide --out-dir ../../public/js/ide/$(MODULE_NAME); fi
 	if [ -e public/src/main ]; then $(BABEL) public/src/main --out-dir ../../public/js/main/$(MODULE_NAME); fi
 	if [ -e test/unit_frontend/src/ide ]; then $(BABEL) test/unit_frontend/src/ide --out-dir ../../test/unit_frontend/js/ide/$(MODULE_NAME); fi
-	@$(MAKE) compile
+	@$(MAKE) compile # Anything else missed
 
 test_acceptance:
-	${DOCKER_COMPOSE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/js
+	${DOCKER_COMPOSE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src

@@ -36,13 +36,6 @@ Thumbs.db
 node_modules/*
 data/*
 
-app.js
-app.js.map
-app/js/*
-test/unit/js/*
-test/unit_frontend/js/*
-test/smoke/js/*
-test/acceptance/js/*
 cookies.txt
 requestQueueWorker.js
 TpdsWorker.js
@@ -71,10 +64,11 @@ public/stylesheets/ieee-style*.css
 public/stylesheets/*.map
 public/minjs/
 
-Gemfile.lock
-
 public/js/libs/require*.js
 
+test/unit_frontend/js/
+
+Gemfile.lock
 
 *.swp
 .DS_Store
@@ -84,8 +78,3 @@ docker-shared.yml
 config/*.coffee
 
 modules/**/Makefile
-
-modules/*/index.js
-modules/**/app/js/*
-modules/**/test/unit/js/*
-modules/**/test/acceptance/js/*
