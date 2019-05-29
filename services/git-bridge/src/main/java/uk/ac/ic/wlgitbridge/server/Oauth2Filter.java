@@ -131,7 +131,7 @@ public class Oauth2Filter implements Filter {
                                 Base64.decodeBase64(st.nextToken()),
                                 "UTF-8"
                         );
-                        String[] split = credentials.split(":");
+                        String[] split = credentials.split(":",2);
                         if (split.length == 2) {
                             String username = split[0];
                             String password = split[1];
