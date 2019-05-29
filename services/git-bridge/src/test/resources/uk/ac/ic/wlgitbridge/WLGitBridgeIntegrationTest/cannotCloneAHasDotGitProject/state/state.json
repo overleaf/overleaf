@@ -1,0 +1,19 @@
+[
+    {
+        "project": "conflict",
+        "getDoc": {
+            "error": 409,
+            "code": "projectHasDotGit",
+            "versionID": 1,
+            "createdAt": "2018-02-05T15:30:00Z",
+            "email": "michael.walker@overleaf.com",
+            "name": "msw"
+        },
+        "getSavedVers": [],
+        "getForVers": [],
+        "push": "success",
+        "postback": {
+            "type": "outOfDate"
+        }
+    }
+]
