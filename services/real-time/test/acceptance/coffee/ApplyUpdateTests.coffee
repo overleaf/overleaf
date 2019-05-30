@@ -48,6 +48,7 @@ describe "applyOtUpdate", ->
 			rclient.lrange "pending-updates-list", 0, -1, (error, [doc_id]) =>
 				doc_id.should.equal "#{@project_id}:#{@doc_id}"
 				done()
+			return null
 
 		it "should push the update into redis", (done) ->
 			rclient.lrange redisSettings.documentupdater.key_schema.pendingUpdates({@doc_id}), 0, -1, (error, [update]) =>
@@ -58,7 +59,8 @@ describe "applyOtUpdate", ->
 					user_id: @user_id
 				}
 				done()
-		
+			return null
+
 		after (done) ->
 			async.series [
 				(cb) => rclient.del "pending-updates-list", cb
@@ -107,6 +109,7 @@ describe "applyOtUpdate", ->
 			rclient.llen redisSettings.documentupdater.key_schema.pendingUpdates({@doc_id}), (error, len) =>
 				len.should.equal 0
 				done()
+			return null
 				
 	describe "when authorized to read-only with a comment update", ->
 		before (done) ->
@@ -142,6 +145,7 @@ describe "applyOtUpdate", ->
 			rclient.lrange "pending-updates-list", 0, -1, (error, [doc_id]) =>
 				doc_id.should.equal "#{@project_id}:#{@doc_id}"
 				done()
+			return null
 
 		it "should push the update into redis", (done) ->
 			rclient.lrange redisSettings.documentupdater.key_schema.pendingUpdates({@doc_id}), 0, -1, (error, [update]) =>
@@ -152,7 +156,8 @@ describe "applyOtUpdate", ->
 					user_id: @user_id
 				}
 				done()
-		
+			return null
+
 		after (done) ->
 			async.series [
 				(cb) => rclient.del "pending-updates-list", cb
