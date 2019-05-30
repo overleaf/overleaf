@@ -49,6 +49,7 @@ module.exports = RedisSharelatex =
 			console.error {
 				err: error,
 				key: client.options?.key # only present for cluster
+				clientOptions: client.options
 			}, "client timed out"
 			callback(error)
 		, RedisSharelatex.HEARTBEAT_TIMEOUT
