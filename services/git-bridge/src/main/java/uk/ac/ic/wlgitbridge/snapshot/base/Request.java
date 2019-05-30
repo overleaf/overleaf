@@ -86,6 +86,8 @@ public abstract class Request<T extends Result> {
                                     "already a git repository. The Overleaf git-bridge cannot work with this project",
                                     "due to a known problem with handling these '.git' folders.",
                                     "",
+                                    "We recommend removing the .git folder before trying again.",
+                                    "",
                                     "If this is unexpected, please contact us at support@overleaf.com, or",
                                     "see https://www.overleaf.com/help/342 for more information."
                             ));
