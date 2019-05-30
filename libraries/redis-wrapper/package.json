@@ -1,6 +1,6 @@
 {
   "name": "redis-sharelatex",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Redis wrapper for node which will either use cluster, sentinal, or single instance redis",
   "main": "index.js",
   "author": "ShareLaTeX",
