@@ -45,7 +45,7 @@ module.exports = RedisSharelatex =
 	_checkClient: (client, callback) ->
 		callback = _.once(callback)
 		timer = setTimeout () ->
-			error = new Error("redis client ping check timed out")
+			error = new Error("redis client ping check timed out #{client?.options?.host}")
 			console.error {
 				err: error,
 				key: client.options?.key # only present for cluster
