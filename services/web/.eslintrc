@@ -33,12 +33,6 @@
     }
   },
   "rules": {
-    "max-len": ["error", {
-      "ignoreUrls": true,
-      // Ignore long describe/it test blocks, long import/require statements
-      "ignorePattern": "(^\\s*(it|describe)\\s*\\(['\"]|^import\\s*.*\\s*from\\s*['\"]|^.*\\s*=\\s*require\\(['\"])"
-    }],
-
     // Fix conflict between prettier & standard by overriding to prefer
     // double quotes
     "jsx-quotes": ["error", "prefer-double"],
