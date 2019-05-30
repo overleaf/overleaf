@@ -290,7 +290,7 @@ describe('PasswordResetHandler', function() {
       })
     })
 
-    describe('when the data is a new style user_id', function() {
+    return describe('when the data is a new style user_id', function() {
       beforeEach(function() {
         this.AuthenticationManager.setUserPassword.yields(
           null,
@@ -310,42 +310,6 @@ describe('PasswordResetHandler', function() {
       it('should call setUserPasswordInV2', function() {
         return this.AuthenticationManager.setUserPassword
           .calledWith(this.user_id, this.password)
-          .should.equal(true)
-      })
-
-      return it('should reset == true and the user_id', function() {
-        return this.callback
-          .calledWith(null, true, this.user_id)
-          .should.equal(true)
-      })
-    })
-
-    return describe('when the data is v1 id', function() {
-      beforeEach(function() {
-        this.v1_user_id = 2345
-        this.AuthenticationManager.setUserPasswordInV1.yields(null, true)
-        this.UserGetter.getUser
-          .withArgs({ 'overleaf.id': this.v1_user_id })
-          .yields(null, { _id: this.user_id })
-        this.OneTimeTokenHandler.getValueFromTokenAndExpire.yields(null, {
-          v1_user_id: this.v1_user_id
-        })
-        return this.PasswordResetHandler.setNewUserPassword(
-          this.token,
-          this.password,
-          this.callback
-        )
-      })
-
-      it('should call setUserPasswordInV1', function() {
-        return this.AuthenticationManager.setUserPasswordInV1
-          .calledWith(this.v1_user_id, this.password)
-          .should.equal(true)
-      })
-
-      it('should look up the user by v1 id for the v2 user id', function() {
-        return this.UserGetter.getUser
-          .calledWith({ 'overleaf.id': this.v1_user_id })
           .should.equal(true)
       })
 
