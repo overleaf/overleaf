@@ -1,11 +1,10 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const App = require('../../../app.js')
-require('logger-sharelatex').logger.level('error')
+const { logger } = require('logger-sharelatex')
 
 before(done => App.listen(3000, 'localhost', done))
+
+beforeEach(() => {
+  // log level is reset in several places throughout the code, can't be set
+  // in a single global `before` step
+  logger.level('fatal')
+})
