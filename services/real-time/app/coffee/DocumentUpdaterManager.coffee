@@ -23,7 +23,7 @@ module.exports = DocumentUpdaterManager =
 				catch error
 					return callback(error)
 				callback null, body?.lines, body?.version, body?.ranges, body?.ops
-			else if res.statusCode == 422 # Unprocessable Entity
+			else if res.statusCode in [404, 422]
 				err = new Error("doc updater could not load requested ops")
 				err.statusCode = res.statusCode
 				logger.warn {err, project_id, doc_id, url, fromVersion}, "doc updater could not load requested ops"
@@ -51,7 +51,7 @@ module.exports = DocumentUpdaterManager =
 				err.statusCode = res.statusCode
 				logger.error {err, project_id}, "document updater returned failure status code: #{res.statusCode}"
 				return callback(err)
-				
+
 	queueChange: (project_id, doc_id, change, callback = ()->)->
 		jsonChange = JSON.stringify change
 		if jsonChange.indexOf("\u0000") != -1
