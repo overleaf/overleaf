@@ -1,4 +1,5 @@
 metrics = require "metrics-sharelatex"
+logger = require("logger-sharelatex")
 
 os = require "os"
 HOST = os.hostname()
@@ -32,6 +33,8 @@ module.exports = class HealthCheckManager
             @timer = null # only time the latency of the first event
     setStatus: () ->
         # if we saw the event anything other than a single time that is an error
+        if @count != 1
+            logger.err channel:@channel, count:@count, id:@id, "redis channel health check error"
         error = (@count != 1)
         CHANNEL_ERROR[@channel] = error
 
