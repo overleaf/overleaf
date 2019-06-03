@@ -14,8 +14,8 @@ var LatexHighlightRules = function() {
             token : ["keyword", "lparen", "variable.parameter", "rparen", "lparen", "storage.type", "rparen"],
             regex : "(\\\\(?:documentclass|usepackage|input))(?:(\\[)([^\\]]*)(\\]))?({)([^}]*)(})"
         }, {
-            token : ["keyword","lparen", "variable.parameter", "rparen"],
-            regex : "(\\\\(?:label|v?ref|cite(?:[^{]*)))(?:({)([^}]*)(}))?"
+            token : ["keyword", "lparen", "variable.parameter", "rparen"],
+            regex : "(\\\\(?:label|(?:eq|page|c|C)?ref|cite(?:[^{]*)))(?:({)([^}]*)(}))?"
         }, {
             token : ["storage.type", "lparen", "variable.parameter", "rparen"],
             regex : "(\\\\begin)({)(verbatim)(})",
