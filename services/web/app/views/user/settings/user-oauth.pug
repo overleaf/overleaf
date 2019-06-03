@@ -6,8 +6,8 @@ block scripts
 
 mixin providerList()
 	ul.list-like-table
-		li(ng-repeat="(key, provider) in providers")
-			.row(ng-if="key != 'collabratec' || (key == 'collabratec' && v2ThirdPartyIds[key])")
+		li(ng-repeat="(key, provider) in providers" ng-if="!provider.hideWhenNotLinked || (key == 'collabratec' && v2ThirdPartyIds[key]) || (provider.hideWhenNotLinked && thirdPartyIds[key])")
+			.row
 				.col-xs-12.col-sm-8.col-md-10
 					h4 {{provider.name}}
 					p.small(ng-bind-html="provider.description")
@@ -21,7 +21,7 @@ mixin providerList()
 						span(ng-if="!providers[key].ui.isProcessing") #{translate("unlink")}
 						span(ng-if="providers[key].ui.isProcessing") #{translate("processing")}
 					//- Link
-					a.btn.btn-primary(
+					a.btn.btn-primary.text-capitalize(
 						href="{{provider.linkPath}}?intent=link"
 						ng-if="!thirdPartyIds[key] && !provider.hideWhenNotLinked"
 					) #{translate("link")}
