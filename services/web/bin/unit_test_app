@@ -3,4 +3,4 @@ set -e;
 
 MOCHA="node_modules/.bin/mocha --exit --recursive --reporter spec --require test/unit/bootstrap.js"
 
-$MOCHA "$@" test/unit/js
+$MOCHA "$@" test/unit/src

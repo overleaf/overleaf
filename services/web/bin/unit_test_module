@@ -6,4 +6,4 @@ MODULE=$1
 
 shift
 
-$MOCHA "$@" modules/$MODULE/test/unit/js
+$MOCHA "$@" modules/$MODULE/test/unit/src
