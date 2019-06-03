@@ -23,14 +23,16 @@ module.exports = HistoryManager =
 	# flush changes in the background
 	flushProjectChangesAsync: (project_id) ->
 		return if !Settings.apis?.project_history?.enabled
-		HistoryManager.flushProjectChanges project_id, ->
+		HistoryManager.flushProjectChanges project_id, {background:true},  ->
 
 	# flush changes and callback (for when we need to know the queue is flushed)
-	flushProjectChanges: (project_id, callback = (error) ->) ->
+	flushProjectChanges: (project_id, options, callback = (error) ->) ->
 		return callback() if !Settings.apis?.project_history?.enabled
 		url = "#{Settings.apis.project_history.url}/project/#{project_id}/flush"
-		logger.log { project_id, url }, "flushing doc in project history api"
-		request.post url, (error, res, body)->
+		qs = {}
+		qs.background = true if options.background # pass on the background flush option if present
+		logger.log { project_id, url, qs }, "flushing doc in project history api"
+		request.post {url: url, qs: qs}, (error, res, body)->
 			if error?
 				logger.error { error, project_id}, "project history doc to track changes api"
 				return callback(error)
