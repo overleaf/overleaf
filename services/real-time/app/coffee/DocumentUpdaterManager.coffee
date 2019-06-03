@@ -36,9 +36,11 @@ module.exports = DocumentUpdaterManager =
 				callback err
 
 	flushProjectToMongoAndDelete: (project_id, callback = ()->) ->
+		# this method is called when the last connected user leaves the project
 		logger.log project_id:project_id, "deleting project from document updater"
 		timer = new metrics.Timer("delete.mongo.project")
-		url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
+		# flush the project in the background when all users have left
+		url = "#{settings.apis.documentupdater.url}/project/#{project_id}?background=true"
 		request.del url, (err, res, body)->
 			timer.done()
 			if err?
