@@ -93,7 +93,7 @@ describe 'DocumentUpdaterManager', ->
 				@DocumentUpdaterManager.flushProjectToMongoAndDelete @project_id, @callback
 
 			it 'should delete the project from the document updater', ->
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}"
+				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}?background=true"
 				@request.del.calledWith(url).should.equal true
 
 			it "should call the callback with no error", ->
