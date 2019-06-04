@@ -68,7 +68,7 @@ describe('UserMembershipAuthorization', function() {
         this.req,
         null,
         error => {
-          expect(error).to.not.extist
+          expect(error).to.not.exist
           sinon.assert.calledWithMatch(
             this.UserMembershipHandler.getEntity,
             this.req.params.id,
@@ -92,7 +92,7 @@ describe('UserMembershipAuthorization', function() {
         this.req,
         null,
         error => {
-          expect(error).to.extist
+          expect(error).to.exist
           expect(error).to.be.instanceof(Error)
           expect(error.constructor.name).to.equal('NotFoundError')
           sinon.assert.called(this.UserMembershipHandler.getEntity)
@@ -113,7 +113,7 @@ describe('UserMembershipAuthorization', function() {
         this.req,
         {
           redirect: path => {
-            expect(path).to.extist
+            expect(path).to.exist
             expect(path).to.match(/create/)
             return done()
           }
@@ -132,7 +132,7 @@ describe('UserMembershipAuthorization', function() {
         this.req,
         {
           redirect: path => {
-            expect(path).to.extist
+            expect(path).to.exist
             expect(path).to.match(/create/)
             return done()
           }
@@ -151,7 +151,7 @@ describe('UserMembershipAuthorization', function() {
         this.req,
         null,
         error => {
-          expect(error).to.extist
+          expect(error).to.exist
           expect(error).to.be.instanceof(Error)
           expect(error.constructor.name).to.equal('NotFoundError')
           return done()
@@ -177,7 +177,7 @@ describe('UserMembershipAuthorization', function() {
         this.req,
         null,
         error => {
-          expect(error).to.extist
+          expect(error).to.not.exist
           sinon.assert.called(this.AuthorizationMiddleware.redirectToRestricted)
           sinon.assert.notCalled(this.UserMembershipHandler.getEntity)
           expect(this.req.entity).to.not.exist
@@ -193,7 +193,7 @@ describe('UserMembershipAuthorization', function() {
         this.req,
         null,
         error => {
-          expect(error).to.not.extist
+          expect(error).to.not.exist
           sinon.assert.calledWithMatch(
             this.UserMembershipHandler.getEntity,
             this.req.params.id,
@@ -209,7 +209,7 @@ describe('UserMembershipAuthorization', function() {
         this.req,
         null,
         error => {
-          expect(error).to.not.extist
+          expect(error).to.not.exist
           sinon.assert.calledWithMatch(
             this.UserMembershipHandler.getEntity,
             this.req.params.id,
@@ -225,7 +225,7 @@ describe('UserMembershipAuthorization', function() {
         this.req,
         null,
         error => {
-          expect(error).to.not.extist
+          expect(error).to.not.exist
           sinon.assert.calledWithMatch(
             this.UserMembershipHandler.getEntity,
             this.req.params.id,
@@ -241,7 +241,7 @@ describe('UserMembershipAuthorization', function() {
         this.req,
         null,
         error => {
-          expect(error).to.not.extist
+          expect(error).to.not.exist
           sinon.assert.calledWithMatch(
             this.UserMembershipHandler.getEntity,
             this.req.params.id,
@@ -267,7 +267,7 @@ describe('UserMembershipAuthorization', function() {
         this.req,
         null,
         error => {
-          expect(error).to.not.extist
+          expect(error).to.not.exist
           sinon.assert.calledWithMatch(
             this.UserMembershipHandler.getEntity,
             'brand-slug',
@@ -293,7 +293,7 @@ describe('UserMembershipAuthorization', function() {
         this.req,
         null,
         error => {
-          expect(error).to.not.extist
+          expect(error).to.not.exist
           sinon.assert.notCalled(this.UserMembershipHandler.getEntity)
           sinon.assert.calledOnce(
             this.AuthorizationMiddleware.ensureUserIsSiteAdmin
@@ -308,7 +308,7 @@ describe('UserMembershipAuthorization', function() {
       this.req.query.resource_type = 'institution'
       const middleware = this.UserMembershipAuthorization.requireGraphAccess
       return middleware(this.req, null, error => {
-        expect(error).to.not.extist
+        expect(error).to.not.exist
         sinon.assert.calledWithMatch(
           this.UserMembershipHandler.getEntity,
           this.req.query.resource_id,
