@@ -622,13 +622,16 @@ describe('RecurlyWrapper', function() {
     beforeEach(function() {
       this.user = {
         _id: 'some_id',
-        email: 'user@example.com'
+        email: 'user@example.com',
+        first_name: 'Foo',
+        last_name: 'Johnson'
       }
       this.subscriptionDetails = {
         currencyCode: 'EUR',
         plan_code: 'some_plan_code',
         coupon_code: '',
         isPaypal: true,
+        first_name: 'Prairie',
         address: {
           address1: 'addr_one',
           address2: 'addr_two',
@@ -674,8 +677,8 @@ describe('RecurlyWrapper', function() {
 	<account>
 		<account_code>some_id</account_code>
 		<email>user@example.com</email>
-		<first_name/>
-		<last_name/>
+		<first_name>Prairie</first_name>
+		<last_name>Johnson</last_name>
 		<billing_info>
 			<token_id>a-token-id</token_id>
 		</billing_info>

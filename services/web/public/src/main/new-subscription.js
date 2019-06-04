@@ -193,6 +193,8 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
             currencyCode: pricing.items.currency,
             plan_code: pricing.items.plan.code,
             coupon_code: pricing.items.coupon ? pricing.items.coupon.code : '',
+            first_name: $scope.data.first_name,
+            last_name: $scope.data.last_name,
 
             isPaypal: $scope.paymentMethod.value === 'paypal',
             address: {

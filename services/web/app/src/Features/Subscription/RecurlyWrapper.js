@@ -376,8 +376,8 @@ module.exports = RecurlyWrapper = {
       account: {
         account_code: user._id,
         email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
+        first_name: subscriptionDetails.first_name || user.first_name,
+        last_name: subscriptionDetails.last_name || user.last_name,
         billing_info: {
           token_id: recurly_token_id
         }
