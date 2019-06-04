@@ -32,31 +32,6 @@ module.exports = RecurlyWrapper = {
       x => x.url
     ) || 'https://api.recurly.com/v2',
 
-  _addressToXml(address) {
-    const allowedKeys = [
-      'address1',
-      'address2',
-      'city',
-      'country',
-      'state',
-      'zip',
-      'postal_code'
-    ]
-    let resultString = '<billing_info>\n'
-    for (let k in address) {
-      const v = address[k]
-      if (k === 'postal_code') {
-        k = 'zip'
-      }
-      if (v && Array.from(allowedKeys).includes(k)) {
-        resultString += `<${k}${k === 'address2' ? ' nil="nil"' : ''}>${v ||
-          ''}</${k}>\n`
-      }
-    }
-    resultString += '</billing_info>\n'
-    return resultString
-  },
-
   _paypal: {
     checkAccountExists(cache, next) {
       const { user } = cache
@@ -132,22 +107,22 @@ module.exports = RecurlyWrapper = {
         { user_id: user._id, recurly_token_id },
         'creating user in recurly'
       )
-      const requestBody = `\
-<account>
-	<account_code>${user._id}</account_code>
-	<email>${user.email}</email>
-	<first_name>${user.first_name}</first_name>
-	<last_name>${user.last_name}</last_name>
-	<address>
-		<address1>${address.address1}</address1>
-		<address2>${address.address2}</address2>
-		<city>${address.city || ''}</city>
-		<state>${address.state || ''}</state>
-		<zip>${address.zip || ''}</zip>
-		<country>${address.country}</country>
-	</address>
-</account>\
-`
+      const data = {
+        account_code: user._id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        address: {
+          address1: address.address1,
+          address2: address.address2 || '',
+          city: address.city || '',
+          state: address.state || '',
+          zip: address.zip || '',
+          country: address.country
+        }
+      }
+      const requestBody = RecurlyWrapper._buildXml('account', data)
+
       return RecurlyWrapper.apiRequest(
         {
           url: 'accounts',
@@ -194,11 +169,8 @@ module.exports = RecurlyWrapper = {
       if (!accountCode) {
         return next(new Error('no account code at createBillingInfo stage'))
       }
-      const requestBody = `\
-<billing_info>
-	<token_id>${recurly_token_id}</token_id>
-</billing_info>\
-`
+      const data = { token_id: recurly_token_id }
+      const requestBody = RecurlyWrapper._buildXml('billing_info', data)
       return RecurlyWrapper.apiRequest(
         {
           url: `accounts/${accountCode}/billing_info`,
@@ -252,7 +224,16 @@ module.exports = RecurlyWrapper = {
           new Error('no address in subscriptionDetails at setAddress stage')
         )
       }
-      const requestBody = RecurlyWrapper._addressToXml(address)
+      const data = {
+        address1: address.address1,
+        address2: address.address2 || '',
+        city: address.city || '',
+        state: address.state || '',
+        zip: address.zip || '',
+        country: address.country
+      }
+      const requestBody = RecurlyWrapper._buildXml('billing_info', data)
+
       return RecurlyWrapper.apiRequest(
         {
           url: `accounts/${accountCode}/billing_info`,
@@ -292,16 +273,16 @@ module.exports = RecurlyWrapper = {
         { user_id: user._id, recurly_token_id },
         'creating subscription in recurly'
       )
-      const requestBody = `\
-<subscription>
-	<plan_code>${subscriptionDetails.plan_code}</plan_code>
-	<currency>${subscriptionDetails.currencyCode}</currency>
-	<coupon_code>${subscriptionDetails.coupon_code}</coupon_code>
-	<account>
-		<account_code>${user._id}</account_code>
-	</account>
-</subscription>\
-` // TODO: check account details and billing
+      const data = {
+        plan_code: subscriptionDetails.plan_code,
+        currency: subscriptionDetails.currencyCode,
+        coupon_code: subscriptionDetails.coupon_code,
+        account: {
+          account_code: user._id
+        }
+      }
+      const requestBody = RecurlyWrapper._buildXml('subscription', data)
+
       return RecurlyWrapper.apiRequest(
         {
           url: 'subscriptions',
@@ -388,22 +369,22 @@ module.exports = RecurlyWrapper = {
     recurly_token_id,
     callback
   ) {
-    const requestBody = `\
-<subscription>
-  <plan_code>${subscriptionDetails.plan_code}</plan_code>
-  <currency>${subscriptionDetails.currencyCode}</currency>
-  <coupon_code>${subscriptionDetails.coupon_code}</coupon_code>
-  <account>
-  	<account_code>${user._id}</account_code>
-  	<email>${user.email}</email>
-  	<first_name>${user.first_name}</first_name>
-  	<last_name>${user.last_name}</last_name>
-  	<billing_info>
-  		<token_id>${recurly_token_id}</token_id>
-  	</billing_info>
-  </account>
-</subscription>\
-`
+    const data = {
+      plan_code: subscriptionDetails.plan_code,
+      currency: subscriptionDetails.currencyCode,
+      coupon_code: subscriptionDetails.coupon_code,
+      account: {
+        account_code: user._id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        billing_info: {
+          token_id: recurly_token_id
+        }
+      }
+    }
+    const requestBody = RecurlyWrapper._buildXml('subscription', data)
+
     return RecurlyWrapper.apiRequest(
       {
         url: 'subscriptions',
@@ -667,12 +648,12 @@ module.exports = RecurlyWrapper = {
       { subscriptionId, options },
       'telling recurly to update subscription'
     )
-    const requestBody = `\
-<subscription>
-  <plan_code>${options.plan_code}</plan_code>
-  <timeframe>${options.timeframe}</timeframe>
-</subscription>\
-`
+    const data = {
+      plan_code: options.plan_code,
+      timeframe: options.timeframe
+    }
+    const requestBody = RecurlyWrapper._buildXml('subscription', data)
+
     return RecurlyWrapper.apiRequest(
       {
         url: `subscriptions/${subscriptionId}`,
@@ -696,20 +677,19 @@ module.exports = RecurlyWrapper = {
     plan_code,
     callback
   ) {
-    const requestBody = `\
-<coupon>
-	<coupon_code>${coupon_code}</coupon_code>
-	<name>${name}</name>
-	<discount_type>dollars</discount_type>
-	<discount_in_cents>
-		<${currencyCode}>${discount_in_cents}</${currencyCode}>
-	</discount_in_cents>
-	<plan_codes>
-		<plan_code>${plan_code}</plan_code>
-	</plan_codes>
-	<applies_to_all_plans>false</applies_to_all_plans>
-</coupon>\
-`
+    const data = {
+      coupon_code,
+      name,
+      discount_type: 'dollars',
+      discount_in_cents: {},
+      plan_codes: {
+        plan_code
+      },
+      applies_to_all_plans: false
+    }
+    data.discount_in_cents[currencyCode] = discount_in_cents
+    const requestBody = RecurlyWrapper._buildXml('coupon', data)
+
     logger.log({ coupon_code, requestBody }, 'creating coupon')
     return RecurlyWrapper.apiRequest(
       {
@@ -787,12 +767,12 @@ module.exports = RecurlyWrapper = {
   },
 
   redeemCoupon(account_code, coupon_code, callback) {
-    const requestBody = `\
-<redemption>
-	<account_code>${account_code}</account_code>
-	<currency>USD</currency>
-</redemption>\
-`
+    const data = {
+      account_code,
+      currency: 'USD'
+    }
+    const requestBody = RecurlyWrapper._buildXml('redemption', data)
+
     logger.log(
       { account_code, coupon_code, requestBody },
       'redeeming coupon for user'
@@ -969,6 +949,19 @@ module.exports = RecurlyWrapper = {
       const result = convertDataTypes(data)
       return callback(null, result)
     })
+  },
+
+  _buildXml(rootName, data) {
+    const options = {
+      headless: true,
+      renderOpts: {
+        pretty: true,
+        indent: '\t'
+      },
+      rootName
+    }
+    const builder = new xml2js.Builder(options)
+    return builder.buildObject(data)
   }
 }
 

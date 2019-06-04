@@ -151,7 +151,8 @@ describe('RecurlyWrapper', function() {
             error: sinon.stub(),
             log: sinon.stub()
           },
-          request: sinon.stub()
+          request: sinon.stub(),
+          xml2js: require('xml2js')
         }
       }
     ))
@@ -280,12 +281,13 @@ describe('RecurlyWrapper', function() {
       return this.RecurlyWrapper.apiRequest.restore()
     })
 
-    it('should send an update request to the API', function() {
+    it('sends correct XML', function() {
       this.apiRequest.called.should.equal(true)
-      this.requestOptions.body.should.equal(`\
+      const { body } = this.apiRequest.lastCall.args[0]
+      expect(body).to.equal(`\
 <subscription>
-  <plan_code>silver</plan_code>
-  <timeframe>now</timeframe>
+	<plan_code>silver</plan_code>
+	<timeframe>now</timeframe>
 </subscription>\
 `)
       this.requestOptions.url.should.equal(
@@ -395,10 +397,6 @@ describe('RecurlyWrapper', function() {
         'apiRequest',
         (options, callback) => {
           options.url.should.equal(`coupons/${this.coupon_code}/redeem`)
-          options.body
-            .indexOf(`<account_code>${this.recurlyAccountId}</account_code>`)
-            .should.not.equal(-1)
-          options.body.indexOf('<currency>USD</currency>').should.not.equal(-1)
           options.method.should.equal('post')
           return callback()
         }
@@ -414,37 +412,63 @@ describe('RecurlyWrapper', function() {
       return this.RecurlyWrapper.apiRequest.restore()
     })
 
-    return it('should send the request to redem the coupon', function() {
-      return this.apiRequest.called.should.equal(true)
+    return it('sends correct XML', function() {
+      this.apiRequest.called.should.equal(true)
+      const { body } = this.apiRequest.lastCall.args[0]
+      return expect(body).to.equal(`\
+<redemption>
+	<account_code>account-id-123</account_code>
+	<currency>USD</currency>
+</redemption>\
+`)
     })
   })
 
-  describe('_addressToXml', function() {
-    beforeEach(function() {
-      return (this.address = {
-        address1: 'addr_one',
-        address2: 'addr_two',
-        country: 'some_country',
-        state: 'some_state',
-        postal_code: 'some_zip',
-        nonsenseKey: 'rubbish'
-      })
+  describe('createFixedAmmountCoupon', function() {
+    beforeEach(function(done) {
+      this.couponCode = 'a-coupon-code'
+      this.couponName = 'a-coupon-name'
+      this.currencyCode = 'EUR'
+      this.discount = 1337
+      this.planCode = 'a-plan-code'
+      this.apiRequest = sinon.stub(
+        this.RecurlyWrapper,
+        'apiRequest',
+        (options, callback) => {
+          return callback()
+        }
+      )
+      return this.RecurlyWrapper.createFixedAmmountCoupon(
+        this.couponCode,
+        this.couponName,
+        this.currencyCode,
+        this.discount,
+        this.planCode,
+        done
+      )
     })
 
-    return it('should generate the correct xml', function() {
-      const result = this.RecurlyWrapper._addressToXml(this.address)
-      return should.equal(
-        result,
-        `\
-<billing_info>
-<address1>addr_one</address1>
-<address2 nil="nil">addr_two</address2>
-<country>some_country</country>
-<state>some_state</state>
-<zip>some_zip</zip>
-</billing_info>\n\
-`
-      )
+    afterEach(function() {
+      return this.RecurlyWrapper.apiRequest.restore()
+    })
+
+    return it('sends correct XML', function() {
+      this.apiRequest.called.should.equal(true)
+      const { body } = this.apiRequest.lastCall.args[0]
+      return expect(body).to.equal(`\
+<coupon>
+	<coupon_code>a-coupon-code</coupon_code>
+	<name>a-coupon-name</name>
+	<discount_type>dollars</discount_type>
+	<discount_in_cents>
+		<EUR>1337</EUR>
+	</discount_in_cents>
+	<plan_codes>
+		<plan_code>a-plan-code</plan_code>
+	</plan_codes>
+	<applies_to_all_plans>false</applies_to_all_plans>
+</coupon>\
+`)
     })
   })
 
@@ -637,6 +661,29 @@ describe('RecurlyWrapper', function() {
     afterEach(function() {
       this.apiRequest.restore()
       return this._parseSubscriptionXml.restore()
+    })
+
+    it('sends correct XML', function(done) {
+      return this.call((err, result) => {
+        const { body } = this.apiRequest.lastCall.args[0]
+        expect(body).to.equal(`\
+<subscription>
+	<plan_code>some_plan_code</plan_code>
+	<currency>EUR</currency>
+	<coupon_code/>
+	<account>
+		<account_code>some_id</account_code>
+		<email>user@example.com</email>
+		<first_name/>
+		<last_name/>
+		<billing_info>
+			<token_id>a-token-id</token_id>
+		</billing_info>
+	</account>
+</subscription>\
+`)
+        return done()
+      })
     })
 
     it('should not produce an error', function(done) {
@@ -875,7 +922,12 @@ describe('RecurlyWrapper', function() {
         '_parseSubscriptionXml'
       )
       return (this.cache = {
-        user: (this.user = { _id: 'some_id' }),
+        user: (this.user = {
+          _id: 'some_id',
+          email: 'foo@bar.com',
+          first_name: 'Foo',
+          last_name: 'Bar'
+        }),
         recurly_token_id: (this.recurly_token_id = 'some_token'),
         subscriptionDetails: (this.subscriptionDetails = {
           currencyCode: 'EUR',
@@ -885,6 +937,7 @@ describe('RecurlyWrapper', function() {
           address: {
             address1: 'addr_one',
             address2: 'addr_two',
+            city: 'some_city',
             country: 'some_country',
             state: 'some_state',
             zip: 'some_zip'
@@ -1091,6 +1144,29 @@ describe('RecurlyWrapper', function() {
           )
         })
 
+        it('sends correct XML', function(done) {
+          return this.call((err, result) => {
+            const { body } = this.apiRequest.lastCall.args[0]
+            expect(body).to.equal(`\
+<account>
+	<account_code>some_id</account_code>
+	<email>foo@bar.com</email>
+	<first_name>Foo</first_name>
+	<last_name>Bar</last_name>
+	<address>
+		<address1>addr_one</address1>
+		<address2>addr_two</address2>
+		<city>some_city</city>
+		<state>some_state</state>
+		<zip>some_zip</zip>
+		<country>some_country</country>
+	</address>
+</account>\
+`)
+            return done()
+          })
+        })
+
         it('should not produce an error', function(done) {
           return this.call((err, result) => {
             expect(err).to.not.be.instanceof(Error)
@@ -1163,6 +1239,18 @@ describe('RecurlyWrapper', function() {
             { statusCode: 200 },
             resultXml
           )
+        })
+
+        it('sends correct XML', function(done) {
+          return this.call((err, result) => {
+            const { body } = this.apiRequest.lastCall.args[0]
+            expect(body).to.equal(`\
+<billing_info>
+	<token_id>some_token</token_id>
+</billing_info>\
+`)
+            return done()
+          })
         })
 
         it('should not produce an error', function(done) {
@@ -1259,6 +1347,23 @@ describe('RecurlyWrapper', function() {
           )
         })
 
+        it('sends correct XML', function(done) {
+          return this.call((err, result) => {
+            const { body } = this.apiRequest.lastCall.args[0]
+            expect(body).to.equal(`\
+<billing_info>
+	<address1>addr_one</address1>
+	<address2>addr_two</address2>
+	<city>some_city</city>
+	<state>some_state</state>
+	<zip>some_zip</zip>
+	<country>some_country</country>
+</billing_info>\
+`)
+            return done()
+          })
+        })
+
         it('should not produce an error', function(done) {
           return this.call((err, result) => {
             expect(err).to.not.be.instanceof(Error)
@@ -1328,6 +1433,23 @@ describe('RecurlyWrapper', function() {
             { statusCode: 200 },
             resultXml
           )
+        })
+
+        it('sends correct XML', function(done) {
+          return this.call((err, result) => {
+            const { body } = this.apiRequest.lastCall.args[0]
+            expect(body).to.equal(`\
+<subscription>
+	<plan_code>some_plan_code</plan_code>
+	<currency>EUR</currency>
+	<coupon_code/>
+	<account>
+		<account_code>some_id</account_code>
+	</account>
+</subscription>\
+`)
+            return done()
+          })
         })
 
         it('should not produce an error', function(done) {
