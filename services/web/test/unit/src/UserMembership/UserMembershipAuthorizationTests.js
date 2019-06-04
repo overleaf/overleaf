@@ -171,9 +171,23 @@ describe('UserMembershipAuthorization', function() {
       )
     })
 
-    return it('handle anonymous user', function(done) {
+    it('handle anonymous user', function(done) {
       this.AuthenticationController.getSessionUser.returns(null)
       return this.UserMembershipAuthorization.requireGroupMetricsAccess(
+        this.req,
+        null,
+        error => {
+          expect(error).to.not.exist
+          sinon.assert.called(this.AuthorizationMiddleware.redirectToRestricted)
+          sinon.assert.notCalled(this.UserMembershipHandler.getEntity)
+          expect(this.req.entity).to.not.exist
+          return done()
+        }
+      )
+    })
+
+    return it('checks user is staff if required', function(done) {
+      return this.UserMembershipAuthorization.requireInstitutionManagementStaffAccess(
         this.req,
         null,
         error => {

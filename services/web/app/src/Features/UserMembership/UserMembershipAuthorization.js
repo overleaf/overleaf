@@ -88,6 +88,18 @@ module.exports = UserMembershipAuthorization = {
     )
   },
 
+  requireInstitutionManagementStaffAccess(req, res, next) {
+    return requireAccessToEntity(
+      'institution',
+      req.params.id,
+      req,
+      res,
+      next,
+      'institutionManagement',
+      true
+    )
+  },
+
   requirePublisherMetricsAccess(req, res, next) {
     return requireAccessToEntity(
       'publisher',
@@ -215,11 +227,26 @@ var requireAccessToEntity = function(
   req,
   res,
   next,
-  requiredStaffAccess = null
+  requiredStaffAccess = null,
+  asStaff
 ) {
+  if (asStaff == null) {
+    asStaff = false
+  }
   const loggedInUser = AuthenticationController.getSessionUser(req)
   if (!loggedInUser) {
     return AuthorizationMiddleware.redirectToRestricted(req, res, next)
+  }
+
+  if (asStaff) {
+    if (
+      !loggedInUser.isAdmin &&
+      !(loggedInUser.staffAccess != null
+        ? loggedInUser.staffAccess[requiredStaffAccess]
+        : undefined)
+    ) {
+      return AuthorizationMiddleware.redirectToRestricted(req, res, next)
+    }
   }
 
   return getEntity(
