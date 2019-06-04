@@ -264,11 +264,40 @@ describe('ProjectCreationHandler', function() {
         )
       })
 
-      return it('should send a project-imported event when importing a project', function(done) {
+      it('should send a project-created event with template information if provided', function(done) {
+        const attributes = {
+          fromV1TemplateId: 100
+        }
         return this.handler.createBlankProject(
           ownerId,
           projectName,
-          1234,
+          attributes,
+          (err, project) => {
+            expect(this.AnalyticsManager.recordEvent.callCount).to.equal(1)
+            expect(
+              this.AnalyticsManager.recordEvent.calledWith(
+                ownerId,
+                'project-created',
+                { projectId: project._id, attributes }
+              )
+            ).to.equal(true)
+            return done()
+          }
+        )
+      })
+
+      return it('should send a project-imported event when importing a project', function(done) {
+        const attributes = {
+          overleaf: {
+            history: {
+              id: 100
+            }
+          }
+        }
+        return this.handler.createBlankProject(
+          ownerId,
+          projectName,
+          attributes,
           (err, project) => {
             expect(this.AnalyticsManager.recordEvent.callCount).to.equal(1)
             expect(

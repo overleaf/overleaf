@@ -89,10 +89,15 @@ module.exports = ProjectUploadHandler = {
     owner_id,
     proposedName,
     zipPath,
+    attributes,
     callback
   ) {
     if (callback == null) {
       callback = function(error, project) {}
+    }
+    if (arguments.length === 4) {
+      callback = attributes
+      attributes = {}
     }
     return ProjectDetailsHandler.generateUniqueName(
       owner_id,
@@ -104,6 +109,7 @@ module.exports = ProjectUploadHandler = {
         return ProjectCreationHandler.createBlankProject(
           owner_id,
           name,
+          attributes,
           (error, project) => {
             if (error != null) {
               return callback(error)

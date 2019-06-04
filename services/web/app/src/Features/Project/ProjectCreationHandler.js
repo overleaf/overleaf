@@ -38,7 +38,7 @@ module.exports = ProjectCreationHandler = {
     metrics.inc('project-creation')
     if (arguments.length === 3) {
       callback = attributes
-      attributes = null
+      attributes = {}
     }
 
     return ProjectDetailsHandler.validateProjectName(projectName, function(
@@ -48,7 +48,7 @@ module.exports = ProjectCreationHandler = {
         return callback(error)
       }
       logger.log({ owner_id, projectName }, 'creating blank project')
-      if (attributes != null) {
+      if (attributes.overleaf !== undefined && attributes.overleaf != null) {
         return ProjectCreationHandler._createBlankProject(
           owner_id,
           projectName,
@@ -69,10 +69,8 @@ module.exports = ProjectCreationHandler = {
           if (error != null) {
             return callback(error)
           }
-          attributes = {
-            overleaf: {
-              history: { id: history != null ? history.overleaf_id : undefined }
-            }
+          attributes.overleaf = {
+            history: { id: history != null ? history.overleaf_id : undefined }
           }
           return ProjectCreationHandler._createBlankProject(
             owner_id,
@@ -83,7 +81,8 @@ module.exports = ProjectCreationHandler = {
                 return callback(error)
               }
               AnalyticsManger.recordEvent(owner_id, 'project-created', {
-                projectId: project._id
+                projectId: project._id,
+                attributes
               })
               return callback(error, project)
             }

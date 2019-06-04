@@ -194,6 +194,10 @@ describe('ProjectUploadManager', function() {
       this.ProjectDetailsHandler.generateUniqueName = sinon
         .stub()
         .callsArgWith(2, null, this.name)
+      // createBlankProject allows taking optional attributes and will callback the last arg
+      this.ProjectCreationHandler.createBlankProject = sinon
+        .stub()
+        .callsArgWith(3, null, this.project)
       this.ProjectUploadManager.insertZipArchiveIntoFolder = sinon
         .stub()
         .callsArg(4)

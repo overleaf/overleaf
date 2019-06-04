@@ -57,6 +57,10 @@ module.exports = TemplatesManager = {
       const projectName = ProjectDetailsHandler.fixProjectName(templateName)
       const dumpPath = `${settings.path.dumpFolder}/${uuid.v4()}`
       const writeStream = fs.createWriteStream(dumpPath)
+      const attributes = {
+        fromV1TemplateId: templateId,
+        fromV1TemplateVersionId: templateVersionId
+      }
       writeStream.on('close', function() {
         if (zipReq.response.statusCode !== 200) {
           logger.err(
@@ -69,6 +73,7 @@ module.exports = TemplatesManager = {
           user_id,
           projectName,
           dumpPath,
+          attributes,
           function(err, project) {
             if (err != null) {
               logger.err({ err, zipReq }, 'problem building project from zip')

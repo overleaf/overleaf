@@ -46,7 +46,7 @@ describe('TemplatesManager', function() {
     this.ProjectUploadManager = {
       createProjectFromZipArchiveWithName: sinon
         .stub()
-        .callsArgWith(3, null, { _id: this.project_id })
+        .callsArgWith(4, null, { _id: this.project_id })
     }
     this.dumpFolder = 'dump/path'
     this.ProjectOptionsHandler = {
@@ -139,7 +139,11 @@ describe('TemplatesManager', function() {
         return this.ProjectUploadManager.createProjectFromZipArchiveWithName.should.have.been.calledWithMatch(
           this.user_id,
           this.templateName,
-          this.dumpPath
+          this.dumpPath,
+          {
+            fromV1TemplateId: this.templateId,
+            fromV1TemplateVersionId: this.templateVersionId
+          }
         )
       })
 
