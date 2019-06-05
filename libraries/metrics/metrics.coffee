@@ -135,27 +135,27 @@ module.exports = Metrics =
 			Metrics.timing(this.key, timeSpan, this.sampleRate, this.opts)
 			return timeSpan
 
-	gauge : (key, value, sampleRate = 1)->
+	gauge : (key, value, sampleRate = 1, opts)->
 		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Gauge({
 				name: key,
 				help: key, 
-				labelNames: ['app','host']
+				labelNames: ['app','host', 'status']
 			})
-		promMetrics[key].set({app: appname, host: hostname}, this.sanitizeValue(value))
+		promMetrics[key].set({app: appname, host: hostname, status: opts?.status}, this.sanitizeValue(value))
 		if process.env['DEBUG_METRICS']
 			console.log("doing gauge", key, opts)
 			
-	globalGauge: (key, value, sampleRate = 1)->
+	globalGauge: (key, value, sampleRate = 1, opts)->
 		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Gauge({
 				name: key,
 				help: key, 
-				labelNames: ['app','host']
+				labelNames: ['app','host', 'status']
 			})
-		promMetrics[key].set({app: appname},this.sanitizeValue(value))
+		promMetrics[key].set({app: appname, status: opts?.status},this.sanitizeValue(value))
 
 	mongodb: require "./mongodb"
 	http: require "./http"
