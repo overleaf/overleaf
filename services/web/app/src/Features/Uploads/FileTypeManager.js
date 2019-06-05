@@ -116,12 +116,20 @@ module.exports = FileTypeManager = {
     })
   },
 
+  getExtension(fileName) {
+    const nameSplit = fileName.split('.')
+    if (nameSplit.length < 2) {
+      return undefined
+    }
+    return nameSplit.pop()
+  },
+
   shouldIgnore(path, callback) {
     if (callback == null) {
       callback = function(error, result) {}
     }
     const name = Path.basename(path)
-    let extension = name.split('.').slice(-1)[0]
+    let extension = this.getExtension(name)
     if (extension != null) {
       extension = extension.toLowerCase()
     }

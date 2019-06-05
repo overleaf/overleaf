@@ -12,8 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
+const expect = require('chai').expect
 const modulePath = '../../../../app/src/Features/Uploads/FileTypeManager.js'
 const SandboxedModule = require('sandboxed-module')
 const isUtf8 = require('is-utf8')
@@ -242,7 +241,7 @@ describe('FileTypeManager', function() {
       })
     })
 
-    return describe('when the file extension is non-text', function() {
+    describe('when the file extension is non-text', function() {
       it('should return .eps files as binary', function() {
         return this.FileTypeManager.getType(
           'file.eps',
@@ -283,7 +282,11 @@ describe('FileTypeManager', function() {
     })
   })
 
-  return describe('shouldIgnore', function() {
+  describe('shouldIgnore', function() {
+    beforeEach(function() {
+      this.stats = {}
+    })
+
     it('should ignore tex auxiliary files', function() {
       return this.FileTypeManager.shouldIgnore('file.aux', (error, ignore) =>
         ignore.should.equal(true)
@@ -316,10 +319,50 @@ describe('FileTypeManager', function() {
       )
     })
 
-    return it('should ignore the case of the extension', function() {
+    it('should ignore the case of the extension', function() {
       return this.FileTypeManager.shouldIgnore('file.AUX', (error, ignore) =>
         ignore.should.equal(true)
       )
+    })
+
+    it('should not ignore files with an ignored extension as full name', function() {
+      this.stats.isDirectory = sinon.stub().returns(false)
+      const fileName = this.FileTypeManager.IGNORE_EXTENSIONS[0]
+      this.FileTypeManager.shouldIgnore(fileName, (error, ignore) =>
+        ignore.should.equal(false)
+      )
+    })
+
+    it('should not ignore directories with an ignored extension as full name', function() {
+      this.stats.isDirectory = sinon.stub().returns(true)
+      const fileName = this.FileTypeManager.IGNORE_EXTENSIONS[0]
+      this.FileTypeManager.shouldIgnore(fileName, (error, ignore) =>
+        ignore.should.equal(false)
+      )
+    })
+  })
+
+  describe('getExtension', function() {
+    it('should return the extension of a file name', function() {
+      expect(this.FileTypeManager.getExtension('example.doc')).to.equal('doc')
+    })
+
+    it('should return the extension with unmodified upper and lower case characters', function() {
+      expect(this.FileTypeManager.getExtension('example.TeX')).to.equal('TeX')
+    })
+
+    it('should return the extension of a file name with multiple dots in the name', function() {
+      expect(this.FileTypeManager.getExtension('example.test.doc')).to.equal(
+        'doc'
+      )
+    })
+
+    it('should return the rest of the string when the file name starts with dot', function() {
+      expect(this.FileTypeManager.getExtension('.example.doc')).to.equal('doc')
+    })
+
+    it('should return undefined when the file name has no extension', function() {
+      expect(this.FileTypeManager.getExtension('example')).to.equal(undefined)
     })
   })
 })
