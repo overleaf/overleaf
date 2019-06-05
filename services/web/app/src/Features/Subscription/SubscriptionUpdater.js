@@ -1,39 +1,43 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let SubscriptionUpdater
 const async = require('async')
 const _ = require('underscore')
 const { Subscription } = require('../../models/Subscription')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const UserGetter = require('../User/UserGetter')
 const PlansLocator = require('./PlansLocator')
-const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const { ObjectId } = require('mongoose').Types
 const FeaturesUpdater = require('./FeaturesUpdater')
 
-const oneMonthInSeconds = 60 * 60 * 24 * 30
+const SubscriptionUpdater = {
+  /**
+   * Change the admin of the given subscription
+   *
+   * Validation checks are assumed to have been made:
+   *   * subscription exists
+   *   * user exists
+   *   * user does not have another subscription
+   *   * subscription is not a Recurly subscription
+   *
+   * If the subscription is Recurly, we silently do nothing.
+   */
+  updateAdmin(subscriptionId, adminId, callback) {
+    const query = {
+      _id: ObjectId(subscriptionId),
+      customAccount: true
+    }
+    const update = {
+      $set: { admin_id: ObjectId(adminId) },
+      $addToSet: { manager_ids: ObjectId(adminId) }
+    }
+    Subscription.update(query, update, callback)
+  },
 
-module.exports = SubscriptionUpdater = {
-  syncSubscription(recurlySubscription, adminUser_id, callback) {
+  syncSubscription(recurlySubscription, adminUserId, callback) {
     logger.log(
-      { adminUser_id, recurlySubscription },
+      { adminUserId, recurlySubscription },
       'syncSubscription, creating new if subscription does not exist'
     )
-    return SubscriptionLocator.getUsersSubscription(adminUser_id, function(
+    SubscriptionLocator.getUsersSubscription(adminUserId, function(
       err,
       subscription
     ) {
@@ -42,42 +46,42 @@ module.exports = SubscriptionUpdater = {
       }
       if (subscription != null) {
         logger.log(
-          { adminUser_id, recurlySubscription },
+          { adminUserId, recurlySubscription },
           'subscription does exist'
         )
-        return SubscriptionUpdater._updateSubscriptionFromRecurly(
+        SubscriptionUpdater._updateSubscriptionFromRecurly(
           recurlySubscription,
           subscription,
           callback
         )
       } else {
         logger.log(
-          { adminUser_id, recurlySubscription },
+          { adminUserId, recurlySubscription },
           'subscription does not exist, creating a new one'
         )
-        return SubscriptionUpdater._createNewSubscription(
-          adminUser_id,
-          function(err, subscription) {
-            if (err != null) {
-              return callback(err)
-            }
-            return SubscriptionUpdater._updateSubscriptionFromRecurly(
-              recurlySubscription,
-              subscription,
-              callback
-            )
+        SubscriptionUpdater._createNewSubscription(adminUserId, function(
+          err,
+          subscription
+        ) {
+          if (err != null) {
+            return callback(err)
           }
-        )
+          SubscriptionUpdater._updateSubscriptionFromRecurly(
+            recurlySubscription,
+            subscription,
+            callback
+          )
+        })
       }
     })
   },
 
   addUserToGroup(subscriptionId, userId, callback) {
-    return this.addUsersToGroup(subscriptionId, [userId], callback)
+    this.addUsersToGroup(subscriptionId, [userId], callback)
   },
 
   addUsersToGroup(subscriptionId, memberIds, callback) {
-    return this.addUsersToGroupWithoutFeaturesRefresh(
+    this.addUsersToGroupWithoutFeaturesRefresh(
       subscriptionId,
       memberIds,
       function(err) {
@@ -86,13 +90,13 @@ module.exports = SubscriptionUpdater = {
         }
 
         // Only apply features updates to users, not user stubs
-        return UserGetter.getUsers(memberIds, { _id: 1 }, function(err, users) {
+        UserGetter.getUsers(memberIds, { _id: 1 }, function(err, users) {
           if (err != null) {
             return callback(err)
           }
 
           const userIds = users.map(u => u._id.toString())
-          return async.map(userIds, FeaturesUpdater.refreshFeatures, callback)
+          async.map(userIds, FeaturesUpdater.refreshFeatures, callback)
         })
       }
     )
@@ -106,20 +110,20 @@ module.exports = SubscriptionUpdater = {
     const searchOps = { _id: subscriptionId }
     const insertOperation = { $addToSet: { member_ids: { $each: memberIds } } }
 
-    return Subscription.findAndModify(searchOps, insertOperation, callback)
+    Subscription.findAndModify(searchOps, insertOperation, callback)
   },
 
-  removeUserFromGroups(filter, user_id, callback) {
-    const removeOperation = { $pull: { member_ids: user_id } }
-    return Subscription.updateMany(filter, removeOperation, function(err) {
+  removeUserFromGroups(filter, userId, callback) {
+    const removeOperation = { $pull: { member_ids: userId } }
+    Subscription.updateMany(filter, removeOperation, function(err) {
       if (err != null) {
         logger.err(
-          { err, searchOps, removeOperation },
+          { err, filter, removeOperation },
           'error removing user from groups'
         )
         return callback(err)
       }
-      return UserGetter.getUserOrUserStubById(user_id, {}, function(
+      UserGetter.getUserOrUserStubById(userId, {}, function(
         error,
         user,
         isStub
@@ -130,21 +134,21 @@ module.exports = SubscriptionUpdater = {
         if (isStub) {
           return callback()
         }
-        return FeaturesUpdater.refreshFeatures(user_id, callback)
+        FeaturesUpdater.refreshFeatures(userId, callback)
       })
     })
   },
 
-  removeUserFromGroup(subscriptionId, user_id, callback) {
-    return SubscriptionUpdater.removeUserFromGroups(
+  removeUserFromGroup(subscriptionId, userId, callback) {
+    SubscriptionUpdater.removeUserFromGroups(
       { _id: subscriptionId },
-      user_id,
+      userId,
       callback
     )
   },
 
-  removeUserFromAllGroups(user_id, callback) {
-    return SubscriptionLocator.getMemberSubscriptions(user_id, function(
+  removeUserFromAllGroups(userId, callback) {
+    SubscriptionLocator.getMemberSubscriptions(userId, function(
       error,
       subscriptions
     ) {
@@ -155,44 +159,42 @@ module.exports = SubscriptionUpdater = {
         return callback()
       }
       const subscriptionIds = subscriptions.map(sub => sub._id)
-      return SubscriptionUpdater.removeUserFromGroups(
+      SubscriptionUpdater.removeUserFromGroups(
         { _id: subscriptionIds },
-        user_id,
+        userId,
         callback
       )
     })
   },
 
   deleteWithV1Id(v1TeamId, callback) {
-    return Subscription.deleteOne({ 'overleaf.id': v1TeamId }, callback)
+    Subscription.deleteOne({ 'overleaf.id': v1TeamId }, callback)
   },
 
-  deleteSubscription(subscription_id, callback) {
+  deleteSubscription(subscriptionId, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function() {}
     }
-    return SubscriptionLocator.getSubscription(subscription_id, function(
+    SubscriptionLocator.getSubscription(subscriptionId, function(
       err,
       subscription
     ) {
       if (err != null) {
         return callback(err)
       }
-      const affected_user_ids = [subscription.admin_id].concat(
+      const affectedUserIds = [subscription.admin_id].concat(
         subscription.member_ids || []
       )
       logger.log(
-        { subscription_id, affected_user_ids },
+        { subscriptionId, affectedUserIds },
         'deleting subscription and downgrading users'
       )
-      return Subscription.remove({ _id: ObjectId(subscription_id) }, function(
-        err
-      ) {
+      Subscription.remove({ _id: ObjectId(subscriptionId) }, function(err) {
         if (err != null) {
           return callback(err)
         }
-        return async.mapSeries(
-          affected_user_ids,
+        async.mapSeries(
+          affectedUserIds,
           FeaturesUpdater.refreshFeatures,
           callback
         )
@@ -200,13 +202,13 @@ module.exports = SubscriptionUpdater = {
     })
   },
 
-  _createNewSubscription(adminUser_id, callback) {
-    logger.log({ adminUser_id }, 'creating new subscription')
+  _createNewSubscription(adminUserId, callback) {
+    logger.log({ adminUserId }, 'creating new subscription')
     const subscription = new Subscription({
-      admin_id: adminUser_id,
-      manager_ids: [adminUser_id]
+      admin_id: adminUserId,
+      manager_ids: [adminUserId]
     })
-    return subscription.save(err => callback(err, subscription))
+    subscription.save(err => callback(err, subscription))
   },
 
   _updateSubscriptionFromRecurly(recurlySubscription, subscription, callback) {
@@ -226,12 +228,14 @@ module.exports = SubscriptionUpdater = {
       subscription.groupPlan = true
       subscription.membersLimit = plan.membersLimit
     }
-    return subscription.save(function() {
+    subscription.save(function() {
       const allIds = _.union(subscription.member_ids, [subscription.admin_id])
-      const jobs = allIds.map(user_id => cb =>
-        FeaturesUpdater.refreshFeatures(user_id, cb)
+      const jobs = allIds.map(userId => cb =>
+        FeaturesUpdater.refreshFeatures(userId, cb)
       )
-      return async.series(jobs, callback)
+      async.series(jobs, callback)
     })
   }
 }
+
+module.exports = SubscriptionUpdater
