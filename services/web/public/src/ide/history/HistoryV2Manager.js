@@ -869,6 +869,15 @@ define([
           ) {
             cutOffIndex = i || 1 // Make sure that we show at least one entry (to allow labelling).
             this.$scope.history.freeHistoryLimitHit = true
+            if (this.$scope.project.owner._id === this.$scope.user.id) {
+              ga(
+                'send',
+                'event',
+                'subscription-funnel',
+                'editor-click-feature',
+                'history'
+              )
+            }
             break
           }
         }
