@@ -69,7 +69,6 @@ describe('AuthenticationController', function() {
         '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
           ipMatcherAffiliation: sinon.stub()
         }),
-        '../V1/V1Api': (this.V1Api = { request: sinon.stub() }),
         '../../models/User': { User: this.UserModel },
         '../../../../modules/oauth2-server/app/src/Oauth2Server': (this.Oauth2Server = {
           Request: sinon.stub(),
@@ -91,7 +90,8 @@ describe('AuthenticationController', function() {
     this.password = 'banana'
     this.req = new MockRequest()
     this.res = new MockResponse()
-    return (this.callback = this.next = sinon.stub())
+    this.callback = sinon.stub()
+    this.next = sinon.stub()
   })
 
   afterEach(() => tk.reset())
@@ -623,11 +623,10 @@ describe('AuthenticationController', function() {
 
   describe('requireOauth', function() {
     beforeEach(function() {
-      this.res.sendStatus = sinon.stub()
       this.res.send = sinon.stub()
       this.res.status = sinon.stub().returns(this.res)
       this.res.sendStatus = sinon.stub()
-      return (this.middleware = this.AuthenticationController.requireOauth())
+      this.middleware = this.AuthenticationController.requireOauth()
     })
 
     describe('when Oauth2Server authenticates', function() {
@@ -637,148 +636,38 @@ describe('AuthenticationController', function() {
           user: 'user'
         }
         this.Oauth2Server.server.authenticate.yields(null, this.token)
-        return this.middleware(this.req, this.res, this.next)
+        this.middleware(this.req, this.res, this.next)
       })
 
       it('should set oauth_token on request', function() {
-        return this.req.oauth_token.should.equal(this.token)
+        this.req.oauth_token.should.equal(this.token)
       })
 
       it('should set oauth on request', function() {
-        return this.req.oauth.access_token.should.equal(this.token.accessToken)
+        this.req.oauth.access_token.should.equal(this.token.accessToken)
       })
 
       it('should set oauth_user on request', function() {
-        return this.req.oauth_user.should.equal('user')
+        this.req.oauth_user.should.equal('user')
       })
 
-      return it('should call next', function() {
-        return this.next.should.have.been.calledOnce
+      it('should call next', function() {
+        this.next.should.have.been.calledOnce
       })
     })
 
-    return describe('when Oauth2Server does not authenticate', function() {
+    describe('when Oauth2Server returns 401 error', function() {
       beforeEach(function() {
-        return this.Oauth2Server.server.authenticate.yields({ code: 401 })
+        this.Oauth2Server.server.authenticate.yields({ code: 401 })
+        this.middleware(this.req, this.res, this.next)
       })
 
-      describe('when token not provided', function() {
-        beforeEach(function() {
-          return this.middleware(this.req, this.res, this.next)
-        })
-
-        return it('should return 401 error', function() {
-          return this.res.sendStatus.should.have.been.calledWith(401)
-        })
+      it('should return 401 error', function() {
+        this.res.status.should.have.been.calledWith(401)
       })
 
-      describe('when token provided', function() {
-        beforeEach(function() {
-          this.V1Api.request = sinon.stub().yields('error', {}, {})
-          this.req.token = 'foo'
-          return this.middleware(this.req, this.res, this.next)
-        })
-
-        return it('should make request to v1 api with token', function() {
-          return this.V1Api.request.should.have.been.calledWith({
-            expectedStatusCodes: [401],
-            json: {
-              token: 'foo'
-            },
-            method: 'POST',
-            uri: '/api/v1/sharelatex/oauth_authorize'
-          })
-        })
-      })
-
-      describe('when v1 api returns error', function() {
-        beforeEach(function() {
-          this.V1Api.request = sinon.stub().yields('error', {}, {})
-          this.req.token = 'foo'
-          return this.middleware(this.req, this.res, this.next)
-        })
-
-        return it('should return status', function() {
-          return this.next.should.have.been.calledWith('error')
-        })
-      })
-
-      describe('when v1 api status code is not 200', function() {
-        beforeEach(function() {
-          this.V1Api.request = sinon
-            .stub()
-            .yields(null, { statusCode: 401 }, {})
-          this.req.token = 'foo'
-          return this.middleware(this.req, this.res, this.next)
-        })
-
-        return it('should return status', function() {
-          return this.res.status.should.have.been.calledWith(401)
-        })
-      })
-
-      return describe('when v1 api returns authorized profile and access token', function() {
-        beforeEach(function() {
-          this.oauth_authorize = {
-            access_token: 'access_token',
-            user_profile: {
-              id: 'overleaf-id'
-            }
-          }
-          this.V1Api.request = sinon
-            .stub()
-            .yields(null, { statusCode: 200 }, this.oauth_authorize)
-          return (this.req.token = 'foo')
-        })
-
-        describe('in all cases', function() {
-          beforeEach(function() {
-            return this.middleware(this.req, this.res, this.next)
-          })
-
-          return it('should find user', function() {
-            return this.UserModel.findOne.should.have.been.calledWithMatch({
-              'overleaf.id': 'overleaf-id'
-            })
-          })
-        })
-
-        describe('when user find returns error', function() {
-          beforeEach(function() {
-            this.UserModel.findOne = sinon.stub().yields('error')
-            return this.middleware(this.req, this.res, this.next)
-          })
-
-          return it('should return error', function() {
-            return this.next.should.have.been.calledWith('error')
-          })
-        })
-
-        describe('when user is not found', function() {
-          beforeEach(function() {
-            this.UserModel.findOne = sinon.stub().yields(null, null)
-            return this.middleware(this.req, this.res, this.next)
-          })
-
-          return it('should return unauthorized', function() {
-            return this.res.status.should.have.been.calledWith(401)
-          })
-        })
-
-        return describe('when user is found', function() {
-          beforeEach(function() {
-            this.UserModel.findOne = sinon.stub().yields(null, 'user')
-            return this.middleware(this.req, this.res, this.next)
-          })
-
-          it('should add user to request', function() {
-            return this.req.oauth_user.should.equal('user')
-          })
-
-          return it('should add access_token to request', function() {
-            return this.req.oauth.access_token.should.equal('access_token')
-          })
-        })
+      it('should not call next', function() {
+        this.next.should.have.not.been.calledOnce
       })
     })
   })

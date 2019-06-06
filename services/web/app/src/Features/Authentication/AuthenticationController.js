@@ -1,13 +1,3 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -17,14 +7,12 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let AuthenticationController
 const AuthenticationManager = require('./AuthenticationManager')
 const LoginRateLimiter = require('../Security/LoginRateLimiter')
 const UserUpdater = require('../User/UserUpdater')
 const Metrics = require('metrics-sharelatex')
 const logger = require('logger-sharelatex')
 const querystring = require('querystring')
-const Url = require('url')
 const Settings = require('settings-sharelatex')
 const basicAuth = require('basic-auth-connect')
 const UserHandler = require('../User/UserHandler')
@@ -33,11 +21,9 @@ const Analytics = require('../Analytics/AnalyticsManager')
 const passport = require('passport')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const SudoModeHandler = require('../SudoMode/SudoModeHandler')
-const V1Api = require('../V1/V1Api')
-const { User } = require('../../models/User')
 const { URL } = require('url')
 
-module.exports = AuthenticationController = {
+const AuthenticationController = (module.exports = {
   serializeUser(user, callback) {
     const lightUser = {
       _id: user._id,
@@ -61,7 +47,7 @@ module.exports = AuthenticationController = {
 
   afterLoginSessionSetup(req, user, callback) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function() {}
     }
     return req.login(user, function(err) {
       if (err != null) {
@@ -173,7 +159,7 @@ module.exports = AuthenticationController = {
       infoList
     ) {
       if (err != null) {
-        return next(err)
+        return done(err)
       }
       const info = infoList.find(i => i != null)
       if (info != null) {
@@ -268,8 +254,8 @@ module.exports = AuthenticationController = {
   },
 
   isUserLoggedIn(req) {
-    const user_id = AuthenticationController.getLoggedInUserId(req)
-    return ![null, undefined, false].includes(user_id)
+    const userId = AuthenticationController.getLoggedInUserId(req)
+    return ![null, undefined, false].includes(userId)
   },
 
   // TODO: perhaps should produce an error if the current user is not present
@@ -309,7 +295,7 @@ module.exports = AuthenticationController = {
   requireLogin() {
     const doRequest = function(req, res, next) {
       if (next == null) {
-        next = function(error) {}
+        next = function() {}
       }
       if (!AuthenticationController.isUserLoggedIn(req)) {
         return AuthenticationController._redirectToLoginOrRegisterPage(req, res)
@@ -333,7 +319,7 @@ module.exports = AuthenticationController = {
     const Oauth2Server = require('../../../../modules/oauth2-server/app/src/Oauth2Server')
     return function(req, res, next) {
       if (next == null) {
-        next = function(error) {}
+        next = function() {}
       }
       const request = new Oauth2Server.Request(req)
       const response = new Oauth2Server.Response(res)
@@ -349,14 +335,6 @@ module.exports = AuthenticationController = {
           ) {
             err.code = 401
           }
-          // fall back to v1 on invalid token
-          if (err.code === 401) {
-            return AuthenticationController._requireOauthV1Fallback(
-              req,
-              res,
-              next
-            )
-          }
           // send all other errors
           return res
             .status(err.code)
@@ -371,42 +349,6 @@ module.exports = AuthenticationController = {
         return next()
       })
     }
-  },
-
-  _requireOauthV1Fallback(req, res, next) {
-    if (req.token == null) {
-      return res.sendStatus(401)
-    }
-    const options = {
-      expectedStatusCodes: [401],
-      json: {
-        token: req.token
-      },
-      method: 'POST',
-      uri: '/api/v1/sharelatex/oauth_authorize'
-    }
-    return V1Api.request(options, function(error, response, body) {
-      if (error != null) {
-        return next(error)
-      }
-      if (!__guard__(body != null ? body.user_profile : undefined, x => x.id)) {
-        return res.status(401).json({ error: 'invalid_token' })
-      }
-      return User.findOne({ 'overleaf.id': body.user_profile.id }, function(
-        error,
-        user
-      ) {
-        if (error != null) {
-          return next(error)
-        }
-        if (user == null) {
-          return res.status(401).json({ error: 'invalid_token' })
-        }
-        req.oauth = { access_token: body.access_token }
-        req.oauth_user = user
-        return next()
-      })
-    })
   },
 
   _globalLoginWhitelist: [],
@@ -514,12 +456,12 @@ module.exports = AuthenticationController = {
     return Metrics.inc('security.login-redirect')
   },
 
-  _recordSuccessfulLogin(user_id, callback) {
+  _recordSuccessfulLogin(userId, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function() {}
     }
     return UserUpdater.updateUser(
-      user_id.toString(),
+      userId.toString(),
       {
         $set: { lastLoggedIn: new Date() },
         $inc: { loginCount: 1 }
@@ -535,11 +477,8 @@ module.exports = AuthenticationController = {
   },
 
   _recordFailedLogin(callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
     Metrics.inc('user.login.failed')
-    return callback()
+    if (callback) callback()
   },
 
   _getRedirectFromSession(req) {
@@ -569,7 +508,7 @@ module.exports = AuthenticationController = {
     }
     return safePath
   }
-}
+})
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null
