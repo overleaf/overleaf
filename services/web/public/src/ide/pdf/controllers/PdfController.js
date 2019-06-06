@@ -407,6 +407,16 @@ define([
         $scope.pdf.view = 'errors'
         $scope.pdf.timedout = true
         fetchLogs(fileByPath, { pdfDownloadDomain })
+        if (
+          !$scope.hasPremiumCompile &&
+          ide.$scope.project.owner._id === ide.$scope.user.id
+        ) {
+          event_tracking.send(
+            'subscription-funnel',
+            'editor-click-feature',
+            'compile-timeout'
+          )
+        }
       } else if (response.status === 'terminated') {
         $scope.pdf.view = 'errors'
         $scope.pdf.compileTerminated = true
