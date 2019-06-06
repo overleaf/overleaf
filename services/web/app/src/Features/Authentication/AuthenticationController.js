@@ -308,14 +308,8 @@ const AuthenticationController = (module.exports = {
     return doRequest
   },
 
-  // access tokens might be associated with user stubs if the user is
-  // not yet migrated to v2. if api can work with user stubs then set
-  // allowUserStub true when adding middleware to route.
-  requireOauth(allowUserStub) {
+  requireOauth() {
     // require this here because module may not be included in some versions
-    if (allowUserStub == null) {
-      allowUserStub = false
-    }
     const Oauth2Server = require('../../../../modules/oauth2-server/app/src/Oauth2Server')
     return function(req, res, next) {
       if (next == null) {
@@ -339,9 +333,6 @@ const AuthenticationController = (module.exports = {
           return res
             .status(err.code)
             .json({ error: err.name, error_description: err.message })
-        }
-        if (token.user.constructor.modelName === 'UserStub' && !allowUserStub) {
-          return res.sendStatus(401)
         }
         req.oauth = { access_token: token.accessToken }
         req.oauth_token = token
