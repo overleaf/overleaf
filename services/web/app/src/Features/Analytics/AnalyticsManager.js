@@ -19,6 +19,10 @@ const _ = require('underscore')
 const request = require('requestretry')
 const Errors = require('../Errors/Errors')
 
+const isProduction =
+  (process.env['NODE_ENV'] || '').toLowerCase() === 'production'
+const isTest = process.env['MOCHA_GREP'] !== undefined
+
 const makeFaultTolerantRequest = function(userId, options, callback) {
   if (
     userId + '' ===
@@ -76,10 +80,12 @@ var exponentialBackoffStrategy = function() {
 var exponentialBackoffDelay = function(attempts) {
   const delay = Math.pow(2, attempts) * 1000
 
-  logger.warn(
-    'Error comunicating with the analytics service. ' +
-      `Will try again attempt ${attempts} in ${delay}ms`
-  )
+  if (isProduction && !isTest) {
+    logger.warn(
+      'Error comunicating with the analytics service. ' +
+        `Will try again attempt ${attempts} in ${delay}ms`
+    )
+  }
 
   return delay
 }
