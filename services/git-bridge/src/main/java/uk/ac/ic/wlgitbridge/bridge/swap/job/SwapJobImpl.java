@@ -139,8 +139,8 @@ public class SwapJobImpl implements SwapJob {
             String projectName = dbStore.getOldestUnswappedProject();
             try {
                 evict(projectName);
-            } catch (Throwable t) {
-                Log.warn("[{}] Exception while swapping, mark project and move on", projectName, t);
+            } catch (Exception e) {
+                Log.warn("[{}] Exception while swapping, mark project and move on", projectName, e);
                 // NOTE: this is something of a hack. If a project fails to swap we get stuck in a
                 // loop where `dbStore.getOldestUnswappedProject()` gives the same failing project over and over again,
                 // which fills up the disk with errors. By touching the access time we can mark the project as a
