@@ -34,7 +34,7 @@ app.use Metrics.http.monitor(logger)
 # Compile requests can take longer than the default two
 # minutes (including file download time), so bump up the 
 # timeout a bit.
-TIMEOUT = 6 * 60 * 1000
+TIMEOUT = 10 * 60 * 1000
 app.use (req, res, next) ->
 	req.setTimeout TIMEOUT
 	res.setTimeout TIMEOUT
