@@ -1,21 +1,6 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
-const should = require('chai').should()
 const sinon = require('sinon')
 const { expect } = require('chai')
-const querystring = require('querystring')
 const modulePath =
   '../../../../app/src/Features/Subscription/TeamInvitesHandler'
 
@@ -25,10 +10,11 @@ const Errors = require('../../../../app/src/Features/Errors/Errors')
 describe('TeamInvitesHandler', function() {
   beforeEach(function() {
     this.manager = {
-      id: '666666',
+      _id: '666666',
       first_name: 'Daenerys',
       last_name: 'Targaryen',
-      email: 'daenerys@example.com'
+      email: 'daenerys@example.com',
+      emails: [{ email: 'daenerys@example.com' }]
     }
 
     this.token = 'aaaaaaaaaaaaaaaaaaaaaa'
@@ -41,7 +27,7 @@ describe('TeamInvitesHandler', function() {
     this.subscription = {
       id: '55153a8014829a865bbf700d',
       _id: new ObjectId('55153a8014829a865bbf700d'),
-      admin_id: this.manager.id,
+      admin_id: this.manager._id,
       groupPlan: true,
       member_ids: [],
       teamInvites: [this.teamInvite],
@@ -83,7 +69,9 @@ describe('TeamInvitesHandler', function() {
       }
     }
 
-    this.UserGetter.getUser.withArgs(this.manager.id).yields(null, this.manager)
+    this.UserGetter.getUser
+      .withArgs(this.manager._id)
+      .yields(null, this.manager)
     this.UserGetter.getUserByAnyEmail
       .withArgs(this.manager.email)
       .yields(null, this.manager)
@@ -94,7 +82,7 @@ describe('TeamInvitesHandler', function() {
     )
     this.Subscription.findOne.yields(null, this.subscription)
 
-    return (this.TeamInvitesHandler = SandboxedModule.require(modulePath, {
+    this.TeamInvitesHandler = SandboxedModule.require(modulePath, {
       requires: {
         'logger-sharelatex': { log() {} },
         crypto: this.crypto,
@@ -108,40 +96,40 @@ describe('TeamInvitesHandler', function() {
         '../Email/EmailHandler': this.EmailHandler,
         '../Errors/Errors': Errors
       }
-    }))
+    })
   })
 
   describe('getInvite', function() {
     it("returns the invite if there's one", function(done) {
-      return this.TeamInvitesHandler.getInvite(
+      this.TeamInvitesHandler.getInvite(
         this.token,
         (err, invite, subscription) => {
           expect(err).to.eq(null)
           expect(invite).to.deep.eq(this.teamInvite)
           expect(subscription).to.deep.eq(this.subscription)
-          return done()
+          done()
         }
       )
     })
 
-    return it("returns teamNotFound if there's none", function(done) {
+    it("returns teamNotFound if there's none", function(done) {
       this.Subscription.findOne = sinon.stub().yields(null, null)
 
-      return this.TeamInvitesHandler.getInvite(this.token, function(
+      this.TeamInvitesHandler.getInvite(this.token, function(
         err,
         invite,
         subscription
       ) {
         expect(err).to.be.instanceof(Errors.NotFoundError)
-        return done()
+        done()
       })
     })
   })
 
   describe('createInvite', function() {
     it('adds the team invite to the subscription', function(done) {
-      return this.TeamInvitesHandler.createInvite(
-        this.manager.id,
+      this.TeamInvitesHandler.createInvite(
+        this.manager._id,
         this.subscription,
         'John.Snow@example.com',
         (err, invite) => {
@@ -152,14 +140,14 @@ describe('TeamInvitesHandler', function() {
             'Daenerys Targaryen (daenerys@example.com)'
           )
           expect(this.subscription.teamInvites).to.deep.include(invite)
-          return done()
+          done()
         }
       )
     })
 
     it('sends an email', function(done) {
-      return this.TeamInvitesHandler.createInvite(
-        this.manager.id,
+      this.TeamInvitesHandler.createInvite(
+        this.manager._id,
         this.subscription,
         'John.Snow@example.com',
         (err, invite) => {
@@ -175,7 +163,7 @@ describe('TeamInvitesHandler', function() {
               })
             )
             .should.equal(true)
-          return done()
+          done(err)
         }
       )
     })
@@ -183,8 +171,8 @@ describe('TeamInvitesHandler', function() {
     it('refreshes the existing invite if the email has already been invited', function(done) {
       const originalInvite = Object.assign({}, this.teamInvite)
 
-      return this.TeamInvitesHandler.createInvite(
-        this.manager.id,
+      this.TeamInvitesHandler.createInvite(
+        this.manager._id,
         this.subscription,
         originalInvite.email,
         (err, invite) => {
@@ -198,14 +186,14 @@ describe('TeamInvitesHandler', function() {
 
           this.subscription.save.calledOnce.should.eq(true)
 
-          return done()
+          done()
         }
       )
     })
 
-    return it('removes any legacy invite from the subscription', function(done) {
-      return this.TeamInvitesHandler.createInvite(
-        this.manager.id,
+    it('removes any legacy invite from the subscription', function(done) {
+      this.TeamInvitesHandler.createInvite(
+        this.manager._id,
         this.subscription,
         'John.Snow@example.com',
         (err, invite) => {
@@ -215,7 +203,24 @@ describe('TeamInvitesHandler', function() {
               { $pull: { invited_emails: 'john.snow@example.com' } }
             )
             .should.eq(true)
-          return done()
+          done(err)
+        }
+      )
+    })
+
+    it('add user to subscription if inviting self', function(done) {
+      this.TeamInvitesHandler.createInvite(
+        this.manager._id,
+        this.subscription,
+        this.manager.email,
+        (err, invite) => {
+          sinon.assert.calledWith(
+            this.SubscriptionUpdater.addUserToGroup,
+            this.subscription._id,
+            this.manager._id
+          )
+          sinon.assert.notCalled(this.subscription.save)
+          done(err)
         }
       )
     })
@@ -223,11 +228,11 @@ describe('TeamInvitesHandler', function() {
 
   describe('importInvite', function() {
     beforeEach(function() {
-      return (this.sentAt = new Date())
+      this.sentAt = new Date()
     })
 
-    return it('can imports an invite from v1', function() {
-      return this.TeamInvitesHandler.importInvite(
+    it('can imports an invite from v1', function() {
+      this.TeamInvitesHandler.importInvite(
         this.subscription,
         'A-Team',
         'hannibal@a-team.org',
@@ -242,7 +247,7 @@ describe('TeamInvitesHandler', function() {
             i => i.email === 'hannibal@a-team.org'
           )
           expect(invite.token).to.eq('secret')
-          return expect(invite.sentAt).to.eq(this.sentAt)
+          expect(invite.sentAt).to.eq(this.sentAt)
         }
       )
     })
@@ -261,7 +266,7 @@ describe('TeamInvitesHandler', function() {
         .withArgs(this.user.email)
         .yields(null, this.user)
 
-      return this.subscription.teamInvites.push({
+      this.subscription.teamInvites.push({
         email: 'john.snow@example.com',
         token: 'dddddddd',
         inviterName: 'Daenerys Targaryen (daenerys@example.com)'
@@ -269,39 +274,31 @@ describe('TeamInvitesHandler', function() {
     })
 
     it('adds the user to the team', function(done) {
-      return this.TeamInvitesHandler.acceptInvite(
-        'dddddddd',
-        this.user.id,
-        () => {
-          this.SubscriptionUpdater.addUserToGroup
-            .calledWith(this.subscription._id, this.user.id)
-            .should.eq(true)
-          return done()
-        }
-      )
+      this.TeamInvitesHandler.acceptInvite('dddddddd', this.user.id, () => {
+        this.SubscriptionUpdater.addUserToGroup
+          .calledWith(this.subscription._id, this.user.id)
+          .should.eq(true)
+        done()
+      })
     })
 
-    return it('removes the invite from the subscription', function(done) {
-      return this.TeamInvitesHandler.acceptInvite(
-        'dddddddd',
-        this.user.id,
-        () => {
-          this.Subscription.update
-            .calledWith(
-              { _id: new ObjectId('55153a8014829a865bbf700d') },
-              { $pull: { teamInvites: { email: 'john.snow@example.com' } } }
-            )
-            .should.eq(true)
-          return done()
-        }
-      )
+    it('removes the invite from the subscription', function(done) {
+      this.TeamInvitesHandler.acceptInvite('dddddddd', this.user.id, () => {
+        this.Subscription.update
+          .calledWith(
+            { _id: new ObjectId('55153a8014829a865bbf700d') },
+            { $pull: { teamInvites: { email: 'john.snow@example.com' } } }
+          )
+          .should.eq(true)
+        done()
+      })
     })
   })
 
   describe('revokeInvite', () =>
     it('removes the team invite from the subscription', function(done) {
-      return this.TeamInvitesHandler.revokeInvite(
-        this.manager.id,
+      this.TeamInvitesHandler.revokeInvite(
+        this.manager._id,
         this.subscription,
         'jorah@example.com',
         () => {
@@ -318,7 +315,7 @@ describe('TeamInvitesHandler', function() {
               { $pull: { invited_emails: 'jorah@example.com' } }
             )
             .should.eq(true)
-          return done()
+          done()
         }
       )
     }))
@@ -330,13 +327,13 @@ describe('TeamInvitesHandler', function() {
         'robert@example.com'
       ]
       this.TeamInvitesHandler.createInvite = sinon.stub().yields(null)
-      return (this.SubscriptionLocator.getGroupsWithEmailInvite = sinon
+      this.SubscriptionLocator.getGroupsWithEmailInvite = sinon
         .stub()
-        .yields(null, [this.subscription]))
+        .yields(null, [this.subscription])
     })
 
-    return it('sends an invitation email to addresses in the legacy invited_emails field', function(done) {
-      return this.TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail(
+    it('sends an invitation email to addresses in the legacy invited_emails field', function(done) {
+      this.TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail(
         'eddard@example.com',
         (err, invite) => {
           expect(err).not.to.exist
@@ -351,42 +348,42 @@ describe('TeamInvitesHandler', function() {
 
           this.TeamInvitesHandler.createInvite.callCount.should.eq(1)
 
-          return done()
+          done()
         }
       )
     })
   })
 
-  return describe('validation', function() {
+  describe('validation', function() {
     it("doesn't create an invite if the team limit has been reached", function(done) {
       this.LimitationsManager.teamHasReachedMemberLimit = sinon
         .stub()
         .returns(true)
-      return this.TeamInvitesHandler.createInvite(
-        this.manager.id,
+      this.TeamInvitesHandler.createInvite(
+        this.manager._id,
         this.subscription,
         'John.Snow@example.com',
         (err, invite) => {
           expect(err).to.deep.equal({ limitReached: true })
-          return done()
+          done()
         }
       )
     })
 
     it("doesn't create an invite if the subscription is not in a group plan", function(done) {
       this.subscription.groupPlan = false
-      return this.TeamInvitesHandler.createInvite(
-        this.manager.id,
+      this.TeamInvitesHandler.createInvite(
+        this.manager._id,
         this.subscription,
         'John.Snow@example.com',
         (err, invite) => {
           expect(err).to.deep.equal({ wrongPlan: true })
-          return done()
+          done()
         }
       )
     })
 
-    return it("doesn't create an invite if the user is already part of the team", function(done) {
+    it("doesn't create an invite if the user is already part of the team", function(done) {
       const member = {
         id: '1a2b',
         _id: '1a2b',
@@ -398,14 +395,14 @@ describe('TeamInvitesHandler', function() {
         .withArgs(member.email)
         .yields(null, member)
 
-      return this.TeamInvitesHandler.createInvite(
-        this.manager.id,
+      this.TeamInvitesHandler.createInvite(
+        this.manager._id,
         this.subscription,
         'tyrion@example.com',
         (err, invite) => {
           expect(err).to.deep.equal({ alreadyInTeam: true })
           expect(invite).not.to.exist
-          return done()
+          done()
         }
       )
     })
