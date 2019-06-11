@@ -26,7 +26,7 @@ module.exports = ShareJsUpdateManager =
 		logger.log project_id: project_id, doc_id: doc_id, update: update, "applying sharejs updates"
 		jobs = []
 		# record the update version before it is modified
-		incomingUpdateVersion = update.version
+		incomingUpdateVersion = update.v
 		# We could use a global model for all docs, but we're hitting issues with the
 		# internal state of ShareJS not being accessible for clearing caches, and
 		# getting stuck due to queued callbacks (line 260 of sharejs/server/model.coffee)
