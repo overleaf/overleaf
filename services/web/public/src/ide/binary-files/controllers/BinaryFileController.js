@@ -38,7 +38,7 @@ define(['base', 'moment'], (App, moment) =>
         return textExtensions.indexOf(extension($scope.openFile)) > -1
       }
       $scope.isImageFile = () => {
-        return imageExtentions.indexOf(extension($scope.openFile)) > -1
+        return imageExtensions.indexOf(extension($scope.openFile)) > -1
       }
       $scope.isPreviewableFile = () => {
         return previewableExtensions.indexOf(extension($scope.openFile)) > -1
