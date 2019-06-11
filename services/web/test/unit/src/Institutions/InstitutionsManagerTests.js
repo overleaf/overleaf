@@ -102,9 +102,7 @@ describe('InstitutionsManager', function() {
       this.SubscriptionLocator.getUsersSubscription
         .withArgs(this.user2)
         .callsArgWith(1, null, this.subscription)
-      this.refreshFeatures
-        .withArgs(this.user1Id)
-        .callsArgWith(2, null, {}, true)
+      this.refreshFeatures.withArgs(this.user1Id).yields(null, {}, true)
       return this.getInstitutionAffiliations.yields(null, this.affiliations)
     })
 

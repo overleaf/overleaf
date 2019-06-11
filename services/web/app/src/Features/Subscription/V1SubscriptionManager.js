@@ -58,22 +58,6 @@ module.exports = V1SubscriptionManager = {
     )
   },
 
-  notifyV1OfFeaturesChange(userId, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return V1SubscriptionManager._v1Request(
-      userId,
-      {
-        method: 'POST',
-        url(v1Id) {
-          return `/api/v1/sharelatex/users/${v1Id}/sync`
-        }
-      },
-      callback
-    )
-  },
-
   getSubscriptionsFromV1(userId, callback) {
     if (callback == null) {
       callback = function(err, subscriptions, v1Id) {}

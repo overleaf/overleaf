@@ -114,7 +114,6 @@ var refreshFeatures = function(affiliation, callback) {
       cb =>
         FeaturesUpdater.refreshFeatures(
           userId,
-          true,
           (err, features, featuresChanged) => cb(err, featuresChanged)
         ),
       (featuresChanged, cb) =>

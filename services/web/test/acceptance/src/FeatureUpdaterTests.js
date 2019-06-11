@@ -30,7 +30,7 @@ const syncUserAndGetFeatures = function(user, callback) {
   if (callback == null) {
     callback = function(error, features) {}
   }
-  return FeaturesUpdater.refreshFeatures(user._id, false, function(error) {
+  return FeaturesUpdater.refreshFeatures(user._id, function(error) {
     if (error != null) {
       return callback(error)
     }
@@ -331,14 +331,5 @@ describe('FeatureUpdater.refreshFeatures', function() {
         }
       )
     }) // returns a promise
-
-    return it('should ping the v1 API end point to sync', function(done) {
-      return FeaturesUpdater.refreshFeatures(this.user._id, true, error => {
-        return setTimeout(() => {
-          expect(MockV1Api.syncUserFeatures.calledWith('42')).to.equal(true)
-          return done()
-        }, 500)
-      })
-    })
   })
 })

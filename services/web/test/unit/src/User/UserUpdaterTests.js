@@ -497,11 +497,7 @@ describe('UserUpdater', function() {
         this.newEmail,
         err => {
           should.not.exist(err)
-          sinon.assert.calledWith(
-            this.refreshFeatures,
-            this.stubbedUser._id,
-            true
-          )
+          sinon.assert.calledWith(this.refreshFeatures, this.stubbedUser._id)
           return done()
         }
       )

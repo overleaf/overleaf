@@ -49,7 +49,7 @@ describe('InstitutionsController', function() {
       .stub()
       .callsArgWith(2, null, [this.stubbedUser1, this.stubbedUser2])
     this.addAffiliation = sinon.stub().callsArgWith(3, null)
-    this.refreshFeatures = sinon.stub().callsArgWith(2, null)
+    this.refreshFeatures = sinon.stub().yields(null)
     this.InstitutionsController = SandboxedModule.require(modulePath, {
       requires: {
         'logger-sharelatex': this.logger,
@@ -90,10 +90,10 @@ describe('InstitutionsController', function() {
           .calledWith(this.stubbedUser2._id, this.stubbedUser2.emails[0].email)
           .should.equal(true)
         this.refreshFeatures
-          .calledWith(this.stubbedUser1._id, true)
+          .calledWith(this.stubbedUser1._id)
           .should.equal(true)
         this.refreshFeatures
-          .calledWith(this.stubbedUser2._id, true)
+          .calledWith(this.stubbedUser2._id)
           .should.equal(true)
         return done()
       }

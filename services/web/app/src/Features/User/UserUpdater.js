@@ -303,7 +303,7 @@ module.exports = UserUpdater = {
             new Errors.NotFoundError('user id and email do no match')
           )
         }
-        return FeaturesUpdater.refreshFeatures(userId, true, callback)
+        return FeaturesUpdater.refreshFeatures(userId, callback)
       })
     })
   },

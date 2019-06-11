@@ -40,9 +40,6 @@ describe('FeaturesUpdater', function() {
 
   describe('refreshFeatures', function() {
     beforeEach(function() {
-      this.V1SubscriptionManager.notifyV1OfFeaturesChange = sinon
-        .stub()
-        .yields()
       this.UserFeaturesUpdater.updateFeatures = sinon.stub().yields()
       this.FeaturesUpdater._getIndividualFeatures = sinon
         .stub()
@@ -143,28 +140,6 @@ describe('FeaturesUpdater', function() {
         return this.UserFeaturesUpdater.updateFeatures
           .calledWith(this.user_id, { merged: 'features' })
           .should.equal(true)
-      })
-
-      return it('should notify v1', function() {
-        return this.V1SubscriptionManager.notifyV1OfFeaturesChange.called.should.equal(
-          true
-        )
-      })
-    })
-
-    return describe('with notifyV1 == false', function() {
-      beforeEach(function() {
-        return this.FeaturesUpdater.refreshFeatures(
-          this.user_id,
-          false,
-          this.callback
-        )
-      })
-
-      return it('should not notify v1', function() {
-        return this.V1SubscriptionManager.notifyV1OfFeaturesChange.called.should.equal(
-          false
-        )
       })
     })
   })

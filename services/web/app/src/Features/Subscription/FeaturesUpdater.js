@@ -27,27 +27,9 @@ const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 const oneMonthInSeconds = 60 * 60 * 24 * 30
 
 module.exports = FeaturesUpdater = {
-  refreshFeatures(user_id, notifyV1, callback) {
-    if (notifyV1 == null) {
-      notifyV1 = true
-    }
+  refreshFeatures(user_id, callback) {
     if (callback == null) {
       callback = function(error, features, featuresChanged) {}
-    }
-    if (typeof notifyV1 === 'function') {
-      callback = notifyV1
-      notifyV1 = true
-    }
-
-    if (notifyV1) {
-      V1SubscriptionManager.notifyV1OfFeaturesChange(user_id, function(error) {
-        if (error != null) {
-          return logger.err(
-            { err: error, user_id },
-            'error notifying v1 about updated features'
-          )
-        }
-      })
     }
 
     const jobs = {
