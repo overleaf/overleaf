@@ -17,6 +17,7 @@ const UserGetter = require('../User/UserGetter')
 const { addAffiliation } = require('../Institutions/InstitutionsAPI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const async = require('async')
+const ASYNC_AFFILIATIONS_LIMIT = 10
 
 module.exports = InstitutionsController = {
   confirmDomain(req, res, next) {
@@ -48,8 +49,9 @@ var affiliateUsers = function(hostname, callback) {
         return callback(error)
       }
 
-      return async.map(
+      return async.mapLimit(
         users,
+        ASYNC_AFFILIATIONS_LIMIT,
         (user, innerCallback) =>
           affiliateUserByReversedHostname(
             user,
@@ -70,7 +72,7 @@ var affiliateUserByReversedHostname = function(
   const matchingEmails = user.emails.filter(
     email => email.reversedHostname === reversedHostname
   )
-  return async.map(
+  return async.mapSeries(
     matchingEmails,
     (email, innerCallback) =>
       addAffiliation(
