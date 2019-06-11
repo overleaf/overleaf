@@ -31,12 +31,14 @@ const ClsiCookieManager = require('./ClsiCookieManager')(
 )
 const Path = require('path')
 
+const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
+
 module.exports = CompileController = {
   compile(req, res, next) {
     if (next == null) {
       next = function(error) {}
     }
-    res.setTimeout(5 * 60 * 1000)
+    res.setTimeout(COMPILE_TIMEOUT_MS)
     const project_id = req.params.Project_id
     const isAutoCompile = !!(req.query != null
       ? req.query.auto_compile
@@ -118,7 +120,7 @@ module.exports = CompileController = {
     if (next == null) {
       next = function(error) {}
     }
-    res.setTimeout(5 * 60 * 1000)
+    res.setTimeout(COMPILE_TIMEOUT_MS)
     const { submission_id } = req.params
     const options = {}
     if ((req.body != null ? req.body.rootResourcePath : undefined) != null) {
