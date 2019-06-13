@@ -322,7 +322,7 @@ describe "HttpController", ->
 
 		describe "successfully", ->
 			beforeEach ->
-				@ProjectManager.flushAndDeleteProjectWithLocks = sinon.stub().callsArgWith(1)
+				@ProjectManager.flushAndDeleteProjectWithLocks = sinon.stub().callsArgWith(2)
 				@HttpController.deleteProject(@req, @res, @next)
 
 			it "should delete the project", ->
@@ -345,7 +345,7 @@ describe "HttpController", ->
 
 		describe "when an errors occurs", ->
 			beforeEach ->
-				@ProjectManager.flushAndDeleteProjectWithLocks = sinon.stub().callsArgWith(1, new Error("oops"))
+				@ProjectManager.flushAndDeleteProjectWithLocks = sinon.stub().callsArgWith(2, new Error("oops"))
 				@HttpController.deleteProject(@req, @res, @next)
 
 			it "should call next with the error", ->

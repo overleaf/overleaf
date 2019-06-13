@@ -3,6 +3,7 @@ chai = require('chai')
 should = chai.should()
 modulePath = "../../../../app/js/ShareJsUpdateManager.js"
 SandboxedModule = require('sandboxed-module')
+crypto = require('crypto')
 
 describe "ShareJsUpdateManager", ->
 	beforeEach ->
@@ -26,8 +27,10 @@ describe "ShareJsUpdateManager", ->
 		beforeEach ->
 			@lines = ["one", "two"]
 			@version = 34
-			@update = {p: 4, t: "foo"}
 			@updatedDocLines = ["onefoo", "two"]
+			content = @updatedDocLines.join("\n")
+			@hash = crypto.createHash('sha1').update("blob " + content.length + "\x00").update(content, 'utf8').digest('hex')
+			@update = {p: 4, t: "foo", v:@version, hash:@hash}
 			@model =
 				applyOp: sinon.stub().callsArg(2)
 				getSnapshot: sinon.stub()
@@ -85,6 +88,18 @@ describe "ShareJsUpdateManager", ->
 				@model.getSnapshot.callsArgWith(1, @error)
 				@ShareJsUpdateManager.applyUpdate @project_id, @doc_id, @update, @lines, @version, (err, docLines, version) =>
 					@callback(err, docLines, version)
+					done()
+
+			it "should call the callback with the error", ->
+				@callback.calledWith(@error).should.equal true
+
+		describe "with an invalid hash", ->
+			beforeEach (done) ->
+				@error = new Error("invalid hash")
+				@model.getSnapshot.callsArgWith(1, null, {snapshot: "unexpected content", v: @version})
+				@model.db.appliedOps["#{@project_id}:#{@doc_id}"] = @appliedOps = ["mock-ops"]
+				@ShareJsUpdateManager.applyUpdate @project_id, @doc_id, @update, @lines, @version, (err, docLines, version, appliedOps) =>
+					@callback(err, docLines, version, appliedOps)
 					done()
 
 			it "should call the callback with the error", ->

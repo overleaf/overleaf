@@ -131,7 +131,9 @@ module.exports = HttpController =
 		project_id = req.params.project_id
 		logger.log project_id: project_id, "deleting project via http"
 		timer = new Metrics.Timer("http.deleteProject")
-		ProjectManager.flushAndDeleteProjectWithLocks project_id, (error) ->
+		options = {}
+		options.background = true if req.query?.background # allow non-urgent flushes to be queued
+		ProjectManager.flushAndDeleteProjectWithLocks project_id, options, (error) ->
 			timer.done()
 			return next(error) if error?
 			logger.log project_id: project_id, "deleted project via http"

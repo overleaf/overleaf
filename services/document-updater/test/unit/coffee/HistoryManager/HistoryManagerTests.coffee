@@ -43,7 +43,7 @@ describe "HistoryManager", ->
 
 		it "should send a request to the project history api", ->
 			@request.post
-				.calledWith("#{@Settings.apis.project_history.url}/project/#{@project_id}/flush")
+				.calledWith({url: "#{@Settings.apis.project_history.url}/project/#{@project_id}/flush", qs:{background:true}})
 				.should.equal true
 
 	describe "recordAndFlushHistoryOps", ->

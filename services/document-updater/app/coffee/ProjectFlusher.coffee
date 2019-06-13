@@ -55,7 +55,7 @@ ProjectFlusher =
 				return callback(null, project_ids)
 			jobs = _.map project_ids, (project_id)->
 				return (cb)->
-					ProjectManager.flushAndDeleteProjectWithLocks project_id, cb
+					ProjectManager.flushAndDeleteProjectWithLocks project_id, {background:true}, cb
 			async.parallelLimit async.reflectAll(jobs), options.concurrency, (error, results)->
 				success = []
 				failure = []

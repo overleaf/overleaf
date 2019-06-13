@@ -12,7 +12,7 @@ describe "ProjectManager - flushAndDeleteProject", ->
 			"./DocumentManager": @DocumentManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./HistoryManager": @HistoryManager =
-				flushProjectChanges: sinon.stub().callsArg(1)
+				flushProjectChanges: sinon.stub().callsArg(2)
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
@@ -24,7 +24,7 @@ describe "ProjectManager - flushAndDeleteProject", ->
 			@doc_ids = ["doc-id-1", "doc-id-2", "doc-id-3"]
 			@RedisManager.getDocIdsInProject = sinon.stub().callsArgWith(1, null, @doc_ids)
 			@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArg(2)
-			@ProjectManager.flushAndDeleteProjectWithLocks @project_id, (error) =>
+			@ProjectManager.flushAndDeleteProjectWithLocks @project_id, {}, (error) =>
 				@callback(error)
 				done()
 
@@ -41,7 +41,7 @@ describe "ProjectManager - flushAndDeleteProject", ->
 
 		it "should flush project history", ->
 			@HistoryManager.flushProjectChanges
-				.calledWith(@project_id)
+				.calledWith(@project_id, {})
 				.should.equal true
 
 		it "should call the callback without error", ->
@@ -59,7 +59,7 @@ describe "ProjectManager - flushAndDeleteProject", ->
 					callback(@error = new Error("oops, something went wrong"))
 				else
 					callback()
-			@ProjectManager.flushAndDeleteProjectWithLocks @project_id, (error) =>
+			@ProjectManager.flushAndDeleteProjectWithLocks @project_id, {}, (error) =>
 				@callback(error)
 				done()
 
@@ -71,7 +71,7 @@ describe "ProjectManager - flushAndDeleteProject", ->
 
 		it "should still flush project history", ->
 			@HistoryManager.flushProjectChanges
-				.calledWith(@project_id)
+				.calledWith(@project_id, {})
 				.should.equal true
 
 		it "should record the error", ->

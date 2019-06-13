@@ -39,7 +39,7 @@ module.exports = ProjectManager =
 				else
 					callback(null)
 
-	flushAndDeleteProjectWithLocks: (project_id, _callback = (error) ->) ->
+	flushAndDeleteProjectWithLocks: (project_id, options, _callback = (error) ->) ->
 		timer = new Metrics.Timer("projectManager.flushAndDeleteProjectWithLocks")
 		callback = (args...) ->
 			timer.done()
@@ -64,7 +64,7 @@ module.exports = ProjectManager =
 				# history is completely flushed because the project may be
 				# deleted in web after this call completes, and so further
 				# attempts to flush would fail after that.
-				HistoryManager.flushProjectChanges project_id, (error) ->
+				HistoryManager.flushProjectChanges project_id, options, (error) ->
 					if errors.length > 0
 						callback new Error("Errors deleting docs. See log for details")
 					else if error?
