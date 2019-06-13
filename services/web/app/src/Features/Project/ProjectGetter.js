@@ -148,6 +148,24 @@ module.exports = ProjectGetter = {
     )
   },
 
+  getProjectByV1Id(v1_id, callback) {
+    if (callback == null) {
+      callback = function(err, v1_id) {}
+    }
+    return Project.findOne({ 'overleaf.id': v1_id }, { _id: 1 }, function(
+      err,
+      project
+    ) {
+      if (err != null) {
+        return callback(err)
+      }
+      if (project == null) {
+        return callback()
+      }
+      return callback(null, project._id)
+    })
+  },
+
   findAllUsersProjects(user_id, fields, callback) {
     if (callback == null) {
       callback = function(error, projects) {
