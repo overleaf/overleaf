@@ -22,6 +22,7 @@ describe "FSPersistorManagerTests", ->
       openSync:sinon.stub()
       fstatSync:sinon.stub()
       closeSync:sinon.stub()
+      stat:sinon.stub()
     @Rimraf = sinon.stub()
     @LocalFileWriter =
       writeStream: sinon.stub()
@@ -156,7 +157,35 @@ describe "FSPersistorManagerTests", ->
             expect(err instanceof Error).to.equal true
             done()
 
+  describe "getFileSize", ->
+    it "should return the file size", (done) ->
+      expectedFileSize = 75382
+      @Fs.stat.yields(new Error("fs.stat got unexpected arguments"))
+      @Fs.stat.withArgs("#{@location}/#{@name1Filtered}")
+        .yields(null, { size: expectedFileSize })
 
+      @FSPersistorManager.getFileSize @location, @name1, (err, fileSize) =>
+        if err?
+          return done(err)
+        expect(fileSize).to.equal(expectedFileSize)
+        done()
+
+    it "should throw a NotFoundError if the file does not exist", (done) ->
+      error = new Error()
+      error.code = "ENOENT"
+      @Fs.stat.yields(error)
+
+      @FSPersistorManager.getFileSize @location, @name1, (err, fileSize) =>
+        expect(err).to.be.instanceof(@Errors.NotFoundError)
+        done()
+
+    it "should rethrow any other error", (done) ->
+      error = new Error()
+      @Fs.stat.yields(error)
+
+      @FSPersistorManager.getFileSize @location, @name1, (err, fileSize) =>
+        expect(err).to.equal(error)
+        done()
 
   describe "copyFile", ->
     beforeEach ->

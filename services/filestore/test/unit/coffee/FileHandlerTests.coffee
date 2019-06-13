@@ -108,7 +108,6 @@ describe "FileHandler", ->
 				@handler._getConvertedFile.called.should.equal true
 				done()
 
-
 	describe "_getStandardFile", ->
 
 		beforeEach ->

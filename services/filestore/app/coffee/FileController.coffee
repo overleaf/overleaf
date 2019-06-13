@@ -21,7 +21,7 @@ module.exports = FileController =
 			style: style,
 		}
 		metrics.inc "getFile"
-		logger.log key:key, bucket:bucket, format:format, style: style, "reciving request to get file"
+		logger.log key:key, bucket:bucket, format:format, style: style, "receiving request to get file"
 		if req.headers.range?
 			range = FileController._get_range(req.headers.range)
 			options.start = range.start
@@ -41,10 +41,24 @@ module.exports = FileController =
 				logger.log key:key, bucket:bucket, format:format, style:style, "sending file to response"
 				fileStream.pipe res
 
+	getFileHead: (req, res) ->
+		{key, bucket} = req
+		metrics.inc("getFileSize")
+		logger.log({ key: key, bucket: bucket }, "receiving request to get file metadata")
+		FileHandler.getFileSize bucket, key, (err, fileSize) ->
+			if err?
+				if err instanceof Errors.NotFoundError
+					res.status(404).end()
+				else
+					res.status(500).end()
+				return
+			res.set("Content-Length", fileSize)
+			res.status(200).end()
+
 	insertFile: (req, res)->
 		metrics.inc "insertFile"
 		{key, bucket} = req
-		logger.log key:key, bucket:bucket, "reciving request to insert file"
+		logger.log key:key, bucket:bucket, "receiving request to insert file"
 		FileHandler.insertFile bucket, key, req, (err)->
 			if err?
 				logger.log err: err, key: key, bucket: bucket, "error inserting file"
@@ -57,7 +71,7 @@ module.exports = FileController =
 		{key, bucket} = req
 		oldProject_id = req.body.source.project_id
 		oldFile_id = req.body.source.file_id
-		logger.log key:key, bucket:bucket, oldProject_id:oldProject_id, oldFile_id:oldFile_id, "reciving request to copy file"
+		logger.log key:key, bucket:bucket, oldProject_id:oldProject_id, oldFile_id:oldFile_id, "receiving request to copy file"
 		PersistorManager.copyFile bucket, "#{oldProject_id}/#{oldFile_id}", key, (err)->
 			if err?
 				if err instanceof Errors.NotFoundError
@@ -71,7 +85,7 @@ module.exports = FileController =
 	deleteFile: (req, res)->
 		metrics.inc "deleteFile"
 		{key, bucket} = req
-		logger.log key:key, bucket:bucket,  "reciving request to delete file"
+		logger.log key:key, bucket:bucket,  "receiving request to delete file"
 		FileHandler.deleteFile bucket, key, (err)->
 			if err?
 				logger.log err:err, key:key, bucket:bucket, "something went wrong deleting file"
@@ -90,7 +104,7 @@ module.exports = FileController =
 	directorySize: (req, res)->
 		metrics.inc "projectSize"
 		{project_id, bucket} = req
-		logger.log project_id:project_id, bucket:bucket, "reciving request to project size"
+		logger.log project_id:project_id, bucket:bucket, "receiving request to project size"
 		FileHandler.getDirectorySize bucket, project_id, (err, size)->
 			if err?
 				logger.log err: err, project_id: project_id, bucket: bucket, "error inserting file"
