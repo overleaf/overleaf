@@ -1303,9 +1303,17 @@ define(['ace/ace','libs/sha1'], function () {
 
         this.emit('flipped_pending_to_inflight');
 
-        if (window.sl_debugging) {
-          // send git hash of current snapshot when debugging
-          var sha1 = CryptoJS.SHA1("blob " + this.snapshot.length + "\x00" + this.snapshot).toString()
+        if (window.useShareJsHash || window.sl_debugging) {
+          var now = Date.now()
+          var age = this.__lastSubmitTimestamp && (now - this.__lastSubmitTimestamp)
+          var RECOMPUTE_HASH_INTERVAL = 5000
+          // check the document hash regularly (but not if we have checked in the last 5 seconds)
+          var needToRecomputeHash = !this.__lastSubmitTimestamp || (age > RECOMPUTE_HASH_INTERVAL) || (age < 0) 
+          if (needToRecomputeHash || window.sl_debugging) {
+            // send git hash of current snapshot
+            var sha1 = CryptoJS.SHA1("blob " + this.snapshot.length + "\x00" + this.snapshot).toString()
+            this.__lastSubmitTimestamp = now;
+          }
         }
 
         // console.log "SENDING OP TO SERVER", @inflightOp, @version
