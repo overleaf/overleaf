@@ -74,7 +74,7 @@ describe('PasswordResetController', function() {
       query: {}
     }
 
-    return (this.res = {})
+    this.res = {}
   })
 
   describe('requestReset', function() {
@@ -202,9 +202,9 @@ describe('PasswordResetController', function() {
         false,
         this.user_id
       )
-      this.res.sendStatus = code => {
+      this.res.status = code => {
         code.should.equal(404)
-        return done()
+        done()
       }
       return this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })

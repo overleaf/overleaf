@@ -98,10 +98,7 @@ block content
 											| #[a(href="/user/password/reset", target='_blank') #{translate("no_existing_password")}]
 									else
 										- var submitAction
-										if settings.overleaf
-											- submitAction = '/user/change_password/v1'
-										else
-											- submitAction = '/user/password/update'
+										- submitAction = '/user/password/update'
 										form(
 											async-form="changepassword"
 											name="changePasswordForm"

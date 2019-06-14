@@ -29,6 +29,7 @@ const UserUpdater = require('./UserUpdater')
 const SudoModeHandler = require('../SudoMode/SudoModeHandler')
 const settings = require('settings-sharelatex')
 const Errors = require('../Errors/Errors')
+const EmailHandler = require('../Email/EmailHandler')
 
 module.exports = UserController = {
   tryDeleteUser(req, res, next) {
@@ -302,78 +303,80 @@ module.exports = UserController = {
   },
 
   changePassword(req, res, next) {
-    if (next == null) {
-      next = function(error) {}
-    }
     metrics.inc('user.password-change')
-    const oldPass = req.body.currentPassword
+    const internalError = {
+      message: { type: 'error', text: req.i18n.translate('internal_error') }
+    }
     const user_id = AuthenticationController.getLoggedInUserId(req)
-    return AuthenticationManager.authenticate(
+    AuthenticationManager.authenticate(
       { _id: user_id },
-      oldPass,
-      function(err, user) {
-        if (err != null) {
-          return next(err)
+      req.body.currentPassword,
+      (err, user) => {
+        if (err) {
+          return res.status(500).json(internalError)
         }
-        if (user) {
-          logger.log({ user: user._id }, 'changing password')
-          const { newPassword1 } = req.body
-          const { newPassword2 } = req.body
-          const validationError = AuthenticationManager.validatePassword(
-            newPassword1
-          )
-          if (newPassword1 !== newPassword2) {
-            logger.log({ user }, 'passwords do not match')
-            return res.send({
-              message: {
-                type: 'error',
-                text: 'Your passwords do not match'
-              }
-            })
-          } else if (validationError != null) {
-            logger.log({ user }, validationError.message)
-            return res.send({
-              message: {
-                type: 'error',
-                text: validationError.message
-              }
-            })
-          } else {
-            logger.log({ user }, 'password changed')
-            return AuthenticationManager.setUserPassword(
-              user._id,
-              newPassword1,
-              function(error) {
-                if (error != null) {
-                  return next(error)
-                }
-                return UserSessionsManager.revokeAllUserSessions(
-                  user,
-                  [req.sessionID],
-                  function(err) {
-                    if (err != null) {
-                      return next(err)
-                    }
-                    return res.send({
-                      message: {
-                        type: 'success',
-                        text: 'Your password has been changed'
-                      }
-                    })
-                  }
-                )
-              }
-            )
-          }
-        } else {
-          logger.log({ user_id }, 'current password wrong')
-          return res.send({
+        if (!user) {
+          return res.status(400).json({
             message: {
               type: 'error',
               text: 'Your old password is wrong'
             }
           })
         }
+        if (req.body.newPassword1 !== req.body.newPassword2) {
+          return res.status(400).json({
+            message: {
+              type: 'error',
+              text: req.i18n.translate('password_change_passwords_do_not_match')
+            }
+          })
+        }
+        const validationError = AuthenticationManager.validatePassword(
+          req.body.newPassword1
+        )
+        if (validationError != null) {
+          return res.status(400).json({
+            message: {
+              type: 'error',
+              text: validationError.message
+            }
+          })
+        }
+        AuthenticationManager.setUserPassword(
+          user._id,
+          req.body.newPassword1,
+          err => {
+            if (err) {
+              return res.status(500).json(internalError)
+            }
+            // log errors but do not wait for response
+            EmailHandler.sendEmail(
+              'passwordChanged',
+              { to: user.email },
+              err => {
+                if (err) {
+                  logger.warn(err)
+                }
+              }
+            )
+            UserSessionsManager.revokeAllUserSessions(
+              user,
+              [req.sessionID],
+              err => {
+                if (err != null) {
+                  return res.status(500).json(internalError)
+                }
+                res.json({
+                  message: {
+                    type: 'success',
+                    email: user.email,
+                    text: req.i18n.translate('password_change_successful')
+                  }
+                })
+              }
+            )
+          }
+        )
       }
     )
   }

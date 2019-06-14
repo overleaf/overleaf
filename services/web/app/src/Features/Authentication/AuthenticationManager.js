@@ -134,48 +134,7 @@ module.exports = AuthenticationManager = {
   },
 
   setUserPassword(user_id, password, callback) {
-    if (callback == null) {
-      callback = function(error, changed) {}
-    }
-    const validation = this.validatePassword(password)
-    if (validation != null) {
-      return callback(validation.message)
-    }
-
-    return UserGetter.getUser(user_id, { email: 1, overleaf: 1 }, function(
-      error,
-      user
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      const v1IdExists =
-        (user.overleaf != null ? user.overleaf.id : undefined) != null
-      if (v1IdExists && Settings.overleaf != null) {
-        // v2 user in v2
-        // v2 user in v2, change password in v1
-        return AuthenticationManager.setUserPasswordInV1(
-          user.overleaf.id,
-          password,
-          callback
-        )
-      } else if (v1IdExists && Settings.overleaf == null) {
-        // v2 user in SL
-        return callback(new Errors.NotInV2Error('Password Reset Attempt'))
-      } else if (!v1IdExists && Settings.overleaf == null) {
-        // SL user in SL, change password in SL
-        return AuthenticationManager.setUserPasswordInV2(
-          user_id,
-          password,
-          callback
-        )
-      } else if (!v1IdExists && Settings.overleaf != null) {
-        // SL user in v2, should not happen
-        return callback(new Errors.SLInV2Error('Password Reset Attempt'))
-      } else {
-        return callback(new Error('Password Reset Attempt Failed'))
-      }
-    })
+    AuthenticationManager.setUserPasswordInV2(user_id, password, callback)
   },
 
   checkRounds(user, hashedPassword, password, callback) {

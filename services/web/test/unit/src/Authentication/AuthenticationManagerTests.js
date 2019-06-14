@@ -574,114 +574,40 @@ describe('AuthenticationManager', function() {
       })
     })
 
-    describe('password set attempt', function() {
-      describe('with SL user in SL', function() {
-        beforeEach(function() {
-          this.UserGetter.getUser = sinon
-            .stub()
-            .yields(null, { overleaf: null })
-          return this.AuthenticationManager.setUserPassword(
-            this.user_id,
-            this.password,
-            this.callback
-          )
-        })
+    describe('successful password set attempt', function() {
+      beforeEach(function() {
+        this.UserGetter.getUser = sinon.stub().yields(null, { overleaf: null })
+        this.AuthenticationManager.setUserPassword(
+          this.user_id,
+          this.password,
+          this.callback
+        )
+      })
 
-        it('should look up the user', function() {
-          return this.UserGetter.getUser
-            .calledWith(this.user_id)
-            .should.equal(true)
+      it("should update the user's password in the database", function() {
+        const { args } = this.db.users.update.lastCall
+        expect(args[0]).to.deep.equal({
+          _id: ObjectId(this.user_id.toString())
         })
-
-        it("should update the user's password in the database", function() {
-          const { args } = this.db.users.update.lastCall
-          expect(args[0]).to.deep.equal({
-            _id: ObjectId(this.user_id.toString())
-          })
-          return expect(args[1]).to.deep.equal({
-            $set: {
-              hashedPassword: this.hashedPassword
-            },
-            $unset: {
-              password: true
-            }
-          })
-        })
-
-        it('should hash the password', function() {
-          this.bcrypt.genSalt.calledWith(12).should.equal(true)
-          return this.bcrypt.hash
-            .calledWith(this.password, this.salt)
-            .should.equal(true)
-        })
-
-        it('should call the callback', function() {
-          return this.callback.called.should.equal(true)
+        return expect(args[1]).to.deep.equal({
+          $set: {
+            hashedPassword: this.hashedPassword
+          },
+          $unset: {
+            password: true
+          }
         })
       })
 
-      describe('with SL user in v2', function() {
-        beforeEach(function(done) {
-          this.settings.overleaf = true
-          this.UserGetter.getUser = sinon
-            .stub()
-            .yields(null, { overleaf: null })
-          return this.AuthenticationManager.setUserPassword(
-            this.user_id,
-            this.password,
-            (err, changed) => {
-              this.callback(err, changed)
-              return done()
-            }
-          )
-        })
-        it('should error', function() {
-          return this.callback
-            .calledWith(new Errors.SLInV2Error('Password Reset Attempt'))
-            .should.equal(true)
-        })
+      it('should hash the password', function() {
+        this.bcrypt.genSalt.calledWith(12).should.equal(true)
+        return this.bcrypt.hash
+          .calledWith(this.password, this.salt)
+          .should.equal(true)
       })
 
-      describe('with v2 user in SL', function() {
-        beforeEach(function(done) {
-          this.UserGetter.getUser = sinon
-            .stub()
-            .yields(null, { overleaf: { id: 1 } })
-          return this.AuthenticationManager.setUserPassword(
-            this.user_id,
-            this.password,
-            (err, changed) => {
-              this.callback(err, changed)
-              return done()
-            }
-          )
-        })
-        it('should error', function() {
-          return this.callback
-            .calledWith(new Errors.NotInV2Error('Password Reset Attempt'))
-            .should.equal(true)
-        })
-      })
-
-      describe('with v2 user in v2', function() {
-        beforeEach(function(done) {
-          this.settings.overleaf = true
-          this.UserGetter.getUser = sinon
-            .stub()
-            .yields(null, { overleaf: { id: 1 } })
-          this.V1Handler.doPasswordReset = sinon.stub().yields(null, true)
-          return this.AuthenticationManager.setUserPassword(
-            this.user_id,
-            this.password,
-            (err, changed) => {
-              this.callback(err, changed)
-              return done()
-            }
-          )
-        })
-        it('should set the password in v2', function() {
-          return this.callback.calledWith(null, true).should.equal(true)
-        })
+      it('should call the callback', function() {
+        return this.callback.called.should.equal(true)
       })
     })
   })
