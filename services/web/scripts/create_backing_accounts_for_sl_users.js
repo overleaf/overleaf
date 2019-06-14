@@ -9,10 +9,10 @@
 
 'use strict'
 
-const SharelatexAuthHandler = require('../modules/overleaf-integration/app/js/SharelatexAuth/SharelatexAuthHandler')
-const UserUpdater = require('../app/js/Features/User/UserUpdater')
+const SharelatexAuthHandler = require('../modules/overleaf-integration/app/src/SharelatexAuth/SharelatexAuthHandler')
+const UserUpdater = require('../app/src/Features/User/UserUpdater')
 const async = require('async')
-const { db } = require('../app/js/infrastructure/mongojs')
+const { db } = require('../app/src/infrastructure/mongojs')
 const logger = require('logger-sharelatex')
 const minimist = require('minimist')
 
