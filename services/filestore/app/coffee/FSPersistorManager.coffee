@@ -1,5 +1,6 @@
 logger = require("logger-sharelatex")
 fs = require("fs")
+path = require("path")
 LocalFileWriter = require("./LocalFileWriter")
 Errors = require('./Errors')
 rimraf = require("rimraf")
@@ -35,7 +36,7 @@ module.exports =
       if err?
         logger.err  location:location, target:target, fsPath:fsPath, err:err, "something went wrong writing stream to disk"
         return callback err
-      @sendFile location, target, fsPath, (err) -> 
+      @sendFile location, target, fsPath, (err) ->
         # delete the temporary file created above and return the original error
         LocalFileWriter.deleteFile fsPath, () ->
           callback(err)
@@ -57,6 +58,18 @@ module.exports =
       # ensures the callback is only called once
       return callback null, sourceStream
 
+  getFileSize: (location, filename, callback) ->
+    fullPath = path.join(location, filterName(filename))
+    fs.stat fullPath, (err, stats) ->
+      if err?
+        if err.code == 'ENOENT'
+          logger.log({location:location, filename:filename}, "file not found")
+          callback(new Errors.NotFoundError(err.message))
+        else
+          logger.err({err:err, location:location, filename:filename}, "failed to stat file")
+          callback(err)
+        return
+      callback(null, stats.size)
 
   copyFile: (location, fromName, toName, callback = (err)->)->
     filteredFromName=filterName fromName

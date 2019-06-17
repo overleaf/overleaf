@@ -32,7 +32,7 @@ describe "Filestore", ->
 
 
 
-	it "should send a 200 for status endpoing", (done)->
+	it "should send a 200 for status endpoint", (done)->
 		request "#{@filestoreUrl}/status", (err, response, body)->
 			response.statusCode.should.equal 200
 			body.indexOf("filestore").should.not.equal -1
@@ -57,6 +57,13 @@ describe "Filestore", ->
 				uri: @fileUrl + '___this_is_clearly_wrong___'
 			request.get options, (err, response, body) =>
 				response.statusCode.should.equal 404
+				done()
+
+		it "should return the file size on a HEAD request", (done) ->
+			expectedLength = Buffer.byteLength(@constantFileContent)
+			request.head @fileUrl, (err, res) =>
+				expect(res.statusCode).to.equal(200)
+				expect(res.headers['content-length']).to.equal(expectedLength.toString())
 				done()
 
 		it "should be able get the file back", (done)->

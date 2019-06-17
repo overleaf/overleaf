@@ -26,11 +26,13 @@ describe "S3PersistorManagerTests", ->
 		@knox =
 			createClient: sinon.stub().returns(@stubbedKnoxClient)
 		@stubbedS3Client =
-			copyObject:sinon.stub()
+			copyObject: sinon.stub()
+			headObject: sinon.stub()
 		@awsS3 = sinon.stub().returns @stubbedS3Client
 		@LocalFileWriter =
 			writeStream: sinon.stub()
 			deleteFile: sinon.stub()
+		@request = sinon.stub()
 		@requires =
 			"knox": @knox
 			"aws-sdk/clients/s3": @awsS3
@@ -39,15 +41,16 @@ describe "S3PersistorManagerTests", ->
 			"logger-sharelatex":
 				log:->
 				err:->
+			"request": @request
 			"./Errors": @Errors =
 				NotFoundError: sinon.stub()
 		@key = "my/key"
 		@bucketName = "my-bucket"
 		@error = "my errror"
+		@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
 
 	describe "getFileStream", ->
 		beforeEach ->
-			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
 			@opts = {}
 
 		it "should use correct key", (done)->
@@ -74,7 +77,6 @@ describe "S3PersistorManagerTests", ->
 
 		describe "with supplied auth", ->
 			beforeEach ->
-				@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
 				@credentials =
 					auth_key: "that_key"
 					auth_secret: "that_secret"
@@ -156,10 +158,45 @@ describe "S3PersistorManagerTests", ->
 						@Errors.NotFoundError.called.should.equal false
 						done()
 
+	describe "getFileSize", ->
+		it "should obtain the file size from S3", (done) ->
+			expectedFileSize = 123
+			@stubbedS3Client.headObject.yields(new Error(
+				"s3Client.headObject got unexpected arguments"
+			))
+			@stubbedS3Client.headObject.withArgs({
+				Bucket: @bucketName
+				Key: @key
+			}).yields(null, { ContentLength: expectedFileSize })
+
+			@S3PersistorManager.getFileSize @bucketName, @key, (err, fileSize) =>
+				if err?
+					return done(err)
+				expect(fileSize).to.equal(expectedFileSize)
+				done()
+
+		[403, 404].forEach (statusCode) ->
+			it "should throw NotFoundError when S3 responds with #{statusCode}", (done) ->
+				error = new Error()
+				error.statusCode = statusCode
+				@stubbedS3Client.headObject.yields(error)
+
+				@S3PersistorManager.getFileSize @bucketName, @key, (err, fileSize) =>
+					expect(err).to.be.an.instanceof(@Errors.NotFoundError)
+					done()
+
+		it "should rethrow any other error", (done) ->
+			error = new Error()
+			@stubbedS3Client.headObject.yields(error)
+			@stubbedS3Client.headObject.yields(error)
+
+			@S3PersistorManager.getFileSize @bucketName, @key, (err, fileSize) =>
+				expect(err).to.equal(error)
+				done()
+
 	describe "sendFile", ->
 
 		beforeEach ->
-			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
 			@stubbedKnoxClient.putFile.returns on:->
 
 		it "should put file with knox", (done)->
@@ -183,7 +220,6 @@ describe "S3PersistorManagerTests", ->
 			@fsPath = "to/some/where"
 			@origin =
 				on:->
-			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
 			@S3PersistorManager.sendFile = sinon.stub().callsArgWith(3)
 
 		it "should send stream to LocalFileWriter", (done)->
@@ -211,7 +247,6 @@ describe "S3PersistorManagerTests", ->
 		beforeEach ->
 			@sourceKey = "my/key"
 			@destKey = "my/dest/key"
-			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
 
 		it "should use AWS SDK to copy file", (done)->
 			@stubbedS3Client.copyObject.callsArgWith(1, @error)
@@ -229,9 +264,6 @@ describe "S3PersistorManagerTests", ->
 
 	describe "deleteDirectory", ->
 
-		beforeEach ->
-			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
-
 		it "should list the contents passing them onto multi delete", (done)->
 			data =
 				Contents: [{Key:"1234"}, {Key: "456"}]
@@ -244,9 +276,7 @@ describe "S3PersistorManagerTests", ->
 	describe "deleteFile", ->
 
 		it "should use correct options", (done)->
-			@request = sinon.stub().callsArgWith(1)
-			@requires["request"] = @request
-			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
+			@request.callsArgWith(1)
 
 			@S3PersistorManager.deleteFile @bucketName, @key, (err)=>
 				opts = @request.args[0][0]
@@ -257,9 +287,7 @@ describe "S3PersistorManagerTests", ->
 				done()
 
 		it "should return the error", (done)->
-			@request = sinon.stub().callsArgWith(1, @error)
-			@requires["request"] = @request
-			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
+			@request.callsArgWith(1, @error)
 
 			@S3PersistorManager.deleteFile @bucketName, @key, (err)=>
 				err.should.equal @error
@@ -268,9 +296,7 @@ describe "S3PersistorManagerTests", ->
 	describe "checkIfFileExists", ->
 
 		it "should use correct options", (done)->
-			@request = sinon.stub().callsArgWith(1,  null, statusCode:200)
-			@requires["request"] = @request
-			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
+			@request.callsArgWith(1,  null, statusCode:200)
 
 			@S3PersistorManager.checkIfFileExists @bucketName, @key, (err)=>
 				opts = @request.args[0][0]
@@ -281,34 +307,27 @@ describe "S3PersistorManagerTests", ->
 				done()
 
 		it "should return true for a 200", (done)->
-			@request = sinon.stub().callsArgWith(1, null, statusCode:200)
-			@requires["request"] = @request
-			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
+			@request.callsArgWith(1, null, statusCode:200)
+
 			@S3PersistorManager.checkIfFileExists @bucketName, @key, (err, exists)=>
 				exists.should.equal true
 				done()
 
 		it "should return false for a non 200", (done)->
-			@request = sinon.stub().callsArgWith(1, null, statusCode:404)
-			@requires["request"] = @request
-			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
+			@request.callsArgWith(1, null, statusCode:404)
+
 			@S3PersistorManager.checkIfFileExists @bucketName, @key, (err, exists)=>
 				exists.should.equal false
 				done()
 
 		it "should return the error", (done)->
-			@request = sinon.stub().callsArgWith(1, @error, {})
-			@requires["request"] = @request
-			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
+			@request.callsArgWith(1, @error, {})
 
 			@S3PersistorManager.checkIfFileExists @bucketName, @key, (err)=>
 				err.should.equal @error
 				done()
 
 	describe "directorySize", ->
-
-		beforeEach ->
-			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
 
 		it "should sum directory files size", (done) ->
 			data =

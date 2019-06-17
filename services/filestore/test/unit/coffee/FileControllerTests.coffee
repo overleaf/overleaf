@@ -20,6 +20,7 @@ describe "FileController", ->
 					user_files:"user_files"
 		@FileHandler =
 			getFile: sinon.stub()
+			getFileSize: sinon.stub()
 			deleteFile: sinon.stub()
 			insertFile: sinon.stub()
 			getDirectorySize: sinon.stub()
@@ -49,7 +50,8 @@ describe "FileController", ->
 				file_id:@file_id
 			headers: {}
 		@res =
-			setHeader: ->
+			set: sinon.stub().returnsThis()
+			status: sinon.stub().returnsThis()
 		@fileStream = {}
 
 	describe "getFile", ->
@@ -88,6 +90,39 @@ describe "FileController", ->
 					expect(@FileHandler.getFile.lastCall.args[2].end).to.equal 8
 					done()
 				@controller.getFile @req, @res
+
+	describe "getFileHead", ->
+		it "should return the file size in a Content-Length header", (done) ->
+			expectedFileSize = 84921
+			@FileHandler.getFileSize.yields(
+				new Error("FileHandler.getFileSize: unexpected arguments")
+			)
+			@FileHandler.getFileSize.withArgs(@bucket, @key).yields(null, expectedFileSize)
+
+			@res.end = () =>
+				expect(@res.status.lastCall.args[0]).to.equal(200)
+				expect(@res.set.calledWith("Content-Length", expectedFileSize)).to.equal(true)
+				done()
+
+			@controller.getFileHead(@req, @res)
+
+		it "should return a 404 is the file is not found", (done) ->
+			@FileHandler.getFileSize.yields(new @Errors.NotFoundError())
+
+			@res.end = () =>
+				expect(@res.status.lastCall.args[0]).to.equal(404)
+				done()
+
+			@controller.getFileHead(@req, @res)
+
+		it "should return a 500 on internal errors", (done) ->
+			@FileHandler.getFileSize.yields(new Error())
+
+			@res.end = () =>
+				expect(@res.status.lastCall.args[0]).to.equal(500)
+				done()
+
+			@controller.getFileHead(@req, @res)
 
 	describe "insertFile", ->
 

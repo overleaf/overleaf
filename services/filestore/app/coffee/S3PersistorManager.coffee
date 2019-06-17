@@ -91,11 +91,35 @@ module.exports =
 			else if res.statusCode not in [200, 206]
 				logger.log bucketName:bucketName, key:key, "error getting file from s3: #{res.statusCode}"
 				return callback new Error("Got non-200 response from S3: #{res.statusCode}"), null
-			else 
+			else
 				return callback null, res
 		s3Stream.on 'error', (err) ->
 			logger.err err:err, bucketName:bucketName, key:key, "error getting file stream from s3"
 			callback err
+
+	getFileSize: (bucketName, key, callback) ->
+		logger.log({ bucketName: bucketName, key: key }, "getting file size from S3")
+		s3.headObject { Bucket: bucketName, Key: key }, (err, data) ->
+			if err?
+				if err.statusCode in [403, 404]
+					# S3 returns a 403 instead of a 404 when the user doesn't have
+					# permission to list the bucket contents.
+					logger.log({
+						bucketName: bucketName,
+						key: key
+					}, "file not found in s3")
+					callback(
+						new Errors.NotFoundError("File not found in S3: #{bucketName}:#{key}")
+					)
+				else
+					logger.err({
+						bucketName: bucketName,
+						key: key,
+						err: err
+					}, "error performing S3 HeadObject")
+					callback(err)
+				return
+			callback(null, data.ContentLength)
 
 	copyFile: (bucketName, sourceKey, destKey, callback)->
 		logger.log bucketName:bucketName, sourceKey:sourceKey, destKey: destKey, "copying file in s3"

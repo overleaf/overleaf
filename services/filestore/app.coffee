@@ -63,22 +63,23 @@ app.use (req, res, next) ->
 
 Metrics.injectMetricsRoute(app)
 
+app.head "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.getFileHead
 app.get  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.getFile
 app.post "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.insertFile
+app.put  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, bodyParser.json(), fileController.copyFile
+app.del  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.deleteFile
 
-app.put "/project/:project_id/file/:file_id", keyBuilder.userFileKey, bodyParser.json(), fileController.copyFile
-app.del "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.deleteFile
-
+app.head "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.getFileHead
 app.get  "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.getFile
 app.get  "/template/:template_id/v/:version/:format/:sub_type", keyBuilder.templateFileKey, fileController.getFile
 app.post "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.insertFile
 
 
+app.head "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.getFileHead
 app.get  "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.getFile
 app.post "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.insertFile
-
-app.put "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, bodyParser.json(), fileController.copyFile
-app.del "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.deleteFile
+app.put  "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, bodyParser.json(), fileController.copyFile
+app.del  "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.deleteFile
 
 app.get "/project/:project_id/size", keyBuilder.publicProjectKey, fileController.directorySize
 
