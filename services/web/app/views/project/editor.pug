@@ -116,7 +116,7 @@ block requirejs
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
 	script#data(type="application/json").
-		!{JSON.stringify({userSettings: userSettings, user: user, trackChangesState: trackChangesState, useV2History: useV2History, enabledLinkedFileTypes: settings.enabledLinkedFileTypes, brandVariation: brandVariation}).replace(/\//g, '\\/')}
+		!{StringHelper.stringifyJsonForScript({ userSettings: userSettings, user: user, trackChangesState: trackChangesState, useV2History: useV2History, enabledLinkedFileTypes: settings.enabledLinkedFileTypes, brandVariation: brandVariation })}
 
 	script(type="text/javascript").
 		window.data = JSON.parse($("#data").text());
@@ -174,14 +174,14 @@ block requirejs
 		};
 		window.aceWorkerPath = "#{aceWorkerPath}";
 		window.pdfCMapsPath = "#{pdfCMapsPath}"
-		window.uiConfig = JSON.parse('!{JSON.stringify(uiConfig).replace(/\//g, "\\/")}');
+		window.uiConfig = JSON.parse('!{StringHelper.stringifyJsonForScript(uiConfig)}');
 		//- enable doc hash checking for projects created after 2019-06-09
 		//- this is for a staged rollout, eventually we will turn this on for all projects
 		window.useShareJsHash = (window.project_id > "5cfd8f700000000000000000")
 
 	- if (settings.overleaf != null)
 		script(type='text/javascript').
-			window.overallThemes = JSON.parse('!{JSON.stringify(overallThemes).replace(/\//g, "\\/")}');
+			window.overallThemes = JSON.parse('!{StringHelper.stringifyJsonForScript(overallThemes)}');
 
 	script(
 		data-main=buildJsPath("ide.js", {hashedPath:false}),

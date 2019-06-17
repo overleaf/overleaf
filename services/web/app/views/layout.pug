@@ -66,17 +66,17 @@ html(
 				jsPath:  '#{jsPath}',
 				sixpackDomain: '#{settings.sixpack.domain}'
 			};
-			window.systemMessages = !{JSON.stringify(systemMessages).replace(/\//g, '\\/')};
+			window.systemMessages = !{StringHelper.stringifyJsonForScript(systemMessages)};
 			window.ab = {};
 			window.user_id = '#{getLoggedInUserId()}';
-			window.ExposedSettings = JSON.parse('!{JSON.stringify(ExposedSettings).replace(/\//g, "\\/")}');
+			window.ExposedSettings = JSON.parse('!{StringHelper.stringifyJsonForScript(ExposedSettings)}');
 
 		- if (typeof(settings.algolia) != "undefined")
 			script.
 				window.sharelatex.algolia = {
 					app_id:'#{settings.algolia.app_id}',
 					api_key:'#{settings.algolia.read_only_api_key}',
-					indexes:!{JSON.stringify(settings.algolia.indexes)}
+					indexes:!{StringHelper.stringifyJsonForScript(settings.algolia.indexes)}
 				}
 
 		- if (typeof(settings.templates) != "undefined")

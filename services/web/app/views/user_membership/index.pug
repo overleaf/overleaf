@@ -103,6 +103,6 @@ block content
 									
 
 	script(type="text/javascript").
-		window.users = !{JSON.stringify(users)};
-		window.paths = !{JSON.stringify(paths)};
+		window.users = !{StringHelper.stringifyJsonForScript(users)};
+		window.paths = !{StringHelper.stringifyJsonForScript(paths)};
 		window.groupSize = #{groupSize || 'null'};

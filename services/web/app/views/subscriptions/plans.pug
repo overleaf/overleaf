@@ -10,7 +10,7 @@ block scripts
 	script(type='text/javascript').
 		window.recomendedCurrency = '#{recomendedCurrency}';
 		window.abCurrencyFlag = '#{abCurrencyFlag}';
-		window.groupPlans = !{JSON.stringify(groupPlans)};
+		window.groupPlans = !{StringHelper.stringifyJsonForScript(groupPlans)};
 
 block content
 	.content.content-alt.content-page

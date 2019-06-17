@@ -1,5 +1,5 @@
 script(type='text/javascript').
-	window.managedInstitutions = !{JSON.stringify(managedInstitutions)}
+	window.managedInstitutions = !{StringHelper.stringifyJsonForScript(managedInstitutions)}
 
 each institution in managedInstitutions
 	p

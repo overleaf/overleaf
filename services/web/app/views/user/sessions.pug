@@ -3,7 +3,7 @@ extends ../layout
 
 block scripts
 	script(type='text/javascript').
-		window.otherSessions = !{JSON.stringify(sessions)}
+		window.otherSessions = !{StringHelper.stringifyJsonForScript(sessions)}
 
 
 block content
