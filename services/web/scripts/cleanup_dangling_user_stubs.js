@@ -48,6 +48,14 @@ db.userstubs.aggregate(
       Number(argv.limit || '10'),
       (stub, callback) => {
         if (commit) {
+          if (stub.users.length === 0) {
+            console.log('Deleting stub without users:', stub._id)
+            return db.userstubs.remove({ _id: stub._id }, callback)
+          }
+          if (stub.users.length > 1) {
+            console.log('Found stub with multiple users:', stub)
+            return callback()
+          }
           console.log(
             'Processing stub',
             stub._id,
@@ -61,6 +69,14 @@ db.userstubs.aggregate(
             callback
           )
         } else {
+          if (stub.users.length === 0) {
+            console.log('Would delete stub without users:', stub._id)
+            return callback()
+          }
+          if (stub.users.length > 1) {
+            console.log('Found stub with multiple users:', stub)
+            return callback()
+          }
           console.log(
             'Would call UserMapper._updateUserStubReferences with:',
             stub.overleaf,
