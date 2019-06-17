@@ -670,12 +670,19 @@ define([
           return
         }
         if (typeof ga === 'function') {
+          // sanitise the error message before sending (the "delete component"
+          // error in public/js/libs/sharejs.js includes the some document
+          // content).
+          let message = error.message
+          if (/^Delete component/.test(message)) {
+            message = 'Delete component does not match deleted text'
+          }
           ga(
             'send',
             'event',
             'error',
             'shareJsError',
-            `${error.message} - ${this.ide.socket.socket.transport.name}`
+            `${message} - ${this.ide.socket.socket.transport.name}`
           )
         }
         if (this.doc != null) {
