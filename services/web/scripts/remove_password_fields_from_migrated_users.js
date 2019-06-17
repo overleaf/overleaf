@@ -18,13 +18,18 @@ function main(callback) {
     if (!commit) {
       return callback()
     }
-    db.users.update(query, { $unset: { hashedPassword: 1 } }, (err, result) => {
-      if (err) {
-        return callback(err)
+    db.users.update(
+      query,
+      { $unset: { hashedPassword: 1 } },
+      { multi: true },
+      (err, result) => {
+        if (err) {
+          return callback(err)
+        }
+        console.log(`>> Updated users: ${JSON.stringify(result)}`)
+        return callback()
       }
-      console.log(`>> Updated users: ${JSON.stringify(result)}`)
-      return callback()
-    })
+    )
   })
 }
 
