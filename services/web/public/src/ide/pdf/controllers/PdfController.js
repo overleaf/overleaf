@@ -1012,7 +1012,11 @@ define([
           })
             .then(function(response) {
               const { data } = response
-              if (data.code != null && data.code.length > 0) {
+              if (
+                data.code != null &&
+                data.code.length > 0 &&
+                data.code[0].file !== ''
+              ) {
                 const doc = ide.fileTreeManager.findEntityByPath(
                   data.code[0].file
                 )
@@ -1020,6 +1024,9 @@ define([
                   return
                 }
                 return deferred.resolve({ doc, line: data.code[0].line })
+              } else if (data.code[0].file === '') {
+                ide.$scope.sync_tex_error = true
+                setTimeout(() => (ide.$scope.sync_tex_error = false), 4000)
               }
             })
             .catch(function(response) {

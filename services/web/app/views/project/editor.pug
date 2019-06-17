@@ -34,6 +34,13 @@ block content
 			.alert.alert-warning.small(ng-if="connection.reconnecting")
 				strong #{translate("reconnecting")}...
 
+			.alert.alert-warning.small(ng-if="sync_tex_error")
+				strong #{translate("synctex_failed")}.
+				a#synctex-more-info-button.alert-link-as-btn.pull-right(
+					href="/learn/how-to/SyncTeX_Errors"
+					target="_blank"
+				) #{translate("more_info")}
+
 			.alert.alert-warning.small(ng-if="connection.inactive_disconnect")
 				strong #{translate("editor_disconected_click_to_reconnect")}
 
