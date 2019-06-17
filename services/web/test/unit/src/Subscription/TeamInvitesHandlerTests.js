@@ -139,6 +139,7 @@ describe('TeamInvitesHandler', function() {
           expect(invite.inviterName).to.eq(
             'Daenerys Targaryen (daenerys@example.com)'
           )
+          expect(invite.invite).to.be.true
           expect(this.subscription.teamInvites).to.deep.include(invite)
           done()
         }
@@ -220,6 +221,11 @@ describe('TeamInvitesHandler', function() {
             this.manager._id
           )
           sinon.assert.notCalled(this.subscription.save)
+          expect(invite.token).to.not.exist
+          expect(invite.email).to.eq(this.manager.email)
+          expect(invite.first_name).to.eq(this.manager.first_name)
+          expect(invite.last_name).to.eq(this.manager.last_name)
+          expect(invite.invite).to.be.false
           done(err)
         }
       )

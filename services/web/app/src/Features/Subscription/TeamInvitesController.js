@@ -37,14 +37,11 @@ module.exports = {
       teamManagerId,
       subscription,
       email,
-      function(err, invite) {
+      function(err, inviteUserData) {
         if (err != null) {
           return next(err)
         }
-        const inviteView = {
-          user: { email: invite.email, sentAt: invite.sentAt, invite: true }
-        }
-        return res.json(inviteView)
+        return res.json({ user: inviteUserData })
       }
     )
   },

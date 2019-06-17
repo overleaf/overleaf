@@ -161,7 +161,15 @@ var createInvite = function(subscription, email, inviter, callback) {
           }
 
           // legacy: remove any invite that might have been created in the past
-          removeInviteFromTeam(subscription._id, email, callback)
+          removeInviteFromTeam(subscription._id, email, error => {
+            const inviteUserData = {
+              email: inviter.email,
+              first_name: inviter.first_name,
+              last_name: inviter.last_name,
+              invite: false
+            }
+            callback(error, inviteUserData)
+          })
         }
       )
     }
@@ -194,9 +202,10 @@ var createInvite = function(subscription, email, inviter, callback) {
         }/`,
         appName: settings.appName
       }
-      EmailHandler.sendEmail('verifyEmailToJoinTeam', opts, error =>
+      EmailHandler.sendEmail('verifyEmailToJoinTeam', opts, error => {
+        Object.assign(invite, { invite: true })
         callback(error, invite)
-      )
+      })
     })
   })
 }
