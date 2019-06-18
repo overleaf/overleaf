@@ -1,12 +1,11 @@
 block scripts
 	script(type='text/javascript').
-		window.oauthUseV2 = #{oauthUseV2}
 		window.oauthProviders = !{StringHelper.stringifyJsonForScript(oauthProviders)}
 		window.thirdPartyIds = !{StringHelper.stringifyJsonForScript(thirdPartyIds)}
 
 mixin providerList()
 	ul.list-like-table
-		li(ng-repeat="(key, provider) in providers" ng-if="!provider.hideWhenNotLinked || (key == 'collabratec' && v2ThirdPartyIds[key]) || (provider.hideWhenNotLinked && thirdPartyIds[key])")
+		li(ng-repeat="(key, provider) in providers" ng-if="!provider.hideWhenNotLinked || (provider.hideWhenNotLinked && thirdPartyIds[key])")
 			.row
 				.col-xs-12.col-sm-8.col-md-10
 					h4 {{provider.name}}
@@ -16,7 +15,7 @@ mixin providerList()
 					button.btn.btn-default(
 						ng-click="unlink(key)"
 						ng-disabled="providers[key].ui.isProcessing"
-						ng-if="thirdPartyIds[key] || (key == 'collabratec' && v2ThirdPartyIds[key])"
+						ng-if="thirdPartyIds[key]"
 					)
 						span(ng-if="!providers[key].ui.isProcessing") #{translate("unlink")}
 						span(ng-if="providers[key].ui.isProcessing") #{translate("processing")}
