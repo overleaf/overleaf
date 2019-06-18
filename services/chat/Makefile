@@ -1,7 +1,7 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.1.16
+# Version: 1.1.21
 
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
@@ -16,10 +16,17 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 clean:
 	docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	docker rmi gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+
+format:
+	$(DOCKER_COMPOSE) run --rm test_unit npm run format
+
+format_fix:
+	$(DOCKER_COMPOSE) run --rm test_unit npm run format:fix
+
 lint:
 	$(DOCKER_COMPOSE) run --rm test_unit npm run lint
 
-test: lint test_unit test_acceptance
+test: format lint test_unit test_acceptance
 
 test_unit:
 	@[ ! -d test/unit ] && echo "chat has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit
