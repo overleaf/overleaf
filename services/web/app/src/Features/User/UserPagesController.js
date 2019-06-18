@@ -19,6 +19,7 @@ const UserSessionsManager = require('./UserSessionsManager')
 const ErrorController = require('../Errors/ErrorController')
 const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
+const Errors = require('../Errors/Errors')
 const request = require('request')
 const fs = require('fs')
 const AuthenticationController = require('../Authentication/AuthenticationController')
@@ -120,6 +121,10 @@ module.exports = UserPagesController = {
 
   settingsPage(req, res, next) {
     const user_id = AuthenticationController.getLoggedInUserId(req)
+    const ssoError = req.session.ssoError
+    if (ssoError) {
+      delete req.session.ssoError
+    }
     logger.log({ user: user_id }, 'loading settings page')
     const shouldAllowEditingDetails =
       !__guard__(
@@ -155,6 +160,7 @@ module.exports = UserPagesController = {
             oauthProviders,
             req
           ),
+          ssoError: ssoError,
           thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
           previewOauth: req.query.prvw != null
         })
