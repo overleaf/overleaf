@@ -102,7 +102,7 @@ module.exports =
 			if statusCode not in [200, 206]
 				logger.log({bucketName: bucketName, key: key }, "error getting file from s3: #{statusCode}")
 				return callback(new Error("Got non-200 response from S3: #{statusCode} #{statusMessage}"), null)
-			stream = response.httpResponse.getUnbufferedStream()
+			stream = response.httpResponse.createUnbufferedStream()
 			callback(null, stream)
 
 		request.on 'error', (err) =>
