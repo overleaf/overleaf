@@ -81,6 +81,7 @@ describe "Applying updates to a doc", ->
 
 		describe "when sending another update", ->
 			before (done) ->
+				@timeout = 10000
 				@second_update = Object.create(@update)
 				@second_update.v = @version + 1
 				DocUpdaterClient.sendUpdate @project_id, @doc_id, @second_update, (error) ->
