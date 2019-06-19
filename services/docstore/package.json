@@ -25,8 +25,8 @@
     "body-parser": "~1.0.2",
     "coffee-script": "^1.12.7",
     "express": "~4.1.1",
-    "logger-sharelatex": "^1.6.0",
-    "metrics-sharelatex": "^2.1.1",
+    "logger-sharelatex": "^1.7.0",
+    "metrics-sharelatex": "^2.2.0",
     "mongojs": "2.4.0",
     "settings-sharelatex": "^1.1.0",
     "underscore": "~1.6.0"
