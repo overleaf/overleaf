@@ -28,6 +28,7 @@ services:
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
+      ENABLE_CONVERSIONS: "true"
       LOG_LEVEL: ERROR
       NODE_ENV: test
     user: node

@@ -22,6 +22,7 @@ services:
       REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
+      ENABLE_CONVERSIONS: "true"
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
     depends_on:
