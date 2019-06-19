@@ -165,8 +165,15 @@
 	}
 }
 
-.hp-login-btn {
+.hp-login-btn when (@is-overleaf = true) {
+	.login-btn;
 	min-width: 220px;
+
+	background-color: @ol-blue-gray-3;
+
+	&:hover, &:focus, &:active {
+		background-color: darken(@ol-blue-gray-3, 8%);
+	}
 }
 
 .hp-register-form-email-pwd {

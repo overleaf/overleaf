@@ -38,10 +38,6 @@ module.exports = {
       '/style',
       HomeController.externalPage('style_guide', 'Style Guide')
     )
-    webRouter.get(
-      '/ol-style',
-      HomeController.externalPage('ol_style_guide', 'Overleaf Style Guide')
-    )
     webRouter.get('/jobs', HomeController.externalPage('jobs', 'Jobs'))
 
     webRouter.get(
