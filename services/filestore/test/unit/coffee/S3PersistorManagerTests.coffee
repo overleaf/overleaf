@@ -32,7 +32,7 @@ describe "S3PersistorManagerTests", ->
 			send: sinon.stub()
 		@s3Response =
 			httpResponse:
-				getUnbufferedStream: sinon.stub()
+				createUnbufferedStream: sinon.stub()
 		@s3Client =
 			copyObject: sinon.stub()
 			headObject: sinon.stub()
@@ -64,7 +64,7 @@ describe "S3PersistorManagerTests", ->
 				@expectedStream = { expectedStream: true }
 				@s3Request.send.callsFake () =>
 					@s3EventHandlers.httpHeaders(200, {}, @s3Response, "OK")
-				@s3Response.httpResponse.getUnbufferedStream.returns(@expectedStream)
+				@s3Response.httpResponse.createUnbufferedStream.returns(@expectedStream)
 
 			it "returns a stream", (done) ->
 				@S3PersistorManager.getFileStream @bucketName, @key, {}, (err, stream) =>
