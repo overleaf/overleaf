@@ -8,7 +8,7 @@
 const version = {
   pdfjs: '2.0.943',
   moment: '2.9.0',
-  ace: '1.4.4', // Upgrade instructions: https://github.com/overleaf/write_latex/wiki/Upgrading-Ace
+  ace: '1.4.5', // Upgrade instructions: https://github.com/overleaf/write_latex/wiki/Upgrading-Ace
   fineuploader: '5.15.4'
 }
 
