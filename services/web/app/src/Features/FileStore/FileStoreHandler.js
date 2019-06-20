@@ -1,18 +1,4 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let FileStoreHandler
+const _ = require('underscore')
 const logger = require('logger-sharelatex')
 const fs = require('fs')
 const request = require('request')
@@ -20,95 +6,84 @@ const settings = require('settings-sharelatex')
 const Async = require('async')
 const FileHashManager = require('./FileHashManager')
 const { File } = require('../../models/File')
+const Errors = require('../Errors/Errors')
 
-const oneMinInMs = 60 * 1000
-const fiveMinsInMs = oneMinInMs * 5
+const ONE_MIN_IN_MS = 60 * 1000
+const FIVE_MINS_IN_MS = ONE_MIN_IN_MS * 5
 
-module.exports = FileStoreHandler = {
+const FileStoreHandler = {
   RETRY_ATTEMPTS: 3,
 
-  uploadFileFromDisk(project_id, file_args, fsPath, callback) {
-    if (callback == null) {
-      callback = function(error, url, fileRef) {}
-    }
-    return fs.lstat(fsPath, function(err, stat) {
-      if (err != null) {
-        logger.err({ err, project_id, file_args, fsPath }, 'error stating file')
+  uploadFileFromDisk(projectId, fileArgs, fsPath, callback) {
+    fs.lstat(fsPath, function(err, stat) {
+      if (err) {
+        logger.err({ err, projectId, fileArgs, fsPath }, 'error stating file')
         callback(err)
       }
-      if (stat == null) {
+      if (!stat) {
         logger.err(
-          { project_id, file_args, fsPath },
+          { projectId, fileArgs, fsPath },
           'stat is not available, can not check file from disk'
         )
         return callback(new Error('error getting stat, not available'))
       }
       if (!stat.isFile()) {
         logger.log(
-          { project_id, file_args, fsPath },
-          'tried to upload symlink, not contining'
+          { projectId, fileArgs, fsPath },
+          'tried to upload symlink, not continuing'
         )
         return callback(new Error('can not upload symlink'))
       }
-      return Async.retry(
+      Async.retry(
         FileStoreHandler.RETRY_ATTEMPTS,
         (cb, results) =>
           FileStoreHandler._doUploadFileFromDisk(
-            project_id,
-            file_args,
+            projectId,
+            fileArgs,
             fsPath,
             cb
           ),
         function(err, result) {
-          if (err != null) {
+          if (err) {
             logger.err(
-              { err, project_id, file_args },
+              { err, projectId, fileArgs },
               'Error uploading file, retries failed'
             )
             return callback(err)
           }
-          return callback(err, result.url, result.fileRef)
+          callback(err, result.url, result.fileRef)
         }
       )
     })
   },
 
-  _doUploadFileFromDisk(project_id, file_args, fsPath, callback) {
-    if (callback == null) {
-      callback = function(err, result) {}
-    }
-    const _cb = callback
-    callback = function(err, ...result) {
-      callback = function() {} // avoid double callbacks
-      return _cb(err, ...Array.from(result))
-    }
+  _doUploadFileFromDisk(projectId, fileArgs, fsPath, callback) {
+    const callbackOnce = _.once(callback)
 
-    return FileHashManager.computeHash(fsPath, function(err, hashValue) {
-      if (err != null) {
-        return callback(err)
+    FileHashManager.computeHash(fsPath, function(err, hashValue) {
+      if (err) {
+        return callbackOnce(err)
       }
-      const fileRef = new File(
-        Object.assign({}, file_args, { hash: hashValue })
-      )
-      const file_id = fileRef._id
+      const fileRef = new File(Object.assign({}, fileArgs, { hash: hashValue }))
+      const fileId = fileRef._id
       logger.log(
-        { project_id, file_id, fsPath, hash: hashValue, fileRef },
+        { projectId, fileId, fsPath, hash: hashValue, fileRef },
         'uploading file from disk'
       )
       const readStream = fs.createReadStream(fsPath)
       readStream.on('error', function(err) {
         logger.err(
-          { err, project_id, file_id, fsPath },
+          { err, projectId, fileId, fsPath },
           'something went wrong on the read stream of uploadFileFromDisk'
         )
-        return callback(err)
+        callbackOnce(err)
       })
-      return readStream.on('open', function() {
-        const url = FileStoreHandler._buildUrl(project_id, file_id)
+      readStream.on('open', function() {
+        const url = FileStoreHandler._buildUrl(projectId, fileId)
         const opts = {
           method: 'post',
           uri: url,
-          timeout: fiveMinsInMs,
+          timeout: FIVE_MINS_IN_MS,
           headers: {
             'X-File-Hash-From-Web': hashValue
           } // send the hash to the filestore as a custom header so it can be checked
@@ -116,10 +91,10 @@ module.exports = FileStoreHandler = {
         const writeStream = request(opts)
         writeStream.on('error', function(err) {
           logger.err(
-            { err, project_id, file_id, fsPath },
+            { err, projectId, fileId, fsPath },
             'something went wrong on the write stream of uploadFileFromDisk'
           )
-          return callback(err)
+          callbackOnce(err)
         })
         writeStream.on('response', function(response) {
           if (![200, 201].includes(response.statusCode)) {
@@ -132,19 +107,18 @@ module.exports = FileStoreHandler = {
               { err, statusCode: response.statusCode },
               'error uploading to filestore'
             )
-            return callback(err)
-          } else {
-            return callback(null, { url, fileRef })
+            return callbackOnce(err)
           }
+          callbackOnce(null, { url, fileRef })
         }) // have to pass back an object because async.retry only accepts a single result argument
-        return readStream.pipe(writeStream)
+        readStream.pipe(writeStream)
       })
     })
   },
 
-  getFileStream(project_id, file_id, query, callback) {
+  getFileStream(projectId, fileId, query, callback) {
     logger.log(
-      { project_id, file_id, query },
+      { projectId, fileId, query },
       'getting file stream from file store'
     )
     let queryString = ''
@@ -153,8 +127,8 @@ module.exports = FileStoreHandler = {
     }
     const opts = {
       method: 'get',
-      uri: `${this._buildUrl(project_id, file_id)}${queryString}`,
-      timeout: fiveMinsInMs,
+      uri: `${this._buildUrl(projectId, fileId)}${queryString}`,
+      timeout: FIVE_MINS_IN_MS,
       headers: {}
     }
     if (query != null && query['range'] != null) {
@@ -166,24 +140,49 @@ module.exports = FileStoreHandler = {
     const readStream = request(opts)
     readStream.on('error', err =>
       logger.err(
-        { err, project_id, file_id, query, opts },
+        { err, projectId, fileId, query, opts },
         'error in file stream'
       )
     )
     return callback(null, readStream)
   },
 
-  deleteFile(project_id, file_id, callback) {
-    logger.log({ project_id, file_id }, 'telling file store to delete file')
+  getFileSize(projectId, fileId, callback) {
+    const url = this._buildUrl(projectId, fileId)
+    request.head(url, (err, res) => {
+      if (err) {
+        logger.err(
+          { err, projectId, fileId },
+          'failed to get file size from filestore'
+        )
+        return callback(err)
+      }
+      if (res.statusCode === 404) {
+        return callback(new Errors.NotFoundError('file not found in filestore'))
+      }
+      if (res.statusCode !== 200) {
+        logger.err(
+          { projectId, fileId, statusCode: res.statusCode },
+          'filestore returned non-200 response'
+        )
+        return callback(new Error('filestore returned non-200 response'))
+      }
+      const fileSize = res.headers['content-length']
+      callback(null, fileSize)
+    })
+  },
+
+  deleteFile(projectId, fileId, callback) {
+    logger.log({ projectId, fileId }, 'telling file store to delete file')
     const opts = {
       method: 'delete',
-      uri: this._buildUrl(project_id, file_id),
-      timeout: fiveMinsInMs
+      uri: this._buildUrl(projectId, fileId),
+      timeout: FIVE_MINS_IN_MS
     }
     return request(opts, function(err, response) {
-      if (err != null) {
+      if (err) {
         logger.err(
-          { err, project_id, file_id },
+          { err, projectId, fileId },
           'something went wrong deleting file from filestore'
         )
       }
@@ -191,26 +190,26 @@ module.exports = FileStoreHandler = {
     })
   },
 
-  copyFile(oldProject_id, oldFile_id, newProject_id, newFile_id, callback) {
+  copyFile(oldProjectId, oldFileId, newProjectId, newFileId, callback) {
     logger.log(
-      { oldProject_id, oldFile_id, newProject_id, newFile_id },
+      { oldProjectId, oldFileId, newProjectId, newFileId },
       'telling filestore to copy a file'
     )
     const opts = {
       method: 'put',
       json: {
         source: {
-          project_id: oldProject_id,
-          file_id: oldFile_id
+          project_id: oldProjectId,
+          file_id: oldFileId
         }
       },
-      uri: this._buildUrl(newProject_id, newFile_id),
-      timeout: fiveMinsInMs
+      uri: this._buildUrl(newProjectId, newFileId),
+      timeout: FIVE_MINS_IN_MS
     }
     return request(opts, function(err, response) {
-      if (err != null) {
+      if (err) {
         logger.err(
-          { err, oldProject_id, oldFile_id, newProject_id, newFile_id },
+          { err, oldProjectId, oldFileId, newProjectId, newFileId },
           'something went wrong telling filestore api to copy file'
         )
         return callback(err)
@@ -230,9 +229,9 @@ module.exports = FileStoreHandler = {
     })
   },
 
-  _buildUrl(project_id, file_id) {
-    return `${
-      settings.apis.filestore.url
-    }/project/${project_id}/file/${file_id}`
+  _buildUrl(projectId, fileId) {
+    return `${settings.apis.filestore.url}/project/${projectId}/file/${fileId}`
   }
 }
+
+module.exports = FileStoreHandler

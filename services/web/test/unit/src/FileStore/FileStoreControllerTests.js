@@ -1,29 +1,19 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const { assert } = require('chai')
+const { expect } = require('chai')
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
-const modulePath =
-  '../../../../app/src/Features/FileStore/FileStoreController.js'
 const SandboxedModule = require('sandboxed-module')
+
+const MODULE_PATH =
+  '../../../../app/src/Features/FileStore/FileStoreController.js'
 
 describe('FileStoreController', function() {
   beforeEach(function() {
-    this.FileStoreHandler = { getFileStream: sinon.stub() }
+    this.FileStoreHandler = {
+      getFileStream: sinon.stub(),
+      getFileSize: sinon.stub()
+    }
     this.ProjectLocator = { findElement: sinon.stub() }
-    this.controller = SandboxedModule.require(modulePath, {
+    this.Errors = { NotFoundError: sinon.stub() }
+    this.controller = SandboxedModule.require(MODULE_PATH, {
       requires: {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': (this.logger = {
@@ -31,16 +21,17 @@ describe('FileStoreController', function() {
           err: sinon.stub()
         }),
         '../Project/ProjectLocator': this.ProjectLocator,
+        '../Errors/Errors': this.Errors,
         './FileStoreHandler': this.FileStoreHandler
       }
     })
     this.stream = {}
-    this.project_id = '2k3j1lk3j21lk3j'
-    this.file_id = '12321kklj1lk3jk12'
+    this.projectId = '2k3j1lk3j21lk3j'
+    this.fileId = '12321kklj1lk3jk12'
     this.req = {
       params: {
-        Project_id: this.project_id,
-        File_id: this.file_id
+        Project_id: this.projectId,
+        File_id: this.fileId
       },
       query: 'query string here',
       get(key) {
@@ -48,16 +39,18 @@ describe('FileStoreController', function() {
       }
     }
     this.res = {
+      set: sinon.stub().returnsThis(),
       setHeader: sinon.stub(),
-      setContentDisposition: sinon.stub()
+      setContentDisposition: sinon.stub(),
+      status: sinon.stub().returnsThis()
     }
-    return (this.file = { name: 'myfile.png' })
+    this.file = { name: 'myfile.png' }
   })
 
-  return describe('getFile', function() {
+  describe('getFile', function() {
     beforeEach(function() {
       this.FileStoreHandler.getFileStream.callsArgWith(3, null, this.stream)
-      return this.ProjectLocator.findElement.callsArgWith(1, null, this.file)
+      this.ProjectLocator.findElement.callsArgWith(1, null, this.file)
     })
 
     it('should call the file store handler with the project_id file_id and any query string', function(done) {
@@ -69,30 +62,30 @@ describe('FileStoreController', function() {
             this.req.query
           )
           .should.equal(true)
-        return done()
+        done()
       }
-      return this.controller.getFile(this.req, this.res)
+      this.controller.getFile(this.req, this.res)
     })
 
     it('should pipe to res', function(done) {
       this.stream.pipe = des => {
         des.should.equal(this.res)
-        return done()
+        done()
       }
-      return this.controller.getFile(this.req, this.res)
+      this.controller.getFile(this.req, this.res)
     })
 
     it('should get the file from the db', function(done) {
       this.stream.pipe = des => {
         const opts = {
-          project_id: this.project_id,
-          element_id: this.file_id,
+          project_id: this.projectId,
+          element_id: this.fileId,
           type: 'file'
         }
         this.ProjectLocator.findElement.calledWith(opts).should.equal(true)
-        return done()
+        done()
       }
-      return this.controller.getFile(this.req, this.res)
+      this.controller.getFile(this.req, this.res)
     })
 
     it('should set the Content-Disposition header', function(done) {
@@ -100,112 +93,156 @@ describe('FileStoreController', function() {
         this.res.setContentDisposition
           .calledWith('attachment', { filename: this.file.name })
           .should.equal(true)
-        return done()
+        done()
       }
-      return this.controller.getFile(this.req, this.res)
+      this.controller.getFile(this.req, this.res)
     })
 
     // Test behaviour around handling html files
-    ;['.html', '.htm', '.xhtml'].forEach(extension =>
+    ;['.html', '.htm', '.xhtml'].forEach(extension => {
       describe(`with a '${extension}' file extension`, function() {
         beforeEach(function() {
           this.file.name = `bad${extension}`
-          return (this.req.get = key => {
+          this.req.get = key => {
             if (key === 'User-Agent') {
               return 'A generic browser'
             }
-          })
+          }
         })
 
-        describe('from a non-ios browser', () =>
+        describe('from a non-ios browser', function() {
           it('should not set Content-Type', function(done) {
             this.stream.pipe = des => {
               this.res.setHeader
                 .calledWith('Content-Type', 'text/plain')
                 .should.equal(false)
-              return done()
+              done()
             }
-            return this.controller.getFile(this.req, this.res)
-          }))
+            this.controller.getFile(this.req, this.res)
+          })
+        })
 
         describe('from an iPhone', function() {
           beforeEach(function() {
-            return (this.req.get = key => {
+            this.req.get = key => {
               if (key === 'User-Agent') {
                 return 'An iPhone browser'
               }
-            })
+            }
           })
 
-          return it("should set Content-Type to 'text/plain'", function(done) {
+          it("should set Content-Type to 'text/plain'", function(done) {
             this.stream.pipe = des => {
               this.res.setHeader
                 .calledWith('Content-Type', 'text/plain')
                 .should.equal(true)
-              return done()
+              done()
             }
-            return this.controller.getFile(this.req, this.res)
+            this.controller.getFile(this.req, this.res)
           })
         })
 
-        return describe('from an iPad', function() {
+        describe('from an iPad', function() {
           beforeEach(function() {
-            return (this.req.get = key => {
+            this.req.get = key => {
               if (key === 'User-Agent') {
                 return 'An iPad browser'
               }
-            })
+            }
           })
 
-          return it("should set Content-Type to 'text/plain'", function(done) {
+          it("should set Content-Type to 'text/plain'", function(done) {
             this.stream.pipe = des => {
               this.res.setHeader
                 .calledWith('Content-Type', 'text/plain')
                 .should.equal(true)
-              return done()
+              done()
             }
-            return this.controller.getFile(this.req, this.res)
+            this.controller.getFile(this.req, this.res)
           })
         })
       })
-    )
-
-    // None of these should trigger the iOS/html logic
-    return [
-      'x.html-is-rad',
+    })
+    ;[
+      // None of these should trigger the iOS/html logic
+      ('x.html-is-rad',
       'html.pdf',
       '.html-is-good-for-hidden-files',
-      'somefile'
-    ].forEach(filename =>
+      'somefile')
+    ].forEach(filename => {
       describe(`with filename as '${filename}'`, function() {
         beforeEach(function() {
           this.user_agent = 'A generic browser'
           this.file.name = filename
-          return (this.req.get = key => {
+          this.req.get = key => {
             if (key === 'User-Agent') {
               return this.user_agent
             }
-          })
+          }
         })
-
-        return ['iPhone', 'iPad', 'Firefox', 'Chrome'].forEach(browser =>
+        ;[('iPhone', 'iPad', 'Firefox', 'Chrome')].forEach(browser => {
           describe(`downloaded from ${browser}`, function() {
             beforeEach(function() {
-              return (this.user_agent = `Some ${browser} thing`)
+              this.user_agent = `Some ${browser} thing`
             })
 
-            return it('Should not set the Content-type', function(done) {
+            it('Should not set the Content-type', function(done) {
               this.stream.pipe = des => {
                 this.res.setHeader
                   .calledWith('Content-Type', 'text/plain')
                   .should.equal(false)
-                return done()
+                done()
               }
-              return this.controller.getFile(this.req, this.res)
+              this.controller.getFile(this.req, this.res)
             })
           })
-        )
+        })
       })
-    )
+    })
+  })
+
+  describe('getFileHead', function() {
+    it('reports the file size', function(done) {
+      const expectedFileSize = 99393
+      this.FileStoreHandler.getFileSize.yields(
+        new Error('getFileSize: unexpected arguments')
+      )
+      this.FileStoreHandler.getFileSize
+        .withArgs(this.projectId, this.fileId)
+        .yields(null, expectedFileSize)
+
+      this.res.end = () => {
+        expect(this.res.status.lastCall.args).to.deep.equal([200])
+        expect(this.res.set.lastCall.args).to.deep.equal([
+          'Content-Length',
+          expectedFileSize
+        ])
+        done()
+      }
+
+      this.controller.getFileHead(this.req, this.res)
+    })
+
+    it('returns 404 on NotFoundError', function(done) {
+      this.FileStoreHandler.getFileSize.yields(new this.Errors.NotFoundError())
+
+      this.res.end = () => {
+        expect(this.res.status.lastCall.args).to.deep.equal([404])
+        done()
+      }
+
+      this.controller.getFileHead(this.req, this.res)
+    })
+
+    it('returns 500 on error', function(done) {
+      this.FileStoreHandler.getFileSize.yields(new Error('boom!'))
+
+      this.res.end = () => {
+        expect(this.res.status.lastCall.args).to.deep.equal([500])
+        done()
+      }
+
+      this.controller.getFileHead(this.req, this.res)
+    })
   })
 })

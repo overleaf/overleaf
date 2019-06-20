@@ -1,25 +1,8 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-    no-useless-escape,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let Router
 const AdminController = require('./Features/ServerAdmin/AdminController')
 const ErrorController = require('./Features/Errors/ErrorController')
 const ProjectController = require('./Features/Project/ProjectController')
 const ProjectApiController = require('./Features/Project/ProjectApiController')
 const SpellingController = require('./Features/Spelling/SpellingController')
-const EditorController = require('./Features/Editor/EditorController')
 const EditorRouter = require('./Features/Editor/EditorRouter')
 const Settings = require('settings-sharelatex')
 const TpdsController = require('./Features/ThirdPartyDataStore/TpdsController')
@@ -52,7 +35,6 @@ const ChatController = require('./Features/Chat/ChatController')
 const BlogController = require('./Features/Blog/BlogController')
 const Modules = require('./infrastructure/Modules')
 const RateLimiterMiddleware = require('./Features/Security/RateLimiterMiddleware')
-const CooldownMiddleware = require('./Features/Cooldown/CooldownMiddleware')
 const RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 const InactiveProjectController = require('./Features/InactiveData/InactiveProjectController')
 const ContactRouter = require('./Features/Contacts/ContactRouter')
@@ -74,7 +56,7 @@ const UserMembershipRouter = require('./Features/UserMembership/UserMembershipRo
 const logger = require('logger-sharelatex')
 const _ = require('underscore')
 
-module.exports = Router = class Router {
+module.exports = class Router {
   constructor(webRouter, privateApiRouter, publicApiRouter) {
     if (!Settings.allowPublicAccess) {
       webRouter.all('*', AuthenticationController.requireGlobalLogin)
@@ -295,6 +277,11 @@ module.exports = Router = class Router {
       AuthorizationMiddleware.ensureUserCanReadProject,
       ProjectController.loadEditor
     )
+    webRouter.head(
+      '/Project/:Project_id/file/:File_id',
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      FileStoreController.getFileHead
+    )
     webRouter.get(
       '/Project/:Project_id/file/:File_id',
       AuthorizationMiddleware.ensureUserCanReadProject,
@@ -338,11 +325,11 @@ module.exports = Router = class Router {
 
     // PDF Download button
     webRouter.get(
-      /^\/download\/project\/([^\/]*)\/output\/output\.pdf$/,
+      /^\/download\/project\/([^/]*)\/output\/output\.pdf$/,
       function(req, res, next) {
         const params = { Project_id: req.params[0] }
         req.params = params
-        return next()
+        next()
       },
       AuthorizationMiddleware.ensureUserCanReadProject,
       CompileController.downloadPdf
@@ -350,14 +337,14 @@ module.exports = Router = class Router {
 
     // PDF Download button for specific build
     webRouter.get(
-      /^\/download\/project\/([^\/]*)\/build\/([0-9a-f-]+)\/output\/output\.pdf$/,
+      /^\/download\/project\/([^/]*)\/build\/([0-9a-f-]+)\/output\/output\.pdf$/,
       function(req, res, next) {
         const params = {
           Project_id: req.params[0],
           build_id: req.params[1]
         }
         req.params = params
-        return next()
+        next()
       },
       AuthorizationMiddleware.ensureUserCanReadProject,
       CompileController.downloadPdf
@@ -365,21 +352,21 @@ module.exports = Router = class Router {
 
     // Used by the pdf viewers
     webRouter.get(
-      /^\/project\/([^\/]*)\/output\/(.*)$/,
+      /^\/project\/([^/]*)\/output\/(.*)$/,
       function(req, res, next) {
         const params = {
           Project_id: req.params[0],
           file: req.params[1]
         }
         req.params = params
-        return next()
+        next()
       },
       AuthorizationMiddleware.ensureUserCanReadProject,
       CompileController.getFileFromClsi
     )
     // direct url access to output files for a specific build (query string not required)
     webRouter.get(
-      /^\/project\/([^\/]*)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
+      /^\/project\/([^/]*)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
       function(req, res, next) {
         const params = {
           Project_id: req.params[0],
@@ -387,7 +374,7 @@ module.exports = Router = class Router {
           file: req.params[2]
         }
         req.params = params
-        return next()
+        next()
       },
       AuthorizationMiddleware.ensureUserCanReadProject,
       CompileController.getFileFromClsi
@@ -395,7 +382,7 @@ module.exports = Router = class Router {
 
     // direct url access to output files for user but no build, to retrieve files when build fails
     webRouter.get(
-      /^\/project\/([^\/]*)\/user\/([0-9a-f-]+)\/output\/(.*)$/,
+      /^\/project\/([^/]*)\/user\/([0-9a-f-]+)\/output\/(.*)$/,
       function(req, res, next) {
         const params = {
           Project_id: req.params[0],
@@ -403,7 +390,7 @@ module.exports = Router = class Router {
           file: req.params[2]
         }
         req.params = params
-        return next()
+        next()
       },
       AuthorizationMiddleware.ensureUserCanReadProject,
       CompileController.getFileFromClsi
@@ -411,7 +398,7 @@ module.exports = Router = class Router {
 
     // direct url access to output files for a specific user and build (query string not required)
     webRouter.get(
-      /^\/project\/([^\/]*)\/user\/([0-9a-f]+)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
+      /^\/project\/([^/]*)\/user\/([0-9a-f]+)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
       function(req, res, next) {
         const params = {
           Project_id: req.params[0],
@@ -420,7 +407,7 @@ module.exports = Router = class Router {
           file: req.params[3]
         }
         req.params = params
-        return next()
+        next()
       },
       AuthorizationMiddleware.ensureUserCanReadProject,
       CompileController.getFileFromClsi
@@ -691,14 +678,14 @@ module.exports = Router = class Router {
     )
 
     webRouter.get(
-      /^\/internal\/project\/([^\/]*)\/output\/(.*)$/,
+      /^\/internal\/project\/([^/]*)\/output\/(.*)$/,
       function(req, res, next) {
         const params = {
           Project_id: req.params[0],
           file: req.params[1]
         }
         req.params = params
-        return next()
+        next()
       },
       AuthenticationController.httpAuth,
       CompileController.getFileFromClsi
@@ -826,7 +813,7 @@ module.exports = Router = class Router {
       CompileController.compileSubmission
     )
     publicApiRouter.get(
-      /^\/api\/clsi\/compile\/([^\/]*)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
+      /^\/api\/clsi\/compile\/([^/]*)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
       function(req, res, next) {
         const params = {
           submission_id: req.params[0],
@@ -834,7 +821,7 @@ module.exports = Router = class Router {
           file: req.params[2]
         }
         req.params = params
-        return next()
+        next()
       },
       AuthenticationController.httpAuth,
       CompileController.getFileFromClsiWithoutUser
@@ -853,9 +840,9 @@ module.exports = Router = class Router {
     webRouter.get('/chrome', function(req, res, next) {
       // Match v1 behaviour - this is used for a Chrome web app
       if (AuthenticationController.isUserLoggedIn(req)) {
-        return res.redirect('/project')
+        res.redirect('/project')
       } else {
-        return res.redirect('/register')
+        res.redirect('/register')
       }
     })
 
@@ -951,33 +938,33 @@ module.exports = Router = class Router {
       '/status/compiler/:Project_id',
       AuthorizationMiddleware.ensureUserCanReadProject,
       function(req, res) {
-        const project_id = req.params.Project_id
+        const projectId = req.params.Project_id
         const sendRes = _.once(function(statusCode, message) {
           res.status(statusCode)
           res.send(message)
-          return ClsiCookieManager.clearServerId(project_id)
+          ClsiCookieManager.clearServerId(projectId)
         }) // force every compile to a new server
         // set a timeout
         var handler = setTimeout(function() {
           sendRes(500, 'Compiler timed out')
-          return (handler = null)
+          handler = null
         }, 10000)
         // use a valid user id for testing
-        const test_user_id = '123456789012345678901234'
+        const testUserId = '123456789012345678901234'
         // run the compile
-        return CompileManager.compile(project_id, test_user_id, {}, function(
+        CompileManager.compile(projectId, testUserId, {}, function(
           error,
           status
         ) {
-          if (handler != null) {
+          if (handler) {
             clearTimeout(handler)
           }
-          if (error != null) {
-            return sendRes(500, `Compiler returned error ${error.message}`)
+          if (error) {
+            sendRes(500, `Compiler returned error ${error.message}`)
           } else if (status === 'success') {
-            return sendRes(200, 'Compiler returned in less than 10 seconds')
+            sendRes(200, 'Compiler returned in less than 10 seconds')
           } else {
-            return sendRes(500, `Compiler returned failure ${status}`)
+            sendRes(500, `Compiler returned failure ${status}`)
           }
         })
       }
@@ -985,7 +972,7 @@ module.exports = Router = class Router {
 
     webRouter.get('/no-cache', function(req, res, next) {
       res.header('Cache-Control', 'max-age=0')
-      return res.sendStatus(404)
+      res.sendStatus(404)
     })
 
     webRouter.get('/oops-express', (req, res, next) =>
@@ -1002,7 +989,7 @@ module.exports = Router = class Router {
 
     privateApiRouter.get('/opps-small', function(req, res, next) {
       logger.err('test error occured')
-      return res.send()
+      res.send()
     })
 
     webRouter.post('/error/client', function(req, res, next) {
@@ -1011,7 +998,7 @@ module.exports = Router = class Router {
         'client side error'
       )
       metrics.inc('client-side-error')
-      return res.sendStatus(204)
+      res.sendStatus(204)
     })
 
     webRouter.get(
