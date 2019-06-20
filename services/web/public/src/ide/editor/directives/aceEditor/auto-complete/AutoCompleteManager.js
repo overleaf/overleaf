@@ -274,21 +274,21 @@ define([
     monkeyPatchAutocomplete() {
       const { Autocomplete } = ace.require('ace/autocomplete')
       const Util = ace.require('ace/autocomplete/util')
-      const { editor } = this
 
       if (Autocomplete.prototype._insertMatch == null) {
         // Only override this once since it's global but we may create multiple
         // autocomplete handlers
         Autocomplete.prototype._insertMatch = Autocomplete.prototype.insertMatch
         Autocomplete.prototype.insertMatch = function(data) {
+          const { editor } = this
+
           const pos = editor.getCursorPosition()
           let range = new Range(pos.row, pos.column, pos.row, pos.column + 1)
           const nextChar = editor.session.getTextRange(range)
-
           // If we are in \begin{it|}, then we need to remove the trailing }
           // since it will be adding in with the autocomplete of \begin{item}...
           if (
-            /^\\\w+(\[[\w\\,= ]*\])?{/.test(this.completions.filterText) &&
+            /^\\\w+(\[[\w\\,=. ]*\])?{/.test(this.completions.filterText) &&
             nextChar === '}'
           ) {
             editor.session.remove(range)
