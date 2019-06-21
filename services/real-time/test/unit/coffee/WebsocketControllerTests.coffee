@@ -116,7 +116,10 @@ describe 'WebsocketController', ->
 				@callback
 					.calledWith(new Error("not authorized"))
 					.should.equal true
-	
+
+			it "should not log an error", ->
+				@logger.error.called.should.equal false
+
 	describe "leaveProject", ->
 		beforeEach ->
 			@DocumentUpdaterManager.flushProjectToMongoAndDelete = sinon.stub().callsArg(1)
