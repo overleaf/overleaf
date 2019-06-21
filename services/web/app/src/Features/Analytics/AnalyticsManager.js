@@ -1,119 +1,106 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
-const _ = require('underscore')
-const request = require('requestretry')
+const request = require('request')
+const FaultTolerantRequest = require('../../infrastructure/FaultTolerantRequest')
 const Errors = require('../Errors/Errors')
 
-const isProduction =
-  (process.env['NODE_ENV'] || '').toLowerCase() === 'production'
-const isTest = process.env['MOCHA_GREP'] !== undefined
-
-const makeFaultTolerantRequest = function(userId, options, callback) {
+// check that the request should be made: ignore smoke test user and ensure the
+// analytics service is configured
+const checkAnalyticsRequest = function(userId) {
   if (
-    userId + '' ===
-    (settings.smokeTest != null ? settings.smokeTest.userId : undefined) + ''
+    settings.smokeTest &&
+    settings.smokeTest.userId &&
+    settings.smokeTest.userId.toString() === userId.toString()
   ) {
-    return callback()
+    // ignore smoke test user
+    return { error: null, skip: true }
   }
 
-  options = Object.assign(options, {
-    delayStrategy: exponentialBackoffStrategy(),
-    timeout: 30000
-  })
+  if (!settings.apis.analytics) {
+    return {
+      error: new Errors.ServiceNotConfiguredError(
+        'Analytics service not configured'
+      ),
+      skip: true
+    }
+  }
 
+  return { error: null, skip: false }
+}
+
+// prepare the request: set `fromv2` param and full URL
+const prepareAnalyticsRequest = function(options) {
   if (settings.overleaf != null) {
     options.qs = Object.assign({}, options.qs, { fromV2: 1 })
   }
 
-  makeRequest(options, function(err) {
-    if (err != null) {
-      return logger.err({ err }, 'Request to analytics failed')
-    }
-  })
+  const urlPath = options.url
+  options.url = `${settings.apis.analytics.url}${urlPath}`
 
-  return callback() // Do not wait for all the attempts
+  options.timeout = options.timeout || 30000
+
+  return options
 }
 
-var makeRequest = function(opts, callback) {
-  if (
-    __guard__(
-      settings.apis != null ? settings.apis.analytics : undefined,
-      x => x.url
-    ) != null
-  ) {
-    const urlPath = opts.url
-    opts.url = `${settings.apis.analytics.url}${urlPath}`
-    return request(opts, callback)
-  } else {
-    return callback(
-      new Errors.ServiceNotConfiguredError('Analytics service not configured')
-    )
+// make the request to analytics after checking and preparing it.
+// request happens asynchronously in the background and will be retried on error
+const makeAnalyticsBackgroundRequest = function(userId, options, callback) {
+  let { error, skip } = checkAnalyticsRequest(userId)
+  if (error || skip) {
+    return callback(error)
   }
+  prepareAnalyticsRequest(options)
+
+  // With the tweaked parameter values (BACKOFF_BASE=3000, BACKOFF_MULTIPLIER=3):
+  // - the 6th attempt (maxAttempts=6) will run after 5.5 to 11.5 minutes
+  // - the 9th attempt (maxAttempts=9) will run after 86 to 250 minutes
+  options.maxAttempts = options.maxAttempts || 9
+  options.backoffBase = options.backoffBase || 3000
+  options.backoffMultiplier = options.backoffMultiplier || 3
+
+  FaultTolerantRequest.backgroundRequest(options, callback)
 }
 
-// Set an exponential backoff to retry calls to analytics. First retry will
-// happen after 4s, then 8, 16, 32, 64...
-var exponentialBackoffStrategy = function() {
-  let attempts = 1 // This won't be called until there has been 1 failure
-
-  return function() {
-    attempts += 1
-    return exponentialBackoffDelay(attempts)
+// make synchronous request to analytics without retries after checking and
+// preparing it.
+const makeAnalyticsRequest = function(userId, options, callback) {
+  let { error, skip } = checkAnalyticsRequest(userId)
+  if (error || skip) {
+    return callback(error)
   }
-}
+  prepareAnalyticsRequest(options)
 
-var exponentialBackoffDelay = function(attempts) {
-  const delay = Math.pow(2, attempts) * 1000
-
-  if (isProduction && !isTest) {
-    logger.warn(
-      'Error comunicating with the analytics service. ' +
-        `Will try again attempt ${attempts} in ${delay}ms`
-    )
-  }
-
-  return delay
+  request(options, callback)
 }
 
 module.exports = {
-  identifyUser(user_id, old_user_id, callback) {
-    if (callback == null) {
-      callback = function(error) {}
+  identifyUser(userId, oldUserId, callback) {
+    if (!callback) {
+      // callback is optional
+      callback = () => {}
     }
+
     const opts = {
       body: {
-        old_user_id
+        old_user_id: oldUserId
       },
       json: true,
       method: 'POST',
-      timeout: 1000,
-      url: `/user/${user_id}/identify`
+      url: `/user/${userId}/identify`
     }
-    return makeRequest(opts, callback)
+    makeAnalyticsBackgroundRequest(userId, opts, callback)
   },
 
-  recordEvent(user_id, event, segmentation, callback) {
+  recordEvent(userId, event, segmentation, callback) {
     if (segmentation == null) {
+      // segmentation is optional
       segmentation = {}
     }
-    if (callback == null) {
-      callback = function(error) {}
+    if (!callback) {
+      // callback is optional
+      callback = () => {}
     }
+
     const opts = {
       body: {
         event,
@@ -121,17 +108,18 @@ module.exports = {
       },
       json: true,
       method: 'POST',
-      url: `/user/${user_id}/event`,
-      maxAttempts: 7 // Give up after ~ 8min
+      url: `/user/${userId}/event`
     }
 
-    return makeFaultTolerantRequest(user_id, opts, callback)
+    makeAnalyticsBackgroundRequest(userId, opts, callback)
   },
 
   updateEditingSession(userId, projectId, countryCode, callback) {
-    if (callback == null) {
-      callback = function(error) {}
+    if (!callback) {
+      // callback is optional
+      callback = () => {}
     }
+
     const query = {
       userId,
       projectId
@@ -145,16 +133,14 @@ module.exports = {
       method: 'PUT',
       url: '/editingSession',
       qs: query,
-      maxAttempts: 6 // Give up after ~ 4min
+      maxAttempts: 6 // dont retry for too long as session ping timestamp are
+      // recorded when the request is received on the analytics
     }
 
-    return makeFaultTolerantRequest(userId, opts, callback)
+    makeAnalyticsBackgroundRequest(userId, opts, callback)
   },
 
-  getLastOccurrence(user_id, event, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
+  getLastOccurrence(userId, event, callback) {
     const opts = {
       body: {
         event
@@ -162,22 +148,16 @@ module.exports = {
       json: true,
       method: 'POST',
       timeout: 1000,
-      url: `/user/${user_id}/event/last_occurrence`
+      url: `/user/${userId}/event/last_occurrence`
     }
-    return makeRequest(opts, function(err, response, body) {
+    makeAnalyticsRequest(userId, opts, function(err, response, body) {
       if (err != null) {
         console.log(response, opts)
-        logger.err({ user_id, err }, 'error getting last occurance of event')
-        return callback(err)
+        logger.err({ userId, err }, 'error getting last occurance of event')
+        callback(err)
       } else {
-        return callback(null, body)
+        callback(null, body)
       }
     })
   }
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

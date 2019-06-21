@@ -1,25 +1,10 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 const path = require('path')
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/Analytics/AnalyticsController'
 )
 const sinon = require('sinon')
-const { expect } = require('chai')
 
 describe('AnalyticsController', function() {
   beforeEach(function() {
@@ -49,7 +34,7 @@ describe('AnalyticsController', function() {
       }
     })
 
-    return (this.res = { send() {} })
+    this.res = { send() {} }
   })
 
   describe('updateEditingSession', function() {
@@ -59,32 +44,32 @@ describe('AnalyticsController', function() {
           projectId: 'a project id'
         }
       }
-      return (this.GeoIpLookup.getDetails = sinon
+      this.GeoIpLookup.getDetails = sinon
         .stub()
-        .callsArgWith(1, null, { country_code: 'XY' }))
+        .callsArgWith(1, null, { country_code: 'XY' })
     })
 
-    return it('delegates to the AnalyticsManager', function(done) {
+    it('delegates to the AnalyticsManager', function(done) {
       this.AuthenticationController.getLoggedInUserId.returns('1234')
       this.controller.updateEditingSession(this.req, this.res)
 
       this.AnalyticsManager.updateEditingSession
         .calledWith('1234', 'a project id', 'XY')
         .should.equal(true)
-      return done()
+      done()
     })
   })
 
   describe('recordEvent', function() {
     beforeEach(function() {
-      return (this.req = {
+      this.req = {
         params: {
           event: 'i_did_something'
         },
         body: 'stuff',
         sessionID: 'sessionIDHere',
         session: {}
-      })
+      }
     })
 
     it('should use the user_id', function(done) {
@@ -93,21 +78,21 @@ describe('AnalyticsController', function() {
       this.AnalyticsManager.recordEvent
         .calledWith('1234', this.req.params['event'], this.req.body)
         .should.equal(true)
-      return done()
+      done()
     })
 
-    return it('should use the session id', function(done) {
+    it('should use the session id', function(done) {
       this.controller.recordEvent(this.req, this.res)
       this.AnalyticsManager.recordEvent
         .calledWith(this.req.sessionID, this.req.params['event'], this.req.body)
         .should.equal(true)
-      return done()
+      done()
     })
   })
 
-  return describe('licences', function() {
+  describe('licences', function() {
     beforeEach(function() {
-      return (this.req = {
+      this.req = {
         query: {
           resource_id: 1,
           start_date: '1514764800',
@@ -116,10 +101,10 @@ describe('AnalyticsController', function() {
         },
         sessionID: 'sessionIDHere',
         session: {}
-      })
+      }
     })
 
-    return it('should trigger institutions api to fetch licences graph data', function(done) {
+    it('should trigger institutions api to fetch licences graph data', function(done) {
       this.controller.licences(this.req, this.res)
       this.InstitutionsAPI.getInstitutionLicences
         .calledWith(
@@ -129,7 +114,7 @@ describe('AnalyticsController', function() {
           this.req.query['lag']
         )
         .should.equal(true)
-      return done()
+      done()
     })
   })
 })

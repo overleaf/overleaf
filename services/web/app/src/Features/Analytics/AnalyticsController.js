@@ -1,39 +1,21 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let AnalyticsController
 const AnalyticsManager = require('./AnalyticsManager')
 const Errors = require('../Errors/Errors')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
 const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
 
-module.exports = AnalyticsController = {
+module.exports = {
   updateEditingSession(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
     const { projectId } = req.params
     let countryCode = null
 
-    if (userId != null) {
-      return GeoIpLookup.getDetails(req.ip, function(err, geoDetails) {
-        if (
-          (geoDetails != null ? geoDetails.country_code : undefined) != null &&
-          geoDetails.country_code !== ''
-        ) {
+    if (userId) {
+      GeoIpLookup.getDetails(req.ip, function(err, geoDetails) {
+        if (!err && geoDetails && geoDetails.country_code) {
           countryCode = geoDetails.country_code
         }
-        return AnalyticsManager.updateEditingSession(
+        AnalyticsManager.updateEditingSession(
           userId,
           projectId,
           countryCode,
@@ -41,34 +23,29 @@ module.exports = AnalyticsController = {
         )
       })
     } else {
-      return res.send(204)
+      res.send(204)
     }
   },
 
   recordEvent(req, res, next) {
-    const user_id =
+    const userId =
       AuthenticationController.getLoggedInUserId(req) || req.sessionID
-    return AnalyticsManager.recordEvent(
-      user_id,
-      req.params.event,
-      req.body,
-      error => respondWith(error, res, next)
+    AnalyticsManager.recordEvent(userId, req.params.event, req.body, error =>
+      respondWith(error, res, next)
     )
   },
 
   licences(req, res, next) {
-    const { resource_id, start_date, end_date, lag } = req.query
-    return InstitutionsAPI.getInstitutionLicences(
-      resource_id,
-      start_date,
-      end_date,
-      lag,
+    InstitutionsAPI.getInstitutionLicences(
+      req.query.resource_id,
+      req.query.start_date,
+      req.query.end_date,
+      req.query.lag,
       function(error, licences) {
-        if (error != null) {
+        if (error) {
           return next(error)
-        } else {
-          return res.send(licences)
         }
+        res.send(licences)
       }
     )
   }
@@ -77,10 +54,10 @@ module.exports = AnalyticsController = {
 var respondWith = function(error, res, next) {
   if (error instanceof Errors.ServiceNotConfiguredError) {
     // ignore, no-op
-    return res.send(204)
-  } else if (error != null) {
-    return next(error)
+    res.send(204)
+  } else if (error) {
+    next(error)
   } else {
-    return res.send(204)
+    res.send(204)
   }
 }

@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const AuthenticationController = require('./../Authentication/AuthenticationController')
 const AnalyticsController = require('./AnalyticsController')
 const AnalyticsProxy = require('./AnalyticsProxy')
@@ -36,7 +29,7 @@ module.exports = {
       AnalyticsProxy.call('/recentV1TemplateIdsActivity')
     )
 
-    return publicApiRouter.use(
+    publicApiRouter.use(
       '/analytics/uniExternalCollaboration',
       AuthenticationController.httpAuth,
       AnalyticsProxy.call('/uniExternalCollaboration')
