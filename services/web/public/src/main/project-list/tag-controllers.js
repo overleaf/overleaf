@@ -1,45 +1,27 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-return-assign,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
   App.controller('TagListController', function($scope, $modal) {
-    $scope.filterProjects = function(filter) {
-      if (filter == null) {
-        filter = 'all'
-      }
+    $scope.filterProjects = function(filter = 'all') {
       $scope._clearTags()
-      return $scope.setFilter(filter)
+      $scope.setFilter(filter)
     }
 
     $scope._clearTags = () =>
-      Array.from($scope.tags).map(tag => (tag.selected = false))
+      $scope.tags.forEach(tag => {
+        tag.selected = false
+      })
 
     $scope.selectTag = function(tag) {
       $scope._clearTags()
       tag.selected = true
-      return $scope.setFilter('tag')
+      $scope.setFilter('tag')
     }
 
     $scope.selectUntagged = function() {
       $scope._clearTags()
-      return $scope.setFilter('untagged')
+      $scope.setFilter('untagged')
     }
 
-    $scope.getHueForTagId = tag_id => {
-      return ColorManager.getHueForTagId(tag_id)
-    }
+    $scope.getHueForTagId = tagId => ColorManager.getHueForTagId(tagId)
 
     $scope.deleteTag = function(tag) {
       const modalInstance = $modal.open({
@@ -51,9 +33,9 @@ define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
           }
         }
       })
-      return modalInstance.result.then(function() {
+      modalInstance.result.then(function() {
         // Remove tag from projects
-        for (let project of Array.from($scope.projects)) {
+        for (let project of $scope.projects) {
           if (!project.tags) {
             project.tags = []
           }
@@ -63,33 +45,30 @@ define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
           }
         }
         // Remove tag
-        return ($scope.tags = $scope.tags.filter(t => t !== tag))
+        $scope.tags = $scope.tags.filter(t => t !== tag)
       })
     }
 
-    return ($scope.renameTag = function(tag) {
+    $scope.renameTag = function(tag) {
       const modalInstance = $modal.open({
         templateUrl: 'renameTagModalTemplate',
         controller: 'RenameTagModalController',
         resolve: {
           tag() {
             return tag
-          },
-          existing_tags() {
-            return $scope.tags
           }
         }
       })
-      return modalInstance.result.then(new_name => (tag.name = new_name))
-    })
+      modalInstance.result.then(newName => (tag.name = newName))
+    }
   })
 
   App.controller('TagDropdownItemController', function($scope) {
     $scope.recalculateProjectsInTag = function() {
       let partialSelection
       $scope.areSelectedProjectsInTag = false
-      for (let project_id of Array.from($scope.getSelectedProjectIds())) {
-        if (Array.from($scope.tag.project_ids).includes(project_id)) {
+      for (let projectId of $scope.getSelectedProjectIds()) {
+        if ($scope.tag.project_ids.includes(projectId)) {
           $scope.areSelectedProjectsInTag = true
         } else {
           partialSelection = true
@@ -97,25 +76,25 @@ define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
       }
 
       if ($scope.areSelectedProjectsInTag && partialSelection) {
-        return ($scope.areSelectedProjectsInTag = 'partial')
+        $scope.areSelectedProjectsInTag = 'partial'
       }
     }
 
     $scope.addOrRemoveProjectsFromTag = function() {
       if ($scope.areSelectedProjectsInTag === true) {
         $scope.removeSelectedProjectsFromTag($scope.tag)
-        return ($scope.areSelectedProjectsInTag = false)
+        $scope.areSelectedProjectsInTag = false
       } else if (
         $scope.areSelectedProjectsInTag === false ||
         $scope.areSelectedProjectsInTag === 'partial'
       ) {
         $scope.addSelectedProjectsToTag($scope.tag)
-        return ($scope.areSelectedProjectsInTag = true)
+        $scope.areSelectedProjectsInTag = true
       }
     }
 
     $scope.$watch('selectedProjects', () => $scope.recalculateProjectsInTag())
-    return $scope.recalculateProjectsInTag()
+    $scope.recalculateProjectsInTag()
   })
 
   App.controller('NewTagModalController', function(
@@ -139,7 +118,7 @@ define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
       const name = $scope.inputs.newTagName
       $scope.state.inflight = true
       $scope.state.error = false
-      return $http
+      $http
         .post('/tag', {
           _csrf: window.csrfToken,
           name
@@ -147,15 +126,15 @@ define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
         .then(function(response) {
           const { data } = response
           $scope.state.inflight = false
-          return $modalInstance.close(data)
+          $modalInstance.close(data)
         })
         .catch(function() {
           $scope.state.inflight = false
-          return ($scope.state.error = true)
+          $scope.state.error = true
         })
     }
 
-    return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
+    $scope.cancel = () => $modalInstance.dismiss('cancel')
   })
 
   App.controller('RenameTagModalController', function(
@@ -163,8 +142,7 @@ define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
     $modalInstance,
     $timeout,
     $http,
-    tag,
-    existing_tags
+    tag
   ) {
     $scope.inputs = { tagName: tag.name }
 
@@ -188,15 +166,15 @@ define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
         })
         .then(function() {
           $scope.state.inflight = false
-          return $modalInstance.close(name)
+          $modalInstance.close(name)
         })
         .catch(function() {
           $scope.state.inflight = false
-          return ($scope.state.error = true)
+          $scope.state.error = true
         })
     }
 
-    return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
+    $scope.cancel = () => $modalInstance.dismiss('cancel')
   })
 
   return App.controller('DeleteTagModalController', function(
@@ -223,14 +201,14 @@ define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
       })
         .then(function() {
           $scope.state.inflight = false
-          return $modalInstance.close()
+          $modalInstance.close()
         })
         .catch(function() {
           $scope.state.inflight = false
-          return ($scope.state.error = true)
+          $scope.state.error = true
         })
     }
 
-    return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
+    $scope.cancel = () => $modalInstance.dismiss('cancel')
   })
 })
