@@ -688,9 +688,6 @@ module.exports = ProjectController = {
                 project.overleaf != null ? project.overleaf.history : undefined,
                 x => x.display
               ),
-              richTextTrackChangesEnabled:
-                (req.query != null ? req.query.rttc : undefined) === 'true' ||
-                user.betaProgram,
               showTestControls:
                 (req.query != null ? req.query.tc : undefined) === 'true' ||
                 user.isAdmin,
