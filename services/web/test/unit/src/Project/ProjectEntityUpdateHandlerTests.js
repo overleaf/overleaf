@@ -186,7 +186,7 @@ describe('ProjectEntityUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('should should send the change in project structure to the doc updater', function() {
+    it('should should send the change in project structure to the doc updater', function() {
       const changesMatcher = sinon.match(changes => {
         const { newFiles } = changes
         if (newFiles.length !== 1) {
@@ -244,7 +244,7 @@ describe('ProjectEntityUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('should put file into folder by calling put element, with the linkedFileData and hash', function() {
+    it('should put file into folder by calling put element, with the linkedFileData and hash', function() {
       return this.ProjectEntityMongoUpdateHandler._putElement
         .calledWithMatch(
           this.project,
@@ -348,7 +348,7 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
@@ -378,7 +378,7 @@ describe('ProjectEntityUpdateHandler', function() {
         return this.TpdsUpdateSender.addDoc.called.should.equal(false)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
@@ -425,7 +425,7 @@ describe('ProjectEntityUpdateHandler', function() {
         return this.TpdsUpdateSender.addDoc.called.should.equal(false)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
@@ -458,14 +458,14 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('should return a not found error', function() {
+      it('should return a not found error', function() {
         return this.callback
           .calledWith(new Errors.NotFoundError())
           .should.equal(true)
       })
     })
 
-    return describe('when the project is not found', function() {
+    describe('when the project is not found', function() {
       beforeEach(function() {
         this.ProjectGetter.getProjectWithoutDocLines = sinon.stub().yields()
         return this.ProjectEntityUpdateHandler.updateDocLines(
@@ -480,7 +480,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('should return a not found error', function() {
+      it('should return a not found error', function() {
         return this.callback
           .calledWith(new Errors.NotFoundError())
           .should.equal(true)
@@ -541,7 +541,7 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('sends the change in project structure to the doc updater', function() {
+      it('sends the change in project structure to the doc updater', function() {
         const newDocs = [
           {
             doc: this.newDoc,
@@ -558,7 +558,7 @@ describe('ProjectEntityUpdateHandler', function() {
       })
     })
 
-    return describe('adding a doc with an invalid name', function() {
+    describe('adding a doc with an invalid name', function() {
       beforeEach(function() {
         this.path = '/path/to/doc'
 
@@ -573,7 +573,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         return this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
@@ -641,7 +641,7 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('sends the change in project structure to the doc updater', function() {
+      it('sends the change in project structure to the doc updater', function() {
         const newFiles = [
           {
             file: this.newFile,
@@ -658,7 +658,7 @@ describe('ProjectEntityUpdateHandler', function() {
       })
     })
 
-    return describe('adding a file with an invalid name', function() {
+    describe('adding a file with an invalid name', function() {
       beforeEach(function() {
         this.path = '/path/to/file'
 
@@ -683,7 +683,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         return this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
@@ -763,7 +763,7 @@ describe('ProjectEntityUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('updates the project structure in the doc updater', function() {
+    it('updates the project structure in the doc updater', function() {
       const oldFiles = [
         {
           file: this.oldFile,
@@ -802,7 +802,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Error)
         return this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
@@ -851,7 +851,7 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('returns the doc', function() {
+      it('returns the doc', function() {
         return this.callback.calledWith(null, this.existingDoc, false)
       })
     })
@@ -895,12 +895,12 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('returns the doc', function() {
+      it('returns the doc', function() {
         return this.callback.calledWith(null, this.newDoc, true)
       })
     })
 
-    return describe('upserting a new doc with an invalid name', function() {
+    describe('upserting a new doc with an invalid name', function() {
       beforeEach(function() {
         this.folder = { _id: folder_id, docs: [] }
         this.newDoc = { _id: doc_id }
@@ -920,7 +920,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         return this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
@@ -948,7 +948,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Error)
         return this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
@@ -986,7 +986,7 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('returns the file', function() {
+      it('returns the file', function() {
         return this.callback.calledWith(null, this.existingFile, false)
       })
     })
@@ -1030,12 +1030,12 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('returns the file', function() {
+      it('returns the file', function() {
         return this.callback.calledWith(null, this.newFile, true)
       })
     })
 
-    return describe('upserting a new file with an invalid name', function() {
+    describe('upserting a new file with an invalid name', function() {
       beforeEach(function() {
         this.folder = { _id: folder_id, fileRefs: [] }
         this.newFile = { _id: file_id }
@@ -1055,7 +1055,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         return this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
@@ -1106,7 +1106,7 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('calls the callback', function() {
+      it('calls the callback', function() {
         return this.callback
           .calledWith(
             null,
@@ -1143,13 +1143,13 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         return this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
     })
 
-    return describe('upserting a doc with an invalid name', function() {
+    describe('upserting a doc with an invalid name', function() {
       beforeEach(function() {
         this.path = '/folder/*doc.tex'
         this.newFolders = ['mock-a', 'mock-b']
@@ -1173,7 +1173,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         return this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
@@ -1227,7 +1227,7 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('calls the callback', function() {
+      it('calls the callback', function() {
         return this.callback
           .calledWith(
             null,
@@ -1265,13 +1265,13 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         return this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
     })
 
-    return describe('upserting a file with an invalid name', function() {
+    describe('upserting a file with an invalid name', function() {
       beforeEach(function() {
         this.path = '/folder/*file.png'
         this.newFolders = ['mock-a', 'mock-b']
@@ -1295,7 +1295,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         return this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
@@ -1358,7 +1358,7 @@ describe('ProjectEntityUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('retuns the entity_id', function() {
+    it('retuns the entity_id', function() {
       return this.callback.calledWith(null, doc_id).should.equal(true)
     })
   })
@@ -1388,14 +1388,14 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('deletes the entity', function() {
+      it('deletes the entity', function() {
         return this.ProjectEntityUpdateHandler.deleteEntity.withoutLock
           .calledWith(project_id, this.doc._id, 'doc', userId, this.callback)
           .should.equal(true)
       })
     })
 
-    return describe('when the entity does not exist', function() {
+    describe('when the entity does not exist', function() {
       beforeEach(function() {
         this.ProjectLocator.findElementByPath = sinon.stub().yields()
         this.path = '/doc.tex'
@@ -1407,7 +1407,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         return this.callback
           .calledWith(new Errors.NotFoundError())
           .should.equal(true)
@@ -1426,7 +1426,7 @@ describe('ProjectEntityUpdateHandler', function() {
       )
     })
 
-    return it('calls ProjectEntityMongoUpdateHandler', function() {
+    it('calls ProjectEntityMongoUpdateHandler', function() {
       return this.ProjectEntityMongoUpdateHandler.mkdirp
         .calledWith(project_id, this.docPath)
         .should.equal(true)
@@ -1444,7 +1444,7 @@ describe('ProjectEntityUpdateHandler', function() {
       )
     })
 
-    return it('calls ProjectEntityMongoUpdateHandler', function() {
+    it('calls ProjectEntityMongoUpdateHandler', function() {
       return this.ProjectEntityMongoUpdateHandler.mkdirp
         .calledWith(project_id, this.docPath, { exactCaseMatch: true })
         .should.equal(true)
@@ -1465,14 +1465,14 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('calls ProjectEntityMongoUpdateHandler', function() {
+      it('calls ProjectEntityMongoUpdateHandler', function() {
         return this.ProjectEntityMongoUpdateHandler.addFolder
           .calledWith(project_id, this.parentFolder_id, this.folderName)
           .should.equal(true)
       })
     })
 
-    return describe('adding a folder with an invalid name', function() {
+    describe('adding a folder with an invalid name', function() {
       beforeEach(function() {
         this.parentFolder_id = '123asdf'
         this.folderName = '*new-folder'
@@ -1485,7 +1485,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         return this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
@@ -1540,7 +1540,7 @@ describe('ProjectEntityUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('sends the changes in project structure to the doc updater', function() {
+    it('sends the changes in project structure to the doc updater', function() {
       return this.DocumentUpdaterHandler.updateProjectStructure
         .calledWith(
           project_id,
@@ -1603,7 +1603,7 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('sends the changes in project structure to the doc updater', function() {
+      it('sends the changes in project structure to the doc updater', function() {
         return this.DocumentUpdaterHandler.updateProjectStructure
           .calledWith(
             project_id,
@@ -1616,7 +1616,7 @@ describe('ProjectEntityUpdateHandler', function() {
       })
     })
 
-    return describe('renaming an entity to an invalid name', function() {
+    describe('renaming an entity to an invalid name', function() {
       beforeEach(function() {
         this.project_name = 'project name'
         this.startPath = '/folder/a.tex'
@@ -1647,7 +1647,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('returns an error', function() {
+      it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         return this.callback.calledWithMatch(errorMatcher).should.equal(true)
       })
@@ -1665,7 +1665,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         const error = new Errors.ProjectHistoryDisabledError(
           `project history not enabled for ${project_id}`
         )
@@ -1684,7 +1684,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         const error = new Errors.ProjectHistoryDisabledError(
           `project history not enabled for ${project_id}`
         )
@@ -1692,7 +1692,7 @@ describe('ProjectEntityUpdateHandler', function() {
       })
     })
 
-    return describe('a project with project-history enabled', function() {
+    describe('a project with project-history enabled', function() {
       beforeEach(function() {
         this.ProjectGetter.getProject = sinon.stub().yields(null, this.project)
         const docs = [
@@ -1755,7 +1755,7 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('calls the callback', function() {
+      it('calls the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
@@ -1804,7 +1804,7 @@ describe('ProjectEntityUpdateHandler', function() {
         return this.DocumentUpdaterHandler.deleteDoc.called.should.equal(false)
       })
 
-      return it('should should send the update to the doc updater', function() {
+      it('should should send the update to the doc updater', function() {
         const oldFiles = [{ file: this.entity, path: this.path }]
         return this.DocumentUpdaterHandler.updateProjectStructure
           .calledWith(project_id, projectHistoryId, userId, {
@@ -1838,7 +1838,7 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('should should send the update to the doc updater', function() {
+      it('should should send the update to the doc updater', function() {
         const oldDocs = [{ doc: this.entity, path: this.path }]
         return this.DocumentUpdaterHandler.updateProjectStructure
           .calledWith(project_id, projectHistoryId, userId, {
@@ -1849,7 +1849,7 @@ describe('ProjectEntityUpdateHandler', function() {
       })
     })
 
-    return describe('a folder', function() {
+    describe('a folder', function() {
       beforeEach(function(done) {
         this.folder = {
           folders: [
@@ -1909,7 +1909,7 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('should should send one update to the doc updater for all docs and files', function() {
+      it('should should send one update to the doc updater for all docs and files', function() {
         const oldFiles = [
           { file: this.file2, path: '/folder/file-name-2' },
           { file: this.file1, path: '/folder/subfolder/file-name-1' }
@@ -1929,7 +1929,7 @@ describe('ProjectEntityUpdateHandler', function() {
     })
   })
 
-  return describe('_cleanUpDoc', function() {
+  describe('_cleanUpDoc', function() {
     beforeEach(function() {
       this.doc = {
         _id: ObjectId(),
@@ -1982,12 +1982,12 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('when the doc is not the root doc', function() {
+    describe('when the doc is not the root doc', function() {
       beforeEach(function() {
         this.project.rootDoc_id = ObjectId()
         return this.ProjectEntityUpdateHandler._cleanUpDoc(
@@ -2005,7 +2005,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })

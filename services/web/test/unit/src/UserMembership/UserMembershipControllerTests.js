@@ -127,7 +127,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    return it('render institution view', function(done) {
+    it('render institution view', function(done) {
       this.req.entity = this.institution
       this.req.entityConfig = EntityConfigs.institution
       return this.UserMembershipController.index(this.req, {
@@ -206,7 +206,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    return it('handle invalid email', function(done) {
+    it('handle invalid email', function(done) {
       this.req.body.email = 'not_valid_email'
       return this.UserMembershipController.add(this.req, {
         status: () => ({
@@ -261,7 +261,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    return it('prevent admin removal', function(done) {
+    it('prevent admin removal', function(done) {
       this.UserMembershipHandler.removeUser.yields({ isAdmin: true })
       return this.UserMembershipController.remove(this.req, {
         status: () => ({
@@ -305,7 +305,7 @@ describe('UserMembershipController', function() {
       )
     })
 
-    return it('should export the correct csv', function() {
+    it('should export the correct csv', function() {
       return assertCalledWith(
         this.res.send,
         'mock-email-1@foo.com\nmock-email-2@foo.com\n'
@@ -319,7 +319,7 @@ describe('UserMembershipController', function() {
       return (this.req.params.id = 'abc')
     })
 
-    return it('renders view', function(done) {
+    it('renders view', function(done) {
       return this.UserMembershipController.new(this.req, {
         render: (viewPath, data) => {
           expect(data.entityName).to.eq('publisher')
@@ -330,7 +330,7 @@ describe('UserMembershipController', function() {
     })
   })
 
-  return describe('create', function() {
+  describe('create', function() {
     beforeEach(function() {
       this.req.params.name = 'institution'
       return (this.req.params.id = 123)
@@ -350,7 +350,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    return it('checks canCreate', function(done) {
+    it('checks canCreate', function(done) {
       this.req.params.name = 'group'
       return this.UserMembershipController.create(this.req, null, error => {
         expect(error).to.extist

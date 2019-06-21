@@ -132,7 +132,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not call _checkSessions', function(done) {
+      it('should not call _checkSessions', function(done) {
         return this.call(err => {
           this._checkSessions.callCount.should.equal(0)
           return done()
@@ -169,7 +169,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not call _checkSessions', function(done) {
+      it('should not call _checkSessions', function(done) {
         return this.call(err => {
           this._checkSessions.callCount.should.equal(0)
           return done()
@@ -177,7 +177,7 @@ describe('UserSessionsManager', function() {
       })
     })
 
-    return describe('when no sessionId is supplied', function() {
+    describe('when no sessionId is supplied', function() {
       beforeEach(function() {
         return (this.call = callback => {
           return this.UserSessionsManager.trackSession(
@@ -206,7 +206,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not call _checkSessions', function(done) {
+      it('should not call _checkSessions', function(done) {
         return this.call(err => {
           this._checkSessions.callCount.should.equal(0)
           return done()
@@ -271,7 +271,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not call _checkSessions', function(done) {
+      it('should not call _checkSessions', function(done) {
         return this.call(err => {
           this._checkSessions.callCount.should.equal(0)
           return done()
@@ -308,7 +308,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not call _checkSessions', function(done) {
+      it('should not call _checkSessions', function(done) {
         return this.call(err => {
           this._checkSessions.callCount.should.equal(0)
           return done()
@@ -316,7 +316,7 @@ describe('UserSessionsManager', function() {
       })
     })
 
-    return describe('when no sessionId is supplied', function() {
+    describe('when no sessionId is supplied', function() {
       beforeEach(function() {
         return (this.call = callback => {
           return this.UserSessionsManager.untrackSession(
@@ -345,7 +345,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not call _checkSessions', function(done) {
+      it('should not call _checkSessions', function(done) {
         return this.call(err => {
           this._checkSessions.callCount.should.equal(0)
           return done()
@@ -431,7 +431,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should remove all sessions except for the retained one', function(done) {
+      it('should remove all sessions except for the retained one', function(done) {
         return this.call(err => {
           expect(this.rclient.del.firstCall.args[0]).to.deep.equal('sess:one')
           expect(this.rclient.del.secondCall.args[0]).to.deep.equal(
@@ -462,7 +462,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not call rclient.srem', function(done) {
+      it('should not call rclient.srem', function(done) {
         return this.call(err => {
           this.rclient.srem.callCount.should.equal(0)
           return done()
@@ -489,7 +489,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not call the appropriate redis methods', function(done) {
+      it('should not call the appropriate redis methods', function(done) {
         return this.call(err => {
           this.rclient.smembers.callCount.should.equal(0)
           this.rclient.del.callCount.should.equal(0)
@@ -499,7 +499,7 @@ describe('UserSessionsManager', function() {
       })
     })
 
-    return describe('when there are no keys to delete', function() {
+    describe('when there are no keys to delete', function() {
       beforeEach(function() {
         return this.rclient.smembers.callsArgWith(1, null, [])
       })
@@ -512,7 +512,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not do the delete operation', function(done) {
+      it('should not do the delete operation', function(done) {
         return this.call(err => {
           this.rclient.smembers.callCount.should.equal(1)
           this.rclient.del.callCount.should.equal(0)
@@ -551,7 +551,7 @@ describe('UserSessionsManager', function() {
         return this.rclient.expire.callsArgWith(2, new Error('woops'))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call(err => {
           expect(err).to.be.instanceof(Error)
           return done()
@@ -559,7 +559,7 @@ describe('UserSessionsManager', function() {
       })
     })
 
-    return describe('when no user is supplied', function() {
+    describe('when no user is supplied', function() {
       beforeEach(function() {
         return (this.call = callback => {
           return this.UserSessionsManager.touch(null, callback)
@@ -574,7 +574,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not call expire', function(done) {
+      it('should not call expire', function(done) {
         return this.call(err => {
           this.rclient.expire.callCount.should.equal(0)
           return done()
@@ -663,7 +663,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not have called rclient.mget', function(done) {
+      it('should not have called rclient.mget', function(done) {
         return this.call((err, sessions) => {
           this.rclient.mget.callCount.should.equal(0)
           return done()
@@ -684,7 +684,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not have called rclient.mget', function(done) {
+      it('should not have called rclient.mget', function(done) {
         return this.call((err, sessions) => {
           this.rclient.mget.callCount.should.equal(0)
           return done()
@@ -692,14 +692,14 @@ describe('UserSessionsManager', function() {
       })
     })
 
-    return describe('when get produces an error', function() {
+    describe('when get produces an error', function() {
       beforeEach(function() {
         return (this.rclient.get = sinon
           .stub()
           .callsArgWith(1, new Error('woops')))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call((err, sessions) => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
@@ -709,7 +709,7 @@ describe('UserSessionsManager', function() {
     })
   })
 
-  return describe('_checkSessions', function() {
+  describe('_checkSessions', function() {
     beforeEach(function() {
       this.call = callback => {
         return this.UserSessionsManager._checkSessions(this.user, callback)
@@ -751,7 +751,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should remove that key from the set', function(done) {
+      it('should remove that key from the set', function(done) {
         return this.call(err => {
           this.rclient.smembers.callCount.should.equal(1)
           this.rclient.get.callCount.should.equal(2)
@@ -777,7 +777,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should not call redis methods', function(done) {
+      it('should not call redis methods', function(done) {
         return this.call(err => {
           this.rclient.smembers.callCount.should.equal(0)
           this.rclient.get.callCount.should.equal(0)
@@ -786,7 +786,7 @@ describe('UserSessionsManager', function() {
       })
     })
 
-    return describe('when one of the get operations produces an error', function() {
+    describe('when one of the get operations produces an error', function() {
       beforeEach(function() {
         this.rclient.get.onCall(0).callsArgWith(1, new Error('woops'), null)
         return this.rclient.get.onCall(1).callsArgWith(1, null, null)
@@ -799,7 +799,7 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      return it('should call the right redis methods, bailing out early', function(done) {
+      it('should call the right redis methods, bailing out early', function(done) {
         return this.call(err => {
           this.rclient.smembers.callCount.should.equal(1)
           this.rclient.get.callCount.should.equal(1)

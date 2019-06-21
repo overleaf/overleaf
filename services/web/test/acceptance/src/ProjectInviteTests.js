@@ -414,7 +414,7 @@ describe('ProjectInviteTests', function() {
       return done()
     })
 
-    return describe('creating two invites', function() {
+    describe('creating two invites', function() {
       beforeEach(function(done) {
         return Async.series(
           [
@@ -524,7 +524,7 @@ describe('ProjectInviteTests', function() {
         )
       })
 
-      return it('should allow the project owner to create many invites at once', function(done) {
+      it('should allow the project owner to create many invites at once', function(done) {
         this.inviteOne = null
         this.inviteTwo = null
         return Async.series(
@@ -600,7 +600,7 @@ describe('ProjectInviteTests', function() {
     })
   })
 
-  return describe('clicking the invite link', function() {
+  describe('clicking the invite link', function() {
     beforeEach(function(done) {
       this.projectId = null
       this.fakeProject = null
@@ -667,7 +667,7 @@ describe('ProjectInviteTests', function() {
           )
         })
 
-        return describe('when user clicks on the invite a second time', function() {
+        describe('when user clicks on the invite a second time', function() {
           it('should just redirect to the project page', function(done) {
             return Async.series(
               [
@@ -685,7 +685,7 @@ describe('ProjectInviteTests', function() {
             )
           })
 
-          return describe('when the user recieves another invite to the same project', () =>
+          describe('when the user recieves another invite to the same project', () =>
             it('should redirect to the project page', function(done) {
               return Async.series(
                 [
@@ -730,7 +730,7 @@ describe('ProjectInviteTests', function() {
         })
       })
 
-      return describe('user is not a member of the project', function() {
+      describe('user is not a member of the project', function() {
         it('should not grant access if the user does not accept the invite', function(done) {
           return Async.series(
             [
@@ -758,7 +758,7 @@ describe('ProjectInviteTests', function() {
           )
         })
 
-        return it('should allow the user to accept the invite and access the project', function(done) {
+        it('should allow the user to accept the invite and access the project', function(done) {
           return Async.series(
             [
               cb => expectInvitePage(this.user, this.link, cb),
@@ -771,7 +771,7 @@ describe('ProjectInviteTests', function() {
       })
     })
 
-    return describe('user is not logged in initially', function() {
+    describe('user is not logged in initially', function() {
       before(function(done) {
         return this.user.logout(done)
       })
@@ -823,7 +823,7 @@ describe('ProjectInviteTests', function() {
           )
         })
 
-        return it('should allow user to accept the invite if the user registers a new account', function(done) {
+        it('should allow user to accept the invite if the user registers a new account', function(done) {
           return Async.series(
             [
               cb => expectInviteRedirectToRegister(this.user, this.link, cb),
@@ -858,7 +858,7 @@ describe('ProjectInviteTests', function() {
           )
         })
 
-        return it('should display invalid-invite if the user registers a new account', function(done) {
+        it('should display invalid-invite if the user registers a new account', function(done) {
           const badLink = this.link.replace(
             this.invite.token,
             'not_a_real_token'
@@ -909,7 +909,7 @@ describe('ProjectInviteTests', function() {
           )
         })
 
-        return it('should allow user to accept the invite if the user registers a new account', function(done) {
+        it('should allow user to accept the invite if the user registers a new account', function(done) {
           return Async.series(
             [
               cb => expectInvitePage(this.user, this.link, cb),
@@ -921,7 +921,7 @@ describe('ProjectInviteTests', function() {
         })
       })
 
-      return describe('login workflow with non-valid token', function() {
+      describe('login workflow with non-valid token', function() {
         before(function(done) {
           return this.user.logout(done)
         })
@@ -936,7 +936,7 @@ describe('ProjectInviteTests', function() {
           )
         })
 
-        return it('should show the invalid-invite page once the user has logged in', function(done) {
+        it('should show the invalid-invite page once the user has logged in', function(done) {
           const badLink = this.link.replace(
             this.invite.token,
             'not_a_real_token'

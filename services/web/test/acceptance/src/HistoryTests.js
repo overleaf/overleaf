@@ -23,7 +23,7 @@ describe('History', function() {
     return this.owner.login(done)
   })
 
-  return describe('zip download of version', function() {
+  describe('zip download of version', function() {
     it('should stream the zip file of a version', function(done) {
       return this.owner.createProject(
         'example-project',
@@ -71,7 +71,7 @@ describe('History', function() {
       )
     })
 
-    return it('should return 402 for non-v2-history project', function(done) {
+    it('should return 402 for non-v2-history project', function(done) {
       return this.owner.createProject('non-v2-project', (error, project_id) => {
         this.project_id = project_id
         if (error != null) {

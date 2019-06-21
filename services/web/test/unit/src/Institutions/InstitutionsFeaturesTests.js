@@ -86,7 +86,7 @@ describe('InstitutionsFeatures', function() {
       })
     })
 
-    return it('should return true if user has confirmed paid affiliation', function(done) {
+    it('should return true if user has confirmed paid affiliation', function(done) {
       const institutions = [
         { licence: 'pro_plus' },
         { licence: 'free' },
@@ -140,7 +140,7 @@ describe('InstitutionsFeatures', function() {
       )
     })
 
-    return it('should return feaures if user has affiliations plan code', function(done) {
+    it('should return feaures if user has affiliations plan code', function(done) {
       this.InstitutionsFeatures.getInstitutionsPlan.yields(
         null,
         this.institutionPlanCode
@@ -156,7 +156,7 @@ describe('InstitutionsFeatures', function() {
     })
   })
 
-  return describe('getInstitutionsPlan', function() {
+  describe('getInstitutionsPlan', function() {
     beforeEach(function() {
       return (this.InstitutionsFeatures.hasLicence = sinon.stub())
     })
@@ -184,7 +184,7 @@ describe('InstitutionsFeatures', function() {
       )
     })
 
-    return it('should return plan if user has licence', function(done) {
+    it('should return plan if user has licence', function(done) {
       this.InstitutionsFeatures.hasLicence.yields(null, true)
       return this.InstitutionsFeatures.getInstitutionsPlan(
         this.userId,

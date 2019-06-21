@@ -89,7 +89,7 @@ describe('Sessions', function() {
       return (this.user2.password = this.user1.password)
     })
 
-    return it('should have two sessions in UserSessions set', function(done) {
+    it('should have two sessions in UserSessions set', function(done) {
       return async.series(
         [
           next => {
@@ -212,7 +212,7 @@ describe('Sessions', function() {
       return (this.user3.password = this.user1.password)
     })
 
-    return it('should erase both sessions when password is reset', function(done) {
+    it('should erase both sessions when password is reset', function(done) {
       return async.series(
         [
           next => {
@@ -320,7 +320,7 @@ describe('Sessions', function() {
     })
   })
 
-  return describe('three sessions, sessions page', function() {
+  describe('three sessions, sessions page', function() {
     before(function(done) {
       // set up second session for this user
       this.user2 = new User()
@@ -338,7 +338,7 @@ describe('Sessions', function() {
       )
     })
 
-    return it('should allow the user to erase the other two sessions', function(done) {
+    it('should allow the user to erase the other two sessions', function(done) {
       return async.series(
         [
           next => {

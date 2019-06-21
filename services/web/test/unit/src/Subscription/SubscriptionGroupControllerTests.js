@@ -71,7 +71,7 @@ describe('SubscriptionGroupController', function() {
     }))
   })
 
-  return describe('removeUserFromGroup', () =>
+  describe('removeUserFromGroup', () =>
     it('should use the subscription id for the logged in user and take the user id from the params', function(done) {
       const userIdToRemove = '31231'
       this.req.params = { user_id: userIdToRemove }

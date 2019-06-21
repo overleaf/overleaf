@@ -77,7 +77,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       })
     }) // returns a promise
 
-    return it('should set their features to the upgraded set', function(done) {
+    it('should set their features to the upgraded set', function(done) {
       return syncUserAndGetFeatures(this.user, (error, features) => {
         if (error != null) {
           throw error
@@ -102,7 +102,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       })
     }) // returns a promise
 
-    return it('should set their features to the upgraded set', function(done) {
+    it('should set their features to the upgraded set', function(done) {
       return syncUserAndGetFeatures(this.user, (error, features) => {
         if (error != null) {
           throw error
@@ -128,7 +128,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     }) // returns a promise
 
-    return it('should set their features to the bonus set', function(done) {
+    it('should set their features to the bonus set', function(done) {
       return syncUserAndGetFeatures(this.user, (error, features) => {
         if (error != null) {
           throw error
@@ -175,7 +175,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       })
     })
 
-    return it('should not set their features if institution is not confirmed', function(done) {
+    it('should not set their features if institution is not confirmed', function(done) {
       this.affiliationData.institution.confirmed = false
       MockV1Api.setAffiliations([this.affiliationData])
       return this.user.confirmEmail(this.email, error => {
@@ -200,7 +200,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     }) // returns a promise
 
-    return it('should set their features to the bonus set and downgrade the extras', function(done) {
+    it('should set their features to the bonus set and downgrade the extras', function(done) {
       return syncUserAndGetFeatures(this.user, (error, features) => {
         if (error != null) {
           throw error
@@ -232,7 +232,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     }) // returns a promise
 
-    return it('should set their features to the v1 plan', function(done) {
+    it('should set their features to the v1 plan', function(done) {
       return syncUserAndGetFeatures(this.user, (error, features) => {
         if (error != null) {
           throw error
@@ -260,7 +260,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     }) // returns a promise
 
-    return it('should set their features to the best of the v1 plan and bonus features', function(done) {
+    it('should set their features to the best of the v1 plan and bonus features', function(done) {
       return syncUserAndGetFeatures(this.user, (error, features) => {
         if (error != null) {
           throw error
@@ -304,7 +304,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     })
 
-    return it('should set their features to the best set', function(done) {
+    it('should set their features to the best set', function(done) {
       return syncUserAndGetFeatures(this.user, (error, features) => {
         if (error != null) {
           throw error
@@ -318,7 +318,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
   })
 
-  return describe('when the notifyV1Flag is passed', function() {
+  describe('when the notifyV1Flag is passed', function() {
     beforeEach(function() {
       return User.update(
         {

@@ -48,7 +48,7 @@ describe('SettingsPage', function() {
     })
   })
 
-  return it('update main email address', function(done) {
+  it('update main email address', function(done) {
     const newEmail = 'foo@bar.com'
     return this.user.updateSettings({ email: newEmail }, error => {
       should.not.exist(error)

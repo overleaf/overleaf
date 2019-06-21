@@ -99,7 +99,7 @@ describe('ProjectDeleter', function() {
       })
     })
 
-    return it('should tell the editor controler so users are notified', function(done) {
+    it('should tell the editor controler so users are notified', function(done) {
       return this.deleter.markAsDeletedByExternalSource(project_id, () => {
         this.editorController.notifyUsersProjectHasBeenDeletedOrRenamed
           .calledWith(project_id)
@@ -122,7 +122,7 @@ describe('ProjectDeleter', function() {
       )
     })
 
-    return it('should remove the flag from the project', function() {
+    it('should remove the flag from the project', function() {
       return this.Project.update
         .calledWith(
           { _id: this.project_id },
@@ -164,7 +164,7 @@ describe('ProjectDeleter', function() {
       })
     })
 
-    return it('should remove all the projects the user is a collaborator of', function(done) {
+    it('should remove all the projects the user is a collaborator of', function(done) {
       return this.deleter.deleteUsersProjects(this.user._id, () => {
         this.CollaboratorsHandler.removeUserFromAllProjets
           .calledWith(this.user._id)
@@ -218,7 +218,7 @@ describe('ProjectDeleter', function() {
       })
     })
 
-    return it('should remove the project from Mongo', function(done) {
+    it('should remove the project from Mongo', function(done) {
       return this.deleter.deleteProject(this.project_id, () => {
         this.Project.remove
           .calledWith({
@@ -235,7 +235,7 @@ describe('ProjectDeleter', function() {
       return this.Project.update.callsArgWith(2)
     })
 
-    return it('should update the project', function(done) {
+    it('should update the project', function(done) {
       return this.deleter.archiveProject(this.project_id, () => {
         this.Project.update
           .calledWith(
@@ -252,12 +252,12 @@ describe('ProjectDeleter', function() {
     })
   })
 
-  return describe('restoreProject', function() {
+  describe('restoreProject', function() {
     beforeEach(function() {
       return this.Project.update.callsArgWith(2)
     })
 
-    return it('should unset the archive attribute', function(done) {
+    it('should unset the archive attribute', function(done) {
       return this.deleter.restoreProject(this.project_id, () => {
         this.Project.update
           .calledWith(

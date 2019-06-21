@@ -94,7 +94,7 @@ describe('BetaProgramController', function() {
       return this.BetaProgramHandler.optIn.callCount.should.equal(1)
     })
 
-    return describe('when BetaProgramHandler.opIn produces an error', function() {
+    describe('when BetaProgramHandler.opIn produces an error', function() {
       beforeEach(function() {
         return this.BetaProgramHandler.optIn.callsArgWith(1, new Error('woops'))
       })
@@ -104,7 +104,7 @@ describe('BetaProgramController', function() {
         return this.res.redirect.callCount.should.equal(0)
       })
 
-      return it('should produce an error', function() {
+      it('should produce an error', function() {
         this.BetaProgramController.optIn(this.req, this.res, this.next)
         this.next.callCount.should.equal(1)
         return this.next.firstCall.args[0].should.be.instanceof(Error)
@@ -140,7 +140,7 @@ describe('BetaProgramController', function() {
       return this.BetaProgramHandler.optOut.callCount.should.equal(1)
     })
 
-    return describe('when BetaProgramHandler.optOut produces an error', function() {
+    describe('when BetaProgramHandler.optOut produces an error', function() {
       beforeEach(function() {
         return this.BetaProgramHandler.optOut.callsArgWith(
           1,
@@ -153,7 +153,7 @@ describe('BetaProgramController', function() {
         return this.res.redirect.callCount.should.equal(0)
       })
 
-      return it('should produce an error', function() {
+      it('should produce an error', function() {
         this.BetaProgramController.optOut(this.req, this.res, this.next)
         this.next.callCount.should.equal(1)
         return this.next.firstCall.args[0].should.be.instanceof(Error)
@@ -161,7 +161,7 @@ describe('BetaProgramController', function() {
     })
   })
 
-  return describe('optInPage', function() {
+  describe('optInPage', function() {
     beforeEach(function() {
       return this.UserGetter.getUser.callsArgWith(1, null, this.user)
     })
@@ -173,7 +173,7 @@ describe('BetaProgramController', function() {
       return args[0].should.equal('beta_program/opt_in')
     })
 
-    return describe('when UserGetter.getUser produces an error', function() {
+    describe('when UserGetter.getUser produces an error', function() {
       beforeEach(function() {
         return this.UserGetter.getUser.callsArgWith(1, new Error('woops'))
       })
@@ -183,7 +183,7 @@ describe('BetaProgramController', function() {
         return this.res.render.callCount.should.equal(0)
       })
 
-      return it('should produce an error', function() {
+      it('should produce an error', function() {
         this.BetaProgramController.optInPage(this.req, this.res, this.next)
         this.next.callCount.should.equal(1)
         return this.next.firstCall.args[0].should.be.instanceof(Error)

@@ -122,7 +122,7 @@ describe('CompileController', function() {
           .should.equal(true)
       })
 
-      return it('should send a successful response reporting the status and files', function() {
+      it('should send a successful response reporting the status and files', function() {
         this.res.statusCode.should.equal(200)
         return this.res.body.should.equal(
           JSON.stringify({
@@ -139,20 +139,20 @@ describe('CompileController', function() {
         return this.CompileController.compile(this.req, this.res, this.next)
       })
 
-      return it('should do the compile with the auto compile flag', function() {
+      it('should do the compile with the auto compile flag', function() {
         return this.CompileManager.compile
           .calledWith(this.project_id, this.user_id, { isAutoCompile: true })
           .should.equal(true)
       })
     })
 
-    return describe('with the draft attribute', function() {
+    describe('with the draft attribute', function() {
       beforeEach(function() {
         this.req.body = { draft: true }
         return this.CompileController.compile(this.req, this.res, this.next)
       })
 
-      return it('should do the compile without the draft compile flag', function() {
+      it('should do the compile without the draft compile flag', function() {
         return this.CompileManager.compile
           .calledWith(this.project_id, this.user_id, {
             isAutoCompile: false,
@@ -213,7 +213,7 @@ describe('CompileController', function() {
         )
       })
 
-      return it('should use the supplied values', function() {
+      it('should use the supplied values', function() {
         return this.ClsiManager.sendExternalRequest
           .calledWith(
             this.submission_id,
@@ -224,7 +224,7 @@ describe('CompileController', function() {
       })
     })
 
-    return describe('with other supported options but not compileGroup and timeout', function() {
+    describe('with other supported options but not compileGroup and timeout', function() {
       beforeEach(function() {
         this.req.body = {
           rootResourcePath: 'main.tex',
@@ -239,7 +239,7 @@ describe('CompileController', function() {
         )
       })
 
-      return it('should use the other options but default values for compileGroup and timeout', function() {
+      it('should use the other options but default values for compileGroup and timeout', function() {
         return this.ClsiManager.sendExternalRequest
           .calledWith(
             this.submission_id,
@@ -303,7 +303,7 @@ describe('CompileController', function() {
         return this.Metrics.inc.calledWith('pdf-downloads').should.equal(true)
       })
 
-      return it('should proxy the PDF from the CLSI', function() {
+      it('should proxy the PDF from the CLSI', function() {
         return this.CompileController.proxyToClsi
           .calledWith(
             this.project_id,
@@ -326,7 +326,7 @@ describe('CompileController', function() {
         return this.CompileController.downloadPdf(this.req, this.res, this.next)
       })
 
-      return it('should proxy the PDF from the CLSI, with a build-id', function() {
+      it('should proxy the PDF from the CLSI, with a build-id', function() {
         return this.CompileController.proxyToClsi
           .calledWith(
             this.project_id,
@@ -341,7 +341,7 @@ describe('CompileController', function() {
       })
     })
 
-    return describe('when the pdf is not going to be used in pdfjs viewer', function() {
+    describe('when the pdf is not going to be used in pdfjs viewer', function() {
       it('should check the rate limiter when pdfng is not set', function(done) {
         this.req.query = {}
         this.RateLimiter.addCount.callsArgWith(1, null, true)
@@ -352,7 +352,7 @@ describe('CompileController', function() {
         return this.CompileController.downloadPdf(this.req, this.res)
       })
 
-      return it('should check the rate limiter when pdfng is false', function(done) {
+      it('should check the rate limiter when pdfng is false', function(done) {
         this.req.query = { pdfng: false }
         this.RateLimiter.addCount.callsArgWith(1, null, true)
         this.CompileController.proxyToClsi = (project_id, url) => {
@@ -390,7 +390,7 @@ describe('CompileController', function() {
         )
       })
 
-      return it('should proxy to CLSI with correct URL and default limits', function() {
+      it('should proxy to CLSI with correct URL and default limits', function() {
         return this.CompileController.proxyToClsiWithLimits
           .calledWith(this.submission_id, this.expected_url, {
             compileGroup: 'standard'
@@ -399,7 +399,7 @@ describe('CompileController', function() {
       })
     })
 
-    return describe('with limits specified', function() {
+    describe('with limits specified', function() {
       beforeEach(function() {
         this.req.body = { compileTimeout: 600, compileGroup: 'special' }
         return this.CompileController.getFileFromClsiWithoutUser(
@@ -409,7 +409,7 @@ describe('CompileController', function() {
         )
       })
 
-      return it('should proxy to CLSI with correct URL and specified limits', function() {
+      it('should proxy to CLSI with correct URL and specified limits', function() {
         return this.CompileController.proxyToClsiWithLimits
           .calledWith(this.submission_id, this.expected_url, {
             compileGroup: 'special'
@@ -470,7 +470,7 @@ describe('CompileController', function() {
           return this.proxy.pipe.calledWith(this.res).should.equal(true)
         })
 
-        return it('should bind an error handle to the request proxy', function() {
+        it('should bind an error handle to the request proxy', function() {
           return this.proxy.on.calledWith('error').should.equal(true)
         })
       })
@@ -516,7 +516,7 @@ describe('CompileController', function() {
           return this.proxy.pipe.calledWith(this.res).should.equal(true)
         })
 
-        return it('should bind an error handle to the request proxy', function() {
+        it('should bind an error handle to the request proxy', function() {
           return this.proxy.on.calledWith('error').should.equal(true)
         })
       })
@@ -533,7 +533,7 @@ describe('CompileController', function() {
           )
         })
 
-        return it('should proxy to the standard url', function() {
+        it('should proxy to the standard url', function() {
           return this.request
             .calledWith({
               jar: this.jar,
@@ -545,7 +545,7 @@ describe('CompileController', function() {
         })
       })
 
-      return describe('user with build parameter via query string', function() {
+      describe('user with build parameter via query string', function() {
         beforeEach(function() {
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
@@ -560,7 +560,7 @@ describe('CompileController', function() {
           )
         })
 
-        return it('should proxy to the standard url without the build parameter', function() {
+        it('should proxy to the standard url without the build parameter', function() {
           return this.request
             .calledWith({
               jar: this.jar,
@@ -573,7 +573,7 @@ describe('CompileController', function() {
       })
     })
 
-    return describe('new pdf viewer', function() {
+    describe('new pdf viewer', function() {
       beforeEach(function() {
         return (this.req.query = { pdfng: true })
       })
@@ -611,12 +611,12 @@ describe('CompileController', function() {
           return this.proxy.pipe.calledWith(this.res).should.equal(true)
         })
 
-        return it('should bind an error handle to the request proxy', function() {
+        it('should bind an error handle to the request proxy', function() {
           return this.proxy.on.calledWith('error').should.equal(true)
         })
       })
 
-      return describe('user with build parameter via query string', function() {
+      describe('user with build parameter via query string', function() {
         beforeEach(function() {
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
@@ -631,7 +631,7 @@ describe('CompileController', function() {
           )
         })
 
-        return it('should proxy to the standard url with the build parameter', function() {
+        it('should proxy to the standard url with the build parameter', function() {
           return this.request
             .calledWith({
               jar: this.jar,
@@ -669,7 +669,7 @@ describe('CompileController', function() {
         .should.equal(true)
     })
 
-    return it('should return a 200', function() {
+    it('should return a 200', function() {
       return this.res.sendStatus.calledWith(200).should.equal(true)
     })
   })
@@ -692,7 +692,7 @@ describe('CompileController', function() {
       return done()
     })
 
-    return it('should proxy the res to the clsi with correct url', function(done) {
+    it('should proxy the res to the clsi with correct url', function(done) {
       this.CompileController.compileAndDownloadPdf(this.req, this.res)
       sinon.assert.calledWith(
         this.CompileController.proxyToClsi,
@@ -714,7 +714,7 @@ describe('CompileController', function() {
     })
   })
 
-  return describe('wordCount', function() {
+  describe('wordCount', function() {
     beforeEach(function() {
       this.CompileManager.wordCount = sinon
         .stub()
@@ -731,7 +731,7 @@ describe('CompileController', function() {
         .should.equal(true)
     })
 
-    return it('should return a 200 and body', function() {
+    it('should return a 200 and body', function() {
       return this.res.send.calledWith({ content: 'body' }).should.equal(true)
     })
   })

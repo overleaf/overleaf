@@ -38,7 +38,7 @@ describe('User Must Reconfirm', function() {
     })
   })
 
-  return describe('Requesting reconfirmation email', function() {
+  describe('Requesting reconfirmation email', function() {
     it('should return a success to client for existing account', function(done) {
       return this.user.reconfirmAccountRequest(
         this.user.email,
@@ -50,7 +50,7 @@ describe('User Must Reconfirm', function() {
       )
     })
 
-    return it('should return a 404 to client for non-existent account', function(done) {
+    it('should return a 404 to client for non-existent account', function(done) {
       return this.user.reconfirmAccountRequest(
         'fake@overleaf.com',
         (err, response) => {

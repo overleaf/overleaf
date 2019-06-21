@@ -30,7 +30,7 @@ describe('RedisWrapper', function() {
     }))
   })
 
-  return describe('client', function() {
+  describe('client', function() {
     it('should use the feature settings if present', function() {
       this.settings.redis = {
         my_feature: {
@@ -45,7 +45,7 @@ describe('RedisWrapper', function() {
         .should.equal(true)
     })
 
-    return it('should use the web settings if feature not present', function() {
+    it('should use the web settings if feature not present', function() {
       this.settings.redis = {
         web: {
           port: '43',

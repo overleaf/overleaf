@@ -33,7 +33,7 @@ describe('ClsiFormatChecker', function() {
     return (this.project_id = 'project-id')
   })
 
-  return describe('checkRecoursesForProblems', function() {
+  describe('checkRecoursesForProblems', function() {
     beforeEach(function() {
       return (this.resources = [
         {
@@ -175,7 +175,7 @@ describe('ClsiFormatChecker', function() {
         )
       })
 
-      return it('should not flag up when the file is a substring of a path', function(done) {
+      it('should not flag up when the file is a substring of a path', function(done) {
         this.resources.push({
           path: 'stuf',
           content: 'other stuff'
@@ -191,7 +191,7 @@ describe('ClsiFormatChecker', function() {
       })
     })
 
-    return describe('_checkDocsAreUnderSizeLimit', function() {
+    describe('_checkDocsAreUnderSizeLimit', function() {
       it('should error when there is more than 5mb of data', function(done) {
         this.resources.push({
           path: 'massive.tex',
@@ -219,7 +219,7 @@ describe('ClsiFormatChecker', function() {
         )
       })
 
-      return it('should return nothing when project is correct size', function(done) {
+      it('should return nothing when project is correct size', function(done) {
         this.resources.push({
           path: 'massive.tex',
           content: require('crypto')

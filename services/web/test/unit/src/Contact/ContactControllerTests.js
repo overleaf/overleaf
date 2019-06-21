@@ -44,7 +44,7 @@ describe('ContactController', function() {
     return (this.res.send = sinon.stub())
   })
 
-  return describe('getContacts', function() {
+  describe('getContacts', function() {
     beforeEach(function() {
       this.user_id = 'mock-user-id'
       this.contact_ids = ['contact-1', 'contact-2', 'contact-3']
@@ -115,7 +115,7 @@ describe('ContactController', function() {
         .should.equal(true)
     })
 
-    return it('should return a formatted list of contacts in contact list order, without holding accounts', function() {
+    it('should return a formatted list of contacts in contact list order, without holding accounts', function() {
       return this.res.send.args[0][0].contacts.should.deep.equal([
         {
           id: 'contact-1',

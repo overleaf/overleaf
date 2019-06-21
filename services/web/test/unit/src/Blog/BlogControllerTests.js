@@ -78,7 +78,7 @@ describe('BlogController', function() {
       return this.BlogController.getPage(this.req, this.res)
     })
 
-    return it('should proxy the image urls', function(done) {
+    it('should proxy the image urls', function(done) {
       this.BlogController._directProxy = sinon.stub()
       this.req.url = '/something.png'
       this.BlogController.getPage(this.req, this.res)
@@ -89,7 +89,7 @@ describe('BlogController', function() {
     })
   })
 
-  return describe('getIndexPage', () =>
+  describe('getIndexPage', () =>
     it('should change the url and send it to getPage', function(done) {
       this.req.url = '/blog'
       this.BlogController.getPage = function(req, res) {

@@ -77,7 +77,7 @@ describe('MetaHandler', function() {
       ])
     })
 
-    return it('should extract all the labels and packages', function() {
+    it('should extract all the labels and packages', function() {
       const docMeta = this.MetaHandler.extractMetaFromDoc(this.lines)
       return expect(docMeta).to.deep.equal({
         labels: ['aaa', 'bbb'],
@@ -137,7 +137,7 @@ describe('MetaHandler', function() {
       })
     })
 
-    return it('should extract all metadata', function() {
+    it('should extract all metadata', function() {
       const projectMeta = this.MetaHandler.extractMetaFromProjectDocs(this.docs)
       return expect(projectMeta).to.deep.equal({
         id_one: { labels: ['aaa'], packages: {} },
@@ -241,7 +241,7 @@ describe('MetaHandler', function() {
       })
     })
 
-    return it('should call extractMetaFromDoc', function(done) {
+    it('should call extractMetaFromDoc', function(done) {
       return this.call((err, docMeta) => {
         this.MetaHandler.extractMetaFromDoc.callCount.should.equal(1)
         this.MetaHandler.extractMetaFromDoc
@@ -252,7 +252,7 @@ describe('MetaHandler', function() {
     })
   })
 
-  return describe('getAllMetaForProject', function() {
+  describe('getAllMetaForProject', function() {
     beforeEach(function() {
       this.fakeDocs = {
         doc_one: {
@@ -317,7 +317,7 @@ describe('MetaHandler', function() {
       })
     })
 
-    return it('should call extractMetaFromDoc', function(done) {
+    it('should call extractMetaFromDoc', function(done) {
       return this.call((err, docMeta) => {
         this.MetaHandler.extractMetaFromProjectDocs.callCount.should.equal(1)
         this.MetaHandler.extractMetaFromProjectDocs

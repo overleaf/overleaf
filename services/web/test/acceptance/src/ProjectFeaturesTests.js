@@ -40,7 +40,7 @@ describe('ProjectFeatures', function() {
     return async.series([cb => this.owner.login(cb)], done)
   })
 
-  return describe('with private project', function() {
+  describe('with private project', function() {
     before(function(done) {
       return this.owner.createProject(
         'private-project',
@@ -62,7 +62,7 @@ describe('ProjectFeatures', function() {
         return this.owner.defaultFeatures(done)
       })
 
-      return it('should have premium features', function(done) {
+      it('should have premium features', function(done) {
         return joinProject(this.owner._id, this.project_id, function(
           error,
           response,
@@ -77,7 +77,7 @@ describe('ProjectFeatures', function() {
       })
     })
 
-    return describe('with an basic account', function() {
+    describe('with an basic account', function() {
       before(function(done) {
         return this.owner.downgradeFeatures(done)
       })
@@ -85,7 +85,7 @@ describe('ProjectFeatures', function() {
         return this.owner.defaultFeatures(done)
       })
 
-      return it('should have basic features', function(done) {
+      it('should have basic features', function(done) {
         return joinProject(this.owner._id, this.project_id, function(
           error,
           response,

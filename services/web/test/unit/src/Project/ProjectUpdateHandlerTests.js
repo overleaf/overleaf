@@ -69,7 +69,7 @@ describe('ProjectUpdateHandler', function() {
       )
     })
 
-    return it('should set smart fallbacks', function(done) {
+    it('should set smart fallbacks', function(done) {
       return this.handler.markAsUpdated(this.project_id, null, null, err => {
         sinon.assert.calledWithMatch(
           this.ProjectModel.update,
@@ -111,7 +111,7 @@ describe('ProjectUpdateHandler', function() {
       })
     }))
 
-  return describe('markAsActive', () =>
+  describe('markAsActive', () =>
     it('should send an update to mongo', function(done) {
       const project_id = 'project_id'
       return this.handler.markAsActive(project_id, err => {

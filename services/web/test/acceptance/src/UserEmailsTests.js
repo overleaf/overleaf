@@ -127,7 +127,7 @@ describe('UserEmails', function() {
       )
     })
 
-    return it('should not allow confirmation of the email if the user has changed', function(done) {
+    it('should not allow confirmation of the email if the user has changed', function(done) {
       let token1 = null
       let token2 = null
       this.user2 = new User()
@@ -472,7 +472,7 @@ describe('UserEmails', function() {
       )
     })
 
-    return it("should not allow reconfirmation if the email doesn't match the user", function(done) {
+    it("should not allow reconfirmation if the email doesn't match the user", function(done) {
       return async.series(
         [
           cb => {
@@ -512,7 +512,7 @@ describe('UserEmails', function() {
     })
   })
 
-  return describe('setting a default email', function() {
+  describe('setting a default email', function() {
     it('should update confirmed emails for users not in v1', function(done) {
       const token = null
       return async.series(
@@ -736,7 +736,7 @@ describe('UserEmails', function() {
       )
     })
 
-    return it('should return an error if the email exists in v1', function(done) {
+    it('should return an error if the email exists in v1', function(done) {
       MockV1Api.existingEmails.push('exists-in-v1@example.com')
       return async.series(
         [

@@ -66,7 +66,7 @@ describe('CooldownManager', function() {
         })
       })
 
-      return it('should produce a true result', function(done) {
+      it('should produce a true result', function(done) {
         return this.call((err, result) => {
           expect(result).to.equal(true)
           return done()
@@ -94,7 +94,7 @@ describe('CooldownManager', function() {
         })
       })
 
-      return it('should produce a false result', function(done) {
+      it('should produce a false result', function(done) {
         return this.call((err, result) => {
           expect(result).to.equal(false)
           return done()
@@ -102,7 +102,7 @@ describe('CooldownManager', function() {
       })
     })
 
-    return describe('when rclient.get produces an error', function() {
+    describe('when rclient.get produces an error', function() {
       beforeEach(function() {
         return (this.rclient.get = sinon
           .stub()
@@ -117,7 +117,7 @@ describe('CooldownManager', function() {
         })
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call((err, result) => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
@@ -127,7 +127,7 @@ describe('CooldownManager', function() {
     })
   })
 
-  return describe('putProjectOnCooldown', function() {
+  describe('putProjectOnCooldown', function() {
     beforeEach(function() {
       return (this.call = cb => {
         return this.CooldownManager.putProjectOnCooldown(this.projectId, cb)
@@ -147,7 +147,7 @@ describe('CooldownManager', function() {
         })
       })
 
-      return it('should not produce an error', function(done) {
+      it('should not produce an error', function(done) {
         return this.call(err => {
           expect(err).to.equal(null)
           return done()
@@ -155,7 +155,7 @@ describe('CooldownManager', function() {
       })
     })
 
-    return describe('when rclient.set produces an error', function() {
+    describe('when rclient.set produces an error', function() {
       beforeEach(function() {
         return (this.rclient.set = sinon
           .stub()
@@ -170,7 +170,7 @@ describe('CooldownManager', function() {
         })
       })
 
-      return it('produce an error', function(done) {
+      it('produce an error', function(done) {
         return this.call(err => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)

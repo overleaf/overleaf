@@ -85,7 +85,7 @@ describe('AuthorizationMiddleware', function() {
       )
     })
 
-    return it('should fall back to null', function(done) {
+    it('should fall back to null', function(done) {
       this.AuthenticationController.getLoggedInUserId = sinon
         .stub()
         .returns(null)
@@ -122,7 +122,7 @@ describe('AuthorizationMiddleware', function() {
             return (this.req.params = {})
           })
 
-          return it('should return an error to next', function() {
+          it('should return an error to next', function() {
             this.AuthorizationMiddleware[middlewareMethod](
               this.req,
               this.res,
@@ -146,7 +146,7 @@ describe('AuthorizationMiddleware', function() {
                 .yields(null, true)
             })
 
-            return it('should return next', function() {
+            it('should return next', function() {
               this.AuthorizationMiddleware[middlewareMethod](
                 this.req,
                 this.res,
@@ -156,14 +156,14 @@ describe('AuthorizationMiddleware', function() {
             })
           })
 
-          return describe("when user doesn't have permission", function() {
+          describe("when user doesn't have permission", function() {
             beforeEach(function() {
               return this.AuthorizationManager[managerMethod]
                 .withArgs(this.user_id, this.project_id, this.token)
                 .yields(null, false)
             })
 
-            return it('should redirect to redirectToRestricted', function() {
+            it('should redirect to redirectToRestricted', function() {
               this.AuthorizationMiddleware[middlewareMethod](
                 this.req,
                 this.res,
@@ -186,7 +186,7 @@ describe('AuthorizationMiddleware', function() {
                 .yields(null, true)
             })
 
-            return it('should return next', function() {
+            it('should return next', function() {
               this.AuthorizationMiddleware[middlewareMethod](
                 this.req,
                 this.res,
@@ -196,7 +196,7 @@ describe('AuthorizationMiddleware', function() {
             })
           })
 
-          return describe("when user doesn't have permission", function() {
+          describe("when user doesn't have permission", function() {
             beforeEach(function() {
               this.AuthenticationController.getLoggedInUserId.returns(null)
               return this.AuthorizationManager[managerMethod]
@@ -204,7 +204,7 @@ describe('AuthorizationMiddleware', function() {
                 .yields(null, false)
             })
 
-            return it('should redirect to redirectToRestricted', function() {
+            it('should redirect to redirectToRestricted', function() {
               this.AuthorizationMiddleware[middlewareMethod](
                 this.req,
                 this.res,
@@ -218,13 +218,13 @@ describe('AuthorizationMiddleware', function() {
           })
         })
 
-        return describe('with malformed project id', function() {
+        describe('with malformed project id', function() {
           beforeEach(function() {
             this.req.params = { project_id: 'blah' }
             return (this.ObjectId.isValid = sinon.stub().returns(false))
           })
 
-          return it('should return a not found error', function(done) {
+          it('should return a not found error', function(done) {
             return this.AuthorizationMiddleware[middlewareMethod](
               this.req,
               this.res,
@@ -258,7 +258,7 @@ describe('AuthorizationMiddleware', function() {
             .yields(null, true)
         })
 
-        return it('should return next', function() {
+        it('should return next', function() {
           this.AuthorizationMiddleware.ensureUserIsSiteAdmin(
             this.req,
             this.res,
@@ -268,14 +268,14 @@ describe('AuthorizationMiddleware', function() {
         })
       })
 
-      return describe("when user doesn't have permission", function() {
+      describe("when user doesn't have permission", function() {
         beforeEach(function() {
           return this.AuthorizationManager.isUserSiteAdmin
             .withArgs(this.user_id)
             .yields(null, false)
         })
 
-        return it('should redirect to redirectToRestricted', function() {
+        it('should redirect to redirectToRestricted', function() {
           this.AuthorizationMiddleware.ensureUserIsSiteAdmin(
             this.req,
             this.res,
@@ -289,7 +289,7 @@ describe('AuthorizationMiddleware', function() {
       })
     })
 
-    return describe('with anonymous user', function() {
+    describe('with anonymous user', function() {
       describe('when user has permission', function() {
         beforeEach(function() {
           this.AuthenticationController.getLoggedInUserId.returns(null)
@@ -298,7 +298,7 @@ describe('AuthorizationMiddleware', function() {
             .yields(null, true)
         })
 
-        return it('should return next', function() {
+        it('should return next', function() {
           this.AuthorizationMiddleware.ensureUserIsSiteAdmin(
             this.req,
             this.res,
@@ -308,7 +308,7 @@ describe('AuthorizationMiddleware', function() {
         })
       })
 
-      return describe("when user doesn't have permission", function() {
+      describe("when user doesn't have permission", function() {
         beforeEach(function() {
           this.AuthenticationController.getLoggedInUserId.returns(null)
           return this.AuthorizationManager.isUserSiteAdmin
@@ -316,7 +316,7 @@ describe('AuthorizationMiddleware', function() {
             .yields(null, false)
         })
 
-        return it('should redirect to redirectToRestricted', function() {
+        it('should redirect to redirectToRestricted', function() {
           this.AuthorizationMiddleware.ensureUserIsSiteAdmin(
             this.req,
             this.res,
@@ -331,7 +331,7 @@ describe('AuthorizationMiddleware', function() {
     })
   })
 
-  return describe('ensureUserCanReadMultipleProjects', function() {
+  describe('ensureUserCanReadMultipleProjects', function() {
     beforeEach(function() {
       this.AuthorizationManager.canUserReadProject = sinon.stub()
       this.AuthorizationMiddleware.redirectToRestricted = sinon.stub()
@@ -355,7 +355,7 @@ describe('AuthorizationMiddleware', function() {
             .yields(null, true)
         })
 
-        return it('should return next', function() {
+        it('should return next', function() {
           this.AuthorizationMiddleware.ensureUserCanReadMultipleProjects(
             this.req,
             this.res,
@@ -365,7 +365,7 @@ describe('AuthorizationMiddleware', function() {
         })
       })
 
-      return describe("when user doesn't have permission to access one of the projects", function() {
+      describe("when user doesn't have permission to access one of the projects", function() {
         beforeEach(function() {
           this.AuthorizationManager.canUserReadProject
             .withArgs(this.user_id, 'project1', this.token)
@@ -375,7 +375,7 @@ describe('AuthorizationMiddleware', function() {
             .yields(null, false)
         })
 
-        return it('should redirect to redirectToRestricted', function() {
+        it('should redirect to redirectToRestricted', function() {
           this.AuthorizationMiddleware.ensureUserCanReadMultipleProjects(
             this.req,
             this.res,
@@ -389,7 +389,7 @@ describe('AuthorizationMiddleware', function() {
       })
     })
 
-    return describe('with anonymous user', () =>
+    describe('with anonymous user', () =>
       describe('when user has permission', function() {
         describe('when user has permission to access all projects', function() {
           beforeEach(function() {
@@ -402,7 +402,7 @@ describe('AuthorizationMiddleware', function() {
               .yields(null, true)
           })
 
-          return it('should return next', function() {
+          it('should return next', function() {
             this.AuthorizationMiddleware.ensureUserCanReadMultipleProjects(
               this.req,
               this.res,
@@ -412,7 +412,7 @@ describe('AuthorizationMiddleware', function() {
           })
         })
 
-        return describe("when user doesn't have permission to access one of the projects", function() {
+        describe("when user doesn't have permission to access one of the projects", function() {
           beforeEach(function() {
             this.AuthenticationController.getLoggedInUserId.returns(null)
             this.AuthorizationManager.canUserReadProject
@@ -423,7 +423,7 @@ describe('AuthorizationMiddleware', function() {
               .yields(null, false)
           })
 
-          return it('should redirect to redirectToRestricted', function() {
+          it('should redirect to redirectToRestricted', function() {
             this.AuthorizationMiddleware.ensureUserCanReadMultipleProjects(
               this.req,
               this.res,

@@ -75,7 +75,7 @@ describe('ProjectStructureChanges', function() {
       return expect(version).to.equal(3)
     })
 
-    return it('should version creating a file', function() {
+    it('should version creating a file', function() {
       const {
         fileUpdates: updates,
         version
@@ -129,7 +129,7 @@ describe('ProjectStructureChanges', function() {
       return expect(version).to.equal(3)
     })
 
-    return it('should version the files created', function() {
+    it('should version the files created', function() {
       const {
         fileUpdates: updates,
         version
@@ -196,7 +196,7 @@ describe('ProjectStructureChanges', function() {
       return expect(version).to.equal(this.project_0.version + 1)
     })
 
-    return it('should increment the project structure version number', function() {
+    it('should increment the project structure version number', function() {
       return expect(this.project_1.version).to.equal(this.project_0.version + 1)
     })
   })
@@ -244,7 +244,7 @@ describe('ProjectStructureChanges', function() {
       return expect(version).to.equal(2)
     })
 
-    return it('should version the files created', function() {
+    it('should version the files created', function() {
       const {
         fileUpdates: updates,
         version
@@ -288,7 +288,7 @@ describe('ProjectStructureChanges', function() {
       ))
     })
 
-    return it('should set the project name from the zip contents', function(done) {
+    it('should set the project name from the zip contents', function(done) {
       return ProjectGetter.getProject(
         this.uploaded_project_id,
         (error, project) => {
@@ -330,7 +330,7 @@ describe('ProjectStructureChanges', function() {
       ))
     })
 
-    return it('should set the project name from the zip contents', function(done) {
+    it('should set the project name from the zip contents', function(done) {
       return ProjectGetter.getProject(
         this.uploaded_project_id,
         (error, project) => {
@@ -372,7 +372,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    return it('should not create the top-level folder', function(done) {
+    it('should not create the top-level folder', function(done) {
       return ProjectGetter.getProject(this.uploaded_project_id, function(
         error,
         project
@@ -415,7 +415,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    return it('should treat the backslash as a directory separator', function(done) {
+    it('should treat the backslash as a directory separator', function(done) {
       return ProjectGetter.getProject(this.uploaded_project_id, function(
         error,
         project
@@ -495,7 +495,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    return it('should correctly parse Greek utf8', function() {
+    it('should correctly parse Greek utf8', function() {
       const {
         docUpdates: updates
       } = MockDocUpdaterApi.getProjectStructureUpdates(this.uploaded_project_id)
@@ -584,7 +584,7 @@ describe('ProjectStructureChanges', function() {
       ))
     })
 
-    return it('should version a replacement file', function(done) {
+    it('should version a replacement file', function(done) {
       let req
       const image_file = fs.createReadStream(
         Path.resolve(__dirname + '/../files/2pixel.png')
@@ -771,7 +771,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    return it('should version moving a folder', function(done) {
+    it('should version moving a folder', function(done) {
       return this.owner.request.post(
         {
           uri: `project/${example_project_id}/folder`,
@@ -949,7 +949,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    return it('should version renaming a folder', function(done) {
+    it('should version renaming a folder', function(done) {
       return this.owner.request.post(
         {
           uri: `project/${example_project_id}/Folder/${example_folder_id_1}/rename`,
@@ -1022,7 +1022,7 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    return it('should version deleting a folder', function(done) {
+    it('should version deleting a folder', function(done) {
       return this.owner.request.delete(
         {
           uri: `project/${example_project_id}/Folder/${example_folder_id_2}`
@@ -1282,7 +1282,7 @@ describe('ProjectStructureChanges', function() {
       return image_file.pipe(req)
     })
 
-    return it('should version deleting a doc', function(done) {
+    it('should version deleting a doc', function(done) {
       let req
       return (req = this.owner.request.delete(
         {
@@ -1333,7 +1333,7 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  return describe('uploading a document', function() {
+  describe('uploading a document', function() {
     beforeEach(function(done) {
       MockDocUpdaterApi.clearProjectStructureUpdates()
       return ProjectGetter.getProject(example_project_id, (error, project) => {
@@ -1346,7 +1346,7 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    return describe('with an unusual character set', function() {
+    describe('with an unusual character set', function() {
       it('should correctly handle utf16-le data', function(done) {
         let req
         const document_file = fs.createReadStream(
@@ -1394,7 +1394,7 @@ describe('ProjectStructureChanges', function() {
         ))
       })
 
-      return it('should correctly handle windows1252/iso-8859-1/latin1 data', function(done) {
+      it('should correctly handle windows1252/iso-8859-1/latin1 data', function(done) {
         let req
         const document_file = fs.createReadStream(
           Path.resolve(

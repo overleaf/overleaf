@@ -81,7 +81,7 @@ describe('UserRegistrationHandler', function() {
         })
       })
 
-      return it('does not allow through', function() {
+      it('does not allow through', function() {
         const result = this.handler._registrationRequestIsValid(
           this.passingRequest
         )
@@ -89,14 +89,14 @@ describe('UserRegistrationHandler', function() {
       })
     })
 
-    return describe('failing password validation', function() {
+    describe('failing password validation', function() {
       beforeEach(function() {
         return this.AuthenticationManager.validatePassword.returns({
           message: 'password is too short'
         })
       })
 
-      return it('does not allow through', function() {
+      it('does not allow through', function() {
         const result = this.handler._registrationRequestIsValid(
           this.passingRequest
         )
@@ -124,7 +124,7 @@ describe('UserRegistrationHandler', function() {
         })
       })
 
-      return it('should set holding account to false', function(done) {
+      it('should set holding account to false', function(done) {
         return this.handler.registerNewUser(this.passingRequest, err => {
           const update = this.User.update.args[0]
           assert.deepEqual(update[0], { _id: this.user._id })
@@ -144,7 +144,7 @@ describe('UserRegistrationHandler', function() {
         })
       })
 
-      return it('should return email registered in the error if there is a non holdingAccount there', function(done) {
+      it('should return email registered in the error if there is a non holdingAccount there', function(done) {
         this.UserGetter.getUserByAnyEmail.callsArgWith(
           1,
           null,
@@ -229,7 +229,7 @@ describe('UserRegistrationHandler', function() {
         })
       })
 
-      return it('should track the registration event', function(done) {
+      it('should track the registration event', function(done) {
         return this.handler.registerNewUser(this.passingRequest, err => {
           this.AnalyticsManager.recordEvent
             .calledWith(this.user._id, 'user-registered')
@@ -239,10 +239,10 @@ describe('UserRegistrationHandler', function() {
       })
     })
 
-    return it('should call the ReferalAllocator', done => done())
+    it('should call the ReferalAllocator', done => done())
   })
 
-  return describe('registerNewUserAndSendActivationEmail', function() {
+  describe('registerNewUserAndSendActivationEmail', function() {
     beforeEach(function() {
       this.email = 'email@example.com'
       this.crypto.randomBytes = sinon.stub().returns({
@@ -293,7 +293,7 @@ describe('UserRegistrationHandler', function() {
           .should.equal(true)
       })
 
-      return it('should return the user', function() {
+      it('should return the user', function() {
         return this.callback
           .calledWith(
             null,
@@ -306,7 +306,7 @@ describe('UserRegistrationHandler', function() {
       })
     })
 
-    return describe('with a user that already exists', function() {
+    describe('with a user that already exists', function() {
       beforeEach(function() {
         this.handler.registerNewUser.callsArgWith(
           1,
@@ -319,7 +319,7 @@ describe('UserRegistrationHandler', function() {
         )
       })
 
-      return it('should still generate a new password token and email', function() {
+      it('should still generate a new password token and email', function() {
         this.OneTimeTokenHandler.getNewToken.called.should.equal(true)
         return this.EmailHandler.sendEmail.called.should.equal(true)
       })

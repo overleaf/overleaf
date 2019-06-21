@@ -393,7 +393,7 @@ describe('Authorization', function() {
       )
     })
 
-    return it('should allow site admin users admin access to it', function(done) {
+    it('should allow site admin users admin access to it', function(done) {
       return expect_admin_access(this.site_admin, this.project_id, done)
     })
   })
@@ -472,7 +472,7 @@ describe('Authorization', function() {
       return expect_settings_write_access(this.rw_user, this.project_id, done)
     })
 
-    return it('should not allow the read-write user admin access to it', function(done) {
+    it('should not allow the read-write user admin access to it', function(done) {
       return expect_no_admin_access(
         this.rw_user,
         this.project_id,
@@ -539,7 +539,7 @@ describe('Authorization', function() {
       )
     })
 
-    return it('should not allow an anonymous user admin access to it', function(done) {
+    it('should not allow an anonymous user admin access to it', function(done) {
       return expect_no_admin_access(
         this.anon,
         this.project_id,
@@ -549,7 +549,7 @@ describe('Authorization', function() {
     })
   })
 
-  return describe('public read-only project', function() {
+  describe('public read-only project', function() {
     before(function(done) {
       return this.owner.createProject(
         'public-ro-project',
@@ -606,7 +606,7 @@ describe('Authorization', function() {
       )
     })
 
-    return it('should not allow an anonymous user admin access to it', function(done) {
+    it('should not allow an anonymous user admin access to it', function(done) {
       return expect_no_admin_access(
         this.anon,
         this.project_id,

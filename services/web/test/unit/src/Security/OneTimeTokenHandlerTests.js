@@ -73,14 +73,14 @@ describe('OneTimeTokenHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the token', function() {
+      it('should call the callback with the token', function() {
         return this.callback
           .calledWith(null, this.stubbedToken)
           .should.equal(true)
       })
     })
 
-    return describe('with an optional expiresIn parameter', function() {
+    describe('with an optional expiresIn parameter', function() {
       beforeEach(function() {
         return this.OneTimeTokenHandler.getNewToken(
           'password',
@@ -102,7 +102,7 @@ describe('OneTimeTokenHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the token', function() {
+      it('should call the callback with the token', function() {
         return this.callback
           .calledWith(null, this.stubbedToken)
           .should.equal(true)
@@ -110,7 +110,7 @@ describe('OneTimeTokenHandler', function() {
     })
   })
 
-  return describe('getValueFromTokenAndExpire', function() {
+  describe('getValueFromTokenAndExpire', function() {
     describe('successfully', function() {
       beforeEach(function() {
         this.db.tokens.findAndModify = sinon
@@ -139,12 +139,12 @@ describe('OneTimeTokenHandler', function() {
           .should.equal(true)
       })
 
-      return it('should return the data', function() {
+      it('should return the data', function() {
         return this.callback.calledWith(null, 'mock-data').should.equal(true)
       })
     })
 
-    return describe('when a valid token is not found', function() {
+    describe('when a valid token is not found', function() {
       beforeEach(function() {
         this.db.tokens.findAndModify = sinon.stub().yields(null, null)
         return this.OneTimeTokenHandler.getValueFromTokenAndExpire(
@@ -154,7 +154,7 @@ describe('OneTimeTokenHandler', function() {
         )
       })
 
-      return it('should return a NotFoundError', function() {
+      it('should return a NotFoundError', function() {
         return this.callback
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)

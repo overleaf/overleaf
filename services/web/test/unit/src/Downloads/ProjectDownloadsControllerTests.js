@@ -104,14 +104,14 @@ describe('ProjectDownloadsController', function() {
       return this.metrics.inc.calledWith('zip-downloads').should.equal(true)
     })
 
-    return it('should log the action', function() {
+    it('should log the action', function() {
       return this.logger.log
         .calledWith(sinon.match.any, 'downloading project')
         .should.equal(true)
     })
   })
 
-  return describe('downloadMultipleProjects', function() {
+  describe('downloadMultipleProjects', function() {
     beforeEach(function() {
       this.stream = { pipe: sinon.stub() }
       this.ProjectZipStreamManager.createZipStreamForMultipleProjects = sinon
@@ -168,7 +168,7 @@ describe('ProjectDownloadsController', function() {
         .should.equal(true)
     })
 
-    return it('should log the action', function() {
+    it('should log the action', function() {
       return this.logger.log
         .calledWith(sinon.match.any, 'downloading multiple projects')
         .should.equal(true)

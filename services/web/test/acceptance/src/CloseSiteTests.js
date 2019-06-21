@@ -22,12 +22,12 @@ describe('siteIsOpen', function() {
         return done()
       })))
 
-  return describe('when siteIsOpen is false', function() {
+  describe('when siteIsOpen is false', function() {
     beforeEach(() => (Settings.siteIsOpen = false))
 
     afterEach(() => (Settings.siteIsOpen = true))
 
-    return it('should return maintenance page', done =>
+    it('should return maintenance page', done =>
       request.get('/login', function(error, response) {
         response.statusCode.should.equal(503)
         return done()

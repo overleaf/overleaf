@@ -114,7 +114,7 @@ describe('ProjectDetailsHandler', function() {
       })
     })
 
-    return it('should return the error', function(done) {
+    it('should return the error', function(done) {
       const error = 'some error'
       this.ProjectGetter.getProject.callsArgWith(2, error)
       return this.handler.getDetails(this.project_id, err => {
@@ -206,7 +206,7 @@ describe('ProjectDetailsHandler', function() {
       })
     })
 
-    return it('should append the supplied suffix to the project name, if passed', function(done) {
+    it('should append the supplied suffix to the project name, if passed', function(done) {
       return this.handler.transferOwnership('abc', '123', ' wombat', () => {
         sinon.assert.calledWith(
           this.handler.generateUniqueName,
@@ -232,7 +232,7 @@ describe('ProjectDetailsHandler', function() {
       )
     })
 
-    return it('should return what the mongo call returns', function(done) {
+    it('should return what the mongo call returns', function(done) {
       const err = 'error'
       const description = 'cool project'
       this.ProjectGetter.getProject.callsArgWith(2, err, { description })
@@ -252,7 +252,7 @@ describe('ProjectDetailsHandler', function() {
       return (this.description = 'updated teh description')
     })
 
-    return it('should update the project detials', function(done) {
+    it('should update the project detials', function(done) {
       this.ProjectModel.update.callsArgWith(2)
       return this.handler.setProjectDescription(
         this.project_id,
@@ -300,7 +300,7 @@ describe('ProjectDetailsHandler', function() {
       })
     })
 
-    return it('should not do anything with an invalid name', function(done) {
+    it('should not do anything with an invalid name', function(done) {
       this.handler.validateProjectName = sinon
         .stub()
         .yields(new Error('invalid name'))
@@ -351,7 +351,7 @@ describe('ProjectDetailsHandler', function() {
       )
     })
 
-    return it('should accept normal names', function(done) {
+    it('should accept normal names', function(done) {
       return this.handler.validateProjectName('foobar', function(error) {
         expect(error).to.not.exist
         return done()
@@ -516,7 +516,7 @@ describe('ProjectDetailsHandler', function() {
       )
     })
 
-    return it('should not find a numeric index lower than the one already present', function(done) {
+    it('should not find a numeric index lower than the one already present', function(done) {
       return this.handler.ensureProjectNameIsUnique(
         this.user_id,
         'numeric (31)',
@@ -551,7 +551,7 @@ describe('ProjectDetailsHandler', function() {
       ).to.equal('a'.repeat(150))
     })
 
-    return it('should accept normal names', function() {
+    it('should accept normal names', function() {
       return expect(this.handler.fixProjectName('foobar')).to.equal('foobar')
     })
   })
@@ -589,12 +589,12 @@ describe('ProjectDetailsHandler', function() {
       )
     })
 
-    return describe('when update produces an error', function() {
+    describe('when update produces an error', function() {
       beforeEach(function() {
         return this.ProjectModel.update.callsArgWith(2, new Error('woops'))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.handler.setPublicAccessLevel(
           this.project_id,
           this.accessLevel,
@@ -608,7 +608,7 @@ describe('ProjectDetailsHandler', function() {
     })
   })
 
-  return describe('ensureTokensArePresent', function() {
+  describe('ensureTokensArePresent', function() {
     beforeEach(function() {})
 
     describe('when the project has tokens', function() {
@@ -652,7 +652,7 @@ describe('ProjectDetailsHandler', function() {
         )
       })
 
-      return it('should produce the tokens without error', function(done) {
+      it('should produce the tokens without error', function(done) {
         return this.handler.ensureTokensArePresent(
           this.project_id,
           (err, tokens) => {
@@ -664,7 +664,7 @@ describe('ProjectDetailsHandler', function() {
       })
     })
 
-    return describe('when tokens are missing', function() {
+    describe('when tokens are missing', function() {
       beforeEach(function() {
         this.project = { _id: this.project_id }
         this.ProjectGetter.getProject = sinon
@@ -728,7 +728,7 @@ describe('ProjectDetailsHandler', function() {
         )
       })
 
-      return it('should produce the tokens without error', function(done) {
+      it('should produce the tokens without error', function(done) {
         return this.handler.ensureTokensArePresent(
           this.project_id,
           (err, tokens) => {

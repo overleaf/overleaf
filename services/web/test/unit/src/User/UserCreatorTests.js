@@ -48,7 +48,7 @@ describe('UserCreator', function() {
     return (this.email = 'bob.oswald@gmail.com')
   })
 
-  return describe('createNewUser', function() {
+  describe('createNewUser', function() {
     it('should take the opts and put them in the model', function(done) {
       const opts = {
         email: this.email,
@@ -133,7 +133,7 @@ describe('UserCreator', function() {
       )
     })
 
-    return it('should not add affiliation if skipping', function(done) {
+    it('should not add affiliation if skipping', function(done) {
       const attributes = { email: this.email }
       const options = { skip_affiliation: true }
       return this.UserCreator.createNewUser(

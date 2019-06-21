@@ -140,7 +140,7 @@ describe('SubscriptionController', function() {
         return done()
       })
 
-      return describe('not dependant on logged in state', function(done) {
+      describe('not dependant on logged in state', function(done) {
         // these could have been put in 'when user is not logged in' too
         it('should set the recommended currency from the geoiplookup', function(done) {
           this.res.renderedVariables.recomendedCurrency.should.equal(
@@ -151,14 +151,14 @@ describe('SubscriptionController', function() {
             .should.equal(true)
           return done()
         })
-        return it('should include data for features table', function(done) {
+        it('should include data for features table', function(done) {
           this.res.renderedVariables.planFeatures.length.should.not.equal(0)
           return done()
         })
       })
     })
 
-    return describe('when user is not logged in', function(done) {
+    describe('when user is not logged in', function(done) {
       beforeEach(function(done) {
         this.res.callback = done
         this.AuthenticationController.getLoggedInUserId = sinon
@@ -167,7 +167,7 @@ describe('SubscriptionController', function() {
         return this.SubscriptionController.plansPage(this.req, this.res)
       })
 
-      return it('should not fetch the current user', function(done) {
+      it('should not fetch the current user', function(done) {
         this.UserGetter.getUser.callCount.should.equal(0)
         return done()
       })
@@ -197,7 +197,7 @@ describe('SubscriptionController', function() {
         return this.PlansLocator.findLocalPlanInSettings.returns({})
       })
 
-      return describe('with a valid plan code', () =>
+      describe('with a valid plan code', () =>
         it('should render the new subscription page', function(done) {
           this.res.render = (page, opts) => {
             page.should.equal('subscriptions/new')
@@ -265,7 +265,7 @@ describe('SubscriptionController', function() {
         return this.SubscriptionController.paymentPage(this.req, this.res)
       })
 
-      return it('should use the geo ip currency if non is provided', function(done) {
+      it('should use the geo ip currency if non is provided', function(done) {
         this.req.query.currency = null
         this.res.render = (page, opts) => {
           opts.currency.should.equal(this.stubbedCurrencyCode)
@@ -275,7 +275,7 @@ describe('SubscriptionController', function() {
       })
     })
 
-    return describe('with a recurly subscription already', () =>
+    describe('with a recurly subscription already', () =>
       it('should redirect to the subscription dashboard', function(done) {
         this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
           1,
@@ -353,7 +353,7 @@ describe('SubscriptionController', function() {
       return expect(this.data.user).to.deep.equal(this.user)
     })
 
-    return it('should load the plans', function() {
+    it('should load the plans', function() {
       return expect(this.data.plans).to.deep.equal(this.plans)
     })
   })
@@ -387,7 +387,7 @@ describe('SubscriptionController', function() {
       return done()
     })
 
-    return it('should redurect to the subscription page', function(done) {
+    it('should redurect to the subscription page', function(done) {
       this.res.sendStatus.calledWith(201).should.equal(true)
       return done()
     })
@@ -413,7 +413,7 @@ describe('SubscriptionController', function() {
       return done()
     })
 
-    return it('should redurect to the subscription page', function(done) {
+    it('should redurect to the subscription page', function(done) {
       this.res.redirect.calledWith('/user/subscription').should.equal(true)
       return done()
     })
@@ -440,7 +440,7 @@ describe('SubscriptionController', function() {
       return done()
     })
 
-    return it('should redurect to the subscription page', function(done) {
+    it('should redurect to the subscription page', function(done) {
       this.res.redirect.calledWith('/user/subscription').should.equal(true)
       return done()
     })
@@ -464,7 +464,7 @@ describe('SubscriptionController', function() {
       return done()
     })
 
-    return it('should redurect to the subscription page', function(done) {
+    it('should redurect to the subscription page', function(done) {
       this.res.redirect
         .calledWith('/user/subscription/canceled')
         .should.equal(true)
@@ -498,13 +498,13 @@ describe('SubscriptionController', function() {
         return done()
       })
 
-      return it('should send a 200', function(done) {
+      it('should send a 200', function(done) {
         this.res.sendStatus.calledWith(200)
         return done()
       })
     })
 
-    return describe('with a non-actionable request', function() {
+    describe('with a non-actionable request', function() {
       beforeEach(function(done) {
         this.user.id = this.activeRecurlySubscription.account.account_code
         this.req = {
@@ -531,7 +531,7 @@ describe('SubscriptionController', function() {
         )
       })
 
-      return it('should respond with a 200 status', function() {
+      it('should respond with a 200 status', function() {
         return this.res.sendStatus.calledWith(200)
       })
     })
@@ -585,7 +585,7 @@ describe('SubscriptionController', function() {
       )
     })
 
-    return it('should pass annual as the plan name if the user is already on an annual plan', function(done) {
+    it('should pass annual as the plan name if the user is already on an annual plan', function(done) {
       this.LimitationsManager.userHasV2Subscription.callsArgWith(
         1,
         null,
@@ -603,7 +603,7 @@ describe('SubscriptionController', function() {
     })
   })
 
-  return describe('processUpgradeToAnnualPlan', function() {
+  describe('processUpgradeToAnnualPlan', function() {
     beforeEach(function() {})
 
     it('should tell the subscription handler to update the subscription with the annual plan and apply a coupon code', function(done) {
@@ -622,7 +622,7 @@ describe('SubscriptionController', function() {
       )
     })
 
-    return it('should get the collaborator coupon code', function(done) {
+    it('should get the collaborator coupon code', function(done) {
       this.req.body = { planName: 'collaborator' }
 
       this.res.sendStatus = url => {

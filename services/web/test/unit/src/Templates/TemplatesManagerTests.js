@@ -107,7 +107,7 @@ describe('TemplatesManager', function() {
       '%2Ftemplates%2F52fb86a81ae1e566597a25f6%2Fv%2F4%2Fzip&templateName=Moderncv%20Banking&compiler=pdflatex')
   })
 
-  return describe('createProjectFromV1Template', function() {
+  describe('createProjectFromV1Template', function() {
     describe('when all options passed', function() {
       beforeEach(function() {
         return this.TemplatesManager.createProjectFromV1Template(
@@ -180,12 +180,12 @@ describe('TemplatesManager', function() {
         )
       })
 
-      return it('should ensure that the dump folder exists', function() {
+      it('should ensure that the dump folder exists', function() {
         return sinon.assert.called(this.FileWriter.ensureDumpFolderExists)
       })
     })
 
-    return describe('when some options not set', function() {
+    describe('when some options not set', function() {
       beforeEach(function() {
         return this.TemplatesManager.createProjectFromV1Template(
           null,
@@ -200,7 +200,7 @@ describe('TemplatesManager', function() {
         )
       })
 
-      return it('should not set missing project options', function() {
+      it('should not set missing project options', function() {
         this.ProjectOptionsHandler.setCompiler.called.should.equal(false)
         this.ProjectRootDocManager.setRootDocFromName.called.should.equal(false)
         this.ProjectOptionsHandler.setBrandVariationId.called.should.equal(

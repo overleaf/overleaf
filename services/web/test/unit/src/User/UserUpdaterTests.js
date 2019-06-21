@@ -117,7 +117,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    return it('handle error', function(done) {
+    it('handle error', function(done) {
       this.UserUpdater.removeEmailAddress.callsArgWith(2, new Error('nope'))
       return this.UserUpdater.changeEmailAddress(
         this.stubbedUser._id,
@@ -216,7 +216,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    return it('validates email', function(done) {
+    it('validates email', function(done) {
       return this.UserUpdater.addEmailAddress(
         this.stubbedUser._id,
         'bar',
@@ -308,7 +308,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    return it('validates email', function(done) {
+    it('validates email', function(done) {
       return this.UserUpdater.removeEmailAddress(
         this.stubbedUser._id,
         'baz',
@@ -389,7 +389,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    return it('validates email', function(done) {
+    it('validates email', function(done) {
       return this.UserUpdater.setDefaultEmailAddress(
         this.stubbedUser._id,
         '.edu',
@@ -401,7 +401,7 @@ describe('UserUpdater', function() {
     })
   })
 
-  return describe('confirmEmail', function() {
+  describe('confirmEmail', function() {
     beforeEach(function() {
       return (this.UserUpdater.updateUser = sinon
         .stub()
@@ -491,7 +491,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    return it('refresh features', function(done) {
+    it('refresh features', function(done) {
       return this.UserUpdater.confirmEmail(
         this.stubbedUser._id,
         this.newEmail,

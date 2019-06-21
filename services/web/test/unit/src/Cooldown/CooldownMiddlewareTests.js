@@ -29,7 +29,7 @@ describe('CooldownMiddleware', function() {
     }))
   })
 
-  return describe('freezeProject', function() {
+  describe('freezeProject', function() {
     describe('when project is on cooldown', function() {
       beforeEach(function() {
         this.CooldownManager.isProjectOnCooldown = sinon
@@ -53,7 +53,7 @@ describe('CooldownMiddleware', function() {
         return this.next.callCount.should.equal(0)
       })
 
-      return it('should send a 429 status', function() {
+      it('should send a 429 status', function() {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         this.res.sendStatus.callCount.should.equal(1)
         return this.res.sendStatus.calledWith(429).should.equal(true)
@@ -78,7 +78,7 @@ describe('CooldownMiddleware', function() {
           .should.equal(true)
       })
 
-      return it('call next with no arguments', function() {
+      it('call next with no arguments', function() {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         this.next.callCount.should.equal(1)
         return expect(this.next.lastCall.args.length).to.equal(0)
@@ -103,14 +103,14 @@ describe('CooldownMiddleware', function() {
           .should.equal(true)
       })
 
-      return it('call next with an error', function() {
+      it('call next with an error', function() {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         this.next.callCount.should.equal(1)
         return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
     })
 
-    return describe('when projectId is not part of route', function() {
+    describe('when projectId is not part of route', function() {
       beforeEach(function() {
         this.CooldownManager.isProjectOnCooldown = sinon
           .stub()
@@ -126,7 +126,7 @@ describe('CooldownMiddleware', function() {
         return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
 
-      return it('should not call CooldownManager.isProjectOnCooldown', function() {
+      it('should not call CooldownManager.isProjectOnCooldown', function() {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         return this.CooldownManager.isProjectOnCooldown.callCount.should.equal(
           0

@@ -236,7 +236,7 @@ describe('LinkedFiles', function() {
       )
     })
 
-    return it('should not allow to create a linked-file with v1 id', function(done) {
+    it('should not allow to create a linked-file with v1 id', function(done) {
       return this.owner.request.post(
         {
           url: `/project/${this.project_one_id}/linked_file`,
@@ -299,7 +299,7 @@ describe('LinkedFiles', function() {
       )
     })
 
-    return it('should refuse to refresh', function(done) {
+    it('should refuse to refresh', function(done) {
       return this.owner.request.post(
         {
           url: `/project/${this.project_one_id}/linked_file/abcd/refresh`,
@@ -524,7 +524,7 @@ describe('LinkedFiles', function() {
       )
     })
 
-    return it('should accept a URL withuot a leading http://, and add it', function(done) {
+    it('should accept a URL withuot a leading http://, and add it', function(done) {
       return this.owner.request.post(
         {
           url: `/project/${this.project_id}/linked_file`,
@@ -664,7 +664,7 @@ describe('LinkedFiles', function() {
       )
     })
 
-    return it('should refresh the file', function(done) {
+    it('should refresh the file', function(done) {
       return this.owner.request.post(
         {
           url: `/project/${this.project_one_id}/linked_file/${
@@ -694,7 +694,7 @@ describe('LinkedFiles', function() {
     })
   })
 
-  return describe('with a linked project_output_file from a v1 project that has not been imported', function() {
+  describe('with a linked project_output_file from a v1 project that has not been imported', function() {
     before(function(done) {
       return async.series(
         [
@@ -734,7 +734,7 @@ describe('LinkedFiles', function() {
       )
     })
 
-    return it('should refuse to refresh', function(done) {
+    it('should refuse to refresh', function(done) {
       return this.owner.request.post(
         {
           url: `/project/${this.project_one_id}/linked_file/abcdef/refresh`,

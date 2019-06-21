@@ -198,7 +198,7 @@ curl -H "X-Forwarded-Proto: https" -v ${buildUrl(
     })
   })
 
-  return it('the project list', function(done) {
+  it('the project list', function(done) {
     logger.log('smoke test: Checking can load project list')
     this.timeout(4000)
     const command = `\

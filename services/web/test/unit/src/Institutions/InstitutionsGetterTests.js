@@ -38,7 +38,7 @@ describe('InstitutionsGetter', function() {
     return (this.userId = '12345abcde')
   })
 
-  return describe('getConfirmedInstitutions', function() {
+  describe('getConfirmedInstitutions', function() {
     it('filters unconfirmed affiliations', function(done) {
       this.userEmails = [
         {
@@ -80,7 +80,7 @@ describe('InstitutionsGetter', function() {
       )
     })
 
-    return it('should handle error', function(done) {
+    it('should handle error', function(done) {
       this.UserGetter.getUserFullEmails.yields(new Error('Nope'))
       return this.InstitutionsGetter.getConfirmedInstitutions(
         this.userId,

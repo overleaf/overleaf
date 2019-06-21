@@ -51,14 +51,14 @@ describe('SystemMessageManager', function() {
         return this.callback.calledWith(null, this.messages).should.equal(true)
       })
 
-      return it('should cache the messages', function() {
+      it('should cache the messages', function() {
         return this.SystemMessageManager._cachedMessages.should.equal(
           this.messages
         )
       })
     })
 
-    return describe('when the messages are cached', function() {
+    describe('when the messages are cached', function() {
       beforeEach(function() {
         this.SystemMessageManager._cachedMessages = this.messages
         return this.SystemMessageManager.getMessages(this.callback)
@@ -68,13 +68,13 @@ describe('SystemMessageManager', function() {
         return this.SystemMessage.find.called.should.equal(false)
       })
 
-      return it('should return the messages', function() {
+      it('should return the messages', function() {
         return this.callback.calledWith(null, this.messages).should.equal(true)
       })
     })
   })
 
-  return describe('clearMessages', function() {
+  describe('clearMessages', function() {
     beforeEach(function() {
       this.SystemMessage.remove = sinon.stub().callsArg(1)
       return this.SystemMessageManager.clearMessages(this.callback)
@@ -84,7 +84,7 @@ describe('SystemMessageManager', function() {
       return this.SystemMessage.remove.calledWith({}).should.equal(true)
     })
 
-    return it('should return the callback', function() {
+    it('should return the callback', function() {
       return this.callback.called.should.equal(true)
     })
   })

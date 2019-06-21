@@ -118,7 +118,7 @@ describe('TagsHandler', function() {
       })
     })
 
-    return it('should return an err and empty array on no body and no response', function(done) {
+    it('should return an err and empty array on no body and no response', function(done) {
       this.request.get.callsArgWith(
         1,
         { something: 'wrong' },
@@ -156,7 +156,7 @@ describe('TagsHandler', function() {
       })
     })
 
-    return it('should return empty arrays if there are no tags', function() {
+    it('should return empty arrays if there are no tags', function() {
       this.request.get.callsArgWith(1, null, { statusCode: 200 }, null)
       return this.handler.getAllTags(
         user_id,
@@ -192,7 +192,7 @@ describe('TagsHandler', function() {
         .should.equal(true)
     })
 
-    return it('should call the callback with no error', function() {
+    it('should call the callback with no error', function() {
       return this.callback.calledWith(null).should.equal(true)
     })
   })
@@ -215,12 +215,12 @@ describe('TagsHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with no error', function() {
+      it('should call the callback with no error', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
 
-    return describe('with error', function() {
+    describe('with error', function() {
       beforeEach(function() {
         this.request.del = sinon
           .stub()
@@ -228,7 +228,7 @@ describe('TagsHandler', function() {
         return this.handler.deleteTag(user_id, tag_id, this.callback)
       })
 
-      return it('should call the callback with an Error', function() {
+      it('should call the callback with an Error', function() {
         return this.callback.calledWith(new Error()).should.equal(true)
       })
     })
@@ -260,12 +260,12 @@ describe('TagsHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with no error', function() {
+      it('should call the callback with no error', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
 
-    return describe('with error', function() {
+    describe('with error', function() {
       beforeEach(function() {
         this.request.post = sinon
           .stub()
@@ -273,7 +273,7 @@ describe('TagsHandler', function() {
         return this.handler.renameTag(user_id, tag_id, 'name', this.callback)
       })
 
-      return it('should call the callback with an Error', function() {
+      it('should call the callback with an Error', function() {
         return this.callback.calledWith(new Error()).should.equal(true)
       })
     })
@@ -302,12 +302,12 @@ describe('TagsHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with no error', function() {
+      it('should call the callback with no error', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
 
-    return describe('with error', function() {
+    describe('with error', function() {
       beforeEach(function() {
         this.request.del = sinon
           .stub()
@@ -320,7 +320,7 @@ describe('TagsHandler', function() {
         )
       })
 
-      return it('should call the callback with an Error', function() {
+      it('should call the callback with an Error', function() {
         return this.callback.calledWith(new Error()).should.equal(true)
       })
     })
@@ -349,12 +349,12 @@ describe('TagsHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with no error', function() {
+      it('should call the callback with no error', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
 
-    return describe('with error', function() {
+    describe('with error', function() {
       beforeEach(function() {
         this.request.post = sinon
           .stub()
@@ -367,7 +367,7 @@ describe('TagsHandler', function() {
         )
       })
 
-      return it('should call the callback with an Error', function() {
+      it('should call the callback with an Error', function() {
         return this.callback.calledWith(new Error()).should.equal(true)
       })
     })
@@ -399,12 +399,12 @@ describe('TagsHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with no error', function() {
+      it('should call the callback with no error', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
 
-    return describe('with error', function() {
+    describe('with error', function() {
       beforeEach(function() {
         this.request.post = sinon
           .stub()
@@ -417,13 +417,13 @@ describe('TagsHandler', function() {
         )
       })
 
-      return it('should call the callback with an Error', function() {
+      it('should call the callback with an Error', function() {
         return this.callback.calledWith(new Error()).should.equal(true)
       })
     })
   })
 
-  return describe('updateTagUserIds', function() {
+  describe('updateTagUserIds', function() {
     describe('successfully', function() {
       beforeEach(function() {
         this.request.put = sinon
@@ -448,12 +448,12 @@ describe('TagsHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with no error', function() {
+      it('should call the callback with no error', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
 
-    return describe('with error', function() {
+    describe('with error', function() {
       beforeEach(function() {
         this.request.put = sinon
           .stub()
@@ -465,7 +465,7 @@ describe('TagsHandler', function() {
         )
       })
 
-      return it('should call the callback with an Error', function() {
+      it('should call the callback with an Error', function() {
         return this.callback.calledWith(new Error()).should.equal(true)
       })
     })

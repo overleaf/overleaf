@@ -246,7 +246,7 @@ describe('ProjectController', function() {
       return this.ProjectController.updateProjectSettings(this.req, this.res)
     })
 
-    return it('should update the root doc', function(done) {
+    it('should update the root doc', function(done) {
       this.EditorController.setRootDoc = sinon.stub().callsArg(2)
       this.req.body = { rootDocId: (this.rootDocId = 'root-doc-id') }
       this.res.sendStatus = code => {
@@ -291,7 +291,7 @@ describe('ProjectController', function() {
       return this.ProjectController.deleteProject(this.req, this.res)
     })
 
-    return it('should tell the project deleter to delete when forever=true', function(done) {
+    it('should tell the project deleter to delete when forever=true', function(done) {
       this.req.query = { forever: 'true' }
       this.res.sendStatus = code => {
         this.ProjectDeleter.deleteProject
@@ -346,7 +346,7 @@ describe('ProjectController', function() {
       return this.ProjectController.newProject(this.req, this.res)
     })
 
-    return it('should call the projectCreationHandler with createBasicProject', function(done) {
+    it('should call the projectCreationHandler with createBasicProject', function(done) {
       this.req.body.template = 'basic'
       this.res.send = json => {
         this.ProjectCreationHandler.createExampleProject.called.should.equal(
@@ -530,7 +530,7 @@ describe('ProjectController', function() {
         return this.ProjectController.projectListPage(this.req, this.res)
       })
 
-      return it('should not show for non sample users', function(done) {
+      it('should not show for non sample users', function(done) {
         this.user._id = '588f3ddae8ebc1bac07c9fff' // last two digits
         this.res.render = (pageName, opts) => {
           expect(opts.frontChatWidgetRoomId).to.equal(undefined)
@@ -540,7 +540,7 @@ describe('ProjectController', function() {
       })
     })
 
-    return describe('with overleaf-integration-web-module hook', function() {
+    describe('with overleaf-integration-web-module hook', function() {
       beforeEach(function() {
         this.V1Response = {
           projects: [
@@ -603,7 +603,7 @@ describe('ProjectController', function() {
         return this.ProjectController.projectListPage(this.req, this.res)
       })
 
-      return it('should have isShowingV1Projects flag', function(done) {
+      it('should have isShowingV1Projects flag', function(done) {
         this.res.render = (pageName, opts) => {
           opts.isShowingV1Projects.should.equal(true)
           return done()
@@ -678,7 +678,7 @@ describe('ProjectController', function() {
       return this.ProjectController.projectListPage(this.req, this.res)
     })
 
-    return it('should omit one of the projects', function(done) {
+    it('should omit one of the projects', function(done) {
       this.res.render = (pageName, opts) => {
         opts.projects.length.should.equal(
           this.projects.length +
@@ -712,7 +712,7 @@ describe('ProjectController', function() {
       return this.ProjectController.renameProject(this.req, this.res)
     })
 
-    return it('should send an error to next() if there is a problem', function(done) {
+    it('should send an error to next() if there is a problem', function(done) {
       let error
       this.EditorController.renameProject.callsArgWith(
         2,
@@ -848,7 +848,7 @@ describe('ProjectController', function() {
       return this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    return it('should expose the brand variation details as locals for branded projects', function(done) {
+    it('should expose the brand variation details as locals for branded projects', function(done) {
       this.ProjectGetter.getProject.callsArgWith(2, null, this.brandedProject)
       this.res.render = (pageName, opts) => {
         opts.brandVariation.should.deep.equal(this.brandVariationDetails)
@@ -900,7 +900,7 @@ describe('ProjectController', function() {
       return done()
     })
 
-    return it('should produce a list of projects', function(done) {
+    it('should produce a list of projects', function(done) {
       this.res.json = data => {
         expect(data).to.deep.equal({
           projects: [
@@ -939,7 +939,7 @@ describe('ProjectController', function() {
         .callsArgWith(1, null, this.docs, this.files))
     })
 
-    return it('should produce a list of entities', function(done) {
+    it('should produce a list of entities', function(done) {
       this.res.json = data => {
         expect(data).to.deep.equal({
           project_id: 'abcd',
@@ -963,7 +963,7 @@ describe('ProjectController', function() {
     })
   })
 
-  return describe('_isInPercentageRollout', function() {
+  describe('_isInPercentageRollout', function() {
     before(function() {
       return (this.ids = [
         '5a05cd7621f9fe22be131740',
@@ -989,7 +989,7 @@ describe('ProjectController', function() {
       ])
     })
 
-    return it('should produce the expected results', function() {
+    it('should produce the expected results', function() {
       expect(
         this.ids.map(i => {
           return this.ProjectController._isInPercentageRollout('abcd', i, 50)

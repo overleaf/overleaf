@@ -186,7 +186,7 @@ describe('UserMembershipAuthorization', function() {
       )
     })
 
-    return it('checks user is staff if required', function(done) {
+    it('checks user is staff if required', function(done) {
       return this.UserMembershipAuthorization.requireInstitutionManagementStaffAccess(
         this.req,
         null,
@@ -201,7 +201,7 @@ describe('UserMembershipAuthorization', function() {
     })
   })
 
-  return describe('requireEntityAccess', function() {
+  describe('requireEntityAccess', function() {
     it('handle team access', function(done) {
       return this.UserMembershipAuthorization.requireTeamMetricsAccess(
         this.req,
@@ -317,7 +317,7 @@ describe('UserMembershipAuthorization', function() {
       )
     })
 
-    return it('handle graph access', function(done) {
+    it('handle graph access', function(done) {
       this.req.query.resource_id = 'mock-resource-id'
       this.req.query.resource_type = 'institution'
       const middleware = this.UserMembershipAuthorization.requireGraphAccess

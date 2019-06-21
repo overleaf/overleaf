@@ -69,7 +69,7 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback without an error', function() {
+      it('should call the callback without an error', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
@@ -94,7 +94,7 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should log the error', function() {
+      it('should log the error', function() {
         return this.logger.error
           .calledWith(
             {
@@ -110,7 +110,7 @@ describe('DocstoreManager', function() {
       })
     })
 
-    return describe('with a missing (404) response code', function() {
+    describe('with a missing (404) response code', function() {
       beforeEach(function() {
         this.request.del = sinon
           .stub()
@@ -130,7 +130,7 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should log the error', function() {
+      it('should log the error', function() {
         return this.logger.error
           .calledWith(
             {
@@ -191,14 +191,14 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the modified status and revision', function() {
+      it('should call the callback with the modified status and revision', function() {
         return this.callback
           .calledWith(null, this.modified, this.rev)
           .should.equal(true)
       })
     })
 
-    return describe('with a failed response code', function() {
+    describe('with a failed response code', function() {
       beforeEach(function() {
         this.request.post = sinon
           .stub()
@@ -221,7 +221,7 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should log the error', function() {
+      it('should log the error', function() {
         return this.logger.error
           .calledWith(
             {
@@ -271,7 +271,7 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the lines, version and rev', function() {
+      it('should call the callback with the lines, version and rev', function() {
         return this.callback
           .calledWith(null, this.lines, this.rev, this.version, this.ranges)
           .should.equal(true)
@@ -298,7 +298,7 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should log the error', function() {
+      it('should log the error', function() {
         return this.logger.error
           .calledWith(
             {
@@ -338,14 +338,14 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the lines, version and rev', function() {
+      it('should call the callback with the lines, version and rev', function() {
         return this.callback
           .calledWith(null, this.lines, this.rev, this.version, this.ranges)
           .should.equal(true)
       })
     })
 
-    return describe('with a missing (404) response code', function() {
+    describe('with a missing (404) response code', function() {
       beforeEach(function() {
         this.request.get = sinon
           .stub()
@@ -363,7 +363,7 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should log the error', function() {
+      it('should log the error', function() {
         return this.logger.error
           .calledWith(
             {
@@ -403,12 +403,12 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the docs', function() {
+      it('should call the callback with the docs', function() {
         return this.callback.calledWith(null, this.docs).should.equal(true)
       })
     })
 
-    return describe('with a failed response code', function() {
+    describe('with a failed response code', function() {
       beforeEach(function() {
         this.request.get = sinon
           .stub()
@@ -424,7 +424,7 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should log the error', function() {
+      it('should log the error', function() {
         return this.logger.error
           .calledWith(
             {
@@ -465,12 +465,12 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the docs', function() {
+      it('should call the callback with the docs', function() {
         return this.callback.calledWith(null, this.docs).should.equal(true)
       })
     })
 
-    return describe('with a failed response code', function() {
+    describe('with a failed response code', function() {
       beforeEach(function() {
         this.request.get = sinon
           .stub()
@@ -486,7 +486,7 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should log the error', function() {
+      it('should log the error', function() {
         return this.logger.error
           .calledWith(
             {
@@ -514,12 +514,12 @@ describe('DocstoreManager', function() {
         )
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('with a failed response code', function() {
+    describe('with a failed response code', function() {
       beforeEach(function() {
         this.request.post = sinon
           .stub()
@@ -530,7 +530,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      return it('should call the callback with an error', function() {
+      it('should call the callback with an error', function() {
         return this.callback
           .calledWith(
             new Error('docstore api responded with non-success code: 500')
@@ -540,7 +540,7 @@ describe('DocstoreManager', function() {
     })
   })
 
-  return describe('unarchiveProject', function() {
+  describe('unarchiveProject', function() {
     describe('with a successful response code', function() {
       beforeEach(function() {
         this.request.post = sinon
@@ -552,12 +552,12 @@ describe('DocstoreManager', function() {
         )
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('with a failed response code', function() {
+    describe('with a failed response code', function() {
       beforeEach(function() {
         this.request.post = sinon
           .stub()
@@ -568,7 +568,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      return it('should call the callback with an error', function() {
+      it('should call the callback with an error', function() {
         return this.callback
           .calledWith(
             new Error('docstore api responded with non-success code: 500')

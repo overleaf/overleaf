@@ -105,7 +105,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('puts the element in mongo', function() {
+    it('puts the element in mongo', function() {
       return this.subject._putElement
         .calledWith(this.project, folder_id, this.doc, 'doc', this.callback)
         .should.equal(true)
@@ -142,7 +142,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('puts the element in mongo', function() {
+    it('puts the element in mongo', function() {
       return this.subject._putElement
         .calledWith(this.project, folder_id, this.file, 'file', this.callback)
         .should.equal(true)
@@ -229,7 +229,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('calls the callback', function() {
+    it('calls the callback', function() {
       return this.callback
         .calledWith(null, this.file, this.project, this.path, this.newProject)
         .should.equal(true)
@@ -361,7 +361,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
       )
     })
 
-    return it('should use a case-sensitive match if exactCaseMatch option is set', function(done) {
+    it('should use a case-sensitive match if exactCaseMatch option is set', function(done) {
       const path = '/differentFolder/'
       return this.subject.mkdirp(
         project_id,
@@ -472,7 +472,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('calls the callback', function() {
+    it('calls the callback', function() {
       const changes = {
         oldDocs: this.oldDocs,
         newDocs: this.newDocs,
@@ -565,7 +565,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
       )
     })
 
-    return it('calls the callback with an error', function() {
+    it('calls the callback with an error', function() {
       return this.callback.calledWith(new Error()).should.equal(true)
     })
   })
@@ -612,7 +612,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('calls the callbck', function() {
+    it('calls the callbck', function() {
       return this.callback
         .calledWith(null, this.doc, this.path, this.project)
         .should.equal(true)
@@ -701,7 +701,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('calls the callback', function() {
+    it('calls the callback', function() {
       const changes = {
         oldDocs: this.oldDocs,
         newDocs: this.newDocs,
@@ -765,7 +765,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('calls the callback', function() {
+    it('calls the callback', function() {
       const folderMatcher = sinon.match(folder => {
         return folder.name === this.folderName
       })
@@ -807,7 +807,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('should call the callback', function() {
+    it('should call the callback', function() {
       return this.callback.calledWith(null, this.project).should.equal(true)
     })
   })
@@ -873,7 +873,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
       return expect(this.subject._countElements(this.project)).to.equal(23)
     })
 
-    return it('should deal with null fileRefs', function() {
+    it('should deal with null fileRefs', function() {
       this.project.rootFolder[0].folders[0].folders[0].fileRefs = undefined
       return expect(this.subject._countElements(this.project)).to.equal(23)
     })
@@ -905,7 +905,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         .yields(null, this.project))
     })
 
-    return describe('updating the project', function() {
+    describe('updating the project', function() {
       it('should use the correct mongo path', function(done) {
         return this.subject._putElement(
           this.project,
@@ -1108,7 +1108,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         )
       })
 
-      return it('should error if a folder already exists with the same name', function(done) {
+      it('should error if a folder already exists with the same name', function(done) {
         const doc = {
           _id: ObjectId(),
           name: 'another-folder'
@@ -1169,7 +1169,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
       )
     })
 
-    return it('returns nothing if name is valid', function() {
+    it('returns nothing if name is valid', function() {
       return this.subject._checkValidElementName(
         this.folder,
         'unique_name',
@@ -1205,7 +1205,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
       )
     })
 
-    return it('returns an error if trying to move a folder inside itself', function() {
+    it('returns an error if trying to move a folder inside itself', function() {
       const folder = { name: 'folder_name' }
       return this.subject._checkValidMove(
         this.project,
@@ -1224,7 +1224,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
     })
   })
 
-  return describe('_insertDeletedDocReference', function() {
+  describe('_insertDeletedDocReference', function() {
     beforeEach(function() {
       this.doc = {
         _id: ObjectId(),
@@ -1258,7 +1258,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         .should.equal(true)
     })
 
-    return it('should call the callback', function() {
+    it('should call the callback', function() {
       return this.callback.called.should.equal(true)
     })
   })

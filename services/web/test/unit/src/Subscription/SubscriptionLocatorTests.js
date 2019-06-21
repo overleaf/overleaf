@@ -39,7 +39,7 @@ describe('Subscription Locator Tests', function() {
     }))
   })
 
-  return describe('finding users subscription', function() {
+  describe('finding users subscription', function() {
     it('should send the users features', function(done) {
       this.Subscription.findOne.callsArgWith(1, null, this.subscription)
       return this.SubscriptionLocator.getUsersSubscription(
@@ -79,7 +79,7 @@ describe('Subscription Locator Tests', function() {
       )
     })
 
-    return describe('finding managed subscription', () =>
+    describe('finding managed subscription', () =>
       it('should query the database', function(done) {
         this.Subscription.findOne.callsArgWith(1, null, this.subscription)
         return this.SubscriptionLocator.findManagedSubscription(

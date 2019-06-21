@@ -45,18 +45,18 @@ describe('FileTypeManager', function() {
         return this.FileTypeManager.isDirectory(this.path, this.callback)
       })
 
-      return it('should return true', function() {
+      it('should return true', function() {
         return this.callback.calledWith(null, true).should.equal(true)
       })
     })
 
-    return describe('when it is not a directory', function() {
+    describe('when it is not a directory', function() {
       beforeEach(function() {
         this.stats.isDirectory = sinon.stub().returns(false)
         return this.FileTypeManager.isDirectory(this.path, this.callback)
       })
 
-      return it('should return false', function() {
+      it('should return false', function() {
         return this.callback.calledWith(null, false).should.equal(true)
       })
     })
@@ -228,7 +228,7 @@ describe('FileTypeManager', function() {
         )
       })
 
-      return it('should detect utf16 with BOM as utf-16', function() {
+      it('should detect utf16 with BOM as utf-16', function() {
         return this.FileTypeManager.getType(
           'file.tex',
           '/path/on/disk/utf16.tex',
@@ -274,7 +274,7 @@ describe('FileTypeManager', function() {
         )
       })
 
-      return it('should not try to get the character encoding', function() {
+      it('should not try to get the character encoding', function() {
         return this.FileTypeManager.getType('file.png', '/path/on/disk', () => {
           return sinon.assert.notCalled(this.isUtf8)
         })

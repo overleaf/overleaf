@@ -40,7 +40,7 @@ describe('ProjectDuplicateNames', function() {
     return (this.callback = sinon.stub())
   })
 
-  return describe('creating a project from the example template', function() {
+  describe('creating a project from the example template', function() {
     before(function(done) {
       return this.owner.createProject(
         'example-project',
@@ -117,7 +117,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
@@ -139,12 +139,12 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      return describe('trying to add a folder with the same name', function() {
+      describe('trying to add a folder with the same name', function() {
         before(function(done) {
           return this.owner.request.post(
             {
@@ -161,7 +161,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
@@ -185,7 +185,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
@@ -207,12 +207,12 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      return describe('trying to upload a file with the same name', function() {
+      describe('trying to upload a file with the same name', function() {
         before(function(done) {
           return this.owner.request.post(
             {
@@ -243,7 +243,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should succeed (overwriting the file)', function() {
+        it('should succeed (overwriting the file)', function() {
           return expect(this.body.success).to.equal(true)
         })
       })
@@ -268,7 +268,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
@@ -290,12 +290,12 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      return describe('trying to upload a file with the same name', function() {
+      describe('trying to upload a file with the same name', function() {
         before(function(done) {
           return this.owner.request.post(
             {
@@ -324,7 +324,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with failure status', function() {
+        it('should respond with failure status', function() {
           return expect(this.body.success).to.equal(false)
         })
       })
@@ -349,7 +349,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
@@ -372,12 +372,12 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      return describe('trying to rename a file to the same name', function() {
+      describe('trying to rename a file to the same name', function() {
         before(function(done) {
           return this.owner.request.post(
             {
@@ -395,7 +395,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with failure status', function() {
+        it('should respond with failure status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
@@ -420,7 +420,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
@@ -443,12 +443,12 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      return describe('trying to rename a file to the same name', function() {
+      describe('trying to rename a file to the same name', function() {
         before(function(done) {
           return this.owner.request.post(
             {
@@ -466,7 +466,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with failure status', function() {
+        it('should respond with failure status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
@@ -491,7 +491,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
@@ -514,12 +514,12 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      return describe('trying to rename a file to the same name', function() {
+      describe('trying to rename a file to the same name', function() {
         before(function(done) {
           return this.owner.request.post(
             {
@@ -537,13 +537,13 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with failure status', function() {
+        it('should respond with failure status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
     })
 
-    return describe('for an existing folder with a file with the same name', function() {
+    describe('for an existing folder with a file with the same name', function() {
       before(function(done) {
         return this.owner.request.post(
           {
@@ -612,7 +612,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
@@ -635,7 +635,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
@@ -658,12 +658,12 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      return describe('trying to move a folder into a subfolder of itself', function() {
+      describe('trying to move a folder into a subfolder of itself', function() {
         before(function(done) {
           return this.owner.request.post(
             {
@@ -681,7 +681,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        return it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function() {
           return expect(this.res.statusCode).to.equal(400)
         })
       })

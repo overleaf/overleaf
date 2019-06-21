@@ -64,7 +64,7 @@ describe('UserEmailsController', function() {
   describe('List', function() {
     beforeEach(function() {})
 
-    return it('lists emails', function(done) {
+    it('lists emails', function(done) {
       const fullEmails = [{ some: 'data' }]
       this.UserGetter.getUserFullEmails.callsArgWith(1, null, fullEmails)
 
@@ -131,7 +131,7 @@ describe('UserEmailsController', function() {
       })
     })
 
-    return it('handles email parse error', function(done) {
+    it('handles email parse error', function(done) {
       this.EmailHelper.parseEmail.returns(null)
       return this.UserEmailsController.add(this.req, {
         sendStatus: code => {
@@ -167,7 +167,7 @@ describe('UserEmailsController', function() {
       })
     })
 
-    return it('handles email parse error', function(done) {
+    it('handles email parse error', function(done) {
       this.EmailHelper.parseEmail.returns(null)
 
       return this.UserEmailsController.remove(this.req, {
@@ -204,7 +204,7 @@ describe('UserEmailsController', function() {
       })
     })
 
-    return it('handles email parse error', function(done) {
+    it('handles email parse error', function(done) {
       this.EmailHelper.parseEmail.returns(null)
 
       return this.UserEmailsController.setDefault(this.req, {
@@ -224,7 +224,7 @@ describe('UserEmailsController', function() {
       return this.EmailHelper.parseEmail.returns(this.email)
     })
 
-    return it('endorses affiliation', function(done) {
+    it('endorses affiliation', function(done) {
       this.req.body.role = 'Role'
       this.req.body.department = 'Department'
 
@@ -244,7 +244,7 @@ describe('UserEmailsController', function() {
     })
   })
 
-  return describe('confirm', function() {
+  describe('confirm', function() {
     beforeEach(function() {
       this.UserEmailsConfirmationHandler.confirmEmailFromToken = sinon
         .stub()
@@ -270,7 +270,7 @@ describe('UserEmailsController', function() {
           .should.equal(true)
       })
 
-      return it('should return a 200 status', function() {
+      it('should return a 200 status', function() {
         return this.res.sendStatus.calledWith(200).should.equal(true)
       })
     })
@@ -281,12 +281,12 @@ describe('UserEmailsController', function() {
         return this.UserEmailsController.confirm(this.req, this.res, this.next)
       })
 
-      return it('should return a 422 status', function() {
+      it('should return a 422 status', function() {
         return this.res.sendStatus.calledWith(422).should.equal(true)
       })
     })
 
-    return describe('when confirming fails', function() {
+    describe('when confirming fails', function() {
       beforeEach(function() {
         this.UserEmailsConfirmationHandler.confirmEmailFromToken = sinon
           .stub()
@@ -294,7 +294,7 @@ describe('UserEmailsController', function() {
         return this.UserEmailsController.confirm(this.req, this.res, this.next)
       })
 
-      return it('should return a 404 error code with a message', function() {
+      it('should return a 404 error code with a message', function() {
         this.res.status.calledWith(404).should.equal(true)
         return this.res.json
           .calledWith({

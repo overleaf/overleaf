@@ -64,7 +64,7 @@ describe('ProjectOptionsHandler', function() {
       return this.projectModel.update.args[0][3]()
     })
 
-    return it('should not perform and update on mongo if it is not a reconised compiler', function(done) {
+    it('should not perform and update on mongo if it is not a reconised compiler', function(done) {
       return this.handler.setCompiler(project_id, 'something', err => {
         this.projectModel.update.called.should.equal(false)
         return done()
@@ -83,7 +83,7 @@ describe('ProjectOptionsHandler', function() {
       return this.projectModel.update.args[0][3]()
     })
 
-    return it('should not perform and update on mongo if it is not a reconised compiler', function(done) {
+    it('should not perform and update on mongo if it is not a reconised compiler', function(done) {
       return this.handler.setImageName(project_id, 'something', err => {
         this.projectModel.update.called.should.equal(false)
         return done()
@@ -113,7 +113,7 @@ describe('ProjectOptionsHandler', function() {
       )
     })
 
-    return it('should perform and update on mongo if the language is blank (means turn it off)', function(done) {
+    it('should perform and update on mongo if the language is blank (means turn it off)', function(done) {
       this.handler.setSpellCheckLanguage(project_id, '', err => {
         this.projectModel.update.called.should.equal(true)
         return done()
@@ -140,7 +140,7 @@ describe('ProjectOptionsHandler', function() {
       })
     })
 
-    return it('should not perform and update on mongo if brand variation is an empty string', function(done) {
+    it('should not perform and update on mongo if brand variation is an empty string', function(done) {
       return this.handler.setBrandVariationId(project_id, '', err => {
         this.projectModel.update.called.should.equal(false)
         return done()
@@ -148,7 +148,7 @@ describe('ProjectOptionsHandler', function() {
     })
   })
 
-  return describe('unsetting the brandVariationId', () =>
+  describe('unsetting the brandVariationId', () =>
     it('should perform and update on mongo', function(done) {
       this.handler.unsetBrandVariationId(project_id, err => {
         const args = this.projectModel.update.args[0]

@@ -86,7 +86,7 @@ describe('RedirectUrls', function() {
       }
     ))
 
-  return it('redirects to /sign_in_to_v1 with authWithV1 setting', done =>
+  it('redirects to /sign_in_to_v1 with authWithV1 setting', done =>
     assertRedirect(
       'get',
       '/docs_v1?zip_uri=http%3A%2F%2Foverleaf.test%2Ffoo%3Fbar%3Dbaz%26qux%3Dthing&bar=baz',

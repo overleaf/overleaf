@@ -101,7 +101,7 @@ describe('ChatController', function() {
         .should.equal(true)
     })
 
-    return it('should return a 204 status code', function() {
+    it('should return a 204 status code', function() {
       return this.res.send.calledWith(204).should.equal(true)
     })
   })
@@ -125,12 +125,12 @@ describe('ChatController', function() {
         .should.equal(true)
     })
 
-    return it('should return the messages', function() {
+    it('should return the messages', function() {
       return this.res.json.calledWith(this.messages).should.equal(true)
     })
   })
 
-  return describe('_injectUserInfoIntoThreads', function() {
+  describe('_injectUserInfoIntoThreads', function() {
     beforeEach(function() {
       this.users = {
         user_id_1: {
@@ -209,7 +209,7 @@ describe('ChatController', function() {
       )
     })
 
-    return it('should only need to look up each user once', function(done) {
+    it('should only need to look up each user once', function(done) {
       return this.ChatController._injectUserInfoIntoThreads(
         [
           {

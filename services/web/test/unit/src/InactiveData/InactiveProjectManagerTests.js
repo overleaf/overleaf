@@ -92,7 +92,7 @@ describe('InactiveProjectManager', function() {
       )
     })
 
-    return it('should not call unarchiveProject if it is active', function(done) {
+    it('should not call unarchiveProject if it is active', function(done) {
       this.project.active = true
       this.DocstoreManager.unarchiveProject.callsArgWith(1)
       return this.InactiveProjectManager.reactivateProjectIfRequired(
@@ -110,7 +110,7 @@ describe('InactiveProjectManager', function() {
     })
   })
 
-  return describe('deactivateProject', function() {
+  describe('deactivateProject', function() {
     it('should call unarchiveProject and markAsInactive', function(done) {
       this.DocstoreManager.archiveProject.callsArgWith(1)
       this.TrackChangesManager.archiveProject.callsArgWith(1)
@@ -132,7 +132,7 @@ describe('InactiveProjectManager', function() {
       )
     })
 
-    return it('should not call markAsInactive if there was a problem archiving in docstore', function(done) {
+    it('should not call markAsInactive if there was a problem archiving in docstore', function(done) {
       this.DocstoreManager.archiveProject.callsArgWith(1, 'errorrr')
       this.TrackChangesManager.archiveProject.callsArgWith(1)
 

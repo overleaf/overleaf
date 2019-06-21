@@ -97,7 +97,7 @@ describe('TokenAccessHandler', function() {
           .callsArgWith(2, new Error('woops')))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.TokenAccessHandler.findProjectWithReadOnlyToken(
           this.token,
           (err, project) => {
@@ -129,7 +129,7 @@ describe('TokenAccessHandler', function() {
         )
       })
 
-      return it('should return projectExists flag as true', function(done) {
+      it('should return projectExists flag as true', function(done) {
         return this.TokenAccessHandler.findProjectWithReadOnlyToken(
           this.token,
           function(err, project, projectExists) {
@@ -140,7 +140,7 @@ describe('TokenAccessHandler', function() {
       })
     })
 
-    return describe('when project does not exist', function() {
+    describe('when project does not exist', function() {
       beforeEach(function() {
         return (this.Project.findOne = sinon.stub().callsArgWith(2, null, null))
       })
@@ -156,7 +156,7 @@ describe('TokenAccessHandler', function() {
         )
       })
 
-      return it('should return projectExists flag as false', function(done) {
+      it('should return projectExists flag as false', function(done) {
         return this.TokenAccessHandler.findProjectWithReadOnlyToken(
           this.token,
           function(err, project, projectExists) {
@@ -226,7 +226,7 @@ describe('TokenAccessHandler', function() {
           .callsArgWith(2, new Error('woops')))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
           this.token,
           (err, project) => {
@@ -258,7 +258,7 @@ describe('TokenAccessHandler', function() {
         )
       })
 
-      return it('should return projectExists flag as true', function(done) {
+      it('should return projectExists flag as true', function(done) {
         return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
           this.token,
           function(err, project, projectExists) {
@@ -269,7 +269,7 @@ describe('TokenAccessHandler', function() {
       })
     })
 
-    return describe('when the tokens have different lengths', function() {
+    describe('when the tokens have different lengths', function() {
       beforeEach(function() {
         this.project.tokens = {
           readOnly: 'atntntn',
@@ -281,7 +281,7 @@ describe('TokenAccessHandler', function() {
           .callsArgWith(2, null, this.project))
       })
 
-      return it('should not return a project', function(done) {
+      it('should not return a project', function(done) {
         return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
           this.token,
           function(err, project) {
@@ -338,7 +338,7 @@ describe('TokenAccessHandler', function() {
         )
       })
 
-      return it('should produce a project object', function(done) {
+      it('should produce a project object', function(done) {
         return this.TokenAccessHandler.findProjectWithHigherAccess(
           this.token,
           this.userId,
@@ -395,7 +395,7 @@ describe('TokenAccessHandler', function() {
         )
       })
 
-      return it('should not produce a project', function(done) {
+      it('should not produce a project', function(done) {
         return this.TokenAccessHandler.findProjectWithHigherAccess(
           this.token,
           this.userId,
@@ -415,7 +415,7 @@ describe('TokenAccessHandler', function() {
           .callsArgWith(2, new Error('woops')))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.TokenAccessHandler.findProjectWithHigherAccess(
           this.token,
           this.userId,
@@ -429,7 +429,7 @@ describe('TokenAccessHandler', function() {
       })
     })
 
-    return describe('when isUserInvitedMemberOfProject produces an error', function() {
+    describe('when isUserInvitedMemberOfProject produces an error', function() {
       beforeEach(function() {
         this.Project.findOne = sinon.stub().callsArgWith(2, null, this.project)
         return (this.CollaboratorsHandler.isUserInvitedMemberOfProject = sinon
@@ -437,7 +437,7 @@ describe('TokenAccessHandler', function() {
           .callsArgWith(2, new Error('woops')))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.TokenAccessHandler.findProjectWithHigherAccess(
           this.token,
           this.userId,
@@ -487,14 +487,14 @@ describe('TokenAccessHandler', function() {
       )
     })
 
-    return describe('when Project.update produces an error', function() {
+    describe('when Project.update produces an error', function() {
       beforeEach(function() {
         return (this.Project.update = sinon
           .stub()
           .callsArgWith(2, new Error('woops')))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.TokenAccessHandler.addReadOnlyUserToProject(
           this.userId,
           this.projectId,
@@ -542,14 +542,14 @@ describe('TokenAccessHandler', function() {
       )
     })
 
-    return describe('when Project.update produces an error', function() {
+    describe('when Project.update produces an error', function() {
       beforeEach(function() {
         return (this.Project.update = sinon
           .stub()
           .callsArgWith(2, new Error('woops')))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.TokenAccessHandler.addReadAndWriteUserToProject(
           this.userId,
           this.projectId,
@@ -567,7 +567,7 @@ describe('TokenAccessHandler', function() {
       return (this.req = { session: {}, headers: {} })
     })
 
-    return it('should add the token to the session', function(done) {
+    it('should add the token to the session', function(done) {
       this.TokenAccessHandler.grantSessionTokenAccess(
         this.req,
         this.projectId,
@@ -607,7 +607,7 @@ describe('TokenAccessHandler', function() {
         )
       })
 
-      return it('should allow read-only access', function(done) {
+      it('should allow read-only access', function(done) {
         return this.TokenAccessHandler.isValidToken(
           this.projectId,
           this.token,
@@ -647,7 +647,7 @@ describe('TokenAccessHandler', function() {
         )
       })
 
-      return it('should allow read-and-write access', function(done) {
+      it('should allow read-and-write access', function(done) {
         return this.TokenAccessHandler.isValidToken(
           this.projectId,
           this.token,
@@ -687,7 +687,7 @@ describe('TokenAccessHandler', function() {
         )
       })
 
-      return it('should not allow any access', function(done) {
+      it('should not allow any access', function(done) {
         return this.TokenAccessHandler.isValidToken(
           this.projectId,
           this.token,
@@ -727,7 +727,7 @@ describe('TokenAccessHandler', function() {
         )
       })
 
-      return it('should produce an error and not allow access', function(done) {
+      it('should produce an error and not allow access', function(done) {
         return this.TokenAccessHandler.isValidToken(
           this.projectId,
           this.token,
@@ -774,7 +774,7 @@ describe('TokenAccessHandler', function() {
           )
         })
 
-        return it('should not allow any access', function(done) {
+        it('should not allow any access', function(done) {
           return this.TokenAccessHandler.isValidToken(
             this.projectId,
             this.token,
@@ -788,7 +788,7 @@ describe('TokenAccessHandler', function() {
         })
       })
 
-      return describe('for read-only project', function() {
+      describe('for read-only project', function() {
         beforeEach(function() {
           this.TokenAccessHandler.findProjectWithReadAndWriteToken = sinon
             .stub()
@@ -815,7 +815,7 @@ describe('TokenAccessHandler', function() {
           )
         })
 
-        return it('should not allow any access', function(done) {
+        it('should not allow any access', function(done) {
           return this.TokenAccessHandler.isValidToken(
             this.projectId,
             this.token,
@@ -830,7 +830,7 @@ describe('TokenAccessHandler', function() {
       })
     })
 
-    return describe('with nothing', function() {
+    describe('with nothing', function() {
       beforeEach(function() {
         this.TokenAccessHandler.findProjectWithReadAndWriteToken = sinon
           .stub()
@@ -869,7 +869,7 @@ describe('TokenAccessHandler', function() {
         )
       })
 
-      return it('should not allow any access', function(done) {
+      it('should not allow any access', function(done) {
         return this.TokenAccessHandler.isValidToken(
           this.projectId,
           null,
@@ -908,7 +908,7 @@ describe('TokenAccessHandler', function() {
       return expect(this.project.tokens.readOnly).to.equal('')
     })
 
-    return it('should leave tokens in place for owner', function() {
+    it('should leave tokens in place for owner', function() {
       this.TokenAccessHandler.protectTokens(this.project, 'owner')
       expect(this.project.tokens.readAndWrite).to.equal('rw')
       return expect(this.project.tokens.readOnly).to.equal('ro')
@@ -928,7 +928,7 @@ describe('TokenAccessHandler', function() {
         )
       })
 
-      return it('should not check access and return default info', function() {
+      it('should not check access and return default info', function() {
         expect(this.V1Api.request.called).to.equal(false)
         return expect(
           this.callback.calledWith(null, {
@@ -938,7 +938,7 @@ describe('TokenAccessHandler', function() {
       })
     })
 
-    return describe('when v1 api is set', function() {
+    describe('when v1 api is set', function() {
       beforeEach(function() {
         return (this.settings.apis = { v1: 'v1' })
       })
@@ -954,7 +954,7 @@ describe('TokenAccessHandler', function() {
           )
         })
 
-        return it('should return response body', function() {
+        it('should return response body', function() {
           expect(
             this.V1Api.request.calledWith({
               url: `/api/v1/sharelatex/docs/${this.token}/is_published`
@@ -966,7 +966,7 @@ describe('TokenAccessHandler', function() {
         })
       })
 
-      return describe('on V1Api.request error', function() {
+      describe('on V1Api.request error', function() {
         beforeEach(function() {
           this.V1Api.request = sinon.stub().callsArgWith(1, 'error')
           return this.TokenAccessHandler.getV1DocPublishedInfo(
@@ -975,14 +975,14 @@ describe('TokenAccessHandler', function() {
           )
         })
 
-        return it('should callback with error', function() {
+        it('should callback with error', function() {
           return expect(this.callback.calledWith('error')).to.equal(true)
         })
       })
     })
   })
 
-  return describe('getV1DocInfo', function() {
+  describe('getV1DocInfo', function() {
     beforeEach(function() {
       this.v2UserId = 123
       return (this.callback = sinon.stub())
@@ -997,7 +997,7 @@ describe('TokenAccessHandler', function() {
         )
       })
 
-      return it('should not check access and return default info', function() {
+      it('should not check access and return default info', function() {
         expect(this.V1Api.request.called).to.equal(false)
         return expect(
           this.callback.calledWith(null, {
@@ -1008,7 +1008,7 @@ describe('TokenAccessHandler', function() {
       })
     })
 
-    return describe('when v1 api is set', function() {
+    describe('when v1 api is set', function() {
       beforeEach(function() {
         return (this.settings.apis = { v1: 'v1' })
       })
@@ -1025,7 +1025,7 @@ describe('TokenAccessHandler', function() {
           )
         })
 
-        return it('should get user', function() {
+        it('should get user', function() {
           return expect(
             this.UserGetter.getUser.calledWith(this.v2UserId)
           ).to.equal(true)
@@ -1043,7 +1043,7 @@ describe('TokenAccessHandler', function() {
           )
         })
 
-        return it('should callback with error', function() {
+        it('should callback with error', function() {
           return expect(this.callback.calledWith(this.error)).to.equal(true)
         })
       })
@@ -1064,7 +1064,7 @@ describe('TokenAccessHandler', function() {
           )
         })
 
-        return it('should return response body', function() {
+        it('should return response body', function() {
           expect(
             this.V1Api.request.calledWith({
               url: `/api/v1/sharelatex/users/${this.v1UserId}/docs/${
@@ -1078,7 +1078,7 @@ describe('TokenAccessHandler', function() {
         })
       })
 
-      return describe('on V1Api.request error', function() {
+      describe('on V1Api.request error', function() {
         beforeEach(function() {
           this.UserGetter.getUser = sinon.stub().yields(null, {
             overleaf: { id: 1 }
@@ -1091,7 +1091,7 @@ describe('TokenAccessHandler', function() {
           )
         })
 
-        return it('should callback with error', function() {
+        it('should callback with error', function() {
           return expect(this.callback.calledWith('error')).to.equal(true)
         })
       })

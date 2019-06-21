@@ -67,7 +67,7 @@ describe('HistoryManager', function() {
             .should.equal(true)
         })
 
-        return it('should return the callback with the overleaf id', function() {
+        it('should return the callback with the overleaf id', function() {
           return this.callback
             .calledWithExactly(null, { overleaf_id: this.overleaf_id })
             .should.equal(true)
@@ -85,7 +85,7 @@ describe('HistoryManager', function() {
           return this.HistoryManager.initializeProject(this.callback)
         })
 
-        return it('should return the callback with an error', function() {
+        it('should return the callback with an error', function() {
           return this.callback
             .calledWith(
               sinon.match.has(
@@ -105,7 +105,7 @@ describe('HistoryManager', function() {
           return this.HistoryManager.initializeProject(this.callback)
         })
 
-        return it('should return the callback with an error', function() {
+        it('should return the callback with an error', function() {
           return this.callback
             .calledWith(
               sinon.match.has(
@@ -117,7 +117,7 @@ describe('HistoryManager', function() {
         })
       })
 
-      return describe('project history errors', function() {
+      describe('project history errors', function() {
         beforeEach(function() {
           this.error = sinon.stub()
           this.request.post = sinon.stub().callsArgWith(1, this.error)
@@ -125,25 +125,25 @@ describe('HistoryManager', function() {
           return this.HistoryManager.initializeProject(this.callback)
         })
 
-        return it('should return the callback with the error', function() {
+        it('should return the callback with the error', function() {
           return this.callback.calledWithExactly(this.error).should.equal(true)
         })
       })
     })
 
-    return describe('with project history disabled', function() {
+    describe('with project history disabled', function() {
       beforeEach(function() {
         this.settings.apis.project_history.initializeHistoryForNewProjects = false
         return this.HistoryManager.initializeProject(this.callback)
       })
 
-      return it('should return the callback', function() {
+      it('should return the callback', function() {
         return this.callback.calledWithExactly().should.equal(true)
       })
     })
   })
 
-  return describe('injectUserDetails', function() {
+  describe('injectUserDetails', function() {
     beforeEach(function() {
       this.user1 = {
         _id: (this.user_id1 = '123456'),
@@ -202,7 +202,7 @@ describe('HistoryManager', function() {
         )
       })
 
-      return it('should leave user objects', function(done) {
+      it('should leave user objects', function(done) {
         return this.HistoryManager.injectUserDetails(
           {
             diff: [
@@ -230,7 +230,7 @@ describe('HistoryManager', function() {
       })
     })
 
-    return describe('with a list of updates', function() {
+    describe('with a list of updates', function() {
       it('should turn user_ids into user objects', function(done) {
         return this.HistoryManager.injectUserDetails(
           {
@@ -264,7 +264,7 @@ describe('HistoryManager', function() {
         )
       })
 
-      return it('should leave user objects', function(done) {
+      it('should leave user objects', function(done) {
         return this.HistoryManager.injectUserDetails(
           {
             updates: [

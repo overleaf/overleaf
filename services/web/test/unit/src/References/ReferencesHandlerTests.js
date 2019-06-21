@@ -156,7 +156,7 @@ describe('ReferencesHandler', function() {
         })
       })
 
-      return it('should return data', function(done) {
+      it('should return data', function(done) {
         return this.call((err, data) => {
           expect(data).to.not.equal(null)
           expect(data).to.not.equal(undefined)
@@ -180,7 +180,7 @@ describe('ReferencesHandler', function() {
         })
       })
 
-      return it('should not send request', function(done) {
+      it('should not send request', function(done) {
         return this.call((err, data) => {
           this.request.post.callCount.should.equal(0)
           return done()
@@ -203,7 +203,7 @@ describe('ReferencesHandler', function() {
         })
       })
 
-      return it('should not send request', function(done) {
+      it('should not send request', function(done) {
         return this.call((err, data) => {
           this.request.post.callCount.should.equal(0)
           return done()
@@ -230,7 +230,7 @@ describe('ReferencesHandler', function() {
         })
       })
 
-      return it('should not send request', function(done) {
+      it('should not send request', function(done) {
         return this.call((err, data) => {
           this.request.post.callCount.should.equal(0)
           return done()
@@ -246,7 +246,7 @@ describe('ReferencesHandler', function() {
         return this.request.post.callsArgWith(1, new Error('woops'))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call((err, data) => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
@@ -256,7 +256,7 @@ describe('ReferencesHandler', function() {
       })
     })
 
-    return describe('when request responds with error status', function() {
+    describe('when request responds with error status', function() {
       beforeEach(function() {
         this.ProjectGetter.getProject.callsArgWith(2, null, this.fakeProject)
         this.handler._isFullIndex.callsArgWith(1, null, false)
@@ -268,7 +268,7 @@ describe('ReferencesHandler', function() {
         )
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call((err, data) => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
@@ -363,7 +363,7 @@ describe('ReferencesHandler', function() {
         })
       })
 
-      return it('should not send request', function(done) {
+      it('should not send request', function(done) {
         return this.call((err, data) => {
           this.request.post.callCount.should.equal(0)
           return done()
@@ -386,7 +386,7 @@ describe('ReferencesHandler', function() {
         })
       })
 
-      return it('should not send request', function(done) {
+      it('should not send request', function(done) {
         return this.call((err, data) => {
           this.request.post.callCount.should.equal(0)
           return done()
@@ -394,7 +394,7 @@ describe('ReferencesHandler', function() {
       })
     })
 
-    return describe('when flushDocToMongo produces an error', function() {
+    describe('when flushDocToMongo produces an error', function() {
       beforeEach(function() {
         this.ProjectGetter.getProject.callsArgWith(2, null, this.fakeProject)
         this.handler._isFullIndex.callsArgWith(1, false)
@@ -413,7 +413,7 @@ describe('ReferencesHandler', function() {
         })
       })
 
-      return it('should not send request', function(done) {
+      it('should not send request', function(done) {
         return this.call((err, data) => {
           this.request.post.callCount.should.equal(0)
           return done()
@@ -445,7 +445,7 @@ describe('ReferencesHandler', function() {
       return expect(result).to.deep.equal(this.expectedIds)
     })
 
-    return it('should not error with a non array of folders from dirty data', function() {
+    it('should not error with a non array of folders from dirty data', function() {
       this.fakeProject.rootFolder[0].folders[0].folders = {}
       const result = this.handler._findBibDocIds(this.fakeProject)
       return expect(result).to.deep.equal(this.expectedIds)
@@ -475,13 +475,13 @@ describe('ReferencesHandler', function() {
       return (this.expectedIds = ['ddd', 'ghg'])
     })
 
-    return it('should select the correct docIds', function() {
+    it('should select the correct docIds', function() {
       const result = this.handler._findBibFileIds(this.fakeProject)
       return expect(result).to.deep.equal(this.expectedIds)
     })
   })
 
-  return describe('_isFullIndex', function() {
+  describe('_isFullIndex', function() {
     beforeEach(function() {
       this.fakeProject = { owner_ref: (this.owner_ref = 'owner-ref-123') }
       this.owner = {
@@ -503,7 +503,7 @@ describe('ReferencesHandler', function() {
         return (this.owner.features.references = true)
       })
 
-      return it('should return true', function() {
+      it('should return true', function() {
         return this.call((err, isFullIndex) => {
           expect(err).to.equal(null)
           return expect(isFullIndex).to.equal(true)
@@ -516,7 +516,7 @@ describe('ReferencesHandler', function() {
         return (this.owner.features.references = false)
       })
 
-      return it('should return false', function() {
+      it('should return false', function() {
         return this.call((err, isFullIndex) => {
           expect(err).to.equal(null)
           return expect(isFullIndex).to.equal(false)
@@ -524,7 +524,7 @@ describe('ReferencesHandler', function() {
       })
     })
 
-    return describe('with referencesSearch', function() {
+    describe('with referencesSearch', function() {
       beforeEach(function() {
         return (this.owner.features = {
           referencesSearch: true,
@@ -532,7 +532,7 @@ describe('ReferencesHandler', function() {
         })
       })
 
-      return it('should return true', function() {
+      it('should return true', function() {
         return this.call((err, isFullIndex) => {
           expect(err).to.equal(null)
           return expect(isFullIndex).to.equal(true)

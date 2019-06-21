@@ -144,7 +144,7 @@ describe('FeaturesUpdater', function() {
     })
   })
 
-  return describe('_mergeFeatures', function() {
+  describe('_mergeFeatures', function() {
     it('should prefer priority over standard for compileGroup', function() {
       expect(
         this.FeaturesUpdater._mergeFeatures(
@@ -262,7 +262,7 @@ describe('FeaturesUpdater', function() {
       })
     })
 
-    return it('should prefer the true over false for other keys', function() {
+    it('should prefer the true over false for other keys', function() {
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {

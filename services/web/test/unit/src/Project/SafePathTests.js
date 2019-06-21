@@ -108,7 +108,7 @@ describe('SafePath', function() {
     // 	result = @SafePath.isCleanFilename 'hello.'
     // 	result.should.equal false
 
-    return it('should not accept \\', function() {
+    it('should not accept \\', function() {
       const result = this.SafePath.isCleanFilename('foo\\bar')
       return result.should.equal(false)
     })
@@ -190,7 +190,7 @@ describe('SafePath', function() {
       return result.should.equal(false)
     })
 
-    return it('should not accept javascript property names resulting from substitutions', function() {
+    it('should not accept javascript property names resulting from substitutions', function() {
       const result = this.SafePath.isCleanPath('  proto  ')
       return result.should.equal(false)
     })
@@ -208,13 +208,13 @@ describe('SafePath', function() {
       return result.should.equal(false)
     })
 
-    return it('should not accept an empty path', function() {
+    it('should not accept an empty path', function() {
       const result = this.SafePath.isAllowedLength('')
       return result.should.equal(false)
     })
   })
 
-  return describe('clean', function() {
+  describe('clean', function() {
     it('should not modify a valid filename', function() {
       const result = this.SafePath.clean('main.tex')
       return result.should.equal('main.tex')
@@ -260,7 +260,7 @@ describe('SafePath', function() {
       return result.should.equal('@prototype')
     })
 
-    return it('should prefix javascript property names in the prototype with @', function() {
+    it('should prefix javascript property names in the prototype with @', function() {
       const result = this.SafePath.clean('hasOwnProperty')
       return result.should.equal('@hasOwnProperty')
     })

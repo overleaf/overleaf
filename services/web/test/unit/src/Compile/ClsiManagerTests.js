@@ -140,7 +140,7 @@ describe('ClsiManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the status and output files', function() {
+      it('should call the callback with the status and output files', function() {
         const outputFiles = [
           {
             url: `/project/${this.project_id}/user/${
@@ -180,7 +180,7 @@ describe('ClsiManager', function() {
         )
       })
 
-      return it('should call the callback with a failure status', function() {
+      it('should call the callback with a failure status', function() {
         return this.callback.calledWith(null, this.status).should.equal(true)
       })
     })
@@ -218,12 +218,12 @@ describe('ClsiManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with a success status', function() {
+      it('should call the callback with a success status', function() {
         return this.callback.calledWith(null, this.status).should.equal(true)
       })
     })
 
-    return describe('when the resources fail the precompile check', function() {
+    describe('when the resources fail the precompile check', function() {
       beforeEach(function() {
         this.ClsiFormatChecker.checkRecoursesForProblems = sinon
           .stub()
@@ -245,7 +245,7 @@ describe('ClsiManager', function() {
         return this.callback.calledOnce.should.equal(true)
       })
 
-      return it('should call the callback with an error', function() {
+      it('should call the callback with an error', function() {
         return this.callback
           .calledWithExactly(new Error('failed'))
           .should.equal(true)
@@ -299,7 +299,7 @@ describe('ClsiManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the status and output files', function() {
+      it('should call the callback with the status and output files', function() {
         const outputFiles = [
           {
             url: `/project/${this.submission_id}/build/1234/output/output.pdf`,
@@ -335,12 +335,12 @@ describe('ClsiManager', function() {
         )
       })
 
-      return it('should call the callback with a failure status', function() {
+      it('should call the callback with a failure status', function() {
         return this.callback.calledWith(null, this.status).should.equal(true)
       })
     })
 
-    return describe('when the resources fail the precompile check', function() {
+    describe('when the resources fail the precompile check', function() {
       beforeEach(function() {
         this.ClsiFormatChecker.checkRecoursesForProblems = sinon
           .stub()
@@ -362,7 +362,7 @@ describe('ClsiManager', function() {
         return this.callback.calledOnce.should.equal(true)
       })
 
-      return it('should call the callback with an error', function() {
+      it('should call the callback with an error', function() {
         return this.callback
           .calledWithExactly(new Error('failed'))
           .should.equal(true)
@@ -378,7 +378,7 @@ describe('ClsiManager', function() {
         .callsArg(1))
     })
 
-    return describe('with the standard compileGroup', function() {
+    describe('with the standard compileGroup', function() {
       beforeEach(function() {
         return this.ClsiManager.deleteAuxFiles(
           this.project_id,
@@ -405,7 +405,7 @@ describe('ClsiManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
@@ -497,7 +497,7 @@ describe('ClsiManager', function() {
           .should.equal(true)
       })
 
-      return it('should build up the CLSI request', function() {
+      it('should build up the CLSI request', function() {
         return expect(this.request).to.deep.equal({
           compile: {
             options: {
@@ -609,7 +609,7 @@ describe('ClsiManager', function() {
         })
       })
 
-      return describe('when the root doc is set and not in the docupdater', function() {
+      describe('when the root doc is set and not in the docupdater', function() {
         beforeEach(function(done) {
           this.ClsiStateManager.computeHash = sinon
             .stub()
@@ -643,7 +643,7 @@ describe('ClsiManager', function() {
           )
         })
 
-        return it('should still change the root path', function() {
+        it('should still change the root path', function() {
           return this.request.compile.rootResourcePath.should.equal(
             'chapters/chapter1.tex'
           )
@@ -663,7 +663,7 @@ describe('ClsiManager', function() {
         )
       })
 
-      return it('should change root path', function() {
+      it('should change root path', function() {
         return this.request.compile.rootResourcePath.should.equal(
           'chapters/chapter1.tex'
         )
@@ -682,7 +682,7 @@ describe('ClsiManager', function() {
         )
       })
 
-      return it('should fallback to default root doc', function() {
+      it('should fallback to default root doc', function() {
         return this.request.compile.rootResourcePath.should.equal('main.tex')
       })
     })
@@ -700,7 +700,7 @@ describe('ClsiManager', function() {
         )
       })
 
-      return it('should set the compiler to pdflatex', function() {
+      it('should set the compiler to pdflatex', function() {
         return this.request.compile.options.compiler.should.equal('pdflatex')
       })
     })
@@ -719,7 +719,7 @@ describe('ClsiManager', function() {
         )
       })
 
-      return it('should set to main.tex', function() {
+      it('should set to main.tex', function() {
         return this.request.compile.rootResourcePath.should.equal('main.tex')
       })
     })
@@ -745,7 +745,7 @@ describe('ClsiManager', function() {
         return this.ClsiManager._buildRequest(this.project, null, this.callback)
       })
 
-      return it('should report an error', function() {
+      it('should report an error', function() {
         return this.callback
           .calledWith(new Error('no main file specified'))
           .should.equal(true)
@@ -776,12 +776,12 @@ describe('ClsiManager', function() {
         )
       })
 
-      return it('should set io to the only file', function() {
+      it('should set io to the only file', function() {
         return this.request.compile.rootResourcePath.should.equal('other.tex')
       })
     })
 
-    return describe('with the draft option', () =>
+    describe('with the draft option', () =>
       it('should add the draft option into the request', function(done) {
         return this.ClsiManager._buildRequest(
           this.project_id,
@@ -831,12 +831,12 @@ describe('ClsiManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the body and no error', function() {
+      it('should call the callback with the body and no error', function() {
         return this.callback.calledWith(null, this.body).should.equal(true)
       })
     })
 
-    return describe('when the CLSI returns an error', function() {
+    describe('when the CLSI returns an error', function() {
       beforeEach(function() {
         this.ClsiManager._makeRequest = sinon
           .stub()
@@ -855,7 +855,7 @@ describe('ClsiManager', function() {
         )
       })
 
-      return it('should call the callback with the body and the error', function() {
+      it('should call the callback with the body and the error', function() {
         return this.callback
           .calledWith(
             new Error('CLSI returned non-success code: 500'),
@@ -908,7 +908,7 @@ describe('ClsiManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
@@ -924,7 +924,7 @@ describe('ClsiManager', function() {
         )
       })
 
-      return it('should call wordCount with param file', function() {
+      it('should call wordCount with param file', function() {
         return this.ClsiManager._makeRequest
           .calledWith(this.project_id, {
             method: 'GET',
@@ -937,7 +937,7 @@ describe('ClsiManager', function() {
       })
     })
 
-    return describe('with image', function() {
+    describe('with image', function() {
       beforeEach(function() {
         this.req.compile.options.imageName = this.image =
           'example.com/mock/image'
@@ -950,7 +950,7 @@ describe('ClsiManager', function() {
         )
       })
 
-      return it('should call wordCount with file and image', function() {
+      it('should call wordCount with file and image', function() {
         return this.ClsiManager._makeRequest
           .calledWith(this.project_id, {
             method: 'GET',
@@ -984,7 +984,7 @@ describe('ClsiManager', function() {
       })
     })
 
-    return it('should set the cookie again on response as it might have changed', function(done) {
+    it('should set the cookie again on response as it might have changed', function(done) {
       return this.ClsiManager._makeRequest(this.project_id, this.opts, () => {
         this.ClsiCookieManager.setServerId
           .calledWith(this.project_id, this.response)
@@ -994,7 +994,7 @@ describe('ClsiManager', function() {
     })
   })
 
-  return describe('_makeGoogleCloudRequest', function() {
+  describe('_makeGoogleCloudRequest', function() {
     beforeEach(function() {
       this.settings.apis.clsi_new = { url: 'https://compiles.somewhere.test' }
       this.response = { there: 'something' }
@@ -1018,7 +1018,7 @@ describe('ClsiManager', function() {
       )
     })
 
-    return it('should not make a request if there is not clsi_new url', function(done) {
+    it('should not make a request if there is not clsi_new url', function(done) {
       this.settings.apis.clsi_new = undefined
       return this.ClsiManager._makeNewBackendRequest(
         this.project_id,

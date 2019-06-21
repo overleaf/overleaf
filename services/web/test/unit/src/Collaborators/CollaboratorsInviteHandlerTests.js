@@ -125,12 +125,12 @@ describe('CollaboratorsInviteHandler', function() {
       })
     })
 
-    return describe('when model.count produces an error', function() {
+    describe('when model.count produces an error', function() {
       beforeEach(function() {
         return this.ProjectInvite.count.callsArgWith(1, new Error('woops'))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call((err, count) => {
           expect(err).to.be.instanceof(Error)
           return done()
@@ -173,7 +173,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should have called ProjectInvite.find', function(done) {
+      it('should have called ProjectInvite.find', function(done) {
         return this.call((err, invites) => {
           this.ProjectInvite.find.callCount.should.equal(1)
           this.ProjectInvite.find
@@ -184,12 +184,12 @@ describe('CollaboratorsInviteHandler', function() {
       })
     })
 
-    return describe('when ProjectInvite.find produces an error', function() {
+    describe('when ProjectInvite.find produces an error', function() {
       beforeEach(function() {
         return this.ProjectInvite.find.callsArgWith(1, new Error('woops'))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call((err, invites) => {
           expect(err).to.be.instanceof(Error)
           return done()
@@ -264,7 +264,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should have called _sendMessages', function(done) {
+      it('should have called _sendMessages', function(done) {
         return this.call((err, invite) => {
           this.CollaboratorsInviteHandler._sendMessages.callCount.should.equal(
             1
@@ -277,14 +277,14 @@ describe('CollaboratorsInviteHandler', function() {
       })
     })
 
-    return describe('when saving model produces an error', function() {
+    describe('when saving model produces an error', function() {
       beforeEach(function() {
         return (this.ProjectInvite.prototype.save = sinon.spy(function(cb) {
           return cb(new Error('woops'), this)
         }))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call((err, invite) => {
           expect(err).to.be.instanceof(Error)
           return done()
@@ -332,7 +332,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should call _trySendInviteNotification', function(done) {
+      it('should call _trySendInviteNotification', function(done) {
         return this.call(err => {
           this.CollaboratorsInviteHandler._trySendInviteNotification.callCount.should.equal(
             1
@@ -359,7 +359,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should not call _trySendInviteNotification', function(done) {
+      it('should not call _trySendInviteNotification', function(done) {
         return this.call(err => {
           this.CollaboratorsInviteHandler._trySendInviteNotification.callCount.should.equal(
             0
@@ -369,14 +369,14 @@ describe('CollaboratorsInviteHandler', function() {
       })
     })
 
-    return describe('when _trySendInviteNotification produces an error', function() {
+    describe('when _trySendInviteNotification produces an error', function() {
       beforeEach(function() {
         return (this.CollaboratorsInviteHandler._trySendInviteNotification = sinon
           .stub()
           .callsArgWith(3, new Error('woops')))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call((err, invite) => {
           expect(err).to.be.instanceof(Error)
           return done()
@@ -421,7 +421,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should call _tryCancelInviteNotification', function(done) {
+      it('should call _tryCancelInviteNotification', function(done) {
         return this.call(err => {
           this.CollaboratorsInviteHandler._tryCancelInviteNotification.callCount.should.equal(
             1
@@ -434,12 +434,12 @@ describe('CollaboratorsInviteHandler', function() {
       })
     })
 
-    return describe('when remove produces an error', function() {
+    describe('when remove produces an error', function() {
       beforeEach(function() {
         return this.ProjectInvite.remove.callsArgWith(1, new Error('woops'))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call(err => {
           expect(err).to.be.instanceof(Error)
           return done()
@@ -485,7 +485,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should have called _sendMessages', function(done) {
+      it('should have called _sendMessages', function(done) {
         return this.call((err, invite) => {
           this.CollaboratorsInviteHandler._sendMessages.callCount.should.equal(
             1
@@ -510,7 +510,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should not have called _sendMessages', function(done) {
+      it('should not have called _sendMessages', function(done) {
         return this.call((err, invite) => {
           this.CollaboratorsInviteHandler._sendMessages.callCount.should.equal(
             0
@@ -520,7 +520,7 @@ describe('CollaboratorsInviteHandler', function() {
       })
     })
 
-    return describe('when findOne does not find an invite', function() {
+    describe('when findOne does not find an invite', function() {
       beforeEach(function() {
         return this.ProjectInvite.findOne.callsArgWith(1, null, null)
       })
@@ -533,7 +533,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should not have called _sendMessages', function(done) {
+      it('should not have called _sendMessages', function(done) {
         return this.call((err, invite) => {
           this.CollaboratorsInviteHandler._sendMessages.callCount.should.equal(
             0
@@ -574,7 +574,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should call ProjectInvite.findOne', function(done) {
+      it('should call ProjectInvite.findOne', function(done) {
         return this.call((err, invite) => {
           this.ProjectInvite.findOne.callCount.should.equal(1)
           this.ProjectInvite.findOne
@@ -590,7 +590,7 @@ describe('CollaboratorsInviteHandler', function() {
         return this.ProjectInvite.findOne.callsArgWith(1, new Error('woops'))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call((err, invite) => {
           expect(err).to.be.instanceof(Error)
           return done()
@@ -598,7 +598,7 @@ describe('CollaboratorsInviteHandler', function() {
       })
     })
 
-    return describe('when findOne does not find an invite', function() {
+    describe('when findOne does not find an invite', function() {
       beforeEach(function() {
         return this.ProjectInvite.findOne.callsArgWith(1, null, null)
       })
@@ -611,7 +611,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should not produce an invite object', function(done) {
+      it('should not produce an invite object', function(done) {
         return this.call((err, invite) => {
           expect(invite).to.not.be.instanceof(Error)
           expect(invite).to.be.oneOf([null, undefined])
@@ -688,7 +688,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should have called ProjectInvite.remove', function(done) {
+      it('should have called ProjectInvite.remove', function(done) {
         return this.call(err => {
           this.ProjectInvite.remove.callCount.should.equal(1)
           this.ProjectInvite.remove
@@ -713,7 +713,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should have called CollaboratorsHandler.addUserIdToProject', function(done) {
+      it('should have called CollaboratorsHandler.addUserIdToProject', function(done) {
         return this.call(err => {
           this.CollaboratorsHandler.addUserIdToProject.callCount.should.equal(1)
           this.CollaboratorsHandler.addUserIdToProject
@@ -759,7 +759,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should not have called ProjectInvite.remove', function(done) {
+      it('should not have called ProjectInvite.remove', function(done) {
         return this.call(err => {
           this.ProjectInvite.remove.callCount.should.equal(0)
           return done()
@@ -796,7 +796,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should not have called ProjectInvite.remove', function(done) {
+      it('should not have called ProjectInvite.remove', function(done) {
         return this.call(err => {
           this.ProjectInvite.remove.callCount.should.equal(0)
           return done()
@@ -844,7 +844,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should not have called ProjectInvite.remove', function(done) {
+      it('should not have called ProjectInvite.remove', function(done) {
         return this.call(err => {
           this.ProjectInvite.remove.callCount.should.equal(0)
           return done()
@@ -852,7 +852,7 @@ describe('CollaboratorsInviteHandler', function() {
       })
     })
 
-    return describe('when ProjectInvite.remove produces an error', function() {
+    describe('when ProjectInvite.remove produces an error', function() {
       beforeEach(function() {
         return this.ProjectInvite.remove.callsArgWith(1, new Error('woops'))
       })
@@ -889,7 +889,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should have called ProjectInvite.remove', function(done) {
+      it('should have called ProjectInvite.remove', function(done) {
         return this.call(err => {
           this.ProjectInvite.remove.callCount.should.equal(1)
           return done()
@@ -928,7 +928,7 @@ describe('CollaboratorsInviteHandler', function() {
       })
     })
 
-    return describe('when notification.read produces an error', function() {
+    describe('when notification.read produces an error', function() {
       beforeEach(function() {
         this.notification = {
           read: sinon.stub().callsArgWith(0, new Error('woops'))
@@ -938,7 +938,7 @@ describe('CollaboratorsInviteHandler', function() {
           .returns(this.notification))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call(err => {
           expect(err).to.be.instanceof(Error)
           return done()
@@ -947,7 +947,7 @@ describe('CollaboratorsInviteHandler', function() {
     })
   })
 
-  return describe('_trySendInviteNotification', function() {
+  describe('_trySendInviteNotification', function() {
     beforeEach(function() {
       this.invite = {
         _id: ObjectId(),
@@ -1039,7 +1039,7 @@ describe('CollaboratorsInviteHandler', function() {
           })
         })
 
-        return it('should not call NotificationsBuilder.projectInvite.create', function(done) {
+        it('should not call NotificationsBuilder.projectInvite.create', function(done) {
           return this.call(err => {
             this.NotificationsBuilder.projectInvite.callCount.should.equal(0)
             this.notification.create.callCount.should.equal(0)
@@ -1048,12 +1048,12 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return describe('when projectInvite.create produces an error', function() {
+      describe('when projectInvite.create produces an error', function() {
         beforeEach(function() {
           return this.notification.create.callsArgWith(0, new Error('woops'))
         })
 
-        return it('should produce an error', function(done) {
+        it('should produce an error', function(done) {
           return this.call(err => {
             expect(err).to.be.instanceof(Error)
             return done()
@@ -1093,7 +1093,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should not call NotificationsBuilder.projectInvite.create', function(done) {
+      it('should not call NotificationsBuilder.projectInvite.create', function(done) {
         return this.call(err => {
           this.NotificationsBuilder.projectInvite.callCount.should.equal(0)
           this.notification.create.callCount.should.equal(0)
@@ -1102,7 +1102,7 @@ describe('CollaboratorsInviteHandler', function() {
       })
     })
 
-    return describe('when the getUser produces an error', function() {
+    describe('when the getUser produces an error', function() {
       beforeEach(function() {
         return (this.UserGetter.getUserByAnyEmail = sinon
           .stub()
@@ -1133,7 +1133,7 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      return it('should not call NotificationsBuilder.projectInvite.create', function(done) {
+      it('should not call NotificationsBuilder.projectInvite.create', function(done) {
         return this.call(err => {
           this.NotificationsBuilder.projectInvite.callCount.should.equal(0)
           this.notification.create.callCount.should.equal(0)

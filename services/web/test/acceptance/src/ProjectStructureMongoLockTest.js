@@ -110,7 +110,7 @@ describe('ProjectStructureMongoLock', () =>
         )
       })
 
-      return it('can get the project if rootFolder is not in the projection', function(done) {
+      it('can get the project if rootFolder is not in the projection', function(done) {
         return ProjectGetter.getProject(
           this.locked_project._id,
           { _id: true },
@@ -123,7 +123,7 @@ describe('ProjectStructureMongoLock', () =>
       })
     })
 
-    return describe('interacting with other projects', function() {
+    describe('interacting with other projects', function() {
       before(function(done) {
         return ProjectCreationHandler.createBlankProject(
           this.user._id,
@@ -151,7 +151,7 @@ describe('ProjectStructureMongoLock', () =>
         )
       })
 
-      return it('can get other projects without a projection', function(done) {
+      it('can get other projects without a projection', function(done) {
         return ProjectGetter.getProject(
           this.unlocked_project._id,
           (err, project) => {

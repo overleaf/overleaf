@@ -106,7 +106,7 @@ describe('ExportsController', function() {
       return (this.req.body.showSource = true)
     })
 
-    return it('should ask the handler to perform the export', function(done) {
+    it('should ask the handler to perform the export', function(done) {
       this.handler.exportProject = sinon
         .stub()
         .yields(null, { iAmAnExport: true, v1_id: 897 })
@@ -144,7 +144,7 @@ describe('ExportsController', function() {
       return done()
     }))
 
-  return it('should ask the handler to return the status of an export', function(done) {
+  it('should ask the handler to return the status of an export', function(done) {
     this.handler.fetchExport = sinon.stub().yields(
       null,
       `{ \

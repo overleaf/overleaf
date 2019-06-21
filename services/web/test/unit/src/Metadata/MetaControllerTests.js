@@ -68,7 +68,7 @@ describe('MetaController', function() {
       ])
     })
 
-    return describe('when MetaHandler.getAllMetaForProject produces an error', function() {
+    describe('when MetaHandler.getAllMetaForProject produces an error', function() {
       beforeEach(function() {
         this.MetaHandler.getAllMetaForProject = sinon
           .stub()
@@ -92,14 +92,14 @@ describe('MetaController', function() {
         return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
 
-      return it('should not send a json response', function() {
+      it('should not send a json response', function() {
         this.MetadataController.getMetadata(this.req, this.res, this.next)
         return this.res.json.callCount.should.equal(0)
       })
     })
   })
 
-  return describe('broadcastMetadataForDoc', function() {
+  describe('broadcastMetadataForDoc', function() {
     beforeEach(function() {
       this.MetaHandler.getMetaForDoc = sinon
         .stub()
@@ -155,7 +155,7 @@ describe('MetaController', function() {
       return expect(lastCall.args[2]).to.have.all.keys(['docId', 'meta'])
     })
 
-    return describe('when MetaHandler.getMetaForDoc produces an error', function() {
+    describe('when MetaHandler.getMetaForDoc produces an error', function() {
       beforeEach(function() {
         this.MetaHandler.getMetaForDoc = sinon
           .stub()
@@ -191,7 +191,7 @@ describe('MetaController', function() {
         return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
 
-      return it('should not send a json response', function() {
+      it('should not send a json response', function() {
         this.MetadataController.broadcastMetadataForDoc(
           this.req,
           this.res,

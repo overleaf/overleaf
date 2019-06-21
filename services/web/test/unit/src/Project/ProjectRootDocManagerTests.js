@@ -100,7 +100,7 @@ describe('ProjectRootDocManager', function() {
           .should.equal(true)
       })
 
-      return it('should set the root doc to the doc containing a documentclass', function() {
+      it('should set the root doc to the doc containing a documentclass', function() {
         return this.ProjectEntityUpdateHandler.setRootDoc
           .calledWith(this.project_id, 'doc-id-2')
           .should.equal(true)
@@ -131,14 +131,14 @@ describe('ProjectRootDocManager', function() {
         )
       })
 
-      return it('should set the root doc to the doc containing a documentclass', function() {
+      it('should set the root doc to the doc containing a documentclass', function() {
         return this.ProjectEntityUpdateHandler.setRootDoc
           .calledWith(this.project_id, 'doc-id-2')
           .should.equal(true)
       })
     })
 
-    return describe('when there is no suitable root doc', function() {
+    describe('when there is no suitable root doc', function() {
       beforeEach(function(done) {
         this.docs = {
           '/chapter1.tex': {
@@ -162,7 +162,7 @@ describe('ProjectRootDocManager', function() {
         )
       })
 
-      return it('should not set the root doc to the doc containing a documentclass', function() {
+      it('should not set the root doc to the doc containing a documentclass', function() {
         return this.ProjectEntityUpdateHandler.setRootDoc.called.should.equal(
           false
         )
@@ -220,7 +220,7 @@ describe('ProjectRootDocManager', function() {
         )
       })
 
-      return it('processes smaller files first', function(done) {
+      it('processes smaller files first', function(done) {
         this.fs.stat.withArgs('/foo/c.tex').callsArgWith(1, null, { size: 1 })
         return this.ProjectRootDocManager.findRootDocFileFromDirectory(
           '/foo',
@@ -258,7 +258,7 @@ describe('ProjectRootDocManager', function() {
         )
       })
 
-      return it('processes main.text first and stops processing when it finds the content', function(done) {
+      it('processes main.text first and stops processing when it finds the content', function(done) {
         return this.ProjectRootDocManager.findRootDocFileFromDirectory(
           '/foo',
           () => {
@@ -289,7 +289,7 @@ describe('ProjectRootDocManager', function() {
         )
       })
 
-      return it('processes main.text first and stops processing when it finds the content', function(done) {
+      it('processes main.text first and stops processing when it finds the content', function(done) {
         return this.ProjectRootDocManager.findRootDocFileFromDirectory(
           '/foo',
           () => {
@@ -315,7 +315,7 @@ describe('ProjectRootDocManager', function() {
         )
       })
 
-      return it('processes all the files', function(done) {
+      it('processes all the files', function(done) {
         return this.ProjectRootDocManager.findRootDocFileFromDirectory(
           '/foo',
           () => {
@@ -328,14 +328,14 @@ describe('ProjectRootDocManager', function() {
       })
     })
 
-    return describe('when there is an error reading a file', function() {
+    describe('when there is an error reading a file', function() {
       beforeEach(function() {
         return this.fs.readFile
           .withArgs('/foo/a.tex')
           .callsArgWith(2, new Error('something went wrong'))
       })
 
-      return it('returns an error', function(done) {
+      it('returns an error', function(done) {
         return this.ProjectRootDocManager.findRootDocFileFromDirectory(
           '/foo',
           (error, path, content) => {
@@ -377,7 +377,7 @@ describe('ProjectRootDocManager', function() {
           .should.equal(true)
       })
 
-      return it('should set the root doc to main.tex', function() {
+      it('should set the root doc to main.tex', function() {
         return this.ProjectEntityUpdateHandler.setRootDoc
           .calledWith(this.project_id, 'doc-id-2')
           .should.equal(true)
@@ -405,7 +405,7 @@ describe('ProjectRootDocManager', function() {
           .should.equal(true)
       })
 
-      return it('should set the root doc to main.tex', function() {
+      it('should set the root doc to main.tex', function() {
         return this.ProjectEntityUpdateHandler.setRootDoc
           .calledWith(this.project_id, 'doc-id-2')
           .should.equal(true)
@@ -433,7 +433,7 @@ describe('ProjectRootDocManager', function() {
           .should.equal(true)
       })
 
-      return it('should set the root doc using the basename', function() {
+      it('should set the root doc using the basename', function() {
         return this.ProjectEntityUpdateHandler.setRootDoc
           .calledWith(this.project_id, 'doc-id-3')
           .should.equal(true)
@@ -461,14 +461,14 @@ describe('ProjectRootDocManager', function() {
           .should.equal(true)
       })
 
-      return it('should set the root doc to main.tex', function() {
+      it('should set the root doc to main.tex', function() {
         return this.ProjectEntityUpdateHandler.setRootDoc
           .calledWith(this.project_id, 'doc-id-2')
           .should.equal(true)
       })
     })
 
-    return describe('when there is no suitable root doc', function() {
+    describe('when there is no suitable root doc', function() {
       beforeEach(function(done) {
         this.ProjectEntityHandler.getAllDocPathsFromProjectById = sinon
           .stub()
@@ -483,7 +483,7 @@ describe('ProjectRootDocManager', function() {
         )
       })
 
-      return it('should not set the root doc', function() {
+      it('should not set the root doc', function() {
         return this.ProjectEntityUpdateHandler.setRootDoc.called.should.equal(
           false
         )
@@ -523,7 +523,7 @@ describe('ProjectRootDocManager', function() {
         )
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
@@ -548,12 +548,12 @@ describe('ProjectRootDocManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('when the project does not exist', function() {
+    describe('when the project does not exist', function() {
       beforeEach(function() {
         this.ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, null)
         return this.ProjectRootDocManager.ensureRootDocumentIsSet(
@@ -562,7 +562,7 @@ describe('ProjectRootDocManager', function() {
         )
       })
 
-      return it('should call the callback with an error', function() {
+      it('should call the callback with an error', function() {
         return this.callback
           .calledWith(new Error('project not found'))
           .should.equal(true)
@@ -570,7 +570,7 @@ describe('ProjectRootDocManager', function() {
     })
   })
 
-  return describe('ensureRootDocumentIsValid', function() {
+  describe('ensureRootDocumentIsValid', function() {
     beforeEach(function() {
       this.project = {}
       this.ProjectGetter.getProject = sinon
@@ -607,12 +607,12 @@ describe('ProjectRootDocManager', function() {
           )
         })
 
-        return it('should call the callback', function() {
+        it('should call the callback', function() {
           return this.callback.called.should.equal(true)
         })
       })
 
-      return describe('when the root doc is not valid', function() {
+      describe('when the root doc is not valid', function() {
         beforeEach(function() {
           this.project.rootDoc_id = 'bogus-doc-id'
           return this.ProjectRootDocManager.ensureRootDocumentIsValid(
@@ -639,7 +639,7 @@ describe('ProjectRootDocManager', function() {
           )
         })
 
-        return it('should call the callback', function() {
+        it('should call the callback', function() {
           return this.callback.called.should.equal(true)
         })
       })
@@ -665,12 +665,12 @@ describe('ProjectRootDocManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('when the project does not exist', function() {
+    describe('when the project does not exist', function() {
       beforeEach(function() {
         this.ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, null)
         return this.ProjectRootDocManager.ensureRootDocumentIsSet(
@@ -679,7 +679,7 @@ describe('ProjectRootDocManager', function() {
         )
       })
 
-      return it('should call the callback with an error', function() {
+      it('should call the callback with an error', function() {
         return this.callback
           .calledWith(new Error('project not found'))
           .should.equal(true)

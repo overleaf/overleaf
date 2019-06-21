@@ -78,7 +78,7 @@ describe('FileSystemImportManager', function() {
         return this.fs.readFile.called.should.equal(false)
       })
 
-      return it('should not insert the doc', function() {
+      it('should not insert the doc', function() {
         return this.EditorController.addDoc.called.should.equal(false)
       })
     })
@@ -102,7 +102,7 @@ describe('FileSystemImportManager', function() {
         return this.fs.readFile.calledWith(this.path_on_disk).should.equal(true)
       })
 
-      return it('should insert the doc', function() {
+      it('should insert the doc', function() {
         return this.EditorController.addDoc
           .calledWith(
             this.project_id,
@@ -134,7 +134,7 @@ describe('FileSystemImportManager', function() {
         )
       })
 
-      return it('should strip the \\r characters before adding', function() {
+      it('should strip the \\r characters before adding', function() {
         return this.EditorController.addDoc
           .calledWith(
             this.project_id,
@@ -166,7 +166,7 @@ describe('FileSystemImportManager', function() {
         )
       })
 
-      return it('should treat the \\r characters as newlines', function() {
+      it('should treat the \\r characters as newlines', function() {
         return this.EditorController.addDoc
           .calledWith(
             this.project_id,
@@ -180,7 +180,7 @@ describe('FileSystemImportManager', function() {
       })
     })
 
-    return describe('with replace set to true', function() {
+    describe('with replace set to true', function() {
       beforeEach(function() {
         this.EditorController.upsertDoc = sinon.stub().yields()
         return this.FileSystemImportManager.addDoc(
@@ -208,7 +208,7 @@ describe('FileSystemImportManager', function() {
           .should.equal(true)
       })
 
-      return it('should read the file with the correct encoding', function() {
+      it('should read the file with the correct encoding', function() {
         return sinon.assert.calledWith(
           this.fs.readFile,
           this.path_on_disk,
@@ -235,7 +235,7 @@ describe('FileSystemImportManager', function() {
       )
     })
 
-    return it('should add the file', function() {
+    it('should add the file', function() {
       return this.EditorController.addFile
         .calledWith(
           this.project_id,
@@ -268,7 +268,7 @@ describe('FileSystemImportManager', function() {
       )
     })
 
-    return it('should node add the file', function() {
+    it('should node add the file', function() {
       this.EditorController.addFile.called.should.equal(false)
       return this.EditorController.replaceFile.called.should.equal(false)
     })
@@ -291,7 +291,7 @@ describe('FileSystemImportManager', function() {
       )
     })
 
-    return it('should add the file', function() {
+    it('should add the file', function() {
       return this.EditorController.upsertFile
         .calledWith(
           this.project_id,
@@ -339,7 +339,7 @@ describe('FileSystemImportManager', function() {
           .should.equal(true)
       })
 
-      return it('should add the folders contents', function() {
+      it('should add the folders contents', function() {
         return this.FileSystemImportManager.addFolderContents
           .calledWith(
             this.user_id,
@@ -352,7 +352,7 @@ describe('FileSystemImportManager', function() {
       })
     })
 
-    return describe('with symlink', function() {
+    describe('with symlink', function() {
       beforeEach(function() {
         this.FileSystemImportManager._isSafeOnFileSystem = sinon
           .stub()
@@ -368,7 +368,7 @@ describe('FileSystemImportManager', function() {
         )
       })
 
-      return it('should not add a folder to the project', function() {
+      it('should not add a folder to the project', function() {
         this.EditorController.addFolder.called.should.equal(false)
         return this.FileSystemImportManager.addFolderContents.called.should.equal(
           false
@@ -434,12 +434,12 @@ describe('FileSystemImportManager', function() {
       )
     })
 
-    return it('should look in the correct directory', function() {
+    it('should look in the correct directory', function() {
       return this.fs.readdir.calledWith(this.path_on_disk).should.equal(true)
     })
   })
 
-  return describe('addEntity', function() {
+  describe('addEntity', function() {
     describe('with directory', function() {
       beforeEach(function() {
         this.FileTypeManager.isDirectory = sinon
@@ -460,7 +460,7 @@ describe('FileSystemImportManager', function() {
         )
       })
 
-      return it('should call addFolder', function() {
+      it('should call addFolder', function() {
         return this.FileSystemImportManager.addFolder
           .calledWith(
             this.user_id,
@@ -495,7 +495,7 @@ describe('FileSystemImportManager', function() {
         )
       })
 
-      return it('should call addFile', function() {
+      it('should call addFile', function() {
         return this.FileSystemImportManager.addFile
           .calledWith(
             this.user_id,
@@ -509,7 +509,7 @@ describe('FileSystemImportManager', function() {
       })
     })
 
-    return describe('with text file', function() {
+    describe('with text file', function() {
       beforeEach(function() {
         this.FileTypeManager.isDirectory = sinon
           .stub()
@@ -532,7 +532,7 @@ describe('FileSystemImportManager', function() {
         )
       })
 
-      return it('should call addFile', function() {
+      it('should call addFile', function() {
         return sinon.assert.calledWith(
           this.FileSystemImportManager.addDoc,
           this.user_id,

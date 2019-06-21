@@ -46,7 +46,7 @@ describe('NotificationsBuilder', function() {
     }))
   })
 
-  return it('should call v1 and create affiliation notifications', function(done) {
+  it('should call v1 and create affiliation notifications', function(done) {
     const ip = '192.168.0.1'
     return this.controller
       .ipMatcherAffiliation(user_id)

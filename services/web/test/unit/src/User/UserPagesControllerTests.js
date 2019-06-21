@@ -117,7 +117,7 @@ describe('UserPagesController', function() {
       return this.UserPagesController.registerPage(this.req, this.res)
     })
 
-    return it('should not set the newTemplateData if there is nothing in the session', function(done) {
+    it('should not set the newTemplateData if there is nothing in the session', function(done) {
       this.res.render = (page, opts) => {
         assert.equal(opts.newTemplateData.templateName, undefined)
         return done()
@@ -135,7 +135,7 @@ describe('UserPagesController', function() {
       return this.UserPagesController.loginPage(this.req, this.res)
     })
 
-    return describe('when an explicit redirect is set via query string', function() {
+    describe('when an explicit redirect is set via query string', function() {
       beforeEach(function() {
         this.AuthenticationController._getRedirectFromSession = sinon
           .stub()
@@ -144,7 +144,7 @@ describe('UserPagesController', function() {
         return (this.req.query.redir = '/somewhere/in/particular')
       })
 
-      return it('should set a redirect', function(done) {
+      it('should set a redirect', function(done) {
         this.res.render = page => {
           this.AuthenticationController.setRedirectInSession.callCount.should.equal(
             1
@@ -184,7 +184,7 @@ describe('UserPagesController', function() {
       return this.UserPagesController.sessionsPage(this.req, this.res)
     })
 
-    return describe('when getAllUserSessions produces an error', function() {
+    describe('when getAllUserSessions produces an error', function() {
       beforeEach(function() {
         return this.UserSessionsManager.getAllUserSessions.callsArgWith(
           2,
@@ -192,7 +192,7 @@ describe('UserPagesController', function() {
         )
       })
 
-      return it('should call next with an error', function(done) {
+      it('should call next with an error', function(done) {
         this.next = err => {
           assert(err !== null)
           assert(err instanceof Error)
@@ -261,7 +261,7 @@ describe('UserPagesController', function() {
         return delete this.settings.ldap
       })
 
-      return it('should set "shouldAllowEditingDetails" to false', function(done) {
+      it('should set "shouldAllowEditingDetails" to false', function(done) {
         this.res.render = (page, opts) => {
           opts.shouldAllowEditingDetails.should.equal(false)
           return done()
@@ -270,7 +270,7 @@ describe('UserPagesController', function() {
       })
     })
 
-    return describe('when saml.updateUserDetailsOnLogin is true', function() {
+    describe('when saml.updateUserDetailsOnLogin is true', function() {
       beforeEach(function() {
         return (this.settings.saml = { updateUserDetailsOnLogin: true })
       })
@@ -279,7 +279,7 @@ describe('UserPagesController', function() {
         return delete this.settings.saml
       })
 
-      return it('should set "shouldAllowEditingDetails" to false', function(done) {
+      it('should set "shouldAllowEditingDetails" to false', function(done) {
         this.res.render = (page, opts) => {
           opts.shouldAllowEditingDetails.should.equal(false)
           return done()
@@ -289,7 +289,7 @@ describe('UserPagesController', function() {
     })
   })
 
-  return describe('activateAccountPage', function() {
+  describe('activateAccountPage', function() {
     beforeEach(function() {
       this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, this.user)
       this.req.query.user_id = this.user_id
@@ -324,7 +324,7 @@ describe('UserPagesController', function() {
       return this.UserPagesController.activateAccountPage(this.req, this.res)
     })
 
-    return it('render the activation page if the user has not logged in before', function(done) {
+    it('render the activation page if the user has not logged in before', function(done) {
       this.user.loginCount = 0
       this.res.render = (page, opts) => {
         page.should.equal('user/activate')

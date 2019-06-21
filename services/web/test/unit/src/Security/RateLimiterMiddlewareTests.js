@@ -49,7 +49,7 @@ describe('RateLimiterMiddleware', function() {
     return (this.next = sinon.stub())
   })
 
-  return describe('rateLimit', function() {
+  describe('rateLimit', function() {
     beforeEach(function() {
       this.rateLimiter = this.RateLimiterMiddleware.rateLimit({
         endpointName: 'test-endpoint',
@@ -81,7 +81,7 @@ describe('RateLimiterMiddleware', function() {
           .should.equal(true)
       })
 
-      return it('should pass on to next()', function() {})
+      it('should pass on to next()', function() {})
     })
 
     describe('when under the rate limit with logged in user', function() {
@@ -106,7 +106,7 @@ describe('RateLimiterMiddleware', function() {
           .should.equal(true)
       })
 
-      return it('should pass on to next()', function() {
+      it('should pass on to next()', function() {
         return this.next.called.should.equal(true)
       })
     })
@@ -129,12 +129,12 @@ describe('RateLimiterMiddleware', function() {
           .should.equal(true)
       })
 
-      return it('should pass on to next()', function() {
+      it('should pass on to next()', function() {
         return this.next.called.should.equal(true)
       })
     })
 
-    return describe('when over the rate limit', function() {
+    describe('when over the rate limit', function() {
       beforeEach(function() {
         this.req.session = {
           user: {
@@ -154,7 +154,7 @@ describe('RateLimiterMiddleware', function() {
         return this.next.called.should.equal(false)
       })
 
-      return it('should log a warning', function() {
+      it('should log a warning', function() {
         return this.logger.warn
           .calledWith(
             {

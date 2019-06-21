@@ -141,7 +141,7 @@ describe('Referal connect middle wear', function() {
     })
   })
 
-  return it('should map the collaborator invite into the session', function(done) {
+  it('should map the collaborator invite into the session', function(done) {
     const req = {
       query: { rs: 'ci' },
       session: {}

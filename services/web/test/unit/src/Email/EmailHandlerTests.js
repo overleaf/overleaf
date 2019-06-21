@@ -40,7 +40,7 @@ describe('EmailHandler', function() {
     return (this.html = '<html>hello</html>')
   })
 
-  return describe('send email', function() {
+  describe('send email', function() {
     it('should use the correct options', function(done) {
       this.EmailBuilder.buildEmail.returns({ html: this.html })
       this.EmailSender.sendEmail.callsArgWith(1)
@@ -98,12 +98,12 @@ describe('EmailHandler', function() {
       })
     })
 
-    return describe('with plain-text email content', function() {
+    describe('with plain-text email content', function() {
       beforeEach(function() {
         return (this.text = 'hello there')
       })
 
-      return it('should pass along the text field', function(done) {
+      it('should pass along the text field', function(done) {
         this.EmailBuilder.buildEmail.returns({
           html: this.html,
           text: this.text

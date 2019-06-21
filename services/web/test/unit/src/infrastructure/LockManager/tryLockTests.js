@@ -59,18 +59,18 @@ describe('LockManager - trying the lock', function() {
         .should.equal(true)
     })
 
-    return it('should return the callback with true', function() {
+    it('should return the callback with true', function() {
       return this.callback.calledWith(null, true).should.equal(true)
     })
   })
 
-  return describe('when the lock is already set', function() {
+  describe('when the lock is already set', function() {
     beforeEach(function() {
       this.set.callsArgWith(5, null, null)
       return this.LockManager._tryLock(this.key, this.namespace, this.callback)
     })
 
-    return it('should return the callback with false', function() {
+    it('should return the callback with false', function() {
       return this.callback.calledWith(null, false).should.equal(true)
     })
   })

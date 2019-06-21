@@ -286,7 +286,7 @@ describe('ProjectCreationHandler', function() {
         )
       })
 
-      return it('should send a project-imported event when importing a project', function(done) {
+      it('should send a project-imported event when importing a project', function(done) {
         const attributes = {
           overleaf: {
             history: {
@@ -324,12 +324,12 @@ describe('ProjectCreationHandler', function() {
         )
       })
 
-      return it('should return the error to the callback', function() {
+      it('should return the error to the callback', function() {
         return should.exist(this.callback.args[0][0])
       })
     })
 
-    return describe('with an invalid name', function() {
+    describe('with an invalid name', function() {
       beforeEach(function() {
         this.ProjectDetailsHandler.validateProjectName = sinon
           .stub()
@@ -345,7 +345,7 @@ describe('ProjectCreationHandler', function() {
         return should.exist(this.callback.args[0][0])
       })
 
-      return it('should not try to create the project', function() {
+      it('should not try to create the project', function() {
         return this.ProjectModel.prototype.save.called.should.equal(false)
       })
     })
@@ -391,7 +391,7 @@ describe('ProjectCreationHandler', function() {
         .should.equal(true)
     })
 
-    return it('should build the mainbasic.tex template', function() {
+    it('should build the mainbasic.tex template', function() {
       return this.handler._buildTemplate
         .calledWith('mainbasic.tex', ownerId, projectName)
         .should.equal(true)
@@ -421,7 +421,7 @@ describe('ProjectCreationHandler', function() {
         .should.equal(true)
     })
 
-    return it('should create the root document', function() {
+    it('should create the root document', function() {
       return this.handler._createRootDoc
         .calledWith(this.project, ownerId, ['snippet line 1', 'snippet line 2'])
         .should.equal(true)
@@ -504,7 +504,7 @@ describe('ProjectCreationHandler', function() {
         .should.equal(true)
     })
 
-    return it('should build the references.bib template', function() {
+    it('should build the references.bib template', function() {
       return this.handler._buildTemplate
         .calledWith('references.bib', ownerId, projectName)
         .should.equal(true)
@@ -548,13 +548,13 @@ describe('ProjectCreationHandler', function() {
       return done()
     })
 
-    return it('should put the year in', function(done) {
+    it('should put the year in', function(done) {
       this.template.indexOf(new Date().getUTCFullYear()).should.not.equal(-1)
       return done()
     })
   })
 
-  return describe('_createRootDoc', function() {
+  describe('_createRootDoc', function() {
     beforeEach(function(done) {
       this.project = new this.ProjectModel()
 
@@ -578,7 +578,7 @@ describe('ProjectCreationHandler', function() {
         .should.equal(true)
     })
 
-    return it('should set the main doc id', function() {
+    it('should set the main doc id', function() {
       return this.ProjectEntityUpdateHandler.setRootDoc
         .calledWith(project_id, docId)
         .should.equal(true)

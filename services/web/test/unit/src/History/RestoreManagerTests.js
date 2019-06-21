@@ -98,12 +98,12 @@ describe('RestoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the entity', function() {
+      it('should call the callback with the entity', function() {
         return this.callback.calledWith(null, this.entity).should.equal(true)
       })
     })
 
-    return describe('with a file in a folder', function() {
+    describe('with a file in a folder', function() {
       beforeEach(function() {
         this.pathname = 'foo/bar.tex'
         return this.RestoreManager.restoreFileFromV2(
@@ -121,7 +121,7 @@ describe('RestoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should add the entity by its basename', function() {
+      it('should add the entity by its basename', function() {
         return this.FileSystemImportManager.addEntity
           .calledWith(
             this.user_id,
@@ -154,12 +154,12 @@ describe('RestoreManager', function() {
         .should.equal(true)
     })
 
-    return it('should return the folder_id', function() {
+    it('should return the folder_id', function() {
       return this.callback.calledWith(null, this.folder_id).should.equal(true)
     })
   })
 
-  return describe('_addEntityWithUniqueName', function() {
+  describe('_addEntityWithUniqueName', function() {
     beforeEach(function() {
       this.addEntityWithName = sinon.stub()
       return (this.name = 'foo.tex')
@@ -179,12 +179,12 @@ describe('RestoreManager', function() {
         return this.addEntityWithName.calledWith(this.name).should.equal(true)
       })
 
-      return it('should return the entity', function() {
+      it('should return the entity', function() {
         return this.callback.calledWith(null, this.entity).should.equal(true)
       })
     })
 
-    return describe('with an invalid name', function() {
+    describe('with an invalid name', function() {
       beforeEach(function() {
         this.addEntityWithName
           .onFirstCall()
@@ -210,7 +210,7 @@ describe('RestoreManager', function() {
           .should.equal(true)
       })
 
-      return it('should return the entity', function() {
+      it('should return the entity', function() {
         return this.callback.calledWith(null, this.entity).should.equal(true)
       })
     })

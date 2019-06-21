@@ -82,7 +82,7 @@ describe('CollaboratorsHandler', function() {
         )
       })
 
-      return it('should return an array of member ids with their privilege levels', function() {
+      it('should return an array of member ids with their privilege levels', function() {
         return this.callback
           .calledWith(null, [
             { id: 'owner-ref', privilegeLevel: 'owner', source: 'owner' },
@@ -111,12 +111,12 @@ describe('CollaboratorsHandler', function() {
       })
     })
 
-    return describe('with a missing project', function() {
+    describe('with a missing project', function() {
       beforeEach(function() {
         return (this.ProjectGetter.getProject = sinon.stub().yields(null, null))
       })
 
-      return it('should return a NotFoundError', function(done) {
+      it('should return a NotFoundError', function(done) {
         return this.CollaboratorHandler.getMemberIdsWithPrivilegeLevels(
           this.project_id,
           function(error) {
@@ -143,7 +143,7 @@ describe('CollaboratorsHandler', function() {
       )
     })
 
-    return it('should return the ids', function() {
+    it('should return the ids', function() {
       return this.callback
         .calledWith(null, ['member-id-1', 'member-id-2'])
         .should.equal(true)
@@ -165,7 +165,7 @@ describe('CollaboratorsHandler', function() {
       )
     })
 
-    return it('should return the invited ids', function() {
+    it('should return the invited ids', function() {
       return this.callback.calledWith(null, ['member-id-1']).should.equal(true)
     })
   })
@@ -224,7 +224,7 @@ describe('CollaboratorsHandler', function() {
       )
     })
 
-    return it('should return an array of members with their privilege levels', function() {
+    it('should return an array of members with their privilege levels', function() {
       return this.callback
         .calledWith(null, [
           { user: { _id: 'read-only-ref-1' }, privilegeLevel: 'readOnly' },
@@ -290,7 +290,7 @@ describe('CollaboratorsHandler', function() {
       )
     })
 
-    return it('should return an array of invited members with their privilege levels', function() {
+    it('should return an array of invited members with their privilege levels', function() {
       return this.callback
         .calledWith(null, [
           { user: { _id: 'read-only-ref-2' }, privilegeLevel: 'readOnly' },
@@ -354,7 +354,7 @@ describe('CollaboratorsHandler', function() {
       )
     })
 
-    return it('should return an array of token members with their privilege levels', function() {
+    it('should return an array of token members with their privilege levels', function() {
       return this.callback
         .calledWith(null, [
           { user: { _id: 'read-only-ref-1' }, privilegeLevel: 'readOnly' },
@@ -386,7 +386,7 @@ describe('CollaboratorsHandler', function() {
       )
     })
 
-    return it('should return false if the member has no privilege level', function(done) {
+    it('should return false if the member has no privilege level', function(done) {
       return this.CollaboratorHandler.getMemberIdPrivilegeLevel(
         'member-id-3',
         this.project_id,
@@ -426,14 +426,14 @@ describe('CollaboratorsHandler', function() {
         )
       })
 
-      return it('should return true and the privilegeLevel', function() {
+      it('should return true and the privilegeLevel', function() {
         return this.callback
           .calledWith(null, true, 'readAndWrite')
           .should.equal(true)
       })
     })
 
-    return describe('when user is not a member of the project', function() {
+    describe('when user is not a member of the project', function() {
       beforeEach(function() {
         this.CollaboratorHandler.getMemberIdsWithPrivilegeLevels
           .withArgs(this.project_id)
@@ -445,7 +445,7 @@ describe('CollaboratorsHandler', function() {
         )
       })
 
-      return it('should return false', function() {
+      it('should return false', function() {
         return this.callback.calledWith(null, false, null).should.equal(true)
       })
     })
@@ -495,7 +495,7 @@ describe('CollaboratorsHandler', function() {
       )
     })
 
-    return it('should call the callback with the projects', function() {
+    it('should call the callback with the projects', function() {
       return this.callback
         .calledWith(null, {
           readAndWrite: [
@@ -526,7 +526,7 @@ describe('CollaboratorsHandler', function() {
       )
     })
 
-    return it('should remove the user from mongo', function() {
+    it('should remove the user from mongo', function() {
       return this.Project.update
         .calledWith(
           {
@@ -590,7 +590,7 @@ describe('CollaboratorsHandler', function() {
           .should.equal(true)
       })
 
-      return it('should add the user as a contact for the adding user', function() {
+      it('should add the user as a contact for the adding user', function() {
         return this.ContactManager.addContact
           .calledWith(this.adding_user_id, this.user_id)
           .should.equal(true)
@@ -621,7 +621,7 @@ describe('CollaboratorsHandler', function() {
           .should.equal(true)
       })
 
-      return it('should flush the project to the TPDS', function() {
+      it('should flush the project to the TPDS', function() {
         return this.ProjectEntityHandler.flushProjectToThirdPartyDataStore
           .calledWith(this.project_id)
           .should.equal(true)
@@ -639,7 +639,7 @@ describe('CollaboratorsHandler', function() {
         )
       })
 
-      return it('should call the callback with an error', function() {
+      it('should call the callback with an error', function() {
         return this.callback.calledWith(new Error()).should.equal(true)
       })
     })
@@ -656,12 +656,12 @@ describe('CollaboratorsHandler', function() {
         )
       })
 
-      return it('should not add the user again', function() {
+      it('should not add the user again', function() {
         return this.Project.update.called.should.equal(false)
       })
     })
 
-    return describe('with null adding_user_id', function() {
+    describe('with null adding_user_id', function() {
       beforeEach(function() {
         return this.CollaboratorHandler.addUserIdToProject(
           this.project_id,
@@ -672,7 +672,7 @@ describe('CollaboratorsHandler', function() {
         )
       })
 
-      return it('should not add the adding user as a contact', function() {
+      it('should not add the adding user as a contact', function() {
         return this.ContactManager.addContact.called.should.equal(false)
       })
     })
@@ -708,7 +708,7 @@ describe('CollaboratorsHandler', function() {
       )
     })
 
-    return it('should remove the user from each project', function() {
+    it('should remove the user from each project', function() {
       const expectedProjects = [
         'read-and-write-0',
         'read-and-write-1',
@@ -793,7 +793,7 @@ describe('CollaboratorsHandler', function() {
       )
     })
 
-    return describe('when getMembersWithPrivileges produces an error', function() {
+    describe('when getMembersWithPrivileges produces an error', function() {
       beforeEach(function() {
         this.CollaboratorHandler.getInvitedMembersWithPrivilegeLevels = sinon
           .stub()
@@ -834,7 +834,7 @@ describe('CollaboratorsHandler', function() {
         )
       })
 
-      return it('should not call ProjectEditorHandler.buildOwnerAndMembersViews', function() {
+      it('should not call ProjectEditorHandler.buildOwnerAndMembersViews', function() {
         return this.ProjectEditorHandler.buildOwnerAndMembersViews.callCount.should.equal(
           0
         )
@@ -875,7 +875,7 @@ describe('CollaboratorsHandler', function() {
       )
     })
 
-    return it('should return false when the project is not found', function(done) {
+    it('should return false when the project is not found', function(done) {
       this.project = null
       this.Project.findOne = sinon.stub().callsArgWith(2, null, this.project)
       return this.CollaboratorHandler.userIsTokenMember(
@@ -890,7 +890,7 @@ describe('CollaboratorsHandler', function() {
     })
   })
 
-  return describe('transferProjects', function() {
+  describe('transferProjects', function() {
     beforeEach(function() {
       this.from_user_id = 'from-user-id'
       this.to_user_id = 'to-user-id'
@@ -1012,12 +1012,12 @@ describe('CollaboratorsHandler', function() {
         )
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('when flushing to TPDS fails', function() {
+    describe('when flushing to TPDS fails', function() {
       beforeEach(function() {
         this.ProjectEntityHandler.flushProjectToThirdPartyDataStore = sinon
           .stub()
@@ -1033,7 +1033,7 @@ describe('CollaboratorsHandler', function() {
         return this.logger.err.called.should.equal(true)
       })
 
-      return it('should not return an error since it happens in the background', function() {
+      it('should not return an error since it happens in the background', function() {
         this.callback.called.should.equal(true)
         return this.callback.calledWith(new Error('oops')).should.equal(false)
       })

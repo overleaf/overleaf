@@ -185,7 +185,7 @@ describe('RecurlyWrapper', function() {
         )
       })
 
-      return it('should return the subscription', function() {
+      it('should return the subscription', function() {
         return this.recurlySubscription.uuid.should.equal(
           '44f83d7cba354d5b84812419f923ea96'
         )
@@ -217,14 +217,14 @@ describe('RecurlyWrapper', function() {
         )
       })
 
-      return it('should look up the subscription at the RecurlyJS API end point', function() {
+      it('should look up the subscription at the RecurlyJS API end point', function() {
         return this.apiRequest.args[0][0].url.should.equal(
           'recurly_js/result/70db44b10f5f4b238669480c9903f6f5'
         )
       })
     })
 
-    return describe('with includeAccount', function() {
+    describe('with includeAccount', function() {
       beforeEach(function() {
         this.apiRequest = sinon.stub(
           this.RecurlyWrapper,
@@ -247,7 +247,7 @@ describe('RecurlyWrapper', function() {
         return this.apiRequest.args[1][0].url.should.equal('accounts/104')
       })
 
-      return it('should populate the account attribute', function() {
+      it('should populate the account attribute', function() {
         return this.recurlySubscription.account.account_code.should.equal('104')
       })
     })
@@ -296,7 +296,7 @@ describe('RecurlyWrapper', function() {
       return this.requestOptions.method.should.equal('put')
     })
 
-    return it('should return the updated subscription', function() {
+    it('should return the updated subscription', function() {
       should.exist(this.recurlySubscription)
       return this.recurlySubscription.plan.plan_code.should.equal('gold')
     })
@@ -330,7 +330,7 @@ describe('RecurlyWrapper', function() {
       return this.apiRequest.called.should.equal(true)
     })
 
-    return describe('when the subscription is already cancelled', function() {
+    describe('when the subscription is already cancelled', function() {
       beforeEach(function() {
         this.RecurlyWrapper.apiRequest.restore()
         this.recurlySubscriptionId = 'subscription-id-123'
@@ -347,7 +347,7 @@ describe('RecurlyWrapper', function() {
         ))
       })
 
-      return it('should not produce an error', function(done) {
+      it('should not produce an error', function(done) {
         return this.RecurlyWrapper.cancelSubscription(
           this.recurlySubscriptionId,
           err => {
@@ -383,7 +383,7 @@ describe('RecurlyWrapper', function() {
       return this.RecurlyWrapper.apiRequest.restore()
     })
 
-    return it('should send a cancel request to the API', function() {
+    it('should send a cancel request to the API', function() {
       return this.apiRequest.called.should.equal(true)
     })
   })
@@ -412,7 +412,7 @@ describe('RecurlyWrapper', function() {
       return this.RecurlyWrapper.apiRequest.restore()
     })
 
-    return it('sends correct XML', function() {
+    it('sends correct XML', function() {
       this.apiRequest.called.should.equal(true)
       const { body } = this.apiRequest.lastCall.args[0]
       return expect(body).to.equal(`\
@@ -452,7 +452,7 @@ describe('RecurlyWrapper', function() {
       return this.RecurlyWrapper.apiRequest.restore()
     })
 
-    return it('sends correct XML', function() {
+    it('sends correct XML', function() {
       this.apiRequest.called.should.equal(true)
       const { body } = this.apiRequest.lastCall.args[0]
       return expect(body).to.equal(`\
@@ -543,7 +543,7 @@ describe('RecurlyWrapper', function() {
         })
       })
 
-      return describe('when _createPaypalSubscription produces an error', function() {
+      describe('when _createPaypalSubscription produces an error', function() {
         beforeEach(function() {
           return this._createPaypalSubscription.callsArgWith(
             3,
@@ -551,7 +551,7 @@ describe('RecurlyWrapper', function() {
           )
         })
 
-        return it('should produce an error', function(done) {
+        it('should produce an error', function(done) {
           return this.call((err, sub) => {
             expect(err).to.be.instanceof(Error)
             return done()
@@ -560,7 +560,7 @@ describe('RecurlyWrapper', function() {
       })
     })
 
-    return describe('when not paypal', function() {
+    describe('when not paypal', function() {
       beforeEach(function() {
         this.subscriptionDetails.isPaypal = false
         this._createCreditCardSubscription = sinon.stub(
@@ -600,7 +600,7 @@ describe('RecurlyWrapper', function() {
         })
       })
 
-      return describe('when _createCreditCardSubscription produces an error', function() {
+      describe('when _createCreditCardSubscription produces an error', function() {
         beforeEach(function() {
           return this._createCreditCardSubscription.callsArgWith(
             3,
@@ -608,7 +608,7 @@ describe('RecurlyWrapper', function() {
           )
         })
 
-        return it('should produce an error', function(done) {
+        it('should produce an error', function(done) {
           return this.call((err, sub) => {
             expect(err).to.be.instanceof(Error)
             return done()
@@ -737,7 +737,7 @@ describe('RecurlyWrapper', function() {
         })
       })
 
-      return it('should not _parseSubscriptionXml', function(done) {
+      it('should not _parseSubscriptionXml', function(done) {
         return this.call((err, sub) => {
           this._parseSubscriptionXml.callCount.should.equal(0)
           return done()
@@ -745,12 +745,12 @@ describe('RecurlyWrapper', function() {
       })
     })
 
-    return describe('when parse xml produces an error', function() {
+    describe('when parse xml produces an error', function() {
       beforeEach(function() {
         return this._parseSubscriptionXml.callsArgWith(1, new Error('woops'))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.call((err, sub) => {
           expect(err).to.be.instanceof(Error)
           return done()
@@ -887,7 +887,7 @@ describe('RecurlyWrapper', function() {
       })
     })
 
-    return describe('when one of the paypal stages produces an error', function() {
+    describe('when one of the paypal stages produces an error', function() {
       beforeEach(function() {
         return this.createAccount.callsArgWith(1, new Error('woops'))
       })
@@ -899,7 +899,7 @@ describe('RecurlyWrapper', function() {
         })
       })
 
-      return it('should stop calling the paypal stages after the error', function(done) {
+      it('should stop calling the paypal stages after the error', function(done) {
         return this.call((err, sub) => {
           this.checkAccountExists.callCount.should.equal(1)
           this.createAccount.callCount.should.equal(1)
@@ -1010,7 +1010,7 @@ describe('RecurlyWrapper', function() {
           })
         })
 
-        return it('should set userExists to true', function(done) {
+        it('should set userExists to true', function(done) {
           return this.call((err, result) => {
             expect(result.userExists).to.equal(true)
             return done()
@@ -1052,7 +1052,7 @@ describe('RecurlyWrapper', function() {
           })
         })
 
-        return it('should set userExists to false', function(done) {
+        it('should set userExists to false', function(done) {
           return this.call((err, result) => {
             expect(result.userExists).to.equal(false)
             return done()
@@ -1060,14 +1060,14 @@ describe('RecurlyWrapper', function() {
         })
       })
 
-      return describe('when apiRequest produces an error', function() {
+      describe('when apiRequest produces an error', function() {
         beforeEach(function() {
           return this.apiRequest.callsArgWith(1, new Error('woops'), {
             statusCode: 500
           })
         })
 
-        return it('should produce an error', function(done) {
+        it('should produce an error', function(done) {
           return this.call((err, result) => {
             expect(err).to.be.instanceof(Error)
             return done()
@@ -1088,7 +1088,7 @@ describe('RecurlyWrapper', function() {
           return (this.cache.subscriptionDetails.address = null)
         })
 
-        return it('should produce an error', function(done) {
+        it('should produce an error', function(done) {
           return this.call((err, result) => {
             expect(err).to.be.instanceof(Error)
             return done()
@@ -1126,7 +1126,7 @@ describe('RecurlyWrapper', function() {
           })
         })
 
-        return it('should not call _parseAccountXml', function(done) {
+        it('should not call _parseAccountXml', function(done) {
           return this.call((err, result) => {
             this.RecurlyWrapper._parseAccountXml.callCount.should.equal(0)
             return done()
@@ -1134,7 +1134,7 @@ describe('RecurlyWrapper', function() {
         })
       })
 
-      return describe('when account does not exist', function() {
+      describe('when account does not exist', function() {
         beforeEach(function() {
           this.cache.userExists = false
           const resultXml =
@@ -1192,14 +1192,14 @@ describe('RecurlyWrapper', function() {
           })
         })
 
-        return describe('when apiRequest produces an error', function() {
+        describe('when apiRequest produces an error', function() {
           beforeEach(function() {
             return this.apiRequest.callsArgWith(1, new Error('woops'), {
               statusCode: 500
             })
           })
 
-          return it('should produce an error', function(done) {
+          it('should produce an error', function(done) {
             return this.call((err, result) => {
               expect(err).to.be.instanceof(Error)
               return done()
@@ -1225,7 +1225,7 @@ describe('RecurlyWrapper', function() {
           return (this.cache.account.account_code = null)
         })
 
-        return it('should produce an error', function(done) {
+        it('should produce an error', function(done) {
           return this.call((err, result) => {
             expect(err).to.be.instanceof(Error)
             return done()
@@ -1278,7 +1278,7 @@ describe('RecurlyWrapper', function() {
           })
         })
 
-        return it('should set billingInfo on cache', function(done) {
+        it('should set billingInfo on cache', function(done) {
           return this.call((err, result) => {
             expect(result.billingInfo).to.deep.equal({
               a: '1'
@@ -1288,14 +1288,14 @@ describe('RecurlyWrapper', function() {
         })
       })
 
-      return describe('when apiRequest produces an error', function() {
+      describe('when apiRequest produces an error', function() {
         beforeEach(function() {
           return this.apiRequest.callsArgWith(1, new Error('woops'), {
             statusCode: 500
           })
         })
 
-        return it('should produce an error', function(done) {
+        it('should produce an error', function(done) {
           return this.call((err, result) => {
             expect(err).to.be.instanceof(Error)
             return done()
@@ -1318,7 +1318,7 @@ describe('RecurlyWrapper', function() {
           return (this.cache.account.account_code = null)
         })
 
-        return it('should produce an error', function(done) {
+        it('should produce an error', function(done) {
           return this.call((err, result) => {
             expect(err).to.be.instanceof(Error)
             return done()
@@ -1331,7 +1331,7 @@ describe('RecurlyWrapper', function() {
           return (this.cache.subscriptionDetails.address = null)
         })
 
-        return it('should produce an error', function(done) {
+        it('should produce an error', function(done) {
           return this.call((err, result) => {
             expect(err).to.be.instanceof(Error)
             return done()
@@ -1389,7 +1389,7 @@ describe('RecurlyWrapper', function() {
           })
         })
 
-        return it('should set billingInfo on cache', function(done) {
+        it('should set billingInfo on cache', function(done) {
           return this.call((err, result) => {
             expect(result.billingInfo).to.deep.equal({
               city: 'London'
@@ -1399,14 +1399,14 @@ describe('RecurlyWrapper', function() {
         })
       })
 
-      return describe('when apiRequest produces an error', function() {
+      describe('when apiRequest produces an error', function() {
         beforeEach(function() {
           return this.apiRequest.callsArgWith(1, new Error('woops'), {
             statusCode: 500
           })
         })
 
-        return it('should produce an error', function(done) {
+        it('should produce an error', function(done) {
           return this.call((err, result) => {
             expect(err).to.be.instanceof(Error)
             return done()
@@ -1415,7 +1415,7 @@ describe('RecurlyWrapper', function() {
       })
     })
 
-    return describe('_paypal.createSubscription', function() {
+    describe('_paypal.createSubscription', function() {
       beforeEach(function() {
         this.cache.account = { account_code: 'abc' }
         this.cache.billingInfo = {}
@@ -1477,7 +1477,7 @@ describe('RecurlyWrapper', function() {
           })
         })
 
-        return it('should set subscription on cache', function(done) {
+        it('should set subscription on cache', function(done) {
           return this.call((err, result) => {
             expect(result.subscription).to.deep.equal({
               a: '1'
@@ -1487,14 +1487,14 @@ describe('RecurlyWrapper', function() {
         })
       })
 
-      return describe('when apiRequest produces an error', function() {
+      describe('when apiRequest produces an error', function() {
         beforeEach(function() {
           return this.apiRequest.callsArgWith(1, new Error('woops'), {
             statusCode: 500
           })
         })
 
-        return it('should produce an error', function(done) {
+        it('should produce an error', function(done) {
           return this.call((err, result) => {
             expect(err).to.be.instanceof(Error)
             return done()
@@ -1504,7 +1504,7 @@ describe('RecurlyWrapper', function() {
     })
   })
 
-  return describe('listAccountActiveSubscriptions', function() {
+  describe('listAccountActiveSubscriptions', function() {
     beforeEach(function() {
       this.user_id = 'mock-user-id'
       this.callback = sinon.stub()
@@ -1540,14 +1540,14 @@ describe('RecurlyWrapper', function() {
           .should.equal(true)
       })
 
-      return it('should return the subscriptions', function() {
+      it('should return the subscriptions', function() {
         return this.callback
           .calledWith(null, this.subscriptions)
           .should.equal(true)
       })
     })
 
-    return describe('without an account', function() {
+    describe('without an account', function() {
       beforeEach(function() {
         this.response.statusCode = 404
         return this.RecurlyWrapper.listAccountActiveSubscriptions(
@@ -1556,7 +1556,7 @@ describe('RecurlyWrapper', function() {
         )
       })
 
-      return it('should return an empty array of subscriptions', function() {
+      it('should return an empty array of subscriptions', function() {
         return this.callback.calledWith(null, []).should.equal(true)
       })
     })

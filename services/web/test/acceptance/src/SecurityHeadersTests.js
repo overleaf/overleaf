@@ -81,7 +81,7 @@ describe('SecurityHeaders', function() {
     )
   })
 
-  return it('should have cache headers on project page', function(done) {
+  it('should have cache headers on project page', function(done) {
     return async.series(
       [
         cb => this.user.login(cb),

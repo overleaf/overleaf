@@ -69,13 +69,13 @@ describe('EmailBuilder', function() {
         return expect(this.email.text != null).to.equal(true)
       })
 
-      return it('should not have undefined in it', function() {
+      it('should not have undefined in it', function() {
         this.email.html.indexOf('undefined').should.equal(-1)
         return this.email.subject.indexOf('undefined').should.equal(-1)
       })
     })
 
-    return describe('when someone is up to no good', function() {
+    describe('when someone is up to no good', function() {
       beforeEach(function() {
         this.opts.project.name = "<img src='http://evilsite.com/evil.php'>"
         return (this.email = this.EmailBuilder.buildEmail(
@@ -88,14 +88,14 @@ describe('EmailBuilder', function() {
         return expect(this.email.html).to.contain('New Project')
       })
 
-      return it('should not have undefined in it', function() {
+      it('should not have undefined in it', function() {
         this.email.html.indexOf('undefined').should.equal(-1)
         return this.email.subject.indexOf('undefined').should.equal(-1)
       })
     })
   })
 
-  return describe('SpamSafe', function() {
+  describe('SpamSafe', function() {
     beforeEach(function() {
       this.opts = {
         to: 'bob@joe.com',
@@ -115,7 +115,7 @@ describe('EmailBuilder', function() {
       ))
     })
 
-    return it('should replace spammy project name', function() {
+    it('should replace spammy project name', function() {
       this.email.html.indexOf('a new project').should.not.equal(-1)
       return this.email.subject.indexOf('New Project').should.not.equal(-1)
     })

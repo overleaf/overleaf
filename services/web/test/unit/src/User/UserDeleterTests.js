@@ -158,7 +158,7 @@ describe('UserDeleter', function() {
       })
     })
 
-    return it('ensures user can be deleted first', function(done) {
+    it('ensures user can be deleted first', function(done) {
       this.UserDeleter._ensureCanDeleteUser.yields(
         new Errors.SubscriptionAdminDeletionError()
       )
@@ -257,7 +257,7 @@ describe('UserDeleter', function() {
       })
     })
 
-    return describe('when unsubscribing from mailchimp fails', function() {
+    describe('when unsubscribing from mailchimp fails', function() {
       beforeEach(function() {
         return (this.NewsletterManager.unsubscribe = sinon
           .stub()
@@ -284,7 +284,7 @@ describe('UserDeleter', function() {
         })
       })
 
-      return it('should log an error', function(done) {
+      it('should log an error', function(done) {
         return this.UserDeleter.deleteUser(this.user._id, err => {
           sinon.assert.called(this.logger.err)
           return done()
@@ -293,7 +293,7 @@ describe('UserDeleter', function() {
     })
   })
 
-  return describe('_ensureCanDeleteUser', function() {
+  describe('_ensureCanDeleteUser', function() {
     it('should not return error when user can be deleted', function(done) {
       this.SubscriptionLocator.getUsersSubscription.yields(null, null)
       return this.UserDeleter._ensureCanDeleteUser(this.user, function(error) {
@@ -312,7 +312,7 @@ describe('UserDeleter', function() {
       })
     })
 
-    return it('propagate errors', function(done) {
+    it('propagate errors', function(done) {
       this.SubscriptionLocator.getUsersSubscription.yields(
         new Error('Some error')
       )

@@ -45,7 +45,7 @@ describe('Subscriptions', function() {
         return expect(this.data.personalSubscription).to.equal(null)
       })
 
-      return it('should return no memberGroupSubscriptions', function() {
+      it('should return no memberGroupSubscriptions', function() {
         return expect(this.data.memberGroupSubscriptions).to.deep.equal([])
       })
     })
@@ -135,7 +135,7 @@ describe('Subscriptions', function() {
         return expect(this.data.memberGroupSubscriptions).to.deep.equal([])
       })
 
-      return it('should include redeemed coupons', function(done) {
+      it('should include redeemed coupons', function(done) {
         MockRecurlyApi.redemptions['mock-account-id'] = [
           { state: 'active', coupon_code: 'test-coupon-1' },
           { state: 'inactive', coupon_code: 'test-coupon-2' },
@@ -209,7 +209,7 @@ describe('Subscriptions', function() {
         return expect(subscription.recurly).to.not.exist
       })
 
-      return it('should return no memberGroupSubscriptions', function() {
+      it('should return no memberGroupSubscriptions', function() {
         return expect(this.data.memberGroupSubscriptions).to.deep.equal([])
       })
     })
@@ -286,7 +286,7 @@ describe('Subscriptions', function() {
         return expect(this.data.personalSubscription).to.equal(null)
       })
 
-      return it('should return the two memberGroupSubscriptions', function() {
+      it('should return the two memberGroupSubscriptions', function() {
         expect(this.data.memberGroupSubscriptions.length).to.equal(2)
         expect(
           // Mongoose populates the admin_id with the user
@@ -348,7 +348,7 @@ describe('Subscriptions', function() {
         return expect(this.data.personalSubscription).to.equal(null)
       })
 
-      return it('should return the managedGroupSubscriptions', function() {
+      it('should return the managedGroupSubscriptions', function() {
         expect(this.data.managedGroupSubscriptions.length).to.equal(1)
         const subscription = this.data.managedGroupSubscriptions[0]
         expect(
@@ -401,7 +401,7 @@ describe('Subscriptions', function() {
         )
       })
 
-      return it('should return the managedInstitutions', function() {
+      it('should return the managedInstitutions', function() {
         expect(this.data.managedInstitutions.length).to.equal(1)
         const institution = this.data.managedInstitutions[0]
         expect(institution.v1Id).to.equal(this.v1Id)
@@ -492,14 +492,14 @@ describe('Subscriptions', function() {
         )
       })
 
-      return it('should return only the affilations with confirmed institutions, and confirmed emails', function() {
+      it('should return only the affilations with confirmed institutions, and confirmed emails', function() {
         return expect(this.data.confirmedMemberInstitutions).to.deep.equal([
           { name: 'Stanford', licence: 'pro_plus', confirmed: true }
         ])
       })
     })
 
-    return describe('when the user has a v1 subscription', function() {
+    describe('when the user has a v1 subscription', function() {
       before(function(done) {
         let v1Id
         MockV1Api.setUser((v1Id = MockV1Api.nextV1Id()), {
@@ -543,7 +543,7 @@ describe('Subscriptions', function() {
         return expect(this.data.memberGroupSubscriptions).to.deep.equal([])
       })
 
-      return it('should return a v1SubscriptionStatus', function() {
+      it('should return a v1SubscriptionStatus', function() {
         return expect(this.data.v1SubscriptionStatus).to.deep.equal(
           this.subscription_status
         )
@@ -551,7 +551,7 @@ describe('Subscriptions', function() {
     })
   })
 
-  return describe('canceling', function() {
+  describe('canceling', function() {
     before(function(done) {
       let v1Id
       this.user = new User()
@@ -580,7 +580,7 @@ describe('Subscriptions', function() {
       return expect(this.v1_user.canceled).to.equal(true)
     })
 
-    return it('should redirect to the subscription dashboard', function() {
+    it('should redirect to the subscription dashboard', function() {
       expect(this.response.statusCode).to.equal(302)
       return expect(this.response.headers.location).to.equal(
         '/user/subscription'

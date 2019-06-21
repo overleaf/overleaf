@@ -59,7 +59,7 @@ describe('Csrf', function() {
         return expect(this.next.calledWith(this.err)).to.equal(true)
       })
 
-      return it('passes the csrf error on when the match is too long', function() {
+      it('passes the csrf error on when the match is too long', function() {
         this.csrf.disableDefaultCsrfProtection('/foo/bar/baz', 'POST')
         this.csrf.middleware(this.req, this.res, this.next)
         return expect(this.next.calledWith(this.err)).to.equal(true)
@@ -75,7 +75,7 @@ describe('Csrf', function() {
         return expect(this.next.calledWith(this.err)).to.equal(false)
       })
 
-      return it('passes the csrf error on when the match is not present', function() {
+      it('passes the csrf error on when the match is not present', function() {
         this.csrf.disableDefaultCsrfProtection('/url', 'POST')
         this.csrf.disableDefaultCsrfProtection('/test', 'POST')
         this.csrf.disableDefaultCsrfProtection('/a/b/c', 'POST')
@@ -92,7 +92,7 @@ describe('Csrf', function() {
         return expect(this.next.calledWith(this.err)).to.equal(true)
       }))
 
-    return describe('when the route is excluded, but the error is not a bad-csrf-token error', () =>
+    describe('when the route is excluded, but the error is not a bad-csrf-token error', () =>
       it('passes the error on', function() {
         let err
         this.Csrf = SandboxedModule.require(modulePath, {
@@ -122,7 +122,7 @@ describe('Csrf', function() {
         return expect(this.cb.calledWith(false)).to.equal(true)
       }))
 
-    return describe('when the request is valid', () =>
+    describe('when the request is valid', () =>
       it('calls the callback with `true`', function() {
         this.Csrf = SandboxedModule.require(modulePath, {
           requires: {
@@ -137,7 +137,7 @@ describe('Csrf', function() {
       }))
   })
 
-  return describe('validateToken', function() {
+  describe('validateToken', function() {
     describe('when the request is invalid', () =>
       it('calls the callback with `false`', function() {
         this.cb = sinon.stub()
@@ -159,7 +159,7 @@ describe('Csrf', function() {
         return expect(this.cb.calledWith(true)).to.equal(true)
       }))
 
-    return describe('when there is no token', () =>
+    describe('when there is no token', () =>
       it('calls the callback with `false`', function() {
         this.Csrf = SandboxedModule.require(modulePath, {
           requires: {

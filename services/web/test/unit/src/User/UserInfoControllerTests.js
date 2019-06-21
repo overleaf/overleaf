@@ -71,7 +71,7 @@ describe('UserInfoController', function() {
       )
     })
 
-    return it('should call sendFormattedPersonalInfo', function() {
+    it('should call sendFormattedPersonalInfo', function() {
       return this.UserInfoController.sendFormattedPersonalInfo
         .calledWith(this.user, this.res, this.next)
         .should.equal(true)
@@ -102,7 +102,7 @@ describe('UserInfoController', function() {
           .should.equal(true)
       })
 
-      return it('should send the formatted details back to the client', function() {
+      it('should send the formatted details back to the client', function() {
         return this.UserInfoController.sendFormattedPersonalInfo
           .calledWith(this.user, this.res, this.next)
           .should.equal(true)
@@ -137,7 +137,7 @@ describe('UserInfoController', function() {
           .should.equal(true)
       })
 
-      return it('should send the formatted details back to the client', function() {
+      it('should send the formatted details back to the client', function() {
         return this.UserInfoController.sendFormattedPersonalInfo
           .calledWith(this.user, this.res, this.next)
           .should.equal(true)
@@ -156,12 +156,12 @@ describe('UserInfoController', function() {
         )
       })
 
-      return it('should return 404 to the client', function() {
+      it('should return 404 to the client', function() {
         return this.res.statusCode.should.equal(404)
       })
     })
 
-    return describe('when the user id is invalid', function() {
+    describe('when the user id is invalid', function() {
       beforeEach(function() {
         this.user_id = 'invalid'
         this.req.params = { user_id: this.user_id }
@@ -173,7 +173,7 @@ describe('UserInfoController', function() {
         )
       })
 
-      return it('should return 400 to the client', function() {
+      it('should return 400 to the client', function() {
         return this.res.statusCode.should.equal(400)
       })
     })
@@ -208,12 +208,12 @@ describe('UserInfoController', function() {
         .should.equal(true)
     })
 
-    return it('should send the formatted details back to the client', function() {
+    it('should send the formatted details back to the client', function() {
       return this.res.body.should.equal(JSON.stringify(this.formattedInfo))
     })
   })
 
-  return describe('formatPersonalInfo', () =>
+  describe('formatPersonalInfo', () =>
     it('should return the correctly formatted data', function() {
       this.user = {
         _id: ObjectId(),

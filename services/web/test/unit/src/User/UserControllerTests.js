@@ -158,7 +158,7 @@ describe('UserController', function() {
         return (this.req.body.password = '')
       })
 
-      return it('should return 403', function(done) {
+      it('should return 403', function(done) {
         this.res.sendStatus = code => {
           code.should.equal(403)
           return done()
@@ -174,7 +174,7 @@ describe('UserController', function() {
           .callsArgWith(2, new Error('woops')))
       })
 
-      return it('should call next with an error', function(done) {
+      it('should call next with an error', function(done) {
         this.next = err => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
@@ -191,7 +191,7 @@ describe('UserController', function() {
           .callsArgWith(2, null, null))
       })
 
-      return it('should return 403', function(done) {
+      it('should return 403', function(done) {
         this.res.sendStatus = code => {
           code.should.equal(403)
           return done()
@@ -207,7 +207,7 @@ describe('UserController', function() {
           .callsArgWith(1, new Error('woops')))
       })
 
-      return it('should call next with an error', function(done) {
+      it('should call next with an error', function(done) {
         this.next = err => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
@@ -224,7 +224,7 @@ describe('UserController', function() {
           .yields(new Errors.SubscriptionAdminDeletionError()))
       })
 
-      return it('should return a json error', function(done) {
+      it('should return a json error', function(done) {
         return this.UserController.tryDeleteUser(this.req, {
           status(status) {
             expect(status).to.equal(422)
@@ -241,14 +241,14 @@ describe('UserController', function() {
       })
     })
 
-    return describe('when session.destroy produces an error', function() {
+    describe('when session.destroy produces an error', function() {
       beforeEach(function() {
         return (this.req.session.destroy = sinon
           .stub()
           .callsArgWith(0, new Error('woops')))
       })
 
-      return it('should call next with an error', function(done) {
+      it('should call next with an error', function(done) {
         this.next = err => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
@@ -400,7 +400,7 @@ describe('UserController', function() {
       return this.UserController.updateUserSettings(this.req, this.res)
     })
 
-    return describe('when using an external auth source', function() {
+    describe('when using an external auth source', function() {
       beforeEach(function() {
         this.UserUpdater.changeEmailAddress.callsArgWith(2)
         this.newEmail = 'someone23@example.com'
@@ -409,7 +409,7 @@ describe('UserController', function() {
           .returns(true))
       })
 
-      return it('should not set a new email', function(done) {
+      it('should not set a new email', function(done) {
         this.req.body.email = this.newEmail
         this.res.sendStatus = code => {
           code.should.equal(200)
@@ -435,7 +435,7 @@ describe('UserController', function() {
       return this.UserController.logout(this.req, this.res)
     })
 
-    return it('should clear sudo-mode', function(done) {
+    it('should clear sudo-mode', function(done) {
       this.req.session.destroy = sinon.stub().callsArgWith(0)
       this.SudoModeHandler.clearSudoMode = sinon.stub()
       this.res.redirect = url => {
@@ -466,7 +466,7 @@ describe('UserController', function() {
         .should.equal(true)
     })
 
-    return it('should return the user and activation url', function() {
+    it('should return the user and activation url', function() {
       return this.res.json
         .calledWith({
           email: this.email,
@@ -491,7 +491,7 @@ describe('UserController', function() {
       return this.UserController.clearSessions(this.req, this.res)
     })
 
-    return describe('when revokeAllUserSessions produces an error', () =>
+    describe('when revokeAllUserSessions produces an error', () =>
       it('should call next with an error', function(done) {
         this.UserSessionsManager.revokeAllUserSessions.callsArgWith(
           2,
@@ -506,7 +506,7 @@ describe('UserController', function() {
       }))
   })
 
-  return describe('changePassword', function() {
+  describe('changePassword', function() {
     it('should check the old password is the current one at the moment', function(done) {
       this.AuthenticationManager.authenticate.callsArgWith(2)
       this.req.body = { currentPassword: 'oldpasshere' }
@@ -549,7 +549,7 @@ describe('UserController', function() {
       return this.UserController.changePassword(this.req, this.res)
     })
 
-    return it('it should not set the new password if it is invalid', function(done) {
+    it('it should not set the new password if it is invalid', function(done) {
       this.AuthenticationManager.validatePassword = sinon
         .stub()
         .returns({ message: 'password contains invalid characters' })

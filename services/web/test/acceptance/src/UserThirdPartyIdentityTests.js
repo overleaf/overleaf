@@ -56,7 +56,7 @@ describe('ThirdPartyIdentityManager', function() {
         )
       })
 
-      return it('should merge external data', function(done) {
+      it('should merge external data', function(done) {
         this.externalData = {
           test: 'different',
           another: 'key'
@@ -76,7 +76,7 @@ describe('ThirdPartyIdentityManager', function() {
       })
     })
 
-    return describe('when third party identity does not exists', () =>
+    describe('when third party identity does not exists', () =>
       it('should return error', function(done) {
         ThirdPartyIdentityManager.login(
           this.provider,
@@ -105,7 +105,7 @@ describe('ThirdPartyIdentityManager', function() {
         )
       }))
 
-    return describe('when provider is already linked', function() {
+    describe('when provider is already linked', function() {
       beforeEach(function(done) {
         return ThirdPartyIdentityManager.link(
           this.user.id,
@@ -144,7 +144,7 @@ describe('ThirdPartyIdentityManager', function() {
         )
       })
 
-      return it('should replace existing data', function(done) {
+      it('should replace existing data', function(done) {
         this.externalData = { replace: 'data' }
         return ThirdPartyIdentityManager.link(
           this.user.id,
@@ -164,7 +164,7 @@ describe('ThirdPartyIdentityManager', function() {
     })
   })
 
-  return describe('unlink', function() {
+  describe('unlink', function() {
     describe('when provider not already linked', () =>
       it('should succeed', function(done) {
         return ThirdPartyIdentityManager.unlink(
@@ -178,7 +178,7 @@ describe('ThirdPartyIdentityManager', function() {
         )
       }))
 
-    return describe('when provider is already linked', function() {
+    describe('when provider is already linked', function() {
       beforeEach(function(done) {
         return ThirdPartyIdentityManager.link(
           this.user.id,
@@ -189,7 +189,7 @@ describe('ThirdPartyIdentityManager', function() {
         )
       })
 
-      return it('should remove thirdPartyIdentifiers entry', function(done) {
+      it('should remove thirdPartyIdentifiers entry', function(done) {
         return ThirdPartyIdentityManager.unlink(
           this.user.id,
           this.provider,

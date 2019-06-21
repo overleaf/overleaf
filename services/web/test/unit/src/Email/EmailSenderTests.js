@@ -66,7 +66,7 @@ describe('EmailSender', function() {
     })
   })
 
-  return describe('sendEmail', function() {
+  describe('sendEmail', function() {
     it('should set the properties on the email to send', function(done) {
       this.sesClient.sendMail.callsArgWith(1)
 
@@ -148,12 +148,12 @@ describe('EmailSender', function() {
       })
     })
 
-    return describe('with plain-text email content', function() {
+    describe('with plain-text email content', function() {
       beforeEach(function() {
         return (this.opts.text = 'hello there')
       })
 
-      return it('should set the text property on the email to send', function(done) {
+      it('should set the text property on the email to send', function(done) {
         this.sesClient.sendMail.callsArgWith(1)
 
         return this.sender.sendEmail(this.opts, () => {

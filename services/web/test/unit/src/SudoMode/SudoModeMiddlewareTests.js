@@ -39,7 +39,7 @@ describe('SudoModeMiddleware', function() {
     }))
   })
 
-  return describe('protectPage', function() {
+  describe('protectPage', function() {
     beforeEach(function() {
       this.externalAuth = false
       return (this.call = cb => {
@@ -84,7 +84,7 @@ describe('SudoModeMiddleware', function() {
         })
       })
 
-      return it('should call next', function(done) {
+      it('should call next', function(done) {
         return this.call(() => {
           this.next.callCount.should.equal(1)
           expect(this.next.lastCall.args[0]).to.equal(undefined)
@@ -135,7 +135,7 @@ describe('SudoModeMiddleware', function() {
         })
       })
 
-      return it('should redirect to the password-prompt page', function(done) {
+      it('should redirect to the password-prompt page', function(done) {
         return this.call(() => {
           this.res.redirect.callCount.should.equal(1)
           this.res.redirect.calledWith('/confirm-password').should.equal(true)
@@ -173,7 +173,7 @@ describe('SudoModeMiddleware', function() {
         })
       })
 
-      return it('should call next with an error', function(done) {
+      it('should call next with an error', function(done) {
         return this.call(() => {
           this.next.callCount.should.equal(1)
           expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
@@ -182,7 +182,7 @@ describe('SudoModeMiddleware', function() {
       })
     })
 
-    return describe('when external auth is being used', function() {
+    describe('when external auth is being used', function() {
       beforeEach(function() {
         this.externalAuth = true
         return (this.call = cb => {
@@ -215,7 +215,7 @@ describe('SudoModeMiddleware', function() {
         })
       })
 
-      return it('should not check if sudo-mode is active', function(done) {
+      it('should not check if sudo-mode is active', function(done) {
         return this.call(() => {
           this.SudoModeHandler.isSudoModeActive.callCount.should.equal(0)
           return done()

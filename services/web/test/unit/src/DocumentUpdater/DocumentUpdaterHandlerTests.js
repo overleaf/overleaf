@@ -89,7 +89,7 @@ describe('DocumentUpdaterHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with no error', function() {
+      it('should call the callback with no error', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
@@ -105,18 +105,18 @@ describe('DocumentUpdaterHandler', function() {
         return this.handler.flushProjectToMongo(this.project_id, this.callback)
       })
 
-      return it('should return an error to the callback', function() {
+      it('should return an error to the callback', function() {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the document updater returns a failure error code', function() {
+    describe('when the document updater returns a failure error code', function() {
       beforeEach(function() {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
         return this.handler.flushProjectToMongo(this.project_id, this.callback)
       })
 
-      return it('should return the callback with an error', function() {
+      it('should return the callback with an error', function() {
         return this.callback
           .calledWith(
             new Error('doc updater returned failure status code: 500')
@@ -147,7 +147,7 @@ describe('DocumentUpdaterHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with no error', function() {
+      it('should call the callback with no error', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
@@ -166,12 +166,12 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return an error to the callback', function() {
+      it('should return an error to the callback', function() {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the document updater returns a failure error code', function() {
+    describe('when the document updater returns a failure error code', function() {
       beforeEach(function() {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
         return this.handler.flushProjectToMongoAndDelete(
@@ -180,7 +180,7 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return the callback with an error', function() {
+      it('should return the callback with an error', function() {
         return this.callback
           .calledWith(
             new Error('doc updater returned failure status code: 500')
@@ -212,7 +212,7 @@ describe('DocumentUpdaterHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with no error', function() {
+      it('should call the callback with no error', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
@@ -232,12 +232,12 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return an error to the callback', function() {
+      it('should return an error to the callback', function() {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the document updater returns a failure error code', function() {
+    describe('when the document updater returns a failure error code', function() {
       beforeEach(function() {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
         return this.handler.flushDocToMongo(
@@ -247,7 +247,7 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return the callback with an error', function() {
+      it('should return the callback with an error', function() {
         return this.callback
           .calledWith(
             new Error('doc updater returned failure status code: 500')
@@ -279,7 +279,7 @@ describe('DocumentUpdaterHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with no error', function() {
+      it('should call the callback with no error', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
@@ -299,12 +299,12 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return an error to the callback', function() {
+      it('should return an error to the callback', function() {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the document updater returns a failure error code', function() {
+    describe('when the document updater returns a failure error code', function() {
       beforeEach(function() {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
         return this.handler.deleteDoc(
@@ -314,7 +314,7 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return the callback with an error', function() {
+      it('should return the callback with an error', function() {
         return this.callback
           .calledWith(
             new Error('doc updater returned failure status code: 500')
@@ -358,7 +358,7 @@ describe('DocumentUpdaterHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with no error', function() {
+      it('should call the callback with no error', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
@@ -381,12 +381,12 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return an error to the callback', function() {
+      it('should return an error to the callback', function() {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the document updater returns a failure error code', function() {
+    describe('when the document updater returns a failure error code', function() {
       beforeEach(function() {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
         return this.handler.setDocument(
@@ -399,7 +399,7 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return the callback with an error', function() {
+      it('should return the callback with an error', function() {
         return this.callback
           .calledWith(
             new Error('doc updater returned failure status code: 500')
@@ -440,7 +440,7 @@ describe('DocumentUpdaterHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the lines and version', function() {
+      it('should call the callback with the lines and version', function() {
         return this.callback
           .calledWith(null, this.lines, this.version, this.ranges, this.ops)
           .should.equal(true)
@@ -463,12 +463,12 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return an error to the callback', function() {
+      it('should return an error to the callback', function() {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the document updater returns a failure error code', function() {
+    describe('when the document updater returns a failure error code', function() {
       beforeEach(function() {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
         return this.handler.getDocument(
@@ -479,7 +479,7 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return the callback with an error', function() {
+      it('should return the callback with an error', function() {
         return this.callback
           .calledWith(
             new Error('doc updater returned failure status code: 500')
@@ -520,7 +520,7 @@ describe('DocumentUpdaterHandler', function() {
         return this.request.post.calledWith(url).should.equal(true)
       })
 
-      return it('should call the callback with the documents', function() {
+      it('should call the callback with the documents', function() {
         return this.callback
           .calledWithExactly(null, this.docs)
           .should.equal(true)
@@ -544,12 +544,12 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return an error to the callback', function() {
+      it('should return an error to the callback', function() {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the document updater returns a conflict error code', function() {
+    describe('when the document updater returns a conflict error code', function() {
       beforeEach(function() {
         this.request.post = sinon
           .stub()
@@ -561,7 +561,7 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return the callback with no documents', function() {
+      it('should return the callback with no documents', function() {
         return this.callback.alwaysCalledWithExactly().should.equal(true)
       })
     })
@@ -585,7 +585,7 @@ describe('DocumentUpdaterHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
@@ -601,18 +601,18 @@ describe('DocumentUpdaterHandler', function() {
         return this.handler.clearProjectState(this.project_id, this.callback)
       })
 
-      return it('should return an error to the callback', function() {
+      it('should return an error to the callback', function() {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the document updater returns an error code', function() {
+    describe('when the document updater returns an error code', function() {
       beforeEach(function() {
         this.request.callsArgWith(1, null, { statusCode: 500 }, null)
         return this.handler.clearProjectState(this.project_id, this.callback)
       })
 
-      return it('should return the callback with no documents', function() {
+      it('should return the callback with no documents', function() {
         return this.callback
           .calledWith(
             new Error('doc updater returned failure status code: 500')
@@ -652,7 +652,7 @@ describe('DocumentUpdaterHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
@@ -673,12 +673,12 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return an error to the callback', function() {
+      it('should return an error to the callback', function() {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the document updater returns a failure error code', function() {
+    describe('when the document updater returns a failure error code', function() {
       beforeEach(function() {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
         return this.handler.acceptChanges(
@@ -689,7 +689,7 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return the callback with an error', function() {
+      it('should return the callback with an error', function() {
         return this.callback
           .calledWith(
             new Error('doc updater returned failure status code: 500')
@@ -726,7 +726,7 @@ describe('DocumentUpdaterHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
@@ -747,12 +747,12 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return an error to the callback', function() {
+      it('should return an error to the callback', function() {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the document updater returns a failure error code', function() {
+    describe('when the document updater returns a failure error code', function() {
       beforeEach(function() {
         this.request.callsArgWith(1, null, { statusCode: 500 }, '')
         return this.handler.deleteThread(
@@ -763,7 +763,7 @@ describe('DocumentUpdaterHandler', function() {
         )
       })
 
-      return it('should return the callback with an error', function() {
+      it('should return the callback with an error', function() {
         return this.callback
           .calledWith(
             new Error('doc updater returned failure status code: 500')
@@ -773,7 +773,7 @@ describe('DocumentUpdaterHandler', function() {
     })
   })
 
-  return describe('updateProjectStructure ', function() {
+  describe('updateProjectStructure ', function() {
     beforeEach(function() {
       this.user_id = 1234
       return (this.version = 999)
@@ -795,12 +795,12 @@ describe('DocumentUpdaterHandler', function() {
         return this.request.called.should.equal(false)
       })
 
-      return it('calls the callback', function() {
+      it('calls the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('with project history enabled', function() {
+    describe('with project history enabled', function() {
       beforeEach(function() {
         this.settings.apis.project_history.sendProjectStructureOps = true
         this.url = `${this.settings.apis.documentupdater.url}/project/${
@@ -998,7 +998,7 @@ describe('DocumentUpdaterHandler', function() {
           )
         }))
 
-      return describe('when the project version is missing', () =>
+      describe('when the project version is missing', () =>
         it('should call the callback with an error', function() {
           this.docId = new ObjectId()
           this.changes = {

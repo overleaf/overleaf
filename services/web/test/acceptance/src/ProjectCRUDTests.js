@@ -31,7 +31,7 @@ describe('Project CRUD', function() {
       )
     }))
 
-  return describe('when project has malformed id', () =>
+  describe('when project has malformed id', () =>
     it('should return 404', function(done) {
       return this.user.request.get('/project/blah', function(err, res, body) {
         expect(res.statusCode).to.equal(404)

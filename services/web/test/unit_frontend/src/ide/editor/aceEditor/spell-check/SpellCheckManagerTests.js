@@ -52,7 +52,7 @@ define([
       return this.timelord.restore()
     })
 
-    return it('runs a full check soon after init', function() {
+    it('runs a full check soon after init', function() {
       this.$httpBackend.when('POST', '/spelling/check').respond({
         misspellings: [
           {

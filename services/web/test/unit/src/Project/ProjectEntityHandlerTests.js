@@ -149,7 +149,7 @@ describe('ProjectEntityHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the docs with the lines and rev included', function() {
+      it('should call the callback with the docs with the lines and rev included', function() {
         return this.callback
           .calledWith(null, {
             '/doc1': {
@@ -175,7 +175,7 @@ describe('ProjectEntityHandler', function() {
         return this.ProjectEntityHandler.getAllFiles(project_id, this.callback)
       })
 
-      return it('should call the callback with the files', function() {
+      it('should call the callback with the files', function() {
         return this.callback
           .calledWith(null, {
             '/file1': this.file1,
@@ -206,7 +206,7 @@ describe('ProjectEntityHandler', function() {
         )
       })
 
-      return it('should call the callback with the path for each doc_id', function() {
+      it('should call the callback with the path for each doc_id', function() {
         this.expected = {}
         this.expected[this.doc1._id] = `/${this.doc1.name}`
         this.expected[this.doc2._id] = `/folder1/${this.doc2.name}`
@@ -229,7 +229,7 @@ describe('ProjectEntityHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the folders', function() {
+      it('should call the callback with the folders', function() {
         return this.callback
           .calledWith(null, {
             '/': this.project.rootFolder[0],
@@ -239,7 +239,7 @@ describe('ProjectEntityHandler', function() {
       })
     })
 
-    return describe('_getAllFoldersFromProject', function() {
+    describe('_getAllFoldersFromProject', function() {
       beforeEach(function() {
         this.callback = sinon.stub()
         return this.ProjectEntityHandler._getAllFoldersFromProject(
@@ -248,7 +248,7 @@ describe('ProjectEntityHandler', function() {
         )
       })
 
-      return it('should call the callback with the folders', function() {
+      it('should call the callback with the folders', function() {
         return this.callback
           .calledWith(null, {
             '/': this.project.rootFolder[0],
@@ -334,7 +334,7 @@ describe('ProjectEntityHandler', function() {
       })()
     })
 
-    return it('should flush each file to the TPDS', function() {
+    it('should flush each file to the TPDS', function() {
       return (() => {
         const result = []
         for (let path in this.files) {
@@ -356,7 +356,7 @@ describe('ProjectEntityHandler', function() {
     })
   })
 
-  return describe('getDoc', function() {
+  describe('getDoc', function() {
     beforeEach(function() {
       this.lines = ['mock', 'doc', 'lines']
       this.rev = 5
@@ -375,7 +375,7 @@ describe('ProjectEntityHandler', function() {
         .should.equal(true)
     })
 
-    return it('should call the callback with the lines, version and rev', function() {
+    it('should call the callback with the lines, version and rev', function() {
       return this.callback
         .calledWith(null, this.lines, this.rev, this.version, this.ranges)
         .should.equal(true)

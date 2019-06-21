@@ -121,7 +121,7 @@ describe('ProjectUploadController', function() {
           .should.equal(true)
       })
 
-      return it('should remove the uploaded file', function() {
+      it('should remove the uploaded file', function() {
         return this.fs.unlink.calledWith(this.path).should.equal(true)
       })
     })
@@ -140,14 +140,14 @@ describe('ProjectUploadController', function() {
         )
       })
 
-      return it('should output an error log line', function() {
+      it('should output an error log line', function() {
         return this.logger.error
           .calledWith(sinon.match.any, 'error uploading project')
           .should.equal(true)
       })
     })
 
-    return describe('when ProjectUploadManager.createProjectFromZipArchive reports the file as invalid', function() {
+    describe('when ProjectUploadManager.createProjectFromZipArchive reports the file as invalid', function() {
       beforeEach(function() {
         this.ProjectUploadManager.createProjectFromZipArchive = sinon
           .stub()
@@ -169,7 +169,7 @@ describe('ProjectUploadController', function() {
         return expect(this.res.statusCode).to.equal(422)
       })
 
-      return it('should output an error log line', function() {
+      it('should output an error log line', function() {
         return this.logger.error
           .calledWith(sinon.match.any, 'error uploading project')
           .should.equal(true)
@@ -177,7 +177,7 @@ describe('ProjectUploadController', function() {
     })
   })
 
-  return describe('uploadFile', function() {
+  describe('uploadFile', function() {
     beforeEach(function() {
       this.project_id = 'project-id-123'
       this.folder_id = 'folder-id-123'
@@ -239,7 +239,7 @@ describe('ProjectUploadController', function() {
         return this.metrics.Timer.prototype.done.called.should.equal(true)
       })
 
-      return it('should remove the uploaded file', function() {
+      it('should remove the uploaded file', function() {
         return this.fs.unlink.calledWith(this.path).should.equal(true)
       })
     })
@@ -258,20 +258,20 @@ describe('ProjectUploadController', function() {
         })
       })
 
-      return it('should output an error log line', function() {
+      it('should output an error log line', function() {
         return this.logger.error
           .calledWith(sinon.match.any, 'error uploading file')
           .should.equal(true)
       })
     })
 
-    return describe('with a bad request', function() {
+    describe('with a bad request', function() {
       beforeEach(function() {
         this.req.file.originalname = ''
         return this.ProjectUploadController.uploadFile(this.req, this.res)
       })
 
-      return it('should return a a non success response', function() {
+      it('should return a a non success response', function() {
         return expect(this.res.body).to.deep.equal({
           success: false
         })

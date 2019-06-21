@@ -75,7 +75,7 @@ describe('InstitutionsAPI', function() {
       )
     })
 
-    return it('handle empty response', function(done) {
+    it('handle empty response', function(done) {
       this.settings.apis = null
       return this.InstitutionsAPI.getInstitutionAffiliations(
         this.institutionId,
@@ -158,7 +158,7 @@ describe('InstitutionsAPI', function() {
       )
     })
 
-    return it('handle empty response', function(done) {
+    it('handle empty response', function(done) {
       this.settings.apis = null
       return this.InstitutionsAPI.getUserAffiliations(
         this.stubbedUser._id,
@@ -211,7 +211,7 @@ describe('InstitutionsAPI', function() {
       )
     })
 
-    return it('handle error', function(done) {
+    it('handle error', function(done) {
       const body = { errors: 'affiliation error message' }
       this.request.callsArgWith(1, null, { statusCode: 422 }, body)
       return this.InstitutionsAPI.addAffiliation(
@@ -252,7 +252,7 @@ describe('InstitutionsAPI', function() {
       )
     })
 
-    return it('handle error', function(done) {
+    it('handle error', function(done) {
       this.request.callsArgWith(1, null, { statusCode: 500 })
       return this.InstitutionsAPI.removeAffiliation(
         this.stubbedUser._id,
@@ -285,7 +285,7 @@ describe('InstitutionsAPI', function() {
       )
     })
 
-    return it('handle error', function(done) {
+    it('handle error', function(done) {
       const body = { errors: 'affiliation error message' }
       this.request.callsArgWith(1, null, { statusCode: 518 }, body)
       return this.InstitutionsAPI.deleteAffiliations(
@@ -300,12 +300,12 @@ describe('InstitutionsAPI', function() {
     })
   })
 
-  return describe('endorseAffiliation', function() {
+  describe('endorseAffiliation', function() {
     beforeEach(function() {
       return this.request.callsArgWith(1, null, { statusCode: 204 })
     })
 
-    return it('endorse affiliation', function(done) {
+    it('endorse affiliation', function(done) {
       return this.InstitutionsAPI.endorseAffiliation(
         this.stubbedUser._id,
         this.newEmail,

@@ -37,7 +37,7 @@ describe('ClsiStateManager', function() {
     return (this.callback = sinon.stub())
   })
 
-  return describe('computeHash', function() {
+  describe('computeHash', function() {
     beforeEach(function(done) {
       this.docs = [
         { path: '/main.tex', doc: { _id: 'doc-id-1' } },
@@ -75,7 +75,7 @@ describe('ClsiStateManager', function() {
         )
       })
 
-      return it('should call the callback with a hash value', function() {
+      it('should call the callback with a hash value', function() {
         return this.callback
           .calledWith(null, '21b1ab73aa3892bec452baf8ffa0956179e1880f')
           .should.equal(true)
@@ -96,7 +96,7 @@ describe('ClsiStateManager', function() {
         )
       })
 
-      return it('should call the callback with the same hash value', function() {
+      it('should call the callback with the same hash value', function() {
         return this.callback.calledWith(null, this.hash0).should.equal(true)
       })
     })
@@ -114,7 +114,7 @@ describe('ClsiStateManager', function() {
         )
       })
 
-      return it('should call the callback with a different hash value', function() {
+      it('should call the callback with a different hash value', function() {
         return this.callback
           .neverCalledWith(null, this.hash0)
           .should.equal(true)
@@ -134,7 +134,7 @@ describe('ClsiStateManager', function() {
         )
       })
 
-      return it('should call the callback with a different hash value', function() {
+      it('should call the callback with a different hash value', function() {
         return this.callback
           .neverCalledWith(null, this.hash0)
           .should.equal(true)
@@ -154,7 +154,7 @@ describe('ClsiStateManager', function() {
         )
       })
 
-      return it('should call the callback with a different hash value', function() {
+      it('should call the callback with a different hash value', function() {
         return this.callback
           .neverCalledWith(null, this.hash0)
           .should.equal(true)
@@ -177,7 +177,7 @@ describe('ClsiStateManager', function() {
         )
       })
 
-      return it('should call the callback with a different hash value', function() {
+      it('should call the callback with a different hash value', function() {
         return this.callback
           .neverCalledWith(null, this.hash0)
           .should.equal(true)
@@ -197,7 +197,7 @@ describe('ClsiStateManager', function() {
         )
       })
 
-      return it('should call the callback with a different hash value', function() {
+      it('should call the callback with a different hash value', function() {
         return this.callback
           .neverCalledWith(null, this.hash0)
           .should.equal(true)
@@ -217,7 +217,7 @@ describe('ClsiStateManager', function() {
         )
       })
 
-      return it('should call the callback with a different hash value', function() {
+      it('should call the callback with a different hash value', function() {
         return this.callback
           .neverCalledWith(null, this.hash0)
           .should.equal(true)
@@ -237,7 +237,7 @@ describe('ClsiStateManager', function() {
         )
       })
 
-      return it('should call the callback with a different hash value', function() {
+      it('should call the callback with a different hash value', function() {
         return this.callback
           .neverCalledWith(null, this.hash0)
           .should.equal(true)
@@ -257,7 +257,7 @@ describe('ClsiStateManager', function() {
         )
       })
 
-      return it('should call the callback with a different hash value', function() {
+      it('should call the callback with a different hash value', function() {
         return this.callback
           .neverCalledWith(null, this.hash0)
           .should.equal(true)
@@ -277,14 +277,14 @@ describe('ClsiStateManager', function() {
         )
       })
 
-      return it('should call the callback with a different hash value', function() {
+      it('should call the callback with a different hash value', function() {
         return this.callback
           .neverCalledWith(null, this.hash0)
           .should.equal(true)
       })
     })
 
-    return describe('when the isAutoCompile option is changed', function() {
+    describe('when the isAutoCompile option is changed', function() {
       beforeEach(function() {
         this.options.isAutoCompile = !this.options.isAutoCompile
         return this.ClsiStateManager.computeHash(
@@ -294,7 +294,7 @@ describe('ClsiStateManager', function() {
         )
       })
 
-      return it('should call the callback with the same hash value', function() {
+      it('should call the callback with the same hash value', function() {
         return this.callback.calledWith(null, this.hash0).should.equal(true)
       })
     })

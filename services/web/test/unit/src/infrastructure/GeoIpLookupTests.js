@@ -87,7 +87,7 @@ describe('GeoIpLookup', function() {
       )
     })
 
-    return it('should take the first ip in the string', function(done) {
+    it('should take the first ip in the string', function(done) {
       return this.GeoIpLookup.getDetails(
         ` ${this.ipAddress} 456.312.452.102 432.433.888.234`,
         err => {
@@ -104,7 +104,7 @@ describe('GeoIpLookup', function() {
     })
   })
 
-  return describe('getCurrencyCode', function() {
+  describe('getCurrencyCode', function() {
     it('should return GBP for GB country', function(done) {
       this.GeoIpLookup.getDetails = sinon
         .stub()
@@ -182,7 +182,7 @@ describe('GeoIpLookup', function() {
       })
     })
 
-    return it('should default to USD if there is no match for their country', function(done) {
+    it('should default to USD if there is no match for their country', function(done) {
       this.stubbedResponse.country_code = 'Non existant'
       this.GeoIpLookup.getDetails = sinon
         .stub()

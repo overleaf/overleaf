@@ -56,7 +56,7 @@ define(['ide/history/util/displayNameForUser'], displayNameForUser =>
         })
       ).to.equal('james.allen'))
 
-    return it("should return the '?' if it has nothing", () =>
+    it("should return the '?' if it has nothing", () =>
       expect(
         displayNameForUser({
           id: window.user.id + 1,

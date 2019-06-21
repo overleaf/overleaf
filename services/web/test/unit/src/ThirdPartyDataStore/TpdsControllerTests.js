@@ -102,7 +102,7 @@ describe('TpdsController', function() {
       return result.projectName.should.equal(path)
     })
 
-    it('should take the project name off the start and return it with no slashes in', function() {
+    it('should take the project name off the start and it with no slashes in', function() {
       const path = '/project/file.tex'
       const req = { params: { 0: path, user_id: this.user_id } }
       const result = this.TpdsController.parseParams(req)
@@ -111,7 +111,7 @@ describe('TpdsController', function() {
       return result.projectName.should.equal('project')
     })
 
-    return it('should take the project name of and return a slash for the file path', function() {
+    it('should take the project name of and return a slash for the file path', function() {
       const path = '/project_name'
       const req = { params: { 0: path, user_id: this.user_id } }
       const result = this.TpdsController.parseParams(req)
@@ -152,12 +152,12 @@ describe('TpdsController', function() {
         .should.equal(true)
     })
 
-    return it('should return a success', function() {
+    it('should return a success', function() {
       return this.res.sendStatus.calledWith(200).should.equal(true)
     })
   })
 
-  return describe('deleteProjectContents', function() {
+  describe('deleteProjectContents', function() {
     beforeEach(function() {
       this.UpdateMerger.deleteUpdate = sinon.stub().callsArg(4)
       this.req = {
@@ -183,7 +183,7 @@ describe('TpdsController', function() {
         .should.equal(true)
     })
 
-    return it('should return a success', function() {
+    it('should return a success', function() {
       return this.res.sendStatus.calledWith(200).should.equal(true)
     })
   })

@@ -135,7 +135,7 @@ describe('InstitutionsManager', function() {
       )
     })
 
-    return it('notifies users if they have a subscription that should be cancelled', function(done) {
+    it('notifies users if they have a subscription that should be cancelled', function(done) {
       return this.InstitutionsManager.upgradeInstitutionUsers(
         this.institutionId,
         error => {
@@ -189,7 +189,7 @@ describe('InstitutionsManager', function() {
       )
     }))
 
-  return describe('getInstitutionUsersSubscriptions', () =>
+  describe('getInstitutionUsersSubscriptions', () =>
     it('returns all institution users subscriptions', function(done) {
       const stubbedUsers = [
         { user_id: '123abc123abc123abc123abc' },

@@ -74,7 +74,7 @@ describe('InstitutionsController', function() {
     return (this.next = sinon.stub())
   })
 
-  return describe('affiliateUsers', function() {
+  describe('affiliateUsers', function() {
     it('should add affiliations for matching users', function(done) {
       this.res.sendStatus = code => {
         code.should.equal(200)
@@ -104,7 +104,7 @@ describe('InstitutionsController', function() {
       )
     })
 
-    return it('should return errors if last affiliation cannot be added', function(done) {
+    it('should return errors if last affiliation cannot be added', function(done) {
       this.addAffiliation.onCall(2).callsArgWith(3, new Error('error'))
       this.next = error => {
         expect(error).to.exist

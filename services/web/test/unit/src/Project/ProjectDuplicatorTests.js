@@ -334,7 +334,7 @@ describe('ProjectDuplicator', function() {
       )
     })
 
-    return it('should copy all the files', function(done) {
+    it('should copy all the files', function(done) {
       return this.duplicator.duplicate(
         this.owner,
         this.old_project_id,
@@ -376,7 +376,7 @@ describe('ProjectDuplicator', function() {
     })
   })
 
-  return describe('when there is an error', function() {
+  describe('when there is an error', function() {
     beforeEach(function() {
       return (this.rootFolder.fileRefs = [
         { name: 'file0', _id: 'file0' },
@@ -414,7 +414,7 @@ describe('ProjectDuplicator', function() {
       )
     })
 
-    return it('should return an error', function(done) {
+    it('should return an error', function(done) {
       return this.duplicator.duplicate(
         this.owner,
         this.old_project_id,

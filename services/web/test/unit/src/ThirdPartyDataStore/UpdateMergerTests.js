@@ -91,7 +91,7 @@ describe('UpdateMerger :', function() {
           .should.equal(true)
       })
 
-      return it('removes the temp file from disk', function() {
+      it('removes the temp file from disk', function() {
         return this.fs.unlink.calledWith(this.fsPath).should.equal(true)
       })
     })
@@ -126,7 +126,7 @@ describe('UpdateMerger :', function() {
           .should.equal(true)
       })
 
-      return it('removes the temp file from disk', function() {
+      it('removes the temp file from disk', function() {
         return this.fs.unlink.calledWith(this.fsPath).should.equal(true)
       })
     })
@@ -161,12 +161,12 @@ describe('UpdateMerger :', function() {
           .should.equal(true)
       })
 
-      return it('removes the temp file from disk', function() {
+      it('removes the temp file from disk', function() {
         return this.fs.unlink.calledWith(this.fsPath).should.equal(true)
       })
     })
 
-    return describe('file updates for an existing file', function() {
+    describe('file updates for an existing file', function() {
       beforeEach(function() {
         this.FileTypeManager.getType = sinon.stub()
         this.updateMerger.p.processFile = sinon.stub().yields()
@@ -196,7 +196,7 @@ describe('UpdateMerger :', function() {
           .should.equal(true)
       })
 
-      return it('removes the temp file from disk', function() {
+      it('removes the temp file from disk', function() {
         return this.fs.unlink.calledWith(this.fsPath).should.equal(true)
       })
     })
@@ -214,14 +214,14 @@ describe('UpdateMerger :', function() {
       )
     })
 
-    return it('should delete the entity in the editor controller', function() {
+    it('should delete the entity in the editor controller', function() {
       return this.EditorController.deleteEntityWithPath
         .calledWith(this.project_id, this.docPath, this.source, this.user_id)
         .should.equal(true)
     })
   })
 
-  return describe('private methods', function() {
+  describe('private methods', function() {
     describe('processDoc', function() {
       beforeEach(function() {
         this.docLines =
@@ -247,7 +247,7 @@ describe('UpdateMerger :', function() {
           .should.equal(true)
       })
 
-      return it('should upsert the doc in the editor controller', function() {
+      it('should upsert the doc in the editor controller', function() {
         return this.EditorController.upsertDocWithPath
           .calledWith(
             this.project_id,
@@ -260,7 +260,7 @@ describe('UpdateMerger :', function() {
       })
     })
 
-    return describe('processFile', function() {
+    describe('processFile', function() {
       beforeEach(function() {
         this.EditorController.upsertFileWithPath = sinon.stub().yields()
         return this.updateMerger.p.processFile(
@@ -273,7 +273,7 @@ describe('UpdateMerger :', function() {
         )
       })
 
-      return it('should upsert the file in the editor controller', function() {
+      it('should upsert the file in the editor controller', function() {
         return this.EditorController.upsertFileWithPath
           .calledWith(
             this.project_id,

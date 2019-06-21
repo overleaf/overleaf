@@ -98,7 +98,7 @@ describe('PasswordResetHandler', function() {
         )
       })
 
-      return it('should return exists == null for a holdingAccount', function(done) {
+      it('should return exists == null for a holdingAccount', function(done) {
         this.user.holdingAccount = true
         this.UserGetter.getUserByMainEmail.callsArgWith(1, null, this.user)
         this.UserGetter.getUserByAnyEmail.callsArgWith(1)
@@ -113,7 +113,7 @@ describe('PasswordResetHandler', function() {
       })
     })
 
-    return describe('when in overleaf', function() {
+    describe('when in overleaf', function() {
       beforeEach(function() {
         return (this.settings.overleaf = true)
       })
@@ -160,7 +160,7 @@ describe('PasswordResetHandler', function() {
           )
         })
 
-        return it('should return status == true', function() {
+        it('should return status == true', function() {
           return this.callback.calledWith(null, 'primary').should.equal(true)
         })
       })
@@ -185,7 +185,7 @@ describe('PasswordResetHandler', function() {
           return this.EmailHandler.sendEmail.called.should.equal(false)
         })
 
-        return it('should return status == null', function() {
+        it('should return status == null', function() {
           return this.callback.calledWith(null, null).should.equal(true)
         })
       })
@@ -210,12 +210,12 @@ describe('PasswordResetHandler', function() {
           return this.EmailHandler.sendEmail.called.should.equal(false)
         })
 
-        return it('should return status == sharelatex', function() {
+        it('should return status == sharelatex', function() {
           return this.callback.calledWith(null, 'sharelatex').should.equal(true)
         })
       })
 
-      return describe('when the email is a secondary email', function() {
+      describe('when the email is a secondary email', function() {
         beforeEach(function() {
           this.V1Api.request = sinon
             .stub()
@@ -236,14 +236,14 @@ describe('PasswordResetHandler', function() {
           return this.EmailHandler.sendEmail.called.should.equal(false)
         })
 
-        return it('should return status == secondary', function() {
+        it('should return status == secondary', function() {
           return this.callback.calledWith(null, 'secondary').should.equal(true)
         })
       })
     })
   })
 
-  return describe('setNewUserPassword', function() {
+  describe('setNewUserPassword', function() {
     describe('when no data is found', function() {
       beforeEach(function() {
         this.OneTimeTokenHandler.getValueFromTokenAndExpire.yields(null, null)
@@ -254,7 +254,7 @@ describe('PasswordResetHandler', function() {
         )
       })
 
-      return it('should return exists == false', function() {
+      it('should return exists == false', function() {
         return this.callback.calledWith(null, false).should.equal(true)
       })
     })
@@ -283,14 +283,14 @@ describe('PasswordResetHandler', function() {
           .should.equal(true)
       })
 
-      return it('should reset == true and the user_id', function() {
+      it('should reset == true and the user_id', function() {
         return this.callback
           .calledWith(null, true, this.user_id)
           .should.equal(true)
       })
     })
 
-    return describe('when the data is a new style user_id', function() {
+    describe('when the data is a new style user_id', function() {
       beforeEach(function() {
         this.AuthenticationManager.setUserPassword.yields(
           null,
@@ -313,7 +313,7 @@ describe('PasswordResetHandler', function() {
           .should.equal(true)
       })
 
-      return it('should reset == true and the user_id', function() {
+      it('should reset == true and the user_id', function() {
         return this.callback
           .calledWith(null, true, this.user_id)
           .should.equal(true)

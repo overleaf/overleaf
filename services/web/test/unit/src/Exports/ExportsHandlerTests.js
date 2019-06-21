@@ -98,7 +98,7 @@ describe('ExportsHandler', function() {
           .should.equal(true)
       })
 
-      return it('should return the export', function() {
+      it('should return the export', function() {
         return this.callback
           .calledWith(null, this.export_data)
           .should.equal(true)
@@ -119,12 +119,12 @@ describe('ExportsHandler', function() {
         )
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         return (this.callback.args[0][0] instanceof Error).should.equal(true)
       })
     })
 
-    return describe('when export request returns an error to forward to the user', function() {
+    describe('when export request returns an error to forward to the user', function() {
       beforeEach(function(done) {
         this.error_json = { status: 422, message: 'nope' }
         this.ExportsHandler._requestExport = sinon
@@ -139,7 +139,7 @@ describe('ExportsHandler', function() {
         )
       })
 
-      return it('should return success and the response to forward', function() {
+      it('should return success and the response to forward', function() {
         ;(this.callback.args[0][0] instanceof Error).should.equal(false)
         return this.callback.calledWith(null, {
           forwardResponse: this.error_json
@@ -211,7 +211,7 @@ describe('ExportsHandler', function() {
         return this.ExportsHandler._requestVersion.called.should.equal(true)
       })
 
-      return it('should return export data', function() {
+      it('should return export data', function() {
         const expected_export_data = {
           project: {
             id: this.project_id,
@@ -265,7 +265,7 @@ describe('ExportsHandler', function() {
         )
       })
 
-      return it('should send the data from the user input', function() {
+      it('should send the data from the user input', function() {
         const expected_export_data = {
           project: {
             id: this.project_id,
@@ -318,7 +318,7 @@ describe('ExportsHandler', function() {
         )
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         return (this.callback.args[0][0] instanceof Error).should.equal(true)
       })
     })
@@ -345,7 +345,7 @@ describe('ExportsHandler', function() {
           )
         })
 
-        return it('should return export data', function() {
+        it('should return export data', function() {
           const expected_export_data = {
             project: {
               id: this.project_id,
@@ -407,7 +407,7 @@ describe('ExportsHandler', function() {
           )
         })
 
-        return it('should return export data', function() {
+        it('should return export data', function() {
           const expected_export_data = {
             project: {
               id: this.project_id,
@@ -446,7 +446,7 @@ describe('ExportsHandler', function() {
         })
       })
 
-      return describe('when no root doc can be identified', function() {
+      describe('when no root doc can be identified', function() {
         beforeEach(function(done) {
           this.ProjectLocator.findRootDoc = sinon
             .stub()
@@ -460,7 +460,7 @@ describe('ExportsHandler', function() {
           )
         })
 
-        return it('should return an error', function() {
+        it('should return an error', function() {
           return (this.callback.args[0][0] instanceof Error).should.equal(true)
         })
       })
@@ -480,12 +480,12 @@ describe('ExportsHandler', function() {
         )
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         return (this.callback.args[0][0] instanceof Error).should.equal(true)
       })
     })
 
-    return describe('when project history request fails', function() {
+    describe('when project history request fails', function() {
       beforeEach(function(done) {
         this.ExportsHandler._requestVersion = sinon
           .stub()
@@ -499,7 +499,7 @@ describe('ExportsHandler', function() {
         )
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         return (this.callback.args[0][0] instanceof Error).should.equal(true)
       })
     })
@@ -545,7 +545,7 @@ describe('ExportsHandler', function() {
         })
       })
 
-      return it('should return the v1 export id', function() {
+      it('should return the v1 export id', function() {
         return this.callback.calledWith(null, this.export_id).should.equal(true)
       })
     })
@@ -564,12 +564,12 @@ describe('ExportsHandler', function() {
         )
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         return (this.callback.args[0][0] instanceof Error).should.equal(true)
       })
     })
 
-    return describe('when the request returns an error response to forward', function() {
+    describe('when the request returns an error response to forward', function() {
       beforeEach(function(done) {
         this.error_code = 422
         this.error_json = { status: this.error_code, message: 'nope' }
@@ -585,7 +585,7 @@ describe('ExportsHandler', function() {
         )
       })
 
-      return it('should return success and the response to forward', function() {
+      it('should return success and the response to forward', function() {
         ;(this.callback.args[0][0] instanceof Error).should.equal(false)
         return this.callback.calledWith(null, {
           forwardResponse: this.error_json
@@ -611,7 +611,7 @@ describe('ExportsHandler', function() {
       return done()
     })
 
-    return describe('when all goes well', function() {
+    describe('when all goes well', function() {
       beforeEach(function(done) {
         this.stubRequest.get = this.stubGet
         return this.ExportsHandler.fetchExport(
@@ -636,7 +636,7 @@ describe('ExportsHandler', function() {
         })
       })
 
-      return it('should return the v1 export id', function() {
+      it('should return the v1 export id', function() {
         return this.callback
           .calledWith(null, { body: this.body })
           .should.equal(true)
@@ -644,7 +644,7 @@ describe('ExportsHandler', function() {
     })
   })
 
-  return describe('fetchDownload', function() {
+  describe('fetchDownload', function() {
     beforeEach(function(done) {
       this.settings.apis = {
         v1: {
@@ -662,7 +662,7 @@ describe('ExportsHandler', function() {
       return done()
     })
 
-    return describe('when all goes well', function() {
+    describe('when all goes well', function() {
       beforeEach(function(done) {
         this.stubRequest.get = this.stubGet
         return this.ExportsHandler.fetchDownload(
@@ -689,7 +689,7 @@ describe('ExportsHandler', function() {
         })
       })
 
-      return it('should return the v1 export id', function() {
+      it('should return the v1 export id', function() {
         return this.callback
           .calledWith(null, { body: this.body })
           .should.equal(true)

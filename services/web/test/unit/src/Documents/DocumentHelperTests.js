@@ -78,7 +78,7 @@ describe('DocumentHelper', function() {
     //	document = "\\title{Second Year \\large{LaTeX} Exercise}"
     //	expect(@DocumentHelper.getTitleFromTexContent(document)).to.equal "Second Year LaTeX Exercise"
 
-    return it('should collapse whitespace', function() {
+    it('should collapse whitespace', function() {
       const document = '\\title{Second    Year  LaTeX     Exercise}'
       return expect(
         this.DocumentHelper.getTitleFromTexContent(document)
@@ -120,14 +120,14 @@ describe('DocumentHelper', function() {
       )
     })
 
-    return it('removes line spacing commands', function() {
+    it('removes line spacing commands', function() {
       return expect(this.DocumentHelper.detex('a \\\\[1.50cm] b')).to.equal(
         'a b'
       )
     })
   })
 
-  return describe('contentHasDocumentclass', function() {
+  describe('contentHasDocumentclass', function() {
     it('should return true if the content has a documentclass', function() {
       const document = ['% line', '% line', '% line', '\\documentclass']
       return expect(
@@ -154,7 +154,7 @@ describe('DocumentHelper', function() {
       ).to.equal(false)
     })
 
-    return it('should return false when there is no documentclass', function() {
+    it('should return false when there is no documentclass', function() {
       const document = ['% line', '% line', '% line']
       return expect(
         this.DocumentHelper.contentHasDocumentclass(document)

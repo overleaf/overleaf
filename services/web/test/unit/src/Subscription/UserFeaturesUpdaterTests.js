@@ -34,7 +34,7 @@ describe('UserFeaturesUpdater', function() {
     }))
   })
 
-  return describe('updateFeatures', () =>
+  describe('updateFeatures', () =>
     it('should send the users features', function(done) {
       const user_id = '5208dd34438842e2db000005'
       this.features = { versioning: true, collaborators: 10 }

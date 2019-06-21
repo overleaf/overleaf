@@ -220,7 +220,7 @@ describe('ProjectEditorHandler', function() {
         )
       })
 
-      return it('should include invites', function() {
+      it('should include invites', function() {
         should.exist(this.result.invites)
         return this.result.invites.should.deep.equal(this.invites)
       })
@@ -248,7 +248,7 @@ describe('ProjectEditorHandler', function() {
         return result.deletedByExternalDataSource.should.equal(false)
       })
 
-      return it('should set the deletedByExternalDataSource flag to true when it is true', function() {
+      it('should set the deletedByExternalDataSource flag to true when it is true', function() {
         this.project.deletedByExternalDataSource = true
         const result = this.handler.buildProjectModelView(
           this.project,
@@ -260,7 +260,7 @@ describe('ProjectEditorHandler', function() {
       })
     })
 
-    return describe('features', function() {
+    describe('features', function() {
       beforeEach(function() {
         this.owner.features = {
           versioning: true,
@@ -276,7 +276,7 @@ describe('ProjectEditorHandler', function() {
         ))
       })
 
-      return it('should copy the owner features to the project', function() {
+      it('should copy the owner features to the project', function() {
         this.result.features.versioning.should.equal(
           this.owner.features.versioning
         )
@@ -293,7 +293,7 @@ describe('ProjectEditorHandler', function() {
     })
   })
 
-  return describe('buildOwnerAndMembersViews', function() {
+  describe('buildOwnerAndMembersViews', function() {
     beforeEach(function() {
       this.owner.features = {
         versioning: true,
@@ -329,7 +329,7 @@ describe('ProjectEditorHandler', function() {
       )
     })
 
-    return describe('when there is no owner', function() {
+    describe('when there is no owner', function() {
       beforeEach(function() {
         // remove the owner from members list
         this.membersWithoutOwner = this.members.filter(
@@ -353,7 +353,7 @@ describe('ProjectEditorHandler', function() {
         return expect(this.result.owner).to.equal(null)
       })
 
-      return it('should not extract the ownerFeatures from the owner object', function() {
+      it('should not extract the ownerFeatures from the owner object', function() {
         return expect(this.result.ownerFeatures).to.equal(null)
       })
     })

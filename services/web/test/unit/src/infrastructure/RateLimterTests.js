@@ -87,7 +87,7 @@ describe('RateLimiter', function() {
       })
     })
 
-    return it('should not increment the metric', function(done) {
+    it('should not increment the metric', function(done) {
       return this.limiter.addCount(
         { endpointName: this.endpointName },
         (err, should) => {
@@ -122,7 +122,7 @@ describe('RateLimiter', function() {
       })
     })
 
-    return it('should increment the metric', function(done) {
+    it('should increment the metric', function(done) {
       return this.limiter.addCount(
         { endpointName: this.endpointName },
         (err, should) => {
@@ -138,7 +138,7 @@ describe('RateLimiter', function() {
     })
   })
 
-  return describe('when limiter produces an error', function() {
+  describe('when limiter produces an error', function() {
     beforeEach(function() {
       this.requires['rolling-rate-limiter'] = opts => {
         return sinon.stub().callsArgWith(1, new Error('woops'))
@@ -148,7 +148,7 @@ describe('RateLimiter', function() {
       }))
     })
 
-    return it('should produce and error', function(done) {
+    it('should produce and error', function(done) {
       return this.limiter.addCount({}, function(err, should) {
         expect(err).to.not.equal(null)
         expect(err).to.be.instanceof(Error)

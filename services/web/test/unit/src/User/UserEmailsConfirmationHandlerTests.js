@@ -85,7 +85,7 @@ describe('UserEmailsConfirmationHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
@@ -99,14 +99,14 @@ describe('UserEmailsConfirmationHandler', function() {
         )
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         return this.callback
           .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
     })
 
-    return describe('a custom template', function() {
+    describe('a custom template', function() {
       beforeEach(function() {
         return this.UserEmailsConfirmationHandler.sendConfirmationEmail(
           this.user_id,
@@ -116,7 +116,7 @@ describe('UserEmailsConfirmationHandler', function() {
         )
       })
 
-      return it('should send an email with the given template', function() {
+      it('should send an email with the given template', function() {
         return this.EmailHandler.sendEmail
           .calledWith('myCustomTemplate')
           .should.equal(true)
@@ -124,7 +124,7 @@ describe('UserEmailsConfirmationHandler', function() {
     })
   })
 
-  return describe('confirmEmailFromToken', function() {
+  describe('confirmEmailFromToken', function() {
     beforeEach(function() {
       this.OneTimeTokenHandler.getValueFromTokenAndExpire = sinon
         .stub()
@@ -152,7 +152,7 @@ describe('UserEmailsConfirmationHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      it('should call the callback', function() {
         return this.callback.called.should.equal(true)
       })
     })
@@ -168,7 +168,7 @@ describe('UserEmailsConfirmationHandler', function() {
         )
       })
 
-      return it('should call the callback with a NotFoundError', function() {
+      it('should call the callback with a NotFoundError', function() {
         return this.callback
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)
@@ -186,7 +186,7 @@ describe('UserEmailsConfirmationHandler', function() {
         )
       })
 
-      return it('should call the callback with a NotFoundError', function() {
+      it('should call the callback with a NotFoundError', function() {
         return this.callback
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)
@@ -204,14 +204,14 @@ describe('UserEmailsConfirmationHandler', function() {
         )
       })
 
-      return it('should call the callback with a NotFoundError', function() {
+      it('should call the callback with a NotFoundError', function() {
         return this.callback
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)
       })
     })
 
-    return describe('with no user found', function() {
+    describe('with no user found', function() {
       beforeEach(function() {
         this.UserGetter.getUser.yields(null, null)
         return this.UserEmailsConfirmationHandler.confirmEmailFromToken(
@@ -220,7 +220,7 @@ describe('UserEmailsConfirmationHandler', function() {
         )
       })
 
-      return it('should call the callback with a NotFoundError', function() {
+      it('should call the callback with a NotFoundError', function() {
         return this.callback
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)

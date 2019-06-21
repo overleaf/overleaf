@@ -82,7 +82,7 @@ describe('TpdsUpdateSender', function() {
       })
     })
 
-    return it('should post the message to the tpdsworker', function(done) {
+    it('should post the message to the tpdsworker', function(done) {
       this.settings.apis.tpdsworker = { url: 'www.tpdsworker.env' }
       const group = 'myproject'
       const method = 'somemethod'
@@ -101,7 +101,7 @@ describe('TpdsUpdateSender', function() {
     })
   })
 
-  return describe('sending updates', function() {
+  describe('sending updates', function() {
     it('queues a post the file with user and file id', function(done) {
       const file_id = '4545345'
       const path = '/some/path/here.jpg'
@@ -219,7 +219,7 @@ describe('TpdsUpdateSender', function() {
       })
     })
 
-    return it('pollDropboxForUser', function(done) {
+    it('pollDropboxForUser', function(done) {
       this.updateSender._enqueue = sinon.stub().callsArg(3)
       return this.updateSender.pollDropboxForUser(user_id, error => {
         this.updateSender._enqueue

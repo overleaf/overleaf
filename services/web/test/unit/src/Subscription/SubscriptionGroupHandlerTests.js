@@ -162,7 +162,7 @@ describe('SubscriptionGroupHandler', function() {
         .should.equal(true)
     })
 
-    return it('replaces the member ids', function() {
+    it('replaces the member ids', function() {
       this.Subscription.update
         .calledWith(
           { member_ids: this.oldId },
@@ -200,7 +200,7 @@ describe('SubscriptionGroupHandler', function() {
       )
     })
 
-    return it('should return false when no subscription is found', function(done) {
+    it('should return false when no subscription is found', function(done) {
       this.SubscriptionLocator.getSubscriptionByMemberIdAndId.callsArgWith(
         2,
         null
@@ -216,12 +216,12 @@ describe('SubscriptionGroupHandler', function() {
     })
   })
 
-  return describe('getTotalConfirmedUsersInGroup', function() {
+  describe('getTotalConfirmedUsersInGroup', function() {
     describe('for existing subscriptions', function() {
       beforeEach(function() {
         return (this.subscription.member_ids = ['12321', '3121321'])
       })
-      return it('should call the subscription locator and return 2 users', function(done) {
+      it('should call the subscription locator and return 2 users', function(done) {
         return this.Handler.getTotalConfirmedUsersInGroup(
           this.subscription_id,
           (err, count) => {
@@ -234,7 +234,7 @@ describe('SubscriptionGroupHandler', function() {
         )
       })
     })
-    return describe('for nonexistent subscriptions', () =>
+    describe('for nonexistent subscriptions', () =>
       it('should return undefined', function(done) {
         return this.Handler.getTotalConfirmedUsersInGroup(
           'fake-id',

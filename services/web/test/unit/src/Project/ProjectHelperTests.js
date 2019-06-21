@@ -22,7 +22,7 @@ describe('ProjectHelper', function() {
     return (this.ProjectHelper = SandboxedModule.require(modulePath))
   })
 
-  return describe('compilerFromV1Engine', function() {
+  describe('compilerFromV1Engine', function() {
     it('returns the correct engine for latex_dvipdf', function() {
       return expect(
         this.ProjectHelper.compilerFromV1Engine('latex_dvipdf')
@@ -41,7 +41,7 @@ describe('ProjectHelper', function() {
       ).to.equal('xelatex')
     })
 
-    return it('returns the correct engine for lualatex', function() {
+    it('returns the correct engine for lualatex', function() {
       return expect(
         this.ProjectHelper.compilerFromV1Engine('lualatex')
       ).to.equal('lualatex')

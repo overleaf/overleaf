@@ -66,7 +66,7 @@ describe('ProxyUrls', function() {
       done
     ))
 
-  return it('handle missing baseUrl', done =>
+  it('handle missing baseUrl', done =>
     async.series(
       [cb => assertResponse('/proxy/missing/baseUrl', 500, null, cb)],
       done

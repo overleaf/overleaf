@@ -93,7 +93,7 @@ describe('Labels', function() {
     )
   })
 
-  return it('deleting a label', function(done) {
+  it('deleting a label', function(done) {
     const label_id = new ObjectId().toString()
     const comment = 'a label comment'
     const version = 3

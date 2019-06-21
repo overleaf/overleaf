@@ -77,7 +77,7 @@ describe('CollaboratorsController', function() {
       return this.res.sendStatus.calledWith(204).should.equal(true)
     })
 
-    return it('should have called emitToRoom', function() {
+    it('should have called emitToRoom', function() {
       return this.EditorRealTimeController.emitToRoom
         .calledWith(this.project_id, 'project:membership:changed')
         .should.equal(true)
@@ -109,12 +109,12 @@ describe('CollaboratorsController', function() {
         .should.equal(true)
     })
 
-    return it('should return a success code', function() {
+    it('should return a success code', function() {
       return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 
-  return describe('getAllMembers', function() {
+  describe('getAllMembers', function() {
     beforeEach(function() {
       this.req.session = { user: { _id: (this.user_id = 'user-id-123') } }
       this.req.params = { Project_id: this.project_id }
@@ -148,7 +148,7 @@ describe('CollaboratorsController', function() {
       )
     })
 
-    return describe('when CollaboratorsHandler.getAllInvitedMembers produces an error', function() {
+    describe('when CollaboratorsHandler.getAllInvitedMembers produces an error', function() {
       beforeEach(function() {
         this.res.json = sinon.stub()
         this.next = sinon.stub()
@@ -167,7 +167,7 @@ describe('CollaboratorsController', function() {
         return this.next.firstCall.args[0].should.be.instanceof(Error)
       })
 
-      return it('should not produce a json response', function() {
+      it('should not produce a json response', function() {
         return this.res.json.callCount.should.equal(0)
       })
     })

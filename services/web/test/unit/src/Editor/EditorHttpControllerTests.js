@@ -101,7 +101,7 @@ describe('EditorHttpController', function() {
         )
       })
 
-      return it('should send an inc metric', function() {
+      it('should send an inc metric', function() {
         return this.Metrics.inc
           .calledWith('editor.join-project')
           .should.equal(true)
@@ -114,20 +114,20 @@ describe('EditorHttpController', function() {
         return this.EditorHttpController.joinProject(this.req, this.res)
       })
 
-      return it('should unmark the project as deleted', function() {
+      it('should unmark the project as deleted', function() {
         return this.ProjectDeleter.unmarkAsDeletedByExternalSource
           .calledWith(this.project_id)
           .should.equal(true)
       })
     })
 
-    return describe('with an anonymous user', function() {
+    describe('with an anonymous user', function() {
       beforeEach(function() {
         this.req.query = { user_id: 'anonymous-user' }
         return this.EditorHttpController.joinProject(this.req, this.res)
       })
 
-      return it('should pass the user id as null', function() {
+      it('should pass the user id as null', function() {
         return this.EditorHttpController._buildJoinProjectView
           .calledWith(this.req, this.project_id, null)
           .should.equal(true)
@@ -223,14 +223,14 @@ describe('EditorHttpController', function() {
           .should.equal(true)
       })
 
-      return it('should return the project model view, privilege level and protocol version', function() {
+      it('should return the project model view, privilege level and protocol version', function() {
         return this.callback
           .calledWith(null, this.projectModelView, 'owner')
           .should.equal(true)
       })
     })
 
-    return describe('when not authorized', function() {
+    describe('when not authorized', function() {
       beforeEach(function() {
         this.AuthorizationManager.getPrivilegeLevelForProject = sinon
           .stub()
@@ -243,7 +243,7 @@ describe('EditorHttpController', function() {
         )
       })
 
-      return it('should return false in the callback', function() {
+      it('should return false in the callback', function() {
         return this.callback.calledWith(null, null, false).should.equal(true)
       })
     })
@@ -280,18 +280,18 @@ describe('EditorHttpController', function() {
           .should.equal(true)
       })
 
-      return it('should send the doc back as JSON', function() {
+      it('should send the doc back as JSON', function() {
         return this.res.json.calledWith(this.doc).should.equal(true)
       })
     })
 
-    return describe('unsuccesfully', function() {
+    describe('unsuccesfully', function() {
       beforeEach(function() {
         this.req.body.name = ''
         return this.EditorHttpController.addDoc(this.req, this.res)
       })
 
-      return it('should send back a bad request status code', function() {
+      it('should send back a bad request status code', function() {
         return this.res.sendStatus.calledWith(400).should.equal(true)
       })
     })
@@ -326,18 +326,18 @@ describe('EditorHttpController', function() {
           .should.equal(true)
       })
 
-      return it('should send the folder back as JSON', function() {
+      it('should send the folder back as JSON', function() {
         return this.res.json.calledWith(this.folder).should.equal(true)
       })
     })
 
-    return describe('unsuccesfully', function() {
+    describe('unsuccesfully', function() {
       beforeEach(function() {
         this.req.body.name = ''
         return this.EditorHttpController.addFolder(this.req, this.res)
       })
 
-      return it('should send back a bad request status code', function() {
+      it('should send back a bad request status code', function() {
         return this.res.sendStatus.calledWith(400).should.equal(true)
       })
     })
@@ -367,7 +367,7 @@ describe('EditorHttpController', function() {
         .should.equal(true)
     })
 
-    return it('should send back a success response', function() {
+    it('should send back a success response', function() {
       return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
@@ -387,7 +387,7 @@ describe('EditorHttpController', function() {
       return this.EditorHttpController.renameEntity(this.req, this.res)
     })
 
-    return it('should send back a bad request status code', function() {
+    it('should send back a bad request status code', function() {
       return this.res.sendStatus.calledWith(400).should.equal(true)
     })
   })
@@ -404,7 +404,7 @@ describe('EditorHttpController', function() {
       return this.EditorHttpController.renameEntity(this.req, this.res)
     })
 
-    return it('should send back a bad request status code', function() {
+    it('should send back a bad request status code', function() {
       return this.res.sendStatus.calledWith(400).should.equal(true)
     })
   })
@@ -433,12 +433,12 @@ describe('EditorHttpController', function() {
         .should.equal(true)
     })
 
-    return it('should send back a success response', function() {
+    it('should send back a success response', function() {
       return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 
-  return describe('deleteEntity', function() {
+  describe('deleteEntity', function() {
     beforeEach(function() {
       this.req.params = {
         Project_id: this.project_id,
@@ -461,7 +461,7 @@ describe('EditorHttpController', function() {
         .should.equal(true)
     })
 
-    return it('should send back a success response', function() {
+    it('should send back a success response', function() {
       return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })

@@ -152,14 +152,14 @@ describe('ProjectUploadManager', function() {
           .should.equal(true)
       })
 
-      return it('should ensure the name is valid', function() {
+      it('should ensure the name is valid', function() {
         return this.ProjectDetailsHandler.fixProjectName.called.should.equal(
           true
         )
       })
     })
 
-    return describe("when the root document can't be determined", function() {
+    describe("when the root document can't be determined", function() {
       beforeEach(function(done) {
         this.ProjectRootDocManager.findRootDocFileFromDirectory = sinon
           .stub()
@@ -181,7 +181,7 @@ describe('ProjectUploadManager', function() {
         )
       })
 
-      return it('should not try to set the root doc', function() {
+      it('should not try to set the root doc', function() {
         return this.ProjectRootDocManager.setRootDocFromName.called.should.equal(
           false
         )
@@ -241,7 +241,7 @@ describe('ProjectUploadManager', function() {
         .should.equal(true)
     })
 
-    return it('should call the callback', function() {
+    it('should call the callback', function() {
       return this.callback
         .calledWith(sinon.match.falsy, this.project)
         .should.equal(true)
@@ -299,12 +299,12 @@ describe('ProjectUploadManager', function() {
       return this.callback.called.should.equal(true)
     })
 
-    return it('should remove the desintation directory afterwards', function() {
+    it('should remove the desintation directory afterwards', function() {
       return this.rimraf.calledWith(this.destination).should.equal(true)
     })
   })
 
-  return describe('_getDestinationDirectory', () =>
+  describe('_getDestinationDirectory', () =>
     it('should return the path with the time appended', function() {
       const date = Date.now()
       sinon.stub(Date, 'now', () => date)

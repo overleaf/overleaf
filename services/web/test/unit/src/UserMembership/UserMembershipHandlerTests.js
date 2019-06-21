@@ -148,7 +148,7 @@ describe('UserMembershipHandler', function() {
         )
       })
 
-      return it('handle error', function(done) {
+      it('handle error', function(done) {
         this.Subscription.findOne.yields(new Error('some error'))
         return this.UserMembershipHandler.getEntity(
           this.fakeEntityId,
@@ -198,7 +198,7 @@ describe('UserMembershipHandler', function() {
         )
       })
 
-      return it('handle errors', function(done) {
+      it('handle errors', function(done) {
         this.Institution.findOne.yields(new Error('nope'))
         return this.UserMembershipHandler.getEntity(
           this.fakeEntityId,
@@ -214,7 +214,7 @@ describe('UserMembershipHandler', function() {
       })
     })
 
-    return describe('publishers', () =>
+    describe('publishers', () =>
       it('get publisher', function(done) {
         return this.UserMembershipHandler.getEntity(
           this.publisher.slug,
@@ -269,7 +269,7 @@ describe('UserMembershipHandler', function() {
         )
       }))
 
-    return describe('institution', () =>
+    describe('institution', () =>
       it('build view model for all managers', function(done) {
         return this.UserMembershipHandler.getUsers(
           this.institution,
@@ -303,7 +303,7 @@ describe('UserMembershipHandler', function() {
       return (this.email = this.newUser.email)
     })
 
-    return describe('institution', function() {
+    describe('institution', function() {
       it('get user', function(done) {
         return this.UserMembershipHandler.addUser(
           this.institution,
@@ -358,7 +358,7 @@ describe('UserMembershipHandler', function() {
         )
       })
 
-      return it('return user view', function(done) {
+      it('return user view', function(done) {
         return this.UserMembershipHandler.addUser(
           this.institution,
           EntityConfigs.institution,
@@ -372,7 +372,7 @@ describe('UserMembershipHandler', function() {
     })
   })
 
-  return describe('removeUser', () =>
+  describe('removeUser', () =>
     describe('institution', function() {
       it('remove user from institution', function(done) {
         return this.UserMembershipHandler.removeUser(
@@ -389,7 +389,7 @@ describe('UserMembershipHandler', function() {
         )
       })
 
-      return it('handle admin', function(done) {
+      it('handle admin', function(done) {
         this.subscription.admin_id = this.newUser._id
         return this.UserMembershipHandler.removeUser(
           this.subscription,

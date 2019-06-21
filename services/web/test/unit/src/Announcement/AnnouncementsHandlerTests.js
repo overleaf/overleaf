@@ -43,7 +43,7 @@ describe('AnnouncementsHandler', function() {
     }))
   })
 
-  return describe('getUnreadAnnouncements', function() {
+  describe('getUnreadAnnouncements', function() {
     beforeEach(function() {
       this.stubbedAnnouncements = [
         {
@@ -178,7 +178,7 @@ describe('AnnouncementsHandler', function() {
           .returns(this.stubbedDomainSpecificAnn))
       })
 
-      return it('should insert the domain specific in the correct place', function(done) {
+      it('should insert the domain specific in the correct place', function(done) {
         this.AnalyticsManager.getLastOccurrence.callsArgWith(2, null, [])
         return this.handler.getUnreadAnnouncements(
           this.user,
@@ -194,7 +194,7 @@ describe('AnnouncementsHandler', function() {
       })
     })
 
-    return describe('_domainSpecificAnnouncements', function() {
+    describe('_domainSpecificAnnouncements', function() {
       beforeEach(function() {
         return (this.settings.domainAnnouncements = [
           {
@@ -233,7 +233,7 @@ describe('AnnouncementsHandler', function() {
         return done()
       })
 
-      return it('should match on domain', function(done) {
+      it('should match on domain', function(done) {
         this.settings.domainAnnouncements[2].domains = ['yahoo.com']
         const result = this.handler._domainSpecificAnnouncements(
           'someone@gmail.com'

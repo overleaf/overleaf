@@ -141,7 +141,7 @@ describe('SubscriptionHandler', function() {
           .should.equal(true)
       })
 
-      return it('should sync the subscription to the user', function() {
+      it('should sync the subscription to the user', function() {
         this.SubscriptionUpdater.syncSubscription.calledOnce.should.equal(true)
         this.SubscriptionUpdater.syncSubscription.args[0][0].should.deep.equal(
           this.activeRecurlySubscription
@@ -152,7 +152,7 @@ describe('SubscriptionHandler', function() {
       })
     })
 
-    return describe('when there is already a subscription in Recurly', function() {
+    describe('when there is already a subscription in Recurly', function() {
       beforeEach(function() {
         this.SubscriptionHandler.validateNoSubscriptionInRecurly = sinon
           .stub()
@@ -165,7 +165,7 @@ describe('SubscriptionHandler', function() {
         )
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         return this.callback.calledWith(
           new Error('user already has subscription in recurly')
         )
@@ -207,7 +207,7 @@ describe('SubscriptionHandler', function() {
           return updateOptions.timeframe.should.equal('now')
         })
 
-        return it('should sync the new subscription to the user', function() {
+        it('should sync the new subscription to the user', function() {
           this.SubscriptionUpdater.syncSubscription.calledOnce.should.equal(
             true
           )
@@ -235,7 +235,7 @@ describe('SubscriptionHandler', function() {
         )
       })
 
-      return it('should redirect to the subscription dashboard', function() {
+      it('should redirect to the subscription dashboard', function() {
         this.RecurlyWrapper.updateSubscription.called.should.equal(false)
         return this.SubscriptionHandler.syncSubscriptionToUser.called.should.equal(
           false
@@ -243,7 +243,7 @@ describe('SubscriptionHandler', function() {
       })
     })
 
-    return describe('with a coupon code', function() {
+    describe('with a coupon code', function() {
       beforeEach(function(done) {
         this.plan_code = 'collaborator'
         this.coupon_code = '1231312'
@@ -277,7 +277,7 @@ describe('SubscriptionHandler', function() {
         return done()
       })
 
-      return it('should update the subscription', function() {
+      it('should update the subscription', function() {
         this.RecurlyWrapper.updateSubscription
           .calledWith(this.subscription.recurlySubscription_id)
           .should.equal(true)
@@ -299,12 +299,12 @@ describe('SubscriptionHandler', function() {
         return this.SubscriptionHandler.cancelSubscription(this.user, done)
       })
 
-      return it('should redirect to the subscription dashboard', function() {
+      it('should redirect to the subscription dashboard', function() {
         return this.RecurlyWrapper.cancelSubscription.called.should.equal(false)
       })
     })
 
-    return describe('with a user with a subscription', function() {
+    describe('with a user with a subscription', function() {
       beforeEach(function(done) {
         this.LimitationsManager.userHasV2Subscription.callsArgWith(
           1,
@@ -322,7 +322,7 @@ describe('SubscriptionHandler', function() {
           .should.equal(true)
       })
 
-      return it('should trigger the cancel subscription event', function() {
+      it('should trigger the cancel subscription event', function() {
         return this.Events.emit
           .calledWith('cancelSubscription', this.user._id)
           .should.equal(true)
@@ -348,12 +348,12 @@ describe('SubscriptionHandler', function() {
         )
       })
 
-      return it('should not send a notification email', function() {
+      it('should not send a notification email', function() {
         return sinon.assert.notCalled(this.EmailHandler.sendEmail)
       })
     })
 
-    return describe('with a user with a subscription', function() {
+    describe('with a user with a subscription', function() {
       beforeEach(function(done) {
         this.LimitationsManager.userHasV2Subscription.callsArgWith(
           1,
@@ -371,7 +371,7 @@ describe('SubscriptionHandler', function() {
           .should.equal(true)
       })
 
-      return it('should send a notification email', function() {
+      it('should send a notification email', function() {
         return sinon.assert.calledWith(
           this.EmailHandler.sendEmail,
           'reactivatedSubscription'
@@ -406,7 +406,7 @@ describe('SubscriptionHandler', function() {
         return options.includeAccount.should.equal(true)
       })
 
-      return it('should sync the subscription to the user', function() {
+      it('should sync the subscription to the user', function() {
         this.SubscriptionUpdater.syncSubscription.calledOnce.should.equal(true)
         this.SubscriptionUpdater.syncSubscription.args[0][0].should.deep.equal(
           this.activeRecurlySubscription
@@ -417,7 +417,7 @@ describe('SubscriptionHandler', function() {
       })
     }))
 
-  return describe('validateNoSubscriptionInRecurly', function() {
+  describe('validateNoSubscriptionInRecurly', function() {
     beforeEach(function() {
       this.subscriptions = []
       this.RecurlyWrapper.listAccountActiveSubscriptions = sinon
@@ -448,12 +448,12 @@ describe('SubscriptionHandler', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with valid == false', function() {
+      it('should call the callback with valid == false', function() {
         return this.callback.calledWith(null, false).should.equal(true)
       })
     })
 
-    return describe('with a subscription in recurly', function() {
+    describe('with a subscription in recurly', function() {
       beforeEach(function() {
         return this.SubscriptionHandler.validateNoSubscriptionInRecurly(
           this.user_id,
@@ -467,7 +467,7 @@ describe('SubscriptionHandler', function() {
         )
       })
 
-      return it('should call the callback with valid == true', function() {
+      it('should call the callback with valid == true', function() {
         return this.callback.calledWith(null, true).should.equal(true)
       })
     })

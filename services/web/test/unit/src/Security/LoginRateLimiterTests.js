@@ -64,7 +64,7 @@ describe('LoginRateLimiter', function() {
           .callsArgWith(1, null, true))
       })
 
-      return it('should call pass allow=true', function(done) {
+      it('should call pass allow=true', function(done) {
         return this.LoginRateLimiter.processLoginRequest(
           this.email,
           (err, allow) => {
@@ -83,7 +83,7 @@ describe('LoginRateLimiter', function() {
           .callsArgWith(1, null, false))
       })
 
-      return it('should call pass allow=false', function(done) {
+      it('should call pass allow=false', function(done) {
         return this.LoginRateLimiter.processLoginRequest(
           this.email,
           (err, allow) => {
@@ -95,14 +95,14 @@ describe('LoginRateLimiter', function() {
       })
     })
 
-    return describe('when addCount produces an error', function() {
+    describe('when addCount produces an error', function() {
       beforeEach(function() {
         return (this.RateLimiter.addCount = sinon
           .stub()
           .callsArgWith(1, new Error('woops')))
       })
 
-      return it('should produce an error', function(done) {
+      it('should produce an error', function(done) {
         return this.LoginRateLimiter.processLoginRequest(
           this.email,
           (err, allow) => {
@@ -115,14 +115,14 @@ describe('LoginRateLimiter', function() {
     })
   })
 
-  return describe('recordSuccessfulLogin', function() {
+  describe('recordSuccessfulLogin', function() {
     beforeEach(function() {
       return (this.RateLimiter.clearRateLimit = sinon
         .stub()
         .callsArgWith(2, null))
     })
 
-    return it('should call clearRateLimit', function(done) {
+    it('should call clearRateLimit', function(done) {
       return this.LoginRateLimiter.recordSuccessfulLogin(this.email, () => {
         this.RateLimiter.clearRateLimit.callCount.should.equal(1)
         this.RateLimiter.clearRateLimit

@@ -83,7 +83,7 @@ describe('LoginRateLimit', function() {
     return (this.badPassword = 'badpassword')
   })
 
-  return it('should rate limit login attempts after 10 within two minutes', function(done) {
+  it('should rate limit login attempts after 10 within two minutes', function(done) {
     return this.user.request.get('/login', (err, res, body) => {
       return async.timesSeries(
         15,
@@ -193,7 +193,7 @@ describe('CSRF protection', function() {
     })
   })
 
-  return it('should fail with a stale csrf token', function(done) {
+  it('should fail with a stale csrf token', function(done) {
     return this.user.request.get('/login', (err, res, body) => {
       return this.user.getCsrfToken(error => {
         const oldCsrfToken = this.user.csrfToken
@@ -225,7 +225,7 @@ describe('Register', function() {
     return (this.user = new User())
   })
 
-  return it('Set emails attribute', function(done) {
+  it('Set emails attribute', function(done) {
     return this.user.register((error, user) => {
       expect(error).to.not.exist
       user.email.should.equal(this.user.email)
@@ -255,7 +255,7 @@ describe('Register with bonus referal id', function() {
     )
   })
 
-  return it('Adds a referal when an id is supplied and the referal source is "bonus"', function(done) {
+  it('Adds a referal when an id is supplied and the referal source is "bonus"', function(done) {
     return this.user1.get((error, user) => {
       expect(error).to.not.exist
       user.refered_user_count.should.eql(1)
@@ -284,7 +284,7 @@ describe('LoginViaRegistration', function() {
     return (this.project_id = null)
   })
 
-  return describe('[Security] Trying to register/login as another user', function() {
+  describe('[Security] Trying to register/login as another user', function() {
     it('should not allow sign in with secondary email', function(done) {
       const secondaryEmail = 'acceptance-test-secondary@example.com'
       return this.user1.addEmail(secondaryEmail, err => {
@@ -336,7 +336,7 @@ describe('LoginViaRegistration', function() {
       )
     })
 
-    return it('should still ensure user2 cannot access the project', function(done) {
+    it('should still ensure user2 cannot access the project', function(done) {
       return expectNoProjectAccess(this.user2, this.project_id, done)
     })
   })

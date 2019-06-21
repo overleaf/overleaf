@@ -87,12 +87,12 @@ describe('AuthenticationManager', function() {
             .should.equal(true)
         })
 
-        return it('should return the user', function() {
+        it('should return the user', function() {
           return this.callback.calledWith(null, this.user).should.equal(true)
         })
       })
 
-      return describe('when the encrypted passwords do not match', function() {
+      describe('when the encrypted passwords do not match', function() {
         beforeEach(function() {
           return this.AuthenticationManager.authenticate(
             { email: this.email },
@@ -101,13 +101,13 @@ describe('AuthenticationManager', function() {
           )
         })
 
-        return it('should not return the user', function() {
+        it('should not return the user', function() {
           return this.callback.calledWith(null, null).should.equal(true)
         })
       })
     })
 
-    return describe('setUserPasswordInV2', function() {
+    describe('setUserPasswordInV2', function() {
       beforeEach(function() {
         this.user = {
           _id: '5c8791477192a80b5e76ca7e',
@@ -130,7 +130,7 @@ describe('AuthenticationManager', function() {
         )
       })
 
-      return it('should set the hashed password', function(done) {
+      it('should set the hashed password', function(done) {
         return this.AuthenticationManager.setUserPasswordInV2(
           this.user._id,
           'testpassword',
@@ -189,7 +189,7 @@ describe('AuthenticationManager', function() {
             .should.equal(true)
         })
 
-        return it('should return the user', function() {
+        it('should return the user', function() {
           return this.callback.calledWith(null, this.user).should.equal(true)
         })
       })
@@ -203,7 +203,7 @@ describe('AuthenticationManager', function() {
           )
         })
 
-        return it('should not return the user', function() {
+        it('should not return the user', function() {
           return this.callback.calledWith(null, null).should.equal(true)
         })
       })
@@ -248,12 +248,12 @@ describe('AuthenticationManager', function() {
             .should.equal(true)
         })
 
-        return it('should return the user', function() {
+        it('should return the user', function() {
           return this.callback.calledWith(null, this.user).should.equal(true)
         })
       })
 
-      return describe('when the hashed password matches but the number of rounds is too low, but upgrades disabled', function() {
+      describe('when the hashed password matches but the number of rounds is too low, but upgrades disabled', function() {
         beforeEach(function(done) {
           this.settings.security.disableBcryptRoundsUpgrades = true
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
@@ -282,13 +282,13 @@ describe('AuthenticationManager', function() {
             .should.equal(false)
         })
 
-        return it('should return the user', function() {
+        it('should return the user', function() {
           return this.callback.calledWith(null, this.user).should.equal(true)
         })
       })
     })
 
-    return describe('when the user does not exist in the database', function() {
+    describe('when the user does not exist in the database', function() {
       beforeEach(function() {
         this.User.findOne = sinon.stub().callsArgWith(1, null, null)
         return this.AuthenticationManager.authenticate(
@@ -298,7 +298,7 @@ describe('AuthenticationManager', function() {
         )
       })
 
-      return it('should not return a user', function() {
+      it('should not return a user', function() {
         return this.callback.calledWith(null, null).should.equal(true)
       })
     })
@@ -313,14 +313,14 @@ describe('AuthenticationManager', function() {
         return expect(result).to.equal(null)
       }))
 
-    return describe('invalid', function() {
+    describe('invalid', function() {
       it('should return validation error object for no email', function() {
         const result = this.AuthenticationManager.validateEmail('')
         expect(result).to.not.equal(null)
         return expect(result.message).to.equal('email not valid')
       })
 
-      return it('should return validation error object for invalid', function() {
+      it('should return validation error object for invalid', function() {
         const result = this.AuthenticationManager.validateEmail('notanemail')
         expect(result).to.not.equal(null)
         return expect(result.message).to.equal('email not valid')
@@ -359,7 +359,7 @@ describe('AuthenticationManager', function() {
           ).to.eql({ message: 'password is too long' })
         })
 
-        return it('should accept passwords that are a good length', function() {
+        it('should accept passwords that are a good length', function() {
           return expect(
             this.AuthenticationManager.validatePassword('l337h4x0r')
           ).to.equal(null)
@@ -394,14 +394,14 @@ describe('AuthenticationManager', function() {
           ).to.eql({ message: 'password is too long' })
         })
 
-        return it('should accept passwords of exactly maximum length', function() {
+        it('should accept passwords of exactly maximum length', function() {
           return expect(
             this.AuthenticationManager.validatePassword('0123456789ab')
           ).to.equal(null)
         })
       })
 
-      return describe('when the maximum password length is set to >72 characters in settings', function() {
+      describe('when the maximum password length is set to >72 characters in settings', function() {
         beforeEach(function() {
           return (this.settings.passwordStrengthOptions = {
             length: {
@@ -410,7 +410,7 @@ describe('AuthenticationManager', function() {
           })
         })
 
-        return it('should still reject passwords > 72 characters in length', function() {
+        it('should still reject passwords > 72 characters in length', function() {
           return expect(
             this.AuthenticationManager.validatePassword(this.longPassword)
           ).to.eql({ message: 'password is too long' })
@@ -418,7 +418,7 @@ describe('AuthenticationManager', function() {
       })
     })
 
-    return describe('allowed characters', function() {
+    describe('allowed characters', function() {
       describe('with the default settings for allowed characters', function() {
         it('should allow passwords with valid characters', function() {
           expect(
@@ -433,7 +433,7 @@ describe('AuthenticationManager', function() {
           ).to.equal(null)
         })
 
-        return it('should not allow passwords with invalid characters', function() {
+        it('should not allow passwords with invalid characters', function() {
           return expect(
             this.AuthenticationManager.validatePassword(
               'correct horse battery staple'
@@ -459,7 +459,7 @@ describe('AuthenticationManager', function() {
           ).to.equal(null)
         })
 
-        return it('should disallow passwords with invalid characters', function() {
+        it('should disallow passwords with invalid characters', function() {
           return expect(
             this.AuthenticationManager.validatePassword(
               '1234567890@#$%^&*()-_=+[]{};:<>/?!£€.,'
@@ -468,14 +468,14 @@ describe('AuthenticationManager', function() {
         })
       })
 
-      return describe('when allowAnyChars is set', function() {
+      describe('when allowAnyChars is set', function() {
         beforeEach(function() {
           return (this.settings.passwordStrengthOptions = {
             allowAnyChars: true
           })
         })
 
-        return it('should allow any characters', function() {
+        it('should allow any characters', function() {
           expect(
             this.AuthenticationManager.validatePassword(
               'correct horse battery staple'
@@ -491,7 +491,7 @@ describe('AuthenticationManager', function() {
     })
   })
 
-  return describe('setUserPassword', function() {
+  describe('setUserPassword', function() {
     beforeEach(function() {
       this.user_id = ObjectId()
       this.password = 'banana'
@@ -523,7 +523,7 @@ describe('AuthenticationManager', function() {
         )
       })
 
-      return it('should not start the bcrypt process', function(done) {
+      it('should not start the bcrypt process', function(done) {
         return this.AuthenticationManager.setUserPassword(
           this.user_id,
           this.password,
@@ -558,7 +558,7 @@ describe('AuthenticationManager', function() {
         )
       })
 
-      return it('should not start the bcrypt process', function(done) {
+      it('should not start the bcrypt process', function(done) {
         return this.AuthenticationManager.setUserPassword(
           this.user_id,
           this.password,
@@ -571,7 +571,7 @@ describe('AuthenticationManager', function() {
       })
     })
 
-    return describe('password set attempt', function() {
+    describe('password set attempt', function() {
       describe('with SL user in SL', function() {
         beforeEach(function() {
           this.UserGetter.getUser = sinon
@@ -612,7 +612,7 @@ describe('AuthenticationManager', function() {
             .should.equal(true)
         })
 
-        return it('should call the callback', function() {
+        it('should call the callback', function() {
           return this.callback.called.should.equal(true)
         })
       })
@@ -632,7 +632,7 @@ describe('AuthenticationManager', function() {
             }
           )
         })
-        return it('should error', function() {
+        it('should error', function() {
           return this.callback
             .calledWith(new Errors.SLInV2Error('Password Reset Attempt'))
             .should.equal(true)
@@ -653,14 +653,14 @@ describe('AuthenticationManager', function() {
             }
           )
         })
-        return it('should error', function() {
+        it('should error', function() {
           return this.callback
             .calledWith(new Errors.NotInV2Error('Password Reset Attempt'))
             .should.equal(true)
         })
       })
 
-      return describe('with v2 user in v2', function() {
+      describe('with v2 user in v2', function() {
         beforeEach(function(done) {
           this.settings.overleaf = true
           this.UserGetter.getUser = sinon
@@ -676,7 +676,7 @@ describe('AuthenticationManager', function() {
             }
           )
         })
-        return it('should set the password in v2', function() {
+        it('should set the password in v2', function() {
           return this.callback.calledWith(null, true).should.equal(true)
         })
       })

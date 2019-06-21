@@ -55,7 +55,7 @@ describe('UserMembershipViewModel', function() {
       })
     })
 
-    return it('build user', function() {
+    it('build user', function() {
       const viewModel = this.UserMembershipViewModel.build(this.user)
       expect(viewModel._id).to.equal(this.user._id)
       expect(viewModel.email).to.equal(this.user.email)
@@ -63,7 +63,7 @@ describe('UserMembershipViewModel', function() {
     })
   })
 
-  return describe('build async', function() {
+  describe('build async', function() {
     beforeEach(function() {
       return (this.UserMembershipViewModel.build = sinon.stub())
     })
@@ -120,7 +120,7 @@ describe('UserMembershipViewModel', function() {
       )
     })
 
-    return it('build user id with error', function(done) {
+    it('build user id with error', function(done) {
       this.UserGetter.getUserOrUserStubById.yields(new Error('nope'))
       const userId = ObjectId()
       return this.UserMembershipViewModel.buildAsync(

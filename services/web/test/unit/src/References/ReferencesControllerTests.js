@@ -123,7 +123,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      return it('should still return data', function(done) {
+      it('should still return data', function(done) {
         return this.call(() => {
           this.res.json.callCount.should.equal(1)
           this.res.json.calledWith(this.fakeResponseData).should.equal(true)
@@ -132,7 +132,7 @@ describe('ReferencesController', function() {
       })
     })
 
-    return describe('when shouldBroadcast is false', function() {
+    describe('when shouldBroadcast is false', function() {
       beforeEach(function() {
         this.ReferencesHandler.index.callsArgWith(
           2,
@@ -158,7 +158,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      return it('should still return data', function(done) {
+      it('should still return data', function(done) {
         return this.call(() => {
           this.res.json.callCount.should.equal(1)
           this.res.json.calledWith(this.fakeResponseData).should.equal(true)
@@ -193,7 +193,7 @@ describe('ReferencesController', function() {
       })
     })
 
-    return it('should send a response with an empty keys list', function(done) {
+    it('should send a response with an empty keys list', function(done) {
       return this.call(() => {
         this.res.json.called.should.equal(true)
         this.res.json
@@ -204,7 +204,7 @@ describe('ReferencesController', function() {
     })
   })
 
-  return describe('index', function() {
+  describe('index', function() {
     beforeEach(function() {
       return (this.call = callback => {
         this.controller.index(this.req, this.res)
@@ -255,7 +255,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      return describe('when ReferencesHandler.index produces an error', function() {
+      describe('when ReferencesHandler.index produces an error', function() {
         beforeEach(function() {
           return this.ReferencesHandler.index.callsArgWith(
             2,
@@ -264,7 +264,7 @@ describe('ReferencesController', function() {
           )
         })
 
-        return it('should produce an error response', function(done) {
+        it('should produce an error response', function(done) {
           return this.call(() => {
             this.res.sendStatus.callCount.should.equal(1)
             this.res.sendStatus.calledWith(500).should.equal(true)
@@ -300,7 +300,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      return it('should still return data', function(done) {
+      it('should still return data', function(done) {
         return this.call(() => {
           this.res.json.callCount.should.equal(1)
           this.res.json.calledWith(this.fakeResponseData).should.equal(true)
@@ -322,7 +322,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      return it('should not call ReferencesHandler.index', function(done) {
+      it('should not call ReferencesHandler.index', function(done) {
         return this.call(() => {
           this.ReferencesHandler.index.callCount.should.equal(0)
           return done()
@@ -330,7 +330,7 @@ describe('ReferencesController', function() {
       })
     })
 
-    return describe('with invalid docIds', function() {
+    describe('with invalid docIds', function() {
       beforeEach(function() {
         return (this.req.body.docIds = 42)
       })
@@ -343,7 +343,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      return it('should not call ReferencesHandler.index', function(done) {
+      it('should not call ReferencesHandler.index', function(done) {
         return this.call(() => {
           this.ReferencesHandler.index.callCount.should.equal(0)
           return done()

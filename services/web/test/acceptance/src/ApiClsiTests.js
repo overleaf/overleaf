@@ -84,7 +84,7 @@ describe('ApiClsiTests', function() {
         )
       }))
 
-    return describe('unauthorized', () =>
+    describe('unauthorized', () =>
       it('returns 401', function(done) {
         return request.post(
           {
@@ -103,7 +103,7 @@ describe('ApiClsiTests', function() {
       }))
   })
 
-  return describe('get output', function() {
+  describe('get output', function() {
     describe('valid file', () =>
       it('returns the file', done =>
         authed_request.get(
@@ -132,7 +132,7 @@ describe('ApiClsiTests', function() {
           }
         )))
 
-    return describe('unauthorized', () =>
+    describe('unauthorized', () =>
       it('returns 401', done =>
         request.get(
           '/api/clsi/compile/abcd/build/1234/output/project.pdf',

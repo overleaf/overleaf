@@ -88,7 +88,7 @@ describe('UserGetter', function() {
       )
     })
 
-    return it('should not allow null query', function(done) {
+    it('should not allow null query', function(done) {
       return this.UserGetter.getUser(null, {}, (error, user) => {
         error.should.exist
         return done()
@@ -178,7 +178,7 @@ describe('UserGetter', function() {
       )
     })
 
-    return it('should get user when it has no emails field', function(done) {
+    it('should get user when it has no emails field', function(done) {
       this.fakeUser = {
         _id: '12390i',
         email: 'email2@foo.bar'
@@ -224,7 +224,7 @@ describe('UserGetter', function() {
       })
     })
 
-    return it('trim email', function(done) {
+    it('trim email', function(done) {
       const email = 'hello@world.com'
       return this.UserGetter.getUserByMainEmail(` ${email} `, (error, user) => {
         this.findOne.called.should.equal(true)
@@ -264,7 +264,7 @@ describe('UserGetter', function() {
       })
     })
 
-    return it('checks main email as well', function(done) {
+    it('checks main email as well', function(done) {
       this.findOne.callsArgWith(2, null, null)
       const email = 'hello@world.com'
       const projection = { emails: 1 }
@@ -302,7 +302,7 @@ describe('UserGetter', function() {
       )
     }))
 
-  return describe('ensureUniqueEmailAddress', function() {
+  describe('ensureUniqueEmailAddress', function() {
     beforeEach(function() {
       return (this.UserGetter.getUserByAnyEmail = sinon.stub())
     })
@@ -317,7 +317,7 @@ describe('UserGetter', function() {
       })
     })
 
-    return it('should return null if no user is found', function(done) {
+    it('should return null if no user is found', function(done) {
       this.UserGetter.getUserByAnyEmail.callsArgWith(1)
       return this.UserGetter.ensureUniqueEmailAddress(this.newEmail, err => {
         should.not.exist(err)

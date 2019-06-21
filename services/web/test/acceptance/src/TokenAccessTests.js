@@ -198,7 +198,7 @@ describe('TokenAccess', function() {
       )
     })
 
-    return it('should not allow the user to join the project', function(done) {
+    it('should not allow the user to join the project', function(done) {
       return try_content_access(
         this.other1,
         this.project_id,
@@ -269,7 +269,7 @@ describe('TokenAccess', function() {
       )
     })
 
-    return describe('made private again', function() {
+    describe('made private again', function() {
       before(function(done) {
         return this.owner.makePrivate(this.project_id, () =>
           setTimeout(done, 1000)
@@ -299,7 +299,7 @@ describe('TokenAccess', function() {
         )
       })
 
-      return it('should not allow the user to join the project', function(done) {
+      it('should not allow the user to join the project', function(done) {
         return try_content_access(
           this.other1,
           this.project_id,
@@ -372,7 +372,7 @@ describe('TokenAccess', function() {
       )
     })
 
-    return describe('made private again', function() {
+    describe('made private again', function() {
       before(function(done) {
         return this.owner.makePrivate(this.project_id, () =>
           setTimeout(done, 1000)
@@ -402,7 +402,7 @@ describe('TokenAccess', function() {
         )
       })
 
-      return it('should not allow the user to join the project', function(done) {
+      it('should not allow the user to join the project', function(done) {
         return try_anon_content_access(
           this.anon,
           this.project_id,
@@ -476,7 +476,7 @@ describe('TokenAccess', function() {
       )
     })
 
-    return describe('made private again', function() {
+    describe('made private again', function() {
       before(function(done) {
         return this.owner.makePrivate(this.project_id, () =>
           setTimeout(done, 1000)
@@ -506,7 +506,7 @@ describe('TokenAccess', function() {
         )
       })
 
-      return it('should not allow the user to join the project', function(done) {
+      it('should not allow the user to join the project', function(done) {
         return try_content_access(
           this.other1,
           this.project_id,
@@ -569,7 +569,7 @@ describe('TokenAccess', function() {
         )
       })
 
-      return it('should not allow the user to join the project', function(done) {
+      it('should not allow the user to join the project', function(done) {
         return try_anon_content_access(
           this.anon,
           this.project_id,
@@ -642,7 +642,7 @@ describe('TokenAccess', function() {
         )
       })
 
-      return describe('made private again', function() {
+      describe('made private again', function() {
         before(function(done) {
           return this.owner.makePrivate(this.project_id, () =>
             setTimeout(done, 1000)
@@ -672,7 +672,7 @@ describe('TokenAccess', function() {
           )
         })
 
-        return it('should not allow the user to join the project', function(done) {
+        it('should not allow the user to join the project', function(done) {
           return try_anon_content_access(
             this.anon,
             this.project_id,
@@ -748,7 +748,7 @@ describe('TokenAccess', function() {
       )
     })
 
-    return it('should not allow other user to join the project', function(done) {
+    it('should not allow other user to join the project', function(done) {
       return try_content_access(
         this.other2,
         this.project_id,
@@ -838,7 +838,7 @@ describe('TokenAccess', function() {
       )
     })
 
-    return it('should not allow a different user to join the project', function(done) {
+    it('should not allow a different user to join the project', function(done) {
       return try_content_access(
         this.other2,
         this.project_id,
@@ -870,7 +870,7 @@ describe('TokenAccess', function() {
       )
     })
 
-    return it('should redirect read only token to v1', function(done) {
+    it('should redirect read only token to v1', function(done) {
       const unimportedV1Token = 'abcd'
       return try_read_only_token_access(
         this.owner,
@@ -886,7 +886,7 @@ describe('TokenAccess', function() {
     })
   })
 
-  return describe('importing v1 project', function() {
+  describe('importing v1 project', function() {
     before(function(done) {
       settings.projectImportingCheckMaxCreateDelta = 3600
       settings.overleaf = { host: 'http://localhost:5000' }
@@ -960,10 +960,10 @@ describe('TokenAccess', function() {
       )
     })
 
-    return describe('when importing check not configured', function() {
+    describe('when importing check not configured', function() {
       before(() => delete settings.projectImportingCheckMaxCreateDelta)
 
-      return it('should load editor', function(done) {
+      it('should load editor', function(done) {
         return try_read_and_write_token_access(
           this.owner,
           this.tokens.readAndWrite,

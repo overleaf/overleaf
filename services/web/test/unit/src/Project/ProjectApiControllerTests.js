@@ -41,7 +41,7 @@ describe('Project api controller', function() {
     return (this.projDetails = { name: 'something' })
   })
 
-  return describe('getProjectDetails', function() {
+  describe('getProjectDetails', function() {
     it('should ask the project details handler for proj details', function(done) {
       this.ProjectDetailsHandler.getDetails.callsArgWith(
         1,
@@ -58,7 +58,7 @@ describe('Project api controller', function() {
       return this.controller.getProjectDetails(this.req, this.res)
     })
 
-    return it('should send a 500 if there is an error', function() {
+    it('should send a 500 if there is an error', function() {
       this.ProjectDetailsHandler.getDetails.callsArgWith(1, 'error')
       this.controller.getProjectDetails(this.req, this.res, this.next)
       return this.next.calledWith('error').should.equal(true)

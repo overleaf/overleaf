@@ -39,7 +39,7 @@ describe('UserMembershipsHandler', function() {
     }))
   })
 
-  return describe('remove user', () =>
+  describe('remove user', () =>
     it('remove user from all entities', function(done) {
       return this.UserMembershipsHandler.removeUserFromAllEntities(
         this.user._id,

@@ -72,7 +72,7 @@ define(['utils/EventEmitter'], EventEmitter =>
       return expect(cb).to.not.have.been.called
     })
 
-    return it('does not remove unnamespaced listeners if off called with namespace', function() {
+    it('does not remove unnamespaced listeners if off called with namespace', function() {
       const cb1 = sinon.stub()
       const cb2 = sinon.stub()
       this.eventEmitter.on('foo', cb1)

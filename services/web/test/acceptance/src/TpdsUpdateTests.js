@@ -37,7 +37,7 @@ describe('TpdsUpdateTests', function() {
     })
   })
 
-  return describe('deleting a file', function() {
+  describe('deleting a file', function() {
     before(function(done) {
       return request(
         {
@@ -59,7 +59,7 @@ describe('TpdsUpdateTests', function() {
       )
     })
 
-    return it('should have deleted the file', function(done) {
+    it('should have deleted the file', function(done) {
       return ProjectGetter.getProject(this.project_id, function(
         error,
         project

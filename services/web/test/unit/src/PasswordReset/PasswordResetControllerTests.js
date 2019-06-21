@@ -150,7 +150,7 @@ describe('PasswordResetController', function() {
       return this.PasswordResetController.requestReset(this.req, this.res)
     })
 
-    return it('should lowercase the email address', function(done) {
+    it('should lowercase the email address', function(done) {
       this.email = 'UPerCaseEMAIL@example.Com'
       this.req.body.email = this.email
       this.RateLimiter.addCount.callsArgWith(1, null, true)
@@ -285,7 +285,7 @@ describe('PasswordResetController', function() {
       return this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    return describe('when login_after is set', function() {
+    describe('when login_after is set', function() {
       beforeEach(function() {
         this.UserGetter.getUser = sinon
           .stub()
@@ -306,7 +306,7 @@ describe('PasswordResetController', function() {
           .returns('/some/path'))
       })
 
-      return it('should login user if login_after is set', function(done) {
+      it('should login user if login_after is set', function(done) {
         this.PasswordResetController.setNewUserPassword(this.req, this.res)
         this.AuthenticationController.afterLoginSessionSetup.callCount.should.equal(
           1
@@ -324,13 +324,13 @@ describe('PasswordResetController', function() {
     })
   })
 
-  return describe('renderSetPasswordForm', function() {
+  describe('renderSetPasswordForm', function() {
     describe('with token in query-string', function() {
       beforeEach(function() {
         return (this.req.query.passwordResetToken = this.token)
       })
 
-      return it('should set session.resetToken and redirect', function(done) {
+      it('should set session.resetToken and redirect', function(done) {
         this.req.session.should.not.have.property('resetToken')
         this.res.redirect = path => {
           path.should.equal('/user/password/set')
@@ -344,13 +344,13 @@ describe('PasswordResetController', function() {
       })
     })
 
-    return describe('without a token in query-string', function() {
+    describe('without a token in query-string', function() {
       describe('with token in session', function() {
         beforeEach(function() {
           return (this.req.session.resetToken = this.token)
         })
 
-        return it('should render the page, passing the reset token', function(done) {
+        it('should render the page, passing the reset token', function(done) {
           this.res.render = (template_path, options) => {
             options.passwordResetToken.should.equal(this.req.session.resetToken)
             return done()
@@ -362,7 +362,7 @@ describe('PasswordResetController', function() {
         })
       })
 
-      return describe('without a token in session', () =>
+      describe('without a token in session', () =>
         it('should redirect to the reset request page', function(done) {
           this.res.redirect = path => {
             path.should.equal('/user/password/reset')

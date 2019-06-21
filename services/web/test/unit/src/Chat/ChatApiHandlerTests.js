@@ -72,12 +72,12 @@ describe('ChatApiHandler', function() {
           .should.equal(true)
       })
 
-      return it('should return the message from the post', function() {
+      it('should return the message from the post', function() {
         return this.callback.calledWith(null, this.message).should.equal(true)
       })
     })
 
-    return describe('with a non-success status code', function() {
+    describe('with a non-success status code', function() {
       beforeEach(function() {
         this.request.callsArgWith(1, null, { statusCode: 500 })
         return this.ChatApiHandler.sendGlobalMessage(
@@ -88,7 +88,7 @@ describe('ChatApiHandler', function() {
         )
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         const error = new Error()
         error.statusCode = 500
         return this.callback.calledWith(error).should.equal(true)
@@ -96,7 +96,7 @@ describe('ChatApiHandler', function() {
     })
   })
 
-  return describe('getGlobalMessages', function() {
+  describe('getGlobalMessages', function() {
     beforeEach(function() {
       this.messages = [{ mock: 'message' }]
       this.limit = 30
@@ -130,12 +130,12 @@ describe('ChatApiHandler', function() {
           .should.equal(true)
       })
 
-      return it('should return the messages from the request', function() {
+      it('should return the messages from the request', function() {
         return this.callback.calledWith(null, this.messages).should.equal(true)
       })
     })
 
-    return describe('with failure error code', function() {
+    describe('with failure error code', function() {
       beforeEach(function() {
         this.request.callsArgWith(1, null, { statusCode: 500 }, null)
         return this.ChatApiHandler.getGlobalMessages(
@@ -146,7 +146,7 @@ describe('ChatApiHandler', function() {
         )
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         const error = new Error()
         error.statusCode = 500
         return this.callback.calledWith(error).should.equal(true)

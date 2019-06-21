@@ -110,7 +110,7 @@ describe('ProjectLocator', function() {
       )
     })
 
-    return it('should give error if element could not be found', function(done) {
+    it('should give error if element could not be found', function(done) {
       return this.locator.findElement(
         { project_id: project._id, element_id: 'ddsd432nj42', type: 'docs' },
         function(err, foundElement, path, parentFolder) {
@@ -147,7 +147,7 @@ describe('ProjectLocator', function() {
       )
     })
 
-    return it('when deeply nested', function(done) {
+    it('when deeply nested', function(done) {
       return this.locator.findElement(
         {
           project_id: project._id,
@@ -183,7 +183,7 @@ describe('ProjectLocator', function() {
       )
     })
 
-    return it('when deeply nested', function(done) {
+    it('when deeply nested', function(done) {
       return this.locator.findElement(
         {
           project_id: project._id,
@@ -216,7 +216,7 @@ describe('ProjectLocator', function() {
       )
     })
 
-    return it('should convert file to fileRefs', function(done) {
+    it('should convert file to fileRefs', function(done) {
       return this.locator.findElement(
         { project_id: project._id, element_id: file1._id, type: 'fileRefs' },
         function(err, foundElement, path, parentFolder) {
@@ -241,7 +241,7 @@ describe('ProjectLocator', function() {
       _id: '1234566',
       rootFolder: [rootFolder2]
     }
-    return it('should find doc in project', function(done) {
+    it('should find doc in project', function(done) {
       return this.locator.findElement(
         { project: project2, element_id: doc3._id, type: 'docs' },
         function(err, foundElement, path, parentFolder) {
@@ -282,7 +282,7 @@ describe('ProjectLocator', function() {
       })
     })
 
-    return it('should return null when the rootDoc_id no longer exists', function(done) {
+    it('should return null when the rootDoc_id no longer exists', function(done) {
       project.rootDoc_id = 'doesntexist'
       return this.locator.findRootDoc(project, function(err, doc) {
         assert(err == null)
@@ -462,7 +462,7 @@ describe('ProjectLocator', function() {
         )
       }) // mocha will throw exception if done called multiple times
 
-      return it('should not call the callback more than once when the path is longer than 1 level below the duplicate level', function(done) {
+      it('should not call the callback more than once when the path is longer than 1 level below the duplicate level', function(done) {
         const path = `${this.duplicateFolder.name}/1/main.tex`
         return this.locator.findElementByPath(
           { project: this.project, path },
@@ -484,7 +484,7 @@ describe('ProjectLocator', function() {
         })
       })
 
-      return it('should not crash with a null', function(done) {
+      it('should not crash with a null', function(done) {
         const path = '/other.tex'
         return this.locator.findElementByPath(
           { project: this.project, path },
@@ -501,7 +501,7 @@ describe('ProjectLocator', function() {
         return (this.ProjectGetter = { getProject: sinon.stub().callsArg(2) })
       })
 
-      return it('should not crash with a null', function(done) {
+      it('should not crash with a null', function(done) {
         const path = '/other.tex'
         return this.locator.findElementByPath(
           { project_id: project._id, path },
@@ -513,7 +513,7 @@ describe('ProjectLocator', function() {
       })
     })
 
-    return describe('with a project_id', () =>
+    describe('with a project_id', () =>
       it('should take a doc path and return the element for a root level document', function(done) {
         const path = `${doc1.name}`
         return this.locator.findElementByPath(
@@ -530,7 +530,7 @@ describe('ProjectLocator', function() {
       }))
   })
 
-  return describe('findUsersProjectByName finding a project by user_id and project name', function() {
+  describe('findUsersProjectByName finding a project by user_id and project name', function() {
     it('should return the project from an array case insenstive', function(done) {
       const user_id = '123jojoidns'
       const stubbedProject = { name: 'findThis' }
@@ -581,7 +581,7 @@ describe('ProjectLocator', function() {
       )
     })
 
-    return it('should search collab projects as well', function(done) {
+    it('should search collab projects as well', function(done) {
       const user_id = '123jojoidns'
       const stubbedProject = { name: 'findThis' }
       const projects = {
