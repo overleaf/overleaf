@@ -15,7 +15,7 @@ MockWebApi = require "./helpers/MockWebApi"
 describe "Flushing updates", ->
 	before (done)->
 		TrackChangesApp.ensureRunning done
-		
+
 	describe "flushing a doc's updates", ->
 		before (done) ->
 			@project_id = ObjectId().toString()
@@ -32,6 +32,7 @@ describe "Flushing updates", ->
 				TrackChangesClient.flushDoc @project_id, @doc_id, (error) ->
 					throw error if error?
 					done()
+			return null
 
 		it "should flush the op into mongo", (done) ->
 			TrackChangesClient.getCompressedUpdates @doc_id, (error, updates) ->
@@ -39,6 +40,7 @@ describe "Flushing updates", ->
 					p: 3, i: "f"
 				}]
 				done()
+			return null
 
 	describe "flushing a project's updates", ->
 		describe "with versioning enabled", ->
@@ -66,16 +68,19 @@ describe "Flushing updates", ->
 					TrackChangesClient.flushProject @project_id, (error) ->
 						throw error if error?
 						done()
+				return null
 
 			it "should not mark the updates for deletion", (done) ->
 				TrackChangesClient.getCompressedUpdates @doc_id, (error, updates) ->
 					expect(updates[0].expiresAt).to.not.exist
 					done()
+				return null
 
 			it "should preserve history forever", (done) ->
 				TrackChangesClient.getProjectMetaData @project_id, (error, project) ->
 					expect(project.preserveHistory).to.equal true
 					done()
+				return null
 
 		describe "without versioning enabled", ->
 			before (done) ->
@@ -102,11 +107,13 @@ describe "Flushing updates", ->
 					TrackChangesClient.flushProject @project_id, (error) ->
 						throw error if error?
 						done()
+				return null
 
 			it "should mark the updates for deletion", (done) ->
 				TrackChangesClient.getCompressedUpdates @doc_id, (error, updates) ->
 					expect(updates[0].expiresAt).to.exist
 					done()
+				return null
 
 		describe "without versioning enabled but with preserveHistory set to true", ->
 			before (done) ->
@@ -135,8 +142,10 @@ describe "Flushing updates", ->
 						TrackChangesClient.flushProject @project_id, (error) ->
 							throw error if error?
 							done()
+				return null
 
 			it "should not mark the updates for deletion", (done) ->
 				TrackChangesClient.getCompressedUpdates @doc_id, (error, updates) ->
 					expect(updates[0].expiresAt).to.not.exist
 					done()
+				return null

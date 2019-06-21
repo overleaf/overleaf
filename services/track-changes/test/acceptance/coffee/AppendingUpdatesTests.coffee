@@ -39,6 +39,7 @@ describe "Appending doc ops to the history", ->
 				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 					throw error if error?
 					done()
+			return null
 
 		it "should insert the compressed op into mongo", ->
 			expect(@updates[0].pack[0].op).to.deep.equal [{
@@ -58,6 +59,7 @@ describe "Appending doc ops to the history", ->
 			rclient.sismember "DocsWithHistoryOps:#{@project_id}", @doc_id, (error, member) ->
 				member.should.equal 0
 				done()
+			return null
 
 	describe "when the history has already been started", ->
 		beforeEach (done) ->
@@ -82,6 +84,7 @@ describe "Appending doc ops to the history", ->
 				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, updates) =>
 					throw error if error?
 					done()
+			return null
 
 		describe "when the updates are recent and from the same user", ->
 			beforeEach (done) ->
@@ -102,6 +105,7 @@ describe "Appending doc ops to the history", ->
 					TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 						throw error if error?
 						done()
+				return null
 
 			it "should combine all the updates into one pack", ->
 				expect(@updates[0].pack[1].op).to.deep.equal [{
@@ -132,6 +136,7 @@ describe "Appending doc ops to the history", ->
 					TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 						throw error if error?
 						done()
+				return null
 
 			it "should combine the updates into one pack", ->
 				expect(@updates[0].pack[0].op).to.deep.equal [{
@@ -162,6 +167,7 @@ describe "Appending doc ops to the history", ->
 				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 					throw error if error?
 					done()
+			return null
 
 		it "should concat the compressed op into mongo", ->
 			expect(@updates[0].pack.length).to.deep.equal 3  # batch size is 100
@@ -190,6 +196,7 @@ describe "Appending doc ops to the history", ->
 				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 					throw error if error?
 					done()
+			return null
 
 		it "should insert the compressed ops into mongo", ->
 			expect(@updates[0].pack[0].op).to.deep.equal [{
@@ -223,6 +230,7 @@ describe "Appending doc ops to the history", ->
 				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 					throw error if error?
 					done()
+			return null
 
 		it "should insert the compressed no-op into mongo", ->
 			expect(@updates[0].pack[0].op).to.deep.equal []
@@ -252,6 +260,7 @@ describe "Appending doc ops to the history", ->
 				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 					throw error if error?
 					done()
+			return null
 
 		it "should ignore the comment op", ->
 			expect(@updates[0].pack[0].op).to.deep.equal [{d: "bar", p: 6}]
@@ -275,6 +284,7 @@ describe "Appending doc ops to the history", ->
 				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 					throw error if error?
 					done()
+			return null
 
 		it "should not add a expiresAt entry in the update in mongo", ->
 			expect(@updates[0].expiresAt).to.be.undefined
@@ -295,6 +305,7 @@ describe "Appending doc ops to the history", ->
 				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 					throw error if error?
 					done()
+			return null
 
 		it "should add a expiresAt entry in the update in mongo", ->
 			expect(@updates[0].expiresAt).to.exist

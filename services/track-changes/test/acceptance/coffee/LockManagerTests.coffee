@@ -13,6 +13,7 @@ describe "Locking document", ->
 
 	before (done)->
 		TrackChangesApp.ensureRunning done
+		return null
 		
 	describe "when the lock has expired in redis", ->
 		before (done) ->
@@ -29,8 +30,10 @@ describe "Locking document", ->
 			, (error) ->
 				# we get here after trying to release lock A
 				done()
+			return null
 
 		it "the new lock should not be removed by the expired locker", (done) ->
 			LockManager.checkLock "doc123", (err, isFree) ->
 					expect(isFree).to.equal false
 					done()
+			return null

@@ -61,11 +61,14 @@ describe "Restoring a version", ->
 				TrackChangesClient.restoreDoc @project_id, @doc_id, @beforeVersion, @user_id, (error) =>
 					throw error if error?
 					done()
+		return null
 
 	after () ->
 		MockDocUpdaterApi.setDoc.restore()
+		return null
 
 	it "should set the doc in the doc updater", ->
 		MockDocUpdaterApi.setDoc
 			.calledWith(@project_id, @doc_id, @restored_lines, @user_id, true)
 			.should.equal true
+		return null
