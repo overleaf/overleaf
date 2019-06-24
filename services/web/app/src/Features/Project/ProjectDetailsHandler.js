@@ -13,7 +13,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let ProjectDetailsHandler
 const ProjectGetter = require('./ProjectGetter')
 const UserGetter = require('../User/UserGetter')
 const { Project } = require('../../models/Project')
@@ -28,8 +27,9 @@ const ProjectEntityHandler = require('./ProjectEntityHandler')
 const ProjectHelper = require('./ProjectHelper')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const settings = require('settings-sharelatex')
+const { promisify } = require('util')
 
-module.exports = ProjectDetailsHandler = {
+const ProjectDetailsHandler = {
   getDetails(project_id, callback) {
     return ProjectGetter.getProject(
       project_id,
@@ -221,7 +221,7 @@ module.exports = ProjectDetailsHandler = {
       return callback(
         new Errors.InvalidNameError('Project name cannot be blank')
       )
-    } else if (name.length > this.MAX_PROJECT_NAME_LENGTH) {
+    } else if (name.length > ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH) {
       return callback(new Errors.InvalidNameError('Project name is too long'))
     } else if (name.indexOf('/') > -1) {
       return callback(
@@ -303,8 +303,8 @@ module.exports = ProjectDetailsHandler = {
       // backslashes in project name will prevent syncing to dropbox
       name = name.replace(/\\/g, '')
     }
-    if (name.length > this.MAX_PROJECT_NAME_LENGTH) {
-      name = name.substr(0, this.MAX_PROJECT_NAME_LENGTH)
+    if (name.length > ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH) {
+      name = name.substr(0, ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH)
     }
     return name
   },
@@ -427,3 +427,11 @@ function __guard__(value, transform) {
     ? transform(value)
     : undefined
 }
+
+const promises = {
+  generateUniqueName: promisify(ProjectDetailsHandler.generateUniqueName)
+}
+
+ProjectDetailsHandler.promises = promises
+
+module.exports = ProjectDetailsHandler

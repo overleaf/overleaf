@@ -12,10 +12,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let ArchiveManager
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const fs = require('fs')
+const { promisify } = require('util')
 const Path = require('path')
 const fse = require('fs-extra')
 const yauzl = require('yauzl')
@@ -25,7 +25,7 @@ const _ = require('underscore')
 
 const ONE_MEG = 1024 * 1024
 
-module.exports = ArchiveManager = {
+const ArchiveManager = {
   _isZipTooLarge(source, callback) {
     if (callback == null) {
       callback = function(err, isTooLarge) {}
@@ -242,3 +242,11 @@ module.exports = ArchiveManager = {
     })
   }
 }
+
+const promises = {
+  extractZipArchive: promisify(ArchiveManager.extractZipArchive)
+}
+
+ArchiveManager.promises = promises
+
+module.exports = ArchiveManager

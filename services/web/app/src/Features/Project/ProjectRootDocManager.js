@@ -20,6 +20,7 @@ const ProjectGetter = require('./ProjectGetter')
 const DocumentHelper = require('../Documents/DocumentHelper')
 const Path = require('path')
 const fs = require('fs')
+const { promisify } = require('util')
 const async = require('async')
 const globby = require('globby')
 const _ = require('underscore')
@@ -307,3 +308,28 @@ module.exports = ProjectRootDocManager = {
     return a.path.localeCompare(b.path)
   }
 }
+
+const promises = {
+  setRootDocAutomatically: promisify(
+    ProjectRootDocManager.setRootDocAutomatically
+  ),
+
+  findRootDocFileFromDirectory: directoryPath =>
+    new Promise((resolve, reject) => {
+      ProjectRootDocManager.findRootDocFileFromDirectory(
+        directoryPath,
+        (error, path, content) => {
+          if (error) {
+            reject(error)
+          } else {
+            resolve({ path, content })
+          }
+        }
+      )
+    }),
+  setRootDocFromName: promisify(ProjectRootDocManager.setRootDocFromName)
+}
+
+ProjectRootDocManager.promises = promises
+
+module.exports = ProjectRootDocManager

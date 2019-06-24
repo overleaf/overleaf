@@ -536,7 +536,7 @@ describe('ProjectRootDocManager', function() {
         )
       })
 
-      it('should find the project with only the rootDoc_id fiel', function() {
+      it('should find the project with only the rootDoc_id field', function() {
         return this.ProjectGetter.getProject
           .calledWith(this.project_id, { rootDoc_id: 1 })
           .should.equal(true)
