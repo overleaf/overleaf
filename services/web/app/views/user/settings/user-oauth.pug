@@ -1,6 +1,6 @@
 block scripts
 	script(type='text/javascript').
-		window.oauthFallback = #{oauthFallback}
+		window.oauthUseV2 = #{oauthUseV2}
 		window.oauthProviders = !{StringHelper.stringifyJsonForScript(oauthProviders)}
 		window.thirdPartyIds = !{StringHelper.stringifyJsonForScript(thirdPartyIds)}
 
@@ -45,7 +45,7 @@ mixin providerList()
 		h3.text-capitalize#linked-accounts #{translate("linked_accounts")}
 		p.small #{translate("linked_accounts_explained", {appName:'{{settings.appName}}'})}
 
-		if settings.oauthFallback
+		if !settings.oauthUseV2
 			div.text-center(ng-if="ui.isLoadingV1Ids") 
 				i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
 				| &nbsp;#{translate("loading")}...

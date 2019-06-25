@@ -160,6 +160,7 @@ module.exports = UserPagesController = {
             oauthProviders,
             req
           ),
+          oauthUseV2: Settings.oauthUseV2 || false,
           ssoError: ssoError,
           thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
           previewOauth: req.query.prvw != null

@@ -30,11 +30,12 @@ define(['base'], App =>
         }
         $scope.providers = window.oauthProviders
         $scope.thirdPartyIds = window.thirdPartyIds
-        // $scope.v2ThirdPartyIds can be removed post user-c11n
-        // until v1 is authoritative we will use v1 SSO data for providers
-        // except collabratec, which will only write to v2.
-        // post user-c11n, oauthFallback setting will be removed and
-        // we will only use data from v2
+        // until oauthUseV2=true, we will use OAuth data via v1 DB,
+        // except for Collabratec, which is only writing to the v2 DB.
+        // $scope.v2ThirdPartyIds is required for Collabratec,
+        // and only until v2 is authoritative. Though, we should leave this
+        // until we stop double writes, in case we need to flip.
+        // Double writes for OAuth will stop when oauthFallback=false
         $scope.v2ThirdPartyIds = window.thirdPartyIds
       }
       const _getUserV1OauthProviders = () => {
@@ -84,7 +85,7 @@ define(['base'], App =>
       }
 
       _reset()
-      if (window.oauthFallback) {
+      if (!window.oauthUseV2) {
         _getUserV1OauthProviders()
       }
     }
