@@ -134,10 +134,6 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
     res.locals.externalAuthenticationSystemUsed =
       Features.externalAuthenticationSystemUsed
     req.hasFeature = res.locals.hasFeature = Features.hasFeature
-    res.locals.userIsFromOLv1 = user =>
-      (user.overleaf != null ? user.overleaf.id : undefined) != null
-    res.locals.userIsFromSL = user =>
-      (user.overleaf != null ? user.overleaf.id : undefined) == null
     return next()
   })
 

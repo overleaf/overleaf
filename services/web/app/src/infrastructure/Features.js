@@ -35,12 +35,6 @@ module.exports = Features = {
         return Settings.enableGithubSync
       case 'git-bridge':
         return Settings.enableGitBridge
-      case 'v1-return-message':
-        return (
-          Settings.accountMerge != null &&
-          Settings.overleaf != null &&
-          !Settings.forceImportToV2
-        )
       case 'custom-togglers':
         return Settings.overleaf != null
       case 'oauth':
