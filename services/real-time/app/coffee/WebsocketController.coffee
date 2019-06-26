@@ -22,7 +22,7 @@ module.exports = WebsocketController =
 
 			if !privilegeLevel or privilegeLevel == ""
 				err = new Error("not authorized")
-				logger.error {err, project_id, user_id, client_id: client.id}, "user is not authorized to join project"
+				logger.warn {err, project_id, user_id, client_id: client.id}, "user is not authorized to join project"
 				return callback(err)
 				
 			client.join project_id
