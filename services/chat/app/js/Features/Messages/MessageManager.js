@@ -129,7 +129,6 @@ module.exports = MessageManager = {
     return query
   }
 }
-
 ;[
   'createMessage',
   'getMessages',
