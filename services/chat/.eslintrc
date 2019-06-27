@@ -16,6 +16,11 @@
   "env": {
     "node": true
   },
+  "globals": {
+    "expect": true,
+    "define": true,
+    "it": true
+  },
   "rules": {
     // Add some mocha specific rules
     "mocha/handle-done-callback": "error",
