@@ -26,12 +26,9 @@ describe('CollaboratorsController', function() {
   beforeEach(function() {
     this.CollaboratorsController = SandboxedModule.require(modulePath, {
       requires: {
-        '../Project/ProjectGetter': (this.ProjectGetter = {}),
         './CollaboratorsHandler': (this.CollaboratorsHandler = {}),
         '../Editor/EditorRealTimeController': (this.EditorRealTimeController = {}),
-        '../Subscription/LimitationsManager': (this.LimitationsManager = {}),
-        '../Project/ProjectEditorHandler': (this.ProjectEditorHandler = {}),
-        '../User/UserGetter': (this.UserGetter = {}),
+        '../Tags/TagsHandler': (this.TagsHandler = {}),
         'logger-sharelatex': (this.logger = {
           err: sinon.stub(),
           erro: sinon.stub(),
@@ -53,8 +50,9 @@ describe('CollaboratorsController', function() {
         user_id: (this.user_id = 'user-id-123')
       }
       this.res.sendStatus = sinon.stub()
-      this.EditorRealTimeController.emitToRoom = sinon.stub()
       this.CollaboratorsHandler.removeUserFromProject = sinon.stub().callsArg(2)
+      this.EditorRealTimeController.emitToRoom = sinon.stub()
+      this.TagsHandler.removeProjectFromAllTags = sinon.stub().callsArg(2)
       return this.CollaboratorsController.removeUserFromProject(
         this.req,
         this.res
@@ -89,8 +87,9 @@ describe('CollaboratorsController', function() {
       this.req.session = { user: { _id: (this.user_id = 'user-id-123') } }
       this.req.params = { Project_id: this.project_id }
       this.res.sendStatus = sinon.stub()
-      this.EditorRealTimeController.emitToRoom = sinon.stub()
       this.CollaboratorsHandler.removeUserFromProject = sinon.stub().callsArg(2)
+      this.EditorRealTimeController.emitToRoom = sinon.stub()
+      this.TagsHandler.removeProjectFromAllTags = sinon.stub().callsArg(2)
       return this.CollaboratorsController.removeSelfFromProject(
         this.req,
         this.res
@@ -107,6 +106,14 @@ describe('CollaboratorsController', function() {
       return this.EditorRealTimeController.emitToRoom
         .calledWith(this.project_id, 'userRemovedFromProject', this.user_id)
         .should.equal(true)
+    })
+
+    it('should remove the project from all tags', function() {
+      sinon.assert.calledWith(
+        this.TagsHandler.removeProjectFromAllTags,
+        this.user_id,
+        this.project_id
+      )
     })
 
     it('should return a success code', function() {
