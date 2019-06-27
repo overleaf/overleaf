@@ -365,7 +365,7 @@ module.exports = ProjectController = {
         const v1Tags =
           (results.v1Projects != null ? results.v1Projects.tags : undefined) ||
           []
-        const tags = results.tags[0].concat(v1Tags)
+        const tags = results.tags.concat(v1Tags)
         const notifications = require('underscore').map(
           results.notifications,
           function(notification) {

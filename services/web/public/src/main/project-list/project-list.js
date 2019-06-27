@@ -125,7 +125,9 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
       projectsById[project.id] = project
     }
 
-    for (var tag of $scope.tags) {
+    $scope.getProjectById = id => projectsById[id]
+
+    for (let tag of $scope.tags) {
       for (let projectId of tag.project_ids || []) {
         let project = projectsById[projectId]
         if (project) {
@@ -273,7 +275,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
     }
 
     $scope.getSelectedTag = function() {
-      for (tag of $scope.tags) {
+      for (let tag of $scope.tags) {
         if (tag.selected) {
           return tag
         }
@@ -395,8 +397,6 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
         })
       }
     }
-
-    $scope.createTag = name => tag
 
     $scope.openNewTagModal = function(e) {
       const modalInstance = $modal.open({
@@ -631,7 +631,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
       }
 
       // Remove project from any tags
-      for (tag of $scope.tags) {
+      for (let tag of $scope.tags) {
         $scope._removeProjectIdsFromTagArray(tag, selectedProjectIds)
       }
 
@@ -709,7 +709,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
       })
 
     const markTagAsSelected = id => {
-      for (tag of $scope.tags) {
+      for (let tag of $scope.tags) {
         if (tag._id === id) {
           tag.selected = true
         } else {

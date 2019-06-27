@@ -62,24 +62,6 @@ describe('TagsHandler', function() {
       })
     }))
 
-  describe('_groupTagsByProject', () =>
-    it('should 	group the tags by project_id', function(done) {
-      const rawTags = [
-        { name: 'class101', project_ids: ['1234', '51db33e31a55afd212000007'] },
-        { name: 'class201', project_ids: ['1234', '51db33e31a55afd212000007'] },
-        {
-          name: 'research group',
-          project_ids: ['12', '51da65f2e2c39a2f09000100', 'odjaskdas', 'dasdsa']
-        },
-        { name: 'different', project_ids: ['1234', 'e2c39a2f09000100'] }
-      ]
-
-      return this.handler._groupTagsByProject(rawTags, function(err, tags) {
-        _.size(tags).should.equal(7)
-        return done()
-      })
-    }))
-
   describe('_requestTags', function() {
     it('should return an err and empty array on error', function(done) {
       this.request.get.callsArgWith(

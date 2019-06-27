@@ -404,7 +404,7 @@ describe('ProjectController', function() {
       }
 
       this.LimitationsManager.hasPaidSubscription.callsArgWith(1, null, false)
-      this.TagsHandler.getAllTags.callsArgWith(1, null, this.tags, {})
+      this.TagsHandler.getAllTags.callsArgWith(1, null, this.tags)
       this.NotificationsHandler.getUserNotifications = sinon
         .stub()
         .callsArgWith(1, null, this.notifications, {})
@@ -656,7 +656,7 @@ describe('ProjectController', function() {
       }
 
       this.LimitationsManager.hasPaidSubscription.callsArgWith(1, null, false)
-      this.TagsHandler.getAllTags.callsArgWith(1, null, this.tags, {})
+      this.TagsHandler.getAllTags.callsArgWith(1, null, this.tags)
       this.NotificationsHandler.getUserNotifications = sinon
         .stub()
         .callsArgWith(1, null, this.notifications, {})

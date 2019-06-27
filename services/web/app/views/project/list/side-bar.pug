@@ -85,7 +85,7 @@
 					aria-hidden="true"
 				)
 				span.name {{tag.name}} 
-					span.subdued  ({{tag.project_ids.length}})
+					span.subdued  ({{countProjectsForTag(tag)}})
 					span.v1-badge(
 						ng-if="tag.isV1",
 						ng-cloak,

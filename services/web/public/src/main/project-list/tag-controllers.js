@@ -21,6 +21,24 @@ define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
       $scope.setFilter('untagged')
     }
 
+    $scope.countProjectsForTag = function(tag) {
+      return tag.project_ids.reduce((acc, projectId) => {
+        const project = $scope.getProjectById(projectId)
+
+        // There is a bug where the tag is not cleaned up when you leave a
+        // project, so tag.project_ids can contain a project that the user can
+        // no longer access. If the project cannot be found, ignore it
+        if (!project) return acc
+
+        // Ignore archived projects as they are not shown in the filter
+        if (!project.archived) {
+          return acc + 1
+        } else {
+          return acc
+        }
+      }, 0)
+    }
+
     $scope.getHueForTagId = tagId => ColorManager.getHueForTagId(tagId)
 
     $scope.deleteTag = function(tag) {
