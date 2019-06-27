@@ -212,7 +212,7 @@ describe "UpdateManager", ->
 
 		describe "with UTF-16 surrogate pairs in the update", ->
 			beforeEach ->
-				@update = {op: [{p: 42, i: "\uD835\uDC00"}], hash: "f1d2d2f924e986ac86fdf7b36c94bcdf32beec15"}
+				@update = {op: [{p: 42, i: "\uD835\uDC00"}]}
 				@UpdateManager.applyUpdate @project_id, @doc_id, @update, @callback
 
 			it "should apply the update but with surrogate pairs removed", ->
@@ -222,9 +222,6 @@ describe "UpdateManager", ->
 
 				# \uFFFD is 'replacement character'
 				@update.op[0].i.should.equal "\uFFFD\uFFFD"
-
-			it "should skip the hash check by removing any hash field present", ->
-				@update.should.not.have.property('hash')
 
 		describe "with an error", ->
 			beforeEach ->

@@ -138,13 +138,10 @@ module.exports = UpdateManager =
 		# 16-bit character of a blackboard bold character (http://www.fileformat.info/info/unicode/char/1d400/index.htm).
 		# Something must be going on client side that is screwing up the encoding and splitting the
 		# two 16-bit characters so that \uD835 is standalone.
-		BAD_CHAR_REGEXP = /[\uD800-\uDFFF]/g
 		for op in update.op or []
-			if op.i? && BAD_CHAR_REGEXP.test(op.i)
+			if op.i?
 				# Replace high and low surrogate characters with 'replacement character' (\uFFFD)
-				op.i = op.i.replace(BAD_CHAR_REGEXP, "\uFFFD")
-				# remove any client-side hash because we have modified the content
-				delete update.hash
+				op.i = op.i.replace(/[\uD800-\uDFFF]/g, "\uFFFD")
 		return update
 
 	_addProjectHistoryMetadataToOps: (updates, pathname, projectHistoryId, lines) ->
