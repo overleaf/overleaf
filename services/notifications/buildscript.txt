@@ -5,4 +5,4 @@ notifications
 --dependencies=mongo,redis
 --docker-repos=gcr.io/overleaf-ops
 --build-target=docker
---script-version=1.1.12
+--script-version=1.1.21
