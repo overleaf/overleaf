@@ -42,11 +42,19 @@ module.exports = {
           'sending response that tpdsUpdate has been completed'
         )
         if (err != null) {
-          logger.err(
-            { err, user_id, filePath },
-            'error reciving update from tpds'
-          )
-          return res.sendStatus(500)
+          if (err.name === 'TooManyRequestsError') {
+            logger.warn(
+              { err, user_id, filePath },
+              'tpds update failed to be processed, too many requests'
+            )
+            return res.sendStatus(429)
+          } else {
+            logger.err(
+              { err, user_id, filePath },
+              'error reciving update from tpds'
+            )
+            return res.sendStatus(500)
+          }
         } else {
           logger.log(
             { user_id, filePath, projectName },
