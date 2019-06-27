@@ -14,12 +14,8 @@
     "chai-friendly"
   ],
   "env": {
-    "node": true
-  },
-  "globals": {
-    "expect": true,
-    "define": true,
-    "it": true
+    "node": true,
+    "mocha": true
   },
   "rules": {
     // Add some mocha specific rules
