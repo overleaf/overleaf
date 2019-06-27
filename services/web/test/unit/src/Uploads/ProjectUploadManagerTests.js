@@ -17,6 +17,7 @@ const modulePath =
 const SandboxedModule = require('sandboxed-module')
 
 const promiseStub = val => new Promise(resolve => resolve(val))
+const failedPromiseStub = err => new Promise((resolve, reject) => reject(err))
 
 describe('ProjectUploadManager', function() {
   beforeEach(function() {
@@ -45,6 +46,9 @@ describe('ProjectUploadManager', function() {
           promises: {}
         }),
         '../Project/ProjectDetailsHandler': (this.ProjectDetailsHandler = {
+          promises: {}
+        }),
+        '../Project/ProjectDeleter': (this.ProjectDeleter = {
           promises: {}
         }),
         '../Documents/DocumentHelper': (this.DocumentHelper = {}),
@@ -211,7 +215,7 @@ describe('ProjectUploadManager', function() {
       this.ProjectUploadManager.promises.insertZipArchiveIntoFolder = sinon
         .stub()
         .returns(promiseStub())
-      return this.ProjectUploadManager.createProjectFromZipArchiveWithName(
+      this.ProjectUploadManager.createProjectFromZipArchiveWithName(
         this.owner_id,
         this.name,
         this.source,
@@ -255,6 +259,71 @@ describe('ProjectUploadManager', function() {
       return this.callback
         .calledWith(sinon.match.falsy, this.project)
         .should.equal(true)
+    })
+    describe('when inserting the zip file contents into the root folder fails', function() {
+      beforeEach(function(done) {
+        this.callback = sinon.stub()
+        this.ProjectUploadManager.promises.insertZipArchiveIntoFolder = sinon
+          .stub()
+          .returns(failedPromiseStub('insert-zip-error'))
+        this.ProjectDeleter.promises.deleteProject = sinon
+          .stub()
+          .returns(promiseStub())
+        this.ProjectUploadManager.createProjectFromZipArchiveWithName(
+          this.owner_id,
+          this.name,
+          this.source,
+          (err, project) => {
+            this.callback(err, project)
+            return done()
+          }
+        )
+      })
+
+      it('should pass an error to the callback', function() {
+        return this.callback
+          .calledWith('insert-zip-error', sinon.match.falsy)
+          .should.equal(true)
+      })
+
+      it('should cleanup the blank project created', function() {
+        return this.ProjectDeleter.promises.deleteProject
+          .calledWith(this.project_id)
+          .should.equal(true)
+      })
+    })
+
+    describe('when setting automatically the root doc fails', function() {
+      beforeEach(function(done) {
+        this.callback = sinon.stub()
+        this.ProjectRootDocManager.promises.setRootDocAutomatically = sinon
+          .stub()
+          .returns(failedPromiseStub('set-root-auto-error'))
+        this.ProjectDeleter.promises.deleteProject = sinon
+          .stub()
+          .returns(promiseStub())
+        this.ProjectUploadManager.createProjectFromZipArchiveWithName(
+          this.owner_id,
+          this.name,
+          this.source,
+          (err, project) => {
+            this.callback(err, project)
+            return done()
+          }
+        )
+      })
+
+      it('should pass an error to the callback', function() {
+        return this.callback
+          .calledWith('set-root-auto-error', sinon.match.falsy)
+          .should.equal(true)
+      })
+
+      it('should cleanup the blank project created', function() {
+        return this.ProjectDeleter.promises.deleteProject
+          .calledWith(this.project_id)
+          .should.equal(true)
+      })
     })
   })
 

@@ -20,7 +20,9 @@ const FileSystemImportManager = require('./FileSystemImportManager')
 const ProjectCreationHandler = require('../Project/ProjectCreationHandler')
 const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
 const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
+const ProjectDeleter = require('../Project/ProjectDeleter').promises
 const DocumentHelper = require('../Documents/DocumentHelper')
+const logger = require('logger-sharelatex')
 
 const ProjectUploadManager = {
   createProjectFromZipArchive(ownerId, defaultName, zipPath, callback) {
@@ -143,17 +145,30 @@ const promises = {
       ownerId,
       uniqueName
     )
-    await ProjectUploadManager.promises._insertZipContentsIntoFolder(
-      ownerId,
-      project._id,
-      project.rootFolder[0]._id,
-      destination
-    )
+    try {
+      await ProjectUploadManager.promises._insertZipContentsIntoFolder(
+        ownerId,
+        project._id,
+        project.rootFolder[0]._id,
+        destination
+      )
 
-    if (path) {
-      await ProjectRootDocManager.promises.setRootDocFromName(project._id, path)
+      if (path) {
+        await ProjectRootDocManager.promises.setRootDocFromName(
+          project._id,
+          path
+        )
+      }
+    } catch (err) {
+      // no need to wait for the cleanup here
+      ProjectDeleter.deleteProject(project._id).catch(err =>
+        logger.error(
+          { err, projectId: project._id },
+          'there was an error cleaning up project after importing a zip failed'
+        )
+      )
+      throw err
     }
-
     return project
   },
 
@@ -176,14 +191,25 @@ const promises = {
       projectName,
       attributes
     )
-    await ProjectUploadManager.promises.insertZipArchiveIntoFolder(
-      ownerId,
-      project._id,
-      project.rootFolder[0]._id,
-      zipPath
-    )
 
-    await ProjectRootDocManager.promises.setRootDocAutomatically(project._id)
+    try {
+      await ProjectUploadManager.promises.insertZipArchiveIntoFolder(
+        ownerId,
+        project._id,
+        project.rootFolder[0]._id,
+        zipPath
+      )
+      await ProjectRootDocManager.promises.setRootDocAutomatically(project._id)
+    } catch (err) {
+      // no need to wait for the cleanup here
+      ProjectDeleter.deleteProject(project._id).catch(err =>
+        logger.error(
+          { err, projectId: project._id },
+          'there was an error cleaning up project after importing a zip failed'
+        )
+      )
+      throw err
+    }
 
     return project
   },

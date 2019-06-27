@@ -14,7 +14,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let ProjectDeleter
+const { promisify } = require('util')
 const { Project } = require('../../models/Project')
 const { DeletedProject } = require('../../models/DeletedProject')
 const logger = require('logger-sharelatex')
@@ -24,7 +24,7 @@ const async = require('async')
 const FileStoreHandler = require('../FileStore/FileStoreHandler')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 
-module.exports = ProjectDeleter = {
+const ProjectDeleter = {
   markAsDeletedByExternalSource(project_id, callback) {
     if (callback == null) {
       callback = function(error) {}
@@ -189,3 +189,11 @@ module.exports = ProjectDeleter = {
     )
   }
 }
+
+const promises = {
+  deleteProject: promisify(ProjectDeleter.deleteProject)
+}
+
+ProjectDeleter.promises = promises
+
+module.exports = ProjectDeleter
