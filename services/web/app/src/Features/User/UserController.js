@@ -254,10 +254,7 @@ module.exports = UserController = {
       if (err != null) {
         return next(err)
       }
-      const redirect_url =
-        settings.overleaf != null
-          ? settings.overleaf.host + '/users/ensure_signed_out'
-          : '/login'
+      const redirect_url = '/login'
       return res.redirect(redirect_url)
     })
   },
