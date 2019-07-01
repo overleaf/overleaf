@@ -11,6 +11,6 @@
   "private": true,
   "devDependencies": {
     "chai": "^3.3.0",
-    "mocha": "^2.3.3"
+    "mocha": "^6.1.4"
   }
 }
