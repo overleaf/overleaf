@@ -47,13 +47,20 @@ define(['base'], function(App) {
           'X-Requested-With': 'XMLHttpRequest'
         }
       })
-        .then(function() {
-          $scope.notification.inflight = false
-          return ($scope.notification.accepted = true)
+        .then(() => {
+          $scope.notification.accepted = true
         })
-        .catch(function() {
+        .catch(({ status }) => {
+          if (status === 404) {
+            // 404 probably means the invite has already been accepted and
+            // deleted. Treat as success
+            $scope.notification.accepted = true
+          } else {
+            $scope.notification.error = true
+          }
+        })
+        .finally(() => {
           $scope.notification.inflight = false
-          return ($scope.notification.error = true)
         })
     })
   })
