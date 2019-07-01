@@ -1,6 +1,7 @@
 'use strict'
 
 var errorType = require('..')
+const { expectError } = require('./support')
 
 describe('errorType', function () {
   it('defines a custom error type', function () {
@@ -14,29 +15,12 @@ describe('errorType', function () {
       doSomethingBad()
       expect.fail('should have thrown')
     } catch (e) {
-      // should set the name to the error's name
-      expect(e.name).to.equal('CustomError')
-
-      // should be an instance of the error type
-      expect(e instanceof CustomError).to.be.true
-
-      // should be an instance of the built-in Error type
-      expect(e instanceof Error).to.be.true
-
-      // should be recognised by util.isError
-      expect(require('util').isError(e)).to.be.true
-
-      // should have a stack trace
-      expect(e.stack).to.be.truthy
-
-      // toString should return the default error message formatting
-      expect(e.toString()).to.equal('CustomError')
-
-      // stack should start with the default error message formatting
-      expect(e.stack.split('\n')[0], 'CustomError')
-
-      // first stack frame should be the function where the error was thrown
-      expect(e.stack.split('\n')[1]).to.match(/doSomethingBad/)
+      expectError(e, {
+        name: 'CustomError',
+        klass: CustomError,
+        message: 'CustomError',
+        firstFrameRx: /doSomethingBad/
+      })
     }
   })
 
