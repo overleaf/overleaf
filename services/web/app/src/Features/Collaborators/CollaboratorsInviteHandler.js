@@ -32,7 +32,7 @@ module.exports = CollaboratorsInviteHandler = {
     logger.log({ projectId }, 'fetching invites for project')
     return ProjectInvite.find({ projectId }, function(err, invites) {
       if (err != null) {
-        logger.err({ err, projectId }, 'error getting invites from mongo')
+        logger.warn({ err, projectId }, 'error getting invites from mongo')
         return callback(err)
       }
       logger.log(
@@ -50,7 +50,7 @@ module.exports = CollaboratorsInviteHandler = {
     logger.log({ projectId }, 'counting invites for project')
     return ProjectInvite.count({ projectId }, function(err, count) {
       if (err != null) {
-        logger.err({ err, projectId }, 'error getting invites from mongo')
+        logger.warn({ err, projectId }, 'error getting invites from mongo')
         return callback(err)
       }
       return callback(null, count)
@@ -67,7 +67,7 @@ module.exports = CollaboratorsInviteHandler = {
       existingUser
     ) {
       if (err != null) {
-        logger.err({ projectId, email }, 'error checking if user exists')
+        logger.warn({ projectId, email }, 'error checking if user exists')
         return callback(err)
       }
       if (existingUser == null) {
@@ -79,7 +79,7 @@ module.exports = CollaboratorsInviteHandler = {
         project
       ) {
         if (err != null) {
-          logger.err({ projectId, email }, 'error getting project')
+          logger.warn({ projectId, email }, 'error getting project')
           return callback(err)
         }
         if (project == null) {
@@ -153,7 +153,7 @@ module.exports = CollaboratorsInviteHandler = {
     )
     return Crypto.randomBytes(24, function(err, buffer) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, projectId, sendingUserId: sendingUser._id, email },
           'error generating random token'
         )
@@ -169,7 +169,7 @@ module.exports = CollaboratorsInviteHandler = {
       })
       return invite.save(function(err, invite) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, projectId, sendingUserId: sendingUser._id, email },
             'error saving token'
           )
@@ -201,7 +201,7 @@ module.exports = CollaboratorsInviteHandler = {
     logger.log({ projectId, inviteId }, 'removing invite')
     return ProjectInvite.remove({ projectId, _id: inviteId }, function(err) {
       if (err != null) {
-        logger.err({ err, projectId, inviteId }, 'error removing invite')
+        logger.warn({ err, projectId, inviteId }, 'error removing invite')
         return callback(err)
       }
       CollaboratorsInviteHandler._tryCancelInviteNotification(
@@ -222,7 +222,7 @@ module.exports = CollaboratorsInviteHandler = {
       invite
     ) {
       if (err != null) {
-        logger.err({ err, projectId, inviteId }, 'error finding invite')
+        logger.warn({ err, projectId, inviteId }, 'error finding invite')
         return callback(err)
       }
       if (invite == null) {
@@ -238,7 +238,7 @@ module.exports = CollaboratorsInviteHandler = {
         invite,
         function(err) {
           if (err != null) {
-            logger.err(
+            logger.warn(
               { projectId, inviteId },
               'error resending invite messages'
             )
@@ -260,7 +260,7 @@ module.exports = CollaboratorsInviteHandler = {
       invite
     ) {
       if (err != null) {
-        logger.err({ err, projectId }, 'error fetching invite')
+        logger.warn({ err, projectId }, 'error fetching invite')
         return callback(err)
       }
       if (invite == null) {
@@ -281,7 +281,7 @@ module.exports = CollaboratorsInviteHandler = {
       tokenString,
       function(err, invite) {
         if (err != null) {
-          logger.err({ err, projectId, tokenString }, 'error finding invite')
+          logger.warn({ err, projectId, tokenString }, 'error finding invite')
           return callback(err)
         }
         if (!invite) {
@@ -300,7 +300,7 @@ module.exports = CollaboratorsInviteHandler = {
           invite.privileges,
           function(err) {
             if (err != null) {
-              logger.err(
+              logger.warn(
                 { err, projectId, inviteId, userId: user._id },
                 'error adding user to project'
               )
@@ -310,7 +310,7 @@ module.exports = CollaboratorsInviteHandler = {
             logger.log({ projectId, inviteId }, 'removing invite')
             return ProjectInvite.remove({ _id: inviteId }, function(err) {
               if (err != null) {
-                logger.err(
+                logger.warn(
                   { err, projectId, inviteId },
                   'error removing invite'
                 )

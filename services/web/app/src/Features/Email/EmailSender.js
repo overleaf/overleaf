@@ -190,7 +190,7 @@ module.exports = {
       }
       return client.sendMail(options, function(err, res) {
         if (err != null) {
-          logger.err({ err }, 'error sending message')
+          logger.warn({ err }, 'error sending message')
           err = new Error('Cannot send email')
         } else {
           logger.log(`Message sent to ${options.to}`)

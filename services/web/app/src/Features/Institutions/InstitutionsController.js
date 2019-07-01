@@ -45,7 +45,7 @@ var affiliateUsers = function(hostname, callback) {
     { _id: 1, emails: 1 },
     function(error, users) {
       if (error != null) {
-        logger.err({ error }, 'problem fetching users by hostname')
+        logger.warn({ error }, 'problem fetching users by hostname')
         return callback(error)
       }
 
@@ -81,7 +81,7 @@ var affiliateUserByReversedHostname = function(
         { confirmedAt: email.confirmedAt },
         error => {
           if (error != null) {
-            logger.err(
+            logger.warn(
               { error },
               'problem adding affiliation while confirming hostname'
             )

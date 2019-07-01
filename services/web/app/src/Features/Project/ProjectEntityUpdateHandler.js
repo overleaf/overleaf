@@ -128,7 +128,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
               fileRef._id,
               function(err, fileStoreUrl) {
                 if (err != null) {
-                  logger.err(
+                  logger.warn(
                     {
                       err,
                       project_id,
@@ -182,7 +182,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
         'file',
         function(err, result, newProject) {
           if (err != null) {
-            logger.err(
+            logger.warn(
               { err, project_id, folder_id },
               'error putting element as part of copy'
             )
@@ -286,7 +286,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
 
           if (doc == null) {
             // Do not allow an update to a doc which has never exist on this project
-            logger.error(
+            logger.warn(
               { doc_id, project_id, lines },
               'doc not found while updating doc lines'
             )
@@ -305,7 +305,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
             ranges,
             function(err, modified, rev) {
               if (err != null) {
-                logger.error(
+                logger.warn(
                   { err, doc_id, project_id, lines },
                   'error sending doc to docstore'
                 )
@@ -379,7 +379,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
       doc,
       function(err, result, project) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             {
               err,
               project_id,
@@ -546,7 +546,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
       fsPath,
       function(err, fileStoreUrl, fileRef) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id, folder_id, file_name: fileName, fileRef },
             'error uploading image to s3'
           )
@@ -567,7 +567,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
       fileRef,
       function(err, result, project) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id, folder_id, file_name: fileRef.name, fileRef },
             'error adding file with project'
           )
@@ -1129,7 +1129,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
     }
     logger.log({ entity_id, entityType, project_id }, 'deleting project entity')
     if (entityType == null) {
-      logger.err({ err: 'No entityType set', project_id, entity_id })
+      logger.warn({ err: 'No entityType set', project_id, entity_id })
       return callback('No entityType set')
     }
     entityType = entityType.toLowerCase()
@@ -1260,7 +1260,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
       'moving entity'
     )
     if (entityType == null) {
-      logger.err({ err: 'No entityType set', project_id, entity_id })
+      logger.warn({ err: 'No entityType set', project_id, entity_id })
       return callback('No entityType set')
     }
     entityType = entityType.toLowerCase()
@@ -1308,7 +1308,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
     }
     logger.log({ entity_id, project_id }, `renaming ${entityType}`)
     if (entityType == null) {
-      logger.err({ err: 'No entityType set', project_id, entity_id })
+      logger.warn({ err: 'No entityType set', project_id, entity_id })
       return callback('No entityType set')
     }
     entityType = entityType.toLowerCase()

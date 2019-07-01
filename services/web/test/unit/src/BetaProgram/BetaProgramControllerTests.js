@@ -50,6 +50,7 @@ describe('BetaProgramController', function() {
         }),
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
+          warn: sinon.stub(),
           err: sinon.stub(),
           error: sinon.stub()
         }),

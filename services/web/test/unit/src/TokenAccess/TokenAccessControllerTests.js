@@ -57,7 +57,11 @@ describe('TokenAccessController', function() {
         '../../infrastructure/Features': (this.Features = {
           hasFeature: sinon.stub().returns(false)
         }),
-        'logger-sharelatex': { log: sinon.stub(), err: sinon.stub() },
+        'logger-sharelatex': {
+          log: sinon.stub(),
+          warn: sinon.stub(),
+          err: sinon.stub()
+        },
         'settings-sharelatex': {
           overleaf: {
             host: 'http://overleaf.test:5000'

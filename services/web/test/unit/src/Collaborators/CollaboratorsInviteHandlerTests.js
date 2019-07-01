@@ -60,6 +60,7 @@ describe('CollaboratorsInviteHandler', function() {
         'logger-sharelatex': (this.logger = {
           err: sinon.stub(),
           error: sinon.stub(),
+          warn: sinon.stub(),
           log: sinon.stub()
         }),
         './CollaboratorsEmailHandler': (this.CollaboratorsEmailHandler = {}),

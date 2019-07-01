@@ -59,7 +59,7 @@ module.exports = function(backendGroup) {
       const url = `${Settings.apis.clsi.url}/project/${project_id}/status`
       return request.get(url, (err, res, body) => {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id },
             'error getting initial server id for project'
           )
@@ -67,7 +67,7 @@ module.exports = function(backendGroup) {
         }
         return this.setServerId(project_id, res, function(err, serverId) {
           if (err != null) {
-            logger.err(
+            logger.warn(
               { err, project_id },
               'error setting server id via populate request'
             )
@@ -139,7 +139,7 @@ module.exports = function(backendGroup) {
       }
       return this._getServerId(project_id, (err, serverId) => {
         if (err != null) {
-          logger.err({ err, project_id }, 'error getting server id')
+          logger.warn({ err, project_id }, 'error getting server id')
           return callback(err)
         }
         const serverCookie = request.cookie(

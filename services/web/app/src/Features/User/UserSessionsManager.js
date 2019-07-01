@@ -48,7 +48,7 @@ module.exports = UserSessionsManager = {
       .expire(sessionSetKey, `${Settings.cookieSessionLength}`)
       .exec(function(err, response) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, user_id: user._id, sessionSetKey },
             'error while adding session key to UserSessions set'
           )
@@ -80,7 +80,7 @@ module.exports = UserSessionsManager = {
       .expire(sessionSetKey, `${Settings.cookieSessionLength}`)
       .exec(function(err, response) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, user_id: user._id, sessionSetKey },
             'error while removing session key from UserSessions set'
           )
@@ -99,7 +99,7 @@ module.exports = UserSessionsManager = {
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
     return rclient.smembers(sessionSetKey, function(err, sessionKeys) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { user_id: user._id },
           'error getting all session keys for user from redis'
         )
@@ -116,7 +116,7 @@ module.exports = UserSessionsManager = {
         (k, cb) => rclient.get(k, cb),
         function(err, sessions) {
           if (err != null) {
-            logger.err(
+            logger.warn(
               { user_id: user._id },
               'error getting all sessions for user from redis'
             )
@@ -163,7 +163,7 @@ module.exports = UserSessionsManager = {
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
     return rclient.smembers(sessionSetKey, function(err, sessionKeys) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, user_id: user._id, sessionSetKey },
           'error getting contents of UserSessions set'
         )
@@ -189,7 +189,7 @@ module.exports = UserSessionsManager = {
 
       return Async.series(deletions, function(err, _result) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, user_id: user._id, sessionSetKey },
             'errror revoking all sessions for user'
           )
@@ -197,7 +197,7 @@ module.exports = UserSessionsManager = {
         }
         return rclient.srem(sessionSetKey, keysToDelete, function(err) {
           if (err != null) {
-            logger.err(
+            logger.warn(
               { err, user_id: user._id, sessionSetKey },
               'error removing session set for user'
             )
@@ -223,7 +223,7 @@ module.exports = UserSessionsManager = {
       `${Settings.cookieSessionLength}`,
       function(err, response) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, user_id: user._id },
             'error while updating ttl on UserSessions set'
           )
@@ -246,7 +246,7 @@ module.exports = UserSessionsManager = {
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
     return rclient.smembers(sessionSetKey, function(err, sessionKeys) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, user_id: user._id, sessionSetKey },
           'error getting contents of UserSessions set'
         )

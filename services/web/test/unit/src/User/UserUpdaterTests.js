@@ -39,7 +39,7 @@ describe('UserUpdater', function() {
     this.logger = {
       err: sinon.stub(),
       log() {},
-      warn() {}
+      warn: sinon.stub()
     }
     this.addAffiliation = sinon.stub().yields()
     this.removeAffiliation = sinon.stub().callsArgWith(2, null)
@@ -195,7 +195,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          this.logger.err.called.should.equal(true)
+          this.logger.warn.called.should.equal(true)
           should.exist(err)
           return done()
         }

@@ -33,6 +33,7 @@ describe('DocstoreManager', function() {
         }),
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
+          warn: sinon.stub(),
           error: sinon.stub(),
           err() {}
         })
@@ -95,7 +96,7 @@ describe('DocstoreManager', function() {
       })
 
       it('should log the error', function() {
-        return this.logger.error
+        return this.logger.warn
           .calledWith(
             {
               err: new Error(
@@ -131,7 +132,7 @@ describe('DocstoreManager', function() {
       })
 
       it('should log the error', function() {
-        return this.logger.error
+        return this.logger.warn
           .calledWith(
             {
               err: new Errors.NotFoundError(
@@ -222,7 +223,7 @@ describe('DocstoreManager', function() {
       })
 
       it('should log the error', function() {
-        return this.logger.error
+        return this.logger.warn
           .calledWith(
             {
               err: new Error(
@@ -299,7 +300,7 @@ describe('DocstoreManager', function() {
       })
 
       it('should log the error', function() {
-        return this.logger.error
+        return this.logger.warn
           .calledWith(
             {
               err: new Error(
@@ -364,7 +365,7 @@ describe('DocstoreManager', function() {
       })
 
       it('should log the error', function() {
-        return this.logger.error
+        return this.logger.warn
           .calledWith(
             {
               err: new Errors.NotFoundError('doc not found in docstore'),
@@ -425,7 +426,7 @@ describe('DocstoreManager', function() {
       })
 
       it('should log the error', function() {
-        return this.logger.error
+        return this.logger.warn
           .calledWith(
             {
               err: new Error(
@@ -487,7 +488,7 @@ describe('DocstoreManager', function() {
       })
 
       it('should log the error', function() {
-        return this.logger.error
+        return this.logger.warn
           .calledWith(
             {
               err: new Error(

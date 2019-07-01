@@ -78,6 +78,7 @@ describe('UserDeleter', function() {
         '../../infrastructure/mongojs': this.mongojs,
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
+          warn: sinon.stub(),
           err: sinon.stub()
         }),
         '../Errors/Errors': Errors

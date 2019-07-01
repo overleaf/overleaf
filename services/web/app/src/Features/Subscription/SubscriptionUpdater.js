@@ -117,7 +117,7 @@ const SubscriptionUpdater = {
     const removeOperation = { $pull: { member_ids: userId } }
     Subscription.updateMany(filter, removeOperation, function(err) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, filter, removeOperation },
           'error removing user from groups'
         )

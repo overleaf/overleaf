@@ -116,7 +116,7 @@ describe('ArchiveManager', function() {
       })
 
       it('should log out the error', function() {
-        return this.logger.error.called.should.equal(true)
+        return this.logger.warn.called.should.equal(true)
       })
     })
 
@@ -167,7 +167,7 @@ describe('ArchiveManager', function() {
       })
 
       it('should log out the error', function() {
-        return this.logger.error.called.should.equal(true)
+        return this.logger.warn.called.should.equal(true)
       })
     })
 
@@ -317,7 +317,7 @@ describe('ArchiveManager', function() {
       })
 
       it('should log out the error', function() {
-        return this.logger.error.called.should.equal(true)
+        return this.logger.warn.called.should.equal(true)
       })
 
       it('should close the zipfile', function() {
@@ -355,7 +355,7 @@ describe('ArchiveManager', function() {
       })
 
       it('should log out the error', function() {
-        return this.logger.error.called.should.equal(true)
+        return this.logger.warn.called.should.equal(true)
       })
 
       it('should close the zipfile', function() {
@@ -395,7 +395,7 @@ describe('ArchiveManager', function() {
       })
 
       it('should log out the error', function() {
-        return this.logger.error.called.should.equal(true)
+        return this.logger.warn.called.should.equal(true)
       })
 
       it('should unpipe from the readstream', function() {

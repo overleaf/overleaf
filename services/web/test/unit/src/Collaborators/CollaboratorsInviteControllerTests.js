@@ -53,6 +53,7 @@ describe('CollaboratorsInviteController', function() {
         'logger-sharelatex': (this.logger = {
           err: sinon.stub(),
           error: sinon.stub(),
+          warn: sinon.stub(),
           log: sinon.stub()
         }),
         '../Editor/EditorRealTimeController': (this.EditorRealTimeController = {

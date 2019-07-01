@@ -164,7 +164,7 @@ module.exports = DocumentUpdaterHandler = {
     return request.post(url, function(error, res, body) {
       timer.done()
       if (error != null) {
-        logger.error(
+        logger.warn(
           { err: error, url, project_id },
           'error getting project docs from doc updater'
         )
@@ -192,7 +192,7 @@ module.exports = DocumentUpdaterHandler = {
         }
         return callback(null, docs)
       } else {
-        logger.error(
+        logger.warn(
           { project_id, url },
           `doc updater returned a non-success status code: ${res.statusCode}`
         )
@@ -320,7 +320,7 @@ module.exports = DocumentUpdaterHandler = {
     }
 
     if (projectVersion == null) {
-      logger.error(
+      logger.warn(
         { project_id, changes, projectVersion },
         'did not receive project version in changes'
       )
@@ -357,7 +357,7 @@ module.exports = DocumentUpdaterHandler = {
       function(error, res, body) {
         timer.done()
         if (error != null) {
-          logger.error(
+          logger.warn(
             { error, project_id },
             'error making request to document updater'
           )
@@ -368,7 +368,7 @@ module.exports = DocumentUpdaterHandler = {
           error = new Error(
             `document updater returned a failure status code: ${res.statusCode}`
           )
-          logger.error(
+          logger.warn(
             { error, project_id },
             `document updater returned failure status code: ${res.statusCode}`
           )

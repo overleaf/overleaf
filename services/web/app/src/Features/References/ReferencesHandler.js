@@ -108,7 +108,7 @@ module.exports = ReferencesHandler = {
       { rootFolder: true, owner_ref: 1 },
       function(err, project) {
         if (err) {
-          logger.err({ err, projectId }, 'error finding project')
+          logger.warn({ err, projectId }, 'error finding project')
           return callback(err)
         }
         logger.log({ projectId }, 'indexing all bib files in project')
@@ -134,7 +134,7 @@ module.exports = ReferencesHandler = {
       { rootFolder: true, owner_ref: 1 },
       function(err, project) {
         if (err) {
-          logger.err({ err, projectId }, 'error finding project')
+          logger.warn({ err, projectId }, 'error finding project')
           return callback(err)
         }
         return ReferencesHandler._doIndexOperation(
@@ -159,7 +159,7 @@ module.exports = ReferencesHandler = {
     }
     return ReferencesHandler._isFullIndex(project, function(err, isFullIndex) {
       if (err) {
-        logger.err(
+        logger.warn(
           { err, projectId },
           'error checking whether to do full index'
         )
@@ -176,7 +176,7 @@ module.exports = ReferencesHandler = {
         function(err) {
           // continue
           if (err) {
-            logger.err(
+            logger.warn(
               { err, projectId, docIds },
               'error flushing docs to mongo'
             )
@@ -203,7 +203,7 @@ module.exports = ReferencesHandler = {
             },
             function(err, res, data) {
               if (err) {
-                logger.err(
+                logger.warn(
                   { err, projectId },
                   'error communicating with references api'
                 )

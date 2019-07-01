@@ -189,7 +189,7 @@ module.exports = ProjectController = {
       projectName,
       function(err, project) {
         if (err != null) {
-          logger.error(
+          logger.warn(
             { err, project_id, user_id: currentUser._id },
             'error cloning project'
           )
@@ -358,7 +358,7 @@ module.exports = ProjectController = {
       },
       function(err, results) {
         if (err != null) {
-          logger.err({ err }, 'error getting data for project list page')
+          logger.warn({ err }, 'error getting data for project list page')
           return next(err)
         }
         logger.log({ results, user_id }, 'rendering project list')
@@ -595,7 +595,7 @@ module.exports = ProjectController = {
       },
       function(err, results) {
         if (err != null) {
-          logger.err({ err }, 'error getting details for project page')
+          logger.warn({ err }, 'error getting details for project page')
           return next(err)
         }
         const { project } = results

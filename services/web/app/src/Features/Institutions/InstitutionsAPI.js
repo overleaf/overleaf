@@ -83,17 +83,17 @@ module.exports = InstitutionsAPI = {
           return callback(error, body)
         }
         // have notifications delete any ip matcher notifications for this university
-        logger.log(university)
         return NotificationsBuilder.ipMatcherAffiliation(userId).read(
           university != null ? university.id : undefined,
           function(err) {
             if (err) {
+              // log and ignore error
               logger.err(
                 { err },
                 'Something went wrong marking ip notifications read'
               )
             }
-            return callback(error, body)
+            return callback(null, body)
           }
         )
       }
@@ -190,7 +190,7 @@ var makeAffiliationRequest = function(requestOptions, callback) {
           }`
         }
 
-        logger.err(
+        logger.warn(
           { path: requestOptions.path, body: requestOptions.body },
           errorMessage
         )

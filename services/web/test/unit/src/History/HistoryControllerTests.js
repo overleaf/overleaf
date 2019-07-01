@@ -31,6 +31,7 @@ describe('HistoryController', function() {
         'settings-sharelatex': (this.settings = {}),
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
+          warn: sinon.stub(),
           error: sinon.stub()
         }),
         '../Authentication/AuthenticationController': this

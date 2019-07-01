@@ -64,6 +64,7 @@ describe('UserPagesController', function() {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': {
           log() {},
+          warn() {},
           err() {}
         },
         './UserGetter': this.UserGetter,

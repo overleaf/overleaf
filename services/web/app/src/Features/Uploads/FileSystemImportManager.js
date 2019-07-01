@@ -301,7 +301,7 @@ module.exports = FileSystemImportManager = {
     }
     return fs.lstat(path, function(err, stat) {
       if (err != null) {
-        logger.err({ err }, 'error with path symlink check')
+        logger.warn({ err }, 'error with path symlink check')
         return callback(err)
       }
       const isSafe = stat.isFile() || stat.isDirectory()

@@ -24,7 +24,7 @@ const modulePath = path.join(
 
 describe('InstitutionsAPI', function() {
   beforeEach(function() {
-    this.logger = { err: sinon.stub(), log() {} }
+    this.logger = { warn: sinon.stub(), err: sinon.stub(), log() {} }
     this.settings = { apis: { v1: { url: 'v1.url', user: '', pass: '' } } }
     this.request = sinon.stub()
     this.ipMatcherNotification = {

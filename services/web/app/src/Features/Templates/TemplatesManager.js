@@ -46,7 +46,7 @@ module.exports = TemplatesManager = {
       }
     })
     zipReq.on('error', function(err) {
-      logger.error({ err }, 'error getting zip from template API')
+      logger.warn({ err }, 'error getting zip from template API')
       return callback(err)
     })
     return FileWriter.ensureDumpFolderExists(function(err) {
@@ -63,7 +63,7 @@ module.exports = TemplatesManager = {
       }
       writeStream.on('close', function() {
         if (zipReq.response.statusCode !== 200) {
-          logger.err(
+          logger.warn(
             { uri: zipUrl, statusCode: zipReq.response.statusCode },
             'non-success code getting zip from template API'
           )
@@ -76,7 +76,7 @@ module.exports = TemplatesManager = {
           attributes,
           function(err, project) {
             if (err != null) {
-              logger.err({ err, zipReq }, 'problem building project from zip')
+              logger.warn({ err, zipReq }, 'problem building project from zip')
               return callback(err)
             }
             return async.series(

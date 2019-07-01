@@ -144,7 +144,7 @@ const ProjectDeleter = {
       ],
       function(err, deletedProject) {
         if (err != null) {
-          logger.err({ err }, 'problem deleting project')
+          logger.warn({ err }, 'problem deleting project')
           return callback(err)
         }
         logger.log(
@@ -166,7 +166,7 @@ const ProjectDeleter = {
       { $set: { archived: true } },
       function(err) {
         if (err != null) {
-          logger.err({ err }, 'problem archived project')
+          logger.warn({ err }, 'problem archived project')
           return callback(err)
         }
         logger.log(

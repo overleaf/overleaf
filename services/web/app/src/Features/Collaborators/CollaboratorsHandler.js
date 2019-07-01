@@ -367,10 +367,7 @@ module.exports = CollaboratorsHandler = {
     }
     return Project.update(conditions, update, function(err) {
       if (err != null) {
-        logger.error(
-          { err },
-          'problem removing user from project collaberators'
-        )
+        logger.warn({ err }, 'problem removing user from project collaberators')
       }
       return callback(err)
     })
@@ -496,7 +493,7 @@ module.exports = CollaboratorsHandler = {
       projectId,
       function(error, rawMembers) {
         if (error != null) {
-          logger.err({ projectId, error }, 'error getting members for project')
+          logger.warn({ projectId, error }, 'error getting members for project')
           return callback(error)
         }
         const {

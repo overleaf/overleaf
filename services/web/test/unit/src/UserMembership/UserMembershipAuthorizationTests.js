@@ -55,6 +55,7 @@ describe('UserMembershipAuthorization', function() {
           request: (this.request = sinon.stub().yields(null, null, {})),
           'logger-sharelatex': {
             log() {},
+            warn() {},
             err() {}
           }
         }

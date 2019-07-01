@@ -31,7 +31,7 @@ describe('CollaboratorsController', function() {
         '../Tags/TagsHandler': (this.TagsHandler = {}),
         'logger-sharelatex': (this.logger = {
           err: sinon.stub(),
-          erro: sinon.stub(),
+          warn: sinon.stub(),
           log: sinon.stub()
         })
       }

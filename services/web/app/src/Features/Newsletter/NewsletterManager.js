@@ -47,7 +47,7 @@ module.exports = {
     )
     return mailchimp.request(options, function(err) {
       if (err != null) {
-        logger.err({ err, user }, 'error subscribing person to newsletter')
+        logger.warn({ err, user }, 'error subscribing person to newsletter')
       } else {
         logger.log({ user }, 'finished subscribing user to the newsletter')
       }
@@ -66,7 +66,7 @@ module.exports = {
     const options = buildOptions(user, false)
     return mailchimp.request(options, function(err) {
       if (err != null) {
-        logger.err({ err, user }, 'error unsubscribing person to newsletter')
+        logger.warn({ err, user }, 'error unsubscribing person to newsletter')
       } else {
         logger.log({ user }, 'finished unsubscribing user to the newsletter')
       }
@@ -126,7 +126,7 @@ module.exports = {
         )
         return callback()
       } else if (err != null) {
-        logger.err(
+        logger.warn(
           { err, oldEmail, newEmail },
           'error changing email in newsletter'
         )

@@ -51,7 +51,7 @@ module.exports = FeaturesUpdater = {
     }
     return async.series(jobs, function(err, results) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, user_id },
           'error getting subscription or group for refreshFeatures'
         )

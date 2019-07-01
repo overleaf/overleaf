@@ -103,7 +103,7 @@ module.exports = ExportsHandler = self = {
 
     return async.auto(jobs, function(err, results) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, project_id, user_id, brand_variation_id },
           'error building project export'
         )
@@ -113,7 +113,7 @@ module.exports = ExportsHandler = self = {
       const { project, rootDoc, user, historyVersion } = results
       if (rootDoc[1] == null) {
         err = new Error('cannot export project without root doc')
-        logger.err({ err, project_id })
+        logger.warn({ err, project_id })
         return callback(err)
       }
 
@@ -174,7 +174,7 @@ module.exports = ExportsHandler = self = {
       },
       function(err, res, body) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, export: export_data },
             'error making request to v1 export'
           )
@@ -182,7 +182,7 @@ module.exports = ExportsHandler = self = {
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
           return callback(null, body.exportId)
         } else {
-          logger.err(
+          logger.warn(
             { export: export_data },
             `v1 export returned failure; forwarding: ${body}`
           )
@@ -206,7 +206,7 @@ module.exports = ExportsHandler = self = {
       },
       function(err, res, body) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id },
             'error making request to project history'
           )
@@ -219,7 +219,7 @@ module.exports = ExportsHandler = self = {
               res.statusCode
             }`
           )
-          logger.err(
+          logger.warn(
             { err, project_id },
             `project history version returned failure status code: ${
               res.statusCode
@@ -242,7 +242,7 @@ module.exports = ExportsHandler = self = {
       },
       function(err, res, body) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, export: export_id },
             'error making request to v1 export'
           )
@@ -253,7 +253,7 @@ module.exports = ExportsHandler = self = {
           err = new Error(
             `v1 export returned a failure status code: ${res.statusCode}`
           )
-          logger.err(
+          logger.warn(
             { err, export: export_id },
             `v1 export returned failure status code: ${res.statusCode}`
           )
@@ -276,7 +276,7 @@ module.exports = ExportsHandler = self = {
       },
       function(err, res, body) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, export: export_id },
             'error making request to v1 export'
           )
@@ -287,7 +287,7 @@ module.exports = ExportsHandler = self = {
           err = new Error(
             `v1 export returned a failure status code: ${res.statusCode}`
           )
-          logger.err(
+          logger.warn(
             { err, export: export_id },
             `v1 export zip fetch returned failure status code: ${
               res.statusCode

@@ -482,7 +482,7 @@ module.exports = CompileController = {
     return ClsiCookieManager.getCookieJar(project_id, function(err, jar) {
       let qs
       if (err != null) {
-        logger.err({ err }, 'error getting cookie jar for clsi request')
+        logger.warn({ err }, 'error getting cookie jar for clsi request')
         return callback(err)
       }
       // expand any url parameter passed in as {url:..., qs:...}

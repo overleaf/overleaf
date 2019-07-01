@@ -99,7 +99,10 @@ module.exports = UserUpdater = {
 
       return addAffiliation(userId, newEmail, affiliationOptions, error => {
         if (error != null) {
-          logger.err({ error }, 'problem adding affiliation while adding email')
+          logger.warn(
+            { error },
+            'problem adding affiliation while adding email'
+          )
           return callback(error)
         }
 
@@ -115,7 +118,7 @@ module.exports = UserUpdater = {
         }
         return this.updateUser(userId, update, function(error) {
           if (error != null) {
-            logger.err({ error }, 'problem updating users emails')
+            logger.warn({ error }, 'problem updating users emails')
             return callback(error)
           }
           return callback()
@@ -133,7 +136,7 @@ module.exports = UserUpdater = {
     }
     return removeAffiliation(userId, email, error => {
       if (error != null) {
-        logger.err({ error }, 'problem removing affiliation')
+        logger.warn({ error }, 'problem removing affiliation')
         return callback(error)
       }
 
@@ -141,7 +144,7 @@ module.exports = UserUpdater = {
       const update = { $pull: { emails: { email } } }
       return this.updateUser(query, update, function(error, res) {
         if (error != null) {
-          logger.err({ error }, 'problem removing users email')
+          logger.warn({ error }, 'problem removing users email')
           return callback(error)
         }
         if (res.n === 0) {
@@ -167,7 +170,7 @@ module.exports = UserUpdater = {
       const update = { $set: { email } }
       return this.updateUser(query, update, function(error, res) {
         if (error != null) {
-          logger.err({ error }, 'problem setting default emails')
+          logger.warn({ error }, 'problem setting default emails')
           return callback(error)
         } else if (res.n === 0) {
           // TODO: Check n or nMatched?
@@ -277,7 +280,7 @@ module.exports = UserUpdater = {
     logger.log({ userId, email }, 'confirming user email')
     return addAffiliation(userId, email, { confirmedAt }, error => {
       if (error != null) {
-        logger.err(
+        logger.warn(
           { error },
           'problem adding affiliation while confirming email'
         )

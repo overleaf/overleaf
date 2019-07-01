@@ -29,6 +29,7 @@ describe('ContactManager', function() {
         }),
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
+          warn: sinon.stub(),
           error: sinon.stub(),
           err() {}
         })
@@ -99,7 +100,7 @@ describe('ContactManager', function() {
       })
 
       it('should log the error', function() {
-        return this.logger.error
+        return this.logger.warn
           .calledWith(
             {
               err: new Error(
@@ -167,7 +168,7 @@ describe('ContactManager', function() {
       })
 
       it('should log the error', function() {
-        return this.logger.error
+        return this.logger.warn
           .calledWith(
             {
               err: new Error(

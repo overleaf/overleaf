@@ -28,6 +28,7 @@ describe('DocumentController', function() {
       requires: {
         'logger-sharelatex': {
           log() {},
+          warn() {},
           err() {}
         },
         '../Project/ProjectGetter': (this.ProjectGetter = {}),

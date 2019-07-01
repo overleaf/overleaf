@@ -24,14 +24,14 @@ module.exports = BetaProgramHandler = {
     }
     return User.findById(user_id, function(err, user) {
       if (err) {
-        logger.err({ err, user_id }, 'problem adding user to beta')
+        logger.warn({ err, user_id }, 'problem adding user to beta')
         return callback(err)
       }
       metrics.inc('beta-program.opt-in')
       user.betaProgram = true
       return user.save(function(err) {
         if (err) {
-          logger.err({ err, user_id }, 'problem adding user to beta')
+          logger.warn({ err, user_id }, 'problem adding user to beta')
           return callback(err)
         }
         return callback(null)
@@ -45,14 +45,14 @@ module.exports = BetaProgramHandler = {
     }
     return User.findById(user_id, function(err, user) {
       if (err) {
-        logger.err({ err, user_id }, 'problem removing user from beta')
+        logger.warn({ err, user_id }, 'problem removing user from beta')
         return callback(err)
       }
       metrics.inc('beta-program.opt-out')
       user.betaProgram = false
       return user.save(function(err) {
         if (err) {
-          logger.err({ err, user_id }, 'problem removing user from beta')
+          logger.warn({ err, user_id }, 'problem removing user from beta')
           return callback(err)
         }
         return callback(null)

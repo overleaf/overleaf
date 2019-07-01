@@ -63,6 +63,7 @@ describe('ProjectDetailsHandler', function() {
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
         'logger-sharelatex': {
           log() {},
+          warn() {},
           err() {}
         },
         './ProjectTokenGenerator': (this.ProjectTokenGenerator = {}),

@@ -57,7 +57,7 @@ module.exports = ReferalAllocator = {
           {},
           function(err) {
             if (err != null) {
-              logger.err(
+              logger.warn(
                 { err, referal_id, new_user_id },
                 'something went wrong allocating referal'
               )

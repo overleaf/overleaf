@@ -27,7 +27,7 @@ module.exports = InactiveProjectManager = {
       project
     ) {
       if (err != null) {
-        logger.err({ err, project_id }, 'error getting project')
+        logger.warn({ err, project_id }, 'error getting project')
         return callback(err)
       }
       logger.log(
@@ -41,7 +41,7 @@ module.exports = InactiveProjectManager = {
 
       return DocstoreManager.unarchiveProject(project_id, function(err) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id },
             'error reactivating project in docstore'
           )
@@ -84,7 +84,7 @@ module.exports = InactiveProjectManager = {
         )
         return async.series(jobs, function(err) {
           if (err != null) {
-            logger.err({ err }, 'error deactivating projects')
+            logger.warn({ err }, 'error deactivating projects')
           }
           return callback(err, projects)
         })
@@ -99,7 +99,7 @@ module.exports = InactiveProjectManager = {
     ]
     return async.series(jobs, function(err) {
       if (err != null) {
-        logger.err({ err, project_id }, 'error deactivating project')
+        logger.warn({ err, project_id }, 'error deactivating project')
       }
       return callback(err)
     })

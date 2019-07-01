@@ -49,7 +49,7 @@ module.exports = RecurlyWrapper = {
         },
         function(error, response, responseBody) {
           if (error) {
-            logger.error(
+            logger.warn(
               { error, user_id: user._id, recurly_token_id },
               'error response from recurly while checking account'
             )
@@ -73,7 +73,7 @@ module.exports = RecurlyWrapper = {
             account
           ) {
             if (err) {
-              logger.error(
+              logger.warn(
                 { err, user_id: user._id, recurly_token_id },
                 'error parsing account'
               )
@@ -131,7 +131,7 @@ module.exports = RecurlyWrapper = {
         },
         (error, response, responseBody) => {
           if (error) {
-            logger.error(
+            logger.warn(
               { error, user_id: user._id, recurly_token_id },
               'error response from recurly while creating account'
             )
@@ -142,7 +142,7 @@ module.exports = RecurlyWrapper = {
             account
           ) {
             if (err) {
-              logger.error(
+              logger.warn(
                 { err, user_id: user._id, recurly_token_id },
                 'error creating account'
               )
@@ -179,7 +179,7 @@ module.exports = RecurlyWrapper = {
         },
         (error, response, responseBody) => {
           if (error) {
-            logger.error(
+            logger.warn(
               { error, user_id: user._id, recurly_token_id },
               'error response from recurly while creating billing info'
             )
@@ -190,7 +190,7 @@ module.exports = RecurlyWrapper = {
             billingInfo
           ) {
             if (err) {
-              logger.error(
+              logger.warn(
                 { err, user_id: user._id, accountCode, recurly_token_id },
                 'error creating billing info'
               )
@@ -242,7 +242,7 @@ module.exports = RecurlyWrapper = {
         },
         (error, response, responseBody) => {
           if (error) {
-            logger.error(
+            logger.warn(
               { error, user_id: user._id, recurly_token_id },
               'error response from recurly while setting address'
             )
@@ -253,7 +253,7 @@ module.exports = RecurlyWrapper = {
             billingInfo
           ) {
             if (err) {
-              logger.error(
+              logger.warn(
                 { err, user_id: user._id, recurly_token_id },
                 'error updating billing info'
               )
@@ -291,7 +291,7 @@ module.exports = RecurlyWrapper = {
         },
         (error, response, responseBody) => {
           if (error) {
-            logger.error(
+            logger.warn(
               { error, user_id: user._id, recurly_token_id },
               'error response from recurly while creating subscription'
             )
@@ -302,7 +302,7 @@ module.exports = RecurlyWrapper = {
             subscription
           ) {
             if (err) {
-              logger.error(
+              logger.warn(
                 { err, user_id: user._id, recurly_token_id },
                 'error creating subscription'
               )
@@ -340,7 +340,7 @@ module.exports = RecurlyWrapper = {
       ],
       function(err, result) {
         if (err) {
-          logger.error(
+          logger.warn(
             { err, user_id: user._id, recurly_token_id },
             'error in paypal subscription creation process'
           )
@@ -348,7 +348,7 @@ module.exports = RecurlyWrapper = {
         }
         if (!result.subscription) {
           err = new Error('no subscription object in result')
-          logger.error(
+          logger.warn(
             { err, user_id: user._id, recurly_token_id },
             'error in paypal subscription creation process'
           )
@@ -431,7 +431,7 @@ module.exports = RecurlyWrapper = {
         response.statusCode !== 204 &&
         (response.statusCode !== 404 || !expect404)
       ) {
-        logger.err(
+        logger.warn(
           {
             err: error,
             body,
@@ -545,7 +545,7 @@ module.exports = RecurlyWrapper = {
         }
         return RecurlyWrapper._parseXml(body, function(err, data) {
           if (err != null) {
-            logger.err({ err }, 'could not get accoutns')
+            logger.warn({ err }, 'could not get accoutns')
             callback(err)
           }
           allAccounts = allAccounts.concat(data.accounts)
@@ -699,7 +699,7 @@ module.exports = RecurlyWrapper = {
       },
       (error, response, responseBody) => {
         if (error != null) {
-          logger.err({ err: error, coupon_code }, 'error creating coupon')
+          logger.warn({ err: error, coupon_code }, 'error creating coupon')
         }
         return callback(error)
       }
@@ -785,7 +785,7 @@ module.exports = RecurlyWrapper = {
       },
       (error, response, responseBody) => {
         if (error != null) {
-          logger.err(
+          logger.warn(
             { err: error, account_code, coupon_code },
             'error redeeming coupon'
           )
@@ -812,7 +812,7 @@ module.exports = RecurlyWrapper = {
       },
       (error, response, responseBody) => {
         if (error != null) {
-          logger.err(
+          logger.warn(
             { err: error, subscriptionId, daysUntilExpire },
             'error exending trial'
           )

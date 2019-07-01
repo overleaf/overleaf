@@ -17,11 +17,11 @@ const FileStoreHandler = {
   uploadFileFromDisk(projectId, fileArgs, fsPath, callback) {
     fs.lstat(fsPath, function(err, stat) {
       if (err) {
-        logger.err({ err, projectId, fileArgs, fsPath }, 'error stating file')
+        logger.warn({ err, projectId, fileArgs, fsPath }, 'error stating file')
         callback(err)
       }
       if (!stat) {
-        logger.err(
+        logger.warn(
           { projectId, fileArgs, fsPath },
           'stat is not available, can not check file from disk'
         )
@@ -45,7 +45,7 @@ const FileStoreHandler = {
           ),
         function(err, result) {
           if (err) {
-            logger.err(
+            logger.warn(
               { err, projectId, fileArgs },
               'Error uploading file, retries failed'
             )
@@ -72,7 +72,7 @@ const FileStoreHandler = {
       )
       const readStream = fs.createReadStream(fsPath)
       readStream.on('error', function(err) {
-        logger.err(
+        logger.warn(
           { err, projectId, fileId, fsPath },
           'something went wrong on the read stream of uploadFileFromDisk'
         )
@@ -90,7 +90,7 @@ const FileStoreHandler = {
         }
         const writeStream = request(opts)
         writeStream.on('error', function(err) {
-          logger.err(
+          logger.warn(
             { err, projectId, fileId, fsPath },
             'something went wrong on the write stream of uploadFileFromDisk'
           )
@@ -103,7 +103,7 @@ const FileStoreHandler = {
                 response.statusCode
               }`
             )
-            logger.err(
+            logger.warn(
               { err, statusCode: response.statusCode },
               'error uploading to filestore'
             )
@@ -151,7 +151,7 @@ const FileStoreHandler = {
     const url = this._buildUrl(projectId, fileId)
     request.head(url, (err, res) => {
       if (err) {
-        logger.err(
+        logger.warn(
           { err, projectId, fileId },
           'failed to get file size from filestore'
         )
@@ -161,7 +161,7 @@ const FileStoreHandler = {
         return callback(new Errors.NotFoundError('file not found in filestore'))
       }
       if (res.statusCode !== 200) {
-        logger.err(
+        logger.warn(
           { projectId, fileId, statusCode: res.statusCode },
           'filestore returned non-200 response'
         )
@@ -181,7 +181,7 @@ const FileStoreHandler = {
     }
     return request(opts, function(err, response) {
       if (err) {
-        logger.err(
+        logger.warn(
           { err, projectId, fileId },
           'something went wrong deleting file from filestore'
         )
@@ -208,7 +208,7 @@ const FileStoreHandler = {
     }
     return request(opts, function(err, response) {
       if (err) {
-        logger.err(
+        logger.warn(
           { err, oldProjectId, oldFileId, newProjectId, newFileId },
           'something went wrong telling filestore api to copy file'
         )
@@ -220,7 +220,7 @@ const FileStoreHandler = {
         err = new Error(
           `non-ok response from filestore for copyFile: ${response.statusCode}`
         )
-        logger.err(
+        logger.warn(
           { uri: opts.uri, statusCode: response.statusCode },
           'error uploading to filestore'
         )

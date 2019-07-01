@@ -54,6 +54,7 @@ describe('UserSessionsManager', function() {
     this.logger = {
       err: sinon.stub(),
       error: sinon.stub(),
+      warn: sinon.stub(),
       log: sinon.stub()
     }
     this.settings = {

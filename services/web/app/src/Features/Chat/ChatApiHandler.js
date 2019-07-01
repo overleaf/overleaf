@@ -32,7 +32,7 @@ module.exports = ChatApiHandler = {
           `chat api returned non-success code: ${response.statusCode}`
         )
         error.statusCode = response.statusCode
-        logger.error({ err: error, opts }, 'error sending request to chat api')
+        logger.warn({ err: error, opts }, 'error sending request to chat api')
         return callback(error)
       }
     })

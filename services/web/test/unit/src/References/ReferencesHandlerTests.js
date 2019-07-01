@@ -51,6 +51,7 @@ describe('ReferencesHandler', function() {
       requires: {
         'logger-sharelatex': {
           log() {},
+          warn() {},
           err() {}
         },
         'settings-sharelatex': (this.settings = {

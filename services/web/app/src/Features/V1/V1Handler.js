@@ -32,7 +32,7 @@ module.exports = V1Handler = {
       },
       function(err, response, body) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { email, err },
             '[V1Handler] error while talking to v1 login api'
           )
@@ -80,7 +80,7 @@ module.exports = V1Handler = {
       },
       function(err, response, body) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { v1_user_id, err },
             'error while talking to v1 password reset api'
           )

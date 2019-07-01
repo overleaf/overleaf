@@ -203,7 +203,7 @@ module.exports = LockManager = {
         return callback(err)
       } else if (result != null && result !== 1) {
         // successful unlock should release exactly one key
-        logger.error(
+        logger.warn(
           { key, lockValue, redis_err: err, redis_result: result },
           'unlocking error'
         )

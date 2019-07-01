@@ -146,7 +146,7 @@ module.exports = ProjectLocator = {
         { rootFolder: true, rootDoc_id: true },
         function(err, project) {
           if (err != null) {
-            logger.err({ err }, 'error getting project')
+            logger.warn({ err }, 'error getting project')
             return callback(err)
           } else {
             return getRootDoc(project)
@@ -272,7 +272,7 @@ module.exports = ProjectLocator = {
     }
 
     if (typeof err !== 'undefined' && err !== null) {
-      logger.err(
+      logger.warn(
         { err, project_id: project._id },
         'error getting project for finding element'
       )

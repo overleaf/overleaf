@@ -48,6 +48,7 @@ describe('AuthenticationController', function() {
         }),
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
+          warn: sinon.stub(),
           error: sinon.stub(),
           err: sinon.stub()
         }),

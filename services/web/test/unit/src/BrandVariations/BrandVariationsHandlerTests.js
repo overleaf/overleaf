@@ -32,6 +32,7 @@ describe('BrandVariationsHandler', function() {
       }
     }
     this.logger = {
+      warn() {},
       err() {},
       log() {}
     }

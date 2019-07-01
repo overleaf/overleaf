@@ -53,7 +53,7 @@ module.exports = ProjectDuplicator = {
             owner_id,
             function(err, newDoc) {
               if (err != null) {
-                logger.err({ err }, 'error copying doc')
+                logger.warn({ err }, 'error copying doc')
                 return callback(err)
               }
               if (
@@ -135,7 +135,7 @@ module.exports = ProjectDuplicator = {
       { rootFolder: true, name: true },
       function(err, newProject) {
         if (err != null) {
-          logger.err({ project_id: newProject_id }, 'could not get project')
+          logger.warn({ project_id: newProject_id }, 'could not get project')
           return callback(err)
         }
 
@@ -226,7 +226,7 @@ module.exports = ProjectDuplicator = {
     // Get the contents of the original project first
     return async.series(jobs, function(err, results) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, originalProject_id },
           'error duplicating project reading original project'
         )
@@ -247,7 +247,7 @@ module.exports = ProjectDuplicator = {
         newProjectName,
         function(err, newProject) {
           if (err != null) {
-            logger.err(
+            logger.warn(
               { err, originalProject_id },
               'error duplicating project when creating new project'
             )
@@ -279,7 +279,7 @@ module.exports = ProjectDuplicator = {
           // Copy the contents of the original project into the new project
           return async.series(copyJobs, function(err) {
             if (err != null) {
-              logger.err(
+              logger.warn(
                 {
                   err,
                   originalProject_id,

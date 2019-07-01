@@ -40,7 +40,7 @@ module.exports = {
       announcements
     ) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, user_id: user._id },
           'unable to get unread announcements'
         )

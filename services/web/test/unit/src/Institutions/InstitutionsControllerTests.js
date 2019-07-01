@@ -23,7 +23,7 @@ const { expect } = require('chai')
 
 describe('InstitutionsController', function() {
   beforeEach(function() {
-    this.logger = { err: sinon.stub(), log() {} }
+    this.logger = { err: sinon.stub(), warn: sinon.stub(), log() {} }
     this.host = 'mit.edu'
       .split('')
       .reverse()

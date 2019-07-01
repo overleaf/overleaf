@@ -60,7 +60,7 @@ module.exports = UserController = {
       password,
       function(err, user) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { user_id },
             'error authenticating during attempt to delete account'
           )
@@ -78,7 +78,7 @@ module.exports = UserController = {
             if (err instanceof Errors.SubscriptionAdminDeletionError) {
               return res.status(422).json({ error: err.name })
             } else {
-              logger.err({ user_id }, 'error while deleting user account')
+              logger.warn({ user_id }, 'error while deleting user account')
               return next(err)
             }
           }
@@ -88,7 +88,7 @@ module.exports = UserController = {
           }
           return req.session.destroy(function(err) {
             if (err != null) {
-              logger.err({ err }, 'error destorying session')
+              logger.warn({ err }, 'error destorying session')
               return next(err)
             }
             UserSessionsManager.untrackSession(user, sessionId)
@@ -238,7 +238,7 @@ module.exports = UserController = {
     } // passport logout
     return req.session.destroy(function(err) {
       if (err) {
-        logger.err({ err }, 'error destorying session')
+        logger.warn({ err }, 'error destorying session')
         cb(err)
       }
       if (user != null) {

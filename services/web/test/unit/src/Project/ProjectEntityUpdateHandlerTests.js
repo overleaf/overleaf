@@ -88,6 +88,7 @@ describe('ProjectEntityUpdateHandler', function() {
         requires: {
           'logger-sharelatex': (this.logger = {
             log: sinon.stub(),
+            warn: sinon.stub(),
             error: sinon.stub(),
             err() {}
           }),
@@ -446,7 +447,7 @@ describe('ProjectEntityUpdateHandler', function() {
       })
 
       it('should log out the error', function() {
-        return this.logger.error
+        return this.logger.warn
           .calledWith(
             {
               project_id,

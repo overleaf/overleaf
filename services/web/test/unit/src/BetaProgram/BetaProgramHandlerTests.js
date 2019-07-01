@@ -41,6 +41,7 @@ describe('BetaProgramHandler', function() {
         },
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
+          warn: sinon.stub(),
           err: sinon.stub()
         }),
         'metrics-sharelatex': (this.logger = {

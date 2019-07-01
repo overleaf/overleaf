@@ -270,7 +270,7 @@ const ProjectCreationHandler = {
       owner_id,
       function(error, doc) {
         if (error != null) {
-          logger.err(
+          logger.warn(
             { err: error },
             'error adding root doc when creating project'
           )

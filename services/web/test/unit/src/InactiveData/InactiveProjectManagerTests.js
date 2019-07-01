@@ -40,6 +40,7 @@ describe('InactiveProjectManager', function() {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': {
           log() {},
+          warn() {},
           err() {}
         },
         '../Docstore/DocstoreManager': this.DocstoreManager,

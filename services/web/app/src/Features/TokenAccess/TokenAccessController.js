@@ -31,7 +31,7 @@ module.exports = TokenAccessController = {
       userId,
       function(err, project) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, token, userId },
             '[TokenAccess] error finding project with higher access'
           )
@@ -66,7 +66,7 @@ module.exports = TokenAccessController = {
       projectExists
     ) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, token, userId },
           '[TokenAccess] error getting project by readAndWrite token'
         )
@@ -143,7 +143,7 @@ module.exports = TokenAccessController = {
           project._id,
           function(err) {
             if (err != null) {
-              logger.err(
+              logger.warn(
                 { err, token, userId, projectId: project._id },
                 '[TokenAccess] error adding user to project with readAndWrite token'
               )
@@ -185,7 +185,7 @@ module.exports = TokenAccessController = {
         projectExists
       ) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, token, userId },
             '[TokenAccess] error getting project by readOnly token'
           )
@@ -258,7 +258,7 @@ module.exports = TokenAccessController = {
               project._id,
               function(err) {
                 if (err != null) {
-                  logger.err(
+                  logger.warn(
                     { err, token, userId, projectId: project._id },
                     '[TokenAccess] error adding user to project with readAndWrite token'
                   )

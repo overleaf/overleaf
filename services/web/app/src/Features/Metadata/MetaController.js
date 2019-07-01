@@ -25,7 +25,7 @@ module.exports = MetaController = {
       projectMeta
     ) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { project_id, err },
           '[MetaController] error getting all labels from project'
         )
@@ -44,7 +44,7 @@ module.exports = MetaController = {
       docMeta
     ) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { project_id, doc_id, err },
           '[MetaController] error getting labels from doc'
         )

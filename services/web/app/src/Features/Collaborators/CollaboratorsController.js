@@ -82,7 +82,7 @@ const CollaboratorsController = {
       members
     ) {
       if (err != null) {
-        logger.err({ projectId }, 'error getting members for project')
+        logger.warn({ projectId }, 'error getting members for project')
         return next(err)
       }
       res.json({ members })

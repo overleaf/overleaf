@@ -76,7 +76,7 @@ module.exports = GeoIpLookup = {
     logger.log({ ip, opts }, 'getting geo ip details')
     return request.get(opts, function(err, res, ipDetails) {
       if (err != null) {
-        logger.err({ err, ip }, 'error getting ip details')
+        logger.warn({ err, ip }, 'error getting ip details')
       }
       return callback(err, ipDetails)
     })

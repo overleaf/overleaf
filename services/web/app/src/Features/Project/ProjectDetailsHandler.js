@@ -43,7 +43,7 @@ const ProjectDetailsHandler = {
       },
       function(err, project) {
         if (err != null) {
-          logger.err({ err, project_id }, 'error getting project')
+          logger.warn({ err, project_id }, 'error getting project')
           return callback(err)
         }
         if (project == null) {
@@ -91,7 +91,7 @@ const ProjectDetailsHandler = {
     )
     return Project.update(conditions, update, function(err) {
       if (err != null) {
-        logger.err({ err }, 'something went wrong setting project description')
+        logger.warn({ err }, 'something went wrong setting project description')
       }
       return callback(err)
     })
@@ -184,7 +184,7 @@ const ProjectDetailsHandler = {
         project
       ) {
         if (err != null || project == null) {
-          logger.err(
+          logger.warn(
             { err, project_id },
             'error getting project or could not find it todo project rename'
           )

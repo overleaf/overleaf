@@ -66,7 +66,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
       { rootFolder: true, name: true, overleaf: true },
       function(err, project) {
         if (err != null) {
-          logger.err({ project_id, err }, 'error getting project for add doc')
+          logger.warn({ project_id, err }, 'error getting project for add doc')
           return callback(err)
         }
         logger.log(
@@ -89,7 +89,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
       { rootFolder: true, name: true, overleaf: true },
       function(err, project) {
         if (err != null) {
-          logger.err({ project_id, err }, 'error getting project for add file')
+          logger.warn({ project_id, err }, 'error getting project for add file')
           return callback(err)
         }
         logger.log(
@@ -336,7 +336,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
                                   oldFiles.length !== newFiles.length ||
                                   oldDocs.length !== newDocs.length
                                 ) {
-                                  logger.err(
+                                  logger.warn(
                                     {
                                       project_id,
                                       oldDocs: oldDocs.length,
@@ -509,7 +509,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
       { rootFolder: true, name: true, overleaf: true },
       function(err, project) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { project_id, err },
             'error getting project for add folder'
           )
@@ -531,7 +531,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
               'folder',
               err => {
                 if (err != null) {
-                  logger.err(
+                  logger.warn(
                     { err, project_id: project._id },
                     'error adding folder to project'
                   )
@@ -622,7 +622,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
 
     if (element == null || element._id == null) {
       e = new Error('no element passed to be inserted')
-      logger.err(
+      logger.warn(
         { project_id: project._id, folder_id, element, type },
         'failed trying to insert element as it was null'
       )
@@ -634,7 +634,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
     // check if name is allowed
     if (!SafePath.isCleanFilename(element.name)) {
       e = new Errors.InvalidNameError('invalid element name')
-      logger.err(
+      logger.warn(
         { project_id: project._id, folder_id, element, type },
         'failed trying to insert element as name was invalid'
       )
@@ -658,7 +658,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
       { project, element_id: folder_id, type: 'folders' },
       (err, folder, path) => {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id: project._id, folder_id, type, element },
             'error finding folder for _putElement'
           )
@@ -706,7 +706,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
             { new: true },
             function(err, newProject) {
               if (err != null) {
-                logger.err(
+                logger.warn(
                   { err, project_id: project._id },
                   'error saving in putElement project'
                 )

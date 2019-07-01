@@ -82,7 +82,7 @@ module.exports = HistoryController = {
     })
     getReq.pipe(res)
     return getReq.on('error', function(error) {
-      logger.error({ url, err: error }, 'history API error')
+      logger.warn({ url, err: error }, 'history API error')
       return next(error)
     })
   },
@@ -267,7 +267,7 @@ module.exports = HistoryController = {
         error = new Error(
           `history api responded with non-success code: ${response.statusCode}`
         )
-        logger.error(
+        logger.warn(
           { err: error },
           `project-history api responded with non-success code: ${
             response.statusCode
@@ -327,7 +327,7 @@ module.exports = HistoryController = {
     }
     return request(options, function(err, response, body) {
       if (err) {
-        logger.error({ err, v1_project_id, version }, 'history API error')
+        logger.warn({ err, v1_project_id, version }, 'history API error')
         return next(err)
       }
       let retryAttempt = 0
@@ -362,7 +362,7 @@ module.exports = HistoryController = {
               return callback()
             })
             return getReq.on('error', function(err) {
-              logger.error(
+              logger.warn(
                 { err, v1_project_id, version, retryAttempt },
                 'history s3 download error'
               )
@@ -371,7 +371,7 @@ module.exports = HistoryController = {
           }, retryDelay),
         function(err) {
           if (err) {
-            logger.error(
+            logger.warn(
               { err, v1_project_id, version, retryAttempt },
               'history s3 download failed'
             )

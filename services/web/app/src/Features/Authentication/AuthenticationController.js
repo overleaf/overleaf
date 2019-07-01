@@ -51,7 +51,7 @@ const AuthenticationController = (module.exports = {
     }
     return req.login(user, function(err) {
       if (err != null) {
-        logger.err({ user_id: user._id, err }, 'error from req.login')
+        logger.warn({ user_id: user._id, err }, 'error from req.login')
         return callback(err)
       }
       // Regenerate the session to get a new sessionID (cookie value) to
@@ -59,7 +59,7 @@ const AuthenticationController = (module.exports = {
       const oldSession = req.session
       return req.session.destroy(function(err) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { user_id: user._id, err },
             'error when trying to destroy old session'
           )
@@ -76,7 +76,7 @@ const AuthenticationController = (module.exports = {
         req.session.user = req.session.passport.user
         return req.session.save(function(err) {
           if (err != null) {
-            logger.err(
+            logger.warn(
               { user_id: user._id },
               'error saving regenerated session after login'
             )

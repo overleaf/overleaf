@@ -35,7 +35,7 @@ module.exports = DocstoreManager = {
         return callback(null)
       } else if (res.statusCode === 404) {
         error = new Errors.NotFoundError('tried to delete doc not in docstore')
-        logger.error(
+        logger.warn(
           { err: error, project_id, doc_id },
           'tried to delete doc not in docstore'
         )
@@ -44,7 +44,7 @@ module.exports = DocstoreManager = {
         error = new Error(
           `docstore api responded with non-success code: ${res.statusCode}`
         )
-        logger.error(
+        logger.warn(
           { err: error, project_id, doc_id },
           'error deleting doc in docstore'
         )
@@ -74,7 +74,7 @@ module.exports = DocstoreManager = {
           error = new Error(
             `docstore api responded with non-success code: ${res.statusCode}`
           )
-          logger.error(
+          logger.warn(
             { err: error, project_id },
             'error getting all docs from docstore'
           )
@@ -108,7 +108,7 @@ module.exports = DocstoreManager = {
           error = new Error(
             `docstore api responded with non-success code: ${res.statusCode}`
           )
-          logger.error(
+          logger.warn(
             { err: error, project_id },
             'error getting all doc ranges from docstore'
           )
@@ -153,7 +153,7 @@ module.exports = DocstoreManager = {
           return callback(null, doc.lines, doc.rev, doc.version, doc.ranges)
         } else if (res.statusCode === 404) {
           error = new Errors.NotFoundError('doc not found in docstore')
-          logger.error(
+          logger.warn(
             { err: error, project_id, doc_id },
             'doc not found in docstore'
           )
@@ -162,7 +162,7 @@ module.exports = DocstoreManager = {
           error = new Error(
             `docstore api responded with non-success code: ${res.statusCode}`
           )
-          logger.error(
+          logger.warn(
             { err: error, project_id, doc_id },
             'error getting doc from docstore'
           )
@@ -203,7 +203,7 @@ module.exports = DocstoreManager = {
           error = new Error(
             `docstore api responded with non-success code: ${res.statusCode}`
           )
-          logger.error(
+          logger.warn(
             { err: error, project_id, doc_id },
             'error updating doc in docstore'
           )
@@ -218,7 +218,7 @@ module.exports = DocstoreManager = {
     logger.log({ project_id }, 'archiving project in docstore')
     return request.post(url, function(err, res, docs) {
       if (err != null) {
-        logger.err({ err, project_id }, 'error archving project in docstore')
+        logger.warn({ err, project_id }, 'error archving project in docstore')
         return callback(err)
       }
       if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -227,7 +227,7 @@ module.exports = DocstoreManager = {
         const error = new Error(
           `docstore api responded with non-success code: ${res.statusCode}`
         )
-        logger.err(
+        logger.warn(
           { err: error, project_id },
           'error archiving project in docstore'
         )
@@ -241,7 +241,10 @@ module.exports = DocstoreManager = {
     logger.log({ project_id }, 'unarchiving project in docstore')
     return request.post(url, function(err, res, docs) {
       if (err != null) {
-        logger.err({ err, project_id }, 'error unarchiving project in docstore')
+        logger.warn(
+          { err, project_id },
+          'error unarchiving project in docstore'
+        )
         return callback(err)
       }
       if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -250,7 +253,7 @@ module.exports = DocstoreManager = {
         const error = new Error(
           `docstore api responded with non-success code: ${res.statusCode}`
         )
-        logger.err(
+        logger.warn(
           { err: error, project_id },
           'error unarchiving project in docstore'
         )

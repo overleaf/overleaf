@@ -34,7 +34,7 @@ module.exports = BrandVariationsHandler = {
       },
       function(error, response, brandVariationDetails) {
         if (error != null) {
-          logger.err(
+          logger.warn(
             { brandVariationId, error },
             'error getting brand variation details'
           )

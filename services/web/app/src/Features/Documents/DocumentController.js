@@ -45,7 +45,7 @@ module.exports = {
           { project, element_id: doc_id, type: 'doc' },
           function(error, doc, path) {
             if (error != null) {
-              logger.err(
+              logger.warn(
                 { err: error, doc_id, project_id },
                 'error finding element for getDocument'
               )
@@ -59,7 +59,7 @@ module.exports = {
               ranges
             ) {
               if (error != null) {
-                logger.err(
+                logger.warn(
                   { err: error, doc_id, project_id },
                   'error finding doc contents for getDocument'
                 )
@@ -112,7 +112,7 @@ module.exports = {
       lastUpdatedBy,
       function(error) {
         if (error != null) {
-          logger.err(
+          logger.warn(
             { err: error, doc_id, project_id },
             'error finding element for getDocument'
           )

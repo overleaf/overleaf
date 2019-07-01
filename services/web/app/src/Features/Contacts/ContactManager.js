@@ -47,7 +47,7 @@ module.exports = ContactManager = {
           error = new Error(
             `contacts api responded with non-success code: ${res.statusCode}`
           )
-          logger.error(
+          logger.warn(
             { err: error, user_id },
             'error getting contacts for user'
           )
@@ -84,7 +84,7 @@ module.exports = ContactManager = {
           error = new Error(
             `contacts api responded with non-success code: ${res.statusCode}`
           )
-          logger.error(
+          logger.warn(
             { err: error, user_id, contact_id },
             'error adding contact for user'
           )

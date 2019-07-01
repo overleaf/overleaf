@@ -43,6 +43,7 @@ describe('TagsHandler', function() {
         request: this.request,
         'logger-sharelatex': {
           log() {},
+          warn() {},
           err() {}
         }
       }

@@ -83,7 +83,7 @@ module.exports = TpdsUpdateSender = {
       allUserIds
     ) {
       if (err != null) {
-        logger.err({ err, options }, 'error getting projects user ids')
+        logger.warn({ err, options }, 'error getting projects user ids')
         return callback(err)
       }
       logger.log(
@@ -117,7 +117,7 @@ module.exports = TpdsUpdateSender = {
         postOptions,
         function(err) {
           if (err != null) {
-            logger.err(
+            logger.warn(
               {
                 err,
                 project_id: options.project_id,

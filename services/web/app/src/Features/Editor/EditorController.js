@@ -72,7 +72,7 @@ module.exports = EditorController = {
       user_id,
       (err, doc, folder_id) => {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id, docName },
             'error adding doc without lock'
           )
@@ -126,7 +126,7 @@ module.exports = EditorController = {
       user_id,
       (err, fileRef, folder_id) => {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id, folder_id, fileName },
             'error adding file without lock'
           )
@@ -334,7 +334,7 @@ module.exports = EditorController = {
       folderName,
       (err, folder, folder_id) => {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id, folder_id, folderName, source },
             'could not add folder'
           )
@@ -365,7 +365,7 @@ module.exports = EditorController = {
       path,
       (err, newFolders, lastFolder) => {
         if (err != null) {
-          logger.err({ err, project_id, path }, 'could not mkdirp')
+          logger.warn({ err, project_id, path }, 'could not mkdirp')
           return callback(err)
         }
 
@@ -399,7 +399,7 @@ module.exports = EditorController = {
       userId,
       function(err) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id, entity_id, entityType },
             'could not delete entity'
           )
@@ -458,7 +458,7 @@ module.exports = EditorController = {
       description,
       function(err) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id, description },
             'something went wrong setting the project description'
           )
@@ -498,7 +498,7 @@ module.exports = EditorController = {
       userId,
       function(err) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id, entity_id, entityType, newName },
             'error renaming entity'
           )
@@ -530,7 +530,7 @@ module.exports = EditorController = {
       userId,
       function(err) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, project_id, entity_id, folder_id },
             'error moving entity'
           )
@@ -555,7 +555,7 @@ module.exports = EditorController = {
       err
     ) {
       if (err != null) {
-        logger.err({ err, project_id, newName }, 'error renaming project')
+        logger.warn({ err, project_id, newName }, 'error renaming project')
         return callback(err)
       }
       EditorRealTimeController.emitToRoom(

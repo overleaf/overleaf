@@ -29,7 +29,7 @@ module.exports = SudoModeController = {
     logger.log({ userId }, '[SudoMode] rendering sudo mode password page')
     return SudoModeHandler.isSudoModeActive(userId, function(err, isActive) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, userId },
           '[SudoMode] error checking if sudo mode is active'
         )
@@ -66,12 +66,12 @@ module.exports = SudoModeController = {
       userRecord
     ) {
       if (err != null) {
-        logger.err({ err, userId }, '[SudoMode] error getting user')
+        logger.warn({ err, userId }, '[SudoMode] error getting user')
         return next(err)
       }
       if (userRecord == null) {
         err = new Error('user not found')
-        logger.err({ err, userId }, '[SudoMode] user not found')
+        logger.warn({ err, userId }, '[SudoMode] user not found')
         return next(err)
       }
       return SudoModeHandler.authenticate(userRecord.email, password, function(
@@ -79,7 +79,7 @@ module.exports = SudoModeController = {
         user
       ) {
         if (err != null) {
-          logger.err({ err, userId }, '[SudoMode] error authenticating user')
+          logger.warn({ err, userId }, '[SudoMode] error authenticating user')
           return next(err)
         }
         if (user != null) {
@@ -89,7 +89,7 @@ module.exports = SudoModeController = {
           )
           return SudoModeHandler.activateSudoMode(userId, function(err) {
             if (err != null) {
-              logger.err(
+              logger.warn(
                 { err, userId },
                 '[SudoMode] error activating sudo mode'
               )

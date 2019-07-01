@@ -104,7 +104,8 @@ describe('SubscriptionUpdater', function() {
         '../User/UserGetter': this.UserGetter,
         './PlansLocator': this.PlansLocator,
         'logger-sharelatex': {
-          log() {}
+          log() {},
+          warn() {}
         },
         'settings-sharelatex': this.Settings,
         './FeaturesUpdater': this.FeaturesUpdater

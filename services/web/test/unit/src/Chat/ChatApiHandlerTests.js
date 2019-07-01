@@ -34,7 +34,11 @@ describe('ChatApiHandler', function() {
     this.ChatApiHandler = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': { log: sinon.stub(), error: sinon.stub() },
+        'logger-sharelatex': {
+          log: sinon.stub(),
+          warn: sinon.stub(),
+          error: sinon.stub()
+        },
         request: this.request
       }
     })

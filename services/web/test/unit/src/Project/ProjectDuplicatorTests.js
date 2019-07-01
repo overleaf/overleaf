@@ -161,6 +161,7 @@ describe('ProjectDuplicator', function() {
         './ProjectGetter': this.ProjectGetter,
         'logger-sharelatex': {
           log() {},
+          warn() {},
           err() {}
         }
       }

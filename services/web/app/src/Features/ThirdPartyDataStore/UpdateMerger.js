@@ -143,7 +143,7 @@ module.exports = UpdateMerger = {
         docLines
       ) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { project_id },
             'error reading file into text array for process doc update'
           )
@@ -192,7 +192,7 @@ module.exports = UpdateMerger = {
           content = ''
         }
         if (error != null) {
-          logger.err({ path }, 'error reading file into text array')
+          logger.warn({ path }, 'error reading file into text array')
           return callback(error)
         }
         const lines = content.split(/\r\n|\n|\r/)

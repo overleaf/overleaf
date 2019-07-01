@@ -33,7 +33,7 @@ module.exports = UserDeleter = {
       callback = function(err) {}
     }
     if (user_id == null) {
-      logger.err('user_id is null when trying to delete user')
+      logger.warn('user_id is null when trying to delete user')
       return callback(new Error('no user_id'))
     }
     return User.findById(user_id, function(err, user) {
@@ -64,7 +64,7 @@ module.exports = UserDeleter = {
       callback = function() {}
     }
     if (user_id == null) {
-      logger.err('user_id is null when trying to delete user')
+      logger.warn('user_id is null when trying to delete user')
       return callback('no user_id')
     }
     return User.findById(user_id, function(err, user) {
@@ -81,7 +81,7 @@ module.exports = UserDeleter = {
         ],
         function(err) {
           if (err != null) {
-            logger.err(
+            logger.warn(
               { err, user_id },
               'something went wrong deleteing the user'
             )

@@ -117,7 +117,7 @@ module.exports = {
     const update = { $unset: { brandVariationId: 1 } }
     return Project.update(conditions, update, {}, function(err) {
       if (err != null) {
-        logger.err({ err }, 'error unsetting brandVariationId')
+        logger.warn({ err }, 'error unsetting brandVariationId')
         return callback(err)
       }
       return callback()

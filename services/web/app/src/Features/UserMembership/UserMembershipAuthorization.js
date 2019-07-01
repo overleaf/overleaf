@@ -141,7 +141,7 @@ module.exports = UserMembershipAuthorization = {
         }
 
         if (response.statusCode !== 200) {
-          logger.err(
+          logger.warn(
             { templateId },
             "[TemplateMetrics] Couldn't fetch template data from v1"
           )

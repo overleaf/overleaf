@@ -177,7 +177,7 @@ module.exports = UserPagesController = {
       [req.sessionID],
       function(err, sessions) {
         if (err != null) {
-          logger.err({ user_id: user._id }, 'error getting all user sessions')
+          logger.warn({ user_id: user._id }, 'error getting all user sessions')
           return next(err)
         }
         return res.render('user/sessions', {

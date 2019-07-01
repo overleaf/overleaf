@@ -223,7 +223,7 @@ module.exports = SubscriptionController = {
         recurly_token_id,
         function(err) {
           if (err != null) {
-            logger.err(
+            logger.warn(
               { err, user_id: user._id },
               'something went wrong creating subscription'
             )
@@ -259,7 +259,7 @@ module.exports = SubscriptionController = {
     logger.log({ user_id: user._id }, 'canceling subscription')
     return SubscriptionHandler.cancelSubscription(user, function(err) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, user_id: user._id },
           'something went wrong canceling subscription'
         )
@@ -283,7 +283,7 @@ module.exports = SubscriptionController = {
     logger.log({ user_id }, 'canceling v1 subscription')
     return V1SubscriptionManager.cancelV1Subscription(user_id, function(err) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, user_id },
           'something went wrong canceling v1 subscription'
         )
@@ -300,7 +300,7 @@ module.exports = SubscriptionController = {
     const planCode = req.body.plan_code
     if (planCode == null) {
       const err = new Error('plan_code is not defined')
-      logger.err(
+      logger.warn(
         { user_id: user._id, err, planCode, origin: _origin, body: req.body },
         '[Subscription] error in updateSubscription form'
       )
@@ -313,7 +313,7 @@ module.exports = SubscriptionController = {
       null,
       function(err) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, user_id: user._id },
             'something went wrong updating subscription'
           )
@@ -329,7 +329,7 @@ module.exports = SubscriptionController = {
     logger.log({ user_id: user._id }, 'reactivating subscription')
     return SubscriptionHandler.reactivateSubscription(user, function(err) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, user_id: user._id },
           'something went wrong reactivating subscription'
         )
@@ -414,7 +414,7 @@ module.exports = SubscriptionController = {
       coupon_code,
       function(err) {
         if (err != null) {
-          logger.err({ err, user_id: user._id }, 'error updating subscription')
+          logger.warn({ err, user_id: user._id }, 'error updating subscription')
           return next(err)
         }
         return res.sendStatus(200)

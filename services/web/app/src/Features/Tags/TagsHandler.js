@@ -168,7 +168,7 @@ module.exports = TagsHandler = {
   _handleResponse(err, res, params, callback) {
     if (err != null) {
       params.err = err
-      logger.err(params, 'error in tag api')
+      logger.warn(params, 'error in tag api')
       return callback(err)
     } else if (res != null && res.statusCode >= 200 && res.statusCode < 300) {
       return callback(null)
@@ -179,7 +179,7 @@ module.exports = TagsHandler = {
         }`
       )
       params.err = err
-      logger.err(
+      logger.warn(
         params,
         `tags api returned failure status code: ${
           res != null ? res.statusCode : undefined

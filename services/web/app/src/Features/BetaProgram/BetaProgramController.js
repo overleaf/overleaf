@@ -51,7 +51,7 @@ module.exports = BetaProgramController = {
     logger.log({ user_id }, 'showing beta participation page for user')
     return UserGetter.getUser(user_id, function(err, user) {
       if (err) {
-        logger.err({ err, user_id }, 'error fetching user')
+        logger.warn({ err, user_id }, 'error fetching user')
         return next(err)
       }
       return res.render('beta_program/opt_in', {

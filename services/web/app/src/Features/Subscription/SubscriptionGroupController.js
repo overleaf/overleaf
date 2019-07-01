@@ -31,7 +31,7 @@ module.exports = {
       userToRemove_id,
       function(err) {
         if (err != null) {
-          logger.err(
+          logger.warn(
             { err, subscriptionId: subscription._id, userToRemove_id },
             'error removing user from group'
           )

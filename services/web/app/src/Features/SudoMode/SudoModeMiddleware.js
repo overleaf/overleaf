@@ -33,7 +33,7 @@ module.exports = SudoModeMiddleware = {
     )
     return SudoModeHandler.isSudoModeActive(userId, function(err, isActive) {
       if (err != null) {
-        logger.err(
+        logger.warn(
           { err, userId },
           '[SudoMode] error checking if sudo mode is active'
         )

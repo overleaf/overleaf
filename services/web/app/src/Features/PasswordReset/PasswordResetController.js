@@ -143,7 +143,7 @@ module.exports = {
                       user,
                       function(err) {
                         if (err != null) {
-                          logger.err(
+                          logger.warn(
                             { err, email: user.email },
                             'Error setting up session after setting password'
                           )

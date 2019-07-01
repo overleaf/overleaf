@@ -51,6 +51,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
       requires: {
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
+          warn: sinon.stub(),
           error: sinon.stub(),
           err() {}
         }),

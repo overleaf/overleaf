@@ -42,7 +42,7 @@ module.exports = FileHashManager = {
 
       const input = fs.createReadStream(filePath)
       input.on('error', function(err) {
-        logger.err({ filePath, err }, 'error opening file in computeHash')
+        logger.warn({ filePath, err }, 'error opening file in computeHash')
         return callback(err)
       })
 
