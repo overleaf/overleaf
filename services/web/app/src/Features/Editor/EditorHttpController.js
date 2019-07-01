@@ -28,6 +28,7 @@ const CollaboratorsInviteHandler = require('../Collaborators/CollaboratorsInvite
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const Errors = require('../Errors/Errors')
 
 module.exports = EditorHttpController = {
   joinProject(req, res, next) {
@@ -73,7 +74,7 @@ module.exports = EditorHttpController = {
         return callback(error)
       }
       if (project == null) {
-        return callback(new Error('not found'))
+        return callback(new Errors.NotFoundError('project not found'))
       }
       return CollaboratorsHandler.getInvitedMembersWithPrivilegeLevels(
         project_id,

@@ -16,6 +16,7 @@ const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Editor/EditorHttpController'
 )
+const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 describe('EditorHttpController', function() {
   beforeEach(function() {
@@ -37,7 +38,8 @@ describe('EditorHttpController', function() {
         '../Collaborators/CollaboratorsHandler': (this.CollaboratorsHandler = {}),
         '../Collaborators/CollaboratorsInviteHandler': (this.CollaboratorsInviteHandler = {}),
         '../TokenAccess/TokenAccessHandler': (this.TokenAccessHandler = {}),
-        '../Authentication/AuthenticationController': (this.AuthenticationController = {})
+        '../Authentication/AuthenticationController': (this.AuthenticationController = {}),
+        '../Errors/Errors': Errors
       }
     })
 
@@ -184,6 +186,24 @@ describe('EditorHttpController', function() {
       return (this.UserGetter.getUser = sinon
         .stub()
         .callsArgWith(2, null, this.user))
+    })
+
+    describe('when project is not found', function() {
+      beforeEach(function() {
+        this.ProjectGetter.getProjectWithoutDocLines.yields(null, null)
+        return this.EditorHttpController._buildJoinProjectView(
+          this.req,
+          this.project_id,
+          this.user_id,
+          this.callback
+        )
+      })
+
+      it('should handle return not found error', function() {
+        let args = this.callback.lastCall.args
+        args.length.should.equal(1)
+        args[0].should.be.instanceof(Errors.NotFoundError)
+      })
     })
 
     describe('when authorized', function() {
