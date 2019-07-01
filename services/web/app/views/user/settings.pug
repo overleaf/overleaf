@@ -232,41 +232,47 @@ block content
 							| If you want to remove your projects from Overleaf v1, you must do this before you
 							| delete your account by going to your My Projects page in Overleaf v1, moving your
 							| projects to the Trash, and then from there either ‘leaving’ or ‘purging’ them, as appropriate.
-			form(novalidate, name="deleteAccountForm")
-				label #{translate('email')}
-				input.form-control(
-					type="text",
-					autocomplete="off",
-					placeholder="",
-					ng-model="state.deleteText",
-					focus-on="open",
-					ng-keyup="checkValidation()"
-				)
 
-				label #{translate('password')}
-				input.form-control(
-					type="password",
-					autocomplete="off",
-					placeholder="",
-					ng-model="state.password",
-					ng-keyup="checkValidation()"
-				)
+			if settings.overleaf && !hasPassword
+				p
+					b
+						| #[a(href="/user/password/reset", target='_blank') #{translate("delete_acct_no_existing_pw")}].
+			else
+				form(novalidate, name="deleteAccountForm")
+					label #{translate('email')}
+					input.form-control(
+						type="text",
+						autocomplete="off",
+						placeholder="",
+						ng-model="state.deleteText",
+						focus-on="open",
+						ng-keyup="checkValidation()"
+					)
 
-				div.confirmation-checkbox-wrapper
-					input(
-						type="checkbox"
-						ng-model="state.confirmV1Purge"
-						ng-change="checkValidation()"
-					).pull-left
-					label(style="display: inline") &nbsp;I have left, purged or imported my projects on Overleaf v1 (if any) &nbsp;
+					label #{translate('password')}
+					input.form-control(
+						type="password",
+						autocomplete="off",
+						placeholder="",
+						ng-model="state.password",
+						ng-keyup="checkValidation()"
+					)
 
-				div.confirmation-checkbox-wrapper
-					input(
-						type="checkbox"
-						ng-model="state.confirmSharelatexDelete"
-						ng-change="checkValidation()"
-					).pull-left
-					label(style="display: inline") &nbsp;I understand this will delete all projects in my Overleaf v2 account (and ShareLaTeX account, if any) with email address #[em {{ userDefaultEmail }}]
+					div.confirmation-checkbox-wrapper
+						input(
+							type="checkbox"
+							ng-model="state.confirmV1Purge"
+							ng-change="checkValidation()"
+						).pull-left
+						label(style="display: inline") &nbsp;I have left, purged or imported my projects on Overleaf v1 (if any) &nbsp;
+
+					div.confirmation-checkbox-wrapper
+						input(
+							type="checkbox"
+							ng-model="state.confirmSharelatexDelete"
+							ng-change="checkValidation()"
+						).pull-left
+						label(style="display: inline") &nbsp;I understand this will delete all projects in my Overleaf v2 account (and ShareLaTeX account, if any) with email address #[em {{ userDefaultEmail }}]
 
 			div(ng-if="state.error")
 				div.alert.alert-danger(ng-switch="state.error.code")
