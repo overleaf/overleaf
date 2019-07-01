@@ -94,6 +94,9 @@ const ThirdPartyIdentityManager = (module.exports = {
     }
     // add new tpi only if an entry for the provider does not exist
     UserUpdater.updateUser(query, update, function(err, res) {
+      if (err && err.code === 11000) {
+        return callback(new Errors.ThirdPartyIdentityExistsError())
+      }
       if (err != null) {
         return callback(err)
       }

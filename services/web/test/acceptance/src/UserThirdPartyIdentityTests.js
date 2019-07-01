@@ -24,7 +24,7 @@ describe('ThirdPartyIdentityManager', function() {
     this.externalUserId = 'external-user-id'
     this.externalData = { test: 'data' }
     this.user = new User()
-    return this.user.ensureUserExists(done)
+    this.user.ensureUserExists(done)
   })
 
   afterEach(function(done) {
@@ -161,6 +161,27 @@ describe('ThirdPartyIdentityManager', function() {
           }
         )
       })
+
+      // describe('when another account tries to link same provider/externalUserId', function() {
+      // NOTE: Cannot run this test because we do not have indexes on the test DB
+      //   beforeEach(function(done) {
+      //     this.user2 = new User()
+      //     this.user2.ensureUserExists(done)
+      //   })
+      //   it('should not link provider', function(done) {
+      //     ThirdPartyIdentityManager.link(
+      //       this.user2.id,
+      //       this.provider,
+      //       this.externalUserId,
+      //       this.externalData,
+      //       (err, user) => {
+      //         expect(err.name).to.equal('ThirdPartyIdentityExistsError')
+      //         return done()
+      //       }
+      //     )
+      //     this.user2.full_delete_user(this.user2.email, done)
+      //   })
+      // })
     })
   })
 

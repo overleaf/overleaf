@@ -139,13 +139,24 @@ var SLInV2Error = function(message) {
 }
 SLInV2Error.prototype.__proto__ = Error.prototype
 
+const ThirdPartyIdentityExistsError = function(message) {
+  if (message == null) {
+    message = 'provider and external id already linked to another account'
+  }
+  const error = new Error(message)
+  error.name = 'ThirdPartyIdentityExistsError'
+  error.__proto__ = ThirdPartyIdentityExistsError.prototype
+  return error
+}
+ThirdPartyIdentityExistsError.prototype.__proto__ = Error.prototype
+
 const ThirdPartyUserNotFoundError = function(message) {
   if (message == null) {
     message = 'user not found for provider and external id'
   }
   const error = new Error(message)
   error.name = 'ThirdPartyUserNotFoundError'
-  error.__proto__ = SLInV2Error.prototype
+  error.__proto__ = ThirdPartyUserNotFoundError.prototype
   return error
 }
 ThirdPartyUserNotFoundError.prototype.__proto__ = Error.prototype
@@ -178,6 +189,7 @@ module.exports = Errors = {
   AccountMergeError,
   NotInV2Error,
   SLInV2Error,
+  ThirdPartyIdentityExistsError,
   ThirdPartyUserNotFoundError,
   SubscriptionAdminDeletionError
 }
