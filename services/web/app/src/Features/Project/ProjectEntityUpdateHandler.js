@@ -1130,7 +1130,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
     logger.log({ entity_id, entityType, project_id }, 'deleting project entity')
     if (entityType == null) {
       logger.warn({ err: 'No entityType set', project_id, entity_id })
-      return callback('No entityType set')
+      return callback(new Error('No entityType set'))
     }
     entityType = entityType.toLowerCase()
     return ProjectEntityMongoUpdateHandler.deleteEntity(
@@ -1261,7 +1261,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
     )
     if (entityType == null) {
       logger.warn({ err: 'No entityType set', project_id, entity_id })
-      return callback('No entityType set')
+      return callback(new Error('No entityType set'))
     }
     entityType = entityType.toLowerCase()
     return ProjectEntityMongoUpdateHandler.moveEntity(
@@ -1309,7 +1309,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
     logger.log({ entity_id, project_id }, `renaming ${entityType}`)
     if (entityType == null) {
       logger.warn({ err: 'No entityType set', project_id, entity_id })
-      return callback('No entityType set')
+      return callback(new Error('No entityType set'))
     }
     entityType = entityType.toLowerCase()
 

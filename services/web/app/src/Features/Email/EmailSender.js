@@ -173,7 +173,7 @@ module.exports = {
           },
           'rate limit hit for sending email, not sending'
         )
-        return callback('rate limit hit sending email')
+        return callback(new Error('rate limit hit sending email'))
       }
       metrics.inc('email')
       options = {

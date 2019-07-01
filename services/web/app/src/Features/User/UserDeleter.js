@@ -65,7 +65,7 @@ module.exports = UserDeleter = {
     }
     if (user_id == null) {
       logger.warn('user_id is null when trying to delete user')
-      return callback('no user_id')
+      return callback(new Error('no user_id'))
     }
     return User.findById(user_id, function(err, user) {
       if (err != null) {

@@ -225,7 +225,7 @@ module.exports = {
             return callback(error)
           }
           if (user == null) {
-            return callback('no user found')
+            return callback(new Error('no user found'))
           }
           return SubscriptionUpdater.syncSubscription(
             recurlySubscription,

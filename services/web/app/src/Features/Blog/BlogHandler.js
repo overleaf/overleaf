@@ -30,7 +30,7 @@ module.exports = BlogHandler = {
         return callback(err)
       }
       if (res.statusCode !== 200) {
-        return callback('blog announcement returned non 200')
+        return callback(new Error('blog announcement returned non 200'))
       }
       logger.log(
         {

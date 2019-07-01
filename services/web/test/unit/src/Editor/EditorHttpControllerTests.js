@@ -51,7 +51,7 @@ describe('EditorHttpController', function() {
     this.AuthenticationController.getLoggedInUserId = sinon
       .stub()
       .returns(this.userId)
-    this.req = {}
+    this.req = { i18n: { translate: string => string } }
     this.res = {
       send: sinon.stub(),
       sendStatus: sinon.stub(),
@@ -306,13 +306,27 @@ describe('EditorHttpController', function() {
     })
 
     describe('unsuccesfully', function() {
-      beforeEach(function() {
+      it('handle name too short', function() {
         this.req.body.name = ''
-        return this.EditorHttpController.addDoc(this.req, this.res)
+        this.EditorHttpController.addDoc(this.req, this.res)
+        this.res.sendStatus.calledWith(400).should.equal(true)
       })
 
-      it('should send back a bad request status code', function() {
-        return this.res.sendStatus.calledWith(400).should.equal(true)
+      it('handle too many files', function() {
+        this.EditorController.addDoc.yields(
+          new Error('project_has_to_many_files')
+        )
+        let res = {
+          status: status => {
+            status.should.equal(400)
+            return {
+              json: json => {
+                json.should.equal('project_has_to_many_files')
+              }
+            }
+          }
+        }
+        this.EditorHttpController.addDoc(this.req, res)
       })
     })
   })
@@ -352,13 +366,44 @@ describe('EditorHttpController', function() {
     })
 
     describe('unsuccesfully', function() {
-      beforeEach(function() {
+      it('handle name too short', function() {
         this.req.body.name = ''
-        return this.EditorHttpController.addFolder(this.req, this.res)
+        this.EditorHttpController.addFolder(this.req, this.res)
+        this.res.sendStatus.calledWith(400).should.equal(true)
       })
 
-      it('should send back a bad request status code', function() {
-        return this.res.sendStatus.calledWith(400).should.equal(true)
+      it('handle too many files', function() {
+        this.EditorController.addFolder.yields(
+          new Error('project_has_to_many_files')
+        )
+        let res = {
+          status: status => {
+            status.should.equal(400)
+            return {
+              json: json => {
+                json.should.equal('project_has_to_many_files')
+              }
+            }
+          }
+        }
+        this.EditorHttpController.addFolder(this.req, res)
+      })
+
+      it('handle invalid element name', function() {
+        this.EditorController.addFolder.yields(
+          new Error('invalid element name')
+        )
+        let res = {
+          status: status => {
+            status.should.equal(400)
+            return {
+              json: json => {
+                json.should.equal('invalid_file_name')
+              }
+            }
+          }
+        }
+        this.EditorHttpController.addFolder(this.req, res)
       })
     })
   })

@@ -505,7 +505,9 @@ module.exports = RecurlyWrapper = {
                   /accounts\/(.*)/
                 )[1]
               } else {
-                return callback("I don't understand the response from Recurly")
+                return callback(
+                  new Error("I don't understand the response from Recurly")
+                )
               }
 
               return RecurlyWrapper.getAccount(accountId, function(

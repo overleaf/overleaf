@@ -44,7 +44,7 @@ module.exports = FileSystemImportManager = {
           { user_id, project_id, folder_id, name, path },
           'add doc is from symlink, stopping process'
         )
-        return callback('path is symlink')
+        return callback(new Error('path is symlink'))
       }
       return fs.readFile(path, charset, function(error, content) {
         if (error != null) {
@@ -90,7 +90,7 @@ module.exports = FileSystemImportManager = {
           { user_id, project_id, folder_id, name, path },
           'add file is from symlink, stopping insert'
         )
-        return callback('path is symlink')
+        return callback(new Error('path is symlink'))
       }
 
       if (replace) {
@@ -132,7 +132,7 @@ module.exports = FileSystemImportManager = {
           { user_id, project_id, folder_id, path },
           'add folder is from symlink, stopping insert'
         )
-        return callback('path is symlink')
+        return callback(new Error('path is symlink'))
       }
       return EditorController.addFolder(
         project_id,
@@ -181,7 +181,7 @@ module.exports = FileSystemImportManager = {
           { user_id, project_id, parent_folder_id, folderPath },
           'add folder contents is from symlink, stopping insert'
         )
-        return callback('path is symlink')
+        return callback(new Error('path is symlink'))
       }
       return fs.readdir(folderPath, (error, entries) => {
         if (entries == null) {
@@ -231,7 +231,7 @@ module.exports = FileSystemImportManager = {
           { user_id, project_id, folder_id, path },
           'add entry is from symlink, stopping insert'
         )
-        return callback('path is symlink')
+        return callback(new Error('path is symlink'))
       }
 
       return FileTypeManager.isDirectory(path, (error, isDirectory) => {

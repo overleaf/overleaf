@@ -651,7 +651,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
         'project too big, stopping insertions'
       )
       CooldownManager.putProjectOnCooldown(project._id)
-      return callback('project_has_to_many_files')
+      return callback(new Error('project_has_to_many_files'))
     }
 
     return ProjectLocator.findElement(

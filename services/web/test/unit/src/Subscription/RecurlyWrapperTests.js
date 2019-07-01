@@ -110,7 +110,7 @@ const mockApiRequest = function(options, callback) {
   if (fixtures[options.url]) {
     return callback(null, { statusCode: 200 }, fixtures[options.url])
   } else {
-    return callback('Not found', { statusCode: 404 })
+    return callback(new Error('Not found'), { statusCode: 404 })
   }
 }
 
