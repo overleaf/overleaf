@@ -2,6 +2,7 @@ Metrics = require("metrics-sharelatex")
 Settings = require "settings-sharelatex"
 Metrics.initialize(Settings.appName or "real-time")
 async = require("async")
+_ = require "underscore"
 
 logger = require "logger-sharelatex"
 logger.initialize("real-time")
@@ -145,7 +146,7 @@ if Settings.continualPubsubTraffic
 					if err?
 						logger.err {err, channel}, "error publishing pubsub traffic to redis"
 					return cb(err)
-					
+
 		async.series jobs, callback
 
 	runPubSubTraffic = ->
