@@ -589,7 +589,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
       } else {
         $scope._removeProjectFromList(project)
 
-        for (let tag of project.tags) {
+        for (let tag of project.tags || []) {
           $scope._removeProjectIdsFromTagArray(tag, [project._id])
         }
 
