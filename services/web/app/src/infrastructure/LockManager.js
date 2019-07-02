@@ -58,7 +58,7 @@ module.exports = LockManager = {
 
     const timer = new metrics.Timer(`lock.${namespace}`)
     const key = `lock:web:${namespace}:${id}`
-    return LockManager._getLock(key, namespace, function(error, lockValue) {
+    LockManager._getLock(key, namespace, function(error, lockValue) {
       if (error != null) {
         return callback(error)
       }
@@ -108,7 +108,7 @@ module.exports = LockManager = {
       callback = function(err, isFree, lockValue) {}
     }
     const lockValue = LockManager.randomLock()
-    return rclient.set(
+    rclient.set(
       key,
       lockValue,
       'EX',
@@ -195,7 +195,7 @@ module.exports = LockManager = {
   },
 
   _releaseLock(key, lockValue, callback) {
-    return rclient.eval(LockManager.unlockScript, 1, key, lockValue, function(
+    rclient.eval(LockManager.unlockScript, 1, key, lockValue, function(
       err,
       result
     ) {

@@ -22,15 +22,13 @@ module.exports = {
       timeInterval: ONE_MIN * 2,
       subjectName: email
     }
-    return RateLimiter.addCount(opts, (err, shouldAllow) =>
-      callback(err, shouldAllow)
-    )
+    RateLimiter.addCount(opts, (err, shouldAllow) => callback(err, shouldAllow))
   },
 
   recordSuccessfulLogin(email, callback) {
     if (callback == null) {
       callback = function() {}
     }
-    return RateLimiter.clearRateLimit('login', email, callback)
+    RateLimiter.clearRateLimit('login', email, callback)
   }
 }

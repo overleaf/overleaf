@@ -31,7 +31,7 @@ module.exports = RateLimiter = {
       interval: opts.timeInterval * 1000,
       maxInInterval: opts.throttle
     })
-    return limiter(k, function(err, timeLeft, actionsLeft) {
+    limiter(k, function(err, timeLeft, actionsLeft) {
       if (err != null) {
         return callback(err)
       }
@@ -48,6 +48,6 @@ module.exports = RateLimiter = {
   clearRateLimit(endpointName, subject, callback) {
     // same as the key which will be built by RollingRateLimiter (namespace+k)
     const keyName = `RateLimit:${endpointName}:{${subject}}`
-    return rclient.del(keyName, callback)
+    rclient.del(keyName, callback)
   }
 }
