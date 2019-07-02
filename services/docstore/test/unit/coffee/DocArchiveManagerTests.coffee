@@ -61,6 +61,22 @@ describe "DocArchiveManager", ->
 			rev: 6
 		}]
 
+		@unarchivedDocs = [{
+			_id: ObjectId()
+			lines: ["wombat", "potato", "banana"]
+			rev: 2
+		}, {
+			_id: ObjectId()
+			lines: ["llama", "turnip", "apple"]
+			rev: 4
+		}, {
+			_id: ObjectId()
+			lines: ["elephant", "swede", "nectarine"]
+			rev: 6
+		}]
+
+		@mixedDocs = @archivedDocs.concat(@unarchivedDocs)
+
 		@MongoManager =
 			markDocAsArchived: sinon.stub().callsArgWith(2, null)
 			upsertIntoDocCollection: sinon.stub().callsArgWith(3, null)
@@ -214,6 +230,51 @@ describe "DocArchiveManager", ->
 			@DocArchiveManager.unArchiveAllDocs @project_id, (err)=>
 				err.should.equal @error
 				done()
+
+	describe "destroyAllDocs", ->
+		beforeEach ->
+			@request.del = sinon.stub().callsArgWith(1, null, statusCode:204, {})
+			@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(3, null, @mixedDocs)
+			@MongoManager.findDoc = sinon.stub().callsArgWith(3, null, null)
+			@MongoManager.destroyDoc = sinon.stub().yields()
+			for doc in @mixedDocs
+				@MongoManager.findDoc.withArgs(@project_id, doc._id).callsArgWith(3, null, doc)
+
+		it "should destroy all the docs", (done)->
+			@DocArchiveManager.destroyDoc = sinon.stub().callsArgWith(2, null)
+			@DocArchiveManager.destroyAllDocs @project_id, (err)=>
+				for doc in @mixedDocs
+					@DocArchiveManager.destroyDoc.calledWith(@project_id, doc._id).should.equal true
+				should.not.exist err
+				done()
+
+		it "should only the s3 docs from s3", (done)->
+			docOpts = (doc) =>
+				JSON.parse(JSON.stringify({
+					aws: {key:@settings.docstore.s3.key, secret:@settings.docstore.s3.secret, bucket:@settings.docstore.s3.bucket},
+					json: true,
+					timeout: 30 * 1000
+					uri:"https://#{@settings.docstore.s3.bucket}.s3.amazonaws.com/#{@project_id}/#{doc._id}"
+				}))
+
+			@DocArchiveManager.destroyAllDocs @project_id, (err)=>
+				expect(err).not.to.exist
+
+				for doc in @archivedDocs
+					sinon.assert.calledWith(@request.del, docOpts(doc))
+				for doc in @unarchivedDocs
+					expect(@request.del.calledWith(docOpts(doc))).to.equal false  # no notCalledWith
+
+				done()
+
+		it "should remove the docs from mongo", (done)->
+			@DocArchiveManager.destroyAllDocs @project_id, (err)=>
+				expect(err).not.to.exist
+
+			for doc in @mixedDocs
+				sinon.assert.calledWith(@MongoManager.destroyDoc, doc._id)
+
+			done()
 	
 	describe "_s3DocToMongoDoc", ->
 		describe "with the old schema", ->

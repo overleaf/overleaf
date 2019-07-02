@@ -110,6 +110,18 @@ describe "MongoManager", ->
 				err.should.equal @stubbedErr
 				done()
 
+	describe "destroyDoc", ->
+		beforeEach (done) ->
+			@db.docs.remove = sinon.stub().yields()
+			@db.docOps.remove = sinon.stub().yields()
+			@MongoManager.destroyDoc '123456789012', done
+
+		it "should destroy the doc", ->
+			sinon.assert.calledWith(@db.docs.remove, {_id: ObjectId('123456789012')})
+
+		it "should destroy the docOps", ->
+			sinon.assert.calledWith(@db.docOps.remove, {doc_id: ObjectId('123456789012')})
+
 	describe "getDocVersion", ->
 		describe "when the doc exists", ->
 			beforeEach ->

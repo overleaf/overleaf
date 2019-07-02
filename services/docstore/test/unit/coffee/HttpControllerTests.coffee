@@ -326,3 +326,17 @@ describe "HttpController", ->
 			@res.send
 				.calledWith(204)
 				.should.equal true
+
+	describe "destroyAllDocs", ->
+		beforeEach ->
+			@req.params =
+				project_id: @project_id
+			@DocArchiveManager.destroyAllDocs = sinon.stub().callsArg(1)
+			@HttpController.destroyAllDocs @req, @res, @next
+
+		it "should destroy the docs", ->
+			sinon.assert.calledWith(@DocArchiveManager.destroyAllDocs, @project_id)
+
+		it "should return 204", ->
+			sinon.assert.calledWith(@res.send, 204)
+

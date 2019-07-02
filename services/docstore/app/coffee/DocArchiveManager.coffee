@@ -79,11 +79,43 @@ module.exports = DocArchive =
 				MongoManager.upsertIntoDocCollection project_id, doc_id.toString(), mongo_doc, (err) ->
 					return callback(err) if err?
 					logger.log project_id: project_id, doc_id: doc_id, "deleting doc from s3"
-					request.del options, (err, res, body)->
-						if err? || res.statusCode != 204
-							logger.err err:err, res:res, project_id:project_id, doc_id:doc_id, "something went wrong deleting doc from aws"
-							return callback new Errors.NotFoundError("Error in S3 request")
-						callback()
+					DocArchive._deleteDocFromS3 project_id, doc_id, callback
+
+	destroyAllDocs: (project_id, callback = (err) ->) ->
+		MongoManager.getProjectsDocs project_id, {include_deleted: true}, {_id: 1}, (err, docs) ->
+			if err?
+				logger.err err:err, project_id:project_id, "error getting project's docs"
+				return callback(err)
+			else if !docs?
+				return callback()
+			jobs = _.map docs, (doc) ->
+				(cb)->
+					DocArchive.destroyDoc(project_id, doc._id, cb)
+			async.parallelLimit jobs, 5, callback
+
+	destroyDoc: (project_id, doc_id, callback)->
+		logger.log project_id: project_id, doc_id: doc_id, "removing doc from mongo and s3"
+		MongoManager.findDoc project_id, doc_id, {inS3: 1}, (error, doc) ->
+			return callback error if error?
+			return callback new Errors.NotFoundError("Doc not found in Mongo") unless doc?
+			if doc.inS3 == true
+				DocArchive._deleteDocFromS3 project_id, doc_id, (err) ->
+					return err if err?
+					MongoManager.destroyDoc doc_id, callback
+			else
+				MongoManager.destroyDoc doc_id, callback
+
+	_deleteDocFromS3: (project_id, doc_id, callback) ->
+		try
+			options = DocArchive.buildS3Options(project_id+"/"+doc_id)
+		catch e
+			return callback e
+		options.json = true
+		request.del options, (err, res, body)->
+			if err? || res.statusCode != 204
+				logger.err err:err, res:res, project_id:project_id, doc_id:doc_id, "something went wrong deleting doc from aws"
+				return callback new Error("Error in S3 request")
+			callback()
 
 	_s3DocToMongoDoc: (doc, callback = (error, mongo_doc) ->) ->
 		mongo_doc = {}

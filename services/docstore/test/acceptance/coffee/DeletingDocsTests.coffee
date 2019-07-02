@@ -2,6 +2,7 @@ sinon = require "sinon"
 chai = require("chai")
 chai.should()
 {db, ObjectId} = require "../../../app/js/mongojs"
+expect = chai.expect
 DocstoreApp = require "./helpers/DocstoreApp"
 
 DocstoreClient = require "./helpers/DocstoreClient"
@@ -40,3 +41,45 @@ describe "Deleting a doc", ->
 				res.statusCode.should.equal 404
 				done()
 
+describe "Destroying a project's documents", ->
+	describe "when the doc exists", ->
+		beforeEach (done) ->
+			db.docOps.insert {doc_id: ObjectId(@doc_id), version: 1}, (err) ->
+				return done(err) if err?
+				DocstoreClient.destroyAllDoc @project_id, done
+
+		it "should remove the doc from the docs collection", (done) ->
+			db.docs.find _id: @doc_id, (err, docs) ->
+				expect(err).not.to.exist
+				expect(docs).to.deep.equal []
+				done()
+
+		it "should remove the docOps from the docOps collection", (done) ->
+			db.docOps.find doc_id: @doc_id, (err, docOps) ->
+				expect(err).not.to.exist
+				expect(docOps).to.deep.equal []
+				done()
+
+	describe "when the doc is archived", ->
+		beforeEach (done) ->
+			DocstoreClient.archiveAllDoc @project_id, (err) ->
+				return done(err) if err?
+				DocstoreClient.destroyAllDoc @project_id, done
+
+		it "should remove the doc from the docs collection", (done) ->
+			db.docs.find _id: @doc_id, (err, docs) ->
+				expect(err).not.to.exist
+				expect(docs).to.deep.equal []
+				done()
+
+		it "should remove the docOps from the docOps collection", (done) ->
+			db.docOps.find doc_id: @doc_id, (err, docOps) ->
+				expect(err).not.to.exist
+				expect(docOps).to.deep.equal []
+				done()
+
+		it "should remove the doc contents from s3", (done) ->
+			DocstoreClient.getS3Doc @project_id, @doc_id, (error, res, s3_doc) =>
+				throw error if error?
+				expect(res.statusCode).to.equal 404
+				done()
