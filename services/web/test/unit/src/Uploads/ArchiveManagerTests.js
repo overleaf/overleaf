@@ -70,11 +70,23 @@ describe('ArchiveManager', function() {
 
     describe('successfully', function() {
       beforeEach(function(done) {
+        this.readStream = new events.EventEmitter()
+        this.readStream.pipe = sinon.stub()
+        this.zipfile.openReadStream = sinon
+          .stub()
+          .callsArgWith(1, null, this.readStream)
+        this.writeStream = new events.EventEmitter()
+        this.fs.createWriteStream = sinon.stub().returns(this.writeStream)
+        this.fse.ensureDir = sinon.stub().callsArg(1)
         this.ArchiveManager.extractZipArchive(
           this.source,
           this.destination,
           done
         )
+
+        // entry contains a single file
+        this.zipfile.emit('entry', { fileName: 'testfile.txt' })
+        this.readStream.emit('end')
         return this.zipfile.emit('end')
       })
 
@@ -90,6 +102,60 @@ describe('ArchiveManager', function() {
         return this.logger.log
           .calledWith(sinon.match.any, 'unzipping file')
           .should.equal(true)
+      })
+    })
+
+    describe('with a zipfile containing an empty directory', function() {
+      beforeEach(function(done) {
+        this.readStream = new events.EventEmitter()
+        this.readStream.pipe = sinon.stub()
+        this.zipfile.openReadStream = sinon
+          .stub()
+          .callsArgWith(1, null, this.readStream)
+        this.writeStream = new events.EventEmitter()
+        this.fs.createWriteStream = sinon.stub().returns(this.writeStream)
+        this.fse.ensureDir = sinon.stub().callsArg(1)
+        this.ArchiveManager.extractZipArchive(
+          this.source,
+          this.destination,
+          error => {
+            this.callback(error)
+            done()
+          }
+        )
+
+        // entry contains a single, empty directory
+        this.zipfile.emit('entry', { fileName: 'testdir/' })
+        this.readStream.emit('end')
+        return this.zipfile.emit('end')
+      })
+
+      it('should return the callback with an error', function() {
+        return sinon.assert.calledWithExactly(
+          this.callback,
+          new Errors.InvalidError('empty_zip_file')
+        )
+      })
+    })
+
+    describe('with an empty zipfile', function() {
+      beforeEach(function(done) {
+        this.ArchiveManager.extractZipArchive(
+          this.source,
+          this.destination,
+          error => {
+            this.callback(error)
+            return done()
+          }
+        )
+        return this.zipfile.emit('end')
+      })
+
+      it('should return the callback with an error', function() {
+        return sinon.assert.calledWithExactly(
+          this.callback,
+          new Errors.InvalidError('empty_zip_file')
+        )
       })
     })
 
@@ -285,10 +351,6 @@ describe('ArchiveManager', function() {
 
       it('should not try to read the entry', function() {
         return this.zipfile.openReadStream.called.should.equal(false)
-      })
-
-      it('should not log out a warning', function() {
-        return this.logger.warn.called.should.equal(false)
       })
     })
 

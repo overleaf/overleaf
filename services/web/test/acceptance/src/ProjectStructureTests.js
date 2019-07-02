@@ -342,6 +342,66 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
+  describe('uploading an empty zipfile', function() {
+    let zipFile = null
+
+    before(function(done) {
+      MockDocUpdaterApi.clearProjectStructureUpdates()
+      zipFile = fs.createReadStream(
+        Path.resolve(__dirname + '/../files/test_project_empty.zip')
+      )
+      done()
+    })
+
+    it('should fail with 422 error', function(done) {
+      this.owner.request.post(
+        {
+          uri: 'project/new/upload',
+          formData: {
+            qqfile: zipFile
+          }
+        },
+        (error, res) => {
+          if (error != null) {
+            throw error
+          }
+          expect(res.statusCode).to.equal(422)
+          done()
+        }
+      )
+    })
+  })
+
+  describe('uploading a zipfile containing only empty directories', function() {
+    let zipFile = null
+
+    before(function(done) {
+      MockDocUpdaterApi.clearProjectStructureUpdates()
+      zipFile = fs.createReadStream(
+        Path.resolve(__dirname + '/../files/test_project_with_empty_folder.zip')
+      )
+      done()
+    })
+
+    it('should fail with 422 error', function(done) {
+      this.owner.request.post(
+        {
+          uri: 'project/new/upload',
+          formData: {
+            qqfile: zipFile
+          }
+        },
+        (error, res) => {
+          if (error != null) {
+            throw error
+          }
+          expect(res.statusCode).to.equal(422)
+          done()
+        }
+      )
+    })
+  })
+
   describe('uploading a project with a shared top-level folder', function() {
     before(function(done) {
       MockDocUpdaterApi.clearProjectStructureUpdates()

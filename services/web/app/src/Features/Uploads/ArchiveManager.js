@@ -61,7 +61,7 @@ const ArchiveManager = {
             { source, totalSizeInBytes },
             'error getting bytes of zip'
           )
-          return callback(new Error('error getting bytes of zip'))
+          return callback(new Errors.InvalidError('invalid_zip_file'))
         }
         const isTooLarge = totalSizeInBytes > ONE_MEG * 300
         return callback(null, isTooLarge)
@@ -139,6 +139,8 @@ const ArchiveManager = {
       zipfile.on('error', callback)
       // read all the entries
       zipfile.readEntry()
+
+      let entryFileCount = 0
       zipfile.on('entry', function(entry) {
         logger.log(
           { source, fileName: entry.fileName },
@@ -168,6 +170,7 @@ const ArchiveManager = {
                   zipfile.close() // bail out, stop reading file entries
                   return callback(err)
                 } else {
+                  entryFileCount++
                   return zipfile.readEntry()
                 }
               }
@@ -179,7 +182,13 @@ const ArchiveManager = {
         })
       })
       // no more entries to read
-      return zipfile.on('end', callback)
+      return zipfile.on('end', () => {
+        if (entryFileCount > 0) {
+          callback()
+        } else {
+          callback(new Errors.InvalidError('empty_zip_file'))
+        }
+      })
     })
   },
 
