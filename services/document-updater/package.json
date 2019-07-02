@@ -28,7 +28,7 @@
     "lynx": "0.0.11",
     "metrics-sharelatex": "^2.2.0",
     "mongojs": "^2.6.0",
-    "redis-sharelatex": "^1.0.8",
+    "redis-sharelatex": "^1.0.9",
     "request": "2.25.0",
     "requestretry": "^1.12.0",
     "sandboxed-module": "~0.2.0",

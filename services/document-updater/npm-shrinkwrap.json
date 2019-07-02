@@ -779,9 +779,21 @@
       "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz"
     },
     "ioredis": {
-      "version": "4.9.5",
-      "from": "ioredis@>=4.9.1 <4.10.0",
-      "resolved": "https://registry.npmjs.org/ioredis/-/ioredis-4.9.5.tgz"
+      "version": "4.11.1",
+      "from": "ioredis@>=4.11.1 <4.12.0",
+      "resolved": "https://registry.npmjs.org/ioredis/-/ioredis-4.11.1.tgz",
+      "dependencies": {
+        "debug": {
+          "version": "4.1.1",
+          "from": "debug@>=4.1.1 <5.0.0",
+          "resolved": "https://registry.npmjs.org/debug/-/debug-4.1.1.tgz"
+        },
+        "ms": {
+          "version": "2.1.2",
+          "from": "ms@>=2.1.1 <3.0.0",
+          "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.2.tgz"
+        }
+      }
     },
     "is": {
       "version": "3.3.0",
@@ -1348,9 +1360,9 @@
       "resolved": "https://registry.npmjs.org/redis/-/redis-0.11.0.tgz"
     },
     "redis-commands": {
-      "version": "1.4.0",
-      "from": "redis-commands@1.4.0",
-      "resolved": "https://registry.npmjs.org/redis-commands/-/redis-commands-1.4.0.tgz"
+      "version": "1.5.0",
+      "from": "redis-commands@1.5.0",
+      "resolved": "https://registry.npmjs.org/redis-commands/-/redis-commands-1.5.0.tgz"
     },
     "redis-errors": {
       "version": "1.2.0",
@@ -1368,9 +1380,9 @@
       "resolved": "https://registry.npmjs.org/redis-sentinel/-/redis-sentinel-0.1.1.tgz"
     },
     "redis-sharelatex": {
-      "version": "1.0.8",
-      "from": "redis-sharelatex@1.0.8",
-      "resolved": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.8.tgz",
+      "version": "1.0.9",
+      "from": "redis-sharelatex@1.0.9",
+      "resolved": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.9.tgz",
       "dependencies": {
         "coffee-script": {
           "version": "1.8.0",
