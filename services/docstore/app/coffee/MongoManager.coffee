@@ -72,6 +72,14 @@ module.exports = MongoManager =
 			upsert: true
 		}, callback
 
+	destroyDoc: (doc_id, callback) ->
+		db.docs.remove {
+			_id: ObjectId(doc_id)
+		}, (err) ->
+			return callback(err) if err?
+			db.docOps.remove {
+				doc_id: ObjectId(doc_id)
+			}, callback
 
 [
 	'findDoc',

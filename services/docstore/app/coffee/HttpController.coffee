@@ -117,6 +117,13 @@ module.exports = HttpController =
 			return next(error) if error?
 			res.send 200
 
+	destroyAllDocs: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		logger.log project_id: project_id, "destroying all docs"
+		DocArchive.destroyAllDocs project_id, (error) ->
+			return next(error) if error?
+			res.send 204
+
 	healthCheck: (req, res)->
 		HealthChecker.check (err)->
 			if err?
