@@ -1,4 +1,4 @@
-FROM node:6.16.0 as app
+FROM node:10.16.0 as app
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY . /app
 
 
 
-FROM node:6.16.0
+FROM node:10.16.0
 
 COPY --from=app /app /app
 

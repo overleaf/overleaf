@@ -36,8 +36,7 @@
     "redis": "~0.8.4",
     "request": "^2.53.0",
     "settings-sharelatex": "^1.1.0",
-    "underscore": "1.4.4",
-    "v8-profiler": "^5.2.4"
+    "underscore": "1.4.4"
   },
   "devDependencies": {
     "bunyan": "^1.0.0",

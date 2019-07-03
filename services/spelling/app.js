@@ -34,16 +34,6 @@ server.get('/status', (req, res) => res.send({ status: 'spelling api is up' }))
 
 server.get('/health_check', HealthCheckController.healthCheck)
 
-const profiler = require('v8-profiler')
-server.get('/profile', function(req, res) {
-  const time = parseInt(req.query.time || '1000')
-  profiler.startProfiling('test')
-  return setTimeout(function() {
-    const profile = profiler.stopProfiling('test')
-    return res.json(profile)
-  }, time)
-})
-
 const host =
   __guard__(
     Settings.internal != null ? Settings.internal.spelling : undefined,
