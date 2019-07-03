@@ -1,6 +1,6 @@
 Settings = require('settings-sharelatex')
-rclient = require("redis-sharelatex").createClient(Settings.redis.realtime)
-Keys = Settings.redis.realtime.key_schema
+rclient = require("redis-sharelatex").createClient(Settings.redis.pubsub)
+Keys = Settings.redis.documentupdater.key_schema
 logger = require('logger-sharelatex')
 os = require "os"
 crypto = require "crypto"
