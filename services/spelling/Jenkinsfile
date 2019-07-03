@@ -36,6 +36,14 @@ pipeline {
       }
     }
 
+    // should be enabled once Node version is updated to >=8
+    // stage('Linting') {
+    //   steps {
+    //     sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make format'
+    //     sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make lint'
+    //   }
+    // }
+
     stage('Unit Tests') {
       steps {
         sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_unit'

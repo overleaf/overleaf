@@ -1,8 +1,8 @@
 spelling
---language=coffeescript
 --node-version=6.16.0
---acceptance-creds=None
---dependencies=mongo,redis
---docker-repos=gcr.io/overleaf-ops
---build-target=docker
 --script-version=1.1.21
+--build-target=docker
+--dependencies=mongo,redis
+--language=es
+--docker-repos=gcr.io/overleaf-ops
+--acceptance-creds=None
