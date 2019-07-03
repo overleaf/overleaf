@@ -95,6 +95,17 @@ describe('errorType.Error', () => {
       )
     }
   })
+
+  it('handles a custom error without info', () => {
+    try {
+      throw new CustomError1({})
+      expect.fail('should have thrown')
+    } catch (e) {
+      expect(errorType.getFullInfo(e)).to.deep.equal({})
+      let infoKey = Object.keys(e).find(k => k === 'info')
+      expect(infoKey).to.not.exist
+    }
+  })
 })
 
 describe('errorType.ErrorWithStatusCode', () => {

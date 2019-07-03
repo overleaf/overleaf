@@ -30,7 +30,9 @@ class ErrorTypeError extends Error {
   constructor ({ message, info }) {
     super(message)
     this.name = this.constructor.name
-    this.info = info
+    if (info) {
+      this.info = info
+    }
   }
 
   /**
