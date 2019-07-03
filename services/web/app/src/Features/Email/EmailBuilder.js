@@ -74,6 +74,48 @@ The ${settings.appName} Team - ${settings.siteUrl}\
   }
 }
 
+// No CTA Email
+const NoCTAEmailBody = require(`./Bodies/NoCTAEmailBody`)
+const NoCTAEmailTemplate = function(content) {
+  if (content.greeting == null) {
+    content.greeting = () => 'Hi,'
+  }
+  if (content.secondaryMessage == null) {
+    content.secondaryMessage = () => ''
+  }
+  return {
+    subject(opts) {
+      return content.subject(opts)
+    },
+    layout: BaseWithHeaderEmailLayout,
+    plainTextTemplate(opts) {
+      return `\
+${content.greeting(opts)}
+${content.message(opts).trim()}
+${(typeof content.secondaryMessage === 'function'
+        ? content.secondaryMessage(opts).trim()
+        : undefined) || ''}
+Regards,
+The ${settings.appName} Team - ${settings.siteUrl}\
+`
+    },
+    compiledTemplate(opts) {
+      return NoCTAEmailBody({
+        title:
+          typeof content.title === 'function' ? content.title(opts) : undefined,
+        greeting: content.greeting(opts),
+        message: marked(content.message(opts).trim()),
+        secondaryMessage: marked(content.secondaryMessage(opts).trim()),
+        gmailGoToAction:
+          typeof content.gmailGoToAction === 'function'
+            ? content.gmailGoToAction(opts)
+            : undefined,
+        StringHelper
+      })
+    }
+  }
+}
+
 const templates = {}
 
 templates.accountMergeToOverleafAddress = CTAEmailTemplate({
@@ -423,6 +465,7 @@ If you have any questions, you can contact our support team by reply.\
 module.exports = {
   templates,
   CTAEmailTemplate,
+  NoCTAEmailTemplate,
   buildEmail(templateName, opts) {
     const template = templates[templateName]
     opts.siteUrl = settings.siteUrl
