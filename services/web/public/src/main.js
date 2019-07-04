@@ -36,8 +36,6 @@ define([
   'main/oauth/factories/UserOauthDataService',
   'main/oauth/controllers/UserOauthController',
   'main/keys',
-  'main/cms/blog',
-  'main/cms/index',
   'main/importing',
   'analytics/AbTestingManager',
   'directives/autoSubmitForm',
