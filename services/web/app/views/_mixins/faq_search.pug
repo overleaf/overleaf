@@ -28,3 +28,5 @@ mixin faq_search(headerText, headerClass)
 					a(ng-href='{{hit.url}}',ng-repeat='hit in hits').search-result.card.card-thin
 						span(ng-bind-html='hit.name')
 						div.search-result-content(ng-show="hit.content != ''", ng-bind-html='hit.content')
+					.row-spaced-small.search-result.card.card-thin(ng-if="!processingSearch && searchQueryText.length > 1 && hits.length === 0")
+						p #{translate("no_search_results")}

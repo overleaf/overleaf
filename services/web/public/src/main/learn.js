@@ -26,6 +26,7 @@ define(['base', 'directives/mathjax', 'services/algolia-search'], function(
     $scope.hits = []
     $scope.hits_total = 0
     $scope.config_hits_per_page = 20
+    $scope.processingSearch = false
 
     $scope.clearSearchText = function() {
       $scope.searchQueryText = ''
@@ -85,6 +86,7 @@ define(['base', 'directives/mathjax', 'services/algolia-search'], function(
     }
 
     $scope.search = function() {
+      $scope.processingSearch = true
       const query = $scope.searchQueryText
       if (query == null || query.length === 0) {
         updateHits([])
@@ -94,6 +96,7 @@ define(['base', 'directives/mathjax', 'services/algolia-search'], function(
       return algoliaSearch.searchWiki(
         query,
         function(err, response) {
+          $scope.processingSearch = false
           if (response.hits.length === 0) {
             return updateHits([])
           } else {
