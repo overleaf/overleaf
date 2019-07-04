@@ -1,26 +1,11 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 const path = require('path')
 const sinon = require('sinon')
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/PasswordReset/PasswordResetHandler'
 )
-const { expect } = require('chai')
 
 describe('PasswordResetHandler', function() {
   beforeEach(function() {
@@ -57,9 +42,10 @@ describe('PasswordResetHandler', function() {
     })
     this.token = '12312321i'
     this.user_id = 'user_id_here'
-    this.user = { email: (this.email = 'bob@bob.com') }
+    this.email = 'bob@bob.com'
+    this.user = { _id: this.user_id, email: this.email }
     this.password = 'my great secret password'
-    return (this.callback = sinon.stub())
+    this.callback = sinon.stub()
   })
 
   describe('generateAndEmailResetToken', function() {
@@ -68,11 +54,14 @@ describe('PasswordResetHandler', function() {
         this.UserGetter.getUserByMainEmail.callsArgWith(1)
         this.UserGetter.getUserByAnyEmail.callsArgWith(1)
         this.OneTimeTokenHandler.getNewToken.yields()
-        return this.PasswordResetHandler.generateAndEmailResetToken(
+        this.PasswordResetHandler.generateAndEmailResetToken(
           this.user.email,
           (err, status) => {
+            if (err) {
+              return done(err)
+            }
             should.equal(status, null)
-            return done()
+            done()
           }
         )
       })
@@ -81,10 +70,20 @@ describe('PasswordResetHandler', function() {
         this.UserGetter.getUserByMainEmail.callsArgWith(1, null, this.user)
         this.OneTimeTokenHandler.getNewToken.yields(null, this.token)
         this.EmailHandler.sendEmail.callsArgWith(2)
-        return this.PasswordResetHandler.generateAndEmailResetToken(
+        this.PasswordResetHandler.generateAndEmailResetToken(
           this.user.email,
           (err, status) => {
+            if (err) {
+              return done(err)
+            }
             this.EmailHandler.sendEmail.called.should.equal(true)
+            this.OneTimeTokenHandler.getNewToken.should.have.been.calledWith(
+              'password',
+              {
+                user_id: this.user_id,
+                email: this.email
+              }
+            )
             status.should.equal('primary')
             const args = this.EmailHandler.sendEmail.args[0]
             args[0].should.equal('passwordResetRequested')
@@ -93,7 +92,7 @@ describe('PasswordResetHandler', function() {
                 this.token
               }&email=${encodeURIComponent(this.user.email)}`
             )
-            return done()
+            done()
           }
         )
       })
@@ -103,19 +102,28 @@ describe('PasswordResetHandler', function() {
         this.UserGetter.getUserByMainEmail.callsArgWith(1, null, this.user)
         this.UserGetter.getUserByAnyEmail.callsArgWith(1)
         this.OneTimeTokenHandler.getNewToken.yields()
-        return this.PasswordResetHandler.generateAndEmailResetToken(
+        this.PasswordResetHandler.generateAndEmailResetToken(
           this.user.email,
           (err, status) => {
+            if (err) {
+              return done(err)
+            }
             should.equal(status, null)
-            return done()
+            done()
           }
         )
+      })
+
+      it('should set the password token data to the user id and email', function() {
+        this.UserGetter.getUserByMainEmail.callsArgWith(1, null, this.user)
+        this.OneTimeTokenHandler.getNewToken.yields(null, this.token)
+        this.EmailHandler.sendEmail.callsArgWith(2)
       })
     })
 
     describe('when in overleaf', function() {
       beforeEach(function() {
-        return (this.settings.overleaf = true)
+        this.settings.overleaf = true
       })
 
       describe('when the email exists', function() {
@@ -123,14 +131,14 @@ describe('PasswordResetHandler', function() {
           this.V1Api.request.yields(null, {}, { user_id: 42 })
           this.OneTimeTokenHandler.getNewToken.yields(null, this.token)
           this.EmailHandler.sendEmail.yields()
-          return this.PasswordResetHandler.generateAndEmailResetToken(
+          this.PasswordResetHandler.generateAndEmailResetToken(
             this.email,
             this.callback
           )
         })
 
         it('should call the v1 api for the user', function() {
-          return this.V1Api.request
+          this.V1Api.request
             .calledWith({
               url: '/api/v1/sharelatex/user_emails',
               qs: {
@@ -142,18 +150,20 @@ describe('PasswordResetHandler', function() {
         })
 
         it('should set the password token data to the user id and email', function() {
-          return this.OneTimeTokenHandler.getNewToken
-            .calledWith('password', {
-              v1_user_id: 42
-            })
-            .should.equal(true)
+          this.OneTimeTokenHandler.getNewToken.should.have.been.calledWith(
+            'password',
+            {
+              v1_user_id: 42,
+              email: this.email
+            }
+          )
         })
 
         it('should send an email with the token', function() {
           this.EmailHandler.sendEmail.called.should.equal(true)
           const args = this.EmailHandler.sendEmail.args[0]
           args[0].should.equal('passwordResetRequested')
-          return args[1].setNewPasswordUrl.should.equal(
+          args[1].setNewPasswordUrl.should.equal(
             `${this.settings.siteUrl}/user/password/set?passwordResetToken=${
               this.token
             }&email=${encodeURIComponent(this.user.email)}`
@@ -161,7 +171,7 @@ describe('PasswordResetHandler', function() {
         })
 
         it('should return status == true', function() {
-          return this.callback.calledWith(null, 'primary').should.equal(true)
+          this.callback.calledWith(null, 'primary').should.equal(true)
         })
       })
 
@@ -171,22 +181,22 @@ describe('PasswordResetHandler', function() {
             .stub()
             .yields(null, { statusCode: 404 }, {})
           this.UserGetter.getUserByAnyEmail.callsArgWith(1)
-          return this.PasswordResetHandler.generateAndEmailResetToken(
+          this.PasswordResetHandler.generateAndEmailResetToken(
             this.email,
             this.callback
           )
         })
 
         it('should not set the password token data', function() {
-          return this.OneTimeTokenHandler.getNewToken.called.should.equal(false)
+          this.OneTimeTokenHandler.getNewToken.called.should.equal(false)
         })
 
         it('should send an email with the token', function() {
-          return this.EmailHandler.sendEmail.called.should.equal(false)
+          this.EmailHandler.sendEmail.called.should.equal(false)
         })
 
         it('should return status == null', function() {
-          return this.callback.calledWith(null, null).should.equal(true)
+          this.callback.calledWith(null, null).should.equal(true)
         })
       })
 
@@ -196,22 +206,22 @@ describe('PasswordResetHandler', function() {
             .stub()
             .yields(null, { statusCode: 404 }, {})
           this.UserGetter.getUserByAnyEmail.callsArgWith(1, null, this.user)
-          return this.PasswordResetHandler.generateAndEmailResetToken(
+          this.PasswordResetHandler.generateAndEmailResetToken(
             this.email,
             this.callback
           )
         })
 
         it('should not set the password token data', function() {
-          return this.OneTimeTokenHandler.getNewToken.called.should.equal(false)
+          this.OneTimeTokenHandler.getNewToken.called.should.equal(false)
         })
 
         it('should not send an email with the token', function() {
-          return this.EmailHandler.sendEmail.called.should.equal(false)
+          this.EmailHandler.sendEmail.called.should.equal(false)
         })
 
         it('should return status == sharelatex', function() {
-          return this.callback.calledWith(null, 'sharelatex').should.equal(true)
+          this.callback.calledWith(null, 'sharelatex').should.equal(true)
         })
       })
 
@@ -222,22 +232,22 @@ describe('PasswordResetHandler', function() {
             .yields(null, { statusCode: 404 }, {})
           this.user.overleaf = { id: 101 }
           this.UserGetter.getUserByAnyEmail.callsArgWith(1, null, this.user)
-          return this.PasswordResetHandler.generateAndEmailResetToken(
+          this.PasswordResetHandler.generateAndEmailResetToken(
             this.email,
             this.callback
           )
         })
 
         it('should not set the password token data', function() {
-          return this.OneTimeTokenHandler.getNewToken.called.should.equal(false)
+          this.OneTimeTokenHandler.getNewToken.called.should.equal(false)
         })
 
         it('should not send an email with the token', function() {
-          return this.EmailHandler.sendEmail.called.should.equal(false)
+          this.EmailHandler.sendEmail.called.should.equal(false)
         })
 
         it('should return status == secondary', function() {
-          return this.callback.calledWith(null, 'secondary').should.equal(true)
+          this.callback.calledWith(null, 'secondary').should.equal(true)
         })
       })
     })
@@ -247,7 +257,7 @@ describe('PasswordResetHandler', function() {
     describe('when no data is found', function() {
       beforeEach(function() {
         this.OneTimeTokenHandler.getValueFromTokenAndExpire.yields(null, null)
-        return this.PasswordResetHandler.setNewUserPassword(
+        this.PasswordResetHandler.setNewUserPassword(
           this.token,
           this.password,
           this.callback
@@ -255,7 +265,7 @@ describe('PasswordResetHandler', function() {
       })
 
       it('should return exists == false', function() {
-        return this.callback.calledWith(null, false).should.equal(true)
+        this.callback.calledWith(null, false).should.equal(true)
       })
     })
 
@@ -270,7 +280,7 @@ describe('PasswordResetHandler', function() {
           null,
           this.user_id
         )
-        return this.PasswordResetHandler.setNewUserPassword(
+        this.PasswordResetHandler.setNewUserPassword(
           this.token,
           this.password,
           this.callback
@@ -278,15 +288,13 @@ describe('PasswordResetHandler', function() {
       })
 
       it('should call setUserPasswordInV2', function() {
-        return this.AuthenticationManager.setUserPassword
+        this.AuthenticationManager.setUserPassword
           .calledWith(this.user_id, this.password)
           .should.equal(true)
       })
 
       it('should reset == true and the user_id', function() {
-        return this.callback
-          .calledWith(null, true, this.user_id)
-          .should.equal(true)
+        this.callback.calledWith(null, true, this.user_id).should.equal(true)
       })
     })
 
@@ -300,7 +308,7 @@ describe('PasswordResetHandler', function() {
         this.OneTimeTokenHandler.getValueFromTokenAndExpire.yields(null, {
           user_id: this.user_id
         })
-        return this.PasswordResetHandler.setNewUserPassword(
+        this.PasswordResetHandler.setNewUserPassword(
           this.token,
           this.password,
           this.callback
@@ -308,15 +316,13 @@ describe('PasswordResetHandler', function() {
       })
 
       it('should call setUserPasswordInV2', function() {
-        return this.AuthenticationManager.setUserPassword
+        this.AuthenticationManager.setUserPassword
           .calledWith(this.user_id, this.password)
           .should.equal(true)
       })
 
       it('should reset == true and the user_id', function() {
-        return this.callback
-          .calledWith(null, true, this.user_id)
-          .should.equal(true)
+        this.callback.calledWith(null, true, this.user_id).should.equal(true)
       })
     })
   })
