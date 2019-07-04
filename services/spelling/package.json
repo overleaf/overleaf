@@ -36,7 +36,8 @@
     "redis": "~0.8.4",
     "request": "^2.53.0",
     "settings-sharelatex": "^1.1.0",
-    "underscore": "1.4.4"
+    "underscore": "1.4.4",
+    "overleaf-error-type": "git+https://github.com/overleaf/overleaf-error-type.git"
   },
   "devDependencies": {
     "bunyan": "^1.0.0",

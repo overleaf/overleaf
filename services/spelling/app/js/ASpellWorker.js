@@ -11,6 +11,7 @@ const childProcess = require('child_process')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const _ = require('underscore')
+const errorType = require('overleaf-error-type')
 
 const BATCH_SIZE = 100
 
@@ -36,7 +37,7 @@ class ASpellWorker {
         { process: this.pipe.pid, lang: this.language },
         'aspell worker has exited'
       )
-      return metrics.inc('aspellWorker', 1, {
+      metrics.inc('aspellWorker', 1, {
         status: 'exit',
         method: this.language
       })
@@ -46,55 +47,68 @@ class ASpellWorker {
         this.state = 'closed'
       }
       if (this.callback != null) {
-        logger.err(
-          { process: this.pipe.pid, lang: this.language },
-          'aspell worker closed output streams with uncalled callback'
-        )
-        this.callback(
-          new Error(
-            'aspell worker closed output streams with uncalled callback'
-          ),
-          []
-        )
-        return (this.callback = null)
+        const err = new errorType.Error({
+          message: 'aspell worker closed output streams with uncalled callback',
+          info: { process: this.pipe.pid, lang: this.language }
+        })
+        this.callback(err, [])
+        this.callback = null
       }
     })
     this.pipe.on('error', err => {
       if (this.state !== 'killed') {
         this.state = 'error'
       }
-      logger.log(
-        {
-          process: this.pipe.pid,
-          error: err,
-          stdout: output.slice(-1024),
-          stderr: error.slice(-1024),
-          lang: this.language
-        },
-        'aspell worker error'
-      )
+      const errInfo = {
+        process: this.pipe.pid,
+        stdout: output.slice(-1024),
+        stderr: error.slice(-1024),
+        lang: this.language,
+        workerState: this.state
+      }
+
       if (this.callback != null) {
-        this.callback(err, [])
-        return (this.callback = null)
+        this.callback(
+          new errorType.Error({
+            message: 'aspell worker error',
+            info: errInfo
+          }).withCause(err),
+          []
+        )
+        this.callback = null
+      } else {
+        logger.warn({ error: err, ...errInfo }, 'aspell worker error')
       }
     })
     this.pipe.stdin.on('error', err => {
       if (this.state !== 'killed') {
         this.state = 'error'
       }
-      logger.info(
-        {
-          process: this.pipe.pid,
-          error: err,
-          stdout: output.slice(-1024),
-          stderr: error.slice(-1024),
-          lang: this.language
-        },
-        'aspell worker error on stdin'
-      )
+      const errInfo = {
+        process: this.pipe.pid,
+        stdout: output.slice(-1024),
+        stderr: error.slice(-1024),
+        lang: this.language,
+        workerState: this.state
+      }
+
       if (this.callback != null) {
-        this.callback(err, [])
-        return (this.callback = null)
+        this.callback(
+          new errorType.Error({
+            message: 'aspell worker error on stdin',
+            info: errInfo
+          }).withCause(err),
+          []
+        )
+        this.callback = null
+      } else {
+        logger.warn(
+          {
+            error: err,
+            ...errInfo
+          },
+          'aspell worker error on stdin'
+        )
       }
     })
 
@@ -109,7 +123,11 @@ class ASpellWorker {
           this.callback = null // only allow one callback in use
         } else {
           logger.err(
-            { process: this.pipe.pid, lang: this.language },
+            {
+              process: this.pipe.pid,
+              lang: this.language,
+              workerState: this.state
+            },
             'end of data marker received when callback already used'
           )
         }
@@ -139,12 +157,15 @@ class ASpellWorker {
     this.state = 'busy'
     if (this.callback != null) {
       // only allow one callback in use
-      logger.err(
-        { process: this.pipe.pid, lang: this.language },
-        'CALLBACK ALREADY IN USE'
-      )
       return this.callback(
-        new Error('Aspell callback already in use - SHOULD NOT HAPPEN')
+        new errorType.Error({
+          message: 'Aspell callback already in use - SHOULD NOT HAPPEN',
+          info: {
+            process: this.pipe.pid,
+            lang: this.language,
+            workerState: this.state
+          }
+        })
       )
     }
     this.callback = _.once(callback) // extra defence against double callback

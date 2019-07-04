@@ -169,7 +169,7 @@ module.exports = ASpell = {
     const runner = new ASpellRunner()
     return runner.checkWords(language, words, callback)
   },
-  ASPELL_TIMEOUT: 4000
+  ASPELL_TIMEOUT: 6000
 }
 
 var WorkerPool = new ASpellWorkerPool()
