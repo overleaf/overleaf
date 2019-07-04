@@ -19,6 +19,7 @@ class ASpellWorker {
   constructor(language) {
     this.language = language
     this.count = 0
+    this.closeReason = ''
     this.pipe = childProcess.spawn('aspell', [
       'pipe',
       '-t',
@@ -43,19 +44,29 @@ class ASpellWorker {
       })
     })
     this.pipe.on('close', () => {
+      const previousWorkerState = this.state
       if (this.state !== 'killed') {
         this.state = 'closed'
       }
       if (this.callback != null) {
         const err = new errorType.Error({
           message: 'aspell worker closed output streams with uncalled callback',
-          info: { process: this.pipe.pid, lang: this.language }
+          info: {
+            process: this.pipe.pid,
+            lang: this.language,
+            stdout: output.slice(-1024),
+            stderr: error.slice(-1024),
+            workerState: this.state,
+            previousWorkerState,
+            closeReason: this.closeReason
+          }
         })
         this.callback(err, [])
         this.callback = null
       }
     })
     this.pipe.on('error', err => {
+      const previousWorkerState = this.state
       if (this.state !== 'killed') {
         this.state = 'error'
       }
@@ -64,7 +75,9 @@ class ASpellWorker {
         stdout: output.slice(-1024),
         stderr: error.slice(-1024),
         lang: this.language,
-        workerState: this.state
+        workerState: this.state,
+        previousWorkerState,
+        closeReason: this.closeReason
       }
 
       if (this.callback != null) {
@@ -81,6 +94,7 @@ class ASpellWorker {
       }
     })
     this.pipe.stdin.on('error', err => {
+      const previousWorkerState = this.state
       if (this.state !== 'killed') {
         this.state = 'error'
       }
@@ -89,7 +103,9 @@ class ASpellWorker {
         stdout: output.slice(-1024),
         stderr: error.slice(-1024),
         lang: this.language,
-        workerState: this.state
+        workerState: this.state,
+        previousWorkerState,
+        closeReason: this.closeReason
       }
 
       if (this.callback != null) {
@@ -199,11 +215,13 @@ class ASpellWorker {
   shutdown(reason) {
     logger.info({ process: this.pipe.pid, reason }, 'shutting down')
     this.state = 'closing'
+    this.closeReason = reason
     return this.pipe.stdin.end()
   }
 
   kill(reason) {
     logger.info({ process: this.pipe.pid, reason }, 'killing')
+    this.closeReason = reason
     if (this.state === 'killed') {
       return
     }
