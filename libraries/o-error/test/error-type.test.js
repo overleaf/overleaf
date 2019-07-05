@@ -1,11 +1,11 @@
 'use strict'
 
-var errorType = require('..')
+var OError = require('..')
 const { expectError } = require('./support')
 
-describe('errorType', function () {
+describe('OError', function () {
   it('defines a custom error type', function () {
-    var CustomError = errorType.define('CustomError')
+    var CustomError = OError.define('CustomError')
 
     function doSomethingBad () {
       throw new CustomError()
@@ -25,7 +25,7 @@ describe('errorType', function () {
   })
 
   it('defines a custom error type with a message', function () {
-    var CustomError = errorType.define('CustomError', function (x) {
+    var CustomError = OError.define('CustomError', function (x) {
       this.message = 'x=' + x
       this.x = x
     })
@@ -45,8 +45,8 @@ describe('errorType', function () {
   })
 
   it('defines extended error type', function () {
-    var BaseError = errorType.define('BaseError')
-    var DerivedError = errorType.extend(BaseError, 'DerivedError')
+    var BaseError = OError.define('BaseError')
+    var DerivedError = OError.extend(BaseError, 'DerivedError')
 
     function doSomethingBad () {
       throw new DerivedError()
@@ -62,7 +62,7 @@ describe('errorType', function () {
 
   it('defines error types in a container object', function () {
     var SomeClass = {}
-    errorType.defineIn(SomeClass, 'CustomError')
+    OError.defineIn(SomeClass, 'CustomError')
 
     function doSomethingBad () {
       throw new SomeClass.CustomError()
@@ -78,11 +78,11 @@ describe('errorType', function () {
 
   it('extends error types in a container object', function () {
     var SomeClass = {}
-    errorType.defineIn(SomeClass, 'CustomError', function (payload) {
+    OError.defineIn(SomeClass, 'CustomError', function (payload) {
       this.message = 'custom error'
       this.payload = payload
     })
-    errorType.extendIn(SomeClass, SomeClass.CustomError, 'DerivedCustomError',
+    OError.extendIn(SomeClass, SomeClass.CustomError, 'DerivedCustomError',
       function (payload) {
         SomeClass.CustomError.call(this, payload)
         this.message = 'derived custom error'

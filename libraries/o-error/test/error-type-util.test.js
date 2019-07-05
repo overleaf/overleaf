@@ -1,6 +1,6 @@
 const { getFullInfo, getFullStack, hasCauseInstanceOf } = require('..')
 
-describe('errorType.getFullInfo', () => {
+describe('OError.getFullInfo', () => {
   it('works on a normal error', () => {
     const err = new Error('foo')
     expect(getFullInfo(err)).to.deep.equal({ })
@@ -43,7 +43,7 @@ describe('errorType.getFullInfo', () => {
   })
 })
 
-describe('errorType.getFullStack', () => {
+describe('OError.getFullStack', () => {
   it('works on a normal error', () => {
     const err = new Error('foo')
     const fullStack = getFullStack(err)
@@ -63,7 +63,7 @@ describe('errorType.getFullStack', () => {
   })
 })
 
-describe('errorType.hasCauseInstanceOf', () => {
+describe('OError.hasCauseInstanceOf', () => {
   it('works on a normal error', () => {
     const err = new Error('foo')
     expect(hasCauseInstanceOf(null, Error)).to.be.false
