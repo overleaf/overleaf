@@ -8,17 +8,17 @@ Make custom error types that:
 
 ## For ES6
 
-ES6 classes make it easy to define custom errors by subclassing `Error`. Subclassing `errorType.Error` adds a few extra helpers.
+ES6 classes make it easy to define custom errors by subclassing `Error`. Subclassing `OErrors.OError` adds a few extra helpers.
 
 ### Usage
 
 #### Throw an error directly
 
 ```js
-const errorType = require('overleaf-error-type')
+const OErrors = require('overleaf-error-type')
 
 function doSomethingBad () {
-  throw new errorType.Error({
+  throw new OErrors.OError({
     message: 'did something bad',
     info: { thing: 'foo' }
   })
@@ -34,7 +34,7 @@ doSomethingBad()
 #### Custom error class
 
 ```js
-class FooError extends errorType.Error {
+class FooError extends OErrors.OError {
   constructor (options) {
     super({ message: 'failed to foo', ...options })
   }
@@ -77,7 +77,7 @@ doFoo2()
 try {
   doFoo2()
 } catch (err) {
-  console.log(errorType.getFullStack(err))
+  console.log(OErrors.getFullStack(err))
 }
 // =>
 // FooError: failed to foo: bad
