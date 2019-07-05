@@ -51,23 +51,6 @@ class ErrorTypeError extends Error {
 }
 
 /**
- * Base class for errors with a corresponding HTTP status code.
- *
- * @extends ErrorTypeError
- */
-class ErrorWithStatusCode extends ErrorTypeError {
-  /**
-   * @param {?number} statusCode an HTTP status code
-   * @param {object} options as for ErrorTypeError
-   */
-  constructor ({ statusCode, ...options }) {
-    super(options)
-    this.statusCode = statusCode || 500
-  }
-}
-exports.ErrorWithStatusCode = ErrorWithStatusCode
-
-/**
  * Return the `info` property from `error` and recursively merge the `info`
  * properties from the error's causes, if any.
  *
