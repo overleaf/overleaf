@@ -22,7 +22,7 @@ var util = require('util')
  *
  * @extends Error
  */
-class ErrorTypeError extends Error {
+class OError extends Error {
   /**
    * @param {string} message as for built-in Error
    * @param {?object} info extra data to attach to the error
@@ -92,7 +92,7 @@ function hasCauseInstanceOf (error, klass) {
   return error instanceof klass || hasCauseInstanceOf(error.cause, klass)
 }
 
-exports.Error = ErrorTypeError
+exports.OError = OError
 exports.getFullInfo = getFullInfo
 exports.getFullStack = getFullStack
 exports.hasCauseInstanceOf = hasCauseInstanceOf
