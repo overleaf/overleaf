@@ -8,17 +8,17 @@ Make custom error types that:
 
 ## For ES6
 
-ES6 classes make it easy to define custom errors by subclassing `Error`. Subclassing `OErrors.OError` adds a few extra helpers.
+ES6 classes make it easy to define custom errors by subclassing `Error`. Subclassing `OError` adds a few extra helpers.
 
 ### Usage
 
 #### Throw an error directly
 
 ```js
-const OErrors = require('overleaf-error-type')
+const OError = require('overleaf-error-type')
 
 function doSomethingBad () {
-  throw new OErrors.OError({
+  throw new OError({
     message: 'did something bad',
     info: { thing: 'foo' }
   })
@@ -34,7 +34,7 @@ doSomethingBad()
 #### Custom error class
 
 ```js
-class FooError extends OErrors.OError {
+class FooError extends OError {
   constructor (options) {
     super({ message: 'failed to foo', ...options })
   }
@@ -77,7 +77,7 @@ doFoo2()
 try {
   doFoo2()
 } catch (err) {
-  console.log(OErrors.getFullStack(err))
+  console.log(OError.getFullStack(err))
 }
 // =>
 // FooError: failed to foo: bad
@@ -101,9 +101,9 @@ The approach is based mainly on https://gist.github.com/justmoon/15511f92e5216fa
 #### Define a standalone error class
 
 ```js
-const errorType = require('overleaf-error-type')
+const OError = require('overleaf-error-type')
 
-const CustomError = errorType.define('CustomError')
+const CustomError = OError.define('CustomError')
 
 function doSomethingBad () {
   throw new CustomError()
@@ -117,7 +117,7 @@ doSomethingBad()
 #### Define an error subclass
 
 ```js
-const SubCustomError = errorType.extend(CustomError, 'SubCustomError')
+const SubCustomError = OError.extend(CustomError, 'SubCustomError')
 
 try {
   throw new SubCustomError()
@@ -132,7 +132,7 @@ try {
 #### Add custom message and/or properties
 
 ```js
-const UserNotFoundError = errorType.define('UserNotFoundError',
+const UserNotFoundError = OError.define('UserNotFoundError',
   function (userId) {
     this.message = `User not found: ${userId}`
     this.userId = userId
@@ -151,7 +151,7 @@ class User {
   }
 }
 
-errorType.defineIn(User, 'UserNotFoundError', function (userId) {
+OError.defineIn(User, 'UserNotFoundError', function (userId) {
   this.message = `User not found: ${userId}`
   this.userId = userId
 })

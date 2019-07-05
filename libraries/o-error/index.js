@@ -92,10 +92,9 @@ function hasCauseInstanceOf (error, klass) {
   return error instanceof klass || hasCauseInstanceOf(error.cause, klass)
 }
 
-exports.OError = OError
-exports.getFullInfo = getFullInfo
-exports.getFullStack = getFullStack
-exports.hasCauseInstanceOf = hasCauseInstanceOf
+OError.getFullInfo = getFullInfo
+OError.getFullStack = getFullStack
+OError.hasCauseInstanceOf = hasCauseInstanceOf
 
 //
 // For ES5
@@ -133,7 +132,9 @@ function defineErrorTypeIn (container, name, builder) {
   extendErrorTypeIn(container, Error, name, builder)
 }
 
-exports.extend = extendErrorType
-exports.define = defineErrorType
-exports.extendIn = extendErrorTypeIn
-exports.defineIn = defineErrorTypeIn
+OError.extend = extendErrorType
+OError.define = defineErrorType
+OError.extendIn = extendErrorTypeIn
+OError.defineIn = defineErrorTypeIn
+
+module.exports = OError
