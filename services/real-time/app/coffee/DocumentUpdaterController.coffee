@@ -1,7 +1,7 @@
 logger = require "logger-sharelatex"
 settings = require 'settings-sharelatex'
 redis = require("redis-sharelatex")
-rclient = redis.createClient(settings.redis.documentupdater)
+rclient = redis.createClient(settings.redis.pubsub)
 SafeJsonParse = require "./SafeJsonParse"
 EventLogger = require "./EventLogger"
 HealthCheckManager = require "./HealthCheckManager"

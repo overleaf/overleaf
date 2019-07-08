@@ -2,6 +2,7 @@ Metrics = require("metrics-sharelatex")
 Settings = require "settings-sharelatex"
 Metrics.initialize(Settings.appName or "real-time")
 async = require("async")
+_ = require "underscore"
 
 logger = require "logger-sharelatex"
 logger.initialize("real-time")
@@ -60,6 +61,7 @@ app.get "/debug/events", (req, res, next) ->
 	res.send "debug mode will log next #{Settings.debugEvents} events"
 
 rclient = require("redis-sharelatex").createClient(Settings.redis.realtime)
+
 app.get "/health_check/redis", (req, res, next) ->
 	rclient.healthCheck (error) ->
 		if error?
@@ -132,16 +134,20 @@ if Settings.forceDrainMsDelay?
 if Settings.continualPubsubTraffic
 	console.log "continualPubsubTraffic enabled"
 
-	pubSubClient = redis.createClient(Settings.redis.documentupdater)
+	redisClients = [redis.createClient(Settings.redis.documentupdater), redis.createClient(Settings.redis.realtime)]
 
-	publishJob = (channel, cb)->
+	publishJob = (channel, callback)->
 		checker = new HealthCheckManager(channel)
 		logger.debug {channel:channel}, "sending pub to keep connection alive"
 		json = JSON.stringify({health_check:true, key: checker.id, date: new Date().toString()})
-		pubSubClient.publish channel, json, (err)->
-			if err?
-				logger.err {err, channel}, "error publishing pubsub traffic to redis"
-			cb(err)
+		jobs = _.map redisClients, (rclient)->
+			return (cb)->
+				rclient.publish channel, json, (err)->
+					if err?
+						logger.err {err, channel}, "error publishing pubsub traffic to redis"
+					return cb(err)
+
+		async.series jobs, callback
 
 	runPubSubTraffic = ->
 		async.map ["applied-ops", "editor-events"], publishJob, (err)->
