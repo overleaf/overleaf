@@ -14,7 +14,7 @@
 let EditorRealTimeController
 const Settings = require('settings-sharelatex')
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
-const rclient = RedisWrapper.client('realtime')
+const rclient = RedisWrapper.client('pubsub')
 const os = require('os')
 const crypto = require('crypto')
 

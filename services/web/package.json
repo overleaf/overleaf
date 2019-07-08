@@ -93,7 +93,7 @@
     "pug": "^2.0.0-beta6",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
-    "redis-sharelatex": "^1.0.8",
+    "redis-sharelatex": "^1.0.9",
     "request": "^2.69.0",
     "requestretry": "^1.13.0",
     "requests": "^0.1.7",
