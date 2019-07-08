@@ -42,6 +42,7 @@ describe "Applying updates to a project's structure", ->
 				update.version.should.equal "#{@version}.0"
 
 				done()
+			return null
 
 	describe "renaming a document", ->
 		before ->
@@ -57,6 +58,7 @@ describe "Applying updates to a project's structure", ->
 				DocUpdaterClient.sendProjectUpdate @project_id, @user_id, @docUpdates, [], @version, (error) ->
 					throw error if error?
 					setTimeout done, 200
+				return null
 
 			it "should push the applied doc renames to the project history api", (done) ->
 				rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
@@ -71,6 +73,7 @@ describe "Applying updates to a project's structure", ->
 					update.version.should.equal "#{@version}.0"
 
 					done()
+				return null
 
 		describe "when the document is loaded", ->
 			before (done) ->
@@ -82,6 +85,7 @@ describe "Applying updates to a project's structure", ->
 					DocUpdaterClient.sendProjectUpdate @project_id, @user_id, @docUpdates, [], @version, (error) ->
 						throw error if error?
 						setTimeout done, 200
+				return null
 
 			after ->
 				MockWebApi.getDocument.restore()
@@ -90,6 +94,7 @@ describe "Applying updates to a project's structure", ->
 				DocUpdaterClient.getDoc @project_id, @docUpdate.id, (error, res, doc) =>
 					doc.pathname.should.equal @docUpdate.newPathname
 					done()
+				return null
 
 			it "should push the applied doc renames to the project history api", (done) ->
 				rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
@@ -104,6 +109,7 @@ describe "Applying updates to a project's structure", ->
 					update.version.should.equal "#{@version}.0"
 
 					done()
+				return null
 
 	describe "renaming multiple documents and files", ->
 		before ->
@@ -132,6 +138,7 @@ describe "Applying updates to a project's structure", ->
 				DocUpdaterClient.sendProjectUpdate @project_id, @user_id, @docUpdates, @fileUpdates, @version, (error) ->
 					throw error if error?
 					setTimeout done, 200
+				return null
 
 			it "should push the applied doc renames to the project history api", (done) ->
 				rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
@@ -170,6 +177,7 @@ describe "Applying updates to a project's structure", ->
 					update.version.should.equal "#{@version}.3"
 
 					done()
+				return null
 
 
 	describe "adding a file", ->
@@ -183,6 +191,7 @@ describe "Applying updates to a project's structure", ->
 			DocUpdaterClient.sendProjectUpdate @project_id, @user_id, [], @fileUpdates, @version, (error) ->
 				throw error if error?
 				setTimeout done, 200
+			return null
 
 		it "should push the file addition to the project history api", (done) ->
 			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
@@ -197,6 +206,7 @@ describe "Applying updates to a project's structure", ->
 				update.version.should.equal "#{@version}.0"
 
 				done()
+			return null
 
 	describe "adding a doc", ->
 		before (done) ->
@@ -209,6 +219,7 @@ describe "Applying updates to a project's structure", ->
 			DocUpdaterClient.sendProjectUpdate @project_id, @user_id, @docUpdates, [], @version, (error) ->
 				throw error if error?
 				setTimeout done, 200
+			return null
 
 		it "should push the doc addition to the project history api", (done) ->
 			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
@@ -223,6 +234,7 @@ describe "Applying updates to a project's structure", ->
 				update.version.should.equal "#{@version}.0"
 
 				done()
+			return null
 
 	describe "with enough updates to flush to the history service", ->
 		before (done) ->
@@ -247,6 +259,7 @@ describe "Applying updates to a project's structure", ->
 				DocUpdaterClient.sendProjectUpdate projectId, userId, updates.slice(250), [], @version1, (error) ->
 					throw error if error?
 					setTimeout done, 2000
+			return null
 
 		after ->
 			MockProjectHistoryApi.flushProject.restore()
@@ -278,6 +291,7 @@ describe "Applying updates to a project's structure", ->
 				DocUpdaterClient.sendProjectUpdate projectId, userId, updates.slice(10), [], @version1, (error) ->
 					throw error if error?
 					setTimeout done, 2000
+			return null
 
 		after ->
 			MockProjectHistoryApi.flushProject.restore()

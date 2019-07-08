@@ -51,6 +51,7 @@ describe "Setting a document", ->
 							@statusCode = res.statusCode
 							done()
 					, 200
+			return null
 
 		it "should return a 204 status code", ->
 			@statusCode.should.equal 204
@@ -64,17 +65,20 @@ describe "Setting a document", ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.lines.should.deep.equal @newLines
 				done()
+			return null
 
 		it "should bump the version in the doc updater", (done) ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.version.should.equal @version + 2
 				done()
+			return null
 
 		it "should leave the document in redis", (done) ->
 			rclient_du.get Keys.docLines({doc_id: @doc_id}), (error, lines) =>
 				throw error if error?
 				expect(JSON.parse(lines)).to.deep.equal @newLines
 				done()
+			return null
 
 	describe "when the updated doc does not exist in the doc updater", ->
 		before (done) ->
@@ -83,6 +87,7 @@ describe "Setting a document", ->
 			DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, false, (error, res, body) =>
 				@statusCode = res.statusCode
 				setTimeout done, 200
+			return null
 
 		it "should return a 204 status code", ->
 			@statusCode.should.equal 204
@@ -103,6 +108,7 @@ describe "Setting a document", ->
 				throw error if error?
 				expect(lines).to.not.exist
 				done()
+			return null
 
 	describe "with track changes", ->
 		before ->
@@ -131,6 +137,7 @@ describe "Setting a document", ->
 						DocUpdaterClient.setDocLines @project_id, @doc_id, @lines, @source, @user_id, true, (error, res, body) =>
 							@statusCode = res.statusCode
 							setTimeout done, 200
+				return null
 
 			it "should undo the tracked changes", (done) ->
 				DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, data) =>
@@ -138,6 +145,7 @@ describe "Setting a document", ->
 					ranges = data.ranges
 					expect(ranges.changes).to.be.undefined
 					done()
+				return null
 
 		describe "without the undo flag", ->
 			before (done) ->
@@ -151,6 +159,7 @@ describe "Setting a document", ->
 						DocUpdaterClient.setDocLines @project_id, @doc_id, @lines, @source, @user_id, false, (error, res, body) =>
 							@statusCode = res.statusCode
 							setTimeout done, 200
+				return null
 
 			it "should not undo the tracked changes", (done) ->
 				DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, data) =>
@@ -158,5 +167,6 @@ describe "Setting a document", ->
 					ranges = data.ranges
 					expect(ranges.changes.length).to.equal 1
 					done()
+				return null
 
 
