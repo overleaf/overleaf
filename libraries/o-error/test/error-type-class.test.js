@@ -1,19 +1,19 @@
-const errorType = require('..')
+const OError = require('..')
 const { expectError } = require('./support')
 
-class CustomError1 extends errorType.Error {
+class CustomError1 extends OError {
   constructor (options) {
     super({ message: 'failed to foo', ...options })
   }
 }
 
-class CustomError2 extends errorType.Error {
+class CustomError2 extends OError {
   constructor (options) {
     super({ message: 'failed to bar', ...options })
   }
 }
 
-describe('errorType.Error', () => {
+describe('OError', () => {
   it('handles a custom error type with a cause', () => {
     function doSomethingBadInternally () {
       throw new Error('internal error')
@@ -37,8 +37,8 @@ describe('errorType.Error', () => {
         message: 'CustomError1: failed to foo: internal error',
         firstFrameRx: /doSomethingBad/
       })
-      expect(errorType.getFullInfo(e)).to.deep.equal({ userId: 123 })
-      const fullStack = errorType.getFullStack(e)
+      expect(OError.getFullInfo(e)).to.deep.equal({ userId: 123 })
+      const fullStack = OError.getFullStack(e)
       expect(fullStack).to.match(
         /^CustomError1: failed to foo: internal error$/m
       )
@@ -79,11 +79,11 @@ describe('errorType.Error', () => {
         message: 'CustomError1: failed to foo: failed to bar: internal error',
         firstFrameRx: /doFoo/
       })
-      expect(errorType.getFullInfo(e)).to.deep.equal({
+      expect(OError.getFullInfo(e)).to.deep.equal({
         userId: 123,
         database: 'a'
       })
-      const fullStack = errorType.getFullStack(e)
+      const fullStack = OError.getFullStack(e)
       expect(fullStack).to.match(
         /^CustomError1: failed to foo: failed to bar: internal error$/m
       )
@@ -101,34 +101,9 @@ describe('errorType.Error', () => {
       throw new CustomError1({})
       expect.fail('should have thrown')
     } catch (e) {
-      expect(errorType.getFullInfo(e)).to.deep.equal({})
+      expect(OError.getFullInfo(e)).to.deep.equal({})
       let infoKey = Object.keys(e).find(k => k === 'info')
       expect(infoKey).to.not.exist
-    }
-  })
-})
-
-describe('errorType.ErrorWithStatusCode', () => {
-  it('accepts a status code', () => {
-    function findPage () {
-      throw new errorType.ErrorWithStatusCode({
-        message: 'page not found',
-        info: { url: '/foo' },
-        statusCode: 404
-      })
-    }
-
-    try {
-      findPage()
-    } catch (e) {
-      expectError(e, {
-        name: 'ErrorWithStatusCode',
-        klass: errorType.ErrorWithStatusCode,
-        message: 'ErrorWithStatusCode: page not found',
-        firstFrameRx: /findPage/
-      })
-      expect(e.statusCode).to.equal(404)
-      expect(e.info).to.deep.equal({url: '/foo'})
     }
   })
 })

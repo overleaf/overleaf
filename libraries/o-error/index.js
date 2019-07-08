@@ -22,7 +22,7 @@ var util = require('util')
  *
  * @extends Error
  */
-class ErrorTypeError extends Error {
+class OError extends Error {
   /**
    * @param {string} message as for built-in Error
    * @param {?object} info extra data to attach to the error
@@ -49,23 +49,6 @@ class ErrorTypeError extends Error {
     return this
   }
 }
-
-/**
- * Base class for errors with a corresponding HTTP status code.
- *
- * @extends ErrorTypeError
- */
-class ErrorWithStatusCode extends ErrorTypeError {
-  /**
-   * @param {?number} statusCode an HTTP status code
-   * @param {object} options as for ErrorTypeError
-   */
-  constructor ({ statusCode, ...options }) {
-    super(options)
-    this.statusCode = statusCode || 500
-  }
-}
-exports.ErrorWithStatusCode = ErrorWithStatusCode
 
 /**
  * Return the `info` property from `error` and recursively merge the `info`
@@ -109,10 +92,9 @@ function hasCauseInstanceOf (error, klass) {
   return error instanceof klass || hasCauseInstanceOf(error.cause, klass)
 }
 
-exports.Error = ErrorTypeError
-exports.getFullInfo = getFullInfo
-exports.getFullStack = getFullStack
-exports.hasCauseInstanceOf = hasCauseInstanceOf
+OError.getFullInfo = getFullInfo
+OError.getFullStack = getFullStack
+OError.hasCauseInstanceOf = hasCauseInstanceOf
 
 //
 // For ES5
@@ -150,7 +132,9 @@ function defineErrorTypeIn (container, name, builder) {
   extendErrorTypeIn(container, Error, name, builder)
 }
 
-exports.extend = extendErrorType
-exports.define = defineErrorType
-exports.extendIn = extendErrorTypeIn
-exports.defineIn = defineErrorTypeIn
+OError.extend = extendErrorType
+OError.define = defineErrorType
+OError.extendIn = extendErrorTypeIn
+OError.defineIn = defineErrorTypeIn
+
+module.exports = OError
