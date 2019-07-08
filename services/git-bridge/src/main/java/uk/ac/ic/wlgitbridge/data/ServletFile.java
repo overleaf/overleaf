@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.data;
 
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
+import java.util.UUID;
 
 /**
  * Created by Winston on 21/02/15.
@@ -9,11 +10,15 @@ public class ServletFile extends RawFile {
 
     private final RawFile file;
     private final boolean changed;
+    private String uuid;
 
     public ServletFile(RawFile file, RawFile oldFile) {
         this.file = file;
+        this.uuid = UUID.randomUUID().toString();
         changed = !equals(oldFile);
     }
+
+    public String getUniqueIdentifier() { return uuid; }
 
     @Override
     public String getPath() {
@@ -38,5 +43,4 @@ public class ServletFile extends RawFile {
     public String toString() {
         return getPath();
     }
-
 }

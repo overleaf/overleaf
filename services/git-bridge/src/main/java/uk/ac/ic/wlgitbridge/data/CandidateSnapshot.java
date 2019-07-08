@@ -5,13 +5,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
-import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +77,7 @@ public class CandidateSnapshot implements AutoCloseable {
         );
         for (ServletFile file : files) {
             if (file.isChanged()) {
-                file.writeToDisk(attsDirectory);
+                file.writeToDiskWithName(attsDirectory, file.getUniqueIdentifier());
             }
         }
     }
@@ -118,16 +115,8 @@ public class CandidateSnapshot implements AutoCloseable {
         JsonObject jsonFile = new JsonObject();
         jsonFile.addProperty("name", file.getPath());
         if (file.isChanged()) {
-            String path = file.getPath();
-            String encodedPath;
-            try {
-                encodedPath = URLEncoder.encode(path, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                // This should never happen
-                Log.error("Error while encoding file path: projectUrl={}, path={}", projectURL, path, e);
-                encodedPath = path;
-            }
-            String url = projectURL + "/" + encodedPath + "?key=" + postbackKey;
+            String identifier = file.getUniqueIdentifier();
+            String url = projectURL + "/" + identifier + "?key=" + postbackKey;
             jsonFile.addProperty("url", url);
         }
         return jsonFile;
