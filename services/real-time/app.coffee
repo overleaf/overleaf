@@ -134,15 +134,15 @@ if Settings.forceDrainMsDelay?
 if Settings.continualPubsubTraffic
 	console.log "continualPubsubTraffic enabled"
 
-	redisClients = [redis.createClient(Settings.redis.documentupdater), redis.createClient(Settings.redis.realtime)]
+	redisClients = [redis.createClient(Settings.redis.documentupdater), redis.createClient(Settings.redis.pubsub)]
 
 	publishJob = (channel, callback)->
 		checker = new HealthCheckManager(channel)
 		logger.debug {channel:channel}, "sending pub to keep connection alive"
 		json = JSON.stringify({health_check:true, key: checker.id, date: new Date().toString()})
-		jobs = _.map redisClients, (rclient)->
+		jobs = _.map redisClients, (checkRclient)->
 			return (cb)->
-				rclient.publish channel, json, (err)->
+				checkRclient.publish channel, json, (err)->
 					if err?
 						logger.err {err, channel}, "error publishing pubsub traffic to redis"
 					return cb(err)
