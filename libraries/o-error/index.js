@@ -1,17 +1,11 @@
 'use strict'
 
-var util = require('util')
-
 /**
  * Make custom error types that pass `instanceof` checks, have stack traces,
  * support custom messages and properties, and support wrapping errors (causes).
  *
  * @module
  */
-
-//
-// For ES6+ Classes
-//
 
 /**
  * A base class for custom errors that handles:
@@ -95,46 +89,5 @@ function hasCauseInstanceOf (error, klass) {
 OError.getFullInfo = getFullInfo
 OError.getFullStack = getFullStack
 OError.hasCauseInstanceOf = hasCauseInstanceOf
-
-//
-// For ES5
-//
-
-function extendErrorType (base, name, builder) {
-  var errorConstructor = function () {
-    Error.captureStackTrace && Error.captureStackTrace(this, this.constructor)
-    if (builder) builder.apply(this, arguments)
-    this.name = name
-  }
-
-  util.inherits(errorConstructor, base)
-
-  errorConstructor.prototype.withCause = function (cause) {
-    this.cause = cause
-    if (this.message && cause.message) {
-      this.message += ': ' + cause.message
-    }
-    return this
-  }
-
-  return errorConstructor
-}
-
-function defineErrorType (name, builder) {
-  return extendErrorType(Error, name, builder)
-}
-
-function extendErrorTypeIn (container, base, name, builder) {
-  container[name] = extendErrorType(base, name, builder)
-}
-
-function defineErrorTypeIn (container, name, builder) {
-  extendErrorTypeIn(container, Error, name, builder)
-}
-
-OError.extend = extendErrorType
-OError.define = defineErrorType
-OError.extendIn = extendErrorTypeIn
-OError.defineIn = defineErrorTypeIn
 
 module.exports = OError
