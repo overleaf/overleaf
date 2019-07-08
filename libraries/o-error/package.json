@@ -8,6 +8,8 @@
   },
   "author": "Overleaf (https://www.overleaf.com)",
   "license": "MIT",
+  "private": true,
+  "repository": "github:overleaf/o-error",
   "devDependencies": {
     "chai": "^3.3.0",
     "mocha": "^6.1.4"
