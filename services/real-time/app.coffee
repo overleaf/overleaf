@@ -61,7 +61,7 @@ app.get "/debug/events", (req, res, next) ->
 	res.send "debug mode will log next #{Settings.debugEvents} events"
 
 rclient = require("redis-sharelatex").createClient(Settings.redis.realtime)
-rclient.set "hello", "world"
+
 app.get "/health_check/redis", (req, res, next) ->
 	rclient.healthCheck (error) ->
 		if error?
