@@ -73,9 +73,9 @@ app.get '/status', (req, res)->
 	else
 		res.send('document updater is alive')
 
-webRedisClient = require("redis-sharelatex").createClient(Settings.redis.realtime)
+pubsubClient = require("redis-sharelatex").createClient(Settings.redis.pubsub)
 app.get "/health_check/redis", (req, res, next) ->
-	webRedisClient.healthCheck (error) ->
+	pubsubClient.healthCheck (error) ->
 		if error?
 			logger.err {err: error}, "failed redis health check"
 			res.send 500
