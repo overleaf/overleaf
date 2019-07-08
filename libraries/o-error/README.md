@@ -1,21 +1,19 @@
-# overleaf-error-type
+# @overleaf/o-error
 
-Make custom error types that:
+Make custom error classes that:
 - pass `instanceof` checks,
 - have stack traces,
 - support custom messages and properties (`info`), and
 - can wrap internal errors (causes) like [VError](https://github.com/joyent/node-verror).
 
-## For ES6
-
 ES6 classes make it easy to define custom errors by subclassing `Error`. Subclassing `OError` adds a few extra helpers.
 
-### Usage
+## Usage
 
-#### Throw an error directly
+### Throw an error directly
 
 ```js
-const OError = require('overleaf-error-type')
+const OError = require('@overleaf/o-error')
 
 function doSomethingBad () {
   throw new OError({
@@ -25,13 +23,13 @@ function doSomethingBad () {
 }
 doSomethingBad()
 // =>
-// { ErrorTypeError: did something bad
+// { OError: did something bad
 //    at doSomethingBad (repl:2:9) <-- stack trace
-//    name: 'ErrorTypeError',      <-- default name
+//    name: 'OError',              <-- default name
 //    info: { thing: 'foo' } }     <-- attached info
 ```
 
-#### Custom error class
+### Custom error class
 
 ```js
 class FooError extends OError {
@@ -51,7 +49,7 @@ doFoo()
 //    info: { foo: 'bar' } }   <-- attached info
 ```
 
-#### Wrapping an inner error (cause)
+### Wrapping an inner error (cause)
 
 ```js
 function doFoo2 () {
@@ -90,91 +88,11 @@ try {
 //     ...
 ```
 
-## For ES5
-
-For backward compatibility, the following ES5-only interface is still supported.
-
-The approach is based mainly on https://gist.github.com/justmoon/15511f92e5216fa2624b; it just tries to DRY it up a bit.
-
-### Usage
-
-#### Define a standalone error class
-
-```js
-const OError = require('overleaf-error-type')
-
-const CustomError = OError.define('CustomError')
-
-function doSomethingBad () {
-  throw new CustomError()
-}
-doSomethingBad()
-// =>
-// CustomError                        <-- correct name
-//    at doSomethingBad (repl:2:9)    <-- stack trace
-```
-
-#### Define an error subclass
-
-```js
-const SubCustomError = OError.extend(CustomError, 'SubCustomError')
-
-try {
-  throw new SubCustomError()
-} catch (err) {
-  console.log(err.name) // => SubCustomError
-  console.log(err instanceof SubCustomError) // => true
-  console.log(err instanceof CustomError) // => true
-  console.log(err instanceof Error) // => true
-}
-```
-
-#### Add custom message and/or properties
-
-```js
-const UserNotFoundError = OError.define('UserNotFoundError',
-  function (userId) {
-    this.message = `User not found: ${userId}`
-    this.userId = userId
-  })
-
-throw new UserNotFoundError(123)
-// => UserNotFoundError: User not found: 123
-```
-
-#### Add custom Error types under an existing class
-
-```js
-class User {
-  static lookup (userId) {
-    throw new User.UserNotFoundError(userId)
-  }
-}
-
-OError.defineIn(User, 'UserNotFoundError', function (userId) {
-  this.message = `User not found: ${userId}`
-  this.userId = userId
-})
-
-User.lookup(123)
-// =>
-// UserNotFoundError: User not found: 123
-//    at Function.lookup (repl:3:11)
-```
-
 ## References
-
-General:
 
 - [MDN: Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
 - [Error Handling in Node.js](https://www.joyent.com/node-js/production/design/errors)
 - [verror](https://github.com/joyent/node-verror)
-
-For ES6:
-
 - [Custom JavaScript Errors in ES6](https://medium.com/@xjamundx/custom-javascript-errors-in-es6-aa891b173f87)
 - [Custom errors, extending Error](https://javascript.info/custom-errors)
-
-For ES5:
-
-- https://gist.github.com/justmoon/15511f92e5216fa2624b
+- https://gist.github.com/justmoon/15511f92e5216fa2624b (some tests are based largely on this gist)

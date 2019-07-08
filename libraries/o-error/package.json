@@ -1,14 +1,13 @@
 {
-  "name": "overleaf-error-type",
-  "version": "1.0.0",
-  "description": "Make custom error types that pass `instanceof` checks, have stack traces and support custom messages and properties.",
+  "name": "@overleaf/o-error",
+  "version": "2.0.0",
+  "description": "Make custom error types that pass `instanceof` checks, have stack traces, support custom messages and properties, and can wrap causes (like VError).",
   "main": "index.js",
   "scripts": {
     "test": "mocha --require test/support"
   },
   "author": "Overleaf (https://www.overleaf.com)",
   "license": "MIT",
-  "private": true,
   "devDependencies": {
     "chai": "^3.3.0",
     "mocha": "^6.1.4"

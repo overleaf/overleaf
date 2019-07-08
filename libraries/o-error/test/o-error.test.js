@@ -99,7 +99,6 @@ describe('OError', () => {
   it('handles a custom error without info', () => {
     try {
       throw new CustomError1({})
-      expect.fail('should have thrown')
     } catch (e) {
       expect(OError.getFullInfo(e)).to.deep.equal({})
       let infoKey = Object.keys(e).find(k => k === 'info')
