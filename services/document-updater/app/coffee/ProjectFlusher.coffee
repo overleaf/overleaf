@@ -56,8 +56,15 @@ ProjectFlusher =
 			jobs = _.map project_ids, (project_id)->
 				return (cb)->
 					ProjectManager.flushAndDeleteProjectWithLocks project_id, {background:true}, cb
-			async.parallelLimit jobs, options.concurrency, (error)->
-				return callback(error, project_ids)
+			async.parallelLimit async.reflectAll(jobs), options.concurrency, (error, results)->
+				success = []
+				failure = []
+				_.each results, (result, i)->
+					if result.error?
+						failure.push(project_ids[i])
+					else 
+						success.push(project_ids[i])
+				return callback(error, {success:success, failure:failure})
 
 
 module.exports = ProjectFlusher
