@@ -105,12 +105,19 @@ module.exports = FileWriter = {
     }
     callback = _.once(callback)
     const stream = request.get(url)
-    return stream.on('response', function(response) {
+    stream.on('error', function(err) {
+      logger.warn(
+        { err, identifier, url },
+        '[writeUrlToDisk] something went wrong with writing to disk'
+      )
+      callback(err)
+    })
+    stream.on('response', function(response) {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return FileWriter.writeStreamToDisk(identifier, stream, callback)
       } else {
         const err = new Error(`bad response from url: ${response.statusCode}`)
-        logger.warn({ err, identifier, url }, err.message)
+        logger.warn({ err, identifier, url }, `[writeUrlToDisk] ${err.message}`)
         return callback(err)
       }
     })
