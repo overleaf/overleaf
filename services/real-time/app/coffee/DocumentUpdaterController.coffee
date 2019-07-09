@@ -1,6 +1,6 @@
 logger = require "logger-sharelatex"
 settings = require 'settings-sharelatex'
-redis = require("redis-sharelatex")
+RedisClientManager = require "./RedisClientManager"
 SafeJsonParse = require "./SafeJsonParse"
 EventLogger = require "./EventLogger"
 HealthCheckManager = require "./HealthCheckManager"
@@ -11,7 +11,7 @@ MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 # 1Mb
 module.exports = DocumentUpdaterController =
 	# DocumentUpdaterController is responsible for updates that come via Redis
 	# Pub/Sub from the document updater.
-	rclientList: [redis.createClient(settings.redis.pubsub)]
+	rclientList: RedisClientManager.createClientList(settings.redis.pubsub, settings.redis.unusedpubsub)
 
 	listenForUpdatesFromDocumentUpdater: (io) ->
 		for rclient in @rclientList

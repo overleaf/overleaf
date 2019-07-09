@@ -1,13 +1,13 @@
 Settings = require 'settings-sharelatex'
 logger = require 'logger-sharelatex'
-redis = require("redis-sharelatex")
+RedisClientManager = require "./RedisClientManager"
 SafeJsonParse = require "./SafeJsonParse"
 EventLogger = require "./EventLogger"
 HealthCheckManager = require "./HealthCheckManager"
 
 module.exports = WebsocketLoadBalancer =
-	rclientPubList: [redis.createClient(Settings.redis.pubsub)]
-	rclientSubList: [redis.createClient(Settings.redis.pubsub)]
+	rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub, Settings.redis.unusedpubsub)
+	rclientSubList: RedisClientManager.createClientList(Settings.redis.pubsub, Settings.redis.unusedpubsub)
 
 	emitToRoom: (room_id, message, payload...) ->
 		if !room_id?
