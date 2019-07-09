@@ -14,12 +14,15 @@ module.exports = DocumentUpdaterController =
 	rclientList: RedisClientManager.createClientList(settings.redis.pubsub, settings.redis.unusedpubsub)
 
 	listenForUpdatesFromDocumentUpdater: (io) ->
-		for rclient in @rclientList
+		for rclient, i in @rclientList
 			rclient.subscribe "applied-ops"
 			rclient.on "message", (channel, message) ->
 				metrics.inc "rclient", 0.001 # global event rate metric
 				EventLogger.debugEvent(channel, message) if settings.debugEvents > 0
 				DocumentUpdaterController._processMessageFromDocumentUpdater(io, channel, message)
+			do (i) ->
+				rclient.on "message", () ->
+					metrics.inc "rclient-#{i}", 0.001 # per client event rate metric
 		
 	_processMessageFromDocumentUpdater: (io, channel, message) ->
 		SafeJsonParse.parse message, (error, message) ->
