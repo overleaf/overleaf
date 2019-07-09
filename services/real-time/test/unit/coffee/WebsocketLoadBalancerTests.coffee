@@ -7,8 +7,8 @@ describe "WebsocketLoadBalancer", ->
 	beforeEach ->
 		@rclient = {}
 		@WebsocketLoadBalancer = SandboxedModule.require modulePath, requires:
-			"redis-sharelatex": 
-				createClient: () => @rclient
+			"./RedisClientManager": 
+				createClientList: () => []
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./SafeJsonParse": @SafeJsonParse =
 				parse: (data, cb) => cb null, JSON.parse(data)
