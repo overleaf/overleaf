@@ -34,25 +34,21 @@ server.get('/status', (req, res) => res.send({ status: 'spelling api is up' }))
 
 server.get('/health_check', HealthCheckController.healthCheck)
 
-const host =
-  __guard__(
-    Settings.internal != null ? Settings.internal.spelling : undefined,
-    x => x.host
-  ) || 'localhost'
-const port =
-  __guard__(
-    Settings.internal != null ? Settings.internal.spelling : undefined,
-    x1 => x1.port
-  ) || 3005
-server.listen(port, host, function(error) {
-  if (error != null) {
-    throw error
-  }
-  return logger.info(`spelling starting up, listening on ${host}:${port}`)
-})
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
+const settings =
+  Settings.internal && Settings.internal.spelling
+    ? Settings.internal.spelling
     : undefined
+const host = settings && settings.host ? settings.host : 'localhost'
+const port = settings && settings.port ? settings.port : 3005
+
+if (!module.parent) {
+  // application entry point, called directly
+  server.listen(port, host, function(error) {
+    if (error != null) {
+      throw error
+    }
+    return logger.info(`spelling starting up, listening on ${host}:${port}`)
+  })
 }
+
+module.exports = server
