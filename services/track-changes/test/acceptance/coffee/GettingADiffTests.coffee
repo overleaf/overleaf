@@ -67,10 +67,12 @@ describe "Getting a diff", ->
 					throw error if error?
 					@diff = diff.diff
 					done()
+		return null
 
 	afterEach () ->
 		MockDocUpdaterApi.getDoc.restore()
 		MockWebApi.getUserInfo.restore()
+		return null
 
 	it "should return the diff", ->
 		expect(@diff).to.deep.equal @expected_diff
@@ -79,3 +81,4 @@ describe "Getting a diff", ->
 		MockDocUpdaterApi.getDoc
 			.calledWith(@project_id, @doc_id)
 			.should.equal true
+		return null
