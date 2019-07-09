@@ -1,7 +1,7 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.1.12
+# Version: 1.1.21
 
 version: "2"
 
@@ -13,6 +13,7 @@ services:
     working_dir: /app
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
+      NODE_ENV: test
     command: npm run test:unit
     user: node
 
@@ -28,6 +29,8 @@ services:
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
       ENABLE_CONVERSIONS: "true"
+      LOG_LEVEL: ERROR
+      NODE_ENV: test
     user: node
     depends_on:
       - mongo
@@ -49,4 +52,5 @@ services:
 
   mongo:
     image: mongo:3.4
+
 
