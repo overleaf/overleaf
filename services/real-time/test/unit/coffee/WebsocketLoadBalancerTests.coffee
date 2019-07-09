@@ -7,19 +7,20 @@ describe "WebsocketLoadBalancer", ->
 	beforeEach ->
 		@rclient = {}
 		@WebsocketLoadBalancer = SandboxedModule.require modulePath, requires:
-			"redis-sharelatex": 
-				createClient: () => @rclient
+			"./RedisClientManager": 
+				createClientList: () => []
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./SafeJsonParse": @SafeJsonParse =
 				parse: (data, cb) => cb null, JSON.parse(data)
 			"./EventLogger": {checkEventOrder: sinon.stub()}
 			"./HealthCheckManager": {check: sinon.stub()}
 		@io = {}
-		@WebsocketLoadBalancer.rclientPub = publish: sinon.stub()
-		@WebsocketLoadBalancer.rclientSub =
+		@WebsocketLoadBalancer.rclientPubList = [{publish: sinon.stub()}]
+		@WebsocketLoadBalancer.rclientSubList = [{
 			subscribe: sinon.stub()
 			on: sinon.stub()
-		
+		}]
+
 		@room_id = "room-id"
 		@message = "message-to-editor"
 		@payload = ["argument one", 42]
@@ -29,7 +30,7 @@ describe "WebsocketLoadBalancer", ->
 			@WebsocketLoadBalancer.emitToRoom(@room_id, @message, @payload...)
 
 		it "should publish the message to redis", ->
-			@WebsocketLoadBalancer.rclientPub.publish
+			@WebsocketLoadBalancer.rclientPubList[0].publish
 				.calledWith("editor-events", JSON.stringify(
 					room_id: @room_id,
 					message: @message
@@ -53,12 +54,12 @@ describe "WebsocketLoadBalancer", ->
 			@WebsocketLoadBalancer.listenForEditorEvents()
 
 		it "should subscribe to the editor-events channel", ->
-			@WebsocketLoadBalancer.rclientSub.subscribe
+			@WebsocketLoadBalancer.rclientSubList[0].subscribe
 				.calledWith("editor-events")
 				.should.equal true
 
 		it "should process the events with _processEditorEvent", ->
-			@WebsocketLoadBalancer.rclientSub.on
+			@WebsocketLoadBalancer.rclientSubList[0].on
 				.calledWith("message", sinon.match.func)
 				.should.equal true
 

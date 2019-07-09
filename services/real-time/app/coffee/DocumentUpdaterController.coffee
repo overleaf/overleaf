@@ -1,7 +1,6 @@
 logger = require "logger-sharelatex"
 settings = require 'settings-sharelatex'
-redis = require("redis-sharelatex")
-rclient = redis.createClient(settings.redis.pubsub)
+RedisClientManager = require "./RedisClientManager"
 SafeJsonParse = require "./SafeJsonParse"
 EventLogger = require "./EventLogger"
 HealthCheckManager = require "./HealthCheckManager"
@@ -12,13 +11,19 @@ MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 # 1Mb
 module.exports = DocumentUpdaterController =
 	# DocumentUpdaterController is responsible for updates that come via Redis
 	# Pub/Sub from the document updater.
+	rclientList: RedisClientManager.createClientList(settings.redis.pubsub, settings.redis.unusedpubsub)
 
 	listenForUpdatesFromDocumentUpdater: (io) ->
-		rclient.subscribe "applied-ops"
-		rclient.on "message", (channel, message) ->
-			metrics.inc "rclient", 0.001 # global event rate metric
-			EventLogger.debugEvent(channel, message) if settings.debugEvents > 0
-			DocumentUpdaterController._processMessageFromDocumentUpdater(io, channel, message)
+		logger.log {rclients: @rclientList.length}, "listening for applied-ops events"
+		for rclient, i in @rclientList
+			rclient.subscribe "applied-ops"
+			rclient.on "message", (channel, message) ->
+				metrics.inc "rclient", 0.001 # global event rate metric
+				EventLogger.debugEvent(channel, message) if settings.debugEvents > 0
+				DocumentUpdaterController._processMessageFromDocumentUpdater(io, channel, message)
+			do (i) ->
+				rclient.on "message", () ->
+					metrics.inc "rclient-#{i}", 0.001 # per client event rate metric
 		
 	_processMessageFromDocumentUpdater: (io, channel, message) ->
 		SafeJsonParse.parse message, (error, message) ->
