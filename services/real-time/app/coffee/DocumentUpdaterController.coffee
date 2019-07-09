@@ -14,6 +14,7 @@ module.exports = DocumentUpdaterController =
 	rclientList: RedisClientManager.createClientList(settings.redis.pubsub, settings.redis.unusedpubsub)
 
 	listenForUpdatesFromDocumentUpdater: (io) ->
+		logger.log {rclients: @rclientList.length}, "listening for applied-ops events"
 		for rclient, i in @rclientList
 			rclient.subscribe "applied-ops"
 			rclient.on "message", (channel, message) ->

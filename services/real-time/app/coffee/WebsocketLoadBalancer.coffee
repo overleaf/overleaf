@@ -25,6 +25,8 @@ module.exports = WebsocketLoadBalancer =
 		@emitToRoom "all", message, payload...
 
 	listenForEditorEvents: (io) ->
+		logger.log {rclients: @rclientPubList.length}, "publishing editor events"
+		logger.log {rclients: @rclientSubList.length}, "listening for editor events"
 		for rclientSub in @rclientSubList
 			rclientSub.subscribe "editor-events"
 			rclientSub.on "message", (channel, message) ->
