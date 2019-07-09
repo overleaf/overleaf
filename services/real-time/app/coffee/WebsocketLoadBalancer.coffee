@@ -6,7 +6,7 @@ EventLogger = require "./EventLogger"
 HealthCheckManager = require "./HealthCheckManager"
 
 module.exports = WebsocketLoadBalancer =
-	rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub, Settings.redis.unusedpubsub)
+	rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub)
 	rclientSubList: RedisClientManager.createClientList(Settings.redis.pubsub, Settings.redis.unusedpubsub)
 
 	emitToRoom: (room_id, message, payload...) ->
