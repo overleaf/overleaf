@@ -139,30 +139,21 @@ module.exports = UserPagesController = {
       if (err != null) {
         return next(err)
       }
-
-      return UserPagesController._hasPassword(user, function(
-        err,
-        passwordPresent
-      ) {
-        if (err) {
-          logger.err({ err }, 'error getting password status from v1')
-        }
-        return res.render('user/settings', {
-          title: 'account_settings',
-          user,
-          hasPassword: passwordPresent,
-          shouldAllowEditingDetails,
-          languages: Settings.languages,
-          accountSettingsTabActive: true,
-          oauthProviders: UserPagesController._translateProviderDescriptions(
-            oauthProviders,
-            req
-          ),
-          oauthUseV2: Settings.oauthUseV2 || false,
-          ssoError: ssoError,
-          thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
-          previewOauth: req.query.prvw != null
-        })
+      res.render('user/settings', {
+        title: 'account_settings',
+        user,
+        hasPassword: !!user.hashedPassword,
+        shouldAllowEditingDetails,
+        languages: Settings.languages,
+        accountSettingsTabActive: true,
+        oauthProviders: UserPagesController._translateProviderDescriptions(
+          oauthProviders,
+          req
+        ),
+        oauthUseV2: Settings.oauthUseV2 || false,
+        ssoError: ssoError,
+        thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
+        previewOauth: req.query.prvw != null
       })
     })
   },
@@ -182,32 +173,6 @@ module.exports = UserPagesController = {
           title: 'sessions',
           sessions
         })
-      }
-    )
-  },
-
-  _hasPassword(user, callback) {
-    return request.get(
-      {
-        url: `${Settings.apis.v1.url}/api/v1/sharelatex/has_password`,
-        auth: { user: Settings.apis.v1.user, pass: Settings.apis.v1.pass },
-        body: {
-          user_id: __guard__(
-            user != null ? user.overleaf : undefined,
-            x => x.id
-          )
-        },
-        timeout: 20 * 1000,
-        json: true
-      },
-      function(err, response, body) {
-        if (err) {
-          // for errors assume password and show password setting form
-          return callback(err, true)
-        } else if (body != null ? body.has_password : undefined) {
-          return callback(err, true)
-        }
-        return callback(err, false)
       }
     )
   },

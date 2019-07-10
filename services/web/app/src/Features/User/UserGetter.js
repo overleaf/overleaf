@@ -28,12 +28,6 @@ module.exports = UserGetter = {
     if (query == null) {
       return callback(new Error('no query provided'))
     }
-    if ((query != null ? query.email : undefined) != null) {
-      return callback(
-        new Error("Don't use getUser to find user by email"),
-        null
-      )
-    }
     if (arguments.length === 2) {
       callback = projection
       projection = {}

@@ -80,17 +80,6 @@ describe('UserGetter', function() {
       })
     })
 
-    it('should not allow email in query', function(done) {
-      return this.UserGetter.getUser(
-        { email: 'foo@bar.com' },
-        {},
-        (error, user) => {
-          error.should.exist
-          return done()
-        }
-      )
-    })
-
     it('should not allow null query', function(done) {
       return this.UserGetter.getUser(null, {}, (error, user) => {
         error.should.exist

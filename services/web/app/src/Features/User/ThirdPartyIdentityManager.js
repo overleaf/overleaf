@@ -101,51 +101,46 @@ const ThirdPartyIdentityManager = (module.exports = {
     }
     // add new tpi only if an entry for the provider does not exist
     // projection includes thirdPartyIdentifiers for tests
-    User.findOneAndUpdate(
-      query,
-      update,
-      { projection: { email: 1, thirdPartyIdentifiers: 1 }, new: 1 },
-      (err, res) => {
-        if (err && err.code === 11000) {
-          callback(new Errors.ThirdPartyIdentityExistsError())
-        } else if (err != null) {
-          callback(err)
-        } else if (res) {
-          const emailOptions = {
-            to: res.email,
-            provider: oauthProviders[providerId].name
-          }
-          EmailHandler.sendEmail(
-            'emailThirdPartyIdentifierLinked',
-            emailOptions,
-            error => {
-              if (error != null) {
-                logger.warn(error)
-              }
-              return callback(null, res)
-            }
-          )
-        } else if (retry) {
-          // if already retried then throw error
-          callback(new Error('update failed'))
-        } else {
-          // attempt to clear existing entry then retry
-          ThirdPartyIdentityManager.unlink(userId, providerId, function(err) {
-            if (err != null) {
-              return callback(err)
-            }
-            ThirdPartyIdentityManager.link(
-              userId,
-              providerId,
-              externalUserId,
-              externalData,
-              callback,
-              retry
-            )
-          })
+    User.findOneAndUpdate(query, update, { new: 1 }, (err, res) => {
+      if (err && err.code === 11000) {
+        callback(new Errors.ThirdPartyIdentityExistsError())
+      } else if (err != null) {
+        callback(err)
+      } else if (res) {
+        const emailOptions = {
+          to: res.email,
+          provider: oauthProviders[providerId].name
         }
+        EmailHandler.sendEmail(
+          'emailThirdPartyIdentifierLinked',
+          emailOptions,
+          error => {
+            if (error != null) {
+              logger.warn(error)
+            }
+            return callback(null, res)
+          }
+        )
+      } else if (retry) {
+        // if already retried then throw error
+        callback(new Error('update failed'))
+      } else {
+        // attempt to clear existing entry then retry
+        ThirdPartyIdentityManager.unlink(userId, providerId, function(err) {
+          if (err != null) {
+            return callback(err)
+          }
+          ThirdPartyIdentityManager.link(
+            userId,
+            providerId,
+            externalUserId,
+            externalData,
+            callback,
+            true
+          )
+        })
       }
-    )
+    })
   },
 
   unlink(userId, providerId, callback) {
@@ -163,32 +158,27 @@ const ThirdPartyIdentityManager = (module.exports = {
       }
     }
     // projection includes thirdPartyIdentifiers for tests
-    User.findOneAndUpdate(
-      query,
-      update,
-      { projection: { email: 1, thirdPartyIdentifiers: 1 }, new: 1 },
-      (err, res) => {
-        if (err != null) {
-          callback(err)
-        } else if (!res) {
-          callback(new Error('update failed'))
-        } else {
-          const emailOptions = {
-            to: res.email,
-            provider: oauthProviders[providerId].name
-          }
-          EmailHandler.sendEmail(
-            'emailThirdPartyIdentifierUnlinked',
-            emailOptions,
-            error => {
-              if (error != null) {
-                logger.warn(error)
-              }
-              return callback(null, res)
-            }
-          )
+    User.findOneAndUpdate(query, update, { new: 1 }, (err, res) => {
+      if (err != null) {
+        callback(err)
+      } else if (!res) {
+        callback(new Error('update failed'))
+      } else {
+        const emailOptions = {
+          to: res.email,
+          provider: oauthProviders[providerId].name
         }
+        EmailHandler.sendEmail(
+          'emailThirdPartyIdentifierUnlinked',
+          emailOptions,
+          error => {
+            if (error != null) {
+              logger.warn(error)
+            }
+            return callback(null, res)
+          }
+        )
       }
-    )
+    })
   }
 })
