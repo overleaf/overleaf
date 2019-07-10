@@ -11,13 +11,17 @@ describe "RealTimeRedisManager", ->
 			auth: () ->
 			exec: sinon.stub()
 		@rclient.multi = () => @rclient
+		@pubsubClient = 
+			publish: sinon.stub()
 		@RealTimeRedisManager = SandboxedModule.require modulePath, requires:
-			"redis-sharelatex": createClient: () => @rclient
+			"redis-sharelatex": createClient: (config) =>  if (config.name is 'pubsub') then @pubsubClient else @rclient
 			"settings-sharelatex":
 				redis:
 					documentupdater: @settings =
 						key_schema:
 							pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
+					pubsub:
+						name: "pubsub"
 			"logger-sharelatex": { log: () -> }
 			"crypto": @crypto = { randomBytes: sinon.stub().withArgs(4).returns(Buffer.from([0x1, 0x2, 0x3, 0x4])) }
 			"os": @os = {hostname: sinon.stub().returns("somehost")}
@@ -81,8 +85,7 @@ describe "RealTimeRedisManager", ->
 	describe "sendData", ->
 		beforeEach ->
 			@message_id = "doc:somehost:01020304-0"
-			@rclient.publish = sinon.stub()
 			@RealTimeRedisManager.sendData({op: "thisop"})
 		
 		it "should send the op with a message id", ->
-			@rclient.publish.calledWith("applied-ops", JSON.stringify({op:"thisop",_id:@message_id})).should.equal true
+			@pubsubClient.publish.calledWith("applied-ops", JSON.stringify({op:"thisop",_id:@message_id})).should.equal true

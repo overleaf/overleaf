@@ -1,5 +1,6 @@
 Settings = require('settings-sharelatex')
-rclient = require("redis-sharelatex").createClient(Settings.redis.pubsub)
+rclient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
+pubsubClient = require("redis-sharelatex").createClient(Settings.redis.pubsub)
 Keys = Settings.redis.documentupdater.key_schema
 logger = require('logger-sharelatex')
 os = require "os"
@@ -35,4 +36,4 @@ module.exports = RealTimeRedisManager =
 		# create a unique message id using a counter
 		message_id = "doc:#{HOST}:#{RND}-#{COUNT++}"
 		data?._id = message_id
-		rclient.publish "applied-ops", JSON.stringify(data)
+		pubsubClient.publish "applied-ops", JSON.stringify(data)
