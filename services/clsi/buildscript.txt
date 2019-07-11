@@ -5,4 +5,4 @@ clsi
 --dependencies=mongo,redis
 --docker-repos=gcr.io/overleaf-ops
 --build-target=docker
---script-version=1.1.20
+--script-version=1.1.21
