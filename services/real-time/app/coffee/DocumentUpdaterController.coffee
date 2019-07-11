@@ -11,7 +11,7 @@ MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 # 1Mb
 module.exports = DocumentUpdaterController =
 	# DocumentUpdaterController is responsible for updates that come via Redis
 	# Pub/Sub from the document updater.
-	rclientList: RedisClientManager.createClientList(settings.redis.pubsub, settings.redis.unusedpubsub)
+	rclientList: RedisClientManager.createClientList(settings.redis.pubsub)
 
 	listenForUpdatesFromDocumentUpdater: (io) ->
 		logger.log {rclients: @rclientList.length}, "listening for applied-ops events"
