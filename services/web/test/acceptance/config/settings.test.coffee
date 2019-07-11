@@ -144,3 +144,15 @@ module.exports =
 			authWithV1: true
 			url: '/docs'
 		}
+
+	oauthProviders:
+		'provider': {
+			name: 'provider'
+		},
+		'collabratec': {
+			name: 'collabratec'
+		}
+		'google': {
+			name: 'google'
+		},
+

@@ -1,7 +1,11 @@
+const EmailHandler = require('../../../../app/src/Features/Email/EmailHandler')
 const Errors = require('../Errors/Errors')
+const logger = require('logger-sharelatex')
 const { User } = require('../../models/User')
-const UserUpdater = require('./UserUpdater')
+const settings = require('settings-sharelatex')
 const _ = require('lodash')
+
+const oauthProviders = settings.oauthProviders || {}
 
 const ThirdPartyIdentityManager = (module.exports = {
   getUser(providerId, externalUserId, callback) {
@@ -77,6 +81,9 @@ const ThirdPartyIdentityManager = (module.exports = {
   // is complete
 
   link(userId, providerId, externalUserId, externalData, callback, retry) {
+    if (!oauthProviders[providerId]) {
+      return callback(new Error('Not a valid provider'))
+    }
     const query = {
       _id: userId,
       'thirdPartyIdentifiers.providerId': {
@@ -93,38 +100,65 @@ const ThirdPartyIdentityManager = (module.exports = {
       }
     }
     // add new tpi only if an entry for the provider does not exist
-    UserUpdater.updateUser(query, update, function(err, res) {
-      if (err && err.code === 11000) {
-        return callback(new Errors.ThirdPartyIdentityExistsError())
-      }
-      if (err != null) {
-        return callback(err)
-      }
-      if (res.nModified === 1) {
-        return callback(null, res)
-      }
-      // if already retried then throw error
-      if (retry) {
-        return callback(new Error('update failed'))
-      }
-      // attempt to clear existing entry then retry
-      ThirdPartyIdentityManager.unlink(userId, providerId, function(err) {
-        if (err != null) {
-          return callback(err)
+    // projection includes thirdPartyIdentifiers for tests
+    User.findOneAndUpdate(
+      query,
+      update,
+      { projection: { email: 1, thirdPartyIdentifiers: 1 }, new: 1 },
+      (err, res) => {
+        if (err && err.code === 11000) {
+          callback(new Errors.ThirdPartyIdentityExistsError())
+        } else if (err != null) {
+          callback(err)
+        } else if (res) {
+          const emailOptions = {
+            to: res.email,
+            provider: oauthProviders[providerId].name
+          }
+          if (settings.oauthFallback) {
+            return callback(null, res)
+          } else {
+            EmailHandler.sendEmail(
+              'emailThirdPartyIdentifierLinked',
+              emailOptions,
+              error => {
+                if (error != null) {
+                  logger.warn(error)
+                }
+                return callback(null, res)
+              }
+            )
+          }
+        } else if (retry) {
+          // if already retried then throw error
+          callback(new Error('update failed'))
+        } else {
+          // attempt to clear existing entry then retry
+          ThirdPartyIdentityManager.unlink(userId, providerId, function(err) {
+            if (err != null) {
+              return callback(err)
+            }
+            ThirdPartyIdentityManager.link(
+              userId,
+              providerId,
+              externalUserId,
+              externalData,
+              callback,
+              retry
+            )
+          })
         }
-        ThirdPartyIdentityManager.link(
-          userId,
-          providerId,
-          externalUserId,
-          externalData,
-          callback,
-          true
-        )
-      })
-    })
+      }
+    )
   },
 
   unlink(userId, providerId, callback) {
+    if (!oauthProviders[providerId]) {
+      return callback(new Error('Not a valid provider'))
+    }
+    const query = {
+      _id: userId
+    }
     const update = {
       $pull: {
         thirdPartyIdentifiers: {
@@ -132,6 +166,37 @@ const ThirdPartyIdentityManager = (module.exports = {
         }
       }
     }
-    UserUpdater.updateUser(userId, update, callback)
+    // projection includes thirdPartyIdentifiers for tests
+    User.findOneAndUpdate(
+      query,
+      update,
+      { projection: { email: 1, thirdPartyIdentifiers: 1 }, new: 1 },
+      (err, res) => {
+        if (err != null) {
+          callback(err)
+        } else if (!res) {
+          callback(new Error('update failed'))
+        } else {
+          const emailOptions = {
+            to: res.email,
+            provider: oauthProviders[providerId].name
+          }
+          if (settings.oauthFallback) {
+            return callback(null, res)
+          } else {
+            EmailHandler.sendEmail(
+              'emailThirdPartyIdentifierUnlinked',
+              emailOptions,
+              error => {
+                if (error != null) {
+                  logger.warn(error)
+                }
+                return callback(null, res)
+              }
+            )
+          }
+        }
+      }
+    )
   }
 })

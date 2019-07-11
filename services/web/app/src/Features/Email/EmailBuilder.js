@@ -23,6 +23,7 @@ const BaseWithHeaderEmailLayout = require(`./Layouts/${
 }BaseWithHeaderEmailLayout`)
 const SpamSafe = require('./SpamSafe')
 
+// Single CTA Email
 const SingleCTAEmailBody = require(`./Bodies/${
   settings.brandPrefix
 }SingleCTAEmailBody`)
@@ -473,6 +474,38 @@ If you have any questions, you can contact our support team by reply.\
   },
   ctaURL() {
     return settings.siteUrl + '/login'
+  }
+})
+
+templates.emailThirdPartyIdentifierLinked = NoCTAEmailTemplate({
+  subject(opts) {
+    return `Your ${settings.appName} account is now linked with ${
+      opts.provider
+    }`
+  },
+  title(opts) {
+    return `Accounts Linked`
+  },
+  message(opts) {
+    let message = `We're contacting you to notify you that your ${opts.provider}
+    account is now linked to your ${settings.appName} account`
+    return message
+  }
+})
+
+templates.emailThirdPartyIdentifierUnlinked = NoCTAEmailTemplate({
+  subject(opts) {
+    return `Your ${settings.appName} account is no longer linked with ${
+      opts.provider
+    }`
+  },
+  title(opts) {
+    return `Accounts No Longer Linked`
+  },
+  message(opts) {
+    let message = `We're contacting you to notify you that your ${opts.provider}
+    account is no longer linked with your ${settings.appName} account.`
+    return message
   }
 })
 
