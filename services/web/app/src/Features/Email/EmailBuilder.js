@@ -233,6 +233,20 @@ If you didn't request a password reset, let us know.\
   }
 })
 
+templates.passwordChanged = NoCTAEmailTemplate({
+  subject(opts) {
+    return `Password Changed - ${settings.appName}`
+  },
+  title(opts) {
+    return `Password Changed`
+  },
+  message(opts) {
+    return `We're contacting you to notify you that your password has been set or changed.
+
+If you have recently set your password for the first time, or if you just changed your password, you don't need to take any further action. If you didn't set or change your password, please contact us.`
+  }
+})
+
 templates.confirmEmail = CTAEmailTemplate({
   subject() {
     return `Confirm Email - ${settings.appName}`
