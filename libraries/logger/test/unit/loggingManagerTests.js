@@ -28,7 +28,7 @@ describe('LoggingManager', function() {
       once: sinon.stub().yields()
     }
     this.LoggingManager = SandboxedModule.require(modulePath, {
-      globals: { console },
+      globals: { console, process },
       requires: {
         bunyan: (this.Bunyan = {
           createLogger: sinon.stub().returns(this.mockBunyanLogger),
