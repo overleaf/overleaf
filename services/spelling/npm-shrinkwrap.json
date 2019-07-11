@@ -2362,10 +2362,11 @@
       "dev": true
     },
     "logger-sharelatex": {
-      "version": "1.7.0",
-      "resolved": "https://registry.npmjs.org/logger-sharelatex/-/logger-sharelatex-1.7.0.tgz",
-      "integrity": "sha512-9sxDGPSphOMDqUqGpOu/KxFAVcpydKggWv60g9D7++FDCxGkhLLn0kmBkDdgB00d1PadgX1CBMWKzIBpptDU/Q==",
+      "version": "1.8.0",
+      "resolved": "https://registry.npmjs.org/logger-sharelatex/-/logger-sharelatex-1.8.0.tgz",
+      "integrity": "sha512-8+lahh2dGkYbhL6OcPuTIKXqg3FLHhzzkDsvg648/ms31BpBh2IX20J7U3VSEKBIR9sPhwYy4F4lQBQMiFp+/Q==",
       "requires": {
+        "@overleaf/o-error": "^2.0.0",
         "bunyan": "1.8.12",
         "raven": "1.1.3",
         "request": "2.88.0"
