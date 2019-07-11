@@ -1,19 +1,3 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-    node/no-deprecated-api,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let TokenAccessHandler
 const { Project } = require('../../models/Project')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
@@ -25,19 +9,20 @@ const logger = require('logger-sharelatex')
 const V1Api = require('../V1/V1Api')
 const crypto = require('crypto')
 
-module.exports = TokenAccessHandler = {
+const TokenAccessHandler = {
   ANONYMOUS_READ_AND_WRITE_ENABLED:
     Settings.allowAnonymousReadAndWriteSharing === true,
+  READ_AND_WRITE_TOKEN_REGEX: /^(\d+)(\w+)$/,
+  READ_AND_WRITE_URL_REGEX: /^\/(\d+)(\w+)$/,
+  READ_ONLY_TOKEN_REGEX: /^([a-z]{12})$/,
+  READ_ONLY_URL_REGEX: /^\/read\/([a-z]{12})$/,
 
   _extractNumericPrefix(token) {
     return token.match(/^(\d+)\w+/)
   },
 
   _getProjectByReadOnlyToken(token, callback) {
-    if (callback == null) {
-      callback = function(err, project) {}
-    }
-    return Project.findOne(
+    Project.findOne(
       {
         'tokens.readOnly': token
       },
@@ -47,10 +32,7 @@ module.exports = TokenAccessHandler = {
   },
 
   _getProjectByEitherToken(token, callback) {
-    if (callback == null) {
-      callback = function(err, project) {}
-    }
-    return TokenAccessHandler._getProjectByReadOnlyToken(token, function(
+    TokenAccessHandler._getProjectByReadOnlyToken(token, function(
       err,
       project
     ) {
@@ -60,28 +42,25 @@ module.exports = TokenAccessHandler = {
       if (project != null) {
         return callback(null, project)
       }
-      return TokenAccessHandler._getProjectByReadAndWriteToken(token, function(
+      TokenAccessHandler._getProjectByReadAndWriteToken(token, function(
         err,
         project
       ) {
         if (err != null) {
           return callback(err)
         }
-        return callback(null, project)
+        callback(null, project)
       })
     })
   },
 
   _getProjectByReadAndWriteToken(token, callback) {
-    if (callback == null) {
-      callback = function(err, project) {}
-    }
     const numericPrefixMatch = TokenAccessHandler._extractNumericPrefix(token)
     if (!numericPrefixMatch) {
       return callback(null, null)
     }
     const numerics = numericPrefixMatch[1]
-    return Project.findOne(
+    Project.findOne(
       {
         'tokens.readAndWritePrefix': numerics
       },
@@ -96,8 +75,8 @@ module.exports = TokenAccessHandler = {
         try {
           if (
             !crypto.timingSafeEqual(
-              new Buffer(token),
-              new Buffer(project.tokens.readAndWrite)
+              Buffer.from(token),
+              Buffer.from(project.tokens.readAndWrite)
             )
           ) {
             logger.err(
@@ -118,10 +97,7 @@ module.exports = TokenAccessHandler = {
   },
 
   findProjectWithReadOnlyToken(token, callback) {
-    if (callback == null) {
-      callback = function(err, project, projectExists) {}
-    }
-    return TokenAccessHandler._getProjectByReadOnlyToken(token, function(
+    TokenAccessHandler._getProjectByReadOnlyToken(token, function(
       err,
       project
     ) {
@@ -134,15 +110,12 @@ module.exports = TokenAccessHandler = {
       if (project.publicAccesLevel !== PublicAccessLevels.TOKEN_BASED) {
         return callback(null, null, true) // Project does exist, but it isn't token based
       }
-      return callback(null, project, true)
+      callback(null, project, true)
     })
   },
 
   findProjectWithReadAndWriteToken(token, callback) {
-    if (callback == null) {
-      callback = function(err, project, projectExists) {}
-    }
-    return TokenAccessHandler._getProjectByReadAndWriteToken(token, function(
+    TokenAccessHandler._getProjectByReadAndWriteToken(token, function(
       err,
       project
     ) {
@@ -155,15 +128,12 @@ module.exports = TokenAccessHandler = {
       if (project.publicAccesLevel !== PublicAccessLevels.TOKEN_BASED) {
         return callback(null, null, true) // Project does exist, but it isn't token based
       }
-      return callback(null, project, true)
+      callback(null, project, true)
     })
   },
 
   _userIsMember(userId, projectId, callback) {
-    if (callback == null) {
-      callback = function(err, isMember) {}
-    }
-    return CollaboratorsHandler.isUserInvitedMemberOfProject(
+    CollaboratorsHandler.isUserInvitedMemberOfProject(
       userId,
       projectId,
       callback
@@ -171,10 +141,7 @@ module.exports = TokenAccessHandler = {
   },
 
   findProjectWithHigherAccess(token, userId, callback) {
-    if (callback == null) {
-      callback = function(err, project) {}
-    }
-    return TokenAccessHandler._getProjectByEitherToken(token, function(
+    TokenAccessHandler._getProjectByEitherToken(token, function(
       err,
       project
     ) {
@@ -185,25 +152,22 @@ module.exports = TokenAccessHandler = {
         return callback(null, null)
       }
       const projectId = project._id
-      return TokenAccessHandler._userIsMember(userId, projectId, function(
+      TokenAccessHandler._userIsMember(userId, projectId, function(
         err,
         isMember
       ) {
         if (err != null) {
           return callback(err)
         }
-        return callback(null, isMember === true ? project : null)
+        callback(null, isMember === true ? project : null)
       })
     })
   },
 
   addReadOnlyUserToProject(userId, projectId, callback) {
-    if (callback == null) {
-      callback = function(err) {}
-    }
     userId = ObjectId(userId.toString())
     projectId = ObjectId(projectId.toString())
-    return Project.update(
+    Project.update(
       {
         _id: projectId
       },
@@ -215,12 +179,9 @@ module.exports = TokenAccessHandler = {
   },
 
   addReadAndWriteUserToProject(userId, projectId, callback) {
-    if (callback == null) {
-      callback = function(err) {}
-    }
     userId = ObjectId(userId.toString())
     projectId = ObjectId(projectId.toString())
-    return Project.update(
+    Project.update(
       {
         _id: projectId
       },
@@ -232,33 +193,23 @@ module.exports = TokenAccessHandler = {
   },
 
   grantSessionTokenAccess(req, projectId, token) {
-    if (req.session != null) {
-      if (req.session.anonTokenAccess == null) {
-        req.session.anonTokenAccess = {}
-      }
-      return (req.session.anonTokenAccess[
-        projectId.toString()
-      ] = token.toString())
+    if (!req.session) {
+      return
     }
+    if (!req.session.anonTokenAccess) {
+      req.session.anonTokenAccess = {}
+    }
+    req.session.anonTokenAccess[
+      projectId.toString()
+    ] = token.toString()
   },
 
   getRequestToken(req, projectId) {
-    const token =
-      __guard__(
-        __guard__(
-          req != null ? req.session : undefined,
-          x1 => x1.anonTokenAccess
-        ),
-        x => x[projectId.toString()]
-      ) ||
-      (req != null ? req.headers['x-sl-anonymous-access-token'] : undefined)
+    const token = req.session && req.session.anonTokenAccess && req.session.anonTokenAccess[ projectId.toString() ] || req.headers['x-sl-anonymous-access-token']
     return token
   },
 
   isValidToken(projectId, token, callback) {
-    if (callback == null) {
-      callback = function(err, isValidReadAndWrite, isValidReadOnly) {}
-    }
     if (!token) {
       return callback(null, false, false)
     }
@@ -266,7 +217,7 @@ module.exports = TokenAccessHandler = {
       project != null &&
       project.publicAccesLevel === PublicAccessLevels.TOKEN_BASED &&
       project._id.toString() === projectId.toString()
-    return TokenAccessHandler.findProjectWithReadAndWriteToken(token, function(
+    TokenAccessHandler.findProjectWithReadAndWriteToken(token, function(
       err,
       readAndWriteProject
     ) {
@@ -274,7 +225,7 @@ module.exports = TokenAccessHandler = {
         return callback(err)
       }
       const isValidReadAndWrite = _validate(readAndWriteProject)
-      return TokenAccessHandler.findProjectWithReadOnlyToken(token, function(
+      TokenAccessHandler.findProjectWithReadOnlyToken(token, function(
         err,
         readOnlyProject
       ) {
@@ -282,85 +233,66 @@ module.exports = TokenAccessHandler = {
           return callback(err)
         }
         const isValidReadOnly = _validate(readOnlyProject)
-        return callback(null, isValidReadAndWrite, isValidReadOnly)
+        callback(null, isValidReadAndWrite, isValidReadOnly)
       })
     })
   },
 
   protectTokens(project, privilegeLevel) {
-    if (project != null && project.tokens != null) {
-      if (privilegeLevel === PrivilegeLevels.OWNER) {
-        return
-      }
-      if (privilegeLevel !== PrivilegeLevels.READ_AND_WRITE) {
-        project.tokens.readAndWrite = ''
-        project.tokens.readAndWritePrefix = ''
-      }
-      if (privilegeLevel !== PrivilegeLevels.READ_ONLY) {
-        return (project.tokens.readOnly = '')
-      }
+    if (!project || !project.tokens) {
+      return
+    }
+    if (privilegeLevel === PrivilegeLevels.OWNER) {
+      return
+    }
+    if (privilegeLevel !== PrivilegeLevels.READ_AND_WRITE) {
+      project.tokens.readAndWrite = ''
+      project.tokens.readAndWritePrefix = ''
+    }
+    if (privilegeLevel !== PrivilegeLevels.READ_ONLY) {
+      project.tokens.readOnly = ''
     }
   },
 
   getV1DocPublishedInfo(token, callback) {
     // default to allowing access
-    if (callback == null) {
-      callback = function(err, publishedInfo) {}
+    if (!Settings.apis || !Settings.apis.v1) {
+      return callback(null, { allow: true })
     }
-    if ((Settings.apis != null ? Settings.apis.v1 : undefined) == null) {
-      return callback(null, {
-        allow: true
-      })
-    }
-
-    return V1Api.request(
+    V1Api.request(
       { url: `/api/v1/sharelatex/docs/${token}/is_published` },
       function(err, response, body) {
         if (err != null) {
           return callback(err)
         }
-        return callback(null, body)
+        callback(null, body)
       }
     )
   },
 
   getV1DocInfo(token, v2UserId, callback) {
-    // default to not exported
-    if (callback == null) {
-      callback = function(err, info) {}
-    }
-    if ((Settings.apis != null ? Settings.apis.v1 : undefined) == null) {
+    if (!Settings.apis || !Settings.apis.v1) {
       return callback(null, {
         exists: true,
         exported: false
       })
     }
-
-    return UserGetter.getUser(v2UserId, { overleaf: 1 }, function(err, user) {
+    UserGetter.getUser(v2UserId, { overleaf: 1 }, function(err, user) {
       if (err != null) {
         return callback(err)
       }
       const v1UserId = user.overleaf != null ? user.overleaf.id : undefined
-      return V1Api.request(
+      V1Api.request(
         { url: `/api/v1/sharelatex/users/${v1UserId}/docs/${token}/info` },
         function(err, response, body) {
           if (err != null) {
             return callback(err)
           }
-          return callback(null, body)
+          callback(null, body)
         }
       )
     })
   }
 }
 
-module.exports.READ_AND_WRITE_TOKEN_REGEX = /^(\d+)(\w+)$/
-module.exports.READ_AND_WRITE_URL_REGEX = /^\/(\d+)(\w+)$/
-module.exports.READ_ONLY_TOKEN_REGEX = /^([a-z]{12})$/
-module.exports.READ_ONLY_URL_REGEX = /^\/read\/([a-z]{12})$/
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
+module.exports = TokenAccessHandler
