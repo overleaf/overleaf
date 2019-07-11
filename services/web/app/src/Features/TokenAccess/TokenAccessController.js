@@ -281,12 +281,13 @@ module.exports = TokenAccessController = {
     if (userId == null) {
       return res.render('project/v2-import', { loginRedirect: redirectPath })
     } else {
-      return TokenAccessHandler.getV1DocInfo(token, userId, function(
-        err,
-        doc_info
-      ) {
+      TokenAccessHandler.getV1DocInfo(token, userId, function(err, doc_info) {
         if (err != null) {
           return next(err)
+        }
+        if (!doc_info) {
+          res.status(400)
+          return res.render('project/cannot-import-v1-project')
         }
         if (!doc_info.exists) {
           return next(new Errors.NotFoundError())

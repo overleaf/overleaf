@@ -855,27 +855,25 @@ describe('TokenAccess', function() {
 
     after(() => delete settings.overleaf)
 
-    it('should redirect read and write token to v1', function(done) {
+    it('should show error page for read and write token', function(done) {
       const unimportedV1Token = '123abc'
-      return try_read_and_write_token_access(
+      try_read_and_write_token_access(
         this.owner,
         unimportedV1Token,
         (response, body) => {
-          expect(response.statusCode).to.equal(200)
-          expect(body).to.contain('has not been imported to v2 yet.')
+          expect(response.statusCode).to.equal(400)
         },
         done
       )
     })
 
-    it('should show import project page', function(done) {
+    it('should show error page for read only token to v1', function(done) {
       const unimportedV1Token = 'abcd'
-      return try_read_only_token_access(
+      try_read_only_token_access(
         this.owner,
         unimportedV1Token,
         (response, body) => {
-          expect(response.statusCode).to.equal(200)
-          expect(body).to.contain('has not been imported to v2 yet.')
+          expect(response.statusCode).to.equal(400)
         },
         done
       )

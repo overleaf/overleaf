@@ -141,10 +141,7 @@ const TokenAccessHandler = {
   },
 
   findProjectWithHigherAccess(token, userId, callback) {
-    TokenAccessHandler._getProjectByEitherToken(token, function(
-      err,
-      project
-    ) {
+    TokenAccessHandler._getProjectByEitherToken(token, function(err, project) {
       if (err != null) {
         return callback(err)
       }
@@ -199,13 +196,15 @@ const TokenAccessHandler = {
     if (!req.session.anonTokenAccess) {
       req.session.anonTokenAccess = {}
     }
-    req.session.anonTokenAccess[
-      projectId.toString()
-    ] = token.toString()
+    req.session.anonTokenAccess[projectId.toString()] = token.toString()
   },
 
   getRequestToken(req, projectId) {
-    const token = req.session && req.session.anonTokenAccess && req.session.anonTokenAccess[ projectId.toString() ] || req.headers['x-sl-anonymous-access-token']
+    const token =
+      (req.session &&
+        req.session.anonTokenAccess &&
+        req.session.anonTokenAccess[projectId.toString()]) ||
+      req.headers['x-sl-anonymous-access-token']
     return token
   },
 
@@ -282,6 +281,9 @@ const TokenAccessHandler = {
         return callback(err)
       }
       const v1UserId = user.overleaf != null ? user.overleaf.id : undefined
+      if (!v1UserId) {
+        return callback(null, null)
+      }
       V1Api.request(
         { url: `/api/v1/sharelatex/users/${v1UserId}/docs/${token}/info` },
         function(err, response, body) {
