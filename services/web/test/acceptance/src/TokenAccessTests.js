@@ -861,25 +861,21 @@ describe('TokenAccess', function() {
         this.owner,
         unimportedV1Token,
         (response, body) => {
-          expect(response.statusCode).to.equal(302)
-          return expect(response.headers.location).to.equal(
-            '/sign_in_to_v1?return_to=/123abc'
-          )
+          expect(response.statusCode).to.equal(200)
+          expect(body).to.contain('has not been imported to v2 yet.')
         },
         done
       )
     })
 
-    it('should redirect read only token to v1', function(done) {
+    it('should show import project page', function(done) {
       const unimportedV1Token = 'abcd'
       return try_read_only_token_access(
         this.owner,
         unimportedV1Token,
         (response, body) => {
-          expect(response.statusCode).to.equal(302)
-          return expect(response.headers.location).to.equal(
-            '/sign_in_to_v1?return_to=/read/abcd'
-          )
+          expect(response.statusCode).to.equal(200)
+          expect(body).to.contain('has not been imported to v2 yet.')
         },
         done
       )

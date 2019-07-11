@@ -7,19 +7,7 @@ td.project-list-table-name-cell(ng-if-start="project.isV1Project")
 				tooltip-append-to-body="true"
 			)
 		span.project-list-table-name
-			if hasFeature('force-import-to-v2')
-				a.projectName(href='/{{project.id}}') {{project.name}}
-			else
-				button.btn.btn-link.projectName(
-					ng-click="openV1ImportModal(project)"
-					stop-propagation="click"
-					ng-show="project.accessLevel == 'owner'"
-				) {{project.name}}
-				a.projectName(
-					href='/sign_in_to_v1?return_to=/{{project.id}}'
-					target="_blank"
-					ng-hide="project.accessLevel == 'owner'"
-				) {{project.name}}
+			a.projectName(href='/{{project.id}}') {{project.name}}
 
 td.project-list-table-owner-cell
 	span.owner {{ownerName(project)}}

@@ -699,19 +699,6 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
       return (window.location = path)
     }
 
-    $scope.openV1ImportModal = project =>
-      $modal.open({
-        templateUrl: 'v1ImportModalTemplate',
-        controller: 'V1ImportModalController',
-        size: 'lg',
-        windowClass: 'v1-import-modal',
-        resolve: {
-          project() {
-            return project
-          }
-        }
-      })
-
     const markTagAsSelected = id => {
       for (let tag of $scope.tags) {
         if (tag._id === id) {

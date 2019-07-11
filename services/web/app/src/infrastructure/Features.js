@@ -55,8 +55,6 @@ module.exports = Features = {
         )
       case 'redirect-sl':
         return Settings.redirectToV2 != null
-      case 'force-import-to-v2':
-        return Settings.forceImportToV2
       default:
         throw new Error(`unknown feature: ${feature}`)
     }

@@ -97,7 +97,7 @@ make test_acceptance_app_stop_service
 During development it is often useful to only run a subset of tests, which can be configured with arguments to the mocha CLI:
 
 ```
-make acceptance_test_run MOCHA_ARGS='--grep=AuthorizationManager'
+make test_acceptance_run MOCHA_GREP='AuthorizationManager'
 ```
 
 To run only the acceptance tests for a single module do:

@@ -14,7 +14,6 @@ let TokenAccessController
 const ProjectController = require('../Project/ProjectController')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const TokenAccessHandler = require('./TokenAccessHandler')
-const Features = require('../../infrastructure/Features')
 const Errors = require('../Errors/Errors')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
@@ -280,11 +279,7 @@ module.exports = TokenAccessController = {
 
   _handleV1Project(token, userId, redirectPath, res, next) {
     if (userId == null) {
-      if (Features.hasFeature('force-import-to-v2')) {
-        return res.render('project/v2-import', { loginRedirect: redirectPath })
-      } else {
-        return res.redirect(302, `/sign_in_to_v1?return_to=${redirectPath}`)
-      }
+      return res.render('project/v2-import', { loginRedirect: redirectPath })
     } else {
       return TokenAccessHandler.getV1DocInfo(token, userId, function(
         err,
@@ -299,17 +294,13 @@ module.exports = TokenAccessController = {
         if (doc_info.exported) {
           return next(new Errors.NotFoundError())
         }
-        if (Features.hasFeature('force-import-to-v2')) {
-          return res.render('project/v2-import', {
-            projectId: token,
-            hasOwner: doc_info.has_owner,
-            name: doc_info.name || 'Untitled',
-            hasAssignment: doc_info.has_assignment,
-            brandInfo: doc_info.brand_info
-          })
-        } else {
-          return res.redirect(302, `/sign_in_to_v1?return_to=${redirectPath}`)
-        }
+        return res.render('project/v2-import', {
+          projectId: token,
+          hasOwner: doc_info.has_owner,
+          name: doc_info.name || 'Untitled',
+          hasAssignment: doc_info.has_assignment,
+          brandInfo: doc_info.brand_info
+        })
       })
     }
   }
