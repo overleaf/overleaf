@@ -32,7 +32,11 @@ describe('LoggingManager', function() {
       requires: {
         bunyan: (this.Bunyan = {
           createLogger: sinon.stub().returns(this.mockBunyanLogger),
-          RingBuffer: bunyan.RingBuffer
+          RingBuffer: bunyan.RingBuffer,
+          stdSerializers: {
+            req: sinon.stub(),
+            res: sinon.stub()
+          }
         }),
         raven: (this.Raven = {
           Client: sinon.stub().returns(this.mockRavenClient)
