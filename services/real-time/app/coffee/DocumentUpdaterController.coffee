@@ -21,9 +21,12 @@ module.exports = DocumentUpdaterController =
 				metrics.inc "rclient", 0.001 # global event rate metric
 				EventLogger.debugEvent(channel, message) if settings.debugEvents > 0
 				DocumentUpdaterController._processMessageFromDocumentUpdater(io, channel, message)
-			do (i) ->
-				rclient.on "message", () ->
-					metrics.inc "rclient-#{i}", 0.001 # per client event rate metric
+		# create metrics for each redis instance only when we have multiple redis clients
+		if @rclientList.length > 1
+			for rclient, i in @rclientList
+				do (i) ->
+					rclient.on "message", () ->
+						metrics.inc "rclient-#{i}", 0.001 # per client event rate metric
 		
 	_processMessageFromDocumentUpdater: (io, channel, message) ->
 		SafeJsonParse.parse message, (error, message) ->
