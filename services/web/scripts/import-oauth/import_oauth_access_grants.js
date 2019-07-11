@@ -12,11 +12,11 @@
 
 'use strict'
 
-const OauthApplication = require('../../app/js/models/OauthApplication')
+const OauthApplication = require('../../app/src/models/OauthApplication')
   .OauthApplication
-const OauthAuthorizationCode = require('../../app/js/models/OauthAuthorizationCode')
+const OauthAuthorizationCode = require('../../app/src/models/OauthAuthorizationCode')
   .OauthAuthorizationCode
-const User = require('../../app/js/models/User').User
+const User = require('../../app/src/models/User').User
 const async = require('async')
 const csvParser = require('csv-parser')
 const fs = require('fs')

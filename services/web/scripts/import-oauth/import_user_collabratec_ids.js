@@ -10,9 +10,9 @@
 
 'use strict'
 
-const UserMapper = require('../../modules/overleaf-integration/app/js/OverleafUsers/UserMapper')
-const User = require('../../app/js/models/User').User
-const UserStub = require('../../app/js/models/UserStub').UserStub
+const UserMapper = require('../../modules/overleaf-integration/app/src/OverleafUsers/UserMapper')
+const User = require('../../app/src/models/User').User
+const UserStub = require('../../app/src/models/UserStub').UserStub
 const async = require('async')
 const csvParser = require('csv-parser')
 const fs = require('fs')

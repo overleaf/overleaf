@@ -1,4 +1,4 @@
-const InstitutionsManager = require('../app/js/Features/Institutions/InstitutionsManager')
+const InstitutionsManager = require('../app/src/Features/Institutions/InstitutionsManager')
 
 const institutionId = parseInt(process.argv[2])
 if (isNaN(institutionId)) throw new Error('No institution id')

@@ -10,7 +10,7 @@
 
 'use strict'
 
-const OauthApplication = require('../../app/js/models/OauthApplication')
+const OauthApplication = require('../../app/src/models/OauthApplication')
   .OauthApplication
 const async = require('async')
 const csvParser = require('csv-parser')

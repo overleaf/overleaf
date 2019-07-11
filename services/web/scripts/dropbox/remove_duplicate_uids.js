@@ -1,6 +1,6 @@
-const { db } = require('../../app/js/infrastructure/mongojs')
-const DropboxHandler = require('../../modules/dropbox/app/js/DropboxHandler')
-const EmailHandler = require('../../app/js/Features/Email/EmailHandler')
+const { db } = require('../../app/src/infrastructure/mongojs')
+const DropboxHandler = require('../../modules/dropbox/app/src/DropboxHandler')
+const EmailHandler = require('../../app/src/Features/Email/EmailHandler')
 const async = require('async')
 const minimist = require('minimist')
 

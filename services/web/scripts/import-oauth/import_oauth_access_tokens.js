@@ -16,12 +16,12 @@
 
 'use strict'
 
-const OauthApplication = require('../../app/js/models/OauthApplication')
+const OauthApplication = require('../../app/src/models/OauthApplication')
   .OauthApplication
-const OauthAccessToken = require('../../app/js/models/OauthAccessToken')
+const OauthAccessToken = require('../../app/src/models/OauthAccessToken')
   .OauthAccessToken
-const User = require('../../app/js/models/User').User
-const UserMapper = require('../../modules/overleaf-integration/app/js/OverleafUsers/UserMapper')
+const User = require('../../app/src/models/User').User
+const UserMapper = require('../../modules/overleaf-integration/app/src/OverleafUsers/UserMapper')
 const async = require('async')
 const csvParser = require('csv-parser')
 const fs = require('fs')

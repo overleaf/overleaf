@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const mongojs = require('../../app/js/infrastructure/mongojs')
+const mongojs = require('../../app/src/infrastructure/mongojs')
 const { db, ObjectId } = mongojs
 const async = require('async')
 

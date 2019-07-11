@@ -1,4 +1,4 @@
-const { db } = require('../app/js/infrastructure/mongojs')
+const { db } = require('../app/src/infrastructure/mongojs')
 const logger = require('logger-sharelatex')
 logger.logger.level('error')
 

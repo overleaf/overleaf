@@ -10,7 +10,7 @@
 //   actually removes the brandVariationId attribute from  project documents
 //   that have brandVariationId attribute with value, "3"
 //
-const { db } = require('../app/js/infrastructure/mongojs')
+const { db } = require('../app/src/infrastructure/mongojs')
 const async = require('async')
 const minimist = require('minimist')
 

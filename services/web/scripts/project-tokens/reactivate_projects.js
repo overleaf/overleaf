@@ -1,4 +1,4 @@
-const ProjectDetailsHandler = require('../../app/js/Features/Project/ProjectDetailsHandler')
+const ProjectDetailsHandler = require('../../app/src/Features/Project/ProjectDetailsHandler')
 const Async = require('async')
 
 const projectIds = [

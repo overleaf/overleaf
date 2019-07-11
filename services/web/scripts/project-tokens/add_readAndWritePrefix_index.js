@@ -1,4 +1,4 @@
-const mongojs = require('../../app/js/infrastructure/mongojs')
+const mongojs = require('../../app/src/infrastructure/mongojs')
 const { db } = mongojs
 
 const keys = { 'tokens.readAndWritePrefix': 1 }

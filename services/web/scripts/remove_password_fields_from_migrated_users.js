@@ -1,4 +1,4 @@
-const { db } = require('../app/js/infrastructure/mongojs')
+const { db } = require('../app/src/infrastructure/mongojs')
 const minimist = require('minimist')
 
 const argv = minimist(process.argv.slice(2))
