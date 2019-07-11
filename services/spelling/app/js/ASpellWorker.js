@@ -11,7 +11,7 @@ const childProcess = require('child_process')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const _ = require('underscore')
-const errorType = require('overleaf-error-type')
+const OError = require('@overleaf/o-error')
 
 const BATCH_SIZE = 100
 
@@ -49,7 +49,7 @@ class ASpellWorker {
         this.state = 'closed'
       }
       if (this.callback != null) {
-        const err = new errorType.Error({
+        const err = new OError({
           message: 'aspell worker closed output streams with uncalled callback',
           info: {
             process: this.pipe.pid,
@@ -82,7 +82,7 @@ class ASpellWorker {
 
       if (this.callback != null) {
         this.callback(
-          new errorType.Error({
+          new OError({
             message: 'aspell worker error',
             info: errInfo
           }).withCause(err),
@@ -110,7 +110,7 @@ class ASpellWorker {
 
       if (this.callback != null) {
         this.callback(
-          new errorType.Error({
+          new OError({
             message: 'aspell worker error on stdin',
             info: errInfo
           }).withCause(err),
@@ -174,7 +174,7 @@ class ASpellWorker {
     if (this.callback != null) {
       // only allow one callback in use
       return this.callback(
-        new errorType.Error({
+        new OError({
           message: 'Aspell callback already in use - SHOULD NOT HAPPEN',
           info: {
             process: this.pipe.pid,

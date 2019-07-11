@@ -24,6 +24,7 @@
   },
   "version": "0.1.4",
   "dependencies": {
+    "@overleaf/o-error": "^2.0.0",
     "async": "0.1.22",
     "body-parser": "^1.12.0",
     "coffee-script": "^1.9.1",
@@ -34,10 +35,9 @@
     "mongojs": "2.4.0",
     "node-statsd": "0.0.3",
     "redis": "~0.8.4",
-    "request": "^2.53.0",
+    "request": "^2.88.0",
     "settings-sharelatex": "^1.1.0",
-    "underscore": "1.4.4",
-    "overleaf-error-type": "git+https://github.com/overleaf/overleaf-error-type.git"
+    "underscore": "1.9.1"
   },
   "devDependencies": {
     "bunyan": "^1.0.0",

@@ -7,13 +7,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let ASpell
 const ASpellWorkerPool = require('./ASpellWorkerPool')
 const LRU = require('lru-cache')
 const logger = require('logger-sharelatex')
 const fs = require('fs')
 const settings = require('settings-sharelatex')
 const Path = require('path')
+const { promisify } = require('util')
 
 const OneMinute = 60 * 1000
 const opts = { max: 10000, maxAge: OneMinute * 60 * 10 }
@@ -164,7 +164,7 @@ class ASpellRunner {
   }
 }
 
-module.exports = ASpell = {
+const ASpell = {
   // The description of how to call aspell from another program can be found here:
   // http://aspell.net/man-html/Through-A-Pipe.html
   checkWords(language, words, callback) {
@@ -174,7 +174,15 @@ module.exports = ASpell = {
     const runner = new ASpellRunner()
     return runner.checkWords(language, words, callback)
   },
-  ASPELL_TIMEOUT: 6000
+  ASPELL_TIMEOUT: 10000
 }
+
+const promises = {
+  checkWords: promisify(ASpell.checkWords)
+}
+
+ASpell.promises = promises
+
+module.exports = ASpell
 
 var WorkerPool = new ASpellWorkerPool()

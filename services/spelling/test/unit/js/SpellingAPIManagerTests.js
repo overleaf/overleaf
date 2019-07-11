@@ -1,14 +1,6 @@
 /* eslint-disable
-    handle-callback-err,
-    no-undef
+    handle-callback-err
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const chai = require('chai')
 const { expect } = chai
@@ -19,6 +11,8 @@ const modulePath = require('path').join(
   '../../../app/js/SpellingAPIManager'
 )
 
+const promiseStub = val => new Promise(resolve => resolve(val))
+
 describe('SpellingAPIManager', function() {
   beforeEach(function() {
     this.token = 'user-id-123'
@@ -26,15 +20,18 @@ describe('SpellingAPIManager', function() {
     this.learnedWords = ['lerned']
     this.LearnedWordsManager = {
       getLearnedWords: sinon.stub().callsArgWith(1, null, this.learnedWords),
-      learnWord: sinon.stub().callsArg(2)
+      learnWord: sinon.stub().callsArg(2),
+      promises: {
+        getLearnedWords: sinon.stub().returns(promiseStub(this.learnedWords))
+      }
     }
 
-    return (this.SpellingAPIManager = SandboxedModule.require(modulePath, {
+    this.SpellingAPIManager = SandboxedModule.require(modulePath, {
       requires: {
         './ASpell': this.ASpell,
         './LearnedWordsManager': this.LearnedWordsManager
       }
-    }))
+    })
   })
 
   describe('runRequest', function() {
@@ -58,25 +55,28 @@ describe('SpellingAPIManager', function() {
       this.misspellingsWithoutLearnedWords = this.misspellings.slice(0, 3)
 
       this.ASpell.checkWords = (lang, word, callback) => {
-        return callback(null, this.misspellings)
+        callback(null, this.misspellings)
       }
-      return sinon.spy(this.ASpell, 'checkWords')
+      this.ASpell.promises = {
+        checkWords: sinon.stub().returns(promiseStub(this.misspellings))
+      }
+      sinon.spy(this.ASpell, 'checkWords')
     })
 
     describe('with sensible JSON', function() {
       beforeEach(function(done) {
-        return this.SpellingAPIManager.runRequest(
+        this.SpellingAPIManager.runRequest(
           this.token,
           { words: this.allWords },
           (error, result) => {
             this.result = result
-            return done()
+            done()
           }
         )
       })
 
-      return it('should return the words that are spelled incorrectly and not learned', function() {
-        return expect(this.result.misspellings).to.deep.equal(
+      it('should return the words that are spelled incorrectly and not learned', function() {
+        expect(this.result.misspellings).to.deep.equal(
           this.misspellingsWithoutLearnedWords
         )
       })
@@ -84,175 +84,209 @@ describe('SpellingAPIManager', function() {
 
     describe('with a missing words array', function() {
       beforeEach(function(done) {
-        return this.SpellingAPIManager.runRequest(
-          this.token,
-          {},
-          (error, result) => {
-            this.error = error
-            this.result = result
-            return done()
-          }
-        )
+        this.SpellingAPIManager.runRequest(this.token, {}, (error, result) => {
+          this.error = error
+          this.result = result
+          done()
+        })
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         expect(this.error).to.exist
         expect(this.error).to.be.instanceof(Error)
-        return expect(this.error.message).to.equal('malformed JSON')
+        expect(this.error.message).to.equal('malformed JSON')
       })
     })
 
     describe('with a missing token', function() {
       beforeEach(function(done) {
-        return this.SpellingAPIManager.runRequest(
+        this.SpellingAPIManager.runRequest(
           null,
           { words: this.allWords },
           (error, result) => {
             this.error = error
             this.result = result
-            return done()
+            done()
           }
         )
       })
 
-      return it('should spell check without using any learned words', function() {
-        return this.LearnedWordsManager.getLearnedWords.called.should.equal(
-          false
-        )
+      it('should spell check without using any learned words', function() {
+        this.LearnedWordsManager.getLearnedWords.called.should.equal(false)
       })
     })
 
     describe('without a language', function() {
       beforeEach(function(done) {
-        return this.SpellingAPIManager.runRequest(
+        this.SpellingAPIManager.runRequest(
           this.token,
           { words: this.allWords },
           (error, result) => {
             this.result = result
-            return done()
+            done()
           }
         )
       })
 
-      return it('should use en as the default', function() {
-        return this.ASpell.checkWords.calledWith('en').should.equal(true)
+      it('should use en as the default', function() {
+        this.ASpell.promises.checkWords.calledWith('en').should.equal(true)
       })
     })
 
     describe('with a language', function() {
       beforeEach(function(done) {
-        return this.SpellingAPIManager.runRequest(
+        this.language = 'fr'
+        this.SpellingAPIManager.runRequest(
           this.token,
           {
             words: this.allWords,
-            language: (this.language = 'fr')
+            language: this.language
           },
           (error, result) => {
             this.result = result
-            return done()
+            done()
           }
         )
       })
 
-      return it('should use the language', function() {
-        return this.ASpell.checkWords
+      it('should use the language', function() {
+        this.ASpell.promises.checkWords
           .calledWith(this.language)
           .should.equal(true)
       })
     })
 
-    describe('with a very large collection of words', function() {
+    describe('with a large collection of words', function() {
       beforeEach(function(done) {
-        this.manyWords = __range__(1, 100000, true).map(i => 'word')
-        return this.SpellingAPIManager.runRequest(
+        this.ASpell.promises.checkWords = sinon.spy(() =>
+          promiseStub(this.misspellings)
+        )
+        this.manyWords = __range__(1, 4500, true).map(i => 'word')
+        this.SpellingAPIManager.runRequest(
           this.token,
           { words: this.manyWords },
           (error, result) => {
             this.result = result
-            return done()
+            done()
           }
         )
       })
 
-      return it('should truncate to 10,000 words', function() {
-        return this.ASpell.checkWords
-          .calledWith(sinon.match.any, this.manyWords.slice(0, 10000))
-          .should.equal(true)
+      it('should make concurrent requests of 1000 words', function() {
+        this.ASpell.promises.checkWords.callCount.should.equal(5)
       })
     })
 
-    return describe('with words from the whitelist', function() {
+    describe('with a collection of words with the max size of a chunk', function() {
+      beforeEach(function(done) {
+        this.ASpell.promises.checkWords = sinon.spy(() =>
+          promiseStub(this.misspellings)
+        )
+        this.manyWords = __range__(1, 1000, true).map(i => 'word')
+        this.SpellingAPIManager.runRequest(
+          this.token,
+          { words: this.manyWords },
+          (error, result) => {
+            this.result = result
+            done()
+          }
+        )
+      })
+
+      it('should make a single request', function() {
+        this.ASpell.promises.checkWords.callCount.should.equal(1)
+      })
+    })
+
+    describe('with a very large collection of words', function() {
+      beforeEach(function(done) {
+        this.ASpell.promises.checkWords = sinon.spy(() =>
+          promiseStub(this.misspellings)
+        )
+        this.manyWords = __range__(1, 50000, true).map(i => 'word')
+        this.SpellingAPIManager.runRequest(
+          this.token,
+          { words: this.manyWords },
+          (error, result) => {
+            this.result = result
+            done()
+          }
+        )
+      })
+
+      it('should make a maximum of 10 concurrent requests', function() {
+        this.ASpell.promises.checkWords.callCount.should.equal(10)
+      })
+    })
+
+    describe('with words from the whitelist', function() {
       beforeEach(function(done) {
         this.whitelistWord = this.SpellingAPIManager.whitelist[0]
         this.words = ['One', 'Two', this.whitelistWord]
-        return this.SpellingAPIManager.runRequest(
+        this.SpellingAPIManager.runRequest(
           this.token,
           { words: this.words },
           (error, result) => {
             this.result = result
-            return done()
+            done()
           }
         )
       })
 
-      return it('should ignore the white-listed word', function() {
-        return expect(this.result.misspellings.length).to.equal(
+      it('should ignore the white-listed word', function() {
+        expect(this.result.misspellings.length).to.equal(
           this.misspellings.length - 1
         )
       })
     })
   })
 
-  return describe('learnWord', function() {
+  describe('learnWord', function() {
     describe('without a token', function() {
       beforeEach(function(done) {
-        return this.SpellingAPIManager.learnWord(
-          null,
-          { word: 'banana' },
-          error => {
-            this.error = error
-            return done()
-          }
-        )
+        this.SpellingAPIManager.learnWord(null, { word: 'banana' }, error => {
+          this.error = error
+          done()
+        })
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         expect(this.error).to.exist
         expect(this.error).to.be.instanceof(Error)
-        return expect(this.error.message).to.equal('no token provided')
+        expect(this.error.message).to.equal('no token provided')
       })
     })
 
     describe('without a word', function() {
       beforeEach(function(done) {
-        return this.SpellingAPIManager.learnWord(this.token, {}, error => {
+        this.SpellingAPIManager.learnWord(this.token, {}, error => {
           this.error = error
-          return done()
+          done()
         })
       })
 
-      return it('should return an error', function() {
+      it('should return an error', function() {
         expect(this.error).to.exist
         expect(this.error).to.be.instanceof(Error)
-        return expect(this.error.message).to.equal('malformed JSON')
+        expect(this.error.message).to.equal('malformed JSON')
       })
     })
 
-    return describe('with a word and a token', function() {
+    describe('with a word and a token', function() {
       beforeEach(function(done) {
         this.word = 'banana'
-        return this.SpellingAPIManager.learnWord(
+        this.SpellingAPIManager.learnWord(
           this.token,
           { word: this.word },
           error => {
             this.error = error
-            return done()
+            done()
           }
         )
       })
 
-      return it('should call LearnedWordsManager.learnWord', function() {
-        return this.LearnedWordsManager.learnWord
+      it('should call LearnedWordsManager.learnWord', function() {
+        this.LearnedWordsManager.learnWord
           .calledWith(this.token, this.word)
           .should.equal(true)
       })

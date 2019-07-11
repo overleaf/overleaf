@@ -1,18 +1,10 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let LearnedWordsManager
 const db = require('./DB')
 const mongoCache = require('./MongoCache')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
+const { promisify } = require('util')
 
-module.exports = LearnedWordsManager = {
+const LearnedWordsManager = {
   learnWord(userToken, word, callback) {
     if (callback == null) {
       callback = () => {}
@@ -45,7 +37,7 @@ module.exports = LearnedWordsManager = {
     metrics.inc('mongoCache', 0.1, { status: 'miss' })
     logger.info({ userToken }, 'mongoCache miss')
 
-    return db.spellingPreferences.findOne({ token: userToken }, function(
+    db.spellingPreferences.findOne({ token: userToken }, function(
       error,
       preferences
     ) {
@@ -55,7 +47,7 @@ module.exports = LearnedWordsManager = {
       const words =
         (preferences != null ? preferences.learnedWords : undefined) || []
       mongoCache.set(userToken, words)
-      return callback(null, words)
+      callback(null, words)
     })
   },
 
@@ -63,9 +55,21 @@ module.exports = LearnedWordsManager = {
     if (callback == null) {
       callback = () => {}
     }
-    return db.spellingPreferences.remove({ token: userToken }, callback)
+    db.spellingPreferences.remove({ token: userToken }, callback)
   }
 }
+
+const promises = {
+  learnWord: promisify(LearnedWordsManager.learnWord),
+  getLearnedWords: promisify(LearnedWordsManager.getLearnedWords),
+  deleteUsersLearnedWords: promisify(
+    LearnedWordsManager.deleteUsersLearnedWords
+  )
+}
+
+LearnedWordsManager.promises = promises
+
+module.exports = LearnedWordsManager
 ;['learnWord', 'getLearnedWords'].map(method =>
   metrics.timeAsyncMethod(
     LearnedWordsManager,
