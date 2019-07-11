@@ -115,20 +115,16 @@ const ThirdPartyIdentityManager = (module.exports = {
             to: res.email,
             provider: oauthProviders[providerId].name
           }
-          if (settings.oauthFallback) {
-            return callback(null, res)
-          } else {
-            EmailHandler.sendEmail(
-              'emailThirdPartyIdentifierLinked',
-              emailOptions,
-              error => {
-                if (error != null) {
-                  logger.warn(error)
-                }
-                return callback(null, res)
+          EmailHandler.sendEmail(
+            'emailThirdPartyIdentifierLinked',
+            emailOptions,
+            error => {
+              if (error != null) {
+                logger.warn(error)
               }
-            )
-          }
+              return callback(null, res)
+            }
+          )
         } else if (retry) {
           // if already retried then throw error
           callback(new Error('update failed'))
@@ -181,20 +177,16 @@ const ThirdPartyIdentityManager = (module.exports = {
             to: res.email,
             provider: oauthProviders[providerId].name
           }
-          if (settings.oauthFallback) {
-            return callback(null, res)
-          } else {
-            EmailHandler.sendEmail(
-              'emailThirdPartyIdentifierUnlinked',
-              emailOptions,
-              error => {
-                if (error != null) {
-                  logger.warn(error)
-                }
-                return callback(null, res)
+          EmailHandler.sendEmail(
+            'emailThirdPartyIdentifierUnlinked',
+            emailOptions,
+            error => {
+              if (error != null) {
+                logger.warn(error)
               }
-            )
-          }
+              return callback(null, res)
+            }
+          )
         }
       }
     )
