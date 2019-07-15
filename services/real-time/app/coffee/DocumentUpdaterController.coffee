@@ -34,7 +34,7 @@ module.exports = DocumentUpdaterController =
 				logger.error {err: error, channel}, "error parsing JSON"
 				return
 			if message.op?
-				if message._id?
+				if message._id? && settings.checkEventOrder
 					status = EventLogger.checkEventOrder("applied-ops", message._id, message)
 					if status is 'duplicate'
 						return # skip duplicate events

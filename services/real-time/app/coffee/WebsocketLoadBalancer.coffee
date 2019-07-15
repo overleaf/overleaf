@@ -41,7 +41,7 @@ module.exports = WebsocketLoadBalancer =
 			if message.room_id == "all"
 				io.sockets.emit(message.message, message.payload...)
 			else if message.room_id?
-				if message._id?
+				if message._id? && Settings.checkEventOrder
 					status = EventLogger.checkEventOrder("editor-events", message._id, message)
 					if status is "duplicate"
 						return # skip duplicate events
