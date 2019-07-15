@@ -29,6 +29,9 @@ describe('OneTimeTokenHandler', function() {
     this.stubbedToken = 'mock-token'
     this.callback = sinon.stub()
     return (this.OneTimeTokenHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': {

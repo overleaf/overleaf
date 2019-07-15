@@ -50,6 +50,9 @@ describe('LimitationsManager', function() {
     }
 
     return (this.LimitationsManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Project/ProjectGetter': this.ProjectGetter,
         '../User/UserGetter': this.UserGetter,

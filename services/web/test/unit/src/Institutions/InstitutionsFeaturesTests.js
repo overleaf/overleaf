@@ -26,6 +26,9 @@ describe('InstitutionsFeatures', function() {
     this.PlansLocator = { findLocalPlanInSettings: sinon.stub() }
     this.institutionPlanCode = 'institution_plan_code'
     this.InstitutionsFeatures = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './InstitutionsGetter': this.InstitutionsGetter,
         '../Subscription/PlansLocator': this.PlansLocator,

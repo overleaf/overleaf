@@ -22,6 +22,9 @@ const SandboxedModule = require('sandboxed-module')
 describe('ClsiStateManager', function() {
   beforeEach(function() {
     this.ClsiStateManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': (this.settings = {}),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),

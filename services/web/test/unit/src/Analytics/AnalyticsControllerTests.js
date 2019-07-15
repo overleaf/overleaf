@@ -20,6 +20,9 @@ describe('AnalyticsController', function() {
     }
 
     this.controller = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './AnalyticsManager': this.AnalyticsManager,
         '../Authentication/AuthenticationController': this

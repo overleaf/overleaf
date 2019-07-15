@@ -48,6 +48,9 @@ describe('ReferencesHandler', function() {
     }
     this.docIds = ['aaa', 'ccc']
     this.handler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': {
           log() {},

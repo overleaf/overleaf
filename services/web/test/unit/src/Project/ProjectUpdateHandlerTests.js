@@ -29,6 +29,9 @@ describe('ProjectUpdateHandler', function() {
     this.ProjectModel = Project = class Project {}
     this.ProjectModel.update = sinon.stub().callsArg(3)
     return (this.handler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/Project': { Project: this.ProjectModel },
         'logger-sharelatex': { log: sinon.stub() }

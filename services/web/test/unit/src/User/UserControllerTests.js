@@ -73,6 +73,9 @@ describe('UserController', function() {
     }
     this.SudoModeHandler = { clearSudoMode: sinon.stub() }
     this.UserController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './UserGetter': this.UserGetter,
         './UserDeleter': this.UserDeleter,

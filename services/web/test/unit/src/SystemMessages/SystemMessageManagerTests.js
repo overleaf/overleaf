@@ -23,6 +23,9 @@ describe('SystemMessageManager', function() {
   beforeEach(function() {
     this.SystemMessage = {}
     this.SystemMessageManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/SystemMessage': { SystemMessage: this.SystemMessage }
       }

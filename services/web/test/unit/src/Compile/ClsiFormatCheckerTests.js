@@ -21,6 +21,9 @@ const SandboxedModule = require('sandboxed-module')
 describe('ClsiFormatChecker', function() {
   beforeEach(function() {
     this.ClsiFormatChecker = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': (this.settings = { compileBodySizeLimitMb: 5 }),
         'logger-sharelatex': (this.logger = {

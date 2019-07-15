@@ -30,6 +30,9 @@ describe('NotificationsHandler', function() {
   beforeEach(function() {
     this.request = sinon.stub().callsArgWith(1)
     return (this.handler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': {
           apis: { notifications: { url: notificationUrl } }

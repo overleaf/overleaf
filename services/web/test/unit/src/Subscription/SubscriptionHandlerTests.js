@@ -87,6 +87,9 @@ describe('SubscriptionHandler', function() {
     this.AnalyticsManager = { recordEvent: sinon.stub() }
 
     this.SubscriptionHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './RecurlyWrapper': this.RecurlyWrapper,
         'settings-sharelatex': this.Settings,

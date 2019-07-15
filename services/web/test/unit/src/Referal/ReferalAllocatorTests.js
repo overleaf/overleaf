@@ -22,6 +22,9 @@ const modulePath = require('path').join(
 describe('ReferalAllocator', function() {
   beforeEach(function() {
     this.ReferalAllocator = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/User': {
           User: (this.User = {})

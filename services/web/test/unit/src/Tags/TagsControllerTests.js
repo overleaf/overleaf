@@ -39,6 +39,9 @@ describe('TagsController', function() {
       }
     }
     this.controller = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './TagsHandler': this.handler,
         'logger-sharelatex': {

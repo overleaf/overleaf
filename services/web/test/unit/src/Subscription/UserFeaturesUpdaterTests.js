@@ -23,6 +23,9 @@ describe('UserFeaturesUpdater', function() {
   beforeEach(function() {
     this.User = { update: sinon.stub().callsArgWith(2) }
     return (this.UserFeaturesUpdater = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/User': {
           User: this.User

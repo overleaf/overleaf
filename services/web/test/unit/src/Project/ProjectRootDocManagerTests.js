@@ -41,6 +41,9 @@ describe('ProjectRootDocManager', function() {
       stat: sinon.stub().callsArgWith(1, null, { size: 100 })
     }
     return (this.ProjectRootDocManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './ProjectEntityHandler': (this.ProjectEntityHandler = {}),
         './ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),

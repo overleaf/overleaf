@@ -44,6 +44,9 @@ describe('ProjectUploadController', function() {
     }
 
     return (this.ProjectUploadController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './ProjectUploadManager': (this.ProjectUploadManager = {}),
         './FileSystemImportManager': (this.FileSystemImportManager = {}),

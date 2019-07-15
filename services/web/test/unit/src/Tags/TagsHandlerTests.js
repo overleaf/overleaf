@@ -36,6 +36,9 @@ describe('TagsHandler', function() {
     }
     this.callback = sinon.stub()
     return (this.handler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': {
           apis: { tags: { url: tagsUrl } }

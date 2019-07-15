@@ -144,6 +144,9 @@ describe('RecurlyWrapper', function() {
     return (this.RecurlyWrapper = RecurlyWrapper = SandboxedModule.require(
       modulePath,
       {
+        globals: {
+          console: console
+        },
         requires: {
           'settings-sharelatex': this.settings,
           'logger-sharelatex': {

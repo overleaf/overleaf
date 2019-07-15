@@ -61,6 +61,9 @@ describe('TpdsUpdateSender', function() {
       }
     }
     return (this.updateSender = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': { log() {} },

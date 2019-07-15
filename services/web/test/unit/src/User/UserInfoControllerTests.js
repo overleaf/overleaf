@@ -35,6 +35,9 @@ describe('UserInfoController', function() {
     this.UserGetter = {}
 
     this.UserInfoController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './UserGetter': this.UserGetter,
         './UserUpdater': this.UserUpdater,

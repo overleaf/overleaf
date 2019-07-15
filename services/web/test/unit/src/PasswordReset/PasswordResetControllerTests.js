@@ -39,6 +39,9 @@ describe('PasswordResetController', function() {
       removeReconfirmFlag: sinon.stub().callsArgWith(1, null)
     }
     this.PasswordResetController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         './PasswordResetHandler': this.PasswordResetHandler,

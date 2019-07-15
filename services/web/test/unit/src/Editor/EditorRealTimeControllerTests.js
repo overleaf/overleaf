@@ -22,6 +22,9 @@ describe('EditorRealTimeController', function() {
   beforeEach(function() {
     this.rclient = { publish: sinon.stub() }
     this.EditorRealTimeController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../infrastructure/RedisWrapper': {
           client: () => this.rclient

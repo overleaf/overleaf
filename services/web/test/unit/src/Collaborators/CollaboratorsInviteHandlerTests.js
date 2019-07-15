@@ -54,6 +54,9 @@ describe('CollaboratorsInviteHandler', function() {
     })()
     this.Crypto = Crypto
     this.CollaboratorsInviteHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': (this.settings = {}),
         '../../models/ProjectInvite': { ProjectInvite: this.ProjectInvite },

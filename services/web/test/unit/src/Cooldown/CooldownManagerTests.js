@@ -25,6 +25,9 @@ describe('CooldownManager', function() {
     this.rclient = { set: sinon.stub(), get: sinon.stub() }
     this.RedisWrapper = { client: () => this.rclient }
     return (this.CooldownManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../infrastructure/RedisWrapper': this.RedisWrapper,
         'logger-sharelatex': { log: sinon.stub() }

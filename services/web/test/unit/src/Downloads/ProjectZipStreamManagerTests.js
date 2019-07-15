@@ -33,6 +33,9 @@ describe('ProjectZipStreamManager', function() {
       append: sinon.stub()
     }
     return (this.ProjectZipStreamManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         archiver: (this.archiver = sinon.stub().returns(this.archive)),
         'logger-sharelatex': (this.logger = {

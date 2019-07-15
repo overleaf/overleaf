@@ -95,6 +95,9 @@ describe('SubscriptionUpdater', function() {
       refreshFeatures: sinon.stub().yields()
     }
     this.SubscriptionUpdater = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/Subscription': {
           Subscription: this.SubscriptionModel

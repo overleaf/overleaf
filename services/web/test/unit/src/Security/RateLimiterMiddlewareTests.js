@@ -33,6 +33,9 @@ describe('RateLimiterMiddleware', function() {
       }
     }
     this.RateLimiterMiddleware = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../infrastructure/RateLimiter': (this.RateLimiter = {}),
         'logger-sharelatex': (this.logger = { warn: sinon.stub() }),

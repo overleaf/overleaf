@@ -25,6 +25,9 @@ const Errors = require('../../../../app/src/Features/Errors/Errors')
 describe('DocumentController', function() {
   beforeEach(function() {
     this.DocumentController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': {
           log() {},

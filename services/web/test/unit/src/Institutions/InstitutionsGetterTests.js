@@ -22,6 +22,9 @@ describe('InstitutionsGetter', function() {
   beforeEach(function() {
     this.UserGetter = { getUserFullEmails: sinon.stub() }
     this.InstitutionsGetter = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../User/UserGetter': this.UserGetter,
         '../UserMembership/UserMembershipsHandler': (this.UserMembershipsHandler = {}),

@@ -20,6 +20,9 @@ describe('DocstoreManager', function() {
   beforeEach(function() {
     this.requestDefaults = sinon.stub().returns((this.request = sinon.stub()))
     this.DocstoreManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         request: {
           defaults: this.requestDefaults

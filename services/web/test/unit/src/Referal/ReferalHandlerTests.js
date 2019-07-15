@@ -24,6 +24,9 @@ describe('Referal handler', function() {
   beforeEach(function() {
     this.User = { findById: sinon.stub() }
     this.handler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': {
           log() {},

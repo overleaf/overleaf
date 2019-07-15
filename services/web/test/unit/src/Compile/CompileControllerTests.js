@@ -61,6 +61,9 @@ describe('CompileController', function() {
       isUserLoggedIn: sinon.stub().returns(true)
     }
     this.CompileController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         request: (this.request = sinon.stub()),

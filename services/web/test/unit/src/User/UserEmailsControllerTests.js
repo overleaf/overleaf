@@ -40,6 +40,9 @@ describe('UserEmailsController', function() {
     this.EmailHelper = { parseEmail: sinon.stub() }
     this.endorseAffiliation = sinon.stub().yields()
     return (this.UserEmailsController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Authentication/AuthenticationController': this
           .AuthenticationController,

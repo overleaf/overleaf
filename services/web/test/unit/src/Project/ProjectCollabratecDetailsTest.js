@@ -34,6 +34,9 @@ describe('ProjectCollabratecDetailsHandler', function() {
     this.ProjectCollabratecDetailsHandler = SandboxedModule.require(
       modulePath,
       {
+        globals: {
+          console: console
+        },
         requires: {
           '../../models/Project': { Project: this.ProjectModel }
         }

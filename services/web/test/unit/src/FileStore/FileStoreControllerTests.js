@@ -14,6 +14,9 @@ describe('FileStoreController', function() {
     this.ProjectLocator = { findElement: sinon.stub() }
     this.Errors = { NotFoundError: sinon.stub() }
     this.controller = SandboxedModule.require(MODULE_PATH, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': (this.logger = {

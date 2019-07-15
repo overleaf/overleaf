@@ -23,6 +23,9 @@ const Errors = require('../../../../app/src/Features/Errors/Errors.js')
 describe('AuthorizationManager', function() {
   beforeEach(function() {
     this.AuthorizationManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Collaborators/CollaboratorsHandler': (this.CollaboratorsHandler = {}),
         '../Project/ProjectGetter': (this.ProjectGetter = {}),

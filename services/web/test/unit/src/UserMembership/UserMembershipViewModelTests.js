@@ -26,6 +26,9 @@ describe('UserMembershipViewModel', function() {
   beforeEach(function() {
     this.UserGetter = { getUserOrUserStubById: sinon.stub() }
     this.UserMembershipViewModel = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         mongojs: mongojs,
         '../User/UserGetter': this.UserGetter

@@ -46,6 +46,9 @@ describe('ProjectHistoryHandler', function() {
     this.callback = sinon.stub()
 
     return (this.ProjectHistoryHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),

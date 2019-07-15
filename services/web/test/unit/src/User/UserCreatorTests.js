@@ -33,6 +33,9 @@ describe('UserCreator', function() {
     this.UserGetter = { getUserByMainEmail: sinon.stub() }
     this.addAffiliation = sinon.stub().yields()
     this.UserCreator = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/User': {
           User: this.UserModel

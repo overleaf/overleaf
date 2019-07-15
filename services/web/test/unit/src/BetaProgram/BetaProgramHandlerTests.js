@@ -33,6 +33,9 @@ describe('BetaProgramHandler', function() {
       save: sinon.stub().callsArgWith(0, null)
     }
     return (this.handler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/User': {
           User: {

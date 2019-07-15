@@ -63,6 +63,9 @@ describe('UserMembershipController', function() {
     return (this.UserMembershipController = SandboxedModule.require(
       modulePath,
       {
+        globals: {
+          console: console
+        },
         requires: {
           '../Authentication/AuthenticationController': this
             .AuthenticationController,

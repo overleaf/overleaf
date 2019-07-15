@@ -27,6 +27,9 @@ describe('RestoreManager', function() {
   beforeEach(function() {
     tk.freeze(Date.now()) // freeze the time for these tests
     this.RestoreManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../infrastructure/FileWriter': (this.FileWriter = {}),
         '../Uploads/FileSystemImportManager': (this.FileSystemImportManager = {}),

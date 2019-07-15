@@ -32,6 +32,9 @@ describe('SudoModeHandler', function() {
     this.rclient = { get: sinon.stub(), set: sinon.stub(), del: sinon.stub() }
     this.RedisWrapper = { client: () => this.rclient }
     return (this.SudoModeHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../infrastructure/RedisWrapper': this.RedisWrapper,
         'logger-sharelatex': (this.logger = {

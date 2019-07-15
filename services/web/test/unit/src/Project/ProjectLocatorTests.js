@@ -66,6 +66,9 @@ describe('ProjectLocator', function() {
       getProject: sinon.stub().callsArgWith(2, null, project)
     }
     return (this.locator = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/Project': { Project },
         '../../models/User': { User: this.User },

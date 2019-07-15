@@ -18,6 +18,9 @@ const SandboxedModule = require('sandboxed-module')
 describe('ContactManager', function() {
   beforeEach(function() {
     this.ContactManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         request: (this.request = sinon.stub()),
         'settings-sharelatex': (this.settings = {

@@ -24,6 +24,9 @@ describe('ProjectGetter', function() {
   beforeEach(function() {
     this.callback = sinon.stub()
     return (this.ProjectGetter = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../infrastructure/mongojs': {
           db: (this.db = {

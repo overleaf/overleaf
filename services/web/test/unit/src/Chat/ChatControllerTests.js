@@ -33,6 +33,9 @@ describe('ChatController', function() {
       getLoggedInUserId: sinon.stub().returns(this.user_id)
     }
     this.ChatController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': {

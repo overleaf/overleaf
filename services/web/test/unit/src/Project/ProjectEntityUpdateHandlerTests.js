@@ -85,6 +85,9 @@ describe('ProjectEntityUpdateHandler', function() {
     return (this.ProjectEntityUpdateHandler = SandboxedModule.require(
       modulePath,
       {
+        globals: {
+          console: console
+        },
         requires: {
           'logger-sharelatex': (this.logger = {
             log: sinon.stub(),

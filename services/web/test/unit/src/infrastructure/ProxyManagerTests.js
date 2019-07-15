@@ -28,6 +28,9 @@ describe('ProxyManager', function() {
       pipe() {}
     })
     this.proxyManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': {

@@ -64,6 +64,9 @@ describe('ExportsController', function() {
       getLoggedInUserId: sinon.stub().returns(this.req.session.user._id)
     }
     return (this.controller = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './ExportsHandler': this.handler,
         'logger-sharelatex': {

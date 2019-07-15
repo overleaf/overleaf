@@ -31,6 +31,9 @@ describe('InstitutionsAPI', function() {
       read: (this.markAsReadIpMatcher = sinon.stub().callsArgWith(1, null))
     }
     this.InstitutionsAPI = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': this.logger,
         'metrics-sharelatex': {

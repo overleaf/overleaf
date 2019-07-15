@@ -22,6 +22,9 @@ describe('CooldownMiddleware', function() {
   beforeEach(function() {
     this.CooldownManager = { isProjectOnCooldown: sinon.stub() }
     return (this.CooldownMiddleware = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './CooldownManager': this.CooldownManager,
         'logger-sharelatex': { log: sinon.stub() }

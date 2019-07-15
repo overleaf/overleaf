@@ -38,6 +38,9 @@ describe('BrandVariationsHandler', function() {
     }
     this.V1Api = { request: sinon.stub() }
     this.BrandVariationsHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': this.logger,

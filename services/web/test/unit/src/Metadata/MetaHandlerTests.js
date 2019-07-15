@@ -54,6 +54,9 @@ describe('MetaHandler', function() {
     }
 
     return (this.MetaHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../DocumentUpdater/DocumentUpdaterHandler': this

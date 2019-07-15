@@ -37,6 +37,9 @@ describe('BetaProgramController', function() {
       }
     }
     this.BetaProgramController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './BetaProgramHandler': (this.BetaProgramHandler = {
           optIn: sinon.stub(),

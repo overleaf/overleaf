@@ -42,6 +42,9 @@ describe('TokenAccessController', function() {
     }
     this.userId = ObjectId()
     this.TokenAccessController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Project/ProjectController': (this.ProjectController = {}),
         '../Authentication/AuthenticationController': (this.AuthenticationController = {}),

@@ -26,6 +26,9 @@ const SandboxedModule = require('sandboxed-module')
 describe('LockManager - getting the lock', function() {
   beforeEach(function() {
     this.LockManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': {
           log() {}

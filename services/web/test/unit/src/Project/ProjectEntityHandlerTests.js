@@ -61,6 +61,9 @@ describe('ProjectEntityHandler', function() {
     this.callback = sinon.stub()
 
     return (this.ProjectEntityHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),

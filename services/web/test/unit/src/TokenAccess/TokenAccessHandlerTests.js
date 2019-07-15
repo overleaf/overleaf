@@ -34,6 +34,9 @@ describe('TokenAccessHandler', function() {
     this.userId = ObjectId()
     this.req = {}
     return (this.TokenAccessHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/Project': { Project: (this.Project = {}) },
         'settings-sharelatex': (this.settings = {}),

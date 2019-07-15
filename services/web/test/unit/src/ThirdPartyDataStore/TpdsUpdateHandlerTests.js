@@ -51,6 +51,9 @@ describe('TpdsUpdateHandler', function() {
       isProjectOnCooldown: sinon.stub().callsArgWith(1, null, false)
     }
     this.handler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './UpdateMerger': this.updateMerger,
         './Editor/EditorController': this.editorController,

@@ -116,6 +116,9 @@ describe('ProjectController', function() {
     this.getUserAffiliations = sinon.stub().callsArgWith(1, null, [])
 
     this.ProjectController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': {

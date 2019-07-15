@@ -64,6 +64,9 @@ describe('InstitutionsManager', function() {
     this.Mongo = { ObjectId: sinon.stub().returnsArg(0) }
 
     return (this.InstitutionsManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': this.logger,
         './InstitutionsAPI': {

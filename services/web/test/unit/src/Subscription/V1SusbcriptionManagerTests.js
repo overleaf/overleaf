@@ -26,6 +26,9 @@ const { expect } = require('chai')
 describe('V1SubscriptionManager', function() {
   beforeEach(function() {
     this.V1SubscriptionManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../User/UserGetter': (this.UserGetter = {}),
         'logger-sharelatex': {

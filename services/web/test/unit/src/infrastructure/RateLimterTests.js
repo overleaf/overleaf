@@ -69,6 +69,9 @@ describe('RateLimiter', function() {
         return sinon.stub().callsArgWith(1, null, 0, 22)
       }
       return (this.limiter = SandboxedModule.require(modulePath, {
+        globals: {
+          console: console
+        },
         requires: this.requires
       }))
     })
@@ -104,6 +107,9 @@ describe('RateLimiter', function() {
         return sinon.stub().callsArgWith(1, null, 4000, 0)
       }
       return (this.limiter = SandboxedModule.require(modulePath, {
+        globals: {
+          console: console
+        },
         requires: this.requires
       }))
     })
@@ -144,6 +150,9 @@ describe('RateLimiter', function() {
         return sinon.stub().callsArgWith(1, new Error('woops'))
       }
       return (this.limiter = SandboxedModule.require(modulePath, {
+        globals: {
+          console: console
+        },
         requires: this.requires
       }))
     })

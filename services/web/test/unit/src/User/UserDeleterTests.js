@@ -62,6 +62,9 @@ describe('UserDeleter', function() {
     }
 
     return (this.UserDeleter = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/User': {
           User: this.User

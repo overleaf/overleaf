@@ -23,6 +23,9 @@ describe('ContactController', function() {
   beforeEach(function() {
     this.AuthenticationController = { getLoggedInUserId: sinon.stub() }
     this.ContactController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),

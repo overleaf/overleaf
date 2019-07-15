@@ -26,6 +26,9 @@ describe('FileTypeManager', function() {
     this.ced = sinon.stub()
     this.DocumentHelper = { getEncodingFromTexContent: sinon.stub() }
     return (this.FileTypeManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         fs: this.fs,
         'is-utf8': this.isUtf8

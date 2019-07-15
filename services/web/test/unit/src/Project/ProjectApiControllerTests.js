@@ -20,6 +20,9 @@ describe('Project api controller', function() {
   beforeEach(function() {
     this.ProjectDetailsHandler = { getDetails: sinon.stub() }
     this.controller = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
         'logger-sharelatex': {

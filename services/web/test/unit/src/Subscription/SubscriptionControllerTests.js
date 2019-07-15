@@ -91,6 +91,9 @@ describe('SubscriptionController', function() {
     this.GeoIpLookup = { getCurrencyCode: sinon.stub() }
     this.UserGetter = { getUser: sinon.stub().callsArgWith(2, null, this.user) }
     this.SubscriptionController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Authentication/AuthenticationController': this
           .AuthenticationController,

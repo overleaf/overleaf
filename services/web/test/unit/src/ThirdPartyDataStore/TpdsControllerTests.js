@@ -22,6 +22,9 @@ describe('TpdsController', function() {
   beforeEach(function() {
     this.TpdsUpdateHandler = {}
     this.TpdsController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './TpdsUpdateHandler': this.TpdsUpdateHandler,
         './UpdateMerger': (this.UpdateMerger = {}),

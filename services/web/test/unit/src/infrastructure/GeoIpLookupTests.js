@@ -33,6 +33,9 @@ describe('GeoIpLookup', function() {
     }
     this.request = { get: sinon.stub() }
     this.GeoIpLookup = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         request: this.request,
         'settings-sharelatex': this.settings,

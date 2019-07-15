@@ -65,6 +65,9 @@ describe('TemplatesManager', function() {
     this.Project = { update: sinon.stub().callsArgWith(3, null) }
     this.FileWriter = { ensureDumpFolderExists: sinon.stub().callsArg(0) }
     this.TemplatesManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Uploads/ProjectUploadManager': this.ProjectUploadManager,
         '../Project/ProjectOptionsHandler': this.ProjectOptionsHandler,

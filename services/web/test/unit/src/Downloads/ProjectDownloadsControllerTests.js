@@ -30,6 +30,9 @@ describe('ProjectDownloadsController', function() {
     return (this.ProjectDownloadsController = SandboxedModule.require(
       modulePath,
       {
+        globals: {
+          console: console
+        },
         requires: {
           './ProjectZipStreamManager': (this.ProjectZipStreamManager = {}),
           '../Project/ProjectGetter': (this.ProjectGetter = {}),

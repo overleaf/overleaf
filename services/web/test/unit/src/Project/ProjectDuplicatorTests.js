@@ -148,6 +148,9 @@ describe('ProjectDuplicator', function() {
     this.ProjectDeleter = { deleteProject: sinon.stub().callsArgWith(1, null) }
 
     return (this.duplicator = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/Project': { Project: this.Project },
         '../DocumentUpdater/DocumentUpdaterHandler': this

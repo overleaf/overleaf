@@ -25,6 +25,9 @@ const { ObjectId } = require('mongojs')
 describe('CollaboratorsController', function() {
   beforeEach(function() {
     this.CollaboratorsController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './CollaboratorsHandler': (this.CollaboratorsHandler = {}),
         '../Editor/EditorRealTimeController': (this.EditorRealTimeController = {}),

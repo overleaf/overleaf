@@ -32,6 +32,9 @@ describe('AnnouncementsHandler', function() {
     this.BlogHandler = { getLatestAnnouncements: sinon.stub() }
     this.settings = {}
     return (this.handler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
         '../Blog/BlogHandler': this.BlogHandler,

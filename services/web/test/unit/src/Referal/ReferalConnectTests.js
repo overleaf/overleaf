@@ -22,6 +22,9 @@ const modulePath = require('path').join(
 describe('Referal connect middle wear', function() {
   beforeEach(function() {
     return (this.connect = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': {
           log() {},

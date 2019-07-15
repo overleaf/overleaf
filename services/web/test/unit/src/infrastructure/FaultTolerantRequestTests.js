@@ -14,6 +14,9 @@ describe('FaultTolerantRequest', function() {
       err: sinon.stub()
     }
     this.FaultTolerantRequest = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         requestretry: this.request,
         'logger-sharelatex': this.logger

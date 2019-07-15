@@ -46,6 +46,9 @@ describe('UserUpdater', function() {
     this.refreshFeatures = sinon.stub().yields()
     this.NewsletterManager = { changeEmail: sinon.stub() }
     this.UserUpdater = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': this.logger,
         '../../infrastructure/mongojs': this.mongojs,

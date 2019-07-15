@@ -32,6 +32,9 @@ describe('ProjectOptionsHandler', function() {
     this.projectModel.update = sinon.spy()
 
     return (this.handler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/Project': { Project: this.projectModel },
         'settings-sharelatex': {

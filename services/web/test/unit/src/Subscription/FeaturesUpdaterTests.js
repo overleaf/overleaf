@@ -23,6 +23,9 @@ describe('FeaturesUpdater', function() {
     this.user_id = ObjectId().toString()
 
     return (this.FeaturesUpdater = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './UserFeaturesUpdater': (this.UserFeaturesUpdater = {}),
         './SubscriptionLocator': (this.SubscriptionLocator = {}),

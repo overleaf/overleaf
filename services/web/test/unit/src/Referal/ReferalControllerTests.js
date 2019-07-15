@@ -22,6 +22,9 @@ const modulePath = require('path').join(
 describe('Referal controller', () =>
   beforeEach(function() {
     return (this.controller = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': {
           log() {},

@@ -32,6 +32,9 @@ describe('FileSystemImportManager', function() {
       convertTexEncodingsToUtf8: sinon.stub().returnsArg(0)
     }
     return (this.FileSystemImportManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         fs: (this.fs = {}),
         '../Editor/EditorController': (this.EditorController = {}),

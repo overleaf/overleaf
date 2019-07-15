@@ -89,6 +89,9 @@ describe('ProjectCreationHandler', function() {
     this.AnalyticsManager = { recordEvent: sinon.stub() }
 
     return (this.handler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/User': {
           User: this.User

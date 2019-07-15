@@ -30,6 +30,9 @@ describe('AuthorizationMiddleware', function() {
       isUserLoggedIn: sinon.stub().returns(true)
     }
     this.AuthorizationMiddleware = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './AuthorizationManager': (this.AuthorizationManager = {}),
         'logger-sharelatex': { log() {} },

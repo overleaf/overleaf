@@ -72,6 +72,9 @@ describe('ProjectDeleter', function() {
         .yields(null, ['member-id-1', 'member-id-2'])
     }
     return (this.deleter = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Editor/EditorController': this.editorController,
         '../../models/Project': { Project: this.Project },

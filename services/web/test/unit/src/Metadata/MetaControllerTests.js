@@ -27,6 +27,9 @@ describe('MetaController', function() {
       getMetaForDoc: sinon.stub()
     }
     return (this.MetadataController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': {
           log: sinon.stub(),

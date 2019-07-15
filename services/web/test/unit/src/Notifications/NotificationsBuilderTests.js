@@ -34,6 +34,9 @@ describe('NotificationsBuilder', function() {
       .returns(this.stubResponse)
       .callsArgWith(1, null, response, this.body)
     return (this.controller = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './NotificationsHandler': this.handler,
         'settings-sharelatex': this.settings,

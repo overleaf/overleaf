@@ -28,6 +28,9 @@ describe('Subscription Locator Tests', function() {
       find: sinon.stub()
     }
     return (this.SubscriptionLocator = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/Subscription': {
           Subscription: this.Subscription

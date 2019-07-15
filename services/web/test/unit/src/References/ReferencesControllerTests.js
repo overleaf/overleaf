@@ -23,6 +23,9 @@ describe('ReferencesController', function() {
   beforeEach(function() {
     this.projectId = '2222'
     this.controller = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': {
           log() {},

@@ -33,6 +33,9 @@ describe('BlogController', function() {
     this.request = { get: sinon.stub() }
     this.ErrorController = {}
     this.BlogController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': {

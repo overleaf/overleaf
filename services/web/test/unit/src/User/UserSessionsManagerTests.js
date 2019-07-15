@@ -63,6 +63,9 @@ describe('UserSessionsManager', function() {
       }
     }
     return (this.UserSessionsManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': this.logger,
         'settings-sharelatex': this.settings,

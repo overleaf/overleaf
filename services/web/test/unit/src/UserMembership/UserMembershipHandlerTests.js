@@ -68,6 +68,9 @@ describe('UserMembershipHandler', function() {
       create: sinon.stub().yields(null, this.publisher)
     }
     return (this.UserMembershipHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './UserMembershipViewModel': this.UserMembershipViewModel,
         '../User/UserGetter': this.UserGetter,

@@ -51,6 +51,9 @@ describe('InstitutionsController', function() {
     this.addAffiliation = sinon.stub().callsArgWith(3, null)
     this.refreshFeatures = sinon.stub().yields(null)
     this.InstitutionsController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': this.logger,
         '../User/UserGetter': {

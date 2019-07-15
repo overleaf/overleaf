@@ -63,6 +63,9 @@ describe('FileStoreHandler', function() {
       computeHash: sinon.stub().callsArgWith(1, null, this.hashValue)
     }
     this.handler = SandboxedModule.require(MODULE_PATH, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         request: this.request,

@@ -23,6 +23,9 @@ const BufferedStream = require('bufferedstream')
 describe('UpdateMerger :', function() {
   beforeEach(function() {
     this.updateMerger = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         fs: (this.fs = { unlink: sinon.stub().callsArgWith(1) }),
         'logger-sharelatex': {

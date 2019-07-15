@@ -28,6 +28,9 @@ describe('LoginRateLimiter', function() {
     }
 
     return (this.LoginRateLimiter = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../infrastructure/RateLimiter': this.RateLimiter
       }

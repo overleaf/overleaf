@@ -24,6 +24,9 @@ describe('HistoryManager', function() {
       getLoggedInUserId: sinon.stub().returns(this.user_id)
     }
     this.HistoryManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         request: (this.request = sinon.stub()),
         'settings-sharelatex': (this.settings = {}),

@@ -35,6 +35,9 @@ describe('ClsiManager', function() {
       checkRecoursesForProblems: sinon.stub().callsArgWith(1)
     }
     this.ClsiManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': (this.settings = {
           apis: {

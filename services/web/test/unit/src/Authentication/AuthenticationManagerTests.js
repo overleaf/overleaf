@@ -27,6 +27,9 @@ describe('AuthenticationManager', function() {
   beforeEach(function() {
     this.settings = { security: { bcryptRounds: 12 } }
     this.AuthenticationManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/User': {
           User: (this.User = {})

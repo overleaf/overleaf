@@ -29,6 +29,9 @@ describe('SudoModeMiddleware', function() {
       setRedirectInSession: sinon.stub()
     }
     return (this.SudoModeMiddleware = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './SudoModeHandler': this.SudoModeHandler,
         '../Authentication/AuthenticationController': this

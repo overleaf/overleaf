@@ -18,6 +18,9 @@ describe('AnalyticsManager', function() {
     this.backgroundRequest = sinon.stub().yields()
     this.request = sinon.stub().yields()
     this.AnalyticsManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         '../../infrastructure/FaultTolerantRequest': {

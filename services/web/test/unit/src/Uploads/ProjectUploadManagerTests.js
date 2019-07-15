@@ -36,6 +36,9 @@ describe('ProjectUploadManager', function() {
       rootFolder: [{ _id: this.root_folder_id }]
     }
     this.ProjectUploadManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './FileSystemImportManager': (this.FileSystemImportManager = {}),
         './ArchiveManager': (this.ArchiveManager = { promises: {} }),

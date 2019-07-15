@@ -27,6 +27,9 @@ describe('EmailHandler', function() {
     this.EmailBuilder = { buildEmail: sinon.stub() }
     this.EmailSender = { sendEmail: sinon.stub() }
     this.EmailHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './EmailBuilder': this.EmailBuilder,
         './EmailSender': this.EmailSender,

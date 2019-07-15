@@ -31,6 +31,9 @@ describe('EmailBuilder', function() {
       brandPrefix: ''
     }
     return (this.EmailBuilder = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': {

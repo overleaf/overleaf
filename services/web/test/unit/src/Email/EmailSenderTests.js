@@ -42,6 +42,9 @@ describe('EmailSender', function() {
     this.ses = { createTransport: () => this.sesClient }
 
     this.sender = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         nodemailer: this.ses,
         'nodemailer-mandrill-transport': {},

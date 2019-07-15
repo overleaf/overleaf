@@ -36,6 +36,9 @@ describe('InactiveProjectManager', function() {
     this.ProjectGetter = { getProject: sinon.stub() }
     this.TrackChangesManager = { archiveProject: sinon.stub() }
     this.InactiveProjectManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': {

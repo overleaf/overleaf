@@ -20,6 +20,9 @@ const SandboxedModule = require('sandboxed-module')
 describe('doc lines comparitor', function() {
   beforeEach(function() {
     return (this.comparitor = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': { log() {} }
       }

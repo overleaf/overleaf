@@ -21,6 +21,9 @@ const Errors = require('../../../../app/src/Features/Errors/Errors')
 describe('EditorHttpController', function() {
   beforeEach(function() {
     this.EditorHttpController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
         '../Project/ProjectDeleter': (this.ProjectDeleter = {}),

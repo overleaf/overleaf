@@ -83,6 +83,9 @@ describe('TeamInvitesHandler', function() {
     this.Subscription.findOne.yields(null, this.subscription)
 
     this.TeamInvitesHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': { log() {} },
         crypto: this.crypto,

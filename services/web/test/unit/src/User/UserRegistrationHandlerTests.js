@@ -40,6 +40,9 @@ describe('UserRegistrationHandler', function() {
     this.EmailHandler = { sendEmail: sinon.stub().callsArgWith(2) }
     this.OneTimeTokenHandler = { getNewToken: sinon.stub() }
     this.handler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/User': { User: this.User },
         './UserGetter': this.UserGetter,

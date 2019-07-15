@@ -26,6 +26,9 @@ const EmailHelper = require('../../../../app/src/Features/Helpers/EmailHelper')
 describe('UserEmailsConfirmationHandler', function() {
   beforeEach(function() {
     this.UserEmailsConfirmationHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': (this.settings = {
           siteUrl: 'emails.example.com'

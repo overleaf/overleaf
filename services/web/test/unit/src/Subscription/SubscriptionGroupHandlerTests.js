@@ -86,6 +86,9 @@ describe('SubscriptionGroupHandler', function() {
     }
 
     return (this.Handler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': {
           log() {}

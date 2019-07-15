@@ -29,6 +29,9 @@ describe('PublishersGetter', function() {
     }
 
     this.PublishersGetter = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../User/UserGetter': this.UserGetter,
         '../UserMembership/UserMembershipsHandler': (this.UserMembershipsHandler = {

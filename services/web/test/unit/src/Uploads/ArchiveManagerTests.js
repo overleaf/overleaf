@@ -46,6 +46,9 @@ describe('ArchiveManager', function() {
     this.zipfile.close = sinon.stub()
 
     this.ArchiveManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         yauzl: (this.yauzl = {
           open: sinon.stub().callsArgWith(2, null, this.zipfile)

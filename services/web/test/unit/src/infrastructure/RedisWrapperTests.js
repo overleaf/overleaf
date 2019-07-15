@@ -23,6 +23,9 @@ describe('RedisWrapper', function() {
     this.settings = { redis: {} }
     this.redis = { createClient: sinon.stub() }
     return (this.RedisWrapper = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'settings-sharelatex': this.settings,
         'redis-sharelatex': this.redis

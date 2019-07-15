@@ -48,6 +48,9 @@ describe('UserGetter', function() {
     this.getUserAffiliations = sinon.stub().callsArgWith(1, null, [])
 
     return (this.UserGetter = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         'logger-sharelatex': {
           log() {}

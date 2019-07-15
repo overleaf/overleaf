@@ -29,6 +29,9 @@ describe('UserHandler', function() {
     }
 
     return (this.UserHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Subscription/TeamInvitesHandler': this.TeamInvitesHandler
       }

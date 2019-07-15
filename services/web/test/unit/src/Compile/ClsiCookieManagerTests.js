@@ -70,6 +70,9 @@ describe('ClsiCookieManager', function() {
       })
     }
     return (this.ClsiCookieManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: this.requires
     })())
   })
@@ -196,6 +199,9 @@ describe('ClsiCookieManager', function() {
     it('should not set the server id if clsiCookies are not enabled', function(done) {
       delete this.settings.clsiCookie.key
       this.ClsiCookieManager = SandboxedModule.require(modulePath, {
+        globals: {
+          console: console
+        },
         requires: this.requires
       })()
       return this.ClsiCookieManager.setServerId(
@@ -236,6 +242,9 @@ describe('ClsiCookieManager', function() {
         .withArgs('clsi_cookie_secondary')
         .returns(this.redis_secondary)
       this.ClsiCookieManager = SandboxedModule.require(modulePath, {
+        globals: {
+          console: console
+        },
         requires: this.requires
       })()
       this.ClsiCookieManager._parseServerIdFromResponse = sinon
@@ -285,6 +294,9 @@ describe('ClsiCookieManager', function() {
     it('should return empty cookie jar if clsiCookies are not enabled', function(done) {
       delete this.settings.clsiCookie.key
       this.ClsiCookieManager = SandboxedModule.require(modulePath, {
+        globals: {
+          console: console
+        },
         requires: this.requires
       })()
       return this.ClsiCookieManager.getCookieJar(this.project_id, function(

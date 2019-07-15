@@ -27,6 +27,9 @@ describe('PasswordResetHandler', function() {
     }
     this.V1Api = { request: sinon.stub() }
     this.PasswordResetHandler = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../User/UserGetter': this.UserGetter,
         '../Security/OneTimeTokenHandler': this.OneTimeTokenHandler,

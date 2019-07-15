@@ -44,6 +44,9 @@ describe('CollaboratorsInviteController', function() {
     }
 
     this.CollaboratorsInviteController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '../Subscription/LimitationsManager': this.LimitationsManager,

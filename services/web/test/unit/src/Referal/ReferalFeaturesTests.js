@@ -22,6 +22,9 @@ const modulePath = require('path').join(
 describe('ReferalFeatures', function() {
   beforeEach(function() {
     this.ReferalFeatures = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../../models/User': {
           User: (this.User = {})

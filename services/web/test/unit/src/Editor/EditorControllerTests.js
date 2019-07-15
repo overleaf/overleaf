@@ -45,6 +45,9 @@ describe('EditorController', function() {
     this.callback = sinon.stub()
 
     return (this.EditorController = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
         '../Project/ProjectOptionsHandler': (this.ProjectOptionsHandler = {
