@@ -7,7 +7,7 @@ HealthCheckManager = require "./HealthCheckManager"
 
 module.exports = WebsocketLoadBalancer =
 	rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub)
-	rclientSubList: RedisClientManager.createClientList(Settings.redis.pubsub, Settings.redis.unusedpubsub)
+	rclientSubList: RedisClientManager.createClientList(Settings.redis.pubsub)
 
 	emitToRoom: (room_id, message, payload...) ->
 		if !room_id?
