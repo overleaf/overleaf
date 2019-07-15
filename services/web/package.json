@@ -88,7 +88,7 @@
     "passport-oauth2": "^1.4.0",
     "passport-oauth2-refresh": "^1.0.0",
     "passport-orcid": "0.0.3",
-    "passport-saml": "^0.15.0",
+    "passport-saml": "^1.1.0",
     "passport-twitter": "^1.0.4",
     "pug": "^2.0.0-beta6",
     "react": "^15.4.2",
