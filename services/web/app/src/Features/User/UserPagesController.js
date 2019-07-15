@@ -126,15 +126,13 @@ module.exports = UserPagesController = {
       delete req.session.ssoError
     }
     logger.log({ user: user_id }, 'loading settings page')
-    const shouldAllowEditingDetails =
-      !__guard__(
-        Settings != null ? Settings.ldap : undefined,
-        x => x.updateUserDetailsOnLogin
-      ) &&
-      !__guard__(
-        Settings != null ? Settings.saml : undefined,
-        x1 => x1.updateUserDetailsOnLogin
-      )
+    let shouldAllowEditingDetails = true
+    if (Settings.ldap && Settings.ldap.updateUserDetailsOnLogin) {
+      shouldAllowEditingDetails = false
+    }
+    if (Settings.saml && Settings.saml.updateUserDetailsOnLogin) {
+      shouldAllowEditingDetails = false
+    }
     const oauthProviders = Settings.oauthProviders || {}
 
     return UserGetter.getUser(user_id, function(err, user) {

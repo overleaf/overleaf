@@ -8,7 +8,6 @@
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -150,12 +149,7 @@ var makeAffiliationRequest = function(requestOptions, callback) {
   if (callback == null) {
     callback = function(error) {}
   }
-  if (
-    !__guard__(
-      __guard__(settings != null ? settings.apis : undefined, x1 => x1.v1),
-      x => x.url
-    )
-  ) {
+  if (!settings.apis.v1.url) {
     return callback(null)
   } // service is not configured
   if (!requestOptions.extraSuccessStatusCodes) {
@@ -214,9 +208,3 @@ var makeAffiliationRequest = function(requestOptions, callback) {
     logger
   )
 )
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}

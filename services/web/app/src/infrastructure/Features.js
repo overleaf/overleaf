@@ -6,7 +6,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -44,25 +43,11 @@ module.exports = Features = {
       case 'view-templates':
         return Settings.overleaf == null
       case 'affiliations':
-        return (
-          __guard__(
-            __guard__(
-              Settings != null ? Settings.apis : undefined,
-              x1 => x1.v1
-            ),
-            x => x.url
-          ) != null
-        )
+        return !!Settings.apis.v1.url
       case 'redirect-sl':
         return Settings.redirectToV2 != null
       default:
         throw new Error(`unknown feature: ${feature}`)
     }
   }
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

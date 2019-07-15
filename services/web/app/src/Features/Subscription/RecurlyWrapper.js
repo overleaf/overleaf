@@ -26,11 +26,7 @@ const logger = require('logger-sharelatex')
 const Async = require('async')
 
 module.exports = RecurlyWrapper = {
-  apiUrl:
-    __guard__(
-      Settings.apis != null ? Settings.apis.recurly : undefined,
-      x => x.url
-    ) || 'https://api.recurly.com/v2',
+  apiUrl: Settings.apis.recurly.url || 'https://api.recurly.com/v2',
 
   _paypal: {
     checkAccountExists(cache, next) {

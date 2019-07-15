@@ -37,7 +37,8 @@ describe('ProjectController', function() {
           url: 'chat.com'
         }
       },
-      siteUrl: 'mysite.com'
+      siteUrl: 'mysite.com',
+      algolia: {}
     }
     this.brandVariationDetails = {
       id: '12',

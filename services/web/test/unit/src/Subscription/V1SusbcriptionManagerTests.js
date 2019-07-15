@@ -39,7 +39,8 @@ describe('V1SubscriptionManager', function() {
         'settings-sharelatex': (this.Settings = {
           apis: {
             v1: {
-              host: (this.host = 'http://overleaf.example.com')
+              host: (this.host = 'http://overleaf.example.com'),
+              url: 'v1.url'
             }
           },
           v1GrandfatheredFeaturesUidCutoff: 10,

@@ -154,7 +154,7 @@ module.exports = V1SubscriptionManager = {
     if (callback == null) {
       callback = function(err, body, v1Id) {}
     }
-    if (!__guard__(settings != null ? settings.apis : undefined, x => x.v1)) {
+    if (!settings.apis.v1.url) {
       return callback(null, null)
     }
 

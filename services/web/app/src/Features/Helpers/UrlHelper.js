@@ -6,7 +6,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -16,12 +15,7 @@ const Settings = require('settings-sharelatex')
 module.exports = UrlHelper = {
   wrapUrlWithProxy(url) {
     // TODO: Consider what to do for Community and Enterprise edition?
-    if (
-      __guard__(
-        Settings.apis != null ? Settings.apis.linkedUrlProxy : undefined,
-        x => x.url
-      ) == null
-    ) {
+    if (!Settings.apis.linkedUrlProxy.url) {
       throw new Error('no linked url proxy configured')
     }
     return `${Settings.apis.linkedUrlProxy.url}?url=${encodeURIComponent(url)}`
@@ -33,9 +27,4 @@ module.exports = UrlHelper = {
     }
     return url
   }
-}
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

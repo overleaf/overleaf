@@ -94,14 +94,10 @@ if (!Settings.useMinifiedJs) {
   }
 }
 
-const cdnAvailable =
-  __guard__(Settings.cdn != null ? Settings.cdn.web : undefined, x => x.host) !=
-  null
+const cdnAvailable = Settings.cdn && Settings.cdn.web && !!Settings.cdn.web.host
+
 const darkCdnAvailable =
-  __guard__(
-    Settings.cdn != null ? Settings.cdn.web : undefined,
-    x1 => x1.darkHost
-  ) != null
+  Settings.cdn && Settings.cdn.web && !!Settings.cdn.web.darkHost
 
 module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(function(req, res, next) {
@@ -167,15 +163,9 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
     const isLive = !isDark && !isSmoke
 
     if (cdnAvailable && isLive && !cdnBlocked) {
-      staticFilesBase = __guard__(
-        Settings.cdn != null ? Settings.cdn.web : undefined,
-        x6 => x6.host
-      )
+      staticFilesBase = Settings.cdn.web.host
     } else if (darkCdnAvailable && isDark) {
-      staticFilesBase = __guard__(
-        Settings.cdn != null ? Settings.cdn.web : undefined,
-        x7 => x7.darkHost
-      )
+      staticFilesBase = Settings.cdn.web.darkHost
     } else {
       staticFilesBase = ''
     }
@@ -428,10 +418,7 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
         delete req.session.justLoggedIn
       }
     }
-    res.locals.gaToken = __guard__(
-      Settings.analytics != null ? Settings.analytics.ga : undefined,
-      x2 => x2.token
-    )
+    res.locals.gaToken = Settings.analytics && Settings.analytics.ga.token
     res.locals.tenderUrl = Settings.tenderUrl
     res.locals.sentrySrc =
       Settings.sentry != null ? Settings.sentry.src : undefined

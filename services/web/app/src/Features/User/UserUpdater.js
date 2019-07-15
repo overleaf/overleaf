@@ -10,7 +10,6 @@
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -193,12 +192,7 @@ module.exports = UserUpdater = {
   },
 
   updateEmailAddressInV1(userId, newEmail, callback) {
-    if (
-      __guard__(
-        Settings.apis != null ? Settings.apis.v1 : undefined,
-        x => x.url
-      ) == null
-    ) {
+    if (!Settings.apis.v1.url) {
       return callback()
     }
     return UserGetter.getUser(userId, { 'overleaf.id': 1, emails: 1 }, function(
@@ -331,9 +325,3 @@ module.exports = UserUpdater = {
 ].map(method =>
   metrics.timeAsyncMethod(UserUpdater, method, 'mongo.UserUpdater', logger)
 )
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}

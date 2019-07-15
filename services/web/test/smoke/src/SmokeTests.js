@@ -8,7 +8,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -21,15 +20,8 @@ if (Object.prototype.should == null) {
 }
 const { expect } = chai
 const Settings = require('settings-sharelatex')
-const ownPort =
-  __guard__(
-    Settings.internal != null ? Settings.internal.web : undefined,
-    x => x.port
-  ) ||
-  Settings.port ||
-  3000
-const port =
-  (Settings.web != null ? Settings.web.web_router_port : undefined) || ownPort // send requests to web router if this is the api process
+let ownPort = Settings.internal.web.port || Settings.port || 3000
+const port = Settings.web.web_router_port || ownPort // send requests to web router if this is the api process
 const cookeFilePath = `/tmp/smoke-test-cookie-${ownPort}-to-${port}.txt`
 const buildUrl = path =>
   ` -b ${cookeFilePath} --resolve 'smoke${
@@ -227,9 +219,3 @@ curl -H "X-Forwarded-Proto: https" -v ${buildUrl('project')}\
     })
   })
 })
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}

@@ -28,7 +28,8 @@ describe('BlogController', function() {
         blog: {
           url: 'http://blog.sharelatex.env'
         }
-      }
+      },
+      cdn: { web: { host: null } }
     }
     this.request = { get: sinon.stub() }
     this.ErrorController = {}

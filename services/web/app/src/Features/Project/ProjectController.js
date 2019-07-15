@@ -427,14 +427,9 @@ module.exports = ProjectController = {
           }
 
           if (
-            __guard__(
-              Settings != null ? Settings.algolia : undefined,
-              x => x.app_id
-            ) != null &&
-            __guard__(
-              Settings != null ? Settings.algolia : undefined,
-              x1 => x1.read_only_api_key
-            ) != null
+            Settings.algolia &&
+            Settings.algolia.app_id &&
+            Settings.algolia.read_only_api_key
           ) {
             viewModel.showUserDetailsArea = true
             viewModel.algolia_api_key = Settings.algolia.read_only_api_key

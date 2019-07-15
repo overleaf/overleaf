@@ -35,7 +35,8 @@ describe('AuthorizationManager', function() {
         '../Errors/Errors': Errors,
         '../TokenAccess/TokenAccessHandler': (this.TokenAccessHandler = {
           isValidToken: sinon.stub().callsArgWith(2, null, false, false)
-        })
+        }),
+        'settings-sharelatex': { passwordStrengthOptions: {} }
       }
     })
     this.user_id = 'user-id-1'

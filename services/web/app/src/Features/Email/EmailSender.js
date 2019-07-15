@@ -10,7 +10,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -41,86 +40,41 @@ let client = {
     return callback()
   }
 }
-if (
-  __guard__(
-    __guard__(
-      Settings != null ? Settings.email : undefined,
-      x1 => x1.parameters
-    ),
-    x => x.AWSAccessKeyID
-  ) != null ||
-  __guard__(Settings != null ? Settings.email : undefined, x2 => x2.driver) ===
-    'ses'
-) {
-  logger.log('using aws ses for email')
-  nm_client = nodemailer.createTransport(
-    sesTransport(Settings.email.parameters)
-  )
-} else if (
-  __guard__(
-    __guard__(
-      Settings != null ? Settings.email : undefined,
-      x4 => x4.parameters
-    ),
-    x3 => x3.sendgridApiKey
-  ) != null
-) {
-  logger.log('using sendgrid for email')
-  nm_client = nodemailer.createTransport(
-    sgTransport({
-      auth: {
-        api_key: __guard__(
-          __guard__(
-            Settings != null ? Settings.email : undefined,
-            x6 => x6.parameters
-          ),
-          x5 => x5.sendgridApiKey
-        )
-      }
-    })
-  )
-} else if (
-  __guard__(
-    __guard__(
-      Settings != null ? Settings.email : undefined,
-      x8 => x8.parameters
-    ),
-    x7 => x7.MandrillApiKey
-  ) != null
-) {
-  logger.log('using mandril for email')
-  nm_client = nodemailer.createTransport(
-    mandrillTransport({
-      auth: {
-        apiKey: __guard__(
-          __guard__(
-            Settings != null ? Settings.email : undefined,
-            x10 => x10.parameters
-          ),
-          x9 => x9.MandrillApiKey
-        )
-      }
-    })
-  )
-} else if (
-  __guard__(
-    Settings != null ? Settings.email : undefined,
-    x11 => x11.parameters
-  ) != null
-) {
-  logger.log('using smtp for email')
-  const smtp = _.pick(
-    __guard__(
-      Settings != null ? Settings.email : undefined,
-      x12 => x12.parameters
-    ),
-    'host',
-    'port',
-    'secure',
-    'auth',
-    'ignoreTLS'
-  )
-  nm_client = nodemailer.createTransport(smtp)
+if (Settings.email && Settings.email.parameters) {
+  let emailParameters = Settings.email.parameters
+  if (emailParameters.AWSAccessKeyID || Settings.email.driver === 'ses') {
+    logger.log('using aws ses for email')
+    nm_client = nodemailer.createTransport(sesTransport(emailParameters))
+  } else if (emailParameters.sendgridApiKey) {
+    logger.log('using sendgrid for email')
+    nm_client = nodemailer.createTransport(
+      sgTransport({
+        auth: {
+          api_key: emailParameters.sendgridApiKey
+        }
+      })
+    )
+  } else if (emailParameters.MandrillApiKey) {
+    logger.log('using mandril for email')
+    nm_client = nodemailer.createTransport(
+      mandrillTransport({
+        auth: {
+          apiKey: emailParameters.MandrillApiKey
+        }
+      })
+    )
+  } else {
+    logger.log('using smtp for email')
+    const smtp = _.pick(
+      emailParameters,
+      'host',
+      'port',
+      'secure',
+      'auth',
+      'ignoreTLS'
+    )
+    nm_client = nodemailer.createTransport(smtp)
+  }
 } else {
   logger.warn(
     'Email transport and/or parameters not defined. No emails will be sent.'
@@ -199,10 +153,4 @@ module.exports = {
       })
     })
   }
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

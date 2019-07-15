@@ -56,22 +56,14 @@ module.exports = BlogController = {
       data = data.trim()
       try {
         data = JSON.parse(data)
-        if (
-          __guard__(
-            settings.cdn != null ? settings.cdn.web : undefined,
-            x => x.host
-          ) != null
-        ) {
+        if (settings.cdn && settings.cdn.web && settings.cdn.web.host) {
           if (data != null) {
             data.content = __guard__(
               data != null ? data.content : undefined,
               x1 =>
                 x1.replace(
                   /src="(\/[^"]+)"/g,
-                  `src='${__guard__(
-                    settings.cdn != null ? settings.cdn.web : undefined,
-                    x2 => x2.host
-                  )}$1'`
+                  `src='${settings.cdn.web.host}$1'`
                 )
             )
           }

@@ -79,7 +79,8 @@ describe('InstitutionsAPI', function() {
     })
 
     it('handle empty response', function(done) {
-      this.settings.apis = null
+      this.settings.apis.v1.url = ''
+
       return this.InstitutionsAPI.getInstitutionAffiliations(
         this.institutionId,
         (err, body) => {
@@ -162,7 +163,7 @@ describe('InstitutionsAPI', function() {
     })
 
     it('handle empty response', function(done) {
-      this.settings.apis = null
+      this.settings.apis.v1.url = ''
       return this.InstitutionsAPI.getUserAffiliations(
         this.stubbedUser._id,
         (err, body) => {

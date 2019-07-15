@@ -499,7 +499,7 @@ module.exports = settings =
 	#	url: "/templates/all"
 	#}]
 
-	rateLimits:
+	rateLimit:
 		autoCompile:
 			everyone: process.env['RATE_LIMIT_AUTO_COMPILE_EVERYONE'] or 100
 			standard: process.env['RATE_LIMIT_AUTO_COMPILE_STANDARD'] or 25

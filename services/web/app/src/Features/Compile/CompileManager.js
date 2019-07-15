@@ -245,14 +245,7 @@ module.exports = CompileManager = {
       endpointName: 'auto_compile',
       timeInterval: 20,
       subjectName: compileGroup,
-      throttle:
-        __guard__(
-          __guard__(
-            Settings != null ? Settings.rateLimit : undefined,
-            x1 => x1.autoCompile
-          ),
-          x => x[compileGroup]
-        ) || 25
+      throttle: Settings.rateLimit.autoCompile[compileGroup] || 25
     }
     return rateLimiter.addCount(opts, function(err, canCompile) {
       if (err != null) {

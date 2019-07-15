@@ -7,7 +7,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -119,15 +118,7 @@ module.exports = {
         if (callback == null) {
           callback = function() {}
         }
-        if (
-          !__guard__(
-            __guard__(
-              settings != null ? settings.apis : undefined,
-              x1 => x1.v1
-            ),
-            x => x.url
-          )
-        ) {
+        if (!settings.apis.v1.url) {
           return null
         } // service is not configured
         return request(
@@ -178,10 +169,4 @@ module.exports = {
       }
     }
   }
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

@@ -7,7 +7,6 @@
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -18,19 +17,10 @@ const Errors = require('../Errors/Errors')
 
 // TODO: check what happens when these settings aren't defined
 const DEFAULT_V1_PARAMS = {
-  baseUrl: __guard__(
-    __guard__(settings != null ? settings.apis : undefined, x1 => x1.v1),
-    x => x.url
-  ),
+  baseUrl: settings.apis.v1.url,
   auth: {
-    user: __guard__(
-      __guard__(settings != null ? settings.apis : undefined, x3 => x3.v1),
-      x2 => x2.user
-    ),
-    pass: __guard__(
-      __guard__(settings != null ? settings.apis : undefined, x5 => x5.v1),
-      x4 => x4.pass
-    )
+    user: settings.apis.v1.user,
+    pass: settings.apis.v1.pass
   },
   json: true,
   timeout: 30 * 1000
@@ -39,10 +29,7 @@ const DEFAULT_V1_PARAMS = {
 const v1Request = request.defaults(DEFAULT_V1_PARAMS)
 
 const DEFAULT_V1_OAUTH_PARAMS = {
-  baseUrl: __guard__(
-    __guard__(settings != null ? settings.apis : undefined, x7 => x7.v1),
-    x6 => x6.url
-  ),
+  baseUrl: settings.apis.v1.url,
   json: true,
   timeout: 30 * 1000
 }
@@ -97,10 +84,4 @@ module.exports = V1Api = {
       return callback(error)
     }
   }
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

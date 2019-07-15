@@ -9,7 +9,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -84,15 +83,4 @@ var _setV1AsHostIfRelativeURL = urlString =>
   // As it only applies if the second argument is not absolute, we can use it to transform relative URLs into
   // absolute ones using v1 as the host. If the URL is absolute (e.g. a filepicker one), then the base
   // argument is just ignored
-  url.resolve(
-    __guard__(
-      __guard__(settings != null ? settings.apis : undefined, x1 => x1.v1),
-      x => x.url
-    ),
-    urlString
-  )
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
+  url.resolve(settings.apis.v1.url, urlString)

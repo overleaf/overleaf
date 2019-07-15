@@ -6,7 +6,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -43,14 +42,7 @@ if (Settings.catchErrors) {
     logger.error({ err: error }, 'uncaughtException')
   )
 }
-
-const port =
-  Settings.port ||
-  __guard__(
-    Settings.internal != null ? Settings.internal.web : undefined,
-    x => x.port
-  ) ||
-  3000
+const port = Settings.port || Settings.internal.web.port || 3000
 const host = Settings.internal.web.host || 'localhost'
 if (!module.parent) {
   // Called directly
@@ -69,9 +61,3 @@ if (!module.parent) {
 }
 
 module.exports = Server.server
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}

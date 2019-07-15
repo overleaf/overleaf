@@ -32,7 +32,8 @@ describe('CompileManager', function() {
       },
       requires: {
         'settings-sharelatex': (this.settings = {
-          redis: { web: { host: 'localhost', port: 42 } }
+          redis: { web: { host: 'localhost', port: 42 } },
+          rateLimit: { autoCompile: {} }
         }),
         '../../infrastructure/RedisWrapper': {
           client: () => {

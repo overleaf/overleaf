@@ -25,12 +25,7 @@ const Async = require('async')
 const oneMinInMs = 60 * 1000
 const fiveMinsInMs = oneMinInMs * 5
 
-if (
-  __guard__(
-    settings.apis != null ? settings.apis.references : undefined,
-    x => x.url
-  ) == null
-) {
+if (!settings.apis.references.url) {
   logger.log('references search not enabled')
 }
 
@@ -149,12 +144,7 @@ module.exports = ReferencesHandler = {
   },
 
   _doIndexOperation(projectId, project, docIds, fileIds, callback) {
-    if (
-      __guard__(
-        settings.apis != null ? settings.apis.references : undefined,
-        x1 => x1.url
-      ) == null
-    ) {
+    if (!settings.apis.references.url) {
       return callback()
     }
     return ReferencesHandler._isFullIndex(project, function(err, isFullIndex) {

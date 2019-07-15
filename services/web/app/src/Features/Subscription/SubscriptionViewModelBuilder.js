@@ -33,10 +33,7 @@ const buildBillingDetails = function(recurlySubscription) {
     recurlySubscription != null ? recurlySubscription.account : undefined,
     x => x.hosted_login_token
   )
-  const recurlySubdomain = __guard__(
-    __guard__(Settings != null ? Settings.apis : undefined, x2 => x2.recurly),
-    x1 => x1.subdomain
-  )
+  const recurlySubdomain = Settings.apis.recurly.subdomain
   if (hostedLoginToken != null && recurlySubdomain != null) {
     return [
       'https://',

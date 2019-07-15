@@ -7,7 +7,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -518,15 +517,11 @@ module.exports = {
     opts.siteUrl = settings.siteUrl
     opts.body = template.compiledTemplate(opts)
     if (
-      __guard__(
-        settings.email != null ? settings.email.templates : undefined,
-        x => x.customFooter
-      ) != null
+      settings.email &&
+      settings.email.template &&
+      settings.email.template.customFooter
     ) {
-      opts.body += __guard__(
-        settings.email != null ? settings.email.templates : undefined,
-        x1 => x1.customFooter
-      )
+      opts.body += settings.email.template.customFooter
     }
     return {
       subject: template.subject(opts),
@@ -538,11 +533,6 @@ module.exports = {
   }
 }
 
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
 function __guardMethod__(obj, methodName, transform) {
   if (
     typeof obj !== 'undefined' &&
