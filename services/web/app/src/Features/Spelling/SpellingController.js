@@ -12,7 +12,7 @@ module.exports = {
   proxyRequestToSpellingApi(req, res) {
     const { language } = req.body
     if (language && !languageCodeIsSupported(language)) {
-      logger.warn(`language_code=${language} not supported`)
+      logger.info({ language }, `language not supported`)
       return res.status(200).send(JSON.stringify({ misspellings: [] }))
     }
 
