@@ -1,4 +1,4 @@
-const should = require('chai').should()
+const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
@@ -21,9 +21,7 @@ describe('PasswordResetHandler', function() {
     }
     this.EmailHandler = { sendEmail: sinon.stub() }
     this.AuthenticationManager = {
-      setUserPassword: sinon.stub(),
-      setUserPasswordInV1: sinon.stub(),
-      setUserPasswordInV2: sinon.stub()
+      setUserPassword: sinon.stub()
     }
     this.V1Api = { request: sinon.stub() }
     this.PasswordResetHandler = SandboxedModule.require(modulePath, {
@@ -44,9 +42,11 @@ describe('PasswordResetHandler', function() {
       }
     })
     this.token = '12312321i'
-    this.user_id = 'user_id_here'
     this.email = 'bob@bob.com'
-    this.user = { _id: this.user_id, email: this.email }
+    this.user = {
+      _id: 'user_id_here',
+      email: this.email
+    }
     this.password = 'my great secret password'
     this.callback = sinon.stub()
   })
@@ -63,7 +63,7 @@ describe('PasswordResetHandler', function() {
             if (err) {
               return done(err)
             }
-            should.equal(status, null)
+            expect(status).to.be.null
             done()
           }
         )
@@ -83,7 +83,7 @@ describe('PasswordResetHandler', function() {
             this.OneTimeTokenHandler.getNewToken.should.have.been.calledWith(
               'password',
               {
-                user_id: this.user_id,
+                user_id: this.user._id,
                 email: this.email
               }
             )
@@ -111,7 +111,7 @@ describe('PasswordResetHandler', function() {
             if (err) {
               return done(err)
             }
-            should.equal(status, null)
+            expect(status).to.be.null
             done()
           }
         )
@@ -257,75 +257,188 @@ describe('PasswordResetHandler', function() {
   })
 
   describe('setNewUserPassword', function() {
-    describe('when no data is found', function() {
+    describe('when no token is found', function() {
       beforeEach(function() {
         this.OneTimeTokenHandler.getValueFromTokenAndExpire.yields(null, null)
+      })
+
+      it('should return found == false when', function(done) {
         this.PasswordResetHandler.setNewUserPassword(
           this.token,
           this.password,
-          this.callback
+          (err, found) => {
+            if (err != null) {
+              return done(err)
+            }
+            expect(found).to.be.false
+            done()
+          }
         )
-      })
-
-      it('should return exists == false', function() {
-        this.callback.calledWith(null, false).should.equal(true)
       })
     })
 
-    describe('when the data is an old style user_id', function() {
+    describe('when the token has a user_id and email', function() {
       beforeEach(function() {
-        this.AuthenticationManager.setUserPassword.yields(
-          null,
-          true,
-          this.user_id
-        )
-        this.OneTimeTokenHandler.getValueFromTokenAndExpire.yields(
-          null,
-          this.user_id
-        )
-        this.PasswordResetHandler.setNewUserPassword(
-          this.token,
-          this.password,
-          this.callback
-        )
-      })
-
-      it('should call setUserPasswordInV2', function() {
+        this.OneTimeTokenHandler.getValueFromTokenAndExpire
+          .withArgs('password', this.token)
+          .yields(null, {
+            user_id: this.user._id,
+            email: this.email
+          })
         this.AuthenticationManager.setUserPassword
-          .calledWith(this.user_id, this.password)
-          .should.equal(true)
+          .withArgs(this.user._id, this.password)
+          .yields(null, true, this.user._id)
       })
 
-      it('should reset == true and the user_id', function() {
-        this.callback.calledWith(null, true, this.user_id).should.equal(true)
-      })
-    })
-
-    describe('when the data is a new style user_id', function() {
-      beforeEach(function() {
-        this.AuthenticationManager.setUserPassword.yields(
-          null,
-          true,
-          this.user_id
-        )
-        this.OneTimeTokenHandler.getValueFromTokenAndExpire.yields(null, {
-          user_id: this.user_id
+      describe('when no user is found with this email', function() {
+        beforeEach(function() {
+          this.UserGetter.getUserByMainEmail
+            .withArgs(this.email)
+            .yields(null, null)
         })
-        this.PasswordResetHandler.setNewUserPassword(
-          this.token,
-          this.password,
-          this.callback
-        )
+
+        it('should return found == false', function(done) {
+          this.PasswordResetHandler.setNewUserPassword(
+            this.token,
+            this.password,
+            (err, found) => {
+              if (err != null) {
+                return done(err)
+              }
+              expect(found).to.be.false
+              done()
+            }
+          )
+        })
       })
 
-      it('should call setUserPasswordInV2', function() {
+      describe("when the email and user don't match", function() {
+        beforeEach(function() {
+          this.UserGetter.getUserByMainEmail
+            .withArgs(this.email)
+            .yields(null, { _id: 'not-the-same', email: this.email })
+        })
+
+        it('should return found == false', function(done) {
+          this.PasswordResetHandler.setNewUserPassword(
+            this.token,
+            this.password,
+            (err, found) => {
+              if (err != null) {
+                return done(err)
+              }
+              expect(found).to.be.false
+              done()
+            }
+          )
+        })
+      })
+
+      describe('when the email and user match', function() {
+        beforeEach(function() {
+          this.UserGetter.getUserByMainEmail
+            .withArgs(this.email)
+            .yields(null, this.user)
+        })
+
+        it('should return found == true and the user id', function(done) {
+          this.PasswordResetHandler.setNewUserPassword(
+            this.token,
+            this.password,
+            (err, found, userId) => {
+              if (err != null) {
+                return done(err)
+              }
+              expect(found).to.be.true
+              expect(userId).to.equal(this.user._id)
+              done()
+            }
+          )
+        })
+      })
+    })
+
+    describe('when the token has a v1_user_id and email', function() {
+      beforeEach(function() {
+        this.user.overleaf = { id: 184 }
+        this.OneTimeTokenHandler.getValueFromTokenAndExpire
+          .withArgs('password', this.token)
+          .yields(null, {
+            v1_user_id: this.user.overleaf.id,
+            email: this.email
+          })
         this.AuthenticationManager.setUserPassword
-          .calledWith(this.user_id, this.password)
-          .should.equal(true)
+          .withArgs(this.user._id, this.password)
+          .yields(null, true)
       })
 
-      it('should reset == true and the user_id', function() {
-        this.callback.calledWith(null, true, this.user_id).should.equal(true)
+      describe('when no user is found with this email', function() {
+        beforeEach(function() {
+          this.UserGetter.getUserByMainEmail
+            .withArgs(this.email)
+            .yields(null, null)
+        })
+
+        it('should return found == false', function(done) {
+          this.PasswordResetHandler.setNewUserPassword(
+            this.token,
+            this.password,
+            (err, found) => {
+              if (err != null) {
+                return done(err)
+              }
+              expect(found).to.be.false
+              done()
+            }
+          )
+        })
+      })
+
+      describe("when the email and user don't match", function() {
+        beforeEach(function() {
+          this.UserGetter.getUserByMainEmail.withArgs(this.email).yields(null, {
+            _id: this.user._id,
+            email: this.email,
+            overleaf: { id: 'not-the-same' }
+          })
+        })
+
+        it('should return found == false', function(done) {
+          this.PasswordResetHandler.setNewUserPassword(
+            this.token,
+            this.password,
+            (err, found) => {
+              if (err != null) {
+                return done(err)
+              }
+              expect(found).to.be.false
+              done()
+            }
+          )
+        })
+      })
+
+      describe('when the email and user match', function() {
+        beforeEach(function() {
+          this.UserGetter.getUserByMainEmail
+            .withArgs(this.email)
+            .yields(null, this.user)
+        })
+
+        it('should return found == true and the user id', function(done) {
+          this.PasswordResetHandler.setNewUserPassword(
+            this.token,
+            this.password,
+            (err, found, userId) => {
+              if (err != null) {
+                return done(err)
+              }
+              expect(found).to.be.true
+              expect(userId).to.equal(this.user._id)
+              done()
+            }
+          )
+        })
       })
     })
   })

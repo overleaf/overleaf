@@ -57,54 +57,70 @@ const PasswordResetHandler = {
   },
 
   setNewUserPassword(token, password, callback) {
-    OneTimeTokenHandler.getValueFromTokenAndExpire('password', token, function(
-      err,
-      data
-    ) {
-      if (err) {
-        return callback(err)
-      }
-      if (data == null) {
-        return callback(null, false, null)
-      }
-      if (typeof data === 'string') {
-        // Backwards compatible with old format.
-        // Tokens expire after 1h, so this can be removed soon after deploy.
-        // Possibly we should keep this until we do an onsite release too.
-        data = { user_id: data }
-      }
-      if (data.user_id != null) {
-        AuthenticationManager.setUserPassword(data.user_id, password, function(
-          err,
-          reset
-        ) {
-          if (err) {
-            return callback(err)
-          }
-          callback(null, reset, data.user_id)
-        })
-      } else if (data.v1_user_id != null) {
-        AuthenticationManager.setUserPasswordInV1(
-          data.v1_user_id,
+    PasswordResetHandler.getUserForPasswordResetToken(
+      token,
+      (err, user, version) => {
+        if (err != null) {
+          return callback(err)
+        }
+        if (user == null) {
+          return callback(null, false, null)
+        }
+        AuthenticationManager.setUserPassword(
+          user._id,
           password,
-          function(error, reset) {
-            if (error != null) {
-              return callback(error)
+          (err, reset) => {
+            if (err) {
+              return callback(err)
             }
-            UserGetter.getUser(
-              { 'overleaf.id': data.v1_user_id },
-              { _id: 1 },
-              function(error, user) {
-                if (error != null) {
-                  return callback(error)
-                }
-                callback(null, reset, user != null ? user._id : undefined)
-              }
-            )
+            callback(null, reset, user._id)
           }
         )
       }
-    })
+    )
+  },
+
+  getUserForPasswordResetToken(token, callback) {
+    OneTimeTokenHandler.getValueFromTokenAndExpire(
+      'password',
+      token,
+      (err, data) => {
+        if (err != null) {
+          if (err.name === 'NotFoundError') {
+            return callback(null, null)
+          } else {
+            return callback(err)
+          }
+        }
+        if (data == null || data.email == null) {
+          return callback(null, null)
+        }
+        UserGetter.getUserByMainEmail(
+          data.email,
+          { _id: 1, 'overleaf.id': 1 },
+          (err, user) => {
+            if (err != null) {
+              callback(err)
+            } else if (user == null) {
+              callback(null, null)
+            } else if (
+              data.user_id != null &&
+              data.user_id === user._id.toString()
+            ) {
+              callback(null, user, 'v2')
+            } else if (
+              data.v1_user_id != null &&
+              user.overleaf != null &&
+              data.v1_user_id === user.overleaf.id
+            ) {
+              callback(null, user, 'v1')
+            } else {
+              callback(null, null)
+            }
+          }
+        )
+      }
+    )
   },
 
   _getPasswordResetData(email, callback) {
