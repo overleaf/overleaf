@@ -35,72 +35,67 @@ const isInViewport = function(element) {
 }
 
 define(['base'], App =>
-  App.directive('eventTracking', [
-    'event_tracking',
-    event_tracking => ({
-      scope: {
-        eventTracking: '@',
-        eventSegmentation: '=?'
-      },
-      link(scope, element, attrs) {
-        const sendGA = attrs.eventTrackingGa || false
-        const sendMB = attrs.eventTrackingMb || false
-        const sendMBFunction = attrs.eventTrackingSendOnce
-          ? 'sendMBOnce'
-          : 'sendMB'
-        const sendGAFunction = attrs.eventTrackingSendOnce
-          ? 'sendGAOnce'
-          : 'send'
-        const segmentation = scope.eventSegmentation || {}
-        segmentation.page = window.location.pathname
+  App.directive('eventTracking', event_tracking => ({
+    scope: {
+      eventTracking: '@',
+      eventSegmentation: '=?'
+    },
+    link(scope, element, attrs) {
+      const sendGA = attrs.eventTrackingGa || false
+      const sendMB = attrs.eventTrackingMb || false
+      const sendMBFunction = attrs.eventTrackingSendOnce
+        ? 'sendMBOnce'
+        : 'sendMB'
+      const sendGAFunction = attrs.eventTrackingSendOnce ? 'sendGAOnce' : 'send'
+      const segmentation = scope.eventSegmentation || {}
+      segmentation.page = window.location.pathname
 
-        const sendEvent = function(scrollEvent) {
-          /*
+      const sendEvent = function(scrollEvent) {
+        /*
 						@param {boolean}		scrollEvent		Use to unbind scroll event
 					*/
-          if (sendMB) {
-            event_tracking[sendMBFunction](scope.eventTracking, segmentation)
-          }
-          if (sendGA) {
-            event_tracking[sendGAFunction](
-              attrs.eventTrackingGa,
-              attrs.eventTrackingAction || scope.eventTracking,
-              attrs.eventTrackingLabel || ''
-            )
-          }
-          if (scrollEvent) {
-            return $(window).unbind('resize scroll')
-          }
+        if (sendMB) {
+          event_tracking[sendMBFunction](scope.eventTracking, segmentation)
         }
-
-        if (attrs.eventTrackingTrigger === 'load') {
-          return sendEvent()
-        } else if (attrs.eventTrackingTrigger === 'click') {
-          return element.on('click', e => sendEvent())
-        } else if (attrs.eventTrackingTrigger === 'hover') {
-          let timer = null
-          let timeoutAmt = 500
-          if (attrs.eventHoverAmt) {
-            timeoutAmt = parseInt(attrs.eventHoverAmt, 10)
-          }
-          return element
-            .on('mouseenter', function() {
-              timer = setTimeout(() => sendEvent(), timeoutAmt)
-            })
-            .on('mouseleave', () => clearTimeout(timer))
-        } else if (attrs.eventTrackingTrigger === 'scroll') {
-          if (!event_tracking.eventInCache(scope.eventTracking)) {
-            return $(window).on('resize scroll', () =>
-              _.throttle(
-                isInViewport(element) &&
-                !event_tracking.eventInCache(scope.eventTracking)
-                  ? sendEvent(true)
-                  : undefined,
-                500
-              )
-            )
-          }
+        if (sendGA) {
+          event_tracking[sendGAFunction](
+            attrs.eventTrackingGa,
+            attrs.eventTrackingAction || scope.eventTracking,
+            attrs.eventTrackingLabel || ''
+          )
+        }
+        if (scrollEvent) {
+          return $(window).unbind('resize scroll')
         }
       }
-    })
-  ]))
+
+      if (attrs.eventTrackingTrigger === 'load') {
+        return sendEvent()
+      } else if (attrs.eventTrackingTrigger === 'click') {
+        return element.on('click', e => sendEvent())
+      } else if (attrs.eventTrackingTrigger === 'hover') {
+        let timer = null
+        let timeoutAmt = 500
+        if (attrs.eventHoverAmt) {
+          timeoutAmt = parseInt(attrs.eventHoverAmt, 10)
+        }
+        return element
+          .on('mouseenter', function() {
+            timer = setTimeout(() => sendEvent(), timeoutAmt)
+          })
+          .on('mouseleave', () => clearTimeout(timer))
+      } else if (attrs.eventTrackingTrigger === 'scroll') {
+        if (!event_tracking.eventInCache(scope.eventTracking)) {
+          return $(window).on('resize scroll', () =>
+            _.throttle(
+              isInViewport(element) &&
+              !event_tracking.eventInCache(scope.eventTracking)
+                ? sendEvent(true)
+                : undefined,
+              500
+            )
+          )
+        }
+      }
+    }
+  })))

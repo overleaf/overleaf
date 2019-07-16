@@ -30,7 +30,7 @@ define([
   // and then again on ack.
   const AUTO_COMPILE_DEBOUNCE = 2000
 
-  App.filter('trusted', ['$sce', $sce => url => $sce.trustAsResourceUrl(url)])
+  App.filter('trusted', $sce => url => $sce.trustAsResourceUrl(url))
 
   App.controller('PdfController', function(
     $scope,
@@ -898,188 +898,175 @@ define([
       }))
   })
 
-  App.factory('synctex', [
-    'ide',
-    '$http',
-    '$q',
-    function(ide, $http, $q) {
-      // enable per-user containers by default
-      const perUserCompile = true
+  App.factory('synctex', function(ide, $http, $q) {
+    // enable per-user containers by default
+    const perUserCompile = true
 
-      const synctex = {
-        syncToPdf(cursorPosition) {
-          const deferred = $q.defer()
+    const synctex = {
+      syncToPdf(cursorPosition) {
+        const deferred = $q.defer()
 
-          const doc_id = ide.editorManager.getCurrentDocId()
-          if (doc_id == null) {
-            deferred.reject()
-            return deferred.promise
-          }
-          const doc = ide.fileTreeManager.findEntityById(doc_id)
-          if (doc == null) {
-            deferred.reject()
-            return deferred.promise
-          }
-          let path = ide.fileTreeManager.getEntityPath(doc)
-          if (path == null) {
-            deferred.reject()
-            return deferred.promise
-          }
-
-          // If the root file is folder/main.tex, then synctex sees the
-          // path as folder/./main.tex
-          const rootDocDirname = ide.fileTreeManager.getRootDocDirname()
-          if (rootDocDirname != null && rootDocDirname !== '') {
-            path = path.replace(
-              RegExp(`^${rootDocDirname}`),
-              `${rootDocDirname}/.`
-            )
-          }
-
-          const { row, column } = cursorPosition
-
-          $http({
-            url: `/project/${ide.project_id}/sync/code`,
-            method: 'GET',
-            params: {
-              file: path,
-              line: row + 1,
-              column,
-              clsiserverid: ide.clsiServerId
-            }
-          })
-            .then(function(response) {
-              const { data } = response
-              return deferred.resolve(data.pdf || [])
-            })
-            .catch(function(response) {
-              const error = response.data
-              return deferred.reject(error)
-            })
-
+        const doc_id = ide.editorManager.getCurrentDocId()
+        if (doc_id == null) {
+          deferred.reject()
           return deferred.promise
-        },
+        }
+        const doc = ide.fileTreeManager.findEntityById(doc_id)
+        if (doc == null) {
+          deferred.reject()
+          return deferred.promise
+        }
+        let path = ide.fileTreeManager.getEntityPath(doc)
+        if (path == null) {
+          deferred.reject()
+          return deferred.promise
+        }
 
-        syncToCode(position, options) {
-          let v
-          if (options == null) {
-            options = {}
+        // If the root file is folder/main.tex, then synctex sees the
+        // path as folder/./main.tex
+        const rootDocDirname = ide.fileTreeManager.getRootDocDirname()
+        if (rootDocDirname != null && rootDocDirname !== '') {
+          path = path.replace(
+            RegExp(`^${rootDocDirname}`),
+            `${rootDocDirname}/.`
+          )
+        }
+
+        const { row, column } = cursorPosition
+
+        $http({
+          url: `/project/${ide.project_id}/sync/code`,
+          method: 'GET',
+          params: {
+            file: path,
+            line: row + 1,
+            column,
+            clsiserverid: ide.clsiServerId
           }
-          const deferred = $q.defer()
-          if (position == null) {
-            deferred.reject()
-            return deferred.promise
-          }
-
-          // FIXME: this actually works better if it's halfway across the
-          // page (or the visible part of the page). Synctex doesn't
-          // always find the right place in the file when the point is at
-          // the edge of the page, it sometimes returns the start of the
-          // next paragraph instead.
-          const h = position.offset.left
-
-          // Compute the vertical position to pass to synctex, which
-          // works with coordinates increasing from the top of the page
-          // down.  This matches the browser's DOM coordinate of the
-          // click point, but the pdf position is measured from the
-          // bottom of the page so we need to invert it.
-          if (
-            options.fromPdfPosition &&
-            (position.pageSize != null
-              ? position.pageSize.height
-              : undefined) != null
-          ) {
-            v = position.pageSize.height - position.offset.top || 0 // measure from pdf point (inverted)
-          } else {
-            v = position.offset.top || 0 // measure from html click position
-          }
-
-          // It's not clear exactly where we should sync to if it wasn't directly
-          // clicked on, but a little bit down from the very top seems best.
-          if (options.includeVisualOffset) {
-            v += 72 // use the same value as in pdfViewer highlighting visual offset
-          }
-
-          $http({
-            url: `/project/${ide.project_id}/sync/pdf`,
-            method: 'GET',
-            params: {
-              page: position.page + 1,
-              h: h.toFixed(2),
-              v: v.toFixed(2),
-              clsiserverid: ide.clsiServerId
-            }
+        })
+          .then(function(response) {
+            const { data } = response
+            return deferred.resolve(data.pdf || [])
           })
-            .then(function(response) {
-              const { data } = response
-              if (
-                data.code != null &&
-                data.code.length > 0 &&
-                data.code[0].file !== ''
-              ) {
-                const doc = ide.fileTreeManager.findEntityByPath(
-                  data.code[0].file
-                )
-                if (doc == null) {
-                  return
-                }
-                return deferred.resolve({ doc, line: data.code[0].line })
-              } else if (data.code[0].file === '') {
-                ide.$scope.sync_tex_error = true
-                setTimeout(() => (ide.$scope.sync_tex_error = false), 4000)
+          .catch(function(response) {
+            const error = response.data
+            return deferred.reject(error)
+          })
+
+        return deferred.promise
+      },
+
+      syncToCode(position, options) {
+        let v
+        if (options == null) {
+          options = {}
+        }
+        const deferred = $q.defer()
+        if (position == null) {
+          deferred.reject()
+          return deferred.promise
+        }
+
+        // FIXME: this actually works better if it's halfway across the
+        // page (or the visible part of the page). Synctex doesn't
+        // always find the right place in the file when the point is at
+        // the edge of the page, it sometimes returns the start of the
+        // next paragraph instead.
+        const h = position.offset.left
+
+        // Compute the vertical position to pass to synctex, which
+        // works with coordinates increasing from the top of the page
+        // down.  This matches the browser's DOM coordinate of the
+        // click point, but the pdf position is measured from the
+        // bottom of the page so we need to invert it.
+        if (
+          options.fromPdfPosition &&
+          (position.pageSize != null ? position.pageSize.height : undefined) !=
+            null
+        ) {
+          v = position.pageSize.height - position.offset.top || 0 // measure from pdf point (inverted)
+        } else {
+          v = position.offset.top || 0 // measure from html click position
+        }
+
+        // It's not clear exactly where we should sync to if it wasn't directly
+        // clicked on, but a little bit down from the very top seems best.
+        if (options.includeVisualOffset) {
+          v += 72 // use the same value as in pdfViewer highlighting visual offset
+        }
+
+        $http({
+          url: `/project/${ide.project_id}/sync/pdf`,
+          method: 'GET',
+          params: {
+            page: position.page + 1,
+            h: h.toFixed(2),
+            v: v.toFixed(2),
+            clsiserverid: ide.clsiServerId
+          }
+        })
+          .then(function(response) {
+            const { data } = response
+            if (
+              data.code != null &&
+              data.code.length > 0 &&
+              data.code[0].file !== ''
+            ) {
+              const doc = ide.fileTreeManager.findEntityByPath(
+                data.code[0].file
+              )
+              if (doc == null) {
+                return
               }
-            })
-            .catch(function(response) {
-              const error = response.data
-              return deferred.reject(error)
-            })
-
-          return deferred.promise
-        }
-      }
-
-      return synctex
-    }
-  ])
-
-  App.controller('PdfSynctexController', [
-    '$scope',
-    'synctex',
-    'ide',
-    function($scope, synctex, ide) {
-      this.cursorPosition = null
-      ide.$scope.$on('cursor:editor:update', (event, cursorPosition) => {
-        this.cursorPosition = cursorPosition
-      })
-
-      $scope.syncToPdf = () => {
-        if (this.cursorPosition == null) {
-          return
-        }
-        return synctex
-          .syncToPdf(this.cursorPosition)
-          .then(highlights => ($scope.pdf.highlights = highlights))
-      }
-
-      ide.$scope.$on('cursor:editor:syncToPdf', $scope.syncToPdf)
-
-      return ($scope.syncToCode = () =>
-        synctex
-          .syncToCode($scope.pdf.position, {
-            includeVisualOffset: true,
-            fromPdfPosition: true
+              return deferred.resolve({ doc, line: data.code[0].line })
+            } else if (data.code[0].file === '') {
+              ide.$scope.sync_tex_error = true
+              setTimeout(() => (ide.$scope.sync_tex_error = false), 4000)
+            }
           })
-          .then(function(data) {
-            const { doc, line } = data
-            return ide.editorManager.openDoc(doc, { gotoLine: line })
-          }))
-    }
-  ])
+          .catch(function(response) {
+            const error = response.data
+            return deferred.reject(error)
+          })
 
-  App.controller('PdfLogEntryController', [
-    '$scope',
-    'ide',
-    'event_tracking',
+        return deferred.promise
+      }
+    }
+
+    return synctex
+  })
+
+  App.controller('PdfSynctexController', function($scope, synctex, ide) {
+    this.cursorPosition = null
+    ide.$scope.$on('cursor:editor:update', (event, cursorPosition) => {
+      this.cursorPosition = cursorPosition
+    })
+
+    $scope.syncToPdf = () => {
+      if (this.cursorPosition == null) {
+        return
+      }
+      return synctex
+        .syncToPdf(this.cursorPosition)
+        .then(highlights => ($scope.pdf.highlights = highlights))
+    }
+
+    ide.$scope.$on('cursor:editor:syncToPdf', $scope.syncToPdf)
+
+    return ($scope.syncToCode = () =>
+      synctex
+        .syncToCode($scope.pdf.position, {
+          includeVisualOffset: true,
+          fromPdfPosition: true
+        })
+        .then(function(data) {
+          const { doc, line } = data
+          return ide.editorManager.openDoc(doc, { gotoLine: line })
+        }))
+  })
+
+  App.controller(
+    'PdfLogEntryController',
     ($scope, ide, event_tracking) =>
       ($scope.openInEditor = function(entry) {
         let column, line
@@ -1099,25 +1086,24 @@ define([
           gotoColumn: column
         })
       })
-  ])
+  )
 
-  return App.controller('ClearCacheModalController', [
-    '$scope',
-    '$modalInstance',
-    function($scope, $modalInstance) {
-      $scope.state = { inflight: false }
+  return App.controller('ClearCacheModalController', function(
+    $scope,
+    $modalInstance
+  ) {
+    $scope.state = { inflight: false }
 
-      $scope.clear = function() {
-        $scope.state.inflight = true
-        return $scope.clearCache().then(function() {
-          $scope.state.inflight = false
-          return $modalInstance.close()
-        })
-      }
-
-      return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
+    $scope.clear = function() {
+      $scope.state.inflight = true
+      return $scope.clearCache().then(function() {
+        $scope.state.inflight = false
+        return $modalInstance.close()
+      })
     }
-  ])
+
+    return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
+  })
 })
 
 function __guard__(value, transform) {

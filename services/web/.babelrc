@@ -2,5 +2,6 @@
   "presets": [
     "react",
     ["env", { "modules": false }]
-  ]
+  ],
+  "plugins": ["angularjs-annotate"]
 }

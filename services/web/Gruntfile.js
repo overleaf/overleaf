@@ -23,9 +23,6 @@ module.exports = function(grunt) {
       compile: {
         options: {
           optimize: 'uglify2',
-          uglify2: {
-            mangle: false
-          },
           appDir: 'public/js',
           baseUrl: './',
           dir: 'public/minjs',

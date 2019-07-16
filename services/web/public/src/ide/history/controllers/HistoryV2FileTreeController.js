@@ -12,12 +12,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define(['base'], App =>
-  App.controller('HistoryV2FileTreeController', [
-    '$scope',
-    'ide',
-    function($scope, ide) {
-      $scope.handleFileSelection = file => {
-        ide.historyManager.selectFile(file)
-      }
+  App.controller('HistoryV2FileTreeController', function($scope, ide) {
+    $scope.handleFileSelection = file => {
+      ide.historyManager.selectFile(file)
     }
-  ]))
+  }))

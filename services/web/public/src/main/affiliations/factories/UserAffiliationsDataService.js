@@ -414,151 +414,145 @@ define(['base'], function(App) {
     }
   }
 
-  return App.factory('UserAffiliationsDataService', [
-    '$http',
-    '$q',
-    '_',
-    function($http, $q, _) {
-      const getCountries = () => $q.resolve(countriesList)
+  return App.factory('UserAffiliationsDataService', function($http, $q, _) {
+    const getCountries = () => $q.resolve(countriesList)
 
-      const getDefaultRoleHints = () => $q.resolve(defaultRoleHints)
+    const getDefaultRoleHints = () => $q.resolve(defaultRoleHints)
 
-      const getDefaultDepartmentHints = () => $q.resolve(defaultDepartmentHints)
+    const getDefaultDepartmentHints = () => $q.resolve(defaultDepartmentHints)
 
-      const getUserEmails = () =>
-        $http.get('/user/emails').then(response => response.data)
+    const getUserEmails = () =>
+      $http.get('/user/emails').then(response => response.data)
 
-      const getUserDefaultEmail = () =>
-        getUserEmails().then(userEmails =>
-          _.find(userEmails, userEmail => userEmail.default)
-        )
+    const getUserDefaultEmail = () =>
+      getUserEmails().then(userEmails =>
+        _.find(userEmails, userEmail => userEmail.default)
+      )
 
-      const getUniversitiesFromCountry = function(country) {
-        let universitiesFromCountry
-        if (universities[country.code] != null) {
-          universitiesFromCountry = universities[country.code]
-        } else {
-          universitiesFromCountry = $http
-            .get('/institutions/list', {
-              params: { country_code: country.code }
-            })
-            .then(response => (universities[country.code] = response.data))
-        }
-        return $q.resolve(universitiesFromCountry)
+    const getUniversitiesFromCountry = function(country) {
+      let universitiesFromCountry
+      if (universities[country.code] != null) {
+        universitiesFromCountry = universities[country.code]
+      } else {
+        universitiesFromCountry = $http
+          .get('/institutions/list', {
+            params: { country_code: country.code }
+          })
+          .then(response => (universities[country.code] = response.data))
       }
+      return $q.resolve(universitiesFromCountry)
+    }
 
-      const getUniversityDomainFromPartialDomainInput = function(
-        partialDomainInput
-      ) {
-        if (universitiesByDomain[partialDomainInput] != null) {
-          return $q.resolve(universitiesByDomain[partialDomainInput])
-        } else {
-          return $http
-            .get('/institutions/domains', {
-              params: { hostname: partialDomainInput, limit: 1 }
-            })
-            .then(function(response) {
-              const university = response.data[0]
-              if (
-                university != null &&
-                !isDomainBlacklisted(university.hostname)
-              ) {
-                universitiesByDomain[university.hostname] = university
-                return $q.resolve(university)
-              } else {
-                return $q.reject(null)
-              }
-            })
-        }
-      }
-
-      const getUniversityDetails = universityId =>
-        $http
-          .get(`/institutions/list/${universityId}`)
-          .then(response => response.data)
-
-      const addUserEmail = email =>
-        $http.post('/user/emails', {
-          email,
-          _csrf: window.csrfToken
-        })
-
-      const addUserAffiliationWithUnknownUniversity = (
-        email,
-        unknownUniversityName,
-        unknownUniversityCountryCode,
-        role,
-        department
-      ) =>
-        $http.post('/user/emails', {
-          email,
-          university: {
-            name: unknownUniversityName,
-            country_code: unknownUniversityCountryCode
-          },
-          role,
-          department,
-          _csrf: window.csrfToken
-        })
-
-      const addUserAffiliation = (email, universityId, role, department) =>
-        $http.post('/user/emails', {
-          email,
-          university: {
-            id: universityId
-          },
-          role,
-          department,
-          _csrf: window.csrfToken
-        })
-
-      const addRoleAndDepartment = (email, role, department) =>
-        $http.post('/user/emails/endorse', {
-          email,
-          role,
-          department,
-          _csrf: window.csrfToken
-        })
-
-      const setDefaultUserEmail = email =>
-        $http.post('/user/emails/default', {
-          email,
-          _csrf: window.csrfToken
-        })
-
-      const removeUserEmail = email =>
-        $http.post('/user/emails/delete', {
-          email,
-          _csrf: window.csrfToken
-        })
-
-      const resendConfirmationEmail = email =>
-        $http.post('/user/emails/resend_confirmation', {
-          email,
-          _csrf: window.csrfToken
-        })
-
-      var isDomainBlacklisted = domain =>
-        domain.toLowerCase() in domainsBlackList
-
-      return {
-        getCountries,
-        getDefaultRoleHints,
-        getDefaultDepartmentHints,
-        getUserEmails,
-        getUserDefaultEmail,
-        getUniversitiesFromCountry,
-        getUniversityDomainFromPartialDomainInput,
-        getUniversityDetails,
-        addUserEmail,
-        addUserAffiliationWithUnknownUniversity,
-        addUserAffiliation,
-        addRoleAndDepartment,
-        setDefaultUserEmail,
-        removeUserEmail,
-        resendConfirmationEmail,
-        isDomainBlacklisted
+    const getUniversityDomainFromPartialDomainInput = function(
+      partialDomainInput
+    ) {
+      if (universitiesByDomain[partialDomainInput] != null) {
+        return $q.resolve(universitiesByDomain[partialDomainInput])
+      } else {
+        return $http
+          .get('/institutions/domains', {
+            params: { hostname: partialDomainInput, limit: 1 }
+          })
+          .then(function(response) {
+            const university = response.data[0]
+            if (
+              university != null &&
+              !isDomainBlacklisted(university.hostname)
+            ) {
+              universitiesByDomain[university.hostname] = university
+              return $q.resolve(university)
+            } else {
+              return $q.reject(null)
+            }
+          })
       }
     }
-  ])
+
+    const getUniversityDetails = universityId =>
+      $http
+        .get(`/institutions/list/${universityId}`)
+        .then(response => response.data)
+
+    const addUserEmail = email =>
+      $http.post('/user/emails', {
+        email,
+        _csrf: window.csrfToken
+      })
+
+    const addUserAffiliationWithUnknownUniversity = (
+      email,
+      unknownUniversityName,
+      unknownUniversityCountryCode,
+      role,
+      department
+    ) =>
+      $http.post('/user/emails', {
+        email,
+        university: {
+          name: unknownUniversityName,
+          country_code: unknownUniversityCountryCode
+        },
+        role,
+        department,
+        _csrf: window.csrfToken
+      })
+
+    const addUserAffiliation = (email, universityId, role, department) =>
+      $http.post('/user/emails', {
+        email,
+        university: {
+          id: universityId
+        },
+        role,
+        department,
+        _csrf: window.csrfToken
+      })
+
+    const addRoleAndDepartment = (email, role, department) =>
+      $http.post('/user/emails/endorse', {
+        email,
+        role,
+        department,
+        _csrf: window.csrfToken
+      })
+
+    const setDefaultUserEmail = email =>
+      $http.post('/user/emails/default', {
+        email,
+        _csrf: window.csrfToken
+      })
+
+    const removeUserEmail = email =>
+      $http.post('/user/emails/delete', {
+        email,
+        _csrf: window.csrfToken
+      })
+
+    const resendConfirmationEmail = email =>
+      $http.post('/user/emails/resend_confirmation', {
+        email,
+        _csrf: window.csrfToken
+      })
+
+    var isDomainBlacklisted = domain => domain.toLowerCase() in domainsBlackList
+
+    return {
+      getCountries,
+      getDefaultRoleHints,
+      getDefaultDepartmentHints,
+      getUserEmails,
+      getUserDefaultEmail,
+      getUniversitiesFromCountry,
+      getUniversityDomainFromPartialDomainInput,
+      getUniversityDetails,
+      addUserEmail,
+      addUserAffiliationWithUnknownUniversity,
+      addUserAffiliation,
+      addRoleAndDepartment,
+      setDefaultUserEmail,
+      removeUserEmail,
+      resendConfirmationEmail,
+      isDomainBlacklisted
+    }
+  })
 })

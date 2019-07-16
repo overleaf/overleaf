@@ -12,12 +12,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define(['base'], App =>
-  App.controller('HistoryV2ToolbarController', [
-    '$scope',
-    '$modal',
-    'ide',
-    'event_tracking',
-    'waitFor',
+  App.controller(
+    'HistoryV2ToolbarController',
     ($scope, $modal, ide, event_tracking, waitFor) => {
       let openEntity
 
@@ -126,4 +122,4 @@ define(['base'], App =>
           .catch(err => console.warn(err))
       }
     }
-  ]))
+  ))

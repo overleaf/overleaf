@@ -119,6 +119,7 @@
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
+    "babel-plugin-angularjs-annotate": "^0.10.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.16.0",
     "bunyan": "0.22.1",
