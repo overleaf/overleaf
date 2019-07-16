@@ -56,9 +56,8 @@ describe('SpellingController', function() {
       headers: { Host: SPELLING_HOST }
     }
 
-    this.res = {
-      send: sinon.stub()
-    }
+    this.res = {}
+    this.res.send = sinon.stub()
     this.res.status = sinon.stub().returns(this.res)
     this.res.end = sinon.stub()
     this.res.json = sinon.stub()
@@ -102,6 +101,16 @@ describe('SpellingController', function() {
 
       it('should not send a request to the spelling host', function() {
         this.request.called.should.equal(false)
+      })
+
+      it('should return an empty misspellings array', function() {
+        this.res.send
+          .calledWith(JSON.stringify({ misspellings: [] }))
+          .should.equal(true)
+      })
+
+      it('should return a 200 status', function() {
+        this.res.status.calledWith(200).should.equal(true)
       })
     })
   })
