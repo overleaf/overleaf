@@ -156,69 +156,6 @@ describe('SpellingAPIManager', function() {
       })
     })
 
-    describe('with a large collection of words', function() {
-      beforeEach(function(done) {
-        this.ASpell.promises.checkWords = sinon.spy(() =>
-          promiseStub(this.misspellings)
-        )
-        this.manyWords = __range__(1, 4500, true).map(i => 'word')
-        this.SpellingAPIManager.runRequest(
-          this.token,
-          { words: this.manyWords },
-          (error, result) => {
-            this.result = result
-            done()
-          }
-        )
-      })
-
-      it('should make concurrent requests of 1000 words', function() {
-        this.ASpell.promises.checkWords.callCount.should.equal(5)
-      })
-    })
-
-    describe('with a collection of words with the max size of a chunk', function() {
-      beforeEach(function(done) {
-        this.ASpell.promises.checkWords = sinon.spy(() =>
-          promiseStub(this.misspellings)
-        )
-        this.manyWords = __range__(1, 1000, true).map(i => 'word')
-        this.SpellingAPIManager.runRequest(
-          this.token,
-          { words: this.manyWords },
-          (error, result) => {
-            this.result = result
-            done()
-          }
-        )
-      })
-
-      it('should make a single request', function() {
-        this.ASpell.promises.checkWords.callCount.should.equal(1)
-      })
-    })
-
-    describe('with a very large collection of words', function() {
-      beforeEach(function(done) {
-        this.ASpell.promises.checkWords = sinon.spy(() =>
-          promiseStub(this.misspellings)
-        )
-        this.manyWords = __range__(1, 50000, true).map(i => 'word')
-        this.SpellingAPIManager.runRequest(
-          this.token,
-          { words: this.manyWords },
-          (error, result) => {
-            this.result = result
-            done()
-          }
-        )
-      })
-
-      it('should make a maximum of 10 concurrent requests', function() {
-        this.ASpell.promises.checkWords.callCount.should.equal(10)
-      })
-    })
-
     describe('with words from the whitelist', function() {
       beforeEach(function(done) {
         this.whitelistWord = this.SpellingAPIManager.whitelist[0]
@@ -293,13 +230,3 @@ describe('SpellingAPIManager', function() {
     })
   })
 })
-
-function __range__(left, right, inclusive) {
-  let range = []
-  let ascending = left < right
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i)
-  }
-  return range
-}

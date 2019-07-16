@@ -9,13 +9,9 @@
 const ASpell = require('./ASpell')
 const LearnedWordsManager = require('./LearnedWordsManager')
 const { callbackify } = require('util')
-const _ = require('underscore')
 
 // The max number of words checked in a single request
 const REQUEST_LIMIT = 10000
-
-// Size of each chunk of words sent to Aspell checker
-const CHUNK_SIZE = 1000
 
 const SpellingAPIManager = {
   whitelist: ['ShareLaTeX', 'sharelatex', 'LaTeX', 'http', 'https', 'www'],
@@ -53,19 +49,7 @@ const promises = {
     // only the first 10K words are checked
     const wordSlice = request.words.slice(0, REQUEST_LIMIT)
 
-    // word list is splitted into chunks and sent to Aspell concurrently
-    const chunks = _.chunk(wordSlice, CHUNK_SIZE)
-    const chunkResults = await Promise.all(
-      chunks.map(chunk => ASpell.promises.checkWords(lang, chunk))
-    )
-
-    // indexes have to be reconstructed for each chunk
-    chunkResults.forEach((result, chunkIndex) =>
-      result.forEach(msp => (msp.index += chunkIndex * CHUNK_SIZE))
-    )
-
-    // the final misspellings object is created merging all the chunks
-    const misspellings = _.flatten(chunkResults)
+    const misspellings = await ASpell.promises.checkWords(lang, wordSlice)
 
     if (token) {
       const learnedWords = await LearnedWordsManager.promises.getLearnedWords(
