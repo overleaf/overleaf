@@ -23,6 +23,9 @@ CookieParser = require("cookie-parser")
 DrainManager = require("./app/js/DrainManager")
 HealthCheckManager = require("./app/js/HealthCheckManager")
 
+# work around frame handler bug in socket.io v0.9.16
+require("./socket.io.patch.js") 
+
 # Set up socket.io server
 app = express()
 Metrics.injectMetricsRoute(app)
