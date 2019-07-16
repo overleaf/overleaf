@@ -31,7 +31,8 @@ describe('SpellingController', function() {
         request: this.request,
         'logger-sharelatex': {
           warn() {},
-          err() {}
+          err() {},
+          info() {}
         },
         'settings-sharelatex': {
           languages: [
