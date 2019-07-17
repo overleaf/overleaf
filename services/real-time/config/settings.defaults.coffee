@@ -52,6 +52,8 @@ settings =
 
 	continualPubsubTraffic: process.env['CONTINUAL_PUBSUB_TRAFFIC'] or false
 
+	checkEventOrder: process.env['CHECK_EVENT_ORDER'] or false
+	
 	sentry:
 		dsn: process.env.SENTRY_DSN
 	
