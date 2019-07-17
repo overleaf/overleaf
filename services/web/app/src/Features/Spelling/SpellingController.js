@@ -17,7 +17,7 @@ module.exports = {
       return res.status(422).send(JSON.stringify({ misspellings: [] }))
     }
 
-    if (language && !languageCodeIsSupported(language)) {
+    if (!languageCodeIsSupported(language)) {
       // this log statement can be changed to 'error' once projects with
       // unsupported languages are removed from the DB
       logger.info({ language }, 'language not supported')
