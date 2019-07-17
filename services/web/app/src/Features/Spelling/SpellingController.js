@@ -11,8 +11,16 @@ const languageCodeIsSupported = code =>
 module.exports = {
   proxyRequestToSpellingApi(req, res) {
     const { language } = req.body
+
+    if (!language) {
+      logger.error('"language" field should be included for spell checking')
+      return res.status(422).send(JSON.stringify({ misspellings: [] }))
+    }
+
     if (language && !languageCodeIsSupported(language)) {
-      logger.info({ language }, `language not supported`)
+      // this log statement can be changed to 'error' once projects with
+      // unsupported languages are removed from the DB
+      logger.info({ language }, 'language not supported')
       return res.status(422).send(JSON.stringify({ misspellings: [] }))
     }
 

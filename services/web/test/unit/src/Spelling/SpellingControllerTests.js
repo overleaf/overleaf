@@ -31,7 +31,7 @@ describe('SpellingController', function() {
         request: this.request,
         'logger-sharelatex': {
           warn() {},
-          err() {},
+          error() {},
           info() {}
         },
         'settings-sharelatex': {
@@ -97,6 +97,28 @@ describe('SpellingController', function() {
       beforeEach(function() {
         this.req.session.user._id = this.userId = 'user-id-123'
         this.req.body = { language: 'fi', words: ['blab'] }
+        this.controller.proxyRequestToSpellingApi(this.req, this.res)
+      })
+
+      it('should not send a request to the spelling host', function() {
+        this.request.called.should.equal(false)
+      })
+
+      it('should return an empty misspellings array', function() {
+        this.res.send
+          .calledWith(JSON.stringify({ misspellings: [] }))
+          .should.equal(true)
+      })
+
+      it('should return a 422 status', function() {
+        this.res.status.calledWith(422).should.equal(true)
+      })
+    })
+
+    describe('when no language is indicated', function() {
+      beforeEach(function() {
+        this.req.session.user._id = this.userId = 'user-id-123'
+        this.req.body = { words: ['blab'] }
         this.controller.proxyRequestToSpellingApi(this.req, this.res)
       })
 
