@@ -110,8 +110,8 @@ describe('SpellingController', function() {
           .should.equal(true)
       })
 
-      it('should return a 200 status', function() {
-        this.res.status.calledWith(200).should.equal(true)
+      it('should return a 422 status', function() {
+        this.res.status.calledWith(422).should.equal(true)
       })
     })
   })

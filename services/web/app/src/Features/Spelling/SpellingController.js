@@ -13,7 +13,7 @@ module.exports = {
     const { language } = req.body
     if (language && !languageCodeIsSupported(language)) {
       logger.info({ language }, `language not supported`)
-      return res.status(200).send(JSON.stringify({ misspellings: [] }))
+      return res.status(422).send(JSON.stringify({ misspellings: [] }))
     }
 
     const userId = AuthenticationController.getLoggedInUserId(req)
