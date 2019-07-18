@@ -1,5 +1,6 @@
 logger = require 'logger-sharelatex'
 metrics = require "metrics-sharelatex"
+settings = require "settings-sharelatex"
 
 ClientMap = new Map() # for each redis client, stores a Set of subscribed channels
 
@@ -34,7 +35,7 @@ module.exports = ChannelManager =
             metrics.inc "unsubscribe.#{baseChannel}"
 
     publish: (rclient, baseChannel, id, data) ->
-        if id is 'all'
+        if id is 'all' or !settings.publishOnIndividualChannels
             channel = baseChannel
         else
             channel = "#{baseChannel}:#{id}"
