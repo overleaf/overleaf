@@ -341,6 +341,32 @@ class User {
     })
   }
 
+  deleteUser(callback) {
+    this.getCsrfToken(error => {
+      if (error) {
+        return callback(error)
+      }
+      this.request.post(
+        {
+          url: '/user/delete',
+          json: { password: this.password }
+        },
+        (err, res) => {
+          if (err) {
+            return callback(err)
+          }
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            return callback(
+              new Error('Error received from API: ' + res.statusCode)
+            )
+          }
+
+          callback()
+        }
+      )
+    })
+  }
+
   getProject(project_id, callback) {
     if (callback == null) {
       callback = function(error, project) {}
@@ -397,7 +423,7 @@ class User {
     }
     return this.request.delete(
       {
-        url: `/project/${project_id}`
+        url: `/project/${project_id}?forever=true`
       },
       function(error, response, body) {
         if (error != null) {

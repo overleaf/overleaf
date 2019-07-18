@@ -33,19 +33,6 @@ const EmailHandler = require('../Email/EmailHandler')
 
 module.exports = UserController = {
   tryDeleteUser(req, res, next) {
-    return UserController._tryDeleteUser(UserDeleter.deleteUser, req, res, next)
-  },
-
-  trySoftDeleteUser(req, res, next) {
-    return UserController._tryDeleteUser(
-      UserDeleter.softDeleteUser,
-      req,
-      res,
-      next
-    )
-  },
-
-  _tryDeleteUser(deleteMethod, req, res, next) {
     const user_id = AuthenticationController.getLoggedInUserId(req)
     const { password } = req.body
     logger.log({ user_id }, 'trying to delete user account')
@@ -56,25 +43,25 @@ module.exports = UserController = {
       )
       return res.sendStatus(403)
     }
-    return AuthenticationManager.authenticate(
-      { _id: user_id },
-      password,
-      function(err, user) {
-        if (err != null) {
-          logger.warn(
-            { user_id },
-            'error authenticating during attempt to delete account'
-          )
-          return next(err)
-        }
-        if (!user) {
-          logger.err(
-            { user_id },
-            'auth failed during attempt to delete account'
-          )
-          return res.sendStatus(403)
-        }
-        return deleteMethod(user_id, function(err) {
+    AuthenticationManager.authenticate({ _id: user_id }, password, function(
+      err,
+      user
+    ) {
+      if (err != null) {
+        logger.warn(
+          { user_id },
+          'error authenticating during attempt to delete account'
+        )
+        return next(err)
+      }
+      if (!user) {
+        logger.err({ user_id }, 'auth failed during attempt to delete account')
+        return res.sendStatus(403)
+      }
+      UserDeleter.deleteUser(
+        user_id,
+        { deleterUser: user, ipAddress: req.ip },
+        function(err) {
           if (err != null) {
             if (err instanceof Errors.SubscriptionAdminDeletionError) {
               return res.status(422).json({ error: err.name })
@@ -87,7 +74,7 @@ module.exports = UserController = {
           if (typeof req.logout === 'function') {
             req.logout()
           }
-          return req.session.destroy(function(err) {
+          req.session.destroy(function(err) {
             if (err != null) {
               logger.warn({ err }, 'error destorying session')
               return next(err)
@@ -95,9 +82,9 @@ module.exports = UserController = {
             UserSessionsManager.untrackSession(user, sessionId)
             return res.sendStatus(200)
           })
-        })
-      }
-    )
+        }
+      )
+    })
   },
 
   unsubscribe(req, res) {
@@ -257,6 +244,27 @@ module.exports = UserController = {
       }
       const redirect_url = '/login'
       return res.redirect(redirect_url)
+    })
+  },
+
+  expireDeletedUser(req, res, next) {
+    const userId = req.params.userId
+    UserDeleter.expireDeletedUser(userId, error => {
+      if (error) {
+        return next(error)
+      }
+
+      res.sendStatus(204)
+    })
+  },
+
+  expireDeletedUsersAfterDuration(req, res, next) {
+    UserDeleter.expireDeletedUsersAfterDuration(error => {
+      if (error) {
+        return next(error)
+      }
+
+      res.sendStatus(204)
     })
   },
 

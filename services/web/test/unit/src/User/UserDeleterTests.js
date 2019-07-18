@@ -1,328 +1,466 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const sinon = require('sinon')
 const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
-const modulePath = '../../../../app/src/Features/User/UserDeleter.js'
+const sinon = require('sinon')
+const tk = require('timekeeper')
+const moment = require('moment')
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
+const ObjectId = require('mongoose').Types.ObjectId
+const { User } = require('../helpers/models/User')
+const { DeletedUser } = require('../helpers/models/DeletedUser')
 
-describe('UserDeleter', function() {
-  beforeEach(function() {
-    this.user = {
-      _id: '12390i',
-      email: 'bob@bob.com',
-      remove: sinon.stub().callsArgWith(0)
-    }
+const expect = chai.expect
 
-    this.User = { findById: sinon.stub().callsArgWith(1, null, this.user) }
+const modulePath = '../../../../app/src/Features/User/UserDeleter.js'
 
-    this.NewsletterManager = { unsubscribe: sinon.stub().callsArgWith(1) }
+describe('UserDeleter', () => {
+  beforeEach(() => {
+    tk.freeze(Date.now())
 
-    this.ProjectDeleter = { deleteUsersProjects: sinon.stub().callsArgWith(1) }
+    this.userId = ObjectId()
 
-    this.SubscriptionHandler = {
-      cancelSubscription: sinon.stub().callsArgWith(1)
-    }
+    this.UserMock = sinon.mock(User)
+    this.DeletedUserMock = sinon.mock(DeletedUser)
 
-    this.SubscriptionUpdater = {
-      removeUserFromAllGroups: sinon.stub().callsArgWith(1)
-    }
-
-    this.SubscriptionLocator = {
-      getUsersSubscription: sinon.stub().yields(null, null)
-    }
-
-    this.UserMembershipsHandler = {
-      removeUserFromAllEntities: sinon.stub().callsArgWith(1)
-    }
-
-    this.deleteAffiliations = sinon.stub().callsArgWith(1)
-
-    this.mongojs = {
-      db: {
-        deletedUsers: {
-          insert: sinon.stub().callsArg(1)
+    this.mockedUser = sinon.mock(
+      new User({
+        _id: this.userId,
+        email: 'bob@bob.com',
+        lastLoggedIn: Date.now() + 1000,
+        signUpDate: Date.now() + 2000,
+        loginCount: 10,
+        overleaf: {
+          id: 1234
         },
-        usersDeletedByMigration: {
-          insert: sinon.stub().callsArg(1)
-        }
+        refered_users: ['wombat', 'potato'],
+        refered_user_count: 2,
+        referal_id: ['giraffe']
+      })
+    )
+    this.user = this.mockedUser.object
+
+    this.NewsletterManager = { unsubscribe: sinon.stub().yields() }
+
+    this.ProjectDeleter = {
+      promises: {
+        deleteUsersProjects: sinon.stub().resolves()
       }
     }
 
-    return (this.UserDeleter = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
+    this.SubscriptionHandler = {
+      cancelSubscription: sinon.stub().yields()
+    }
+
+    this.SubscriptionUpdater = {
+      removeUserFromAllGroups: sinon.stub().yields()
+    }
+
+    this.SubscriptionLocator = {
+      getUsersSubscription: sinon.stub().yields()
+    }
+
+    this.UserMembershipsHandler = {
+      removeUserFromAllEntities: sinon.stub().yields()
+    }
+
+    this.InstitutionsApi = {
+      deleteAffiliations: sinon.stub().yields()
+    }
+
+    this.UserDeleter = SandboxedModule.require(modulePath, {
       requires: {
-        '../../models/User': {
-          User: this.User
-        },
+        '../../models/User': { User: User },
+        '../../models/DeletedUser': { DeletedUser: DeletedUser },
         '../Newsletter/NewsletterManager': this.NewsletterManager,
         '../Subscription/SubscriptionHandler': this.SubscriptionHandler,
         '../Subscription/SubscriptionUpdater': this.SubscriptionUpdater,
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
         '../UserMembership/UserMembershipsHandler': this.UserMembershipsHandler,
         '../Project/ProjectDeleter': this.ProjectDeleter,
-        '../Institutions/InstitutionsAPI': {
-          deleteAffiliations: this.deleteAffiliations
-        },
-        '../../infrastructure/mongojs': this.mongojs,
+        '../Institutions/InstitutionsAPI': this.InstitutionsApi,
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
           warn: sinon.stub(),
           err: sinon.stub()
         }),
         '../Errors/Errors': Errors
+      },
+      globals: {
+        console: console
       }
-    }))
+    })
   })
 
-  describe('softDeleteUserForMigration', function() {
-    beforeEach(function() {
-      return (this.UserDeleter._ensureCanDeleteUser = sinon.stub().yields(null))
+  afterEach(() => {
+    this.DeletedUserMock.restore()
+    this.UserMock.restore()
+    this.mockedUser.restore()
+  })
+
+  describe('deleteUser', () => {
+    beforeEach(() => {
+      this.UserDeleter.promises.ensureCanDeleteUser = sinon.stub().resolves()
+
+      this.UserMock.expects('findById')
+        .withArgs(this.userId)
+        .chain('exec')
+        .resolves(this.user)
     })
 
-    it('should delete the user in mongo', function(done) {
-      return this.UserDeleter.softDeleteUserForMigration(this.user._id, err => {
-        this.User.findById.calledWith(this.user._id).should.equal(true)
-        this.user.remove.called.should.equal(true)
-        return done()
+    describe('when the user can be deleted', () => {
+      beforeEach(() => {
+        this.deletedUser = {
+          user: this.user,
+          deleterData: {
+            deletedAt: new Date(),
+            deletedUserId: this.userId,
+            deleterIpAddress: undefined,
+            deleterId: undefined,
+            deletedUserLastLoggedIn: this.user.lastLoggedIn,
+            deletedUserSignUpDate: this.user.signUpDate,
+            deletedUserLoginCount: this.user.loginCount,
+            deletedUserReferralId: this.user.referal_id,
+            deletedUserReferredUsers: this.user.refered_users,
+            deletedUserReferredUserCount: this.user.refered_user_count,
+            deletedUserOverleafId: this.user.overleaf.id
+          }
+        }
+
+        this.UserMock.expects('deleteOne')
+          .withArgs({ _id: this.userId })
+          .chain('exec')
+          .resolves()
       })
-    })
 
-    it('should add the user to the deletedUsers collection', function(done) {
-      return this.UserDeleter.softDeleteUserForMigration(this.user._id, err => {
-        sinon.assert.calledWith(
-          this.mongojs.db.usersDeletedByMigration.insert,
-          this.user
-        )
-        return done()
-      })
-    })
+      describe('when no options are passed', () => {
+        beforeEach(() => {
+          this.DeletedUserMock.expects('create')
+            .withArgs(this.deletedUser)
+            .chain('exec')
+            .resolves()
+        })
 
-    it('should set the deletedAt field on the user', function(done) {
-      return this.UserDeleter.softDeleteUserForMigration(this.user._id, err => {
-        this.user.deletedAt.should.exist
-        return done()
-      })
-    })
+        it('should find and the user in mongo by its id', async () => {
+          await this.UserDeleter.promises.deleteUser(this.userId)
+          this.UserMock.verify()
+        })
 
-    it('should unsubscribe the user from the news letter', function(done) {
-      return this.UserDeleter.softDeleteUserForMigration(this.user._id, err => {
-        this.NewsletterManager.unsubscribe
-          .calledWith(this.user)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    it('should unsubscribe the user', function(done) {
-      return this.UserDeleter.softDeleteUserForMigration(this.user._id, err => {
-        this.SubscriptionHandler.cancelSubscription
-          .calledWith(this.user)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    it('should delete user affiliations', function(done) {
-      return this.UserDeleter.softDeleteUserForMigration(this.user._id, err => {
-        this.deleteAffiliations.calledWith(this.user._id).should.equal(true)
-        return done()
-      })
-    })
-
-    it('should delete all the projects of a user', function(done) {
-      return this.UserDeleter.softDeleteUserForMigration(this.user._id, err => {
-        this.ProjectDeleter.deleteUsersProjects
-          .calledWith(this.user._id)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    it('should remove user memberships', function(done) {
-      return this.UserDeleter.softDeleteUserForMigration(this.user._id, err => {
-        this.UserMembershipsHandler.removeUserFromAllEntities
-          .calledWith(this.user._id)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    it('ensures user can be deleted first', function(done) {
-      this.UserDeleter._ensureCanDeleteUser.yields(
-        new Errors.SubscriptionAdminDeletionError()
-      )
-      return this.UserDeleter.softDeleteUserForMigration(
-        this.user._id,
-        error => {
-          sinon.assert.calledWith(
-            this.UserDeleter._ensureCanDeleteUser,
+        it('should unsubscribe the user from the news letter', async () => {
+          await this.UserDeleter.promises.deleteUser(this.userId)
+          expect(this.NewsletterManager.unsubscribe).to.have.been.calledWith(
             this.user
           )
-          sinon.assert.notCalled(this.user.remove)
-          expect(error).to.be.instanceof(Errors.SubscriptionAdminDeletionError)
-          return done()
-        }
-      )
-    })
-  })
+        })
 
-  describe('deleteUser', function() {
-    beforeEach(function() {
-      return (this.UserDeleter._ensureCanDeleteUser = sinon.stub().yields(null))
-    })
+        it('should delete all the projects of a user', async () => {
+          await this.UserDeleter.promises.deleteUser(this.userId)
+          expect(
+            this.ProjectDeleter.promises.deleteUsersProjects
+          ).to.have.been.calledWith(this.userId)
+        })
 
-    it('should delete the user in mongo', function(done) {
-      return this.UserDeleter.deleteUser(this.user._id, err => {
-        this.User.findById.calledWith(this.user._id).should.equal(true)
-        this.user.remove.called.should.equal(true)
-        return done()
+        it("should cancel the user's subscription", async () => {
+          await this.UserDeleter.promises.deleteUser(this.userId)
+          expect(
+            this.SubscriptionHandler.cancelSubscription
+          ).to.have.been.calledWith(this.user)
+        })
+
+        it('should delete user affiliations', async () => {
+          await this.UserDeleter.promises.deleteUser(this.userId)
+          expect(
+            this.InstitutionsApi.deleteAffiliations
+          ).to.have.been.calledWith(this.userId)
+        })
+
+        it('should remove user from group subscriptions', async () => {
+          await this.UserDeleter.promises.deleteUser(this.userId)
+          expect(
+            this.SubscriptionUpdater.removeUserFromAllGroups
+          ).to.have.been.calledWith(this.userId)
+        })
+
+        it('should remove user memberships', async () => {
+          await this.UserDeleter.promises.deleteUser(this.userId)
+          expect(
+            this.UserMembershipsHandler.removeUserFromAllEntities
+          ).to.have.been.calledWith(this.userId)
+        })
+
+        it('ensures user can be deleted', async () => {
+          await this.UserDeleter.promises.deleteUser(this.userId)
+          expect(
+            this.UserDeleter.promises.ensureCanDeleteUser
+          ).to.have.been.calledWith(this.user)
+        })
+
+        it('should create a deletedUser', async () => {
+          await this.UserDeleter.promises.deleteUser(this.userId)
+          this.DeletedUserMock.verify()
+        })
+
+        describe('when unsubscribing from mailchimp fails', () => {
+          beforeEach(() => {
+            this.NewsletterManager.unsubscribe = sinon
+              .stub()
+              .yields(new Error('something went wrong'))
+          })
+
+          it('should not return an error', async () => {
+            try {
+              await this.UserDeleter.promises.deleteUser(this.userId)
+            } catch (error) {
+              expect(error).not.to.exist
+              expect.fail()
+            }
+            // check that we called `unsubscribe` to generate the error
+            expect(this.NewsletterManager.unsubscribe).to.have.been.calledWith(
+              this.user
+            )
+          })
+
+          it('should delete the user', async () => {
+            await this.UserDeleter.promises.deleteUser(this.userId)
+            this.UserMock.verify()
+          })
+
+          it('should log an error', async () => {
+            await this.UserDeleter.promises.deleteUser(this.userId)
+            sinon.assert.called(this.logger.err)
+          })
+        })
+
+        describe('when called as a callback', () => {
+          it('should delete the user', done => {
+            this.UserDeleter.deleteUser(this.userId, err => {
+              expect(err).not.to.exist
+              this.UserMock.verify()
+              this.DeletedUserMock.verify()
+              done()
+            })
+          })
+        })
+      })
+
+      describe('when a user and IP address are specified', () => {
+        beforeEach(() => {
+          this.ipAddress = '1.2.3.4'
+          this.deleterId = ObjectId()
+
+          this.deletedUser.deleterData.deleterIpAddress = this.ipAddress
+          this.deletedUser.deleterData.deleterId = this.deleterId
+
+          this.DeletedUserMock.expects('create')
+            .withArgs(this.deletedUser)
+            .chain('exec')
+            .resolves()
+        })
+
+        it('should add the deleted user id and ip address to the deletedUser', async () => {
+          await this.UserDeleter.promises.deleteUser(this.userId, {
+            deleterUser: { _id: this.deleterId },
+            ipAddress: this.ipAddress
+          })
+          this.DeletedUserMock.verify()
+        })
+
+        describe('when called as a callback', () => {
+          it('should delete the user', done => {
+            this.UserDeleter.deleteUser(
+              this.userId,
+              {
+                deleterUser: { _id: this.deleterId },
+                ipAddress: this.ipAddress
+              },
+              err => {
+                expect(err).not.to.exist
+                this.UserMock.verify()
+                this.DeletedUserMock.verify()
+                done()
+              }
+            )
+          })
+        })
       })
     })
 
-    it('should unsubscribe the user from the news letter', function(done) {
-      return this.UserDeleter.deleteUser(this.user._id, err => {
-        this.NewsletterManager.unsubscribe
-          .calledWith(this.user)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    it('should delete all the projects of a user', function(done) {
-      return this.UserDeleter.deleteUser(this.user._id, err => {
-        this.ProjectDeleter.deleteUsersProjects
-          .calledWith(this.user._id)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    it('should unsubscribe the user', function(done) {
-      return this.UserDeleter.deleteUser(this.user._id, err => {
-        this.SubscriptionHandler.cancelSubscription
-          .calledWith(this.user)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    it('should delete user affiliations', function(done) {
-      return this.UserDeleter.deleteUser(this.user._id, err => {
-        this.deleteAffiliations.calledWith(this.user._id).should.equal(true)
-        return done()
-      })
-    })
-
-    it('should remove user from group subscriptions', function(done) {
-      return this.UserDeleter.deleteUser(this.user._id, err => {
-        this.SubscriptionUpdater.removeUserFromAllGroups
-          .calledWith(this.user._id)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    it('should remove user memberships', function(done) {
-      return this.UserDeleter.deleteUser(this.user._id, err => {
-        this.UserMembershipsHandler.removeUserFromAllEntities
-          .calledWith(this.user._id)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    it('ensures user can be deleted first', function(done) {
-      this.UserDeleter._ensureCanDeleteUser.yields(
-        new Errors.SubscriptionAdminDeletionError()
-      )
-      return this.UserDeleter.deleteUser(this.user._id, error => {
-        sinon.assert.calledWith(
-          this.UserDeleter._ensureCanDeleteUser,
-          this.user
+    describe('when the user cannot be deleted because they are a subscription admin', () => {
+      beforeEach(() => {
+        this.UserDeleter.promises.ensureCanDeleteUser.rejects(
+          new Errors.SubscriptionAdminDeletionError()
         )
-        sinon.assert.notCalled(this.user.remove)
-        expect(error).to.be.instanceof(Errors.SubscriptionAdminDeletionError)
-        return done()
-      })
-    })
-
-    describe('when unsubscribing from mailchimp fails', function() {
-      beforeEach(function() {
-        return (this.NewsletterManager.unsubscribe = sinon
-          .stub()
-          .callsArgWith(1, new Error('something went wrong')))
       })
 
-      it('should not return an error', function(done) {
-        return this.UserDeleter.deleteUser(this.user._id, err => {
-          this.NewsletterManager.unsubscribe
-            .calledWith(this.user)
-            .should.equal(true)
-          should.not.exist(err)
-          return done()
-        })
+      it('fails with a SubscriptionAdminDeletionError', async () => {
+        let error
+        try {
+          await this.UserDeleter.promises.deleteUser(this.userId)
+        } catch (e) {
+          error = e
+        } finally {
+          expect(error).to.be.instanceof(Errors.SubscriptionAdminDeletionError)
+        }
       })
 
-      it('should delete the user', function(done) {
-        return this.UserDeleter.deleteUser(this.user._id, err => {
-          this.NewsletterManager.unsubscribe
-            .calledWith(this.user)
-            .should.equal(true)
-          this.user.remove.called.should.equal(true)
-          return done()
-        })
+      it('should not create a deletedUser', async () => {
+        try {
+          await this.UserDeleter.promises.deleteUser(this.userId)
+        } catch (e) {
+        } finally {
+          this.DeletedUserMock.verify()
+        }
       })
 
-      it('should log an error', function(done) {
-        return this.UserDeleter.deleteUser(this.user._id, err => {
-          sinon.assert.called(this.logger.err)
-          return done()
-        })
+      it('should not remove the user from mongo', async () => {
+        try {
+          await this.UserDeleter.promises.deleteUser(this.userId)
+        } catch (e) {
+        } finally {
+          this.UserMock.verify()
+        }
       })
     })
   })
 
-  describe('_ensureCanDeleteUser', function() {
-    it('should not return error when user can be deleted', function(done) {
+  describe('ensureCanDeleteUser', () => {
+    it('should not return error when user can be deleted', async () => {
       this.SubscriptionLocator.getUsersSubscription.yields(null, null)
-      return this.UserDeleter._ensureCanDeleteUser(this.user, function(error) {
-        expect(error).to.not.exist
-        return done()
-      })
+      let error
+      try {
+        await this.UserDeleter.promises.ensureCanDeleteUser(this.user)
+      } catch (e) {
+        error = e
+      } finally {
+        expect(error).not.to.exist
+      }
     })
 
-    it('should return custom error when user is group admin', function(done) {
+    it('should return custom error when user is group admin', async () => {
       this.SubscriptionLocator.getUsersSubscription.yields(null, {
         _id: '123abc'
       })
-      return this.UserDeleter._ensureCanDeleteUser(this.user, function(error) {
+      let error
+      try {
+        await this.UserDeleter.promises.ensureCanDeleteUser(this.user)
+      } catch (e) {
+        error = e
+      } finally {
         expect(error).to.be.instanceof(Errors.SubscriptionAdminDeletionError)
-        return done()
-      })
+      }
     })
 
-    it('propagate errors', function(done) {
+    it('propagates errors', async () => {
       this.SubscriptionLocator.getUsersSubscription.yields(
         new Error('Some error')
       )
-      return this.UserDeleter._ensureCanDeleteUser(this.user, function(error) {
+      let error
+      try {
+        await this.UserDeleter.promises.ensureCanDeleteUser(this.user)
+      } catch (e) {
+        error = e
+      } finally {
         expect(error).to.be.instanceof(Error)
-        return done()
+      }
+    })
+  })
+
+  describe('expireDeletedUsersAfterDuration', () => {
+    beforeEach(() => {
+      this.UserDeleter.promises.expireDeletedUser = sinon.stub().resolves()
+      this.deletedUsers = [
+        {
+          user: { _id: 'wombat' },
+          deleterData: { deletedUserId: 'wombat' }
+        },
+        {
+          user: { _id: 'potato' },
+          deleterData: { deletedUserId: 'potato' }
+        }
+      ]
+
+      this.DeletedUserMock.expects('find')
+        .withArgs({
+          'deleterData.deletedAt': {
+            $lt: new Date(moment().subtract(90, 'days'))
+          },
+          user: {
+            $ne: null
+          }
+        })
+        .chain('exec')
+        .resolves(this.deletedUsers)
+    })
+
+    it('calls expireDeletedUser for each user', async () => {
+      await this.UserDeleter.promises.expireDeletedUsersAfterDuration()
+      expect(
+        this.UserDeleter.promises.expireDeletedUser
+      ).to.have.been.calledWith('wombat')
+      expect(
+        this.UserDeleter.promises.expireDeletedUser
+      ).to.have.been.calledWith('potato')
+    })
+  })
+
+  describe('expireDeletedUser', () => {
+    beforeEach(() => {
+      this.mockedDeletedUser = sinon.mock(
+        new DeletedUser({
+          user: this.user,
+          deleterData: {
+            deleterIpAddress: '1.1.1.1',
+            deletedUserId: this.userId
+          }
+        })
+      )
+      this.deletedUser = this.mockedDeletedUser.object
+
+      this.mockedDeletedUser.expects('save').resolves()
+
+      this.DeletedUserMock.expects('findOne')
+        .withArgs({ 'deleterData.deletedUserId': 'giraffe' })
+        .chain('exec')
+        .resolves(this.deletedUser)
+    })
+
+    afterEach(() => {
+      this.mockedDeletedUser.restore()
+    })
+
+    it('should find the user by user ID', async () => {
+      await this.UserDeleter.promises.expireDeletedUser('giraffe')
+      this.DeletedUserMock.verify()
+    })
+
+    it('should remove the user data from mongo', async () => {
+      await this.UserDeleter.promises.expireDeletedUser('giraffe')
+      expect(this.deletedUser.user).not.to.exist
+    })
+
+    it('should remove the IP address from mongo', async () => {
+      await this.UserDeleter.promises.expireDeletedUser('giraffe')
+      expect(this.deletedUser.deleterData.ipAddress).not.to.exist
+    })
+
+    it('should not delete other deleterData fields', async () => {
+      await this.UserDeleter.promises.expireDeletedUser('giraffe')
+      expect(this.deletedUser.deleterData.deletedUserId).to.equal(this.userId)
+    })
+
+    it('should save the record to mongo', async () => {
+      await this.UserDeleter.promises.expireDeletedUser('giraffe')
+      this.mockedDeletedUser.verify()
+    })
+
+    describe('when called as a callback', () => {
+      it('should expire the user', done => {
+        this.UserDeleter.expireDeletedUser('giraffe', err => {
+          expect(err).not.to.exists
+          this.DeletedUserMock.verify()
+          this.mockedDeletedUser.verify()
+          expect(this.deletedUser.user).not.to.exist
+          expect(this.deletedUser.deleterData.ipAddress).not.to.exist
+          done()
+        })
       })
     })
   })

@@ -76,6 +76,12 @@ module.exports = MockDocStoreApi = {
       }
     })
 
+    app.post('/project/:project_id/destroy', (req, res, next) => {
+      const { project_id } = req.params
+      delete this.docs[project_id]
+      res.sendStatus(204)
+    })
+
     return app
       .listen(3016, function(error) {
         if (error != null) {

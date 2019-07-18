@@ -133,3 +133,4 @@ const User = conn.model('User', UserSchema)
 
 const model = mongoose.model('User', UserSchema)
 exports.User = User
+exports.UserSchema = UserSchema

@@ -161,6 +161,31 @@ module.exports = ProjectController = {
     }
   },
 
+  expireDeletedProjectsAfterDuration(req, res) {
+    logger.log(
+      'received request to look for old deleted projects and expire them'
+    )
+    projectDeleter.expireDeletedProjectsAfterDuration(function(err) {
+      if (err != null) {
+        return res.sendStatus(500)
+      } else {
+        return res.sendStatus(200)
+      }
+    })
+  },
+
+  expireDeletedProject(req, res, next) {
+    const { projectId } = req.params
+    logger.log('received request to expire deleted project', { projectId })
+    projectDeleter.expireDeletedProject(projectId, function(err) {
+      if (err != null) {
+        return next(err)
+      } else {
+        return res.sendStatus(200)
+      }
+    })
+  },
+
   restoreProject(req, res) {
     const project_id = req.params.Project_id
     logger.log({ project_id }, 'received request to restore project')

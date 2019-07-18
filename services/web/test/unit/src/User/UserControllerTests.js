@@ -48,7 +48,7 @@ describe('UserController', function() {
       }
     }
 
-    this.UserDeleter = { deleteUser: sinon.stub().callsArgWith(1) }
+    this.UserDeleter = { deleteUser: sinon.stub().yields() }
     this.UserGetter = { getUser: sinon.stub().callsArgWith(1, null, this.user) }
     this.User = { findById: sinon.stub().callsArgWith(1, null, this.user) }
     this.NewsLetterManager = { unsubscribe: sinon.stub().callsArgWith(1) }
@@ -132,7 +132,6 @@ describe('UserController', function() {
       this.AuthenticationManager.authenticate = sinon
         .stub()
         .callsArgWith(2, null, this.user)
-      return (this.UserDeleter.deleteUser = sinon.stub().callsArgWith(1, null))
     })
 
     it('should send 200', function(done) {
@@ -214,7 +213,7 @@ describe('UserController', function() {
       beforeEach(function() {
         return (this.UserDeleter.deleteUser = sinon
           .stub()
-          .callsArgWith(1, new Error('woops')))
+          .yields(new Error('woops')))
       })
 
       it('should call next with an error', function(done) {

@@ -569,6 +569,27 @@ module.exports = class Router {
       MetaController.broadcastMetadataForDoc
     )
 
+    privateApiRouter.post(
+      '/internal/expire-deleted-projects-after-duration',
+      AuthenticationController.httpAuth,
+      ProjectController.expireDeletedProjectsAfterDuration
+    )
+    privateApiRouter.post(
+      '/internal/expire-deleted-users-after-duration',
+      AuthenticationController.httpAuth,
+      UserController.expireDeletedUsersAfterDuration
+    )
+    privateApiRouter.post(
+      '/internal/project/:projectId/expire-deleted-project',
+      AuthenticationController.httpAuth,
+      ProjectController.expireDeletedProject
+    )
+    privateApiRouter.post(
+      '/internal/users/:userId/expire',
+      AuthenticationController.httpAuth,
+      UserController.expireDeletedUser
+    )
+
     webRouter.get(
       '/tag',
       AuthenticationController.requireLogin(),

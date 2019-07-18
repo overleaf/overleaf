@@ -141,6 +141,10 @@ module.exports = MockV1Api = {
       return res.sendStatus(201)
     })
 
+    app.delete('/api/v2/users/:userId/affiliations', (req, res, next) => {
+      return res.sendStatus(201)
+    })
+
     app.delete(
       '/api/v2/users/:userId/affiliations/:email',
       (req, res, next) => {

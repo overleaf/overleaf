@@ -23,6 +23,10 @@ const { assert } = require('chai')
 describe('ProjectGetter', function() {
   beforeEach(function() {
     this.callback = sinon.stub()
+    this.deletedProject = { deleterData: { wombat: 'potato' } }
+    this.DeletedProject = {
+      find: sinon.stub().yields(null, [this.deletedProject])
+    }
     return (this.ProjectGetter = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -40,6 +44,9 @@ describe('ProjectGetter', function() {
         },
         '../../models/Project': {
           Project: (this.Project = {})
+        },
+        '../../models/DeletedProject': {
+          DeletedProject: this.DeletedProject
         },
         '../Collaborators/CollaboratorsHandler': (this.CollaboratorsHandler = {}),
         '../../infrastructure/LockManager': (this.LockManager = {
@@ -382,6 +389,30 @@ describe('ProjectGetter', function() {
 
       it('should callback with error', function() {
         return this.callback.calledWith('error').should.equal(true)
+      })
+    })
+  })
+
+  describe('getUsersDeletedProjects', function() {
+    it('should look up the deleted projects by deletedProjectOwnerId', function(done) {
+      this.ProjectGetter.getUsersDeletedProjects('giraffe', err => {
+        if (err) {
+          return done(err)
+        }
+        sinon.assert.calledWith(this.DeletedProject.find, {
+          'deleterData.deletedProjectOwnerId': 'giraffe'
+        })
+        done()
+      })
+    })
+
+    it('should pass the found projects to the callback', function(done) {
+      this.ProjectGetter.getUsersDeletedProjects('giraffe', (err, docs) => {
+        if (err) {
+          return done(err)
+        }
+        expect(docs).to.deep.equal([this.deletedProject])
+        done()
       })
     })
   })

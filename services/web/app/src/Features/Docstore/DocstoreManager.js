@@ -214,50 +214,40 @@ module.exports = DocstoreManager = {
   },
 
   archiveProject(project_id, callback) {
-    const url = `${settings.apis.docstore.url}/project/${project_id}/archive`
-    logger.log({ project_id }, 'archiving project in docstore')
-    return request.post(url, function(err, res, docs) {
-      if (err != null) {
-        logger.warn({ err, project_id }, 'error archving project in docstore')
-        return callback(err)
-      }
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        return callback()
-      } else {
-        const error = new Error(
-          `docstore api responded with non-success code: ${res.statusCode}`
-        )
-        logger.warn(
-          { err: error, project_id },
-          'error archiving project in docstore'
-        )
-        return callback(error)
-      }
-    })
+    DocstoreManager._operateOnProject(project_id, 'archive', callback)
   },
 
   unarchiveProject(project_id, callback) {
-    const url = `${settings.apis.docstore.url}/project/${project_id}/unarchive`
-    logger.log({ project_id }, 'unarchiving project in docstore')
-    return request.post(url, function(err, res, docs) {
+    DocstoreManager._operateOnProject(project_id, 'unarchive', callback)
+  },
+
+  destroyProject(project_id, callback) {
+    DocstoreManager._operateOnProject(project_id, 'destroy', callback)
+  },
+
+  _operateOnProject(project_id, method, callback) {
+    const url = `${settings.apis.docstore.url}/project/${project_id}/${method}`
+    logger.log({ project_id }, `calling ${method} for project in docstore`)
+    request.post(url, function(err, res, docs) {
       if (err != null) {
         logger.warn(
           { err, project_id },
-          'error unarchiving project in docstore'
+          `error calling ${method} project in docstore`
         )
         return callback(err)
       }
+
       if (res.statusCode >= 200 && res.statusCode < 300) {
-        return callback()
+        callback()
       } else {
         const error = new Error(
           `docstore api responded with non-success code: ${res.statusCode}`
         )
         logger.warn(
           { err: error, project_id },
-          'error unarchiving project in docstore'
+          `error calling ${method} project in docstore`
         )
-        return callback(error)
+        callback(error)
       }
     })
   }

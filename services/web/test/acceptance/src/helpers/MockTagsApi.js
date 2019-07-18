@@ -11,6 +11,10 @@ const MockTagsApi = {
       res.json(tags)
     })
 
+    app.delete('/user/:user_id/project/:project_id', (req, res) => {
+      res.sendStatus(200)
+    })
+
     app
       .listen(3012, function(error) {
         if (error) {

@@ -5148,6 +5148,16 @@
         "object-assign": "^4.1.1"
       }
     },
+    "create-thenable": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/create-thenable/-/create-thenable-1.0.2.tgz",
+      "integrity": "sha512-yk1hts1Z13S2gtW0GAPicV928+VDY3snEi7gJf5hoU5bhruBDuD8U+bF/KwIqpK4UhWBzNkZr/53Qj+eBK5CZQ==",
+      "dev": true,
+      "requires": {
+        "object.omit": "~2.0.0",
+        "unique-concat": "~0.2.2"
+      }
+    },
     "cross-spawn": {
       "version": "5.1.0",
       "resolved": "https://registry.npmjs.org/cross-spawn/-/cross-spawn-5.1.0.tgz",
@@ -13255,6 +13265,12 @@
         }
       }
     },
+    "native-promise-only": {
+      "version": "0.8.1",
+      "resolved": "https://registry.npmjs.org/native-promise-only/-/native-promise-only-0.8.1.tgz",
+      "integrity": "sha512-zkVhZUA3y8mbz652WrL5x0fB0ehrBkulWT3TomAQ9iDtyXZvzKeEA6GPxAItBYeNYl5yngKRX612qHOhvMkDeg==",
+      "dev": true
+    },
     "natural-compare": {
       "version": "1.4.0",
       "resolved": "https://registry.npmjs.org/natural-compare/-/natural-compare-1.4.0.tgz",
@@ -17247,10 +17263,26 @@
         "util": ">=0.10.3 <1"
       }
     },
+    "sinon-as-promised": {
+      "version": "4.0.3",
+      "resolved": "https://registry.npmjs.org/sinon-as-promised/-/sinon-as-promised-4.0.3.tgz",
+      "integrity": "sha512-9vApOPQydJD7ZFRGZGD4+6Am5NU3QqlFdpbbZbnvdOoZte8cp4dOb0ej8CHfMlyfJtbweXOnmj/TimBkfcB/GA==",
+      "dev": true,
+      "requires": {
+        "create-thenable": "~1.0.0",
+        "native-promise-only": "~0.8.1"
+      }
+    },
     "sinon-chai": {
       "version": "2.14.0",
       "resolved": "https://registry.npmjs.org/sinon-chai/-/sinon-chai-2.14.0.tgz",
       "integrity": "sha512-9stIF1utB0ywNHNT7RgiXbdmen8QDCRsrTjw+G9TgKt1Yexjiv8TOWZ6WHsTPz57Yky3DIswZvEqX8fpuHNDtQ==",
+      "dev": true
+    },
+    "sinon-mongoose": {
+      "version": "2.3.0",
+      "resolved": "https://registry.npmjs.org/sinon-mongoose/-/sinon-mongoose-2.3.0.tgz",
+      "integrity": "sha512-d0rrL53wuDDs91GMCFAvQam64IpdVfkaxA4cGLTZfw1d5tTg6+F/D7F080d1n3d1gSHJBZLUf9pGpijC/x7xKQ==",
       "dev": true
     },
     "sixpack-client": {
@@ -18816,6 +18848,12 @@
           }
         }
       }
+    },
+    "unique-concat": {
+      "version": "0.2.2",
+      "resolved": "https://registry.npmjs.org/unique-concat/-/unique-concat-0.2.2.tgz",
+      "integrity": "sha512-nFT3frbsvTa9rrc71FJApPqXF8oIhVHbX3IWgObQi1mF7WrW48Ys70daL7o4evZUtmUf6Qn6WK0LbHhyO0hpXw==",
+      "dev": true
     },
     "unique-string": {
       "version": "1.0.0",

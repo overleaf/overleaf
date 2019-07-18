@@ -581,4 +581,42 @@ describe('DocstoreManager', function() {
       })
     })
   })
+
+  describe('destroyProject', function() {
+    describe('with a successful response code', function() {
+      beforeEach(function() {
+        this.request.post = sinon
+          .stub()
+          .callsArgWith(1, null, { statusCode: 204 })
+        return this.DocstoreManager.destroyProject(
+          this.project_id,
+          this.callback
+        )
+      })
+
+      it('should call the callback', function() {
+        return this.callback.called.should.equal(true)
+      })
+    })
+
+    describe('with a failed response code', function() {
+      beforeEach(function() {
+        this.request.post = sinon
+          .stub()
+          .callsArgWith(1, null, { statusCode: 500 })
+        return this.DocstoreManager.destroyProject(
+          this.project_id,
+          this.callback
+        )
+      })
+
+      it('should call the callback with an error', function() {
+        return this.callback
+          .calledWith(
+            new Error('docstore api responded with non-success code: 500')
+          )
+          .should.equal(true)
+      })
+    })
+  })
 })
