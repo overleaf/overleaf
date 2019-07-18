@@ -13,8 +13,6 @@ define([
   'libs/angular-sanitize-1.6.4',
   'libs/angular-cookie',
   'libs/passfield',
-  'libs/sixpack',
-  'libs/angular-sixpack',
   'libs/ng-tags-input-3.0.0',
   'libs/select/select'
 ], function() {})

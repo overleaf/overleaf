@@ -81,7 +81,6 @@ define([
     $timeout,
     ide,
     localStorage,
-    sixpack,
     event_tracking,
     metadata,
     $q,

@@ -13,7 +13,6 @@ module.exports = function (config) {
     },
     browsers: ['ChromeCustom'],
     files: [
-      'test/unit_frontend/js/bootstrap.js',
       'test/unit_frontend/es/es-bootstrap.js',
       // Angular must be loaded before requirejs to set up angular global
       'public/js/libs/angular-1.6.4.min.js',

@@ -13,12 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define(['base'], App =>
-  App.controller('FreeTrialModalController', function(
-    $scope,
-    abTestManager,
-    sixpack,
-    event_tracking
-  ) {
+  App.controller('FreeTrialModalController', function($scope, event_tracking) {
     $scope.buttonClass = 'btn-primary'
 
     return ($scope.startFreeTrial = function(source, couponCode) {
