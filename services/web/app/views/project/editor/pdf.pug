@@ -312,11 +312,11 @@ div.full-size.pdf(ng-controller="PdfController")
 			if settings.enableSubscriptions
 				.alert.alert-success(ng-show="pdf.timedout && !hasPremiumCompile")
 					p(ng-if="project.owner._id == user.id")
-						strong #{translate("upgrade_for_faster_compiles")}
+						strong #{translate("upgrade_for_longer_compiles")}
 					p(ng-if="project.owner._id != user.id")
-						strong #{translate("ask_proj_owner_to_upgrade_for_faster_compiles")}
+						strong #{translate("ask_proj_owner_to_upgrade_for_longer_compiles")}
 					p #{translate("free_accounts_have_timeout_upgrade_to_increase")}
-					p Plus:
+					p #{translate("plus_upgraded_accounts_receive")}:
 					div
 						ul.list-unstyled
 							li
