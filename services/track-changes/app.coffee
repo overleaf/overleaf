@@ -80,15 +80,6 @@ app.get "/check_lock", HttpController.checkLock
 
 app.get "/health_check",  HttpController.healthCheck
 
-profiler = require "v8-profiler"
-app.get "/profile", (req, res) ->
-	time = parseInt(req.query.time || "1000")
-	profiler.startProfiling("test")
-	setTimeout () ->
-		profile = profiler.stopProfiling("test")
-		res.json(profile)
-	, time
-
 app.use (error, req, res, next) ->
 	logger.error err: error, req: req, "an internal error occured"
 	res.send 500
