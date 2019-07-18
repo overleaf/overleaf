@@ -5,6 +5,7 @@ AuthorizationManager = require "./AuthorizationManager"
 DocumentUpdaterManager = require "./DocumentUpdaterManager"
 ConnectedUsersManager = require "./ConnectedUsersManager"
 WebsocketLoadBalancer = require "./WebsocketLoadBalancer"
+RoomManager = require "./RoomManager"
 Utils = require "./Utils"
 
 module.exports = WebsocketController =
@@ -25,7 +26,7 @@ module.exports = WebsocketController =
 				logger.warn {err, project_id, user_id, client_id: client.id}, "user is not authorized to join project"
 				return callback(err)
 				
-			client.join project_id
+			RoomManager.joinProject(client, project_id)
 
 			client.set("privilege_level", privilegeLevel)
 			client.set("user_id", user_id)
@@ -71,6 +72,7 @@ module.exports = WebsocketController =
 				if err?
 					logger.error {err, project_id, user_id, client_id: client.id}, "error marking client as disconnected"
 					
+			RoomManager.leaveProjectAndDocs(client)
 			setTimeout () ->
 				remainingClients = io.sockets.clients(project_id)
 				if remainingClients.length == 0
@@ -116,7 +118,7 @@ module.exports = WebsocketController =
 							return callback(err)
 
 					AuthorizationManager.addAccessToDoc client, doc_id
-					client.join(doc_id)
+					RoomManager.joinDoc(client, doc_id)
 					callback null, escapedLines, version, ops, ranges
 					logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joined doc"
 					
@@ -124,7 +126,7 @@ module.exports = WebsocketController =
 		metrics.inc "editor.leave-doc"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			logger.log {user_id, project_id, doc_id, client_id: client.id}, "client leaving doc"
-			client.leave doc_id
+			RoomManager.leaveDoc(client, doc_id)
 			# we could remove permission when user leaves a doc, but because
 			# the connection is per-project, we continue to allow access
 			# after the initial joinDoc since we know they are already authorised.

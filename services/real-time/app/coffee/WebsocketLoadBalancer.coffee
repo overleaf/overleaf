@@ -4,6 +4,8 @@ RedisClientManager = require "./RedisClientManager"
 SafeJsonParse = require "./SafeJsonParse"
 EventLogger = require "./EventLogger"
 HealthCheckManager = require "./HealthCheckManager"
+RoomManager = require "./RoomManager"
+ChannelManager = require "./ChannelManager"
 
 module.exports = WebsocketLoadBalancer =
 	rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub)
@@ -18,8 +20,9 @@ module.exports = WebsocketLoadBalancer =
 			message: message
 			payload: payload
 		logger.log {room_id, message, payload, length: data.length}, "emitting to room"
+
 		for rclientPub in @rclientPubList
-			rclientPub.publish "editor-events", data
+			ChannelManager.publish rclientPub, "editor-events", room_id, data
 
 	emitToAll: (message, payload...) ->
 		@emitToRoom "all", message, payload...
@@ -32,6 +35,15 @@ module.exports = WebsocketLoadBalancer =
 			rclientSub.on "message", (channel, message) ->
 				EventLogger.debugEvent(channel, message) if Settings.debugEvents > 0
 				WebsocketLoadBalancer._processEditorEvent io, channel, message
+		for rclientSub in @rclientSubList
+			@handleRoomUpdates(rclientSub)
+
+	handleRoomUpdates: (rclientSub) ->
+		roomEvents = RoomManager.eventSource()
+		roomEvents.on 'project-active', (project_id) ->
+			ChannelManager.subscribe rclientSub, "editor-events", project_id
+		roomEvents.on 'project-empty', (project_id) ->
+			ChannelManager.unsubscribe rclientSub, "editor-events", project_id
 
 	_processEditorEvent: (io, channel, message) ->
 		SafeJsonParse.parse message, (error, message) ->
