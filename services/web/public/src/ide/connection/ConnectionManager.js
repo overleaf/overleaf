@@ -206,7 +206,7 @@ define([], function() {
           this.ide.showGenericMessageModal(
             'Please Refresh',
             `\
-We're performing maintenance on ShareLaTeX and you need to refresh the editor.
+We're performing maintenance on Overleaf and you need to refresh the editor.
 Sorry for any inconvenience.
 The editor will refresh in automatically in 10 seconds.\
 `
