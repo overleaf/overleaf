@@ -6,7 +6,7 @@
     "async": "^0.9.0",
     "bson": "^1.0.4",
     "coffee-script": "^1.11.1",
-    "east": "0.5.7",
+    "east": "1.0.0",
     "east-mongo": "0.3.3",
     "grunt-shell": "^1.1.1",
     "load-grunt-config": "^0.19.2",
