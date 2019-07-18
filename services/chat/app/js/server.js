@@ -33,16 +33,6 @@ if (app.get('env') === 'production') {
   app.use(express.errorHandler())
 }
 
-const profiler = require('v8-profiler')
-app.get('/profile', function(req, res) {
-  const time = parseInt(req.query.time || '1000')
-  profiler.startProfiling('test')
-  return setTimeout(function() {
-    const profile = profiler.stopProfiling('test')
-    return res.json(profile)
-  }, time)
-})
-
 Router.route(app)
 
 module.exports = {
