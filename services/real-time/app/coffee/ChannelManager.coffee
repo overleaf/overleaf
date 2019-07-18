@@ -16,9 +16,9 @@ module.exports = ChannelManager =
         existingChannelSet = ClientMap.get(rclient) || @_createNewClientEntry(rclient)
         channel = "#{baseChannel}:#{id}"
         if existingChannelSet.has(channel)
-            logger.error {channel}, "already subscribed"
+            logger.error {channel}, "already subscribed - shouldn't happen"
         else
-            rclient.subscribe channel
+            rclient.subscribe channel # completes in the background
             existingChannelSet.add(channel)
             logger.log {channel}, "subscribed to new channel"
             metrics.inc "subscribe.#{baseChannel}"
@@ -27,9 +27,9 @@ module.exports = ChannelManager =
         existingChannelSet = ClientMap.get(rclient)
         channel = "#{baseChannel}:#{id}"
         if !existingChannelSet.has(channel)
-            logger.error {channel}, "not subscribed, cannot unsubscribe"
+            logger.error {channel}, "not subscribed - shouldn't happen"
         else
-            rclient.unsubscribe channel
+            rclient.unsubscribe channel # completes in the background
             existingChannelSet.delete(channel)
             logger.log {channel}, "unsubscribed from channel"
             metrics.inc "unsubscribe.#{baseChannel}"
