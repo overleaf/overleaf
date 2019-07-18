@@ -1,0 +1,20 @@
+extends ../layout
+
+block vars
+	- metadata = { viewport: true }
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
+					.card
+						.page-header
+							h1 We're back!
+						p Overleaf is now running normally.
+						p
+							| Please
+							|
+							a(href="/login") log in
+							|
+							| to continue working on your projects.

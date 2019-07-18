@@ -67,6 +67,14 @@ module.exports = class Router {
 
     webRouter.post('/login', AuthenticationController.passportLogin)
 
+    webRouter.get(
+      '/read-only/one-time-login',
+      UserPagesController.oneTimeLoginPage
+    )
+    AuthenticationController.addEndpointToLoginWhitelist(
+      '/read-only/one-time-login'
+    )
+
     webRouter.get('/logout', UserPagesController.logoutPage)
     webRouter.post('/logout', UserController.logout)
 

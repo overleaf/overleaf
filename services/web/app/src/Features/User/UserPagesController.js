@@ -1,30 +1,11 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let UserPagesController
 const UserGetter = require('./UserGetter')
 const UserSessionsManager = require('./UserSessionsManager')
 const ErrorController = require('../Errors/ErrorController')
 const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
-const Errors = require('../Errors/Errors')
-const request = require('request')
-const fs = require('fs')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 
-module.exports = UserPagesController = {
+const UserPagesController = {
   registerPage(req, res) {
     const sharedProjectData = {
       project_name: req.query.project_name,
@@ -36,7 +17,7 @@ module.exports = UserPagesController = {
       newTemplateData.templateName = req.session.templateData.templateName
     }
 
-    return res.render('user/register', {
+    res.render('user/register', {
       title: 'register',
       sharedProjectData,
       newTemplateData,
@@ -44,21 +25,18 @@ module.exports = UserPagesController = {
     })
   },
 
-  activateAccountPage(req, res) {
+  activateAccountPage(req, res, next) {
     // An 'activation' is actually just a password reset on an account that
     // was set with a random password originally.
     logger.log({ query: req.query }, 'activiate account page called')
-    if (
-      (req.query != null ? req.query.user_id : undefined) == null ||
-      (req.query != null ? req.query.token : undefined) == null
-    ) {
+    if (req.query.user_id == null || req.query.token == null) {
       return ErrorController.notFound(req, res)
     }
 
-    return UserGetter.getUser(
+    UserGetter.getUser(
       req.query.user_id,
       { email: 1, loginCount: 1 },
-      function(error, user) {
+      (error, user) => {
         if (error != null) {
           return next(error)
         }
@@ -73,9 +51,9 @@ module.exports = UserPagesController = {
           // Already seen this user, so account must be activate
           // This lets users keep clicking the 'activate' link in their email
           // as a way to log in which, if I know our users, they will.
-          return res.redirect(`/login?email=${encodeURIComponent(user.email)}`)
+          res.redirect(`/login?email=${encodeURIComponent(user.email)}`)
         } else {
-          return res.render('user/activate', {
+          res.render('user/activate', {
             title: 'activate_account',
             email: user.email,
             token: req.query.token
@@ -98,34 +76,41 @@ module.exports = UserPagesController = {
       )
       AuthenticationController.setRedirectInSession(req, req.query.redir)
     }
-    return res.render('user/login', {
+    res.render('user/login', {
       title: 'login',
       email: req.query.email
     })
   },
 
+  /**
+   * Landing page for users who may have received one-time login
+   * tokens from the read-only maintenance site.
+   *
+   * We tell them that Overleaf is back up and that they can login normally.
+   */
+  oneTimeLoginPage(req, res, next) {
+    res.render('user/one_time_login')
+  },
+
   logoutPage(req, res) {
-    return res.render('user/logout')
+    res.render('user/logout')
   },
 
   renderReconfirmAccountPage(req, res) {
-    const page_data = {
-      reconfirm_email: __guard__(
-        req != null ? req.session : undefined,
-        x => x.reconfirm_email
-      )
+    const pageData = {
+      reconfirm_email: req.session.reconfirm_email
     }
     // when a user must reconfirm their account
-    return res.render('user/reconfirm', page_data)
+    res.render('user/reconfirm', pageData)
   },
 
   settingsPage(req, res, next) {
-    const user_id = AuthenticationController.getLoggedInUserId(req)
+    const userId = AuthenticationController.getLoggedInUserId(req)
     const ssoError = req.session.ssoError
     if (ssoError) {
       delete req.session.ssoError
     }
-    logger.log({ user: user_id }, 'loading settings page')
+    logger.log({ user: userId }, 'loading settings page')
     let shouldAllowEditingDetails = true
     if (Settings.ldap && Settings.ldap.updateUserDetailsOnLogin) {
       shouldAllowEditingDetails = false
@@ -135,7 +120,7 @@ module.exports = UserPagesController = {
     }
     const oauthProviders = Settings.oauthProviders || {}
 
-    return UserGetter.getUser(user_id, function(err, user) {
+    UserGetter.getUser(userId, (err, user) => {
       if (err != null) {
         return next(err)
       }
@@ -160,16 +145,16 @@ module.exports = UserPagesController = {
 
   sessionsPage(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
-    logger.log({ user_id: user._id }, 'loading sessions page')
-    return UserSessionsManager.getAllUserSessions(
+    logger.log({ userId: user._id }, 'loading sessions page')
+    UserSessionsManager.getAllUserSessions(
       user,
       [req.sessionID],
-      function(err, sessions) {
+      (err, sessions) => {
         if (err != null) {
-          logger.warn({ user_id: user._id }, 'error getting all user sessions')
+          logger.warn({ userId: user._id }, 'error getting all user sessions')
           return next(err)
         }
-        return res.render('user/sessions', {
+        res.render('user/sessions', {
           title: 'sessions',
           sessions
         })
@@ -187,7 +172,7 @@ module.exports = UserPagesController = {
     ) {
       return null
     }
-    return user.thirdPartyIdentifiers.reduce(function(obj, identifier) {
+    return user.thirdPartyIdentifiers.reduce((obj, identifier) => {
       obj[identifier.providerId] = identifier.externalUserId
       return obj
     }, {})
@@ -208,8 +193,5 @@ module.exports = UserPagesController = {
     return result
   }
 }
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
+
+module.exports = UserPagesController
