@@ -215,11 +215,11 @@ async function undeleteProject(project_id) {
   }).exec()
 
   if (!deletedProject) {
-    throw Errors.NotFoundError('project_not_found')
+    throw new Errors.NotFoundError('project_not_found')
   }
 
   if (!deletedProject.project) {
-    throw Errors.NotFoundError('project_too_old_to_restore')
+    throw new Errors.NotFoundError('project_too_old_to_restore')
   }
 
   let restored = new Project(deletedProject.project)
