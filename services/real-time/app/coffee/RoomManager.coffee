@@ -26,15 +26,20 @@ module.exports = RoomManager =
         @_leave client, "doc", doc_id
 
     leaveProjectAndDocs: (client) ->
-        # what rooms is this client in? we need to leave them all
-        # FIXME: socket.io will cause us to leave the rooms, so we only need
-        # to manage our channel subscriptions
+        # what rooms is this client in? we need to leave them all. socket.io
+        # will cause us to leave the rooms, so we only need to manage our
+        # channel subscriptions... but it will be safer if we leave them
+        # explicitly, and then socket.io will just regard this as a client that
+        # has not joined any rooms and do a final disconnection.
         for id in @_roomsClientIsIn(client)
             entity = IdMap.get(id)
             @_leave client, entity, id
 
     eventSource: () ->
         return RoomEvents
+
+    # internal functions below, these access socket.io rooms data directly and
+    # will need updating for socket.io v2
 
     _clientsInRoom: (client, room) ->
         nsp = client.namespace.name
