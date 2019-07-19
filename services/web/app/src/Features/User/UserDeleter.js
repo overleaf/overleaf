@@ -90,7 +90,7 @@ async function ensureCanDeleteUser(user) {
       }
 
       if (subscription) {
-        return reject(new Errors.SubscriptionAdminDeletionError())
+        return reject(new Errors.SubscriptionAdminDeletionError({}))
       }
 
       resolve()

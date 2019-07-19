@@ -50,6 +50,7 @@ const translations = require('translations-sharelatex').setup(Settings.i18n)
 const Modules = require('./Modules')
 
 const ErrorController = require('../Features/Errors/ErrorController')
+const HttpErrorController = require('../Features/Errors/HttpErrorController')
 const UserSessionsManager = require('../Features/User/UserSessionsManager')
 const AuthenticationController = require('../Features/Authentication/AuthenticationController')
 
@@ -232,6 +233,7 @@ const enableApiRouter =
 if (enableApiRouter || notDefined(enableApiRouter)) {
   logger.info('providing api router')
   app.use(privateApiRouter)
+  app.use(HttpErrorController.handleError)
   app.use(ErrorController.handleApiError)
 }
 
@@ -240,8 +242,10 @@ const enableWebRouter =
 if (enableWebRouter || notDefined(enableWebRouter)) {
   logger.info('providing web router')
   app.use(publicApiRouter) // public API goes with web router for public access
+  app.use(HttpErrorController.handleError)
   app.use(ErrorController.handleApiError)
   app.use(webRouter)
+  app.use(HttpErrorController.handleError)
   app.use(ErrorController.handleError)
 }
 

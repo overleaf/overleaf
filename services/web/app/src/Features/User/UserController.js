@@ -29,6 +29,8 @@ const UserUpdater = require('./UserUpdater')
 const SudoModeHandler = require('../SudoMode/SudoModeHandler')
 const settings = require('settings-sharelatex')
 const Errors = require('../Errors/Errors')
+const OError = require('@overleaf/o-error')
+const HttpErrors = require('../Errors/HttpErrors')
 const EmailHandler = require('../Email/EmailHandler')
 
 module.exports = UserController = {
@@ -62,12 +64,24 @@ module.exports = UserController = {
         user_id,
         { deleterUser: user, ipAddress: req.ip },
         function(err) {
-          if (err != null) {
+          if (err) {
+            let errorData = {
+              message: 'error while deleting user account',
+              info: { user_id }
+            }
             if (err instanceof Errors.SubscriptionAdminDeletionError) {
-              return res.status(422).json({ error: err.name })
+              // set info.public.error for JSON response so frontend can display
+              // a specific message
+              errorData.info.public = {
+                error: 'SubscriptionAdminDeletionError'
+              }
+              return next(
+                new HttpErrors.UnprocessableEntityError(errorData).withCause(
+                  err
+                )
+              )
             } else {
-              logger.warn({ user_id }, 'error while deleting user account')
-              return next(err)
+              return next(new OError(errorData).withCause(err))
             }
           }
           const sessionId = req.sessionID

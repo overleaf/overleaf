@@ -21,7 +21,9 @@ const MockResponse = require('../helpers/MockResponse')
 const MockRequest = require('../helpers/MockRequest')
 const { ObjectId } = require('mongojs')
 const assert = require('assert')
+const OError = require('@overleaf/o-error')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
+const HttpErrors = require('../../../../app/src/Features/Errors/HttpErrors')
 
 describe('UserController', function() {
   beforeEach(function() {
@@ -106,7 +108,8 @@ describe('UserController', function() {
         'metrics-sharelatex': {
           inc() {}
         },
-        '../Errors/Errors': Errors
+        '../Errors/Errors': Errors,
+        '../Errors/HttpErrors': HttpErrors
       }
     })
 
@@ -234,18 +237,15 @@ describe('UserController', function() {
       })
 
       it('should return a json error', function(done) {
-        return this.UserController.tryDeleteUser(this.req, {
-          status(status) {
-            expect(status).to.equal(422)
-            return {
-              json(json) {
-                expect(json.error).to.equal(
-                  Errors.SubscriptionAdminDeletionError.name
-                )
-                return done()
-              }
-            }
-          }
+        this.UserController.tryDeleteUser(this.req, null, error => {
+          expect(error).to.be.instanceof(HttpErrors.UnprocessableEntityError)
+          expect(
+            OError.hasCauseInstanceOf(
+              error,
+              Errors.SubscriptionAdminDeletionError
+            )
+          ).to.be.true
+          done()
         })
       })
     })

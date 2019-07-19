@@ -66,12 +66,12 @@ class ThirdPartyUserNotFoundError extends BackwardCompatibleError {
   }
 }
 
-class SubscriptionAdminDeletionError extends BackwardCompatibleError {
-  constructor(arg) {
-    super(arg)
-    if (!this.message) {
-      this.message = 'subscription admins cannot be deleted'
-    }
+class SubscriptionAdminDeletionError extends OError {
+  constructor(options) {
+    super({
+      message: 'subscription admins cannot be deleted',
+      ...options
+    })
   }
 }
 

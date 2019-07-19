@@ -19,6 +19,7 @@ class MockRequest {
       }
     }
     this.prototype.route = { path: '' }
+    this.prototype.accepts = () => {}
   }
   param(param) {
     return this.params[param]
