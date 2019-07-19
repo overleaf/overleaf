@@ -118,5 +118,14 @@ module.exports = {
         removeMember: `/manage/publishers/${id}/managers`
       }
     }
+  },
+
+  conversion: {
+    // for metrics only
+    modelName: 'Publisher',
+    fields: {
+      primaryKey: 'slug',
+      access: 'managerIds'
+    }
   }
 }
