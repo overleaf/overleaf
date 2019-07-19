@@ -27,6 +27,8 @@ module.exports = RoomManager =
 
     leaveProjectAndDocs: (client) ->
         # what rooms is this client in? we need to leave them all
+        # FIXME: socket.io will cause us to leave the rooms, so we only need
+        # to manage our channel subscriptions
         for id in @_roomsClientIsIn(client)
             entity = IdMap.get(id)
             @_leave client, entity, id
