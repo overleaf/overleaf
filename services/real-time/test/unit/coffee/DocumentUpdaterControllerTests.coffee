@@ -11,6 +11,7 @@ describe "DocumentUpdaterController", ->
 		@callback = sinon.stub()
 		@io = { "mock": "socket.io" }
 		@rclient = []
+		@RoomEvents = { on: sinon.stub() }
 		@EditorUpdatesController = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
 			"settings-sharelatex": @settings =
@@ -28,6 +29,8 @@ describe "DocumentUpdaterController", ->
 			"./EventLogger": @EventLogger = {checkEventOrder: sinon.stub()}
 			"./HealthCheckManager": {check: sinon.stub()}
 			"metrics-sharelatex": @metrics = {inc: sinon.stub()}
+			"./RoomManager" : @RoomManager = { eventSource: sinon.stub().returns @RoomEvents}
+			"./ChannelManager": @ChannelManager = {}
 
 	describe "listenForUpdatesFromDocumentUpdater", ->
 		beforeEach ->
