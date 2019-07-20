@@ -49,6 +49,19 @@ module.exports = {
     })
   },
 
+  unlearn(req, res, next) {
+    metrics.inc('spelling-unlearn', 0.1)
+    const { token, word } = extractLearnRequestData(req)
+    logger.info({ token, word }, 'unlearning word')
+    SpellingAPIManager.unlearnWord(token, req.body, function(error) {
+      if (error != null) {
+        return next(error)
+      }
+      res.sendStatus(200)
+      next()
+    })
+  },
+
   deleteDic(req, res, next) {
     const { token, word } = extractLearnRequestData(req)
     logger.log({ token, word }, 'deleting user dictionary')

@@ -19,6 +19,14 @@ const learnWord = word =>
     })
   })
 
+const unlearnWord = word =>
+  request.post({
+    url: `/user/${USER_ID}/unlearn`,
+    body: JSON.stringify({
+      word
+    })
+  })
+
 const deleteDict = () =>
   request.del({
     url: `/user/${USER_ID}`
@@ -49,5 +57,26 @@ describe('learning words', () => {
     const response = await checkWord(['bvc'])
     const responseBody = JSON.parse(response.body)
     expect(responseBody.misspellings.length).to.equals(1)
+  })
+})
+
+describe('unlearning words', () => {
+  it('should return status 200 when posting a word successfully', async () => {
+    const response = await unlearnWord('anything')
+    expect(response.statusCode).to.equal(200)
+  })
+
+  it('should return misspellings after a word is unlearnt', async () => {
+    await learnWord('abv')
+
+    const response = await checkWord(['abv'])
+    const responseBody = JSON.parse(response.body)
+    expect(responseBody.misspellings.length).to.equals(0)
+
+    await unlearnWord('abv')
+
+    const response2 = await checkWord(['abv'])
+    const responseBody2 = JSON.parse(response2.body)
+    expect(responseBody2.misspellings.length).to.equals(1)
   })
 })

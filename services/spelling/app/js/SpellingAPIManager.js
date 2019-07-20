@@ -30,6 +30,20 @@ const SpellingAPIManager = {
     return LearnedWordsManager.learnWord(token, request.word, callback)
   },
 
+  unlearnWord(token, request, callback) {
+    if (callback == null) {
+      callback = () => {}
+    }
+    if (request.word == null) {
+      return callback(new Error('malformed JSON'))
+    }
+    if (token == null) {
+      return callback(new Error('no token provided'))
+    }
+
+    return LearnedWordsManager.unlearnWord(token, request.word, callback)
+  },
+
   deleteDic(token, callback) {
     return LearnedWordsManager.deleteUsersLearnedWords(token, callback)
   },

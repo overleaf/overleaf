@@ -24,7 +24,7 @@ describe('LearnedWordsManager', function() {
     this.callback = sinon.stub()
     this.db = {
       spellingPreferences: {
-        update: sinon.stub().callsArg(3)
+        update: sinon.stub().yields()
       }
     }
     this.cache = {
@@ -70,6 +70,34 @@ describe('LearnedWordsManager', function() {
           },
           {
             upsert: true
+          }
+        )
+      ).to.equal(true)
+    })
+
+    return it('should call the callback', function() {
+      return expect(this.callback.called).to.equal(true)
+    })
+  })
+
+  describe('unlearnWord', function() {
+    beforeEach(function() {
+      this.word = 'instanton'
+      return this.LearnedWordsManager.unlearnWord(
+        this.token,
+        this.word,
+        this.callback
+      )
+    })
+
+    it('should remove the word from the word list in the database', function() {
+      return expect(
+        this.db.spellingPreferences.update.calledWith(
+          {
+            token: this.token
+          },
+          {
+            $pull: { learnedWords: this.word }
           }
         )
       ).to.equal(true)
