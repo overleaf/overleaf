@@ -12,20 +12,23 @@ module.exports = {
   proxyRequestToSpellingApi(req, res) {
     const { language } = req.body
 
-    if (!language) {
-      logger.error('"language" field should be included for spell checking')
-      return res.status(422).send(JSON.stringify({ misspellings: [] }))
-    }
+    let url = req.url.slice('/spelling'.length)
 
-    if (!languageCodeIsSupported(language)) {
-      // this log statement can be changed to 'error' once projects with
-      // unsupported languages are removed from the DB
-      logger.info({ language }, 'language not supported')
-      return res.status(422).send(JSON.stringify({ misspellings: [] }))
+    if (url === '/check') {
+      if (!language) {
+        logger.error('"language" field should be included for spell checking')
+        return res.status(422).send(JSON.stringify({ misspellings: [] }))
+      }
+
+      if (!languageCodeIsSupported(language)) {
+        // this log statement can be changed to 'error' once projects with
+        // unsupported languages are removed from the DB
+        logger.info({ language }, 'language not supported')
+        return res.status(422).send(JSON.stringify({ misspellings: [] }))
+      }
     }
 
     const userId = AuthenticationController.getLoggedInUserId(req)
-    let url = req.url.slice('/spelling'.length)
     url = `/user/${userId}${url}`
     req.headers['Host'] = Settings.apis.spelling.host
     return request({
