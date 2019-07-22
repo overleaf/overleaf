@@ -386,7 +386,6 @@ module.exports = ProjectController = {
           logger.warn({ err }, 'error getting data for project list page')
           return next(err)
         }
-        logger.log({ results, user_id }, 'rendering project list')
         const v1Tags =
           (results.v1Projects != null ? results.v1Projects.tags : undefined) ||
           []
