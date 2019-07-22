@@ -44,8 +44,7 @@ module.exports = {
       if (error != null) {
         return next(error)
       }
-      res.sendStatus(200)
-      next()
+      res.sendStatus(204)
     })
   },
 
@@ -57,8 +56,7 @@ module.exports = {
       if (error != null) {
         return next(error)
       }
-      res.sendStatus(200)
-      next()
+      res.sendStatus(204)
     })
   },
 

@@ -33,9 +33,9 @@ const deleteDict = () =>
   })
 
 describe('learning words', () => {
-  it('should return status 200 when posting a word successfully', async () => {
+  it('should return status 204 when posting a word successfully', async () => {
     const response = await learnWord('abcd')
-    expect(response.statusCode).to.equal(200)
+    expect(response.statusCode).to.equal(204)
   })
 
   it('should return no misspellings after a word is learnt', async () => {
@@ -61,9 +61,9 @@ describe('learning words', () => {
 })
 
 describe('unlearning words', () => {
-  it('should return status 200 when posting a word successfully', async () => {
+  it('should return status 204 when posting a word successfully', async () => {
     const response = await unlearnWord('anything')
-    expect(response.statusCode).to.equal(200)
+    expect(response.statusCode).to.equal(204)
   })
 
   it('should return misspellings after a word is unlearnt', async () => {
