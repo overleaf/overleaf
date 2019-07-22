@@ -9,11 +9,13 @@ ClientMap = new Map() # for each redis client, stores a Set of subscribed channe
 # handled by RoomManager.
 
 module.exports = ChannelManager =
-    _createNewClientEntry: (rclient) ->
-        ClientMap.set(rclient, new Set()).get(rclient)
+    getClientMapEntry: (rclient) ->
+        # return the rclient channel set if it exists, otherwise create and
+        # return an empty set for the client.
+        ClientMap.get(rclient) || ClientMap.set(rclient, new Set()).get(rclient)
 
     subscribe: (rclient, baseChannel, id) ->
-        existingChannelSet = ClientMap.get(rclient) || @_createNewClientEntry(rclient)
+        existingChannelSet = @getClientMapEntry(rclient)
         channel = "#{baseChannel}:#{id}"
         if existingChannelSet.has(channel)
             logger.error {channel}, "already subscribed - shouldn't happen"
@@ -24,7 +26,7 @@ module.exports = ChannelManager =
             metrics.inc "subscribe.#{baseChannel}"
 
     unsubscribe: (rclient, baseChannel, id) ->
-        existingChannelSet = ClientMap.get(rclient)
+        existingChannelSet = @getClientMapEntry(rclient)
         channel = "#{baseChannel}:#{id}"
         if !existingChannelSet.has(channel)
             logger.error {channel}, "not subscribed - shouldn't happen"
