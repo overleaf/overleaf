@@ -653,7 +653,7 @@ describe('UserEmails', function() {
       )
     })
 
-    it('should update the email in v1 if confirmed', function(done) {
+    it('should not update the email in v1', function(done) {
       const token = null
       return async.series(
         [
@@ -725,18 +725,13 @@ describe('UserEmails', function() {
           if (error != null) {
             return done(error)
           }
-          expect(
-            MockV1Api.updateEmail.calledWith(
-              42,
-              'new-confirmed-default-in-v1@example.com'
-            )
-          ).to.equal(true)
-          return done()
+          expect(MockV1Api.updateEmail.callCount).to.equal(0)
+          done()
         }
       )
     })
 
-    it('should return an error if the email exists in v1', function(done) {
+    it('should not return an error if the email exists in v1', function(done) {
       MockV1Api.existingEmails.push('exists-in-v1@example.com')
       return async.series(
         [
@@ -798,11 +793,8 @@ describe('UserEmails', function() {
                 if (error != null) {
                   return done(error)
                 }
-                expect(response.statusCode).to.equal(409)
-                expect(body).to.deep.equal({
-                  message: 'This email is already registered'
-                })
-                return cb()
+                expect(response.statusCode).to.equal(200)
+                cb()
               }
             )
           },
@@ -810,8 +802,8 @@ describe('UserEmails', function() {
             return this.user.request(
               { url: '/user/emails', json: true },
               function(error, response, body) {
-                expect(body[0].default).to.equal(true)
-                expect(body[1].default).to.equal(false)
+                expect(body[0].default).to.equal(false)
+                expect(body[1].default).to.equal(true)
                 return cb()
               }
             )

@@ -28,8 +28,6 @@ const {
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const EmailHelper = require('../Helpers/EmailHelper')
 const Errors = require('../Errors/Errors')
-const Settings = require('settings-sharelatex')
-const request = require('request')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
 
 module.exports = UserUpdater = {
@@ -71,7 +69,7 @@ module.exports = UserUpdater = {
             return cb(error)
           }),
         cb => UserUpdater.addEmailAddress(userId, newEmail, cb),
-        cb => UserUpdater.setDefaultEmailAddress(userId, newEmail, cb),
+        cb => UserUpdater.setDefaultEmailAddress(userId, newEmail, true, cb),
         cb => UserUpdater.removeEmailAddress(userId, oldEmail, cb)
       ],
       callback
@@ -156,109 +154,44 @@ module.exports = UserUpdater = {
 
   // set the default email address by setting the `email` attribute. The email
   // must be one of the user's multiple emails (`emails` attribute)
-  setDefaultEmailAddress(userId, email, callback) {
+  setDefaultEmailAddress(userId, email, allowUnconfirmed, callback) {
+    if (typeof allowUnconfirmed === 'function') {
+      callback = allowUnconfirmed
+      allowUnconfirmed = false
+    }
     email = EmailHelper.parseEmail(email)
     if (email == null) {
       return callback(new Error('invalid email'))
     }
-    return UserGetter.getUserEmail(userId, (error, oldEmail) => {
-      if (typeof err !== 'undefined' && err !== null) {
-        return callback(error)
+    UserGetter.getUser(userId, { email: 1, emails: 1 }, (err, user) => {
+      if (err) {
+        return callback(err)
+      }
+      if (!user) {
+        return callback(new Error('invalid userId'))
+      }
+      const oldEmail = user.email
+      const userEmail = user.emails.find(e => e.email === email)
+      if (!userEmail) {
+        return callback(new Error('Default email does not belong to user'))
+      }
+      if (!userEmail.confirmedAt && !allowUnconfirmed) {
+        return callback(new Errors.UnconfirmedEmailError())
       }
       const query = { _id: userId, 'emails.email': email }
       const update = { $set: { email } }
-      return this.updateUser(query, update, function(error, res) {
-        if (error != null) {
-          logger.warn({ error }, 'problem setting default emails')
-          return callback(error)
-        } else if (res.n === 0) {
-          // TODO: Check n or nMatched?
-          return callback(new Error('Default email does not belong to user'))
-        } else {
-          NewsletterManager.changeEmail(oldEmail, email, function() {})
-          return callback()
+      UserUpdater.updateUser(query, update, (err, res) => {
+        if (err) {
+          return callback(err)
         }
+        // this should not happen
+        if (res.n === 0) {
+          return callback(new Error('email update error'))
+        }
+        // do not wait - this will log its own errors
+        NewsletterManager.changeEmail(oldEmail, email, () => {})
+        callback()
       })
-    })
-  },
-
-  updateV1AndSetDefaultEmailAddress(userId, email, callback) {
-    return this.updateEmailAddressInV1(userId, email, error => {
-      if (error != null) {
-        return callback(error)
-      }
-      return this.setDefaultEmailAddress(userId, email, callback)
-    })
-  },
-
-  updateEmailAddressInV1(userId, newEmail, callback) {
-    if (!Settings.apis.v1.url) {
-      return callback()
-    }
-    return UserGetter.getUser(userId, { 'overleaf.id': 1, emails: 1 }, function(
-      error,
-      user
-    ) {
-      let email
-      if (error != null) {
-        return callback(error)
-      }
-      if (user == null) {
-        return callback(new Errors.NotFoundError('no user found'))
-      }
-      if ((user.overleaf != null ? user.overleaf.id : undefined) == null) {
-        return callback()
-      }
-      let newEmailIsConfirmed = false
-      for (email of Array.from(user.emails)) {
-        if (email.email === newEmail && email.confirmedAt != null) {
-          newEmailIsConfirmed = true
-          break
-        }
-      }
-      if (!newEmailIsConfirmed) {
-        return callback(
-          new Errors.UnconfirmedEmailError(
-            "can't update v1 with unconfirmed email"
-          )
-        )
-      }
-      return request(
-        {
-          baseUrl: Settings.apis.v1.url,
-          url: `/api/v1/sharelatex/users/${user.overleaf.id}/email`,
-          method: 'PUT',
-          auth: {
-            user: Settings.apis.v1.user,
-            pass: Settings.apis.v1.pass,
-            sendImmediately: true
-          },
-          json: {
-            user: {
-              email: newEmail
-            }
-          },
-          timeout: 5 * 1000
-        },
-        function(error, response, body) {
-          if (error != null) {
-            if (error.code === 'ECONNREFUSED') {
-              error = new Errors.V1ConnectionError('No V1 connection')
-            }
-            return callback(error)
-          }
-          if (response.statusCode === 409) {
-            // Conflict
-            return callback(new Errors.EmailExistsError('email exists in v1'))
-          } else if (response.statusCode >= 200 && response.statusCode < 300) {
-            return callback()
-          } else {
-            return callback(
-              new Error(`non-success code from v1: ${response.statusCode}`)
-            )
-          }
-        }
-      )
     })
   },
 

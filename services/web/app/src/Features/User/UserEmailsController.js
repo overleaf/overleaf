@@ -87,18 +87,12 @@ module.exports = UserEmailsController = {
     if (email == null) {
       return res.sendStatus(422)
     }
-
-    return UserUpdater.updateV1AndSetDefaultEmailAddress(
-      userId,
-      email,
-      function(error) {
-        if (error != null) {
-          return UserEmailsController._handleEmailError(error, req, res, next)
-        } else {
-          return res.sendStatus(200)
-        }
+    UserUpdater.setDefaultEmailAddress(userId, email, err => {
+      if (err) {
+        return UserEmailsController._handleEmailError(err, req, res, next)
       }
-    )
+      res.sendStatus(200)
+    })
   },
 
   endorse(req, res, next) {

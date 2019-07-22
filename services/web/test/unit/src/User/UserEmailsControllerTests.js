@@ -187,22 +187,22 @@ describe('UserEmailsController', function() {
     beforeEach(function() {
       this.email = 'email_to_set_default@bar.com'
       this.req.body.email = this.email
-      return this.EmailHelper.parseEmail.returns(this.email)
+      this.EmailHelper.parseEmail.returns(this.email)
     })
 
     it('sets default email', function(done) {
-      this.UserUpdater.updateV1AndSetDefaultEmailAddress.callsArgWith(2, null)
+      this.UserUpdater.setDefaultEmailAddress.yields()
 
-      return this.UserEmailsController.setDefault(this.req, {
+      this.UserEmailsController.setDefault(this.req, {
         sendStatus: code => {
           code.should.equal(200)
           assertCalledWith(this.EmailHelper.parseEmail, this.email)
           assertCalledWith(
-            this.UserUpdater.updateV1AndSetDefaultEmailAddress,
+            this.UserUpdater.setDefaultEmailAddress,
             this.user._id,
             this.email
           )
-          return done()
+          done()
         }
       })
     })
@@ -210,7 +210,7 @@ describe('UserEmailsController', function() {
     it('handles email parse error', function(done) {
       this.EmailHelper.parseEmail.returns(null)
 
-      return this.UserEmailsController.setDefault(this.req, {
+      this.UserEmailsController.setDefault(this.req, {
         sendStatus: code => {
           code.should.equal(422)
           assertNotCalled(this.UserUpdater.setDefaultEmailAddress)
