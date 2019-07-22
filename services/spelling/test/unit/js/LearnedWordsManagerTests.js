@@ -1,14 +1,3 @@
-/* eslint-disable
-    handle-callback-err,
-    no-undef
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const chai = require('chai')
 const { expect } = chai
@@ -32,7 +21,7 @@ describe('LearnedWordsManager', function() {
       set: sinon.stub(),
       del: sinon.stub()
     }
-    return (this.LearnedWordsManager = SandboxedModule.require(modulePath, {
+    this.LearnedWordsManager = SandboxedModule.require(modulePath, {
       requires: {
         './DB': this.db,
         './MongoCache': this.cache,
@@ -46,21 +35,17 @@ describe('LearnedWordsManager', function() {
           inc: sinon.stub()
         }
       }
-    }))
+    })
   })
 
   describe('learnWord', function() {
     beforeEach(function() {
       this.word = 'instanton'
-      return this.LearnedWordsManager.learnWord(
-        this.token,
-        this.word,
-        this.callback
-      )
+      this.LearnedWordsManager.learnWord(this.token, this.word, this.callback)
     })
 
     it('should insert the word in the word list in the database', function() {
-      return expect(
+      expect(
         this.db.spellingPreferences.update.calledWith(
           {
             token: this.token
@@ -75,23 +60,19 @@ describe('LearnedWordsManager', function() {
       ).to.equal(true)
     })
 
-    return it('should call the callback', function() {
-      return expect(this.callback.called).to.equal(true)
+    it('should call the callback', function() {
+      expect(this.callback.called).to.equal(true)
     })
   })
 
   describe('unlearnWord', function() {
     beforeEach(function() {
       this.word = 'instanton'
-      return this.LearnedWordsManager.unlearnWord(
-        this.token,
-        this.word,
-        this.callback
-      )
+      this.LearnedWordsManager.unlearnWord(this.token, this.word, this.callback)
     })
 
     it('should remove the word from the word list in the database', function() {
-      return expect(
+      expect(
         this.db.spellingPreferences.update.calledWith(
           {
             token: this.token
@@ -103,8 +84,8 @@ describe('LearnedWordsManager', function() {
       ).to.equal(true)
     })
 
-    return it('should call the callback', function() {
-      return expect(this.callback.called).to.equal(true)
+    it('should call the callback', function() {
+      expect(this.callback.called).to.equal(true)
     })
   })
 
@@ -112,22 +93,20 @@ describe('LearnedWordsManager', function() {
     beforeEach(function() {
       this.wordList = ['apples', 'bananas', 'pears']
       this.db.spellingPreferences.findOne = (conditions, callback) => {
-        return callback(null, { learnedWords: this.wordList })
+        callback(null, { learnedWords: this.wordList })
       }
       sinon.spy(this.db.spellingPreferences, 'findOne')
-      return this.LearnedWordsManager.getLearnedWords(this.token, this.callback)
+      this.LearnedWordsManager.getLearnedWords(this.token, this.callback)
     })
 
     it('should get the word list for the given user', function() {
-      return expect(
+      expect(
         this.db.spellingPreferences.findOne.calledWith({ token: this.token })
       ).to.equal(true)
     })
 
-    return it('should return the word list in the callback', function() {
-      return expect(this.callback.calledWith(null, this.wordList)).to.equal(
-        true
-      )
+    it('should return the word list in the callback', function() {
+      expect(this.callback.calledWith(null, this.wordList)).to.equal(true)
     })
   })
 
@@ -136,14 +115,12 @@ describe('LearnedWordsManager', function() {
       this.wordList = ['apples', 'bananas', 'pears']
       this.cache.get.returns(this.wordList)
       this.db.spellingPreferences.findOne = sinon.stub()
-      return this.LearnedWordsManager.getLearnedWords(
-        this.token,
-        (err, spellings) => {
-          this.db.spellingPreferences.findOne.called.should.equal(false)
-          assert.deepEqual(this.wordList, spellings)
-          return done()
-        }
-      )
+      this.LearnedWordsManager.getLearnedWords(this.token, (err, spellings) => {
+        expect(err).not.to.exist
+        this.db.spellingPreferences.findOne.called.should.equal(false)
+        assert.deepEqual(this.wordList, spellings)
+        done()
+      })
     })
 
     it('should set the cache after hitting the db', function(done) {
@@ -151,41 +128,33 @@ describe('LearnedWordsManager', function() {
       this.db.spellingPreferences.findOne = sinon
         .stub()
         .callsArgWith(1, null, { learnedWords: this.wordList })
-      return this.LearnedWordsManager.getLearnedWords(
-        this.token,
-        (err, spellings) => {
-          this.cache.set
-            .calledWith(this.token, this.wordList)
-            .should.equal(true)
-          return done()
-        }
-      )
+      this.LearnedWordsManager.getLearnedWords(this.token, () => {
+        this.cache.set.calledWith(this.token, this.wordList).should.equal(true)
+        done()
+      })
     })
 
-    return it('should break cache when update is called', function(done) {
+    it('should break cache when update is called', function(done) {
       this.word = 'instanton'
-      return this.LearnedWordsManager.learnWord(this.token, this.word, () => {
+      this.LearnedWordsManager.learnWord(this.token, this.word, () => {
         this.cache.del.calledWith(this.token).should.equal(true)
-        return done()
+        done()
       })
     })
   })
 
-  return describe('deleteUsersLearnedWords', function() {
+  describe('deleteUsersLearnedWords', function() {
     beforeEach(function() {
-      return (this.db.spellingPreferences.remove = sinon.stub().callsArgWith(1))
+      this.db.spellingPreferences.remove = sinon.stub().callsArgWith(1)
     })
 
-    return it('should get the word list for the given user', function(done) {
-      return this.LearnedWordsManager.deleteUsersLearnedWords(
-        this.token,
-        () => {
-          this.db.spellingPreferences.remove
-            .calledWith({ token: this.token })
-            .should.equal(true)
-          return done()
-        }
-      )
+    it('should get the word list for the given user', function(done) {
+      this.LearnedWordsManager.deleteUsersLearnedWords(this.token, () => {
+        this.db.spellingPreferences.remove
+          .calledWith({ token: this.token })
+          .should.equal(true)
+        done()
+      })
     })
   })
 })
