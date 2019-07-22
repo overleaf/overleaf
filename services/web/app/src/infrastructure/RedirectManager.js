@@ -63,15 +63,6 @@ module.exports = RedirectManager = {
           ;({ url } = target)
         }
 
-        // Special handling for redirecting to v1, to ensure that query params
-        // are encoded
-        if (target.authWithV1) {
-          url = `/sign_in_to_v1?${querystring.stringify({
-            return_to: url + getQueryString(req)
-          })}`
-          return res.redirect(code, url)
-        }
-
         if (target.baseUrl != null) {
           url = `${target.baseUrl}${url}`
         }

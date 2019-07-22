@@ -141,7 +141,6 @@ module.exports =
 		},
 		'/redirect/qs': '/destination/qs'
 		'/docs_v1': {
-			authWithV1: true
 			url: '/docs'
 		}
 
