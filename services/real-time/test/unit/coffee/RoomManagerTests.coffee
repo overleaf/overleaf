@@ -15,25 +15,35 @@ describe 'RoomManager', ->
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 		@RoomManager._clientsInRoom = sinon.stub()
 		@RoomEvents = @RoomManager.eventSource()
-		sinon.spy(@RoomEvents, 'emit') 
+		sinon.spy(@RoomEvents, 'emit')
+		sinon.spy(@RoomEvents, 'once') 
 	
 	describe "joinProject", ->
 	
 		describe "when the project room is empty", ->
 
-			beforeEach ->
+			beforeEach (done) ->
 				@RoomManager._clientsInRoom
 					.withArgs(@client, @project_id)
 					.onFirstCall().returns(0)
-					.onSecondCall().returns(1)
 				@client.join = sinon.stub()
-				@RoomManager.joinProject @client, @project_id
-
-			it "should join the room using the id", ->
-				@client.join.calledWithExactly(@project_id).should.equal true
+				@callback = sinon.stub()
+				@RoomEvents.on 'project-active', (id) =>
+					setTimeout () =>
+						@RoomEvents.emit "project-subscribed-#{id}"
+					, 100
+				@RoomManager.joinProject @client, @project_id, (err) =>
+					@callback(err)
+					done()
 
 			it "should emit a 'project-active' event with the id", ->
 				@RoomEvents.emit.calledWithExactly('project-active', @project_id).should.equal true
+
+			it "should listen for the 'project-subscribed-id' event", ->
+				@RoomEvents.once.calledWith("project-subscribed-#{@project_id}").should.equal true
+
+			it "should join the room using the id", ->
+				@client.join.calledWithExactly(@project_id).should.equal true
 
 		describe "when there are other clients in the project room", ->
 
@@ -56,19 +66,28 @@ describe 'RoomManager', ->
 
 		describe "when the doc room is empty", ->
 
-			beforeEach ->
+			beforeEach (done) ->
 				@RoomManager._clientsInRoom
 					.withArgs(@client, @doc_id)
 					.onFirstCall().returns(0)
-					.onSecondCall().returns(1)
 				@client.join = sinon.stub()
-				@RoomManager.joinDoc @client, @doc_id
-
-			it "should join the room using the id", ->
-				@client.join.calledWithExactly(@doc_id).should.equal true
+				@callback = sinon.stub()
+				@RoomEvents.on 'doc-active', (id) =>
+					setTimeout () =>
+						@RoomEvents.emit "doc-subscribed-#{id}"
+					, 100
+				@RoomManager.joinDoc @client, @doc_id, (err) =>
+					@callback(err)
+					done()
 
 			it "should emit a 'doc-active' event with the id", ->
 				@RoomEvents.emit.calledWithExactly('doc-active', @doc_id).should.equal true
+
+			it "should listen for the 'doc-subscribed-id' event", ->
+				@RoomEvents.once.calledWith("doc-subscribed-#{@doc_id}").should.equal true
+
+			it "should join the room using the id", ->
+				@client.join.calledWithExactly(@doc_id).should.equal true
 
 		describe "when there are other clients in the doc room", ->
 
@@ -94,8 +113,7 @@ describe 'RoomManager', ->
 			beforeEach ->
 				@RoomManager._clientsInRoom
 					.withArgs(@client, @doc_id)
-					.onFirstCall().returns(1)
-					.onSecondCall().returns(0)
+					.onCall(0).returns(0)
 				@client.leave = sinon.stub()
 				@RoomManager.leaveDoc @client, @doc_id
 
@@ -111,8 +129,7 @@ describe 'RoomManager', ->
 			beforeEach ->
 				@RoomManager._clientsInRoom
 					.withArgs(@client, @doc_id)
-					.onFirstCall().returns(123)
-					.onSecondCall().returns(122)
+					.onCall(0).returns(123)
 				@client.leave = sinon.stub()
 				@RoomManager.leaveDoc @client, @doc_id
 
@@ -134,33 +151,36 @@ describe 'RoomManager', ->
 
 			describe "when this is the only client connected", ->
 
-				beforeEach ->
-						# first and secondc calls are for the join, 
-					# calls 2 and 3 are for the leave
+				beforeEach (done) ->
+					# first call is for the join, 
+					# second for the leave
 					@RoomManager._clientsInRoom
 						.withArgs(@client, @doc_id)
 						.onCall(0).returns(0)
-						.onSecondCall().returns(1)
-						.onCall(2).returns(1)
-						.onCall(3).returns(0)
+						.onCall(1).returns(0)
 					@RoomManager._clientsInRoom
 						.withArgs(@client, @other_doc_id)
 						.onCall(0).returns(0)
-						.onCall(1).returns(1)
-						.onCall(2).returns(1)
-						.onCall(3).returns(0)
+						.onCall(1).returns(0)
 					@RoomManager._clientsInRoom
 						.withArgs(@client, @project_id)
 						.onCall(0).returns(0)
-						.onCall(1).returns(1)
-						.onCall(2).returns(1)
-						.onCall(3).returns(0)
+						.onCall(1).returns(0)
+					@RoomEvents.on 'project-active', (id) =>
+						setTimeout () =>
+							@RoomEvents.emit "project-subscribed-#{id}"
+						, 100
+					@RoomEvents.on 'doc-active', (id) =>
+						setTimeout () =>
+							@RoomEvents.emit "doc-subscribed-#{id}"
+						, 100
 					# put the client in the rooms
-					@RoomManager.joinProject(@client, @project_id)
-					@RoomManager.joinDoc(@client, @doc_id)
-					@RoomManager.joinDoc(@client, @other_doc_id)
-					# now leave the project
-					@RoomManager.leaveProjectAndDocs @client
+					@RoomManager.joinProject @client, @project_id, () =>
+						@RoomManager.joinDoc @client, @doc_id, () =>
+							@RoomManager.joinDoc @client, @other_doc_id, () =>
+								# now leave the project
+								@RoomManager.leaveProjectAndDocs @client
+								done()
 
 				it "should leave all the docs", ->
 					@client.leave.calledWithExactly(@doc_id).should.equal true

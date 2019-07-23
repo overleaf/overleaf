@@ -16,11 +16,11 @@ RoomEvents = new EventEmitter()
 
 module.exports = RoomManager =
 
-    joinProject: (client, project_id) ->
-        @joinEntity client, "project", project_id
+    joinProject: (client, project_id, callback = () ->) ->
+        @joinEntity client, "project", project_id, callback
 
-    joinDoc: (client, doc_id) ->
-        @joinEntity client, "doc", doc_id
+    joinDoc: (client, doc_id, callback = () ->) ->
+        @joinEntity client, "doc", doc_id, callback
 
     leaveDoc: (client, doc_id) ->
         @leaveEntity client, "doc", doc_id
@@ -38,27 +38,31 @@ module.exports = RoomManager =
     eventSource: () ->
         return RoomEvents
 
-    joinEntity: (client, entity, id) ->
+    joinEntity: (client, entity, id, callback) ->
         beforeCount = @_clientsInRoom(client, id)
-        client.join id
-        afterCount = @_clientsInRoom(client, id)
-        logger.log {client: client.id, entity, id, beforeCount, afterCount}, "client joined room"
         # is this a new room? if so, subscribe
-        if beforeCount == 0 and afterCount == 1
+        if beforeCount == 0
             logger.log {entity, id}, "room is now active"
+            RoomEvents.once "#{entity}-subscribed-#{id}", (err) ->
+                logger.log {client: client.id, entity, id, beforeCount}, "client joined room after subscribing channel"
+                client.join id
+                callback(err)
             RoomEvents.emit "#{entity}-active", id
             IdMap.set(id, entity)
+        else
+            logger.log {client: client.id, entity, id, beforeCount}, "client joined existing room"
+            client.join id
+            callback()
 
     leaveEntity: (client, entity, id) ->
-        beforeCount = @_clientsInRoom(client, id)
         client.leave id
         afterCount = @_clientsInRoom(client, id)
-        logger.log {client: client.id, entity, id, beforeCount, afterCount}, "client left room"
+        logger.log {client: client.id, entity, id, afterCount}, "client left room"
         # is the room now empty? if so, unsubscribe
         if !entity?
             logger.error {entity: id}, "unknown entity when leaving with id"
             return
-        if beforeCount == 1 and afterCount == 0
+        if afterCount == 0
             logger.log {entity, id}, "room is now empty"
             RoomEvents.emit "#{entity}-empty", id
             IdMap.delete(id)

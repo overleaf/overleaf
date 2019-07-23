@@ -7,6 +7,7 @@ HealthCheckManager = require "./HealthCheckManager"
 RoomManager = require "./RoomManager"
 ChannelManager = require "./ChannelManager"
 metrics = require "metrics-sharelatex"
+util = require "util"
 
 MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 # 1Mb
 
@@ -29,15 +30,20 @@ module.exports = DocumentUpdaterController =
 				do (i) ->
 					rclient.on "message", () ->
 						metrics.inc "rclient-#{i}", 0.001 # per client event rate metric
-		for rclient in @rclientList
-			@handleRoomUpdates(rclient)
+		@handleRoomUpdates(@rclientList)
 
-	handleRoomUpdates: (rclientSub) ->
+	handleRoomUpdates: (rclientSubList) ->
 		roomEvents = RoomManager.eventSource()
 		roomEvents.on 'doc-active', (doc_id) ->
-			ChannelManager.subscribe rclientSub, "applied-ops", doc_id
+			subscribePromises = for rclient in rclientSubList
+				ChannelManager.subscribe rclient, "applied-ops", doc_id
+			subscribeResult = Promise.all(subscribePromises)
+			emitResult = (err) => this.emit("doc-subscribed-#{doc_id}", err)
+			subscribeResult.then () -> emitResult()
+			subscribeResult.catch (err) -> emitResult(err)
 		roomEvents.on 'doc-empty', (doc_id) ->
-			ChannelManager.unsubscribe rclientSub, "applied-ops", doc_id
+			for rclient in rclientSubList
+				ChannelManager.unsubscribe rclient, "applied-ops", doc_id
 
 	_processMessageFromDocumentUpdater: (io, channel, message) ->
 		SafeJsonParse.parse message, (error, message) ->

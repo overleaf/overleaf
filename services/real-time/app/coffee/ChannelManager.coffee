@@ -2,7 +2,7 @@ logger = require 'logger-sharelatex'
 metrics = require "metrics-sharelatex"
 settings = require "settings-sharelatex"
 
-ClientMap = new Map() # for each redis client, stores a Set of subscribed channels
+ClientMap = new Map() # for each redis client, stores a Map of subscribed channels (channelname -> subscribe promise)
 
 # Manage redis pubsub subscriptions for individual projects and docs, ensuring
 # that we never subscribe to a channel multiple times. The socket.io side is
@@ -12,18 +12,23 @@ module.exports = ChannelManager =
     getClientMapEntry: (rclient) ->
         # return the rclient channel set if it exists, otherwise create and
         # return an empty set for the client.
-        ClientMap.get(rclient) || ClientMap.set(rclient, new Set()).get(rclient)
+        ClientMap.get(rclient) || ClientMap.set(rclient, new Map()).get(rclient)
 
     subscribe: (rclient, baseChannel, id) ->
         existingChannelSet = @getClientMapEntry(rclient)
         channel = "#{baseChannel}:#{id}"
         if existingChannelSet.has(channel)
             logger.error {channel}, "already subscribed - shouldn't happen"
+            # return the subscribe promise, so we can wait for it to resolve
+            return existingChannelSet.get(channel)
         else
-            rclient.subscribe channel # completes in the background
-            existingChannelSet.add(channel)
+            # get the subscribe promise and return it, the actual subscribe
+            # completes in the background
+            subscribePromise = rclient.subscribe channel 
+            existingChannelSet.set(channel, subscribePromise)
             logger.log {channel}, "subscribed to new channel"
             metrics.inc "subscribe.#{baseChannel}"
+            return subscribePromise
 
     unsubscribe: (rclient, baseChannel, id) ->
         existingChannelSet = @getClientMapEntry(rclient)

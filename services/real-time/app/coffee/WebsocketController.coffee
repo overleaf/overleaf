@@ -25,8 +25,7 @@ module.exports = WebsocketController =
 				err = new Error("not authorized")
 				logger.warn {err, project_id, user_id, client_id: client.id}, "user is not authorized to join project"
 				return callback(err)
-				
-			RoomManager.joinProject(client, project_id)
+
 
 			client.set("privilege_level", privilegeLevel)
 			client.set("user_id", user_id)
@@ -39,8 +38,9 @@ module.exports = WebsocketController =
 			client.set("signup_date", user?.signUpDate)
 			client.set("login_count", user?.loginCount)
 			
-			callback null, project, privilegeLevel, WebsocketController.PROTOCOL_VERSION
-			logger.log {user_id, project_id, client_id: client.id}, "user joined project"
+			RoomManager.joinProject client, project_id, (err) ->
+				logger.log {user_id, project_id, client_id: client.id}, "user joined project"
+				callback null, project, privilegeLevel, WebsocketController.PROTOCOL_VERSION
 			
 			# No need to block for setting the user as connected in the cursor tracking
 			ConnectedUsersManager.updateUserPosition project_id, client.id, user, null, () ->
@@ -118,9 +118,9 @@ module.exports = WebsocketController =
 							return callback(err)
 
 					AuthorizationManager.addAccessToDoc client, doc_id
-					RoomManager.joinDoc(client, doc_id)
-					callback null, escapedLines, version, ops, ranges
-					logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joined doc"
+					RoomManager.joinDoc client, doc_id, (err) ->
+						logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joined doc"
+						callback null, escapedLines, version, ops, ranges
 					
 	leaveDoc: (client, doc_id, callback = (error) ->) ->
 		metrics.inc "editor.leave-doc"

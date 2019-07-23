@@ -54,7 +54,7 @@ describe 'WebsocketController', ->
 				@privilegeLevel = "owner"
 				@ConnectedUsersManager.updateUserPosition = sinon.stub().callsArg(4)
 				@WebApiManager.joinProject = sinon.stub().callsArgWith(2, null, @project, @privilegeLevel)
-				@RoomManager.joinProject = sinon.stub()
+				@RoomManager.joinProject = sinon.stub().callsArg(2)
 				@WebsocketController.joinProject @client, @user, @project_id, @callback
 				
 			it "should load the project from web", ->
@@ -237,7 +237,7 @@ describe 'WebsocketController', ->
 			@AuthorizationManager.addAccessToDoc = sinon.stub()
 			@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
 			@DocumentUpdaterManager.getDocument = sinon.stub().callsArgWith(3, null, @doc_lines, @version, @ranges, @ops)
-			@RoomManager.joinDoc = sinon.stub()
+			@RoomManager.joinDoc = sinon.stub().callsArg(2)
 
 		describe "works", ->
 			beforeEach ->

@@ -35,15 +35,20 @@ module.exports = WebsocketLoadBalancer =
 			rclientSub.on "message", (channel, message) ->
 				EventLogger.debugEvent(channel, message) if Settings.debugEvents > 0
 				WebsocketLoadBalancer._processEditorEvent io, channel, message
-		for rclientSub in @rclientSubList
-			@handleRoomUpdates(rclientSub)
+		@handleRoomUpdates(@rclientSubList)
 
-	handleRoomUpdates: (rclientSub) ->
+	handleRoomUpdates: (rclientSubList) ->
 		roomEvents = RoomManager.eventSource()
 		roomEvents.on 'project-active', (project_id) ->
-			ChannelManager.subscribe rclientSub, "editor-events", project_id
+			subscribePromises = for rclient in rclientSubList
+				ChannelManager.subscribe rclient, "editor-events", project_id
+			subscribeResult = Promise.all(subscribePromises)
+			emitResult = (err) => this.emit("project-subscribed-#{project_id}", err)
+			subscribeResult.then () -> emitResult()
+			subscribeResult.catch (err) -> emitResult(err)
 		roomEvents.on 'project-empty', (project_id) ->
-			ChannelManager.unsubscribe rclientSub, "editor-events", project_id
+			for rclient in rclientSubList
+				ChannelManager.unsubscribe rclient, "editor-events", project_id
 
 	_processEditorEvent: (io, channel, message) ->
 		SafeJsonParse.parse message, (error, message) ->
