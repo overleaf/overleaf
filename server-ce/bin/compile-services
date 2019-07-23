@@ -1,0 +1,23 @@
+#! env bash
+
+set -ex
+
+grep 'name:' config/services.js | \
+	sed 's/.*name: "\(.*\)",/\1/' | \
+	while read service
+	do
+		pushd $service
+		echo "Compiling Service $service"
+		case $service in 
+			web)
+				make compile_full
+				;;
+			chat)
+				echo "$service doesn't require a compilation"
+				;;	
+			*)
+				npm run compile:all
+				;;
+		esac	
+		popd
+	done
