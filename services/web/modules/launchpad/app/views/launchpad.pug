@@ -1,0 +1,267 @@
+extends ../../../../app/views/layout
+
+block content
+
+	script(type="text/javascript").
+		window.data = {
+			adminUserExists: !{adminUserExists == true},
+			ideJsPath: "!{buildJsPath('ide.js')}",
+			authMethod: "!{authMethod}"
+		}
+
+	script(type="text/javascript" src='/socket.io/socket.io.js')
+
+	style.
+		hr { margin-bottom: 5px; }
+		.status-check {
+			margin-bottom: 15px;
+		}
+		.alert { margin-top: 15px; margin-bottom: 15px; }
+		a small { cursor: pointer; color: #a93529; }
+		.launchpad-body img { width: 150px; margin-top: 15px; }
+
+
+	.content.content-alt(ng-controller="LaunchpadController")
+		.container(ng-cloak)
+			.row
+				.col-md-8.col-md-offset-2
+					.card.launchpad-body
+						.row
+							.col-md-12
+								.text-center
+									h1 #{translate('welcome_to_sl')}
+									p
+										img(src=buildImgPath('/brand/lion.svg'))
+
+						<!-- wrapper -->
+						.row
+							.col-md-8.col-md-offset-2
+
+
+								<!-- create first admin form -->
+								.row(ng-if="shouldShowAdminForm()")
+									.col-md-12
+										h2 #{translate('create_first_admin_account')}
+
+										// Local Auth Form
+										div(ng-if="authMethod == 'local'")
+											form(async-form="register", name="registerForm", on-success="onCreateAdminSuccess"
+													on-error="onCreateAdminError"
+													action="/launchpad/register_admin", method="POST", ng-cloak)
+												input(name='_csrf', type='hidden', value=csrfToken)
+												form-messages(for="registerForm")
+												.form-group
+													label(for='email') #{translate("email")}
+													input.form-control(
+														type='email',
+														name='email',
+														placeholder="email@example.com"
+														required,
+														ng-model="email",
+														ng-model-options="{ updateOn: 'blur' }",
+														focus="true"
+													)
+													span.small.text-primary(ng-show="registerForm.email.$invalid && registerForm.email.$dirty")
+														| #{translate("must_be_email_address")}
+												.form-group
+													label(for='password') #{translate("password")}
+													input.form-control#passwordField(
+														type='password',
+														name='password',
+														placeholder="********",
+														required,
+														ng-model="password",
+														complex-password
+													)
+													span.small.text-primary(ng-show="registerForm.password.$error.complexPassword",
+																									ng-bind-html="complexPasswordErrorMessage")
+												.actions
+													button.btn-primary.btn(
+														type='submit'
+														ng-disabled="registerForm.inflight || registerForm.password.$error.required|| registerForm.password.$error.complexPassword || createAdminSuccess"
+													)
+														span(ng-show="!registerForm.inflight") #{translate("register")}
+														span(ng-show="registerForm.inflight") #{translate("registering")}...
+
+										// Ldap Form
+										div(ng-if="authMethod == 'ldap'")
+											h3 #{translate('ldap')}
+											p
+												| #{translate('ldap_create_admin_instructions')}
+
+											form(async-form="register", name="registerLdapForm", on-success="onCreateAdminSuccess"
+													on-error="onCreateAdminError"
+													action="/launchpad/register_ldap_admin", method="POST", ng-cloak)
+												input(name='_csrf', type='hidden', value=csrfToken)
+												form-messages(for="registerLdapForm")
+												.form-group
+													label(for='email') #{translate("email")}
+													input.form-control(
+														type='email',
+														name='email',
+														placeholder="email@example.com"
+														required,
+														ng-model="email",
+														ng-model-options="{ updateOn: 'blur' }",
+														focus="true"
+													)
+													span.small.text-primary(ng-show="registerLdapForm.email.$invalid && registerLdapForm.email.$dirty")
+														| #{translate("must_be_email_address")}
+												.actions
+													button.btn-primary.btn(
+														type='submit'
+														ng-disabled="registerLdapForm.inflight || registerLdapForm.password.$error.required|| registerLdapForm.password.$error.complexPassword || createAdminSuccess"
+													)
+														span(ng-show="!registerLdapForm.inflight") #{translate("register")}
+														span(ng-show="registerLdapForm.inflight") #{translate("registering")}...
+
+
+										// Saml Form
+										div(ng-if="authMethod == 'saml'")
+											h3 #{translate('saml')}
+											p
+												| #{translate('saml_create_admin_instructions')}
+
+											form(async-form="register", name="registerSamlForm", on-success="onCreateAdminSuccess"
+													on-error="onCreateAdminError"
+													action="/launchpad/register_saml_admin", method="POST", ng-cloak)
+												input(name='_csrf', type='hidden', value=csrfToken)
+												form-messages(for="registerSamlForm")
+												.form-group
+													label(for='email') #{translate("email")}
+													input.form-control(
+														type='email',
+														name='email',
+														placeholder="email@example.com"
+														required,
+														ng-model="email",
+														ng-model-options="{ updateOn: 'blur' }",
+														focus="true"
+													)
+													span.small.text-primary(ng-show="registerSamlForm.email.$invalid && registerSamlForm.email.$dirty")
+														| #{translate("must_be_email_address")}
+												.actions
+													button.btn-primary.btn(
+														type='submit'
+														ng-disabled="registerSamlForm.inflight || registerSamlForm.password.$error.required|| registerSamlForm.password.$error.complexPassword || createAdminSuccess"
+													)
+														span(ng-show="!registerSamlForm.inflight") #{translate("register")}
+														span(ng-show="registerSamlForm.inflight") #{translate("registering")}...
+
+
+										<!-- success message -->
+										.row(ng-if="createAdminSuccess")
+											.col-md-12.text-center
+												.alert.alert-success
+													| !{translate('admin_user_created_message', {link: '/login?redir=/launchpad'})}
+
+										<!-- error message -->
+										.row(ng-if="createAdminError")
+											.col-md-12.text-center
+												.alert.alert-danger
+													| #{translate('generic_something_went_wrong')}
+
+										br
+
+									<!-- status indicators -->
+								div(ng-if="!shouldShowAdminForm()")
+									.row
+										.col-md-12.status-indicators
+
+											h2 #{translate('status_checks')}
+
+											<!-- ide js -->
+											.row.status-check
+												.col-sm-5
+													| #{translate('editor_resources')}
+												.col-sm-7
+													div(ng-switch="statusChecks.ideJs.status")
+
+														span(ng-switch-when="inflight")
+															i.fa.fa-fw.fa-spinner.fa-spin
+															span &nbsp;#{translate('checking')}
+
+														span(ng-switch-when="ok")
+															i.fa.fa-check
+															span &nbsp;#{translate('ok')}
+															a(ng-click="tryFetchIdeJs()")
+																small &nbsp;#{translate('retry')}
+
+														span(ng-switch-when="error")
+															i.fa.fa-exclamation
+															span &nbsp;#{translate('error')}
+															a(ng-click="tryFetchIdeJs()")
+																small &nbsp;#{translate('retry')}
+															div.alert.alert-danger
+																| {{ statusChecks.ideJs.error }}
+
+
+											<!-- websocket -->
+											.row.status-check
+												.col-sm-5
+													| #{translate('websockets')}
+												.col-sm-7
+													div(ng-switch="statusChecks.websocket.status")
+
+														span(ng-switch-when="inflight")
+															i.fa.fa-fw.fa-spinner.fa-spin
+															span &nbsp;#{translate('checking')}
+
+														span(ng-switch-when="ok")
+															i.fa.fa-check
+															span &nbsp;#{translate('ok')}
+															a(ng-click="tryOpenWebSocket()")
+																small &nbsp;#{translate('retry')}
+
+														span(ng-switch-when="error")
+															i.fa.fa-exclamation
+															span &nbsp;#{translate('error')}
+															a(ng-click="tryOpenWebSocket()")
+																small &nbsp;#{translate('retry')}
+															div.alert.alert-danger
+																| {{ statusChecks.websocket.error }}
+
+
+									<!-- break -->
+									hr
+
+									<!-- other actions -->
+									.row
+										.col-md-12
+											h2 #{translate('other_actions')}
+
+											h3 #{translate('send_test_email')}
+											form.form
+												.form-group
+													label(for="emailInput") Email
+													input(type="text", name="emailInput" ng-model="testEmail.emailAddress").form-control
+												button(ng-click="sendTestEmail()", ng-disabled="testEmail.inflight").btn.btn-primary
+													span(ng-show="!testEmail.inflight") #{translate("send")}
+													span(ng-show="testEmail.inflight") #{translate("sending")}...
+											div(ng-if="testEmail.status == 'ok'")
+												.alert.alert-success
+													| #{translate('email_sent')}
+											div(ng-if="testEmail.status == 'error'")
+												.alert.alert-danger
+													| #{translate('generic_something_went_wrong')}
+
+
+
+
+
+									<!-- break -->
+									hr
+
+
+									<!-- Go to ShareLaTex -->
+									.row
+										.col-md-12
+											.text-center
+												br
+												p
+													a(href="/admin").btn.btn-md
+														| Go To Admin Panel
+													| &nbsp;
+													a(href="/project").btn.btn-md.btn-primary
+														| Start Using ShareLaTeX
+												br
