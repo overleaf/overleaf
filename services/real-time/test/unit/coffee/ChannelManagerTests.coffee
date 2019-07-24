@@ -11,7 +11,7 @@ describe 'ChannelManager', ->
 		@ChannelManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings = {}
 			"metrics-sharelatex": @metrics = {inc: sinon.stub()}
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), warn: sinon.stub(), error: sinon.stub() }
 	
 	describe "subscribe", ->
 
