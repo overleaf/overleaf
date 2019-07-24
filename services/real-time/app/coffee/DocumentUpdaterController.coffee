@@ -36,10 +36,7 @@ module.exports = DocumentUpdaterController =
 		roomEvents.on 'doc-active', (doc_id) ->
 			subscribePromises = for rclient in rclientSubList
 				ChannelManager.subscribe rclient, "applied-ops", doc_id
-			subscribeResult = Promise.all(subscribePromises)
-			emitResult = (err) => this.emit("doc-subscribed-#{doc_id}", err)
-			subscribeResult.then () -> emitResult()
-			subscribeResult.catch (err) -> emitResult(err)
+			RoomManager.emitOnCompletion(subscribePromises, "doc-subscribed-#{doc_id}")
 		roomEvents.on 'doc-empty', (doc_id) ->
 			for rclient in rclientSubList
 				ChannelManager.unsubscribe rclient, "applied-ops", doc_id

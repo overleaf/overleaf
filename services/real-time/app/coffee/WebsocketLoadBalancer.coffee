@@ -42,10 +42,7 @@ module.exports = WebsocketLoadBalancer =
 		roomEvents.on 'project-active', (project_id) ->
 			subscribePromises = for rclient in rclientSubList
 				ChannelManager.subscribe rclient, "editor-events", project_id
-			subscribeResult = Promise.all(subscribePromises)
-			emitResult = (err) => this.emit("project-subscribed-#{project_id}", err)
-			subscribeResult.then () -> emitResult()
-			subscribeResult.catch (err) -> emitResult(err)
+			RoomManager.emitOnCompletion(subscribePromises, "project-subscribed-#{project_id}")
 		roomEvents.on 'project-empty', (project_id) ->
 			for rclient in rclientSubList
 				ChannelManager.unsubscribe rclient, "editor-events", project_id
