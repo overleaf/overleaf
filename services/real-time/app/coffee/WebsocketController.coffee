@@ -92,33 +92,36 @@ module.exports = WebsocketController =
 					
 			AuthorizationManager.assertClientCanViewProject client, (error) ->
 				return callback(error) if error?
-				DocumentUpdaterManager.getDocument project_id, doc_id, fromVersion, (error, lines, version, ranges, ops) ->
+				# ensure the per-doc applied-ops channel is subscribed before sending the
+				# doc to the client, so that no events are missed.
+				RoomManager.joinDoc client, doc_id, (error) ->
 					return callback(error) if error?
+					DocumentUpdaterManager.getDocument project_id, doc_id, fromVersion, (error, lines, version, ranges, ops) ->
+						return callback(error) if error?
 
-					# Encode any binary bits of data so it can go via WebSockets
-					# See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
-					encodeForWebsockets = (text) -> unescape(encodeURIComponent(text))
-					escapedLines = []
-					for line in lines
-						try
-							line = encodeForWebsockets(line)
-						catch err
-							logger.err {err, project_id, doc_id, fromVersion, line, client_id: client.id}, "error encoding line uri component"
-							return callback(err)
-						escapedLines.push line
-					if options.encodeRanges
-						try
-							for comment in ranges?.comments or []
-								comment.op.c = encodeForWebsockets(comment.op.c) if comment.op.c?
-							for change in ranges?.changes or []
-								change.op.i = encodeForWebsockets(change.op.i) if change.op.i?
-								change.op.d = encodeForWebsockets(change.op.d) if change.op.d?
-						catch err
-							logger.err {err, project_id, doc_id, fromVersion, ranges, client_id: client.id}, "error encoding range uri component"
-							return callback(err)
+						# Encode any binary bits of data so it can go via WebSockets
+						# See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
+						encodeForWebsockets = (text) -> unescape(encodeURIComponent(text))
+						escapedLines = []
+						for line in lines
+							try
+								line = encodeForWebsockets(line)
+							catch err
+								logger.err {err, project_id, doc_id, fromVersion, line, client_id: client.id}, "error encoding line uri component"
+								return callback(err)
+							escapedLines.push line
+						if options.encodeRanges
+							try
+								for comment in ranges?.comments or []
+									comment.op.c = encodeForWebsockets(comment.op.c) if comment.op.c?
+								for change in ranges?.changes or []
+									change.op.i = encodeForWebsockets(change.op.i) if change.op.i?
+									change.op.d = encodeForWebsockets(change.op.d) if change.op.d?
+							catch err
+								logger.err {err, project_id, doc_id, fromVersion, ranges, client_id: client.id}, "error encoding range uri component"
+								return callback(err)
 
-					AuthorizationManager.addAccessToDoc client, doc_id
-					RoomManager.joinDoc client, doc_id, (err) ->
+						AuthorizationManager.addAccessToDoc client, doc_id
 						logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joined doc"
 						callback null, escapedLines, version, ops, ranges
 					
