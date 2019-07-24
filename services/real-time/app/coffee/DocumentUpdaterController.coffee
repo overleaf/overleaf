@@ -7,7 +7,6 @@ HealthCheckManager = require "./HealthCheckManager"
 RoomManager = require "./RoomManager"
 ChannelManager = require "./ChannelManager"
 metrics = require "metrics-sharelatex"
-util = require "util"
 
 MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 # 1Mb
 
