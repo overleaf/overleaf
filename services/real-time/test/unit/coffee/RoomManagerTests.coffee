@@ -16,7 +16,7 @@ describe 'RoomManager', ->
 		@RoomManager._clientsInRoom = sinon.stub()
 		@RoomEvents = @RoomManager.eventSource()
 		sinon.spy(@RoomEvents, 'emit')
-		sinon.spy(@RoomEvents, 'once') 
+		sinon.spy(@RoomEvents, 'once')
 	
 	describe "joinProject", ->
 	
@@ -152,7 +152,7 @@ describe 'RoomManager', ->
 			describe "when this is the only client connected", ->
 
 				beforeEach (done) ->
-					# first call is for the join, 
+					# first call is for the join,
 					# second for the leave
 					@RoomManager._clientsInRoom
 						.withArgs(@client, @doc_id)

@@ -24,7 +24,7 @@ module.exports = ChannelManager =
         else
             # get the subscribe promise and return it, the actual subscribe
             # completes in the background
-            subscribePromise = rclient.subscribe channel 
+            subscribePromise = rclient.subscribe channel
             existingChannelSet.set(channel, subscribePromise)
             logger.log {channel}, "subscribed to new channel"
             metrics.inc "subscribe.#{baseChannel}"
