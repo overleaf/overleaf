@@ -17,6 +17,9 @@ module.exports = ChannelManager =
     subscribe: (rclient, baseChannel, id) ->
         clientChannelMap = @getClientMapEntry(rclient)
         channel = "#{baseChannel}:#{id}"
+        # we track pending subscribes because we want to be sure that the
+        # channel is active before letting the client join the doc or project,
+        # so that events are not lost.
         if clientChannelMap.has(channel)
             logger.warn {channel}, "subscribe already actioned"
             # return the existing subscribe promise, so we can wait for it to resolve
@@ -33,6 +36,9 @@ module.exports = ChannelManager =
     unsubscribe: (rclient, baseChannel, id) ->
         clientChannelMap = @getClientMapEntry(rclient)
         channel = "#{baseChannel}:#{id}"
+        # we don't need to track pending unsubscribes, because we there is no
+        # harm if events continue to arrive on the channel while the unsubscribe
+        # command in pending.
         if !clientChannelMap.has(channel)
             logger.error {channel}, "not subscribed - shouldn't happen"
         else

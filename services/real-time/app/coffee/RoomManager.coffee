@@ -2,7 +2,7 @@ logger = require 'logger-sharelatex'
 {EventEmitter} = require 'events'
 
 IdMap = new Map() # keep track of whether ids are from projects or docs
-RoomEvents = new EventEmitter()
+RoomEvents = new EventEmitter() # emits {project,doc}-active and {project,doc}-empty events
 
 # Manage socket.io rooms for individual projects and docs
 #
@@ -49,6 +49,7 @@ module.exports = RoomManager =
         if beforeCount == 0
             logger.log {entity, id}, "room is now active"
             RoomEvents.once "#{entity}-subscribed-#{id}", (err) ->
+                # only allow the client to join when all the relevant channels have subscribed
                 logger.log {client: client.id, entity, id, beforeCount}, "client joined room after subscribing channel"
                 client.join id
                 callback(err)
