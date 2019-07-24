@@ -1,4 +1,5 @@
 logger = require 'logger-sharelatex'
+metrics = require "metrics-sharelatex"
 {EventEmitter} = require 'events'
 
 IdMap = new Map() # keep track of whether ids are from projects or docs
@@ -55,6 +56,8 @@ module.exports = RoomManager =
                 callback(err)
             RoomEvents.emit "#{entity}-active", id
             IdMap.set(id, entity)
+            # keep track of the number of listeners
+            metrics.gauge "room-listeners", RoomEvents.eventNames().length
         else
             logger.log {client: client.id, entity, id, beforeCount}, "client joined existing room"
             client.join id
@@ -72,6 +75,7 @@ module.exports = RoomManager =
             logger.log {entity, id}, "room is now empty"
             RoomEvents.emit "#{entity}-empty", id
             IdMap.delete(id)
+            metrics.gauge "room-listeners", RoomEvents.eventNames().length
 
     # internal functions below, these access socket.io rooms data directly and
     # will need updating for socket.io v2

@@ -13,6 +13,7 @@ describe 'RoomManager', ->
 		@RoomManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"metrics-sharelatex": @metrics = { gauge: sinon.stub() }
 		@RoomManager._clientsInRoom = sinon.stub()
 		@RoomEvents = @RoomManager.eventSource()
 		sinon.spy(@RoomEvents, 'emit')
