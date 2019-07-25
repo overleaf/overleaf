@@ -5,6 +5,7 @@ AuthorizationManager = require "./AuthorizationManager"
 DocumentUpdaterManager = require "./DocumentUpdaterManager"
 ConnectedUsersManager = require "./ConnectedUsersManager"
 WebsocketLoadBalancer = require "./WebsocketLoadBalancer"
+RoomManager = require "./RoomManager"
 Utils = require "./Utils"
 
 module.exports = WebsocketController =
@@ -24,8 +25,7 @@ module.exports = WebsocketController =
 				err = new Error("not authorized")
 				logger.warn {err, project_id, user_id, client_id: client.id}, "user is not authorized to join project"
 				return callback(err)
-				
-			client.join project_id
+
 
 			client.set("privilege_level", privilegeLevel)
 			client.set("user_id", user_id)
@@ -38,8 +38,9 @@ module.exports = WebsocketController =
 			client.set("signup_date", user?.signUpDate)
 			client.set("login_count", user?.loginCount)
 			
-			callback null, project, privilegeLevel, WebsocketController.PROTOCOL_VERSION
-			logger.log {user_id, project_id, client_id: client.id}, "user joined project"
+			RoomManager.joinProject client, project_id, (err) ->
+				logger.log {user_id, project_id, client_id: client.id}, "user joined project"
+				callback null, project, privilegeLevel, WebsocketController.PROTOCOL_VERSION
 			
 			# No need to block for setting the user as connected in the cursor tracking
 			ConnectedUsersManager.updateUserPosition project_id, client.id, user, null, () ->
@@ -71,6 +72,7 @@ module.exports = WebsocketController =
 				if err?
 					logger.error {err, project_id, user_id, client_id: client.id}, "error marking client as disconnected"
 					
+			RoomManager.leaveProjectAndDocs(client)
 			setTimeout () ->
 				remainingClients = io.sockets.clients(project_id)
 				if remainingClients.length == 0
@@ -90,41 +92,44 @@ module.exports = WebsocketController =
 					
 			AuthorizationManager.assertClientCanViewProject client, (error) ->
 				return callback(error) if error?
-				DocumentUpdaterManager.getDocument project_id, doc_id, fromVersion, (error, lines, version, ranges, ops) ->
+				# ensure the per-doc applied-ops channel is subscribed before sending the
+				# doc to the client, so that no events are missed.
+				RoomManager.joinDoc client, doc_id, (error) ->
 					return callback(error) if error?
+					DocumentUpdaterManager.getDocument project_id, doc_id, fromVersion, (error, lines, version, ranges, ops) ->
+						return callback(error) if error?
 
-					# Encode any binary bits of data so it can go via WebSockets
-					# See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
-					encodeForWebsockets = (text) -> unescape(encodeURIComponent(text))
-					escapedLines = []
-					for line in lines
-						try
-							line = encodeForWebsockets(line)
-						catch err
-							logger.err {err, project_id, doc_id, fromVersion, line, client_id: client.id}, "error encoding line uri component"
-							return callback(err)
-						escapedLines.push line
-					if options.encodeRanges
-						try
-							for comment in ranges?.comments or []
-								comment.op.c = encodeForWebsockets(comment.op.c) if comment.op.c?
-							for change in ranges?.changes or []
-								change.op.i = encodeForWebsockets(change.op.i) if change.op.i?
-								change.op.d = encodeForWebsockets(change.op.d) if change.op.d?
-						catch err
-							logger.err {err, project_id, doc_id, fromVersion, ranges, client_id: client.id}, "error encoding range uri component"
-							return callback(err)
+						# Encode any binary bits of data so it can go via WebSockets
+						# See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
+						encodeForWebsockets = (text) -> unescape(encodeURIComponent(text))
+						escapedLines = []
+						for line in lines
+							try
+								line = encodeForWebsockets(line)
+							catch err
+								logger.err {err, project_id, doc_id, fromVersion, line, client_id: client.id}, "error encoding line uri component"
+								return callback(err)
+							escapedLines.push line
+						if options.encodeRanges
+							try
+								for comment in ranges?.comments or []
+									comment.op.c = encodeForWebsockets(comment.op.c) if comment.op.c?
+								for change in ranges?.changes or []
+									change.op.i = encodeForWebsockets(change.op.i) if change.op.i?
+									change.op.d = encodeForWebsockets(change.op.d) if change.op.d?
+							catch err
+								logger.err {err, project_id, doc_id, fromVersion, ranges, client_id: client.id}, "error encoding range uri component"
+								return callback(err)
 
-					AuthorizationManager.addAccessToDoc client, doc_id
-					client.join(doc_id)
-					callback null, escapedLines, version, ops, ranges
-					logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joined doc"
+						AuthorizationManager.addAccessToDoc client, doc_id
+						logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joined doc"
+						callback null, escapedLines, version, ops, ranges
 					
 	leaveDoc: (client, doc_id, callback = (error) ->) ->
 		metrics.inc "editor.leave-doc"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			logger.log {user_id, project_id, doc_id, client_id: client.id}, "client leaving doc"
-			client.leave doc_id
+			RoomManager.leaveDoc(client, doc_id)
 			# we could remove permission when user leaves a doc, but because
 			# the connection is per-project, we continue to allow access
 			# after the initial joinDoc since we know they are already authorised.

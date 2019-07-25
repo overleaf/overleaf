@@ -36,7 +36,7 @@ describe 'WebsocketController', ->
 			"metrics-sharelatex": @metrics =
 				inc: sinon.stub()
 				set: sinon.stub()
-				
+			"./RoomManager": @RoomManager = {}
 	
 	afterEach ->
 		tk.reset()
@@ -54,6 +54,7 @@ describe 'WebsocketController', ->
 				@privilegeLevel = "owner"
 				@ConnectedUsersManager.updateUserPosition = sinon.stub().callsArg(4)
 				@WebApiManager.joinProject = sinon.stub().callsArgWith(2, null, @project, @privilegeLevel)
+				@RoomManager.joinProject = sinon.stub().callsArg(2)
 				@WebsocketController.joinProject @client, @user, @project_id, @callback
 				
 			it "should load the project from web", ->
@@ -62,7 +63,7 @@ describe 'WebsocketController', ->
 					.should.equal true
 					
 			it "should join the project room", ->
-				@client.join.calledWith(@project_id).should.equal true
+				@RoomManager.joinProject.calledWith(@client, @project_id).should.equal true
 					
 			it "should set the privilege level on the client", ->
 				@client.set.calledWith("privilege_level", @privilegeLevel).should.equal true
@@ -125,6 +126,7 @@ describe 'WebsocketController', ->
 			@DocumentUpdaterManager.flushProjectToMongoAndDelete = sinon.stub().callsArg(1)
 			@ConnectedUsersManager.markUserAsDisconnected = sinon.stub().callsArg(2)
 			@WebsocketLoadBalancer.emitToRoom = sinon.stub()
+			@RoomManager.leaveProjectAndDocs = sinon.stub()
 			@clientsInRoom = []
 			@io =
 				sockets:
@@ -160,6 +162,11 @@ describe 'WebsocketController', ->
 			it "should increment the leave-project metric", ->
 				@metrics.inc.calledWith("editor.leave-project").should.equal true
 			
+			it "should track the disconnection in RoomManager", ->
+				@RoomManager.leaveProjectAndDocs
+					.calledWith(@client)
+					.should.equal true
+
 		describe "when the project is not empty", ->
 			beforeEach ->
 				@clientsInRoom = ["mock-remaining-client"]
@@ -230,6 +237,7 @@ describe 'WebsocketController', ->
 			@AuthorizationManager.addAccessToDoc = sinon.stub()
 			@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
 			@DocumentUpdaterManager.getDocument = sinon.stub().callsArgWith(3, null, @doc_lines, @version, @ranges, @ops)
+			@RoomManager.joinDoc = sinon.stub().callsArg(2)
 
 		describe "works", ->
 			beforeEach ->
@@ -251,8 +259,8 @@ describe 'WebsocketController', ->
 					.should.equal true
 
 			it "should join the client to room for the doc_id", ->
-				@client.join
-					.calledWith(@doc_id)
+				@RoomManager.joinDoc
+					.calledWith(@client, @doc_id)
 					.should.equal true
 
 			it "should call the callback with the lines, version, ranges and ops", ->
@@ -330,11 +338,12 @@ describe 'WebsocketController', ->
 		beforeEach ->
 			@doc_id = "doc-id-123"			
 			@client.params.project_id = @project_id
+			@RoomManager.leaveDoc = sinon.stub()
 			@WebsocketController.leaveDoc @client, @doc_id, @callback
 			
 		it "should remove the client from the doc_id room", ->
-			@client.leave
-				.calledWith(@doc_id).should.equal true
+			@RoomManager.leaveDoc
+				.calledWith(@client, @doc_id).should.equal true
 				
 		it "should call the callback", ->
 			@callback.called.should.equal true

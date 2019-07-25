@@ -54,6 +54,8 @@ settings =
 
 	checkEventOrder: process.env['CHECK_EVENT_ORDER'] or false
 	
+	publishOnIndividualChannels: process.env['PUBLISH_ON_INDIVIDUAL_CHANNELS'] or false
+
 	sentry:
 		dsn: process.env.SENTRY_DSN
 	

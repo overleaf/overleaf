@@ -4,6 +4,8 @@ RedisClientManager = require "./RedisClientManager"
 SafeJsonParse = require "./SafeJsonParse"
 EventLogger = require "./EventLogger"
 HealthCheckManager = require "./HealthCheckManager"
+RoomManager = require "./RoomManager"
+ChannelManager = require "./ChannelManager"
 metrics = require "metrics-sharelatex"
 
 MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 # 1Mb
@@ -27,7 +29,18 @@ module.exports = DocumentUpdaterController =
 				do (i) ->
 					rclient.on "message", () ->
 						metrics.inc "rclient-#{i}", 0.001 # per client event rate metric
-		
+		@handleRoomUpdates(@rclientList)
+
+	handleRoomUpdates: (rclientSubList) ->
+		roomEvents = RoomManager.eventSource()
+		roomEvents.on 'doc-active', (doc_id) ->
+			subscribePromises = for rclient in rclientSubList
+				ChannelManager.subscribe rclient, "applied-ops", doc_id
+			RoomManager.emitOnCompletion(subscribePromises, "doc-subscribed-#{doc_id}")
+		roomEvents.on 'doc-empty', (doc_id) ->
+			for rclient in rclientSubList
+				ChannelManager.unsubscribe rclient, "applied-ops", doc_id
+
 	_processMessageFromDocumentUpdater: (io, channel, message) ->
 		SafeJsonParse.parse message, (error, message) ->
 			if error?

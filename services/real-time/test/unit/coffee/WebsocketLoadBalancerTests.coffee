@@ -6,6 +6,7 @@ modulePath = require('path').join __dirname, '../../../app/js/WebsocketLoadBalan
 describe "WebsocketLoadBalancer", ->
 	beforeEach ->
 		@rclient = {}
+		@RoomEvents = {on: sinon.stub()}
 		@WebsocketLoadBalancer = SandboxedModule.require modulePath, requires:
 			"./RedisClientManager": 
 				createClientList: () => []
@@ -14,6 +15,8 @@ describe "WebsocketLoadBalancer", ->
 				parse: (data, cb) => cb null, JSON.parse(data)
 			"./EventLogger": {checkEventOrder: sinon.stub()}
 			"./HealthCheckManager": {check: sinon.stub()}
+			"./RoomManager" : @RoomManager = {eventSource: sinon.stub().returns @RoomEvents}
+			"./ChannelManager": @ChannelManager = {publish: sinon.stub()}
 		@io = {}
 		@WebsocketLoadBalancer.rclientPubList = [{publish: sinon.stub()}]
 		@WebsocketLoadBalancer.rclientSubList = [{
@@ -30,8 +33,8 @@ describe "WebsocketLoadBalancer", ->
 			@WebsocketLoadBalancer.emitToRoom(@room_id, @message, @payload...)
 
 		it "should publish the message to redis", ->
-			@WebsocketLoadBalancer.rclientPubList[0].publish
-				.calledWith("editor-events", JSON.stringify(
+			@ChannelManager.publish
+				.calledWith(@WebsocketLoadBalancer.rclientPubList[0], "editor-events", @room_id, JSON.stringify(
 					room_id: @room_id,
 					message: @message
 					payload: @payload
