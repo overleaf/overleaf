@@ -109,7 +109,8 @@ describe('UserController', function() {
           inc() {}
         },
         '../Errors/Errors': Errors,
-        '../Errors/HttpErrors': HttpErrors
+        '../Errors/HttpErrors': HttpErrors,
+        '../Email/EmailHandler': { sendEmail: sinon.stub() }
       }
     })
 
