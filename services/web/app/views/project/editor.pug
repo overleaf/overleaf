@@ -181,9 +181,9 @@ block requirejs
 		window.aceWorkerPath = "#{aceWorkerPath}";
 		window.pdfCMapsPath = "#{pdfCMapsPath}"
 		window.uiConfig = JSON.parse('!{StringHelper.stringifyJsonForScript(uiConfig)}');
-		//- enable doc hash checking for projects created after 2019-06-09
-		//- this is for a staged rollout, eventually we will turn this on for all projects
-		window.useShareJsHash = (window.project_id > "5cfd8f700000000000000000")
+		//- enable doc hash checking for all projects
+		//- used in public/js/libs/sharejs.js
+		window.useShareJsHash = true
 
 	- if (settings.overleaf != null)
 		script(type='text/javascript').
