@@ -24,6 +24,22 @@ const LearnedWordsManager = {
     )
   },
 
+  unlearnWord(userToken, word, callback) {
+    if (callback == null) {
+      callback = () => {}
+    }
+    mongoCache.del(userToken)
+    return db.spellingPreferences.update(
+      {
+        token: userToken
+      },
+      {
+        $pull: { learnedWords: word }
+      },
+      callback
+    )
+  },
+
   getLearnedWords(userToken, callback) {
     if (callback == null) {
       callback = () => {}
@@ -61,6 +77,7 @@ const LearnedWordsManager = {
 
 const promises = {
   learnWord: promisify(LearnedWordsManager.learnWord),
+  unlearnWord: promisify(LearnedWordsManager.unlearnWord),
   getLearnedWords: promisify(LearnedWordsManager.getLearnedWords),
   deleteUsersLearnedWords: promisify(
     LearnedWordsManager.deleteUsersLearnedWords
@@ -70,7 +87,7 @@ const promises = {
 LearnedWordsManager.promises = promises
 
 module.exports = LearnedWordsManager
-;['learnWord', 'getLearnedWords'].map(method =>
+;['learnWord', 'unlearnWord', 'getLearnedWords'].map(method =>
   metrics.timeAsyncMethod(
     LearnedWordsManager,
     method,

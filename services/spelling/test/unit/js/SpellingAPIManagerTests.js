@@ -21,6 +21,7 @@ describe('SpellingAPIManager', function() {
     this.LearnedWordsManager = {
       getLearnedWords: sinon.stub().callsArgWith(1, null, this.learnedWords),
       learnWord: sinon.stub().callsArg(2),
+      unlearnWord: sinon.stub().callsArg(2),
       promises: {
         getLearnedWords: sinon.stub().returns(promiseStub(this.learnedWords))
       }
@@ -224,6 +225,58 @@ describe('SpellingAPIManager', function() {
 
       it('should call LearnedWordsManager.learnWord', function() {
         this.LearnedWordsManager.learnWord
+          .calledWith(this.token, this.word)
+          .should.equal(true)
+      })
+    })
+  })
+
+  describe('unlearnWord', function() {
+    describe('without a token', function() {
+      beforeEach(function(done) {
+        this.SpellingAPIManager.unlearnWord(null, { word: 'banana' }, error => {
+          this.error = error
+          done()
+        })
+      })
+
+      it('should return an error', function() {
+        expect(this.error).to.exist
+        expect(this.error).to.be.instanceof(Error)
+        expect(this.error.message).to.equal('no token provided')
+      })
+    })
+
+    describe('without a word', function() {
+      beforeEach(function(done) {
+        this.SpellingAPIManager.unlearnWord(this.token, {}, error => {
+          this.error = error
+          done()
+        })
+      })
+
+      it('should return an error', function() {
+        expect(this.error).to.exist
+        expect(this.error).to.be.instanceof(Error)
+        expect(this.error.message).to.equal('malformed JSON')
+      })
+    })
+
+    describe('with a word and a token', function() {
+      beforeEach(function(done) {
+        this.word = 'banana'
+        this.SpellingAPIManager.unlearnWord(
+          this.token,
+          { word: this.word },
+          error => {
+            this.error = error
+            done()
+          }
+        )
+      })
+
+      it('should call LearnedWordsManager.unlearnWord', function() {
+        this.LearnedWordsManager.unlearnWord
           .calledWith(this.token, this.word)
           .should.equal(true)
       })

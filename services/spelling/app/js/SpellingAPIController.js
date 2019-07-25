@@ -44,8 +44,19 @@ module.exports = {
       if (error != null) {
         return next(error)
       }
-      res.sendStatus(200)
-      next()
+      res.sendStatus(204)
+    })
+  },
+
+  unlearn(req, res, next) {
+    metrics.inc('spelling-unlearn', 0.1)
+    const { token, word } = extractLearnRequestData(req)
+    logger.info({ token, word }, 'unlearning word')
+    SpellingAPIManager.unlearnWord(token, req.body, function(error) {
+      if (error != null) {
+        return next(error)
+      }
+      res.sendStatus(204)
     })
   },
 
