@@ -27,6 +27,12 @@ describe('ProjectDeleter', () => {
         readOnly: 'wombat',
         readAndWrite: 'potato'
       },
+      overleaf: {
+        id: 1234,
+        history: {
+          id: 5678
+        }
+      },
       name: 'a very scientific analysis of spooky ghosts'
     }
 
@@ -238,6 +244,8 @@ describe('ProjectDeleter', () => {
           .tokenAccessReadOnly_refs,
         deletedProjectReadWriteToken: this.project.tokens.readAndWrite,
         deletedProjectReadOnlyToken: this.project.tokens.readOnly,
+        deletedProjectOverleafId: this.project.overleaf.id,
+        deletedProjectOverleafHistoryId: this.project.overleaf.history.id,
         deletedProjectLastUpdatedAt: this.project.lastUpdated
       }
 

@@ -19,7 +19,9 @@ const DeleterDataSchema = new Schema({
   deletedProjectReadOnlyTokenAccessIds: [{ type: ObjectId, ref: 'User' }],
   deletedProjectReadWriteToken: { type: String },
   deletedProjectReadOnlyToken: { type: String },
-  deletedProjectLastUpdatedAt: { type: Date }
+  deletedProjectLastUpdatedAt: { type: Date },
+  deletedProjectOverleafId: { type: Number },
+  deletedProjectOverleafHistoryId: { type: Number }
 })
 
 const DeletedProjectSchema = new Schema(

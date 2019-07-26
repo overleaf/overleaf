@@ -180,6 +180,13 @@ async function deleteProject(project_id, options = {}) {
         deletedProjectReadOnlyIds: project.readOnly_refs,
         deletedProjectReadWriteTokenAccessIds:
           project.tokenAccessReadAndWrite_refs,
+        deletedProjectOverleafId: project.overleaf
+          ? project.overleaf.id
+          : undefined,
+        deletedProjectOverleafHistoryId:
+          project.overleaf && project.overleaf.history
+            ? project.overleaf.history.id
+            : undefined,
         deletedProjectReadOnlyTokenAccessIds: project.tokenAccessReadOnly_refs,
         deletedProjectReadWriteToken: project.tokens.readAndWrite,
         deletedProjectReadOnlyToken: project.tokens.readOnly,
