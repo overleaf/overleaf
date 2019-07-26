@@ -43,59 +43,75 @@ module.exports = CollaboratorsHandler = {
       tokenAccessReadAndWrite_refs: 1,
       publicAccesLevel: 1
     }
-    return ProjectGetter.getProject(project_id, projection, function(
-      error,
-      project
-    ) {
-      let member_id
-      if (error != null) {
+    ProjectGetter.getProject(project_id, projection, (error, project) => {
+      if (error) {
         return callback(error)
       }
-      if (project == null) {
+      if (!project) {
         return callback(
           new Errors.NotFoundError(`no project found with id ${project_id}`)
         )
       }
-      const members = []
+      callback(
+        null,
+        CollaboratorsHandler.getMemberIdsWithPrivilegeLevelsFromFields(
+          project.owner_ref,
+          project.collaberator_refs,
+          project.readOnly_refs,
+          project.tokenAccessReadAndWrite_refs,
+          project.tokenAccessReadOnly_refs,
+          project.publicAccesLevel
+        )
+      )
+    })
+  },
+
+  getMemberIdsWithPrivilegeLevelsFromFields(
+    ownerId,
+    collaboratorIds,
+    readOnlyIds,
+    tokenAccessIds,
+    tokenAccessReadOnlyIds,
+    publicAccessLevel
+  ) {
+    let member_id
+    const members = []
+    members.push({
+      id: ownerId.toString(),
+      privilegeLevel: PrivilegeLevels.OWNER,
+      source: Sources.OWNER
+    })
+    for (member_id of Array.from(collaboratorIds || [])) {
       members.push({
-        id: project.owner_ref.toString(),
-        privilegeLevel: PrivilegeLevels.OWNER,
-        source: Sources.OWNER
+        id: member_id.toString(),
+        privilegeLevel: PrivilegeLevels.READ_AND_WRITE,
+        source: Sources.INVITE
       })
-      for (member_id of Array.from(project.collaberator_refs || [])) {
+    }
+    for (member_id of Array.from(readOnlyIds || [])) {
+      members.push({
+        id: member_id.toString(),
+        privilegeLevel: PrivilegeLevels.READ_ONLY,
+        source: Sources.INVITE
+      })
+    }
+    if (publicAccessLevel === PublicAccessLevels.TOKEN_BASED) {
+      for (member_id of Array.from(tokenAccessIds || [])) {
         members.push({
           id: member_id.toString(),
           privilegeLevel: PrivilegeLevels.READ_AND_WRITE,
-          source: Sources.INVITE
+          source: Sources.TOKEN
         })
       }
-      for (member_id of Array.from(project.readOnly_refs || [])) {
+      for (member_id of Array.from(tokenAccessReadOnlyIds || [])) {
         members.push({
           id: member_id.toString(),
           privilegeLevel: PrivilegeLevels.READ_ONLY,
-          source: Sources.INVITE
+          source: Sources.TOKEN
         })
       }
-      if (project.publicAccesLevel === PublicAccessLevels.TOKEN_BASED) {
-        for (member_id of Array.from(
-          project.tokenAccessReadAndWrite_refs || []
-        )) {
-          members.push({
-            id: member_id.toString(),
-            privilegeLevel: PrivilegeLevels.READ_AND_WRITE,
-            source: Sources.TOKEN
-          })
-        }
-        for (member_id of Array.from(project.tokenAccessReadOnly_refs || [])) {
-          members.push({
-            id: member_id.toString(),
-            privilegeLevel: PrivilegeLevels.READ_ONLY,
-            source: Sources.TOKEN
-          })
-        }
-      }
-      return callback(null, members)
-    })
+    }
+    return members
   },
 
   getMemberIds(project_id, callback) {
@@ -208,6 +224,25 @@ module.exports = CollaboratorsHandler = {
           callback(error, users)
         )
       }
+    )
+  },
+
+  getInvitedMembersWithPrivilegeLevelsFromFields(
+    ownerId,
+    collaboratorIds,
+    readOnlyIds,
+    callback
+  ) {
+    let members = CollaboratorsHandler.getMemberIdsWithPrivilegeLevelsFromFields(
+      ownerId,
+      collaboratorIds,
+      readOnlyIds,
+      [],
+      [],
+      null
+    )
+    return CollaboratorsHandler._loadMembers(members, (error, users) =>
+      callback(error, users)
     )
   },
 
