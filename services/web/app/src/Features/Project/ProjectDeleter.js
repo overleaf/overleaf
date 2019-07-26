@@ -167,31 +167,37 @@ async function deleteProject(project_id, options = {}) {
       throw new Errors.NotFoundError('project not found')
     }
 
+    let deleterData = {
+      deletedAt: new Date(),
+      deleterId:
+        options.deleterUser != null ? options.deleterUser._id : undefined,
+      deleterIpAddress: options.ipAddress,
+      deletedProjectId: project._id,
+      deletedProjectOwnerId: project.owner_ref,
+      deletedProjectCollaboratorIds: project.collaberator_refs,
+      deletedProjectReadOnlyIds: project.readOnly_refs,
+      deletedProjectReadWriteTokenAccessIds:
+        project.tokenAccessReadAndWrite_refs,
+      deletedProjectOverleafId: project.overleaf
+        ? project.overleaf.id
+        : undefined,
+      deletedProjectOverleafHistoryId:
+        project.overleaf && project.overleaf.history
+          ? project.overleaf.history.id
+          : undefined,
+      deletedProjectReadOnlyTokenAccessIds: project.tokenAccessReadOnly_refs,
+      deletedProjectReadWriteToken: project.tokens.readAndWrite,
+      deletedProjectReadOnlyToken: project.tokens.readOnly,
+      deletedProjectLastUpdatedAt: project.lastUpdated
+    }
+
+    Object.keys(deleterData).forEach(
+      key => (deleterData[key] === undefined ? delete deleterData[key] : '')
+    )
+
     await DeletedProject.create({
       project: project,
-      deleterData: {
-        deletedAt: new Date(),
-        deleterId:
-          options.deleterUser != null ? options.deleterUser._id : undefined,
-        deleterIpAddress: options.ipAddress,
-        deletedProjectId: project._id,
-        deletedProjectOwnerId: project.owner_ref,
-        deletedProjectCollaboratorIds: project.collaberator_refs,
-        deletedProjectReadOnlyIds: project.readOnly_refs,
-        deletedProjectReadWriteTokenAccessIds:
-          project.tokenAccessReadAndWrite_refs,
-        deletedProjectOverleafId: project.overleaf
-          ? project.overleaf.id
-          : undefined,
-        deletedProjectOverleafHistoryId:
-          project.overleaf && project.overleaf.history
-            ? project.overleaf.history.id
-            : undefined,
-        deletedProjectReadOnlyTokenAccessIds: project.tokenAccessReadOnly_refs,
-        deletedProjectReadWriteToken: project.tokens.readAndWrite,
-        deletedProjectReadOnlyToken: project.tokens.readOnly,
-        deletedProjectLastUpdatedAt: project.lastUpdated
-      }
+      deleterData: deleterData
     })
 
     const flushProjectToMongoAndDelete = promisify(
