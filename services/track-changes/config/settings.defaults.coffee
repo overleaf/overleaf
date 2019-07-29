@@ -15,7 +15,7 @@ module.exports =
 		docstore:
 			url: "http://#{process.env["DOCSTORE_HOST"] or "localhost"}:3016"
 		web:
-			url: "http://#{process.env["WEB_API_HOST"] or "localhost"}:#{process.env['WEB_API_PORT'] or 3000}"
+			url: "http://#{process.env['WEB_API_HOST'] or process.env['WEB_HOST'] or "localhost"}:#{process.env['WEB_API_PORT'] or process.env['WEB_PORT'] or 3000}"
 			user: "sharelatex"
 			pass: "password"
 	redis:
