@@ -46,13 +46,15 @@ module.exports = RoomManager =
 
     joinEntity: (client, entity, id, callback) ->
         beforeCount = @_clientsInRoom(client, id)
+        # client joins room immediately but joinDoc request does not complete
+        # until room is subscribed
+        client.join id
         # is this a new room? if so, subscribe
         if beforeCount == 0
             logger.log {entity, id}, "room is now active"
             RoomEvents.once "#{entity}-subscribed-#{id}", (err) ->
                 # only allow the client to join when all the relevant channels have subscribed
-                logger.log {client: client.id, entity, id, beforeCount}, "client joined room after subscribing channel"
-                client.join id
+                logger.log {client: client.id, entity, id, beforeCount}, "client joined new room and subscribed to channel"
                 callback(err)
             RoomEvents.emit "#{entity}-active", id
             IdMap.set(id, entity)

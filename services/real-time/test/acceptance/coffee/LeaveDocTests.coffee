@@ -1,10 +1,12 @@
 chai = require("chai")
 expect = chai.expect
 chai.should()
+sinon = require("sinon")
 
 RealTimeClient = require "./helpers/RealTimeClient"
 MockDocUpdaterServer = require "./helpers/MockDocUpdaterServer"
 FixturesManager = require "./helpers/FixturesManager"
+logger = require("logger-sharelatex")
 
 async = require "async"
 
@@ -13,9 +15,13 @@ describe "leaveDoc", ->
 		@lines = ["test", "doc", "lines"]
 		@version = 42
 		@ops = ["mock", "doc", "ops"]
+		sinon.spy(logger, "error")
+	
+	after ->
+		logger.error.restore() # remove the spy
 			
 	describe "when joined to a doc", ->
-		before (done) ->
+		beforeEach (done) ->
 			async.series [
 				(cb) =>
 					FixturesManager.setUpProject {
@@ -39,11 +45,27 @@ describe "leaveDoc", ->
 			], done
 							
 		describe "then leaving the doc", ->
-			before (done) ->
+			beforeEach (done) ->
 				@client.emit "leaveDoc", @doc_id, (error) ->
 					throw error if error?
 					done()
 			
+			it "should have left the doc room", (done) ->
+				RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
+					expect(@doc_id in client.rooms).to.equal false
+					done()
+
+		describe "when sending a leaveDoc request before the previous joinDoc request has completed", ->
+			beforeEach (done) ->
+				@client.emit "leaveDoc", @doc_id, () ->
+				@client.emit "joinDoc", @doc_id, () ->
+				@client.emit "leaveDoc", @doc_id, (error) ->
+					throw error if error?
+					done()
+
+			it "should not trigger an error", ->
+				sinon.assert.neverCalledWith(logger.error, sinon.match.any, "not subscribed - shouldn't happen")
+
 			it "should have left the doc room", (done) ->
 				RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
 					expect(@doc_id in client.rooms).to.equal false
