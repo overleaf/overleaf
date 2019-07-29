@@ -130,7 +130,7 @@ module.exports = HistoryManager = {
     // 	diff: [{
     // 		i: "foo",
     // 		meta: {
-    // 			users: ["user_id", { first_name: "James", ... }, ...]
+    // 			users: ["user_id", v1_user_id, ...]
     // 			...
     // 		}
     // 	}, ...]
@@ -140,7 +140,7 @@ module.exports = HistoryManager = {
     // 	updates: [{
     // 		pathnames: ["main.tex"]
     // 		meta: {
-    // 			users: ["user_id", { first_name: "James", ... }, ...]
+    // 			users: ["user_id", v1_user_id, ...]
     // 			...
     // 		},
     // 		...
@@ -148,50 +148,65 @@ module.exports = HistoryManager = {
     // }
     // Either way, the top level key points to an array of objects with a meta.users property
     // that we need to replace user_ids with populated user objects.
-    // Note that some entries in the users arrays may already have user objects from the v1 history
-    // service
+    // Note that some entries in the users arrays may be v1 ids returned by the v1 history
+    // service. v1 ids will be `numbers`
     let entry, user
     if (callback == null) {
       callback = function(error, data_with_users) {}
     }
     let user_ids = new Set()
+    let v1_user_ids = new Set()
     for (entry of Array.from(data.diff || data.updates || [])) {
       for (user of Array.from(
         (entry.meta != null ? entry.meta.users : undefined) || []
       )) {
         if (typeof user === 'string') {
           user_ids.add(user)
+        } else if (typeof user === 'number') {
+          v1_user_ids.add(user)
         }
       }
     }
     user_ids = Array.from(user_ids)
-    return UserGetter.getUsers(
-      user_ids,
-      { first_name: 1, last_name: 1, email: 1 },
-      function(error, users_array) {
-        if (error != null) {
-          return callback(error)
-        }
-        const users = {}
-        for (user of Array.from(users_array || [])) {
-          users[user._id.toString()] = HistoryManager._userView(user)
-        }
-        for (entry of Array.from(data.diff || data.updates || [])) {
-          if (entry.meta != null) {
-            entry.meta.users = (
-              (entry.meta != null ? entry.meta.users : undefined) || []
-            ).map(function(user) {
-              if (typeof user === 'string') {
-                return users[user]
-              } else {
-                return user
-              }
-            })
-          }
-        }
-        return callback(null, data)
+    v1_user_ids = Array.from(v1_user_ids)
+    const projection = { first_name: 1, last_name: 1, email: 1 }
+    return UserGetter.getUsers(user_ids, projection, function(
+      error,
+      users_array
+    ) {
+      if (error != null) {
+        return callback(error)
       }
-    )
+      const v1_query = { 'overleaf.id': v1_user_ids }
+      const users = {}
+      for (user of Array.from(users_array || [])) {
+        users[user._id.toString()] = HistoryManager._userView(user)
+      }
+      projection.overleaf = 1
+      UserGetter.getUsersByV1Ids(
+        v1_user_ids,
+        projection,
+        (error, v1_identified_users_array) => {
+          for (user of Array.from(v1_identified_users_array || [])) {
+            users[user.overleaf.id] = HistoryManager._userView(user)
+          }
+          for (entry of Array.from(data.diff || data.updates || [])) {
+            if (entry.meta != null) {
+              entry.meta.users = (
+                (entry.meta != null ? entry.meta.users : undefined) || []
+              ).map(function(user) {
+                if (typeof user === 'string' || typeof user === 'number') {
+                  return users[user]
+                } else {
+                  return user
+                }
+              })
+            }
+          }
+          return callback(null, data)
+        }
+      )
+    })
   },
 
   _userView(user) {

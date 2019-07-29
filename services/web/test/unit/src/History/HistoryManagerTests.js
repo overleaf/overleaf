@@ -152,7 +152,8 @@ describe('HistoryManager', function() {
         _id: (this.user_id1 = '123456'),
         first_name: 'Jane',
         last_name: 'Doe',
-        email: 'jane@example.com'
+        email: 'jane@example.com',
+        overleaf: { id: 5011 }
       }
       this.user1_view = {
         id: this.user_id1,
@@ -172,6 +173,7 @@ describe('HistoryManager', function() {
         last_name: 'Doe',
         email: 'john@example.com'
       }
+      this.UserGetter.getUsersByV1Ids = sinon.stub().yields(null, [this.user1])
       return (this.UserGetter.getUsers = sinon
         .stub()
         .yields(null, [this.user1, this.user2]))
@@ -186,6 +188,33 @@ describe('HistoryManager', function() {
                 i: 'foo',
                 meta: {
                   users: [this.user_id1]
+                }
+              },
+              {
+                i: 'bar',
+                meta: {
+                  users: [this.user_id2]
+                }
+              }
+            ]
+          },
+          (error, diff) => {
+            expect(error).to.be.null
+            expect(diff.diff[0].meta.users).to.deep.equal([this.user1_view])
+            expect(diff.diff[1].meta.users).to.deep.equal([this.user2_view])
+            return done()
+          }
+        )
+      })
+
+      it('should handle v1 user ids', function(done) {
+        return this.HistoryManager.injectUserDetails(
+          {
+            diff: [
+              {
+                i: 'foo',
+                meta: {
+                  users: [5011]
                 }
               },
               {

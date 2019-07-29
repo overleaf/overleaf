@@ -294,6 +294,24 @@ describe('UserGetter', function() {
       )
     }))
 
+  describe('getUsersByV1Id', () =>
+    it('should find users by list of v1 ids', function(done) {
+      const v1Ids = [501]
+      const expectedQuery = {
+        'overleaf.id': { $in: v1Ids }
+      }
+      const projection = { emails: 1 }
+      return this.UserGetter.getUsersByV1Ids(
+        v1Ids,
+        projection,
+        (error, users) => {
+          this.find.calledOnce.should.equal(true)
+          this.find.calledWith(expectedQuery, projection).should.equal(true)
+          return done()
+        }
+      )
+    }))
+
   describe('ensureUniqueEmailAddress', function() {
     beforeEach(function() {
       return (this.UserGetter.getUserByAnyEmail = sinon.stub())

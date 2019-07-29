@@ -132,6 +132,20 @@ module.exports = UserGetter = {
     })
   },
 
+  getUsersByV1Ids(v1Ids, projection, callback) {
+    if (callback == null) {
+      callback = function(error, user) {}
+    }
+    if (arguments.length === 2) {
+      callback = projection
+      projection = {}
+    }
+    const query = { 'overleaf.id': { $in: v1Ids } }
+    return db.users.find(query, projection, (error, users) => {
+      return callback(error, users)
+    })
+  },
+
   getUsersByHostname(hostname, projection, callback) {
     if (callback == null) {
       callback = function(error, users) {}
