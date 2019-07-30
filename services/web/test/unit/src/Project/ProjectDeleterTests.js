@@ -58,7 +58,8 @@ describe('ProjectDeleter', () => {
             .subtract(95, 'days')
             .toDate(),
           deleterId: '588f3ddae8ebc1bac07c9fa4',
-          deleterIpAddress: '172.19.0.1'
+          deleterIpAddress: '172.19.0.1',
+          deletedProjectId: '5cf9270b4eff6e186cf8b05e'
         },
         project: {
           _id: '5cf9270b4eff6e186cf8b05e'
@@ -359,7 +360,7 @@ describe('ProjectDeleter', () => {
 
     it('should call expireDeletedProject', done => {
       expect(this.ProjectDeleter.expireDeletedProject).to.have.been.calledWith(
-        this.deletedProjects[0].deletedProjectId
+        this.deletedProjects[0].deleterData.deletedProjectId
       )
       done()
     })

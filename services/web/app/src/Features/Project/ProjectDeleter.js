@@ -103,7 +103,7 @@ const ProjectDeleter = {
             deletedProjects,
             function(deletedProject, cb) {
               ProjectDeleter.expireDeletedProject(
-                deletedProject.deletedProjectId,
+                deletedProject.deleterData.deletedProjectId,
                 cb
               )
             },
