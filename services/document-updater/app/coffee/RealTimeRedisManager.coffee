@@ -36,4 +36,9 @@ module.exports = RealTimeRedisManager =
 		# create a unique message id using a counter
 		message_id = "doc:#{HOST}:#{RND}-#{COUNT++}"
 		data?._id = message_id
-		pubsubClient.publish "applied-ops", JSON.stringify(data)
+		# publish on separate channels for individual projects and docs when
+		# configured (needs realtime to be configured for this too).
+		if Settings.publishOnIndividualChannels
+			pubsubClient.publish "applied-ops:#{data.doc_id}", JSON.stringify(data)
+		else
+			pubsubClient.publish "applied-ops", JSON.stringify(data)
