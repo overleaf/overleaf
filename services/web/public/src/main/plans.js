@@ -3,7 +3,7 @@
     max-len
 */
 /* global define,history */
-define(['base', 'libs/recurly-4.8.5'], function(App, recurly) {
+define(['base'], function(App) {
   App.factory('MultiCurrencyPricing', function() {
     const currencyCode = window.recomendedCurrency
 

@@ -2,6 +2,13 @@ extends ../layout
 
 include ./dashboard/_team_name_mixin
 
+block requirejs-init
+	script(
+		data-main=buildJsPath("main-recurly.js", {hashedPath:false}),
+		baseurl=fullJsPath,
+		src=buildJsPath('libs/require.js', {hashedPath:true})
+	)
+
 block content
 	.content.content-alt(ng-cloak)
 		.container
@@ -12,7 +19,7 @@ block content
 							p You already have a subscription
 					.card
 						.page-header
-							h1 #{translate("your_subscription")} 
+							h1 #{translate("your_subscription")}
 
 						-var hasDisplayedSubscription = false
 						-if (personalSubscription)

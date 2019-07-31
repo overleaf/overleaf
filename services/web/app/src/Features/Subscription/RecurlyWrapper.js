@@ -415,7 +415,8 @@ module.exports = RecurlyWrapper = {
         'base64'
       )}`,
       Accept: 'application/xml',
-      'Content-Type': 'application/xml; charset=utf-8'
+      'Content-Type': 'application/xml; charset=utf-8',
+      'X-Api-Version': Settings.apis.recurly.apiVersion
     }
     const { expect404 } = options
     delete options.expect404

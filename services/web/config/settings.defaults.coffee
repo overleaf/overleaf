@@ -136,6 +136,7 @@ module.exports = settings =
 			url: "http://#{process.env['GITHUB_SYNC_HOST'] or 'localhost'}:3022"
 		recurly:
 			apiKey: process.env['RECURLY_API_KEY'] or ''
+			apiVersion: process.env['RECURLY_API_VERSION']
 			subdomain: process.env['RECURLY_SUBDOMAIN'] or ''
 			publicKey: process.env['RECURLY_PUBLIC_KEY'] or ''
 		geoIpLookup:

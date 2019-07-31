@@ -19,8 +19,11 @@ define(['base'], function(App) {
   const SUBSCRIPTION_URL = '/user/subscription/update'
 
   const ensureRecurlyIsSetup = _.once(() => {
-    if (!recurly) return
+    if (typeof recurly === 'undefined' || !recurly) {
+      return false
+    }
     recurly.configure(window.recurlyApiKey)
+    return true
   })
 
   App.controller('MetricsEmailController', function($scope, $http) {
@@ -60,7 +63,7 @@ define(['base'], function(App) {
   App.factory('RecurlyPricing', function($q, MultiCurrencyPricing) {
     return {
       loadDisplayPriceWithTax: function(planCode, currency, taxRate) {
-        ensureRecurlyIsSetup()
+        if (!ensureRecurlyIsSetup()) return
         const currencySymbol = MultiCurrencyPricing.plans[currency].symbol
         const pricing = recurly.Pricing()
         return $q(function(resolve, reject) {
@@ -89,7 +92,7 @@ define(['base'], function(App) {
     $modal,
     RecurlyPricing
   ) {
-    ensureRecurlyIsSetup()
+    if (!ensureRecurlyIsSetup()) return
 
     $scope.changePlan = () =>
       $modal.open({
@@ -164,7 +167,9 @@ define(['base'], function(App) {
   })
 
   App.controller('RecurlySubscriptionController', function($scope) {
-    $scope.showChangePlanButton = !subscription.groupPlan
+    const recurlyIsSetup = ensureRecurlyIsSetup()
+    $scope.showChangePlanButton = recurlyIsSetup && !subscription.groupPlan
+    $scope.recurlyLoadError = !recurlyIsSetup
 
     $scope.switchToDefaultView = () => {
       $scope.showCancellation = false
@@ -188,6 +193,7 @@ define(['base'], function(App) {
     RecurlyPricing,
     $http
   ) {
+    if (!ensureRecurlyIsSetup()) return
     const subscription = window.subscription
     const sevenDaysTime = new Date()
     sevenDaysTime.setDate(sevenDaysTime.getDate() + 7)

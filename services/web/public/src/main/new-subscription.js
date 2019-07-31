@@ -4,7 +4,7 @@
     no-return-assign
 */
 /* global recurly,_,define */
-define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
+define(['base', 'directives/creditCards'], App =>
   App.controller('NewSubscriptionController', function(
     $scope,
     MultiCurrencyPricing,
@@ -12,10 +12,12 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
     event_tracking,
     ccUtils
   ) {
-    if (typeof recurly === 'undefined') {
-      throw new Error('Recurly API Library Missing.')
+    if (typeof recurly === 'undefined' || !recurly) {
+      $scope.recurlyLoadError = true
+      return
     }
 
+    $scope.recurlyLoadError = false
     $scope.currencyCode = MultiCurrencyPricing.currencyCode
     $scope.allCurrencies = MultiCurrencyPricing.plans
     $scope.availableCurrencies = {}

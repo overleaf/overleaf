@@ -22,8 +22,6 @@ define([
   'main/bonus',
   'main/system-messages',
   'main/translations',
-  'main/subscription-dashboard',
-  'main/new-subscription',
   'main/annual-upgrade',
   'main/announcements',
   'main/register-users',

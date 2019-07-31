@@ -117,29 +117,33 @@ html(
 			include scribtex-modal
 
 		block requirejs
-			script(type='text/javascript').
-				// minimal requirejs configuration (can be extended/overridden)
-				window.requirejs = {
-					"paths" : {
-						"moment": "libs/#{lib('moment')}",
-						"fineuploader": "libs/#{lib('fineuploader')}",
-						"main": "#{buildJsPath('main.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
-						"libraries": "#{buildJsPath('libraries.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
-					},
-					"config":{
-						"moment":{
-							"noGlobal": true
+			block requirejs-config
+				script(type='text/javascript').
+					// minimal requirejs configuration (can be extended/overridden)
+					window.requirejs = {
+						"paths" : {
+							"moment": "libs/#{lib('moment')}",
+							"fineuploader": "libs/#{lib('fineuploader')}",
+							"main": "#{buildJsPath('main.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
+							"libraries": "#{buildJsPath('libraries.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
+							"recurly": "https://js.recurly.com/v4/recurly.js"
+						},
+						"config":{
+							"moment":{
+								"noGlobal": true
+							}
 						}
-					}
-				};
-			script(
-				data-main=buildJsPath('main.js', {hashedPath:false}),
-				baseurl=fullJsPath,
-				src=buildJsPath('libs/require.js', {hashedPath:true})
-			)
+					};
+
+			block requirejs-init
+				script(
+					data-main=buildJsPath('main.js', {hashedPath:false}),
+					baseurl=fullJsPath,
+					src=buildJsPath('libs/require.js', {hashedPath:true})
+				)
 
 		!= moduleIncludes("contactModal", locals)
 		include v1-tooltip
 		include sentry
-		
+
 
