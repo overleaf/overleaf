@@ -30,7 +30,7 @@ const SudoModeHandler = require('../SudoMode/SudoModeHandler')
 const settings = require('settings-sharelatex')
 const Errors = require('../Errors/Errors')
 const OError = require('@overleaf/o-error')
-const HttpErrors = require('../Errors/HttpErrors')
+const HttpErrors = require('@overleaf/o-error/http')
 const EmailHandler = require('../Email/EmailHandler')
 
 module.exports = UserController = {
@@ -108,7 +108,7 @@ module.exports = UserController = {
     )
   },
 
-  updateUserSettings(req, res) {
+  updateUserSettings(req, res, next) {
     const user_id = AuthenticationController.getLoggedInUserId(req)
     logger.log({ user_id }, 'updating account settings')
     return User.findById(user_id, function(err, user) {
@@ -187,18 +187,26 @@ module.exports = UserController = {
           return UserUpdater.changeEmailAddress(user_id, newEmail, function(
             err
           ) {
-            if (err != null) {
-              let message
-              logger.err(
-                { err, user_id, newEmail },
-                'problem updaing users email address'
-              )
-              if (err instanceof Errors.EmailExistsError) {
-                message = req.i18n.translate('email_already_registered')
-              } else {
-                message = req.i18n.translate('problem_changing_email_address')
+            if (err) {
+              let errorData = {
+                message: 'problem updaing users email address',
+                info: { user_id, newEmail, public: {} }
               }
-              return res.send(500, { message })
+              if (err instanceof Errors.EmailExistsError) {
+                errorData.info.public.message = req.i18n.translate(
+                  'email_already_registered'
+                )
+                return next(
+                  new HttpErrors.ConflictError(errorData).withCause(err)
+                )
+              } else {
+                errorData.info.public.message = req.i18n.translate(
+                  'problem_changing_email_address'
+                )
+                next(
+                  new HttpErrors.InternalServerError(errorData).withCause(err)
+                )
+              }
             }
             return User.findById(user_id, function(err, user) {
               if (err != null) {

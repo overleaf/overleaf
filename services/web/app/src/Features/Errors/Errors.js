@@ -39,7 +39,14 @@ class V1ConnectionError extends BackwardCompatibleError {}
 
 class UnconfirmedEmailError extends BackwardCompatibleError {}
 
-class EmailExistsError extends BackwardCompatibleError {}
+class EmailExistsError extends OError {
+  constructor(options) {
+    super({
+      message: 'Email already exists',
+      ...options
+    })
+  }
+}
 
 class InvalidError extends BackwardCompatibleError {}
 

@@ -209,7 +209,7 @@ module.exports = UserGetter = {
   ensureUniqueEmailAddress(newEmail, callback) {
     return this.getUserByAnyEmail(newEmail, function(error, user) {
       if (user != null) {
-        return callback(new Errors.EmailExistsError('alread_exists'))
+        return callback(new Errors.EmailExistsError())
       }
       return callback(error)
     })

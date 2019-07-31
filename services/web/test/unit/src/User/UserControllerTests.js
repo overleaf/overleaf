@@ -23,7 +23,7 @@ const { ObjectId } = require('mongojs')
 const assert = require('assert')
 const OError = require('@overleaf/o-error')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
-const HttpErrors = require('../../../../app/src/Features/Errors/HttpErrors')
+const HttpErrors = require('@overleaf/o-error/http')
 
 describe('UserController', function() {
   beforeEach(function() {
@@ -109,7 +109,7 @@ describe('UserController', function() {
           inc() {}
         },
         '../Errors/Errors': Errors,
-        '../Errors/HttpErrors': HttpErrors,
+        '@overleaf/o-error/http': HttpErrors,
         '../Email/EmailHandler': { sendEmail: sinon.stub() }
       }
     })

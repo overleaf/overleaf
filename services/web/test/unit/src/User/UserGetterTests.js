@@ -322,7 +322,6 @@ describe('UserGetter', function() {
       return this.UserGetter.ensureUniqueEmailAddress(this.newEmail, err => {
         should.exist(err)
         expect(err).to.be.an.instanceof(Errors.EmailExistsError)
-        err.message.should.equal('alread_exists')
         return done()
       })
     })

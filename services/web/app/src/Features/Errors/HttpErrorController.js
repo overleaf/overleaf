@@ -1,7 +1,7 @@
 const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
+const HttpErrors = require('@overleaf/o-error/http')
 const AuthenticationController = require('../Authentication/AuthenticationController')
-const HttpErrors = require('./HttpErrors')
 
 function renderHTMLError(statusCode, publicInfo, res) {
   res.status(statusCode)

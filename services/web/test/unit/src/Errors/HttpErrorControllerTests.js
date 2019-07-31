@@ -5,7 +5,7 @@ const SandboxedModule = require('sandboxed-module')
 const MockResponse = require('../helpers/MockResponse')
 const MockRequest = require('../helpers/MockRequest')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
-const HttpErrors = require('../../../../app/src/Features/Errors/HttpErrors')
+const HttpErrors = require('@overleaf/o-error/http')
 
 describe('HttpErrorController', () => {
   beforeEach(() => {
@@ -28,7 +28,7 @@ describe('HttpErrorController', () => {
           .AuthenticationController,
         'logger-sharelatex': this.logger,
         './Errors': Errors,
-        './HttpErrors': HttpErrors
+        '@overleaf/o-error/http': HttpErrors
       }
     })
   })

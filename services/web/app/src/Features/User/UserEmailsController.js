@@ -20,6 +20,7 @@ const UserEmailsConfirmationHandler = require('./UserEmailsConfirmationHandler')
 const { endorseAffiliation } = require('../Institutions/InstitutionsAPI')
 const logger = require('logger-sharelatex')
 const Errors = require('../Errors/Errors')
+const HttpErrors = require('@overleaf/o-error/http')
 
 module.exports = UserEmailsController = {
   list(req, res, next) {
@@ -186,16 +187,23 @@ module.exports = UserEmailsController = {
 
   _handleEmailError(error, req, res, next) {
     if (error instanceof Errors.UnconfirmedEmailError) {
-      return res.status(409).json({
-        message: 'email must be confirmed'
-      })
+      return next(
+        new HttpErrors.ConflictError({
+          info: {
+            public: { message: 'email must be confirmed' }
+          }
+        }).withCause(error)
+      )
     } else if (error instanceof Errors.EmailExistsError) {
-      return res.status(409).json({
-        message: req.i18n.translate('email_already_registered')
-      })
-    } else {
-      return next(error)
+      return next(
+        new HttpErrors.ConflictError({
+          info: {
+            public: { message: req.i18n.translate('email_already_registered') }
+          }
+        }).withCause(error)
+      )
     }
+    next(new HttpErrors.InternalServerError().withCause(error))
   }
 }
 function __guard__(value, transform) {
