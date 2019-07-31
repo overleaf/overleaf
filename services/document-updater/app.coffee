@@ -6,8 +6,9 @@ http = require("http")
 Settings = require('settings-sharelatex')
 logger = require('logger-sharelatex')
 logger.initialize("document-updater")
-logger.logger.serializers.docs = require("./app/js/LoggerSerializers").docs
-logger.logger.serializers.files = require("./app/js/LoggerSerializers").files
+
+logger.logger.addSerializers(require("./app/js/LoggerSerializers"))
+
 if Settings.sentry?.dsn?
 	logger.initializeErrorReporting(Settings.sentry.dsn)
 
