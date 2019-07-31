@@ -34,7 +34,8 @@ module.exports = function(grunt) {
             mathjax: '/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML',
             'pdfjs-dist/build/pdf': `libs/${PackageVersions.lib('pdfjs')}/pdf`,
             ace: `${PackageVersions.lib('ace')}`,
-            fineuploader: `libs/${PackageVersions.lib('fineuploader')}`
+            fineuploader: `libs/${PackageVersions.lib('fineuploader')}`,
+            recurly: 'https://js.recurly.com/v4/recurly'
           },
 
           skipDirOptimize: true,
@@ -55,6 +56,9 @@ module.exports = function(grunt) {
             },
             {
               name: 'ace/worker-latex'
+            },
+            {
+              name: 'main-recurly'
             }
           ]
         }
