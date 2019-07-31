@@ -19,8 +19,7 @@ define(['base'], function(App) {
     $http,
     $modal,
     event_tracking,
-    UserAffiliationsDataService,
-    UserOauthDataService
+    UserAffiliationsDataService
   ) {
     $scope.subscribed = true
 

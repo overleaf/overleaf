@@ -31,7 +31,6 @@ define([
   'main/affiliations/components/affiliationForm',
   'main/affiliations/controllers/UserAffiliationsController',
   'main/affiliations/factories/UserAffiliationsDataService',
-  'main/oauth/factories/UserOauthDataService',
   'main/oauth/controllers/UserOauthController',
   'main/keys',
   'main/importing',

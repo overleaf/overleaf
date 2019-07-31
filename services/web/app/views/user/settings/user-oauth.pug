@@ -43,20 +43,4 @@ mixin providerList()
 	.col-xs-12
 		h3.text-capitalize#linked-accounts #{translate("linked_accounts")}
 		p.small #{translate("linked_accounts_explained", {appName:'{{settings.appName}}'})}
-
-		if !settings.oauthUseV2
-			div.text-center(ng-if="ui.isLoadingV1Ids") 
-				i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
-				| &nbsp;#{translate("loading")}...
-
-			div(ng-if="ui.isLoadingV1Ids == false && ui.hasError == false")
-				+providerList()
-
-			.alert.alert-danger(
-				ng-if="ui.hasError"
-			)
-				i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
-				span(ng-if="!ui.errorMessage") &nbsp;#{translate("error_performing_request")}
-				span(ng-if="ui.errorMessage") &nbsp;{{ui.errorMessage}}
-		else
-			+providerList()
+		+providerList()
