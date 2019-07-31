@@ -61,7 +61,6 @@ const pathList = [
   `${jsPath}libs/require.js`,
   `${jsPath}ide.js`,
   `${jsPath}main.js`,
-  `${jsPath}main-recurly.js`,
   `${jsPath}libraries.js`,
   '/stylesheets/style.css',
   '/stylesheets/light-style.css',

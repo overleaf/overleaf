@@ -101,16 +101,16 @@ minify_css: $(CSS_FILES)
 minify_es:
 	npm -q run webpack:production
 
-compile: $(DIST_FILES) css public/js/main.js public/js/main-recurly.js public/js/ide.js
+compile: $(DIST_FILES) css public/js/main.js public/js/ide.js
 	@$(MAKE) compile_modules
 
 compile_full:
 	$(BABEL) public/src --out-dir public/js
 	$(BABEL) test/unit_frontend/src --out-dir test/unit_frontend/js
-	rm -f public/js/ide.js public/js/main.js public/js/main-recurly.js # We need to generate ide.js, main.js, main-recurly.js manually later
+	rm -f public/js/ide.js public/js/main.js # We need to generate ide.js, main.js, manually later
 	$(MAKE) css_full
 	$(MAKE) compile_modules_full
-	$(MAKE) compile # ide.js, main.js, main-recurly.js, share.js, and anything missed
+	$(MAKE) compile # ide.js, main.js, share.js, and anything missed
 
 compile_css_full:
 	$(MAKE) css_full
@@ -150,7 +150,7 @@ $(MODULE_MAKEFILES): Makefile.module
 clean: clean_frontend clean_css clean_tests
 
 clean_frontend:
-	rm -rf public/js/{analytics,directives,es,filters,ide,main,main-recurly,modules,services,utils}
+	rm -rf public/js/{analytics,directives,es,filters,ide,main,modules,services,utils}
 	rm -f public/js/*.{js,map}
 
 clean_css:

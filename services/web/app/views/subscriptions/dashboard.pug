@@ -2,12 +2,8 @@ extends ../layout
 
 include ./dashboard/_team_name_mixin
 
-block requirejs-init
-	script(
-		data-main=buildJsPath("main-recurly.js", {hashedPath:false}),
-		baseurl=fullJsPath,
-		src=buildJsPath('libs/require.js', {hashedPath:true})
-	)
+block scripts
+	script(src="https://js.recurly.com/v4/recurly.js")
 
 block content
 	.content.content-alt(ng-cloak)

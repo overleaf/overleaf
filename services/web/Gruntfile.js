@@ -56,9 +56,6 @@ module.exports = function(grunt) {
             },
             {
               name: 'ace/worker-latex'
-            },
-            {
-              name: 'main-recurly'
             }
           ]
         }
