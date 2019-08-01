@@ -852,10 +852,10 @@ public class WLGitBridgeIntegrationTest {
         int gitBridgePort = 33885;
         int mockServerPort = 3885;
 
-        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/cannotCloneAHasDotGitProject").toFile());
+        server = new MockSnapshotServer(mockServerPort, getResource("/cannotCloneAHasDotGitProject").toFile());
         server.start();
         server.setState(states.get("cannotCloneAHasDotGitProject").get("state"));
-        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+        wlgb = new GitBridgeApp(new String[] {
                 makeConfigFile(gitBridgePort, mockServerPort)
         });
 
