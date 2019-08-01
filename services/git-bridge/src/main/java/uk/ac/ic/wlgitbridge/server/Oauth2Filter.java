@@ -40,6 +40,18 @@ public class Oauth2Filter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) {}
 
+    private void sendResponse(ServletResponse servletResponse, int code, List<String> lines) throws IOException {
+        HttpServletResponse response = ((HttpServletResponse) servletResponse);
+        response.setContentType("text/plain");
+        response.setStatus(code);
+        PrintWriter w = response.getWriter();
+        for (String line : lines) {
+            w.println(line);
+        }
+        w.close();
+        return;
+    }
+
     /**
      * The original request from git will not contain the Authorization header.
      *
@@ -57,8 +69,16 @@ public class Oauth2Filter implements Filter {
             ServletResponse servletResponse,
             FilterChain filterChain
     ) throws IOException, ServletException {
+        String requestUri = ((Request) servletRequest).getRequestURI();
+        if (requestUri.startsWith("/project")) {
+            Log.info("[{}] Invalid request URI", requestUri);
+            sendResponse(servletResponse,400, Arrays.asList(
+                    "Invalid Project ID (must not have a '/project' prefix)"
+            ));
+            return;
+        }
         String project = Util.removeAllSuffixes(
-                ((Request) servletRequest).getRequestURI().split("/")[1],
+                requestUri.split("/")[1],
                 ".git"
         );
         // Reject v1 ids, the request will be rejected by v1 anyway

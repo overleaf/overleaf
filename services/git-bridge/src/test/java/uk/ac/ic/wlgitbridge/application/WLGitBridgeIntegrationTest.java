@@ -865,6 +865,32 @@ public class WLGitBridgeIntegrationTest {
         wlgb.stop();
     }
 
+    @Test
+    public void cannotCloneProjectWithSlash() throws IOException, GitAPIException, InterruptedException {
+        int gitBridgePort = 33886;
+        int mockServerPort = 3886;
+
+        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/canCloneARepository").toFile());
+        server.start();
+        server.setState(states.get("canCloneARepository").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(gitBridgePort, mockServerPort)
+        });
+
+        wlgb.run();
+        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/project/1234abcd", null, dir);
+        assertNotEquals(0, gitProcess.waitFor());
+
+        List<String> actual = Util.linesFromStream(gitProcess.getErrorStream(), 0, "");
+        assertEquals(Arrays.asList(
+            "Cloning into '1234abcd'...",
+            "remote: Invalid Project ID (must not have a '/project' prefix)",
+            "fatal: unable to access 'http://127.0.0.1:33886/project/1234abcd/': The requested URL returned error: 400"
+        ), actual);
+
+        wlgb.stop();
+    }
+
     private String makeConfigFile(
             int port,
             int apiPort
