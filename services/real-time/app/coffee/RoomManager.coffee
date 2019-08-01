@@ -32,7 +32,9 @@ module.exports = RoomManager =
         # channel subscriptions... but it will be safer if we leave them
         # explicitly, and then socket.io will just regard this as a client that
         # has not joined any rooms and do a final disconnection.
-        for id in @_roomsClientIsIn(client)
+        roomsToLeave = @_roomsClientIsIn(client)
+        logger.log {client: client.id, roomsToLeave: roomsToLeave}, "client leaving project"
+        for id in roomsToLeave
             entity = IdMap.get(id)
             @leaveEntity client, entity, id
 
@@ -66,6 +68,12 @@ module.exports = RoomManager =
             callback()
 
     leaveEntity: (client, entity, id) ->
+        # Ignore any requests to leave when the client is not actually in the
+        # room. This can happen if the client sends spurious leaveDoc requests
+        # for old docs after a reconnection.
+        if !@_clientAlreadyInRoom(client, id)
+            logger.warn {client: client.id, entity, id}, "ignoring request from client to leave room it is not in"
+            return
         client.leave id
         afterCount = @_clientsInRoom(client, id)
         logger.log {client: client.id, entity, id, afterCount}, "client left room"
@@ -93,3 +101,8 @@ module.exports = RoomManager =
             [prefix, room] = fullRoomPath.split('/', 2)
             room
         return roomList
+
+    _clientAlreadyInRoom: (client, room) ->
+        nsp = client.namespace.name
+        name = (nsp + '/') + room;
+        return client.manager.roomClients?[client.id]?[name]

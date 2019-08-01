@@ -12,9 +12,10 @@ describe 'RoomManager', ->
 		@client = {namespace: {name: ''}, id: "first-client"}
 		@RoomManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings = {}
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), warn: sinon.stub(), error: sinon.stub() }
 			"metrics-sharelatex": @metrics = { gauge: sinon.stub() }
 		@RoomManager._clientsInRoom = sinon.stub()
+		@RoomManager._clientAlreadyInRoom = sinon.stub()
 		@RoomEvents = @RoomManager.eventSource()
 		sinon.spy(@RoomEvents, 'emit')
 		sinon.spy(@RoomEvents, 'once')
@@ -112,6 +113,9 @@ describe 'RoomManager', ->
 		describe "when doc room will be empty after this client has left", ->
 
 			beforeEach ->
+				@RoomManager._clientAlreadyInRoom
+					.withArgs(@client, @doc_id)
+					.returns(true)
 				@RoomManager._clientsInRoom
 					.withArgs(@client, @doc_id)
 					.onCall(0).returns(0)
@@ -128,6 +132,9 @@ describe 'RoomManager', ->
 		describe "when there are other clients in the doc room", ->
 
 			beforeEach ->
+				@RoomManager._clientAlreadyInRoom
+					.withArgs(@client, @doc_id)
+					.returns(true)
 				@RoomManager._clientsInRoom
 					.withArgs(@client, @doc_id)
 					.onCall(0).returns(123)
@@ -136,6 +143,24 @@ describe 'RoomManager', ->
 
 			it "should leave the room using the id", ->
 				@client.leave.calledWithExactly(@doc_id).should.equal true
+
+			it "should not emit any events", ->
+				@RoomEvents.emit.called.should.equal false
+
+		describe "when the client is not in the doc room", ->
+
+			beforeEach ->
+				@RoomManager._clientAlreadyInRoom
+					.withArgs(@client, @doc_id)
+					.returns(false)
+				@RoomManager._clientsInRoom
+					.withArgs(@client, @doc_id)
+					.onCall(0).returns(0)
+				@client.leave = sinon.stub()
+				@RoomManager.leaveDoc @client, @doc_id
+
+			it "should not leave the room", ->
+				@client.leave.called.should.equal false
 
 			it "should not emit any events", ->
 				@RoomEvents.emit.called.should.equal false
@@ -167,6 +192,13 @@ describe 'RoomManager', ->
 						.withArgs(@client, @project_id)
 						.onCall(0).returns(0)
 						.onCall(1).returns(0)
+					@RoomManager._clientAlreadyInRoom
+						.withArgs(@client, @doc_id)
+						.returns(true)
+						.withArgs(@client, @other_doc_id)
+						.returns(true)
+						.withArgs(@client, @project_id)
+						.returns(true)
 					@RoomEvents.on 'project-active', (id) =>
 						setTimeout () =>
 							@RoomEvents.emit "project-subscribed-#{id}"
@@ -212,6 +244,13 @@ describe 'RoomManager', ->
 						.withArgs(@client, @project_id)
 						.onFirstCall().returns(123)
 						.onSecondCall().returns(122)
+					@RoomManager._clientAlreadyInRoom
+						.withArgs(@client, @doc_id)
+						.returns(true)
+						.withArgs(@client, @other_doc_id)
+						.returns(true)
+						.withArgs(@client, @project_id)
+						.returns(true)
 					@RoomManager.leaveProjectAndDocs @client
 
 				it "should leave all the docs", ->

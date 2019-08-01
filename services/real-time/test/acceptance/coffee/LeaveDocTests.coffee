@@ -16,9 +16,12 @@ describe "leaveDoc", ->
 		@version = 42
 		@ops = ["mock", "doc", "ops"]
 		sinon.spy(logger, "error")
+		sinon.spy(logger, "warn")
+		@other_doc_id = FixturesManager.getRandomId()
 	
 	after ->
 		logger.error.restore() # remove the spy
+		logger.warn.restore()
 			
 	describe "when joined to a doc", ->
 		beforeEach (done) ->
@@ -70,3 +73,12 @@ describe "leaveDoc", ->
 				RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
 					expect(@doc_id in client.rooms).to.equal false
 					done()
+
+		describe "when sending a leaveDoc for a room the client has not joined ", ->
+			beforeEach (done) ->
+				@client.emit "leaveDoc", @other_doc_id, (error) ->
+					throw error if error?
+					done()
+
+			it "should trigger a warning only", ->
+				sinon.assert.calledWith(logger.warn, sinon.match.any, "ignoring request from client to leave room it is not in")
