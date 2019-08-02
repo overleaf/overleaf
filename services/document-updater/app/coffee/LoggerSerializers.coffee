@@ -1,14 +1,10 @@
-module.exports =
-	docs: (docs) ->
-		docs.map (doc) ->
-			{
-				path: doc.path
-				id: doc.doc
-			}
+showLength = (thing) ->
+	"length: #{thing?.length}"
 
-	files: (files) ->
-		files.map (file) ->
-			{
-				path: file.path
-				id: file.file
-			}
+module.exports =
+	# replace long values with their length
+	lines: showLength
+	oldLines: showLength
+	newLines: showLength
+	ranges: showLength
+	update: showLength
