@@ -3,7 +3,7 @@ FROM node:10.15.3 as app
 WORKDIR /app
 
 #wildcard as some files may not be in all repos
-COPY package.json npm-shrinkwrap.json /app/
+COPY package.json package-lock.json /app/
 
 RUN npm install --quiet
 
