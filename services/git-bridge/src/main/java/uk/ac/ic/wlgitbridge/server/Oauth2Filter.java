@@ -40,6 +40,18 @@ public class Oauth2Filter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) {}
 
+    private void sendResponse(ServletResponse servletResponse, int code, List<String> lines) throws IOException {
+        HttpServletResponse response = ((HttpServletResponse) servletResponse);
+        response.setContentType("text/plain");
+        response.setStatus(code);
+        PrintWriter w = response.getWriter();
+        for (String line : lines) {
+            w.println(line);
+        }
+        w.close();
+        return;
+    }
+
     /**
      * The original request from git will not contain the Authorization header.
      *
@@ -57,18 +69,22 @@ public class Oauth2Filter implements Filter {
             ServletResponse servletResponse,
             FilterChain filterChain
     ) throws IOException, ServletException {
+        String requestUri = ((Request) servletRequest).getRequestURI();
+        if (requestUri.startsWith("/project")) {
+            Log.info("[{}] Invalid request URI", requestUri);
+            sendResponse(servletResponse,404, Arrays.asList(
+                    "Invalid Project ID (must not have a '/project' prefix)"
+            ));
+            return;
+        }
         String project = Util.removeAllSuffixes(
-                ((Request) servletRequest).getRequestURI().split("/")[1],
+                requestUri.split("/")[1],
                 ".git"
         );
         // Reject v1 ids, the request will be rejected by v1 anyway
         if (project.matches("^[0-9]+[bcdfghjklmnpqrstvwxyz]{6,12}$") && !project.matches("^[0-9a-f]{24}$")) {
             Log.info("[{}] Request for v1 project, refusing", project);
-            HttpServletResponse response = ((HttpServletResponse) servletResponse);
-            response.setContentType("text/plain");
-            response.setStatus(404);
-            PrintWriter w = response.getWriter();
-            List<String> l = Arrays.asList(
+            sendResponse(servletResponse, 404, Arrays.asList(
                     "This project has not yet been moved into the new version",
                     "of Overleaf. You will need to move it in order to continue working on it.",
                     "Please visit this project online on www.overleaf.com to do this.",
@@ -78,11 +94,7 @@ public class Oauth2Filter implements Filter {
                     "",
                     "If this is unexpected, please contact us at support@overleaf.com, or",
                     "see https://www.overleaf.com/help/342 for more information."
-            );
-            for (String line : l) {
-                w.println(line);
-            }
-            w.close();
+            ));
             return;
         }
         Log.info("[{}] Checking if auth needed", project);
