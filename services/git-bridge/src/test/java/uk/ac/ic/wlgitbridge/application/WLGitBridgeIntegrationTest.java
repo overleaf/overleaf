@@ -885,7 +885,7 @@ public class WLGitBridgeIntegrationTest {
         assertEquals(Arrays.asList(
             "Cloning into '1234abcd'...",
             "remote: Invalid Project ID (must not have a '/project' prefix)",
-            "fatal: unable to access 'http://127.0.0.1:33886/project/1234abcd/': The requested URL returned error: 400"
+            "fatal: repository 'http://127.0.0.1:33886/project/1234abcd/' not found"
         ), actual);
 
         wlgb.stop();

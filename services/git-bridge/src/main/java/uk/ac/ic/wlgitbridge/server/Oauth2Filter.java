@@ -72,7 +72,7 @@ public class Oauth2Filter implements Filter {
         String requestUri = ((Request) servletRequest).getRequestURI();
         if (requestUri.startsWith("/project")) {
             Log.info("[{}] Invalid request URI", requestUri);
-            sendResponse(servletResponse,400, Arrays.asList(
+            sendResponse(servletResponse,404, Arrays.asList(
                     "Invalid Project ID (must not have a '/project' prefix)"
             ));
             return;
