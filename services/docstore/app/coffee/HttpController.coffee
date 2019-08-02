@@ -2,6 +2,7 @@ DocManager = require "./DocManager"
 logger = require "logger-sharelatex"
 DocArchive = require "./DocArchiveManager"
 HealthChecker = require "./HealthChecker"
+Settings   = require "settings-sharelatex"
 
 
 module.exports = HttpController =
@@ -66,6 +67,15 @@ module.exports = HttpController =
 		if !ranges?
 			logger.error project_id: project_id, doc_id: doc_id, "no doc ranges provided"
 			res.send 400 # Bad Request
+			return
+
+		bodyLength = lines.reduce(
+			(len, line) => line.length + len
+			0
+		)
+		if bodyLength > Settings.max_doc_length
+			logger.error project_id: project_id, doc_id: doc_id, bodyLength: bodyLength, "document body too large"
+			res.status(413).send("document body too large")
 			return
 
 		logger.log project_id: project_id, doc_id: doc_id, "got http request to update doc"

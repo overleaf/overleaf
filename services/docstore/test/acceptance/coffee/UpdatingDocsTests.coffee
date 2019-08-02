@@ -176,3 +176,50 @@ describe "Applying updates to a doc", ->
 			DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>
 				doc.lines.should.deep.equal @largeLines
 				done()
+
+	describe "when there is a large json payload", ->
+		beforeEach (done) ->
+			line = new Array(1025).join("x") # 1kb
+			@largeLines = Array.apply(null, Array(1024)).map(() -> line) # 1kb
+			@originalRanges.padding = Array.apply(null, Array(2049)).map(() -> line) # 2mb + 1kb
+			DocstoreClient.updateDoc @project_id, @doc_id, @largeLines, @version, @originalRanges, (error, @res, @body) =>
+				done()
+
+		it "should return modified = true", ->
+			@body.modified.should.equal true
+
+		it "should update the doc in the API", (done) ->
+			DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>
+				doc.lines.should.deep.equal @largeLines
+				done()
+
+	describe "when the document body is too large", ->
+		beforeEach (done) ->
+			line = new Array(1025).join("x") # 1kb
+			@largeLines = Array.apply(null, Array(2049)).map(() -> line) # 2mb + 1kb
+			DocstoreClient.updateDoc @project_id, @doc_id, @largeLines, @version, @originalRanges, (error, @res, @body) =>
+				done()
+
+		it "should return 413", ->
+			@res.statusCode.should.equal 413
+
+		it "should report body too large", ->
+			@res.body.should.equal 'document body too large'
+
+		it "should not update the doc in the API", (done) ->
+			DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>
+				doc.lines.should.deep.equal @originalLines
+				done()
+
+	describe "when the json payload is too large", ->
+		beforeEach (done) ->
+			line = new Array(1025).join("x") # 1kb
+			@largeLines = Array.apply(null, Array(1024)).map(() -> line) # 1kb
+			@originalRanges.padding = Array.apply(null, Array(4096)).map(() -> line) # 4mb
+			DocstoreClient.updateDoc @project_id, @doc_id, @largeLines, @version, @originalRanges, (error, @res, @body) =>
+				done()
+
+		it "should not update the doc in the API", (done) ->
+			DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>
+				doc.lines.should.deep.equal @originalLines
+				done()
