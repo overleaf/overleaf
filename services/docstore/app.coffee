@@ -50,7 +50,7 @@ app.get '/status', (req, res)->
 	res.send('docstore is alive')
 
 app.use (error, req, res, next) ->
-	logger.error err: error, "request errored"
+	logger.error err: error, req:req, "request errored"
 	if error instanceof Errors.NotFoundError
 		res.send 404
 	else
