@@ -66,7 +66,7 @@ describe('UpdateMerger :', function() {
   describe('mergeUpdate', function() {
     describe('doc updates for a new doc', function() {
       beforeEach(function() {
-        this.FileTypeManager.getType = sinon.stub().yields(null, false)
+        this.FileTypeManager.getStrictType = sinon.stub().yields(null, false)
         this.updateMerger.p.processDoc = sinon.stub().yields()
         return this.updateMerger.mergeUpdate(
           this.user_id,
@@ -79,7 +79,7 @@ describe('UpdateMerger :', function() {
       })
 
       it('should look at the file contents', function() {
-        return this.FileTypeManager.getType.called.should.equal(true)
+        return this.FileTypeManager.getStrictType.called.should.equal(true)
       })
 
       it('should process update as doc', function() {
@@ -101,7 +101,7 @@ describe('UpdateMerger :', function() {
 
     describe('file updates for a new file ', function() {
       beforeEach(function() {
-        this.FileTypeManager.getType = sinon.stub().yields(null, true)
+        this.FileTypeManager.getStrictType = sinon.stub().yields(null, true)
         this.updateMerger.p.processFile = sinon.stub().yields()
         return this.updateMerger.mergeUpdate(
           this.user_id,
@@ -114,7 +114,7 @@ describe('UpdateMerger :', function() {
       })
 
       it('should look at the file contents', function() {
-        return this.FileTypeManager.getType.called.should.equal(true)
+        return this.FileTypeManager.getStrictType.called.should.equal(true)
       })
 
       it('should process update as file', function() {
@@ -136,7 +136,7 @@ describe('UpdateMerger :', function() {
 
     describe('doc updates for an existing doc', function() {
       beforeEach(function() {
-        this.FileTypeManager.getType = sinon.stub()
+        this.FileTypeManager.getStrictType = sinon.stub().yields(null, false)
         this.updateMerger.p.processDoc = sinon.stub().yields()
         return this.updateMerger.mergeUpdate(
           this.user_id,
@@ -148,8 +148,8 @@ describe('UpdateMerger :', function() {
         )
       })
 
-      it('should not look at the file contents', function() {
-        return this.FileTypeManager.getType.called.should.equal(false)
+      it('should look at the file contents', function() {
+        return this.FileTypeManager.getStrictType.called.should.equal(true)
       })
 
       it('should process update as doc', function() {
@@ -171,7 +171,7 @@ describe('UpdateMerger :', function() {
 
     describe('file updates for an existing file', function() {
       beforeEach(function() {
-        this.FileTypeManager.getType = sinon.stub()
+        this.FileTypeManager.getStrictType = sinon.stub().yields(null, true)
         this.updateMerger.p.processFile = sinon.stub().yields()
         return this.updateMerger.mergeUpdate(
           this.user_id,
@@ -183,8 +183,8 @@ describe('UpdateMerger :', function() {
         )
       })
 
-      it('should not look at the file contents', function() {
-        return this.FileTypeManager.getType.called.should.equal(false)
+      it('should look at the file contents', function() {
+        return this.FileTypeManager.getStrictType.called.should.equal(true)
       })
 
       it('should process update as file', function() {
@@ -202,6 +202,95 @@ describe('UpdateMerger :', function() {
       it('removes the temp file from disk', function() {
         return this.fs.unlink.calledWith(this.fsPath).should.equal(true)
       })
+    })
+  })
+
+  describe('file updates for an existing doc', function() {
+    beforeEach(function() {
+      this.FileTypeManager.getStrictType = sinon
+        .stub()
+        .yields(null, true, 'delete-existing-doc')
+      this.updateMerger.deleteUpdate = sinon.stub().yields()
+      this.updateMerger.p.processFile = sinon.stub().yields()
+      return this.updateMerger.mergeUpdate(
+        this.user_id,
+        this.project_id,
+        this.existingDocPath,
+        this.updateRequest,
+        this.source,
+        this.callback
+      )
+    })
+
+    it('should look at the file contents', function() {
+      return this.FileTypeManager.getStrictType.called.should.equal(true)
+    })
+
+    it('should delete the existing doc', function() {
+      this.updateMerger.deleteUpdate
+        .calledWith(
+          this.user_id,
+          this.project_id,
+          this.existingDocPath,
+          this.source
+        )
+        .should.equal(true)
+    })
+
+    it('should process update as file', function() {
+      return this.updateMerger.p.processFile
+        .calledWith(
+          this.project_id,
+          this.fsPath,
+          this.existingDocPath,
+          this.source,
+          this.user_id
+        )
+        .should.equal(true)
+    })
+
+    it('removes the temp file from disk', function() {
+      return this.fs.unlink.calledWith(this.fsPath).should.equal(true)
+    })
+  })
+
+  describe('doc updates for an existing file', function() {
+    beforeEach(function() {
+      this.FileTypeManager.getStrictType = sinon.stub().yields(null, true)
+      this.updateMerger.deleteUpdate = sinon.stub().yields()
+      this.updateMerger.p.processFile = sinon.stub().yields()
+      return this.updateMerger.mergeUpdate(
+        this.user_id,
+        this.project_id,
+        this.existingFilePath,
+        this.updateRequest,
+        this.source,
+        this.callback
+      )
+    })
+
+    it('should look at the file contents', function() {
+      return this.FileTypeManager.getStrictType.called.should.equal(true)
+    })
+
+    it('should not delete the existing file', function() {
+      this.updateMerger.deleteUpdate.called.should.equal(false)
+    })
+
+    it('should process update as file', function() {
+      return this.updateMerger.p.processFile
+        .calledWith(
+          this.project_id,
+          this.fsPath,
+          this.existingFilePath,
+          this.source,
+          this.user_id
+        )
+        .should.equal(true)
+    })
+
+    it('removes the temp file from disk', function() {
+      return this.fs.unlink.calledWith(this.fsPath).should.equal(true)
     })
   })
 

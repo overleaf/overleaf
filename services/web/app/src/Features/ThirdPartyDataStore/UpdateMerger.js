@@ -13,6 +13,7 @@
  */
 let UpdateMerger
 const _ = require('underscore')
+const async = require('async')
 const fs = require('fs')
 const logger = require('logger-sharelatex')
 const EditorController = require('../Editor/EditorController')
@@ -50,34 +51,66 @@ module.exports = UpdateMerger = {
     })
   },
 
+  _findExistingFileType(project_id, path, callback) {
+    ProjectEntityHandler.getAllEntities(project_id, function(err, docs, files) {
+      if (err != null) {
+        return callback(err)
+      }
+      var existingFileType = null
+      if (_.some(files, f => f.path === path)) {
+        existingFileType = 'file'
+      }
+      if (_.some(docs, d => d.path === path)) {
+        existingFileType = 'doc'
+      }
+      callback(null, existingFileType)
+    })
+  },
+
   _determineFileType(project_id, path, fsPath, callback) {
     if (callback == null) {
       callback = function(err, fileType) {}
     }
-    return ProjectEntityHandler.getAllEntities(project_id, function(
+    // check if there is an existing file with the same path (we either need
+    // to overwrite it or delete it)
+    UpdateMerger._findExistingFileType(project_id, path, function(
       err,
-      docs,
-      files
+      existingFileType
     ) {
-      if (err != null) {
+      if (err) {
         return callback(err)
       }
-      if (_.some(files, f => f.path === path)) {
-        return callback(null, 'existing-file')
-      }
-      if (_.some(docs, d => d.path === path)) {
-        return callback(null, 'existing-doc')
-      }
-      // existing file not found in project, so check the file type to determine if doc
-      return FileTypeManager.getType(path, fsPath, function(err, isBinary) {
+      // determine whether the update should create a doc or binary file
+      FileTypeManager.getStrictType(path, fsPath, function(err, isBinary) {
         if (err != null) {
           return callback(err)
         }
-        if (isBinary) {
-          return callback(null, 'new-file') // extension was not text
-        } else {
-          return callback(null, 'new-doc')
+        // Existing | Update    | Action
+        // ---------|-----------|-------
+        // file     | isBinary  | existing-file
+        // file     | !isBinary | existing-file
+        // doc      | isBinary  | new-file, delete-existing-doc
+        // doc      | !isBinary | existing-doc
+        // null     | isBinary  | new-file
+        // null     | !isBinary | new-doc
+
+        // if a binary file already exists, always keep it as a binary file
+        // even if the update looks like a text file
+        if (existingFileType === 'file') {
+          return callback(null, 'existing-file')
         }
+        // if there is an existing doc, keep it as a doc except when the
+        // incoming update is binary. In that case delete the doc and replace
+        // it with a new file.
+        if (existingFileType === 'doc') {
+          if (isBinary) {
+            return callback(null, 'new-file', 'delete-existing-doc')
+          } else {
+            return callback(null, 'existing-doc')
+          }
+        }
+        // if there no existing file, create a file or doc as needed
+        return callback(null, isBinary ? 'new-file' : 'new-doc')
       })
     })
   },
@@ -88,32 +121,48 @@ module.exports = UpdateMerger = {
     }
     return UpdateMerger._determineFileType(project_id, path, fsPath, function(
       err,
-      fileType
+      fileType,
+      deleteOriginalEntity
     ) {
       if (err != null) {
         return callback(err)
       }
-      if (['existing-file', 'new-file'].includes(fileType)) {
-        return UpdateMerger.p.processFile(
-          project_id,
-          fsPath,
-          path,
-          source,
-          user_id,
-          callback
-        )
-      } else if (['existing-doc', 'new-doc'].includes(fileType)) {
-        return UpdateMerger.p.processDoc(
-          project_id,
-          user_id,
-          fsPath,
-          path,
-          source,
-          callback
-        )
-      } else {
-        return callback(new Error('unrecognized file'))
-      }
+      async.series(
+        [
+          function(cb) {
+            if (deleteOriginalEntity) {
+              // currently we only delete docs
+              UpdateMerger.deleteUpdate(user_id, project_id, path, source, cb)
+            } else {
+              cb()
+            }
+          },
+          function(cb) {
+            if (['existing-file', 'new-file'].includes(fileType)) {
+              return UpdateMerger.p.processFile(
+                project_id,
+                fsPath,
+                path,
+                source,
+                user_id,
+                cb
+              )
+            } else if (['existing-doc', 'new-doc'].includes(fileType)) {
+              return UpdateMerger.p.processDoc(
+                project_id,
+                user_id,
+                fsPath,
+                path,
+                source,
+                cb
+              )
+            } else {
+              return cb(new Error('unrecognized file'))
+            }
+          }
+        ],
+        callback
+      )
     })
   },
 
