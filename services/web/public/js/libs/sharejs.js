@@ -1634,9 +1634,11 @@ define(['ace/ace','libs/sha1'], function () {
     // I tuned this operation a little bit, for speed.
     var startPos = 0; // Get character position from # of chars in each line.
     var i = 0; // i goes through all lines.
-
+    // Compute the position from the shareJS snapshot because we are in the CodeMirror
+    // change event, where the change has already been applied to the editorDoc
+    var docLines = doc.snapshot.split('\n', delta.from.line) // only split the document as far as we need to
     while (i < delta.from.line) {
-      startPos += editorDoc.lineInfo(i).text.length + 1; // Add 1 for '\n'
+      startPos += docLines[i].length + 1; // Add 1 for '\n'
       i++;
     }
     startPos += delta.from.ch;
