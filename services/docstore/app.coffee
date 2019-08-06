@@ -36,8 +36,8 @@ app.get  '/project/:project_id/doc', HttpController.getAllDocs
 app.get  '/project/:project_id/ranges', HttpController.getAllRanges
 app.get  '/project/:project_id/doc/:doc_id', HttpController.getDoc
 app.get  '/project/:project_id/doc/:doc_id/raw', HttpController.getRawDoc
-# Add 64kb overhead for the JSON encoding
-app.post '/project/:project_id/doc/:doc_id', bodyParser.json(limit: Settings.max_doc_length + 64 * 1024), HttpController.updateDoc
+# Add 64kb overhead for the JSON encoding, and double the size to allow for ranges in the json payload
+app.post '/project/:project_id/doc/:doc_id', bodyParser.json(limit: (Settings.max_doc_length + 64 * 1024) * 2), HttpController.updateDoc
 app.del  '/project/:project_id/doc/:doc_id', HttpController.deleteDoc
 
 app.post  '/project/:project_id/archive', HttpController.archiveAllDocs
