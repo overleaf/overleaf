@@ -1,6 +1,6 @@
 const path = require('path')
 
-module.exports = function (config) {
+module.exports = function(config) {
   config.set({
     customLaunchers: {
       ChromeCustom: {
@@ -43,20 +43,24 @@ module.exports = function (config) {
     // Configure webpack in the tests
     webpack: {
       module: {
-        rules: [{
-          // Pass application JS files through babel-loader, compiling to ES5
-          test: /\.js$/,
-          // Only compile application files (dependencies are in ES5 already)
-          exclude: /node_modules/,
-          use: [{
-            loader: 'babel-loader',
-            options: {
-              // Configure babel-loader to cache compiled output so that subsequent
-              // compile runs are much faster
-              cacheDirectory: true
-            }
-          }]
-        }]
+        rules: [
+          {
+            // Pass application JS files through babel-loader, compiling to ES5
+            test: /\.js$/,
+            // Only compile application files (dependencies are in ES5 already)
+            exclude: /node_modules/,
+            use: [
+              {
+                loader: 'babel-loader',
+                options: {
+                  // Configure babel-loader to cache compiled output so that
+                  // subsequent compile runs are much faster
+                  cacheDirectory: true
+                }
+              }
+            ]
+          }
+        ]
       },
       resolve: {
         // Alias common directories in import pathnames to cut down on the
@@ -82,14 +86,14 @@ module.exports = function (config) {
       { 'middleware:fake-img': ['factory', fakeImgMiddlewareFactory] }
     ],
     reporters: ['mocha']
-  });
+  })
 }
 
 /**
  * Handle fake images
  */
-function fakeImgMiddlewareFactory () {
-  return function (req, res, next) {
+function fakeImgMiddlewareFactory() {
+  return function(req, res, next) {
     if (req.originalUrl.startsWith('/fake/')) {
       return res.end('fake img response')
     }
