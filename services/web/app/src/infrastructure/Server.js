@@ -1,18 +1,3 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-path-concat,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let staticCacheAge
 const Path = require('path')
 const express = require('express')
 const Settings = require('settings-sharelatex')
@@ -34,13 +19,8 @@ const methodOverride = require('method-override')
 const cookieParser = require('cookie-parser')
 const bearerToken = require('express-bearer-token')
 
-// Init the session store
-const sessionStore = new RedisStore({ client: sessionsRedisClient })
-
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
-
-const Mongoose = require('./Mongoose')
 
 const oneDayInMilliseconds = 86400000
 const ReferalConnect = require('../Features/Referal/ReferalConnect')
@@ -54,14 +34,15 @@ const HttpErrorController = require('../Features/Errors/HttpErrorController')
 const UserSessionsManager = require('../Features/User/UserSessionsManager')
 const AuthenticationController = require('../Features/Authentication/AuthenticationController')
 
+const STATIC_CACHE_AGE = Settings.cacheStaticAssets
+  ? oneDayInMilliseconds * 365
+  : 0
+
+// Init the session store
+const sessionStore = new RedisStore({ client: sessionsRedisClient })
+
 if (metrics.event_loop != null) {
   metrics.event_loop.monitor(logger)
-}
-
-if (Settings.cacheStaticAssets) {
-  staticCacheAge = oneDayInMilliseconds * 365
-} else {
-  staticCacheAge = 0
 }
 
 const app = express()
@@ -71,13 +52,34 @@ const privateApiRouter = express.Router()
 const publicApiRouter = express.Router()
 
 if (Settings.behindProxy) {
-  app.enable('trust proxy')
+  app.set('trust proxy', Settings.trustedProxyIps || true)
+  /**
+   * Handle the X-Original-Forwarded-For header.
+   *
+   * The nginx ingress sends us the contents of X-Forwarded-For it received in
+   * X-Original-Forwarded-For. Express expects all proxy IPs to be in a comma
+   * separated list in X-Forwarded-For.
+   */
+  app.use((req, res, next) => {
+    if (
+      req.headers['x-original-forwarded-for'] &&
+      req.headers['x-forwarded-for']
+    ) {
+      req.headers['x-forwarded-for'] =
+        req.headers['x-original-forwarded-for'] +
+        ', ' +
+        req.headers['x-forwarded-for']
+    }
+    next()
+  })
 }
 
 webRouter.use(
-  express.static(__dirname + '/../../../public', { maxAge: staticCacheAge })
+  express.static(Path.join(__dirname, '/../../../public'), {
+    maxAge: STATIC_CACHE_AGE
+  })
 )
-app.set('views', __dirname + '/../../views')
+app.set('views', Path.join(__dirname, '/../../views'))
 app.set('view engine', 'pug')
 Modules.loadViewIncludes(app)
 
@@ -131,7 +133,7 @@ passport.deserializeUser(AuthenticationController.deserializeUser)
 
 Modules.hooks.fire('passportSetup', passport, function(err) {
   if (err != null) {
-    return logger.err({ err }, 'error setting up passport in modules')
+    logger.err({ err }, 'error setting up passport in modules')
   }
 })
 
@@ -148,10 +150,12 @@ webRouter.use(function(req, res, next) {
   if (AuthenticationController.isUserLoggedIn(req)) {
     UserSessionsManager.touch(
       AuthenticationController.getSessionUser(req),
-      function(err) {}
+      err => {
+        logger.err({ err }, 'error extending user session')
+      }
     )
   }
-  return next()
+  next()
 })
 
 webRouter.use(ReferalConnect.use)
@@ -165,26 +169,26 @@ if (app.get('env') === 'production') {
 app.use(function(req, res, next) {
   metrics.inc('http-request')
   crawlerLogger.log(req)
-  return next()
+  next()
 })
 
 webRouter.use(function(req, res, next) {
   if (Settings.siteIsOpen) {
-    return next()
+    next()
   } else {
     res.status(503)
-    return res.render('general/closed', { title: 'maintenance' })
+    res.render('general/closed', { title: 'maintenance' })
   }
 })
 
 webRouter.use(function(req, res, next) {
   if (Settings.editorIsOpen) {
-    return next()
+    next()
   } else if (req.url.indexOf('/admin') === 0) {
-    return next()
+    next()
   } else {
     res.status(503)
-    return res.render('general/closed', { title: 'maintenance' })
+    res.render('general/closed', { title: 'maintenance' })
   }
 })
 
@@ -193,7 +197,7 @@ webRouter.use(function(req, res, next) {
   const isLoggedIn = AuthenticationController.isUserLoggedIn(req)
   const isProjectPage = !!req.path.match('^/project/[a-f0-9]{24}$')
 
-  return helmet({
+  helmet({
     // note that more headers are added by default
     dnsPrefetchControl: false,
     referrerPolicy: { policy: 'origin-when-cross-origin' },
@@ -208,16 +212,21 @@ const profiler = require('v8-profiler-node8')
 privateApiRouter.get('/profile', function(req, res) {
   const time = parseInt(req.query.time || '1000')
   profiler.startProfiling('test')
-  return setTimeout(function() {
+  setTimeout(function() {
     const profile = profiler.stopProfiling('test')
-    return res.json(profile)
+    res.json(profile)
   }, time)
 })
 
-privateApiRouter.get('/heapdump', (req, res) =>
+privateApiRouter.get('/heapdump', (req, res, next) =>
   require('heapdump').writeSnapshot(
     `/tmp/${Date.now()}.web.heapsnapshot`,
-    (err, filename) => res.send(filename)
+    (err, filename) => {
+      if (err != null) {
+        return next(err)
+      }
+      res.send(filename)
+    }
   )
 )
 
@@ -250,8 +259,7 @@ if (enableWebRouter || notDefined(enableWebRouter)) {
 }
 
 metrics.injectMetricsRoute(webRouter)
-
-const router = new Router(webRouter, privateApiRouter, publicApiRouter)
+Router.initialize(webRouter, privateApiRouter, publicApiRouter)
 
 module.exports = {
   app,
