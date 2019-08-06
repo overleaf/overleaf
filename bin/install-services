@@ -1,14 +1,12 @@
 #! env bash
 
-set -ex
+set -e
 
 grep 'name:' config/services.js | \
 	sed 's/.*name: "\(.*\)",/\1/' | \
 	while read service
 	do
 		pushd $service
-		echo "Installing Node from .nvmrc"
-		nvm install && nvm use
 		echo "Installing service $service"
 		npm install --quiet
 		popd
