@@ -194,32 +194,32 @@ define([
       return (autoCompileInterval = null)
     }
 
-    $scope.$watch('uncompiledChanges', function(uncompiledChanges) {
-      if (uncompiledChanges) {
+    $scope.changesToAutoCompile = false
+    $scope.$watch('pdf.uncompiled', function(uncompiledChanges) {
+      // don't autocompile if disabled or the pdf is not visible
+      if (
+        $scope.pdf.uncompiled &&
+        $scope.autocompile_enabled &&
+        !$scope.ui.pdfHidden
+      ) {
+        $scope.changesToAutoCompile = true
         return startTryingAutoCompile()
       } else {
+        $scope.changesToAutoCompile = false
         return stopTryingAutoCompile()
       }
     })
 
-    $scope.uncompiledChanges = false
     const recalculateUncompiledChanges = function() {
-      if (!$scope.autocompile_enabled) {
-        // Auto-compile was disabled
-        $scope.uncompiledChanges = false
-      }
-      if ($scope.ui.pdfHidden) {
-        // Don't bother auto-compiling if pdf isn't visible
-        return ($scope.uncompiledChanges = false)
-      } else if ($scope.docLastChangedAt == null) {
-        return ($scope.uncompiledChanges = false)
+      if ($scope.docLastChangedAt == null) {
+        $scope.pdf.uncompiled = false
       } else if (
         $scope.lastStartedCompileAt == null ||
         $scope.docLastChangedAt > $scope.lastStartedCompileAt
       ) {
-        return ($scope.uncompiledChanges = true)
+        $scope.pdf.uncompiled = true
       } else {
-        return ($scope.uncompiledChanges = false)
+        $scope.pdf.uncompiled = false
       }
     }
 
@@ -241,38 +241,23 @@ define([
 
     const onCompilingStateChanged = compiling => recalculateUncompiledChanges()
 
-    let autoCompileListeners = []
-    const toggleAutoCompile = function(enabling) {
-      if (enabling) {
-        return (autoCompileListeners = [
-          ide.$scope.$on('doc:changed', onDocChanged),
-          ide.$scope.$on('doc:saved', onDocSaved),
-          $scope.$watch('pdf.compiling', onCompilingStateChanged)
-        ])
-      } else {
-        for (let unbind of Array.from(autoCompileListeners)) {
-          unbind()
-        }
-        autoCompileListeners = []
-        return ($scope.autoCompileLintingError = false)
-      }
-    }
+    ide.$scope.$on('doc:changed', onDocChanged)
+    ide.$scope.$on('doc:saved', onDocSaved)
+    $scope.$watch('pdf.compiling', onCompilingStateChanged)
 
     $scope.autocompile_enabled =
       localStorage(`autocompile_enabled:${$scope.project_id}`) || false
     $scope.$watch('autocompile_enabled', function(newValue, oldValue) {
       if (newValue != null && oldValue !== newValue) {
+        if (newValue === true) {
+          startTryingAutoCompile()
+        }
         localStorage(`autocompile_enabled:${$scope.project_id}`, newValue)
-        toggleAutoCompile(newValue)
         return event_tracking.sendMB('autocompile-setting-changed', {
           value: newValue
         })
       }
     })
-
-    if ($scope.autocompile_enabled) {
-      toggleAutoCompile(true)
-    }
 
     // abort compile if syntax checks fail
     $scope.stop_on_validation_error = localStorage(
