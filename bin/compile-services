@@ -1,6 +1,6 @@
 #! env bash
 
-set -ex
+set -e
 
 grep 'name:' config/services.js | \
 	sed 's/.*name: "\(.*\)",/\1/' | \
