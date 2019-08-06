@@ -97,7 +97,6 @@ define([
           this.ace
         )
         this._checkCMConsistency = _.bind(this._checkConsistency, this, this.cm)
-        this.inconsistentCount = 0
         this._bindToEditorEvents()
         this._bindToSocketEvents()
       }
@@ -161,12 +160,6 @@ define([
             const sharejsValue =
               this.doc != null ? this.doc.getSnapshot() : undefined
             if (editorValue !== sharejsValue) {
-              this.inconsistentCount++
-            } else {
-              this.inconsistentCount = 0
-            }
-
-            if (this.inconsistentCount >= 3) {
               return this._onError(
                 new Error('Editor text does not match server text')
               )

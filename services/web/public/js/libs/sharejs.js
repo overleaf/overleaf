@@ -1505,6 +1505,7 @@ define(['ace/ace','libs/sha1'], function () {
         var otText = doc.getText();
 
         if (editorText !== otText) {
+          doc.emit('error','Text does not match in ace')
           console.error('Text does not match!');
           console.error('editor: ' + editorText);
           return console.error('ot:     ' + otText);
@@ -1665,6 +1666,7 @@ define(['ace/ace','libs/sha1'], function () {
         var otText = sharedoc.getText();
 
         if (editorText !== otText) {
+          sharedoc.emit('error','Text does not match in CodeMirror')
           console.error('Text does not match!');
           console.error('editor: ' + editorText);
           return console.error('ot:     ' + otText);
