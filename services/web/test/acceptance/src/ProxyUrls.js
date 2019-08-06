@@ -26,7 +26,7 @@ const assertResponse = (path, expectedStatusCode, expectedBody, cb) =>
   })
 
 describe('ProxyUrls', function() {
-  before(function() {
+  beforeEach(function() {
     return this.timeout(1000)
   })
 

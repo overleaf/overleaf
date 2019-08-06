@@ -15,7 +15,7 @@ const async = require('async')
 const User = require('./helpers/User')
 
 describe('Project CRUD', function() {
-  before(function(done) {
+  beforeEach(function(done) {
     this.user = new User()
     return this.user.login(done)
   })

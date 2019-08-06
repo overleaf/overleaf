@@ -14,7 +14,7 @@ const User = require('./helpers/User')
 const MockV1Api = require('./helpers/MockV1Api')
 
 describe('SettingsPage', function() {
-  before(function(done) {
+  beforeEach(function(done) {
     this.user = new User()
     this.v1Id = 1234
     this.v1User = {

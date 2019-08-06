@@ -25,7 +25,7 @@ const MockDocstoreApi = require('./helpers/MockDocstoreApi')
 const MockFileStoreApi = require('./helpers/MockFileStoreApi')
 
 describe('RestoringFiles', function() {
-  before(function(done) {
+  beforeEach(function(done) {
     this.owner = new User()
     return this.owner.login(error => {
       if (error != null) {

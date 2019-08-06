@@ -34,14 +34,14 @@ const joinProject = (user_id, project_id, callback) =>
   )
 
 describe('ProjectFeatures', function() {
-  before(function(done) {
+  beforeEach(function(done) {
     this.timeout(90000)
     this.owner = new User()
     return async.series([cb => this.owner.login(cb)], done)
   })
 
   describe('with private project', function() {
-    before(function(done) {
+    beforeEach(function(done) {
       return this.owner.createProject(
         'private-project',
         (error, project_id) => {
@@ -55,7 +55,7 @@ describe('ProjectFeatures', function() {
     })
 
     describe('with an upgraded account', function() {
-      before(function(done) {
+      beforeEach(function(done) {
         return this.owner.upgradeFeatures(done)
       })
       after(function(done) {
@@ -78,7 +78,7 @@ describe('ProjectFeatures', function() {
     })
 
     describe('with an basic account', function() {
-      before(function(done) {
+      beforeEach(function(done) {
         return this.owner.downgradeFeatures(done)
       })
       after(function(done) {

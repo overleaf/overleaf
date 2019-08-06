@@ -32,7 +32,7 @@ const _ = require('lodash')
 
 describe('ProjectStructureMongoLock', () =>
   describe('whilst a project lock is taken', function() {
-    before(function(done) {
+    beforeEach(function(done) {
       // We want to instantly fail if the lock is taken
       LockManager.MAX_LOCK_WAIT_TIME = 1
       this.lockValue = 'lock-value'
@@ -124,7 +124,7 @@ describe('ProjectStructureMongoLock', () =>
     })
 
     describe('interacting with other projects', function() {
-      before(function(done) {
+      beforeEach(function(done) {
         return ProjectCreationHandler.createBlankProject(
           this.user._id,
           'unlocked-project',

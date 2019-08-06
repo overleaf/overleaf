@@ -25,7 +25,7 @@ const authed_request = request.defaults({
 
 describe('ApiClsiTests', function() {
   describe('compile', function() {
-    before(function(done) {
+    beforeEach(function(done) {
       this.compileSpec = {
         compile: {
           options: {

@@ -24,7 +24,7 @@ const assertRedirect = (method, path, expectedStatusCode, destination, cb) =>
   })
 
 describe('RedirectUrls', function() {
-  before(function() {
+  beforeEach(function() {
     return this.timeout(1000)
   })
 

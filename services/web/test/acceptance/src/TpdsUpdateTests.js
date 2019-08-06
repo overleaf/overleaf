@@ -17,7 +17,7 @@ const request = require('./helpers/request')
 const User = require('./helpers/User')
 
 describe('TpdsUpdateTests', function() {
-  before(function(done) {
+  beforeEach(function(done) {
     this.owner = new User()
     return this.owner.login(error => {
       if (error != null) {
@@ -38,7 +38,7 @@ describe('TpdsUpdateTests', function() {
   })
 
   describe('deleting a file', function() {
-    before(function(done) {
+    beforeEach(function(done) {
       return request(
         {
           method: 'DELETE',

@@ -22,13 +22,13 @@ const MockV1Api = require('./helpers/MockV1Api')
 
 describe('Subscriptions', function() {
   describe('dashboard', function() {
-    before(function(done) {
+    beforeEach(function(done) {
       this.user = new User()
       return this.user.ensureUserExists(done)
     })
 
     describe('when the user has no subscription', function() {
-      before(function(done) {
+      beforeEach(function(done) {
         return SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel(
           this.user,
           (error, data) => {
@@ -51,7 +51,7 @@ describe('Subscriptions', function() {
     })
 
     describe('when the user has a subscription with recurly', function() {
-      before(function(done) {
+      beforeEach(function(done) {
         MockRecurlyApi.accounts['mock-account-id'] = this.accounts = {
           hosted_login_token: 'mock-login-token'
         }
@@ -168,7 +168,7 @@ describe('Subscriptions', function() {
     })
 
     describe('when the user has a subscription without recurly', function() {
-      before(function(done) {
+      beforeEach(function(done) {
         Subscription.create(
           {
             admin_id: this.user._id,
@@ -215,7 +215,7 @@ describe('Subscriptions', function() {
     })
 
     describe('when the user is a member of a group subscription', function() {
-      before(function(done) {
+      beforeEach(function(done) {
         this.owner1 = new User()
         this.owner2 = new User()
         async.series(
@@ -299,7 +299,7 @@ describe('Subscriptions', function() {
     })
 
     describe('when the user is a manager of a group subscription', function() {
-      before(function(done) {
+      beforeEach(function(done) {
         this.owner1 = new User()
         this.owner2 = new User()
         async.series(
@@ -360,7 +360,7 @@ describe('Subscriptions', function() {
     })
 
     describe('when the user is a manager of an institution', function() {
-      before(function(done) {
+      beforeEach(function(done) {
         this.v1Id = MockV1Api.nextV1Id()
         async.series(
           [
@@ -410,7 +410,7 @@ describe('Subscriptions', function() {
     })
 
     describe('when the user is a member of an affiliation', function() {
-      before(function(done) {
+      beforeEach(function(done) {
         const v1Id = MockV1Api.nextV1Id()
         MockV1Api.setUser(v1Id, {
           subscription: {},
@@ -500,7 +500,7 @@ describe('Subscriptions', function() {
     })
 
     describe('when the user has a v1 subscription', function() {
-      before(function(done) {
+      beforeEach(function(done) {
         let v1Id
         MockV1Api.setUser((v1Id = MockV1Api.nextV1Id()), {
           subscription: (this.subscription = {
@@ -552,7 +552,7 @@ describe('Subscriptions', function() {
   })
 
   describe('canceling', function() {
-    before(function(done) {
+    beforeEach(function(done) {
       let v1Id
       this.user = new User()
       MockV1Api.setUser((v1Id = MockV1Api.nextV1Id()), (this.v1_user = {}))

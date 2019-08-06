@@ -21,7 +21,7 @@ const MockV1Api = require('./helpers/MockV1Api')
 const MockTagsApi = require('./helpers/MockTagsApi')
 
 describe('Sessions', function() {
-  before(function(done) {
+  beforeEach(function(done) {
     this.timeout(20000)
     this.user1 = new User()
     this.site_admin = new User({ email: 'admin@example.com' })
@@ -84,7 +84,7 @@ describe('Sessions', function() {
     }))
 
   describe('two sessions', function() {
-    before(function() {
+    beforeEach(function() {
       // set up second session for this user
       this.user2 = new User()
       this.user2.email = this.user1.email
@@ -204,7 +204,7 @@ describe('Sessions', function() {
   })
 
   describe('three sessions, password reset', function() {
-    before(function() {
+    beforeEach(function() {
       // set up second session for this user
       this.user2 = new User()
       this.user2.email = this.user1.email
@@ -323,7 +323,7 @@ describe('Sessions', function() {
   })
 
   describe('three sessions, sessions page', function() {
-    before(function(done) {
+    beforeEach(function(done) {
       // set up second session for this user
       this.user2 = new User()
       this.user2.email = this.user1.email

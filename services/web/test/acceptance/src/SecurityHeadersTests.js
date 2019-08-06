@@ -44,7 +44,7 @@ const assert_has_no_cache_headers = function(response) {
 }
 
 describe('SecurityHeaders', function() {
-  before(function() {
+  beforeEach(function() {
     return (this.user = new User())
   })
 

@@ -17,7 +17,7 @@ const async = require('async')
 const User = require('./helpers/User')
 
 describe('User Must Reconfirm', function() {
-  before(function(done) {
+  beforeEach(function(done) {
     this.user = new User()
     return async.series(
       [

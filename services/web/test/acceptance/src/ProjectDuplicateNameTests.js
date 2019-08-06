@@ -33,7 +33,7 @@ const request = require('./helpers/request')
 const User = require('./helpers/User')
 
 describe('ProjectDuplicateNames', function() {
-  before(function(done) {
+  beforeEach(function(done) {
     this.owner = new User()
     this.owner.login(done)
     this.project = {}
@@ -41,7 +41,7 @@ describe('ProjectDuplicateNames', function() {
   })
 
   describe('creating a project from the example template', function() {
-    before(function(done) {
+    beforeEach(function(done) {
       return this.owner.createProject(
         'example-project',
         { template: 'example' },
@@ -101,7 +101,7 @@ describe('ProjectDuplicateNames', function() {
 
     describe('for an existing doc', function() {
       describe('trying to add a doc with the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/doc`,
@@ -123,7 +123,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to add a folder with the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder`,
@@ -145,7 +145,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to add a folder with the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder`,
@@ -169,7 +169,7 @@ describe('ProjectDuplicateNames', function() {
 
     describe('for an existing file', function() {
       describe('trying to add a doc with the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/doc`,
@@ -191,7 +191,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to add a folder with the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder`,
@@ -213,7 +213,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to upload a file with the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/upload`,
@@ -252,7 +252,7 @@ describe('ProjectDuplicateNames', function() {
 
     describe('for an existing folder', function() {
       describe('trying to add a doc with the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/doc`,
@@ -274,7 +274,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to add a folder with the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder`,
@@ -296,7 +296,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to upload a file with the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/upload`,
@@ -332,7 +332,7 @@ describe('ProjectDuplicateNames', function() {
 
     describe('for an existing doc', function() {
       describe('trying to rename a doc to the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/doc/${
@@ -355,7 +355,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to rename a folder to the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder/${
@@ -378,7 +378,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to rename a file to the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/file/${
@@ -403,7 +403,7 @@ describe('ProjectDuplicateNames', function() {
 
     describe('for an existing file', function() {
       describe('trying to rename a doc to the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/doc/${
@@ -426,7 +426,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to rename a folder to the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder/${
@@ -449,7 +449,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to rename a file to the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/file/${
@@ -474,7 +474,7 @@ describe('ProjectDuplicateNames', function() {
 
     describe('for an existing folder', function() {
       describe('trying to rename a doc to the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/doc/${
@@ -497,7 +497,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to rename a folder to the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder/${
@@ -520,7 +520,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to rename a file to the same name', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/file/${
@@ -544,7 +544,7 @@ describe('ProjectDuplicateNames', function() {
     })
 
     describe('for an existing folder with a file with the same name', function() {
-      before(function(done) {
+      beforeEach(function(done) {
         return this.owner.request.post(
           {
             uri: `/project/${this.example_project_id}/doc`,
@@ -595,7 +595,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to move a doc into the folder', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/doc/${
@@ -618,7 +618,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to move a file into the folder', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/file/${
@@ -641,7 +641,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to move a folder into the folder', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder/${
@@ -664,7 +664,7 @@ describe('ProjectDuplicateNames', function() {
       })
 
       describe('trying to move a folder into a subfolder of itself', function() {
-        before(function(done) {
+        beforeEach(function(done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder/${
