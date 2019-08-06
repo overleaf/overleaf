@@ -131,7 +131,11 @@ define([
 
     let autoCompileInterval = null
     const autoCompileIfReady = function() {
-      if ($scope.pdf.compiling || !$scope.autocompile_enabled) {
+      if (
+        $scope.pdf.compiling ||
+        !$scope.autocompile_enabled ||
+        !$scope.pdf.uncompiled
+      ) {
         return
       }
 
@@ -250,7 +254,7 @@ define([
     $scope.$watch('autocompile_enabled', function(newValue, oldValue) {
       if (newValue != null && oldValue !== newValue) {
         if (newValue === true) {
-          startTryingAutoCompile()
+          autoCompileIfReady()
         }
         localStorage(`autocompile_enabled:${$scope.project_id}`, newValue)
         return event_tracking.sendMB('autocompile-setting-changed', {
