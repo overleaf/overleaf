@@ -151,7 +151,9 @@ webRouter.use(function(req, res, next) {
     UserSessionsManager.touch(
       AuthenticationController.getSessionUser(req),
       err => {
-        logger.err({ err }, 'error extending user session')
+        if (err) {
+          logger.err({ err }, 'error extending user session')
+        }
       }
     )
   }
