@@ -22,6 +22,8 @@ TMP_DIR = '/var/lib/sharelatex/tmp'
 
 settings =
 
+	brandPrefix: ""
+
 	allowAnonymousReadAndWriteSharing:
 		process.env['SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING'] == 'true'
 
@@ -169,7 +171,7 @@ settings =
 	# Should javascript assets be served minified or not. Note that you will
 	# need to run `grunt compile:minify` within the web-sharelatex directory
 	# to generate these.
-	useMinifiedJs: true
+	useMinifiedJs: false
 
 	# Should static assets be sent with a header to tell the browser to cache
 	# them. This should be false in development where changes are being made,
