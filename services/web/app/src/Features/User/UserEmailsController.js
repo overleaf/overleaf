@@ -92,6 +92,7 @@ module.exports = UserEmailsController = {
       if (err) {
         return UserEmailsController._handleEmailError(err, req, res, next)
       }
+      AuthenticationController.setInSessionUser(req, { email: email })
       res.sendStatus(200)
     })
   },

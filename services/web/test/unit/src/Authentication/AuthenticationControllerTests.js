@@ -142,8 +142,9 @@ describe('AuthenticationController', function() {
         last_name: 'b',
         email: 'c'
       }
-      this.req.session.passport = { user: this.user }
-      return (this.req.session.user = this.user)
+      this.AuthenticationController.getSessionUser = sinon
+        .stub()
+        .returns(this.user)
     })
 
     it('should update the right properties', function() {
@@ -157,8 +158,8 @@ describe('AuthenticationController', function() {
         last_name: 'b',
         email: 'new_email'
       }
-      expect(this.req.session.passport.user).to.deep.equal(expectedUser)
-      return expect(this.req.session.user).to.deep.equal(expectedUser)
+      expect(this.user).to.deep.equal(expectedUser)
+      return expect(this.user).to.deep.equal(expectedUser)
     })
   })
 

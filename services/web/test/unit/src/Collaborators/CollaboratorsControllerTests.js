@@ -32,6 +32,7 @@ describe('CollaboratorsController', function() {
         './CollaboratorsHandler': (this.CollaboratorsHandler = {}),
         '../Editor/EditorRealTimeController': (this.EditorRealTimeController = {}),
         '../Tags/TagsHandler': (this.TagsHandler = {}),
+        '../Authentication/AuthenticationController': (this.AuthenticationController = {}),
         'logger-sharelatex': (this.logger = {
           err: sinon.stub(),
           warn: sinon.stub(),
@@ -87,7 +88,10 @@ describe('CollaboratorsController', function() {
 
   describe('removeSelfFromProject', function() {
     beforeEach(function() {
-      this.req.session = { user: { _id: (this.user_id = 'user-id-123') } }
+      this.user_id = 'user-id-123'
+      this.AuthenticationController.getLoggedInUserId = sinon
+        .stub()
+        .returns(this.user_id)
       this.req.params = { Project_id: this.project_id }
       this.res.sendStatus = sinon.stub()
       this.CollaboratorsHandler.removeUserFromProject = sinon.stub().callsArg(2)
@@ -126,7 +130,9 @@ describe('CollaboratorsController', function() {
 
   describe('getAllMembers', function() {
     beforeEach(function() {
-      this.req.session = { user: { _id: (this.user_id = 'user-id-123') } }
+      this.AuthenticationController.getLoggedInUserId = sinon
+        .stub()
+        .returns((this.user_id = 'user-id-123'))
       this.req.params = { Project_id: this.project_id }
       this.res.json = sinon.stub()
       this.next = sinon.stub()

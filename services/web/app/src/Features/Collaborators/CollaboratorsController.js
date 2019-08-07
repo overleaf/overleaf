@@ -1,12 +1,6 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const async = require('async')
 const CollaboratorsHandler = require('./CollaboratorsHandler')
+const AuthenticationController = require('../Authentication/AuthenticationController')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const TagsHandler = require('../Tags/TagsHandler')
 const logger = require('logger-sharelatex')
@@ -19,7 +13,7 @@ const CollaboratorsController = {
       projectId,
       userId,
       function(error) {
-        if (error != null) {
+        if (error) {
           return next(error)
         }
         EditorRealTimeController.emitToRoom(
@@ -34,12 +28,12 @@ const CollaboratorsController = {
 
   removeSelfFromProject(req, res, next) {
     const projectId = req.params.Project_id
-    const userId = req.session.user ? req.session.user._id : undefined
+    const userId = AuthenticationController.getLoggedInUserId(req)
     CollaboratorsController._removeUserIdFromProject(
       projectId,
       userId,
       function(error) {
-        if (error != null) {
+        if (error) {
           return next(error)
         }
         res.sendStatus(204)
@@ -66,7 +60,7 @@ const CollaboratorsController = {
         }
       ],
       function(error) {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
         callback()
@@ -81,7 +75,7 @@ const CollaboratorsController = {
       err,
       members
     ) {
-      if (err != null) {
+      if (err) {
         logger.warn({ projectId }, 'error getting members for project')
         return next(err)
       }

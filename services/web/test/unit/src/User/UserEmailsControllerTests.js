@@ -29,7 +29,8 @@ describe('UserEmailsController', function() {
 
     this.UserGetter = { getUserFullEmails: sinon.stub() }
     this.AuthenticationController = {
-      getLoggedInUserId: sinon.stub().returns(this.user._id)
+      getLoggedInUserId: sinon.stub().returns(this.user._id),
+      setInSessionUser: sinon.stub()
     }
     this.UserUpdater = {
       addEmailAddress: sinon.stub(),
@@ -188,6 +189,7 @@ describe('UserEmailsController', function() {
       this.email = 'email_to_set_default@bar.com'
       this.req.body.email = this.email
       this.EmailHelper.parseEmail.returns(this.email)
+      this.AuthenticationController.setInSessionUser.returns(null)
     })
 
     it('sets default email', function(done) {
@@ -197,6 +199,11 @@ describe('UserEmailsController', function() {
         sendStatus: code => {
           code.should.equal(200)
           assertCalledWith(this.EmailHelper.parseEmail, this.email)
+          assertCalledWith(
+            this.AuthenticationController.setInSessionUser,
+            this.req,
+            { email: this.email }
+          )
           assertCalledWith(
             this.UserUpdater.setDefaultEmailAddress,
             this.user._id,
