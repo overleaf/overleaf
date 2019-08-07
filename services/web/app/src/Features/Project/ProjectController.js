@@ -420,10 +420,9 @@ module.exports = ProjectController = {
             user
           ) {
             if (req.ip !== user.lastLoginIp) {
-              return NotificationsBuilder.ipMatcherAffiliation(
-                user._id,
+              return NotificationsBuilder.ipMatcherAffiliation(user._id).create(
                 req.ip
-              ).create()
+              )
             }
           })
         }
