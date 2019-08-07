@@ -88,7 +88,7 @@ module.exports =
 	dispatcherCount: process.env["DISPATCHER_COUNT"]
 
 	mongo:
-		url: "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"
+		url : process.env['MONGO_CONNECTION_STRING'] || "mongodb://#{process.env['MONGO_HOST'] or '127.0.0.1'}/sharelatex"
 
 	sentry:
 		dsn: process.env.SENTRY_DSN
