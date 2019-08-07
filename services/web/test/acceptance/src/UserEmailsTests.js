@@ -52,7 +52,7 @@ describe('UserEmails', function() {
           cb => {
             return this.user.request(
               { url: '/user/emails', json: true },
-              function(error, response, body) {
+              (error, response, body) => {
                 expect(response.statusCode).to.equal(200)
                 expect(body[0].confirmedAt).to.not.exist
                 expect(body[1].confirmedAt).to.not.exist
@@ -100,7 +100,7 @@ describe('UserEmails', function() {
           cb => {
             return this.user.request(
               { url: '/user/emails', json: true },
-              function(error, response, body) {
+              (error, response, body) => {
                 expect(response.statusCode).to.equal(200)
                 expect(body[0].confirmedAt).to.not.exist
                 expect(body[1].confirmedAt).to.exist
@@ -243,7 +243,7 @@ describe('UserEmails', function() {
           cb => {
             return this.user2.request(
               { url: '/user/emails', json: true },
-              function(error, response, body) {
+              (error, response, body) => {
                 expect(response.statusCode).to.equal(200)
                 expect(body[0].confirmedAt).to.not.exist
                 expect(body[1].confirmedAt).to.exist
@@ -257,7 +257,7 @@ describe('UserEmails', function() {
     })
   })
 
-  describe('with an expired token', () =>
+  describe('with an expired token', function() {
     it('should not confirm the email', function(done) {
       let token = null
       return async.series(
@@ -331,7 +331,8 @@ describe('UserEmails', function() {
         ],
         done
       )
-    }))
+    })
+  })
 
   describe('resending the confirmation', function() {
     it('should generate a new token', function(done) {
@@ -570,7 +571,7 @@ describe('UserEmails', function() {
           cb => {
             return this.user.request(
               { url: '/user/emails', json: true },
-              function(error, response, body) {
+              (error, response, body) => {
                 expect(response.statusCode).to.equal(200)
                 expect(body[0].confirmedAt).to.not.exist
                 expect(body[0].default).to.equal(false)
@@ -641,7 +642,7 @@ describe('UserEmails', function() {
           cb => {
             return this.user.request(
               { url: '/user/emails', json: true },
-              function(error, response, body) {
+              (error, response, body) => {
                 expect(body[0].default).to.equal(true)
                 expect(body[1].default).to.equal(false)
                 return cb()
@@ -801,7 +802,7 @@ describe('UserEmails', function() {
           cb => {
             return this.user.request(
               { url: '/user/emails', json: true },
-              function(error, response, body) {
+              (error, response, body) => {
                 expect(body[0].default).to.equal(false)
                 expect(body[1].default).to.equal(true)
                 return cb()

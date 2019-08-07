@@ -76,7 +76,7 @@ describe('ThirdPartyIdentityManager', function() {
       })
     })
 
-    describe('when third party identity does not exists', () =>
+    describe('when third party identity does not exists', function() {
       it('should return error', function(done) {
         ThirdPartyIdentityManager.login(
           this.provider,
@@ -87,23 +87,25 @@ describe('ThirdPartyIdentityManager', function() {
             return done()
           }
         )
-      }))
+      })
+    })
   })
 
   describe('link', function() {
-    describe('when provider not already linked', () =>
+    describe('when provider not already linked', function() {
       it('should link provider to user', function(done) {
         ThirdPartyIdentityManager.link(
           this.user.id,
           this.provider,
           this.externalUserId,
           this.externalData,
-          function(err, res) {
+          (err, res) => {
             expect(res.thirdPartyIdentifiers.length).to.equal(1)
             return done()
           }
         )
-      }))
+      })
+    })
 
     describe('when provider is already linked', function() {
       beforeEach(function(done) {
@@ -122,7 +124,7 @@ describe('ThirdPartyIdentityManager', function() {
           this.provider,
           this.externalUserId,
           this.externalData,
-          function(err, res) {
+          (err, res) => {
             expect(res).to.exist
             done()
           }
@@ -135,7 +137,7 @@ describe('ThirdPartyIdentityManager', function() {
           this.provider,
           this.externalUserId,
           this.externalData,
-          function(err, user) {
+          (err, user) => {
             expect(user.thirdPartyIdentifiers.length).to.equal(1)
             return done()
           }
@@ -180,18 +182,19 @@ describe('ThirdPartyIdentityManager', function() {
   })
 
   describe('unlink', function() {
-    describe('when provider not already linked', () =>
+    describe('when provider not already linked', function() {
       it('should succeed', function(done) {
         return ThirdPartyIdentityManager.unlink(
           this.user.id,
           this.provider,
-          function(err, res) {
+          (err, res) => {
             expect(err).to.be.null
             expect(res.thirdPartyIdentifiers.length).to.equal(0)
             return done()
           }
         )
-      }))
+      })
+    })
 
     describe('when provider is already linked', function() {
       beforeEach(function(done) {

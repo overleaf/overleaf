@@ -82,7 +82,9 @@ describe('ProjectEntityMongoUpdateHandler', function() {
     }))
   })
 
-  afterEach(() => tk.reset())
+  afterEach(function() {
+    return tk.reset()
+  })
 
   describe('addDoc', function() {
     beforeEach(function() {

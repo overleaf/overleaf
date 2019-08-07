@@ -93,7 +93,7 @@ describe('InstitutionsAPI', function() {
     })
   })
 
-  describe('getInstitutionLicences', () =>
+  describe('getInstitutionLicences', function() {
     it('get licences', function(done) {
       this.institutionId = 123
       const responseBody = {
@@ -124,7 +124,8 @@ describe('InstitutionsAPI', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 
   describe('getUserAffiliations', function() {
     it('get affiliations', function(done) {

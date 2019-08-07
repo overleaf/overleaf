@@ -69,7 +69,7 @@ describe('TagsController', function() {
     return (this.res.json = sinon.stub())
   })
 
-  describe('getAllTags', () =>
+  describe('getAllTags', function() {
     it('should ask the handler for all tags', function(done) {
       const allTags = [{ name: 'tag', projects: ['123423', '423423'] }]
       this.handler.getAllTags = sinon.stub().callsArgWith(1, null, allTags)
@@ -80,7 +80,8 @@ describe('TagsController', function() {
           return done()
         }
       })
-    }))
+    })
+  })
 
   describe('createTag', function() {
     beforeEach(function() {

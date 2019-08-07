@@ -784,7 +784,7 @@ describe('ClsiManager', function() {
       })
     })
 
-    describe('with the draft option', () =>
+    describe('with the draft option', function() {
       it('should add the draft option into the request', function(done) {
         return this.ClsiManager._buildRequest(
           this.project_id,
@@ -794,7 +794,8 @@ describe('ClsiManager', function() {
             return done()
           }
         )
-      }))
+      })
+    })
   })
 
   describe('_postToClsi', function() {

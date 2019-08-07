@@ -123,7 +123,7 @@ describe('CollaboratorsHandler', function() {
       it('should return a NotFoundError', function(done) {
         return this.CollaboratorHandler.getMemberIdsWithPrivilegeLevels(
           this.project_id,
-          function(error) {
+          error => {
             error.should.be.instanceof(Errors.NotFoundError)
             return done()
           }
@@ -383,7 +383,7 @@ describe('CollaboratorsHandler', function() {
       return this.CollaboratorHandler.getMemberIdPrivilegeLevel(
         'member-id-2',
         this.project_id,
-        function(error, level) {
+        (error, level) => {
           expect(level).to.equal('readOnly')
           return done()
         }
@@ -394,7 +394,7 @@ describe('CollaboratorsHandler', function() {
       return this.CollaboratorHandler.getMemberIdPrivilegeLevel(
         'member-id-3',
         this.project_id,
-        function(error, level) {
+        (error, level) => {
           expect(level).to.equal(false)
           return done()
         }

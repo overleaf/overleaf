@@ -86,7 +86,7 @@ describe('TokenAccessHandler', function() {
     it('should return projectExists flag as true', function(done) {
       return this.TokenAccessHandler.findProjectWithReadOnlyToken(
         this.token,
-        function(err, project, projectExists) {
+        (err, project, projectExists) => {
           expect(projectExists).to.equal(true)
           return done()
         }
@@ -124,7 +124,7 @@ describe('TokenAccessHandler', function() {
       it('should not return a project', function(done) {
         return this.TokenAccessHandler.findProjectWithReadOnlyToken(
           this.token,
-          function(err, project) {
+          (err, project) => {
             expect(err).to.not.exist
             expect(project).to.not.exist
             return done()
@@ -135,7 +135,7 @@ describe('TokenAccessHandler', function() {
       it('should return projectExists flag as true', function(done) {
         return this.TokenAccessHandler.findProjectWithReadOnlyToken(
           this.token,
-          function(err, project, projectExists) {
+          (err, project, projectExists) => {
             expect(projectExists).to.equal(true)
             return done()
           }
@@ -151,7 +151,7 @@ describe('TokenAccessHandler', function() {
       it('should not return a project', function(done) {
         return this.TokenAccessHandler.findProjectWithReadOnlyToken(
           this.token,
-          function(err, project) {
+          (err, project) => {
             expect(err).to.not.exist
             expect(project).to.not.exist
             return done()
@@ -162,7 +162,7 @@ describe('TokenAccessHandler', function() {
       it('should return projectExists flag as false', function(done) {
         return this.TokenAccessHandler.findProjectWithReadOnlyToken(
           this.token,
-          function(err, project, projectExists) {
+          (err, project, projectExists) => {
             expect(projectExists).to.equal(false)
             return done()
           }
@@ -215,7 +215,7 @@ describe('TokenAccessHandler', function() {
     it('should return projectExists flag as true', function(done) {
       return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
         this.token,
-        function(err, project, projectExists) {
+        (err, project, projectExists) => {
           expect(projectExists).to.equal(true)
           return done()
         }
@@ -253,7 +253,7 @@ describe('TokenAccessHandler', function() {
       it('should not return a project', function(done) {
         return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
           this.token,
-          function(err, project) {
+          (err, project) => {
             expect(err).to.not.exist
             expect(project).to.not.exist
             return done()
@@ -264,7 +264,7 @@ describe('TokenAccessHandler', function() {
       it('should return projectExists flag as true', function(done) {
         return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
           this.token,
-          function(err, project, projectExists) {
+          (err, project, projectExists) => {
             expect(projectExists).to.equal(true)
             return done()
           }
@@ -287,7 +287,7 @@ describe('TokenAccessHandler', function() {
       it('should not return a project', function(done) {
         return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
           this.token,
-          function(err, project) {
+          (err, project) => {
             expect(err).to.not.exist
             expect(project).to.not.exist
             return done()

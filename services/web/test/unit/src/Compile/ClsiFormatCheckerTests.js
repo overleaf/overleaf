@@ -154,7 +154,7 @@ describe('ClsiFormatChecker', function() {
 
         return this.ClsiFormatChecker._checkForConflictingPaths(
           this.resources,
-          function(err, conflictPathErrors) {
+          (err, conflictPathErrors) => {
             conflictPathErrors.length.should.equal(1)
             conflictPathErrors[0].path.should.equal('stuff/image')
             return done()
@@ -170,7 +170,7 @@ describe('ClsiFormatChecker', function() {
 
         return this.ClsiFormatChecker._checkForConflictingPaths(
           this.resources,
-          function(err, conflictPathErrors) {
+          (err, conflictPathErrors) => {
             conflictPathErrors.length.should.equal(1)
             conflictPathErrors[0].path.should.equal('stuff')
             return done()
@@ -186,7 +186,7 @@ describe('ClsiFormatChecker', function() {
 
         return this.ClsiFormatChecker._checkForConflictingPaths(
           this.resources,
-          function(err, conflictPathErrors) {
+          (err, conflictPathErrors) => {
             conflictPathErrors.length.should.equal(0)
             return done()
           }
@@ -212,7 +212,7 @@ describe('ClsiFormatChecker', function() {
 
         return this.ClsiFormatChecker._checkDocsAreUnderSizeLimit(
           this.resources,
-          function(err, sizeError) {
+          (err, sizeError) => {
             sizeError.totalSize.should.equal(10000016)
             sizeError.resources.length.should.equal(10)
             sizeError.resources[0].path.should.equal('massive.tex')
@@ -239,7 +239,7 @@ describe('ClsiFormatChecker', function() {
 
         return this.ClsiFormatChecker._checkDocsAreUnderSizeLimit(
           this.resources,
-          function(err, sizeError) {
+          (err, sizeError) => {
             expect(sizeError).to.not.exist
             return done()
           }

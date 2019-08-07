@@ -293,8 +293,8 @@ const expectInvitesInJoinProjectCount = (user, projectId, count, callback) => {
   })
 }
 
-describe('ProjectInviteTests', () => {
-  beforeEach(done => {
+describe('ProjectInviteTests', function() {
+  beforeEach(function(done) {
     this.sendingUser = new User()
     this.user = new User()
     this.site_admin = new User({ email: 'admin@example.com' })
@@ -310,13 +310,13 @@ describe('ProjectInviteTests', () => {
     )
   })
 
-  describe('creating invites', () => {
-    beforeEach(() => {
+  describe('creating invites', function() {
+    beforeEach(function() {
       this.projectName = 'wat'
     })
 
-    describe('creating two invites', () => {
-      beforeEach(done => {
+    describe('creating two invites', function() {
+      beforeEach(function(done) {
         createProject(
           this.sendingUser,
           this.projectName,
@@ -329,7 +329,7 @@ describe('ProjectInviteTests', () => {
         )
       })
 
-      it('should allow the project owner to create and remove invites', done => {
+      it('should allow the project owner to create and remove invites', function(done) {
         Async.series(
           [
             cb => expectProjectAccess(this.sendingUser, this.projectId, cb),
@@ -408,7 +408,7 @@ describe('ProjectInviteTests', () => {
         )
       })
 
-      it('should allow the project owner to create many invites at once', done => {
+      it('should allow the project owner to create many invites at once', function(done) {
         Async.series(
           [
             cb => expectProjectAccess(this.sendingUser, this.projectId, cb),
@@ -482,8 +482,8 @@ describe('ProjectInviteTests', () => {
     })
   })
 
-  describe('clicking the invite link', () => {
-    beforeEach(done => {
+  describe('clicking the invite link', function() {
+    beforeEach(function(done) {
       createProjectAndInvite(
         this.sendingUser,
         this.projectName,
@@ -499,13 +499,13 @@ describe('ProjectInviteTests', () => {
       )
     })
 
-    describe('user is logged in already', () => {
-      beforeEach(done => {
+    describe('user is logged in already', function() {
+      beforeEach(function(done) {
         this.user.login(done)
       })
 
-      describe('user is already a member of the project', () => {
-        beforeEach(done => {
+      describe('user is already a member of the project', function() {
+        beforeEach(function(done) {
           Async.series(
             [
               cb => expectInvitePage(this.user, this.link, cb),
@@ -516,8 +516,8 @@ describe('ProjectInviteTests', () => {
           )
         })
 
-        describe('when user clicks on the invite a second time', () => {
-          it('should just redirect to the project page', done => {
+        describe('when user clicks on the invite a second time', function() {
+          it('should just redirect to the project page', function(done) {
             Async.series(
               [
                 cb => expectProjectAccess(this.user, this.invite.projectId, cb),
@@ -534,8 +534,8 @@ describe('ProjectInviteTests', () => {
             )
           })
 
-          describe('when the user recieves another invite to the same project', () =>
-            it('should redirect to the project page', done => {
+          describe('when the user recieves another invite to the same project', function() {
+            it('should redirect to the project page', function(done) {
               Async.series(
                 [
                   cb => {
@@ -575,12 +575,13 @@ describe('ProjectInviteTests', () => {
                 ],
                 done
               )
-            }))
+            })
+          })
         })
       })
 
-      describe('user is not a member of the project', () => {
-        it('should not grant access if the user does not accept the invite', done => {
+      describe('user is not a member of the project', function() {
+        it('should not grant access if the user does not accept the invite', function(done) {
           Async.series(
             [
               cb => expectInvitePage(this.user, this.link, cb),
@@ -590,7 +591,7 @@ describe('ProjectInviteTests', () => {
           )
         })
 
-        it('should render the invalid-invite page if the token is invalid', done => {
+        it('should render the invalid-invite page if the token is invalid', function(done) {
           Async.series(
             [
               cb => {
@@ -607,7 +608,7 @@ describe('ProjectInviteTests', () => {
           )
         })
 
-        it('should allow the user to accept the invite and access the project', done => {
+        it('should allow the user to accept the invite and access the project', function(done) {
           Async.series(
             [
               cb => expectInvitePage(this.user, this.link, cb),
@@ -620,13 +621,13 @@ describe('ProjectInviteTests', () => {
       })
     })
 
-    describe('user is not logged in initially', () => {
-      describe('registration prompt workflow with valid token', () => {
-        it('should redirect to the register page', done => {
+    describe('user is not logged in initially', function() {
+      describe('registration prompt workflow with valid token', function() {
+        it('should redirect to the register page', function(done) {
           expectInviteRedirectToRegister(this.user, this.link, done)
         })
 
-        it('should allow user to accept the invite if the user registers a new account', done => {
+        it('should allow user to accept the invite if the user registers a new account', function(done) {
           Async.series(
             [
               cb => expectInviteRedirectToRegister(this.user, this.link, cb),
@@ -646,8 +647,8 @@ describe('ProjectInviteTests', () => {
         })
       })
 
-      describe('registration prompt workflow with non-valid token', () => {
-        it('should redirect to the register page', done => {
+      describe('registration prompt workflow with non-valid token', function() {
+        it('should redirect to the register page', function(done) {
           Async.series(
             [
               cb => expectInviteRedirectToRegister(this.user, this.link, cb),
@@ -657,7 +658,7 @@ describe('ProjectInviteTests', () => {
           )
         })
 
-        it('should display invalid-invite if the user registers a new account', done => {
+        it('should display invalid-invite if the user registers a new account', function(done) {
           const badLink = this.link.replace(
             this.invite.token,
             'not_a_real_token'
@@ -680,8 +681,8 @@ describe('ProjectInviteTests', () => {
         })
       })
 
-      describe('login workflow with valid token', () => {
-        it('should redirect to the register page', done => {
+      describe('login workflow with valid token', function() {
+        it('should redirect to the register page', function(done) {
           Async.series(
             [
               cb => expectInviteRedirectToRegister(this.user, this.link, cb),
@@ -691,7 +692,7 @@ describe('ProjectInviteTests', () => {
           )
         })
 
-        it('should allow the user to login to view the invite', done => {
+        it('should allow the user to login to view the invite', function(done) {
           Async.series(
             [
               cb => expectInviteRedirectToRegister(this.user, this.link, cb),
@@ -704,7 +705,7 @@ describe('ProjectInviteTests', () => {
           )
         })
 
-        it('should allow user to accept the invite if the user logs in', done => {
+        it('should allow user to accept the invite if the user logs in', function(done) {
           Async.series(
             [
               cb => expectInviteRedirectToRegister(this.user, this.link, cb),
@@ -719,8 +720,8 @@ describe('ProjectInviteTests', () => {
         })
       })
 
-      describe('login workflow with non-valid token', () => {
-        it('should redirect to the register page', done => {
+      describe('login workflow with non-valid token', function() {
+        it('should redirect to the register page', function(done) {
           Async.series(
             [
               cb => expectInviteRedirectToRegister(this.user, this.link, cb),
@@ -730,7 +731,7 @@ describe('ProjectInviteTests', () => {
           )
         })
 
-        it('should show the invalid-invite page once the user has logged in', done => {
+        it('should show the invalid-invite page once the user has logged in', function(done) {
           const badLink = this.link.replace(
             this.invite.token,
             'not_a_real_token'

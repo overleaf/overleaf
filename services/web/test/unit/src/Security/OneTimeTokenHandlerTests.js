@@ -48,7 +48,9 @@ describe('OneTimeTokenHandler', function() {
     }))
   })
 
-  afterEach(() => tk.reset())
+  afterEach(function() {
+    return tk.reset()
+  })
 
   describe('getNewToken', function() {
     beforeEach(function() {

@@ -93,12 +93,12 @@ module.exports = MockDocUpdaterApi = {
     })
 
     return app
-      .listen(3003, function(error) {
+      .listen(3003, error => {
         if (error != null) {
           throw error
         }
       })
-      .on('error', function(error) {
+      .on('error', error => {
         console.error('error starting MockDocUpdaterApi:', error.message)
         return process.exit(1)
       })

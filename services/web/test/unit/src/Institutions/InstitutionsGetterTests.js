@@ -62,7 +62,7 @@ describe('InstitutionsGetter', function() {
       this.UserGetter.getUserFullEmails.yields(null, this.userEmails)
       return this.InstitutionsGetter.getConfirmedInstitutions(
         this.userId,
-        function(error, institutions) {
+        (error, institutions) => {
           expect(error).to.not.exist
           institutions.length.should.equal(1)
           institutions[0].id.should.equal(456)
@@ -75,7 +75,7 @@ describe('InstitutionsGetter', function() {
       this.UserGetter.getUserFullEmails.yields(null, [])
       return this.InstitutionsGetter.getConfirmedInstitutions(
         this.userId,
-        function(error, institutions) {
+        (error, institutions) => {
           expect(error).to.not.exist
           institutions.length.should.equal(0)
           return done()
@@ -87,7 +87,7 @@ describe('InstitutionsGetter', function() {
       this.UserGetter.getUserFullEmails.yields(new Error('Nope'))
       return this.InstitutionsGetter.getConfirmedInstitutions(
         this.userId,
-        function(error, institutions) {
+        (error, institutions) => {
           expect(error).to.exist
           return done()
         }

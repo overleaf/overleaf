@@ -272,7 +272,7 @@ describe('UserGetter', function() {
     })
   })
 
-  describe('getUsersByHostname', () =>
+  describe('getUsersByHostname', function() {
     it('should find user by hostname', function(done) {
       const hostname = 'bar.foo'
       const expectedQuery = {
@@ -292,9 +292,10 @@ describe('UserGetter', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 
-  describe('getUsersByV1Id', () =>
+  describe('getUsersByV1Id', function() {
     it('should find users by list of v1 ids', function(done) {
       const v1Ids = [501]
       const expectedQuery = {
@@ -310,7 +311,8 @@ describe('UserGetter', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 
   describe('ensureUniqueEmailAddress', function() {
     beforeEach(function() {

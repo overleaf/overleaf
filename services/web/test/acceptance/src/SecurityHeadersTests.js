@@ -48,23 +48,26 @@ describe('SecurityHeaders', function() {
     return (this.user = new User())
   })
 
-  it('should not have x-powered-by header', done =>
-    request.get('/', (err, res, body) => {
+  it('should not have x-powered-by header', function(done) {
+    return request.get('/', (err, res, body) => {
       assert.isUndefined(res.headers['x-powered-by'])
       return done()
-    }))
+    })
+  })
 
-  it('should have all common headers', done =>
-    request.get('/', (err, res, body) => {
+  it('should have all common headers', function(done) {
+    return request.get('/', (err, res, body) => {
       assert_has_common_headers(res)
       return done()
-    }))
+    })
+  })
 
-  it('should not have cache headers on public pages', done =>
-    request.get('/', (err, res, body) => {
+  it('should not have cache headers on public pages', function(done) {
+    return request.get('/', (err, res, body) => {
       assert_has_no_cache_headers(res)
       return done()
-    }))
+    })
+  })
 
   it('should have cache headers when user is logged in', function(done) {
     return async.series(

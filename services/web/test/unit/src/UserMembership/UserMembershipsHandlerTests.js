@@ -42,7 +42,7 @@ describe('UserMembershipsHandler', function() {
     }))
   })
 
-  describe('remove user', () =>
+  describe('remove user', function() {
     it('remove user from all entities', function(done) {
       return this.UserMembershipsHandler.removeUserFromAllEntities(
         this.user._id,
@@ -65,5 +65,6 @@ describe('UserMembershipsHandler', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 })

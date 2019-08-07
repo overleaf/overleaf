@@ -49,7 +49,7 @@ describe('TpdsUpdateTests', function() {
             sendImmediately: true
           }
         },
-        function(error, response, body) {
+        (error, response, body) => {
           if (error != null) {
             throw error
           }
@@ -60,10 +60,7 @@ describe('TpdsUpdateTests', function() {
     })
 
     it('should have deleted the file', function(done) {
-      return ProjectGetter.getProject(this.project_id, function(
-        error,
-        project
-      ) {
+      return ProjectGetter.getProject(this.project_id, (error, project) => {
         if (error != null) {
           throw error
         }

@@ -20,22 +20,24 @@ describe('Project CRUD', function() {
     return this.user.login(done)
   })
 
-  describe("when project doesn't exist", () =>
+  describe("when project doesn't exist", function() {
     it('should return 404', function(done) {
       return this.user.request.get(
         '/project/aaaaaaaaaaaaaaaaaaaaaaaa',
-        function(err, res, body) {
+        (err, res, body) => {
           expect(res.statusCode).to.equal(404)
           return done()
         }
       )
-    }))
+    })
+  })
 
-  describe('when project has malformed id', () =>
+  describe('when project has malformed id', function() {
     it('should return 404', function(done) {
-      return this.user.request.get('/project/blah', function(err, res, body) {
+      return this.user.request.get('/project/blah', (err, res, body) => {
         expect(res.statusCode).to.equal(404)
         return done()
       })
-    }))
+    })
+  })
 })

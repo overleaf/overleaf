@@ -128,7 +128,7 @@ describe('RestoringFiles', function() {
               version: 42
             }
           },
-          function(error, response, body) {
+          (error, response, body) => {
             if (error != null) {
               throw error
             }
@@ -175,7 +175,7 @@ describe('RestoringFiles', function() {
               version: 42
             }
           },
-          function(error, response, body) {
+          (error, response, body) => {
             if (error != null) {
               throw error
             }
@@ -230,7 +230,7 @@ describe('RestoringFiles', function() {
                   version: 42
                 }
               },
-              function(error, response, body) {
+              (error, response, body) => {
                 if (error != null) {
                   throw error
                 }
@@ -276,7 +276,7 @@ describe('RestoringFiles', function() {
               version: 42
             }
           },
-          function(error, response, body) {
+          (error, response, body) => {
             if (error != null) {
               throw error
             }
@@ -321,7 +321,7 @@ describe('RestoringFiles', function() {
               version: 42
             }
           },
-          function(error, response, body) {
+          (error, response, body) => {
             if (error != null) {
               throw error
             }

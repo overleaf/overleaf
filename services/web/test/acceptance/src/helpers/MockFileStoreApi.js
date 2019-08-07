@@ -64,12 +64,12 @@ module.exports = MockFileStoreApi = {
     )
 
     return app
-      .listen(3009, function(error) {
+      .listen(3009, error => {
         if (error != null) {
           throw error
         }
       })
-      .on('error', function(error) {
+      .on('error', error => {
         console.error('error starting MockFileStoreApi:', error.message)
         return process.exit(1)
       })

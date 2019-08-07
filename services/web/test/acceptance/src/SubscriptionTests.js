@@ -145,7 +145,7 @@ describe('Subscriptions', function() {
         // rebuild the view model with the redemptions
         return SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel(
           this.user,
-          function(error, data) {
+          (error, data) => {
             expect(error).to.not.exist
             expect(
               data.personalSubscription.recurly.activeCoupons

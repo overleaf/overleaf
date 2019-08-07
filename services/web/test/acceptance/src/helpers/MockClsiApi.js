@@ -47,20 +47,19 @@ module.exports = MockClsiApi = {
     app.post('/project/:project_id/compile', compile)
     app.post('/project/:project_id/user/:user_id/compile', compile)
 
-    app.get('/project/:project_id/build/:build_id/output/*', function(
-      req,
-      res,
-      next
-    ) {
-      const filename = req.params[0]
-      if (filename === 'project.pdf') {
-        return res.status(200).send('mock-pdf')
-      } else if (filename === 'project.log') {
-        return res.status(200).send('mock-log')
-      } else {
-        return res.sendStatus(404)
+    app.get(
+      '/project/:project_id/build/:build_id/output/*',
+      (req, res, next) => {
+        const filename = req.params[0]
+        if (filename === 'project.pdf') {
+          return res.status(200).send('mock-pdf')
+        } else if (filename === 'project.log') {
+          return res.status(200).send('mock-log')
+        } else {
+          return res.sendStatus(404)
+        }
       }
-    })
+    )
 
     app.get(
       '/project/:project_id/user/:user_id/build/:build_id/output/:output_path',
@@ -74,12 +73,12 @@ module.exports = MockClsiApi = {
     })
 
     return app
-      .listen(3013, function(error) {
+      .listen(3013, error => {
         if (error != null) {
           throw error
         }
       })
-      .on('error', function(error) {
+      .on('error', error => {
         console.error('error starting MockClsiApi:', error.message)
         return process.exit(1)
       })

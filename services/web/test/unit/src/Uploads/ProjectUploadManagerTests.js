@@ -386,7 +386,7 @@ describe('ProjectUploadManager', function() {
     })
   })
 
-  describe('_getDestinationDirectory', () =>
+  describe('_getDestinationDirectory', function() {
     it('should return the path with the time appended', function() {
       const date = Date.now()
       sinon.stub(Date, 'now', () => date)
@@ -394,5 +394,6 @@ describe('ProjectUploadManager', function() {
         '/path/to/zip/file.zip'
       ).should.equal(`/path/to/zip/file-${date}`)
       Date.now.restore()
-    }))
+    })
+  })
 })

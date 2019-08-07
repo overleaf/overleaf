@@ -386,36 +386,36 @@ describe('LimitationsManager', function() {
       this.SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {
         recurlySubscription_id: '1234'
       })
-      return this.LimitationsManager.userHasV2Subscription(this.user, function(
-        err,
-        hasSubscription
-      ) {
-        hasSubscription.should.equal(true)
-        return done()
-      })
+      return this.LimitationsManager.userHasV2Subscription(
+        this.user,
+        (err, hasSubscription) => {
+          hasSubscription.should.equal(true)
+          return done()
+        }
+      )
     })
 
     it('should return false if the recurly token is not set', function(done) {
       this.SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
       this.subscription = {}
-      return this.LimitationsManager.userHasV2Subscription(this.user, function(
-        err,
-        hasSubscription
-      ) {
-        hasSubscription.should.equal(false)
-        return done()
-      })
+      return this.LimitationsManager.userHasV2Subscription(
+        this.user,
+        (err, hasSubscription) => {
+          hasSubscription.should.equal(false)
+          return done()
+        }
+      )
     })
 
     it('should return false if the subscription is undefined', function(done) {
       this.SubscriptionLocator.getUsersSubscription.callsArgWith(1)
-      return this.LimitationsManager.userHasV2Subscription(this.user, function(
-        err,
-        hasSubscription
-      ) {
-        hasSubscription.should.equal(false)
-        return done()
-      })
+      return this.LimitationsManager.userHasV2Subscription(
+        this.user,
+        (err, hasSubscription) => {
+          hasSubscription.should.equal(false)
+          return done()
+        }
+      )
     })
 
     it('should return the subscription', function(done) {
@@ -425,14 +425,13 @@ describe('LimitationsManager', function() {
         null,
         stubbedSubscription
       )
-      return this.LimitationsManager.userHasV2Subscription(this.user, function(
-        err,
-        hasSubOrIsGroupMember,
-        subscription
-      ) {
-        subscription.should.deep.equal(stubbedSubscription)
-        return done()
-      })
+      return this.LimitationsManager.userHasV2Subscription(
+        this.user,
+        (err, hasSubOrIsGroupMember, subscription) => {
+          subscription.should.deep.equal(stubbedSubscription)
+          return done()
+        }
+      )
     })
 
     describe('when user has a custom account', function() {
@@ -448,7 +447,7 @@ describe('LimitationsManager', function() {
       it('should return true', function(done) {
         return this.LimitationsManager.userHasV2Subscription(
           this.user,
-          function(err, hasSubscription, subscription) {
+          (err, hasSubscription, subscription) => {
             hasSubscription.should.equal(true)
             return done()
           }
@@ -476,7 +475,7 @@ describe('LimitationsManager', function() {
       this.SubscriptionLocator.getMemberSubscriptions.callsArgWith(1, null, [])
       return this.LimitationsManager.userIsMemberOfGroupSubscription(
         this.user,
-        function(err, isMember) {
+        (err, isMember) => {
           isMember.should.equal(false)
           return done()
         }
@@ -492,7 +491,7 @@ describe('LimitationsManager', function() {
       )
       return this.LimitationsManager.userIsMemberOfGroupSubscription(
         this.user,
-        function(err, isMember, retSubscriptions) {
+        (err, isMember, retSubscriptions) => {
           isMember.should.equal(true)
           retSubscriptions.should.equal(subscriptions)
           return done()
@@ -518,55 +517,55 @@ describe('LimitationsManager', function() {
       this.LimitationsManager.userIsMemberOfGroupSubscription = sinon
         .stub()
         .yields(null, true)
-      return this.LimitationsManager.hasPaidSubscription(this.user, function(
-        err,
-        hasSubOrIsGroupMember
-      ) {
-        hasSubOrIsGroupMember.should.equal(true)
-        return done()
-      })
+      return this.LimitationsManager.hasPaidSubscription(
+        this.user,
+        (err, hasSubOrIsGroupMember) => {
+          hasSubOrIsGroupMember.should.equal(true)
+          return done()
+        }
+      )
     })
 
     it('should return true if userHasV2Subscription', function(done) {
       this.LimitationsManager.userHasV2Subscription = sinon
         .stub()
         .yields(null, true)
-      return this.LimitationsManager.hasPaidSubscription(this.user, function(
-        err,
-        hasSubOrIsGroupMember
-      ) {
-        hasSubOrIsGroupMember.should.equal(true)
-        return done()
-      })
+      return this.LimitationsManager.hasPaidSubscription(
+        this.user,
+        (err, hasSubOrIsGroupMember) => {
+          hasSubOrIsGroupMember.should.equal(true)
+          return done()
+        }
+      )
     })
 
     it('should return true if userHasV1Subscription', function(done) {
       this.LimitationsManager.userHasV1Subscription = sinon
         .stub()
         .yields(null, true)
-      return this.LimitationsManager.hasPaidSubscription(this.user, function(
-        err,
-        hasSubOrIsGroupMember
-      ) {
-        hasSubOrIsGroupMember.should.equal(true)
-        return done()
-      })
+      return this.LimitationsManager.hasPaidSubscription(
+        this.user,
+        (err, hasSubOrIsGroupMember) => {
+          hasSubOrIsGroupMember.should.equal(true)
+          return done()
+        }
+      )
     })
 
     it('should return false if none are true', function(done) {
-      return this.LimitationsManager.hasPaidSubscription(this.user, function(
-        err,
-        hasSubOrIsGroupMember
-      ) {
-        hasSubOrIsGroupMember.should.equal(false)
-        return done()
-      })
+      return this.LimitationsManager.hasPaidSubscription(
+        this.user,
+        (err, hasSubOrIsGroupMember) => {
+          hasSubOrIsGroupMember.should.equal(false)
+          return done()
+        }
+      )
     })
 
     it('should have userHasSubscriptionOrIsGroupMember alias', function(done) {
       return this.LimitationsManager.userHasSubscriptionOrIsGroupMember(
         this.user,
-        function(err, hasSubOrIsGroupMember) {
+        (err, hasSubOrIsGroupMember) => {
           hasSubOrIsGroupMember.should.equal(false)
           return done()
         }
@@ -590,7 +589,7 @@ describe('LimitationsManager', function() {
         .yields(null, true)
       return this.LimitationsManager.userHasV1OrV2Subscription(
         this.user,
-        function(err, hasSub) {
+        (err, hasSub) => {
           hasSub.should.equal(true)
           return done()
         }
@@ -603,7 +602,7 @@ describe('LimitationsManager', function() {
         .yields(null, true)
       return this.LimitationsManager.userHasV1OrV2Subscription(
         this.user,
-        function(err, hasSub) {
+        (err, hasSub) => {
           hasSub.should.equal(true)
           return done()
         }
@@ -613,7 +612,7 @@ describe('LimitationsManager', function() {
     it('should return false if none are true', function(done) {
       return this.LimitationsManager.userHasV1OrV2Subscription(
         this.user,
-        function(err, hasSub) {
+        (err, hasSub) => {
           hasSub.should.equal(false)
           return done()
         }
@@ -641,7 +640,7 @@ describe('LimitationsManager', function() {
       )
       return this.LimitationsManager.hasGroupMembersLimitReached(
         this.subscriptionId,
-        function(err, limitReached) {
+        (err, limitReached) => {
           limitReached.should.equal(true)
           return done()
         }
@@ -657,7 +656,7 @@ describe('LimitationsManager', function() {
       )
       return this.LimitationsManager.hasGroupMembersLimitReached(
         this.subscriptionId,
-        function(err, limitReached) {
+        (err, limitReached) => {
           limitReached.should.equal(false)
           return done()
         }
@@ -673,7 +672,7 @@ describe('LimitationsManager', function() {
       )
       return this.LimitationsManager.hasGroupMembersLimitReached(
         this.subscriptionId,
-        function(err, limitReached) {
+        (err, limitReached) => {
           limitReached.should.equal(true)
           return done()
         }

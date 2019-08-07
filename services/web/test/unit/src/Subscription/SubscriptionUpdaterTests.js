@@ -309,7 +309,7 @@ describe('SubscriptionUpdater', function() {
     })
   })
 
-  describe('_createNewSubscription', () =>
+  describe('_createNewSubscription', function() {
     it('should create a new subscription then update the subscription', function(done) {
       this.SubscriptionUpdater._createNewSubscription(
         this.adminUser._id,
@@ -320,7 +320,8 @@ describe('SubscriptionUpdater', function() {
           done()
         }
       )
-    }))
+    })
+  })
 
   describe('addUserToGroup', function() {
     beforeEach(function() {

@@ -77,14 +77,14 @@ describe('RateLimiter', function() {
     })
 
     it('should not produce and error', function(done) {
-      return this.limiter.addCount({}, function(err, should) {
+      return this.limiter.addCount({}, (err, should) => {
         expect(err).to.equal(null)
         return done()
       })
     })
 
     it('should callback with true', function(done) {
-      return this.limiter.addCount({}, function(err, should) {
+      return this.limiter.addCount({}, (err, should) => {
         expect(should).to.equal(true)
         return done()
       })
@@ -115,14 +115,14 @@ describe('RateLimiter', function() {
     })
 
     it('should not produce and error', function(done) {
-      return this.limiter.addCount({}, function(err, should) {
+      return this.limiter.addCount({}, (err, should) => {
         expect(err).to.equal(null)
         return done()
       })
     })
 
     it('should callback with false', function(done) {
-      return this.limiter.addCount({}, function(err, should) {
+      return this.limiter.addCount({}, (err, should) => {
         expect(should).to.equal(false)
         return done()
       })
@@ -158,7 +158,7 @@ describe('RateLimiter', function() {
     })
 
     it('should produce and error', function(done) {
-      return this.limiter.addCount({}, function(err, should) {
+      return this.limiter.addCount({}, (err, should) => {
         expect(err).to.not.equal(null)
         expect(err).to.be.instanceof(Error)
         return done()

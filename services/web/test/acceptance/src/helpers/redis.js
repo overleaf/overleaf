@@ -36,7 +36,7 @@ module.exports = {
       callback = function(err) {}
     }
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
-    return rclient.smembers(sessionSetKey, function(err, sessionKeys) {
+    return rclient.smembers(sessionSetKey, (err, sessionKeys) => {
       if (err) {
         return callback(err)
       }
@@ -45,7 +45,7 @@ module.exports = {
       }
       const actions = sessionKeys.map(k => cb => rclient.del(k, err => cb(err)))
       return Async.series(actions, (err, results) =>
-        rclient.srem(sessionSetKey, sessionKeys, function(err) {
+        rclient.srem(sessionSetKey, sessionKeys, err => {
           if (err) {
             return callback(err)
           }

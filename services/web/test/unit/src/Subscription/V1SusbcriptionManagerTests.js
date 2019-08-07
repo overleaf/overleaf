@@ -120,15 +120,16 @@ describe('V1SubscriptionManager', function() {
   })
 
   describe('getGrandfatheredFeaturesForV1User', function() {
-    describe('when the user ID is greater than the cutoff', () =>
+    describe('when the user ID is greater than the cutoff', function() {
       it('should return an empty feature set', function(done) {
         expect(
           this.V1SubscriptionManager.getGrandfatheredFeaturesForV1User(100)
         ).to.eql({})
         return done()
-      }))
+      })
+    })
 
-    describe('when the user ID is less than the cutoff', () =>
+    describe('when the user ID is less than the cutoff', function() {
       it('should return a feature set with grandfathered properties for github and mendeley', function(done) {
         expect(
           this.V1SubscriptionManager.getGrandfatheredFeaturesForV1User(1)
@@ -137,7 +138,8 @@ describe('V1SubscriptionManager', function() {
           mendeley: true
         })
         return done()
-      }))
+      })
+    })
   })
 
   describe('_v1Request', function() {

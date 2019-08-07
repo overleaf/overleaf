@@ -40,7 +40,9 @@ describe('Labels', function() {
     })
   })
 
-  afterEach(() => MockProjectHistoryApi.reset())
+  afterEach(function() {
+    return MockProjectHistoryApi.reset()
+  })
 
   it('getting labels', function(done) {
     const label_id = new ObjectId().toString()

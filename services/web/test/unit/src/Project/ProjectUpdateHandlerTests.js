@@ -90,7 +90,7 @@ describe('ProjectUpdateHandler', function() {
     })
   })
 
-  describe('markAsOpened', () =>
+  describe('markAsOpened', function() {
     it('should send an update to mongo', function(done) {
       const project_id = 'project_id'
       return this.handler.markAsOpened(project_id, err => {
@@ -101,9 +101,10 @@ describe('ProjectUpdateHandler', function() {
         date.substring(0, 5).should.equal(now.substring(0, 5))
         return done()
       })
-    }))
+    })
+  })
 
-  describe('markAsInactive', () =>
+  describe('markAsInactive', function() {
     it('should send an update to mongo', function(done) {
       const project_id = 'project_id'
       return this.handler.markAsInactive(project_id, err => {
@@ -112,9 +113,10 @@ describe('ProjectUpdateHandler', function() {
         args[1].active.should.equal(false)
         return done()
       })
-    }))
+    })
+  })
 
-  describe('markAsActive', () =>
+  describe('markAsActive', function() {
     it('should send an update to mongo', function(done) {
       const project_id = 'project_id'
       return this.handler.markAsActive(project_id, err => {
@@ -123,5 +125,6 @@ describe('ProjectUpdateHandler', function() {
         args[1].active.should.equal(true)
         return done()
       })
-    }))
+    })
+  })
 })

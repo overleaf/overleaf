@@ -7,8 +7,8 @@ const MockRequest = require('../helpers/MockRequest')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const HttpErrors = require('@overleaf/o-error/http')
 
-describe('HttpErrorController', () => {
-  beforeEach(() => {
+describe('HttpErrorController', function() {
+  beforeEach(function() {
     this.req = new MockRequest()
     this.res = new MockResponse()
 
@@ -33,10 +33,10 @@ describe('HttpErrorController', () => {
     })
   })
 
-  describe('handleError', () => {
-    beforeEach(() => {})
+  describe('handleError', function() {
+    beforeEach(function() {})
 
-    it('logs and return status code', () => {
+    it('logs and return status code', function() {
       let error = new HttpErrors.UnprocessableEntityError()
 
       this.ErrorController.handleError(error, this.req, this.res)
@@ -49,7 +49,7 @@ describe('HttpErrorController', () => {
       expect(url).to.not.be.defined
     })
 
-    it('logs url method and userId', () => {
+    it('logs url method and userId', function() {
       let error = new HttpErrors.UnprocessableEntityError()
       this.AuthenticationController.getLoggedInUserId.returns('123abc')
       this.req.url = 'overleaf.url'
@@ -63,7 +63,7 @@ describe('HttpErrorController', () => {
       expect(url).to.equal('overleaf.url')
     })
 
-    it('logs and return status code when wrapped', () => {
+    it('logs and return status code when wrapped', function() {
       let cause = new Errors.SubscriptionAdminDeletionError()
       let error = new HttpErrors.UnprocessableEntityError({}).withCause(cause)
 
@@ -72,7 +72,7 @@ describe('HttpErrorController', () => {
       sinon.assert.calledOnce(this.logger.warn)
     })
 
-    it('renders JSON with info', () => {
+    it('renders JSON with info', function() {
       let cause = new Errors.SubscriptionAdminDeletionError({
         info: {
           public: { some: 'data' }
@@ -92,7 +92,7 @@ describe('HttpErrorController', () => {
       )
     })
 
-    it('renders HTML with info', () => {
+    it('renders HTML with info', function() {
       let cause = new Errors.SubscriptionAdminDeletionError()
       let error = new HttpErrors.UnprocessableEntityError({}).withCause(cause)
       this.req.accepts = () => 'html'

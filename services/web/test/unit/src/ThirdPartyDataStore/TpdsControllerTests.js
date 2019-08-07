@@ -42,7 +42,7 @@ describe('TpdsController', function() {
     this.user_id = 'dsad29jlkjas'
   })
 
-  describe('getting an update', () => {
+  describe('getting an update', function() {
     it('should process the update with the update receiver', function(done) {
       const path = '/projectName/here.txt'
       const req = {
@@ -118,7 +118,7 @@ describe('TpdsController', function() {
     })
   })
 
-  describe('getting a delete update', () =>
+  describe('getting a delete update', function() {
     it('should process the delete with the update reciver', function(done) {
       const path = '/projectName/here.txt'
       const req = {
@@ -140,7 +140,8 @@ describe('TpdsController', function() {
         }
       }
       this.TpdsController.deleteUpdate(req, res)
-    }))
+    })
+  })
 
   describe('parseParams', function() {
     it('should take the project name off the start and replace with slash', function() {
@@ -152,7 +153,7 @@ describe('TpdsController', function() {
       result.projectName.should.equal(path)
     })
 
-    it('should take the project name off the start and return it with no slashes in', function() {
+    it('should take the project name off the start and it with no slashes in', function() {
       const path = '/project/file.tex'
       const req = { params: { 0: path, user_id: this.user_id } }
       const result = this.TpdsController.parseParams(req)

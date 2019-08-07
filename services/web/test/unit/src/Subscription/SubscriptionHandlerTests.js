@@ -177,7 +177,7 @@ describe('SubscriptionHandler', function() {
   })
 
   describe('updateSubscription', function() {
-    describe('with a user with a subscription', () =>
+    describe('with a user with a subscription', function() {
       describe('with a valid plan code', function() {
         beforeEach(function(done) {
           this.plan_code = 'collaborator'
@@ -221,7 +221,8 @@ describe('SubscriptionHandler', function() {
             this.user._id
           )
         })
-      }))
+      })
+    })
 
     describe('with a user without a subscription', function() {
       beforeEach(function(done) {
@@ -383,7 +384,7 @@ describe('SubscriptionHandler', function() {
     })
   })
 
-  describe('recurlyCallback', () =>
+  describe('recurlyCallback', function() {
     describe('with an actionable request', function() {
       beforeEach(function(done) {
         this.user.id = this.activeRecurlySubscription.account.account_code
@@ -418,7 +419,8 @@ describe('SubscriptionHandler', function() {
           this.user._id
         )
       })
-    }))
+    })
+  })
 
   describe('validateNoSubscriptionInRecurly', function() {
     beforeEach(function() {

@@ -93,7 +93,7 @@ describe('BlogController', function() {
     })
   })
 
-  describe('getIndexPage', () =>
+  describe('getIndexPage', function() {
     it('should change the url and send it to getPage', function(done) {
       this.req.url = '/blog'
       this.BlogController.getPage = function(req, res) {
@@ -101,5 +101,6 @@ describe('BlogController', function() {
         return done()
       }
       return this.BlogController.getIndexPage(this.req, this.res)
-    }))
+    })
+  })
 })

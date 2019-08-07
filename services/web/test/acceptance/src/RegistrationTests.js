@@ -59,7 +59,7 @@ const tryLoginThroughRegistrationForm = function(
   if (callback == null) {
     callback = function(err, response, body) {}
   }
-  return user.getCsrfToken(function(err) {
+  return user.getCsrfToken(err => {
     if (err != null) {
       return callback(err)
     }
@@ -290,7 +290,7 @@ describe('LoginViaRegistration', function() {
       return this.user1.addEmail(secondaryEmail, err => {
         return this.user1.loginWith(secondaryEmail, err => {
           expect(err != null).to.equal(false)
-          return this.user1.isLoggedIn(function(err, isLoggedIn) {
+          return this.user1.isLoggedIn((err, isLoggedIn) => {
             expect(isLoggedIn).to.equal(false)
             return done()
           })
@@ -299,7 +299,7 @@ describe('LoginViaRegistration', function() {
     })
 
     it('should have user1 login', function(done) {
-      return this.user1.login(function(err) {
+      return this.user1.login(err => {
         expect(err != null).to.equal(false)
         return done()
       })

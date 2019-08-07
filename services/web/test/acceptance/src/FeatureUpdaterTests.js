@@ -30,11 +30,11 @@ const syncUserAndGetFeatures = function(user, callback) {
   if (callback == null) {
     callback = function(error, features) {}
   }
-  return FeaturesUpdater.refreshFeatures(user._id, function(error) {
+  return FeaturesUpdater.refreshFeatures(user._id, error => {
     if (error != null) {
       return callback(error)
     }
-    return User.findById(user._id, function(error, user) {
+    return User.findById(user._id, (error, user) => {
       if (error != null) {
         return callback(error)
       }
@@ -48,7 +48,7 @@ const syncUserAndGetFeatures = function(user, callback) {
 describe('FeatureUpdater.refreshFeatures', function() {
   beforeEach(function(done) {
     this.user = new UserClient()
-    return this.user.ensureUserExists(function(error) {
+    return this.user.ensureUserExists(error => {
       if (error != null) {
         throw error
       }
@@ -56,7 +56,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
   })
 
-  describe('when user has no subscriptions', () =>
+  describe('when user has no subscriptions', function() {
     it('should set their features to the basic set', function(done) {
       return syncUserAndGetFeatures(this.user, (error, features) => {
         if (error != null) {
@@ -65,7 +65,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
         expect(features).to.deep.equal(settings.defaultFeatures)
         return done()
       })
-    }))
+    })
+  })
 
   describe('when the user has an individual subscription', function() {
     beforeEach(function() {

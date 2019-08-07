@@ -812,7 +812,7 @@ describe('DocumentUpdaterHandler', function() {
         return this.request.callsArgWith(1, null, { statusCode: 204 }, '')
       })
 
-      describe('when an entity has changed name', () =>
+      describe('when an entity has changed name', function() {
         it('should send the structure update to the document updater', function(done) {
           this.docIdA = new ObjectId()
           this.docIdB = new ObjectId()
@@ -865,9 +865,10 @@ describe('DocumentUpdaterHandler', function() {
               return done()
             }
           )
-        }))
+        })
+      })
 
-      describe('when a doc has been added', () =>
+      describe('when a doc has been added', function() {
         it('should send the structure update to the document updater', function(done) {
           this.docId = new ObjectId()
           this.changes = {
@@ -909,9 +910,10 @@ describe('DocumentUpdaterHandler', function() {
               return done()
             }
           )
-        }))
+        })
+      })
 
-      describe('when a file has been added', () =>
+      describe('when a file has been added', function() {
         it('should send the structure update to the document updater', function(done) {
           this.fileId = new ObjectId()
           this.changes = {
@@ -957,9 +959,10 @@ describe('DocumentUpdaterHandler', function() {
               return done()
             }
           )
-        }))
+        })
+      })
 
-      describe('when an entity has been deleted', () =>
+      describe('when an entity has been deleted', function() {
         it('should end the structure update to the document updater', function(done) {
           this.docId = new ObjectId()
           this.changes = {
@@ -999,9 +1002,10 @@ describe('DocumentUpdaterHandler', function() {
               return done()
             }
           )
-        }))
+        })
+      })
 
-      describe('when the project version is missing', () =>
+      describe('when the project version is missing', function() {
         it('should call the callback with an error', function() {
           this.docId = new ObjectId()
           this.changes = {
@@ -1031,7 +1035,8 @@ describe('DocumentUpdaterHandler', function() {
           return firstCallArgs[0].message.should.equal(
             'did not receive project version in changes'
           )
-        }))
+        })
+      })
     })
   })
 })

@@ -260,12 +260,12 @@ module.exports = MockV1Api = {
     )
 
     return app
-      .listen(5000, function(error) {
+      .listen(5000, error => {
         if (error != null) {
           throw error
         }
       })
-      .on('error', function(error) {
+      .on('error', error => {
         console.error('error starting MockV1Api:', error.message)
         return process.exit(1)
       })

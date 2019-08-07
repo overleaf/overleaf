@@ -78,7 +78,9 @@ describe('UserUpdater', function() {
     this.callback = sinon.stub()
   })
 
-  afterEach(() => tk.reset())
+  afterEach(function() {
+    return tk.reset()
+  })
 
   describe('changeEmailAddress', function() {
     beforeEach(function() {
@@ -410,7 +412,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    describe('when email not confirmed', () => {
+    describe('when email not confirmed', function() {
       beforeEach(function() {
         this.stubbedUser.emails = [
           {
@@ -437,7 +439,7 @@ describe('UserUpdater', function() {
       })
     })
 
-    describe('when email does not belong to user', () => {
+    describe('when email does not belong to user', function() {
       beforeEach(function() {
         this.stubbedUser.emails = []
         this.UserGetter.getUser = sinon.stub().yields(null, this.stubbedUser)

@@ -31,7 +31,7 @@ describe('User Must Reconfirm', function() {
   it('should not allow sign in', function(done) {
     return this.user.login(err => {
       expect(err != null).to.equal(false)
-      return this.user.isLoggedIn(function(err, isLoggedIn) {
+      return this.user.isLoggedIn((err, isLoggedIn) => {
         expect(isLoggedIn).to.equal(false)
         return done()
       })

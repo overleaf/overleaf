@@ -61,12 +61,12 @@ module.exports = MockV1HistoryApi = {
     )
 
     return app
-      .listen(3100, function(error) {
+      .listen(3100, error => {
         if (error != null) {
           throw error
         }
       })
-      .on('error', function(error) {
+      .on('error', error => {
         console.error('error starting MockV1HistoryApi:', error.message)
         return process.exit(1)
       })

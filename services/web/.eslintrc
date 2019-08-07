@@ -51,20 +51,33 @@
       }
     ],
 
-    // Add some mocha specific rules
-    "mocha/handle-done-callback": "error",
-    "mocha/no-exclusive-tests": "error",
-    "mocha/no-global-tests": "error",
-    "mocha/no-identical-title": "error",
-    "mocha/no-nested-tests": "error",
-    "mocha/no-pending-tests": "error",
-    "mocha/no-skipped-tests": "error",
-
-    // Add some chai specific rules
-    "chai-expect/missing-assertion": "error",
-    "chai-expect/terminating-properties": "error",
     // Swap the no-unused-expressions rule with a more chai-friendly one
     "no-unused-expressions": 0,
     "chai-friendly/no-unused-expressions": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/test/*/src/**/*.js"],
+      "rules": {
+        // mocha-specific rules
+        "mocha/handle-done-callback": "error",
+        "mocha/no-exclusive-tests": "error",
+        "mocha/no-global-tests": "error",
+        "mocha/no-identical-title": "error",
+        "mocha/no-nested-tests": "error",
+        "mocha/no-pending-tests": "error",
+        "mocha/no-skipped-tests": "error",
+        "mocha/no-mocha-arrows": "error",
+
+        // chai-specific rules
+        "chai-expect/missing-assertion": "error",
+        "chai-expect/terminating-properties": "error",
+
+        // prefer-arrow-callback applies to all callbacks, not just ones in mocha tests.
+        // we don't enforce this at the top-level - just in tests to manage `this` scope
+        // based on mocha's context mechanism
+        "mocha/prefer-arrow-callback": "error"
+      }
+    }
+  ]
 }

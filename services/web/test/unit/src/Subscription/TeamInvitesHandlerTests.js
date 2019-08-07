@@ -118,14 +118,13 @@ describe('TeamInvitesHandler', function() {
     it("returns teamNotFound if there's none", function(done) {
       this.Subscription.findOne = sinon.stub().yields(null, null)
 
-      this.TeamInvitesHandler.getInvite(this.token, function(
-        err,
-        invite,
-        subscription
-      ) {
-        expect(err).to.be.instanceof(Errors.NotFoundError)
-        done()
-      })
+      this.TeamInvitesHandler.getInvite(
+        this.token,
+        (err, invite, subscription) => {
+          expect(err).to.be.instanceof(Errors.NotFoundError)
+          done()
+        }
+      )
     })
   })
 
@@ -304,7 +303,7 @@ describe('TeamInvitesHandler', function() {
     })
   })
 
-  describe('revokeInvite', () =>
+  describe('revokeInvite', function() {
     it('removes the team invite from the subscription', function(done) {
       this.TeamInvitesHandler.revokeInvite(
         this.manager._id,
@@ -327,7 +326,8 @@ describe('TeamInvitesHandler', function() {
           done()
         }
       )
-    }))
+    })
+  })
 
   describe('createTeamInvitesForLegacyInvitedEmail', function(done) {
     beforeEach(function() {

@@ -269,7 +269,7 @@ describe('UserController', function() {
     })
   })
 
-  describe('unsubscribe', () =>
+  describe('unsubscribe', function() {
     it('should send the user to unsubscribe', function(done) {
       this.res.send = code => {
         this.NewsLetterManager.unsubscribe
@@ -278,7 +278,8 @@ describe('UserController', function() {
         return done()
       }
       return this.UserController.unsubscribe(this.req, this.res)
-    }))
+    })
+  })
 
   describe('updateUserSettings', function() {
     beforeEach(function() {
@@ -501,7 +502,7 @@ describe('UserController', function() {
       return this.UserController.clearSessions(this.req, this.res)
     })
 
-    describe('when revokeAllUserSessions produces an error', () =>
+    describe('when revokeAllUserSessions produces an error', function() {
       it('should call next with an error', function(done) {
         this.UserSessionsManager.revokeAllUserSessions.callsArgWith(
           2,
@@ -513,7 +514,8 @@ describe('UserController', function() {
           return done()
         }
         return this.UserController.clearSessions(this.req, this.res, next)
-      }))
+      })
+    })
   })
 
   describe('changePassword', function() {

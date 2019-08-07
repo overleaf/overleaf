@@ -24,11 +24,7 @@ const try_read_access = (user, project_id, test, callback) =>
   async.series(
     [
       cb =>
-        user.request.get(`/project/${project_id}`, function(
-          error,
-          response,
-          body
-        ) {
+        user.request.get(`/project/${project_id}`, (error, response, body) => {
           if (error != null) {
             return cb(error)
           }
@@ -36,17 +32,16 @@ const try_read_access = (user, project_id, test, callback) =>
           return cb()
         }),
       cb =>
-        user.request.get(`/project/${project_id}/download/zip`, function(
-          error,
-          response,
-          body
-        ) {
-          if (error != null) {
-            return cb(error)
+        user.request.get(
+          `/project/${project_id}/download/zip`,
+          (error, response, body) => {
+            if (error != null) {
+              return cb(error)
+            }
+            test(response, body)
+            return cb()
           }
-          test(response, body)
-          return cb()
-        })
+        )
     ],
     callback
   )
@@ -55,7 +50,7 @@ const try_read_only_token_access = (user, token, test, callback) =>
   async.series(
     [
       cb =>
-        user.request.get(`/read/${token}`, function(error, response, body) {
+        user.request.get(`/read/${token}`, (error, response, body) => {
           if (error != null) {
             return cb(error)
           }
@@ -70,7 +65,7 @@ const try_read_and_write_token_access = (user, token, test, callback) =>
   async.series(
     [
       cb =>
-        user.request.get(`/${token}`, function(error, response, body) {
+        user.request.get(`/${token}`, (error, response, body) => {
           if (error != null) {
             return cb(error)
           }
@@ -102,7 +97,7 @@ const try_content_access = function(user, project_id, test, callback) {
       json: true,
       jar: false
     },
-    function(error, response, body) {
+    (error, response, body) => {
       if (error != null) {
         return callback(error)
       }
@@ -142,7 +137,7 @@ const try_anon_content_access = function(
       json: true,
       jar: false
     },
-    function(error, response, body) {
+    (error, response, body) => {
       if (error != null) {
         return callback(error)
       }
@@ -851,9 +846,13 @@ describe('TokenAccess', function() {
   })
 
   describe('unimported v1 project', function() {
-    before(() => (settings.overleaf = { host: 'http://localhost:5000' }))
+    before(function() {
+      return (settings.overleaf = { host: 'http://localhost:5000' })
+    })
 
-    after(() => delete settings.overleaf)
+    after(function() {
+      return delete settings.overleaf
+    })
 
     it('should show error page for read and write token', function(done) {
       const unimportedV1Token = '123abc'
@@ -955,7 +954,9 @@ describe('TokenAccess', function() {
     })
 
     describe('when importing check not configured', function() {
-      before(() => delete settings.projectImportingCheckMaxCreateDelta)
+      before(function() {
+        return delete settings.projectImportingCheckMaxCreateDelta
+      })
 
       it('should load editor', function(done) {
         return try_read_and_write_token_access(

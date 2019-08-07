@@ -25,11 +25,7 @@ const try_read_access = (user, project_id, test, callback) =>
   async.series(
     [
       cb =>
-        user.request.get(`/project/${project_id}`, function(
-          error,
-          response,
-          body
-        ) {
+        user.request.get(`/project/${project_id}`, (error, response, body) => {
           if (error != null) {
             return cb(error)
           }
@@ -37,17 +33,16 @@ const try_read_access = (user, project_id, test, callback) =>
           return cb()
         }),
       cb =>
-        user.request.get(`/project/${project_id}/download/zip`, function(
-          error,
-          response,
-          body
-        ) {
-          if (error != null) {
-            return cb(error)
+        user.request.get(
+          `/project/${project_id}/download/zip`,
+          (error, response, body) => {
+            if (error != null) {
+              return cb(error)
+            }
+            test(response, body)
+            return cb()
           }
-          test(response, body)
-          return cb()
-        })
+        )
     ],
     callback
   )
@@ -63,7 +58,7 @@ const try_settings_write_access = (user, project_id, test, callback) =>
               compiler: 'latex'
             }
           },
-          function(error, response, body) {
+          (error, response, body) => {
             if (error != null) {
               return cb(error)
             }
@@ -86,7 +81,7 @@ const try_admin_access = (user, project_id, test, callback) =>
               newProjectName: 'new-name'
             }
           },
-          function(error, response, body) {
+          (error, response, body) => {
             if (error != null) {
               return cb(error)
             }
@@ -102,7 +97,7 @@ const try_admin_access = (user, project_id, test, callback) =>
               publicAccessLevel: 'private'
             }
           },
-          function(error, response, body) {
+          (error, response, body) => {
             if (error != null) {
               return cb(error)
             }
@@ -135,7 +130,7 @@ const try_content_access = function(user, project_id, test, callback) {
       json: true,
       jar: false
     },
-    function(error, response, body) {
+    (error, response, body) => {
       if (error != null) {
         return callback(error)
       }
@@ -204,7 +199,7 @@ const expect_no_read_access = (user, project_id, options, callback) =>
         try_read_access(
           user,
           project_id,
-          function(response, body) {
+          (response, body) => {
             expect(response.statusCode).to.equal(302)
             return expect(response.headers.location).to.match(
               new RegExp(options.redirect_to)
@@ -236,7 +231,7 @@ const expect_no_settings_write_access = (user, project_id, options, callback) =>
   try_settings_write_access(
     user,
     project_id,
-    function(response, body) {
+    (response, body) => {
       expect(response.statusCode).to.equal(302)
       return expect(response.headers.location).to.match(
         new RegExp(options.redirect_to)
@@ -249,7 +244,7 @@ const expect_no_admin_access = (user, project_id, options, callback) =>
   try_admin_access(
     user,
     project_id,
-    function(response, body) {
+    (response, body) => {
       expect(response.statusCode).to.equal(302)
       return expect(response.headers.location).to.match(
         new RegExp(options.redirect_to)

@@ -9,8 +9,8 @@ const { Project } = require('../helpers/models/Project')
 const { DeletedProject } = require('../helpers/models/DeletedProject')
 const { ObjectId } = require('mongoose').Types
 
-describe('ProjectDeleter', () => {
-  beforeEach(() => {
+describe('ProjectDeleter', function() {
+  beforeEach(function() {
     tk.freeze(Date.now())
     this.project_id = ObjectId('588fffffffffffffffffffff')
     this.ip = '192.170.18.1'
@@ -143,14 +143,14 @@ describe('ProjectDeleter', () => {
     })
   })
 
-  afterEach(() => {
+  afterEach(function() {
     tk.reset()
     this.DeletedProjectMock.restore()
     this.ProjectMock.restore()
   })
 
-  describe('mark as deleted by external source', () => {
-    beforeEach(() => {
+  describe('mark as deleted by external source', function() {
+    beforeEach(function() {
       this.ProjectMock.expects('update')
         .withArgs(
           { _id: this.project_id },
@@ -159,14 +159,14 @@ describe('ProjectDeleter', () => {
         .yields()
     })
 
-    it('should update the project with the flag set to true', done => {
+    it('should update the project with the flag set to true', function(done) {
       this.ProjectDeleter.markAsDeletedByExternalSource(this.project_id, () => {
         this.ProjectMock.verify()
         done()
       })
     })
 
-    it('should tell the editor controler so users are notified', done => {
+    it('should tell the editor controler so users are notified', function(done) {
       this.ProjectDeleter.markAsDeletedByExternalSource(this.project_id, () => {
         this.editorController.notifyUsersProjectHasBeenDeletedOrRenamed
           .calledWith(this.project_id)
@@ -176,8 +176,8 @@ describe('ProjectDeleter', () => {
     })
   })
 
-  describe('unmarkAsDeletedByExternalSource', done => {
-    beforeEach(() => {
+  describe('unmarkAsDeletedByExternalSource', function(done) {
+    beforeEach(function() {
       this.ProjectMock.expects('update')
         .withArgs(
           { _id: this.project_id },
@@ -187,13 +187,13 @@ describe('ProjectDeleter', () => {
       this.ProjectDeleter.unmarkAsDeletedByExternalSource(this.project_id, done)
     })
 
-    it('should remove the flag from the project', () => {
+    it('should remove the flag from the project', function() {
       this.ProjectMock.verify()
     })
   })
 
-  describe('deleteUsersProjects', () => {
-    beforeEach(() => {
+  describe('deleteUsersProjects', function() {
+    beforeEach(function() {
       this.ProjectMock.expects('find')
         .withArgs({ owner_ref: this.user._id })
         .yields(null, [{ _id: 'wombat' }, { _id: 'potato' }])
@@ -201,14 +201,14 @@ describe('ProjectDeleter', () => {
       this.ProjectDeleter.deleteProject = sinon.stub().yields()
     })
 
-    it('should find all the projects owned by the user_id', done => {
+    it('should find all the projects owned by the user_id', function(done) {
       this.ProjectDeleter.deleteUsersProjects(this.user._id, () => {
         this.ProjectMock.verify()
         done()
       })
     })
 
-    it('should call deleteProject once for each project', done => {
+    it('should call deleteProject once for each project', function(done) {
       this.ProjectDeleter.deleteUsersProjects(this.user._id, () => {
         sinon.assert.calledTwice(this.ProjectDeleter.deleteProject)
         sinon.assert.calledWith(this.ProjectDeleter.deleteProject, 'wombat')
@@ -217,7 +217,7 @@ describe('ProjectDeleter', () => {
       })
     })
 
-    it('should remove all the projects the user is a collaborator of', done => {
+    it('should remove all the projects the user is a collaborator of', function(done) {
       this.ProjectDeleter.deleteUsersProjects(this.user._id, () => {
         sinon.assert.calledWith(
           this.CollaboratorsHandler.removeUserFromAllProjets,
@@ -231,8 +231,8 @@ describe('ProjectDeleter', () => {
     })
   })
 
-  describe('deleteProject', () => {
-    beforeEach(() => {
+  describe('deleteProject', function() {
+    beforeEach(function() {
       this.deleterData = {
         deletedAt: new Date(),
         deletedProjectId: this.project._id,
@@ -256,7 +256,7 @@ describe('ProjectDeleter', () => {
         .resolves(this.project)
     })
 
-    it('should save a DeletedProject with additional deleterData', done => {
+    it('should save a DeletedProject with additional deleterData', function(done) {
       this.deleterData.deleterIpAddress = this.ip
       this.deleterData.deleterId = this.user._id
 
@@ -281,7 +281,7 @@ describe('ProjectDeleter', () => {
       )
     })
 
-    it('should flushProjectToMongoAndDelete in doc updater', done => {
+    it('should flushProjectToMongoAndDelete in doc updater', function(done) {
       this.ProjectMock.expects('remove')
         .chain('exec')
         .resolves()
@@ -299,7 +299,7 @@ describe('ProjectDeleter', () => {
       )
     })
 
-    it('should removeProjectFromAllTags', done => {
+    it('should removeProjectFromAllTags', function(done) {
       this.ProjectMock.expects('remove')
         .chain('exec')
         .resolves()
@@ -320,7 +320,7 @@ describe('ProjectDeleter', () => {
       })
     })
 
-    it('should remove the project from Mongo', done => {
+    it('should remove the project from Mongo', function(done) {
       this.ProjectMock.expects('remove')
         .withArgs({ _id: this.project_id })
         .chain('exec')
@@ -334,8 +334,8 @@ describe('ProjectDeleter', () => {
     })
   })
 
-  describe('expireDeletedProjectsAfterDuration', () => {
-    beforeEach(done => {
+  describe('expireDeletedProjectsAfterDuration', function() {
+    beforeEach(function(done) {
       this.ProjectDeleter.expireDeletedProject = sinon
         .stub()
         .callsArgWith(1, null)
@@ -354,11 +354,11 @@ describe('ProjectDeleter', () => {
       this.ProjectDeleter.expireDeletedProjectsAfterDuration(done)
     })
 
-    it('should call find with a date 90 days earlier than today', () => {
+    it('should call find with a date 90 days earlier than today', function() {
       this.DeletedProjectMock.verify()
     })
 
-    it('should call expireDeletedProject', done => {
+    it('should call expireDeletedProject', function(done) {
       expect(this.ProjectDeleter.expireDeletedProject).to.have.been.calledWith(
         this.deletedProjects[0].deleterData.deletedProjectId
       )
@@ -366,8 +366,8 @@ describe('ProjectDeleter', () => {
     })
   })
 
-  describe('expireDeletedProject', () => {
-    beforeEach(done => {
+  describe('expireDeletedProject', function() {
+    beforeEach(function(done) {
       this.DeletedProjectMock.expects('update')
         .withArgs(
           {
@@ -396,19 +396,19 @@ describe('ProjectDeleter', () => {
       )
     })
 
-    it('should find the specified deletedProject and remove its project and ip address', () => {
+    it('should find the specified deletedProject and remove its project and ip address', function() {
       this.DeletedProjectMock.verify()
     })
 
-    it('should destroy the docs in docstore', () => {
+    it('should destroy the docs in docstore', function() {
       expect(this.DocstoreManager.destroyProject).to.have.been.calledWith(
         this.deletedProjects[0].project._id
       )
     })
   })
 
-  describe('archiveProject', () => {
-    beforeEach(() => {
+  describe('archiveProject', function() {
+    beforeEach(function() {
       this.ProjectMock.expects('update')
         .withArgs(
           {
@@ -421,7 +421,7 @@ describe('ProjectDeleter', () => {
         .yields()
     })
 
-    it('should update the project', done => {
+    it('should update the project', function(done) {
       this.ProjectDeleter.archiveProject(this.project_id, () => {
         this.ProjectMock.verify()
         done()
@@ -429,8 +429,8 @@ describe('ProjectDeleter', () => {
     })
   })
 
-  describe('restoreProject', () => {
-    beforeEach(() => {
+  describe('restoreProject', function() {
+    beforeEach(function() {
       this.ProjectMock.expects('update')
         .withArgs(
           {
@@ -443,7 +443,7 @@ describe('ProjectDeleter', () => {
         .yields()
     })
 
-    it('should unset the archive attribute', done => {
+    it('should unset the archive attribute', function(done) {
       this.ProjectDeleter.restoreProject(this.project_id, () => {
         this.ProjectMock.verify()
         done()
@@ -451,8 +451,8 @@ describe('ProjectDeleter', () => {
     })
   })
 
-  describe('undeleteProject', () => {
-    beforeEach(() => {
+  describe('undeleteProject', function() {
+    beforeEach(function() {
       this.deletedProject = {
         _id: 'deleted',
         project: this.project,
@@ -486,7 +486,7 @@ describe('ProjectDeleter', () => {
         .resolves()
     })
 
-    it('should return not found if the project does not exist', done => {
+    it('should return not found if the project does not exist', function(done) {
       this.ProjectDeleter.undeleteProject('wombat', err => {
         expect(err).to.exist
         expect(err.name).to.equal('NotFoundError')
@@ -495,7 +495,7 @@ describe('ProjectDeleter', () => {
       })
     })
 
-    it('should return not found if the project has been expired', done => {
+    it('should return not found if the project has been expired', function(done) {
       this.ProjectDeleter.undeleteProject('purgedProject', err => {
         expect(err.name).to.equal('NotFoundError')
         expect(err.message).to.equal('project_too_old_to_restore')
@@ -503,7 +503,7 @@ describe('ProjectDeleter', () => {
       })
     })
 
-    it('should insert the project into the collection', done => {
+    it('should insert the project into the collection', function(done) {
       this.ProjectDeleter.undeleteProject(this.project._id, err => {
         expect(err).not.to.exist
         sinon.assert.calledWith(
@@ -517,7 +517,42 @@ describe('ProjectDeleter', () => {
       })
     })
 
-    it('should remove the DeletedProject', done => {
+    it('should clear the archive bit', function(done) {
+      this.project.archived = true
+      this.ProjectDeleter.undeleteProject(this.project._id, err => {
+        expect(err).not.to.exist
+        sinon.assert.calledWith(
+          this.db.projects.insert,
+          sinon.match({ archived: undefined })
+        )
+        done()
+      })
+    })
+
+    it('should generate a unique name for the project', function(done) {
+      this.ProjectDeleter.undeleteProject(this.project._id, err => {
+        expect(err).not.to.exist
+        sinon.assert.calledWith(
+          this.ProjectDetailsHandler.generateUniqueName,
+          this.project.owner_ref
+        )
+        done()
+      })
+    })
+
+    it('should add a suffix to the project name', function(done) {
+      this.ProjectDeleter.undeleteProject(this.project._id, err => {
+        expect(err).not.to.exist
+        sinon.assert.calledWith(
+          this.ProjectDetailsHandler.generateUniqueName,
+          this.project.owner_ref,
+          this.project.name + ' (Restored)'
+        )
+        done()
+      })
+    })
+
+    it('should remove the DeletedProject', function(done) {
       // need to change the mock just to include the methods we want
       this.DeletedProjectMock.restore()
       this.DeletedProjectMock = sinon.mock(DeletedProject)
@@ -533,41 +568,6 @@ describe('ProjectDeleter', () => {
       this.ProjectDeleter.undeleteProject(this.project._id, err => {
         expect(err).not.to.exist
         this.DeletedProjectMock.verify()
-        done()
-      })
-    })
-
-    it('should clear the archive bit', done => {
-      this.project.archived = true
-      this.ProjectDeleter.undeleteProject(this.project._id, err => {
-        expect(err).not.to.exist
-        sinon.assert.calledWith(
-          this.db.projects.insert,
-          sinon.match({ archived: undefined })
-        )
-        done()
-      })
-    })
-
-    it('should generate a unique name for the project', done => {
-      this.ProjectDeleter.undeleteProject(this.project._id, err => {
-        expect(err).not.to.exist
-        sinon.assert.calledWith(
-          this.ProjectDetailsHandler.generateUniqueName,
-          this.project.owner_ref
-        )
-        done()
-      })
-    })
-
-    it('should add a suffix to the project name', done => {
-      this.ProjectDeleter.undeleteProject(this.project._id, err => {
-        expect(err).not.to.exist
-        sinon.assert.calledWith(
-          this.ProjectDetailsHandler.generateUniqueName,
-          this.project.owner_ref,
-          this.project.name + ' (Restored)'
-        )
         done()
       })
     })

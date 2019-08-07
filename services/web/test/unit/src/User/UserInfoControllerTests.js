@@ -216,7 +216,7 @@ describe('UserInfoController', function() {
     })
   })
 
-  describe('formatPersonalInfo', () =>
+  describe('formatPersonalInfo', function() {
     it('should return the correctly formatted data', function() {
       this.user = {
         _id: ObjectId(),
@@ -239,5 +239,6 @@ describe('UserInfoController', function() {
         role: this.user.role,
         institution: this.user.institution
       })
-    }))
+    })
+  })
 })

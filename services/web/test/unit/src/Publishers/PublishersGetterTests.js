@@ -60,14 +60,15 @@ describe('PublishersGetter', function() {
     return (this.userId = '12345abcde')
   })
 
-  describe('getManagedPublishers', () =>
+  describe('getManagedPublishers', function() {
     it('fetches v1 data before returning publisher list', function(done) {
-      return this.PublishersGetter.getManagedPublishers(this.userId, function(
-        error,
-        publishers
-      ) {
-        publishers.length.should.equal(1)
-        return done()
-      })
-    }))
+      return this.PublishersGetter.getManagedPublishers(
+        this.userId,
+        (error, publishers) => {
+          publishers.length.should.equal(1)
+          return done()
+        }
+      )
+    })
+  })
 })

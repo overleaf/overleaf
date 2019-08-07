@@ -82,7 +82,7 @@ describe('Subscription Locator Tests', function() {
       )
     })
 
-    describe('finding managed subscription', () =>
+    describe('finding managed subscription', function() {
       it('should query the database', function(done) {
         this.Subscription.findOne.callsArgWith(1, null, this.subscription)
         return this.SubscriptionLocator.findManagedSubscription(
@@ -95,6 +95,7 @@ describe('Subscription Locator Tests', function() {
             return done()
           }
         )
-      }))
+      })
+    })
   })
 })

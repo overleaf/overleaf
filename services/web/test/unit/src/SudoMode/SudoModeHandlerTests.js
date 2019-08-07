@@ -49,12 +49,13 @@ describe('SudoModeHandler', function() {
     }))
   })
 
-  describe('_buildKey', () =>
+  describe('_buildKey', function() {
     it('should build a properly formed key', function() {
       return expect(this.SudoModeHandler._buildKey('123')).to.equal(
         'SudoMode:{123}'
       )
-    }))
+    })
+  })
 
   describe('activateSudoMode', function() {
     beforeEach(function() {

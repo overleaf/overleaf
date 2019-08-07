@@ -16,7 +16,7 @@ const request = require('./helpers/request')
 const MockV1Api = require('./helpers/MockV1Api')
 
 const assertResponse = (path, expectedStatusCode, expectedBody, cb) =>
-  request.get(path, function(error, response) {
+  request.get(path, (error, response) => {
     should.not.exist(error)
     response.statusCode.should.equal(expectedStatusCode)
     if (expectedBody) {
@@ -30,17 +30,18 @@ describe('ProxyUrls', function() {
     return this.timeout(1000)
   })
 
-  it('proxy static URLs', done =>
-    async.series(
+  it('proxy static URLs', function(done) {
+    return async.series(
       [
         cb => assertResponse('/institutions/list', 200, [], cb),
         cb => assertResponse('/institutions/domains', 200, [], cb)
       ],
       done
-    ))
+    )
+  })
 
-  it('proxy dynamic URLs', done =>
-    async.series(
+  it('proxy dynamic URLs', function(done) {
+    return async.series(
       [
         cb =>
           assertResponse(
@@ -58,17 +59,20 @@ describe('ProxyUrls', function() {
           )
       ],
       done
-    ))
+    )
+  })
 
-  it('return 404 if proxy is not set', done =>
-    async.series(
+  it('return 404 if proxy is not set', function(done) {
+    return async.series(
       [cb => assertResponse('/institutions/foobar', 404, null, cb)],
       done
-    ))
+    )
+  })
 
-  it('handle missing baseUrl', done =>
-    async.series(
+  it('handle missing baseUrl', function(done) {
+    return async.series(
       [cb => assertResponse('/proxy/missing/baseUrl', 500, null, cb)],
       done
-    ))
+    )
+  })
 })

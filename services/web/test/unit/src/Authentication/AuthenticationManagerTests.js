@@ -308,13 +308,14 @@ describe('AuthenticationManager', function() {
   })
 
   describe('validateEmail', function() {
-    describe('valid', () =>
+    describe('valid', function() {
       it('should return null', function() {
         const result = this.AuthenticationManager.validateEmail(
           'foo@example.com'
         )
         return expect(result).to.equal(null)
-      }))
+      })
+    })
 
     describe('invalid', function() {
       it('should return validation error object for no email', function() {
@@ -338,12 +339,13 @@ describe('AuthenticationManager', function() {
         '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef012345678')
     })
 
-    describe('with a null password', () =>
+    describe('with a null password', function() {
       it('should return an error', function() {
         return expect(this.AuthenticationManager.validatePassword()).to.eql({
           message: 'password not set'
         })
-      }))
+      })
+    })
 
     describe('password length', function() {
       describe('with the default password length options', function() {
@@ -519,7 +521,7 @@ describe('AuthenticationManager', function() {
         return this.AuthenticationManager.setUserPassword(
           this.user_id,
           this.password,
-          function(err) {
+          err => {
             expect(err).to.exist
             return done()
           }
@@ -554,7 +556,7 @@ describe('AuthenticationManager', function() {
         return this.AuthenticationManager.setUserPassword(
           this.user_id,
           this.password,
-          function(err) {
+          err => {
             expect(err).to.exist
             return done()
           }

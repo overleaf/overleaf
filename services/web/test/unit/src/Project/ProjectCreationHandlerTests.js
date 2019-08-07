@@ -130,14 +130,15 @@ describe('ProjectCreationHandler', function() {
       })
 
       it('should return the project in the callback', function(done) {
-        return this.handler.createBlankProject(ownerId, projectName, function(
-          err,
-          project
-        ) {
-          project.name.should.equal(projectName)
-          ;(project.owner_ref + '').should.equal(ownerId)
-          return done()
-        })
+        return this.handler.createBlankProject(
+          ownerId,
+          projectName,
+          (err, project) => {
+            project.name.should.equal(projectName)
+            ;(project.owner_ref + '').should.equal(ownerId)
+            return done()
+          }
+        )
       })
 
       it('should initialize the project overleaf if history id not provided', function(done) {
@@ -171,7 +172,7 @@ describe('ProjectCreationHandler', function() {
           ownerId,
           projectName,
           attributes,
-          function(err, project) {
+          (err, project) => {
             project.overleaf.history.id.should.equal(overleaf_id)
             return done()
           }
@@ -179,13 +180,14 @@ describe('ProjectCreationHandler', function() {
       })
 
       it('should set the language from the user', function(done) {
-        return this.handler.createBlankProject(ownerId, projectName, function(
-          err,
-          project
-        ) {
-          project.spellCheckLanguage.should.equal('de')
-          return done()
-        })
+        return this.handler.createBlankProject(
+          ownerId,
+          projectName,
+          (err, project) => {
+            project.spellCheckLanguage.should.equal('de')
+            return done()
+          }
+        )
       })
 
       it('should set the imageName to currentImageName if set and no imageName attribute', function(done) {

@@ -478,7 +478,7 @@ describe('CompileController', function() {
         })
       })
 
-      describe('user with priority compile', () =>
+      describe('user with priority compile', function() {
         beforeEach(function() {
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
@@ -490,7 +490,8 @@ describe('CompileController', function() {
             this.res,
             this.next
           )
-        }))
+        })
+      })
 
       describe('user with standard priority via query string', function() {
         beforeEach(function() {

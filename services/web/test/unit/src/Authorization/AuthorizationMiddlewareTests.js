@@ -231,7 +231,7 @@ describe('AuthorizationMiddleware', function() {
             return this.AuthorizationMiddleware[middlewareMethod](
               this.req,
               this.res,
-              function(error) {
+              error => {
                 error.should.be.instanceof(Errors.NotFoundError)
                 return done()
               }
@@ -392,7 +392,7 @@ describe('AuthorizationMiddleware', function() {
       })
     })
 
-    describe('with anonymous user', () =>
+    describe('with anonymous user', function() {
       describe('when user has permission', function() {
         describe('when user has permission to access all projects', function() {
           beforeEach(function() {
@@ -438,6 +438,7 @@ describe('AuthorizationMiddleware', function() {
               .should.equal(true)
           })
         })
-      }))
+      })
+    })
   })
 })

@@ -151,7 +151,7 @@ describe('ProjectOptionsHandler', function() {
     })
   })
 
-  describe('unsetting the brandVariationId', () =>
+  describe('unsetting the brandVariationId', function() {
     it('should perform and update on mongo', function(done) {
       this.handler.unsetBrandVariationId(project_id, err => {
         const args = this.projectModel.update.args[0]
@@ -160,5 +160,6 @@ describe('ProjectOptionsHandler', function() {
         return done()
       })
       return this.projectModel.update.args[0][3]()
-    }))
+    })
+  })
 })

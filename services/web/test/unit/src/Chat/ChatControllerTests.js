@@ -178,7 +178,7 @@ describe('ChatController', function() {
             ]
           }
         },
-        function(error, threads) {
+        (error, threads) => {
           expect(threads).to.deep.equal({
             thread1: {
               resolved: true,

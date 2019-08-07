@@ -331,7 +331,7 @@ class User {
       return db.projects.remove(
         { owner_ref: ObjectId(user_id) },
         { multi: true },
-        function(err) {
+        err => {
           if (err != null) {
             callback(err)
           }
@@ -398,7 +398,7 @@ class User {
         url: '/project/new',
         json: Object.assign({ projectName: name }, options)
       },
-      function(error, response, body) {
+      (error, response, body) => {
         if (error != null) {
           return callback(error)
         }
@@ -425,7 +425,7 @@ class User {
       {
         url: `/project/${project_id}?forever=true`
       },
-      function(error, response, body) {
+      (error, response, body) => {
         if (error != null) {
           return callback(error)
         }
@@ -453,7 +453,7 @@ class User {
       {
         url: `/project/${project_id}`
       },
-      function(error, response, body) {
+      (error, response, body) => {
         if (error != null) {
           return callback(error)
         }
@@ -517,7 +517,7 @@ class User {
           publicAccessLevel: level
         }
       },
-      function(error, response, body) {
+      (error, response, body) => {
         if (error != null) {
           return callback(error)
         }
@@ -537,7 +537,7 @@ class User {
           publicAccessLevel: 'private'
         }
       },
-      function(error, response, body) {
+      (error, response, body) => {
         if (error != null) {
           return callback(error)
         }
@@ -557,7 +557,7 @@ class User {
           publicAccessLevel: 'tokenBased'
         }
       },
-      function(error, response, body) {
+      (error, response, body) => {
         if (error != null) {
           return callback(error)
         }
@@ -729,11 +729,7 @@ class User {
     if (callback == null) {
       callback = function(error, loggedIn) {}
     }
-    return this.request.get('/user/personal_info', function(
-      error,
-      response,
-      body
-    ) {
+    return this.request.get('/user/personal_info', (error, response, body) => {
       if (error != null) {
         return callback(error)
       }

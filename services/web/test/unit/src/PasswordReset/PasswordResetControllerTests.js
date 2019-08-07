@@ -365,7 +365,7 @@ describe('PasswordResetController', function() {
         })
       })
 
-      describe('without a token in session', () =>
+      describe('without a token in session', function() {
         it('should redirect to the reset request page', function(done) {
           this.res.redirect = path => {
             path.should.equal('/user/password/reset')
@@ -376,7 +376,8 @@ describe('PasswordResetController', function() {
             this.req,
             this.res
           )
-        }))
+        })
+      })
     })
   })
 })

@@ -79,7 +79,7 @@ describe('ExportsController', function() {
     }))
   })
 
-  describe('without gallery fields', () =>
+  describe('without gallery fields', function() {
     it('should ask the handler to perform the export', function(done) {
       this.handler.exportProject = sinon
         .stub()
@@ -98,7 +98,8 @@ describe('ExportsController', function() {
           return done()
         }
       })
-    }))
+    })
+  })
 
   describe('with gallery fields', function() {
     beforeEach(function() {
@@ -135,7 +136,7 @@ describe('ExportsController', function() {
     })
   })
 
-  describe('with an error return from v1 to forward to the publish modal', () =>
+  describe('with an error return from v1 to forward to the publish modal', function() {
     it('should forward the response onward', function(done) {
       this.error_json = { status: 422, message: 'nope' }
       this.handler.exportProject = sinon
@@ -145,7 +146,8 @@ describe('ExportsController', function() {
       expect(this.res.json.args[0][0]).to.deep.equal(this.error_json)
       expect(this.res.status.args[0][0]).to.equal(this.error_json.status)
       return done()
-    }))
+    })
+  })
 
   it('should ask the handler to return the status of an export', function(done) {
     this.handler.fetchExport = sinon.stub().yields(

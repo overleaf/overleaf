@@ -112,13 +112,13 @@ describe('GeoIpLookup', function() {
       this.GeoIpLookup.getDetails = sinon
         .stub()
         .callsArgWith(1, null, this.stubbedResponse)
-      return this.GeoIpLookup.getCurrencyCode(this.ipAddress, function(
-        err,
-        currencyCode
-      ) {
-        currencyCode.should.equal('GBP')
-        return done()
-      })
+      return this.GeoIpLookup.getCurrencyCode(
+        this.ipAddress,
+        (err, currencyCode) => {
+          currencyCode.should.equal('GBP')
+          return done()
+        }
+      )
     })
 
     it('should return GBP for gb country', function(done) {
@@ -126,13 +126,13 @@ describe('GeoIpLookup', function() {
       this.GeoIpLookup.getDetails = sinon
         .stub()
         .callsArgWith(1, null, this.stubbedResponse)
-      return this.GeoIpLookup.getCurrencyCode(this.ipAddress, function(
-        err,
-        currencyCode
-      ) {
-        currencyCode.should.equal('GBP')
-        return done()
-      })
+      return this.GeoIpLookup.getCurrencyCode(
+        this.ipAddress,
+        (err, currencyCode) => {
+          currencyCode.should.equal('GBP')
+          return done()
+        }
+      )
     })
 
     it('should return USD for US', function(done) {
@@ -140,13 +140,13 @@ describe('GeoIpLookup', function() {
       this.GeoIpLookup.getDetails = sinon
         .stub()
         .callsArgWith(1, null, this.stubbedResponse)
-      return this.GeoIpLookup.getCurrencyCode(this.ipAddress, function(
-        err,
-        currencyCode
-      ) {
-        currencyCode.should.equal('USD')
-        return done()
-      })
+      return this.GeoIpLookup.getCurrencyCode(
+        this.ipAddress,
+        (err, currencyCode) => {
+          currencyCode.should.equal('USD')
+          return done()
+        }
+      )
     })
 
     it('should return EUR for DE', function(done) {
@@ -154,35 +154,35 @@ describe('GeoIpLookup', function() {
       this.GeoIpLookup.getDetails = sinon
         .stub()
         .callsArgWith(1, null, this.stubbedResponse)
-      return this.GeoIpLookup.getCurrencyCode(this.ipAddress, function(
-        err,
-        currencyCode
-      ) {
-        currencyCode.should.equal('EUR')
-        return done()
-      })
+      return this.GeoIpLookup.getCurrencyCode(
+        this.ipAddress,
+        (err, currencyCode) => {
+          currencyCode.should.equal('EUR')
+          return done()
+        }
+      )
     })
 
     it('should default to USD if there is an error', function(done) {
       this.GeoIpLookup.getDetails = sinon.stub().callsArgWith(1, 'problem')
-      return this.GeoIpLookup.getCurrencyCode(this.ipAddress, function(
-        err,
-        currencyCode
-      ) {
-        currencyCode.should.equal('USD')
-        return done()
-      })
+      return this.GeoIpLookup.getCurrencyCode(
+        this.ipAddress,
+        (err, currencyCode) => {
+          currencyCode.should.equal('USD')
+          return done()
+        }
+      )
     })
 
     it('should default to USD if there are no details', function(done) {
       this.GeoIpLookup.getDetails = sinon.stub().callsArgWith(1)
-      return this.GeoIpLookup.getCurrencyCode(this.ipAddress, function(
-        err,
-        currencyCode
-      ) {
-        currencyCode.should.equal('USD')
-        return done()
-      })
+      return this.GeoIpLookup.getCurrencyCode(
+        this.ipAddress,
+        (err, currencyCode) => {
+          currencyCode.should.equal('USD')
+          return done()
+        }
+      )
     })
 
     it('should default to USD if there is no match for their country', function(done) {
@@ -190,13 +190,13 @@ describe('GeoIpLookup', function() {
       this.GeoIpLookup.getDetails = sinon
         .stub()
         .callsArgWith(1, null, this.stubbedResponse)
-      return this.GeoIpLookup.getCurrencyCode(this.ipAddress, function(
-        err,
-        currencyCode
-      ) {
-        currencyCode.should.equal('USD')
-        return done()
-      })
+      return this.GeoIpLookup.getCurrencyCode(
+        this.ipAddress,
+        (err, currencyCode) => {
+          currencyCode.should.equal('USD')
+          return done()
+        }
+      )
     })
   })
 })

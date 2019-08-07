@@ -1,4 +1,4 @@
-define([], function() {
+define([], () => {
   return {
     edited: 'edited',
     renamed: 'renamed',

@@ -10,8 +10,8 @@ const MockDocstoreApi = require('./helpers/MockDocstoreApi')
 require('./helpers/MockTagsApi')
 require('./helpers/MockV1Api')
 
-describe('Deleting a user', () => {
-  beforeEach(done => {
+describe('Deleting a user', function() {
+  beforeEach(function(done) {
     this.user = new User()
     async.series(
       [
@@ -23,7 +23,7 @@ describe('Deleting a user', () => {
     )
   })
 
-  it('Should remove the user from active users', done => {
+  it('Should remove the user from active users', function(done) {
     this.user.get((error, user) => {
       expect(error).not.to.exist
       expect(user).to.exist
@@ -38,7 +38,7 @@ describe('Deleting a user', () => {
     })
   })
 
-  it('Should create a soft-deleted user', done => {
+  it('Should create a soft-deleted user', function(done) {
     this.user.get((error, user) => {
       expect(error).not.to.exist
       this.user.deleteUser(error => {
@@ -70,7 +70,7 @@ describe('Deleting a user', () => {
     })
   })
 
-  it('Should fail if the user has a subscription', done => {
+  it('Should fail if the user has a subscription', function(done) {
     Subscription.create(
       {
         admin_id: this.user._id,
@@ -93,7 +93,7 @@ describe('Deleting a user', () => {
     )
   })
 
-  it("Should delete the user's projects", done => {
+  it("Should delete the user's projects", function(done) {
     this.user.createProject('wombat', (error, projectId) => {
       expect(error).not.to.exist
       this.user.getProject(projectId, (error, project) => {
@@ -112,8 +112,8 @@ describe('Deleting a user', () => {
     })
   })
 
-  describe('when scrubbing the user', () => {
-    beforeEach(done => {
+  describe('when scrubbing the user', function() {
+    beforeEach(function(done) {
       this.user.get((error, user) => {
         if (error) {
           throw error
@@ -123,7 +123,7 @@ describe('Deleting a user', () => {
       })
     })
 
-    it('Should remove the user data from mongo', done => {
+    it('Should remove the user data from mongo', function(done) {
       db.deletedUsers.findOne(
         { 'deleterData.deletedUserId': this.userId },
         (error, deletedUser) => {
@@ -163,8 +163,8 @@ describe('Deleting a user', () => {
   })
 })
 
-describe('Deleting a project', () => {
-  beforeEach(done => {
+describe('Deleting a project', function() {
+  beforeEach(function(done) {
     this.user = new User()
     this.projectName = 'wombat'
     this.user.ensureUserExists(() => {
@@ -177,7 +177,7 @@ describe('Deleting a project', () => {
     })
   })
 
-  it('Should remove the project from active projects', done => {
+  it('Should remove the project from active projects', function(done) {
     this.user.getProject(this.projectId, (error, project) => {
       expect(error).not.to.exist
       expect(project).to.exist
@@ -194,7 +194,7 @@ describe('Deleting a project', () => {
     })
   })
 
-  it('Should create a soft-deleted project', done => {
+  it('Should create a soft-deleted project', function(done) {
     this.user.getProject(this.projectId, (error, project) => {
       expect(error).not.to.exist
 
@@ -234,8 +234,8 @@ describe('Deleting a project', () => {
     })
   })
 
-  describe('When the project has docs', () => {
-    beforeEach(done => {
+  describe('When the project has docs', function() {
+    beforeEach(function(done) {
       this.user.getProject(this.projectId, (error, project) => {
         if (error) {
           throw error
@@ -255,7 +255,7 @@ describe('Deleting a project', () => {
       })
     })
 
-    it('should mark the docs as deleted', done => {
+    it('should mark the docs as deleted', function(done) {
       let doc =
         MockDocstoreApi.docs[this.projectId.toString()][this.docId.toString()]
       expect(doc).to.exist
@@ -270,8 +270,8 @@ describe('Deleting a project', () => {
       })
     })
 
-    describe('When the deleted project is expired', () => {
-      beforeEach(done => {
+    describe('When the deleted project is expired', function() {
+      beforeEach(function(done) {
         this.user.deleteProject(this.projectId, error => {
           if (error) {
             throw error
@@ -280,7 +280,7 @@ describe('Deleting a project', () => {
         })
       })
 
-      it('Should destroy the docs', done => {
+      it('Should destroy the docs', function(done) {
         expect(
           MockDocstoreApi.docs[this.projectId.toString()][this.docId.toString()]
         ).to.exist
@@ -304,7 +304,7 @@ describe('Deleting a project', () => {
         )
       })
 
-      it('Should remove the project data from mongo', done => {
+      it('Should remove the project data from mongo', function(done) {
         db.deletedProjects.findOne(
           { 'deleterData.deletedProjectId': ObjectId(this.projectId) },
           (error, deletedProject) => {

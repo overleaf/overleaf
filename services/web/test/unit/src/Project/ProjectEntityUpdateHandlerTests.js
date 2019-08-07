@@ -492,7 +492,7 @@ describe('ProjectEntityUpdateHandler', function() {
     })
   })
 
-  describe('setRootDoc', () =>
+  describe('setRootDoc', function() {
     it('should call Project.update', function() {
       const rootDoc_id = 'root-doc-id-123123'
       this.ProjectModel.update = sinon.stub()
@@ -500,16 +500,18 @@ describe('ProjectEntityUpdateHandler', function() {
       return this.ProjectModel.update
         .calledWith({ _id: project_id }, { rootDoc_id })
         .should.equal(true)
-    }))
+    })
+  })
 
-  describe('unsetRootDoc', () =>
+  describe('unsetRootDoc', function() {
     it('should call Project.update', function() {
       this.ProjectModel.update = sinon.stub()
       this.ProjectEntityUpdateHandler.unsetRootDoc(project_id)
       return this.ProjectModel.update
         .calledWith({ _id: project_id }, { $unset: { rootDoc_id: true } })
         .should.equal(true)
-    }))
+    })
+  })
 
   describe('addDoc', function() {
     describe('adding a doc', function() {

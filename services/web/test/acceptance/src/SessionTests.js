@@ -32,7 +32,7 @@ describe('Sessions', function() {
     )
   })
 
-  describe('one session', () =>
+  describe('one session', function() {
     it('should have one session in UserSessions set', function(done) {
       return async.series(
         [
@@ -81,7 +81,8 @@ describe('Sessions', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 
   describe('two sessions', function() {
     beforeEach(function() {

@@ -264,7 +264,7 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('updateProjectAdminSettings', () =>
+  describe('updateProjectAdminSettings', function() {
     it('should update the public access level', function(done) {
       this.EditorController.setPublicAccessLevel = sinon.stub().callsArg(2)
       this.req.body = {
@@ -281,7 +281,8 @@ describe('ProjectController', function() {
         this.req,
         this.res
       )
-    }))
+    })
+  })
 
   describe('deleteProject', function() {
     it('should tell the project deleter to archive when forever=false', function(done) {
@@ -311,7 +312,7 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('restoreProject', () =>
+  describe('restoreProject', function() {
     it('should tell the project deleter', function(done) {
       this.res.sendStatus = code => {
         this.ProjectDeleter.restoreProject
@@ -321,9 +322,10 @@ describe('ProjectController', function() {
         return done()
       }
       return this.ProjectController.restoreProject(this.req, this.res)
-    }))
+    })
+  })
 
-  describe('cloneProject', () =>
+  describe('cloneProject', function() {
     it('should call the project duplicator', function(done) {
       this.res.send = json => {
         this.ProjectDuplicator.duplicate
@@ -333,7 +335,8 @@ describe('ProjectController', function() {
         return done()
       }
       return this.ProjectController.cloneProject(this.req, this.res)
-    }))
+    })
+  })
 
   describe('newProject', function() {
     it('should call the projectCreationHandler with createExampleProject', function(done) {
@@ -580,7 +583,7 @@ describe('ProjectController', function() {
               this.tokenReadOnly.length +
               this.V1Response.projects.length
           )
-          opts.projects.forEach(function(p) {
+          opts.projects.forEach(p => {
             // Check properties correctly mapped from V1
             expect(p).to.have.property('id')
             expect(p).to.have.property('name')
@@ -598,7 +601,7 @@ describe('ProjectController', function() {
           opts.tags.length.should.equal(
             this.tags.length + this.V1Response.tags.length
           )
-          opts.tags.forEach(function(t) {
+          opts.tags.forEach(t => {
             expect(t).to.have.property('name')
             return expect(t).to.have.property('project_ids')
           })

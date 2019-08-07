@@ -98,7 +98,9 @@ describe('AuthenticationController', function() {
     this.next = sinon.stub()
   })
 
-  afterEach(() => tk.reset())
+  afterEach(function() {
+    return tk.reset()
+  })
 
   describe('isUserLoggedIn', function() {
     beforeEach(function() {
@@ -1007,7 +1009,7 @@ describe('AuthenticationController', function() {
     })
   })
 
-  describe('_getSafeRedirectPath', () =>
+  describe('_getSafeRedirectPath', function() {
     it('sanitize redirect path to prevent open redirects', function() {
       expect(
         this.AuthenticationController._getSafeRedirectPath('https://evil.com')
@@ -1030,7 +1032,8 @@ describe('AuthenticationController', function() {
       return expect(
         this.AuthenticationController._getSafeRedirectPath('.evil.com')
       ).to.equal('/.evil.com')
-    }))
+    })
+  })
 
   describe('_clearRedirectFromSession', function() {
     beforeEach(function() {

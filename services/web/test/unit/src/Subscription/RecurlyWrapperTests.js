@@ -162,7 +162,9 @@ describe('RecurlyWrapper', function() {
     ))
   })
 
-  after(() => tk.reset())
+  after(function() {
+    return tk.reset()
+  })
 
   describe('getSubscription', function() {
     describe('with proper subscription id', function() {

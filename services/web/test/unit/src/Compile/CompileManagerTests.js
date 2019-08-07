@@ -154,7 +154,7 @@ describe('CompileManager', function() {
       })
     })
 
-    describe('when the project has been recently compiled', () =>
+    describe('when the project has been recently compiled', function() {
       it('should return', function(done) {
         this.CompileManager._checkIfAutoCompileLimitHasBeenHit = (
           isAutoCompile,
@@ -168,14 +168,15 @@ describe('CompileManager', function() {
           this.project_id,
           this.user_id,
           {},
-          function(err, status) {
+          (err, status) => {
             status.should.equal('too-recently-compiled')
             return done()
           }
         )
-      }))
+      })
+    })
 
-    describe('should check the rate limit', () =>
+    describe('should check the rate limit', function() {
       it('should return', function(done) {
         this.CompileManager._checkIfAutoCompileLimitHasBeenHit = sinon
           .stub()
@@ -184,12 +185,13 @@ describe('CompileManager', function() {
           this.project_id,
           this.user_id,
           {},
-          function(err, status) {
+          (err, status) => {
             status.should.equal('autocompile-backoff')
             return done()
           }
         )
-      }))
+      })
+    })
   })
 
   describe('getProjectCompileLimits', function() {

@@ -100,7 +100,7 @@ module.exports = MockRecurlyApi = {
 `)
     })
 
-    return app.listen(6034, function(error) {
+    return app.listen(6034, error => {
       if (error != null) {
         throw error
       }

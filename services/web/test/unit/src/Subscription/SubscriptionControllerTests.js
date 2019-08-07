@@ -200,17 +200,18 @@ describe('SubscriptionController', function() {
         return this.PlansLocator.findLocalPlanInSettings.returns({})
       })
 
-      describe('with a valid plan code', () =>
+      describe('with a valid plan code', function() {
         it('should render the new subscription page', function(done) {
           this.res.render = (page, opts) => {
             page.should.equal('subscriptions/new')
             return done()
           }
           return this.SubscriptionController.paymentPage(this.req, this.res)
-        }))
+        })
+      })
     })
 
-    describe('with a user with subscription', () =>
+    describe('with a user with subscription', function() {
       it('should redirect to the subscription dashboard', function(done) {
         this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
           1,
@@ -222,9 +223,10 @@ describe('SubscriptionController', function() {
           return done()
         }
         return this.SubscriptionController.paymentPage(this.req, this.res)
-      }))
+      })
+    })
 
-    describe('with an invalid plan code', () =>
+    describe('with an invalid plan code', function() {
       it('should redirect to the subscription dashboard', function(done) {
         this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
           1,
@@ -237,7 +239,8 @@ describe('SubscriptionController', function() {
           return done()
         }
         return this.SubscriptionController.paymentPage(this.req, this.res)
-      }))
+      })
+    })
 
     describe('which currency to use', function() {
       beforeEach(function() {
@@ -278,7 +281,7 @@ describe('SubscriptionController', function() {
       })
     })
 
-    describe('with a recurly subscription already', () =>
+    describe('with a recurly subscription already', function() {
       it('should redirect to the subscription dashboard', function(done) {
         this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
           1,
@@ -293,10 +296,11 @@ describe('SubscriptionController', function() {
           return done()
         }
         return this.SubscriptionController.paymentPage(this.req, this.res)
-      }))
+      })
+    })
   })
 
-  describe('successful_subscription', () =>
+  describe('successful_subscription', function() {
     beforeEach(function(done) {
       this.SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(
         1,
@@ -308,7 +312,8 @@ describe('SubscriptionController', function() {
         this.req,
         this.res
       )
-    }))
+    })
+  })
 
   describe('userSubscriptionPage', function() {
     beforeEach(function(done) {

@@ -17,7 +17,7 @@ const modulePath = path.join(
 const SpamSafe = require(modulePath)
 const { expect } = require('chai')
 
-describe('SpamSafe', () =>
+describe('SpamSafe', function() {
   it('should reject spammy names', function() {
     expect(SpamSafe.isSafeUserName('Charline Wałęsa')).to.equal(true)
     expect(
@@ -83,4 +83,5 @@ describe('SpamSafe', () =>
     return expect(
       SpamSafe.safeEmail('sendME$$$@iAmAprince.com', 'A collaborator')
     ).to.equal('A collaborator')
-  }))
+  })
+})

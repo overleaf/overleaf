@@ -16,12 +16,12 @@ const MockTagsApi = {
     })
 
     app
-      .listen(3012, function(error) {
+      .listen(3012, error => {
         if (error) {
           throw error
         }
       })
-      .on('error', function(error) {
+      .on('error', error => {
         console.error('error starting MockTagsApi:', error.message)
         process.exit(1)
       })

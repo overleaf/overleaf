@@ -15,22 +15,29 @@ const chai = require('chai')
 const request = require('./helpers/request')
 
 describe('siteIsOpen', function() {
-  describe('when siteIsOpen is default (true)', () =>
-    it('should get page', done =>
-      request.get('/login', function(error, response, body) {
+  describe('when siteIsOpen is default (true)', function() {
+    it('should get page', function(done) {
+      return request.get('/login', (error, response, body) => {
         response.statusCode.should.equal(200)
         return done()
-      })))
+      })
+    })
+  })
 
   describe('when siteIsOpen is false', function() {
-    beforeEach(() => (Settings.siteIsOpen = false))
+    beforeEach(function() {
+      return (Settings.siteIsOpen = false)
+    })
 
-    afterEach(() => (Settings.siteIsOpen = true))
+    afterEach(function() {
+      return (Settings.siteIsOpen = true)
+    })
 
-    it('should return maintenance page', done =>
-      request.get('/login', function(error, response) {
+    it('should return maintenance page', function(done) {
+      return request.get('/login', (error, response) => {
         response.statusCode.should.equal(503)
         return done()
-      }))
+      })
+    })
   })
 })

@@ -92,7 +92,7 @@ describe('UserMembershipHandler', function() {
     }))
   })
 
-  describe('getEntity', () =>
+  describe('getEntity', function() {
     describe('group subscriptions', function() {
       it('get subscription', function(done) {
         return this.UserMembershipHandler.getEntity(
@@ -164,7 +164,8 @@ describe('UserMembershipHandler', function() {
           }
         )
       })
-    }))
+    })
+  })
 
   describe('getEntityWithoutAuthorizationCheck', function() {
     it('get publisher', function(done) {
@@ -217,7 +218,7 @@ describe('UserMembershipHandler', function() {
       })
     })
 
-    describe('publishers', () =>
+    describe('publishers', function() {
       it('get publisher', function(done) {
         return this.UserMembershipHandler.getEntity(
           this.publisher.slug,
@@ -235,11 +236,12 @@ describe('UserMembershipHandler', function() {
             return done()
           }
         )
-      }))
+      })
+    })
   })
 
   describe('getUsers', function() {
-    describe('group', () =>
+    describe('group', function() {
       it('build view model for all users', function(done) {
         return this.UserMembershipHandler.getUsers(
           this.subscription,
@@ -255,9 +257,10 @@ describe('UserMembershipHandler', function() {
             return done()
           }
         )
-      }))
+      })
+    })
 
-    describe('group mamagers', () =>
+    describe('group mamagers', function() {
       it('build view model for all managers', function(done) {
         return this.UserMembershipHandler.getUsers(
           this.subscription,
@@ -270,9 +273,10 @@ describe('UserMembershipHandler', function() {
             return done()
           }
         )
-      }))
+      })
+    })
 
-    describe('institution', () =>
+    describe('institution', function() {
       it('build view model for all managers', function(done) {
         return this.UserMembershipHandler.getUsers(
           this.institution,
@@ -285,10 +289,11 @@ describe('UserMembershipHandler', function() {
             return done()
           }
         )
-      }))
+      })
+    })
   })
 
-  describe('createEntity', () =>
+  describe('createEntity', function() {
     it('creates publisher', function(done) {
       return this.UserMembershipHandler.createEntity(
         this.fakeEntityId,
@@ -299,7 +304,8 @@ describe('UserMembershipHandler', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 
   describe('addUser', function() {
     beforeEach(function() {
@@ -375,7 +381,7 @@ describe('UserMembershipHandler', function() {
     })
   })
 
-  describe('removeUser', () =>
+  describe('removeUser', function() {
     describe('institution', function() {
       it('remove user from institution', function(done) {
         return this.UserMembershipHandler.removeUser(
@@ -405,5 +411,6 @@ describe('UserMembershipHandler', function() {
           }
         )
       })
-    }))
+    })
+  })
 })

@@ -86,7 +86,7 @@ describe('ProjectLocator', function() {
     it('finds one at the root level', function(done) {
       return this.locator.findElement(
         { project_id: project._id, element_id: doc2._id, type: 'docs' },
-        function(err, foundElement, path, parentFolder) {
+        (err, foundElement, path, parentFolder) => {
           assert(err == null)
           foundElement._id.should.equal(doc2._id)
           path.fileSystem.should.equal(`/${doc2.name}`)
@@ -100,7 +100,7 @@ describe('ProjectLocator', function() {
     it('when it is nested', function(done) {
       return this.locator.findElement(
         { project_id: project._id, element_id: subSubDoc._id, type: 'doc' },
-        function(err, foundElement, path, parentFolder) {
+        (err, foundElement, path, parentFolder) => {
           assert(err == null)
           should.equal(foundElement._id, subSubDoc._id)
           path.fileSystem.should.equal(
@@ -116,7 +116,7 @@ describe('ProjectLocator', function() {
     it('should give error if element could not be found', function(done) {
       return this.locator.findElement(
         { project_id: project._id, element_id: 'ddsd432nj42', type: 'docs' },
-        function(err, foundElement, path, parentFolder) {
+        (err, foundElement, path, parentFolder) => {
           err.should.deep.equal(new Errors.NotFoundError('entity not found'))
           return done()
         }
@@ -128,7 +128,7 @@ describe('ProjectLocator', function() {
     it('should return root folder when looking for root folder', function(done) {
       return this.locator.findElement(
         { project_id: project._id, element_id: rootFolder._id, type: 'folder' },
-        function(err, foundElement, path, parentFolder) {
+        (err, foundElement, path, parentFolder) => {
           assert(!err)
           foundElement._id.should.equal(rootFolder._id)
           return done()
@@ -139,7 +139,7 @@ describe('ProjectLocator', function() {
     it('when at root', function(done) {
       return this.locator.findElement(
         { project_id: project._id, element_id: subFolder._id, type: 'folder' },
-        function(err, foundElement, path, parentFolder) {
+        (err, foundElement, path, parentFolder) => {
           assert(!err)
           foundElement._id.should.equal(subFolder._id)
           path.fileSystem.should.equal(`/${subFolder.name}`)
@@ -157,7 +157,7 @@ describe('ProjectLocator', function() {
           element_id: secondSubFolder._id,
           type: 'folder'
         },
-        function(err, foundElement, path, parentFolder) {
+        (err, foundElement, path, parentFolder) => {
           assert(!err)
           foundElement._id.should.equal(secondSubFolder._id)
           path.fileSystem.should.equal(
@@ -175,7 +175,7 @@ describe('ProjectLocator', function() {
     it('when at root', function(done) {
       return this.locator.findElement(
         { project_id: project._id, element_id: file1._id, type: 'fileRefs' },
-        function(err, foundElement, path, parentFolder) {
+        (err, foundElement, path, parentFolder) => {
           assert(!err)
           foundElement._id.should.equal(file1._id)
           path.fileSystem.should.equal(`/${file1.name}`)
@@ -193,7 +193,7 @@ describe('ProjectLocator', function() {
           element_id: subSubFile._id,
           type: 'fileRefs'
         },
-        function(err, foundElement, path, parentFolder) {
+        (err, foundElement, path, parentFolder) => {
           assert(!err)
           foundElement._id.should.equal(subSubFile._id)
           path.fileSystem.should.equal(
@@ -211,7 +211,7 @@ describe('ProjectLocator', function() {
     it('should add an s onto the element type', function(done) {
       return this.locator.findElement(
         { project_id: project._id, element_id: subSubDoc._id, type: 'doc' },
-        function(err, foundElement, path, parentFolder) {
+        (err, foundElement, path, parentFolder) => {
           assert(!err)
           foundElement._id.should.equal(subSubDoc._id)
           return done()
@@ -222,7 +222,7 @@ describe('ProjectLocator', function() {
     it('should convert file to fileRefs', function(done) {
       return this.locator.findElement(
         { project_id: project._id, element_id: file1._id, type: 'fileRefs' },
-        function(err, foundElement, path, parentFolder) {
+        (err, foundElement, path, parentFolder) => {
           assert(!err)
           foundElement._id.should.equal(file1._id)
           return done()
@@ -247,7 +247,7 @@ describe('ProjectLocator', function() {
     it('should find doc in project', function(done) {
       return this.locator.findElement(
         { project: project2, element_id: doc3._id, type: 'docs' },
-        function(err, foundElement, path, parentFolder) {
+        (err, foundElement, path, parentFolder) => {
           assert(err == null)
           foundElement._id.should.equal(doc3._id)
           path.fileSystem.should.equal(`/${doc3.name}`)
@@ -261,7 +261,7 @@ describe('ProjectLocator', function() {
 
   describe('finding root doc', function() {
     it('should return root doc when passed project', function(done) {
-      return this.locator.findRootDoc(project, function(err, doc) {
+      return this.locator.findRootDoc(project, (err, doc) => {
         assert(err == null)
         doc._id.should.equal(rootDoc._id)
         return done()
@@ -269,7 +269,7 @@ describe('ProjectLocator', function() {
     })
 
     it('should return root doc when passed project_id', function(done) {
-      return this.locator.findRootDoc(project._id, function(err, doc) {
+      return this.locator.findRootDoc(project._id, (err, doc) => {
         assert(err == null)
         doc._id.should.equal(rootDoc._id)
         return done()
@@ -278,7 +278,7 @@ describe('ProjectLocator', function() {
 
     it('should return null when the project has no rootDoc', function(done) {
       project.rootDoc_id = null
-      return this.locator.findRootDoc(project, function(err, doc) {
+      return this.locator.findRootDoc(project, (err, doc) => {
         assert(err == null)
         expect(doc).to.equal(null)
         return done()
@@ -287,7 +287,7 @@ describe('ProjectLocator', function() {
 
     it('should return null when the rootDoc_id no longer exists', function(done) {
       project.rootDoc_id = 'doesntexist'
-      return this.locator.findRootDoc(project, function(err, doc) {
+      return this.locator.findRootDoc(project, (err, doc) => {
         assert(err == null)
         expect(doc).to.equal(null)
         return done()
@@ -298,136 +298,126 @@ describe('ProjectLocator', function() {
   describe('findElementByPath', function() {
     it('should take a doc path and return the element for a root level document', function(done) {
       const path = `${doc1.name}`
-      return this.locator.findElementByPath({ project, path }, function(
-        err,
-        element,
-        type
-      ) {
-        element.should.deep.equal(doc1)
-        expect(type).to.equal('doc')
-        return done()
-      })
+      return this.locator.findElementByPath(
+        { project, path },
+        (err, element, type) => {
+          element.should.deep.equal(doc1)
+          expect(type).to.equal('doc')
+          return done()
+        }
+      )
     })
 
     it('should take a doc path and return the element for a root level document with a starting slash', function(done) {
       const path = `/${doc1.name}`
-      return this.locator.findElementByPath({ project, path }, function(
-        err,
-        element,
-        type
-      ) {
-        element.should.deep.equal(doc1)
-        expect(type).to.equal('doc')
-        return done()
-      })
+      return this.locator.findElementByPath(
+        { project, path },
+        (err, element, type) => {
+          element.should.deep.equal(doc1)
+          expect(type).to.equal('doc')
+          return done()
+        }
+      )
     })
 
     it('should take a doc path and return the element for a nested document', function(done) {
       const path = `${subFolder.name}/${secondSubFolder.name}/${subSubDoc.name}`
-      return this.locator.findElementByPath({ project, path }, function(
-        err,
-        element,
-        type
-      ) {
-        element.should.deep.equal(subSubDoc)
-        expect(type).to.equal('doc')
-        return done()
-      })
+      return this.locator.findElementByPath(
+        { project, path },
+        (err, element, type) => {
+          element.should.deep.equal(subSubDoc)
+          expect(type).to.equal('doc')
+          return done()
+        }
+      )
     })
 
     it('should take a file path and return the element for a root level document', function(done) {
       const path = `${file1.name}`
-      return this.locator.findElementByPath({ project, path }, function(
-        err,
-        element,
-        type
-      ) {
-        element.should.deep.equal(file1)
-        expect(type).to.equal('file')
-        return done()
-      })
+      return this.locator.findElementByPath(
+        { project, path },
+        (err, element, type) => {
+          element.should.deep.equal(file1)
+          expect(type).to.equal('file')
+          return done()
+        }
+      )
     })
 
     it('should take a file path and return the element for a nested document', function(done) {
       const path = `${subFolder.name}/${secondSubFolder.name}/${
         subSubFile.name
       }`
-      return this.locator.findElementByPath({ project, path }, function(
-        err,
-        element,
-        type
-      ) {
-        element.should.deep.equal(subSubFile)
-        expect(type).to.equal('file')
-        return done()
-      })
+      return this.locator.findElementByPath(
+        { project, path },
+        (err, element, type) => {
+          element.should.deep.equal(subSubFile)
+          expect(type).to.equal('file')
+          return done()
+        }
+      )
     })
 
     it('should take a file path and return the element for a nested document case insenstive', function(done) {
       const path = `${subFolder.name.toUpperCase()}/${secondSubFolder.name.toUpperCase()}/${subSubFile.name.toUpperCase()}`
-      return this.locator.findElementByPath({ project, path }, function(
-        err,
-        element,
-        type
-      ) {
-        element.should.deep.equal(subSubFile)
-        expect(type).to.equal('file')
-        return done()
-      })
+      return this.locator.findElementByPath(
+        { project, path },
+        (err, element, type) => {
+          element.should.deep.equal(subSubFile)
+          expect(type).to.equal('file')
+          return done()
+        }
+      )
     })
 
     it('should take a file path and return the element for a nested folder', function(done) {
       const path = `${subFolder.name}/${secondSubFolder.name}`
-      return this.locator.findElementByPath({ project, path }, function(
-        err,
-        element,
-        type
-      ) {
-        element.should.deep.equal(secondSubFolder)
-        expect(type).to.equal('folder')
-        return done()
-      })
+      return this.locator.findElementByPath(
+        { project, path },
+        (err, element, type) => {
+          element.should.deep.equal(secondSubFolder)
+          expect(type).to.equal('folder')
+          return done()
+        }
+      )
     })
 
     it('should take a file path and return the root folder', function(done) {
       const path = '/'
-      return this.locator.findElementByPath({ project, path }, function(
-        err,
-        element,
-        type
-      ) {
-        element.should.deep.equal(rootFolder)
-        expect(type).to.equal('folder')
-        return done()
-      })
+      return this.locator.findElementByPath(
+        { project, path },
+        (err, element, type) => {
+          element.should.deep.equal(rootFolder)
+          expect(type).to.equal('folder')
+          return done()
+        }
+      )
     })
 
     it('should return an error if the file can not be found inside know folder', function(done) {
       const path = `${subFolder.name}/${secondSubFolder.name}/exist.txt`
-      return this.locator.findElementByPath({ project, path }, function(
-        err,
-        element,
-        type
-      ) {
-        err.should.not.equal(undefined)
-        assert.equal(element, undefined)
-        expect(type).to.be.undefined
-        return done()
-      })
+      return this.locator.findElementByPath(
+        { project, path },
+        (err, element, type) => {
+          err.should.not.equal(undefined)
+          assert.equal(element, undefined)
+          expect(type).to.be.undefined
+          return done()
+        }
+      )
     })
 
     it('should return an error if the file can not be found inside unknown folder', function(done) {
       const path = 'this/does/not/exist.txt'
-      return this.locator.findElementByPath({ project, path }, function(
-        err,
-        element,
-        type
-      ) {
-        err.should.not.equal(undefined)
-        assert.equal(element, undefined)
-        expect(type).to.be.undefined
-        return done()
-      })
+      return this.locator.findElementByPath(
+        { project, path },
+        (err, element, type) => {
+          err.should.not.equal(undefined)
+          assert.equal(element, undefined)
+          expect(type).to.be.undefined
+          return done()
+        }
+      )
     })
 
     describe('where duplicate folder exists', function() {
@@ -491,7 +481,7 @@ describe('ProjectLocator', function() {
         const path = '/other.tex'
         return this.locator.findElementByPath(
           { project: this.project, path },
-          function(err, element) {
+          (err, element) => {
             element.name.should.equal('other.tex')
             return done()
           }
@@ -508,7 +498,7 @@ describe('ProjectLocator', function() {
         const path = '/other.tex'
         return this.locator.findElementByPath(
           { project_id: project._id, path },
-          function(err, element) {
+          (err, element) => {
             expect(err).to.exist
             return done()
           }
@@ -516,7 +506,7 @@ describe('ProjectLocator', function() {
       })
     })
 
-    describe('with a project_id', () =>
+    describe('with a project_id', function() {
       it('should take a doc path and return the element for a root level document', function(done) {
         const path = `${doc1.name}`
         return this.locator.findElementByPath(
@@ -530,7 +520,8 @@ describe('ProjectLocator', function() {
             return done()
           }
         )
-      }))
+      })
+    })
   })
 
   describe('findUsersProjectByName finding a project by user_id and project name', function() {
@@ -551,7 +542,7 @@ describe('ProjectLocator', function() {
       return this.locator.findUsersProjectByName(
         user_id,
         stubbedProject.name.toLowerCase(),
-        function(err, project) {
+        (err, project) => {
           project.should.equal(stubbedProject)
           return done()
         }
@@ -577,7 +568,7 @@ describe('ProjectLocator', function() {
       return this.locator.findUsersProjectByName(
         user_id,
         stubbedProject.name.toLowerCase(),
-        function(err, project) {
+        (err, project) => {
           project._id.should.equal(stubbedProject._id)
           return done()
         }
@@ -597,7 +588,7 @@ describe('ProjectLocator', function() {
       return this.locator.findUsersProjectByName(
         user_id,
         stubbedProject.name.toLowerCase(),
-        function(err, project) {
+        (err, project) => {
           project.should.equal(stubbedProject)
           return done()
         }

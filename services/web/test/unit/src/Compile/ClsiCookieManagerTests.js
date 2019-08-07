@@ -299,13 +299,13 @@ describe('ClsiCookieManager', function() {
         },
         requires: this.requires
       })()
-      return this.ClsiCookieManager.getCookieJar(this.project_id, function(
-        err,
-        jar
-      ) {
-        assert.deepEqual(jar, realRequst.jar())
-        return done()
-      })
+      return this.ClsiCookieManager.getCookieJar(
+        this.project_id,
+        (err, jar) => {
+          assert.deepEqual(jar, realRequst.jar())
+          return done()
+        }
+      )
     })
   })
 })

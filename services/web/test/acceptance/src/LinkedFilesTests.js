@@ -367,7 +367,7 @@ describe('LinkedFiles', function() {
             })
             return this.owner.request.get(
               `/project/${this.project_id}/file/${file._id}`,
-              function(error, response, body) {
+              (error, response, body) => {
                 if (error != null) {
                   throw error
                 }
@@ -429,7 +429,7 @@ describe('LinkedFiles', function() {
                   })
                   return this.owner.request.get(
                     `/project/${this.project_id}/file/${file._id}`,
-                    function(error, response, body) {
+                    (error, response, body) => {
                       if (error != null) {
                         throw error
                       }
@@ -556,7 +556,7 @@ describe('LinkedFiles', function() {
             })
             return this.owner.request.get(
               `/project/${this.project_id}/file/${file._id}`,
-              function(error, response, body) {
+              (error, response, body) => {
                 if (error != null) {
                   throw error
                 }

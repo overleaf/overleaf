@@ -157,7 +157,7 @@ describe('InstitutionsManager', function() {
     })
   })
 
-  describe('checkInstitutionUsers', () =>
+  describe('checkInstitutionUsers', function() {
     it('check all users Features', function(done) {
       const affiliations = [{ email: 'foo@bar.com' }, { email: 'baz@boo.edu' }]
       const stubbedUsers = [
@@ -190,9 +190,10 @@ describe('InstitutionsManager', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 
-  describe('getInstitutionUsersSubscriptions', () =>
+  describe('getInstitutionUsersSubscriptions', function() {
     it('returns all institution users subscriptions', function(done) {
       const stubbedUsers = [
         { user_id: '123abc123abc123abc123abc' },
@@ -208,5 +209,6 @@ describe('InstitutionsManager', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 })

@@ -53,7 +53,7 @@ describe('TagsHandler', function() {
     }))
   })
 
-  describe('removeProjectFromAllTags', () =>
+  describe('removeProjectFromAllTags', function() {
     it('should tell the tags api to remove the project_id from all the users tags', function(done) {
       return this.handler.removeProjectFromAllTags(user_id, project_id, () => {
         this.request.del
@@ -64,7 +64,8 @@ describe('TagsHandler', function() {
           .should.equal(true)
         return done()
       })
-    }))
+    })
+  })
 
   describe('_requestTags', function() {
     it('should return an err and empty array on error', function(done) {

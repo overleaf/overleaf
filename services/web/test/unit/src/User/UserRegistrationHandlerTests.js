@@ -242,7 +242,9 @@ describe('UserRegistrationHandler', function() {
       })
     })
 
-    it('should call the ReferalAllocator', done => done())
+    it('should call the ReferalAllocator', function(done) {
+      return done()
+    })
   })
 
   describe('registerNewUserAndSendActivationEmail', function() {

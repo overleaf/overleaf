@@ -125,7 +125,7 @@ describe('TpdsUpdateSender', function() {
       }
       return this.updateSender.addFile(
         { project_id, file_id, path, project_name },
-        function() {}
+        () => {}
       )
     })
 

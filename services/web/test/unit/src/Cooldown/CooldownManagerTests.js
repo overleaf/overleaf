@@ -35,12 +35,13 @@ describe('CooldownManager', function() {
     }))
   })
 
-  describe('_buildKey', () =>
+  describe('_buildKey', function() {
     it('should build a properly formatted redis key', function() {
       return expect(this.CooldownManager._buildKey('ABC')).to.equal(
         'Cooldown:{ABC}'
       )
-    }))
+    })
+  })
 
   describe('isProjectOnCooldown', function() {
     beforeEach(function() {

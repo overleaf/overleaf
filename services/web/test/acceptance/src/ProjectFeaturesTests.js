@@ -63,17 +63,17 @@ describe('ProjectFeatures', function() {
       })
 
       it('should have premium features', function(done) {
-        return joinProject(this.owner._id, this.project_id, function(
-          error,
-          response,
-          body
-        ) {
-          expect(body.project.features.compileGroup).to.equal('priority')
-          expect(body.project.features.versioning).to.equal(true)
-          expect(body.project.features.templates).to.equal(true)
-          expect(body.project.features.dropbox).to.equal(true)
-          return done()
-        })
+        return joinProject(
+          this.owner._id,
+          this.project_id,
+          (error, response, body) => {
+            expect(body.project.features.compileGroup).to.equal('priority')
+            expect(body.project.features.versioning).to.equal(true)
+            expect(body.project.features.templates).to.equal(true)
+            expect(body.project.features.dropbox).to.equal(true)
+            return done()
+          }
+        )
       })
     })
 
@@ -86,17 +86,17 @@ describe('ProjectFeatures', function() {
       })
 
       it('should have basic features', function(done) {
-        return joinProject(this.owner._id, this.project_id, function(
-          error,
-          response,
-          body
-        ) {
-          expect(body.project.features.compileGroup).to.equal('standard')
-          expect(body.project.features.versioning).to.equal(false)
-          expect(body.project.features.templates).to.equal(false)
-          expect(body.project.features.dropbox).to.equal(false)
-          return done()
-        })
+        return joinProject(
+          this.owner._id,
+          this.project_id,
+          (error, response, body) => {
+            expect(body.project.features.compileGroup).to.equal('standard')
+            expect(body.project.features.versioning).to.equal(false)
+            expect(body.project.features.templates).to.equal(false)
+            expect(body.project.features.dropbox).to.equal(false)
+            return done()
+          }
+        )
       })
     })
   })

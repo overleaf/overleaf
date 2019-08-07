@@ -138,7 +138,7 @@ describe('ProjectDetailsHandler', function() {
 
     it("should return a not found error if the project can't be found", function(done) {
       this.ProjectGetter.getProject.callsArgWith(2)
-      return this.handler.transferOwnership('abc', '123', function(err) {
+      return this.handler.transferOwnership('abc', '123', err => {
         err.should.exist
         err.name.should.equal('NotFoundError')
         return done()
@@ -147,7 +147,7 @@ describe('ProjectDetailsHandler', function() {
 
     it("should return a not found error if the user can't be found", function(done) {
       this.ProjectGetter.getProject.callsArgWith(2)
-      return this.handler.transferOwnership('abc', '123', function(err) {
+      return this.handler.transferOwnership('abc', '123', err => {
         err.should.exist
         err.name.should.equal('NotFoundError')
         return done()
@@ -160,7 +160,7 @@ describe('ProjectDetailsHandler', function() {
         2,
         errorMessage
       )
-      return this.handler.transferOwnership('abc', '123', function(err) {
+      return this.handler.transferOwnership('abc', '123', err => {
         err.should.exist
         err.should.equal(errorMessage)
         return done()
@@ -318,28 +318,28 @@ describe('ProjectDetailsHandler', function() {
 
   describe('validateProjectName', function() {
     it('should reject undefined names', function(done) {
-      return this.handler.validateProjectName(undefined, function(error) {
+      return this.handler.validateProjectName(undefined, error => {
         expect(error).to.exist
         return done()
       })
     })
 
     it('should reject empty names', function(done) {
-      return this.handler.validateProjectName('', function(error) {
+      return this.handler.validateProjectName('', error => {
         expect(error).to.exist
         return done()
       })
     })
 
     it('should reject names with /s', function(done) {
-      return this.handler.validateProjectName('foo/bar', function(error) {
+      return this.handler.validateProjectName('foo/bar', error => {
         expect(error).to.exist
         return done()
       })
     })
 
     it('should reject names with \\s', function(done) {
-      return this.handler.validateProjectName('foo\\bar', function(error) {
+      return this.handler.validateProjectName('foo\\bar', error => {
         expect(error).to.exist
         return done()
       })
@@ -348,7 +348,7 @@ describe('ProjectDetailsHandler', function() {
     it('should reject long names', function(done) {
       return this.handler.validateProjectName(
         new Array(1000).join('a'),
-        function(error) {
+        error => {
           expect(error).to.exist
           return done()
         }
@@ -356,7 +356,7 @@ describe('ProjectDetailsHandler', function() {
     })
 
     it('should accept normal names', function(done) {
-      return this.handler.validateProjectName('foobar', function(error) {
+      return this.handler.validateProjectName('foobar', error => {
         expect(error).to.not.exist
         return done()
       })
@@ -420,7 +420,7 @@ describe('ProjectDetailsHandler', function() {
         this.user_id,
         'unique-name',
         ['-test-suffix'],
-        function(error, name, changed) {
+        (error, name, changed) => {
           expect(name).to.equal('unique-name')
           expect(changed).to.equal(false)
           return done()
@@ -433,7 +433,7 @@ describe('ProjectDetailsHandler', function() {
         this.user_id,
         'name1',
         ['-test-suffix'],
-        function(error, name, changed) {
+        (error, name, changed) => {
           expect(name).to.equal('name1-test-suffix')
           expect(changed).to.equal(true)
           return done()
@@ -446,7 +446,7 @@ describe('ProjectDetailsHandler', function() {
         this.user_id,
         'name1',
         ['1', '-test-suffix'],
-        function(error, name, changed) {
+        (error, name, changed) => {
           expect(name).to.equal('name1-test-suffix')
           expect(changed).to.equal(true)
           return done()
@@ -460,7 +460,7 @@ describe('ProjectDetailsHandler', function() {
         this.user_id,
         'x'.repeat(15),
         ['-test-suffix'],
-        function(error, name, changed) {
+        (error, name, changed) => {
           expect(name).to.equal('x'.repeat(8) + '-test-suffix')
           expect(changed).to.equal(true)
           return done()
@@ -473,7 +473,7 @@ describe('ProjectDetailsHandler', function() {
         this.user_id,
         'name1',
         [],
-        function(error, name, changed) {
+        (error, name, changed) => {
           expect(name).to.equal('name1 (1)')
           expect(changed).to.equal(true)
           return done()
@@ -486,7 +486,7 @@ describe('ProjectDetailsHandler', function() {
         this.user_id,
         'name',
         ['1', '11'],
-        function(error, name, changed) {
+        (error, name, changed) => {
           expect(name).to.equal('name (1)')
           expect(changed).to.equal(true)
           return done()
@@ -499,7 +499,7 @@ describe('ProjectDetailsHandler', function() {
         this.user_id,
         'numeric',
         [],
-        function(error, name, changed) {
+        (error, name, changed) => {
           expect(name).to.equal('numeric (21)')
           expect(changed).to.equal(true)
           return done()
@@ -512,7 +512,7 @@ describe('ProjectDetailsHandler', function() {
         this.user_id,
         'numeric (5)',
         [],
-        function(error, name, changed) {
+        (error, name, changed) => {
           expect(name).to.equal('numeric (21)')
           expect(changed).to.equal(true)
           return done()
@@ -525,7 +525,7 @@ describe('ProjectDetailsHandler', function() {
         this.user_id,
         'numeric (31)',
         [],
-        function(error, name, changed) {
+        (error, name, changed) => {
           expect(name).to.equal('numeric (41)')
           expect(changed).to.equal(true)
           return done()

@@ -75,11 +75,12 @@ describe('UserSessionsManager', function() {
     }))
   })
 
-  describe('_sessionKey', () =>
+  describe('_sessionKey', function() {
     it('should build the correct key', function() {
       const result = this.UserSessionsManager._sessionKey(this.sessionId)
       return result.should.equal('sess:some_session_id')
-    }))
+    })
+  })
 
   describe('trackSession', function() {
     beforeEach(function() {

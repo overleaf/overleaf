@@ -116,7 +116,7 @@ describe('SubscriptionGroupHandler', function() {
     }))
   })
 
-  describe('removeUserFromGroup', () =>
+  describe('removeUserFromGroup', function() {
     it('should call the subscription updater to remove the user', function(done) {
       return this.Handler.removeUserFromGroup(
         this.adminUser_id,
@@ -128,7 +128,8 @@ describe('SubscriptionGroupHandler', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 
   describe('replaceUserReferencesInGroups', function() {
     beforeEach(function(done) {
@@ -196,7 +197,7 @@ describe('SubscriptionGroupHandler', function() {
       return this.Handler.isUserPartOfGroup(
         this.user_id,
         this.subscription_id,
-        function(err, partOfGroup) {
+        (err, partOfGroup) => {
           partOfGroup.should.equal(true)
           return done()
         }
@@ -211,7 +212,7 @@ describe('SubscriptionGroupHandler', function() {
       return this.Handler.isUserPartOfGroup(
         this.user_id,
         this.subscription_id,
-        function(err, partOfGroup) {
+        (err, partOfGroup) => {
           partOfGroup.should.equal(false)
           return done()
         }
@@ -237,7 +238,7 @@ describe('SubscriptionGroupHandler', function() {
         )
       })
     })
-    describe('for nonexistent subscriptions', () =>
+    describe('for nonexistent subscriptions', function() {
       it('should return undefined', function(done) {
         return this.Handler.getTotalConfirmedUsersInGroup(
           'fake-id',
@@ -246,6 +247,7 @@ describe('SubscriptionGroupHandler', function() {
             return done()
           }
         )
-      }))
+      })
+    })
   })
 })

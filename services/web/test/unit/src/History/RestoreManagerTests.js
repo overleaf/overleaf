@@ -49,7 +49,9 @@ describe('RestoreManager', function() {
     return (this.callback = sinon.stub())
   })
 
-  afterEach(() => tk.reset())
+  afterEach(function() {
+    return tk.reset()
+  })
 
   describe('restoreFileFromV2', function() {
     beforeEach(function() {

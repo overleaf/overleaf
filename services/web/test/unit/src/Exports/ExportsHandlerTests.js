@@ -327,7 +327,7 @@ describe('ExportsHandler', function() {
       })
     })
 
-    describe('when project has no root doc', () =>
+    describe('when project has no root doc', function() {
       describe('when a root doc can be set automatically', function() {
         beforeEach(function(done) {
           this.project.rootDoc_id = null
@@ -386,7 +386,8 @@ describe('ExportsHandler', function() {
             .calledWith(null, expected_export_data)
             .should.equal(true)
         })
-      }))
+      })
+    })
 
     describe('when project has an invalid root doc', function() {
       describe('when a new root doc can be set automatically', function() {

@@ -637,7 +637,7 @@ describe('EditorController', function() {
     })
   })
 
-  describe('notifyUsersProjectHasBeenDeletedOrRenamed', () =>
+  describe('notifyUsersProjectHasBeenDeletedOrRenamed', function() {
     it('should emmit a message to all users in a project', function(done) {
       return this.EditorController.notifyUsersProjectHasBeenDeletedOrRenamed(
         this.project_id,
@@ -651,7 +651,8 @@ describe('EditorController', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 
   describe('updateProjectDescription', function() {
     beforeEach(function() {

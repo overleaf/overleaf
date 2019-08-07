@@ -40,11 +40,12 @@ describe('LockManager - releasing the lock', function() {
   const LockManager = SandboxedModule.require(modulePath, { requires: mocks })
   LockManager.unlockScript = 'this is the unlock script'
 
-  it('should put a all data into memory', done =>
-    LockManager._releaseLock(lockKey, lockValue, function() {
+  it('should put a all data into memory', function(done) {
+    return LockManager._releaseLock(lockKey, lockValue, () => {
       deleteStub
         .calledWith(LockManager.unlockScript, 1, lockKey, lockValue)
         .should.equal(true)
       return done()
-    }))
+    })
+  })
 })

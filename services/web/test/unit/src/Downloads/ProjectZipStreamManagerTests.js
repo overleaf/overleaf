@@ -49,7 +49,7 @@ describe('ProjectZipStreamManager', function() {
     }))
   })
 
-  describe('createZipStreamForMultipleProjects', () =>
+  describe('createZipStreamForMultipleProjects', function() {
     describe('successfully', function() {
       beforeEach(function(done) {
         this.project_ids = ['project-1', 'project-2']
@@ -128,7 +128,8 @@ describe('ProjectZipStreamManager', function() {
             .should.equal(true)
         )
       })
-    }))
+    })
+  })
 
   describe('createZipStreamForProject', function() {
     describe('successfully', function() {

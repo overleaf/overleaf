@@ -562,7 +562,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canRead) {
+          (error, canRead) => {
             expect(canRead).to.equal(true)
             return done()
           }
@@ -582,7 +582,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canRead) {
+          (error, canRead) => {
             expect(canRead).to.equal(true)
             return done()
           }
@@ -602,7 +602,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canRead) {
+          (error, canRead) => {
             expect(canRead).to.equal(true)
             return done()
           }
@@ -622,7 +622,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canRead) {
+          (error, canRead) => {
             expect(canRead).to.equal(false)
             return done()
           }
@@ -648,7 +648,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canWrite) {
+          (error, canWrite) => {
             expect(canWrite).to.equal(true)
             return done()
           }
@@ -668,7 +668,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canWrite) {
+          (error, canWrite) => {
             expect(canWrite).to.equal(true)
             return done()
           }
@@ -688,7 +688,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canWrite) {
+          (error, canWrite) => {
             expect(canWrite).to.equal(false)
             return done()
           }
@@ -708,7 +708,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canWrite) {
+          (error, canWrite) => {
             expect(canWrite).to.equal(false)
             return done()
           }
@@ -734,7 +734,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canWrite) {
+          (error, canWrite) => {
             expect(canWrite).to.equal(true)
             return done()
           }
@@ -754,7 +754,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canWrite) {
+          (error, canWrite) => {
             expect(canWrite).to.equal(true)
             return done()
           }
@@ -774,7 +774,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canWrite) {
+          (error, canWrite) => {
             expect(canWrite).to.equal(false)
             return done()
           }
@@ -794,7 +794,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canWrite) {
+          (error, canWrite) => {
             expect(canWrite).to.equal(false)
             return done()
           }
@@ -814,7 +814,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canWrite) {
+          (error, canWrite) => {
             expect(canWrite).to.equal(false)
             return done()
           }
@@ -840,7 +840,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canAdmin) {
+          (error, canAdmin) => {
             expect(canAdmin).to.equal(true)
             return done()
           }
@@ -860,7 +860,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canAdmin) {
+          (error, canAdmin) => {
             expect(canAdmin).to.equal(false)
             return done()
           }
@@ -880,7 +880,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canAdmin) {
+          (error, canAdmin) => {
             expect(canAdmin).to.equal(false)
             return done()
           }
@@ -900,7 +900,7 @@ describe('AuthorizationManager', function() {
           this.user_id,
           this.project_id,
           this.token,
-          function(error, canAdmin) {
+          (error, canAdmin) => {
             expect(canAdmin).to.equal(false)
             return done()
           }
@@ -922,13 +922,13 @@ describe('AuthorizationManager', function() {
       })
 
       it('should return true', function(done) {
-        return this.AuthorizationManager.isUserSiteAdmin(this.user_id, function(
-          error,
-          isAdmin
-        ) {
-          expect(isAdmin).to.equal(true)
-          return done()
-        })
+        return this.AuthorizationManager.isUserSiteAdmin(
+          this.user_id,
+          (error, isAdmin) => {
+            expect(isAdmin).to.equal(true)
+            return done()
+          }
+        )
       })
     })
 
@@ -940,13 +940,13 @@ describe('AuthorizationManager', function() {
       })
 
       it('should return false', function(done) {
-        return this.AuthorizationManager.isUserSiteAdmin(this.user_id, function(
-          error,
-          isAdmin
-        ) {
-          expect(isAdmin).to.equal(false)
-          return done()
-        })
+        return this.AuthorizationManager.isUserSiteAdmin(
+          this.user_id,
+          (error, isAdmin) => {
+            expect(isAdmin).to.equal(false)
+            return done()
+          }
+        )
       })
     })
 
@@ -958,17 +958,17 @@ describe('AuthorizationManager', function() {
       })
 
       it('should return false', function(done) {
-        return this.AuthorizationManager.isUserSiteAdmin(this.user_id, function(
-          error,
-          isAdmin
-        ) {
-          expect(isAdmin).to.equal(false)
-          return done()
-        })
+        return this.AuthorizationManager.isUserSiteAdmin(
+          this.user_id,
+          (error, isAdmin) => {
+            expect(isAdmin).to.equal(false)
+            return done()
+          }
+        )
       })
     })
 
-    describe('when no user is passed', () =>
+    describe('when no user is passed', function() {
       it('should return false', function(done) {
         return this.AuthorizationManager.isUserSiteAdmin(
           null,
@@ -978,6 +978,7 @@ describe('AuthorizationManager', function() {
             return done()
           }
         )
-      }))
+      })
+    })
   })
 })
