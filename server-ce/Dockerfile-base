@@ -39,12 +39,11 @@ RUN wget https://nodejs.org/dist/v6.17.1/node-v6.17.1-linux-x64.tar.gz && \
 
 # Install TexLive
 # ---------------
-RUN wget https://ctan.crest.fr/tex-archive/systems/texlive/tlnet/install-tl-unx.tar.gz; \
-	mkdir /install-tl-unx; \
+RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz && \
+	mkdir /install-tl-unx && \
 	tar -xvf install-tl-unx.tar.gz -C /install-tl-unx --strip-components=1
-RUN echo "selected_scheme scheme-basic" >> /install-tl-unx/texlive.profile; \
-	/install-tl-unx/install-tl -profile /install-tl-unx/texlive.profile \
-	-repository http://tug.ctan.org/systems/texlive/tlnet/
+RUN echo "selected_scheme scheme-basic" >> /install-tl-unx/texlive.profile && \
+	/install-tl-unx/install-tl -profile /install-tl-unx/texlive.profile 
 RUN rm -r /install-tl-unx; \
 	rm install-tl-unx.tar.gz
 ENV PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/2019/bin/x86_64-linux/
@@ -54,10 +53,10 @@ RUN tlmgr install texcount
 
 # Set up sharelatex user and home directory
 # -----------------------------------------
-RUN adduser --system --group --home /var/www/sharelatex --no-create-home sharelatex; \
-	mkdir -p /var/lib/sharelatex; \
-	chown www-data:www-data /var/lib/sharelatex; \
-	mkdir -p /var/log/sharelatex; \
-	chown www-data:www-data /var/log/sharelatex; \
-	mkdir -p /var/lib/sharelatex/data/template_files; \
-	chown www-data:www-data /var/lib/sharelatex/data/template_files;
+RUN adduser --system --group --home /var/www/sharelatex --no-create-home sharelatex && \
+	mkdir -p /var/lib/sharelatex && \
+	chown www-data:www-data /var/lib/sharelatex && \
+	mkdir -p /var/log/sharelatex && \
+	chown www-data:www-data /var/log/sharelatex && \
+	mkdir -p /var/lib/sharelatex/data/template_files && \
+	chown www-data:www-data /var/lib/sharelatex/data/template_files
