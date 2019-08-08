@@ -16,6 +16,8 @@ RedisManager = require('./app/js/RedisManager')
 DispatchManager = require('./app/js/DispatchManager')
 Errors = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
+mongojs = require "./app/js/mongojs"
+async = require "async"
 
 Path = require "path"
 
@@ -88,6 +90,29 @@ app.get "/health_check/redis_cluster", (req, res, next) ->
 	docUpdaterRedisClient.healthCheck (error) ->
 		if error?
 			logger.err {err: error}, "failed redis cluster health check"
+			res.send 500
+		else
+			res.send 200
+
+app.get "/health_check", (req, res, next) ->
+	async.series [
+		(cb) -> 
+			pubsubClient.healthCheck (error) ->
+				if error?
+					logger.err {err: error}, "failed redis health check"
+				cb(error)
+		(cb) ->
+			docUpdaterRedisClient.healthCheck (error) ->
+				if error?
+					logger.err {err: error}, "failed redis cluster health check"
+				cb(error)
+		(cb) ->
+			mongojs.healthCheck (error) ->
+				if error?
+					logger.err {err: error}, "failed mongo health check"
+				cb(error)
+	] , (error) ->
+		if error?
 			res.send 500
 		else
 			res.send 200
