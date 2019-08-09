@@ -78,6 +78,13 @@
         // based on mocha's context mechanism
         "mocha/prefer-arrow-callback": "error"
       }
+    },
+    {
+      // don't allow console.log in backend code
+      "files": ["**/app/*/src/**/*.js"],
+      "rules": {
+        "no-console": "error"
+      }
     }
   ]
 }
