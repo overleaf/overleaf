@@ -22,6 +22,7 @@ const { db, ObjectId } = require('../../../../app/src/infrastructure/mongojs')
 const UserModel = require('../../../../app/src/models/User').User
 const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')
 const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
+const { promisify } = require('util')
 
 let count = 0
 
@@ -763,6 +764,30 @@ class User {
     )
   }
 }
+
+User.promises = class extends User {
+  doRequest(method, params) {
+    return new Promise((resolve, reject) => {
+      this.request[method.toLowerCase()](params, (err, response, body) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve({ response, body })
+        }
+      })
+    })
+  }
+}
+
+// promisify User class methods - works for methods with 0-1 output parameters,
+// otherwise we will need to implement the method manually instead
+const nonPromiseMethods = ['constructor', 'setExtraAttributes']
+Object.getOwnPropertyNames(User.prototype).forEach(methodName => {
+  const method = User.prototype[methodName]
+  if (typeof method === 'function' && !nonPromiseMethods.includes(methodName)) {
+    User.promises.prototype[methodName] = promisify(method)
+  }
+})
 
 module.exports = User
 
