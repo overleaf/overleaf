@@ -113,7 +113,7 @@ module.exports = UserUpdater = {
             emails: { email: newEmail, createdAt: new Date(), reversedHostname }
           }
         }
-        return this.updateUser(userId, update, function(error) {
+        return UserUpdater.updateUser(userId, update, function(error) {
           if (error != null) {
             logger.warn({ error }, 'problem updating users emails')
             return callback(error)
@@ -139,7 +139,7 @@ module.exports = UserUpdater = {
 
       const query = { _id: userId, email: { $ne: email } }
       const update = { $pull: { emails: { email } } }
-      return this.updateUser(query, update, function(error, res) {
+      return UserUpdater.updateUser(query, update, function(error, res) {
         if (error != null) {
           logger.warn({ error }, 'problem removing users email')
           return callback(error)
@@ -223,7 +223,7 @@ module.exports = UserUpdater = {
           'emails.$.confirmedAt': confirmedAt
         }
       }
-      return this.updateUser(query, update, function(error, res) {
+      return UserUpdater.updateUser(query, update, function(error, res) {
         if (error != null) {
           return callback(error)
         }
