@@ -1,12 +1,7 @@
 /* eslint-disable
     camelcase,
-    constructor-super,
     handle-callback-err,
     max-len,
-    no-constant-condition,
-    no-eval,
-    no-return-assign,
-    no-this-before-super,
     no-undef,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -73,19 +68,7 @@ define([
       }
 
       constructor(ide, doc_id) {
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) {
-            super()
-          }
-          let thisFn = (() => {
-            return this
-          }).toString()
-          let thisName = thisFn
-            .slice(thisFn.indexOf('return') + 6 + 1, thisFn.indexOf(';'))
-            .trim()
-          eval(`${thisName} = this;`)
-        }
+        super()
         this.ide = ide
         this.doc_id = doc_id
         this.connected = this.ide.socket.socket.connected

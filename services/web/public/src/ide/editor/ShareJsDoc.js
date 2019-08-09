@@ -1,11 +1,6 @@
 /* eslint-disable
     camelcase,
-    constructor-super,
     max-len,
-    no-constant-condition,
-    no-eval,
-    no-return-assign,
-    no-this-before-super,
     no-undef,
     no-unused-vars,
 */
@@ -35,21 +30,9 @@ define(['utils/EventEmitter', 'libs/sharejs'], function(EventEmitter, ShareJs) {
         this.prototype.FATAL_OP_TIMEOUT = 30000
       }
       constructor(doc_id, docLines, version, socket) {
+        super()
         // Dencode any binary bits of data
         // See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
-        {
-          // Hack: trick Babel/TypeScript into allowing this before super.
-          if (false) {
-            super()
-          }
-          let thisFn = (() => {
-            return this
-          }).toString()
-          let thisName = thisFn
-            .slice(thisFn.indexOf('return') + 6 + 1, thisFn.indexOf(';'))
-            .trim()
-          eval(`${thisName} = this;`)
-        }
         this.doc_id = doc_id
         this.socket = socket
         this.type = 'text'

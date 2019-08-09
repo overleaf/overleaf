@@ -26,6 +26,10 @@
     "format:fix": "prettier-eslint '**/*.js' --write"
   },
   "dependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/preset-react": "^7.0.0",
     "@overleaf/o-error": "^2.1.0",
     "archiver": "0.9.0",
     "async": "0.6.2",
@@ -98,6 +102,7 @@
     "settings-sharelatex": "^1.1.0",
     "temp": "^0.8.3",
     "underscore": "1.6.0",
+    "url-parse": "^1.4.7",
     "uuid": "^3.0.1",
     "v8-profiler-node8": "^6.0.1",
     "valid-url": "^1.0.9",
@@ -108,12 +113,8 @@
   "devDependencies": {
     "acorn": "^6.1.0",
     "acorn-walk": "^6.1.1",
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
+    "babel-loader": "^8.0.6",
     "babel-plugin-angularjs-annotate": "^0.10.0",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-react": "^6.16.0",
     "chai": "3.5.0",
     "chai-spies": "^1.0.0",
     "clean-css-cli": "^4.2.1",

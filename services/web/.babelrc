@@ -1,7 +1,7 @@
 {
   "presets": [
-    "react",
-    ["env", { "modules": false }]
+    "@babel/react",
+    ["@babel/env", { "modules": false }]
   ],
   "plugins": ["angularjs-annotate"]
 }
