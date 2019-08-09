@@ -1,17 +1,3 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { expect } = require('chai')
 const async = require('async')
 const MockV1Api = require('./helpers/MockV1Api')
@@ -20,75 +6,63 @@ const request = require('./helpers/request')
 const settings = require('settings-sharelatex')
 const { db, ObjectId } = require('../../../app/src/infrastructure/mongojs')
 
-const try_read_access = (user, project_id, test, callback) =>
+const tryReadAccess = (user, projectId, test, callback) =>
   async.series(
     [
       cb =>
-        user.request.get(`/project/${project_id}`, (error, response, body) => {
+        user.request.get(`/project/${projectId}`, (error, response, body) => {
           if (error != null) {
             return cb(error)
           }
           test(response, body)
-          return cb()
+          cb()
         }),
       cb =>
         user.request.get(
-          `/project/${project_id}/download/zip`,
+          `/project/${projectId}/download/zip`,
           (error, response, body) => {
             if (error != null) {
               return cb(error)
             }
             test(response, body)
-            return cb()
+            cb()
           }
         )
     ],
     callback
   )
 
-const try_read_only_token_access = (user, token, test, callback) =>
-  async.series(
-    [
-      cb =>
-        user.request.get(`/read/${token}`, (error, response, body) => {
-          if (error != null) {
-            return cb(error)
-          }
-          test(response, body)
-          return cb()
-        })
-    ],
-    callback
-  )
+const tryReadOnlyTokenAccess = (user, token, test, callback) =>
+  user.request.get(`/read/${token}`, (error, response, body) => {
+    if (error != null) {
+      return callback(error)
+    }
+    test(response, body)
+    callback()
+  })
 
-const try_read_and_write_token_access = (user, token, test, callback) =>
-  async.series(
-    [
-      cb =>
-        user.request.get(`/${token}`, (error, response, body) => {
-          if (error != null) {
-            return cb(error)
-          }
-          test(response, body)
-          return cb()
-        })
-    ],
-    callback
-  )
+const tryReadAndWriteTokenAccess = (user, token, test, callback) =>
+  user.request.get(`/${token}`, (error, response, body) => {
+    if (error != null) {
+      return callback(error)
+    }
+    test(response, body)
+    callback()
+  })
 
-const try_content_access = function(user, project_id, test, callback) {
+const tryContentAccess = (user, projcetId, test, callback) => {
   // The real-time service calls this end point to determine the user's
   // permissions.
-  let user_id
+  let userId
   if (user.id != null) {
-    user_id = user.id
+    userId = user.id
   } else {
-    user_id = 'anonymous-user'
+    userId = 'anonymous-user'
   }
-  return request.post(
+  request.post(
     {
-      url: `/project/${project_id}/join`,
-      qs: { user_id },
+      url: `/project/${projcetId}/join`,
+      qs: { user_id: userId },
       auth: {
         user: settings.apis.web.user,
         pass: settings.apis.web.pass,
@@ -102,30 +76,24 @@ const try_content_access = function(user, project_id, test, callback) {
         return callback(error)
       }
       test(response, body)
-      return callback()
+      callback()
     }
   )
 }
 
-const try_anon_content_access = function(
-  user,
-  project_id,
-  token,
-  test,
-  callback
-) {
+const tryAnonContentAccess = (user, projectId, token, test, callback) => {
   // The real-time service calls this end point to determine the user's
   // permissions.
-  let user_id
+  let userId
   if (user.id != null) {
-    user_id = user.id
+    userId = user.id
   } else {
-    user_id = 'anonymous-user'
+    userId = 'anonymous-user'
   }
-  return request.post(
+  request.post(
     {
-      url: `/project/${project_id}/join`,
-      qs: { user_id },
+      url: `/project/${projectId}/join`,
+      qs: { user_id: userId },
       auth: {
         user: settings.apis.web.user,
         pass: settings.apis.web.pass,
@@ -142,19 +110,19 @@ const try_anon_content_access = function(
         return callback(error)
       }
       test(response, body)
-      return callback()
+      callback()
     }
   )
 }
 
 describe('TokenAccess', function() {
-  before(function(done) {
+  beforeEach(function(done) {
     this.timeout(90000)
     this.owner = new User()
     this.other1 = new User()
     this.other2 = new User()
     this.anon = new User()
-    return async.parallel(
+    async.parallel(
       [
         cb => this.owner.login(cb),
         cb => this.other1.login(cb),
@@ -166,141 +134,156 @@ describe('TokenAccess', function() {
   })
 
   describe('no token-access', function() {
-    before(function(done) {
-      return this.owner.createProject(
+    beforeEach(function(done) {
+      this.owner.createProject(
         `token-ro-test${Math.random()}`,
-        (err, project_id) => {
+        (err, projectId) => {
           if (err != null) {
             return done(err)
           }
-          this.project_id = project_id
+          this.projectId = projectId
           // Note, never made token-based,
           // thus no tokens
-          return done()
+          done()
         }
       )
     })
 
     it('should deny access ', function(done) {
-      return try_read_access(
-        this.other1,
-        this.project_id,
-        (response, body) => {
-          expect(response.statusCode).to.equal(302)
-          return expect(body).to.match(/.*\/restricted.*/)
-        },
-        done
-      )
-    })
-
-    it('should not allow the user to join the project', function(done) {
-      return try_content_access(
-        this.other1,
-        this.project_id,
-        (response, body) => {
-          return expect(body.privilegeLevel).to.equal(false)
-        },
+      async.series(
+        [
+          cb => {
+            tryReadAccess(
+              this.other1,
+              this.projectId,
+              (response, body) => {
+                expect(response.statusCode).to.equal(302)
+                expect(body).to.match(/.*\/restricted.*/)
+              },
+              cb
+            )
+          },
+          cb => {
+            tryContentAccess(
+              this.other1,
+              this.projectId,
+              (response, body) => {
+                expect(body.privilegeLevel).to.equal(false)
+              },
+              cb
+            )
+          }
+        ],
         done
       )
     })
   })
 
   describe('read-only token', function() {
-    before(function(done) {
-      return this.owner.createProject(
+    beforeEach(function(done) {
+      this.owner.createProject(
         `token-ro-test${Math.random()}`,
-        (err, project_id) => {
+        (err, projectId) => {
           if (err != null) {
             return done(err)
           }
-          this.project_id = project_id
-          return this.owner.makeTokenBased(this.project_id, err => {
+          this.projectId = projectId
+          this.owner.makeTokenBased(this.projectId, err => {
             if (err != null) {
               return done(err)
             }
-            return this.owner.getProject(this.project_id, (err, project) => {
+            this.owner.getProject(this.projectId, (err, project) => {
               if (err != null) {
                 return done(err)
               }
               this.tokens = project.tokens
-              return done()
+              done()
             })
           })
         }
       )
     })
 
-    it('should deny access before the token is used', function(done) {
-      return try_read_access(
-        this.other1,
-        this.project_id,
-        (response, body) => {
-          expect(response.statusCode).to.equal(302)
-          return expect(body).to.match(/.*\/restricted.*/)
-        },
-        done
-      )
-    })
-
-    it('should allow the user to access project via read-only token url', function(done) {
-      return try_read_only_token_access(
-        this.other1,
-        this.tokens.readOnly,
-        (response, body) => {
-          return expect(response.statusCode).to.equal(200)
-        },
-        done
-      )
-    })
-
-    it('should allow the user to join the project with read-only access', function(done) {
-      return try_content_access(
-        this.other1,
-        this.project_id,
-        (response, body) => {
-          return expect(body.privilegeLevel).to.equal('readOnly')
-        },
+    it('allow the user read-only access to the project', function(done) {
+      async.series(
+        [
+          cb => {
+            // deny access before token is used
+            tryReadAccess(
+              this.other1,
+              this.projectId,
+              (response, body) => {
+                expect(response.statusCode).to.equal(302)
+                expect(body).to.match(/.*\/restricted.*/)
+              },
+              cb
+            )
+          },
+          cb => {
+            // use token
+            tryReadOnlyTokenAccess(
+              this.other1,
+              this.tokens.readOnly,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              cb
+            )
+          },
+          cb => {
+            // allow content access read-only
+            tryContentAccess(
+              this.other1,
+              this.projectId,
+              (response, body) => {
+                expect(body.privilegeLevel).to.equal('readOnly')
+              },
+              cb
+            )
+          }
+        ],
         done
       )
     })
 
     describe('made private again', function() {
-      before(function(done) {
-        return this.owner.makePrivate(this.project_id, () =>
-          setTimeout(done, 1000)
-        )
+      beforeEach(function(done) {
+        this.owner.makePrivate(this.projectId, () => setTimeout(done, 1000))
       })
 
-      it('should deny access to project', function(done) {
-        return try_read_access(
-          this.other1,
-          this.project_id,
-          (response, body) => {
-            expect(response.statusCode).to.equal(302)
-            return expect(body).to.match(/.*\/restricted.*/)
-          },
-          done
-        )
-      })
-
-      it('should not allow the user to access read-only token', function(done) {
-        return try_read_only_token_access(
-          this.other1,
-          this.tokens.readOnly,
-          (response, body) => {
-            return expect(response.statusCode).to.equal(404)
-          },
-          done
-        )
-      })
-
-      it('should not allow the user to join the project', function(done) {
-        return try_content_access(
-          this.other1,
-          this.project_id,
-          (response, body) => {
-            return expect(body.privilegeLevel).to.equal(false)
-          },
+      it('should not allow the user to access the project', function(done) {
+        async.series(
+          [
+            // no access before token is used
+            cb =>
+              tryReadAccess(
+                this.other1,
+                this.projectId,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(302)
+                  expect(body).to.match(/.*\/restricted.*/)
+                },
+                cb
+              ),
+            cb =>
+              tryReadOnlyTokenAccess(
+                this.other1,
+                this.tokens.readOnly,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(404)
+                },
+                cb
+              ),
+            cb =>
+              tryContentAccess(
+                this.other1,
+                this.projectId,
+                (response, body) => {
+                  expect(body.privilegeLevel).to.equal(false)
+                },
+                cb
+              )
+          ],
           done
         )
       })
@@ -308,103 +291,107 @@ describe('TokenAccess', function() {
   })
 
   describe('anonymous read-only token', function() {
-    before(function(done) {
-      return this.owner.createProject(
+    beforeEach(function(done) {
+      this.owner.createProject(
         `token-anon-ro-test${Math.random()}`,
-        (err, project_id) => {
+        (err, projectId) => {
           if (err != null) {
             return done(err)
           }
-          this.project_id = project_id
-          return this.owner.makeTokenBased(this.project_id, err => {
+          this.projectId = projectId
+          this.owner.makeTokenBased(this.projectId, err => {
             if (err != null) {
               return done(err)
             }
-            return this.owner.getProject(this.project_id, (err, project) => {
+            this.owner.getProject(this.projectId, (err, project) => {
               if (err != null) {
                 return done(err)
               }
               this.tokens = project.tokens
-              return done()
+              done()
             })
           })
         }
       )
     })
 
-    it('should deny access before the token is used', function(done) {
-      return try_read_access(
-        this.anon,
-        this.project_id,
-        (response, body) => {
-          expect(response.statusCode).to.equal(302)
-          return expect(body).to.match(/.*\/restricted.*/)
-        },
-        done
-      )
-    })
-
     it('should allow the user to access project via read-only token url', function(done) {
-      return try_read_only_token_access(
-        this.anon,
-        this.tokens.readOnly,
-        (response, body) => {
-          return expect(response.statusCode).to.equal(200)
-        },
-        done
-      )
-    })
-
-    it('should allow the user to anonymously join the project with read-only access', function(done) {
-      return try_anon_content_access(
-        this.anon,
-        this.project_id,
-        this.tokens.readOnly,
-        (response, body) => {
-          return expect(body.privilegeLevel).to.equal('readOnly')
-        },
+      async.series(
+        [
+          cb =>
+            tryReadAccess(
+              this.anon,
+              this.projectId,
+              (response, body) => {
+                expect(response.statusCode).to.equal(302)
+                expect(body).to.match(/.*\/restricted.*/)
+              },
+              cb
+            ),
+          cb =>
+            tryReadOnlyTokenAccess(
+              this.anon,
+              this.tokens.readOnly,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              cb
+            ),
+          cb =>
+            tryAnonContentAccess(
+              this.anon,
+              this.projectId,
+              this.tokens.readOnly,
+              (response, body) => {
+                expect(body.privilegeLevel).to.equal('readOnly')
+              },
+              cb
+            )
+        ],
         done
       )
     })
 
     describe('made private again', function() {
-      before(function(done) {
-        return this.owner.makePrivate(this.project_id, () =>
-          setTimeout(done, 1000)
-        )
+      beforeEach(function(done) {
+        this.owner.makePrivate(this.projectId, () => setTimeout(done, 1000))
       })
 
       it('should deny access to project', function(done) {
-        return try_read_access(
-          this.anon,
-          this.project_id,
-          (response, body) => {
-            expect(response.statusCode).to.equal(302)
-            return expect(body).to.match(/.*\/restricted.*/)
-          },
-          done
-        )
-      })
-
-      it('should not allow the user to access read-only token', function(done) {
-        return try_read_only_token_access(
-          this.anon,
-          this.tokens.readOnly,
-          (response, body) => {
-            return expect(response.statusCode).to.equal(404)
-          },
-          done
-        )
-      })
-
-      it('should not allow the user to join the project', function(done) {
-        return try_anon_content_access(
-          this.anon,
-          this.project_id,
-          this.tokens.readOnly,
-          (response, body) => {
-            return expect(body.privilegeLevel).to.equal(false)
-          },
+        async.series(
+          [
+            cb =>
+              tryReadAccess(
+                this.anon,
+                this.projectId,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(302)
+                  expect(body).to.match(/.*\/restricted.*/)
+                },
+                cb
+              ),
+            // should not allow the user to access read-only token
+            cb =>
+              tryReadOnlyTokenAccess(
+                this.anon,
+                this.tokens.readOnly,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(404)
+                },
+                cb
+              ),
+            // should not allow the user to join the project
+            cb =>
+              tryAnonContentAccess(
+                this.anon,
+                this.projectId,
+                this.tokens.readOnly,
+                (response, body) => {
+                  expect(body.privilegeLevel).to.equal(false)
+                },
+                cb
+              )
+          ],
           done
         )
       })
@@ -412,102 +399,108 @@ describe('TokenAccess', function() {
   })
 
   describe('read-and-write token', function() {
-    before(function(done) {
-      return this.owner.createProject(
+    beforeEach(function(done) {
+      this.owner.createProject(
         `token-rw-test${Math.random()}`,
-        (err, project_id) => {
+        (err, projectId) => {
           if (err != null) {
             return done(err)
           }
-          this.project_id = project_id
-          return this.owner.makeTokenBased(this.project_id, err => {
+          this.projectId = projectId
+          this.owner.makeTokenBased(this.projectId, err => {
             if (err != null) {
               return done(err)
             }
-            return this.owner.getProject(this.project_id, (err, project) => {
+            this.owner.getProject(this.projectId, (err, project) => {
               if (err != null) {
                 return done(err)
               }
               this.tokens = project.tokens
-              return done()
+              done()
             })
           })
         }
       )
     })
 
-    it('should deny access before the token is used', function(done) {
-      return try_read_access(
-        this.other1,
-        this.project_id,
-        (response, body) => {
-          expect(response.statusCode).to.equal(302)
-          expect(response.headers.location).to.match(/\/restricted.*/)
-          return expect(body).to.match(/.*\/restricted.*/)
-        },
-        done
-      )
-    })
-
     it('should allow the user to access project via read-and-write token url', function(done) {
-      return try_read_and_write_token_access(
-        this.other1,
-        this.tokens.readAndWrite,
-        (response, body) => {
-          return expect(response.statusCode).to.equal(200)
-        },
-        done
-      )
-    })
-
-    it('should allow the user to join the project with read-and-write access', function(done) {
-      return try_content_access(
-        this.other1,
-        this.project_id,
-        (response, body) => {
-          return expect(body.privilegeLevel).to.equal('readAndWrite')
-        },
+      async.series(
+        [
+          // deny access before the token is used
+          cb =>
+            tryReadAccess(
+              this.other1,
+              this.projectId,
+              (response, body) => {
+                expect(response.statusCode).to.equal(302)
+                expect(response.headers.location).to.match(/\/restricted.*/)
+                expect(body).to.match(/.*\/restricted.*/)
+              },
+              cb
+            ),
+          cb =>
+            tryReadAndWriteTokenAccess(
+              this.other1,
+              this.tokens.readAndWrite,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              cb
+            ),
+          cb =>
+            tryContentAccess(
+              this.other1,
+              this.projectId,
+              (response, body) => {
+                expect(body.privilegeLevel).to.equal('readAndWrite')
+              },
+              cb
+            )
+        ],
         done
       )
     })
 
     describe('made private again', function() {
-      before(function(done) {
-        return this.owner.makePrivate(this.project_id, () =>
-          setTimeout(done, 1000)
-        )
+      beforeEach(function(done) {
+        this.owner.makePrivate(this.projectId, () => setTimeout(done, 1000))
       })
 
       it('should deny access to project', function(done) {
-        return try_read_access(
-          this.other1,
-          this.project_id,
-          (response, body) => {
-            expect(response.statusCode).to.equal(302)
-            return expect(body).to.match(/.*\/restricted.*/)
-          },
-          done
-        )
-      })
-
-      it('should not allow the user to access read-and-write token', function(done) {
-        return try_read_and_write_token_access(
-          this.other1,
-          this.tokens.readAndWrite,
-          (response, body) => {
-            return expect(response.statusCode).to.equal(404)
-          },
-          done
-        )
-      })
-
-      it('should not allow the user to join the project', function(done) {
-        return try_content_access(
-          this.other1,
-          this.project_id,
-          (response, body) => {
-            return expect(body.privilegeLevel).to.equal(false)
-          },
+        async.series(
+          [
+            cb => {
+              tryReadAccess(
+                this.other1,
+                this.projectId,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(302)
+                  expect(body).to.match(/.*\/restricted.*/)
+                },
+                cb
+              )
+            },
+            cb => {
+              tryReadAndWriteTokenAccess(
+                this.other1,
+                this.tokens.readAndWrite,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(404)
+                },
+                cb
+              )
+            },
+            cb => {
+              tryContentAccess(
+                this.other1,
+                this.projectId,
+                (response, body) => {
+                  expect(body.privilegeLevel).to.equal(false)
+                },
+                cb
+              )
+            }
+          ],
           done
         )
       })
@@ -516,165 +509,169 @@ describe('TokenAccess', function() {
 
   if (!settings.allowAnonymousReadAndWriteSharing) {
     describe('anonymous read-and-write token, disabled', function() {
-      before(function(done) {
-        return this.owner.createProject(
+      beforeEach(function(done) {
+        this.owner.createProject(
           `token-anon-rw-test${Math.random()}`,
-          (err, project_id) => {
+          (err, projectId) => {
             if (err != null) {
               return done(err)
             }
-            this.project_id = project_id
-            return this.owner.makeTokenBased(this.project_id, err => {
+            this.projectId = projectId
+            this.owner.makeTokenBased(this.projectId, err => {
               if (err != null) {
                 return done(err)
               }
-              return this.owner.getProject(this.project_id, (err, project) => {
+              this.owner.getProject(this.projectId, (err, project) => {
                 if (err != null) {
                   return done(err)
                 }
                 this.tokens = project.tokens
-                return done()
+                done()
               })
             })
           }
         )
       })
 
-      it('should deny access before the token is used', function(done) {
-        return try_read_access(
-          this.anon,
-          this.project_id,
-          (response, body) => {
-            expect(response.statusCode).to.equal(302)
-            return expect(body).to.match(/.*\/restricted.*/)
-          },
-          done
-        )
-      })
-
       it('should not allow the user to access read-and-write token', function(done) {
-        return try_read_and_write_token_access(
-          this.anon,
-          this.tokens.readAndWrite,
-          (response, body) => {
-            expect(response.statusCode).to.equal(302)
-            return expect(body).to.match(/.*\/restricted.*/)
-          },
-          done
-        )
-      })
-
-      it('should not allow the user to join the project', function(done) {
-        return try_anon_content_access(
-          this.anon,
-          this.project_id,
-          this.tokens.readAndWrite,
-          (response, body) => {
-            return expect(body.privilegeLevel).to.equal(false)
-          },
+        async.series(
+          [
+            cb =>
+              tryReadAccess(
+                this.anon,
+                this.projectId,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(302)
+                  expect(body).to.match(/.*\/restricted.*/)
+                },
+                cb
+              ),
+            cb =>
+              tryReadAndWriteTokenAccess(
+                this.anon,
+                this.tokens.readAndWrite,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(302)
+                  expect(body).to.match(/.*\/restricted.*/)
+                },
+                cb
+              ),
+            cb =>
+              tryAnonContentAccess(
+                this.anon,
+                this.projectId,
+                this.tokens.readAndWrite,
+                (response, body) => {
+                  expect(body.privilegeLevel).to.equal(false)
+                },
+                cb
+              )
+          ],
           done
         )
       })
     })
   } else {
     describe('anonymous read-and-write token, enabled', function() {
-      before(function(done) {
-        return this.owner.createProject(
+      beforeEach(function(done) {
+        this.owner.createProject(
           `token-anon-rw-test${Math.random()}`,
-          (err, project_id) => {
+          (err, projectId) => {
             if (err != null) {
               return done(err)
             }
-            this.project_id = project_id
-            return this.owner.makeTokenBased(this.project_id, err => {
+            this.projectId = projectId
+            this.owner.makeTokenBased(this.projectId, err => {
               if (err != null) {
                 return done(err)
               }
-              return this.owner.getProject(this.project_id, (err, project) => {
+              this.owner.getProject(this.projectId, (err, project) => {
                 if (err != null) {
                   return done(err)
                 }
                 this.tokens = project.tokens
-                return done()
+                done()
               })
             })
           }
         )
       })
 
-      it('should deny access before the token is used', function(done) {
-        return try_read_access(
-          this.anon,
-          this.project_id,
-          (response, body) => {
-            expect(response.statusCode).to.equal(302)
-            return expect(body).to.match(/.*\/restricted.*/)
-          },
-          done
-        )
-      })
-
       it('should allow the user to access project via read-and-write token url', function(done) {
-        return try_read_and_write_token_access(
-          this.anon,
-          this.tokens.readAndWrite,
-          (response, body) => {
-            return expect(response.statusCode).to.equal(200)
-          },
-          done
-        )
-      })
-
-      it('should allow the user to anonymously join the project with read-and-write access', function(done) {
-        return try_anon_content_access(
-          this.anon,
-          this.project_id,
-          this.tokens.readAndWrite,
-          (response, body) => {
-            return expect(body.privilegeLevel).to.equal('readAndWrite')
-          },
+        async.series(
+          [
+            cb =>
+              tryReadAccess(
+                this.anon,
+                this.projectId,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(302)
+                  expect(body).to.match(/.*\/restricted.*/)
+                },
+                cb
+              ),
+            cb =>
+              tryReadAndWriteTokenAccess(
+                this.anon,
+                this.tokens.readAndWrite,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(200)
+                },
+                cb
+              ),
+            cb =>
+              tryAnonContentAccess(
+                this.anon,
+                this.projectId,
+                this.tokens.readAndWrite,
+                (response, body) => {
+                  expect(body.privilegeLevel).to.equal('readAndWrite')
+                },
+                cb
+              )
+          ],
           done
         )
       })
 
       describe('made private again', function() {
-        before(function(done) {
-          return this.owner.makePrivate(this.project_id, () =>
-            setTimeout(done, 1000)
-          )
-        })
-
-        it('should deny access to project', function(done) {
-          return try_read_access(
-            this.anon,
-            this.project_id,
-            (response, body) => {
-              expect(response.statusCode).to.equal(302)
-              return expect(body).to.match(/.*\/restricted.*/)
-            },
-            done
-          )
+        beforeEach(function(done) {
+          this.owner.makePrivate(this.projectId, () => setTimeout(done, 1000))
         })
 
         it('should not allow the user to access read-and-write token', function(done) {
-          return try_read_and_write_token_access(
-            this.anon,
-            this.tokens.readAndWrite,
-            (response, body) => {
-              return expect(response.statusCode).to.equal(404)
-            },
-            done
-          )
-        })
-
-        it('should not allow the user to join the project', function(done) {
-          return try_anon_content_access(
-            this.anon,
-            this.project_id,
-            this.tokens.readAndWrite,
-            (response, body) => {
-              return expect(body.privilegeLevel).to.equal(false)
-            },
+          async.series(
+            [
+              cb =>
+                tryReadAccess(
+                  this.anon,
+                  this.projectId,
+                  (response, body) => {
+                    expect(response.statusCode).to.equal(302)
+                    expect(body).to.match(/.*\/restricted.*/)
+                  },
+                  cb
+                ),
+              cb =>
+                tryReadAndWriteTokenAccess(
+                  this.anon,
+                  this.tokens.readAndWrite,
+                  (response, body) => {
+                    expect(response.statusCode).to.equal(404)
+                  },
+                  cb
+                ),
+              cb =>
+                tryAnonContentAccess(
+                  this.anon,
+                  this.projectId,
+                  this.tokens.readAndWrite,
+                  (response, body) => {
+                    expect(body.privilegeLevel).to.equal(false)
+                  },
+                  cb
+                )
+            ],
             done
           )
         })
@@ -683,14 +680,17 @@ describe('TokenAccess', function() {
   }
 
   describe('private overleaf project', function() {
-    before(function(done) {
-      return this.owner.createProject('overleaf-import', (err, project_id) => {
-        this.project_id = project_id
-        return this.owner.makeTokenBased(this.project_id, err => {
-          return this.owner.getProject(this.project_id, (err, project) => {
+    beforeEach(function(done) {
+      this.owner.createProject('overleaf-import', (err, projectId) => {
+        expect(err).not.to.exist
+        this.projectId = projectId
+        this.owner.makeTokenBased(this.projectId, err => {
+          expect(err).not.to.exist
+          this.owner.getProject(this.projectId, (err, project) => {
+            expect(err).not.to.exist
             this.tokens = project.tokens
-            return this.owner.makePrivate(this.project_id, () => {
-              return db.projects.update(
+            this.owner.makePrivate(this.projectId, () => {
+              db.projects.update(
                 { _id: project._id },
                 {
                   $set: {
@@ -698,7 +698,8 @@ describe('TokenAccess', function() {
                   }
                 },
                 err => {
-                  return done()
+                  expect(err).not.to.exist
+                  done()
                 }
               )
             })
@@ -707,75 +708,78 @@ describe('TokenAccess', function() {
       })
     })
 
-    it('should redirect to canonical path, when owner uses read-write token', function(done) {
-      return try_read_and_write_token_access(
-        this.owner,
-        this.tokens.readAndWrite,
-        (response, body) => {
-          expect(response.statusCode).to.equal(302)
-          return expect(response.headers.location).to.equal(
-            `/project/${this.project_id}`
-          )
-        },
-        done
-      )
-    })
-
-    it('should allow the owner access to the project', function(done) {
-      return try_read_access(
-        this.owner,
-        this.project_id,
-        (response, body) => {
-          return expect(response.statusCode).to.equal(200)
-        },
-        done
-      )
-    })
-
-    it('should allow owner to join the project', function(done) {
-      return try_content_access(
-        this.owner,
-        this.project_id,
-        (response, body) => {
-          return expect(body.privilegeLevel).to.equal('owner')
-        },
-        done
-      )
-    })
-
-    it('should not allow other user to join the project', function(done) {
-      return try_content_access(
-        this.other2,
-        this.project_id,
-        (response, body) => {
-          return expect(body.privilegeLevel).to.equal(false)
-        },
+    it('should only allow the owner access to the project', function(done) {
+      async.series(
+        [
+          // should redirect to canonical path, when owner uses read-write token
+          cb =>
+            tryReadAndWriteTokenAccess(
+              this.owner,
+              this.tokens.readAndWrite,
+              (response, body) => {
+                expect(response.statusCode).to.equal(302)
+                expect(response.headers.location).to.equal(
+                  `/project/${this.projectId}`
+                )
+              },
+              cb
+            ),
+          cb =>
+            tryReadAccess(
+              this.owner,
+              this.projectId,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              cb
+            ),
+          cb =>
+            tryContentAccess(
+              this.owner,
+              this.projectId,
+              (response, body) => {
+                expect(body.privilegeLevel).to.equal('owner')
+              },
+              cb
+            ),
+          // non-owner should be denied access
+          cb =>
+            tryContentAccess(
+              this.other2,
+              this.projectId,
+              (response, body) => {
+                expect(body.privilegeLevel).to.equal(false)
+              },
+              cb
+            )
+        ],
         done
       )
     })
   })
 
   describe('private project, with higher access', function() {
-    before(function(done) {
-      return this.owner.createProject(
+    beforeEach(function(done) {
+      this.owner.createProject(
         `higher-access-test-${Math.random()}`,
-        (err, project_id) => {
-          this.project_id = project_id
-          return this.owner.addUserToProject(
-            this.project_id,
+        (err, projectId) => {
+          expect(err).not.to.exist
+          this.projectId = projectId
+          this.owner.addUserToProject(
+            this.projectId,
             this.other1,
             'readAndWrite',
             err => {
-              return this.owner.makeTokenBased(this.project_id, err => {
-                return this.owner.getProject(
-                  this.project_id,
-                  (err, project) => {
-                    this.tokens = project.tokens
-                    return this.owner.makePrivate(this.project_id, () => {
-                      return setTimeout(done, 1000)
-                    })
-                  }
-                )
+              expect(err).not.to.exist
+              this.owner.makeTokenBased(this.projectId, err => {
+                expect(err).not.to.exist
+                this.owner.getProject(this.projectId, (err, project) => {
+                  expect(err).not.to.exist
+                  this.tokens = project.tokens
+                  this.owner.makePrivate(this.projectId, () => {
+                    setTimeout(done, 1000)
+                  })
+                })
               })
             }
           )
@@ -783,80 +787,83 @@ describe('TokenAccess', function() {
       )
     })
 
-    it('should redirect to canonical path, when user uses read-write token', function(done) {
-      return try_read_and_write_token_access(
-        this.other1,
-        this.tokens.readAndWrite,
-        (response, body) => {
-          expect(response.statusCode).to.equal(302)
-          return expect(response.headers.location).to.equal(
-            `/project/${this.project_id}`
-          )
-        },
-        done
-      )
-    })
-
-    it('should redirect to canonical path, when user uses read-only token', function(done) {
-      return try_read_only_token_access(
-        this.other1,
-        this.tokens.readOnly,
-        (response, body) => {
-          expect(response.statusCode).to.equal(302)
-          return expect(response.headers.location).to.equal(
-            `/project/${this.project_id}`
-          )
-        },
-        done
-      )
-    })
-
     it('should allow the user access to the project', function(done) {
-      return try_read_access(
-        this.other1,
-        this.project_id,
-        (response, body) => {
-          return expect(response.statusCode).to.equal(200)
-        },
-        done
-      )
-    })
-
-    it('should allow user to join the project', function(done) {
-      return try_content_access(
-        this.other1,
-        this.project_id,
-        (response, body) => {
-          return expect(body.privilegeLevel).to.equal('readAndWrite')
-        },
-        done
-      )
-    })
-
-    it('should not allow a different user to join the project', function(done) {
-      return try_content_access(
-        this.other2,
-        this.project_id,
-        (response, body) => {
-          return expect(body.privilegeLevel).to.equal(false)
-        },
+      async.series(
+        [
+          // should redirect to canonical path, when user uses read-write token
+          cb =>
+            tryReadAndWriteTokenAccess(
+              this.other1,
+              this.tokens.readAndWrite,
+              (response, body) => {
+                expect(response.statusCode).to.equal(302)
+                expect(response.headers.location).to.equal(
+                  `/project/${this.projectId}`
+                )
+              },
+              cb
+            ),
+          // should redirect to canonical path, when user uses read-only token
+          cb =>
+            tryReadOnlyTokenAccess(
+              this.other1,
+              this.tokens.readOnly,
+              (response, body) => {
+                expect(response.statusCode).to.equal(302)
+                expect(response.headers.location).to.equal(
+                  `/project/${this.projectId}`
+                )
+              },
+              cb
+            ),
+          // should allow the user access to the project
+          cb =>
+            tryReadAccess(
+              this.other1,
+              this.projectId,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              cb
+            ),
+          // should allow user to join the project
+          cb =>
+            tryContentAccess(
+              this.other1,
+              this.projectId,
+              (response, body) => {
+                expect(body.privilegeLevel).to.equal('readAndWrite')
+              },
+              cb
+            ),
+          // should not allow a different user to join the project
+          cb =>
+            tryContentAccess(
+              this.other2,
+              this.projectId,
+              (response, body) => {
+                expect(body.privilegeLevel).to.equal(false)
+              },
+              cb
+            )
+        ],
         done
       )
     })
   })
 
   describe('unimported v1 project', function() {
-    before(function() {
-      return (settings.overleaf = { host: 'http://localhost:5000' })
+    beforeEach(function() {
+      settings.overleaf = { host: 'http://localhost:5000' }
     })
 
-    after(function() {
-      return delete settings.overleaf
+    afterEach(function() {
+      delete settings.overleaf
     })
 
     it('should show error page for read and write token', function(done) {
       const unimportedV1Token = '123abc'
-      try_read_and_write_token_access(
+      tryReadAndWriteTokenAccess(
         this.owner,
         unimportedV1Token,
         (response, body) => {
@@ -868,7 +875,7 @@ describe('TokenAccess', function() {
 
     it('should show error page for read only token to v1', function(done) {
       const unimportedV1Token = 'abcd'
-      try_read_only_token_access(
+      tryReadOnlyTokenAccess(
         this.owner,
         unimportedV1Token,
         (response, body) => {
@@ -880,43 +887,40 @@ describe('TokenAccess', function() {
   })
 
   describe('importing v1 project', function() {
-    before(function(done) {
+    beforeEach(function(done) {
       settings.projectImportingCheckMaxCreateDelta = 3600
       settings.overleaf = { host: 'http://localhost:5000' }
-      return this.owner.createProject(
+      this.owner.createProject(
         `token-rw-test${Math.random()}`,
-        (err, project_id) => {
+        (err, projectId) => {
           if (err != null) {
             return done(err)
           }
-          this.project_id = project_id
-          return this.owner.makeTokenBased(this.project_id, err => {
+          this.projectId = projectId
+          this.owner.makeTokenBased(this.projectId, err => {
             if (err != null) {
               return done(err)
             }
-            return db.projects.update(
-              { _id: ObjectId(project_id) },
+            db.projects.update(
+              { _id: ObjectId(projectId) },
               { $set: { overleaf: { id: 1234 } } },
               err => {
                 if (err != null) {
                   return done(err)
                 }
-                return this.owner.getProject(
-                  this.project_id,
-                  (err, project) => {
-                    if (err != null) {
-                      return done(err)
-                    }
-                    this.tokens = project.tokens
-                    MockV1Api.setDocExported(this.tokens.readAndWrite, {
-                      exporting: true
-                    })
-                    MockV1Api.setDocExported(this.tokens.readOnly, {
-                      exporting: true
-                    })
-                    return done()
+                this.owner.getProject(this.projectId, (err, project) => {
+                  if (err != null) {
+                    return done(err)
                   }
-                )
+                  this.tokens = project.tokens
+                  MockV1Api.setDocExported(this.tokens.readAndWrite, {
+                    exporting: true
+                  })
+                  MockV1Api.setDocExported(this.tokens.readOnly, {
+                    exporting: true
+                  })
+                  done()
+                })
               }
             )
           })
@@ -924,47 +928,51 @@ describe('TokenAccess', function() {
       )
     })
 
-    after(function() {
+    afterEach(function() {
       delete settings.projectImportingCheckMaxCreateDelta
-      return delete settings.overleaf
+      delete settings.overleaf
     })
 
-    it('should show importing page for read and write token', function(done) {
-      return try_read_and_write_token_access(
-        this.owner,
-        this.tokens.readAndWrite,
-        (response, body) => {
-          expect(response.statusCode).to.equal(200)
-          return expect(body).to.include('ImportingController')
-        },
-        done
-      )
-    })
-
-    it('should show importing page for read only token', function(done) {
-      return try_read_only_token_access(
-        this.owner,
-        this.tokens.readOnly,
-        (response, body) => {
-          expect(response.statusCode).to.equal(200)
-          return expect(body).to.include('ImportingController')
-        },
+    it('should show importing page for read, and read-write tokens', function(done) {
+      async.series(
+        [
+          cb =>
+            tryReadAndWriteTokenAccess(
+              this.owner,
+              this.tokens.readAndWrite,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+                expect(body).to.include('ImportingController')
+              },
+              cb
+            ),
+          cb =>
+            tryReadOnlyTokenAccess(
+              this.owner,
+              this.tokens.readOnly,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+                expect(body).to.include('ImportingController')
+              },
+              cb
+            )
+        ],
         done
       )
     })
 
     describe('when importing check not configured', function() {
-      before(function() {
-        return delete settings.projectImportingCheckMaxCreateDelta
+      beforeEach(function() {
+        delete settings.projectImportingCheckMaxCreateDelta
       })
 
       it('should load editor', function(done) {
-        return try_read_and_write_token_access(
+        tryReadAndWriteTokenAccess(
           this.owner,
           this.tokens.readAndWrite,
           (response, body) => {
             expect(response.statusCode).to.equal(200)
-            return expect(body).to.include('IdeController')
+            expect(body).to.include('IdeController')
           },
           done
         )
