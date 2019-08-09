@@ -21,6 +21,7 @@
 let ProjectLocator
 const { Project } = require('../../models/Project')
 const ProjectGetter = require('./ProjectGetter')
+const ProjectHelper = require('./ProjectHelper')
 const Errors = require('../Errors/Errors')
 const _ = require('underscore')
 const logger = require('logger-sharelatex')
@@ -319,7 +320,7 @@ module.exports = ProjectLocator = {
           projects,
           project =>
             project.name.toLowerCase() === projectName &&
-            project.archived !== true
+            !ProjectHelper.isArchived(project, user_id)
         )
         logger.log(
           { user_id, projectName, totalProjects: projects.length, project },

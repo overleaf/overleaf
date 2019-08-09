@@ -65,6 +65,9 @@ describe('ProjectLocator', function() {
     this.ProjectGetter = {
       getProject: sinon.stub().callsArgWith(2, null, project)
     }
+    this.ProjectHelper = {
+      isArchived: sinon.stub()
+    }
     return (this.locator = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -73,6 +76,7 @@ describe('ProjectLocator', function() {
         '../../models/Project': { Project },
         '../../models/User': { User: this.User },
         './ProjectGetter': this.ProjectGetter,
+        './ProjectHelper': this.ProjectHelper,
         'logger-sharelatex': {
           log() {},
           err() {},
@@ -562,6 +566,26 @@ describe('ProjectLocator', function() {
           { name: 'Noooo' }
         ]
       }
+
+      this.ProjectHelper.isArchived
+        .withArgs(projects.owned[0], user_id)
+        .returns(false)
+      this.ProjectHelper.isArchived
+        .withArgs(projects.owned[1], user_id)
+        .returns(false)
+      this.ProjectHelper.isArchived
+        .withArgs(projects.owned[2], user_id)
+        .returns(true)
+      this.ProjectHelper.isArchived
+        .withArgs(projects.owned[3], user_id)
+        .returns(false)
+      this.ProjectHelper.isArchived
+        .withArgs(projects.owned[4], user_id)
+        .returns(true)
+      this.ProjectHelper.isArchived
+        .withArgs(projects.owned[5], user_id)
+        .returns(false)
+
       this.ProjectGetter.findAllUsersProjects = sinon
         .stub()
         .callsArgWith(2, null, projects)

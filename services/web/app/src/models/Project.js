@@ -61,7 +61,7 @@ const ProjectSchema = new Schema({
   spellCheckLanguage: { type: String, default: 'en' },
   deletedByExternalDataSource: { type: Boolean, default: false },
   description: { type: String, default: '' },
-  archived: { type: Boolean },
+  archived: Schema.Types.Mixed,
   deletedDocs: [DeletedDocSchema],
   deletedFiles: [DeletedFileSchema],
   imageName: { type: String },

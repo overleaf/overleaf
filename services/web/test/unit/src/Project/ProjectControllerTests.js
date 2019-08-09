@@ -79,6 +79,9 @@ describe('ProjectController', function() {
       findAllUsersProjects: sinon.stub(),
       getProject: sinon.stub()
     }
+    this.ProjectHelper = {
+      isArchived: sinon.stub()
+    }
     this.AuthenticationController = {
       getLoggedInUser: sinon.stub().callsArgWith(1, null, this.user),
       getLoggedInUserId: sinon.stub().returns(this.user._id),
@@ -136,6 +139,7 @@ describe('ProjectController', function() {
         './ProjectDuplicator': this.ProjectDuplicator,
         './ProjectCreationHandler': this.ProjectCreationHandler,
         '../Editor/EditorController': this.EditorController,
+        './ProjectHelper': this.ProjectHelper,
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
         '../Subscription/LimitationsManager': this.LimitationsManager,
         '../Tags/TagsHandler': this.TagsHandler,
@@ -897,13 +901,27 @@ describe('ProjectController', function() {
           somethingElse: 1
         }
       ]
+
+      this.ProjectHelper.isArchived
+        .withArgs(projects[0], this.user._id)
+        .returns(true)
+      this.ProjectHelper.isArchived
+        .withArgs(projects[1], this.user._id)
+        .returns(false)
+      this.ProjectHelper.isArchived
+        .withArgs(projects[2], this.user._id)
+        .returns(false)
+      this.ProjectHelper.isArchived
+        .withArgs(projects[3], this.user._id)
+        .returns(false)
+
       this.ProjectGetter.findAllUsersProjects = sinon
         .stub()
         .callsArgWith(2, null, [])
       this.ProjectController._buildProjectList = sinon.stub().returns(projects)
       this.AuthenticationController.getLoggedInUserId = sinon
         .stub()
-        .returns('abc')
+        .returns(this.user._id)
       return done()
     })
 

@@ -16,10 +16,58 @@ const should = chai.should()
 const { expect } = chai
 const modulePath = '../../../../app/src/Features/Project/ProjectHelper.js'
 const SandboxedModule = require('sandboxed-module')
+const { ObjectId } = require('mongojs')
 
 describe('ProjectHelper', function() {
   beforeEach(function() {
+    this.project = {
+      _id: '123213jlkj9kdlsaj'
+    }
+
+    this.user = {
+      _id: '588f3ddae8ebc1bac07c9fa4',
+      first_name: 'bjkdsjfk',
+      features: {}
+    }
+
     return (this.ProjectHelper = SandboxedModule.require(modulePath))
+  })
+
+  describe('isArchived', function() {
+    describe('project.archived being an array', function() {
+      it('returns true if user id is found', function() {
+        this.project.archived = [
+          ObjectId('588f3ddae8ebc1bac07c9fa4'),
+          ObjectId('5c41deb2b4ca500153340809')
+        ]
+        expect(
+          this.ProjectHelper.isArchived(this.project, this.user._id)
+        ).to.equal(true)
+      })
+
+      it('returns false if user id is not found', function() {
+        this.project.archived = []
+        expect(
+          this.ProjectHelper.isArchived(this.project, this.user._id)
+        ).to.equal(false)
+      })
+    })
+
+    describe('project.archived being a boolean', function() {
+      it('returns true if archived is true', function() {
+        this.project.archived = true
+        expect(
+          this.ProjectHelper.isArchived(this.project, this.user._id)
+        ).to.equal(true)
+      })
+
+      it('returns false if archived is false', function() {
+        this.project.archived = false
+        expect(
+          this.ProjectHelper.isArchived(this.project, this.user._id)
+        ).to.equal(false)
+      })
+    })
   })
 
   describe('compilerFromV1Engine', function() {

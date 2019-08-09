@@ -18,10 +18,21 @@ const ENGINE_TO_COMPILER_MAP = {
   xelatex: 'xelatex',
   lualatex: 'lualatex'
 }
+const { ObjectId } = require('../../infrastructure/mongojs')
 
 module.exports = ProjectHelper = {
   compilerFromV1Engine(engine) {
     return ENGINE_TO_COMPILER_MAP[engine]
+  },
+
+  isArchived(project, userId) {
+    userId = ObjectId(userId)
+
+    if (Array.isArray(project.archived)) {
+      return project.archived.find(id => id.equals(userId)) !== undefined
+    } else {
+      return project.archived
+    }
   },
 
   ensureNameIsUnique(nameList, name, suffixes, maxLength, callback) {
