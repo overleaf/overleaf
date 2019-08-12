@@ -127,5 +127,10 @@ module.exports = {
       primaryKey: 'slug',
       access: 'managerIds'
     }
+  },
+
+  admin: {
+    // for metrics only
+    modelName: null
   }
 }

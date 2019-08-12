@@ -42,7 +42,8 @@ const UserSchema = new Schema({
     institutionMetrics: { type: Boolean, default: false },
     institutionManagement: { type: Boolean, default: false },
     groupMetrics: { type: Boolean, default: false },
-    groupManagement: { type: Boolean, default: false }
+    groupManagement: { type: Boolean, default: false },
+    adminMetrics: { type: Boolean, default: false }
   },
   signUpDate: {
     type: Date,

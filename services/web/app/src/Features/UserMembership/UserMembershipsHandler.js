@@ -28,7 +28,7 @@ module.exports = UserMembershipsHandler = {
     const entityConfigs = []
     for (let key in UserMembershipEntityConfigs) {
       const entityConfig = UserMembershipEntityConfigs[key]
-      if (entityConfig.fields.write != null) {
+      if (entityConfig.fields && entityConfig.fields.write != null) {
         entityConfigs.push(entityConfig)
       }
     }

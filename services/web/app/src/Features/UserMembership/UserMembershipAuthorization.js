@@ -122,6 +122,18 @@ module.exports = UserMembershipAuthorization = {
     )
   },
 
+  requireAdminMetricsStaffAccess(req, res, next) {
+    return requireAccessToEntity(
+      'admin',
+      'admin',
+      req,
+      res,
+      next,
+      'adminMetrics',
+      true
+    )
+  },
+
   requireTemplateMetricsAccess(req, res, next) {
     const templateId = req.params.id
     return request(
@@ -198,6 +210,12 @@ module.exports = UserMembershipAuthorization = {
       )
     } else if (req.query.resource_type === 'team') {
       return UserMembershipAuthorization.requireTeamMetricsAccess(
+        req,
+        res,
+        next
+      )
+    } else if (req.query.resource_type === 'admin') {
+      return UserMembershipAuthorization.requireAdminMetricsStaffAccess(
         req,
         res,
         next
@@ -293,6 +311,9 @@ var getEntity = function(
   const entityConfig = EntityConfigs[entityName]
   if (!entityConfig) {
     return callback(new Errors.NotFoundError(`No such entity: ${entityName}`))
+  }
+  if (!entityConfig.modelName) {
+    return callback(null, { id: entityName }, entityConfig, true)
   }
 
   return UserMembershipHandler.getEntity(
