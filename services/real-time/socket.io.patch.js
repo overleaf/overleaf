@@ -1,3 +1,9 @@
+// EventEmitter has been removed from process in node >= 7
+// https://github.com/nodejs/node/commit/62b544290a075fe38e233887a06c408ba25a1c71
+if(process.versions.node.split('.')[0] >= 7) {
+  process.EventEmitter = require('events')
+}
+
 var io = require("socket.io");
 
 if (io.version === "0.9.16") {
