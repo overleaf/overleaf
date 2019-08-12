@@ -11,7 +11,6 @@ grep 'name:' config/services.js | \
 		case $service in 
 			web)
 				make compile_full
-				make minify
 				;;
 			chat)
 				echo "$service doesn't require a compilation"
