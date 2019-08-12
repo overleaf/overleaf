@@ -1,25 +1,14 @@
 #! env bash
 
-[ -z "`type -t nvm`" ] && cat <<EOF
-
-==========================================================
-== NVM not installed, you should consider installing it ==
-==========================================================
-
-EOF
-
+set -e
 
 grep 'name:' config/services.js | \
 	sed 's/.*name: "\(.*\)",/\1/' | \
 	while read service
 	do
 		pushd $service
-		echo "Installing Service $service"
-		echo '  installing Node'
-		type -t nvm && nvm install
-		type -t nvm && nvm use
-		echo '  installing Dependencies'
-		npm install
-		grunt install
+		echo "Installing service $service"
+		npm install --quiet
 		popd
 	done
+
