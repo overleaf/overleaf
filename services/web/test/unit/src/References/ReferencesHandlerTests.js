@@ -76,6 +76,9 @@ describe('ReferencesHandler', function() {
         }),
         '../DocumentUpdater/DocumentUpdaterHandler': (this.DocumentUpdaterHandler = {
           flushDocToMongo: sinon.stub().callsArgWith(2, null)
+        }),
+        '../../infrastructure/Features': (this.Features = {
+          hasFeature: sinon.stub().returns(true)
         })
       }
     })
@@ -98,6 +101,26 @@ describe('ReferencesHandler', function() {
       )
       return (this.call = callback => {
         return this.handler.index(this.projectId, this.docIds, callback)
+      })
+    })
+
+    describe('when references feature is disabled', function() {
+      beforeEach(function() {
+        this.Features.hasFeature.withArgs('references').returns(false)
+      })
+
+      it('should not try to retrieve any user information', function(done) {
+        this.call(() => {
+          this.UserGetter.getUser.callCount.should.equal(0)
+          done()
+        })
+      })
+
+      it('should not produce an error', function(done) {
+        return this.call(err => {
+          expect(err).to.equal(undefined)
+          return done()
+        })
       })
     })
 

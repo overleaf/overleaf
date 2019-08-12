@@ -553,6 +553,10 @@ describe('ProjectController', function() {
 
     describe('with overleaf-integration-web-module hook', function() {
       beforeEach(function() {
+        this.Features.hasFeature = sinon
+          .stub()
+          .withArgs('overleaf-integration')
+          .returns(true)
         this.V1Response = {
           projects: [
             {

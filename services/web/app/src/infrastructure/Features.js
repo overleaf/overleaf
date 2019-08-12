@@ -46,6 +46,10 @@ module.exports = Features = {
         return !!Settings.apis.v1.url
       case 'redirect-sl':
         return Settings.redirectToV2 != null
+      case 'overleaf-integration':
+        return Settings.overleaf != null
+      case 'references':
+        return Settings.apis.references.url != null
       default:
         throw new Error(`unknown feature: ${feature}`)
     }

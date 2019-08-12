@@ -16,6 +16,7 @@ let ReferencesHandler
 const logger = require('logger-sharelatex')
 const request = require('request')
 const settings = require('settings-sharelatex')
+const Features = require('../../infrastructure/Features')
 const ProjectGetter = require('../Project/ProjectGetter')
 const UserGetter = require('../User/UserGetter')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
@@ -25,7 +26,7 @@ const Async = require('async')
 const oneMinInMs = 60 * 1000
 const fiveMinsInMs = oneMinInMs * 5
 
-if (!settings.apis.references.url) {
+if (!Features.hasFeature('references')) {
   logger.log('references search not enabled')
 }
 
@@ -144,7 +145,7 @@ module.exports = ReferencesHandler = {
   },
 
   _doIndexOperation(projectId, project, docIds, fileIds, callback) {
-    if (!settings.apis.references.url) {
+    if (!Features.hasFeature('references')) {
       return callback()
     }
     return ReferencesHandler._isFullIndex(project, function(err, isFullIndex) {

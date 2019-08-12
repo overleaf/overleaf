@@ -347,6 +347,10 @@ module.exports = ProjectController = {
           )
         },
         v1Projects(cb) {
+          if (!Features.hasFeature('overleaf-integration')) {
+            return cb(null, null)
+          }
+
           return Modules.hooks.fire('findAllV1Projects', user_id, function(
             error,
             projects
@@ -379,6 +383,9 @@ module.exports = ProjectController = {
           )
         },
         userAffiliations(cb) {
+          if (!Features.hasFeature('affiliations')) {
+            return cb(null, null)
+          }
           return getUserAffiliations(user_id, cb)
         }
       },
@@ -905,7 +912,7 @@ module.exports = ProjectController = {
       v1ProjectData = {}
     }
     const warnings = []
-    if (v1ProjectData.noConnection) {
+    if (v1ProjectData.noConnection && Settings.overleaf) {
       warnings.push('No V1 Connection')
     }
     if (v1ProjectData.hasHiddenV1Projects) {
