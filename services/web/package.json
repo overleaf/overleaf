@@ -1,7 +1,9 @@
 {
-  "name": "web-sharelatex",
+  "name": "web-overleaf",
   "version": "0.1.4",
   "description": "The HTTP front end for ShareLaTeX",
+  "license": "AGPL-3.0-only",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/sharelatex/web-sharelatex.git"
