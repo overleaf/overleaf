@@ -50,6 +50,8 @@ settings =
 
 	forceDrainMsDelay: process.env['FORCE_DRAIN_MS_DELAY'] or false
 
+	shutdownDrainTimeWindow: process.env['SHUTDOWN_DRAIN_TIME_WINDOW'] or 9
+
 	continualPubsubTraffic: process.env['CONTINUAL_PUBSUB_TRAFFIC'] or false
 
 	checkEventOrder: process.env['CHECK_EVENT_ORDER'] or false

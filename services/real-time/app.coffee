@@ -113,8 +113,8 @@ shutdownCleanly = (signal) ->
 forceDrain = ->
 	logger.log {delay_ms:Settings.forceDrainMsDelay}, "starting force drain after timeout"
 	setTimeout ()-> 
-		logger.log "starting drain"
-		DrainManager.startDrain(io, 4)
+		logger.log "starting drain over #{Settings.shutdownDrainTimeWindow} mins"
+		DrainManager.startDrainTimeWindow(io, Settings.shutdownDrainTimeWindow)
 	, Settings.forceDrainMsDelay
 
 shutDownInProgress = false

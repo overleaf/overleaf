@@ -1,6 +1,11 @@
 logger = require "logger-sharelatex"
 
-module.exports =
+module.exports = DrainManager =
+
+	startDrainTimeWindow: (io, minsToDrain)->
+		drainPerMin = io.sockets.clients().length / minsToDrain
+		DrainManager.startDrain(io, drainPerMin / 60)
+
 	startDrain: (io, rate) ->
 		# Clear out any old interval
 		clearInterval @interval
