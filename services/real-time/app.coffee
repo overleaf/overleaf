@@ -56,7 +56,7 @@ app.get "/", (req, res, next) ->
 	res.send "real-time-sharelatex is alive"
 
 app.get "/status", (req, res, next) ->
-	if shutDownInProgress
+	if Settings.shutDownInProgress
 		res.send 503 # Service unavailable
 	else
 		res.send "real-time-sharelatex is alive"
@@ -120,17 +120,17 @@ forceDrain = ->
 		DrainManager.startDrain(io, 4)
 	, Settings.forceDrainMsDelay
 
-shutDownInProgress = false
+Settings.shutDownInProgress = false
 if Settings.forceDrainMsDelay?
 	Settings.forceDrainMsDelay = parseInt(Settings.forceDrainMsDelay, 10)
 	logger.log forceDrainMsDelay: Settings.forceDrainMsDelay,"forceDrainMsDelay enabled"
 	for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
 		process.on signal, ->
-			if shutDownInProgress
+			if Settings.shutDownInProgress
 				logger.log signal: signal, "shutdown already in progress, ignoring signal"
 				return
 			else
-				shutDownInProgress = true
+				Settings.shutDownInProgress = true
 				logger.log signal: signal, "received interrupt, cleaning up"
 				shutdownCleanly(signal)
 				forceDrain()
