@@ -101,6 +101,8 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 				strong #{translate("ask_proj_owner_to_upgrade_for_full_history")}
 
 script(type="text/ng-template", id="historyEntryTpl")
+	time.history-entry-day(ng-if="::$ctrl.entry.meta.first_in_day") {{ ::$ctrl.entry.meta.end_ts | relativeDate }}
+
 	.history-entry(
 		ng-class="{\
 			'history-entry-first-in-day': $ctrl.entry.meta.first_in_day,\
@@ -115,9 +117,6 @@ script(type="text/ng-template", id="historyEntryTpl")
 		history-droppable-area-on-drop="$ctrl.onDrop(boundary)"
 		history-droppable-area-on-over="$ctrl.onOver(boundary)"
 	)
-
-		time.history-entry-day(ng-if="::$ctrl.entry.meta.first_in_day") {{ ::$ctrl.entry.meta.end_ts | relativeDate }}
-
 		.history-entry-details(
 			ng-click="$ctrl.onSelect({ selectedEntry: $ctrl.entry })"
 		)

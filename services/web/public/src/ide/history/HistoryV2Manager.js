@@ -342,43 +342,111 @@ define([
         let files = this.$scope.history.selection.files
         let fileToSelect = null
         let previouslySelectedFile = null
+        let previouslySelectedFileHasOp = false
+        let filesWithOps = this._getFilesWithOps()
         const orderedOpTypes = ['edited', 'added', 'renamed', 'removed']
 
         if (this._previouslySelectedPathname != null) {
           previouslySelectedFile = _.find(files, {
             pathname: this._previouslySelectedPathname
           })
+          previouslySelectedFileHasOp = _.some(filesWithOps, {
+            pathname: this._previouslySelectedPathname
+          })
         }
-
-        if (previouslySelectedFile != null) {
+        if (previouslySelectedFile != null && previouslySelectedFileHasOp) {
           fileToSelect = previouslySelectedFile
         } else {
           for (let opType of orderedOpTypes) {
-            let fileWithMatchingOpType = _.find(files, { operation: opType })
+            let fileWithMatchingOpType = _.find(filesWithOps, {
+              operation: opType
+            })
             if (fileWithMatchingOpType != null) {
-              fileToSelect = fileWithMatchingOpType
+              fileToSelect = _.find(files, {
+                pathname: fileWithMatchingOpType.pathname
+              })
               break
             }
           }
           if (fileToSelect == null) {
-            let mainFile = _.find(files, function(file) {
-              return /main\.tex$/.test(file.pathname)
-            })
-            if (mainFile != null) {
-              fileToSelect = mainFile
+            if (previouslySelectedFile != null) {
+              fileToSelect = previouslySelectedFile
             } else {
-              let anyTeXFile = _.find(files, function(file) {
-                return /\.tex$/.test(file.pathname)
+              let mainFile = _.find(files, function(file) {
+                return /main\.tex$/.test(file.pathname)
               })
-              if (anyTeXFile != null) {
-                fileToSelect = anyTeXFile
+              if (mainFile != null) {
+                fileToSelect = mainFile
               } else {
-                fileToSelect = files[0]
+                let anyTeXFile = _.find(files, function(file) {
+                  return /\.tex$/.test(file.pathname)
+                })
+                if (anyTeXFile != null) {
+                  fileToSelect = anyTeXFile
+                } else {
+                  fileToSelect = files[0]
+                }
               }
             }
           }
         }
+
         this.selectFile(fileToSelect)
+      }
+
+      _getFilesWithOps() {
+        let filesWithOps
+        if (this.$scope.history.viewMode === HistoryViewModes.POINT_IN_TIME) {
+          let currentUpdate = this.getUpdateForVersion(
+            this.$scope.history.selection.range.toV
+          )
+          filesWithOps = []
+          if (currentUpdate != null) {
+            for (pathname of currentUpdate.pathnames) {
+              filesWithOps.push({
+                pathname: pathname,
+                operation: 'edited'
+              })
+            }
+            for (op of currentUpdate.project_ops) {
+              let fileWithOp
+              if (op.add != null) {
+                fileWithOp = {
+                  pathname: op.add.pathname,
+                  operation: 'added'
+                }
+              } else if (op.remove != null) {
+                fileWithOp = {
+                  pathname: op.remove.pathname,
+                  operation: 'removed'
+                }
+              } else if (op.rename != null) {
+                fileWithOp = {
+                  pathname: op.rename.newPathname,
+                  operation: 'renamed'
+                }
+              }
+              if (fileWithOp != null) {
+                filesWithOps.push(fileWithOp)
+              }
+            }
+          }
+        } else {
+          filesWithOps = _.reduce(
+            this.$scope.history.selection.files,
+            (curFilesWithOps, file) => {
+              if (file.operation) {
+                curFilesWithOps.push({
+                  pathname: file.pathname,
+                  operation: file.operation
+                })
+              }
+              return curFilesWithOps
+            },
+            []
+          )
+        }
+        return filesWithOps
       }
 
       autoSelectRecentUpdates() {
