@@ -56,7 +56,10 @@ app.get "/", (req, res, next) ->
 	res.send "real-time-sharelatex is alive"
 
 app.get "/status", (req, res, next) ->
-	res.send "real-time-sharelatex is alive"
+	if shutDownInProgress
+		res.send 503 # Service unavailable
+	else
+		res.send "real-time-sharelatex is alive"
 
 app.get "/debug/events", (req, res, next) ->
 	Settings.debugEvents = parseInt(req.query?.count,10) || 20
