@@ -15,7 +15,7 @@ describe "DrainManager", ->
 	describe "startDrainTimeWindow", ->
 		beforeEach ->
 			@clients = []
-			for i in [0..1619]
+			for i in [0..5399]
 				@clients[i] = {
 					id: i
 					emit: sinon.stub()
@@ -25,8 +25,7 @@ describe "DrainManager", ->
 
 		it "should set a drain rate fast enough", (done)->
 			@DrainManager.startDrainTimeWindow(@io, 9)
-			console.log(@DrainManager.startDrain.args[0])
-			@DrainManager.startDrain.calledWith(@io, 3).should.equal true
+			@DrainManager.startDrain.calledWith(@io, 10).should.equal true
 			done()
 
 
