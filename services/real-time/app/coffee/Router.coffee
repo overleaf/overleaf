@@ -39,6 +39,11 @@ module.exports = Router =
 		app.post "/drain", httpAuth, HttpApiController.startDrain
 
 		session.on 'connection', (error, client, session) ->
+			if settings.shutDownInProgress
+				client.emit("connectionRejected", {message: "retry"})
+				client.disconnect()
+				return
+
 			if client? and error?.message?.match(/could not look up session by key/)
 				logger.warn err: error, client: client?, session: session?, "invalid session"
 				# tell the client to reauthenticate if it has an invalid session key
