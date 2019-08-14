@@ -78,7 +78,7 @@ module.exports = Router =
 
 			client.on "disconnect", () ->
 				metrics.inc('socket-io.disconnect')
-				metrics.gauge('socket-io.clients', io.sockets.clients()?.length)
+				metrics.gauge('socket-io.clients', io.sockets.clients()?.length - 1)
 				WebsocketController.leaveProject io, client, (err) ->
 					if err?
 						Router._handleError null, err, client, "leaveProject"
