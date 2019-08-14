@@ -775,10 +775,7 @@ const ClsiManager = {
     }
     if (rootResourcePath == null) {
       if (hasMainFile) {
-        logger.warn(
-          { projectId },
-          'no root document found, setting to main.tex'
-        )
+        logger.log({ projectId }, 'no root document found, setting to main.tex')
         rootResourcePath = 'main.tex'
       } else if (numberOfDocsInProject === 1) {
         // only one file, must be the main document
