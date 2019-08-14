@@ -355,18 +355,26 @@ describe 'WebsocketController', ->
 		beforeEach ->
 			@client.params.project_id = @project_id
 			@users = ["mock", "users"]
+			@WebsocketLoadBalancer.emitToRoom = sinon.stub()
 			@ConnectedUsersManager.getConnectedUsers = sinon.stub().callsArgWith(1, null, @users)
 			
 		describe "when authorized", ->
-			beforeEach ->
+			beforeEach (done) ->
 				@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
-				@WebsocketController.getConnectedUsers @client, @callback
+				@WebsocketController.getConnectedUsers @client, (args...) =>
+					@callback(args...)
+					done()
 				
 			it "should check that the client is authorized to view the project", ->
 				@AuthorizationManager.assertClientCanViewProject
 					.calledWith(@client)
 					.should.equal true
-					
+
+			it "should broadcast a request to update the client list", ->
+				@WebsocketLoadBalancer.emitToRoom
+					.calledWith(@project_id, "clientTracking.refresh")
+					.should.equal true
+
 			it "should get the connected users for the project", ->
 				@ConnectedUsersManager.getConnectedUsers
 					.calledWith(@project_id)
