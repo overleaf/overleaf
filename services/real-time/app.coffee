@@ -25,10 +25,9 @@ HealthCheckManager = require("./app/js/HealthCheckManager")
 
 # work around frame handler bug in socket.io v0.9.16
 require("./socket.io.patch.js") 
-
 # Set up socket.io server
 app = express()
-Metrics.injectMetricsRoute(app)
+
 server = require('http').createServer(app)
 io = require('socket.io').listen(server)
 
@@ -37,6 +36,9 @@ sessionStore = new RedisStore(client: sessionRedisClient)
 cookieParser = CookieParser(Settings.security.sessionSecret)
 
 sessionSockets = new SessionSockets(io, sessionStore, cookieParser, Settings.cookieName)
+
+Metrics.injectMetricsRoute(app)
+app.use(Metrics.http.monitor(logger))
 
 io.configure ->
 	io.enable('browser client minification')
@@ -65,7 +67,7 @@ app.get "/debug/events", (req, res, next) ->
 
 rclient = require("redis-sharelatex").createClient(Settings.redis.realtime)
 
-app.get "/health_check/redis", (req, res, next) ->
+healthCheck = (req, res, next)->
 	rclient.healthCheck (error) ->
 		if error?
 			logger.err {err: error}, "failed redis health check"
@@ -77,7 +79,11 @@ app.get "/health_check/redis", (req, res, next) ->
 		else
 			res.sendStatus 200
 
-Metrics.injectMetricsRoute(app)
+app.get "/health_check", healthCheck
+
+app.get "/health_check/redis", healthCheck
+
+
 
 Router = require "./app/js/Router"
 Router.configure(app, io, sessionSockets)
