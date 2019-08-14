@@ -159,6 +159,10 @@ define([], function() {
           sl_console.log(
             '[socket.io connectionRejected] session not valid or other connection error'
           )
+          // real time sends a 'retry' message if the process was shutting down
+          if (err && err.message === 'retry') {
+            return this.tryReconnectWithRateLimit()
+          }
           // we have failed authentication, usually due to an invalid session cookie
           return this.reportConnectionError(err)
         })
@@ -286,6 +290,12 @@ Something went wrong connecting to your project. Please refresh if this continue
       }
 
       disconnect() {
+        if (this.ide.socket.socket && !this.ide.socket.socket.connected) {
+          sl_console.log(
+            '[socket.io] skipping disconnect because socket.io has not connected'
+          )
+          return
+        }
         sl_console.log('[socket.io] disconnecting client')
         return this.ide.socket.disconnect()
       }
