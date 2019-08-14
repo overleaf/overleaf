@@ -184,7 +184,7 @@ module.exports = WebsocketController =
 			logger.log {user_id, project_id, client_id: client.id}, "getting connected users"
 			AuthorizationManager.assertClientCanViewProject client, (error) ->
 				return callback(error) if error?
-				WebsocketLoadBalancer.emitToRoom project_id, 'clientTracking.refresh', project_id
+				WebsocketLoadBalancer.emitToRoom project_id, 'clientTracking.refresh'
 				setTimeout () ->
 					ConnectedUsersManager.getConnectedUsers project_id, (error, users) ->
 						return callback(error) if error?
