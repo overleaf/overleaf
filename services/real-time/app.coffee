@@ -58,7 +58,10 @@ app.get "/", (req, res, next) ->
 	res.send "real-time-sharelatex is alive"
 
 app.get "/status", (req, res, next) ->
-	res.send "real-time-sharelatex is alive"
+	if Settings.shutDownInProgress
+		res.send 503 # Service unavailable
+	else
+		res.send "real-time-sharelatex is alive"
 
 app.get "/debug/events", (req, res, next) ->
 	Settings.debugEvents = parseInt(req.query?.count,10) || 20
@@ -116,17 +119,17 @@ shutdownCleanly = (signal) ->
 			shutdownCleanly(signal)
 		, 10000
 
-shutDownInProgress = false
+Settings.shutDownInProgress = false
 if Settings.shutdownDrainTimeWindow?
 	Settings.forceDrainMsDelay = parseInt(Settings.shutdownDrainTimeWindow, 10)
 	logger.log shutdownDrainTimeWindow: Settings.shutdownDrainTimeWindow,"shutdownDrainTimeWindow enabled"
 	for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
 		process.on signal, ->
-			if shutDownInProgress
+			if Settings.shutDownInProgress
 				logger.log signal: signal, "shutdown already in progress, ignoring signal"
 				return
 			else
-				shutDownInProgress = true
+				Settings.shutDownInProgress = true
 				logger.log signal: signal, "received interrupt, starting drain over #{Settings.shutdownDrainTimeWindow} mins"
 				DrainManager.startDrainTimeWindow(io, Settings.shutdownDrainTimeWindow)
 				shutdownCleanly(signal)
