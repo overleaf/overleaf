@@ -133,6 +133,7 @@ module.exports = HttpController =
 		timer = new Metrics.Timer("http.deleteProject")
 		options = {}
 		options.background = true if req.query?.background # allow non-urgent flushes to be queued
+		options.skip_history_flush = true if req.query?.shutdown # don't flush history when realtime shuts down
 		ProjectManager.flushAndDeleteProjectWithLocks project_id, options, (error) ->
 			timer.done()
 			return next(error) if error?

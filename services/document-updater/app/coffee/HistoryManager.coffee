@@ -28,6 +28,9 @@ module.exports = HistoryManager =
 	# flush changes and callback (for when we need to know the queue is flushed)
 	flushProjectChanges: (project_id, options, callback = (error) ->) ->
 		return callback() if !Settings.apis?.project_history?.enabled
+		if options.skip_history_flush
+			logger.log {project_id}, "skipping flush of project history from realtime shutdown"
+			return callback()
 		url = "#{Settings.apis.project_history.url}/project/#{project_id}/flush"
 		qs = {}
 		qs.background = true if options.background # pass on the background flush option if present
