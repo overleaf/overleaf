@@ -48,7 +48,7 @@ settings =
 	
 	max_doc_length: 2 * 1024 * 1024 # 2mb
 
-	forceDrainMsDelay: process.env['FORCE_DRAIN_MS_DELAY'] or false
+	shutdownDrainTimeWindow: process.env['SHUTDOWN_DRAIN_TIME_WINDOW'] or 9
 
 	continualPubsubTraffic: process.env['CONTINUAL_PUBSUB_TRAFFIC'] or false
 

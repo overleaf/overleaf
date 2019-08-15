@@ -12,6 +12,23 @@ describe "DrainManager", ->
 			sockets:
 				clients: sinon.stub()
 
+	describe "startDrainTimeWindow", ->
+		beforeEach ->
+			@clients = []
+			for i in [0..5399]
+				@clients[i] = {
+					id: i
+					emit: sinon.stub()
+				}
+			@io.sockets.clients.returns @clients
+			@DrainManager.startDrain = sinon.stub()
+
+		it "should set a drain rate fast enough", (done)->
+			@DrainManager.startDrainTimeWindow(@io, 9)
+			@DrainManager.startDrain.calledWith(@io, 10).should.equal true
+			done()
+
+
 	describe "reconnectNClients", ->
 		beforeEach ->
 			@clients = []
