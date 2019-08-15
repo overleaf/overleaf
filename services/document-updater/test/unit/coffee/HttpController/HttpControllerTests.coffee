@@ -343,6 +343,17 @@ describe "HttpController", ->
 			it "should time the request", ->
 				@Metrics.Timer::done.called.should.equal true
 
+		describe "with the shutdown=true option from realtime", ->
+			beforeEach ->
+				@ProjectManager.flushAndDeleteProjectWithLocks = sinon.stub().callsArgWith(2)
+				@req.query = {background:true, shutdown:true}
+				@HttpController.deleteProject(@req, @res, @next)
+
+			it "should pass the skip_history_flush option when flushing the project", ->
+				@ProjectManager.flushAndDeleteProjectWithLocks
+					.calledWith(@project_id, {background:true, skip_history_flush:true})
+					.should.equal true
+
 		describe "when an errors occurs", ->
 			beforeEach ->
 				@ProjectManager.flushAndDeleteProjectWithLocks = sinon.stub().callsArgWith(2, new Error("oops"))
