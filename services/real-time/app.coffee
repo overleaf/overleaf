@@ -121,8 +121,8 @@ shutdownCleanly = (signal) ->
 
 Settings.shutDownInProgress = false
 if Settings.shutdownDrainTimeWindow?
-	Settings.forceDrainMsDelay = parseInt(Settings.shutdownDrainTimeWindow, 10)
-	logger.log shutdownDrainTimeWindow: Settings.shutdownDrainTimeWindow,"shutdownDrainTimeWindow enabled"
+	shutdownDrainTimeWindow = parseInt(Settings.shutdownDrainTimeWindow, 10)
+	logger.log shutdownDrainTimeWindow: shutdownDrainTimeWindow,"shutdownDrainTimeWindow enabled"
 	for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
 		process.on signal, ->
 			if Settings.shutDownInProgress
@@ -130,8 +130,8 @@ if Settings.shutdownDrainTimeWindow?
 				return
 			else
 				Settings.shutDownInProgress = true
-				logger.log signal: signal, "received interrupt, starting drain over #{Settings.shutdownDrainTimeWindow} mins"
-				DrainManager.startDrainTimeWindow(io, Settings.shutdownDrainTimeWindow)
+				logger.log signal: signal, "received interrupt, starting drain over #{shutdownDrainTimeWindow} mins"
+				DrainManager.startDrainTimeWindow(io, shutdownDrainTimeWindow)
 				shutdownCleanly(signal)
 
 
