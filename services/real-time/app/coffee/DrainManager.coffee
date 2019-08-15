@@ -9,6 +9,7 @@ module.exports = DrainManager =
 	startDrain: (io, rate) ->
 		# Clear out any old interval
 		clearInterval @interval
+		logger.log  rate: rate, "starting drain"
 		if rate == 0
 			return
 		else if rate < 1

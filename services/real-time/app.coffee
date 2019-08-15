@@ -130,7 +130,7 @@ if Settings.shutdownDrainTimeWindow?
 				return
 			else
 				Settings.shutDownInProgress = true
-				logger.log signal: signal, "received interrupt, starting drain over #{shutdownDrainTimeWindow} mins"
+				logger.warn signal: signal, "received interrupt, starting drain over #{shutdownDrainTimeWindow} mins"
 				DrainManager.startDrainTimeWindow(io, shutdownDrainTimeWindow)
 				shutdownCleanly(signal)
 
