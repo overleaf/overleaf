@@ -147,18 +147,18 @@ describe "ConnectedUsersManager", ->
 	describe "getConnectedUsers", ->
 
 		beforeEach ->
-			@users = ["1234", "5678", "9123"]
+			@users = ["1234", "5678", "9123", "8234"]
 			@rClient.smembers.callsArgWith(1, null, @users)
 			@ConnectedUsersManager._getConnectedUser = sinon.stub()
-			@ConnectedUsersManager._getConnectedUser.withArgs(@project_id, @users[0]).callsArgWith(2, null, {connected:true, client_id:@users[0]})
-			@ConnectedUsersManager._getConnectedUser.withArgs(@project_id, @users[1]).callsArgWith(2, null, {connected:false, client_id:@users[1]})
-			@ConnectedUsersManager._getConnectedUser.withArgs(@project_id, @users[2]).callsArgWith(2, null, {connected:true, client_id:@users[2]})
+			@ConnectedUsersManager._getConnectedUser.withArgs(@project_id, @users[0]).callsArgWith(2, null, {connected:true, client_age: 2, client_id:@users[0]})
+			@ConnectedUsersManager._getConnectedUser.withArgs(@project_id, @users[1]).callsArgWith(2, null, {connected:false, client_age: 1, client_id:@users[1]})
+			@ConnectedUsersManager._getConnectedUser.withArgs(@project_id, @users[2]).callsArgWith(2, null, {connected:true, client_age: 3, client_id:@users[2]})
+			@ConnectedUsersManager._getConnectedUser.withArgs(@project_id, @users[3]).callsArgWith(2, null, {connected:true, client_age: 11, client_id:@users[3]}) # connected but old
 
-
-		it "should only return the users in the list which are still in redis", (done)->
+		it "should only return the users in the list which are still in redis and recently updated", (done)->
 			@ConnectedUsersManager.getConnectedUsers @project_id, (err, users)=>
 				users.length.should.equal 2
-				users[0].should.deep.equal {client_id:@users[0], connected:true}
-				users[1].should.deep.equal {client_id:@users[2], connected:true}
+				users[0].should.deep.equal {client_id:@users[0], client_age: 2, connected:true}
+				users[1].should.deep.equal {client_id:@users[2], client_age: 3, connected:true}
 				done()
 

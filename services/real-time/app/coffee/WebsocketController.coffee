@@ -175,6 +175,7 @@ module.exports = WebsocketController =
 					}, callback)
 				WebsocketLoadBalancer.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
 
+	CLIENT_REFRESH_DELAY: 1000
 	getConnectedUsers: (client, callback = (error, users) ->) ->
 		metrics.inc "editor.get-connected-users"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
@@ -183,11 +184,13 @@ module.exports = WebsocketController =
 			logger.log {user_id, project_id, client_id: client.id}, "getting connected users"
 			AuthorizationManager.assertClientCanViewProject client, (error) ->
 				return callback(error) if error?
-				ConnectedUsersManager.getConnectedUsers project_id, (error, users) ->
-					return callback(error) if error?
-					callback null, users
-					logger.log {user_id, project_id, client_id: client.id}, "got connected users"
-					
+				WebsocketLoadBalancer.emitToRoom project_id, 'clientTracking.refresh'
+				setTimeout () ->
+					ConnectedUsersManager.getConnectedUsers project_id, (error, users) ->
+						return callback(error) if error?
+						callback null, users
+						logger.log {user_id, project_id, client_id: client.id}, "got connected users"
+				, WebsocketController.CLIENT_REFRESH_DELAY
 
 	applyOtUpdate: (client, doc_id, update, callback = (error) ->) ->
 		Utils.getClientAttributes client, ["user_id", "project_id"], (error, {user_id, project_id}) ->
