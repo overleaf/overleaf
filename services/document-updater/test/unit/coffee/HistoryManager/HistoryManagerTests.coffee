@@ -46,6 +46,28 @@ describe "HistoryManager", ->
 				.calledWith({url: "#{@Settings.apis.project_history.url}/project/#{@project_id}/flush", qs:{background:true}})
 				.should.equal true
 
+	describe "flushProjectChanges", ->
+
+		describe "in the normal case", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204)
+				@HistoryManager.flushProjectChanges @project_id, {background:true}
+
+			it "should send a request to the project history api", ->
+				@request.post
+					.calledWith({url: "#{@Settings.apis.project_history.url}/project/#{@project_id}/flush", qs:{background:true}})
+					.should.equal true
+
+		describe "with the skip_history_flush option", ->
+			beforeEach ->
+				@request.post = sinon.stub()
+				@HistoryManager.flushProjectChanges @project_id, {skip_history_flush:true}
+
+			it "should not send a request to the project history api", ->
+				@request.post
+					.called
+					.should.equal false
+
 	describe "recordAndFlushHistoryOps", ->
 		beforeEach ->
 			@ops = [ 'mock-ops' ]

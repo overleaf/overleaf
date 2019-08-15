@@ -41,17 +41,15 @@ describe "Deleting a project", ->
 				version: doc.update.v
 			}
 
-		sinon.spy MockTrackChangesApi, "flushDoc"
-		sinon.spy MockProjectHistoryApi, "flushProject"
 		DocUpdaterApp.ensureRunning(done)
 
-	after ->
-		MockTrackChangesApi.flushDoc.restore()
-		MockProjectHistoryApi.flushProject.restore()
 
 	describe "with documents which have been updated", ->
 		before (done) ->
 			sinon.spy MockWebApi, "setDocument"
+			sinon.spy MockTrackChangesApi, "flushDoc"
+			sinon.spy MockProjectHistoryApi, "flushProject"
+
 			async.series @docs.map((doc) =>
 				(callback) =>
 					DocUpdaterClient.preloadDoc @project_id, doc.id, (error) =>
@@ -68,6 +66,8 @@ describe "Deleting a project", ->
 
 		after ->
 			MockWebApi.setDocument.restore()
+			MockTrackChangesApi.flushDoc.restore()
+			MockProjectHistoryApi.flushProject.restore()
 
 		it "should return a 204 status code", ->
 			@statusCode.should.equal 204
@@ -96,3 +96,42 @@ describe "Deleting a project", ->
 
 		it "should flush each doc in project history", ->
 			MockProjectHistoryApi.flushProject.calledWith(@project_id).should.equal true
+
+	describe "with the shutdown=true parameter from realtime", ->
+		before (done) ->
+			sinon.spy MockWebApi, "setDocument"
+			sinon.spy MockTrackChangesApi, "flushDoc"
+			sinon.spy MockProjectHistoryApi, "flushProject"
+
+			async.series @docs.map((doc) =>
+				(callback) =>
+					DocUpdaterClient.preloadDoc @project_id, doc.id, callback
+			), (error) =>
+				throw error if error?
+				setTimeout () =>
+					DocUpdaterClient.deleteProjectOnShutdown @project_id, (error, res, body) =>
+						@statusCode = res.statusCode
+						done()
+				, 200
+
+		after ->
+			MockWebApi.setDocument.restore()
+			MockTrackChangesApi.flushDoc.restore()
+			MockProjectHistoryApi.flushProject.restore()
+
+		it "should return a 204 status code", ->
+			@statusCode.should.equal 204
+
+		it "should send each document to the web api", ->
+			for doc in @docs
+				MockWebApi.setDocument
+					.calledWith(@project_id, doc.id, doc.updatedLines)
+					.should.equal true
+
+		it "should flush each doc in track changes", ->
+			for doc in @docs
+				MockTrackChangesApi.flushDoc.calledWith(doc.id).should.equal true
+
+		it "should not flush to project history", ->
+			MockProjectHistoryApi.flushProject.called.should.equal false
+
