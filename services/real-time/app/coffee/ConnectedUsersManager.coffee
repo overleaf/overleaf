@@ -60,7 +60,7 @@ module.exports =
 
 	_getConnectedUser: (project_id, client_id, callback)->
 		rclient.hgetall Keys.connectedUser({project_id, client_id}), (err, result)->
-			if !result? or Object.keys(result).length == 0
+			if !result? or Object.keys(result).length == 0 or !result.user_id
 				result =
 					connected : false
 					client_id:client_id

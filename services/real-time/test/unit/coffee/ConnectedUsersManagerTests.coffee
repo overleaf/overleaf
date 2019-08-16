@@ -124,7 +124,7 @@ describe "ConnectedUsersManager", ->
 
 		it "should return a connected user if there is a user object", (done)->
 			cursorData = JSON.stringify(cursorData:{row:1})
-			@rClient.hgetall.callsArgWith(1, null, {connected_at:new Date(), cursorData})
+			@rClient.hgetall.callsArgWith(1, null, {connected_at:new Date(), user_id: @user._id, last_updated_at: "#{Date.now()}", cursorData})
 			@ConnectedUsersManager._getConnectedUser @project_id, @client_id, (err, result)=>
 				result.connected.should.equal true
 				result.client_id.should.equal @client_id
