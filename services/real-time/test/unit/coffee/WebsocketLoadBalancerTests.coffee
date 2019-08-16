@@ -17,6 +17,7 @@ describe "WebsocketLoadBalancer", ->
 			"./HealthCheckManager": {check: sinon.stub()}
 			"./RoomManager" : @RoomManager = {eventSource: sinon.stub().returns @RoomEvents}
 			"./ChannelManager": @ChannelManager = {publish: sinon.stub()}
+			"./ConnectedUsersManager": @ConnectedUsersManager = {refreshClient: sinon.stub()}
 		@io = {}
 		@WebsocketLoadBalancer.rclientPubList = [{publish: sinon.stub()}]
 		@WebsocketLoadBalancer.rclientSubList = [{
