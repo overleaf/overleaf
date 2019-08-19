@@ -366,7 +366,15 @@ describe('LaunchpadController', function() {
       it('should have updated the user to make them an admin', function() {
         this.User.update.callCount.should.equal(1)
         return this.User.update
-          .calledWith({ _id: this.user._id }, { $set: { isAdmin: true } })
+          .calledWithMatch(
+            { _id: this.user._id },
+            {
+              $set: {
+                isAdmin: true,
+                emails: [{ email: this.user.email }]
+              }
+            }
+          )
           .should.equal(true)
       })
 
@@ -677,7 +685,15 @@ describe('LaunchpadController', function() {
 
       it('should have updated the user to make them an admin', function() {
         return this.User.update
-          .calledWith({ _id: this.user._id }, { $set: { isAdmin: true } })
+          .calledWith(
+            { _id: this.user._id },
+            {
+              $set: {
+                isAdmin: true,
+                emails: [{ email: this.user.email }]
+              }
+            }
+          )
           .should.equal(true)
       })
 
@@ -752,7 +768,13 @@ describe('LaunchpadController', function() {
       it('should have updated the user to make them an admin', function() {
         this.User.update.callCount.should.equal(1)
         return this.User.update
-          .calledWith({ _id: this.user._id }, { $set: { isAdmin: true } })
+          .calledWith(
+            { _id: this.user._id },
+            {
+              $set: { isAdmin: true },
+              emails: [{ email: this.user.email }]
+            }
+          )
           .should.equal(true)
       })
 
