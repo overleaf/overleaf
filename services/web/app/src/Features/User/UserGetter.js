@@ -19,6 +19,7 @@ const { db } = mongojs
 const { ObjectId } = mongojs
 const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
 const Errors = require('../Errors/Errors')
+const Features = require('../../infrastructure/Features')
 
 module.exports = UserGetter = {
   getUser(query, projection, callback) {
@@ -64,6 +65,10 @@ module.exports = UserGetter = {
       }
       if (!user) {
         return callback(new Error('User not Found'))
+      }
+
+      if (!Features.hasFeature('affiliations')) {
+        return callback(null, decorateFullEmails(user.email, user.emails, []))
       }
 
       return getUserAffiliations(userId, function(error, affiliationsData) {

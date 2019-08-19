@@ -63,6 +63,9 @@ describe('UserGetter', function() {
         '../Institutions/InstitutionsAPI': {
           getUserAffiliations: this.getUserAffiliations
         },
+        '../../infrastructure/Features': {
+          hasFeature: sinon.stub().returns(true)
+        },
         '../Errors/Errors': Errors
       }
     }))
