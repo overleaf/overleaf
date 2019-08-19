@@ -115,6 +115,7 @@
   "devDependencies": {
     "acorn": "^6.1.0",
     "acorn-walk": "^6.1.1",
+    "babel-eslint": "^10.0.2",
     "babel-loader": "^8.0.6",
     "babel-plugin-angularjs-annotate": "^0.10.0",
     "chai": "3.5.0",

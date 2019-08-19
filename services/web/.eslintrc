@@ -14,6 +14,7 @@
     "chai-expect",
     "chai-friendly"
   ],
+  "parser": "babel-eslint",
   "env": {
     "browser": true,
     "mocha": true
