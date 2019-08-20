@@ -50,6 +50,8 @@ module.exports = Features = {
         return Settings.overleaf != null
       case 'references':
         return Settings.apis.references.url != null
+      case 'saml':
+        return Settings.enableSaml != null
       default:
         throw new Error(`unknown feature: ${feature}`)
     }
