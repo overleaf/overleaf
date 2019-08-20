@@ -7,8 +7,13 @@ block content
 				.col-md-8.col-md-offset-2.text-center
 					.page-header
 						h1 Maintenance
-					p (ng-non-bindable)
-						| Sorry, #{settings.appName} is briefly down for maintenance.
-						| We should be back within minutes, but if not, or you have
-						| an urgent request, please contact us at
-						| &nbsp;#{settings.adminEmail}
+					p(ng-non-bindable)
+						if settings.statusPageUrl
+							| #{settings.appName} is currently down for maintenance.
+							| Please check our #[a(href='http://' + settings.statusPageUrl) status page]
+							| for updates.
+						else
+							| #{settings.appName} is currently down for maintenance.
+							| We should be back within minutes, but if not, or you have
+							| an urgent request, please contact us at
+							| &nbsp;#{settings.adminEmail}
