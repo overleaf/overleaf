@@ -48,6 +48,21 @@ module.exports = {
         res.send(licences)
       }
     )
+  },
+
+  newLicences(req, res, next) {
+    InstitutionsAPI.getInstitutionNewLicences(
+      req.query.resource_id,
+      req.query.start_date,
+      req.query.end_date,
+      req.query.lag,
+      function(error, licences) {
+        if (error) {
+          return next(error)
+        }
+        res.send(licences)
+      }
+    )
   }
 }
 

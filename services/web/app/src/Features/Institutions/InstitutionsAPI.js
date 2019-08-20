@@ -48,6 +48,21 @@ module.exports = InstitutionsAPI = {
     )
   },
 
+  getInstitutionNewLicences(institutionId, startDate, endDate, lag, callback) {
+    if (callback == null) {
+      callback = function(error, body) {}
+    }
+    return makeAffiliationRequest(
+      {
+        method: 'GET',
+        path: `/api/v2/institutions/${institutionId.toString()}/new_institution_licences`,
+        body: { start_date: startDate, end_date: endDate, lag },
+        defaultErrorMessage: "Couldn't get institution new licences"
+      },
+      callback
+    )
+  },
+
   getUserAffiliations(userId, callback) {
     if (callback == null) {
       callback = function(error, body) {}
