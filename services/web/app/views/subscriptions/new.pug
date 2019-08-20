@@ -166,8 +166,8 @@ block content
 													required,
 													ng-selected="{{country.code == data.country}}"
 												)
-													option(value='', disabled, selected) #{translate("country")}
-													option(value='-') --------------
+													option(value='', disabled) #{translate("country")}
+													option(value='-', disabled) --------------
 													option(ng-repeat="country in countries" ng-bind-html="country.name" value="{{country.code}}")
 												span.input-feedback-message {{ simpleCCForm.country.$error.required ? 'This field is required' : '' }}
 
