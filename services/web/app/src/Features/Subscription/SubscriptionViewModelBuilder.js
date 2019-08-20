@@ -28,17 +28,19 @@ const logger = require('logger-sharelatex')
 const _ = require('underscore')
 const async = require('async')
 
-const buildBillingDetails = function(recurlySubscription) {
-  const hostedLoginToken = __guard__(
-    recurlySubscription != null ? recurlySubscription.account : undefined,
-    x => x.hosted_login_token
-  )
+const buildHostedLink = function(recurlySubscription, type) {
   const recurlySubdomain = Settings.apis.recurly.subdomain
-  if (hostedLoginToken != null && recurlySubdomain != null) {
+  const hostedLoginToken = recurlySubscription.account.hosted_login_token
+  let path = ''
+  if (type === 'billingDetails') {
+    path = 'billing_info/edit?ht='
+  }
+  if (hostedLoginToken && recurlySubdomain) {
     return [
       'https://',
       recurlySubdomain,
-      '.recurly.com/account/billing_info/edit?ht=',
+      '.recurly.com/account/',
+      path,
       hostedLoginToken
     ].join('')
   }
@@ -195,7 +197,11 @@ module.exports = {
                 x => x._
               )
             ),
-            billingDetailsLink: buildBillingDetails(recurlySubscription),
+            billingDetailsLink: buildHostedLink(
+              recurlySubscription,
+              'billingDetails'
+            ),
+            accountManagementLink: buildHostedLink(recurlySubscription),
             price: SubscriptionFormatters.formatPrice(
               (recurlySubscription != null
                 ? recurlySubscription.unit_amount_in_cents

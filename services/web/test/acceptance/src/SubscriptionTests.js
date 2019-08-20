@@ -120,6 +120,8 @@ describe('Subscriptions', function() {
           activeCoupons: [],
           billingDetailsLink:
             'https://test.recurly.com/account/billing_info/edit?ht=mock-login-token',
+          accountManagementLink:
+            'https://test.recurly.com/account/mock-login-token',
           currency: 'GBP',
           nextPaymentDueAt: '5th May 2018',
           price: '£6.00',

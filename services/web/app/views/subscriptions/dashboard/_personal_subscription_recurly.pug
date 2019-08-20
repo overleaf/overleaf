@@ -17,16 +17,23 @@ div(ng-controller="RecurlySubscriptionController")
 				p
 					a(href=personalSubscription.recurly.billingDetailsLink, target="_blank").btn.btn-info #{translate("update_your_billing_details")}
 					| &nbsp;
-					a(href, ng-click="switchToCancellationView()", ng-hide="recurlyLoadError").btn.btn-primary !{translate("cancel_your_subscription")}
+					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-info #{translate("view_your_invoices")}
+					| &nbsp;
+					a(href, ng-click="switchToCancellationView()", ng-hide="recurlyLoadError").btn.btn-danger !{translate("cancel_your_subscription")}
 			when "canceled"
 				p !{translate("currently_subscribed_to_plan", {planName:"<strong>" + personalSubscription.plan.name + "</strong>"})}
 				p !{translate("subscription_canceled_and_terminate_on_x", {terminateDate:"<strong>" + personalSubscription.recurly.nextPaymentDueAt + "</strong>"})}
-				p: form(action="/user/subscription/reactivate",method="post")
-					input(type="hidden", name="_csrf", value=csrfToken)
-					input(type="submit",value="Reactivate your subscription").btn.btn-success
+				p
+					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-info #{translate("view_your_invoices")}
+					p: form(action="/user/subscription/reactivate",method="post")
+						input(type="hidden", name="_csrf", value=csrfToken)
+						input(type="submit",value="Reactivate your subscription").btn.btn-success
 			when "expired"
 				p !{translate("your_subscription_has_expired")}
-					a(href="/user/subscription/plans") !{translate("create_new_subscription")}
+				p
+					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-info #{translate("view_your_invoices")}
+					| &nbsp;
+					a(href="/user/subscription/plans").btn.btn-success !{translate("create_new_subscription")}
 			default
 				p !{translate("problem_with_subscription_contact_us")}
 
