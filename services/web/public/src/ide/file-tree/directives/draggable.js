@@ -15,7 +15,7 @@ define(['base'], App =>
         if (draggable) {
           return element.draggable({
             delay: 250,
-            opacity: 0.7,
+            opacity: 0.95,
             scroll: true,
             helper: scope.$eval(attrs.draggableHelper)
           })
