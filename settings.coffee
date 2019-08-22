@@ -193,146 +193,6 @@ settings =
 			www: {lngCode:process.env["SHARELATEX_SITE_LANGUAGE"] or "en", url: siteUrl}
 		defaultLng: process.env["SHARELATEX_SITE_LANGUAGE"] or "en"
 
-	# Spell Check Languages
-	# ---------------------
-	#
-	# You must have the corresponding aspell dictionary installed to
-	# be able to use a language. Run `grunt check:aspell` to check which
-	# dictionaries you have installed. These should be set for the `code` for
-	# each language.
-	languages: [{
-		"code":"en", "name":"English (American)"
-		},{
-		"code":"en_GB", "name":"English (British)"
-		},{
-		"code":"af", "name":"Africaans"
-		},{
-		"code":"am", "name":"Amharic"
-		},{
-		"code":"ar", "name":"Arabic"
-		},{
-		"code":"hy", "name":"Armenian"
-		},{
-		"code":"gl", "name":"Galician"
-		},{
-		"code":"eu", "name":"Basque"
-		},{
-		"code":"bn", "name":"Bengali"
-		},{
-		"code":"br", "name":"Breton"
-		},{
-		"code":"bg", "name":"Bulgarian"
-		},{
-		"code":"ca", "name":"Catalan"
-		},{
-		"code":"hr", "name":"Croatian"
-		},{
-		"code":"cs", "name":"Czech"
-		},{
-		"code":"da", "name":"Danish"
-		},{
-		"code":"nl", "name":"Dutch"
-		},{
-		"code":"eo", "name":"Esperanto"
-		},{
-		"code":"et", "name":"Estonian"
-		},{
-		"code":"fo", "name":"Faroese"
-		},{
-		"code":"fr", "name":"French"
-		},{
-		"code":"de", "name":"German"
-		},{
-		"code":"el", "name":"Greek"
-		},{
-		"code":"gu", "name":"Gujarati"
-		},{
-		"code":"he", "name":"Hebrew"
-		},{
-		"code":"hi", "name":"Hindi"
-		},{
-		"code":"hu", "name":"Hungarian"
-		},{
-		"code":"is", "name":"Icelandic"
-		},{
-		"code":"id", "name":"Indonesian"
-		},{
-		"code":"ga", "name":"Irish"
-		},{
-		"code":"it", "name":"Italian"
-		},{
-		"code":"kn", "name":"Kannada"
-		},{
-		"code":"kk", "name":"Kazakh"
-		},{
-		"code":"ku", "name":"Kurdish"
-		},{
-		"code":"lv", "name":"Latvian"
-		},{
-		"code":"lt", "name":"Lithuanian"
-		},{
-		"code":"ml", "name":"Malayalam"
-		},{
-		"code":"mr", "name":"Marathi"
-		},{
-		"code":"nr", "name":"Ndebele"
-		},{
-		"code":"ns", "name":"Northern Sotho"
-		},{
-		"code":"no", "name":"Norwegian"
-		},{
-		"code":"or", "name":"Oriya"
-		},{
-		"code":"fa", "name":"Persian"
-		},{
-		"code":"pl", "name":"Polish"
-		},{
-		"code":"pt_BR", "name":"Portuguese (Brazilian)"
-		},{
-		"code":"pt_PT", "name":"Portuguese (European)"
-		},{
-		"code":"pa", "name":"Punjabi"
-		},{
-		"code":"ro", "name":"Romanian"
-		},{
-		"code":"ru", "name":"Russian"
-		},{
-		"code":"sk", "name":"Slovak"
-		},{
-		"code":"sl", "name":"Slovenian"
-		},{
-		"code":"st", "name":"Southern Sotho"
-		},{
-		"code":"es", "name":"Spanish"
-		},{
-		"code":"ss", "name":"Swazi"
-		},{
-		"code":"sv", "name":"Swedish"
-		},{
-		"code":"tl", "name":"Tagalog"
-		},{
-		"code":"ta", "name":"Tamil"
-		},{
-		"code":"te", "name":"Telugu"
-		},{
-		"code":"ts", "name":"Tsonga"
-		},{
-		"code":"tn", "name":"Tswana"
-		},{
-		"code":"uk", "name":"Ukrainian"
-		},{
-		"code":"hsb", "name":"Upper Sorbian"
-		},{
-		"code":"uz", "name":"Uzbek"
-		},{
-		"code":"cy", "name":"Welsh"
-		},{
-		"code":"xh", "name":"Xhosa"
-		},{
-		"code":"zu", "name":"Zulu"
-		}
-	]
-
 	apis:
 		web:
 			url: "http://localhost:3000"
@@ -628,7 +488,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 # --------
 if process.env["SANDBOXED_COMPILES"] == "true"
 	settings.clsi =
-		commandRunner: "docker-runner-sharelatex"
+		dockerRunner: true
 		docker:
 			image: process.env["TEX_LIVE_DOCKER_IMAGE"]
 			env:
@@ -640,7 +500,7 @@ if process.env["SANDBOXED_COMPILES"] == "true"
 		settings.path = {}
 	settings.path.synctexBaseDir = () -> "/compile"
 	if process.env['SANDBOXED_COMPILES_SIBLING_CONTAINERS']  == 'true'
-		console.log("Using sibling containers for sandoxed compiles")
+		console.log("Using sibling containers for sandboxed compiles")
 		if process.env['SANDBOXED_COMPILES_HOST_DIR']
 			settings.path.sandboxedCompilesHostDir = process.env['SANDBOXED_COMPILES_HOST_DIR']
 		else
