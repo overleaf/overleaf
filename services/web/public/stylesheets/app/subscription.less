@@ -80,3 +80,13 @@
 .capitalised {
 	text-transform:capitalize;
 }
+
+.three-d-secure-container {
+  > .three-d-secure-recurly-container {
+    height: 400px;
+
+    > div[data-recurly="three-d-secure-container"] {
+      height: 100%;
+    }
+  }
+}

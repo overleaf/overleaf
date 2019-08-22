@@ -15,7 +15,7 @@ block content
 		.container(ng-controller="NewSubscriptionController" ng-cloak)
 			.row.card-group
 				.col-md-5.col-md-push-4
-					.card.card-highlighted.card-border
+					.card.card-highlighted.card-border(ng-hide="threeDSecureFlow")
 						.alert.alert-danger(ng-show="recurlyLoadError")
 							strong #{translate('payment_provider_unreachable_error')}
 						.page-header(ng-hide="recurlyLoadError")
@@ -211,6 +211,12 @@ block content
 													span(ng-if="paymentMethod.value === 'credit_card'")
 														| {{ monthlyBilling ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_now")}'}}
 													span(ng-if="paymentMethod.value !== 'credit_card'") #{translate("upgrade_paypal_btn")}
+
+					div.three-d-secure-container.card.card-highlighted.card-border(ng-show="threeDSecureFlow")
+						.alert.alert-info.small(aria-live="assertive")
+							strong #{translate('card_must_be_authenticated_by_3dsecure')}
+						div.three-d-secure-recurly-container
+
 
 
 				.col-md-3.col-md-pull-4

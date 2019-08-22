@@ -29,6 +29,8 @@ const FeaturesUpdater = require('./FeaturesUpdater')
 const planFeatures = require('./planFeatures')
 const GroupPlansData = require('./GroupPlansData')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
+const SubscriptionErrors = require('./Errors')
+const HttpErrors = require('@overleaf/o-error/http')
 
 module.exports = SubscriptionController = {
   plansPage(req, res, next) {
@@ -199,10 +201,14 @@ module.exports = SubscriptionController = {
 
   createSubscription(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
-    const { recurly_token_id } = req.body
+    const recurlyTokenIds = {
+      billing: req.body.recurly_token_id,
+      threeDSecureActionResult:
+        req.body.recurly_three_d_secure_action_result_token_id
+    }
     const { subscriptionDetails } = req.body
     logger.log(
-      { recurly_token_id, user_id: user._id, subscriptionDetails },
+      { user_id: user._id, subscriptionDetails },
       'creating subscription'
     )
 
@@ -220,16 +226,23 @@ module.exports = SubscriptionController = {
       return SubscriptionHandler.createSubscription(
         user,
         subscriptionDetails,
-        recurly_token_id,
+        recurlyTokenIds,
         function(err) {
-          if (err != null) {
-            logger.warn(
-              { err, user_id: user._id },
-              'something went wrong creating subscription'
-            )
-            return next(err)
+          if (!err) {
+            return res.sendStatus(201)
           }
-          return res.sendStatus(201)
+
+          if (err instanceof SubscriptionErrors.RecurlyTransactionError) {
+            return next(
+              new HttpErrors.UnprocessableEntityError({}).withCause(err)
+            )
+          }
+
+          logger.warn(
+            { err, user_id: user._id },
+            'something went wrong creating subscription'
+          )
+          next(err)
         }
       )
     })

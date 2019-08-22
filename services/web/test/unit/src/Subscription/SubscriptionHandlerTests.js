@@ -118,7 +118,7 @@ describe('SubscriptionHandler', function() {
         cvv: '123',
         number: '12345'
       }
-      this.recurly_token_id = '45555666'
+      this.recurlyTokenIds = { billing: '45555666' }
       return (this.SubscriptionHandler.validateNoSubscriptionInRecurly = sinon
         .stub()
         .yields(null, true))
@@ -129,18 +129,14 @@ describe('SubscriptionHandler', function() {
         return this.SubscriptionHandler.createSubscription(
           this.user,
           this.subscriptionDetails,
-          this.recurly_token_id,
+          this.recurlyTokenIds,
           this.callback
         )
       })
 
       it('should create the subscription with the wrapper', function() {
         return this.RecurlyWrapper.createSubscription
-          .calledWith(
-            this.user,
-            this.subscriptionDetails,
-            this.recurly_token_id
-          )
+          .calledWith(this.user, this.subscriptionDetails, this.recurlyTokenIds)
           .should.equal(true)
       })
 
@@ -163,7 +159,7 @@ describe('SubscriptionHandler', function() {
         return this.SubscriptionHandler.createSubscription(
           this.user,
           this.subscriptionDetails,
-          this.recurly_token_id,
+          this.recurlyTokenIds,
           this.callback
         )
       })

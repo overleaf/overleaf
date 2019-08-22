@@ -24,6 +24,7 @@ const Settings = require('settings-sharelatex')
 const xml2js = require('xml2js')
 const logger = require('logger-sharelatex')
 const Async = require('async')
+const SubscriptionErrors = require('./Errors')
 
 module.exports = RecurlyWrapper = {
   apiUrl: Settings.apis.recurly.url || 'https://api.recurly.com/v2',
@@ -31,10 +32,9 @@ module.exports = RecurlyWrapper = {
   _paypal: {
     checkAccountExists(cache, next) {
       const { user } = cache
-      const { recurly_token_id } = cache
       const { subscriptionDetails } = cache
       logger.log(
-        { user_id: user._id, recurly_token_id },
+        { user_id: user._id },
         'checking if recurly account exists for user'
       )
       return RecurlyWrapper.apiRequest(
@@ -46,7 +46,7 @@ module.exports = RecurlyWrapper = {
         function(error, response, responseBody) {
           if (error) {
             logger.warn(
-              { error, user_id: user._id, recurly_token_id },
+              { error, user_id: user._id },
               'error response from recurly while checking account'
             )
             return next(error)
@@ -54,25 +54,19 @@ module.exports = RecurlyWrapper = {
           if (response.statusCode === 404) {
             // actually not an error in this case, just no existing account
             logger.log(
-              { user_id: user._id, recurly_token_id },
+              { user_id: user._id },
               'user does not currently exist in recurly, proceed'
             )
             cache.userExists = false
             return next(null, cache)
           }
-          logger.log(
-            { user_id: user._id, recurly_token_id },
-            'user appears to exist in recurly'
-          )
+          logger.log({ user_id: user._id }, 'user appears to exist in recurly')
           return RecurlyWrapper._parseAccountXml(responseBody, function(
             err,
             account
           ) {
             if (err) {
-              logger.warn(
-                { err, user_id: user._id, recurly_token_id },
-                'error parsing account'
-              )
+              logger.warn({ err, user_id: user._id }, 'error parsing account')
               return next(err)
             }
             cache.userExists = true
@@ -84,7 +78,6 @@ module.exports = RecurlyWrapper = {
     },
     createAccount(cache, next) {
       const { user } = cache
-      const { recurly_token_id } = cache
       const { subscriptionDetails } = cache
       const { address } = subscriptionDetails
       if (!address) {
@@ -93,16 +86,10 @@ module.exports = RecurlyWrapper = {
         )
       }
       if (cache.userExists) {
-        logger.log(
-          { user_id: user._id, recurly_token_id },
-          'user already exists in recurly'
-        )
+        logger.log({ user_id: user._id }, 'user already exists in recurly')
         return next(null, cache)
       }
-      logger.log(
-        { user_id: user._id, recurly_token_id },
-        'creating user in recurly'
-      )
+      logger.log({ user_id: user._id }, 'creating user in recurly')
       const data = {
         account_code: user._id,
         email: user.email,
@@ -128,7 +115,7 @@ module.exports = RecurlyWrapper = {
         (error, response, responseBody) => {
           if (error) {
             logger.warn(
-              { error, user_id: user._id, recurly_token_id },
+              { error, user_id: user._id },
               'error response from recurly while creating account'
             )
             return next(error)
@@ -138,10 +125,7 @@ module.exports = RecurlyWrapper = {
             account
           ) {
             if (err) {
-              logger.warn(
-                { err, user_id: user._id, recurly_token_id },
-                'error creating account'
-              )
+              logger.warn({ err, user_id: user._id }, 'error creating account')
               return next(err)
             }
             cache.account = account
@@ -152,12 +136,9 @@ module.exports = RecurlyWrapper = {
     },
     createBillingInfo(cache, next) {
       const { user } = cache
-      const { recurly_token_id } = cache
+      const { recurlyTokenIds } = cache
       const { subscriptionDetails } = cache
-      logger.log(
-        { user_id: user._id, recurly_token_id },
-        'creating billing info in recurly'
-      )
+      logger.log({ user_id: user._id }, 'creating billing info in recurly')
       const accountCode = __guard__(
         cache != null ? cache.account : undefined,
         x1 => x1.account_code
@@ -165,7 +146,7 @@ module.exports = RecurlyWrapper = {
       if (!accountCode) {
         return next(new Error('no account code at createBillingInfo stage'))
       }
-      const data = { token_id: recurly_token_id }
+      const data = { token_id: recurlyTokenIds.billing }
       const requestBody = RecurlyWrapper._buildXml('billing_info', data)
       return RecurlyWrapper.apiRequest(
         {
@@ -176,7 +157,7 @@ module.exports = RecurlyWrapper = {
         (error, response, responseBody) => {
           if (error) {
             logger.warn(
-              { error, user_id: user._id, recurly_token_id },
+              { error, user_id: user._id },
               'error response from recurly while creating billing info'
             )
             return next(error)
@@ -187,7 +168,7 @@ module.exports = RecurlyWrapper = {
           ) {
             if (err) {
               logger.warn(
-                { err, user_id: user._id, accountCode, recurly_token_id },
+                { err, user_id: user._id, accountCode },
                 'error creating billing info'
               )
               return next(err)
@@ -201,12 +182,8 @@ module.exports = RecurlyWrapper = {
 
     setAddress(cache, next) {
       const { user } = cache
-      const { recurly_token_id } = cache
       const { subscriptionDetails } = cache
-      logger.log(
-        { user_id: user._id, recurly_token_id },
-        'setting billing address in recurly'
-      )
+      logger.log({ user_id: user._id }, 'setting billing address in recurly')
       const accountCode = __guard__(
         cache != null ? cache.account : undefined,
         x1 => x1.account_code
@@ -239,7 +216,7 @@ module.exports = RecurlyWrapper = {
         (error, response, responseBody) => {
           if (error) {
             logger.warn(
-              { error, user_id: user._id, recurly_token_id },
+              { error, user_id: user._id },
               'error response from recurly while setting address'
             )
             return next(error)
@@ -250,7 +227,7 @@ module.exports = RecurlyWrapper = {
           ) {
             if (err) {
               logger.warn(
-                { err, user_id: user._id, recurly_token_id },
+                { err, user_id: user._id },
                 'error updating billing info'
               )
               return next(err)
@@ -263,12 +240,8 @@ module.exports = RecurlyWrapper = {
     },
     createSubscription(cache, next) {
       const { user } = cache
-      const { recurly_token_id } = cache
       const { subscriptionDetails } = cache
-      logger.log(
-        { user_id: user._id, recurly_token_id },
-        'creating subscription in recurly'
-      )
+      logger.log({ user_id: user._id }, 'creating subscription in recurly')
       const data = {
         plan_code: subscriptionDetails.plan_code,
         currency: subscriptionDetails.currencyCode,
@@ -288,7 +261,7 @@ module.exports = RecurlyWrapper = {
         (error, response, responseBody) => {
           if (error) {
             logger.warn(
-              { error, user_id: user._id, recurly_token_id },
+              { error, user_id: user._id },
               'error response from recurly while creating subscription'
             )
             return next(error)
@@ -299,7 +272,7 @@ module.exports = RecurlyWrapper = {
           ) {
             if (err) {
               logger.warn(
-                { err, user_id: user._id, recurly_token_id },
+                { err, user_id: user._id },
                 'error creating subscription'
               )
               return next(err)
@@ -315,17 +288,17 @@ module.exports = RecurlyWrapper = {
   _createPaypalSubscription(
     user,
     subscriptionDetails,
-    recurly_token_id,
+    recurlyTokenIds,
     callback
   ) {
     logger.log(
-      { user_id: user._id, recurly_token_id },
+      { user_id: user._id },
       'starting process of creating paypal subscription'
     )
     // We use `async.waterfall` to run each of these actions in sequence
     // passing a `cache` object along the way. The cache is initialized
     // with required data, and `async.apply` to pass the cache to the first function
-    const cache = { user, recurly_token_id, subscriptionDetails }
+    const cache = { user, recurlyTokenIds, subscriptionDetails }
     return Async.waterfall(
       [
         Async.apply(RecurlyWrapper._paypal.checkAccountExists, cache),
@@ -337,7 +310,7 @@ module.exports = RecurlyWrapper = {
       function(err, result) {
         if (err) {
           logger.warn(
-            { err, user_id: user._id, recurly_token_id },
+            { err, user_id: user._id },
             'error in paypal subscription creation process'
           )
           return callback(err)
@@ -345,13 +318,13 @@ module.exports = RecurlyWrapper = {
         if (!result.subscription) {
           err = new Error('no subscription object in result')
           logger.warn(
-            { err, user_id: user._id, recurly_token_id },
+            { err, user_id: user._id },
             'error in paypal subscription creation process'
           )
           return callback(err)
         }
         logger.log(
-          { user_id: user._id, recurly_token_id },
+          { user_id: user._id },
           'done creating paypal subscription for user'
         )
         return callback(null, result.subscription)
@@ -362,7 +335,7 @@ module.exports = RecurlyWrapper = {
   _createCreditCardSubscription(
     user,
     subscriptionDetails,
-    recurly_token_id,
+    recurlyTokenIds,
     callback
   ) {
     const data = {
@@ -375,9 +348,13 @@ module.exports = RecurlyWrapper = {
         first_name: subscriptionDetails.first_name || user.first_name,
         last_name: subscriptionDetails.last_name || user.last_name,
         billing_info: {
-          token_id: recurly_token_id
+          token_id: recurlyTokenIds.billing
         }
       }
+    }
+    if (recurlyTokenIds.threeDSecureActionResult) {
+      data.account.billing_info.three_d_secure_action_result_token_id =
+        recurlyTokenIds.threeDSecureActionResult
     }
     const requestBody = RecurlyWrapper._buildXml('subscription', data)
 
@@ -385,27 +362,33 @@ module.exports = RecurlyWrapper = {
       {
         url: 'subscriptions',
         method: 'POST',
-        body: requestBody
+        body: requestBody,
+        expect422: true
       },
       (error, response, responseBody) => {
         if (error != null) {
           return callback(error)
         }
-        return RecurlyWrapper._parseSubscriptionXml(responseBody, callback)
+
+        if (response.statusCode === 422) {
+          RecurlyWrapper._handle422Response(responseBody, callback)
+        } else {
+          RecurlyWrapper._parseSubscriptionXml(responseBody, callback)
+        }
       }
     )
   },
 
-  createSubscription(user, subscriptionDetails, recurly_token_id, callback) {
+  createSubscription(user, subscriptionDetails, recurlyTokenIds, callback) {
     const { isPaypal } = subscriptionDetails
     logger.log(
-      { user_id: user._id, isPaypal, recurly_token_id },
+      { user_id: user._id, isPaypal },
       'setting up subscription in recurly'
     )
     const fn = isPaypal
       ? RecurlyWrapper._createPaypalSubscription
       : RecurlyWrapper._createCreditCardSubscription
-    return fn(user, subscriptionDetails, recurly_token_id, callback)
+    return fn(user, subscriptionDetails, recurlyTokenIds, callback)
   },
 
   apiRequest(options, callback) {
@@ -418,15 +401,17 @@ module.exports = RecurlyWrapper = {
       'Content-Type': 'application/xml; charset=utf-8',
       'X-Api-Version': Settings.apis.recurly.apiVersion
     }
-    const { expect404 } = options
+    const { expect404, expect422 } = options
     delete options.expect404
+    delete options.expect422
     return request(options, function(error, response, body) {
       if (
         error == null &&
         response.statusCode !== 200 &&
         response.statusCode !== 201 &&
         response.statusCode !== 204 &&
-        (response.statusCode !== 404 || !expect404)
+        (response.statusCode !== 404 || !expect404) &&
+        (response.statusCode !== 422 || !expect422)
       ) {
         logger.warn(
           {
@@ -443,6 +428,12 @@ module.exports = RecurlyWrapper = {
         logger.log(
           { url: options.url, method: options.method },
           'got 404 response from recurly, expected as valid response'
+        )
+      }
+      if (response.statusCode === 422 && expect422) {
+        logger.log(
+          { url: options.url, method: options.method },
+          'got 422 response from recurly, expected as valid response'
         )
       }
       return callback(error, response, body)
@@ -846,6 +837,43 @@ module.exports = RecurlyWrapper = {
     )
   },
 
+  _handle422Response(body, callback) {
+    RecurlyWrapper._parseErrorsXml(body, (error, data) => {
+      if (error) {
+        return callback(error)
+      }
+
+      let errorData = {}
+      if (data.transaction_error) {
+        errorData = {
+          message: data.transaction_error.merchant_message,
+          info: {
+            category: data.transaction_error.error_category,
+            gatewayCode: data.transaction_error.gateway_error_code,
+            public: {
+              code: data.transaction_error.error_code,
+              message: data.transaction_error.customer_message
+            }
+          }
+        }
+        if (data.transaction_error.three_d_secure_action_token_id) {
+          errorData.info.public.threeDSecureActionTokenId =
+            data.transaction_error.three_d_secure_action_token_id
+        }
+      } else if (data.error && data.error._) {
+        // fallback for errors that don't have a `transaction_error` field, but
+        // instead a `error` field with a message (e.g. VATMOSS errors)
+        errorData = {
+          info: {
+            public: {
+              message: data.error._
+            }
+          }
+        }
+      }
+      callback(new SubscriptionErrors.RecurlyTransactionError(errorData))
+    })
+  },
   _parseSubscriptionsXml(xml, callback) {
     return RecurlyWrapper._parseXmlAndGetAttribute(
       xml,
@@ -880,6 +908,10 @@ module.exports = RecurlyWrapper = {
 
   _parseCouponXml(xml, callback) {
     return RecurlyWrapper._parseXmlAndGetAttribute(xml, 'coupon', callback)
+  },
+
+  _parseErrorsXml(xml, callback) {
+    return RecurlyWrapper._parseXmlAndGetAttribute(xml, 'errors', callback)
   },
 
   _parseXmlAndGetAttribute(xml, attribute, callback) {

@@ -64,6 +64,14 @@ define(['base', 'directives/creditCards'], App =>
 
     $scope.processing = false
 
+    $scope.threeDSecureFlow = false
+    $scope.threeDSecureContainer = document.querySelector(
+      '.three-d-secure-container'
+    )
+    $scope.threeDSecureRecurlyContainer = document.querySelector(
+      '.three-d-secure-recurly-container'
+    )
+
     recurly.configure({
       publicKey: window.recurlyApiKey,
       style: {
@@ -172,7 +180,17 @@ define(['base', 'directives/creditCards'], App =>
       $scope.genericError = ''
     }
 
-    const completeSubscription = function(err, recurly_token_id) {
+    let cachedRecurlyBillingToken
+    const completeSubscription = function(
+      err,
+      recurlyBillingToken,
+      recurly3DSecureResultToken
+    ) {
+      if (recurlyBillingToken) {
+        // temporary store the billing token as it might be needed when
+        // re-sending the request after SCA authentication
+        cachedRecurlyBillingToken = recurlyBillingToken
+      }
       $scope.validation.errorFields = {}
       if (err != null) {
         event_tracking.sendMB('subscription-error', err)
@@ -190,7 +208,9 @@ define(['base', 'directives/creditCards'], App =>
       } else {
         const postData = {
           _csrf: window.csrfToken,
-          recurly_token_id: recurly_token_id.id,
+          recurly_token_id: cachedRecurlyBillingToken.id,
+          recurly_three_d_secure_action_result_token_id:
+            recurly3DSecureResultToken && recurly3DSecureResultToken.id,
           subscriptionDetails: {
             currencyCode: pricing.items.currency,
             plan_code: pricing.items.plan.code,
@@ -232,9 +252,16 @@ define(['base', 'directives/creditCards'], App =>
             )
             window.location.href = '/user/subscription/thank-you'
           })
-          .catch(function() {
+          .catch(response => {
             $scope.processing = false
-            $scope.genericError = 'Something went wrong processing the request'
+            const { data } = response
+            $scope.genericError =
+              (data && data.message) ||
+              'Something went wrong processing the request'
+
+            if (data.threeDSecureActionTokenId) {
+              initThreeDSecure(data.threeDSecureActionTokenId)
+            }
           })
       }
     }
@@ -247,6 +274,44 @@ define(['base', 'directives/creditCards'], App =>
       } else {
         return recurly.token($scope.data, completeSubscription)
       }
+    }
+
+    const initThreeDSecure = function(threeDSecureActionTokenId) {
+      // instanciate and configure Recurly 3DSecure flow
+      const risk = recurly.Risk()
+      const threeDSecure = risk.ThreeDSecure({
+        actionTokenId: threeDSecureActionTokenId
+      })
+
+      // on SCA verification error: show payment UI with the error message
+      threeDSecure.on('error', error => {
+        $scope.genericError = `Error: ${error.message}`
+        $scope.threeDSecureFlow = false
+        $scope.$apply()
+      })
+
+      // on SCA verification success: show payment UI in processing mode and
+      // resubmit the payment with the new token final success or error will be
+      // handled by `completeSubscription`
+      threeDSecure.on('token', recurly3DSecureResultToken => {
+        completeSubscription(null, null, recurly3DSecureResultToken)
+        $scope.genericError = null
+        $scope.threeDSecureFlow = false
+        $scope.processing = true
+        $scope.$apply()
+      })
+
+      // make sure the threeDSecureRecurlyContainer is empty (in case of
+      // retries) and show 3DSecure UI
+      $scope.threeDSecureRecurlyContainer.innerHTML = ''
+      $scope.threeDSecureFlow = true
+      threeDSecure.attach($scope.threeDSecureRecurlyContainer)
+
+      // scroll the UI into view (timeout needed to make sure the element is
+      // visible)
+      window.setTimeout(() => {
+        $scope.threeDSecureContainer.scrollIntoView()
+      }, 0)
     }
 
     $scope.countries = [

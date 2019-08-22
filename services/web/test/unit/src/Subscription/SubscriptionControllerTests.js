@@ -19,6 +19,9 @@ const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionController'
+const SubscriptionErrors = require('../../../../app/src/Features/Subscription/Errors')
+const OError = require('@overleaf/o-error')
+const HttpErrors = require('@overleaf/o-error/http')
 
 const mockSubscriptions = {
   'subscription-123-active': {
@@ -89,7 +92,9 @@ describe('SubscriptionController', function() {
       gaExperiments: {}
     }
     this.GeoIpLookup = { getCurrencyCode: sinon.stub() }
-    this.UserGetter = { getUser: sinon.stub().callsArgWith(2, null, this.user) }
+    this.UserGetter = {
+      getUser: sinon.stub().callsArgWith(2, null, this.user)
+    }
     this.SubscriptionController = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -111,7 +116,9 @@ describe('SubscriptionController', function() {
         './RecurlyWrapper': (this.RecurlyWrapper = {}),
         './FeaturesUpdater': (this.FeaturesUpdater = {}),
         './GroupPlansData': (this.GroupPlansData = {}),
-        './V1SubscriptionManager': (this.V1SubscriptionManager = {})
+        './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
+        './Errors': SubscriptionErrors,
+        '@overleaf/o-error/http': HttpErrors
       }
     })
 
@@ -378,7 +385,12 @@ describe('SubscriptionController', function() {
         card: '1234',
         cvv: '123'
       }
-      this.req.body.recurly_token_id = '1234'
+      this.recurlyTokenIds = {
+        billing: '1234',
+        threeDSecureActionResult: '5678'
+      }
+      this.req.body.recurly_token_id = this.recurlyTokenIds.billing
+      this.req.body.recurly_three_d_secure_action_result_token_id = this.recurlyTokenIds.threeDSecureActionResult
       this.req.body.subscriptionDetails = this.subscriptionDetails
       this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
       return this.SubscriptionController.createSubscription(this.req, this.res)
@@ -386,10 +398,10 @@ describe('SubscriptionController', function() {
 
     it('should send the user and subscriptionId to the handler', function(done) {
       this.SubscriptionHandler.createSubscription
-        .calledWith(
+        .calledWithMatch(
           this.user,
           this.subscriptionDetails,
-          this.req.body.recurly_token_id
+          this.recurlyTokenIds
         )
         .should.equal(true)
       return done()
@@ -397,6 +409,27 @@ describe('SubscriptionController', function() {
 
     it('should redurect to the subscription page', function(done) {
       this.res.sendStatus.calledWith(201).should.equal(true)
+      return done()
+    })
+  })
+
+  describe('createSubscription with errors', function() {
+    it('should handle 3DSecure errors', function(done) {
+      this.next = sinon.stub()
+      this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
+      this.SubscriptionHandler.createSubscription.yields(
+        new SubscriptionErrors.RecurlyTransactionError({})
+      )
+      this.SubscriptionController.createSubscription(this.req, null, error => {
+        expect(error).to.exist
+        expect(error).to.be.instanceof(HttpErrors.UnprocessableEntityError)
+        expect(
+          OError.hasCauseInstanceOf(
+            error,
+            SubscriptionErrors.RecurlyTransactionError
+          )
+        ).to.be.true
+      })
       return done()
     })
   })

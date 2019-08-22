@@ -56,7 +56,7 @@ module.exports = {
     })
   },
 
-  createSubscription(user, subscriptionDetails, recurly_token_id, callback) {
+  createSubscription(user, subscriptionDetails, recurlyTokenIds, callback) {
     const self = this
     const clientTokenId = ''
     return this.validateNoSubscriptionInRecurly(user._id, function(
@@ -72,7 +72,7 @@ module.exports = {
       return RecurlyWrapper.createSubscription(
         user,
         subscriptionDetails,
-        recurly_token_id,
+        recurlyTokenIds,
         function(error, recurlySubscription) {
           if (error != null) {
             return callback(error)

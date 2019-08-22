@@ -21,6 +21,7 @@ const querystring = require('querystring')
 const modulePath = '../../../../app/src/Features/Subscription/RecurlyWrapper'
 const SandboxedModule = require('sandboxed-module')
 const tk = require('timekeeper')
+const SubscriptionErrors = require('../../../../app/src/Features/Subscription/Errors')
 
 const fixtures = {
   'subscriptions/44f83d7cba354d5b84812419f923ea96':
@@ -156,7 +157,8 @@ describe('RecurlyWrapper', function() {
             log: sinon.stub()
           },
           request: sinon.stub(),
-          xml2js: require('xml2js')
+          xml2js: require('xml2js'),
+          './Errors': SubscriptionErrors
         }
       }
     ))
@@ -498,12 +500,15 @@ describe('RecurlyWrapper', function() {
         }
       }
       this.subscription = {}
-      this.recurly_token_id = 'a-token-id'
+      this.recurlyTokenIds = {
+        billing: 'a-token-id',
+        threeDSecureActionResult: 'a-3d-token-id'
+      }
       return (this.call = callback => {
         return this.RecurlyWrapper.createSubscription(
           this.user,
           this.subscriptionDetails,
-          this.recurly_token_id,
+          this.recurlyTokenIds,
           callback
         )
       })
@@ -647,7 +652,10 @@ describe('RecurlyWrapper', function() {
         }
       }
       this.subscription = {}
-      this.recurly_token_id = 'a-token-id'
+      this.recurlyTokenIds = {
+        billing: 'a-token-id',
+        threeDSecureActionResult: 'a-3d-token-id'
+      }
       this.apiRequest = sinon.stub(this.RecurlyWrapper, 'apiRequest')
       this.response = { statusCode: 200 }
       this.body = '<xml>is_bad</xml>'
@@ -661,7 +669,7 @@ describe('RecurlyWrapper', function() {
         return this.RecurlyWrapper._createCreditCardSubscription(
           this.user,
           this.subscriptionDetails,
-          this.recurly_token_id,
+          this.recurlyTokenIds,
           callback
         )
       })
@@ -687,6 +695,7 @@ describe('RecurlyWrapper', function() {
 		<last_name>Johnson</last_name>
 		<billing_info>
 			<token_id>a-token-id</token_id>
+			<three_d_secure_action_result_token_id>a-3d-token-id</three_d_secure_action_result_token_id>
 		</billing_info>
 	</account>
 </subscription>\
@@ -721,6 +730,41 @@ describe('RecurlyWrapper', function() {
       return this.call((err, sub) => {
         this._parseSubscriptionXml.callCount.should.equal(1)
         return done()
+      })
+    })
+
+    describe('when api request returns 422', function() {
+      beforeEach(function() {
+        const body = `\
+          <?xml version="1.0" encoding="UTF-8"?>
+          <errors>
+            <transaction_error>
+              <error_code>three_d_secure_action_required</error_code>
+              <error_category>3d_secure_action_required</error_category>
+              <merchant_message>Your payment gateway is requesting that the transaction be completed with 3D Secure in accordance with PSD2.</merchant_message>
+              <customer_message>Your card must be authenticated with 3D Secure before continuing.</customer_message>
+              <gateway_error_code nil="nil"></gateway_error_code>
+              <three_d_secure_action_token_id>mock_three_d_secure_action_token</three_d_secure_action_token_id>
+            </transaction_error>
+            <error field="subscription.account.base" symbol="three_d_secure_action_required">Your card must be authenticated with 3D Secure before continuing.</error>
+          </errors>
+        `
+        this.apiRequest.yields(null, { statusCode: 422 }, body)
+      })
+
+      it('should produce an error', function(done) {
+        return this.call((err, sub) => {
+          expect(err).to.be.instanceof(
+            SubscriptionErrors.RecurlyTransactionError
+          )
+          expect(err.info.public.message).to.be.equal(
+            'Your card must be authenticated with 3D Secure before continuing.'
+          )
+          expect(err.info.public.threeDSecureActionTokenId).to.be.equal(
+            'mock_three_d_secure_action_token'
+          )
+          return done()
+        })
       })
     })
 
@@ -802,31 +846,34 @@ describe('RecurlyWrapper', function() {
         }
       }
       this.subscription = {}
-      this.recurly_token_id = 'a-token-id'
+      this.recurlyTokenIds = {
+        billing: 'a-token-id',
+        threeDSecureActionResult: 'a-3d-token-id'
+      }
 
       // set up data callbacks
       const { user } = this
       const { subscriptionDetails } = this
-      const { recurly_token_id } = this
+      const { recurlyTokenIds } = this
 
       this.checkAccountExists.callsArgWith(1, null, {
         user,
         subscriptionDetails,
-        recurly_token_id,
+        recurlyTokenIds,
         userExists: false,
         account: { accountCode: 'xx' }
       })
       this.createAccount.callsArgWith(1, null, {
         user,
         subscriptionDetails,
-        recurly_token_id,
+        recurlyTokenIds,
         userExists: false,
         account: { accountCode: 'xx' }
       })
       this.createBillingInfo.callsArgWith(1, null, {
         user,
         subscriptionDetails,
-        recurly_token_id,
+        recurlyTokenIds,
         userExists: false,
         account: { accountCode: 'xx' },
         billingInfo: { token_id: 'abc' }
@@ -834,7 +881,7 @@ describe('RecurlyWrapper', function() {
       this.setAddress.callsArgWith(1, null, {
         user,
         subscriptionDetails,
-        recurly_token_id,
+        recurlyTokenIds,
         userExists: false,
         account: { accountCode: 'xx' },
         billingInfo: { token_id: 'abc' }
@@ -842,7 +889,7 @@ describe('RecurlyWrapper', function() {
       this.createSubscription.callsArgWith(1, null, {
         user,
         subscriptionDetails,
-        recurly_token_id,
+        recurlyTokenIds,
         userExists: false,
         account: { accountCode: 'xx' },
         billingInfo: { token_id: 'abc' },
@@ -853,7 +900,7 @@ describe('RecurlyWrapper', function() {
         return this.RecurlyWrapper._createPaypalSubscription(
           this.user,
           this.subscriptionDetails,
-          this.recurly_token_id,
+          this.recurlyTokenIds,
           callback
         )
       })
@@ -937,7 +984,10 @@ describe('RecurlyWrapper', function() {
           first_name: 'Foo',
           last_name: 'Bar'
         }),
-        recurly_token_id: (this.recurly_token_id = 'some_token'),
+        recurlyTokenIds: (this.recurlyTokenIds = {
+          billing: 'a-token-id',
+          threeDSecureActionResult: 'a-3d-token-id'
+        }),
         subscriptionDetails: (this.subscriptionDetails = {
           currencyCode: 'EUR',
           plan_code: 'some_plan_code',
@@ -1255,7 +1305,7 @@ describe('RecurlyWrapper', function() {
             const { body } = this.apiRequest.lastCall.args[0]
             expect(body).to.equal(`\
 <billing_info>
-	<token_id>some_token</token_id>
+	<token_id>a-token-id</token_id>
 </billing_info>\
 `)
             return done()
