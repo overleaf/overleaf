@@ -119,7 +119,6 @@
     "babel-loader": "^8.0.6",
     "babel-plugin-angularjs-annotate": "^0.10.0",
     "chai": "3.5.0",
-    "chai-spies": "^1.0.0",
     "clean-css-cli": "^4.2.1",
     "es6-promise": "^4.0.5",
     "eslint": "^4.18.1",
