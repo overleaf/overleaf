@@ -54,6 +54,15 @@ class NotInV2Error extends BackwardCompatibleError {}
 
 class SLInV2Error extends BackwardCompatibleError {}
 
+class SAMLUserNotFoundError extends BackwardCompatibleError {
+  constructor(arg) {
+    super(arg)
+    if (!this.message) {
+      this.message = 'user not found for SAML provider and external id'
+    }
+  }
+}
+
 class ThirdPartyIdentityExistsError extends BackwardCompatibleError {
   constructor(arg) {
     super(arg)
@@ -99,6 +108,7 @@ module.exports = {
   EmailExistsError,
   InvalidError,
   NotInV2Error,
+  SAMLUserNotFoundError,
   SLInV2Error,
   ThirdPartyIdentityExistsError,
   ThirdPartyUserNotFoundError,
