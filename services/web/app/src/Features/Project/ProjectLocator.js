@@ -308,7 +308,7 @@ module.exports = ProjectLocator = {
   findUsersProjectByName(user_id, projectName, callback) {
     return ProjectGetter.findAllUsersProjects(
       user_id,
-      'name archived',
+      'name archived trashed',
       function(err, allProjects) {
         if (typeof error !== 'undefined' && error !== null) {
           return callback(error)
@@ -320,7 +320,7 @@ module.exports = ProjectLocator = {
           projects,
           project =>
             project.name.toLowerCase() === projectName &&
-            !ProjectHelper.isArchived(project, user_id)
+            !ProjectHelper.isArchivedOrTrashed(project, user_id)
         )
         logger.log(
           { user_id, projectName, totalProjects: projects.length, project },

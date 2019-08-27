@@ -285,13 +285,13 @@ module.exports = ProjectController = {
     const user_id = AuthenticationController.getLoggedInUserId(req)
     return ProjectGetter.findAllUsersProjects(
       user_id,
-      'name lastUpdated publicAccesLevel archived owner_ref tokens',
+      'name lastUpdated publicAccesLevel archived trashed owner_ref tokens',
       function(err, projects) {
         if (err != null) {
           return next(err)
         }
         projects = ProjectController._buildProjectList(projects, user_id)
-          .filter(p => !ProjectHelper.isArchived(p, user_id))
+          .filter(p => !ProjectHelper.isArchivedOrTrashed(p, user_id))
           .filter(p => !p.isV1Project)
           .map(p => ({ _id: p.id, name: p.name, accessLevel: p.accessLevel }))
 

@@ -68,6 +68,43 @@ describe('ProjectHelper', function() {
         ).to.equal(false)
       })
     })
+
+    describe('project.archived being undefined', function() {
+      it('returns false if archived is undefined', function() {
+        this.project.archived = undefined
+        expect(
+          this.ProjectHelper.isArchived(this.project, this.user._id)
+        ).to.equal(false)
+      })
+    })
+  })
+
+  describe('isTrashed', function() {
+    it('returns true if user id is found', function() {
+      this.project.trashed = [
+        ObjectId('588f3ddae8ebc1bac07c9fa4'),
+        ObjectId('5c41deb2b4ca500153340809')
+      ]
+      expect(
+        this.ProjectHelper.isTrashed(this.project, this.user._id)
+      ).to.equal(true)
+    })
+
+    it('returns false if user id is not found', function() {
+      this.project.trashed = []
+      expect(
+        this.ProjectHelper.isTrashed(this.project, this.user._id)
+      ).to.equal(false)
+    })
+
+    describe('project.trashed being undefined', function() {
+      it('returns false if trashed is undefined', function() {
+        this.project.trashed = undefined
+        expect(
+          this.ProjectHelper.isTrashed(this.project, this.user._id)
+        ).to.equal(false)
+      })
+    })
   })
 
   describe('compilerFromV1Engine', function() {

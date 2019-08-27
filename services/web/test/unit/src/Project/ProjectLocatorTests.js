@@ -47,7 +47,9 @@ describe('ProjectLocator', function() {
       getProject: sinon.stub().callsArgWith(2, null, project)
     }
     this.ProjectHelper = {
-      isArchived: sinon.stub()
+      isArchived: sinon.stub(),
+      isTrashed: sinon.stub(),
+      isArchivedOrTrashed: sinon.stub()
     }
     this.locator = SandboxedModule.require(modulePath, {
       globals: {
@@ -602,31 +604,31 @@ describe('ProjectLocator', function() {
         owned: [
           { name: 'notThis' },
           { name: 'wellll' },
-          { name: 'findThis', archived: true },
+          { name: 'findThis', archived: true, trashed: true },
           stubbedProject,
-          { name: 'findThis', archived: true },
-          { name: 'Noooo' }
+          { name: 'findThis', archived: true, trashed: false },
+          { name: 'Noooo', trashed: true }
         ]
       }
 
-      this.ProjectHelper.isArchived
+      this.ProjectHelper.isArchivedOrTrashed
         .withArgs(projects.owned[0], userId)
         .returns(false)
-      this.ProjectHelper.isArchived
+      this.ProjectHelper.isArchivedOrTrashed
         .withArgs(projects.owned[1], userId)
         .returns(false)
-      this.ProjectHelper.isArchived
+      this.ProjectHelper.isArchivedOrTrashed
         .withArgs(projects.owned[2], userId)
         .returns(true)
-      this.ProjectHelper.isArchived
+      this.ProjectHelper.isArchivedOrTrashed
         .withArgs(projects.owned[3], userId)
         .returns(false)
-      this.ProjectHelper.isArchived
+      this.ProjectHelper.isArchivedOrTrashed
         .withArgs(projects.owned[4], userId)
         .returns(true)
-      this.ProjectHelper.isArchived
+      this.ProjectHelper.isArchivedOrTrashed
         .withArgs(projects.owned[5], userId)
-        .returns(false)
+        .returns(true)
 
       this.ProjectGetter.findAllUsersProjects = sinon
         .stub()

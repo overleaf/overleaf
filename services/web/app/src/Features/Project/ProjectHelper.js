@@ -31,8 +31,25 @@ module.exports = ProjectHelper = {
     if (Array.isArray(project.archived)) {
       return project.archived.find(id => id.equals(userId)) !== undefined
     } else {
-      return project.archived
+      return !!project.archived
     }
+  },
+
+  isTrashed(project, userId) {
+    userId = ObjectId(userId)
+
+    if (project.trashed) {
+      return project.trashed.find(id => id.equals(userId)) !== undefined
+    } else {
+      return false
+    }
+  },
+
+  isArchivedOrTrashed(project, userId) {
+    return (
+      ProjectHelper.isArchived(project, userId) ||
+      ProjectHelper.isTrashed(project, userId)
+    )
   },
 
   ensureNameIsUnique(nameList, name, suffixes, maxLength, callback) {

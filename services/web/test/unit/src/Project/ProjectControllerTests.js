@@ -80,7 +80,9 @@ describe('ProjectController', function() {
       getProject: sinon.stub()
     }
     this.ProjectHelper = {
-      isArchived: sinon.stub()
+      isArchived: sinon.stub(),
+      isTrashed: sinon.stub(),
+      isArchivedOrTrashed: sinon.stub()
     }
     this.AuthenticationController = {
       getLoggedInUser: sinon.stub().callsArgWith(1, null, this.user),
@@ -878,6 +880,7 @@ describe('ProjectController', function() {
       const projects = [
         {
           archived: true,
+          trashed: true,
           id: 'a',
           name: 'A',
           accessLevel: 'a',
@@ -892,6 +895,7 @@ describe('ProjectController', function() {
         },
         {
           archived: false,
+          trashed: true,
           id: 'c',
           name: 'C',
           accessLevel: 'c',
@@ -899,6 +903,7 @@ describe('ProjectController', function() {
         },
         {
           archived: false,
+          trashed: false,
           id: 'd',
           name: 'D',
           accessLevel: 'd',
@@ -906,16 +911,16 @@ describe('ProjectController', function() {
         }
       ]
 
-      this.ProjectHelper.isArchived
+      this.ProjectHelper.isArchivedOrTrashed
         .withArgs(projects[0], this.user._id)
         .returns(true)
-      this.ProjectHelper.isArchived
+      this.ProjectHelper.isArchivedOrTrashed
         .withArgs(projects[1], this.user._id)
         .returns(false)
-      this.ProjectHelper.isArchived
+      this.ProjectHelper.isArchivedOrTrashed
         .withArgs(projects[2], this.user._id)
-        .returns(false)
-      this.ProjectHelper.isArchived
+        .returns(true)
+      this.ProjectHelper.isArchivedOrTrashed
         .withArgs(projects[3], this.user._id)
         .returns(false)
 
@@ -934,7 +939,6 @@ describe('ProjectController', function() {
         expect(data).to.deep.equal({
           projects: [
             { _id: 'b', name: 'B', accessLevel: 'b' },
-            { _id: 'c', name: 'C', accessLevel: 'c' },
             { _id: 'd', name: 'D', accessLevel: 'd' }
           ]
         })
