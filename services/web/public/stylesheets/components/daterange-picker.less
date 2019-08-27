@@ -462,7 +462,6 @@
 
     &:hover {
       background-color: @daterangepicker-ranges-hover-bg-color;
-      border: @daterangepicker-ranges-hover-border-size solid @daterangepicker-ranges-hover-border-color;
       color: @daterangepicker-ranges-hover-color;
     }
 
@@ -602,6 +601,14 @@
 }
 
 @media (min-width: 730px) {
+  /* force the calendar to display on one row */
+  &.show-calendar {
+    min-width: 658px; /* width of all contained elements, IE/Edge fallback */
+    width: -moz-max-content;
+    width: -webkit-max-content;
+    width: max-content;
+  }
+
   .daterangepicker {
     .ranges {
       width: auto;
@@ -609,6 +616,7 @@
     &.ltr {
       .ranges {
         float: left;
+        clear: none !important
       }
     }
     &.rtl {
@@ -617,7 +625,7 @@
       }
     }
 
-    .calendar.left {
+    .calendar {
       clear: none !important;
     }
   }
