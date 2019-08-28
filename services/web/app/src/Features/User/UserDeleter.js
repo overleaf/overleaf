@@ -1,20 +1,18 @@
+const { callbackify } = require('util')
+const logger = require('logger-sharelatex')
+const moment = require('moment')
 const { User } = require('../../models/User')
 const { DeletedUser } = require('../../models/DeletedUser')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
-const ProjectDeleterPromises = require('../Project/ProjectDeleter').promises
-const logger = require('logger-sharelatex')
-const moment = require('moment')
+const ProjectDeleter = require('../Project/ProjectDeleter')
 const SubscriptionHandler = require('../Subscription/SubscriptionHandler')
 const SubscriptionUpdater = require('../Subscription/SubscriptionUpdater')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
-const async = require('async')
 const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
 const Errors = require('../Errors/Errors')
-const { promisify, callbackify } = require('util')
 
-let UserDeleter
-module.exports = UserDeleter = {
+module.exports = {
   deleteUser: callbackify(deleteUser),
   expireDeletedUser: callbackify(expireDeletedUser),
   ensureCanDeleteUser: callbackify(ensureCanDeleteUser),
@@ -38,10 +36,10 @@ async function deleteUser(userId, options = {}) {
     let user = await User.findById(userId).exec()
     logger.log({ user }, 'deleting user')
 
-    await UserDeleter.promises.ensureCanDeleteUser(user)
-    await _createDeletedUser(user, options)
+    await ensureCanDeleteUser(user)
     await _cleanupUser(user)
-    await ProjectDeleterPromises.deleteUsersProjects(user._id)
+    await _createDeletedUser(user, options)
+    await ProjectDeleter.promises.deleteUsersProjects(user._id)
     await User.deleteOne({ _id: userId }).exec()
   } catch (error) {
     logger.warn({ error, userId }, 'something went wrong deleting the user')
@@ -76,26 +74,17 @@ async function expireDeletedUsersAfterDuration() {
   }
 
   for (let i = 0; i < deletedUsers.length; i++) {
-    await UserDeleter.promises.expireDeletedUser(
-      deletedUsers[i].deleterData.deletedUserId
-    )
+    await expireDeletedUser(deletedUsers[i].deleterData.deletedUserId)
   }
 }
 
 async function ensureCanDeleteUser(user) {
-  await new Promise((resolve, reject) => {
-    SubscriptionLocator.getUsersSubscription(user, (error, subscription) => {
-      if (error) {
-        return reject(error)
-      }
-
-      if (subscription) {
-        return reject(new Errors.SubscriptionAdminDeletionError({}))
-      }
-
-      resolve()
-    })
-  })
+  const subscription = await SubscriptionLocator.promises.getUsersSubscription(
+    user
+  )
+  if (subscription) {
+    throw new Errors.SubscriptionAdminDeletionError({})
+  }
 }
 
 async function _createDeletedUser(user, options) {
@@ -121,21 +110,9 @@ async function _cleanupUser(user) {
   if (user == null) {
     throw new Error('no user supplied')
   }
-
-  const runInSeries = promisify(async.series)
-
-  await runInSeries([
-    cb =>
-      NewsletterManager.unsubscribe(user, err => {
-        logger.err('Failed to unsubscribe user from newsletter', {
-          user_id: user._id,
-          error: err
-        })
-        cb()
-      }),
-    cb => SubscriptionHandler.cancelSubscription(user, cb),
-    cb => InstitutionsAPI.deleteAffiliations(user._id, cb),
-    cb => SubscriptionUpdater.removeUserFromAllGroups(user._id, cb),
-    cb => UserMembershipsHandler.removeUserFromAllEntities(user._id, cb)
-  ])
+  await NewsletterManager.promises.unsubscribe(user)
+  await SubscriptionHandler.promises.cancelSubscription(user)
+  await InstitutionsAPI.promises.deleteAffiliations(user._id)
+  await SubscriptionUpdater.promises.removeUserFromAllGroups(user._id)
+  await UserMembershipsHandler.promises.removeUserFromAllEntities(user._id)
 }

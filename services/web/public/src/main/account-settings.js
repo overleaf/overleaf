@@ -1,23 +1,9 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-return-assign,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 define(['base'], function(App) {
   App.controller('AccountSettingsController', function(
     $scope,
     $http,
     $modal,
+    // eslint-disable-next-line camelcase
     event_tracking,
     UserAffiliationsDataService
   ) {
@@ -34,14 +20,13 @@ define(['base'], function(App) {
       })
         .then(function() {
           $scope.unsubscribing = false
-          return ($scope.subscribed = false)
+          $scope.subscribed = false
         })
         .catch(() => ($scope.unsubscribing = true))
     }
 
     $scope.deleteAccount = function() {
-      let modalInstance
-      return (modalInstance = $modal.open({
+      $modal.open({
         templateUrl: 'deleteAccountModalTemplate',
         controller: 'DeleteAccountModalController',
         resolve: {
@@ -56,14 +41,14 @@ define(['base'], function(App) {
               .catch(() => null)
           }
         }
-      }))
+      })
     }
 
-    return ($scope.upgradeIntegration = service =>
-      event_tracking.send('subscription-funnel', 'settings-page', service))
+    $scope.upgradeIntegration = service =>
+      event_tracking.send('subscription-funnel', 'settings-page', service)
   })
 
-  return App.controller('DeleteAccountModalController', function(
+  App.controller('DeleteAccountModalController', function(
     $scope,
     $modalInstance,
     $timeout,
@@ -114,19 +99,21 @@ define(['base'], function(App) {
           $modalInstance.close()
           $scope.state.inflight = false
           $scope.state.error = null
-          return setTimeout(() => (window.location = '/login'), 1000)
+          setTimeout(() => (window.location = '/login'), 1000)
         })
         .catch(function(response) {
           const { data, status } = response
           $scope.state.inflight = false
           if (status === 403) {
             $scope.state.error = { code: 'InvalidCredentialsError' }
-          } else {
+          } else if (data.error) {
             $scope.state.error = { code: data.error }
+          } else {
+            $scope.state.error = { code: 'UserDeletionError' }
           }
         })
     }
 
-    return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
+    $scope.cancel = () => $modalInstance.dismiss('cancel')
   })
 })

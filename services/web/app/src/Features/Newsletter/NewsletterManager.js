@@ -1,182 +1,170 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let mailchimp
-const async = require('async')
+const { callbackify } = require('util')
 const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
 const crypto = require('crypto')
 const Mailchimp = require('mailchimp-api-v3')
+const OError = require('@overleaf/o-error')
 
-if (
-  (Settings.mailchimp != null ? Settings.mailchimp.api_key : undefined) == null
-) {
-  logger.info('Using newsletter provider: none')
-  mailchimp = {
-    request(opts, cb) {
-      return cb()
-    }
-  }
-} else {
-  logger.info('Using newsletter provider: mailchimp')
-  mailchimp = new Mailchimp(
-    Settings.mailchimp != null ? Settings.mailchimp.api_key : undefined
-  )
-}
+const provider = getProvider()
 
 module.exports = {
-  subscribe(user, callback) {
-    if (callback == null) {
-      callback = function() {}
-    }
-    const options = buildOptions(user, true)
-    logger.log(
-      { options, user, email: user.email },
-      'subscribing user to the mailing list'
-    )
-    return mailchimp.request(options, function(err) {
-      if (err != null) {
-        logger.warn({ err, user }, 'error subscribing person to newsletter')
-      } else {
-        logger.log({ user }, 'finished subscribing user to the newsletter')
-      }
-      return callback(err)
-    })
-  },
+  subscribe: callbackify(provider.subscribe),
+  unsubscribe: callbackify(provider.unsubscribe),
+  changeEmail: callbackify(provider.changeEmail),
+  promises: provider
+}
 
-  unsubscribe(user, callback) {
-    if (callback == null) {
-      callback = function() {}
-    }
-    logger.log(
-      { user, email: user.email },
-      'trying to unsubscribe user to the mailing list'
-    )
-    const options = buildOptions(user, false)
-    return mailchimp.request(options, function(err) {
-      if (err != null) {
-        logger.warn({ err, user }, 'error unsubscribing person to newsletter')
-      } else {
-        logger.log({ user }, 'finished unsubscribing user to the newsletter')
-      }
-      return callback(err)
-    })
-  },
+function getProvider() {
+  if (mailchimpIsConfigured()) {
+    logger.info('Using newsletter provider: mailchimp')
+    return makeMailchimpProvider()
+  } else {
+    logger.info('Using newsletter provider: none')
+    return makeNullProvider()
+  }
+}
 
-  changeEmail(oldEmail, newEmail, callback) {
-    if (callback == null) {
-      callback = function() {}
+function mailchimpIsConfigured() {
+  return Settings.mailchimp != null && Settings.mailchimp.api_key != null
+}
+
+function makeMailchimpProvider() {
+  const mailchimp = new Mailchimp(Settings.mailchimp.api_key)
+  const MAILCHIMP_LIST_ID = Settings.mailchimp.list_id
+
+  return {
+    subscribe,
+    unsubscribe,
+    changeEmail
+  }
+
+  async function subscribe(user) {
+    try {
+      const path = getSubscriberPath(user.email)
+      await mailchimp.put(path, {
+        email_address: user.email,
+        status: 'subscribed',
+        status_if_new: 'subscribed',
+        merge_fields: getMergeFields(user)
+      })
+      logger.info({ user }, 'finished subscribing user to newsletter')
+    } catch (err) {
+      throw new OError({
+        message: 'error subscribing user to newsletter',
+        info: { userId: user._id }
+      }).withCause(err)
     }
-    const options = buildOptions({ email: oldEmail })
-    delete options.body.status
-    options.body.email_address = newEmail
-    logger.log({ oldEmail, newEmail, options }, 'changing email in newsletter')
-    return mailchimp.request(options, function(err) {
-      if (
-        err != null &&
-        __guard__(err != null ? err.message : undefined, x =>
-          x.indexOf('merge fields were invalid')
-        ) !== -1
-      ) {
-        logger.log(
+  }
+
+  async function unsubscribe(user) {
+    try {
+      const path = getSubscriberPath(user.email)
+      await mailchimp.put(path, {
+        email_address: user.email,
+        status: 'unsubscribed',
+        status_if_new: 'unsubscribed',
+        merge_fields: getMergeFields(user)
+      })
+      logger.info({ user }, 'finished unsubscribing user from newsletter')
+    } catch (err) {
+      if (err.message.includes('looks fake or invalid')) {
+        logger.info(
+          { err, user },
+          'Mailchimp declined to unsubscribe user because it finds the email looks fake'
+        )
+      } else {
+        throw new OError({
+          message: 'error unsubscribing user from newsletter',
+          info: { userId: user._id }
+        }).withCause(err)
+      }
+    }
+  }
+
+  async function changeEmail(oldEmail, newEmail) {
+    try {
+      const path = getSubscriberPath(oldEmail)
+      await mailchimp.put(path, {
+        email_address: newEmail,
+        status_if_new: 'unsubscribed'
+      })
+      logger.info('finished changing email in the newsletter')
+    } catch (err) {
+      if (err.message.includes('merge fields were invalid')) {
+        logger.info(
           { oldEmail, newEmail },
           'unable to change email in newsletter, user has never subscribed'
         )
-        return callback()
-      } else if (
-        err != null &&
-        __guard__(err != null ? err.message : undefined, x1 =>
-          x1.indexOf('could not be validated')
-        ) !== -1
-      ) {
-        logger.log(
+      } else if (err.message.includes('could not be validated')) {
+        logger.info(
           { oldEmail, newEmail },
           'unable to change email in newsletter, user has previously unsubscribed or new email already exist on list'
         )
-        return callback()
-      } else if (
-        err != null &&
-        err.message.indexOf('is already a list member') !== -1
-      ) {
-        logger.log(
+      } else if (err.message.includes('is already a list member')) {
+        logger.info(
           { oldEmail, newEmail },
           'unable to change email in newsletter, new email is already on mailing list'
         )
-        return callback()
-      } else if (
-        err != null &&
-        __guard__(err != null ? err.message : undefined, x2 =>
-          x2.indexOf('looks fake or invalid')
-        ) !== -1
-      ) {
-        logger.log(
+      } else if (err.message.includes('looks fake or invalid')) {
+        logger.info(
           { oldEmail, newEmail },
           'unable to change email in newsletter, email looks fake to mailchimp'
         )
-        return callback()
-      } else if (err != null) {
-        logger.warn(
-          { err, oldEmail, newEmail },
-          'error changing email in newsletter'
-        )
-        return callback(err)
       } else {
-        logger.log('finished changing email in the newsletter')
-        return callback()
+        throw new OError({
+          message: 'error changing email in newsletter',
+          info: { oldEmail, newEmail }
+        }).withCause(err)
       }
-    })
-  }
-}
-
-const hashEmail = email =>
-  crypto
-    .createHash('md5')
-    .update(email.toLowerCase())
-    .digest('hex')
-
-var buildOptions = function(user, is_subscribed) {
-  const subscriber_hash = hashEmail(user.email)
-  const status = is_subscribed ? 'subscribed' : 'unsubscribed'
-  const opts = {
-    method: 'PUT',
-    path: `/lists/${
-      Settings.mailchimp != null ? Settings.mailchimp.list_id : undefined
-    }/members/${subscriber_hash}`,
-    body: {
-      email_address: user.email,
-      status_if_new: status
     }
   }
 
-  // only set status if we explictly want to set it
-  if (is_subscribed != null) {
-    opts.body.status = status
+  function getSubscriberPath(email) {
+    const emailHash = hashEmail(email)
+    return `/lists/${MAILCHIMP_LIST_ID}/members/${emailHash}`
   }
 
-  if (user._id != null) {
-    opts.body.merge_fields = {
+  function hashEmail(email) {
+    return crypto
+      .createHash('md5')
+      .update(email.toLowerCase())
+      .digest('hex')
+  }
+
+  function getMergeFields(user) {
+    return {
       FNAME: user.first_name,
       LNAME: user.last_name,
-      MONGO_ID: user._id
+      MONGO_ID: user._id.toString()
     }
   }
-
-  return opts
 }
 
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
+function makeNullProvider() {
+  return {
+    subscribe,
+    unsubscribe,
+    changeEmail
+  }
+
+  async function subscribe(user) {
+    logger.info(
+      { user },
+      'Not subscribing user to newsletter because no newsletter provider is configured'
+    )
+  }
+
+  async function unsubscribe(user) {
+    logger.info(
+      { user },
+      'Not unsubscribing user from newsletter because no newsletter provider is configured'
+    )
+  }
+
+  async function changeEmail(oldEmail, newEmail) {
+    logger.info(
+      { oldEmail, newEmail },
+      'Not changing email in newsletter for user because no newsletter provider is configured'
+    )
+  }
 }

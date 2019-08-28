@@ -268,6 +268,8 @@ block content
 						| #{translate('email_or_password_wrong_try_again')}
 					span(ng-switch-when="SubscriptionAdminDeletionError")
 						| #{translate('subscription_admins_cannot_be_deleted')}
+					span(ng-switch-when="UserDeletionError")
+						| #{translate('user_deletion_error')}
 					span(ng-switch-default)
 						| #{translate('generic_something_went_wrong')}
 			if settings.createV1AccountOnLogin && settings.overleaf

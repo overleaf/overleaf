@@ -11,14 +11,14 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let InstitutionsAPI
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const settings = require('settings-sharelatex')
 const request = require('request')
+const { promisifyAll } = require('../../util/promises')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 
-module.exports = InstitutionsAPI = {
+const InstitutionsAPI = {
   getInstitutionAffiliations(institutionId, callback) {
     if (callback == null) {
       callback = function(error, body) {}
@@ -223,3 +223,6 @@ var makeAffiliationRequest = function(requestOptions, callback) {
     logger
   )
 )
+
+InstitutionsAPI.promises = promisifyAll(InstitutionsAPI)
+module.exports = InstitutionsAPI

@@ -17,6 +17,7 @@ const async = require('async')
 const RecurlyWrapper = require('./RecurlyWrapper')
 const Settings = require('settings-sharelatex')
 const { User } = require('../../models/User')
+const { promisifyAll } = require('../../util/promises')
 const logger = require('logger-sharelatex')
 const SubscriptionUpdater = require('./SubscriptionUpdater')
 const LimitationsManager = require('./LimitationsManager')
@@ -24,7 +25,7 @@ const EmailHandler = require('../Email/EmailHandler')
 const Events = require('../../infrastructure/Events')
 const Analytics = require('../Analytics/AnalyticsManager')
 
-module.exports = {
+const SubscriptionHandler = {
   validateNoSubscriptionInRecurly(user_id, callback) {
     if (callback == null) {
       callback = function(error, valid) {}
@@ -57,39 +58,38 @@ module.exports = {
   },
 
   createSubscription(user, subscriptionDetails, recurlyTokenIds, callback) {
-    const self = this
     const clientTokenId = ''
-    return this.validateNoSubscriptionInRecurly(user._id, function(
-      error,
-      valid
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (!valid) {
-        return callback(new Error('user already has subscription in recurly'))
-      }
-      return RecurlyWrapper.createSubscription(
-        user,
-        subscriptionDetails,
-        recurlyTokenIds,
-        function(error, recurlySubscription) {
-          if (error != null) {
-            return callback(error)
-          }
-          return SubscriptionUpdater.syncSubscription(
-            recurlySubscription,
-            user._id,
-            function(error) {
-              if (error != null) {
-                return callback(error)
-              }
-              return callback()
-            }
-          )
+    return SubscriptionHandler.validateNoSubscriptionInRecurly(
+      user._id,
+      function(error, valid) {
+        if (error != null) {
+          return callback(error)
         }
-      )
-    })
+        if (!valid) {
+          return callback(new Error('user already has subscription in recurly'))
+        }
+        return RecurlyWrapper.createSubscription(
+          user,
+          subscriptionDetails,
+          recurlyTokenIds,
+          function(error, recurlySubscription) {
+            if (error != null) {
+              return callback(error)
+            }
+            return SubscriptionUpdater.syncSubscription(
+              recurlySubscription,
+              user._id,
+              function(error) {
+                if (error != null) {
+                  return callback(error)
+                }
+                return callback()
+              }
+            )
+          }
+        )
+      }
+    )
   },
 
   updateSubscription(user, plan_code, coupon_code, callback) {
@@ -245,3 +245,6 @@ module.exports = {
     )
   }
 }
+
+SubscriptionHandler.promises = promisifyAll(SubscriptionHandler)
+module.exports = SubscriptionHandler

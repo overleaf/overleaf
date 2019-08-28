@@ -1,5 +1,6 @@
 const async = require('async')
 const _ = require('underscore')
+const { promisifyAll } = require('../../util/promises')
 const { Subscription } = require('../../models/Subscription')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const UserGetter = require('../User/UserGetter')
@@ -77,11 +78,11 @@ const SubscriptionUpdater = {
   },
 
   addUserToGroup(subscriptionId, userId, callback) {
-    this.addUsersToGroup(subscriptionId, [userId], callback)
+    SubscriptionUpdater.addUsersToGroup(subscriptionId, [userId], callback)
   },
 
   addUsersToGroup(subscriptionId, memberIds, callback) {
-    this.addUsersToGroupWithoutFeaturesRefresh(
+    SubscriptionUpdater.addUsersToGroupWithoutFeaturesRefresh(
       subscriptionId,
       memberIds,
       function(err) {
@@ -238,4 +239,5 @@ const SubscriptionUpdater = {
   }
 }
 
+SubscriptionUpdater.promises = promisifyAll(SubscriptionUpdater)
 module.exports = SubscriptionUpdater

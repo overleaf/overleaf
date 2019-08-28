@@ -10,8 +10,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let UserMembershipsHandler
 const async = require('async')
+const { promisifyAll } = require('../../util/promises')
 const EntityModels = {
   Institution: require('../../models/Institution').Institution,
   Subscription: require('../../models/Subscription').Subscription,
@@ -19,7 +19,7 @@ const EntityModels = {
 }
 const UserMembershipEntityConfigs = require('./UserMembershipEntityConfigs')
 
-module.exports = UserMembershipsHandler = {
+const UserMembershipsHandler = {
   removeUserFromAllEntities(userId, callback) {
     // get all writable entity types
     if (callback == null) {
@@ -83,3 +83,6 @@ module.exports = UserMembershipsHandler = {
     })
   }
 }
+
+UserMembershipsHandler.promises = promisifyAll(UserMembershipsHandler)
+module.exports = UserMembershipsHandler

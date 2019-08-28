@@ -38,7 +38,11 @@ describe('UserDeleter', function() {
     )
     this.user = this.mockedUser.object
 
-    this.NewsletterManager = { unsubscribe: sinon.stub().yields() }
+    this.NewsletterManager = {
+      promises: {
+        unsubscribe: sinon.stub().resolves()
+      }
+    }
 
     this.ProjectDeleter = {
       promises: {
@@ -47,23 +51,33 @@ describe('UserDeleter', function() {
     }
 
     this.SubscriptionHandler = {
-      cancelSubscription: sinon.stub().yields()
+      promises: {
+        cancelSubscription: sinon.stub().resolves()
+      }
     }
 
     this.SubscriptionUpdater = {
-      removeUserFromAllGroups: sinon.stub().yields()
+      promises: {
+        removeUserFromAllGroups: sinon.stub().resolves()
+      }
     }
 
     this.SubscriptionLocator = {
-      getUsersSubscription: sinon.stub().yields()
+      promises: {
+        getUsersSubscription: sinon.stub().resolves()
+      }
     }
 
     this.UserMembershipsHandler = {
-      removeUserFromAllEntities: sinon.stub().yields()
+      promises: {
+        removeUserFromAllEntities: sinon.stub().resolves()
+      }
     }
 
     this.InstitutionsApi = {
-      deleteAffiliations: sinon.stub().yields()
+      promises: {
+        deleteAffiliations: sinon.stub().resolves()
+      }
     }
 
     this.UserDeleter = SandboxedModule.require(modulePath, {
@@ -98,8 +112,6 @@ describe('UserDeleter', function() {
 
   describe('deleteUser', function() {
     beforeEach(function() {
-      this.UserDeleter.promises.ensureCanDeleteUser = sinon.stub().resolves()
-
       this.UserMock.expects('findById')
         .withArgs(this.userId)
         .chain('exec')
@@ -124,11 +136,6 @@ describe('UserDeleter', function() {
             deletedUserOverleafId: this.user.overleaf.id
           }
         }
-
-        this.UserMock.expects('deleteOne')
-          .withArgs({ _id: this.userId })
-          .chain('exec')
-          .resolves()
       })
 
       describe('when no options are passed', function() {
@@ -139,97 +146,103 @@ describe('UserDeleter', function() {
             .resolves()
         })
 
-        it('should find and the user in mongo by its id', async function() {
-          await this.UserDeleter.promises.deleteUser(this.userId)
-          this.UserMock.verify()
-        })
-
-        it('should unsubscribe the user from the news letter', async function() {
-          await this.UserDeleter.promises.deleteUser(this.userId)
-          expect(this.NewsletterManager.unsubscribe).to.have.been.calledWith(
-            this.user
-          )
-        })
-
-        it('should delete all the projects of a user', async function() {
-          await this.UserDeleter.promises.deleteUser(this.userId)
-          expect(
-            this.ProjectDeleter.promises.deleteUsersProjects
-          ).to.have.been.calledWith(this.userId)
-        })
-
-        it("should cancel the user's subscription", async function() {
-          await this.UserDeleter.promises.deleteUser(this.userId)
-          expect(
-            this.SubscriptionHandler.cancelSubscription
-          ).to.have.been.calledWith(this.user)
-        })
-
-        it('should delete user affiliations', async function() {
-          await this.UserDeleter.promises.deleteUser(this.userId)
-          expect(
-            this.InstitutionsApi.deleteAffiliations
-          ).to.have.been.calledWith(this.userId)
-        })
-
-        it('should remove user from group subscriptions', async function() {
-          await this.UserDeleter.promises.deleteUser(this.userId)
-          expect(
-            this.SubscriptionUpdater.removeUserFromAllGroups
-          ).to.have.been.calledWith(this.userId)
-        })
-
-        it('should remove user memberships', async function() {
-          await this.UserDeleter.promises.deleteUser(this.userId)
-          expect(
-            this.UserMembershipsHandler.removeUserFromAllEntities
-          ).to.have.been.calledWith(this.userId)
-        })
-
-        it('ensures user can be deleted', async function() {
-          await this.UserDeleter.promises.deleteUser(this.userId)
-          expect(
-            this.UserDeleter.promises.ensureCanDeleteUser
-          ).to.have.been.calledWith(this.user)
-        })
-
-        it('should create a deletedUser', async function() {
-          await this.UserDeleter.promises.deleteUser(this.userId)
-          this.DeletedUserMock.verify()
-        })
-
-        describe('when unsubscribing from mailchimp fails', function() {
+        describe('when unsubscribing in Mailchimp succeeds', function() {
           beforeEach(function() {
-            this.NewsletterManager.unsubscribe = sinon
-              .stub()
-              .yields(new Error('something went wrong'))
+            this.UserMock.expects('deleteOne')
+              .withArgs({ _id: this.userId })
+              .chain('exec')
+              .resolves()
           })
 
-          it('should not return an error', async function() {
-            try {
-              await this.UserDeleter.promises.deleteUser(this.userId)
-            } catch (error) {
-              expect(error).not.to.exist
-              expect.fail()
-            }
-            // check that we called `unsubscribe` to generate the error
-            expect(this.NewsletterManager.unsubscribe).to.have.been.calledWith(
-              this.user
-            )
-          })
-
-          it('should delete the user', async function() {
+          it('should find and the user in mongo by its id', async function() {
             await this.UserDeleter.promises.deleteUser(this.userId)
             this.UserMock.verify()
           })
 
-          it('should log an error', async function() {
+          it('should unsubscribe the user from the news letter', async function() {
             await this.UserDeleter.promises.deleteUser(this.userId)
-            sinon.assert.called(this.logger.err)
+            expect(
+              this.NewsletterManager.promises.unsubscribe
+            ).to.have.been.calledWith(this.user)
+          })
+
+          it('should delete all the projects of a user', async function() {
+            await this.UserDeleter.promises.deleteUser(this.userId)
+            expect(
+              this.ProjectDeleter.promises.deleteUsersProjects
+            ).to.have.been.calledWith(this.userId)
+          })
+
+          it("should cancel the user's subscription", async function() {
+            await this.UserDeleter.promises.deleteUser(this.userId)
+            expect(
+              this.SubscriptionHandler.promises.cancelSubscription
+            ).to.have.been.calledWith(this.user)
+          })
+
+          it('should delete user affiliations', async function() {
+            await this.UserDeleter.promises.deleteUser(this.userId)
+            expect(
+              this.InstitutionsApi.promises.deleteAffiliations
+            ).to.have.been.calledWith(this.userId)
+          })
+
+          it('should remove user from group subscriptions', async function() {
+            await this.UserDeleter.promises.deleteUser(this.userId)
+            expect(
+              this.SubscriptionUpdater.promises.removeUserFromAllGroups
+            ).to.have.been.calledWith(this.userId)
+          })
+
+          it('should remove user memberships', async function() {
+            await this.UserDeleter.promises.deleteUser(this.userId)
+            expect(
+              this.UserMembershipsHandler.promises.removeUserFromAllEntities
+            ).to.have.been.calledWith(this.userId)
+          })
+
+          it('rejects if the user is a subscription admin', async function() {
+            this.SubscriptionLocator.promises.getUsersSubscription.rejects({
+              _id: 'some-subscription'
+            })
+            await expect(this.UserDeleter.promises.deleteUser(this.userId)).to
+              .be.rejected
+          })
+
+          it('should create a deletedUser', async function() {
+            await this.UserDeleter.promises.deleteUser(this.userId)
+            this.DeletedUserMock.verify()
+          })
+        })
+
+        describe('when unsubscribing from mailchimp fails', function() {
+          beforeEach(function() {
+            this.NewsletterManager.promises.unsubscribe.rejects(
+              new Error('something went wrong')
+            )
+          })
+
+          it('should return an error and not delete the user', async function() {
+            await expect(this.UserDeleter.promises.deleteUser(this.userId)).to
+              .be.rejected
+            this.UserMock.verify()
+          })
+
+          it('should log a warning', async function() {
+            await expect(this.UserDeleter.promises.deleteUser(this.userId)).to
+              .be.rejected
+            sinon.assert.called(this.logger.warn)
           })
         })
 
         describe('when called as a callback', function() {
+          beforeEach(function() {
+            this.UserMock.expects('deleteOne')
+              .withArgs({ _id: this.userId })
+              .chain('exec')
+              .resolves()
+          })
+
           it('should delete the user', function(done) {
             this.UserDeleter.deleteUser(this.userId, err => {
               expect(err).not.to.exist
@@ -251,6 +264,10 @@ describe('UserDeleter', function() {
 
           this.DeletedUserMock.expects('create')
             .withArgs(this.deletedUser)
+            .chain('exec')
+            .resolves()
+          this.UserMock.expects('deleteOne')
+            .withArgs({ _id: this.userId })
             .chain('exec')
             .resolves()
         })
@@ -285,45 +302,34 @@ describe('UserDeleter', function() {
 
     describe('when the user cannot be deleted because they are a subscription admin', function() {
       beforeEach(function() {
-        this.UserDeleter.promises.ensureCanDeleteUser.rejects(
-          new Errors.SubscriptionAdminDeletionError()
-        )
+        this.SubscriptionLocator.promises.getUsersSubscription.resolves({
+          _id: 'some-subscription'
+        })
       })
 
       it('fails with a SubscriptionAdminDeletionError', async function() {
-        let error
-        try {
-          await this.UserDeleter.promises.deleteUser(this.userId)
-        } catch (e) {
-          error = e
-        } finally {
-          expect(error).to.be.instanceof(Errors.SubscriptionAdminDeletionError)
-        }
+        await expect(
+          this.UserDeleter.promises.deleteUser(this.userId)
+        ).to.be.rejectedWith(Errors.SubscriptionAdminDeletionError)
       })
 
       it('should not create a deletedUser', async function() {
-        try {
-          await this.UserDeleter.promises.deleteUser(this.userId)
-        } catch (e) {
-        } finally {
-          this.DeletedUserMock.verify()
-        }
+        await expect(this.UserDeleter.promises.deleteUser(this.userId)).to.be
+          .rejected
+        this.DeletedUserMock.verify()
       })
 
       it('should not remove the user from mongo', async function() {
-        try {
-          await this.UserDeleter.promises.deleteUser(this.userId)
-        } catch (e) {
-        } finally {
-          this.UserMock.verify()
-        }
+        await expect(this.UserDeleter.promises.deleteUser(this.userId)).to.be
+          .rejected
+        this.UserMock.verify()
       })
     })
   })
 
   describe('ensureCanDeleteUser', function() {
     it('should not return error when user can be deleted', async function() {
-      this.SubscriptionLocator.getUsersSubscription.yields(null, null)
+      this.SubscriptionLocator.promises.getUsersSubscription.resolves(null)
       let error
       try {
         await this.UserDeleter.promises.ensureCanDeleteUser(this.user)
@@ -335,7 +341,7 @@ describe('UserDeleter', function() {
     })
 
     it('should return custom error when user is group admin', async function() {
-      this.SubscriptionLocator.getUsersSubscription.yields(null, {
+      this.SubscriptionLocator.promises.getUsersSubscription.resolves({
         _id: '123abc'
       })
       let error
@@ -349,7 +355,7 @@ describe('UserDeleter', function() {
     })
 
     it('propagates errors', async function() {
-      this.SubscriptionLocator.getUsersSubscription.yields(
+      this.SubscriptionLocator.promises.getUsersSubscription.rejects(
         new Error('Some error')
       )
       let error
@@ -364,16 +370,20 @@ describe('UserDeleter', function() {
   })
 
   describe('expireDeletedUsersAfterDuration', function() {
+    const userId1 = new ObjectId()
+    const userId2 = new ObjectId()
+
     beforeEach(function() {
-      this.UserDeleter.promises.expireDeletedUser = sinon.stub().resolves()
       this.deletedUsers = [
         {
-          user: { _id: 'wombat' },
-          deleterData: { deletedUserId: 'wombat' }
+          user: { _id: userId1 },
+          deleterData: { deletedUserId: userId1 },
+          save: sinon.stub().resolves()
         },
         {
-          user: { _id: 'potato' },
-          deleterData: { deletedUserId: 'potato' }
+          user: { _id: userId2 },
+          deleterData: { deletedUserId: userId2 },
+          save: sinon.stub().resolves()
         }
       ]
 
@@ -388,16 +398,22 @@ describe('UserDeleter', function() {
         })
         .chain('exec')
         .resolves(this.deletedUsers)
+      for (const deletedUser of this.deletedUsers) {
+        this.DeletedUserMock.expects('findOne')
+          .withArgs({
+            'deleterData.deletedUserId': deletedUser.deleterData.deletedUserId
+          })
+          .chain('exec')
+          .resolves(deletedUser)
+      }
     })
 
-    it('calls expireDeletedUser for each user', async function() {
+    it('clears data from all deleted users', async function() {
       await this.UserDeleter.promises.expireDeletedUsersAfterDuration()
-      expect(
-        this.UserDeleter.promises.expireDeletedUser
-      ).to.have.been.calledWith('wombat')
-      expect(
-        this.UserDeleter.promises.expireDeletedUser
-      ).to.have.been.calledWith('potato')
+      for (const deletedUser of this.deletedUsers) {
+        expect(deletedUser.user).to.be.undefined
+        expect(deletedUser.save.called).to.be.true
+      }
     })
   })
 

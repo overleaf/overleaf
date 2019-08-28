@@ -1,21 +1,8 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let UserRegistrationHandler
 const { User } = require('../../models/User')
 const UserCreator = require('./UserCreator')
 const UserGetter = require('./UserGetter')
 const AuthenticationManager = require('../Authentication/AuthenticationManager')
-const NewsLetterManager = require('../Newsletter/NewsletterManager')
+const NewsletterManager = require('../Newsletter/NewsletterManager')
 const async = require('async')
 const logger = require('logger-sharelatex')
 const crypto = require('crypto')
@@ -25,7 +12,7 @@ const Analytics = require('../Analytics/AnalyticsManager')
 const settings = require('settings-sharelatex')
 const EmailHelper = require('../Helpers/EmailHelper')
 
-module.exports = UserRegistrationHandler = {
+const UserRegistrationHandler = {
   _registrationRequestIsValid(body, callback) {
     const invalidEmail = AuthenticationManager.validateEmail(body.email || '')
     const invalidPassword = AuthenticationManager.validatePassword(
@@ -41,7 +28,7 @@ module.exports = UserRegistrationHandler = {
   _createNewUserIfRequired(user, userDetails, callback) {
     if (user == null) {
       userDetails.holdingAccount = false
-      return UserCreator.createNewUser(
+      UserCreator.createNewUser(
         {
           holdingAccount: false,
           email: userDetails.email,
@@ -51,7 +38,7 @@ module.exports = UserRegistrationHandler = {
         callback
       )
     } else {
-      return callback(null, user)
+      callback(null, user)
     }
   },
 
@@ -62,21 +49,18 @@ module.exports = UserRegistrationHandler = {
       return callback(new Error('request is not valid'))
     }
     userDetails.email = EmailHelper.parseEmail(userDetails.email)
-    return UserGetter.getUserByAnyEmail(userDetails.email, (err, user) => {
+    UserGetter.getUserByAnyEmail(userDetails.email, (err, user) => {
       if (err != null) {
         return callback(err)
       }
       if ((user != null ? user.holdingAccount : undefined) === false) {
         return callback(new Error('EmailAlreadyRegistered'), user)
       }
-      return self._createNewUserIfRequired(user, userDetails, function(
-        err,
-        user
-      ) {
+      self._createNewUserIfRequired(user, userDetails, (err, user) => {
         if (err != null) {
           return callback(err)
         }
-        return async.series(
+        async.series(
           [
             cb =>
               User.update(
@@ -90,17 +74,24 @@ module.exports = UserRegistrationHandler = {
                 userDetails.password,
                 cb
               ),
-            function(cb) {
+            cb => {
               if (userDetails.subscribeToNewsletter === 'true') {
-                NewsLetterManager.subscribe(user, function() {})
+                NewsletterManager.subscribe(user, err => {
+                  if (err != null) {
+                    logger.warn(
+                      { err, user },
+                      'Failed to subscribe user to newsletter'
+                    )
+                  }
+                })
               }
-              return cb()
+              cb()
             } // this can be slow, just fire it off
           ],
-          function(err) {
+          err => {
             logger.log({ user }, 'registered')
             Analytics.recordEvent(user._id, 'user-registered')
-            return callback(err, user)
+            callback(err, user)
           }
         )
       })
@@ -108,16 +99,13 @@ module.exports = UserRegistrationHandler = {
   },
 
   registerNewUserAndSendActivationEmail(email, callback) {
-    if (callback == null) {
-      callback = function(error, user, setNewPasswordUrl) {}
-    }
     logger.log({ email }, 'registering new user')
-    return UserRegistrationHandler.registerNewUser(
+    UserRegistrationHandler.registerNewUser(
       {
         email,
         password: crypto.randomBytes(32).toString('hex')
       },
-      function(err, user) {
+      (err, user) => {
         if (
           err != null &&
           (err != null ? err.message : undefined) !== 'EmailAlreadyRegistered'
@@ -132,11 +120,11 @@ module.exports = UserRegistrationHandler = {
         }
 
         const ONE_WEEK = 7 * 24 * 60 * 60 // seconds
-        return OneTimeTokenHandler.getNewToken(
+        OneTimeTokenHandler.getNewToken(
           'password',
           user._id,
           { expiresIn: ONE_WEEK },
-          function(err, token) {
+          (err, token) => {
             if (err != null) {
               return callback(err)
             }
@@ -151,13 +139,15 @@ module.exports = UserRegistrationHandler = {
                 to: user.email,
                 setNewPasswordUrl
               },
-              function() {}
+              () => {}
             )
 
-            return callback(null, user, setNewPasswordUrl)
+            callback(null, user, setNewPasswordUrl)
           }
         )
       }
     )
   }
 }
+
+module.exports = UserRegistrationHandler
