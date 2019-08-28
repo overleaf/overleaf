@@ -73,6 +73,12 @@ module.exports = MockV1Api = {
     return (this.doc_exported[token] = info)
   },
 
+  templates: {},
+
+  setTemplates(templates) {
+    this.templates = templates
+  },
+
   run() {
     app.get(
       '/api/v1/sharelatex/users/:v1_user_id/plan_code',
@@ -258,6 +264,14 @@ module.exports = MockV1Api = {
         return res.json({ exists: false })
       }
     )
+
+    app.get('/api/v2/templates/:templateId', (req, res, next) => {
+      const template = this.templates[req.params.templateId]
+      if (!template) {
+        res.sendStatus(404)
+      }
+      return res.json(template)
+    })
 
     return app
       .listen(5000, error => {

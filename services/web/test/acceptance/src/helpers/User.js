@@ -264,6 +264,12 @@ class User {
     )
   }
 
+  ensureStaffAccess(flag, callback) {
+    const update = { $set: {} }
+    update.$set[`staffAccess.${flag}`] = true
+    return db.users.update({ _id: ObjectId(this.id) }, update, callback)
+  }
+
   upgradeFeatures(callback) {
     if (callback == null) {
       callback = function(error) {}
