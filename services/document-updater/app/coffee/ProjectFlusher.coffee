@@ -6,6 +6,7 @@ docUpdaterKeys = Settings.redis.documentupdater.key_schema
 async = require("async")
 ProjectManager = require("./ProjectManager")
 _ = require("lodash")
+logger = require("logger-sharelatex")
 
 ProjectFlusher = 
 
