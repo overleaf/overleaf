@@ -47,6 +47,7 @@ ProjectFlusher =
 		return ids
 
 	flushAllProjects: (options, callback)->
+		logger.log options:options, "flushing all projects"
 		ProjectFlusher._getKeys docUpdaterKeys.docsInProject({project_id:"*"}), options.limit, (error, project_keys) ->
 			if error?
 				logger.err err:error, "error getting keys for flushing"
@@ -65,6 +66,7 @@ ProjectFlusher =
 						failure.push(project_ids[i])
 					else 
 						success.push(project_ids[i])
+				logger.log success:success, failure:failure, "finished flushing all projects"
 				return callback(error, {success:success, failure:failure})
 
 
