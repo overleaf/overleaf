@@ -43,7 +43,7 @@ module.exports = Features = {
       case 'view-templates':
         return Settings.overleaf == null
       case 'affiliations':
-        return Settings.overleaf != null
+        return Settings.apis.v1 != null
       case 'redirect-sl':
         return Settings.redirectToV2 != null
       case 'overleaf-integration':
