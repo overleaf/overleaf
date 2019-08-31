@@ -3,6 +3,7 @@ should = chai.should()
 sinon = require("sinon")
 modulePath = "../../../app/js/WebApiManager.js"
 SandboxedModule = require('sandboxed-module')
+{ CodedError } = require('../../../app/js/Errors')
 
 describe 'WebApiManager', ->
 	beforeEach ->
@@ -61,3 +62,12 @@ describe 'WebApiManager', ->
 					.calledWith(new Error("non-success code from web: 500"))
 					.should.equal true
 	
+		describe "when the project is over its rate limit", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 429}, null)
+				@WebApiManager.joinProject @project_id, @user_id, @callback
+
+			it "should call the callback with a TooManyRequests error code", ->
+				@callback
+					.calledWith(new CodedError("rate-limit hit when joining project", "TooManyRequests"))
+					.should.equal true

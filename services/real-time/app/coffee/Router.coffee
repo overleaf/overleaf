@@ -21,6 +21,9 @@ module.exports = Router =
 				attrs[key] = value
 			attrs.client_id = client.id
 			attrs.err = error
+			if error.name == "CodedError"
+				logger.warn attrs, error.message, code: error.code
+				return callback {message: error.message, code: error.code}
 			if error.message in ["not authorized", "doc updater could not load requested ops", "no project_id found on client"]
 				logger.warn attrs, error.message
 				return callback {message: error.message}
