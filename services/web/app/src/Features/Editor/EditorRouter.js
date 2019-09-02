@@ -74,7 +74,7 @@ module.exports = {
       RateLimiterMiddleware.rateLimit({
         endpointName: 'join-project',
         params: ['Project_id'],
-        maxRequests: 30,
+        maxRequests: 45,
         timeInterval: 60
       }),
       EditorHttpController.joinProject
