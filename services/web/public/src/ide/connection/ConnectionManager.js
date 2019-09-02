@@ -27,7 +27,7 @@ define([], function() {
         this.prototype.BACKGROUND_RETRY_INTERVAL = 5 * 1000
 
         this.prototype.RECONNECT_GRACEFULLY_RETRY_INTERVAL = 5000 // ms
-        this.prototype.MAX_RECONNECT_GRACEFULLY_INTERVAL = 60 * 5 * 1000
+        this.prototype.MAX_RECONNECT_GRACEFULLY_INTERVAL = 45 * 1000
       }
 
       constructor(ide, $scope) {
