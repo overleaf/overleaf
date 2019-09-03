@@ -169,9 +169,8 @@ settings =
 	httpAuthUsers: httpAuthUsers
 	
 	# Should javascript assets be served minified or not. Note that you will
-	# need to run `grunt compile:minify` within the web-sharelatex directory
-	# to generate these.
-	useMinifiedJs: false
+	# need to run `make minify` within the web directory to generate these.
+	useMinifiedJs: true
 
 	# Should static assets be sent with a header to tell the browser to cache
 	# them. This should be false in development where changes are being made,
