@@ -40,34 +40,20 @@ block content
 										input(name="_csrf", type="hidden", value=csrfToken)
 										button.btn.btn-danger(type="submit") Close Editor
 									p.small Will stop anyone opening the editor. Will NOT disconnect already connected users.
-									
+
 								.row-spaced
 									form(method='post',action='/admin/dissconectAllUsers')
 										input(name="_csrf", type="hidden", value=csrfToken)
 										button.btn.btn-danger(type="submit") Disconnect all users
 									p.small Will force disconnect all users with the editor open. Make sure to close the editor first to avoid them reconnecting.
-									
-							tab(heading="Subscriptions")
-								h3 Link Recurly subscription to user
-								.row
-									form.form.col-xs-6(method='post',action='/admin/syncUserToSubscription')
-										input(name="_csrf", type="hidden", value=csrfToken)
-										.form-group
-											label(for='subscription_id') subscription_id (in Recurly)
-											input.form-control(type='text', name='subscription_id', placeholder='subscription_id', required)
-										.form-group
-											label(for='user_id') user_id 
-											input.form-control(type='text', name='user_id', placeholder='user_id', required)
-										.form-group
-											button.btn-primary.btn(type='submit') Link
-											
+
 							tab(heading="TPDS/Dropbox Management")
 								h3 Flush project to TPDS
 								.row
 									form.col-xs-6(method='post',action='/admin/flushProjectToTpds')
 										input(name="_csrf", type="hidden", value=csrfToken)
 										.form-group
-											label(for='project_id') project_id 
+											label(for='project_id') project_id
 											input.form-control(type='text',  name='project_id', placeholder='project_id', required)
 										.form-group
 											button.btn-primary.btn(type='submit') Flush
@@ -77,11 +63,7 @@ block content
 									form.col-xs-6(method='post',action='/admin/pollDropboxForUser')
 										input(name="_csrf", type="hidden", value=csrfToken)
 										.form-group
-											label(for='user_id') user_id 
+											label(for='user_id') user_id
 											input.form-control(type='text',  name='user_id', placeholder='user_id', required)
 										.form-group
 											button.btn-primary.btn(type='submit') Poll
-										
-
-
-

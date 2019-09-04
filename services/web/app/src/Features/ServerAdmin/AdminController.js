@@ -129,28 +129,6 @@ module.exports = AdminController = {
     })
   },
 
-  syncUserToSubscription(req, res) {
-    const { user_id, subscription_id } = req.body
-    return RecurlyWrapper.getSubscription(
-      subscription_id,
-      {},
-      (err, subscription) =>
-        User.findById(user_id, (err, user) =>
-          SubscriptionHandler.syncSubscriptionToUser(
-            subscription,
-            user._id,
-            function(err) {
-              logger.log(
-                { user_id, subscription_id },
-                'linked account to subscription'
-              )
-              return res.send()
-            }
-          )
-        )
-    )
-  },
-
   flushProjectToTpds(req, res) {
     return projectEntityHandler.flushProjectToThirdPartyDataStore(
       req.body.project_id,

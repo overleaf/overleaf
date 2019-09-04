@@ -908,11 +908,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AdminController.dissconectAllUsers
   )
   webRouter.post(
-    '/admin/syncUserToSubscription',
-    AuthorizationMiddleware.ensureUserIsSiteAdmin,
-    AdminController.syncUserToSubscription
-  )
-  webRouter.post(
     '/admin/flushProjectToTpds',
     AuthorizationMiddleware.ensureUserIsSiteAdmin,
     AdminController.flushProjectToTpds
