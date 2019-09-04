@@ -168,8 +168,7 @@ settings =
 	# between services that may need to go over public channels
 	httpAuthUsers: httpAuthUsers
 	
-	# Should javascript assets be served minified or not. Note that you will
-	# need to run `make minify` within the web directory to generate these.
+	# Should javascript assets be served minified or not.
 	useMinifiedJs: true
 
 	# Should static assets be sent with a header to tell the browser to cache
@@ -197,6 +196,10 @@ settings =
 			url: "http://localhost:3000"
 			user: httpAuthUser
 			pass: httpAuthPass
+		# overrides v1.url to indicate via Feature Flags that Overleaf V1
+		# is not available	
+		v1:
+			url: null    
 	references:{}
 	notifications:undefined
 
@@ -421,8 +424,6 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			entryPoint: process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			callbackUrl: process.env["SHARELATEX_SAML_CALLBACK_URL"]
 			issuer: process.env["SHARELATEX_SAML_ISSUER"]
-			cert: process.env["SHARELATEX_SAML_CERT"]
-			privateCert: process.env["SHARELATEX_SAML_PRIVATE_CERT"]
 			decryptionPvk: process.env["SHARELATEX_SAML_DECRYPTION_PVK"]
 			signatureAlgorithm: process.env["SHARELATEX_SAML_SIGNATURE_ALGORITHM"]
 			identifierFormat: process.env["SHARELATEX_SAML_IDENTIFIER_FORMAT"]
@@ -482,6 +483,11 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 					undefined
 			)
 
+	# SHARELATEX_SAML_CERT cannot be empty
+	# https://github.com/bergie/passport-saml/commit/f6b1c885c0717f1083c664345556b535f217c102		
+	if process.env["SHARELATEX_SAML_CERT"]
+		settings.saml.server.cert = process.env["SHARELATEX_SAML_CERT"]
+		settings.saml.server.privateCert = process.env["SHARELATEX_SAML_PRIVATE_CERT"]
 
 # Compiler
 # --------
