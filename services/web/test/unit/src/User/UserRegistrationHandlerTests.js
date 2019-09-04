@@ -282,8 +282,9 @@ describe('UserRegistrationHandler', function() {
       })
 
       it('should generate a new password reset token', function() {
+        const data = { user_id: this.user._id.toString(), email: this.email }
         return this.OneTimeTokenHandler.getNewToken
-          .calledWith('password', this.user_id, { expiresIn: 7 * 24 * 60 * 60 })
+          .calledWith('password', data, { expiresIn: 7 * 24 * 60 * 60 })
           .should.equal(true)
       })
 

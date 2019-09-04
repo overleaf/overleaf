@@ -122,7 +122,7 @@ const UserRegistrationHandler = {
         const ONE_WEEK = 7 * 24 * 60 * 60 // seconds
         OneTimeTokenHandler.getNewToken(
           'password',
-          user._id,
+          { user_id: user._id.toString(), email },
           { expiresIn: ONE_WEEK },
           (err, token) => {
             if (err != null) {
