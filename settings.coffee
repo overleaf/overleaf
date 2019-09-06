@@ -199,7 +199,7 @@ settings =
 		# overrides v1.url to indicate via Feature Flags that Overleaf V1
 		# is not available	
 		v1:
-			url: null    
+			url: ""    
 	references:{}
 	notifications:undefined
 
