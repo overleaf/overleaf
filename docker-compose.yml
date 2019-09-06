@@ -17,10 +17,18 @@ services:
             - ~/sharelatex_data:/var/lib/sharelatex
             - /var/run/docker.sock:/var/run/docker.sock
         environment:
+
+            SHARELATEX_APP_NAME: Overleaf Community Edition
+
             SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex
+
+            # Same property, unfortunately with different names in
+            # different locations
             SHARELATEX_REDIS_HOST: redis
-            SHARELATEX_APP_NAME: Our ShareLaTeX
-            
+            REDIS_HOST: redis
+
+            ENABLED_LINKED_FILE_TYPES: 'url,project_file'
+
             ## Set for SSL via nginx-proxy
             #VIRTUAL_HOST: 103.112.212.22
 
@@ -34,14 +42,14 @@ services:
 
             # SHARELATEX_EMAIL_FROM_ADDRESS: "team@sharelatex.com"
 
-            # SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID: 
-            # SHARELATEX_EMAIL_AWS_SES_SECRET_KEY: 
+            # SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID:
+            # SHARELATEX_EMAIL_AWS_SES_SECRET_KEY:
 
             # SHARELATEX_EMAIL_SMTP_HOST: smtp.mydomain.com
             # SHARELATEX_EMAIL_SMTP_PORT: 587
             # SHARELATEX_EMAIL_SMTP_SECURE: false
-            # SHARELATEX_EMAIL_SMTP_USER: 
-            # SHARELATEX_EMAIL_SMTP_PASS: 
+            # SHARELATEX_EMAIL_SMTP_USER:
+            # SHARELATEX_EMAIL_SMTP_PASS:
             # SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH: true
             # SHARELATEX_EMAIL_SMTP_IGNORE_TLS: false
             # SHARELATEX_CUSTOM_EMAIL_FOOTER: "<div>This system is run by department x </div>"
@@ -51,9 +59,11 @@ services:
             ################
 
             # SANDBOXED_COMPILES: 'true'
-            
+
             # SANDBOXED_COMPILES_SIBLING_CONTAINERS: 'true'
             # SANDBOXED_COMPILES_HOST_DIR: '/var/clsi/compiles'
+
+            # DOCKER_RUNNER: 'false'
 
             ## Works with test LDAP server shown at bottom of docker compose
             # SHARELATEX_LDAP_URL: 'ldap://ldap:389'
@@ -67,6 +77,8 @@ services:
             # SHARELATEX_LDAP_UPDATE_USER_DETAILS_ON_LOGIN: 'true'
 
             # SHARELATEX_TEMPLATES_USER_ID: "578773160210479700917ee5"
+            # SHARELATEX_NEW_PROJECT_TEMPLATE_LINKS: '[ {"name":"All Templates","url":"/templates/all"}]'
+
 
             # SHARELATEX_PROXY_LEARN: "true"
 
