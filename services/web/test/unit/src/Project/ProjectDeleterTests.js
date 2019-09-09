@@ -106,7 +106,9 @@ describe('ProjectDeleter', function() {
     }
 
     this.ProjectDetailsHandler = {
-      generateUniqueName: sinon.stub().yields(null, this.project.name)
+      promises: {
+        generateUniqueName: sinon.stub().resolves(this.project.name)
+      }
     }
 
     this.db = {
@@ -533,7 +535,7 @@ describe('ProjectDeleter', function() {
       this.ProjectDeleter.undeleteProject(this.project._id, err => {
         expect(err).not.to.exist
         sinon.assert.calledWith(
-          this.ProjectDetailsHandler.generateUniqueName,
+          this.ProjectDetailsHandler.promises.generateUniqueName,
           this.project.owner_ref
         )
         done()
@@ -544,7 +546,7 @@ describe('ProjectDeleter', function() {
       this.ProjectDeleter.undeleteProject(this.project._id, err => {
         expect(err).not.to.exist
         sinon.assert.calledWith(
-          this.ProjectDetailsHandler.generateUniqueName,
+          this.ProjectDetailsHandler.promises.generateUniqueName,
           this.project.owner_ref,
           this.project.name + ' (Restored)'
         )

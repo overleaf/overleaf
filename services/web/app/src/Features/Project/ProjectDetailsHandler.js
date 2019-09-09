@@ -1,25 +1,9 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+const _ = require('underscore')
 const ProjectGetter = require('./ProjectGetter')
 const UserGetter = require('../User/UserGetter')
 const { Project } = require('../../models/Project')
-const { ObjectId } = require('mongojs')
 const logger = require('logger-sharelatex')
-const tpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
-const _ = require('underscore')
+const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const Errors = require('../Errors/Errors')
 const ProjectTokenGenerator = require('./ProjectTokenGenerator')
@@ -27,411 +11,276 @@ const ProjectEntityHandler = require('./ProjectEntityHandler')
 const ProjectHelper = require('./ProjectHelper')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const settings = require('settings-sharelatex')
-const { promisify } = require('util')
+const { callbackify } = require('util')
 
-const ProjectDetailsHandler = {
-  getDetails(project_id, callback) {
-    return ProjectGetter.getProject(
-      project_id,
-      {
-        name: true,
-        description: true,
-        compiler: true,
-        features: true,
-        owner_ref: true,
-        overleaf: true
-      },
-      function(err, project) {
-        if (err != null) {
-          logger.warn({ err, project_id }, 'error getting project')
-          return callback(err)
-        }
-        if (project == null) {
-          return callback(new Errors.NotFoundError('project not found'))
-        }
-        return UserGetter.getUser(project.owner_ref, function(err, user) {
-          if (err != null) {
-            return callback(err)
-          }
-          const details = {
-            name: project.name,
-            description: project.description,
-            compiler: project.compiler,
-            features:
-              (user != null ? user.features : undefined) ||
-              settings.defaultFeatures
-          }
+const MAX_PROJECT_NAME_LENGTH = 150
 
-          if (project.overleaf != null) {
-            details.overleaf = project.overleaf
-          }
-
-          logger.log({ project_id, details }, 'getting project details')
-          return callback(err, details)
-        })
-      }
-    )
-  },
-
-  getProjectDescription(project_id, callback) {
-    return ProjectGetter.getProject(
-      project_id,
-      { description: true },
-      (err, project) =>
-        callback(err, project != null ? project.description : undefined)
-    )
-  },
-
-  setProjectDescription(project_id, description, callback) {
-    const conditions = { _id: project_id }
-    const update = { description }
-    logger.log(
-      { conditions, update, project_id, description },
-      'setting project description'
-    )
-    return Project.update(conditions, update, function(err) {
-      if (err != null) {
-        logger.warn({ err }, 'something went wrong setting project description')
-      }
-      return callback(err)
-    })
-  },
-
-  transferOwnership(project_id, user_id, suffix, callback) {
-    if (suffix == null) {
-      suffix = ''
-    }
-    if (typeof suffix === 'function') {
-      callback = suffix
-      suffix = ''
-    }
-    return ProjectGetter.getProject(
-      project_id,
-      { owner_ref: true, name: true },
-      function(err, project) {
-        if (err != null) {
-          return callback(err)
-        }
-        if (project == null) {
-          return callback(new Errors.NotFoundError('project not found'))
-        }
-        if (project.owner_ref === user_id) {
-          return callback()
-        }
-
-        return UserGetter.getUser(user_id, function(err, user) {
-          if (err != null) {
-            return callback(err)
-          }
-          if (user == null) {
-            return callback(new Errors.NotFoundError('user not found'))
-          }
-
-          //	we make sure the user to which the project is transferred is not a collaborator for the project,
-          //	this prevents any conflict during unique name generation
-          return CollaboratorsHandler.removeUserFromProject(
-            project_id,
-            user_id,
-            function(err) {
-              if (err != null) {
-                return callback(err)
-              }
-              return ProjectDetailsHandler.generateUniqueName(
-                user_id,
-                project.name + suffix,
-                function(err, name) {
-                  if (err != null) {
-                    return callback(err)
-                  }
-                  return Project.update(
-                    { _id: project_id },
-                    {
-                      $set: {
-                        owner_ref: user_id,
-                        name
-                      }
-                    },
-                    function(err) {
-                      if (err != null) {
-                        return callback(err)
-                      }
-                      return ProjectEntityHandler.flushProjectToThirdPartyDataStore(
-                        project_id,
-                        callback
-                      )
-                    }
-                  )
-                }
-              )
-            }
-          )
-        })
-      }
-    )
-  },
-
-  renameProject(project_id, newName, callback) {
-    if (callback == null) {
-      callback = function() {}
-    }
-    return ProjectDetailsHandler.validateProjectName(newName, function(error) {
-      if (error != null) {
-        return callback(error)
-      }
-      logger.log({ project_id, newName }, 'renaming project')
-      return ProjectGetter.getProject(project_id, { name: true }, function(
-        err,
-        project
-      ) {
-        if (err != null || project == null) {
-          logger.warn(
-            { err, project_id },
-            'error getting project or could not find it todo project rename'
-          )
-          return callback(err)
-        }
-        const oldProjectName = project.name
-        return Project.update(
-          { _id: project_id },
-          { name: newName },
-          (err, project) => {
-            if (err != null) {
-              return callback(err)
-            }
-            return tpdsUpdateSender.moveEntity(
-              {
-                project_id,
-                project_name: oldProjectName,
-                newProjectName: newName
-              },
-              callback
-            )
-          }
-        )
-      })
-    })
-  },
-
-  MAX_PROJECT_NAME_LENGTH: 150,
-  validateProjectName(name, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    if (name == null || name.length === 0) {
-      return callback(
-        new Errors.InvalidNameError('Project name cannot be blank')
-      )
-    } else if (name.length > ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH) {
-      return callback(new Errors.InvalidNameError('Project name is too long'))
-    } else if (name.indexOf('/') > -1) {
-      return callback(
-        new Errors.InvalidNameError('Project name cannot contain / characters')
-      )
-    } else if (name.indexOf('\\') > -1) {
-      return callback(
-        new Errors.InvalidNameError('Project name cannot contain \\ characters')
-      )
-    } else {
-      return callback()
-    }
-  },
-
-  generateUniqueName(user_id, name, suffixes, callback) {
-    if (suffixes == null) {
-      suffixes = []
-    }
-    if (callback == null) {
-      callback = function(error, newName) {}
-    }
-    if (arguments.length === 3 && typeof suffixes === 'function') {
-      // make suffixes an optional argument
-      callback = suffixes
-      suffixes = []
-    }
-    return ProjectDetailsHandler.ensureProjectNameIsUnique(
-      user_id,
-      name,
-      suffixes,
-      callback
-    )
-  },
-
-  // FIXME: we should put a lock around this to make it completely safe, but we would need to do that at
-  // the point of project creation, rather than just checking the name at the start of the import.
-  // If we later move this check into ProjectCreationHandler we can ensure all new projects are created
-  // with a unique name.  But that requires thinking through how we would handle incoming projects from
-  // dropbox for example.
-  ensureProjectNameIsUnique(user_id, name, suffixes, callback) {
-    if (suffixes == null) {
-      suffixes = []
-    }
-    if (callback == null) {
-      callback = function(error, name, changed) {}
-    }
-    return ProjectGetter.findAllUsersProjects(user_id, { name: 1 }, function(
-      error,
-      allUsersProjectNames
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      // allUsersProjectNames is returned as a hash {owned: [name1, name2, ...], readOnly: [....]}
-      // collect all of the names and flatten them into a single array
-      const projectNameList = _.pluck(
-        _.flatten(_.values(allUsersProjectNames)),
-        'name'
-      )
-      return ProjectHelper.ensureNameIsUnique(
-        projectNameList,
-        name,
-        suffixes,
-        ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH,
-        callback
-      )
-    })
-  },
-
-  fixProjectName(name) {
-    if (name === '' || !name) {
-      name = 'Untitled'
-    }
-    if (name.indexOf('/') > -1) {
-      // v2 does not allow / in a project name
-      name = name.replace(/\//g, '-')
-    }
-    if (name.indexOf('\\') > -1) {
-      // backslashes in project name will prevent syncing to dropbox
-      name = name.replace(/\\/g, '')
-    }
-    if (name.length > ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH) {
-      name = name.substr(0, ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH)
-    }
-    return name
-  },
-
-  setPublicAccessLevel(project_id, newAccessLevel, callback) {
-    if (callback == null) {
-      callback = function() {}
-    }
-    logger.log({ project_id, level: newAccessLevel }, 'set public access level')
-    // DEPRECATED: `READ_ONLY` and `READ_AND_WRITE` are still valid in, but should no longer
-    // be passed here. Remove after token-based access has been live for a while
-    if (
-      project_id != null &&
-      newAccessLevel != null &&
-      _.include(
-        [
-          PublicAccessLevels.READ_ONLY,
-          PublicAccessLevels.READ_AND_WRITE,
-          PublicAccessLevels.PRIVATE,
-          PublicAccessLevels.TOKEN_BASED
-        ],
-        newAccessLevel
-      )
-    ) {
-      return Project.update(
-        { _id: project_id },
-        { publicAccesLevel: newAccessLevel },
-        err => callback(err)
-      )
-    }
-  },
-
-  ensureTokensArePresent(project_id, callback) {
-    if (callback == null) {
-      callback = function(err, tokens) {}
-    }
-    return ProjectGetter.getProject(project_id, { tokens: 1 }, function(
-      err,
-      project
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      if (
-        project.tokens != null &&
-        project.tokens.readOnly != null &&
-        project.tokens.readAndWrite != null
-      ) {
-        logger.log({ project_id }, 'project already has tokens')
-        return callback(null, project.tokens)
-      } else {
-        logger.log(
-          {
-            project_id,
-            has_tokens: project.tokens != null,
-            has_readOnly:
-              __guard__(
-                project != null ? project.tokens : undefined,
-                x => x.readOnly
-              ) != null,
-            has_readAndWrite:
-              __guard__(
-                project != null ? project.tokens : undefined,
-                x1 => x1.readAndWrite
-              ) != null
-          },
-          'generating tokens for project'
-        )
-        return ProjectDetailsHandler._generateTokens(project, function(err) {
-          if (err != null) {
-            return callback(err)
-          }
-          return Project.update(
-            { _id: project_id },
-            { $set: { tokens: project.tokens } },
-            function(err) {
-              if (err != null) {
-                return callback(err)
-              }
-              return callback(null, project.tokens)
-            }
-          )
-        })
-      }
-    })
-  },
-
-  _generateTokens(project, callback) {
-    if (callback == null) {
-      callback = function(err) {}
-    }
-    if (!project.tokens) {
-      project.tokens = {}
-    }
-    const { tokens } = project
-    if (tokens.readAndWrite == null) {
-      const { token, numericPrefix } = ProjectTokenGenerator.readAndWriteToken()
-      tokens.readAndWrite = token
-      tokens.readAndWritePrefix = numericPrefix
-    }
-    if (tokens.readOnly == null) {
-      return ProjectTokenGenerator.generateUniqueReadOnlyToken(function(
-        err,
-        token
-      ) {
-        if (err != null) {
-          return callback(err)
-        }
-        tokens.readOnly = token
-        return callback()
-      })
-    } else {
-      return callback()
-    }
+module.exports = {
+  MAX_PROJECT_NAME_LENGTH,
+  getDetails: callbackify(getDetails),
+  getProjectDescription: callbackify(getProjectDescription),
+  setProjectDescription: callbackify(setProjectDescription),
+  transferOwnership: callbackify(transferOwnership),
+  renameProject: callbackify(renameProject),
+  validateProjectName: callbackify(validateProjectName),
+  generateUniqueName: callbackify(generateUniqueName),
+  setPublicAccessLevel: callbackify(setPublicAccessLevel),
+  ensureTokensArePresent: callbackify(ensureTokensArePresent),
+  fixProjectName,
+  promises: {
+    getDetails,
+    getProjectDescription,
+    setProjectDescription,
+    transferOwnership,
+    renameProject,
+    validateProjectName,
+    generateUniqueName,
+    setPublicAccessLevel,
+    ensureTokensArePresent
   }
 }
 
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
+async function getDetails(projectId) {
+  let project
+  try {
+    project = await ProjectGetter.promises.getProject(projectId, {
+      name: true,
+      description: true,
+      compiler: true,
+      features: true,
+      owner_ref: true,
+      overleaf: true
+    })
+  } catch (err) {
+    logger.warn({ err, projectId }, 'error getting project')
+    throw err
+  }
+  if (project == null) {
+    throw new Errors.NotFoundError('project not found')
+  }
+  const user = await UserGetter.promises.getUser(project.owner_ref)
+  const details = {
+    name: project.name,
+    description: project.description,
+    compiler: project.compiler,
+    features:
+      user != null && user.features != null
+        ? user.features
+        : settings.defaultFeatures
+  }
+  if (project.overleaf != null) {
+    details.overleaf = project.overleaf
+  }
+  logger.log({ projectId, details }, 'getting project details')
+  return details
 }
 
-const promises = {
-  generateUniqueName: promisify(ProjectDetailsHandler.generateUniqueName)
+async function getProjectDescription(projectId) {
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    description: true
+  })
+  if (project == null) {
+    return undefined
+  }
+  return project.description
 }
 
-ProjectDetailsHandler.promises = promises
+async function setProjectDescription(projectId, description) {
+  const conditions = { _id: projectId }
+  const update = { description }
+  logger.log(
+    { conditions, update, projectId, description },
+    'setting project description'
+  )
+  try {
+    await Project.update(conditions, update).exec()
+  } catch (err) {
+    logger.warn({ err }, 'something went wrong setting project description')
+    throw err
+  }
+}
 
-module.exports = ProjectDetailsHandler
+async function transferOwnership(projectId, userId, suffix = '') {
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    owner_ref: true,
+    name: true
+  })
+  if (project == null) {
+    throw new Errors.NotFoundError('project not found')
+  }
+  if (project.owner_ref === userId) {
+    return
+  }
+  const user = await UserGetter.promises.getUser(userId)
+  if (user == null) {
+    throw new Errors.NotFoundError('user not found')
+  }
+
+  // we make sure the user to which the project is transferred is not a collaborator for the project,
+  // this prevents any conflict during unique name generation
+  await CollaboratorsHandler.promises.removeUserFromProject(projectId, userId)
+  const name = await generateUniqueName(userId, project.name + suffix)
+  await Project.update(
+    { _id: projectId },
+    {
+      $set: {
+        owner_ref: userId,
+        name
+      }
+    }
+  ).exec()
+  await ProjectEntityHandler.promises.flushProjectToThirdPartyDataStore(
+    projectId
+  )
+}
+
+async function renameProject(projectId, newName) {
+  await validateProjectName(newName)
+  logger.log({ projectId, newName }, 'renaming project')
+  let project
+  try {
+    project = await ProjectGetter.promises.getProject(projectId, { name: true })
+  } catch (err) {
+    logger.warn({ err, projectId }, 'error getting project')
+    throw err
+  }
+  if (project == null) {
+    logger.warn({ projectId }, 'could not find project to rename')
+    return
+  }
+  const oldProjectName = project.name
+  await Project.update({ _id: projectId }, { name: newName }).exec()
+  await TpdsUpdateSender.promises.moveEntity({
+    project_id: projectId,
+    project_name: oldProjectName,
+    newProjectName: newName
+  })
+}
+
+async function validateProjectName(name) {
+  if (name == null || name.length === 0) {
+    throw new Errors.InvalidNameError('Project name cannot be blank')
+  }
+  if (name.length > MAX_PROJECT_NAME_LENGTH) {
+    throw new Errors.InvalidNameError('Project name is too long')
+  }
+  if (name.indexOf('/') > -1) {
+    throw new Errors.InvalidNameError(
+      'Project name cannot contain / characters'
+    )
+  }
+  if (name.indexOf('\\') > -1) {
+    throw new Errors.InvalidNameError(
+      'Project name cannot contain \\ characters'
+    )
+  }
+}
+
+// FIXME: we should put a lock around this to make it completely safe, but we would need to do that at
+// the point of project creation, rather than just checking the name at the start of the import.
+// If we later move this check into ProjectCreationHandler we can ensure all new projects are created
+// with a unique name.  But that requires thinking through how we would handle incoming projects from
+// dropbox for example.
+async function generateUniqueName(userId, name, suffixes = []) {
+  const allUsersProjectNames = await ProjectGetter.promises.findAllUsersProjects(
+    userId,
+    { name: 1 }
+  )
+  // allUsersProjectNames is returned as a hash {owned: [name1, name2, ...], readOnly: [....]}
+  // collect all of the names and flatten them into a single array
+  const projectNameList = _.pluck(
+    _.flatten(_.values(allUsersProjectNames)),
+    'name'
+  )
+  const uniqueName = await ProjectHelper.promises.ensureNameIsUnique(
+    projectNameList,
+    name,
+    suffixes,
+    MAX_PROJECT_NAME_LENGTH
+  )
+  return uniqueName
+}
+
+function fixProjectName(name) {
+  if (name === '' || !name) {
+    name = 'Untitled'
+  }
+  if (name.indexOf('/') > -1) {
+    // v2 does not allow / in a project name
+    name = name.replace(/\//g, '-')
+  }
+  if (name.indexOf('\\') > -1) {
+    // backslashes in project name will prevent syncing to dropbox
+    name = name.replace(/\\/g, '')
+  }
+  if (name.length > MAX_PROJECT_NAME_LENGTH) {
+    name = name.substr(0, MAX_PROJECT_NAME_LENGTH)
+  }
+  return name
+}
+
+async function setPublicAccessLevel(projectId, newAccessLevel) {
+  logger.log({ projectId, level: newAccessLevel }, 'set public access level')
+  // DEPRECATED: `READ_ONLY` and `READ_AND_WRITE` are still valid in, but should no longer
+  // be passed here. Remove after token-based access has been live for a while
+  if (
+    projectId != null &&
+    newAccessLevel != null &&
+    _.include(
+      [
+        PublicAccessLevels.READ_ONLY,
+        PublicAccessLevels.READ_AND_WRITE,
+        PublicAccessLevels.PRIVATE,
+        PublicAccessLevels.TOKEN_BASED
+      ],
+      newAccessLevel
+    )
+  ) {
+    await Project.update(
+      { _id: projectId },
+      { publicAccesLevel: newAccessLevel }
+    ).exec()
+  }
+}
+
+async function ensureTokensArePresent(projectId) {
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    tokens: 1
+  })
+  if (
+    project.tokens != null &&
+    project.tokens.readOnly != null &&
+    project.tokens.readAndWrite != null
+  ) {
+    logger.log({ projectId }, 'project already has tokens')
+    return project.tokens
+  }
+  const hasTokens = project.tokens != null
+  const hasReadOnly = hasTokens && project.tokens.readOnly != null
+  const hasReadAndWrite = hasTokens && project.tokens.readAndWrite != null
+  logger.log(
+    { projectId, hasTokens, hasReadOnly, hasReadAndWrite },
+    'generating tokens for project'
+  )
+  await _generateTokens(project)
+  await Project.update(
+    { _id: projectId },
+    { $set: { tokens: project.tokens } }
+  ).exec()
+  return project.tokens
+}
+
+async function _generateTokens(project, callback) {
+  if (!project.tokens) {
+    project.tokens = {}
+  }
+  const { tokens } = project
+  if (tokens.readAndWrite == null) {
+    const { token, numericPrefix } = ProjectTokenGenerator.readAndWriteToken()
+    tokens.readAndWrite = token
+    tokens.readAndWritePrefix = numericPrefix
+  }
+  if (tokens.readOnly == null) {
+    tokens.readOnly = await ProjectTokenGenerator.promises.generateUniqueReadOnlyToken()
+  }
+}

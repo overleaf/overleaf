@@ -135,4 +135,4 @@ describe('ProjectHelper', function() {
 })
 
 // describe "ensureNameIsUnique", ->
-// see tests for: ProjectDetailsHandler.ensureProjectNameIsUnique, which calls here.
+// see tests for: ProjectDetailsHandler.generateUniqueName, which calls here.

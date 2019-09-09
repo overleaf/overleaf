@@ -13,7 +13,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let TpdsUpdateSender, tpdsUrl
+let tpdsUrl
 const settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const path = require('path')
@@ -22,6 +22,7 @@ const keys = require('../../infrastructure/Keys')
 const metrics = require('metrics-sharelatex')
 const request = require('request')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
+const { promisifyAll } = require('../../util/promises')
 
 const buildPath = function(user_id, project_name, filePath) {
   let projectPath = path.join(project_name, '/', filePath)
@@ -44,7 +45,7 @@ if (settings.apis.thirdPartyDataStore.linode_url != null) {
   tpdsUrl = settings.apis.thirdPartyDataStore.url
 }
 
-module.exports = TpdsUpdateSender = {
+const TpdsUpdateSender = {
   _enqueue(group, method, job, callback) {
     if (!tpdsworkerEnabled()) {
       return callback()
@@ -321,3 +322,6 @@ var mergeProjectNameAndPath = function(project_name, path) {
   const fullPath = `/${project_name}/${path}`
   return fullPath
 }
+
+TpdsUpdateSender.promises = promisifyAll(TpdsUpdateSender)
+module.exports = TpdsUpdateSender

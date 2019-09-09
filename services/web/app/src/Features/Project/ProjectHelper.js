@@ -11,7 +11,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let ProjectHelper
 const ENGINE_TO_COMPILER_MAP = {
   latex_dvipdf: 'latex',
   pdflatex: 'pdflatex',
@@ -19,8 +18,9 @@ const ENGINE_TO_COMPILER_MAP = {
   lualatex: 'lualatex'
 }
 const { ObjectId } = require('../../infrastructure/mongojs')
+const { promisify } = require('util')
 
-module.exports = ProjectHelper = {
+const ProjectHelper = {
   compilerFromV1Engine(engine) {
     return ENGINE_TO_COMPILER_MAP[engine]
   },
@@ -58,13 +58,13 @@ module.exports = ProjectHelper = {
       suffixes = []
     }
     if (callback == null) {
-      callback = function(error, name, changed) {}
+      callback = function(error, name) {}
     }
     const allNames = new Set(nameList)
     const isUnique = x => !allNames.has(x)
     // check if the supplied name is already unique
     if (isUnique(name)) {
-      return callback(null, name, false)
+      return callback(null, name)
     }
     // the name already exists, try adding the user-supplied suffixes to generate a unique name
     for (let suffix of Array.from(suffixes)) {
@@ -74,7 +74,7 @@ module.exports = ProjectHelper = {
         maxLength
       )
       if (isUnique(candidateName)) {
-        return callback(null, candidateName, true)
+        return callback(null, candidateName)
       }
     }
     // if there are no (more) suffixes, use a numeric one
@@ -84,7 +84,7 @@ module.exports = ProjectHelper = {
       maxLength
     )
     if (uniqueName != null) {
-      return callback(null, uniqueName, true)
+      return callback(null, uniqueName)
     } else {
       return callback(
         new Error(`Failed to generate a unique name for: ${name}`)
@@ -129,3 +129,8 @@ module.exports = ProjectHelper = {
     return null
   }
 }
+
+ProjectHelper.promises = {
+  ensureNameIsUnique: promisify(ProjectHelper.ensureNameIsUnique)
+}
+module.exports = ProjectHelper

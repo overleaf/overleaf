@@ -11,17 +11,17 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let UserGetter
 const mongojs = require('../../infrastructure/mongojs')
 const metrics = require('metrics-sharelatex')
 const logger = require('logger-sharelatex')
 const { db } = mongojs
 const { ObjectId } = mongojs
+const { promisifyAll } = require('../../util/promises')
 const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
 const Errors = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')
 
-module.exports = UserGetter = {
+const UserGetter = {
   getUser(query, projection, callback) {
     if (callback == null) {
       callback = function(error, user) {}
@@ -248,3 +248,6 @@ var decorateFullEmails = (defaultEmail, emailsData, affiliationsData) =>
 ].map(method =>
   metrics.timeAsyncMethod(UserGetter, method, 'mongo.UserGetter', logger)
 )
+
+UserGetter.promises = promisifyAll(UserGetter)
+module.exports = UserGetter

@@ -238,8 +238,7 @@ async function undeleteProject(project_id) {
   let restored = new Project(deletedProject.project)
 
   // if we're undeleting, we want the document to show up
-  const generateUniqueName = promisify(ProjectDetailsHandler.generateUniqueName)
-  restored.name = await generateUniqueName(
+  restored.name = await ProjectDetailsHandler.promises.generateUniqueName(
     deletedProject.deleterData.deletedProjectOwnerId,
     restored.name + ' (Restored)'
   )

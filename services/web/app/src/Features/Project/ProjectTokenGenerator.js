@@ -10,17 +10,17 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let ProjectTokenGenerator
 const crypto = require('crypto')
 const V1Api = require('../V1/V1Api')
 const Async = require('async')
 const logger = require('logger-sharelatex')
+const { promisify } = require('util')
 
 // This module mirrors the token generation in Overleaf (`random_token.rb`),
 // for the purposes of implementing token-based project access, like the
 // 'unlisted-projects' feature in Overleaf
 
-module.exports = ProjectTokenGenerator = {
+const ProjectTokenGenerator = {
   // (From Overleaf `random_token.rb`)
   //   Letters (not numbers! see generate_token) used in tokens. They're all
   //   consonants, to avoid embarassing words (I can't think of any that use only
@@ -105,3 +105,10 @@ module.exports = ProjectTokenGenerator = {
     )
   }
 }
+
+ProjectTokenGenerator.promises = {
+  generateUniqueReadOnlyToken: promisify(
+    ProjectTokenGenerator.generateUniqueReadOnlyToken
+  )
+}
+module.exports = ProjectTokenGenerator

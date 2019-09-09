@@ -13,7 +13,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let CollaboratorsHandler
 const UserCreator = require('../User/UserCreator')
 const { Project } = require('../../models/Project')
 const ProjectGetter = require('../Project/ProjectGetter')
@@ -29,8 +28,9 @@ const EmailHelper = require('../Helpers/EmailHelper')
 const ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 const Sources = require('../Authorization/Sources')
 const { ObjectId } = require('mongojs')
+const { promisifyAll } = require('../../util/promises')
 
-module.exports = CollaboratorsHandler = {
+const CollaboratorsHandler = {
   getMemberIdsWithPrivilegeLevels(project_id, callback) {
     if (callback == null) {
       callback = function(error, members) {}
@@ -665,3 +665,8 @@ module.exports = CollaboratorsHandler = {
     })
   }
 }
+
+CollaboratorsHandler.promises = promisifyAll(CollaboratorsHandler, {
+  without: ['getMemberIdsWithPrivilegeLevelsFromFields']
+})
+module.exports = CollaboratorsHandler
