@@ -81,7 +81,7 @@ const ClsiManager = {
             return callback(
               new OError({
                 message: 'CLSI compile failed',
-                info: { projectId, userId, req, options }
+                info: { projectId, userId }
               }).withCause(err)
             )
           }
@@ -157,8 +157,8 @@ const ClsiManager = {
         if (clsiErr != null) {
           return callback(
             new OError({
-              message: 'Error making request to CLSI',
-              info: { projectId, opts }
+              message: 'Failed to delete aux files',
+              info: { projectId }
             }).withCause(clsiErr)
           )
         }
@@ -186,8 +186,7 @@ const ClsiManager = {
           return callback(
             new OError({
               message:
-                'could not check resources for potential problems before sending to clsi',
-              info: { req }
+                'could not check resources for potential problems before sending to clsi'
             }).withCause(err)
           )
         }
@@ -214,7 +213,7 @@ const ClsiManager = {
               return callback(
                 new OError({
                   message: 'error sending request to clsi',
-                  info: { projectId, userId, req, options }
+                  info: { projectId, userId }
                 }).withCause(err)
               )
             }
@@ -277,7 +276,7 @@ const ClsiManager = {
                 return callback(
                   new OError({
                     message: 'error making request to CLSI',
-                    info: { projectId, opts }
+                    info: { projectId }
                   }).withCause(err)
                 )
               }
@@ -433,7 +432,17 @@ const ClsiManager = {
     }
     ClsiManager._makeRequest(projectId, opts, (err, response, body) => {
       if (err != null) {
-        return callback(err)
+        return callback(
+          new OError({
+            message: 'failed to make request to CLSI',
+            info: {
+              projectId,
+              userId,
+              compileOptions: req.compile.options,
+              rootResourcePath: req.compile.rootResourcePath
+            }
+          })
+        )
       }
       if (response.statusCode >= 200 && response.statusCode < 300) {
         callback(null, body)
@@ -447,7 +456,14 @@ const ClsiManager = {
         callback(
           new OError({
             message: `CLSI returned non-success code: ${response.statusCode}`,
-            info: { projectId, opts, body }
+            info: {
+              projectId,
+              userId,
+              compileOptions: req.compile.options,
+              rootResourcePath: req.compile.rootResourcePath,
+              clsiResponse: body,
+              statusCode: response.statusCode
+            }
           })
         )
       }
@@ -856,7 +872,7 @@ const ClsiManager = {
           return callback(
             new OError({
               message: 'CLSI request failed',
-              info: { projectId, opts }
+              info: { projectId }
             }).withCause(err)
           )
         }
@@ -868,8 +884,7 @@ const ClsiManager = {
               message: `CLSI returned non-success code: ${response.statusCode}`,
               info: {
                 projectId,
-                opts,
-                response: body,
+                clsiResponse: body,
                 statusCode: response.statusCode
               }
             })

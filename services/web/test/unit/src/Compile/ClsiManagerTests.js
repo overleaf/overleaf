@@ -789,7 +789,7 @@ describe('ClsiManager', function() {
 
   describe('_postToClsi', function() {
     beforeEach(function() {
-      this.req = { mock: 'req' }
+      this.req = { mock: 'req', compile: {} }
     })
 
     describe('successfully', function() {
