@@ -351,7 +351,6 @@ describe "RedisManager", ->
 			@multi.expire = sinon.stub()
 			@multi.ltrim = sinon.stub()
 			@multi.del = sinon.stub()
-			@multi.eval = sinon.stub()
 			@multi.exec = sinon.stub().callsArgWith(0, null,
 				[@hash, null, null, null, null, null, null, @doc_update_list_length, null, null]
 			)
@@ -374,8 +373,8 @@ describe "RedisManager", ->
 						.should.equal true
 
 				it "should set the doclines", ->
-					@multi.eval
-						.calledWith(sinon.match(/redis.call/), 1, "doclines:#{@doc_id}", JSON.stringify(@lines))
+					@multi.set
+						.calledWith("doclines:#{@doc_id}", JSON.stringify(@lines))
 						.should.equal true
 
 				it "should set the version", ->
@@ -486,8 +485,8 @@ describe "RedisManager", ->
 					.should.equal false
 
 			it "should still set the doclines", ->
-				@multi.eval
-					.calledWith(sinon.match(/redis.call/), 1, "doclines:#{@doc_id}", JSON.stringify(@lines))
+				@multi.set
+					.calledWith("doclines:#{@doc_id}", JSON.stringify(@lines))
 					.should.equal true
 
 		describe "with empty ranges", ->
@@ -504,20 +503,6 @@ describe "RedisManager", ->
 				@multi.del
 					.calledWith("Ranges:#{@doc_id}")
 					.should.equal true
-
-		describe "with a corrupted write", ->
-			beforeEach ->
-				@badHash = "INVALID-HASH-VALUE"
-				@multi.exec = sinon.stub().callsArgWith(0, null, [@badHash])
-				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
-				@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, @ops, @ranges, @updateMeta, @callback
-
-			it 'should log a hash error', ->
-				@logger.error.calledWith()
-					.should.equal true
-
-			it "should call the callback", ->
-				@callback.called.should.equal true
 
 		describe "with null bytes in the serialized doc lines", ->
 			beforeEach ->
@@ -567,7 +552,6 @@ describe "RedisManager", ->
 			@multi.set = sinon.stub()
 			@rclient.sadd = sinon.stub().yields()
 			@multi.del = sinon.stub()
-			@multi.eval = sinon.stub()
 			@lines = ["one", "two", "three", "これは"]
 			@version = 42
 			@hash = crypto.createHash('sha1').update(JSON.stringify(@lines),'utf8').digest('hex')
@@ -580,8 +564,8 @@ describe "RedisManager", ->
 				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, @pathname, @projectHistoryId, done
 
 			it "should set the lines", ->
-				@multi.eval
-					.calledWith(sinon.match(/redis.call/), 1, "doclines:#{@doc_id}", JSON.stringify(@lines))
+				@multi.set
+					.calledWith("doclines:#{@doc_id}", JSON.stringify(@lines))
 					.should.equal true
 
 			it "should set the version", ->
@@ -636,15 +620,6 @@ describe "RedisManager", ->
 				@multi.set
 					.calledWith("Ranges:#{@doc_id}", JSON.stringify(@ranges))
 					.should.equal false
-
-		describe "with a corrupted write", ->
-			beforeEach (done) ->
-				@multi.exec = sinon.stub().callsArgWith(0, null, ["INVALID-HASH-VALUE"])
-				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, @pathname, @projectHistoryId, done
-
-			it 'should log a hash error', ->
-				@logger.error.calledWith()
-					.should.equal true
 
 		describe "with null bytes in the serialized doc lines", ->
 			beforeEach ->
