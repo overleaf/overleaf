@@ -26,6 +26,14 @@ module.exports = MockRecurlyApi = {
 
   coupons: {},
 
+  addSubscription(subscription) {
+    this.subscriptions[subscription.uuid] = subscription
+  },
+
+  addAccount(account) {
+    this.accounts[account.id] = account
+  },
+
   run() {
     app.get('/subscriptions/:id', (req, res, next) => {
       const subscription = this.subscriptions[req.params.id]

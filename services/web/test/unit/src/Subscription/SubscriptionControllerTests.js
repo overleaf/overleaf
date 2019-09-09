@@ -60,7 +60,7 @@ describe('SubscriptionController', function() {
       updateSubscription: sinon.stub().callsArgWith(3),
       reactivateSubscription: sinon.stub().callsArgWith(1),
       cancelSubscription: sinon.stub().callsArgWith(1),
-      recurlyCallback: sinon.stub().callsArgWith(1),
+      recurlyCallback: sinon.stub().yields(),
       startFreeTrial: sinon.stub()
     }
 

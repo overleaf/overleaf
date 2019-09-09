@@ -361,14 +361,16 @@ module.exports = SubscriptionController = {
     ) {
       const recurlySubscription =
         req.body['expired_subscription_notification'].subscription
-      return SubscriptionHandler.recurlyCallback(recurlySubscription, function(
-        err
-      ) {
-        if (err != null) {
-          return next(err)
+      return SubscriptionHandler.recurlyCallback(
+        recurlySubscription,
+        { ip: req.ip },
+        function(err) {
+          if (err != null) {
+            return next(err)
+          }
+          return res.sendStatus(200)
         }
-        return res.sendStatus(200)
-      })
+      )
     } else {
       return res.sendStatus(200)
     }

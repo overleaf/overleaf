@@ -209,7 +209,7 @@ const SubscriptionHandler = {
     })
   },
 
-  recurlyCallback(recurlySubscription, callback) {
+  recurlyCallback(recurlySubscription, requesterData, callback) {
     return RecurlyWrapper.getSubscription(
       recurlySubscription.uuid,
       { includeAccount: true },
@@ -230,6 +230,7 @@ const SubscriptionHandler = {
           return SubscriptionUpdater.syncSubscription(
             recurlySubscription,
             user != null ? user._id : undefined,
+            requesterData,
             callback
           )
         })

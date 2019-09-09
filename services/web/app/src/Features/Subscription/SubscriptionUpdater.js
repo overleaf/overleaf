@@ -8,6 +8,7 @@ const PlansLocator = require('./PlansLocator')
 const logger = require('logger-sharelatex')
 const { ObjectId } = require('mongoose').Types
 const FeaturesUpdater = require('./FeaturesUpdater')
+const { DeletedSubscription } = require('../../models/DeletedSubscription')
 
 const SubscriptionUpdater = {
   /**
@@ -33,7 +34,11 @@ const SubscriptionUpdater = {
     Subscription.update(query, update, callback)
   },
 
-  syncSubscription(recurlySubscription, adminUserId, callback) {
+  syncSubscription(recurlySubscription, adminUserId, requesterData, callback) {
+    if (!callback) {
+      callback = requesterData
+      requesterData = {}
+    }
     logger.log(
       { adminUserId, recurlySubscription },
       'syncSubscription, creating new if subscription does not exist'
@@ -53,6 +58,7 @@ const SubscriptionUpdater = {
         SubscriptionUpdater._updateSubscriptionFromRecurly(
           recurlySubscription,
           subscription,
+          requesterData,
           callback
         )
       } else {
@@ -70,6 +76,7 @@ const SubscriptionUpdater = {
           SubscriptionUpdater._updateSubscriptionFromRecurly(
             recurlySubscription,
             subscription,
+            requesterData,
             callback
           )
         })
@@ -172,11 +179,11 @@ const SubscriptionUpdater = {
     Subscription.deleteOne({ 'overleaf.id': v1TeamId }, callback)
   },
 
-  deleteSubscription(subscriptionId, callback) {
+  deleteSubscription(subscription, deleterData, callback) {
     if (callback == null) {
       callback = function() {}
     }
-    SubscriptionLocator.getSubscription(subscriptionId, function(
+    SubscriptionLocator.getSubscription(subscription._id, function(
       err,
       subscription
     ) {
@@ -187,20 +194,44 @@ const SubscriptionUpdater = {
         subscription.member_ids || []
       )
       logger.log(
-        { subscriptionId, affectedUserIds },
+        { subscriptionId: subscription._id, affectedUserIds },
         'deleting subscription and downgrading users'
       )
-      Subscription.remove({ _id: ObjectId(subscriptionId) }, function(err) {
-        if (err != null) {
-          return callback(err)
+      SubscriptionUpdater._createDeletedSubscription(
+        subscription,
+        deleterData,
+        error => {
+          if (error) {
+            return callback(error)
+          }
+          Subscription.remove({ _id: subscription._id }, function(err) {
+            if (err != null) {
+              return callback(err)
+            }
+            async.mapSeries(
+              affectedUserIds,
+              FeaturesUpdater.refreshFeatures,
+              callback
+            )
+          })
         }
-        async.mapSeries(
-          affectedUserIds,
-          FeaturesUpdater.refreshFeatures,
-          callback
-        )
-      })
+      )
     })
+  },
+
+  _createDeletedSubscription(subscription, deleterData, callback) {
+    subscription.teamInvites = []
+    subscription.invited_emails = []
+    const filter = { 'subscription._id': subscription._id }
+    const data = {
+      deleterData: {
+        deleterId: deleterData.id,
+        deleterIpAddress: deleterData.ip
+      },
+      subscription: subscription
+    }
+    const options = { upsert: true, new: true, setDefaultsOnInsert: true }
+    DeletedSubscription.findOneAndUpdate(filter, data, options, callback)
   },
 
   _createNewSubscription(adminUserId, callback) {
@@ -212,10 +243,19 @@ const SubscriptionUpdater = {
     subscription.save(err => callback(err, subscription))
   },
 
-  _updateSubscriptionFromRecurly(recurlySubscription, subscription, callback) {
+  _updateSubscriptionFromRecurly(
+    recurlySubscription,
+    subscription,
+    requesterData,
+    callback
+  ) {
     logger.log({ recurlySubscription, subscription }, 'updaing subscription')
     if (recurlySubscription.state === 'expired') {
-      return SubscriptionUpdater.deleteSubscription(subscription._id, callback)
+      return SubscriptionUpdater.deleteSubscription(
+        subscription,
+        requesterData,
+        callback
+      )
     }
     subscription.recurlySubscription_id = recurlySubscription.uuid
     subscription.planCode = recurlySubscription.plan.plan_code

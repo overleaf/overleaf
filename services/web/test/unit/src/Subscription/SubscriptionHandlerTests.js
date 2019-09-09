@@ -76,7 +76,7 @@ describe('SubscriptionHandler', function() {
     this.DropboxHandler = { unlinkAccount: sinon.stub().callsArgWith(1) }
 
     this.SubscriptionUpdater = {
-      syncSubscription: sinon.stub().callsArgWith(2),
+      syncSubscription: sinon.stub().yields(),
       startFreeTrial: sinon.stub().callsArgWith(1)
     }
 
@@ -391,6 +391,7 @@ describe('SubscriptionHandler', function() {
         }
         return this.SubscriptionHandler.recurlyCallback(
           this.activeRecurlySubscription,
+          {},
           done
         )
       })

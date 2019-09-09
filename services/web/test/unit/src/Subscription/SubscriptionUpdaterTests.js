@@ -94,6 +94,9 @@ describe('SubscriptionUpdater', function() {
     this.FeaturesUpdater = {
       refreshFeatures: sinon.stub().yields()
     }
+    this.DeletedSubscription = {
+      findOneAndUpdate: sinon.stub().yields()
+    }
     this.SubscriptionUpdater = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -111,7 +114,10 @@ describe('SubscriptionUpdater', function() {
           warn() {}
         },
         'settings-sharelatex': this.Settings,
-        './FeaturesUpdater': this.FeaturesUpdater
+        './FeaturesUpdater': this.FeaturesUpdater,
+        '../../models/DeletedSubscription': {
+          DeletedSubscription: this.DeletedSubscription
+        }
       }
     })
   })
@@ -153,7 +159,7 @@ describe('SubscriptionUpdater', function() {
       )
       this.SubscriptionUpdater._updateSubscriptionFromRecurly = sinon
         .stub()
-        .callsArgWith(2)
+        .yields()
     })
 
     it('should update the subscription if the user already is admin of one', function(done) {
@@ -214,6 +220,7 @@ describe('SubscriptionUpdater', function() {
       this.SubscriptionUpdater._updateSubscriptionFromRecurly(
         this.recurlySubscription,
         this.subscription,
+        {},
         err => {
           if (err != null) {
             return done(err)
@@ -238,12 +245,13 @@ describe('SubscriptionUpdater', function() {
       this.SubscriptionUpdater._updateSubscriptionFromRecurly(
         this.recurlySubscription,
         this.subscription,
+        {},
         err => {
           if (err != null) {
             return done(err)
           }
           this.SubscriptionUpdater.deleteSubscription
-            .calledWith(this.subscription._id)
+            .calledWithMatch(this.subscription)
             .should.equal(true)
           done()
         }
@@ -254,6 +262,7 @@ describe('SubscriptionUpdater', function() {
       this.SubscriptionUpdater._updateSubscriptionFromRecurly(
         this.recurlySubscription,
         this.subscription,
+        {},
         err => {
           if (err != null) {
             return done(err)
@@ -282,6 +291,7 @@ describe('SubscriptionUpdater', function() {
       this.SubscriptionUpdater._updateSubscriptionFromRecurly(
         this.recurlySubscription,
         this.subscription,
+        {},
         err => {
           if (err != null) {
             return done(err)
@@ -297,6 +307,7 @@ describe('SubscriptionUpdater', function() {
       this.SubscriptionUpdater._updateSubscriptionFromRecurly(
         this.recurlySubscription,
         this.subscription,
+        {},
         err => {
           if (err != null) {
             return done(err)
@@ -441,8 +452,8 @@ describe('SubscriptionUpdater', function() {
 
   describe('deleteSubscription', function() {
     beforeEach(function(done) {
-      this.subscription_id = ObjectId().toString()
       this.subscription = {
+        _id: ObjectId().toString(),
         mock: 'subscription',
         admin_id: ObjectId(),
         member_ids: [ObjectId(), ObjectId(), ObjectId()]
@@ -451,18 +462,18 @@ describe('SubscriptionUpdater', function() {
         .stub()
         .yields(null, this.subscription)
       this.FeaturesUpdater.refreshFeatures = sinon.stub().yields()
-      this.SubscriptionUpdater.deleteSubscription(this.subscription_id, done)
+      this.SubscriptionUpdater.deleteSubscription(this.subscription, {}, done)
     })
 
     it('should look up the subscription', function() {
       this.SubscriptionLocator.getSubscription
-        .calledWith(this.subscription_id)
+        .calledWith(this.subscription._id)
         .should.equal(true)
     })
 
     it('should remove the subscription', function() {
       this.SubscriptionModel.remove
-        .calledWith({ _id: ObjectId(this.subscription_id) })
+        .calledWith({ _id: this.subscription._id })
         .should.equal(true)
     })
 
