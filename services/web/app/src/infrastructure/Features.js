@@ -40,7 +40,7 @@ module.exports = Features = {
         return Settings.oauth != null
       case 'publish-templates':
         return true
-      case 'view-templates':
+      case 'templates-server-pro':
         return Settings.overleaf == null
       case 'affiliations':
         // Checking both properties is needed for the time being to allow
