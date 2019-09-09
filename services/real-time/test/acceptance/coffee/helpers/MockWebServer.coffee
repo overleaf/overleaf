@@ -19,12 +19,15 @@ module.exports = MockWebServer =
 	joinProjectRequest: (req, res, next) ->
 		{project_id} = req.params
 		{user_id} = req.query
-		MockWebServer.joinProject project_id, user_id, (error, project, privilegeLevel) ->
-			return next(error) if error?
-			res.json {
-				project: project
-				privilegeLevel: privilegeLevel
-			}
+		if project_id == 'rate-limited'
+			res.status(429).send()
+		else
+			MockWebServer.joinProject project_id, user_id, (error, project, privilegeLevel) ->
+				return next(error) if error?
+				res.json {
+					project: project
+					privilegeLevel: privilegeLevel
+				}
 	
 	running: false
 	run: (callback = (error) ->) ->

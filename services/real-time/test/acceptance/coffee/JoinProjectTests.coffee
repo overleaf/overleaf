@@ -89,3 +89,20 @@ describe "joinProject", ->
 			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
 				expect(@project_id in client.rooms).to.equal false
 				done()
+
+	describe "when over rate limit", ->
+		before (done) ->
+			async.series [
+				(cb) =>
+					@client = RealTimeClient.connect()
+					@client.on "connectionAccepted", cb
+
+				(cb) =>
+					@client.emit "joinProject", project_id: 'rate-limited', (@error) =>
+						cb()
+			], done
+
+		it "should return a TooManyRequests error code", ->
+			@error.message.should.equal "rate-limit hit when joining project"
+			@error.code.should.equal "TooManyRequests"
+

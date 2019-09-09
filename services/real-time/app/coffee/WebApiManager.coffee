@@ -1,6 +1,7 @@
 request = require "request"
 settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
+{ CodedError } = require "./Errors"
 
 module.exports = WebApiManager =
 	joinProject: (project_id, user, callback = (error, project, privilegeLevel) ->) ->
@@ -24,7 +25,10 @@ module.exports = WebApiManager =
 			return callback(error) if error?
 			if 200 <= response.statusCode < 300
 				callback null, data?.project, data?.privilegeLevel
+			else if response.statusCode == 429
+				logger.log(project_id, user_id, "rate-limit hit when joining project")
+				callback(new CodedError("rate-limit hit when joining project", "TooManyRequests"))
 			else
 				err = new Error("non-success status code from web: #{response.statusCode}")
-				logger.error {err, project_id, user_id}, "error accessing web api" 
+				logger.error {err, project_id, user_id}, "error accessing web api"
 				callback err
