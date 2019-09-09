@@ -43,7 +43,10 @@ module.exports = Features = {
       case 'view-templates':
         return Settings.overleaf == null
       case 'affiliations':
-        return Settings.apis.v1 != null
+        // Checking both properties is needed for the time being to allow
+        // enabling the feature in web-api and disabling in Server Pro
+        // see https://github.com/overleaf/web-internal/pull/2127
+        return Settings.apis.v1 && !!Settings.apis.v1.url
       case 'redirect-sl':
         return Settings.redirectToV2 != null
       case 'overleaf-integration':
