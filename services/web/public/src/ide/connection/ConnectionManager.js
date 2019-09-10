@@ -1,8 +1,3 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-undef,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -13,9 +8,12 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+/* global io sl_console sl_debugging */
+
 define([], function() {
   let ConnectionManager
   const ONEHOUR = 1000 * 60 * 60
+
   return (ConnectionManager = (function() {
     ConnectionManager = class ConnectionManager {
       static initClass() {
@@ -26,6 +24,8 @@ define([], function() {
         this.prototype.MIN_RETRY_INTERVAL = 1000 // ms, rate limit on reconnects for user clicking "try now"
         this.prototype.BACKGROUND_RETRY_INTERVAL = 5 * 1000
 
+        this.prototype.JOIN_PROJECT_RETRY_INTERVAL = 5000
+        this.prototype.JOIN_PROJECT_MAX_RETRY_INTERVAL = 60000
         this.prototype.RECONNECT_GRACEFULLY_RETRY_INTERVAL = 5000 // ms
         this.prototype.MAX_RECONNECT_GRACEFULLY_INTERVAL = 45 * 1000
       }
@@ -67,11 +67,16 @@ define([], function() {
         this.userIsInactive = false
         this.gracefullyReconnecting = false
 
+        this.joinProjectRetryInterval = this.JOIN_PROJECT_RETRY_INTERVAL
+
         this.$scope.connection = {
+          debug: sl_debugging,
           reconnecting: false,
+          stillReconnecting: false,
           // If we need to force everyone to reload the editor
           forced_disconnect: false,
-          inactive_disconnect: false
+          inactive_disconnect: false,
+          jobId: 0
         }
 
         this.$scope.tryReconnectNow = () => {
@@ -94,6 +99,8 @@ define([], function() {
           }
         })
 
+        // initial connection attempt
+        this.updateConnectionManagerState('connecting')
         this.ide.socket = io.connect(
           this.wsUrl,
           {
@@ -106,6 +113,7 @@ define([], function() {
         // handle network-level websocket errors (e.g. failed dns lookups)
 
         let connectionErrorHandler = err => {
+          this.updateConnectionManagerState('error')
           sl_console.log('socket.io error', err)
           if (this.wsUrl && !window.location.href.match(/ws=fallback/)) {
             // if we tried to load a custom websocket location and failed
@@ -126,9 +134,11 @@ define([], function() {
         // pass authentication to join a project.
 
         this.ide.socket.on('connect', () => {
+          // state should be 'connecting'...
           // remove connection error handler when connected, avoid unwanted fallbacks
           this.ide.socket.removeListener('error', connectionErrorHandler)
-          return sl_console.log('[socket.io connect] Connected')
+          sl_console.log('[socket.io connect] Connected')
+          this.updateConnectionManagerState('authenticating')
         })
 
         // The next event we should get is an authentication response
@@ -136,26 +146,28 @@ define([], function() {
         // "connectionRejected".
 
         this.ide.socket.on('connectionAccepted', message => {
+          // state should be 'authenticating'...
           sl_console.log('[socket.io connectionAccepted] allowed to connect')
           this.connected = true
           this.gracefullyReconnecting = false
           this.ide.pushEvent('connected')
+          this.updateConnectionManagerState('joining')
 
           this.$scope.$apply(() => {
-            this.$scope.connection.reconnecting = false
-            this.$scope.connection.inactive_disconnect = false
             if (this.$scope.state.loading) {
               return (this.$scope.state.load_progress = 70)
             }
           })
 
           // we have passed authentication so we can now join the project
-          return setTimeout(() => {
-            return this.joinProject()
+          let connectionJobId = this.$scope.connection.jobId
+          setTimeout(() => {
+            this.joinProject(connectionJobId)
           }, 100)
         })
 
         this.ide.socket.on('connectionRejected', err => {
+          // state should be 'authenticating'...
           sl_console.log(
             '[socket.io connectionRejected] session not valid or other connection error'
           )
@@ -171,6 +183,7 @@ define([], function() {
         // we never get into the "connect" state.
 
         this.ide.socket.on('connect_failed', () => {
+          this.updateConnectionManagerState('error')
           this.connected = false
           return this.$scope.$apply(() => {
             return (this.$scope.state.error =
@@ -186,22 +199,22 @@ define([], function() {
           this.connected = false
           this.ide.pushEvent('disconnected')
 
-          this.$scope.$apply(() => {
-            return (this.$scope.connection.reconnecting = false)
-          })
-
-          if (
-            !this.$scope.connection.forced_disconnect &&
-            !this.userIsInactive &&
-            !this.gracefullyReconnecting
-          ) {
-            return this.startAutoReconnectCountdown()
+          if (!this.$scope.connection.state.match(/^waiting/)) {
+            if (
+              !this.$scope.connection.forced_disconnect &&
+              !this.userIsInactive
+            ) {
+              this.startAutoReconnectCountdown()
+            } else {
+              this.updateConnectionManagerState('inactive')
+            }
           }
         })
 
         // Site administrators can send the forceDisconnect event to all users
 
         this.ide.socket.on('forceDisconnect', message => {
+          this.updateConnectionManagerState('inactive')
           this.$scope.$apply(() => {
             this.$scope.permissions.write = false
             return (this.$scope.connection.forced_disconnect = true)
@@ -220,14 +233,90 @@ The editor will refresh in automatically in 10 seconds.\
 
         this.ide.socket.on('reconnectGracefully', () => {
           sl_console.log('Reconnect gracefully')
-          return this.reconnectGracefully()
+          this.reconnectGracefully()
         })
+      }
+
+      updateConnectionManagerState(state) {
+        this.$scope.$apply(() => {
+          this.$scope.connection.jobId += 1
+          let jobId = this.$scope.connection.jobId
+          sl_console.log(
+            `[updateConnectionManagerState ${jobId}] from ${
+              this.$scope.connection.state
+            } to ${state}`
+          )
+          this.$scope.connection.state = state
+
+          this.$scope.connection.reconnecting = false
+          this.$scope.connection.stillReconnecting = false
+          this.$scope.connection.inactive_disconnect = false
+          this.$scope.connection.joining = false
+          this.$scope.connection.reconnection_countdown = null
+
+          if (state === 'connecting') {
+            // initial connection
+          } else if (state === 'reconnecting') {
+            // reconnection after a connection has failed
+            this.$scope.connection.reconnecting = true
+            // if reconnecting takes more than 1s (it doesn't, usually) show the
+            // 'reconnecting...' warning
+            setTimeout(() => {
+              if (
+                this.$scope.connection.reconnecting &&
+                this.$scope.connection.jobId === jobId
+              ) {
+                this.$scope.connection.stillReconnecting = true
+              }
+            }, 1000)
+          } else if (state === 'authenticating') {
+            // socket connection has been established, trying to authenticate
+          } else if (state === 'joining') {
+            // authenticated, joining project
+            this.$scope.connection.joining = true
+          } else if (state === 'ready') {
+            // project has been joined
+          } else if (state === 'waitingCountdown') {
+            // disconnected and waiting to reconnect via the countdown timer
+            this.cancelReconnect()
+          } else if (state === 'waitingGracefully') {
+            // disconnected and waiting to reconnect gracefully
+            this.cancelReconnect()
+          } else if (state === 'inactive') {
+            // disconnected and not trying to reconnect (inactive)
+          } else if (state === 'error') {
+            // something is wrong
+          } else {
+            sl_console.log(
+              `[WARN] [updateConnectionManagerState ${jobId}] got unrecognised state ${state}`
+            )
+          }
+        })
+      }
+
+      expectConnectionManagerState(state, jobId) {
+        if (
+          this.$scope.connection.state === state &&
+          (!jobId || jobId === this.$scope.connection.jobId)
+        ) {
+          return true
+        }
+
+        sl_console.log(
+          `[WARN] [state mismatch] expected state ${state}${
+            jobId ? '/' + jobId : ''
+          } when in ${this.$scope.connection.state}/${
+            this.$scope.connection.jobId
+          }`
+        )
+        return false
       }
 
       // Error reporting, which can reload the page if appropriate
 
       reportConnectionError(err) {
         sl_console.log('[socket.io] reporting connection error')
+        this.updateConnectionManagerState('error')
         if (
           (err != null ? err.message : undefined) === 'not authorized' ||
           (err != null ? err.message : undefined) === 'invalid session'
@@ -246,24 +335,49 @@ Something went wrong connecting to your project. Please refresh if this continue
         }
       }
 
-      joinProject() {
-        sl_console.log('[joinProject] joining...')
+      joinProject(connectionId) {
+        sl_console.log(`[joinProject ${connectionId}] joining...`)
         // Note: if the "joinProject" message doesn't reach the server
         // (e.g. if we are in a disconnected state at this point) the
         // callback will never be executed
+        if (!this.expectConnectionManagerState('joining', connectionId)) {
+          sl_console.log(
+            `[joinProject ${connectionId}] aborting with stale connection`
+          )
+          return
+        }
         const data = {
           project_id: this.ide.project_id
         }
         if (window.anonymousAccessToken) {
           data.anonymousAccessToken = window.anonymousAccessToken
         }
-        return this.ide.socket.emit(
+        this.ide.socket.emit(
           'joinProject',
           data,
           (err, project, permissionsLevel, protocolVersion) => {
             if (err != null || project == null) {
-              return this.reportConnectionError(err)
+              if (err.code === 'TooManyRequests') {
+                sl_console.log(
+                  `[joinProject ${connectionId}] retrying: ${err.message}`
+                )
+                setTimeout(
+                  () => this.joinProject(connectionId),
+                  this.joinProjectRetryInterval
+                )
+                if (
+                  this.joinProjectRetryInterval <
+                  this.JOIN_PROJECT_MAX_RETRY_INTERVAL
+                ) {
+                  this.joinProjectRetryInterval += this.JOIN_PROJECT_RETRY_INTERVAL
+                }
+                return
+              } else {
+                return this.reportConnectionError(err)
+              }
             }
+
+            this.joinProjectRetryInterval = this.JOIN_PROJECT_RETRY_INTERVAL
 
             if (
               this.$scope.protocolVersion != null &&
@@ -272,13 +386,14 @@ Something went wrong connecting to your project. Please refresh if this continue
               location.reload(true)
             }
 
-            return this.$scope.$apply(() => {
+            this.$scope.$apply(() => {
+              this.updateConnectionManagerState('ready')
               this.$scope.protocolVersion = protocolVersion
               this.$scope.project = project
               this.$scope.permissionsLevel = permissionsLevel
               this.$scope.state.load_progress = 100
               this.$scope.state.loading = false
-              return this.$scope.$broadcast('project:joined')
+              this.$scope.$broadcast('project:joined')
             })
           }
         )
@@ -301,6 +416,8 @@ Something went wrong connecting to your project. Please refresh if this continue
       }
 
       startAutoReconnectCountdown() {
+        this.updateConnectionManagerState('waitingCountdown')
+        let connectionId = this.$scope.connection.jobId
         let countdown
         sl_console.log('[ConnectionManager] starting autoreconnect countdown')
         const twoMinutes = 2 * 60 * 1000
@@ -321,89 +438,90 @@ Something went wrong connecting to your project. Please refresh if this continue
 
         this.$scope.$apply(() => {
           this.$scope.connection.reconnecting = false
-          return (this.$scope.connection.reconnection_countdown = countdown)
+          this.$scope.connection.stillReconnecting = false
+          this.$scope.connection.joining = false
+          this.$scope.connection.reconnection_countdown = countdown
         })
 
-        return setTimeout(() => {
+        setTimeout(() => {
           if (!this.connected) {
-            return (this.timeoutId = setTimeout(
-              () => this.decreaseCountdown(),
+            this.countdownTimeoutId = setTimeout(
+              () => this.decreaseCountdown(connectionId),
               1000
-            ))
+            )
           }
         }, 200)
       }
 
       cancelReconnect() {
+        this.disconnect()
         // clear timeout and set to null so we know there is no countdown running
-        if (this.timeoutId != null) {
+        if (this.countdownTimeoutId != null) {
           sl_console.log(
             '[ConnectionManager] cancelling existing reconnect timer'
           )
-          clearTimeout(this.timeoutId)
-          return (this.timeoutId = null)
+          clearTimeout(this.countdownTimeoutId)
+          this.countdownTimeoutId = null
         }
       }
 
-      decreaseCountdown() {
-        this.timeoutId = null
+      decreaseCountdown(connectionId) {
+        this.countdownTimeoutId = null
         if (this.$scope.connection.reconnection_countdown == null) {
           return
         }
+        if (
+          !this.expectConnectionManagerState('waitingCountdown', connectionId)
+        ) {
+          sl_console.log(
+            `[ConnectionManager] Aborting stale countdown ${connectionId}`
+          )
+          return
+        }
+
         sl_console.log(
           '[ConnectionManager] decreasing countdown',
           this.$scope.connection.reconnection_countdown
         )
         this.$scope.$apply(() => {
-          return this.$scope.connection.reconnection_countdown--
+          this.$scope.connection.reconnection_countdown--
         })
 
         if (this.$scope.connection.reconnection_countdown <= 0) {
-          return this.$scope.$apply(() => {
-            return this.tryReconnect()
+          this.$scope.connection.reconnecting = false
+          this.$scope.$apply(() => {
+            this.tryReconnect()
           })
         } else {
-          return (this.timeoutId = setTimeout(
-            () => this.decreaseCountdown(),
+          this.countdownTimeoutId = setTimeout(
+            () => this.decreaseCountdown(connectionId),
             1000
-          ))
+          )
         }
       }
 
       tryReconnect() {
         sl_console.log('[ConnectionManager] tryReconnect')
-        this.cancelReconnect()
-        delete this.$scope.connection.reconnection_countdown
-        if (this.connected) {
+        if (this.connected || this.$scope.connection.reconnecting) {
           return
         }
-        this.$scope.connection.reconnecting = true
+        this.updateConnectionManagerState('reconnecting')
+        sl_console.log('[ConnectionManager] Starting new connection')
         // use socket.io connect() here to make a single attempt, the
         // reconnect() method makes multiple attempts
         this.ide.socket.socket.connect()
         // record the time of the last attempt to connect
         this.lastConnectionAttempt = new Date()
-        return setTimeout(() => {
-          if (!this.connected) {
-            return this.startAutoReconnectCountdown()
-          }
-        }, 2000) // ms, rate limit on reconnects for other user activity (e.g. cursor moves)
       }
 
       tryReconnectWithRateLimit(options) {
         // bail out if the reconnect is already in progress
-        if (
-          this.$scope.connection != null
-            ? this.$scope.connection.reconnecting
-            : undefined
-        ) {
+        if (this.$scope.connection.reconnecting || this.connected) {
           return
         }
         // bail out if we are going to reconnect soon anyway
         const reconnectingSoon =
-          (this.$scope.connection != null
-            ? this.$scope.connection.reconnection_countdown
-            : undefined) != null &&
+          this.$scope.connection.reconnection_countdown != null &&
           this.$scope.connection.reconnection_countdown <= 5
         const clickedTryNow = options != null ? options.force : undefined // user requested reconnection
         if (reconnectingSoon && !clickedTryNow) {
@@ -417,9 +535,12 @@ Something went wrong connecting to your project. Please refresh if this continue
           this.lastConnectionAttempt != null &&
           new Date() - this.lastConnectionAttempt < allowedInterval
         ) {
+          if (this.$scope.connection.state !== 'waitingCountdown') {
+            this.startAutoReconnectCountdown()
+          }
           return
         }
-        return this.tryReconnect()
+        this.tryReconnect()
       }
 
       disconnectIfInactive() {
@@ -432,9 +553,16 @@ Something went wrong connecting to your project. Please refresh if this continue
           }) // 5 minutes
         }
       }
-      reconnectGracefully() {
+      reconnectGracefully(force) {
         if (this.reconnectGracefullyStarted == null) {
           this.reconnectGracefullyStarted = new Date()
+        } else {
+          if (!force) {
+            sl_console.log(
+              '[reconnectGracefully] reconnection is already in process, so skipping'
+            )
+            return
+          }
         }
         const userIsInactive =
           new Date() - this.lastUserAction >
@@ -446,13 +574,14 @@ Something went wrong connecting to your project. Please refresh if this continue
           sl_console.log(
             "[reconnectGracefully] User didn't do anything for last 5 seconds, reconnecting"
           )
-          return this._reconnectGracefullyNow()
+          this._reconnectGracefullyNow()
         } else {
           sl_console.log(
             '[reconnectGracefully] User is working, will try again in 5 seconds'
           )
-          return setTimeout(() => {
-            return this.reconnectGracefully()
+          this.updateConnectionManagerState('waitingGracefully')
+          setTimeout(() => {
+            this.reconnectGracefully(true)
           }, this.RECONNECT_GRACEFULLY_RETRY_INTERVAL)
         }
       }

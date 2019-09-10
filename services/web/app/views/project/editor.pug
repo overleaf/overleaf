@@ -31,7 +31,7 @@ block content
 				|  #{translate("reconnecting_in_x_secs", {seconds:"{{ connection.reconnection_countdown }}"})}.
 				a#try-reconnect-now-button.alert-link-as-btn.pull-right(href, ng-click="tryReconnectNow()") #{translate("try_now")}
 
-			.alert.alert-warning.small(ng-if="connection.reconnecting")
+			.alert.alert-warning.small(ng-if="connection.reconnecting && connection.stillReconnecting")
 				strong #{translate("reconnecting")}...
 
 			.alert.alert-warning.small(ng-if="sync_tex_error")
@@ -43,6 +43,8 @@ block content
 
 			.alert.alert-warning.small(ng-if="connection.inactive_disconnect")
 				strong #{translate("editor_disconected_click_to_reconnect")}
+
+			.alert.alert-warning.small(ng-if="connection.debug") {{ connection.state }}
 
 			.div(ng-controller="SavingNotificationController")
 				.alert.alert-warning.small(ng-repeat="(doc_id, state) in docSavingStatus" ng-if="state.unsavedSeconds > 8") #{translate("saving_notification_with_seconds", {docname:"{{ state.doc.name }}", seconds:"{{ state.unsavedSeconds }}"})}
