@@ -411,10 +411,14 @@ class User {
         }
         if ((body != null ? body.project_id : undefined) == null) {
           error = new Error(
-            'SOMETHING WENT WRONG CREATING PROJECT',
-            response.statusCode,
-            response.headers['location'],
-            body
+            JSON.stringify([
+              'SOMETHING WENT WRONG CREATING PROJECT',
+              name,
+              options,
+              response.statusCode,
+              response.headers['location'],
+              body
+            ])
           )
           return callback(error)
         } else {

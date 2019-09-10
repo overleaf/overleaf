@@ -20,6 +20,9 @@ const RollingRateLimiter = require('rolling-rate-limiter')
 
 module.exports = RateLimiter = {
   addCount(opts, callback) {
+    if (settings.disableRateLimits) {
+      return callback(null, true)
+    }
     if (callback == null) {
       callback = function(err, shouldProcess) {}
     }
