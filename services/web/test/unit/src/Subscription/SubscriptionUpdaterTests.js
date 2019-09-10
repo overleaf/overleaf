@@ -465,12 +465,6 @@ describe('SubscriptionUpdater', function() {
       this.SubscriptionUpdater.deleteSubscription(this.subscription, {}, done)
     })
 
-    it('should look up the subscription', function() {
-      this.SubscriptionLocator.getSubscription
-        .calledWith(this.subscription._id)
-        .should.equal(true)
-    })
-
     it('should remove the subscription', function() {
       this.SubscriptionModel.remove
         .calledWith({ _id: this.subscription._id })

@@ -326,6 +326,15 @@ class User {
     )
   }
 
+  getFeatures(callback) {
+    const features = settings.defaultFeatures
+    return db.users.findOne(
+      { _id: ObjectId(this.id) },
+      { features: 1 },
+      (error, user) => callback(error, user && user.features)
+    )
+  }
+
   full_delete_user(email, callback) {
     if (callback == null) {
       callback = function(error) {}

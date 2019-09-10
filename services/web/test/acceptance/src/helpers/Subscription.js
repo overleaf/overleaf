@@ -1,5 +1,6 @@
 const { ObjectId } = require('../../../../app/src/infrastructure/mongojs')
 const { expect } = require('chai')
+const SubscriptionUpdater = require('../../../../app/src/Features/Subscription/SubscriptionUpdater')
 const SubscriptionModel = require('../../../../app/src/models/Subscription')
   .Subscription
 const DeletedSubscriptionModel = require(`../../../../app/src/models/DeletedSubscription`)
@@ -14,6 +15,7 @@ class Subscription {
     this.member_ids = options.memberIds || []
     this.invited_emails = options.invitedEmails || []
     this.teamInvites = options.teamInvites || []
+    this.planCode = options.planCode
   }
 
   ensureExists(callback) {
@@ -38,6 +40,10 @@ class Subscription {
       { manager_ids: managerIds },
       callback
     )
+  }
+
+  refreshUsersFeatures(callback) {
+    SubscriptionUpdater._refreshUsersFeatures(this, callback)
   }
 
   expectDeleted(deleterData, callback) {

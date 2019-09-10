@@ -1,6 +1,5 @@
 const { db } = require('../../infrastructure/mongojs')
 const async = require('async')
-const _ = require('underscore')
 const { promisifyAll } = require('../../util/promises')
 const { Subscription } = require('../../models/Subscription')
 const SubscriptionLocator = require('./SubscriptionLocator')
@@ -184,40 +183,28 @@ const SubscriptionUpdater = {
     if (callback == null) {
       callback = function() {}
     }
-    SubscriptionLocator.getSubscription(subscription._id, function(
-      err,
-      subscription
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      const affectedUserIds = [subscription.admin_id].concat(
-        subscription.member_ids || []
-      )
-      logger.log(
-        { subscriptionId: subscription._id, affectedUserIds },
-        'deleting subscription and downgrading users'
-      )
-      SubscriptionUpdater._createDeletedSubscription(
-        subscription,
-        deleterData,
-        error => {
-          if (error) {
-            return callback(error)
-          }
-          Subscription.remove({ _id: subscription._id }, function(err) {
-            if (err != null) {
-              return callback(err)
-            }
-            async.mapSeries(
-              affectedUserIds,
-              FeaturesUpdater.refreshFeatures,
-              callback
-            )
-          })
-        }
-      )
-    })
+    logger.log(
+      { subscriptionId: subscription._id },
+      'deleting subscription and downgrading users'
+    )
+    async.series(
+      [
+        cb =>
+          // 1. create deletedSubscription
+          SubscriptionUpdater._createDeletedSubscription(
+            subscription,
+            deleterData,
+            cb
+          ),
+        cb =>
+          // 2. remove subscription
+          Subscription.remove({ _id: subscription._id }, cb),
+        cb =>
+          // 3. refresh users features
+          SubscriptionUpdater._refreshUsersFeatures(subscription, cb)
+      ],
+      callback
+    )
   },
 
   restoreSubscription(subscriptionId, callback) {
@@ -240,21 +227,22 @@ const SubscriptionUpdater = {
               cb
             ),
           cb =>
-            // 2. remove deleted subscription
+            // 2. refresh users features. Do this before removing the
+            //    subscription so the restore can be retried if this fails
+            SubscriptionUpdater._refreshUsersFeatures(subscription, cb),
+          cb =>
+            // 3. remove deleted subscription
             DeletedSubscription.deleteOne(
               { 'subscription._id': subscription._id },
               callback
-            ),
-          cb =>
-            // 3. refresh users features
-            SubscriptionUpdater._refreshUsersFeature(subscription, cb)
+            )
         ],
         callback
       )
     })
   },
 
-  _refreshUsersFeature(subscription, callback) {
+  _refreshUsersFeatures(subscription, callback) {
     const userIds = [subscription.admin_id].concat(
       subscription.member_ids || []
     )
@@ -311,12 +299,11 @@ const SubscriptionUpdater = {
       subscription.groupPlan = true
       subscription.membersLimit = plan.membersLimit
     }
-    subscription.save(function() {
-      const allIds = _.union(subscription.member_ids, [subscription.admin_id])
-      const jobs = allIds.map(userId => cb =>
-        FeaturesUpdater.refreshFeatures(userId, cb)
-      )
-      async.series(jobs, callback)
+    subscription.save(function(error) {
+      if (error) {
+        return callback(error)
+      }
+      SubscriptionUpdater._refreshUsersFeatures(subscription, callback)
     })
   }
 }

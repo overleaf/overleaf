@@ -22,11 +22,13 @@ describe('Subscriptions', function() {
               invitedEmails: ['foo@bar.com'],
               teamInvites: [{ email: 'foo@baz.com' }],
               groupPlan: true,
-              state: 'expired'
+              state: 'expired',
+              planCode: 'professional'
             })
             this.subscription = this.recurlySubscription.subscription
             this.recurlySubscription.ensureExists(cb)
-          }
+          },
+          cb => this.subscription.refreshUsersFeatures(cb)
         ],
         done
       )
@@ -42,6 +44,21 @@ describe('Subscriptions', function() {
         }
         expect(statusCode).to.equal(200)
         this.subscription.expectDeleted({ ip: '127.0.0.1' }, done)
+      })
+    })
+
+    it('refresh features', function(done) {
+      let url = '/user/subscription/callback'
+      let body = this.recurlySubscription.buildCallbackXml()
+
+      request.post({ url, body }, (error, { statusCode }) => {
+        if (error) {
+          return done(error)
+        }
+        this.memberUser.getFeatures((error, features) => {
+          expect(features.collaborators).to.equal(1)
+          done(error)
+        })
       })
     })
 
