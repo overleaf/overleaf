@@ -15,16 +15,8 @@ MAX_REDIS_REQUEST_LENGTH = 5000 # 5 seconds
 # Make times easy to read
 minutes = 60 # seconds for Redis expire
 
-# LUA script to write document and return hash
-# arguments: docLinesKey docLines
-setScript = """
-	redis.call('set', KEYS[1], ARGV[1])
-	return redis.sha1hex(ARGV[1])
-"""
-
 logHashErrors = Settings.documentupdater?.logHashErrors
 logHashReadErrors = logHashErrors?.read
-logHashWriteErrors = logHashErrors?.write
 
 MEGABYTES = 1024 * 1024
 MAX_RANGES_SIZE = 3 * MEGABYTES
@@ -52,7 +44,7 @@ module.exports = RedisManager =
 				logger.error {err: error, doc_id, project_id}, error.message
 				return callback(error)
 			multi = rclient.multi()
-			multi.eval setScript, 1, keys.docLines(doc_id:doc_id), docLines
+			multi.set keys.docLines(doc_id:doc_id), docLines
 			multi.set keys.projectKey({doc_id:doc_id}), project_id
 			multi.set keys.docVersion(doc_id:doc_id), version
 			multi.set keys.docHash(doc_id:doc_id), docHash
@@ -64,10 +56,6 @@ module.exports = RedisManager =
 			multi.set keys.projectHistoryId(doc_id:doc_id), projectHistoryId
 			multi.exec (error, result) ->
 				return callback(error) if error?
-				# check the hash computed on the redis server
-				writeHash = result?[0]
-				if logHashWriteErrors and writeHash? and writeHash isnt docHash
-					logger.error project_id: project_id, doc_id: doc_id, writeHash: writeHash, origHash: docHash, docLines:docLines, "hash mismatch on putDocInMemory"
 				# update docsInProject set
 				rclient.sadd keys.docsInProject(project_id:project_id), doc_id, callback
 
@@ -247,7 +235,7 @@ module.exports = RedisManager =
 					logger.error err: error, doc_id: doc_id, ranges: ranges, error.message
 					return callback(error)
 				multi = rclient.multi()
-				multi.eval setScript, 1, keys.docLines(doc_id:doc_id), newDocLines  # index 0
+				multi.set    keys.docLines(doc_id:doc_id), newDocLines  # index 0
 				multi.set    keys.docVersion(doc_id:doc_id), newVersion             # index 1
 				multi.set    keys.docHash(doc_id:doc_id), newHash                   # index 2
 				multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1 # index 3
@@ -272,10 +260,6 @@ module.exports = RedisManager =
 						multi.del keys.lastUpdatedBy(doc_id: doc_id) # index 9
 				multi.exec (error, result) ->
 						return callback(error) if error?
-						# check the hash computed on the redis server
-						writeHash = result?[0]
-						if logHashWriteErrors and writeHash? and writeHash isnt newHash
-							logger.error doc_id: doc_id, writeHash: writeHash, origHash: newHash, docLines:newDocLines, "hash mismatch on updateDocument"
 
 						# length of uncompressedHistoryOps queue (index 7)
 						docUpdateCount = result[7]
