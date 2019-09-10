@@ -34,7 +34,7 @@ settings =
 	# Documentation about the URL connection string format can be found at:
 	#
 	#    http://docs.mongodb.org/manual/reference/connection-string/
-	# 
+	#
 	# The following works out of the box with Mongo's default settings:
 	mongo:
 		url : process.env["SHARELATEX_MONGO_URL"] or 'mongodb://dockerhost/sharelatex'
@@ -105,11 +105,11 @@ settings =
 	# ShareLaTeX can store binary files like images either locally or in Amazon
 	# S3. The default is locally:
 	filestore:
-		backend: "fs"	
+		backend: "fs"
 		stores:
 			user_files: Path.join(DATA_DIR, "user_files")
 			template_files: Path.join(DATA_DIR, "template_files")
-			
+
 	# To use Amazon S3 as a storage backend, comment out the above config, and
 	# uncomment the following, filling in your key, secret, and bucket name:
 	#
@@ -120,7 +120,7 @@ settings =
 	# 	s3:
 	# 		key: "AWS_KEY"
 	# 		secret: "AWS_SECRET"
-	# 		
+	#
 
 	trackchanges:
 		continueOnError: true
@@ -158,7 +158,7 @@ settings =
 	# The email address which users will be directed to as the main point of
 	# contact for this installation of ShareLaTeX.
 	adminEmail: process.env["SHARELATEX_ADMIN_EMAIL"] or "placeholder@example.com"
-	
+
 	# If provided, a sessionSecret is used to sign cookies so that they cannot be
 	# spoofed. This is recommended.
 	security:
@@ -167,7 +167,7 @@ settings =
 	# These credentials are used for authenticating api requests
 	# between services that may need to go over public channels
 	httpAuthUsers: httpAuthUsers
-	
+
 	# Should javascript assets be served minified or not.
 	useMinifiedJs: true
 
@@ -179,7 +179,7 @@ settings =
 	# If you are running ShareLaTeX over https, set this to true to send the
 	# cookie with a secure flag (recommended).
 	secureCookie: process.env["SHARELATEX_SECURE_COOKIE"]?
-	
+
 	# If you are running ShareLaTeX behind a proxy (like Apache, Nginx, etc)
 	# then set this to true to allow it to correctly detect the forwarded IP
 	# address and http/https protocol information.
@@ -197,9 +197,9 @@ settings =
 			user: httpAuthUser
 			pass: httpAuthPass
 		# overrides v1.url to indicate via Feature Flags that Overleaf V1
-		# is not available	
+		# is not available
 		v1:
-			url: ""    
+			url: ""
 	references:{}
 	notifications:undefined
 
@@ -260,7 +260,7 @@ if process.env["SHARELATEX_HEADER_EXTRAS"]?
 
 
 if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
-	
+
 	settings.email =
 		fromAddress: process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]
 		replyTo: process.env["SHARELATEX_EMAIL_REPLY_TO"] or ""
@@ -291,7 +291,7 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
 
 
 # i18n
-if process.env["SHARELATEX_LANG_DOMAIN_MAPPING"]?		
+if process.env["SHARELATEX_LANG_DOMAIN_MAPPING"]?
 
 	settings.i18n.subdomainLang = parse(process.env["SHARELATEX_LANG_DOMAIN_MAPPING"])
 
@@ -484,7 +484,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			)
 
 	# SHARELATEX_SAML_CERT cannot be empty
-	# https://github.com/bergie/passport-saml/commit/f6b1c885c0717f1083c664345556b535f217c102		
+	# https://github.com/bergie/passport-saml/commit/f6b1c885c0717f1083c664345556b535f217c102
 	if process.env["SHARELATEX_SAML_CERT"]
 		settings.saml.server.cert = process.env["SHARELATEX_SAML_CERT"]
 		settings.saml.server.privateCert = process.env["SHARELATEX_SAML_PRIVATE_CERT"]
@@ -518,7 +518,7 @@ if process.env["SHARELATEX_TEMPLATES_USER_ID"]
 	settings.templates =
 		mountPointUrl: "/templates"
 		user_id: process.env["SHARELATEX_TEMPLATES_USER_ID"]
-		
+
 	settings.templateLinks = parse(process.env["SHARELATEX_NEW_PROJECT_TEMPLATE_LINKS"])
 
 
@@ -533,7 +533,7 @@ if process.env["SHARELATEX_PROXY_LEARN"]?
 if process.env["SHARELATEX_ELASTICSEARCH_URL"]?
 	settings.references.elasticsearch =
 			host: process.env["SHARELATEX_ELASTICSEARCH_URL"]
-	
+
 
 # With lots of incoming and outgoing HTTP connections to different services,
 # sometimes long running, it is a good idea to increase the default number

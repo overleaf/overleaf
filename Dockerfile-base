@@ -43,7 +43,7 @@ RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz && \
 	mkdir /install-tl-unx && \
 	tar -xvf install-tl-unx.tar.gz -C /install-tl-unx --strip-components=1
 RUN echo "selected_scheme scheme-basic" >> /install-tl-unx/texlive.profile && \
-	/install-tl-unx/install-tl -profile /install-tl-unx/texlive.profile 
+	/install-tl-unx/install-tl -profile /install-tl-unx/texlive.profile
 
 # CTAN mirrors occasionally fail, in that case install TexLive against an
 # specific server, for example http://ctan.crest.fr
