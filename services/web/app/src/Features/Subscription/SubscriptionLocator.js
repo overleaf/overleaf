@@ -14,6 +14,7 @@
  */
 const { promisify } = require('util')
 const { Subscription } = require('../../models/Subscription')
+const { DeletedSubscription } = require('../../models/DeletedSubscription')
 const logger = require('logger-sharelatex')
 const { ObjectId } = require('mongoose').Types
 
@@ -84,6 +85,20 @@ const SubscriptionLocator = {
     return Subscription.findOne({ 'overleaf.id': v1TeamId }, callback)
   },
 
+  getUserDeletedSubscriptions(userId, callback) {
+    logger.log({ userId }, 'getting users deleted subscriptions')
+    DeletedSubscription.find({ 'subscription.admin_id': userId }, callback)
+  },
+
+  getDeletedSubscription(subscriptionId, callback) {
+    DeletedSubscription.findOne(
+      {
+        'subscription._id': subscriptionId
+      },
+      callback
+    )
+  },
+
   _getUserId(user_or_id) {
     if (user_or_id != null && user_or_id._id != null) {
       return user_or_id._id
@@ -112,6 +127,10 @@ SubscriptionLocator.promises = {
   getGroupsWithEmailInvite: promisify(
     SubscriptionLocator.getGroupsWithEmailInvite
   ),
-  getGroupWithV1Id: promisify(SubscriptionLocator.getGroupWithV1Id)
+  getGroupWithV1Id: promisify(SubscriptionLocator.getGroupWithV1Id),
+  getUserDeletedSubscriptions: promisify(
+    SubscriptionLocator.getUserDeletedSubscriptions
+  ),
+  getDeletedSubscription: promisify(SubscriptionLocator.getDeletedSubscription)
 }
 module.exports = SubscriptionLocator

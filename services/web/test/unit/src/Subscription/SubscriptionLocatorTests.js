@@ -27,6 +27,10 @@ describe('Subscription Locator Tests', function() {
       findOne: sinon.stub(),
       find: sinon.stub()
     }
+    this.DeletedSubscription = {
+      findOne: sinon.stub().yields(),
+      find: sinon.stub().yields()
+    }
     return (this.SubscriptionLocator = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -34,6 +38,9 @@ describe('Subscription Locator Tests', function() {
       requires: {
         '../../models/Subscription': {
           Subscription: this.Subscription
+        },
+        '../../models/DeletedSubscription': {
+          DeletedSubscription: this.DeletedSubscription
         },
         'logger-sharelatex': {
           log() {}

@@ -22,7 +22,7 @@ class Subscription {
     }
     const options = { upsert: true, new: true, setDefaultsOnInsert: true }
     SubscriptionModel.findOneAndUpdate(
-      {},
+      { admin_id: this.admin_id },
       this,
       options,
       (error, subscription) => {

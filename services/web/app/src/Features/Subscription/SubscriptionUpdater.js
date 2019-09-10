@@ -1,3 +1,4 @@
+const { db } = require('../../infrastructure/mongojs')
 const async = require('async')
 const _ = require('underscore')
 const { promisifyAll } = require('../../util/promises')
@@ -217,6 +218,47 @@ const SubscriptionUpdater = {
         }
       )
     })
+  },
+
+  restoreSubscription(subscriptionId, callback) {
+    SubscriptionLocator.getDeletedSubscription(subscriptionId, function(
+      err,
+      deletedSubscription
+    ) {
+      if (err) {
+        return callback(err)
+      }
+      let subscription = deletedSubscription.subscription
+      async.series(
+        [
+          cb =>
+            // 1. upsert subscription
+            db.subscriptions.update(
+              { _id: subscription._id },
+              subscription,
+              { upsert: true },
+              cb
+            ),
+          cb =>
+            // 2. remove deleted subscription
+            DeletedSubscription.deleteOne(
+              { 'subscription._id': subscription._id },
+              callback
+            ),
+          cb =>
+            // 3. refresh users features
+            SubscriptionUpdater._refreshUsersFeature(subscription, cb)
+        ],
+        callback
+      )
+    })
+  },
+
+  _refreshUsersFeature(subscription, callback) {
+    const userIds = [subscription.admin_id].concat(
+      subscription.member_ids || []
+    )
+    async.mapSeries(userIds, FeaturesUpdater.refreshFeatures, callback)
   },
 
   _createDeletedSubscription(subscription, deleterData, callback) {
