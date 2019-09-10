@@ -12,5 +12,9 @@ services:
             - 30360:30360
             - 30130:30130
             - 30100:30100
+
+            # Server Pro
+            - 30070:30070
+            - 30400:30400
         environment:
             DEBUG_NODE: 'true'
