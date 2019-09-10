@@ -18,7 +18,7 @@ block content
 				span.loading-screen-ellip .
 				span.loading-screen-ellip .
 				span.loading-screen-ellip .
-			p.loading-screen-error(ng-if="state.error").ng-cloak 
+			p.loading-screen-error(ng-if="state.error").ng-cloak
 				span(ng-bind-html="state.error")
 
 		.global-alerts(ng-cloak)
@@ -28,7 +28,7 @@ block content
 
 			.alert.alert-warning.small(ng-if="connection.reconnection_countdown")
 				strong #{translate("lost_connection")}.
-				| #{translate("reconnecting_in_x_secs", {seconds:"{{ connection.reconnection_countdown }}"})}.
+				|  #{translate("reconnecting_in_x_secs", {seconds:"{{ connection.reconnection_countdown }}"})}.
 				a#try-reconnect-now-button.alert-link-as-btn.pull-right(href, ng-click="tryReconnectNow()") #{translate("try_now")}
 
 			.alert.alert-warning.small(ng-if="connection.reconnecting")
@@ -90,7 +90,7 @@ block content
 
 			.ui-layout-east
 				include ./editor/chat
-				
+
 	include ./editor/hotkeys
 
 	script(type="text/ng-template", id="genericMessageModalTemplate")
