@@ -1,12 +1,14 @@
-version: '2'
+version: '2.2'
 services:
     sharelatex:
         restart: always
         image: sharelatex/sharelatex
         container_name: sharelatex
         depends_on:
-            - mongo
-            - redis
+            mongo:
+                condition: service_healthy
+            redis:
+                condition: service_started
         privileged: true
         ports:
             - 80:80
@@ -93,6 +95,11 @@ services:
             - 27017
         volumes:
             - ~/mongo_data:/data/db
+        healthcheck:
+            test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+            interval: 10s
+            timeout: 10s
+            retries: 5
 
     redis:
         restart: always
