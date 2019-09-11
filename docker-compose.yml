@@ -30,7 +30,7 @@ services:
             ENABLED_LINKED_FILE_TYPES: 'url,project_file'
 
             # Enables Thumbnail generation using ImageMagick
-            ENABLE_IMAGE_MAGICK_CONVERSIONS: 'true'
+            ENABLE_CONVERSIONS: 'true'
 
             ## Set for SSL via nginx-proxy
             #VIRTUAL_HOST: 103.112.212.22
