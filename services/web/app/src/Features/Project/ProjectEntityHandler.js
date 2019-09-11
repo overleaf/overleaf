@@ -110,6 +110,10 @@ const ProjectEntityHandler = {
       if (err != null) {
         return callback(err)
       }
+      if (project == null) {
+        return callback(new Errors.NotFoundError('project not found'))
+      }
+
       return ProjectEntityHandler.getAllEntitiesFromProject(project, callback)
     })
   },

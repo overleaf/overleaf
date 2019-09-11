@@ -280,9 +280,7 @@ module.exports = ProjectLocator = {
       return callback(err)
     }
     if (project == null) {
-      return callback(
-        `project could not be found for finding a element ${project._id}`
-      )
+      return callback('Tried to find an element for a null project')
     }
     if (needlePath === '' || needlePath === '/') {
       return callback(null, project.rootFolder[0], 'folder')
