@@ -108,7 +108,13 @@ define(['base', 'libs/passfield'], function(App) {
               return
             }
 
-            if (status === 400) {
+            if (status === 400 && data.accountLinkingError) {
+              // Bad Request for account linking
+              response.message = {
+                text: data.accountLinkingError,
+                type: 'error'
+              }
+            } else if (status === 400) {
               // Bad Request
               response.message = {
                 text: 'Invalid Request. Please correct the data and try again.',

@@ -64,6 +64,16 @@ class SAMLIdentityExistsError extends BackwardCompatibleError {
   }
 }
 
+class SAMLSessionDataMissing extends BackwardCompatibleError {
+  constructor(arg) {
+    super(arg)
+    if (!this.message) {
+      this.message =
+        'Please resubmit your institutional email.<br/><a href="/institutional-login">institutional login</a>'
+    }
+  }
+}
+
 class SAMLUserNotFoundError extends BackwardCompatibleError {
   constructor(arg) {
     super(arg)
@@ -119,6 +129,7 @@ module.exports = {
   InvalidError,
   NotInV2Error,
   SAMLIdentityExistsError,
+  SAMLSessionDataMissing,
   SAMLUserNotFoundError,
   SLInV2Error,
   ThirdPartyIdentityExistsError,

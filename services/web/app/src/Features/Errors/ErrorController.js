@@ -44,6 +44,13 @@ module.exports = ErrorController = {
       logger.warn({ err: error, url: req.url }, 'invalid name error')
       res.status(400)
       res.send(error.message)
+    } else if (error instanceof Errors.SAMLSessionDataMissing) {
+      logger.warn(
+        { err: error, url: req.url },
+        'missing SAML session data error'
+      )
+      res.status(400)
+      res.send({ accountLinkingError: error.message })
     } else {
       logger.error(
         { err: error, url: req.url, method: req.method, user },
