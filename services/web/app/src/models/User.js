@@ -121,6 +121,7 @@ const UserSchema = new Schema({
     refreshToken: { type: String }
   },
   awareOfV2: { type: Boolean, default: false },
+  samlIdentifiers: { type: Array, default: [] },
   thirdPartyIdentifiers: { type: Array, default: [] },
   migratedAt: { type: Date }
 })
