@@ -36,7 +36,7 @@ describe('UserSessionsManager', function() {
       srem: sinon.stub(),
       smembers: sinon.stub(),
       mget: sinon.stub(),
-      expire: sinon.stub()
+      pexpire: sinon.stub()
     }
     this.rclient.multi.returns(this.rclient)
     this.rclient.get.returns(this.rclient)
@@ -44,7 +44,7 @@ describe('UserSessionsManager', function() {
     this.rclient.sadd.returns(this.rclient)
     this.rclient.srem.returns(this.rclient)
     this.rclient.smembers.returns(this.rclient)
-    this.rclient.expire.returns(this.rclient)
+    this.rclient.pexpire.returns(this.rclient)
     this.rclient.exec.callsArgWith(0, null)
 
     this.UserSessionsRedis = {
@@ -112,7 +112,7 @@ describe('UserSessionsManager', function() {
       return this.call(err => {
         this.rclient.multi.callCount.should.equal(1)
         this.rclient.sadd.callCount.should.equal(1)
-        this.rclient.expire.callCount.should.equal(1)
+        this.rclient.pexpire.callCount.should.equal(1)
         this.rclient.exec.callCount.should.equal(1)
         return done()
       })
@@ -168,7 +168,7 @@ describe('UserSessionsManager', function() {
         return this.call(err => {
           this.rclient.multi.callCount.should.equal(0)
           this.rclient.sadd.callCount.should.equal(0)
-          this.rclient.expire.callCount.should.equal(0)
+          this.rclient.pexpire.callCount.should.equal(0)
           this.rclient.exec.callCount.should.equal(0)
           return done()
         })
@@ -205,7 +205,7 @@ describe('UserSessionsManager', function() {
         return this.call(err => {
           this.rclient.multi.callCount.should.equal(0)
           this.rclient.sadd.callCount.should.equal(0)
-          this.rclient.expire.callCount.should.equal(0)
+          this.rclient.pexpire.callCount.should.equal(0)
           this.rclient.exec.callCount.should.equal(0)
           return done()
         })
@@ -251,7 +251,7 @@ describe('UserSessionsManager', function() {
       return this.call(err => {
         this.rclient.multi.callCount.should.equal(1)
         this.rclient.srem.callCount.should.equal(1)
-        this.rclient.expire.callCount.should.equal(1)
+        this.rclient.pexpire.callCount.should.equal(1)
         this.rclient.exec.callCount.should.equal(1)
         return done()
       })
@@ -307,7 +307,7 @@ describe('UserSessionsManager', function() {
         return this.call(err => {
           this.rclient.multi.callCount.should.equal(0)
           this.rclient.srem.callCount.should.equal(0)
-          this.rclient.expire.callCount.should.equal(0)
+          this.rclient.pexpire.callCount.should.equal(0)
           this.rclient.exec.callCount.should.equal(0)
           return done()
         })
@@ -344,7 +344,7 @@ describe('UserSessionsManager', function() {
         return this.call(err => {
           this.rclient.multi.callCount.should.equal(0)
           this.rclient.srem.callCount.should.equal(0)
-          this.rclient.expire.callCount.should.equal(0)
+          this.rclient.pexpire.callCount.should.equal(0)
           this.rclient.exec.callCount.should.equal(0)
           return done()
         })
@@ -530,7 +530,7 @@ describe('UserSessionsManager', function() {
 
   describe('touch', function() {
     beforeEach(function() {
-      this.rclient.expire.callsArgWith(2, null)
+      this.rclient.pexpire.callsArgWith(2, null)
       return (this.call = callback => {
         return this.UserSessionsManager.touch(this.user, callback)
       })
@@ -544,16 +544,16 @@ describe('UserSessionsManager', function() {
       })
     })
 
-    it('should call rclient.expire', function(done) {
+    it('should call rclient.pexpire', function(done) {
       return this.call(err => {
-        this.rclient.expire.callCount.should.equal(1)
+        this.rclient.pexpire.callCount.should.equal(1)
         return done()
       })
     })
 
     describe('when rclient produces an error', function() {
       beforeEach(function() {
-        return this.rclient.expire.callsArgWith(2, new Error('woops'))
+        return this.rclient.pexpire.callsArgWith(2, new Error('woops'))
       })
 
       it('should produce an error', function(done) {
@@ -579,9 +579,9 @@ describe('UserSessionsManager', function() {
         })
       })
 
-      it('should not call expire', function(done) {
+      it('should not call pexpire', function(done) {
         return this.call(err => {
-          this.rclient.expire.callCount.should.equal(0)
+          this.rclient.pexpire.callCount.should.equal(0)
           return done()
         })
       })

@@ -45,7 +45,7 @@ module.exports = UserSessionsManager = {
     return rclient
       .multi()
       .sadd(sessionSetKey, value)
-      .expire(sessionSetKey, `${Settings.cookieSessionLength}`)
+      .pexpire(sessionSetKey, `${Settings.cookieSessionLength}`) // in milliseconds
       .exec(function(err, response) {
         if (err != null) {
           logger.warn(
@@ -77,7 +77,7 @@ module.exports = UserSessionsManager = {
     return rclient
       .multi()
       .srem(sessionSetKey, value)
-      .expire(sessionSetKey, `${Settings.cookieSessionLength}`)
+      .pexpire(sessionSetKey, `${Settings.cookieSessionLength}`) // in milliseconds
       .exec(function(err, response) {
         if (err != null) {
           logger.warn(
@@ -218,9 +218,9 @@ module.exports = UserSessionsManager = {
       return callback(null)
     }
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
-    return rclient.expire(
+    return rclient.pexpire(
       sessionSetKey,
-      `${Settings.cookieSessionLength}`,
+      `${Settings.cookieSessionLength}`, // in milliseconds
       function(err, response) {
         if (err != null) {
           logger.warn(

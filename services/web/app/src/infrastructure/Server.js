@@ -105,7 +105,7 @@ webRouter.use(
     proxy: Settings.behindProxy,
     cookie: {
       domain: Settings.cookieDomain,
-      maxAge: Settings.cookieSessionLength,
+      maxAge: Settings.cookieSessionLength, // in milliseconds, see https://github.com/expressjs/session#cookiemaxage
       secure: Settings.secureCookie
     },
     store: sessionStore,
