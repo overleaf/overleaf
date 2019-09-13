@@ -12,6 +12,7 @@
  */
 const crypto = require('crypto')
 const V1Api = require('../V1/V1Api')
+const Features = require('../../infrastructure/Features')
 const Async = require('async')
 const logger = require('logger-sharelatex')
 const { promisify } = require('util')
@@ -71,6 +72,11 @@ const ProjectTokenGenerator = {
       function(cb) {
         const token = ProjectTokenGenerator.readOnlyToken()
         logger.log({ token }, 'Generated read-only token')
+
+        if (!Features.hasFeature('overleaf-integration')) {
+          return cb(null, token)
+        }
+
         return V1Api.request(
           {
             url: `/api/v1/sharelatex/docs/read_token/${token}/exists`,
