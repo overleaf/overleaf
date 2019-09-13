@@ -13,7 +13,7 @@ module.exports =
 		else
 			@initing = true
 			@callbacks.push callback
-			app.listen 3003, "localhost", (error) => 
+			app.listen 3003, "localhost", (error) =>
 				throw error if error?
 				@running = true
 				for callback in @callbacks
