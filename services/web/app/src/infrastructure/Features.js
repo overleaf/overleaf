@@ -38,8 +38,6 @@ module.exports = Features = {
         return Settings.overleaf != null
       case 'oauth':
         return Settings.oauth != null
-      case 'publish-templates':
-        return true
       case 'templates-server-pro':
         return Settings.overleaf == null
       case 'affiliations':
