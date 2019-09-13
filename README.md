@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://www.overleaf.com"><img src="https://images.ctfassets.net/nrgyaltdicpt/6gsvc5Ogjmu04I4Miu0uGg/cb1d4391717d2ab8d5e42ede6fb0eef1/overleaf_wide_colour_light_bg.png" alt="Overleaf" width="300"></a>
+  <a href="https://www.overleaf.com"><img src="doc/logo.png" alt="Overleaf" width="300"></a>
 </h1>
 
 <h4 align="center">An open-source online real-time collaborative LaTeX editor.</h4>
@@ -10,12 +10,12 @@
   <a href="https://github.com/overleaf/overleaf/wiki">Wiki</a> •
   <a href="https://www.sharelatex.com/i/university/onsite">Server Pro</a> •
   <a href="#contributing">Contributing</a> •
-  <a href="https://mailchi.mp/overleaf.com/community-edition-and-server-pro">Mailing List</a> •
+  <a href="https://www.overleaf.com/for/enterprises">Mailing List</a> •
   <a href="#authors">Authors</a> •
   <a href="#license">License</a>
 </p>
 
-<a href="https://www.overleaf.com"><img src="https://images.ctfassets.net/nrgyaltdicpt/b8LAh62mK5CAba7hrUFkK/b479c936bb524135a150703105d0930d/Overleaf-journal-template-source-trackchanges-example-hires.png" alt="Overleaf" ></a>
+<a href="https://www.overleaf.com"><img src="doc/screenshot.png" alt="Overleaf" ></a>
 
 ## Key Features
 
