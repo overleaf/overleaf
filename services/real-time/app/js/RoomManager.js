@@ -85,7 +85,6 @@ module.exports = {
         { client: client.id, entity, id, beforeCount },
         'client joined existing room'
       )
-      client.join(id)
       callback()
     }
   },
