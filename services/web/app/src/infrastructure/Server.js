@@ -204,9 +204,7 @@ webRouter.use(function(req, res, next) {
     dnsPrefetchControl: false,
     referrerPolicy: { policy: 'origin-when-cross-origin' },
     noCache: isLoggedIn || isProjectPage,
-    noSniff: false,
-    hsts: false,
-    frameguard: false
+    hsts: false
   })(req, res, next)
 })
 
