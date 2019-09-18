@@ -94,8 +94,10 @@ describe('FeatureUpdater.refreshFeatures', function() {
 
   describe('when the user is in a group subscription', function() {
     beforeEach(function() {
+      const groupAdminId = ObjectId()
       return Subscription.create({
-        admin_id: ObjectId(),
+        admin_id: groupAdminId,
+        manager_ids: [groupAdminId],
         member_ids: [this.user._id],
         groupAccount: true,
         planCode: 'collaborator',
@@ -280,6 +282,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
 
   describe('when the user has a group and personal subscription', function() {
     beforeEach(function(done) {
+      const groupAdminId = ObjectId()
+
       Subscription.create(
         {
           admin_id: this.user._id,
@@ -293,7 +297,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
           }
           return Subscription.create(
             {
-              admin_id: ObjectId(),
+              admin_id: groupAdminId,
+              manager_ids: [groupAdminId],
               member_ids: [this.user._id],
               groupAccount: true,
               planCode: 'collaborator',

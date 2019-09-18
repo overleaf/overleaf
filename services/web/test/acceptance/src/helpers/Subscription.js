@@ -11,7 +11,7 @@ class Subscription {
     this.admin_id = options.adminId || ObjectId()
     this.overleaf = options.overleaf || {}
     this.groupPlan = options.groupPlan
-    this.manager_ids = []
+    this.manager_ids = options.managerIds || [this.admin_id]
     this.member_ids = options.memberIds || []
     this.invited_emails = options.invitedEmails || []
     this.teamInvites = options.teamInvites || []
@@ -28,8 +28,11 @@ class Subscription {
       this,
       options,
       (error, subscription) => {
+        if (error) {
+          return callback(error)
+        }
         this._id = subscription._id
-        callback(error)
+        callback()
       }
     )
   }
