@@ -708,6 +708,8 @@ module.exports = ProjectController = {
               anonymous,
               anonymousAccessToken: req._anonymousAccessToken,
               isTokenMember,
+              isRestrictedTokenMember:
+                isTokenMember === true && privilegeLevel === 'readOnly',
               languages: Settings.languages,
               editorThemes: THEME_LIST,
               maxDocLength: Settings.max_doc_length,
@@ -827,6 +829,10 @@ module.exports = ProjectController = {
       owner_ref: project.owner_ref,
       tokens: project.tokens,
       isV1Project: false
+    }
+    if (accessLevel === PrivilegeLevels.READ_ONLY && source === Sources.TOKEN) {
+      model.owner_ref = null
+      model.lastUpdatedBy = null
     }
     return model
   },

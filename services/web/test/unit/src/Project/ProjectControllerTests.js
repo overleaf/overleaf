@@ -804,6 +804,30 @@ describe('ProjectController', function() {
       return this.ProjectController.loadEditor(this.req, this.res)
     })
 
+    it('should add isRestrictedTokenMember', function(done) {
+      this.res.render = (pageName, opts) => {
+        opts.isRestrictedTokenMember.should.exist
+        opts.isRestrictedTokenMember.should.equal(false)
+        return done()
+      }
+      return this.ProjectController.loadEditor(this.req, this.res)
+    })
+
+    it('should set isRestrictedTokenMember to true under the right conditions', function(done) {
+      this.CollaboratorsHandler.userIsTokenMember.callsArgWith(2, null, true)
+      this.AuthorizationManager.getPrivilegeLevelForProject.callsArgWith(
+        3,
+        null,
+        'readOnly'
+      )
+      this.res.render = (pageName, opts) => {
+        opts.isRestrictedTokenMember.should.exist
+        opts.isRestrictedTokenMember.should.equal(true)
+        return done()
+      }
+      return this.ProjectController.loadEditor(this.req, this.res)
+    })
+
     it('should render the closed page if the editor is closed', function(done) {
       this.settings.editorIsOpen = false
       this.res.render = (pageName, opts) => {
@@ -996,6 +1020,83 @@ describe('ProjectController', function() {
     })
   })
 
+  describe('_buildProjectViewModel', function() {
+    beforeEach(function() {
+      this.ProjectHelper.isArchived.returns(false)
+      this.project = {
+        _id: 'abcd',
+        name: 'netsenits',
+        lastUpdated: 1,
+        lastUpdatedBy: 2,
+        publicAccesLevel: 'private',
+        archived: false,
+        owner_ref: 'defg',
+        tokens: {
+          readAndWrite: '1abcd',
+          readAndWritePrefix: '1',
+          readOnly: 'neiotsranteoia'
+        }
+      }
+    })
+
+    it('should produce a model of the project', function() {
+      const result = this.ProjectController._buildProjectViewModel(
+        this.project,
+        'readAndWrite',
+        'owner',
+        this.user._id
+      )
+      expect(result).to.exist
+      expect(result).to.be.object
+      expect(result).to.deep.equal({
+        id: 'abcd',
+        name: 'netsenits',
+        lastUpdated: 1,
+        lastUpdatedBy: 2,
+        publicAccessLevel: 'private',
+        accessLevel: 'readAndWrite',
+        source: 'owner',
+        archived: false,
+        owner_ref: 'defg',
+        tokens: {
+          readAndWrite: '1abcd',
+          readAndWritePrefix: '1',
+          readOnly: 'neiotsranteoia'
+        },
+        isV1Project: false
+      })
+    })
+
+    describe('when token-read-only access', function() {
+      it('should redact the owner and last-updated data', function() {
+        const result = this.ProjectController._buildProjectViewModel(
+          this.project,
+          'readOnly',
+          'token',
+          this.user._id
+        )
+        expect(result).to.exist
+        expect(result).to.be.object
+        expect(result).to.deep.equal({
+          id: 'abcd',
+          name: 'netsenits',
+          lastUpdated: 1,
+          lastUpdatedBy: null,
+          publicAccessLevel: 'private',
+          accessLevel: 'readOnly',
+          source: 'token',
+          archived: false,
+          owner_ref: null,
+          tokens: {
+            readAndWrite: '1abcd',
+            readAndWritePrefix: '1',
+            readOnly: 'neiotsranteoia'
+          },
+          isV1Project: false
+        })
+      })
+    })
+  })
   describe('_isInPercentageRollout', function() {
     before(function() {
       return (this.ids = [

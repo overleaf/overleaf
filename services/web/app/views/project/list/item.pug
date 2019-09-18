@@ -35,7 +35,7 @@ td.project-list-table-name-cell(ng-if-start="!project.isV1Project")
 					) &times;
 
 td.project-list-table-owner-cell
-	span.owner {{getOwnerName(project)}}
+	span.owner(ng-if='project.owner') {{getOwnerName(project)}}
 		| &nbsp;
 		i.fa.fa-question-circle.small(
 			ng-if="hasGenericOwnerName()"

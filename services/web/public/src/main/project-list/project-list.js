@@ -759,7 +759,8 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
 
     $scope.getUserName = ProjectListService.getUserName
 
-    $scope.isOwner = () => window.user_id === $scope.project.owner._id
+    $scope.isOwner = () =>
+      $scope.project.owner && window.user_id === $scope.project.owner._id
 
     $scope.$watch('project.selected', function(value) {
       if (value != null) {

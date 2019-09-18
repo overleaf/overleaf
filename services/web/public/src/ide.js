@@ -125,6 +125,7 @@ define([
     $scope.settings = window.userSettings
     $scope.anonymous = window.anonymous
     $scope.isTokenMember = window.isTokenMember
+    $scope.isRestrictedTokenMember = window.isRestrictedTokenMember
 
     $scope.cobranding = {
       isProjectCobranded: CobrandingDataService.isProjectCobranded(),

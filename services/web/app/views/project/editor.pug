@@ -91,7 +91,8 @@ block content
 						include ./editor/history
 
 			.ui-layout-east
-				include ./editor/chat
+				if !isRestrictedTokenMember
+					include ./editor/chat
 
 	include ./editor/hotkeys
 
@@ -140,6 +141,7 @@ block requirejs
 		window.brandVariation = data.brandVariation;
 		window.anonymousAccessToken = "#{anonymousAccessToken}";
 		window.isTokenMember = #{!!isTokenMember};
+		window.isRestrictedTokenMember = #{!!isRestrictedTokenMember};
 		window.maxDocLength = #{maxDocLength};
 		window.trackChangesState = data.trackChangesState;
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
