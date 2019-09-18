@@ -22,7 +22,7 @@ const initUserEmailsAttribute = (user, callback) => {
 }
 
 const updateAllUsersEmailsAttribute = (users, callback) => {
-  console.log(`updating ${user.length} users`)
+  console.log(`updating ${users.length} users`)
   async.eachSeries(users, initUserEmailsAttribute, callback)
 }
 
