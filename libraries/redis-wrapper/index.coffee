@@ -80,7 +80,7 @@ module.exports = RedisSharelatex =
 			multi.exec (err, reply) ->
 				clearTimeout timer
 				return callback(err) if err?
-				return callback(new Error("bad response from redis health check")) if reply?[0] isnt healthCheckValue
+				return callback(new Error("bad response from redis health check")) if reply?[0] isnt healthCheckValue or reply?[1] isnt 1
 				return callback()
 
 	_monkeyPatchIoredisExec: (client) ->
