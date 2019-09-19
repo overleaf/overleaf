@@ -1,5 +1,13 @@
 _ = require("underscore")
 async = require "async"
+os = require('os')
+crypto = require('crypto')
+
+# generate unique values for health check
+HOST = os.hostname()
+PID = process.pid
+RND = crypto.randomBytes(4).toString('hex')
+COUNT = 0
 
 module.exports = RedisSharelatex =
 	createClient: (opts = {port: 6379, host: "localhost"})->
@@ -44,19 +52,37 @@ module.exports = RedisSharelatex =
 	
 	_checkClient: (client, callback) ->
 		callback = _.once(callback)
+		# check the redis connection by storing and retrieving a unique key/value pair
+		uniqueToken = "host=#{HOST}:pid=#{PID}:random=#{RND}:time=#{Date.now()}:count=#{COUNT++}"
 		timer = setTimeout () ->
-			error = new Error("redis client ping check timed out #{client?.options?.host}")
+			error = new Error("redis client health check timed out #{client?.options?.host}")
 			console.error {
 				err: error,
 				key: client.options?.key # only present for cluster
 				clientOptions: client.options
+				uniqueToken: uniqueToken
 			}, "client timed out"
 			callback(error)
 		, RedisSharelatex.HEARTBEAT_TIMEOUT
-		client.ping (err) ->
-			clearTimeout timer
-			callback(err)
-		
+		healthCheckKey = "_redis-wrapper:healthCheckKey:{#{uniqueToken}}"
+		healthCheckValue = "_redis-wrapper:healthCheckValue:{#{uniqueToken}}"
+		# set the unique key/value pair
+		multi = client.multi()
+		multi.set healthCheckKey, healthCheckValue, "EX", 60
+		multi.exec (err, reply) ->
+			if err?
+				clearTimeout timer
+				return callback(err)
+			# check that we can retrieve the unique key/value pair
+			multi = client.multi()
+			multi.get healthCheckKey
+			multi.del healthCheckKey
+			multi.exec (err, reply) ->
+				clearTimeout timer
+				return callback(err) if err?
+				return callback(new Error("bad response from redis health check")) if reply?[0] isnt healthCheckValue
+				return callback()
+
 	_monkeyPatchIoredisExec: (client) ->
 		_multi = client.multi
 		client.multi = (args...) ->
