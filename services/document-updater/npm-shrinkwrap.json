@@ -779,9 +779,9 @@
       "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz"
     },
     "ioredis": {
-      "version": "4.11.1",
+      "version": "4.11.2",
       "from": "ioredis@>=4.11.1 <4.12.0",
-      "resolved": "https://registry.npmjs.org/ioredis/-/ioredis-4.11.1.tgz",
+      "resolved": "https://registry.npmjs.org/ioredis/-/ioredis-4.11.2.tgz",
       "dependencies": {
         "debug": {
           "version": "4.1.1",
@@ -1380,9 +1380,9 @@
       "resolved": "https://registry.npmjs.org/redis-sentinel/-/redis-sentinel-0.1.1.tgz"
     },
     "redis-sharelatex": {
-      "version": "1.0.9",
-      "from": "redis-sharelatex@1.0.9",
-      "resolved": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.9.tgz",
+      "version": "1.0.10",
+      "from": "redis-sharelatex@1.0.10",
+      "resolved": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.10.tgz",
       "dependencies": {
         "coffee-script": {
           "version": "1.8.0",
