@@ -37,12 +37,7 @@ module.exports = RedisSharelatex =
 		return healthCheck
 	
 	clusterHealthCheckBuilder: (client) ->
-		healthCheck = (callback) ->
-			jobs = client.nodes("all").map (node) =>
-				(cb) => RedisSharelatex._checkClient(node, cb)
-			async.parallel jobs, callback
-		
-		return healthCheck
+		return RedisSharelatex.singleInstanceHealthCheckBuilder(client)
 	
 	_checkClient: (client, callback) ->
 		callback = _.once(callback)
