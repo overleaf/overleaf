@@ -1,41 +1,21 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let UserController
 const UserGetter = require('./UserGetter')
 const logger = require('logger-sharelatex')
-const UserDeleter = require('./UserDeleter')
-const UserUpdater = require('./UserUpdater')
-const sanitize = require('sanitizer')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const { ObjectId } = require('mongojs')
 
 module.exports = UserController = {
   getLoggedInUsersPersonalInfo(req, res, next) {
-    if (next == null) {
-      next = function(error) {}
-    }
-    const user_id = AuthenticationController.getLoggedInUserId(req)
+    const userId = AuthenticationController.getLoggedInUserId(req)
     logger.log(
-      { user_id },
+      { userId },
       'reciving request for getting logged in users personal info'
     )
-    if (user_id == null) {
+    if (!userId) {
       return next(new Error('User is not logged in'))
     }
-    return UserGetter.getUser(
-      user_id,
+    UserGetter.getUser(
+      userId,
       {
         first_name: true,
         last_name: true,
@@ -45,64 +25,55 @@ module.exports = UserController = {
         signUpDate: true
       },
       function(error, user) {
-        if (error != null) {
+        if (error) {
           return next(error)
         }
-        return UserController.sendFormattedPersonalInfo(user, res, next)
+        UserController.sendFormattedPersonalInfo(user, res, next)
       }
     )
   },
 
   getPersonalInfo(req, res, next) {
     let query
-    if (next == null) {
-      next = function(error) {}
-    }
-    const { user_id } = req.params
+    const userId = req.params.user_id
 
-    if (/^\d+$/.test(user_id)) {
-      query = { 'overleaf.id': parseInt(user_id, 10) }
-    } else if (/^[a-f0-9]{24}$/.test(user_id)) {
-      query = { _id: ObjectId(user_id) }
+    if (/^\d+$/.test(userId)) {
+      query = { 'overleaf.id': parseInt(userId, 10) }
+    } else if (/^[a-f0-9]{24}$/.test(userId)) {
+      query = { _id: ObjectId(userId) }
     } else {
       return res.send(400)
     }
 
-    return UserGetter.getUser(
+    UserGetter.getUser(
       query,
       { _id: true, first_name: true, last_name: true, email: true },
       function(error, user) {
         logger.log(
-          { user_id: req.params.user_id },
+          { userId },
           'receiving request for getting users personal info'
         )
-        if (error != null) {
+        if (error) {
           return next(error)
         }
-        if (user == null) {
+        if (!user) {
           return res.send(404)
         }
-        return UserController.sendFormattedPersonalInfo(user, res, next)
+        UserController.sendFormattedPersonalInfo(user, res, next)
       }
     )
   },
 
   sendFormattedPersonalInfo(user, res, next) {
-    if (next == null) {
-      next = function(error) {}
-    }
     const info = UserController.formatPersonalInfo(user)
-    return res.json(info)
+    res.json(info)
   },
 
   formatPersonalInfo(user, callback) {
-    if (callback == null) {
-      callback = function(error, info) {}
-    }
-    if (user == null) {
+    if (!user) {
       return {}
     }
-    const formatted_user = { id: user._id.toString() }
+    const formattedUser = { id: user._id.toString() }
     for (let key of [
       'first_name',
       'last_name',
@@ -111,10 +82,10 @@ module.exports = UserController = {
       'role',
       'institution'
     ]) {
-      if (user[key] != null) {
-        formatted_user[key] = user[key]
+      if (user[key]) {
+        formattedUser[key] = user[key]
       }
     }
-    return formatted_user
+    return formattedUser
   }
 }

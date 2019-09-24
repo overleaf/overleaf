@@ -1,18 +1,3 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let UserEmailsConfirmationHandler
 const EmailHelper = require('../Helpers/EmailHelper')
 const EmailHandler = require('../Email/EmailHandler')
 const OneTimeTokenHandler = require('../Security/OneTimeTokenHandler')
@@ -24,11 +9,8 @@ const UserGetter = require('./UserGetter')
 
 const ONE_YEAR_IN_S = 365 * 24 * 60 * 60
 
-module.exports = UserEmailsConfirmationHandler = {
-  sendConfirmationEmail(user_id, email, emailTemplate, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
+const UserEmailsConfirmationHandler = {
+  sendConfirmationEmail(userId, email, emailTemplate, callback) {
     if (arguments.length === 3) {
       callback = emailTemplate
       emailTemplate = 'confirmEmail'
@@ -41,16 +23,16 @@ module.exports = UserEmailsConfirmationHandler = {
     }
 
     email = EmailHelper.parseEmail(email)
-    if (email == null) {
+    if (!email) {
       return callback(new Error('invalid email'))
     }
-    const data = { user_id, email }
-    return OneTimeTokenHandler.getNewToken(
+    const data = { user_id: userId, email }
+    OneTimeTokenHandler.getNewToken(
       'email_confirmation',
       data,
       { expiresIn: ONE_YEAR_IN_S },
       function(err, token) {
-        if (err != null) {
+        if (err) {
           return callback(err)
         }
         const emailOptions = {
@@ -58,49 +40,49 @@ module.exports = UserEmailsConfirmationHandler = {
           confirmEmailUrl: `${
             settings.siteUrl
           }/user/emails/confirm?token=${token}`,
-          sendingUser_id: user_id
+          sendingUser_id: userId
         }
-        return EmailHandler.sendEmail(emailTemplate, emailOptions, callback)
+        EmailHandler.sendEmail(emailTemplate, emailOptions, callback)
       }
     )
   },
 
   confirmEmailFromToken(token, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
     logger.log(
       { token_start: token.slice(0, 8) },
       'confirming email from token'
     )
-    return OneTimeTokenHandler.getValueFromTokenAndExpire(
+    OneTimeTokenHandler.getValueFromTokenAndExpire(
       'email_confirmation',
       token,
       function(error, data) {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
-        if (data == null) {
+        if (!data) {
           return callback(new Errors.NotFoundError('no token found'))
         }
-        const { user_id, email } = data
+        const userId = data.user_id
+        const email = data.email
         logger.log(
-          { data, user_id, email, token_start: token.slice(0, 8) },
+          { data, userId, email, token_start: token.slice(0, 8) },
           'found data for email confirmation'
         )
-        if (user_id == null || email !== EmailHelper.parseEmail(email)) {
+        if (!userId || email !== EmailHelper.parseEmail(email)) {
           return callback(new Errors.NotFoundError('invalid data'))
         }
-        return UserGetter.getUser(user_id, {}, function(error, user) {
-          if (error != null) {
+        UserGetter.getUser(userId, {}, function(error, user) {
+          if (error) {
             return callback(error)
           }
-          if (!(user != null ? user._id : undefined)) {
+          if (!user) {
             return callback(new Errors.NotFoundError('user not found'))
           }
-          return UserUpdater.confirmEmail(user_id, email, callback)
+          UserUpdater.confirmEmail(userId, email, callback)
         })
       }
     )
   }
 }
+
+module.exports = UserEmailsConfirmationHandler

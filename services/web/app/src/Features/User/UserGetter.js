@@ -1,16 +1,3 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const mongojs = require('../../infrastructure/mongojs')
 const metrics = require('metrics-sharelatex')
 const logger = require('logger-sharelatex')
@@ -23,10 +10,7 @@ const Features = require('../../infrastructure/Features')
 
 const UserGetter = {
   getUser(query, projection, callback) {
-    if (callback == null) {
-      callback = function(error, user) {}
-    }
-    if (query == null) {
+    if (!query) {
       return callback(new Error('no query provided'))
     }
     if (arguments.length === 2) {
@@ -43,24 +27,18 @@ const UserGetter = {
       query = { _id: query }
     }
 
-    return db.users.findOne(query, projection, callback)
+    db.users.findOne(query, projection, callback)
   },
 
   getUserEmail(userId, callback) {
-    if (callback == null) {
-      callback = function(error, email) {}
-    }
-    return this.getUser(userId, { email: 1 }, (error, user) =>
-      callback(error, user != null ? user.email : undefined)
+    this.getUser(userId, { email: 1 }, (error, user) =>
+      callback(error, user && user.email)
     )
   },
 
   getUserFullEmails(userId, callback) {
-    if (callback == null) {
-      callback = function(error, emails) {}
-    }
-    return this.getUser(userId, { email: 1, emails: 1 }, function(error, user) {
-      if (error != null) {
+    this.getUser(userId, { email: 1, emails: 1 }, function(error, user) {
+      if (error) {
         return callback(error)
       }
       if (!user) {
@@ -71,11 +49,11 @@ const UserGetter = {
         return callback(null, decorateFullEmails(user.email, user.emails, []))
       }
 
-      return getUserAffiliations(userId, function(error, affiliationsData) {
-        if (error != null) {
+      getUserAffiliations(userId, function(error, affiliationsData) {
+        if (error) {
           return callback(error)
         }
-        return callback(
+        callback(
           null,
           decorateFullEmails(user.email, user.emails || [], affiliationsData)
         )
@@ -84,21 +62,15 @@ const UserGetter = {
   },
 
   getUserByMainEmail(email, projection, callback) {
-    if (callback == null) {
-      callback = function(error, user) {}
-    }
     email = email.trim()
     if (arguments.length === 2) {
       callback = projection
       projection = {}
     }
-    return db.users.findOne({ email }, projection, callback)
+    db.users.findOne({ email }, projection, callback)
   },
 
   getUserByAnyEmail(email, projection, callback) {
-    if (callback == null) {
-      callback = function(error, user) {}
-    }
     email = email.trim()
     if (arguments.length === 2) {
       callback = projection
@@ -106,21 +78,18 @@ const UserGetter = {
     }
     // $exists: true MUST be set to use the partial index
     const query = { emails: { $exists: true }, 'emails.email': email }
-    return db.users.findOne(query, projection, (error, user) => {
-      if (error != null || user != null) {
+    db.users.findOne(query, projection, (error, user) => {
+      if (error || user) {
         return callback(error, user)
       }
 
       // While multiple emails are being rolled out, check for the main email as
       // well
-      return this.getUserByMainEmail(email, projection, callback)
+      this.getUserByMainEmail(email, projection, callback)
     })
   },
 
   getUsersByAnyConfirmedEmail(emails, projection, callback) {
-    if (callback == null) {
-      callback = function(error, user) {}
-    }
     if (arguments.length === 2) {
       callback = projection
       projection = {}
@@ -132,29 +101,19 @@ const UserGetter = {
         $elemMatch: { email: { $in: emails }, confirmedAt: { $exists: true } }
       }
     }
-    return db.users.find(query, projection, (error, users) => {
-      return callback(error, users)
-    })
+    db.users.find(query, projection, callback)
   },
 
   getUsersByV1Ids(v1Ids, projection, callback) {
-    if (callback == null) {
-      callback = function(error, user) {}
-    }
     if (arguments.length === 2) {
       callback = projection
       projection = {}
     }
     const query = { 'overleaf.id': { $in: v1Ids } }
-    return db.users.find(query, projection, (error, users) => {
-      return callback(error, users)
-    })
+    db.users.find(query, projection, callback)
   },
 
   getUsersByHostname(hostname, projection, callback) {
-    if (callback == null) {
-      callback = function(error, users) {}
-    }
     const reversedHostname = hostname
       .trim()
       .split('')
@@ -164,59 +123,49 @@ const UserGetter = {
       emails: { $exists: true },
       'emails.reversedHostname': reversedHostname
     }
-    return db.users.find(query, projection, callback)
+    db.users.find(query, projection, callback)
   },
 
-  getUsers(user_ids, projection, callback) {
-    if (callback == null) {
-      callback = function(error, users) {}
-    }
+  getUsers(userIds, projection, callback) {
     try {
-      user_ids = user_ids.map(u => ObjectId(u.toString()))
-    } catch (error1) {
-      const error = error1
+      userIds = userIds.map(u => ObjectId(u.toString()))
+    } catch (error) {
       return callback(error)
     }
 
-    return db.users.find({ _id: { $in: user_ids } }, projection, callback)
+    db.users.find({ _id: { $in: userIds } }, projection, callback)
   },
 
-  getUserOrUserStubById(user_id, projection, callback) {
+  getUserOrUserStubById(userId, projection, callback) {
     let query
-    if (callback == null) {
-      callback = function(error, user, isStub) {}
-    }
     try {
-      query = { _id: ObjectId(user_id.toString()) }
+      query = { _id: ObjectId(userId.toString()) }
     } catch (e) {
       return callback(new Error(e))
     }
-    return db.users.findOne(query, projection, function(error, user) {
-      if (error != null) {
+    db.users.findOne(query, projection, function(error, user) {
+      if (error) {
         return callback(error)
       }
-      if (user != null) {
+      if (user) {
         return callback(null, user, false)
       }
-      return db.userstubs.findOne(query, projection, function(error, user) {
-        if (error) {
-          return callback(error)
+      db.userstubs.findOne(query, projection, function(error, user) {
+        if (error || user) {
+          return callback(error, user)
         }
-        if (user == null) {
-          return callback()
-        }
-        return callback(null, user, true)
+        callback(null, user, true)
       })
     })
   },
 
   // check for duplicate email address. This is also enforced at the DB level
   ensureUniqueEmailAddress(newEmail, callback) {
-    return this.getUserByAnyEmail(newEmail, function(error, user) {
-      if (user != null) {
+    this.getUserByAnyEmail(newEmail, function(error, user) {
+      if (user) {
         return callback(new Errors.EmailExistsError())
       }
-      return callback(error)
+      callback(error)
     })
   }
 }
@@ -228,7 +177,7 @@ var decorateFullEmails = (defaultEmail, emailsData, affiliationsData) =>
     const affiliation = affiliationsData.find(
       aff => aff.email === emailData.email
     )
-    if (affiliation != null) {
+    if (affiliation) {
       const { institution, inferred, role, department } = affiliation
       emailData.affiliation = { institution, inferred, role, department }
     } else {
