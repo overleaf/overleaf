@@ -10,7 +10,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let TemplatesManager
 const { Project } = require('../../models/Project')
 const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 const ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
@@ -19,12 +18,15 @@ const ProjectUploadManager = require('../Uploads/ProjectUploadManager')
 const FileWriter = require('../../infrastructure/FileWriter')
 const async = require('async')
 const fs = require('fs')
+const util = require('util')
 const logger = require('logger-sharelatex')
 const request = require('request')
+const requestPromise = require('request-promise-native')
 const settings = require('settings-sharelatex')
 const uuid = require('uuid')
+const Errors = require('../Errors/Errors')
 
-module.exports = TemplatesManager = {
+const TemplatesManager = {
   createProjectFromV1Template(
     brandVariationId,
     compiler,
@@ -158,5 +160,42 @@ module.exports = TemplatesManager = {
       brandVariationId,
       callback
     )
+  },
+
+  promises: {
+    async fetchFromV1(templateId, callback) {
+      let { body, statusCode } = await requestPromise({
+        baseUrl: settings.apis.v1.url,
+        url: `/api/v2/templates/${templateId}`,
+        method: 'GET',
+        auth: {
+          user: settings.apis.v1.user,
+          pass: settings.apis.v1.pass,
+          sendImmediately: true
+        },
+        resolveWithFullResponse: true,
+        simple: false,
+        json: true
+      })
+
+      if (statusCode === 404) {
+        throw new Errors.NotFoundError()
+      }
+
+      if (statusCode !== 200) {
+        logger.warn(
+          { templateId },
+          "[TemplateMetrics] Couldn't fetch template data from v1"
+        )
+        throw new Error("Couldn't fetch template data from v1")
+      }
+
+      return body
+    }
   }
 }
+
+TemplatesManager.fetchFromV1 = util.callbackify(
+  TemplatesManager.promises.fetchFromV1
+)
+module.exports = TemplatesManager

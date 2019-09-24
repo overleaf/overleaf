@@ -5,7 +5,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const UserMembershipAuthorization = require('./UserMembershipAuthorization')
+const UserMembershipMiddleware = require('./UserMembershipMiddleware')
 const UserMembershipController = require('./UserMembershipController')
 const SubscriptionGroupController = require('../Subscription/SubscriptionGroupController')
 const TeamInvitesController = require('../Subscription/TeamInvitesController')
@@ -16,12 +16,12 @@ module.exports = {
     // group members routes
     webRouter.get(
       '/manage/groups/:id/members',
-      UserMembershipAuthorization.requireGroupManagementAccess,
+      UserMembershipMiddleware.requireGroupManagementAccess,
       UserMembershipController.index
     )
     webRouter.post(
       '/manage/groups/:id/invites',
-      UserMembershipAuthorization.requireGroupManagementAccess,
+      UserMembershipMiddleware.requireGroupManagementAccess,
       RateLimiterMiddleware.rateLimit({
         endpointName: 'create-team-invite',
         maxRequests: 100,
@@ -31,17 +31,17 @@ module.exports = {
     )
     webRouter.delete(
       '/manage/groups/:id/user/:user_id',
-      UserMembershipAuthorization.requireGroupManagementAccess,
+      UserMembershipMiddleware.requireGroupManagementAccess,
       SubscriptionGroupController.removeUserFromGroup
     )
     webRouter.delete(
       '/manage/groups/:id/invites/:email',
-      UserMembershipAuthorization.requireGroupManagementAccess,
+      UserMembershipMiddleware.requireGroupManagementAccess,
       TeamInvitesController.revokeInvite
     )
     webRouter.get(
       '/manage/groups/:id/members/export',
-      UserMembershipAuthorization.requireGroupManagementAccess,
+      UserMembershipMiddleware.requireGroupManagementAccess,
       RateLimiterMiddleware.rateLimit({
         endpointName: 'export-team-csv',
         maxRequests: 30,
@@ -53,63 +53,75 @@ module.exports = {
     // group managers routes
     webRouter.get(
       '/manage/groups/:id/managers',
-      UserMembershipAuthorization.requireGroupManagersManagementAccess,
+      UserMembershipMiddleware.requireGroupManagersManagementAccess,
       UserMembershipController.index
     )
     webRouter.post(
       '/manage/groups/:id/managers',
-      UserMembershipAuthorization.requireGroupManagersManagementAccess,
+      UserMembershipMiddleware.requireGroupManagersManagementAccess,
       UserMembershipController.add
     )
     webRouter.delete(
       '/manage/groups/:id/managers/:userId',
-      UserMembershipAuthorization.requireGroupManagersManagementAccess,
+      UserMembershipMiddleware.requireGroupManagersManagementAccess,
       UserMembershipController.remove
     )
 
     // institution members routes
     webRouter.get(
       '/manage/institutions/:id/managers',
-      UserMembershipAuthorization.requireInstitutionManagementAccess,
+      UserMembershipMiddleware.requireInstitutionManagementAccess,
       UserMembershipController.index
     )
     webRouter.post(
       '/manage/institutions/:id/managers',
-      UserMembershipAuthorization.requireInstitutionManagementAccess,
+      UserMembershipMiddleware.requireInstitutionManagementAccess,
       UserMembershipController.add
     )
     webRouter.delete(
       '/manage/institutions/:id/managers/:userId',
-      UserMembershipAuthorization.requireInstitutionManagementAccess,
+      UserMembershipMiddleware.requireInstitutionManagementAccess,
       UserMembershipController.remove
     )
 
     // publisher members routes
     webRouter.get(
       '/manage/publishers/:id/managers',
-      UserMembershipAuthorization.requirePublisherManagementAccess,
+      UserMembershipMiddleware.requirePublisherManagementAccess,
       UserMembershipController.index
     )
     webRouter.post(
       '/manage/publishers/:id/managers',
-      UserMembershipAuthorization.requirePublisherManagementAccess,
+      UserMembershipMiddleware.requirePublisherManagementAccess,
       UserMembershipController.add
     )
     webRouter.delete(
       '/manage/publishers/:id/managers/:userId',
-      UserMembershipAuthorization.requirePublisherManagementAccess,
+      UserMembershipMiddleware.requirePublisherManagementAccess,
       UserMembershipController.remove
     )
 
-    // create new entitites
+    // publisher creation routes
     webRouter.get(
-      '/entities/:name/create/:id',
-      UserMembershipAuthorization.requireEntityCreationAccess,
+      '/entities/publisher/create/:id',
+      UserMembershipMiddleware.requirePublisherCreationAccess,
       UserMembershipController.new
     )
-    return webRouter.post(
-      '/entities/:name/create/:id',
-      UserMembershipAuthorization.requireEntityCreationAccess,
+    webRouter.post(
+      '/entities/publisher/create/:id',
+      UserMembershipMiddleware.requirePublisherCreationAccess,
+      UserMembershipController.create
+    )
+
+    // institution creation routes
+    webRouter.get(
+      '/entities/institution/create/:id',
+      UserMembershipMiddleware.requireInstitutionCreationAccess,
+      UserMembershipController.new
+    )
+    webRouter.post(
+      '/entities/institution/create/:id',
+      UserMembershipMiddleware.requireInstitutionCreationAccess,
       UserMembershipController.create
     )
   }

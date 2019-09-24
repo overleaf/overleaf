@@ -15,6 +15,7 @@
  */
 const { ObjectId } = require('mongoose').Types
 const async = require('async')
+const { promisifyAll } = require('../../util/promises')
 const Errors = require('../Errors/Errors')
 const EntityModels = {
   Institution: require('../../models/Institution').Institution,
@@ -26,29 +27,7 @@ const UserGetter = require('../User/UserGetter')
 const logger = require('logger-sharelatex')
 const UserMembershipEntityConfigs = require('./UserMembershipEntityConfigs')
 
-module.exports = {
-  getEntity(
-    entityId,
-    entityConfig,
-    loggedInUser,
-    requiredStaffAccess,
-    callback
-  ) {
-    if (callback == null) {
-      callback = function(error, entity) {}
-    }
-    const query = buildEntityQuery(entityId, entityConfig)
-    if (
-      !loggedInUser.isAdmin &&
-      !(loggedInUser.staffAccess != null
-        ? loggedInUser.staffAccess[requiredStaffAccess]
-        : undefined)
-    ) {
-      query[entityConfig.fields.access] = ObjectId(loggedInUser._id)
-    }
-    return EntityModels[entityConfig.modelName].findOne(query, callback)
-  },
-
+const UserMembershipHandler = {
   getEntityWithoutAuthorizationCheck(entityId, entityConfig, callback) {
     if (callback == null) {
       callback = function(error, entity) {}
@@ -106,6 +85,9 @@ module.exports = {
     return removeUserFromEntity(entity, attribute, userId, callback)
   }
 }
+
+UserMembershipHandler.promises = promisifyAll(UserMembershipHandler)
+module.exports = UserMembershipHandler
 
 var getPopulatedListOfMembers = function(entity, attributes, callback) {
   if (callback == null) {

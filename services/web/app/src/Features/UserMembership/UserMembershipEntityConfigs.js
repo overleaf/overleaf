@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 module.exports = {
   group: {
     modelName: 'Subscription',
@@ -74,7 +67,6 @@ module.exports = {
 
   institution: {
     modelName: 'Institution',
-    canCreate: true,
     fields: {
       primaryKey: 'v1Id',
       read: ['managerIds'],
@@ -98,7 +90,6 @@ module.exports = {
 
   publisher: {
     modelName: 'Publisher',
-    canCreate: true,
     fields: {
       primaryKey: 'slug',
       read: ['managerIds'],
@@ -118,19 +109,5 @@ module.exports = {
         removeMember: `/manage/publishers/${id}/managers`
       }
     }
-  },
-
-  conversion: {
-    // for metrics only
-    modelName: 'Publisher',
-    fields: {
-      primaryKey: 'slug',
-      access: 'managerIds'
-    }
-  },
-
-  admin: {
-    // for metrics only
-    modelName: null
   }
 }

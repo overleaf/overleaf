@@ -336,6 +336,7 @@ describe('UserMembershipController', function() {
   describe('create', function() {
     beforeEach(function() {
       this.req.params.name = 'institution'
+      this.req.entityConfig = EntityConfigs['institution']
       return (this.req.params.id = 123)
     })
 
@@ -350,16 +351,6 @@ describe('UserMembershipController', function() {
           )
           return done()
         }
-      })
-    })
-
-    it('checks canCreate', function(done) {
-      this.req.params.name = 'group'
-      return this.UserMembershipController.create(this.req, null, error => {
-        expect(error).to.extist
-        expect(error).to.be.an.instanceof(Errors.NotFoundError)
-        sinon.assert.notCalled(this.UserMembershipHandler.createEntity)
-        return done()
       })
     })
   })

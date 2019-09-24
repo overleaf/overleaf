@@ -12,7 +12,6 @@
  */
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const UserMembershipHandler = require('./UserMembershipHandler')
-const EntityConfigs = require('./UserMembershipEntityConfigs')
 const Errors = require('../Errors/Errors')
 const EmailHelper = require('../Helpers/EmailHelper')
 const logger = require('logger-sharelatex')
@@ -161,15 +160,8 @@ module.exports = {
   },
 
   create(req, res, next) {
-    const entityName = req.params.name
     const entityId = req.params.id
-    const entityConfig = EntityConfigs[entityName]
-    if (!entityConfig) {
-      return next(new Errors.NotFoundError(`No such entity: ${entityName}`))
-    }
-    if (!entityConfig.canCreate) {
-      return next(new Errors.NotFoundError(`Cannot create new ${entityName}`))
-    }
+    const entityConfig = req.entityConfig
 
     return UserMembershipHandler.createEntity(entityId, entityConfig, function(
       error,

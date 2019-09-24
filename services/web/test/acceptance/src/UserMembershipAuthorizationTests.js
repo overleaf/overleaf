@@ -33,7 +33,7 @@ describe('UserMembershipAuthorization', function() {
         const url = `/metrics/teams/123`
         async.series(
           [
-            expectAccess(this.user, url, 302, /\/restricted/),
+            expectAccess(this.user, url, 403),
             cb => this.subscription.setManagerIds([this.user._id], cb),
             expectAccess(this.user, url, 200)
           ],
@@ -62,7 +62,7 @@ describe('UserMembershipAuthorization', function() {
         const url = `/manage/groups/${this.subscription._id}/members`
         async.series(
           [
-            expectAccess(this.user, url, 302, /\/restricted/),
+            expectAccess(this.user, url, 403),
             cb => this.subscription.setManagerIds([this.user._id], cb),
             expectAccess(this.user, url, 200)
           ],
@@ -76,7 +76,7 @@ describe('UserMembershipAuthorization', function() {
         const url = `/metrics/groups/${this.subscription._id}`
         async.series(
           [
-            expectAccess(this.user, url, 302, /\/restricted/),
+            expectAccess(this.user, url, 403),
             cb => this.subscription.setManagerIds([this.user._id], cb),
             expectAccess(this.user, url, 200)
           ],
@@ -95,7 +95,7 @@ describe('UserMembershipAuthorization', function() {
         const url = `/manage/groups/${this.subscription._id}/managers`
         async.series(
           [
-            expectAccess(this.user, url, 302, /\/restricted/),
+            expectAccess(this.user, url, 403),
             cb => this.subscription.setManagerIds([this.user._id], cb),
             expectAccess(this.user, url, 200)
           ],
@@ -151,10 +151,7 @@ describe('UserMembershipAuthorization', function() {
       it('should not allow users without access', function(done) {
         const url = `/metrics/institutions/${this.institution.v1Id}`
         async.series(
-          [
-            this.user.login.bind(this.user),
-            expectAccess(this.user, url, 302, /\/restricted/)
-          ],
+          [this.user.login.bind(this.user), expectAccess(this.user, url, 403)],
           done
         )
       })
@@ -166,7 +163,7 @@ describe('UserMembershipAuthorization', function() {
         async.series(
           [
             this.user.login.bind(this.user),
-            expectAccess(this.user, url, 302, /\/restricted/),
+            expectAccess(this.user, url, 403),
             cb => this.institution.setManagerIds([this.user._id], cb),
             expectAccess(this.user, url, 200)
           ],
@@ -181,7 +178,7 @@ describe('UserMembershipAuthorization', function() {
         async.series(
           [
             this.user.login.bind(this.user),
-            expectAccess(this.user, url, 302, /\/restricted/),
+            expectAccess(this.user, url, 403),
             cb => this.institution.setManagerIds([this.user._id], cb),
             expectAccess(this.user, url, 200)
           ],
@@ -196,7 +193,7 @@ describe('UserMembershipAuthorization', function() {
         async.series(
           [
             this.user.login.bind(this.user),
-            expectAccess(this.user, url, 302, /\/restricted/),
+            expectAccess(this.user, url, 403),
             cb => this.user.ensureStaffAccess('institutionManagement', cb),
             this.user.login.bind(this.user),
             expectAccess(this.user, url, 200)
@@ -224,7 +221,7 @@ describe('UserMembershipAuthorization', function() {
         const url = `/metrics/conversions/${this.publisher.slug}`
         async.series(
           [
-            expectAccess(this.user, url, 302, /\/restricted/),
+            expectAccess(this.user, url, 403),
             cb => this.publisher.setManagerIds([this.user._id], cb),
             expectAccess(this.user, url, 200)
           ],
@@ -238,7 +235,7 @@ describe('UserMembershipAuthorization', function() {
         const url = `/manage/publishers/${this.publisher.slug}/managers`
         async.series(
           [
-            expectAccess(this.user, url, 302, /\/restricted/),
+            expectAccess(this.user, url, 403),
             cb => this.publisher.setManagerIds([this.user._id], cb),
             expectAccess(this.user, url, 200)
           ],
@@ -266,7 +263,7 @@ describe('UserMembershipAuthorization', function() {
         const url = `/entities/publisher/create/foo`
         async.series(
           [
-            expectAccess(this.user, url, 302, /\/restricted/),
+            expectAccess(this.user, url, 403),
             cb => this.user.ensureStaffAccess('publisherManagement', cb),
             this.user.login.bind(this.user),
             expectAccess(this.user, url, 200)
@@ -300,7 +297,7 @@ describe('UserMembershipAuthorization', function() {
       const url = '/metrics/templates/123'
       async.series(
         [
-          expectAccess(this.user, url, 302, /\/restricted/),
+          expectAccess(this.user, url, 403),
           cb => this.publisher.setManagerIds([this.user._id], cb),
           expectAccess(this.user, url, 200)
         ],
@@ -319,7 +316,7 @@ describe('UserMembershipAuthorization', function() {
       const url = '/metrics/templates/456'
       async.series(
         [
-          expectAccess(this.user, url, 302, /\/restricted/),
+          expectAccess(this.user, url, 403),
           this.user.ensure_admin.bind(this.user),
           this.user.login.bind(this.user),
           expectAccess(this.user, url, 200)
@@ -347,7 +344,7 @@ describe('UserMembershipAuthorization', function() {
       async.series(
         [
           this.user.login.bind(this.user),
-          expectAccess(this.user, url, 302, /\/restricted/),
+          expectAccess(this.user, url, 403),
           this.user.ensure_admin.bind(this.user),
           this.user.login.bind(this.user),
           expectAccess(this.user, url, 200)
@@ -359,14 +356,14 @@ describe('UserMembershipAuthorization', function() {
 
   describe('admin metrics', function() {
     it('should not allow anonymous users', function(done) {
-      expectAccess(this.user, '/metrics/admin', 302, /\/restricted/)(done)
+      expectAccess(this.user, '/metrics/admin', 302, /\/login/)(done)
     })
 
     it('should not allow all users', function(done) {
       async.series(
         [
           this.user.login.bind(this.user),
-          expectAccess(this.user, '/metrics/admin', 302, /\/restricted/)
+          expectAccess(this.user, '/metrics/admin', 403)
         ],
         done
       )
