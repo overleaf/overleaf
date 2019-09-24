@@ -20,7 +20,7 @@ const modulePath =
 const SandboxedModule = require('sandboxed-module')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
+const ArchiveErrors = require('../../../../app/src/Features/Uploads/ArchiveErrors')
 
 describe('ProjectUploadController', function() {
   beforeEach(function() {
@@ -58,6 +58,7 @@ describe('ProjectUploadController', function() {
         'metrics-sharelatex': this.metrics,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
+        './ArchiveErrors': ArchiveErrors,
         fs: (this.fs = {})
       }
     }))
@@ -156,16 +157,17 @@ describe('ProjectUploadController', function() {
           .stub()
           .callsArgWith(
             3,
-            new Errors.InvalidError('zip_contents_too_large'),
+            new ArchiveErrors.ZipContentsTooLargeError(),
             this.project
           )
         return this.ProjectUploadController.uploadProject(this.req, this.res)
       })
 
       it('should return the reported error to the FileUploader client', function() {
-        return expect(this.res.body).to.deep.equal(
-          JSON.stringify({ success: false, error: 'zip_contents_too_large' })
-        )
+        expect(JSON.parse(this.res.body)).to.deep.equal({
+          success: false,
+          error: 'zip_contents_too_large'
+        })
       })
 
       it("should return an 'unprocessable entity' status code", function() {

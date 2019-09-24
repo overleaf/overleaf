@@ -17,7 +17,11 @@ const { expect } = require('chai')
 const chai = require('chai')
 const should = chai.should()
 const modulePath = '../../../../app/src/Features/Uploads/ArchiveManager.js'
-const Errors = require('../../../../app/src/Features/Errors/Errors')
+const {
+  InvalidZipFileError,
+  EmptyZipFileError,
+  ZipContentsTooLargeError
+} = require('../../../../app/src/Features/Uploads/ArchiveErrors')
 const SandboxedModule = require('sandboxed-module')
 const events = require('events')
 
@@ -136,7 +140,7 @@ describe('ArchiveManager', function() {
       it('should return the callback with an error', function() {
         return sinon.assert.calledWithExactly(
           this.callback,
-          new Errors.InvalidError('empty_zip_file')
+          new EmptyZipFileError()
         )
       })
     })
@@ -157,7 +161,7 @@ describe('ArchiveManager', function() {
       it('should return the callback with an error', function() {
         return sinon.assert.calledWithExactly(
           this.callback,
-          new Errors.InvalidError('empty_zip_file')
+          new EmptyZipFileError()
         )
       })
     })
@@ -166,7 +170,7 @@ describe('ArchiveManager', function() {
       beforeEach(function(done) {
         this.yauzl.open = sinon
           .stub()
-          .callsArgWith(2, new Errors.InvalidError('invalid_zip_file'))
+          .callsArgWith(2, new InvalidZipFileError())
         return this.ArchiveManager.extractZipArchive(
           this.source,
           this.destination,
@@ -180,7 +184,7 @@ describe('ArchiveManager', function() {
       it('should return the callback with an error', function() {
         return sinon.assert.calledWithExactly(
           this.callback,
-          new Errors.InvalidError('invalid_zip_file')
+          new InvalidZipFileError()
         )
       })
 
@@ -207,7 +211,7 @@ describe('ArchiveManager', function() {
       it('should return the callback with an error', function() {
         return sinon.assert.calledWithExactly(
           this.callback,
-          new Errors.InvalidError('zip_contents_too_large')
+          new ZipContentsTooLargeError()
         )
       })
 

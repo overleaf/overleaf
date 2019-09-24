@@ -20,7 +20,11 @@ const Path = require('path')
 const fse = require('fs-extra')
 const yauzl = require('yauzl')
 const Settings = require('settings-sharelatex')
-const Errors = require('../Errors/Errors')
+const {
+  InvalidZipFileError,
+  EmptyZipFileError,
+  ZipContentsTooLargeError
+} = require('./ArchiveErrors')
 const _ = require('underscore')
 
 const ONE_MEG = 1024 * 1024
@@ -35,7 +39,7 @@ const ArchiveManager = {
     let totalSizeInBytes = null
     return yauzl.open(source, { lazyEntries: true }, function(err, zipfile) {
       if (err != null) {
-        return callback(new Errors.InvalidError('invalid_zip_file'))
+        return callback(new InvalidZipFileError().withCause(err))
       }
 
       if (
@@ -61,7 +65,9 @@ const ArchiveManager = {
             { source, totalSizeInBytes },
             'error getting bytes of zip'
           )
-          return callback(new Errors.InvalidError('invalid_zip_file'))
+          return callback(
+            new InvalidZipFileError({ info: { totalSizeInBytes } })
+          )
         }
         const isTooLarge = totalSizeInBytes > ONE_MEG * 300
         return callback(null, isTooLarge)
@@ -186,7 +192,7 @@ const ArchiveManager = {
         if (entryFileCount > 0) {
           callback()
         } else {
-          callback(new Errors.InvalidError('empty_zip_file'))
+          callback(new EmptyZipFileError())
         }
       })
     })
@@ -208,7 +214,7 @@ const ArchiveManager = {
       }
 
       if (isTooLarge) {
-        return callback(new Errors.InvalidError('zip_contents_too_large'))
+        return callback(new ZipContentsTooLargeError())
       }
 
       const timer = new metrics.Timer('unzipDirectory')

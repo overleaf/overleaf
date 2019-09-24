@@ -20,7 +20,7 @@ const FileSystemImportManager = require('./FileSystemImportManager')
 const ProjectUploadManager = require('./ProjectUploadManager')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const Settings = require('settings-sharelatex')
-const Errors = require('../Errors/Errors')
+const { InvalidZipFileError } = require('./ArchiveErrors')
 const multer = require('multer')
 
 let upload = null
@@ -62,7 +62,7 @@ module.exports = ProjectUploadController = {
             { err: error, file_path: path, file_name: name },
             'error uploading project'
           )
-          if (error.name != null && error.name === 'InvalidError') {
+          if (error instanceof InvalidZipFileError) {
             return res.status(422).json({
               success: false,
               error: req.i18n.translate(error.message)
