@@ -7,4 +7,13 @@ if [ "$DEBUG_NODE" == "true" ]; then
     NODE_PARAMS="--inspect=0.0.0.0:30130"
 fi
 
+# Set permissions on docker.sock if present,
+# To enable sibling-containers (see entrypoint.sh in clsi project)
+if [ -e '/var/run/docker.sock' ]; then
+  echo ">> Setting permissions on docker socket"
+  DOCKER_GROUP=$(stat -c '%g' /var/run/docker.sock)
+  groupadd --non-unique --gid ${DOCKER_GROUP} dockeronhost
+  usermod -aG dockeronhost www-data
+fi
+
 exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /var/www/sharelatex/clsi/app.js >> /var/log/sharelatex/clsi.log 2>&1
