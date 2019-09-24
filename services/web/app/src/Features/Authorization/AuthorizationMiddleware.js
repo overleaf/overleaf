@@ -1,17 +1,3 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let AuthorizationMiddleware
 const AuthorizationManager = require('./AuthorizationManager')
 const async = require('async')
@@ -23,276 +9,242 @@ const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 
 module.exports = AuthorizationMiddleware = {
   ensureUserCanReadMultipleProjects(req, res, next) {
-    const project_ids = (req.query.project_ids || '').split(',')
-    return AuthorizationMiddleware._getUserId(req, function(error, user_id) {
-      if (error != null) {
+    const projectIds = (req.query.project_ids || '').split(',')
+    AuthorizationMiddleware._getUserId(req, function(error, userId) {
+      if (error) {
         return next(error)
       }
       // Remove the projects we have access to. Note rejectSeries doesn't use
       // errors in callbacks
-      return async.rejectSeries(
-        project_ids,
-        function(project_id, cb) {
-          const token = TokenAccessHandler.getRequestToken(req, project_id)
-          return AuthorizationManager.canUserReadProject(
-            user_id,
-            project_id,
+      async.rejectSeries(
+        projectIds,
+        function(projectId, cb) {
+          const token = TokenAccessHandler.getRequestToken(req, projectId)
+          AuthorizationManager.canUserReadProject(
+            userId,
+            projectId,
             token,
             function(error, canRead) {
-              if (error != null) {
+              if (error) {
                 return next(error)
               }
-              return cb(canRead)
+              cb(canRead)
             }
           )
         },
-        function(unauthorized_project_ids) {
-          if (unauthorized_project_ids.length > 0) {
+        function(unauthorizedProjectIds) {
+          if (unauthorizedProjectIds.length > 0) {
             return AuthorizationMiddleware.redirectToRestricted(req, res, next)
-          } else {
-            return next()
           }
+          next()
         }
       )
     })
   },
 
   ensureUserCanReadProject(req, res, next) {
-    return AuthorizationMiddleware._getUserAndProjectId(req, function(
+    AuthorizationMiddleware._getUserAndProjectId(req, function(
       error,
-      user_id,
-      project_id
+      userId,
+      projectId
     ) {
-      if (error != null) {
+      if (error) {
         return next(error)
       }
-      const token = TokenAccessHandler.getRequestToken(req, project_id)
-      return AuthorizationManager.canUserReadProject(
-        user_id,
-        project_id,
+      const token = TokenAccessHandler.getRequestToken(req, projectId)
+      AuthorizationManager.canUserReadProject(
+        userId,
+        projectId,
         token,
         function(error, canRead) {
-          if (error != null) {
+          if (error) {
             return next(error)
           }
           if (canRead) {
             logger.log(
-              { user_id, project_id },
+              { userId, projectId },
               'allowing user read access to project'
             )
             return next()
-          } else {
-            logger.log(
-              { user_id, project_id },
-              'denying user read access to project'
-            )
-            if (
-              __guard__(
-                req.headers != null ? req.headers['accept'] : undefined,
-                x => x.match(/^application\/json.*$/)
-              )
-            ) {
-              return res.sendStatus(403)
-            } else {
-              return AuthorizationMiddleware.redirectToRestricted(
-                req,
-                res,
-                next
-              )
-            }
           }
+          logger.log(
+            { userId, projectId },
+            'denying user read access to project'
+          )
+          const acceptHeader = req.headers && req.headers['accept']
+          if (acceptHeader && acceptHeader.match(/^application\/json.*$/)) {
+            return res.sendStatus(403)
+          }
+          AuthorizationMiddleware.redirectToRestricted(req, res, next)
         }
       )
     })
   },
 
   ensureUserCanWriteProjectSettings(req, res, next) {
-    return AuthorizationMiddleware._getUserAndProjectId(req, function(
+    AuthorizationMiddleware._getUserAndProjectId(req, function(
       error,
-      user_id,
-      project_id
+      userId,
+      projectId
     ) {
-      if (error != null) {
+      if (error) {
         return next(error)
       }
-      const token = TokenAccessHandler.getRequestToken(req, project_id)
-      return AuthorizationManager.canUserWriteProjectSettings(
-        user_id,
-        project_id,
+      const token = TokenAccessHandler.getRequestToken(req, projectId)
+      AuthorizationManager.canUserWriteProjectSettings(
+        userId,
+        projectId,
         token,
         function(error, canWrite) {
-          if (error != null) {
+          if (error) {
             return next(error)
           }
           if (canWrite) {
             logger.log(
-              { user_id, project_id },
+              { userId, projectId },
               'allowing user write access to project settings'
             )
             return next()
-          } else {
-            logger.log(
-              { user_id, project_id },
-              'denying user write access to project settings'
-            )
-            return AuthorizationMiddleware.redirectToRestricted(req, res, next)
           }
+          logger.log(
+            { userId, projectId },
+            'denying user write access to project settings'
+          )
+          AuthorizationMiddleware.redirectToRestricted(req, res, next)
         }
       )
     })
   },
 
   ensureUserCanWriteProjectContent(req, res, next) {
-    return AuthorizationMiddleware._getUserAndProjectId(req, function(
+    AuthorizationMiddleware._getUserAndProjectId(req, function(
       error,
-      user_id,
-      project_id
+      userId,
+      projectId
     ) {
-      if (error != null) {
+      if (error) {
         return next(error)
       }
-      const token = TokenAccessHandler.getRequestToken(req, project_id)
-      return AuthorizationManager.canUserWriteProjectContent(
-        user_id,
-        project_id,
+      const token = TokenAccessHandler.getRequestToken(req, projectId)
+      AuthorizationManager.canUserWriteProjectContent(
+        userId,
+        projectId,
         token,
         function(error, canWrite) {
-          if (error != null) {
+          if (error) {
             return next(error)
           }
           if (canWrite) {
             logger.log(
-              { user_id, project_id },
+              { userId, projectId },
               'allowing user write access to project content'
             )
             return next()
-          } else {
-            logger.log(
-              { user_id, project_id },
-              'denying user write access to project settings'
-            )
-            return AuthorizationMiddleware.redirectToRestricted(req, res, next)
           }
+          logger.log(
+            { userId, projectId },
+            'denying user write access to project settings'
+          )
+          AuthorizationMiddleware.redirectToRestricted(req, res, next)
         }
       )
     })
   },
 
   ensureUserCanAdminProject(req, res, next) {
-    return AuthorizationMiddleware._getUserAndProjectId(req, function(
+    AuthorizationMiddleware._getUserAndProjectId(req, function(
       error,
-      user_id,
-      project_id
+      userId,
+      projectId
     ) {
-      if (error != null) {
+      if (error) {
         return next(error)
       }
-      const token = TokenAccessHandler.getRequestToken(req, project_id)
-      return AuthorizationManager.canUserAdminProject(
-        user_id,
-        project_id,
+      const token = TokenAccessHandler.getRequestToken(req, projectId)
+      AuthorizationManager.canUserAdminProject(
+        userId,
+        projectId,
         token,
         function(error, canAdmin) {
-          if (error != null) {
+          if (error) {
             return next(error)
           }
           if (canAdmin) {
             logger.log(
-              { user_id, project_id },
+              { userId, projectId },
               'allowing user admin access to project'
             )
             return next()
-          } else {
-            logger.log(
-              { user_id, project_id },
-              'denying user admin access to project'
-            )
-            return AuthorizationMiddleware.redirectToRestricted(req, res, next)
           }
+          logger.log(
+            { userId, projectId },
+            'denying user admin access to project'
+          )
+          AuthorizationMiddleware.redirectToRestricted(req, res, next)
         }
       )
     })
   },
 
   ensureUserIsSiteAdmin(req, res, next) {
-    return AuthorizationMiddleware._getUserId(req, function(error, user_id) {
-      if (error != null) {
+    AuthorizationMiddleware._getUserId(req, function(error, userId) {
+      if (error) {
         return next(error)
       }
-      return AuthorizationManager.isUserSiteAdmin(user_id, function(
-        error,
-        isAdmin
-      ) {
-        if (error != null) {
+      AuthorizationManager.isUserSiteAdmin(userId, function(error, isAdmin) {
+        if (error) {
           return next(error)
         }
         if (isAdmin) {
-          logger.log({ user_id }, 'allowing user admin access to site')
+          logger.log({ userId }, 'allowing user admin access to site')
           return next()
-        } else {
-          logger.log({ user_id }, 'denying user admin access to site')
-          return AuthorizationMiddleware.redirectToRestricted(req, res, next)
         }
+        logger.log({ userId }, 'denying user admin access to site')
+        AuthorizationMiddleware.redirectToRestricted(req, res, next)
       })
     })
   },
 
   _getUserAndProjectId(req, callback) {
-    if (callback == null) {
-      callback = function(error, user_id, project_id) {}
-    }
-    const project_id =
-      (req.params != null ? req.params.project_id : undefined) ||
-      (req.params != null ? req.params.Project_id : undefined)
-    if (project_id == null) {
+    const projectId = req.params.project_id || req.params.Project_id
+    if (!projectId) {
       return callback(new Error('Expected project_id in request parameters'))
     }
-    if (!ObjectId.isValid(project_id)) {
+    if (!ObjectId.isValid(projectId)) {
       return callback(
-        new Errors.NotFoundError(`invalid project_id: ${project_id}`)
+        new Errors.NotFoundError(`invalid projectId: ${projectId}`)
       )
     }
-    return AuthorizationMiddleware._getUserId(req, function(error, user_id) {
-      if (error != null) {
+    AuthorizationMiddleware._getUserId(req, function(error, userId) {
+      if (error) {
         return callback(error)
       }
-      return callback(null, user_id, project_id)
+      callback(null, userId, projectId)
     })
   },
 
   _getUserId(req, callback) {
-    if (callback == null) {
-      callback = function(error, user_id) {}
-    }
-    const user_id =
+    const userId =
       AuthenticationController.getLoggedInUserId(req) ||
-      __guard__(req != null ? req.oauth_user : undefined, x => x._id) ||
+      (req.oauth_user && req.oauth_user._id) ||
       null
-    return callback(null, user_id)
+    callback(null, userId)
   },
 
   redirectToRestricted(req, res, next) {
     // TODO: move this to throwing ForbiddenError
-    return res.redirect(`/restricted?from=${encodeURIComponent(req.url)}`)
+    res.redirect(`/restricted?from=${encodeURIComponent(req.url)}`)
   },
 
   restricted(req, res, next) {
     if (AuthenticationController.isUserLoggedIn(req)) {
       return res.render('user/restricted', { title: 'restricted' })
-    } else {
-      const { from } = req.query
-      logger.log({ from }, 'redirecting to login')
-      const redirect_to = '/login'
-      if (from != null) {
-        AuthenticationController.setRedirectInSession(req, from)
-      }
-      return res.redirect(redirect_to)
     }
+    const { from } = req.query
+    logger.log({ from }, 'redirecting to login')
+    if (from) {
+      AuthenticationController.setRedirectInSession(req, from)
+    }
+    res.redirect('/login')
   }
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }
