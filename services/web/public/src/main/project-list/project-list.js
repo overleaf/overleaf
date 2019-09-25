@@ -39,7 +39,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
 
     var recalculateProjectListHeight = function() {
       const $projListCard = $('.project-list-card')
-      if (!$projListCard) return
+      if (!$projListCard || !$projListCard.offset()) return
 
       const topOffset = $projListCard.offset().top
       const cardPadding = $projListCard.outerHeight() - $projListCard.height()
