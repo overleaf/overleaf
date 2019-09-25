@@ -90,6 +90,9 @@ define(['ace/ace', 'ide/editor/EditorShareJsCodec'], function(
     }
 
     onInsertRemoved(change) {
+      if (this.changeIdToMarkerIdMap[change.id] == null) {
+        return
+      }
       const {
         background_marker_id,
         callout_marker_id
@@ -101,6 +104,9 @@ define(['ace/ace', 'ide/editor/EditorShareJsCodec'], function(
     }
 
     onDeleteRemoved(change) {
+      if (this.changeIdToMarkerIdMap[change.id] == null) {
+        return
+      }
       const {
         background_marker_id,
         callout_marker_id
