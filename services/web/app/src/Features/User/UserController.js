@@ -15,6 +15,7 @@ const Errors = require('../Errors/Errors')
 const OError = require('@overleaf/o-error')
 const HttpErrors = require('@overleaf/o-error/http')
 const EmailHandler = require('../Email/EmailHandler')
+const UrlHelper = require('../Helpers/UrlHelper')
 
 const UserController = {
   tryDeleteUser(req, res, next) {
@@ -253,11 +254,15 @@ const UserController = {
   },
 
   logout(req, res, next) {
+    const requestedRedirect = req.body.redirect
+      ? UrlHelper.getSafeRedirectPath(req.body.redirect)
+      : undefined
+    const redirectUrl = requestedRedirect || '/login'
+
     UserController._doLogout(req, err => {
       if (err != null) {
         return next(err)
       }
-      const redirectUrl = '/login'
       res.redirect(redirectUrl)
     })
   },

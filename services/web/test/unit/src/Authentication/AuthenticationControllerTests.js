@@ -80,9 +80,16 @@ describe('AuthenticationController', function() {
           server: {
             authenticate: sinon.stub()
           }
+        }),
+        '../Helpers/UrlHelper': (this.UrlHelper = {
+          getSafeRedirectPath: sinon.stub()
         })
       }
     })
+    this.UrlHelper.getSafeRedirectPath
+      .withArgs('https://evil.com')
+      .returns(undefined)
+    this.UrlHelper.getSafeRedirectPath.returnsArg(0)
     this.user = {
       _id: ObjectId(),
       email: (this.email = 'USER@example.com'),
@@ -104,10 +111,7 @@ describe('AuthenticationController', function() {
 
   describe('isUserLoggedIn', function() {
     beforeEach(function() {
-      return (this.stub = sinon.stub(
-        this.AuthenticationController,
-        'getLoggedInUserId'
-      ))
+      this.stub = sinon.stub(this.AuthenticationController, 'getLoggedInUserId')
     })
 
     afterEach(function() {
@@ -1007,32 +1011,6 @@ describe('AuthenticationController', function() {
       return expect(
         this.AuthenticationController._getRedirectFromSession(this.req)
       ).to.be.null
-    })
-  })
-
-  describe('_getSafeRedirectPath', function() {
-    it('sanitize redirect path to prevent open redirects', function() {
-      expect(
-        this.AuthenticationController._getSafeRedirectPath('https://evil.com')
-      ).to.be.undefined
-
-      expect(this.AuthenticationController._getSafeRedirectPath('//evil.com'))
-        .to.be.undefined
-
-      expect(
-        this.AuthenticationController._getSafeRedirectPath('//ol.com/evil')
-      ).to.equal('/evil')
-
-      expect(this.AuthenticationController._getSafeRedirectPath('////evil.com'))
-        .to.be.undefined
-
-      expect(
-        this.AuthenticationController._getSafeRedirectPath('%2F%2Fevil.com')
-      ).to.equal('/%2F%2Fevil.com')
-
-      return expect(
-        this.AuthenticationController._getSafeRedirectPath('.evil.com')
-      ).to.equal('/.evil.com')
     })
   })
 

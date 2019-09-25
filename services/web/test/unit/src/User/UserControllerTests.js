@@ -460,6 +460,27 @@ describe('UserController', function() {
 
       return this.UserController.logout(this.req, this.res)
     })
+
+    it('should redirect after logout', function(done) {
+      this.req.body.redirect = '/institutional-login'
+      this.req.session.destroy = sinon.stub().callsArgWith(0)
+      this.SudoModeHandler.clearSudoMode = sinon.stub()
+      this.res.redirect = url => {
+        url.should.equal(this.req.body.redirect)
+        return done()
+      }
+      return this.UserController.logout(this.req, this.res)
+    })
+
+    it('should redirect to login after logout when no redirect set', function(done) {
+      this.req.session.destroy = sinon.stub().callsArgWith(0)
+      this.SudoModeHandler.clearSudoMode = sinon.stub()
+      this.res.redirect = url => {
+        url.should.equal('/login')
+        return done()
+      }
+      return this.UserController.logout(this.req, this.res)
+    })
   })
 
   describe('register', function() {

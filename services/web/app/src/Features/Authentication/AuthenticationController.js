@@ -11,8 +11,8 @@ const UserSessionsManager = require('../User/UserSessionsManager')
 const Analytics = require('../Analytics/AnalyticsManager')
 const passport = require('passport')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
+const UrlHelper = require('../Helpers/UrlHelper')
 const SudoModeHandler = require('../SudoMode/SudoModeHandler')
-const { URL } = require('url')
 const _ = require('lodash')
 
 const AuthenticationController = (module.exports = {
@@ -351,7 +351,7 @@ const AuthenticationController = (module.exports = {
       !/^\/(socket.io|js|stylesheets|img)\/.*$/.test(value) &&
       !/^.*\.(png|jpeg|svg)$/.test(value)
     ) {
-      const safePath = AuthenticationController._getSafeRedirectPath(value)
+      const safePath = UrlHelper.getSafeRedirectPath(value)
       return (req.session.postLoginRedirect = safePath)
     }
   },
@@ -433,7 +433,7 @@ const AuthenticationController = (module.exports = {
     let safePath
     const value = _.get(req, ['session', 'postLoginRedirect'])
     if (value) {
-      safePath = AuthenticationController._getSafeRedirectPath(value)
+      safePath = UrlHelper.getSafeRedirectPath(value)
     }
     return safePath || null
   },
@@ -442,15 +442,5 @@ const AuthenticationController = (module.exports = {
     if (req.session != null) {
       delete req.session.postLoginRedirect
     }
-  },
-
-  _getSafeRedirectPath(value) {
-    const baseURL = Settings.siteUrl // base URL is required to construct URL from path
-    const url = new URL(value, baseURL)
-    let safePath = `${url.pathname}${url.search}${url.hash}`
-    if (safePath === '/') {
-      safePath = undefined
-    }
-    return safePath
   }
 })

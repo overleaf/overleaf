@@ -1,18 +1,18 @@
-/* eslint-disable
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let UrlHelper
 const Settings = require('settings-sharelatex')
+const { URL } = require('url')
 
-module.exports = UrlHelper = {
+function getSafeRedirectPath(value) {
+  const baseURL = Settings.siteUrl // base URL is required to construct URL from path
+  const url = new URL(value, baseURL)
+  let safePath = `${url.pathname}${url.search}${url.hash}`
+  if (safePath === '/') {
+    safePath = undefined
+  }
+  return safePath
+}
+
+const UrlHelper = {
+  getSafeRedirectPath,
   wrapUrlWithProxy(url) {
     // TODO: Consider what to do for Community and Enterprise edition?
     if (!Settings.apis.linkedUrlProxy.url) {
@@ -28,3 +28,5 @@ module.exports = UrlHelper = {
     return url
   }
 }
+
+module.exports = UrlHelper
