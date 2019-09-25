@@ -159,11 +159,11 @@ describe('UserDeleter', function() {
             this.UserMock.verify()
           })
 
-          it('should unsubscribe the user from the news letter', async function() {
+          it('should delete the user from mailchimp', async function() {
             await this.UserDeleter.promises.deleteUser(this.userId)
             expect(
               this.NewsletterManager.promises.unsubscribe
-            ).to.have.been.calledWith(this.user)
+            ).to.have.been.calledWith(this.user, { delete: true })
           })
 
           it('should delete all the projects of a user', async function() {

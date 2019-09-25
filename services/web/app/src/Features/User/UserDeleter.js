@@ -110,7 +110,7 @@ async function _cleanupUser(user) {
   if (user == null) {
     throw new Error('no user supplied')
   }
-  await NewsletterManager.promises.unsubscribe(user)
+  await NewsletterManager.promises.unsubscribe(user, { delete: true })
   await SubscriptionHandler.promises.cancelSubscription(user)
   await InstitutionsAPI.promises.deleteAffiliations(user._id)
   await SubscriptionUpdater.promises.removeUserFromAllGroups(user._id)

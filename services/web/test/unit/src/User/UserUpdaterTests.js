@@ -366,7 +366,7 @@ describe('UserUpdater', function() {
         err => {
           should.not.exist(err)
           this.NewsletterManager.changeEmail
-            .calledWith(this.stubbedUser.email, this.newEmail)
+            .calledWith(this.stubbedUser, this.newEmail)
             .should.equal(true)
           done()
         }

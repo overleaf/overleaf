@@ -172,7 +172,7 @@ const UserUpdater = {
         if (res.n === 0) {
           return callback(new Error('email update error'))
         }
-        NewsletterManager.changeEmail(oldEmail, email, err => {
+        NewsletterManager.changeEmail(user, email, err => {
           if (err != null) {
             logger.warn(
               { err, oldEmail, newEmail: email },
