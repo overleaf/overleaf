@@ -22,6 +22,7 @@ define([
   'modules/recursionHelper',
   'modules/errorCatcher',
   'modules/localStorage',
+  'modules/sessionStorage',
   'utils/underscore'
 ], function() {
   const App = angular
@@ -35,6 +36,7 @@ define([
       'ipCookie',
       'ErrorCatcher',
       'localStorage',
+      'sessionStorage',
       'ngTagsInput',
       'ui.select'
     ])
