@@ -97,7 +97,7 @@ describe "Deleting a project", ->
 		it "should flush each doc in project history", ->
 			MockProjectHistoryApi.flushProject.calledWith(@project_id).should.equal true
 
-	describe "with the shutdown=true parameter from realtime", ->
+	describe "with the background=true parameter from realtime", ->
 		before (done) ->
 			sinon.spy MockWebApi, "setDocument"
 			sinon.spy MockTrackChangesApi, "flushDoc"
@@ -111,7 +111,11 @@ describe "Deleting a project", ->
 				setTimeout () =>
 					DocUpdaterClient.deleteProjectOnShutdown @project_id, (error, res, body) =>
 						@statusCode = res.statusCode
-						done()
+						# after deleting the project and putting it in the queue, flush the queue
+						setTimeout () ->
+							DocUpdaterClient.flushOldProjects (error, res, body) =>
+								done()
+						, 100
 				, 200
 
 		after ->

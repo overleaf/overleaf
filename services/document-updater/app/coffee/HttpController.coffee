@@ -5,7 +5,8 @@ Errors = require "./Errors"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
 ProjectFlusher = require("./ProjectFlusher")
-
+DeleteQueueManager = require("./DeleteQueueManager")
+async = require "async"
 
 TWO_MEGABYTES = 2 * 1024 * 1024
 
@@ -130,14 +131,30 @@ module.exports = HttpController =
 	deleteProject: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
 		logger.log project_id: project_id, "deleting project via http"
-		timer = new Metrics.Timer("http.deleteProject")
 		options = {}
 		options.background = true if req.query?.background # allow non-urgent flushes to be queued
 		options.skip_history_flush = true if req.query?.shutdown # don't flush history when realtime shuts down
-		ProjectManager.flushAndDeleteProjectWithLocks project_id, options, (error) ->
-			timer.done()
+		if req.query?.background
+			ProjectManager.queueFlushAndDeleteProject project_id, (error) ->
+				return next(error) if error?
+				logger.log project_id: project_id, "queue delete of project via http"
+				res.send 204 # No Content
+		else
+			timer = new Metrics.Timer("http.deleteProject")
+			ProjectManager.flushAndDeleteProjectWithLocks project_id, options, (error) ->
+				timer.done()
+				return next(error) if error?
+				logger.log project_id: project_id, "deleted project via http"
+				res.send 204 # No Content
+
+	deleteMultipleProjects: (req, res, next = (error) ->) ->
+		project_ids = req.body?.project_ids || []
+		logger.log project_ids: project_ids, "deleting multiple projects via http"
+		async.eachSeries project_ids, (project_id, cb) ->
+			logger.log project_id: project_id, "queue delete of project via http"
+			ProjectManager.queueFlushAndDeleteProject project_id, cb
+		, (error) ->
 			return next(error) if error?
-			logger.log project_id: project_id, "deleted project via http"
 			res.send 204 # No Content
 
 	acceptChanges: (req, res, next = (error) ->) ->
@@ -198,4 +215,16 @@ module.exports = HttpController =
 			else
 				res.send project_ids
 
-
+	flushQueuedProjects: (req, res, next = (error) ->) ->
+		res.setTimeout(5 * 60 * 1000)
+		options = 
+			limit : req.query.limit || 1000
+			timeout: 5 * 60 * 1000
+			dryRun : req.query.dryRun || false
+			min_delete_age: req.query.min_delete_age || 5 * 60 * 1000
+		DeleteQueueManager.flushAndDeleteOldProjects options, (err, project_ids)->
+			if err?
+				logger.err err:err, "error flushing old projects"
+				res.send 500
+			else
+				res.send project_ids

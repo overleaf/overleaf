@@ -14,6 +14,7 @@ describe "HttpController", ->
 			"./ProjectManager": @ProjectManager = {}
 			"logger-sharelatex" : @logger = { log: sinon.stub() }
 			"./ProjectFlusher": {flushAllProjects:->}
+			"./DeleteQueueManager": @DeleteQueueManager = {}
 			"./Metrics": @Metrics = {}
 			"./Errors" : Errors
 		@Metrics.Timer = class Timer
@@ -343,15 +344,15 @@ describe "HttpController", ->
 			it "should time the request", ->
 				@Metrics.Timer::done.called.should.equal true
 
-		describe "with the shutdown=true option from realtime", ->
+		describe "with the background=true option from realtime", ->
 			beforeEach ->
-				@ProjectManager.flushAndDeleteProjectWithLocks = sinon.stub().callsArgWith(2)
+				@ProjectManager.queueFlushAndDeleteProject = sinon.stub().callsArgWith(1)
 				@req.query = {background:true, shutdown:true}
 				@HttpController.deleteProject(@req, @res, @next)
 
-			it "should pass the skip_history_flush option when flushing the project", ->
-				@ProjectManager.flushAndDeleteProjectWithLocks
-					.calledWith(@project_id, {background:true, skip_history_flush:true})
+			it "should queue the flush and delete", ->
+				@ProjectManager.queueFlushAndDeleteProject
+					.calledWith(@project_id)
 					.should.equal true
 
 		describe "when an errors occurs", ->
