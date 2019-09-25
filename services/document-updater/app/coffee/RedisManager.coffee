@@ -298,18 +298,20 @@ module.exports = RedisManager =
 		rclient.zadd keys.flushAndDeleteQueue(), Date.now(), project_id, callback
 
 	getNextProjectToFlushAndDelete: (cutoffTime, callback = (error, key, timestamp)->) ->
-		# find the oldest queued flsus
+		# find the oldest queued flush
 		rclient.zrangebyscore keys.flushAndDeleteQueue(), 0, cutoffTime, "WITHSCORES", "LIMIT", 0, 1, (err, reply) ->
 			return callback(err) if err?
 			return callback() if !reply?.length
 			multi = rclient.multi()
 			multi.zrange keys.flushAndDeleteQueue(), 0, 0, "WITHSCORES"
 			multi.zremrangebyrank keys.flushAndDeleteQueue(), 0, 0
+			multi.zcard keys.flushAndDeleteQueue()
 			multi.exec (err, reply) ->
 				return callback(err) if err?
 				return callback() if !reply?.length
 				[key, timestamp] = reply[0]
-				callback(null, key, timestamp)
+				queueLength = reply[2]
+				callback(null, key, timestamp, queueLength)
 
 	_serializeRanges: (ranges, callback = (error, serializedRanges) ->) ->
 		jsonRanges = JSON.stringify(ranges)
