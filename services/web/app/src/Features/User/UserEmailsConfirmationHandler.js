@@ -78,6 +78,12 @@ const UserEmailsConfirmationHandler = {
           if (!user) {
             return callback(new Errors.NotFoundError('user not found'))
           }
+          const emailExists = user.emails.some(
+            emailData => emailData.email === email
+          )
+          if (!emailExists) {
+            return callback(new Errors.NotFoundError('email missing for user'))
+          }
           UserUpdater.confirmEmail(userId, email, callback)
         })
       }

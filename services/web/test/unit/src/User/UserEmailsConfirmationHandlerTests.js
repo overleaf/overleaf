@@ -44,9 +44,13 @@ describe('UserEmailsConfirmationHandler', function() {
         '../Helpers/EmailHelper': EmailHelper
       }
     })
-    this.mockUser = { _id: 'mock-user-id' }
+    this.mockUser = {
+      _id: 'mock-user-id',
+      email: 'mock@example.com',
+      emails: [{ email: 'mock@example.com' }]
+    }
     this.user_id = this.mockUser._id
-    this.email = 'mock@example.com'
+    this.email = this.mockUser.email
     return (this.callback = sinon.stub())
   })
 
@@ -224,6 +228,25 @@ describe('UserEmailsConfirmationHandler', function() {
       })
 
       it('should call the callback with a NotFoundError', function() {
+        return this.callback
+          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
+          .should.equal(true)
+      })
+    })
+
+    describe('with secondary email missing on user', function() {
+      beforeEach(function() {
+        this.OneTimeTokenHandler.getValueFromTokenAndExpire = sinon
+          .stub()
+          .yields(null, { user_id: this.user_id, email: 'deleted@email.com' })
+        return this.UserEmailsConfirmationHandler.confirmEmailFromToken(
+          (this.token = 'mock-token'),
+          this.callback
+        )
+      })
+
+      it('should call the callback with a NotFoundError', function() {
+        console.log(this.callback.lastCall.args)
         return this.callback
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)
