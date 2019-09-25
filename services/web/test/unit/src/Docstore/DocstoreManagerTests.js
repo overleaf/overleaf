@@ -65,11 +65,12 @@ describe('DocstoreManager', function() {
 
       it('should delete the doc in the docstore api', function() {
         return this.request.del
-          .calledWith(
-            `${this.settings.apis.docstore.url}/project/${
+          .calledWith({
+            url: `${this.settings.apis.docstore.url}/project/${
               this.project_id
-            }/doc/${this.doc_id}`
-          )
+            }/doc/${this.doc_id}`,
+            timeout: 30 * 1000
+          })
           .should.equal(true)
       })
 
@@ -186,6 +187,7 @@ describe('DocstoreManager', function() {
             url: `${this.settings.apis.docstore.url}/project/${
               this.project_id
             }/doc/${this.doc_id}`,
+            timeout: 30 * 1000,
             json: {
               lines: this.lines,
               version: this.version,
@@ -270,6 +272,7 @@ describe('DocstoreManager', function() {
             url: `${this.settings.apis.docstore.url}/project/${
               this.project_id
             }/doc/${this.doc_id}`,
+            timeout: 30 * 1000,
             json: true
           })
           .should.equal(true)
@@ -337,6 +340,7 @@ describe('DocstoreManager', function() {
             url: `${this.settings.apis.docstore.url}/project/${
               this.project_id
             }/doc/${this.doc_id}?include_deleted=true`,
+            timeout: 30 * 1000,
             json: true
           })
           .should.equal(true)
@@ -402,6 +406,7 @@ describe('DocstoreManager', function() {
             url: `${this.settings.apis.docstore.url}/project/${
               this.project_id
             }/doc`,
+            timeout: 30 * 1000,
             json: true
           })
           .should.equal(true)
@@ -464,6 +469,7 @@ describe('DocstoreManager', function() {
             url: `${this.settings.apis.docstore.url}/project/${
               this.project_id
             }/ranges`,
+            timeout: 30 * 1000,
             json: true
           })
           .should.equal(true)

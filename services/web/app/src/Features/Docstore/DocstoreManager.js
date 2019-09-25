@@ -18,6 +18,8 @@ const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const Errors = require('../Errors/Errors')
 
+const TIMEOUT = 30 * 1000 // request timeout
+
 module.exports = DocstoreManager = {
   deleteDoc(project_id, doc_id, callback) {
     if (callback == null) {
@@ -27,7 +29,11 @@ module.exports = DocstoreManager = {
     const url = `${
       settings.apis.docstore.url
     }/project/${project_id}/doc/${doc_id}`
-    return request.del(url, function(error, res, body) {
+    return request.del({ url: url, timeout: TIMEOUT }, function(
+      error,
+      res,
+      body
+    ) {
       if (error != null) {
         return callback(error)
       }
@@ -62,6 +68,7 @@ module.exports = DocstoreManager = {
     return request.get(
       {
         url,
+        timeout: TIMEOUT,
         json: true
       },
       function(error, res, docs) {
@@ -96,6 +103,7 @@ module.exports = DocstoreManager = {
     return request.get(
       {
         url,
+        timeout: TIMEOUT,
         json: true
       },
       function(error, res, docs) {
@@ -139,6 +147,7 @@ module.exports = DocstoreManager = {
     return request.get(
       {
         url,
+        timeout: TIMEOUT,
         json: true
       },
       function(error, res, doc) {
@@ -183,6 +192,7 @@ module.exports = DocstoreManager = {
     return request.post(
       {
         url,
+        timeout: TIMEOUT,
         json: {
           lines,
           version,
@@ -228,6 +238,7 @@ module.exports = DocstoreManager = {
   _operateOnProject(project_id, method, callback) {
     const url = `${settings.apis.docstore.url}/project/${project_id}/${method}`
     logger.log({ project_id }, `calling ${method} for project in docstore`)
+    // use default timeout for archiving/unarchiving/destroying
     request.post(url, function(err, res, docs) {
       if (err != null) {
         logger.warn(
