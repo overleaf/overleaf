@@ -15,6 +15,7 @@ let RateLimiterMiddleware
 const RateLimiter = require('../../infrastructure/RateLimiter')
 const logger = require('logger-sharelatex')
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const settings = require('settings-sharelatex')
 
 module.exports = RateLimiterMiddleware = {
   /*
@@ -31,6 +32,14 @@ module.exports = RateLimiterMiddleware = {
   rateLimit(opts) {
     return function(req, res, next) {
       const user_id = AuthenticationController.getLoggedInUserId(req) || req.ip
+      if (
+        settings.smokeTest &&
+        settings.smokeTest.userId &&
+        settings.smokeTest.userId.toString() === user_id.toString()
+      ) {
+        // ignore smoke test user
+        return next()
+      }
       const params = (opts.params || []).map(p => req.params[p])
       params.push(user_id)
       let subjectName = params.join(':')

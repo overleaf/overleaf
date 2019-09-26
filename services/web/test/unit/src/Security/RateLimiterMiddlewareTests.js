@@ -37,6 +37,7 @@ describe('RateLimiterMiddleware', function() {
         console: console
       },
       requires: {
+        'settings-sharelatex': (this.settings = {}),
         '../../infrastructure/RateLimiter': (this.RateLimiter = {}),
         'logger-sharelatex': (this.logger = { warn: sinon.stub() }),
         '../Authentication/AuthenticationController': this
@@ -85,6 +86,35 @@ describe('RateLimiterMiddleware', function() {
       })
 
       it('should pass on to next()', function() {})
+    })
+
+    describe('when smoke test user', function() {
+      beforeEach(function() {
+        this.req.session = {
+          user: {
+            _id: (this.user_id = 'smoke-test-user-id')
+          }
+        }
+        this.settings.smokeTest = { userId: this.user_id }
+        this.RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
+        return this.rateLimiter(this.req, this.res, this.next)
+      })
+
+      it('should not call the rate limiter backend with the user_id', function() {
+        this.RateLimiter.addCount
+          .calledWith({
+            endpointName: 'test-endpoint',
+            timeInterval: 42,
+            throttle: 12,
+            subjectName: `${this.project_id}:${this.doc_id}:${this.user_id}`
+          })
+          .should.equal(false)
+        this.RateLimiter.addCount.callCount.should.equal(0)
+      })
+
+      it('should pass on to next()', function() {
+        return this.next.called.should.equal(true)
+      })
     })
 
     describe('when under the rate limit with logged in user', function() {
