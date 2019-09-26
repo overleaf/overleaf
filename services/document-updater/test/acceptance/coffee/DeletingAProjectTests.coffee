@@ -97,7 +97,41 @@ describe "Deleting a project", ->
 		it "should flush each doc in project history", ->
 			MockProjectHistoryApi.flushProject.calledWith(@project_id).should.equal true
 
-	describe "with the background=true parameter from realtime", ->
+	describe "with the background=true parameter from realtime and no request to flush the queue", ->
+		before (done) ->
+			sinon.spy MockWebApi, "setDocument"
+			sinon.spy MockTrackChangesApi, "flushDoc"
+			sinon.spy MockProjectHistoryApi, "flushProject"
+
+			async.series @docs.map((doc) =>
+				(callback) =>
+					DocUpdaterClient.preloadDoc @project_id, doc.id, callback
+			), (error) =>
+				throw error if error?
+				setTimeout () =>
+					DocUpdaterClient.deleteProjectOnShutdown @project_id, (error, res, body) =>
+						@statusCode = res.statusCode
+						done()
+				, 200
+
+		after ->
+			MockWebApi.setDocument.restore()
+			MockTrackChangesApi.flushDoc.restore()
+			MockProjectHistoryApi.flushProject.restore()
+
+		it "should return a 204 status code", ->
+			@statusCode.should.equal 204
+
+		it "should not send any documents to the web api", ->
+			MockWebApi.setDocument.called.should.equal false
+
+		it "should not flush any docs in track changes", ->
+			MockTrackChangesApi.flushDoc.called.should.equal false
+
+		it "should not flush to project history", ->
+			MockProjectHistoryApi.flushProject.called.should.equal false
+
+	describe "with the background=true parameter from realtime and a request to flush the queue", ->
 		before (done) ->
 			sinon.spy MockWebApi, "setDocument"
 			sinon.spy MockTrackChangesApi, "flushDoc"
