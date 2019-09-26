@@ -22,6 +22,7 @@ async = require "async"
 module.exports = DeleteQueueManager =
     flushAndDeleteOldProjects: (options, callback) ->
         startTime = Date.now()
+        cutoffTime = startTime - options.min_delete_age 
         count = 0
 
         flushProjectIfNotModified = (project_id, flushTimestamp, cb) ->
@@ -49,7 +50,6 @@ module.exports = DeleteQueueManager =
             if count > options.limit
                 logger.log "hit count limit on flushing old projects"
                 return callback()
-            cutoffTime = now - options.min_delete_age 
             RedisManager.getNextProjectToFlushAndDelete cutoffTime, (err, project_id, flushTimestamp, queueLength) ->
                 return callback(err) if err?
                 return callback() if !project_id?
