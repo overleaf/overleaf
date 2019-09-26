@@ -46,13 +46,13 @@ module.exports = DeleteQueueManager =
             now = Date.now()
             if now - startTime > options.timeout
                 logger.log "hit time limit on flushing old projects"
-                return callback()
+                return callback(null, count)
             if count > options.limit
                 logger.log "hit count limit on flushing old projects"
-                return callback()
+                return callback(null, count)
             RedisManager.getNextProjectToFlushAndDelete cutoffTime, (err, project_id, flushTimestamp, queueLength) ->
                 return callback(err) if err?
-                return callback() if !project_id?
+                return callback(null, count) if !project_id?
                 logger.log {project_id, queueLength: queueLength}, "flushing queued project"
                 metrics.globalGauge "queued-flush-backlog", queueLength
                 flushProjectIfNotModified project_id, flushTimestamp, (err, flushed) ->
