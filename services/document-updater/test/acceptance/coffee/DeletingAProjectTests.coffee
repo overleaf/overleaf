@@ -148,7 +148,7 @@ describe "Deleting a project", ->
 						# after deleting the project and putting it in the queue, flush the queue
 						setTimeout () ->
 							DocUpdaterClient.flushOldProjects (error, res, body) =>
-								done()
+							setTimeout done, 1000 # allow time for the flush to complete
 						, 100
 				, 200
 
