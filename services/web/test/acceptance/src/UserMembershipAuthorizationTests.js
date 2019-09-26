@@ -352,6 +352,16 @@ describe('UserMembershipAuthorization', function() {
         done
       )
     })
+
+    it('handle missing resource type', function(done) {
+      const url = '/graphs/foo'
+      expectAccess(this.user, url, 404)(done)
+    })
+
+    it('handle incorrect resource type', function(done) {
+      const url = '/graphs/foo?resource_type=evil'
+      expectAccess(this.user, url, 404)(done)
+    })
   })
 
   describe('admin metrics', function() {

@@ -163,7 +163,7 @@ const TemplatesManager = {
   },
 
   promises: {
-    async fetchFromV1(templateId, callback) {
+    async fetchFromV1(templateId) {
       let { body, statusCode } = await requestPromise({
         baseUrl: settings.apis.v1.url,
         url: `/api/v2/templates/${templateId}`,

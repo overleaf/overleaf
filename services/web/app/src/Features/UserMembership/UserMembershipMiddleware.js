@@ -16,7 +16,7 @@ let UserMembershipMiddleware = {
     fetchEntityConfig('team'),
     fetchEntity(),
     requireEntity(),
-    restrictAccess([
+    allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
       UserMembershipAuthorization.hasStaffAccess('groupMetrics')
     ])
@@ -27,7 +27,7 @@ let UserMembershipMiddleware = {
     fetchEntityConfig('group'),
     fetchEntity(),
     requireEntity(),
-    restrictAccess([
+    allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
       UserMembershipAuthorization.hasStaffAccess('groupManagement')
     ])
@@ -38,7 +38,7 @@ let UserMembershipMiddleware = {
     fetchEntityConfig('group'),
     fetchEntity(),
     requireEntity(),
-    restrictAccess([
+    allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
       UserMembershipAuthorization.hasStaffAccess('groupMetrics')
     ])
@@ -49,7 +49,7 @@ let UserMembershipMiddleware = {
     fetchEntityConfig('groupManagers'),
     fetchEntity(),
     requireEntity(),
-    restrictAccess([
+    allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
       UserMembershipAuthorization.hasStaffAccess('groupManagement')
     ])
@@ -60,7 +60,7 @@ let UserMembershipMiddleware = {
     fetchEntityConfig('institution'),
     fetchEntity(),
     requireEntityOrCreate('institutionManagement'),
-    restrictAccess([
+    allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
       UserMembershipAuthorization.hasStaffAccess('institutionMetrics')
     ])
@@ -71,7 +71,7 @@ let UserMembershipMiddleware = {
     fetchEntityConfig('institution'),
     fetchEntity(),
     requireEntityOrCreate('institutionManagement'),
-    restrictAccess([
+    allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
       UserMembershipAuthorization.hasStaffAccess('institutionManagement')
     ])
@@ -79,7 +79,7 @@ let UserMembershipMiddleware = {
 
   requireInstitutionManagementStaffAccess: [
     AuthenticationController.requireLogin(),
-    restrictAccess([
+    allowAccessIfAny([
       UserMembershipAuthorization.hasStaffAccess('institutionManagement')
     ]),
     fetchEntityConfig('institution'),
@@ -92,7 +92,7 @@ let UserMembershipMiddleware = {
     fetchEntityConfig('publisher'),
     fetchEntity(),
     requireEntityOrCreate('publisherManagement'),
-    restrictAccess([
+    allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
       UserMembershipAuthorization.hasStaffAccess('publisherMetrics')
     ])
@@ -103,7 +103,7 @@ let UserMembershipMiddleware = {
     fetchEntityConfig('publisher'),
     fetchEntity(),
     requireEntityOrCreate('publisherManagement'),
-    restrictAccess([
+    allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
       UserMembershipAuthorization.hasStaffAccess('publisherManagement')
     ])
@@ -114,7 +114,7 @@ let UserMembershipMiddleware = {
     fetchEntityConfig('publisher'),
     fetchEntity(),
     requireEntityOrCreate('publisherManagement'),
-    restrictAccess([
+    allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
       UserMembershipAuthorization.hasStaffAccess('publisherMetrics')
     ])
@@ -122,7 +122,9 @@ let UserMembershipMiddleware = {
 
   requireAdminMetricsAccess: [
     AuthenticationController.requireLogin(),
-    restrictAccess([UserMembershipAuthorization.hasStaffAccess('adminMetrics')])
+    allowAccessIfAny([
+      UserMembershipAuthorization.hasStaffAccess('adminMetrics')
+    ])
   ],
 
   requireTemplateMetricsAccess: [
@@ -130,8 +132,8 @@ let UserMembershipMiddleware = {
     fetchV1Template(),
     requireV1Template(),
     fetchEntityConfig('publisher'),
-    fetchEntity(), // at this point the entity is the template's publisher, if any
-    restrictAccess([
+    fetchEntityIfSet(), // at this point the entity is the template's publisher, if any
+    allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
       UserMembershipAuthorization.hasStaffAccess('publisherMetrics')
     ])
@@ -139,7 +141,7 @@ let UserMembershipMiddleware = {
 
   requirePublisherCreationAccess: [
     AuthenticationController.requireLogin(),
-    restrictAccess([
+    allowAccessIfAny([
       UserMembershipAuthorization.hasStaffAccess('publisherManagement')
     ]),
     fetchEntityConfig('publisher')
@@ -147,7 +149,7 @@ let UserMembershipMiddleware = {
 
   requireInstitutionCreationAccess: [
     AuthenticationController.requireLogin(),
-    restrictAccess([
+    allowAccessIfAny([
       UserMembershipAuthorization.hasStaffAccess('institutionManagement')
     ]),
     fetchEntityConfig('institution')
@@ -161,15 +163,21 @@ let UserMembershipMiddleware = {
   requireGraphAccess(req, res, next) {
     req.params.id = req.query.resource_id
     let entityName = req.query.resource_type
+    if (!entityName) {
+      return next(new HttpErrors.NotFoundError('resource_type param missing'))
+    }
     entityName = entityName.charAt(0).toUpperCase() + entityName.slice(1)
 
+    const middleware =
+      UserMembershipMiddleware[`require${entityName}MetricsAccess`]
+    if (!middleware) {
+      return next(
+        new HttpErrors.NotFoundError(`incorrect entity name: ${entityName}`)
+      )
+    }
     // run the list of middleware functions in series. This is essencially
     // a poor man's middleware runner
-    async.eachSeries(
-      UserMembershipMiddleware[`require${entityName}MetricsAccess`],
-      (fn, callback) => fn(req, res, callback),
-      next
-    )
+    async.eachSeries(middleware, (fn, callback) => fn(req, res, callback), next)
   }
 }
 
@@ -195,6 +203,15 @@ function fetchEntity() {
     req.entity = entity
     next()
   })
+}
+
+function fetchEntityIfSet() {
+  return (req, res, next) => {
+    if (!req.params.id) {
+      return next()
+    }
+    return fetchEntity()(req, res, next)
+  }
 }
 
 // ensure an entity was found, or fail with 404
@@ -232,7 +249,7 @@ function requireEntityOrCreate(creationStaffAccess) {
 // fetch the template from v1, and set it in the request
 function fetchV1Template() {
   return expressify(async (req, res, next) => {
-    const templateId = req.params.id
+    const templateId = req.params.templateId
     const body = await TemplatesManager.promises.fetchFromV1(templateId)
     req.template = {
       id: body.id,
@@ -261,7 +278,7 @@ function requireV1Template() {
 
 // run a serie of synchronous access functions and call `next` if any of the
 // retur values is truly. Redirect to restricted otherwise
-function restrictAccess(accessFunctions) {
+function allowAccessIfAny(accessFunctions) {
   return (req, res, next) => {
     for (let accessFunction of accessFunctions) {
       if (accessFunction(req)) {
