@@ -443,6 +443,18 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     CompileController.wordCount
   )
 
+  webRouter.post(
+    '/project/:project_id/trash',
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    ProjectController.trashProject
+  )
+
+  webRouter.delete(
+    '/project/:project_id/trash',
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    ProjectController.untrashProject
+  )
+
   webRouter.delete(
     '/Project/:Project_id',
     AuthorizationMiddleware.ensureUserCanAdminProject,

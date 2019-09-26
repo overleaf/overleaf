@@ -54,6 +54,7 @@ const Features = require('../../infrastructure/Features')
 const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandler')
 const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
 const V1Handler = require('../V1/V1Handler')
+const { Project } = require('../../models/Project')
 
 module.exports = ProjectController = {
   _isInPercentageRollout(rolloutName, objectId, percentage) {
@@ -197,6 +198,38 @@ module.exports = ProjectController = {
         return res.sendStatus(200)
       }
     })
+  },
+
+  trashProject(req, res, next) {
+    const projectId = req.params.project_id
+    const userId = AuthenticationController.getLoggedInUserId(req)
+
+    Project.update(
+      { _id: projectId },
+      { $addToSet: { trashed: userId } },
+      error => {
+        if (error) {
+          return next(error)
+        }
+        res.sendStatus(200)
+      }
+    )
+  },
+
+  untrashProject(req, res, next) {
+    const projectId = req.params.project_id
+    const userId = AuthenticationController.getLoggedInUserId(req)
+
+    Project.update(
+      { _id: projectId },
+      { $pull: { trashed: userId } },
+      error => {
+        if (error) {
+          return next(error)
+        }
+        res.sendStatus(200)
+      }
+    )
   },
 
   cloneProject(req, res, next) {

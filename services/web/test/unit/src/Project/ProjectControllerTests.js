@@ -171,7 +171,8 @@ describe('ProjectController', function() {
         '../Institutions/InstitutionsAPI': {
           getUserAffiliations: this.getUserAffiliations
         },
-        '../V1/V1Handler': {}
+        '../V1/V1Handler': {},
+        '../../models/Project': {}
       }
     })
 
