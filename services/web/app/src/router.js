@@ -262,6 +262,11 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get(
     '/project',
     AuthenticationController.requireLogin(),
+    RateLimiterMiddleware.rateLimit({
+      endpointName: 'open-dashboard',
+      maxRequests: 30,
+      timeInterval: 60
+    }),
     ProjectController.projectListPage
   )
   webRouter.post(
