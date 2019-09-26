@@ -4,6 +4,21 @@ logger = require "logger-sharelatex"
 metrics = require "./Metrics"
 async = require "async"
 
+# Maintain a sorted set of project flushAndDelete requests, ordered by timestamp
+# (ZADD), and process them from oldest to newest. A flushAndDelete request comes
+# from real-time and is triggered when a user leaves a project. 
+#
+# The aim is to remove the project from redis 5 minutes after the last request
+# if there has been no activity (document updates) in that time.  If there is
+# activity we can expect a further flushAndDelete request when the editing user
+# leaves the project. 
+#
+# If a new flushAndDelete request comes in while an existing request is already
+# in the queue we update the timestamp as we can postpone flushing further.
+#
+# Documents are processed by checking the queue, seeing if the first entry is
+# older than 5 minutes, and popping it from the queue in that case.
+
 module.exports = DeleteQueueManager =
     flushAndDeleteOldProjects: (options, callback) ->
         startTime = Date.now()

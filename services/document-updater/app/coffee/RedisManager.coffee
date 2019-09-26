@@ -295,17 +295,19 @@ module.exports = RedisManager =
 		multi.exec callback
 
 	queueFlushAndDeleteProject: (project_id, callback) ->
+		# store the project id in a sorted set ordered by time
 		rclient.zadd keys.flushAndDeleteQueue(), Date.now(), project_id, callback
 
 	getNextProjectToFlushAndDelete: (cutoffTime, callback = (error, key, timestamp)->) ->
-		# find the oldest queued flush
+		# find the oldest queued flush that is before the cutoff time
 		rclient.zrangebyscore keys.flushAndDeleteQueue(), 0, cutoffTime, "WITHSCORES", "LIMIT", 0, 1, (err, reply) ->
 			return callback(err) if err?
-			return callback() if !reply?.length
+			return callback() if !reply?.length # return if no projects ready to be processed
+			# pop the oldest entry (get and remove in a multi)
 			multi = rclient.multi()
 			multi.zrange keys.flushAndDeleteQueue(), 0, 0, "WITHSCORES"
 			multi.zremrangebyrank keys.flushAndDeleteQueue(), 0, 0
-			multi.zcard keys.flushAndDeleteQueue()
+			multi.zcard keys.flushAndDeleteQueue() # the total length of the queue (for metrics)
 			multi.exec (err, reply) ->
 				return callback(err) if err?
 				return callback() if !reply?.length
