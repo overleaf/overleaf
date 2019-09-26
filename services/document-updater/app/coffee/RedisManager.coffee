@@ -305,6 +305,7 @@ module.exports = RedisManager =
 			return callback() if !reply?.length # return if no projects ready to be processed
 			# pop the oldest entry (get and remove in a multi)
 			multi = rclient.multi()
+			# Poor man's version of ZPOPMIN, which is only available in Redis 5.
 			multi.zrange keys.flushAndDeleteQueue(), 0, 0, "WITHSCORES"
 			multi.zremrangebyrank keys.flushAndDeleteQueue(), 0, 0
 			multi.zcard keys.flushAndDeleteQueue() # the total length of the queue (for metrics)
