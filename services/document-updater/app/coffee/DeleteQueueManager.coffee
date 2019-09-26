@@ -38,7 +38,8 @@ module.exports = DeleteQueueManager =
                     return cb()
                 logger.log {project_id, flushTimestamp}, "flushing queued project"
                 ProjectManager.flushAndDeleteProjectWithLocks project_id, {skip_history_flush: true}, (err) ->
-                    logger.err {project_id, err}, "error flushing queued project"
+                    if err?
+                        logger.err {project_id, err}, "error flushing queued project"
                     metrics.inc "queued-delete-completed"
                     return cb(null, true)
 
