@@ -83,7 +83,7 @@ module.exports = ProjectManager =
 	getProjectDocsTimestamps: (project_id, callback = (error) ->) ->
 		RedisManager.getDocIdsInProject project_id, (error, doc_ids) ->
 			return callback(error) if error?
-			return callback() if !doc_ids?.length
+			return callback(null, []) if !doc_ids?.length
 			RedisManager.getDocTimestamps doc_ids, (error, timestamps) ->
 				return callback(error) if error?
 				callback(null, timestamps)

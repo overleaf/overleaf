@@ -31,7 +31,7 @@ module.exports = DeleteQueueManager =
                     logger.log {project_id}, "skipping flush of queued project - no timestamps"
                     return cb()
                 # are any of the timestamps newer than the time the project was flushed?
-                for timestamp in timestamps or [] when timestamp > flushTimestamp
+                for timestamp in timestamps when timestamp > flushTimestamp
                     metrics.inc "queued-delete-skipped"
                     logger.debug {project_id, timestamps, flushTimestamp}, "found newer timestamp, will skip delete"
                     return cb()
