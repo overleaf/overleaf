@@ -1,4 +1,3 @@
-let AuthenticationManager
 const Settings = require('settings-sharelatex')
 const { User } = require('../../models/User')
 const { db, ObjectId } = require('../../infrastructure/mongojs')
@@ -9,6 +8,7 @@ const {
   InvalidEmailError,
   InvalidPasswordError
 } = require('./AuthenticationErrors')
+const util = require('util')
 
 const BCRYPT_ROUNDS = Settings.security.bcryptRounds || 12
 const BCRYPT_MINOR_VERSION = Settings.security.bcryptMinorVersion || 'a'
@@ -22,7 +22,7 @@ const _checkWriteResult = function(result, callback) {
   }
 }
 
-module.exports = AuthenticationManager = {
+const AuthenticationManager = {
   authenticate(query, password, callback) {
     // Using Mongoose for legacy reasons here. The returned User instance
     // gets serialized into the session and there may be subtle differences
@@ -217,3 +217,10 @@ module.exports = AuthenticationManager = {
     return true
   }
 }
+
+AuthenticationManager.promises = {
+  authenticate: util.promisify(AuthenticationManager.authenticate),
+  hashPassword: util.promisify(AuthenticationManager.hashPassword)
+}
+
+module.exports = AuthenticationManager
