@@ -28,7 +28,7 @@ module.exports = DeleteQueueManager =
         flushProjectIfNotModified = (project_id, flushTimestamp, cb) ->
             ProjectManager.getProjectDocsTimestamps project_id, (err, timestamps) ->
                 return callback(err) if err?
-                if !timestamps?
+                if timestamps.length == 0
                     logger.log {project_id}, "skipping flush of queued project - no timestamps"
                     return cb()
                 # are any of the timestamps newer than the time the project was flushed?
