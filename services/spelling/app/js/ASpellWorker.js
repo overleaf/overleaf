@@ -130,11 +130,16 @@ class ASpellWorker {
 
     this.pipe.stdout.setEncoding('utf8') // ensure utf8 output is handled correctly
     var output = ''
-    const endMarker = new RegExp('^[a-z][a-z]', 'm')
-    this.pipe.stdout.on('data', chunk => {
-      output = output + chunk
-      // We receive the language code from Aspell as the end of data marker
-      if (chunk.toString().match(endMarker)) {
+    const endMarkerRegex = new RegExp('^[a-z][a-z]', 'm')
+    this.pipe.stdout.on('data', data => {
+      // We receive the language code from Aspell as the end of data marker in
+      // the data.  The input is a utf8 encoded string.
+      let oldPos = output.length
+      output = output + data
+      // The end marker may cross the end of a chunk, so we optimise the search
+      // using the regex lastIndex property.
+      endMarkerRegex.lastIndex = oldPos > 2 ? oldPos - 2 : 0
+      if (endMarkerRegex.test(output)) {
         if (this.callback != null) {
           this.callback(null, output.slice())
           this.callback = null // only allow one callback in use
