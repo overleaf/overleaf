@@ -128,6 +128,7 @@ class ASpellWorker {
       }
     })
 
+    this.pipe.stdout.setEncoding('utf8') // ensure utf8 output is handled correctly
     var output = ''
     const endMarker = new RegExp('^[a-z][a-z]', 'm')
     this.pipe.stdout.on('data', chunk => {
