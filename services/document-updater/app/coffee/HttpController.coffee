@@ -216,14 +216,15 @@ module.exports = HttpController =
 				res.send project_ids
 
 	flushQueuedProjects: (req, res, next = (error) ->) ->
+		res.setTimeout(10 * 60 * 1000)
 		options = 
 			limit : req.query.limit || 1000
 			timeout: 5 * 60 * 1000
 			min_delete_age: req.query.min_delete_age || 5 * 60 * 1000
-		res.send 204
-		# run the flush in the background
 		DeleteQueueManager.flushAndDeleteOldProjects options, (err, flushed)->
 			if err?
 				logger.err err:err, "error flushing old projects"
-			else 
+				res.send 500
+			else
 				logger.log {flushed: flushed}, "flush of queued projects completed"
+				res.send {flushed: flushed}
