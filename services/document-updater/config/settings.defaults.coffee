@@ -11,8 +11,8 @@ module.exports =
 	apis:
 		web:
 			url: "http://#{process.env['WEB_API_HOST'] or process.env['WEB_HOST'] or "localhost"}:#{process.env['WEB_API_PORT'] or process.env['WEB_PORT'] or 3000}"
-			user: "sharelatex"
-			pass: "password"
+			user: process.env['WEB_API_USER'] or "sharelatex"
+			pass: process.env['WEB_API_PASSWORD'] or "password"
 		trackchanges:
 			url: "http://#{process.env["TRACK_CHANGES_HOST"] or "localhost"}:3015"
 		project_history:
