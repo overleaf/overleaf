@@ -25,6 +25,7 @@ module.exports = {
 
     webRouter.delete(
       '/project/:Project_id/users/:user_id',
+      AuthenticationController.requireLogin(),
       AuthorizationMiddleware.ensureUserCanAdminProject,
       CollaboratorsController.removeUserFromProject
     )

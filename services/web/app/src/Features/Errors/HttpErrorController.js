@@ -8,7 +8,7 @@ function renderHTMLError(statusCode, publicInfo, res) {
   if (statusCode === 404) {
     res.render('general/404', { title: 'page_not_found' })
   } else if (statusCode === 403) {
-    res.render('user/restricted')
+    res.render('user/restricted', { title: 'restricted' })
   } else if (statusCode >= 400 && statusCode < 500) {
     res.render('general/500', { title: 'Client Error' })
   } else {

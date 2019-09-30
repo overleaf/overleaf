@@ -308,6 +308,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   webRouter.post(
     '/project/:Project_id/settings/admin',
+    AuthenticationController.requireLogin(),
     AuthorizationMiddleware.ensureUserCanAdminProject,
     ProjectController.updateProjectAdminSettings
   )
@@ -462,11 +463,13 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.delete(
     '/Project/:Project_id',
+    AuthenticationController.requireLogin(),
     AuthorizationMiddleware.ensureUserCanAdminProject,
     ProjectController.deleteProject
   )
   webRouter.post(
     '/Project/:Project_id/restore',
+    AuthenticationController.requireLogin(),
     AuthorizationMiddleware.ensureUserCanAdminProject,
     ProjectController.restoreProject
   )
@@ -478,6 +481,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.post(
     '/project/:Project_id/rename',
+    AuthenticationController.requireLogin(),
     AuthorizationMiddleware.ensureUserCanAdminProject,
     ProjectController.renameProject
   )
