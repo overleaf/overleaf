@@ -95,3 +95,5 @@ module.exports =
 		dsn: process.env.SENTRY_DSN
 
 	publishOnIndividualChannels: process.env['PUBLISH_ON_INDIVIDUAL_CHANNELS'] or false
+
+	continuousBackgroundFlush: process.env['CONTINUOUS_BACKGROUND_FLUSH'] or false

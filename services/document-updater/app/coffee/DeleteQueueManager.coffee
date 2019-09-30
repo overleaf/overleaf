@@ -1,3 +1,4 @@
+Settings = require('settings-sharelatex')
 RedisManager = require "./RedisManager"
 ProjectManager = require "./ProjectManager"
 logger = require "logger-sharelatex"
@@ -61,3 +62,12 @@ module.exports = DeleteQueueManager =
                     flushNextProject()
 
         flushNextProject()
+
+    startBackgroundFlush: () ->
+        doFlush = () ->
+            if Settings.shuttingDown
+                logger.warn "discontinuing background flush due to shutdown"
+                return
+            DeleteQueueManager.flushAndDeleteOldProjects {timeout:1000,min_delete_age:3*60*1000,limit:1000}, () ->
+                setTimeout doFlush, 10
+        doFlush()
