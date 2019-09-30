@@ -6,6 +6,7 @@ const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 
 function _addIdentifier(userId, externalUserId, providerId) {
+  providerId = providerId.toString()
   const query = {
     _id: userId,
     'samlIdentifiers.providerId': {
@@ -36,63 +37,44 @@ function _addIdentifier(userId, externalUserId, providerId) {
   return updatedUser
 }
 
-async function _addInstitutionEmail(userId, email) {
+function _getUserQuery(providerId, externalUserId) {
+  externalUserId = externalUserId.toString()
+  providerId = providerId.toString()
+  const query = {
+    'samlIdentifiers.externalUserId': externalUserId,
+    'samlIdentifiers.providerId': providerId
+  }
+  return query
+}
+
+async function _addInstitutionEmail(userId, email, providerId) {
   const user = await UserGetter.promises.getUser(userId)
+  const query = {
+    _id: userId,
+    'emails.email': email
+  }
+  const update = {
+    $set: {
+      'emails.$.samlProviderId': providerId.toString()
+    }
+  }
   if (user == null) {
     logger.log(userId, 'could not find user for institution SAML linking')
     throw new Errors.NotFoundError('user not found')
   }
   const emailAlreadyAssociated = user.emails.find(e => e.email === email)
   if (emailAlreadyAssociated && emailAlreadyAssociated.confirmedAt) {
-    // nothing to do, email is already added and confirmed
+    await UserUpdater.promises.updateUser(query, update)
   } else if (emailAlreadyAssociated) {
     // add and confirm email
-    await _confirmEmail(user._id, email)
+    await UserUpdater.promises.confirmEmail(user._id, email)
+    await UserUpdater.promises.updateUser(query, update)
   } else {
     // add and confirm email
-    await _addEmail(user._id, email)
-    await _confirmEmail(user._id, email)
+    await UserUpdater.promises.addEmailAddress(user._id, email)
+    await UserUpdater.promises.confirmEmail(user._id, email)
+    await UserUpdater.promises.updateUser(query, update)
   }
-}
-
-function _addEmail(userId, institutionEmail) {
-  return new Promise((resolve, reject) => {
-    UserUpdater.addEmailAddress(userId, institutionEmail, function(
-      error,
-      addEmailResult
-    ) {
-      if (error) {
-        logger.log(
-          error,
-          userId,
-          'could not add institution email after SAML linking'
-        )
-        reject(error)
-      } else {
-        resolve()
-      }
-    })
-  })
-}
-
-function _confirmEmail(userId, institutionEmail) {
-  return new Promise((resolve, reject) => {
-    UserUpdater.confirmEmail(userId, institutionEmail, function(
-      error,
-      confirmedResult
-    ) {
-      if (error) {
-        logger.log(
-          error,
-          userId,
-          'could not confirm institution email after SAML linking'
-        )
-        reject(error)
-      } else {
-        resolve()
-      }
-    })
-  })
 }
 
 async function getUser(providerId, externalUserId) {
@@ -100,7 +82,7 @@ async function getUser(providerId, externalUserId) {
     throw new Error('invalid arguments')
   }
   try {
-    const query = SAMLIdentityManager._getUserQuery(providerId, externalUserId)
+    const query = _getUserQuery(providerId, externalUserId)
     let user = await User.findOne(query).exec()
     if (!user) {
       throw new Errors.SAMLUserNotFoundError()
@@ -117,20 +99,15 @@ async function linkAccounts(
   institutionEmail,
   providerId
 ) {
-  await _addIdentifier(userId, externalUserId, providerId)
-  await _addInstitutionEmail(userId, institutionEmail)
+  try {
+    await _addIdentifier(userId, externalUserId, providerId)
+    await _addInstitutionEmail(userId, institutionEmail, providerId)
+  } catch (error) {
+    throw error
+  }
 }
 
 const SAMLIdentityManager = {
-  _getUserQuery(providerId, externalUserId) {
-    externalUserId = externalUserId.toString()
-    providerId = providerId.toString()
-    const query = {
-      'samlIdentifiers.externalUserId': externalUserId,
-      'samlIdentifiers.providerId': providerId
-    }
-    return query
-  },
   getUser,
   linkAccounts
 }

@@ -4,6 +4,7 @@ const metrics = require('metrics-sharelatex')
 const { db } = mongojs
 const async = require('async')
 const { ObjectId } = mongojs
+const { promisify } = require('util')
 const UserGetter = require('./UserGetter')
 const {
   addAffiliation,
@@ -248,5 +249,13 @@ const UserUpdater = {
 ].map(method =>
   metrics.timeAsyncMethod(UserUpdater, method, 'mongo.UserUpdater', logger)
 )
+
+const promises = {
+  addEmailAddress: promisify(UserUpdater.addEmailAddress),
+  confirmEmail: promisify(UserUpdater.confirmEmail),
+  updateUser: promisify(UserUpdater.updateUser)
+}
+
+UserUpdater.promises = promises
 
 module.exports = UserUpdater

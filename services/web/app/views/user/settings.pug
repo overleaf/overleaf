@@ -174,7 +174,7 @@ block content
 							div
 								a(id="sessions-link", href="/user/sessions") #{translate("manage_sessions")}
 
-							if hasFeature('oauth') || previewOauth
+							if hasFeature('oauth')
 								hr
 								include settings/user-oauth
 
@@ -292,3 +292,4 @@ block content
 	
 	script(type='text/javascript').
 		window.passwordStrengthOptions = !{StringHelper.stringifyJsonForScript(settings.passwordStrengthOptions || {})}
+		window.samlInitPath = '#{samlInitPath}';

@@ -13,18 +13,18 @@ form.row(
 					th.affiliations-table-inline-actions
 			tbody
 				tr(
-					ng-repeat="userEmail in userEmails"
+					ng-repeat-start="userEmail in userEmails"
 				)
 					td
 						| {{ userEmail.email + (userEmail.default ? ' (primary)' : '') }}
 						div(ng-if="!userEmail.confirmedAt").small
 							strong #{translate('unconfirmed')}.
-							|
-							| #{translate('please_check_your_inbox')}.
+								span(ng-if="!userEmail.affiliation.institution.ssoEnabled") #{translate('please_check_your_inbox')}.
 							br
 							a(
 								href,
-								ng-click="resendConfirmationEmail(userEmail)"
+								ng-click="resendConfirmationEmail(userEmail)",
+								ng-if="!userEmail.affiliation.institution.ssoEnabled"
 							) #{translate('resend_confirmation_email')}
 						div(ng-if="userEmail.confirmedAt && userEmail.affiliation.institution && userEmail.affiliation.institution.confirmed && userEmail.affiliation.institution.licence != 'free'").small
 							span.label.label-primary #{translate("professional")}
@@ -72,7 +72,7 @@ form.row(
 						div.affiliations-table-inline-action-disabled-wrapper(
 							tooltip=translate("please_confirm_your_email_before_making_it_default")
 							tooltip-enable="!ui.isMakingRequest"
-							ng-if="!userEmail.default && (!userEmail.confirmedAt || ui.isMakingRequest)"
+							ng-if="!userEmail.default && (!userEmail.confirmedAt || ui.isMakingRequest) && !institutionAlreadyLinked(userEmail)"
 						)
 							button.btn.btn-sm.btn-success.affiliations-table-inline-action(
 								disabled
@@ -91,6 +91,24 @@ form.row(
 						)
 							i.fa.fa-fw.fa-trash(aria-hidden="true")
 							span.sr-only #{translate("remove")}
+				tr.affiliations-table-saml-row(ng-repeat-end ng-if="userEmail.affiliation && userEmail.affiliation && userEmail.affiliation.institution.ssoEnabled")
+					if hasFeature('saml')
+						td
+						td(ng-attr-colspan="{{userEmail.samlProviderId ? '2' : '1'}}" ng-class="institutionAlreadyLinked(userEmail) ? '' : 'with-border'")
+							p.small(ng-if="userEmail.samlProviderId")
+								| !{translate("acct_linked_to_institution_acct", {institutionName: '{{userEmail.affiliation.institution.name}}'})}
+							div(ng-if="!userEmail.samlProviderId && !institutionAlreadyLinked(userEmail)")
+								//- this email is not linked to institution login but
+								//- cannot have multiple emails at same institution linked for "institution login"
+								//- so check if institution is already linked
+								p.small
+									| !{translate("can_link_your_institution_acct", {institutionName: '{{userEmail.affiliation.institution.name}}'})}
+								p.small
+									| !{translate("doing_this_allow_log_in_through_institution")}&nbsp;
+									a(href="/") #{translate("find_out_more_about_institution_login")}
+						td.with-border.affiliations-table-inline-actions(ng-if="!userEmail.samlProviderId && !institutionAlreadyLinked(userEmail)")
+							button.btn-sm.btn.btn-info(ng-click="linkInstitutionAcct(userEmail.email, userEmail.affiliation.institution.id)" ng-disabled="ui.isMakingRequest")
+								| #{translate("link_accounts")}
 				tr.affiliations-table-highlighted-row(
 					ng-if="!ui.showAddEmailUI && !ui.isMakingRequest"
 				)
@@ -160,7 +178,10 @@ form.row(
 					td.text-center(colspan="3", ng-if="ui.isResendingConfirmation") 
 						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
 						| &nbsp;#{translate("sending")}...
-					td.text-center(colspan="3", ng-if="!ui.isLoadingEmails && !ui.isResendingConfirmation") 
+					td.text-center(colspan="3", ng-if="ui.isLinkingInstitution") 
+						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
+						| &nbsp;#{translate("processing")}...
+					td.text-center(colspan="3", ng-if="!ui.isLoadingEmails && !ui.isResendingConfirmations && !ui.isLinkingInstitution") 
 						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
 						| &nbsp;#{translate("saving")}...
 				tr.affiliations-table-error-row(
@@ -171,7 +192,47 @@ form.row(
 							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
 							span(ng-if="!ui.errorMessage") &nbsp;#{translate("error_performing_request")}
 							span(ng-if="ui.errorMessage") &nbsp;{{ui.errorMessage}}
-				
+				if institutionLinked
+					tr.affiliations-table-info-row(ng-if="!hideInstitutionNotifications.info")
+						td(colspan="3").text-center(aria-live="assertive")
+							button.close(
+								type="button"
+								data-dismiss="modal"
+								ng-click="closeInstitutionNotification('info')"
+								aria-label=translate("close")
+							)
+								span(aria-hidden="true") &times;
+							.small !{translate("institution_acct_successfully_linked", {institutionName: institutionLinked.universityName})}
+							if institutionLinked.hasEntitlement
+								.small !{translate("this_grants_access_to_features", {featureType: translate("professional")})}
+					if institutionLinked.emailViaInstitution
+						tr.affiliations-table-warning-row(ng-if="!hideInstitutionNotifications.warning")
+							td(colspan="3").text-center(aria-live="assertive")
+								button.close(
+									type="button"
+									data-dismiss="modal"
+									ng-click="closeInstitutionNotification('warning')"
+									aria-label=translate("close")
+								)
+									span(aria-hidden="true") &times;
+								.small
+									i.fa.fa-exclamation-triangle(aria-hidden="true")
+									| &nbsp;
+									| !{translate("in_order_to_match_institutional_metadata", {email: institutionLinked.emailViaInstitution})}
+				if institutionNotLinked
+					tr.affiliations-table-error-row(ng-if="!hideInstitutionNotifications.error")
+						td(colspan="3").text-center(aria-live="assertive")
+							button.close(
+								type="button"
+								data-dismiss="modal"
+								ng-click="closeInstitutionNotification('error')"
+								aria-label=translate("close")
+							)
+								span(aria-hidden="true") &times;
+							.small
+								i.fa.fa-exclamation-triangle(aria-hidden="true")
+								| &nbsp;
+								| !{translate("institution_account_tried_to_add_already_registered")}
 		hr
 
 script(type="text/ng-template", id="affiliationFormTpl")
