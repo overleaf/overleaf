@@ -4,6 +4,7 @@ logger = require('logger-sharelatex')
 metrics = require('./Metrics')
 Errors = require "./Errors"
 crypto = require "crypto"
+async = require "async"
 ProjectHistoryRedisManager = require "./ProjectHistoryRedisManager"
 
 # Sometimes Redis calls take an unexpectedly long time.  We have to be
@@ -289,10 +290,9 @@ module.exports = RedisManager =
 
 	getDocTimestamps: (doc_ids, callback = (error, result) ->) ->
 		# get lastupdatedat timestamps for an array of doc_ids
-		multi = rclient.multi()
-		for doc_id in doc_ids
-			multi.get keys.lastUpdatedAt(doc_id: doc_id)
-		multi.exec callback
+		async.mapSeries doc_ids, (doc_id, cb) ->
+			rclient.get keys.lastUpdatedAt(doc_id: doc_id), cb
+		, callback
 
 	queueFlushAndDeleteProject: (project_id, callback) ->
 		# store the project id in a sorted set ordered by time
