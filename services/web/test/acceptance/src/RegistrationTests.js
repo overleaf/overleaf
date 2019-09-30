@@ -143,8 +143,8 @@ describe('Registration', function() {
       return (this.password = 'password11')
     })
 
-    afterEach(function() {
-      return this.user.full_delete_user(this.email)
+    afterEach(function(done) {
+      return this.user.fullDeleteUser(this.email, done)
     })
 
     it('should register with the csrf token', function(done) {

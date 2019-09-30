@@ -10,6 +10,7 @@ const ProjectTokenGenerator = require('./ProjectTokenGenerator')
 const ProjectEntityHandler = require('./ProjectEntityHandler')
 const ProjectHelper = require('./ProjectHelper')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
+const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const settings = require('settings-sharelatex')
 const { callbackify } = require('util')
 
@@ -100,35 +101,40 @@ async function setProjectDescription(projectId, description) {
   }
 }
 
-async function transferOwnership(projectId, userId, suffix = '') {
+async function transferOwnership(projectId, toUserId, options = {}) {
   const project = await ProjectGetter.promises.getProject(projectId, {
-    owner_ref: true,
-    name: true
+    owner_ref: 1,
+    collaberator_refs: 1
   })
   if (project == null) {
-    throw new Errors.NotFoundError('project not found')
+    throw new Errors.ProjectNotFoundError({ info: { projectId: projectId } })
   }
-  if (project.owner_ref === userId) {
+  const fromUserId = project.owner_ref
+  if (fromUserId.equals(toUserId)) {
     return
   }
-  const user = await UserGetter.promises.getUser(userId)
-  if (user == null) {
-    throw new Errors.NotFoundError('user not found')
+  const toUser = await UserGetter.promises.getUser(toUserId)
+  if (toUser == null) {
+    throw new Errors.UserNotFoundError({ info: { userId: toUserId } })
   }
-
-  // we make sure the user to which the project is transferred is not a collaborator for the project,
-  // this prevents any conflict during unique name generation
-  await CollaboratorsHandler.promises.removeUserFromProject(projectId, userId)
-  const name = await generateUniqueName(userId, project.name + suffix)
+  const collaboratorIds = project.collaberator_refs || []
+  if (
+    !options.allowTransferToNonCollaborators &&
+    !collaboratorIds.some(collaboratorId => collaboratorId.equals(toUser._id))
+  ) {
+    throw new Errors.UserNotCollaboratorError({ info: { userId: toUserId } })
+  }
+  await CollaboratorsHandler.promises.removeUserFromProject(projectId, toUserId)
   await Project.update(
     { _id: projectId },
-    {
-      $set: {
-        owner_ref: userId,
-        name
-      }
-    }
+    { $set: { owner_ref: toUserId } }
   ).exec()
+  await CollaboratorsHandler.promises.addUserIdToProject(
+    projectId,
+    toUserId,
+    fromUserId,
+    PrivilegeLevels.READ_AND_WRITE
+  )
   await ProjectEntityHandler.promises.flushProjectToThirdPartyDataStore(
     projectId
   )

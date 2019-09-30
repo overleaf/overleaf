@@ -1,22 +1,30 @@
-const Errors = require('../../../../app/src/Features/Errors/Errors')
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
+const { ObjectId } = require('mongodb')
+const Errors = require('../../../../app/src/Features/Errors/Errors')
+const PrivilegeLevels = require('../../../../app/src/Features/Authorization/PrivilegeLevels')
 
 const MODULE_PATH = '../../../../app/src/Features/Project/ProjectDetailsHandler'
 
 describe('ProjectDetailsHandler', function() {
   beforeEach(function() {
-    this.project_id = '321l3j1kjkjl'
-    this.user_id = 'user-id-123'
+    this.user = {
+      _id: ObjectId('abcdefabcdefabcdefabcdef'),
+      features: 'mock-features'
+    }
+    this.collaborator = {
+      _id: ObjectId('123456123456123456123456')
+    }
     this.project = {
+      _id: ObjectId('5d5dabdbb351de090cdff0b2'),
       name: 'project',
       description: 'this is a great project',
       something: 'should not exist',
       compiler: 'latexxxxxx',
-      owner_ref: this.user_id
+      owner_ref: this.user._id,
+      collaberator_refs: [this.collaborator._id]
     }
-    this.user = { features: 'mock-features' }
     this.ProjectGetter = {
       promises: {
         getProjectWithoutDocLines: sinon.stub().resolves(this.project),
@@ -52,7 +60,8 @@ describe('ProjectDetailsHandler', function() {
     }
     this.CollaboratorsHandler = {
       promises: {
-        removeUserFromProject: sinon.stub().resolves()
+        removeUserFromProject: sinon.stub().resolves(),
+        addUserIdToProject: sinon.stub().resolves()
       }
     }
     this.ProjectTokenGenerator = {
@@ -91,7 +100,7 @@ describe('ProjectDetailsHandler', function() {
 
   describe('getDetails', function() {
     it('should find the project and owner', async function() {
-      const details = await this.handler.promises.getDetails(this.project_id)
+      const details = await this.handler.promises.getDetails(this.project._id)
       details.name.should.equal(this.project.name)
       details.description.should.equal(this.project.description)
       details.compiler.should.equal(this.project.compiler)
@@ -101,7 +110,7 @@ describe('ProjectDetailsHandler', function() {
 
     it('should find overleaf metadata if it exists', async function() {
       this.project.overleaf = { id: 'id' }
-      const details = await this.handler.promises.getDetails(this.project_id)
+      const details = await this.handler.promises.getDetails(this.project._id)
       details.overleaf.should.equal(this.project.overleaf)
       expect(details.something).to.be.undefined
     })
@@ -115,95 +124,122 @@ describe('ProjectDetailsHandler', function() {
 
     it('should return the default features if no owner found', async function() {
       this.UserGetter.promises.getUser.resolves(null)
-      const details = await this.handler.promises.getDetails(this.project_id)
+      const details = await this.handler.promises.getDetails(this.project._id)
       details.features.should.equal(this.settings.defaultFeatures)
     })
 
     it('should rethrow any error', async function() {
       this.ProjectGetter.promises.getProject.rejects(new Error('boom'))
-      await expect(this.handler.promises.getDetails(this.project_id)).to.be
+      await expect(this.handler.promises.getDetails(this.project._id)).to.be
         .rejected
     })
   })
 
   describe('transferOwnership', function() {
     beforeEach(function() {
-      this.ProjectGetter.promises.findAllUsersProjects.resolves({
-        owned: [{ name: this.project.name }],
-        readAndWrite: [],
-        readOnly: [],
-        tokenReadAndWrite: [],
-        tokenReadOnly: []
-      })
+      this.UserGetter.promises.getUser.resolves(this.collaborator)
     })
 
     it("should return a not found error if the project can't be found", async function() {
       this.ProjectGetter.promises.getProject.resolves(null)
       await expect(
-        this.handler.promises.transferOwnership('abc', '123')
-      ).to.be.rejectedWith(Errors.NotFoundError)
+        this.handler.promises.transferOwnership('abc', this.collaborator._id)
+      ).to.be.rejectedWith(Errors.ProjectNotFoundError)
     })
 
     it("should return a not found error if the user can't be found", async function() {
       this.UserGetter.promises.getUser.resolves(null)
       await expect(
-        this.handler.promises.transferOwnership('abc', '123')
-      ).to.be.rejectedWith(Errors.NotFoundError)
+        this.handler.promises.transferOwnership(
+          this.project._id,
+          this.collaborator._id
+        )
+      ).to.be.rejectedWith(Errors.UserNotFoundError)
     })
 
     it('should return an error if user cannot be removed as collaborator ', async function() {
       this.CollaboratorsHandler.promises.removeUserFromProject.rejects(
         new Error('user-cannot-be-removed')
       )
-      await expect(this.handler.promises.transferOwnership('abc', '123')).to.be
-        .rejected
+      await expect(
+        this.handler.promises.transferOwnership(
+          this.project._id,
+          this.collaborator._id
+        )
+      ).to.be.rejected
     })
 
     it('should transfer ownership of the project', async function() {
-      await this.handler.promises.transferOwnership('abc', '123')
-      expect(this.ProjectModel.update).to.have.been.calledWith(
-        { _id: 'abc' },
-        sinon.match({ $set: { owner_ref: '123' } })
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.collaborator._id
       )
+      expect(this.ProjectModel.update).to.have.been.calledWith(
+        { _id: this.project._id },
+        sinon.match({ $set: { owner_ref: this.collaborator._id } })
+      )
+    })
+
+    it('should do nothing if transferring back to the owner', async function() {
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.user._id
+      )
+      expect(this.ProjectModel.update).not.to.have.been.called
     })
 
     it("should remove the user from the project's collaborators", async function() {
-      await this.handler.promises.transferOwnership('abc', '123')
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.collaborator._id
+      )
       expect(
         this.CollaboratorsHandler.promises.removeUserFromProject
-      ).to.have.been.calledWith('abc', '123')
+      ).to.have.been.calledWith(this.project._id, this.collaborator._id)
+    })
+
+    it('should add the former project owner as a read/write collaborator', async function() {
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.collaborator._id
+      )
+      expect(
+        this.CollaboratorsHandler.promises.addUserIdToProject
+      ).to.have.been.calledWith(
+        this.project._id,
+        this.collaborator._id,
+        this.user._id,
+        PrivilegeLevels.READ_AND_WRITE
+      )
     })
 
     it('should flush the project to tpds', async function() {
-      await this.handler.promises.transferOwnership('abc', '123')
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.collaborator._id
+      )
       expect(
         this.ProjectEntityHandler.promises.flushProjectToThirdPartyDataStore
-      ).to.have.been.calledWith('abc')
+      ).to.have.been.calledWith(this.project._id)
     })
 
-    it('should generate a unique name for the project', async function() {
-      await this.handler.promises.transferOwnership('abc', '123')
-      expect(this.ProjectModel.update).to.have.been.calledWith(
-        { _id: 'abc' },
-        sinon.match({ $set: { name: `${this.project.name} (1)` } })
-      )
-    })
-
-    it('should append the supplied suffix to the project name, if passed', async function() {
-      await this.handler.promises.transferOwnership('abc', '123', ' wombat')
-      expect(this.ProjectModel.update).to.have.been.calledWith(
-        { _id: 'abc' },
-        sinon.match({ $set: { name: `${this.project.name} wombat` } })
-      )
+    it('should decline to transfer ownership to a non-collaborator', async function() {
+      this.project.collaberator_refs = []
+      await expect(
+        this.handler.promises.transferOwnership(
+          this.project._id,
+          this.collaborator._id
+        )
+      ).to.be.rejectedWith(Errors.UserNotCollaboratorError)
     })
   })
 
   describe('getProjectDescription', function() {
     it('should make a call to mongo just for the description', async function() {
       this.ProjectGetter.promises.getProject.resolves()
-      await this.handler.promises.getProjectDescription(this.project_id)
+      await this.handler.promises.getProjectDescription(this.project._id)
       expect(this.ProjectGetter.promises.getProject).to.have.been.calledWith(
-        this.project_id,
+        this.project._id,
         { description: true }
       )
     })
@@ -214,7 +250,7 @@ describe('ProjectDetailsHandler', function() {
         description: expectedDescription
       })
       const description = await this.handler.promises.getProjectDescription(
-        this.project_id
+        this.project._id
       )
       expect(description).to.equal(expectedDescription)
     })
@@ -227,11 +263,11 @@ describe('ProjectDetailsHandler', function() {
 
     it('should update the project detials', async function() {
       await this.handler.promises.setProjectDescription(
-        this.project_id,
+        this.project._id,
         this.description
       )
       expect(this.ProjectModel.update).to.have.been.calledWith(
-        { _id: this.project_id },
+        { _id: this.project._id },
         { description: this.description }
       )
     })
@@ -243,18 +279,18 @@ describe('ProjectDetailsHandler', function() {
     })
 
     it('should update the project with the new name', async function() {
-      await this.handler.promises.renameProject(this.project_id, this.newName)
+      await this.handler.promises.renameProject(this.project._id, this.newName)
       expect(this.ProjectModel.update).to.have.been.calledWith(
-        { _id: this.project_id },
+        { _id: this.project._id },
         { name: this.newName }
       )
     })
 
     it('should tell the TpdsUpdateSender', async function() {
-      await this.handler.promises.renameProject(this.project_id, this.newName)
+      await this.handler.promises.renameProject(this.project._id, this.newName)
       expect(this.TpdsUpdateSender.promises.moveEntity).to.have.been.calledWith(
         {
-          project_id: this.project_id,
+          project_id: this.project._id,
           project_name: this.project.name,
           newProjectName: this.newName
         }
@@ -262,7 +298,7 @@ describe('ProjectDetailsHandler', function() {
     })
 
     it('should not do anything with an invalid name', async function() {
-      await expect(this.handler.promises.renameProject(this.project_id)).to.be
+      await expect(this.handler.promises.renameProject(this.project._id)).to.be
         .rejected
       expect(this.TpdsUpdateSender.promises.moveEntity).not.to.have.been.called
       expect(this.ProjectModel.update).not.to.have.been.called
@@ -358,7 +394,7 @@ describe('ProjectDetailsHandler', function() {
 
     it('should leave a unique name unchanged', async function() {
       const name = await this.handler.promises.generateUniqueName(
-        this.user_id,
+        this.user._id,
         'unique-name',
         ['-test-suffix']
       )
@@ -367,7 +403,7 @@ describe('ProjectDetailsHandler', function() {
 
     it('should append a suffix to an existing name', async function() {
       const name = await this.handler.promises.generateUniqueName(
-        this.user_id,
+        this.user._id,
         'name1',
         ['-test-suffix']
       )
@@ -376,7 +412,7 @@ describe('ProjectDetailsHandler', function() {
 
     it('should fallback to a second suffix when needed', async function() {
       const name = await this.handler.promises.generateUniqueName(
-        this.user_id,
+        this.user._id,
         'name1',
         ['1', '-test-suffix']
       )
@@ -385,7 +421,7 @@ describe('ProjectDetailsHandler', function() {
 
     it('should truncate the name when append a suffix if the result is too long', async function() {
       const name = await this.handler.promises.generateUniqueName(
-        this.user_id,
+        this.user._id,
         this.longName,
         ['-test-suffix']
       )
@@ -397,7 +433,7 @@ describe('ProjectDetailsHandler', function() {
 
     it('should use a numeric index if no suffix is supplied', async function() {
       const name = await this.handler.promises.generateUniqueName(
-        this.user_id,
+        this.user._id,
         'name1',
         []
       )
@@ -406,7 +442,7 @@ describe('ProjectDetailsHandler', function() {
 
     it('should use a numeric index if all suffixes are exhausted', async function() {
       const name = await this.handler.promises.generateUniqueName(
-        this.user_id,
+        this.user._id,
         'name',
         ['1', '11']
       )
@@ -415,7 +451,7 @@ describe('ProjectDetailsHandler', function() {
 
     it('should find the next lowest available numeric index for the base name', async function() {
       const name = await this.handler.promises.generateUniqueName(
-        this.user_id,
+        this.user._id,
         'numeric',
         []
       )
@@ -424,7 +460,7 @@ describe('ProjectDetailsHandler', function() {
 
     it('should find the next available numeric index when a numeric index is already present', async function() {
       const name = await this.handler.promises.generateUniqueName(
-        this.user_id,
+        this.user._id,
         'numeric (5)',
         []
       )
@@ -433,7 +469,7 @@ describe('ProjectDetailsHandler', function() {
 
     it('should not find a numeric index lower than the one already present', async function() {
       const name = await this.handler.promises.generateUniqueName(
-        this.user_id,
+        this.user._id,
         'numeric (31)',
         []
       )
@@ -472,11 +508,11 @@ describe('ProjectDetailsHandler', function() {
 
     it('should update the project with the new level', async function() {
       await this.handler.promises.setPublicAccessLevel(
-        this.project_id,
+        this.project._id,
         this.accessLevel
       )
       expect(this.ProjectModel.update).to.have.been.calledWith(
-        { _id: this.project_id },
+        { _id: this.project._id },
         { publicAccesLevel: this.accessLevel }
       )
     })
@@ -484,7 +520,7 @@ describe('ProjectDetailsHandler', function() {
     it('should not produce an error', async function() {
       await expect(
         this.handler.promises.setPublicAccessLevel(
-          this.project_id,
+          this.project._id,
           this.accessLevel
         )
       ).to.be.resolved
@@ -498,7 +534,7 @@ describe('ProjectDetailsHandler', function() {
       it('should produce an error', async function() {
         await expect(
           this.handler.promises.setPublicAccessLevel(
-            this.project_id,
+            this.project._id,
             this.accessLevel
           )
         ).to.be.rejected
@@ -510,7 +546,7 @@ describe('ProjectDetailsHandler', function() {
     describe('when the project has tokens', function() {
       beforeEach(function() {
         this.project = {
-          _id: this.project_id,
+          _id: this.project._id,
           tokens: {
             readOnly: 'aaa',
             readAndWrite: '42bbb',
@@ -521,10 +557,10 @@ describe('ProjectDetailsHandler', function() {
       })
 
       it('should get the project', async function() {
-        await this.handler.promises.ensureTokensArePresent(this.project_id)
+        await this.handler.promises.ensureTokensArePresent(this.project._id)
         expect(this.ProjectGetter.promises.getProject).to.have.been.calledOnce
         expect(this.ProjectGetter.promises.getProject).to.have.been.calledWith(
-          this.project_id,
+          this.project._id,
           {
             tokens: 1
           }
@@ -532,13 +568,13 @@ describe('ProjectDetailsHandler', function() {
       })
 
       it('should not update the project with new tokens', async function() {
-        await this.handler.promises.ensureTokensArePresent(this.project_id)
+        await this.handler.promises.ensureTokensArePresent(this.project._id)
         expect(this.ProjectModel.update).not.to.have.been.called
       })
 
       it('should produce the tokens without error', async function() {
         const tokens = await this.handler.promises.ensureTokensArePresent(
-          this.project_id
+          this.project._id
         )
         expect(tokens).to.deep.equal(this.project.tokens)
       })
@@ -546,7 +582,7 @@ describe('ProjectDetailsHandler', function() {
 
     describe('when tokens are missing', function() {
       beforeEach(function() {
-        this.project = { _id: this.project_id }
+        this.project = { _id: this.project._id }
         this.ProjectGetter.promises.getProject.resolves(this.project)
         this.readOnlyToken = 'abc'
         this.readAndWriteToken = '42def'
@@ -561,10 +597,10 @@ describe('ProjectDetailsHandler', function() {
       })
 
       it('should get the project', async function() {
-        await this.handler.promises.ensureTokensArePresent(this.project_id)
+        await this.handler.promises.ensureTokensArePresent(this.project._id)
         expect(this.ProjectGetter.promises.getProject).to.have.been.calledOnce
         expect(this.ProjectGetter.promises.getProject).to.have.been.calledWith(
-          this.project_id,
+          this.project._id,
           {
             tokens: 1
           }
@@ -572,14 +608,14 @@ describe('ProjectDetailsHandler', function() {
       })
 
       it('should update the project with new tokens', async function() {
-        await this.handler.promises.ensureTokensArePresent(this.project_id)
+        await this.handler.promises.ensureTokensArePresent(this.project._id)
         expect(this.ProjectTokenGenerator.promises.generateUniqueReadOnlyToken)
           .to.have.been.calledOnce
         expect(this.ProjectTokenGenerator.readAndWriteToken).to.have.been
           .calledOnce
         expect(this.ProjectModel.update).to.have.been.calledOnce
         expect(this.ProjectModel.update).to.have.been.calledWith(
-          { _id: this.project_id },
+          { _id: this.project._id },
           {
             $set: {
               tokens: {
@@ -594,7 +630,7 @@ describe('ProjectDetailsHandler', function() {
 
       it('should produce the tokens without error', async function() {
         const tokens = await this.handler.promises.ensureTokensArePresent(
-          this.project_id
+          this.project._id
         )
         expect(tokens).to.deep.equal({
           readOnly: this.readOnlyToken,

@@ -278,7 +278,7 @@ describe('Authorization', function() {
             if (err != null) {
               return cb(err)
             }
-            this.site_admin.ensure_admin(cb)
+            return this.site_admin.ensureAdmin(cb)
           })
         }
       ],

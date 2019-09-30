@@ -1,22 +1,4 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const request = require('./request')
-const _ = require('underscore')
 const settings = require('settings-sharelatex')
 const { db, ObjectId } = require('../../../../app/src/infrastructure/mongojs')
 const UserModel = require('../../../../app/src/models/User').User
@@ -53,42 +35,30 @@ class User {
     this.id = user._id.toString()
     this._id = user._id.toString()
     this.first_name = user.first_name
-    return (this.referal_id = user.referal_id)
+    this.referal_id = user.referal_id
   }
 
   get(callback) {
-    if (callback == null) {
-      callback = function(error, user) {}
-    }
-    return db.users.findOne({ _id: ObjectId(this._id) }, callback)
+    db.users.findOne({ _id: ObjectId(this._id) }, callback)
   }
 
   mongoUpdate(updateOp, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return db.users.update({ _id: ObjectId(this._id) }, updateOp, callback)
+    db.users.update({ _id: ObjectId(this._id) }, updateOp, callback)
   }
 
   register(callback) {
-    if (callback == null) {
-      callback = function(error, user) {}
-    }
-    return this.registerWithQuery('', callback)
+    this.registerWithQuery('', callback)
   }
 
   registerWithQuery(query, callback) {
-    if (callback == null) {
-      callback = function(error, user) {}
-    }
     if (this._id != null) {
       return callback(new Error('User already registered'))
     }
-    return this.getCsrfToken(error => {
+    this.getCsrfToken(error => {
       if (error != null) {
         return callback(error)
       }
-      return this.request.post(
+      this.request.post(
         {
           url: `/register${query}`,
           json: { email: this.email, password: this.password }
@@ -97,12 +67,12 @@ class User {
           if (error != null) {
             return callback(error)
           }
-          return db.users.findOne({ email: this.email }, (error, user) => {
+          db.users.findOne({ email: this.email }, (error, user) => {
             if (error != null) {
               return callback(error)
             }
             this.setExtraAttributes(user)
-            return callback(null, user)
+            callback(null, user)
           })
         }
       )
@@ -110,25 +80,19 @@ class User {
   }
 
   login(callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return this.loginWith(this.email, callback)
+    this.loginWith(this.email, callback)
   }
 
   loginWith(email, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return this.ensureUserExists(error => {
+    this.ensureUserExists(error => {
       if (error != null) {
         return callback(error)
       }
-      return this.getCsrfToken(error => {
+      this.getCsrfToken(error => {
         if (error != null) {
           return callback(error)
         }
-        return this.request.post(
+        this.request.post(
           {
             url: settings.enableLegacyLogin ? '/login/legacy' : '/login',
             json: { email, password: this.password }
@@ -140,23 +104,20 @@ class User {
   }
 
   ensureUserExists(callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
     const filter = { email: this.email }
     const options = { upsert: true, new: true, setDefaultsOnInsert: true }
-    return UserModel.findOneAndUpdate(filter, {}, options, (error, user) => {
+    UserModel.findOneAndUpdate(filter, {}, options, (error, user) => {
       if (error != null) {
         return callback(error)
       }
-      return AuthenticationManager.setUserPasswordInV2(
+      AuthenticationManager.setUserPasswordInV2(
         user._id,
         this.password,
         error => {
           if (error != null) {
             return callback(error)
           }
-          return UserUpdater.updateUser(
+          UserUpdater.updateUser(
             user._id,
             { $set: { emails: this.emails } },
             error => {
@@ -164,7 +125,7 @@ class User {
                 return callback(error)
               }
               this.setExtraAttributes(user)
-              return callback(null, this.password)
+              callback(null, this.password)
             }
           )
         }
@@ -173,37 +134,24 @@ class User {
   }
 
   setFeatures(features, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
     const update = {}
     for (let key in features) {
       const value = features[key]
       update[`features.${key}`] = value
     }
-    return UserModel.update({ _id: this.id }, update, callback)
+    UserModel.update({ _id: this.id }, update, callback)
   }
 
-  setOverleafId(overleaf_id, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return UserModel.update(
-      { _id: this.id },
-      { 'overleaf.id': overleaf_id },
-      callback
-    )
+  setOverleafId(overleafId, callback) {
+    UserModel.update({ _id: this.id }, { 'overleaf.id': overleafId }, callback)
   }
 
   logout(callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return this.getCsrfToken(error => {
+    this.getCsrfToken(error => {
       if (error != null) {
         return callback(error)
       }
-      return this.request.post(
+      this.request.post(
         {
           url: '/logout',
           json: {
@@ -215,17 +163,16 @@ class User {
           if (error != null) {
             return callback(error)
           }
-          return db.users.findOne({ email: this.email }, (error, user) => {
+          db.users.findOne({ email: this.email }, (error, user) => {
             if (error != null) {
               return callback(error)
             }
-            this.id = __guard__(user != null ? user._id : undefined, x =>
-              x.toString()
-            )
-            this._id = __guard__(user != null ? user._id : undefined, x1 =>
-              x1.toString()
-            )
-            return callback()
+            if (user == null) {
+              return callback()
+            }
+            this.id = user._id.toString()
+            this._id = user._id.toString()
+            callback()
           })
         }
       )
@@ -233,31 +180,22 @@ class User {
   }
 
   addEmail(email, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
     this.emails.push({ email, createdAt: new Date() })
-    return UserUpdater.addEmailAddress(this.id, email, callback)
+    UserUpdater.addEmailAddress(this.id, email, callback)
   }
 
   confirmEmail(email, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
     for (let idx = 0; idx < this.emails.length; idx++) {
       const emailData = this.emails[idx]
       if (emailData.email === email) {
         this.emails[idx].confirmedAt = new Date()
       }
     }
-    return UserUpdater.confirmEmail(this.id, email, callback)
+    UserUpdater.confirmEmail(this.id, email, callback)
   }
 
-  ensure_admin(callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return db.users.update(
+  ensureAdmin(callback) {
+    db.users.update(
       { _id: ObjectId(this.id) },
       { $set: { isAdmin: true } },
       callback
@@ -267,13 +205,10 @@ class User {
   ensureStaffAccess(flag, callback) {
     const update = { $set: {} }
     update.$set[`staffAccess.${flag}`] = true
-    return db.users.update({ _id: ObjectId(this.id) }, update, callback)
+    db.users.update({ _id: ObjectId(this.id) }, update, callback)
   }
 
   upgradeFeatures(callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
     const features = {
       collaborators: -1, // Infinite
       versioning: true,
@@ -285,7 +220,7 @@ class User {
       trackChanges: true,
       trackChangesVisible: true
     }
-    return db.users.update(
+    db.users.update(
       { _id: ObjectId(this.id) },
       { $set: { features } },
       callback
@@ -293,9 +228,6 @@ class User {
   }
 
   downgradeFeatures(callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
     const features = {
       collaborators: 1,
       versioning: false,
@@ -307,7 +239,7 @@ class User {
       trackChanges: false,
       trackChangesVisible: false
     }
-    return db.users.update(
+    db.users.update(
       { _id: ObjectId(this.id) },
       { $set: { features } },
       callback
@@ -315,11 +247,8 @@ class User {
   }
 
   defaultFeatures(callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
     const features = settings.defaultFeatures
-    return db.users.update(
+    db.users.update(
       { _id: ObjectId(this.id) },
       { $set: { features } },
       callback
@@ -327,31 +256,30 @@ class User {
   }
 
   getFeatures(callback) {
-    const features = settings.defaultFeatures
-    return db.users.findOne(
+    db.users.findOne(
       { _id: ObjectId(this.id) },
       { features: 1 },
       (error, user) => callback(error, user && user.features)
     )
   }
 
-  full_delete_user(email, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return db.users.findOne({ email }, (error, user) => {
+  fullDeleteUser(email, callback) {
+    db.users.findOne({ email }, (error, user) => {
+      if (error != null) {
+        return callback(error)
+      }
       if (user == null) {
         return callback()
       }
-      const user_id = user._id
-      return db.projects.remove(
-        { owner_ref: ObjectId(user_id) },
+      const userId = user._id
+      db.projects.remove(
+        { owner_ref: ObjectId(userId) },
         { multi: true },
         err => {
           if (err != null) {
             callback(err)
           }
-          return db.users.remove({ _id: ObjectId(user_id) }, callback)
+          db.users.remove({ _id: ObjectId(userId) }, callback)
         }
       )
     })
@@ -383,33 +311,21 @@ class User {
     })
   }
 
-  getProject(project_id, callback) {
-    if (callback == null) {
-      callback = function(error, project) {}
-    }
-    return db.projects.findOne(
-      { _id: ObjectId(project_id.toString()) },
-      callback
-    )
+  getProject(projectId, callback) {
+    db.projects.findOne({ _id: ObjectId(projectId.toString()) }, callback)
   }
 
   saveProject(project, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return db.projects.update({ _id: project._id }, project, callback)
+    db.projects.update({ _id: project._id }, project, callback)
   }
 
   createProject(name, options, callback) {
-    if (callback == null) {
-      callback = function(error, oroject_id) {}
-    }
     if (typeof options === 'function') {
       callback = options
       options = {}
     }
 
-    return this.request.post(
+    this.request.post(
       {
         url: '/project/new',
         json: Object.assign({ projectName: name }, options)
@@ -429,49 +345,38 @@ class User {
               body
             ])
           )
-          return callback(error)
+          callback(error)
         } else {
-          return callback(null, body.project_id)
+          callback(null, body.project_id)
         }
       }
     )
   }
 
-  deleteProject(project_id, callback) {
-    if (callback == null) {
-      callback = error
-    }
-    return this.request.delete(
+  deleteProject(projectId, callback) {
+    this.request.delete(
       {
-        url: `/project/${project_id}?forever=true`
+        url: `/project/${projectId}?forever=true`
       },
       (error, response, body) => {
         if (error != null) {
           return callback(error)
         }
-        return callback(null)
+        callback(null)
       }
     )
   }
 
   deleteProjects(callback) {
-    if (callback == null) {
-      callback = error
-    }
-    return db.projects.remove(
-      { owner_ref: ObjectId(this.id) },
-      { multi: true },
-      err => callback(err)
+    db.projects.remove({ owner_ref: ObjectId(this.id) }, { multi: true }, err =>
+      callback(err)
     )
   }
 
-  openProject(project_id, callback) {
-    if (callback == null) {
-      callback = error
-    }
-    return this.request.get(
+  openProject(projectId, callback) {
+    this.request.get(
       {
-        url: `/project/${project_id}`
+        url: `/project/${projectId}`
       },
       (error, response, body) => {
         if (error != null) {
@@ -483,56 +388,50 @@ class User {
           )
           return callback(err)
         }
-        return callback(null)
+        callback(null)
       }
     )
   }
 
-  createDocInProject(project_id, parent_folder_id, name, callback) {
-    if (callback == null) {
-      callback = function(error, doc_id) {}
-    }
-    return this.getCsrfToken(error => {
+  createDocInProject(projectId, parentFolderId, name, callback) {
+    this.getCsrfToken(error => {
       if (error != null) {
         return callback(error)
       }
-      return this.request.post(
+      this.request.post(
         {
-          url: `/project/${project_id}/doc`,
+          url: `/project/${projectId}/doc`,
           json: {
             name,
-            parent_folder_id
+            parentFolderId
           }
         },
         (error, response, body) => {
-          return callback(null, body._id)
+          if (error != null) {
+            return callback(error)
+          }
+          callback(null, body._id)
         }
       )
     })
   }
 
-  addUserToProject(project_id, user, privileges, callback) {
+  addUserToProject(projectId, user, privileges, callback) {
     let updateOp
-    if (callback == null) {
-      callback = function(error, user) {}
-    }
     if (privileges === 'readAndWrite') {
-      updateOp = { $addToSet: { collaberator_refs: user._id.toString() } }
+      updateOp = { $addToSet: { collaberator_refs: user._id } }
     } else if (privileges === 'readOnly') {
-      updateOp = { $addToSet: { readOnly_refs: user._id.toString() } }
+      updateOp = { $addToSet: { readOnly_refs: user._id } }
     }
-    return db.projects.update({ _id: db.ObjectId(project_id) }, updateOp, err =>
+    db.projects.update({ _id: db.ObjectId(projectId) }, updateOp, err =>
       callback(err)
     )
   }
 
-  makePublic(project_id, level, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return this.request.post(
+  makePublic(projectId, level, callback) {
+    this.request.post(
       {
-        url: `/project/${project_id}/settings/admin`,
+        url: `/project/${projectId}/settings/admin`,
         json: {
           publicAccessLevel: level
         }
@@ -541,18 +440,15 @@ class User {
         if (error != null) {
           return callback(error)
         }
-        return callback(null)
+        callback(null)
       }
     )
   }
 
-  makePrivate(project_id, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return this.request.post(
+  makePrivate(projectId, callback) {
+    this.request.post(
       {
-        url: `/project/${project_id}/settings/admin`,
+        url: `/project/${projectId}/settings/admin`,
         json: {
           publicAccessLevel: 'private'
         }
@@ -561,18 +457,15 @@ class User {
         if (error != null) {
           return callback(error)
         }
-        return callback(null)
+        callback(null)
       }
     )
   }
 
-  makeTokenBased(project_id, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return this.request.post(
+  makeTokenBased(projectId, callback) {
+    this.request.post(
       {
-        url: `/project/${project_id}/settings/admin`,
+        url: `/project/${projectId}/settings/admin`,
         json: {
           publicAccessLevel: 'tokenBased'
         }
@@ -581,16 +474,13 @@ class User {
         if (error != null) {
           return callback(error)
         }
-        return callback(null)
+        callback(null)
       }
     )
   }
 
   getCsrfToken(callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return this.request.get(
+    this.request.get(
       {
         url: '/dev/csrf'
       },
@@ -604,20 +494,17 @@ class User {
             'x-csrf-token': this.csrfToken
           }
         })
-        return callback()
+        callback()
       }
     )
   }
 
   changePassword(callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return this.getCsrfToken(error => {
+    this.getCsrfToken(error => {
       if (error != null) {
         return callback(error)
       }
-      return this.request.post(
+      this.request.post(
         {
           url: '/user/password/update',
           json: {
@@ -630,48 +517,42 @@ class User {
           if (error != null) {
             return callback(error)
           }
-          return db.users.findOne({ email: this.email }, (error, user) => {
+          db.users.findOne({ email: this.email }, (error, user) => {
             if (error != null) {
               return callback(error)
             }
-            return callback()
+            callback()
           })
         }
       )
     })
   }
 
-  reconfirmAccountRequest(user_email, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return this.getCsrfToken(error => {
+  reconfirmAccountRequest(userEmail, callback) {
+    this.getCsrfToken(error => {
       if (error != null) {
         return callback(error)
       }
-      return this.request.post(
+      this.request.post(
         {
           url: '/user/reconfirm',
           json: {
-            email: user_email
+            email: userEmail
           }
         },
         (error, response, body) => {
-          return callback(error, response)
+          callback(error, response)
         }
       )
     })
   }
 
   getUserSettingsPage(callback) {
-    if (callback == null) {
-      callback = function(error, statusCode) {}
-    }
-    return this.getCsrfToken(error => {
+    this.getCsrfToken(error => {
       if (error != null) {
         return callback(error)
       }
-      return this.request.get(
+      this.request.get(
         {
           url: '/user/settings'
         },
@@ -679,21 +560,18 @@ class User {
           if (error != null) {
             return callback(error)
           }
-          return callback(null, response.statusCode)
+          callback(null, response.statusCode)
         }
       )
     })
   }
 
   activateSudoMode(callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return this.getCsrfToken(error => {
+    this.getCsrfToken(error => {
       if (error != null) {
         return callback(error)
       }
-      return this.request.post(
+      this.request.post(
         {
           uri: '/confirm-password',
           json: {
@@ -706,14 +584,11 @@ class User {
   }
 
   updateSettings(newSettings, callback) {
-    if (callback == null) {
-      callback = function(error, response, body) {}
-    }
-    return this.getCsrfToken(error => {
+    this.getCsrfToken(error => {
       if (error != null) {
         return callback(error)
       }
-      return this.request.post(
+      this.request.post(
         {
           url: '/user/settings',
           json: newSettings
@@ -724,14 +599,11 @@ class User {
   }
 
   getProjectListPage(callback) {
-    if (callback == null) {
-      callback = function(error, statusCode) {}
-    }
-    return this.getCsrfToken(error => {
+    this.getCsrfToken(error => {
       if (error != null) {
         return callback(error)
       }
-      return this.request.get(
+      this.request.get(
         {
           url: '/project'
         },
@@ -739,26 +611,23 @@ class User {
           if (error != null) {
             return callback(error)
           }
-          return callback(null, response.statusCode)
+          callback(null, response.statusCode)
         }
       )
     })
   }
 
   isLoggedIn(callback) {
-    if (callback == null) {
-      callback = function(error, loggedIn) {}
-    }
-    return this.request.get('/user/personal_info', (error, response, body) => {
+    this.request.get('/user/personal_info', (error, response, body) => {
       if (error != null) {
         return callback(error)
       }
       if (response.statusCode === 200) {
-        return callback(null, true)
+        callback(null, true)
       } else if (response.statusCode === 302) {
-        return callback(null, false)
+        callback(null, false)
       } else {
-        return callback(
+        callback(
           new Error(
             `unexpected status code from /user/personal_info: ${
               response.statusCode
@@ -769,8 +638,35 @@ class User {
     })
   }
 
+  transferProjectOwnership(projectId, userId, callback) {
+    this.getCsrfToken(err => {
+      if (err != null) {
+        return callback(err)
+      }
+      this.request.post(
+        {
+          url: `/project/${projectId.toString()}/transfer-ownership`,
+          json: {
+            user_id: userId.toString()
+          }
+        },
+        (err, response) => {
+          if (err != null) {
+            return callback(err)
+          }
+          if (response.statusCode !== 204) {
+            return callback(
+              new Error(`Unexpected status code: ${response.statusCode}`)
+            )
+          }
+          callback()
+        }
+      )
+    })
+  }
+
   setV1Id(v1Id, callback) {
-    return UserModel.update(
+    UserModel.update(
       {
         _id: this._id
       },
@@ -809,9 +705,3 @@ Object.getOwnPropertyNames(User.prototype).forEach(methodName => {
 })
 
 module.exports = User
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}

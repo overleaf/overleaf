@@ -28,7 +28,7 @@ describe('ThirdPartyIdentityManager', function() {
   })
 
   afterEach(function(done) {
-    return this.user.full_delete_user(this.user.email, done)
+    return this.user.fullDeleteUser(this.user.email, done)
   })
 
   describe('login', function() {
@@ -175,7 +175,7 @@ describe('ThirdPartyIdentityManager', function() {
       //         return done()
       //       }
       //     )
-      //     this.user2.full_delete_user(this.user2.email, done)
+      //     this.user2.fullDeleteUser(this.user2.email, done)
       //   })
       // })
     })

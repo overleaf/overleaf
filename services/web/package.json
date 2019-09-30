@@ -12,7 +12,7 @@
     "public": "./public"
   },
   "scripts": {
-    "test:acceptance:run_dir": "mocha --recursive --reporter spec --timeout 25000 --exit --grep=$MOCHA_GREP $@",
+    "test:acceptance:run_dir": "mocha --recursive --reporter spec --require test/acceptance/bootstrap.js --timeout 25000 --exit --grep=$MOCHA_GREP $@",
     "test:unit": "bin/unit_test --grep=$MOCHA_GREP $@",
     "test:unit:ci": "bin/unit_test --timeout 10000",
     "test:unit:app": "bin/unit_test_app $@",

@@ -128,7 +128,7 @@ describe('UserMembershipAuthorization', function() {
         const url = `/metrics/institutions/${this.institution.v1Id}`
         async.series(
           [
-            this.user.ensure_admin.bind(this.user),
+            this.user.ensureAdmin.bind(this.user),
             this.user.login.bind(this.user),
             expectAccess(this.user, url, 200)
           ],
@@ -317,7 +317,7 @@ describe('UserMembershipAuthorization', function() {
       async.series(
         [
           expectAccess(this.user, url, 403),
-          this.user.ensure_admin.bind(this.user),
+          this.user.ensureAdmin.bind(this.user),
           this.user.login.bind(this.user),
           expectAccess(this.user, url, 200)
         ],
@@ -329,7 +329,7 @@ describe('UserMembershipAuthorization', function() {
       const url = '/metrics/templates/789'
       async.series(
         [
-          this.user.ensure_admin.bind(this.user),
+          this.user.ensureAdmin.bind(this.user),
           this.user.login.bind(this.user),
           expectAccess(this.user, url, 404)
         ],
@@ -345,7 +345,7 @@ describe('UserMembershipAuthorization', function() {
         [
           this.user.login.bind(this.user),
           expectAccess(this.user, url, 403),
-          this.user.ensure_admin.bind(this.user),
+          this.user.ensureAdmin.bind(this.user),
           this.user.login.bind(this.user),
           expectAccess(this.user, url, 200)
         ],
@@ -382,7 +382,7 @@ describe('UserMembershipAuthorization', function() {
     it('should allow admin users', function(done) {
       async.series(
         [
-          this.user.ensure_admin.bind(this.user),
+          this.user.ensureAdmin.bind(this.user),
           this.user.login.bind(this.user),
           expectAccess(this.user, '/metrics/admin', 200)
         ],

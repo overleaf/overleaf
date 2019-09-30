@@ -111,6 +111,33 @@ class SubscriptionAdminDeletionError extends OError {
   }
 }
 
+class ProjectNotFoundError extends OError {
+  constructor(options) {
+    super({
+      message: 'project not found',
+      ...options
+    })
+  }
+}
+
+class UserNotFoundError extends OError {
+  constructor(options) {
+    super({
+      message: 'user not found',
+      ...options
+    })
+  }
+}
+
+class UserNotCollaboratorError extends OError {
+  constructor(options) {
+    super({
+      message: 'user not a collaborator',
+      ...options
+    })
+  }
+}
+
 module.exports = {
   OError,
   BackwardCompatibleError,
@@ -134,5 +161,8 @@ module.exports = {
   SLInV2Error,
   ThirdPartyIdentityExistsError,
   ThirdPartyUserNotFoundError,
-  SubscriptionAdminDeletionError
+  SubscriptionAdminDeletionError,
+  ProjectNotFoundError,
+  UserNotFoundError,
+  UserNotCollaboratorError
 }
