@@ -742,7 +742,7 @@ module.exports = ProjectController = {
               anonymousAccessToken: req._anonymousAccessToken,
               isTokenMember,
               isRestrictedTokenMember:
-                isTokenMember === true && privilegeLevel === 'readOnly',
+                privilegeLevel === 'readOnly' && (anonymous || isTokenMember),
               languages: Settings.languages,
               editorThemes: THEME_LIST,
               maxDocLength: Settings.max_doc_length,
