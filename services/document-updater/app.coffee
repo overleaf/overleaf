@@ -55,6 +55,7 @@ app.post   '/project/:project_id/doc/:doc_id',                          HttpCont
 app.post   '/project/:project_id/doc/:doc_id/flush',                    HttpController.flushDocIfLoaded
 app.delete '/project/:project_id/doc/:doc_id',                          HttpController.flushAndDeleteDoc
 app.delete '/project/:project_id',                                      HttpController.deleteProject
+app.delete '/project',                                                  HttpController.deleteMultipleProjects
 app.post   '/project/:project_id',                                      HttpController.updateProject
 app.post   '/project/:project_id/history/resync',                       HttpController.resyncProjectHistory
 app.post   '/project/:project_id/flush',                                HttpController.flushProject
@@ -63,6 +64,7 @@ app.post   '/project/:project_id/doc/:doc_id/change/accept',            HttpCont
 app.del    '/project/:project_id/doc/:doc_id/comment/:comment_id',      HttpController.deleteComment
 
 app.get    '/flush_all_projects',                                       HttpController.flushAllProjects
+app.get    '/flush_queued_projects', HttpController.flushQueuedProjects
 
 app.get '/total', (req, res)->
 	timer = new Metrics.Timer("http.allDocList")	

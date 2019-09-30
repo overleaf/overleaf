@@ -72,6 +72,22 @@ module.exports = ProjectManager =
 					else
 						callback(null)
 
+	queueFlushAndDeleteProject: (project_id, callback = (error) ->) ->
+		RedisManager.queueFlushAndDeleteProject project_id, (error) ->
+			if error?
+				logger.error {project_id: project_id, error:error}, "error adding project to flush and delete queue"
+				return callback(error)
+			Metrics.inc "queued-delete"
+			callback()
+
+	getProjectDocsTimestamps: (project_id, callback = (error) ->) ->
+		RedisManager.getDocIdsInProject project_id, (error, doc_ids) ->
+			return callback(error) if error?
+			return callback(null, []) if !doc_ids?.length
+			RedisManager.getDocTimestamps doc_ids, (error, timestamps) ->
+				return callback(error) if error?
+				callback(null, timestamps)
+
 	getProjectDocsAndFlushIfOld: (project_id, projectStateHash, excludeVersions = {}, _callback = (error, docs) ->) ->
 		timer = new Metrics.Timer("projectManager.getProjectDocsAndFlushIfOld")
 		callback = (args...) ->

@@ -287,6 +287,35 @@ module.exports = RedisManager =
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
 
+	getDocTimestamps: (doc_ids, callback = (error, result) ->) ->
+		# get lastupdatedat timestamps for an array of doc_ids
+		multi = rclient.multi()
+		for doc_id in doc_ids
+			multi.get keys.lastUpdatedAt(doc_id: doc_id)
+		multi.exec callback
+
+	queueFlushAndDeleteProject: (project_id, callback) ->
+		# store the project id in a sorted set ordered by time
+		rclient.zadd keys.flushAndDeleteQueue(), Date.now(), project_id, callback
+
+	getNextProjectToFlushAndDelete: (cutoffTime, callback = (error, key, timestamp)->) ->
+		# find the oldest queued flush that is before the cutoff time
+		rclient.zrangebyscore keys.flushAndDeleteQueue(), 0, cutoffTime, "WITHSCORES", "LIMIT", 0, 1, (err, reply) ->
+			return callback(err) if err?
+			return callback() if !reply?.length # return if no projects ready to be processed
+			# pop the oldest entry (get and remove in a multi)
+			multi = rclient.multi()
+			# Poor man's version of ZPOPMIN, which is only available in Redis 5.
+			multi.zrange keys.flushAndDeleteQueue(), 0, 0, "WITHSCORES"
+			multi.zremrangebyrank keys.flushAndDeleteQueue(), 0, 0
+			multi.zcard keys.flushAndDeleteQueue() # the total length of the queue (for metrics)
+			multi.exec (err, reply) ->
+				return callback(err) if err?
+				return callback() if !reply?.length
+				[key, timestamp] = reply[0]
+				queueLength = reply[2]
+				callback(null, key, timestamp, queueLength)
+
 	_serializeRanges: (ranges, callback = (error, serializedRanges) ->) ->
 		jsonRanges = JSON.stringify(ranges)
 		if jsonRanges? and jsonRanges.length > MAX_RANGES_SIZE

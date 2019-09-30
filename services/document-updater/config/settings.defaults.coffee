@@ -80,6 +80,7 @@ module.exports =
 				lastUpdatedBy: ({doc_id}) -> "lastUpdatedBy:{#{doc_id}}"
 				lastUpdatedAt: ({doc_id}) -> "lastUpdatedAt:{#{doc_id}}"
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
+				flushAndDeleteQueue: () -> "DocUpdaterFlushAndDeleteQueue"
 			redisOptions:
 				keepAlive: 100
 	

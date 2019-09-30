@@ -29,7 +29,7 @@ module.exports = HistoryManager =
 	flushProjectChanges: (project_id, options, callback = (error) ->) ->
 		return callback() if !Settings.apis?.project_history?.enabled
 		if options.skip_history_flush
-			logger.log {project_id}, "skipping flush of project history from realtime shutdown"
+			logger.log {project_id}, "skipping flush of project history"
 			return callback()
 		url = "#{Settings.apis.project_history.url}/project/#{project_id}/flush"
 		qs = {}

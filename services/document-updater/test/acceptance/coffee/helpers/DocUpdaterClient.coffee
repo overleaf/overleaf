@@ -78,6 +78,9 @@ module.exports = DocUpdaterClient =
 	deleteProjectOnShutdown: (project_id, callback = () ->) ->
 		request.del "http://localhost:3003/project/#{project_id}?background=true&shutdown=true", callback
 
+	flushOldProjects: (callback = () ->) ->
+		request.get "http://localhost:3003/flush_queued_projects?min_delete_age=1", callback
+
 	acceptChange: (project_id, doc_id, change_id, callback = () ->) ->
 		request.post "http://localhost:3003/project/#{project_id}/doc/#{doc_id}/change/#{change_id}/accept", callback
 
