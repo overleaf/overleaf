@@ -68,13 +68,16 @@ module.exports = MockProjectHistoryApi = {
 
   reset() {
     this.oldFiles = {}
+    this.projectHistoryId = 1
     this.projectVersions = {}
     return (this.labels = {})
   },
 
   run() {
+    this.reset()
+
     app.post('/project', (req, res, next) => {
-      return res.json({ project: { id: 1 } })
+      return res.json({ project: { id: this.projectHistoryId++ } })
     })
 
     app.get(

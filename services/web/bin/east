@@ -1,0 +1,10 @@
+#!/bin/sh
+
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
+if [ -f /.dockerenv ]; then
+  # I'm running inside docker
+  npm run migrations -- "$@"
+else
+  ${SCRIPTPATH}/run web_v2 bin/east "$@"
+fi

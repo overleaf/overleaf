@@ -10,11 +10,6 @@ describe('Project CRUD', function() {
     this.projectId = await this.user.createProject('example-project')
   })
 
-  afterEach(async function() {
-    // TODO: This can be removed after migrations are merged
-    await Project.deleteMany({}).exec()
-  })
-
   describe("when project doesn't exist", function() {
     it('should return 404', async function() {
       const { response } = await this.user.doRequest(
