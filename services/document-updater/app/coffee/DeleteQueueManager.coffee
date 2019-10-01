@@ -23,7 +23,7 @@ async = require "async"
 module.exports = DeleteQueueManager =
     flushAndDeleteOldProjects: (options, callback) ->
         startTime = Date.now()
-        cutoffTime = startTime - options.min_delete_age 
+        cutoffTime = startTime - options.min_delete_age + 100 * (Math.random() - 0.5)
         count = 0
 
         flushProjectIfNotModified = (project_id, flushTimestamp, cb) ->
