@@ -275,6 +275,26 @@ define(['base'], function(App) {
       $scope.openGroupPlanModal()
     }
 
+    $scope.openPayByInvoiceModal = function() {
+      const path = `${window.location.pathname}${window.location.search}`
+      history.replaceState(null, document.title, path + '#pay-by-invoice')
+      $modal
+        .open({
+          templateUrl: 'groupPlanModalInquiryTemplate'
+        })
+        .result.finally(() =>
+          history.replaceState(null, document.title, window.location.pathname)
+        )
+      event_tracking.send(
+        'subscription-funnel',
+        'plans-page',
+        'group-inquiry-potential'
+      )
+    }
+    if ($location.hash() === 'pay-by-invoice') {
+      $scope.openPayByInvoiceModal()
+    }
+
     var eventLabel = (label, location) => label
 
     switchEvent = function(e, label, location) {
