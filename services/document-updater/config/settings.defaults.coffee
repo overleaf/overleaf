@@ -97,3 +97,5 @@ module.exports =
 	publishOnIndividualChannels: process.env['PUBLISH_ON_INDIVIDUAL_CHANNELS'] or false
 
 	continuousBackgroundFlush: process.env['CONTINUOUS_BACKGROUND_FLUSH'] or false
+
+	smoothingOffset: process.env['SMOOTHING_OFFSET'] or 1000 # milliseconds
