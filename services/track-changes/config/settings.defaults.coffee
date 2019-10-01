@@ -40,6 +40,7 @@ module.exports =
 			secret: process.env['AWS_SECRET_ACCESS_KEY']
 		stores:
 			doc_history: process.env['AWS_BUCKET']
+		continueOnError: process.env['TRACK_CHANGES_CONTINUE_ON_ERROR'] or false
 			
 	path:
 		dumpFolder:   Path.join(TMP_DIR, "dumpFolder")
