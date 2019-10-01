@@ -70,6 +70,10 @@ module.exports = DeleteQueueManager =
             if Settings.shuttingDown
                 logger.warn "discontinuing background flush due to shutdown"
                 return
-            DeleteQueueManager.flushAndDeleteOldProjects {timeout:1000,min_delete_age:3*60*1000,limit:1000}, (err, flushed) ->
+            DeleteQueueManager.flushAndDeleteOldProjects {
+                timeout:1000,
+                min_delete_age:3*60*1000,
+                limit:1000 # high value, to ensure we always flush enough projects
+            }, (err, flushed) ->
                 setTimeout doFlush, (if flushed > 10 then SHORT_DELAY else LONG_DELAY)
         doFlush()
