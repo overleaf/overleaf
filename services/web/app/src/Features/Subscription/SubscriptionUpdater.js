@@ -96,16 +96,7 @@ const SubscriptionUpdater = {
         if (err != null) {
           return callback(err)
         }
-
-        // Only apply features updates to users, not user stubs
-        UserGetter.getUsers(memberIds, { _id: 1 }, function(err, users) {
-          if (err != null) {
-            return callback(err)
-          }
-
-          const userIds = users.map(u => u._id.toString())
-          async.map(userIds, FeaturesUpdater.refreshFeatures, callback)
-        })
+        async.map(memberIds, FeaturesUpdater.refreshFeatures, callback)
       }
     )
   },
@@ -131,16 +122,9 @@ const SubscriptionUpdater = {
         )
         return callback(err)
       }
-      UserGetter.getUserOrUserStubById(userId, {}, function(
-        error,
-        user,
-        isStub
-      ) {
+      UserGetter.getUser(userId, function(error, user) {
         if (error) {
           return callback(error)
-        }
-        if (isStub) {
-          return callback()
         }
         FeaturesUpdater.refreshFeatures(userId, callback)
       })

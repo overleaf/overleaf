@@ -97,8 +97,7 @@ describe('ProjectController', function() {
     this.UserGetter = {
       getUser: sinon
         .stub()
-        .callsArgWith(2, null, { lastLoginIp: '192.170.18.2' }),
-      getUserOrUserStubById: sinon.stub().callsArgWith(2, null, {})
+        .callsArgWith(2, null, { lastLoginIp: '192.170.18.2' })
     }
     this.Modules = {
       hooks: {
@@ -404,7 +403,7 @@ describe('ProjectController', function() {
       this.UserModel.findById = (id, fields, callback) => {
         callback(null, this.users[id])
       }
-      this.UserGetter.getUserOrUserStubById = (id, fields, callback) => {
+      this.UserGetter.getUser = (id, fields, callback) => {
         callback(null, this.users[id])
       }
 

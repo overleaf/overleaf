@@ -136,29 +136,6 @@ const UserGetter = {
     db.users.find({ _id: { $in: userIds } }, projection, callback)
   },
 
-  getUserOrUserStubById(userId, projection, callback) {
-    let query
-    try {
-      query = { _id: ObjectId(userId.toString()) }
-    } catch (e) {
-      return callback(new Error(e))
-    }
-    db.users.findOne(query, projection, function(error, user) {
-      if (error) {
-        return callback(error)
-      }
-      if (user) {
-        return callback(null, user, false)
-      }
-      db.userstubs.findOne(query, projection, function(error, user) {
-        if (error || user) {
-          return callback(error, user)
-        }
-        callback(null, user, true)
-      })
-    })
-  },
-
   // check for duplicate email address. This is also enforced at the DB level
   ensureUniqueEmailAddress(newEmail, callback) {
     this.getUserByAnyEmail(newEmail, function(error, user) {
@@ -192,7 +169,6 @@ var decorateFullEmails = (defaultEmail, emailsData, affiliationsData) =>
   'getUserByMainEmail',
   'getUserByAnyEmail',
   'getUsers',
-  'getUserOrUserStubById',
   'ensureUniqueEmailAddress'
 ].map(method =>
   metrics.timeAsyncMethod(UserGetter, method, 'mongo.UserGetter', logger)

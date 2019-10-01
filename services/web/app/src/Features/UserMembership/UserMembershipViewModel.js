@@ -34,16 +34,9 @@ module.exports = UserMembershipViewModel = {
 
     const userId = userOrIdOrEmail
     const projection = { email: 1, first_name: 1, last_name: 1 }
-    return UserGetter.getUserOrUserStubById(userId, projection, function(
-      error,
-      user,
-      isStub
-    ) {
+    return UserGetter.getUser(userId, projection, function(error, user) {
       if (error != null || user == null) {
         return callback(null, buildUserViewModelWithId(userId.toString()))
-      }
-      if (isStub) {
-        return callback(null, buildUserViewModelWithStub(user))
       }
       return callback(null, buildUserViewModel(user))
     })
@@ -64,9 +57,5 @@ var buildUserViewModel = function(user, isInvite) {
 }
 
 var buildUserViewModelWithEmail = email => buildUserViewModel({ email }, true)
-
-var buildUserViewModelWithStub = user =>
-  // user stubs behave as invites
-  buildUserViewModel(user, true)
 
 var buildUserViewModelWithId = id => buildUserViewModel({ _id: id }, false)

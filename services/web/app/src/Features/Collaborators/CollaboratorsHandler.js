@@ -164,7 +164,7 @@ const CollaboratorsHandler = {
       members,
       3,
       (member, cb) =>
-        UserGetter.getUserOrUserStubById(
+        UserGetter.getUser(
           member.id,
           CollaboratorsHandler.USER_PROJECTION,
           function(error, user) {

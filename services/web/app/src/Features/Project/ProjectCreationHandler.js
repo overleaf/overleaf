@@ -117,10 +117,7 @@ const ProjectCreationHandler = {
       err,
       user
     ) {
-      if (user != null) {
-        // It's possible the owner_id is a UserStub
-        project.spellCheckLanguage = user.ace.spellCheckLanguage
-      }
+      project.spellCheckLanguage = user.ace.spellCheckLanguage
       return project.save(function(err) {
         if (err != null) {
           return callback(err)

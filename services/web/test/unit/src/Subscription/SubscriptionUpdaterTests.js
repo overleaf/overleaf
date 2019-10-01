@@ -19,10 +19,6 @@ describe('SubscriptionUpdater', function() {
     this.adminUser = { _id: (this.adminuser_id = '5208dd34438843e2db000007') }
     this.otherUserId = '5208dd34438842e2db000005'
     this.allUserIds = ['13213', 'dsadas', 'djsaiud89']
-    this.userStub = {
-      _id: 'mock-user-stub-id',
-      email: 'mock-stub-email@baz.com'
-    }
     this.subscription = {
       _id: '111111111111111111111111',
       admin_id: this.adminUser._id,
@@ -86,7 +82,7 @@ describe('SubscriptionUpdater', function() {
         const users = memberIds.map(id => ({ _id: id }))
         callback(null, users)
       },
-      getUserOrUserStubById: sinon.stub()
+      getUser: sinon.stub()
     }
 
     this.ReferalFeatures = { getBonusFeatures: sinon.stub().callsArgWith(1) }
@@ -392,7 +388,7 @@ describe('SubscriptionUpdater', function() {
   describe('removeUserFromGroups', function() {
     beforeEach(function() {
       this.FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
-      this.UserGetter.getUserOrUserStubById.yields(null, {}, false)
+      this.UserGetter.getUser.yields(null, {})
       this.fakeSubscriptions = [{ _id: 'fake-id-1' }, { _id: 'fake-id-2' }]
       this.SubscriptionLocator.getMemberSubscriptions.yields(
         null,
@@ -432,18 +428,6 @@ describe('SubscriptionUpdater', function() {
           this.FeaturesUpdater.refreshFeatures
             .calledWith(this.otherUserId)
             .should.equal(true)
-          done()
-        }
-      )
-    })
-
-    it('should not update features for user stubs', function(done) {
-      this.UserGetter.getUserOrUserStubById.yields(null, {}, true)
-      this.SubscriptionUpdater.removeUserFromGroup(
-        this.subscription._id,
-        this.userStub._id,
-        () => {
-          this.FeaturesUpdater.refreshFeatures.called.should.equal(false)
           done()
         }
       )

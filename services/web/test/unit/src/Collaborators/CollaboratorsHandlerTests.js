@@ -206,22 +206,20 @@ describe('CollaboratorsHandler', function() {
             source: 'invite'
           }
         ])
-      this.UserGetter.getUserOrUserStubById = sinon.stub()
-      this.UserGetter.getUserOrUserStubById
+      this.UserGetter.getUser = sinon.stub()
+      this.UserGetter.getUser
         .withArgs('read-only-ref-1')
         .yields(null, { _id: 'read-only-ref-1' })
-      this.UserGetter.getUserOrUserStubById
+      this.UserGetter.getUser
         .withArgs('read-only-ref-2')
         .yields(null, { _id: 'read-only-ref-2' })
-      this.UserGetter.getUserOrUserStubById
+      this.UserGetter.getUser
         .withArgs('read-write-ref-1')
         .yields(null, { _id: 'read-write-ref-1' })
-      this.UserGetter.getUserOrUserStubById
+      this.UserGetter.getUser
         .withArgs('read-write-ref-2')
         .yields(null, { _id: 'read-write-ref-2' })
-      this.UserGetter.getUserOrUserStubById
-        .withArgs('doesnt-exist')
-        .yields(null, null)
+      this.UserGetter.getUser.withArgs('doesnt-exist').yields(null, null)
       return this.CollaboratorHandler.getMembersWithPrivilegeLevels(
         this.project_id,
         this.callback
@@ -272,22 +270,20 @@ describe('CollaboratorsHandler', function() {
             source: 'invite'
           }
         ])
-      this.UserGetter.getUserOrUserStubById = sinon.stub()
-      this.UserGetter.getUserOrUserStubById
+      this.UserGetter.getUser = sinon.stub()
+      this.UserGetter.getUser
         .withArgs('read-only-ref-1')
         .yields(null, { _id: 'read-only-ref-1' })
-      this.UserGetter.getUserOrUserStubById
+      this.UserGetter.getUser
         .withArgs('read-only-ref-2')
         .yields(null, { _id: 'read-only-ref-2' })
-      this.UserGetter.getUserOrUserStubById
+      this.UserGetter.getUser
         .withArgs('read-write-ref-1')
         .yields(null, { _id: 'read-write-ref-1' })
-      this.UserGetter.getUserOrUserStubById
+      this.UserGetter.getUser
         .withArgs('read-write-ref-2')
         .yields(null, { _id: 'read-write-ref-2' })
-      this.UserGetter.getUserOrUserStubById
-        .withArgs('doesnt-exist')
-        .yields(null, null)
+      this.UserGetter.getUser.withArgs('doesnt-exist').yields(null, null)
       return this.CollaboratorHandler.getInvitedMembersWithPrivilegeLevels(
         this.project_id,
         this.callback
@@ -336,22 +332,20 @@ describe('CollaboratorsHandler', function() {
             source: 'invite'
           }
         ])
-      this.UserGetter.getUserOrUserStubById = sinon.stub()
-      this.UserGetter.getUserOrUserStubById
+      this.UserGetter.getUser = sinon.stub()
+      this.UserGetter.getUser
         .withArgs('read-only-ref-1')
         .yields(null, { _id: 'read-only-ref-1' })
-      this.UserGetter.getUserOrUserStubById
+      this.UserGetter.getUser
         .withArgs('read-only-ref-2')
         .yields(null, { _id: 'read-only-ref-2' })
-      this.UserGetter.getUserOrUserStubById
+      this.UserGetter.getUser
         .withArgs('read-write-ref-1')
         .yields(null, { _id: 'read-write-ref-1' })
-      this.UserGetter.getUserOrUserStubById
+      this.UserGetter.getUser
         .withArgs('read-write-ref-2')
         .yields(null, { _id: 'read-write-ref-2' })
-      this.UserGetter.getUserOrUserStubById
-        .withArgs('doesnt-exist')
-        .yields(null, null)
+      this.UserGetter.getUser.withArgs('doesnt-exist').yields(null, null)
       return this.CollaboratorHandler.getTokenMembersWithPrivilegeLevels(
         this.project_id,
         this.callback

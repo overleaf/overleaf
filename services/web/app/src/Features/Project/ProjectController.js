@@ -933,7 +933,7 @@ const ProjectController = {
     async.eachSeries(
       userIds,
       (userId, cb) => {
-        UserGetter.getUserOrUserStubById(
+        UserGetter.getUser(
           userId,
           { first_name: 1, last_name: 1, email: 1 },
           (error, user) => {
