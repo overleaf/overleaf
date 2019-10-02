@@ -5,6 +5,10 @@ const { db, ObjectId } = require('../../infrastructure/mongojs')
 const bcrypt = require('bcrypt')
 const EmailHelper = require('../Helpers/EmailHelper')
 const V1Handler = require('../V1/V1Handler')
+const {
+  InvalidEmailError,
+  InvalidPasswordError
+} = require('./AuthenticationErrors')
 
 const BCRYPT_ROUNDS = Settings.security.bcryptRounds || 12
 const BCRYPT_MINOR_VERSION = Settings.security.bcryptMinorVersion || 'a'
@@ -55,7 +59,7 @@ module.exports = AuthenticationManager = {
   validateEmail(email) {
     const parsed = EmailHelper.parseEmail(email)
     if (!parsed) {
-      return { message: 'email not valid' }
+      return new InvalidEmailError({ message: 'email not valid' })
     }
     return null
   },
@@ -65,7 +69,10 @@ module.exports = AuthenticationManager = {
   // returns null on success, or an error string.
   validatePassword(password) {
     if (password == null) {
-      return { message: 'password not set' }
+      return new InvalidPasswordError({
+        message: 'password not set',
+        info: { code: 'not_set' }
+      })
     }
 
     let allowAnyChars, min, max
@@ -86,16 +93,25 @@ module.exports = AuthenticationManager = {
     }
 
     if (password.length < min) {
-      return { message: 'password is too short' }
+      return new InvalidPasswordError({
+        message: 'password is too short',
+        info: { code: 'too_short' }
+      })
     }
     if (password.length > max) {
-      return { message: 'password is too long' }
+      return new InvalidPasswordError({
+        message: 'password is too long',
+        info: { code: 'too_long' }
+      })
     }
     if (
       !allowAnyChars &&
       !AuthenticationManager._passwordCharactersAreValid(password)
     ) {
-      return { message: 'password contains an invalid character' }
+      return new InvalidPasswordError({
+        message: 'password contains an invalid character',
+        info: { code: 'invalid_character' }
+      })
     }
     return null
   },
@@ -128,9 +144,9 @@ module.exports = AuthenticationManager = {
   },
 
   setUserPasswordInV2(userId, password, callback) {
-    const validation = this.validatePassword(password)
-    if (validation) {
-      return callback(validation.message)
+    const validationError = this.validatePassword(password)
+    if (validationError) {
+      return callback(validationError)
     }
     this.hashPassword(password, function(error, hash) {
       if (error) {
@@ -159,9 +175,9 @@ module.exports = AuthenticationManager = {
   },
 
   setUserPasswordInV1(v1UserId, password, callback) {
-    const validation = this.validatePassword(password)
-    if (validation) {
-      return callback(validation.message)
+    const validationError = this.validatePassword(password)
+    if (validationError) {
+      return callback(validationError.message)
     }
 
     V1Handler.doPasswordReset(v1UserId, password, function(error, reset) {
