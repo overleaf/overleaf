@@ -87,8 +87,9 @@ define(['base'], App =>
     }
 
     $scope.linkInstitutionAcct = function(email, institutionId) {
+      _resetMakingRequestType()
       $scope.ui.isMakingRequest = true
-      $scope.ui.isLinkingInstitution = true
+      $scope.ui.isProcessing = true
       $window.location.href = `${
         window.samlInitPath
       }?university_id=${institutionId}&auto=true&email=${email}`
@@ -197,6 +198,7 @@ define(['base'], App =>
     }
 
     $scope.resendConfirmationEmail = function(userEmail) {
+      _resetMakingRequestType()
       $scope.ui.isResendingConfirmation = true
       return _monitorRequest(
         UserAffiliationsDataService.resendConfirmationEmail(userEmail.email)
@@ -232,16 +234,20 @@ define(['base'], App =>
       return ($scope.ui.showManualUniversitySelectionUI = false)
     }
 
+    var _resetMakingRequestType = function() {
+      $scope.ui.isLoadingEmails = false
+      $scope.ui.isProcessing = false
+      $scope.ui.isResendingConfirmation = false
+    }
+
     var _reset = function() {
       $scope.ui = {
         hasError: false,
         errorMessage: '',
         showChangeAffiliationUI: false,
         isMakingRequest: false,
-        isLinkingInstitution: false,
         isLoadingEmails: false,
-        isAddingNewEmail: false,
-        isResendingConfirmation: false
+        isAddingNewEmail: false
       }
       _resetAffiliationToChange()
       _resetNewAffiliation()
@@ -277,6 +283,7 @@ define(['base'], App =>
 
     // Populates the emails table
     var _getUserEmails = function() {
+      _resetMakingRequestType()
       $scope.ui.isLoadingEmails = true
       return _monitorRequest(UserAffiliationsDataService.getUserEmails())
         .then(emails => {

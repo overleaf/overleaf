@@ -178,7 +178,10 @@ form.row(
 					td.text-center(colspan="3", ng-if="ui.isResendingConfirmation") 
 						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
 						| &nbsp;#{translate("sending")}...
-					td.text-center(colspan="3", ng-if="!ui.isLoadingEmails && !ui.isResendingConfirmation")
+					td.text-center.text-capitalize(colspan="3", ng-if="ui.isProcessing") 
+						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
+						| &nbsp;#{translate("processing")}
+					td.text-center(colspan="3", ng-if="!ui.isLoadingEmails && !ui.isResendingConfirmation && !ui.isProcessing")
 						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
 						| &nbsp;#{translate("saving")}
 				tr.affiliations-table-error-row(
