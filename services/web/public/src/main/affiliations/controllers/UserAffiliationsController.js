@@ -28,7 +28,21 @@ define(['base'], App =>
     $scope.closeInstitutionNotification = type => {
       $scope.hideInstitutionNotifications[type] = true
     }
-
+    $scope.hasSamlFeature = ExposedSettings.hasSamlFeature
+    $scope.samlInitPath = ExposedSettings.samlInitPath
+    $scope.shouldShowRolesAndAddEmailButton = () => {
+      const newAffiliation = $scope.newAffiliation
+      const hasSamlFeature = $scope.hasSamlFeature
+      return (
+        !newAffiliation ||
+        (newAffiliation && !newAffiliation.university) ||
+        (!hasSamlFeature && newAffiliation && newAffiliation.university) ||
+        (hasSamlFeature &&
+          newAffiliation &&
+          newAffiliation.university &&
+          !newAffiliation.university.ssoEnabled)
+      )
+    }
     const LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
     const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\ ".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA -Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
@@ -91,7 +105,7 @@ define(['base'], App =>
       $scope.ui.isMakingRequest = true
       $scope.ui.isProcessing = true
       $window.location.href = `${
-        window.samlInitPath
+        $scope.samlInitPath
       }?university_id=${institutionId}&auto=true&email=${email}`
     }
 

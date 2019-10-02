@@ -38,6 +38,7 @@ const Path = require('path')
 const Features = require('./Features')
 Modules = require('./Modules')
 const moment = require('moment')
+const lodash = require('lodash')
 
 const jsPath = Settings.useMinifiedJs ? '/minjs/' : '/js/'
 
@@ -529,6 +530,8 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
     res.locals.ExposedSettings = {
       isOverleaf: Settings.overleaf != null,
       appName: Settings.appName,
+      hasSamlFeature: Features.hasFeature('saml'),
+      samlInitPath: lodash.get(Settings, ['saml', 'ukamf', 'initPath']),
       siteUrl: Settings.siteUrl,
       recaptchaSiteKeyV3:
         Settings.recaptcha != null ? Settings.recaptcha.siteKeyV3 : undefined,

@@ -144,7 +144,6 @@ const UserPagesController = {
           req
         ),
         oauthUseV2: Settings.oauthUseV2 || false,
-        samlInitPath: _.get(Settings, ['saml', 'ukamf', 'initPath']),
         institutionLinked,
         institutionNotLinked,
         samlBeta: req.session.samlBeta,
