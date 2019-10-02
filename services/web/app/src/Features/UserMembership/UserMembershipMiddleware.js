@@ -175,6 +175,9 @@ let UserMembershipMiddleware = {
         new HttpErrors.NotFoundError(`incorrect entity name: ${entityName}`)
       )
     }
+    if (entityName === 'Template') {
+      req.params.templateId = req.params.id
+    }
     // run the list of middleware functions in series. This is essencially
     // a poor man's middleware runner
     async.eachSeries(middleware, (fn, callback) => fn(req, res, callback), next)
