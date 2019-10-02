@@ -11,7 +11,7 @@
  */
 const sinon = require('sinon')
 const chai = require('chai')
-const { should, expect, assert } = chai
+const { expect } = chai
 const SandboxedModule = require('sandboxed-module')
 const EventEmitter = require('events')
 
