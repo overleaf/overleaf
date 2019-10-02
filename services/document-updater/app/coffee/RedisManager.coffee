@@ -295,8 +295,9 @@ module.exports = RedisManager =
 		, callback
 
 	queueFlushAndDeleteProject: (project_id, callback) ->
-		# store the project id in a sorted set ordered by time
-		rclient.zadd keys.flushAndDeleteQueue(), Date.now(), project_id, callback
+		# store the project id in a sorted set ordered by time with a random offset to smooth out spikes
+		SMOOTHING_OFFSET = if Settings.smoothingOffset > 0 then Math.round(Settings.smoothingOffset * Math.random()) else 0
+		rclient.zadd keys.flushAndDeleteQueue(), Date.now() + SMOOTHING_OFFSET, project_id, callback
 
 	getNextProjectToFlushAndDelete: (cutoffTime, callback = (error, key, timestamp)->) ->
 		# find the oldest queued flush that is before the cutoff time

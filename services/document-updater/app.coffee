@@ -14,6 +14,7 @@ if Settings.sentry?.dsn?
 
 RedisManager = require('./app/js/RedisManager')
 DispatchManager = require('./app/js/DispatchManager')
+DeleteQueueManager = require('./app/js/DeleteQueueManager')
 Errors = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
 mongojs = require "./app/js/mongojs"
@@ -142,7 +143,12 @@ host = Settings.internal.documentupdater.host or "localhost"
 if !module.parent # Called directly
 	app.listen port, host, ->
 		logger.info "Document-updater starting up, listening on #{host}:#{port}"
+		if Settings.continuousBackgroundFlush
+			logger.info "Starting continuous background flush"
+			DeleteQueueManager.startBackgroundFlush()
+
 module.exports = app
 
 for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
 	process.on signal, shutdownCleanly(signal)
+

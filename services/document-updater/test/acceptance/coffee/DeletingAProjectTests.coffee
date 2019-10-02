@@ -147,9 +147,8 @@ describe "Deleting a project", ->
 						@statusCode = res.statusCode
 						# after deleting the project and putting it in the queue, flush the queue
 						setTimeout () ->
-							DocUpdaterClient.flushOldProjects (error, res, body) =>
-							setTimeout done, 1000 # allow time for the flush to complete
-						, 100
+							DocUpdaterClient.flushOldProjects done
+						, 2000
 				, 200
 
 		after ->
