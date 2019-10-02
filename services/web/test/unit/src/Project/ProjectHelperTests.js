@@ -107,6 +107,130 @@ describe('ProjectHelper', function() {
     })
   })
 
+  describe('calculateArchivedArray', function() {
+    describe('project.archived being an array', function() {
+      it('returns an array adding the current user id when archiving', function() {
+        const project = { archived: [] }
+        const result = this.ProjectHelper.calculateArchivedArray(
+          project,
+          ObjectId('5c922599cdb09e014aa7d499'),
+          'ARCHIVE'
+        )
+        expect(result).to.deep.equal([ObjectId('5c922599cdb09e014aa7d499')])
+      })
+
+      it('returns an array without the current user id when unarchiving', function() {
+        const project = { archived: [ObjectId('5c922599cdb09e014aa7d499')] }
+        const result = this.ProjectHelper.calculateArchivedArray(
+          project,
+          ObjectId('5c922599cdb09e014aa7d499'),
+          'UNARCHIVE'
+        )
+        expect(result).to.deep.equal([])
+      })
+    })
+
+    describe('project.archived being a boolean and being true', function() {
+      it('returns an array of all associated user ids when archiving', function() {
+        const project = {
+          archived: true,
+          owner_ref: this.user._id,
+          collaberator_refs: [
+            ObjectId('4f2cfb341eb5855a5b000f8b'),
+            ObjectId('5c45f3bd425ead01488675aa')
+          ],
+          readOnly_refs: [ObjectId('5c92243fcdb09e014aa7d487')],
+          tokenAccessReadAndWrite_refs: [ObjectId('5c922599cdb09e014aa7d499')],
+          tokenAccessReadOnly_refs: []
+        }
+
+        const result = this.ProjectHelper.calculateArchivedArray(
+          project,
+          this.user._id,
+          'ARCHIVE'
+        )
+        expect(result).to.deep.equal([
+          this.user._id,
+          ObjectId('4f2cfb341eb5855a5b000f8b'),
+          ObjectId('5c45f3bd425ead01488675aa'),
+          ObjectId('5c92243fcdb09e014aa7d487'),
+          ObjectId('5c922599cdb09e014aa7d499')
+        ])
+      })
+
+      it('returns an array of all associated users without the current user id when unarchived', function() {
+        const project = {
+          archived: true,
+          owner_ref: this.user._id,
+          collaberator_refs: [
+            ObjectId('4f2cfb341eb5855a5b000f8b'),
+            ObjectId('5c45f3bd425ead01488675aa'),
+            ObjectId('5c922599cdb09e014aa7d499')
+          ],
+          readOnly_refs: [ObjectId('5c92243fcdb09e014aa7d487')],
+          tokenAccessReadAndWrite_refs: [ObjectId('5c922599cdb09e014aa7d499')],
+          tokenAccessReadOnly_refs: []
+        }
+
+        const result = this.ProjectHelper.calculateArchivedArray(
+          project,
+          this.user._id,
+          'UNARCHIVE'
+        )
+        expect(result).to.deep.equal([
+          ObjectId('4f2cfb341eb5855a5b000f8b'),
+          ObjectId('5c45f3bd425ead01488675aa'),
+          ObjectId('5c922599cdb09e014aa7d499'),
+          ObjectId('5c92243fcdb09e014aa7d487')
+        ])
+      })
+    })
+
+    describe('project.archived being a boolean and being false', function() {
+      it('returns an array adding the current user id when archiving', function() {
+        const project = { archived: false }
+        const result = this.ProjectHelper.calculateArchivedArray(
+          project,
+          ObjectId('5c922599cdb09e014aa7d499'),
+          'ARCHIVE'
+        )
+        expect(result).to.deep.equal([ObjectId('5c922599cdb09e014aa7d499')])
+      })
+
+      it('returns an empty array when unarchiving', function() {
+        const project = { archived: false }
+        const result = this.ProjectHelper.calculateArchivedArray(
+          project,
+          ObjectId('5c922599cdb09e014aa7d499'),
+          'UNARCHIVE'
+        )
+        expect(result).to.deep.equal([])
+      })
+    })
+
+    describe('project.archived not being set', function() {
+      it('returns an array adding the current user id when archiving', function() {
+        const project = { archived: undefined }
+        const result = this.ProjectHelper.calculateArchivedArray(
+          project,
+          ObjectId('5c922599cdb09e014aa7d499'),
+          'ARCHIVE'
+        )
+        expect(result).to.deep.equal([ObjectId('5c922599cdb09e014aa7d499')])
+      })
+
+      it('returns an empty array when unarchiving', function() {
+        const project = { archived: undefined }
+        const result = this.ProjectHelper.calculateArchivedArray(
+          project,
+          ObjectId('5c922599cdb09e014aa7d499'),
+          'UNARCHIVE'
+        )
+        expect(result).to.deep.equal([])
+      })
+    })
+  })
+
   describe('compilerFromV1Engine', function() {
     it('returns the correct engine for latex_dvipdf', function() {
       return expect(

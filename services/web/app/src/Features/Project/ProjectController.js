@@ -143,8 +143,38 @@ const ProjectController = {
         cb
       )
     } else {
-      ProjectDeleter.archiveProject(projectId, cb)
+      ProjectDeleter.legacyArchiveProject(projectId, cb)
     }
+  },
+
+  archiveProject(req, res, next) {
+    const projectId = req.params.Project_id
+    logger.log({ projectId }, 'received request to archive project')
+
+    const user = AuthenticationController.getSessionUser(req)
+
+    ProjectDeleter.archiveProject(projectId, user._id, function(err) {
+      if (err != null) {
+        return next(err)
+      } else {
+        return res.sendStatus(200)
+      }
+    })
+  },
+
+  unarchiveProject(req, res, next) {
+    const projectId = req.params.Project_id
+    logger.log({ projectId }, 'received request to unarchive project')
+
+    const user = AuthenticationController.getSessionUser(req)
+
+    ProjectDeleter.unarchiveProject(projectId, user._id, function(err) {
+      if (err != null) {
+        return next(err)
+      } else {
+        return res.sendStatus(200)
+      }
+    })
   },
 
   expireDeletedProjectsAfterDuration(req, res) {

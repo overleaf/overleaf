@@ -18,10 +18,22 @@ describe('ProjectDeleter', function() {
       _id: this.project_id,
       lastUpdated: new Date(),
       rootFolder: [],
-      collaberator_refs: ['collab1', 'collab2'],
-      readOnly_refs: ['readOnly1', 'readOnly2'],
-      tokenAccessReadAndWrite_refs: ['tokenCollab1', 'tokenCollab2'],
-      tokenAccessReadOnly_refs: ['tokenReadOnly1', 'tokenReadOnly2'],
+      collaberator_refs: [
+        ObjectId('5b895d372f4189011c2f5afc'),
+        ObjectId('5b8d40073ead20011caca726')
+      ],
+      readOnly_refs: [
+        ObjectId('5b8d4602b2f786011c4fb244'),
+        ObjectId('5b8d4a57c1cd2b011c39161c')
+      ],
+      tokenAccessReadAndWrite_refs: [
+        ObjectId('5b8d5663a26df3035ea0d5a1'),
+        ObjectId('5b8e8676373c14011c2cad3c')
+      ],
+      tokenAccessReadOnly_refs: [
+        ObjectId('5b9b801b5dd22c011ba5d9b3'),
+        ObjectId('5bc5adae1cad8d011fd4060a')
+      ],
       owner_ref: ObjectId('588aaaaaaaaaaaaaaaaaaaaa'),
       tokens: {
         readOnly: 'wombat',
@@ -111,6 +123,10 @@ describe('ProjectDeleter', function() {
       }
     }
 
+    this.ProjectHelper = {
+      calculateArchivedArray: sinon.stub()
+    }
+
     this.db = {
       projects: {
         insert: sinon.stub().yields()
@@ -128,6 +144,7 @@ describe('ProjectDeleter', function() {
       requires: {
         '../Editor/EditorController': this.editorController,
         '../../models/Project': { Project: Project },
+        './ProjectHelper': this.ProjectHelper,
         '../../models/DeletedProject': { DeletedProject: DeletedProject },
         '../DocumentUpdater/DocumentUpdaterHandler': this
           .documentUpdaterHandler,
@@ -409,7 +426,7 @@ describe('ProjectDeleter', function() {
     })
   })
 
-  describe('archiveProject', function() {
+  describe('legacyArchiveProject', function() {
     beforeEach(function() {
       this.ProjectMock.expects('update')
         .withArgs(
@@ -424,10 +441,58 @@ describe('ProjectDeleter', function() {
     })
 
     it('should update the project', function(done) {
-      this.ProjectDeleter.archiveProject(this.project_id, () => {
+      this.ProjectDeleter.legacyArchiveProject(this.project_id, () => {
         this.ProjectMock.verify()
         done()
       })
+    })
+  })
+
+  describe('archiveProject', function() {
+    beforeEach(function() {
+      let archived = [ObjectId(this.user._id)]
+      this.ProjectHelper.calculateArchivedArray.returns(archived)
+
+      this.ProjectMock.expects('findOne')
+        .withArgs({ _id: this.project_id })
+        .chain('exec')
+        .resolves(this.project)
+
+      this.ProjectMock.expects('update')
+        .withArgs({ _id: this.project_id }, { $set: { archived: archived } })
+        .resolves()
+    })
+
+    it('should update the project', async function() {
+      await this.ProjectDeleter.promises.archiveProject(
+        this.project_id,
+        this.user._id
+      )
+      this.ProjectMock.verify()
+    })
+  })
+
+  describe('unarchiveProject', function() {
+    beforeEach(function() {
+      let archived = [ObjectId(this.user._id)]
+      this.ProjectHelper.calculateArchivedArray.returns(archived)
+
+      this.ProjectMock.expects('findOne')
+        .withArgs({ _id: this.project_id })
+        .chain('exec')
+        .resolves(this.project)
+
+      this.ProjectMock.expects('update')
+        .withArgs({ _id: this.project_id }, { $set: { archived: archived } })
+        .resolves()
+    })
+
+    it('should update the project', async function() {
+      await this.ProjectDeleter.promises.unarchiveProject(
+        this.project_id,
+        this.user._id
+      )
+      this.ProjectMock.verify()
     })
   })
 

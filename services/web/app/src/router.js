@@ -450,11 +450,20 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
 
   webRouter.post(
+    '/Project/:Project_id/archive',
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    ProjectController.archiveProject
+  )
+  webRouter.delete(
+    '/Project/:Project_id/archive',
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    ProjectController.unarchiveProject
+  )
+  webRouter.post(
     '/project/:project_id/trash',
     AuthorizationMiddleware.ensureUserCanReadProject,
     ProjectController.trashProject
   )
-
   webRouter.delete(
     '/project/:project_id/trash',
     AuthorizationMiddleware.ensureUserCanReadProject,
@@ -467,6 +476,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthorizationMiddleware.ensureUserCanAdminProject,
     ProjectController.deleteProject
   )
+
   webRouter.post(
     '/Project/:Project_id/restore',
     AuthenticationController.requireLogin(),

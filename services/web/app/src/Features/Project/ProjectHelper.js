@@ -18,6 +18,7 @@ const ENGINE_TO_COMPILER_MAP = {
   lualatex: 'lualatex'
 }
 const { ObjectId } = require('../../infrastructure/mongojs')
+const _ = require('lodash')
 const { promisify } = require('util')
 
 const ProjectHelper = {
@@ -50,6 +51,40 @@ const ProjectHelper = {
       ProjectHelper.isArchived(project, userId) ||
       ProjectHelper.isTrashed(project, userId)
     )
+  },
+
+  allCollaborators(project) {
+    return _.unionWith(
+      [project.owner_ref],
+      project.collaberator_refs,
+      project.readOnly_refs,
+      project.tokenAccessReadAndWrite_refs,
+      project.tokenAccessReadOnly_refs,
+      ProjectHelper._objectIdEquals
+    )
+  },
+
+  calculateArchivedArray(project, userId, action) {
+    let archived = project.archived
+    userId = ObjectId(userId)
+
+    if (archived === true) {
+      archived = ProjectHelper.allCollaborators(project)
+    } else if (!archived) {
+      archived = []
+    }
+
+    if (action === 'ARCHIVE') {
+      archived = _.unionWith(archived, [userId], ProjectHelper._objectIdEquals)
+    } else if (action === 'UNARCHIVE') {
+      archived = archived.filter(
+        id => !ProjectHelper._objectIdEquals(id, userId)
+      )
+    } else {
+      throw new Error('Unrecognised action')
+    }
+
+    return archived
   },
 
   ensureNameIsUnique(nameList, name, suffixes, maxLength, callback) {
@@ -90,6 +125,11 @@ const ProjectHelper = {
         new Error(`Failed to generate a unique name for: ${name}`)
       )
     }
+  },
+
+  _objectIdEquals(firstVal, secondVal) {
+    // For use as a comparator for unionWith
+    return firstVal.toString() === secondVal.toString()
   },
 
   _addSuffixToProjectName(name, suffix, maxLength) {
