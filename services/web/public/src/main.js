@@ -30,6 +30,7 @@ define([
   'main/subscription/team-invite-controller',
   'main/contact-us',
   'main/learn',
+  'main/exposed-settings',
   'main/affiliations/components/affiliationForm',
   'main/affiliations/controllers/UserAffiliationsController',
   'main/affiliations/factories/UserAffiliationsDataService',

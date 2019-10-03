@@ -278,6 +278,51 @@ const ProjectEntityHandler = {
     return DocstoreManager.getDoc(project_id, doc_id, options, callback)
   },
 
+  getDocPathByProjectIdAndDocId(project_id, doc_id, callback) {
+    logger.log({ project_id, doc_id }, 'getting path for doc and project')
+    return ProjectGetter.getProjectWithoutDocLines(project_id, function(
+      err,
+      project
+    ) {
+      if (err != null) {
+        return callback(err)
+      }
+      if (project == null) {
+        return callback(new Errors.NotFoundError('no project'))
+      }
+      function recursivelyFindDocInFolder(basePath, doc_id, folder) {
+        let docInCurrentFolder = Array.from(folder.docs || []).find(
+          currentDoc => currentDoc._id.toString() === doc_id.toString()
+        )
+        if (docInCurrentFolder != null) {
+          return path.join(basePath, docInCurrentFolder.name)
+        } else {
+          let docPath, childFolder
+          for (childFolder of Array.from(folder.folders || [])) {
+            docPath = recursivelyFindDocInFolder(
+              path.join(basePath, childFolder.name),
+              doc_id,
+              childFolder
+            )
+            if (docPath != null) {
+              return docPath
+            }
+          }
+          return null
+        }
+      }
+      const docPath = recursivelyFindDocInFolder(
+        '/',
+        doc_id,
+        project.rootFolder[0]
+      )
+      if (docPath == null) {
+        return callback(new Errors.NotFoundError('no doc'))
+      }
+      return callback(null, docPath)
+    })
+  },
+
   _getAllFolders(project_id, callback) {
     logger.log({ project_id }, 'getting all folders for project')
     return ProjectGetter.getProjectWithoutDocLines(project_id, function(

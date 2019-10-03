@@ -20,6 +20,7 @@ let ProjectEntityUpdateHandler, self
 const _ = require('lodash')
 const async = require('async')
 const logger = require('logger-sharelatex')
+const Settings = require('settings-sharelatex')
 const path = require('path')
 const { Doc } = require('../../models/Doc')
 const DocstoreManager = require('../Docstore/DocstoreManager')
@@ -38,6 +39,12 @@ const SafePath = require('./SafePath')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 
 const LOCK_NAMESPACE = 'sequentialProjectStructureUpdateLock'
+
+const validRootDocExtensions = Settings.validRootDocExtensions
+const validRootDocRegExp = new RegExp(
+  `^\\.(${validRootDocExtensions.join('|')})$`,
+  'i'
+)
 
 const wrapWithLock = function(methodWithoutLock) {
   // This lock is used to make sure that the project structure updates are made
@@ -348,11 +355,33 @@ module.exports = ProjectEntityUpdateHandler = self = {
       callback = function(error) {}
     }
     logger.log({ project_id, rootDocId: newRootDocID }, 'setting root doc')
-    return Project.update(
-      { _id: project_id },
-      { rootDoc_id: newRootDocID },
-      {},
-      callback
+    if (project_id == null || newRootDocID == null) {
+      return callback(
+        new Errors.InvalidError('missing arguments (project or doc)')
+      )
+    }
+    ProjectEntityHandler.getDocPathByProjectIdAndDocId(
+      project_id,
+      newRootDocID,
+      function(err, docPath) {
+        if (err != null) {
+          return callback(err)
+        }
+        if (ProjectEntityUpdateHandler.isPathValidForRootDoc(docPath)) {
+          return Project.update(
+            { _id: project_id },
+            { rootDoc_id: newRootDocID },
+            {},
+            callback
+          )
+        } else {
+          return callback(
+            new Errors.UnsupportedFileTypeError(
+              'invalid file extension for root doc'
+            )
+          )
+        }
+      }
     )
   },
 
@@ -1400,6 +1429,11 @@ module.exports = ProjectEntityUpdateHandler = self = {
       }
     )
   ),
+
+  isPathValidForRootDoc(docPath) {
+    let docExtension = path.extname(docPath)
+    return validRootDocRegExp.test(docExtension)
+  },
 
   _cleanUpEntity(
     project,

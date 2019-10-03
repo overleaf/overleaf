@@ -90,7 +90,7 @@ aside#left-menu.full-size(
 				select(
 					name="rootDoc_id",
 					ng-model="project.rootDoc_id",
-					ng-options="doc.doc.id as doc.path for doc in docs"
+					ng-options="doc.doc.id as doc.path for doc in getValidMainDocs()"
 				)
 
 			.form-controls

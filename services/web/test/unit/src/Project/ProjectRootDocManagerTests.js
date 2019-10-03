@@ -55,6 +55,12 @@ describe('ProjectRootDocManager', function() {
   })
 
   describe('setRootDocAutomatically', function() {
+    beforeEach(function() {
+      this.ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
+      this.ProjectEntityUpdateHandler.isPathValidForRootDoc = sinon
+        .stub()
+        .returns(true)
+    })
     describe('when there is a suitable root doc', function() {
       beforeEach(function(done) {
         this.docs = {
@@ -84,14 +90,10 @@ describe('ProjectRootDocManager', function() {
             lines: ['Hello world']
           }
         }
-
         this.ProjectEntityHandler.getAllDocs = sinon
           .stub()
           .callsArgWith(1, null, this.docs)
-        this.ProjectEntityUpdateHandler.setRootDoc = sinon
-          .stub()
-          .callsArgWith(2)
-        return this.ProjectRootDocManager.setRootDocAutomatically(
+        this.ProjectRootDocManager.setRootDocAutomatically(
           this.project_id,
           done
         )
@@ -125,9 +127,6 @@ describe('ProjectRootDocManager', function() {
         this.ProjectEntityHandler.getAllDocs = sinon
           .stub()
           .callsArgWith(1, null, this.docs)
-        this.ProjectEntityUpdateHandler.setRootDoc = sinon
-          .stub()
-          .callsArgWith(2)
         return this.ProjectRootDocManager.setRootDocAutomatically(
           this.project_id,
           this.callback
@@ -156,9 +155,6 @@ describe('ProjectRootDocManager', function() {
         this.ProjectEntityHandler.getAllDocs = sinon
           .stub()
           .callsArgWith(1, null, this.docs)
-        this.ProjectEntityUpdateHandler.setRootDoc = sinon
-          .stub()
-          .callsArgWith(2)
         return this.ProjectRootDocManager.setRootDocAutomatically(
           this.project_id,
           done
@@ -580,6 +576,7 @@ describe('ProjectRootDocManager', function() {
         .stub()
         .callsArgWith(2, null, this.project)
       this.ProjectEntityUpdateHandler.setRootDoc = sinon.stub().yields()
+      this.ProjectEntityUpdateHandler.unsetRootDoc = sinon.stub().yields()
       this.ProjectEntityHandler.getAllDocPathsFromProjectById = sinon
         .stub()
         .callsArgWith(1, null, this.docPaths)
@@ -630,9 +627,9 @@ describe('ProjectRootDocManager', function() {
             .should.equal(true)
         })
 
-        it('should null the rootDoc_id field', function() {
-          return this.ProjectEntityUpdateHandler.setRootDoc
-            .calledWith(this.project_id, null)
+        it('should unset the root doc', function() {
+          return this.ProjectEntityUpdateHandler.unsetRootDoc
+            .calledWith(this.project_id)
             .should.equal(true)
         })
 

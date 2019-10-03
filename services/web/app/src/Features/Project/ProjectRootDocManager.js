@@ -40,7 +40,7 @@ module.exports = ProjectRootDocManager = {
         (doc, path) =>
           function(cb) {
             if (
-              /\.R?tex$/.test(Path.extname(path)) &&
+              ProjectEntityUpdateHandler.isPathValidForRootDoc(path) &&
               DocumentHelper.contentHasDocumentclass(doc.lines)
             ) {
               return cb(doc._id)
@@ -232,14 +232,11 @@ module.exports = ProjectRootDocManager = {
             if (rootDocValid) {
               return callback()
             } else {
-              return ProjectEntityUpdateHandler.setRootDoc(
-                project_id,
-                null,
-                () =>
-                  ProjectRootDocManager.setRootDocAutomatically(
-                    project_id,
-                    callback
-                  )
+              return ProjectEntityUpdateHandler.unsetRootDoc(project_id, () =>
+                ProjectRootDocManager.setRootDocAutomatically(
+                  project_id,
+                  callback
+                )
               )
             }
           }

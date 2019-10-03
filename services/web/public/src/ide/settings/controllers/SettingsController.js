@@ -13,7 +13,19 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define(['base'], App =>
-  App.controller('SettingsController', function($scope, settings, ide, _) {
+  App.controller('SettingsController', function(
+    $scope,
+    ExposedSettings,
+    settings,
+    ide,
+    _
+  ) {
+    const validRootDocExtensions = ExposedSettings.validRootDocExtensions
+    const validRootDocRegExp = new RegExp(
+      `\\.(${validRootDocExtensions.join('|')})$`,
+      'i'
+    )
+
     $scope.overallThemesList = window.overallThemes
     $scope.ui = { loadingStyleSheet: false }
 
@@ -61,6 +73,21 @@ define(['base'], App =>
         $scope.settings.fontSize = newVal
       }
       return $scope.settings.fontSize.toString()
+    }
+
+    $scope.getValidMainDocs = () => {
+      let filteredDocs = []
+      if ($scope.docs) {
+        // Filter the existing docs (editable files) by accepted file extensions.
+        // It's possible that an existing project has an invalid file selected as the main one.
+        // To gracefully handle that case, make sure we also show the current main file (ignoring extension).
+        filteredDocs = $scope.docs.filter(
+          doc =>
+            validRootDocRegExp.test(doc.doc.name) ||
+            $scope.project.rootDoc_id === doc.doc.id
+        )
+      }
+      return filteredDocs
     }
 
     $scope.$watch('settings.editorTheme', (editorTheme, oldEditorTheme) => {
@@ -176,7 +203,9 @@ define(['base'], App =>
       }
       // otherwise only save changes, null values are allowed
       if (rootDoc_id !== oldRootDoc_id) {
-        return settings.saveProjectSettings({ rootDocId: rootDoc_id })
+        settings.saveProjectSettings({ rootDocId: rootDoc_id }).catch(() => {
+          $scope.project.rootDoc_id = oldRootDoc_id
+        })
       }
     })
 

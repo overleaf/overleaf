@@ -493,13 +493,49 @@ describe('ProjectEntityUpdateHandler', function() {
   })
 
   describe('setRootDoc', function() {
-    it('should call Project.update', function() {
-      const rootDoc_id = 'root-doc-id-123123'
+    beforeEach(function() {
+      this.rootDoc_id = 'root-doc-id-123123'
+      this.callback = sinon.stub()
+    })
+
+    it('should call Project.update when the doc exists and has a valid extension', function() {
       this.ProjectModel.update = sinon.stub()
-      this.ProjectEntityUpdateHandler.setRootDoc(project_id, rootDoc_id)
+      this.ProjectEntityHandler.getDocPathByProjectIdAndDocId = sinon
+        .stub()
+        .yields(null, `/main.tex`)
+
+      this.ProjectEntityUpdateHandler.setRootDoc(project_id, this.rootDoc_id)
       return this.ProjectModel.update
-        .calledWith({ _id: project_id }, { rootDoc_id })
+        .calledWith({ _id: project_id }, { rootDoc_id: this.rootDoc_id })
         .should.equal(true)
+    })
+
+    it("should not call Project.update when the doc doesn't exist", function() {
+      this.ProjectModel.update = sinon.stub()
+      this.ProjectEntityHandler.getDocPathByProjectIdAndDocId = sinon
+        .stub()
+        .yields(Errors.NotFoundError)
+
+      this.ProjectEntityUpdateHandler.setRootDoc(project_id, this.rootDoc_id)
+      return this.ProjectModel.update
+        .calledWith({ _id: project_id }, { rootDoc_id: this.rootDoc_id })
+        .should.equal(false)
+    })
+
+    it('should call the callback with an UnsupportedFileTypeError when the doc has an unaccepted file extension', function() {
+      this.ProjectModel.update = sinon.stub()
+      this.ProjectEntityHandler.getDocPathByProjectIdAndDocId = sinon
+        .stub()
+        .yields(null, `/foo/bar.baz`)
+
+      this.ProjectEntityUpdateHandler.setRootDoc(
+        project_id,
+        this.rootDoc_id,
+        this.callback
+      )
+      return expect(this.callback.firstCall.args[0]).to.be.an.instanceof(
+        Errors.UnsupportedFileTypeError
+      )
     })
   })
 

@@ -533,7 +533,8 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
       recaptchaSiteKeyV3:
         Settings.recaptcha != null ? Settings.recaptcha.siteKeyV3 : undefined,
       recaptchaDisabled:
-        Settings.recaptcha != null ? Settings.recaptcha.disabled : undefined
+        Settings.recaptcha != null ? Settings.recaptcha.disabled : undefined,
+      validRootDocExtensions: Settings.validRootDocExtensions
     }
     return next()
   })

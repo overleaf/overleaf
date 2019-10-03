@@ -59,7 +59,8 @@ define([
   'services/wait-for',
   'filters/formatDate',
   'main/event',
-  'main/account-upgrade'
+  'main/account-upgrade',
+  'main/exposed-settings'
 ], function(
   App,
   FileTreeManager,
