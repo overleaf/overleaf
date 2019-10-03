@@ -339,28 +339,62 @@ describe('UserMembershipAuthorization', function() {
   })
 
   describe('graph', function() {
-    it('allow admins only', function(done) {
-      const url = '/graphs/foo?resource_type=admin'
-      async.series(
-        [
-          this.user.login.bind(this.user),
-          expectAccess(this.user, url, 403),
-          this.user.ensureAdmin.bind(this.user),
-          this.user.login.bind(this.user),
-          expectAccess(this.user, url, 200)
-        ],
-        done
-      )
+    describe('admin', function() {
+      it('allow admins only', function(done) {
+        const url = '/graphs/foo?resource_type=admin'
+        async.series(
+          [
+            this.user.login.bind(this.user),
+            expectAccess(this.user, url, 403),
+            this.user.ensureAdmin.bind(this.user),
+            this.user.login.bind(this.user),
+            expectAccess(this.user, url, 200)
+          ],
+          done
+        )
+      })
+
+      it('handle missing resource type', function(done) {
+        const url = '/graphs/foo'
+        expectAccess(this.user, url, 404)(done)
+      })
+
+      it('handle incorrect resource type', function(done) {
+        const url = '/graphs/foo?resource_type=evil'
+        expectAccess(this.user, url, 404)(done)
+      })
     })
 
-    it('handle missing resource type', function(done) {
-      const url = '/graphs/foo'
-      expectAccess(this.user, url, 404)(done)
-    })
+    describe('template', function() {
+      beforeEach(function(done) {
+        this.publisher = new Publisher({})
+        async.series(
+          [
+            this.publisher.ensureExists.bind(this.publisher),
+            cb => this.user.login(cb)
+          ],
+          done
+        )
+      })
 
-    it('handle incorrect resource type', function(done) {
-      const url = '/graphs/foo?resource_type=evil'
-      expectAccess(this.user, url, 404)(done)
+      it('get template graphs', function(done) {
+        MockV1Api.setTemplates({
+          123: {
+            id: 123,
+            title: '123 title',
+            brand: { slug: this.publisher.slug }
+          }
+        })
+        const url = '/graphs/foo?resource_type=template&resource_id=123'
+        async.series(
+          [
+            this.user.ensureAdmin.bind(this.user),
+            this.user.login.bind(this.user),
+            expectAccess(this.user, url, 200)
+          ],
+          done
+        )
+      })
     })
   })
 

@@ -132,7 +132,7 @@ let UserMembershipMiddleware = {
     fetchV1Template(),
     requireV1Template(),
     fetchEntityConfig('publisher'),
-    fetchEntityIfSet(), // at this point the entity is the template's publisher, if any
+    fetchPublisherFromTemplate(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
       UserMembershipAuthorization.hasStaffAccess('publisherMetrics')
@@ -175,9 +175,6 @@ let UserMembershipMiddleware = {
         new HttpErrors.NotFoundError(`incorrect entity name: ${entityName}`)
       )
     }
-    if (entityName === 'Template') {
-      req.params.templateId = req.params.id
-    }
     // run the list of middleware functions in series. This is essencially
     // a poor man's middleware runner
     async.eachSeries(middleware, (fn, callback) => fn(req, res, callback), next)
@@ -208,12 +205,16 @@ function fetchEntity() {
   })
 }
 
-function fetchEntityIfSet() {
+function fetchPublisherFromTemplate() {
   return (req, res, next) => {
-    if (!req.params.id) {
+    if (req.template.brand.slug) {
+      // set the id as the publisher's id as it's the entity used for access
+      // control
+      req.params.id = req.template.brand.slug
+      return fetchEntity()(req, res, next)
+    } else {
       return next()
     }
-    return fetchEntity()(req, res, next)
   }
 }
 
@@ -252,17 +253,12 @@ function requireEntityOrCreate(creationStaffAccess) {
 // fetch the template from v1, and set it in the request
 function fetchV1Template() {
   return expressify(async (req, res, next) => {
-    const templateId = req.params.templateId
+    const templateId = req.params.id
     const body = await TemplatesManager.promises.fetchFromV1(templateId)
     req.template = {
       id: body.id,
       title: body.title,
       brand: body.brand
-    }
-    if (req.template.brand.slug) {
-      // set the id as the publisher's id as it's the entity used for access
-      // control
-      req.params.id = req.template.brand.slug
     }
     next()
   })
