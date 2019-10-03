@@ -1,3 +1,4 @@
+const EmailHandler = require('../Email/EmailHandler')
 const Errors = require('../Errors/Errors')
 const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
@@ -77,39 +78,82 @@ async function _addInstitutionEmail(userId, email, providerId) {
   }
 }
 
+async function _sendLinkedEmail(userId, providerName) {
+  const user = await UserGetter.promises.getUser(userId, { email: 1 })
+  const emailOptions = {
+    to: user.email,
+    provider: providerName
+  }
+  EmailHandler.sendEmail(
+    'emailThirdPartyIdentifierLinked',
+    emailOptions,
+    error => {
+      if (error != null) {
+        logger.warn(error)
+      }
+    }
+  )
+}
+
+function _sendUnlinkedEmail(primaryEmail, providerName) {
+  const emailOptions = {
+    to: primaryEmail,
+    provider: providerName
+  }
+  EmailHandler.sendEmail(
+    'emailThirdPartyIdentifierUnlinked',
+    emailOptions,
+    error => {
+      if (error != null) {
+        logger.warn(error)
+      }
+    }
+  )
+}
+
 async function getUser(providerId, externalUserId) {
   if (providerId == null || externalUserId == null) {
     throw new Error('invalid arguments')
   }
-  try {
-    const query = _getUserQuery(providerId, externalUserId)
-    let user = await User.findOne(query).exec()
-    if (!user) {
-      throw new Errors.SAMLUserNotFoundError()
-    }
-    return user
-  } catch (error) {
-    throw error
+  const query = _getUserQuery(providerId, externalUserId)
+  let user = await User.findOne(query).exec()
+  if (!user) {
+    throw new Errors.SAMLUserNotFoundError()
   }
+  return user
 }
 
 async function linkAccounts(
   userId,
   externalUserId,
   institutionEmail,
-  providerId
+  providerId,
+  providerName
 ) {
-  try {
-    await _addIdentifier(userId, externalUserId, providerId)
-    await _addInstitutionEmail(userId, institutionEmail, providerId)
-  } catch (error) {
-    throw error
+  await _addIdentifier(userId, externalUserId, providerId)
+  await _addInstitutionEmail(userId, institutionEmail, providerId)
+  await _sendLinkedEmail(userId, providerName)
+}
+
+async function unlinkAccounts(userId, primaryEmail, providerId, providerName) {
+  const query = {
+    _id: userId
   }
+  const update = {
+    $pull: {
+      samlIdentifiers: {
+        providerId
+      }
+    }
+  }
+  await User.update(query, update).exec()
+  _sendUnlinkedEmail(primaryEmail, providerName)
 }
 
 const SAMLIdentityManager = {
   getUser,
-  linkAccounts
+  linkAccounts,
+  unlinkAccounts
 }
 
 module.exports = SAMLIdentityManager

@@ -487,7 +487,7 @@ templates.emailThirdPartyIdentifierLinked = NoCTAEmailTemplate({
   },
   message(opts) {
     let message = `We're contacting you to notify you that your ${opts.provider}
-    account is now linked to your ${settings.appName} account`
+    account is now linked to your ${settings.appName} account.`
     return message
   }
 })
