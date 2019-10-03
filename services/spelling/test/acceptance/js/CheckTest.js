@@ -7,7 +7,7 @@ const checkWord = (words, language) =>
   request.post({
     url: `/user/${USER_ID}/check`,
     body: JSON.stringify({
-      words, 
+      words,
       language
     })
   })
@@ -103,7 +103,6 @@ describe('checking words', () => {
       }
     })
   })
-
 
   describe('when multiple words with utf8 are submitted', () => {
     beforeEach(async () => {
