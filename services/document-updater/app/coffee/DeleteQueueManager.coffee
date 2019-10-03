@@ -38,7 +38,7 @@ module.exports = DeleteQueueManager =
                     logger.debug {project_id, timestamps, flushTimestamp}, "found newer timestamp, will skip delete"
                     return cb()
                 logger.log {project_id, flushTimestamp}, "flushing queued project"
-                ProjectManager.flushAndDeleteProjectWithLocks project_id, {skip_history_flush: true}, (err) ->
+                ProjectManager.flushAndDeleteProjectWithLocks project_id, {skip_history_flush: false}, (err) ->
                     if err?
                         logger.err {project_id, err}, "error flushing queued project"
                     metrics.inc "queued-delete-completed"

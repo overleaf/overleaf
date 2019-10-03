@@ -169,6 +169,6 @@ describe "Deleting a project", ->
 			for doc in @docs
 				MockTrackChangesApi.flushDoc.calledWith(doc.id).should.equal true
 
-		it "should not flush to project history", ->
-			MockProjectHistoryApi.flushProject.called.should.equal false
+		it "should flush to project history", ->
+			MockProjectHistoryApi.flushProject.called.should.equal true
 
