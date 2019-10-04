@@ -9,6 +9,35 @@ const logger = require('logger-sharelatex')
 const Errors = require('../Errors/Errors')
 const HttpErrors = require('@overleaf/o-error/http')
 
+function add(req, res, next) {
+  const userId = AuthenticationController.getLoggedInUserId(req)
+  const email = EmailHelper.parseEmail(req.body.email)
+  if (!email) {
+    return res.sendStatus(422)
+  }
+
+  const affiliationOptions = {
+    university: req.body.university,
+    role: req.body.role,
+    department: req.body.department
+  }
+  UserUpdater.addEmailAddress(userId, email, affiliationOptions, function(
+    error
+  ) {
+    if (error) {
+      return UserEmailsController._handleEmailError(error, req, res, next)
+    }
+    UserEmailsConfirmationHandler.sendConfirmationEmail(userId, email, function(
+      error
+    ) {
+      if (error) {
+        return next(error)
+      }
+      res.sendStatus(204)
+    })
+  })
+}
+
 module.exports = UserEmailsController = {
   list(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
@@ -20,36 +49,7 @@ module.exports = UserEmailsController = {
     })
   },
 
-  add(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
-    const email = EmailHelper.parseEmail(req.body.email)
-    if (!email) {
-      return res.sendStatus(422)
-    }
-
-    const affiliationOptions = {
-      university: req.body.university,
-      role: req.body.role,
-      department: req.body.department
-    }
-    UserUpdater.addEmailAddress(userId, email, affiliationOptions, function(
-      error
-    ) {
-      if (error) {
-        return UserEmailsController._handleEmailError(error, req, res, next)
-      }
-      UserEmailsConfirmationHandler.sendConfirmationEmail(
-        userId,
-        email,
-        function(error) {
-          if (error) {
-            return next(error)
-          }
-          res.sendStatus(204)
-        }
-      )
-    })
-  },
+  add,
 
   remove(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
