@@ -250,7 +250,7 @@ module.exports = CompileManager =
 		directory = getCompileDir(project_id, user_id)
 		timeout = 60 * 1000 # increased to allow for large projects
 		compileName = getCompileName(project_id, user_id)
-		CommandRunner.run compileName, command, directory, Settings.clsi.docker.image, timeout, {}, (error, output) ->
+		CommandRunner.run compileName, command, directory, Settings.clsi?.docker.image, timeout, {}, (error, output) ->
 			if error?
 				logger.err err:error, command:command, project_id:project_id, user_id:user_id, "error running synctex"
 				return callback(error)
