@@ -27,6 +27,10 @@ describe('UrlHelper', function() {
         '/%2F%2Fevil.com'
       )
 
+      expect(
+        this.UrlHelper.getSafeRedirectPath('http://foo.com//evil.com/bad')
+      ).to.equal('/evil.com/bad')
+
       return expect(this.UrlHelper.getSafeRedirectPath('.evil.com')).to.equal(
         '/.evil.com'
       )

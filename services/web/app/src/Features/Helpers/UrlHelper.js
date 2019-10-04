@@ -4,7 +4,7 @@ const { URL } = require('url')
 function getSafeRedirectPath(value) {
   const baseURL = Settings.siteUrl // base URL is required to construct URL from path
   const url = new URL(value, baseURL)
-  let safePath = `${url.pathname}${url.search}${url.hash}`
+  let safePath = `${url.pathname}${url.search}${url.hash}`.replace(/^\/+/, '/')
   if (safePath === '/') {
     safePath = undefined
   }
