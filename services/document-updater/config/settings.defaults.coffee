@@ -25,8 +25,6 @@ module.exports =
 			host: process.env['PUBSUB_REDIS_HOST'] or process.env['REDIS_HOST'] or "localhost"
 			port: process.env['PUBSUB_REDIS_PORT'] or process.env['REDIS_PORT'] or "6379"
 			password: process.env["PUBSUB_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
-			redisOptions:	
-				keepAlive: 100
 				
 		history:
 			port: process.env["HISTORY_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
@@ -35,8 +33,6 @@ module.exports =
 			key_schema:
 				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:{#{doc_id}}"
 				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:{#{project_id}}"
-			redisOptions:
-				keepAlive: 100
 
 		project_history:
 			port: process.env["HISTORY_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
@@ -45,8 +41,6 @@ module.exports =
 			key_schema:
 				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:{#{project_id}}"
 				projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:{#{project_id}}"
-			redisOptions:
-				keepAlive: 100
 
 		lock:
 			port: process.env["LOCK_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
@@ -54,15 +48,11 @@ module.exports =
 			password: process.env["LOCK_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
 			key_schema:
 				blockingKey: ({doc_id}) -> "Blocking:{#{doc_id}}"
-			redisOptions:
-				keepAlive: 100
 
 		documentupdater:
 			port: process.env["DOC_UPDATER_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
 			host: process.env["DOC_UPDATER_REDIS_HOST"] or process.env["REDIS_HOST"] or "localhost"
 			password: process.env["DOC_UPDATER_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
-			redisOptions:
-				keepAlive: 100
 			key_schema:
 				blockingKey: ({doc_id}) -> "Blocking:{#{doc_id}}"
 				docLines: ({doc_id}) -> "doclines:{#{doc_id}}"
@@ -81,8 +71,6 @@ module.exports =
 				lastUpdatedAt: ({doc_id}) -> "lastUpdatedAt:{#{doc_id}}"
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
 				flushAndDeleteQueue: () -> "DocUpdaterFlushAndDeleteQueue"
-			redisOptions:
-				keepAlive: 100
 	
 	max_doc_length: 2 * 1024 * 1024 # 2mb
 
