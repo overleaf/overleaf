@@ -7,6 +7,8 @@ HealthCheckManager = require "./HealthCheckManager"
 RoomManager = require "./RoomManager"
 ChannelManager = require "./ChannelManager"
 ConnectedUsersManager = require "./ConnectedUsersManager"
+Utils = require './Utils'
+Async = require 'async'
 
 module.exports = WebsocketLoadBalancer =
 	rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub)
@@ -58,7 +60,7 @@ module.exports = WebsocketLoadBalancer =
 			else if message.message is 'clientTracking.refresh' && message.room_id?
 				clientList = io.sockets.clients(message.room_id)
 				logger.log {channel:channel, message: message.message, room_id: message.room_id, message_id: message._id, socketIoClients: (client.id for client in clientList)}, "refreshing client list"
-				for client in clientList 
+				for client in clientList
 					ConnectedUsersManager.refreshClient(message.room_id, client.id)
 			else if message.room_id?
 				if message._id? && Settings.checkEventOrder
@@ -69,12 +71,27 @@ module.exports = WebsocketLoadBalancer =
 				clientList = io.sockets.clients(message.room_id)
 				# avoid unnecessary work if no clients are connected
 				return if clientList.length is 0
-				logger.log {channel:channel, message: message.message, room_id: message.room_id, message_id: message._id, socketIoClients: (client.id for client in clientList)}, "distributing event to clients"
+				logger.log {
+					channel: channel,
+					message: message.message,
+					room_id: message.room_id,
+					message_id: message._id,
+					socketIoClients: (client.id for client in clientList)
+				}, "distributing event to clients"
 				seen = {}
-				for client in clientList when not seen[client.id]
-					seen[client.id] = true
-					client.emit(message.message, message.payload...)
+				# Send the messages to clients async, don't wait for them all to finish
+				Async.eachSeries clientList
+					, (client, cb) ->
+						Utils.getClientAttributes client, ['is_restricted_user'], (err, {is_restricted_user}) ->
+							return cb(err) if err?
+							if !seen[client.id]
+								seen[client.id] = true
+								if !(is_restricted_user && message.message in ['new-chat-message', 'new-comment'])
+									client.emit(message.message, message.payload...)
+							cb()
+					, (err) ->
+						if err?
+							logger.err {err, message}, "Error sending message to clients"
 			else if message.health_check?
 				logger.debug {message}, "got health check message in editor events channel"
 				HealthCheckManager.check channel, message.key
-		
