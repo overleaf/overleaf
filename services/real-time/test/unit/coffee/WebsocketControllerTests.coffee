@@ -403,6 +403,20 @@ describe 'WebsocketController', ->
 			it "should return an error", ->
 				@callback.calledWith(@err).should.equal true
 
+		describe "when restricted user", ->
+			beforeEach ->
+				@client.params.is_restricted_user = true
+				@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
+				@WebsocketController.getConnectedUsers @client, @callback
+
+			it "should return an empty array of users", ->
+				@callback.calledWith(null, []).should.equal true
+
+			it "should not get the connected users for the project", ->
+				@ConnectedUsersManager.getConnectedUsers
+					.called
+					.should.equal false
+
 	describe "updateClientPosition", ->
 		beforeEach ->
 			@WebsocketLoadBalancer.emitToRoom = sinon.stub()

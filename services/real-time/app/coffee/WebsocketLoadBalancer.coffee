@@ -10,6 +10,17 @@ ConnectedUsersManager = require "./ConnectedUsersManager"
 Utils = require './Utils'
 Async = require 'async'
 
+RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
+	'connectionAccepted',
+	'otUpdateApplied',
+	'otUpdateError',
+	'joinDoc',
+	'reciveNewDoc',
+	'reciveNewFile',
+	'reciveNewFolder',
+	'removeEntity'
+]
+
 module.exports = WebsocketLoadBalancer =
 	rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub)
 	rclientSubList: RedisClientManager.createClientList(Settings.redis.pubsub)
@@ -86,7 +97,7 @@ module.exports = WebsocketLoadBalancer =
 							return cb(err) if err?
 							if !seen[client.id]
 								seen[client.id] = true
-								if !(is_restricted_user && message.message in ['new-chat-message', 'new-comment'])
+								if !(is_restricted_user && message.message not in RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST)
 									client.emit(message.message, message.payload...)
 							cb()
 					, (err) ->

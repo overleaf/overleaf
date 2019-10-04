@@ -178,8 +178,11 @@ module.exports = WebsocketController =
 	CLIENT_REFRESH_DELAY: 1000
 	getConnectedUsers: (client, callback = (error, users) ->) ->
 		metrics.inc "editor.get-connected-users"
-		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
+		Utils.getClientAttributes client, ["project_id", "user_id", "is_restricted_user"], (error, clientAttributes) ->
 			return callback(error) if error?
+			{project_id, user_id, is_restricted_user} = clientAttributes
+			if is_restricted_user
+				return callback(null, [])
 			return callback(new Error("no project_id found on client")) if !project_id?
 			logger.log {user_id, project_id, client_id: client.id}, "getting connected users"
 			AuthorizationManager.assertClientCanViewProject client, (error) ->

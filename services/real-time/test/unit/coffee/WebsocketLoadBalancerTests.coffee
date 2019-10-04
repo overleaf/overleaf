@@ -32,7 +32,7 @@ describe "WebsocketLoadBalancer", ->
 		}]
 
 		@room_id = "room-id"
-		@message = "message-to-editor"
+		@message = "otUpdateApplied"
 		@payload = ["argument one", 42]
 
 	describe "emitToRoom", ->
