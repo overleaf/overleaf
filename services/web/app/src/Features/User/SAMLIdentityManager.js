@@ -6,8 +6,9 @@ const { User } = require('../../models/User')
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 
-function _addIdentifier(userId, externalUserId, providerId) {
+function _addIdentifier(userId, externalUserId, providerId, hasEntitlement) {
   providerId = providerId.toString()
+  hasEntitlement = !!hasEntitlement
   const query = {
     _id: userId,
     'samlIdentifiers.providerId': {
@@ -17,6 +18,7 @@ function _addIdentifier(userId, externalUserId, providerId) {
   const update = {
     $push: {
       samlIdentifiers: {
+        hasEntitlement,
         externalUserId,
         providerId
       }
@@ -113,8 +115,12 @@ function _sendUnlinkedEmail(primaryEmail, providerName) {
 
 async function getUser(providerId, externalUserId) {
   if (providerId == null || externalUserId == null) {
-    throw new Error('invalid arguments')
+    throw new Error(
+      `invalid arguments: providerId: ${providerId}, externalUserId: ${externalUserId}`
+    )
   }
+  providerId = providerId.toString()
+  externalUserId = externalUserId.toString()
   const query = _getUserQuery(providerId, externalUserId)
   let user = await User.findOne(query).exec()
   if (!user) {
@@ -128,14 +134,16 @@ async function linkAccounts(
   externalUserId,
   institutionEmail,
   providerId,
-  providerName
+  providerName,
+  hasEntitlement
 ) {
-  await _addIdentifier(userId, externalUserId, providerId)
+  await _addIdentifier(userId, externalUserId, providerId, hasEntitlement)
   await _addInstitutionEmail(userId, institutionEmail, providerId)
   await _sendLinkedEmail(userId, providerName)
 }
 
 async function unlinkAccounts(userId, primaryEmail, providerId, providerName) {
+  providerId = providerId.toString()
   const query = {
     _id: userId
   }
@@ -150,10 +158,55 @@ async function unlinkAccounts(userId, primaryEmail, providerId, providerName) {
   _sendUnlinkedEmail(primaryEmail, providerName)
 }
 
+async function updateEntitlement(userId, providerId, hasEntitlement) {
+  providerId = providerId.toString()
+  hasEntitlement = !!hasEntitlement
+  const query = {
+    _id: userId,
+    'samlIdentifiers.providerId': providerId.toString()
+  }
+  const update = {
+    $set: {
+      'samlIdentifiers.$.hasEntitlement': hasEntitlement
+    }
+  }
+  await User.update(query, update).exec()
+}
+
+function entitlementAttributeMatches(entitlementAttribute, entitlementMatcher) {
+  if (
+    typeof entitlementAttribute !== 'string' ||
+    typeof entitlementMatcher !== 'string'
+  ) {
+    return false
+  }
+  const entitlementRegExp = new RegExp(entitlementMatcher)
+  return !!entitlementAttribute.match(entitlementRegExp)
+}
+
+function userHasEntitlement(user, providerId) {
+  providerId = providerId.toString()
+  if (!user || !Array.isArray(user.samlIdentifiers)) {
+    return false
+  }
+  for (const samlIdentifier of user.samlIdentifiers) {
+    if (providerId && samlIdentifier.providerId !== providerId) {
+      continue
+    }
+    if (samlIdentifier.hasEntitlement) {
+      return true
+    }
+  }
+  return false
+}
+
 const SAMLIdentityManager = {
+  entitlementAttributeMatches,
   getUser,
   linkAccounts,
-  unlinkAccounts
+  unlinkAccounts,
+  updateEntitlement,
+  userHasEntitlement
 }
 
 module.exports = SAMLIdentityManager

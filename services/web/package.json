@@ -115,7 +115,7 @@
     "uuid": "^3.0.1",
     "v8-profiler-node8": "^6.0.1",
     "valid-url": "^1.0.9",
-    "xml2js": "^0.4.19",
+    "xml2js": "^0.4.22",
     "xregexp": "^4.2.4",
     "yauzl": "^2.10.0"
   },
@@ -128,6 +128,7 @@
     "chai": "3.5.0",
     "chai-as-promised": "^7.1.1",
     "chaid": "^1.0.2",
+    "cheerio": "^1.0.0-rc.3",
     "clean-css-cli": "^4.2.1",
     "es6-promise": "^4.0.5",
     "eslint": "^4.18.1",

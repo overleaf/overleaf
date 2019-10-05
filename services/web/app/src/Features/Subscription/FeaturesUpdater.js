@@ -23,6 +23,7 @@ const logger = require('logger-sharelatex')
 const ReferalFeatures = require('../Referal/ReferalFeatures')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
+const UserGetter = require('../User/UserGetter')
 
 const oneMonthInSeconds = 60 * 60 * 24 * 30
 
@@ -47,6 +48,9 @@ module.exports = FeaturesUpdater = {
       },
       bonusFeatures(cb) {
         return ReferalFeatures.getBonusFeatures(user_id, cb)
+      },
+      samlFeatures(cb) {
+        return FeaturesUpdater._getSamlFeatures(user_id, cb)
       }
     }
     return async.series(jobs, function(err, results) {
@@ -63,7 +67,8 @@ module.exports = FeaturesUpdater = {
         groupFeatureSets,
         institutionFeatures,
         v1Features,
-        bonusFeatures
+        bonusFeatures,
+        samlFeatures
       } = results
       logger.log(
         {
@@ -72,7 +77,8 @@ module.exports = FeaturesUpdater = {
           groupFeatureSets,
           institutionFeatures,
           v1Features,
-          bonusFeatures
+          bonusFeatures,
+          samlFeatures
         },
         'merging user features'
       )
@@ -80,7 +86,8 @@ module.exports = FeaturesUpdater = {
         individualFeatures,
         institutionFeatures,
         v1Features,
-        bonusFeatures
+        bonusFeatures,
+        samlFeatures
       ])
       const features = _.reduce(
         featureSets,
@@ -111,6 +118,30 @@ module.exports = FeaturesUpdater = {
       (err, subs) =>
         callback(err, (subs || []).map(FeaturesUpdater._subscriptionToFeatures))
     )
+  },
+
+  _getSamlFeatures(user_id, callback) {
+    UserGetter.getUser(user_id, (err, user) => {
+      if (err) {
+        return callback(err)
+      }
+      if (
+        !user ||
+        !Array.isArray(user.samlIdentifiers) ||
+        !user.samlIdentifiers.length
+      ) {
+        return callback(null, {})
+      }
+      for (const samlIdentifier of user.samlIdentifiers) {
+        if (samlIdentifier && samlIdentifier.hasEntitlement) {
+          return callback(
+            null,
+            FeaturesUpdater._planCodeToFeatures('professional')
+          )
+        }
+      }
+      return callback(null, {})
+    })
   },
 
   _getV1Features(user_id, callback) {

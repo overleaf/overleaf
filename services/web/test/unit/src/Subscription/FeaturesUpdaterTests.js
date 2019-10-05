@@ -36,7 +36,8 @@ describe('FeaturesUpdater', function() {
         'settings-sharelatex': (this.Settings = {}),
         '../Referal/ReferalFeatures': (this.ReferalFeatures = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
-        '../Institutions/InstitutionsFeatures': (this.InstitutionsFeatures = {})
+        '../Institutions/InstitutionsFeatures': (this.InstitutionsFeatures = {}),
+        '../User/UserGetter': (this.UserGetter = {})
       }
     }))
   })
@@ -62,6 +63,7 @@ describe('FeaturesUpdater', function() {
       this.FeaturesUpdater._mergeFeatures = sinon
         .stub()
         .returns({ merged: 'features' })
+      this.UserGetter.getUser = sinon.stub().yields(null, {})
       return (this.callback = sinon.stub())
     })
 

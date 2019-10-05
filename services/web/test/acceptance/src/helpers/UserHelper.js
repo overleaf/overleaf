@@ -1,4 +1,5 @@
 const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
+const Settings = require('settings-sharelatex')
 const UserCreator = require('../../../../app/src/Features/User/UserCreator')
 const UserGetter = require('../../../../app/src/Features/User/UserGetter')
 const request = require('request-promise-native')
@@ -123,6 +124,29 @@ module.exports = class UserHelper {
     const user = await UserGetter.promises.getUser(...args)
 
     return new UserHelper(user)
+  }
+
+  static async loginUser(userData) {
+    if (!userData.email || !userData.password) {
+      throw new Error('email and password required')
+    }
+    const userHelper = new UserHelper()
+    const loginPath = Settings.enableLegacyLogin ? '/login/legacy' : '/login'
+    await userHelper.getCsrfToken()
+    const response = await userHelper.request.post(loginPath, {
+      json: userData
+    })
+    if (response.statusCode !== 200 || response.body.redir !== '/project') {
+      throw new Error('login failed')
+    }
+    userHelper.user = await UserGetter.promises.getUser({
+      email: userData.email
+    })
+    if (!userHelper.user) {
+      throw new Error(`user not found for email: ${userData.email}`)
+    }
+
+    return userHelper
   }
 
   static async registerUser(userData, options = {}) {
