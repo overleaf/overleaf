@@ -181,7 +181,7 @@ const ProjectGetter = {
         }
       }
     }
-    const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
+    const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
     return Project.find({ owner_ref: user_id }, fields, function(
       error,
       ownedProjects
@@ -189,7 +189,7 @@ const ProjectGetter = {
       if (error != null) {
         return callback(error)
       }
-      return CollaboratorsHandler.getProjectsUserIsMemberOf(
+      return CollaboratorsGetter.getProjectsUserIsMemberOf(
         user_id,
         fields,
         function(error, projects) {

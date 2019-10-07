@@ -1,5 +1,5 @@
 let AuthorizationManager
-const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
+const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const ProjectGetter = require('../Project/ProjectGetter')
 const { User } = require('../../models/User')
 const PrivilegeLevels = require('./PrivilegeLevels')
@@ -55,7 +55,7 @@ module.exports = AuthorizationManager = {
 
   // User is present, get their privilege level from database
   getPrivilegeLevelForProjectWithUser(userId, projectId, token, callback) {
-    CollaboratorsHandler.getMemberIdPrivilegeLevel(userId, projectId, function(
+    CollaboratorsGetter.getMemberIdPrivilegeLevel(userId, projectId, function(
       error,
       privilegeLevel
     ) {

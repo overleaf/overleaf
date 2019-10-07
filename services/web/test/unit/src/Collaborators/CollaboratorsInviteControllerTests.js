@@ -51,7 +51,7 @@ describe('CollaboratorsInviteController', function() {
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '../Subscription/LimitationsManager': this.LimitationsManager,
         '../User/UserGetter': this.UserGetter,
-        './CollaboratorsHandler': (this.CollaboratorsHandler = {}),
+        './CollaboratorsGetter': (this.CollaboratorsGetter = {}),
         './CollaboratorsInviteHandler': (this.CollaboratorsInviteHandler = {}),
         'logger-sharelatex': (this.logger = {
           err: sinon.stub(),
@@ -571,9 +571,9 @@ describe('CollaboratorsInviteController', function() {
         email: 'john@example.com'
       }
 
-      this.CollaboratorsHandler.isUserInvitedMemberOfProject = sinon
+      this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
         .stub()
-        .callsArgWith(2, null, false, null)
+        .callsArgWith(2, null, false)
       this.CollaboratorsInviteHandler.getInviteByToken = sinon
         .stub()
         .callsArgWith(2, null, this.invite)
@@ -606,11 +606,11 @@ describe('CollaboratorsInviteController', function() {
         return this.next.callCount.should.equal(0)
       })
 
-      it('should call CollaboratorsHandler.isUserInvitedMemberOfProject', function() {
-        this.CollaboratorsHandler.isUserInvitedMemberOfProject.callCount.should.equal(
+      it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function() {
+        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsHandler.isUserInvitedMemberOfProject
+        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
@@ -641,9 +641,9 @@ describe('CollaboratorsInviteController', function() {
 
     describe('when user is already a member of the project', function() {
       beforeEach(function() {
-        this.CollaboratorsHandler.isUserInvitedMemberOfProject = sinon
+        this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
           .stub()
-          .callsArgWith(2, null, true, null)
+          .callsArgWith(2, null, true)
         return this.CollaboratorsInviteController.viewInvite(
           this.req,
           this.res,
@@ -662,11 +662,11 @@ describe('CollaboratorsInviteController', function() {
         return this.next.callCount.should.equal(0)
       })
 
-      it('should call CollaboratorsHandler.isUserInvitedMemberOfProject', function() {
-        this.CollaboratorsHandler.isUserInvitedMemberOfProject.callCount.should.equal(
+      it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function() {
+        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsHandler.isUserInvitedMemberOfProject
+        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
@@ -688,7 +688,7 @@ describe('CollaboratorsInviteController', function() {
 
     describe('when isUserInvitedMemberOfProject produces an error', function() {
       beforeEach(function() {
-        this.CollaboratorsHandler.isUserInvitedMemberOfProject = sinon
+        this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
           .stub()
           .callsArgWith(2, new Error('woops'))
         return this.CollaboratorsInviteController.viewInvite(
@@ -703,11 +703,11 @@ describe('CollaboratorsInviteController', function() {
         return expect(this.next.firstCall.args[0]).to.be.instanceof(Error)
       })
 
-      it('should call CollaboratorsHandler.isUserInvitedMemberOfProject', function() {
-        this.CollaboratorsHandler.isUserInvitedMemberOfProject.callCount.should.equal(
+      it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function() {
+        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsHandler.isUserInvitedMemberOfProject
+        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
@@ -746,11 +746,11 @@ describe('CollaboratorsInviteController', function() {
         return this.next.calledWith(this.err).should.equal(true)
       })
 
-      it('should call CollaboratorsHandler.isUserInvitedMemberOfProject', function() {
-        this.CollaboratorsHandler.isUserInvitedMemberOfProject.callCount.should.equal(
+      it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function() {
+        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsHandler.isUserInvitedMemberOfProject
+        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
@@ -759,7 +759,7 @@ describe('CollaboratorsInviteController', function() {
         this.CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal(
           1
         )
-        return this.CollaboratorsHandler.isUserInvitedMemberOfProject
+        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
@@ -798,11 +798,11 @@ describe('CollaboratorsInviteController', function() {
         return this.next.callCount.should.equal(0)
       })
 
-      it('should call CollaboratorsHandler.isUserInvitedMemberOfProject', function() {
-        this.CollaboratorsHandler.isUserInvitedMemberOfProject.callCount.should.equal(
+      it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function() {
+        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsHandler.isUserInvitedMemberOfProject
+        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
@@ -811,7 +811,7 @@ describe('CollaboratorsInviteController', function() {
         this.CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal(
           1
         )
-        return this.CollaboratorsHandler.isUserInvitedMemberOfProject
+        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
@@ -840,11 +840,11 @@ describe('CollaboratorsInviteController', function() {
         return expect(this.next.firstCall.args[0]).to.be.instanceof(Error)
       })
 
-      it('should call CollaboratorsHandler.isUserInvitedMemberOfProject', function() {
-        this.CollaboratorsHandler.isUserInvitedMemberOfProject.callCount.should.equal(
+      it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function() {
+        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsHandler.isUserInvitedMemberOfProject
+        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
@@ -888,11 +888,11 @@ describe('CollaboratorsInviteController', function() {
         return this.next.callCount.should.equal(0)
       })
 
-      it('should call CollaboratorsHandler.isUserInvitedMemberOfProject', function() {
-        this.CollaboratorsHandler.isUserInvitedMemberOfProject.callCount.should.equal(
+      it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function() {
+        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsHandler.isUserInvitedMemberOfProject
+        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
@@ -930,11 +930,11 @@ describe('CollaboratorsInviteController', function() {
         return expect(this.next.firstCall.args[0]).to.be.instanceof(Error)
       })
 
-      it('should call CollaboratorsHandler.isUserInvitedMemberOfProject', function() {
-        this.CollaboratorsHandler.isUserInvitedMemberOfProject.callCount.should.equal(
+      it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function() {
+        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsHandler.isUserInvitedMemberOfProject
+        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })
@@ -978,11 +978,11 @@ describe('CollaboratorsInviteController', function() {
         return this.next.callCount.should.equal(0)
       })
 
-      it('should call CollaboratorsHandler.isUserInvitedMemberOfProject', function() {
-        this.CollaboratorsHandler.isUserInvitedMemberOfProject.callCount.should.equal(
+      it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function() {
+        this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount.should.equal(
           1
         )
-        return this.CollaboratorsHandler.isUserInvitedMemberOfProject
+        return this.CollaboratorsGetter.isUserInvitedMemberOfProject
           .calledWith(this.current_user_id, this.project_id)
           .should.equal(true)
       })

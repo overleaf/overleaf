@@ -1,5 +1,5 @@
 const { Project } = require('../../models/Project')
-const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
+const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const UserGetter = require('../User/UserGetter')
@@ -133,7 +133,7 @@ const TokenAccessHandler = {
   },
 
   _userIsMember(userId, projectId, callback) {
-    CollaboratorsHandler.isUserInvitedMemberOfProject(
+    CollaboratorsGetter.isUserInvitedMemberOfProject(
       userId,
       projectId,
       callback

@@ -27,7 +27,7 @@ describe('AuthorizationManager', function() {
         console: console
       },
       requires: {
-        '../Collaborators/CollaboratorsHandler': (this.CollaboratorsHandler = {}),
+        '../Collaborators/CollaboratorsGetter': (this.CollaboratorsGetter = {}),
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '../../models/User': {
           User: (this.User = {})
@@ -49,7 +49,7 @@ describe('AuthorizationManager', function() {
     beforeEach(function() {
       this.ProjectGetter.getProject = sinon.stub()
       this.AuthorizationManager.isUserSiteAdmin = sinon.stub()
-      return (this.CollaboratorsHandler.getMemberIdPrivilegeLevel = sinon.stub())
+      return (this.CollaboratorsGetter.getMemberIdPrivilegeLevel = sinon.stub())
     })
 
     describe('with a token-based project', function() {
@@ -64,7 +64,7 @@ describe('AuthorizationManager', function() {
           this.AuthorizationManager.isUserSiteAdmin
             .withArgs(this.user_id)
             .yields(null, false)
-          this.CollaboratorsHandler.getMemberIdPrivilegeLevel
+          this.CollaboratorsGetter.getMemberIdPrivilegeLevel
             .withArgs(this.user_id, this.project_id)
             .yields(null, 'readOnly')
           return this.AuthorizationManager.getPrivilegeLevelForProject(
@@ -87,7 +87,7 @@ describe('AuthorizationManager', function() {
           this.AuthorizationManager.isUserSiteAdmin
             .withArgs(this.user_id)
             .yields(null, false)
-          this.CollaboratorsHandler.getMemberIdPrivilegeLevel
+          this.CollaboratorsGetter.getMemberIdPrivilegeLevel
             .withArgs(this.user_id, this.project_id)
             .yields(null, false)
           return this.AuthorizationManager.getPrivilegeLevelForProject(
@@ -110,7 +110,7 @@ describe('AuthorizationManager', function() {
           this.AuthorizationManager.isUserSiteAdmin
             .withArgs(this.user_id)
             .yields(null, true)
-          this.CollaboratorsHandler.getMemberIdPrivilegeLevel
+          this.CollaboratorsGetter.getMemberIdPrivilegeLevel
             .withArgs(this.user_id, this.project_id)
             .yields(null, false)
           return this.AuthorizationManager.getPrivilegeLevelForProject(
@@ -143,8 +143,8 @@ describe('AuthorizationManager', function() {
             )
           })
 
-          it('should not call CollaboratorsHandler.getMemberIdPrivilegeLevel', function() {
-            return this.CollaboratorsHandler.getMemberIdPrivilegeLevel.called.should.equal(
+          it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function() {
+            return this.CollaboratorsGetter.getMemberIdPrivilegeLevel.called.should.equal(
               false
             )
           })
@@ -184,8 +184,8 @@ describe('AuthorizationManager', function() {
               )
             })
 
-            it('should not call CollaboratorsHandler.getMemberIdPrivilegeLevel', function() {
-              return this.CollaboratorsHandler.getMemberIdPrivilegeLevel.called.should.equal(
+            it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function() {
+              return this.CollaboratorsGetter.getMemberIdPrivilegeLevel.called.should.equal(
                 false
               )
             })
@@ -224,8 +224,8 @@ describe('AuthorizationManager', function() {
               )
             })
 
-            it('should not call CollaboratorsHandler.getMemberIdPrivilegeLevel', function() {
-              return this.CollaboratorsHandler.getMemberIdPrivilegeLevel.called.should.equal(
+            it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function() {
+              return this.CollaboratorsGetter.getMemberIdPrivilegeLevel.called.should.equal(
                 false
               )
             })
@@ -264,8 +264,8 @@ describe('AuthorizationManager', function() {
             )
           })
 
-          it('should not call CollaboratorsHandler.getMemberIdPrivilegeLevel', function() {
-            return this.CollaboratorsHandler.getMemberIdPrivilegeLevel.called.should.equal(
+          it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function() {
+            return this.CollaboratorsGetter.getMemberIdPrivilegeLevel.called.should.equal(
               false
             )
           })
@@ -303,7 +303,7 @@ describe('AuthorizationManager', function() {
           this.AuthorizationManager.isUserSiteAdmin
             .withArgs(this.user_id)
             .yields(null, false)
-          this.CollaboratorsHandler.getMemberIdPrivilegeLevel
+          this.CollaboratorsGetter.getMemberIdPrivilegeLevel
             .withArgs(this.user_id, this.project_id)
             .yields(null, 'readOnly')
           return this.AuthorizationManager.getPrivilegeLevelForProject(
@@ -326,7 +326,7 @@ describe('AuthorizationManager', function() {
           this.AuthorizationManager.isUserSiteAdmin
             .withArgs(this.user_id)
             .yields(null, false)
-          this.CollaboratorsHandler.getMemberIdPrivilegeLevel
+          this.CollaboratorsGetter.getMemberIdPrivilegeLevel
             .withArgs(this.user_id, this.project_id)
             .yields(null, false)
           return this.AuthorizationManager.getPrivilegeLevelForProject(
@@ -349,7 +349,7 @@ describe('AuthorizationManager', function() {
           this.AuthorizationManager.isUserSiteAdmin
             .withArgs(this.user_id)
             .yields(null, true)
-          this.CollaboratorsHandler.getMemberIdPrivilegeLevel
+          this.CollaboratorsGetter.getMemberIdPrivilegeLevel
             .withArgs(this.user_id, this.project_id)
             .yields(null, false)
           return this.AuthorizationManager.getPrivilegeLevelForProject(
@@ -377,8 +377,8 @@ describe('AuthorizationManager', function() {
           )
         })
 
-        it('should not call CollaboratorsHandler.getMemberIdPrivilegeLevel', function() {
-          return this.CollaboratorsHandler.getMemberIdPrivilegeLevel.called.should.equal(
+        it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function() {
+          return this.CollaboratorsGetter.getMemberIdPrivilegeLevel.called.should.equal(
             false
           )
         })
@@ -409,7 +409,7 @@ describe('AuthorizationManager', function() {
           this.AuthorizationManager.isUserSiteAdmin
             .withArgs(this.user_id)
             .yields(null, false)
-          this.CollaboratorsHandler.getMemberIdPrivilegeLevel
+          this.CollaboratorsGetter.getMemberIdPrivilegeLevel
             .withArgs(this.user_id, this.project_id)
             .yields(null, 'readOnly')
           return this.AuthorizationManager.getPrivilegeLevelForProject(
@@ -432,7 +432,7 @@ describe('AuthorizationManager', function() {
           this.AuthorizationManager.isUserSiteAdmin
             .withArgs(this.user_id)
             .yields(null, false)
-          this.CollaboratorsHandler.getMemberIdPrivilegeLevel
+          this.CollaboratorsGetter.getMemberIdPrivilegeLevel
             .withArgs(this.user_id, this.project_id)
             .yields(null, false)
           return this.AuthorizationManager.getPrivilegeLevelForProject(
@@ -455,7 +455,7 @@ describe('AuthorizationManager', function() {
           this.AuthorizationManager.isUserSiteAdmin
             .withArgs(this.user_id)
             .yields(null, true)
-          this.CollaboratorsHandler.getMemberIdPrivilegeLevel
+          this.CollaboratorsGetter.getMemberIdPrivilegeLevel
             .withArgs(this.user_id, this.project_id)
             .yields(null, false)
           return this.AuthorizationManager.getPrivilegeLevelForProject(
@@ -483,8 +483,8 @@ describe('AuthorizationManager', function() {
           )
         })
 
-        it('should not call CollaboratorsHandler.getMemberIdPrivilegeLevel', function() {
-          return this.CollaboratorsHandler.getMemberIdPrivilegeLevel.called.should.equal(
+        it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function() {
+          return this.CollaboratorsGetter.getMemberIdPrivilegeLevel.called.should.equal(
             false
           )
         })
@@ -525,7 +525,7 @@ describe('AuthorizationManager', function() {
         this.AuthorizationManager.isUserSiteAdmin
           .withArgs(this.user_id)
           .yields(null, false)
-        return this.CollaboratorsHandler.getMemberIdPrivilegeLevel
+        return this.CollaboratorsGetter.getMemberIdPrivilegeLevel
           .withArgs(this.user_id, this.project_id)
           .yields(null, 'readOnly')
       })

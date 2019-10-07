@@ -38,7 +38,7 @@ describe('EditorHttpController', function() {
         }),
         './EditorController': (this.EditorController = {}),
         'metrics-sharelatex': (this.Metrics = { inc: sinon.stub() }),
-        '../Collaborators/CollaboratorsHandler': (this.CollaboratorsHandler = {}),
+        '../Collaborators/CollaboratorsGetter': (this.CollaboratorsGetter = {}),
         '../Collaborators/CollaboratorsInviteHandler': (this.CollaboratorsInviteHandler = {}),
         '../TokenAccess/TokenAccessHandler': (this.TokenAccessHandler = {}),
         '../Authentication/AuthenticationController': (this.AuthenticationController = {}),
@@ -177,12 +177,9 @@ describe('EditorHttpController', function() {
       this.ProjectGetter.getProjectWithoutDocLines = sinon
         .stub()
         .callsArgWith(1, null, this.project)
-      this.CollaboratorsHandler.getInvitedMembersWithPrivilegeLevels = sinon
+      this.CollaboratorsGetter.getInvitedMembersWithPrivilegeLevels = sinon
         .stub()
         .callsArgWith(1, null, this.members)
-      this.CollaboratorsHandler.getTokenMembersWithPrivilegeLevels = sinon
-        .stub()
-        .callsArgWith(1, null, this.tokenMembers)
       this.CollaboratorsInviteHandler.getAllInvites = sinon
         .stub()
         .callsArgWith(1, null, this.invites)
@@ -229,7 +226,7 @@ describe('EditorHttpController', function() {
       })
 
       it('should get the list of users in the project', function() {
-        return this.CollaboratorsHandler.getInvitedMembersWithPrivilegeLevels
+        return this.CollaboratorsGetter.getInvitedMembersWithPrivilegeLevels
           .calledWith(this.project_id)
           .should.equal(true)
       })

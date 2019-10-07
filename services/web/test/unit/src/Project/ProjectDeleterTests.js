@@ -104,11 +104,15 @@ describe('ProjectDeleter', function() {
       removeProjectFromAllTags: sinon.stub().callsArgWith(2)
     }
     this.CollaboratorsHandler = {
-      removeUserFromAllProjets: sinon.stub().yields(),
-      getMemberIds: sinon
-        .stub()
-        .withArgs(this.project_id)
-        .yields(null, ['member-id-1', 'member-id-2'])
+      removeUserFromAllProjects: sinon.stub().yields()
+    }
+    this.CollaboratorsGetter = {
+      promises: {
+        getMemberIds: sinon
+          .stub()
+          .withArgs(this.project_id)
+          .resolves(['member-id-1', 'member-id-2'])
+      }
     }
 
     this.logger = {
@@ -151,6 +155,7 @@ describe('ProjectDeleter', function() {
         '../Tags/TagsHandler': this.TagsHandler,
         '../FileStore/FileStoreHandler': (this.FileStoreHandler = {}),
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
+        '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../Docstore/DocstoreManager': this.DocstoreManager,
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
         '../../infrastructure/mongojs': { db: this.db },
@@ -239,11 +244,11 @@ describe('ProjectDeleter', function() {
     it('should remove all the projects the user is a collaborator of', function(done) {
       this.ProjectDeleter.deleteUsersProjects(this.user._id, () => {
         sinon.assert.calledWith(
-          this.CollaboratorsHandler.removeUserFromAllProjets,
+          this.CollaboratorsHandler.removeUserFromAllProjects,
           this.user._id
         )
         sinon.assert.calledOnce(
-          this.CollaboratorsHandler.removeUserFromAllProjets
+          this.CollaboratorsHandler.removeUserFromAllProjects
         )
         done()
       })

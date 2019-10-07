@@ -16,7 +16,7 @@ let CollaboratorsInviteController
 const ProjectGetter = require('../Project/ProjectGetter')
 const LimitationsManager = require('../Subscription/LimitationsManager')
 const UserGetter = require('../User/UserGetter')
-const CollaboratorsHandler = require('./CollaboratorsHandler')
+const CollaboratorsGetter = require('./CollaboratorsGetter')
 const CollaboratorsInviteHandler = require('./CollaboratorsInviteHandler')
 const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
@@ -257,10 +257,10 @@ module.exports = CollaboratorsInviteController = {
     }
     // check if the user is already a member of the project
     const currentUser = AuthenticationController.getSessionUser(req)
-    return CollaboratorsHandler.isUserInvitedMemberOfProject(
+    return CollaboratorsGetter.isUserInvitedMemberOfProject(
       currentUser._id,
       projectId,
-      function(err, isMember, _privilegeLevel) {
+      function(err, isMember) {
         if (err != null) {
           logger.warn(
             { err, projectId },

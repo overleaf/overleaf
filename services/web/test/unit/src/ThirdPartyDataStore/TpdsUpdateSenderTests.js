@@ -39,7 +39,7 @@ describe('TpdsUpdateSender', function() {
     this.requestQueuer = function(queue, meth, opts, callback) {}
     const project = { owner_ref: user_id }
     const member_ids = [collaberator_ref_1, read_only_ref_1, user_id]
-    this.CollaboratorsHandler = {
+    this.CollaboratorsGetter = {
       getInvitedMemberIds: sinon.stub().yields(null, member_ids)
     }
     this.ProjectGetter = {
@@ -69,7 +69,7 @@ describe('TpdsUpdateSender', function() {
         'logger-sharelatex': { log() {} },
         '../Project/ProjectGetter': this.ProjectGetter,
         request: this.request,
-        '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
+        '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         'metrics-sharelatex': {
           inc() {}
         }

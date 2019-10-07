@@ -40,7 +40,7 @@ describe('TokenAccessHandler', function() {
       requires: {
         '../../models/Project': { Project: (this.Project = {}) },
         'settings-sharelatex': (this.settings = {}),
-        '../Collaborators/CollaboratorsHandler': (this.CollaboratorsHandler = {}),
+        '../Collaborators/CollaboratorsGetter': (this.CollaboratorsGetter = {}),
         '../User/UserGetter': (this.UserGetter = {}),
         '../V1/V1Api': (this.V1Api = {
           request: sinon.stub()
@@ -301,7 +301,7 @@ describe('TokenAccessHandler', function() {
     describe('when user does have higher access', function() {
       beforeEach(function() {
         this.Project.findOne = sinon.stub().callsArgWith(2, null, this.project)
-        return (this.CollaboratorsHandler.isUserInvitedMemberOfProject = sinon
+        return (this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
           .stub()
           .callsArgWith(2, null, true))
       })
@@ -328,10 +328,10 @@ describe('TokenAccessHandler', function() {
           this.userId,
           (err, project) => {
             expect(
-              this.CollaboratorsHandler.isUserInvitedMemberOfProject.callCount
+              this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount
             ).to.equal(1)
             expect(
-              this.CollaboratorsHandler.isUserInvitedMemberOfProject.calledWith(
+              this.CollaboratorsGetter.isUserInvitedMemberOfProject.calledWith(
                 this.userId,
                 this.project._id
               )
@@ -358,7 +358,7 @@ describe('TokenAccessHandler', function() {
     describe('when user does not have higher access', function() {
       beforeEach(function() {
         this.Project.findOne = sinon.stub().callsArgWith(2, null, this.project)
-        return (this.CollaboratorsHandler.isUserInvitedMemberOfProject = sinon
+        return (this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
           .stub()
           .callsArgWith(2, null, false))
       })
@@ -385,10 +385,10 @@ describe('TokenAccessHandler', function() {
           this.userId,
           (err, project) => {
             expect(
-              this.CollaboratorsHandler.isUserInvitedMemberOfProject.callCount
+              this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount
             ).to.equal(1)
             expect(
-              this.CollaboratorsHandler.isUserInvitedMemberOfProject.calledWith(
+              this.CollaboratorsGetter.isUserInvitedMemberOfProject.calledWith(
                 this.userId,
                 this.project._id
               )
@@ -435,7 +435,7 @@ describe('TokenAccessHandler', function() {
     describe('when isUserInvitedMemberOfProject produces an error', function() {
       beforeEach(function() {
         this.Project.findOne = sinon.stub().callsArgWith(2, null, this.project)
-        return (this.CollaboratorsHandler.isUserInvitedMemberOfProject = sinon
+        return (this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
           .stub()
           .callsArgWith(2, new Error('woops')))
       })

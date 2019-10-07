@@ -28,7 +28,7 @@ const AuthenticationController = require('../Authentication/AuthenticationContro
 const PackageVersions = require('../../infrastructure/PackageVersions')
 const Sources = require('../Authorization/Sources')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
-const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
+const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const Modules = require('../../infrastructure/Modules')
 const ProjectEntityHandler = require('./ProjectEntityHandler')
 const UserGetter = require('../User/UserGetter')
@@ -616,7 +616,7 @@ const ProjectController = {
           if (userId == null) {
             return cb()
           }
-          CollaboratorsHandler.userIsTokenMember(userId, projectId, cb)
+          CollaboratorsGetter.userIsTokenMember(userId, projectId, cb)
         },
         brandVariation: [
           'project',

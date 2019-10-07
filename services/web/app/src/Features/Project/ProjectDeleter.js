@@ -23,6 +23,7 @@ const async = require('async')
 const ProjectHelper = require('./ProjectHelper')
 const ProjectDetailsHandler = require('./ProjectDetailsHandler')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
+const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const moment = require('moment')
 
@@ -73,7 +74,7 @@ const ProjectDeleter = {
           if (err != null) {
             return callback(err)
           }
-          return CollaboratorsHandler.removeUserFromAllProjets(
+          return CollaboratorsHandler.removeUserFromAllProjects(
             user_id,
             callback
           )
@@ -249,8 +250,7 @@ async function deleteProject(project_id, options = {}) {
     )
     await flushProjectToMongoAndDelete(project_id)
 
-    const getMemberIds = promisify(CollaboratorsHandler.getMemberIds)
-    let member_ids = await getMemberIds(project_id)
+    let member_ids = await CollaboratorsGetter.promises.getMemberIds(project_id)
 
     // fire these jobs in the background
     Array.from(member_ids).forEach(member_id =>

@@ -12,13 +12,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let TagsHandler
 const settings = require('settings-sharelatex')
 const request = require('request')
 const logger = require('logger-sharelatex')
+const { promisifyAll } = require('../../util/promises')
 
 const TIMEOUT = 1000
-module.exports = TagsHandler = {
+const TagsHandler = {
   getAllTags(user_id, callback) {
     this._requestTags(user_id, (err, allTags) => {
       if (allTags == null) {
@@ -205,3 +205,6 @@ module.exports = TagsHandler = {
     )
   }
 }
+
+TagsHandler.promises = promisifyAll(TagsHandler)
+module.exports = TagsHandler

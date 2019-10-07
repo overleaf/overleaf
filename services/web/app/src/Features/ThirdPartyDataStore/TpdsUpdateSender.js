@@ -21,7 +21,7 @@ const ProjectGetter = require('../Project/ProjectGetter')
 const keys = require('../../infrastructure/Keys')
 const metrics = require('metrics-sharelatex')
 const request = require('request')
-const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
+const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const { promisifyAll } = require('../../util/promises')
 
 const buildPath = function(user_id, project_name, filePath) {
@@ -298,7 +298,7 @@ var getProjectsUsersIds = function(project_id, callback) {
       if (err != null) {
         return callback(err)
       }
-      return CollaboratorsHandler.getInvitedMemberIds(project_id, function(
+      return CollaboratorsGetter.getInvitedMemberIds(project_id, function(
         err,
         member_ids
       ) {

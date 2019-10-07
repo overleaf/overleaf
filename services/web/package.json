@@ -86,6 +86,7 @@
     "nvd3": "^1.8.6",
     "oauth2-server": "^3.0.1",
     "optimist": "0.6.1",
+    "p-limit": "^2.2.1",
     "passport": "^0.3.2",
     "passport-google-oauth20": "^1.0.0",
     "passport-ldapauth": "^0.6.0",

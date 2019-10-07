@@ -48,7 +48,7 @@ describe('ProjectGetter', function() {
         '../../models/DeletedProject': {
           DeletedProject: this.DeletedProject
         },
-        '../Collaborators/CollaboratorsHandler': (this.CollaboratorsHandler = {}),
+        '../Collaborators/CollaboratorsGetter': (this.CollaboratorsGetter = {}),
         '../../infrastructure/LockManager': (this.LockManager = {
           runWithLock: sinon.spy((namespace, id, runner, callback) =>
             runner(callback)
@@ -314,8 +314,8 @@ describe('ProjectGetter', function() {
       this.Project.find
         .withArgs({ owner_ref: this.user_id }, this.fields)
         .yields(null, ['mock-owned-projects'])
-      this.CollaboratorsHandler.getProjectsUserIsMemberOf = sinon.stub()
-      this.CollaboratorsHandler.getProjectsUserIsMemberOf
+      this.CollaboratorsGetter.getProjectsUserIsMemberOf = sinon.stub()
+      this.CollaboratorsGetter.getProjectsUserIsMemberOf
         .withArgs(this.user_id, this.fields)
         .yields(null, {
           readAndWrite: ['mock-rw-projects'],

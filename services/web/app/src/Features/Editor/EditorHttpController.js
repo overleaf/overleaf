@@ -23,7 +23,7 @@ const UserGetter = require('../User/UserGetter')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 const Metrics = require('metrics-sharelatex')
-const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
+const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const CollaboratorsInviteHandler = require('../Collaborators/CollaboratorsInviteHandler')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
@@ -76,7 +76,7 @@ module.exports = EditorHttpController = {
       if (project == null) {
         return callback(new Errors.NotFoundError('project not found'))
       }
-      return CollaboratorsHandler.getInvitedMembersWithPrivilegeLevels(
+      return CollaboratorsGetter.getInvitedMembersWithPrivilegeLevels(
         project_id,
         function(error, members) {
           if (error != null) {

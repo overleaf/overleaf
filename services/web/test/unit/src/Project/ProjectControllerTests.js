@@ -87,7 +87,7 @@ describe('ProjectController', function() {
       getRequestToken: sinon.stub().returns(this.token),
       protectTokens: sinon.stub()
     }
-    this.CollaboratorsHandler = {
+    this.CollaboratorsGetter = {
       userIsTokenMember: sinon.stub().callsArgWith(2, null, false)
     }
     this.ProjectEntityHandler = {}
@@ -152,7 +152,7 @@ describe('ProjectController', function() {
           .AuthenticationController,
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
-        '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
+        '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../../infrastructure/Modules': this.Modules,
         './ProjectEntityHandler': this.ProjectEntityHandler,
         '../Errors/Errors': Errors,
@@ -805,7 +805,7 @@ describe('ProjectController', function() {
     })
 
     it('should set isRestrictedTokenMember to true when the user is accessing project via read-only token', function(done) {
-      this.CollaboratorsHandler.userIsTokenMember.callsArgWith(2, null, true)
+      this.CollaboratorsGetter.userIsTokenMember.callsArgWith(2, null, true)
       this.AuthorizationManager.getPrivilegeLevelForProject.callsArgWith(
         3,
         null,
@@ -820,7 +820,7 @@ describe('ProjectController', function() {
     })
 
     it('should set isRestrictedTokenMember to true when anonymous read-only token access', function(done) {
-      this.CollaboratorsHandler.userIsTokenMember.callsArgWith(2, null, null)
+      this.CollaboratorsGetter.userIsTokenMember.callsArgWith(2, null, null)
       this.AuthenticationController.isUserLoggedIn = sinon.stub().returns(false)
       this.AuthorizationManager.getPrivilegeLevelForProject.callsArgWith(
         3,

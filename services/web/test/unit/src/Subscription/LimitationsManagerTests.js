@@ -58,7 +58,7 @@ describe('LimitationsManager', function() {
         '../User/UserGetter': this.UserGetter,
         './SubscriptionLocator': this.SubscriptionLocator,
         'settings-sharelatex': (this.Settings = {}),
-        '../Collaborators/CollaboratorsHandler': (this.CollaboratorsHandler = {}),
+        '../Collaborators/CollaboratorsGetter': (this.CollaboratorsGetter = {}),
         '../Collaborators/CollaboratorsInviteHandler': (this.CollaboratorsInviteHandler = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
         'logger-sharelatex': {
@@ -150,7 +150,7 @@ describe('LimitationsManager', function() {
         this.current_number = 1
         this.allowed_number = 2
         this.invite_count = 0
-        this.CollaboratorsHandler.getInvitedCollaboratorCount = (
+        this.CollaboratorsGetter.getInvitedCollaboratorCount = (
           project_id,
           callback
         ) => callback(null, this.current_number)
@@ -183,7 +183,7 @@ describe('LimitationsManager', function() {
         this.current_number = 1
         this.allowed_number = 4
         this.invite_count = 1
-        this.CollaboratorsHandler.getInvitedCollaboratorCount = (
+        this.CollaboratorsGetter.getInvitedCollaboratorCount = (
           project_id,
           callback
         ) => callback(null, this.current_number)
@@ -216,7 +216,7 @@ describe('LimitationsManager', function() {
         this.current_number = 1
         this.allowed_number = 2
         this.invite_count = 0
-        this.CollaboratorsHandler.getInvitedCollaboratorCount = (
+        this.CollaboratorsGetter.getInvitedCollaboratorCount = (
           project_id,
           callback
         ) => callback(null, this.current_number)
@@ -249,7 +249,7 @@ describe('LimitationsManager', function() {
         this.current_number = 3
         this.allowed_number = 2
         this.invite_count = 0
-        this.CollaboratorsHandler.getInvitedCollaboratorCount = (
+        this.CollaboratorsGetter.getInvitedCollaboratorCount = (
           project_id,
           callback
         ) => callback(null, this.current_number)
@@ -282,7 +282,7 @@ describe('LimitationsManager', function() {
         this.current_number = 100
         this.allowed_number = -1
         this.invite_count = 0
-        this.CollaboratorsHandler.getInvitedCollaboratorCount = (
+        this.CollaboratorsGetter.getInvitedCollaboratorCount = (
           project_id,
           callback
         ) => callback(null, this.current_number)
@@ -315,7 +315,7 @@ describe('LimitationsManager', function() {
         this.current_number = 0
         this.allowed_number = 2
         this.invite_count = 2
-        this.CollaboratorsHandler.getInvitedCollaboratorCount = (
+        this.CollaboratorsGetter.getInvitedCollaboratorCount = (
           project_id,
           callback
         ) => callback(null, this.current_number)
@@ -348,7 +348,7 @@ describe('LimitationsManager', function() {
         this.current_number = 1
         this.allowed_number = 2
         this.invite_count = 1
-        this.CollaboratorsHandler.getInvitedCollaboratorCount = (
+        this.CollaboratorsGetter.getInvitedCollaboratorCount = (
           project_id,
           callback
         ) => callback(null, this.current_number)
