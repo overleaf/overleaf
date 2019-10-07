@@ -74,6 +74,14 @@ module.exports = V1Api = {
       error = new Errors.ForbiddenError('overleaf v1 returned forbidden')
       error.statusCode = response.statusCode
       return callback(error)
+    } else if (response.statusCode === 404) {
+      error = new Errors.NotFoundError(
+        `overleaf v1 returned non-success code: ${response.statusCode} ${
+          options.method
+        } ${options.uri}`
+      )
+      error.statusCode = response.statusCode
+      return callback(error)
     } else {
       error = new Error(
         `overleaf v1 returned non-success code: ${response.statusCode} ${

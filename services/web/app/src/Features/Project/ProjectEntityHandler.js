@@ -333,7 +333,7 @@ const ProjectEntityHandler = {
         return callback(err)
       }
       if (project == null) {
-        return callback(Errors.NotFoundError('no project'))
+        return callback(new Errors.NotFoundError('no project'))
       }
       return ProjectEntityHandler._getAllFoldersFromProject(project, callback)
     })
