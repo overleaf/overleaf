@@ -27,7 +27,8 @@ const UserSchema = new Schema({
           return new Date()
         }
       },
-      confirmedAt: { type: Date }
+      confirmedAt: { type: Date },
+      samlProviderId: { type: String }
     }
   ],
   first_name: { type: String, default: '' },

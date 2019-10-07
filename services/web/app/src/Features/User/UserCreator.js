@@ -23,13 +23,20 @@ async function createNewUser(attributes, options = {}) {
     .reverse()
     .join('')
 
-  user.emails = [
-    {
-      email: user.email,
-      createdAt: new Date(),
-      reversedHostname
-    }
-  ]
+  const emailData = {
+    email: user.email,
+    createdAt: new Date(),
+    reversedHostname
+  }
+  if (
+    attributes.samlIdentifiers &&
+    attributes.samlIdentifiers[0] &&
+    attributes.samlIdentifiers[0].providerId
+  ) {
+    emailData.samlProviderId = attributes.samlIdentifiers[0].providerId
+  }
+
+  user.emails = [emailData]
 
   user = await user.save()
 

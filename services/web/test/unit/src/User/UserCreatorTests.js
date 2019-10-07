@@ -162,6 +162,15 @@ describe('UserCreator', function() {
         await this.UserCreator.promises.createNewUser(attributes, opts)
         sinon.assert.notCalled(this.addAffiliation)
       })
+
+      it('should include SAML provider ID with email', async function() {
+        const attributes = {
+          email: this.email,
+          samlIdentifiers: [{ email: this.email, providerId: '1' }]
+        }
+        const user = await this.UserCreator.promises.createNewUser(attributes)
+        assert.equal(user.emails[0].samlProviderId, '1')
+      })
     })
   })
 })
