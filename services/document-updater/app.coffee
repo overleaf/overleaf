@@ -138,6 +138,15 @@ shutdownCleanly = (signal) ->
 			process.exit()
 		, 10000
 
+watchForEvent = (eventName)->
+	docUpdaterRedisClient.on eventName, (e)->
+		console.log "redis event: #{eventName} #{e}"
+
+events = ["connect", "ready", "error", "close", "reconnecting", "end"]
+for eventName in events
+	watchForEvent(eventName)
+
+
 port = Settings.internal?.documentupdater?.port or Settings.apis?.documentupdater?.port or 3003
 host = Settings.internal.documentupdater.host or "localhost"
 if !module.parent # Called directly
