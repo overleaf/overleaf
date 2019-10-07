@@ -7,6 +7,7 @@ const ContactManager = require('../Contacts/ContactManager')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 const CollaboratorsGetter = require('./CollaboratorsGetter')
+const Errors = require('../Errors/Errors')
 
 module.exports = {
   removeUserFromProject: callbackify(removeUserFromProject),
@@ -17,7 +18,8 @@ module.exports = {
     removeUserFromProject,
     removeUserFromAllProjects,
     addUserIdToProject,
-    transferProjects
+    transferProjects,
+    setCollaboratorPrivilegeLevel
   }
 }
 
@@ -148,6 +150,45 @@ async function transferProjects(fromUserId, toUserId) {
       'error flushing tranferred projects to TPDS'
     )
   })
+}
+
+async function setCollaboratorPrivilegeLevel(
+  projectId,
+  userId,
+  privilegeLevel
+) {
+  // Make sure we're only updating the project if the user is already a
+  // collaborator
+  const query = {
+    _id: projectId,
+    $or: [{ collaberator_refs: userId }, { readOnly_refs: userId }]
+  }
+  let update
+  switch (privilegeLevel) {
+    case PrivilegeLevels.READ_AND_WRITE: {
+      update = {
+        $pull: { readOnly_refs: userId },
+        $addToSet: { collaberator_refs: userId }
+      }
+      break
+    }
+    case PrivilegeLevels.READ_ONLY: {
+      update = {
+        $pull: { collaberator_refs: userId },
+        $addToSet: { readOnly_refs: userId }
+      }
+      break
+    }
+    default: {
+      throw new OError({
+        message: `unknown privilege level: ${privilegeLevel}`
+      })
+    }
+  }
+  const mongoResponse = await Project.updateOne(query, update).exec()
+  if (mongoResponse.n === 0) {
+    throw new Errors.NotFoundError('project or collaborator not found')
+  }
 }
 
 async function _flushProjects(projectIds) {

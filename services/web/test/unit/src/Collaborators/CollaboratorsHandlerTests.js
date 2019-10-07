@@ -21,8 +21,8 @@ describe('CollaboratorsHandler', function() {
       warn: sinon.stub(),
       err: sinon.stub()
     }
-    this.userId = 'mock-user-id'
-    this.addingUserId = 'adding-user-id'
+    this.userId = ObjectId()
+    this.addingUserId = ObjectId()
     this.project = {
       _id: ObjectId()
     }
@@ -344,6 +344,69 @@ describe('CollaboratorsHandler', function() {
         await sleep(100) // let the background tasks run
         expect(this.logger.err).to.have.been.called
       })
+    })
+  })
+
+  describe('setCollaboratorPrivilegeLevel', function() {
+    it('sets a collaborator to read-only', async function() {
+      this.ProjectMock.expects('updateOne')
+        .withArgs(
+          {
+            _id: this.projectId,
+            $or: [
+              { collaberator_refs: this.userId },
+              { readOnly_refs: this.userId }
+            ]
+          },
+          {
+            $pull: { collaberator_refs: this.userId },
+            $addToSet: { readOnly_refs: this.userId }
+          }
+        )
+        .chain('exec')
+        .resolves({ n: 1 })
+      await this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
+        this.projectId,
+        this.userId,
+        'readOnly'
+      )
+    })
+
+    it('sets a collaborator to read-write', async function() {
+      this.ProjectMock.expects('updateOne')
+        .withArgs(
+          {
+            _id: this.projectId,
+            $or: [
+              { collaberator_refs: this.userId },
+              { readOnly_refs: this.userId }
+            ]
+          },
+          {
+            $addToSet: { collaberator_refs: this.userId },
+            $pull: { readOnly_refs: this.userId }
+          }
+        )
+        .chain('exec')
+        .resolves({ n: 1 })
+      await this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
+        this.projectId,
+        this.userId,
+        'readAndWrite'
+      )
+    })
+
+    it('throws a NotFoundError if the project or collaborator does not exist', async function() {
+      this.ProjectMock.expects('updateOne')
+        .chain('exec')
+        .resolves({ n: 0 })
+      await expect(
+        this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
+          this.projectId,
+          this.userId,
+          'readAndWrite'
+        )
+      ).to.be.rejectedWith(Errors.NotFoundError)
     })
   })
 })

@@ -678,6 +678,31 @@ class User {
       callback
     )
   }
+
+  setCollaboratorInfo(projectId, userId, info, callback) {
+    this.getCsrfToken(err => {
+      if (err != null) {
+        return callback(err)
+      }
+      this.request.put(
+        {
+          url: `/project/${projectId.toString()}/users/${userId.toString()}`,
+          json: info
+        },
+        (err, response) => {
+          if (err != null) {
+            return callback(err)
+          }
+          if (response.statusCode !== 204) {
+            return callback(
+              new Error(`Unexpected status code: ${response.statusCode}`)
+            )
+          }
+          callback()
+        }
+      )
+    })
+  }
 }
 
 User.promises = class extends User {

@@ -1,19 +1,11 @@
-/* eslint-disable
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const CollaboratorsController = require('./CollaboratorsController')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const AuthorizationMiddleware = require('../Authorization/AuthorizationMiddleware')
+const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const CollaboratorsInviteController = require('./CollaboratorsInviteController')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 const CaptchaMiddleware = require('../Captcha/CaptchaMiddleware')
+const { Joi, validate } = require('../../infrastructure/Validation')
 
 module.exports = {
   apply(webRouter, apiRouter) {
@@ -21,6 +13,24 @@ module.exports = {
       '/project/:Project_id/leave',
       AuthenticationController.requireLogin(),
       CollaboratorsController.removeSelfFromProject
+    )
+
+    webRouter.put(
+      '/project/:Project_id/users/:user_id',
+      AuthenticationController.requireLogin(),
+      validate({
+        params: Joi.object({
+          Project_id: Joi.objectId(),
+          user_id: Joi.objectId()
+        }),
+        body: Joi.object({
+          privilegeLevel: Joi.string()
+            .valid(PrivilegeLevels.READ_ONLY, PrivilegeLevels.READ_AND_WRITE)
+            .required()
+        })
+      }),
+      AuthorizationMiddleware.ensureUserCanAdminProject,
+      CollaboratorsController.setCollaboratorInfo
     )
 
     webRouter.delete(
@@ -91,7 +101,7 @@ module.exports = {
       CollaboratorsInviteController.viewInvite
     )
 
-    return webRouter.post(
+    webRouter.post(
       '/project/:Project_id/invite/token/:token/accept',
       AuthenticationController.requireLogin(),
       CollaboratorsInviteController.acceptInvite

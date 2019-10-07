@@ -1,6 +1,9 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
+const { ObjectId } = require('mongodb')
+const HttpErrors = require('@overleaf/o-error/http')
+const Errors = require('../../../../app/src/Features/Errors/Errors')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 
@@ -12,13 +15,14 @@ describe('CollaboratorsController', function() {
     this.res = new MockResponse()
     this.req = new MockRequest()
 
-    this.user_id = 'user-id-123'
-    this.project_id = 'project-id-123'
+    this.userId = ObjectId()
+    this.projectId = ObjectId()
     this.callback = sinon.stub()
 
     this.CollaboratorsHandler = {
       promises: {
-        removeUserFromProject: sinon.stub().resolves()
+        removeUserFromProject: sinon.stub().resolves(),
+        setCollaboratorPrivilegeLevel: sinon.stub().resolves()
       }
     }
     this.CollaboratorsGetter = {
@@ -35,7 +39,7 @@ describe('CollaboratorsController', function() {
       }
     }
     this.AuthenticationController = {
-      getLoggedInUserId: sinon.stub().returns(this.user_id)
+      getLoggedInUserId: sinon.stub().returns(this.userId)
     }
     this.logger = {
       err: sinon.stub(),
@@ -54,6 +58,8 @@ describe('CollaboratorsController', function() {
         '../Tags/TagsHandler': this.TagsHandler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
+        '../Errors/Errors': Errors,
+        '@overleaf/o-error/http': HttpErrors,
         'logger-sharelatex': this.logger
       }
     })
@@ -62,8 +68,8 @@ describe('CollaboratorsController', function() {
   describe('removeUserFromProject', function() {
     beforeEach(function(done) {
       this.req.params = {
-        Project_id: this.project_id,
-        user_id: this.user_id
+        Project_id: this.projectId,
+        user_id: this.userId
       }
       this.res.sendStatus = sinon.spy(() => {
         done()
@@ -74,14 +80,14 @@ describe('CollaboratorsController', function() {
     it('should from the user from the project', function() {
       expect(
         this.CollaboratorsHandler.promises.removeUserFromProject
-      ).to.have.been.calledWith(this.project_id, this.user_id)
+      ).to.have.been.calledWith(this.projectId, this.userId)
     })
 
     it('should emit a userRemovedFromProject event to the proejct', function() {
       expect(this.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
-        this.project_id,
+        this.projectId,
         'userRemovedFromProject',
-        this.user_id
+        this.userId
       )
     })
 
@@ -91,7 +97,7 @@ describe('CollaboratorsController', function() {
 
     it('should have called emitToRoom', function() {
       expect(this.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
-        this.project_id,
+        this.projectId,
         'project:membership:changed'
       )
     })
@@ -99,7 +105,7 @@ describe('CollaboratorsController', function() {
 
   describe('removeSelfFromProject', function() {
     beforeEach(function(done) {
-      this.req.params = { Project_id: this.project_id }
+      this.req.params = { Project_id: this.projectId }
       this.res.sendStatus = sinon.spy(() => {
         done()
       })
@@ -109,21 +115,21 @@ describe('CollaboratorsController', function() {
     it('should remove the logged in user from the project', function() {
       expect(
         this.CollaboratorsHandler.promises.removeUserFromProject
-      ).to.have.been.calledWith(this.project_id, this.user_id)
+      ).to.have.been.calledWith(this.projectId, this.userId)
     })
 
     it('should emit a userRemovedFromProject event to the proejct', function() {
       expect(this.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
-        this.project_id,
+        this.projectId,
         'userRemovedFromProject',
-        this.user_id
+        this.userId
       )
     })
 
     it('should remove the project from all tags', function() {
       expect(
         this.TagsHandler.promises.removeProjectFromAllTags
-      ).to.have.been.calledWith(this.user_id, this.project_id)
+      ).to.have.been.calledWith(this.userId, this.projectId)
     })
 
     it('should return a success code', function() {
@@ -133,7 +139,7 @@ describe('CollaboratorsController', function() {
 
   describe('getAllMembers', function() {
     beforeEach(function(done) {
-      this.req.params = { Project_id: this.project_id }
+      this.req.params = { Project_id: this.projectId }
       this.res.json = sinon.spy(() => {
         done()
       })
@@ -185,6 +191,41 @@ describe('CollaboratorsController', function() {
       it('should not produce a json response', function() {
         this.res.json.callCount.should.equal(0)
       })
+    })
+  })
+
+  describe('setCollaboratorInfo', function() {
+    beforeEach(function() {
+      this.req.params = {
+        Project_id: this.projectId,
+        user_id: this.userId
+      }
+      this.req.body = { privilegeLevel: 'readOnly' }
+    })
+
+    it('should set the collaborator privilege level', function(done) {
+      this.res.sendStatus = status => {
+        expect(status).to.equal(204)
+        expect(
+          this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel
+        ).to.have.been.calledWith(this.projectId, this.userId, 'readOnly')
+        done()
+      }
+      this.CollaboratorsController.setCollaboratorInfo(this.req, this.res)
+    })
+
+    it('should return a 404 when the project or collaborator is not found', function(done) {
+      this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel.rejects(
+        new Errors.NotFoundError()
+      )
+      this.CollaboratorsController.setCollaboratorInfo(
+        this.req,
+        this.res,
+        err => {
+          expect(err).to.be.instanceof(HttpErrors.NotFoundError)
+          done()
+        }
+      )
     })
   })
 })

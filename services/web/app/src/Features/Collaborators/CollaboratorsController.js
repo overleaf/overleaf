@@ -1,16 +1,19 @@
 const OError = require('@overleaf/o-error')
+const HttpErrors = require('@overleaf/o-error/http')
 const CollaboratorsHandler = require('./CollaboratorsHandler')
 const CollaboratorsGetter = require('./CollaboratorsGetter')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const TagsHandler = require('../Tags/TagsHandler')
+const Errors = require('../Errors/Errors')
 const logger = require('logger-sharelatex')
 const { expressify } = require('../../util/promises')
 
 module.exports = {
   removeUserFromProject: expressify(removeUserFromProject),
   removeSelfFromProject: expressify(removeSelfFromProject),
-  getAllMembers: expressify(getAllMembers)
+  getAllMembers: expressify(getAllMembers),
+  setCollaboratorInfo: expressify(setCollaboratorInfo)
 }
 
 async function removeUserFromProject(req, res, next) {
@@ -43,6 +46,26 @@ async function getAllMembers(req, res, next) {
     }).withCause(err)
   }
   res.json({ members })
+}
+
+async function setCollaboratorInfo(req, res, next) {
+  const projectId = req.params.Project_id
+  const userId = req.params.user_id
+  const { privilegeLevel } = req.body
+  try {
+    await CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
+      projectId,
+      userId,
+      privilegeLevel
+    )
+  } catch (err) {
+    if (err instanceof Errors.NotFoundError) {
+      throw new HttpErrors.NotFoundError({})
+    } else {
+      throw err
+    }
+  }
+  res.sendStatus(204)
 }
 
 async function _removeUserIdFromProject(projectId, userId) {
