@@ -42,7 +42,7 @@ module.exports = ClsiFormatChecker = {
   },
 
   _checkForConflictingPaths(resources, callback) {
-    const paths = _.map(resources, 'path')
+    const paths = resources.map(resource => resource.path)
 
     const conflicts = _.filter(paths, function(path) {
       const matchingPaths = _.filter(
@@ -53,7 +53,7 @@ module.exports = ClsiFormatChecker = {
       return matchingPaths.length > 0
     })
 
-    const conflictObjects = _.map(conflicts, conflict => ({ path: conflict }))
+    const conflictObjects = conflicts.map(conflict => ({ path: conflict }))
 
     return callback(null, conflictObjects)
   },
@@ -63,7 +63,7 @@ module.exports = ClsiFormatChecker = {
 
     let totalSize = 0
 
-    let sizedResources = _.map(resources, function(resource) {
+    let sizedResources = resources.map(function(resource) {
       const result = { path: resource.path }
       if (resource.content != null) {
         result.size = resource.content.replace(/\n/g).length
