@@ -92,7 +92,7 @@ form.row(
 							i.fa.fa-fw.fa-trash(aria-hidden="true")
 							span.sr-only #{translate("remove")}
 				tr.affiliations-table-saml-row(ng-repeat-end ng-if="userEmail.affiliation && userEmail.affiliation && userEmail.affiliation.institution.ssoEnabled")
-					if hasFeature('saml')
+					if hasFeature('saml') || samlBeta
 						td
 						td(ng-attr-colspan="{{userEmail.samlProviderId ? '2' : '1'}}" ng-class="institutionAlreadyLinked(userEmail) ? '' : 'with-border'")
 							p.small(ng-if="userEmail.samlProviderId")

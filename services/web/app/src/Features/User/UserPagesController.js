@@ -22,7 +22,8 @@ const UserPagesController = {
       title: 'register',
       sharedProjectData,
       newTemplateData,
-      new_email: req.query.new_email || ''
+      new_email: req.query.new_email || '',
+      samlBeta: req.session.samlBeta
     })
   },
 
@@ -79,7 +80,8 @@ const UserPagesController = {
     }
     res.render('user/login', {
       title: 'login',
-      email: req.query.email
+      email: req.query.email,
+      samlBeta: req.session.samlBeta
     })
   },
 
@@ -145,6 +147,7 @@ const UserPagesController = {
         samlInitPath: _.get(Settings, ['saml', 'ukamf', 'initPath']),
         institutionLinked,
         institutionNotLinked,
+        samlBeta: req.session.samlBeta,
         ssoError: ssoError,
         thirdPartyIds: UserPagesController._restructureThirdPartyIds(user)
       })
