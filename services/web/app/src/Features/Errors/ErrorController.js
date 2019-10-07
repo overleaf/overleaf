@@ -30,6 +30,13 @@ module.exports = ErrorController = {
     } else if (error instanceof Errors.NotFoundError) {
       logger.warn({ err: error, url: req.url }, 'not found error')
       ErrorController.notFound(req, res)
+    } else if (
+      error instanceof URIError &&
+      error.message.match(/^Failed to decode param/)
+    ) {
+      logger.warn({ err: error, url: req.url }, 'Express URIError')
+      res.status(400)
+      res.render('general/500', { title: 'Invalid Error' })
     } else if (error instanceof Errors.ForbiddenError) {
       logger.error({ err: error }, 'forbidden error')
       ErrorController.forbidden(req, res)
@@ -64,6 +71,12 @@ module.exports = ErrorController = {
     if (error instanceof Errors.NotFoundError) {
       logger.warn({ err: error, url: req.url }, 'not found error')
       res.sendStatus(404)
+    } else if (
+      error instanceof URIError &&
+      error.message.match(/^Failed to decode param/)
+    ) {
+      logger.warn({ err: error, url: req.url }, 'Express URIError')
+      res.sendStatus(400)
     } else {
       logger.error(
         { err: error, url: req.url, method: req.method },
