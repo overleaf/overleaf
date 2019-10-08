@@ -44,6 +44,11 @@ RUN bash -c 'cd /var/www/sharelatex && source ./bin/install-services'
 RUN bash -c 'cd /var/www/sharelatex && source ./bin/compile-services'
 
 
+# Links CLSI sycntex to its default location
+# ------------------------------------------
+RUN ln -s /var/www/sharelatex/clsi/bin/synctex /opt/synctex
+
+
 # Change application ownership to www-data
 # ----------------------------------------
 RUN	chown -R www-data:www-data /var/www/sharelatex;
