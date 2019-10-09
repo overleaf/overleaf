@@ -137,7 +137,7 @@ form.row(
 								input-type="email"
 								input-required="true"
 							)
-					if hasFeature('saml')
+					if hasFeature('saml') || samlBeta
 						td(
 							colspan="2"
 							ng-if="newAffiliation && newAffiliation.university && newAffiliation.university.ssoEnabled"

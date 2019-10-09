@@ -28,11 +28,12 @@ define(['base'], App =>
     $scope.closeInstitutionNotification = type => {
       $scope.hideInstitutionNotifications[type] = true
     }
+    $scope.hasSamlBeta = ExposedSettings.hasSamlBeta
     $scope.hasSamlFeature = ExposedSettings.hasSamlFeature
     $scope.samlInitPath = ExposedSettings.samlInitPath
     $scope.shouldShowRolesAndAddEmailButton = () => {
       const newAffiliation = $scope.newAffiliation
-      const hasSamlFeature = $scope.hasSamlFeature
+      const hasSamlFeature = $scope.hasSamlFeature || $scope.hasSamlBeta
       return (
         !newAffiliation ||
         (newAffiliation && !newAffiliation.university) ||

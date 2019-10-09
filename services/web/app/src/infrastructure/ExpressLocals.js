@@ -530,6 +530,7 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
     res.locals.ExposedSettings = {
       isOverleaf: Settings.overleaf != null,
       appName: Settings.appName,
+      hasSamlBeta: req.session.samlBeta,
       hasSamlFeature: Features.hasFeature('saml'),
       samlInitPath: lodash.get(Settings, ['saml', 'ukamf', 'initPath']),
       siteUrl: Settings.siteUrl,
