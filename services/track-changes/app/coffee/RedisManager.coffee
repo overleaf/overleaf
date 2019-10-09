@@ -21,7 +21,7 @@ module.exports = RedisManager =
 		multi = rclient.multi()
 		# Delete all the updates which have been applied (exact match)
 		for update in docUpdates or []
-			multi.lrem Keys.uncompressedHistoryOps({doc_id}), 0, update
+			multi.lrem Keys.uncompressedHistoryOps({doc_id}), 1, update
 		multi.exec (error, results) ->
 			return callback(error) if error?
 			# It's ok to delete the doc_id from the set here. Even though the list
