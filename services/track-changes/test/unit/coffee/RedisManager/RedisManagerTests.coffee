@@ -56,12 +56,12 @@ describe "RedisManager", ->
 
 			it "should delete the first update from redis", ->
 				@rclient.lrem
-					.calledWith("UncompressedHistoryOps:#{@doc_id}", 0, @jsonUpdates[0])
+					.calledWith("UncompressedHistoryOps:#{@doc_id}", 1, @jsonUpdates[0])
 					.should.equal true
 
 			it "should delete the second update from redis", ->
 				@rclient.lrem
-					.calledWith("UncompressedHistoryOps:#{@doc_id}", 0, @jsonUpdates[1])
+					.calledWith("UncompressedHistoryOps:#{@doc_id}", 1, @jsonUpdates[1])
 					.should.equal true
 
 			it "should delete the doc from the set of docs with history ops", ->
