@@ -5,6 +5,7 @@ settings =
 			host: process.env['PUBSUB_REDIS_HOST'] or process.env['REDIS_HOST'] or "localhost"
 			port: process.env['PUBSUB_REDIS_PORT'] or process.env['REDIS_PORT'] or "6379"
 			password: process.env["PUBSUB_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
+			maxRetriesPerRequest: parseInt(process.env["PUBSUB_REDIS_MAX_RETRIES_PER_REQUEST"] or process.env["REDIS_MAX_RETRIES_PER_REQUEST"] or "20")
 
 		realtime:
 			host: process.env['REAL_TIME_REDIS_HOST'] or process.env['REDIS_HOST'] or "localhost"
@@ -13,6 +14,7 @@ settings =
 			key_schema:
 				clientsInProject: ({project_id}) -> "clients_in_project:{#{project_id}}"
 				connectedUser: ({project_id, client_id})-> "connected_user:{#{project_id}}:#{client_id}"
+			maxRetriesPerRequest: parseInt(process.env["REAL_TIME_REDIS_MAX_RETRIES_PER_REQUEST"] or process.env["REDIS_MAX_RETRIES_PER_REQUEST"] or "20")
 
 		documentupdater:
 			host: process.env['DOC_UPDATER_REDIS_HOST'] or process.env['REDIS_HOST'] or "localhost"
@@ -20,11 +22,13 @@ settings =
 			password: process.env["DOC_UPDATER_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
 			key_schema:
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
+			maxRetriesPerRequest: parseInt(process.env["DOC_UPDATER_REDIS_MAX_RETRIES_PER_REQUEST"] or process.env["REDIS_MAX_RETRIES_PER_REQUEST"] or "20")
 
 		websessions: 			
 			host: process.env['WEB_REDIS_HOST'] or process.env['REDIS_HOST'] or "localhost"
 			port: process.env['WEB_REDIS_PORT'] or process.env['REDIS_PORT'] or "6379"
 			password: process.env["WEB_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
+			maxRetriesPerRequest: parseInt(process.env["WEB_REDIS_MAX_RETRIES_PER_REQUEST"] or process.env["REDIS_MAX_RETRIES_PER_REQUEST"] or "20")
 
 	internal:
 		realTime:
