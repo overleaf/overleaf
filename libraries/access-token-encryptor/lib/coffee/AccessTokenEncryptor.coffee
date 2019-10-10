@@ -3,7 +3,7 @@ crypto = require('crypto')
 ALGORITHM = 'aes-256-ctr'
 
 keyFn = (password, salt, callback)->
-	return crypto.pbkdf2(password, salt, 10000, 64, callback)
+	return crypto.pbkdf2(password, salt, 10000, 64, 'sha1', callback)
 
 class AccessTokenEncryptor
 
