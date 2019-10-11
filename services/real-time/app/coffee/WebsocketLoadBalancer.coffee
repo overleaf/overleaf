@@ -91,7 +91,8 @@ module.exports = WebsocketLoadBalancer =
 				}, "distributing event to clients"
 				seen = {}
 				# Send the messages to clients async, don't wait for them all to finish
-				Async.eachSeries clientList
+				Async.eachLimit clientList
+					, 2
 					, (client, cb) ->
 						Utils.getClientAttributes client, ['is_restricted_user'], (err, {is_restricted_user}) ->
 							return cb(err) if err?
