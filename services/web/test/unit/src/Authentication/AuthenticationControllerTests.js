@@ -1,25 +1,9 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const chai = require('chai')
-const should = chai.should()
 const { expect } = chai
 const modulePath =
   '../../../../app/src/Features/Authentication/AuthenticationController.js'
 const SandboxedModule = require('sandboxed-module')
-const events = require('events')
 const tk = require('timekeeper')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
@@ -106,7 +90,7 @@ describe('AuthenticationController', function() {
   })
 
   afterEach(function() {
-    return tk.reset()
+    tk.reset()
   })
 
   describe('isUserLoggedIn', function() {
@@ -115,7 +99,7 @@ describe('AuthenticationController', function() {
     })
 
     afterEach(function() {
-      return this.stub.restore()
+      this.stub.restore()
     })
 
     it('should do the right thing in all cases', function() {
@@ -132,9 +116,9 @@ describe('AuthenticationController', function() {
         false
       )
       this.AuthenticationController.getLoggedInUserId.returns(undefined)
-      return expect(
-        this.AuthenticationController.isUserLoggedIn(this.req)
-      ).to.equal(false)
+      expect(this.AuthenticationController.isUserLoggedIn(this.req)).to.equal(
+        false
+      )
     })
   })
 
@@ -163,7 +147,7 @@ describe('AuthenticationController', function() {
         email: 'new_email'
       }
       expect(this.user).to.deep.equal(expectedUser)
-      return expect(this.user).to.deep.equal(expectedUser)
+      expect(this.user).to.deep.equal(expectedUser)
     })
   })
 
@@ -172,7 +156,7 @@ describe('AuthenticationController', function() {
       this.info = null
       this.req.login = sinon.stub().callsArgWith(1, null)
       this.res.json = sinon.stub()
-      this.req.session = this.session = {
+      this.req.session = {
         passport: { user: this.user },
         postLoginRedirect: '/path/to/redir/to'
       }
@@ -181,17 +165,17 @@ describe('AuthenticationController', function() {
       this.req.sessionStore = { generate: sinon.stub() }
       this.AuthenticationController.finishLogin = sinon.stub()
       this.passport.authenticate.callsArgWith(1, null, this.user, this.info)
-      return (this.err = new Error('woops'))
+      this.err = new Error('woops')
     })
 
     it('should call passport.authenticate', function() {
       this.AuthenticationController.passportLogin(this.req, this.res, this.next)
-      return this.passport.authenticate.callCount.should.equal(1)
+      this.passport.authenticate.callCount.should.equal(1)
     })
 
     describe('when authenticate produces an error', function() {
       beforeEach(function() {
-        return this.passport.authenticate.callsArgWith(1, this.err)
+        this.passport.authenticate.callsArgWith(1, this.err)
       })
 
       it('should return next with an error', function() {
@@ -200,23 +184,18 @@ describe('AuthenticationController', function() {
           this.res,
           this.next
         )
-        return this.next.calledWith(this.err).should.equal(true)
+        this.next.calledWith(this.err).should.equal(true)
       })
     })
 
     describe('when authenticate produces a user', function() {
       beforeEach(function() {
         this.req.session.postLoginRedirect = 'some_redirect'
-        return this.passport.authenticate.callsArgWith(
-          1,
-          null,
-          this.user,
-          this.info
-        )
+        this.passport.authenticate.callsArgWith(1, null, this.user, this.info)
       })
 
       afterEach(function() {
-        return delete this.req.session.postLoginRedirect
+        delete this.req.session.postLoginRedirect
       })
 
       it('should call finishLogin', function() {
@@ -226,7 +205,7 @@ describe('AuthenticationController', function() {
           this.next
         )
         this.AuthenticationController.finishLogin.callCount.should.equal(1)
-        return this.AuthenticationController.finishLogin
+        this.AuthenticationController.finishLogin
           .calledWith(this.user)
           .should.equal(true)
       })
@@ -235,12 +214,7 @@ describe('AuthenticationController', function() {
     describe('when authenticate does not produce a user', function() {
       beforeEach(function() {
         this.info = { text: 'a', type: 'b' }
-        return this.passport.authenticate.callsArgWith(
-          1,
-          null,
-          false,
-          this.info
-        )
+        this.passport.authenticate.callsArgWith(1, null, false, this.info)
       })
 
       it('should not call finishLogin', function() {
@@ -249,9 +223,7 @@ describe('AuthenticationController', function() {
           this.res,
           this.next
         )
-        return this.AuthenticationController.finishLogin.callCount.should.equal(
-          0
-        )
+        this.AuthenticationController.finishLogin.callCount.should.equal(0)
       })
 
       it('should not send a json response with redirect', function() {
@@ -262,9 +234,7 @@ describe('AuthenticationController', function() {
         )
         this.res.json.callCount.should.equal(1)
         this.res.json.calledWith({ message: this.info }).should.equal(true)
-        return expect(this.res.json.lastCall.args[0].redir != null).to.equal(
-          false
-        )
+        expect(this.res.json.lastCall.args[0].redir != null).to.equal(false)
       })
     })
   })
@@ -272,88 +242,132 @@ describe('AuthenticationController', function() {
   describe('afterLoginSessionSetup', function() {
     beforeEach(function() {
       this.req.login = sinon.stub().callsArgWith(1, null)
-      this.req.session = this.session = { passport: { user: this.user } }
-      this.req.session = { passport: { user: { _id: 'one' } } }
+      this.req.sessionID = 'thisisacryptographicallysecurerandomid'
+      this.req.session = {
+        passport: { user: { _id: 'one' } }
+      }
       this.req.session.destroy = sinon.stub().callsArgWith(0, null)
       this.req.session.save = sinon.stub().callsArgWith(0, null)
       this.req.sessionStore = { generate: sinon.stub() }
       this.UserSessionsManager.trackSession = sinon.stub()
-      return (this.call = callback => {
-        return this.AuthenticationController.afterLoginSessionSetup(
+      this.call = callback => {
+        this.AuthenticationController.afterLoginSessionSetup(
           this.req,
           this.user,
           callback
         )
-      })
+      }
     })
 
     it('should not produce an error', function(done) {
-      return this.call(err => {
+      this.call(err => {
         expect(err).to.equal(null)
-        return done()
+        done()
       })
     })
 
     it('should call req.login', function(done) {
-      return this.call(err => {
+      this.call(err => {
+        if (err) {
+          return done(err)
+        }
         this.req.login.callCount.should.equal(1)
-        return done()
+        done()
       })
     })
 
     it('should call req.session.save', function(done) {
-      return this.call(err => {
+      this.call(err => {
+        if (err) {
+          return done(err)
+        }
         this.req.session.save.callCount.should.equal(1)
-        return done()
+        done()
       })
     })
 
     it('should call UserSessionsManager.trackSession', function(done) {
-      return this.call(err => {
+      this.call(err => {
+        if (err) {
+          return done(err)
+        }
         this.UserSessionsManager.trackSession.callCount.should.equal(1)
-        return done()
+        done()
+      })
+    })
+
+    it('should set a vaildation token on the session', function(done) {
+      this.call(err => {
+        if (err) {
+          return done(err)
+        }
+        expect(this.req.session).to.have.property('validationToken', 'v1:omid')
+        done()
       })
     })
 
     describe('when req.session.save produces an error', function() {
       beforeEach(function() {
-        return (this.req.session.save = sinon
-          .stub()
-          .callsArgWith(0, new Error('woops')))
+        this.req.session.save = sinon.stub().callsArgWith(0, new Error('woops'))
       })
 
       it('should produce an error', function(done) {
-        return this.call(err => {
+        this.call(err => {
           expect(err).to.not.be.oneOf([null, undefined])
           expect(err).to.be.instanceof(Error)
-          return done()
+          done()
         })
       })
 
       it('should not call UserSessionsManager.trackSession', function(done) {
-        return this.call(err => {
+        this.call(err => {
+          expect(err).to.exist
           this.UserSessionsManager.trackSession.callCount.should.equal(0)
-          return done()
+          done()
         })
       })
     })
   })
 
   describe('getSessionUser', function() {
-    it('should get the user object from session', function() {
+    it('should accept a session without a validation token', function() {
       this.req.session = {
         passport: {
           user: { _id: 'one' }
         }
       }
       const user = this.AuthenticationController.getSessionUser(this.req)
-      return expect(user).to.deep.equal({ _id: 'one' })
+      expect(user).to.deep.equal({ _id: 'one' })
+    })
+
+    it('should reject an invalid validation token', function() {
+      this.req.sessionID = 'nabuchodonosorroidebabylone'
+      this.req.session = {
+        validationToken: 'v1:gasp', // does not match last 4 characters of session id
+        passport: {
+          user: { _id: 'two' }
+        }
+      }
+      const user = this.AuthenticationController.getSessionUser(this.req)
+      expect(user).to.be.null
+    })
+
+    it('should accept a valid validation token', function() {
+      this.req.sessionID = 'nabuchodonosorroidebabylone'
+      this.req.session = {
+        validationToken: 'v1:lone', // matches last 4 characters of session id
+        passport: {
+          user: { _id: 'three' }
+        }
+      }
+      const user = this.AuthenticationController.getSessionUser(this.req)
+      expect(user).to.deep.equal({ _id: 'three' })
     })
 
     it('should work with legacy sessions', function() {
       this.req.session = { user: { _id: 'one' } }
       const user = this.AuthenticationController.getSessionUser(this.req)
-      return expect(user).to.deep.equal({ _id: 'one' })
+      expect(user).to.deep.equal({ _id: 'one' })
     })
   })
 
@@ -370,14 +384,14 @@ describe('AuthenticationController', function() {
           postLoginRedirect: '/path/to/redir/to'
         }
       }
-      return (this.cb = sinon.stub())
+      this.cb = sinon.stub()
     })
 
     describe('when the preDoPassportLogin hooks produce an info object', function() {
       beforeEach(function() {
-        return (this.Modules.hooks.fire = sinon
+        this.Modules.hooks.fire = sinon
           .stub()
-          .callsArgWith(3, null, [null, { redir: '/somewhere' }, null]))
+          .callsArgWith(3, null, [null, { redir: '/somewhere' }, null])
       })
 
       it('should stop early and call done with this info object', function(done) {
@@ -392,17 +406,13 @@ describe('AuthenticationController', function() {
           .calledWith(null, false, { redir: '/somewhere' })
           .should.equal(true)
         this.LoginRateLimiter.processLoginRequest.callCount.should.equal(0)
-        return done()
+        done()
       })
     })
 
     describe('when the users rate limit', function() {
       beforeEach(function() {
-        return this.LoginRateLimiter.processLoginRequest.callsArgWith(
-          1,
-          null,
-          false
-        )
+        this.LoginRateLimiter.processLoginRequest.callsArgWith(1, null, false)
       })
 
       it('should block the request if the limit has been exceeded', function(done) {
@@ -414,7 +424,7 @@ describe('AuthenticationController', function() {
         )
         this.cb.callCount.should.equal(1)
         this.cb.calledWith(null, null).should.equal(true)
-        return done()
+        done()
       })
     })
 
@@ -426,7 +436,7 @@ describe('AuthenticationController', function() {
           .stub()
           .callsArgWith(2, null, this.user)
         this.req.sessionID = Math.random()
-        return this.AuthenticationController.doPassportLogin(
+        this.AuthenticationController.doPassportLogin(
           this.req,
           this.req.body.email,
           this.req.body.password,
@@ -435,13 +445,13 @@ describe('AuthenticationController', function() {
       })
 
       it('should attempt to authorise the user', function() {
-        return this.AuthenticationManager.authenticate
+        this.AuthenticationManager.authenticate
           .calledWith({ email: this.email.toLowerCase() }, this.password)
           .should.equal(true)
       })
 
       it("should establish the user's session", function() {
-        return this.cb.calledWith(null, this.user).should.equal(true)
+        this.cb.calledWith(null, this.user).should.equal(true)
       })
     })
 
@@ -452,42 +462,37 @@ describe('AuthenticationController', function() {
         this.AuthenticationController._recordSuccessfulLogin = sinon.stub()
         this.AnalyticsManager.recordEvent = sinon.stub()
         this.AnalyticsManager.identifyUser = sinon.stub()
-        return this.AuthenticationController._loginAsyncHandlers(
-          this.req,
-          this.user
-        )
+        this.AuthenticationController._loginAsyncHandlers(this.req, this.user)
       })
 
       it('should call identifyUser', function() {
-        return this.AnalyticsManager.identifyUser
+        this.AnalyticsManager.identifyUser
           .calledWith(this.user._id, this.req.sessionID)
           .should.equal(true)
       })
 
       it('should setup the user data in the background', function() {
-        return this.UserHandler.setupLoginData
-          .calledWith(this.user)
-          .should.equal(true)
+        this.UserHandler.setupLoginData.calledWith(this.user).should.equal(true)
       })
 
       it('should set res.session.justLoggedIn', function() {
-        return this.req.session.justLoggedIn.should.equal(true)
+        this.req.session.justLoggedIn.should.equal(true)
       })
 
       it('should record the successful login', function() {
-        return this.AuthenticationController._recordSuccessfulLogin
+        this.AuthenticationController._recordSuccessfulLogin
           .calledWith(this.user._id)
           .should.equal(true)
       })
 
       it('should tell the rate limiter that there was a success for that email', function() {
-        return this.LoginRateLimiter.recordSuccessfulLogin
+        this.LoginRateLimiter.recordSuccessfulLogin
           .calledWith(this.user.email)
           .should.equal(true)
       })
 
       it('should log the successful login', function() {
-        return this.logger.log
+        this.logger.log
           .calledWith(
             { email: this.user.email, user_id: this.user._id.toString() },
             'successful log in'
@@ -496,7 +501,7 @@ describe('AuthenticationController', function() {
       })
 
       it('should track the login event', function() {
-        return this.AnalyticsManager.recordEvent
+        this.AnalyticsManager.recordEvent
           .calledWith(this.user._id, 'user-logged-in')
           .should.equal(true)
       })
@@ -509,7 +514,7 @@ describe('AuthenticationController', function() {
           .stub()
           .callsArgWith(2, null, null)
         this.cb = sinon.stub()
-        return this.AuthenticationController.doPassportLogin(
+        this.AuthenticationController.doPassportLogin(
           this.req,
           this.req.body.email,
           this.req.body.password,
@@ -521,27 +526,24 @@ describe('AuthenticationController', function() {
         this.cb.callCount.should.equal(1)
         this.cb.calledWith(null, false)
         // @res.body.should.exist
-        return expect(this.cb.lastCall.args[2]).to.contain.all.keys([
-          'text',
-          'type'
-        ])
+        expect(this.cb.lastCall.args[2]).to.contain.all.keys(['text', 'type'])
       })
       // message:
       // 	text: 'Your email or password were incorrect. Please try again',
       // 	type: 'error'
 
       it('should not setup the user data in the background', function() {
-        return this.UserHandler.setupLoginData.called.should.equal(false)
+        this.UserHandler.setupLoginData.called.should.equal(false)
       })
 
       it('should record a failed login', function() {
-        return this.AuthenticationController._recordFailedLogin.called.should.equal(
+        this.AuthenticationController._recordFailedLogin.called.should.equal(
           true
         )
       })
 
       it('should log the failed login', function() {
-        return this.logger.log
+        this.logger.log
           .calledWith({ email: this.email.toLowerCase() }, 'failed log in')
           .should.equal(true)
       })
@@ -550,14 +552,14 @@ describe('AuthenticationController', function() {
 
   describe('getLoggedInUserId', function() {
     beforeEach(function() {
-      return (this.req = { session: {} })
+      this.req = { session: {} }
     })
 
     it('should return the user id from the session', function() {
       this.user_id = '2134'
       this.req.session.user = { _id: this.user_id }
       const result = this.AuthenticationController.getLoggedInUserId(this.req)
-      return expect(result).to.equal(this.user_id)
+      expect(result).to.equal(this.user_id)
     })
 
     it('should return user for passport session', function() {
@@ -570,24 +572,24 @@ describe('AuthenticationController', function() {
         }
       }
       const result = this.AuthenticationController.getLoggedInUserId(this.req)
-      return expect(result).to.equal(this.user_id)
+      expect(result).to.equal(this.user_id)
     })
 
     it('should return null if there is no user on the session', function() {
       const result = this.AuthenticationController.getLoggedInUserId(this.req)
-      return expect(result).to.equal(null)
+      expect(result).to.equal(null)
     })
 
     it('should return null if there is no session', function() {
       this.req = {}
       const result = this.AuthenticationController.getLoggedInUserId(this.req)
-      return expect(result).to.equal(null)
+      expect(result).to.equal(null)
     })
 
     it('should return null if there is no req', function() {
       this.req = {}
       const result = this.AuthenticationController.getLoggedInUserId(this.req)
-      return expect(result).to.equal(null)
+      expect(result).to.equal(null)
     })
   })
 
@@ -597,7 +599,7 @@ describe('AuthenticationController', function() {
         _id: 'user-id-123',
         email: 'user@sharelatex.com'
       }
-      return (this.middleware = this.AuthenticationController.requireLogin())
+      this.middleware = this.AuthenticationController.requireLogin()
     })
 
     describe('when the user is logged in', function() {
@@ -608,11 +610,11 @@ describe('AuthenticationController', function() {
             email: 'user@sharelatex.com'
           })
         }
-        return this.middleware(this.req, this.res, this.next)
+        this.middleware(this.req, this.res, this.next)
       })
 
       it('should call the next method in the chain', function() {
-        return this.next.called.should.equal(true)
+        this.next.called.should.equal(true)
       })
     })
 
@@ -621,11 +623,11 @@ describe('AuthenticationController', function() {
         this.req.session = {}
         this.AuthenticationController._redirectToLoginOrRegisterPage = sinon.stub()
         this.req.query = {}
-        return this.middleware(this.req, this.res, this.next)
+        this.middleware(this.req, this.res, this.next)
       })
 
       it('should redirect to the register or login page', function() {
-        return this.AuthenticationController._redirectToLoginOrRegisterPage
+        this.AuthenticationController._redirectToLoginOrRegisterPage
           .calledWith(this.req, this.res)
           .should.equal(true)
       })
@@ -687,21 +689,21 @@ describe('AuthenticationController', function() {
     beforeEach(function() {
       this.req.headers = {}
       this.AuthenticationController.httpAuth = sinon.stub()
-      return (this.setRedirect = sinon.spy(
+      this.setRedirect = sinon.spy(
         this.AuthenticationController,
         'setRedirectInSession'
-      ))
+      )
     })
 
     afterEach(function() {
-      return this.setRedirect.restore()
+      this.setRedirect.restore()
     })
 
     describe('with white listed url', function() {
       beforeEach(function() {
         this.AuthenticationController.addEndpointToLoginWhitelist('/login')
         this.req._parsedUrl.pathname = '/login'
-        return this.AuthenticationController.requireGlobalLogin(
+        this.AuthenticationController.requireGlobalLogin(
           this.req,
           this.res,
           this.next
@@ -709,7 +711,7 @@ describe('AuthenticationController', function() {
       })
 
       it('should call next() directly', function() {
-        return this.next.called.should.equal(true)
+        this.next.called.should.equal(true)
       })
     })
 
@@ -718,7 +720,7 @@ describe('AuthenticationController', function() {
         this.AuthenticationController.addEndpointToLoginWhitelist('/login')
         this.req._parsedUrl.pathname = '/login'
         this.req.url = '/login?query=something'
-        return this.AuthenticationController.requireGlobalLogin(
+        this.AuthenticationController.requireGlobalLogin(
           this.req,
           this.res,
           this.next
@@ -726,14 +728,14 @@ describe('AuthenticationController', function() {
       })
 
       it('should call next() directly', function() {
-        return this.next.called.should.equal(true)
+        this.next.called.should.equal(true)
       })
     })
 
     describe('with http auth', function() {
       beforeEach(function() {
         this.req.headers['authorization'] = 'Mock Basic Auth'
-        return this.AuthenticationController.requireGlobalLogin(
+        this.AuthenticationController.requireGlobalLogin(
           this.req,
           this.res,
           this.next
@@ -741,7 +743,7 @@ describe('AuthenticationController', function() {
       })
 
       it('should pass the request onto httpAuth', function() {
-        return this.AuthenticationController.httpAuth
+        this.AuthenticationController.httpAuth
           .calledWith(this.req, this.res, this.next)
           .should.equal(true)
       })
@@ -750,7 +752,7 @@ describe('AuthenticationController', function() {
     describe('with a user session', function() {
       beforeEach(function() {
         this.req.session = { user: { mock: 'user', _id: 'some_id' } }
-        return this.AuthenticationController.requireGlobalLogin(
+        this.AuthenticationController.requireGlobalLogin(
           this.req,
           this.res,
           this.next
@@ -758,14 +760,14 @@ describe('AuthenticationController', function() {
       })
 
       it('should call next() directly', function() {
-        return this.next.called.should.equal(true)
+        this.next.called.should.equal(true)
       })
     })
 
     describe('with no login credentials', function() {
       beforeEach(function() {
         this.req.session = {}
-        return this.AuthenticationController.requireGlobalLogin(
+        this.AuthenticationController.requireGlobalLogin(
           this.req,
           this.res,
           this.next
@@ -773,11 +775,11 @@ describe('AuthenticationController', function() {
       })
 
       it('should have called setRedirectInSession', function() {
-        return this.setRedirect.callCount.should.equal(1)
+        this.setRedirect.callCount.should.equal(1)
       })
 
       it('should redirect to the /login page', function() {
-        return this.res.redirectedTo.should.equal('/login')
+        this.res.redirectedTo.should.equal('/login')
       })
     })
   })
@@ -790,20 +792,20 @@ describe('AuthenticationController', function() {
       this.req.session = {}
       this.AuthenticationController._redirectToRegisterPage = sinon.stub()
       this.AuthenticationController._redirectToLoginPage = sinon.stub()
-      return (this.req.query = {})
+      this.req.query = {}
     })
 
     describe('they have come directly to the url', function() {
       beforeEach(function() {
         this.req.query = {}
-        return this.middleware(this.req, this.res, this.next)
+        this.middleware(this.req, this.res, this.next)
       })
 
       it('should redirect to the login page', function() {
         this.AuthenticationController._redirectToRegisterPage
           .calledWith(this.req, this.res)
           .should.equal(false)
-        return this.AuthenticationController._redirectToLoginPage
+        this.AuthenticationController._redirectToLoginPage
           .calledWith(this.req, this.res)
           .should.equal(true)
       })
@@ -812,14 +814,14 @@ describe('AuthenticationController', function() {
     describe('they have come via a templates link', function() {
       beforeEach(function() {
         this.req.query.zipUrl = 'something'
-        return this.middleware(this.req, this.res, this.next)
+        this.middleware(this.req, this.res, this.next)
       })
 
       it('should redirect to the register page', function() {
         this.AuthenticationController._redirectToRegisterPage
           .calledWith(this.req, this.res)
           .should.equal(true)
-        return this.AuthenticationController._redirectToLoginPage
+        this.AuthenticationController._redirectToLoginPage
           .calledWith(this.req, this.res)
           .should.equal(false)
       })
@@ -828,14 +830,14 @@ describe('AuthenticationController', function() {
     describe('they have been invited to a project', function() {
       beforeEach(function() {
         this.req.query.project_name = 'something'
-        return this.middleware(this.req, this.res, this.next)
+        this.middleware(this.req, this.res, this.next)
       })
 
       it('should redirect to the register page', function() {
         this.AuthenticationController._redirectToRegisterPage
           .calledWith(this.req, this.res)
           .should.equal(true)
-        return this.AuthenticationController._redirectToLoginPage
+        this.AuthenticationController._redirectToLoginPage
           .calledWith(this.req, this.res)
           .should.equal(false)
       })
@@ -846,21 +848,18 @@ describe('AuthenticationController', function() {
     beforeEach(function() {
       this.req.path = '/target/url'
       this.req.query = { extra_query: 'foo' }
-      return this.AuthenticationController._redirectToRegisterPage(
-        this.req,
-        this.res
-      )
+      this.AuthenticationController._redirectToRegisterPage(this.req, this.res)
     })
 
     it('should redirect to the register page with a query string attached', function() {
       this.req.session.postLoginRedirect.should.equal(
         '/target/url?extra_query=foo'
       )
-      return this.res.redirectedTo.should.equal('/register?extra_query=foo')
+      this.res.redirectedTo.should.equal('/register?extra_query=foo')
     })
 
     it('should log out a message', function() {
-      return this.logger.log
+      this.logger.log
         .calledWith(
           { url: this.url },
           'user not logged in so redirecting to register page'
@@ -873,60 +872,55 @@ describe('AuthenticationController', function() {
     beforeEach(function() {
       this.req.path = '/target/url'
       this.req.query = { extra_query: 'foo' }
-      return this.AuthenticationController._redirectToLoginPage(
-        this.req,
-        this.res
-      )
+      this.AuthenticationController._redirectToLoginPage(this.req, this.res)
     })
 
     it('should redirect to the register page with a query string attached', function() {
       this.req.session.postLoginRedirect.should.equal(
         '/target/url?extra_query=foo'
       )
-      return this.res.redirectedTo.should.equal('/login?extra_query=foo')
+      this.res.redirectedTo.should.equal('/login?extra_query=foo')
     })
   })
 
   describe('_recordSuccessfulLogin', function() {
     beforeEach(function() {
       this.UserUpdater.updateUser = sinon.stub().callsArg(2)
-      return this.AuthenticationController._recordSuccessfulLogin(
+      this.AuthenticationController._recordSuccessfulLogin(
         this.user._id,
         this.callback
       )
     })
 
     it('should increment the user.login.success metric', function() {
-      return this.Metrics.inc
-        .calledWith('user.login.success')
-        .should.equal(true)
+      this.Metrics.inc.calledWith('user.login.success').should.equal(true)
     })
 
     it("should update the user's login count and last logged in date", function() {
       this.UserUpdater.updateUser.args[0][1]['$set'][
         'lastLoggedIn'
       ].should.not.equal(undefined)
-      return this.UserUpdater.updateUser.args[0][1]['$inc'][
-        'loginCount'
-      ].should.equal(1)
+      this.UserUpdater.updateUser.args[0][1]['$inc']['loginCount'].should.equal(
+        1
+      )
     })
 
     it('should call the callback', function() {
-      return this.callback.called.should.equal(true)
+      this.callback.called.should.equal(true)
     })
   })
 
   describe('_recordFailedLogin', function() {
     beforeEach(function() {
-      return this.AuthenticationController._recordFailedLogin(this.callback)
+      this.AuthenticationController._recordFailedLogin(this.callback)
     })
 
     it('should increment the user.login.failed metric', function() {
-      return this.Metrics.inc.calledWith('user.login.failed').should.equal(true)
+      this.Metrics.inc.calledWith('user.login.failed').should.equal(true)
     })
 
     it('should call the callback', function() {
-      return this.callback.called.should.equal(true)
+      this.callback.called.should.equal(true)
     })
   })
 
@@ -934,14 +928,12 @@ describe('AuthenticationController', function() {
     beforeEach(function() {
       this.req = { session: {} }
       this.req.path = '/somewhere'
-      return (this.req.query = { one: '1' })
+      this.req.query = { one: '1' }
     })
 
     it('should set redirect property on session', function() {
       this.AuthenticationController.setRedirectInSession(this.req)
-      return expect(this.req.session.postLoginRedirect).to.equal(
-        '/somewhere?one=1'
-      )
+      expect(this.req.session.postLoginRedirect).to.equal('/somewhere?one=1')
     })
 
     it('should set the supplied value', function() {
@@ -949,9 +941,7 @@ describe('AuthenticationController', function() {
         this.req,
         '/somewhere/specific'
       )
-      return expect(this.req.session.postLoginRedirect).to.equal(
-        '/somewhere/specific'
-      )
+      expect(this.req.session.postLoginRedirect).to.equal('/somewhere/specific')
     })
 
     it('should not allow open redirects', function() {
@@ -959,12 +949,12 @@ describe('AuthenticationController', function() {
         this.req,
         'https://evil.com'
       )
-      return expect(this.req.session.postLoginRedirect).to.be.undefined
+      expect(this.req.session.postLoginRedirect).to.be.undefined
     })
 
     describe('with a png', function() {
       beforeEach(function() {
-        return (this.req = { session: {} })
+        this.req = { session: {} }
       })
 
       it('should not set the redirect', function() {
@@ -972,13 +962,13 @@ describe('AuthenticationController', function() {
           this.req,
           '/something.png'
         )
-        return expect(this.req.session.postLoginRedirect).to.equal(undefined)
+        expect(this.req.session.postLoginRedirect).to.equal(undefined)
       })
     })
 
     describe('with a js path', function() {
       beforeEach(function() {
-        return (this.req = { session: {} })
+        this.req = { session: {} }
       })
 
       it('should not set the redirect', function() {
@@ -986,7 +976,7 @@ describe('AuthenticationController', function() {
           this.req,
           '/js/something.js'
         )
-        return expect(this.req.session.postLoginRedirect).to.equal(undefined)
+        expect(this.req.session.postLoginRedirect).to.equal(undefined)
       })
     })
   })
@@ -994,34 +984,32 @@ describe('AuthenticationController', function() {
   describe('_getRedirectFromSession', function() {
     it('should get redirect property from session', function() {
       this.req = { session: { postLoginRedirect: '/a?b=c' } }
-      return expect(
+      expect(
         this.AuthenticationController._getRedirectFromSession(this.req)
       ).to.equal('/a?b=c')
     })
 
     it('should not allow open redirects', function() {
       this.req = { session: { postLoginRedirect: 'https://evil.com' } }
-      return expect(
-        this.AuthenticationController._getRedirectFromSession(this.req)
-      ).to.be.null
+      expect(this.AuthenticationController._getRedirectFromSession(this.req)).to
+        .be.null
     })
 
     it('handle null values', function() {
       this.req = { session: {} }
-      return expect(
-        this.AuthenticationController._getRedirectFromSession(this.req)
-      ).to.be.null
+      expect(this.AuthenticationController._getRedirectFromSession(this.req)).to
+        .be.null
     })
   })
 
   describe('_clearRedirectFromSession', function() {
     beforeEach(function() {
-      return (this.req = { session: { postLoginRedirect: '/a?b=c' } })
+      this.req = { session: { postLoginRedirect: '/a?b=c' } }
     })
 
     it('should remove the redirect property from session', function() {
       this.AuthenticationController._clearRedirectFromSession(this.req)
-      return expect(this.req.session.postLoginRedirect).to.equal(undefined)
+      expect(this.req.session.postLoginRedirect).to.equal(undefined)
     })
   })
 
@@ -1043,7 +1031,7 @@ describe('AuthenticationController', function() {
       this.AuthenticationController._redirectToReconfirmPage = sinon.stub()
       this.req.headers = { accept: 'application/json, whatever' }
       this.res.json = sinon.stub()
-      return (this.res.redirect = sinon.stub())
+      this.res.redirect = sinon.stub()
     })
 
     it('should extract the redirect from the session', function() {
@@ -1056,7 +1044,7 @@ describe('AuthenticationController', function() {
       expect(
         this.AuthenticationController._getRedirectFromSession.callCount
       ).to.equal(1)
-      return expect(
+      expect(
         this.AuthenticationController._getRedirectFromSession.calledWith(
           this.req
         )
@@ -1073,7 +1061,7 @@ describe('AuthenticationController', function() {
       expect(
         this.AuthenticationController._loginAsyncHandlers.callCount
       ).to.equal(1)
-      return expect(
+      expect(
         this.AuthenticationController._loginAsyncHandlers.calledWith(
           this.req,
           this.user
@@ -1091,7 +1079,7 @@ describe('AuthenticationController', function() {
       expect(
         this.AuthenticationController.afterLoginSessionSetup.callCount
       ).to.equal(1)
-      return expect(
+      expect(
         this.AuthenticationController.afterLoginSessionSetup.calledWith(
           this.req,
           this.user
@@ -1109,7 +1097,7 @@ describe('AuthenticationController', function() {
       expect(
         this.AuthenticationController._clearRedirectFromSession.callCount
       ).to.equal(1)
-      return expect(
+      expect(
         this.AuthenticationController._clearRedirectFromSession.calledWith(
           this.req
         )
@@ -1125,16 +1113,14 @@ describe('AuthenticationController', function() {
       )
       expect(this.res.json.callCount).to.equal(1)
       expect(this.res.redirect.callCount).to.equal(0)
-      return expect(this.res.json.calledWith({ redir: '/some/page' })).to.equal(
-        true
-      )
+      expect(this.res.json.calledWith({ redir: '/some/page' })).to.equal(true)
     })
 
     describe('with a non-json request', function() {
       beforeEach(function() {
         this.req.headers = {}
         this.res.json = sinon.stub()
-        return (this.res.redirect = sinon.stub())
+        this.res.redirect = sinon.stub()
       })
 
       it('should issue a plain redirect', function() {
@@ -1146,14 +1132,14 @@ describe('AuthenticationController', function() {
         )
         expect(this.res.json.callCount).to.equal(0)
         expect(this.res.redirect.callCount).to.equal(1)
-        return expect(this.res.redirect.calledWith('/some/page')).to.equal(true)
+        expect(this.res.redirect.calledWith('/some/page')).to.equal(true)
       })
     })
 
     describe('when user is flagged to reconfirm', function() {
       beforeEach(function() {
         this.req.session = {}
-        return (this.user.must_reconfirm = true)
+        this.user.must_reconfirm = true
       })
       it('should redirect to reconfirm page', function() {
         this.AuthenticationController.finishLogin(
@@ -1162,7 +1148,7 @@ describe('AuthenticationController', function() {
           this.res,
           this.next
         )
-        return expect(
+        expect(
           this.AuthenticationController._redirectToReconfirmPage.calledWith(
             this.req
           )
