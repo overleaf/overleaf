@@ -36,7 +36,7 @@ module.exports = settings =
 			host: process.env['REDIS_HOST'] || "localhost"
 			port: process.env['REDIS_PORT'] || "6379"
 			password: process.env["REDIS_PASSWORD"] or ""
-			maxRetriesPerRequest: parseInt(process.env["REDIS_MAX_RETRIES_PER_REQUEST"]) || 20
+			maxRetriesPerRequest: parseInt(process.env["REDIS_MAX_RETRIES_PER_REQUEST"] || '20')
 
 		# websessions:
 		# 	cluster: [
@@ -72,7 +72,7 @@ module.exports = settings =
 			host: process.env['REDIS_HOST'] || "localhost"
 			port: process.env['REDIS_PORT'] || "6379"
 			password: process.env["REDIS_PASSWORD"] or ""
-			maxRetriesPerRequest: parseInt(process.env["REDIS_MAX_RETRIES_PER_REQUEST"]) || 20
+			maxRetriesPerRequest: parseInt(process.env["REDIS_MAX_RETRIES_PER_REQUEST"] || '20')
 
 	# Service locations
 	# -----------------
