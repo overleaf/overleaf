@@ -101,7 +101,7 @@
     "pug": "^2.0.0-beta6",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
-    "redis-sharelatex": "^1.0.9",
+    "redis-sharelatex": "^1.0.11",
     "request": "^2.69.0",
     "request-promise-native": "^1.0.7",
     "requestretry": "^1.13.0",
