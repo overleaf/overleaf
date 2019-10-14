@@ -404,7 +404,8 @@
     "cluster-key-slot": {
       "version": "1.0.8",
       "from": "cluster-key-slot@>=1.0.6 <2.0.0",
-      "resolved": "https://registry.npmjs.org/cluster-key-slot/-/cluster-key-slot-1.0.8.tgz"
+      "resolved": "https://registry.npmjs.org/cluster-key-slot/-/cluster-key-slot-1.0.8.tgz",
+      "dev": true
     },
     "co": {
       "version": "4.6.0",
@@ -779,10 +780,15 @@
       "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz"
     },
     "ioredis": {
-      "version": "4.11.2",
-      "from": "ioredis@>=4.11.1 <4.12.0",
-      "resolved": "https://registry.npmjs.org/ioredis/-/ioredis-4.11.2.tgz",
+      "version": "4.14.1",
+      "from": "ioredis@>=4.14.1 <4.15.0",
+      "resolved": "https://registry.npmjs.org/ioredis/-/ioredis-4.14.1.tgz",
       "dependencies": {
+        "cluster-key-slot": {
+          "version": "1.1.0",
+          "from": "cluster-key-slot@>=1.1.0 <2.0.0",
+          "resolved": "https://registry.npmjs.org/cluster-key-slot/-/cluster-key-slot-1.1.0.tgz"
+        },
         "debug": {
           "version": "4.1.1",
           "from": "debug@>=4.1.1 <5.0.0",
@@ -1380,9 +1386,9 @@
       "resolved": "https://registry.npmjs.org/redis-sentinel/-/redis-sentinel-0.1.1.tgz"
     },
     "redis-sharelatex": {
-      "version": "1.0.10",
-      "from": "redis-sharelatex@1.0.10",
-      "resolved": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.10.tgz",
+      "version": "1.0.11",
+      "from": "redis-sharelatex@1.0.11",
+      "resolved": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.11.tgz",
       "dependencies": {
         "coffee-script": {
           "version": "1.8.0",
