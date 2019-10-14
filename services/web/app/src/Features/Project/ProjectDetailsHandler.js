@@ -27,6 +27,7 @@ module.exports = {
   generateUniqueName: callbackify(generateUniqueName),
   setPublicAccessLevel: callbackify(setPublicAccessLevel),
   ensureTokensArePresent: callbackify(ensureTokensArePresent),
+  clearTokens: callbackify(clearTokens),
   fixProjectName,
   promises: {
     getDetails,
@@ -37,7 +38,8 @@ module.exports = {
     validateProjectName,
     generateUniqueName,
     setPublicAccessLevel,
-    ensureTokensArePresent
+    ensureTokensArePresent,
+    clearTokens
   }
 }
 
@@ -274,6 +276,13 @@ async function ensureTokensArePresent(projectId) {
     { $set: { tokens: project.tokens } }
   ).exec()
   return project.tokens
+}
+
+async function clearTokens(projectId) {
+  await Project.update(
+    { _id: projectId },
+    { $unset: { tokens: 1 }, $set: { publicAccesLevel: 'private' } }
+  ).exec()
 }
 
 async function _generateTokens(project, callback) {

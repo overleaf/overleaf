@@ -640,4 +640,14 @@ describe('ProjectDetailsHandler', function() {
       })
     })
   })
+
+  describe('clearTokens', function() {
+    it('clears the tokens from the project', async function() {
+      await this.handler.promises.clearTokens(this.project._id)
+      expect(this.ProjectModel.update).to.have.been.calledWith(
+        { _id: this.project._id },
+        { $unset: { tokens: 1 }, $set: { publicAccesLevel: 'private' } }
+      )
+    })
+  })
 })
