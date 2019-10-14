@@ -42,10 +42,6 @@ const STATIC_CACHE_AGE = Settings.cacheStaticAssets
 // Init the session store
 const sessionStore = new RedisStore({ client: sessionsRedisClient })
 
-if (metrics.event_loop != null) {
-  metrics.event_loop.monitor(logger)
-}
-
 const app = express()
 
 const webRouter = express.Router()

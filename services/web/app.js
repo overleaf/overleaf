@@ -49,6 +49,8 @@ if (!module.parent) {
   Server.server.listen(port, host, function() {
     logger.info(`web starting up, listening on ${host}:${port}`)
     logger.info(`${require('http').globalAgent.maxSockets} sockets enabled`)
+    // wait until the process is ready before monitoring the event loop
+    metrics.event_loop.monitor(logger)
     if (argv.user) {
       process.setuid(argv.user)
       logger.info(`Running as user: ${argv.user}`)
