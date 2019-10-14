@@ -1,4 +1,3 @@
-/* global _ */
 define(['base'], App =>
   App.factory('files', function(ide) {
     const Files = {

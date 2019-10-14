@@ -1,4 +1,3 @@
-/* global _ */
 define([
   'ide/editor/directives/aceEditor/auto-complete/CommandManager',
   'ide/editor/directives/aceEditor/auto-complete/EnvironmentManager',

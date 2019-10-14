@@ -1,4 +1,4 @@
-/* global MathJax, _ */
+/* global MathJax */
 
 define(['base'], function(App) {
   return App.directive('mathjax', function($compile, $parse) {

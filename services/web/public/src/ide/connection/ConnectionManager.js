@@ -8,7 +8,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-/* global io sl_console sl_debugging */
+/* global io */
 
 define([], function() {
   let ConnectionManager

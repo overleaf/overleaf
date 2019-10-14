@@ -128,8 +128,4 @@ prototype\
   })
 }
 
-if (typeof define !== 'undefined' && define !== null) {
-  define([], load)
-} else {
-  module.exports = load()
-}
+module.exports = load()

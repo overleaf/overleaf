@@ -19,15 +19,6 @@
     "browser": true,
     "mocha": true
   },
-  "globals": {
-    "expect": true,
-    "define": true,
-    "$": true,
-    "angular": true,
-    // Injected in layout.pug
-    "user_id": true,
-    "ace": true
-  },
   "settings": {
     // Tell eslint-plugin-react to detect which version of React we are using
     "react": {
@@ -59,7 +50,11 @@
   },
   "overrides": [
     {
+      // Test specific rules
       "files": ["**/test/*/src/**/*.js"],
+      "globals": {
+        "expect": true
+      },
       "rules": {
         // mocha-specific rules
         "mocha/handle-done-callback": "error",
@@ -82,10 +77,37 @@
       }
     },
     {
-      // don't allow console.log in backend code
+      // Frontend test specific rules
+      "files": ["**/test/unit_frontend/{src,es}/**/*.js"],
+      "globals": {
+        "expect": true,
+        "define": true,
+        "$": true
+      }
+    },
+    {
+      // Backend specific rules
       "files": ["**/app/*/src/**/*.js"],
       "rules": {
+        // don't allow console.log in backend code
         "no-console": "error"
+      }
+    },
+    {
+      // Frontend specific rules
+      "files": ["**/public/{src,es}/**/*.js"],
+      "globals": {
+        "define": true,
+        "$": true,
+        "angular": true,
+        "_": true,
+        "ace": true,
+        "ga": true,
+        "AlgoliaSearch": true,
+        "sl_console": true,
+        "sl_debugging": true,
+        // Injected in layout.pug
+        "user_id": true
       }
     }
   ]

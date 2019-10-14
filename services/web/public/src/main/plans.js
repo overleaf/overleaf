@@ -2,7 +2,6 @@
     camelcase,
     max-len
 */
-/* global define,history */
 define(['base'], function(App) {
   App.factory('MultiCurrencyPricing', function() {
     const currencyCode = window.recomendedCurrency

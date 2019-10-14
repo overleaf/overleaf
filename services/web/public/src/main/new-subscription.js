@@ -3,7 +3,7 @@
     max-len,
     no-return-assign
 */
-/* global recurly,_,define */
+/* global recurly */
 define(['base', 'directives/creditCards'], App =>
   App.controller('NewSubscriptionController', function(
     $scope,

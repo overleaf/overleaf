@@ -1,4 +1,3 @@
-/* global _ */
 /* eslint-disable
     camelcase,
     max-len
