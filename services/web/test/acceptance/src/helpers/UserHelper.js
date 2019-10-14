@@ -158,6 +158,7 @@ module.exports = class UserHelper {
     if (body.message && body.message.type === 'error') {
       throw new Error(`register api error: ${body.message.text}`)
     }
+    console.log(body)
     userHelper.user = await UserGetter.promises.getUser({
       email: userData.email
     })
