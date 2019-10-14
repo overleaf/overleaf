@@ -6,7 +6,19 @@ const { User } = require('../../models/User')
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 
-function _addIdentifier(userId, externalUserId, providerId, hasEntitlement) {
+async function _addIdentifier(
+  userId,
+  externalUserId,
+  providerId,
+  hasEntitlement,
+  institutionEmail
+) {
+  // first check if institutionEmail linked to another account
+  // before adding the identifier for the email
+  const user = await UserGetter.promises.getUserByAnyEmail(institutionEmail)
+  if (user && user._id.toString() !== userId.toString()) {
+    throw new Errors.EmailExistsError()
+  }
   providerId = providerId.toString()
   hasEntitlement = !!hasEntitlement
   const query = {
@@ -137,7 +149,13 @@ async function linkAccounts(
   providerName,
   hasEntitlement
 ) {
-  await _addIdentifier(userId, externalUserId, providerId, hasEntitlement)
+  await _addIdentifier(
+    userId,
+    externalUserId,
+    providerId,
+    hasEntitlement,
+    institutionEmail
+  )
   await _addInstitutionEmail(userId, institutionEmail, providerId)
   await _sendLinkedEmail(userId, providerName)
 }
