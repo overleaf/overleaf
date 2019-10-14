@@ -17,6 +17,24 @@ const settings = require('settings-sharelatex')
 const request = require('request')
 const { promisifyAll } = require('../../util/promises')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
+const V1Api = require('../V1/V1Api')
+
+function getInstitutionViaDomain(domain) {
+  return new Promise(function(resolve, reject) {
+    V1Api.request(
+      {
+        timeout: 20 * 1000,
+        uri: `api/v1/sharelatex/university_saml?hostname=${domain}`
+      },
+      function(error, response, body) {
+        if (error) {
+          reject(error)
+        }
+        resolve(body)
+      }
+    )
+  })
+}
 
 const InstitutionsAPI = {
   getInstitutionAffiliations(institutionId, callback) {
@@ -32,6 +50,8 @@ const InstitutionsAPI = {
       (error, body) => callback(error, body || [])
     )
   },
+
+  getInstitutionViaDomain,
 
   getInstitutionLicences(institutionId, startDate, endDate, lag, callback) {
     if (callback == null) {

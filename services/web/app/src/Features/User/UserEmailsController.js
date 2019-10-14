@@ -1,5 +1,7 @@
 let UserEmailsController
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const Features = require('../../infrastructure/Features')
+const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
 const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
 const EmailHelper = require('../Helpers/EmailHelper')
@@ -34,6 +36,52 @@ function add(req, res, next) {
         return next(error)
       }
       res.sendStatus(204)
+    })
+  })
+}
+
+async function resendConfirmation(req, res, next) {
+  const userId = AuthenticationController.getLoggedInUserId(req)
+  const email = EmailHelper.parseEmail(req.body.email)
+  if (!email) {
+    return res.sendStatus(422)
+  }
+  UserGetter.getUserByAnyEmail(email, { _id: 1 }, async function(error, user) {
+    if (error) {
+      return next(error)
+    }
+    if (!user || user._id.toString() !== userId) {
+      logger.log(
+        { userId, email, foundUserId: user && user._id },
+        "email doesn't match logged in user"
+      )
+      return res.sendStatus(422)
+    }
+    if (Features.hasFeature('saml') || req.session.samlBeta) {
+      // institution SSO emails cannot be confirmed by email,
+      // confirmation happens by linking to the institution
+      let institution
+      try {
+        institution = await InstitutionsAPI.getInstitutionViaDomain(
+          email.split('@').pop()
+        )
+      } catch (error) {
+        if (!(error instanceof Errors.NotFoundError)) {
+          throw error
+        }
+      }
+      if (institution && institution.sso_enabled) {
+        return res.sendStatus(422)
+      }
+    }
+    logger.log({ userId, email }, 'resending email confirmation token')
+    UserEmailsConfirmationHandler.sendConfirmationEmail(userId, email, function(
+      error
+    ) {
+      if (error) {
+        return next(error)
+      }
+      res.sendStatus(200)
     })
   })
 }
@@ -102,36 +150,7 @@ module.exports = UserEmailsController = {
     )
   },
 
-  resendConfirmation(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
-    const email = EmailHelper.parseEmail(req.body.email)
-    if (!email) {
-      return res.sendStatus(422)
-    }
-    UserGetter.getUserByAnyEmail(email, { _id: 1 }, function(error, user) {
-      if (error) {
-        return next(error)
-      }
-      if (!user || user._id.toString() !== userId) {
-        logger.log(
-          { userId, email, foundUserId: user && user._id },
-          "email doesn't match logged in user"
-        )
-        return res.sendStatus(422)
-      }
-      logger.log({ userId, email }, 'resending email confirmation token')
-      UserEmailsConfirmationHandler.sendConfirmationEmail(
-        userId,
-        email,
-        function(error) {
-          if (error) {
-            return next(error)
-          }
-          res.sendStatus(200)
-        }
-      )
-    })
-  },
+  resendConfirmation,
 
   showConfirm(req, res, next) {
     res.render('user/confirm_email', {

@@ -99,6 +99,19 @@ define(['base'], function(App) {
     UserAffiliationsDataService
   ) {
     $scope.userEmails = []
+    $scope.showConfirmEmail = email => {
+      if (!email.confirmedAt && !email.hide) {
+        if (
+          email.affiliation &&
+          email.affiliation.institution &&
+          email.affiliation.institution.ssoEnabled &&
+          (ExposedSettings.hasSamlBeta || ExposedSettings.hasSamlFeature)
+        ) {
+          return false
+        }
+        return true
+      }
+    }
     for (let userEmail of Array.from($scope.userEmails)) {
       userEmail.hide = false
     }

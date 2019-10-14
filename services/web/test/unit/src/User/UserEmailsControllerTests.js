@@ -32,6 +32,9 @@ describe('UserEmailsController', function() {
       getLoggedInUserId: sinon.stub().returns(this.user._id),
       setInSessionUser: sinon.stub()
     }
+    this.Features = {
+      hasFeature: sinon.stub()
+    }
     this.UserUpdater = {
       addEmailAddress: sinon.stub(),
       removeEmailAddress: sinon.stub(),
@@ -40,6 +43,15 @@ describe('UserEmailsController', function() {
     }
     this.EmailHelper = { parseEmail: sinon.stub() }
     this.endorseAffiliation = sinon.stub().yields()
+    this.InstitutionsAPI = {
+      endorseAffiliation: this.endorseAffiliation,
+      getInstitutionViaDomain: sinon
+        .stub()
+        .withArgs('overleaf.com')
+        .resolves({ sso_enabled: true })
+        .withArgs('example.com')
+        .resolves({ sso_enabled: false })
+    }
     return (this.UserEmailsController = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -47,13 +59,12 @@ describe('UserEmailsController', function() {
       requires: {
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
+        '../../infrastructure/Features': this.Features,
         './UserGetter': this.UserGetter,
         './UserUpdater': this.UserUpdater,
         '../Helpers/EmailHelper': this.EmailHelper,
         './UserEmailsConfirmationHandler': (this.UserEmailsConfirmationHandler = {}),
-        '../Institutions/InstitutionsAPI': {
-          endorseAffiliation: this.endorseAffiliation
-        },
+        '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
         '../Errors/Errors': Errors,
         'logger-sharelatex': {
           log() {
@@ -312,6 +323,90 @@ describe('UserEmailsController', function() {
               'Sorry, your confirmation token is invalid or has expired. Please request a new email confirmation link.'
           })
           .should.equal(true)
+      })
+    })
+  })
+  describe('resendConfirmation', function() {
+    beforeEach(function() {
+      this.req = {
+        body: {}
+      }
+      this.res = {
+        sendStatus: sinon.stub()
+      }
+      this.next = sinon.stub()
+      this.UserEmailsConfirmationHandler.sendConfirmationEmail = sinon
+        .stub()
+        .yields()
+    })
+    describe('when institution SSO is released', function() {
+      beforeEach(function() {
+        this.Features.hasFeature.withArgs('saml').returns(true)
+      })
+      describe('for an institution SSO email', function() {
+        beforeEach(function() {
+          this.req.body.email = 'with-sso@overleaf.com'
+        })
+        it('should not send the email', function() {
+          this.UserEmailsController.resendConfirmation(
+            this.req,
+            this.res,
+            () => {
+              this.UserEmailsConfirmationHandler.sendConfirmationEmail.should
+                .not.have.been.called.once
+            }
+          )
+        })
+      })
+      describe('for a non-institution SSO email', function() {
+        beforeEach(function() {
+          this.req.body.email = 'without-sso@example.com'
+        })
+        it('should send the email', function() {
+          this.UserEmailsController.resendConfirmation(
+            this.req,
+            this.res,
+            () => {
+              this.UserEmailsConfirmationHandler.sendConfirmationEmail.should
+                .have.been.called.once
+            }
+          )
+        })
+      })
+    })
+    describe('when institution SSO is not released', function() {
+      beforeEach(function() {
+        this.Features.hasFeature.withArgs('saml').returns(false)
+      })
+      describe('for an institution SSO email', function() {
+        beforeEach(function() {
+          this.req.body.email = 'with-sso@overleaf.com'
+        })
+        it('should send the email', function() {
+          this.UserEmailsController.resendConfirmation(
+            this.req,
+            this.res,
+            () => {
+              this.UserEmailsConfirmationHandler.sendConfirmationEmail.should
+                .have.been.called.once
+            }
+          )
+        })
+      })
+      describe('for a non-institution SSO email', function() {
+        beforeEach(function() {
+          this.req.body.email = 'without-sso@example.com'
+        })
+        it('should send the email', function() {
+          this.UserEmailsController.resendConfirmation(
+            this.req,
+            this.res,
+            () => {
+              this.UserEmailsConfirmationHandler.sendConfirmationEmail.should
+                .have.been.called.once
+            }
+          )
+        })
       })
     })
   })

@@ -43,6 +43,9 @@ describe('InstitutionsAPI', function() {
         request: this.request,
         '../Notifications/NotificationsBuilder': {
           ipMatcherAffiliation: sinon.stub().returns(this.ipMatcherNotification)
+        },
+        '../../../../../app/src/Features/V1/V1Api': {
+          request: sinon.stub()
         }
       }
     })
