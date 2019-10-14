@@ -373,9 +373,9 @@
       "dev": true
     },
     "cluster-key-slot": {
-      "version": "1.0.12",
+      "version": "1.1.0",
       "from": "cluster-key-slot@>=1.0.6 <2.0.0",
-      "resolved": "https://registry.npmjs.org/cluster-key-slot/-/cluster-key-slot-1.0.12.tgz"
+      "resolved": "https://registry.npmjs.org/cluster-key-slot/-/cluster-key-slot-1.1.0.tgz"
     },
     "coffee-script": {
       "version": "1.6.0",
@@ -884,9 +884,9 @@
       "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz"
     },
     "ioredis": {
-      "version": "4.11.1",
-      "from": "ioredis@>=4.11.1 <4.12.0",
-      "resolved": "https://registry.npmjs.org/ioredis/-/ioredis-4.11.1.tgz",
+      "version": "4.14.1",
+      "from": "ioredis@>=4.14.1 <4.15.0",
+      "resolved": "https://registry.npmjs.org/ioredis/-/ioredis-4.14.1.tgz",
       "dependencies": {
         "debug": {
           "version": "4.1.1",
@@ -1014,9 +1014,9 @@
       "resolved": "https://registry.npmjs.org/jws/-/jws-3.2.2.tgz"
     },
     "lodash": {
-      "version": "4.17.11",
-      "from": "lodash@>=4.17.10 <5.0.0",
-      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.11.tgz"
+      "version": "4.17.15",
+      "from": "lodash@>=4.17.14 <5.0.0",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
     },
     "lodash.defaults": {
       "version": "4.2.0",
@@ -1445,14 +1445,14 @@
       }
     },
     "redis-sharelatex": {
-      "version": "1.0.9",
-      "from": "redis-sharelatex@1.0.9",
-      "resolved": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.9.tgz",
+      "version": "1.0.11",
+      "from": "redis-sharelatex@1.0.11",
+      "resolved": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.11.tgz",
       "dependencies": {
         "async": {
-          "version": "2.6.2",
-          "from": "async@https://registry.npmjs.org/async/-/async-2.6.2.tgz",
-          "resolved": "https://registry.npmjs.org/async/-/async-2.6.2.tgz"
+          "version": "2.6.3",
+          "from": "async@>=2.5.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/async/-/async-2.6.3.tgz"
         },
         "coffee-script": {
           "version": "1.8.0",
