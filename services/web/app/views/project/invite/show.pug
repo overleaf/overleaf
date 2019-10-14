@@ -7,9 +7,9 @@ block content
 				.col-md-8.col-md-offset-2
 					.card.project-invite-accept
 						.page-header.text-centered
-							h1  #{translate("user_wants_you_to_see_project", {username:owner.first_name, projectname:""})}
-								em
-									span.project-name(ng-non-bindable) #{project.name} 
+							h1 #{translate("user_wants_you_to_see_project", {username:owner.first_name, projectname:""})}
+								br
+								em(ng-non-bindable) #{project.name}
 						.row.text-center
 							.col-md-12
 								p
@@ -28,4 +28,3 @@ block content
 										button.btn.btn-lg.btn-primary(type="submit")
 											| #{translate("join_project")}
 									.form-group.text-center
-							
