@@ -1,14 +1,3 @@
-/* eslint-disable
-    camelcase,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 define(['base'], App =>
   App.factory('projectMembers', (ide, $http) => ({
     removeMember(member) {
@@ -21,9 +10,9 @@ define(['base'], App =>
       })
     },
 
-    addGroup(group_id, privileges) {
+    addGroup(groupId, privileges) {
       return $http.post(`/project/${ide.project_id}/group`, {
-        group_id,
+        group_id: groupId,
         privileges,
         _csrf: window.csrfToken
       })
@@ -36,5 +25,17 @@ define(['base'], App =>
           'X-Csrf-Token': window.csrfToken
         }
       })
+    },
+
+    setMemberPrivilegeLevel(userId, privilegeLevel) {
+      return $http.put(
+        `/project/${ide.project_id}/users/${userId}`,
+        { privilegeLevel },
+        {
+          headers: {
+            'X-Csrf-Token': window.csrfToken
+          }
+        }
+      )
     }
   })))

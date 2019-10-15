@@ -49,23 +49,28 @@ async function getAllMembers(req, res, next) {
 }
 
 async function setCollaboratorInfo(req, res, next) {
-  const projectId = req.params.Project_id
-  const userId = req.params.user_id
-  const { privilegeLevel } = req.body
   try {
+    const projectId = req.params.Project_id
+    const userId = req.params.user_id
+    const { privilegeLevel } = req.body
     await CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
       projectId,
       userId,
       privilegeLevel
     )
+    EditorRealTimeController.emitToRoom(
+      projectId,
+      'project:membership:changed',
+      { members: true }
+    )
+    res.sendStatus(204)
   } catch (err) {
     if (err instanceof Errors.NotFoundError) {
       throw new HttpErrors.NotFoundError({})
     } else {
-      throw err
+      throw new HttpErrors.InternalServerError({}).withCause(err)
     }
   }
-  res.sendStatus(204)
 }
 
 async function _removeUserIdFromProject(projectId, userId) {

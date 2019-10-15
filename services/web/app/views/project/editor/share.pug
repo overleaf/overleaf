@@ -77,25 +77,45 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						) #{translate("make_private")}
 
 				.row.project-member
-					.col-xs-8 {{ project.owner.email }}
-					.text-left(
-						ng-class="{'col-xs-3': project.members.length > 0, 'col-xs-4': project.members.length == 0}"
-					) #{translate("owner")}
-				.row.project-member(ng-repeat="member in project.members")
-					.col-xs-8 {{ member.email }}
-					.col-xs-3.text-left
-						span(ng-show="member.privileges == 'readAndWrite'") #{translate("can_edit")}
-						span(ng-show="member.privileges == 'readOnly'") #{translate("read_only")}
-					.col-xs-1(ng-show="isAdmin")
-						a(
-							href
-							tooltip=translate('remove_collaborator')
-							tooltip-placement="bottom"
-							ng-click="removeMember(member)"
-						)
-							i.fa.fa-times
+					.col-xs-7 {{ project.owner.email }}
+					.text-left.col-xs-3 #{translate("owner")}
+				form.form-horizontal(
+					ng-if="isAdmin"
+					ng-repeat="member in project.members"
+					ng-controller="ShareProjectModalMemberRowController"
+				)
+					.row.form-group.project-member
+						.col-xs-7.form-control-static {{ member.email }}
+						.col-xs-3
+							select.privileges.form-control.input-sm(name="privileges" ng-model="form.privileges")
+								option(value="readAndWrite") #{translate("can_edit")}
+								option(value="readOnly") #{translate("read_only")}
+						.col-xs-2.form-control-static.text-center(ng-hide="form.isModified()")
+							a(
+								href
+								tooltip=translate('remove_collaborator')
+								tooltip-placement="bottom"
+								ng-click="removeMember(member)"
+								aria-label=translate('remove_collaborator')
+							)
+								i.fa.fa-times
+						.col-xs-2.text-center(ng-show="form.isModified()")
+							button.btn.btn-sm.btn-success(
+								type="submit"
+								ng-click="form.submit()"
+							) #{translate("change")}
+							.text-sm
+								| #{translate("or")}
+								|
+								button.btn.btn-inline-link(ng-click="form.reset()") #{translate("cancel").toLowerCase()}
+
+				.row.project-member(ng-if="!isAdmin" ng-repeat="member in project.members")
+					.col-xs-7 {{ member.email }}
+					.col-xs-3
+						span(ng-if="member.privileges == 'readAndWrite'") #{translate("can_edit")}
+						span(ng-if="member.privileges == 'readOnly'") #{translate("read_only")}
 				.row.project-invite(ng-repeat="invite in project.invites")
-					.col-xs-8 {{ invite.email }}&nbsp;
+					.col-xs-7 {{ invite.email }}&nbsp;
 						div.small
 							| #{translate("invite_not_accepted")}.&nbsp;
 							button.btn.btn-inline-link(
@@ -106,7 +126,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						// todo: get invite privileges
 						span(ng-show="invite.privileges == 'readAndWrite'") #{translate("can_edit")}
 						span(ng-show="invite.privileges == 'readOnly'") #{translate("read_only")}
-					.col-xs-1(ng-show="isAdmin")
+					.col-xs-2.text-center(ng-if="isAdmin")
 						a(
 							href
 							tooltip=translate('revoke_invite')
