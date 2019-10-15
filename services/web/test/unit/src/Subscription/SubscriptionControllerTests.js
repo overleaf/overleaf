@@ -550,7 +550,7 @@ describe('SubscriptionController', function() {
         this.user.id = this.activeRecurlySubscription.account.account_code
         this.req = {
           body: {
-            new_subscription_notification: {
+            renewed_subscription_notification: {
               subscription: {
                 uuid: this.activeRecurlySubscription.uuid
               }

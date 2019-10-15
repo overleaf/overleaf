@@ -355,12 +355,16 @@ module.exports = SubscriptionController = {
   recurlyCallback(req, res, next) {
     logger.log({ data: req.body }, 'received recurly callback')
     // we only care if a subscription has exipired
+    const event = Object.keys(req.body)[0]
+    const eventData = req.body[event]
     if (
-      req.body != null &&
-      req.body['expired_subscription_notification'] != null
+      [
+        'new_subscription_notification',
+        'updated_subscription_notification',
+        'expired_subscription_notification'
+      ].includes(event)
     ) {
-      const recurlySubscription =
-        req.body['expired_subscription_notification'].subscription
+      const recurlySubscription = eventData.subscription
       return SubscriptionHandler.recurlyCallback(
         recurlySubscription,
         { ip: req.ip },
