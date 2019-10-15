@@ -201,6 +201,7 @@ module.exports = settings =
 	# Same, but with http auth credentials.
 	httpAuthSiteUrl: "http://#{httpAuthUser}:#{httpAuthPass}@#{siteUrl}"
 
+	robotsNoindex: (process.env['ROBOTS_NOINDEX'] == "true") or false
 
 	maxEntitiesPerProject: 2000
 	

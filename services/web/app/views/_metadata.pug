@@ -96,6 +96,11 @@ meta(name="twitter:card", content=metadata && metadata.twitterCardType ? metadat
 if metadata && metadata.viewport
 	meta(name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes")
 
+//- Noindex
+if settings.robotsNoindex
+	meta(name="robots" content="noindex")
+
+
 //- Icons
 link(rel="icon", href="/" + settings.brandPrefix + "favicon.ico")
 link(rel="icon", sizes="192x192", href="/" + settings.brandPrefix + "touch-icon-192x192.png")
