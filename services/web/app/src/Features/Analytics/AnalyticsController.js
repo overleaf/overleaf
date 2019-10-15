@@ -69,10 +69,10 @@ module.exports = {
 var respondWith = function(error, res, next) {
   if (error instanceof Errors.ServiceNotConfiguredError) {
     // ignore, no-op
-    res.send(204)
+    res.sendStatus(204)
   } else if (error) {
     next(error)
   } else {
-    res.send(204)
+    res.sendStatus(204)
   }
 }

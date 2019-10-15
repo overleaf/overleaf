@@ -37,7 +37,10 @@ describe('AnalyticsController', function() {
       }
     })
 
-    this.res = { send() {} }
+    this.res = {
+      send() {},
+      sendStatus() {}
+    }
   })
 
   describe('updateEditingSession', function() {
