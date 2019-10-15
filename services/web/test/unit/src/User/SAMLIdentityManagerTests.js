@@ -13,17 +13,22 @@ describe('SAMLIdentityManager', function() {
       SAMLUserNotFoundError: sinon.stub()
     }
     this.user = {
-      _id: 'user-id',
-      email: 'dev@overleaf.com',
-      emails: [
-        { email: 'dev@overleaf.com' },
-        { email: 'team@overleaf.com', samlProviderId: '1' }
-      ],
-      samlIdentifiers: [{ providerId: '1' }]
+      _id: 'user-id-1',
+      email: 'not-linked@overleaf.com',
+      emails: [{ email: 'not-linked@overleaf.com' }],
+      samlIdentifiers: []
     }
-    this.userWithoutInstitutionEmail = {
-      _id: 'user-id',
-      emails: [{ email: 'dev@overleaf.com' }]
+    this.userAlreadyLinked = {
+      _id: 'user-id-2',
+      email: 'linked@overleaf.com',
+      emails: [{ email: 'linked@overleaf.com', samlProviderId: '1' }],
+      samlIdentifiers: [{ externalUserId: 'linked-id', providerId: '1' }]
+    }
+    this.userEmailExists = {
+      _id: 'user-id-3',
+      email: 'exists@overleaf.com',
+      emails: [{ email: 'exists@overleaf.com' }],
+      samlIdentifiers: []
     }
     this.institution = {
       name: 'Overleaf University'
@@ -37,7 +42,9 @@ describe('SAMLIdentityManager', function() {
         '../../models/User': {
           User: (this.User = {
             findOneAndUpdate: sinon.stub(),
-            findOne: sinon.stub(this.user),
+            findOne: sinon.stub().returns({
+              exec: sinon.stub().resolves()
+            }),
             update: sinon.stub().returns({
               exec: sinon.stub().resolves()
             })
@@ -81,24 +88,48 @@ describe('SAMLIdentityManager', function() {
     })
     describe('when email is already associated with another Overleaf account', function() {
       beforeEach(function() {
-        this.UserGetter.promises.getUserByAnyEmail.resolves({
-          user_id: 'user-id-2'
-        })
+        this.UserGetter.promises.getUserByAnyEmail.resolves(
+          this.userEmailExists
+        )
       })
-      it('should throw an error if email is associated with another account', async function() {
+      it('should throw an EmailExistsError error', async function() {
         let error
         try {
           await this.SAMLIdentityManager.linkAccounts(
             'user-id-1',
-            '2',
-            'overleaf',
-            true,
-            'test@overleaf.com'
+            'not-linked-id',
+            'exists@overleaf.com',
+            'provider-id',
+            true
           )
         } catch (e) {
           error = e
         } finally {
-          expect(error).to.exist
+          expect(error).to.be.instanceof(this.Errors.EmailExistsError)
+          expect(this.User.findOneAndUpdate).to.not.have.been.called
+        }
+      })
+    })
+    describe('when institution identifier is already associated with another Overleaf account', function() {
+      beforeEach(function() {
+        this.UserGetter.promises.getUserByAnyEmail.resolves(
+          this.userAlreadyLinked
+        )
+      })
+      it('should throw an SAMLIdentityExistsError error', async function() {
+        let error
+        try {
+          await this.SAMLIdentityManager.linkAccounts(
+            'user-id-1',
+            'already-linked-id',
+            'linked@overleaf.com',
+            'provider-id',
+            true
+          )
+        } catch (e) {
+          error = e
+        } finally {
+          expect(error).to.be.instanceof(this.Errors.SAMLIdentityExistsError)
           expect(this.User.findOneAndUpdate).to.not.have.been.called
         }
       })

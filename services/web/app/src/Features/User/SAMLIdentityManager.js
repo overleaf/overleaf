@@ -17,7 +17,18 @@ async function _addIdentifier(
   // before adding the identifier for the email
   const user = await UserGetter.promises.getUserByAnyEmail(institutionEmail)
   if (user && user._id.toString() !== userId.toString()) {
-    throw new Errors.EmailExistsError()
+    const existingEmailData = user.emails.find(
+      emailData => emailData.email === institutionEmail
+    )
+    if (existingEmailData && existingEmailData.samlProviderId) {
+      // email exists and institution link.
+      // Return back to requesting page with error
+      throw new Errors.SAMLIdentityExistsError()
+    } else {
+      // Only email exists but not linked, so redirect to linking page
+      // which will tell this user to log out to link
+      throw new Errors.EmailExistsError()
+    }
   }
   providerId = providerId.toString()
   hasEntitlement = !!hasEntitlement
