@@ -46,7 +46,9 @@ describe('PasswordResetController', function() {
         'settings-sharelatex': this.settings,
         './PasswordResetHandler': this.PasswordResetHandler,
         'logger-sharelatex': {
-          log() {}
+          log() {},
+          warn() {},
+          error() {}
         },
         '../../infrastructure/RateLimiter': this.RateLimiter,
         '../Authentication/AuthenticationController': (this.AuthenticationController = {}),

@@ -234,7 +234,11 @@ const AuthenticationController = (module.exports = {
   },
 
   _loginAsyncHandlers(req, user) {
-    UserHandler.setupLoginData(user, function() {})
+    UserHandler.setupLoginData(user, err => {
+      if (err != null) {
+        logger.warn({ err }, 'error setting up login data')
+      }
+    })
     LoginRateLimiter.recordSuccessfulLogin(user.email)
     AuthenticationController._recordSuccessfulLogin(user._id)
     AuthenticationController.ipMatchCheck(req, user)

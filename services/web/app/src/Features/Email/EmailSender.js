@@ -1,19 +1,4 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-undef,
-    standard/no-callback-literal,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let defaultFromAddress, nm_client
+const { callbackify } = require('util')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const Settings = require('settings-sharelatex')
@@ -21,79 +6,116 @@ const nodemailer = require('nodemailer')
 const sesTransport = require('nodemailer-ses-transport')
 const sgTransport = require('nodemailer-sendgrid-transport')
 const mandrillTransport = require('nodemailer-mandrill-transport')
-const rateLimiter = require('../../infrastructure/RateLimiter')
+const OError = require('@overleaf/o-error')
+const RateLimiter = require('../../infrastructure/RateLimiter')
 const _ = require('underscore')
 
-if (Settings.email != null && Settings.email.fromAddress != null) {
-  defaultFromAddress = Settings.email.fromAddress
-} else {
-  defaultFromAddress = ''
+const EMAIL_SETTINGS = Settings.email || {}
+
+module.exports = {
+  sendEmail: callbackify(sendEmail),
+  promises: {
+    sendEmail
+  }
 }
 
-// provide dummy mailer unless we have a better one configured.
-let client = {
-  sendMail(options, callback) {
-    if (callback == null) {
-      callback = function(err, status) {}
+const client = getClient()
+
+function getClient() {
+  let client
+  if (EMAIL_SETTINGS.parameters) {
+    const emailParameters = EMAIL_SETTINGS.parameters
+    if (emailParameters.AWSAccessKeyID || EMAIL_SETTINGS.driver === 'ses') {
+      logger.log('using aws ses for email')
+      client = nodemailer.createTransport(sesTransport(emailParameters))
+    } else if (emailParameters.sendgridApiKey) {
+      logger.log('using sendgrid for email')
+      client = nodemailer.createTransport(
+        sgTransport({
+          auth: {
+            api_key: emailParameters.sendgridApiKey
+          }
+        })
+      )
+    } else if (emailParameters.MandrillApiKey) {
+      logger.log('using mandril for email')
+      client = nodemailer.createTransport(
+        mandrillTransport({
+          auth: {
+            apiKey: emailParameters.MandrillApiKey
+          }
+        })
+      )
+    } else {
+      logger.log('using smtp for email')
+      const smtp = _.pick(
+        emailParameters,
+        'host',
+        'port',
+        'secure',
+        'auth',
+        'ignoreTLS'
+      )
+      client = nodemailer.createTransport(smtp)
     }
-    logger.log({ options }, 'Would send email if enabled.')
-    return callback()
-  }
-}
-if (Settings.email && Settings.email.parameters) {
-  let emailParameters = Settings.email.parameters
-  if (emailParameters.AWSAccessKeyID || Settings.email.driver === 'ses') {
-    logger.log('using aws ses for email')
-    nm_client = nodemailer.createTransport(sesTransport(emailParameters))
-  } else if (emailParameters.sendgridApiKey) {
-    logger.log('using sendgrid for email')
-    nm_client = nodemailer.createTransport(
-      sgTransport({
-        auth: {
-          api_key: emailParameters.sendgridApiKey
-        }
-      })
-    )
-  } else if (emailParameters.MandrillApiKey) {
-    logger.log('using mandril for email')
-    nm_client = nodemailer.createTransport(
-      mandrillTransport({
-        auth: {
-          apiKey: emailParameters.MandrillApiKey
-        }
-      })
-    )
   } else {
-    logger.log('using smtp for email')
-    const smtp = _.pick(
-      emailParameters,
-      'host',
-      'port',
-      'secure',
-      'auth',
-      'ignoreTLS'
+    logger.warn(
+      'Email transport and/or parameters not defined. No emails will be sent.'
     )
-    nm_client = nodemailer.createTransport(smtp)
+    client = {
+      async sendMail(options) {
+        logger.log({ options }, 'Would send email if enabled.')
+      }
+    }
   }
-} else {
-  logger.warn(
-    'Email transport and/or parameters not defined. No emails will be sent.'
-  )
-  nm_client = client
+  return client
 }
 
-if (nm_client != null) {
-  client = nm_client
-} else {
-  logger.warn(
-    'Failed to create email transport. Please check your settings. No email will be sent.'
-  )
+async function sendEmail(options) {
+  try {
+    logger.log(
+      { receiver: options.to, subject: options.subject },
+      'sending email'
+    )
+    const canContinue = await checkCanSendEmail(options)
+    if (!canContinue) {
+      logger.log(
+        {
+          sendingUser_id: options.sendingUser_id,
+          to: options.to,
+          subject: options.subject,
+          canContinue
+        },
+        'rate limit hit for sending email, not sending'
+      )
+      throw new OError({ message: 'rate limit hit sending email' })
+    }
+    metrics.inc('email')
+    let sendMailOptions = {
+      to: options.to,
+      from: EMAIL_SETTINGS.fromAddress || '',
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+      replyTo: options.replyTo || EMAIL_SETTINGS.replyToAddress,
+      socketTimeout: 30 * 1000
+    }
+    if (EMAIL_SETTINGS.textEncoding != null) {
+      sendMailOptions.textEncoding = EMAIL_SETTINGS.textEncoding
+    }
+    await client.sendMail(sendMailOptions)
+    logger.log(`Message sent to ${options.to}`)
+  } catch (err) {
+    throw new OError({
+      message: 'error sending message'
+    }).withCause(err)
+  }
 }
 
-const checkCanSendEmail = function(options, callback) {
+async function checkCanSendEmail(options) {
   if (options.sendingUser_id == null) {
     // email not sent from user, not rate limited
-    return callback(null, true)
+    return true
   }
   const opts = {
     endpointName: 'send_email',
@@ -101,56 +123,6 @@ const checkCanSendEmail = function(options, callback) {
     subjectName: options.sendingUser_id,
     throttle: 100
   }
-  return rateLimiter.addCount(opts, callback)
-}
-
-module.exports = {
-  sendEmail(options, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    logger.log(
-      { receiver: options.to, subject: options.subject },
-      'sending email'
-    )
-    return checkCanSendEmail(options, function(err, canContinue) {
-      if (err != null) {
-        return callback(err)
-      }
-      if (!canContinue) {
-        logger.log(
-          {
-            sendingUser_id: options.sendingUser_id,
-            to: options.to,
-            subject: options.subject,
-            canContinue
-          },
-          'rate limit hit for sending email, not sending'
-        )
-        return callback(new Error('rate limit hit sending email'))
-      }
-      metrics.inc('email')
-      options = {
-        to: options.to,
-        from: defaultFromAddress,
-        subject: options.subject,
-        html: options.html,
-        text: options.text,
-        replyTo: options.replyTo || Settings.email.replyToAddress,
-        socketTimeout: 30 * 1000
-      }
-      if (Settings.email.textEncoding != null) {
-        opts.textEncoding = textEncoding
-      }
-      return client.sendMail(options, function(err, res) {
-        if (err != null) {
-          logger.warn({ err }, 'error sending message')
-          err = new Error('Cannot send email')
-        } else {
-          logger.log(`Message sent to ${options.to}`)
-        }
-        return callback(err)
-      })
-    })
-  }
+  const allowed = await RateLimiter.promises.addCount(opts)
+  return allowed
 }

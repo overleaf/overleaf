@@ -1,14 +1,3 @@
-/* eslint-disable
-    max-len,
-    no-useless-escape,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const path = require('path')
 const modulePath = path.join(
   __dirname,
@@ -80,7 +69,7 @@ describe('SpamSafe', function() {
     expect(
       SpamSafe.safeEmail(`me+${'a'.repeat(40)}@googoole.con`, 'A collaborator')
     ).to.equal('A collaborator')
-    return expect(
+    expect(
       SpamSafe.safeEmail('sendME$$$@iAmAprince.com', 'A collaborator')
     ).to.equal('A collaborator')
   })

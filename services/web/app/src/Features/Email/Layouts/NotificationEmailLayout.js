@@ -1,9 +1,3 @@
-/* eslint-disable
-    max-len,
-    no-useless-escape,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
 const _ = require('underscore')
 const settings = require('settings-sharelatex')
 
@@ -15,7 +9,7 @@ module.exports = _.template(`\
 		<!-- Facebook sharing information tags -->
 		<meta property="og:title" />
 
-		
+
 	</head>
 	<body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
 
@@ -99,7 +93,7 @@ module.exports = _.template(`\
 				/*@editable*/ text-align:left;
 			}
 
-			/* /\/\/\/\/\/\/\/\/\/\ STANDARD STYLING: PREHEADER /\/\/\/\/\/\/\/\/\/\ */
+			/* ////////// STANDARD STYLING: PREHEADER ////////// */
 
 			/**
 			* @tab Header
@@ -135,7 +129,7 @@ module.exports = _.template(`\
 				/*@editable*/ text-decoration:underline;
 			}
 
-			/* /\/\/\/\/\/\/\/\/\/\ STANDARD STYLING: HEADER /\/\/\/\/\/\/\/\/\/\ */
+			/* ////////// STANDARD STYLING: HEADER ////////// */
 
 			/**
 			* @tab Header
@@ -180,7 +174,7 @@ module.exports = _.template(`\
 				max-width:600px !important;
 			}
 
-			/* /\/\/\/\/\/\/\/\/\/\ STANDARD STYLING: MAIN BODY /\/\/\/\/\/\/\/\/\/\ */
+			/* ////////// STANDARD STYLING: MAIN BODY ////////// */
 
 			/**
 			* @tab Body
@@ -221,7 +215,7 @@ module.exports = _.template(`\
 				height:auto;
 			}
 
-			/* /\/\/\/\/\/\/\/\/\/\ STANDARD STYLING: FOOTER /\/\/\/\/\/\/\/\/\/\ */
+			/* ////////// STANDARD STYLING: FOOTER ////////// */
 
 			/**
 			* @tab Footer
@@ -307,7 +301,7 @@ module.exports = _.template(`\
 				max-width:190px;
 			}
 		</style>
-		
+
 		<center>
 			<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="backgroundTable">
 				<tr>

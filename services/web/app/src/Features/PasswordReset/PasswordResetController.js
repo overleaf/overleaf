@@ -32,6 +32,10 @@ module.exports = {
       }
       PasswordResetHandler.generateAndEmailResetToken(email, (err, status) => {
         if (err != null) {
+          logger.warn(
+            { err },
+            'failed to generate and email password reset token'
+          )
           res.send(500, { message: err.message })
         } else if (status === 'primary') {
           res.send(200, {

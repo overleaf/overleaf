@@ -1,123 +1,99 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 const path = require('path')
 const sinon = require('sinon')
-const modulePath = path.join(
+const { expect } = require('chai')
+
+const MODULE_PATH = path.join(
   __dirname,
   '../../../../app/src/Features/Email/EmailHandler'
 )
-const { expect } = require('chai')
 
 describe('EmailHandler', function() {
   beforeEach(function() {
-    this.settings = { email: {} }
-    this.EmailBuilder = { buildEmail: sinon.stub() }
-    this.EmailSender = { sendEmail: sinon.stub() }
-    this.EmailHandler = SandboxedModule.require(modulePath, {
+    this.html = '<html>hello</html>'
+    this.Settings = { email: {} }
+    this.EmailBuilder = {
+      buildEmail: sinon.stub().returns({ html: this.html })
+    }
+    this.EmailSender = {
+      promises: {
+        sendEmail: sinon.stub().resolves()
+      }
+    }
+    this.EmailHandler = SandboxedModule.require(MODULE_PATH, {
       globals: {
         console: console
       },
       requires: {
         './EmailBuilder': this.EmailBuilder,
         './EmailSender': this.EmailSender,
-        'settings-sharelatex': this.settings,
+        'settings-sharelatex': this.Settings,
         'logger-sharelatex': {
           log() {}
         }
       }
     })
-
-    return (this.html = '<html>hello</html>')
   })
 
   describe('send email', function() {
-    it('should use the correct options', function(done) {
-      this.EmailBuilder.buildEmail.returns({ html: this.html })
-      this.EmailSender.sendEmail.callsArgWith(1)
-
+    it('should use the correct options', async function() {
       const opts = { to: 'bob@bob.com' }
-      return this.EmailHandler.sendEmail('welcome', opts, () => {
-        const args = this.EmailSender.sendEmail.args[0][0]
-        args.html.should.equal(this.html)
-        return done()
+      await this.EmailHandler.promises.sendEmail('welcome', opts)
+      expect(this.EmailSender.promises.sendEmail).to.have.been.calledWithMatch({
+        html: this.html
       })
     })
 
-    it('should return the erroor', function(done) {
-      this.EmailBuilder.buildEmail.returns({ html: this.html })
-      this.EmailSender.sendEmail.callsArgWith(1, 'error')
-
+    it('should return the error', async function() {
+      this.EmailSender.promises.sendEmail.rejects(new Error('boom'))
       const opts = {
         to: 'bob@bob.com',
         subject: 'hello bob'
       }
-      return this.EmailHandler.sendEmail('welcome', opts, err => {
-        err.should.equal('error')
-        return done()
-      })
+      await expect(this.EmailHandler.promises.sendEmail('welcome', opts)).to.be
+        .rejected
     })
 
-    it('should not send an email if lifecycle is not enabled', function(done) {
-      this.settings.email.lifecycle = false
+    it('should not send an email if lifecycle is not enabled', async function() {
+      this.Settings.email.lifecycle = false
       this.EmailBuilder.buildEmail.returns({ type: 'lifecycle' })
-      return this.EmailHandler.sendEmail('welcome', {}, () => {
-        this.EmailSender.sendEmail.called.should.equal(false)
-        return done()
-      })
+      await this.EmailHandler.promises.sendEmail('welcome', {})
+      expect(this.EmailSender.promises.sendEmail).not.to.have.been.called
     })
 
-    it('should send an email if lifecycle is not enabled but the type is notification', function(done) {
-      this.settings.email.lifecycle = false
+    it('should send an email if lifecycle is not enabled but the type is notification', async function() {
+      this.Settings.email.lifecycle = false
       this.EmailBuilder.buildEmail.returns({ type: 'notification' })
-      this.EmailSender.sendEmail.callsArgWith(1)
       const opts = { to: 'bob@bob.com' }
-      return this.EmailHandler.sendEmail('welcome', opts, () => {
-        this.EmailSender.sendEmail.called.should.equal(true)
-        return done()
-      })
+      await this.EmailHandler.promises.sendEmail('welcome', opts)
+      expect(this.EmailSender.promises.sendEmail).to.have.been.called
     })
 
-    it('should send lifecycle email if it is enabled', function(done) {
-      this.settings.email.lifecycle = true
+    it('should send lifecycle email if it is enabled', async function() {
+      this.Settings.email.lifecycle = true
       this.EmailBuilder.buildEmail.returns({ type: 'lifecycle' })
-      this.EmailSender.sendEmail.callsArgWith(1)
       const opts = { to: 'bob@bob.com' }
-      return this.EmailHandler.sendEmail('welcome', opts, () => {
-        this.EmailSender.sendEmail.called.should.equal(true)
-        return done()
-      })
+      await this.EmailHandler.promises.sendEmail('welcome', opts)
+      expect(this.EmailSender.promises.sendEmail).to.have.been.called
     })
 
     describe('with plain-text email content', function() {
       beforeEach(function() {
-        return (this.text = 'hello there')
+        this.text = 'hello there'
       })
 
-      it('should pass along the text field', function(done) {
+      it('should pass along the text field', async function() {
         this.EmailBuilder.buildEmail.returns({
           html: this.html,
           text: this.text
         })
-        this.EmailSender.sendEmail.callsArgWith(1)
         const opts = { to: 'bob@bob.com' }
-        return this.EmailHandler.sendEmail('welcome', opts, () => {
-          const args = this.EmailSender.sendEmail.args[0][0]
-          args.html.should.equal(this.html)
-          args.text.should.equal(this.text)
-          return done()
+        await this.EmailHandler.promises.sendEmail('welcome', opts)
+        expect(
+          this.EmailSender.promises.sendEmail
+        ).to.have.been.calledWithMatch({
+          html: this.html,
+          text: this.text
         })
       })
     })

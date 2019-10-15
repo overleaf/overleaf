@@ -169,7 +169,19 @@ const SubscriptionHandler = {
             }
             const ONE_HOUR_IN_MS = 1000 * 60 * 60
             setTimeout(
-              () => EmailHandler.sendEmail('canceledSubscription', emailOpts),
+              () =>
+                EmailHandler.sendEmail(
+                  'canceledSubscription',
+                  emailOpts,
+                  err => {
+                    if (err != null) {
+                      logger.warn(
+                        { err },
+                        'failed to send confirmation email for subscription cancellation'
+                      )
+                    }
+                  }
+                ),
               ONE_HOUR_IN_MS
             )
             Events.emit('cancelSubscription', user._id)
@@ -196,9 +208,18 @@ const SubscriptionHandler = {
             if (error != null) {
               return callback(error)
             }
-            EmailHandler.sendEmail('reactivatedSubscription', {
-              to: user.email
-            })
+            EmailHandler.sendEmail(
+              'reactivatedSubscription',
+              { to: user.email },
+              err => {
+                if (err != null) {
+                  logger.warn(
+                    { err },
+                    'failed to send reactivation confirmation email'
+                  )
+                }
+              }
+            )
             Analytics.recordEvent(user._id, 'subscription-reactivated')
             return callback()
           }

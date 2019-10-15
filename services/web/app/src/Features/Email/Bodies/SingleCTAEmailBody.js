@@ -1,11 +1,4 @@
-/* eslint-disable
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
 const _ = require('underscore')
-const settings = require('settings-sharelatex')
 
 module.exports = _.template(`\
 <table class="row" style="border-collapse: collapse; border-spacing: 0; display: table; padding: 0; position: relative; text-align: left; vertical-align: top; width: 100%;"><tbody><tr style="padding: 0; text-align: left; vertical-align: top;">

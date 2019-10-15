@@ -1,33 +1,17 @@
-/* eslint-disable
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('underscore')
 const settings = require('settings-sharelatex')
 const marked = require('marked')
 const StringHelper = require('../Helpers/StringHelper')
-
-const PersonalEmailLayout = require('./Layouts/PersonalEmailLayout')
-const NotificationEmailLayout = require('./Layouts/NotificationEmailLayout')
 const BaseWithHeaderEmailLayout = require(`./Layouts/${
   settings.brandPrefix
 }BaseWithHeaderEmailLayout`)
 const SpamSafe = require('./SpamSafe')
-
-// Single CTA Email
 const SingleCTAEmailBody = require(`./Bodies/${
   settings.brandPrefix
 }SingleCTAEmailBody`)
+const NoCTAEmailBody = require(`./Bodies/NoCTAEmailBody`)
 
-const CTAEmailTemplate = function(content) {
+function CTAEmailTemplate(content) {
   if (content.greeting == null) {
     content.greeting = () => 'Hi,'
   }
@@ -74,9 +58,7 @@ The ${settings.appName} Team - ${settings.siteUrl}\
   }
 }
 
-// No CTA Email
-const NoCTAEmailBody = require(`./Bodies/NoCTAEmailBody`)
-const NoCTAEmailTemplate = function(content) {
+function NoCTAEmailTemplate(content) {
   if (content.greeting == null) {
     content.greeting = () => 'Hi,'
   }
@@ -113,6 +95,24 @@ The ${settings.appName} Team - ${settings.siteUrl}\
         StringHelper
       })
     }
+  }
+}
+
+function buildEmail(templateName, opts) {
+  const template = templates[templateName]
+  opts.siteUrl = settings.siteUrl
+  opts.body = template.compiledTemplate(opts)
+  if (
+    settings.email &&
+    settings.email.template &&
+    settings.email.template.customFooter
+  ) {
+    opts.body += settings.email.template.customFooter
+  }
+  return {
+    subject: template.subject(opts),
+    html: template.layout(opts),
+    text: template.plainTextTemplate && template.plainTextTemplate(opts)
   }
 }
 
@@ -508,39 +508,82 @@ templates.emailThirdPartyIdentifierUnlinked = NoCTAEmailTemplate({
   }
 })
 
+templates.ownershipTransferConfirmationPreviousOwner = NoCTAEmailTemplate({
+  subject(opts) {
+    return `Project ownership transfer - ${settings.appName}`
+  },
+  title(opts) {
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'Your project')
+    )
+    return `${projectName} - Owner change`
+  },
+  message(opts) {
+    const nameAndEmail = _.escape(
+      _formatUserNameAndEmail(opts.newOwner, 'a collaborator')
+    )
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'your project')
+    )
+    return `\
+As per your request, we have made ${nameAndEmail} the owner of ${projectName}.
+
+If you haven't asked to change the owner of ${projectName}, please get in touch
+with us via ${settings.adminEmail}.
+`
+  }
+})
+
+templates.ownershipTransferConfirmationNewOwner = CTAEmailTemplate({
+  subject(opts) {
+    return `Project ownership transfer - ${settings.appName}`
+  },
+  title(opts) {
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'Your project')
+    )
+    return `${projectName} - Owner change`
+  },
+  message(opts) {
+    const nameAndEmail = _.escape(
+      _formatUserNameAndEmail(opts.previousOwner, 'A collaborator')
+    )
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'a project')
+    )
+    return `\
+${nameAndEmail} has made you the owner of ${projectName}. You can now
+manage ${projectName} sharing settings.
+`
+  },
+  ctaText(opts) {
+    return 'View project'
+  },
+  ctaURL(opts) {
+    const projectUrl = `${
+      settings.siteUrl
+    }/project/${opts.project._id.toString()}`
+    return projectUrl
+  }
+})
+
+function _formatUserNameAndEmail(user, placeholder) {
+  if (user.first_name && user.last_name) {
+    const fullName = `${user.first_name} ${user.last_name}`
+    if (SpamSafe.isSafeUserName(fullName)) {
+      if (SpamSafe.isSafeEmail(user.email)) {
+        return `${fullName} (${user.email})`
+      } else {
+        return fullName
+      }
+    }
+  }
+  return SpamSafe.safeEmail(user.email, placeholder)
+}
+
 module.exports = {
   templates,
   CTAEmailTemplate,
   NoCTAEmailTemplate,
-  buildEmail(templateName, opts) {
-    const template = templates[templateName]
-    opts.siteUrl = settings.siteUrl
-    opts.body = template.compiledTemplate(opts)
-    if (
-      settings.email &&
-      settings.email.template &&
-      settings.email.template.customFooter
-    ) {
-      opts.body += settings.email.template.customFooter
-    }
-    return {
-      subject: template.subject(opts),
-      html: template.layout(opts),
-      text: __guardMethod__(template, 'plainTextTemplate', o =>
-        o.plainTextTemplate(opts)
-      )
-    }
-  }
-}
-
-function __guardMethod__(obj, methodName, transform) {
-  if (
-    typeof obj !== 'undefined' &&
-    obj !== null &&
-    typeof obj[methodName] === 'function'
-  ) {
-    return transform(obj, methodName)
-  } else {
-    return undefined
-  }
+  buildEmail
 }

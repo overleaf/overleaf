@@ -139,7 +139,11 @@ const UserRegistrationHandler = {
                 to: user.email,
                 setNewPasswordUrl
               },
-              () => {}
+              err => {
+                if (err != null) {
+                  logger.warn({ err }, 'failed to send activation email')
+                }
+              }
             )
 
             callback(null, user, setNewPasswordUrl)

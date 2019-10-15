@@ -1,31 +1,22 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 const path = require('path')
 const sinon = require('sinon')
-const modulePath = path.join(
+const { expect } = require('chai')
+
+const MODULE_PATH = path.join(
   __dirname,
   '../../../../app/src/Features/Email/EmailSender.js'
 )
-const { expect } = require('chai')
 
 describe('EmailSender', function() {
   beforeEach(function() {
-    this.RateLimiter = { addCount: sinon.stub() }
+    this.RateLimiter = {
+      promises: {
+        addCount: sinon.stub()
+      }
+    }
 
-    this.settings = {
+    this.Settings = {
       email: {
         transport: 'ses',
         parameters: {
@@ -37,11 +28,11 @@ describe('EmailSender', function() {
       }
     }
 
-    this.sesClient = { sendMail: sinon.stub() }
+    this.sesClient = { sendMail: sinon.stub().resolves() }
 
     this.ses = { createTransport: () => this.sesClient }
 
-    this.sender = SandboxedModule.require(modulePath, {
+    this.EmailSender = SandboxedModule.require(MODULE_PATH, {
       globals: {
         console: console
       },
@@ -49,7 +40,7 @@ describe('EmailSender', function() {
         nodemailer: this.ses,
         'nodemailer-mandrill-transport': {},
         'nodemailer-sendgrid-transport': {},
-        'settings-sharelatex': this.settings,
+        'settings-sharelatex': this.Settings,
         '../../infrastructure/RateLimiter': this.RateLimiter,
         'logger-sharelatex': {
           log() {},
@@ -62,110 +53,86 @@ describe('EmailSender', function() {
       }
     })
 
-    return (this.opts = {
+    this.opts = {
       to: 'bob@bob.com',
       subject: 'new email',
       html: '<hello></hello>'
-    })
+    }
   })
 
   describe('sendEmail', function() {
-    it('should set the properties on the email to send', function(done) {
-      this.sesClient.sendMail.callsArgWith(1)
-
-      return this.sender.sendEmail(this.opts, err => {
-        expect(err).to.not.exist
-        const args = this.sesClient.sendMail.args[0][0]
-        args.html.should.equal(this.opts.html)
-        args.to.should.equal(this.opts.to)
-        args.subject.should.equal(this.opts.subject)
-        return done()
+    it('should set the properties on the email to send', async function() {
+      await this.EmailSender.promises.sendEmail(this.opts)
+      expect(this.sesClient.sendMail).to.have.been.calledWithMatch({
+        html: this.opts.html,
+        to: this.opts.to,
+        subject: this.opts.subject
       })
     })
 
-    it('should return a non-specific error', function(done) {
-      this.sesClient.sendMail.callsArgWith(1, 'error')
-      return this.sender.sendEmail({}, err => {
-        err.should.exist
-        err.toString().should.equal('Error: Cannot send email')
-        return done()
+    it('should return a non-specific error', async function() {
+      this.sesClient.sendMail.rejects(new Error('boom'))
+      expect(this.EmailSender.promises.sendEmail({})).to.be.rejectedWith(
+        'Error: Cannot send email'
+      )
+    })
+
+    it('should use the from address from settings', async function() {
+      await this.EmailSender.promises.sendEmail(this.opts)
+      expect(this.sesClient.sendMail).to.have.been.calledWithMatch({
+        from: this.Settings.email.fromAddress
       })
     })
 
-    it('should use the from address from settings', function(done) {
-      this.sesClient.sendMail.callsArgWith(1)
-
-      return this.sender.sendEmail(this.opts, () => {
-        const args = this.sesClient.sendMail.args[0][0]
-        args.from.should.equal(this.settings.email.fromAddress)
-        return done()
+    it('should use the reply to address from settings', async function() {
+      await this.EmailSender.promises.sendEmail(this.opts)
+      expect(this.sesClient.sendMail).to.have.been.calledWithMatch({
+        replyTo: this.Settings.email.replyToAddress
       })
     })
 
-    it('should use the reply to address from settings', function(done) {
-      this.sesClient.sendMail.callsArgWith(1)
-
-      return this.sender.sendEmail(this.opts, () => {
-        const args = this.sesClient.sendMail.args[0][0]
-        args.replyTo.should.equal(this.settings.email.replyToAddress)
-        return done()
-      })
-    })
-
-    it('should use the reply to address in options as an override', function(done) {
-      this.sesClient.sendMail.callsArgWith(1)
-
+    it('should use the reply to address in options as an override', async function() {
       this.opts.replyTo = 'someone@else.com'
-      return this.sender.sendEmail(this.opts, () => {
-        const args = this.sesClient.sendMail.args[0][0]
-        args.replyTo.should.equal(this.opts.replyTo)
-        return done()
+      await this.EmailSender.promises.sendEmail(this.opts)
+      expect(this.sesClient.sendMail).to.have.been.calledWithMatch({
+        replyTo: this.opts.replyTo
       })
     })
 
-    it('should not send an email when the rate limiter says no', function(done) {
+    it('should not send an email when the rate limiter says no', async function() {
       this.opts.sendingUser_id = '12321312321'
-      this.RateLimiter.addCount.callsArgWith(1, null, false)
-      return this.sender.sendEmail(this.opts, () => {
-        this.sesClient.sendMail.called.should.equal(false)
-        return done()
-      })
+      this.RateLimiter.promises.addCount.resolves(false)
+      await expect(this.EmailSender.promises.sendEmail(this.opts)).to.be
+        .rejected
+      expect(this.sesClient.sendMail).not.to.have.been.called
     })
 
-    it('should send the email when the rate limtier says continue', function(done) {
-      this.sesClient.sendMail.callsArgWith(1)
+    it('should send the email when the rate limtier says continue', async function() {
       this.opts.sendingUser_id = '12321312321'
-      this.RateLimiter.addCount.callsArgWith(1, null, true)
-      return this.sender.sendEmail(this.opts, () => {
-        this.sesClient.sendMail.called.should.equal(true)
-        return done()
-      })
+      this.RateLimiter.promises.addCount.resolves(true)
+      await this.EmailSender.promises.sendEmail(this.opts)
+      expect(this.sesClient.sendMail).to.have.been.called
     })
 
-    it('should not check the rate limiter when there is no sendingUser_id', function(done) {
-      this.sesClient.sendMail.callsArgWith(1)
-      return this.sender.sendEmail(this.opts, () => {
-        this.sesClient.sendMail.called.should.equal(true)
-        this.RateLimiter.addCount.called.should.equal(false)
-        return done()
+    it('should not check the rate limiter when there is no sendingUser_id', async function() {
+      this.EmailSender.sendEmail(this.opts, () => {
+        expect(this.sesClient.sendMail).to.have.been.called
+        expect(this.RateLimiter.addCount).not.to.have.been.called
       })
     })
 
     describe('with plain-text email content', function() {
       beforeEach(function() {
-        return (this.opts.text = 'hello there')
+        this.opts.text = 'hello there'
       })
 
-      it('should set the text property on the email to send', function(done) {
-        this.sesClient.sendMail.callsArgWith(1)
-
-        return this.sender.sendEmail(this.opts, () => {
-          const args = this.sesClient.sendMail.args[0][0]
-          args.html.should.equal(this.opts.html)
-          args.text.should.equal(this.opts.text)
-          args.to.should.equal(this.opts.to)
-          args.subject.should.equal(this.opts.subject)
-          return done()
+      it('should set the text property on the email to send', async function() {
+        await this.EmailSender.promises.sendEmail(this.opts)
+        expect(this.sesClient.sendMail).to.have.been.calledWithMatch({
+          html: this.opts.html,
+          text: this.opts.text,
+          to: this.opts.to,
+          subject: this.opts.subject
         })
       })
     })

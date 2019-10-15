@@ -11,14 +11,14 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let RateLimiter
 const settings = require('settings-sharelatex')
 const Metrics = require('metrics-sharelatex')
 const RedisWrapper = require('./RedisWrapper')
 const rclient = RedisWrapper.client('ratelimiter')
 const RollingRateLimiter = require('rolling-rate-limiter')
+const { promisifyAll } = require('../util/promises')
 
-module.exports = RateLimiter = {
+const RateLimiter = {
   addCount(opts, callback) {
     if (settings.disableRateLimits) {
       return callback(null, true)
@@ -54,3 +54,6 @@ module.exports = RateLimiter = {
     rclient.del(keyName, callback)
   }
 }
+
+RateLimiter.promises = promisifyAll(RateLimiter)
+module.exports = RateLimiter
