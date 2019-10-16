@@ -139,7 +139,7 @@ block content
 		//- Set base path for Ace scripts loaded on demand/workers and don't use cdn
 		window.aceBasePath = "#{buildJsPath(lib('ace'), {cdn:false})}"
 		//- Set path for PDFjs CMaps
-		window.pdfCMapsPath = "#{buildJsPath('cmaps/')}"
+		window.pdfCMapsPath = "#{buildJsPath('cmaps/', {cdn: false})}"
 		window.uiConfig = JSON.parse('!{StringHelper.stringifyJsonForScript(uiConfig)}');
 		//- enable doc hash checking for all projects
 		//- used in public/js/libs/sharejs.js
