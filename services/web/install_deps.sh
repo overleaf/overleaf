@@ -3,14 +3,19 @@
 make --no-print-directory format & FORMAT=$!
 make --no-print-directory lint & LINT=$!
 npm install git+https://github.com/sharelatex/translations-sharelatex.git#master & TRANSLATIONS=$!
-WEBPACK_ENV=production make minify & MINIFY=$!
+
+# CSS
+make minify & MINIFY=$!
+# JS
+npm run webpack:production & WEBPACK=$!
 
 echo "Waiting for lint, format, translations and minify to finish"
 
 wait $LINT && echo "Lint complete" || exit 1
 wait $FORMAT && echo "Format complete" || exit 1
 wait $TRANSLATIONS && echo "Translations install complete" || exit 1
-wait $MINIFY && echo "Minifiy complete" || exit 1
+wait $MINIFY && echo "Minify complete" || exit 1
+wait $WEBPACK && echo "Webpack complete" || exit 1
 
 chmod -R 0755 /app/public
 chown -R node:node /app/public

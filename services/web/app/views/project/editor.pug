@@ -113,16 +113,6 @@ block content
 			h3 {{ title }}
 		.modal-body(ng-bind-html="message")
 
-	script(src=mathJaxPath)
-
-block requirejs
-	script(type="text/javascript" src='/socket.io/socket.io.js')
-
-	//- don't use cdn for workers
-	- var aceWorkerPath = buildJsPath(lib('ace'), {cdn:false})
-	- var pdfWorkerPath = buildJsPath('/libs/' + lib('pdfjs') + '/pdf.worker', {cdn:false})
-	- var pdfCMapsPath = buildJsPath('/libs/' + lib('pdfjs') + '/bcmaps/', {cdn:false})
-
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
 	script#data(type="application/json").
@@ -146,44 +136,10 @@ block requirejs
 		window.trackChangesState = data.trackChangesState;
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
 		window.gitBridgePublicBaseUrl = '#{gitBridgePublicBaseUrl}'
-		window.requirejs = {
-			"paths" : {
-				"moment": "libs/#{lib('moment')}",
-				"pdfjs-dist/build/pdf": "libs/#{lib('pdfjs')}/pdf",
-				"pdfjs-dist/build/pdf.worker": "#{pdfWorkerPath}",
-				"ace": "#{lib('ace')}",
-				"fineuploader": "libs/#{lib('fineuploader')}",
-				"ide": "#{buildJsPath('ide.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
-				"libraries": "#{buildJsPath('libraries.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
-				!{moduleIncludes("editor:script", locals)}
-				!{moduleIncludes("publish:script", locals)}
-			},
-			"waitSeconds": 0,
-			"shim": {
-				"ace/ext-searchbox": {
-					"deps": ["ace/ace"]
-				},
-				"ace/ext-modelist": {
-					"deps": ["ace/ace"]
-				},
-				"ace/ext-language_tools": {
-					"deps": ["ace/ace"]
-				},
-				"ace/keybinding-vim": {
-					"deps": ["ace/ace"]
-				},
-				"libs/jquery.ui.touch-punch": {
-					"deps": [ "libs/#{lib('jquery-layout')}" ]
-				}
-			},
-			"config":{
-				"moment":{
-					"noGlobal": true
-				}
-			}
-		};
-		window.aceWorkerPath = "#{aceWorkerPath}";
-		window.pdfCMapsPath = "#{pdfCMapsPath}"
+		//- Set base path for Ace scripts loaded on demand/workers and don't use cdn
+		window.aceBasePath = "#{buildJsPath(lib('ace'), {cdn:false})}"
+		//- Set path for PDFjs CMaps
+		window.pdfCMapsPath = "#{buildJsPath('cmaps/')}"
 		window.uiConfig = JSON.parse('!{StringHelper.stringifyJsonForScript(uiConfig)}');
 		//- enable doc hash checking for all projects
 		//- used in public/js/libs/sharejs.js
@@ -193,9 +149,8 @@ block requirejs
 		script(type='text/javascript').
 			window.overallThemes = JSON.parse('!{StringHelper.stringifyJsonForScript(overallThemes)}');
 
-	script(
-		data-main=buildJsPath("ide.js", {hashedPath:false}),
-		baseurl=fullJsPath,
-		data-ace-base=buildJsPath(lib('ace')),
-		src=buildJsPath('libs/require.js', {hashedPath:true})
-	)
+block foot-scripts
+	script(type="text/javascript" src='/socket.io/socket.io.js')
+	script(src=mathJaxPath)
+	script(src=buildJsPath('libraries.js'))
+	script(src=buildJsPath('ide.js'))

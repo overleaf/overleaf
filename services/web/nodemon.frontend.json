@@ -1,9 +1,7 @@
 {
   "exec": "make compile || exit 1",
   "watch": [
-    "public/src/",
-    "public/stylesheets/",
-    "modules/**/public/src/"
+    "public/stylesheets/"
   ],
-  "ext": "js less"
+  "ext": "less"
 }

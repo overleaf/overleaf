@@ -1,4 +1,4 @@
-define(['base', 'pdfjs-dist/build/pdf'], (App, PDFJS) => {
+define(['base', 'pdfjs-dist/webpack'], (App, PDFJS) => {
   const EXTERNAL_LINK_TARGET = '_blank'
   const REL_NOOPENER = 'noreferrer noopener'
 

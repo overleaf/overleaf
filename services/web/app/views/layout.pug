@@ -53,7 +53,7 @@ html(
 				window.location.search += '&'+noCdnKey;
 			}
 
-		block scripts
+		block head-scripts
 
 		script(src=buildJsPath("libs/angular-1.6.4.min.js"))
 
@@ -61,7 +61,6 @@ html(
 			window.sharelatex = {
 				siteUrl: '#{settings.siteUrl}',
 				wsUrl: '#{settings.wsUrl}',
-				jsPath:  '#{jsPath}',
 			};
 			window.systemMessages = !{StringHelper.stringifyJsonForScript(systemMessages)};
 			window.ab = {};
@@ -116,33 +115,9 @@ html(
 			span(ng-controller="ScribtexPopupController")
 			include scribtex-modal
 
-		block requirejs
-			block requirejs-config
-				script(type='text/javascript').
-					// minimal requirejs configuration (can be extended/overridden)
-					window.requirejs = {
-						"paths" : {
-							"moment": "libs/#{lib('moment')}",
-							"fineuploader": "libs/#{lib('fineuploader')}",
-							"main": "#{buildJsPath('main.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
-							"libraries": "#{buildJsPath('libraries.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}"
-						},
-						"config":{
-							"moment":{
-								"noGlobal": true
-							}
-						}
-					};
-
-			block requirejs-init
-				script(
-					data-main=buildJsPath('main.js', {hashedPath:false}),
-					baseurl=fullJsPath,
-					src=buildJsPath('libs/require.js', {hashedPath:true})
-				)
-
 		!= moduleIncludes("contactModal", locals)
 		include v1-tooltip
-		include sentry
 
-
+		block foot-scripts
+			script(src=buildJsPath('libraries.js'))
+			script(src=buildJsPath('main.js'))

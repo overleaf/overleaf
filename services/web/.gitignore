@@ -42,31 +42,14 @@ TpdsWorker.js
 BackgroundJobsWorker.js
 UserAndProjectPopulator.coffee
 
-public/es/modules
-
-public/js/*.js
-public/js/*.map
-public/js/analytics/
-public/js/directives/
-public/js/components/
-public/js/es/
-public/js/filters/
-public/js/ide/
-public/js/main/
-public/js/modules/
-public/js/services/
-public/js/utils/
+public/js/manifest.json
+public/minjs/
 
 public/stylesheets/style*.css
 public/stylesheets/sl-style*.css
 public/stylesheets/light-style*.css
 public/stylesheets/ieee-style*.css
 public/stylesheets/*.map
-public/minjs/
-
-public/js/libs/require*.js
-
-test/unit_frontend/js/
 
 Gemfile.lock
 

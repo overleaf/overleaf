@@ -18,7 +18,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'pdfjs-dist/build/pdf'], (App, PDFJS) =>
+define(['base', 'pdfjs-dist/webpack'], (App, PDFJS) =>
   // App = angular.module 'PDFRenderer', ['pdfAnnotations', 'pdfTextLayer']
 
   App.factory('PDFRenderer', function(

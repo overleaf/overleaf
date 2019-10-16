@@ -6,7 +6,7 @@ include _plans_page_tables
 block vars
 	- metadata = { viewport: true }
 
-block scripts
+block head-scripts
 	script(type='text/javascript').
 		window.recomendedCurrency = '#{recomendedCurrency}';
 		window.abCurrencyFlag = '#{abCurrencyFlag}';

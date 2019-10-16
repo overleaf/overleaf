@@ -114,16 +114,6 @@ module.exports = Modules = {
     return (Modules.viewIncludes[view] || []).length > 0
   },
 
-  moduleAssetFiles(pathPrefix) {
-    const assetFiles = []
-    for (let module of Array.from(this.modules)) {
-      for (let assetFile of Array.from(module.assetFiles || [])) {
-        assetFiles.push(`${pathPrefix}${assetFile}`)
-      }
-    }
-    return assetFiles
-  },
-
   linkedFileAgentsIncludes() {
     const agents = {}
     for (let module of Array.from(this.modules)) {

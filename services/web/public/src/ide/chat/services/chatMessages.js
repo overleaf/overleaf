@@ -14,7 +14,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'libs/md5'], App =>
+define(['base', 'crypto-js/md5'], (App, CryptoJS) =>
   App.factory('chatMessages', function($http, ide) {
     const MESSAGES_URL = `/project/${ide.project_id}/messages`
     const MESSAGE_LIMIT = 50
@@ -152,7 +152,7 @@ define(['base', 'libs/md5'], App =>
     }
 
     var formatUser = function(user) {
-      const hash = CryptoJS.MD5(user.email.toLowerCase())
+      const hash = CryptoJS(user.email.toLowerCase())
       user.gravatar_url = `//www.gravatar.com/avatar/${hash}`
       return user
     }

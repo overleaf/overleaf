@@ -50,64 +50,70 @@ define([
     this.load = function() {
       // $scope.pages = []
 
-      if ($scope.document != null) {
-        $scope.document.destroy()
-      }
-      $scope.loadCount = $scope.loadCount != null ? $scope.loadCount + 1 : 1
-      // TODO need a proper url manipulation library to add to query string
-      let url = $scope.pdfSrc
-      // add 'pdfng=true' to show that we are using the angular pdfjs viewer
-      const queryStringExists = /\?/.test(url)
-      url = url + (!queryStringExists ? '?' : '&') + 'pdfng=true'
-      // for isolated compiles, load the pdf on-demand because nobody will overwrite it
-      const onDemandLoading = true
-      $scope.document = new PDFRenderer(url, {
-        scale: 1,
-        disableAutoFetch: onDemandLoading ? true : undefined,
-        navigateFn(ref) {
-          // this function captures clicks on the annotation links
-          $scope.navigateTo = ref
-          return $scope.$apply()
-        },
-        progressCallback(progress) {
-          return $scope.$emit('progress', progress)
-        },
-        loadedCallback() {
-          return $scope.$emit('loaded')
-        },
-        errorCallback(error) {
-          __guardMethod__(window.Raven, 'captureMessage', o =>
-            o.captureMessage(`pdfng error ${error}`)
-          )
-          return $scope.$emit('pdf:error', error)
-        },
-        pageSizeChangeCallback(pageNum, deltaH) {
-          return $scope.$broadcast('pdf:page:size-change', pageNum, deltaH)
-        }
-      })
+      // Ensure previous document is torn down before loading the next one (to
+      // prevent race conditions)
+      const documentTearDown =
+        $scope.document != null ? $scope.document.destroy() : Promise.resolve()
 
-      // we will have all the main information needed to start display
-      // after the following promise is resolved
-      return ($scope.loaded = $q
-        .all({
-          numPages: $scope.document.getNumPages(),
-          // get size of first page as default @ scale 1
-          pdfViewport: $scope.document.getPdfViewport(1, 1)
+      return documentTearDown.then(() => {
+        $scope.loadCount = $scope.loadCount != null ? $scope.loadCount + 1 : 1
+        // TODO need a proper url manipulation library to add to query string
+        let url = $scope.pdfSrc
+        // add 'pdfng=true' to show that we are using the angular pdfjs viewer
+        const queryStringExists = /\?/.test(url)
+        url = url + (!queryStringExists ? '?' : '&') + 'pdfng=true'
+        // for isolated compiles, load the pdf on-demand because nobody will overwrite it
+        const onDemandLoading = true
+        $scope.document = new PDFRenderer(url, {
+          scale: 1,
+          disableAutoFetch: onDemandLoading ? true : undefined,
+          navigateFn(ref) {
+            // this function captures clicks on the annotation links
+            $scope.navigateTo = ref
+            return $scope.$apply()
+          },
+          progressCallback(progress) {
+            return $scope.$emit('progress', progress)
+          },
+          loadedCallback() {
+            return $scope.$emit('loaded')
+          },
+          errorCallback(error) {
+            __guardMethod__(window.Raven, 'captureMessage', o =>
+              o.captureMessage(`pdfng error ${error}`)
+            )
+            return $scope.$emit('pdf:error', error)
+          },
+          pageSizeChangeCallback(pageNum, deltaH) {
+            return $scope.$broadcast('pdf:page:size-change', pageNum, deltaH)
+          }
         })
-        .then(function(result) {
-          $scope.pdfViewport = result.pdfViewport
-          $scope.pdfPageSize = [
-            result.pdfViewport.height,
-            result.pdfViewport.width
-          ]
-          // console.log 'resolved q.all, page size is', result
-          $scope.$emit('loaded')
-          return ($scope.numPages = result.numPages)
-        })
-        .catch(function(error) {
-          $scope.$emit('pdf:error', error)
-          return $q.reject(error)
-        }))
+
+        // we will have all the main information needed to start display
+        // after the following promise is resolved
+        $scope.loaded = $q
+          .all({
+            numPages: $scope.document.getNumPages(),
+            // get size of first page as default @ scale 1
+            pdfViewport: $scope.document.getPdfViewport(1, 1)
+          })
+          .then(function(result) {
+            $scope.pdfViewport = result.pdfViewport
+            $scope.pdfPageSize = [
+              result.pdfViewport.height,
+              result.pdfViewport.width
+            ]
+            // console.log 'resolved q.all, page size is', result
+            $scope.$emit('loaded')
+            return ($scope.numPages = result.numPages)
+          })
+          .catch(function(error) {
+            $scope.$emit('pdf:error', error)
+            return $q.reject(error)
+          })
+
+        return $scope.loaded
+      })
     }
 
     this.setScale = (scale, containerHeight, containerWidth) =>

@@ -1,16 +1,6 @@
 MODULE_NAME := $(notdir $(shell pwd))
 MODULE_DIR := modules/$(MODULE_NAME)
 PROJECT_NAME = web
-BABEL := ../../node_modules/.bin/babel
-
-IDE_SRC_FILES := $(shell [ -e public/src/ide ] && find public/src/ide -name '*.js')
-IDE_DIST_FILES := $(subst public/src/ide,../../public/js/ide/$(MODULE_NAME),$(IDE_SRC_FILES))
-
-IDE_TEST_SRC_FILES := $(shell [ -e test/unit_frontend/src/ide ] && find test/unit_frontend/src/ide -name '*.js')
-IDE_TEST_DIST_FILES := $(subst test/unit_frontend/src/ide,../../test/unit_frontend/js/ide/$(MODULE_NAME),$(IDE_TEST_SRC_FILES))
-
-MAIN_SRC_FILES := $(shell [ -e public/src/main ] && find public/src/main -name '*.js')
-MAIN_DIST_FILES := $(subst public/src/main,../../public/js/main/$(MODULE_NAME),$(MAIN_SRC_FILES))
 
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 DOCKER_COMPOSE_MODULE_FLAGS := ${DOCKER_COMPOSE_FLAGS} -f $(MODULE_DIR)/docker-compose.yml
@@ -21,27 +11,6 @@ DOCKER_COMPOSE := cd ../../ && \
 	PROJECT_NAME=$(PROJECT_NAME) \
 	MOCHA_GREP=${MOCHA_GREP} \
 	docker-compose ${DOCKER_COMPOSE_MODULE_FLAGS}
-
-../../test/unit_frontend/js/ide/$(MODULE_NAME)/%.js: test/unit_frontend/src/ide/%.js
-	@mkdir -p $(dir $@)
-	$(BABEL) $< --out-file $@
-
-../../public/js/ide/$(MODULE_NAME)/%.js: public/src/ide/%.js
-	@mkdir -p $(dir $@)
-	$(BABEL) $< --out-file $@
-
-../../public/js/main/$(MODULE_NAME)/%.js: public/src/main/%.js
-	@mkdir -p $(dir $@)
-	$(BABEL) $< --out-file $@
-
-compile: $(IDE_DIST_FILES) $(MAIN_DIST_FILES) $(IDE_TEST_DIST_FILES)
-	@echo > /dev/null
-
-compile_full:
-	if [ -e public/src/ide ]; then $(BABEL) public/src/ide --out-dir ../../public/js/ide/$(MODULE_NAME); fi
-	if [ -e public/src/main ]; then $(BABEL) public/src/main --out-dir ../../public/js/main/$(MODULE_NAME); fi
-	if [ -e test/unit_frontend/src/ide ]; then $(BABEL) test/unit_frontend/src/ide --out-dir ../../test/unit_frontend/js/ide/$(MODULE_NAME); fi
-	@$(MAKE) compile # Anything else missed
 
 test_acceptance:
 	${DOCKER_COMPOSE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src

@@ -43,7 +43,6 @@ define([
   'ide/directives/layout',
   'ide/directives/validFile',
   'ide/services/ide',
-  '__IDE_CLIENTSIDE_INCLUDES__',
   'analytics/AbTestingManager',
   'directives/focus',
   'directives/fineUpload',
@@ -60,7 +59,8 @@ define([
   'filters/formatDate',
   'main/event',
   'main/account-upgrade',
-  'main/exposed-settings'
+  'main/exposed-settings',
+  '../../modules/modules-ide.js'
 ], function(
   App,
   FileTreeManager,

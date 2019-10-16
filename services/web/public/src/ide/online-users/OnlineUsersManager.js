@@ -17,7 +17,7 @@
  */
 define([
   'ide/colors/ColorManager',
-  'libs/md5',
+  'crypto-js/md5',
   'ide/online-users/controllers/OnlineUsersController'
 ], function(ColorManager) {
   let OnlineUsersManager

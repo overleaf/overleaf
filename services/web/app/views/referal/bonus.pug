@@ -1,6 +1,6 @@
 extends ../layout
 
-block scripts
+block head-scripts
 	script(type='text/javascript').
 		$(document).ready(function () {
 			$.ajax({dataType: "script", cache: true, url: "//connect.facebook.net/en_US/all.js"}).done(function () {

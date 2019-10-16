@@ -7,12 +7,12 @@
  */
 
 const { User } = require('../../app/src/models/User')
-require('colors')
+// const somePackage = require('some-package')
 
 const runScript = async () => {
   const user = await User.findOne({}, { first_name: 1 }).exec()
   const name = user ? user.first_name : 'World'
-  console.log(`Hello ${name}!`.rainbow.underline.bold)
+  console.log(`Hello ${name}!`)
 }
 
 if (!module.parent) {

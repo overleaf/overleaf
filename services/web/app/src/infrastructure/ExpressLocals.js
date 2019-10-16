@@ -18,7 +18,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let path
 const logger = require('logger-sharelatex')
 const fs = require('fs')
 const crypto = require('crypto')
@@ -39,12 +38,34 @@ const Features = require('./Features')
 Modules = require('./Modules')
 const moment = require('moment')
 const lodash = require('lodash')
+const chokidar = require('chokidar')
 
 const jsPath = Settings.useMinifiedJs ? '/minjs/' : '/js/'
 
-const ace = PackageVersions.lib('ace')
-const pdfjs = PackageVersions.lib('pdfjs')
-const fineuploader = PackageVersions.lib('fineuploader')
+const webpackManifestPath = Path.join(
+  __dirname,
+  `../../../public${jsPath}manifest.json`
+)
+let webpackManifest
+if (['development', 'test'].includes(process.env.NODE_ENV)) {
+  // In dev the web and webpack containers can race (and therefore the manifest
+  // file may not be created when web is running), so watch the file for changes
+  // and reload
+  webpackManifest = {}
+  const reloadManifest = () => {
+    logger.log('[DEV] Reloading webpack manifest')
+    webpackManifest = require(webpackManifestPath)
+  }
+
+  logger.log('[DEV] Watching webpack manifest')
+  chokidar
+    .watch(webpackManifestPath)
+    .on('add', reloadManifest)
+    .on('change', reloadManifest)
+} else {
+  logger.log('[PRODUCTION] Loading webpack manifest')
+  webpackManifest = require(webpackManifestPath)
+}
 
 const getFileContent = function(filePath) {
   filePath = Path.join(__dirname, '../../../', `public${filePath}`)
@@ -59,21 +80,17 @@ const getFileContent = function(filePath) {
 }
 
 const pathList = [
-  `${jsPath}libs/require.js`,
-  `${jsPath}ide.js`,
-  `${jsPath}main.js`,
-  `${jsPath}libraries.js`,
   '/stylesheets/style.css',
   '/stylesheets/light-style.css',
   '/stylesheets/ieee-style.css',
   '/stylesheets/sl-style.css'
-].concat(Modules.moduleAssetFiles(jsPath))
+]
 
 if (!Settings.useMinifiedJs) {
   logger.log('not using minified JS, not hashing static files')
 } else {
   logger.log('Generating file hashes...')
-  for (path of Array.from(pathList)) {
+  for (let path of Array.from(pathList)) {
     const content = getFileContent(path)
     const hash = crypto
       .createHash('md5')
@@ -171,56 +188,34 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
       staticFilesBase = ''
     }
 
-    res.locals.jsPath = jsPath
-    res.locals.fullJsPath = Url.resolve(staticFilesBase, jsPath)
     res.locals.lib = PackageVersions.lib
 
     res.locals.moment = moment
 
-    res.locals.buildJsPath = function(jsFile, opts) {
-      if (opts == null) {
-        opts = {}
-      }
-      path = Path.join(jsPath, jsFile)
-
-      if (opts.hashedPath && hashedFiles[path] != null) {
-        path = hashedFiles[path]
-      }
-
-      if (opts.qs == null) {
-        opts.qs = {}
+    res.locals.buildJsPath = function(jsFile, opts = {}) {
+      // Resolve path from webpack manifest file
+      let path = webpackManifest[jsFile]
+      // If not found in manifest, it is directly linked, so fallback to
+      // relevant public directory
+      if (!path) {
+        path = Path.join(jsPath, jsFile)
       }
 
       if (opts.cdn !== false) {
         path = Url.resolve(staticFilesBase, path)
       }
 
-      const qs = querystring.stringify(opts.qs)
-
-      if (opts.removeExtension === true) {
-        path = path.slice(0, -3)
+      if (opts.qs) {
+        path = path + '?' + querystring.stringify(opts.qs)
       }
 
-      if (qs != null && qs.length > 0) {
-        path = path + '?' + qs
-      }
       return path
     }
 
-    res.locals.buildWebpackPath = function(jsFile, opts) {
-      if (opts == null) {
-        opts = {}
-      }
-      if (Settings.webpack != null && !Settings.useMinifiedJs) {
-        path = Path.join(jsPath, jsFile)
-        if (opts.removeExtension === true) {
-          path = path.slice(0, -3)
-        }
-        return `${Settings.webpack.url}/public${path}`
-      } else {
-        return res.locals.buildJsPath(jsFile, opts)
-      }
-    }
+    res.locals.mathJaxPath = res.locals.buildJsPath('libs/mathjax/MathJax.js', {
+      cdn: false,
+      qs: { config: 'TeX-AMS_HTML,Safe' }
+    })
 
     const IEEE_BRAND_ID = 15
     res.locals.isIEEE = brandVariation =>
@@ -249,7 +244,7 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
 
     res.locals.buildCssPath = function(themeModifier, buildOpts) {
       const cssFileName = _buildCssFileName(themeModifier)
-      path = Path.join('/stylesheets/', cssFileName)
+      const path = Path.join('/stylesheets/', cssFileName)
       if (
         (buildOpts != null ? buildOpts.hashedPath : undefined) &&
         hashedFiles[path] != null
@@ -261,14 +256,9 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
     }
 
     res.locals.buildImgPath = function(imgFile) {
-      path = Path.join('/img/', imgFile)
+      const path = Path.join('/img/', imgFile)
       return Url.resolve(staticFilesBase, path)
     }
-
-    res.locals.mathJaxPath = res.locals.buildJsPath('libs/mathjax/MathJax.js', {
-      cdn: false,
-      qs: { config: 'TeX-AMS_HTML,Safe' }
-    })
 
     return next()
   })
@@ -421,10 +411,6 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
     }
     res.locals.gaToken = Settings.analytics && Settings.analytics.ga.token
     res.locals.tenderUrl = Settings.tenderUrl
-    res.locals.sentrySrc =
-      Settings.sentry != null ? Settings.sentry.src : undefined
-    res.locals.sentryPublicDSN =
-      Settings.sentry != null ? Settings.sentry.publicDSN : undefined
     return next()
   })
 

@@ -506,7 +506,7 @@ module.exports = settings =
 	redirects:
 		"/templates/index": "/templates/"
 
-	reloadModuleViewsOnEachRequest: process.env['NODE_ENV'] != 'production'
+	reloadModuleViewsOnEachRequest: ['development', 'test'].includes(process.env['NODE_ENV'])
 
 	domainLicences: [
 

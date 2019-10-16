@@ -29,7 +29,7 @@ services:
       ENABLED_LINKED_FILE_TYPES: 'url,project_file,project_output_file,mendeley,zotero'
       SHARELATEX_CONFIG: /app/test/acceptance/config/settings.test.coffee
       MOCHA_GREP: ${MOCHA_GREP}
-      NODE_ENV: production
+      NODE_ENV: test
     depends_on:
       - redis
       - mongo
@@ -42,7 +42,7 @@ services:
     volumes:
       - .:/app
     working_dir: /app
-    command: npm run test:frontend -- --single-run
+    command: npm run test:frontend:single
 
   redis:
     image: redis

@@ -14,7 +14,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define([], function() {
+define(['crypto-js/md5'], function(CryptoJS) {
   let ColorManager
   return (ColorManager = {
     getColorScheme(hue, element) {
@@ -72,7 +72,7 @@ define([], function() {
     },
 
     getHueForId(id) {
-      const hash = CryptoJS.MD5(id)
+      const hash = CryptoJS(id)
       let hue = parseInt(hash.toString().slice(0, 8), 16) % 320
       return hue
     }

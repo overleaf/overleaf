@@ -13,7 +13,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'libs/md5'], function(App) {
+define(['base', 'crypto-js/md5'], function(App, CryptoJS) {
   const oldKeys = [
     'sl_abt_multi_currency_editor_eu-eu',
     'sl_abt_multi_currency_eu-eu',
@@ -73,7 +73,7 @@ define(['base', 'libs/md5'], function(App) {
         user_uuid = Math.random()
         ipCookie(sl_user_test_token, user_uuid, { expires: 365, path: '/' })
       }
-      const hash = CryptoJS.MD5(`${user_uuid}:${testName}`)
+      const hash = CryptoJS(`${user_uuid}:${testName}`)
       return hash
     }
 

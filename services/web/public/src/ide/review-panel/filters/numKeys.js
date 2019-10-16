@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define(['base'], App =>
-  app.filter(
+  App.filter(
     'numKeys',
     () =>
       function(object) {

@@ -1,3 +1,4 @@
+const path = require('path')
 const merge = require('webpack-merge')
 
 const base = require('./webpack.config')
@@ -9,7 +10,7 @@ module.exports = merge(base, {
   devtool: 'cheap-module-eval-source-map',
 
   output: {
-    publicPath: '/public/js/es/'
+    publicPath: '/js/'
   },
 
   devServer: {
@@ -27,21 +28,21 @@ module.exports = merge(base, {
       'Access-Control-Allow-Origin': '*'
     },
 
+    // Serve all content from public via webpack. This allows for serving assets
+    // not (currently) bundled with webpack to be served as normal scripts
+    contentBase: path.join(__dirname, 'public'),
+
     // Customise output to the (node) console
     stats: {
       colors: true, // Enable some coloured highlighting
-      timings: true, // Show build timing info
-      assets: true, // Show output bundles
-      warnings: true, // Show build warnings
       // Hide some overly verbose output
+      performance: false, // Disable as code is uncompressed in dev mode
       hash: false,
       version: false,
-      chunks: false
+      chunks: false,
+      modules: false,
+      // Hide cmaps from asset output
+      excludeAssets: [/cmap/]
     }
-  },
-
-  // Disable performance budget warnings as code is uncompressed in dev mode
-  performance: {
-    hints: false
   }
 })

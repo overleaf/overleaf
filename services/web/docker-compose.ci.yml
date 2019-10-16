@@ -23,7 +23,7 @@ services:
       ENABLED_LINKED_FILE_TYPES: 'url,project_file,project_output_file,mendeley,zotero'
       LINKED_URL_PROXY: 'http://localhost:6543'
       SHARELATEX_CONFIG: /app/test/acceptance/config/settings.test.coffee
-      NODE_ENV: production
+      NODE_ENV: test
     user: root
     depends_on:
       - redis

@@ -45,10 +45,10 @@ define([
   const { Vim } = ace.require('ace/keyboard/vim')
   const SearchBox = ace.require('ace/ext/searchbox')
 
-  // set the path for ace workers if using a CDN (from editor.pug)
-  if (window.aceWorkerPath !== '') {
+  // Set the base path that ace will fetch modes/snippets/workers from
+  if (window.aceBasePath !== '') {
     syntaxValidationEnabled = true
-    ace.config.set('workerPath', `${window.aceWorkerPath}`)
+    ace.config.set('basePath', `${window.aceBasePath}`)
   } else {
     syntaxValidationEnabled = false
   }

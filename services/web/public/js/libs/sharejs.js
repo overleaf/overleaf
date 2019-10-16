@@ -26,7 +26,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['ace/ace','libs/sha1'], function () {
+define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
   var append = void 0,
       bootstrapTransform = void 0,
       exports = void 0,
@@ -226,9 +226,6 @@ define(['ace/ace','libs/sha1'], function () {
     };
   };
 
-  if (typeof WEB === 'undefined') {
-    exports.bootstrapTransform = bootstrapTransform;
-  }
   // A simple text implementation
   //
   // Operations are lists of components.
@@ -673,20 +670,9 @@ define(['ace/ace','libs/sha1'], function () {
 
     // [] is used to prevent closure from renaming types.text
     exports.types.text = text;
-  } else {
-    module.exports = text;
-
-    // The text type really shouldn't need this - it should be possible to define
-    // an efficient transform function by making a sort of transform map and passing each
-    // op component through it.
-    require('./helpers').bootstrapTransform(text, transformComponent, checkValidOp, append);
   }
 
   // Text document API for text
-
-  if (typeof WEB === 'undefined') {
-    text = require('./text');
-  }
 
   text.api = {
     provides: { text: true },
@@ -876,10 +862,6 @@ define(['ace/ace','libs/sha1'], function () {
 
   if (WEB == null) {
     module.exports = MicroEvent;
-  }
-
-  if (WEB == null) {
-    types = require('../types');
   }
 
   if (WEB != null) {
@@ -1311,7 +1293,7 @@ define(['ace/ace','libs/sha1'], function () {
           var needToRecomputeHash = !this.__lastSubmitTimestamp || (age > RECOMPUTE_HASH_INTERVAL) || (age < 0) 
           if (needToRecomputeHash || window.sl_debugging) {
             // send git hash of current snapshot
-            var sha1 = CryptoJS.SHA1("blob " + this.snapshot.length + "\x00" + this.snapshot).toString()
+            var sha1 = CryptoJSSHA1("blob " + this.snapshot.length + "\x00" + this.snapshot).toString()
             this.__lastSubmitTimestamp = now;
           }
         }
@@ -1434,10 +1416,6 @@ define(['ace/ace','libs/sha1'], function () {
 
   // Make documents event emitters
 
-
-  if (WEB == null) {
-    MicroEvent = require('./microevent');
-  }
 
   MicroEvent.mixin(Doc);
 

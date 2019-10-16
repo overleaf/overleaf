@@ -56,7 +56,7 @@ define([
   'services/validateCaptchaV3',
   'filters/formatDate',
   'components/inputSuggestions',
-  '__MAIN_CLIENTSIDE_INCLUDES__'
+  '../../modules/modules-main.js'
 ], function() {
   angular.module('SharelatexApp').config(function($locationProvider) {
     try {
