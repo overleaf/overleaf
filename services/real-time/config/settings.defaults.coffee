@@ -62,6 +62,10 @@ settings =
 
 	sentry:
 		dsn: process.env.SENTRY_DSN
+
+	errors:
+		catchUncaughtErrors: true
+		shutdownOnUncaughtError: true
 	
 # console.log settings.redis
 module.exports = settings
