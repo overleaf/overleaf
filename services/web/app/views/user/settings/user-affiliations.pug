@@ -223,7 +223,7 @@ form.row(
 							.small !{translate("institution_acct_successfully_linked", {institutionName: institutionLinked.universityName})}
 							if institutionLinked.hasEntitlement
 								.small !{translate("this_grants_access_to_features", {featureType: translate("professional")})}
-					if institutionLinked.emailViaInstitution
+					if institutionEmailNonCanonical
 						tr.affiliations-table-warning-row(ng-if="!hideInstitutionNotifications.warning")
 							td(colspan="3").text-center(aria-live="assertive")
 								button.close(
@@ -236,7 +236,7 @@ form.row(
 								.small
 									i.fa.fa-exclamation-triangle(aria-hidden="true")
 									| &nbsp;
-									| !{translate("in_order_to_match_institutional_metadata", {email: institutionLinked.emailViaInstitution})}
+									| !{translate("in_order_to_match_institutional_metadata", {email: institutionEmailNonCanonical})}
 				if institutionNotLinked
 					tr.affiliations-table-error-row(ng-if="!hideInstitutionNotifications.error")
 						td(colspan="3").text-center(aria-live="assertive")

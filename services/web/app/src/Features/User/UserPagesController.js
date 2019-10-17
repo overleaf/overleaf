@@ -117,6 +117,10 @@ const UserPagesController = {
     // Institution SSO
     const institutionLinked = _.get(req.session, ['saml', 'linked'])
     const institutionNotLinked = _.get(req.session, ['saml', 'notLinked'])
+    const institutionEmailNonCanonical = _.get(req.session, [
+      'saml',
+      'emailNonCanonical'
+    ])
     delete req.session.saml
     logger.log({ user: userId }, 'loading settings page')
     let shouldAllowEditingDetails = true
@@ -146,6 +150,7 @@ const UserPagesController = {
         oauthUseV2: Settings.oauthUseV2 || false,
         institutionLinked,
         institutionNotLinked,
+        institutionEmailNonCanonical,
         samlBeta: req.session.samlBeta,
         ssoError: ssoError,
         thirdPartyIds: UserPagesController._restructureThirdPartyIds(user)
