@@ -1607,7 +1607,7 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
   // It is heavily inspired from the Ace editor hook.
 
   // Convert a CodeMirror delta into an op understood by share.js
-  var applyCMToShareJS = function applyCMToShareJS(editorDoc, delta, doc) {
+  var applyCMToShareJS = function applyCMToShareJS(editorDoc, delta, doc, fromUndo) {
     // CodeMirror deltas give a text replacement.
     // I tuned this operation a little bit, for speed.
     var startPos = 0; // Get character position from # of chars in each line.
@@ -1622,10 +1622,10 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
     startPos += delta.from.ch;
 
     if (delta.removed) {
-      doc.del(startPos, delta.removed.join('\n').length);
+      doc.del(startPos, delta.removed.join('\n').length, fromUndo);
     }
     if (delta.text) {
-      return doc.insert(startPos, delta.text.join('\n'));
+      return doc.insert(startPos, delta.text.join('\n'), fromUndo);
     }
   };
 
@@ -1676,7 +1676,8 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
       if (suppress) {
         return;
       }
-      applyCMToShareJS(editorDoc, change, sharedoc);
+      var fromUndo = (change.origin === 'undo')
+      applyCMToShareJS(editorDoc, change, sharedoc, fromUndo);
       return check();
     };
 
