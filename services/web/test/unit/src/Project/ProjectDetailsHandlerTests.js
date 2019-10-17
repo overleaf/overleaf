@@ -11,10 +11,12 @@ describe('ProjectDetailsHandler', function() {
   beforeEach(function() {
     this.user = {
       _id: ObjectId('abcdefabcdefabcdefabcdef'),
+      email: 'user@example.com',
       features: 'mock-features'
     }
     this.collaborator = {
-      _id: ObjectId('123456123456123456123456')
+      _id: ObjectId('123456123456123456123456'),
+      email: 'collaborator@example.com'
     }
     this.project = {
       _id: ObjectId('5d5dabdbb351de090cdff0b2'),
@@ -64,6 +66,11 @@ describe('ProjectDetailsHandler', function() {
         addUserIdToProject: sinon.stub().resolves()
       }
     }
+    this.EmailHandler = {
+      promises: {
+        sendEmail: sinon.stub().resolves()
+      }
+    }
     this.ProjectTokenGenerator = {
       readAndWriteToken: sinon.stub(),
       promises: {
@@ -86,6 +93,7 @@ describe('ProjectDetailsHandler', function() {
         '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
         './ProjectEntityHandler': this.ProjectEntityHandler,
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
+        '../Email/EmailHandler': this.EmailHandler,
         'logger-sharelatex': {
           log() {},
           warn() {},
@@ -137,7 +145,12 @@ describe('ProjectDetailsHandler', function() {
 
   describe('transferOwnership', function() {
     beforeEach(function() {
-      this.UserGetter.promises.getUser.resolves(this.collaborator)
+      this.UserGetter.promises.getUser
+        .withArgs(this.user._id)
+        .resolves(this.user)
+      this.UserGetter.promises.getUser
+        .withArgs(this.collaborator._id)
+        .resolves(this.collaborator)
     })
 
     it("should return a not found error if the project can't be found", async function() {
@@ -148,7 +161,9 @@ describe('ProjectDetailsHandler', function() {
     })
 
     it("should return a not found error if the user can't be found", async function() {
-      this.UserGetter.promises.getUser.resolves(null)
+      this.UserGetter.promises.getUser
+        .withArgs(this.collaborator._id)
+        .resolves(null)
       await expect(
         this.handler.promises.transferOwnership(
           this.project._id,
@@ -221,6 +236,29 @@ describe('ProjectDetailsHandler', function() {
       expect(
         this.ProjectEntityHandler.promises.flushProjectToThirdPartyDataStore
       ).to.have.been.calledWith(this.project._id)
+    })
+
+    it('should send an email notification', async function() {
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.collaborator._id
+      )
+      expect(this.EmailHandler.promises.sendEmail).to.have.been.calledWith(
+        'ownershipTransferConfirmationPreviousOwner',
+        {
+          to: this.user.email,
+          project: this.project,
+          newOwner: this.collaborator
+        }
+      )
+      expect(this.EmailHandler.promises.sendEmail).to.have.been.calledWith(
+        'ownershipTransferConfirmationNewOwner',
+        {
+          to: this.collaborator.email,
+          project: this.project,
+          previousOwner: this.user
+        }
+      )
     })
 
     it('should decline to transfer ownership to a non-collaborator', async function() {
