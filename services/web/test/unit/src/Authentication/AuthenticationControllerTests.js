@@ -48,9 +48,6 @@ describe('AuthenticationController', function() {
           untrackSession: sinon.stub(),
           revokeAllUserSessions: sinon.stub().callsArgWith(1, null)
         }),
-        '../../infrastructure/SessionStoreManager': (this.SessionStoreManager = {
-          checkValidationToken: sinon.stub().returns(true)
-        }),
         '../../infrastructure/Modules': (this.Modules = {
           hooks: { fire: sinon.stub().callsArgWith(2, null, []) }
         }),
@@ -299,6 +296,16 @@ describe('AuthenticationController', function() {
       })
     })
 
+    it('should set a vaildation token on the session', function(done) {
+      this.call(err => {
+        if (err) {
+          return done(err)
+        }
+        expect(this.req.session).to.have.property('validationToken', 'v1:omid')
+        done()
+      })
+    })
+
     describe('when req.session.save produces an error', function() {
       beforeEach(function() {
         this.req.session.save = sinon.stub().callsArgWith(0, new Error('woops'))
@@ -323,28 +330,44 @@ describe('AuthenticationController', function() {
   })
 
   describe('getSessionUser', function() {
-    it('should accept a valid session', function() {
+    it('should accept a session without a validation token', function() {
       this.req.session = {
         passport: {
           user: { _id: 'one' }
         }
       }
-      this.SessionStoreManager.checkValidationToken = sinon.stub().returns(true)
       const user = this.AuthenticationController.getSessionUser(this.req)
       expect(user).to.deep.equal({ _id: 'one' })
     })
 
-    it('should reject an invalid session', function() {
+    it('should reject an invalid validation token', function() {
+      this.req.sessionID = 'nabuchodonosorroidebabylone'
       this.req.session = {
+        validationToken: 'v1:gasp', // does not match last 4 characters of session id
         passport: {
           user: { _id: 'two' }
         }
       }
-      this.SessionStoreManager.checkValidationToken = sinon
-        .stub()
-        .returns(false)
       const user = this.AuthenticationController.getSessionUser(this.req)
       expect(user).to.be.null
+    })
+
+    it('should accept a valid validation token', function() {
+      this.req.sessionID = 'nabuchodonosorroidebabylone'
+      this.req.session = {
+        validationToken: 'v1:lone', // matches last 4 characters of session id
+        passport: {
+          user: { _id: 'three' }
+        }
+      }
+      const user = this.AuthenticationController.getSessionUser(this.req)
+      expect(user).to.deep.equal({ _id: 'three' })
+    })
+
+    it('should work with legacy sessions', function() {
+      this.req.session = { user: { _id: 'one' } }
+      const user = this.AuthenticationController.getSessionUser(this.req)
+      expect(user).to.deep.equal({ _id: 'one' })
     })
   })
 

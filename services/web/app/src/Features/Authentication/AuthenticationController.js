@@ -8,7 +8,6 @@ const Settings = require('settings-sharelatex')
 const basicAuth = require('basic-auth-connect')
 const UserHandler = require('../User/UserHandler')
 const UserSessionsManager = require('../User/UserSessionsManager')
-const SessionStoreManager = require('../../infrastructure/SessionStoreManager')
 const Analytics = require('../Analytics/AnalyticsManager')
 const passport = require('passport')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
@@ -43,6 +42,51 @@ const AuthenticationController = (module.exports = {
     cb(null, user)
   },
 
+  computeSessionValidationToken(req) {
+    // this should be a deterministic function of the client-side sessionID,
+    // prepended with a version number in case we want to change it later
+    return 'v1:' + req.sessionID.slice(-4)
+  },
+
+  setSessionValidationToken(req) {
+    req.session.validationToken = AuthenticationController.computeSessionValidationToken(
+      req
+    )
+  },
+
+  checkSessionValidationToken(req) {
+    if (req.session) {
+      const token = req.session.validationToken
+      if (token) {
+        const clientToken = AuthenticationController.computeSessionValidationToken(
+          req
+        )
+        // Reject invalid sessions. If you change the method for computing the
+        // token (above) then you need to either check or ignore previous
+        // versions of the token.
+        if (token === clientToken) {
+          Metrics.inc('security.session', 1, { status: 'ok' })
+          return true
+        } else {
+          logger.error(
+            {
+              token: token,
+              clientToken: clientToken,
+              req: req,
+              sessionID: req.sessionID
+            },
+            'session token validation failed'
+          )
+          Metrics.inc('security.session', 1, { status: 'error' })
+          return false
+        }
+      } else {
+        Metrics.inc('security.session', 1, { status: 'missing' })
+      }
+    }
+    return true // fallback to allowing session
+  },
+
   afterLoginSessionSetup(req, user, callback) {
     if (callback == null) {
       callback = function() {}
@@ -64,14 +108,14 @@ const AuthenticationController = (module.exports = {
           return callback(err)
         }
         req.sessionStore.generate(req)
-        // Note: the validation token is not writable, so it does not get
-        // transferred to the new session below.
         for (let key in oldSession) {
           const value = oldSession[key]
           if (key !== '__tmp') {
             req.session[key] = value
           }
         }
+        // generate an identifier from the sessionID
+        AuthenticationController.setSessionValidationToken(req)
         req.session.save(function(err) {
           if (err) {
             logger.warn(
@@ -255,7 +299,7 @@ const AuthenticationController = (module.exports = {
   },
 
   getSessionUser(req) {
-    if (!SessionStoreManager.checkValidationToken(req)) {
+    if (!AuthenticationController.checkSessionValidationToken(req)) {
       return null
     }
     const sessionUser = _.get(req, ['session', 'user'])
