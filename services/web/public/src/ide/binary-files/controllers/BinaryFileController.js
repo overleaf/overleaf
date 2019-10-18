@@ -184,8 +184,8 @@ define(['base', 'moment'], (App, moment) =>
 
     function setPreviewHeight() {
       const $preview = $element.find('.text-preview .scroll-container')
-      const $footer = $element.find('.binary-file-footer')
-      const maxHeight = $element.height() - $footer.height() - 14 // borders + margin
+      const $header = $element.find('.binary-file-header')
+      const maxHeight = $element.height() - $header.height() - 14 // borders + margin
       $preview.css({ 'max-height': maxHeight })
       // Don't show the preview until we've set the height, otherwise we jump around
       $scope.textPreview.loading = false

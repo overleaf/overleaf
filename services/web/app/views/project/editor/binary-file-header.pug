@@ -1,0 +1,60 @@
+div.binary-file-header
+  // Linked Files: URL
+  div(ng-if="openFile.linkedFileData.provider == 'url'")
+    p
+      i.fa.fa-fw.fa-external-link-square.fa-rotate-180.linked-file-icon
+      | Imported from
+      |
+      a(ng-href='{{openFile.linkedFileData.url}}') {{ displayUrl(openFile.linkedFileData.url) }}
+      |
+      | at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
+
+  // Linked Files: Project File
+  div(ng-if="openFile.linkedFileData.provider == 'project_file'")
+    p
+      i.fa.fa-fw.fa-external-link-square.fa-rotate-180.linked-file-icon
+      | Imported from
+      |
+      a(ng-if='!openFile.linkedFileData.v1_source_doc_id'
+        ng-href='/project/{{openFile.linkedFileData.source_project_id}}' target="_blank")
+        | Another project
+      span(ng-if='openFile.linkedFileData.v1_source_doc_id')
+        | Another project
+      | /{{ openFile.linkedFileData.source_entity_path.slice(1) }},
+      |
+      | at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
+
+  // Linked Files: Project Output File
+  div(ng-if="openFile.linkedFileData.provider == 'project_output_file'")
+    p
+      i.fa.fa-fw.fa-external-link-square.fa-rotate-180.linked-file-icon
+      | Imported from the output of
+      |
+      a(ng-if='!openFile.linkedFileData.v1_source_doc_id'
+        ng-href='/project/{{openFile.linkedFileData.source_project_id}}' target="_blank")
+        | Another project
+      span(ng-if='openFile.linkedFileData.v1_source_doc_id')
+        | Another project
+      | : {{ openFile.linkedFileData.source_output_file_path }},
+      |
+      | at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
+
+  != moduleIncludes("binaryFile:linkedFileInfo", locals)
+
+  // Bottom Controls
+  span(ng-if="openFile.linkedFileData.provider")
+    button.btn.btn-success(
+      href, ng-click="refreshFile(openFile)",
+      ng-disabled="refreshing"
+    )
+      i.fa.fa-fw.fa-refresh(ng-class={'fa-spin': refreshing})
+      |
+      span(ng-show="!refreshing") Refresh
+      span(ng-show="refreshing") Refreshing...
+    | &nbsp;
+  a.btn.btn-info(
+    ng-href="/project/{{ project_id }}/file/{{ openFile.id }}"
+  )
+    i.fa.fa-fw.fa-download
+    |
+    | #{translate("download")}
