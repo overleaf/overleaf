@@ -59,7 +59,10 @@ describe('ProjectController', function() {
     this.TagsHandler = { getAllTags: sinon.stub() }
     this.NotificationsHandler = { getUserNotifications: sinon.stub() }
     this.UserModel = { findById: sinon.stub() }
-    this.AuthorizationManager = { getPrivilegeLevelForProject: sinon.stub() }
+    this.AuthorizationManager = {
+      getPrivilegeLevelForProject: sinon.stub(),
+      isRestrictedUser: sinon.stub().returns(false)
+    }
     this.EditorController = { renameProject: sinon.stub() }
     this.InactiveProjectManager = { reactivateProjectIfRequired: sinon.stub() }
     this.ProjectUpdateHandler = { markAsOpened: sinon.stub() }
@@ -804,13 +807,8 @@ describe('ProjectController', function() {
       return this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should set isRestrictedTokenMember to true when the user is accessing project via read-only token', function(done) {
-      this.CollaboratorsGetter.userIsTokenMember.callsArgWith(2, null, true)
-      this.AuthorizationManager.getPrivilegeLevelForProject.callsArgWith(
-        3,
-        null,
-        'readOnly'
-      )
+    it('should set isRestrictedTokenMember when appropriate', function(done) {
+      this.AuthorizationManager.isRestrictedUser.returns(true)
       this.res.render = (pageName, opts) => {
         opts.isRestrictedTokenMember.should.exist
         opts.isRestrictedTokenMember.should.equal(true)
@@ -819,21 +817,6 @@ describe('ProjectController', function() {
       return this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should set isRestrictedTokenMember to true when anonymous read-only token access', function(done) {
-      this.CollaboratorsGetter.userIsTokenMember.callsArgWith(2, null, null)
-      this.AuthenticationController.isUserLoggedIn = sinon.stub().returns(false)
-      this.AuthorizationManager.getPrivilegeLevelForProject.callsArgWith(
-        3,
-        null,
-        'readOnly'
-      )
-      this.res.render = (pageName, opts) => {
-        opts.isRestrictedTokenMember.should.exist
-        opts.isRestrictedTokenMember.should.equal(true)
-        return done()
-      }
-      return this.ProjectController.loadEditor(this.req, this.res)
-    })
     it('should render the closed page if the editor is closed', function(done) {
       this.settings.editorIsOpen = false
       this.res.render = (pageName, opts) => {

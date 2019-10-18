@@ -1,14 +1,3 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 require('chai').should()
@@ -25,13 +14,10 @@ describe('EditorHttpController', function() {
         console: console
       },
       requires: {
-        '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
         '../Project/ProjectDeleter': (this.ProjectDeleter = {}),
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
-        '../User/UserGetter': (this.UserGetter = {}),
         '../Authorization/AuthorizationManager': (this.AuthorizationManager = {}),
         '../Project/ProjectEditorHandler': (this.ProjectEditorHandler = {}),
-        './EditorRealTimeController': (this.EditorRealTimeController = {}),
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
           error: sinon.stub()
@@ -39,6 +25,7 @@ describe('EditorHttpController', function() {
         './EditorController': (this.EditorController = {}),
         'metrics-sharelatex': (this.Metrics = { inc: sinon.stub() }),
         '../Collaborators/CollaboratorsGetter': (this.CollaboratorsGetter = {}),
+        '../Collaborators/CollaboratorsHandler': (this.CollaboratorsHandler = {}),
         '../Collaborators/CollaboratorsInviteHandler': (this.CollaboratorsInviteHandler = {}),
         '../TokenAccess/TokenAccessHandler': (this.TokenAccessHandler = {}),
         '../Authentication/AuthenticationController': (this.AuthenticationController = {}),
@@ -64,7 +51,7 @@ describe('EditorHttpController', function() {
     this.TokenAccessHandler.getRequestToken = sinon
       .stub()
       .returns((this.token = null))
-    return (this.TokenAccessHandler.protectTokens = sinon.stub())
+    this.TokenAccessHandler.protectTokens = sinon.stub()
   })
 
   describe('joinProject', function() {
@@ -72,56 +59,84 @@ describe('EditorHttpController', function() {
       this.req.params = { Project_id: this.project_id }
       this.req.query = { user_id: this.user_id }
       this.projectView = {
-        _id: this.project_id
+        _id: this.project_id,
+        owner: {
+          _id: 'owner',
+          email: 'owner@example.com',
+          other_property: true
+        }
+      }
+      this.reducedProjectView = {
+        _id: this.project_id,
+        owner: { _id: 'owner' }
       }
       this.EditorHttpController._buildJoinProjectView = sinon
         .stub()
-        .callsArgWith(3, null, this.projectView, 'owner')
-      return (this.ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub())
+        .callsArgWith(3, null, this.projectView, 'owner', false)
+      this.ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
     })
 
     describe('successfully', function() {
       beforeEach(function() {
-        return this.EditorHttpController.joinProject(this.req, this.res)
+        this.AuthorizationManager.isRestrictedUser = sinon.stub().returns(false)
+        this.EditorHttpController.joinProject(this.req, this.res)
       })
 
       it('should get the project view', function() {
-        return this.EditorHttpController._buildJoinProjectView
+        this.EditorHttpController._buildJoinProjectView
           .calledWith(this.req, this.project_id, this.user_id)
           .should.equal(true)
       })
 
       it('should return the project and privilege level', function() {
-        return this.res.json
+        this.res.json
           .calledWith({
             project: this.projectView,
-            privilegeLevel: 'owner'
+            privilegeLevel: 'owner',
+            isRestrictedUser: false
           })
           .should.equal(true)
       })
 
       it('should not try to unmark the project as deleted', function() {
-        return this.ProjectDeleter.unmarkAsDeletedByExternalSource.called.should.equal(
+        this.ProjectDeleter.unmarkAsDeletedByExternalSource.called.should.equal(
           false
         )
       })
 
       it('should send an inc metric', function() {
-        return this.Metrics.inc
-          .calledWith('editor.join-project')
-          .should.equal(true)
+        this.Metrics.inc.calledWith('editor.join-project').should.equal(true)
       })
     })
 
     describe('when the project is marked as deleted', function() {
       beforeEach(function() {
         this.projectView.deletedByExternalDataSource = true
-        return this.EditorHttpController.joinProject(this.req, this.res)
+        this.EditorHttpController.joinProject(this.req, this.res)
       })
 
       it('should unmark the project as deleted', function() {
-        return this.ProjectDeleter.unmarkAsDeletedByExternalSource
+        this.ProjectDeleter.unmarkAsDeletedByExternalSource
           .calledWith(this.project_id)
+          .should.equal(true)
+      })
+    })
+
+    describe('with an restricted user', function() {
+      beforeEach(function() {
+        this.EditorHttpController._buildJoinProjectView = sinon
+          .stub()
+          .callsArgWith(3, null, this.projectView, 'readOnly', true)
+        this.EditorHttpController.joinProject(this.req, this.res)
+      })
+
+      it('should mark the user as restricted, and hide details of owner', function() {
+        this.res.json
+          .calledWith({
+            project: this.reducedProjectView,
+            privilegeLevel: 'readOnly',
+            isRestrictedUser: true
+          })
           .should.equal(true)
       })
     })
@@ -129,12 +144,25 @@ describe('EditorHttpController', function() {
     describe('with an anonymous user', function() {
       beforeEach(function() {
         this.req.query = { user_id: 'anonymous-user' }
-        return this.EditorHttpController.joinProject(this.req, this.res)
+        this.EditorHttpController._buildJoinProjectView = sinon
+          .stub()
+          .callsArgWith(3, null, this.projectView, 'readOnly', true)
+        this.EditorHttpController.joinProject(this.req, this.res)
       })
 
       it('should pass the user id as null', function() {
-        return this.EditorHttpController._buildJoinProjectView
+        this.EditorHttpController._buildJoinProjectView
           .calledWith(this.req, this.project_id, null)
+          .should.equal(true)
+      })
+
+      it('should mark the user as restricted', function() {
+        this.res.json
+          .calledWith({
+            project: this.reducedProjectView,
+            privilegeLevel: 'readOnly',
+            isRestrictedUser: true
+          })
           .should.equal(true)
       })
     })
@@ -180,18 +208,19 @@ describe('EditorHttpController', function() {
       this.CollaboratorsGetter.getInvitedMembersWithPrivilegeLevels = sinon
         .stub()
         .callsArgWith(1, null, this.members)
+      this.CollaboratorsHandler.userIsTokenMember = sinon
+        .stub()
+        .callsArgWith(2, null, false)
+      this.AuthorizationManager.isRestrictedUser = sinon.stub().returns(false)
       this.CollaboratorsInviteHandler.getAllInvites = sinon
         .stub()
         .callsArgWith(1, null, this.invites)
-      return (this.UserGetter.getUser = sinon
-        .stub()
-        .callsArgWith(2, null, this.user))
     })
 
     describe('when project is not found', function() {
       beforeEach(function() {
         this.ProjectGetter.getProjectWithoutDocLines.yields(null, null)
-        return this.EditorHttpController._buildJoinProjectView(
+        this.EditorHttpController._buildJoinProjectView(
           this.req,
           this.project_id,
           this.user_id,
@@ -211,7 +240,7 @@ describe('EditorHttpController', function() {
         this.AuthorizationManager.getPrivilegeLevelForProject = sinon
           .stub()
           .callsArgWith(3, null, 'owner')
-        return this.EditorHttpController._buildJoinProjectView(
+        this.EditorHttpController._buildJoinProjectView(
           this.req,
           this.project_id,
           this.user_id,
@@ -220,32 +249,57 @@ describe('EditorHttpController', function() {
       })
 
       it('should find the project without doc lines', function() {
-        return this.ProjectGetter.getProjectWithoutDocLines
+        this.ProjectGetter.getProjectWithoutDocLines
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
       it('should get the list of users in the project', function() {
-        return this.CollaboratorsGetter.getInvitedMembersWithPrivilegeLevels
+        this.CollaboratorsGetter.getInvitedMembersWithPrivilegeLevels
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
       it('should check the privilege level', function() {
-        return this.AuthorizationManager.getPrivilegeLevelForProject
+        this.AuthorizationManager.getPrivilegeLevelForProject
           .calledWith(this.user_id, this.project_id, this.token)
           .should.equal(true)
       })
 
+      it('should check if user is restricted', function() {
+        this.AuthorizationManager.isRestrictedUser.called.should.equal(true)
+      })
+
       it('should include the invites', function() {
-        return this.CollaboratorsInviteHandler.getAllInvites
+        this.CollaboratorsInviteHandler.getAllInvites
           .calledWith(this.project._id)
           .should.equal(true)
       })
 
       it('should return the project model view, privilege level and protocol version', function() {
-        return this.callback
-          .calledWith(null, this.projectModelView, 'owner')
+        this.callback
+          .calledWith(null, this.projectModelView, 'owner', false)
+          .should.equal(true)
+      })
+    })
+
+    describe('when user is restricted', function() {
+      beforeEach(function() {
+        this.AuthorizationManager.getPrivilegeLevelForProject = sinon
+          .stub()
+          .callsArgWith(3, null, 'readOnly')
+        this.AuthorizationManager.isRestrictedUser.returns(true)
+        this.EditorHttpController._buildJoinProjectView(
+          this.req,
+          this.project_id,
+          this.user_id,
+          this.callback
+        )
+      })
+
+      it('should set the isRestrictedUser flag', function() {
+        this.callback
+          .calledWith(null, this.projectModelView, 'readOnly', true)
           .should.equal(true)
       })
     })
@@ -255,7 +309,7 @@ describe('EditorHttpController', function() {
         this.AuthorizationManager.getPrivilegeLevelForProject = sinon
           .stub()
           .callsArgWith(3, null, null)
-        return this.EditorHttpController._buildJoinProjectView(
+        this.EditorHttpController._buildJoinProjectView(
           this.req,
           this.project_id,
           this.user_id,
@@ -264,7 +318,7 @@ describe('EditorHttpController', function() {
       })
 
       it('should return false in the callback', function() {
-        return this.callback.calledWith(null, null, false).should.equal(true)
+        this.callback.calledWith(null, null, false).should.equal(true)
       })
     })
   })
@@ -277,18 +331,18 @@ describe('EditorHttpController', function() {
         name: (this.name = 'doc-name'),
         parent_folder_id: this.parent_folder_id
       }
-      return (this.EditorController.addDoc = sinon
+      this.EditorController.addDoc = sinon
         .stub()
-        .callsArgWith(6, null, this.doc))
+        .callsArgWith(6, null, this.doc)
     })
 
     describe('successfully', function() {
       beforeEach(function() {
-        return this.EditorHttpController.addDoc(this.req, this.res)
+        this.EditorHttpController.addDoc(this.req, this.res)
       })
 
       it('should call EditorController.addDoc', function() {
-        return this.EditorController.addDoc
+        this.EditorController.addDoc
           .calledWith(
             this.project_id,
             this.parent_folder_id,
@@ -301,7 +355,7 @@ describe('EditorHttpController', function() {
       })
 
       it('should send the doc back as JSON', function() {
-        return this.res.json.calledWith(this.doc).should.equal(true)
+        this.res.json.calledWith(this.doc).should.equal(true)
       })
     })
 
@@ -339,18 +393,18 @@ describe('EditorHttpController', function() {
         name: (this.name = 'folder-name'),
         parent_folder_id: this.parent_folder_id
       }
-      return (this.EditorController.addFolder = sinon
+      this.EditorController.addFolder = sinon
         .stub()
-        .callsArgWith(4, null, this.folder))
+        .callsArgWith(4, null, this.folder)
     })
 
     describe('successfully', function() {
       beforeEach(function() {
-        return this.EditorHttpController.addFolder(this.req, this.res)
+        this.EditorHttpController.addFolder(this.req, this.res)
       })
 
       it('should call EditorController.addFolder', function() {
-        return this.EditorController.addFolder
+        this.EditorController.addFolder
           .calledWith(
             this.project_id,
             this.parent_folder_id,
@@ -361,7 +415,7 @@ describe('EditorHttpController', function() {
       })
 
       it('should send the folder back as JSON', function() {
-        return this.res.json.calledWith(this.folder).should.equal(true)
+        this.res.json.calledWith(this.folder).should.equal(true)
       })
     })
 
@@ -417,11 +471,11 @@ describe('EditorHttpController', function() {
       }
       this.req.body = { name: (this.name = 'new-name') }
       this.EditorController.renameEntity = sinon.stub().callsArg(5)
-      return this.EditorHttpController.renameEntity(this.req, this.res)
+      this.EditorHttpController.renameEntity(this.req, this.res)
     })
 
     it('should call EditorController.renameEntity', function() {
-      return this.EditorController.renameEntity
+      this.EditorController.renameEntity
         .calledWith(
           this.project_id,
           this.entity_id,
@@ -433,7 +487,7 @@ describe('EditorHttpController', function() {
     })
 
     it('should send back a success response', function() {
-      return this.res.sendStatus.calledWith(204).should.equal(true)
+      this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 
@@ -449,11 +503,11 @@ describe('EditorHttpController', function() {
           'EDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOTEDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOT')
       }
       this.EditorController.renameEntity = sinon.stub().callsArg(4)
-      return this.EditorHttpController.renameEntity(this.req, this.res)
+      this.EditorHttpController.renameEntity(this.req, this.res)
     })
 
     it('should send back a bad request status code', function() {
-      return this.res.sendStatus.calledWith(400).should.equal(true)
+      this.res.sendStatus.calledWith(400).should.equal(true)
     })
   })
 
@@ -466,11 +520,11 @@ describe('EditorHttpController', function() {
       }
       this.req.body = { name: (this.name = '') }
       this.EditorController.renameEntity = sinon.stub().callsArg(4)
-      return this.EditorHttpController.renameEntity(this.req, this.res)
+      this.EditorHttpController.renameEntity(this.req, this.res)
     })
 
     it('should send back a bad request status code', function() {
-      return this.res.sendStatus.calledWith(400).should.equal(true)
+      this.res.sendStatus.calledWith(400).should.equal(true)
     })
   })
 
@@ -483,11 +537,11 @@ describe('EditorHttpController', function() {
       }
       this.req.body = { folder_id: (this.folder_id = 'folder-id-123') }
       this.EditorController.moveEntity = sinon.stub().callsArg(5)
-      return this.EditorHttpController.moveEntity(this.req, this.res)
+      this.EditorHttpController.moveEntity(this.req, this.res)
     })
 
     it('should call EditorController.moveEntity', function() {
-      return this.EditorController.moveEntity
+      this.EditorController.moveEntity
         .calledWith(
           this.project_id,
           this.entity_id,
@@ -499,7 +553,7 @@ describe('EditorHttpController', function() {
     })
 
     it('should send back a success response', function() {
-      return this.res.sendStatus.calledWith(204).should.equal(true)
+      this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 
@@ -511,11 +565,11 @@ describe('EditorHttpController', function() {
         entity_type: (this.entity_type = 'entity-type')
       }
       this.EditorController.deleteEntity = sinon.stub().callsArg(5)
-      return this.EditorHttpController.deleteEntity(this.req, this.res)
+      this.EditorHttpController.deleteEntity(this.req, this.res)
     })
 
     it('should call EditorController.deleteEntity', function() {
-      return this.EditorController.deleteEntity
+      this.EditorController.deleteEntity
         .calledWith(
           this.project_id,
           this.entity_id,
@@ -527,7 +581,7 @@ describe('EditorHttpController', function() {
     })
 
     it('should send back a success response', function() {
-      return this.res.sendStatus.calledWith(204).should.equal(true)
+      this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 })

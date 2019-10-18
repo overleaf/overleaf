@@ -723,8 +723,11 @@ const ProjectController = {
               anonymous,
               anonymousAccessToken: req._anonymousAccessToken,
               isTokenMember,
-              isRestrictedTokenMember:
-                privilegeLevel === 'readOnly' && (anonymous || isTokenMember),
+              isRestrictedTokenMember: AuthorizationManager.isRestrictedUser(
+                userId,
+                privilegeLevel,
+                isTokenMember
+              ),
               languages: Settings.languages,
               editorThemes: THEME_LIST,
               maxDocLength: Settings.max_doc_length,

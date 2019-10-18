@@ -1,30 +1,14 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let EditorHttpController
-const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
 const ProjectDeleter = require('../Project/ProjectDeleter')
 const logger = require('logger-sharelatex')
-const EditorRealTimeController = require('./EditorRealTimeController')
 const EditorController = require('./EditorController')
 const ProjectGetter = require('../Project/ProjectGetter')
-const UserGetter = require('../User/UserGetter')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 const Metrics = require('metrics-sharelatex')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const CollaboratorsInviteHandler = require('../Collaborators/CollaboratorsInviteHandler')
+const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
@@ -32,63 +16,67 @@ const Errors = require('../Errors/Errors')
 
 module.exports = EditorHttpController = {
   joinProject(req, res, next) {
-    const project_id = req.params.Project_id
-    let { user_id } = req.query
-    if (user_id === 'anonymous-user') {
-      user_id = null
+    const projectId = req.params.Project_id
+    let userId = req.query.user_id
+    if (userId === 'anonymous-user') {
+      userId = null
     }
-    logger.log({ user_id, project_id }, 'join project request')
+    logger.log({ userId, projectId }, 'join project request')
     Metrics.inc('editor.join-project')
-    return EditorHttpController._buildJoinProjectView(
-      req,
-      project_id,
-      user_id,
-      function(error, project, privilegeLevel) {
-        if (error != null) {
-          return next(error)
-        }
-        // Hide access tokens if this is not the project owner
-        TokenAccessHandler.protectTokens(project, privilegeLevel)
-        res.json({
-          project,
-          privilegeLevel
-        })
-        // Only show the 'renamed or deleted' message once
-        if (project != null ? project.deletedByExternalDataSource : undefined) {
-          return ProjectDeleter.unmarkAsDeletedByExternalSource(project_id)
-        }
+    EditorHttpController._buildJoinProjectView(req, projectId, userId, function(
+      error,
+      project,
+      privilegeLevel,
+      isRestrictedUser
+    ) {
+      if (error) {
+        return next(error)
       }
-    )
+      // Hide access tokens if this is not the project owner
+      TokenAccessHandler.protectTokens(project, privilegeLevel)
+      if (isRestrictedUser) {
+        project.owner = { _id: project.owner._id }
+      }
+      res.json({
+        project,
+        privilegeLevel,
+        isRestrictedUser
+      })
+      // Only show the 'renamed or deleted' message once
+      if (project != null ? project.deletedByExternalDataSource : undefined) {
+        return ProjectDeleter.unmarkAsDeletedByExternalSource(projectId)
+      }
+    })
   },
 
-  _buildJoinProjectView(req, project_id, user_id, callback) {
+  _buildJoinProjectView(req, projectId, userId, callback) {
     if (callback == null) {
-      callback = function(error, project, privilegeLevel) {}
+      callback = function() {}
     }
-    logger.log({ project_id, user_id }, 'building the joinProject view')
-    return ProjectGetter.getProjectWithoutDocLines(project_id, function(
+    logger.log({ projectId, userId }, 'building the joinProject view')
+    ProjectGetter.getProjectWithoutDocLines(projectId, function(
       error,
       project
     ) {
-      if (error != null) {
+      if (error) {
         return callback(error)
       }
       if (project == null) {
         return callback(new Errors.NotFoundError('project not found'))
       }
-      return CollaboratorsGetter.getInvitedMembersWithPrivilegeLevels(
-        project_id,
+      CollaboratorsGetter.getInvitedMembersWithPrivilegeLevels(
+        projectId,
         function(error, members) {
-          if (error != null) {
+          if (error) {
             return callback(error)
           }
-          const token = TokenAccessHandler.getRequestToken(req, project_id)
-          return AuthorizationManager.getPrivilegeLevelForProject(
-            user_id,
-            project_id,
+          const token = TokenAccessHandler.getRequestToken(req, projectId)
+          AuthorizationManager.getPrivilegeLevelForProject(
+            userId,
+            projectId,
             token,
             function(error, privilegeLevel) {
-              if (error != null) {
+              if (error) {
                 return callback(error)
               }
               if (
@@ -96,38 +84,53 @@ module.exports = EditorHttpController = {
                 privilegeLevel === PrivilegeLevels.NONE
               ) {
                 logger.log(
-                  { project_id, user_id, privilegeLevel },
+                  { projectId, userId, privilegeLevel },
                   'not an acceptable privilege level, returning null'
                 )
                 return callback(null, null, false)
               }
-              return CollaboratorsInviteHandler.getAllInvites(
-                project_id,
-                function(error, invites) {
-                  if (error != null) {
-                    return callback(error)
-                  }
-                  logger.log(
-                    {
-                      project_id,
-                      user_id,
-                      memberCount: members.length,
-                      inviteCount: invites.length,
-                      privilegeLevel
-                    },
-                    'returning project model view'
-                  )
-                  return callback(
-                    null,
-                    ProjectEditorHandler.buildProjectModelView(
-                      project,
-                      members,
-                      invites
-                    ),
-                    privilegeLevel
-                  )
+              CollaboratorsInviteHandler.getAllInvites(projectId, function(
+                error,
+                invites
+              ) {
+                if (error) {
+                  return callback(error)
                 }
-              )
+                logger.log(
+                  {
+                    projectId,
+                    userId,
+                    memberCount: members.length,
+                    inviteCount: invites.length,
+                    privilegeLevel
+                  },
+                  'returning project model view'
+                )
+                CollaboratorsHandler.userIsTokenMember(
+                  userId,
+                  projectId,
+                  (err, isTokenMember) => {
+                    if (err) {
+                      return callback(err)
+                    }
+                    const isRestrictedUser = AuthorizationManager.isRestrictedUser(
+                      userId,
+                      privilegeLevel,
+                      isTokenMember
+                    )
+                    callback(
+                      null,
+                      ProjectEditorHandler.buildProjectModelView(
+                        project,
+                        members,
+                        invites
+                      ),
+                      privilegeLevel,
+                      isRestrictedUser
+                    )
+                  }
+                )
+              })
             }
           )
         }
@@ -140,24 +143,24 @@ module.exports = EditorHttpController = {
   },
 
   addDoc(req, res, next) {
-    const project_id = req.params.Project_id
+    const projectId = req.params.Project_id
     const { name } = req.body
-    const { parent_folder_id } = req.body
-    const user_id = AuthenticationController.getLoggedInUserId(req)
+    const parentFolderId = req.body.parent_folder_id
+    const userId = AuthenticationController.getLoggedInUserId(req)
     logger.log(
-      { project_id, name, parent_folder_id },
+      { projectId, name, parentFolderId },
       'getting request to add doc to project'
     )
     if (!EditorHttpController._nameIsAcceptableLength(name)) {
       return res.sendStatus(400)
     }
-    return EditorController.addDoc(
-      project_id,
-      parent_folder_id,
+    EditorController.addDoc(
+      projectId,
+      parentFolderId,
       name,
       [],
       'editor',
-      user_id,
+      userId,
       function(error, doc) {
         if (error && error.message === 'project_has_to_many_files') {
           return res
@@ -173,15 +176,15 @@ module.exports = EditorHttpController = {
   },
 
   addFolder(req, res, next) {
-    const project_id = req.params.Project_id
+    const projectId = req.params.Project_id
     const { name } = req.body
-    const { parent_folder_id } = req.body
+    const parentFolderId = req.body.parent_folder_id
     if (!EditorHttpController._nameIsAcceptableLength(name)) {
       return res.sendStatus(400)
     }
-    return EditorController.addFolder(
-      project_id,
-      parent_folder_id,
+    EditorController.addFolder(
+      projectId,
+      parentFolderId,
       name,
       'editor',
       function(error, doc) {
@@ -201,22 +204,22 @@ module.exports = EditorHttpController = {
   },
 
   renameEntity(req, res, next) {
-    const project_id = req.params.Project_id
-    const { entity_id } = req.params
-    const { entity_type } = req.params
+    const projectId = req.params.Project_id
+    const entityId = req.params.entity_id
+    const entityType = req.params.entity_type
     const { name } = req.body
     if (!EditorHttpController._nameIsAcceptableLength(name)) {
       return res.sendStatus(400)
     }
-    const user_id = AuthenticationController.getLoggedInUserId(req)
-    return EditorController.renameEntity(
-      project_id,
-      entity_id,
-      entity_type,
+    const userId = AuthenticationController.getLoggedInUserId(req)
+    EditorController.renameEntity(
+      projectId,
+      entityId,
+      entityType,
       name,
-      user_id,
+      userId,
       function(error) {
-        if (error != null) {
+        if (error) {
           return next(error)
         }
         return res.sendStatus(204)
@@ -225,19 +228,19 @@ module.exports = EditorHttpController = {
   },
 
   moveEntity(req, res, next) {
-    const project_id = req.params.Project_id
-    const { entity_id } = req.params
-    const { entity_type } = req.params
-    const { folder_id } = req.body
-    const user_id = AuthenticationController.getLoggedInUserId(req)
-    return EditorController.moveEntity(
-      project_id,
-      entity_id,
-      folder_id,
-      entity_type,
-      user_id,
+    const projectId = req.params.Project_id
+    const entityId = req.params.entity_id
+    const entityType = req.params.entity_type
+    const folderId = req.body.folder_id
+    const userId = AuthenticationController.getLoggedInUserId(req)
+    EditorController.moveEntity(
+      projectId,
+      entityId,
+      folderId,
+      entityType,
+      userId,
       function(error) {
-        if (error != null) {
+        if (error) {
           return next(error)
         }
         return res.sendStatus(204)
@@ -247,35 +250,35 @@ module.exports = EditorHttpController = {
 
   deleteDoc(req, res, next) {
     req.params.entity_type = 'doc'
-    return EditorHttpController.deleteEntity(req, res, next)
+    EditorHttpController.deleteEntity(req, res, next)
   },
 
   deleteFile(req, res, next) {
     req.params.entity_type = 'file'
-    return EditorHttpController.deleteEntity(req, res, next)
+    EditorHttpController.deleteEntity(req, res, next)
   },
 
   deleteFolder(req, res, next) {
     req.params.entity_type = 'folder'
-    return EditorHttpController.deleteEntity(req, res, next)
+    EditorHttpController.deleteEntity(req, res, next)
   },
 
   deleteEntity(req, res, next) {
-    const project_id = req.params.Project_id
-    const { entity_id } = req.params
-    const { entity_type } = req.params
-    const user_id = AuthenticationController.getLoggedInUserId(req)
-    return EditorController.deleteEntity(
-      project_id,
-      entity_id,
-      entity_type,
+    const projectId = req.params.Project_id
+    const entityId = req.params.entity_id
+    const entityType = req.params.entity_type
+    const userId = AuthenticationController.getLoggedInUserId(req)
+    EditorController.deleteEntity(
+      projectId,
+      entityId,
+      entityType,
       'editor',
-      user_id,
+      userId,
       function(error) {
-        if (error != null) {
+        if (error) {
           return next(error)
         }
-        return res.sendStatus(204)
+        res.sendStatus(204)
       }
     )
   }

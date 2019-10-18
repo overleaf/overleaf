@@ -45,6 +45,30 @@ describe('AuthorizationManager', function() {
     return (this.callback = sinon.stub())
   })
 
+  describe('isRestrictedUser', function() {
+    it('should produce the correct values', function() {
+      const notRestrictedScenarios = [
+        [null, 'readAndWrite', false],
+        ['id', 'readAndWrite', true],
+        ['id', 'readOnly', false]
+      ]
+      const restrictedScenarios = [
+        [null, 'readOnly', false],
+        ['id', 'readOnly', true]
+      ]
+      for (var notRestrictedArgs of notRestrictedScenarios) {
+        expect(
+          this.AuthorizationManager.isRestrictedUser(...notRestrictedArgs)
+        ).to.equal(false)
+      }
+      for (var restrictedArgs of restrictedScenarios) {
+        expect(
+          this.AuthorizationManager.isRestrictedUser(...restrictedArgs)
+        ).to.equal(true)
+      }
+    })
+  })
+
   describe('getPrivilegeLevelForProject', function() {
     beforeEach(function() {
       this.ProjectGetter.getProject = sinon.stub()

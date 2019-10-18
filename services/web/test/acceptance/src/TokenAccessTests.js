@@ -237,6 +237,13 @@ describe('TokenAccess', function() {
               this.projectId,
               (response, body) => {
                 expect(body.privilegeLevel).to.equal('readOnly')
+                expect(body.isRestrictedUser).to.equal(true)
+                expect(body.project.owner).to.have.keys('_id')
+                expect(body.project.owner).to.not.have.any.keys(
+                  'email',
+                  'first_name',
+                  'last_name'
+                )
               },
               cb
             )
@@ -344,6 +351,13 @@ describe('TokenAccess', function() {
               this.tokens.readOnly,
               (response, body) => {
                 expect(body.privilegeLevel).to.equal('readOnly')
+                expect(body.isRestrictedUser).to.equal(true)
+                expect(body.project.owner).to.have.keys('_id')
+                expect(body.project.owner).to.not.have.any.keys(
+                  'email',
+                  'first_name',
+                  'last_name'
+                )
               },
               cb
             )
@@ -453,6 +467,15 @@ describe('TokenAccess', function() {
               this.projectId,
               (response, body) => {
                 expect(body.privilegeLevel).to.equal('readAndWrite')
+                expect(body.isRestrictedUser).to.equal(false)
+                expect(body.project.owner).to.have.all.keys(
+                  '_id',
+                  'email',
+                  'first_name',
+                  'last_name',
+                  'privileges',
+                  'signUpDate'
+                )
               },
               cb
             )

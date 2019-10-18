@@ -10,11 +10,13 @@ const CollaboratorsGetter = require('./CollaboratorsGetter')
 const Errors = require('../Errors/Errors')
 
 module.exports = {
+  userIsTokenMember: callbackify(userIsTokenMember),
   removeUserFromProject: callbackify(removeUserFromProject),
   removeUserFromAllProjects: callbackify(removeUserFromAllProjects),
   addUserIdToProject: callbackify(addUserIdToProject),
   transferProjects: callbackify(transferProjects),
   promises: {
+    userIsTokenMember,
     removeUserFromProject,
     removeUserFromAllProjects,
     addUserIdToProject,
@@ -188,6 +190,32 @@ async function setCollaboratorPrivilegeLevel(
   const mongoResponse = await Project.updateOne(query, update).exec()
   if (mongoResponse.n === 0) {
     throw new Errors.NotFoundError('project or collaborator not found')
+  }
+}
+
+async function userIsTokenMember(userId, projectId) {
+  if (!userId) {
+    return false
+  }
+  try {
+    const project = await Project.findOne(
+      {
+        _id: projectId,
+        $or: [
+          { tokenAccessReadOnly_refs: userId },
+          { tokenAccessReadAndWrite_refs: userId }
+        ]
+      },
+      {
+        _id: 1
+      }
+    )
+    return project != null
+  } catch (err) {
+    throw new OError({
+      message: 'problem while checking if user is token member',
+      info: { userId, projectId }
+    }).withCause(err)
   }
 }
 

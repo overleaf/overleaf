@@ -9,6 +9,12 @@ const { ObjectId } = require('mongojs')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 
 module.exports = AuthorizationManager = {
+  isRestrictedUser(userId, privilegeLevel, isTokenMember) {
+    return (
+      privilegeLevel === PrivilegeLevels.READ_ONLY && (isTokenMember || !userId)
+    )
+  },
+
   getPublicAccessLevel(projectId, callback) {
     if (!ObjectId.isValid(projectId)) {
       return callback(new Error('invalid project id'))
