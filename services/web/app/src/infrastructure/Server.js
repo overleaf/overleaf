@@ -13,6 +13,7 @@ const Csrf = require('./Csrf')
 
 const sessionsRedisClient = UserSessionsRedis.client()
 
+const SessionStoreManager = require('./SessionStoreManager')
 const session = require('express-session')
 const RedisStore = require('connect-redis')(session)
 const bodyParser = require('body-parser')
@@ -110,6 +111,9 @@ webRouter.use(
     rolling: true
   })
 )
+
+// patch the session store to generate a validation token for every new session
+SessionStoreManager.enableValidationToken(sessionStore)
 
 // passport
 webRouter.use(passport.initialize())
