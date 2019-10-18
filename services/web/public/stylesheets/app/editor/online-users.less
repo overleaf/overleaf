@@ -1,6 +1,8 @@
 @online-user-color: rgb(0, 170, 255);
 
 .online-users {
+	display: flex;
+
 	.online-user {
 		background-color: @online-user-color;
 		width: 24px;
@@ -13,15 +15,18 @@
 		border-radius: 3px;
 		cursor: pointer;
 	}
-	
+
 	.online-user-multi {
 		width: auto;
 		min-width: 24px;
 		padding-left: 8px;
 		padding-right: 5px;
+		display: flex;
+		align-items: center;
 	}
-	
+
 	.dropdown-menu {
+		margin-right: 8px;
 		a {
 			// Override toolbar link styles
 			display: block;
