@@ -1,10 +1,11 @@
 const EmailHandler = require('../Email/EmailHandler')
 const Errors = require('../Errors/Errors')
-const logger = require('logger-sharelatex')
+const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
 const OError = require('@overleaf/o-error')
-const { User } = require('../../models/User')
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
+const logger = require('logger-sharelatex')
+const { User } = require('../../models/User')
 
 async function _addIdentifier(
   userId,
@@ -47,20 +48,23 @@ async function _addIdentifier(
       }
     }
   }
-
-  // First update user.samlIdentifiers
-  let updatedUser = User.findOneAndUpdate(query, update, { new: true }).exec()
   try {
-    updatedUser = User.findOneAndUpdate(query, update, { new: true }).exec()
+    // update v2 user record
+    const updatedUser = User.findOneAndUpdate(query, update, {
+      new: true
+    }).exec()
+    // update v1 affiliations record
+    if (hasEntitlement) {
+      await InstitutionsAPI.promises.addEntitlement(userId, institutionEmail)
+    }
+    return updatedUser
   } catch (err) {
-    if (err && err.code === 11000) {
+    if (err.code === 11000) {
       throw new Errors.SAMLIdentityExistsError()
-    } else if (err != null) {
-      logger.log(err, userId, 'failed to add institution SAML identifier')
+    } else {
       throw new OError(err)
     }
   }
-  return updatedUser
 }
 
 function _getUserQuery(providerId, externalUserId) {
@@ -171,7 +175,13 @@ async function linkAccounts(
   await _sendLinkedEmail(userId, providerName)
 }
 
-async function unlinkAccounts(userId, primaryEmail, providerId, providerName) {
+async function unlinkAccounts(
+  userId,
+  institutionEmail,
+  primaryEmail,
+  providerId,
+  providerName
+) {
   providerId = providerId.toString()
   const query = {
     _id: userId
@@ -183,11 +193,20 @@ async function unlinkAccounts(userId, primaryEmail, providerId, providerName) {
       }
     }
   }
+  // update v2 user
   await User.update(query, update).exec()
+  // update v1 affiliations record
+  await InstitutionsAPI.promises.removeEntitlement(userId, institutionEmail)
+  // send email
   _sendUnlinkedEmail(primaryEmail, providerName)
 }
 
-async function updateEntitlement(userId, providerId, hasEntitlement) {
+async function updateEntitlement(
+  userId,
+  institutionEmail,
+  providerId,
+  hasEntitlement
+) {
   providerId = providerId.toString()
   hasEntitlement = !!hasEntitlement
   const query = {
@@ -199,7 +218,14 @@ async function updateEntitlement(userId, providerId, hasEntitlement) {
       'samlIdentifiers.$.hasEntitlement': hasEntitlement
     }
   }
+  // update v2 user
   await User.update(query, update).exec()
+  // update v1 affiliations record
+  if (hasEntitlement) {
+    await InstitutionsAPI.promises.addEntitlement(userId, institutionEmail)
+  } else {
+    await InstitutionsAPI.promises.removeEntitlement(userId, institutionEmail)
+  }
 }
 
 function entitlementAttributeMatches(entitlementAttribute, entitlementMatcher) {

@@ -177,6 +177,30 @@ const InstitutionsAPI = {
       },
       callback
     )
+  },
+
+  addEntitlement(userId, email, callback) {
+    return makeAffiliationRequest(
+      {
+        method: 'POST',
+        path: `/api/v2/users/${userId}/affiliations/add_entitlement`,
+        body: { email },
+        defaultErrorMessage: "Couldn't add entitlement"
+      },
+      callback
+    )
+  },
+
+  removeEntitlement(userId, email, callback) {
+    return makeAffiliationRequest(
+      {
+        method: 'POST',
+        path: `/api/v2/users/${userId}/affiliations/remove_entitlement`,
+        body: { email },
+        defaultErrorMessage: "Couldn't remove entitlement"
+      },
+      callback
+    )
   }
 }
 
