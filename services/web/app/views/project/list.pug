@@ -89,8 +89,11 @@ block content
 						include ./list/project-list
 				
 				.project-list-empty.row(ng-if="projects.length === 0")
-					.col-md-offset-2.col-md-8.col-md-offset-2.col-xs-8
+					.project-list-empty-col.col-md-offset-2.col-md-8.col-md-offset-2.col-xs-8.col-xs-offset-2
 						include ./list/empty-project-list
+						.row.row-spaced
+							.col-sm-12
+								include ./list/notifications
 
 		include ./list/modals
 

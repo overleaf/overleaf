@@ -17,8 +17,10 @@ describe('ProjectController', function() {
 
     this.user = {
       _id: ObjectId('123456123456123456123456'),
+      email: 'test@overleaf.com',
       first_name: 'bjkdsjfk',
-      features: {}
+      features: {},
+      emails: [{ email: 'test@overleaf.com' }]
     }
     this.settings = {
       apis: {
@@ -107,13 +109,27 @@ describe('ProjectController', function() {
         fire: sinon.stub()
       }
     }
-    this.Features = { hasFeature: sinon.stub() }
+    this.Features = {
+      hasFeature: sinon
+        .stub()
+        .withArgs('saml')
+        .returns(false)
+    }
     this.BrandVariationsHandler = {
       getBrandVariationById: sinon
         .stub()
         .callsArgWith(1, null, this.brandVariationDetails)
     }
-    this.getUserAffiliations = sinon.stub().callsArgWith(1, null, [])
+    this.getUserAffiliations = sinon.stub().callsArgWith(1, null, [
+      {
+        email: 'test@overleaf.com',
+        institution: {
+          id: 1,
+          name: 'Overleaf',
+          ssoEnabled: true
+        }
+      }
+    ])
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
       globals: {
@@ -618,6 +634,99 @@ describe('ProjectController', function() {
         this.res.render = (pageName, opts) => {
           opts.isShowingV1Projects.should.equal(true)
           done()
+        }
+        this.ProjectController.projectListPage(this.req, this.res)
+      })
+    })
+
+    describe('When Institution SSO is released', function() {
+      beforeEach(function(done) {
+        this.institutionEmail = 'test@overleaf.com'
+        this.institutionName = 'Overleaf'
+        this.Features.hasFeature.withArgs('saml').returns(true)
+        done()
+      })
+      it('should show institution SSO available notification', function() {
+        this.res.render = (pageName, opts) => {
+          expect(opts.notifications).to.deep.include({
+            email: 'test@overleaf.com',
+            institutionId: 1,
+            institutionName: 'Overleaf',
+            templateKey: 'notification_institution_sso_available'
+          })
+        }
+        this.ProjectController.projectListPage(this.req, this.res)
+      })
+      it('should show a linked notification', function() {
+        this.req.session.saml = {
+          institutionEmail: this.institutionEmail,
+          linked: {
+            hasEntitlement: false,
+            universityName: this.institutionName
+          }
+        }
+        this.res.render = (pageName, opts) => {
+          expect(opts.notifications).to.deep.include({
+            email: this.institutionEmail,
+            institutionName: this.institutionName,
+            templateKey: 'notification_institution_sso_linked'
+          })
+        }
+        this.ProjectController.projectListPage(this.req, this.res)
+      })
+      it('should show a linked another email notification', function() {
+        // when they request to link an email but the institution returns
+        // a different email
+        this.res.render = (pageName, opts) => {
+          expect(opts.notifications).to.deep.include({
+            institutionEmail: this.institutionEmail,
+            requestedEmail: 'requested@overleaf.com',
+            templateKey: 'notification_institution_sso_non_canonical'
+          })
+        }
+        this.req.session.saml = {
+          emailNonCanonical: this.institutionEmail,
+          institutionEmail: this.institutionEmail,
+          requestedEmail: 'requested@overleaf.com',
+          linked: {
+            hasEntitlement: false,
+            universityName: this.institutionName
+          }
+        }
+        this.ProjectController.projectListPage(this.req, this.res)
+      })
+      it('should show a notification when intent was to register via SSO but account existed', function() {
+        this.res.render = (pageName, opts) => {
+          expect(opts.notifications).to.deep.include({
+            email: this.institutionEmail,
+            templateKey: 'notification_institution_sso_already_registered'
+          })
+        }
+        this.req.session.saml = {
+          institutionEmail: this.institutionEmail,
+          linked: {
+            hasEntitlement: false,
+            universityName: 'Overleaf'
+          },
+          registerIntercept: true
+        }
+        this.ProjectController.projectListPage(this.req, this.res)
+      })
+    })
+
+    describe('When Institution SSO is not released', function() {
+      beforeEach(function(done) {
+        this.Features.hasFeature.withArgs('saml').returns(false)
+        done()
+      })
+      it('should not show institution sso available notification', function() {
+        this.res.render = (pageName, opts) => {
+          expect(opts.notifications).to.deep.not.include({
+            email: 'test@overleaf.com',
+            institutionId: 1,
+            institutionName: 'Overleaf',
+            templateKey: 'notification_institution_sso_available'
+          })
         }
         this.ProjectController.projectListPage(this.req, this.res)
       })

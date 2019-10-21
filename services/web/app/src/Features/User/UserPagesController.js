@@ -115,7 +115,16 @@ const UserPagesController = {
       delete req.session.ssoError
     }
     // Institution SSO
-    const institutionLinked = _.get(req.session, ['saml', 'linked'])
+    let institutionLinked = _.get(req.session, ['saml', 'linked'])
+    if (institutionLinked) {
+      // copy object if exists because _.get does not
+      institutionLinked = Object.assign(
+        {
+          hasEntitlement: _.get(req.session, ['saml', 'hasEntitlement'])
+        },
+        institutionLinked
+      )
+    }
     const institutionNotLinked = _.get(req.session, ['saml', 'notLinked'])
     const institutionEmailNonCanonical = _.get(req.session, [
       'saml',

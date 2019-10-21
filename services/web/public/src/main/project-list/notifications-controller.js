@@ -17,6 +17,8 @@ define(['base'], function(App) {
       notification.hide = false
     }
 
+    $scope.samlInitPath = ExposedSettings.samlInitPath
+
     return ($scope.dismiss = notification =>
       $http({
         url: `/notifications/${notification._id}`,

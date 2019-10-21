@@ -412,7 +412,7 @@ const ProjectController = {
         user(cb) {
           User.findById(
             userId,
-            'featureSwitches overleaf awareOfV2 features lastLoginIp',
+            'emails featureSwitches overleaf awareOfV2 features lastLoginIp',
             cb
           )
         },
@@ -428,27 +428,92 @@ const ProjectController = {
           logger.warn({ err }, 'error getting data for project list page')
           return next(err)
         }
+        const { notifications, user, userAffiliations } = results
         const v1Tags =
           (results.v1Projects != null ? results.v1Projects.tags : undefined) ||
           []
         const tags = results.tags.concat(v1Tags)
-        const notifications = results.notifications
         for (const notification of notifications) {
           notification.html = req.i18n.translate(
             notification.templateKey,
             notification.messageOpts
           )
         }
+
+        // Institution SSO Notifications
+        if (Features.hasFeature('saml') || req.session.samlBeta) {
+          const samlSession = req.session.saml
+          // Notification: SSO Available
+          // Could have multiple emails at the same institution, and if any are
+          // linked to the institution then do not show notification for others
+          const linkedInstitutionIds = []
+          const linkedInstitutionEmails = []
+          user.emails.forEach(email => {
+            if (email.samlProviderId) {
+              linkedInstitutionEmails.push(email.email)
+              linkedInstitutionIds.push(email.samlProviderId)
+            }
+          })
+          if (Array.isArray(userAffiliations)) {
+            userAffiliations.forEach(affiliation => {
+              if (
+                affiliation.institution &&
+                affiliation.institution.ssoEnabled &&
+                linkedInstitutionEmails.indexOf(affiliation.email) === -1 &&
+                linkedInstitutionIds.indexOf(
+                  affiliation.institution.id.toString()
+                ) === -1
+              ) {
+                notifications.push({
+                  email: affiliation.email,
+                  institutionId: affiliation.institution.id,
+                  institutionName: affiliation.institution.name,
+                  templateKey: 'notification_institution_sso_available'
+                })
+              }
+            })
+          }
+
+          if (samlSession) {
+            // Notification: After SSO Linked
+            if (samlSession.linked) {
+              notifications.push({
+                email: samlSession.institutionEmail,
+                institutionName: samlSession.linked.universityName,
+                templateKey: 'notification_institution_sso_linked'
+              })
+            }
+
+            // Notification: After SSO Linked or Logging in
+            // The requested email does not match primary email returned from
+            // the institution
+            if (samlSession.emailNonCanonical) {
+              notifications.push({
+                institutionEmail: samlSession.emailNonCanonical,
+                requestedEmail: samlSession.requestedEmail,
+                templateKey: 'notification_institution_sso_non_canonical'
+              })
+            }
+
+            // Notification: Tried to register, but account already existed
+            if (samlSession.registerIntercept) {
+              notifications.push({
+                email: samlSession.institutionEmail,
+                templateKey: 'notification_institution_sso_already_registered'
+              })
+            }
+          }
+          delete req.session.saml
+        }
+
         const portalTemplates = ProjectController._buildPortalTemplatesList(
-          results.userAffiliations
+          userAffiliations
         )
         const projects = ProjectController._buildProjectList(
           results.projects,
           userId,
           results.v1Projects != null ? results.v1Projects.projects : undefined
         )
-        const { user } = results
-        const { userAffiliations } = results
         const warnings = ProjectController._buildWarningsList(
           results.v1Projects
         )

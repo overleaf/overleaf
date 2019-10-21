@@ -212,7 +212,7 @@ form.row(
 							span(ng-if="ui.errorMessage") &nbsp;{{ui.errorMessage}}
 				if institutionLinked
 					tr.affiliations-table-info-row(ng-if="!hideInstitutionNotifications.info")
-						td(colspan="3").text-center(aria-live="assertive")
+						td.text-center(aria-live="assertive" colspan="3")
 							button.close(
 								type="button"
 								data-dismiss="modal"
@@ -225,7 +225,7 @@ form.row(
 								.small !{translate("this_grants_access_to_features", {featureType: translate("professional")})}
 					if institutionEmailNonCanonical
 						tr.affiliations-table-warning-row(ng-if="!hideInstitutionNotifications.warning")
-							td(colspan="3").text-center(aria-live="assertive")
+							td.text-center(aria-live="assertive" colspan="3")
 								button.close(
 									type="button"
 									data-dismiss="modal"
@@ -239,7 +239,7 @@ form.row(
 									| !{translate("in_order_to_match_institutional_metadata", {email: institutionEmailNonCanonical})}
 				if institutionNotLinked
 					tr.affiliations-table-error-row(ng-if="!hideInstitutionNotifications.error")
-						td(colspan="3").text-center(aria-live="assertive")
+						td.text-center(aria-live="assertive" colspan="3")
 							button.close(
 								type="button"
 								data-dismiss="modal"

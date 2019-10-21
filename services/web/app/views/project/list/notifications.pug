@@ -1,77 +1,106 @@
-span(ng-controller="NotificationsController").userNotifications
-	ul.list-unstyled.notifications-list(
+.user-notifications(ng-controller="NotificationsController")
+	ul.list-unstyled(
 		ng-if="notifications.length > 0",
 		ng-cloak
 	)
-		li.notification_entry(
+		li.notification-entry(
 			ng-repeat="notification in notifications",
 		)
-			.row(ng-hide="notification.hide")
-				.col-xs-12
-					div(ng-switch="notification.templateKey")
-						.alert.alert-info(ng-switch-when="notification_project_invite", ng-controller="ProjectInviteNotificationController")
-							div.notification_inner
-								.notification_body(ng-show="!notification.accepted")
-									| !{translate("notification_project_invite_message", { userName: "{{ userName }}", projectName: "{{ projectName }}" })}
-									a.pull-right.btn.btn-sm.btn-info(href, ng-click="accept()", ng-disabled="notification.inflight")
-										span(ng-show="!notification.inflight") #{translate("join_project")}
-										span(ng-show="notification.inflight")
-											i.fa.fa-fw.fa-spinner.fa-spin(aria-hidden="true")
-											| &nbsp;
-											| #{translate("joining")}...
-								.notification_body(ng-show="notification.accepted")
-									| !{translate("notification_project_invite_accepted_message", { projectName: "{{ projectName }}" })}
-									a.pull-right.btn.btn-sm.btn-info(href="/project/{{ notification.messageOpts.projectId }}") #{translate("open_project")}
-								span().notification_close
-									button(ng-click="dismiss(notification)").close.pull-right
-										span(aria-hidden="true") &times;
-										span.sr-only #{translate("close")}
-						.alert.alert-info(ng-switch-when="notification_ip_matched_affiliation")
-							div.notification_inner
-								.notification_body
-									| It looks like you're at 
-									strong {{ notification.messageOpts.university_name }}! <br/>
-									|	Did you know that {{notification.messageOpts.university_name}} is providing
-									strong  free Overleaf Professional accounts 
-									|	 to everyone at {{notification.messageOpts.university_name}}? <br/>
-									|	Add an institutional email address to claim your account.
-									a.pull-right.btn.btn-sm.btn-info(href="/user/settings")
-										| Add Affiliation
-								span().notification_close
-									button(ng-click="dismiss(notification)").close.pull-right
-										span(aria-hidden="true") &times;
-										span.sr-only #{translate("close")}
-						.alert.alert-info(ng-switch-default)
-							div.notification_inner
-								span(ng-bind-html="notification.html").notification_body
-								span().notification_close
-									button(ng-click="dismiss(notification)").close.pull-right
-										span(aria-hidden="true") &times;
-										span.sr-only #{translate("close")}
+			div(ng-switch="notification.templateKey" ng-hide="notification.hide")
+				.alert.alert-info(ng-switch-when="notification_project_invite", ng-controller="ProjectInviteNotificationController")
+					.notification-body(ng-show="!notification.accepted")
+						| !{translate("notification_project_invite_message", { userName: "{{ userName }}", projectName: "{{ projectName }}" })}
+						a.pull-right.btn.btn-sm.btn-info(href, ng-click="accept()", ng-disabled="notification.inflight")
+							span(ng-show="!notification.inflight") #{translate("join_project")}
+							span(ng-show="notification.inflight")
+								i.fa.fa-fw.fa-spinner.fa-spin(aria-hidden="true")
+								| &nbsp;
+								| #{translate("joining")}...
+					.notification-body(ng-show="notification.accepted")
+						| !{translate("notification_project_invite_accepted_message", { projectName: "{{ projectName }}" })}
+						a.pull-right.btn.btn-sm.btn-info(href="/project/{{ notification.messageOpts.projectId }}") #{translate("open_project")}
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+				.alert.alert-info(ng-switch-when="notification_ip_matched_affiliation")
+					.notification-body
+						| It looks like you're at 
+						strong {{ notification.messageOpts.university_name }}! <br/>
+						|	Did you know that {{notification.messageOpts.university_name}} is providing
+						strong  free Overleaf Professional accounts 
+						|	 to everyone at {{notification.messageOpts.university_name}}? <br/>
+						|	Add an institutional email address to claim your account.
+						a.pull-right.btn.btn-sm.btn-info(href="/user/settings")
+							| Add Affiliation
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+				.alert.alert-info(ng-switch-when="notification_institution_sso_available")
+					.notification-body
+						p !{translate("can_link_institution_email_acct_to_institution_acct", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
+						div !{translate("doing_this_allow_log_in_through_institution", {appName: settings.appName})}
+					.notification-action
+						a.btn.btn-info(href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=project&email={{notification.email}}")
+							| #{translate('link_account')}
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+				.alert.alert-info(ng-switch-when="notification_institution_sso_linked")
+					.notification-body
+						div !{translate("account_has_been_link_to_institution_account", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+				.alert.alert-warning(ng-switch-when="notification_institution_sso_non_canonical")
+					.notification-body
+						div 
+							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
+							| !{translate("tried_to_log_in_with_email", {email: "{{notification.requestedEmail}}"})} !{translate("in_order_to_match_institutional_metadata_associated", {email: "{{notification.institutionEmail}}"})}
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+				.alert.alert-info(ng-switch-when="notification_institution_sso_already_registered")
+					.notification-body
+						| !{translate("tried_to_register_with_email", {appName: settings.appName, email: "{{notification.email}}"})}
+						| #{translate("we_logged_you_in")}
+					.notification-action
+						a.btn.btn-info(href="/")
+							| #{translate("find_out_more")}
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+				.alert.alert-info(ng-switch-default)
+					span(ng-bind-html="notification.html").notification-body
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
 
-	ul.list-unstyled.notifications-list(
+
+	ul.list-unstyled(
 		ng-controller="EmailNotificationController",
 		ng-cloak
 	)
-		li.notification_entry(
+		li.notification-entry(
 			ng-repeat="userEmail in userEmails",
 			ng-if="showConfirmEmail(userEmail)"
 		)
-			.row
-				.col-xs-12
-					.alert.alert-warning
-						.notification_inner(
-							ng-if="!userEmail.confirmationInflight"
-						)
-							| #{translate("please_confirm_email", {emailAddress: "{{ userEmail.email }}"})}
-							|
-							a(
-								href
-								ng-click="resendConfirmationEmail(userEmail)"
-							) (#{translate('resend_confirmation_email')})
-						.notification_inner(
-							ng-if="userEmail.confirmationInflight"
-						)
-							i.fa.fa-spinner.fa-spin(aria-hidden="true")
-							|
-							| #{translate('resending_confirmation_email')}&hellip;
+			.alert.alert-warning(ng-if="!userEmail.confirmationInflight")
+				.notification-body
+					| #{translate("please_confirm_email", {emailAddress: "{{ userEmail.email }}"})}
+					|
+					a(
+						href
+						ng-click="resendConfirmationEmail(userEmail)"
+					) (#{translate('resend_confirmation_email')})
+			.alert.alert-warning(ng-if="userEmail.confirmationInflight")
+				.notification-body
+					i.fa.fa-spinner.fa-spin(aria-hidden="true")
+					|
+					| #{translate('resending_confirmation_email')}&hellip;
