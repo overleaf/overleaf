@@ -4,31 +4,37 @@ const CSVParser = require('json2csv').Parser
 
 const NOW = new Date()
 
+const slowCallback = (callback, error, data) =>
+  setTimeout(() => callback(error, data), 80)
+
+const handleAPIError = (type, account, error, callback) => {
+  console.warn(
+    `Errors getting ${type} for account ${account.account_code}`,
+    error
+  )
+  if (typeof error === 'string' && error.match(/429$/)) {
+    return setTimeout(callback, 1000 * 60 * 5)
+  }
+  slowCallback(callback)
+}
+
 const getAccountSubscription = (account, callback) =>
   RecurlyWrapper.getSubscriptions(account.account_code, (error, response) => {
     if (error) {
-      console.warn(
-        `Errors getting subscription for account ${account.account_code}`,
-        error
-      )
-      return callback()
+      return handleAPIError('subscriptions', account, error, callback)
     }
-    callback(null, response.subscriptions[0])
+    slowCallback(callback, null, response.subscriptions[0])
   })
 
 const isAccountUsingPaypal = (account, callback) =>
   RecurlyWrapper.getBillingInfo(account.account_code, (error, response) => {
     if (error) {
-      console.warn(
-        `Errors getting billing info for account ${account.account_code}`,
-        error
-      )
-      return callback(null, false)
+      return handleAPIError('billing info', account, error, callback)
     }
     if (response.billing_info.paypal_billing_agreement_id) {
-      return callback(null, true)
+      return slowCallback(callback, null, true)
     }
-    callback(null, false)
+    slowCallback(callback, null, false)
   })
 
 const printAccountCSV = (account, callback) => {
@@ -71,7 +77,7 @@ const printAccountsCSV = callback => {
     if (error) {
       return callback(error)
     }
-    async.mapLimit(accounts, 10, printAccountCSV, (error, csvData) => {
+    async.mapSeries(accounts, printAccountCSV, (error, csvData) => {
       csvData = csvData.filter(d => !!d)
       callback(error, csvData)
     })
