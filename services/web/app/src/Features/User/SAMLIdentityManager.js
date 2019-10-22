@@ -53,10 +53,6 @@ async function _addIdentifier(
     const updatedUser = User.findOneAndUpdate(query, update, {
       new: true
     }).exec()
-    // update v1 affiliations record
-    if (hasEntitlement) {
-      await InstitutionsAPI.promises.addEntitlement(userId, institutionEmail)
-    }
     return updatedUser
   } catch (err) {
     if (err.code === 11000) {
@@ -173,6 +169,10 @@ async function linkAccounts(
   )
   await _addInstitutionEmail(userId, institutionEmail, providerId)
   await _sendLinkedEmail(userId, providerName)
+  // update v1 affiliations record
+  if (hasEntitlement) {
+    await InstitutionsAPI.promises.addEntitlement(userId, institutionEmail)
+  }
 }
 
 async function unlinkAccounts(
