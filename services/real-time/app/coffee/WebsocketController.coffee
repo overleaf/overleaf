@@ -13,19 +13,18 @@ module.exports = WebsocketController =
 	# it will force a full refresh of the page. Useful for non-backwards
 	# compatible protocol changes. Use only in extreme need.
 	PROTOCOL_VERSION: 2
-	
+
 	joinProject: (client, user, project_id, callback = (error, project, privilegeLevel, protocolVersion) ->) ->
 		user_id = user?._id
 		logger.log {user_id, project_id, client_id: client.id}, "user joining project"
 		metrics.inc "editor.join-project"
-		WebApiManager.joinProject project_id, user, (error, project, privilegeLevel) ->
+		WebApiManager.joinProject project_id, user, (error, project, privilegeLevel, isRestrictedUser) ->
 			return callback(error) if error?
 
 			if !privilegeLevel or privilegeLevel == ""
 				err = new Error("not authorized")
 				logger.warn {err, project_id, user_id, client_id: client.id}, "user is not authorized to join project"
 				return callback(err)
-
 
 			client.set("privilege_level", privilegeLevel)
 			client.set("user_id", user_id)
@@ -37,18 +36,19 @@ module.exports = WebsocketController =
 			client.set("connected_time", new Date())
 			client.set("signup_date", user?.signUpDate)
 			client.set("login_count", user?.loginCount)
-			
+			client.set("is_restricted_user", !!(isRestrictedUser))
+
 			RoomManager.joinProject client, project_id, (err) ->
 				logger.log {user_id, project_id, client_id: client.id}, "user joined project"
 				callback null, project, privilegeLevel, WebsocketController.PROTOCOL_VERSION
-			
+
 			# No need to block for setting the user as connected in the cursor tracking
 			ConnectedUsersManager.updateUserPosition project_id, client.id, user, null, () ->
-		
+
 	# We want to flush a project if there are no more (local) connected clients
 	# but we need to wait for the triggering client to disconnect. How long we wait
 	# is determined by FLUSH_IF_EMPTY_DELAY.
-	FLUSH_IF_EMPTY_DELAY: 500 #ms		
+	FLUSH_IF_EMPTY_DELAY: 500 #ms
 	leaveProject: (io, client, callback = (error) ->) ->
 		metrics.inc "editor.leave-project"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
@@ -56,7 +56,7 @@ module.exports = WebsocketController =
 
 			logger.log {project_id, user_id, client_id: client.id}, "client leaving project"
 			WebsocketLoadBalancer.emitToRoom project_id, "clientTracking.clientDisconnected", client.id
-			
+
 			# bail out if the client had not managed to authenticate or join
 			# the project.  Prevents downstream errors in docupdater from
 			# flushProjectToMongoAndDelete with null project_id.
@@ -66,12 +66,12 @@ module.exports = WebsocketController =
 			if not project_id?
 				logger.log {user_id: user_id, client_id: client.id}, "client leaving, not in project"
 				return callback()
-		
+
 			# We can do this in the background
 			ConnectedUsersManager.markUserAsDisconnected project_id, client.id, (err) ->
 				if err?
 					logger.error {err, project_id, user_id, client_id: client.id}, "error marking client as disconnected"
-					
+
 			RoomManager.leaveProjectAndDocs(client)
 			setTimeout () ->
 				remainingClients = io.sockets.clients(project_id)
@@ -82,14 +82,14 @@ module.exports = WebsocketController =
 							logger.error {err, project_id, user_id, client_id: client.id}, "error flushing to doc updater after leaving project"
 				callback()
 			, WebsocketController.FLUSH_IF_EMPTY_DELAY
-			
+
 	joinDoc: (client, doc_id, fromVersion = -1, options, callback = (error, doclines, version, ops, ranges) ->) ->
 		metrics.inc "editor.join-doc"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			return callback(error) if error?
 			return callback(new Error("no project_id found on client")) if !project_id?
 			logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joining doc"
-					
+
 			AuthorizationManager.assertClientCanViewProject client, (error) ->
 				return callback(error) if error?
 				# ensure the per-doc applied-ops channel is subscribed before sending the
@@ -124,7 +124,7 @@ module.exports = WebsocketController =
 						AuthorizationManager.addAccessToDoc client, doc_id
 						logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joined doc"
 						callback null, escapedLines, version, ops, ranges
-					
+
 	leaveDoc: (client, doc_id, callback = (error) ->) ->
 		metrics.inc "editor.leave-doc"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
@@ -178,8 +178,11 @@ module.exports = WebsocketController =
 	CLIENT_REFRESH_DELAY: 1000
 	getConnectedUsers: (client, callback = (error, users) ->) ->
 		metrics.inc "editor.get-connected-users"
-		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
+		Utils.getClientAttributes client, ["project_id", "user_id", "is_restricted_user"], (error, clientAttributes) ->
 			return callback(error) if error?
+			{project_id, user_id, is_restricted_user} = clientAttributes
+			if is_restricted_user
+				return callback(null, [])
 			return callback(new Error("no project_id found on client")) if !project_id?
 			logger.log {user_id, project_id, client_id: client.id}, "getting connected users"
 			AuthorizationManager.assertClientCanViewProject client, (error) ->
@@ -227,7 +230,7 @@ module.exports = WebsocketController =
 					return callback(error)
 			else
 				return callback(null)
-	
+
 	_isCommentUpdate: (update) ->
 		for op in update.op
 			if !op.c?
