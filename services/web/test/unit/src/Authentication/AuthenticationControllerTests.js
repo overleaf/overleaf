@@ -48,9 +48,6 @@ describe('AuthenticationController', function() {
           untrackSession: sinon.stub(),
           revokeAllUserSessions: sinon.stub().callsArgWith(1, null)
         }),
-        '../../infrastructure/SessionStoreManager': (this.SessionStoreManager = {
-          checkValidationToken: sinon.stub().returns(true)
-        }),
         '../../infrastructure/Modules': (this.Modules = {
           hooks: { fire: sinon.stub().callsArgWith(2, null, []) }
         }),
@@ -319,32 +316,6 @@ describe('AuthenticationController', function() {
           done()
         })
       })
-    })
-  })
-
-  describe('getSessionUser', function() {
-    it('should accept a valid session', function() {
-      this.req.session = {
-        passport: {
-          user: { _id: 'one' }
-        }
-      }
-      this.SessionStoreManager.checkValidationToken = sinon.stub().returns(true)
-      const user = this.AuthenticationController.getSessionUser(this.req)
-      expect(user).to.deep.equal({ _id: 'one' })
-    })
-
-    it('should reject an invalid session', function() {
-      this.req.session = {
-        passport: {
-          user: { _id: 'two' }
-        }
-      }
-      this.SessionStoreManager.checkValidationToken = sinon
-        .stub()
-        .returns(false)
-      const user = this.AuthenticationController.getSessionUser(this.req)
-      expect(user).to.be.null
     })
   })
 

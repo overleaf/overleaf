@@ -23,6 +23,7 @@ describe('SessionStoreManager', function() {
     this.sessionStore = {
       generate: sinon.spy(req => {
         req.session = {}
+        req.session.destroy = sinon.stub().yields()
       })
     }
   })
@@ -46,25 +47,41 @@ describe('SessionStoreManager', function() {
       expect(this.req.session.validationToken).to.equal('v1:6789')
     })
   })
-  describe('checkValidationToken', function() {
+  describe('validationMiddleware', function() {
     this.beforeEach(function() {
       this.SessionStoreManager.enableValidationToken(this.sessionStore)
       this.req = { sessionID: '123456789' }
+      this.next = sinon.stub()
       this.sessionStore.generate(this.req)
     })
-    it('should return true when the session id matches the validation token', function() {
-      const result = this.SessionStoreManager.checkValidationToken(this.req)
-      expect(result).to.equal(true)
+    it('should accept the request when the session id matches the validation token', function() {
+      this.SessionStoreManager.validationMiddleware(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.next).to.be.calledWithExactly()
     })
-    it('should return false when the session id has changed', function() {
+    it('should destroy the session and return an error when the session id does not match the validation token', function() {
       this.req.sessionID = 'abcdefghijklmnopqrstuvwxyz'
-      const result = this.SessionStoreManager.checkValidationToken(this.req)
-      expect(result).to.equal(false)
+      this.next = sinon.stub()
+      this.SessionStoreManager.validationMiddleware(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.req.session.destroy).to.be.called
+      expect(this.next).to.be.calledWithExactly(new Error('invalid session'))
     })
-    it('should return true when the session does not have a validation token', function() {
+    it('should accept the request when the session does not have a validation token', function() {
       this.req = { sessionID: '123456789', session: {} }
-      const result = this.SessionStoreManager.checkValidationToken(this.req)
-      expect(result).to.equal(true)
+      this.next = sinon.stub()
+      this.SessionStoreManager.validationMiddleware(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.next).to.be.calledWithExactly()
     })
   })
 })

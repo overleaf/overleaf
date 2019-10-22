@@ -114,6 +114,8 @@ webRouter.use(
 
 // patch the session store to generate a validation token for every new session
 SessionStoreManager.enableValidationToken(sessionStore)
+// use middleware to reject all requests with invalid tokens
+webRouter.use(SessionStoreManager.validationMiddleware)
 
 // passport
 webRouter.use(passport.initialize())

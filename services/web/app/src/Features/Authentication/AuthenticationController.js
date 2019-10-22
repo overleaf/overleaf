@@ -8,7 +8,6 @@ const Settings = require('settings-sharelatex')
 const basicAuth = require('basic-auth-connect')
 const UserHandler = require('../User/UserHandler')
 const UserSessionsManager = require('../User/UserSessionsManager')
-const SessionStoreManager = require('../../infrastructure/SessionStoreManager')
 const Analytics = require('../Analytics/AnalyticsManager')
 const passport = require('passport')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
@@ -255,9 +254,6 @@ const AuthenticationController = (module.exports = {
   },
 
   getSessionUser(req) {
-    if (!SessionStoreManager.checkValidationToken(req)) {
-      return null
-    }
     const sessionUser = _.get(req, ['session', 'user'])
     const sessionPassportUser = _.get(req, ['session', 'passport', 'user'])
     return sessionUser || sessionPassportUser || null

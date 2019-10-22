@@ -7,6 +7,35 @@ function computeValidationToken(req) {
   return 'v1:' + req.sessionID.slice(-4)
 }
 
+function checkValidationToken(req) {
+  if (req.session) {
+    const sessionToken = req.session.validationToken
+    if (sessionToken) {
+      const clientToken = computeValidationToken(req)
+      // Reject invalid sessions. If you change the method for computing the
+      // token (above) then you need to either check or ignore previous
+      // versions of the token.
+      if (sessionToken === clientToken) {
+        Metrics.inc('security.session', 1, { status: 'ok' })
+        return true
+      } else {
+        logger.error(
+          {
+            sessionToken: sessionToken,
+            clientToken: clientToken
+          },
+          'session token validation failed'
+        )
+        Metrics.inc('security.session', 1, { status: 'error' })
+        return false
+      }
+    } else {
+      Metrics.inc('security.session', 1, { status: 'missing' })
+    }
+  }
+  return true // fallback to allowing session
+}
+
 module.exports = {
   enableValidationToken(sessionStore) {
     // generate an identifier from the sessionID for every new session
@@ -23,32 +52,14 @@ module.exports = {
     }
   },
 
-  checkValidationToken(req) {
-    if (req.session) {
-      const sessionToken = req.session.validationToken
-      if (sessionToken) {
-        const clientToken = computeValidationToken(req)
-        // Reject invalid sessions. If you change the method for computing the
-        // token (above) then you need to either check or ignore previous
-        // versions of the token.
-        if (sessionToken === clientToken) {
-          Metrics.inc('security.session', 1, { status: 'ok' })
-          return true
-        } else {
-          logger.error(
-            {
-              sessionToken: sessionToken,
-              clientToken: clientToken
-            },
-            'session token validation failed'
-          )
-          Metrics.inc('security.session', 1, { status: 'error' })
-          return false
-        }
-      } else {
-        Metrics.inc('security.session', 1, { status: 'missing' })
-      }
+  validationMiddleware(req, res, next) {
+    if (!checkValidationToken(req)) {
+      // the session must exist for it to fail validation
+      req.session.destroy(() => {
+        return next(new Error('invalid session'))
+      })
+    } else {
+      return next()
     }
-    return true // fallback to allowing session
   }
 }
