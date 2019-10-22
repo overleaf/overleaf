@@ -106,10 +106,11 @@ module.exports = CompileManager =
 						error = new Error("compilation")
 						error.validate = "fail"
 					# compile was killed by user, was a validation, or a compile which failed validation
-					if error?.terminated or error?.validate
+					if error?.terminated or error?.validate or error?.timedout
 						OutputFileFinder.findOutputFiles resourceList, compileDir, (err, outputFiles) ->
 							return callback(err) if err?
-							callback(error, outputFiles) # return output files so user can check logs
+							error.outputFiles = outputFiles  # return output files so user can check logs
+							callback(error)
 						return
 					# compile completed normally
 					return callback(error) if error?

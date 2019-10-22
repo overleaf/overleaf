@@ -78,7 +78,7 @@ module.exports = DockerRunner =
 			_callback(args...)
 			# Only call the callback once
 			_callback = () ->
-		
+
 		name = options.name
 
 		streamEnded = false
@@ -115,7 +115,7 @@ module.exports = DockerRunner =
 
 	_getContainerOptions: (command, image, volumes, timeout, environment) ->
 		timeoutInSeconds = timeout / 1000
-		
+
 		dockerVolumes = {}
 		for hostVol, dockerVol of volumes
 			dockerVolumes[dockerVol] = {}
@@ -148,7 +148,7 @@ module.exports = DockerRunner =
 				"Ulimits": [{'Name': 'cpu', 'Soft': timeoutInSeconds+5, 'Hard': timeoutInSeconds+10}]
 				"CapDrop": "ALL"
 				"SecurityOpt": ["no-new-privileges"]
-		
+
 
 		if Settings.path?.synctexBinHostPath?
 			options["HostConfig"]["Binds"].push("#{Settings.path.synctexBinHostPath}:/opt/synctex:ro")
@@ -276,7 +276,7 @@ module.exports = DockerRunner =
 			logger.log container_id: containerId, "timeout reached, killing container"
 			container.kill(() ->)
 		, timeout
-			
+
 		logger.log container_id: containerId, "waiting for docker container"
 		container.wait (error, res) ->
 			if error?

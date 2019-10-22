@@ -26,21 +26,19 @@ module.exports = CompileController =
 						status = "terminated"
 					else if error?.validate
 						status = "validation-#{error.validate}"
+					else if error?.timedout
+						status = "timedout"
+						logger.log err: error, project_id: request.project_id, "timeout running compile"
 					else if error?
-						if error.timedout
-							status = "timedout"
-							logger.log err: error, project_id: request.project_id, "timeout running compile"
-						else
-							status = "error"
-							code = 500
-							logger.warn err: error, project_id: request.project_id, "error running compile"
-
+						status = "error"
+						code = 500
+						logger.warn err: error, project_id: request.project_id, "error running compile"
 					else
 						status = "failure"
 						for file in outputFiles
 							if file.path?.match(/output\.pdf$/)
 								status = "success"
-								
+
 						if status == "failure"
 							logger.warn project_id: request.project_id, outputFiles:outputFiles, "project failed to compile successfully, no output.pdf generated"
 
@@ -48,6 +46,9 @@ module.exports = CompileController =
 						for file in outputFiles
 							if file.path is "core"
 								logger.error project_id:request.project_id, req:req, outputFiles:outputFiles, "core file found in output"
+
+					if error?
+						outputFiles = error.outputFiles || []
 
 					timer.done()
 					res.status(code or 200).send {
