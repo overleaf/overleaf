@@ -61,5 +61,13 @@ module.exports = {
     } else {
       return next()
     }
+  },
+
+  hasValidationToken(req) {
+    if (req && req.session && req.session.validationToken) {
+      return true
+    } else {
+      return false
+    }
   }
 }

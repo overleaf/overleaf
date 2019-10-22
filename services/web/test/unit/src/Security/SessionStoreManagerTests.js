@@ -84,4 +84,24 @@ describe('SessionStoreManager', function() {
       expect(this.next).to.be.calledWithExactly()
     })
   })
+  describe('hasValidationToken', function() {
+    this.beforeEach(function() {
+      this.req = { sessionID: '123456789' }
+    })
+    it('should return true when the session is valid', function() {
+      this.req.session = { validationToken: 'v1:6789' }
+      const result = this.SessionStoreManager.hasValidationToken(this.req)
+      expect(result).to.equal(true)
+    })
+    it('should return false when the session is valid', function() {
+      this.req.session = { validationToken: 'v1:abcd' }
+      const result = this.SessionStoreManager.hasValidationToken(this.req)
+      expect(result).to.equal(true)
+    })
+    it('should return false when the validation token is missing', function() {
+      this.req.session = {}
+      const result = this.SessionStoreManager.hasValidationToken(this.req)
+      expect(result).to.equal(false)
+    })
+  })
 })

@@ -288,6 +288,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       maxRequests: 15,
       timeInterval: 60
     }),
+    AuthenticationController.validateUserSession(),
     AuthorizationMiddleware.ensureUserCanReadProject,
     ProjectController.loadEditor
   )
