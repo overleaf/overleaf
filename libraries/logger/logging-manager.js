@@ -3,9 +3,10 @@ const request = require('request')
 const OError = require('@overleaf/o-error')
 
 // bunyan error serializer
-const errSerializer = function (err) {
-  if (!err || !err.stack)
-    return err;
+const errSerializer = function(err) {
+  if (!err || !err.stack) {
+    return err
+  }
   return {
     message: err.message,
     name: err.name,
@@ -13,10 +14,10 @@ const errSerializer = function (err) {
     info: OError.getFullInfo(err),
     code: err.code,
     signal: err.signal
-  };
-};
+  }
+}
 
-const Logger = module.exports = {
+const Logger = (module.exports = {
   initialize(name) {
     this.isProduction =
       (process.env['NODE_ENV'] || '').toLowerCase() === 'production'
@@ -31,14 +32,13 @@ const Logger = module.exports = {
       }
     ]
     if (this.ringBufferSize > 0) {
-      this.ringBuffer = new bunyan.RingBuffer({limit: this.ringBufferSize})
+      this.ringBuffer = new bunyan.RingBuffer({ limit: this.ringBufferSize })
       loggerStreams.push({
         level: 'trace',
         type: 'raw',
         stream: this.ringBuffer
       })
-    }
-    else {
+    } else {
       this.ringBuffer = null
     }
     this.logger = bunyan.createLogger({
@@ -69,9 +69,7 @@ const Logger = module.exports = {
       headers: {
         'Metadata-Flavor': 'Google'
       },
-      uri: `http://metadata.google.internal/computeMetadata/v1/project/attributes/${
-        this.loggerName
-      }-setLogLevelEndTime`
+      uri: `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
     }
     request(options, (err, response, body) => {
       if (err) {
@@ -86,9 +84,9 @@ const Logger = module.exports = {
     })
   },
 
-  initializeErrorReporting(sentry_dsn, options) {
+  initializeErrorReporting(sentryDsn, options) {
     const raven = require('raven')
-    this.raven = new raven.Client(sentry_dsn, options)
+    this.raven = new raven.Client(sentryDsn, options)
     this.lastErrorTimeStamp = 0 // for rate limiting on sentry reporting
     this.lastErrorCount = 0
   },
@@ -154,25 +152,21 @@ const Logger = module.exports = {
         if (error.path) {
           error.message = error.message.replace(` '${error.path}'`, '')
         }
-      } catch (error1) {}
-      // send the error to sentry
-      try {
+
+        // send the error to sentry
         this.raven.captureException(error, { tags, extra, level })
+
         // put a flag on the errors to avoid reporting them multiple times
-        return (() => {
-          const result = []
-          for (key in attributes) {
-            value = attributes[key]
-            if (value instanceof Error) {
-              result.push((value.reportedToSentry = true))
-            } else {
-              result.push(undefined)
-            }
+        const result = []
+        for (key in attributes) {
+          value = attributes[key]
+          if (value instanceof Error) {
+            value.reportedToSentry = true
           }
           return result
-        })()
-      } catch (error2) {
-        return
+        }
+      } catch (err) {
+        // ignore Raven errors
       }
     }
   },
@@ -191,7 +185,7 @@ const Logger = module.exports = {
 
   error(attributes, message, ...args) {
     if (this.ringBuffer !== null && Array.isArray(this.ringBuffer.records)) {
-      attributes.logBuffer = this.ringBuffer.records.filter(function (record) {
+      attributes.logBuffer = this.ringBuffer.records.filter(function(record) {
         return record.level !== 50
       })
     }
@@ -245,6 +239,6 @@ const Logger = module.exports = {
       return callback()
     }
   }
-}
+})
 
 Logger.initialize('default-sharelatex')
