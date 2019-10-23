@@ -1,4 +1,4 @@
-define(['base'], App =>
+define(['base'], App => {
   App.factory('projectMembers', (ide, $http) => ({
     removeMember(member) {
       return $http({
@@ -37,5 +37,13 @@ define(['base'], App =>
           }
         }
       )
+    },
+
+    transferOwnership(userId) {
+      return $http.post(`/project/${ide.project_id}/transfer-ownership`, {
+        user_id: userId,
+        _csrf: window.csrfToken
+      })
     }
-  })))
+  }))
+})

@@ -88,6 +88,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						.col-xs-7.form-control-static {{ member.email }}
 						.col-xs-3
 							select.privileges.form-control.input-sm(name="privileges" ng-model="form.privileges")
+								option(value="owner") #{translate("owner")}
 								option(value="readAndWrite") #{translate("can_edit")}
 								option(value="readOnly") #{translate("read_only")}
 						.col-xs-2.form-control-static.text-center(ng-hide="form.isModified()")
@@ -254,3 +255,22 @@ script(type="text/ng-template", id="shareAutocompleteTemplate")
 			|
 			span(ng-bind-html="$highlight(data.name)")
 			span.subdued.small(ng-show="data.member_count")  ({{ data.member_count }} members)
+
+script(type="text/ng-template", id="ownershipTransferConfirmTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 #{translate("change_project_owner")}
+	.modal-body
+		p !{translate('project_ownership_transfer_confirmation_1', { user: '<strong>{{ member.email }}</strong>', project: '<strong>{{ project.name }}</strong>' })}
+		p #{translate('project_ownership_transfer_confirmation_2')}
+	.modal-footer
+		.modal-footer-left
+			i.fa.fa-refresh.fa-spin(ng-show="state.inflight")
+			span.text-danger.error(ng-show="state.error") #{translate("generic_something_went_wrong")}
+		.modal-footer-right
+			button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
+			button.btn.btn-success(ng-click="confirm()") #{translate("change_owner")}
