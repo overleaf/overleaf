@@ -12,13 +12,13 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define(['base'], App =>
-  App.factory('settings', (ide, event_tracking) => ({
+  App.factory('settings', (ide, eventTracking) => ({
     saveSettings(data) {
       // Tracking code.
       for (let key of Array.from(Object.keys(data))) {
         const changedSetting = key
         const changedSettingVal = data[key]
-        event_tracking.sendMB('setting-changed', {
+        eventTracking.sendMB('setting-changed', {
           changedSetting,
           changedSettingVal
         })
@@ -34,7 +34,7 @@ define(['base'], App =>
       for (let key of Array.from(Object.keys(data))) {
         const changedSetting = key
         const changedSettingVal = data[key]
-        event_tracking.sendMB('project-setting-changed', {
+        eventTracking.sendMB('project-setting-changed', {
           changedSetting,
           changedSettingVal
         })
@@ -50,7 +50,7 @@ define(['base'], App =>
       for (let key of Array.from(Object.keys(data))) {
         const changedSetting = key
         const changedSettingVal = data[key]
-        event_tracking.sendMB('project-admin-setting-changed', {
+        eventTracking.sendMB('project-admin-setting-changed', {
           changedSetting,
           changedSettingVal
         })

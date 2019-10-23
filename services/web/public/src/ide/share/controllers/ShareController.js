@@ -6,11 +6,11 @@ define(['base'], App => {
     projectInvites,
     projectMembers,
     // eslint-disable-next-line camelcase
-    event_tracking
+    eventTracking
   ) {
     $scope.openShareProjectModal = function(isAdmin) {
       $scope.isAdmin = isAdmin
-      event_tracking.sendMBOnce('ide-open-share-modal-once')
+      eventTracking.sendMBOnce('ide-open-share-modal-once')
 
       $modal.open({
         templateUrl: 'shareProjectModalTemplate',

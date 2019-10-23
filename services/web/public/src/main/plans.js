@@ -191,7 +191,7 @@ define(['base'], function(App) {
   App.controller('PlansController', function(
     $scope,
     $modal,
-    event_tracking,
+    eventTracking,
     MultiCurrencyPricing,
     $http,
     $filter,
@@ -231,8 +231,8 @@ define(['base'], function(App) {
         plan = `${plan}_annual`
       }
       plan = eventLabel(plan, location)
-      event_tracking.sendMB('plans-page-start-trial')
-      event_tracking.send('subscription-funnel', 'sign_up_now_button', plan)
+      eventTracking.sendMB('plans-page-start-trial')
+      eventTracking.send('subscription-funnel', 'sign_up_now_button', plan)
     }
 
     $scope.switchToMonthly = function(e, location) {
@@ -264,7 +264,7 @@ define(['base'], function(App) {
         .result.finally(() =>
           history.replaceState(null, document.title, window.location.pathname)
         )
-      event_tracking.send(
+      eventTracking.send(
         'subscription-funnel',
         'plans-page',
         'group-inquiry-potential'
@@ -284,7 +284,7 @@ define(['base'], function(App) {
         .result.finally(() =>
           history.replaceState(null, document.title, window.location.pathname)
         )
-      event_tracking.send(
+      eventTracking.send(
         'subscription-funnel',
         'plans-page',
         'group-inquiry-potential'
@@ -299,7 +299,7 @@ define(['base'], function(App) {
     switchEvent = function(e, label, location) {
       e.preventDefault()
       const gaLabel = eventLabel(label, location)
-      event_tracking.send('subscription-funnel', 'plans-page', gaLabel)
+      eventTracking.send('subscription-funnel', 'plans-page', gaLabel)
     }
   })
 

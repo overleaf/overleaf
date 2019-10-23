@@ -12,7 +12,7 @@ define(['base'], App => {
     validateCaptchaV3,
     settings,
     // eslint-disable-next-line camelcase
-    event_tracking
+    eventTracking
   ) {
     $scope.inputs = {
       privileges: 'readAndWrite',
@@ -42,7 +42,7 @@ define(['base'], App => {
 
     $scope.$watch('canAddCollaborators', function() {
       if (!$scope.canAddCollaborators) {
-        event_tracking.send(
+        eventTracking.send(
           'subscription-funnel',
           'editor-click-feature',
           'projectMembers'
@@ -246,7 +246,7 @@ define(['base'], App => {
     $scope.makeTokenBased = function() {
       $scope.project.publicAccesLevel = 'tokenBased'
       settings.saveProjectAdminSettings({ publicAccessLevel: 'tokenBased' })
-      event_tracking.sendMB('project-make-token-based')
+      eventTracking.sendMB('project-make-token-based')
     }
 
     $scope.makePrivate = function() {

@@ -4,7 +4,7 @@ define(['base'], function(App) {
     $http,
     $modal,
     // eslint-disable-next-line camelcase
-    event_tracking,
+    eventTracking,
     UserAffiliationsDataService
   ) {
     $scope.subscribed = true
@@ -45,7 +45,7 @@ define(['base'], function(App) {
     }
 
     $scope.upgradeIntegration = service =>
-      event_tracking.send('subscription-funnel', 'settings-page', service)
+      eventTracking.send('subscription-funnel', 'settings-page', service)
   })
 
   App.controller('DeleteAccountModalController', function(

@@ -130,7 +130,7 @@ define(['base'], function(App) {
     type,
     parent_folder,
     $modalInstance,
-    event_tracking,
+    eventTracking,
     projectFeatures,
     userFeatures
   ) {
@@ -157,14 +157,14 @@ define(['base'], function(App) {
 
     $scope.$watch('type', function() {
       if ($scope.type === 'mendeley' && !hasMendeleyFeature) {
-        event_tracking.send(
+        eventTracking.send(
           'subscription-funnel',
           'editor-click-feature',
           $scope.type
         )
       }
       if ($scope.type === 'zotero' && !hasZoteroFeature) {
-        event_tracking.send(
+        eventTracking.send(
           'subscription-funnel',
           'editor-click-feature',
           $scope.type

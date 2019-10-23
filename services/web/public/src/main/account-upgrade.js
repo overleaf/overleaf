@@ -1,22 +1,8 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-return-assign,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 define(['base'], App =>
-  App.controller('FreeTrialModalController', function($scope, event_tracking) {
+  App.controller('FreeTrialModalController', function($scope, eventTracking) {
     $scope.buttonClass = 'btn-primary'
 
-    return ($scope.startFreeTrial = function(source, couponCode) {
+    $scope.startFreeTrial = function(source) {
       const plan = 'collaborator_free_trial_7_days'
 
       const w = window.open()
@@ -31,21 +17,14 @@ define(['base'], App =>
             source
           )
         }
-        if (window.useV2TrialUrl) {
-          url = '/user/trial'
-        } else {
-          url = `/user/subscription/new?planCode=${plan}&ssp=true`
-          if (couponCode != null) {
-            url = `${url}&cc=${couponCode}`
-          }
-        }
+        url = `/user/subscription/new?planCode=${plan}&ssp=true`
         $scope.startedFreeTrial = true
 
-        event_tracking.sendMB('subscription-start-trial', { source, plan })
+        eventTracking.sendMB('subscription-start-trial', { source, plan })
 
-        return (w.location = url)
+        w.location = url
       }
 
-      return go()
-    })
+      go()
+    }
   }))

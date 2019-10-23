@@ -32,7 +32,7 @@ define(['moment', 'base', 'modules/localStorage'], function(moment, App) {
       : undefined
   }
 
-  App.factory('event_tracking', function($http, localStorage) {
+  App.factory('eventTracking', function($http, localStorage) {
     const _getEventCache = function() {
       let eventCache = localStorage(CACHE_KEY)
 

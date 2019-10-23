@@ -157,7 +157,7 @@ define(['base', 'ide/history/util/displayNameForUser'], function(
 
   return App.controller('HistoryListItemController', function(
     $scope,
-    event_tracking
+    eventTracking
   ) {
     $scope.$watch('update.selectedFrom', function(
       selectedFrom,
@@ -185,7 +185,7 @@ define(['base', 'ide/history/util/displayNameForUser'], function(
     })
 
     $scope.select = function() {
-      event_tracking.sendMB('history-view-change')
+      eventTracking.sendMB('history-view-change')
       $scope.update.selectedTo = true
       return ($scope.update.selectedFrom = true)
     }

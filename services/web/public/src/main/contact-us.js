@@ -48,7 +48,7 @@ define(['base', 'libs/platform'], (App, platform) =>
 
       return request.then(function(response) {
         $scope.sent = true
-        event_tracking.send(
+        eventTracking.send(
           'subscription-funnel',
           'plans-page',
           'group-inquiry-sent'

@@ -4,7 +4,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
     $modal,
     $window,
     queuedHttp,
-    event_tracking, // eslint-disable-line camelcase
+    eventTracking, // eslint-disable-line camelcase
     $timeout,
     localStorage,
     ProjectListService
@@ -157,7 +157,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
     }
 
     $scope.searchProjects = function() {
-      event_tracking.send(
+      eventTracking.send(
         'project-list-page-interaction',
         'project-search',
         'keydown'
@@ -366,7 +366,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
 
     $scope.addSelectedProjectsToTag = function(tag) {
       const selectedProjects = $scope.getSelectedProjects()
-      event_tracking.send(
+      eventTracking.send(
         'project-list-page-interaction',
         'project action',
         'addSelectedProjectsToTag'
@@ -446,7 +446,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
       if (template == null) {
         template = 'none'
       }
-      event_tracking.send(
+      eventTracking.send(
         'project-list-page-interaction',
         'new-project',
         template
@@ -480,7 +480,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
       if (!project || project.accessLevel !== 'owner') {
         return
       }
-      event_tracking.send(
+      eventTracking.send(
         'project-list-page-interaction',
         'project action',
         'Rename'
@@ -498,7 +498,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
     }
 
     $scope.cloneProject = function(project, cloneName) {
-      event_tracking.send(
+      eventTracking.send(
         'project-list-page-interaction',
         'project action',
         'Clone'
@@ -558,7 +558,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
       const modalInstance = $scope.createArchiveProjectsModal(
         $scope.getSelectedProjects()
       )
-      event_tracking.send(
+      eventTracking.send(
         'project-list-page-interaction',
         'project action',
         'Delete'
@@ -686,7 +686,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
 
     $scope.downloadProjectsById = function(projectIds) {
       let path
-      event_tracking.send(
+      eventTracking.send(
         'project-list-page-interaction',
         'project action',
         'Download Zip'

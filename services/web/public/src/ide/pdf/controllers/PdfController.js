@@ -38,7 +38,7 @@ define([
     ide,
     $modal,
     synctex,
-    event_tracking,
+    eventTracking,
     localStorage
   ) {
     // enable per-user containers by default
@@ -83,7 +83,7 @@ define([
     })
 
     $scope.trackLogHintsLearnMore = () =>
-      event_tracking.sendMB('logs-hints-learn-more')
+      eventTracking.sendMB('logs-hints-learn-more')
 
     if (ace.require('ace/lib/useragent').isMac) {
       $scope.modifierKey = 'Cmd'
@@ -257,7 +257,7 @@ define([
           autoCompileIfReady()
         }
         localStorage(`autocompile_enabled:${$scope.project_id}`, newValue)
-        return event_tracking.sendMB('autocompile-setting-changed', {
+        return eventTracking.sendMB('autocompile-setting-changed', {
           value: newValue
         })
       }
@@ -302,7 +302,7 @@ define([
       // keep track of whether this is a compile or check
       $scope.check = !!options.check
       if (options.check) {
-        event_tracking.sendMB('syntax-check-request')
+        eventTracking.sendMB('syntax-check-request')
       }
       // send appropriate check type to clsi
       let checkType = (() => {
@@ -400,7 +400,7 @@ define([
           !$scope.hasPremiumCompile &&
           ide.$scope.project.owner._id === ide.$scope.user.id
         ) {
-          event_tracking.send(
+          eventTracking.send(
             'subscription-funnel',
             'editor-click-feature',
             'compile-timeout'
@@ -419,7 +419,7 @@ define([
         if (response.status === 'validation-fail') {
           $scope.pdf.failedCheck = true
         }
-        event_tracking.sendMB(`syntax-check-${response.status}`)
+        eventTracking.sendMB(`syntax-check-${response.status}`)
         fetchLogs(fileByPath, { validation: true, pdfDownloadDomain })
       } else if (response.status === 'exited') {
         $scope.pdf.view = 'pdf'
@@ -436,7 +436,7 @@ define([
           $scope.pdf.view = 'errors'
           $scope.pdf.autoCompileDisabled = true
           $scope.autocompile_enabled = false // disable any further autocompiles
-          event_tracking.sendMB('autocompile-rate-limited', {
+          eventTracking.sendMB('autocompile-rate-limited', {
             hasPremiumCompile: $scope.hasPremiumCompile
           })
         }
@@ -647,7 +647,7 @@ define([
           errors,
           warnings
         })
-        event_tracking.sendMB('syntax-check-return-count', {
+        eventTracking.sendMB('syntax-check-return-count', {
           errors: errors.length,
           warnings: warnings.length
         })
@@ -775,7 +775,7 @@ define([
         return
       }
 
-      event_tracking.sendMBSampled('editor-recompile-sampled', options)
+      eventTracking.sendMBSampled('editor-recompile-sampled', options)
 
       $scope.lastStartedCompileAt = Date.now()
       $scope.pdf.compiling = true
@@ -786,12 +786,12 @@ define([
         // for forced compile, turn off validation check and ignore errors
         $scope.stop_on_validation_error = false
         $scope.shouldShowLogs = false // hide the logs while compiling
-        event_tracking.sendMB('syntax-check-turn-off-checking')
+        eventTracking.sendMB('syntax-check-turn-off-checking')
       }
 
       if (options != null ? options.try : undefined) {
         $scope.shouldShowLogs = false // hide the logs while compiling
-        event_tracking.sendMB('syntax-check-try-compile-anyway')
+        eventTracking.sendMB('syntax-check-try-compile-anyway')
       }
 
       ide.$scope.$broadcast('flush-changes')
@@ -855,7 +855,7 @@ define([
     $scope.toggleLogs = function() {
       $scope.shouldShowLogs = !$scope.shouldShowLogs
       if ($scope.shouldShowLogs) {
-        return event_tracking.sendMBOnce('ide-open-logs-once')
+        return eventTracking.sendMBOnce('ide-open-logs-once')
       }
     }
 
@@ -867,7 +867,7 @@ define([
     $scope.toggleRawLog = function() {
       $scope.pdf.showRawLog = !$scope.pdf.showRawLog
       if ($scope.pdf.showRawLog) {
-        return event_tracking.sendMB('logs-view-raw')
+        return eventTracking.sendMB('logs-view-raw')
       }
     }
 
@@ -1056,10 +1056,10 @@ define([
 
   App.controller(
     'PdfLogEntryController',
-    ($scope, ide, event_tracking) =>
+    ($scope, ide, eventTracking) =>
       ($scope.openInEditor = function(entry) {
         let column, line
-        event_tracking.sendMBOnce('logs-jump-to-location-once')
+        eventTracking.sendMBOnce('logs-jump-to-location-once')
         const entity = ide.fileTreeManager.findEntityByPath(entry.file)
         if (entity == null || entity.type !== 'doc') {
           return

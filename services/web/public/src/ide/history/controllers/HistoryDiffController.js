@@ -16,10 +16,10 @@ define(['base'], function(App) {
     $scope,
     $modal,
     ide,
-    event_tracking
+    eventTracking
   ) {
     $scope.restoreDeletedDoc = function() {
-      event_tracking.sendMB('history-restore-deleted')
+      eventTracking.sendMB('history-restore-deleted')
       $scope.history.diff.restoreInProgress = true
       return ide.historyManager
         .restoreDeletedDoc($scope.history.diff.doc)
@@ -32,7 +32,7 @@ define(['base'], function(App) {
     }
 
     $scope.openRestoreDiffModal = function() {
-      event_tracking.sendMB('history-restore-modal')
+      eventTracking.sendMB('history-restore-modal')
       return $modal.open({
         templateUrl: 'historyRestoreDiffModalTemplate',
         controller: 'HistoryRestoreDiffModalController',
@@ -53,14 +53,14 @@ define(['base'], function(App) {
     $modalInstance,
     diff,
     ide,
-    event_tracking
+    eventTracking
   ) {
     $scope.state = { inflight: false }
 
     $scope.diff = diff
 
     $scope.restore = function() {
-      event_tracking.sendMB('history-restored')
+      eventTracking.sendMB('history-restored')
       $scope.state.inflight = true
       return ide.historyManager.restoreDiff(diff).then(function() {
         $scope.state.inflight = false
