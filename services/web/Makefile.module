@@ -2,15 +2,18 @@ MODULE_NAME := $(notdir $(shell pwd))
 MODULE_DIR := modules/$(MODULE_NAME)
 PROJECT_NAME = web
 
-DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
-DOCKER_COMPOSE_MODULE_FLAGS := ${DOCKER_COMPOSE_FLAGS} -f $(MODULE_DIR)/docker-compose.yml
+DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml --log-level ERROR
 DOCKER_COMPOSE := cd ../../ && \
 	MODULE_DIR=$(MODULE_DIR) \
 	BUILD_NUMBER=$(BUILD_NUMBER) \
 	BRANCH_NAME=$(BRANCH_NAME) \
 	PROJECT_NAME=$(PROJECT_NAME) \
 	MOCHA_GREP=${MOCHA_GREP} \
-	docker-compose ${DOCKER_COMPOSE_MODULE_FLAGS}
+	SHARELATEX_CONFIG=/app/$(MODULE_DIR)/test/acceptance/config/settings.test.coffee \
+	docker-compose ${DOCKER_COMPOSE_FLAGS}
+
+test_unit:
+	${DOCKER_COMPOSE} run --rm test_unit npm -q run test:unit:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/unit/src
 
 test_acceptance:
 	${DOCKER_COMPOSE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src

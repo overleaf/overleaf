@@ -12,10 +12,10 @@
     "public": "./public"
   },
   "scripts": {
-    "test:acceptance:run_dir": "mocha --recursive --reporter spec --require test/acceptance/bootstrap.js --timeout 25000 --exit --grep=$MOCHA_GREP $@",
-    "test:unit": "bin/unit_test --grep=$MOCHA_GREP $@",
-    "test:unit:ci": "bin/unit_test --timeout 10000",
-    "test:unit:app": "bin/unit_test_app $@",
+    "test:acceptance:run_dir": "mocha --recursive --reporter spec --timeout 25000 --exit --grep=$MOCHA_GREP --require test/acceptance/bootstrap.js",
+    "test:acceptance:app": "npm run test:acceptance:run_dir -- test/acceptance/src",
+    "test:unit:run_dir": "mocha --recursive --reporter spec --timeout 25000 --exit --grep=$MOCHA_GREP --require test/unit/bootstrap.js",
+    "test:unit:app": "npm run test:unit:run_dir -- test/unit/src",
     "test:frontend": "karma start",
     "test:frontend:single": "karma start --single-run",
     "compile": "make compile",

@@ -12,7 +12,7 @@ services:
     working_dir: /app
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
-    command: npm run test:unit
+    command: npm run test:unit:app
     user: node
 
   test_acceptance:
@@ -27,9 +27,10 @@ services:
       PROJECT_HISTORY_ENABLED: 'true'
       LINKED_URL_PROXY: 'http://localhost:6543'
       ENABLED_LINKED_FILE_TYPES: 'url,project_file,project_output_file,mendeley,zotero'
-      SHARELATEX_CONFIG: /app/test/acceptance/config/settings.test.coffee
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
+      SHARELATEX_CONFIG:
+    command: npm run test:acceptance:app
     depends_on:
       - redis
       - mongo
