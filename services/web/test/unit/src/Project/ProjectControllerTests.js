@@ -73,9 +73,6 @@ describe('ProjectController', function() {
       findAllUsersProjects: sinon.stub(),
       getProject: sinon.stub()
     }
-    this.ProjectDetailsHandler = {
-      transferOwnership: sinon.stub().yields()
-    }
     this.ProjectHelper = {
       isArchived: sinon.stub(),
       isTrashed: sinon.stub(),
@@ -1266,48 +1263,6 @@ describe('ProjectController', function() {
         false,
         false
       ])
-    })
-  })
-
-  describe('transferOwnership', function() {
-    beforeEach(function() {
-      this.req.body = { user_id: this.user._id.toString() }
-    })
-
-    it('validates the request body', function(done) {
-      this.req.body = {}
-      this.ProjectController.transferOwnership(this.req, this.res, err => {
-        expect(err).to.be.instanceof(HttpErrors.BadRequestError)
-        done()
-      })
-    })
-
-    it('returns 204 on success', function(done) {
-      this.res.sendStatus = status => {
-        expect(status).to.equal(204)
-        done()
-      }
-      this.ProjectController.transferOwnership(this.req, this.res)
-    })
-
-    it('returns 404 if the project does not exist', function(done) {
-      this.ProjectDetailsHandler.transferOwnership.yields(
-        new Errors.ProjectNotFoundError()
-      )
-      this.ProjectController.transferOwnership(this.req, this.res, err => {
-        expect(err).to.be.instanceof(HttpErrors.NotFoundError)
-        done()
-      })
-    })
-
-    it('returns 404 if the user does not exist', function(done) {
-      this.ProjectDetailsHandler.transferOwnership.yields(
-        new Errors.UserNotFoundError()
-      )
-      this.ProjectController.transferOwnership(this.req, this.res, err => {
-        expect(err).to.be.instanceof(HttpErrors.NotFoundError)
-        done()
-      })
     })
   })
 })

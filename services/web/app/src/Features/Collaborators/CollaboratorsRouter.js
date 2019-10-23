@@ -47,6 +47,21 @@ module.exports = {
       CollaboratorsController.getAllMembers
     )
 
+    webRouter.post(
+      '/project/:Project_id/transfer-ownership',
+      AuthenticationController.requireLogin(),
+      validate({
+        params: Joi.object({
+          Project_id: Joi.objectId()
+        }),
+        body: Joi.object({
+          user_id: Joi.objectId()
+        })
+      }),
+      AuthorizationMiddleware.ensureUserCanAdminProject,
+      CollaboratorsController.transferOwnership
+    )
+
     // invites
     webRouter.post(
       '/project/:Project_id/invite',

@@ -7,11 +7,7 @@ const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const Errors = require('../Errors/Errors')
 const ProjectTokenGenerator = require('./ProjectTokenGenerator')
-const ProjectEntityHandler = require('./ProjectEntityHandler')
 const ProjectHelper = require('./ProjectHelper')
-const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
-const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
-const EmailHandler = require('../Email/EmailHandler')
 const settings = require('settings-sharelatex')
 const { callbackify } = require('util')
 
@@ -22,7 +18,6 @@ module.exports = {
   getDetails: callbackify(getDetails),
   getProjectDescription: callbackify(getProjectDescription),
   setProjectDescription: callbackify(setProjectDescription),
-  transferOwnership: callbackify(transferOwnership),
   renameProject: callbackify(renameProject),
   validateProjectName: callbackify(validateProjectName),
   generateUniqueName: callbackify(generateUniqueName),
@@ -34,7 +29,6 @@ module.exports = {
     getDetails,
     getProjectDescription,
     setProjectDescription,
-    transferOwnership,
     renameProject,
     validateProjectName,
     generateUniqueName,
@@ -103,87 +97,6 @@ async function setProjectDescription(projectId, description) {
     throw err
   }
 }
-
-async function transferOwnership(projectId, toUserId, options = {}) {
-  // Fetch project and user
-  const [project, toUser] = await Promise.all([
-    ProjectGetter.promises.getProject(projectId, {
-      owner_ref: 1,
-      collaberator_refs: 1,
-      name: 1
-    }),
-    UserGetter.promises.getUser(toUserId)
-  ])
-  if (project == null) {
-    throw new Errors.ProjectNotFoundError({ info: { projectId: projectId } })
-  }
-  if (toUser == null) {
-    throw new Errors.UserNotFoundError({ info: { userId: toUserId } })
-  }
-
-  // Exit early if the transferee is already the project owner
-  const fromUserId = project.owner_ref
-  if (fromUserId.equals(toUserId)) {
-    return
-  }
-
-  // Check permissions
-  const collaboratorIds = project.collaberator_refs || []
-  if (
-    !options.allowTransferToNonCollaborators &&
-    !collaboratorIds.some(collaboratorId => collaboratorId.equals(toUser._id))
-  ) {
-    throw new Errors.UserNotCollaboratorError({ info: { userId: toUserId } })
-  }
-
-  // Fetch the current project owner
-  const fromUser = await UserGetter.promises.getUser(fromUserId)
-
-  // Transfer ownership
-  await CollaboratorsHandler.promises.removeUserFromProject(projectId, toUserId)
-  await Project.update(
-    { _id: projectId },
-    { $set: { owner_ref: toUserId } }
-  ).exec()
-  await CollaboratorsHandler.promises.addUserIdToProject(
-    projectId,
-    toUserId,
-    fromUserId,
-    PrivilegeLevels.READ_AND_WRITE
-  )
-
-  // Flush project to TPDS
-  await ProjectEntityHandler.promises.flushProjectToThirdPartyDataStore(
-    projectId
-  )
-
-  if (fromUser == null) {
-    // The previous owner didn't exist. This is not supposed to happen, but
-    // since we're changing the owner anyway, we'll just warn
-    logger.warn(
-      { projectId, ownerId: fromUserId },
-      'Project owner did not exist before ownership transfer'
-    )
-  } else {
-    // Send confirmation emails
-    await Promise.all([
-      EmailHandler.promises.sendEmail(
-        'ownershipTransferConfirmationPreviousOwner',
-        {
-          to: fromUser.email,
-          project,
-          newOwner: toUser
-        }
-      ),
-      EmailHandler.promises.sendEmail('ownershipTransferConfirmationNewOwner', {
-        to: toUser.email,
-        project,
-        previousOwner: fromUser
-      })
-    ])
-  }
-}
-
 async function renameProject(projectId, newName) {
   await validateProjectName(newName)
   logger.log({ projectId, newName }, 'renaming project')

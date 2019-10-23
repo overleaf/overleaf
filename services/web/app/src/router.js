@@ -496,11 +496,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthorizationMiddleware.ensureUserCanAdminProject,
     ProjectController.renameProject
   )
-  webRouter.post(
-    '/project/:Project_id/transfer-ownership',
-    AuthorizationMiddleware.ensureUserCanAdminProject,
-    ProjectController.transferOwnership
-  )
   webRouter.get(
     '/project/:Project_id/updates',
     AuthorizationMiddleware.ensureUserCanReadProject,

@@ -3,13 +3,9 @@ const fs = require('fs')
 const crypto = require('crypto')
 const async = require('async')
 const logger = require('logger-sharelatex')
-const HttpErrors = require('@overleaf/o-error/http')
-const { ObjectId } = require('mongodb')
-const Errors = require('../Errors/Errors')
 const ProjectDeleter = require('./ProjectDeleter')
 const ProjectDuplicator = require('./ProjectDuplicator')
 const ProjectCreationHandler = require('./ProjectCreationHandler')
-const ProjectDetailsHandler = require('./ProjectDetailsHandler')
 const EditorController = require('../Editor/EditorController')
 const ProjectHelper = require('./ProjectHelper')
 const metrics = require('metrics-sharelatex')
@@ -809,75 +805,6 @@ const ProjectController = {
             timer.done()
           }
         )
-      }
-    )
-  },
-
-  transferOwnership(req, res, next) {
-    const sessionUser = AuthenticationController.getSessionUser(req)
-    if (req.body.user_id == null) {
-      return next(
-        new HttpErrors.BadRequestError({
-          info: { public: { message: 'Missing parameter: user_id' } }
-        })
-      )
-    }
-    let projectId
-    try {
-      projectId = ObjectId(req.params.Project_id)
-    } catch (err) {
-      return next(
-        new HttpErrors.BadRequestError({
-          info: {
-            public: { message: `Invalid project id: ${req.params.Project_id}` }
-          }
-        })
-      )
-    }
-    let toUserId
-    try {
-      toUserId = ObjectId(req.body.user_id)
-    } catch (err) {
-      return next(
-        new HttpErrors.BadRequestError({
-          info: { public: { message: `Invalid user id: ${req.body.user_id}` } }
-        })
-      )
-    }
-    ProjectDetailsHandler.transferOwnership(
-      projectId,
-      toUserId,
-      { allowTransferToNonCollaborators: sessionUser.isAdmin },
-      err => {
-        if (err != null) {
-          if (err instanceof Errors.ProjectNotFoundError) {
-            next(
-              new HttpErrors.NotFoundError({
-                info: { public: { message: `project not found: ${projectId}` } }
-              })
-            )
-          } else if (err instanceof Errors.UserNotFoundError) {
-            next(
-              new HttpErrors.NotFoundError({
-                info: { public: { message: `user not found: ${toUserId}` } }
-              })
-            )
-          } else if (err instanceof Errors.UserNotCollaboratorError) {
-            next(
-              new HttpErrors.ForbiddenError({
-                info: {
-                  public: {
-                    message: `user ${toUserId} should be a collaborator in project ${projectId} prior to ownership transfer`
-                  }
-                }
-              })
-            )
-          } else {
-            next(err)
-          }
-        } else {
-          res.sendStatus(204)
-        }
       }
     )
   },

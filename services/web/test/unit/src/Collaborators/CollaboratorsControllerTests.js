@@ -15,7 +15,7 @@ describe('CollaboratorsController', function() {
     this.res = new MockResponse()
     this.req = new MockRequest()
 
-    this.userId = ObjectId()
+    this.user = { _id: ObjectId() }
     this.projectId = ObjectId()
     this.callback = sinon.stub()
 
@@ -39,7 +39,13 @@ describe('CollaboratorsController', function() {
       }
     }
     this.AuthenticationController = {
-      getLoggedInUserId: sinon.stub().returns(this.userId)
+      getSessionUser: sinon.stub().returns(this.user),
+      getLoggedInUserId: sinon.stub().returns(this.user._id)
+    }
+    this.OwnershipTransferHandler = {
+      promises: {
+        transferOwnership: sinon.stub().resolves()
+      }
     }
     this.logger = {
       err: sinon.stub(),
@@ -54,6 +60,7 @@ describe('CollaboratorsController', function() {
       requires: {
         './CollaboratorsHandler': this.CollaboratorsHandler,
         './CollaboratorsGetter': this.CollaboratorsGetter,
+        './OwnershipTransferHandler': this.OwnershipTransferHandler,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         '../Tags/TagsHandler': this.TagsHandler,
         '../Authentication/AuthenticationController': this
@@ -69,7 +76,7 @@ describe('CollaboratorsController', function() {
     beforeEach(function(done) {
       this.req.params = {
         Project_id: this.projectId,
-        user_id: this.userId
+        user_id: this.user._id
       }
       this.res.sendStatus = sinon.spy(() => {
         done()
@@ -80,14 +87,14 @@ describe('CollaboratorsController', function() {
     it('should from the user from the project', function() {
       expect(
         this.CollaboratorsHandler.promises.removeUserFromProject
-      ).to.have.been.calledWith(this.projectId, this.userId)
+      ).to.have.been.calledWith(this.projectId, this.user._id)
     })
 
     it('should emit a userRemovedFromProject event to the proejct', function() {
       expect(this.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
         this.projectId,
         'userRemovedFromProject',
-        this.userId
+        this.user._id
       )
     })
 
@@ -115,21 +122,21 @@ describe('CollaboratorsController', function() {
     it('should remove the logged in user from the project', function() {
       expect(
         this.CollaboratorsHandler.promises.removeUserFromProject
-      ).to.have.been.calledWith(this.projectId, this.userId)
+      ).to.have.been.calledWith(this.projectId, this.user._id)
     })
 
     it('should emit a userRemovedFromProject event to the proejct', function() {
       expect(this.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
         this.projectId,
         'userRemovedFromProject',
-        this.userId
+        this.user._id
       )
     })
 
     it('should remove the project from all tags', function() {
       expect(
         this.TagsHandler.promises.removeProjectFromAllTags
-      ).to.have.been.calledWith(this.userId, this.projectId)
+      ).to.have.been.calledWith(this.user._id, this.projectId)
     })
 
     it('should return a success code', function() {
@@ -198,7 +205,7 @@ describe('CollaboratorsController', function() {
     beforeEach(function() {
       this.req.params = {
         Project_id: this.projectId,
-        user_id: this.userId
+        user_id: this.user._id
       }
       this.req.body = { privilegeLevel: 'readOnly' }
     })
@@ -208,7 +215,7 @@ describe('CollaboratorsController', function() {
         expect(status).to.equal(204)
         expect(
           this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel
-        ).to.have.been.calledWith(this.projectId, this.userId, 'readOnly')
+        ).to.have.been.calledWith(this.projectId, this.user._id, 'readOnly')
         done()
       }
       this.CollaboratorsController.setCollaboratorInfo(this.req, this.res)
@@ -219,6 +226,48 @@ describe('CollaboratorsController', function() {
         new Errors.NotFoundError()
       )
       this.CollaboratorsController.setCollaboratorInfo(
+        this.req,
+        this.res,
+        err => {
+          expect(err).to.be.instanceof(HttpErrors.NotFoundError)
+          done()
+        }
+      )
+    })
+  })
+
+  describe('transferOwnership', function() {
+    beforeEach(function() {
+      this.req.body = { user_id: this.user._id.toString() }
+    })
+
+    it('returns 204 on success', function(done) {
+      this.res.sendStatus = status => {
+        expect(status).to.equal(204)
+        done()
+      }
+      this.CollaboratorsController.transferOwnership(this.req, this.res)
+    })
+
+    it('returns 404 if the project does not exist', function(done) {
+      this.OwnershipTransferHandler.promises.transferOwnership.rejects(
+        new Errors.ProjectNotFoundError()
+      )
+      this.CollaboratorsController.transferOwnership(
+        this.req,
+        this.res,
+        err => {
+          expect(err).to.be.instanceof(HttpErrors.NotFoundError)
+          done()
+        }
+      )
+    })
+
+    it('returns 404 if the user does not exist', function(done) {
+      this.OwnershipTransferHandler.promises.transferOwnership.rejects(
+        new Errors.UserNotFoundError()
+      )
+      this.CollaboratorsController.transferOwnership(
         this.req,
         this.res,
         err => {
