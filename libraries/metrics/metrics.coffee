@@ -3,30 +3,25 @@ if process.env["USE_PROM_METRICS"] != "true"
 else
  	console.log("using prometheus")
 
-
-prom = require('prom-client')
-Register = require('prom-client').register
+prom = require('./prom_wrapper')
 
 collectDefaultMetrics = prom.collectDefaultMetrics
 
 appname = "unknown"
 hostname = require('os').hostname()
 
-buildKey = (key)-> "#{name}.#{hostname}.#{key}"
-buildGlobalKey = (key)-> "#{name}.global.#{key}"
-
-promMetrics = {}
-
 destructors = []
 
 require "./uv_threadpool_size"
 
 module.exports = Metrics =
-	register:Register
-	initialize: (_name) ->
+	register: prom.registry
+
+	initialize: (_name, opts = {}) ->
 		appname = _name
 		collectDefaultMetrics({ timeout: 5000, prefix: Metrics.buildPromKey()})
-
+		if opts.ttlInMinutes
+			prom.ttlInMinutes = opts.ttlInMinutes
 
 		console.log("ENABLE_TRACE_AGENT set to #{process.env['ENABLE_TRACE_AGENT']}")
 		if process.env['ENABLE_TRACE_AGENT'] == "true"
@@ -67,8 +62,8 @@ module.exports = Metrics =
 
 	injectMetricsRoute: (app) ->
 		app.get('/metrics', (req, res) -> 
-			res.set('Content-Type', Register.contentType)
-			res.end(Register.metrics())
+			res.set('Content-Type', prom.registry.contentType)
+			res.end(prom.registry.metrics())
 		)
 
 	buildPromKey: (key = "")->
@@ -82,43 +77,23 @@ module.exports = Metrics =
 
 	inc : (key, sampleRate = 1, opts = {})->
 		key = Metrics.buildPromKey(key)
-		if !promMetrics[key]?
-			promMetrics[key] = new prom.Counter({
-				name: key,
-				help: key, 
-				labelNames: ['app','host','status','method', 'path']
-			})
 		opts.app = appname
 		opts.host = hostname
-		promMetrics[key].inc(opts)
+		prom.metric('counter', key).inc(opts)
 		if process.env['DEBUG_METRICS']
 			console.log("doing inc", key, opts)
 
 	count : (key, count, sampleRate = 1)->
 		key = Metrics.buildPromKey(key)
-		if !promMetrics[key]?
-			promMetrics[key] = new prom.Counter({
-				name: key,
-				help: key, 
-				labelNames: ['app','host']
-			})
-		promMetrics[key].inc({app: appname, host: hostname}, count)
+		prom.metric('counter', key).inc({app: appname, host: hostname}, count)
 		if process.env['DEBUG_METRICS']
 			console.log("doing count/inc", key, opts)
 
 	timing: (key, timeSpan, sampleRate, opts = {})->
 		key = Metrics.buildPromKey("timer_" + key)
-		if !promMetrics[key]?
-			promMetrics[key] = new prom.Summary({
-				name: key,
-				help: key,
-				maxAgeSeconds: 600,
-				ageBuckets: 10,
-				labelNames: ['app', 'host', 'path', 'status_code', 'method', 'collection', 'query']
-			})
 		opts.app = appname
 		opts.host = hostname
-		promMetrics[key].observe(opts, timeSpan)
+		prom.metric('summary', key).observe(opts, timeSpan)
 		if process.env['DEBUG_METRICS']
 			console.log("doing timing", key, opts)
 
@@ -137,25 +112,13 @@ module.exports = Metrics =
 
 	gauge : (key, value, sampleRate = 1, opts)->
 		key = Metrics.buildPromKey(key)
-		if !promMetrics[key]?
-			promMetrics[key] = new prom.Gauge({
-				name: key,
-				help: key, 
-				labelNames: ['app','host', 'status']
-			})
-		promMetrics[key].set({app: appname, host: hostname, status: opts?.status}, this.sanitizeValue(value))
+		prom.metric('gague', key).set({app: appname, host: hostname, status: opts?.status}, this.sanitizeValue(value))
 		if process.env['DEBUG_METRICS']
 			console.log("doing gauge", key, opts)
 			
 	globalGauge: (key, value, sampleRate = 1, opts)->
 		key = Metrics.buildPromKey(key)
-		if !promMetrics[key]?
-			promMetrics[key] = new prom.Gauge({
-				name: key,
-				help: key, 
-				labelNames: ['app','host', 'status']
-			})
-		promMetrics[key].set({app: appname, status: opts?.status},this.sanitizeValue(value))
+		prom.metric('gague', key).set({app: appname, status: opts?.status},this.sanitizeValue(value))
 
 	mongodb: require "./mongodb"
 	http: require "./http"
