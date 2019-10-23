@@ -1,8 +1,10 @@
 const { promisify } = require('util')
+const pLimit = require('p-limit')
 
 module.exports = {
   promisifyAll,
-  expressify
+  expressify,
+  promiseMapWithLimit
 }
 
 /**
@@ -42,4 +44,14 @@ function expressify(fn) {
   return (req, res, next) => {
     fn(req, res, next).catch(next)
   }
+}
+
+/**
+ * Map values in `array` with the async function `fn`
+ *
+ * Limit the number of unresolved promises to `concurrency`.
+ */
+function promiseMapWithLimit(concurrency, array, fn) {
+  const limit = pLimit(concurrency)
+  return Promise.all(array.map(x => limit(() => fn(x))))
 }

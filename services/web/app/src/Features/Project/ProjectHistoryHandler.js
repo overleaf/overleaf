@@ -13,15 +13,15 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let ProjectHistoryHandler
 const { Project } = require('../../models/Project')
 const ProjectDetailsHandler = require('./ProjectDetailsHandler')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const HistoryManager = require('../History/HistoryManager')
 const ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
+const { promisifyAll } = require('../../util/promises')
 
-module.exports = ProjectHistoryHandler = {
+const ProjectHistoryHandler = {
   setHistoryId(project_id, history_id, callback) {
     // reject invalid history ids
     if (callback == null) {
@@ -171,3 +171,6 @@ function __guard__(value, transform) {
     ? transform(value)
     : undefined
 }
+
+ProjectHistoryHandler.promises = promisifyAll(ProjectHistoryHandler)
+module.exports = ProjectHistoryHandler

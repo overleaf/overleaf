@@ -1,10 +1,11 @@
 const { Project } = require('../../models/Project')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
+const { promisifyAll } = require('../../util/promises')
 
 const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex']
 
-module.exports = {
+const ProjectOptionsHandler = {
   setCompiler(projectId, compiler, callback) {
     logger.log({ projectId, compiler }, 'setting the compiler')
     if (!compiler) {
@@ -72,3 +73,6 @@ module.exports = {
     Project.update(conditions, update, {}, callback)
   }
 }
+
+ProjectOptionsHandler.promises = promisifyAll(ProjectOptionsHandler)
+module.exports = ProjectOptionsHandler

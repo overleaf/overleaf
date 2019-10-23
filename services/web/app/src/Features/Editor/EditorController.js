@@ -13,7 +13,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let EditorController
 const logger = require('logger-sharelatex')
 const Metrics = require('metrics-sharelatex')
 const sanitize = require('sanitizer')
@@ -26,8 +25,9 @@ const EditorRealTimeController = require('./EditorRealTimeController')
 const async = require('async')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const _ = require('underscore')
+const { promisifyAll } = require('../../util/promises')
 
-module.exports = EditorController = {
+const EditorController = {
   addDoc(project_id, folder_id, docName, docLines, source, user_id, callback) {
     if (callback == null) {
       callback = function(error, doc) {}
@@ -725,3 +725,6 @@ module.exports = EditorController = {
     return callback()
   }
 }
+
+EditorController.promises = promisifyAll(EditorController)
+module.exports = EditorController

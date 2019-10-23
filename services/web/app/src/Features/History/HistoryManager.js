@@ -14,13 +14,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let HistoryManager
 const request = require('request')
 const settings = require('settings-sharelatex')
 const async = require('async')
 const UserGetter = require('../User/UserGetter')
+const { promisifyAll } = require('../../util/promises')
 
-module.exports = HistoryManager = {
+const HistoryManager = {
   initializeProject(callback) {
     if (callback == null) {
       callback = function(error, history_id) {}
@@ -219,3 +219,6 @@ function __guard__(value, transform) {
     ? transform(value)
     : undefined
 }
+
+HistoryManager.promises = promisifyAll(HistoryManager, { without: '_userView' })
+module.exports = HistoryManager
