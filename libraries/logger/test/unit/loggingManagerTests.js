@@ -17,6 +17,7 @@ describe('LoggingManager', function() {
     this.clock = sinon.useFakeTimers(this.start)
     this.captureException = sinon.stub()
     this.bunyanLogger = {
+      addStream: sinon.stub(),
       debug: sinon.stub(),
       error: sinon.stub(),
       fatal: sinon.stub(),
@@ -40,12 +41,20 @@ describe('LoggingManager', function() {
       Client: sinon.stub().returns(this.ravenClient)
     }
     this.Request = sinon.stub()
+    this.stackdriverStreamConfig = { stream: 'stackdriver' }
+    this.stackdriverClient = {
+      stream: sinon.stub().returns(this.stackdriverStreamConfig)
+    }
+    this.GCPLogging = {
+      LoggingBunyan: sinon.stub().returns(this.stackdriverClient)
+    }
     this.LoggingManager = SandboxedModule.require(modulePath, {
       globals: { console, process },
       requires: {
         bunyan: this.Bunyan,
         raven: this.Raven,
-        request: this.Request
+        request: this.Request,
+        '@google-cloud/logging-bunyan': this.GCPLogging
       }
     })
     this.loggerName = 'test'
@@ -374,6 +383,41 @@ describe('LoggingManager', function() {
 
       it('should not include buffered logs in error log', function() {
         expect(this.bunyanLogger.error.lastCall.args[0].logBuffer).be.undefined
+      })
+    })
+  })
+
+  describe('stackdriver logging', function() {
+    describe('when STACKDRIVER_LOGGING is unset', function() {
+      beforeEach(function() {
+        process.env['STACKDRIVER_LOGGING'] = undefined
+        this.LoggingManager.initialize(this.loggerName)
+      })
+
+      it('is disabled', function() {
+        expect(this.bunyanLogger.addStream).not.to.have.been.calledWith(
+          this.stackdriverStreamConfig
+        )
+      })
+    })
+
+    describe('when STACKDRIVER_LOGGING is true', function() {
+      beforeEach(function() {
+        process.env['STACKDRIVER_LOGGING'] = 'true'
+        this.LoggingManager.initialize(this.loggerName)
+      })
+
+      it('is enabled', function() {
+        expect(this.bunyanLogger.addStream).to.have.been.calledWith(
+          this.stackdriverStreamConfig
+        )
+      })
+
+      it('is configured properly', function() {
+        expect(this.GCPLogging.LoggingBunyan).to.have.been.calledWith({
+          logName: this.loggerName,
+          serviceContext: { service: this.loggerName }
+        })
       })
     })
   })

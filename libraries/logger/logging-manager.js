@@ -1,6 +1,8 @@
 const bunyan = require('bunyan')
 const request = require('request')
+const yn = require('yn')
 const OError = require('@overleaf/o-error')
+const GCPLogging = require('@google-cloud/logging-bunyan')
 
 // bunyan error serializer
 const errSerializer = function(err) {
@@ -24,23 +26,6 @@ const Logger = (module.exports = {
     this.defaultLevel =
       process.env['LOG_LEVEL'] || (this.isProduction ? 'warn' : 'debug')
     this.loggerName = name
-    this.ringBufferSize = parseInt(process.env['LOG_RING_BUFFER_SIZE']) || 0
-    const loggerStreams = [
-      {
-        level: this.defaultLevel,
-        stream: process.stdout
-      }
-    ]
-    if (this.ringBufferSize > 0) {
-      this.ringBuffer = new bunyan.RingBuffer({ limit: this.ringBufferSize })
-      loggerStreams.push({
-        level: 'trace',
-        type: 'raw',
-        stream: this.ringBuffer
-      })
-    } else {
-      this.ringBuffer = null
-    }
     this.logger = bunyan.createLogger({
       name,
       serializers: {
@@ -48,19 +33,11 @@ const Logger = (module.exports = {
         req: bunyan.stdSerializers.req,
         res: bunyan.stdSerializers.res
       },
-      streams: loggerStreams
+      streams: [{ level: this.defaultLevel, stream: process.stdout }]
     })
-    if (this.isProduction) {
-      // clear interval if already set
-      if (this.checkInterval) {
-        clearInterval(this.checkInterval)
-      }
-      // check for log level override on startup
-      this.checkLogLevel()
-      // re-check log level every minute
-      const checkLogLevel = () => this.checkLogLevel()
-      this.checkInterval = setInterval(checkLogLevel, 1000 * 60)
-    }
+    this._setupRingBuffer()
+    this._setupStackdriver()
+    this._setupLogLevelChecker()
     return this
   },
 
@@ -237,6 +214,45 @@ const Logger = (module.exports = {
       return this.raven.once('error', cb)
     } else {
       return callback()
+    }
+  },
+
+  _setupRingBuffer() {
+    this.ringBufferSize = parseInt(process.env['LOG_RING_BUFFER_SIZE']) || 0
+    if (this.ringBufferSize > 0) {
+      this.ringBuffer = new bunyan.RingBuffer({ limit: this.ringBufferSize })
+      this.logger.addStream({
+        level: 'trace',
+        type: 'raw',
+        stream: this.ringBuffer
+      })
+    } else {
+      this.ringBuffer = null
+    }
+  },
+
+  _setupStackdriver() {
+    const stackdriverEnabled = yn(process.env['STACKDRIVER_LOGGING'])
+    if (!stackdriverEnabled) {
+      return
+    }
+    const stackdriverClient = new GCPLogging.LoggingBunyan({
+      logName: this.loggerName,
+      serviceContext: { service: this.loggerName }
+    })
+    this.logger.addStream(stackdriverClient.stream(this.defaultLevel))
+  },
+
+  _setupLogLevelChecker() {
+    if (this.isProduction) {
+      // clear interval if already set
+      if (this.checkInterval) {
+        clearInterval(this.checkInterval)
+      }
+      // check for log level override on startup
+      this.checkLogLevel()
+      // re-check log level every minute
+      this.checkInterval = setInterval(this.checkLogLevel.bind(this), 1000 * 60)
     }
   }
 })
