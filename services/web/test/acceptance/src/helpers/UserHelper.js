@@ -158,6 +158,11 @@ module.exports = class UserHelper {
     if (body.message && body.message.type === 'error') {
       throw new Error(`register api error: ${body.message.text}`)
     }
+    if (body.redir === '/institutional-login') {
+      throw new Error(
+        `cannot register intitutional email: ${options.json.email}`
+      )
+    }
     userHelper.user = await UserGetter.promises.getUser({
       email: userData.email
     })
