@@ -26,6 +26,7 @@ services:
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
+      TEXLIVE_IMAGE:
     depends_on:
       - mongo
       - redis
