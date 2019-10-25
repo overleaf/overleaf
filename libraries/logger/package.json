@@ -7,7 +7,7 @@
     "url": "http://github.com/sharelatex/logger-sharelatex.git"
   },
   "license": "AGPL-3.0-only",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "scripts": {
     "test": "mocha test/**/*.js",
     "format": "prettier-eslint '**/*.js' --list-different",
