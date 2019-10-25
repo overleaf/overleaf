@@ -8,6 +8,8 @@ block head-scripts
 		window.recurlyApiKey = "!{settings.apis.recurly.publicKey}"
 		window.couponCode = !{StringHelper.stringifyJsonForScript(couponCode)}
 		window.recomendedCurrency = !{StringHelper.stringifyJsonForScript(currency.slice(0,3))}
+		window.ITMCampaign = '#{ITMCampaign}'
+		window.ITMContent = '#{ITMContent}'
 
 block content
 	.content.content-alt

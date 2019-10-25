@@ -127,7 +127,9 @@ module.exports = SubscriptionController = {
                     }),
                     showCouponField: req.query.scf,
                     showVatField: req.query.svf,
-                    couponCode: req.query.cc || ''
+                    couponCode: req.query.cc || '',
+                    ITMCampaign: req.query.itm_campaign,
+                    ITMContent: req.query.itm_content
                   })
                 }
               )

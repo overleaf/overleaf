@@ -225,7 +225,9 @@ define(['base', 'directives/creditCards'], App =>
               country: $scope.data.country,
               state: $scope.data.state,
               postal_code: $scope.data.postal_code
-            }
+            },
+            ITMCampaign: window.ITMCampaign,
+            ITMContent: window.ITMContent
           }
         }
 

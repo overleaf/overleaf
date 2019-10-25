@@ -649,7 +649,9 @@ describe('RecurlyWrapper', function() {
           country: 'some_country',
           state: 'some_state',
           zip: 'some_zip'
-        }
+        },
+        ITMCampaign: 'itm-campaign-value',
+        ITMContent: 'itm-content-value'
       }
       this.subscription = {}
       this.recurlyTokenIds = {
@@ -698,6 +700,16 @@ describe('RecurlyWrapper', function() {
 			<three_d_secure_action_result_token_id>a-3d-token-id</three_d_secure_action_result_token_id>
 		</billing_info>
 	</account>
+	<custom_fields>
+		<custom_field>
+			<name>itm_campaign</name>
+			<value>itm-campaign-value</value>
+		</custom_field>
+		<custom_field>
+			<name>itm_content</name>
+			<value>itm-content-value</value>
+		</custom_field>
+	</custom_fields>
 </subscription>\
 `)
         return done()
@@ -1000,7 +1012,9 @@ describe('RecurlyWrapper', function() {
             country: 'some_country',
             state: 'some_state',
             zip: 'some_zip'
-          }
+          },
+          ITMCampaign: 'itm-campaign-value',
+          ITMContent: 'itm-content-value'
         })
       })
     })
@@ -1505,6 +1519,16 @@ describe('RecurlyWrapper', function() {
 	<account>
 		<account_code>some_id</account_code>
 	</account>
+	<custom_fields>
+		<custom_field>
+			<name>itm_campaign</name>
+			<value>itm-campaign-value</value>
+		</custom_field>
+		<custom_field>
+			<name>itm_content</name>
+			<value>itm-content-value</value>
+		</custom_field>
+	</custom_fields>
 </subscription>\
 `)
             return done()
