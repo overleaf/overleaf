@@ -19,12 +19,6 @@
   "settings": {
   },
   "rules": {
-    "max-len": ["error", {
-      "ignoreUrls": true,
-      // Ignore long describe/it test blocks, long import/require statements
-      "ignorePattern": "(^\\s*(it|describe)\\s*\\(['\"]|^import\\s*.*\\s*from\\s*['\"]|^.*\\s*=\\s*require\\(['\"])"
-    }],
-
     // Add some mocha specific rules
     "mocha/handle-done-callback": "error",
     "mocha/no-exclusive-tests": "error",
