@@ -80,8 +80,7 @@ const UserPagesController = {
     }
     res.render('user/login', {
       title: 'login',
-      email: req.query.email,
-      samlBeta: req.session.samlBeta
+      email: req.query.email
     })
   },
 
