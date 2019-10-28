@@ -528,7 +528,7 @@ templates.ownershipTransferConfirmationPreviousOwner = NoCTAEmailTemplate({
     return `\
 As per your request, we have made ${nameAndEmail} the owner of ${projectName}.
 
-If you haven't asked to change the owner of ${projectName}, please get in touch
+If you haven't asked to change the owner of **${projectName}**, please get in touch
 with us via ${settings.adminEmail}.
 `
   }
@@ -552,7 +552,7 @@ templates.ownershipTransferConfirmationNewOwner = CTAEmailTemplate({
       SpamSafe.safeProjectName(opts.project.name, 'a project')
     )
     return `\
-${nameAndEmail} has made you the owner of ${projectName}. You can now
+${nameAndEmail} has made you the owner of **${projectName}**. You can now
 manage ${projectName} sharing settings.
 `
   },
