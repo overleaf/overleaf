@@ -1,6 +1,6 @@
 prom = require('prom-client')
 registry = require('prom-client').register
-metrics = {}
+metrics = new Map()
 
 
 optsKey = (opts) ->
@@ -33,16 +33,16 @@ PromWrapper =
 	registry: registry
 
 	metric: (type, name) ->
-		registry.getSingleMetric(name) || new MetricWrapper(type, name)
+		metrics.get(name) || new MetricWrapper(type, name)
 
 	collectDefaultMetrics: prom.collectDefaultMetrics
 
 
 class MetricWrapper
 	constructor: (type, name) ->
-		metrics[name] = this
+		metrics.set(name, this)
 		@name = name
-		@instances = {}
+		@instances = new Map()
 		@lastAccess = new Date()
 		@metric = switch type
 			when "counter"
@@ -77,22 +77,22 @@ class MetricWrapper
 
 	sweep: () ->
 		thresh = new Date(Date.now() - 1000 * 60 * PromWrapper.ttlInMinutes)
-		for key in Object.keys(@instances)
-			if thresh > @instances[key].time
+		@instances.forEach (instance, key) =>
+			if thresh > instance.time
 				if process.env['DEBUG_METRICS']
-					console.log("Sweeping stale metric instance", @name, opts: @instances[key].opts, key)
-				@metric.remove(optsAsArgs(@instances[key].opts, @metric.labelNames)...)
+					console.log("Sweeping stale metric instance", @name, opts: instance.opts, key)
+				@metric.remove(optsAsArgs(instance.opts, @metric.labelNames)...)
 
 		if thresh > @lastAccess
 			if process.env['DEBUG_METRICS']
-				console.log("Sweeping stale metric", @name)
-			delete metrics[@name]
+				console.log("Sweeping stale metric", @name, thresh, @lastAccess)
+			metrics.delete(@name)
 			registry.removeSingleMetric(@name)
 
 	_execMethod: (method, opts, value) ->
 		opts = extendOpts(opts, @metric.labelNames)
 		key = optsKey(opts)
-		@instances[key] = { time: new Date(), opts } unless key == ''
+		@instances.set(key, { time: new Date(), opts }) unless key == ''
 		@lastAccess = new Date()
 		@metric[method](opts, value)
 
@@ -106,8 +106,8 @@ unless PromWrapper.sweepRegistered
 			if PromWrapper.ttlInMinutes
 				if process.env['DEBUG_METRICS']
 					console.log("Sweeping metrics")
-				for key in Object.keys(metrics)
-					metrics[key].sweep()
+				metrics.forEach (metric, key) =>
+					metric.sweep()
 	60000)
 
 
