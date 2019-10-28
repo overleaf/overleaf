@@ -1,6 +1,17 @@
 mixin aboutInstitutionLink()
 	a(href="/") #{translate("find_out_more_about_institution_login")}.
 
+mixin btnMakePrimaryDisabled(tooltip)
+	div(
+		tooltip=tooltip
+		tooltip-enable="!ui.isMakingRequest"
+		ng-if="!userEmail.default && (!userEmail.confirmedAt || ui.isMakingRequest) && !institutionAlreadyLinked(userEmail)"
+	)
+		button.btn.btn-sm.btn-success.affiliations-table-inline-action(
+			disabled
+			type="button"
+		) #{translate("make_primary")}
+
 form.row(
 	ng-controller="UserAffiliationsController"
 	name="affiliationsForm"
@@ -73,15 +84,10 @@ form.row(
 					td.affiliations-table-inline-actions
 						// Disabled buttons don't work with tooltips, due to pointer-events: none,
 						// so create a wrapper for the tooltip
-						div.affiliations-table-inline-action-disabled-wrapper(
-							tooltip=translate("please_confirm_your_email_before_making_it_default")
-							tooltip-enable="!ui.isMakingRequest"
-							ng-if="!userEmail.default && (!userEmail.confirmedAt || ui.isMakingRequest) && !institutionAlreadyLinked(userEmail)"
-						)
-							button.btn.btn-sm.btn-success.affiliations-table-inline-action(
-								disabled
-								type="button"
-							) #{translate("make_primary")}
+						.affiliations-table-inline-action-disabled-wrapper(ng-if="showInstitutionTooltip(userEmail)")
+							+btnMakePrimaryDisabled("Please confirm your email by linking to your institutional account before making it the primary email.")
+						.affiliations-table-inline-action-disabled-wrapper(ng-if="!showInstitutionTooltip(userEmail)")
+							+btnMakePrimaryDisabled(translate("please_confirm_your_email_before_making_it_default"))
 						button.btn.btn-sm.btn-success.affiliations-table-inline-action(
 							tooltip=translate("make_email_primary_description")
 							ng-if="!userEmail.default && (userEmail.confirmedAt && !ui.isMakingRequest)"

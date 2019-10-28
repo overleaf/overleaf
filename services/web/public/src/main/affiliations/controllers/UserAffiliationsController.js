@@ -30,15 +30,29 @@ define(['base'], App =>
     }
     $scope.hasSamlBeta = ExposedSettings.hasSamlBeta
     $scope.hasSamlFeature = ExposedSettings.hasSamlFeature
+    $scope.canUseSamlFeature = $scope.hasSamlFeature || $scope.hasSamlBeta
     $scope.samlInitPath = ExposedSettings.samlInitPath
+    $scope.showInstitutionTooltip = emailData => {
+      if (!emailData.affiliation || !$scope.canUseSamlFeature) {
+        return false
+      }
+      if (
+        emailData.affiliation.institution &&
+        emailData.affiliation.institution.ssoEnabled
+      ) {
+        return true
+      }
+      return false
+    }
     $scope.shouldShowRolesAndAddEmailButton = () => {
       const newAffiliation = $scope.newAffiliation
-      const hasSamlFeature = $scope.hasSamlFeature || $scope.hasSamlBeta
       return (
         !newAffiliation ||
         (newAffiliation && !newAffiliation.university) ||
-        (!hasSamlFeature && newAffiliation && newAffiliation.university) ||
-        (hasSamlFeature &&
+        (!$scope.canUseSamlFeature &&
+          newAffiliation &&
+          newAffiliation.university) ||
+        ($scope.canUseSamlFeature &&
           newAffiliation &&
           newAffiliation.university &&
           !newAffiliation.university.ssoEnabled)
