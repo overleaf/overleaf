@@ -15,10 +15,14 @@ define(['base'], App =>
       const resetHeight = function() {
         const curHeight = el.outerHeight()
         const fitHeight = el.prop('scrollHeight')
-
-        if (fitHeight > curHeight && el.val() !== '') {
+        // clear height if text area is empty
+        if (el.val() === '') {
+          el.css('height', 'unset')
+        }
+        // otherwise expand to fit text
+        else if (fitHeight > curHeight) {
           scope.$emit('expandable-text-area:resize')
-          return el.css('height', fitHeight)
+          el.css('height', fitHeight)
         }
       }
 
