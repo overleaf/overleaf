@@ -1,22 +1,3 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-cond-assign,
-    no-return-assign,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 define([
   'base',
   'ace/ace',
@@ -41,17 +22,10 @@ define([
     eventTracking,
     localStorage
   ) {
-    // enable per-user containers by default
-    const perUserCompile = true
     let autoCompile = true
 
     // pdf.view = uncompiled | pdf | errors
-    $scope.pdf.view = __guard__(
-      $scope != null ? $scope.pdf : undefined,
-      x => x.url
-    )
-      ? 'pdf'
-      : 'uncompiled'
+    $scope.pdf.view = $scope.pdf.url ? 'pdf' : 'uncompiled'
     $scope.shouldShowLogs = false
     $scope.wikiEnabled = window.wikiEnabled
 
@@ -60,30 +34,31 @@ define([
 
     const logsContainerEl = document.querySelector('.pdf-logs')
     const filesDropdownEl =
-      logsContainerEl != null
-        ? logsContainerEl.querySelector('.files-dropdown')
-        : undefined
+      logsContainerEl && logsContainerEl.querySelector('.files-dropdown')
 
     // get the top coordinate of the files dropdown as a ratio (to the logs container height)
     // logs container supports scrollable content, so it's possible that ratio > 1.
-    const getFilesDropdownTopCoordAsRatio = () =>
-      (filesDropdownEl != null
-        ? filesDropdownEl.getBoundingClientRect().top
-        : undefined) /
-      (logsContainerEl != null
-        ? logsContainerEl.getBoundingClientRect().height
-        : undefined)
+    function getFilesDropdownTopCoordAsRatio() {
+      if (filesDropdownEl == null || logsContainerEl == null) {
+        return 0
+      }
+      return (
+        filesDropdownEl.getBoundingClientRect().top /
+        logsContainerEl.getBoundingClientRect().height
+      )
+    }
 
-    $scope.$watch('shouldShowLogs', function(shouldShow) {
+    $scope.$watch('shouldShowLogs', shouldShow => {
       if (shouldShow) {
-        return $scope.$applyAsync(
-          () => ($scope.shouldDropUp = getFilesDropdownTopCoordAsRatio() > 0.65)
-        )
+        $scope.$applyAsync(() => {
+          $scope.shouldDropUp = getFilesDropdownTopCoordAsRatio() > 0.65
+        })
       }
     })
 
-    $scope.trackLogHintsLearnMore = () =>
+    $scope.trackLogHintsLearnMore = function() {
       eventTracking.sendMB('logs-hints-learn-more')
+    }
 
     if (ace.require('ace/lib/useragent').isMac) {
       $scope.modifierKey = 'Cmd'
@@ -92,17 +67,14 @@ define([
     }
 
     // utility for making a query string from a hash, could use jquery $.param
-    const createQueryString = function(args) {
-      const qs_args = (() => {
-        const result = []
-        for (let k in args) {
-          const v = args[k]
-          result.push(`${k}=${v}`)
-        }
-        return result
-      })()
-      if (qs_args.length) {
-        return `?${qs_args.join('&')}`
+    function createQueryString(args) {
+      const qsArgs = []
+      for (const k in args) {
+        const v = args[k]
+        qsArgs.push(`${k}=${v}`)
+      }
+      if (qsArgs.length) {
+        return `?${qsArgs.join('&')}`
       } else {
         return ''
       }
@@ -114,23 +86,23 @@ define([
       return tmp.textContent || tmp.innerText || ''
     }
 
-    $scope.$on('project:joined', function() {
+    $scope.$on('project:joined', () => {
       if (!autoCompile) {
         return
       }
       autoCompile = false
       $scope.recompile({ isAutoCompileOnLoad: true })
-      return ($scope.hasPremiumCompile =
-        $scope.project.features.compileGroup === 'priority')
+      $scope.hasPremiumCompile =
+        $scope.project.features.compileGroup === 'priority'
     })
 
     $scope.$on('pdf:error:display', function() {
       $scope.pdf.view = 'errors'
-      return ($scope.pdf.renderingError = true)
+      $scope.pdf.renderingError = true
     })
 
     let autoCompileInterval = null
-    const autoCompileIfReady = function() {
+    function autoCompileIfReady() {
       if (
         $scope.pdf.compiling ||
         !$scope.autocompile_enabled ||
@@ -143,12 +115,12 @@ define([
       const autoCompileLintingError =
         ide.$scope.hasLintingError && ide.$scope.settings.syntaxValidation
       if ($scope.autoCompileLintingError !== autoCompileLintingError) {
-        $scope.$apply(function() {
+        $scope.$apply(() => {
           $scope.autoCompileLintingError = autoCompileLintingError
           // We've likely been waiting a while until the user fixed the linting, but we
           // don't want to compile as soon as it is fixed, so reset the timeout.
           $scope.startedTryingAutoCompileAt = Date.now()
-          return ($scope.docLastChangedAt = Date.now())
+          $scope.docLastChangedAt = Date.now()
         })
       }
       if (autoCompileLintingError && $scope.stop_on_validation_error) {
@@ -182,24 +154,25 @@ define([
       }
     }
 
-    var triggerAutoCompile = () =>
+    function triggerAutoCompile() {
       $scope.recompile({ isAutoCompileOnChange: true })
+    }
 
-    const startTryingAutoCompile = function() {
+    function startTryingAutoCompile() {
       if (autoCompileInterval != null) {
         return
       }
       $scope.startedTryingAutoCompileAt = Date.now()
-      return (autoCompileInterval = setInterval(autoCompileIfReady, 200))
+      autoCompileInterval = setInterval(autoCompileIfReady, 200)
     }
 
-    const stopTryingAutoCompile = function() {
+    function stopTryingAutoCompile() {
       clearInterval(autoCompileInterval)
-      return (autoCompileInterval = null)
+      autoCompileInterval = null
     }
 
     $scope.changesToAutoCompile = false
-    $scope.$watch('pdf.uncompiled', function(uncompiledChanges) {
+    $scope.$watch('pdf.uncompiled', uncompiledChanges => {
       // don't autocompile if disabled or the pdf is not visible
       if (
         $scope.pdf.uncompiled &&
@@ -207,14 +180,14 @@ define([
         !$scope.ui.pdfHidden
       ) {
         $scope.changesToAutoCompile = true
-        return startTryingAutoCompile()
+        startTryingAutoCompile()
       } else {
         $scope.changesToAutoCompile = false
-        return stopTryingAutoCompile()
+        stopTryingAutoCompile()
       }
     })
 
-    const recalculateUncompiledChanges = function() {
+    function recalculateUncompiledChanges() {
       if ($scope.docLastChangedAt == null) {
         $scope.pdf.uncompiled = false
       } else if (
@@ -227,23 +200,26 @@ define([
       }
     }
 
-    const _updateDocLastChangedAt = function() {
+    function _updateDocLastChangedAt() {
       $scope.docLastChangedAt = Date.now()
-      return recalculateUncompiledChanges()
+      recalculateUncompiledChanges()
     }
 
-    const onDocChanged = function() {
+    function onDocChanged() {
       $scope.autoCompileLintingError = false
-      return _updateDocLastChangedAt()
+      _updateDocLastChangedAt()
     }
 
-    const onDocSaved = () =>
+    function onDocSaved() {
       // We use the save as a trigger too, to account for the delay between the client
       // and server. Otherwise, we might have compiled after the user made
       // the change on the client, but before the server had it.
       _updateDocLastChangedAt()
+    }
 
-    const onCompilingStateChanged = compiling => recalculateUncompiledChanges()
+    function onCompilingStateChanged(compiling) {
+      recalculateUncompiledChanges()
+    }
 
     ide.$scope.$on('doc:changed', onDocChanged)
     ide.$scope.$on('doc:saved', onDocSaved)
@@ -251,13 +227,13 @@ define([
 
     $scope.autocompile_enabled =
       localStorage(`autocompile_enabled:${$scope.project_id}`) || false
-    $scope.$watch('autocompile_enabled', function(newValue, oldValue) {
+    $scope.$watch('autocompile_enabled', (newValue, oldValue) => {
       if (newValue != null && oldValue !== newValue) {
         if (newValue === true) {
           autoCompileIfReady()
         }
         localStorage(`autocompile_enabled:${$scope.project_id}`, newValue)
-        return eventTracking.sendMB('autocompile-setting-changed', {
+        eventTracking.sendMB('autocompile-setting-changed', {
           value: newValue
         })
       }
@@ -269,24 +245,22 @@ define([
     )
     if ($scope.stop_on_validation_error == null) {
       $scope.stop_on_validation_error = true
-    } // turn on for all users by default
-    $scope.$watch('stop_on_validation_error', function(new_value, old_value) {
-      if (new_value != null && old_value !== new_value) {
-        return localStorage(
-          `stop_on_validation_error:${$scope.project_id}`,
-          new_value
-        )
+    }
+    // turn on for all users by default
+    $scope.$watch('stop_on_validation_error', (newValue, oldValue) => {
+      if (newValue != null && oldValue !== newValue) {
+        localStorage(`stop_on_validation_error:${$scope.project_id}`, newValue)
       }
     })
 
     $scope.draft = localStorage(`draft:${$scope.project_id}`) || false
-    $scope.$watch('draft', function(new_value, old_value) {
-      if (new_value != null && old_value !== new_value) {
-        return localStorage(`draft:${$scope.project_id}`, new_value)
+    $scope.$watch('draft', (newValue, oldValue) => {
+      if (newValue != null && oldValue !== newValue) {
+        localStorage(`draft:${$scope.project_id}`, newValue)
       }
     })
 
-    const sendCompileRequest = function(options) {
+    function sendCompileRequest(options) {
       if (options == null) {
         options = {}
       }
@@ -305,24 +279,24 @@ define([
         eventTracking.sendMB('syntax-check-request')
       }
       // send appropriate check type to clsi
-      let checkType = (() => {
-        switch (false) {
-          case !$scope.check:
-            return 'validate' // validate only
-          case !options.try:
-            return 'silent' // allow use to try compile once
-          case !$scope.stop_on_validation_error:
-            return 'error' // try to compile
-          default:
-            return 'silent' // ignore errors
-        }
-      })()
+      let checkType
+      if ($scope.check) {
+        checkType = 'validate' // validate only
+      } else if (options.try) {
+        checkType = 'silent' // allow use to try compile once
+      } else if ($scope.stop_on_validation_error) {
+        checkType = 'error' // try to compile
+      } else {
+        checkType = 'silent' // ignore errors
+      }
+
       // FIXME: Temporarily disable syntax checking as it is causing
       // excessive support requests for projects migrated from v1
       // https://github.com/overleaf/sharelatex/issues/911
       if (checkType === 'error') {
         checkType = 'silent'
       }
+
       return $http.post(
         url,
         {
@@ -338,7 +312,7 @@ define([
       )
     }
 
-    const buildPdfDownloadUrl = function(pdfDownloadDomain, path) {
+    function buildPdfDownloadUrl(pdfDownloadDomain, path) {
       // we only download builds from compiles server for security reasons
       if (
         pdfDownloadDomain != null &&
@@ -351,10 +325,9 @@ define([
       }
     }
 
-    const parseCompileResponse = function(response) {
+    function parseCompileResponse(response) {
       // keep last url
-      let file
-      const last_pdf_url = $scope.pdf.url
+      const lastPdfUrl = $scope.pdf.url
       const { pdfDownloadDomain } = response
       // Reset everything
       $scope.pdf.error = false
@@ -373,10 +346,8 @@ define([
 
       // make a cache to look up files by name
       const fileByPath = {}
-      if ((response != null ? response.outputFiles : undefined) != null) {
-        for (file of Array.from(
-          response != null ? response.outputFiles : undefined
-        )) {
+      if (response.outputFiles != null) {
+        for (const file of response.outputFiles) {
           fileByPath[file.path] = file
         }
       }
@@ -414,7 +385,7 @@ define([
         ['validation-fail', 'validation-pass'].includes(response.status)
       ) {
         $scope.pdf.view = 'pdf'
-        $scope.pdf.url = buildPdfDownloadUrl(pdfDownloadDomain, last_pdf_url)
+        $scope.pdf.url = buildPdfDownloadUrl(pdfDownloadDomain, lastPdfUrl)
         $scope.shouldShowLogs = true
         if (response.status === 'validation-fail') {
           $scope.pdf.failedCheck = true
@@ -424,7 +395,7 @@ define([
       } else if (response.status === 'exited') {
         $scope.pdf.view = 'pdf'
         $scope.pdf.compileExited = true
-        $scope.pdf.url = buildPdfDownloadUrl(pdfDownloadDomain, last_pdf_url)
+        $scope.pdf.url = buildPdfDownloadUrl(pdfDownloadDomain, lastPdfUrl)
         $scope.shouldShowLogs = true
         fetchLogs(fileByPath, { pdfDownloadDomain })
       } else if (response.status === 'autocompile-backoff') {
@@ -462,26 +433,17 @@ define([
         $scope.pdf.view = 'errors'
         $scope.pdf.compileInProgress = true
       } else if (response.status === 'success') {
-        let build
         $scope.pdf.view = 'pdf'
         $scope.shouldShowLogs = false
 
         // define the base url. if the pdf file has a build number, pass it to the clsi in the url
-        if (
-          (fileByPath['output.pdf'] != null
-            ? fileByPath['output.pdf'].url
-            : undefined) != null
-        ) {
+        if (fileByPath['output.pdf'] && fileByPath['output.pdf'].url) {
           $scope.pdf.url = buildPdfDownloadUrl(
             pdfDownloadDomain,
             fileByPath['output.pdf'].url
           )
-        } else if (
-          (fileByPath['output.pdf'] != null
-            ? fileByPath['output.pdf'].build
-            : undefined) != null
-        ) {
-          ;({ build } = fileByPath['output.pdf'])
+        } else if (fileByPath['output.pdf'] && fileByPath['output.pdf'].build) {
+          const { build } = fileByPath['output.pdf']
           $scope.pdf.url = buildPdfDownloadUrl(
             pdfDownloadDomain,
             `/project/${$scope.project_id}/build/${build}/output/output.pdf`
@@ -493,11 +455,7 @@ define([
           )
         }
         // check if we need to bust cache (build id is unique so don't need it in that case)
-        if (
-          (fileByPath['output.pdf'] != null
-            ? fileByPath['output.pdf'].build
-            : undefined) == null
-        ) {
+        if (fileByPath['output.pdf'] && fileByPath['output.pdf'].build) {
           qs.cache_bust = `${Date.now()}`
         }
         // convert the qs hash into a query string and append it
@@ -530,7 +488,7 @@ define([
       if (response.clsiServerId != null) {
         qs.clsiserverid = response.clsiServerId
       }
-      for (file of Array.from(response.outputFiles)) {
+      for (const file of response.outputFiles) {
         if (IGNORE_FILES.indexOf(file.path) === -1) {
           const isOutputFile = /^output\./.test(file.path)
           $scope.pdf.outputFiles.push({
@@ -539,7 +497,7 @@ define([
               ? `${file.path.replace(/^output\./, '')} file`
               : file.path,
             url:
-              `/project/${project_id}/output/${file.path}` +
+              `/project/${$scope.project_id}/output/${file.path}` +
               createQueryString(qs),
             main: !!isOutputFile
           })
@@ -547,13 +505,13 @@ define([
       }
 
       // sort the output files into order, main files first, then others
-      return $scope.pdf.outputFiles.sort(
+      $scope.pdf.outputFiles.sort(
         (a, b) => b.main - a.main || a.name.localeCompare(b.name)
       )
     }
 
-    var fetchLogs = function(fileByPath, options) {
-      let blgFile, chktexFile, logFile, response
+    function fetchLogs(fileByPath, options) {
+      let blgFile, chktexFile, logFile
       if (options != null ? options.validation : undefined) {
         chktexFile = fileByPath['output.chktex']
       } else {
@@ -561,7 +519,7 @@ define([
         blgFile = fileByPath['output.blg']
       }
 
-      const getFile = function(name, file) {
+      function getFile(name, file) {
         const opts = {
           method: 'GET',
           params: {
@@ -569,10 +527,10 @@ define([
             clsiserverid: ide.clsiServerId
           }
         }
-        if ((file != null ? file.url : undefined) != null) {
+        if (file && file.url) {
           // FIXME clean this up when we have file.urls out consistently
           opts.url = file.url
-        } else if ((file != null ? file.build : undefined) != null) {
+        } else if (file && file.build) {
           opts.url = `/project/${$scope.project_id}/build/${
             file.build
           }/output/${name}`
@@ -580,7 +538,7 @@ define([
           opts.url = `/project/${$scope.project_id}/output/${name}`
         }
         // check if we need to bust cache (build id is unique so don't need it in that case)
-        if ((file != null ? file.build : undefined) == null) {
+        if (file && file.build) {
           opts.params.cache_bust = `${Date.now()}`
         }
         opts.url = buildPdfDownloadUrl(options.pdfDownloadDomain, opts.url)
@@ -594,36 +552,31 @@ define([
         warnings: []
       }
 
-      const accumulateResults = newEntries =>
-        (() => {
-          const result = []
-          for (let key of ['all', 'errors', 'warnings']) {
-            if (newEntries.type != null) {
-              for (let entry of Array.from(newEntries[key])) {
-                entry.type = newEntries.type
-              }
+      function accumulateResults(newEntries) {
+        for (let key of ['all', 'errors', 'warnings']) {
+          if (newEntries.type != null) {
+            for (let entry of newEntries[key]) {
+              entry.type = newEntries.type
             }
-            result.push(
-              (logEntries[key] = logEntries[key].concat(newEntries[key]))
-            )
           }
-          return result
-        })()
+          logEntries[key] = logEntries[key].concat(newEntries[key])
+        }
+      }
 
       // use the parsers for each file type
-      const processLog = function(log) {
+      function processLog(log) {
         $scope.pdf.rawLog = log
         const { errors, warnings, typesetting } = HumanReadableLogs.parse(log, {
           ignoreDuplicates: true
         })
         const all = [].concat(errors, warnings, typesetting)
-        return accumulateResults({ all, errors, warnings })
+        accumulateResults({ all, errors, warnings })
       }
 
-      const processChkTex = function(log) {
+      function processChkTex(log) {
         const errors = []
         const warnings = []
-        for (let line of Array.from(log.split('\n'))) {
+        for (let line of log.split('\n')) {
           var m
           if ((m = line.match(/^(\S+):(\d+):(\d+): (Error|Warning): (.*)/))) {
             const result = {
@@ -651,53 +604,44 @@ define([
           errors: errors.length,
           warnings: warnings.length
         })
-        return accumulateResults(logHints)
+        accumulateResults(logHints)
       }
 
-      const processBiber = function(log) {
+      function processBiber(log) {
         const { errors, warnings } = BibLogParser.parse(log, {})
         const all = [].concat(errors, warnings)
-        return accumulateResults({ type: 'BibTeX', all, errors, warnings })
+        accumulateResults({ type: 'BibTeX', all, errors, warnings })
       }
 
       // output the results
-      const handleError = function() {
+      function handleError() {
         $scope.pdf.logEntries = []
-        return ($scope.pdf.rawLog = '')
+        $scope.pdf.rawLog = ''
       }
 
-      const annotateFiles = function() {
+      function annotateFiles() {
         $scope.pdf.logEntries = logEntries
         $scope.pdf.logEntryAnnotations = {}
-        return (() => {
-          const result = []
-          for (let entry of Array.from(logEntries.all)) {
-            if (entry.file != null) {
-              entry.file = normalizeFilePath(entry.file)
-              const entity = ide.fileTreeManager.findEntityByPath(entry.file)
-              if (entity != null) {
-                if (!$scope.pdf.logEntryAnnotations[entity.id]) {
-                  $scope.pdf.logEntryAnnotations[entity.id] = []
-                }
-                result.push(
-                  $scope.pdf.logEntryAnnotations[entity.id].push({
-                    row: entry.line - 1,
-                    type: entry.level === 'error' ? 'error' : 'warning',
-                    text: entry.message
-                  })
-                )
-              } else {
-                result.push(undefined)
+        for (const entry of logEntries.all) {
+          if (entry.file != null) {
+            entry.file = normalizeFilePath(entry.file)
+            const entity = ide.fileTreeManager.findEntityByPath(entry.file)
+            if (entity != null) {
+              if (!$scope.pdf.logEntryAnnotations[entity.id]) {
+                $scope.pdf.logEntryAnnotations[entity.id] = []
               }
-            } else {
-              result.push(undefined)
+              $scope.pdf.logEntryAnnotations[entity.id].push({
+                row: entry.line - 1,
+                type: entry.level === 'error' ? 'error' : 'warning',
+                text: entry.message
+              })
             }
           }
-          return result
-        })()
+        }
       }
 
       // retrieve the logfile and process it
+      let response
       if (logFile != null) {
         response = getFile('output.log', logFile).then(response =>
           processLog(response.data)
@@ -735,16 +679,16 @@ define([
 
       // display the combined result
       if (response != null) {
-        return response.finally(annotateFiles)
+        response.finally(annotateFiles)
       }
     }
 
-    const getRootDocOverride_id = function() {
+    function getRootDocOverrideId() {
       const doc = ide.editorManager.getCurrentDocValue()
       if (doc == null) {
         return null
       }
-      for (let line of Array.from(doc.split('\n'))) {
+      for (let line of doc.split('\n')) {
         if (/^[^%]*\\documentclass/.test(line)) {
           return ide.editorManager.getCurrentDocId()
         }
@@ -752,7 +696,7 @@ define([
       return null
     }
 
-    var normalizeFilePath = function(path) {
+    function normalizeFilePath(path) {
       path = path.replace(
         /^(.*)\/compiles\/[0-9a-f]{24}(-[0-9a-f]{24})?\/(\.\/)?/,
         ''
@@ -796,32 +740,36 @@ define([
 
       ide.$scope.$broadcast('flush-changes')
 
-      options.rootDocOverride_id = getRootDocOverride_id()
+      options.rootDocOverride_id = getRootDocOverrideId()
 
-      return sendCompileRequest(options)
+      sendCompileRequest(options)
         .then(function(response) {
           const { data } = response
           $scope.pdf.view = 'pdf'
           $scope.pdf.compiling = false
-          return parseCompileResponse(data)
+          parseCompileResponse(data)
         })
         .catch(function(response) {
-          const { data, status } = response
+          const { status } = response
           if (status === 429) {
             $scope.pdf.rateLimited = true
           }
           $scope.pdf.compiling = false
           $scope.pdf.renderingError = false
           $scope.pdf.error = true
-          return ($scope.pdf.view = 'errors')
+          $scope.pdf.view = 'errors'
         })
-        .finally(() => ($scope.lastFinishedCompileAt = Date.now()))
+        .finally(() => {
+          $scope.lastFinishedCompileAt = Date.now()
+        })
     }
 
     // This needs to be public.
     ide.$scope.recompile = $scope.recompile
     // This method is a simply wrapper and exists only for tracking purposes.
-    ide.$scope.recompileViaKey = () => $scope.recompile({ keyShortcut: true })
+    ide.$scope.recompileViaKey = function() {
+      $scope.recompile({ keyShortcut: true })
+    }
 
     $scope.stop = function() {
       if (!$scope.pdf.compiling) {
@@ -840,8 +788,8 @@ define([
       })
     }
 
-    $scope.clearCache = () =>
-      $http({
+    $scope.clearCache = function() {
+      return $http({
         url: `/project/${$scope.project_id}/output`,
         method: 'DELETE',
         params: {
@@ -851,56 +799,54 @@ define([
           'X-Csrf-Token': window.csrfToken
         }
       })
+    }
 
     $scope.toggleLogs = function() {
       $scope.shouldShowLogs = !$scope.shouldShowLogs
       if ($scope.shouldShowLogs) {
-        return eventTracking.sendMBOnce('ide-open-logs-once')
+        eventTracking.sendMBOnce('ide-open-logs-once')
       }
     }
 
     $scope.showPdf = function() {
       $scope.pdf.view = 'pdf'
-      return ($scope.shouldShowLogs = false)
+      $scope.shouldShowLogs = false
     }
 
     $scope.toggleRawLog = function() {
       $scope.pdf.showRawLog = !$scope.pdf.showRawLog
       if ($scope.pdf.showRawLog) {
-        return eventTracking.sendMB('logs-view-raw')
+        eventTracking.sendMB('logs-view-raw')
       }
     }
 
     $scope.openClearCacheModal = function() {
-      let modalInstance
-      return (modalInstance = $modal.open({
+      $modal.open({
         templateUrl: 'clearCacheModalTemplate',
         controller: 'ClearCacheModalController',
         scope: $scope
-      }))
+      })
     }
 
-    return ($scope.syncToCode = position =>
+    $scope.syncToCode = function(position) {
       synctex.syncToCode(position).then(function(data) {
         const { doc, line } = data
-        return ide.editorManager.openDoc(doc, { gotoLine: line })
-      }))
+        ide.editorManager.openDoc(doc, { gotoLine: line })
+      })
+    }
   })
 
   App.factory('synctex', function(ide, $http, $q) {
-    // enable per-user containers by default
-    const perUserCompile = true
-
     const synctex = {
       syncToPdf(cursorPosition) {
         const deferred = $q.defer()
 
-        const doc_id = ide.editorManager.getCurrentDocId()
-        if (doc_id == null) {
+        const docId = ide.editorManager.getCurrentDocId()
+        if (docId == null) {
           deferred.reject()
           return deferred.promise
         }
-        const doc = ide.fileTreeManager.findEntityById(doc_id)
+        const doc = ide.fileTreeManager.findEntityById(docId)
         if (doc == null) {
           deferred.reject()
           return deferred.promise
@@ -946,7 +892,6 @@ define([
       },
 
       syncToCode(position, options) {
-        let v
         if (options == null) {
           options = {}
         }
@@ -968,6 +913,7 @@ define([
         // down.  This matches the browser's DOM coordinate of the
         // click point, but the pdf position is measured from the
         // bottom of the page so we need to invert it.
+        let v
         if (
           options.fromPdfPosition &&
           (position.pageSize != null ? position.pageSize.height : undefined) !=
@@ -1031,18 +977,18 @@ define([
       this.cursorPosition = cursorPosition
     })
 
-    $scope.syncToPdf = () => {
+    $scope.syncToPdf = function() {
       if (this.cursorPosition == null) {
         return
       }
-      return synctex
-        .syncToPdf(this.cursorPosition)
-        .then(highlights => ($scope.pdf.highlights = highlights))
+      synctex.syncToPdf(this.cursorPosition).then(highlights => {
+        $scope.pdf.highlights = highlights
+      })
     }
 
     ide.$scope.$on('cursor:editor:syncToPdf', $scope.syncToPdf)
 
-    return ($scope.syncToCode = () =>
+    $scope.syncToCode = function() {
       synctex
         .syncToCode($scope.pdf.position, {
           includeVisualOffset: true,
@@ -1050,53 +996,43 @@ define([
         })
         .then(function(data) {
           const { doc, line } = data
-          return ide.editorManager.openDoc(doc, { gotoLine: line })
-        }))
+          ide.editorManager.openDoc(doc, { gotoLine: line })
+        })
+    }
   })
 
-  App.controller(
-    'PdfLogEntryController',
-    ($scope, ide, eventTracking) =>
-      ($scope.openInEditor = function(entry) {
-        let column, line
-        eventTracking.sendMBOnce('logs-jump-to-location-once')
-        const entity = ide.fileTreeManager.findEntityByPath(entry.file)
-        if (entity == null || entity.type !== 'doc') {
-          return
-        }
-        if (entry.line != null) {
-          ;({ line } = entry)
-        }
-        if (entry.column != null) {
-          ;({ column } = entry)
-        }
-        return ide.editorManager.openDoc(entity, {
-          gotoLine: line,
-          gotoColumn: column
-        })
+  App.controller('PdfLogEntryController', function($scope, ide, eventTracking) {
+    $scope.openInEditor = function(entry) {
+      let column, line
+      eventTracking.sendMBOnce('logs-jump-to-location-once')
+      const entity = ide.fileTreeManager.findEntityByPath(entry.file)
+      if (entity == null || entity.type !== 'doc') {
+        return
+      }
+      if (entry.line != null) {
+        line = entry.line
+      }
+      if (entry.column != null) {
+        column = entry.column
+      }
+      ide.editorManager.openDoc(entity, {
+        gotoLine: line,
+        gotoColumn: column
       })
-  )
+    }
+  })
 
-  return App.controller('ClearCacheModalController', function(
-    $scope,
-    $modalInstance
-  ) {
+  App.controller('ClearCacheModalController', function($scope, $modalInstance) {
     $scope.state = { inflight: false }
 
     $scope.clear = function() {
       $scope.state.inflight = true
-      return $scope.clearCache().then(function() {
+      $scope.clearCache().then(function() {
         $scope.state.inflight = false
-        return $modalInstance.close()
+        $modalInstance.close()
       })
     }
 
-    return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
+    $scope.cancel = () => $modalInstance.dismiss('cancel')
   })
 })
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
