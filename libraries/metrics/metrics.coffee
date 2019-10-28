@@ -112,13 +112,13 @@ module.exports = Metrics =
 
 	gauge : (key, value, sampleRate = 1, opts)->
 		key = Metrics.buildPromKey(key)
-		prom.metric('gague', key).set({app: appname, host: hostname, status: opts?.status}, this.sanitizeValue(value))
+		prom.metric('gauge', key).set({app: appname, host: hostname, status: opts?.status}, this.sanitizeValue(value))
 		if process.env['DEBUG_METRICS']
 			console.log("doing gauge", key, opts)
 			
 	globalGauge: (key, value, sampleRate = 1, opts)->
 		key = Metrics.buildPromKey(key)
-		prom.metric('gague', key).set({app: appname, status: opts?.status},this.sanitizeValue(value))
+		prom.metric('gauge', key).set({app: appname, status: opts?.status},this.sanitizeValue(value))
 
 	mongodb: require "./mongodb"
 	http: require "./http"
