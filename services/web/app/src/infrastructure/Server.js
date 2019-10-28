@@ -3,7 +3,6 @@ const express = require('express')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
-const crawlerLogger = require('./CrawlerLogger')
 const expressLocals = require('./ExpressLocals')
 const Validation = require('./Validation')
 const Router = require('../router')
@@ -171,12 +170,6 @@ if (app.get('env') === 'production') {
   app.enable('view cache')
 }
 
-app.use(function(req, res, next) {
-  metrics.inc('http-request')
-  crawlerLogger.log(req)
-  next()
-})
-
 webRouter.use(function(req, res, next) {
   if (Settings.siteIsOpen) {
     next()
@@ -210,28 +203,6 @@ webRouter.use(function(req, res, next) {
     hsts: false
   })(req, res, next)
 })
-
-const profiler = require('v8-profiler-node8')
-privateApiRouter.get('/profile', function(req, res) {
-  const time = parseInt(req.query.time || '1000')
-  profiler.startProfiling('test')
-  setTimeout(function() {
-    const profile = profiler.stopProfiling('test')
-    res.json(profile)
-  }, time)
-})
-
-privateApiRouter.get('/heapdump', (req, res, next) =>
-  require('heapdump').writeSnapshot(
-    `/tmp/${Date.now()}.web.heapsnapshot`,
-    (err, filename) => {
-      if (err != null) {
-        return next(err)
-      }
-      res.send(filename)
-    }
-  )
-)
 
 logger.info('creating HTTP server'.yellow)
 const server = require('http').createServer(app)
