@@ -25,17 +25,6 @@ if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
 metrics.memory.monitor(logger)
 const Server = require('./app/src/infrastructure/Server')
 
-const { argv } = require('optimist')
-  .options('user', {
-    alias: 'u',
-    description: 'Run the server with permissions of the specified user'
-  })
-  .options('group', {
-    alias: 'g',
-    description: 'Run the server with permissions of the specified group'
-  })
-  .usage('Usage: $0')
-
 if (Settings.catchErrors) {
   process.removeAllListeners('uncaughtException')
   process.on('uncaughtException', error =>
@@ -51,14 +40,6 @@ if (!module.parent) {
     logger.info(`${require('http').globalAgent.maxSockets} sockets enabled`)
     // wait until the process is ready before monitoring the event loop
     metrics.event_loop.monitor(logger)
-    if (argv.user) {
-      process.setuid(argv.user)
-      logger.info(`Running as user: ${argv.user}`)
-    }
-    if (argv.group) {
-      process.setgid(argv.group)
-      return logger.info(`Running as group: ${argv.group}`)
-    }
   })
 }
 
