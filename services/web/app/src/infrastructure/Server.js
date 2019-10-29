@@ -163,7 +163,7 @@ webRouter.use(function(req, res, next) {
 })
 
 webRouter.use(ReferalConnect.use)
-expressLocals(app, webRouter, privateApiRouter, publicApiRouter)
+expressLocals(webRouter, privateApiRouter, publicApiRouter)
 
 if (app.get('env') === 'production') {
   logger.info('Production Enviroment')

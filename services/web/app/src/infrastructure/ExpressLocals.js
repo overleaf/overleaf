@@ -1,44 +1,22 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    new-cap,
-    no-new-require,
-    no-unused-vars,
-    no-useless-escape,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const logger = require('logger-sharelatex')
 const fs = require('fs')
 const crypto = require('crypto')
 const Settings = require('settings-sharelatex')
-const SubscriptionFormatters = require('../Features/Subscription/SubscriptionFormatters')
 const querystring = require('querystring')
-const SystemMessageManager = require('../Features/SystemMessages/SystemMessageManager')
-const AuthenticationController = require('../Features/Authentication/AuthenticationController')
-const _ = require('underscore')
-const async = require('async')
-let Modules = require('./Modules')
+const _ = require('lodash')
 const Url = require('url')
-const PackageVersions = require('./PackageVersions')
-const htmlEncoder = new require('node-html-encoder').Encoder('numerical')
-const hashedFiles = {}
+const NodeHtmlEncoder = require('node-html-encoder').Encoder
 const Path = require('path')
-const Features = require('./Features')
-Modules = require('./Modules')
 const moment = require('moment')
-const lodash = require('lodash')
 const chokidar = require('chokidar')
+
+const Features = require('./Features')
+const AuthenticationController = require('../Features/Authentication/AuthenticationController')
+const PackageVersions = require('./PackageVersions')
+const SystemMessageManager = require('../Features/SystemMessages/SystemMessageManager')
+const Modules = require('./Modules')
+
+const htmlEncoder = new NodeHtmlEncoder('numerical')
 
 const jsPath = Settings.useMinifiedJs ? '/minjs/' : '/js/'
 
@@ -67,7 +45,7 @@ if (['development', 'test'].includes(process.env.NODE_ENV)) {
   webpackManifest = require(webpackManifestPath)
 }
 
-const getFileContent = function(filePath) {
+function getFileContent(filePath) {
   filePath = Path.join(__dirname, '../../../', `public${filePath}`)
   const exists = fs.existsSync(filePath)
   if (exists) {
@@ -85,12 +63,12 @@ const pathList = [
   '/stylesheets/ieee-style.css',
   '/stylesheets/sl-style.css'
 ]
-
+const hashedFiles = {}
 if (!Settings.useMinifiedJs) {
   logger.log('not using minified JS, not hashing static files')
 } else {
   logger.log('Generating file hashes...')
-  for (let path of Array.from(pathList)) {
+  for (let path of pathList) {
     const content = getFileContent(path)
     const hash = crypto
       .createHash('md5')
@@ -112,31 +90,22 @@ if (!Settings.useMinifiedJs) {
   }
 }
 
-const cdnAvailable = Settings.cdn && Settings.cdn.web && !!Settings.cdn.web.host
-
-const darkCdnAvailable =
-  Settings.cdn && Settings.cdn.web && !!Settings.cdn.web.darkHost
-
-module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
+module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(function(req, res, next) {
     res.locals.session = req.session
-    return next()
+    next()
   })
 
-  const addSetContentDisposition = function(req, res, next) {
+  function addSetContentDisposition(req, res, next) {
     res.setContentDisposition = function(type, opts) {
-      const directives = (() => {
-        const result = []
-        for (let k in opts) {
-          const v = opts[k]
-          result.push(`${k}=\"${encodeURIComponent(v)}\"`)
-        }
-        return result
-      })()
+      const directives = _.map(
+        opts,
+        (v, k) => `${k}="${encodeURIComponent(v)}"`
+      )
       const contentDispositionValue = `${type}; ${directives.join('; ')}`
-      return res.setHeader('Content-Disposition', contentDispositionValue)
+      res.setHeader('Content-Disposition', contentDispositionValue)
     }
-    return next()
+    next()
   }
   webRouter.use(addSetContentDisposition)
   privateApiRouter.use(addSetContentDisposition)
@@ -148,49 +117,30 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
     res.locals.externalAuthenticationSystemUsed =
       Features.externalAuthenticationSystemUsed
     req.hasFeature = res.locals.hasFeature = Features.hasFeature
-    return next()
+    next()
   })
 
   webRouter.use(function(req, res, next) {
     let staticFilesBase
-    const cdnBlocked = req.query.nocdn === 'true' || req.session.cdnBlocked
-    const user_id = AuthenticationController.getLoggedInUserId(req)
 
+    const cdnAvailable =
+      Settings.cdn && Settings.cdn.web && !!Settings.cdn.web.host
+    const cdnBlocked = req.query.nocdn === 'true' || req.session.cdnBlocked
+    const userId = AuthenticationController.getLoggedInUserId(req)
     if (cdnBlocked && req.session.cdnBlocked == null) {
       logger.log(
-        { user_id, ip: req != null ? req.ip : undefined },
+        { user_id: userId, ip: req != null ? req.ip : undefined },
         'cdnBlocked for user, not using it and turning it off for future requets'
       )
       req.session.cdnBlocked = true
     }
-
-    const isDark =
-      __guard__(
-        __guard__(req.headers != null ? req.headers.host : undefined, x3 =>
-          x3.slice(0, 7)
-        ),
-        x2 => x2.toLowerCase().indexOf('dark')
-      ) !== -1
-    const isSmoke =
-      __guard__(
-        __guard__(req.headers != null ? req.headers.host : undefined, x5 =>
-          x5.slice(0, 5)
-        ),
-        x4 => x4.toLowerCase()
-      ) === 'smoke'
-    const isLive = !isDark && !isSmoke
-
-    if (cdnAvailable && isLive && !cdnBlocked) {
+    const host = req.headers && req.headers.host
+    const isSmoke = host.slice(0, 5).toLowerCase() === 'smoke'
+    if (cdnAvailable && !isSmoke && !cdnBlocked) {
       staticFilesBase = Settings.cdn.web.host
-    } else if (darkCdnAvailable && isDark) {
-      staticFilesBase = Settings.cdn.web.darkHost
     } else {
       staticFilesBase = ''
     }
-
-    res.locals.lib = PackageVersions.lib
-
-    res.locals.moment = moment
 
     res.locals.buildJsPath = function(jsFile, opts = {}) {
       // Resolve path from webpack manifest file
@@ -216,6 +166,10 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
       cdn: false,
       qs: { config: 'TeX-AMS_HTML,Safe' }
     })
+
+    res.locals.lib = PackageVersions.lib
+
+    res.locals.moment = moment
 
     const IEEE_BRAND_ID = 15
     res.locals.isIEEE = brandVariation =>
@@ -260,12 +214,7 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
       return Url.resolve(staticFilesBase, path)
     }
 
-    return next()
-  })
-
-  webRouter.use(function(req, res, next) {
-    res.locals.settings = Settings
-    return next()
+    next()
   })
 
   webRouter.use(function(req, res, next) {
@@ -293,13 +242,17 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
       }
       return string.charAt(0).toUpperCase() + string.slice(1)
     }
-    return next()
+    next()
   })
 
   webRouter.use(function(req, res, next) {
-    res.locals.getSiteHost = () =>
-      Settings.siteUrl.substring(Settings.siteUrl.indexOf('//') + 2)
-    return next()
+    const subdomain = _.find(
+      Settings.i18n.subdomainLang,
+      subdomain => subdomain.lngCode === req.showUserOtherLng && !subdomain.hide
+    )
+    res.locals.recomendSubdomain = subdomain
+    res.locals.currentLngCode = req.lng
+    next()
   })
 
   webRouter.use(function(req, res, next) {
@@ -308,35 +261,23 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
       const email = (user != null ? user.email : undefined) || ''
       return email
     }
-    return next()
+    next()
   })
 
   webRouter.use(function(req, res, next) {
     res.locals.StringHelper = require('../Features/Helpers/StringHelper')
-    return next()
+    next()
   })
 
   webRouter.use(function(req, res, next) {
-    res.locals.formatProjectPublicAccessLevel = function(privilegeLevel) {
-      const formatedPrivileges = {
-        private: 'Private',
-        readOnly: 'Public: Read Only',
-        readAndWrite: 'Public: Read and Write'
-      }
-      return formatedPrivileges[privilegeLevel] || 'Private'
-    }
-    return next()
-  })
-
-  webRouter.use(function(req, res, next) {
-    res.locals.buildReferalUrl = function(referal_medium) {
+    res.locals.buildReferalUrl = function(referalMedium) {
       let url = Settings.siteUrl
       const currentUser = AuthenticationController.getSessionUser(req)
       if (
         currentUser != null &&
         (currentUser != null ? currentUser.referal_id : undefined) != null
       ) {
-        url += `?r=${currentUser.referal_id}&rm=${referal_medium}&rs=b` // Referal source = bonus
+        url += `?r=${currentUser.referal_id}&rm=${referalMedium}&rs=b` // Referal source = bonus
       }
       return url
     }
@@ -349,47 +290,23 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
         return currentUser.referal_id
       }
     }
-    res.locals.getReferalTagLine = function() {
-      const tagLines = [
-        'Roar!',
-        'Shout about us!',
-        'Please recommend us',
-        'Tell the world!',
-        'Thanks for using ShareLaTeX'
-      ]
-      return tagLines[Math.floor(Math.random() * tagLines.length)]
-    }
-    res.locals.getRedirAsQueryString = function() {
-      if (req.query.redir != null) {
-        return `?${querystring.stringify({ redir: req.query.redir })}`
-      }
-      return ''
-    }
-
-    res.locals.getLoggedInUserId = () =>
-      AuthenticationController.getLoggedInUserId(req)
-    res.locals.isUserLoggedIn = () =>
-      AuthenticationController.isUserLoggedIn(req)
-    res.locals.getSessionUser = () =>
-      AuthenticationController.getSessionUser(req)
-
-    return next()
+    next()
   })
 
   webRouter.use(function(req, res, next) {
     res.locals.csrfToken = req != null ? req.csrfToken() : undefined
-    return next()
+    next()
+  })
+
+  webRouter.use(function(req, res, next) {
+    res.locals.gaToken = Settings.analytics && Settings.analytics.ga.token
+    next()
   })
 
   webRouter.use(function(req, res, next) {
     res.locals.getReqQueryParam = field =>
       req.query != null ? req.query[field] : undefined
-    return next()
-  })
-
-  webRouter.use(function(req, res, next) {
-    res.locals.formatPrice = SubscriptionFormatters.formatPrice
-    return next()
+    next()
   })
 
   webRouter.use(function(req, res, next) {
@@ -400,69 +317,40 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
         first_name: currentUser.first_name,
         last_name: currentUser.last_name
       }
-      if (req.session.justRegistered) {
-        res.locals.justRegistered = true
-        delete req.session.justRegistered
-      }
-      if (req.session.justLoggedIn) {
-        res.locals.justLoggedIn = true
-        delete req.session.justLoggedIn
-      }
     }
-    res.locals.gaToken = Settings.analytics && Settings.analytics.ga.token
-    res.locals.tenderUrl = Settings.tenderUrl
-    return next()
+    next()
   })
 
   webRouter.use(function(req, res, next) {
-    if (req.query != null && req.query.scribtex_path != null) {
-      res.locals.lookingForScribtex = true
-      res.locals.scribtexPath = req.query.scribtex_path
-    }
-    return next()
+    res.locals.getLoggedInUserId = () =>
+      AuthenticationController.getLoggedInUserId(req)
+    res.locals.getSessionUser = () =>
+      AuthenticationController.getSessionUser(req)
+    next()
   })
 
   webRouter.use(function(req, res, next) {
     // Clone the nav settings so they can be modified for each request
     res.locals.nav = {}
     for (let key in Settings.nav) {
-      const value = Settings.nav[key]
       res.locals.nav[key] = _.clone(Settings.nav[key])
     }
     res.locals.templates = Settings.templateLinks
-    if (res.locals.nav.header) {
-      console.error(
-        {},
-        'The `nav.header` setting is no longer supported, use `nav.header_extras` instead'
-      )
-    }
-    return next()
+    next()
   })
 
   webRouter.use((req, res, next) =>
     SystemMessageManager.getMessages(function(error, messages) {
+      if (error) {
+        return next(error)
+      }
       if (messages == null) {
         messages = []
       }
       res.locals.systemMessages = messages
-      return next()
+      next()
     })
   )
-
-  webRouter.use(function(req, res, next) {
-    res.locals.query = req.query
-    return next()
-  })
-
-  webRouter.use(function(req, res, next) {
-    const subdomain = _.find(
-      Settings.i18n.subdomainLang,
-      subdomain => subdomain.lngCode === req.showUserOtherLng && !subdomain.hide
-    )
-    res.locals.recomendSubdomain = subdomain
-    res.locals.currentLngCode = req.lng
-    return next()
-  })
 
   webRouter.use(function(req, res, next) {
     if (Settings.reloadModuleViewsOnEachRequest) {
@@ -470,27 +358,26 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
     }
     res.locals.moduleIncludes = Modules.moduleIncludes
     res.locals.moduleIncludesAvailable = Modules.moduleIncludesAvailable
-    return next()
+    next()
   })
 
   webRouter.use(function(req, res, next) {
-    const isSl = Settings.brandPrefix === 'sl-'
     res.locals.uiConfig = {
-      defaultResizerSizeOpen: isSl ? 24 : 7,
-      defaultResizerSizeClosed: isSl ? 24 : 7,
-      eastResizerCursor: isSl ? null : 'ew-resize',
-      westResizerCursor: isSl ? null : 'ew-resize',
-      chatResizerSizeOpen: isSl ? 12 : 7,
+      defaultResizerSizeOpen: 7,
+      defaultResizerSizeClosed: 7,
+      eastResizerCursor: 'ew-resize',
+      westResizerCursor: 'ew-resize',
+      chatResizerSizeOpen: 7,
       chatResizerSizeClosed: 0,
-      chatMessageBorderSaturation: isSl ? '70%' : '85%',
-      chatMessageBorderLightness: isSl ? '70%' : '40%',
-      chatMessageBgSaturation: isSl ? '60%' : '85%',
-      chatMessageBgLightness: isSl ? '97%' : '40%',
-      defaultFontFamily: isSl ? 'monaco' : 'lucida',
-      defaultLineHeight: isSl ? 'compact' : 'normal',
-      renderAnnouncements: isSl
+      chatMessageBorderSaturation: '85%',
+      chatMessageBorderLightness: '40%',
+      chatMessageBgSaturation: '85%',
+      chatMessageBgLightness: '40%',
+      defaultFontFamily: 'lucida',
+      defaultLineHeight: 'normal',
+      renderAnnouncements: false
     }
-    return next()
+    next()
   })
 
   webRouter.use(function(req, res, next) {
@@ -509,16 +396,21 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
         }
       ]
     }
-    return next()
+    next()
   })
 
-  return webRouter.use(function(req, res, next) {
+  webRouter.use(function(req, res, next) {
+    res.locals.settings = Settings
+    next()
+  })
+
+  webRouter.use(function(req, res, next) {
     res.locals.ExposedSettings = {
       isOverleaf: Settings.overleaf != null,
       appName: Settings.appName,
       hasSamlBeta: req.session.samlBeta,
       hasSamlFeature: Features.hasFeature('saml'),
-      samlInitPath: lodash.get(Settings, ['saml', 'ukamf', 'initPath']),
+      samlInitPath: _.get(Settings, ['saml', 'ukamf', 'initPath']),
       siteUrl: Settings.siteUrl,
       recaptchaSiteKeyV3:
         Settings.recaptcha != null ? Settings.recaptcha.siteKeyV3 : undefined,
@@ -526,12 +418,6 @@ module.exports = function(app, webRouter, privateApiRouter, publicApiRouter) {
         Settings.recaptcha != null ? Settings.recaptcha.disabled : undefined,
       validRootDocExtensions: Settings.validRootDocExtensions
     }
-    return next()
+    next()
   })
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

@@ -107,10 +107,6 @@ html(
 		- if(typeof(suppressFooter) == "undefined")
 			include layout/footer
 
-		- if (typeof(lookingForScribtex) != "undefined" && lookingForScribtex)
-			span(ng-controller="ScribtexPopupController")
-			include scribtex-modal
-
 		!= moduleIncludes("contactModal", locals)
 		include v1-tooltip
 
