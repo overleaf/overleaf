@@ -5,7 +5,7 @@ block vars
 
 block content
 	script#data(type="application/json").
-		!{StringHelper.stringifyJsonForScript({ projects, tags, notifications })}
+		!{StringHelper.stringifyJsonForScript({ projects, tags, notifications, notificationsInstitution })}
 
 	script(type="text/javascript").
 		window.data = JSON.parse($("#data").text());

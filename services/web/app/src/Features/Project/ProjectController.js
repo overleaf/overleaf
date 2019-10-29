@@ -429,6 +429,7 @@ const ProjectController = {
           (results.v1Projects != null ? results.v1Projects.tags : undefined) ||
           []
         const tags = results.tags.concat(v1Tags)
+        const notificationsInstitution = []
         for (const notification of notifications) {
           notification.html = req.i18n.translate(
             notification.templateKey,
@@ -460,7 +461,7 @@ const ProjectController = {
                   affiliation.institution.id.toString()
                 ) === -1
               ) {
-                notifications.push({
+                notificationsInstitution.push({
                   email: affiliation.email,
                   institutionId: affiliation.institution.id,
                   institutionName: affiliation.institution.name,
@@ -473,7 +474,7 @@ const ProjectController = {
           if (samlSession) {
             // Notification: After SSO Linked
             if (samlSession.linked) {
-              notifications.push({
+              notificationsInstitution.push({
                 email: samlSession.institutionEmail,
                 institutionName: samlSession.linked.universityName,
                 templateKey: 'notification_institution_sso_linked'
@@ -484,7 +485,7 @@ const ProjectController = {
             // The requested email does not match primary email returned from
             // the institution
             if (samlSession.emailNonCanonical) {
-              notifications.push({
+              notificationsInstitution.push({
                 institutionEmail: samlSession.emailNonCanonical,
                 requestedEmail: samlSession.requestedEmail,
                 templateKey: 'notification_institution_sso_non_canonical'
@@ -493,7 +494,7 @@ const ProjectController = {
 
             // Notification: Tried to register, but account already existed
             if (samlSession.registerIntercept) {
-              notifications.push({
+              notificationsInstitution.push({
                 email: samlSession.institutionEmail,
                 templateKey: 'notification_institution_sso_already_registered'
               })
@@ -529,6 +530,7 @@ const ProjectController = {
             projects,
             tags,
             notifications: notifications || [],
+            notificationsInstitution,
             portalTemplates,
             user,
             userAffiliations,

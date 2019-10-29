@@ -645,7 +645,7 @@ describe('ProjectController', function() {
       })
       it('should show institution SSO available notification', function() {
         this.res.render = (pageName, opts) => {
-          expect(opts.notifications).to.deep.include({
+          expect(opts.notificationsInstitution).to.deep.include({
             email: 'test@overleaf.com',
             institutionId: 1,
             institutionName: 'Overleaf',
@@ -663,7 +663,7 @@ describe('ProjectController', function() {
           }
         }
         this.res.render = (pageName, opts) => {
-          expect(opts.notifications).to.deep.include({
+          expect(opts.notificationsInstitution).to.deep.include({
             email: this.institutionEmail,
             institutionName: this.institutionName,
             templateKey: 'notification_institution_sso_linked'
@@ -675,7 +675,7 @@ describe('ProjectController', function() {
         // when they request to link an email but the institution returns
         // a different email
         this.res.render = (pageName, opts) => {
-          expect(opts.notifications).to.deep.include({
+          expect(opts.notificationsInstitution).to.deep.include({
             institutionEmail: this.institutionEmail,
             requestedEmail: 'requested@overleaf.com',
             templateKey: 'notification_institution_sso_non_canonical'
@@ -694,7 +694,7 @@ describe('ProjectController', function() {
       })
       it('should show a notification when intent was to register via SSO but account existed', function() {
         this.res.render = (pageName, opts) => {
-          expect(opts.notifications).to.deep.include({
+          expect(opts.notificationsInstitution).to.deep.include({
             email: this.institutionEmail,
             templateKey: 'notification_institution_sso_already_registered'
           })
@@ -718,7 +718,7 @@ describe('ProjectController', function() {
       })
       it('should not show institution sso available notification', function() {
         this.res.render = (pageName, opts) => {
-          expect(opts.notifications).to.deep.not.include({
+          expect(opts.notificationsInstitution).to.deep.not.include({
             email: 'test@overleaf.com',
             institutionId: 1,
             institutionName: 'Overleaf',

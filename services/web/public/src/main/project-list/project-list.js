@@ -12,6 +12,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
     $scope.projects = window.data.projects
     $scope.tags = window.data.tags
     $scope.notifications = window.data.notifications
+    $scope.notificationsInstitution = window.data.notificationsInstitution
     $scope.allSelected = false
     $scope.selectedProjects = []
     $scope.isArchiveableProjectSelected = false

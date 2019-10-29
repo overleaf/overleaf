@@ -1,29 +1,43 @@
 .user-notifications(ng-controller="NotificationsController")
 	ul.list-unstyled(
-		ng-if="notifications.length > 0",
+		ng-if="notifications.length > 0 && projects.length > 0",
 		ng-cloak
 	)
 		li.notification-entry(
-			ng-repeat="notification in notifications",
+			ng-repeat="notification in notifications"
 		)
 			div(ng-switch="notification.templateKey" ng-hide="notification.hide")
-				.alert.alert-info(ng-switch-when="notification_project_invite", ng-controller="ProjectInviteNotificationController")
-					.notification-body(ng-show="!notification.accepted")
-						| !{translate("notification_project_invite_message", { userName: "{{ userName }}", projectName: "{{ projectName }}" })}
-						a.pull-right.btn.btn-sm.btn-info(href, ng-click="accept()", ng-disabled="notification.inflight")
+				.alert.alert-info(
+					ng-switch-when="notification_project_invite",
+					ng-controller="ProjectInviteNotificationController"
+				)
+					.notification-body
+						span(ng-show="!notification.accepted") !{translate("notification_project_invite_message", { userName: "{{ userName }}", projectName: "{{ projectName }}" })}
+						span(ng-show="notification.accepted") !{translate("notification_project_invite_accepted_message", { projectName: "{{ projectName }}" })}
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(
+							ng-show="notification.accepted",
+							href="/project/{{ notification.messageOpts.projectId }}"
+						) #{translate("open_project")}
+						a.pull-right.btn.btn-sm.btn-info(
+							href,
+							ng-click="accept()",
+							ng-disabled="notification.inflight",
+							ng-show="!notification.accepted"
+						)
 							span(ng-show="!notification.inflight") #{translate("join_project")}
 							span(ng-show="notification.inflight")
 								i.fa.fa-fw.fa-spinner.fa-spin(aria-hidden="true")
 								| &nbsp;
 								| #{translate("joining")}...
-					.notification-body(ng-show="notification.accepted")
-						| !{translate("notification_project_invite_accepted_message", { projectName: "{{ projectName }}" })}
-						a.pull-right.btn.btn-sm.btn-info(href="/project/{{ notification.messageOpts.projectId }}") #{translate("open_project")}
 					.notification-close
 						button(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
-				.alert.alert-info(ng-switch-when="notification_ip_matched_affiliation")
+
+				.alert.alert-info(
+					ng-switch-when="notification_ip_matched_affiliation"
+				)
 					.notification-body
 						| It looks like you're at 
 						strong {{ notification.messageOpts.university_name }}! <br/>
@@ -31,31 +45,41 @@
 						strong  free Overleaf Professional accounts 
 						|	 to everyone at {{notification.messageOpts.university_name}}? <br/>
 						|	Add an institutional email address to claim your account.
+					.notification-action
 						a.pull-right.btn.btn-sm.btn-info(href="/user/settings")
 							| Add Affiliation
 					.notification-close
-						button(ng-click="dismiss(notification)").close.pull-right
+						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
-				.alert.alert-info(ng-switch-when="notification_institution_sso_available")
+
+				.alert.alert-info(
+						ng-switch-when="notification_institution_sso_available"
+					)
 					.notification-body
 						p !{translate("can_link_institution_email_acct_to_institution_acct", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
 						div !{translate("doing_this_allow_log_in_through_institution", {appName: settings.appName})}
 					.notification-action
-						a.btn.btn-info(href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=project&email={{notification.email}}")
+						a.btn.btn-sm.btn-info(href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=project&email={{notification.email}}")
 							| #{translate('link_account')}
 					.notification-close
 						button(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
-				.alert.alert-info(ng-switch-when="notification_institution_sso_linked")
+
+				.alert.alert-info(
+					ng-switch-when="notification_institution_sso_linked"
+				)
 					.notification-body
 						div !{translate("account_has_been_link_to_institution_account", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
 					.notification-close
 						button(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
-				.alert.alert-warning(ng-switch-when="notification_institution_sso_non_canonical")
+
+				.alert.alert-warning(
+					ng-switch-when="notification_institution_sso_non_canonical"
+				)
 					.notification-body
 						div 
 							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
@@ -64,19 +88,83 @@
 						button(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
-				.alert.alert-info(ng-switch-when="notification_institution_sso_already_registered")
+
+				.alert.alert-info(
+					ng-switch-when="notification_institution_sso_already_registered"
+				)
 					.notification-body
 						| !{translate("tried_to_register_with_email", {appName: settings.appName, email: "{{notification.email}}"})}
 						| #{translate("we_logged_you_in")}
 					.notification-action
-						a.btn.btn-info(href="/")
+						a.btn.btn-sm.btn-info(href="/")
 							| #{translate("find_out_more")}
 					.notification-close
 						button(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
-				.alert.alert-info(ng-switch-default)
+
+				.alert.alert-info(
+					ng-switch-default
+				)
 					span(ng-bind-html="notification.html").notification-body
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+	ul.list-unstyled(
+		ng-if="notificationsInstitution.length > 0",
+		ng-cloak
+	)
+		li.notification-entry(
+			ng-repeat="notification in notificationsInstitution"
+		)
+			div(ng-switch="notification.templateKey" ng-hide="notification.hide")
+				.alert.alert-info(
+						ng-switch-when="notification_institution_sso_available"
+					)
+					.notification-body
+						p !{translate("can_link_institution_email_acct_to_institution_acct", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
+						div !{translate("doing_this_allow_log_in_through_institution", {appName: settings.appName})}
+					.notification-action
+						a.btn.btn-sm.btn-info(href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=project&email={{notification.email}}")
+							| #{translate('link_account')}
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+				.alert.alert-info(
+					ng-switch-when="notification_institution_sso_linked"
+				)
+					.notification-body
+						div !{translate("account_has_been_link_to_institution_account", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+				.alert.alert-warning(
+					ng-switch-when="notification_institution_sso_non_canonical"
+				)
+					.notification-body
+						div 
+							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
+							| !{translate("tried_to_log_in_with_email", {email: "{{notification.requestedEmail}}"})} !{translate("in_order_to_match_institutional_metadata_associated", {email: "{{notification.institutionEmail}}"})}
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+				.alert.alert-info(
+					ng-switch-when="notification_institution_sso_already_registered"
+				)
+					.notification-body
+						| !{translate("tried_to_register_with_email", {appName: settings.appName, email: "{{notification.email}}"})}
+						| #{translate("we_logged_you_in")}
+					.notification-action
+						a.btn.btn-sm.btn-info(href="/")
+							| #{translate("find_out_more")}
 					.notification-close
 						button(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;
@@ -89,7 +177,7 @@
 	)
 		li.notification-entry(
 			ng-repeat="userEmail in userEmails",
-			ng-if="showConfirmEmail(userEmail)"
+			ng-if="showConfirmEmail(userEmail) && projects.length > 0"
 		)
 			.alert.alert-warning(ng-if="!userEmail.confirmationInflight")
 				.notification-body
