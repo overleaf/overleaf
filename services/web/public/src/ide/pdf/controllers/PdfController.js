@@ -977,7 +977,7 @@ define([
       this.cursorPosition = cursorPosition
     })
 
-    $scope.syncToPdf = function() {
+    $scope.syncToPdf = () => {
       if (this.cursorPosition == null) {
         return
       }
