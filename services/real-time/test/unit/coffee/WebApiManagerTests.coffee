@@ -20,17 +20,18 @@ describe 'WebApiManager', ->
 						user: "username"
 						pass: "password"
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
-	
+
 	describe "joinProject", ->
 		describe "successfully", ->
 			beforeEach ->
 				@response = {
 					project: { name: "Test project" }
-					privilegeLevel: "owner"
+					privilegeLevel: "owner",
+					isRestrictedUser: true
 				}
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @response)
 				@WebApiManager.joinProject @project_id, @user, @callback
-				
+
 			it "should send a request to web to join the project", ->
 				@request.post
 					.calledWith({
@@ -46,22 +47,32 @@ describe 'WebApiManager', ->
 						headers: {}
 					})
 					.should.equal true
-					
-			it "should return the project and privilegeLevel", ->
+
+			it "should return the project, privilegeLevel, and restricted flag", ->
 				@callback
-					.calledWith(null, @response.project, @response.privilegeLevel)
+					.calledWith(null, @response.project, @response.privilegeLevel, @response.isRestrictedUser)
 					.should.equal true
-					
+
 		describe "with an error from web", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, null)
 				@WebApiManager.joinProject @project_id, @user_id, @callback
-				
+
 			it "should call the callback with an error", ->
 				@callback
 					.calledWith(new Error("non-success code from web: 500"))
 					.should.equal true
-	
+
+		describe "with no data from web", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200}, null)
+				@WebApiManager.joinProject @project_id, @user_id, @callback
+
+			it "should call the callback with an error", ->
+				@callback
+					.calledWith(new Error("no data returned from joinProject request"))
+					.should.equal true
+
 		describe "when the project is over its rate limit", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 429}, null)
