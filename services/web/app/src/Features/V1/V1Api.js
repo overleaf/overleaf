@@ -61,7 +61,17 @@ module.exports = V1Api = {
 
   _responseHandler(options, error, response, body, callback) {
     if (error != null) {
-      return callback(error, response, body)
+      return callback(
+        new Errors.V1ConnectionError('error from V1 API').withCause(error)
+      )
+    }
+    if (response && response.statusCode >= 500) {
+      return callback(
+        new Errors.V1ConnectionError({
+          message: 'error from V1 API',
+          info: { status: response.statusCode, body: body }
+        })
+      )
     }
     if (
       (response.statusCode >= 200 && response.statusCode < 300) ||

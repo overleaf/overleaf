@@ -520,6 +520,48 @@ describe('ProjectController', function() {
       this.ProjectController.projectListPage(this.req, this.res)
     })
 
+    describe('when there is a v1 connection error', function() {
+      beforeEach(function() {
+        this.Features.hasFeature = sinon
+          .stub()
+          .withArgs('overleaf-integration')
+          .returns(true)
+        this.connectionWarning =
+          'Error accessing Overleaf V1. Some of your projects or features may be missing.'
+      })
+
+      it('should show a warning when there is an error getting v1 projects', function(done) {
+        this.Modules.hooks.fire
+          .withArgs('findAllV1Projects', this.user._id)
+          .yields(new Errors.V1ConnectionError('error'))
+        this.res.render = (pageName, opts) => {
+          expect(opts.warnings).to.contain(this.connectionWarning)
+          done()
+        }
+        this.ProjectController.projectListPage(this.req, this.res)
+      })
+
+      it('should show a warning when there is an error getting subscriptions from v1', function(done) {
+        this.LimitationsManager.hasPaidSubscription.yields(
+          new Errors.V1ConnectionError('error')
+        )
+        this.res.render = (pageName, opts) => {
+          expect(opts.warnings).to.contain(this.connectionWarning)
+          done()
+        }
+        this.ProjectController.projectListPage(this.req, this.res)
+      })
+
+      it('should show a warning when there is an error getting affiliations from v1', function(done) {
+        this.getUserAffiliations.yields(new Errors.V1ConnectionError('error'))
+        this.res.render = (pageName, opts) => {
+          expect(opts.warnings).to.contain(this.connectionWarning)
+          done()
+        }
+        this.ProjectController.projectListPage(this.req, this.res)
+      })
+    })
+
     describe('front widget', function(done) {
       beforeEach(function() {
         this.settings.overleaf = {

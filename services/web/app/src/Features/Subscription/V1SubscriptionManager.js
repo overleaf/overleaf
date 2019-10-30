@@ -180,11 +180,20 @@ module.exports = V1SubscriptionManager = {
         },
         function(error, response, body) {
           if (error != null) {
-            // Specially handle no connection err, so warning can be shown
-            if (error.code === 'ECONNREFUSED') {
-              error = new V1ConnectionError('No V1 connection')
-            }
-            return callback(error)
+            return callback(
+              new V1ConnectionError('no v1 connection').withCause(error)
+            )
+          }
+          if (response && response.statusCode >= 500) {
+            return callback(
+              new V1ConnectionError({
+                message: 'error from v1',
+                info: {
+                  status: response.statusCode,
+                  body: body
+                }
+              })
+            )
           }
           if (response.statusCode >= 200 && response.statusCode < 300) {
             return callback(null, body, v1Id)

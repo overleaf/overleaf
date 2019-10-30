@@ -364,6 +364,7 @@ const ProjectController = {
     const timer = new metrics.Timer('project-list')
     const userId = AuthenticationController.getLoggedInUserId(req)
     const currentUser = AuthenticationController.getSessionUser(req)
+    let noV1Connection = false
     async.parallel(
       {
         tags(cb) {
@@ -389,7 +390,8 @@ const ProjectController = {
               projects = []
             }
             if (error != null && error instanceof V1ConnectionError) {
-              return cb(null, { projects: [], tags: [], noConnection: true })
+              noV1Connection = true
+              return cb(null, null)
             }
             cb(error, projects[0])
           })
@@ -399,6 +401,7 @@ const ProjectController = {
             currentUser,
             (error, hasPaidSubscription) => {
               if (error != null && error instanceof V1ConnectionError) {
+                noV1Connection = true
                 return cb(null, true)
               }
               cb(error, hasPaidSubscription)
@@ -416,13 +419,23 @@ const ProjectController = {
           if (!Features.hasFeature('affiliations')) {
             return cb(null, null)
           }
-          getUserAffiliations(userId, cb)
+          getUserAffiliations(userId, (error, affiliations) => {
+            if (error && error instanceof V1ConnectionError) {
+              noV1Connection = true
+              return cb(null, [])
+            }
+            cb(error, affiliations)
+          })
         }
       },
       (err, results) => {
         if (err != null) {
           logger.warn({ err }, 'error getting data for project list page')
           return next(err)
+        }
+        if (noV1Connection) {
+          results.v1Projects = results.v1Projects || { projects: [], tags: [] }
+          results.v1Projects.noConnection = true
         }
         const { notifications, user, userAffiliations } = results
         const v1Tags =
@@ -995,8 +1008,10 @@ const ProjectController = {
       v1ProjectData = {}
     }
     const warnings = []
-    if (v1ProjectData.noConnection && Settings.overleaf) {
-      warnings.push('No V1 Connection')
+    if (v1ProjectData.noConnection) {
+      warnings.push(
+        'Error accessing Overleaf V1. Some of your projects or features may be missing.'
+      )
     }
     if (v1ProjectData.hasHiddenV1Projects) {
       warnings.push(

@@ -17,6 +17,7 @@ const settings = require('settings-sharelatex')
 const request = require('request')
 const { promisifyAll } = require('../../util/promises')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
+const { V1ConnectionError } = require('../Errors/Errors')
 
 const InstitutionsAPI = {
   getInstitutionAffiliations(institutionId, callback) {
@@ -205,7 +206,22 @@ var makeAffiliationRequest = function(requestOptions, callback) {
     },
     function(error, response, body) {
       if (error != null) {
-        return callback(error)
+        return callback(
+          new V1ConnectionError('error getting affiliations from v1').withCause(
+            error
+          )
+        )
+      }
+      if (response && response.statusCode >= 500) {
+        return callback(
+          new V1ConnectionError({
+            message: 'error getting affiliations from v1',
+            info: {
+              status: response.statusCode,
+              body: body
+            }
+          })
+        )
       }
       let isSuccess = response.statusCode >= 200 && response.statusCode < 300
       if (!isSuccess) {

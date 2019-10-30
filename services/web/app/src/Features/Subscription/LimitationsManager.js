@@ -21,6 +21,7 @@ const Settings = require('settings-sharelatex')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const CollaboratorsInvitesHandler = require('../Collaborators/CollaboratorsInviteHandler')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
+const { V1ConnectionError } = require('../Errors/Errors')
 
 module.exports = LimitationsManager = {
   allowedNumberOfCollaboratorsInProject(project_id, callback) {
@@ -107,7 +108,11 @@ module.exports = LimitationsManager = {
           }
           return this.userHasV1Subscription(user, (err, hasV1Subscription) => {
             if (err != null) {
-              return callback(err)
+              return callback(
+                new V1ConnectionError(
+                  'error getting subscription from v1'
+                ).withCause(err)
+              )
             }
             logger.log(
               {
