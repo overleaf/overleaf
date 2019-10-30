@@ -1,4 +1,7 @@
-<!-- Please review https://github.com/overleaf/write_latex/blob/master/.github/CONTRIBUTING.md for guidance on what is expected in each section. -->
+
+<!-- ** This is an Overleaf public repository ** -->
+
+<!-- Please review https://github.com/overleaf/overleaf/blob/master/CONTRIBUTING.md for guidance on what is expected of a contribution. -->
 
 ### Description
 

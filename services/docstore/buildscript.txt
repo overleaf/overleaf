@@ -5,4 +5,6 @@ docstore
 --dependencies=mongo,redis
 --docker-repos=gcr.io/overleaf-ops
 --build-target=docker
---script-version=1.1.21
+--script-version=1.1.24
+--env-pass-through=
+--public-repo=True
