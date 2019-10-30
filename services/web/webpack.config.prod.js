@@ -1,9 +1,7 @@
 const path = require('path')
 const merge = require('webpack-merge')
-const CopyPlugin = require('copy-webpack-plugin')
 
 const base = require('./webpack.config')
-const PackageVersions = require('./app/src/infrastructure/PackageVersions')
 
 module.exports = merge(base, {
   mode: 'production',
@@ -19,40 +17,5 @@ module.exports = merge(base, {
     filename: '[name]-[chunkhash].js',
 
     publicPath: '/minjs/'
-  },
-
-  plugins: [
-    // Copy vendored dependencies to minjs directory as these are directly
-    // loaded in a script tag by instead of being part of the webpack build
-    new CopyPlugin([
-      {
-        from: 'public/js/libs/angular-1.6.4.min.js',
-        to: 'libs/angular-1.6.4.min.js'
-      },
-      {
-        from: 'public/js/libs/angular-1.6.4.min.js.map',
-        to: 'libs/angular-1.6.4.min.js.map'
-      },
-      {
-        from: 'public/js/libs/jquery-1.11.1.min.js',
-        to: 'libs/jquery-1.11.1.min.js'
-      },
-      {
-        from: 'public/js/libs/jquery-1.11.1.min.js.map',
-        to: 'libs/jquery-1.11.1.min.js.map'
-      },
-      {
-        from: 'public/js/libs/mathjax',
-        to: 'libs/mathjax'
-      },
-      {
-        from: 'public/js/libs/sigma-master',
-        to: 'libs/sigma-master'
-      },
-      {
-        from: `public/js/ace-${PackageVersions.version.ace}/`,
-        to: `ace-${PackageVersions.version.ace}/`
-      }
-    ])
-  ]
+  }
 })

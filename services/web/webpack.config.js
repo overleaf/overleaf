@@ -96,7 +96,7 @@ module.exports = {
         // Expose underscore global variable
         test: path.join(
           __dirname,
-          `public/js/libs/${PackageVersions.lib('underscore')}.js`
+          `public/src/vendor/libs/${PackageVersions.lib('underscore')}.js`
         ),
         use: [
           {
@@ -109,7 +109,7 @@ module.exports = {
         // Expose Algolia global variable
         test: path.join(
           __dirname,
-          `public/js/libs/${PackageVersions.lib('algolia')}.js`
+          `public/src/vendor/libs/${PackageVersions.lib('algolia')}.js`
         ),
         use: [
           {
@@ -124,20 +124,23 @@ module.exports = {
     alias: {
       // Aliases for AMD modules
 
-      // Vendored dependencies in public/js/libs (e.g. angular)
-      libs: path.join(__dirname, 'public/js/libs'),
+      // Vendored dependencies in public/src/vendor/libs (e.g. angular)
+      libs: path.join(__dirname, 'public/src/vendor/libs'),
       // Use vendored moment (with correct version)
       moment: path.join(
         __dirname,
-        `public/js/libs/${PackageVersions.lib('moment')}`
+        `public/src/vendor/libs/${PackageVersions.lib('moment')}`
       ),
       // Enables ace/ace shortcut
-      ace: path.join(__dirname, `public/js/${PackageVersions.lib('ace')}`),
+      ace: path.join(
+        __dirname,
+        `public/src/vendor/${PackageVersions.lib('ace')}`
+      ),
       // fineupload vendored dependency (which we're aliasing to fineuploadER
       // for some reason)
       fineuploader: path.join(
         __dirname,
-        `public/js/libs/${PackageVersions.lib('fineuploader')}`
+        `public/src/vendor/libs/${PackageVersions.lib('fineuploader')}`
       )
     },
     // Define what can be imported with out an absolute or relative path. This
@@ -156,7 +159,7 @@ module.exports = {
     splitChunks: {
       cacheGroups: {
         libraries: {
-          test: /[\\/]node_modules[\\/]|[\\/]public[\\/]js[\\/]libs[\\/]/,
+          test: /[\\/]node_modules[\\/]|[\\/]public[\\/]src[\\/]vendor[\\/]libs[\\/]/,
           name: 'libraries',
           chunks: 'initial',
           minChunks: 2
@@ -178,11 +181,41 @@ module.exports = {
     // Silence warning when loading moment from vendored dependencies as it
     // attempts to load locales.js file which does not exist (but this is fine
     // as we don't want to load the large amount of locale data from moment)
-    new webpack.IgnorePlugin(/^\.\/locale$/, /public\/js\/libs/),
+    new webpack.IgnorePlugin(/^\.\/locale$/, /public\/src\/vendor\/libs/),
 
     // Copy CMap files from pdfjs-dist package to build output. These are used
     // to provide support for non-Latin characters
-    new CopyPlugin([{ from: 'node_modules/pdfjs-dist/cmaps', to: 'cmaps' }])
+    new CopyPlugin([
+      {
+        from: 'public/src/vendor/libs/angular-1.6.4.min.js',
+        to: 'libs/angular-1.6.4.min.js'
+      },
+      {
+        from: 'public/src/vendor/libs/angular-1.6.4.min.js.map',
+        to: 'libs/angular-1.6.4.min.js.map'
+      },
+      {
+        from: 'public/src/vendor/libs/jquery-1.11.1.min.js',
+        to: 'libs/jquery-1.11.1.min.js'
+      },
+      {
+        from: 'public/src/vendor/libs/jquery-1.11.1.min.js.map',
+        to: 'libs/jquery-1.11.1.min.js.map'
+      },
+      {
+        from: 'public/src/vendor/libs/mathjax',
+        to: 'libs/mathjax'
+      },
+      {
+        from: 'public/src/vendor/libs/sigma-master',
+        to: 'libs/sigma-master'
+      },
+      {
+        from: `public/src/vendor/ace-${PackageVersions.version.ace}/`,
+        to: `ace-${PackageVersions.version.ace}/`
+      },
+      { from: 'node_modules/pdfjs-dist/cmaps', to: 'cmaps' }
+    ])
   ],
 
   // If jquery or underscore is required by another dependency *don't* include

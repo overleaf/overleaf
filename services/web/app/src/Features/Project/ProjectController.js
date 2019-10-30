@@ -1053,7 +1053,11 @@ var defaultSettingsForAnonymousUser = userId => ({
 var THEME_LIST = []
 function generateThemeList() {
   const files = fs.readdirSync(
-    Path.join(__dirname, '/../../../../public/js/', PackageVersions.lib('ace'))
+    Path.join(
+      __dirname,
+      '/../../../../public/src/vendor/',
+      PackageVersions.lib('ace')
+    )
   )
   const result = []
   for (let file of files) {

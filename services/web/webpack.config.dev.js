@@ -1,4 +1,3 @@
-const path = require('path')
 const merge = require('webpack-merge')
 
 const base = require('./webpack.config')
@@ -19,18 +18,7 @@ module.exports = merge(base, {
 
     // Expose dev server as localhost with dev box
     host: '0.0.0.0',
-
-    // Webpack-rails default port for webpack-dev-server
     port: 3808,
-
-    // Allow CORS
-    headers: {
-      'Access-Control-Allow-Origin': '*'
-    },
-
-    // Serve all content from public via webpack. This allows for serving assets
-    // not (currently) bundled with webpack to be served as normal scripts
-    contentBase: path.join(__dirname, 'public'),
 
     // Customise output to the (node) console
     stats: {
@@ -41,8 +29,8 @@ module.exports = merge(base, {
       version: false,
       chunks: false,
       modules: false,
-      // Hide cmaps from asset output
-      excludeAssets: [/cmap/]
+      // Hide copied assets from output
+      excludeAssets: [/^ace/, /^libs/, /^cmaps/]
     }
   }
 })

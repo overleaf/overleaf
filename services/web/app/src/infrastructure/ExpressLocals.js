@@ -145,8 +145,11 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     res.locals.buildJsPath = function(jsFile, opts = {}) {
       // Resolve path from webpack manifest file
       let path = webpackManifest[jsFile]
-      // If not found in manifest, it is directly linked, so fallback to
-      // relevant public directory
+
+      // HACK: If file can't be found within the webpack manifest, force url
+      // to be relative to JS asset directory.
+      // This should never happen in production, but it can happen in local
+      // testing if webpack hasn't compiled
       if (!path) {
         path = Path.join(jsPath, jsFile)
       }
@@ -160,6 +163,10 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       }
 
       return path
+    }
+
+    res.locals.buildAssetsPath = function(path) {
+      return `${jsPath}/${path}`
     }
 
     res.locals.mathJaxPath = res.locals.buildJsPath('libs/mathjax/MathJax.js', {

@@ -137,9 +137,9 @@ block content
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
 		window.gitBridgePublicBaseUrl = '#{gitBridgePublicBaseUrl}'
 		//- Set base path for Ace scripts loaded on demand/workers and don't use cdn
-		window.aceBasePath = "#{buildJsPath(lib('ace'), {cdn:false})}"
+		window.aceBasePath = "#{buildAssetsPath(lib('ace'))}"
 		//- Set path for PDFjs CMaps
-		window.pdfCMapsPath = "#{buildJsPath('cmaps/', {cdn: false})}"
+		window.pdfCMapsPath = "#{buildAssetsPath('cmaps/')}"
 		window.uiConfig = JSON.parse('!{StringHelper.stringifyJsonForScript(uiConfig)}');
 		//- enable doc hash checking for all projects
 		//- used in public/js/libs/sharejs.js
