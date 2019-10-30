@@ -22,7 +22,7 @@
   "dependencies": {
     "async": "^2.5.0",
     "coffee-script": "~1.7.0",
-    "express": "3.3.4",
+    "express": "3.11.0",
     "lodash": "^4.17.4",
     "logger-sharelatex": "^1.7.0",
     "lynx": "0.0.11",
