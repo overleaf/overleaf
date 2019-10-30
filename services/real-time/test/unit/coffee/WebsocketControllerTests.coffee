@@ -238,6 +238,7 @@ describe 'WebsocketController', ->
 			@options = {}
 
 			@client.params.project_id = @project_id
+			@client.params.is_restricted_user = false
 			@AuthorizationManager.addAccessToDoc = sinon.stub()
 			@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
 			@DocumentUpdaterManager.getDocument = sinon.stub().callsArgWith(3, null, @doc_lines, @version, @ranges, @ops)
@@ -337,6 +338,16 @@ describe 'WebsocketController', ->
 
 			it "should not call the DocumentUpdaterManager", ->
 				@DocumentUpdaterManager.getDocument.called.should.equal false
+
+		describe "with a restricted client", ->
+			beforeEach ->
+				@ranges.comments = [{op: {a: 1}}, {op: {a: 2}}]
+				@client.params.is_restricted_user = true
+				@WebsocketController.joinDoc @client, @doc_id, -1, @options, @callback
+
+			it "should overwrite ranges.comments with an empty list", ->
+				ranges = @callback.args[0][4]
+				expect(ranges.comments).to.deep.equal []
 
 	describe "leaveDoc", ->
 		beforeEach ->

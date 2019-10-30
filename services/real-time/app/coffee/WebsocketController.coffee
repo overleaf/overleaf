@@ -85,7 +85,7 @@ module.exports = WebsocketController =
 
 	joinDoc: (client, doc_id, fromVersion = -1, options, callback = (error, doclines, version, ops, ranges) ->) ->
 		metrics.inc "editor.join-doc"
-		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
+		Utils.getClientAttributes client, ["project_id", "user_id", "is_restricted_user"], (error, {project_id, user_id, is_restricted_user}) ->
 			return callback(error) if error?
 			return callback(new Error("no project_id found on client")) if !project_id?
 			logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joining doc"
@@ -98,6 +98,9 @@ module.exports = WebsocketController =
 					return callback(error) if error?
 					DocumentUpdaterManager.getDocument project_id, doc_id, fromVersion, (error, lines, version, ranges, ops) ->
 						return callback(error) if error?
+
+						if is_restricted_user and ranges?.comments?
+							ranges.comments = []
 
 						# Encode any binary bits of data so it can go via WebSockets
 						# See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
