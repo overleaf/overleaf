@@ -8,7 +8,8 @@ const Url = require('url')
 const NodeHtmlEncoder = require('node-html-encoder').Encoder
 const Path = require('path')
 const moment = require('moment')
-const chokidar = require('chokidar')
+
+const IS_DEV_ENV = ['development', 'test'].includes(process.env.NODE_ENV)
 
 const Features = require('./Features')
 const AuthenticationController = require('../Features/Authentication/AuthenticationController')
@@ -20,29 +21,13 @@ const htmlEncoder = new NodeHtmlEncoder('numerical')
 
 const jsPath = Settings.useMinifiedJs ? '/minjs/' : '/js/'
 
-const webpackManifestPath = Path.join(
-  __dirname,
-  `../../../public${jsPath}manifest.json`
-)
 let webpackManifest
-if (['development', 'test'].includes(process.env.NODE_ENV)) {
-  // In dev the web and webpack containers can race (and therefore the manifest
-  // file may not be created when web is running), so watch the file for changes
-  // and reload
-  webpackManifest = {}
-  const reloadManifest = () => {
-    logger.log('[DEV] Reloading webpack manifest')
-    webpackManifest = require(webpackManifestPath)
-  }
-
-  logger.log('[DEV] Watching webpack manifest')
-  chokidar
-    .watch(webpackManifestPath)
-    .on('add', reloadManifest)
-    .on('change', reloadManifest)
-} else {
-  logger.log('[PRODUCTION] Loading webpack manifest')
-  webpackManifest = require(webpackManifestPath)
+if (!IS_DEV_ENV) {
+  // Only load webpack manifest file in production. In dev, the web and webpack
+  // containers can't coordinate, so there no guarantee that the manifest file
+  // exists when the web server boots. We therefore ignore the manifest file in
+  // dev reload
+  webpackManifest = require(`../../../public${jsPath}manifest.json`)
 }
 
 function getFileContent(filePath) {
@@ -143,15 +128,17 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     }
 
     res.locals.buildJsPath = function(jsFile, opts = {}) {
-      // Resolve path from webpack manifest file
-      let path = webpackManifest[jsFile]
-
-      // HACK: If file can't be found within the webpack manifest, force url
-      // to be relative to JS asset directory.
-      // This should never happen in production, but it can happen in local
-      // testing if webpack hasn't compiled
-      if (!path) {
+      let path
+      if (IS_DEV_ENV) {
+        // In dev: resolve path within JS asset directory
+        // We are *not* guaranteed to have a manifest file when the server
+        // starts up
         path = Path.join(jsPath, jsFile)
+      } else {
+        // In production: resolve path from webpack manifest file
+        // We are guaranteed to have a manifest file since webpack compiles in
+        // the build
+        path = webpackManifest[jsFile]
       }
 
       if (opts.cdn !== false) {
