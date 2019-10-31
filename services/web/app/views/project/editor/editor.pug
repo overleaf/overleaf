@@ -75,7 +75,8 @@ div.full-size(
 			line-height="settings.lineHeight || ui.defaultLineHeight"
 		)
 
-		include ./review-panel
+		if !isRestrictedTokenMember
+			include ./review-panel
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")

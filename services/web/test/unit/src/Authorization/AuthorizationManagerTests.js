@@ -28,6 +28,7 @@ describe('AuthorizationManager', function() {
       },
       requires: {
         '../Collaborators/CollaboratorsGetter': (this.CollaboratorsGetter = {}),
+        '../Collaborators/CollaboratorsHandler': (this.CollaboratorsHandler = {}),
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '../../models/User': {
           User: (this.User = {})
