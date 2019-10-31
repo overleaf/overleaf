@@ -121,7 +121,7 @@ services:
         expose:
             - 8080
         environment:
-            - PROXY_TOKEN: token
+            PROXY_TOKEN: token
 
     # ldap:
     #    restart: always
