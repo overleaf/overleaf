@@ -8,7 +8,7 @@ describe "WebsocketLoadBalancer", ->
 		@rclient = {}
 		@RoomEvents = {on: sinon.stub()}
 		@WebsocketLoadBalancer = SandboxedModule.require modulePath, requires:
-			"./RedisClientManager": 
+			"./RedisClientManager":
 				createClientList: () => []
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./SafeJsonParse": @SafeJsonParse =
@@ -18,6 +18,12 @@ describe "WebsocketLoadBalancer", ->
 			"./RoomManager" : @RoomManager = {eventSource: sinon.stub().returns @RoomEvents}
 			"./ChannelManager": @ChannelManager = {publish: sinon.stub()}
 			"./ConnectedUsersManager": @ConnectedUsersManager = {refreshClient: sinon.stub()}
+			"./Utils": @Utils = {
+				getClientAttributes: sinon.spy(
+					(client, _attrs, callback) ->
+						callback(null, {is_restricted_user: !!client.__isRestricted})
+				)
+			}
 		@io = {}
 		@WebsocketLoadBalancer.rclientPubList = [{publish: sinon.stub()}]
 		@WebsocketLoadBalancer.rclientSubList = [{
@@ -26,7 +32,7 @@ describe "WebsocketLoadBalancer", ->
 		}]
 
 		@room_id = "room-id"
-		@message = "message-to-editor"
+		@message = "otUpdateApplied"
 		@payload = ["argument one", 42]
 
 	describe "emitToRoom", ->
@@ -51,7 +57,7 @@ describe "WebsocketLoadBalancer", ->
 			@WebsocketLoadBalancer.emitToRoom
 				.calledWith("all", @message, @payload...)
 				.should.equal true
-			
+
 	describe "listenForEditorEvents", ->
 		beforeEach ->
 			@WebsocketLoadBalancer._processEditorEvent = sinon.stub()
@@ -70,9 +76,10 @@ describe "WebsocketLoadBalancer", ->
 	describe "_processEditorEvent", ->
 		describe "with bad JSON", ->
 			beforeEach ->
+				@isRestrictedUser = false
 				@SafeJsonParse.parse = sinon.stub().callsArgWith 1, new Error("oops")
 				@WebsocketLoadBalancer._processEditorEvent(@io, "editor-events", "blah")
-			
+
 			it "should log an error", ->
 				@logger.error.called.should.equal true
 
@@ -98,6 +105,54 @@ describe "WebsocketLoadBalancer", ->
 				@emit2.calledWith(@message, @payload...).should.equal true
 				@emit3.called.should.equal false # duplicate client should be ignored
 
+		describe "with a designated room, and restricted clients, not restricted message", ->
+			beforeEach ->
+				@io.sockets =
+					clients: sinon.stub().returns([
+						{id: 'client-id-1', emit: @emit1 = sinon.stub()}
+						{id: 'client-id-2', emit: @emit2 = sinon.stub()}
+						{id: 'client-id-1', emit: @emit3 = sinon.stub()} # duplicate client
+						{id: 'client-id-4', emit: @emit4 = sinon.stub(), __isRestricted: true}
+					])
+				data = JSON.stringify
+					room_id: @room_id
+					message: @message
+					payload: @payload
+				@WebsocketLoadBalancer._processEditorEvent(@io, "editor-events", data)
+
+			it "should send the message to all (unique) clients in the room", ->
+				@io.sockets.clients
+					.calledWith(@room_id)
+					.should.equal true
+				@emit1.calledWith(@message, @payload...).should.equal true
+				@emit2.calledWith(@message, @payload...).should.equal true
+				@emit3.called.should.equal false # duplicate client should be ignored
+				@emit4.called.should.equal true  # restricted client, but should be called
+
+		describe "with a designated room, and restricted clients, restricted message", ->
+			beforeEach ->
+				@io.sockets =
+					clients: sinon.stub().returns([
+						{id: 'client-id-1', emit: @emit1 = sinon.stub()}
+						{id: 'client-id-2', emit: @emit2 = sinon.stub()}
+						{id: 'client-id-1', emit: @emit3 = sinon.stub()} # duplicate client
+						{id: 'client-id-4', emit: @emit4 = sinon.stub(), __isRestricted: true}
+					])
+				data = JSON.stringify
+					room_id: @room_id
+					message: @restrictedMessage = 'new-comment'
+					payload: @payload
+				@WebsocketLoadBalancer._processEditorEvent(@io, "editor-events", data)
+
+			it "should send the message to all (unique) clients in the room, who are not restricted", ->
+				@io.sockets.clients
+					.calledWith(@room_id)
+					.should.equal true
+				@emit1.calledWith(@restrictedMessage, @payload...).should.equal true
+				@emit2.calledWith(@restrictedMessage, @payload...).should.equal true
+				@emit3.called.should.equal false # duplicate client should be ignored
+				@emit4.called.should.equal false # restricted client, should not be called
+
 		describe "when emitting to all", ->
 			beforeEach ->
 				@io.sockets =
@@ -110,4 +165,3 @@ describe "WebsocketLoadBalancer", ->
 
 			it "should send the message to all clients", ->
 				@emit.calledWith(@message, @payload...).should.equal true
-			
