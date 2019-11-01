@@ -41,13 +41,15 @@ module.exports = class UserHelper {
     this.user = null
     // cookie jar
     this.jar = request.jar()
+    // create new request instance
+    this.request = request.defaults({})
     // initialize request instance with default options
     this.setRequestDefaults()
   }
 
   setRequestDefaults(defaults = {}) {
     // request-promise instance for making requests
-    this.request = request.defaults({
+    this.request = this.request.defaults({
       baseUrl: UserHelper.baseUrl(),
       followRedirect: false,
       jar: this.jar,
