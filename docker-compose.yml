@@ -17,7 +17,6 @@ services:
         links:
             - mongo
             - redis
-            - file_proxy
         volumes:
             - ~/sharelatex_data:/var/lib/sharelatex
             - /var/run/docker.sock:/var/run/docker.sock
@@ -38,6 +37,9 @@ services:
 
             # Enables Thumbnail generation using ImageMagick
             ENABLE_CONVERSIONS: 'true'
+
+            # Enables link URL Feature, requires file_proxy services with a token defined
+            # LINKED_URL_PROXY: 'http://file_proxy:8080/proxy/token'
 
             ## Set for SSL via nginx-proxy
             #VIRTUAL_HOST: 103.112.212.22
@@ -115,13 +117,13 @@ services:
         volumes:
             - ~/redis_data:/data
 
-    file_proxy:
-        image: sharelatex/linked-url-proxy
-        container_name: file_proxy
-        expose:
-            - 8080
-        environment:
-            PROXY_TOKEN: token
+    # file_proxy:
+    #   image: sharelatex/linked-url-proxy
+    #   container_name: file_proxy
+    #   expose:
+    #       - 8080
+    #   environment:
+    #       PROXY_TOKEN: token
 
     # ldap:
     #    restart: always
