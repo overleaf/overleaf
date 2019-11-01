@@ -33,8 +33,6 @@ services:
 
             ENABLED_LINKED_FILE_TYPES: 'url,project_file'
 
-            LINKED_URL_PROXY: 'http://file_proxy:8080/proxy/token'
-
             # Enables Thumbnail generation using ImageMagick
             ENABLE_CONVERSIONS: 'true'
 
