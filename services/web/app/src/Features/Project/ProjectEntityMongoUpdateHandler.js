@@ -1,22 +1,3 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    one-var,
-    standard/no-callback-literal,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS201: Simplify complex destructure assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let ProjectEntityMongoUpdateHandler, self
 const _ = require('underscore')
 const async = require('async')
 const logger = require('logger-sharelatex')
@@ -34,19 +15,19 @@ const SafePath = require('./SafePath')
 
 const LOCK_NAMESPACE = 'mongoTransaction'
 
-const wrapWithLock = function(methodWithoutLock) {
+function wrapWithLock(methodWithoutLock) {
   // This lock is used whenever we read or write to an existing project's
   // structure. Some operations to project structure cannot be done atomically
   // in mongo, this lock is used to prevent reading the structure between two
   // parts of a staged update.
-  const methodWithLock = function(project_id, ...rest) {
-    const adjustedLength = Math.max(rest.length, 1),
-      args = rest.slice(0, adjustedLength - 1),
-      callback = rest[adjustedLength - 1]
-    return LockManager.runWithLock(
+  function methodWithLock(projectId, ...rest) {
+    const adjustedLength = Math.max(rest.length, 1)
+    const args = rest.slice(0, adjustedLength - 1)
+    const callback = rest[adjustedLength - 1]
+    LockManager.runWithLock(
       LOCK_NAMESPACE,
-      project_id,
-      cb => methodWithoutLock(project_id, ...Array.from(args), cb),
+      projectId,
+      cb => methodWithoutLock(projectId, ...args, cb),
       callback
     )
   }
@@ -54,233 +35,245 @@ const wrapWithLock = function(methodWithoutLock) {
   return methodWithLock
 }
 
-module.exports = ProjectEntityMongoUpdateHandler = self = {
+const ProjectEntityMongoUpdateHandler = {
   LOCK_NAMESPACE,
 
-  addDoc: wrapWithLock(function(project_id, folder_id, doc, callback) {
-    if (callback == null) {
-      callback = function(err, result) {}
-    }
-    return ProjectGetter.getProjectWithoutLock(
-      project_id,
+  addDoc: wrapWithLock(function(projectId, folderId, doc, callback) {
+    ProjectGetter.getProjectWithoutLock(
+      projectId,
       { rootFolder: true, name: true, overleaf: true },
-      function(err, project) {
+      (err, project) => {
         if (err != null) {
-          logger.warn({ project_id, err }, 'error getting project for add doc')
+          logger.warn({ projectId, err }, 'error getting project for add doc')
           return callback(err)
         }
         logger.log(
-          { project_id, folder_id, doc_name: doc.name },
+          { projectId, folderId, doc_name: doc.name },
           'adding doc to project with project'
         )
-        return self._confirmFolder(project, folder_id, folder_id => {
-          return self._putElement(project, folder_id, doc, 'doc', callback)
-        })
+        ProjectEntityMongoUpdateHandler._confirmFolder(
+          project,
+          folderId,
+          folderId => {
+            ProjectEntityMongoUpdateHandler._putElement(
+              project,
+              folderId,
+              doc,
+              'doc',
+              callback
+            )
+          }
+        )
       }
     )
   }),
 
-  addFile: wrapWithLock(function(project_id, folder_id, fileRef, callback) {
-    if (callback == null) {
-      callback = function(error, result, project) {}
-    }
-    return ProjectGetter.getProjectWithoutLock(
-      project_id,
+  addFile: wrapWithLock(function(projectId, folderId, fileRef, callback) {
+    ProjectGetter.getProjectWithoutLock(
+      projectId,
       { rootFolder: true, name: true, overleaf: true },
-      function(err, project) {
+      (err, project) => {
         if (err != null) {
-          logger.warn({ project_id, err }, 'error getting project for add file')
+          logger.warn({ projectId, err }, 'error getting project for add file')
           return callback(err)
         }
         logger.log(
-          { project_id: project._id, folder_id, file_name: fileRef.name },
+          { projectId: project._id, folderId, file_name: fileRef.name },
           'adding file'
         )
-        return self._confirmFolder(project, folder_id, folder_id =>
-          self._putElement(project, folder_id, fileRef, 'file', callback)
+        ProjectEntityMongoUpdateHandler._confirmFolder(
+          project,
+          folderId,
+          folderId =>
+            ProjectEntityMongoUpdateHandler._putElement(
+              project,
+              folderId,
+              fileRef,
+              'file',
+              callback
+            )
         )
       }
     )
   }),
 
-  replaceFileWithNew: wrapWithLock(
-    (project_id, file_id, newFileRef, callback) =>
-      ProjectGetter.getProjectWithoutLock(
-        project_id,
-        { rootFolder: true, name: true, overleaf: true },
-        function(err, project) {
-          if (err != null) {
-            return callback(err)
-          }
-          return ProjectLocator.findElement(
-            { project, element_id: file_id, type: 'file' },
-            (err, fileRef, path) => {
-              if (err != null) {
-                return callback(err)
-              }
-              return ProjectEntityMongoUpdateHandler._insertDeletedFileReference(
-                project_id,
-                fileRef,
-                function(err) {
-                  if (err != null) {
-                    return callback(err)
-                  }
-                  const conditions = { _id: project._id }
-                  const inc = {}
-                  // increment the project structure version as we are adding a new file here
-                  inc['version'] = 1
-                  const set = {}
-                  set[`${path.mongo}._id`] = newFileRef._id
-                  set[`${path.mongo}.created`] = new Date()
-                  set[`${path.mongo}.linkedFileData`] =
-                    newFileRef.linkedFileData
-                  inc[`${path.mongo}.rev`] = 1
-                  set[`${path.mongo}.hash`] = newFileRef.hash
-                  const update = {
-                    $inc: inc,
-                    $set: set
-                  }
-                  // Note: Mongoose uses new:true to return the modified document
-                  // https://mongoosejs.com/docs/api.html#model_Model.findOneAndUpdate
-                  // but Mongo uses returnNewDocument:true instead
-                  // https://docs.mongodb.com/manual/reference/method/db.collection.findOneAndUpdate/
-                  // We are using Mongoose here, but if we ever switch to a direct mongo call
-                  // the next line will need to be updated.
-                  return Project.findOneAndUpdate(
-                    conditions,
-                    update,
-                    { new: true },
-                    function(err, newProject) {
-                      if (err != null) {
-                        return callback(err)
-                      }
-                      return callback(null, fileRef, project, path, newProject)
-                    }
-                  )
-                }
-              )
-            }
-          )
+  replaceFileWithNew: wrapWithLock((projectId, fileId, newFileRef, callback) =>
+    ProjectGetter.getProjectWithoutLock(
+      projectId,
+      { rootFolder: true, name: true, overleaf: true },
+      (err, project) => {
+        if (err != null) {
+          return callback(err)
         }
-      )
+        ProjectLocator.findElement(
+          { project, element_id: fileId, type: 'file' },
+          (err, fileRef, path) => {
+            if (err != null) {
+              return callback(err)
+            }
+            ProjectEntityMongoUpdateHandler._insertDeletedFileReference(
+              projectId,
+              fileRef,
+              err => {
+                if (err != null) {
+                  return callback(err)
+                }
+                const conditions = { _id: project._id }
+                const inc = {}
+                // increment the project structure version as we are adding a new file here
+                inc['version'] = 1
+                const set = {}
+                set[`${path.mongo}._id`] = newFileRef._id
+                set[`${path.mongo}.created`] = new Date()
+                set[`${path.mongo}.linkedFileData`] = newFileRef.linkedFileData
+                inc[`${path.mongo}.rev`] = 1
+                set[`${path.mongo}.hash`] = newFileRef.hash
+                const update = {
+                  $inc: inc,
+                  $set: set
+                }
+                // Note: Mongoose uses new:true to return the modified document
+                // https://mongoosejs.com/docs/api.html#model_Model.findOneAndUpdate
+                // but Mongo uses returnNewDocument:true instead
+                // https://docs.mongodb.com/manual/reference/method/db.collection.findOneAndUpdate/
+                // We are using Mongoose here, but if we ever switch to a direct mongo call
+                // the next line will need to be updated.
+                Project.findOneAndUpdate(
+                  conditions,
+                  update,
+                  { new: true },
+                  (err, newProject) => {
+                    if (err != null) {
+                      return callback(err)
+                    }
+                    callback(null, fileRef, project, path, newProject)
+                  }
+                )
+              }
+            )
+          }
+        )
+      }
+    )
   ),
 
-  mkdirp: wrapWithLock(function(project_id, path, options, callback) {
+  mkdirp: wrapWithLock(function(projectId, path, options, callback) {
     // defaults to case insensitive paths, use options {exactCaseMatch:true}
     // to make matching case-sensitive
     let folders = path.split('/')
     folders = _.select(folders, folder => folder.length !== 0)
 
-    return ProjectGetter.getProjectWithOnlyFolders(
-      project_id,
-      (err, project) => {
-        if (path === '/') {
-          logger.log(
-            { project_id: project._id },
-            'mkdir is only trying to make path of / so sending back root folder'
-          )
-          return callback(null, [], project.rootFolder[0])
-        }
-        logger.log({ project_id: project._id, path, folders }, 'running mkdirp')
-
-        let builtUpPath = ''
-        const procesFolder = (previousFolders, folderName, callback) => {
-          let parentFolder_id
-          previousFolders = previousFolders || []
-          const parentFolder = previousFolders[previousFolders.length - 1]
-          if (parentFolder != null) {
-            parentFolder_id = parentFolder._id
-          }
-          builtUpPath = `${builtUpPath}/${folderName}`
-          return ProjectLocator.findElementByPath(
-            {
-              project,
-              path: builtUpPath,
-              exactCaseMatch:
-                options != null ? options.exactCaseMatch : undefined
-            },
-            (err, foundFolder) => {
-              if (foundFolder == null) {
-                logger.log(
-                  { path, project_id: project._id, folderName },
-                  'making folder from mkdirp'
-                )
-                return self.addFolder.withoutLock(
-                  project_id,
-                  parentFolder_id,
-                  folderName,
-                  function(err, newFolder, parentFolder_id) {
-                    if (err != null) {
-                      return callback(err)
-                    }
-                    newFolder.parentFolder_id = parentFolder_id
-                    previousFolders.push(newFolder)
-                    return callback(null, previousFolders)
-                  }
-                )
-              } else {
-                foundFolder.filterOut = true
-                previousFolders.push(foundFolder)
-                return callback(null, previousFolders)
-              }
-            }
-          )
-        }
-
-        return async.reduce(folders, [], procesFolder, function(err, folders) {
-          if (err != null) {
-            return callback(err)
-          }
-          const lastFolder = folders[folders.length - 1]
-          folders = _.select(folders, folder => !folder.filterOut)
-          return callback(null, folders, lastFolder)
-        })
+    ProjectGetter.getProjectWithOnlyFolders(projectId, (err, project) => {
+      if (err != null) {
+        return callback(err)
       }
-    )
+      if (path === '/') {
+        logger.log(
+          { projectId: project._id },
+          'mkdir is only trying to make path of / so sending back root folder'
+        )
+        return callback(null, [], project.rootFolder[0])
+      }
+      logger.log({ projectId: project._id, path, folders }, 'running mkdirp')
+
+      let builtUpPath = ''
+      const procesFolder = (previousFolders, folderName, callback) => {
+        let parentFolderId
+        previousFolders = previousFolders || []
+        const parentFolder = previousFolders[previousFolders.length - 1]
+        if (parentFolder != null) {
+          parentFolderId = parentFolder._id
+        }
+        builtUpPath = `${builtUpPath}/${folderName}`
+        ProjectLocator.findElementByPath(
+          {
+            project,
+            path: builtUpPath,
+            exactCaseMatch: options != null ? options.exactCaseMatch : undefined
+          },
+          (err, foundFolder) => {
+            if (err != null) {
+              logger.log(
+                { path, projectId: project._id, folderName },
+                'making folder from mkdirp'
+              )
+              ProjectEntityMongoUpdateHandler.addFolder.withoutLock(
+                projectId,
+                parentFolderId,
+                folderName,
+                (err, newFolder, parentFolderId) => {
+                  if (err != null) {
+                    return callback(err)
+                  }
+                  newFolder.parentFolder_id = parentFolderId
+                  previousFolders.push(newFolder)
+                  callback(null, previousFolders)
+                }
+              )
+            } else {
+              foundFolder.filterOut = true
+              previousFolders.push(foundFolder)
+              callback(null, previousFolders)
+            }
+          }
+        )
+      }
+
+      async.reduce(folders, [], procesFolder, (err, folders) => {
+        if (err != null) {
+          return callback(err)
+        }
+        const lastFolder = folders[folders.length - 1]
+        folders = _.select(folders, folder => !folder.filterOut)
+        callback(null, folders, lastFolder)
+      })
+    })
   }),
 
   moveEntity: wrapWithLock(function(
-    project_id,
-    entity_id,
+    projectId,
+    entityId,
     destFolderId,
     entityType,
     callback
   ) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return ProjectGetter.getProjectWithoutLock(
-      project_id,
+    ProjectGetter.getProjectWithoutLock(
+      projectId,
       { rootFolder: true, name: true, overleaf: true },
-      function(err, project) {
+      (err, project) => {
         if (err != null) {
           return callback(err)
         }
-        return ProjectLocator.findElement(
-          { project, element_id: entity_id, type: entityType },
-          function(err, entity, entityPath) {
+        ProjectLocator.findElement(
+          { project, element_id: entityId, type: entityType },
+          (err, entity, entityPath) => {
             if (err != null) {
               return callback(err)
             }
             // Prevent top-level docs/files with reserved names (to match v1 behaviour)
-            if (self._blockedFilename(entityPath, entityType)) {
+            if (
+              ProjectEntityMongoUpdateHandler._blockedFilename(
+                entityPath,
+                entityType
+              )
+            ) {
               return callback(
                 new Errors.InvalidNameError('blocked element name')
               )
             }
-            return self._checkValidMove(
+            ProjectEntityMongoUpdateHandler._checkValidMove(
               project,
               entityType,
               entity,
               entityPath,
               destFolderId,
-              function(error) {
+              error => {
                 if (error != null) {
                   return callback(error)
                 }
-                return ProjectEntityHandler.getAllEntitiesFromProject(
+                ProjectEntityHandler.getAllEntitiesFromProject(
                   project,
-                  function(error, oldDocs, oldFiles) {
+                  (error, oldDocs, oldFiles) => {
                     if (error != null) {
                       return callback(error)
                     }
@@ -290,12 +283,12 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
                     // will cause some breakage but is better than being
                     // lost, which is what happens if this is done in the
                     // opposite order.
-                    return self._putElement(
+                    ProjectEntityMongoUpdateHandler._putElement(
                       project,
                       destFolderId,
                       entity,
                       entityType,
-                      function(err, result) {
+                      (err, result) => {
                         if (err != null) {
                           return callback(err)
                         }
@@ -307,18 +300,18 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
                         // have not moved a folder subfolder of itself (which
                         // is done by _checkValidMove above) because that
                         // would lead to it being deleted.
-                        return self._removeElementFromMongoArray(
+                        ProjectEntityMongoUpdateHandler._removeElementFromMongoArray(
                           Project,
-                          project_id,
+                          projectId,
                           entityPath.mongo,
-                          entity_id,
-                          function(err, newProject) {
+                          entityId,
+                          (err, newProject) => {
                             if (err != null) {
                               return callback(err)
                             }
-                            return ProjectEntityHandler.getAllEntitiesFromProject(
+                            ProjectEntityHandler.getAllEntitiesFromProject(
                               newProject,
-                              function(err, newDocs, newFiles) {
+                              (err, newDocs, newFiles) => {
                                 if (err != null) {
                                   return callback(err)
                                 }
@@ -338,7 +331,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
                                 ) {
                                   logger.warn(
                                     {
-                                      project_id,
+                                      projectId,
                                       oldDocs: oldDocs.length,
                                       newDocs: newDocs.length,
                                       oldFiles: oldFiles.length,
@@ -354,7 +347,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
                                     )
                                   )
                                 }
-                                return callback(
+                                callback(
                                   null,
                                   project,
                                   startPath,
@@ -379,30 +372,30 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
     )
   }),
 
-  deleteEntity: wrapWithLock((project_id, entity_id, entityType, callback) =>
+  deleteEntity: wrapWithLock((projectId, entityId, entityType, callback) =>
     ProjectGetter.getProjectWithoutLock(
-      project_id,
+      projectId,
       { name: true, rootFolder: true, overleaf: true },
-      function(error, project) {
+      (error, project) => {
         if (error != null) {
           return callback(error)
         }
-        return ProjectLocator.findElement(
-          { project, element_id: entity_id, type: entityType },
-          function(error, entity, path) {
+        ProjectLocator.findElement(
+          { project, element_id: entityId, type: entityType },
+          (error, entity, path) => {
             if (error != null) {
               return callback(error)
             }
-            return self._removeElementFromMongoArray(
+            ProjectEntityMongoUpdateHandler._removeElementFromMongoArray(
               Project,
-              project_id,
+              projectId,
               path.mongo,
-              entity_id,
-              function(error, newProject) {
+              entityId,
+              (error, newProject) => {
                 if (error != null) {
                   return callback(error)
                 }
-                return callback(null, entity, path, project, newProject)
+                callback(null, entity, path, project, newProject)
               }
             )
           }
@@ -412,22 +405,22 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
   ),
 
   renameEntity: wrapWithLock(
-    (project_id, entity_id, entityType, newName, callback) =>
+    (projectId, entityId, entityType, newName, callback) =>
       ProjectGetter.getProjectWithoutLock(
-        project_id,
+        projectId,
         { rootFolder: true, name: true, overleaf: true },
         (error, project) => {
           if (error != null) {
             return callback(error)
           }
-          return ProjectEntityHandler.getAllEntitiesFromProject(
+          ProjectEntityHandler.getAllEntitiesFromProject(
             project,
             (error, oldDocs, oldFiles) => {
               if (error != null) {
                 return callback(error)
               }
-              return ProjectLocator.findElement(
-                { project, element_id: entity_id, type: entityType },
+              ProjectLocator.findElement(
+                { project, element_id: entityId, type: entityType },
                 (error, entity, entPath, parentFolder) => {
                   if (error != null) {
                     return callback(error)
@@ -438,35 +431,38 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
                   )
                   // Prevent top-level docs/files with reserved names (to match v1 behaviour)
                   if (
-                    self._blockedFilename({ fileSystem: endPath }, entityType)
+                    ProjectEntityMongoUpdateHandler._blockedFilename(
+                      { fileSystem: endPath },
+                      entityType
+                    )
                   ) {
                     return callback(
                       new Errors.InvalidNameError('blocked element name')
                     )
                   }
                   // check if the new name already exists in the current folder
-                  return self._checkValidElementName(
+                  ProjectEntityMongoUpdateHandler._checkValidElementName(
                     parentFolder,
                     newName,
                     error => {
                       if (error != null) {
                         return callback(error)
                       }
-                      const conditions = { _id: project_id }
+                      const conditions = { _id: projectId }
                       const update = { $set: {}, $inc: {} }
                       const namePath = entPath.mongo + '.name'
                       update['$set'][namePath] = newName
                       // we need to increment the project version number for any structure change
                       update['$inc']['version'] = 1
-                      return Project.findOneAndUpdate(
+                      Project.findOneAndUpdate(
                         conditions,
                         update,
                         { new: true },
-                        function(error, newProject) {
+                        (error, newProject) => {
                           if (error != null) {
                             return callback(error)
                           }
-                          return ProjectEntityHandler.getAllEntitiesFromProject(
+                          ProjectEntityHandler.getAllEntitiesFromProject(
                             newProject,
                             (error, newDocs, newFiles) => {
                               if (error != null) {
@@ -480,7 +476,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
                                 newFiles,
                                 newProject
                               }
-                              return callback(
+                              callback(
                                 null,
                                 project,
                                 startPath,
@@ -503,41 +499,41 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
       )
   ),
 
-  addFolder: wrapWithLock((project_id, parentFolder_id, folderName, callback) =>
+  addFolder: wrapWithLock((projectId, parentFolderId, folderName, callback) =>
     ProjectGetter.getProjectWithoutLock(
-      project_id,
+      projectId,
       { rootFolder: true, name: true, overleaf: true },
-      function(err, project) {
+      (err, project) => {
         if (err != null) {
           logger.warn(
-            { project_id, err },
+            { projectId, err },
             'error getting project for add folder'
           )
           return callback(err)
         }
-        return self._confirmFolder(
+        ProjectEntityMongoUpdateHandler._confirmFolder(
           project,
-          parentFolder_id,
-          parentFolder_id => {
+          parentFolderId,
+          parentFolderId => {
             const folder = new Folder({ name: folderName })
             logger.log(
-              { project: project._id, parentFolder_id, folderName },
+              { project: project._id, parentFolderId, folderName },
               'adding new folder'
             )
-            return self._putElement(
+            ProjectEntityMongoUpdateHandler._putElement(
               project,
-              parentFolder_id,
+              parentFolderId,
               folder,
               'folder',
               err => {
                 if (err != null) {
                   logger.warn(
-                    { err, project_id: project._id },
+                    { err, projectId: project._id },
                     'error adding folder to project'
                   )
                   return callback(err)
                 }
-                return callback(null, folder, parentFolder_id)
+                callback(null, folder, parentFolderId)
               }
             )
           }
@@ -546,54 +542,42 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
     )
   ),
 
-  _removeElementFromMongoArray(model, model_id, path, element_id, callback) {
-    if (callback == null) {
-      callback = function(err, project) {}
-    }
-    const conditions = { _id: model_id }
+  _removeElementFromMongoArray(model, modelId, path, elementId, callback) {
+    const conditions = { _id: modelId }
     const pullUpdate = { $pull: {}, $inc: {} }
     const nonArrayPath = path.slice(0, path.lastIndexOf('.'))
     // remove specific element from array by id
-    pullUpdate['$pull'][nonArrayPath] = { _id: element_id }
+    pullUpdate['$pull'][nonArrayPath] = { _id: elementId }
     // we need to increment the project version number for any structure change
     pullUpdate['$inc']['version'] = 1
-    return model.findOneAndUpdate(
-      conditions,
-      pullUpdate,
-      { new: true },
-      callback
-    )
+    model.findOneAndUpdate(conditions, pullUpdate, { new: true }, callback)
   },
 
   _countElements(project) {
-    var countFolder = function(folder) {
+    function countFolder(folder) {
       let total = 0
 
-      for (let subfolder of Array.from(
-        (folder != null ? folder.folders : undefined) || []
-      )) {
+      for (let subfolder of (folder != null ? folder.folders : undefined) ||
+        []) {
         total += countFolder(subfolder)
       }
 
       if (
-        __guard__(folder != null ? folder.folders : undefined, x => x.length) !=
-        null
+        folder != null &&
+        folder.folders != null &&
+        folder.folders.length > 0
       ) {
         total += folder.folders.length
       }
 
-      if (
-        __guard__(folder != null ? folder.docs : undefined, x1 => x1.length) !=
-        null
-      ) {
+      if (folder != null && folder.docs != null && folder.docs.length > 0) {
         total += folder.docs.length
       }
 
       if (
-        __guard__(
-          folder != null ? folder.fileRefs : undefined,
-          x2 => x2.length
-        ) != null
+        folder != null &&
+        folder.fileRefs != null &&
+        folder.fileRefs.length > 0
       ) {
         total += folder.fileRefs.length
       }
@@ -604,12 +588,8 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
     return countFolder(project.rootFolder[0])
   },
 
-  _putElement(project, folder_id, element, type, callback) {
-    let e
-    if (callback == null) {
-      callback = function(err, path, project) {}
-    }
-    const sanitizeTypeOfElement = function(elementType) {
+  _putElement(project, folderId, element, type, callback) {
+    function sanitizeTypeOfElement(elementType) {
       const lastChar = elementType.slice(-1)
       if (lastChar !== 's') {
         elementType += 's'
@@ -621,45 +601,46 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
     }
 
     if (element == null || element._id == null) {
-      e = new Error('no element passed to be inserted')
       logger.warn(
-        { project_id: project._id, folder_id, element, type },
+        { projectId: project._id, folderId, element, type },
         'failed trying to insert element as it was null'
       )
-      return callback(e)
+      return callback(new Error('no element passed to be inserted'))
     }
     type = sanitizeTypeOfElement(type)
 
     // original check path.resolve("/", element.name) isnt "/#{element.name}" or element.name.match("/")
     // check if name is allowed
     if (!SafePath.isCleanFilename(element.name)) {
-      e = new Errors.InvalidNameError('invalid element name')
       logger.warn(
-        { project_id: project._id, folder_id, element, type },
+        { projectId: project._id, folderId, element, type },
         'failed trying to insert element as name was invalid'
       )
-      return callback(e)
+      return callback(new Errors.InvalidNameError('invalid element name'))
     }
 
-    if (folder_id == null) {
-      folder_id = project.rootFolder[0]._id
+    if (folderId == null) {
+      folderId = project.rootFolder[0]._id
     }
 
-    if (self._countElements(project) > settings.maxEntitiesPerProject) {
+    if (
+      ProjectEntityMongoUpdateHandler._countElements(project) >
+      settings.maxEntitiesPerProject
+    ) {
       logger.warn(
-        { project_id: project._id },
+        { projectId: project._id },
         'project too big, stopping insertions'
       )
       CooldownManager.putProjectOnCooldown(project._id)
       return callback(new Error('project_has_to_many_files'))
     }
 
-    return ProjectLocator.findElement(
-      { project, element_id: folder_id, type: 'folders' },
+    ProjectLocator.findElement(
+      { project, element_id: folderId, type: 'folders' },
       (err, folder, path) => {
         if (err != null) {
           logger.warn(
-            { err, project_id: project._id, folder_id, type, element },
+            { err, projectId: project._id, folderId, type, element },
             'error finding folder for _putElement'
           )
           return callback(err)
@@ -673,49 +654,53 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
           return callback(new Errors.InvalidNameError('path too long'))
         }
         // Prevent top-level docs/files with reserved names (to match v1 behaviour)
-        if (self._blockedFilename(newPath, type)) {
+        if (ProjectEntityMongoUpdateHandler._blockedFilename(newPath, type)) {
           return callback(new Errors.InvalidNameError('blocked element name'))
         }
-        return self._checkValidElementName(folder, element.name, err => {
-          if (err != null) {
-            return callback(err)
-          }
-          const id = element._id + ''
-          element._id = require('mongoose').Types.ObjectId(id)
-          const conditions = { _id: project._id }
-          const mongopath = `${path.mongo}.${type}`
-          const update = { $push: {}, $inc: {} }
-          update['$push'][mongopath] = element
-          // we need to increment the project version number for any structure change
-          update['$inc']['version'] = 1 // increment project version number
-          logger.log(
-            {
-              project_id: project._id,
-              element_id: element._id,
-              fileType: type,
-              folder_id,
-              mongopath
-            },
-            'adding element to project'
-          )
-          // We are using Mongoose here, but if we ever switch to a direct mongo call
-          // the next line will need to be updated to {returnNewDocument:true}
-          return Project.findOneAndUpdate(
-            conditions,
-            update,
-            { new: true },
-            function(err, newProject) {
-              if (err != null) {
-                logger.warn(
-                  { err, project_id: project._id },
-                  'error saving in putElement project'
-                )
-                return callback(err)
-              }
-              return callback(err, { path: newPath }, newProject)
+        ProjectEntityMongoUpdateHandler._checkValidElementName(
+          folder,
+          element.name,
+          err => {
+            if (err != null) {
+              return callback(err)
             }
-          )
-        })
+            const id = element._id + ''
+            element._id = require('mongoose').Types.ObjectId(id)
+            const conditions = { _id: project._id }
+            const mongopath = `${path.mongo}.${type}`
+            const update = { $push: {}, $inc: {} }
+            update['$push'][mongopath] = element
+            // we need to increment the project version number for any structure change
+            update['$inc']['version'] = 1 // increment project version number
+            logger.log(
+              {
+                projectId: project._id,
+                element_id: element._id,
+                fileType: type,
+                folderId,
+                mongopath
+              },
+              'adding element to project'
+            )
+            // We are using Mongoose here, but if we ever switch to a direct mongo call
+            // the next line will need to be updated to {returnNewDocument:true}
+            Project.findOneAndUpdate(
+              conditions,
+              update,
+              { new: true },
+              (err, newProject) => {
+                if (err != null) {
+                  logger.warn(
+                    { err, projectId: project._id },
+                    'error saving in putElement project'
+                  )
+                  return callback(err)
+                }
+                callback(err, { path: newPath }, newProject)
+              }
+            )
+          }
+        )
       }
     )
   },
@@ -725,10 +710,10 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
     // javascript reserved names are forbidden for docs and files
     // at the top-level (but folders with reserved names are allowed).
     const isFolder = ['folder', 'folders'].includes(entityType)
-    const [dir, file] = Array.from([
+    const [dir, file] = [
       path.dirname(entityPath.fileSystem),
       path.basename(entityPath.fileSystem)
-    ])
+    ]
     const isTopLevel = dir === '/'
     if (isTopLevel && !isFolder && SafePath.isBlockedFilename(file)) {
       return true
@@ -740,45 +725,36 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
   _checkValidElementName(folder, name, callback) {
     // check if the name is already taken by a doc, file or
     // folder. If so, return an error "file already exists".
-    if (callback == null) {
-      callback = function(err) {}
-    }
     const err = new Errors.InvalidNameError('file already exists')
-    for (let doc of Array.from(
-      (folder != null ? folder.docs : undefined) || []
-    )) {
+    for (let doc of (folder != null ? folder.docs : undefined) || []) {
       if (doc.name === name) {
         return callback(err)
       }
     }
-    for (let file of Array.from(
-      (folder != null ? folder.fileRefs : undefined) || []
-    )) {
+    for (let file of (folder != null ? folder.fileRefs : undefined) || []) {
       if (file.name === name) {
         return callback(err)
       }
     }
-    for (folder of Array.from(
-      (folder != null ? folder.folders : undefined) || []
-    )) {
+    for (folder of (folder != null ? folder.folders : undefined) || []) {
       if (folder.name === name) {
         return callback(err)
       }
     }
-    return callback()
+    callback()
   },
 
-  _confirmFolder(project, folder_id, callback) {
+  _confirmFolder(project, folderId, callback) {
     logger.log(
-      { folder_id, project_id: project._id },
+      { folderId, projectId: project._id },
       'confirming folder in project'
     )
-    if (folder_id + '' === 'undefined') {
-      return callback(project.rootFolder[0]._id)
-    } else if (folder_id !== null) {
-      return callback(folder_id)
+    if (folderId + '' === 'undefined') {
+      callback(project.rootFolder[0]._id)
+    } else if (folderId !== null) {
+      callback(folderId)
     } else {
-      return callback(project.rootFolder[0]._id)
+      callback(project.rootFolder[0]._id)
     }
   },
 
@@ -790,57 +766,53 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
     destFolderId,
     callback
   ) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return ProjectLocator.findElement(
+    ProjectLocator.findElement(
       { project, element_id: destFolderId, type: 'folder' },
-      function(err, destEntity, destFolderPath) {
+      (err, destEntity, destFolderPath) => {
         if (err != null) {
           return callback(err)
         }
         // check if there is already a doc/file/folder with the same name
         // in the destination folder
-        return self._checkValidElementName(destEntity, entity.name, function(
-          err
-        ) {
-          if (err != null) {
-            return callback(err)
-          }
-          if (/folder/.test(entityType)) {
-            logger.log(
-              {
-                destFolderPath: destFolderPath.fileSystem,
-                folderPath: entityPath.fileSystem
-              },
-              'checking folder is not moving into child folder'
-            )
-            const isNestedFolder =
-              destFolderPath.fileSystem.slice(
-                0,
-                entityPath.fileSystem.length
-              ) === entityPath.fileSystem
-            if (isNestedFolder) {
-              return callback(
-                new Errors.InvalidNameError(
-                  'destination folder is a child folder of me'
-                )
-              )
+        ProjectEntityMongoUpdateHandler._checkValidElementName(
+          destEntity,
+          entity.name,
+          err => {
+            if (err != null) {
+              return callback(err)
             }
+            if (/folder/.test(entityType)) {
+              logger.log(
+                {
+                  destFolderPath: destFolderPath.fileSystem,
+                  folderPath: entityPath.fileSystem
+                },
+                'checking folder is not moving into child folder'
+              )
+              const isNestedFolder =
+                destFolderPath.fileSystem.slice(
+                  0,
+                  entityPath.fileSystem.length
+                ) === entityPath.fileSystem
+              if (isNestedFolder) {
+                return callback(
+                  new Errors.InvalidNameError(
+                    'destination folder is a child folder of me'
+                  )
+                )
+              }
+            }
+            callback()
           }
-          return callback()
-        })
+        )
       }
     )
   },
 
-  _insertDeletedDocReference(project_id, doc, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return Project.update(
+  _insertDeletedDocReference(projectId, doc, callback) {
+    Project.update(
       {
-        _id: project_id
+        _id: projectId
       },
       {
         $push: {
@@ -856,13 +828,10 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
     )
   },
 
-  _insertDeletedFileReference(project_id, fileRef, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return Project.update(
+  _insertDeletedFileReference(projectId, fileRef, callback) {
+    Project.update(
       {
-        _id: project_id
+        _id: projectId
       },
       {
         $push: {
@@ -881,8 +850,4 @@ module.exports = ProjectEntityMongoUpdateHandler = self = {
   }
 }
 
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
+module.exports = ProjectEntityMongoUpdateHandler

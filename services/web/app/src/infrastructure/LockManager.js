@@ -1,20 +1,4 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let LockManager
 const metrics = require('metrics-sharelatex')
-const Settings = require('settings-sharelatex')
 const RedisWrapper = require('./RedisWrapper')
 const rclient = RedisWrapper.client('lock')
 const logger = require('logger-sharelatex')
@@ -29,7 +13,7 @@ let COUNT = 0
 
 const LOCK_QUEUES = new Map() // queue lock requests for each name/id so they get the lock on a first-come first-served basis
 
-module.exports = LockManager = {
+const LockManager = {
   LOCK_TEST_INTERVAL: 50, // 50ms between each test of the lock
   MAX_TEST_INTERVAL: 1000, // back off to 1s between each test of the lock
   MAX_LOCK_WAIT_TIME: 10000, // 10s maximum time to spend trying to get the lock
@@ -51,23 +35,20 @@ module.exports = LockManager = {
     // runner must be a function accepting a callback, e.g. runner = (cb) ->
 
     // This error is defined here so we get a useful stacktrace
-    if (callback == null) {
-      callback = function(error) {}
-    }
     const slowExecutionError = new Error('slow execution during lock')
 
     const timer = new metrics.Timer(`lock.${namespace}`)
     const key = `lock:web:${namespace}:${id}`
-    LockManager._getLock(key, namespace, function(error, lockValue) {
+    LockManager._getLock(key, namespace, (error, lockValue) => {
       if (error != null) {
         return callback(error)
       }
 
-      // The lock can expire in redis but the process carry on. This setTimout call
+      // The lock can expire in redis but the process carry on. This setTimeout call
       // is designed to log if this happens.
-      const countIfExceededLockTimeout = function() {
+      function countIfExceededLockTimeout() {
         metrics.inc(`lock.${namespace}.exceeded_lock_timeout`)
-        return logger.log('exceeded lock timeout', {
+        logger.log('exceeded lock timeout', {
           namespace,
           id,
           slowExecutionError
@@ -78,8 +59,8 @@ module.exports = LockManager = {
         LockManager.REDIS_LOCK_EXPIRY * 1000
       )
 
-      return runner((error1, ...values) =>
-        LockManager._releaseLock(key, lockValue, function(error2) {
+      runner((error1, ...values) =>
+        LockManager._releaseLock(key, lockValue, error2 => {
           clearTimeout(exceededLockTimeout)
 
           const timeTaken = new Date() - timer.start
@@ -97,16 +78,13 @@ module.exports = LockManager = {
           if (error != null) {
             return callback(error)
           }
-          return callback(null, ...Array.from(values))
+          callback(null, ...values)
         })
       )
     })
   },
 
   _tryLock(key, namespace, callback) {
-    if (callback == null) {
-      callback = function(err, isFree, lockValue) {}
-    }
     const lockValue = LockManager.randomLock()
     rclient.set(
       key,
@@ -114,17 +92,17 @@ module.exports = LockManager = {
       'EX',
       LockManager.REDIS_LOCK_EXPIRY,
       'NX',
-      function(err, gotLock) {
+      (err, gotLock) => {
         if (err != null) {
           return callback(err)
         }
         if (gotLock === 'OK') {
           metrics.inc(`lock.${namespace}.try.success`)
-          return callback(err, true, lockValue)
+          callback(err, true, lockValue)
         } else {
           metrics.inc(`lock.${namespace}.try.failed`)
           logger.log({ key, redis_response: gotLock }, 'lock is locked')
-          return callback(err, false)
+          callback(err, false)
         }
       }
     )
@@ -133,15 +111,12 @@ module.exports = LockManager = {
   // it's sufficient to serialize within a process because that is where the parallel operations occur
   _getLock(key, namespace, callback) {
     // this is what we need to do for each lock we want to request
-    if (callback == null) {
-      callback = function(error, lockValue) {}
-    }
     const task = next =>
-      LockManager._getLockByPolling(key, namespace, function(error, lockValue) {
+      LockManager._getLockByPolling(key, namespace, (error, lockValue) => {
         // tell the queue to start trying to get the next lock (if any)
         next()
         // we have got a lock result, so we can continue with our own execution
-        return callback(error, lockValue)
+        callback(error, lockValue)
       })
     // create a queue for this key if needed
     const queueName = `${key}:${namespace}`
@@ -154,53 +129,43 @@ module.exports = LockManager = {
       // remove the queue object when queue is empty
       queue.drain = () => LOCK_QUEUES.delete(queueName)
       // store the queue in our global map
-      return LOCK_QUEUES.set(queueName, queue)
+      LOCK_QUEUES.set(queueName, queue)
     } else {
       // queue the request to get the lock
-      return queue.push(task)
+      queue.push(task)
     }
   },
 
   _getLockByPolling(key, namespace, callback) {
-    let attempt
-    if (callback == null) {
-      callback = function(error, lockValue) {}
-    }
     const startTime = Date.now()
     const testInterval = LockManager.LOCK_TEST_INTERVAL
     let attempts = 0
-    return (attempt = function() {
+    function attempt() {
       if (Date.now() - startTime > LockManager.MAX_LOCK_WAIT_TIME) {
         metrics.inc(`lock.${namespace}.get.failed`)
         return callback(new Error('Timeout'))
       }
 
       attempts += 1
-      return LockManager._tryLock(key, namespace, function(
-        error,
-        gotLock,
-        lockValue
-      ) {
+      LockManager._tryLock(key, namespace, (error, gotLock, lockValue) => {
         if (error != null) {
           return callback(error)
         }
         if (gotLock) {
           metrics.gauge(`lock.${namespace}.get.success.tries`, attempts)
-          return callback(null, lockValue)
+          callback(null, lockValue)
         } else {
-          return setTimeout(attempt, testInterval)
+          setTimeout(attempt, testInterval)
         }
       })
-    })()
+    }
+    attempt()
   },
 
   _releaseLock(key, lockValue, callback) {
-    rclient.eval(LockManager.unlockScript, 1, key, lockValue, function(
-      err,
-      result
-    ) {
+    rclient.eval(LockManager.unlockScript, 1, key, lockValue, (err, result) => {
       if (err != null) {
-        return callback(err)
+        callback(err)
       } else if (result != null && result !== 1) {
         // successful unlock should release exactly one key
         logger.warn(
@@ -208,10 +173,12 @@ module.exports = LockManager = {
           'unlocking error'
         )
         metrics.inc('unlock-error')
-        return callback(new Error('tried to release timed out lock'))
+        callback(new Error('tried to release timed out lock'))
       } else {
-        return callback(null, result)
+        callback(null, result)
       }
     })
   }
 }
+
+module.exports = LockManager
