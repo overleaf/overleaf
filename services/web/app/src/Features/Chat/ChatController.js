@@ -113,13 +113,11 @@ module.exports = ChatController = {
       const _ = user_ids[user_id]
       ;(user_id =>
         jobs.push(cb =>
-          UserInfoManager.getPersonalInfo(user_id, function(err, user) {
-            if (typeof error !== 'undefined' && error !== null) {
-              return cb(error)
-            }
+          UserInfoManager.getPersonalInfo(user_id, function(error, user) {
+            if (error != null) return cb(error)
             user = UserInfoController.formatPersonalInfo(user)
             users[user_id] = user
-            return cb()
+            cb()
           })
         ))(user_id)
     }

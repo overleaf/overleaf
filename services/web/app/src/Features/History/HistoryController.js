@@ -184,11 +184,9 @@ module.exports = HistoryController = {
       project_id,
       doc_id,
       name,
-      (err, doc) => {
-        if (typeof error !== 'undefined' && error !== null) {
-          return next(error)
-        }
-        return res.json({
+      (error, doc) => {
+        if (error != null) return next(error)
+        res.json({
           doc_id: doc._id
         })
       }
