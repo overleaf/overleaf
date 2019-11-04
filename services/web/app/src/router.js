@@ -972,7 +972,9 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     res.send('web sharelatex is alive (api)')
   )
 
-  webRouter.get('/dev/csrf', (req, res) => res.send(res.locals.csrfToken))
+  if (['development', 'test'].includes(process.env.NODE_ENV)) {
+    webRouter.get('/dev/csrf', (req, res) => res.send(res.locals.csrfToken))
+  }
 
   publicApiRouter.get('/health_check', HealthCheckController.check)
   privateApiRouter.get('/health_check', HealthCheckController.check)
