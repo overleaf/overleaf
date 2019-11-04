@@ -49,27 +49,17 @@ aside#left-menu.full-size(
 					span &nbsp;&nbsp; #{translate("word_count")}
 				a.link-disabled(href, ng-if="!pdf.url" , tooltip=translate('please_compile_pdf_before_word_count'))
 					i.fa.fa-fw.fa-eye
-					span.link-disabled &nbsp;&nbsp; #{translate("word_count")}	
+					span.link-disabled &nbsp;&nbsp; #{translate("word_count")}
 
 	if (moduleIncludesAvailable("editorLeftMenu:sync"))
 		div(ng-show="!anonymous")
 			h4() #{translate("sync")}
 			!= moduleIncludes("editorLeftMenu:sync", locals)
-	
+
 	if (moduleIncludesAvailable("editorLeftMenu:editing_services"))
 		span(ng-show="!anonymous")
 			h4 #{translate("services")}
 			!= moduleIncludes("editorLeftMenu:editing_services", locals)
-
-
-	if showTestControls
-		h4 Test Controls
-		ul.list-unstyled.nav(ng-controller="TestControlsController")
-			li
-				a(href="#" ng-click="richText()")
-					i.fa.fa-exclamation.fa-fw
-					| Rich Text
-
 
 	h4(ng-show="!anonymous") #{translate("settings")}
 	form.settings(ng-controller="SettingsController", ng-show="!anonymous")
@@ -84,7 +74,7 @@ aside#left-menu.full-size(
 					option(value='latex') LaTeX
 					option(value='xelatex') XeLaTeX
 					option(value='lualatex') LuaLaTeX
-					
+
 			.form-controls(ng-show="permissions.write")
 				label(for="rootDoc_id") #{translate("main_document")}
 				select(
