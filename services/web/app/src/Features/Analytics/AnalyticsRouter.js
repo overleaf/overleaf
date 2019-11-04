@@ -4,7 +4,10 @@ const AnalyticsProxy = require('./AnalyticsProxy')
 
 module.exports = {
   apply(webRouter, privateApiRouter, publicApiRouter) {
-    webRouter.post('/event/:event', AnalyticsController.recordEvent)
+    webRouter.post(
+      '/event/:event([a-z0-9-_]+)',
+      AnalyticsController.recordEvent
+    )
 
     webRouter.put(
       '/editingSession/:projectId',
