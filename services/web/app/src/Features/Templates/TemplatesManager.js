@@ -45,7 +45,8 @@ const TemplatesManager = {
       auth: {
         user: settings.apis.v1.user,
         pass: settings.apis.v1.pass
-      }
+      },
+      timeout: 60 * 1000
     })
     zipReq.on('error', function(err) {
       logger.warn({ err }, 'error getting zip from template API')
@@ -175,7 +176,8 @@ const TemplatesManager = {
         },
         resolveWithFullResponse: true,
         simple: false,
-        json: true
+        json: true,
+        timeout: 60 * 1000
       })
 
       if (statusCode === 404) {
