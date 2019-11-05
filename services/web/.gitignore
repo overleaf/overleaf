@@ -42,8 +42,8 @@ TpdsWorker.js
 BackgroundJobsWorker.js
 UserAndProjectPopulator.coffee
 
-public/js/manifest.json
-public/minjs/
+public/js
+public/minjs
 
 public/stylesheets/style*.css
 public/stylesheets/sl-style*.css

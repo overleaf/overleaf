@@ -13,16 +13,16 @@ module.exports = function(config) {
     },
     browsers: ['ChromeCustom'],
     files: [
-      'test/unit_frontend/bootstrap.js',
+      'test/frontend/bootstrap.js',
       // Include scripts that are injected into the page outside of webpack
-      'public/src/vendor/libs/angular-1.6.4.min.js',
-      'public/src/vendor/libs/jquery-1.11.1.min.js',
+      'frontend/js/vendor/libs/angular-1.6.4.min.js',
+      'frontend/js/vendor/libs/jquery-1.11.1.min.js',
 
       // Allow mocking of angular
-      'public/src/vendor/libs/angular-mocks.js',
+      'frontend/js/vendor/libs/angular-mocks.js',
 
       // Import all tests (see comment in the file for why this is necessary)
-      'test/unit_frontend/import_tests.js',
+      'test/frontend/import_tests.js',
 
       // Include CSS
       'public/stylesheets/**/*.css'
@@ -30,7 +30,7 @@ module.exports = function(config) {
     middleware: ['fake-img'],
     preprocessors: {
       // Run files through webpack
-      'test/unit_frontend/import_tests.js': ['webpack']
+      'test/frontend/import_tests.js': ['webpack']
     },
     frameworks: ['mocha', 'chai-sinon'],
     // Configure webpack in the tests

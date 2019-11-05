@@ -1068,7 +1068,7 @@ function generateThemeList() {
   const files = fs.readdirSync(
     Path.join(
       __dirname,
-      '/../../../../public/src/vendor/',
+      '/../../../../frontend/js/vendor/',
       PackageVersions.lib('ace')
     )
   )

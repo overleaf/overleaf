@@ -9,7 +9,7 @@ if (fs.existsSync(MODULES_PATH)) {
     const entryPath = path.join(
       MODULES_PATH,
       module,
-      '/public/src/ide/index.js'
+      '/frontend/js/ide/index.js'
     )
     if (fs.existsSync(entryPath)) {
       acc.push(entryPath)

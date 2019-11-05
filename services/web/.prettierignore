@@ -1,4 +1,5 @@
 node_modules
 modules/**/scripts
-public/src/vendor
+frontend/js/vendor
+public/js
 public/minjs

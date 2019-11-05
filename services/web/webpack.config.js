@@ -10,13 +10,14 @@ const MODULES_PATH = path.join(__dirname, '/modules')
 
 // Generate a hash of entry points, including modules
 const entryPoints = {
-  main: './public/src/main.js',
-  ide: './public/src/ide.js'
+  main: './frontend/js/main.js',
+  ide: './frontend/js/ide.js'
 }
 
 if (fs.existsSync(MODULES_PATH)) {
   fs.readdirSync(MODULES_PATH).reduce((acc, module) => {
-    const entryPath = path.join(MODULES_PATH, module, '/public/src/index.js')
+    // FIXME: modules frontend path
+    const entryPath = path.join(MODULES_PATH, module, '/frontend/js/index.js')
     if (fs.existsSync(entryPath)) {
       acc[module] = entryPath
     }
@@ -96,7 +97,7 @@ module.exports = {
         // Expose underscore global variable
         test: path.join(
           __dirname,
-          `public/src/vendor/libs/${PackageVersions.lib('underscore')}.js`
+          `frontend/js/vendor/libs/${PackageVersions.lib('underscore')}.js`
         ),
         use: [
           {
@@ -109,7 +110,7 @@ module.exports = {
         // Expose Algolia global variable
         test: path.join(
           __dirname,
-          `public/src/vendor/libs/${PackageVersions.lib('algolia')}.js`
+          `frontend/js/vendor/libs/${PackageVersions.lib('algolia')}.js`
         ),
         use: [
           {
@@ -125,29 +126,29 @@ module.exports = {
       // Aliases for AMD modules
 
       // Vendored dependencies in public/src/vendor/libs (e.g. angular)
-      libs: path.join(__dirname, 'public/src/vendor/libs'),
+      libs: path.join(__dirname, 'frontend/js/vendor/libs'),
       // Use vendored moment (with correct version)
       moment: path.join(
         __dirname,
-        `public/src/vendor/libs/${PackageVersions.lib('moment')}`
+        `frontend/js/vendor/libs/${PackageVersions.lib('moment')}`
       ),
       // Enables ace/ace shortcut
       ace: path.join(
         __dirname,
-        `public/src/vendor/${PackageVersions.lib('ace')}`
+        `frontend/js/vendor/${PackageVersions.lib('ace')}`
       ),
       // fineupload vendored dependency (which we're aliasing to fineuploadER
       // for some reason)
       fineuploader: path.join(
         __dirname,
-        `public/src/vendor/libs/${PackageVersions.lib('fineuploader')}`
+        `frontend/js/vendor/libs/${PackageVersions.lib('fineuploader')}`
       )
     },
     // Define what can be imported with out an absolute or relative path. This
     // is because we need to override the default (which is just node_modules)
     // to get AMD modules in public/src to work as they do not use relative/
     // absolute paths for dependencies
-    modules: [path.join(__dirname, 'public/src'), 'node_modules']
+    modules: ['frontend/js', 'node_modules']
   },
 
   // Split out vendored dependencies that are shared between 2 or more "real
@@ -159,7 +160,7 @@ module.exports = {
     splitChunks: {
       cacheGroups: {
         libraries: {
-          test: /[\\/]node_modules[\\/]|[\\/]public[\\/]src[\\/]vendor[\\/]libs[\\/]/,
+          test: /[\\/]node_modules[\\/]|[\\/]frontend[\\/]js[\\/]vendor[\\/]libs[\\/]/,
           name: 'libraries',
           chunks: 'initial',
           minChunks: 2
@@ -181,39 +182,39 @@ module.exports = {
     // Silence warning when loading moment from vendored dependencies as it
     // attempts to load locales.js file which does not exist (but this is fine
     // as we don't want to load the large amount of locale data from moment)
-    new webpack.IgnorePlugin(/^\.\/locale$/, /public\/src\/vendor\/libs/),
+    new webpack.IgnorePlugin(/^\.\/locale$/, /frontend\/js\/vendor\/libs/),
 
-    // Copy CMap files from pdfjs-dist package to build output. These are used
-    // to provide support for non-Latin characters
     new CopyPlugin([
       {
-        from: 'public/src/vendor/libs/angular-1.6.4.min.js',
+        from: 'frontend/js/vendor/libs/angular-1.6.4.min.js',
         to: 'libs/angular-1.6.4.min.js'
       },
       {
-        from: 'public/src/vendor/libs/angular-1.6.4.min.js.map',
+        from: 'frontend/js/vendor/libs/angular-1.6.4.min.js.map',
         to: 'libs/angular-1.6.4.min.js.map'
       },
       {
-        from: 'public/src/vendor/libs/jquery-1.11.1.min.js',
+        from: 'frontend/js/vendor/libs/jquery-1.11.1.min.js',
         to: 'libs/jquery-1.11.1.min.js'
       },
       {
-        from: 'public/src/vendor/libs/jquery-1.11.1.min.js.map',
+        from: 'frontend/js/vendor/libs/jquery-1.11.1.min.js.map',
         to: 'libs/jquery-1.11.1.min.js.map'
       },
       {
-        from: 'public/src/vendor/libs/mathjax',
+        from: 'frontend/js/vendor/libs/mathjax',
         to: 'libs/mathjax'
       },
       {
-        from: 'public/src/vendor/libs/sigma-master',
+        from: 'frontend/js/vendor/libs/sigma-master',
         to: 'libs/sigma-master'
       },
       {
-        from: `public/src/vendor/ace-${PackageVersions.version.ace}/`,
+        from: `frontend/js/vendor/ace-${PackageVersions.version.ace}/`,
         to: `ace-${PackageVersions.version.ace}/`
       },
+      // Copy CMap files from pdfjs-dist package to build output. These are used
+      // to provide support for non-Latin characters
       { from: 'node_modules/pdfjs-dist/cmaps', to: 'cmaps' }
     ])
   ],
