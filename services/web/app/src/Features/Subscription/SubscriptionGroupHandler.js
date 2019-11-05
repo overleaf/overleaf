@@ -13,9 +13,9 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let SubscriptionGroupHandler
 const async = require('async')
 const _ = require('underscore')
+const { promisify } = require('util')
 const SubscriptionUpdater = require('./SubscriptionUpdater')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const UserGetter = require('../User/UserGetter')
@@ -28,7 +28,7 @@ const settings = require('settings-sharelatex')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const UserMembershipViewModel = require('../UserMembership/UserMembershipViewModel')
 
-module.exports = SubscriptionGroupHandler = {
+const SubscriptionGroupHandler = {
   removeUserFromGroup(subscriptionId, userToRemove_id, callback) {
     return SubscriptionUpdater.removeUserFromGroup(
       subscriptionId,
@@ -153,3 +153,12 @@ function __guard__(value, transform) {
     ? transform(value)
     : undefined
 }
+
+SubscriptionGroupHandler.promises = {
+  getTotalConfirmedUsersInGroup: promisify(
+    SubscriptionGroupHandler.getTotalConfirmedUsersInGroup
+  ),
+  isUserPartOfGroup: promisify(SubscriptionGroupHandler.isUserPartOfGroup)
+}
+
+module.exports = SubscriptionGroupHandler
