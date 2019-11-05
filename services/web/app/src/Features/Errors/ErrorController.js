@@ -2,6 +2,8 @@ let ErrorController
 const Errors = require('./Errors')
 const logger = require('logger-sharelatex')
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const SamlLogHandler = require('../SamlLog/SamlLogHandler')
+const _ = require('lodash')
 
 module.exports = ErrorController = {
   notFound(req, res) {
@@ -21,6 +23,20 @@ module.exports = ErrorController = {
 
   handleError(error, req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
+    // log errors related to SAML flow
+    if (req.session.saml) {
+      const providerId = _.get(req.session.saml, 'universityId', '').toString()
+      SamlLogHandler.log(providerId, req.sessionID, {
+        error: {
+          message: error && error.message,
+          stack: error && error.stack
+        },
+        path: req.path,
+        query: req.query,
+        saml: req.session.saml,
+        user_id: user && user._id
+      })
+    }
     if (error.code === 'EBADCSRFTOKEN') {
       logger.warn(
         { err: error, url: req.url, method: req.method, user },
