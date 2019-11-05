@@ -1,21 +1,7 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const mongoose = require('mongoose')
 const Settings = require('settings-sharelatex')
 const _ = require('underscore')
 const { FolderSchema } = require('./Folder.js')
-const logger = require('logger-sharelatex')
 const concreteObjectId = require('mongoose').Types.ObjectId
 const Errors = require('../Features/Errors/Errors')
 
@@ -132,16 +118,16 @@ const ProjectSchema = new Schema({
   auditLog: [AuditLogEntrySchema]
 })
 
-ProjectSchema.statics.getProject = function(project_or_id, fields, callback) {
-  if (project_or_id._id != null) {
-    return callback(null, project_or_id)
+ProjectSchema.statics.getProject = function(projectOrId, fields, callback) {
+  if (projectOrId._id != null) {
+    return callback(null, projectOrId)
   } else {
     try {
-      concreteObjectId(project_or_id.toString())
+      concreteObjectId(projectOrId.toString())
     } catch (e) {
       return callback(new Errors.NotFoundError(e.message))
     }
-    return this.findById(project_or_id, fields, callback)
+    return this.findById(projectOrId, fields, callback)
   }
 }
 

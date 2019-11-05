@@ -1,12 +1,6 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
 const Settings = require('settings-sharelatex')
 const mongoose = require('mongoose')
 const { Schema } = mongoose
-const { ObjectId } = Schema
 
 const UserStubSchema = new Schema({
   email: { type: String, default: '' },
@@ -24,5 +18,6 @@ const conn = mongoose.createConnection(Settings.mongo.url, {
 
 const UserStub = conn.model('UserStub', UserStubSchema)
 
-const model = mongoose.model('UserStub', UserStubSchema)
+mongoose.model('UserStub', UserStubSchema)
 exports.UserStub = UserStub
+exports.UserStubSchema = UserStubSchema

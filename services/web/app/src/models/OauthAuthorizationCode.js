@@ -1,8 +1,3 @@
-/* eslint-disable
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
 const mongoose = require('mongoose')
 const Settings = require('settings-sharelatex')
 
