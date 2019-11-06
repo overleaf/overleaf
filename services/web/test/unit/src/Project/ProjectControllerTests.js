@@ -747,7 +747,27 @@ describe('ProjectController', function() {
             hasEntitlement: false,
             universityName: 'Overleaf'
           },
-          registerIntercept: true
+          registerIntercept: {
+            id: 1,
+            name: 'Example University'
+          }
+        }
+        this.ProjectController.projectListPage(this.req, this.res)
+      })
+      it('should not show a register notification if the flow was abandoned', function() {
+        // could initially start to register with an SSO email and then
+        // abandon flow and login with an existing non-institution SSO email
+        this.res.render = (pageName, opts) => {
+          expect(opts.notificationsInstitution).to.deep.not.include({
+            email: 'test@overleaf.com',
+            templateKey: 'notification_institution_sso_already_registered'
+          })
+        }
+        this.req.session.saml = {
+          registerIntercept: {
+            id: 1,
+            name: 'Example University'
+          }
         }
         this.ProjectController.projectListPage(this.req, this.res)
       })

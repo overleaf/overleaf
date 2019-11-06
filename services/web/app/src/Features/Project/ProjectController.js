@@ -506,7 +506,10 @@ const ProjectController = {
             }
 
             // Notification: Tried to register, but account already existed
-            if (samlSession.registerIntercept) {
+            // registerIntercept is set before the institution callback.
+            // institutionEmail is set after institution callback.
+            // Check for both in case SSO flow was abandoned
+            if (samlSession.registerIntercept && samlSession.institutionEmail) {
               notificationsInstitution.push({
                 email: samlSession.institutionEmail,
                 templateKey: 'notification_institution_sso_already_registered'
