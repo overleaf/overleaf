@@ -111,7 +111,7 @@ module.exports = ExportsHandler = self = {
       }
 
       const { project, rootDoc, user, historyVersion } = results
-      if (rootDoc[1] == null) {
+      if (!rootDoc || rootDoc[1] == null) {
         err = new Error('cannot export project without root doc')
         logger.warn({ err, project_id })
         return callback(err)
