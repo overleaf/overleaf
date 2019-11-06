@@ -1,6 +1,8 @@
 .content-portal {
   padding-top: @navbar-height!important;
-
+  .join-rider {
+    margin-top: -(@line-height-computed / 2); // negate bottom margin from h4
+  }
   /*
     Begin Header
   */
@@ -68,7 +70,7 @@
   }
   .content-pull {
     padding-right: @padding-sm;
-    width: calc(~"100% - "@btn-portal-width);
+    width: calc(~'100% - ' @btn-portal-width);
   }
   // End Layout
 

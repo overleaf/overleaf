@@ -11,8 +11,18 @@
 // Headings
 // -------------------------
 
-h1, h2, h3, h4, h5, h6,
-.h1, .h2, .h3, .h4, .h5, .h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
   font-family: @headings-font-family;
   font-weight: @headings-font-weight;
   line-height: @headings-line-height;
@@ -26,9 +36,12 @@ h1, h2, h3, h4, h5, h6,
   }
 }
 
-h1, .h1,
-h2, .h2,
-h3, .h3 {
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3 {
   margin-top: @line-height-computed;
   margin-bottom: (@line-height-computed / 2);
 
@@ -37,9 +50,12 @@ h3, .h3 {
     font-size: 70%;
   }
 }
-h4, .h4,
-h5, .h5,
-h6, .h6 {
+h4,
+.h4,
+h5,
+.h5,
+h6,
+.h6 {
   margin-top: (@line-height-computed / 2);
   margin-bottom: (@line-height-computed / 2);
 
@@ -49,13 +65,30 @@ h6, .h6 {
   }
 }
 
-h1, .h1 { font-size: @font-size-h1; }
-h2, .h2 { font-size: @font-size-h2; }
-h3, .h3 { font-size: @font-size-h3; }
-h4, .h4 { font-size: @font-size-h4; }
-h5, .h5 { font-size: @font-size-h5; }
-h6, .h6 { font-size: @font-size-h6; }
-
+h1,
+.h1 {
+  font-size: @font-size-h1;
+}
+h2,
+.h2 {
+  font-size: @font-size-h2;
+}
+h3,
+.h3 {
+  font-size: @font-size-h3;
+}
+h4,
+.h4 {
+  font-size: @font-size-h4;
+}
+h5,
+.h5 {
+  font-size: @font-size-h5;
+}
+h6,
+.h6 {
+  font-size: @font-size-h6;
+}
 
 // Body text
 // -------------------------
@@ -75,13 +108,15 @@ p {
   }
 }
 
-
 // Emphasis & misc
 // -------------------------
 
 // Ex: 14px base font * 85% = about 12px
 small,
-.small  { font-size: 90%; color: @text-small-color; }
+.small {
+  font-size: 90%;
+  color: @text-small-color;
+}
 
 .login-register-text,
 .login-register-hr-text-container,
@@ -90,13 +125,23 @@ small,
 }
 
 // Undo browser default styling
-cite    { font-style: normal; }
+cite {
+  font-style: normal;
+}
 
 // Alignment
-.text-left           { text-align: left; }
-.text-right          { text-align: right; }
-.text-center         { text-align: center; }
-.text-justify        { text-align: justify; }
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
+}
+.text-center {
+  text-align: center;
+}
+.text-justify {
+  text-align: justify;
+}
 
 // Contextual colors
 .text-muted {
@@ -158,7 +203,6 @@ cite    { font-style: normal; }
   .bg-variant(@state-danger-bg);
 }
 
-
 // Page header
 // -------------------------
 
@@ -167,7 +211,6 @@ cite    { font-style: normal; }
   margin: (@line-height-computed) 0 @line-height-computed;
   border-bottom: 1px solid @page-header-border-color;
 }
-
 
 // Lists
 // --------------------------------------------------
@@ -235,7 +278,8 @@ dd {
     }
     dd {
       margin-left: @component-offset-horizontal;
-      &:extend(.clearfix all); // Clear the floated `dt` if an empty `dd` is present
+      &:extend(.clearfix
+          all); // Clear the floated `dt` if an empty `dd` is present
     }
   }
 }
@@ -260,26 +304,26 @@ blockquote {
   padding: (@line-height-computed / 2) @line-height-computed;
   margin: 0 0 @line-height-computed;
   font-size: @blockquote-font-size;
-  quotes: "\201C""\201D""\2018""\2019";
+  quotes: '\201C' '\201D' '\2018' '\2019';
   border-left: 5px solid @blockquote-border-color;
   &:before {
-      content: open-quote;
-      font-size: @blockquote-font-size * 3;
-      color: @blockquote-border-color;
-      margin-right: 0.25em;
-      vertical-align: -0.4em;
-      line-height: 0.1em;
+    content: open-quote;
+    font-size: @blockquote-font-size * 3;
+    color: @blockquote-border-color;
+    margin-right: 0.25em;
+    vertical-align: -0.4em;
+    line-height: 0.1em;
   }
 
   &:after {
-      content: close-quote;
-      display: inherit;
-      height: 0;
-      visibility: hidden;
+    content: close-quote;
+    display: inherit;
+    height: 0;
+    visibility: hidden;
   }
 
   p {
-      display: inline;
+    display: inline;
   }
 
   p,
@@ -321,7 +365,9 @@ blockquote {
   footer,
   small,
   .small {
-    &:before { content: ''; }
+    &:before {
+      content: '';
+    }
     &:after {
       content: '\00A0 \2014'; // nbsp, em dash
     }
