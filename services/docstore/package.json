@@ -21,7 +21,7 @@
   "dependencies": {
     "async": "~0.8.0",
     "body-parser": "~1.0.2",
-    "express": "~4.1.1",
+    "express": "~4.5.0",
     "logger-sharelatex": "^1.7.0",
     "metrics-sharelatex": "^2.2.0",
     "mongojs": "2.4.0",
