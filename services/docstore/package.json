@@ -50,7 +50,7 @@
     "mocha": "^4.0.1",
     "prettier": "^1.19.1",
     "prettier-eslint-cli": "^5.0.0",
-    "request": "~2.34.0",
+    "request": "~2.47.0",
     "sandboxed-module": "~0.3.0",
     "sinon": "~3.2.1"
   },
