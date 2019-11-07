@@ -32,6 +32,9 @@ module.exports = EditorHttpController = {
       if (error) {
         return next(error)
       }
+      if (!project) {
+        return res.sendStatus(403)
+      }
       // Hide access tokens if this is not the project owner
       TokenAccessHandler.protectTokens(project, privilegeLevel)
       if (isRestrictedUser) {

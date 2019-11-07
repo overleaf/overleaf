@@ -141,6 +141,26 @@ describe('EditorHttpController', function() {
       })
     })
 
+    describe('when no project', function() {
+      beforeEach(function() {
+        this.EditorHttpController._buildJoinProjectView = sinon
+          .stub()
+          .callsArgWith(3, null, null, null, false)
+        this.EditorHttpController.joinProject(this.req, this.res)
+      })
+
+      it('should send a 403 response', function() {
+        this.res.json
+          .calledWith({
+            project: null,
+            privilegeLevel: null,
+            isRestrictedUser: null
+          })
+          .should.equal(false)
+        this.res.sendStatus.calledWith(403).should.equal(true)
+      })
+    })
+
     describe('with an anonymous user', function() {
       beforeEach(function() {
         this.req.query = { user_id: 'anonymous-user' }

@@ -204,7 +204,10 @@ function expectNoReadAccess(user, projectId, options, callback) {
         tryContentAccess(
           user,
           projectId,
-          (response, body) => expect(body.privilegeLevel).to.be.equal(false),
+          (response, body) => {
+            expect(response.statusCode).to.equal(403)
+            expect(body).to.equal('Forbidden')
+          },
           cb
         )
     ],
@@ -217,7 +220,7 @@ function expectNoContentWriteAccess(user, projectId, callback) {
     user,
     projectId,
     (response, body) =>
-      expect(body.privilegeLevel).to.be.oneOf([false, 'readOnly']),
+      expect(body.privilegeLevel).to.be.oneOf([undefined, null, 'readOnly']),
     callback
   )
 }
