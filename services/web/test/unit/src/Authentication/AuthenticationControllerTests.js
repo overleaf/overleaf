@@ -13,6 +13,11 @@ describe('AuthenticationController', function() {
   beforeEach(function() {
     tk.freeze(Date.now())
     this.UserModel = { findOne: sinon.stub() }
+    this.httpAuthUsers = {
+      'valid-test-user': Math.random()
+        .toString(16)
+        .slice(2)
+    }
     this.AuthenticationController = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -40,7 +45,10 @@ describe('AuthenticationController', function() {
           error: sinon.stub(),
           err: sinon.stub()
         }),
-        'settings-sharelatex': { siteUrl: 'http://www.foo.bar' },
+        'settings-sharelatex': {
+          siteUrl: 'http://www.foo.bar',
+          httpAuthUsers: this.httpAuthUsers
+        },
         passport: (this.passport = {
           authenticate: sinon.stub().returns(sinon.stub())
         }),
@@ -777,6 +785,56 @@ describe('AuthenticationController', function() {
 
       it('should redirect to the /login page', function() {
         this.res.redirectedTo.should.equal('/login')
+      })
+    })
+  })
+
+  describe('httpAuth', function() {
+    describe('with http auth', function() {
+      it('should error with incorrect user', function(done) {
+        this.req.headers = {
+          authorization: `Basic ${Buffer.from('user:nope').toString('base64')}`
+        }
+        this.req.end = status => {
+          expect(status).to.equal('Unauthorized')
+          done()
+        }
+        this.AuthenticationController.httpAuth(this.req, this.req)
+      })
+
+      it('should error with incorrect password', function(done) {
+        this.req.headers = {
+          authorization: `Basic ${Buffer.from('valid-test-user:nope').toString(
+            'base64'
+          )}`
+        }
+        this.req.end = status => {
+          expect(status).to.equal('Unauthorized')
+          done()
+        }
+        this.AuthenticationController.httpAuth(this.req, this.req)
+      })
+
+      it('should fail with empty pass', function(done) {
+        this.req.headers = {
+          authorization: `Basic ${Buffer.from(`invalid-test-user:`).toString(
+            'base64'
+          )}`
+        }
+        this.req.end = status => {
+          expect(status).to.equal('Unauthorized')
+          done()
+        }
+        this.AuthenticationController.httpAuth(this.req, this.req)
+      })
+
+      it('should succeed with correct user/pass', function(done) {
+        this.req.headers = {
+          authorization: `Basic ${Buffer.from(
+            `valid-test-user:${this.httpAuthUsers['valid-test-user']}`
+          ).toString('base64')}`
+        }
+        this.AuthenticationController.httpAuth(this.req, this.res, done)
       })
     })
   })

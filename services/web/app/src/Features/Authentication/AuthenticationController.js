@@ -6,6 +6,7 @@ const logger = require('logger-sharelatex')
 const querystring = require('querystring')
 const Settings = require('settings-sharelatex')
 const basicAuth = require('basic-auth-connect')
+const crypto = require('crypto')
 const UserHandler = require('../User/UserHandler')
 const UserSessionsManager = require('../User/UserSessionsManager')
 const SessionStoreManager = require('../../infrastructure/SessionStoreManager')
@@ -362,7 +363,11 @@ const AuthenticationController = (module.exports = {
   },
 
   httpAuth: basicAuth(function(user, pass) {
-    const isValid = Settings.httpAuthUsers[user] === pass
+    let expectedPassword = Settings.httpAuthUsers[user]
+    const isValid =
+      expectedPassword &&
+      expectedPassword.length === pass.length &&
+      crypto.timingSafeEqual(Buffer.from(expectedPassword), Buffer.from(pass))
     if (!isValid) {
       logger.err({ user, pass }, 'invalid login details')
     }

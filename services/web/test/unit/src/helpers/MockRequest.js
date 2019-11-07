@@ -20,6 +20,7 @@ class MockRequest {
     }
     this.prototype.route = { path: '' }
     this.prototype.accepts = () => {}
+    this.prototype.setHeader = () => {}
   }
   param(param) {
     return this.params[param]
