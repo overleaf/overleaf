@@ -65,7 +65,7 @@ module.exports = OutputCacheManager =
 				async.mapSeries outputFiles, (file, cb) ->
 					# don't send dot files as output, express doesn't serve them
 					if OutputCacheManager._fileIsHidden(file.path)
-						logger.warn compileDir: compileDir, path: file.path, "ignoring dotfile in output"
+						logger.debug compileDir: compileDir, path: file.path, "ignoring dotfile in output"
 						return cb()
 					# copy other files into cache directory if valid
 					newFile = _.clone(file)
@@ -150,7 +150,7 @@ module.exports = OutputCacheManager =
 			, callback
 
 	_fileIsHidden: (path) ->
-		return path?.match(/^\.|\/./)?
+		return path?.match(/^\.|\/\./)?
 
 	_checkFileIsSafe: (src, callback = (error, isSafe) ->) ->
 		# check if we have a valid file to copy into the cache
