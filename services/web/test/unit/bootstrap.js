@@ -15,3 +15,9 @@ chai.config.truncateThreshold = 0
 require('sinon-as-promised')
 // add support for mongoose in sinon
 require('sinon-mongoose')
+
+// Crash the process on an unhandled promise rejection
+process.on('unhandledRejection', err => {
+  console.error('Unhandled promise rejection:', err)
+  process.exit(1)
+})

@@ -72,8 +72,8 @@ describe('EmailSender', function() {
 
     it('should return a non-specific error', async function() {
       this.sesClient.sendMail.rejects(new Error('boom'))
-      expect(this.EmailSender.promises.sendEmail({})).to.be.rejectedWith(
-        'Error: Cannot send email'
+      await expect(this.EmailSender.promises.sendEmail({})).to.be.rejectedWith(
+        'error sending message'
       )
     })
 
