@@ -3,7 +3,6 @@ const Errors = require('./Errors')
 const logger = require('logger-sharelatex')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const SamlLogHandler = require('../SamlLog/SamlLogHandler')
-const _ = require('lodash')
 
 module.exports = ErrorController = {
   notFound(req, res) {
@@ -25,8 +24,7 @@ module.exports = ErrorController = {
     const user = AuthenticationController.getSessionUser(req)
     // log errors related to SAML flow
     if (req.session.saml) {
-      const providerId = _.get(req.session.saml, 'universityId', '').toString()
-      SamlLogHandler.log(providerId, req.sessionID, {
+      SamlLogHandler.log(req.session.saml.universityId, req.sessionID, {
         error: {
           message: error && error.message,
           stack: error && error.stack
