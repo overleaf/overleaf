@@ -11,16 +11,19 @@ const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 
 module.exports = AuthorizationManager = {
   isRestrictedUser(userId, privilegeLevel, isTokenMember) {
+    if (privilegeLevel === PrivilegeLevels.NONE) {
+      return true
+    }
     return (
       privilegeLevel === PrivilegeLevels.READ_ONLY && (isTokenMember || !userId)
     )
   },
 
-  isRestrictedUserForProject(userId, projectId, callback) {
+  isRestrictedUserForProject(userId, projectId, token, callback) {
     this.getPrivilegeLevelForProject(
       userId,
       projectId,
-      null,
+      token,
       (err, privilegeLevel) => {
         if (err) {
           return callback(err)
