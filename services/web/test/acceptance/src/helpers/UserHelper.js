@@ -139,7 +139,9 @@ module.exports = class UserHelper {
       json: userData
     })
     if (response.statusCode !== 200 || response.body.redir !== '/project') {
-      throw new Error('login failed')
+      const error = new Error('login failed')
+      error.response = response
+      throw error
     }
     userHelper.user = await UserGetter.promises.getUser({
       email: userData.email
