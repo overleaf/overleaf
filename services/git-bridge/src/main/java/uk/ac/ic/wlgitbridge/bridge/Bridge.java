@@ -28,6 +28,7 @@ import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.model.Snapshot;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.git.exception.SizeLimitExceededException;
+import uk.ac.ic.wlgitbridge.git.exception.FileLimitExceededException;
 import uk.ac.ic.wlgitbridge.git.handler.WLReceivePackFactory;
 import uk.ac.ic.wlgitbridge.git.handler.WLRepositoryResolver;
 import uk.ac.ic.wlgitbridge.git.handler.WLUploadPackFactory;
@@ -426,6 +427,7 @@ public class Bridge {
      * @throws IOException
      * @throws MissingRepositoryException
      * @throws ForbiddenException
+     * @throws GitUserException
      */
     public void push(
             Optional<Credential> oauth2,
@@ -433,7 +435,7 @@ public class Bridge {
             RawDirectory directoryContents,
             RawDirectory oldDirectoryContents,
             String hostname
-    ) throws SnapshotPostException, IOException, MissingRepositoryException, ForbiddenException {
+    ) throws SnapshotPostException, IOException, MissingRepositoryException, ForbiddenException, GitUserException {
         try (LockGuard __ = lock.lockGuard(projectName)) {
             pushCritical(
                     oauth2,
@@ -507,13 +509,23 @@ public class Bridge {
      * @throws MissingRepositoryException
      * @throws ForbiddenException
      * @throws SnapshotPostException
+     * @throws GitUserException
      */
     private void pushCritical(
             Optional<Credential> oauth2,
             String projectName,
             RawDirectory directoryContents,
             RawDirectory oldDirectoryContents
-    ) throws IOException, MissingRepositoryException, ForbiddenException, SnapshotPostException {
+    ) throws IOException, MissingRepositoryException, ForbiddenException, SnapshotPostException, GitUserException {
+        Optional<Long> maxFileNum = config
+                  .getRepoStore()
+                  .flatMap(RepoStoreConfig::getMaxFileNum);
+        if (maxFileNum.isPresent()) {
+          long maxFileNum_ = maxFileNum.get();
+          if (directoryContents.getFileTable().size() > maxFileNum_) {
+            throw new FileLimitExceededException(directoryContents.getFileTable().size(), maxFileNum_);
+          }
+        }
         Log.info("[{}] Pushing", projectName);
         String postbackKey = postbackManager.makeKeyForProject(projectName);
         Log.info(
@@ -529,7 +541,7 @@ public class Bridge {
                 );
         ) {
             Log.info(
-                    "[{}] Candindate snapshot created: {}",
+                    "[{}] Candidate snapshot created: {}",
                     projectName,
                     candidate
             );

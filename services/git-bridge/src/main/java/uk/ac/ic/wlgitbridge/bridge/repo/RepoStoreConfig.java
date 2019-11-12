@@ -11,11 +11,19 @@ public class RepoStoreConfig {
     @Nullable
     private final Long maxFileSize;
 
-    public RepoStoreConfig(Long maxFileSize) {
+    @Nullable
+    private final Long maxFileNum;
+
+    public RepoStoreConfig(Long maxFileSize, Long maxFileNum) {
         this.maxFileSize = maxFileSize;
+        this.maxFileNum = maxFileNum;
     }
 
     public Optional<Long> getMaxFileSize() {
         return Optional.ofNullable(maxFileSize);
+    }
+
+    public Optional<Long> getMaxFileNum() {
+        return Optional.ofNullable(maxFileNum);
     }
 }
