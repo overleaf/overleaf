@@ -60,7 +60,8 @@ describe('SubscriptionController', function() {
       updateSubscription: sinon.stub().callsArgWith(3),
       reactivateSubscription: sinon.stub().callsArgWith(1),
       cancelSubscription: sinon.stub().callsArgWith(1),
-      recurlyCallback: sinon.stub().yields(),
+      syncSubscription: sinon.stub().yields(),
+      attemptPaypalInvoiceCollection: sinon.stub().yields(),
       startFreeTrial: sinon.stub()
     }
 
@@ -514,7 +515,7 @@ describe('SubscriptionController', function() {
   })
 
   describe('recurly callback', function() {
-    describe('with a actionable request', function() {
+    describe('with a sync subscription request', function() {
       beforeEach(function(done) {
         this.req = {
           body: {
@@ -535,13 +536,46 @@ describe('SubscriptionController', function() {
       })
 
       it('should tell the SubscriptionHandler to process the recurly callback', function(done) {
-        this.SubscriptionHandler.recurlyCallback.called.should.equal(true)
+        this.SubscriptionHandler.syncSubscription.called.should.equal(true)
         return done()
       })
 
       it('should send a 200', function(done) {
         this.res.sendStatus.calledWith(200)
         return done()
+      })
+    })
+
+    describe('with a billing info updated request', function() {
+      beforeEach(function(done) {
+        this.req = {
+          body: {
+            billing_info_updated_notification: {
+              account: {
+                account_code: 'mock-account-code'
+              }
+            }
+          }
+        }
+        this.res = {
+          sendStatus() {
+            done()
+          }
+        }
+        sinon.spy(this.res, 'sendStatus')
+        this.SubscriptionController.recurlyCallback(this.req, this.res)
+      })
+
+      it('should call attemptPaypalInvoiceCollection', function(done) {
+        this.SubscriptionHandler.attemptPaypalInvoiceCollection
+          .calledWith('mock-account-code')
+          .should.equal(true)
+        done()
+      })
+
+      it('should send a 200', function(done) {
+        this.res.sendStatus.calledWith(200)
+        done()
       })
     })
 
@@ -567,7 +601,8 @@ describe('SubscriptionController', function() {
       })
 
       it('should not call the subscriptionshandler', function() {
-        return this.SubscriptionHandler.recurlyCallback.called.should.equal(
+        this.SubscriptionHandler.syncSubscription.called.should.equal(false)
+        this.SubscriptionHandler.attemptPaypalInvoiceCollection.called.should.equal(
           false
         )
       })

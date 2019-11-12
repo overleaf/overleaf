@@ -73,15 +73,19 @@ const printAccountCSV = (account, callback) => {
 }
 
 const printAccountsCSV = callback => {
-  RecurlyWrapper.getAccounts({ state: 'subscriber' }, (error, accounts) => {
-    if (error) {
-      return callback(error)
+  RecurlyWrapper.getPaginatedEndpoint(
+    'accounts',
+    { state: 'subscriber' },
+    (error, accounts) => {
+      if (error) {
+        return callback(error)
+      }
+      async.mapSeries(accounts, printAccountCSV, (error, csvData) => {
+        csvData = csvData.filter(d => !!d)
+        callback(error, csvData)
+      })
     }
-    async.mapSeries(accounts, printAccountCSV, (error, csvData) => {
-      csvData = csvData.filter(d => !!d)
-      callback(error, csvData)
-    })
-  })
+  )
 }
 
 const csvFields = [

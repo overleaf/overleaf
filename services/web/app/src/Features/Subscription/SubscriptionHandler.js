@@ -230,7 +230,7 @@ const SubscriptionHandler = {
     })
   },
 
-  recurlyCallback(recurlySubscription, requesterData, callback) {
+  syncSubscription(recurlySubscription, requesterData, callback) {
     return RecurlyWrapper.getSubscription(
       recurlySubscription.uuid,
       { includeAccount: true },
@@ -257,6 +257,38 @@ const SubscriptionHandler = {
         })
       }
     )
+  },
+
+  // attempt to collect past due invoice for customer. Only do that when a) the
+  // customer is using Paypal and b) there is only one past due invoice.
+  // This is used because Recurly doesn't always attempt collection of paast due
+  // invoices after Paypal billing info were updated.
+  attemptPaypalInvoiceCollection(recurlyAccountCode, callback) {
+    RecurlyWrapper.getBillingInfo(recurlyAccountCode, (error, billingInfo) => {
+      if (error) {
+        return callback(error)
+      }
+      if (!billingInfo.paypal_billing_agreement_id) {
+        // this is not a Paypal user
+        return callback()
+      }
+      RecurlyWrapper.getAccountPastDueInvoices(
+        recurlyAccountCode,
+        (error, pastDueInvoices) => {
+          if (error) {
+            return callback(error)
+          }
+          if (pastDueInvoices.length !== 1) {
+            // no past due invoices, or more than one. Ignore.
+            return callback()
+          }
+          RecurlyWrapper.attemptInvoiceCollection(
+            pastDueInvoices[0].invoice_number,
+            callback
+          )
+        }
+      )
+    })
   },
 
   extendTrial(subscription, daysToExend, callback) {

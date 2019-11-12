@@ -70,7 +70,10 @@ describe('SubscriptionHandler', function() {
       redeemCoupon: sinon.stub().callsArgWith(2),
       createSubscription: sinon
         .stub()
-        .callsArgWith(3, null, this.activeRecurlySubscription)
+        .callsArgWith(3, null, this.activeRecurlySubscription),
+      getBillingInfo: sinon.stub().yields(),
+      getAccountPastDueInvoices: sinon.stub().yields(),
+      attemptInvoiceCollection: sinon.stub().yields()
     }
 
     this.DropboxHandler = { unlinkAccount: sinon.stub().callsArgWith(1) }
@@ -380,7 +383,7 @@ describe('SubscriptionHandler', function() {
     })
   })
 
-  describe('recurlyCallback', function() {
+  describe('syncSubscription', function() {
     describe('with an actionable request', function() {
       beforeEach(function(done) {
         this.user.id = this.activeRecurlySubscription.account.account_code
@@ -389,7 +392,7 @@ describe('SubscriptionHandler', function() {
           userId.should.equal(this.user.id)
           return callback(null, this.user)
         }
-        return this.SubscriptionHandler.recurlyCallback(
+        return this.SubscriptionHandler.syncSubscription(
           this.activeRecurlySubscription,
           {},
           done
@@ -414,6 +417,60 @@ describe('SubscriptionHandler', function() {
         )
         return this.SubscriptionUpdater.syncSubscription.args[0][1].should.deep.equal(
           this.user._id
+        )
+      })
+    })
+  })
+
+  describe('attemptPaypalInvoiceCollection', function() {
+    describe('for credit card users', function() {
+      beforeEach(function(done) {
+        this.RecurlyWrapper.getBillingInfo.yields(null, {
+          paypal_billing_agreement_id: null
+        })
+        this.SubscriptionHandler.attemptPaypalInvoiceCollection(
+          this.activeRecurlySubscription.account.account_code,
+          done
+        )
+      })
+
+      it('gets billing infos', function() {
+        sinon.assert.calledWith(
+          this.RecurlyWrapper.getBillingInfo,
+          this.activeRecurlySubscription.account.account_code
+        )
+      })
+
+      it('skips user', function() {
+        sinon.assert.notCalled(this.RecurlyWrapper.getAccountPastDueInvoices)
+      })
+    })
+
+    describe('for paypal users', function() {
+      beforeEach(function(done) {
+        this.RecurlyWrapper.getBillingInfo.yields(null, {
+          paypal_billing_agreement_id: 'mock-billing-agreement'
+        })
+        this.RecurlyWrapper.getAccountPastDueInvoices.yields(null, [
+          { invoice_number: 'mock-invoice-number' }
+        ])
+        this.SubscriptionHandler.attemptPaypalInvoiceCollection(
+          this.activeRecurlySubscription.account.account_code,
+          done
+        )
+      })
+
+      it('gets past due invoices', function() {
+        sinon.assert.calledWith(
+          this.RecurlyWrapper.getAccountPastDueInvoices,
+          this.activeRecurlySubscription.account.account_code
+        )
+      })
+
+      it('calls attemptInvoiceCollection', function() {
+        sinon.assert.calledWith(
+          this.RecurlyWrapper.attemptInvoiceCollection,
+          'mock-invoice-number'
         )
       })
     })

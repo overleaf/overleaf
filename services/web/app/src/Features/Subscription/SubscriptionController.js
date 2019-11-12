@@ -356,7 +356,6 @@ module.exports = SubscriptionController = {
 
   recurlyCallback(req, res, next) {
     logger.log({ data: req.body }, 'received recurly callback')
-    // we only care if a subscription has exipired
     const event = Object.keys(req.body)[0]
     const eventData = req.body[event]
     if (
@@ -367,11 +366,22 @@ module.exports = SubscriptionController = {
       ].includes(event)
     ) {
       const recurlySubscription = eventData.subscription
-      return SubscriptionHandler.recurlyCallback(
+      return SubscriptionHandler.syncSubscription(
         recurlySubscription,
         { ip: req.ip },
         function(err) {
           if (err != null) {
+            return next(err)
+          }
+          return res.sendStatus(200)
+        }
+      )
+    } else if (event === 'billing_info_updated_notification') {
+      const recurlyAccountCode = eventData.account.account_code
+      return SubscriptionHandler.attemptPaypalInvoiceCollection(
+        recurlyAccountCode,
+        function(err) {
+          if (err) {
             return next(err)
           }
           return res.sendStatus(200)

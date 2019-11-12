@@ -529,12 +529,12 @@ module.exports = RecurlyWrapper = {
     )
   },
 
-  getAccounts(queryParams, callback) {
+  getPaginatedEndpoint(resource, queryParams, callback) {
     queryParams.per_page = queryParams.per_page || 200
-    let allAccounts = []
-    var getPageOfAccounts = (cursor = null) => {
+    let allItems = []
+    var getPage = (cursor = null) => {
       const opts = {
-        url: 'accounts',
+        url: resource,
         qs: queryParams
       }
       if (cursor != null) {
@@ -549,11 +549,10 @@ module.exports = RecurlyWrapper = {
             logger.warn({ err }, 'could not get accoutns')
             callback(err)
           }
-          allAccounts = allAccounts.concat(data.accounts)
+          const items = data[resource]
+          allItems = allItems.concat(items)
           logger.log(
-            `got another ${data.accounts.length}, total now ${
-              allAccounts.length
-            }`
+            `got another ${items.length}, total now ${allItems.length}`
           )
           cursor = __guard__(
             response.headers.link != null
@@ -563,15 +562,15 @@ module.exports = RecurlyWrapper = {
           )
           if (cursor != null) {
             cursor = decodeURIComponent(cursor)
-            return getPageOfAccounts(cursor)
+            return getPage(cursor)
           } else {
-            return callback(err, allAccounts)
+            return callback(err, allItems)
           }
         })
       })
     }
 
-    return getPageOfAccounts()
+    return getPage()
   },
 
   getAccount(accountId, callback) {
@@ -642,6 +641,30 @@ module.exports = RecurlyWrapper = {
         }
         return RecurlyWrapper._parseXml(body, callback)
       }
+    )
+  },
+
+  getAccountPastDueInvoices(accountId, callback) {
+    RecurlyWrapper.apiRequest(
+      {
+        url: `accounts/${accountId}/invoices?state=past_due`
+      },
+      (error, response, body) => {
+        if (error) {
+          return callback(error)
+        }
+        RecurlyWrapper._parseInvoicesXml(body, callback)
+      }
+    )
+  },
+
+  attemptInvoiceCollection(invoiceId, callback) {
+    RecurlyWrapper.apiRequest(
+      {
+        url: `invoices/${invoiceId}/collect`,
+        method: 'put'
+      },
+      callback
     )
   },
 
@@ -924,6 +947,10 @@ module.exports = RecurlyWrapper = {
 
   _parseErrorsXml(xml, callback) {
     return RecurlyWrapper._parseXmlAndGetAttribute(xml, 'errors', callback)
+  },
+
+  _parseInvoicesXml(xml, callback) {
+    return RecurlyWrapper._parseXmlAndGetAttribute(xml, 'invoices', callback)
   },
 
   _parseXmlAndGetAttribute(xml, attribute, callback) {
