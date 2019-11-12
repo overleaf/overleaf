@@ -49,9 +49,8 @@ td.project-list-table-owner-cell
 			tooltip=translate("link_sharing")
 			tooltip-placement="right"
 			tooltip-append-to-body="true"
-			aria-hidden="true"
+			aria-label=translate("link_sharing")
 		)
-		span.sr-only #{translate("link_sharing")}
 
 td.project-list-table-lastupdated-cell
 	span.last-modified(tooltip="{{project.lastUpdated | formatDate}}")
