@@ -170,6 +170,17 @@
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
 
+				.alert.alert-danger(
+					ng-switch-when="notification_institution_sso_linked_by_another"
+				)
+					.notification-body
+						div 
+							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
+							| !{translate("institution_account_tried_to_add_already_registered")}
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
 
 	ul.list-unstyled(
 		ng-controller="EmailNotificationController",

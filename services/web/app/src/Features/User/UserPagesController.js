@@ -124,7 +124,10 @@ const UserPagesController = {
         institutionLinked
       )
     }
-    const institutionNotLinked = _.get(req.session, ['saml', 'notLinked'])
+    const institutionLinkedToAnother = _.get(req.session, [
+      'saml',
+      'linkedToAnother'
+    ])
     const institutionEmailNonCanonical = _.get(req.session, [
       'saml',
       'emailNonCanonical'
@@ -157,7 +160,7 @@ const UserPagesController = {
         ),
         oauthUseV2: Settings.oauthUseV2 || false,
         institutionLinked,
-        institutionNotLinked,
+        institutionLinkedToAnother,
         institutionEmailNonCanonical,
         samlBeta: req.session.samlBeta,
         ssoError: ssoError,

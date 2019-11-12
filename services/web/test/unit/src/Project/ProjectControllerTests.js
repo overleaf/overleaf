@@ -771,6 +771,35 @@ describe('ProjectController', function() {
         }
         this.ProjectController.projectListPage(this.req, this.res)
       })
+      it('should show institution account linked to another account', function() {
+        this.res.render = (pageName, opts) => {
+          expect(opts.notificationsInstitution).to.deep.include({
+            templateKey: 'notification_institution_sso_linked_by_another'
+          })
+          // Also check other notifications are not shown
+          expect(opts.notificationsInstitution).to.not.deep.include({
+            email: this.institutionEmail,
+            templateKey: 'notification_institution_sso_already_registered'
+          })
+          expect(opts.notificationsInstitution).to.not.deep.include({
+            institutionEmail: this.institutionEmail,
+            requestedEmail: 'requested@overleaf.com',
+            templateKey: 'notification_institution_sso_non_canonical'
+          })
+          expect(opts.notificationsInstitution).to.not.deep.include({
+            email: this.institutionEmail,
+            institutionName: this.institutionName,
+            templateKey: 'notification_institution_sso_linked'
+          })
+        }
+        this.req.session.saml = {
+          emailNonCanonical: this.institutionEmail,
+          institutionEmail: this.institutionEmail,
+          requestedEmail: 'requested@overleaf.com',
+          linkedToAnother: true
+        }
+        this.ProjectController.projectListPage(this.req, this.res)
+      })
     })
 
     describe('When Institution SSO is not released', function() {

@@ -255,7 +255,7 @@ form.row(
 									i.fa.fa-exclamation-triangle(aria-hidden="true")
 									| &nbsp;
 									| !{translate("in_order_to_match_institutional_metadata", {email: institutionEmailNonCanonical})}
-				if institutionNotLinked
+				if institutionLinkedToAnother
 					tr.affiliations-table-error-row(ng-if="!hideInstitutionNotifications.error")
 						td.text-center(aria-live="assertive" colspan="3")
 							button.close(

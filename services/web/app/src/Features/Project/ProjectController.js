@@ -497,7 +497,7 @@ const ProjectController = {
             // Notification: After SSO Linked or Logging in
             // The requested email does not match primary email returned from
             // the institution
-            if (samlSession.emailNonCanonical) {
+            if (samlSession.emailNonCanonical && !samlSession.linkedToAnother) {
               notificationsInstitution.push({
                 institutionEmail: samlSession.emailNonCanonical,
                 requestedEmail: samlSession.requestedEmail,
@@ -509,10 +509,21 @@ const ProjectController = {
             // registerIntercept is set before the institution callback.
             // institutionEmail is set after institution callback.
             // Check for both in case SSO flow was abandoned
-            if (samlSession.registerIntercept && samlSession.institutionEmail) {
+            if (
+              samlSession.registerIntercept &&
+              samlSession.institutionEmail &&
+              !samlSession.linkedToAnother
+            ) {
               notificationsInstitution.push({
                 email: samlSession.institutionEmail,
                 templateKey: 'notification_institution_sso_already_registered'
+              })
+            }
+
+            // Notification: Already linked to another account
+            if (samlSession.linkedToAnother) {
+              notificationsInstitution.push({
+                templateKey: 'notification_institution_sso_linked_by_another'
               })
             }
           }
