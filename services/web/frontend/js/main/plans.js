@@ -416,7 +416,7 @@ define(['base'], function(App) {
     $scope.purchase = function() {
       let { plan_code, size, usage, currency } = $scope.selected
       plan_code = `group_${plan_code}_${size}_${usage}`
-      window.location = `/user/subscription/new?planCode=${plan_code}&currency=${currency}`
+      window.location = `/user/subscription/new?planCode=${plan_code}&currency=${currency}&itm_campaign=groups`
     }
 
     $scope.payByInvoice = function() {

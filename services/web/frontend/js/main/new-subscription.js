@@ -36,7 +36,9 @@ define(['base', 'directives/creditCards'], App =>
       )
       window.location = `/user/subscription/new?planCode=${planCode}&currency=${
         $scope.currencyCode
-      }&cc=${$scope.data.coupon}`
+      }&cc=${$scope.data.coupon}&itm_campaign=${
+        window.ITMCampaign
+      }&itm_content=${window.ITMContent}`
     }
 
     eventTracking.sendMB('subscription-form', { plan: window.plan_code })
