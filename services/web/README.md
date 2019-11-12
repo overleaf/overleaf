@@ -8,7 +8,7 @@ a lot of logic around creating and editing projects, and account management.
 
 
 The rest of the Overleaf stack, along with information about contributing can be found in the
-[overleaf/ovelreaf](https://github.com/overleaf/overleaf) repository.
+[overleaf/overleaf](https://github.com/overleaf/overleaf) repository.
 
 Build process
 ----------------
