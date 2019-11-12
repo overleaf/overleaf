@@ -363,5 +363,10 @@ const ProjectEntityHandler = {
   }
 }
 
-ProjectEntityHandler.promises = promisifyAll(ProjectEntityHandler)
 module.exports = ProjectEntityHandler
+module.exports.promises = promisifyAll(ProjectEntityHandler, {
+  multiResult: {
+    getAllEntities: ['docs', 'files'],
+    getAllEntitiesFromProject: ['docs', 'files']
+  }
+})

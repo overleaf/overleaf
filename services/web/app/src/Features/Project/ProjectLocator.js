@@ -4,6 +4,7 @@ const Errors = require('../Errors/Errors')
 const _ = require('underscore')
 const logger = require('logger-sharelatex')
 const async = require('async')
+const { promisifyAll } = require('../../util/promises')
 
 const ProjectLocator = {
   findElement(options, _callback) {
@@ -327,3 +328,9 @@ function getIndexOf(searchEntity, id) {
 }
 
 module.exports = ProjectLocator
+module.exports.promises = promisifyAll(ProjectLocator, {
+  multiResult: {
+    findElement: ['element', 'path', 'folder'],
+    findElementByPath: ['element', 'type']
+  }
+})
