@@ -87,7 +87,7 @@
     },
     {
       // Backend specific rules
-      "files": ["**/app/*/src/**/*.js"],
+      "files": ["**/app/src/**/*.js"],
       "rules": {
         // don't allow console.log in backend code
         "no-console": "error"

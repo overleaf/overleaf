@@ -152,7 +152,6 @@ module.exports = {
     }
     makeAnalyticsRequest(userId, opts, function(err, response, body) {
       if (err != null) {
-        console.log(response, opts)
         logger.warn({ userId, err }, 'error getting last occurance of event')
         callback(err)
       } else {
