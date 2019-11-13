@@ -497,7 +497,11 @@ const ProjectController = {
             // Notification: After SSO Linked or Logging in
             // The requested email does not match primary email returned from
             // the institution
-            if (samlSession.emailNonCanonical && !samlSession.linkedToAnother) {
+            if (
+              samlSession.requestedEmail &&
+              samlSession.emailNonCanonical &&
+              !samlSession.linkedToAnother
+            ) {
               notificationsInstitution.push({
                 institutionEmail: samlSession.emailNonCanonical,
                 requestedEmail: samlSession.requestedEmail,

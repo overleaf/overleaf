@@ -800,6 +800,28 @@ describe('ProjectController', function() {
         }
         this.ProjectController.projectListPage(this.req, this.res)
       })
+      describe('when linking/logging in initiated on institution side', function() {
+        it('should not show a linked another email notification', function() {
+          // this is only used when initated on Overleaf,
+          // because we keep track of the requested email they tried to link
+          this.res.render = (pageName, opts) => {
+            expect(opts.notificationsInstitution).to.not.deep.include({
+              institutionEmail: this.institutionEmail,
+              requestedEmail: undefined,
+              templateKey: 'notification_institution_sso_non_canonical'
+            })
+          }
+          this.req.session.saml = {
+            emailNonCanonical: this.institutionEmail,
+            institutionEmail: this.institutionEmail,
+            linked: {
+              hasEntitlement: false,
+              universityName: this.institutionName
+            }
+          }
+          this.ProjectController.projectListPage(this.req, this.res)
+        })
+      })
     })
 
     describe('When Institution SSO is not released', function() {
