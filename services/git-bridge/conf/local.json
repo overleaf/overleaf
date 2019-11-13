@@ -12,6 +12,7 @@
         "oauth2Server": "http://v2.overleaf.test:4000"
     },
     "repoStore": {
+        "maxFileNum": 2000,
         "maxFileSize": 52428800
     },
     "swapStore": {

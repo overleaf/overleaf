@@ -12,6 +12,7 @@
         "oauth2Server": "https://localhost"
     },
     "repoStore": {
+        "maxFileNum": 2000,
         "maxFileSize": 52428800
     },
     "swapStore": {
