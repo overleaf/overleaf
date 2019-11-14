@@ -15,10 +15,16 @@ httpAuthUsers[httpAuthUser] = httpAuthPass
 
 sessionSecret = process.env['SESSION_SECRET'] or "secret-please-change"
 
-v1Api =
-	url: process.env['V1_API_URL'] or "http://#{process.env['V1_HOST'] or 'localhost'}:5000"
-	user: process.env['V1_API_USER'] or 'overleaf'
-	pass: process.env['V1_API_PASSWORD'] or 'password'
+if process.env['V1_API_URL'] or process.env['V1_HOST']
+	v1Api =
+		url: process.env['V1_API_URL'] or "http://#{process.env['V1_HOST']}:5000"
+		user: process.env['V1_API_USER']
+		pass: process.env['V1_API_PASSWORD']
+else
+	v1Api =
+		url: undefined
+		user: undefined
+		pass: undefined
 
 module.exports = settings =
 
@@ -159,10 +165,7 @@ module.exports = settings =
 			url: process.env['LINKED_URL_PROXY']
 		thirdpartyreferences:
 			url: "http://#{process.env['THIRD_PARTY_REFERENCES_HOST'] or 'localhost'}:3046"
-		v1:
-			url: v1Api.url
-			user: v1Api.user
-			pass: v1Api.pass
+		v1: v1Api
 		v1_history:
 			url: "http://#{process.env['V1_HISTORY_HOST'] or "localhost"}:3100/api"
 			user: process.env['V1_HISTORY_USER'] or 'staging'
