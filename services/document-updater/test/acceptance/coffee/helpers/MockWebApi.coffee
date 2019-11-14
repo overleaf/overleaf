@@ -1,5 +1,6 @@
 express = require("express")
 app = express()
+MAX_REQUEST_SIZE = 2*(2*1024*1024 + 64*1024)
 
 module.exports = MockWebApi =
 	docs: {}
@@ -35,7 +36,7 @@ module.exports = MockWebApi =
 				else
 					res.send 404
 
-		app.post "/project/:project_id/doc/:doc_id", express.bodyParser(), (req, res, next) =>
+		app.post "/project/:project_id/doc/:doc_id", express.bodyParser({limit: MAX_REQUEST_SIZE}), (req, res, next) =>
 			MockWebApi.setDocument req.params.project_id, req.params.doc_id, req.body.lines, req.body.version, req.body.ranges, req.body.lastUpdatedAt, req.body.lastUpdatedBy, (error) ->
 				if error?
 					res.send 500
