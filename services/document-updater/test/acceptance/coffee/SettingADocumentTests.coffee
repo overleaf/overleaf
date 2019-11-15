@@ -127,7 +127,6 @@ describe "Setting a document", ->
 			@newLines = []
 			while JSON.stringify(@newLines).length < Settings.max_doc_length + 64 * 1024
 				@newLines.push("(a long line of text)".repeat(10000))
-			console.log("newlines size",JSON.stringify(@newLines).length)
 			DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, false, (error, res, body) =>
 				@statusCode = res.statusCode
 				setTimeout done, 200
@@ -159,7 +158,6 @@ describe "Setting a document", ->
 			while JSON.stringify(@newLines).length < 2 * 1024 * 1024 # limit in HTTPController
 				@newLines.push("(a long line of text)".repeat(10000))
 			@newLines.pop() # remove the line which took it over the limit
-			console.log("newlines size",JSON.stringify(@newLines).length)
 			DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, false, (error, res, body) =>
 				@statusCode = res.statusCode
 				setTimeout done, 200
