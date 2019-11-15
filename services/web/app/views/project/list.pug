@@ -61,6 +61,9 @@ block content
 		role="main"
 	)
 		- if(typeof(suppressSystemMessages) == "undefined")
+			script.
+				window.systemMessages = !{StringHelper.stringifyJsonForScript(systemMessages)};
+
 			.system-messages(
 				ng-cloak
 				ng-controller="SystemMessagesController"

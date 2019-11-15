@@ -12,7 +12,6 @@ const IS_DEV_ENV = ['development', 'test'].includes(process.env.NODE_ENV)
 const Features = require('./Features')
 const AuthenticationController = require('../Features/Authentication/AuthenticationController')
 const PackageVersions = require('./PackageVersions')
-const SystemMessageManager = require('../Features/SystemMessages/SystemMessageManager')
 const Modules = require('./Modules')
 
 const htmlEncoder = new NodeHtmlEncoder('numerical')
@@ -305,19 +304,6 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     res.locals.templates = Settings.templateLinks
     next()
   })
-
-  webRouter.use((req, res, next) =>
-    SystemMessageManager.getMessages(function(error, messages) {
-      if (error) {
-        return next(error)
-      }
-      if (messages == null) {
-        messages = []
-      }
-      res.locals.systemMessages = messages
-      next()
-    })
-  )
 
   webRouter.use(function(req, res, next) {
     if (Settings.reloadModuleViewsOnEachRequest) {
