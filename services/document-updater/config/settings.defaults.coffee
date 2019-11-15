@@ -70,13 +70,14 @@ module.exports =
 				unflushedTime: ({doc_id}) -> "UnflushedTime:{#{doc_id}}"
 				pathname: ({doc_id}) -> "Pathname:{#{doc_id}}"
 				projectHistoryId: ({doc_id}) -> "ProjectHistoryId:{#{doc_id}}"
+				projectHistoryType: ({doc_id}) -> "ProjectHistoryType:{#{doc_id}}"
 				projectState: ({project_id}) -> "ProjectState:{#{project_id}}"
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
 				lastUpdatedBy: ({doc_id}) -> "lastUpdatedBy:{#{doc_id}}"
 				lastUpdatedAt: ({doc_id}) -> "lastUpdatedAt:{#{doc_id}}"
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
 				flushAndDeleteQueue: () -> "DocUpdaterFlushAndDeleteQueue"
-	
+
 	max_doc_length: 2 * 1024 * 1024 # 2mb
 
 	dispatcherCount: process.env["DISPATCHER_COUNT"]

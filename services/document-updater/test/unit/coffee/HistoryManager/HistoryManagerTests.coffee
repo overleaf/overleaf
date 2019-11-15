@@ -15,7 +15,7 @@ describe "HistoryManager", ->
 					trackchanges:
 						url: "http://trackchanges.example.com"
 			}
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), debug: sinon.stub() }
 			"./DocumentManager": @DocumentManager = {}
 			"./HistoryRedisManager": @HistoryRedisManager = {}
 			"./RedisManager": @RedisManager = {}
@@ -28,12 +28,25 @@ describe "HistoryManager", ->
 		beforeEach ->
 			@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204)
 
-			@HistoryManager.flushDocChangesAsync @project_id, @doc_id
+		describe "when the project uses track changes", ->
+			beforeEach ->
+				@RedisManager.getHistoryType = sinon.stub().yields(null, 'track-changes')
+				@HistoryManager.flushDocChangesAsync @project_id, @doc_id
 
-		it "should send a request to the track changes api", ->
-			@request.post
-				.calledWith("#{@Settings.apis.trackchanges.url}/project/#{@project_id}/doc/#{@doc_id}/flush")
-				.should.equal true
+			it "should send a request to the track changes api", ->
+				@request.post
+					.calledWith("#{@Settings.apis.trackchanges.url}/project/#{@project_id}/doc/#{@doc_id}/flush")
+					.should.equal true
+
+		describe "when the project uses project history", ->
+			beforeEach ->
+				@RedisManager.getHistoryType = sinon.stub().yields(null, 'project-history')
+				@HistoryManager.flushDocChangesAsync @project_id, @doc_id
+
+			it "should not send a request to the track changes api", ->
+				@request.post
+					.called
+					.should.equal false
 
 	describe "flushProjectChangesAsync", ->
 		beforeEach ->
