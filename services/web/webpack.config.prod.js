@@ -1,4 +1,3 @@
-const path = require('path')
 const merge = require('webpack-merge')
 
 const base = require('./webpack.config')
@@ -10,12 +9,7 @@ module.exports = merge(base, {
   devtool: 'source-map',
 
   output: {
-    // Override output path to minjs dir
-    path: path.join(__dirname, '/public/minjs'),
-
     // Override filename to include hash for immutable caching
-    filename: '[name]-[chunkhash].js',
-
-    publicPath: '/minjs/'
+    filename: '[name]-[chunkhash].js'
   }
 })

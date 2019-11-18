@@ -14,9 +14,9 @@ const entryPoints = {
   ide: './frontend/js/ide.js'
 }
 
+// Attempt to load frontend entry-points from modules, if they exist
 if (fs.existsSync(MODULES_PATH)) {
   fs.readdirSync(MODULES_PATH).reduce((acc, module) => {
-    // FIXME: modules frontend path
     const entryPath = path.join(MODULES_PATH, module, '/frontend/js/index.js')
     if (fs.existsSync(entryPath)) {
       acc[module] = entryPath
@@ -35,6 +35,9 @@ module.exports = {
   // kept in memory for speed
   output: {
     path: path.join(__dirname, '/public/js'),
+
+    // Serve from /js
+    publicPath: '/js/',
 
     filename: '[name].js',
 

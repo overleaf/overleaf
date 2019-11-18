@@ -23,7 +23,7 @@
     "nodemon": "nodemon --config nodemon.json",
     "nodemon:frontend": "nodemon --config nodemon.frontend.json",
     "webpack": "webpack-dev-server --config webpack.config.dev.js",
-    "webpack:production": "webpack --config webpack.config.prod.js",
+    "webpack:production": "webpack --config webpack.config.prod.js && cp -R public/js public/minjs",
     "lint": "eslint -f unix .",
     "format": "prettier-eslint '**/*.js' --list-different",
     "format:fix": "prettier-eslint '**/*.js' --write",

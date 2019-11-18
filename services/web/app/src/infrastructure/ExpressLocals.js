@@ -19,15 +19,13 @@ const Modules = require('./Modules')
 
 const htmlEncoder = new NodeHtmlEncoder('numerical')
 
-const jsPath = Settings.useMinifiedJs ? '/minjs/' : '/js/'
-
 let webpackManifest
 if (!IS_DEV_ENV) {
   // Only load webpack manifest file in production. In dev, the web and webpack
   // containers can't coordinate, so there no guarantee that the manifest file
   // exists when the web server boots. We therefore ignore the manifest file in
   // dev reload
-  webpackManifest = require(`../../../public${jsPath}manifest.json`)
+  webpackManifest = require(`../../../public/js/manifest.json`)
 }
 
 function getFileContent(filePath) {
@@ -133,7 +131,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
         // In dev: resolve path within JS asset directory
         // We are *not* guaranteed to have a manifest file when the server
         // starts up
-        path = Path.join(jsPath, jsFile)
+        path = Path.join('/js', jsFile)
       } else {
         // In production: resolve path from webpack manifest file
         // We are guaranteed to have a manifest file since webpack compiles in
@@ -150,10 +148,6 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       }
 
       return path
-    }
-
-    res.locals.buildAssetsPath = function(path) {
-      return `${jsPath}/${path}`
     }
 
     res.locals.mathJaxPath = res.locals.buildJsPath('libs/mathjax/MathJax.js', {
