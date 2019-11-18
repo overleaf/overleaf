@@ -453,8 +453,8 @@ describe('ProjectEntityUpdateHandler', function() {
         return this.logger.warn
           .calledWith(
             {
-              project_id,
-              doc_id,
+              projectId: project_id,
+              docId: doc_id,
               lines: this.docLines
             },
             'doc not found while updating doc lines'
@@ -504,7 +504,11 @@ describe('ProjectEntityUpdateHandler', function() {
         .stub()
         .yields(null, `/main.tex`)
 
-      this.ProjectEntityUpdateHandler.setRootDoc(project_id, this.rootDoc_id)
+      this.ProjectEntityUpdateHandler.setRootDoc(
+        project_id,
+        this.rootDoc_id,
+        () => {}
+      )
       return this.ProjectModel.update
         .calledWith({ _id: project_id }, { rootDoc_id: this.rootDoc_id })
         .should.equal(true)
@@ -516,7 +520,11 @@ describe('ProjectEntityUpdateHandler', function() {
         .stub()
         .yields(Errors.NotFoundError)
 
-      this.ProjectEntityUpdateHandler.setRootDoc(project_id, this.rootDoc_id)
+      this.ProjectEntityUpdateHandler.setRootDoc(
+        project_id,
+        this.rootDoc_id,
+        () => {}
+      )
       return this.ProjectModel.update
         .calledWith({ _id: project_id }, { rootDoc_id: this.rootDoc_id })
         .should.equal(false)

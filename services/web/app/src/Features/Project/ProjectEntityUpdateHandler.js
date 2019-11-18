@@ -1,27 +1,8 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    one-var,
-    standard/no-callback-literal,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS201: Simplify complex destructure assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let ProjectEntityUpdateHandler, self
 const _ = require('lodash')
 const async = require('async')
 const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
-const path = require('path')
+const Path = require('path')
 const { Doc } = require('../../models/Doc')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const DocumentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
@@ -39,27 +20,25 @@ const SafePath = require('./SafePath')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 
 const LOCK_NAMESPACE = 'sequentialProjectStructureUpdateLock'
-
-const validRootDocExtensions = Settings.validRootDocExtensions
-const validRootDocRegExp = new RegExp(
-  `^\\.(${validRootDocExtensions.join('|')})$`,
+const VALID_ROOT_DOC_EXTENSIONS = Settings.validRootDocExtensions
+const VALID_ROOT_DOC_REGEXP = new RegExp(
+  `^\\.(${VALID_ROOT_DOC_EXTENSIONS.join('|')})$`,
   'i'
 )
 
-const wrapWithLock = function(methodWithoutLock) {
+function wrapWithLock(methodWithoutLock) {
   // This lock is used to make sure that the project structure updates are made
   // sequentially. In particular the updates must be made in mongo and sent to
   // the doc-updater in the same order.
-  let methodWithLock
   if (typeof methodWithoutLock === 'function') {
-    methodWithLock = function(project_id, ...rest) {
-      const adjustedLength = Math.max(rest.length, 1),
-        args = rest.slice(0, adjustedLength - 1),
-        callback = rest[adjustedLength - 1]
-      return LockManager.runWithLock(
+    const methodWithLock = (projectId, ...rest) => {
+      const adjustedLength = Math.max(rest.length, 1)
+      const args = rest.slice(0, adjustedLength - 1)
+      const callback = rest[adjustedLength - 1]
+      LockManager.runWithLock(
         LOCK_NAMESPACE,
-        project_id,
-        cb => methodWithoutLock(project_id, ...Array.from(args), cb),
+        projectId,
+        cb => methodWithoutLock(projectId, ...args, cb),
         callback
       )
     }
@@ -69,14 +48,14 @@ const wrapWithLock = function(methodWithoutLock) {
     // handle case with separate setup and locked stages
     const wrapWithSetup = methodWithoutLock.beforeLock // a function to set things up before the lock
     const mainTask = methodWithoutLock.withLock // function to execute inside the lock
-    methodWithLock = wrapWithSetup(function(project_id, ...rest) {
-      const adjustedLength = Math.max(rest.length, 1),
-        args = rest.slice(0, adjustedLength - 1),
-        callback = rest[adjustedLength - 1]
-      return LockManager.runWithLock(
+    const methodWithLock = wrapWithSetup((projectId, ...rest) => {
+      const adjustedLength = Math.max(rest.length, 1)
+      const args = rest.slice(0, adjustedLength - 1)
+      const callback = rest[adjustedLength - 1]
+      LockManager.runWithLock(
         LOCK_NAMESPACE,
-        project_id,
-        cb => mainTask(project_id, ...Array.from(args), cb),
+        projectId,
+        cb => mainTask(projectId, ...args, cb),
         callback
       )
     })
@@ -87,72 +66,69 @@ const wrapWithLock = function(methodWithoutLock) {
   }
 }
 
-module.exports = ProjectEntityUpdateHandler = self = {
+const ProjectEntityUpdateHandler = {
   copyFileFromExistingProjectWithProject: wrapWithLock({
     beforeLock(next) {
       return function(
-        project_id,
+        projectId,
         project,
-        folder_id,
-        originalProject_id,
-        origonalFileRef,
+        folderId,
+        originalProjectId,
+        originalFileRef,
         userId,
         callback
       ) {
-        if (callback == null) {
-          callback = function(error, fileRef, folder_id) {}
-        }
         logger.log(
-          { project_id, folder_id, originalProject_id, origonalFileRef },
+          { projectId, folderId, originalProjectId, originalFileRef },
           'copying file in s3 with project'
         )
-        return ProjectEntityMongoUpdateHandler._confirmFolder(
+        ProjectEntityMongoUpdateHandler._confirmFolder(
           project,
-          folder_id,
-          function(folder_id) {
-            if (origonalFileRef == null) {
+          folderId,
+          folderId => {
+            if (originalFileRef == null) {
               logger.err(
-                { project_id, folder_id, originalProject_id, origonalFileRef },
+                { projectId, folderId, originalProjectId, originalFileRef },
                 'file trying to copy is null'
               )
               return callback()
             }
             // convert any invalid characters in original file to '_'
             const fileProperties = {
-              name: SafePath.clean(origonalFileRef.name)
+              name: SafePath.clean(originalFileRef.name)
             }
-            if (origonalFileRef.linkedFileData != null) {
-              fileProperties.linkedFileData = origonalFileRef.linkedFileData
+            if (originalFileRef.linkedFileData != null) {
+              fileProperties.linkedFileData = originalFileRef.linkedFileData
             }
-            if (origonalFileRef.hash != null) {
-              fileProperties.hash = origonalFileRef.hash
+            if (originalFileRef.hash != null) {
+              fileProperties.hash = originalFileRef.hash
             }
             const fileRef = new File(fileProperties)
-            return FileStoreHandler.copyFile(
-              originalProject_id,
-              origonalFileRef._id,
+            FileStoreHandler.copyFile(
+              originalProjectId,
+              originalFileRef._id,
               project._id,
               fileRef._id,
-              function(err, fileStoreUrl) {
+              (err, fileStoreUrl) => {
                 if (err != null) {
                   logger.warn(
                     {
                       err,
-                      project_id,
-                      folder_id,
-                      originalProject_id,
-                      origonalFileRef
+                      projectId,
+                      folderId,
+                      originalProjectId,
+                      originalFileRef
                     },
                     'error coping file in s3'
                   )
                   return callback(err)
                 }
-                return next(
-                  project_id,
+                next(
+                  projectId,
                   project,
-                  folder_id,
-                  originalProject_id,
-                  origonalFileRef,
+                  folderId,
+                  originalProjectId,
+                  originalFileRef,
                   userId,
                   fileRef,
                   fileStoreUrl,
@@ -165,56 +141,50 @@ module.exports = ProjectEntityUpdateHandler = self = {
       }
     },
     withLock(
-      project_id,
+      projectId,
       project,
-      folder_id,
-      originalProject_id,
-      origonalFileRef,
+      folderId,
+      originalProjectId,
+      originalFileRef,
       userId,
       fileRef,
       fileStoreUrl,
       callback
     ) {
-      if (callback == null) {
-        callback = function(error, fileRef, folder_id) {}
-      }
-      const projectHistoryId = __guard__(
-        project.overleaf != null ? project.overleaf.history : undefined,
-        x => x.id
-      )
-      return ProjectEntityMongoUpdateHandler._putElement(
+      const projectHistoryId =
+        project.overleaf &&
+        project.overleaf.history &&
+        project.overleaf.history.id
+      ProjectEntityMongoUpdateHandler._putElement(
         project,
-        folder_id,
+        folderId,
         fileRef,
         'file',
-        function(err, result, newProject) {
+        (err, result, newProject) => {
           if (err != null) {
             logger.warn(
-              { err, project_id, folder_id },
+              { err, projectId, folderId },
               'error putting element as part of copy'
             )
             return callback(err)
           }
-          return TpdsUpdateSender.addFile(
+          TpdsUpdateSender.addFile(
             {
-              project_id,
+              project_id: projectId,
               file_id: fileRef._id,
-              path: __guard__(
-                result != null ? result.path : undefined,
-                x1 => x1.fileSystem
-              ),
+              path: result && result.path && result.path.fileSystem,
               rev: fileRef.rev,
               project_name: project.name
             },
-            function(err) {
+            err => {
               if (err != null) {
                 logger.err(
                   {
                     err,
-                    project_id,
-                    folder_id,
-                    originalProject_id,
-                    origonalFileRef
+                    projectId,
+                    folderId,
+                    originalProjectId,
+                    originalFileRef
                   },
                   'error sending file to tpds worker'
                 )
@@ -222,23 +192,20 @@ module.exports = ProjectEntityUpdateHandler = self = {
               const newFiles = [
                 {
                   file: fileRef,
-                  path: __guard__(
-                    result != null ? result.path : undefined,
-                    x2 => x2.fileSystem
-                  ),
+                  path: result && result.path && result.path.fileSystem,
                   url: fileStoreUrl
                 }
               ]
-              return DocumentUpdaterHandler.updateProjectStructure(
-                project_id,
+              DocumentUpdaterHandler.updateProjectStructure(
+                projectId,
                 projectHistoryId,
                 userId,
                 { newFiles, newProject },
-                function(error) {
+                error => {
                   if (error != null) {
                     return callback(error)
                   }
-                  return callback(null, fileRef, folder_id)
+                  callback(null, fileRef, folderId)
                 }
               )
             }
@@ -249,8 +216,8 @@ module.exports = ProjectEntityUpdateHandler = self = {
   }),
 
   updateDocLines(
-    project_id,
-    doc_id,
+    projectId,
+    docId,
     lines,
     version,
     ranges,
@@ -258,23 +225,17 @@ module.exports = ProjectEntityUpdateHandler = self = {
     lastUpdatedBy,
     callback
   ) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return ProjectGetter.getProjectWithoutDocLines(project_id, function(
-      err,
-      project
-    ) {
+    ProjectGetter.getProjectWithoutDocLines(projectId, (err, project) => {
       if (err != null) {
         return callback(err)
       }
       if (project == null) {
         return callback(new Errors.NotFoundError('project not found'))
       }
-      logger.log({ project_id, doc_id }, 'updating doc lines')
-      return ProjectLocator.findElement(
-        { project, element_id: doc_id, type: 'docs' },
-        function(err, doc, path) {
+      logger.log({ projectId, docId }, 'updating doc lines')
+      ProjectLocator.findElement(
+        { project, element_id: docId, type: 'docs' },
+        (err, doc, path) => {
           let isDeletedDoc = false
           if (err != null) {
             if (err instanceof Errors.NotFoundError) {
@@ -284,7 +245,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
               isDeletedDoc = true
               doc = _.find(
                 project.deletedDocs,
-                doc => doc._id.toString() === doc_id.toString()
+                doc => doc._id.toString() === docId.toString()
               )
             } else {
               return callback(err)
@@ -294,54 +255,54 @@ module.exports = ProjectEntityUpdateHandler = self = {
           if (doc == null) {
             // Do not allow an update to a doc which has never exist on this project
             logger.warn(
-              { doc_id, project_id, lines },
+              { docId, projectId, lines },
               'doc not found while updating doc lines'
             )
             return callback(new Errors.NotFoundError('doc not found'))
           }
 
           logger.log(
-            { project_id, doc_id },
+            { projectId, docId },
             'telling docstore manager to update doc'
           )
-          return DocstoreManager.updateDoc(
-            project_id,
-            doc_id,
+          DocstoreManager.updateDoc(
+            projectId,
+            docId,
             lines,
             version,
             ranges,
-            function(err, modified, rev) {
+            (err, modified, rev) => {
               if (err != null) {
                 logger.warn(
-                  { err, doc_id, project_id, lines },
+                  { err, docId, projectId, lines },
                   'error sending doc to docstore'
                 )
                 return callback(err)
               }
               logger.log(
-                { project_id, doc_id, modified },
+                { projectId, docId, modified },
                 'finished updating doc lines'
               )
               // path will only be present if the doc is not deleted
               if (modified && !isDeletedDoc) {
                 // Don't need to block for marking as updated
                 ProjectUpdateHandler.markAsUpdated(
-                  project_id,
+                  projectId,
                   lastUpdatedAt,
                   lastUpdatedBy
                 )
-                return TpdsUpdateSender.addDoc(
+                TpdsUpdateSender.addDoc(
                   {
-                    project_id,
+                    project_id: projectId,
                     path: path.fileSystem,
-                    doc_id,
+                    doc_id: docId,
                     project_name: project.name,
                     rev
                   },
                   callback
                 )
               } else {
-                return callback()
+                callback()
               }
             }
           )
@@ -350,32 +311,29 @@ module.exports = ProjectEntityUpdateHandler = self = {
     })
   },
 
-  setRootDoc(project_id, newRootDocID, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    logger.log({ project_id, rootDocId: newRootDocID }, 'setting root doc')
-    if (project_id == null || newRootDocID == null) {
+  setRootDoc(projectId, newRootDocID, callback) {
+    logger.log({ projectId, rootDocId: newRootDocID }, 'setting root doc')
+    if (projectId == null || newRootDocID == null) {
       return callback(
         new Errors.InvalidError('missing arguments (project or doc)')
       )
     }
     ProjectEntityHandler.getDocPathByProjectIdAndDocId(
-      project_id,
+      projectId,
       newRootDocID,
-      function(err, docPath) {
+      (err, docPath) => {
         if (err != null) {
           return callback(err)
         }
         if (ProjectEntityUpdateHandler.isPathValidForRootDoc(docPath)) {
-          return Project.update(
-            { _id: project_id },
+          Project.update(
+            { _id: projectId },
             { rootDoc_id: newRootDocID },
             {},
             callback
           )
         } else {
-          return callback(
+          callback(
             new Errors.UnsupportedFileTypeError(
               'invalid file extension for root doc'
             )
@@ -385,34 +343,28 @@ module.exports = ProjectEntityUpdateHandler = self = {
     )
   },
 
-  unsetRootDoc(project_id, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    logger.log({ project_id }, 'removing root doc')
-    return Project.update(
-      { _id: project_id },
+  unsetRootDoc(projectId, callback) {
+    logger.log({ projectId }, 'removing root doc')
+    Project.update(
+      { _id: projectId },
       { $unset: { rootDoc_id: true } },
       {},
       callback
     )
   },
 
-  _addDocAndSendToTpds(project_id, folder_id, doc, callback) {
-    if (callback == null) {
-      callback = function(error, result, project) {}
-    }
-    return ProjectEntityMongoUpdateHandler.addDoc(
-      project_id,
-      folder_id,
+  _addDocAndSendToTpds(projectId, folderId, doc, callback) {
+    ProjectEntityMongoUpdateHandler.addDoc(
+      projectId,
+      folderId,
       doc,
-      function(err, result, project) {
+      (err, result, project) => {
         if (err != null) {
           logger.warn(
             {
               err,
-              project_id,
-              folder_id,
+              projectId,
+              folderId,
               doc_name: doc != null ? doc.name : undefined,
               doc_id: doc != null ? doc._id : undefined
             },
@@ -420,32 +372,29 @@ module.exports = ProjectEntityUpdateHandler = self = {
           )
           return callback(err)
         }
-        return TpdsUpdateSender.addDoc(
+        TpdsUpdateSender.addDoc(
           {
-            project_id,
+            project_id: projectId,
             doc_id: doc != null ? doc._id : undefined,
-            path: __guard__(
-              result != null ? result.path : undefined,
-              x => x.fileSystem
-            ),
+            path: result && result.path && result.path.fileSystem,
             project_name: project.name,
             rev: 0
           },
-          function(err) {
+          err => {
             if (err != null) {
               return callback(err)
             }
-            return callback(null, result, project)
+            callback(null, result, project)
           }
         )
       }
     )
   },
 
-  addDoc(project_id, folder_id, docName, docLines, userId, callback) {
-    return self.addDocWithRanges(
-      project_id,
-      folder_id,
+  addDoc(projectId, folderId, docName, docLines, userId, callback) {
+    ProjectEntityUpdateHandler.addDocWithRanges(
+      projectId,
+      folderId,
       docName,
       docLines,
       {},
@@ -457,36 +406,33 @@ module.exports = ProjectEntityUpdateHandler = self = {
   addDocWithRanges: wrapWithLock({
     beforeLock(next) {
       return function(
-        project_id,
-        folder_id,
+        projectId,
+        folderId,
         docName,
         docLines,
         ranges,
         userId,
         callback
       ) {
-        if (callback == null) {
-          callback = function(error, doc, folder_id) {}
-        }
         if (!SafePath.isCleanFilename(docName)) {
           return callback(new Errors.InvalidNameError('invalid element name'))
         }
         // Put doc in docstore first, so that if it errors, we don't have a doc_id in the project
         // which hasn't been created in docstore.
         const doc = new Doc({ name: docName })
-        return DocstoreManager.updateDoc(
-          project_id.toString(),
+        DocstoreManager.updateDoc(
+          projectId.toString(),
           doc._id.toString(),
           docLines,
           0,
           ranges,
-          function(err, modified, rev) {
+          (err, modified, rev) => {
             if (err != null) {
               return callback(err)
             }
-            return next(
-              project_id,
-              folder_id,
+            next(
+              projectId,
+              folderId,
               doc,
               docName,
               docLines,
@@ -499,8 +445,8 @@ module.exports = ProjectEntityUpdateHandler = self = {
       }
     },
     withLock(
-      project_id,
-      folder_id,
+      projectId,
+      folderId,
       doc,
       docName,
       docLines,
@@ -508,25 +454,19 @@ module.exports = ProjectEntityUpdateHandler = self = {
       userId,
       callback
     ) {
-      if (callback == null) {
-        callback = function(error, doc, folder_id) {}
-      }
-      return ProjectEntityUpdateHandler._addDocAndSendToTpds(
-        project_id,
-        folder_id,
+      ProjectEntityUpdateHandler._addDocAndSendToTpds(
+        projectId,
+        folderId,
         doc,
-        function(err, result, project) {
+        (err, result, project) => {
           if (err != null) {
             return callback(err)
           }
-          const docPath = __guard__(
-            result != null ? result.path : undefined,
-            x => x.fileSystem
-          )
-          const projectHistoryId = __guard__(
-            project.overleaf != null ? project.overleaf.history : undefined,
-            x1 => x1.id
-          )
+          const docPath = result && result.path && result.path.fileSystem
+          const projectHistoryId =
+            project.overleaf &&
+            project.overleaf.history &&
+            project.overleaf.history.id
           const newDocs = [
             {
               doc,
@@ -534,16 +474,16 @@ module.exports = ProjectEntityUpdateHandler = self = {
               docLines: docLines.join('\n')
             }
           ]
-          return DocumentUpdaterHandler.updateProjectStructure(
-            project_id,
+          DocumentUpdaterHandler.updateProjectStructure(
+            projectId,
             projectHistoryId,
             userId,
             { newDocs, newProject: project },
-            function(error) {
+            error => {
               if (error != null) {
                 return callback(error)
               }
-              return callback(null, doc, folder_id)
+              callback(null, doc, folderId)
             }
           )
         }
@@ -551,17 +491,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
     }
   }),
 
-  _uploadFile(
-    project_id,
-    folder_id,
-    fileName,
-    fsPath,
-    linkedFileData,
-    callback
-  ) {
-    if (callback == null) {
-      callback = function(error, fileStoreUrl, fileRef) {}
-    }
+  _uploadFile(projectId, folderId, fileName, fsPath, linkedFileData, callback) {
     if (!SafePath.isCleanFilename(fileName)) {
       return callback(new Errors.InvalidNameError('invalid element name'))
     }
@@ -569,55 +499,49 @@ module.exports = ProjectEntityUpdateHandler = self = {
       name: fileName,
       linkedFileData
     }
-    return FileStoreHandler.uploadFileFromDisk(
-      project_id,
+    FileStoreHandler.uploadFileFromDisk(
+      projectId,
       fileArgs,
       fsPath,
-      function(err, fileStoreUrl, fileRef) {
+      (err, fileStoreUrl, fileRef) => {
         if (err != null) {
           logger.warn(
-            { err, project_id, folder_id, file_name: fileName, fileRef },
+            { err, projectId, folderId, file_name: fileName, fileRef },
             'error uploading image to s3'
           )
           return callback(err)
         }
-        return callback(null, fileStoreUrl, fileRef)
+        callback(null, fileStoreUrl, fileRef)
       }
     )
   },
 
-  _addFileAndSendToTpds(project_id, folder_id, fileRef, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return ProjectEntityMongoUpdateHandler.addFile(
-      project_id,
-      folder_id,
+  _addFileAndSendToTpds(projectId, folderId, fileRef, callback) {
+    ProjectEntityMongoUpdateHandler.addFile(
+      projectId,
+      folderId,
       fileRef,
-      function(err, result, project) {
+      (err, result, project) => {
         if (err != null) {
           logger.warn(
-            { err, project_id, folder_id, file_name: fileRef.name, fileRef },
+            { err, projectId, folderId, file_name: fileRef.name, fileRef },
             'error adding file with project'
           )
           return callback(err)
         }
-        return TpdsUpdateSender.addFile(
+        TpdsUpdateSender.addFile(
           {
-            project_id,
+            project_id: projectId,
             file_id: fileRef._id,
-            path: __guard__(
-              result != null ? result.path : undefined,
-              x => x.fileSystem
-            ),
+            path: result && result.path && result.path.fileSystem,
             project_name: project.name,
             rev: fileRef.rev
           },
-          function(err) {
+          err => {
             if (err != null) {
               return callback(err)
             }
-            return callback(null, result, project)
+            callback(null, result, project)
           }
         )
       }
@@ -627,8 +551,8 @@ module.exports = ProjectEntityUpdateHandler = self = {
   addFile: wrapWithLock({
     beforeLock(next) {
       return function(
-        project_id,
-        folder_id,
+        projectId,
+        folderId,
         fileName,
         fsPath,
         linkedFileData,
@@ -638,19 +562,19 @@ module.exports = ProjectEntityUpdateHandler = self = {
         if (!SafePath.isCleanFilename(fileName)) {
           return callback(new Errors.InvalidNameError('invalid element name'))
         }
-        return ProjectEntityUpdateHandler._uploadFile(
-          project_id,
-          folder_id,
+        ProjectEntityUpdateHandler._uploadFile(
+          projectId,
+          folderId,
           fileName,
           fsPath,
           linkedFileData,
-          function(error, fileStoreUrl, fileRef) {
+          (error, fileStoreUrl, fileRef) => {
             if (error != null) {
               return callback(error)
             }
-            return next(
-              project_id,
-              folder_id,
+            next(
+              projectId,
+              folderId,
               fileName,
               fsPath,
               linkedFileData,
@@ -664,8 +588,8 @@ module.exports = ProjectEntityUpdateHandler = self = {
       }
     },
     withLock(
-      project_id,
-      folder_id,
+      projectId,
+      folderId,
       fileName,
       fsPath,
       linkedFileData,
@@ -674,41 +598,35 @@ module.exports = ProjectEntityUpdateHandler = self = {
       fileStoreUrl,
       callback
     ) {
-      if (callback == null) {
-        callback = function(error, fileRef, folder_id) {}
-      }
-      return ProjectEntityUpdateHandler._addFileAndSendToTpds(
-        project_id,
-        folder_id,
+      ProjectEntityUpdateHandler._addFileAndSendToTpds(
+        projectId,
+        folderId,
         fileRef,
-        function(err, result, project) {
+        (err, result, project) => {
           if (err != null) {
             return callback(err)
           }
-          const projectHistoryId = __guard__(
-            project.overleaf != null ? project.overleaf.history : undefined,
-            x => x.id
-          )
+          const projectHistoryId =
+            project.overleaf &&
+            project.overleaf.history &&
+            project.overleaf.history.id
           const newFiles = [
             {
               file: fileRef,
-              path: __guard__(
-                result != null ? result.path : undefined,
-                x1 => x1.fileSystem
-              ),
+              path: result && result.path && result.path.fileSystem,
               url: fileStoreUrl
             }
           ]
-          return DocumentUpdaterHandler.updateProjectStructure(
-            project_id,
+          DocumentUpdaterHandler.updateProjectStructure(
+            projectId,
             projectHistoryId,
             userId,
             { newFiles, newProject: project },
-            function(error) {
+            error => {
               if (error != null) {
                 return callback(error)
               }
-              return callback(null, fileRef, folder_id)
+              callback(null, fileRef, folderId)
             }
           )
         }
@@ -719,8 +637,8 @@ module.exports = ProjectEntityUpdateHandler = self = {
   replaceFile: wrapWithLock({
     beforeLock(next) {
       return function(
-        project_id,
-        file_id,
+        projectId,
+        fileId,
         fsPath,
         linkedFileData,
         userId,
@@ -731,17 +649,17 @@ module.exports = ProjectEntityUpdateHandler = self = {
           name: 'dummy-upload-filename',
           linkedFileData
         }
-        return FileStoreHandler.uploadFileFromDisk(
-          project_id,
+        FileStoreHandler.uploadFileFromDisk(
+          projectId,
           fileArgs,
           fsPath,
-          function(err, fileStoreUrl, fileRef) {
+          (err, fileStoreUrl, fileRef) => {
             if (err != null) {
               return callback(err)
             }
-            return next(
-              project_id,
-              file_id,
+            next(
+              projectId,
+              fileId,
               fsPath,
               linkedFileData,
               userId,
@@ -754,8 +672,8 @@ module.exports = ProjectEntityUpdateHandler = self = {
       }
     },
     withLock(
-      project_id,
-      file_id,
+      projectId,
+      fileId,
       fsPath,
       linkedFileData,
       userId,
@@ -763,11 +681,11 @@ module.exports = ProjectEntityUpdateHandler = self = {
       fileStoreUrl,
       callback
     ) {
-      return ProjectEntityMongoUpdateHandler.replaceFileWithNew(
-        project_id,
-        file_id,
+      ProjectEntityMongoUpdateHandler.replaceFileWithNew(
+        projectId,
+        fileId,
         newFileRef,
-        function(err, oldFileRef, project, path, newProject) {
+        (err, oldFileRef, project, path, newProject) => {
           if (err != null) {
             return callback(err)
           }
@@ -784,17 +702,17 @@ module.exports = ProjectEntityUpdateHandler = self = {
               url: fileStoreUrl
             }
           ]
-          const projectHistoryId = __guard__(
-            project.overleaf != null ? project.overleaf.history : undefined,
-            x => x.id
-          )
+          const projectHistoryId =
+            project.overleaf &&
+            project.overleaf.history &&
+            project.overleaf.history.id
           // Increment the rev for an in-place update (with the same path) so the third-party-datastore
           // knows this is a new file.
           // Ideally we would get this from ProjectEntityMongoUpdateHandler.replaceFileWithNew
           // but it returns the original oldFileRef (after incrementing the rev value in mongo),
           // so we add 1 to the rev from that. This isn't atomic and relies on the lock
           // but it is acceptable for now.
-          return TpdsUpdateSender.addFile(
+          TpdsUpdateSender.addFile(
             {
               project_id: project._id,
               file_id: newFileRef._id,
@@ -802,12 +720,12 @@ module.exports = ProjectEntityUpdateHandler = self = {
               rev: oldFileRef.rev + 1,
               project_name: project.name
             },
-            function(err) {
+            err => {
               if (err != null) {
                 return callback(err)
               }
-              return DocumentUpdaterHandler.updateProjectStructure(
-                project_id,
+              DocumentUpdaterHandler.updateProjectStructure(
+                projectId,
                 projectHistoryId,
                 userId,
                 { oldFiles, newFiles, newProject },
@@ -821,23 +739,20 @@ module.exports = ProjectEntityUpdateHandler = self = {
   }),
 
   upsertDoc: wrapWithLock(function(
-    project_id,
-    folder_id,
+    projectId,
+    folderId,
     docName,
     docLines,
     source,
     userId,
     callback
   ) {
-    if (callback == null) {
-      callback = function(err, doc, folder_id, isNewDoc) {}
-    }
     if (!SafePath.isCleanFilename(docName)) {
       return callback(new Errors.InvalidNameError('invalid element name'))
     }
-    return ProjectLocator.findElement(
-      { project_id, element_id: folder_id, type: 'folder' },
-      function(error, folder) {
+    ProjectLocator.findElement(
+      { project_id: projectId, element_id: folderId, type: 'folder' },
+      (error, folder) => {
         if (error != null) {
           return callback(error)
         }
@@ -845,49 +760,52 @@ module.exports = ProjectEntityUpdateHandler = self = {
           return callback(new Error("Couldn't find folder"))
         }
         let existingDoc = null
-        for (let doc of Array.from(folder.docs)) {
+        for (let doc of folder.docs) {
           if (doc.name === docName) {
             existingDoc = doc
             break
           }
         }
         if (existingDoc != null) {
-          return DocumentUpdaterHandler.setDocument(
-            project_id,
+          DocumentUpdaterHandler.setDocument(
+            projectId,
             existingDoc._id,
             userId,
             docLines,
             source,
             err => {
+              if (err != null) {
+                return callback(err)
+              }
               logger.log(
-                { project_id, doc_id: existingDoc._id },
+                { projectId, docId: existingDoc._id },
                 'notifying users that the document has been updated'
               )
-              return DocumentUpdaterHandler.flushDocToMongo(
-                project_id,
+              DocumentUpdaterHandler.flushDocToMongo(
+                projectId,
                 existingDoc._id,
-                function(err) {
+                err => {
                   if (err != null) {
                     return callback(err)
                   }
-                  return callback(null, existingDoc, existingDoc == null)
+                  callback(null, existingDoc, existingDoc == null)
                 }
               )
             }
           )
         } else {
-          return self.addDocWithRanges.withoutLock(
-            project_id,
-            folder_id,
+          ProjectEntityUpdateHandler.addDocWithRanges.withoutLock(
+            projectId,
+            folderId,
             docName,
             docLines,
             {},
             userId,
-            function(err, doc) {
+            (err, doc) => {
               if (err != null) {
                 return callback(err)
               }
-              return callback(null, doc, existingDoc == null)
+              callback(null, doc, existingDoc == null)
             }
           )
         }
@@ -898,8 +816,8 @@ module.exports = ProjectEntityUpdateHandler = self = {
   upsertFile: wrapWithLock({
     beforeLock(next) {
       return function(
-        project_id,
-        folder_id,
+        projectId,
+        folderId,
         fileName,
         fsPath,
         linkedFileData,
@@ -914,17 +832,17 @@ module.exports = ProjectEntityUpdateHandler = self = {
           name: fileName,
           linkedFileData
         }
-        return FileStoreHandler.uploadFileFromDisk(
-          project_id,
+        FileStoreHandler.uploadFileFromDisk(
+          projectId,
           fileArgs,
           fsPath,
-          function(err, fileStoreUrl, fileRef) {
+          (err, fileStoreUrl, fileRef) => {
             if (err != null) {
               return callback(err)
             }
-            return next(
-              project_id,
-              folder_id,
+            next(
+              projectId,
+              folderId,
               fileName,
               fsPath,
               linkedFileData,
@@ -938,8 +856,8 @@ module.exports = ProjectEntityUpdateHandler = self = {
       }
     },
     withLock(
-      project_id,
-      folder_id,
+      projectId,
+      folderId,
       fileName,
       fsPath,
       linkedFileData,
@@ -948,12 +866,9 @@ module.exports = ProjectEntityUpdateHandler = self = {
       fileStoreUrl,
       callback
     ) {
-      if (callback == null) {
-        callback = function(err, file, isNewFile, existingFile) {}
-      }
-      return ProjectLocator.findElement(
-        { project_id, element_id: folder_id, type: 'folder' },
-        function(error, folder) {
+      ProjectLocator.findElement(
+        { project_id: projectId, element_id: folderId, type: 'folder' },
+        (error, folder) => {
           if (error != null) {
             return callback(error)
           }
@@ -961,7 +876,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
             return callback(new Error("Couldn't find folder"))
           }
           let existingFile = null
-          for (let fileRef of Array.from(folder.fileRefs)) {
+          for (let fileRef of folder.fileRefs) {
             if (fileRef.name === fileName) {
               existingFile = fileRef
               break
@@ -969,47 +884,37 @@ module.exports = ProjectEntityUpdateHandler = self = {
           }
           if (existingFile != null) {
             // this calls directly into the replaceFile main task (without the beforeLock part)
-            return self.replaceFile.mainTask(
-              project_id,
+            return ProjectEntityUpdateHandler.replaceFile.mainTask(
+              projectId,
               existingFile._id,
               fsPath,
               linkedFileData,
               userId,
               newFileRef,
               fileStoreUrl,
-              function(err) {
+              err => {
                 if (err != null) {
                   return callback(err)
                 }
-                return callback(
-                  null,
-                  newFileRef,
-                  existingFile == null,
-                  existingFile
-                )
+                callback(null, newFileRef, existingFile == null, existingFile)
               }
             )
           } else {
             // this calls directly into the addFile main task (without the beforeLock part)
-            return self.addFile.mainTask(
-              project_id,
-              folder_id,
+            ProjectEntityUpdateHandler.addFile.mainTask(
+              projectId,
+              folderId,
               fileName,
               fsPath,
               linkedFileData,
               userId,
               newFileRef,
               fileStoreUrl,
-              function(err) {
+              err => {
                 if (err != null) {
                   return callback(err)
                 }
-                return callback(
-                  null,
-                  newFileRef,
-                  existingFile == null,
-                  existingFile
-                )
+                callback(null, newFileRef, existingFile == null, existingFile)
               }
             )
           }
@@ -1019,7 +924,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
   }),
 
   upsertDocWithPath: wrapWithLock(function(
-    project_id,
+    projectId,
     elementPath,
     docLines,
     source,
@@ -1029,37 +934,37 @@ module.exports = ProjectEntityUpdateHandler = self = {
     if (!SafePath.isCleanPath(elementPath)) {
       return callback(new Errors.InvalidNameError('invalid element name'))
     }
-    const docName = path.basename(elementPath)
-    const folderPath = path.dirname(elementPath)
-    return self.mkdirp.withoutLock(project_id, folderPath, function(
-      err,
-      newFolders,
-      folder
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      return self.upsertDoc.withoutLock(
-        project_id,
-        folder._id,
-        docName,
-        docLines,
-        source,
-        userId,
-        function(err, doc, isNewDoc) {
-          if (err != null) {
-            return callback(err)
-          }
-          return callback(null, doc, isNewDoc, newFolders, folder)
+    const docName = Path.basename(elementPath)
+    const folderPath = Path.dirname(elementPath)
+    ProjectEntityUpdateHandler.mkdirp.withoutLock(
+      projectId,
+      folderPath,
+      (err, newFolders, folder) => {
+        if (err != null) {
+          return callback(err)
         }
-      )
-    })
+        ProjectEntityUpdateHandler.upsertDoc.withoutLock(
+          projectId,
+          folder._id,
+          docName,
+          docLines,
+          source,
+          userId,
+          (err, doc, isNewDoc) => {
+            if (err != null) {
+              return callback(err)
+            }
+            callback(null, doc, isNewDoc, newFolders, folder)
+          }
+        )
+      }
+    )
   }),
 
   upsertFileWithPath: wrapWithLock({
     beforeLock(next) {
       return function(
-        project_id,
+        projectId,
         elementPath,
         fsPath,
         linkedFileData,
@@ -1069,23 +974,23 @@ module.exports = ProjectEntityUpdateHandler = self = {
         if (!SafePath.isCleanPath(elementPath)) {
           return callback(new Errors.InvalidNameError('invalid element name'))
         }
-        const fileName = path.basename(elementPath)
-        const folderPath = path.dirname(elementPath)
+        const fileName = Path.basename(elementPath)
+        const folderPath = Path.dirname(elementPath)
         // create a new file
         const fileArgs = {
           name: fileName,
           linkedFileData
         }
-        return FileStoreHandler.uploadFileFromDisk(
-          project_id,
+        FileStoreHandler.uploadFileFromDisk(
+          projectId,
           fileArgs,
           fsPath,
-          function(err, fileStoreUrl, fileRef) {
+          (err, fileStoreUrl, fileRef) => {
             if (err != null) {
               return callback(err)
             }
-            return next(
-              project_id,
+            next(
+              projectId,
               folderPath,
               fileName,
               fsPath,
@@ -1100,7 +1005,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
       }
     },
     withLock(
-      project_id,
+      projectId,
       folderPath,
       fileName,
       fsPath,
@@ -1110,88 +1015,85 @@ module.exports = ProjectEntityUpdateHandler = self = {
       fileStoreUrl,
       callback
     ) {
-      return self.mkdirp.withoutLock(project_id, folderPath, function(
-        err,
-        newFolders,
-        folder
-      ) {
-        if (err != null) {
-          return callback(err)
-        }
-        // this calls directly into the upsertFile main task (without the beforeLock part)
-        return self.upsertFile.mainTask(
-          project_id,
-          folder._id,
-          fileName,
-          fsPath,
-          linkedFileData,
-          userId,
-          fileRef,
-          fileStoreUrl,
-          function(err, newFile, isNewFile, existingFile) {
-            if (err != null) {
-              return callback(err)
-            }
-            return callback(
-              null,
-              newFile,
-              isNewFile,
-              existingFile,
-              newFolders,
-              folder
-            )
+      ProjectEntityUpdateHandler.mkdirp.withoutLock(
+        projectId,
+        folderPath,
+        (err, newFolders, folder) => {
+          if (err != null) {
+            return callback(err)
           }
-        )
-      })
+          // this calls directly into the upsertFile main task (without the beforeLock part)
+          ProjectEntityUpdateHandler.upsertFile.mainTask(
+            projectId,
+            folder._id,
+            fileName,
+            fsPath,
+            linkedFileData,
+            userId,
+            fileRef,
+            fileStoreUrl,
+            (err, newFile, isNewFile, existingFile) => {
+              if (err != null) {
+                return callback(err)
+              }
+              callback(
+                null,
+                newFile,
+                isNewFile,
+                existingFile,
+                newFolders,
+                folder
+              )
+            }
+          )
+        }
+      )
     }
   }),
 
   deleteEntity: wrapWithLock(function(
-    project_id,
-    entity_id,
+    projectId,
+    entityId,
     entityType,
     userId,
     callback
   ) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    logger.log({ entity_id, entityType, project_id }, 'deleting project entity')
+    logger.log({ entityId, entityType, projectId }, 'deleting project entity')
     if (entityType == null) {
-      logger.warn({ err: 'No entityType set', project_id, entity_id })
+      logger.warn({ err: 'No entityType set', projectId, entityId })
       return callback(new Error('No entityType set'))
     }
     entityType = entityType.toLowerCase()
-    return ProjectEntityMongoUpdateHandler.deleteEntity(
-      project_id,
-      entity_id,
+    ProjectEntityMongoUpdateHandler.deleteEntity(
+      projectId,
+      entityId,
       entityType,
-      function(error, entity, path, projectBeforeDeletion, newProject) {
+      (error, entity, path, projectBeforeDeletion, newProject) => {
         if (error != null) {
           return callback(error)
         }
-        return self._cleanUpEntity(
+        ProjectEntityUpdateHandler._cleanUpEntity(
           projectBeforeDeletion,
           newProject,
           entity,
           entityType,
           path.fileSystem,
           userId,
-          function(error) {
+          error => {
             if (error != null) {
               return callback(error)
             }
-            return TpdsUpdateSender.deleteEntity(
+            TpdsUpdateSender.deleteEntity(
               {
-                project_id,
+                project_id: projectId,
                 path: path.fileSystem,
                 project_name: projectBeforeDeletion.name
               },
-              function(error) {
+              error => {
                 if (error != null) {
                   return callback(error)
                 }
-                return callback(null, entity_id)
+                callback(null, entityId)
               }
             )
           }
@@ -1200,56 +1102,49 @@ module.exports = ProjectEntityUpdateHandler = self = {
     )
   }),
 
-  deleteEntityWithPath: wrapWithLock((project_id, path, userId, callback) =>
-    ProjectLocator.findElementByPath({ project_id, path }, function(
-      err,
-      element,
-      type
-    ) {
-      if (err != null) {
-        return callback(err)
+  deleteEntityWithPath: wrapWithLock((projectId, path, userId, callback) =>
+    ProjectLocator.findElementByPath(
+      { project_id: projectId, path },
+      (err, element, type) => {
+        if (err != null) {
+          return callback(err)
+        }
+        if (element == null) {
+          return callback(new Errors.NotFoundError('project not found'))
+        }
+        ProjectEntityUpdateHandler.deleteEntity.withoutLock(
+          projectId,
+          element._id,
+          type,
+          userId,
+          callback
+        )
       }
-      if (element == null) {
-        return callback(new Errors.NotFoundError('project not found'))
-      }
-      return self.deleteEntity.withoutLock(
-        project_id,
-        element._id,
-        type,
-        userId,
-        callback
-      )
-    })
+    )
   ),
 
-  mkdirp: wrapWithLock(function(project_id, path, callback) {
-    if (callback == null) {
-      callback = function(err, newlyCreatedFolders, lastFolderInPath) {}
-    }
-    for (let folder of Array.from(path.split('/'))) {
+  mkdirp: wrapWithLock(function(projectId, path, callback) {
+    for (let folder of path.split('/')) {
       if (folder.length > 0 && !SafePath.isCleanFilename(folder)) {
         return callback(new Errors.InvalidNameError('invalid element name'))
       }
     }
-    return ProjectEntityMongoUpdateHandler.mkdirp(
-      project_id,
+    ProjectEntityMongoUpdateHandler.mkdirp(
+      projectId,
       path,
       { exactCaseMatch: false },
       callback
     )
   }),
 
-  mkdirpWithExactCase: wrapWithLock(function(project_id, path, callback) {
-    if (callback == null) {
-      callback = function(err, newlyCreatedFolders, lastFolderInPath) {}
-    }
-    for (let folder of Array.from(path.split('/'))) {
+  mkdirpWithExactCase: wrapWithLock(function(projectId, path, callback) {
+    for (let folder of path.split('/')) {
       if (folder.length > 0 && !SafePath.isCleanFilename(folder)) {
         return callback(new Errors.InvalidNameError('invalid element name'))
       }
     }
-    return ProjectEntityMongoUpdateHandler.mkdirp(
-      project_id,
+    ProjectEntityMongoUpdateHandler.mkdirp(
+      projectId,
       path,
       { exactCaseMatch: true },
       callback
@@ -1257,64 +1152,61 @@ module.exports = ProjectEntityUpdateHandler = self = {
   }),
 
   addFolder: wrapWithLock(function(
-    project_id,
-    parentFolder_id,
+    projectId,
+    parentFolderId,
     folderName,
     callback
   ) {
     if (!SafePath.isCleanFilename(folderName)) {
       return callback(new Errors.InvalidNameError('invalid element name'))
     }
-    return ProjectEntityMongoUpdateHandler.addFolder(
-      project_id,
-      parentFolder_id,
+    ProjectEntityMongoUpdateHandler.addFolder(
+      projectId,
+      parentFolderId,
       folderName,
       callback
     )
   }),
 
   moveEntity: wrapWithLock(function(
-    project_id,
-    entity_id,
+    projectId,
+    entityId,
     destFolderId,
     entityType,
     userId,
     callback
   ) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
     logger.log(
-      { entityType, entity_id, project_id, destFolderId },
+      { entityType, entityId, projectId, destFolderId },
       'moving entity'
     )
     if (entityType == null) {
-      logger.warn({ err: 'No entityType set', project_id, entity_id })
+      logger.warn({ err: 'No entityType set', projectId, entityId })
       return callback(new Error('No entityType set'))
     }
     entityType = entityType.toLowerCase()
-    return ProjectEntityMongoUpdateHandler.moveEntity(
-      project_id,
-      entity_id,
+    ProjectEntityMongoUpdateHandler.moveEntity(
+      projectId,
+      entityId,
       destFolderId,
       entityType,
-      function(err, project, startPath, endPath, rev, changes) {
+      (err, project, startPath, endPath, rev, changes) => {
         if (err != null) {
           return callback(err)
         }
-        const projectHistoryId = __guard__(
-          project.overleaf != null ? project.overleaf.history : undefined,
-          x => x.id
-        )
+        const projectHistoryId =
+          project.overleaf &&
+          project.overleaf.history &&
+          project.overleaf.history.id
         TpdsUpdateSender.moveEntity({
-          project_id,
+          project_id: projectId,
           project_name: project.name,
           startPath,
           endPath,
           rev
         })
-        return DocumentUpdaterHandler.updateProjectStructure(
-          project_id,
+        DocumentUpdaterHandler.updateProjectStructure(
+          projectId,
           projectHistoryId,
           userId,
           changes,
@@ -1325,8 +1217,8 @@ module.exports = ProjectEntityUpdateHandler = self = {
   }),
 
   renameEntity: wrapWithLock(function(
-    project_id,
-    entity_id,
+    projectId,
+    entityId,
     entityType,
     newName,
     userId,
@@ -1335,35 +1227,35 @@ module.exports = ProjectEntityUpdateHandler = self = {
     if (!SafePath.isCleanFilename(newName)) {
       return callback(new Errors.InvalidNameError('invalid element name'))
     }
-    logger.log({ entity_id, project_id }, `renaming ${entityType}`)
+    logger.log({ entityId, projectId }, `renaming ${entityType}`)
     if (entityType == null) {
-      logger.warn({ err: 'No entityType set', project_id, entity_id })
+      logger.warn({ err: 'No entityType set', projectId, entityId })
       return callback(new Error('No entityType set'))
     }
     entityType = entityType.toLowerCase()
 
-    return ProjectEntityMongoUpdateHandler.renameEntity(
-      project_id,
-      entity_id,
+    ProjectEntityMongoUpdateHandler.renameEntity(
+      projectId,
+      entityId,
       entityType,
       newName,
-      function(err, project, startPath, endPath, rev, changes) {
+      (err, project, startPath, endPath, rev, changes) => {
         if (err != null) {
           return callback(err)
         }
-        const projectHistoryId = __guard__(
-          project.overleaf != null ? project.overleaf.history : undefined,
-          x => x.id
-        )
+        const projectHistoryId =
+          project.overleaf &&
+          project.overleaf.history &&
+          project.overleaf.history.id
         TpdsUpdateSender.moveEntity({
-          project_id,
+          project_id: projectId,
           project_name: project.name,
           startPath,
           endPath,
           rev
         })
-        return DocumentUpdaterHandler.updateProjectStructure(
-          project_id,
+        DocumentUpdaterHandler.updateProjectStructure(
+          projectId,
           projectHistoryId,
           userId,
           changes,
@@ -1375,64 +1267,61 @@ module.exports = ProjectEntityUpdateHandler = self = {
 
   // This doesn't directly update project structure but we need to take the lock
   // to prevent anything else being queued before the resync update
-  resyncProjectHistory: wrapWithLock((project_id, callback) =>
+  resyncProjectHistory: wrapWithLock((projectId, callback) =>
     ProjectGetter.getProject(
-      project_id,
+      projectId,
       { rootFolder: true, overleaf: true },
-      function(error, project) {
+      (error, project) => {
         if (error != null) {
           return callback(error)
         }
 
-        const projectHistoryId = __guard__(
-          __guard__(
-            project != null ? project.overleaf : undefined,
-            x1 => x1.history
-          ),
-          x => x.id
-        )
+        const projectHistoryId =
+          project &&
+          project.overleaf &&
+          project.overleaf.history &&
+          project.overleaf.history.id
         if (projectHistoryId == null) {
           error = new Errors.ProjectHistoryDisabledError(
-            `project history not enabled for ${project_id}`
+            `project history not enabled for ${projectId}`
           )
           return callback(error)
         }
 
-        return ProjectEntityHandler.getAllEntitiesFromProject(project, function(
-          error,
-          docs,
-          files
-        ) {
-          if (error != null) {
-            return callback(error)
+        ProjectEntityHandler.getAllEntitiesFromProject(
+          project,
+          (error, docs, files) => {
+            if (error != null) {
+              return callback(error)
+            }
+
+            docs = _.map(docs, doc => ({
+              doc: doc.doc._id,
+              path: doc.path
+            }))
+
+            files = _.map(files, file => ({
+              file: file.file._id,
+              path: file.path,
+              url: FileStoreHandler._buildUrl(projectId, file.file._id)
+            }))
+
+            DocumentUpdaterHandler.resyncProjectHistory(
+              projectId,
+              projectHistoryId,
+              docs,
+              files,
+              callback
+            )
           }
-
-          docs = _.map(docs, doc => ({
-            doc: doc.doc._id,
-            path: doc.path
-          }))
-
-          files = _.map(files, file => ({
-            file: file.file._id,
-            path: file.path,
-            url: FileStoreHandler._buildUrl(project_id, file.file._id)
-          }))
-
-          return DocumentUpdaterHandler.resyncProjectHistory(
-            project_id,
-            projectHistoryId,
-            docs,
-            files,
-            callback
-          )
-        })
+        )
       }
     )
   ),
 
   isPathValidForRootDoc(docPath) {
-    let docExtension = path.extname(docPath)
-    return validRootDocRegExp.test(docExtension)
+    let docExtension = Path.extname(docPath)
+    return VALID_ROOT_DOC_REGEXP.test(docExtension)
   },
 
   _cleanUpEntity(
@@ -1444,28 +1333,43 @@ module.exports = ProjectEntityUpdateHandler = self = {
     userId,
     callback
   ) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return self._updateProjectStructureWithDeletedEntity(
+    ProjectEntityUpdateHandler._updateProjectStructureWithDeletedEntity(
       project,
       newProject,
       entity,
       entityType,
       path,
       userId,
-      function(error) {
+      error => {
         if (error != null) {
           return callback(error)
         }
         if (entityType.indexOf('file') !== -1) {
-          return self._cleanUpFile(project, entity, path, userId, callback)
+          ProjectEntityUpdateHandler._cleanUpFile(
+            project,
+            entity,
+            path,
+            userId,
+            callback
+          )
         } else if (entityType.indexOf('doc') !== -1) {
-          return self._cleanUpDoc(project, entity, path, userId, callback)
+          ProjectEntityUpdateHandler._cleanUpDoc(
+            project,
+            entity,
+            path,
+            userId,
+            callback
+          )
         } else if (entityType.indexOf('folder') !== -1) {
-          return self._cleanUpFolder(project, entity, path, userId, callback)
+          ProjectEntityUpdateHandler._cleanUpFolder(
+            project,
+            entity,
+            path,
+            userId,
+            callback
+          )
         } else {
-          return callback()
+          callback()
         }
       }
     )
@@ -1486,40 +1390,37 @@ module.exports = ProjectEntityUpdateHandler = self = {
   ) {
     // compute the changes to the project structure
     let changes
-    if (callback == null) {
-      callback = function(error) {}
-    }
     if (entityType.indexOf('file') !== -1) {
       changes = { oldFiles: [{ file: entity, path: entityPath }] }
     } else if (entityType.indexOf('doc') !== -1) {
       changes = { oldDocs: [{ doc: entity, path: entityPath }] }
     } else if (entityType.indexOf('folder') !== -1) {
       changes = { oldDocs: [], oldFiles: [] }
-      var _recurseFolder = function(folder, folderPath) {
-        for (let doc of Array.from(folder.docs)) {
-          changes.oldDocs.push({ doc, path: path.join(folderPath, doc.name) })
+      const _recurseFolder = (folder, folderPath) => {
+        for (let doc of folder.docs) {
+          changes.oldDocs.push({ doc, path: Path.join(folderPath, doc.name) })
         }
-        for (let file of Array.from(folder.fileRefs)) {
+        for (let file of folder.fileRefs) {
           changes.oldFiles.push({
             file,
-            path: path.join(folderPath, file.name)
+            path: Path.join(folderPath, file.name)
           })
         }
-        return Array.from(folder.folders).map(childFolder =>
-          _recurseFolder(childFolder, path.join(folderPath, childFolder.name))
-        )
+        for (const childFolder of folder.folders) {
+          _recurseFolder(childFolder, Path.join(folderPath, childFolder.name))
+        }
       }
       _recurseFolder(entity, entityPath)
     }
     // now send the project structure changes to the docupdater
     changes.newProject = newProject
-    const project_id = project._id.toString()
-    const projectHistoryId = __guard__(
-      project.overleaf != null ? project.overleaf.history : undefined,
-      x => x.id
-    )
-    return DocumentUpdaterHandler.updateProjectStructure(
-      project_id,
+    const projectId = project._id.toString()
+    const projectHistoryId =
+      project.overleaf &&
+      project.overleaf.history &&
+      project.overleaf.history.id
+    DocumentUpdaterHandler.updateProjectStructure(
+      projectId,
       projectHistoryId,
       userId,
       changes,
@@ -1528,40 +1429,35 @@ module.exports = ProjectEntityUpdateHandler = self = {
   },
 
   _cleanUpDoc(project, doc, path, userId, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    const project_id = project._id.toString()
-    const doc_id = doc._id.toString()
+    const projectId = project._id.toString()
+    const docId = doc._id.toString()
     const unsetRootDocIfRequired = callback => {
       if (
         project.rootDoc_id != null &&
-        project.rootDoc_id.toString() === doc_id
+        project.rootDoc_id.toString() === docId
       ) {
-        return this.unsetRootDoc(project_id, callback)
+        ProjectEntityUpdateHandler.unsetRootDoc(projectId, callback)
       } else {
-        return callback()
+        callback()
       }
     }
 
-    return unsetRootDocIfRequired(function(error) {
+    unsetRootDocIfRequired(error => {
       if (error != null) {
         return callback(error)
       }
-      return ProjectEntityMongoUpdateHandler._insertDeletedDocReference(
+      ProjectEntityMongoUpdateHandler._insertDeletedDocReference(
         project._id,
         doc,
-        function(error) {
+        error => {
           if (error != null) {
             return callback(error)
           }
-          return DocumentUpdaterHandler.deleteDoc(project_id, doc_id, function(
-            error
-          ) {
+          DocumentUpdaterHandler.deleteDoc(projectId, docId, error => {
             if (error != null) {
               return callback(error)
             }
-            return DocstoreManager.deleteDoc(project_id, doc_id, callback)
+            DocstoreManager.deleteDoc(projectId, docId, callback)
           })
         }
       )
@@ -1569,10 +1465,7 @@ module.exports = ProjectEntityUpdateHandler = self = {
   },
 
   _cleanUpFile(project, file, path, userId, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return ProjectEntityMongoUpdateHandler._insertDeletedFileReference(
+    ProjectEntityMongoUpdateHandler._insertDeletedFileReference(
       project._id,
       file,
       callback
@@ -1580,49 +1473,48 @@ module.exports = ProjectEntityUpdateHandler = self = {
   },
 
   _cleanUpFolder(project, folder, folderPath, userId, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
     const jobs = []
-    for (let doc of Array.from(folder.docs)) {
-      ;(function(doc) {
-        const docPath = path.join(folderPath, doc.name)
-        return jobs.push(callback =>
-          self._cleanUpDoc(project, doc, docPath, userId, callback)
+    folder.docs.forEach(doc => {
+      const docPath = Path.join(folderPath, doc.name)
+      jobs.push(callback =>
+        ProjectEntityUpdateHandler._cleanUpDoc(
+          project,
+          doc,
+          docPath,
+          userId,
+          callback
         )
-      })(doc)
-    }
+      )
+    })
 
-    for (let file of Array.from(folder.fileRefs)) {
-      ;(function(file) {
-        const filePath = path.join(folderPath, file.name)
-        return jobs.push(callback =>
-          self._cleanUpFile(project, file, filePath, userId, callback)
+    folder.fileRefs.forEach(file => {
+      const filePath = Path.join(folderPath, file.name)
+      jobs.push(callback =>
+        ProjectEntityUpdateHandler._cleanUpFile(
+          project,
+          file,
+          filePath,
+          userId,
+          callback
         )
-      })(file)
-    }
+      )
+    })
 
-    for (let childFolder of Array.from(folder.folders)) {
-      ;(function(childFolder) {
-        folderPath = path.join(folderPath, childFolder.name)
-        return jobs.push(callback =>
-          self._cleanUpFolder(
-            project,
-            childFolder,
-            folderPath,
-            userId,
-            callback
-          )
+    folder.folders.forEach(childFolder => {
+      folderPath = Path.join(folderPath, childFolder.name)
+      jobs.push(callback =>
+        ProjectEntityUpdateHandler._cleanUpFolder(
+          project,
+          childFolder,
+          folderPath,
+          userId,
+          callback
         )
-      })(childFolder)
-    }
+      )
+    })
 
-    return async.series(jobs, callback)
+    async.series(jobs, callback)
   }
 }
 
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
+module.exports = ProjectEntityUpdateHandler

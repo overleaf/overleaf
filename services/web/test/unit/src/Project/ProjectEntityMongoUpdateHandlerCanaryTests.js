@@ -177,6 +177,10 @@ describe('ProjectEntityMongoUpdateHandler', function() {
       }
     }
 
+    this.FolderStructureBuilder = {
+      buildFolderStructure: sinon.stub()
+    }
+
     this.subject = SandboxedModule.require(MODULE_PATH, {
       globals: {
         console: console
@@ -191,6 +195,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         './ProjectEntityHandler': this.ProjectEntityHandler,
         './ProjectLocator': this.ProjectLocator,
         './ProjectGetter': this.ProjectGetter,
+        './FolderStructureBuilder': this.FolderStructureBuilder,
         // We need to provide Errors here to make instance check work
         '../Errors/Errors': Errors
       }
@@ -1029,6 +1034,59 @@ describe('ProjectEntityMongoUpdateHandler', function() {
 
     it('should update the database', function() {
       this.ProjectMock.verify()
+    })
+  })
+
+  describe('createNewFolderStructure', function() {
+    beforeEach(function() {
+      this.mockRootFolder = 'MOCK_ROOT_FOLDER'
+      this.docUploads = ['MOCK_DOC_UPLOAD']
+      this.fileUploads = ['MOCK_FILE_UPLOAD']
+      this.FolderStructureBuilder.buildFolderStructure
+        .withArgs(this.docUploads, this.fileUploads)
+        .returns(this.mockRootFolder)
+      this.updateExpectation = this.ProjectMock.expects('updateOne')
+        .withArgs(
+          {
+            _id: this.project._id,
+            'rootFolder.0.folders.0': { $exists: false },
+            'rootFolder.0.docs.0': { $exists: false },
+            'rootFolder.0.files.0': { $exists: false }
+          },
+          { $set: { rootFolder: [this.mockRootFolder] }, $inc: { version: 1 } }
+        )
+        .chain('exec')
+    })
+
+    describe('happy path', function() {
+      beforeEach(async function() {
+        this.updateExpectation.resolves({ n: 1 })
+        await this.subject.promises.createNewFolderStructure(
+          this.project._id,
+          this.docUploads,
+          this.fileUploads
+        )
+      })
+
+      it('updates the database', function() {
+        this.ProjectMock.verify()
+      })
+    })
+
+    describe("when the update doesn't find a matching document", function() {
+      beforeEach(async function() {
+        this.updateExpectation.resolves({ n: 0 })
+      })
+
+      it('throws an error', async function() {
+        await expect(
+          this.subject.promises.createNewFolderStructure(
+            this.project._id,
+            this.docUploads,
+            this.fileUploads
+          )
+        ).to.be.rejected
+      })
     })
   })
 })

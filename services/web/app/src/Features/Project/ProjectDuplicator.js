@@ -35,7 +35,7 @@ module.exports = ProjectDuplicator = {
     callback
   ) {
     const setRootDoc = _.once(doc_id =>
-      ProjectEntityUpdateHandler.setRootDoc(newProject._id, doc_id)
+      ProjectEntityUpdateHandler.setRootDoc(newProject._id, doc_id, () => {})
     )
     const docs = originalFolder.docs || []
     const jobs = docs.map(

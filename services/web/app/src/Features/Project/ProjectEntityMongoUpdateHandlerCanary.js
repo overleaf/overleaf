@@ -10,6 +10,7 @@ const logger = require('logger-sharelatex')
 const path = require('path')
 const { ObjectId } = require('mongodb')
 const Settings = require('settings-sharelatex')
+const OError = require('@overleaf/o-error')
 const CooldownManager = require('../Cooldown/CooldownManager')
 const Errors = require('../Errors/Errors')
 const { Folder } = require('../../models/Folder')
@@ -18,6 +19,7 @@ const { Project } = require('../../models/Project')
 const ProjectEntityHandler = require('./ProjectEntityHandler')
 const ProjectGetter = require('./ProjectGetter')
 const ProjectLocator = require('./ProjectLocator')
+const FolderStructureBuilder = require('./FolderStructureBuilder')
 const SafePath = require('./SafePath')
 
 const LOCK_NAMESPACE = 'mongoTransaction'
@@ -69,6 +71,7 @@ module.exports = {
     'rev',
     'changes'
   ]),
+  createNewFolderStructure: callbackify(wrapWithLock(createNewFolderStructure)),
   _insertDeletedDocReference: callbackify(_insertDeletedDocReference),
   _insertDeletedFileReference: callbackify(_insertDeletedFileReference),
   _putElement: callbackifyMultiResult(_putElement, ['result', 'project']),
@@ -82,6 +85,7 @@ module.exports = {
     moveEntity: wrapWithLock(moveEntity),
     deleteEntity: wrapWithLock(deleteEntity),
     renameEntity: wrapWithLock(renameEntity),
+    createNewFolderStructure: wrapWithLock(createNewFolderStructure),
     _insertDeletedDocReference,
     _insertDeletedFileReference,
     _putElement
@@ -604,5 +608,37 @@ async function _checkValidMove(
         'destination folder is a child folder of me'
       )
     }
+  }
+}
+
+async function createNewFolderStructure(projectId, docUploads, fileUploads) {
+  try {
+    const rootFolder = FolderStructureBuilder.buildFolderStructure(
+      docUploads,
+      fileUploads
+    )
+    const result = await Project.updateOne(
+      {
+        _id: projectId,
+        'rootFolder.0.folders.0': { $exists: false },
+        'rootFolder.0.docs.0': { $exists: false },
+        'rootFolder.0.files.0': { $exists: false }
+      },
+      {
+        $set: { rootFolder: [rootFolder] },
+        $inc: { version: 1 }
+      }
+    ).exec()
+    if (result.n !== 1) {
+      throw new OError({
+        message: 'project not found or folder structure already exists',
+        info: { projectId }
+      })
+    }
+  } catch (err) {
+    throw new OError({
+      message: 'failed to create folder structure',
+      info: { projectId }
+    }).withCause(err)
   }
 }
