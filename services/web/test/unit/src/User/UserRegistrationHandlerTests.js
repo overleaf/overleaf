@@ -156,7 +156,8 @@ describe('UserRegistrationHandler', function() {
         return this.handler.registerNewUser(
           this.passingRequest,
           (err, user) => {
-            err.should.deep.equal(new Error('EmailAlreadyRegistered'))
+            expect(err).to.be.instanceOf(Error)
+            expect(err).to.have.property('message', 'EmailAlreadyRegistered')
             user.should.deep.equal(this.user)
             return done()
           }

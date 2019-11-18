@@ -120,7 +120,9 @@ describe('LockManager - getting the lock', function() {
     })
 
     it('should return the callback with an error', function() {
-      return this.callback.calledWith(new Error('timeout')).should.equal(true)
+      this.callback.should.have.been.calledWith(
+        sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Timeout'))
+      )
     })
   })
 

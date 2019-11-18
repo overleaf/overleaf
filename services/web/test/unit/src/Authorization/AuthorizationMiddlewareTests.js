@@ -115,7 +115,9 @@ describe('AuthorizationMiddleware', function() {
               this.res,
               this.next
             )
-            this.next.calledWith(new Error()).should.equal(true)
+            this.next
+              .calledWith(sinon.match.instanceOf(Error))
+              .should.equal(true)
           })
         })
 
@@ -242,7 +244,7 @@ describe('AuthorizationMiddleware', function() {
           this.res,
           this.next
         )
-        this.next.calledWith(new Error()).should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
 

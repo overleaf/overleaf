@@ -117,7 +117,7 @@ describe('EmailSender', function() {
     it('should not check the rate limiter when there is no sendingUser_id', async function() {
       this.EmailSender.sendEmail(this.opts, () => {
         expect(this.sesClient.sendMail).to.have.been.called
-        expect(this.RateLimiter.addCount).not.to.have.been.called
+        expect(this.RateLimiter.promises.addCount).not.to.have.been.called
       })
     })
 

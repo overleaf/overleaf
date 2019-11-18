@@ -31,7 +31,7 @@ class DeletedSubscription {
         SubscriptionModel.findById(
           this.subscription._id,
           (error, subscription) => {
-            expect(subscription).to.exists
+            expect(subscription).to.exist
             expect(subscription._id.toString()).to.equal(
               this.subscription._id.toString()
             )

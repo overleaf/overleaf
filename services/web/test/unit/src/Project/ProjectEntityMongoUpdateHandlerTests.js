@@ -61,7 +61,8 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         './ProjectLocator': (this.ProjectLocator = {}),
         './ProjectGetter': (this.ProjectGetter = {
           getProjectWithoutLock: sinon.stub().yields(null, this.project)
-        })
+        }),
+        '../Errors/Errors': Errors
       }
     })
   })
@@ -234,16 +235,18 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         .stub()
         .yields(null, this.project)
       this.ProjectLocator.findElementByPath = function() {}
-      sinon.stub(this.ProjectLocator, 'findElementByPath', (options, cb) => {
-        const { path } = options
-        this.parentFolder = { _id: 'parentFolder_id_here' }
-        const lastFolder = path.substring(path.lastIndexOf('/'))
-        if (lastFolder.indexOf('level1') === -1) {
-          cb(new Error('level1 is not the last folder'))
-        } else {
-          cb(null, this.parentFolder)
-        }
-      })
+      sinon
+        .stub(this.ProjectLocator, 'findElementByPath')
+        .callsFake((options, cb) => {
+          const { path } = options
+          this.parentFolder = { _id: 'parentFolder_id_here' }
+          const lastFolder = path.substring(path.lastIndexOf('/'))
+          if (lastFolder.indexOf('level1') === -1) {
+            cb(new Error('level1 is not the last folder'))
+          } else {
+            cb(null, this.parentFolder)
+          }
+        })
       this.subject.addFolder = {
         withoutLock: (projectId, parentFolderId, folderName, callback) => {
           return callback(null, { name: folderName }, this.parentFolderId)
@@ -528,7 +531,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
     })
 
     it('calls the callback with an error', function() {
-      this.callback.calledWith(new Error()).should.equal(true)
+      this.callback.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
     })
   })
 
@@ -977,9 +980,8 @@ describe('ProjectEntityMongoUpdateHandler', function() {
           'doc',
           err => {
             this.ProjectModel.findOneAndUpdate.called.should.equal(false)
-            err.should.deep.equal(
-              new Errors.InvalidNameError('invalid element name')
-            )
+            expect(err).to.be.instanceOf(Errors.InvalidNameError)
+            expect(err).to.have.property('message', 'invalid element name')
             done()
           }
         )
@@ -997,9 +999,8 @@ describe('ProjectEntityMongoUpdateHandler', function() {
           'doc',
           err => {
             this.ProjectModel.findOneAndUpdate.called.should.equal(false)
-            err.should.deep.equal(
-              new Errors.InvalidNameError('invalid element name')
-            )
+            expect(err).to.be.instanceOf(Errors.InvalidNameError)
+            expect(err).to.have.property('message', 'path too long')
             done()
           }
         )
@@ -1027,7 +1028,8 @@ describe('ProjectEntityMongoUpdateHandler', function() {
           'doc',
           err => {
             this.ProjectModel.findOneAndUpdate.called.should.equal(false)
-            err.should.deep.equal(new Errors.InvalidNameError('path too long'))
+            expect(err).to.be.instanceOf(Errors.InvalidNameError)
+            expect(err).to.have.property('message', 'path too long')
             done()
           }
         )
@@ -1040,9 +1042,8 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         }
         this.subject._putElement(this.project, this.folder, doc, 'doc', err => {
           this.ProjectModel.findOneAndUpdate.called.should.equal(false)
-          err.should.deep.equal(
-            new Errors.InvalidNameError('file already exists')
-          )
+          expect(err).to.be.instanceOf(Errors.InvalidNameError)
+          expect(err).to.have.property('message', 'file already exists')
           done()
         })
       })
@@ -1054,9 +1055,8 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         }
         this.subject._putElement(this.project, this.folder, doc, 'doc', err => {
           this.ProjectModel.findOneAndUpdate.called.should.equal(false)
-          err.should.deep.equal(
-            new Errors.InvalidNameError('file already exists')
-          )
+          expect(err).to.be.instanceOf(Errors.InvalidNameError)
+          expect(err).to.have.property('message', 'file already exists')
           done()
         })
       })
@@ -1068,9 +1068,8 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         }
         this.subject._putElement(this.project, this.folder, doc, 'doc', err => {
           this.ProjectModel.findOneAndUpdate.called.should.equal(false)
-          err.should.deep.equal(
-            new Errors.InvalidNameError('file already exists')
-          )
+          expect(err).to.be.instanceOf(Errors.InvalidNameError)
+          expect(err).to.have.property('message', 'file already exists')
           done()
         })
       })
@@ -1087,27 +1086,24 @@ describe('ProjectEntityMongoUpdateHandler', function() {
     })
 
     it('returns an error if name matches any doc name', function() {
-      this.subject._checkValidElementName(this.folder, 'doc_name', err =>
-        expect(err).to.deep.equal(
-          new Errors.InvalidNameError('file already exists')
-        )
-      )
+      this.subject._checkValidElementName(this.folder, 'doc_name', err => {
+        expect(err).to.be.instanceOf(Errors.InvalidNameError)
+        expect(err).to.have.property('message', 'file already exists')
+      })
     })
 
     it('returns an error if name matches any file name', function() {
-      this.subject._checkValidElementName(this.folder, 'file_name', err =>
-        expect(err).to.deep.equal(
-          new Errors.InvalidNameError('file already exists')
-        )
-      )
+      this.subject._checkValidElementName(this.folder, 'file_name', err => {
+        expect(err).to.be.instanceOf(Errors.InvalidNameError)
+        expect(err).to.have.property('message', 'file already exists')
+      })
     })
 
     it('returns an error if name matches any folder name', function() {
-      this.subject._checkValidElementName(this.folder, 'folder_name', err =>
-        expect(err).to.deep.equal(
-          new Errors.InvalidNameError('file already exists')
-        )
-      )
+      this.subject._checkValidElementName(this.folder, 'folder_name', err => {
+        expect(err).to.be.instanceOf(Errors.InvalidNameError)
+        expect(err).to.have.property('message', 'file already exists')
+      })
     })
 
     it('returns nothing if name is valid', function() {
@@ -1155,10 +1151,10 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         { fileSystem: '/foo' },
         this.destFolder._id,
         err => {
-          expect(err).to.deep.equal(
-            new Errors.InvalidNameError(
-              'destination folder is a child folder of me'
-            )
+          expect(err).to.be.instanceOf(Errors.InvalidNameError)
+          expect(err).to.have.property(
+            'message',
+            'destination folder is a child folder of me'
           )
         }
       )

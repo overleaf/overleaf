@@ -255,21 +255,6 @@ describe('Deleting a project', function() {
       })
     })
 
-    it('should mark the docs as deleted', function(done) {
-      let doc =
-        MockDocstoreApi.docs[this.projectId.toString()][this.docId.toString()]
-      expect(doc).to.exist
-      expect(doc.deleted).to.be.falsey
-      this.user.deleteProject(this.projectId, error => {
-        expect(error).not.to.exist
-        let doc =
-          MockDocstoreApi.docs[this.projectId.toString()][this.docId.toString()]
-        expect(doc).to.exist
-        expect(doc.deleted).to.be.truthy
-        done()
-      })
-    })
-
     describe('When the deleted project is expired', function() {
       beforeEach(function(done) {
         this.user.deleteProject(this.projectId, error => {

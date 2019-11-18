@@ -116,7 +116,7 @@ const mockApiRequest = function(options, callback) {
 }
 
 describe('RecurlyWrapper', function() {
-  before(function() {
+  beforeEach(function() {
     let RecurlyWrapper
     this.settings = {
       plans: [
@@ -164,18 +164,16 @@ describe('RecurlyWrapper', function() {
     ))
   })
 
-  after(function() {
+  afterEach(function() {
     return tk.reset()
   })
 
   describe('getSubscription', function() {
     describe('with proper subscription id', function() {
-      before(function() {
-        this.apiRequest = sinon.stub(
-          this.RecurlyWrapper,
-          'apiRequest',
-          mockApiRequest
-        )
+      beforeEach(function() {
+        this.apiRequest = sinon
+          .stub(this.RecurlyWrapper, 'apiRequest')
+          .callsFake(mockApiRequest)
         return this.RecurlyWrapper.getSubscription(
           '44f83d7cba354d5b84812419f923ea96',
           (error, recurlySubscription) => {
@@ -183,7 +181,7 @@ describe('RecurlyWrapper', function() {
           }
         )
       })
-      after(function() {
+      afterEach(function() {
         return this.RecurlyWrapper.apiRequest.restore()
       })
 
@@ -201,12 +199,10 @@ describe('RecurlyWrapper', function() {
     })
 
     describe('with ReculyJS token', function() {
-      before(function() {
-        this.apiRequest = sinon.stub(
-          this.RecurlyWrapper,
-          'apiRequest',
-          mockApiRequest
-        )
+      beforeEach(function() {
+        this.apiRequest = sinon
+          .stub(this.RecurlyWrapper, 'apiRequest')
+          .callsFake(mockApiRequest)
         return this.RecurlyWrapper.getSubscription(
           '70db44b10f5f4b238669480c9903f6f5',
           { recurlyJsResult: true },
@@ -215,7 +211,7 @@ describe('RecurlyWrapper', function() {
           }
         )
       })
-      after(function() {
+      afterEach(function() {
         return this.RecurlyWrapper.apiRequest.restore()
       })
 
@@ -234,11 +230,9 @@ describe('RecurlyWrapper', function() {
 
     describe('with includeAccount', function() {
       beforeEach(function() {
-        this.apiRequest = sinon.stub(
-          this.RecurlyWrapper,
-          'apiRequest',
-          mockApiRequest
-        )
+        this.apiRequest = sinon
+          .stub(this.RecurlyWrapper, 'apiRequest')
+          .callsFake(mockApiRequest)
         return this.RecurlyWrapper.getSubscription(
           '44f83d7cba354d5b84812419f923ea96',
           { includeAccount: true },
@@ -264,18 +258,16 @@ describe('RecurlyWrapper', function() {
   describe('updateSubscription', function() {
     beforeEach(function(done) {
       this.recurlySubscriptionId = 'subscription-id-123'
-      this.apiRequest = sinon.stub(
-        this.RecurlyWrapper,
-        'apiRequest',
-        (options, callback) => {
+      this.apiRequest = sinon
+        .stub(this.RecurlyWrapper, 'apiRequest')
+        .callsFake((options, callback) => {
           this.requestOptions = options
           return callback(
             null,
             {},
             fixtures['subscriptions/44f83d7cba354d5b84812419f923ea96']
           )
-        }
-      )
+        })
       return this.RecurlyWrapper.updateSubscription(
         this.recurlySubscriptionId,
         { plan_code: 'silver', timeframe: 'now' },
@@ -313,17 +305,15 @@ describe('RecurlyWrapper', function() {
   describe('cancelSubscription', function() {
     beforeEach(function(done) {
       this.recurlySubscriptionId = 'subscription-id-123'
-      this.apiRequest = sinon.stub(
-        this.RecurlyWrapper,
-        'apiRequest',
-        (options, callback) => {
+      this.apiRequest = sinon
+        .stub(this.RecurlyWrapper, 'apiRequest')
+        .callsFake((options, callback) => {
           options.url.should.equal(
             `subscriptions/${this.recurlySubscriptionId}/cancel`
           )
           options.method.should.equal('put')
           return callback()
-        }
-      )
+        })
       return this.RecurlyWrapper.cancelSubscription(
         this.recurlySubscriptionId,
         done
@@ -342,17 +332,15 @@ describe('RecurlyWrapper', function() {
       beforeEach(function() {
         this.RecurlyWrapper.apiRequest.restore()
         this.recurlySubscriptionId = 'subscription-id-123'
-        return (this.apiRequest = sinon.stub(
-          this.RecurlyWrapper,
-          'apiRequest',
-          (options, callback) => {
+        return (this.apiRequest = sinon
+          .stub(this.RecurlyWrapper, 'apiRequest')
+          .callsFake((options, callback) => {
             return callback(
               new Error('woops'),
               {},
               "<error><description>A canceled subscription can't transition to canceled</description></error>"
             )
-          }
-        ))
+          }))
       })
 
       it('should not produce an error', function(done) {
@@ -370,17 +358,15 @@ describe('RecurlyWrapper', function() {
   describe('reactivateSubscription', function() {
     beforeEach(function(done) {
       this.recurlySubscriptionId = 'subscription-id-123'
-      this.apiRequest = sinon.stub(
-        this.RecurlyWrapper,
-        'apiRequest',
-        (options, callback) => {
+      this.apiRequest = sinon
+        .stub(this.RecurlyWrapper, 'apiRequest')
+        .callsFake((options, callback) => {
           options.url.should.equal(
             `subscriptions/${this.recurlySubscriptionId}/reactivate`
           )
           options.method.should.equal('put')
           return callback()
-        }
-      )
+        })
       return this.RecurlyWrapper.reactivateSubscription(
         this.recurlySubscriptionId,
         done
@@ -400,15 +386,13 @@ describe('RecurlyWrapper', function() {
     beforeEach(function(done) {
       this.recurlyAccountId = 'account-id-123'
       this.coupon_code = '312321312'
-      this.apiRequest = sinon.stub(
-        this.RecurlyWrapper,
-        'apiRequest',
-        (options, callback) => {
+      this.apiRequest = sinon
+        .stub(this.RecurlyWrapper, 'apiRequest')
+        .callsFake((options, callback) => {
           options.url.should.equal(`coupons/${this.coupon_code}/redeem`)
           options.method.should.equal('post')
           return callback()
-        }
-      )
+        })
       return this.RecurlyWrapper.redeemCoupon(
         this.recurlyAccountId,
         this.coupon_code,
@@ -439,13 +423,11 @@ describe('RecurlyWrapper', function() {
       this.currencyCode = 'EUR'
       this.discount = 1337
       this.planCode = 'a-plan-code'
-      this.apiRequest = sinon.stub(
-        this.RecurlyWrapper,
-        'apiRequest',
-        (options, callback) => {
+      this.apiRequest = sinon
+        .stub(this.RecurlyWrapper, 'apiRequest')
+        .callsFake((options, callback) => {
           return callback()
-        }
-      )
+        })
       return this.RecurlyWrapper.createFixedAmmountCoupon(
         this.couponCode,
         this.couponName,

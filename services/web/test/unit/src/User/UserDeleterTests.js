@@ -470,7 +470,7 @@ describe('UserDeleter', function() {
     describe('when called as a callback', function() {
       it('should expire the user', function(done) {
         this.UserDeleter.expireDeletedUser('giraffe', err => {
-          expect(err).not.to.exists
+          expect(err).not.to.exist
           this.DeletedUserMock.verify()
           this.mockedDeletedUser.verify()
           expect(this.deletedUser.user).not.to.exist

@@ -216,7 +216,9 @@ describe('TagsHandler', function() {
       })
 
       it('should call the callback with an Error', function() {
-        return this.callback.calledWith(new Error()).should.equal(true)
+        return this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
   })
@@ -261,7 +263,9 @@ describe('TagsHandler', function() {
       })
 
       it('should call the callback with an Error', function() {
-        return this.callback.calledWith(new Error()).should.equal(true)
+        return this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
   })
@@ -308,7 +312,9 @@ describe('TagsHandler', function() {
       })
 
       it('should call the callback with an Error', function() {
-        return this.callback.calledWith(new Error()).should.equal(true)
+        return this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
   })
@@ -355,7 +361,9 @@ describe('TagsHandler', function() {
       })
 
       it('should call the callback with an Error', function() {
-        return this.callback.calledWith(new Error()).should.equal(true)
+        return this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
   })
@@ -405,7 +413,9 @@ describe('TagsHandler', function() {
       })
 
       it('should call the callback with an Error', function() {
-        return this.callback.calledWith(new Error()).should.equal(true)
+        return this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
   })
@@ -453,7 +463,9 @@ describe('TagsHandler', function() {
       })
 
       it('should call the callback with an Error', function() {
-        return this.callback.calledWith(new Error()).should.equal(true)
+        return this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
   })

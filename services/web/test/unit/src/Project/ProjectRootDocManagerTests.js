@@ -563,7 +563,11 @@ describe('ProjectRootDocManager', function() {
 
       it('should call the callback with an error', function() {
         return this.callback
-          .calledWith(new Error('project not found'))
+          .calledWith(
+            sinon.match
+              .instanceOf(Error)
+              .and(sinon.match.has('message', 'project not found'))
+          )
           .should.equal(true)
       })
     })
@@ -681,7 +685,11 @@ describe('ProjectRootDocManager', function() {
 
       it('should call the callback with an error', function() {
         return this.callback
-          .calledWith(new Error('project not found'))
+          .calledWith(
+            sinon.match
+              .instanceOf(Error)
+              .and(sinon.match.has('message', 'project not found'))
+          )
           .should.equal(true)
       })
     })

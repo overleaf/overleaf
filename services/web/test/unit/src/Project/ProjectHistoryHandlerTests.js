@@ -98,7 +98,7 @@ describe('ProjectHistoryHandler', function() {
       })
 
       it('should initialize a new history in the v1 history service', function() {
-        return this.HistoryManager.initializeProject.called.should.equal.true
+        return this.HistoryManager.initializeProject.called.should.equal(true)
       })
 
       it('should set the new history id on the project', function() {

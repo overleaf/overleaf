@@ -1,5 +1,5 @@
 const chai = require('chai')
-require('sinon')
+const sinon = require('sinon')
 
 // Load sinon-chai assertions so expect(stubFn).to.have.been.calledWith('abc')
 // has a nicer failure messages
@@ -11,8 +11,6 @@ chai.use(require('chai-as-promised'))
 // Do not truncate assertion errors
 chai.config.truncateThreshold = 0
 
-// add support for promises in sinon
-require('sinon-as-promised')
 // add support for mongoose in sinon
 require('sinon-mongoose')
 
@@ -20,4 +18,8 @@ require('sinon-mongoose')
 process.on('unhandledRejection', err => {
   console.error('Unhandled promise rejection:', err)
   process.exit(1)
+})
+
+afterEach(function() {
+  sinon.restore()
 })

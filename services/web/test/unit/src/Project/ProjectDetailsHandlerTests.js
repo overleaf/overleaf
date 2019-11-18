@@ -39,10 +39,11 @@ describe('ProjectDetailsHandler', function() {
         })
       }
     }
+    this.ProjectModelUpdateQuery = {
+      exec: sinon.stub().resolves()
+    }
     this.ProjectModel = {
-      update: sinon.stub().returns({
-        exec: sinon.stub().resolves()
-      })
+      update: sinon.stub().returns(this.ProjectModelUpdateQuery)
     }
     this.UserGetter = {
       promises: {
@@ -221,7 +222,7 @@ describe('ProjectDetailsHandler', function() {
 
     it('should accept normal names', async function() {
       await expect(this.handler.promises.validateProjectName('foobar')).to.be
-        .resolved
+        .fulfilled
     })
   })
 
@@ -412,12 +413,12 @@ describe('ProjectDetailsHandler', function() {
           this.project._id,
           this.accessLevel
         )
-      ).to.be.resolved
+      ).to.be.fulfilled
     })
 
     describe('when update produces an error', function() {
       beforeEach(function() {
-        this.ProjectModel.update.rejects(new Error('woops'))
+        this.ProjectModelUpdateQuery.exec.rejects(new Error('woops'))
       })
 
       it('should produce an error', async function() {

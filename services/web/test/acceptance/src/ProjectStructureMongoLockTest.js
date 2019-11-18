@@ -86,7 +86,8 @@ describe('ProjectStructureMongoLock', function() {
           const method = ProjectEntityMongoUpdateHandler[methodName]
           const args = _.times(method.length - 2, _.constant(null))
           return method(this.locked_project._id, args, err => {
-            expect(err).to.deep.equal(new Error('Timeout'))
+            expect(err).to.be.instanceOf(Error)
+            expect(err).to.have.property('message', 'Timeout')
             return done()
           })
         })
@@ -94,7 +95,8 @@ describe('ProjectStructureMongoLock', function() {
 
       it('cannot get the project without a projection', function(done) {
         return ProjectGetter.getProject(this.locked_project._id, err => {
-          expect(err).to.deep.equal(new Error('Timeout'))
+          expect(err).to.be.instanceOf(Error)
+          expect(err).to.have.property('message', 'Timeout')
           return done()
         })
       })
@@ -104,7 +106,8 @@ describe('ProjectStructureMongoLock', function() {
           this.locked_project._id,
           { rootFolder: true },
           err => {
-            expect(err).to.deep.equal(new Error('Timeout'))
+            expect(err).to.be.instanceOf(Error)
+            expect(err).to.have.property('message', 'Timeout')
             return done()
           }
         )
@@ -145,7 +148,7 @@ describe('ProjectStructureMongoLock', function() {
           'new folder',
           (err, folder) => {
             expect(err).to.equal(null)
-            expect(folder).to.be.defined
+            expect(folder).to.exist
             return done()
           }
         )

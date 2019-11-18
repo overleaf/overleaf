@@ -179,7 +179,7 @@ describe('UserMembershipController', function() {
     it('handle readOnly entity', function(done) {
       this.req.entityConfig = EntityConfigs.group
       return this.UserMembershipController.add(this.req, null, error => {
-        expect(error).to.extist
+        expect(error).to.exist
         expect(error).to.be.an.instanceof(Errors.NotFoundError)
         return done()
       })
@@ -246,7 +246,7 @@ describe('UserMembershipController', function() {
     it('handle readOnly entity', function(done) {
       this.req.entityConfig = EntityConfigs.group
       return this.UserMembershipController.remove(this.req, null, error => {
-        expect(error).to.extist
+        expect(error).to.exist
         expect(error).to.be.an.instanceof(Errors.NotFoundError)
         return done()
       })

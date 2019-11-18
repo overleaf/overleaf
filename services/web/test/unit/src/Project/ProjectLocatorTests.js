@@ -58,6 +58,7 @@ describe('ProjectLocator', function() {
       requires: {
         '../../models/Project': { Project },
         '../../models/User': { User: this.User },
+        '../Errors/Errors': Errors,
         './ProjectGetter': this.ProjectGetter,
         './ProjectHelper': this.ProjectHelper,
         'logger-sharelatex': {
@@ -108,9 +109,8 @@ describe('ProjectLocator', function() {
       this.locator.findElement(
         { project_id: project._id, element_id: 'ddsd432nj42', type: 'docs' },
         (err, foundElement, path, parentFolder) => {
-          expect(err).to.deep.equal(
-            new Errors.NotFoundError('entity not found')
-          )
+          expect(err).to.be.instanceOf(Errors.NotFoundError)
+          expect(err).to.have.property('message', 'entity not found')
           done()
         }
       )

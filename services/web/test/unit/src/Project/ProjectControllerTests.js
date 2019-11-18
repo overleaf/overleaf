@@ -1247,7 +1247,7 @@ describe('ProjectController', function() {
         this.user._id
       )
       expect(result).to.exist
-      expect(result).to.be.object
+      expect(result).to.be.an('object')
       expect(result).to.deep.equal({
         id: 'abcd',
         name: 'netsenits',
@@ -1276,7 +1276,7 @@ describe('ProjectController', function() {
           this.user._id
         )
         expect(result).to.exist
-        expect(result).to.be.object
+        expect(result).to.be.an('object')
         expect(result).to.deep.equal({
           id: 'abcd',
           name: 'netsenits',

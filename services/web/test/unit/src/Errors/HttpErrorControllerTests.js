@@ -44,9 +44,9 @@ describe('HttpErrorController', function() {
       sinon.assert.calledOnce(this.logger.warn)
 
       const { url, method, userId } = this.logger.warn.lastCall.args[0]
-      expect(userId).to.not.be.defined
-      expect(method).to.not.be.defined
-      expect(url).to.not.be.defined
+      expect(userId).not.to.exist
+      expect(method).not.to.exist
+      expect(url).not.to.exist
     })
 
     it('logs url method and userId', function() {

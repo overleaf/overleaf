@@ -108,7 +108,7 @@ describe('ProjectCollabratecDetailsHandler', function() {
       })
 
       it('should not update', function() {
-        return expect(this.ProjectModel.update).not.to.have.beenCalled
+        return expect(this.ProjectModel.update).not.to.have.been.called
       })
 
       it('should callback with error', function() {
@@ -193,7 +193,7 @@ describe('ProjectCollabratecDetailsHandler', function() {
       })
 
       it('should not update', function() {
-        return expect(this.ProjectModel.findOne).not.to.have.beenCalled
+        return expect(this.ProjectModel.findOne).not.to.have.been.called
       })
 
       it('should callback with error', function() {
@@ -270,7 +270,7 @@ describe('ProjectCollabratecDetailsHandler', function() {
       })
 
       it('should not update', function() {
-        return expect(this.ProjectModel.update).not.to.have.beenCalled
+        return expect(this.ProjectModel.update).not.to.have.been.called
       })
 
       it('should callback with error', function() {
@@ -345,7 +345,7 @@ describe('ProjectCollabratecDetailsHandler', function() {
       })
 
       it('should not update', function() {
-        return expect(this.ProjectModel.update).not.to.have.beenCalled
+        return expect(this.ProjectModel.update).not.to.have.been.called
       })
 
       it('should callback with error', function() {
@@ -365,7 +365,7 @@ describe('ProjectCollabratecDetailsHandler', function() {
       })
 
       it('should not update', function() {
-        return expect(this.ProjectModel.update).not.to.have.beenCalled
+        return expect(this.ProjectModel.update).not.to.have.been.called
       })
 
       it('should callback with error', function() {
@@ -428,7 +428,7 @@ describe('ProjectCollabratecDetailsHandler', function() {
       })
 
       it('should not update', function() {
-        return expect(this.ProjectModel.update).not.to.have.beenCalled
+        return expect(this.ProjectModel.update).not.to.have.been.called
       })
 
       it('should callback with error', function() {
@@ -484,7 +484,7 @@ describe('ProjectCollabratecDetailsHandler', function() {
       })
 
       it('should not update', function() {
-        return expect(this.ProjectModel.update).not.to.have.beenCalled
+        return expect(this.ProjectModel.update).not.to.have.been.called
       })
 
       it('should callback with error', function() {
@@ -503,7 +503,7 @@ describe('ProjectCollabratecDetailsHandler', function() {
       })
 
       it('should not update', function() {
-        return expect(this.ProjectModel.update).not.to.have.beenCalled
+        return expect(this.ProjectModel.update).not.to.have.been.called
       })
 
       it('should callback with error', function() {

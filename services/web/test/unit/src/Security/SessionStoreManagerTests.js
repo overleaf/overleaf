@@ -71,7 +71,11 @@ describe('SessionStoreManager', function() {
         this.next
       )
       expect(this.req.session.destroy).to.be.called
-      expect(this.next).to.be.calledWithExactly(new Error('invalid session'))
+      expect(this.next).to.be.calledWithExactly(
+        sinon.match
+          .instanceOf(Error)
+          .and(sinon.match.has('message', 'invalid session'))
+      )
     })
     it('should accept the request when the session does not have a validation token', function() {
       this.req = { sessionID: '123456789', session: {} }

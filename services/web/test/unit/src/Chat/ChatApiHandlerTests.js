@@ -96,9 +96,9 @@ describe('ChatApiHandler', function() {
       })
 
       it('should return an error', function() {
-        const error = new Error()
-        error.statusCode = 500
-        return this.callback.calledWith(error).should.equal(true)
+        expect(this.callback).to.have.been.calledWith(
+          sinon.match.instanceOf(Error).and(sinon.match.has('statusCode', 500))
+        )
       })
     })
   })
@@ -154,9 +154,9 @@ describe('ChatApiHandler', function() {
       })
 
       it('should return an error', function() {
-        const error = new Error()
-        error.statusCode = 500
-        return this.callback.calledWith(error).should.equal(true)
+        expect(this.callback).to.have.been.calledWith(
+          sinon.match.instanceOf(Error).and(sinon.match.has('statusCode', 500))
+        )
       })
     })
   })

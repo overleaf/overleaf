@@ -19,9 +19,9 @@ const modulePath =
 const SandboxedModule = require('sandboxed-module')
 
 describe('ProjectUpdateHandler', function() {
-  before(function() {
+  beforeEach(function() {
     this.fakeTime = new Date()
-    return (this.clock = sinon.useFakeTimers(this.fakeTime.getTime()))
+    this.clock = sinon.useFakeTimers(this.fakeTime.getTime())
   })
 
   beforeEach(function() {
@@ -37,10 +37,6 @@ describe('ProjectUpdateHandler', function() {
         'logger-sharelatex': { log: sinon.stub() }
       }
     }))
-  })
-
-  after(function() {
-    return this.clock.restore()
   })
 
   describe('marking a project as recently updated', function() {

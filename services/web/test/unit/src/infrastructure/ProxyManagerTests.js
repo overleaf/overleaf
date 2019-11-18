@@ -21,7 +21,7 @@ const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 
 describe('ProxyManager', function() {
-  before(function() {
+  beforeEach(function() {
     this.settings = { proxyUrls: {} }
     this.request = sinon.stub().returns({
       on() {},

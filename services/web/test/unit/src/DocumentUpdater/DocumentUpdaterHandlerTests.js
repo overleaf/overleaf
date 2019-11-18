@@ -84,7 +84,7 @@ describe('DocumentUpdaterHandler', function() {
       beforeEach(function() {
         this.request.callsArgWith(
           1,
-          (this.error = new Error('something went wrong')),
+          new Error('something went wrong'),
           null,
           null
         )
@@ -92,7 +92,9 @@ describe('DocumentUpdaterHandler', function() {
       })
 
       it('should return an error to the callback', function() {
-        this.callback.calledWith(this.error).should.equal(true)
+        this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
 
@@ -105,7 +107,14 @@ describe('DocumentUpdaterHandler', function() {
       it('should return the callback with an error', function() {
         this.callback
           .calledWith(
-            new Error('doc updater returned failure status code: 500')
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'document updater returned a failure status code: 500'
+                )
+              )
           )
           .should.equal(true)
       })
@@ -142,7 +151,7 @@ describe('DocumentUpdaterHandler', function() {
       beforeEach(function() {
         this.request.callsArgWith(
           1,
-          (this.error = new Error('something went wrong')),
+          new Error('something went wrong'),
           null,
           null
         )
@@ -153,7 +162,9 @@ describe('DocumentUpdaterHandler', function() {
       })
 
       it('should return an error to the callback', function() {
-        this.callback.calledWith(this.error).should.equal(true)
+        this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
 
@@ -169,7 +180,14 @@ describe('DocumentUpdaterHandler', function() {
       it('should return the callback with an error', function() {
         this.callback
           .calledWith(
-            new Error('doc updater returned failure status code: 500')
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'document updater returned a failure status code: 500'
+                )
+              )
           )
           .should.equal(true)
       })
@@ -207,7 +225,7 @@ describe('DocumentUpdaterHandler', function() {
       beforeEach(function() {
         this.request.callsArgWith(
           1,
-          (this.error = new Error('something went wrong')),
+          new Error('something went wrong'),
           null,
           null
         )
@@ -219,7 +237,9 @@ describe('DocumentUpdaterHandler', function() {
       })
 
       it('should return an error to the callback', function() {
-        this.callback.calledWith(this.error).should.equal(true)
+        this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
 
@@ -236,7 +256,14 @@ describe('DocumentUpdaterHandler', function() {
       it('should return the callback with an error', function() {
         this.callback
           .calledWith(
-            new Error('doc updater returned failure status code: 500')
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'document updater returned a failure status code: 500'
+                )
+              )
           )
           .should.equal(true)
       })
@@ -270,7 +297,7 @@ describe('DocumentUpdaterHandler', function() {
       beforeEach(function() {
         this.request.callsArgWith(
           1,
-          (this.error = new Error('something went wrong')),
+          new Error('something went wrong'),
           null,
           null
         )
@@ -278,7 +305,9 @@ describe('DocumentUpdaterHandler', function() {
       })
 
       it('should return an error to the callback', function() {
-        this.callback.calledWith(this.error).should.equal(true)
+        this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
 
@@ -291,7 +320,14 @@ describe('DocumentUpdaterHandler', function() {
       it('should return the callback with an error', function() {
         this.callback
           .calledWith(
-            new Error('doc updater returned failure status code: 500')
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'document updater returned a failure status code: 500'
+                )
+              )
           )
           .should.equal(true)
       })
@@ -341,7 +377,7 @@ describe('DocumentUpdaterHandler', function() {
       beforeEach(function() {
         this.request.callsArgWith(
           1,
-          (this.error = new Error('something went wrong')),
+          new Error('something went wrong'),
           null,
           null
         )
@@ -356,7 +392,9 @@ describe('DocumentUpdaterHandler', function() {
       })
 
       it('should return an error to the callback', function() {
-        this.callback.calledWith(this.error).should.equal(true)
+        this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
 
@@ -376,7 +414,14 @@ describe('DocumentUpdaterHandler', function() {
       it('should return the callback with an error', function() {
         this.callback
           .calledWith(
-            new Error('doc updater returned failure status code: 500')
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'document updater returned a failure status code: 500'
+                )
+              )
           )
           .should.equal(true)
       })
@@ -425,7 +470,7 @@ describe('DocumentUpdaterHandler', function() {
       beforeEach(function() {
         this.request.callsArgWith(
           1,
-          (this.error = new Error('something went wrong')),
+          new Error('something went wrong'),
           null,
           null
         )
@@ -438,7 +483,9 @@ describe('DocumentUpdaterHandler', function() {
       })
 
       it('should return an error to the callback', function() {
-        this.callback.calledWith(this.error).should.equal(true)
+        this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
 
@@ -456,7 +503,14 @@ describe('DocumentUpdaterHandler', function() {
       it('should return the callback with an error', function() {
         this.callback
           .calledWith(
-            new Error('doc updater returned failure status code: 500')
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'document updater returned a failure status code: 500'
+                )
+              )
           )
           .should.equal(true)
       })
@@ -503,12 +557,7 @@ describe('DocumentUpdaterHandler', function() {
       beforeEach(function() {
         this.request.post = sinon
           .stub()
-          .callsArgWith(
-            1,
-            (this.error = new Error('something went wrong')),
-            null,
-            null
-          )
+          .callsArgWith(1, new Error('something went wrong'), null, null)
         this.handler.getProjectDocsIfMatch(
           this.project_id,
           this.project_state_hash,
@@ -517,7 +566,9 @@ describe('DocumentUpdaterHandler', function() {
       })
 
       it('should return an error to the callback', function() {
-        this.callback.calledWith(this.error).should.equal(true)
+        this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
 
@@ -566,7 +617,7 @@ describe('DocumentUpdaterHandler', function() {
       beforeEach(function() {
         this.request.callsArgWith(
           1,
-          (this.error = new Error('something went wrong')),
+          new Error('something went wrong'),
           null,
           null
         )
@@ -574,7 +625,9 @@ describe('DocumentUpdaterHandler', function() {
       })
 
       it('should return an error to the callback', function() {
-        this.callback.calledWith(this.error).should.equal(true)
+        this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
 
@@ -587,7 +640,14 @@ describe('DocumentUpdaterHandler', function() {
       it('should return the callback with no documents', function() {
         this.callback
           .calledWith(
-            new Error('doc updater returned failure status code: 500')
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'document updater returned a failure status code: 500'
+                )
+              )
           )
           .should.equal(true)
       })
@@ -633,7 +693,7 @@ describe('DocumentUpdaterHandler', function() {
       beforeEach(function() {
         this.request.callsArgWith(
           1,
-          (this.error = new Error('something went wrong')),
+          new Error('something went wrong'),
           null,
           null
         )
@@ -646,7 +706,9 @@ describe('DocumentUpdaterHandler', function() {
       })
 
       it('should return an error to the callback', function() {
-        this.callback.calledWith(this.error).should.equal(true)
+        this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
 
@@ -664,7 +726,14 @@ describe('DocumentUpdaterHandler', function() {
       it('should return the callback with an error', function() {
         this.callback
           .calledWith(
-            new Error('doc updater returned failure status code: 500')
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'document updater returned a failure status code: 500'
+                )
+              )
           )
           .should.equal(true)
       })
@@ -707,7 +776,7 @@ describe('DocumentUpdaterHandler', function() {
       beforeEach(function() {
         this.request.callsArgWith(
           1,
-          (this.error = new Error('something went wrong')),
+          new Error('something went wrong'),
           null,
           null
         )
@@ -720,7 +789,9 @@ describe('DocumentUpdaterHandler', function() {
       })
 
       it('should return an error to the callback', function() {
-        this.callback.calledWith(this.error).should.equal(true)
+        this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
 
@@ -738,7 +809,14 @@ describe('DocumentUpdaterHandler', function() {
       it('should return the callback with an error', function() {
         this.callback
           .calledWith(
-            new Error('doc updater returned failure status code: 500')
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'document updater returned a failure status code: 500'
+                )
+              )
           )
           .should.equal(true)
       })
@@ -991,7 +1069,9 @@ describe('DocumentUpdaterHandler', function() {
             this.callback
           )
 
-          this.callback.calledWith(new Error()).should.equal(true)
+          this.callback
+            .calledWith(sinon.match.instanceOf(Error))
+            .should.equal(true)
           const firstCallArgs = this.callback.args[0]
           firstCallArgs[0].message.should.equal(
             'did not receive project version in changes'

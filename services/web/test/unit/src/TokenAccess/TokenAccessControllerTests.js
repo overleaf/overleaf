@@ -72,7 +72,8 @@ describe('TokenAccessController', function() {
         },
         '../V1/V1Api': (this.V1Api = {
           request: sinon.stub().callsArgWith(1, null, {}, { allow: true })
-        })
+        }),
+        '../Errors/Errors': Errors
       }
     })
 
@@ -668,9 +669,11 @@ describe('TokenAccessController', function() {
 
             it('should call next with a not-found error', function(done) {
               expect(this.next.callCount).to.equal(1)
-              expect(this.next.calledWith(new Errors.NotFoundError())).to.equal(
-                true
-              )
+              expect(
+                this.next.calledWith(
+                  sinon.match.instanceOf(Errors.NotFoundError)
+                )
+              ).to.equal(true)
               return done()
             })
           })
@@ -1747,9 +1750,9 @@ describe('TokenAccessController', function() {
 
           it('should call next with not found error', function(done) {
             expect(this.next.callCount).to.equal(1)
-            expect(this.next.calledWith(new Errors.NotFoundError())).to.equal(
-              true
-            )
+            expect(
+              this.next.calledWith(sinon.match.instanceOf(Errors.NotFoundError))
+            ).to.equal(true)
             return done()
           })
         })
@@ -1796,9 +1799,9 @@ describe('TokenAccessController', function() {
 
           it('should call next with not found error', function(done) {
             expect(this.next.callCount).to.equal(1)
-            expect(this.next.calledWith(new Errors.NotFoundError())).to.equal(
-              true
-            )
+            expect(
+              this.next.calledWith(sinon.match.instanceOf(Errors.NotFoundError))
+            ).to.equal(true)
             return done()
           })
         })

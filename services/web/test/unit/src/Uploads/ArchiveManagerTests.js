@@ -17,11 +17,7 @@ const { expect } = require('chai')
 const chai = require('chai')
 const should = chai.should()
 const modulePath = '../../../../app/src/Features/Uploads/ArchiveManager.js'
-const {
-  InvalidZipFileError,
-  EmptyZipFileError,
-  ZipContentsTooLargeError
-} = require('../../../../app/src/Features/Uploads/ArchiveErrors')
+const ArchiveErrors = require('../../../../app/src/Features/Uploads/ArchiveErrors')
 const SandboxedModule = require('sandboxed-module')
 const events = require('events')
 
@@ -60,7 +56,8 @@ describe('ArchiveManager', function() {
         'logger-sharelatex': this.logger,
         'metrics-sharelatex': this.metrics,
         fs: (this.fs = {}),
-        'fs-extra': (this.fse = {})
+        'fs-extra': (this.fse = {}),
+        './ArchiveErrors': ArchiveErrors
       }
     })
     return (this.callback = sinon.stub())
@@ -140,7 +137,7 @@ describe('ArchiveManager', function() {
       it('should return the callback with an error', function() {
         return sinon.assert.calledWithExactly(
           this.callback,
-          new EmptyZipFileError()
+          sinon.match.instanceOf(ArchiveErrors.EmptyZipFileError)
         )
       })
     })
@@ -161,7 +158,7 @@ describe('ArchiveManager', function() {
       it('should return the callback with an error', function() {
         return sinon.assert.calledWithExactly(
           this.callback,
-          new EmptyZipFileError()
+          sinon.match.instanceOf(ArchiveErrors.EmptyZipFileError)
         )
       })
     })
@@ -170,7 +167,7 @@ describe('ArchiveManager', function() {
       beforeEach(function(done) {
         this.yauzl.open = sinon
           .stub()
-          .callsArgWith(2, new InvalidZipFileError())
+          .callsArgWith(2, new ArchiveErrors.InvalidZipFileError())
         return this.ArchiveManager.extractZipArchive(
           this.source,
           this.destination,
@@ -184,7 +181,7 @@ describe('ArchiveManager', function() {
       it('should return the callback with an error', function() {
         return sinon.assert.calledWithExactly(
           this.callback,
-          new InvalidZipFileError()
+          sinon.match.instanceOf(ArchiveErrors.InvalidZipFileError)
         )
       })
 
@@ -211,7 +208,7 @@ describe('ArchiveManager', function() {
       it('should return the callback with an error', function() {
         return sinon.assert.calledWithExactly(
           this.callback,
-          new ZipContentsTooLargeError()
+          sinon.match.instanceOf(ArchiveErrors.ZipContentsTooLargeError)
         )
       })
 
@@ -234,9 +231,11 @@ describe('ArchiveManager', function() {
       })
 
       it('should return the callback with an error', function() {
-        return this.callback
-          .calledWithExactly(new Error('Something went wrong'))
-          .should.equal(true)
+        return this.callback.should.have.been.calledWithExactly(
+          sinon.match
+            .instanceOf(Error)
+            .and(sinon.match.has('message', 'Something went wrong'))
+        )
       })
 
       it('should log out the error', function() {
@@ -380,9 +379,11 @@ describe('ArchiveManager', function() {
       })
 
       it('should return the callback with an error', function() {
-        return this.callback
-          .calledWithExactly(new Error('Something went wrong'))
-          .should.equal(true)
+        return this.callback.should.have.been.calledWithExactly(
+          sinon.match
+            .instanceOf(Error)
+            .and(sinon.match.has('message', 'Something went wrong'))
+        )
       })
 
       it('should log out the error', function() {
@@ -418,9 +419,11 @@ describe('ArchiveManager', function() {
       })
 
       it('should return the callback with an error', function() {
-        return this.callback
-          .calledWithExactly(new Error('Something went wrong'))
-          .should.equal(true)
+        return this.callback.should.have.been.calledWithExactly(
+          sinon.match
+            .instanceOf(Error)
+            .and(sinon.match.has('message', 'Something went wrong'))
+        )
       })
 
       it('should log out the error', function() {
@@ -458,9 +461,11 @@ describe('ArchiveManager', function() {
       })
 
       it('should return the callback with an error', function() {
-        return this.callback
-          .calledWithExactly(new Error('Something went wrong'))
-          .should.equal(true)
+        return this.callback.should.have.been.calledWithExactly(
+          sinon.match
+            .instanceOf(Error)
+            .and(sinon.match.has('message', 'Something went wrong'))
+        )
       })
 
       it('should log out the error', function() {

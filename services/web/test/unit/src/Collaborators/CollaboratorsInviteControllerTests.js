@@ -164,7 +164,6 @@ describe('CollaboratorsInviteController', function() {
       this.CollaboratorsInviteHandler.inviteToProject = sinon
         .stub()
         .callsArgWith(4, null, this.invite)
-      this.err = new Error('woops')
       this.callback = sinon.stub()
       return (this.next = sinon.stub())
     })
@@ -283,7 +282,7 @@ describe('CollaboratorsInviteController', function() {
           .yields(null, true)
         this.LimitationsManager.canAddXCollaborators = sinon
           .stub()
-          .callsArgWith(2, this.err)
+          .callsArgWith(2, new Error('woops'))
         return this.CollaboratorsInviteController.inviteToProject(
           this.req,
           this.res,
@@ -293,7 +292,9 @@ describe('CollaboratorsInviteController', function() {
 
       it('should call next with an error', function() {
         this.next.callCount.should.equal(1)
-        return this.next.calledWith(this.err).should.equal(true)
+        return this.next
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
 
       it('should not have called _checkShouldInviteEmail', function() {
@@ -320,10 +321,9 @@ describe('CollaboratorsInviteController', function() {
         this.CollaboratorsInviteController._checkRateLimit = sinon
           .stub()
           .yields(null, true)
-        this.err = new Error('woops')
         this.CollaboratorsInviteHandler.inviteToProject = sinon
           .stub()
-          .callsArgWith(4, this.err)
+          .callsArgWith(4, new Error('woops'))
         return this.CollaboratorsInviteController.inviteToProject(
           this.req,
           this.res,
@@ -333,7 +333,7 @@ describe('CollaboratorsInviteController', function() {
 
       it('should call next with an error', function() {
         this.next.callCount.should.equal(1)
-        return this.next.calledWith(this.err).should.equal(true)
+        expect(this.next).to.have.been.calledWith(sinon.match.instanceOf(Error))
       })
 
       it('should have called canAddXCollaborators', function() {
@@ -429,7 +429,9 @@ describe('CollaboratorsInviteController', function() {
 
       it('should call next with an error', function() {
         this.next.callCount.should.equal(1)
-        return this.next.calledWith(this.err).should.equal(true)
+        return this.next
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
 
       it('should have called _checkShouldInviteEmail', function() {
@@ -729,10 +731,9 @@ describe('CollaboratorsInviteController', function() {
 
     describe('when the getInviteByToken produces an error', function() {
       beforeEach(function() {
-        this.err = new Error('woops')
         this.CollaboratorsInviteHandler.getInviteByToken.callsArgWith(
           2,
-          this.err
+          new Error('woops')
         )
         return this.CollaboratorsInviteController.viewInvite(
           this.req,
@@ -743,7 +744,9 @@ describe('CollaboratorsInviteController', function() {
 
       it('should call next with the error', function() {
         this.next.callCount.should.equal(1)
-        return this.next.calledWith(this.err).should.equal(true)
+        return this.next
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
 
       it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function() {
@@ -1056,10 +1059,9 @@ describe('CollaboratorsInviteController', function() {
 
     describe('when resendInvite produces an error', function() {
       beforeEach(function() {
-        this.err = new Error('woops')
         this.CollaboratorsInviteHandler.resendInvite = sinon
           .stub()
-          .callsArgWith(3, this.err)
+          .callsArgWith(3, new Error('woops'))
         return this.CollaboratorsInviteController.resendInvite(
           this.req,
           this.res,
@@ -1073,7 +1075,9 @@ describe('CollaboratorsInviteController', function() {
 
       it('should call next with the error', function() {
         this.next.callCount.should.equal(1)
-        return this.next.calledWith(this.err).should.equal(true)
+        return this.next
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
 
       it('should have called resendInvite', function() {
@@ -1131,10 +1135,9 @@ describe('CollaboratorsInviteController', function() {
 
     describe('when revokeInvite produces an error', function() {
       beforeEach(function() {
-        this.err = new Error('woops')
         this.CollaboratorsInviteHandler.revokeInvite = sinon
           .stub()
-          .callsArgWith(2, this.err)
+          .callsArgWith(2, new Error('woops'))
         return this.CollaboratorsInviteController.revokeInvite(
           this.req,
           this.res,
@@ -1148,7 +1151,9 @@ describe('CollaboratorsInviteController', function() {
 
       it('should call next with the error', function() {
         this.next.callCount.should.equal(1)
-        return this.next.calledWith(this.err).should.equal(true)
+        return this.next
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
 
       it('should have called revokeInvite', function() {
@@ -1209,10 +1214,9 @@ describe('CollaboratorsInviteController', function() {
 
     describe('when revokeInvite produces an error', function() {
       beforeEach(function() {
-        this.err = new Error('woops')
         this.CollaboratorsInviteHandler.acceptInvite = sinon
           .stub()
-          .callsArgWith(3, this.err)
+          .callsArgWith(3, new Error('woops'))
         return this.CollaboratorsInviteController.acceptInvite(
           this.req,
           this.res,
@@ -1226,7 +1230,9 @@ describe('CollaboratorsInviteController', function() {
 
       it('should call next with the error', function() {
         this.next.callCount.should.equal(1)
-        return this.next.calledWith(this.err).should.equal(true)
+        return this.next
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
 
       it('should have called acceptInvite', function() {

@@ -581,12 +581,9 @@ describe('EditorController', function() {
     })
 
     it('should delete the folder using the project entity handler', function() {
-      return this.ProjectEntityUpdateHandler.deleteEntity.calledWith(
-        this.project_id,
-        this.entity_id,
-        this.type,
-        this.user_id
-      ).should.equal.true
+      return this.ProjectEntityUpdateHandler.deleteEntity
+        .calledWith(this.project_id, this.entity_id, this.type, this.user_id)
+        .should.equal(true)
     })
 
     it('notify users an entity has been deleted', function() {
@@ -618,11 +615,9 @@ describe('EditorController', function() {
     })
 
     it('should delete the folder using the project entity handler', function() {
-      return this.ProjectEntityUpdateHandler.deleteEntityWithPath.calledWith(
-        this.project_id,
-        this.path,
-        this.user_id
-      ).should.equal.true
+      return this.ProjectEntityUpdateHandler.deleteEntityWithPath
+        .calledWith(this.project_id, this.path, this.user_id)
+        .should.equal(true)
     })
 
     it('notify users an entity has been deleted', function() {

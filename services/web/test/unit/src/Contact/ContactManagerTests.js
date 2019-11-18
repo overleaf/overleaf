@@ -97,23 +97,33 @@ describe('ContactManager', function() {
       it('should call the callback with an error', function() {
         return this.callback
           .calledWith(
-            new Error('contacts api responded with non-success code: 500')
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'contacts api responded with non-success code: 500'
+                )
+              )
           )
           .should.equal(true)
       })
 
       it('should log the error', function() {
-        return this.logger.warn
-          .calledWith(
-            {
-              err: new Error(
-                'contacts api responded with a non-success code: 500'
+        this.logger.warn.should.have.been.calledWith(
+          {
+            err: sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'contacts api responded with non-success code: 500'
+                )
               ),
-              user_id: this.user_id
-            },
-            'error getting contacts for user'
-          )
-          .should.equal(true)
+            user_id: this.user_id
+          },
+          'error getting contacts for user'
+        )
       })
     })
   })
@@ -165,7 +175,14 @@ describe('ContactManager', function() {
       it('should call the callback with an error', function() {
         return this.callback
           .calledWith(
-            new Error('contacts api responded with non-success code: 500')
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'contacts api responded with non-success code: 500'
+                )
+              )
           )
           .should.equal(true)
       })
@@ -174,9 +191,14 @@ describe('ContactManager', function() {
         return this.logger.warn
           .calledWith(
             {
-              err: new Error(
-                'contacts api responded with a non-success code: 500'
-              ),
+              err: sinon.match
+                .instanceOf(Error)
+                .and(
+                  sinon.match.has(
+                    'message',
+                    'contacts api responded with non-success code: 500'
+                  )
+                ),
               user_id: this.user_id,
               contact_id: this.contact_id
             },
