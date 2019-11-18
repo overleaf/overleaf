@@ -169,6 +169,8 @@ define([
               if (previousArgs == null) {
                 previousArgs = ''
               }
+              const previousArgsCaption =
+                previousArgs.length > 8 ? '…,' : previousArgs
               const result = []
               result.push({
                 caption: `\\${commandName}{}`,
@@ -180,7 +182,7 @@ define([
                 references.keys.forEach(function(key) {
                   if (key != null) {
                     result.push({
-                      caption: `\\${commandName}{${previousArgs}${key}}`,
+                      caption: `\\${commandName}{${previousArgsCaption}${key}}`,
                       value: `\\${commandName}{${previousArgs}${key}}`,
                       meta: 'reference',
                       score: 50

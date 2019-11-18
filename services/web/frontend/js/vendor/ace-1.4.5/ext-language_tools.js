@@ -1760,7 +1760,7 @@ var FilteredList = function(array, filterText) {
         var upper = needle.toUpperCase();
         var lower = needle.toLowerCase();
         loop: for (var i = 0, item; item = items[i]; i++) {
-            var caption = item.caption || item.value || item.snippet;
+            var caption = item.value || item.caption || item.snippet;
             if (!caption) continue;
             var lastIndex = -1;
             var matchMask = 0;
@@ -2020,8 +2020,7 @@ require("../config").defineOptions(Editor.prototype, "editor", {
         value: false
     }
 });
-});
-                (function() {
+});                (function() {
                     ace.require(["ace/ext/language_tools"], function(m) {
                         if (typeof module == "object" && typeof exports == "object" && module) {
                             module.exports = m;

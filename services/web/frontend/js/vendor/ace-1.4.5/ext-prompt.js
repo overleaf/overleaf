@@ -1791,7 +1791,7 @@ var FilteredList = function(array, filterText) {
         var upper = needle.toUpperCase();
         var lower = needle.toLowerCase();
         loop: for (var i = 0, item; item = items[i]; i++) {
-            var caption = item.caption || item.value || item.snippet;
+            var caption = item.value || item.caption || item.snippet;
             if (!caption) continue;
             var lastIndex = -1;
             var matchMask = 0;
@@ -2614,8 +2614,7 @@ dom.importCssString(".ace_prompt_container {\
 
 exports.prompt = prompt;
 
-});
-                (function() {
+});                (function() {
                     ace.require(["ace/ext/prompt"], function(m) {
                         if (typeof module == "object" && typeof exports == "object" && module) {
                             module.exports = m;
