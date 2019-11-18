@@ -1,5 +1,4 @@
-const Settings = require('settings-sharelatex')
-const mongoose = require('mongoose')
+const mongoose = require('../infrastructure/Mongoose')
 const { Schema } = mongoose
 
 const SamlLogSchema = new Schema(
@@ -14,13 +13,5 @@ const SamlLogSchema = new Schema(
   }
 )
 
-const conn = mongoose.createConnection(Settings.mongo.url, {
-  server: { poolSize: Settings.mongo.poolSize || 10 },
-  config: { autoIndex: false }
-})
-
-const SamlLog = conn.model('SamlLog', SamlLogSchema)
-
-mongoose.model('SamlLog', SamlLogSchema)
-exports.SamlLog = SamlLog
+exports.SamlLog = mongoose.model('SamlLog', SamlLogSchema)
 exports.SamlLogSchema = SamlLogSchema

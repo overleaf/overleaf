@@ -48,11 +48,9 @@ describe('SudoModeController', function() {
         './SudoModeHandler': this.SudoModeHandler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
-        '../../infrastructure/Mongoose': {
-          mongo: {
-            ObjectId() {
-              return 'some_object_id'
-            }
+        mongodb: {
+          ObjectId() {
+            return 'some_object_id'
           }
         },
         '../User/UserGetter': this.UserGetter,

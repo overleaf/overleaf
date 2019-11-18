@@ -1,27 +1,27 @@
-/* eslint-disable
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const mongoose = require('mongoose')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 
+const POOL_SIZE = Settings.mongo.poolSize
+
 mongoose.connect(
   Settings.mongo.url,
   {
-    server: { poolSize: 10 },
-    config: { autoIndex: false }
+    poolSize: POOL_SIZE,
+    config: { autoIndex: false },
+    useMongoClient: true,
+    appname: 'web'
   }
 )
 
 mongoose.connection.on('connected', () =>
-  logger.log({ url: Settings.mongo.url }, 'mongoose default connection open')
+  logger.log(
+    {
+      url: Settings.mongo.url,
+      poolSize: POOL_SIZE
+    },
+    'mongoose default connection open'
+  )
 )
 
 mongoose.connection.on('error', err =>

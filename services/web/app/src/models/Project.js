@@ -1,10 +1,9 @@
-const mongoose = require('mongoose')
-const Settings = require('settings-sharelatex')
+const mongoose = require('../infrastructure/Mongoose')
 const _ = require('underscore')
 const { FolderSchema } = require('./Folder.js')
-const concreteObjectId = require('mongoose').Types.ObjectId
 const Errors = require('../Features/Errors/Errors')
 
+const concreteObjectId = mongoose.Types.ObjectId
 const { Schema } = mongoose
 const { ObjectId } = Schema
 
@@ -120,34 +119,22 @@ const ProjectSchema = new Schema({
 
 ProjectSchema.statics.getProject = function(projectOrId, fields, callback) {
   if (projectOrId._id != null) {
-    return callback(null, projectOrId)
+    callback(null, projectOrId)
   } else {
     try {
       concreteObjectId(projectOrId.toString())
     } catch (e) {
       return callback(new Errors.NotFoundError(e.message))
     }
-    return this.findById(projectOrId, fields, callback)
+    this.findById(projectOrId, fields, callback)
   }
 }
 
-var applyToAllFilesRecursivly = (ProjectSchema.statics.applyToAllFilesRecursivly = function(
-  folder,
-  fun
-) {
+function applyToAllFilesRecursivly(folder, fun) {
   _.each(folder.fileRefs, file => fun(file))
-  return _.each(folder.folders, folder =>
-    applyToAllFilesRecursivly(folder, fun)
-  )
-})
+  _.each(folder.folders, folder => applyToAllFilesRecursivly(folder, fun))
+}
+ProjectSchema.statics.applyToAllFilesRecursivly = applyToAllFilesRecursivly
 
-const conn = mongoose.createConnection(Settings.mongo.url, {
-  server: { poolSize: Settings.mongo.poolSize || 10 },
-  config: { autoIndex: false }
-})
-
-const Project = conn.model('Project', ProjectSchema)
-
-mongoose.model('Project', ProjectSchema)
-exports.Project = Project
+exports.Project = mongoose.model('Project', ProjectSchema)
 exports.ProjectSchema = ProjectSchema

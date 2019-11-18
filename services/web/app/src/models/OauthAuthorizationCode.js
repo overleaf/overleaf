@@ -1,5 +1,4 @@
-const mongoose = require('mongoose')
-const Settings = require('settings-sharelatex')
+const mongoose = require('../infrastructure/Mongoose')
 
 const { Schema } = mongoose
 const { ObjectId } = Schema
@@ -18,16 +17,9 @@ const OauthAuthorizationCodeSchema = new Schema(
   }
 )
 
-const conn = mongoose.createConnection(Settings.mongo.url, {
-  server: { poolSize: Settings.mongo.poolSize || 10 },
-  config: { autoIndex: false }
-})
-
-const OauthAuthorizationCode = conn.model(
+exports.OauthAuthorizationCode = mongoose.model(
   'OauthAuthorizationCode',
   OauthAuthorizationCodeSchema
 )
 
-mongoose.model('OauthAuthorizationCode', OauthAuthorizationCodeSchema)
-exports.OauthAuthorizationCode = OauthAuthorizationCode
 exports.OauthAuthorizationCodeSchema = OauthAuthorizationCodeSchema

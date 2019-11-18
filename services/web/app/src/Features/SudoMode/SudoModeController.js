@@ -15,7 +15,7 @@ let SudoModeController
 const logger = require('logger-sharelatex')
 const SudoModeHandler = require('./SudoModeHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
-const { ObjectId } = require('../../infrastructure/Mongoose').mongo
+const { ObjectId } = require('mongodb')
 const UserGetter = require('../User/UserGetter')
 const Settings = require('settings-sharelatex')
 

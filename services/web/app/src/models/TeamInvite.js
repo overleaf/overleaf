@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require('../infrastructure/Mongoose')
 
 const { Schema } = mongoose
 
@@ -9,6 +9,5 @@ const TeamInviteSchema = new Schema({
   sentAt: { type: Date }
 })
 
-mongoose.model('TeamInvite', TeamInviteSchema)
-exports.TeamInvite = mongoose.model('TeamInvite')
+exports.TeamInvite = mongoose.model('TeamInvite', TeamInviteSchema)
 exports.TeamInviteSchema = TeamInviteSchema

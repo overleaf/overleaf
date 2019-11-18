@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require('../infrastructure/Mongoose')
 const { DocSchema } = require('./Doc')
 const { FileSchema } = require('./File')
 
@@ -14,6 +14,5 @@ FolderSchema.add({
   folders: [FolderSchema]
 })
 
-mongoose.model('Folder', FolderSchema)
-exports.Folder = mongoose.model('Folder')
+exports.Folder = mongoose.model('Folder', FolderSchema)
 exports.FolderSchema = FolderSchema

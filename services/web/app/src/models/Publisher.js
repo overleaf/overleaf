@@ -1,7 +1,4 @@
-/* eslint-disable
-    handle-callback-err
-*/
-const mongoose = require('mongoose')
+const mongoose = require('../infrastructure/Mongoose')
 const { Schema } = mongoose
 const { ObjectId } = Schema
 const settings = require('settings-sharelatex')
@@ -15,10 +12,7 @@ const PublisherSchema = new Schema({
 
 // fetch publisher's (brand on v1) data from v1 API. Errors are ignored
 PublisherSchema.method('fetchV1Data', function(callback) {
-  if (callback == null) {
-    callback = function(error, publisher) {}
-  }
-  return request(
+  request(
     {
       baseUrl: settings.apis.v1.url,
       url: `/api/v2/brands/${this.slug}`,
@@ -43,16 +37,10 @@ PublisherSchema.method('fetchV1Data', function(callback) {
       }
       this.name = parsedBody != null ? parsedBody.name : undefined
       this.partner = parsedBody != null ? parsedBody.partner : undefined
-      return callback(null, this)
+      callback(null, this)
     }
   )
 })
 
-const conn = mongoose.createConnection(settings.mongo.url, {
-  server: { poolSize: settings.mongo.poolSize || 10 },
-  config: { autoIndex: false }
-})
-
-const Publisher = conn.model('Publisher', PublisherSchema)
-exports.Publisher = Publisher
+exports.Publisher = mongoose.model('Publisher', PublisherSchema)
 exports.PublisherSchema = PublisherSchema

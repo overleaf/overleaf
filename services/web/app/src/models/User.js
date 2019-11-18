@@ -1,5 +1,5 @@
 const Settings = require('settings-sharelatex')
-const mongoose = require('mongoose')
+const mongoose = require('../infrastructure/Mongoose')
 const uuid = require('uuid')
 const { Schema } = mongoose
 const { ObjectId } = Schema
@@ -119,13 +119,5 @@ const UserSchema = new Schema({
   migratedAt: { type: Date }
 })
 
-const conn = mongoose.createConnection(Settings.mongo.url, {
-  server: { poolSize: Settings.mongo.poolSize || 10 },
-  config: { autoIndex: false }
-})
-
-const User = conn.model('User', UserSchema)
-
-mongoose.model('User', UserSchema)
-exports.User = User
+exports.User = mongoose.model('User', UserSchema)
 exports.UserSchema = UserSchema

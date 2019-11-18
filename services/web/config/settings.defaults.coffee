@@ -30,6 +30,7 @@ module.exports = settings =
 	# ---------
 	mongo:
 		url : process.env['MONGO_CONNECTION_STRING'] || process.env['MONGO_URL'] || "mongodb://#{process.env['MONGO_HOST'] or '127.0.0.1'}/sharelatex"
+		poolSize: parseInt(process.env['MONGO_POOL_SIZE'], 10) || 10
 
 	redis:
 		web:

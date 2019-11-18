@@ -1,5 +1,4 @@
-const mongoose = require('mongoose')
-const Settings = require('settings-sharelatex')
+const mongoose = require('../infrastructure/Mongoose')
 const { SubscriptionSchema } = require('./Subscription')
 
 const { Schema } = mongoose
@@ -27,16 +26,9 @@ const DeletedSubscriptionSchema = new Schema(
   { collection: 'deletedSubscriptions' }
 )
 
-const conn = mongoose.createConnection(Settings.mongo.url, {
-  server: { poolSize: Settings.mongo.poolSize || 10 },
-  config: { autoIndex: false }
-})
-
-const DeletedSubscription = conn.model(
+exports.DeletedSubscription = mongoose.model(
   'DeletedSubscription',
   DeletedSubscriptionSchema
 )
 
-mongoose.model('DeletedSubscription', DeletedSubscriptionSchema)
-exports.DeletedSubscription = DeletedSubscription
 exports.DeletedSubscriptionSchema = DeletedSubscriptionSchema
