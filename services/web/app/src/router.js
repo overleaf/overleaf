@@ -735,7 +735,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     InactiveProjectController.deactivateProject
   )
 
-  webRouter.get(
+  privateApiRouter.get(
     /^\/internal\/project\/([^/]*)\/output\/(.*)$/,
     function(req, res, next) {
       const params = {
