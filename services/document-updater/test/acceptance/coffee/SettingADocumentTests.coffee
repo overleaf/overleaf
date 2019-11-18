@@ -53,6 +53,11 @@ describe "Setting a document", ->
 					, 200
 			return null
 
+		after ->
+			MockTrackChangesApi.flushDoc.reset()
+			MockProjectHistoryApi.flushProject.reset()
+			MockWebApi.setDocument.reset()
+
 		it "should return a 204 status code", ->
 			@statusCode.should.equal 204
 
@@ -89,6 +94,11 @@ describe "Setting a document", ->
 				setTimeout done, 200
 			return null
 
+		after ->
+			MockTrackChangesApi.flushDoc.reset()
+			MockProjectHistoryApi.flushProject.reset()
+			MockWebApi.setDocument.reset()
+
 		it "should return a 204 status code", ->
 			@statusCode.should.equal 204
 
@@ -109,6 +119,62 @@ describe "Setting a document", ->
 				expect(lines).to.not.exist
 				done()
 			return null
+
+	describe "when the updated doc is too large for the body parser", ->
+		before (done) ->
+			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
+			@newLines = []
+			while JSON.stringify(@newLines).length < Settings.max_doc_length + 64 * 1024
+				@newLines.push("(a long line of text)".repeat(10000))
+			DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, false, (error, res, body) =>
+				@statusCode = res.statusCode
+				setTimeout done, 200
+			return null
+
+		after ->
+			MockTrackChangesApi.flushDoc.reset()
+			MockProjectHistoryApi.flushProject.reset()
+			MockWebApi.setDocument.reset()
+
+		it "should return a 413 status code", ->
+			@statusCode.should.equal 413
+
+		it "should not send the updated doc lines to the web api", ->
+			MockWebApi.setDocument.called.should.equal false
+
+		it "should not flush track changes", ->
+			MockTrackChangesApi.flushDoc.called.should.equal false
+
+		it "should not flush project history", ->
+			MockProjectHistoryApi.flushProject.called.should.equal false
+
+	describe "when the updated doc is large but under the bodyParser and HTTPController size limit", ->
+		before (done) ->
+			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
+
+			@newLines = []
+			while JSON.stringify(@newLines).length < 2 * 1024 * 1024 # limit in HTTPController
+				@newLines.push("(a long line of text)".repeat(10000))
+			@newLines.pop() # remove the line which took it over the limit
+			DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, false, (error, res, body) =>
+				@statusCode = res.statusCode
+				setTimeout done, 200
+			return null
+
+		after ->
+			MockTrackChangesApi.flushDoc.reset()
+			MockProjectHistoryApi.flushProject.reset()
+			MockWebApi.setDocument.reset()
+
+		it "should return a 204 status code", ->
+			@statusCode.should.equal 204
+
+		it "should send the updated doc lines to the web api", ->
+			MockWebApi.setDocument
+				.calledWith(@project_id, @doc_id, @newLines)
+				.should.equal true
 
 	describe "with track changes", ->
 		before ->
@@ -139,6 +205,11 @@ describe "Setting a document", ->
 							setTimeout done, 200
 				return null
 
+			after ->
+				MockTrackChangesApi.flushDoc.reset()
+				MockProjectHistoryApi.flushProject.reset()
+				MockWebApi.setDocument.reset()
+
 			it "should undo the tracked changes", (done) ->
 				DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, data) =>
 					throw error if error?
@@ -160,6 +231,11 @@ describe "Setting a document", ->
 							@statusCode = res.statusCode
 							setTimeout done, 200
 				return null
+
+			after ->
+				MockTrackChangesApi.flushDoc.reset()
+				MockProjectHistoryApi.flushProject.reset()
+				MockWebApi.setDocument.reset()
 
 			it "should not undo the tracked changes", (done) ->
 				DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, data) =>

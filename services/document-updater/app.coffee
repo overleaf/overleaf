@@ -28,7 +28,7 @@ Metrics.event_loop.monitor(logger, 100)
 app = express()
 app.configure ->
 	app.use(Metrics.http.monitor(logger));
-	app.use express.bodyParser()
+	app.use express.bodyParser({limit: (Settings.max_doc_length + 64 * 1024)})
 	app.use app.router
 Metrics.injectMetricsRoute(app)
 
@@ -125,6 +125,8 @@ app.use (error, req, res, next) ->
 		res.send 404
 	else if error instanceof Errors.OpRangeNotAvailableError
 		res.send 422 # Unprocessable Entity
+	else if error.statusCode is 413
+		res.send(413, "request entity too large")
 	else
 		logger.error err: error, req: req, "request errored"
 		res.send(500, "Oops, something went wrong")
