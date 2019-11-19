@@ -58,10 +58,6 @@ const EditorController = {
       callback = function(error, doc) {}
     }
     docName = docName.trim()
-    logger.log(
-      { project_id, folder_id, docName, source },
-      'sending new doc to project'
-    )
     Metrics.inc('editor.add-doc')
     return ProjectEntityUpdateHandler.addDocWithRanges(
       project_id,
@@ -104,18 +100,6 @@ const EditorController = {
       callback = function(error, file) {}
     }
     fileName = fileName.trim()
-    logger.log(
-      {
-        project_id,
-        folder_id,
-        fileName,
-        fsPath,
-        linkedFileData,
-        source,
-        user_id
-      },
-      'sending new file to project'
-    )
     Metrics.inc('editor.add-file')
     return ProjectEntityUpdateHandler.addFile(
       project_id,
@@ -323,10 +307,6 @@ const EditorController = {
       callback = function(error, folder) {}
     }
     folderName = folderName.trim()
-    logger.log(
-      { project_id, folder_id, folderName, source },
-      'sending new folder to project'
-    )
     Metrics.inc('editor.add-folder')
     return ProjectEntityUpdateHandler.addFolder(
       project_id,
@@ -387,10 +367,6 @@ const EditorController = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log(
-      { project_id, entity_id, entityType, source },
-      'start delete process of entity'
-    )
     Metrics.inc('editor.delete-entity')
     return ProjectEntityUpdateHandler.deleteEntity(
       project_id,
@@ -476,7 +452,6 @@ const EditorController = {
 
   deleteProject(project_id, callback) {
     Metrics.inc('editor.delete-project')
-    logger.log({ project_id }, 'recived message to delete project')
     return ProjectDeleter.deleteProject(project_id, callback)
   },
 
@@ -486,10 +461,6 @@ const EditorController = {
     }
     newName = sanitize.escape(newName)
     Metrics.inc('editor.rename-entity')
-    logger.log(
-      { entity_id, entity_id, entity_id },
-      'reciving new name for entity for project'
-    )
     return ProjectEntityUpdateHandler.renameEntity(
       project_id,
       entity_id,
@@ -577,7 +548,6 @@ const EditorController = {
       if (err != null) {
         return callback(err)
       }
-      logger.log({ compiler, project_id }, 'setting compiler')
       EditorRealTimeController.emitToRoom(
         project_id,
         'compilerUpdated',
@@ -597,7 +567,6 @@ const EditorController = {
       if (err != null) {
         return callback(err)
       }
-      logger.log({ imageName, project_id }, 'setting imageName')
       EditorRealTimeController.emitToRoom(
         project_id,
         'imageNameUpdated',
@@ -618,10 +587,6 @@ const EditorController = {
         if (err != null) {
           return callback(err)
         }
-        logger.log(
-          { languageCode, project_id },
-          'setting languageCode for spell check'
-        )
         EditorRealTimeController.emitToRoom(
           project_id,
           'spellCheckLanguageUpdated',
@@ -712,10 +677,6 @@ const EditorController = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log(
-      { project_id, folder, parentFolder_id: folder_id },
-      'sending newly created folder out to users'
-    )
     EditorRealTimeController.emitToRoom(
       project_id,
       'reciveNewFolder',

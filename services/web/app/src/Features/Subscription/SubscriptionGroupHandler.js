@@ -38,10 +38,6 @@ const SubscriptionGroupHandler = {
   },
 
   replaceUserReferencesInGroups(oldId, newId, callback) {
-    logger.log(
-      { old_id: oldId, new_id: newId },
-      'replacing user reference in groups'
-    )
     return Subscription.update(
       { admin_id: oldId },
       { admin_id: newId },
@@ -87,10 +83,6 @@ const SubscriptionGroupHandler = {
         } else {
           partOfGroup = false
         }
-        logger.log(
-          { user_id, subscription_id, partOfGroup },
-          'checking if user is part of a group'
-        )
         return callback(err, partOfGroup)
       }
     )
@@ -115,10 +107,6 @@ const SubscriptionGroupHandler = {
 }
 
 var replaceInArray = function(model, property, oldValue, newValue, callback) {
-  logger.log(
-    `Replacing ${oldValue} with ${newValue} in ${property} of ${model}`
-  )
-
   // Mongo won't let us pull and addToSet in the same query, so do it in
   // two. Note we need to add first, since the query is based on the old user.
   const query = {}

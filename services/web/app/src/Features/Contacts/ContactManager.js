@@ -25,7 +25,6 @@ module.exports = ContactManager = {
     if (callback == null) {
       callback = function(error, contacts) {}
     }
-    logger.log({ user_id }, 'getting user contacts')
     const url = `${settings.apis.contacts.url}/user/${user_id}/contacts`
     return request.get(
       {
@@ -61,7 +60,6 @@ module.exports = ContactManager = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log({ user_id, contact_id }, 'add user contact')
     const url = `${settings.apis.contacts.url}/user/${user_id}/contacts`
     return request.post(
       {

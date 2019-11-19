@@ -143,15 +143,6 @@ describe('CompileManager', function() {
       it('should time the compile', function() {
         return this.Metrics.Timer.prototype.done.called.should.equal(true)
       })
-
-      it('should log out the compile', function() {
-        return this.logger.log
-          .calledWith(
-            { project_id: this.project_id, user_id: this.user_id },
-            'compiling project'
-          )
-          .should.equal(true)
-      })
     })
 
     describe('when the project has been recently compiled', function() {

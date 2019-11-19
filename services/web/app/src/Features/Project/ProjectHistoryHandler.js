@@ -152,10 +152,6 @@ const ProjectHistoryHandler = {
                 if (err != null) {
                   return callback(err)
                 }
-                logger.log(
-                  { project_id, history_id: history.overleaf_id },
-                  'started syncing project with new history id'
-                )
                 return HistoryManager.flushProject(project_id, callback)
               }
             )

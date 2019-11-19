@@ -31,10 +31,6 @@ module.exports = {
         user_id,
         projectName,
         (err, project) => {
-          logger.log(
-            { user_id, filePath: path, projectName },
-            'handling new update from tpds'
-          )
           if (project == null) {
             return projectCreationHandler.createBlankProject(
               user_id,
@@ -68,10 +64,6 @@ module.exports = {
           return callback(err)
         }
         if (projectIsOnCooldown) {
-          logger.log(
-            { projectId: project._id },
-            'project is on cooldown, denying request'
-          )
           return callback(
             new Errors.TooManyRequestsError('project on cooldown')
           )

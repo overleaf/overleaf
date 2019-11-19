@@ -22,6 +22,8 @@ const Settings = require('settings-sharelatex')
 module.exports = SudoModeController = {
   sudoModePrompt(req, res, next) {
     if (req.externalAuthenticationSystemUsed() && Settings.overleaf == null) {
+      // TODO: maybe we should have audit logging on sudo mode, but if so, it
+      // probably belongs in an internal database and not stackdriver
       logger.log({ userId }, '[SudoMode] using external auth, redirecting')
       return res.redirect('/project')
     }

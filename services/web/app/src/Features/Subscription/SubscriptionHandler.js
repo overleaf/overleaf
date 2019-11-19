@@ -93,7 +93,6 @@ const SubscriptionHandler = {
   },
 
   updateSubscription(user, plan_code, coupon_code, callback) {
-    logger.log({ user, plan_code, coupon_code }, 'updating subscription')
     return LimitationsManager.userHasV2Subscription(user, function(
       err,
       hasSubscription,
@@ -108,10 +107,6 @@ const SubscriptionHandler = {
               if (coupon_code == null) {
                 return cb()
               }
-              logger.log(
-                { user_id: user._id, plan_code, coupon_code },
-                'updating subscription with coupon code applied first'
-              )
               return RecurlyWrapper.getSubscription(
                 subscription.recurlySubscription_id,
                 { includeAccount: true },

@@ -21,7 +21,6 @@ const { ObjectId } = require('mongoose').Types
 const SubscriptionLocator = {
   getUsersSubscription(user_or_id, callback) {
     const user_id = SubscriptionLocator._getUserId(user_or_id)
-    logger.log({ user_id }, 'getting users subscription')
     return Subscription.findOne({ admin_id: user_id }, function(
       err,
       subscription
@@ -32,7 +31,6 @@ const SubscriptionLocator = {
   },
 
   findManagedSubscription(managerId, callback) {
-    logger.log({ managerId }, 'finding managed subscription')
     return Subscription.findOne({ manager_ids: managerId }, callback)
   },
 
@@ -51,7 +49,6 @@ const SubscriptionLocator = {
 
   getMemberSubscriptions(user_or_id, callback) {
     const user_id = SubscriptionLocator._getUserId(user_or_id)
-    logger.log({ user_id }, 'getting users group subscriptions')
     return Subscription.find({ member_ids: user_id })
       .populate('admin_id')
       .exec(callback)
@@ -86,7 +83,6 @@ const SubscriptionLocator = {
   },
 
   getUserDeletedSubscriptions(userId, callback) {
-    logger.log({ userId }, 'getting users deleted subscriptions')
     DeletedSubscription.find({ 'subscription.admin_id': userId }, callback)
   },
 

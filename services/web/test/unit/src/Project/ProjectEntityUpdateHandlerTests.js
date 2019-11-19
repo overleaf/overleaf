@@ -449,19 +449,6 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      it('should log out the error', function() {
-        return this.logger.warn
-          .calledWith(
-            {
-              projectId: project_id,
-              docId: doc_id,
-              lines: this.docLines
-            },
-            'doc not found while updating doc lines'
-          )
-          .should.equal(true)
-      })
-
       it('should return a not found error', function() {
         return this.callback
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))

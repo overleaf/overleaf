@@ -22,7 +22,6 @@ module.exports = ProjectDownloadsController = {
   downloadProject(req, res, next) {
     const project_id = req.params.Project_id
     Metrics.inc('zip-downloads')
-    logger.log({ project_id }, 'downloading project')
     return DocumentUpdaterHandler.flushProjectToMongo(project_id, function(
       error
     ) {
@@ -56,7 +55,6 @@ module.exports = ProjectDownloadsController = {
   downloadMultipleProjects(req, res, next) {
     const project_ids = req.query.project_ids.split(',')
     Metrics.inc('zip-downloads-multiple')
-    logger.log({ project_ids }, 'downloading multiple projects')
     return DocumentUpdaterHandler.flushMultipleProjectsToMongo(
       project_ids,
       function(error) {

@@ -101,12 +101,6 @@ describe('ArchiveManager', function() {
       it('should time the unzip', function() {
         return this.metrics.Timer.prototype.done.called.should.equal(true)
       })
-
-      it('should log the unzip', function() {
-        return this.logger.log
-          .calledWith(sinon.match.any, 'unzipping file')
-          .should.equal(true)
-      })
     })
 
     describe('with a zipfile containing an empty directory', function() {
@@ -184,10 +178,6 @@ describe('ArchiveManager', function() {
           sinon.match.instanceOf(ArchiveErrors.InvalidZipFileError)
         )
       })
-
-      it('should log out the error', function() {
-        return this.logger.warn.called.should.equal(true)
-      })
     })
 
     describe('with a zip that is too large', function() {
@@ -237,10 +227,6 @@ describe('ArchiveManager', function() {
             .and(sinon.match.has('message', 'Something went wrong'))
         )
       })
-
-      it('should log out the error', function() {
-        return this.logger.warn.called.should.equal(true)
-      })
     })
 
     describe('with a relative extracted file path', function() {
@@ -261,10 +247,6 @@ describe('ArchiveManager', function() {
       it('should not write try to read the file entry', function() {
         return this.zipfile.openReadStream.called.should.equal(false)
       })
-
-      it('should log out a warning', function() {
-        return this.logger.warn.called.should.equal(true)
-      })
     })
 
     describe('with an unnormalized extracted file path', function() {
@@ -284,10 +266,6 @@ describe('ArchiveManager', function() {
 
       it('should not try to read the file entry', function() {
         return this.zipfile.openReadStream.called.should.equal(false)
-      })
-
-      it('should log out a warning', function() {
-        return this.logger.warn.called.should.equal(true)
       })
     })
 
@@ -386,10 +364,6 @@ describe('ArchiveManager', function() {
         )
       })
 
-      it('should log out the error', function() {
-        return this.logger.warn.called.should.equal(true)
-      })
-
       it('should close the zipfile', function() {
         return this.zipfile.close.called.should.equal(true)
       })
@@ -424,10 +398,6 @@ describe('ArchiveManager', function() {
             .instanceOf(Error)
             .and(sinon.match.has('message', 'Something went wrong'))
         )
-      })
-
-      it('should log out the error', function() {
-        return this.logger.warn.called.should.equal(true)
       })
 
       it('should close the zipfile', function() {
@@ -466,10 +436,6 @@ describe('ArchiveManager', function() {
             .instanceOf(Error)
             .and(sinon.match.has('message', 'Something went wrong'))
         )
-      })
-
-      it('should log out the error', function() {
-        return this.logger.warn.called.should.equal(true)
       })
 
       it('should unpipe from the readstream', function() {

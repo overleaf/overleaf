@@ -14,14 +14,11 @@ module.exports = UserSessionsManager = {
 
   trackSession(user, sessionId, callback) {
     if (!user) {
-      logger.log({ sessionId }, 'no user to track, returning')
       return callback(null)
     }
     if (!sessionId) {
-      logger.log({ user_id: user._id }, 'no sessionId to track, returning')
       return callback(null)
     }
-    logger.log({ user_id: user._id, sessionId }, 'onLogin handler')
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
     const value = UserSessionsManager._sessionKey(sessionId)
     rclient
@@ -46,14 +43,11 @@ module.exports = UserSessionsManager = {
       callback = function() {}
     }
     if (!user) {
-      logger.log({ sessionId }, 'no user to untrack, returning')
       return callback(null)
     }
     if (!sessionId) {
-      logger.log({ user_id: user._id }, 'no sessionId to untrack, returning')
       return callback(null)
     }
-    logger.log({ user_id: user._id, sessionId }, 'onLogout handler')
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
     const value = UserSessionsManager._sessionKey(sessionId)
     rclient
@@ -130,10 +124,8 @@ module.exports = UserSessionsManager = {
     }
     retain = retain.map(i => UserSessionsManager._sessionKey(i))
     if (!user) {
-      logger.log({}, 'no user to revoke sessions for, returning')
       return callback(null)
     }
-    logger.log({ user_id: user._id }, 'revoking all existing sessions for user')
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
     rclient.smembers(sessionSetKey, function(err, sessionKeys) {
       if (err) {
@@ -185,7 +177,6 @@ module.exports = UserSessionsManager = {
 
   touch(user, callback) {
     if (!user) {
-      logger.log({}, 'no user to touch sessions for, returning')
       return callback(null)
     }
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
@@ -207,10 +198,8 @@ module.exports = UserSessionsManager = {
 
   _checkSessions(user, callback) {
     if (!user) {
-      logger.log({}, 'no user, returning')
       return callback(null)
     }
-    logger.log({ user_id: user._id }, 'checking sessions for user')
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
     rclient.smembers(sessionSetKey, function(err, sessionKeys) {
       if (err) {
@@ -220,10 +209,6 @@ module.exports = UserSessionsManager = {
         )
         return callback(err)
       }
-      logger.log(
-        { user_id: user._id, count: sessionKeys.length },
-        'checking sessions for user'
-      )
       Async.series(
         sessionKeys.map(key => next =>
           rclient.get(key, function(err, val) {
@@ -231,10 +216,6 @@ module.exports = UserSessionsManager = {
               return next(err)
             }
             if (!val) {
-              logger.log(
-                { user_id: user._id, key },
-                '>> removing key from UserSessions set'
-              )
               rclient.srem(sessionSetKey, key, function(err, result) {
                 return next(err)
               })
@@ -244,7 +225,6 @@ module.exports = UserSessionsManager = {
           })
         ),
         function(err, results) {
-          logger.log({ user_id: user._id }, 'done checking sessions for user')
           callback(err)
         }
       )

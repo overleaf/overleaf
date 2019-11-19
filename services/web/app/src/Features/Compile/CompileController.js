@@ -74,7 +74,6 @@ module.exports = CompileController = {
     if (req.body != null ? req.body.incrementalCompilesEnabled : undefined) {
       options.incrementalCompilesEnabled = true
     }
-    logger.log({ options, project_id, user_id }, 'got compile request')
     return CompileManager.compile(project_id, user_id, options, function(
       error,
       status,
@@ -106,7 +105,6 @@ module.exports = CompileController = {
     }
     const project_id = req.params.Project_id
     const user_id = AuthenticationController.getLoggedInUserId(req)
-    logger.log({ project_id, user_id }, 'stop compile request')
     return CompileManager.stopCompile(project_id, user_id, function(error) {
       if (error != null) {
         return next(error)
@@ -145,7 +143,6 @@ module.exports = CompileController = {
     options.timeout =
       (req.body != null ? req.body.timeout : undefined) ||
       Settings.defaultFeatures.compileTimeout
-    logger.log({ options, submission_id }, 'got compileSubmission request')
     return ClsiManager.sendExternalRequest(
       submission_id,
       req.body,
@@ -154,10 +151,6 @@ module.exports = CompileController = {
         if (error != null) {
           return next(error)
         }
-        logger.log(
-          { submission_id, files: outputFiles },
-          'compileSubmission output files'
-        )
         res.contentType('application/json')
         return res.status(200).send(
           JSON.stringify({
@@ -221,10 +214,8 @@ module.exports = CompileController = {
       const filename = `${CompileController._getSafeProjectName(project)}.pdf`
 
       if (req.query.popupDownload) {
-        logger.log({ project_id }, 'download pdf as popup download')
         res.setContentDisposition('attachment', { filename })
       } else {
-        logger.log({ project_id }, 'download pdf to embed in browser')
         res.setContentDisposition('', { filename })
       }
 
@@ -491,7 +482,6 @@ module.exports = CompileController = {
       }
       const compilerUrl = Settings.apis.clsi.url
       url = `${compilerUrl}${url}`
-      logger.log({ url }, 'proxying to CLSI')
       const oneMinute = 60 * 1000
       // the base request
       const options = { url, method: req.method, timeout: oneMinute, jar }

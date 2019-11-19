@@ -14,7 +14,6 @@
  */
 let ReferalFeatures
 const _ = require('underscore')
-const logger = require('logger-sharelatex')
 const { User } = require('../../models/User')
 const Settings = require('settings-sharelatex')
 
@@ -31,10 +30,6 @@ module.exports = ReferalFeatures = {
       if (user == null) {
         return callback(new Error(`user not found ${user_id} for assignBonus`))
       }
-      logger.log(
-        { user_id, refered_user_count: user.refered_user_count },
-        'assigning bonus'
-      )
       if (user.refered_user_count != null && user.refered_user_count > 0) {
         const newFeatures = ReferalFeatures._calculateFeatures(user)
         return callback(null, newFeatures)

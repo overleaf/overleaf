@@ -39,10 +39,6 @@ const SubscriptionUpdater = {
       callback = requesterData
       requesterData = {}
     }
-    logger.log(
-      { adminUserId, recurlySubscription },
-      'syncSubscription, creating new if subscription does not exist'
-    )
     SubscriptionLocator.getUsersSubscription(adminUserId, function(
       err,
       subscription
@@ -51,10 +47,6 @@ const SubscriptionUpdater = {
         return callback(err)
       }
       if (subscription != null) {
-        logger.log(
-          { adminUserId, recurlySubscription },
-          'subscription does exist'
-        )
         SubscriptionUpdater._updateSubscriptionFromRecurly(
           recurlySubscription,
           subscription,
@@ -62,10 +54,6 @@ const SubscriptionUpdater = {
           callback
         )
       } else {
-        logger.log(
-          { adminUserId, recurlySubscription },
-          'subscription does not exist, creating a new one'
-        )
         SubscriptionUpdater._createNewSubscription(adminUserId, function(
           err,
           subscription
@@ -102,10 +90,6 @@ const SubscriptionUpdater = {
   },
 
   addUsersToGroupWithoutFeaturesRefresh(subscriptionId, memberIds, callback) {
-    logger.log(
-      { subscriptionId, memberIds },
-      'adding members into mongo subscription'
-    )
     const searchOps = { _id: subscriptionId }
     const insertOperation = { $addToSet: { member_ids: { $each: memberIds } } }
 
@@ -167,10 +151,6 @@ const SubscriptionUpdater = {
     if (callback == null) {
       callback = function() {}
     }
-    logger.log(
-      { subscriptionId: subscription._id },
-      'deleting subscription and downgrading users'
-    )
     async.series(
       [
         cb =>
@@ -249,7 +229,6 @@ const SubscriptionUpdater = {
   },
 
   _createNewSubscription(adminUserId, callback) {
-    logger.log({ adminUserId }, 'creating new subscription')
     const subscription = new Subscription({
       admin_id: adminUserId,
       manager_ids: [adminUserId]
@@ -263,7 +242,6 @@ const SubscriptionUpdater = {
     requesterData,
     callback
   ) {
-    logger.log({ recurlySubscription, subscription }, 'updaing subscription')
     if (recurlySubscription.state === 'expired') {
       return SubscriptionUpdater.deleteSubscription(
         subscription,

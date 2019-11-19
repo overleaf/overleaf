@@ -180,10 +180,6 @@ module.exports = ReferencesHandler = {
             ReferencesHandler._buildFileUrl(projectId, fileId)
           )
           const allUrls = bibDocUrls.concat(bibFileUrls)
-          logger.log(
-            { projectId, isFullIndex, docIds, bibDocUrls },
-            'sending request to references service'
-          )
           return request.post(
             {
               url: `${settings.apis.references.url}/project/${projectId}/index`,
@@ -209,7 +205,6 @@ module.exports = ReferencesHandler = {
                     res.statusCode
                   }`
                 )
-                logger.log({ err, projectId }, 'error updating references')
                 return callback(err)
               }
             }

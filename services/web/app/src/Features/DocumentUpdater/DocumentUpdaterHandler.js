@@ -30,7 +30,6 @@ module.exports = DocumentUpdaterHandler = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log({ project_id }, 'flushing project from document updater')
     return DocumentUpdaterHandler._makeRequest(
       {
         path: `/project/${project_id}/flush`,
@@ -77,7 +76,6 @@ module.exports = DocumentUpdaterHandler = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log({ project_id, doc_id }, 'flushing doc from document updater')
     return DocumentUpdaterHandler._makeRequest(
       {
         path: `/project/${project_id}/doc/${doc_id}/flush`,
@@ -93,7 +91,6 @@ module.exports = DocumentUpdaterHandler = {
     if (callback == null) {
       callback = function() {}
     }
-    logger.log({ project_id, doc_id }, 'deleting doc from document updater')
     return DocumentUpdaterHandler._makeRequest(
       {
         path: `/project/${project_id}/doc/${doc_id}`,
@@ -109,7 +106,6 @@ module.exports = DocumentUpdaterHandler = {
     if (callback == null) {
       callback = function(error, doclines, version, ranges, ops) {}
     }
-    logger.log({ project_id, doc_id }, 'getting doc from document updater')
     return DocumentUpdaterHandler._makeRequest(
       {
         path: `/project/${project_id}/doc/${doc_id}?fromVersion=${fromVersion}`,
@@ -130,10 +126,6 @@ module.exports = DocumentUpdaterHandler = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log(
-      { project_id, doc_id, source, user_id },
-      'setting doc in document updater'
-    )
     return DocumentUpdaterHandler._makeRequest(
       {
         path: `/project/${project_id}/doc/${doc_id}`,
@@ -161,7 +153,6 @@ module.exports = DocumentUpdaterHandler = {
     const url = `${
       settings.apis.documentupdater.url
     }/project/${project_id}/get_and_flush_if_old?state=${projectStateHash}`
-    logger.log({ project_id }, 'getting project docs from document updater')
     return request.post(url, function(error, res, body) {
       timer.done()
       if (error != null) {
@@ -181,10 +172,6 @@ module.exports = DocumentUpdaterHandler = {
         return callback()
       } else if (res.statusCode >= 200 && res.statusCode < 300) {
         let docs
-        logger.log(
-          { project_id },
-          'got project docs from document document updater'
-        )
         try {
           docs = JSON.parse(body)
         } catch (error1) {
@@ -210,8 +197,6 @@ module.exports = DocumentUpdaterHandler = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log({ project_id }, 'clearing project state from document updater')
-
     return DocumentUpdaterHandler._makeRequest(
       {
         path: `/project/${project_id}/clearState`,
@@ -230,8 +215,6 @@ module.exports = DocumentUpdaterHandler = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log({ project_id, doc_id }, `accepting ${change_ids.length} changes`)
-
     return DocumentUpdaterHandler._makeRequest(
       {
         path: `/project/${project_id}/doc/${doc_id}/change/accept`,
@@ -251,10 +234,6 @@ module.exports = DocumentUpdaterHandler = {
       callback = function(error) {}
     }
     const timer = new metrics.Timer('delete-thread')
-    logger.log(
-      { project_id, doc_id, thread_id },
-      'deleting comment range in document updater'
-    )
     return DocumentUpdaterHandler._makeRequest(
       {
         path: `/project/${project_id}/doc/${doc_id}/comment/${thread_id}`,
@@ -267,10 +246,6 @@ module.exports = DocumentUpdaterHandler = {
   },
 
   resyncProjectHistory(project_id, projectHistoryId, docs, files, callback) {
-    logger.info(
-      { project_id, docs, files },
-      'resyncing project history in doc updater'
-    )
     return DocumentUpdaterHandler._makeRequest(
       {
         path: `/project/${project_id}/history/resync`,
@@ -328,7 +303,6 @@ module.exports = DocumentUpdaterHandler = {
       return callback(new Error('did not receive project version in changes'))
     }
 
-    logger.log({ project_id }, 'updating project structure in doc updater')
     return DocumentUpdaterHandler._makeRequest(
       {
         path: `/project/${project_id}`,

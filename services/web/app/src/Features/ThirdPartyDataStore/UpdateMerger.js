@@ -26,7 +26,6 @@ module.exports = UpdateMerger = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log({ project_id, path }, 'merging update from tpds')
     return FileWriter.writeStreamToDisk(project_id, updateRequest, function(
       err,
       fsPath
@@ -176,10 +175,6 @@ module.exports = UpdateMerger = {
       source,
       user_id,
       function() {
-        logger.log(
-          { project_id, path },
-          'finished processing update to delete entity from tpds'
-        )
         return callback()
       }
     )
@@ -206,10 +201,6 @@ module.exports = UpdateMerger = {
           source,
           user_id,
           function(err) {
-            logger.log(
-              { project_id },
-              'completed processing file update from tpds'
-            )
             return callback(err)
           }
         )
@@ -217,7 +208,6 @@ module.exports = UpdateMerger = {
     },
 
     processFile(project_id, fsPath, path, source, user_id, callback) {
-      logger.log({ project_id }, 'processing file update from tpds')
       return EditorController.upsertFileWithPath(
         project_id,
         path,
@@ -226,10 +216,6 @@ module.exports = UpdateMerger = {
         source,
         user_id,
         function(err) {
-          logger.log(
-            { project_id },
-            'completed processing file update from tpds'
-          )
           return callback(err)
         }
       )

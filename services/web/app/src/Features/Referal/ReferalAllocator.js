@@ -24,14 +24,8 @@ module.exports = ReferalAllocator = {
       callback = function() {}
     }
     if (referal_id == null) {
-      logger.log({ new_user_id }, 'no referal for user')
       return callback(null)
     }
-
-    logger.log(
-      { referal_id, new_user_id, referal_source, referal_medium },
-      'allocating users referal'
-    )
 
     const query = { referal_id: referal_id }
     return User.findOne(query, function(error, user) {
@@ -39,7 +33,6 @@ module.exports = ReferalAllocator = {
         return callback(error)
       }
       if (user == null || user._id == null) {
-        logger.log({ new_user_id, referal_id }, 'no user found for referal id')
         return callback(null)
       }
 

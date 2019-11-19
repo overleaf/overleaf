@@ -196,10 +196,6 @@ async function mkdirp(projectId, path, options = {}) {
     projectId
   )
   if (path === '/') {
-    logger.log(
-      { projectId: project._id },
-      'mkdir is only trying to make path of / so sending back root folder'
-    )
     return { newFolders: [], folder: project.rootFolder[0] }
   }
 
@@ -219,10 +215,6 @@ async function mkdirp(projectId, path, options = {}) {
       lastFolder = foundFolder
     } catch (err) {
       // Folder couldn't be found. Create it.
-      logger.log(
-        { path, projectId: project._id, folderName },
-        'making folder from mkdirp'
-      )
       const parentFolderId = lastFolder && lastFolder._id
       const {
         folder: newFolder,
@@ -593,13 +585,6 @@ async function _checkValidMove(
   // in the destination folder
   _checkValidElementName(destEntity, entity.name)
   if (/folder/.test(entityType)) {
-    logger.log(
-      {
-        destFolderPath: destFolderPath.fileSystem,
-        folderPath: entityPath.fileSystem
-      },
-      'checking folder is not moving into child folder'
-    )
     const isNestedFolder =
       destFolderPath.fileSystem.slice(0, entityPath.fileSystem.length) ===
       entityPath.fileSystem

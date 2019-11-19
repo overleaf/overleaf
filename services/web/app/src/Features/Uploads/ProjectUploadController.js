@@ -74,10 +74,6 @@ module.exports = ProjectUploadController = {
             })
           }
         } else {
-          logger.log(
-            { project: project._id, file_path: path, file_name: name },
-            'uploaded project'
-          )
           return res.send({ success: true, project_id: project._id })
         }
       }
@@ -94,7 +90,6 @@ module.exports = ProjectUploadController = {
       logger.err({ project_id, name }, 'bad name when trying to upload file')
       return res.send({ success: false })
     }
-    logger.log({ folder_id, project_id }, 'getting upload file request')
     const user_id = AuthenticationController.getLoggedInUserId(req)
 
     return FileSystemImportManager.addEntity(
@@ -120,10 +115,6 @@ module.exports = ProjectUploadController = {
           )
           return res.send({ success: false })
         } else {
-          logger.log(
-            { project_id, file_path: path, file_name: name, folder_id },
-            'uploaded file'
-          )
           return res.send({
             success: true,
             entity_id: entity != null ? entity._id : undefined,

@@ -89,7 +89,6 @@ const UserRegistrationHandler = {
             } // this can be slow, just fire it off
           ],
           err => {
-            logger.log({ user }, 'registered')
             Analytics.recordEvent(user._id, 'user-registered')
             callback(err, user)
           }
@@ -99,7 +98,6 @@ const UserRegistrationHandler = {
   },
 
   registerNewUserAndSendActivationEmail(email, callback) {
-    logger.log({ email }, 'registering new user')
     UserRegistrationHandler.registerNewUser(
       {
         email,

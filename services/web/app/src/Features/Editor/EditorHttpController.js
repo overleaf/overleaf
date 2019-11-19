@@ -21,7 +21,6 @@ module.exports = EditorHttpController = {
     if (userId === 'anonymous-user') {
       userId = null
     }
-    logger.log({ userId, projectId }, 'join project request')
     Metrics.inc('editor.join-project')
     EditorHttpController._buildJoinProjectView(req, projectId, userId, function(
       error,
@@ -56,7 +55,6 @@ module.exports = EditorHttpController = {
     if (callback == null) {
       callback = function() {}
     }
-    logger.log({ projectId, userId }, 'building the joinProject view')
     ProjectGetter.getProjectWithoutDocLines(projectId, function(
       error,
       project
@@ -99,16 +97,6 @@ module.exports = EditorHttpController = {
                 if (error) {
                   return callback(error)
                 }
-                logger.log(
-                  {
-                    projectId,
-                    userId,
-                    memberCount: members.length,
-                    inviteCount: invites.length,
-                    privilegeLevel
-                  },
-                  'returning project model view'
-                )
                 CollaboratorsHandler.userIsTokenMember(
                   userId,
                   projectId,
@@ -150,10 +138,7 @@ module.exports = EditorHttpController = {
     const { name } = req.body
     const parentFolderId = req.body.parent_folder_id
     const userId = AuthenticationController.getLoggedInUserId(req)
-    logger.log(
-      { projectId, name, parentFolderId },
-      'getting request to add doc to project'
-    )
+
     if (!EditorHttpController._nameIsAcceptableLength(name)) {
       return res.sendStatus(400)
     }

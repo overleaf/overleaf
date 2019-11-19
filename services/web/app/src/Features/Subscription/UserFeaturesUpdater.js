@@ -11,7 +11,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const logger = require('logger-sharelatex')
 const { User } = require('../../models/User')
 
 module.exports = {
@@ -21,7 +20,6 @@ module.exports = {
     }
     const conditions = { _id: user_id }
     const update = {}
-    logger.log({ user_id, features }, 'updating users features')
     for (let key in features) {
       const value = features[key]
       update[`features.${key}`] = value

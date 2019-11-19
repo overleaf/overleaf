@@ -1,5 +1,4 @@
 const { Project } = require('../../models/Project')
-const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const { promisifyAll } = require('../../util/promises')
 
@@ -7,7 +6,6 @@ const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex']
 
 const ProjectOptionsHandler = {
   setCompiler(projectId, compiler, callback) {
-    logger.log({ projectId, compiler }, 'setting the compiler')
     if (!compiler) {
       return callback()
     }
@@ -21,7 +19,6 @@ const ProjectOptionsHandler = {
   },
 
   setImageName(projectId, imageName, callback) {
-    logger.log({ projectId, imageName }, 'setting the imageName')
     if (!imageName || !Array.isArray(settings.allowedImageNames)) {
       return callback()
     }
@@ -38,7 +35,6 @@ const ProjectOptionsHandler = {
   },
 
   setSpellCheckLanguage(projectId, languageCode, callback) {
-    logger.log({ projectId, languageCode }, 'setting the spell check language')
     if (!Array.isArray(settings.languages)) {
       return callback()
     }
@@ -54,10 +50,6 @@ const ProjectOptionsHandler = {
   },
 
   setBrandVariationId(projectId, brandVariationId, callback) {
-    logger.log(
-      { projectId, brandVariationId },
-      'setting the brand variation id'
-    )
     if (!brandVariationId) {
       return callback()
     }
@@ -67,7 +59,6 @@ const ProjectOptionsHandler = {
   },
 
   unsetBrandVariationId(projectId, callback) {
-    logger.log({ projectId }, 'unsetting the brand variation id')
     const conditions = { _id: projectId }
     const update = { $unset: { brandVariationId: 1 } }
     Project.update(conditions, update, {}, callback)

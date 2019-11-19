@@ -84,15 +84,7 @@ module.exports = TokenAccessController = {
           next
         )
       } else if (project == null) {
-        logger.log(
-          { token, userId },
-          '[TokenAccess] no token-based project found for readAndWrite token'
-        )
         if (userId == null) {
-          logger.log(
-            { token },
-            '[TokenAccess] No project found with read-write token, anonymous user, deny'
-          )
           return next(new Errors.NotFoundError())
         }
         return TokenAccessController._tryHigherAccess(
@@ -105,10 +97,6 @@ module.exports = TokenAccessController = {
       } else {
         if (userId == null) {
           if (TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED) {
-            logger.log(
-              { token, projectId: project._id },
-              '[TokenAccess] allow anonymous read-and-write token access'
-            )
             TokenAccessHandler.grantSessionTokenAccess(req, project._id, token)
             req._anonymousAccessToken = token
             return TokenAccessController._loadEditor(
@@ -163,10 +151,7 @@ module.exports = TokenAccessController = {
   readOnlyToken(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
     const token = req.params['read_only_token']
-    logger.log(
-      { userId, token },
-      '[TokenAccess] requesting read-only token access'
-    )
+
     return TokenAccessHandler.getV1DocPublishedInfo(token, function(
       err,
       doc_published_info
@@ -203,15 +188,7 @@ module.exports = TokenAccessController = {
             next
           )
         } else if (project == null) {
-          logger.log(
-            { token, userId },
-            '[TokenAccess] no project found for readOnly token'
-          )
           if (userId == null) {
-            logger.log(
-              { token },
-              '[TokenAccess] No project found with readOnly token, anonymous user, deny'
-            )
             return next(new Errors.NotFoundError())
           }
           return TokenAccessController._tryHigherAccess(
@@ -223,10 +200,6 @@ module.exports = TokenAccessController = {
           )
         } else {
           if (userId == null) {
-            logger.log(
-              { userId, projectId: project._id },
-              '[TokenAccess] adding anonymous user to project with readOnly token'
-            )
             TokenAccessHandler.grantSessionTokenAccess(req, project._id, token)
             req._anonymousAccessToken = token
             return TokenAccessController._loadEditor(
@@ -237,10 +210,6 @@ module.exports = TokenAccessController = {
             )
           } else {
             if (project.owner_ref.toString() === userId) {
-              logger.log(
-                { userId, projectId: project._id },
-                '[TokenAccess] user is already project owner'
-              )
               return TokenAccessController._loadEditor(
                 project._id,
                 req,

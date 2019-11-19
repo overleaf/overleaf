@@ -42,7 +42,6 @@ module.exports = BlogController = {
       return BlogController._directProxy(blogUrl, res)
     }
 
-    logger.log({ url }, 'proxying request to blog api')
     return request.get(blogUrl, function(err, r, data) {
       if (
         (r != null ? r.statusCode : undefined) === 404 ||

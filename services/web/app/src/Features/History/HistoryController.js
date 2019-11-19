@@ -59,7 +59,6 @@ module.exports = HistoryController = {
     if (req.useProjectHistory != null) {
       return next()
     } else {
-      logger.log({ project_id }, 'project history not enabled')
       return res.sendStatus(404)
     }
   },
@@ -72,7 +71,6 @@ module.exports = HistoryController = {
     const url =
       HistoryController.buildHistoryServiceUrl(req.useProjectHistory) + req.url
 
-    logger.log({ url }, 'proxying to history api')
     const getReq = request({
       url,
       method: req.method,
@@ -94,7 +92,6 @@ module.exports = HistoryController = {
     const user_id = AuthenticationController.getLoggedInUserId(req)
     const url =
       HistoryController.buildHistoryServiceUrl(req.useProjectHistory) + req.url
-    logger.log({ url }, 'proxying to history api')
     return HistoryController._makeRequest(
       {
         url,
@@ -150,7 +147,6 @@ module.exports = HistoryController = {
     const { project_id } = req.params
     const { version, pathname } = req.body
     const user_id = AuthenticationController.getLoggedInUserId(req)
-    logger.log({ project_id, version, pathname }, 'restoring file from v2')
     return RestoreManager.restoreFileFromV2(
       user_id,
       project_id,
@@ -175,10 +171,6 @@ module.exports = HistoryController = {
     if (name == null) {
       return res.sendStatus(400) // Malformed request
     }
-    logger.log(
-      { project_id, doc_id, user_id },
-      'restoring doc from v1 deleted doc'
-    )
     return RestoreManager.restoreDocFromDeletedDoc(
       user_id,
       project_id,
@@ -278,7 +270,6 @@ module.exports = HistoryController = {
 
   downloadZipOfVersion(req, res, next) {
     const { project_id, version } = req.params
-    logger.log({ project_id, version }, 'got request for zip file at version')
     return ProjectDetailsHandler.getDetails(project_id, function(err, project) {
       if (err != null) {
         return next(err)
@@ -310,10 +301,6 @@ module.exports = HistoryController = {
     const url = `${
       settings.apis.v1_history.url
     }/projects/${v1_project_id}/version/${version}/zip`
-    logger.log(
-      { v1_project_id, version, url },
-      'getting s3 url from history api'
-    )
     const options = {
       auth: {
         user: settings.apis.v1_history.user,

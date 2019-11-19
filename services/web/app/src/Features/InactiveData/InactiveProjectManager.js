@@ -60,10 +60,6 @@ module.exports = InactiveProjectManager = {
       daysOld = 360
     }
     const oldProjectDate = new Date() - MILISECONDS_IN_DAY * daysOld
-    logger.log(
-      { oldProjectDate, limit, daysOld },
-      'starting process of deactivating old projects'
-    )
     return Project.find()
       .where('lastOpened')
       .lt(oldProjectDate)

@@ -39,7 +39,6 @@ module.exports = SubscriptionController = {
     if (req.query.v != null) {
       viewName = `${viewName}_${req.query.v}`
     }
-    logger.log({ viewName }, 'showing plans page')
     let currentUser = null
 
     return GeoIpLookup.getCurrencyCode(
@@ -165,21 +164,6 @@ module.exports = SubscriptionController = {
             return next(error)
           }
           const fromPlansPage = req.query.hasSubscription
-          logger.log(
-            {
-              user,
-              hasSubscription,
-              fromPlansPage,
-              personalSubscription,
-              memberGroupSubscriptions,
-              managedGroupSubscriptions,
-              confirmedMemberInstitutions,
-              managedInstitutions,
-              managedPublishers,
-              v1SubscriptionStatus
-            },
-            'showing subscription dashboard'
-          )
           const plans = SubscriptionViewModelBuilder.buildViewModel()
           const data = {
             title: 'your_subscription',
@@ -209,10 +193,6 @@ module.exports = SubscriptionController = {
         req.body.recurly_three_d_secure_action_result_token_id
     }
     const { subscriptionDetails } = req.body
-    logger.log(
-      { user_id: user._id, subscriptionDetails },
-      'creating subscription'
-    )
 
     return LimitationsManager.userHasV1OrV2Subscription(user, function(
       err,
@@ -419,10 +399,6 @@ module.exports = SubscriptionController = {
       if (!hasSubscription) {
         return res.redirect('/user/subscription/plans')
       }
-      logger.log(
-        { planName, user_id: user._id },
-        'rendering upgrade to annual page'
-      )
       return res.render('subscriptions/upgradeToAnnual', {
         title: 'Upgrade to annual',
         planName

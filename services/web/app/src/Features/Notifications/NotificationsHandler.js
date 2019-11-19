@@ -90,7 +90,6 @@ module.exports = {
       method: 'POST',
       json: payload
     }
-    logger.log({ opts }, 'creating notification for user')
     return makeRequest(opts, callback)
   },
 
@@ -107,10 +106,6 @@ module.exports = {
         key
       }
     }
-    logger.log(
-      { user_id, key },
-      'sending mark notification as read with key to notifications api'
-    )
     return makeRequest(opts, callback)
   },
 
@@ -124,10 +119,6 @@ module.exports = {
       }/user/${user_id}/notification/${notification_id}`,
       timeout: oneSecond
     }
-    logger.log(
-      { user_id, notification_id },
-      'sending mark notification as read to notifications api'
-    )
     return makeRequest(opts, callback)
   },
 
@@ -143,10 +134,6 @@ module.exports = {
       method: 'DELETE',
       timeout: oneSecond
     }
-    logger.log(
-      { key },
-      'sending mark notification as read with key-only to notifications api'
-    )
     return makeRequest(opts, callback)
   }
 }

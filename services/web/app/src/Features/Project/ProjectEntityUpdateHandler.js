@@ -253,7 +253,7 @@ const ProjectEntityUpdateHandler = {
           if (doc == null) {
             // Do not allow an update to a doc which has never exist on this project
             logger.warn(
-              { docId, projectId, lines },
+              { docId, projectId },
               'doc not found while updating doc lines'
             )
             return callback(new Errors.NotFoundError('doc not found'))
@@ -272,7 +272,7 @@ const ProjectEntityUpdateHandler = {
             (err, modified, rev) => {
               if (err != null) {
                 logger.warn(
-                  { err, docId, projectId, lines },
+                  { err, docId, projectId },
                   'error sending doc to docstore'
                 )
                 return callback(err)

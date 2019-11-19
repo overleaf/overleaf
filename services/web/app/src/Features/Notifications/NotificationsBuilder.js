@@ -10,7 +10,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const logger = require('logger-sharelatex')
 const NotificationsHandler = require('./NotificationsHandler')
 const request = require('request')
 const settings = require('settings-sharelatex')
@@ -85,15 +84,6 @@ module.exports = {
           projectId: project._id.toString(),
           token: invite.token
         }
-        logger.log(
-          {
-            user_id: user._id,
-            project_id: project._id,
-            invite_id: invite._id,
-            key: this.key
-          },
-          'creating project invite notification for user'
-        )
         return NotificationsHandler.createNotification(
           user._id,
           this.key,
@@ -143,10 +133,6 @@ module.exports = {
               university_name: body.name,
               content: body.enrolment_ad_html
             }
-            logger.log(
-              { user_id: userId, key },
-              'creating notification key for user'
-            )
             return NotificationsHandler.createNotification(
               userId,
               key,

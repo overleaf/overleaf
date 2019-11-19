@@ -36,10 +36,6 @@ module.exports = {
     const createdAt = new Date()
     const expiresAt = new Date(createdAt.getTime() + expiresIn * 1000)
     const token = crypto.randomBytes(32).toString('hex')
-    logger.log(
-      { data, expiresIn, token_start: token.slice(0, 8) },
-      `generating token for ${use}`
-    )
     return db.tokens.insert(
       {
         use,
@@ -61,10 +57,6 @@ module.exports = {
     if (callback == null) {
       callback = function(error, data) {}
     }
-    logger.log(
-      { token_start: token.slice(0, 8) },
-      `getting data from ${use} token`
-    )
     const now = new Date()
     return db.tokens.findAndModify(
       {

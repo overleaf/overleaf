@@ -106,12 +106,6 @@ describe('ProjectDownloadsController', function() {
     it('should record the action via Metrics', function() {
       return this.metrics.inc.calledWith('zip-downloads').should.equal(true)
     })
-
-    it('should log the action', function() {
-      return this.logger.log
-        .calledWith(sinon.match.any, 'downloading project')
-        .should.equal(true)
-    })
   })
 
   describe('downloadMultipleProjects', function() {
@@ -168,12 +162,6 @@ describe('ProjectDownloadsController', function() {
     it('should record the action via Metrics', function() {
       return this.metrics.inc
         .calledWith('zip-downloads-multiple')
-        .should.equal(true)
-    })
-
-    it('should log the action', function() {
-      return this.logger.log
-        .calledWith(sinon.match.any, 'downloading multiple projects')
         .should.equal(true)
     })
   })

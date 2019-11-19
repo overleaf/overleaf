@@ -66,10 +66,6 @@ const FileStoreHandler = {
       }
       const fileRef = new File(Object.assign({}, fileArgs, { hash: hashValue }))
       const fileId = fileRef._id
-      logger.log(
-        { projectId, fileId, fsPath, hash: hashValue, fileRef },
-        'uploading file from disk'
-      )
       const readStream = fs.createReadStream(fsPath)
       readStream.on('error', function(err) {
         logger.warn(
@@ -117,10 +113,6 @@ const FileStoreHandler = {
   },
 
   getFileStream(projectId, fileId, query, callback) {
-    logger.log(
-      { projectId, fileId, query },
-      'getting file stream from file store'
-    )
     let queryString = ''
     if (query != null && query['format'] != null) {
       queryString = `?format=${query['format']}`

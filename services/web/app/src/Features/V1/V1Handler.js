@@ -67,7 +67,7 @@ module.exports = V1Handler = {
     if (callback == null) {
       callback = function(err, created) {}
     }
-    logger.log({ v1_user_id }, 'sending password reset request to v1 login api')
+
     return V1Api.request(
       {
         method: 'POST',

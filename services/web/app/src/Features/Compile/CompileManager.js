@@ -39,7 +39,6 @@ module.exports = CompileManager = {
       return _callback(...Array.from(args || []))
     }
 
-    logger.log({ project_id, user_id }, 'compiling project')
     return CompileManager._checkIfRecentlyCompiled(
       project_id,
       user_id,
@@ -105,7 +104,6 @@ module.exports = CompileManager = {
                             if (error != null) {
                               return callback(error)
                             }
-                            logger.log({ files: outputFiles }, 'output files')
                             return callback(
                               null,
                               status,

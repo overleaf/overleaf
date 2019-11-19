@@ -32,13 +32,6 @@ module.exports = BlogHandler = {
       if (res.statusCode !== 200) {
         return callback(new Error('blog announcement returned non 200'))
       }
-      logger.log(
-        {
-          announcementsLength:
-            announcements != null ? announcements.length : undefined
-        },
-        'announcements returned'
-      )
       announcements = _.map(announcements, function(announcement) {
         announcement.date = new Date(announcement.date)
         return announcement

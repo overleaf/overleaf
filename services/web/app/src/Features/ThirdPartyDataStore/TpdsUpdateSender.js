@@ -68,7 +68,6 @@ const TpdsUpdateSender = {
         )
         return callback()
       } else {
-        logger.log({ group, job }, 'successfully queued up job for tpdsworker')
         return callback()
       }
     })
@@ -189,16 +188,6 @@ const TpdsUpdateSender = {
       user_id,
       allUserIds
     ) {
-      logger.log(
-        {
-          project_id: options.project_id,
-          user_id,
-          startPath,
-          endPath,
-          uri: options.uri
-        },
-        'moving entity in third party data store'
-      )
       const moveOptions = {
         method: 'put',
         title: 'moveEntity',
@@ -233,15 +222,6 @@ const TpdsUpdateSender = {
       user_id,
       allUserIds
     ) {
-      logger.log(
-        {
-          project_id: options.project_id,
-          user_id,
-          path: options.path,
-          uri: options.uri
-        },
-        'deleting entity in third party data store'
-      )
       const deleteOptions = {
         method: 'DELETE',
         headers: {
@@ -270,7 +250,6 @@ const TpdsUpdateSender = {
       callback = function(err) {}
     }
     metrics.inc('tpds.poll-dropbox')
-    logger.log({ user_id }, 'polling dropbox for user')
     const options = {
       method: 'POST',
       uri: `${tpdsUrl}/user/poll`,

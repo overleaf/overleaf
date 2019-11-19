@@ -28,10 +28,6 @@ module.exports = {
     const { doc_id } = req.params
     const plain =
       __guard__(req != null ? req.query : undefined, x => x.plain) === 'true'
-    logger.log(
-      { doc_id, project_id },
-      'receiving get document request from api (docupdater)'
-    )
     return ProjectGetter.getProject(
       project_id,
       { rootFolder: true, overleaf: true },
@@ -100,10 +96,6 @@ module.exports = {
     const project_id = req.params.Project_id
     const { doc_id } = req.params
     const { lines, version, ranges, lastUpdatedAt, lastUpdatedBy } = req.body
-    logger.log(
-      { doc_id, project_id },
-      'receiving set document request from api (docupdater)'
-    )
     return ProjectEntityUpdateHandler.updateDocLines(
       project_id,
       doc_id,

@@ -15,7 +15,6 @@ let V1SubscriptionManager
 const UserGetter = require('../User/UserGetter')
 const request = require('request')
 const settings = require('settings-sharelatex')
-const logger = require('logger-sharelatex')
 const { V1ConnectionError, NotFoundError } = require('../Errors/Errors')
 
 module.exports = V1SubscriptionManager = {
@@ -29,7 +28,6 @@ module.exports = V1SubscriptionManager = {
     if (callback == null) {
       callback = function(err, planCode, v1Id) {}
     }
-    logger.log({ userId }, '[V1SubscriptionManager] fetching v1 plan for user')
     return V1SubscriptionManager._v1Request(
       userId,
       {
@@ -43,10 +41,6 @@ module.exports = V1SubscriptionManager = {
           return callback(error)
         }
         let planName = body != null ? body.plan_name : undefined
-        logger.log(
-          { userId, planName, body },
-          '[V1SubscriptionManager] fetched v1 plan for user'
-        )
         if (['pro', 'pro_plus', 'student', 'free'].includes(planName)) {
           planName = `v1_${planName}`
         } else {
@@ -121,12 +115,6 @@ module.exports = V1SubscriptionManager = {
         user != null ? user.overleaf : undefined,
         x => x.id
       )
-      if (v1Id == null) {
-        logger.log(
-          { userId },
-          '[V1SubscriptionManager] no v1 id found for user'
-        )
-      }
 
       return callback(null, v1Id)
     })

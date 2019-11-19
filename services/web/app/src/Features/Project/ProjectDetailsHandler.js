@@ -69,7 +69,6 @@ async function getDetails(projectId) {
   if (project.overleaf != null) {
     details.overleaf = project.overleaf
   }
-  logger.log({ projectId, details }, 'getting project details')
   return details
 }
 
@@ -183,7 +182,6 @@ function fixProjectName(name) {
 }
 
 async function setPublicAccessLevel(projectId, newAccessLevel) {
-  logger.log({ projectId, level: newAccessLevel }, 'set public access level')
   // DEPRECATED: `READ_ONLY` and `READ_AND_WRITE` are still valid in, but should no longer
   // be passed here. Remove after token-based access has been live for a while
   if (
@@ -215,16 +213,8 @@ async function ensureTokensArePresent(projectId) {
     project.tokens.readOnly != null &&
     project.tokens.readAndWrite != null
   ) {
-    logger.log({ projectId }, 'project already has tokens')
     return project.tokens
   }
-  const hasTokens = project.tokens != null
-  const hasReadOnly = hasTokens && project.tokens.readOnly != null
-  const hasReadAndWrite = hasTokens && project.tokens.readAndWrite != null
-  logger.log(
-    { projectId, hasTokens, hasReadOnly, hasReadAndWrite },
-    'generating tokens for project'
-  )
   await _generateTokens(project)
   await Project.update(
     { _id: projectId },

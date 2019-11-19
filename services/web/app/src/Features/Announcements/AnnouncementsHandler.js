@@ -113,15 +113,6 @@ module.exports = AnnouncementsHandler = {
           return announcement
         })
 
-        logger.log(
-          {
-            announcementsLength:
-              announcements != null ? announcements.length : undefined,
-            user_id: user != null ? user._id : undefined
-          },
-          'returning announcements'
-        )
-
         return callback(null, announcements)
       }
     )

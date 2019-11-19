@@ -114,10 +114,6 @@ const ProjectGetter = {
       query = { _id: ObjectId(project_id.toString()) }
     } else {
       const err = new Error('malformed get request')
-      logger.log(
-        { project_id, err, type: typeof project_id },
-        'malformed get request'
-      )
       return callback(err)
     }
 

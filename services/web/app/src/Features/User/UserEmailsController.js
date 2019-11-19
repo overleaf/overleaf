@@ -5,7 +5,6 @@ const UserUpdater = require('./UserUpdater')
 const EmailHelper = require('../Helpers/EmailHelper')
 const UserEmailsConfirmationHandler = require('./UserEmailsConfirmationHandler')
 const { endorseAffiliation } = require('../Institutions/InstitutionsAPI')
-const logger = require('logger-sharelatex')
 const Errors = require('../Errors/Errors')
 const HttpErrors = require('@overleaf/o-error/http')
 
@@ -49,13 +48,8 @@ function resendConfirmation(req, res, next) {
       return next(error)
     }
     if (!user || user._id.toString() !== userId) {
-      logger.log(
-        { userId, email, foundUserId: user && user._id },
-        "email doesn't match logged in user"
-      )
       return res.sendStatus(422)
     }
-    logger.log({ userId, email }, 'resending email confirmation token')
     UserEmailsConfirmationHandler.sendConfirmationEmail(userId, email, function(
       error
     ) {

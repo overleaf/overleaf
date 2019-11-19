@@ -227,12 +227,6 @@ describe('UserDeleter', function() {
               .be.rejected
             this.UserMock.verify()
           })
-
-          it('should log a warning', async function() {
-            await expect(this.UserDeleter.promises.deleteUser(this.userId)).to
-              .be.rejected
-            sinon.assert.called(this.logger.warn)
-          })
         })
 
         describe('when called as a callback', function() {

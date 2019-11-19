@@ -69,7 +69,6 @@ module.exports = HealthCheckController = {
   },
 
   checkMongo(req, res, next) {
-    logger.log('running mongo health check')
     return UserGetter.getUserEmail(settings.smokeTest.userId, function(
       err,
       email
@@ -84,7 +83,6 @@ module.exports = HealthCheckController = {
         )
         return res.sendStatus(500)
       } else {
-        logger.log({ email }, 'mongo health check passed')
         return res.sendStatus(200)
       }
     })

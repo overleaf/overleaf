@@ -69,7 +69,6 @@ async function expireDeletedUsersAfterDuration() {
   }).exec()
 
   if (deletedUsers.length === 0) {
-    logger.log('No deleted users were found for duration')
     return
   }
 

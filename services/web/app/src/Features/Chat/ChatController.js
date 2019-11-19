@@ -62,7 +62,6 @@ module.exports = ChatController = {
   getMessages(req, res, next) {
     const { project_id } = req.params
     const { query } = req
-    logger.log({ project_id, query }, 'getting messages')
     return ChatApiHandler.getGlobalMessages(
       project_id,
       query.limit,
@@ -77,10 +76,6 @@ module.exports = ChatController = {
             if (err != null) {
               return next(err)
             }
-            logger.log(
-              { length: messages != null ? messages.length : undefined },
-              'sending messages to client'
-            )
             return res.json(messages)
           }
         )

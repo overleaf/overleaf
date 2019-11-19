@@ -114,15 +114,6 @@ module.exports = LimitationsManager = {
                 ).withCause(err)
               )
             }
-            logger.log(
-              {
-                user_id: user._id,
-                isMember,
-                hasSubscription,
-                hasV1Subscription
-              },
-              'checking if user has subscription or is group member'
-            )
             return callback(
               err,
               isMember || hasSubscription || hasV1Subscription,
@@ -143,7 +134,6 @@ module.exports = LimitationsManager = {
     if (callback == null) {
       callback = function(err, hasSubscription, subscription) {}
     }
-    logger.log({ user_id: user._id }, 'checking if user has subscription')
     return SubscriptionLocator.getUsersSubscription(user._id, function(
       err,
       subscription
@@ -156,10 +146,6 @@ module.exports = LimitationsManager = {
         (subscription.recurlySubscription_id != null ||
           (subscription != null ? subscription.customAccount : undefined) ===
             true)
-      logger.log(
-        { user, hasValidSubscription, subscription },
-        'checking if user has subscription'
-      )
       return callback(err, hasValidSubscription, subscription)
     })
   },
@@ -191,10 +177,6 @@ module.exports = LimitationsManager = {
     if (callback == null) {
       callback = function(error, isMember, subscriptions) {}
     }
-    logger.log(
-      { user_id: user._id },
-      'checking is user is member of subscription groups'
-    )
     return SubscriptionLocator.getMemberSubscriptions(user._id, function(
       err,
       subscriptions
@@ -217,10 +199,6 @@ module.exports = LimitationsManager = {
       err,
       v1Subscription
     ) {
-      logger.log(
-        { user_id: user._id, v1Subscription },
-        '[userHasV1Subscription]'
-      )
       return callback(
         err,
         !!(v1Subscription != null ? v1Subscription.has_subscription : undefined)

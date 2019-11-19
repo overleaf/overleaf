@@ -41,7 +41,6 @@ module.exports = TeamInvitesHandler = {
     if (!email) {
       return callback(new Error('invalid email'))
     }
-    logger.log({ teamManagerId, email }, 'Creating manager team invite')
     return UserGetter.getUser(teamManagerId, function(error, teamManager) {
       if (error) {
         return callback(error)
@@ -81,7 +80,6 @@ module.exports = TeamInvitesHandler = {
   },
 
   acceptInvite(token, userId, callback) {
-    logger.log({ userId }, 'Accepting invite')
     TeamInvitesHandler.getInvite(token, function(err, invite, subscription) {
       if (err) {
         return callback(err)
@@ -107,7 +105,6 @@ module.exports = TeamInvitesHandler = {
     if (!email) {
       return callback(new Error('invalid email'))
     }
-    logger.log({ teamManagerId, email }, 'Revoking invite')
     removeInviteFromTeam(subscription.id, email, callback)
   },
 
@@ -131,10 +128,6 @@ module.exports = TeamInvitesHandler = {
 }
 
 var createInvite = function(subscription, email, inviter, callback) {
-  logger.log(
-    { subscriptionId: subscription.id, email, inviterId: inviter._id },
-    'Creating invite'
-  )
   checkIfInviteIsPossible(subscription, email, function(
     error,
     possible,
@@ -213,10 +206,6 @@ var createInvite = function(subscription, email, inviter, callback) {
 var removeInviteFromTeam = function(subscriptionId, email, callback) {
   const searchConditions = { _id: new ObjectId(subscriptionId.toString()) }
   const removeInvite = { $pull: { teamInvites: { email } } }
-  logger.log(
-    { subscriptionId, email, searchConditions, removeInvite },
-    'removeInviteFromTeam'
-  )
 
   async.series(
     [

@@ -73,10 +73,6 @@ function getClient() {
 
 async function sendEmail(options) {
   try {
-    logger.log(
-      { receiver: options.to, subject: options.subject },
-      'sending email'
-    )
     const canContinue = await checkCanSendEmail(options)
     if (!canContinue) {
       logger.log(
@@ -104,7 +100,6 @@ async function sendEmail(options) {
       sendMailOptions.textEncoding = EMAIL_SETTINGS.textEncoding
     }
     await client.sendMail(sendMailOptions)
-    logger.log(`Message sent to ${options.to}`)
   } catch (err) {
     throw new OError({
       message: 'error sending message'

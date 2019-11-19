@@ -3,7 +3,6 @@ const EmailHandler = require('../Email/EmailHandler')
 const OneTimeTokenHandler = require('../Security/OneTimeTokenHandler')
 const settings = require('settings-sharelatex')
 const Errors = require('../Errors/Errors')
-const logger = require('logger-sharelatex')
 const UserUpdater = require('./UserUpdater')
 const UserGetter = require('./UserGetter')
 
@@ -48,10 +47,6 @@ const UserEmailsConfirmationHandler = {
   },
 
   confirmEmailFromToken(token, callback) {
-    logger.log(
-      { token_start: token.slice(0, 8) },
-      'confirming email from token'
-    )
     OneTimeTokenHandler.getValueFromTokenAndExpire(
       'email_confirmation',
       token,
@@ -64,10 +59,7 @@ const UserEmailsConfirmationHandler = {
         }
         const userId = data.user_id
         const email = data.email
-        logger.log(
-          { data, userId, email, token_start: token.slice(0, 8) },
-          'found data for email confirmation'
-        )
+
         if (!userId || email !== EmailHelper.parseEmail(email)) {
           return callback(new Errors.NotFoundError('invalid data'))
         }

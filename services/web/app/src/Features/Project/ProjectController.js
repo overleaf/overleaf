@@ -122,7 +122,6 @@ const ProjectController = {
   deleteProject(req, res) {
     const projectId = req.params.Project_id
     const forever = (req.query != null ? req.query.forever : undefined) != null
-    logger.log({ projectId, forever }, 'received request to archive project')
     const user = AuthenticationController.getSessionUser(req)
     const cb = err => {
       if (err != null) {
@@ -146,7 +145,6 @@ const ProjectController = {
   archiveProject(req, res, next) {
     const projectId = req.params.Project_id
     const userId = AuthenticationController.getLoggedInUserId(req)
-    logger.log({ projectId }, 'received request to archive project')
 
     ProjectDeleter.archiveProject(projectId, userId, function(err) {
       if (err != null) {
@@ -160,7 +158,6 @@ const ProjectController = {
   unarchiveProject(req, res, next) {
     const projectId = req.params.Project_id
     const userId = AuthenticationController.getLoggedInUserId(req)
-    logger.log({ projectId }, 'received request to unarchive project')
 
     ProjectDeleter.unarchiveProject(projectId, userId, function(err) {
       if (err != null) {
@@ -174,7 +171,6 @@ const ProjectController = {
   trashProject(req, res, next) {
     const projectId = req.params.project_id
     const userId = AuthenticationController.getLoggedInUserId(req)
-    logger.log({ projectId }, 'received request to trash project')
 
     ProjectDeleter.trashProject(projectId, userId, function(err) {
       if (err != null) {
@@ -188,7 +184,6 @@ const ProjectController = {
   untrashProject(req, res, next) {
     const projectId = req.params.project_id
     const userId = AuthenticationController.getLoggedInUserId(req)
-    logger.log({ projectId }, 'received request to untrash project')
 
     ProjectDeleter.untrashProject(projectId, userId, function(err) {
       if (err != null) {
@@ -200,9 +195,6 @@ const ProjectController = {
   },
 
   expireDeletedProjectsAfterDuration(req, res) {
-    logger.log(
-      'received request to look for old deleted projects and expire them'
-    )
     ProjectDeleter.expireDeletedProjectsAfterDuration(err => {
       if (err != null) {
         res.sendStatus(500)
@@ -214,7 +206,6 @@ const ProjectController = {
 
   expireDeletedProject(req, res, next) {
     const { projectId } = req.params
-    logger.log('received request to expire deleted project', { projectId })
     ProjectDeleter.expireDeletedProject(projectId, err => {
       if (err != null) {
         next(err)
@@ -226,7 +217,6 @@ const ProjectController = {
 
   restoreProject(req, res) {
     const projectId = req.params.Project_id
-    logger.log({ projectId }, 'received request to restore project')
     ProjectDeleter.restoreProject(projectId, err => {
       if (err != null) {
         res.sendStatus(500)
@@ -272,10 +262,7 @@ const ProjectController = {
     const projectName =
       req.body.projectName != null ? req.body.projectName.trim() : undefined
     const { template } = req.body
-    logger.log(
-      { user: userId, projectType: template, name: projectName },
-      'creating project'
-    )
+
     async.waterfall(
       [
         cb => {
@@ -290,10 +277,6 @@ const ProjectController = {
         if (err != null) {
           return next(err)
         }
-        logger.log(
-          { project, userId, name: projectName, templateType: template },
-          'created project'
-        )
         res.send({ project_id: project._id })
       }
     )
@@ -585,10 +568,7 @@ const ProjectController = {
             parseInt(user._id.toString().slice(-2), 16) <
             freeUserProportion * 255
           const showFrontWidget = paidUser || sampleFreeUser
-          logger.log(
-            { paidUser, sampleFreeUser, showFrontWidget },
-            'deciding whether to show front widget'
-          )
+
           if (showFrontWidget) {
             viewModel.frontChatWidgetRoomId =
               Settings.overleaf != null
@@ -619,7 +599,6 @@ const ProjectController = {
     }
 
     const projectId = req.params.Project_id
-    logger.log({ projectId, anonymous, userId }, 'loading editor')
 
     // record failures to load the custom websocket
     if ((req.query != null ? req.query.ws : undefined) === 'fallback') {
@@ -738,10 +717,6 @@ const ProjectController = {
 
         const daysSinceLastUpdated =
           (new Date() - project.lastUpdated) / 86400000
-        logger.log(
-          { projectId, daysSinceLastUpdated },
-          'got db results for loading editor'
-        )
 
         const token = TokenAccessHandler.getRequestToken(req, projectId)
         const { isTokenMember } = results
@@ -774,7 +749,6 @@ const ProjectController = {
               allowedFreeTrial = !!subscription.freeTrial.allowed || true
             }
 
-            logger.log({ projectId }, 'rendering editor page')
             res.render('project/editor', {
               title: project.name,
               priority_title: true,

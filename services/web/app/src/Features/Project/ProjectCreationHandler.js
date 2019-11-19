@@ -46,7 +46,6 @@ const ProjectCreationHandler = {
       if (error != null) {
         return callback(error)
       }
-      logger.log({ owner_id, projectName }, 'creating blank project')
       if (attributes.overleaf !== undefined && attributes.overleaf != null) {
         return ProjectCreationHandler._createBlankProject(
           owner_id,

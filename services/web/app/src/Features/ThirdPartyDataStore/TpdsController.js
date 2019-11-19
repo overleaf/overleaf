@@ -26,10 +26,7 @@ module.exports = {
     metrics.inc('tpds.merge-update')
     const { filePath, user_id, projectName } = parseParams(req)
     const source = req.headers['x-sl-update-source'] || 'unknown'
-    logger.log(
-      { user_id, filePath, fullPath: req.params[0], projectName, source },
-      'reciving update request from tpds'
-    )
+
     return tpdsUpdateHandler.newUpdate(
       user_id,
       projectName,
@@ -37,10 +34,6 @@ module.exports = {
       req,
       source,
       function(err) {
-        logger.log(
-          { user_id, filePath, fullPath: req.params[0] },
-          'sending response that tpdsUpdate has been completed'
-        )
         if (err != null) {
           if (err.name === 'TooManyRequestsError') {
             logger.warn(
@@ -56,10 +49,6 @@ module.exports = {
             return res.sendStatus(500)
           }
         } else {
-          logger.log(
-            { user_id, filePath, projectName },
-            'telling tpds update has been processed'
-          )
           return res.sendStatus(200)
         }
       }
@@ -70,10 +59,6 @@ module.exports = {
     metrics.inc('tpds.delete-update')
     const { filePath, user_id, projectName } = parseParams(req)
     const source = req.headers['x-sl-update-source'] || 'unknown'
-    logger.log(
-      { user_id, filePath, projectName, fullPath: req.params[0], source },
-      'reciving delete request from tpds'
-    )
     return tpdsUpdateHandler.deleteUpdate(
       user_id,
       projectName,
@@ -87,10 +72,6 @@ module.exports = {
           )
           return res.sendStatus(500)
         } else {
-          logger.log(
-            { user_id, filePath, projectName },
-            'telling tpds delete has been processed'
-          )
           return res.sendStatus(200)
         }
       }
@@ -108,7 +89,6 @@ module.exports = {
     const { project_id } = req.params
     const path = `/${req.params[0]}` // UpdateMerger expects leading slash
     const source = req.headers['x-sl-update-source'] || 'unknown'
-    logger.log({ project_id, path, source }, 'received project contents update')
     return UpdateMerger.mergeUpdate(
       null,
       project_id,
@@ -131,10 +111,7 @@ module.exports = {
     const { project_id } = req.params
     const path = `/${req.params[0]}` // UpdateMerger expects leading slash
     const source = req.headers['x-sl-update-source'] || 'unknown'
-    logger.log(
-      { project_id, path, source },
-      'received project contents delete request'
-    )
+
     return UpdateMerger.deleteUpdate(null, project_id, path, source, function(
       error
     ) {

@@ -12,7 +12,6 @@
  */
 const NotificationsHandler = require('./NotificationsHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
-const logger = require('logger-sharelatex')
 const _ = require('underscore')
 
 module.exports = {
@@ -37,6 +36,5 @@ module.exports = {
     const user_id = AuthenticationController.getLoggedInUserId(req)
     const { notification_id } = req.params
     NotificationsHandler.markAsRead(user_id, notification_id, () => res.send())
-    return logger.log({ user_id, notification_id }, 'mark notification as read')
   }
 }

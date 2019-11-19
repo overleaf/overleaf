@@ -14,7 +14,6 @@ const AuthenticationController = require('../Authentication/AuthenticationContro
 const UserMembershipHandler = require('./UserMembershipHandler')
 const Errors = require('../Errors/Errors')
 const EmailHelper = require('../Helpers/EmailHelper')
-const logger = require('logger-sharelatex')
 
 module.exports = {
   index(req, res, next) {
@@ -134,7 +133,7 @@ module.exports = {
 
   exportCsv(req, res, next) {
     const { entity, entityConfig } = req
-    logger.log({ subscriptionId: entity._id }, 'exporting csv')
+
     return UserMembershipHandler.getUsers(entity, entityConfig, function(
       error,
       users

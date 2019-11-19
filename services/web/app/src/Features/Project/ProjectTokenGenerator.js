@@ -14,7 +14,6 @@ const crypto = require('crypto')
 const V1Api = require('../V1/V1Api')
 const Features = require('../../infrastructure/Features')
 const Async = require('async')
-const logger = require('logger-sharelatex')
 const { promisify } = require('util')
 
 // This module mirrors the token generation in Overleaf (`random_token.rb`),
@@ -71,7 +70,6 @@ const ProjectTokenGenerator = {
       10,
       function(cb) {
         const token = ProjectTokenGenerator.readOnlyToken()
-        logger.log({ token }, 'Generated read-only token')
 
         if (!Features.hasFeature('overleaf-integration')) {
           return cb(null, token)
@@ -98,10 +96,6 @@ const ProjectTokenGenerator = {
             if (body.exists === true) {
               return cb(new Error(`token already exists in v1: ${token}`))
             } else {
-              logger.log(
-                { token },
-                'Read-only token does not exist in v1, good to use'
-              )
               return cb(null, token)
             }
           }

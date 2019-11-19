@@ -85,7 +85,6 @@ async function _addInstitutionEmail(userId, email, providerId) {
     }
   }
   if (user == null) {
-    logger.log(userId, 'could not find user for institution SAML linking')
     throw new Errors.NotFoundError('user not found')
   }
   const emailAlreadyAssociated = user.emails.find(e => e.email === email)

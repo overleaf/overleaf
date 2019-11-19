@@ -264,10 +264,6 @@ const ProjectLocator = {
     const needleName = foldersList.pop()
     const rootFolder = project.rootFolder[0]
 
-    logger.log(
-      { projectId: project._id, path: needlePath, foldersList },
-      'looking for element by path'
-    )
     const jobs = []
     jobs.push(cb => getParentFolder(rootFolder, foldersList, 0, cb))
     jobs.push((folder, cb) => getEntity(folder, needleName, cb))
@@ -290,10 +286,6 @@ const ProjectLocator = {
           project =>
             project.name.toLowerCase() === projectName &&
             !ProjectHelper.isArchivedOrTrashed(project, userId)
-        )
-        logger.log(
-          { userId, projectName, totalProjects: projects.length, project },
-          'looking for project by name'
         )
         callback(null, project)
       }

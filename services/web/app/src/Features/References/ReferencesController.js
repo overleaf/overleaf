@@ -28,7 +28,6 @@ module.exports = ReferencesController = {
       )
       return res.sendStatus(400)
     }
-    logger.log({ projectId, docIds }, 'index references for project')
     return ReferencesHandler.index(projectId, docIds, function(err, data) {
       if (err != null) {
         logger.err({ err, projectId }, 'error indexing all references')
@@ -47,7 +46,6 @@ module.exports = ReferencesController = {
   indexAll(req, res) {
     const projectId = req.params.Project_id
     const { shouldBroadcast } = req.body
-    logger.log({ projectId }, 'index all references for project')
     return ReferencesHandler.indexAll(projectId, function(err, data) {
       if (err != null) {
         logger.err({ err, projectId }, 'error indexing all references')
@@ -68,10 +66,6 @@ module.exports = ReferencesController = {
       return res.json({ projectId, keys: [] })
     }
     if (shouldBroadcast) {
-      logger.log(
-        { projectId },
-        'emitting new references keys to connected clients'
-      )
       EditorRealTimeController.emitToRoom(
         projectId,
         'references:keys:updated',

@@ -25,7 +25,6 @@ module.exports = DocstoreManager = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log({ project_id, doc_id }, 'deleting doc in docstore api')
     const url = `${
       settings.apis.docstore.url
     }/project/${project_id}/doc/${doc_id}`
@@ -63,7 +62,6 @@ module.exports = DocstoreManager = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log({ project_id }, 'getting all docs for project in docstore api')
     const url = `${settings.apis.docstore.url}/project/${project_id}/doc`
     return request.get(
       {
@@ -95,10 +93,6 @@ module.exports = DocstoreManager = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log(
-      { project_id },
-      'getting all doc ranges for project in docstore api'
-    )
     const url = `${settings.apis.docstore.url}/project/${project_id}/ranges`
     return request.get(
       {
@@ -137,7 +131,6 @@ module.exports = DocstoreManager = {
       callback = options
       options = {}
     }
-    logger.log({ project_id, doc_id, options }, 'getting doc in docstore api')
     let url = `${
       settings.apis.docstore.url
     }/project/${project_id}/doc/${doc_id}`
@@ -185,7 +178,6 @@ module.exports = DocstoreManager = {
     if (callback == null) {
       callback = function(error, modified, rev) {}
     }
-    logger.log({ project_id, doc_id }, 'updating doc in docstore api')
     const url = `${
       settings.apis.docstore.url
     }/project/${project_id}/doc/${doc_id}`

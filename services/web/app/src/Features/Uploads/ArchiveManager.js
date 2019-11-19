@@ -148,10 +148,6 @@ const ArchiveManager = {
 
       let entryFileCount = 0
       zipfile.on('entry', function(entry) {
-        logger.log(
-          { source, fileName: entry.fileName },
-          'processing zip file entry'
-        )
         return ArchiveManager._checkFilePath(entry, destination, function(
           err,
           destFile

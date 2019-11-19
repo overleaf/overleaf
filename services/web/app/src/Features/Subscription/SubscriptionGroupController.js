@@ -49,10 +49,7 @@ module.exports = {
       if (error != null) {
         return next(error)
       }
-      logger.log(
-        { adminUserId, userToRemove_id },
-        'removing user from group subscription after self request'
-      )
+
       return SubscriptionGroupHandler.removeUserFromGroup(
         subscription._id,
         userToRemove_id,
@@ -90,13 +87,13 @@ var getManagedSubscription = (managerId, callback) =>
     err,
     subscription
   ) {
-    if (subscription != null) {
-      logger.log({ managerId }, 'got managed subscription')
-    } else {
-      if (!err) {
-        err = new Error(`No subscription found managed by user ${managerId}`)
-      }
+    if (err) {
+      return callback(err)
+    } else if (!subscription) {
+      return callback(
+        new Error(`No subscription found managed by user ${managerId}`)
+      )
     }
 
-    return callback(err, subscription)
+    return callback(null, subscription)
   })

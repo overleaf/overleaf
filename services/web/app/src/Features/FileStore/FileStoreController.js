@@ -10,7 +10,6 @@ module.exports = {
     const fileId = req.params.File_id
     const queryString = req.query
     const userAgent = req.get('User-Agent')
-    logger.log({ projectId, fileId, queryString }, 'file download')
     ProjectLocator.findElement(
       { project_id: projectId, element_id: fileId, type: 'file' },
       function(err, file) {
@@ -34,10 +33,6 @@ module.exports = {
           }
           // mobile safari will try to render html files, prevent this
           if (isMobileSafari(userAgent) && isHtml(file)) {
-            logger.log(
-              { filename: file.name, userAgent },
-              'sending html file to mobile-safari as plain text'
-            )
             res.setHeader('Content-Type', 'text/plain')
           }
           res.setContentDisposition('attachment', { filename: file.name })

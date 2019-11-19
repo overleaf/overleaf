@@ -61,10 +61,6 @@ module.exports = LinkedFilesController = {
     const { project_id } = req.params
     const { name, provider, data, parent_folder_id } = req.body
     const user_id = AuthenticationController.getLoggedInUserId(req)
-    logger.log(
-      { project_id, name, provider, data, parent_folder_id, user_id },
-      'create linked file request'
-    )
 
     const Agent = LinkedFilesController._getAgent(provider)
     if (Agent == null) {
@@ -91,7 +87,6 @@ module.exports = LinkedFilesController = {
   refreshLinkedFile(req, res, next) {
     const { project_id, file_id } = req.params
     const user_id = AuthenticationController.getLoggedInUserId(req)
-    logger.log({ project_id, file_id, user_id }, 'refresh linked file request')
 
     return LinkedFilesHandler.getFileById(project_id, file_id, function(
       err,

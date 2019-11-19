@@ -21,7 +21,7 @@ const UserController = {
   tryDeleteUser(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
     const { password } = req.body
-    logger.log({ userId }, 'trying to delete user account')
+
     if (password == null || password === '') {
       logger.err(
         { userId },
@@ -106,7 +106,6 @@ const UserController = {
 
   updateUserSettings(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
-    logger.log({ userId }, 'updating account settings')
     User.findById(userId, (err, user) => {
       if (err != null || user == null) {
         logger.err({ err, userId }, 'problem updaing user settings')
@@ -310,7 +309,6 @@ const UserController = {
   clearSessions(req, res, next) {
     metrics.inc('user.clear-sessions')
     const user = AuthenticationController.getSessionUser(req)
-    logger.log({ userId: user._id }, 'clearing sessions for user')
     UserSessionsManager.revokeAllUserSessions(user, [req.sessionID], err => {
       if (err != null) {
         return next(err)

@@ -1,16 +1,11 @@
 let UserController
 const UserGetter = require('./UserGetter')
-const logger = require('logger-sharelatex')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const { ObjectId } = require('mongojs')
 
 module.exports = UserController = {
   getLoggedInUsersPersonalInfo(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
-    logger.log(
-      { userId },
-      'reciving request for getting logged in users personal info'
-    )
     if (!userId) {
       return next(new Error('User is not logged in'))
     }
@@ -49,10 +44,6 @@ module.exports = UserController = {
       query,
       { _id: true, first_name: true, last_name: true, email: true },
       function(error, user) {
-        logger.log(
-          { userId },
-          'receiving request for getting users personal info'
-        )
         if (error) {
           return next(error)
         }

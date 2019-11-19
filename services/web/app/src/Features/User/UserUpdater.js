@@ -43,7 +43,6 @@ const UserUpdater = {
     if (newEmail == null) {
       return callback(new Error('invalid email'))
     }
-    logger.log({ userId, newEmail }, 'updaing email address of user')
 
     let oldEmail = null
     async.series(
@@ -218,7 +217,6 @@ const UserUpdater = {
         if (error != null) {
           return callback(error)
         }
-        logger.log({ res, userId, email }, 'tried to confirm email')
         if (res.n === 0) {
           return callback(
             new Errors.NotFoundError('user id and email do no match')

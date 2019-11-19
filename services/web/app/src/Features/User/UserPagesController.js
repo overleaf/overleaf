@@ -30,7 +30,6 @@ const UserPagesController = {
   activateAccountPage(req, res, next) {
     // An 'activation' is actually just a password reset on an account that
     // was set with a random password originally.
-    logger.log({ query: req.query }, 'activiate account page called')
     if (req.query.user_id == null || req.query.token == null) {
       return ErrorController.notFound(req, res)
     }
@@ -46,10 +45,6 @@ const UserPagesController = {
           return ErrorController.notFound(req, res)
         }
         if (user.loginCount > 0) {
-          logger.log(
-            { user },
-            'user has already logged in so is active, sending them to /login'
-          )
           // Already seen this user, so account must be activate
           // This lets users keep clicking the 'activate' link in their email
           // as a way to log in which, if I know our users, they will.
@@ -72,10 +67,6 @@ const UserPagesController = {
       req.query.redir != null &&
       AuthenticationController._getRedirectFromSession(req) == null
     ) {
-      logger.log(
-        { redir: req.query.redir },
-        'setting explicit redirect from login page'
-      )
       AuthenticationController.setRedirectInSession(req, req.query.redir)
     }
     res.render('user/login', {
@@ -137,7 +128,6 @@ const UserPagesController = {
       'requestedEmail'
     ])
     delete req.session.saml
-    logger.log({ user: userId }, 'loading settings page')
     let shouldAllowEditingDetails = true
     if (Settings.ldap && Settings.ldap.updateUserDetailsOnLogin) {
       shouldAllowEditingDetails = false

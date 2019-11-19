@@ -37,8 +37,6 @@ module.exports = ProjectZipStreamManager = {
     )
     callback(null, archive)
 
-    logger.log({ project_ids }, 'creating zip stream of multiple projects')
-
     const jobs = []
     for (let project_id of Array.from(project_ids || [])) {
       ;(project_id =>

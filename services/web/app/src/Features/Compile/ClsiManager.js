@@ -70,7 +70,6 @@ const ClsiManager = {
           )
         }
       }
-      logger.log({ projectId }, 'sending compile to CLSI')
       ClsiManager._sendBuiltRequest(
         projectId,
         userId,
@@ -96,11 +95,6 @@ const ClsiManager = {
     if (options == null) {
       options = {}
     }
-    logger.log(
-      { submissionId },
-      'sending external compile to CLSI',
-      clsiRequest
-    )
     ClsiManager._sendBuiltRequest(
       submissionId,
       null,
@@ -215,18 +209,6 @@ const ClsiManager = {
                   message: 'error sending request to clsi',
                   info: { projectId, userId }
                 }).withCause(err)
-              )
-            }
-            if (response != null) {
-              logger.log(
-                {
-                  projectId,
-                  outputFilesLength:
-                    response.outputFiles && response.outputFiles.length,
-                  status: response.status,
-                  compile_status: response.compile && response.compile.status
-                },
-                'received compile response from CLSI'
               )
             }
             ClsiCookieManager._getServerId(projectId, (err, clsiServerId) => {
@@ -522,15 +504,6 @@ const ClsiManager = {
                 // note: we don't bail out when there's an error getting
                 // incremental files from the docupdater, we just fall back
                 // to a normal compile below
-              } else {
-                logger.log(
-                  {
-                    projectId,
-                    projectStateHash,
-                    docs: docUpdaterDocs != null
-                  },
-                  'checked project state'
-                )
               }
               // see if we can send an incremental update to the CLSI
               if (
@@ -791,7 +764,6 @@ const ClsiManager = {
     }
     if (rootResourcePath == null) {
       if (hasMainFile) {
-        logger.log({ projectId }, 'no root document found, setting to main.tex')
         rootResourcePath = 'main.tex'
       } else if (numberOfDocsInProject === 1) {
         // only one file, must be the main document
@@ -799,10 +771,6 @@ const ClsiManager = {
           // Remove leading /
           rootResourcePath = path.replace(/^\//, '')
         }
-        logger.warn(
-          { projectId, rootResourcePath },
-          'no root document found, single document in project'
-        )
       } else {
         return callback(
           new OError({

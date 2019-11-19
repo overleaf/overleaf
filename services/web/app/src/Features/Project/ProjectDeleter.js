@@ -51,18 +51,13 @@ const ProjectDeleter = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log(
-      { project_id },
-      'removing flag marking project as deleted by external data source'
-    )
+
     const conditions = { _id: project_id }
     const update = { deletedByExternalDataSource: false }
     return Project.update(conditions, update, {}, callback)
   },
 
   deleteUsersProjects(user_id, callback) {
-    logger.log({ user_id }, 'deleting users projects')
-
     return Project.find({ owner_ref: user_id }, function(error, projects) {
       if (error != null) {
         return callback(error)
@@ -117,7 +112,6 @@ const ProjectDeleter = {
             }
           )
         } else {
-          logger.log({}, 'No deleted projects for duration were found')
           callback(err)
         }
       }
@@ -128,7 +122,6 @@ const ProjectDeleter = {
     if (callback == null) {
       callback = function(error) {}
     }
-    logger.log({ project_id }, 'archived project from user request')
     return Project.update(
       { _id: project_id },
       { $set: { archived: true } },
@@ -137,10 +130,6 @@ const ProjectDeleter = {
           logger.warn({ err }, 'problem archived project')
           return callback(err)
         }
-        logger.log(
-          { project_id },
-          'successfully archived project from user request'
-        )
         return callback()
       }
     )
@@ -161,8 +150,6 @@ const ProjectDeleter = {
 // Async methods
 
 async function archiveProject(projectId, userId) {
-  logger.log({ projectId }, 'archiving project from user request')
-
   try {
     let project = await Project.findOne({ _id: projectId }).exec()
     if (!project) {
@@ -185,8 +172,6 @@ async function archiveProject(projectId, userId) {
 }
 
 async function unarchiveProject(projectId, userId) {
-  logger.log({ projectId }, 'unarchiving project from user request')
-
   try {
     let project = await Project.findOne({ _id: projectId }).exec()
     if (!project) {
@@ -207,8 +192,6 @@ async function unarchiveProject(projectId, userId) {
 }
 
 async function trashProject(projectId, userId) {
-  logger.log({ projectId }, 'trashing project from user request')
-
   try {
     let project = await Project.findOne({ _id: projectId }).exec()
     if (!project) {
@@ -229,8 +212,6 @@ async function trashProject(projectId, userId) {
 }
 
 async function untrashProject(projectId, userId) {
-  logger.log({ projectId }, 'untrashing project from user request')
-
   try {
     let project = await Project.findOne({ _id: projectId }).exec()
     if (!project) {
@@ -248,8 +229,6 @@ async function untrashProject(projectId, userId) {
 }
 
 async function deleteProject(project_id, options = {}) {
-  logger.log({ project_id }, 'deleting project')
-
   try {
     let project = await Project.findOne({ _id: project_id }).exec()
     if (!project) {
@@ -381,8 +360,6 @@ async function expireDeletedProject(projectId) {
         }
       }
     ).exec()
-
-    logger.log({ projectId }, 'Successfully expired deleted project')
   } catch (error) {
     logger.warn({ projectId, error }, 'error expiring deleted project')
     throw error
