@@ -59,10 +59,10 @@ module.exports = {
       try {
         let filename = app.get('views') + '/' + view + '.pug'
         pug.compileFile(filename, { cache: true })
-        console.log('compiled', view)
+        logger.log({ view }, 'compiled')
         success++
       } catch (err) {
-        console.log('error compiling', view, err)
+        logger.error({ view, err }, 'error compiling')
         failures++
       }
     })
