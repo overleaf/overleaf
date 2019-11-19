@@ -169,7 +169,7 @@ expressLocals(webRouter, privateApiRouter, publicApiRouter)
 if (app.get('env') === 'production') {
   logger.info('Production Enviroment')
   app.enable('view cache')
-  Views.precompileViews(app) // precompile templates
+  // Views.precompileViews(app) // precompile templates
 }
 
 webRouter.use(function(req, res, next) {
