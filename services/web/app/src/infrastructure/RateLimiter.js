@@ -1,16 +1,3 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const settings = require('settings-sharelatex')
 const Metrics = require('metrics-sharelatex')
 const RedisWrapper = require('./RedisWrapper')
@@ -24,7 +11,7 @@ const RateLimiter = {
       return callback(null, true)
     }
     if (callback == null) {
-      callback = function(err, shouldProcess) {}
+      callback = function() {}
     }
     const namespace = `RateLimit:${opts.endpointName}:`
     const k = `{${opts.subjectName}}`
@@ -35,7 +22,7 @@ const RateLimiter = {
       maxInInterval: opts.throttle
     })
     limiter(k, function(err, timeLeft, actionsLeft) {
-      if (err != null) {
+      if (err) {
         return callback(err)
       }
       const allowed = timeLeft === 0
