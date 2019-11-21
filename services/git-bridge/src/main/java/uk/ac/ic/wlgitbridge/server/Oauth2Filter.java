@@ -133,7 +133,11 @@ public class Oauth2Filter implements Filter {
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null) {
-            Log.info("[{}] Authorization header present");
+            String clientIp = request.getHeader("X-Forwarded-For");
+            if (clientIp == null) {
+              clientIp = request.getRemoteAddr();
+            }
+            Log.info("[{}] Authorization header present", clientIp);
             StringTokenizer st = new StringTokenizer(authHeader);
             if (st.hasMoreTokens()) {
                 String basic = st.nextToken();
@@ -157,7 +161,8 @@ public class Oauth2Filter implements Filter {
                                         Instance.jsonFactory,
                                         new GenericUrl(
                                                 oauth2.getOauth2Server()
-                                                        + "/oauth/token"
+                                                        + "/oauth/token?client_ip="
+                                                        + clientIp
                                         ),
                                         username,
                                         password
