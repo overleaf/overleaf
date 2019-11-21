@@ -2,7 +2,7 @@ version: '2.2'
 services:
     sharelatex:
         restart: always
-        # Server Pro users: 
+        # Server Pro users:
         # image: quay.io/sharelatex/sharelatex-pro
         image: sharelatex/sharelatex
         container_name: sharelatex
@@ -68,7 +68,8 @@ services:
             # SANDBOXED_COMPILES: 'true'
 
             # SANDBOXED_COMPILES_SIBLING_CONTAINERS: 'true'
-            # SANDBOXED_COMPILES_HOST_DIR: '/var/clsi/compiles'
+            # SANDBOXED_COMPILES_HOST_DIR: '/var/sharelatex_data/data/compiles'
+            # SYNCTEX_BIN_HOST_PATH: '/var/sharelatex_data/synctex'
 
             # DOCKER_RUNNER: 'false'
 
