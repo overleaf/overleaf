@@ -60,7 +60,7 @@
 						p !{translate("can_link_institution_email_acct_to_institution_acct", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
 						div !{translate("doing_this_allow_log_in_through_institution", {appName: settings.appName})}
 					.notification-action
-						a.btn.btn-sm.btn-info(href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=project&email={{notification.email}}")
+						a.btn.btn-sm.btn-info(href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=/project&email={{notification.email}}")
 							| #{translate('link_account')}
 					.notification-close
 						button(ng-click="dismiss(notification)").close.pull-right
@@ -127,7 +127,7 @@
 						p !{translate("can_link_institution_email_acct_to_institution_acct", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
 						div !{translate("doing_this_allow_log_in_through_institution", {appName: settings.appName})}
 					.notification-action
-						a.btn.btn-sm.btn-info(href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=project&email={{notification.email}}")
+						a.btn.btn-sm.btn-info(href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=/project&email={{notification.email}}")
 							| #{translate('link_account')}
 					.notification-close
 						button(ng-click="dismiss(notification)").close.pull-right

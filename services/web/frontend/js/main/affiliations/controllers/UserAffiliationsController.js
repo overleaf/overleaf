@@ -121,7 +121,7 @@ define(['base'], App =>
       $scope.ui.isProcessing = true
       $window.location.href = `${
         $scope.samlInitPath
-      }?university_id=${institutionId}&auto=true&email=${email}`
+      }?university_id=${institutionId}&auto=/user/settings&email=${email}`
     }
 
     $scope.selectUniversityManually = function() {
