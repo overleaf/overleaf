@@ -19,6 +19,10 @@ describe('AnalyticsController', function() {
       getInstitutionLicences: sinon.stub().callsArgWith(4)
     }
 
+    this.Features = {
+      hasFeature: sinon.stub().returns(true)
+    }
+
     this.controller = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -28,6 +32,7 @@ describe('AnalyticsController', function() {
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
+        '../../infrastructure/Features': this.Features,
         'logger-sharelatex': {
           log() {}
         },

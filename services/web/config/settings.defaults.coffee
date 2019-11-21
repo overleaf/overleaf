@@ -15,10 +15,16 @@ httpAuthUsers[httpAuthUser] = httpAuthPass
 
 sessionSecret = process.env['SESSION_SECRET'] or "secret-please-change"
 
-v1Api =
-	url: process.env['V1_API_URL'] or "http://#{process.env['V1_HOST'] or 'localhost'}:5000"
-	user: process.env['V1_API_USER'] or 'overleaf'
-	pass: process.env['V1_API_PASSWORD'] or 'password'
+if process.env['V1_API_URL'] or process.env['V1_HOST']
+	v1Api =
+		url: process.env['V1_API_URL'] or "http://#{process.env['V1_HOST']}:5000"
+		user: process.env['V1_API_USER']
+		pass: process.env['V1_API_PASSWORD']
+else
+	v1Api =
+		url: undefined
+		user: undefined
+		pass: undefined
 
 module.exports = settings =
 
