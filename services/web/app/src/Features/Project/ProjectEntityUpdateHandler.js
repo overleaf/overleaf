@@ -82,59 +82,57 @@ const ProjectEntityUpdateHandler = {
           { projectId, folderId, originalProjectId, originalFileRef },
           'copying file in s3 with project'
         )
-        ProjectEntityMongoUpdateHandler._confirmFolder(
+        folderId = ProjectEntityMongoUpdateHandler._confirmFolder(
           project,
-          folderId,
-          folderId => {
-            if (originalFileRef == null) {
-              logger.err(
-                { projectId, folderId, originalProjectId, originalFileRef },
-                'file trying to copy is null'
-              )
-              return callback()
-            }
-            // convert any invalid characters in original file to '_'
-            const fileProperties = {
-              name: SafePath.clean(originalFileRef.name)
-            }
-            if (originalFileRef.linkedFileData != null) {
-              fileProperties.linkedFileData = originalFileRef.linkedFileData
-            }
-            if (originalFileRef.hash != null) {
-              fileProperties.hash = originalFileRef.hash
-            }
-            const fileRef = new File(fileProperties)
-            FileStoreHandler.copyFile(
-              originalProjectId,
-              originalFileRef._id,
-              project._id,
-              fileRef._id,
-              (err, fileStoreUrl) => {
-                if (err != null) {
-                  logger.warn(
-                    {
-                      err,
-                      projectId,
-                      folderId,
-                      originalProjectId,
-                      originalFileRef
-                    },
-                    'error coping file in s3'
-                  )
-                  return callback(err)
-                }
-                next(
+          folderId
+        )
+        if (originalFileRef == null) {
+          logger.err(
+            { projectId, folderId, originalProjectId, originalFileRef },
+            'file trying to copy is null'
+          )
+          return callback()
+        }
+        // convert any invalid characters in original file to '_'
+        const fileProperties = {
+          name: SafePath.clean(originalFileRef.name)
+        }
+        if (originalFileRef.linkedFileData != null) {
+          fileProperties.linkedFileData = originalFileRef.linkedFileData
+        }
+        if (originalFileRef.hash != null) {
+          fileProperties.hash = originalFileRef.hash
+        }
+        const fileRef = new File(fileProperties)
+        FileStoreHandler.copyFile(
+          originalProjectId,
+          originalFileRef._id,
+          project._id,
+          fileRef._id,
+          (err, fileStoreUrl) => {
+            if (err != null) {
+              logger.warn(
+                {
+                  err,
                   projectId,
-                  project,
                   folderId,
                   originalProjectId,
-                  originalFileRef,
-                  userId,
-                  fileRef,
-                  fileStoreUrl,
-                  callback
-                )
-              }
+                  originalFileRef
+                },
+                'error coping file in s3'
+              )
+              return callback(err)
+            }
+            next(
+              projectId,
+              project,
+              folderId,
+              originalProjectId,
+              originalFileRef,
+              userId,
+              fileRef,
+              fileStoreUrl,
+              callback
             )
           }
         )
