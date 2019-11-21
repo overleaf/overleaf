@@ -13,8 +13,9 @@ module.exports = HistoryManager =
 			return
 		RedisManager.getHistoryType doc_id, (err, projectHistoryType) ->
 			if err?
-				logger.error {err, doc_id}, "error getting history type"
-			else if projectHistoryType is "project-history"
+				logger.warn {err, doc_id}, "error getting history type"
+				# if there's an error continue and flush to track-changes for safety
+			if projectHistoryType is "project-history"
 				logger.debug {doc_id, projectHistoryType}, "skipping track-changes flush"
 			else
 				url = "#{Settings.apis.trackchanges.url}/project/#{project_id}/doc/#{doc_id}/flush"
