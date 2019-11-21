@@ -196,10 +196,6 @@ settings =
 			url: "http://localhost:3000"
 			user: httpAuthUser
 			pass: httpAuthPass
-		# overrides v1.url to indicate via Feature Flags that Overleaf V1
-		# is not available
-		v1:
-			url: ""
 		project_history:
 			enabled: false
 	references:{}
