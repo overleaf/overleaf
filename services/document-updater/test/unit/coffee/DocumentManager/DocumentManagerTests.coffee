@@ -27,6 +27,7 @@ describe "DocumentManager", ->
 			"./RangesManager": @RangesManager = {}
 		@project_id = "project-id-123"
 		@projectHistoryId = "history-id-123"
+		@projectHistoryType = "project-history"
 		@doc_id = "doc-id-123"
 		@user_id = 1234
 		@callback = sinon.stub()
@@ -178,8 +179,9 @@ describe "DocumentManager", ->
 		describe "when the doc does not exist in Redis", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, null, null, null, null, null)
-				@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname, @projectHistoryId)
+				@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname, @projectHistoryId, @projectHistoryType)
 				@RedisManager.putDocInMemory = sinon.stub().yields()
+				@RedisManager.setHistoryType = sinon.stub().yields()
 				@DocumentManager.getDoc @project_id, @doc_id, @callback
 
 			it "should try to get the doc from Redis", ->
@@ -195,6 +197,11 @@ describe "DocumentManager", ->
 			it "should set the doc in Redis", ->
 				@RedisManager.putDocInMemory
 					.calledWith(@project_id, @doc_id, @lines, @version, @ranges, @pathname, @projectHistoryId)
+					.should.equal true
+
+			it "should set the history type in Redis", ->
+				@RedisManager.setHistoryType
+					.calledWith(@doc_id, @projectHistoryType)
 					.should.equal true
 
 			it "should call the callback with the doc info", ->

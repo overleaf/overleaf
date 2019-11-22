@@ -78,6 +78,7 @@ module.exports = RedisManager =
 		multi.del keys.ranges(doc_id:doc_id)
 		multi.del keys.pathname(doc_id:doc_id)
 		multi.del keys.projectHistoryId(doc_id:doc_id)
+		multi.del keys.projectHistoryType(doc_id:doc_id)
 		multi.del keys.unflushedTime(doc_id:doc_id)
 		multi.del keys.lastUpdatedAt(doc_id: doc_id)
 		multi.del keys.lastUpdatedBy(doc_id: doc_id)
@@ -154,11 +155,11 @@ module.exports = RedisManager =
 					logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, "doc missing from docsInProject set"
 				callback null, docLines, version, ranges, pathname, projectHistoryId, unflushedTime, lastUpdatedAt, lastUpdatedBy
 
-	getDocVersion: (doc_id, callback = (error, version) ->) ->
-		rclient.get keys.docVersion(doc_id: doc_id), (error, version) ->
+	getDocVersion: (doc_id, callback = (error, version, projectHistoryType) ->) ->
+		rclient.mget keys.docVersion(doc_id: doc_id), keys.projectHistoryType(doc_id:doc_id), (error, version, projectHistoryType) ->
 			return callback(error) if error?
 			version = parseInt(version, 10)
-			callback null, version
+			callback null, version, projectHistoryType
 
 	getDocLines: (doc_id, callback = (error, version) ->) ->
 		rclient.get keys.docLines(doc_id: doc_id), (error, docLines) ->
@@ -200,10 +201,18 @@ module.exports = RedisManager =
 						return callback(error)
 					callback null, ops
 
+	getHistoryType: (doc_id, callback = (error, projectHistoryType) ->) ->
+		rclient.get keys.projectHistoryType(doc_id:doc_id), (error, projectHistoryType) ->
+			return callback(error) if error?
+			callback null, projectHistoryType
+
+	setHistoryType: (doc_id, projectHistoryType, callback = (error) ->) ->
+		rclient.set keys.projectHistoryType(doc_id:doc_id), projectHistoryType, callback
+
 	DOC_OPS_TTL: 60 * minutes
 	DOC_OPS_MAX_LENGTH: 100
 	updateDocument : (project_id, doc_id, docLines, newVersion, appliedOps = [], ranges, updateMeta, callback = (error) ->)->
-		RedisManager.getDocVersion doc_id, (error, currentVersion) ->
+		RedisManager.getDocVersion doc_id, (error, currentVersion, projectHistoryType) ->
 			return callback(error) if error?
 			if currentVersion + appliedOps.length != newVersion
 				error = new Error("Version mismatch. '#{doc_id}' is corrupted.")
@@ -249,7 +258,11 @@ module.exports = RedisManager =
 					multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...                         # index 5
 					# expire must come after rpush since before it will be a no-op if the list is empty
 					multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL           # index 6
-					multi.rpush  historyKeys.uncompressedHistoryOps(doc_id: doc_id), jsonOps...  # index 7
+					if projectHistoryType is "project-history"
+						logger.debug {doc_id}, "skipping push of uncompressed ops for project using project-history"
+					else
+						# project is using old track-changes history service
+						multi.rpush  historyKeys.uncompressedHistoryOps(doc_id: doc_id), jsonOps...  # index 7
 					# Set the unflushed timestamp to the current time if the doc
 					# hasn't been modified before (the content in mongo has been
 					# valid up to this point). Otherwise leave it alone ("NX" flag).
@@ -262,8 +275,11 @@ module.exports = RedisManager =
 				multi.exec (error, result) ->
 						return callback(error) if error?
 
-						# length of uncompressedHistoryOps queue (index 7)
-						docUpdateCount = result[7]
+						if projectHistoryType is 'project-history'
+							docUpdateCount = undefined  # only using project history, don't bother with track-changes
+						else
+							# project is using old track-changes history service
+							docUpdateCount = result[7] # length of uncompressedHistoryOps queue (index 7)
 
 						if jsonOps.length > 0 && Settings.apis?.project_history?.enabled
 							ProjectHistoryRedisManager.queueOps project_id, jsonOps..., (error, projectUpdateCount) ->
