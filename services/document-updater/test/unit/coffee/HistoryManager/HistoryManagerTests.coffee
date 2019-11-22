@@ -20,6 +20,7 @@ describe "HistoryManager", ->
 			"./HistoryRedisManager": @HistoryRedisManager = {}
 			"./RedisManager": @RedisManager = {}
 			"./ProjectHistoryRedisManager": @ProjectHistoryRedisManager = {}
+			"./Metrics": @metrics = {inc: sinon.stub()}
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
 		@callback = sinon.stub()

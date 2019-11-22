@@ -5,6 +5,7 @@ Settings = require "settings-sharelatex"
 HistoryRedisManager = require "./HistoryRedisManager"
 ProjectHistoryRedisManager = require "./ProjectHistoryRedisManager"
 RedisManager = require "./RedisManager"
+metrics = require "./Metrics"
 
 module.exports = HistoryManager =
 	flushDocChangesAsync: (project_id, doc_id) ->
@@ -18,6 +19,7 @@ module.exports = HistoryManager =
 			if projectHistoryType is "project-history"
 				logger.debug {doc_id, projectHistoryType}, "skipping track-changes flush"
 			else
+				metrics.inc 'history-flush', 1, { status: 'track-changes'}
 				url = "#{Settings.apis.trackchanges.url}/project/#{project_id}/doc/#{doc_id}/flush"
 				logger.log { project_id, doc_id, url, projectHistoryType }, "flushing doc in track changes api"
 				request.post url, (error, res, body)->
@@ -37,6 +39,7 @@ module.exports = HistoryManager =
 		if options.skip_history_flush
 			logger.log {project_id}, "skipping flush of project history"
 			return callback()
+		metrics.inc 'history-flush', 1, { status: 'project-history'}
 		url = "#{Settings.apis.project_history.url}/project/#{project_id}/flush"
 		qs = {}
 		qs.background = true if options.background # pass on the background flush option if present
