@@ -925,6 +925,7 @@ describe('TokenAccessHandler', function() {
 
     describe('when v1 api not set', function() {
       beforeEach(function() {
+        this.settings.apis = { v1: undefined }
         return this.TokenAccessHandler.getV1DocPublishedInfo(
           this.token,
           this.callback
@@ -943,7 +944,7 @@ describe('TokenAccessHandler', function() {
 
     describe('when v1 api is set', function() {
       beforeEach(function() {
-        return (this.settings.apis = { v1: 'v1' })
+        return (this.settings.apis = { v1: { url: 'v1Url' } })
       })
 
       describe('on V1Api.request success', function() {
