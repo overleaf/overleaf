@@ -135,6 +135,39 @@ describe "Applying updates to a doc", ->
 				done()
 			return null
 
+	describe "when the document is loaded and is using project-history only", ->
+		before (done) ->
+			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+
+			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version, projectHistoryType: 'project-history'}
+			DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
+				throw error if error?
+				sinon.spy MockWebApi, "getDocument"
+				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) ->
+					throw error if error?
+					setTimeout done, 200
+			return null
+
+		after ->
+			MockWebApi.getDocument.restore()
+
+		it "should update the doc", (done) ->
+			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
+				doc.lines.should.deep.equal @result
+				done()
+			return null
+
+		it "should not push any applied updates to the track changes api", (done) ->
+			rclient_history.lrange HistoryKeys.uncompressedHistoryOps({@doc_id}), 0, -1, (error, updates) =>
+				updates.length.should.equal 0
+				done()
+			return null
+
+		it "should push the applied updates to the project history changes api", (done) ->
+			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+				JSON.parse(updates[0]).op.should.deep.equal @update.op
+				done()
+			return null
 
 	describe "when the document has been deleted", ->
 		describe "when the ops come in a single linear order", ->

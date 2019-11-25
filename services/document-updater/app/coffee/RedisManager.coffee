@@ -156,8 +156,9 @@ module.exports = RedisManager =
 				callback null, docLines, version, ranges, pathname, projectHistoryId, unflushedTime, lastUpdatedAt, lastUpdatedBy
 
 	getDocVersion: (doc_id, callback = (error, version, projectHistoryType) ->) ->
-		rclient.mget keys.docVersion(doc_id: doc_id), keys.projectHistoryType(doc_id:doc_id), (error, version, projectHistoryType) ->
+		rclient.mget keys.docVersion(doc_id: doc_id), keys.projectHistoryType(doc_id:doc_id), (error, result) ->
 			return callback(error) if error?
+			[version, projectHistoryType] = result || []
 			version = parseInt(version, 10)
 			callback null, version, projectHistoryType
 
