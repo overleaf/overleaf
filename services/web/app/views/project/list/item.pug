@@ -3,7 +3,6 @@ td.project-list-table-name-cell(ng-if-start="!project.isV1Project")
 		input.project-list-table-select-item(
 			select-individual,
 			type="checkbox",
-			ng-disabled="shouldDisableCheckbox(project)",
 			ng-model="project.selected"
 			stop-propagation="click"
 			aria-label=translate('select_project') + " '{{ project.name }}'"
@@ -66,6 +65,7 @@ td.project-list-table-actions-cell(ng-if-end)
 		ng-if="!project.isTableActionInflight"
 	)
 		button.btn.btn-link.action-btn(
+			ng-if="!(project.archived || project.trashed)"
 			aria-label=translate('copy'),
 			tooltip=translate('copy'),
 			tooltip-placement="top",
@@ -82,41 +82,59 @@ td.project-list-table-actions-cell(ng-if-end)
 		)
 			i.icon.fa.fa-cloud-download(aria-hidden="true")
 		button.btn.btn-link.action-btn(
-			ng-if="!project.archived && isOwner()"
+			ng-if="!project.archived"
 			aria-label=translate('archive'),
 			tooltip=translate('archive'),
 			tooltip-placement="top",
 			tooltip-append-to-body="true",
-			ng-click="archiveOrLeave($event)"
+			ng-click="archive($event)"
 		)
 			i.icon.fa.fa-inbox(aria-hidden="true")
 		button.btn.btn-link.action-btn(
-			ng-if="!isOwner()"
-			aria-label=translate('leave'),
-			tooltip=translate('leave'),
+			ng-if="!project.trashed"
+			aria-label=translate('trash'),
+			tooltip=translate('trash'),
 			tooltip-placement="top",
 			tooltip-append-to-body="true",
-			ng-click="archiveOrLeave($event)"
+			ng-click="trash($event)"
 		)
-			i.icon.fa.fa-sign-out(aria-hidden="true")
+			i.icon.fa.fa-trash(aria-hidden="true")
 		button.btn.btn-link.action-btn(
-			ng-if="project.archived && isOwner()"
+			ng-if="project.archived && !project.trashed"
 			aria-label=translate('unarchive'),
 			tooltip=translate('unarchive'),
 			tooltip-placement="top",
 			tooltip-append-to-body="true",
-			ng-click="restore($event)"
+			ng-click="unarchive($event)"
 		)
 			i.icon.fa.fa-reply(aria-hidden="true")
 		button.btn.btn-link.action-btn(
-			ng-if="project.archived && isOwner()"
-			aria-label=translate('delete_forever'),
-			tooltip=translate('delete_forever'),
+			ng-if="project.trashed && !project.archived"
+			aria-label=translate('untrash'),
+			tooltip=translate('untrash'),
 			tooltip-placement="top",
 			tooltip-append-to-body="true",
-			ng-click="deleteProject($event)"
+			ng-click="untrash($event)"
 		)
-			i.icon.fa.fa-trash(aria-hidden="true")
+			i.icon.fa.fa-reply(aria-hidden="true")
+		button.btn.btn-link.action-btn(
+			ng-if="project.trashed && !project.archived && !isOwner()"
+			aria-label=translate('leave'),
+			tooltip=translate('leave'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="leave($event)"
+		)
+			i.icon.fa.fa-sign-out(aria-hidden="true")
+		button.btn.btn-link.action-btn(
+			ng-if="project.trashed && !project.archived && isOwner()"
+			aria-label=translate('delete'),
+			tooltip=translate('delete'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="delete($event)"
+		)
+			i.icon.fa.fa-ban(aria-hidden="true")
 	div(
 		ng-if="project.isTableActionInflight"
 		aria-label=translate('processing')

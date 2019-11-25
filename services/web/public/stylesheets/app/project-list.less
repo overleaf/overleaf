@@ -350,6 +350,12 @@ ul.folders-menu {
       }
     }
   }
+  > li.folders-menu-item-with-tooltip {
+    > a {
+      padding-right: 1.5 * @folders-menu-item-h-padding +
+        @folders-menu-tooltip-size;
+    }
+  }
   > li > a.small {
     color: @gray;
   }
@@ -428,6 +434,37 @@ ul.folders-menu {
       }
     }
   }
+}
+
+.folders-menu-tooltip-trigger {
+  display: none;
+  position: absolute;
+  top: 50%;
+  right: @folders-menu-item-h-padding;
+  width: @folders-menu-tooltip-size;
+  height: @folders-menu-tooltip-size;
+  margin-top: -(floor(@folders-menu-tooltip-size / 2));
+  line-height: @folders-menu-tooltip-size;
+  background-color: @folders-menu-tooltip-bg;
+  font-family: @font-family-serif;
+  color: #fff;
+  font-style: italic;
+  border-radius: ceil(@folders-menu-tooltip-size / 2);
+  text-align: center;
+  font-weight: 700;
+  @media (min-width: @screen-sm-min) {
+    display: block;
+  }
+}
+
+.project-action-alert {
+  display: flex;
+  margin-bottom: 0;
+  align-items: center;
+}
+.project-action-alert-msg {
+  flex-grow: 1;
+  padding-right: 10px;
 }
 
 form.project-search {

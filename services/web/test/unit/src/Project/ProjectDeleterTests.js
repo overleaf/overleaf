@@ -158,7 +158,7 @@ describe('ProjectDeleter', function() {
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../Docstore/DocstoreManager': this.DocstoreManager,
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
-        '../../infrastructure/mongojs': { db: this.db },
+        '../../infrastructure/mongojs': { db: this.db, ObjectId },
         'logger-sharelatex': this.logger
       },
       globals: {
@@ -464,7 +464,13 @@ describe('ProjectDeleter', function() {
         .resolves(this.project)
 
       this.ProjectMock.expects('update')
-        .withArgs({ _id: this.project_id }, { $set: { archived: archived } })
+        .withArgs(
+          { _id: this.project_id },
+          {
+            $set: { archived: archived },
+            $pull: { trashed: ObjectId(this.user._id) }
+          }
+        )
         .resolves()
     })
 
@@ -494,6 +500,57 @@ describe('ProjectDeleter', function() {
 
     it('should update the project', async function() {
       await this.ProjectDeleter.promises.unarchiveProject(
+        this.project_id,
+        this.user._id
+      )
+      this.ProjectMock.verify()
+    })
+  })
+
+  describe('trashProject', function() {
+    beforeEach(function() {
+      this.ProjectMock.expects('findOne')
+        .withArgs({ _id: this.project_id })
+        .chain('exec')
+        .resolves(this.project)
+
+      this.ProjectMock.expects('update')
+        .withArgs(
+          { _id: this.project_id },
+          {
+            $addToSet: { trashed: ObjectId(this.user._id) },
+            $pull: { archived: ObjectId(this.user._id) }
+          }
+        )
+        .resolves()
+    })
+
+    it('should update the project', async function() {
+      await this.ProjectDeleter.promises.trashProject(
+        this.project_id,
+        this.user._id
+      )
+      this.ProjectMock.verify()
+    })
+  })
+
+  describe('untrashProject', function() {
+    beforeEach(function() {
+      this.ProjectMock.expects('findOne')
+        .withArgs({ _id: this.project_id })
+        .chain('exec')
+        .resolves(this.project)
+
+      this.ProjectMock.expects('update')
+        .withArgs(
+          { _id: this.project_id },
+          { $pull: { trashed: ObjectId(this.user._id) } }
+        )
+        .resolves()
+    })
+
+    it('should update the project', async function() {
+      await this.ProjectDeleter.promises.untrashProject(
         this.project_id,
         this.user._id
       )

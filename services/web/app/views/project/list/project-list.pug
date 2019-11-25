@@ -24,7 +24,7 @@
 				) #{translate('clear_search')}
 
 		.project-tools(ng-cloak)
-			.btn-toolbar(ng-show="filter != 'archived'")
+			.btn-toolbar
 				.btn-group(ng-hide="selectedProjects.length < 1")
 					a.btn.btn-default(
 						href,
@@ -37,15 +37,28 @@
 						i.fa.fa-cloud-download(aria-hidden="true")
 					a.btn.btn-default(
 						href,
-						aria-label=`{{ isArchiveableProjectSelected ? '${translate("archive")}' : '${translate("leave")}' }}`,
-						tooltip=`{{ isArchiveableProjectSelected ? '${translate("archive")}' : '${translate("leave")}' }}`,
+						ng-if="filter !== 'archived'"
+						aria-label=translate("archive"),
+						tooltip=translate("archive"),
 						tooltip-placement="bottom",
 						tooltip-append-to-body="true",
 						ng-click="openArchiveProjectsModal()"
 					)
-						i.fa(ng-class=`isArchiveableProjectSelected ? 'fa-inbox' : 'fa-sign-out'` aria-hidden="true")
-
-				.btn-group.dropdown(ng-hide="selectedProjects.length < 1", dropdown)
+						i.fa.fa-inbox(aria-hidden="true")
+					a.btn.btn-default(
+						href,
+						ng-if="filter !== 'trashed'"
+						aria-label=translate("trash"),
+						tooltip=translate("trash"),
+						tooltip-placement="bottom",
+						tooltip-append-to-body="true",
+						ng-click="openTrashProjectsModal()"
+					)
+						i.fa.fa-trash(aria-hidden="true")
+				.btn-group.dropdown(
+					ng-hide="selectedProjects.length < 1 || filter === 'archived' || filter === 'trashed'", 
+					dropdown
+				)
 					a.btn.btn-default.dropdown-toggle(
 						href,
 						data-toggle="dropdown",
@@ -54,7 +67,7 @@
 						tooltip-append-to-body="true",
 						tooltip-placement="bottom"
 					)
-						i.fa.fa-folder-open-o
+						i.fa.fa-folder-open
 						|  
 						span.caret
 						span.sr-only #{translate('add_to_folders')}
@@ -82,7 +95,10 @@
 						li
 							a(href, ng-click="openNewTagModal()", stop-propagation="click") #{translate("create_new_folder")}
 
-				.btn-group(ng-hide="selectedProjects.length != 1", dropdown).dropdown
+				.btn-group.dropdown(
+					ng-hide="selectedProjects.length != 1  || filter === 'archived' || filter === 'trashed'", 
+					dropdown
+				)
 					a.btn.btn-default.dropdown-toggle(
 						href,
 						data-toggle="dropdown",
@@ -101,24 +117,51 @@
 								ng-click="openCloneProjectModal()"
 							) #{translate("make_copy")}
 
-			.btn-toolbar(ng-show="filter == 'archived'")
-				.btn-group(ng-hide="selectedProjects.length < 1")
+				.btn-group(ng-show="filter === 'archived' && selectedProjects.length > 0")
 					a.btn.btn-default(
 						href,
-						data-original-title="Restore",
+						data-original-title=translate("unarchive"),
 						data-toggle="tooltip",
 						data-placement="bottom",
-						ng-click="restoreSelectedProjects()"
-					) #{translate("restore")}
+						ng-click="unarchiveProjects(selectedProjects)"
+					) #{translate("unarchive")}
 
-				.btn-group(ng-hide="selectedProjects.length < 1")
+				.btn-group(ng-show="filter === 'trashed' && selectedProjects.length > 0")
+					a.btn.btn-default(
+						href,
+						data-original-title=translate("untrash"),
+						data-toggle="tooltip",
+						data-placement="bottom",
+						ng-click="untrashProjects(selectedProjects)"
+					) #{translate("untrash")}
+
+				.btn-group(ng-show="filter === 'trashed' && selectedProjects.length > 0")
 					a.btn.btn-danger(
 						href,
-						data-original-title="Delete Forever",
+						ng-if="hasLeavableProjectsSelected() && !hasDeletableProjectsSelected()",
+						data-original-title=translate('leave'),
+						data-toggle="tooltip",
+						data-placement="bottom",
+						ng-click="openLeaveProjectsModal()"
+					) #{translate("leave")}
+
+					a.btn.btn-danger(
+						href,
+						ng-if="hasDeletableProjectsSelected() && !hasLeavableProjectsSelected()",
+						data-original-title=translate('delete'),
 						data-toggle="tooltip",
 						data-placement="bottom",
 						ng-click="openDeleteProjectsModal()"
-					) #{translate("delete_forever")}
+					) #{translate("delete")}
+
+					a.btn.btn-danger(
+						href,
+						ng-if="hasDeletableProjectsSelected() && hasLeavableProjectsSelected()",
+						data-original-title=translate('delete_and_leave'),
+						data-toggle="tooltip",
+						data-placement="bottom",
+						ng-click="openLeaveOrDeleteProjectsModal()"
+					) #{translate("delete_and_leave")}
 
 .row.row-spaced
 	each warning in warnings

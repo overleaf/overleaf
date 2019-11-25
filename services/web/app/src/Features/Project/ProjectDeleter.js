@@ -11,7 +11,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { db } = require('../../infrastructure/mongojs')
+const { db, ObjectId } = require('../../infrastructure/mongojs')
 const { promisify, callbackify } = require('util')
 const { Project } = require('../../models/Project')
 const { DeletedProject } = require('../../models/DeletedProject')
@@ -160,11 +160,11 @@ const ProjectDeleter = {
 
 // Async methods
 
-async function archiveProject(project_id, userId) {
-  logger.log({ project_id }, 'archiving project from user request')
+async function archiveProject(projectId, userId) {
+  logger.log({ projectId }, 'archiving project from user request')
 
   try {
-    let project = await Project.findOne({ _id: project_id }).exec()
+    let project = await Project.findOne({ _id: projectId }).exec()
     if (!project) {
       throw new Errors.NotFoundError('project not found')
     }
@@ -174,18 +174,21 @@ async function archiveProject(project_id, userId) {
       'ARCHIVE'
     )
 
-    await Project.update({ _id: project_id }, { $set: { archived: archived } })
+    await Project.update(
+      { _id: projectId },
+      { $set: { archived: archived }, $pull: { trashed: ObjectId(userId) } }
+    )
   } catch (err) {
     logger.warn({ err }, 'problem archiving project')
     throw err
   }
 }
 
-async function unarchiveProject(project_id, userId) {
-  logger.log({ project_id }, 'unarchiving project from user request')
+async function unarchiveProject(projectId, userId) {
+  logger.log({ projectId }, 'unarchiving project from user request')
 
   try {
-    let project = await Project.findOne({ _id: project_id }).exec()
+    let project = await Project.findOne({ _id: projectId }).exec()
     if (!project) {
       throw new Errors.NotFoundError('project not found')
     }
@@ -196,9 +199,50 @@ async function unarchiveProject(project_id, userId) {
       'UNARCHIVE'
     )
 
-    await Project.update({ _id: project_id }, { $set: { archived: archived } })
+    await Project.update({ _id: projectId }, { $set: { archived: archived } })
   } catch (err) {
     logger.warn({ err }, 'problem unarchiving project')
+    throw err
+  }
+}
+
+async function trashProject(projectId, userId) {
+  logger.log({ projectId }, 'trashing project from user request')
+
+  try {
+    let project = await Project.findOne({ _id: projectId }).exec()
+    if (!project) {
+      throw new Errors.NotFoundError('project not found')
+    }
+
+    await Project.update(
+      { _id: projectId },
+      {
+        $addToSet: { trashed: ObjectId(userId) },
+        $pull: { archived: ObjectId(userId) }
+      }
+    )
+  } catch (err) {
+    logger.warn({ err }, 'problem trashing project')
+    throw err
+  }
+}
+
+async function untrashProject(projectId, userId) {
+  logger.log({ projectId }, 'untrashing project from user request')
+
+  try {
+    let project = await Project.findOne({ _id: projectId }).exec()
+    if (!project) {
+      throw new Errors.NotFoundError('project not found')
+    }
+
+    await Project.update(
+      { _id: projectId },
+      { $pull: { trashed: ObjectId(userId) } }
+    )
+  } catch (err) {
+    logger.warn({ err }, 'problem untrashing project')
     throw err
   }
 }
@@ -350,6 +394,8 @@ async function expireDeletedProject(projectId) {
 const promises = {
   archiveProject: archiveProject,
   unarchiveProject: unarchiveProject,
+  trashProject: trashProject,
+  untrashProject: untrashProject,
   deleteProject: deleteProject,
   undeleteProject: undeleteProject,
   expireDeletedProject: expireDeletedProject,
@@ -359,6 +405,8 @@ const promises = {
 ProjectDeleter.promises = promises
 ProjectDeleter.archiveProject = callbackify(archiveProject)
 ProjectDeleter.unarchiveProject = callbackify(unarchiveProject)
+ProjectDeleter.trashProject = callbackify(trashProject)
+ProjectDeleter.untrashProject = callbackify(untrashProject)
 ProjectDeleter.deleteProject = callbackify(deleteProject)
 ProjectDeleter.undeleteProject = callbackify(undeleteProject)
 ProjectDeleter.expireDeletedProject = callbackify(expireDeletedProject)

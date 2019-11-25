@@ -1223,6 +1223,8 @@ describe('ProjectController', function() {
   describe('_buildProjectViewModel', function() {
     beforeEach(function() {
       this.ProjectHelper.isArchived.returns(false)
+      this.ProjectHelper.isTrashed.returns(false)
+
       this.project = {
         _id: 'abcd',
         name: 'netsenits',
@@ -1239,31 +1241,70 @@ describe('ProjectController', function() {
       }
     })
 
-    it('should produce a model of the project', function() {
-      const result = this.ProjectController._buildProjectViewModel(
-        this.project,
-        'readAndWrite',
-        'owner',
-        this.user._id
-      )
-      expect(result).to.exist
-      expect(result).to.be.an('object')
-      expect(result).to.deep.equal({
-        id: 'abcd',
-        name: 'netsenits',
-        lastUpdated: 1,
-        lastUpdatedBy: 2,
-        publicAccessLevel: 'private',
-        accessLevel: 'readAndWrite',
-        source: 'owner',
-        archived: false,
-        owner_ref: 'defg',
-        tokens: {
-          readAndWrite: '1abcd',
-          readAndWritePrefix: '1',
-          readOnly: 'neiotsranteoia'
-        },
-        isV1Project: false
+    describe('project not being archived or trashed', function() {
+      it('should produce a model of the project', function() {
+        const result = this.ProjectController._buildProjectViewModel(
+          this.project,
+          'readAndWrite',
+          'owner',
+          this.user._id
+        )
+        expect(result).to.exist
+        expect(result).to.be.an('object')
+        expect(result).to.deep.equal({
+          id: 'abcd',
+          name: 'netsenits',
+          lastUpdated: 1,
+          lastUpdatedBy: 2,
+          publicAccessLevel: 'private',
+          accessLevel: 'readAndWrite',
+          source: 'owner',
+          archived: false,
+          trashed: false,
+          owner_ref: 'defg',
+          tokens: {
+            readAndWrite: '1abcd',
+            readAndWritePrefix: '1',
+            readOnly: 'neiotsranteoia'
+          },
+          isV1Project: false
+        })
+      })
+    })
+
+    describe('project being simultaneously archived and trashed', function() {
+      beforeEach(function() {
+        this.ProjectHelper.isArchived.returns(true)
+        this.ProjectHelper.isTrashed.returns(true)
+      })
+
+      it('should produce a model of the project', function() {
+        const result = this.ProjectController._buildProjectViewModel(
+          this.project,
+          'readAndWrite',
+          'owner',
+          this.user._id
+        )
+        expect(result).to.exist
+        expect(result).to.be.an('object')
+        expect(result).to.deep.equal({
+          id: 'abcd',
+          name: 'netsenits',
+          lastUpdated: 1,
+          lastUpdatedBy: 2,
+          publicAccessLevel: 'private',
+          accessLevel: 'readAndWrite',
+          source: 'owner',
+          archived: true,
+          trashed: false,
+          owner_ref: 'defg',
+          tokens: {
+            readAndWrite: '1abcd',
+            readAndWritePrefix: '1',
+            readOnly: 'neiotsranteoia'
+          },
+          isV1Project: false
+        })
       })
     })
 
@@ -1286,6 +1327,7 @@ describe('ProjectController', function() {
           accessLevel: 'readOnly',
           source: 'token',
           archived: false,
+          trashed: false,
           owner_ref: null,
           tokens: {
             readAndWrite: '1abcd',

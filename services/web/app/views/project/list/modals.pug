@@ -184,36 +184,54 @@ script(type='text/ng-template', id='newProjectModalTemplate')
 			span(ng-hide="state.inflight") #{translate("create")}
 			span(ng-show="state.inflight") #{translate("creating")} ...
 
-script(type='text/ng-template', id='deleteProjectsModalTemplate')
+script(type='text/ng-template', id='archiveTrashLeaveOrDeleteProjectsModalTemplate')
 	.modal-header
 		button.close(
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3(ng-if="action == 'delete'") #{translate("delete_projects")}
-		h3(ng-if="action == 'archive'") #{translate("archive_projects")}
-		h3(ng-if="action == 'leave'") #{translate("leave_projects")}
-		h3(ng-if="action == 'delete-and-leave'") #{translate("delete_and_leave_projects")}
-		h3(ng-if="action == 'archive-and-leave'") #{translate("archive_and_leave_projects")}
+		h3(ng-if="action === 'archive'") #{translate("archive_projects")}
+		h3(ng-if="action === 'trash'") #{translate("trash_projects")}
+		h3(ng-if="action === 'leave'") #{translate("leave_projects")}
+		h3(ng-if="action === 'delete'") #{translate("delete_projects")}
+		h3(ng-if="action === 'leaveOrDelete'") #{translate("delete_and_leave_projects")}
 	.modal-body
-		div(ng-show="projectsToDelete.length > 0")
-			p(ng-if="action == 'delete' || action == 'delete-and-leave'") #{translate("about_to_delete_projects")}
-			p(ng-if="action == 'archive' || action == 'archive-and-leave'") #{translate("about_to_archive_projects")}
+		div(ng-if="action !== 'leaveOrDelete'")
+			p(ng-if="action === 'archive'") #{translate("about_to_archive_projects")}
+			p(ng-if="action === 'trash'") #{translate("about_to_trash_projects")}
+			p(ng-if="action === 'leave'") #{translate("about_to_leave_projects")}
+			p(ng-if="action === 'delete'") #{translate("about_to_delete_projects")}
 			ul
-				li(ng-repeat="project in projectsToDelete | orderBy:'name'")
+				li(ng-repeat="project in projects | orderBy:'name'")
 					strong {{project.name}}
-		div(ng-show="projectsToLeave.length > 0")
+			.project-action-alert.alert.alert-info(ng-if="action === 'archive'") 
+				.project-action-alert-msg #{translate("archived_projects_info_note")}
+				a(href="https://www.overleaf.com/blog/new-feature-using-archive-and-trash-to-keep-your-projects-organized").project-action-alert-btn.btn.btn-info.pull-right #{translate("find_out_more")}
+			.project-action-alert.alert.alert-info(ng-if="action === 'trash'") 
+				.project-action-alert-msg #{translate("trashed_projects_info_note")}
+				a(href="https://www.overleaf.com/blog/new-feature-using-archive-and-trash-to-keep-your-projects-organized").project-action-alert-btn.btn.btn-info.pull-right #{translate("find_out_more")}
+			.project-action-alert.alert.alert-warning(ng-if="action === 'leave' || action === 'delete'")
+				i.fa.fa-fw.fa-exclamation-triangle
+				.project-action-alert-msg #{translate("this_action_cannot_be_undone")}
+		div(ng-if="action === 'leaveOrDelete'")
+			p #{translate("about_to_delete_projects")}
+			ul
+				li(ng-repeat="project in projects | filter:{accessLevel: 'owner'} | orderBy:'name'")
+					strong {{project.name}}
 			p #{translate("about_to_leave_projects")}
 			ul
-				li(ng-repeat="project in projectsToLeave | orderBy:'name'")
+				li(ng-repeat="project in projects | filter:{accessLevel: '!owner'} | orderBy:'name'")
 					strong {{project.name}}
+			.project-action-alert.alert.alert-warning
+				i.fa.fa-fw.fa-exclamation-triangle
+				.project-action-alert-msg #{translate("this_action_cannot_be_undone")}
 	.modal-footer
 		button.btn.btn-default(
 			ng-click="cancel()"
 		) #{translate("cancel")}
 		button.btn.btn-danger(
-			ng-click="delete()"
+			ng-click="confirm()"
 		) #{translate("confirm")}
 
 script(type="text/template", id="qq-project-uploader-template")
