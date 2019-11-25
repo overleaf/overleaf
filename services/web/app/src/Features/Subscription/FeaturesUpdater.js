@@ -12,7 +12,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let FeaturesUpdater
 const async = require('async')
 const PlansLocator = require('./PlansLocator')
 const _ = require('underscore')
@@ -27,7 +26,7 @@ const UserGetter = require('../User/UserGetter')
 
 const oneMonthInSeconds = 60 * 60 * 24 * 30
 
-module.exports = FeaturesUpdater = {
+const FeaturesUpdater = {
   refreshFeatures(user_id, callback) {
     if (callback == null) {
       callback = function(error, features, featuresChanged) {}
@@ -227,3 +226,23 @@ module.exports = FeaturesUpdater = {
     }
   }
 }
+
+const refreshFeaturesPromise = user_id =>
+  new Promise(function(resolve, reject) {
+    FeaturesUpdater.refreshFeatures(
+      user_id,
+      (error, features, featuresChanged) => {
+        if (error) {
+          reject(error)
+        } else {
+          resolve({ features, featuresChanged })
+        }
+      }
+    )
+  })
+
+FeaturesUpdater.promises = {
+  refreshFeatures: refreshFeaturesPromise
+}
+
+module.exports = FeaturesUpdater
