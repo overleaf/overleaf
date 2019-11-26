@@ -1,6 +1,4 @@
-const _ = require('underscore')
 const path = require('path')
-const logger = require('logger-sharelatex')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const Errors = require('../Errors/Errors')
 const ProjectGetter = require('./ProjectGetter')

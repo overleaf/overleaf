@@ -715,9 +715,6 @@ const ProjectController = {
         const { subscription } = results
         const { brandVariation } = results
 
-        const daysSinceLastUpdated =
-          (new Date() - project.lastUpdated) / 86400000
-
         const token = TokenAccessHandler.getRequestToken(req, projectId)
         const { isTokenMember } = results
         AuthorizationManager.getPrivilegeLevelForProject(
