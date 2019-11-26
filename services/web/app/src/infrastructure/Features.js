@@ -11,6 +11,11 @@
  */
 let Features
 const Settings = require('settings-sharelatex')
+const fs = require('fs')
+
+const publicRegistrationModuleAvailable = fs.existsSync(
+  `${__dirname}/../../../modules/public-registration`
+)
 
 module.exports = Features = {
   externalAuthenticationSystemUsed() {
@@ -56,6 +61,9 @@ module.exports = Features = {
         return Settings.enableSaml
       case 'link-url':
         return Settings.apis.linkedUrlProxy && Settings.apis.linkedUrlProxy.url
+
+      case 'public-registration':
+        return publicRegistrationModuleAvailable
       default:
         throw new Error(`unknown feature: ${feature}`)
     }

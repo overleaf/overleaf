@@ -2,6 +2,7 @@ const AuthenticationManager = require('../../../app/src/Features/Authentication/
 const UserHelper = require('./helpers/UserHelper')
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
+const Features = require('../../../app/src/infrastructure/Features')
 
 const expect = chai.expect
 chai.should()
@@ -94,6 +95,12 @@ describe('UserHelper', function() {
 
   describe('registerUser', function() {
     describe('with no args', function() {
+      before(function() {
+        if (!Features.hasFeature('public-registration')) {
+          this.skip()
+        }
+      })
+
       it('should create new user with default username and password', async function() {
         const userHelper = await UserHelper.registerUser()
         userHelper.user.email.should.equal(userHelper.getDefaultEmail())
@@ -106,6 +113,12 @@ describe('UserHelper', function() {
     })
 
     describe('with email', function() {
+      before(function() {
+        if (!Features.hasFeature('public-registration')) {
+          this.skip()
+        }
+      })
+
       it('should create new user with provided email and default password', async function() {
         const userHelper = await UserHelper.registerUser({
           email: 'foo2@test.com'
@@ -120,6 +133,12 @@ describe('UserHelper', function() {
     })
 
     describe('with password', function() {
+      before(function() {
+        if (!Features.hasFeature('public-registration')) {
+          this.skip()
+        }
+      })
+
       it('should create new user with provided password and default email', async function() {
         const userHelper = await UserHelper.registerUser({
           password: 'foofoofoo'
@@ -136,6 +155,11 @@ describe('UserHelper', function() {
 
   describe('after logout', function() {
     let userHelper, oldCsrfToken
+    before(function() {
+      if (!Features.hasFeature('public-registration')) {
+        this.skip()
+      }
+    })
 
     beforeEach(async function() {
       userHelper = await UserHelper.registerUser()

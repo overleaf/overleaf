@@ -3,6 +3,7 @@ const Async = require('async')
 const User = require('./helpers/User')
 const settings = require('settings-sharelatex')
 const CollaboratorsEmailHandler = require('../../../app/src/Features/Collaborators/CollaboratorsEmailHandler')
+const Features = require('../../../app/src/infrastructure/Features')
 
 const createInvite = (sendingUser, projectId, email, callback) => {
   sendingUser.getCsrfToken(err => {
@@ -623,6 +624,12 @@ describe('ProjectInviteTests', function() {
 
     describe('user is not logged in initially', function() {
       describe('registration prompt workflow with valid token', function() {
+        before(function() {
+          if (!Features.hasFeature('public-registration')) {
+            this.skip()
+          }
+        })
+
         it('should redirect to the register page', function(done) {
           expectInviteRedirectToRegister(this.user, this.link, done)
         })
@@ -648,6 +655,12 @@ describe('ProjectInviteTests', function() {
       })
 
       describe('registration prompt workflow with non-valid token', function() {
+        before(function() {
+          if (!Features.hasFeature('public-registration')) {
+            this.skip()
+          }
+        })
+
         it('should redirect to the register page', function(done) {
           Async.series(
             [
