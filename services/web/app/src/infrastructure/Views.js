@@ -1,55 +1,23 @@
 const logger = require('logger-sharelatex')
 const pug = require('pug')
+const globby = require('globby')
 
-// List of view names found with
-//
-// git grep res.render | perl filter.pl  | sort -u
-//
-// where filter.pl is the perl script below.
-//
-// #!/usr/bin/perl
-// while (<>) {print "'$1',\n" if /render\(\'(.*?)\'/;}
+// Generate list of view names from app/views
 
-const viewList = [
-  'admin/index',
-  'admin/register',
-  'beta_program/opt_in',
-  'blog/blog_holder',
-  'external/home/sl',
-  'external/home/v2',
-  'general/404',
-  'general/500',
-  'general/closed',
-  'project/cannot-import-v1-project',
-  'project/editor',
-  'project/importing',
-  'project/invite/not-valid',
-  'project/invite/show',
-  'project/list',
-  'project/v2-import',
-  'referal/bonus',
-  'subscriptions/canceled_subscription',
-  'subscriptions/dashboard',
-  'subscriptions/new',
-  'subscriptions/successful_subscription',
-  'subscriptions/team/invite',
-  'subscriptions/upgradeToAnnual',
-  'sudo_mode/sudo_mode_prompt',
-  'user/activate',
-  'user/confirm_email',
-  'user/login',
-  'user/logout',
-  'user_membership/index',
-  'user_membership/new',
-  'user/one_time_login',
-  'user/passwordReset',
-  'user/reconfirm',
-  'user/register',
-  'user/restricted',
-  'user/sessions',
-  'user/setPassword',
-  'user/settings'
-]
+const viewList = globby
+  .sync('**/*.pug', {
+    onlyFiles: true,
+    concurrency: 1,
+    ignore: '**/_*.pug',
+    cwd: 'app/views'
+  })
+  .map(x => {
+    return x.replace(/\.pug$/, '') // strip trailing .pug extension
+  })
+  .filter(x => {
+    return !/^_/.test(x)
+  })
+
 module.exports = {
   precompileViews(app) {
     let startTime = Date.now()
@@ -62,7 +30,7 @@ module.exports = {
         logger.log({ view }, 'compiled')
         success++
       } catch (err) {
-        logger.error({ view, err }, 'error compiling')
+        logger.error({ view, err: err.message }, 'error compiling')
         failures++
       }
     })
