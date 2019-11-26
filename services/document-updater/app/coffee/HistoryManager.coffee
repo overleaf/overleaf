@@ -16,7 +16,7 @@ module.exports = HistoryManager =
 			if err?
 				logger.warn {err, doc_id}, "error getting history type"
 				# if there's an error continue and flush to track-changes for safety
-			if projectHistoryType is "project-history"
+			if Settings.disableDoubleFlush and projectHistoryType is "project-history"
 				logger.debug {doc_id, projectHistoryType}, "skipping track-changes flush"
 			else
 				metrics.inc 'history-flush', 1, { status: 'track-changes'}

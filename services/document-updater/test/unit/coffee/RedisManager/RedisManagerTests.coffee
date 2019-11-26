@@ -361,11 +361,12 @@ describe "RedisManager", ->
 
 		describe "with a consistent version", ->
 			beforeEach ->
-				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
+
 
 			describe "with project history enabled", ->
 				beforeEach ->
 					@settings.apis.project_history.enabled = true
+					@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
 					@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, @ops, @ranges, @updateMeta, @callback
 
 				it "should get the current doc version to check for consistency", ->
@@ -446,6 +447,7 @@ describe "RedisManager", ->
 				beforeEach ->
 					@rclient.rpush = sinon.stub()
 					@settings.apis.project_history.enabled = false
+					@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
 					@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, @ops, @ranges, @updateMeta, @callback
 
 				it "should not push the updates into the project history ops list", ->
@@ -454,6 +456,26 @@ describe "RedisManager", ->
 				it "should call the callback", ->
 					@callback
 						.calledWith(null, @doc_update_list_length)
+						.should.equal true
+
+			describe "with a doc using project history only", ->
+				beforeEach ->
+					@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length, 'project-history')
+					@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, @ops, @ranges, @updateMeta, @callback
+
+				it "should not push the updates to the track-changes ops list", ->
+					@multi.rpush
+						.calledWith("UncompressedHistoryOps:#{@doc_id}")
+						.should.equal false
+
+				it "should push the updates into the project history ops list", ->
+					@ProjectHistoryRedisManager.queueOps
+						.calledWith(@project_id, JSON.stringify(@ops[0]))
+						.should.equal true
+
+				it "should call the callback with the project update count only", ->
+					@callback
+						.calledWith(null, undefined, @project_update_list_length)
 						.should.equal true
 
 		describe "with an inconsistent version", ->
@@ -754,3 +776,23 @@ describe "RedisManager", ->
 				@ProjectHistoryRedisManager.queueRenameEntity
 					.calledWithExactly(@project_id, @projectHistoryId, 'doc', @doc_id, @userId, @update, @callback)
 					.should.equal true
+
+		describe "getDocVersion", ->
+			beforeEach ->
+				@version = 12345
+
+			describe "when the document does not have a project history type set", ->
+				beforeEach ->
+					@rclient.mget = sinon.stub().withArgs("DocVersion:#{@doc_id}", "ProjectHistoryType:#{@doc_id}").callsArgWith(2, null, ["#{@version}"])
+					@RedisManager.getDocVersion @doc_id, @callback
+
+				it "should return the document version and an undefined history type", ->
+					@callback.calledWithExactly(null, @version, undefined).should.equal true
+
+			describe "when the document has a project history type set", ->
+				beforeEach ->
+					@rclient.mget = sinon.stub().withArgs("DocVersion:#{@doc_id}", "ProjectHistoryType:#{@doc_id}").callsArgWith(2, null, ["#{@version}", 'project-history'])
+					@RedisManager.getDocVersion @doc_id, @callback
+
+				it "should return the document version and history type", ->
+					@callback.calledWithExactly(null, @version, 'project-history').should.equal true

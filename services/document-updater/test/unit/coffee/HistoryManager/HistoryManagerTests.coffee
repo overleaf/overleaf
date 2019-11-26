@@ -39,8 +39,19 @@ describe "HistoryManager", ->
 					.calledWith("#{@Settings.apis.trackchanges.url}/project/#{@project_id}/doc/#{@doc_id}/flush")
 					.should.equal true
 
-		describe "when the project uses project history", ->
+		describe "when the project uses project history and double flush is not disabled", ->
 			beforeEach ->
+				@RedisManager.getHistoryType = sinon.stub().yields(null, 'project-history')
+				@HistoryManager.flushDocChangesAsync @project_id, @doc_id
+
+			it "should send a request to the track changes api", ->
+				@request.post
+					.called
+					.should.equal true
+
+		describe "when the project uses project history and double flush is disabled", ->
+			beforeEach ->
+				@Settings.disableDoubleFlush = true
 				@RedisManager.getHistoryType = sinon.stub().yields(null, 'project-history')
 				@HistoryManager.flushDocChangesAsync @project_id, @doc_id
 
@@ -48,6 +59,7 @@ describe "HistoryManager", ->
 				@request.post
 					.called
 					.should.equal false
+
 
 	describe "flushProjectChangesAsync", ->
 		beforeEach ->

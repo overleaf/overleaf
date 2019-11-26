@@ -93,3 +93,5 @@ module.exports =
 	continuousBackgroundFlush: process.env['CONTINUOUS_BACKGROUND_FLUSH'] or false
 
 	smoothingOffset: process.env['SMOOTHING_OFFSET'] or 1000 # milliseconds
+
+	disableDoubleFlush: process.env['DISABLE_DOUBLE_FLUSH'] or false # don't flush track-changes for projects using project-history

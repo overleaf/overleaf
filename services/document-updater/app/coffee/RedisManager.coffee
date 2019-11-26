@@ -156,8 +156,9 @@ module.exports = RedisManager =
 				callback null, docLines, version, ranges, pathname, projectHistoryId, unflushedTime, lastUpdatedAt, lastUpdatedBy
 
 	getDocVersion: (doc_id, callback = (error, version, projectHistoryType) ->) ->
-		rclient.mget keys.docVersion(doc_id: doc_id), keys.projectHistoryType(doc_id:doc_id), (error, version, projectHistoryType) ->
+		rclient.mget keys.docVersion(doc_id: doc_id), keys.projectHistoryType(doc_id:doc_id), (error, result) ->
 			return callback(error) if error?
+			[version, projectHistoryType] = result || []
 			version = parseInt(version, 10)
 			callback null, version, projectHistoryType
 
@@ -259,9 +260,11 @@ module.exports = RedisManager =
 					# expire must come after rpush since before it will be a no-op if the list is empty
 					multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL           # index 6
 					if projectHistoryType is "project-history"
-						logger.debug {doc_id}, "skipping push of uncompressed ops for project using project-history"
+						metrics.inc 'history-queue', 1, {status: 'skip-track-changes'}
+						logger.log {doc_id}, "skipping push of uncompressed ops for project using project-history"
 					else
 						# project is using old track-changes history service
+						metrics.inc 'history-queue', 1, {status: 'track-changes'}
 						multi.rpush  historyKeys.uncompressedHistoryOps(doc_id: doc_id), jsonOps...  # index 7
 					# Set the unflushed timestamp to the current time if the doc
 					# hasn't been modified before (the content in mongo has been
@@ -282,6 +285,7 @@ module.exports = RedisManager =
 							docUpdateCount = result[7] # length of uncompressedHistoryOps queue (index 7)
 
 						if jsonOps.length > 0 && Settings.apis?.project_history?.enabled
+							metrics.inc 'history-queue', 1, {status: 'project-history'}
 							ProjectHistoryRedisManager.queueOps project_id, jsonOps..., (error, projectUpdateCount) ->
 								callback null, docUpdateCount, projectUpdateCount
 						else
