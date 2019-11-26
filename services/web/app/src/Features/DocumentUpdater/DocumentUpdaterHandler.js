@@ -23,6 +23,7 @@ const async = require('async')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const { Project } = require('../../models/Project')
+const { promisifyAll } = require('../../util/promises')
 
 module.exports = DocumentUpdaterHandler = {
   flushProjectToMongo(project_id, callback) {
@@ -442,6 +443,9 @@ module.exports = DocumentUpdaterHandler = {
     return updates
   }
 }
+module.exports.promises = promisifyAll(DocumentUpdaterHandler, {
+  without: ['_getUpdates']
+})
 
 const PENDINGUPDATESKEY = 'PendingUpdates'
 const DOCLINESKEY = 'doclines'

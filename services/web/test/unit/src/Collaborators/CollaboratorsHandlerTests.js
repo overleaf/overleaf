@@ -36,9 +36,9 @@ describe('CollaboratorsHandler', function() {
       addContact: sinon.stub()
     }
     this.ProjectMock = sinon.mock(Project)
-    this.ProjectEntityHandler = {
+    this.TpdsProjectFlusher = {
       promises: {
-        flushProjectToThirdPartyDataStore: sinon.stub().resolves()
+        flushProjectToTpds: sinon.stub().resolves()
       }
     }
     this.ProjectGetter = {
@@ -60,7 +60,7 @@ describe('CollaboratorsHandler', function() {
         '../User/UserGetter': this.UserGetter,
         '../Contacts/ContactManager': this.ContactManager,
         '../../models/Project': { Project },
-        '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
+        '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../Project/ProjectGetter': this.ProjectGetter,
         '../Errors/Errors': Errors,
         './CollaboratorsGetter': this.CollaboratorsGetter
@@ -123,7 +123,7 @@ describe('CollaboratorsHandler', function() {
 
       it('should flush the project to the TPDS', function() {
         expect(
-          this.ProjectEntityHandler.promises.flushProjectToThirdPartyDataStore
+          this.TpdsProjectFlusher.promises.flushProjectToTpds
         ).to.have.been.calledWith(this.project._id)
       })
 
@@ -158,7 +158,7 @@ describe('CollaboratorsHandler', function() {
 
       it('should flush the project to the TPDS', function() {
         expect(
-          this.ProjectEntityHandler.promises.flushProjectToThirdPartyDataStore
+          this.TpdsProjectFlusher.promises.flushProjectToTpds
         ).to.have.been.calledWith(this.project._id)
       })
     })
@@ -326,7 +326,7 @@ describe('CollaboratorsHandler', function() {
         await sleep(100) // let the background tasks run
         for (const project of this.projects) {
           expect(
-            this.ProjectEntityHandler.promises.flushProjectToThirdPartyDataStore
+            this.TpdsProjectFlusher.promises.flushProjectToTpds
           ).to.have.been.calledWith(project._id)
         }
       })
@@ -334,7 +334,7 @@ describe('CollaboratorsHandler', function() {
 
     describe('when flushing to TPDS fails', function() {
       it('should log an error but not fail', async function() {
-        this.ProjectEntityHandler.promises.flushProjectToThirdPartyDataStore.rejects(
+        this.TpdsProjectFlusher.promises.flushProjectToTpds.rejects(
           new Error('oops')
         )
         await this.CollaboratorsHandler.promises.transferProjects(

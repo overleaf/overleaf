@@ -38,9 +38,9 @@ describe('OwnershipTransferHandler', function() {
         moveEntity: sinon.stub().resolves()
       }
     }
-    this.ProjectEntityHandler = {
+    this.TpdsProjectFlusher = {
       promises: {
-        flushProjectToThirdPartyDataStore: sinon.stub().resolves()
+        flushProjectToTpds: sinon.stub().resolves()
       }
     }
     this.CollaboratorsHandler = {
@@ -69,7 +69,7 @@ describe('OwnershipTransferHandler', function() {
           Project: this.ProjectModel
         },
         '../User/UserGetter': this.UserGetter,
-        '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
+        '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../Project/ProjectAuditLogHandler': this.ProjectAuditLogHandler,
         '../Email/EmailHandler': this.EmailHandler,
         './CollaboratorsHandler': this.CollaboratorsHandler,
@@ -174,7 +174,7 @@ describe('OwnershipTransferHandler', function() {
         this.collaborator._id
       )
       expect(
-        this.ProjectEntityHandler.promises.flushProjectToThirdPartyDataStore
+        this.TpdsProjectFlusher.promises.flushProjectToTpds
       ).to.have.been.calledWith(this.project._id)
     })
 

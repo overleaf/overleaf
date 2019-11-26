@@ -27,6 +27,7 @@ const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const Modules = require('../../infrastructure/Modules')
 const ProjectEntityHandler = require('./ProjectEntityHandler')
+const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const UserGetter = require('../User/UserGetter')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const { V1ConnectionError } = require('../Errors/Errors')
@@ -720,7 +721,10 @@ const ProjectController = {
               (error, brandVariationDetails) => cb(error, brandVariationDetails)
             )
           }
-        ]
+        ],
+        flushToTpds: cb => {
+          TpdsProjectFlusher.flushProjectToTpdsIfNeeded(projectId, cb)
+        }
       },
       (err, results) => {
         if (err != null) {

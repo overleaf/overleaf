@@ -28,6 +28,7 @@ const RecurlyWrapper = require('../Subscription/RecurlyWrapper')
 const SubscriptionHandler = require('../Subscription/SubscriptionHandler')
 const projectEntityHandler = require('../Project/ProjectEntityHandler')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
+const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const SystemMessageManager = require('../SystemMessages/SystemMessageManager')
 
@@ -130,9 +131,8 @@ module.exports = AdminController = {
   },
 
   flushProjectToTpds(req, res) {
-    return projectEntityHandler.flushProjectToThirdPartyDataStore(
-      req.body.project_id,
-      err => res.sendStatus(200)
+    return TpdsProjectFlusher.flushProjectToTpds(req.body.project_id, err =>
+      res.sendStatus(200)
     )
   },
 

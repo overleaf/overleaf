@@ -6,7 +6,7 @@ const CollaboratorsHandler = require('./CollaboratorsHandler')
 const EmailHandler = require('../Email/EmailHandler')
 const Errors = require('../Errors/Errors')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
-const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
+const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
 
 module.exports = {
@@ -46,9 +46,7 @@ async function transferOwnership(projectId, newOwnerId, options = {}) {
   await _transferOwnership(projectId, previousOwnerId, newOwnerId)
 
   // Flush project to TPDS
-  await ProjectEntityHandler.promises.flushProjectToThirdPartyDataStore(
-    projectId
-  )
+  await TpdsProjectFlusher.promises.flushProjectToTpds(projectId)
 
   // Send confirmation emails
   const previousOwner = await UserGetter.promises.getUser(previousOwnerId)

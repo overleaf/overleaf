@@ -117,6 +117,9 @@ describe('ProjectController', function() {
         .stub()
         .callsArgWith(1, null, this.brandVariationDetails)
     }
+    this.TpdsProjectFlusher = {
+      flushProjectToTpdsIfNeeded: sinon.stub().yields()
+    }
     this.getUserAffiliations = sinon.stub().callsArgWith(1, null, [
       {
         email: 'test@overleaf.com',
@@ -154,9 +157,7 @@ describe('ProjectController', function() {
         '../Subscription/LimitationsManager': this.LimitationsManager,
         '../Tags/TagsHandler': this.TagsHandler,
         '../Notifications/NotificationsHandler': this.NotificationsHandler,
-        '../../models/User': {
-          User: this.UserModel
-        },
+        '../../models/User': { User: this.UserModel },
         '../Authorization/AuthorizationManager': this.AuthorizationManager,
         '../InactiveData/InactiveProjectManager': this.InactiveProjectManager,
         './ProjectUpdateHandler': this.ProjectUpdateHandler,
@@ -180,6 +181,7 @@ describe('ProjectController', function() {
         '../Institutions/InstitutionsAPI': {
           getUserAffiliations: this.getUserAffiliations
         },
+        '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../V1/V1Handler': {},
         '../../models/Project': {}
       }
@@ -1101,6 +1103,16 @@ describe('ProjectController', function() {
       this.ProjectGetter.getProject.callsArgWith(2, null, this.brandedProject)
       this.res.render = (pageName, opts) => {
         opts.brandVariation.should.deep.equal(this.brandVariationDetails)
+        done()
+      }
+      this.ProjectController.loadEditor(this.req, this.res)
+    })
+
+    it('flushes the project to TPDS if a flush is pending', function(done) {
+      this.res.render = () => {
+        this.TpdsProjectFlusher.flushProjectToTpdsIfNeeded.should.have.been.calledWith(
+          this.project_id
+        )
         done()
       }
       this.ProjectController.loadEditor(this.req, this.res)

@@ -5,7 +5,7 @@ const ProjectGetter = require('../Project/ProjectGetter')
 const logger = require('logger-sharelatex')
 const ContactManager = require('../Contacts/ContactManager')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
-const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
+const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const CollaboratorsGetter = require('./CollaboratorsGetter')
 const Errors = require('../Errors/Errors')
 
@@ -98,14 +98,12 @@ async function addUserIdToProject(
   await Project.update({ _id: projectId }, { $addToSet: level }).exec()
 
   // Flush to TPDS in background to add files to collaborator's Dropbox
-  ProjectEntityHandler.promises
-    .flushProjectToThirdPartyDataStore(projectId)
-    .catch(err => {
-      logger.error(
-        { err, projectId, userId },
-        'error flushing to TPDS after adding collaborator'
-      )
-    })
+  TpdsProjectFlusher.promises.flushProjectToTpds(projectId).catch(err => {
+    logger.error(
+      { err, projectId, userId },
+      'error flushing to TPDS after adding collaborator'
+    )
+  })
 }
 
 async function transferProjects(fromUserId, toUserId) {
@@ -221,8 +219,6 @@ async function userIsTokenMember(userId, projectId) {
 
 async function _flushProjects(projectIds) {
   for (const projectId of projectIds) {
-    await ProjectEntityHandler.promises.flushProjectToThirdPartyDataStore(
-      projectId
-    )
+    await TpdsProjectFlusher.promises.flushProjectToTpds(projectId)
   }
 }
