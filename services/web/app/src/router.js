@@ -32,7 +32,6 @@ const ExportsController = require('./Features/Exports/ExportsController')
 const PasswordResetRouter = require('./Features/PasswordReset/PasswordResetRouter')
 const StaticPagesRouter = require('./Features/StaticPages/StaticPagesRouter')
 const ChatController = require('./Features/Chat/ChatController')
-const BlogController = require('./Features/Blog/BlogController')
 const Modules = require('./infrastructure/Modules')
 const RateLimiterMiddleware = require('./Features/Security/RateLimiterMiddleware')
 const InactiveProjectController = require('./Features/InactiveData/InactiveProjectController')
@@ -105,11 +104,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       AuthenticationController.requireLogin(),
       ReferalController.bonus
     )
-  }
-
-  if (Settings.overleaf == null) {
-    webRouter.get('/blog', BlogController.getIndexPage)
-    webRouter.get('/blog/*', BlogController.getPage)
   }
 
   webRouter.get('/user/activate', UserPagesController.activateAccountPage)
