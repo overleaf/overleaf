@@ -38,11 +38,6 @@ mixin linkEducation(linkText, linkClass)
 	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/for/edu" class=linkClass ? linkClass : '', ng-non-bindable)
 		| #{linkText ? linkText : 'teaching toolkit'}
 
-mixin linkEmail(linkText, linkClass, email)
-	- var emailAddress = email ? email : 'contact'
-	a(href="mailto:" + emailAddress + "@overleaf.com" class=linkClass ? linkClass : '', ng-non-bindable)
-		| #{linkText ? linkText : 'email'}
-
 mixin linkInvite(linkText, linkClass, track)
 	- var gaCategory = track && track.category ? track.category : 'All'
 	- var gaAction = track && track.action ? track.action : null
