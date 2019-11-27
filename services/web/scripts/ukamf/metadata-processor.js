@@ -30,7 +30,7 @@ async function main() {
   const samlConfig = entity.getSamlConfig()
 
   console.log(`UPDATE universities SET
-  sso_entity_id = '${entityId}',
+  sso_entity_id = '${samlConfig.entityId}',
   sso_entry_point = '${samlConfig.entryPoint}',
   sso_cert = '${samlConfig.cert}',
   sso_user_id_attribute = 'eduPersonPrincipalName',
