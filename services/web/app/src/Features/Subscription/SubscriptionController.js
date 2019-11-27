@@ -52,6 +52,7 @@ module.exports = SubscriptionController = {
             title: 'plans_and_pricing',
             plans,
             gaExperiments: Settings.gaExperiments.plansPage,
+            gaOptimize: true,
             recomendedCurrency,
             planFeatures,
             groupPlans: GroupPlansData
