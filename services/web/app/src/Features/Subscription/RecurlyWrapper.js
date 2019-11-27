@@ -555,7 +555,7 @@ module.exports = RecurlyWrapper = {
           )
           cursor = __guard__(
             response.headers.link != null
-              ? response.headers.link.match(/cursor=([0-9]+%3A[0-9]+)&/)
+              ? response.headers.link.match(/cursor=([0-9.]+%3A[0-9.]+)&/)
               : undefined,
             x1 => x1[1]
           )

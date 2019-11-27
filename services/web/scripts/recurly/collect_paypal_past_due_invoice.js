@@ -39,6 +39,7 @@ const attemptInvoiceCollection = (invoice, callback) => {
             callback
           )
         }
+        INVOICES_COLLECTED_SUCCESS.push(invoice.invoice_number)
         slowCallback(callback, null)
       }
     )
@@ -75,6 +76,7 @@ const attemptInvoicesCollection = callback => {
 const argv = minimist(process.argv.slice(2))
 const DRY_RUN = argv.n !== undefined
 const INVOICES_COLLECTED = []
+const INVOICES_COLLECTED_SUCCESS = []
 const USERS_COLLECTED = []
 attemptInvoicesCollection(error => {
   if (error) {
@@ -83,8 +85,17 @@ attemptInvoicesCollection(error => {
   console.log(
     `DONE (DRY_RUN=${DRY_RUN}). ${
       INVOICES_COLLECTED.length
-    } invoices collected for ${USERS_COLLECTED.length} users.`
+    } invoices collection attempts for ${USERS_COLLECTED.length} users. ${
+      INVOICES_COLLECTED_SUCCESS.length
+    } successful collections`
   )
-  console.log({ INVOICES_COLLECTED, USERS_COLLECTED })
+  console.dir(
+    {
+      INVOICES_COLLECTED,
+      INVOICES_COLLECTED_SUCCESS,
+      USERS_COLLECTED
+    },
+    { maxArrayLength: null }
+  )
   process.exit()
 })
