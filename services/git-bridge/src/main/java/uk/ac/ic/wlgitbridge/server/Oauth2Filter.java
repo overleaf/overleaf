@@ -138,12 +138,6 @@ public class Oauth2Filter implements Filter {
               clientIp = request.getRemoteAddr();
             }
             Log.info("[{}] Authorization header present", clientIp);
-            // TEMPORARY DEBUG CODE
-            Enumeration headerNames = request.getHeaderNames();
-            while(headerNames.hasMoreElements()) {
-              String headerName = (String)headerNames.nextElement();
-              Log.info("HEADER {}: {}", headerName, request.getHeader(headerName));
-            }
             StringTokenizer st = new StringTokenizer(authHeader);
             if (st.hasMoreTokens()) {
                 String basic = st.nextToken();
