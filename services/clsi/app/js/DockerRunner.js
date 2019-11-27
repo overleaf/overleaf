@@ -632,6 +632,9 @@ module.exports = DockerRunner = {
             ttl
           ) {
             if (name.slice(0, 9) === '/project-' && ttl <= 0) {
+              // strip the / prefix
+              // the LockManager uses the plain container name
+              name = name.slice(1)
               return jobs.push(cb =>
                 DockerRunner.destroyContainer(name, id, false, () => cb())
               )
