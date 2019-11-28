@@ -29,14 +29,17 @@ describe 'Notifications Tests', ->
 				remove: @removeStub
 		@mongojs.ObjectId = ObjectId
 
-		@notifications = SandboxedModule.require modulePath, requires:
-			'logger-sharelatex': {
-				log:()->
-				error:()->
-			}
-			'settings-sharelatex': {}
-			'mongojs':@mongojs
-			'metrics-sharelatex': {timeAsyncMethod: sinon.stub()}
+		@notifications = SandboxedModule.require modulePath,
+			requires:
+				'logger-sharelatex': {
+					log:()->
+					error:()->
+				}
+				'settings-sharelatex': {}
+				'mongojs':@mongojs
+				'metrics-sharelatex': {timeAsyncMethod: sinon.stub()}
+			globals:
+				console: console
 
 		@stubbedNotification = {user_id: ObjectId(user_id), key:"notification-key", messageOpts:"some info", templateKey:"template-key"}
 		@stubbedNotificationArray = [@stubbedNotification]
@@ -63,33 +66,34 @@ describe 'Notifications Tests', ->
 				messageOpts:"some info",
 				templateKey:"template-key"
 			}
-			@notifications.deleteNotificationByKeyOnly = sinon.stub()
-			@notifications.deleteNotificationByKeyOnly.callsArgWith(1, null)
+			@expectedQuery = {
+				user_id: @stubbedNotification.user_id,
+				key:"notification-key",
+			}
+			@updateStub.yields()
+			@countStub.yields(null, 0)
 
 		it 'should insert the notification into the collection', (done)->
-			@insertStub.callsArgWith(1, null)
-			@countStub.callsArgWith(1, null, 0)
-
 			@notifications.addNotification user_id, @stubbedNotification, (err)=>
-				assert.deepEqual(@insertStub.lastCall.args[0], @expectedDocument)
+				expect(err).not.exists
+				sinon.assert.calledWith(@updateStub, @expectedQuery, @expectedDocument, { upsert: true })
 				done()
 
-		it 'should fail insert of existing notification key', (done)->
-			@insertStub.callsArgWith(1, null)
-			@countStub.callsArgWith(1, null, 1)
-			@notifications.addNotification user_id, @stubbedNotification, (err)=>
-				@insertStub.calledWith(@expectedDocument).should.equal false
-				done()
+		describe 'when there is an existing notification', (done) ->
+			beforeEach ->
+				@countStub.yields(null, 1)
 
-		describe "when key already exists but forceCreate is passed", (done)->
+			it 'should fail to insert', (done)->
+				@notifications.addNotification user_id, @stubbedNotification, (err)=>
+					expect(err).not.exists
+					sinon.assert.notCalled(@updateStub)
+					done()
 
-			it "should delete the old key and insert the new one", (done) ->
-				@insertStub.callsArgWith(1, null)
-				@countStub.callsArgWith(1, null, 1)
+			it "should update the key if forceCreate is true", (done) ->
 				@stubbedNotification.forceCreate = true
 				@notifications.addNotification user_id, @stubbedNotification, (err)=>
-					assert.deepEqual(@insertStub.lastCall.args[0], @expectedDocument)
-					@notifications.deleteNotificationByKeyOnly.calledWith(@stubbedNotification.key).should.equal true
+					expect(err).not.exists
+					sinon.assert.calledWith(@updateStub, @expectedQuery, @expectedDocument, { upsert: true })
 					done()
 
 		describe 'when the notification is set to expire', () ->
@@ -108,14 +112,15 @@ describe 'Notifications Tests', ->
 					templateKey:"template-key",
 					expires: new Date(@stubbedNotification.expires),
 				}
+				@expectedQuery = {
+					user_id: @stubbedNotification.user_id,
+					key:"notification-key",
+				}
 
 			it 'should add an `expires` Date field to the document', (done)->
-				@insertStub.callsArgWith(1, null)
-				@countStub.callsArgWith(1, null, 0)
-
 				@notifications.addNotification user_id, @stubbedNotification, (err)=>
-					@insertStub.callCount.should.equal 1
-					assert.deepEqual(@insertStub.lastCall.args[0], @expectedDocument)
+					expect(err).not.exists
+					sinon.assert.calledWith(@updateStub, @expectedQuery, @expectedDocument, { upsert: true })
 					done()
 
 		describe 'when the notification has a nonsensical expires field', () ->
@@ -136,13 +141,9 @@ describe 'Notifications Tests', ->
 				}
 
 			it 'should produce an error', (done)->
-				@insertStub.callsArgWith(1, null)
-				@countStub.callsArgWith(1, null, 0)
-
 				@notifications.addNotification user_id, @stubbedNotification, (err)=>
 					(err instanceof Error).should.equal true
-					@insertStub.callCount.should.equal 0
-					@insertStub.calledWith(@expectedDocument).should.equal false
+					sinon.assert.notCalled(@updateStub)
 					done()
 
 	describe 'removeNotificationId', ->
