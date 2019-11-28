@@ -1,4 +1,5 @@
 const merge = require('webpack-merge')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const base = require('./webpack.config')
 
@@ -7,6 +8,14 @@ module.exports = merge(base, {
 
   // Enable source maps for dev (fast compilation, slow runtime)
   devtool: 'cheap-module-eval-source-map',
+
+  plugins: [
+    // Extract CSS to a separate file (rather than inlining to a <style> tag)
+    new MiniCssExtractPlugin({
+      // Output to public/stylesheets directory
+      filename: 'stylesheets/[name].css'
+    })
+  ],
 
   devServer: {
     // Disable webpack dev server auto-reload
@@ -26,7 +35,7 @@ module.exports = merge(base, {
       chunks: false,
       modules: false,
       // Hide copied assets from output
-      excludeAssets: [/^ace/, /^libs/, /^cmaps/]
+      excludeAssets: [/^js\/ace/, /^js\/libs/, /^js\/cmaps/]
     }
   }
 })

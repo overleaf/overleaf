@@ -3,6 +3,7 @@ const path = require('path')
 const webpack = require('webpack')
 const CopyPlugin = require('copy-webpack-plugin')
 const ManifestPlugin = require('webpack-manifest-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const PackageVersions = require('./app/src/infrastructure/PackageVersions')
 
@@ -11,7 +12,11 @@ const MODULES_PATH = path.join(__dirname, '/modules')
 // Generate a hash of entry points, including modules
 const entryPoints = {
   main: './frontend/js/main.js',
-  ide: './frontend/js/ide.js'
+  ide: './frontend/js/ide.js',
+  style: './frontend/stylesheets/style.less',
+  'ieee-style': './frontend/stylesheets/ieee-style.less',
+  'light-style': './frontend/stylesheets/light-style.less',
+  'sl-style': './frontend/stylesheets/sl-style.less'
 }
 
 // Attempt to load frontend entry-points from modules, if they exist
@@ -34,12 +39,13 @@ module.exports = {
   // Note: webpack-dev-server does not write the bundle to disk, instead it is
   // kept in memory for speed
   output: {
-    path: path.join(__dirname, '/public/js'),
+    path: path.join(__dirname, '/public'),
 
-    // Serve from /js
-    publicPath: '/js/',
+    // Serve from the root of public directory
+    publicPath: '/',
 
-    filename: '[name].js',
+    // By default write into js directory
+    filename: 'js/[name].js',
 
     // Output as UMD bundle (allows main JS to import with CJS, AMD or global
     // style code bundles
@@ -65,6 +71,44 @@ module.exports = {
               cacheDirectory: true
             }
           }
+        ]
+      },
+      {
+        // Wrap PDF.js worker in a Web Worker
+        test: /pdf\.worker\.js$/,
+        use: [
+          {
+            loader: 'worker-loader',
+            options: {
+              // Write into js directory (note: customising this is not possible
+              // with pdfjs-dist/webpack auto loader)
+              name: 'js/pdfjs-worker.[hash].js'
+            }
+          }
+        ]
+      },
+      {
+        // Pass Less files through less-loader/css-loader/mini-css-extract-
+        // plugin (note: run in reverse order)
+        test: /\.less$/,
+        use: [
+          // Allows the CSS to be extracted to a separate .css file
+          { loader: MiniCssExtractPlugin.loader },
+          // Resolves any CSS dependencies (e.g. url())
+          { loader: 'css-loader' },
+          {
+            // Runs autoprefixer on CSS via postcss
+            loader: 'postcss-loader',
+            options: {
+              // Uniquely identifies the postcss plugin (required by webpack)
+              ident: 'postcss',
+              plugins: [
+                require('autoprefixer')({ env: 'last 2 versions, ie >= 10' })
+              ]
+            }
+          },
+          // Compiles the Less syntax to CSS
+          { loader: 'less-loader' }
         ]
       },
       {
@@ -190,35 +234,35 @@ module.exports = {
     new CopyPlugin([
       {
         from: 'frontend/js/vendor/libs/angular-1.6.4.min.js',
-        to: 'libs/angular-1.6.4.min.js'
+        to: 'js/libs/angular-1.6.4.min.js'
       },
       {
         from: 'frontend/js/vendor/libs/angular-1.6.4.min.js.map',
-        to: 'libs/angular-1.6.4.min.js.map'
+        to: 'js/libs/angular-1.6.4.min.js.map'
       },
       {
         from: 'frontend/js/vendor/libs/jquery-1.11.1.min.js',
-        to: 'libs/jquery-1.11.1.min.js'
+        to: 'js/libs/jquery-1.11.1.min.js'
       },
       {
         from: 'frontend/js/vendor/libs/jquery-1.11.1.min.js.map',
-        to: 'libs/jquery-1.11.1.min.js.map'
+        to: 'js/libs/jquery-1.11.1.min.js.map'
       },
       {
         from: 'frontend/js/vendor/libs/mathjax',
-        to: 'libs/mathjax'
+        to: 'js/libs/mathjax'
       },
       {
         from: 'frontend/js/vendor/libs/sigma-master',
-        to: 'libs/sigma-master'
+        to: 'js/libs/sigma-master'
       },
       {
         from: `frontend/js/vendor/ace-${PackageVersions.version.ace}/`,
-        to: `ace-${PackageVersions.version.ace}/`
+        to: `js/ace-${PackageVersions.version.ace}/`
       },
       // Copy CMap files from pdfjs-dist package to build output. These are used
       // to provide support for non-Latin characters
-      { from: 'node_modules/pdfjs-dist/cmaps', to: 'cmaps' }
+      { from: 'node_modules/pdfjs-dist/cmaps', to: 'js/cmaps' }
     ])
   ],
 

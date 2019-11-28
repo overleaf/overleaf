@@ -1,4 +1,4 @@
-Compiled source #
+# Compiled source #
 ###################
 *.com
 *.class
@@ -42,14 +42,11 @@ TpdsWorker.js
 BackgroundJobsWorker.js
 UserAndProjectPopulator.coffee
 
+public/manifest.json
+
 public/js
 public/minjs
-
-public/stylesheets/style*.css
-public/stylesheets/sl-style*.css
-public/stylesheets/light-style*.css
-public/stylesheets/ieee-style*.css
-public/stylesheets/*.map
+public/stylesheets
 
 Gemfile.lock
 

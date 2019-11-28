@@ -1,7 +1,0 @@
-{
-  "exec": "make compile || exit 1",
-  "watch": [
-    "public/stylesheets/"
-  ],
-  "ext": "less"
-}

@@ -16,41 +16,6 @@ MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '
 MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
 MODULE_NAME=$(shell basename $(MODULE))
 
-LESSC := node_modules/.bin/lessc
-CLEANCSS := node_modules/.bin/cleancss
-
-LESS_FILES := $(shell find public/stylesheets -name '*.less')
-LESSC_COMMON_FLAGS := --source-map --autoprefix="last 2 versions, ie >= 10"
-CLEANCSS_FLAGS := --s0 --source-map
-
-LESS_SL_FILE := public/stylesheets/sl-style.less
-CSS_SL_FILE := public/stylesheets/sl-style.css
-LESS_OL_FILE := public/stylesheets/style.less
-CSS_OL_FILE := public/stylesheets/style.css
-LESS_OL_LIGHT_FILE := public/stylesheets/light-style.less
-CSS_OL_LIGHT_FILE := public/stylesheets/light-style.css
-LESS_OL_IEEE_FILE := public/stylesheets/ieee-style.less
-CSS_OL_IEEE_FILE := public/stylesheets/ieee-style.css
-
-CSS_FILES := $(CSS_SL_FILE) $(CSS_OL_FILE) $(CSS_OL_LIGHT_FILE) $(CSS_OL_IEEE_FILE)
-
-public/stylesheets/%.css: $(LESS_FILES)
-	$(LESSC) $(LESSC_COMMON_FLAGS) $(@D)/$*.less $(@D)/$*.css
-
-css_full: $(CSS_FILES)
-
-css: $(CSS_OL_FILE)
-
-minify: $(CSS_FILES)
-	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_SL_FILE) $(CSS_SL_FILE)
-	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_OL_FILE) $(CSS_OL_FILE)
-	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_OL_LIGHT_FILE) $(CSS_OL_LIGHT_FILE)
-	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_OL_IEEE_FILE) $(CSS_OL_IEEE_FILE)
-
-compile: css
-
-compile_full: css_full
-
 $(MODULE_MAKEFILES): Makefile.module
 	@set -e; \
 	for makefile in $(MODULE_MAKEFILES); \
@@ -61,9 +26,6 @@ $(MODULE_MAKEFILES): Makefile.module
 #
 # Clean
 #
-
-clean:
-	rm -f public/stylesheets/*.css*
 
 clean_ci:
 	$(DOCKER_COMPOSE) down -v -t 0
@@ -187,9 +149,8 @@ tar:
 	COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 .PHONY:
-	css_full css minify minify_css minify_es compile compile_full \
-	compile_css_full compile_modules compile_modules_full clean clean_frontend \
-	clean_css clean_tests clean_ci test test_module test_unit test_unit_app \
+	compile_modules compile_modules_full clean_ci \
+	test test_module test_unit test_unit_app \
 	test_unit_modules test_unit_module test_frontend test_frontend_run \
 	test_frontend_build_run test_acceptance test_acceptance_app \
 	test_acceptance_modules test_acceptance_module ci format format_fix lint \

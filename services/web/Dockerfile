@@ -10,8 +10,6 @@ RUN npm install --quiet
 
 COPY . /app
 
-RUN make compile_full
-
 FROM node:10.15.3
 
 COPY --from=app /app /app

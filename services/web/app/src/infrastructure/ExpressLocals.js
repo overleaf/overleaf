@@ -1,6 +1,4 @@
 const logger = require('logger-sharelatex')
-const fs = require('fs')
-const crypto = require('crypto')
 const Settings = require('settings-sharelatex')
 const querystring = require('querystring')
 const _ = require('lodash')
@@ -25,52 +23,7 @@ if (!IS_DEV_ENV) {
   // containers can't coordinate, so there no guarantee that the manifest file
   // exists when the web server boots. We therefore ignore the manifest file in
   // dev reload
-  webpackManifest = require(`../../../public/js/manifest.json`)
-}
-
-function getFileContent(filePath) {
-  filePath = Path.join(__dirname, '../../../', `public${filePath}`)
-  const exists = fs.existsSync(filePath)
-  if (exists) {
-    const content = fs.readFileSync(filePath, 'UTF-8')
-    return content
-  } else {
-    logger.log({ filePath }, 'file does not exist for hashing')
-    return ''
-  }
-}
-
-const pathList = [
-  '/stylesheets/style.css',
-  '/stylesheets/light-style.css',
-  '/stylesheets/ieee-style.css',
-  '/stylesheets/sl-style.css'
-]
-const hashedFiles = {}
-if (!Settings.useMinifiedJs) {
-  logger.log('not using minified JS, not hashing static files')
-} else {
-  logger.log('Generating file hashes...')
-  for (let path of pathList) {
-    const content = getFileContent(path)
-    const hash = crypto
-      .createHash('md5')
-      .update(content)
-      .digest('hex')
-
-    const splitPath = path.split('/')
-    const filenameSplit = splitPath.pop().split('.')
-    filenameSplit.splice(filenameSplit.length - 1, 0, hash)
-    splitPath.push(filenameSplit.join('.'))
-
-    const hashPath = splitPath.join('/')
-    hashedFiles[path] = hashPath
-
-    const fsHashPath = Path.join(__dirname, '../../../', `public${hashPath}`)
-    fs.writeFileSync(fsHashPath, content)
-
-    logger.log('Finished hashing static content')
-  }
+  webpackManifest = require(`../../../public/manifest.json`)
 }
 
 module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
@@ -125,13 +78,32 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       staticFilesBase = ''
     }
 
-    res.locals.buildJsPath = function(jsFile, opts = {}) {
+    res.locals.buildJsPath = function(jsFile) {
       let path
       if (IS_DEV_ENV) {
         // In dev: resolve path within JS asset directory
         // We are *not* guaranteed to have a manifest file when the server
         // starts up
         path = Path.join('/js', jsFile)
+      } else {
+        // In production: resolve path from webpack manifest file
+        // We are guaranteed to have a manifest file since webpack compiles in
+        // the build
+        path = webpackManifest[jsFile]
+      }
+
+      return Url.resolve(staticFilesBase, path)
+    }
+
+    // Temporary hack while jQuery/Angular dependencies are *not* bundled,
+    // instead copied into output directory
+    res.locals.buildCopiedJsAssetPath = function(jsFile, opts = {}) {
+      let path
+      if (IS_DEV_ENV) {
+        // In dev: resolve path to root directory
+        // We are *not* guaranteed to have a manifest file when the server
+        // starts up
+        path = Path.join('/', jsFile)
       } else {
         // In production: resolve path from webpack manifest file
         // We are guaranteed to have a manifest file since webpack compiles in
@@ -150,10 +122,13 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       return path
     }
 
-    res.locals.mathJaxPath = res.locals.buildJsPath('libs/mathjax/MathJax.js', {
-      cdn: false,
-      qs: { config: 'TeX-AMS_HTML,Safe' }
-    })
+    res.locals.mathJaxPath = res.locals.buildCopiedJsAssetPath(
+      'js/libs/mathjax/MathJax.js',
+      {
+        cdn: false,
+        qs: { config: 'TeX-AMS_HTML,Safe' }
+      }
+    )
 
     res.locals.lib = PackageVersions.lib
 
@@ -164,36 +139,39 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       (brandVariation != null ? brandVariation.brand_id : undefined) ===
       IEEE_BRAND_ID
 
-    const _buildCssFileName = themeModifier =>
-      `/${Settings.brandPrefix}${themeModifier || ''}style.css`
-
     res.locals.getCssThemeModifier = function(userSettings, brandVariation) {
       // Themes only exist in OL v2
-      let themeModifier
       if (Settings.overleaf != null) {
         // The IEEE theme takes precedence over the user personal setting, i.e. a user with
         // a theme setting of "light" will still get the IEE theme in IEEE branded projects.
         if (res.locals.isIEEE(brandVariation)) {
-          themeModifier = 'ieee-'
-        } else if (
-          (userSettings != null ? userSettings.overallTheme : undefined) != null
-        ) {
-          themeModifier = userSettings.overallTheme
+          return 'ieee-'
+        } else if (userSettings && userSettings.overallTheme != null) {
+          return userSettings.overallTheme
         }
       }
-      return themeModifier
     }
 
-    res.locals.buildCssPath = function(themeModifier, buildOpts) {
+    function _buildCssFileName(themeModifier) {
+      return `${Settings.brandPrefix}${themeModifier || ''}style.css`
+    }
+
+    res.locals.buildCssPath = function(themeModifier) {
       const cssFileName = _buildCssFileName(themeModifier)
-      const path = Path.join('/stylesheets/', cssFileName)
-      if (
-        (buildOpts != null ? buildOpts.hashedPath : undefined) &&
-        hashedFiles[path] != null
-      ) {
-        const hashedPath = hashedFiles[path]
-        return Url.resolve(staticFilesBase, hashedPath)
+
+      let path
+      if (IS_DEV_ENV) {
+        // In dev: resolve path within CSS asset directory
+        // We are *not* guaranteed to have a manifest file when the server
+        // starts up
+        path = Path.join('/stylesheets/', cssFileName)
+      } else {
+        // In production: resolve path from webpack manifest file
+        // We are guaranteed to have a manifest file since webpack compiles in
+        // the build
+        path = webpackManifest[cssFileName]
       }
+
       return Url.resolve(staticFilesBase, path)
     }
 
