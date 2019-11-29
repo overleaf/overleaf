@@ -15,42 +15,35 @@ module.exports = Notifications =
 			callback err, notifications
 
 
-	_checkExistingNotifcationAndOverride : (user_id, notification, callback)->
-		self = @
+	_countExistingNotifications : (user_id, notification, callback = (err, count)->)->
 		query =
 			user_id: ObjectId(user_id)
 			key: notification.key
-		db.notifications.count query, (err, number)->
-			if number > 0 and !notification.forceCreate
-				logger.log number:number, user_id:user_id, key:notification.key, "alredy has notification key for user"
-				return callback(number)
-			else if number > 0 and notification.forceCreate
-				self.deleteNotificationByKeyOnly notification.key, callback
-			else
-				callback()
+		db.notifications.count query, (err, count)->
+			return callback(err) if err?
+			callback(null, count)
 
 	addNotification: (user_id, notification, callback)->
-		@_checkExistingNotifcationAndOverride user_id, notification, (err)->
-			if err?
-				callback err
-			else
-				doc =
-					user_id: ObjectId(user_id)
-					key: notification.key
-					messageOpts: notification.messageOpts
-					templateKey: notification.templateKey
-				# TTL index on the optional `expires` field, which should arrive as an iso date-string, corresponding to
-				# a datetime in the future when the document should be automatically removed.
-				# in Mongo, TTL indexes only work on date fields, and ignore the document when that field is missing
-				# see `README.md` for instruction on creating TTL index
-				if notification.expires?
-					try
-						doc.expires =  new Date(notification.expires)
-						_testValue = doc.expires.toISOString()
-					catch err
-						logger.error {user_id, expires: notification.expires}, "error converting `expires` field to Date"
-						return callback(err)
-				db.notifications.insert(doc, callback)
+		@_countExistingNotifications user_id, notification, (err, count)->
+			return callback(err) if err?
+			return callback() unless count == 0 || notification.forceCreate
+			doc =
+				user_id: ObjectId(user_id)
+				key: notification.key
+				messageOpts: notification.messageOpts
+				templateKey: notification.templateKey
+			# TTL index on the optional `expires` field, which should arrive as an iso date-string, corresponding to
+			# a datetime in the future when the document should be automatically removed.
+			# in Mongo, TTL indexes only work on date fields, and ignore the document when that field is missing
+			# see `README.md` for instruction on creating TTL index
+			if notification.expires?
+				try
+					doc.expires =  new Date(notification.expires)
+					_testValue = doc.expires.toISOString()
+				catch err
+					logger.error {user_id, expires: notification.expires}, "error converting `expires` field to Date"
+					return callback(err)
+			db.notifications.update({user_id: doc.user_id, key: notification.key}, doc, {upsert: true}, callback)
 
 	removeNotificationId: (user_id, notification_id, callback)->
 		searchOps =
