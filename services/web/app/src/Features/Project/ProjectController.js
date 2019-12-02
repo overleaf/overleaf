@@ -801,7 +801,8 @@ const ProjectController = {
                 Boolean(project.overleaf.history.display),
               brandVariation,
               allowedImageNames: Settings.allowedImageNames || [],
-              gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl
+              gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
+              showSupport: Features.hasFeature('support')
             })
             timer.done()
           }

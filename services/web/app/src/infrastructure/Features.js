@@ -17,6 +17,10 @@ const publicRegistrationModuleAvailable = fs.existsSync(
   `${__dirname}/../../../modules/public-registration`
 )
 
+const supportModuleAvailable = fs.existsSync(
+  `${__dirname}/../../../modules/support`
+)
+
 module.exports = Features = {
   externalAuthenticationSystemUsed() {
     return (
@@ -61,9 +65,10 @@ module.exports = Features = {
         return Settings.enableSaml
       case 'link-url':
         return Settings.apis.linkedUrlProxy && Settings.apis.linkedUrlProxy.url
-
       case 'public-registration':
         return publicRegistrationModuleAvailable
+      case 'support':
+        return supportModuleAvailable
       default:
         throw new Error(`unknown feature: ${feature}`)
     }

@@ -208,14 +208,15 @@ aside#left-menu.full-size(
 			a(ng-click="openHotkeysModal()")
 				i.fa.fa-keyboard-o.fa-fw
 				| &nbsp;&nbsp; #{translate("show_hotkeys")}
-		li
-			a(href='/learn', target="_blank")
-				i.fa.fa-book.fa-fw
-				| &nbsp;&nbsp; #{translate('documentation')}
-		li
-			a(ng-controller="ContactModal", ng-click="contactUsModal()")
-				i.fa.fa-question.fa-fw
-				| &nbsp;&nbsp; #{translate("contact_us")}
+		if showSupport
+			li
+				a(href='/learn', target="_blank")
+					i.fa.fa-book.fa-fw
+					| &nbsp;&nbsp; #{translate('documentation')}
+			li
+				a(ng-controller="ContactModal", ng-click="contactUsModal()")
+					i.fa.fa-question.fa-fw
+					| &nbsp;&nbsp; #{translate("contact_us")}
 
 #left-menu-mask(
 	ng-show="ui.leftMenuShown",
