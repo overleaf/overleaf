@@ -72,7 +72,6 @@ module.exports = {
     if (!passwordResetToken || !password) {
       return res.sendStatus(400)
     }
-    password = password.trim()
     passwordResetToken = passwordResetToken.trim()
     if (AuthenticationManager.validatePassword(password) != null) {
       return res.sendStatus(400)
