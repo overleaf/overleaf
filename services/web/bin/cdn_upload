@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+
+# Upload to staging CDN if branch is either 'master' or 'staging-master'
+if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "staging-master" ]]; then
+  tar --directory=/tmp/ -xzf build.tar.gz ./public/
+  gsutil -h "Cache-Control:public, max-age=31536000" -m cp -r /tmp/public $CDN_STAG
+  # Only upload to production CDN if branch is 
+  if [[ "$BRANCH_NAME" == "master" ]]; then
+    gsutil -h "Cache-Control:public, max-age=31536000" -m cp -r /tmp/public $CDN_PROD
+  fi
+fi
+
+
