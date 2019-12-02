@@ -91,6 +91,32 @@ const UserSchema = new Schema({
       default: Settings.defaultFeatures.referencesSearch
     }
   },
+  featuresOverrides: [
+    {
+      createdAt: {
+        type: Date,
+        default() {
+          return new Date()
+        }
+      },
+      expiresAt: { type: Date },
+      note: { type: String },
+      features: {
+        collaborators: { type: Number },
+        versioning: { type: Boolean },
+        dropbox: { type: Boolean },
+        github: { type: Boolean },
+        gitBridge: { type: Boolean },
+        compileTimeout: { type: Number },
+        compileGroup: { type: String },
+        templates: { type: Boolean },
+        trackChanges: { type: Boolean },
+        mendeley: { type: Boolean },
+        zotero: { type: Boolean },
+        referencesSearch: { type: Boolean }
+      }
+    }
+  ],
   // when auto-merged from SL and must-reconfirm is set, we may end up using
   // `sharelatexHashedPassword` to recover accounts...
   sharelatexHashedPassword: String,

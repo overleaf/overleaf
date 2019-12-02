@@ -338,4 +338,51 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     }) // returns a promise
   })
+
+  describe('when the user has features overrides', function() {
+    beforeEach(function() {
+      const futureDate = new Date()
+      futureDate.setDate(futureDate.getDate() + 1)
+      return User.update(
+        {
+          _id: this.user._id
+        },
+        {
+          featuresOverrides: [
+            {
+              features: {
+                github: true
+              }
+            },
+            {
+              features: {
+                dropbox: true
+              },
+              expiresAt: new Date(1990, 12, 25)
+            },
+            {
+              features: {
+                trackChanges: true
+              },
+              expiresAt: futureDate
+            }
+          ]
+        }
+      )
+    }) // returns a promise
+
+    it('should set their features to the overridden set', function(done) {
+      return syncUserAndGetFeatures(this.user, (error, features) => {
+        if (error != null) {
+          throw error
+        }
+        let expectedFeatures = Object.assign(settings.defaultFeatures, {
+          github: true,
+          trackChanges: true
+        })
+        expect(features).to.deep.equal(expectedFeatures)
+        return done()
+      })
+    })
+  })
 })

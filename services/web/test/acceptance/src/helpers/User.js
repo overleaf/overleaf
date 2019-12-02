@@ -142,6 +142,11 @@ class User {
     UserModel.update({ _id: this.id }, update, callback)
   }
 
+  setFeaturesOverride(featuresOverride, callback) {
+    const update = { $push: { featuresOverrides: featuresOverride } }
+    UserModel.update({ _id: this.id }, update, callback)
+  }
+
   setOverleafId(overleafId, callback) {
     UserModel.update({ _id: this.id }, { 'overleaf.id': overleafId }, callback)
   }

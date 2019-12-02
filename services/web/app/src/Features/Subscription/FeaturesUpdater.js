@@ -50,6 +50,9 @@ const FeaturesUpdater = {
       },
       samlFeatures(cb) {
         return FeaturesUpdater._getSamlFeatures(user_id, cb)
+      },
+      featuresOverrides(cb) {
+        return FeaturesUpdater._getFeaturesOverrides(user_id, cb)
       }
     }
     return async.series(jobs, function(err, results) {
@@ -67,7 +70,8 @@ const FeaturesUpdater = {
         institutionFeatures,
         v1Features,
         bonusFeatures,
-        samlFeatures
+        samlFeatures,
+        featuresOverrides
       } = results
       logger.log(
         {
@@ -77,7 +81,8 @@ const FeaturesUpdater = {
           institutionFeatures,
           v1Features,
           bonusFeatures,
-          samlFeatures
+          samlFeatures,
+          featuresOverrides
         },
         'merging user features'
       )
@@ -86,7 +91,8 @@ const FeaturesUpdater = {
         institutionFeatures,
         v1Features,
         bonusFeatures,
-        samlFeatures
+        samlFeatures,
+        featuresOverrides
       ])
       const features = _.reduce(
         featureSets,
@@ -140,6 +146,36 @@ const FeaturesUpdater = {
         }
       }
       return callback(null, {})
+    })
+  },
+
+  _getFeaturesOverrides(user_id, callback) {
+    UserGetter.getUser(user_id, { featuresOverrides: 1 }, (error, user) => {
+      if (error) {
+        return callback(error)
+      }
+      if (
+        !user ||
+        !user.featuresOverrides ||
+        user.featuresOverrides.length === 0
+      ) {
+        return callback(null, {})
+      }
+      let activeFeaturesOverrides = []
+      for (let featuresOverride of user.featuresOverrides) {
+        if (
+          !featuresOverride.expiresAt ||
+          featuresOverride.expiresAt > new Date()
+        ) {
+          activeFeaturesOverrides.push(featuresOverride.features)
+        }
+      }
+      const features = _.reduce(
+        activeFeaturesOverrides,
+        FeaturesUpdater._mergeFeatures,
+        {}
+      )
+      return callback(null, features)
     })
   },
 
