@@ -25,6 +25,7 @@ const requestPromise = require('request-promise-native')
 const settings = require('settings-sharelatex')
 const uuid = require('uuid')
 const Errors = require('../Errors/Errors')
+const _ = require('underscore')
 
 const TemplatesManager = {
   createProjectFromV1Template(
@@ -36,8 +37,9 @@ const TemplatesManager = {
     templateVersionId,
     user_id,
     imageName,
-    callback
+    _callback
   ) {
+    const callback = _.once(_callback)
     const zipUrl = `${
       settings.apis.v1.url
     }/api/v1/sharelatex/templates/${templateVersionId}`
