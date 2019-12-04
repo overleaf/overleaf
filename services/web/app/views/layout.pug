@@ -47,6 +47,9 @@ html(
 
 		script(type="text/javascript").
 			window.csrfToken = "#{csrfToken}";
+			//- Configure dynamically loaded assets (via webpack) to be downloaded from CDN
+			//- See: https://webpack.js.org/guides/public-path/#on-the-fly
+			window.baseAssetPath = "#{buildBaseAssetPath()}"
 
 		script(src=buildCopiedJsAssetPath('js/libs/jquery-1.11.1.min.js'))
 		script(type="text/javascript").
