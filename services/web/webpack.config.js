@@ -41,6 +41,9 @@ module.exports = {
   output: {
     path: path.join(__dirname, '/public'),
 
+    // Serve from the root of public directory
+    publicPath: '/',
+
     // By default write into js directory
     filename: 'js/[name].js',
 

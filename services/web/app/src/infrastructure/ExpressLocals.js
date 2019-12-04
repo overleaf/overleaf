@@ -78,12 +78,6 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       staticFilesBase = ''
     }
 
-    res.locals.buildBaseAssetPath = function() {
-      // Return the base asset path (including the CDN url) so that webpack can
-      // use this to dynamically fetch scripts (e.g. PDFjs worker)
-      return Url.resolve(staticFilesBase, '/')
-    }
-
     res.locals.buildJsPath = function(jsFile) {
       let path
       if (IS_DEV_ENV) {
@@ -95,7 +89,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
         // In production: resolve path from webpack manifest file
         // We are guaranteed to have a manifest file since webpack compiles in
         // the build
-        path = `/${webpackManifest[jsFile]}`
+        path = webpackManifest[jsFile]
       }
 
       return Url.resolve(staticFilesBase, path)
@@ -103,7 +97,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
 
     // Temporary hack while jQuery/Angular dependencies are *not* bundled,
     // instead copied into output directory
-    res.locals.buildCopiedJsAssetPath = function(jsFile) {
+    res.locals.buildCopiedJsAssetPath = function(jsFile, opts = {}) {
       let path
       if (IS_DEV_ENV) {
         // In dev: resolve path to root directory
@@ -114,17 +108,27 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
         // In production: resolve path from webpack manifest file
         // We are guaranteed to have a manifest file since webpack compiles in
         // the build
-        path = `/${webpackManifest[jsFile]}`
+        path = webpackManifest[jsFile]
       }
 
-      return Url.resolve(staticFilesBase, path)
+      if (opts.cdn !== false) {
+        path = Url.resolve(staticFilesBase, path)
+      }
+
+      if (opts.qs) {
+        path = path + '?' + querystring.stringify(opts.qs)
+      }
+
+      return path
     }
 
-    res.locals.mathJaxPath = `/js/libs/mathjax/MathJax.js?${querystring.stringify(
+    res.locals.mathJaxPath = res.locals.buildCopiedJsAssetPath(
+      'js/libs/mathjax/MathJax.js',
       {
-        config: 'TeX-AMS_HTML,Safe'
+        cdn: false,
+        qs: { config: 'TeX-AMS_HTML,Safe' }
       }
-    )}`
+    )
 
     res.locals.lib = PackageVersions.lib
 
@@ -165,7 +169,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
         // In production: resolve path from webpack manifest file
         // We are guaranteed to have a manifest file since webpack compiles in
         // the build
-        path = `/${webpackManifest[cssFileName]}`
+        path = webpackManifest[cssFileName]
       }
 
       return Url.resolve(staticFilesBase, path)
