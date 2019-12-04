@@ -94,7 +94,34 @@ describe('ExportsController', function() {
       return this.controller.exportProject(this.req, {
         json: body => {
           expect(this.handler.exportProject.args[0][0]).to.deep.equal(expected)
-          expect(body).to.deep.equal({ export_v1_id: 897 })
+          expect(body).to.deep.equal({ export_v1_id: 897, message: undefined })
+          return done()
+        }
+      })
+    })
+  })
+
+  describe('with a message from v1', function() {
+    it('should ask the handler to perform the export', function(done) {
+      this.handler.exportProject = sinon.stub().yields(null, {
+        iAmAnExport: true,
+        v1_id: 897,
+        message: 'RESUBMISSION'
+      })
+      const expected = {
+        project_id,
+        user_id,
+        brand_variation_id,
+        first_name: firstName,
+        last_name: lastName
+      }
+      return this.controller.exportProject(this.req, {
+        json: body => {
+          expect(this.handler.exportProject.args[0][0]).to.deep.equal(expected)
+          expect(body).to.deep.equal({
+            export_v1_id: 897,
+            message: 'RESUBMISSION'
+          })
           return done()
         }
       })
@@ -129,7 +156,7 @@ describe('ExportsController', function() {
       return this.controller.exportProject(this.req, {
         json: body => {
           expect(this.handler.exportProject.args[0][0]).to.deep.equal(expected)
-          expect(body).to.deep.equal({ export_v1_id: 897 })
+          expect(body).to.deep.equal({ export_v1_id: 897, message: undefined })
           return done()
         }
       })

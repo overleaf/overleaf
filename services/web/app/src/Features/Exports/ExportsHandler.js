@@ -36,11 +36,12 @@ module.exports = ExportsHandler = self = {
       if (err != null) {
         return callback(err)
       }
-      return self._requestExport(export_data, function(err, export_v1_id) {
+      return self._requestExport(export_data, function(err, body) {
         if (err != null) {
           return callback(err)
         }
-        export_data.v1_id = export_v1_id
+        export_data.v1_id = body.exportId
+        export_data.message = body.message
         // TODO: possibly store the export data in Mongo
         return callback(null, export_data)
       })
@@ -180,7 +181,7 @@ module.exports = ExportsHandler = self = {
           )
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
-          return callback(null, body.exportId)
+          return callback(null, body)
         } else {
           logger.warn(
             { export: export_data },

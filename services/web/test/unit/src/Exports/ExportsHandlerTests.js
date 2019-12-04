@@ -550,8 +550,10 @@ describe('ExportsHandler', function() {
         })
       })
 
-      it('should return the v1 export id', function() {
-        return this.callback.calledWith(null, this.export_id).should.equal(true)
+      it('should return the body with v1 export id', function() {
+        return this.callback
+          .calledWith(null, { exportId: this.export_id })
+          .should.equal(true)
       })
     })
 

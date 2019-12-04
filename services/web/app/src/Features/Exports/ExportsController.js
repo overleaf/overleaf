@@ -74,7 +74,10 @@ module.exports = {
         },
         'exported project'
       )
-      return res.json({ export_v1_id: export_data.v1_id })
+      return res.json({
+        export_v1_id: export_data.v1_id,
+        message: export_data.message
+      })
     })
   },
 
