@@ -307,12 +307,12 @@ templates.projectInvite = CTAEmailTemplate({
 templates.verifyEmailToJoinTeam = CTAEmailTemplate({
   subject(opts) {
     return `${_.escape(
-      SpamSafe.safeUserName(opts.inviterName, 'A collaborator')
+      _formatUserNameAndEmail(opts.inviter, 'A collaborator')
     )} has invited you to join a team on ${settings.appName}`
   },
   title(opts) {
     return `${_.escape(
-      SpamSafe.safeUserName(opts.inviterName, 'A collaborator')
+      _formatUserNameAndEmail(opts.inviter, 'A collaborator')
     )} has invited you to join a team on ${settings.appName}`
   },
   message(opts) {

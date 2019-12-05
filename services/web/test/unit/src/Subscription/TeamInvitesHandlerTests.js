@@ -159,7 +159,7 @@ describe('TeamInvitesHandler', function() {
               'verifyEmailToJoinTeam',
               sinon.match({
                 to: 'john.snow@example.com',
-                inviterName: 'Daenerys Targaryen (daenerys@example.com)',
+                inviter: this.manager,
                 acceptInviteUrl: `http://example.com/subscription/invites/${
                   this.newToken
                 }/`

@@ -189,7 +189,7 @@ var createInvite = function(subscription, email, inviter, callback) {
 
       const opts = {
         to: email,
-        inviterName,
+        inviter,
         acceptInviteUrl: `${settings.siteUrl}/subscription/invites/${
           invite.token
         }/`,
