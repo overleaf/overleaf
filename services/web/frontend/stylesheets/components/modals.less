@@ -32,9 +32,12 @@
   // When fading in the modal, animate it to slide down
   &.fade .modal-dialog {
     .translate(0, -25%);
-    .transition-transform(~"0.3s ease-out");
+    .transition-transform(~'0.3s ease-out');
   }
-  &.in .modal-dialog { .translate(0, 0)}
+  &.in .modal-dialog {
+    // prettier-ignore
+    .translate(0, 0);
+  }
 }
 
 // Shell div to position the modal with bottom padding
@@ -51,7 +54,7 @@
   border: 1px solid @modal-content-fallback-border-color; //old browsers fallback (ie8 etc)
   border: 1px solid @modal-content-border-color;
   border-radius: @border-radius-large;
-  .box-shadow(0 3px 9px rgba(0,0,0,.5));
+  .box-shadow(0 3px 9px rgba(0, 0, 0, 0.5));
   background-clip: padding-box;
   // Remove focus outline from opened modal
   outline: none;
@@ -67,8 +70,12 @@
   z-index: @zindex-modal-background;
   background-color: @modal-backdrop-bg;
   // Fade for backdrop
-  &.fade { .opacity(0); }
-  &.in { .opacity(@modal-backdrop-opacity); }
+  &.fade {
+    .opacity(0);
+  }
+  &.in {
+    .opacity(@modal-backdrop-opacity);
+  }
 }
 
 // Modal header
@@ -83,7 +90,11 @@
   margin-top: -2px;
 }
 .modal-header {
-  h1, h2, h3, h4, h5 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
     margin: 0;
     font-family: @font-family-sans-serif;
     font-weight: 700;
@@ -111,7 +122,8 @@
   border-top: 1px solid @modal-footer-border-color;
   background-color: @modal-footer-background-color;
   border-radius: 0 0 @border-radius-large @border-radius-large;
-  &:extend(.clearfix all); // clear it in case folks use .pull-* classes on buttons
+  &:extend(.clearfix
+      all); // clear it in case folks use .pull-* classes on buttons
 
   // Properly space out buttons
   .btn + .btn {
@@ -140,13 +152,17 @@
     margin: 30px auto;
   }
   .modal-content {
-    .box-shadow(0 5px 15px rgba(0,0,0,.5));
+    .box-shadow(0 5px 15px rgba(0, 0, 0, 0.5));
   }
 
   // Modal sizes
-  .modal-sm { width: @modal-sm; }
+  .modal-sm {
+    width: @modal-sm;
+  }
 }
 
 @media (min-width: @screen-md-min) {
-  .modal-lg { width: @modal-lg; }
+  .modal-lg {
+    width: @modal-lg;
+  }
 }

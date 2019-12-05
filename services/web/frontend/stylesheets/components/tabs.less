@@ -1,7 +1,7 @@
 .ol-tabs {
   // Overrides for nav.less
   .nav-tabs {
-    border: 0!important;
+    border: 0 !important;
     margin-bottom: 0;
     margin-top: -@line-height-computed; //- adjusted for portal-name
     padding: @padding-lg 0 @padding-md;
@@ -14,8 +14,9 @@
     a {
       border: 0;
       color: @link-color-alt;
-      &:focus, &:hover {
-        background-color: transparent!important;
+      &:focus,
+      &:hover {
+        background-color: transparent !important;
         border: 0;
         color: @link-hover-color-alt;
       }
@@ -23,8 +24,8 @@
   }
 
   li.active > a {
-    background-color: transparent!important;
-    border: 0!important;
+    background-color: transparent !important;
+    border: 0 !important;
     border-bottom: 1px solid @accent-color-secondary!important;
     color: @accent-color-secondary!important;
     &:hover {
@@ -33,7 +34,7 @@
     }
   }
   .tab-content:extend(.container) {
-    background-color: transparent!important;
-    border: none!important;
+    background-color: transparent !important;
+    border: none !important;
   }
 }

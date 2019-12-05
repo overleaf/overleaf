@@ -23,8 +23,8 @@
     "webpack": "webpack-dev-server --config webpack.config.dev.js",
     "webpack:production": "webpack --config webpack.config.prod.js && cp -R public/js public/minjs",
     "lint": "eslint -f unix .",
-    "format": "prettier-eslint '**/*.js' --list-different",
-    "format:fix": "prettier-eslint '**/*.js' --write",
+    "format": "prettier-eslint '**/*.{js,less}' --list-different",
+    "format:fix": "prettier-eslint '**/*.{js,less}' --write",
     "migrations": "east"
   },
   "dependencies": {

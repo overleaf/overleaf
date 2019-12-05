@@ -1,7 +1,9 @@
 tags-input {
   display: block;
 }
-tags-input *, tags-input *:before, tags-input *:after {
+tags-input *,
+tags-input *:before,
+tags-input *:after {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
@@ -86,8 +88,18 @@ tags-input[disabled] .tags {
 }
 tags-input[disabled] .tags .tag-item {
   opacity: 0.65;
-  background: -webkit-linear-gradient(top, #f0f9ff 0%, rgba(203, 235, 255, 0.75) 47%, rgba(161, 219, 255, 0.62) 100%);
-  background: linear-gradient(to bottom, #f0f9ff 0%, rgba(203, 235, 255, 0.75) 47%, rgba(161, 219, 255, 0.62) 100%);
+  background: -webkit-linear-gradient(
+    top,
+    #f0f9ff 0%,
+    rgba(203, 235, 255, 0.75) 47%,
+    rgba(161, 219, 255, 0.62) 100%
+  );
+  background: linear-gradient(
+    to bottom,
+    #f0f9ff 0%,
+    rgba(203, 235, 255, 0.75) 47%,
+    rgba(161, 219, 255, 0.62) 100%
+  );
 }
 tags-input[disabled] .tags .tag-item .remove-button {
   cursor: default;
@@ -131,7 +143,7 @@ tags-input .autocomplete .suggestion-item.selected {
   color: white;
   background-color: @brand-primary;
   .subdued {
-	  color: white;
+    color: white;
   }
 }
 tags-input .autocomplete .suggestion-item em {

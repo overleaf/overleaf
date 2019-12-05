@@ -2,7 +2,6 @@
 // Navbars
 // --------------------------------------------------
 
-
 // Wrapper and base class
 //
 // Provide a static navbar from which we expand to create full-width, fixed, and
@@ -35,7 +34,6 @@
   }
 }
 
-
 // Navbar collapse (body)
 //
 // Group your navbar content into this for easy collapsing and expanding across
@@ -50,7 +48,7 @@
   max-height: @navbar-collapse-max-height;
   overflow-x: visible;
   padding-right: @navbar-padding-horizontal;
-  padding-left:  @navbar-padding-horizontal;
+  padding-left: @navbar-padding-horizontal;
   &:extend(.clearfix all);
   -webkit-overflow-scrolling: touch;
 
@@ -85,7 +83,6 @@
   }
 }
 
-
 .navbar-main {
   z-index: 1;
   .container-fluid > .navbar-collapse {
@@ -106,13 +103,13 @@
     padding: 0;
 
     @media (min-width: @grid-float-breakpoint) {
-      // Get back to regular layout mode as soon as the menu items are 
+      // Get back to regular layout mode as soon as the menu items are
       // expanded (i.e. not contained within the hamburguer menu).
       position: static;
       background-color: transparent;
       border-bottom: 0;
       padding-right: @navbar-padding-horizontal;
-      padding-left:  @navbar-padding-horizontal;
+      padding-left: @navbar-padding-horizontal;
     }
   }
 }
@@ -125,15 +122,14 @@
   > .navbar-header,
   > .navbar-collapse {
     margin-right: -@navbar-padding-horizontal;
-    margin-left:  -@navbar-padding-horizontal;
+    margin-left: -@navbar-padding-horizontal;
 
     @media (min-width: @grid-float-breakpoint) {
       margin-right: 0;
-      margin-left:  0;
+      margin-left: 0;
     }
   }
 }
-
 
 //
 // Navbar alignment options
@@ -174,7 +170,6 @@
   border-width: 1px 0 0;
 }
 
-
 // Brand/project name
 
 .navbar-brand {
@@ -198,16 +193,17 @@
 }
 
 .navbar-title {
-    font-size: 20px;
-    display: inline-block;
-    margin-top: 2px;
-    color: @navbar-title-color;
-    &:hover, &:active, &:focus {
-        color: @navbar-title-color-hover;
-        text-decoration: none;
-    }
+  font-size: 20px;
+  display: inline-block;
+  margin-top: 2px;
+  color: @navbar-title-color;
+  &:hover,
+  &:active,
+  &:focus {
+    color: @navbar-title-color-hover;
+    text-decoration: none;
+  }
 }
-
 
 // Navbar toggle
 //
@@ -233,7 +229,6 @@
   }
 }
 
-
 // Navbar nav links
 //
 // Builds on top of the `.nav` components with its own modifier class to make
@@ -243,7 +238,7 @@
   margin: (@navbar-padding-vertical / 2) -@navbar-padding-horizontal;
 
   > li > a {
-    padding-top:    10px;
+    padding-top: 10px;
     padding-bottom: 10px;
     line-height: @line-height-computed;
   }
@@ -275,7 +270,6 @@
       }
       > li > div.subdued {
         line-height: @line-height-computed;
-
       }
     }
   }
@@ -288,7 +282,7 @@
     > li {
       float: left;
       > a {
-        padding-top:    @navbar-padding-vertical;
+        padding-top: @navbar-padding-vertical;
         padding-bottom: @navbar-padding-vertical;
       }
     }
@@ -299,7 +293,6 @@
   }
 }
 
-
 // Component alignment
 //
 // Repurpose the pull utilities as their own navbar utilities to avoid specificity
@@ -307,10 +300,13 @@
 // though so that navbar contents properly stack and align in mobile.
 
 @media (min-width: @grid-float-breakpoint) {
-  .navbar-left  { .pull-left(); }
-  .navbar-right { .pull-right(); }
+  .navbar-left {
+    .pull-left();
+  }
+  .navbar-right {
+    .pull-right();
+  }
 }
-
 
 // Navbar form
 //
@@ -323,7 +319,8 @@
   padding: 10px @navbar-padding-horizontal;
   border-top: 1px solid transparent;
   border-bottom: 1px solid transparent;
-  @shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 1px 0 rgba(255,255,255,.1);
+  @shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.1);
   .box-shadow(@shadow);
 
   // Mixin behavior for optimum display
@@ -355,7 +352,6 @@
   }
 }
 
-
 // Dropdown menus
 
 // Menu position and menu carets
@@ -367,7 +363,6 @@
 .navbar-fixed-bottom .navbar-nav > li > .dropdown-menu {
   .border-bottom-radius(0);
 }
-
 
 // Buttons in navbars
 //
@@ -383,7 +378,6 @@
     .navbar-vertical-align(22);
   }
 }
-
 
 // Text in navbars
 //
@@ -416,7 +410,7 @@
   top: 0;
   width: 100%;
   height: @header-height;
-  
+
   .navbar-brand {
     position: absolute;
     top: 5px;
@@ -482,7 +476,7 @@
         background-color: @navbar-subdued-hover-bg;
       }
       &:focus {
-        .tab-focus()
+        .tab-focus();
       }
       @media (min-width: @grid-float-breakpoint) {
         padding: @navbar-subdued-padding;
@@ -514,7 +508,7 @@
   }
 
   .navbar-collapse.in {
-    box-shadow: 0 10px 15px rgba(0, 0, 0, .25);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.25);
   }
   // Dropdown menu items
   .navbar-nav {
@@ -576,7 +570,6 @@
     }
   }
 
-
   // Links in navbars
   //
   // Add a class to ensure links outside the navbar nav are colored correctly.
@@ -587,7 +580,6 @@
       color: @navbar-default-link-hover-color;
     }
   }
-
 }
 
 .navbar-default when (@is-overleaf = true) {

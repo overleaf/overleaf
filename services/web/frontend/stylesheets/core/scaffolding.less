@@ -2,25 +2,24 @@
 // Scaffolding
 // --------------------------------------------------
 
-
 // Reset the box-sizing
 //
 // Heads up! This reset may cause conflicts with some third-party widgets.
 // For recommendations on resolving such conflicts, see
 // http://getbootstrap.com/getting-started/#third-box-sizing
 * {
-  .box-sizing(border-box);}
+  .box-sizing(border-box);
+}
 *:before,
 *:after {
   .box-sizing(border-box);
 }
 
-
 // Body reset
 
 html {
   //font-size: 62.5%;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   height: 100%;
 }
 
@@ -34,7 +33,7 @@ body {
   position: relative;
   padding-bottom: @footer-height;
   & > .content {
-    min-height: calc(~"100vh -" @footer-height);
+    min-height: calc(~'100vh -' @footer-height);
     padding-top: @header-height + @content-margin-vertical;
   }
 }
@@ -48,7 +47,6 @@ textarea {
   font-size: inherit;
   line-height: inherit;
 }
-
 
 // Links
 
@@ -67,7 +65,6 @@ a {
   }
 }
 
-
 // Figures
 //
 // We reset this here because previously Normalize had no `figure` margins. This
@@ -76,7 +73,6 @@ a {
 figure {
   margin: 0;
 }
-
 
 // Images
 
@@ -103,7 +99,7 @@ img {
   background-color: @thumbnail-bg;
   border: 1px solid @thumbnail-border;
   border-radius: @thumbnail-border-radius;
-  .transition(all .2s ease-in-out);
+  .transition(all 0.2s ease-in-out);
 
   // Keep them at most 100% wide
   .img-responsive(inline-block);
@@ -114,20 +110,18 @@ img {
   border-radius: 50%; // set radius in percents
 }
 
-
 // Horizontal rules
 
 hr {
-  margin-top:    @line-height-computed;
+  margin-top: @line-height-computed;
   margin-bottom: @line-height-computed;
   border: 0;
   border-top: 1px solid @hr-border;
   &.thin {
-      margin-top:    @line-height-computed / 2;
-      margin-bottom: @line-height-computed / 2;
+    margin-top: @line-height-computed / 2;
+    margin-bottom: @line-height-computed / 2;
   }
 }
-
 
 // Only display content to screen readers
 //
@@ -140,7 +134,7 @@ hr {
   margin: -1px;
   padding: 0;
   overflow: hidden;
-  clip: rect(0,0,0,0);
+  clip: rect(0, 0, 0, 0);
   border: 0;
 }
 
@@ -164,4 +158,3 @@ hr {
 .row-spaced-large {
   margin-top: @line-height-computed * 2;
 }
-

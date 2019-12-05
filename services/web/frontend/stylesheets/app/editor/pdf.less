@@ -1,507 +1,525 @@
 @stripe-width: 20px;
 @keyframes pdf-toolbar-stripes {
-  from  { background-position: 0 0; }
-  to    { background-position: @stripe-width 0; }
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: @stripe-width 0;
+  }
 }
 
 .pdf .toolbar.toolbar-pdf when (@is-overleaf = true) {
-	.toolbar-small-mixin;
-	.toolbar-alt-mixin;
-	padding-right: 5px;
-	&.changes-to-autocompile {
-		#gradient > .striped(@color: rgba(255,255,255,.10), @angle: -45deg);
-		background-size: @stripe-width @stripe-width;
-		.animation(pdf-toolbar-stripes 2s linear infinite);
-	}
-	.auto-compile-status {
-		color: white;
-		margin-right: (@line-height-computed / 2);
-		i {
-			color: @brand-danger;
-		}
-	}
-	.auto-compile-status when (@is-overleaf-light = true) {
-		color: @ol-blue-gray-3;
-	}
+  .toolbar-small-mixin;
+  .toolbar-alt-mixin;
+  padding-right: 5px;
+  &.changes-to-autocompile {
+    #gradient > .striped(@color: rgba(255, 255, 255, 0.1), @angle: -45deg);
+    background-size: @stripe-width @stripe-width;
+    .animation(pdf-toolbar-stripes 2s linear infinite);
+  }
+  .auto-compile-status {
+    color: white;
+    margin-right: (@line-height-computed / 2);
+    i {
+      color: @brand-danger;
+    }
+  }
+  .auto-compile-status when (@is-overleaf-light = true) {
+    color: @ol-blue-gray-3;
+  }
 }
 
-.pdf .toolbar.toolbar-pdf when (@is-overleaf = true) and (@is-overleaf-light = false) {
-	border-bottom: 0;
+.pdf
+  .toolbar.toolbar-pdf
+  when
+  (@is-overleaf = true)
+  and
+  (@is-overleaf-light = false) {
+  border-bottom: 0;
 }
-
 
 .pdf .toolbar.toolbar-pdf when (@is-overleaf = false) {
-	.toolbar-tall-mixin;
-	padding: 0 (@line-height-computed / 2);
-	.auto-compile-status {
-		display: none;
-	}
+  .toolbar-tall-mixin;
+  padding: 0 (@line-height-computed / 2);
+  .auto-compile-status {
+    display: none;
+  }
 }
 
 .pdf {
-	background-color: @pdf-bg;
+  background-color: @pdf-bg;
 }
 
-.pdf-viewer, .pdf-logs, .pdf-errors, .pdf-uncompiled {
-	.full-size;
-	top: @pdf-top-offset;
+.pdf-viewer,
+.pdf-logs,
+.pdf-errors,
+.pdf-uncompiled {
+  .full-size;
+  top: @pdf-top-offset;
 }
 
-.pdf-logs, .pdf-errors, .pdf-uncompiled, .pdf-validation-problems{
-	padding: @line-height-computed / 2;
+.pdf-logs,
+.pdf-errors,
+.pdf-uncompiled,
+.pdf-validation-problems {
+  padding: @line-height-computed / 2;
 }
 
 .pdf-uncompiled {
-	.fa {
-		color: @blue;
-	}
+  .fa {
+    color: @blue;
+  }
 }
 
 .btn-recompile-group when (@is-overleaf = true) {
-	align-self: stretch;
-	margin-right: 6px;
-	.btn-recompile {
-		height: 100%;
-		.btn-primary;
-		padding-top: 3px;
-		padding-bottom: 3px;
-		&:first-child {
-			border-top-left-radius: 0;
-			border-bottom-left-radius: 0;
-		}
-		&[disabled] {
-			background-color: mix(@btn-primary-bg, @toolbar-alt-bg-color, 65%);
-			.opacity(1.0);
-		}
-	}
+  align-self: stretch;
+  margin-right: 6px;
+  .btn-recompile {
+    height: 100%;
+    .btn-primary;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    &:first-child {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+    &[disabled] {
+      background-color: mix(@btn-primary-bg, @toolbar-alt-bg-color, 65%);
+      .opacity(1);
+    }
+  }
 }
 
 .btn-recompile-group when (@is-overleaf = false) {
-	margin-right: (@line-height-computed / 2);
-	.btn-recompile {
-		.btn-info;
-	}
+  margin-right: (@line-height-computed / 2);
+  .btn-recompile {
+    .btn-info;
+  }
 }
 
 .btn-split-screen when (@is-overleaf = false) {
-	.fa {
-		display: none;
-	}
+  .fa {
+    display: none;
+  }
 }
 .btn-split-screen when (@is-overleaf = true) {
-	.fa {
-		display: none;
-	}
+  .fa {
+    display: none;
+  }
 }
 
 .pdf-viewer {
-	iframe {
-		width: 100%;
-		height: 100%;
-		border: none;
-	}
-	.pdfjs-viewer {
-		.full-size;
-		background-color: @pdfjs-bg;
-		overflow: scroll;
-		canvas, div.pdf-canvas {
-			background: white;
-			box-shadow: @pdf-page-shadow-color 0px 0px 10px;
-		}
-		div.pdf-canvas.pdfng-empty {
-			background-color: white;
-		}
-		div.pdf-canvas.pdfng-loading {
-			background-color: white;
-		}
-		.page-container {
-			margin: 10px auto;
-			padding: 0 10px;
-			box-sizing: content-box;
-			user-select: none;
-		}
-	}
-	.progress-thin {
-		position: absolute;
-		top: -2px;
-		height: 3px;
-		left: 0;
-		right: 0;
-		.progress-bar {
-			height: 100%;
-			background-color: @link-color;
-		}
-	}
-	.pdfjs-controls {
-		position: absolute;
-		padding: @line-height-computed / 2;
-		top: 0;
-		left: 0;
-		display: inline-block;
-		.btn-group {
-			transition: opacity 0.5s ease, visibility 0 linear 0.5s;
-			visibility: hidden;
-			opacity: 0;
-		}
-		&:hover, &.flash {
-			.btn-group {
-				transition: none;
-				visibility: visible;
-				opacity: 1;
-			}
-		}
-		i.fa-arrows-h {
-			border-right: 2px solid white;
-			border-left: 2px solid white;
-		}
-		i.fa-arrows-v {
-			border-top: 2px solid white;
-			border-bottom: 2px solid white;
-		}
-	}
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  .pdfjs-viewer {
+    .full-size;
+    background-color: @pdfjs-bg;
+    overflow: scroll;
+    canvas,
+    div.pdf-canvas {
+      background: white;
+      box-shadow: @pdf-page-shadow-color 0px 0px 10px;
+    }
+    div.pdf-canvas.pdfng-empty {
+      background-color: white;
+    }
+    div.pdf-canvas.pdfng-loading {
+      background-color: white;
+    }
+    .page-container {
+      margin: 10px auto;
+      padding: 0 10px;
+      box-sizing: content-box;
+      user-select: none;
+    }
+  }
+  .progress-thin {
+    position: absolute;
+    top: -2px;
+    height: 3px;
+    left: 0;
+    right: 0;
+    .progress-bar {
+      height: 100%;
+      background-color: @link-color;
+    }
+  }
+  .pdfjs-controls {
+    position: absolute;
+    padding: @line-height-computed / 2;
+    top: 0;
+    left: 0;
+    display: inline-block;
+    .btn-group {
+      transition: opacity 0.5s ease, visibility 0 linear 0.5s;
+      visibility: hidden;
+      opacity: 0;
+    }
+    &:hover,
+    &.flash {
+      .btn-group {
+        transition: none;
+        visibility: visible;
+        opacity: 1;
+      }
+    }
+    i.fa-arrows-h {
+      border-right: 2px solid white;
+      border-left: 2px solid white;
+    }
+    i.fa-arrows-v {
+      border-top: 2px solid white;
+      border-bottom: 2px solid white;
+    }
+  }
 }
 
 .pdf .toolbar {
-	.toolbar-right {
-		a {
-			&:hover {
-				i when (@is-overleaf = false) {
-					box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
-					border-color: @gray-dark;
-				}
-			}
-			i when (@is-overleaf = false) {
-				display: inline-block;
-				width: 16px;
-				height: 16px;
-				border: 1px solid @gray-light;
-			}
+  .toolbar-right {
+    a {
+      &:hover {
+        i when (@is-overleaf = false) {
+          box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+          border-color: @gray-dark;
+        }
+      }
+      i when (@is-overleaf = false) {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 1px solid @gray-light;
+      }
 
-			i.full-screen {
-				border-top-width: 3px;
-				border-radius: 2px;
-			}
+      i.full-screen {
+        border-top-width: 3px;
+        border-radius: 2px;
+      }
 
-			i.full-screen when (@is-overleaf = true) {
-				display: none;
-			}
-			i.split-screen {
-				width: 7px;
-				border-top-width: 3px;
-				border-radius: 2px;
-				margin-left: 2px;
-			}
+      i.full-screen when (@is-overleaf = true) {
+        display: none;
+      }
+      i.split-screen {
+        width: 7px;
+        border-top-width: 3px;
+        border-radius: 2px;
+        margin-left: 2px;
+      }
 
-			i.split-screen when (@is-overleaf = true) {
-				display: none;
-			}
+      i.split-screen when (@is-overleaf = true) {
+        display: none;
+      }
 
-			i.fa when (@is-overleaf = false) {
-				display: none;
-			}
-		}
-	}
+      i.fa when (@is-overleaf = false) {
+        display: none;
+      }
+    }
+  }
 }
 
 .pdf-logs {
-	overflow: auto;
-	.alert {
-		font-size: 0.9rem;
-		margin-bottom: @line-height-computed / 2;
-		cursor: pointer;
-		.line-no {
-			float: right;
-			color: @log-line-no-color;
-			font-weight: 700;
+  overflow: auto;
+  .alert {
+    font-size: 0.9rem;
+    margin-bottom: @line-height-computed / 2;
+    cursor: pointer;
+    .line-no {
+      float: right;
+      color: @log-line-no-color;
+      font-weight: 700;
 
-			.fa {
-				opacity: 0;
-			}
-		}
-		.entry-message {
-			font-weight: 700;
-			//font-family: @font-family-monospace;
-		}
-		.entry-content {
-			white-space: pre-wrap;
-			font-size: 0.8rem;
-			//font-family: @font-family-monospace;
-		}
+      .fa {
+        opacity: 0;
+      }
+    }
+    .entry-message {
+      font-weight: 700;
+      //font-family: @font-family-monospace;
+    }
+    .entry-content {
+      white-space: pre-wrap;
+      font-size: 0.8rem;
+      //font-family: @font-family-monospace;
+    }
 
-		&:hover .line-no {
-			color: inherit;
-			.fa {
-				opacity: 1;
-			}
-		}
+    &:hover .line-no {
+      color: inherit;
+      .fa {
+        opacity: 1;
+      }
+    }
 
-		&.alert-danger {
-			background-color: tint(@alert-danger-bg, 15%);
-			&:hover {
-				background-color: @alert-danger-bg;
-			}
-		}
+    &.alert-danger {
+      background-color: tint(@alert-danger-bg, 15%);
+      &:hover {
+        background-color: @alert-danger-bg;
+      }
+    }
 
-		&.alert-warning {
-			background-color: tint(@alert-warning-bg, 15%);
-			&:hover {
-				background-color: @alert-warning-bg;
-			}
-		}
+    &.alert-warning {
+      background-color: tint(@alert-warning-bg, 15%);
+      &:hover {
+        background-color: @alert-warning-bg;
+      }
+    }
 
-		&.alert-info {
-			background-color: tint(@alert-info-bg, 15%);
-			&:hover {
-				background-color: @alert-info-bg;
-			}
-		}
-
-	}
-	pre {
-		font-size: 12px;
-	}
-	.dropdown {
-		position: relative;
-	}
-	.force-recompile {
-		margin-top: 10px;
-		text-align: right;
-	}
+    &.alert-info {
+      background-color: tint(@alert-info-bg, 15%);
+      &:hover {
+        background-color: @alert-info-bg;
+      }
+    }
+  }
+  pre {
+    font-size: 12px;
+  }
+  .dropdown {
+    position: relative;
+  }
+  .force-recompile {
+    margin-top: 10px;
+    text-align: right;
+  }
 }
 
 .synctex-controls {
-	position: absolute;
-	z-index: @synctex-controls-z-index;
-	padding: @synctex-controls-padding;
-	top: 68px;
+  position: absolute;
+  z-index: @synctex-controls-z-index;
+  padding: @synctex-controls-padding;
+  top: 68px;
 }
 
 .synctex-controls when (@is-overleaf = true) {
-	margin-right: -8px;
+  margin-right: -8px;
 }
-	.synctex-control {
-		display: block;
-		margin-bottom: 3px;
+.synctex-control {
+  display: block;
+  margin-bottom: 3px;
 
-		> .synctex-control-icon {
-			display: inline-block;
-			font: normal normal normal 14px/1 FontAwesome;
-			font-size: inherit;
-			text-rendering: auto;
-			-webkit-font-smoothing: antialiased;
-			-moz-osx-font-smoothing: grayscale;
-		}
-	}
+  > .synctex-control-icon {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
 
-	.synctex-control when (@is-overleaf = true) {
-		@ol-synctex-control-size: 24px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 1em;
-		width: @ol-synctex-control-size;
-		height: @ol-synctex-control-size;
-		border-radius: @ol-synctex-control-size / 2;
-		padding: 0 0 2px;
-		background-color: fade(@btn-default-bg, 80%);
-		transition: background 0.15s ease;
-		margin-bottom: @ol-synctex-control-size / 2;
-	}
+.synctex-control when (@is-overleaf = true) {
+  @ol-synctex-control-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em;
+  width: @ol-synctex-control-size;
+  height: @ol-synctex-control-size;
+  border-radius: @ol-synctex-control-size / 2;
+  padding: 0 0 2px;
+  background-color: fade(@btn-default-bg, 80%);
+  transition: background 0.15s ease;
+  margin-bottom: @ol-synctex-control-size / 2;
+}
 
-	.synctex-control when (@is-overleaf = false) {
-		line-height: 1.3;
-		padding: 0 2px;
-	}
+.synctex-control when (@is-overleaf = false) {
+  line-height: 1.3;
+  padding: 0 2px;
+}
 
-	.synctex-control-goto-pdf > .synctex-control-icon when (@is-overleaf = true) {
-		text-indent: 1px; // "Optical" adjustment.
-		&::before {
-			content: "\f061";
-		}
-	}
-	.synctex-control-goto-code > .synctex-control-icon when (@is-overleaf = true) {
-		text-indent: -1px; // "Optical" adjustment.
-		&::before {
-			content: "\f060";
-		}
-	}
+.synctex-control-goto-pdf > .synctex-control-icon when (@is-overleaf = true) {
+  text-indent: 1px; // "Optical" adjustment.
+  &::before {
+    content: '\f061';
+  }
+}
+.synctex-control-goto-code > .synctex-control-icon when (@is-overleaf = true) {
+  text-indent: -1px; // "Optical" adjustment.
+  &::before {
+    content: '\f060';
+  }
+}
 
-	.synctex-control-goto-pdf > .synctex-control-icon::before when (@is-overleaf = false) {
-		content: "\f178";
-	}
-	.synctex-control-goto-code > .synctex-control-icon::before when (@is-overleaf = false) {
-		content: "\f177";
-	}
+.synctex-control-goto-pdf
+  > .synctex-control-icon::before
+  when
+  (@is-overleaf = false) {
+  content: '\f178';
+}
+.synctex-control-goto-code
+  > .synctex-control-icon::before
+  when
+  (@is-overleaf = false) {
+  content: '\f177';
+}
 
 .editor-dark {
-	.pdf-logs {
-		background-color: lighten(@editor-dark-background-color, 10%);
-	}
-	.pdfjs-viewer {
-		background-color: lighten(@editor-dark-background-color, 10%);
-	}
-	.pdf .toolbar {
-		.toolbar-right a {
-			i {
-				border-color: @gray;
-			}
-			&:hover {
-				i {
-					border-color: @gray-light;
-				}
-			}
-		}
-	}
+  .pdf-logs {
+    background-color: lighten(@editor-dark-background-color, 10%);
+  }
+  .pdfjs-viewer {
+    background-color: lighten(@editor-dark-background-color, 10%);
+  }
+  .pdf .toolbar {
+    .toolbar-right a {
+      i {
+        border-color: @gray;
+      }
+      &:hover {
+        i {
+          border-color: @gray-light;
+        }
+      }
+    }
+  }
 }
 
 .keyboard-tooltip {
-	.tooltip-inner {
-		max-width: none;
-	}
+  .tooltip-inner {
+    max-width: none;
+  }
 }
 
 .keyboard-shortcut {
-	white-space: nowrap;
+  white-space: nowrap;
 }
 
-
 @keyframes expand-feedback-area {
-	from {
-		max-height: 0;
-	}
+  from {
+    max-height: 0;
+  }
 
-	to {
-		max-height: 500px;
-	}
+  to {
+    max-height: 500px;
+  }
 }
 
 .card-hint:extend(.card-thin) {
-	margin-top: 10px;
-	padding-bottom: 7px;
-	cursor: default;
+  margin-top: 10px;
+  padding-bottom: 7px;
+  cursor: default;
 
-	&-icon-container {
-		background: currentColor;
-		width: 2.5rem;
-		height: 2.5rem;
-		font-size: 1.5rem;
-		text-align: center;
-		border-radius: 50%;
-		float: left;
-		margin-right: 10px;
+  &-icon-container {
+    background: currentColor;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.5rem;
+    text-align: center;
+    border-radius: 50%;
+    float: left;
+    margin-right: 10px;
 
-		.fa {
-			color: #FFF;
-		}
+    .fa {
+      color: #fff;
+    }
 
-		.alert-danger & {
-			color: @state-danger-border;
-		}
+    .alert-danger & {
+      color: @state-danger-border;
+    }
 
-		.alert-warning & {
-			color: @state-warning-border;
-		}
+    .alert-warning & {
+      color: @state-warning-border;
+    }
 
-		.alert-info & {
-			color: @state-info-border;
-		}
+    .alert-info & {
+      color: @state-info-border;
+    }
+  }
 
-	}
+  &-text,
+  &-feedback-label {
+    color: @log-hints-color;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
 
-	&-text,
-	&-feedback-label {
-		color: @log-hints-color;
-		font-size: 0.9rem;
-		margin-bottom: 20px;
-	}
+  &-text {
+    min-height: 35px;
+  }
 
-	&-text {
-		min-height: 35px;
-	}
+  &-feedback-label {
+    font-size: inherit;
+    margin-right: 0.5em;
+    margin-bottom: 0;
+    font-weight: normal;
+  }
 
-	&-feedback-label {
-		font-size: inherit;
-		margin-right: 0.5em;
-		margin-bottom: 0;
-		font-weight: normal;
-	}
+  &-ext-link,
+  &-feedback {
+    display: inline-block;
+    font-size: 0.8rem;
+  }
 
-	&-ext-link,
-	&-feedback {
-		display: inline-block;
-		font-size: 0.8rem;
-	}
+  &-footer a,
+  &-text a {
+    .alert-danger & {
+      color: @state-danger-text;
+    }
 
-	&-footer a,
-	&-text a {
-		.alert-danger & {
-			color: @state-danger-text;
-		}
+    .alert-warning & {
+      color: @state-warning-text;
+    }
 
-		.alert-warning & {
-			color: @state-warning-text;
-		}
+    .alert-info & {
+      color: @state-info-text;
+    }
+  }
 
-		.alert-info & {
-			color: @state-info-text;
-		}
-	}
+  &-feedback {
+    color: @log-hints-color;
+    float: right;
+  }
 
-	&-feedback {
-		color: @log-hints-color;
-		float: right;
-	}
+  &-extra-feedback {
+    color: @log-hints-color;
+    font-size: 0.8rem;
+    margin-top: 10px;
+    padding-bottom: 5px;
+    animation: 0.5s ease-out expand-feedback-area;
+    overflow: hidden;
 
-	&-extra-feedback {
-		color: @log-hints-color;
-		font-size: 0.8rem;
-		margin-top: 10px;
-		padding-bottom: 5px;
-		animation: 0.5s ease-out expand-feedback-area;
-		overflow: hidden;
+    &-label {
+      margin: 5px 0 10px;
+      padding-top: 5px;
+      border-top: solid 1px @gray-lighter;
+    }
 
-		&-label {
-			margin: 5px 0 10px;
-			padding-top: 5px;
-			border-top: solid 1px @gray-lighter;
-		}
+    .radio {
+      margin: 5px;
+    }
 
-		.radio {
-			margin: 5px;
-		}
+    textarea {
+      font-size: 0.8rem;
+      margin-bottom: 10px;
+      padding: 5px;
+    }
 
-		textarea {
-			font-size: 0.8rem;
-			margin-bottom: 10px;
-			padding: 5px;
-		}
+    input[type='radio'] {
+      margin-top: 2px;
+    }
+  }
 
-		input[type="radio"] {
-			margin-top: 2px;
-		}
-	}
-
-	& + p {
-		margin-top: 20px;
-	}
-
+  & + p {
+    margin-top: 20px;
+  }
 }
 
 .files-dropdown-container {
-	.pull-right();
-	position: relative;
+  .pull-right();
+  position: relative;
 }
 
-	.files-dropdown {
-		display: inline-block;
-	}
+.files-dropdown {
+  display: inline-block;
+}
 
 .plv-text-layer {
-	display: none;
-	user-select: text;
+  display: none;
+  user-select: text;
 
-	.pdf-page-container:hover &,
-	.pdfjs-viewer-show-text & {
-		display: block;
-	}
+  .pdf-page-container:hover &,
+  .pdfjs-viewer-show-text & {
+    display: block;
+  }
 }

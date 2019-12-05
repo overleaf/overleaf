@@ -4,7 +4,6 @@
 // Source: https://github.com/h5bp/html5-boilerplate/blob/master/css/main.css
 
 @media print {
-
   * {
     text-shadow: none !important;
     color: #000 !important; // Black prints faster: h5bp.com/s
@@ -18,17 +17,17 @@
   }
 
   a[href]:after {
-    content: " (" attr(href) ")";
+    content: ' (' attr(href) ')';
   }
 
   abbr[title]:after {
-    content: " (" attr(title) ")";
+    content: ' (' attr(title) ')';
   }
 
   // Don't show links for images, or javascript/internal links
-  a[href^="javascript:"]:after,
-  a[href^="#"]:after {
-    content: "";
+  a[href^='javascript:']:after,
+  a[href^='#']:after {
+    content: '';
   }
 
   pre,
@@ -97,5 +96,4 @@
       border: 1px solid #ddd !important;
     }
   }
-
 }
