@@ -95,9 +95,9 @@ module.exports =
 		}
 		if opts.start? and opts.end?
 			s3Params['Range'] = "bytes=#{opts.start}-#{opts.end}"
-		request = s3.getObject(s3Params)
+		s3Request = s3.getObject(s3Params)
 
-		request.on 'httpHeaders', (statusCode, headers, response, statusMessage) =>
+		s3Request.on 'httpHeaders', (statusCode, headers, response, statusMessage) =>
 			if statusCode in [403, 404]
 				# S3 returns a 403 instead of a 404 when the user doesn't have
 				# permission to list the bucket contents.
@@ -109,11 +109,11 @@ module.exports =
 			stream = response.httpResponse.createUnbufferedStream()
 			callback(null, stream)
 
-		request.on 'error', (err) =>
+		s3Request.on 'error', (err) =>
 			logger.err({ err: err, bucketName: bucketName, key: key }, "error getting file stream from s3")
 			callback(err)
 
-		request.send()
+		s3Request.send()
 
 	getFileSize: (bucketName, key, callback) ->
 		logger.log({ bucketName: bucketName, key: key }, "getting file size from S3")
