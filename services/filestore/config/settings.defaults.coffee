@@ -16,6 +16,7 @@ settings =
 			s3:
 				key: process.env['AWS_KEY']
 				secret: process.env['AWS_SECRET']
+				endpoint: process.env['AWS_S3_ENDPOINT']
 			stores:
 				user_files: process.env['AWS_S3_USER_FILES_BUCKET_NAME']
 				template_files: process.env['AWS_S3_TEMPLATE_FILES_BUCKET_NAME']
