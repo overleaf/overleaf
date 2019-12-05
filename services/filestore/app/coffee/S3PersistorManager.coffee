@@ -16,10 +16,15 @@ LocalFileWriter = require("./LocalFileWriter")
 Errors = require("./Errors")
 _ = require("underscore")
 awsS3 = require "aws-sdk/clients/s3"
+URL = require('url')
 
 thirtySeconds = 30 * 1000
 
 buildDefaultOptions = (bucketName, method, key)->
+	if settings.filestore.s3.endpoint
+		endpoint = "#{settings.filestore.s3.endpoint}/#{bucketName}"
+	else
+		endpoint = "https://#{bucketName}.s3.amazonaws.com"
 	return {
 			aws:
 				key: settings.filestore.s3.key
@@ -27,32 +32,47 @@ buildDefaultOptions = (bucketName, method, key)->
 				bucket: bucketName
 			method: method
 			timeout: thirtySeconds
-			uri:"https://#{bucketName}.s3.amazonaws.com/#{key}"
+			uri:"#{endpoint}/#{key}"
 	}
 
-defaultS3Client = new awsS3({
-	credentials:
-		accessKeyId: settings.filestore.s3.key,
-		secretAccessKey: settings.filestore.s3.secret
-})
+getS3Options = (credentials) ->
+	options =
+		credentials:
+			accessKeyId: credentials.auth_key
+			secretAccessKey: credentials.auth_secret
+
+	if settings.filestore.s3.endpoint
+		options.endpoint = settings.filestore.s3.endpoint
+		options.sslEnabled = false
+
+	return options
+
+defaultS3Client = new awsS3(getS3Options({
+	auth_key: settings.filestore.s3.key,
+	auth_secret: settings.filestore.s3.secret
+}))
 
 getS3Client = (credentials) ->
 	if credentials?
-		return new awsS3({
-			credentials:
-				accessKeyId: credentials.auth_key
-				secretAccessKey: credentials.auth_secret
-		})
+		return new awsS3(getS3Options(credentials))
 	else
 		return defaultS3Client
+
+getKnoxClient = (bucketName) =>
+	options =
+		key: settings.filestore.s3.key
+		secret: settings.filestore.s3.secret
+		bucket: bucketName
+	if settings.filestore.s3.endpoint
+		endpoint = URL.parse(settings.filestore.s3.endpoint)
+		options.endpoint = endpoint.hostname
+		options.port = endpoint.port
+	return knox.createClient(options)
 
 module.exports =
 
 	sendFile: (bucketName, key, fsPath, callback)->
-		s3Client = knox.createClient
-			key: settings.filestore.s3.key
-			secret: settings.filestore.s3.secret
-			bucket: bucketName
+		s3Client = getKnoxClient(bucketName)
 		putEventEmiter = s3Client.putFile fsPath, key, (err, res)->
 			if err?
 				logger.err err:err,  bucketName:bucketName, key:key, fsPath:fsPath,"something went wrong uploading file to s3"
@@ -171,10 +191,7 @@ module.exports =
 			_callback = () ->
 
 		logger.log key: key, bucketName: bucketName, "deleting directory"
-		s3Client = knox.createClient
-			key: settings.filestore.s3.key
-			secret: settings.filestore.s3.secret
-			bucket: bucketName
+		s3Client = getKnoxClient(bucketName)
 		s3Client.list prefix:key, (err, data)->
 			if err?
 				logger.err err:err, bucketName:bucketName, key:key, "something went wrong listing prefix in aws"
@@ -200,10 +217,7 @@ module.exports =
 
 	directorySize:(bucketName, key, callback)->
 		logger.log bucketName:bucketName, key:key, "get project size in s3"
-		s3Client = knox.createClient
-			key: settings.filestore.s3.key
-			secret: settings.filestore.s3.secret
-			bucket: bucketName
+		s3Client = getKnoxClient(bucketName)
 		s3Client.list prefix:key, (err, data)->
 			if err?
 				logger.err err:err, bucketName:bucketName, key:key, "something went wrong listing prefix in aws"
