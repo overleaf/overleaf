@@ -9,6 +9,7 @@ fs = require("fs")
 request = require("request")
 settings = require("settings-sharelatex")
 FilestoreApp = require "./FilestoreApp"
+async = require('async')
 
 
 getMetric = (filestoreUrl, metric, cb) ->
@@ -33,10 +34,19 @@ describe "Filestore", ->
 
 	beforeEach (done)->
 		FilestoreApp.ensureRunning =>
-			fs.unlink @localFileWritePath, =>
-				getMetric @filestoreUrl, 's3_egress', (metric) =>
-					@previousEgress = metric
-					done()
+			async.parallel [
+				(cb) =>
+					fs.unlink @localFileWritePath, () ->
+						cb()
+				(cb) =>
+					getMetric @filestoreUrl, 's3_egress', (metric) =>
+						@previousEgress = metric
+						cb()
+				(cb) =>
+					getMetric @filestoreUrl, 's3_ingress', (metric) =>
+						@previousIngress = metric
+						cb()
+			], done
 
 	it "should send a 200 for status endpoint", (done)->
 		request "#{@filestoreUrl}/status", (err, response, body)->
@@ -83,7 +93,14 @@ describe "Filestore", ->
 				body.should.equal @constantFileContent
 				done()
 
-		it "should be able to get back the first 8 bytes of the file", (done) ->
+		it "should record an ingress metric when downloading the file", (done)->
+			@timeout(1000 * 10)
+			request.get @fileUrl, () =>
+				getMetric @filestoreUrl, 's3_ingress', (metric) =>
+					expect(metric - @previousIngress).to.equal @constantFileContent.length
+					done()
+
+		it "should be able to get back the first 9 bytes of the file", (done) ->
 			@timeout(1000 * 10)
 			options =
 				uri: @fileUrl
@@ -92,6 +109,17 @@ describe "Filestore", ->
 			request.get options, (err, response, body)=>
 				body.should.equal 'hello wor'
 				done()
+
+		it "should record an ingress metric for a partial download", (done)->
+			@timeout(1000 * 10)
+			options =
+				uri: @fileUrl
+				headers:
+					'Range': 'bytes=0-8'
+			request.get options, ()=>
+				getMetric @filestoreUrl, 's3_ingress', (metric) =>
+					expect(metric - @previousIngress).to.equal 9
+					done()
 
 		it "should be able to get back bytes 4 through 10 of the file", (done) ->
 			@timeout(1000 * 10)

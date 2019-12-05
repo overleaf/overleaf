@@ -62,6 +62,7 @@ describe "S3PersistorManagerTests", ->
 		describe "success", ->
 			beforeEach () ->
 				@expectedStream = { expectedStream: true }
+				@expectedStream.on = sinon.stub()
 				@s3Request.send.callsFake () =>
 					@s3EventHandlers.httpHeaders(200, {}, @s3Response, "OK")
 				@s3Response.httpResponse.createUnbufferedStream.returns(@expectedStream)

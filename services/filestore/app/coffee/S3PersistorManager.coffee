@@ -132,6 +132,9 @@ module.exports =
 				logger.log({bucketName: bucketName, key: key }, "error getting file from s3: #{statusCode}")
 				return callback(new Error("Got non-200 response from S3: #{statusCode} #{statusMessage}"), null)
 			stream = response.httpResponse.createUnbufferedStream()
+			stream.on 'data', (data) ->
+				metrics.count 's3.ingress', data.byteLength
+
 			callback(null, stream)
 
 		s3Request.on 'error', (err) =>
