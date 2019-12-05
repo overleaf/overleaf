@@ -23,7 +23,8 @@ define(['base'], function(App) {
       addMembers: {
         content: '',
         error: false,
-        errorMessage: null
+        errorMessage: null,
+        inflightCount: 0
       },
       removeMembers: {
         error: false,
@@ -42,14 +43,17 @@ define(['base'], function(App) {
     $scope.addMembers = function() {
       $scope.inputs.addMembers.error = false
       $scope.inputs.addMembers.errorMessage = null
+      $scope.inputs.addMembers.inflightCount = 0
       const emails = parseEmails($scope.inputs.addMembers.content)
-      return Array.from(emails).map(email =>
-        queuedHttp
+      return Array.from(emails).map(email => {
+        $scope.inputs.addMembers.inflightCount += 1
+        return queuedHttp
           .post(paths.addMember, {
             email,
             _csrf: window.csrfToken
           })
           .then(function(response) {
+            $scope.inputs.addMembers.inflightCount -= 1
             const { data } = response
             if (data.user != null) {
               $scope.users.push(data.user)
@@ -57,12 +61,13 @@ define(['base'], function(App) {
             return ($scope.inputs.addMembers.content = '')
           })
           .catch(function(response) {
+            $scope.inputs.addMembers.inflightCount -= 1
             const { data } = response
             $scope.inputs.addMembers.error = true
             return ($scope.inputs.addMembers.errorMessage =
               data.error != null ? data.error.message : undefined)
           })
-      )
+      })
     }
 
     $scope.removeMembers = function() {
