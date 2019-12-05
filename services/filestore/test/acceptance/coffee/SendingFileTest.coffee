@@ -10,8 +10,14 @@ request = require("request")
 settings = require("settings-sharelatex")
 FilestoreApp = require "./FilestoreApp"
 
-describe "Filestore", ->
 
+getMetric = (filestoreUrl, metric, cb) ->
+	request.get "#{filestoreUrl}/metrics", (err, res) ->
+		expect(res.statusCode).to.equal 200
+		metricRegex = new RegExp("^#{metric}{[^}]+} ([0-9]+)$", "m")
+		cb(parseInt(metricRegex.exec(res.body)?[1] || '0'))
+
+describe "Filestore", ->
 	before (done)->
 		@localFileReadPath = "/tmp/filestore_acceptence_tests_file_read.txt"
 		@localFileWritePath = "/tmp/filestore_acceptence_tests_file_write.txt"
@@ -27,10 +33,10 @@ describe "Filestore", ->
 
 	beforeEach (done)->
 		FilestoreApp.ensureRunning =>
-			fs.unlink @localFileWritePath, ->
-				done()
-
-
+			fs.unlink @localFileWritePath, =>
+				getMetric @filestoreUrl, 's3_egress', (metric) =>
+					@previousEgress = metric
+					done()
 
 	it "should send a 200 for status endpoint", (done)->
 		request "#{@filestoreUrl}/status", (err, response, body)->
@@ -57,6 +63,11 @@ describe "Filestore", ->
 				uri: @fileUrl + '___this_is_clearly_wrong___'
 			request.get options, (err, response, body) =>
 				response.statusCode.should.equal 404
+				done()
+
+		it 'should record an egress metric for the upload', (done) ->
+			getMetric @filestoreUrl, 's3_egress', (metric) =>
+				expect(metric - @previousEgress).to.equal @constantFileContent.length
 				done()
 
 		it "should return the file size on a HEAD request", (done) ->
@@ -128,11 +139,17 @@ describe "Filestore", ->
 			@file_id = Math.random()
 			@fileUrl = "#{@filestoreUrl}/project/acceptence_tests/file/#{@file_id}"
 			@localFileReadPath = __dirname + '/../../fixtures/test.pdf'
+			fs.stat @localFileReadPath, (err, stat) =>
+				@localFileSize = stat.size
+				writeStream = request.post(@fileUrl)
 
-			writeStream = request.post(@fileUrl)
+				writeStream.on "end", done
+				fs.createReadStream(@localFileReadPath).pipe writeStream
 
-			writeStream.on "end", done
-			fs.createReadStream(@localFileReadPath).pipe writeStream
+		it 'should record an egress metric for the upload', (done) ->
+			getMetric @filestoreUrl, 's3_egress', (metric) =>
+				expect(metric - @previousEgress).to.equal @localFileSize
+				done()
 
 		it "should be able get the file back", (done)->
 			@timeout(1000 * 10)

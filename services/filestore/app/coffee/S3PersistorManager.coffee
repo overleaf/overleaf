@@ -9,6 +9,7 @@ https.globalAgent.maxSockets = 300
 settings = require("settings-sharelatex")
 request = require("request")
 logger = require("logger-sharelatex")
+metrics = require("metrics-sharelatex")
 fs = require("fs")
 knox = require("knox")
 path = require("path")
@@ -73,7 +74,9 @@ module.exports =
 
 	sendFile: (bucketName, key, fsPath, callback)->
 		s3Client = getKnoxClient(bucketName)
+		uploaded = 0
 		putEventEmiter = s3Client.putFile fsPath, key, (err, res)->
+			metrics.count 's3.egress', uploaded
 			if err?
 				logger.err err:err,  bucketName:bucketName, key:key, fsPath:fsPath,"something went wrong uploading file to s3"
 				return callback(err)
@@ -88,6 +91,8 @@ module.exports =
 		putEventEmiter.on "error", (err)->
 			logger.err err:err,  bucketName:bucketName, key:key, fsPath:fsPath, "error emmited on put of file"
 			callback err
+		putEventEmiter.on "progress", (progress)->
+			uploaded = progress.written
 
 	sendStream: (bucketName, key, readStream, callback)->
 		logger.log bucketName:bucketName, key:key, "sending file to s3"

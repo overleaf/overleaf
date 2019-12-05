@@ -25,6 +25,7 @@ services:
       ENABLE_CONVERSIONS: "true"
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
+      USE_PROM_METRICS: "true"
       AWS_KEY: fake
       AWS_SECRET: fake
       AWS_S3_USER_FILES_BUCKET_NAME: fake_user_files
