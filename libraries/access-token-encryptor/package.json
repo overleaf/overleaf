@@ -22,8 +22,9 @@
     "grunt-contrib-coffee": "~0.10.1",
     "grunt-execute": "~0.2.1",
     "grunt-mocha-test": "^0.13.3",
+    "mocha": "^6.2.2",
     "nock": "0.15.2",
-    "sandboxed-module": "",
-    "sinon": ""
+    "sandboxed-module": "^2.0.3",
+    "sinon": "^7.5.0"
   }
 }
