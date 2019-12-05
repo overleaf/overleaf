@@ -29,7 +29,7 @@ class AccessTokenEncryptor
 			salt = results[0]
 			iv = results[1]
 
-			keyFn cipherPassword, salt, 32, (err, key) =>
+			keyFn @cipherPassword, salt, 32, (err, key) =>
 				if err?
 					logger.err err:err, "error getting Fn key"
 					return callback(err)
