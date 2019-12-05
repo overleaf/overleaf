@@ -31,7 +31,16 @@ const FeaturesUpdater = {
     if (callback == null) {
       callback = function(error, features, featuresChanged) {}
     }
+    FeaturesUpdater._computeFeatures(user_id, (error, features) => {
+      if (error) {
+        return callback(error)
+      }
+      logger.log({ user_id, features }, 'updating user features')
+      UserFeaturesUpdater.updateFeatures(user_id, features, callback)
+    })
+  },
 
+  _computeFeatures(user_id, callback) {
     const jobs = {
       individualFeatures(cb) {
         return FeaturesUpdater._getIndividualFeatures(user_id, cb)
@@ -99,9 +108,7 @@ const FeaturesUpdater = {
         FeaturesUpdater._mergeFeatures,
         Settings.defaultFeatures
       )
-
-      logger.log({ user_id, features }, 'updating user features')
-      return UserFeaturesUpdater.updateFeatures(user_id, features, callback)
+      callback(null, features)
     })
   },
 
