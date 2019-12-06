@@ -1,3 +1,8 @@
+# This  module is not used in production, which currently uses
+# S3PersistorManager.  The intention is to migrate S3PersistorManager to use the
+# latest aws-sdk and delete this module so that PersistorManager would load the
+# same backend for both the 's3' and 'aws-sdk' options.
+
 logger = require "logger-sharelatex"
 aws = require "aws-sdk"
 _ = require "underscore"
