@@ -14,6 +14,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
 define(['base'], App =>
   App.controller('UserAffiliationsController', function(
     $scope,
@@ -28,36 +29,9 @@ define(['base'], App =>
     $scope.closeInstitutionNotification = type => {
       $scope.hideInstitutionNotifications[type] = true
     }
-    $scope.hasSamlBeta = ExposedSettings.hasSamlBeta
-    $scope.hasSamlFeature = ExposedSettings.hasSamlFeature
-    $scope.canUseSamlFeature = $scope.hasSamlFeature || $scope.hasSamlBeta
+    $scope.samlBetaSession = ExposedSettings.hasSamlBeta
     $scope.samlInitPath = ExposedSettings.samlInitPath
-    $scope.showInstitutionTooltip = emailData => {
-      if (!emailData.affiliation || !$scope.canUseSamlFeature) {
-        return false
-      }
-      if (
-        emailData.affiliation.institution &&
-        emailData.affiliation.institution.ssoEnabled
-      ) {
-        return true
-      }
-      return false
-    }
-    $scope.shouldShowRolesAndAddEmailButton = () => {
-      const newAffiliation = $scope.newAffiliation
-      return (
-        !newAffiliation ||
-        (newAffiliation && !newAffiliation.university) ||
-        (!$scope.canUseSamlFeature &&
-          newAffiliation &&
-          newAffiliation.university) ||
-        ($scope.canUseSamlFeature &&
-          newAffiliation &&
-          newAffiliation.university &&
-          !newAffiliation.university.ssoEnabled)
-      )
-    }
+
     const LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
     const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\ ".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA -Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
@@ -71,6 +45,27 @@ define(['base'], App =>
       } else {
         return { local: null, domain: null }
       }
+    }
+    const _ssoAvailable = affiliation => {
+      if (!affiliation) {
+        return false
+      }
+
+      // university via v1 for new affiliations
+      const institution = affiliation.university || affiliation.institution
+      if (!institution) {
+        return false
+      }
+
+      if (institution && institution.ssoEnabled) {
+        return true
+      }
+
+      if ($scope.samlBetaSession && institution && institution.ssoBeta) {
+        return true
+      }
+
+      return false
     }
 
     $scope.getEmailSuggestion = function(userInput) {
@@ -95,6 +90,9 @@ define(['base'], App =>
             ) {
               $scope.newAffiliation.university = universityDomain.university
               $scope.newAffiliation.department = universityDomain.department
+              $scope.newAffiliation.ssoAvailable = _ssoAvailable(
+                universityDomain
+              )
             } else {
               $scope.newAffiliation.university = null
               $scope.newAffiliation.department = null
@@ -314,9 +312,12 @@ define(['base'], App =>
     var _getUserEmails = function() {
       _resetMakingRequestType()
       $scope.ui.isLoadingEmails = true
-      return _monitorRequest(UserAffiliationsDataService.getUserEmails())
+      _monitorRequest(UserAffiliationsDataService.getUserEmails())
         .then(emails => {
-          $scope.userEmails = emails
+          $scope.userEmails = emails.map(email => {
+            email.ssoAvailable = _ssoAvailable(email.affiliation)
+            return email
+          })
           $scope.linkedInstitutionIds = emails
             .filter(email => {
               if (email.samlProviderId) {

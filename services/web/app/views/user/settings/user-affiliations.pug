@@ -33,12 +33,12 @@ form.row(
 						| {{ userEmail.email + (userEmail.default ? ' (primary)' : '') }}
 						div(ng-if="!userEmail.confirmedAt").small
 							strong #{translate('unconfirmed')}.
-								span(ng-if="!hasSamlFeature || (hasSamlFeature && !userEmail.affiliation.institution.ssoEnabled)") &nbsp;#{translate('please_check_your_inbox')}.
+								span(ng-if="!userEmail.ssoAvailable") &nbsp;#{translate('please_check_your_inbox')}.
 							br
 							a(
 								href,
 								ng-click="resendConfirmationEmail(userEmail)",
-								ng-if="!hasSamlFeature || (hasSamlFeature && !userEmail.affiliation.institution.ssoEnabled)"
+								ng-if="!userEmail.ssoAvailable"
 							) #{translate('resend_confirmation_email')}
 						div(ng-if="userEmail.confirmedAt && userEmail.affiliation.institution && userEmail.affiliation.institution.confirmed && userEmail.affiliation.institution.licence != 'free'").small
 							span.label.label-primary #{translate("professional")}
@@ -84,9 +84,9 @@ form.row(
 					td.affiliations-table-inline-actions
 						// Disabled buttons don't work with tooltips, due to pointer-events: none,
 						// so create a wrapper for the tooltip
-						.affiliations-table-inline-action-disabled-wrapper(ng-if="showInstitutionTooltip(userEmail)")
+						.affiliations-table-inline-action-disabled-wrapper(ng-if="userEmail.ssoAvailable")
 							+btnMakePrimaryDisabled("Please confirm your email by linking to your institutional account before making it the primary email.")
-						.affiliations-table-inline-action-disabled-wrapper(ng-if="!showInstitutionTooltip(userEmail)")
+						.affiliations-table-inline-action-disabled-wrapper(ng-if="!userEmail.ssoAvailable")
 							+btnMakePrimaryDisabled(translate("please_confirm_your_email_before_making_it_default"))
 						button.btn.btn-sm.btn-success.affiliations-table-inline-action(
 							tooltip=translate("make_email_primary_description")
@@ -104,28 +104,27 @@ form.row(
 						)
 							i.fa.fa-fw.fa-trash(aria-hidden="true")
 							span.sr-only #{translate("remove")}
-				tr.affiliations-table-saml-row(ng-repeat-end ng-if="userEmail.affiliation && userEmail.affiliation && userEmail.affiliation.institution.ssoEnabled")
-					if hasFeature('saml') || samlBeta
-						td
-						td(ng-attr-colspan="{{userEmail.samlProviderId ? '2' : '1'}}" ng-class="institutionAlreadyLinked(userEmail) ? '' : 'with-border'")
-							p.small(ng-if="userEmail.samlProviderId")
-								| !{translate("acct_linked_to_institution_acct", {institutionName: '{{userEmail.affiliation.institution.name}}'})}
-							div(ng-if="!userEmail.samlProviderId && !institutionAlreadyLinked(userEmail)")
-								//- this email is not linked to institution login but
-								//- cannot have multiple emails at same institution linked for "institution login"
-								//- so check if institution is already linked
-								p.small
-									| !{translate("can_link_your_institution_acct", {institutionName: '{{userEmail.affiliation.institution.name}}'})}
-								p.small
-									| !{translate("doing_this_allow_log_in_through_institution")}&nbsp;
-									+aboutInstitutionLink()
-						td.with-border.affiliations-table-inline-actions(ng-if="!userEmail.samlProviderId && !institutionAlreadyLinked(userEmail)")
-							button.btn-sm.btn.btn-info(
-								ng-click="linkInstitutionAcct(userEmail.email, userEmail.affiliation.institution.id)"
-								ng-disabled="ui.isMakingRequest"
-								type="button"
-							)
-								| #{translate("link_accounts")}
+				tr.affiliations-table-saml-row(ng-repeat-end ng-if="userEmail.affiliation && userEmail.affiliation && userEmail.ssoAvailable")
+					td
+					td(ng-attr-colspan="{{userEmail.samlProviderId ? '2' : '1'}}" ng-class="institutionAlreadyLinked(userEmail) ? '' : 'with-border'")
+						p.small(ng-if="userEmail.samlProviderId")
+							| !{translate("acct_linked_to_institution_acct", {institutionName: '{{userEmail.affiliation.institution.name}}'})}
+						div(ng-if="!userEmail.samlProviderId && !institutionAlreadyLinked(userEmail)")
+							//- this email is not linked to institution login but
+							//- cannot have multiple emails at same institution linked for "institution login"
+							//- so check if institution is already linked
+							p.small
+								| !{translate("can_link_your_institution_acct", {institutionName: '{{userEmail.affiliation.institution.name}}'})}
+							p.small
+								| !{translate("doing_this_allow_log_in_through_institution")}&nbsp;
+								+aboutInstitutionLink()
+					td.with-border.affiliations-table-inline-actions(ng-if="!userEmail.samlProviderId && !institutionAlreadyLinked(userEmail)")
+						button.btn-sm.btn.btn-info(
+							ng-click="linkInstitutionAcct(userEmail.email, userEmail.affiliation.institution.id)"
+							ng-disabled="ui.isMakingRequest"
+							type="button"
+						)
+							| #{translate("link_accounts")}
 				tr.affiliations-table-highlighted-row(
 					ng-if="!ui.showAddEmailUI && !ui.isMakingRequest"
 				)
@@ -151,23 +150,22 @@ form.row(
 								input-type="email"
 								input-required="true"
 							)
-					if hasFeature('saml') || samlBeta
-						td(
-							colspan="2"
-							ng-if="newAffiliation && newAffiliation.university && newAffiliation.university.ssoEnabled"
-						)
-							p.affiliations-table-label {{ newAffiliation.university.name }}
-							p !{translate("to_add_email_accounts_need_to_be_linked", {institutionName: "{{newAffiliation.university.name}}"})}
-							p !{translate("doing_this_will_verify_affiliation_and_allow_log_in", {institutionName: "{{newAffiliation.university.name}}"})}&nbsp;
-								+aboutInstitutionLink()
-							button.btn-sm.btn.btn-primary.btn-link-accounts(
-								ng-click="linkInstitutionAcct(newAffiliation.email, newAffiliation.university.id)"
-								ng-disabled="ui.isMakingRequest"
-								type="button"
-							)
-								| #{translate("link_accounts_and_add_email")}
 					td(
-						ng-if="shouldShowRolesAndAddEmailButton()"
+						colspan="2"
+						ng-if="newAffiliation.ssoAvailable"
+					)
+						p.affiliations-table-label {{ newAffiliation.university.name }}
+						p !{translate("to_add_email_accounts_need_to_be_linked", {institutionName: "{{newAffiliation.university.name}}"})}
+						p !{translate("doing_this_will_verify_affiliation_and_allow_log_in", {institutionName: "{{newAffiliation.university.name}}"})}&nbsp;
+							+aboutInstitutionLink()
+						button.btn-sm.btn.btn-primary.btn-link-accounts(
+							ng-click="linkInstitutionAcct(newAffiliation.email, newAffiliation.university.id)"
+							ng-disabled="ui.isMakingRequest"
+							type="button"
+						)
+							| #{translate("link_accounts_and_add_email")}
+					td(
+						ng-if="!newAffiliation.ssoAvailable"
 					)
 						p.affiliations-table-label(
 							ng-if="newAffiliation.university && !ui.showManualUniversitySelectionUI"
@@ -198,7 +196,7 @@ form.row(
 							show-role-and-department="ui.isValidEmail && newAffiliation.university"
 						)
 					td(
-						ng-if="shouldShowRolesAndAddEmailButton()"
+						ng-if="!newAffiliation.ssoAvailable"
 					)
 						button.btn.btn-sm.btn-primary(
 							ng-disabled="affiliationsForm.$invalid || ui.isMakingRequest"
