@@ -10,8 +10,6 @@ grep 'name:' config/services.js | \
 		echo "Compiling Service $service"
 		case $service in 
 			web)
-				make compile_full
-				make minify
 				npm run webpack:production
 				;;
 			chat)
