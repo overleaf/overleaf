@@ -10,7 +10,10 @@ class UKAMFEntity {
   getSamlConfig() {
     const idp = this.data.IDPSSODescriptor[0]
     const keys = idp.KeyDescriptor
-    const signingKey = keys.find(key => _.get(key, ['$', 'use']) === 'signing')
+    const signingKey =
+      keys.length === 1
+        ? keys[0]
+        : keys.find(key => _.get(key, ['$', 'use']) === 'signing')
     const entityId = this.data.$.entityID
 
     let cert = _.get(signingKey, [
