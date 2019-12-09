@@ -37,14 +37,6 @@ describe 'AccessTokenEncryptor', ->
 					encrypted1.should.not.equal(encrypted2)
 					done()
 
-		it 'should encrypt the object in v1 format for an old label', (done)->
-			@settings.cipherLabel = "2016.1"
-			@encryptor = new @AccessTokenEncryptor(@settings)
-			@encryptor.encryptJson @testObject, (err, encrypted)->
-				expect(err).to.be.null
-				encrypted.should.match(/^2016.1:[0-9a-f]{32}:[a-zA-Z0-9=+\/]+$/)
-				done()
-
 	describe "decrypt", ->
 		it 'should decrypt the string to get the same object', (done)->
 			@encryptor.encryptJson @testObject, (err, encrypted) =>

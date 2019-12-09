@@ -21,20 +21,6 @@ class AccessTokenEncryptor
 		throw Error("cipherPassword too short") if @cipherPassword.length < 16
 
 	encryptJson: (json, callback) ->
-		unless ["2015.1", "2016.1"].includes(@cipherLabel)
-			return @encryptJsonV2(json, callback)
-
-		string = JSON.stringify(json)
-		salt = crypto.randomBytes(16)
-		keyFn @cipherPassword, salt, (err, key) =>
-			if err?
-				logger.err err:err, "error getting Fn key"
-				return callback(err)
-			cipher = crypto.createCipher(ALGORITHM,  key)
-			crypted  = cipher.update(string, 'utf8', 'base64') + cipher.final('base64')
-			callback(null, @cipherLabel + ":" + salt.toString('hex') + ":" + crypted)
-
-	encryptJsonV2: (json, callback) ->
 		string = JSON.stringify(json)
 		crypto.randomBytes 32, (err, bytes) =>
 			return callback(err) if err
@@ -53,11 +39,15 @@ class AccessTokenEncryptor
 
 	decryptToJson: (encryptedJson, callback) ->
 		[label, salt, cipherText, iv] = encryptedJson.split(':', 4)
-		if iv and iv.length > 0
-			return @decryptToJsonV2(encryptedJson, callback)
-
 		password = @settings.cipherPasswords[label]
 		return callback(new Error("invalid password")) if not password? or password.length < 16
+
+		if iv
+			@decryptToJsonV2(password, salt, cipherText, iv, callback)
+		else
+			@decryptToJsonV1(password, salt, cipherText, callback)
+
+	decryptToJsonV1: (password, salt, cipherText, callback) ->
 		keyFn password, Buffer.from(salt, 'hex'), (err, key) =>
 			if err?
 				logger.err err:err, "error getting Fn key"
@@ -68,13 +58,9 @@ class AccessTokenEncryptor
 				json = JSON.parse(dec)
 			catch e
 				return callback(new Error("error decrypting token"))
-			callback(null, json)
+			callback(null, json, true)
 
-	decryptToJsonV2: (encryptedJson, callback) ->
-		[label, salt, cipherText, iv] = encryptedJson.split(':', 4)
-		password = @settings.cipherPasswords[label]
-		return callback(new Error("invalid password")) if not password? or password.length < 16
-
+	decryptToJsonV2: (password, salt, cipherText, iv, callback) ->
 		keyFn32 password, Buffer.from(salt, 'hex'), 32, (err, key) =>
 			if err?
 				logger.err err:err, "error getting Fn key"
