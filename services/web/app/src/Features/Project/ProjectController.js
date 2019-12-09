@@ -35,6 +35,7 @@ const Features = require('../../infrastructure/Features')
 const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandler')
 const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
 const V1Handler = require('../V1/V1Handler')
+const SystemMessageManager = require('../SystemMessages/SystemMessageManager')
 
 const ProjectController = {
   _isInPercentageRollout(rolloutName, objectId, percentage) {
@@ -346,6 +347,9 @@ const ProjectController = {
     let noV1Connection = false
     async.parallel(
       {
+        systemMessages(cb) {
+          SystemMessageManager.getMessages(cb)
+        },
         tags(cb) {
           TagsHandler.getAllTags(userId, cb)
         },
@@ -537,6 +541,7 @@ const ProjectController = {
           const viewModel = {
             title: 'your_projects',
             priority_title: true,
+            systemMessages: results.systemMessages,
             projects,
             tags,
             notifications: notifications || [],
