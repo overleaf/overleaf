@@ -1,5 +1,4 @@
 crypto = require('crypto')
-async = require('async')
 
 ALGORITHM = 'aes-256-ctr'
 
