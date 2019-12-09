@@ -21,14 +21,14 @@ describe 'AccessTokenEncryptor', ->
 				"2016.1": "11111111111111111111111111111111111111"
 				"2015.1": "22222222222222222222222222222222222222"
 				"2019.1": "33333333333333333333333333333333333333"
-		AccessTokenEncryptor = SandboxedModule.require modulePath
-		@encryptor = new AccessTokenEncryptor(@settings)
+		@AccessTokenEncryptor = SandboxedModule.require modulePath
+		@encryptor = new @AccessTokenEncryptor(@settings)
 
 	describe "encrypt", ->
 		it 'should encrypt the object', (done)->
 			@encryptor.encryptJson @testObject, (err, encrypted)->
 				expect(err).to.be.null
-				encrypted.should.match(/^2019.1:[0-9a-f]+:[a-zA-Z0-9=+\/]+:[0-9a-f]+$/)
+				encrypted.should.match(/^2019.1:[0-9a-f]{32}:[a-zA-Z0-9=+\/]+:[0-9a-f]{32}$/)
 				done()
 
 		it 'should encrypt the object differently the next time', (done)->
@@ -36,6 +36,14 @@ describe 'AccessTokenEncryptor', ->
 				@encryptor.encryptJson @testObject, (err, encrypted2)=>
 					encrypted1.should.not.equal(encrypted2)
 					done()
+
+		it 'should encrypt the object in v1 format for an old label', (done)->
+			@settings.cipherLabel = "2016.1"
+			@encryptor = new @AccessTokenEncryptor(@settings)
+			@encryptor.encryptJson @testObject, (err, encrypted)->
+				expect(err).to.be.null
+				encrypted.should.match(/^2016.1:[0-9a-f]{32}:[a-zA-Z0-9=+\/]+$/)
+				done()
 
 	describe "decrypt", ->
 		it 'should decrypt the string to get the same object', (done)->
