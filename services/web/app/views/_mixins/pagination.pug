@@ -1,4 +1,4 @@
-mixin paginate(pages, page_path, max_btns)
+mixin pagination(pages, page_path, max_btns)
 	//- @param pages.current_page the current page viewed
 	//- @param pages.total_pages previously calculated,
 	//- based on total entries and entries per page
@@ -6,7 +6,7 @@ mixin paginate(pages, page_path, max_btns)
 	//- @param max_btns max number of buttons on either side of the current page
 	//- button and excludes first, prev, next, last
 
-	if pages && pages.current_page && pages.total_pages
+	if pages && pages.current_page && pages.total_pages && pages.total_pages > 1
 		- var max_btns = max_btns || 4
 		- var prev_page = Math.max(parseInt(pages.current_page, 10) - max_btns, 1)
 		- var next_page = parseInt(pages.current_page, 10) + 1
