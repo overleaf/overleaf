@@ -10,24 +10,26 @@ describe 'AccessTokenEncryptor', ->
 
 	beforeEach ->
 		@testObject = {"hello":"world"}
-		@Encrypted = "2016.1:6e7ac79ab13a18b5749eace965ec7962:sAAYt1yQZqpvOnu6l8iUD/Y="
-		@oldEncrypted = "2015.1:473a66fb5d816bc716f278ab819d88a5:+mTg7O9sgUND8pNQFG6h2GE="
+		@encrypted2015 = "2015.1:473a66fb5d816bc716f278ab819d88a5:+mTg7O9sgUND8pNQFG6h2GE="
+		@encrypted2016 = "2016.1:76a7d64a444ccee1a515b49c44844a69:m5YSkexUsLjcF4gLncm72+k="
+		@encrypted2019 = "2019.1:627143b2ab185a020c8720253a4c984e:7gnY6Ez3/Y3UWgLHLfBtJsE=:bf75cecb6aeea55b3c060e1122d2a82d"
 		@badLabel = "xxxxxx:c7a39310056b694c:jQf+Uh5Den3JREtvc82GW5Q="
 		@badKey = "2015.1:d7a39310056b694c:jQf+Uh5Den3JREtvc82GW5Q="
 		@badCipherText = "2015.1:c7a39310056b694c:xQf+Uh5Den3JREtvc82GW5Q="
 		@settings =
-			cipherLabel: "2016.1"
+			cipherLabel: "2019.1"
 			cipherPasswords:
 				"2016.1": "11111111111111111111111111111111111111"
 				"2015.1": "22222222222222222222222222222222222222"
-		AccessTokenEncryptor = SandboxedModule.require modulePath, @requires
-		@encryptor = new AccessTokenEncryptor(@settings)
+				"2019.1": "33333333333333333333333333333333333333"
+		@AccessTokenEncryptor = SandboxedModule.require modulePath
+		@encryptor = new @AccessTokenEncryptor(@settings)
 
 	describe "encrypt", ->
 		it 'should encrypt the object', (done)->
 			@encryptor.encryptJson @testObject, (err, encrypted)->
 				expect(err).to.be.null
-				encrypted.should.match(/^2016.1:[0-9a-f]+:[a-zA-Z0-9=+\/]+$/)
+				encrypted.should.match(/^2019.1:[0-9a-f]{32}:[a-zA-Z0-9=+\/]+:[0-9a-f]{32}$/)
 				done()
 
 		it 'should encrypt the object differently the next time', (done)->
@@ -45,8 +47,20 @@ describe 'AccessTokenEncryptor', ->
 					expect(decrypted).to.deep.equal @testObject
 					done()
 
-		it 'should decrypt an old string to get the same object', (done)->
-			@encryptor.decryptToJson @oldEncrypted, (err, decrypted)=>
+		it 'should decrypt an 2015 string to get the same object', (done)->
+			@encryptor.decryptToJson @encrypted2015, (err, decrypted)=>
+				expect(err).to.be.null
+				expect(decrypted).to.deep.equal @testObject
+				done()
+
+		it 'should decrypt an 2016 string to get the same object', (done)->
+			@encryptor.decryptToJson @encrypted2016, (err, decrypted)=>
+				expect(err).to.be.null
+				expect(decrypted).to.deep.equal @testObject
+				done()
+
+		it 'should decrypt an 2019 string to get the same object', (done)->
+			@encryptor.decryptToJson @encrypted2019, (err, decrypted)=>
 				expect(err).to.be.null
 				expect(decrypted).to.deep.equal @testObject
 				done()
