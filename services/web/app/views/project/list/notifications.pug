@@ -54,56 +54,6 @@
 							span.sr-only #{translate("close")}
 
 				.alert.alert-info(
-						ng-switch-when="notification_institution_sso_available"
-					)
-					.notification-body
-						p !{translate("can_link_institution_email_acct_to_institution_acct", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
-						div !{translate("doing_this_allow_log_in_through_institution", {appName: settings.appName})}
-					.notification-action
-						a.btn.btn-sm.btn-info(href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=/project&email={{notification.email}}")
-							| #{translate('link_account')}
-					.notification-close
-						button(ng-click="dismiss(notification)").close.pull-right
-							span(aria-hidden="true") &times;
-							span.sr-only #{translate("close")}
-
-				.alert.alert-info(
-					ng-switch-when="notification_institution_sso_linked"
-				)
-					.notification-body
-						div !{translate("account_has_been_link_to_institution_account", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
-					.notification-close
-						button(ng-click="dismiss(notification)").close.pull-right
-							span(aria-hidden="true") &times;
-							span.sr-only #{translate("close")}
-
-				.alert.alert-warning(
-					ng-switch-when="notification_institution_sso_non_canonical"
-				)
-					.notification-body
-						div 
-							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
-							| !{translate("tried_to_log_in_with_email", {email: "{{notification.requestedEmail}}"})} !{translate("in_order_to_match_institutional_metadata_associated", {email: "{{notification.institutionEmail}}"})}
-					.notification-close
-						button(ng-click="dismiss(notification)").close.pull-right
-							span(aria-hidden="true") &times;
-							span.sr-only #{translate("close")}
-
-				.alert.alert-info(
-					ng-switch-when="notification_institution_sso_already_registered"
-				)
-					.notification-body
-						| !{translate("tried_to_register_with_email", {appName: settings.appName, email: "{{notification.email}}"})}
-						| #{translate("we_logged_you_in")}
-					.notification-action
-						a.btn.btn-sm.btn-info(href="/")
-							| #{translate("find_out_more")}
-					.notification-close
-						button(ng-click="dismiss(notification)").close.pull-right
-							span(aria-hidden="true") &times;
-							span.sr-only #{translate("close")}
-
-				.alert.alert-info(
 					ng-switch-default
 				)
 					span(ng-bind-html="notification.html").notification-body
@@ -163,7 +113,7 @@
 						| !{translate("tried_to_register_with_email", {appName: settings.appName, email: "{{notification.email}}"})}
 						| #{translate("we_logged_you_in")}
 					.notification-action
-						a.btn.btn-sm.btn-info(href="/")
+						a.btn.btn-sm.btn-info(href="/learn/how-to/Institutional_Login")
 							| #{translate("find_out_more")}
 					.notification-close
 						button(ng-click="dismiss(notification)").close.pull-right
