@@ -12,6 +12,7 @@ describe 'AccessTokenEncryptor', ->
 		@testObject = {"hello":"world"}
 		@encrypted2015 = "2015.1:473a66fb5d816bc716f278ab819d88a5:+mTg7O9sgUND8pNQFG6h2GE="
 		@encrypted2016 = "2016.1:76a7d64a444ccee1a515b49c44844a69:m5YSkexUsLjcF4gLncm72+k="
+		@encrypted2019 = "2019.1:627143b2ab185a020c8720253a4c984e:7gnY6Ez3/Y3UWgLHLfBtJsE=:bf75cecb6aeea55b3c060e1122d2a82d"
 		@badLabel = "xxxxxx:c7a39310056b694c:jQf+Uh5Den3JREtvc82GW5Q="
 		@badKey = "2015.1:d7a39310056b694c:jQf+Uh5Den3JREtvc82GW5Q="
 		@badCipherText = "2015.1:c7a39310056b694c:xQf+Uh5Den3JREtvc82GW5Q="
@@ -54,6 +55,12 @@ describe 'AccessTokenEncryptor', ->
 
 		it 'should decrypt an 2016 string to get the same object', (done)->
 			@encryptor.decryptToJson @encrypted2016, (err, decrypted)=>
+				expect(err).to.be.null
+				expect(decrypted).to.deep.equal @testObject
+				done()
+
+		it 'should decrypt an 2019 string to get the same object', (done)->
+			@encryptor.decryptToJson @encrypted2019, (err, decrypted)=>
 				expect(err).to.be.null
 				expect(decrypted).to.deep.equal @testObject
 				done()
