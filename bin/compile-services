@@ -9,9 +9,7 @@ grep 'name:' config/services.js | \
 		pushd $service
 		echo "Compiling Service $service"
 		case $service in 
-			web)
-				make compile_full
-				make minify
+			web)			
 				npm run webpack:production
 				;;
 			chat)
