@@ -1,3 +1,7 @@
+# This module is the one which is used in production.  It needs to be migrated
+# to use aws-sdk throughout, see the comments in AWSSDKPersistorManager for
+# details. The knox library is unmaintained and has bugs.
+
 http = require('http')
 http.globalAgent.maxSockets = 300
 https = require('https')
