@@ -43,8 +43,9 @@ getS3Options = (credentials) ->
 			secretAccessKey: credentials.auth_secret
 
 	if settings.filestore.s3.endpoint
+		endpoint = URL.parse(settings.filestore.s3.endpoint)
 		options.endpoint = settings.filestore.s3.endpoint
-		options.sslEnabled = false
+		options.sslEnabled = endpoint.protocol == 'https'
 
 	return options
 
