@@ -3,7 +3,7 @@
 # https://github.com/sharelatex/sharelatex-dev-environment
 # Version: 1.1.24
 
-version: "2"
+version: "2.1"
 
 services:
   test_unit:
@@ -40,9 +40,12 @@ services:
       AWS_S3_ENDPOINT: http://fakes3:9090
     user: node
     depends_on:
-      - mongo
-      - redis
-      - fakes3
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      fakes3:
+        condition: service_healthy
     command: npm run test:acceptance
 
 
@@ -65,5 +68,7 @@ services:
     image: adobe/s3mock
     environment:
       - initialBuckets=fake_user_files,fake_template_files,fake_public_files
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090"]
 
 
