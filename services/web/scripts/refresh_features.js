@@ -7,7 +7,7 @@ const UserFeaturesUpdater = require('../app/src/Features/Subscription/UserFeatur
 
 const getMismatchReasons = (currentFeatures, expectedFeatures) => {
   if (_.isEqual(currentFeatures, expectedFeatures)) {
-    return null
+    return {}
   }
 
   let mismatchReasons = {}
@@ -23,7 +23,11 @@ const getMismatchReasons = (currentFeatures, expectedFeatures) => {
 }
 
 const normalizeMismatchReasons = mismatchReasons => {
-  if (mismatchReasons.collaborators > 1 && mismatchReasons.collaborators < 10) {
+  if (
+    mismatchReasons.collaborators > 1 &&
+    mismatchReasons.collaborators < 10 &&
+    mismatchReasons.collaborators !== 6
+  ) {
     mismatchReasons.collaborators = 10
   }
 
@@ -63,7 +67,7 @@ const checkAndUpdateUser = (user, callback) =>
     }
 
     let mismatchReasons = getMismatchReasons(user.features, freshFeatures)
-    if (!mismatchReasons) {
+    if (Object.keys(mismatchReasons).length === 0) {
       // features are matching; nothing else to do
       return callback()
     }
@@ -97,6 +101,7 @@ const loopForUsers = (lastUserId, callback) => {
   }
   db.users
     .find(query, { features: 1, lastLoggedIn: 1 })
+    .sort('_id')
     .limit(FETCH_LIMIT, (error, users) => {
       if (error) {
         return callback(error)
