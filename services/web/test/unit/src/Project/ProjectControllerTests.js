@@ -84,6 +84,9 @@ describe('ProjectController', function() {
       getSessionUser: sinon.stub().returns(this.user),
       isUserLoggedIn: sinon.stub().returns(true)
     }
+    this.UserController = {
+      logout: sinon.stub()
+    }
     this.AnalyticsManager = { getLastOccurrence: sinon.stub() }
     this.TokenAccessHandler = {
       getRequestToken: sinon.stub().returns(this.token),
@@ -157,6 +160,7 @@ describe('ProjectController', function() {
         './ProjectDuplicator': this.ProjectDuplicator,
         './ProjectCreationHandler': this.ProjectCreationHandler,
         '../Editor/EditorController': this.EditorController,
+        '../User/UserController': this.UserController,
         './ProjectHelper': this.ProjectHelper,
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
         '../Subscription/LimitationsManager': this.LimitationsManager,

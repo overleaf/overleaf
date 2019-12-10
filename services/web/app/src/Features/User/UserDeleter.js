@@ -9,6 +9,7 @@ const SubscriptionHandler = require('../Subscription/SubscriptionHandler')
 const SubscriptionUpdater = require('../Subscription/SubscriptionUpdater')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
+const UserSessionsManager = require('./UserSessionsManager')
 const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
 const Errors = require('../Errors/Errors')
 
@@ -106,9 +107,7 @@ async function _createDeletedUser(user, options) {
 }
 
 async function _cleanupUser(user) {
-  if (user == null) {
-    throw new Error('no user supplied')
-  }
+  await UserSessionsManager.promises.revokeAllUserSessions(user._id, [])
   await NewsletterManager.promises.unsubscribe(user, { delete: true })
   await SubscriptionHandler.promises.cancelSubscription(user)
   await InstitutionsAPI.promises.deleteAffiliations(user._id)

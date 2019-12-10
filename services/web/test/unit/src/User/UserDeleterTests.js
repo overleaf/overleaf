@@ -74,6 +74,12 @@ describe('UserDeleter', function() {
       }
     }
 
+    this.UserSessionsManager = {
+      promises: {
+        revokeAllUserSessions: sinon.stub().resolves()
+      }
+    }
+
     this.InstitutionsApi = {
       promises: {
         deleteAffiliations: sinon.stub().resolves()
@@ -85,6 +91,7 @@ describe('UserDeleter', function() {
         '../../models/User': { User: User },
         '../../models/DeletedUser': { DeletedUser: DeletedUser },
         '../Newsletter/NewsletterManager': this.NewsletterManager,
+        './UserSessionsManager': this.UserSessionsManager,
         '../Subscription/SubscriptionHandler': this.SubscriptionHandler,
         '../Subscription/SubscriptionUpdater': this.SubscriptionUpdater,
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
@@ -185,6 +192,13 @@ describe('UserDeleter', function() {
             expect(
               this.InstitutionsApi.promises.deleteAffiliations
             ).to.have.been.calledWith(this.userId)
+          })
+
+          it('should stop the user sessions', async function() {
+            await this.UserDeleter.promises.deleteUser(this.userId)
+            expect(
+              this.UserSessionsManager.promises.revokeAllUserSessions
+            ).to.have.been.calledWith(this.userId, [])
           })
 
           it('should remove user from group subscriptions', async function() {

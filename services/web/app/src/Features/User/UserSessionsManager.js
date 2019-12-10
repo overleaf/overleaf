@@ -3,10 +3,11 @@ const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const Async = require('async')
 const _ = require('underscore')
+const { promisify } = require('util')
 const UserSessionsRedis = require('./UserSessionsRedis')
 const rclient = UserSessionsRedis.client()
 
-module.exports = UserSessionsManager = {
+UserSessionsManager = {
   // mimic the key used by the express sessions
   _sessionKey(sessionId) {
     return `sess:${sessionId}`
@@ -231,3 +232,9 @@ module.exports = UserSessionsManager = {
     })
   }
 }
+
+UserSessionsManager.promises = {
+  revokeAllUserSessions: promisify(UserSessionsManager.revokeAllUserSessions)
+}
+
+module.exports = UserSessionsManager

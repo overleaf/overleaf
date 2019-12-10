@@ -35,6 +35,7 @@ const Features = require('../../infrastructure/Features')
 const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandler')
 const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
 const V1Handler = require('../V1/V1Handler')
+const UserController = require('../User/UserController')
 const SystemMessageManager = require('../SystemMessages/SystemMessageManager')
 
 const ProjectController = {
@@ -421,6 +422,11 @@ const ProjectController = {
           results.v1Projects.noConnection = true
         }
         const { notifications, user, userAffiliations } = results
+        // Handle case of deleted user
+        if (user == null) {
+          UserController.logout(req, res, next)
+          return
+        }
         const v1Tags =
           (results.v1Projects != null ? results.v1Projects.tags : undefined) ||
           []
@@ -667,6 +673,12 @@ const ProjectController = {
             cb(null, defaultSettingsForAnonymousUser(userId))
           } else {
             User.findById(userId, (err, user) => {
+              // Handle case of deleted user
+              if (user == null) {
+                UserController.logout(req, res, next)
+                return
+              }
+
               logger.log({ projectId, userId }, 'got user')
               cb(err, user)
             })
