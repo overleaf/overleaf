@@ -29,8 +29,10 @@ describe "Filestore", ->
 			"there are 3 lines in all"
 		].join("\n")
 
-		fs.writeFile(@localFileReadPath, @constantFileContent, done)
 		@filestoreUrl = "http://localhost:#{settings.internal.filestore.port}"
+		fs.writeFile @localFileReadPath, @constantFileContent, (err) ->
+			return done(err) if err
+			FilestoreApp.waitForS3(done)
 
 	beforeEach (done)->
 		FilestoreApp.ensureRunning =>
