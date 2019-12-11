@@ -33,7 +33,17 @@ module.exports = DocUpdaterClient =
 				do (update) ->
 					jobs.push (callback) ->
 						DocUpdaterClient.sendUpdate project_id, doc_id, update, callback
-			async.series jobs, callback
+			async.series jobs, (err) ->
+				DocUpdaterClient.waitForPendingUpdates project_id, doc_id, callback
+
+	waitForPendingUpdates: (project_id, doc_id, callback) ->
+		async.retry {times: 30, interval: 100}, (cb) ->
+			rclient.llen keys.pendingUpdates({doc_id}), (err, length) ->
+				if length > 0
+					cb(new Error("updates still pending"))
+				else
+					cb()
+		, callback
 
 	getDoc: (project_id, doc_id, callback = (error, res, body) ->) ->
 		request.get "http://localhost:3003/project/#{project_id}/doc/#{doc_id}", (error, res, body) ->
