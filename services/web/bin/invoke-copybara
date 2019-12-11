@@ -2,7 +2,7 @@
 
 KNOWN_HOSTS=/root/.ssh/known_hosts 
 
-if [[ "$BRANCH_NAME" == "master" ]]; then
+if [[ "$BRANCH_NAME" == "master" && "$COPYBARA" == "run" ]]; then
   set -e
   chmod -R 0600 /root/.ssh
   ssh-keyscan github.com > $KNOWN_HOSTS
