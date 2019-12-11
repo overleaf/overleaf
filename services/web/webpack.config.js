@@ -41,9 +41,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, '/public'),
 
-    // Serve from the root of public directory
-    publicPath: '/',
-
     // By default write into js directory
     filename: 'js/[name].js',
 
@@ -82,7 +79,12 @@ module.exports = {
             options: {
               // Write into js directory (note: customising this is not possible
               // with pdfjs-dist/webpack auto loader)
-              name: 'js/pdfjs-worker.[hash].js'
+              name: 'js/pdfjs-worker.[hash].js',
+              // Override dynamically-set publicPath to explicitly use root.
+              // This prevents a security problem where the Worker - normally
+              // loaded from a CDN - has cross-origin issues, by forcing it to not
+              // be loaded from the CDN
+              publicPath: '/'
             }
           }
         ]
