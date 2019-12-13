@@ -1,4 +1,4 @@
-FROM node:6.9.5 as app
+FROM node:10.17.0-jessie as app
 
 WORKDIR /app
 
@@ -9,10 +9,9 @@ RUN npm install --quiet
 
 COPY . /app
 
-
 RUN npm run compile:all
 
-FROM node:6.9.5
+FROM node:10.17.0-jessie
 
 COPY --from=app /app /app
 
