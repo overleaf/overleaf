@@ -60,7 +60,7 @@ class MetricWrapper
 					labelNames: ['app', 'host', 'path', 'status_code', 'method', 'collection', 'query']
 				})
 			when "gauge"
-				prom.Gauge({
+				new prom.Gauge({
 					name: name,
 					help: name,
 					labelNames: ['app','host', 'status']
