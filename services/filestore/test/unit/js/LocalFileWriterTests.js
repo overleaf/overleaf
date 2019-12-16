@@ -48,10 +48,8 @@ describe('LocalFileWriter', function() {
         },
         'settings-sharelatex': this.settings,
         'metrics-sharelatex': {
-          inc() {},
-          Timer() {
-            return { done() {} }
-          }
+          inc: sinon.stub(),
+          Timer: sinon.stub().returns({ done: sinon.stub() })
         }
       }
     })

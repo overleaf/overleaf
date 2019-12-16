@@ -29,10 +29,8 @@ describe('FileConverter', function() {
           err() {}
         },
         'metrics-sharelatex': {
-          inc() {},
-          Timer() {
-            return { done() {} }
-          }
+          inc: sinon.stub(),
+          Timer: sinon.stub().returns({ done: sinon.stub() })
         },
         'settings-sharelatex': (this.Settings = {
           commands: {
