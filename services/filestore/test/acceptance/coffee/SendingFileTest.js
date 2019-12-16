@@ -1,226 +1,306 @@
-assert = require("chai").assert
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-expect = chai.expect
-modulePath = "../../../app/js/LocalFileWriter.js"
-SandboxedModule = require('sandboxed-module')
-fs = require("fs")
-request = require("request")
-settings = require("settings-sharelatex")
-FilestoreApp = require "./FilestoreApp"
-async = require('async')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS103: Rewrite code to no longer use __guard__
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const {
+    assert
+} = require("chai");
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const {
+    expect
+} = chai;
+const modulePath = "../../../app/js/LocalFileWriter.js";
+const SandboxedModule = require('sandboxed-module');
+const fs = require("fs");
+const request = require("request");
+const settings = require("settings-sharelatex");
+const FilestoreApp = require("./FilestoreApp");
+const async = require('async');
 
 
-getMetric = (filestoreUrl, metric, cb) ->
-	request.get "#{filestoreUrl}/metrics", (err, res) ->
-		expect(res.statusCode).to.equal 200
-		metricRegex = new RegExp("^#{metric}{[^}]+} ([0-9]+)$", "m")
-		cb(parseInt(metricRegex.exec(res.body)?[1] || '0'))
+const getMetric = (filestoreUrl, metric, cb) => request.get(`${filestoreUrl}/metrics`, function(err, res) {
+    expect(res.statusCode).to.equal(200);
+    const metricRegex = new RegExp(`^${metric}{[^}]+} ([0-9]+)$`, "m");
+    return cb(parseInt(__guard__(metricRegex.exec(res.body), x => x[1]) || '0'));
+});
 
-describe "Filestore", ->
-	before (done)->
-		@localFileReadPath = "/tmp/filestore_acceptence_tests_file_read.txt"
-		@localFileWritePath = "/tmp/filestore_acceptence_tests_file_write.txt"
+describe("Filestore", function() {
+	before(function(done){
+		this.localFileReadPath = "/tmp/filestore_acceptence_tests_file_read.txt";
+		this.localFileWritePath = "/tmp/filestore_acceptence_tests_file_write.txt";
 
-		@constantFileContent = [
-			"hello world"
-			"line 2 goes here #{Math.random()}"
+		this.constantFileContent = [
+			"hello world",
+			`line 2 goes here ${Math.random()}`,
 			"there are 3 lines in all"
-		].join("\n")
+		].join("\n");
 
-		@filestoreUrl = "http://localhost:#{settings.internal.filestore.port}"
-		fs.writeFile @localFileReadPath, @constantFileContent, (err) ->
-			return done(err) if err
-			FilestoreApp.waitForS3(done)
+		this.filestoreUrl = `http://localhost:${settings.internal.filestore.port}`;
+		return fs.writeFile(this.localFileReadPath, this.constantFileContent, function(err) {
+			if (err) { return done(err); }
+			return FilestoreApp.waitForS3(done);
+		});
+	});
 
-	beforeEach (done)->
-		FilestoreApp.ensureRunning =>
-			async.parallel [
-				(cb) =>
-					fs.unlink @localFileWritePath, () ->
-						cb()
-				(cb) =>
-					getMetric @filestoreUrl, 's3_egress', (metric) =>
-						@previousEgress = metric
-						cb()
-				(cb) =>
-					getMetric @filestoreUrl, 's3_ingress', (metric) =>
-						@previousIngress = metric
-						cb()
-			], done
+	beforeEach(function(done){
+		return FilestoreApp.ensureRunning(() => {
+			return async.parallel([
+				cb => {
+					return fs.unlink(this.localFileWritePath, () => cb());
+				},
+				cb => {
+					return getMetric(this.filestoreUrl, 's3_egress', metric => {
+						this.previousEgress = metric;
+						return cb();
+					});
+				},
+				cb => {
+					return getMetric(this.filestoreUrl, 's3_ingress', metric => {
+						this.previousIngress = metric;
+						return cb();
+					});
+				}
+			], done);
+		});
+	});
 
-	it "should send a 200 for status endpoint", (done)->
-		request "#{@filestoreUrl}/status", (err, response, body)->
-			response.statusCode.should.equal 200
-			body.indexOf("filestore").should.not.equal -1
-			body.indexOf("up").should.not.equal -1
-			done()
+	it("should send a 200 for status endpoint", function(done){
+		return request(`${this.filestoreUrl}/status`, function(err, response, body){
+			response.statusCode.should.equal(200);
+			body.indexOf("filestore").should.not.equal(-1);
+			body.indexOf("up").should.not.equal(-1);
+			return done();
+		});
+	});
 
-	describe "with a file on the server", ->
+	describe("with a file on the server", function() {
 
-		beforeEach (done)->
-			@timeout(1000 * 10)
-			@file_id = Math.random()
-			@fileUrl = "#{@filestoreUrl}/project/acceptence_tests/file/#{@file_id}"
+		beforeEach(function(done){
+			this.timeout(1000 * 10);
+			this.file_id = Math.random();
+			this.fileUrl = `${this.filestoreUrl}/project/acceptence_tests/file/${this.file_id}`;
 
-			writeStream = request.post(@fileUrl)
+			const writeStream = request.post(this.fileUrl);
 
-			writeStream.on "end", done
-			fs.createReadStream(@localFileReadPath).pipe writeStream
+			writeStream.on("end", done);
+			return fs.createReadStream(this.localFileReadPath).pipe(writeStream);
+		});
 
-		it "should return 404 for a non-existant id", (done) ->
-			@timeout(1000 * 20)
-			options =
-				uri: @fileUrl + '___this_is_clearly_wrong___'
-			request.get options, (err, response, body) =>
-				response.statusCode.should.equal 404
-				done()
+		it("should return 404 for a non-existant id", function(done) {
+			this.timeout(1000 * 20);
+			const options =
+				{uri: this.fileUrl + '___this_is_clearly_wrong___'};
+			return request.get(options, (err, response, body) => {
+				response.statusCode.should.equal(404);
+				return done();
+			});
+		});
 
-		it 'should record an egress metric for the upload', (done) ->
-			getMetric @filestoreUrl, 's3_egress', (metric) =>
-				expect(metric - @previousEgress).to.equal @constantFileContent.length
-				done()
+		it('should record an egress metric for the upload', function(done) {
+			return getMetric(this.filestoreUrl, 's3_egress', metric => {
+				expect(metric - this.previousEgress).to.equal(this.constantFileContent.length);
+				return done();
+			});
+		});
 
-		it "should return the file size on a HEAD request", (done) ->
-			expectedLength = Buffer.byteLength(@constantFileContent)
-			request.head @fileUrl, (err, res) =>
-				expect(res.statusCode).to.equal(200)
-				expect(res.headers['content-length']).to.equal(expectedLength.toString())
-				done()
+		it("should return the file size on a HEAD request", function(done) {
+			const expectedLength = Buffer.byteLength(this.constantFileContent);
+			return request.head(this.fileUrl, (err, res) => {
+				expect(res.statusCode).to.equal(200);
+				expect(res.headers['content-length']).to.equal(expectedLength.toString());
+				return done();
+			});
+		});
 
-		it "should be able get the file back", (done)->
-			@timeout(1000 * 10)
-			request.get @fileUrl, (err, response, body)=>
-				body.should.equal @constantFileContent
-				done()
+		it("should be able get the file back", function(done){
+			this.timeout(1000 * 10);
+			return request.get(this.fileUrl, (err, response, body)=> {
+				body.should.equal(this.constantFileContent);
+				return done();
+			});
+		});
 
-		it "should record an ingress metric when downloading the file", (done)->
-			@timeout(1000 * 10)
-			request.get @fileUrl, () =>
-				getMetric @filestoreUrl, 's3_ingress', (metric) =>
-					expect(metric - @previousIngress).to.equal @constantFileContent.length
-					done()
+		it("should record an ingress metric when downloading the file", function(done){
+			this.timeout(1000 * 10);
+			return request.get(this.fileUrl, () => {
+				return getMetric(this.filestoreUrl, 's3_ingress', metric => {
+					expect(metric - this.previousIngress).to.equal(this.constantFileContent.length);
+					return done();
+				});
+			});
+		});
 
-		it "should be able to get back the first 9 bytes of the file", (done) ->
-			@timeout(1000 * 10)
-			options =
-				uri: @fileUrl
-				headers:
+		it("should be able to get back the first 9 bytes of the file", function(done) {
+			this.timeout(1000 * 10);
+			const options = {
+				uri: this.fileUrl,
+				headers: {
 					'Range': 'bytes=0-8'
-			request.get options, (err, response, body)=>
-				body.should.equal 'hello wor'
-				done()
+				}
+			};
+			return request.get(options, (err, response, body)=> {
+				body.should.equal('hello wor');
+				return done();
+			});
+		});
 
-		it "should record an ingress metric for a partial download", (done)->
-			@timeout(1000 * 10)
-			options =
-				uri: @fileUrl
-				headers:
+		it("should record an ingress metric for a partial download", function(done){
+			this.timeout(1000 * 10);
+			const options = {
+				uri: this.fileUrl,
+				headers: {
 					'Range': 'bytes=0-8'
-			request.get options, ()=>
-				getMetric @filestoreUrl, 's3_ingress', (metric) =>
-					expect(metric - @previousIngress).to.equal 9
-					done()
+				}
+			};
+			return request.get(options, ()=> {
+				return getMetric(this.filestoreUrl, 's3_ingress', metric => {
+					expect(metric - this.previousIngress).to.equal(9);
+					return done();
+				});
+			});
+		});
 
-		it "should be able to get back bytes 4 through 10 of the file", (done) ->
-			@timeout(1000 * 10)
-			options =
-				uri: @fileUrl
-				headers:
+		it("should be able to get back bytes 4 through 10 of the file", function(done) {
+			this.timeout(1000 * 10);
+			const options = {
+				uri: this.fileUrl,
+				headers: {
 					'Range': 'bytes=4-10'
-			request.get options, (err, response, body)=>
-				body.should.equal 'o world'
-				done()
+				}
+			};
+			return request.get(options, (err, response, body)=> {
+				body.should.equal('o world');
+				return done();
+			});
+		});
 
-		it "should be able to delete the file", (done)->
-			@timeout(1000 * 20)
-			request.del @fileUrl, (err, response, body)=>
-				response.statusCode.should.equal 204
-				request.get @fileUrl, (err, response, body)=>
-					response.statusCode.should.equal 404
-					done()
+		it("should be able to delete the file", function(done){
+			this.timeout(1000 * 20);
+			return request.del(this.fileUrl, (err, response, body)=> {
+				response.statusCode.should.equal(204);
+				return request.get(this.fileUrl, (err, response, body)=> {
+					response.statusCode.should.equal(404);
+					return done();
+				});
+			});
+		});
 
-		it "should be able to copy files", (done)->
-			@timeout(1000 * 20)
+		return it("should be able to copy files", function(done){
+			this.timeout(1000 * 20);
 
-			newProjectID = "acceptence_tests_copyied_project"
-			newFileId = Math.random()
-			newFileUrl = "#{@filestoreUrl}/project/#{newProjectID}/file/#{newFileId}"
-			opts =
-				method: 'put'
-				uri: newFileUrl
-				json:
-					source:
-						project_id:"acceptence_tests"
-						file_id: @file_id
-			request opts, (err, response, body)=>
-				response.statusCode.should.equal 200
-				request.del @fileUrl, (err, response, body)=>
-					response.statusCode.should.equal 204
-					request.get newFileUrl, (err, response, body)=>
-						body.should.equal @constantFileContent
-						done()
+			const newProjectID = "acceptence_tests_copyied_project";
+			const newFileId = Math.random();
+			const newFileUrl = `${this.filestoreUrl}/project/${newProjectID}/file/${newFileId}`;
+			const opts = {
+				method: 'put',
+				uri: newFileUrl,
+				json: {
+					source: {
+						project_id:"acceptence_tests",
+						file_id: this.file_id
+					}
+				}
+			};
+			return request(opts, (err, response, body)=> {
+				response.statusCode.should.equal(200);
+				return request.del(this.fileUrl, (err, response, body)=> {
+					response.statusCode.should.equal(204);
+					return request.get(newFileUrl, (err, response, body)=> {
+						body.should.equal(this.constantFileContent);
+						return done();
+					});
+				});
+			});
+		});
+	});
 
-	describe "with a pdf file", ->
+	return describe("with a pdf file", function() {
 
-		beforeEach (done)->
-			@timeout(1000 * 10)
-			@file_id = Math.random()
-			@fileUrl = "#{@filestoreUrl}/project/acceptence_tests/file/#{@file_id}"
-			@localFileReadPath = __dirname + '/../../fixtures/test.pdf'
-			fs.stat @localFileReadPath, (err, stat) =>
-				@localFileSize = stat.size
-				writeStream = request.post(@fileUrl)
+		beforeEach(function(done){
+			this.timeout(1000 * 10);
+			this.file_id = Math.random();
+			this.fileUrl = `${this.filestoreUrl}/project/acceptence_tests/file/${this.file_id}`;
+			this.localFileReadPath = __dirname + '/../../fixtures/test.pdf';
+			return fs.stat(this.localFileReadPath, (err, stat) => {
+				this.localFileSize = stat.size;
+				const writeStream = request.post(this.fileUrl);
 
-				writeStream.on "end", done
-				fs.createReadStream(@localFileReadPath).pipe writeStream
+				writeStream.on("end", done);
+				return fs.createReadStream(this.localFileReadPath).pipe(writeStream);
+			});
+		});
 
-		it 'should record an egress metric for the upload', (done) ->
-			getMetric @filestoreUrl, 's3_egress', (metric) =>
-				expect(metric - @previousEgress).to.equal @localFileSize
-				done()
+		it('should record an egress metric for the upload', function(done) {
+			return getMetric(this.filestoreUrl, 's3_egress', metric => {
+				expect(metric - this.previousEgress).to.equal(this.localFileSize);
+				return done();
+			});
+		});
 
-		it "should be able get the file back", (done)->
-			@timeout(1000 * 10)
-			request.get @fileUrl, (err, response, body)=>
-				expect(body.substring(0, 8)).to.equal '%PDF-1.5'
-				done()
+		it("should be able get the file back", function(done){
+			this.timeout(1000 * 10);
+			return request.get(this.fileUrl, (err, response, body)=> {
+				expect(body.substring(0, 8)).to.equal('%PDF-1.5');
+				return done();
+			});
+		});
 
-		describe "getting the preview image", ->
+		describe("getting the preview image", function() {
 
-			beforeEach ->
-				@previewFileUrl = "#{@fileUrl}?style=preview"
+			beforeEach(function() {
+				return this.previewFileUrl = `${this.fileUrl}?style=preview`;
+			});
 
-			it "should not time out", (done) ->
-				@timeout(1000 * 20)
-				request.get @previewFileUrl, (err, response, body) =>
-					expect(response).to.not.equal null
-					done()
+			it("should not time out", function(done) {
+				this.timeout(1000 * 20);
+				return request.get(this.previewFileUrl, (err, response, body) => {
+					expect(response).to.not.equal(null);
+					return done();
+				});
+			});
 
-			it "should respond with image data", (done) ->
-				# note: this test relies of the imagemagick conversion working
-				@timeout(1000 * 20)
-				request.get @previewFileUrl, (err, response, body) =>
-					expect(response.statusCode).to.equal 200
-					expect(body.length).to.be.greaterThan 400
-					done()
+			return it("should respond with image data", function(done) {
+				// note: this test relies of the imagemagick conversion working
+				this.timeout(1000 * 20);
+				return request.get(this.previewFileUrl, (err, response, body) => {
+					expect(response.statusCode).to.equal(200);
+					expect(body.length).to.be.greaterThan(400);
+					return done();
+				});
+			});
+		});
 
-		describe "warming the cache", ->
+		return describe("warming the cache", function() {
 
-			beforeEach ->
-				@fileUrl = @fileUrl + '?style=preview&cacheWarm=true'
+			beforeEach(function() {
+				return this.fileUrl = this.fileUrl + '?style=preview&cacheWarm=true';
+			});
 
-			it "should not time out", (done) ->
-				@timeout(1000 * 20)
-				request.get @fileUrl, (err, response, body) =>
-					expect(response).to.not.equal null
-					done()
+			it("should not time out", function(done) {
+				this.timeout(1000 * 20);
+				return request.get(this.fileUrl, (err, response, body) => {
+					expect(response).to.not.equal(null);
+					return done();
+				});
+			});
 
-			it "should respond with only an 'OK'", (done) ->
-				# note: this test relies of the imagemagick conversion working
-				@timeout(1000 * 20)
-				request.get @fileUrl, (err, response, body) =>
-					expect(response.statusCode).to.equal 200
-					body.should.equal 'OK'
-					done()
+			return it("should respond with only an 'OK'", function(done) {
+				// note: this test relies of the imagemagick conversion working
+				this.timeout(1000 * 20);
+				return request.get(this.fileUrl, (err, response, body) => {
+					expect(response.statusCode).to.equal(200);
+					body.should.equal('OK');
+					return done();
+				});
+			});
+		});
+	});
+});
+
+function __guard__(value, transform) {
+  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+}
