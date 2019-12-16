@@ -83,9 +83,11 @@ module.exports = Metrics =
 		if process.env['DEBUG_METRICS']
 			console.log("doing inc", key, opts)
 
-	count : (key, count, sampleRate = 1)->
+	count : (key, count, sampleRate = 1, opts = {})->
 		key = Metrics.buildPromKey(key)
-		prom.metric('counter', key).inc({app: appname, host: hostname}, count)
+		opts.app = appname
+		opts.host = hostname
+		prom.metric('counter', key).inc(opts, count)
 		if process.env['DEBUG_METRICS']
 			console.log("doing count/inc", key, opts)
 
