@@ -24,6 +24,7 @@ const Settings = require('settings-sharelatex')
 const xml2js = require('xml2js')
 const logger = require('logger-sharelatex')
 const Async = require('async')
+const Errors = require('../Errors/Errors')
 const SubscriptionErrors = require('./Errors')
 
 module.exports = RecurlyWrapper = {
@@ -79,28 +80,22 @@ module.exports = RecurlyWrapper = {
     createAccount(cache, next) {
       const { user } = cache
       const { subscriptionDetails } = cache
-      const { address } = subscriptionDetails
-      if (!address) {
-        return next(
-          new Error('no address in subscriptionDetails at createAccount stage')
-        )
-      }
       if (cache.userExists) {
         return next(null, cache)
+      }
+
+      let address
+      try {
+        address = getAddressFromSubscriptionDetails(subscriptionDetails)
+      } catch (error) {
+        return next(error)
       }
       const data = {
         account_code: user._id,
         email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
-        address: {
-          address1: address.address1,
-          address2: address.address2 || '',
-          city: address.city || '',
-          state: address.state || '',
-          zip: address.zip || '',
-          country: address.country
-        }
+        address
       }
       const requestBody = RecurlyWrapper._buildXml('account', data)
 
@@ -189,21 +184,14 @@ module.exports = RecurlyWrapper = {
       if (!accountCode) {
         return next(new Error('no account code at setAddress stage'))
       }
-      const { address } = subscriptionDetails
-      if (!address) {
-        return next(
-          new Error('no address in subscriptionDetails at setAddress stage')
-        )
+
+      let address
+      try {
+        address = getAddressFromSubscriptionDetails(subscriptionDetails)
+      } catch (error) {
+        return next(error)
       }
-      const data = {
-        address1: address.address1,
-        address2: address.address2 || '',
-        city: address.city || '',
-        state: address.state || '',
-        zip: address.zip || '',
-        country: address.country
-      }
-      const requestBody = RecurlyWrapper._buildXml('billing_info', data)
+      const requestBody = RecurlyWrapper._buildXml('billing_info', address)
 
       return RecurlyWrapper.apiRequest(
         {
@@ -1049,6 +1037,31 @@ function getCustomFieldsFromSubscriptionDetails(subscriptionDetails) {
     })
   }
   return { custom_field: customFields }
+}
+
+function getAddressFromSubscriptionDetails(subscriptionDetails) {
+  const { address } = subscriptionDetails
+  if (!address || !address.country) {
+    throw new Errors.InvalidError({
+      message: 'Invalid country',
+      info: {
+        public: {
+          message: 'Invalid country'
+        }
+      }
+    })
+  }
+
+  const addressObject = {
+    address1: address.address1,
+    address2: address.address2 || '',
+    city: address.city || '',
+    state: address.state || '',
+    zip: address.zip || '',
+    country: address.country
+  }
+
+  return addressObject
 }
 
 function __guard__(value, transform) {

@@ -19,6 +19,7 @@ const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionController'
+const Errors = require('../../../../app/src/Features/Errors/Errors')
 const SubscriptionErrors = require('../../../../app/src/Features/Subscription/Errors')
 const OError = require('@overleaf/o-error')
 const HttpErrors = require('@overleaf/o-error/http')
@@ -118,6 +119,7 @@ describe('SubscriptionController', function() {
         './FeaturesUpdater': (this.FeaturesUpdater = {}),
         './GroupPlansData': (this.GroupPlansData = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
+        '../Errors/Errors': Errors,
         './Errors': SubscriptionErrors,
         '@overleaf/o-error/http': HttpErrors
       }
@@ -430,6 +432,20 @@ describe('SubscriptionController', function() {
             SubscriptionErrors.RecurlyTransactionError
           )
         ).to.be.true
+      })
+      return done()
+    })
+
+    it('should handle validation errors', function(done) {
+      this.next = sinon.stub()
+      this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
+      this.SubscriptionHandler.createSubscription.yields(
+        new Errors.InvalidError({})
+      )
+      this.SubscriptionController.createSubscription(this.req, null, error => {
+        expect(error).to.exist
+        expect(error).to.be.instanceof(HttpErrors.UnprocessableEntityError)
+        expect(OError.hasCauseInstanceOf(error, Errors.InvalidError)).to.be.true
       })
       return done()
     })

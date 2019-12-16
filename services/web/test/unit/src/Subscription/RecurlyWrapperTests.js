@@ -21,6 +21,7 @@ const querystring = require('querystring')
 const modulePath = '../../../../app/src/Features/Subscription/RecurlyWrapper'
 const SandboxedModule = require('sandboxed-module')
 const tk = require('timekeeper')
+const Errors = require('../../../../app/src/Features/Errors/Errors')
 const SubscriptionErrors = require('../../../../app/src/Features/Subscription/Errors')
 
 const fixtures = {
@@ -158,7 +159,8 @@ describe('RecurlyWrapper', function() {
           },
           request: sinon.stub(),
           xml2js: require('xml2js'),
-          './Errors': SubscriptionErrors
+          './Errors': SubscriptionErrors,
+          '../Errors/Errors': Errors
         }
       }
     ))
@@ -1148,6 +1150,19 @@ describe('RecurlyWrapper', function() {
         })
       })
 
+      describe('when country is missing from address', function() {
+        beforeEach(function() {
+          return (this.cache.subscriptionDetails.address = {})
+        })
+
+        it('should produce an error', function(done) {
+          return this.call((err, result) => {
+            expect(err).to.be.instanceof(Errors.InvalidError)
+            return done()
+          })
+        })
+      })
+
       describe('when account already exists', function() {
         beforeEach(function() {
           this.cache.userExists = true
@@ -1378,14 +1393,14 @@ describe('RecurlyWrapper', function() {
         })
       })
 
-      describe('when address is missing from subscriptionDetails', function() {
+      describe('when country is missing', function() {
         beforeEach(function() {
-          return (this.cache.subscriptionDetails.address = null)
+          return (this.cache.subscriptionDetails.address = { country: '' })
         })
 
         it('should produce an error', function(done) {
           return this.call((err, result) => {
-            expect(err).to.be.instanceof(Error)
+            expect(err).to.be.instanceof(Errors.InvalidError)
             return done()
           })
         })
