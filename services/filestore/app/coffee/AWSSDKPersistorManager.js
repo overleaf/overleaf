@@ -1,3 +1,9 @@
+/* eslint-disable
+    handle-callback-err,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -48,7 +54,7 @@ module.exports = {
 			Key: key
 		};
 		if ((opts.start != null) && (opts.end != null)) {
-			params['Range'] = `bytes=${opts.start}-${opts.end}`;
+			params.Range = `bytes=${opts.start}-${opts.end}`;
 		}
 		const request = s3.getObject(params);
 		const stream = request.createReadStream();

@@ -1,3 +1,13 @@
+/* eslint-disable
+    handle-callback-err,
+    new-cap,
+    no-return-assign,
+    no-unused-vars,
+    node/no-deprecated-api,
+    standard/no-callback-literal,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -146,7 +156,7 @@ module.exports = {
 			Key: key
 		};
 		if ((opts.start != null) && (opts.end != null)) {
-			s3Params['Range'] = `bytes=${opts.start}-${opts.end}`;
+			s3Params.Range = `bytes=${opts.start}-${opts.end}`;
 		}
 		const s3Request = s3.getObject(s3Params);
 
