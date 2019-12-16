@@ -67,6 +67,7 @@
     z-index: 20;
   }
 }
+
 #try-reconnect-now-button {
   margin-left: 20px;
 }
@@ -76,6 +77,7 @@
 }
 
 #ide-body {
+  background-color: @pdf-bg;
   .full-size;
   top: @ide-body-top-offset;
   &.ide-history-open {
@@ -91,6 +93,26 @@
 
 #editor-rich-text {
   top: @editor-toolbar-height;
+}
+
+.no-file-selection,
+.multi-selection-ongoing {
+  &::before {
+    .full-size;
+    left: 20px;
+    content: '';
+    background: url(/img/ol-brand/overleaf-o-grey.svg) center / 200px no-repeat;
+    opacity: 0.2;
+    pointer-events: none;
+  }
+}
+
+.no-file-selection-message,
+.multi-selection-message {
+  width: 50%;
+  margin: 0 auto;
+  text-align: center;
+  padding: @line-height-computed 0;
 }
 
 .toolbar-editor {

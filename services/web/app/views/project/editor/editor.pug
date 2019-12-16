@@ -39,10 +39,16 @@ div.full-size(
 
 		!= moduleIncludes('editor:main', locals)
 
+		.multi-selection-ongoing(
+			ng-show="multiSelectedCount > 0"
+		)
+			.multi-selection-message
+				h4 {{ multiSelectedCount }} #{translate('files_selected')}
+
 		#editor(
 			ace-editor="editor",
 			ng-if="!editor.showRichText",
-			ng-show="!!editor.sharejs_doc && !editor.opening",
+			ng-show="!!editor.sharejs_doc && !editor.opening && multiSelectedCount === 0",
 			theme="settings.editorTheme",
 			keybindings="settings.mode",
 			font-size="settings.fontSize",
@@ -106,3 +112,26 @@ div.full-size(
 	ng-show="ui.view == 'pdf'"
 )
 	include ./pdf
+
+// fallback, shown when no file/view is selected
+div.full-size.no-file-selection(
+	ng-if="!ui.view"
+)
+	.no-file-selection-message(
+		ng-if="rootFolder.children && rootFolder.children.length > 0"
+	)
+		h3
+			| #{translate('no_selection_select_file')}
+	.no-file-selection-message(
+		ng-if="rootFolder.children && rootFolder.children.length === 0"
+	)
+		h3
+			| #{translate('no_selection_create_new_file')}
+		div(
+			ng-controller="FileTreeController"
+		)
+			button.btn.btn-primary(
+				ng-click="openNewDocModal()"
+			)
+				| #{translate('new_file')}
+

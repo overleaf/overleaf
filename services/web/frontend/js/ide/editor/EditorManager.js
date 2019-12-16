@@ -50,12 +50,14 @@ define([
         this.$scope.$on('entity:deleted', (event, entity) => {
           if (this.$scope.editor.open_doc_id === entity.id) {
             if (!this.$scope.project.rootDoc_id) {
+              this.$scope.ui.view = null
               return
             }
             const doc = this.ide.fileTreeManager.findEntityById(
               this.$scope.project.rootDoc_id
             )
             if (doc == null) {
+              this.$scope.ui.view = null
               return
             }
             return this.openDoc(doc)

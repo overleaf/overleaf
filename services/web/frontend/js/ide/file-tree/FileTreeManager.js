@@ -213,7 +213,11 @@ define([
     }
 
     multiSelectSelectedEntity() {
-      return __guard__(this.findSelectedEntity(), x => (x.multiSelected = true))
+      const entity = this.findSelectedEntity()
+      if (entity) {
+        entity.multiSelected = true
+      }
+      this.$scope.multiSelectedCount = this.multiSelectedCount()
     }
 
     existsInFolder(folder_id, name) {
@@ -725,6 +729,10 @@ define([
         if (index > -1) {
           parent_folder.children.splice(index, 1)
         }
+      }
+
+      if (entity.type !== 'folder' && entity.selected) {
+        this.$scope.ui.view = null
       }
 
       if (entity.type === 'doc' && options.moveToDeleted) {
