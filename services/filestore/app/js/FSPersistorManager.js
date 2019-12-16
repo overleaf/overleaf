@@ -82,11 +82,11 @@ module.exports = {
           { err, location, filteredName: name },
           'Error reading from file'
         )
-      }
-      if (err.code === 'ENOENT') {
-        return callback(new Errors.NotFoundError(err.message), null)
-      } else {
-        return callback(err, null)
+        if (err.code === 'ENOENT') {
+          return callback(new Errors.NotFoundError(err.message), null)
+        } else {
+          return callback(err, null)
+        }
       }
       opts.fd = fd
       const sourceStream = fs.createReadStream(null, opts)
