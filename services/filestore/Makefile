@@ -1,7 +1,7 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.1.12
+# Version: 1.1.24
 
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
@@ -26,14 +26,16 @@ test: test_unit test_acceptance
 test_unit:
 	@[ ! -d test/unit ] && echo "filestore has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit
 
-test_acceptance: test_clean test_acceptance_pre_run # clear the database before each acceptance test run
+test_acceptance: test_clean test_acceptance_pre_run test_acceptance_run
+
+test_acceptance_run:
 	@[ ! -d test/acceptance ] && echo "filestore has no acceptance tests" || $(DOCKER_COMPOSE) run --rm test_acceptance
 
 test_clean:
 	$(DOCKER_COMPOSE) down -v -t 0
 
 test_acceptance_pre_run:
-	@[ ! -f test/acceptance/scripts/pre-run ] && echo "filestore has no pre acceptance tests task" || $(DOCKER_COMPOSE) run --rm test_acceptance test/acceptance/scripts/pre-run
+	@[ ! -f test/acceptance/js/scripts/pre-run ] && echo "filestore has no pre acceptance tests task" || $(DOCKER_COMPOSE) run --rm test_acceptance test/acceptance/js/scripts/pre-run
 build:
 	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \

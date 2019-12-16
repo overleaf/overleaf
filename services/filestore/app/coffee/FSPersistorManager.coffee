@@ -1,5 +1,6 @@
 logger = require("logger-sharelatex")
 fs = require("fs")
+path = require("path")
 LocalFileWriter = require("./LocalFileWriter")
 Errors = require('./Errors')
 rimraf = require("rimraf")
@@ -35,28 +36,38 @@ module.exports =
       if err?
         logger.err  location:location, target:target, fsPath:fsPath, err:err, "something went wrong writing stream to disk"
         return callback err
-      @sendFile location, target, fsPath, (err) -> 
+      @sendFile location, target, fsPath, (err) ->
         # delete the temporary file created above and return the original error
         LocalFileWriter.deleteFile fsPath, () ->
           callback(err)
 
   # opts may be {start: Number, end: Number}
-  getFileStream: (location, name, opts, _callback = (err, res)->) ->
-    callback = _.once _callback
+  getFileStream: (location, name, opts, callback = (err, res)->) ->
     filteredName = filterName name
     logger.log location:location, filteredName:filteredName, "getting file"
-    sourceStream = fs.createReadStream "#{location}/#{filteredName}", opts
-    sourceStream.on 'error', (err) ->
-      logger.err err:err, location:location, filteredName:name, "Error reading from file"
-      if err.code == 'ENOENT'
-        return callback new Errors.NotFoundError(err.message), null
-      else
-        return callback err, null
-    sourceStream.on 'readable', () ->
-      # This can be called multiple times, but the callback wrapper
-      # ensures the callback is only called once
+    fs.open "#{location}/#{filteredName}", 'r', (err, fd) ->
+      if err?
+        logger.err err:err, location:location, filteredName:name, "Error reading from file"
+        if err.code == 'ENOENT'
+          return callback new Errors.NotFoundError(err.message), null
+        else
+          return callback err, null
+      opts.fd = fd
+      sourceStream = fs.createReadStream null, opts
       return callback null, sourceStream
 
+  getFileSize: (location, filename, callback) ->
+    fullPath = path.join(location, filterName(filename))
+    fs.stat fullPath, (err, stats) ->
+      if err?
+        if err.code == 'ENOENT'
+          logger.log({location:location, filename:filename}, "file not found")
+          callback(new Errors.NotFoundError(err.message))
+        else
+          logger.err({err:err, location:location, filename:filename}, "failed to stat file")
+          callback(err)
+        return
+      callback(null, stats.size)
 
   copyFile: (location, fromName, toName, callback = (err)->)->
     filteredFromName=filterName fromName

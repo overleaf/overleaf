@@ -19,9 +19,11 @@ describe "FSPersistorManagerTests", ->
       rmdir:sinon.stub()
       exists:sinon.stub()
       readdir:sinon.stub()
+      open:sinon.stub()
       openSync:sinon.stub()
       fstatSync:sinon.stub()
       closeSync:sinon.stub()
+      stat:sinon.stub()
     @Rimraf = sinon.stub()
     @LocalFileWriter =
       writeStream: sinon.stub()
@@ -103,20 +105,21 @@ describe "FSPersistorManagerTests", ->
       @opts = {}
 
     it "should use correct file location", (done) ->
-      @Fs.createReadStream.returns({on: ->})
       @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res) =>
-      @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal true
+      @Fs.open.calledWith("#{@location}/#{@name1Filtered}").should.equal true
       done()
 
     describe "with start and end options", ->
 
       beforeEach ->
-        @opts = {start: 0, end: 8}
+        @fd = 2019
+        @opts_in = {start: 0, end: 8}
+        @opts = {start: 0, end: 8, fd: @fd}
+        @Fs.open.callsArgWith(2, null, @fd)
 
       it 'should pass the options to createReadStream', (done) ->
-        @Fs.createReadStream.returns({on: ->})
-        @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
-        @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}", @opts).should.equal true
+        @FSPersistorManager.getFileStream @location, @name1, @opts_in, (err,res)=>
+        @Fs.createReadStream.calledWith(null, @opts).should.equal true
         done()
 
     describe "error conditions", ->
@@ -125,12 +128,10 @@ describe "FSPersistorManagerTests", ->
 
         beforeEach ->
           @fakeCode = 'ENOENT'
-          @Fs.createReadStream.returns(
-            on: (key, callback) =>
-              err = new Error()
-              err.code = @fakeCode
-              callback(err, null)
-          )
+          err = new Error()
+          err.code = @fakeCode
+          @Fs.open.callsArgWith(2, err, null)
+
         it "should give a NotFoundError", (done) ->
           @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
             expect(res).to.equal null
@@ -142,12 +143,9 @@ describe "FSPersistorManagerTests", ->
 
         beforeEach ->
           @fakeCode = 'SOMETHINGHORRIBLE'
-          @Fs.createReadStream.returns(
-            on: (key, callback) =>
-              err = new Error()
-              err.code = @fakeCode
-              callback(err, null)
-          )
+          err = new Error()
+          err.code = @fakeCode
+          @Fs.open.callsArgWith(2, err, null)
 
         it "should give an Error", (done) ->
           @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
@@ -156,7 +154,35 @@ describe "FSPersistorManagerTests", ->
             expect(err instanceof Error).to.equal true
             done()
 
+  describe "getFileSize", ->
+    it "should return the file size", (done) ->
+      expectedFileSize = 75382
+      @Fs.stat.yields(new Error("fs.stat got unexpected arguments"))
+      @Fs.stat.withArgs("#{@location}/#{@name1Filtered}")
+        .yields(null, { size: expectedFileSize })
 
+      @FSPersistorManager.getFileSize @location, @name1, (err, fileSize) =>
+        if err?
+          return done(err)
+        expect(fileSize).to.equal(expectedFileSize)
+        done()
+
+    it "should throw a NotFoundError if the file does not exist", (done) ->
+      error = new Error()
+      error.code = "ENOENT"
+      @Fs.stat.yields(error)
+
+      @FSPersistorManager.getFileSize @location, @name1, (err, fileSize) =>
+        expect(err).to.be.instanceof(@Errors.NotFoundError)
+        done()
+
+    it "should rethrow any other error", (done) ->
+      error = new Error()
+      @Fs.stat.yields(error)
+
+      @FSPersistorManager.getFileSize @location, @name1, (err, fileSize) =>
+        expect(err).to.equal(error)
+        done()
 
   describe "copyFile", ->
     beforeEach ->

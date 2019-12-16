@@ -31,6 +31,9 @@ module.exports = FileHandler =
 		else
 			@_getConvertedFile bucket, key, opts, callback
 
+	getFileSize: (bucket, key, callback) ->
+		PersistorManager.getFileSize(bucket, key, callback)
+
 	_getStandardFile: (bucket, key, opts, callback)->
 		PersistorManager.getFileStream bucket, key, opts, (err, fileStream)->
 			if err? and !(err instanceof Errors.NotFoundError)
