@@ -1,101 +1,131 @@
-logger = require("logger-sharelatex")
-assert = require("chai").assert
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-expect = chai.expect
-modulePath = "../../../app/js/PersistorManager.js"
-SandboxedModule = require('sandboxed-module')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const logger = require("logger-sharelatex");
+const {
+    assert
+} = require("chai");
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const {
+    expect
+} = chai;
+const modulePath = "../../../app/js/PersistorManager.js";
+const SandboxedModule = require('sandboxed-module');
 
 
-describe "PersistorManagerTests", ->
+describe("PersistorManagerTests", function() {
 
-	beforeEach ->
-		@S3PersistorManager =
-			getFileStream: sinon.stub()
-			checkIfFileExists: sinon.stub()
-			deleteFile: sinon.stub()
-			deleteDirectory: sinon.stub()
-			sendStream: sinon.stub()
+	beforeEach(function() {
+		return this.S3PersistorManager = {
+			getFileStream: sinon.stub(),
+			checkIfFileExists: sinon.stub(),
+			deleteFile: sinon.stub(),
+			deleteDirectory: sinon.stub(),
+			sendStream: sinon.stub(),
 			insertFile: sinon.stub()
+		};
+	});
 
-	describe "test s3 mixin", ->
-		beforeEach ->
-			@settings =
-				filestore:
+	describe("test s3 mixin", function() {
+		beforeEach(function() {
+			this.settings = {
+				filestore: {
 					backend: "s3"
-			@requires =
-				"./S3PersistorManager": @S3PersistorManager
-				"settings-sharelatex": @settings
-				"logger-sharelatex":
-					log:->
-					err:->
-			@PersistorManager = SandboxedModule.require modulePath, requires: @requires
+				}
+			};
+			this.requires = {
+				"./S3PersistorManager": this.S3PersistorManager,
+				"settings-sharelatex": this.settings,
+				"logger-sharelatex": {
+					log() {},
+					err() {}
+				}
+			};
+			return this.PersistorManager = SandboxedModule.require(modulePath, {requires: this.requires});
+		});
 
-		it "should load getFileStream", (done) ->
-			@PersistorManager.should.respondTo("getFileStream")
-			@PersistorManager.getFileStream()
-			@S3PersistorManager.getFileStream.calledOnce.should.equal true
-			done()
+		it("should load getFileStream", function(done) {
+			this.PersistorManager.should.respondTo("getFileStream");
+			this.PersistorManager.getFileStream();
+			this.S3PersistorManager.getFileStream.calledOnce.should.equal(true);
+			return done();
+		});
 
-		it "should load checkIfFileExists", (done) ->
-			@PersistorManager.checkIfFileExists()
-			@S3PersistorManager.checkIfFileExists.calledOnce.should.equal true
-			done()
+		it("should load checkIfFileExists", function(done) {
+			this.PersistorManager.checkIfFileExists();
+			this.S3PersistorManager.checkIfFileExists.calledOnce.should.equal(true);
+			return done();
+		});
 
-		it "should load deleteFile", (done) ->
-			@PersistorManager.deleteFile()
-			@S3PersistorManager.deleteFile.calledOnce.should.equal true
-			done()
+		it("should load deleteFile", function(done) {
+			this.PersistorManager.deleteFile();
+			this.S3PersistorManager.deleteFile.calledOnce.should.equal(true);
+			return done();
+		});
 
-		it "should load deleteDirectory", (done) ->
-			@PersistorManager.deleteDirectory()
-			@S3PersistorManager.deleteDirectory.calledOnce.should.equal true
-			done()
+		it("should load deleteDirectory", function(done) {
+			this.PersistorManager.deleteDirectory();
+			this.S3PersistorManager.deleteDirectory.calledOnce.should.equal(true);
+			return done();
+		});
 
-		it "should load sendStream", (done) ->
-			@PersistorManager.sendStream()
-			@S3PersistorManager.sendStream.calledOnce.should.equal true
-			done()
+		it("should load sendStream", function(done) {
+			this.PersistorManager.sendStream();
+			this.S3PersistorManager.sendStream.calledOnce.should.equal(true);
+			return done();
+		});
 
-		it "should load insertFile", (done) ->
-			@PersistorManager.insertFile()
-			@S3PersistorManager.insertFile.calledOnce.should.equal true
-			done()
+		return it("should load insertFile", function(done) {
+			this.PersistorManager.insertFile();
+			this.S3PersistorManager.insertFile.calledOnce.should.equal(true);
+			return done();
+		});
+	});
 
-	describe "test unspecified mixins", ->
+	describe("test unspecified mixins", () => it("should load s3 when no wrapper specified", function(done) {
+        this.settings = {filestore:{}};
+        this.requires = {
+            "./S3PersistorManager": this.S3PersistorManager,
+            "settings-sharelatex": this.settings,
+            "logger-sharelatex": {
+                log() {},
+                err() {}
+            }
+        };
+        this.PersistorManager = SandboxedModule.require(modulePath, {requires: this.requires});
+        this.PersistorManager.should.respondTo("getFileStream");
+        this.PersistorManager.getFileStream();
+        this.S3PersistorManager.getFileStream.calledOnce.should.equal(true);
+        return done();
+    }));
 
-		it "should load s3 when no wrapper specified", (done) ->
-			@settings = {filestore:{}}
-			@requires =
-				"./S3PersistorManager": @S3PersistorManager
-				"settings-sharelatex": @settings
-				"logger-sharelatex":
-					log:->
-					err:->
-			@PersistorManager = SandboxedModule.require modulePath, requires: @requires
-			@PersistorManager.should.respondTo("getFileStream")
-			@PersistorManager.getFileStream()
-			@S3PersistorManager.getFileStream.calledOnce.should.equal true
-			done()
-
-	describe "test invalid mixins", ->
-		it "should not load an invalid wrapper", (done) ->
-			@settings =
-				filestore:
-					backend:"magic"
-			@requires =
-				"./S3PersistorManager": @S3PersistorManager
-				"settings-sharelatex": @settings
-				"logger-sharelatex":
-					log:->
-					err:->
-			@fsWrapper=null
-			try
-				@PersistorManager=SandboxedModule.require modulePath, requires: @requires
-			catch error
-				assert.equal("Unknown filestore backend: magic",error.message)
-			assert.isNull(@fsWrapper)
-			done()
+	return describe("test invalid mixins", () => it("should not load an invalid wrapper", function(done) {
+        this.settings = {
+            filestore: {
+                backend:"magic"
+            }
+        };
+        this.requires = {
+            "./S3PersistorManager": this.S3PersistorManager,
+            "settings-sharelatex": this.settings,
+            "logger-sharelatex": {
+                log() {},
+                err() {}
+            }
+        };
+        this.fsWrapper=null;
+        try {
+            this.PersistorManager=SandboxedModule.require(modulePath, {requires: this.requires});
+        } catch (error) {
+            assert.equal("Unknown filestore backend: magic",error.message);
+        }
+        assert.isNull(this.fsWrapper);
+        return done();
+    }));
+});
 
 

@@ -1,39 +1,59 @@
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
 
-assert = require("chai").assert
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-expect = chai.expect
-modulePath = "../../../app/js/KeyBuilder.js"
-SandboxedModule = require('sandboxed-module')
+const {
+    assert
+} = require("chai");
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const {
+    expect
+} = chai;
+const modulePath = "../../../app/js/KeyBuilder.js";
+const SandboxedModule = require('sandboxed-module');
 
-describe "LocalFileWriter", ->
+describe("LocalFileWriter", function() {
 
-	beforeEach ->
+	beforeEach(function() {
 
-		@keyBuilder = SandboxedModule.require modulePath, requires:
-			"logger-sharelatex":
-				log:->
-				err:->
-		@key = "123/456"
+		this.keyBuilder = SandboxedModule.require(modulePath, { requires: {
+			"logger-sharelatex": {
+				log() {},
+				err() {}
+			}
+		}
+	}
+		);
+		return this.key = "123/456";
+	});
 		
-	describe "cachedKey", ->
+	return describe("cachedKey", function() {
 
-		it "should add the fomat on", ->
-			opts =
+		it("should add the fomat on", function() {
+			const opts =
+				{format: "png"};
+			const newKey = this.keyBuilder.addCachingToKey(this.key, opts);
+			return newKey.should.equal(`${this.key}-converted-cache/format-png`);
+		});
+
+		it("should add the style on", function() {
+			const opts =
+				{style: "thumbnail"};
+			const newKey = this.keyBuilder.addCachingToKey(this.key, opts);
+			return newKey.should.equal(`${this.key}-converted-cache/style-thumbnail`);
+		});
+
+		return it("should add format on first", function() {
+			const opts = {
+				style: "thumbnail",
 				format: "png"
-			newKey = @keyBuilder.addCachingToKey @key, opts
-			newKey.should.equal "#{@key}-converted-cache/format-png"
-
-		it "should add the style on", ->
-			opts =
-				style: "thumbnail"
-			newKey = @keyBuilder.addCachingToKey @key, opts
-			newKey.should.equal "#{@key}-converted-cache/style-thumbnail"
-
-		it "should add format on first", ->
-			opts =
-				style: "thumbnail"
-				format: "png"
-			newKey = @keyBuilder.addCachingToKey @key, opts
-			newKey.should.equal "#{@key}-converted-cache/format-png-style-thumbnail"
+			};
+			const newKey = this.keyBuilder.addCachingToKey(this.key, opts);
+			return newKey.should.equal(`${this.key}-converted-cache/format-png-style-thumbnail`);
+		});
+	});
+});
