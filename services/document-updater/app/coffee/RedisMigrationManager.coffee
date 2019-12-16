@@ -114,7 +114,7 @@ class MigrationClient
 		@rclient_new = redis.createClient(new_settings)
 		@new_key_schema = new_settings.key_schema
 		@migration_phase = new_settings.migration_phase
-		throw new Error("invalid migration phase") unless @migration_phase in ['prepare', 'start', 'switch', 'complete']
+		throw new Error("invalid migration phase") unless @migration_phase in ['prepare', 'switch', 'rollback']
 
 	getMigrationStatus: (key, migrationKey, callback) ->
 		async.series [
@@ -132,7 +132,7 @@ class MigrationClient
 		project_id = getProjectId(key)
 		migrationKey = @new_key_schema.projectHistoryMigrationKey({project_id})
 
-		@getMigrationStatus key, migrationKey, (err, migrationKeyExists, newQueueExists, oldQueueExists) ->
+		@getMigrationStatus key, migrationKey, (err, migrationKeyExists, newQueueExists, oldQueueExists) =>
 			return callback(err) if err?
 			# In all cases, if the migration key exists we must always write to the
 			# new redis, unless we are rolling back.
@@ -189,7 +189,7 @@ class MigrationClient
 					logger.debug {project_id}, "using old client because migration key does not exist"
 					return callback(null, @rclient_old)
 			else
-				logger.error {key: key}, "unknown migration phase"
+				logger.error {key: key, migration_phase: @migration_phase}, "unknown migration phase"
 				callback(new Error('invalid migration phase'))
 	multi: () ->
 		new Multi(@)
