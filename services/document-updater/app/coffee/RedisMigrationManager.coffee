@@ -2,6 +2,7 @@ logger = require "logger-sharelatex"
 Settings = require "settings-sharelatex"
 redis = require("redis-sharelatex")
 LockManager = require("./LockManager")
+metrics = require "./Metrics"
 async = require("async")
 
 # The aim is to migrate the project history queues
@@ -89,6 +90,7 @@ class Multi
 		@queueKey = null
 	rpush: (args...) ->
 		@queueKey = args[0]
+		@updates_count = args.length - 1
 		@command_list.push { command:'rpush', args: args}
 	setnx: (args...) ->
 		@command_list.push { command: 'setnx', args: args}
@@ -103,6 +105,9 @@ class Multi
 					callback(args...)
 			@migrationClient.findQueue @queueKey, (err, rclient) =>
 				return releaseLock(err) if err?
+				# add metric for updates
+				dest = (if rclient == @rclient_new then "new" else "old")
+				metrics.count "migration", @updates_count, 1, {status: "#{@migrationClient.migration_phase}-#{dest}"}
 				multi = rclient.multi()
 				for entry in @command_list
 					multi[entry.command](entry.args...)
