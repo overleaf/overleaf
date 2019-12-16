@@ -4,6 +4,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+/* eslint-disable node/no-deprecated-api */
 const Metrics = require('metrics-sharelatex')
 Metrics.initialize('filestore')
 const express = require('express')
@@ -11,7 +12,6 @@ const bodyParser = require('body-parser')
 let logger = require('logger-sharelatex')
 logger.initialize('filestore')
 const settings = require('settings-sharelatex')
-const request = require('request')
 const fileController = require('./app/js/FileController')
 const bucketController = require('./app/js/BucketController')
 const keyBuilder = require('./app/js/KeyBuilder')
@@ -170,10 +170,15 @@ app.get(
 
 app.get('/bucket/:bucket/key/*', bucketController.getFile)
 
-app.get('/heapdump', (req, res) =>
+app.get('/heapdump', (req, res, next) =>
   require('heapdump').writeSnapshot(
     '/tmp/' + Date.now() + '.filestore.heapsnapshot',
-    (err, filename) => res.send(filename)
+    (err, filename) => {
+      if (err) {
+        return next(err)
+      }
+      res.send(filename)
+    }
   )
 )
 
@@ -219,9 +224,13 @@ const host = '0.0.0.0'
 
 if (!module.parent) {
   // Called directly
-  var server = app.listen(port, host, error =>
+  var server = app.listen(port, host, error => {
+    if (error) {
+      logger.error('Error starting Filestore', error)
+      throw error
+    }
     logger.info(`Filestore starting up, listening on ${host}:${port}`)
-  )
+  })
 }
 
 module.exports = app
@@ -232,10 +241,10 @@ process.on('SIGTERM', function() {
 })
 
 if (global.gc != null) {
-  let oneMinute
+  const oneMinute = 60 * 1000
   const gcTimer = setInterval(function() {
     global.gc()
     return logger.log(process.memoryUsage(), 'global.gc')
-  }, 3 * (oneMinute = 60 * 1000))
+  }, 3 * oneMinute)
   gcTimer.unref()
 }
