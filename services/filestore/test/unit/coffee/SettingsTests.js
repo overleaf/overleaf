@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -21,7 +27,7 @@ describe("Settings", () => describe("s3", () => it("should use JSONified env var
             auth_secret: 'bucket1_secret'
         }
     };
-    process.env['S3_BUCKET_CREDENTIALS'] = JSON.stringify(s3_settings);
+    process.env.S3_BUCKET_CREDENTIALS = JSON.stringify(s3_settings);
 
     const settings = require("settings-sharelatex");
     expect(settings.filestore.s3BucketCreds).to.deep.equal(s3_settings);
