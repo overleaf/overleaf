@@ -31,5 +31,13 @@ module.exports = {
         (result != null ? result.nModified : undefined) === 1
       )
     )
+  },
+
+  overrideFeatures(user_id, features, callback) {
+    const conditions = { _id: user_id }
+    const update = { features }
+    return User.update(conditions, update, (err, result) =>
+      callback(err, (result != null ? result.nModified : undefined) === 1)
+    )
   }
 }

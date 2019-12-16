@@ -6,6 +6,8 @@ const FeaturesUpdater = require('../app/src/Features/Subscription/FeaturesUpdate
 const UserFeaturesUpdater = require('../app/src/Features/Subscription/UserFeaturesUpdater')
 
 const getMismatchReasons = (currentFeatures, expectedFeatures) => {
+  currentFeatures = _.clone(currentFeatures)
+  expectedFeatures = _.clone(expectedFeatures)
   if (_.isEqual(currentFeatures, expectedFeatures)) {
     return {}
   }
@@ -15,35 +17,33 @@ const getMismatchReasons = (currentFeatures, expectedFeatures) => {
     .sort()
     .forEach(key => {
       if (expectedFeatures[key] !== currentFeatures[key]) {
-        mismatchReasons[key] = currentFeatures[key]
+        mismatchReasons[key] = expectedFeatures[key]
       }
     })
 
-  return mismatchReasons
-}
-
-const normalizeMismatchReasons = mismatchReasons => {
-  if (
-    mismatchReasons.collaborators > 1 &&
-    mismatchReasons.collaborators < 10 &&
-    mismatchReasons.collaborators !== 6
-  ) {
-    mismatchReasons.collaborators = 10
-  }
-
-  if (mismatchReasons.collaborators > 10) {
-    mismatchReasons.collaborators = -1
-  }
-
   if (mismatchReasons.compileTimeout) {
-    mismatchReasons.compileTimeout = 240
+    // store the compile timeout difference instead of the new compile timeout
+    mismatchReasons.compileTimeout =
+      expectedFeatures.compileTimeout - currentFeatures.compileTimeout
+  }
+
+  if (mismatchReasons.collaborators) {
+    // store the collaborators difference instead of the new number only
+    // replace -1 by 100 to make it clearer
+    if (expectedFeatures.collaborators === -1) {
+      expectedFeatures.collaborators = 100
+    }
+    if (currentFeatures.collaborators === -1) {
+      currentFeatures.collaborators = 100
+    }
+    mismatchReasons.collaborators =
+      expectedFeatures.collaborators - currentFeatures.collaborators
   }
 
   return mismatchReasons
 }
 
 const recordMismatch = (user, mismatchReasons) => {
-  mismatchReasons = normalizeMismatchReasons(mismatchReasons)
   const mismatchReasonsString = JSON.stringify(mismatchReasons)
   if (allMismatchReasons[mismatchReasonsString]) {
     allMismatchReasons[mismatchReasonsString] += 1
@@ -79,7 +79,7 @@ const checkAndUpdateUser = (user, callback) =>
       return callback()
     }
 
-    UserFeaturesUpdater.updateFeatures(user._id, freshFeatures, callback)
+    UserFeaturesUpdater.overrideFeatures(user._id, freshFeatures, callback)
   })
 
 const updateUsers = (users, callback) =>
@@ -122,6 +122,22 @@ const loopForUsers = (lastUserId, callback) => {
     })
 }
 
+const printSummary = () => {
+  console.log({ allMismatchReasons })
+  console.log(
+    'Average Last Logged In (Days):',
+    _.sum(allDaysSinceLastLoggedIn) / allDaysSinceLastLoggedIn.length
+  )
+  console.log(
+    'Recent Logged In (Last 7 Days):',
+    _.filter(allDaysSinceLastLoggedIn, a => a < 7).length
+  )
+  console.log(
+    'Recent Logged In (Last 30 Days):',
+    _.filter(allDaysSinceLastLoggedIn, a => a < 30).length
+  )
+}
+
 let checkedUsersCount = 0
 let mismatchUsersCount = 0
 let allDaysSinceLastLoggedIn = []
@@ -131,19 +147,7 @@ const run = () =>
     if (error) {
       throw error
     }
-    console.log({ allMismatchReasons })
-    console.log(
-      'Average Last Logged In (Days):',
-      _.sum(allDaysSinceLastLoggedIn) / allDaysSinceLastLoggedIn.length
-    )
-    console.log(
-      'Recent Logged In (Last 7 Days):',
-      _.filter(allDaysSinceLastLoggedIn, a => a < 7).length
-    )
-    console.log(
-      'Recent Logged In (Last 30 Days):',
-      _.filter(allDaysSinceLastLoggedIn, a => a < 30).length
-    )
+    printSummary()
     process.exit()
   })
 
