@@ -6,7 +6,11 @@ const request = require('request-promise-native')
 
 let globalUserNum = 1
 
-module.exports = class UserHelper {
+class UserHelper {
+  /**
+   * Create UserHelper
+   * @param {object} [user] - Mongo User object
+   */
   constructor(user = null) {
     // used for constructing default emails, etc
     this.userNum = globalUserNum++
@@ -18,22 +22,41 @@ module.exports = class UserHelper {
 
   /* sync functions */
 
+  /**
+   * Generate default email from unique (per instantiation) user number
+   * @returns {string} email
+   */
   getDefaultEmail() {
     return `test.user.${this.userNum}@example.com`
   }
 
+  /**
+   * Generate email, password args object. Default values will be used if
+   * email and password are not passed in args.
+   * @param {object} [userData]
+   * @param {string} [userData.email] email to use
+   * @param {string} [userData.password] password to use
+   * @returns {object} email, password object
+   */
   getDefaultEmailPassword(userData = {}) {
     return {
       email: this.getDefaultEmail(),
-      password: this.getDefaultPassword(this.userNum),
+      password: this.getDefaultPassword(),
       ...userData
     }
   }
 
+  /**
+   * Generate default password from unique (per instantiation) user number
+   * @returns {string} password
+   */
   getDefaultPassword() {
-    return `new-password-${this.userNum}!`
+    return `New-Password-${this.userNum}!`
   }
 
+  /**
+   * (Re)set internal state of UserHelper object.
+   */
   reset() {
     // cached csrf token
     this._csrfToken = ''
@@ -44,22 +67,27 @@ module.exports = class UserHelper {
     // create new request instance
     this.request = request.defaults({})
     // initialize request instance with default options
-    this.setRequestDefaults()
-  }
-
-  setRequestDefaults(defaults = {}) {
-    // request-promise instance for making requests
-    this.request = this.request.defaults({
+    this.setRequestDefaults({
       baseUrl: UserHelper.baseUrl(),
       followRedirect: false,
       jar: this.jar,
-      resolveWithFullResponse: true,
-      ...defaults
+      resolveWithFullResponse: true
     })
+  }
+
+  /* Set defaults for request object. Applied over existing defaults.
+   * @param {object} [defaults]
+   */
+  setRequestDefaults(defaults = {}) {
+    // request-promise instance for making requests
+    this.request = this.request.defaults(defaults)
   }
 
   /* async http api call methods */
 
+  /**
+   * Requests csrf token unless already cached in internal state
+   */
   async getCsrfToken() {
     if (this._csrfToken) {
       return
@@ -73,6 +101,11 @@ module.exports = class UserHelper {
     })
   }
 
+  /**
+   * Make request to POST /logout
+   * @param {object} [options] options to pass to request
+   * @returns {object} http response
+   */
   async logout(options = {}) {
     // do not throw exception on 302
     options.simple = false
@@ -84,20 +117,30 @@ module.exports = class UserHelper {
     ) {
       throw new Error('logout failed')
     }
-    // clear out internal state
-    this.reset()
+    // after logout CSRF token becomes invalid
+    this._csrfToken = ''
     // resolve with http request response
     return response
   }
 
   /* static sync methods */
 
+  /**
+   * Generates base URL from env options
+   * @returns {string} baseUrl
+   */
   static baseUrl() {
     return `http://${process.env['HTTP_TEST_HOST'] || 'localhost'}:3000`
   }
 
   /* static async instantiation methods */
 
+  /**
+   * Create a new user via UserCreator and return UserHelper instance
+   * @param {object} attributes user data for UserCreator
+   * @param {object} options options for UserCreator
+   * @returns {UserHelper}
+   */
   static async createUser(attributes = {}, options = {}) {
     const userHelper = new UserHelper()
     attributes = userHelper.getDefaultEmailPassword(attributes)
@@ -122,14 +165,30 @@ module.exports = class UserHelper {
     return userHelper
   }
 
+  /**
+   * Get existing user via UserGetter and return UserHelper instance.
+   * All args passed to UserGetter.getUser.
+   * @returns {UserHelper}
+   */
   static async getUser(...args) {
     const user = await UserGetter.promises.getUser(...args)
+
+    if (!user) {
+      throw new Error(`no user found for args: ${JSON.stringify([...args])}`)
+    }
 
     return new UserHelper(user)
   }
 
+  /**
+   * Login to existing account via request and return UserHelper instance
+   * @param {object} userData
+   * @param {string} userData.email
+   * @param {string} userData.password
+   * @returns {UserHelper}
+   */
   static async loginUser(userData) {
-    if (!userData.email || !userData.password) {
+    if (!userData || !userData.email || !userData.password) {
       throw new Error('email and password required')
     }
     const userHelper = new UserHelper()
@@ -153,6 +212,14 @@ module.exports = class UserHelper {
     return userHelper
   }
 
+  /**
+   * Register new account via request and return UserHelper instance.
+   * If userData is not provided the default email and password will be used.
+   * @param {object} [userData]
+   * @param {string} [userData.email]
+   * @param {string} [userData.password]
+   * @returns {UserHelper}
+   */
   static async registerUser(userData, options = {}) {
     const userHelper = new UserHelper()
     await userHelper.getCsrfToken()
@@ -177,3 +244,5 @@ module.exports = class UserHelper {
     return userHelper
   }
 }
+
+module.exports = UserHelper

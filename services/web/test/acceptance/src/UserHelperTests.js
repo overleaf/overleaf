@@ -9,6 +9,13 @@ chai.should()
 chai.use(chaiAsPromised)
 
 describe('UserHelper', function() {
+  // Disable all tests unless the public-registration feature is enabled
+  beforeEach(function() {
+    if (!Features.hasFeature('public-registration')) {
+      this.skip()
+    }
+  })
+
   describe('UserHelper.createUser', function() {
     describe('with no args', function() {
       it('should create new user with default username and password', async function() {
@@ -51,7 +58,7 @@ describe('UserHelper', function() {
     })
   })
 
-  describe('fetching existing user', function() {
+  describe('UserHelper.getUser', function() {
     let user
 
     beforeEach(async function() {
@@ -73,34 +80,50 @@ describe('UserHelper', function() {
     })
   })
 
-  describe('getCsrfToken', function() {
-    describe('when the csrfToken is not cached', function() {
-      it('should fetch csrfToken', async function() {
-        const userHelper = new UserHelper()
-        await userHelper.getCsrfToken()
-        expect(userHelper.csrfToken).to.be.a.string
+  describe('UserHelper.loginUser', function() {
+    let userHelper
+
+    beforeEach(async function() {
+      userHelper = await UserHelper.createUser()
+    })
+
+    describe('with email and password', function() {
+      it('should login user', async function() {
+        const newUserHelper = await UserHelper.loginUser({
+          email: userHelper.getDefaultEmail(),
+          password: userHelper.getDefaultPassword()
+        })
+        newUserHelper.user.email.should.equal(userHelper.user.email)
       })
     })
 
-    describe('when the csrfToken is cached', function() {
-      it('should fetch csrfToken', async function() {
-        let userHelper = new UserHelper()
-        await userHelper.getCsrfToken()
-        const csrfToken = userHelper._csrfToken
-        await userHelper.getCsrfToken()
-        expect(csrfToken).to.equal(userHelper._csrfToken)
+    describe('without email', function() {
+      it('should throw error', async function() {
+        await UserHelper.loginUser({
+          password: userHelper.getDefaultPassword()
+        }).should.be.rejectedWith('email and password required')
+      })
+    })
+
+    describe('without password', function() {
+      it('should throw error', async function() {
+        await UserHelper.loginUser({
+          email: userHelper.getDefaultEmail()
+        }).should.be.rejectedWith('email and password required')
+      })
+    })
+
+    describe('without email and password', function() {
+      it('should throw error', async function() {
+        await UserHelper.loginUser().should.be.rejectedWith(
+          'email and password required'
+        )
       })
     })
   })
 
-  describe('registerUser', function() {
+  describe('UserHelper.registerUser', function() {
     describe('with no args', function() {
-      before(function() {
-        if (!Features.hasFeature('public-registration')) {
-          this.skip()
-        }
-      })
-
       it('should create new user with default username and password', async function() {
         const userHelper = await UserHelper.registerUser()
         userHelper.user.email.should.equal(userHelper.getDefaultEmail())
@@ -113,12 +136,6 @@ describe('UserHelper', function() {
     })
 
     describe('with email', function() {
-      before(function() {
-        if (!Features.hasFeature('public-registration')) {
-          this.skip()
-        }
-      })
-
       it('should create new user with provided email and default password', async function() {
         const userHelper = await UserHelper.registerUser({
           email: 'foo2@test.com'
@@ -133,12 +150,6 @@ describe('UserHelper', function() {
     })
 
     describe('with password', function() {
-      before(function() {
-        if (!Features.hasFeature('public-registration')) {
-          this.skip()
-        }
-      })
-
       it('should create new user with provided password and default email', async function() {
         const userHelper = await UserHelper.registerUser({
           password: 'foofoofoo'
@@ -153,13 +164,28 @@ describe('UserHelper', function() {
     })
   })
 
+  describe('getCsrfToken', function() {
+    describe('when the csrfToken is not cached', function() {
+      it('should fetch csrfToken', async function() {
+        const userHelper = new UserHelper()
+        await userHelper.getCsrfToken()
+        expect(userHelper.csrfToken).to.be.a.string
+      })
+    })
+
+    describe('when the csrfToken is cached', function() {
+      it('should return cached csrfToken', async function() {
+        let userHelper = new UserHelper()
+        await userHelper.getCsrfToken()
+        const csrfToken = userHelper._csrfToken
+        await userHelper.getCsrfToken()
+        expect(csrfToken).to.equal(userHelper._csrfToken)
+      })
+    })
+  })
+
   describe('after logout', function() {
     let userHelper, oldCsrfToken
-    before(function() {
-      if (!Features.hasFeature('public-registration')) {
-        this.skip()
-      }
-    })
 
     beforeEach(async function() {
       userHelper = await UserHelper.registerUser()
