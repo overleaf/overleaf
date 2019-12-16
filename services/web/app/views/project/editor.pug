@@ -118,22 +118,20 @@ block content
 	script#data(type="application/json").
 		!{StringHelper.stringifyJsonForScript({ userSettings: userSettings, user: user, trackChangesState: trackChangesState, useV2History: useV2History, enabledLinkedFileTypes: settings.enabledLinkedFileTypes, brandVariation: brandVariation })}
 
-	script(type="text/javascript").
-		window.data = JSON.parse($("#data").text());
 	script(type='text/javascript').
+		window.data = JSON.parse(document.querySelector("#data").text);
 		window.project_id = "!{project_id}";
-		var data = JSON.parse($("#data").text());
-		window.userSettings = data.userSettings;
-		window.user = data.user;
-		window.enabledLinkedFiles = data.enabledLinkedFiles;
+		window.userSettings = window.data.userSettings;
+		window.user = window.data.user;
+		window.enabledLinkedFiles = window.data.enabledLinkedFiles;
 		window.csrfToken = "!{csrfToken}";
 		window.anonymous = #{anonymous};
-		window.brandVariation = data.brandVariation;
+		window.brandVariation = window.data.brandVariation;
 		window.anonymousAccessToken = "#{anonymousAccessToken}";
 		window.isTokenMember = #{!!isTokenMember};
 		window.isRestrictedTokenMember = #{!!isRestrictedTokenMember};
 		window.maxDocLength = #{maxDocLength};
-		window.trackChangesState = data.trackChangesState;
+		window.trackChangesState = window.data.trackChangesState;
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
 		window.gitBridgePublicBaseUrl = '#{gitBridgePublicBaseUrl}'
 		//- Set base path for Ace scripts loaded on demand/workers and don't use cdn

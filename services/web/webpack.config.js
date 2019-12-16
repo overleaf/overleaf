@@ -143,6 +143,30 @@ module.exports = {
         ]
       },
       {
+        // Expose jQuery and $ global variables
+        test: require.resolve('jquery'),
+        use: [
+          {
+            loader: 'expose-loader',
+            options: 'jQuery'
+          },
+          {
+            loader: 'expose-loader',
+            options: '$'
+          }
+        ]
+      },
+      {
+        // Expose angular global variable
+        test: require.resolve('angular'),
+        use: [
+          {
+            loader: 'expose-loader',
+            options: 'angular'
+          }
+        ]
+      },
+      {
         // Expose underscore global variable
         test: path.join(
           __dirname,
@@ -235,22 +259,6 @@ module.exports = {
 
     new CopyPlugin([
       {
-        from: 'frontend/js/vendor/libs/angular-1.6.4.min.js',
-        to: 'js/libs/angular-1.6.4.min.js'
-      },
-      {
-        from: 'frontend/js/vendor/libs/angular-1.6.4.min.js.map',
-        to: 'js/libs/angular-1.6.4.min.js.map'
-      },
-      {
-        from: 'frontend/js/vendor/libs/jquery-1.11.1.min.js',
-        to: 'js/libs/jquery-1.11.1.min.js'
-      },
-      {
-        from: 'frontend/js/vendor/libs/jquery-1.11.1.min.js.map',
-        to: 'js/libs/jquery-1.11.1.min.js.map'
-      },
-      {
         from: 'frontend/js/vendor/libs/mathjax',
         to: 'js/libs/mathjax'
       },
@@ -268,10 +276,9 @@ module.exports = {
     ])
   ],
 
-  // If jquery or underscore is required by another dependency *don't* include
-  // in the bundle and use the relevant global variable instead
+  // If underscore is required by another dependency *don't* include in the
+  // bundle and use the relevant global variable instead
   externals: {
-    jquery: '$',
     underscore: '_'
   }
 }

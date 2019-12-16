@@ -1,11 +1,6 @@
 extends ../../layout
 
 block content
-  script.
-    $(document).ready(function(){
-      $('#create_form').submit();
-    });
-
   .editor.full-size
     .loading-screen()
       .loading-screen-brand-container
@@ -28,3 +23,9 @@ block content
     input(type="hidden" name="mainFile" value=mainFile)
     if brandVariationId
       input(type="hidden" name="brandVariationId" value=brandVariationId)
+
+block append foot-scripts
+  script.
+    $(document).ready(function(){
+      $('#create_form').submit();
+    });

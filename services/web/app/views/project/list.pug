@@ -8,7 +8,7 @@ block content
 		!{StringHelper.stringifyJsonForScript({ projects, tags, notifications, notificationsInstitution })}
 
 	script(type="text/javascript").
-		window.data = JSON.parse($("#data").text());
+		window.data = JSON.parse(document.querySelector("#data").text);
 		window.algolia = {
 			institutions: {
 				app_id:  '#{algolia_app_id}',

@@ -78,11 +78,6 @@ div(ng-controller="RecurlySubscriptionController")
 			p
 				a(href, ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary #{translate("cancel_my_account")}
 
-script(type="text/javascript").
-	$('#cancelSubscription').on("click", function() {
-		ga('send', 'event', 'subscription-funnel', 'cancelation')
-	})
-
 script(type='text/ng-template', id='confirmChangePlanModalTemplate')
 	.modal-header
 		h3 #{translate("change_plan")}

@@ -13,19 +13,8 @@ module.exports = function(config) {
     },
     browsers: ['ChromeCustom'],
     files: [
-      'test/frontend/bootstrap.js',
-      // Include scripts that are injected into the page outside of webpack
-      'frontend/js/vendor/libs/angular-1.6.4.min.js',
-      'frontend/js/vendor/libs/jquery-1.11.1.min.js',
-
-      // Allow mocking of angular
-      'frontend/js/vendor/libs/angular-mocks.js',
-
       // Import all tests (see comment in the file for why this is necessary)
-      'test/frontend/import_tests.js',
-
-      // Include CSS
-      'public/stylesheets/**/*.css'
+      'test/frontend/import_tests.js'
     ],
     middleware: ['fake-img'],
     preprocessors: {
