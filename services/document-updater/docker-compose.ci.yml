@@ -20,6 +20,7 @@ services:
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis
+      NEW_HISTORY_REDIS_HOST: new_redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
@@ -27,6 +28,7 @@ services:
     depends_on:
       - mongo
       - redis
+      - new_redis
     user: node
     command: npm run test:acceptance:_run
 
@@ -41,6 +43,9 @@ services:
     user: root
 
   redis:
+    image: redis
+
+  new_redis:
     image: redis
 
   mongo:
