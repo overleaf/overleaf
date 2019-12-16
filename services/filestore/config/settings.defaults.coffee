@@ -11,11 +11,11 @@ settings =
 		# Choices are
 		# s3 - Amazon S3
 		# fs - local filesystem
-		if process.env['AWS_KEY']? or process.env['S3_BUCKET_CREDENTIALS']?
+		if process.env['AWS_ACCESS_KEY_ID']? or process.env['S3_BUCKET_CREDENTIALS']?
 			backend: "s3"
 			s3:
-				key: process.env['AWS_KEY']
-				secret: process.env['AWS_SECRET']
+				key: process.env['AWS_ACCESS_KEY_ID']
+				secret: process.env['AWS_SECRET_ACCESS_KEY']
 				endpoint: process.env['AWS_S3_ENDPOINT']
 			stores:
 				user_files: process.env['AWS_S3_USER_FILES_BUCKET_NAME']
