@@ -44,10 +44,10 @@ module.exports =
   # opts may be {start: Number, end: Number}
   getFileStream: (location, name, opts, callback = (err, res)->) ->
     filteredName = filterName name
-    logger.log location:location, name:filteredName, "getting file"
+    logger.log location:location, filteredName:filteredName, "getting file"
     fs.open "#{location}/#{filteredName}", 'r', (err, fd) ->
       if err?
-        logger.err err:err, location:location, name:name, "Error reading from file"
+        logger.err err:err, location:location, filteredName:name, "Error reading from file"
         if err.code == 'ENOENT'
           return callback new Errors.NotFoundError(err.message), null
         else
@@ -87,10 +87,10 @@ module.exports =
 
   deleteFile: (location, name, callback)->
     filteredName = filterName name
-    logger.log location:location, name:filteredName, "delete file"
+    logger.log location:location, filteredName:filteredName, "delete file"
     fs.unlink "#{location}/#{filteredName}", (err) ->
       if err?
-        logger.err err:err, location:location, name:filteredName, "Error on delete."
+        logger.err err:err, location:location, filteredName:filteredName, "Error on delete."
         callback err
       else
         callback()
@@ -99,24 +99,24 @@ module.exports =
     filteredName = filterName name.replace(/\/$/,'')
     rimraf "#{location}/#{filteredName}", (err) ->
       if err?
-        logger.err err:err, location:location, name:filteredName, "Error on rimraf rmdir."
+        logger.err err:err, location:location, filteredName:filteredName, "Error on rimraf rmdir."
         callback err
       else
         callback()
 
   checkIfFileExists:(location, name, callback = (err,exists)->)->
     filteredName = filterName name
-    logger.log location:location, name:filteredName, "checking if file exists"
+    logger.log location:location, filteredName:filteredName, "checking if file exists"
     fs.exists "#{location}/#{filteredName}", (exists) ->
-      logger.log location:location, name:filteredName, exists:exists, "checked if file exists"
+      logger.log location:location, filteredName:filteredName, exists:exists, "checked if file exists"
       callback null, exists
 
   directorySize:(location, name, callback)->
     filteredName = filterName name.replace(/\/$/,'')
-    logger.log location:location, name:filteredName, "get project size in file system"
+    logger.log location:location, filteredName:filteredName, "get project size in file system"
     fs.readdir "#{location}/#{filteredName}", (err, files) ->
       if err?
-        logger.err err:err, location:location, name:filteredName, "something went wrong listing prefix in aws"
+        logger.err err:err, location:location, filteredName:filteredName, "something went wrong listing prefix in aws"
         return callback(err)
       totalSize = 0
       _.each files, (entry)->
