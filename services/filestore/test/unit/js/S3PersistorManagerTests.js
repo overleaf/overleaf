@@ -317,7 +317,6 @@ describe('S3PersistorManagerTests', function() {
         }
       )
     })
-
     ;[403, 404].forEach(statusCode =>
       it(`should throw NotFoundError when S3 responds with ${statusCode}`, function(done) {
         const error = new Error()
