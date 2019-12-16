@@ -35,12 +35,12 @@ html(
 				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-			if gaOptimize === true && typeof(gaOptimizeId) != "undefined"
-				script(type='text/javascript').
-					ga('require', '#{gaOptimizeId}')
 			script(type='text/javascript').
 				ga('create', '#{gaToken}', '#{settings.cookieDomain.replace(/^\./, "")}');
 				ga('send', 'pageview');
+			if gaOptimize === true && typeof(gaOptimizeId) != "undefined"
+				script(type='text/javascript').
+					ga('require', '#{gaOptimizeId}')
 		- else
 			script(type='text/javascript').
 				window.ga = function() { console.log("would send to GA", arguments) };
