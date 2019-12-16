@@ -1,25 +1,39 @@
-exec = require('child_process').exec
-logger = require("logger-sharelatex")
-Settings = require "settings-sharelatex"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const {
+    exec
+} = require('child_process');
+const logger = require("logger-sharelatex");
+const Settings = require("settings-sharelatex");
 
-module.exports = 
+module.exports = { 
 
-	compressPng: (localPath, callback)->
-		startTime = new Date()
-		logger.log localPath:localPath, "optimising png path"
-		args = "optipng #{localPath}"
-		opts =
-			timeout: 30 * 1000
+	compressPng(localPath, callback){
+		const startTime = new Date();
+		logger.log({localPath}, "optimising png path");
+		const args = `optipng ${localPath}`;
+		const opts = {
+			timeout: 30 * 1000,
 			killSignal: "SIGKILL"
-		if !Settings.enableConversions
-			error = new Error("Image conversions are disabled")
-			return callback(error)
-		exec args, opts,(err, stdout, stderr)->
-			if err? and err.signal == 'SIGKILL'
-				logger.warn {err: err, stderr: stderr, localPath: localPath}, "optimiser timeout reached"
-				err = null
-			else if err?
-				logger.err err:err, stderr:stderr, localPath:localPath, "something went wrong converting compressPng"
-			else
-				logger.log  localPath:localPath, "finished compressPng file"
-			callback(err)
+		};
+		if (!Settings.enableConversions) {
+			const error = new Error("Image conversions are disabled");
+			return callback(error);
+		}
+		return exec(args, opts,function(err, stdout, stderr){
+			if ((err != null) && (err.signal === 'SIGKILL')) {
+				logger.warn({err, stderr, localPath}, "optimiser timeout reached");
+				err = null;
+			} else if (err != null) {
+				logger.err({err, stderr, localPath}, "something went wrong converting compressPng");
+			} else {
+				logger.log({localPath}, "finished compressPng file");
+			}
+			return callback(err);
+		});
+	}
+};
