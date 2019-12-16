@@ -13,6 +13,9 @@
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "start": "node $NODE_APP_OPTIONS app.js",
     "nodemon": "nodemon --config nodemon.json",
+    "lint": "eslint -f unix .",
+    "format": "prettier-eslint \"$(pwd)/**/*.js\" --list-different",
+    "format:fix": "prettier-eslint \"$(pwd)/**/*.js\" --write",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 30000 --exit $@ test/acceptance/js",
     "test:unit:_run": "mocha --recursive --reporter spec --exit $@ test/unit/js"
   },
