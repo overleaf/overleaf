@@ -42,20 +42,18 @@ module.exports =
           callback(err)
 
   # opts may be {start: Number, end: Number}
-  getFileStream: (location, name, opts, _callback = (err, res)->) ->
-    callback = _.once _callback
+  getFileStream: (location, name, opts, callback = (err, res)->) ->
     filteredName = filterName name
     logger.log location:location, name:filteredName, "getting file"
-    sourceStream = fs.createReadStream "#{location}/#{filteredName}", opts
-    sourceStream.on 'error', (err) ->
-      logger.err err:err, location:location, name:name, "Error reading from file"
-      if err.code == 'ENOENT'
-        return callback new Errors.NotFoundError(err.message), null
-      else
-        return callback err, null
-    sourceStream.on 'readable', () ->
-      # This can be called multiple times, but the callback wrapper
-      # ensures the callback is only called once
+    fs.open "#{location}/#{filteredName}", 'r', (err, fd) ->
+      if err?
+        logger.err err:err, location:location, name:name, "Error reading from file"
+        if err.code == 'ENOENT'
+          return callback new Errors.NotFoundError(err.message), null
+        else
+          return callback err, null
+      opts.fd = fd
+      sourceStream = fs.createReadStream null, opts
       return callback null, sourceStream
 
   getFileSize: (location, filename, callback) ->

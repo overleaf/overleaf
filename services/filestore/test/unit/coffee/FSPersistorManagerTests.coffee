@@ -19,6 +19,7 @@ describe "FSPersistorManagerTests", ->
       rmdir:sinon.stub()
       exists:sinon.stub()
       readdir:sinon.stub()
+      open:sinon.stub()
       openSync:sinon.stub()
       fstatSync:sinon.stub()
       closeSync:sinon.stub()
@@ -104,20 +105,21 @@ describe "FSPersistorManagerTests", ->
       @opts = {}
 
     it "should use correct file location", (done) ->
-      @Fs.createReadStream.returns({on: ->})
       @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res) =>
-      @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal true
+      @Fs.open.calledWith("#{@location}/#{@name1Filtered}").should.equal true
       done()
 
     describe "with start and end options", ->
 
       beforeEach ->
-        @opts = {start: 0, end: 8}
+        @fd = 2019
+        @opts_in = {start: 0, end: 8}
+        @opts = {start: 0, end: 8, fd: @fd}
+        @Fs.open.callsArgWith(2, null, @fd)
 
       it 'should pass the options to createReadStream', (done) ->
-        @Fs.createReadStream.returns({on: ->})
-        @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
-        @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}", @opts).should.equal true
+        @FSPersistorManager.getFileStream @location, @name1, @opts_in, (err,res)=>
+        @Fs.createReadStream.calledWith(null, @opts).should.equal true
         done()
 
     describe "error conditions", ->
@@ -126,12 +128,10 @@ describe "FSPersistorManagerTests", ->
 
         beforeEach ->
           @fakeCode = 'ENOENT'
-          @Fs.createReadStream.returns(
-            on: (key, callback) =>
-              err = new Error()
-              err.code = @fakeCode
-              callback(err, null)
-          )
+          err = new Error()
+          err.code = @fakeCode
+          @Fs.open.callsArgWith(2, err, null)
+
         it "should give a NotFoundError", (done) ->
           @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
             expect(res).to.equal null
@@ -143,12 +143,9 @@ describe "FSPersistorManagerTests", ->
 
         beforeEach ->
           @fakeCode = 'SOMETHINGHORRIBLE'
-          @Fs.createReadStream.returns(
-            on: (key, callback) =>
-              err = new Error()
-              err.code = @fakeCode
-              callback(err, null)
-          )
+          err = new Error()
+          err.code = @fakeCode
+          @Fs.open.callsArgWith(2, err, null)
 
         it "should give an Error", (done) ->
           @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
