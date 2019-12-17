@@ -1,5 +1,12 @@
 Path = require "path"
 
+# environment variables renamed for consistency
+# use AWS_ACCESS_KEY_ID-style going forward
+if process.env['AWS_KEY'] && !process.env['AWS_ACCESS_KEY_ID']
+	process.env['AWS_ACCESS_KEY_ID'] = process.env['AWS_KEY']
+if process.env['AWS_SECRET'] && !process.env['AWS_SECRET_ACCESS_KEY']
+	process.env['AWS_SECRET_ACCESS_KEY'] = process.env['AWS_SECRET']
+
 settings =
 	internal:
 		filestore:
