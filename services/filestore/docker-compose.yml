@@ -40,19 +40,9 @@ services:
       AWS_SECRET_ACCESS_KEY: fake
     user: node
     depends_on:
-      mongo:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
       s3:
         condition: service_healthy
     command: npm run test:acceptance
-
-  redis:
-    image: redis
-
-  mongo:
-    image: mongo:3.4
 
   s3:
     image: adobe/s3mock
