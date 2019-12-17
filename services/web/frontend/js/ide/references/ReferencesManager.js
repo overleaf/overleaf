@@ -13,13 +13,14 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define([], function() {
+define(['crypto-js/sha1'], function(CryptoJSSHA1) {
   let ReferencesManager
   return (ReferencesManager = class ReferencesManager {
     constructor(ide, $scope) {
       this.ide = ide
       this.$scope = $scope
       this.$scope.$root._references = this.state = { keys: [] }
+      this.existingIndexHash = {}
 
       this.$scope.$on('document:closed', (e, doc) => {
         let entity
@@ -31,7 +32,7 @@ define([], function() {
             x.match(/.*\.bib$/)
           )
         ) {
-          return this.indexReferences([doc.doc_id], true)
+          return this.indexReferencesIfDocModified(doc, true)
         }
       })
 
@@ -68,6 +69,27 @@ define([], function() {
       // console.log '>> storing references keys'
       const oldKeys = this.$scope.$root._references.keys
       return (this.$scope.$root._references.keys = _.union(oldKeys, newKeys))
+    }
+
+    indexReferencesIfDocModified(doc, shouldBroadcast) {
+      // avoid reindexing references if the bib file has not changed since the
+      // last time they were indexed
+      const docId = doc.doc_id
+      const snapshot = doc._doc.snapshot
+      const now = Date.now()
+      const sha1 = CryptoJSSHA1(
+        'blob ' + snapshot.length + '\x00' + snapshot
+      ).toString()
+      const CACHE_LIFETIME = 6 * 3600 * 1000 // allow reindexing every 6 hours
+      const cacheEntry = this.existingIndexHash[docId]
+      const isCached =
+        cacheEntry &&
+        cacheEntry.timestamp > now - CACHE_LIFETIME &&
+        cacheEntry.hash === sha1
+      if (!isCached) {
+        this.indexReferences([docId], shouldBroadcast)
+        this.existingIndexHash[docId] = { hash: sha1, timestamp: now }
+      }
     }
 
     indexReferences(docIds, shouldBroadcast) {
