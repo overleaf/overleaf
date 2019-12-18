@@ -20,6 +20,7 @@
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js"
   },
   "dependencies": {
+    "@overleaf/o-error": "^2.1.0",
     "async": "~0.2.10",
     "aws-sdk": "^2.1.39",
     "body-parser": "^1.2.0",
