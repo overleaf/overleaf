@@ -8,10 +8,11 @@ minutes = 60 * seconds
 
 # These credentials are used for authenticating api requests
 # between services that may need to go over public channels
-httpAuthUser = process.env['WEB_API_USER'] or "sharelatex"
-httpAuthPass = process.env['WEB_API_PASSWORD'] or "password"
+httpAuthUser = process.env['WEB_API_USER']
+httpAuthPass = process.env['WEB_API_PASSWORD']
 httpAuthUsers = {}
-httpAuthUsers[httpAuthUser] = httpAuthPass
+if httpAuthUser and httpAuthPass
+	httpAuthUsers[httpAuthUser] = httpAuthPass
 
 sessionSecret = process.env['SESSION_SECRET'] or "secret-please-change"
 

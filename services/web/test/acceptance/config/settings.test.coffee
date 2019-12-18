@@ -3,10 +3,20 @@ v1Api =
 	user: 'overleaf'
 	pass: 'password'
 
+httpAuthUser = "sharelatex"
+httpAuthPass = "password"
+httpAuthUsers = {}
+httpAuthUsers[httpAuthUser] = httpAuthPass
+
 module.exports =
 	enableSubscriptions: true
 
+	httpAuthUsers: httpAuthUsers
+
 	apis:
+		web:
+			user: httpAuthUser
+			pass: httpAuthPass
 		v1:
 			url: v1Api.url
 			user: v1Api.user
