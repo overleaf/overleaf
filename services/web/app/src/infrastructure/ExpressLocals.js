@@ -361,6 +361,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       hasSamlFeature: Features.hasFeature('saml'),
       samlInitPath: _.get(Settings, ['saml', 'ukamf', 'initPath']),
       siteUrl: Settings.siteUrl,
+      emailConfirmationDisabled: Settings.emailConfirmationDisabled,
       recaptchaSiteKeyV3:
         Settings.recaptcha != null ? Settings.recaptcha.siteKeyV3 : undefined,
       recaptchaDisabled:

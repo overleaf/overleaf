@@ -567,6 +567,8 @@ module.exports = settings =
 
 	validRootDocExtensions: ['tex', 'Rtex', 'ltx']
 
+	emailConfirmationDisabled: (process.env['EMAIL_CONFIRMATION_DISABLED'] == "true") or false
+
 	# allowedImageNames: [
 	# 	{imageName: 'texlive-full:2017.1', imageDesc: 'TeXLive 2017'}
 	# 	{imageName:   'wl_texlive:2018.1', imageDesc: 'Legacy OL TeXLive 2015'}

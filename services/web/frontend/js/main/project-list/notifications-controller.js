@@ -102,6 +102,9 @@ define(['base'], function(App) {
   ) {
     $scope.userEmails = []
     $scope.showConfirmEmail = email => {
+      if (ExposedSettings.emailConfirmationDisabled) {
+        return false
+      }
       if (!email.confirmedAt && !email.hide) {
         if (
           email.affiliation &&
