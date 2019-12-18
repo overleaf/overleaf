@@ -18,7 +18,10 @@ class BackwardCompatibleError extends OError {
 }
 
 class NotFoundError extends BackwardCompatibleError {}
+class WriteError extends BackwardCompatibleError {}
+class ReadError extends BackwardCompatibleError {}
 class ConversionsDisabledError extends BackwardCompatibleError {}
+class ConversionError extends BackwardCompatibleError {}
 
 class FailedCommandError extends OError {
   constructor(command, code, stdout, stderr) {
@@ -35,4 +38,11 @@ class FailedCommandError extends OError {
   }
 }
 
-module.exports = { NotFoundError, FailedCommandError, ConversionsDisabledError }
+module.exports = {
+  NotFoundError,
+  FailedCommandError,
+  ConversionsDisabledError,
+  WriteError,
+  ReadError,
+  ConversionError
+}

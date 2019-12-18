@@ -1,120 +1,79 @@
-/* eslint-disable
-    handle-callback-err,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
-const { assert } = require('chai')
 const sinon = require('sinon')
 const chai = require('chai')
-const should = chai.should()
 const { expect } = chai
 const modulePath = '../../../app/js/LocalFileWriter.js'
 const SandboxedModule = require('sandboxed-module')
+chai.use(require('sinon-chai'))
 
 describe('LocalFileWriter', function() {
+  const writeStream = 'writeStream'
+  const readStream = 'readStream'
+  const settings = { path: { uploadFolder: '/uploads' } }
+  const fsPath = '/uploads/wombat'
+  const filename = 'wombat'
+  let stream, fs, LocalFileWriter
+
   beforeEach(function() {
-    this.writeStream = {
-      on(type, cb) {
-        if (type === 'finish') {
-          return cb()
-        }
-      }
+    fs = {
+      createWriteStream: sinon.stub().returns(writeStream),
+      unlink: sinon.stub().yields()
     }
-    this.readStream = { on() {} }
-    this.fs = {
-      createWriteStream: sinon.stub().returns(this.writeStream),
-      createReadStream: sinon.stub().returns(this.readStream),
-      unlink: sinon.stub()
+    stream = {
+      pipeline: sinon.stub().yields()
     }
-    this.settings = {
-      path: {
-        uploadFolder: 'somewhere'
-      }
-    }
-    this.writer = SandboxedModule.require(modulePath, {
+
+    LocalFileWriter = SandboxedModule.require(modulePath, {
       requires: {
-        fs: this.fs,
+        fs,
+        stream,
         'logger-sharelatex': {
           log() {},
           err() {}
         },
-        'settings-sharelatex': this.settings,
+        'settings-sharelatex': settings,
         'metrics-sharelatex': {
           inc: sinon.stub(),
           Timer: sinon.stub().returns({ done: sinon.stub() })
         }
       }
     })
-
-    return (this.stubbedFsPath = 'something/uploads/eio2k1j3')
   })
 
-  describe('writeStrem', function() {
-    beforeEach(function() {
-      return (this.writer._getPath = sinon.stub().returns(this.stubbedFsPath))
-    })
-
-    it('write the stream to ./uploads', function(done) {
-      const stream = {
-        pipe: dest => {
-          dest.should.equal(this.writeStream)
-          return done()
-        },
-        on() {}
-      }
-      return this.writer.writeStream(stream, null, () => {})
-    })
-
-    return it('should send the path in the callback', function(done) {
-      const stream = {
-        pipe: dest => {},
-        on(type, cb) {
-          if (type === 'end') {
-            return cb()
-          }
-        }
-      }
-      return this.writer.writeStream(stream, null, (err, fsPath) => {
-        fsPath.should.equal(this.stubbedFsPath)
-        return done()
+  describe('writeStream', function() {
+    it('writes the stream to the upload folder', function(done) {
+      LocalFileWriter.writeStream(readStream, filename, (err, path) => {
+        expect(err).not.to.exist
+        expect(fs.createWriteStream).to.have.been.calledWith(fsPath)
+        expect(stream.pipeline).to.have.been.calledWith(readStream, writeStream)
+        expect(path).to.equal(fsPath)
+        done()
       })
     })
   })
 
-  describe('getStream', function() {
-    it('should read the stream from the file ', function(done) {
-      return this.writer.getStream(this.stubbedFsPath, (err, stream) => {
-        this.fs.createReadStream
-          .calledWith(this.stubbedFsPath)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    return it('should send the stream in the callback', function(done) {
-      return this.writer.getStream(this.stubbedFsPath, (err, readStream) => {
-        readStream.should.equal(this.readStream)
-        return done()
-      })
-    })
-  })
-
-  return describe('delete file', () =>
+  describe('deleteFile', function() {
     it('should unlink the file', function(done) {
-      const error = 'my error'
-      this.fs.unlink.callsArgWith(1, error)
-      return this.writer.deleteFile(this.stubbedFsPath, err => {
-        this.fs.unlink.calledWith(this.stubbedFsPath).should.equal(true)
-        err.should.equal(error)
-        return done()
+      LocalFileWriter.deleteFile(fsPath, err => {
+        expect(err).not.to.exist
+        expect(fs.unlink).to.have.been.calledWith(fsPath)
+        done()
       })
-    }))
+    })
+
+    it('should not do anything if called with an empty path', function(done) {
+      fs.unlink = sinon.stub().yields(new Error('failed to reticulate splines'))
+      LocalFileWriter.deleteFile(fsPath, err => {
+        expect(err).to.exist
+        done()
+      })
+    })
+
+    it('should not call unlink with an empty path', function(done) {
+      LocalFileWriter.deleteFile('', err => {
+        expect(err).not.to.exist
+        expect(fs.unlink).not.to.have.been.called
+        done()
+      })
+    })
+  })
 })
