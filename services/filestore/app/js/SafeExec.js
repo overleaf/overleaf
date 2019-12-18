@@ -1,21 +1,8 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('underscore')
 const logger = require('logger-sharelatex')
-const child_process = require('child_process')
+const childProcess = require('child_process')
 const Settings = require('settings-sharelatex')
+const { ConversionsDisabledError, FailedCommandError } = require('./Errors')
 
 // execute a command in the same way as 'exec' but with a timeout that
 // kills all child processes
@@ -23,36 +10,32 @@ const Settings = require('settings-sharelatex')
 // we spawn the command with 'detached:true' to make a new process
 // group, then we can kill everything in that process group.
 
-module.exports = function(command, options, callback) {
-  if (callback == null) {
-    callback = function(err, stdout, stderr) {}
-  }
+module.exports = safeExec
+module.exports.promises = safeExecPromise
+
+// options are {timeout:  number-of-milliseconds, killSignal: signal-name}
+function safeExec(command, options, callback) {
   if (!Settings.enableConversions) {
-    const error = new Error('Image conversions are disabled')
-    return callback(error)
+    return callback(
+      new ConversionsDisabledError('image conversions are disabled')
+    )
   }
 
-  // options are {timeout:  number-of-milliseconds, killSignal: signal-name}
-  const [cmd, ...args] = Array.from(command)
+  const [cmd, ...args] = command
 
-  const child = child_process.spawn(cmd, args, { detached: true })
+  const child = childProcess.spawn(cmd, args, { detached: true })
   let stdout = ''
   let stderr = ''
 
-  const cleanup = _.once(function(err) {
-    if (killTimer != null) {
-      clearTimeout(killTimer)
-    }
-    return callback(err, stdout, stderr)
-  })
+  let killTimer
 
-  if (options.timeout != null) {
-    var killTimer = setTimeout(function() {
+  if (options.timeout) {
+    killTimer = setTimeout(function() {
       try {
         // use negative process id to kill process group
-        return process.kill(-child.pid, options.killSignal || 'SIGTERM')
+        process.kill(-child.pid, options.killSignal || 'SIGTERM')
       } catch (error) {
-        return logger.log(
+        logger.log(
           { process: child.pid, kill_error: error },
           'error killing process'
         )
@@ -60,14 +43,41 @@ module.exports = function(command, options, callback) {
     }, options.timeout)
   }
 
-  child.on('close', function(code, signal) {
-    const err = code ? new Error(`exit status ${code}`) : signal
-    return cleanup(err)
+  const cleanup = _.once(function(err) {
+    if (killTimer) {
+      clearTimeout(killTimer)
+    }
+    callback(err, stdout, stderr)
   })
 
-  child.on('error', err => cleanup(err))
+  child.on('close', function(code, signal) {
+    if (code || signal) {
+      return cleanup(
+        new FailedCommandError(command, code || signal, stdout, stderr)
+      )
+    }
 
-  child.stdout.on('data', chunk => (stdout += chunk))
+    cleanup()
+  })
 
-  return child.stderr.on('data', chunk => (stderr += chunk))
+  child.on('error', err => {
+    cleanup(err)
+  })
+  child.stdout.on('data', chunk => {
+    stdout += chunk
+  })
+  child.stderr.on('data', chunk => {
+    stderr += chunk
+  })
+}
+
+function safeExecPromise(command, options) {
+  return new Promise((resolve, reject) => {
+    safeExec(command, options, (err, stdout, stderr) => {
+      if (err) {
+        reject(err)
+      }
+      resolve({ stdout, stderr })
+    })
+  })
 }
