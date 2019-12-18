@@ -45,7 +45,7 @@ describe('SamlLogHandler', function() {
 
     it('should log data', function() {
       samlLog.providerId.should.equal(providerId)
-      samlLog.sessionId.should.equal(sessionId)
+      samlLog.sessionId.should.equal(sessionId.substr(0, 8))
       samlLog.jsonData.should.equal('{"foo":true}')
       expect(samlLog.data).to.be.undefined
       samlLog.save.should.have.been.calledOnce
@@ -62,12 +62,12 @@ describe('SamlLogHandler', function() {
 
     it('should log without data and log error', function() {
       samlLog.providerId.should.equal(providerId)
-      samlLog.sessionId.should.equal(sessionId)
+      samlLog.sessionId.should.equal(sessionId.substr(0, 8))
       expect(samlLog.data).to.be.undefined
       expect(samlLog.jsonData).to.be.undefined
       samlLog.save.should.have.been.calledOnce
       LoggerSharelatex.error.should.have.been.calledOnce.and.calledWithMatch(
-        { providerId, sessionId },
+        { providerId, sessionId: sessionId.substr(0, 8) },
         'SamlLog JSON.stringify Error'
       )
     })
@@ -82,7 +82,7 @@ describe('SamlLogHandler', function() {
 
     it('should log error', function() {
       LoggerSharelatex.error.should.have.been.calledOnce.and.calledWithMatch(
-        { err: 'error', providerId, sessionId },
+        { err: 'error', providerId, sessionId: sessionId.substr(0, 8) },
         'SamlLog Error'
       )
     })
