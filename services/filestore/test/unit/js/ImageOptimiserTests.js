@@ -1,81 +1,59 @@
-/* eslint-disable
-    handle-callback-err,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const { assert } = require('chai')
 const sinon = require('sinon')
 const chai = require('chai')
-const should = chai.should()
 const { expect } = chai
 const modulePath = '../../../app/js/ImageOptimiser.js'
+const { FailedCommandError } = require('../../../app/js/Errors')
 const SandboxedModule = require('sandboxed-module')
 
 describe('ImageOptimiser', function() {
+  let ImageOptimiser, SafeExec
+  const sourcePath = '/wombat/potato.eps'
+
   beforeEach(function() {
-    this.child_process = { exec: sinon.stub() }
-    this.settings = { enableConversions: true }
-    this.optimiser = SandboxedModule.require(modulePath, {
+    SafeExec = {
+      promises: sinon.stub().resolves()
+    }
+    ImageOptimiser = SandboxedModule.require(modulePath, {
       requires: {
-        child_process: this.child_process,
+        './SafeExec': SafeExec,
         'logger-sharelatex': {
           log() {},
           err() {},
           warn() {}
-        },
-        'settings-sharelatex': this.settings
+        }
       }
     })
-
-    this.sourcePath = '/this/path/here.eps'
-    return (this.error = 'Error')
   })
 
   describe('compressPng', function() {
-    it('convert the file', function(done) {
-      this.child_process.exec.callsArgWith(2)
-      return this.optimiser.compressPng(this.sourcePath, err => {
-        const args = this.child_process.exec.args[0][0]
-        args.should.equal(`optipng ${this.sourcePath}`)
-        return done()
+    it('should convert the file', function(done) {
+      ImageOptimiser.compressPng(sourcePath, err => {
+        expect(err).not.to.exist
+        expect(SafeExec.promises).to.have.been.calledWith([
+          'optipng',
+          sourcePath
+        ])
+        done()
       })
     })
 
-    return it('should return the error', function(done) {
-      this.child_process.exec.callsArgWith(2, this.error)
-      return this.optimiser.compressPng(this.sourcePath, err => {
-        err.should.equal(this.error)
-        return done()
+    it('should return the error', function(done) {
+      SafeExec.promises.rejects('wombat herding failure')
+      ImageOptimiser.compressPng(sourcePath, err => {
+        expect(err.toString()).to.equal('wombat herding failure')
+        done()
       })
     })
   })
 
-  describe('when enableConversions is disabled', () =>
-    it('should produce an error', function(done) {
-      this.settings.enableConversions = false
-      this.child_process.exec.callsArgWith(2)
-      return this.optimiser.compressPng(this.sourcePath, err => {
-        this.child_process.exec.called.should.equal(false)
-        expect(err).to.exist
-        return done()
-      })
-    }))
-
-  return describe('when optimiser is sigkilled', () =>
+  describe('when optimiser is sigkilled', function() {
     it('should not produce an error', function(done) {
-      this.error = new Error('woops')
-      this.error.signal = 'SIGKILL'
-      this.child_process.exec.callsArgWith(2, this.error)
-      return this.optimiser.compressPng(this.sourcePath, err => {
-        expect(err).to.equal(null)
-        return done()
+      const error = new FailedCommandError('', 'SIGKILL', '', '')
+      SafeExec.promises.rejects(error)
+      ImageOptimiser.compressPng(sourcePath, err => {
+        expect(err).not.to.exist
+        done()
       })
-    }))
+    })
+  })
 })
