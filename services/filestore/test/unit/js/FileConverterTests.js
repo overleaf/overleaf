@@ -1,29 +1,30 @@
-/* eslint-disable
-    handle-callback-err,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const { assert } = require('chai')
 const sinon = require('sinon')
 const chai = require('chai')
-const should = chai.should()
 const { expect } = chai
-const modulePath = '../../../app/js/FileConverter.js'
 const SandboxedModule = require('sandboxed-module')
 
+const modulePath = '../../../app/js/FileConverter.js'
+
 describe('FileConverter', function() {
+  let SafeExec, FileConverter
+  const sourcePath = '/data/wombat.eps'
+  const destPath = '/tmp/dest.png'
+  const format = 'png'
+  const errorMessage = 'guru meditation error'
+  const Settings = {
+    commands: {
+      convertCommandPrefix: []
+    }
+  }
+
   beforeEach(function() {
-    this.safe_exec = sinon.stub()
-    this.converter = SandboxedModule.require(modulePath, {
+    SafeExec = {
+      promises: sinon.stub().resolves(destPath)
+    }
+
+    FileConverter = SandboxedModule.require(modulePath, {
       requires: {
-        './SafeExec': this.safe_exec,
+        './SafeExec': SafeExec,
         'logger-sharelatex': {
           log() {},
           err() {}
@@ -32,86 +33,75 @@ describe('FileConverter', function() {
           inc: sinon.stub(),
           Timer: sinon.stub().returns({ done: sinon.stub() })
         },
-        'settings-sharelatex': (this.Settings = {
-          commands: {
-            convertCommandPrefix: []
-          }
-        })
+        'settings-sharelatex': Settings
       }
     })
-
-    this.sourcePath = '/this/path/here.eps'
-    this.format = 'png'
-    return (this.error = 'Error')
   })
 
   describe('convert', function() {
-    it('should convert the source to the requested format', function(done) {
-      this.safe_exec.callsArgWith(2)
-      return this.converter.convert(this.sourcePath, this.format, err => {
-        const args = this.safe_exec.args[0][0]
-        args.indexOf(`${this.sourcePath}[0]`).should.not.equal(-1)
-        args.indexOf(`${this.sourcePath}.${this.format}`).should.not.equal(-1)
-        return done()
-      })
+    it('should convert the source to the requested format', async function() {
+      await FileConverter.promises.convert(sourcePath, format)
+      const args = SafeExec.promises.args[0][0]
+      expect(args).to.include(`${sourcePath}[0]`)
+      expect(args).to.include(`${sourcePath}.${format}`)
     })
 
-    it('should return the dest path', function(done) {
-      this.safe_exec.callsArgWith(2)
-      return this.converter.convert(
-        this.sourcePath,
-        this.format,
-        (err, destPath) => {
-          destPath.should.equal(`${this.sourcePath}.${this.format}`)
-          return done()
-        }
-      )
+    it('should return the dest path', async function() {
+      const destPath = await FileConverter.promises.convert(sourcePath, format)
+      destPath.should.equal(`${sourcePath}.${format}`)
     })
 
-    it('should return the error from convert', function(done) {
-      this.safe_exec.callsArgWith(2, this.error)
-      return this.converter.convert(this.sourcePath, this.format, err => {
-        err.should.equal(this.error)
-        return done()
-      })
+    it('should wrap the error from convert', async function() {
+      SafeExec.promises.rejects(errorMessage)
+      try {
+        await FileConverter.promises.convert(sourcePath, format)
+        expect('error should have been thrown').not.to.exist
+      } catch (err) {
+        expect(err.name).to.equal('ConversionError')
+        expect(err.cause.toString()).to.equal(errorMessage)
+      }
     })
 
-    it('should not accapt an non aproved format', function(done) {
-      this.safe_exec.callsArgWith(2)
-      return this.converter.convert(this.sourcePath, 'ahhhhh', err => {
-        expect(err).to.exist
-        return done()
-      })
+    it('should not accept an non approved format', async function() {
+      try {
+        await FileConverter.promises.convert(sourcePath, 'potato')
+        expect('error should have been thrown').not.to.exist
+      } catch (err) {
+        expect(err.name).to.equal('ConversionError')
+      }
     })
 
-    return it('should prefix the command with Settings.commands.convertCommandPrefix', function(done) {
-      this.safe_exec.callsArgWith(2)
-      this.Settings.commands.convertCommandPrefix = ['nice']
-      return this.converter.convert(this.sourcePath, this.format, err => {
-        const command = this.safe_exec.args[0][0]
-        command[0].should.equal('nice')
-        return done()
+    it('should prefix the command with Settings.commands.convertCommandPrefix', async function() {
+      Settings.commands.convertCommandPrefix = ['nice']
+      await FileConverter.promises.convert(sourcePath, format)
+    })
+
+    it('should convert the file when called as a callback', function(done) {
+      FileConverter.convert(sourcePath, format, (err, destPath) => {
+        expect(err).not.to.exist
+        destPath.should.equal(`${sourcePath}.${format}`)
+
+        const args = SafeExec.promises.args[0][0]
+        expect(args).to.include(`${sourcePath}[0]`)
+        expect(args).to.include(`${sourcePath}.${format}`)
+        done()
       })
     })
   })
 
-  describe('thumbnail', () =>
-    it('should call converter resize with args', function(done) {
-      this.safe_exec.callsArgWith(2)
-      return this.converter.thumbnail(this.sourcePath, err => {
-        const args = this.safe_exec.args[0][0]
-        args.indexOf(`${this.sourcePath}[0]`).should.not.equal(-1)
-        return done()
-      })
-    }))
+  describe('thumbnail', function() {
+    it('should call converter resize with args', async function() {
+      await FileConverter.promises.thumbnail(sourcePath)
+      const args = SafeExec.promises.args[0][0]
+      expect(args).to.include(`${sourcePath}[0]`)
+    })
+  })
 
-  return describe('preview', () =>
-    it('should call converter resize with args', function(done) {
-      this.safe_exec.callsArgWith(2)
-      return this.converter.preview(this.sourcePath, err => {
-        const args = this.safe_exec.args[0][0]
-        args.indexOf(`${this.sourcePath}[0]`).should.not.equal(-1)
-        return done()
-      })
-    }))
+  describe('preview', function() {
+    it('should call converter resize with args', async function() {
+      await FileConverter.promises.preview(sourcePath)
+      const args = SafeExec.promises.args[0][0]
+      expect(args).to.include(`${sourcePath}[0]`)
+    })
+  })
 })
