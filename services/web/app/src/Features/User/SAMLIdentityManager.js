@@ -228,14 +228,25 @@ async function updateEntitlement(
 }
 
 function entitlementAttributeMatches(entitlementAttribute, entitlementMatcher) {
+  if (Array.isArray(entitlementAttribute)) {
+    entitlementAttribute = entitlementAttribute.join(' ')
+  }
   if (
     typeof entitlementAttribute !== 'string' ||
     typeof entitlementMatcher !== 'string'
   ) {
     return false
   }
-  const entitlementRegExp = new RegExp(entitlementMatcher)
-  return !!entitlementAttribute.match(entitlementRegExp)
+  try {
+    const entitlementRegExp = new RegExp(entitlementMatcher)
+    return !!entitlementAttribute.match(entitlementRegExp)
+  } catch (err) {
+    logger.error({ err }, 'Invalid SAML entitlement matcher')
+    // this is likely caused by an invalid regex in the matcher string
+    // log the error but do not bubble so that user can still sign in
+    // even if they don't have the entitlement
+    return false
+  }
 }
 
 function userHasEntitlement(user, providerId) {
