@@ -7,7 +7,12 @@ const FileConverter = require('./FileConverter')
 const KeyBuilder = require('./KeyBuilder')
 const async = require('async')
 const ImageOptimiser = require('./ImageOptimiser')
-const { WriteError, ReadError, ConversionError } = require('./Errors')
+const {
+  WriteError,
+  ReadError,
+  ConversionError,
+  NotFoundError
+} = require('./Errors')
 
 module.exports = {
   insertFile,
@@ -66,16 +71,17 @@ function getDirectorySize(bucket, projectId, callback) {
   logger.log({ bucket, project_id: projectId }, 'getting project size')
   PersistorManager.directorySize(bucket, projectId, function(err, size) {
     if (err) {
-      logger.err({ bucket, project_id: projectId }, 'error getting size')
-      err = new ReadError('error getting project size').withCause(err)
+      return callback(
+        new ReadError('error getting project size').withCause(err)
+      )
     }
-    return callback(err, size)
+    callback(null, size)
   })
 }
 
 function _getStandardFile(bucket, key, opts, callback) {
   PersistorManager.getFileStream(bucket, key, opts, function(err, fileStream) {
-    if (err && err.name !== 'NotFoundError') {
+    if (err && !(err instanceof NotFoundError)) {
       logger.err(
         { bucket, key, opts: _scrubSecrets(opts) },
         'error getting fileStream'
