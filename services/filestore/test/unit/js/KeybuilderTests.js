@@ -1,26 +1,13 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
-const { assert } = require('chai')
-const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
-const modulePath = '../../../app/js/KeyBuilder.js'
 const SandboxedModule = require('sandboxed-module')
 
+const modulePath = '../../../app/js/KeyBuilder.js'
+
 describe('LocalFileWriter', function() {
+  let KeyBuilder
+  const key = 'wombat/potato'
+
   beforeEach(function() {
-    this.keyBuilder = SandboxedModule.require(modulePath, {
+    KeyBuilder = SandboxedModule.require(modulePath, {
       requires: {
         'logger-sharelatex': {
           log() {},
@@ -28,31 +15,28 @@ describe('LocalFileWriter', function() {
         }
       }
     })
-    return (this.key = '123/456')
   })
 
-  return describe('cachedKey', function() {
-    it('should add the fomat on', function() {
+  describe('cachedKey', function() {
+    it('should add the format to the key', function() {
       const opts = { format: 'png' }
-      const newKey = this.keyBuilder.addCachingToKey(this.key, opts)
-      return newKey.should.equal(`${this.key}-converted-cache/format-png`)
+      const newKey = KeyBuilder.addCachingToKey(key, opts)
+      newKey.should.equal(`${key}-converted-cache/format-png`)
     })
 
-    it('should add the style on', function() {
+    it('should add the style to the key', function() {
       const opts = { style: 'thumbnail' }
-      const newKey = this.keyBuilder.addCachingToKey(this.key, opts)
-      return newKey.should.equal(`${this.key}-converted-cache/style-thumbnail`)
+      const newKey = KeyBuilder.addCachingToKey(key, opts)
+      newKey.should.equal(`${key}-converted-cache/style-thumbnail`)
     })
 
-    return it('should add format on first', function() {
+    it('should add format first, then style', function() {
       const opts = {
         style: 'thumbnail',
         format: 'png'
       }
-      const newKey = this.keyBuilder.addCachingToKey(this.key, opts)
-      return newKey.should.equal(
-        `${this.key}-converted-cache/format-png-style-thumbnail`
-      )
+      const newKey = KeyBuilder.addCachingToKey(key, opts)
+      newKey.should.equal(`${key}-converted-cache/format-png-style-thumbnail`)
     })
   })
 })
