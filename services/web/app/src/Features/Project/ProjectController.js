@@ -38,6 +38,21 @@ const V1Handler = require('../V1/V1Handler')
 const UserController = require('../User/UserController')
 const SystemMessageManager = require('../SystemMessages/SystemMessageManager')
 
+const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
+  if (!affiliation.institution) return false
+
+  // Could have multiple emails at the same institution, and if any are
+  // linked to the institution then do not show notification for others
+  if (
+    linkedInstitutionIds.indexOf(affiliation.institution.id.toString()) === -1
+  ) {
+    if (affiliation.institution.ssoEnabled) return true
+    if (affiliation.institution.ssoBeta && session.samlBeta) return true
+    return false
+  }
+  return false
+}
+
 const ProjectController = {
   _isInPercentageRollout(rolloutName, objectId, percentage) {
     if (Settings.bypassPercentageRollouts === true) {
@@ -440,28 +455,19 @@ const ProjectController = {
         }
 
         // Institution SSO Notifications
-        if (Features.hasFeature('saml') || req.session.samlBeta) {
+        if (Features.hasFeature('saml')) {
           const samlSession = req.session.saml
           // Notification: SSO Available
-          // Could have multiple emails at the same institution, and if any are
-          // linked to the institution then do not show notification for others
           const linkedInstitutionIds = []
-          const linkedInstitutionEmails = []
           user.emails.forEach(email => {
             if (email.samlProviderId) {
-              linkedInstitutionEmails.push(email.email)
               linkedInstitutionIds.push(email.samlProviderId)
             }
           })
           if (Array.isArray(userAffiliations)) {
             userAffiliations.forEach(affiliation => {
               if (
-                affiliation.institution &&
-                affiliation.institution.ssoEnabled &&
-                linkedInstitutionEmails.indexOf(affiliation.email) === -1 &&
-                linkedInstitutionIds.indexOf(
-                  affiliation.institution.id.toString()
-                ) === -1
+                _ssoAvailable(affiliation, req.session, linkedInstitutionIds)
               ) {
                 notificationsInstitution.push({
                   email: affiliation.email,

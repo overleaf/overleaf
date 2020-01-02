@@ -110,10 +110,7 @@ describe('ProjectController', function() {
       }
     }
     this.Features = {
-      hasFeature: sinon
-        .stub()
-        .withArgs('saml')
-        .returns(false)
+      hasFeature: sinon.stub()
     }
     this.BrandVariationsHandler = {
       getBrandVariationById: sinon
@@ -129,6 +126,7 @@ describe('ProjectController', function() {
         institution: {
           id: 1,
           name: 'Overleaf',
+          ssoBeta: false,
           ssoEnabled: true
         }
       }
@@ -705,11 +703,13 @@ describe('ProjectController', function() {
       })
     })
 
-    describe('When Institution SSO is released', function() {
+    describe('With Institution SSO feature', function() {
       beforeEach(function(done) {
         this.institutionEmail = 'test@overleaf.com'
         this.institutionName = 'Overleaf'
         this.Features.hasFeature.withArgs('saml').returns(true)
+        this.Features.hasFeature.withArgs('affiliations').returns(true)
+        this.Features.hasFeature.withArgs('overleaf-integration').returns(true)
         done()
       })
       it('should show institution SSO available notification', function() {
@@ -849,9 +849,49 @@ describe('ProjectController', function() {
           this.ProjectController.projectListPage(this.req, this.res)
         })
       })
+      describe('Institution with SSO beta testable', function() {
+        beforeEach(function(done) {
+          this.getUserAffiliations.yields(null, [
+            {
+              email: 'beta@beta.com',
+              institution: {
+                id: 2,
+                name: 'Beta University',
+                ssoBeta: true,
+                ssoEnabled: false
+              }
+            }
+          ])
+          done()
+        })
+        it('should show institution SSO available notification when on a beta testing session', function() {
+          this.req.session.samlBeta = true
+          this.res.render = (pageName, opts) => {
+            expect(opts.notificationsInstitution).to.deep.include({
+              email: 'beta@beta.com',
+              institutionId: 2,
+              institutionName: 'Beta University',
+              templateKey: 'notification_institution_sso_available'
+            })
+          }
+          this.ProjectController.projectListPage(this.req, this.res)
+        })
+        it('should not show institution SSO available notification when not on a beta testing session', function() {
+          this.req.session.samlBeta = false
+          this.res.render = (pageName, opts) => {
+            expect(opts.notificationsInstitution).to.deep.not.include({
+              email: 'test@overleaf.com',
+              institutionId: 1,
+              institutionName: 'Overleaf',
+              templateKey: 'notification_institution_sso_available'
+            })
+          }
+          this.ProjectController.projectListPage(this.req, this.res)
+        })
+      })
     })
 
-    describe('When Institution SSO is not released', function() {
+    describe('Without Institution SSO feature', function() {
       beforeEach(function(done) {
         this.Features.hasFeature.withArgs('saml').returns(false)
         done()

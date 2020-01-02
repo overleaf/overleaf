@@ -101,21 +101,29 @@ define(['base'], function(App) {
     UserAffiliationsDataService
   ) {
     $scope.userEmails = []
+    const _ssoAvailable = email => {
+      if (!ExposedSettings.hasSamlFeature) return false
+      if (!email.affiliation || !email.affiliation.institution) return false
+      if (email.affiliation.institution.ssoEnabled) return true
+      if (
+        ExposedSettings.hasSamlBeta &&
+        email.affiliation.institution.ssoBeta
+      ) {
+        return true
+      }
+      return false
+    }
     $scope.showConfirmEmail = email => {
       if (ExposedSettings.emailConfirmationDisabled) {
         return false
       }
       if (!email.confirmedAt && !email.hide) {
-        if (
-          email.affiliation &&
-          email.affiliation.institution &&
-          email.affiliation.institution.ssoEnabled &&
-          (ExposedSettings.hasSamlBeta || ExposedSettings.hasSamlFeature)
-        ) {
+        if (_ssoAvailable(email)) {
           return false
         }
         return true
       }
+      return false
     }
     for (let userEmail of Array.from($scope.userEmails)) {
       userEmail.hide = false
