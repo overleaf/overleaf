@@ -1,52 +1,60 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const { assert } = require('chai')
 const sinon = require('sinon')
 const chai = require('chai')
-const should = chai.should()
 const { expect } = chai
-const modulePath = '../../../app/js/FileController.js'
 const SandboxedModule = require('sandboxed-module')
+const Errors = require('../../../app/js/Errors')
+const modulePath = '../../../app/js/FileController.js'
 
 describe('FileController', function() {
-  beforeEach(function() {
-    this.PersistorManager = {
-      sendStream: sinon.stub(),
-      copyFile: sinon.stub(),
-      deleteFile: sinon.stub()
-    }
-
-    this.settings = {
-      s3: {
-        buckets: {
-          user_files: 'user_files'
-        }
+  let PersistorManager,
+    FileHandler,
+    LocalFileWriter,
+    FileController,
+    req,
+    res,
+    stream
+  const settings = {
+    s3: {
+      buckets: {
+        user_files: 'user_files'
       }
     }
-    this.FileHandler = {
-      getFile: sinon.stub(),
-      getFileSize: sinon.stub(),
-      deleteFile: sinon.stub(),
-      insertFile: sinon.stub(),
-      getDirectorySize: sinon.stub()
+  }
+  const fileSize = 1234
+  const fileStream = 'fileStream'
+  const projectId = 'projectId'
+  const fileId = 'file_id'
+  const bucket = 'user_files'
+  const key = `${projectId}/${fileId}`
+
+  beforeEach(function() {
+    PersistorManager = {
+      sendStream: sinon.stub().yields(),
+      copyFile: sinon.stub().yields(),
+      deleteFile: sinon.stub().yields()
     }
-    this.LocalFileWriter = {}
-    this.controller = SandboxedModule.require(modulePath, {
+
+    FileHandler = {
+      getFile: sinon.stub().yields(null, fileStream),
+      getFileSize: sinon.stub().yields(null, fileSize),
+      deleteFile: sinon.stub().yields(),
+      insertFile: sinon.stub().yields(),
+      getDirectorySize: sinon.stub().yields(null, fileSize)
+    }
+
+    LocalFileWriter = {}
+    stream = {
+      pipeline: sinon.stub()
+    }
+
+    FileController = SandboxedModule.require(modulePath, {
       requires: {
-        './LocalFileWriter': this.LocalFileWriter,
-        './FileHandler': this.FileHandler,
-        './PersistorManager': this.PersistorManager,
-        './Errors': (this.Errors = { NotFoundError: sinon.stub() }),
-        'settings-sharelatex': this.settings,
+        './LocalFileWriter': LocalFileWriter,
+        './FileHandler': FileHandler,
+        './PersistorManager': PersistorManager,
+        './Errors': Errors,
+        stream: stream,
+        'settings-sharelatex': settings,
         'metrics-sharelatex': {
           inc() {}
         },
@@ -54,244 +62,227 @@ describe('FileController', function() {
           log() {},
           err() {}
         }
-      }
+      },
+      globals: { console }
     })
-    this.project_id = 'project_id'
-    this.file_id = 'file_id'
-    this.bucket = 'user_files'
-    this.key = `${this.project_id}/${this.file_id}`
-    this.req = {
-      key: this.key,
-      bucket: this.bucket,
+
+    req = {
+      key: key,
+      bucket: bucket,
       query: {},
       params: {
-        project_id: this.project_id,
-        file_id: this.file_id
+        project_id: projectId,
+        file_id: fileId
       },
       headers: {}
     }
-    this.res = {
+
+    res = {
       set: sinon.stub().returnsThis(),
+      sendStatus: sinon.stub().returnsThis(),
       status: sinon.stub().returnsThis()
     }
-    return (this.fileStream = {})
   })
 
   describe('getFile', function() {
-    it('should pipe the stream', function(done) {
-      this.FileHandler.getFile.callsArgWith(3, null, this.fileStream)
-      this.fileStream.pipe = res => {
-        res.should.equal(this.res)
-        return done()
-      }
-      return this.controller.getFile(this.req, this.res)
+    it('should pipe the stream', function() {
+      FileController.getFile(req, res)
+      expect(stream.pipeline).to.have.been.calledWith(fileStream, res)
     })
 
     it('should send a 200 if the cacheWarm param is true', function(done) {
-      this.req.query.cacheWarm = true
-      this.FileHandler.getFile.callsArgWith(3, null, this.fileStream)
-      this.res.send = statusCode => {
+      req.query.cacheWarm = true
+      res.sendStatus = statusCode => {
         statusCode.should.equal(200)
-        return done()
+        done()
       }
-      return this.controller.getFile(this.req, this.res)
+      FileController.getFile(req, res)
     })
 
     it('should send a 500 if there is a problem', function(done) {
-      this.FileHandler.getFile.callsArgWith(3, 'error')
-      this.res.send = code => {
+      FileHandler.getFile.yields('error')
+      res.sendStatus = code => {
         code.should.equal(500)
-        return done()
+        done()
       }
-      return this.controller.getFile(this.req, this.res)
+      FileController.getFile(req, res)
     })
 
-    return describe("with a 'Range' header set", function() {
+    describe('with a range header', function() {
+      let expectedOptions
+
       beforeEach(function() {
-        return (this.req.headers.range = 'bytes=0-8')
+        expectedOptions = {
+          bucket,
+          key,
+          format: undefined,
+          style: undefined
+        }
       })
 
-      return it("should pass 'start' and 'end' options to FileHandler", function(done) {
-        this.FileHandler.getFile.callsArgWith(3, null, this.fileStream)
-        this.fileStream.pipe = res => {
-          expect(this.FileHandler.getFile.lastCall.args[2].start).to.equal(0)
-          expect(this.FileHandler.getFile.lastCall.args[2].end).to.equal(8)
-          return done()
-        }
-        return this.controller.getFile(this.req, this.res)
+      it('should pass range options to FileHandler', function() {
+        req.headers.range = 'bytes=0-8'
+        expectedOptions.start = 0
+        expectedOptions.end = 8
+
+        FileController.getFile(req, res)
+        expect(FileHandler.getFile).to.have.been.calledWith(
+          bucket,
+          key,
+          expectedOptions
+        )
+      })
+
+      it('should ignore an invalid range header', function() {
+        req.headers.range = 'potato'
+        FileController.getFile(req, res)
+        expect(FileHandler.getFile).to.have.been.calledWith(
+          bucket,
+          key,
+          expectedOptions
+        )
+      })
+
+      it("should ignore any type other than 'bytes'", function() {
+        req.headers.range = 'wombats=0-8'
+        FileController.getFile(req, res)
+        expect(FileHandler.getFile).to.have.been.calledWith(
+          bucket,
+          key,
+          expectedOptions
+        )
       })
     })
   })
 
   describe('getFileHead', function() {
     it('should return the file size in a Content-Length header', function(done) {
-      const expectedFileSize = 84921
-      this.FileHandler.getFileSize.yields(
-        new Error('FileHandler.getFileSize: unexpected arguments')
-      )
-      this.FileHandler.getFileSize
-        .withArgs(this.bucket, this.key)
-        .yields(null, expectedFileSize)
-
-      this.res.end = () => {
-        expect(this.res.status.lastCall.args[0]).to.equal(200)
-        expect(
-          this.res.set.calledWith('Content-Length', expectedFileSize)
-        ).to.equal(true)
-        return done()
+      res.end = () => {
+        expect(res.status).to.have.been.calledWith(200)
+        expect(res.set).to.have.been.calledWith('Content-Length', fileSize)
+        done()
       }
 
-      return this.controller.getFileHead(this.req, this.res)
+      FileController.getFileHead(req, res)
     })
 
     it('should return a 404 is the file is not found', function(done) {
-      this.FileHandler.getFileSize.yields(new this.Errors.NotFoundError())
+      FileHandler.getFileSize.yields(new Errors.NotFoundError())
 
-      this.res.end = () => {
-        expect(this.res.status.lastCall.args[0]).to.equal(404)
-        return done()
+      res.sendStatus = code => {
+        expect(code).to.equal(404)
+        done()
       }
 
-      return this.controller.getFileHead(this.req, this.res)
+      FileController.getFileHead(req, res)
     })
 
-    return it('should return a 500 on internal errors', function(done) {
-      this.FileHandler.getFileSize.yields(new Error())
+    it('should return a 500 on internal errors', function(done) {
+      FileHandler.getFileSize.yields(new Error())
 
-      this.res.end = () => {
-        expect(this.res.status.lastCall.args[0]).to.equal(500)
-        return done()
+      res.sendStatus = code => {
+        expect(code).to.equal(500)
+        done()
       }
 
-      return this.controller.getFileHead(this.req, this.res)
+      FileController.getFileHead(req, res)
     })
   })
 
-  describe('insertFile', () =>
+  describe('insertFile', function() {
     it('should send bucket name key and res to PersistorManager', function(done) {
-      this.FileHandler.insertFile.callsArgWith(3)
-      this.res.send = () => {
-        this.FileHandler.insertFile
-          .calledWith(this.bucket, this.key, this.req)
-          .should.equal(true)
-        return done()
+      res.sendStatus = code => {
+        expect(FileHandler.insertFile).to.have.been.calledWith(bucket, key, req)
+        expect(code).to.equal(200)
+        done()
       }
-      return this.controller.insertFile(this.req, this.res)
-    }))
+      FileController.insertFile(req, res)
+    })
+  })
 
   describe('copyFile', function() {
+    const oldFileId = 'oldFileId'
+    const oldProjectId = 'oldProjectid'
+    const oldKey = `${oldProjectId}/${oldFileId}`
+
     beforeEach(function() {
-      this.oldFile_id = 'old_file_id'
-      this.oldProject_id = 'old_project_id'
-      return (this.req.body = {
+      req.body = {
         source: {
-          project_id: this.oldProject_id,
-          file_id: this.oldFile_id
+          project_id: oldProjectId,
+          file_id: oldFileId
         }
-      })
+      }
     })
 
     it('should send bucket name and both keys to PersistorManager', function(done) {
-      this.PersistorManager.copyFile.callsArgWith(3)
-      this.res.send = code => {
+      res.sendStatus = code => {
         code.should.equal(200)
-        this.PersistorManager.copyFile
-          .calledWith(
-            this.bucket,
-            `${this.oldProject_id}/${this.oldFile_id}`,
-            this.key
-          )
-          .should.equal(true)
-        return done()
+        expect(PersistorManager.copyFile).to.have.been.calledWith(
+          bucket,
+          oldKey,
+          key
+        )
+        done()
       }
-      return this.controller.copyFile(this.req, this.res)
+      FileController.copyFile(req, res)
     })
 
     it('should send a 404 if the original file was not found', function(done) {
-      this.PersistorManager.copyFile.callsArgWith(
-        3,
-        new this.Errors.NotFoundError()
-      )
-      this.res.send = code => {
+      PersistorManager.copyFile.yields(new Errors.NotFoundError())
+      res.sendStatus = code => {
         code.should.equal(404)
-        return done()
+        done()
       }
-      return this.controller.copyFile(this.req, this.res)
+      FileController.copyFile(req, res)
     })
 
-    return it('should send a 500 if there was an error', function(done) {
-      this.PersistorManager.copyFile.callsArgWith(3, 'error')
-      this.res.send = code => {
+    it('should send a 500 if there was an error', function(done) {
+      PersistorManager.copyFile.yields('error')
+      res.sendStatus = code => {
         code.should.equal(500)
-        return done()
+        done()
       }
-      return this.controller.copyFile(this.req, this.res)
+      FileController.copyFile(req, res)
     })
   })
 
   describe('delete file', function() {
     it('should tell the file handler', function(done) {
-      this.FileHandler.deleteFile.callsArgWith(2)
-      this.res.send = code => {
+      res.sendStatus = code => {
         code.should.equal(204)
-        this.FileHandler.deleteFile
-          .calledWith(this.bucket, this.key)
-          .should.equal(true)
-        return done()
+        expect(FileHandler.deleteFile).to.have.been.calledWith(bucket, key)
+        done()
       }
-      return this.controller.deleteFile(this.req, this.res)
+      FileController.deleteFile(req, res)
     })
 
-    return it('should send a 500 if there was an error', function(done) {
-      this.FileHandler.deleteFile.callsArgWith(2, 'error')
-      this.res.send = function(code) {
+    it('should send a 500 if there was an error', function(done) {
+      FileHandler.deleteFile.yields('error')
+      res.sendStatus = code => {
         code.should.equal(500)
-        return done()
+        done()
       }
-      return this.controller.deleteFile(this.req, this.res)
+      FileController.deleteFile(req, res)
     })
   })
 
-  describe('_get_range', function() {
-    it('should parse a valid Range header', function(done) {
-      const result = this.controller._get_range('bytes=0-200')
-      expect(result).to.not.equal(null)
-      expect(result.start).to.equal(0)
-      expect(result.end).to.equal(200)
-      return done()
-    })
-
-    it('should return null for an invalid Range header', function(done) {
-      const result = this.controller._get_range('wat')
-      expect(result).to.equal(null)
-      return done()
-    })
-
-    return it("should return null for any type other than 'bytes'", function(done) {
-      const result = this.controller._get_range('carrots=0-200')
-      expect(result).to.equal(null)
-      return done()
-    })
-  })
-
-  return describe('directorySize', function() {
+  describe('directorySize', function() {
     it('should return total directory size bytes', function(done) {
-      this.FileHandler.getDirectorySize.callsArgWith(2, null, 1024)
-      return this.controller.directorySize(this.req, {
+      FileController.directorySize(req, {
         json: result => {
-          expect(result['total bytes']).to.equal(1024)
-          return done()
+          expect(result['total bytes']).to.equal(fileSize)
+          done()
         }
       })
     })
 
-    return it('should send a 500 if there was an error', function(done) {
-      this.FileHandler.getDirectorySize.callsArgWith(2, 'error')
-      this.res.send = function(code) {
+    it('should send a 500 if there was an error', function(done) {
+      FileHandler.getDirectorySize.callsArgWith(2, 'error')
+      res.sendStatus = code => {
         code.should.equal(500)
-        return done()
+        done()
       }
-      return this.controller.directorySize(this.req, this.res)
+      FileController.directorySize(req, res)
     })
   })
 })
