@@ -39,6 +39,22 @@ module.exports = {
       email,
       function(err, inviteUserData) {
         if (err != null) {
+          if (err.alreadyInTeam) {
+            return res.status(400).json({
+              error: {
+                code: 'user_already_added',
+                message: req.i18n.translate('user_already_added')
+              }
+            })
+          }
+          if (err.limitReached) {
+            return res.status(400).json({
+              error: {
+                code: 'group_full',
+                message: req.i18n.translate('group_full')
+              }
+            })
+          }
           return next(err)
         }
         return res.json({ user: inviteUserData })
