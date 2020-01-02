@@ -2,15 +2,18 @@ const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
 const fs = require('fs')
 const Path = require('path')
-const request = require('request')
 const { promisify } = require('util')
 const disrequire = require('disrequire')
+const rp = require('request-promise-native').defaults({
+  resolveWithFullResponse: true
+})
 
 const S3_TRIES = 30
 
 logger.logger.level('info')
 
 const fsReaddir = promisify(fs.readdir)
+const sleep = promisify(setTimeout)
 
 class FilestoreApp {
   constructor() {
@@ -57,15 +60,15 @@ class FilestoreApp {
 
   async waitForInit() {
     while (this.initing) {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await sleep(1000)
     }
   }
 
   async stop() {
-    if (this.server) {
-      await new Promise(resolve => {
-        this.server.close(resolve)
-      })
+    const closeServer = promisify(this.server.close).bind(this.server)
+    try {
+      await closeServer()
+    } finally {
       delete this.server
     }
   }
@@ -80,17 +83,16 @@ class FilestoreApp {
 
     while (tries < S3_TRIES && !s3Available) {
       try {
-        const response = await promisify(request.get)(
-          `${Settings.filestore.s3.endpoint}/`
-        )
+        const response = await rp.get(`${Settings.filestore.s3.endpoint}/`)
         if ([200, 404].includes(response.statusCode)) {
           s3Available = true
         }
       } catch (err) {
+        // swallow errors, as we may experience them until fake-s3 is running
       } finally {
         tries++
         if (!s3Available) {
-          await new Promise(resolve => setTimeout(resolve, 1000))
+          await sleep(1000)
         }
       }
     }
