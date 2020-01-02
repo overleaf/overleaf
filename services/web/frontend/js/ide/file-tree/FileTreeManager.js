@@ -676,21 +676,18 @@ define([
       })
     }
 
-    moveEntity(entity, parent_folder, callback) {
+    moveEntity(entity, parent_folder) {
       // Abort move if the folder being moved (entity) has the parent_folder as child
       // since that would break the tree structure.
-      if (callback == null) {
-        callback = function(error) {}
-      }
       if (this._isChildFolder(entity, parent_folder)) {
         return
       }
       // check if a doc/file/folder already exists with this name
       if (this.existsInThisFolder(parent_folder, entity.name)) {
-        return this.nameExistsError()
+        throw new Error('file exists in this location')
       }
       // Wait for the http response before doing the move
-      return this.ide.queuedHttp
+      this.ide.queuedHttp
         .post(
           `/project/${this.ide.project_id}/${entity.type}/${entity.id}/move`,
           {
@@ -699,7 +696,7 @@ define([
           }
         )
         .then(() => {
-          return this._moveEntityInScope(entity, parent_folder)
+          this._moveEntityInScope(entity, parent_folder)
         })
     }
 

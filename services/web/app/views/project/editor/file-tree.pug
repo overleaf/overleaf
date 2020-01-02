@@ -281,7 +281,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 									href
 									ng-click="openNewDocModal()"
 									right-click="openNewDocModal()"
-								) #{translate("new_file")} 
+								) #{translate("new_file")}
 							li
 								a(
 									href
@@ -333,13 +333,23 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 		button.btn.btn-default(
 			ng-disabled="state.inflight"
 			ng-click="cancel()"
-		) #{translate("cancel")} 
+		) #{translate("cancel")}
 		button.btn.btn-primary(
 			ng-disabled="newFolderForm.$invalid || state.inflight"
 			ng-click="create()"
 		)
 			span(ng-hide="state.inflight") #{translate("create")}
 			span(ng-show="state.inflight") #{translate("creating")}...
+
+script(type='text/ng-template', id='duplicateFileModalTemplate')
+	.modal-header
+		h3 #{translate("duplicate_file")}
+	.modal-body
+		p #{translate("file_already_exists_in_this_location", { fileName: "'{{ fileName }}'" })}
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()"
+		) #{translate("dismiss")}
 
 include ./new-file-modal
 

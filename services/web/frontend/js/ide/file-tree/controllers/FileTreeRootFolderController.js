@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define(['base'], App =>
-  App.controller('FileTreeRootFolderController', function($scope, ide) {
+  App.controller('FileTreeRootFolderController', function($scope, $modal, ide) {
     const { rootFolder } = $scope
     return ($scope.onDrop = function(events, ui) {
       let entities
@@ -23,7 +23,19 @@ define(['base'], App =>
         entities = [$(ui.draggable).scope().entity]
       }
       for (let dropped_entity of Array.from(entities)) {
-        ide.fileTreeManager.moveEntity(dropped_entity, rootFolder)
+        try {
+          ide.fileTreeManager.moveEntity(dropped_entity, rootFolder)
+        } catch (err) {
+          $modal.open({
+            templateUrl: 'duplicateFileModalTemplate',
+            controller: 'DuplicateFileModalController',
+            resolve: {
+              fileName() {
+                return dropped_entity.name
+              }
+            }
+          })
+        }
       }
       $scope.$digest()
       // clear highlight explicitly

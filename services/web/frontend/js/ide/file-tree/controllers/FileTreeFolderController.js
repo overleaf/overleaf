@@ -39,7 +39,19 @@ define(['base'], App =>
         entities = [$(ui.draggable).scope().entity]
       }
       for (let dropped_entity of Array.from(entities)) {
-        ide.fileTreeManager.moveEntity(dropped_entity, $scope.entity)
+        try {
+          ide.fileTreeManager.moveEntity(dropped_entity, $scope.entity)
+        } catch (err) {
+          $modal.open({
+            templateUrl: 'duplicateFileModalTemplate',
+            controller: 'DuplicateFileModalController',
+            resolve: {
+              fileName() {
+                return dropped_entity.name
+              }
+            }
+          })
+        }
       }
       $scope.$digest()
       // clear highlight explicitly

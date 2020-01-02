@@ -124,6 +124,15 @@ define(['base'], function(App) {
     return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
   })
 
+  App.controller('DuplicateFileModalController', function(
+    $scope,
+    $modalInstance,
+    fileName
+  ) {
+    $scope.fileName = fileName
+    $scope.cancel = () => $modalInstance.dismiss('cancel')
+  })
+
   App.controller('NewFileModalController', function(
     $scope,
     ide,
