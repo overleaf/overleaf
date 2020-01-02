@@ -15,24 +15,6 @@ module.exports = {
     )
 
     publicApiRouter.use(
-      '/analytics/graphs',
-      AuthenticationController.httpAuth,
-      AnalyticsProxy.call('/graphs')
-    )
-
-    publicApiRouter.use(
-      '/analytics/recentTeamActivity',
-      AuthenticationController.httpAuth,
-      AnalyticsProxy.call('/recentTeamActivity')
-    )
-
-    publicApiRouter.use(
-      '/analytics/recentV1TemplateIdsActivity',
-      AuthenticationController.httpAuth,
-      AnalyticsProxy.call('/recentV1TemplateIdsActivity')
-    )
-
-    publicApiRouter.use(
       '/analytics/uniExternalCollaboration',
       AuthenticationController.httpAuth,
       AnalyticsProxy.call('/uniExternalCollaboration')
