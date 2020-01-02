@@ -1017,7 +1017,8 @@ define([
       }
       ide.editorManager.openDoc(entity, {
         gotoLine: line,
-        gotoColumn: column
+        gotoColumn: column,
+        forceReopen: true
       })
     }
   })

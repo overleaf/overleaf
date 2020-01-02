@@ -17,7 +17,12 @@ define(['base', 'ide/file-tree/util/iconTypeFromName'], function(
   App,
   iconTypeFromName
 ) {
-  App.controller('FileTreeEntityController', function($scope, ide, $modal) {
+  App.controller('FileTreeEntityController', function(
+    $scope,
+    ide,
+    $modal,
+    $element
+  ) {
     $scope.select = function(e) {
       if (e.ctrlKey || e.metaKey) {
         e.stopPropagation()
@@ -31,6 +36,17 @@ define(['base', 'ide/file-tree/util/iconTypeFromName'], function(
         ide.fileTreeManager.selectEntity($scope.entity)
         return $scope.$emit('entity:selected', $scope.entity)
       }
+    }
+
+    if ($scope.entity.type === 'doc') {
+      $scope.$watch('entity.selected', function(isSelected) {
+        if (isSelected) {
+          $scope.$emit('entity-file:selected', $scope.entity)
+          $scope.$applyAsync(function() {
+            $element[0].scrollIntoView()
+          })
+        }
+      })
     }
 
     $scope.draggableHelper = function() {

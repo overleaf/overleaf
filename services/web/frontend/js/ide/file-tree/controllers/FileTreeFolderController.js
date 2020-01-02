@@ -25,10 +25,16 @@ define(['base'], App =>
 
     $scope.toggleExpanded = function() {
       $scope.expanded = !$scope.expanded
-      return localStorage(
-        `folder.${$scope.entity.id}.expanded`,
-        $scope.expanded
-      )
+      $scope._storeCurrentStateInLocalStorage()
+    }
+
+    $scope.$on('entity-file:selected', function() {
+      $scope.expanded = true
+      $scope._storeCurrentStateInLocalStorage()
+    })
+
+    $scope._storeCurrentStateInLocalStorage = function() {
+      localStorage(`folder.${$scope.entity.id}.expanded`, $scope.expanded)
     }
 
     $scope.onDrop = function(events, ui) {
