@@ -12,8 +12,11 @@ const fileController = require('./app/js/FileController')
 const bucketController = require('./app/js/BucketController')
 const keyBuilder = require('./app/js/KeyBuilder')
 const healthCheckController = require('./app/js/HealthCheckController')
+const ExceptionHandler = require('./app/js/ExceptionHandler')
+const exceptionHandler = new ExceptionHandler()
 
 const app = express()
+app.exceptionHandler = exceptionHandler
 
 if (settings.sentry && settings.sentry.dsn) {
   logger.initializeErrorReporting(settings.sentry.dsn)
@@ -30,6 +33,8 @@ app.use(function(req, res, next) {
   Metrics.inc('http-request')
   next()
 })
+
+exceptionHandler.addMiddleware(app)
 
 Metrics.injectMetricsRoute(app)
 
@@ -128,11 +133,23 @@ app.get('/heapdump', (req, res, next) =>
   )
 )
 
+app.post('/shutdown', function(req, res) {
+  exceptionHandler.setNotOk()
+  res.sendStatus(200)
+})
+
 app.get('/status', function(req, res) {
-  res.send('filestore sharelatex up')
+  if (exceptionHandler.appIsOk()) {
+    res.send('filestore sharelatex up')
+  } else {
+    logger.log('app is not ok - shutting down')
+    res.send('server is being shut down').status(500)
+  }
 })
 
 app.get('/health_check', healthCheckController.check)
+
+app.get('*', (req, res) => res.sendStatus(404))
 
 const port = settings.internal.filestore.port || 3009
 const host = '0.0.0.0'
@@ -146,6 +163,21 @@ if (!module.parent) {
     }
     logger.info(`Filestore starting up, listening on ${host}:${port}`)
   })
+  exceptionHandler.server = server
 }
 
 module.exports = app
+
+process.on('SIGTERM', function() {
+  logger.log('filestore got SIGTERM, shutting down gracefully')
+  exceptionHandler.beginShutdown()
+})
+
+if (global.gc) {
+  const oneMinute = 60 * 1000
+  const gcTimer = setInterval(function() {
+    global.gc()
+    logger.log(process.memoryUsage(), 'global.gc')
+  }, 3 * oneMinute)
+  gcTimer.unref()
+}
