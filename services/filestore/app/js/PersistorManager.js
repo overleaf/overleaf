@@ -13,8 +13,6 @@ if (!settings.filestore.backend) {
 
 switch (settings.filestore.backend) {
   case 'aws-sdk':
-    module.exports = require('./AWSSDKPersistorManager')
-    break
   case 's3':
     module.exports = require('./S3PersistorManager')
     break
