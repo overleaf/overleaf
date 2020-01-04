@@ -57,7 +57,7 @@ class ExceptionHandler {
         // request a shutdown to prevent memory leaks
         this.beginShutdown()
         if (!res.headerSent) {
-          res.send('uncaught exception').status(500)
+          res.status(500).send('uncaught exception')
         }
         req = {
           body: req.body,

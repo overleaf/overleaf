@@ -143,7 +143,7 @@ app.get('/status', function(req, res) {
     res.send('filestore sharelatex up')
   } else {
     logger.log('app is not ok - shutting down')
-    res.send('server is being shut down').status(500)
+    res.status(500).send('server is being shut down')
   }
 })
 
