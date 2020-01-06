@@ -258,8 +258,6 @@ module.exports = {
 
     const result = { allPlans }
 
-    result.personalAccount = _.find(plans, plan => plan.planCode === 'personal')
-
     result.studentAccounts = _.filter(
       plans,
       plan => plan.planCode.indexOf('student') !== -1
@@ -280,7 +278,6 @@ module.exports = {
       plan =>
         !plan.groupPlan &&
         !plan.annual &&
-        plan.planCode !== 'personal' &&
         plan.planCode.indexOf('student') === -1
     )
 
