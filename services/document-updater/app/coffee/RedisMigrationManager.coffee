@@ -114,12 +114,17 @@ class Multi
 				multi.exec releaseLock
 
 class MigrationClient
-	constructor: (old_settings, new_settings) ->
-		@rclient_old = redis.createClient(old_settings)
-		@rclient_new = redis.createClient(new_settings)
+	constructor: (@old_settings, @new_settings) ->
+		@rclient_old = redis.createClient(@old_settings)
+		@rclient_new = redis.createClient(@new_settings)
 		@new_key_schema = new_settings.key_schema
-		@migration_phase = new_settings.migration_phase
+		# check that migration phase is valid on startup
+		@getMigrationPhase()
+
+	getMigrationPhase: () ->
+		@migration_phase = @new_settings.migration_phase  # FIXME: allow setting migration phase while running for testing
 		throw new Error("invalid migration phase") unless @migration_phase in ['prepare', 'switch', 'rollback']
+		return @migration_phase
 
 	getMigrationStatus: (key, migrationKey, callback) ->
 		async.series [
@@ -136,12 +141,12 @@ class MigrationClient
 	findQueue: (key, callback) ->
 		project_id = getProjectId(key)
 		migrationKey = @new_key_schema.projectHistoryMigrationKey({project_id})
-
+		migration_phase = @getMigrationPhase()  # allow setting migration phase while running for testing
 		@getMigrationStatus key, migrationKey, (err, migrationKeyExists, newQueueExists, oldQueueExists) =>
 			return callback(err) if err?
 			# In all cases, if the migration key exists we must always write to the
 			# new redis, unless we are rolling back.
-			if @migration_phase is "prepare"
+			if migration_phase is "prepare"
 			# in this phase we prepare for the switch, when some docupdaters will
 			# start setting the migration flag.  We monitor the migration key and
 			# write to the new redis if the key is present, but we do not set the
@@ -154,7 +159,7 @@ class MigrationClient
 				else
 					logger.debug {project_id}, "using old client because migration key does not exist"
 					return callback(null, @rclient_old)
-			else if @migration_phase is "switch"
+			else if migration_phase is "switch"
 				# As we deploy the "switch" phase new docupdaters will set the migration
 				# flag for projects which have an empty queue in the old redis, and
 				# write updates into the new redis.  Existing docupdaters still in the
@@ -175,7 +180,7 @@ class MigrationClient
 							return callback(err) if err?
 							logger.debug {key: key}, "switching to new redis because old queue is empty"
 							return callback(null, @rclient_new)
-			else if @migration_phase is "rollback"
+			else if migration_phase is "rollback"
 				# If we need to roll back gracefully we do the opposite of the "switch"
 				# phase. We use the new redis when the migration key is set and the
 				# queue exists in the new redis, but if the queue in the new redis is
@@ -194,7 +199,7 @@ class MigrationClient
 					logger.debug {project_id}, "using old client because migration key does not exist"
 					return callback(null, @rclient_old)
 			else
-				logger.error {key: key, migration_phase: @migration_phase}, "unknown migration phase"
+				logger.error {key: key, migration_phase: migration_phase}, "unknown migration phase"
 				callback(new Error('invalid migration phase'))
 	multi: () ->
 		new Multi(@)
