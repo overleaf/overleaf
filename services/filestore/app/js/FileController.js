@@ -62,6 +62,7 @@ function getFile(req, res, next) {
 
     logger.log({ key, bucket, format, style }, 'sending file to response')
 
+    // pass 'next' as a callback to 'pipeline' to receive any errors
     pipeline(fileStream, res, next)
   })
 }
