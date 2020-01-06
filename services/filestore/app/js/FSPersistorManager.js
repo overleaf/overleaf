@@ -1,4 +1,5 @@
 const fs = require('fs')
+const glob = require('glob')
 const logger = require('logger-sharelatex')
 const path = require('path')
 const rimraf = require('rimraf')
@@ -12,7 +13,7 @@ const pipeline = promisify(Stream.pipeline)
 const fsUnlink = promisify(fs.unlink)
 const fsOpen = promisify(fs.open)
 const fsStat = promisify(fs.stat)
-const fsReaddir = promisify(fs.readdir)
+const fsGlob = promisify(glob)
 const rmrf = promisify(rimraf)
 
 const filterName = key => key.replace(/\//g, '_')
@@ -124,16 +125,25 @@ async function checkIfFileExists(location, name) {
   }
 }
 
-// note, does not recurse into subdirectories
+// note, does not recurse into subdirectories, as we use a flattened directory structure
 async function directorySize(location, name) {
   const filteredName = filterName(name.replace(/\/$/, ''))
   let size = 0
 
   try {
-    const files = await fsReaddir(`${location}/${filteredName}`)
+    const files = await fsGlob(`${location}/${filteredName}_*`)
     for (const file of files) {
-      const stat = await fsStat(`${location}/${filteredName}/${file}`)
-      size += stat.size
+      try {
+        const stat = await fsStat(file)
+        if (stat.isFile()) {
+          size += stat.size
+        }
+      } catch (err) {
+        // ignore files that may have just been deleted
+        if (err.code !== 'ENOENT') {
+          throw err
+        }
+      }
     }
   } catch (err) {
     throw new ReadError({

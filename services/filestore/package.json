@@ -26,6 +26,7 @@
     "body-parser": "^1.2.0",
     "express": "^4.2.0",
     "fs-extra": "^1.0.0",
+    "glob": "^7.1.6",
     "heapdump": "^0.3.2",
     "knox": "~0.9.1",
     "logger-sharelatex": "^1.7.0",

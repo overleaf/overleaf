@@ -10,7 +10,7 @@ chai.use(require('chai-as-promised'))
 const modulePath = '../../../app/js/FSPersistorManager.js'
 
 describe('FSPersistorManagerTests', function() {
-  const stat = { size: 4 }
+  const stat = { size: 4, isFile: sinon.stub().returns(true) }
   const fd = 1234
   const readStream = 'readStream'
   const writeStream = 'writeStream'
@@ -19,8 +19,9 @@ describe('FSPersistorManagerTests', function() {
   const location = '/foo'
   const error = new Error('guru meditation error')
 
-  const files = ['wombat.txt', 'potato.tex']
-  let fs, rimraf, stream, LocalFileWriter, FSPersistorManager
+  const files = ['animals/wombat.tex', 'vegetables/potato.tex']
+  const filteredFilenames = ['animals_wombat.tex', 'vegetables_potato.tex']
+  let fs, rimraf, stream, LocalFileWriter, FSPersistorManager, glob
 
   beforeEach(function() {
     fs = {
@@ -28,9 +29,9 @@ describe('FSPersistorManagerTests', function() {
       createWriteStream: sinon.stub().returns(writeStream),
       unlink: sinon.stub().yields(),
       open: sinon.stub().yields(null, fd),
-      readdir: sinon.stub().yields(null, files),
       stat: sinon.stub().yields(null, stat)
     }
+    glob = sinon.stub().yields(null, files)
     rimraf = sinon.stub().yields()
     stream = { pipeline: sinon.stub().yields() }
     LocalFileWriter = {
@@ -42,25 +43,31 @@ describe('FSPersistorManagerTests', function() {
     FSPersistorManager = SandboxedModule.require(modulePath, {
       requires: {
         './LocalFileWriter': LocalFileWriter,
-        fs: fs,
         'logger-sharelatex': {
           log() {},
           err() {}
         },
-        rimraf: rimraf,
-        stream: stream,
-        './Errors': Errors
+        './Errors': Errors,
+        fs,
+        glob,
+        rimraf,
+        stream
       },
       globals: { console }
     })
   })
 
   describe('sendFile', function() {
+    const localFilesystemPath = '/path/to/local/file'
     it('should copy the file', async function() {
-      await FSPersistorManager.promises.sendFile(location, files[0], files[1])
-      expect(fs.createReadStream).to.have.been.calledWith(files[1])
+      await FSPersistorManager.promises.sendFile(
+        location,
+        files[0],
+        localFilesystemPath
+      )
+      expect(fs.createReadStream).to.have.been.calledWith(localFilesystemPath)
       expect(fs.createWriteStream).to.have.been.calledWith(
-        `${location}/${files[0]}`
+        `${location}/${filteredFilenames[0]}`
       )
       expect(stream.pipeline).to.have.been.calledWith(readStream, writeStream)
     })
@@ -68,7 +75,11 @@ describe('FSPersistorManagerTests', function() {
     it('should return an error if the file cannot be stored', async function() {
       stream.pipeline.yields(error)
       await expect(
-        FSPersistorManager.promises.sendFile(location, files[0], files[1])
+        FSPersistorManager.promises.sendFile(
+          location,
+          files[0],
+          localFilesystemPath
+        )
       ).to.eventually.be.rejectedWith(error)
     })
   })
@@ -114,16 +125,15 @@ describe('FSPersistorManagerTests', function() {
   })
 
   describe('getFileStream', function() {
-    const filename = 'wombat/potato'
-    const filteredFilename = 'wombat_potato'
-
     it('should use correct file location', async function() {
-      await FSPersistorManager.promises.getFileStream(location, filename, {})
-      expect(fs.open).to.have.been.calledWith(`${location}/${filteredFilename}`)
+      await FSPersistorManager.promises.getFileStream(location, files[0], {})
+      expect(fs.open).to.have.been.calledWith(
+        `${location}/${filteredFilenames[0]}`
+      )
     })
 
     it('should pass the options to createReadStream', async function() {
-      await FSPersistorManager.promises.getFileStream(location, filename, {
+      await FSPersistorManager.promises.getFileStream(location, files[0], {
         start: 0,
         end: 8
       })
@@ -140,7 +150,7 @@ describe('FSPersistorManagerTests', function() {
       fs.open.yields(err)
 
       await expect(
-        FSPersistorManager.promises.getFileStream(location, filename, {})
+        FSPersistorManager.promises.getFileStream(location, files[0], {})
       )
         .to.eventually.be.rejectedWith('file not found')
         .and.be.an.instanceOf(Errors.NotFoundError)
@@ -149,7 +159,7 @@ describe('FSPersistorManagerTests', function() {
     it('should wrap any other error', async function() {
       fs.open.yields(error)
       await expect(
-        FSPersistorManager.promises.getFileStream(location, filename, {})
+        FSPersistorManager.promises.getFileStream(location, files[0], {})
       )
         .to.eventually.be.rejectedWith('failed to open file for streaming')
         .and.be.an.instanceOf(Errors.ReadError)
@@ -158,9 +168,7 @@ describe('FSPersistorManagerTests', function() {
   })
 
   describe('getFileSize', function() {
-    const filename = 'wombat/potato'
     const badFilename = 'neenaw.tex'
-    const filteredFilename = 'wombat_potato'
     const size = 65536
     const noentError = new Error('not found')
     noentError.code = 'ENOENT'
@@ -168,7 +176,7 @@ describe('FSPersistorManagerTests', function() {
     beforeEach(function() {
       fs.stat
         .yields(error)
-        .withArgs(`${location}/${filteredFilename}`)
+        .withArgs(`${location}/${filteredFilenames[0]}`)
         .yields(null, { size })
         .withArgs(`${location}/${badFilename}`)
         .yields(noentError)
@@ -176,7 +184,7 @@ describe('FSPersistorManagerTests', function() {
 
     it('should return the file size', async function() {
       expect(
-        await FSPersistorManager.promises.getFileSize(location, filename)
+        await FSPersistorManager.promises.getFileSize(location, files[0])
       ).to.equal(size)
     })
 
@@ -197,14 +205,14 @@ describe('FSPersistorManagerTests', function() {
     it('Should open the source for reading', async function() {
       await FSPersistorManager.promises.copyFile(location, files[0], files[1])
       expect(fs.createReadStream).to.have.been.calledWith(
-        `${location}/${files[0]}`
+        `${location}/${filteredFilenames[0]}`
       )
     })
 
     it('Should open the target for writing', async function() {
       await FSPersistorManager.promises.copyFile(location, files[0], files[1])
       expect(fs.createWriteStream).to.have.been.calledWith(
-        `${location}/${files[1]}`
+        `${location}/${filteredFilenames[1]}`
       )
     })
 
@@ -217,7 +225,9 @@ describe('FSPersistorManagerTests', function() {
   describe('deleteFile', function() {
     it('Should call unlink with correct options', async function() {
       await FSPersistorManager.promises.deleteFile(location, files[0])
-      expect(fs.unlink).to.have.been.calledWith(`${location}/${files[0]}`)
+      expect(fs.unlink).to.have.been.calledWith(
+        `${location}/${filteredFilenames[0]}`
+      )
     })
 
     it('Should propagate the error', async function() {
@@ -231,7 +241,9 @@ describe('FSPersistorManagerTests', function() {
   describe('deleteDirectory', function() {
     it('Should call rmdir(rimraf) with correct options', async function() {
       await FSPersistorManager.promises.deleteDirectory(location, files[0])
-      expect(rimraf).to.have.been.calledWith(`${location}/${files[0]}`)
+      expect(rimraf).to.have.been.calledWith(
+        `${location}/${filteredFilenames[0]}`
+      )
     })
 
     it('Should propagate the error', async function() {
@@ -243,28 +255,29 @@ describe('FSPersistorManagerTests', function() {
   })
 
   describe('checkIfFileExists', function() {
-    const filename = 'wombat'
-    const badFilename = 'potato'
+    const badFilename = 'pototo'
     const noentError = new Error('not found')
     noentError.code = 'ENOENT'
 
     beforeEach(function() {
       fs.stat
         .yields(error)
-        .withArgs(`${location}/${filename}`)
+        .withArgs(`${location}/${filteredFilenames[0]}`)
         .yields(null, {})
         .withArgs(`${location}/${badFilename}`)
         .yields(noentError)
     })
 
     it('Should call stat with correct options', async function() {
-      await FSPersistorManager.promises.checkIfFileExists(location, filename)
-      expect(fs.stat).to.have.been.calledWith(`${location}/${filename}`)
+      await FSPersistorManager.promises.checkIfFileExists(location, files[0])
+      expect(fs.stat).to.have.been.calledWith(
+        `${location}/${filteredFilenames[0]}`
+      )
     })
 
     it('Should return true for existing files', async function() {
       expect(
-        await FSPersistorManager.promises.checkIfFileExists(location, filename)
+        await FSPersistorManager.promises.checkIfFileExists(location, files[0])
       ).to.equal(true)
     })
 
@@ -288,19 +301,26 @@ describe('FSPersistorManagerTests', function() {
 
   describe('directorySize', function() {
     it('should wrap the error', async function() {
-      fs.readdir.yields(error)
+      glob.yields(error)
       await expect(
-        FSPersistorManager.promises.directorySize(location, 'wombat')
+        FSPersistorManager.promises.directorySize(location, files[0])
       )
         .to.eventually.be.rejected.and.be.an.instanceOf(Errors.ReadError)
         .and.include({ cause: error })
         .and.have.property('info')
-        .which.includes({ location, name: 'wombat' })
+        .which.includes({ location, name: files[0] })
+    })
+
+    it('should filter the directory name', async function() {
+      await FSPersistorManager.promises.directorySize(location, files[0])
+      expect(glob).to.have.been.calledWith(
+        `${location}/${filteredFilenames[0]}_*`
+      )
     })
 
     it('should sum directory files size', async function() {
       expect(
-        await FSPersistorManager.promises.directorySize(location, 'wombat')
+        await FSPersistorManager.promises.directorySize(location, files[0])
       ).to.equal(stat.size * files.length)
     })
   })
