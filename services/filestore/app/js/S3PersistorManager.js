@@ -23,7 +23,7 @@ module.exports = {
   deleteFile: callbackify(deleteFile),
   copyFile: callbackify(copyFile),
   checkIfFileExists: callbackify(checkIfFileExists),
-  getDirectorySize: callbackify(getDirectorySize),
+  directorySize: callbackify(directorySize),
   promises: {
     sendFile,
     sendStream,
@@ -33,7 +33,7 @@ module.exports = {
     deleteFile,
     copyFile,
     checkIfFileExists,
-    getDirectorySize
+    directorySize
   }
 }
 
@@ -209,7 +209,7 @@ async function checkIfFileExists(bucketName, key) {
   }
 }
 
-async function getDirectorySize(bucketName, key) {
+async function directorySize(bucketName, key) {
   try {
     const response = await _client
       .listObjects({ Bucket: bucketName, Prefix: key })

@@ -186,7 +186,6 @@ describe('S3PersistorManagerTests', function() {
         S3ReadStream.on.withArgs('error').yields(S3NotFoundError)
         try {
           stream = await S3PersistorManager.promises.getFileStream(bucket, key)
-          console.log(stream)
         } catch (err) {
           error = err
         }
@@ -217,7 +216,6 @@ describe('S3PersistorManagerTests', function() {
         S3ReadStream.on.withArgs('error').yields(genericError)
         try {
           stream = await S3PersistorManager.promises.getFileStream(bucket, key)
-          console.log(stream)
         } catch (err) {
           error = err
         }
@@ -581,7 +579,7 @@ describe('S3PersistorManagerTests', function() {
       let size
 
       beforeEach(async function() {
-        size = await S3PersistorManager.promises.getDirectorySize(bucket, key)
+        size = await S3PersistorManager.promises.directorySize(bucket, key)
       })
 
       it('should list the objects in the directory', function() {
@@ -603,7 +601,7 @@ describe('S3PersistorManagerTests', function() {
         S3Client.listObjects = sinon
           .stub()
           .returns({ promise: sinon.stub().resolves({ Contents: [] }) })
-        size = await S3PersistorManager.promises.getDirectorySize(bucket, key)
+        size = await S3PersistorManager.promises.directorySize(bucket, key)
       })
 
       it('should list the objects in the directory', function() {
@@ -626,7 +624,7 @@ describe('S3PersistorManagerTests', function() {
           .stub()
           .returns({ promise: sinon.stub().rejects(genericError) })
         try {
-          await S3PersistorManager.promises.getDirectorySize(bucket, key)
+          await S3PersistorManager.promises.directorySize(bucket, key)
         } catch (err) {
           error = err
         }
