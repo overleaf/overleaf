@@ -123,6 +123,7 @@ async function deleteFile(location, name) {
   }
 }
 
+// this is only called internally for clean-up by `FileHandler` and isn't part of the external API
 async function deleteDirectory(location, name) {
   const filteredName = filterName(name.replace(/\/$/, ''))
 
