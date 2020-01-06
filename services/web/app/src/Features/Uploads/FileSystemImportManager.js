@@ -28,7 +28,7 @@ module.exports = FileSystemImportManager = {
     folder_id,
     name,
     path,
-    charset,
+    encoding,
     replace,
     callback
   ) {
@@ -46,7 +46,7 @@ module.exports = FileSystemImportManager = {
         )
         return callback(new Error('path is symlink'))
       }
-      return fs.readFile(path, charset, function(error, content) {
+      return fs.readFile(path, encoding, function(error, content) {
         if (error != null) {
           return callback(error)
         }
@@ -252,11 +252,11 @@ module.exports = FileSystemImportManager = {
           return FileTypeManager.getType(
             name,
             path,
-            (error, isBinary, charset) => {
+            (error, { binary, encoding }) => {
               if (error != null) {
                 return callback(error)
               }
-              if (isBinary) {
+              if (binary) {
                 return FileSystemImportManager.addFile(
                   user_id,
                   project_id,
@@ -278,7 +278,7 @@ module.exports = FileSystemImportManager = {
                   folder_id,
                   name,
                   path,
-                  charset,
+                  encoding,
                   replace,
                   function(err, entity) {
                     if (entity != null) {

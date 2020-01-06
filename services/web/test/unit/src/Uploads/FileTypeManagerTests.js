@@ -1,371 +1,353 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
-const expect = require('chai').expect
-const modulePath = '../../../../app/src/Features/Uploads/FileTypeManager.js'
+const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
-const isUtf8 = require('is-utf8')
+const isUtf8 = require('utf-8-validate')
+const modulePath = '../../../../app/src/Features/Uploads/FileTypeManager.js'
 
 describe('FileTypeManager', function() {
   beforeEach(function() {
     this.isUtf8 = sinon.spy(isUtf8)
-    this.fs = {}
-    this.path = '/path/to/test'
+    this.stats = {
+      isDirectory: sinon.stub().returns(false),
+      size: 100
+    }
+    const fileContents = 'Ich bin eine kleine Teekanne, kurz und kräftig.'
+    this.fs = {
+      stat: sinon.stub().yields(null, this.stats),
+      readFile: sinon.stub()
+    }
+    this.fs.readFile
+      .withArgs('utf8.tex')
+      .yields(null, Buffer.from(fileContents, 'utf-8'))
+    this.fs.readFile
+      .withArgs('utf16.tex')
+      .yields(null, Buffer.from(`\uFEFF${fileContents}`, 'utf-16le'))
+    this.fs.readFile
+      .withArgs('latin1.tex')
+      .yields(null, Buffer.from(fileContents, 'latin1'))
+    this.fs.readFile
+      .withArgs('latin1-null.tex')
+      .yields(null, Buffer.from(`${fileContents}\x00${fileContents}`, 'utf-8'))
+    this.fs.readFile
+      .withArgs('utf8-null.tex')
+      .yields(null, Buffer.from(`${fileContents}\x00${fileContents}`, 'utf-8'))
+    this.fs.readFile
+      .withArgs('utf8-non-bmp.tex')
+      .yields(null, Buffer.from(`${fileContents}😈`))
+    this.fs.readFile
+      .withArgs('utf8-control-chars.tex')
+      .yields(null, Buffer.from(`${fileContents}\x0c${fileContents}`))
     this.callback = sinon.stub()
-    this.ced = sinon.stub()
     this.DocumentHelper = { getEncodingFromTexContent: sinon.stub() }
-    return (this.FileTypeManager = SandboxedModule.require(modulePath, {
+    this.FileTypeManager = SandboxedModule.require(modulePath, {
       globals: {
         console: console
       },
       requires: {
         fs: this.fs,
-        'is-utf8': this.isUtf8
+        'utf-8-validate': this.isUtf8
       }
-    }))
+    })
   })
 
   describe('isDirectory', function() {
-    beforeEach(function() {
-      this.stats = {}
-      return (this.fs.stat = sinon.stub().callsArgWith(1, null, this.stats))
-    })
-
     describe('when it is a directory', function() {
       beforeEach(function() {
-        this.stats.isDirectory = sinon.stub().returns(true)
-        return this.FileTypeManager.isDirectory(this.path, this.callback)
+        this.stats.isDirectory.returns(true)
+        this.FileTypeManager.isDirectory('/some/path', this.callback)
       })
 
       it('should return true', function() {
-        return this.callback.calledWith(null, true).should.equal(true)
+        this.callback.should.have.been.calledWith(null, true)
       })
     })
 
     describe('when it is not a directory', function() {
       beforeEach(function() {
-        this.stats.isDirectory = sinon.stub().returns(false)
-        return this.FileTypeManager.isDirectory(this.path, this.callback)
+        this.stats.isDirectory.returns(false)
+        this.FileTypeManager.isDirectory('/some/path', this.callback)
       })
 
       it('should return false', function() {
-        return this.callback.calledWith(null, false).should.equal(true)
+        this.callback.should.have.been.calledWith(null, false)
       })
     })
   })
 
   describe('getType', function() {
-    beforeEach(function() {
-      this.stat = { size: 100 }
-      this.contents = 'Ich bin eine kleine Teekanne, kurz und kräftig.'
-      this.fs.stat = sinon.stub().callsArgWith(1, null, this.stat)
-      this.fs.readFile = sinon
-        .stub()
-        .callsArgWith(1, null, Buffer.from(this.contents, 'utf-8'))
-      this.fs.readFile
-        .withArgs('/path/on/disk/utf16.tex')
-        .callsArgWith(
-          1,
-          null,
-          Buffer.from(`\uFEFF${this.contents}`, 'utf-16le')
-        )
-      this.fs.readFile
-        .withArgs('/path/on/disk/latin1.tex')
-        .callsArgWith(1, null, Buffer.from(this.contents, 'latin1'))
-      return (this.encoding = 'ASCII')
-    })
-
     describe('when the file extension is text', function() {
-      it('should return .tex files as not binary', function() {
-        return this.FileTypeManager.getType(
-          'file.tex',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should return .bib files as not binary', function() {
-        return this.FileTypeManager.getType(
-          'file.bib',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should return .bibtex files as not binary', function() {
-        return this.FileTypeManager.getType(
-          'file.bibtex',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should return .cls files as not binary', function() {
-        return this.FileTypeManager.getType(
-          'file.cls',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should return .sty files as not binary', function() {
-        return this.FileTypeManager.getType(
-          'file.sty',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should return .bst files as not binary', function() {
-        return this.FileTypeManager.getType(
-          'file.bst',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should return .latexmkrc file as not binary', function() {
-        return this.FileTypeManager.getType(
-          '.latexmkrc',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should return latexmkrc file as not binary', function() {
-        return this.FileTypeManager.getType(
-          'latexmkrc',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should return lbx file as not binary', function() {
-        return this.FileTypeManager.getType(
-          'file.lbx',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should return bbx file as not binary', function() {
-        return this.FileTypeManager.getType(
-          'file.bbx',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should return cbx file as not binary', function() {
-        return this.FileTypeManager.getType(
-          'file.cbx',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should return m file as not binary', function() {
-        return this.FileTypeManager.getType(
-          'file.m',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should ignore the case of an extension', function() {
-        return this.FileTypeManager.getType(
-          'file.TEX',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(false)
-        )
-      })
-
-      it('should return large text files as binary', function() {
-        this.stat.size = 2 * 1024 * 1024 // 2Mb
-        return this.FileTypeManager.getType(
-          'file.tex',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(true)
-        )
-      })
-
-      it('should return try to determine the encoding of large files', function() {
-        this.stat.size = 2 * 1024 * 1024 // 2Mb
-        return this.FileTypeManager.getType('file.tex', '/path/on/disk', () => {
-          return sinon.assert.notCalled(this.isUtf8)
+      const TEXT_FILENAMES = [
+        'file.tex',
+        'file.bib',
+        'file.bibtex',
+        'file.cls',
+        'file.bst',
+        '.latexmkrc',
+        'latexmkrc',
+        'file.lbx',
+        'file.bbx',
+        'file.cbx',
+        'file.m',
+        'file.TEX'
+      ]
+      TEXT_FILENAMES.forEach(filename => {
+        it(`should classify ${filename} as text`, function(done) {
+          this.FileTypeManager.getType(
+            'file.tex',
+            'utf8.tex',
+            (err, { binary }) => {
+              if (err) {
+                return done(err)
+              }
+              binary.should.equal(false)
+              done()
+            }
+          )
         })
       })
 
-      it('should detect the file as utf8', function() {
-        return this.FileTypeManager.getType(
+      it('should classify large text files as binary', function(done) {
+        this.stats.size = 2 * 1024 * 1024 // 2Mb
+        this.FileTypeManager.getType(
           'file.tex',
-          '/path/on/disk',
-          (error, binary, encoding) => {
+          'utf8.tex',
+          (err, { binary }) => {
+            if (err) {
+              return done(err)
+            }
+            binary.should.equal(true)
+            done()
+          }
+        )
+      })
+
+      it('should not try to determine the encoding of large files', function(done) {
+        this.stats.size = 2 * 1024 * 1024 // 2Mb
+        this.FileTypeManager.getType('file.tex', 'utf8.tex', err => {
+          if (err) {
+            return done(err)
+          }
+          sinon.assert.notCalled(this.isUtf8)
+          done()
+        })
+      })
+
+      it('should detect the encoding of a utf8 file', function(done) {
+        this.FileTypeManager.getType(
+          'file.tex',
+          'utf8.tex',
+          (err, { binary, encoding }) => {
+            if (err) {
+              return done(err)
+            }
             sinon.assert.calledOnce(this.isUtf8)
             this.isUtf8.returned(true).should.equal(true)
-            return encoding.should.equal('utf-8')
+            encoding.should.equal('utf-8')
+            done()
           }
         )
       })
 
-      it("should return 'latin1' for non-unicode encodings", function() {
-        return this.FileTypeManager.getType(
+      it("should return 'latin1' for non-unicode encodings", function(done) {
+        this.FileTypeManager.getType(
           'file.tex',
-          '/path/on/disk/latin1.tex',
-          (error, binary, encoding) => {
+          'latin1.tex',
+          (err, { binary, encoding }) => {
+            if (err) {
+              return done(err)
+            }
             sinon.assert.calledOnce(this.isUtf8)
             this.isUtf8.returned(false).should.equal(true)
-            return encoding.should.equal('latin1')
+            encoding.should.equal('latin1')
+            done()
           }
         )
       })
 
-      it('should detect utf16 with BOM as utf-16', function() {
-        return this.FileTypeManager.getType(
+      it('should classify utf16 with BOM as utf-16', function(done) {
+        this.FileTypeManager.getType(
           'file.tex',
-          '/path/on/disk/utf16.tex',
-          (error, binary, encoding) => {
+          'utf16.tex',
+          (err, { binary, encoding }) => {
+            if (err) {
+              return done(err)
+            }
             sinon.assert.calledOnce(this.isUtf8)
             this.isUtf8.returned(false).should.equal(true)
-            return encoding.should.equal('utf-16le')
+            encoding.should.equal('utf-16le')
+            done()
+          }
+        )
+      })
+
+      it('should classify latin1 files with a null char as binary', function(done) {
+        this.FileTypeManager.getType(
+          'file.tex',
+          'latin1-null.tex',
+          (err, { binary }) => {
+            if (err) {
+              return done(err)
+            }
+            expect(binary).to.equal(true)
+            done()
+          }
+        )
+      })
+
+      it('should classify utf8 files with a null char as binary', function(done) {
+        this.FileTypeManager.getType(
+          'file.tex',
+          'utf8-null.tex',
+          (err, { binary }) => {
+            if (err) {
+              return done(err)
+            }
+            expect(binary).to.equal(true)
+            done()
+          }
+        )
+      })
+
+      it('should classify utf8 files with non-BMP chars as binary', function(done) {
+        this.FileTypeManager.getType(
+          'file.tex',
+          'utf8-non-bmp.tex',
+          (err, { binary }) => {
+            if (err) {
+              return done(err)
+            }
+            expect(binary).to.equal(true)
+            done()
+          }
+        )
+      })
+
+      it('should classify utf8 files with ascii control chars as utf-8', function(done) {
+        this.FileTypeManager.getType(
+          'file.tex',
+          'utf8-control-chars.tex',
+          (err, { binary, encoding }) => {
+            if (err) {
+              return done(err)
+            }
+            expect(binary).to.equal(false)
+            expect(encoding).to.equal('utf-8')
+            done()
           }
         )
       })
     })
 
     describe('when the file extension is non-text', function() {
-      it('should return .eps files as binary', function() {
-        return this.FileTypeManager.getType(
-          'file.eps',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(true)
-        )
+      const BINARY_FILENAMES = ['file.eps', 'file.dvi', 'file.png', 'tex']
+      BINARY_FILENAMES.forEach(filename => {
+        it(`should classify ${filename} as binary`, function(done) {
+          this.FileTypeManager.getType(
+            'file.tex',
+            'utf8.tex',
+            (err, { binary }) => {
+              if (err) {
+                return done(err)
+              }
+              binary.should.equal(false)
+              done()
+            }
+          )
+        })
       })
 
-      it('should return .dvi files as binary', function() {
-        return this.FileTypeManager.getType(
-          'file.dvi',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(true)
-        )
-      })
-
-      it('should return .png files as binary', function() {
-        return this.FileTypeManager.getType(
-          'file.png',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(true)
-        )
-      })
-
-      it('should return files without extensions as binary', function() {
-        return this.FileTypeManager.getType(
-          'tex',
-          '/path/on/disk',
-          (error, binary) => binary.should.equal(true)
-        )
-      })
-
-      it('should not try to get the character encoding', function() {
-        return this.FileTypeManager.getType('file.png', '/path/on/disk', () => {
-          return sinon.assert.notCalled(this.isUtf8)
+      it('should not try to get the character encoding', function(done) {
+        this.FileTypeManager.getType('file.png', 'utf8.tex', err => {
+          if (err) {
+            return done(err)
+          }
+          sinon.assert.notCalled(this.isUtf8)
+          done()
         })
       })
     })
   })
 
   describe('shouldIgnore', function() {
-    beforeEach(function() {
-      this.stats = {}
-    })
-
-    it('should ignore tex auxiliary files', function() {
-      return this.FileTypeManager.shouldIgnore('file.aux', (error, ignore) =>
+    it('should ignore tex auxiliary files', function(done) {
+      this.FileTypeManager.shouldIgnore('file.aux', (err, ignore) => {
+        if (err) {
+          return done(err)
+        }
         ignore.should.equal(true)
-      )
+        done()
+      })
     })
 
-    it('should ignore dotfiles', function() {
-      return this.FileTypeManager.shouldIgnore('path/.git', (error, ignore) =>
+    it('should ignore dotfiles', function(done) {
+      this.FileTypeManager.shouldIgnore('path/.git', (err, ignore) => {
+        if (err) {
+          return done(err)
+        }
         ignore.should.equal(true)
-      )
+        done()
+      })
     })
 
-    it('should not ignore .latexmkrc dotfile', function() {
-      return this.FileTypeManager.shouldIgnore(
-        'path/.latexmkrc',
-        (error, ignore) => ignore.should.equal(false)
-      )
-    })
-
-    it('should ignore __MACOSX', function() {
-      return this.FileTypeManager.shouldIgnore(
-        'path/__MACOSX',
-        (error, ignore) => ignore.should.equal(true)
-      )
-    })
-
-    it('should not ignore .tex files', function() {
-      return this.FileTypeManager.shouldIgnore('file.tex', (error, ignore) =>
+    it('should not ignore .latexmkrc dotfile', function(done) {
+      this.FileTypeManager.shouldIgnore('path/.latexmkrc', (err, ignore) => {
+        if (err) {
+          return done(err)
+        }
         ignore.should.equal(false)
-      )
+        done()
+      })
     })
 
-    it('should ignore the case of the extension', function() {
-      return this.FileTypeManager.shouldIgnore('file.AUX', (error, ignore) =>
+    it('should ignore __MACOSX', function(done) {
+      this.FileTypeManager.shouldIgnore('path/__MACOSX', (err, ignore) => {
+        if (err) {
+          return done(err)
+        }
         ignore.should.equal(true)
-      )
+        done()
+      })
     })
 
-    it('should not ignore files with an ignored extension as full name', function() {
-      this.stats.isDirectory = sinon.stub().returns(false)
-      const fileName = this.FileTypeManager.IGNORE_EXTENSIONS[0]
-      this.FileTypeManager.shouldIgnore(fileName, (error, ignore) =>
+    it('should not ignore .tex files', function(done) {
+      this.FileTypeManager.shouldIgnore('file.tex', (err, ignore) => {
+        if (err) {
+          return done(err)
+        }
         ignore.should.equal(false)
-      )
+        done()
+      })
     })
 
-    it('should not ignore directories with an ignored extension as full name', function() {
-      this.stats.isDirectory = sinon.stub().returns(true)
-      const fileName = this.FileTypeManager.IGNORE_EXTENSIONS[0]
-      this.FileTypeManager.shouldIgnore(fileName, (error, ignore) =>
+    it('should ignore the case of the extension', function(done) {
+      this.FileTypeManager.shouldIgnore('file.AUX', (err, ignore) => {
+        if (err) {
+          return done(err)
+        }
+        ignore.should.equal(true)
+        done()
+      })
+    })
+
+    it('should not ignore files with an ignored extension as full name', function(done) {
+      this.FileTypeManager.shouldIgnore('dvi', (err, ignore) => {
+        if (err) {
+          return done(err)
+        }
         ignore.should.equal(false)
-      )
-    })
-  })
-
-  describe('getExtension', function() {
-    it('should return the extension of a file name', function() {
-      expect(this.FileTypeManager.getExtension('example.doc')).to.equal('doc')
+        done()
+      })
     })
 
-    it('should return the extension with unmodified upper and lower case characters', function() {
-      expect(this.FileTypeManager.getExtension('example.TeX')).to.equal('TeX')
-    })
-
-    it('should return the extension of a file name with multiple dots in the name', function() {
-      expect(this.FileTypeManager.getExtension('example.test.doc')).to.equal(
-        'doc'
-      )
-    })
-
-    it('should return the rest of the string when the file name starts with dot', function() {
-      expect(this.FileTypeManager.getExtension('.example.doc')).to.equal('doc')
-    })
-
-    it('should return undefined when the file name has no extension', function() {
-      expect(this.FileTypeManager.getExtension('example')).to.equal(undefined)
+    it('should not ignore directories with an ignored extension as full name', function(done) {
+      this.stats.isDirectory.returns(true)
+      this.FileTypeManager.shouldIgnore('dvi', (err, ignore) => {
+        if (err) {
+          return done(err)
+        }
+        ignore.should.equal(false)
+        done()
+      })
     })
   })
 })

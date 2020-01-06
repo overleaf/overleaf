@@ -482,7 +482,9 @@ describe('FileSystemImportManager', function() {
         this.FileTypeManager.isDirectory = sinon
           .stub()
           .callsArgWith(1, null, false)
-        this.FileTypeManager.getType = sinon.stub().callsArgWith(2, null, true)
+        this.FileTypeManager.getType = sinon
+          .stub()
+          .yields(null, { binary: true })
         this.FileSystemImportManager._isSafeOnFileSystem = sinon
           .stub()
           .callsArgWith(1, null, true)
@@ -519,7 +521,7 @@ describe('FileSystemImportManager', function() {
           .callsArgWith(1, null, false)
         this.FileTypeManager.getType = sinon
           .stub()
-          .callsArgWith(2, null, false, 'latin1')
+          .yields(null, { binary: false, encoding: 'latin1' })
         this.FileSystemImportManager.addDoc = sinon.stub().callsArg(7)
         this.FileSystemImportManager._isSafeOnFileSystem = sinon
           .stub()

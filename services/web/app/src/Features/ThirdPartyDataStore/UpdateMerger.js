@@ -80,10 +80,18 @@ module.exports = UpdateMerger = {
         return callback(err)
       }
       // determine whether the update should create a doc or binary file
-      FileTypeManager.getStrictType(path, fsPath, function(err, isBinary) {
+      FileTypeManager.getType(path, fsPath, function(
+        err,
+        { binary, encoding }
+      ) {
         if (err != null) {
           return callback(err)
         }
+
+        // If we receive a non-utf8 encoding, we won't be able to keep things in
+        // sync, so we'll treat non-utf8 files as binary
+        const isBinary = binary || encoding !== 'utf-8'
+
         // Existing | Update    | Action
         // ---------|-----------|-------
         // file     | isBinary  | existing-file
@@ -98,6 +106,7 @@ module.exports = UpdateMerger = {
         if (existingFileType === 'file') {
           return callback(null, 'existing-file')
         }
+
         // if there is an existing doc, keep it as a doc except when the
         // incoming update is binary. In that case delete the doc and replace
         // it with a new file.
