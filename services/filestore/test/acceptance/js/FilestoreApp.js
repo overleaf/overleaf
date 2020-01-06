@@ -44,7 +44,6 @@ class FilestoreApp {
           resolve()
         }
       )
-      this.app.exceptionHandler.server = this.server
     })
 
     if (Settings.filestore.backend === 's3') {
