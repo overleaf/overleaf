@@ -80,7 +80,7 @@ describe('FSPersistorManagerTests', function() {
           files[0],
           localFilesystemPath
         )
-      ).to.eventually.be.rejectedWith(error)
+      ).to.eventually.be.rejected.and.have.property('cause', error)
     })
   })
 
@@ -152,8 +152,8 @@ describe('FSPersistorManagerTests', function() {
       await expect(
         FSPersistorManager.promises.getFileStream(location, files[0], {})
       )
-        .to.eventually.be.rejectedWith('file not found')
-        .and.be.an.instanceOf(Errors.NotFoundError)
+        .to.eventually.be.rejected.and.be.an.instanceOf(Errors.NotFoundError)
+        .and.have.property('cause', err)
     })
 
     it('should wrap any other error', async function() {
@@ -234,7 +234,7 @@ describe('FSPersistorManagerTests', function() {
       fs.unlink.yields(error)
       await expect(
         FSPersistorManager.promises.deleteFile(location, files[0])
-      ).to.eventually.be.rejectedWith(error)
+      ).to.eventually.be.rejected.and.have.property('cause', error)
     })
   })
 
@@ -250,7 +250,7 @@ describe('FSPersistorManagerTests', function() {
       rimraf.yields(error)
       await expect(
         FSPersistorManager.promises.deleteDirectory(location, files[0])
-      ).to.eventually.be.rejectedWith(error)
+      ).to.eventually.be.rejected.and.have.property('cause', error)
     })
   })
 

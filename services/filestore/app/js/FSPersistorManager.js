@@ -7,7 +7,7 @@ const Stream = require('stream')
 const { promisify, callbackify } = require('util')
 
 const LocalFileWriter = require('./LocalFileWriter').promises
-const { NotFoundError, ReadError } = require('./Errors')
+const { NotFoundError, ReadError, WriteError } = require('./Errors')
 
 const pipeline = promisify(Stream.pipeline)
 const fsUnlink = promisify(fs.unlink)
@@ -24,17 +24,26 @@ async function sendFile(location, target, source) {
 
   // actually copy the file (instead of moving it) to maintain consistent behaviour
   // between the different implementations
-  const sourceStream = fs.createReadStream(source)
-  const targetStream = fs.createWriteStream(`${location}/${filteredTarget}`)
-  await pipeline(sourceStream, targetStream)
+  try {
+    const sourceStream = fs.createReadStream(source)
+    const targetStream = fs.createWriteStream(`${location}/${filteredTarget}`)
+    await pipeline(sourceStream, targetStream)
+  } catch (err) {
+    throw _wrapError(
+      err,
+      'failed to copy the specified file',
+      { location, target, source },
+      WriteError
+    )
+  }
 }
 
 async function sendStream(location, target, sourceStream) {
   logger.log({ location, target }, 'sending file stream')
 
-  let fsPath
+  const fsPath = await LocalFileWriter.writeStream(sourceStream)
+
   try {
-    fsPath = await LocalFileWriter.writeStream(sourceStream)
     await sendFile(location, target, fsPath)
   } finally {
     await LocalFileWriter.deleteFile(fsPath)
@@ -51,16 +60,12 @@ async function getFileStream(location, name, opts) {
   } catch (err) {
     logger.err({ err, location, filteredName: name }, 'Error reading from file')
 
-    if (err.code === 'ENOENT') {
-      throw new NotFoundError({
-        message: 'file not found',
-        info: {
-          location,
-          filteredName
-        }
-      }).withCause(err)
-    }
-    throw new ReadError('failed to open file for streaming').withCause(err)
+    throw _wrapError(
+      err,
+      'failed to open file for streaming',
+      { location, filteredName, opts },
+      ReadError
+    )
   }
 
   return fs.createReadStream(null, opts)
@@ -75,16 +80,12 @@ async function getFileSize(location, filename) {
   } catch (err) {
     logger.err({ err, location, filename }, 'failed to stat file')
 
-    if (err.code === 'ENOENT') {
-      throw new NotFoundError({
-        message: 'file not found',
-        info: {
-          location,
-          fullPath
-        }
-      }).withCause(err)
-    }
-    throw new ReadError('failed to stat file').withCause(err)
+    throw _wrapError(
+      err,
+      'failed to stat file',
+      { location, filename },
+      ReadError
+    )
   }
 }
 
@@ -93,15 +94,33 @@ async function copyFile(location, fromName, toName) {
   const filteredToName = filterName(toName)
   logger.log({ location, filteredFromName, filteredToName }, 'copying file')
 
-  const sourceStream = fs.createReadStream(`${location}/${filteredFromName}`)
-  const targetStream = fs.createWriteStream(`${location}/${filteredToName}`)
-  await pipeline(sourceStream, targetStream)
+  try {
+    const sourceStream = fs.createReadStream(`${location}/${filteredFromName}`)
+    const targetStream = fs.createWriteStream(`${location}/${filteredToName}`)
+    await pipeline(sourceStream, targetStream)
+  } catch (err) {
+    throw _wrapError(
+      err,
+      'failed to copy file',
+      { location, filteredFromName, filteredToName },
+      WriteError
+    )
+  }
 }
 
 async function deleteFile(location, name) {
   const filteredName = filterName(name)
   logger.log({ location, filteredName }, 'delete file')
-  await fsUnlink(`${location}/${filteredName}`)
+  try {
+    await fsUnlink(`${location}/${filteredName}`)
+  } catch (err) {
+    throw _wrapError(
+      err,
+      'failed to delete file',
+      { location, filteredName },
+      WriteError
+    )
+  }
 }
 
 async function deleteDirectory(location, name) {
@@ -109,7 +128,16 @@ async function deleteDirectory(location, name) {
 
   logger.log({ location, filteredName }, 'deleting directory')
 
-  await rmrf(`${location}/${filteredName}`)
+  try {
+    await rmrf(`${location}/${filteredName}`)
+  } catch (err) {
+    throw _wrapError(
+      err,
+      'failed to delete directory',
+      { location, filteredName },
+      WriteError
+    )
+  }
 }
 
 async function checkIfFileExists(location, name) {
@@ -121,7 +149,12 @@ async function checkIfFileExists(location, name) {
     if (err.code === 'ENOENT') {
       return false
     }
-    throw new ReadError('failed to stat file').withCause(err)
+    throw _wrapError(
+      err,
+      'failed to stat file',
+      { location, filteredName },
+      ReadError
+    )
   }
 }
 
@@ -146,13 +179,29 @@ async function directorySize(location, name) {
       }
     }
   } catch (err) {
-    throw new ReadError({
-      message: 'failed to get directory size',
-      info: { location, name }
-    }).withCause(err)
+    throw _wrapError(
+      err,
+      'failed to get directory size',
+      { location, name },
+      ReadError
+    )
   }
 
   return size
+}
+
+function _wrapError(error, message, params, ErrorType) {
+  if (error.code === 'ENOENT') {
+    return new NotFoundError({
+      message: 'no such file or directory',
+      info: params
+    }).withCause(error)
+  } else {
+    return new ErrorType({
+      message: message,
+      info: params
+    }).withCause(error)
+  }
 }
 
 module.exports = {
