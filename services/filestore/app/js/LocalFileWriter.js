@@ -32,6 +32,8 @@ async function writeStream(stream, key) {
     logger.log({ fsPath }, 'finished writing file locally')
     return fsPath
   } catch (err) {
+    await deleteFile(fsPath)
+
     logger.err({ err, fsPath }, 'problem writing file locally')
     throw new WriteError({
       message: 'problem writing file locally',
@@ -45,7 +47,16 @@ async function deleteFile(fsPath) {
     return
   }
   logger.log({ fsPath }, 'removing local temp file')
-  await promisify(fs.unlink)(fsPath)
+  try {
+    await promisify(fs.unlink)(fsPath)
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      throw new WriteError({
+        message: 'failed to delete file',
+        info: { fsPath }
+      }).withCause(err)
+    }
+  }
 }
 
 function _getPath(key) {
