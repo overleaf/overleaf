@@ -20,6 +20,7 @@ describe('FSPersistorManagerTests', function() {
   const error = new Error('guru meditation error')
 
   const files = ['animals/wombat.tex', 'vegetables/potato.tex']
+  const globs = [`${location}/${files[0]}`, `${location}/${files[1]}`]
   const filteredFilenames = ['animals_wombat.tex', 'vegetables_potato.tex']
   let fs, rimraf, stream, LocalFileWriter, FSPersistorManager, glob
 
@@ -31,7 +32,7 @@ describe('FSPersistorManagerTests', function() {
       open: sinon.stub().yields(null, fd),
       stat: sinon.stub().yields(null, stat)
     }
-    glob = sinon.stub().yields(null, files)
+    glob = sinon.stub().yields(null, globs)
     rimraf = sinon.stub().yields()
     stream = { pipeline: sinon.stub().yields() }
     LocalFileWriter = {
