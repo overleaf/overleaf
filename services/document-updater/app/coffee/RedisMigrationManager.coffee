@@ -106,7 +106,7 @@ class Multi
 			@migrationClient.findQueue @queueKey, (err, rclient) =>
 				return releaseLock(err) if err?
 				# add metric for updates
-				dest = (if rclient == @rclient_new then "new" else "old")
+				dest = (if rclient == @migrationClient.rclient_new then "new" else "old")
 				metrics.count "migration", @updates_count, 1, {status: "#{@migrationClient.migration_phase}-#{dest}"}
 				multi = rclient.multi()
 				for entry in @command_list
