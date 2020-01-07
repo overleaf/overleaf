@@ -7,6 +7,7 @@ const FilestoreApp = require('./FilestoreApp')
 const rp = require('request-promise-native').defaults({
   resolveWithFullResponse: true
 })
+const S3 = require('aws-sdk/clients/s3')
 const Stream = require('stream')
 const request = require('request')
 const { promisify } = require('util')
@@ -43,7 +44,8 @@ if (process.env.AWS_ACCESS_KEY_ID) {
     s3: {
       key: process.env.AWS_ACCESS_KEY_ID,
       secret: process.env.AWS_SECRET_ACCESS_KEY,
-      endpoint: process.env.AWS_S3_ENDPOINT
+      endpoint: process.env.AWS_S3_ENDPOINT,
+      pathStyle: true
     },
     stores: {
       user_files: process.env.AWS_S3_USER_FILES_BUCKET_NAME,
@@ -287,6 +289,48 @@ describe('Filestore', function() {
           )
         })
       })
+
+      if (backend === 'S3Persistor') {
+        describe('with a file in a specific bucket', function() {
+          let constantFileContents, fileId, fileUrl, bucketName
+
+          beforeEach(async function() {
+            constantFileContents = `This is a file in a different S3 bucket ${Math.random()}`
+            fileId = Math.random().toString()
+            bucketName = Math.random().toString()
+            fileUrl = `${filestoreUrl}/bucket/${bucketName}/key/${fileId}`
+
+            const s3ClientSettings = {
+              credentials: {
+                accessKeyId: 'fake',
+                secretAccessKey: 'fake'
+              },
+              endpoint: process.env.AWS_S3_ENDPOINT,
+              sslEnabled: false,
+              s3ForcePathStyle: true
+            }
+
+            const s3 = new S3(s3ClientSettings)
+            await s3
+              .createBucket({
+                Bucket: bucketName
+              })
+              .promise()
+            await s3
+              .upload({
+                Bucket: bucketName,
+                Key: fileId,
+                Body: constantFileContents
+              })
+              .promise()
+          })
+
+          it('should get the file from the specified bucket', async function() {
+            const response = await rp.get(fileUrl)
+            expect(response.body).to.equal(constantFileContents)
+          })
+        })
+      }
 
       describe('with a pdf file', function() {
         let fileId, fileUrl, localFileSize

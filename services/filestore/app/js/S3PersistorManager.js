@@ -303,5 +303,10 @@ function _clientOptions(bucketCredentials) {
     options.sslEnabled = endpoint.protocol === 'https'
   }
 
+  // path-style access is only used for acceptance tests
+  if (settings.filestore.s3.pathStyle) {
+    options.s3ForcePathStyle = true
+  }
+
   return options
 }
