@@ -1,4 +1,4 @@
-define(['base', 'moment'], (App, moment) =>
+define(['base'], App =>
   App.controller('BinaryFileController', function(
     $scope,
     $rootScope,

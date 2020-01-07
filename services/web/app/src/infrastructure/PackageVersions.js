@@ -6,7 +6,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const version = {
-  moment: '2.9.0',
   ace: '1.4.5', // Upgrade instructions: https://github.com/overleaf/write_latex/wiki/Upgrading-Ace
   fineuploader: '5.15.4',
   algolia: '2.5.2'

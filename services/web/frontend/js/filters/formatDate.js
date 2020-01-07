@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define(['base', 'moment'], function(App, moment) {
-  moment.locale('en', {
+  moment.updateLocale('en', {
     calendar: {
       lastDay: '[Yesterday]',
       sameDay: '[Today]',
