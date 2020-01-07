@@ -1,109 +1,114 @@
-/* eslint-disable
-    handle-callback-err,
-    standard/no-callback-literal,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const app = require('../../../app')
-require('logger-sharelatex').logger.level('info')
 const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
-const request = require('request')
+const fs = require('fs')
+const Path = require('path')
+const { promisify } = require('util')
+const disrequire = require('disrequire')
+const rp = require('request-promise-native').defaults({
+  resolveWithFullResponse: true
+})
 
 const S3_TRIES = 30
 
-module.exports = {
-  running: false,
-  initing: false,
-  callbacks: [],
-  ensureRunning(callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    if (this.running) {
-      return callback()
-    } else if (this.initing) {
-      return this.callbacks.push(callback)
-    } else {
-      this.initing = true
-      this.callbacks.push(callback)
-      return app.listen(
-        __guard__(
-          Settings.internal != null ? Settings.internal.filestore : undefined,
-          x => x.port
-        ),
-        'localhost',
-        error => {
-          if (error != null) {
-            throw error
-          }
-          this.running = true
-          logger.log('filestore running in dev mode')
+logger.logger.level('info')
 
-          return (() => {
-            const result = []
-            for (callback of Array.from(this.callbacks)) {
-              result.push(callback())
-            }
-            return result
-          })()
+const fsReaddir = promisify(fs.readdir)
+const sleep = promisify(setTimeout)
+
+class FilestoreApp {
+  constructor() {
+    this.running = false
+    this.initing = false
+  }
+
+  async runServer() {
+    if (this.running) {
+      return
+    }
+
+    if (this.initing) {
+      return this.waitForInit()
+    }
+    this.initing = true
+
+    this.app = await FilestoreApp.requireApp()
+
+    await new Promise((resolve, reject) => {
+      this.server = this.app.listen(
+        Settings.internal.filestore.port,
+        'localhost',
+        err => {
+          if (err) {
+            return reject(err)
+          }
+          resolve()
         }
       )
-    }
-  },
+    })
 
-  waitForS3(callback, tries) {
-    if (
-      !(Settings.filestore.s3 != null
-        ? Settings.filestore.s3.endpoint
-        : undefined)
-    ) {
-      return callback()
-    }
-    if (!tries) {
-      tries = 1
-    }
-
-    return request.get(
-      `${Settings.filestore.s3.endpoint}/`,
-      (err, response) => {
-        console.log(
-          err,
-          response != null ? response.statusCode : undefined,
-          tries
-        )
-        if (
-          !err &&
-          [200, 404].includes(
-            response != null ? response.statusCode : undefined
-          )
-        ) {
-          return callback()
-        }
-
-        if (tries === S3_TRIES) {
-          return callback('timed out waiting for S3')
-        }
-
-        return setTimeout(() => {
-          return this.waitForS3(callback, tries + 1)
-        }, 1000)
+    if (Settings.filestore.backend === 's3') {
+      try {
+        await FilestoreApp.waitForS3()
+      } catch (err) {
+        await this.stop()
+        throw err
       }
-    )
+    }
+
+    this.initing = false
+  }
+
+  async waitForInit() {
+    while (this.initing) {
+      await sleep(1000)
+    }
+  }
+
+  async stop() {
+    const closeServer = promisify(this.server.close).bind(this.server)
+    try {
+      await closeServer()
+    } finally {
+      delete this.server
+    }
+  }
+
+  static async waitForS3() {
+    let tries = 0
+    if (!Settings.filestore.s3.endpoint) {
+      return
+    }
+
+    let s3Available = false
+
+    while (tries < S3_TRIES && !s3Available) {
+      try {
+        const response = await rp.get(`${Settings.filestore.s3.endpoint}/`)
+        if ([200, 404].includes(response.statusCode)) {
+          s3Available = true
+        }
+      } catch (err) {
+        // swallow errors, as we may experience them until fake-s3 is running
+      } finally {
+        tries++
+        if (!s3Available) {
+          await sleep(1000)
+        }
+      }
+    }
+  }
+
+  static async requireApp() {
+    // unload the app, as we may be doing this on multiple runs with
+    // different settings, which affect startup in some cases
+    const files = await fsReaddir(Path.resolve(__dirname, '../../../app/js'))
+    files.forEach(file => {
+      disrequire(Path.resolve(__dirname, '../../../app/js', file))
+    })
+    disrequire(Path.resolve(__dirname, '../../../app'))
+
+    return require('../../../app')
   }
 }
 
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
+module.exports = FilestoreApp
