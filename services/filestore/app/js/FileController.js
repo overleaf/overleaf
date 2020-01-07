@@ -17,7 +17,7 @@ module.exports = {
   directorySize
 }
 
-function getFile(req, res) {
+function getFile(req, res, next) {
   const { key, bucket } = req
   const { format, style } = req.query
   const options = {
@@ -61,7 +61,9 @@ function getFile(req, res) {
     }
 
     logger.log({ key, bucket, format, style }, 'sending file to response')
-    pipeline(fileStream, res)
+
+    // pass 'next' as a callback to 'pipeline' to receive any errors
+    pipeline(fileStream, res, next)
   })
 }
 

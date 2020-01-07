@@ -43,6 +43,14 @@ describe('PersistorManager', function() {
     expect(PersistorManager.wrappedMethod()).to.equal('S3PersistorManager')
   })
 
+  it("should implement the S3 wrapped method when 'aws-sdk' is configured", function() {
+    settings.filestore.backend = 'aws-sdk'
+    PersistorManager = SandboxedModule.require(modulePath, { requires })
+
+    expect(PersistorManager).to.respondTo('wrappedMethod')
+    expect(PersistorManager.wrappedMethod()).to.equal('S3PersistorManager')
+  })
+
   it('should implement the FS wrapped method when FS is configured', function() {
     settings.filestore.backend = 'fs'
     PersistorManager = SandboxedModule.require(modulePath, { requires })
