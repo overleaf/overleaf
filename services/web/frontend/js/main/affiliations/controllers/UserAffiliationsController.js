@@ -94,21 +94,18 @@ define(['base'], App =>
                 universityDomain
               )
             } else {
-              $scope.newAffiliation.university = null
-              $scope.newAffiliation.department = null
+              _resetAffiliationSuggestion()
             }
             return $q.resolve(
               `${userInputLocalAndDomain.local}@${universityDomain.hostname}`
             )
           })
           .catch(function() {
-            $scope.newAffiliation.university = null
-            $scope.newAffiliation.department = null
+            _resetAffiliationSuggestion()
             return $q.reject(null)
           })
       } else {
-        $scope.newAffiliation.university = null
-        $scope.newAffiliation.department = null
+        _resetAffiliationSuggestion()
         return $q.reject(null)
       }
     }
@@ -123,8 +120,7 @@ define(['base'], App =>
     }
 
     $scope.selectUniversityManually = function() {
-      $scope.newAffiliation.university = null
-      $scope.newAffiliation.department = null
+      _resetAffiliationSuggestion()
       return ($scope.ui.showManualUniversitySelectionUI = true)
     }
 
@@ -259,6 +255,12 @@ define(['base'], App =>
       $scope.ui.isValidEmail = false
       $scope.ui.isBlacklistedEmail = false
       return ($scope.ui.showManualUniversitySelectionUI = false)
+    }
+
+    var _resetAffiliationSuggestion = () => {
+      $scope.newAffiliation = {
+        email: $scope.newAffiliation.email
+      }
     }
 
     var _resetMakingRequestType = function() {
