@@ -12,7 +12,12 @@ const fs = require('fs')
 const S3 = require('aws-sdk/clients/s3')
 const { URL } = require('url')
 const { callbackify } = require('util')
-const { WriteError, ReadError, NotFoundError } = require('./Errors')
+const {
+  WriteError,
+  ReadError,
+  NotFoundError,
+  SettingsError
+} = require('./Errors')
 
 module.exports = {
   sendFile: callbackify(sendFile),
@@ -37,8 +42,6 @@ module.exports = {
   }
 }
 
-const _client = new S3(_defaultOptions())
-
 async function sendFile(bucketName, key, fsPath) {
   let readStream
   try {
@@ -61,7 +64,7 @@ async function sendStream(bucketName, key, readStream) {
       metrics.count('s3.egress', meteredStream.bytes)
     })
 
-    const response = await _client
+    const response = await _client(bucketName)
       .upload({
         Bucket: bucketName,
         Key: key,
@@ -92,7 +95,9 @@ async function getFileStream(bucketName, key, opts) {
   }
 
   return new Promise((resolve, reject) => {
-    const stream = _client.getObject(params).createReadStream()
+    const stream = _client(bucketName)
+      .getObject(params)
+      .createReadStream()
 
     const meteredStream = meter()
     meteredStream.on('finish', () => {
@@ -115,7 +120,7 @@ async function deleteDirectory(bucketName, key) {
   let response
 
   try {
-    response = await _client
+    response = await _client(bucketName)
       .listObjects({ Bucket: bucketName, Prefix: key })
       .promise()
   } catch (err) {
@@ -130,7 +135,7 @@ async function deleteDirectory(bucketName, key) {
   const objects = response.Contents.map(item => ({ Key: item.Key }))
   if (objects.length) {
     try {
-      await _client
+      await _client(bucketName)
         .deleteObjects({
           Bucket: bucketName,
           Delete: {
@@ -152,7 +157,7 @@ async function deleteDirectory(bucketName, key) {
 
 async function getFileSize(bucketName, key) {
   try {
-    const response = await _client
+    const response = await _client(bucketName)
       .headObject({ Bucket: bucketName, Key: key })
       .promise()
     return response.ContentLength
@@ -168,7 +173,9 @@ async function getFileSize(bucketName, key) {
 
 async function deleteFile(bucketName, key) {
   try {
-    await _client.deleteObject({ Bucket: bucketName, Key: key }).promise()
+    await _client(bucketName)
+      .deleteObject({ Bucket: bucketName, Key: key })
+      .promise()
   } catch (err) {
     throw _wrapError(
       err,
@@ -186,7 +193,9 @@ async function copyFile(bucketName, sourceKey, destKey) {
     CopySource: `${bucketName}/${sourceKey}`
   }
   try {
-    await _client.copyObject(params).promise()
+    await _client(bucketName)
+      .copyObject(params)
+      .promise()
   } catch (err) {
     throw _wrapError(err, 'failed to copy file in S3', params, WriteError)
   }
@@ -211,7 +220,7 @@ async function checkIfFileExists(bucketName, key) {
 
 async function directorySize(bucketName, key) {
   try {
-    const response = await _client
+    const response = await _client(bucketName)
       .listObjects({ Bucket: bucketName, Prefix: key })
       .promise()
 
@@ -240,9 +249,49 @@ function _wrapError(error, message, params, ErrorType) {
   }
 }
 
-function _defaultOptions() {
-  const options = {
-    credentials: {
+const _clients = {}
+
+function _client(bucket) {
+  if (_clients[bucket]) {
+    return _clients[bucket]
+  }
+
+  if (
+    settings.filestore.s3.s3BucketCreds &&
+    settings.filestore.s3.s3BucketCreds[bucket]
+  ) {
+    _clients[bucket] = new S3(
+      _clientOptions(settings.filestore.s3.s3BucketCreds[bucket])
+    )
+    return _clients[bucket]
+  }
+
+  // no specific credentials for the bucket
+  if (_clients.default) {
+    return _clients.default
+  }
+
+  if (settings.filestore.s3.key) {
+    _clients.default = new S3(_clientOptions())
+    return _clients.default
+  }
+
+  throw new SettingsError({
+    message: 'no bucket-specific or default credentials provided',
+    info: { bucket }
+  })
+}
+
+function _clientOptions(bucketCredentials) {
+  const options = {}
+
+  if (bucketCredentials) {
+    options.credentials = {
+      accessKeyId: bucketCredentials.auth_key,
+      secretAccessKey: bucketCredentials.auth_secret
+    }
+  } else {
+    options.credentials = {
       accessKeyId: settings.filestore.s3.key,
       secretAccessKey: settings.filestore.s3.secret
     }
