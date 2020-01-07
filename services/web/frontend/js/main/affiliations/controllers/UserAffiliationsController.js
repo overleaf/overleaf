@@ -47,6 +47,8 @@ define(['base'], App =>
       }
     }
     const _ssoAvailable = affiliation => {
+      if (!ExposedSettings.hasSamlFeature) return false
+
       if (!affiliation) {
         return false
       }
