@@ -20,6 +20,7 @@
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js"
   },
   "dependencies": {
+    "@overleaf/o-error": "^2.1.0",
     "async": "~0.2.10",
     "aws-sdk": "^2.1.39",
     "body-parser": "^1.2.0",
@@ -47,7 +48,7 @@
     "babel-eslint": "^10.0.3",
     "bunyan": "^1.3.5",
     "chai": "4.2.0",
-    "eslint": "^5.16.0",
+    "eslint": "^6.4.0",
     "eslint-config-prettier": "^6.7.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-chai-expect": "^2.1.0",

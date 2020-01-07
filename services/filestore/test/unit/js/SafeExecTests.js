@@ -1,95 +1,109 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const { assert } = require('chai')
-const sinon = require('sinon')
 const chai = require('chai')
 const should = chai.should()
 const { expect } = chai
-const modulePath = '../../../app/js/SafeExec.js'
+const modulePath = '../../../app/js/SafeExec'
 const SandboxedModule = require('sandboxed-module')
 
 describe('SafeExec', function() {
+  let settings, options, safeExec
+
   beforeEach(function() {
-    this.settings = { enableConversions: true }
-    this.safe_exec = SandboxedModule.require(modulePath, {
+    settings = { enableConversions: true }
+    options = { timeout: 10 * 1000, killSignal: 'SIGTERM' }
+
+    safeExec = SandboxedModule.require(modulePath, {
       requires: {
         'logger-sharelatex': {
           log() {},
           err() {}
         },
-        'settings-sharelatex': this.settings
+        'settings-sharelatex': settings
       }
     })
-    return (this.options = { timeout: 10 * 1000, killSignal: 'SIGTERM' })
   })
 
-  return describe('safe_exec', function() {
+  describe('safeExec', function() {
     it('should execute a valid command', function(done) {
-      return this.safe_exec(
-        ['/bin/echo', 'hello'],
-        this.options,
-        (err, stdout, stderr) => {
-          stdout.should.equal('hello\n')
-          should.not.exist(err)
-          return done()
-        }
-      )
+      safeExec(['/bin/echo', 'hello'], options, (err, stdout, stderr) => {
+        stdout.should.equal('hello\n')
+        stderr.should.equal('')
+        should.not.exist(err)
+        done()
+      })
     })
 
     it('should error when conversions are disabled', function(done) {
-      this.settings.enableConversions = false
-      return this.safe_exec(
-        ['/bin/echo', 'hello'],
-        this.options,
-        (err, stdout, stderr) => {
-          expect(err).to.exist
-          return done()
-        }
-      )
+      settings.enableConversions = false
+      safeExec(['/bin/echo', 'hello'], options, err => {
+        expect(err).to.exist
+        done()
+      })
     })
 
     it('should execute a command with non-zero exit status', function(done) {
-      return this.safe_exec(
-        ['/usr/bin/env', 'false'],
-        this.options,
-        (err, stdout, stderr) => {
-          stdout.should.equal('')
-          stderr.should.equal('')
-          err.message.should.equal('exit status 1')
-          return done()
-        }
-      )
+      safeExec(['/usr/bin/env', 'false'], options, err => {
+        expect(err).to.exist
+        expect(err.name).to.equal('FailedCommandError')
+        expect(err.code).to.equal(1)
+        expect(err.stdout).to.equal('')
+        expect(err.stderr).to.equal('')
+        done()
+      })
     })
 
     it('should handle an invalid command', function(done) {
-      return this.safe_exec(
-        ['/bin/foobar'],
-        this.options,
-        (err, stdout, stderr) => {
-          err.code.should.equal('ENOENT')
-          return done()
+      safeExec(['/bin/foobar'], options, err => {
+        err.code.should.equal('ENOENT')
+        done()
+      })
+    })
+
+    it('should handle a command that runs too long', function(done) {
+      safeExec(
+        ['/bin/sleep', '10'],
+        { timeout: 500, killSignal: 'SIGTERM' },
+        err => {
+          expect(err).to.exist
+          expect(err.name).to.equal('FailedCommandError')
+          expect(err.code).to.equal('SIGTERM')
+          done()
         }
       )
     })
+  })
 
-    return it('should handle a command that runs too long', function(done) {
-      return this.safe_exec(
-        ['/bin/sleep', '10'],
-        { timeout: 500, killSignal: 'SIGTERM' },
-        (err, stdout, stderr) => {
-          err.should.equal('SIGTERM')
-          return done()
-        }
-      )
+  describe('as a promise', function() {
+    beforeEach(function() {
+      safeExec = safeExec.promises
+    })
+
+    it('should execute a valid command', async function() {
+      const { stdout, stderr } = await safeExec(['/bin/echo', 'hello'], options)
+
+      stdout.should.equal('hello\n')
+      stderr.should.equal('')
+    })
+
+    it('should throw a ConversionsDisabledError when appropriate', async function() {
+      settings.enableConversions = false
+      try {
+        await safeExec(['/bin/echo', 'hello'], options)
+      } catch (err) {
+        expect(err.name).to.equal('ConversionsDisabledError')
+        return
+      }
+      expect('method did not throw an error').not.to.exist
+    })
+
+    it('should throw a FailedCommandError when appropriate', async function() {
+      try {
+        await safeExec(['/usr/bin/env', 'false'], options)
+      } catch (err) {
+        expect(err.name).to.equal('FailedCommandError')
+        expect(err.code).to.equal(1)
+        return
+      }
+      expect('method did not throw an error').not.to.exist
     })
   })
 })

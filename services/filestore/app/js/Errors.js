@@ -1,16 +1,38 @@
-/* eslint-disable
-    no-proto,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-let Errors
-var NotFoundError = function(message) {
-  const error = new Error(message)
-  error.name = 'NotFoundError'
-  error.__proto__ = NotFoundError.prototype
-  return error
-}
-NotFoundError.prototype.__proto__ = Error.prototype
+const OError = require('@overleaf/o-error')
 
-module.exports = Errors = { NotFoundError }
+// Error class for legacy errors so they inherit OError while staying
+// backward-compatible (can be instantiated with string as argument instead
+// of object)
+class BackwardCompatibleError extends OError {
+  constructor(messageOrOptions) {
+    let options
+    if (typeof messageOrOptions === 'string') {
+      options = { message: messageOrOptions }
+    } else if (!messageOrOptions) {
+      options = {}
+    } else {
+      options = messageOrOptions
+    }
+    super(options)
+  }
+}
+
+class NotFoundError extends BackwardCompatibleError {}
+class ConversionsDisabledError extends BackwardCompatibleError {}
+
+class FailedCommandError extends OError {
+  constructor(command, code, stdout, stderr) {
+    super({
+      message: 'command failed with error exit code',
+      info: {
+        command,
+        code
+      }
+    })
+    this.stdout = stdout
+    this.stderr = stderr
+    this.code = code
+  }
+}
+
+module.exports = { NotFoundError, FailedCommandError, ConversionsDisabledError }
