@@ -1,71 +1,78 @@
-/* eslint-disable
-    camelcase,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const settings = require('settings-sharelatex')
 
 module.exports = {
-  getConvertedFolderKey(key) {
-    return (key = `${key}-converted-cache/`)
-  },
+  getConvertedFolderKey,
+  addCachingToKey,
+  userFileKeyMiddleware,
+  publicFileKeyMiddleware,
+  publicProjectKeyMiddleware,
+  templateFileKeyMiddleware
+}
 
-  addCachingToKey(key, opts) {
-    key = this.getConvertedFolderKey(key)
-    if (opts.format != null && opts.style == null) {
-      key = `${key}format-${opts.format}`
-    }
-    if (opts.style != null && opts.format == null) {
-      key = `${key}style-${opts.style}`
-    }
-    if (opts.style != null && opts.format != null) {
-      key = `${key}format-${opts.format}-style-${opts.style}`
-    }
-    return key
-  },
+function getConvertedFolderKey(key) {
+  return `${key}-converted-cache/`
+}
 
-  userFileKey(req, res, next) {
-    const { project_id, file_id } = req.params
-    req.key = `${project_id}/${file_id}`
-    req.bucket = settings.filestore.stores.user_files
-    return next()
-  },
+function addCachingToKey(key, opts) {
+  key = this.getConvertedFolderKey(key)
 
-  publicFileKey(req, res, next) {
-    const { project_id, public_file_id } = req.params
-    if (settings.filestore.stores.public_files == null) {
-      return res.status(501).send('public files not available')
-    } else {
-      req.key = `${project_id}/${public_file_id}`
-      req.bucket = settings.filestore.stores.public_files
-      return next()
-    }
-  },
-
-  templateFileKey(req, res, next) {
-    const { template_id, format, version, sub_type } = req.params
-    req.key = `${template_id}/v/${version}/${format}`
-    if (sub_type != null) {
-      req.key = `${req.key}/${sub_type}`
-    }
-    req.bucket = settings.filestore.stores.template_files
-    req.version = version
-    const opts = req.query
-    return next()
-  },
-
-  publicProjectKey(req, res, next) {
-    const { project_id } = req.params
-    req.project_id = project_id
-    req.bucket = settings.filestore.stores.user_files
-    return next()
+  if (opts.format && !opts.style) {
+    key = `${key}format-${opts.format}`
   }
+  if (opts.style && !opts.format) {
+    key = `${key}style-${opts.style}`
+  }
+  if (opts.style && opts.format) {
+    key = `${key}format-${opts.format}-style-${opts.style}`
+  }
+
+  return key
+}
+
+function userFileKeyMiddleware(req, res, next) {
+  const { project_id: projectId, file_id: fileId } = req.params
+  req.key = `${projectId}/${fileId}`
+  req.bucket = settings.filestore.stores.user_files
+  next()
+}
+
+function publicFileKeyMiddleware(req, res, next) {
+  if (settings.filestore.stores.public_files == null) {
+    return res.status(501).send('public files not available')
+  }
+
+  const { project_id: projectId, public_file_id: publicFileId } = req.params
+  req.key = `${projectId}/${publicFileId}`
+  req.bucket = settings.filestore.stores.public_files
+
+  next()
+}
+
+function templateFileKeyMiddleware(req, res, next) {
+  const {
+    template_id: templateId,
+    format,
+    version,
+    sub_type: subType
+  } = req.params
+
+  req.key = `${templateId}/v/${version}/${format}`
+
+  if (subType) {
+    req.key = `${req.key}/${subType}`
+  }
+
+  req.bucket = settings.filestore.stores.template_files
+  req.version = version
+
+  next()
+}
+
+function publicProjectKeyMiddleware(req, res, next) {
+  const { project_id: projectId } = req.params
+
+  req.project_id = projectId
+  req.bucket = settings.filestore.stores.user_files
+
+  next()
 }

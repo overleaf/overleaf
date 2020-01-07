@@ -89,82 +89,82 @@ Metrics.injectMetricsRoute(app)
 
 app.head(
   '/project/:project_id/file/:file_id',
-  keyBuilder.userFileKey,
+  keyBuilder.userFileKeyMiddleware,
   fileController.getFileHead
 )
 app.get(
   '/project/:project_id/file/:file_id',
-  keyBuilder.userFileKey,
+  keyBuilder.userFileKeyMiddleware,
   fileController.getFile
 )
 app.post(
   '/project/:project_id/file/:file_id',
-  keyBuilder.userFileKey,
+  keyBuilder.userFileKeyMiddleware,
   fileController.insertFile
 )
 app.put(
   '/project/:project_id/file/:file_id',
-  keyBuilder.userFileKey,
+  keyBuilder.userFileKeyMiddleware,
   bodyParser.json(),
   fileController.copyFile
 )
 app.del(
   '/project/:project_id/file/:file_id',
-  keyBuilder.userFileKey,
+  keyBuilder.userFileKeyMiddleware,
   fileController.deleteFile
 )
 
 app.head(
   '/template/:template_id/v/:version/:format',
-  keyBuilder.templateFileKey,
+  keyBuilder.templateFileKeyMiddleware,
   fileController.getFileHead
 )
 app.get(
   '/template/:template_id/v/:version/:format',
-  keyBuilder.templateFileKey,
+  keyBuilder.templateFileKeyMiddleware,
   fileController.getFile
 )
 app.get(
   '/template/:template_id/v/:version/:format/:sub_type',
-  keyBuilder.templateFileKey,
+  keyBuilder.templateFileKeyMiddleware,
   fileController.getFile
 )
 app.post(
   '/template/:template_id/v/:version/:format',
-  keyBuilder.templateFileKey,
+  keyBuilder.templateFileKeyMiddleware,
   fileController.insertFile
 )
 
 app.head(
   '/project/:project_id/public/:public_file_id',
-  keyBuilder.publicFileKey,
+  keyBuilder.publicFileKeyMiddleware,
   fileController.getFileHead
 )
 app.get(
   '/project/:project_id/public/:public_file_id',
-  keyBuilder.publicFileKey,
+  keyBuilder.publicFileKeyMiddleware,
   fileController.getFile
 )
 app.post(
   '/project/:project_id/public/:public_file_id',
-  keyBuilder.publicFileKey,
+  keyBuilder.publicFileKeyMiddleware,
   fileController.insertFile
 )
 app.put(
   '/project/:project_id/public/:public_file_id',
-  keyBuilder.publicFileKey,
+  keyBuilder.publicFileKeyMiddleware,
   bodyParser.json(),
   fileController.copyFile
 )
 app.del(
   '/project/:project_id/public/:public_file_id',
-  keyBuilder.publicFileKey,
+  keyBuilder.publicFileKeyMiddleware,
   fileController.deleteFile
 )
 
 app.get(
   '/project/:project_id/size',
-  keyBuilder.publicProjectKey,
+  keyBuilder.publicProjectKeyMiddleware,
   fileController.directorySize
 )
 

@@ -20,6 +20,7 @@ class BackwardCompatibleError extends OError {
 class NotFoundError extends BackwardCompatibleError {}
 class WriteError extends BackwardCompatibleError {}
 class ReadError extends BackwardCompatibleError {}
+class HealthCheckError extends BackwardCompatibleError {}
 class ConversionsDisabledError extends BackwardCompatibleError {}
 class ConversionError extends BackwardCompatibleError {}
 
@@ -44,5 +45,6 @@ module.exports = {
   ConversionsDisabledError,
   WriteError,
   ReadError,
-  ConversionError
+  ConversionError,
+  HealthCheckError
 }
