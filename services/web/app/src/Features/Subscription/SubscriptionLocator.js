@@ -17,6 +17,7 @@ const { Subscription } = require('../../models/Subscription')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
 const logger = require('logger-sharelatex')
 const { ObjectId } = require('mongoose').Types
+require('./GroupPlansData') // make sure dynamic group plans are loaded
 
 const SubscriptionLocator = {
   getUsersSubscription(user_or_id, callback) {

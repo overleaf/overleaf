@@ -1,17 +1,3 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const async = require('async')
 const PlansLocator = require('./PlansLocator')
 const _ = require('underscore')
@@ -24,50 +10,45 @@ const V1SubscriptionManager = require('./V1SubscriptionManager')
 const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 const UserGetter = require('../User/UserGetter')
 
-const oneMonthInSeconds = 60 * 60 * 24 * 30
-
 const FeaturesUpdater = {
-  refreshFeatures(user_id, callback) {
-    if (callback == null) {
-      callback = function(error, features, featuresChanged) {}
-    }
-    FeaturesUpdater._computeFeatures(user_id, (error, features) => {
+  refreshFeatures(userId, callback = () => {}) {
+    FeaturesUpdater._computeFeatures(userId, (error, features) => {
       if (error) {
         return callback(error)
       }
-      logger.log({ user_id, features }, 'updating user features')
-      UserFeaturesUpdater.updateFeatures(user_id, features, callback)
+      logger.log({ userId, features }, 'updating user features')
+      UserFeaturesUpdater.updateFeatures(userId, features, callback)
     })
   },
 
-  _computeFeatures(user_id, callback) {
+  _computeFeatures(userId, callback) {
     const jobs = {
       individualFeatures(cb) {
-        return FeaturesUpdater._getIndividualFeatures(user_id, cb)
+        FeaturesUpdater._getIndividualFeatures(userId, cb)
       },
       groupFeatureSets(cb) {
-        return FeaturesUpdater._getGroupFeatureSets(user_id, cb)
+        FeaturesUpdater._getGroupFeatureSets(userId, cb)
       },
       institutionFeatures(cb) {
-        return InstitutionsFeatures.getInstitutionsFeatures(user_id, cb)
+        InstitutionsFeatures.getInstitutionsFeatures(userId, cb)
       },
       v1Features(cb) {
-        return FeaturesUpdater._getV1Features(user_id, cb)
+        FeaturesUpdater._getV1Features(userId, cb)
       },
       bonusFeatures(cb) {
-        return ReferalFeatures.getBonusFeatures(user_id, cb)
+        ReferalFeatures.getBonusFeatures(userId, cb)
       },
       samlFeatures(cb) {
-        return FeaturesUpdater._getSamlFeatures(user_id, cb)
+        FeaturesUpdater._getSamlFeatures(userId, cb)
       },
       featuresOverrides(cb) {
-        return FeaturesUpdater._getFeaturesOverrides(user_id, cb)
+        FeaturesUpdater._getFeaturesOverrides(userId, cb)
       }
     }
-    return async.series(jobs, function(err, results) {
-      if (err != null) {
+    async.series(jobs, function(err, results) {
+      if (err) {
         logger.warn(
-          { err, user_id },
+          { err, userId },
           'error getting subscription or group for refreshFeatures'
         )
         return callback(err)
@@ -84,7 +65,7 @@ const FeaturesUpdater = {
       } = results
       logger.log(
         {
-          user_id,
+          userId,
           individualFeatures,
           groupFeatureSets,
           institutionFeatures,
@@ -112,28 +93,20 @@ const FeaturesUpdater = {
     })
   },
 
-  _getIndividualFeatures(user_id, callback) {
-    if (callback == null) {
-      callback = function(error, features) {}
-    }
-    return SubscriptionLocator.getUsersSubscription(user_id, (err, sub) =>
+  _getIndividualFeatures(userId, callback) {
+    SubscriptionLocator.getUsersSubscription(userId, (err, sub) =>
       callback(err, FeaturesUpdater._subscriptionToFeatures(sub))
     )
   },
 
-  _getGroupFeatureSets(user_id, callback) {
-    if (callback == null) {
-      callback = function(error, featureSets) {}
-    }
-    return SubscriptionLocator.getGroupSubscriptionsMemberOf(
-      user_id,
-      (err, subs) =>
-        callback(err, (subs || []).map(FeaturesUpdater._subscriptionToFeatures))
+  _getGroupFeatureSets(userId, callback) {
+    SubscriptionLocator.getGroupSubscriptionsMemberOf(userId, (err, subs) =>
+      callback(err, (subs || []).map(FeaturesUpdater._subscriptionToFeatures))
     )
   },
 
-  _getSamlFeatures(user_id, callback) {
-    UserGetter.getUser(user_id, (err, user) => {
+  _getSamlFeatures(userId, callback) {
+    UserGetter.getUser(userId, (err, user) => {
       if (err) {
         return callback(err)
       }
@@ -152,12 +125,12 @@ const FeaturesUpdater = {
           )
         }
       }
-      return callback(null, {})
+      callback(null, {})
     })
   },
 
-  _getFeaturesOverrides(user_id, callback) {
-    UserGetter.getUser(user_id, { featuresOverrides: 1 }, (error, user) => {
+  _getFeaturesOverrides(userId, callback) {
+    UserGetter.getUser(userId, { featuresOverrides: 1 }, (error, user) => {
       if (error) {
         return callback(error)
       }
@@ -182,27 +155,24 @@ const FeaturesUpdater = {
         FeaturesUpdater._mergeFeatures,
         {}
       )
-      return callback(null, features)
+      callback(null, features)
     })
   },
 
-  _getV1Features(user_id, callback) {
-    if (callback == null) {
-      callback = function(error, features) {}
-    }
-    return V1SubscriptionManager.getPlanCodeFromV1(user_id, function(
+  _getV1Features(userId, callback) {
+    V1SubscriptionManager.getPlanCodeFromV1(userId, function(
       err,
       planCode,
       v1Id
     ) {
-      if (err != null) {
-        if ((err != null ? err.name : undefined) === 'NotFoundError') {
+      if (err) {
+        if ((err ? err.name : undefined) === 'NotFoundError') {
           return callback(null, [])
         }
         return callback(err)
       }
 
-      return callback(
+      callback(
         err,
         FeaturesUpdater._mergeFeatures(
           V1SubscriptionManager.getGrandfatheredFeaturesForV1User(v1Id) || {},
@@ -216,7 +186,6 @@ const FeaturesUpdater = {
     const features = Object.assign({}, featuresA)
     for (let key in featuresB) {
       // Special merging logic for non-boolean features
-      const value = featuresB[key]
       if (key === 'compileGroup') {
         if (
           features['compileGroup'] === 'priority' ||
@@ -253,27 +222,69 @@ const FeaturesUpdater = {
 
   _subscriptionToFeatures(subscription) {
     return FeaturesUpdater._planCodeToFeatures(
-      subscription != null ? subscription.planCode : undefined
+      subscription ? subscription.planCode : undefined
     )
   },
 
   _planCodeToFeatures(planCode) {
-    if (planCode == null) {
+    if (!planCode) {
       return {}
     }
     const plan = PlansLocator.findLocalPlanInSettings(planCode)
-    if (plan == null) {
+    if (!plan) {
       return {}
     } else {
       return plan.features
     }
+  },
+
+  compareFeatures(currentFeatures, expectedFeatures) {
+    currentFeatures = _.clone(currentFeatures)
+    expectedFeatures = _.clone(expectedFeatures)
+    if (_.isEqual(currentFeatures, expectedFeatures)) {
+      return {}
+    }
+
+    let mismatchReasons = {}
+    const featureKeys = [
+      ...new Set([
+        ...Object.keys(currentFeatures),
+        ...Object.keys(expectedFeatures)
+      ])
+    ]
+    featureKeys.sort().forEach(key => {
+      if (expectedFeatures[key] !== currentFeatures[key]) {
+        mismatchReasons[key] = expectedFeatures[key]
+      }
+    })
+
+    if (mismatchReasons.compileTimeout) {
+      // store the compile timeout difference instead of the new compile timeout
+      mismatchReasons.compileTimeout =
+        expectedFeatures.compileTimeout - currentFeatures.compileTimeout
+    }
+
+    if (mismatchReasons.collaborators) {
+      // store the collaborators difference instead of the new number only
+      // replace -1 by 100 to make it clearer
+      if (expectedFeatures.collaborators === -1) {
+        expectedFeatures.collaborators = 100
+      }
+      if (currentFeatures.collaborators === -1) {
+        currentFeatures.collaborators = 100
+      }
+      mismatchReasons.collaborators =
+        expectedFeatures.collaborators - currentFeatures.collaborators
+    }
+
+    return mismatchReasons
   }
 }
 
-const refreshFeaturesPromise = user_id =>
+const refreshFeaturesPromise = userId =>
   new Promise(function(resolve, reject) {
     FeaturesUpdater.refreshFeatures(
-      user_id,
+      userId,
       (error, features, featuresChanged) => {
         if (error) {
           reject(error)
