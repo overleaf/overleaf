@@ -12,6 +12,7 @@ describe('FileController', function() {
     FileController,
     req,
     res,
+    next,
     stream
   const settings = {
     s3: {
@@ -26,6 +27,7 @@ describe('FileController', function() {
   const fileId = 'file_id'
   const bucket = 'user_files'
   const key = `${projectId}/${fileId}`
+  const error = new Error('incorrect utensil')
 
   beforeEach(function() {
     PersistorManager = {
@@ -57,10 +59,6 @@ describe('FileController', function() {
         'settings-sharelatex': settings,
         'metrics-sharelatex': {
           inc() {}
-        },
-        'logger-sharelatex': {
-          log() {},
-          err() {}
         }
       },
       globals: { console }
@@ -82,11 +80,13 @@ describe('FileController', function() {
       sendStatus: sinon.stub().returnsThis(),
       status: sinon.stub().returnsThis()
     }
+
+    next = sinon.stub()
   })
 
   describe('getFile', function() {
     it('should pipe the stream', function() {
-      FileController.getFile(req, res)
+      FileController.getFile(req, res, next)
       expect(stream.pipeline).to.have.been.calledWith(fileStream, res)
     })
 
@@ -96,16 +96,13 @@ describe('FileController', function() {
         statusCode.should.equal(200)
         done()
       }
-      FileController.getFile(req, res)
+      FileController.getFile(req, res, next)
     })
 
-    it('should send a 500 if there is a problem', function(done) {
-      FileHandler.getFile.yields('error')
-      res.sendStatus = code => {
-        code.should.equal(500)
-        done()
-      }
-      FileController.getFile(req, res)
+    it('should send an error if there is a problem', function() {
+      FileHandler.getFile.yields(error)
+      FileController.getFile(req, res, next)
+      expect(next).to.have.been.calledWith(error)
     })
 
     describe('with a range header', function() {
@@ -125,7 +122,7 @@ describe('FileController', function() {
         expectedOptions.start = 0
         expectedOptions.end = 8
 
-        FileController.getFile(req, res)
+        FileController.getFile(req, res, next)
         expect(FileHandler.getFile).to.have.been.calledWith(
           bucket,
           key,
@@ -135,7 +132,7 @@ describe('FileController', function() {
 
       it('should ignore an invalid range header', function() {
         req.headers.range = 'potato'
-        FileController.getFile(req, res)
+        FileController.getFile(req, res, next)
         expect(FileHandler.getFile).to.have.been.calledWith(
           bucket,
           key,
@@ -145,7 +142,7 @@ describe('FileController', function() {
 
       it("should ignore any type other than 'bytes'", function() {
         req.headers.range = 'wombats=0-8'
-        FileController.getFile(req, res)
+        FileController.getFile(req, res, next)
         expect(FileHandler.getFile).to.have.been.calledWith(
           bucket,
           key,
@@ -163,7 +160,7 @@ describe('FileController', function() {
         done()
       }
 
-      FileController.getFileHead(req, res)
+      FileController.getFileHead(req, res, next)
     })
 
     it('should return a 404 is the file is not found', function(done) {
@@ -174,18 +171,14 @@ describe('FileController', function() {
         done()
       }
 
-      FileController.getFileHead(req, res)
+      FileController.getFileHead(req, res, next)
     })
 
-    it('should return a 500 on internal errors', function(done) {
-      FileHandler.getFileSize.yields(new Error())
+    it('should send an error on internal errors', function() {
+      FileHandler.getFileSize.yields(error)
 
-      res.sendStatus = code => {
-        expect(code).to.equal(500)
-        done()
-      }
-
-      FileController.getFileHead(req, res)
+      FileController.getFileHead(req, res, next)
+      expect(next).to.have.been.calledWith(error)
     })
   })
 
@@ -196,7 +189,7 @@ describe('FileController', function() {
         expect(code).to.equal(200)
         done()
       }
-      FileController.insertFile(req, res)
+      FileController.insertFile(req, res, next)
     })
   })
 
@@ -224,7 +217,7 @@ describe('FileController', function() {
         )
         done()
       }
-      FileController.copyFile(req, res)
+      FileController.copyFile(req, res, next)
     })
 
     it('should send a 404 if the original file was not found', function(done) {
@@ -233,16 +226,13 @@ describe('FileController', function() {
         code.should.equal(404)
         done()
       }
-      FileController.copyFile(req, res)
+      FileController.copyFile(req, res, next)
     })
 
-    it('should send a 500 if there was an error', function(done) {
-      PersistorManager.copyFile.yields('error')
-      res.sendStatus = code => {
-        code.should.equal(500)
-        done()
-      }
-      FileController.copyFile(req, res)
+    it('should send an error if there was an error', function() {
+      PersistorManager.copyFile.yields(error)
+      FileController.copyFile(req, res, next)
+      expect(next).to.have.been.calledWith(error)
     })
   })
 
@@ -253,16 +243,13 @@ describe('FileController', function() {
         expect(FileHandler.deleteFile).to.have.been.calledWith(bucket, key)
         done()
       }
-      FileController.deleteFile(req, res)
+      FileController.deleteFile(req, res, next)
     })
 
-    it('should send a 500 if there was an error', function(done) {
-      FileHandler.deleteFile.yields('error')
-      res.sendStatus = code => {
-        code.should.equal(500)
-        done()
-      }
-      FileController.deleteFile(req, res)
+    it('should send a 500 if there was an error', function() {
+      FileHandler.deleteFile.yields(error)
+      FileController.deleteFile(req, res, next)
+      expect(next).to.have.been.calledWith(error)
     })
   })
 
@@ -276,13 +263,10 @@ describe('FileController', function() {
       })
     })
 
-    it('should send a 500 if there was an error', function(done) {
-      FileHandler.getDirectorySize.callsArgWith(2, 'error')
-      res.sendStatus = code => {
-        code.should.equal(500)
-        done()
-      }
-      FileController.directorySize(req, res)
+    it('should send a 500 if there was an error', function() {
+      FileHandler.getDirectorySize.yields(error)
+      FileController.directorySize(req, res, next)
+      expect(next).to.have.been.calledWith(error)
     })
   })
 })

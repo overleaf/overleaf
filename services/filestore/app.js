@@ -12,6 +12,8 @@ const fileController = require('./app/js/FileController')
 const keyBuilder = require('./app/js/KeyBuilder')
 const healthCheckController = require('./app/js/HealthCheckController')
 
+const RequestLogger = require('./app/js/RequestLogger')
+
 const app = express()
 
 if (settings.sentry && settings.sentry.dsn) {
@@ -27,6 +29,7 @@ if (Metrics.event_loop) {
 app.use(Metrics.http.monitor(logger))
 app.use(function(req, res, next) {
   Metrics.inc('http-request')
+  res.logInfo = {}
   next()
 })
 
@@ -136,6 +139,9 @@ app.get('/status', function(req, res) {
 })
 
 app.get('/health_check', healthCheckController.check)
+
+app.use(RequestLogger.logRequest)
+app.use(RequestLogger.logError)
 
 const port = settings.internal.filestore.port || 3009
 const host = '0.0.0.0'

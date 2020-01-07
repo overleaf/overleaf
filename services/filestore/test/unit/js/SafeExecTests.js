@@ -13,10 +13,6 @@ describe('SafeExec', function() {
 
     safeExec = SandboxedModule.require(modulePath, {
       requires: {
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        },
         'settings-sharelatex': settings
       }
     })

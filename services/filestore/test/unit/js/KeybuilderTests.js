@@ -7,14 +7,7 @@ describe('LocalFileWriter', function() {
   const key = 'wombat/potato'
 
   beforeEach(function() {
-    KeyBuilder = SandboxedModule.require(modulePath, {
-      requires: {
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
-      }
-    })
+    KeyBuilder = SandboxedModule.require(modulePath)
   })
 
   describe('cachedKey', function() {

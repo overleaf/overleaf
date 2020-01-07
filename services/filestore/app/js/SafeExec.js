@@ -1,5 +1,4 @@
 const _ = require('underscore')
-const logger = require('logger-sharelatex')
 const childProcess = require('child_process')
 const Settings = require('settings-sharelatex')
 const { ConversionsDisabledError, FailedCommandError } = require('./Errors')
@@ -29,26 +28,32 @@ function safeExec(command, options, callback) {
 
   let killTimer
 
-  if (options.timeout) {
-    killTimer = setTimeout(function() {
-      try {
-        // use negative process id to kill process group
-        process.kill(-child.pid, options.killSignal || 'SIGTERM')
-      } catch (error) {
-        logger.log(
-          { process: child.pid, kill_error: error },
-          'error killing process'
-        )
-      }
-    }, options.timeout)
-  }
-
   const cleanup = _.once(function(err) {
     if (killTimer) {
       clearTimeout(killTimer)
     }
     callback(err, stdout, stderr)
   })
+
+  if (options.timeout) {
+    killTimer = setTimeout(function() {
+      try {
+        // use negative process id to kill process group
+        process.kill(-child.pid, options.killSignal || 'SIGTERM')
+      } catch (error) {
+        cleanup(
+          new FailedCommandError({
+            message: 'failed to kill process after timeout',
+            info: {
+              command,
+              options,
+              pid: child.pid
+            }
+          })
+        )
+      }
+    }, options.timeout)
+  }
 
   child.on('close', function(code, signal) {
     if (code || signal) {

@@ -4,7 +4,6 @@ http.globalAgent.maxSockets = 300
 https.globalAgent.maxSockets = 300
 
 const settings = require('settings-sharelatex')
-const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 
 const meter = require('stream-meter')
@@ -64,15 +63,13 @@ async function sendStream(bucketName, key, readStream) {
       metrics.count('s3.egress', meteredStream.bytes)
     })
 
-    const response = await _getClientForBucket(bucketName)
+    await _getClientForBucket(bucketName)
       .upload({
         Bucket: bucketName,
         Key: key,
         Body: readStream.pipe(meteredStream)
       })
       .promise()
-
-    logger.log({ response, bucketName, key }, 'data uploaded to s3')
   } catch (err) {
     throw _wrapError(
       err,
@@ -116,7 +113,6 @@ async function getFileStream(bucketName, key, opts) {
 }
 
 async function deleteDirectory(bucketName, key) {
-  logger.log({ key, bucketName }, 'deleting directory')
   let response
 
   try {

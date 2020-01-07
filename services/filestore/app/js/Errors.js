@@ -24,6 +24,7 @@ class HealthCheckError extends BackwardCompatibleError {}
 class ConversionsDisabledError extends BackwardCompatibleError {}
 class ConversionError extends BackwardCompatibleError {}
 class SettingsError extends BackwardCompatibleError {}
+class TimeoutError extends BackwardCompatibleError {}
 
 class FailedCommandError extends OError {
   constructor(command, code, stdout, stderr) {
@@ -48,5 +49,6 @@ module.exports = {
   ReadError,
   ConversionError,
   HealthCheckError,
-  SettingsError
+  SettingsError,
+  TimeoutError
 }

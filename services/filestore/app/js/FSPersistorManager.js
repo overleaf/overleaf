@@ -1,6 +1,5 @@
 const fs = require('fs')
 const glob = require('glob')
-const logger = require('logger-sharelatex')
 const path = require('path')
 const rimraf = require('rimraf')
 const Stream = require('stream')
@@ -20,7 +19,6 @@ const filterName = key => key.replace(/\//g, '_')
 
 async function sendFile(location, target, source) {
   const filteredTarget = filterName(target)
-  logger.log({ location, target: filteredTarget, source }, 'sending file')
 
   // actually copy the file (instead of moving it) to maintain consistent behaviour
   // between the different implementations
@@ -39,8 +37,6 @@ async function sendFile(location, target, source) {
 }
 
 async function sendStream(location, target, sourceStream) {
-  logger.log({ location, target }, 'sending file stream')
-
   const fsPath = await LocalFileWriter.writeStream(sourceStream)
 
   try {
@@ -53,13 +49,10 @@ async function sendStream(location, target, sourceStream) {
 // opts may be {start: Number, end: Number}
 async function getFileStream(location, name, opts) {
   const filteredName = filterName(name)
-  logger.log({ location, filteredName }, 'getting file')
 
   try {
     opts.fd = await fsOpen(`${location}/${filteredName}`, 'r')
   } catch (err) {
-    logger.err({ err, location, filteredName: name }, 'Error reading from file')
-
     throw _wrapError(
       err,
       'failed to open file for streaming',
@@ -78,8 +71,6 @@ async function getFileSize(location, filename) {
     const stat = await fsStat(fullPath)
     return stat.size
   } catch (err) {
-    logger.err({ err, location, filename }, 'failed to stat file')
-
     throw _wrapError(
       err,
       'failed to stat file',
@@ -92,7 +83,6 @@ async function getFileSize(location, filename) {
 async function copyFile(location, fromName, toName) {
   const filteredFromName = filterName(fromName)
   const filteredToName = filterName(toName)
-  logger.log({ location, filteredFromName, filteredToName }, 'copying file')
 
   try {
     const sourceStream = fs.createReadStream(`${location}/${filteredFromName}`)
@@ -110,7 +100,6 @@ async function copyFile(location, fromName, toName) {
 
 async function deleteFile(location, name) {
   const filteredName = filterName(name)
-  logger.log({ location, filteredName }, 'delete file')
   try {
     await fsUnlink(`${location}/${filteredName}`)
   } catch (err) {
@@ -126,8 +115,6 @@ async function deleteFile(location, name) {
 // this is only called internally for clean-up by `FileHandler` and isn't part of the external API
 async function deleteDirectory(location, name) {
   const filteredName = filterName(name.replace(/\/$/, ''))
-
-  logger.log({ location, filteredName }, 'deleting directory')
 
   try {
     await rmrf(`${location}/${filteredName}`)
