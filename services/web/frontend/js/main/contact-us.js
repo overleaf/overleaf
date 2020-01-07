@@ -12,7 +12,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'libs/platform'], (App, platform) =>
+define(['base'], App =>
   App.controller('GroupPlanContactController', function($scope, $modal, $http) {
     $scope.form = {}
     $scope.sent = false
