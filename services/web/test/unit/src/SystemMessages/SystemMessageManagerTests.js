@@ -21,7 +21,10 @@ const modulePath = require('path').join(
 
 describe('SystemMessageManager', function() {
   beforeEach(function() {
-    this.SystemMessage = {}
+    this.messages = ['messages-stub']
+    this.SystemMessage = {
+      find: sinon.stub().yields(null, this.messages)
+    }
     this.SystemMessageManager = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -33,47 +36,18 @@ describe('SystemMessageManager', function() {
     return (this.callback = sinon.stub())
   })
 
+  it('should look the messages up in the database on import', function() {
+    sinon.assert.called(this.SystemMessage.find)
+  })
+
   describe('getMessage', function() {
     beforeEach(function() {
-      this.messages = ['messages-stub']
-      return (this.SystemMessage.find = sinon
-        .stub()
-        .callsArgWith(1, null, this.messages))
+      this.SystemMessageManager._cachedMessages = this.messages
+      return this.SystemMessageManager.getMessages(this.callback)
     })
 
-    describe('when the messages are not cached', function() {
-      beforeEach(function() {
-        return this.SystemMessageManager.getMessages(this.callback)
-      })
-
-      it('should look the messages up in the database', function() {
-        return this.SystemMessage.find.calledWith({}).should.equal(true)
-      })
-
-      it('should return the messages', function() {
-        return this.callback.calledWith(null, this.messages).should.equal(true)
-      })
-
-      it('should cache the messages', function() {
-        return this.SystemMessageManager._cachedMessages.should.equal(
-          this.messages
-        )
-      })
-    })
-
-    describe('when the messages are cached', function() {
-      beforeEach(function() {
-        this.SystemMessageManager._cachedMessages = this.messages
-        return this.SystemMessageManager.getMessages(this.callback)
-      })
-
-      it('should not look the messages up in the database', function() {
-        return this.SystemMessage.find.called.should.equal(false)
-      })
-
-      it('should return the messages', function() {
-        return this.callback.calledWith(null, this.messages).should.equal(true)
-      })
+    it('should return the messages', function() {
+      return this.callback.calledWith(null, this.messages).should.equal(true)
     })
   })
 

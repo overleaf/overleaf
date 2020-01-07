@@ -17,17 +17,7 @@ module.exports = SystemMessageManager = {
     if (callback == null) {
       callback = function(error, messages) {}
     }
-    if (this._cachedMessages != null) {
-      return callback(null, this._cachedMessages)
-    } else {
-      return this.getMessagesFromDB((error, messages) => {
-        if (error != null) {
-          return callback(error)
-        }
-        this._cachedMessages = messages
-        return callback(null, messages)
-      })
-    }
+    callback(null, this._cachedMessages)
   },
 
   getMessagesFromDB(callback) {
@@ -52,10 +42,15 @@ module.exports = SystemMessageManager = {
     return message.save(callback)
   },
 
-  clearCache() {
-    return delete this._cachedMessages
+  refreshCache() {
+    this.getMessagesFromDB((error, messages) => {
+      if (!error) {
+        this._cachedMessages = messages
+      }
+    })
   }
 }
 
-const CACHE_TIMEOUT = 20 * 1000 // 20 seconds
-setInterval(() => SystemMessageManager.clearCache(), CACHE_TIMEOUT)
+const CACHE_TIMEOUT = 10 * 1000 * (Math.random() + 2) // 20-30 seconds
+SystemMessageManager.refreshCache()
+setInterval(() => SystemMessageManager.refreshCache(), CACHE_TIMEOUT)
