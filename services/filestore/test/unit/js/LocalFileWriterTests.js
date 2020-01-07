@@ -49,6 +49,26 @@ describe('LocalFileWriter', function() {
         done()
       })
     })
+
+    describe('when there is an error', function() {
+      const error = new Error('not enough ketchup')
+      beforeEach(function() {
+        stream.pipeline.yields(error)
+      })
+
+      it('should wrap the error', function() {
+        LocalFileWriter.writeStream(readStream, filename, err => {
+          expect(err).to.exist
+          expect(err.cause).to.equal(error)
+        })
+      })
+
+      it('should delete the temporary file', function() {
+        LocalFileWriter.writeStream(readStream, filename, () => {
+          expect(fs.unlink).to.have.been.calledWith(fsPath)
+        })
+      })
+    })
   })
 
   describe('deleteFile', function() {
@@ -60,18 +80,30 @@ describe('LocalFileWriter', function() {
       })
     })
 
-    it('should not do anything if called with an empty path', function(done) {
-      fs.unlink = sinon.stub().yields(new Error('failed to reticulate splines'))
-      LocalFileWriter.deleteFile(fsPath, err => {
-        expect(err).to.exist
-        done()
-      })
-    })
-
     it('should not call unlink with an empty path', function(done) {
       LocalFileWriter.deleteFile('', err => {
         expect(err).not.to.exist
         expect(fs.unlink).not.to.have.been.called
+        done()
+      })
+    })
+
+    it('should not throw a error if the file does not exist', function(done) {
+      const error = new Error('file not found')
+      error.code = 'ENOENT'
+      fs.unlink = sinon.stub().yields(error)
+      LocalFileWriter.deleteFile(fsPath, err => {
+        expect(err).not.to.exist
+        done()
+      })
+    })
+
+    it('should wrap the error', function(done) {
+      const error = new Error('failed to reticulate splines')
+      fs.unlink = sinon.stub().yields(error)
+      LocalFileWriter.deleteFile(fsPath, err => {
+        expect(err).to.exist
+        expect(err.cause).to.equal(error)
         done()
       })
     })

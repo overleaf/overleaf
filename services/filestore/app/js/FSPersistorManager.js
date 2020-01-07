@@ -1,206 +1,229 @@
-/* eslint-disable
-    handle-callback-err,
-    no-unreachable,
-    node/no-deprecated-api,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const logger = require('logger-sharelatex')
 const fs = require('fs')
+const glob = require('glob')
+const logger = require('logger-sharelatex')
 const path = require('path')
-const LocalFileWriter = require('./LocalFileWriter')
-const Errors = require('./Errors')
 const rimraf = require('rimraf')
-const _ = require('underscore')
+const Stream = require('stream')
+const { promisify, callbackify } = require('util')
+
+const LocalFileWriter = require('./LocalFileWriter').promises
+const { NotFoundError, ReadError, WriteError } = require('./Errors')
+
+const pipeline = promisify(Stream.pipeline)
+const fsUnlink = promisify(fs.unlink)
+const fsOpen = promisify(fs.open)
+const fsStat = promisify(fs.stat)
+const fsGlob = promisify(glob)
+const rmrf = promisify(rimraf)
 
 const filterName = key => key.replace(/\//g, '_')
 
-module.exports = {
-  sendFile(location, target, source, callback) {
-    if (callback == null) {
-      callback = function(err) {}
-    }
-    const filteredTarget = filterName(target)
-    logger.log({ location, target: filteredTarget, source }, 'sending file')
-    const done = _.once(function(err) {
-      if (err != null) {
-        logger.err(
-          { err, location, target: filteredTarget, source },
-          'Error on put of file'
-        )
-      }
-      return callback(err)
-    })
-    // actually copy the file (instead of moving it) to maintain consistent behaviour
-    // between the different implementations
+async function sendFile(location, target, source) {
+  const filteredTarget = filterName(target)
+  logger.log({ location, target: filteredTarget, source }, 'sending file')
+
+  // actually copy the file (instead of moving it) to maintain consistent behaviour
+  // between the different implementations
+  try {
     const sourceStream = fs.createReadStream(source)
-    sourceStream.on('error', done)
     const targetStream = fs.createWriteStream(`${location}/${filteredTarget}`)
-    targetStream.on('error', done)
-    targetStream.on('finish', () => done())
-    return sourceStream.pipe(targetStream)
-  },
-
-  sendStream(location, target, sourceStream, callback) {
-    if (callback == null) {
-      callback = function(err) {}
-    }
-    logger.log({ location, target }, 'sending file stream')
-    sourceStream.on('error', err =>
-      logger.err({ location, target, err: err('error on stream to send') })
+    await pipeline(sourceStream, targetStream)
+  } catch (err) {
+    throw _wrapError(
+      err,
+      'failed to copy the specified file',
+      { location, target, source },
+      WriteError
     )
-    return LocalFileWriter.writeStream(sourceStream, null, (err, fsPath) => {
-      if (err != null) {
-        logger.err(
-          { location, target, fsPath, err },
-          'something went wrong writing stream to disk'
-        )
-        return callback(err)
-      }
-      return this.sendFile(location, target, fsPath, (
-        err // delete the temporary file created above and return the original error
-      ) => LocalFileWriter.deleteFile(fsPath, () => callback(err)))
-    })
-  },
+  }
+}
 
-  // opts may be {start: Number, end: Number}
-  getFileStream(location, name, opts, callback) {
-    if (callback == null) {
-      callback = function(err, res) {}
-    }
-    const filteredName = filterName(name)
-    logger.log({ location, filteredName }, 'getting file')
-    return fs.open(`${location}/${filteredName}`, 'r', function(err, fd) {
-      if (err != null) {
-        logger.err(
-          { err, location, filteredName: name },
-          'Error reading from file'
-        )
-        if (err.code === 'ENOENT') {
-          return callback(new Errors.NotFoundError(err.message), null)
-        } else {
-          return callback(err, null)
-        }
-      }
-      opts.fd = fd
-      const sourceStream = fs.createReadStream(null, opts)
-      return callback(null, sourceStream)
-    })
-  },
+async function sendStream(location, target, sourceStream) {
+  logger.log({ location, target }, 'sending file stream')
 
-  getFileSize(location, filename, callback) {
-    const fullPath = path.join(location, filterName(filename))
-    return fs.stat(fullPath, function(err, stats) {
-      if (err != null) {
-        if (err.code === 'ENOENT') {
-          logger.log({ location, filename }, 'file not found')
-          callback(new Errors.NotFoundError(err.message))
-        } else {
-          logger.err({ err, location, filename }, 'failed to stat file')
-          callback(err)
-        }
-        return
-      }
-      return callback(null, stats.size)
-    })
-  },
+  const fsPath = await LocalFileWriter.writeStream(sourceStream)
 
-  copyFile(location, fromName, toName, callback) {
-    if (callback == null) {
-      callback = function(err) {}
-    }
-    const filteredFromName = filterName(fromName)
-    const filteredToName = filterName(toName)
-    logger.log(
-      { location, fromName: filteredFromName, toName: filteredToName },
-      'copying file'
+  try {
+    await sendFile(location, target, fsPath)
+  } finally {
+    await LocalFileWriter.deleteFile(fsPath)
+  }
+}
+
+// opts may be {start: Number, end: Number}
+async function getFileStream(location, name, opts) {
+  const filteredName = filterName(name)
+  logger.log({ location, filteredName }, 'getting file')
+
+  try {
+    opts.fd = await fsOpen(`${location}/${filteredName}`, 'r')
+  } catch (err) {
+    logger.err({ err, location, filteredName: name }, 'Error reading from file')
+
+    throw _wrapError(
+      err,
+      'failed to open file for streaming',
+      { location, filteredName, opts },
+      ReadError
     )
+  }
+
+  return fs.createReadStream(null, opts)
+}
+
+async function getFileSize(location, filename) {
+  const fullPath = path.join(location, filterName(filename))
+
+  try {
+    const stat = await fsStat(fullPath)
+    return stat.size
+  } catch (err) {
+    logger.err({ err, location, filename }, 'failed to stat file')
+
+    throw _wrapError(
+      err,
+      'failed to stat file',
+      { location, filename },
+      ReadError
+    )
+  }
+}
+
+async function copyFile(location, fromName, toName) {
+  const filteredFromName = filterName(fromName)
+  const filteredToName = filterName(toName)
+  logger.log({ location, filteredFromName, filteredToName }, 'copying file')
+
+  try {
     const sourceStream = fs.createReadStream(`${location}/${filteredFromName}`)
-    sourceStream.on('error', function(err) {
-      logger.err(
-        { err, location, key: filteredFromName },
-        'Error reading from file'
-      )
-      return callback(err)
-    })
     const targetStream = fs.createWriteStream(`${location}/${filteredToName}`)
-    targetStream.on('error', function(err) {
-      logger.err(
-        { err, location, key: filteredToName },
-        'Error writing to file'
-      )
-      return callback(err)
-    })
-    targetStream.on('finish', () => callback(null))
-    return sourceStream.pipe(targetStream)
-  },
+    await pipeline(sourceStream, targetStream)
+  } catch (err) {
+    throw _wrapError(
+      err,
+      'failed to copy file',
+      { location, filteredFromName, filteredToName },
+      WriteError
+    )
+  }
+}
 
-  deleteFile(location, name, callback) {
-    const filteredName = filterName(name)
-    logger.log({ location, filteredName }, 'delete file')
-    return fs.unlink(`${location}/${filteredName}`, function(err) {
-      if (err != null) {
-        logger.err({ err, location, filteredName }, 'Error on delete.')
-        return callback(err)
-      } else {
-        return callback()
-      }
-    })
-  },
+async function deleteFile(location, name) {
+  const filteredName = filterName(name)
+  logger.log({ location, filteredName }, 'delete file')
+  try {
+    await fsUnlink(`${location}/${filteredName}`)
+  } catch (err) {
+    throw _wrapError(
+      err,
+      'failed to delete file',
+      { location, filteredName },
+      WriteError
+    )
+  }
+}
 
-  deleteDirectory(location, name, callback) {
-    if (callback == null) {
-      callback = function(err) {}
+// this is only called internally for clean-up by `FileHandler` and isn't part of the external API
+async function deleteDirectory(location, name) {
+  const filteredName = filterName(name.replace(/\/$/, ''))
+
+  logger.log({ location, filteredName }, 'deleting directory')
+
+  try {
+    await rmrf(`${location}/${filteredName}`)
+  } catch (err) {
+    throw _wrapError(
+      err,
+      'failed to delete directory',
+      { location, filteredName },
+      WriteError
+    )
+  }
+}
+
+async function checkIfFileExists(location, name) {
+  const filteredName = filterName(name)
+  try {
+    const stat = await fsStat(`${location}/${filteredName}`)
+    return !!stat
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return false
     }
-    const filteredName = filterName(name.replace(/\/$/, ''))
-    return rimraf(`${location}/${filteredName}`, function(err) {
-      if (err != null) {
-        logger.err({ err, location, filteredName }, 'Error on rimraf rmdir.')
-        return callback(err)
-      } else {
-        return callback()
-      }
-    })
-  },
+    throw _wrapError(
+      err,
+      'failed to stat file',
+      { location, filteredName },
+      ReadError
+    )
+  }
+}
 
-  checkIfFileExists(location, name, callback) {
-    if (callback == null) {
-      callback = function(err, exists) {}
+// note, does not recurse into subdirectories, as we use a flattened directory structure
+async function directorySize(location, name) {
+  const filteredName = filterName(name.replace(/\/$/, ''))
+  let size = 0
+
+  try {
+    const files = await fsGlob(`${location}/${filteredName}_*`)
+    for (const file of files) {
+      try {
+        const stat = await fsStat(file)
+        if (stat.isFile()) {
+          size += stat.size
+        }
+      } catch (err) {
+        // ignore files that may have just been deleted
+        if (err.code !== 'ENOENT') {
+          throw err
+        }
+      }
     }
-    const filteredName = filterName(name)
-    logger.log({ location, filteredName }, 'checking if file exists')
-    return fs.exists(`${location}/${filteredName}`, function(exists) {
-      logger.log({ location, filteredName, exists }, 'checked if file exists')
-      return callback(null, exists)
-    })
-  },
+  } catch (err) {
+    throw _wrapError(
+      err,
+      'failed to get directory size',
+      { location, name },
+      ReadError
+    )
+  }
 
-  directorySize(location, name, callback) {
-    const filteredName = filterName(name.replace(/\/$/, ''))
-    logger.log({ location, filteredName }, 'get project size in file system')
-    return fs.readdir(`${location}/${filteredName}`, function(err, files) {
-      if (err != null) {
-        logger.err(
-          { err, location, filteredName },
-          'something went wrong listing prefix in aws'
-        )
-        return callback(err)
-      }
-      let totalSize = 0
-      _.each(files, function(entry) {
-        const fd = fs.openSync(`${location}/${filteredName}/${entry}`, 'r')
-        const fileStats = fs.fstatSync(fd)
-        totalSize += fileStats.size
-        return fs.closeSync(fd)
-      })
-      logger.log({ totalSize }, 'total size', { files })
-      return callback(null, totalSize)
-    })
+  return size
+}
+
+function _wrapError(error, message, params, ErrorType) {
+  if (error.code === 'ENOENT') {
+    return new NotFoundError({
+      message: 'no such file or directory',
+      info: params
+    }).withCause(error)
+  } else {
+    return new ErrorType({
+      message: message,
+      info: params
+    }).withCause(error)
+  }
+}
+
+module.exports = {
+  sendFile: callbackify(sendFile),
+  sendStream: callbackify(sendStream),
+  getFileStream: callbackify(getFileStream),
+  getFileSize: callbackify(getFileSize),
+  copyFile: callbackify(copyFile),
+  deleteFile: callbackify(deleteFile),
+  deleteDirectory: callbackify(deleteDirectory),
+  checkIfFileExists: callbackify(checkIfFileExists),
+  directorySize: callbackify(directorySize),
+  promises: {
+    sendFile,
+    sendStream,
+    getFileStream,
+    getFileSize,
+    copyFile,
+    deleteFile,
+    deleteDirectory,
+    checkIfFileExists,
+    directorySize
   }
 }

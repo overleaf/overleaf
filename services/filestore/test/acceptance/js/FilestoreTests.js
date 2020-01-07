@@ -56,6 +56,7 @@ if (process.env.AWS_ACCESS_KEY_ID) {
 describe('Filestore', function() {
   this.timeout(1000 * 10)
   const filestoreUrl = `http://localhost:${Settings.internal.filestore.port}`
+  const directoryName = 'directory'
 
   // redefine the test suite for every available backend
   Object.keys(BackendSettings).forEach(backend => {
@@ -113,11 +114,11 @@ describe('Filestore', function() {
 
         beforeEach(async function() {
           fileId = Math.random()
-          fileUrl = `${filestoreUrl}/project/acceptance_tests/file/${fileId}`
+          fileUrl = `${filestoreUrl}/project/acceptance_tests/file/${directoryName}%2F${fileId}`
 
           const writeStream = request.post(fileUrl)
           const readStream = fs.createReadStream(localFileReadPath)
-          // consume the result to ensure the http request has been fully processed
+          // hack to consume the result to ensure the http request has been fully processed
           const resultStream = fs.createWriteStream('/dev/null')
           await pipeline(readStream, writeStream, resultStream)
         })
@@ -176,14 +177,14 @@ describe('Filestore', function() {
         it('should be able to copy files', async function() {
           const newProjectID = 'acceptance_tests_copyied_project'
           const newFileId = Math.random()
-          const newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${newFileId}`
+          const newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${directoryName}%2F${newFileId}`
           const opts = {
             method: 'put',
             uri: newFileUrl,
             json: {
               source: {
                 project_id: 'acceptance_tests',
-                file_id: fileId
+                file_id: `${directoryName}/${fileId}`
               }
             }
           }
@@ -223,6 +224,70 @@ describe('Filestore', function() {
         }
       })
 
+      describe('with multiple files', function() {
+        let fileIds, fileUrls, project
+        const directoryName = 'directory'
+        const localFileReadPaths = [
+          '/tmp/filestore_acceptance_tests_file_read_1.txt',
+          '/tmp/filestore_acceptance_tests_file_read_2.txt'
+        ]
+        const constantFileContents = [
+          [
+            'hello world',
+            `line 2 goes here ${Math.random()}`,
+            'there are 3 lines in all'
+          ].join('\n'),
+          [
+            `for reference: ${Math.random()}`,
+            'cats are the best animals',
+            'wombats are a close second'
+          ].join('\n')
+        ]
+
+        before(async function() {
+          return Promise.all([
+            fsWriteFile(localFileReadPaths[0], constantFileContents[0]),
+            fsWriteFile(localFileReadPaths[1], constantFileContents[1])
+          ])
+        })
+
+        beforeEach(async function() {
+          project = `acceptance_tests_${Math.random()}`
+          fileIds = [Math.random(), Math.random()]
+          fileUrls = [
+            `${filestoreUrl}/project/${project}/file/${directoryName}%2F${fileIds[0]}`,
+            `${filestoreUrl}/project/${project}/file/${directoryName}%2F${fileIds[1]}`
+          ]
+
+          const writeStreams = [
+            request.post(fileUrls[0]),
+            request.post(fileUrls[1])
+          ]
+          const readStreams = [
+            fs.createReadStream(localFileReadPaths[0]),
+            fs.createReadStream(localFileReadPaths[1])
+          ]
+          // hack to consume the result to ensure the http request has been fully processed
+          const resultStreams = [
+            fs.createWriteStream('/dev/null'),
+            fs.createWriteStream('/dev/null')
+          ]
+          return Promise.all([
+            pipeline(readStreams[0], writeStreams[0], resultStreams[0]),
+            pipeline(readStreams[1], writeStreams[1], resultStreams[1])
+          ])
+        })
+
+        it('should get the directory size', async function() {
+          const response = await rp.get(
+            `${filestoreUrl}/project/${project}/size`
+          )
+          expect(parseInt(JSON.parse(response.body)['total bytes'])).to.equal(
+            constantFileContents[0].length + constantFileContents[1].length
+          )
+        })
+      })
+
       describe('with a pdf file', function() {
         let fileId, fileUrl, localFileSize
         const localFileReadPath = Path.resolve(
@@ -232,7 +297,7 @@ describe('Filestore', function() {
 
         beforeEach(async function() {
           fileId = Math.random()
-          fileUrl = `${filestoreUrl}/project/acceptance_tests/file/${fileId}`
+          fileUrl = `${filestoreUrl}/project/acceptance_tests/file/${directoryName}%2F${fileId}`
           const stat = await fsStat(localFileReadPath)
           localFileSize = stat.size
           const writeStream = request.post(fileUrl)
