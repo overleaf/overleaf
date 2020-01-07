@@ -63,10 +63,10 @@ module.exports = {
   check(req, res) {
     logger.log({}, 'performing health check')
     Promise.all([checkCanGetFiles(), checkFileConvert()])
-      .then(() => res.send(200))
+      .then(() => res.sendStatus(200))
       .catch(err => {
         logger.err({ err }, 'Health check: error running')
-        res.send(500)
+        res.sendStatus(500)
       })
   }
 }
