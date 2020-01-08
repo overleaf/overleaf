@@ -64,7 +64,7 @@ async function sendStream(bucketName, key, readStream) {
       metrics.count('s3.egress', meteredStream.bytes)
     })
 
-    const response = await _client(bucketName)
+    const response = await _getClientForBucket(bucketName)
       .upload({
         Bucket: bucketName,
         Key: key,
@@ -95,7 +95,7 @@ async function getFileStream(bucketName, key, opts) {
   }
 
   return new Promise((resolve, reject) => {
-    const stream = _client(bucketName)
+    const stream = _getClientForBucket(bucketName)
       .getObject(params)
       .createReadStream()
 
@@ -120,7 +120,7 @@ async function deleteDirectory(bucketName, key) {
   let response
 
   try {
-    response = await _client(bucketName)
+    response = await _getClientForBucket(bucketName)
       .listObjects({ Bucket: bucketName, Prefix: key })
       .promise()
   } catch (err) {
@@ -135,7 +135,7 @@ async function deleteDirectory(bucketName, key) {
   const objects = response.Contents.map(item => ({ Key: item.Key }))
   if (objects.length) {
     try {
-      await _client(bucketName)
+      await _getClientForBucket(bucketName)
         .deleteObjects({
           Bucket: bucketName,
           Delete: {
@@ -157,7 +157,7 @@ async function deleteDirectory(bucketName, key) {
 
 async function getFileSize(bucketName, key) {
   try {
-    const response = await _client(bucketName)
+    const response = await _getClientForBucket(bucketName)
       .headObject({ Bucket: bucketName, Key: key })
       .promise()
     return response.ContentLength
@@ -173,7 +173,7 @@ async function getFileSize(bucketName, key) {
 
 async function deleteFile(bucketName, key) {
   try {
-    await _client(bucketName)
+    await _getClientForBucket(bucketName)
       .deleteObject({ Bucket: bucketName, Key: key })
       .promise()
   } catch (err) {
@@ -193,7 +193,7 @@ async function copyFile(bucketName, sourceKey, destKey) {
     CopySource: `${bucketName}/${sourceKey}`
   }
   try {
-    await _client(bucketName)
+    await _getClientForBucket(bucketName)
       .copyObject(params)
       .promise()
   } catch (err) {
@@ -220,7 +220,7 @@ async function checkIfFileExists(bucketName, key) {
 
 async function directorySize(bucketName, key) {
   try {
-    const response = await _client(bucketName)
+    const response = await _getClientForBucket(bucketName)
       .listObjects({ Bucket: bucketName, Prefix: key })
       .promise()
 
@@ -249,9 +249,10 @@ function _wrapError(error, message, params, ErrorType) {
   }
 }
 
-const _clients = {}
+const _clients = new Map()
+let _defaultClient
 
-function _client(bucket) {
+function _getClientForBucket(bucket) {
   if (_clients[bucket]) {
     return _clients[bucket]
   }
@@ -261,19 +262,19 @@ function _client(bucket) {
     settings.filestore.s3.s3BucketCreds[bucket]
   ) {
     _clients[bucket] = new S3(
-      _clientOptions(settings.filestore.s3.s3BucketCreds[bucket])
+      _buildClientOptions(settings.filestore.s3.s3BucketCreds[bucket])
     )
     return _clients[bucket]
   }
 
   // no specific credentials for the bucket
-  if (_clients.default) {
-    return _clients.default
+  if (_defaultClient) {
+    return _defaultClient
   }
 
   if (settings.filestore.s3.key) {
-    _clients.default = new S3(_clientOptions())
-    return _clients.default
+    _defaultClient = new S3(_buildClientOptions())
+    return _defaultClient
   }
 
   throw new SettingsError({
@@ -282,7 +283,7 @@ function _client(bucket) {
   })
 }
 
-function _clientOptions(bucketCredentials) {
+function _buildClientOptions(bucketCredentials) {
   const options = {}
 
   if (bucketCredentials) {
