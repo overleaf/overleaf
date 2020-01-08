@@ -6,6 +6,7 @@ module.exports = {
   userFileKeyMiddleware,
   publicFileKeyMiddleware,
   publicProjectKeyMiddleware,
+  bucketFileKeyMiddleware,
   templateFileKeyMiddleware
 }
 
@@ -45,6 +46,12 @@ function publicFileKeyMiddleware(req, res, next) {
   req.key = `${projectId}/${publicFileId}`
   req.bucket = settings.filestore.stores.public_files
 
+  next()
+}
+
+function bucketFileKeyMiddleware(req, res, next) {
+  req.bucket = req.params.bucket
+  req.key = req.params[0]
   next()
 }
 

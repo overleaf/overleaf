@@ -7,16 +7,12 @@ const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../app/js/Errors')
 
 describe('S3PersistorManagerTests', function() {
-  const settings = {
-    filestore: {
-      backend: 's3',
-      s3: {
-        secret: 'secret',
-        key: 'this_key'
-      },
-      stores: {
-        user_files: 'sl_user_files'
-      }
+  const defaultS3Key = 'frog'
+  const defaultS3Secret = 'prince'
+  const defaultS3Credentials = {
+    credentials: {
+      accessKeyId: defaultS3Key,
+      secretAccessKey: defaultS3Secret
     }
   }
   const filename = '/wombat/potato.tex'
@@ -42,9 +38,23 @@ describe('S3PersistorManagerTests', function() {
     S3ReadStream,
     S3NotFoundError,
     FileNotFoundError,
-    EmptyPromise
+    EmptyPromise,
+    settings
 
   beforeEach(function() {
+    settings = {
+      filestore: {
+        backend: 's3',
+        s3: {
+          secret: defaultS3Secret,
+          key: defaultS3Key
+        },
+        stores: {
+          user_files: 'sl_user_files'
+        }
+      }
+    }
+
     EmptyPromise = {
       promise: sinon.stub().resolves()
     }
@@ -131,12 +141,7 @@ describe('S3PersistorManagerTests', function() {
       })
 
       it('sets the AWS client up with credentials from settings', function() {
-        expect(S3).to.have.been.calledWith({
-          credentials: {
-            accessKeyId: settings.filestore.s3.key,
-            secretAccessKey: settings.filestore.s3.secret
-          }
-        })
+        expect(S3).to.have.been.calledWith(defaultS3Credentials)
       })
 
       it('fetches the right key from the right bucket', function() {
@@ -175,6 +180,84 @@ describe('S3PersistorManagerTests', function() {
           Key: key,
           Range: 'bytes=5-10'
         })
+      })
+    })
+
+    describe('when there are alternative credentials', function() {
+      let stream
+      const alternativeSecret = 'giraffe'
+      const alternativeKey = 'hippo'
+      const alternativeS3Credentials = {
+        credentials: {
+          accessKeyId: alternativeKey,
+          secretAccessKey: alternativeSecret
+        }
+      }
+
+      beforeEach(async function() {
+        settings.filestore.s3.s3BucketCreds = {}
+        settings.filestore.s3.s3BucketCreds[bucket] = {
+          auth_key: alternativeKey,
+          auth_secret: alternativeSecret
+        }
+
+        stream = await S3PersistorManager.promises.getFileStream(bucket, key)
+      })
+
+      it('returns a stream', function() {
+        expect(stream).to.equal('s3Stream')
+      })
+
+      it('sets the AWS client up with the alternative credentials', function() {
+        expect(S3).to.have.been.calledWith(alternativeS3Credentials)
+      })
+
+      it('fetches the right key from the right bucket', function() {
+        expect(S3Client.getObject).to.have.been.calledWith({
+          Bucket: bucket,
+          Key: key
+        })
+      })
+
+      it('caches the credentials', async function() {
+        stream = await S3PersistorManager.promises.getFileStream(bucket, key)
+
+        expect(S3).to.have.been.calledOnceWith(alternativeS3Credentials)
+      })
+
+      it('uses the default credentials for an unknown bucket', async function() {
+        stream = await S3PersistorManager.promises.getFileStream(
+          'anotherBucket',
+          key
+        )
+
+        expect(S3).to.have.been.calledTwice
+        expect(S3.firstCall).to.have.been.calledWith(alternativeS3Credentials)
+        expect(S3.secondCall).to.have.been.calledWith(defaultS3Credentials)
+      })
+
+      it('caches the default credentials', async function() {
+        stream = await S3PersistorManager.promises.getFileStream(
+          'anotherBucket',
+          key
+        )
+        stream = await S3PersistorManager.promises.getFileStream(
+          'anotherBucket',
+          key
+        )
+
+        expect(S3).to.have.been.calledTwice
+        expect(S3.firstCall).to.have.been.calledWith(alternativeS3Credentials)
+        expect(S3.secondCall).to.have.been.calledWith(defaultS3Credentials)
+      })
+
+      it('throws an error if there are no credentials for the bucket', async function() {
+        delete settings.filestore.s3.key
+        delete settings.filestore.s3.secret
+
+        await expect(
+          S3PersistorManager.promises.getFileStream('anotherBucket', key)
+        ).to.eventually.be.rejected.and.be.an.instanceOf(Errors.SettingsError)
       })
     })
 
