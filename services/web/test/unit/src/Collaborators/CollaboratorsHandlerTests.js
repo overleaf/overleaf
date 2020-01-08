@@ -297,7 +297,16 @@ describe('CollaboratorsHandler', function() {
         .withArgs(
           { collaberator_refs: this.fromUserId },
           {
-            $addToSet: { collaberator_refs: this.toUserId },
+            $addToSet: { collaberator_refs: this.toUserId }
+          },
+          { multi: true }
+        )
+        .chain('exec')
+        .resolves()
+      this.ProjectMock.expects('update')
+        .withArgs(
+          { collaberator_refs: this.fromUserId },
+          {
             $pull: { collaberator_refs: this.fromUserId }
           },
           { multi: true }
@@ -308,7 +317,16 @@ describe('CollaboratorsHandler', function() {
         .withArgs(
           { readOnly_refs: this.fromUserId },
           {
-            $addToSet: { readOnly_refs: this.toUserId },
+            $addToSet: { readOnly_refs: this.toUserId }
+          },
+          { multi: true }
+        )
+        .chain('exec')
+        .resolves()
+      this.ProjectMock.expects('update')
+        .withArgs(
+          { readOnly_refs: this.fromUserId },
+          {
             $pull: { readOnly_refs: this.fromUserId }
           },
           { multi: true }

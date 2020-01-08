@@ -126,18 +126,32 @@ async function transferProjects(fromUserId, toUserId) {
     { $set: { owner_ref: toUserId } },
     { multi: true }
   ).exec()
+
   await Project.update(
     { collaberator_refs: fromUserId },
     {
-      $addToSet: { collaberator_refs: toUserId },
+      $addToSet: { collaberator_refs: toUserId }
+    },
+    { multi: true }
+  ).exec()
+  await Project.update(
+    { collaberator_refs: fromUserId },
+    {
       $pull: { collaberator_refs: fromUserId }
+    },
+    { multi: true }
+  ).exec()
+
+  await Project.update(
+    { readOnly_refs: fromUserId },
+    {
+      $addToSet: { readOnly_refs: toUserId }
     },
     { multi: true }
   ).exec()
   await Project.update(
     { readOnly_refs: fromUserId },
     {
-      $addToSet: { readOnly_refs: toUserId },
       $pull: { readOnly_refs: fromUserId }
     },
     { multi: true }

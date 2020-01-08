@@ -49,4 +49,4 @@ services:
     image: redis
 
   mongo:
-    image: mongo:3.4.6
+    image: mongo:3.6.16
