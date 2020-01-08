@@ -195,8 +195,8 @@ describe('S3PersistorManagerTests', function() {
       }
 
       beforeEach(async function() {
-        settings.filestore.s3.s3BucketCreds = {}
-        settings.filestore.s3.s3BucketCreds[bucket] = {
+        settings.filestore.s3BucketCreds = {}
+        settings.filestore.s3BucketCreds[bucket] = {
           auth_key: alternativeKey,
           auth_secret: alternativeSecret
         }

@@ -258,11 +258,11 @@ function _getClientForBucket(bucket) {
   }
 
   if (
-    settings.filestore.s3.s3BucketCreds &&
-    settings.filestore.s3.s3BucketCreds[bucket]
+    settings.filestore.s3BucketCreds &&
+    settings.filestore.s3BucketCreds[bucket]
   ) {
     _clients[bucket] = new S3(
-      _buildClientOptions(settings.filestore.s3.s3BucketCreds[bucket])
+      _buildClientOptions(settings.filestore.s3BucketCreds[bucket])
     )
     return _clients[bucket]
   }
