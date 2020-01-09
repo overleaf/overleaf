@@ -236,7 +236,9 @@ async function directorySize(bucketName, key) {
 }
 
 function _wrapError(error, message, params, ErrorType) {
-  if (['NoSuchKey', 'NotFound', 'ENOENT'].includes(error.code)) {
+  if (
+    ['NoSuchKey', 'NotFound', 'AccessDenied', 'ENOENT'].includes(error.code)
+  ) {
     return new NotFoundError({
       message: 'no such file',
       info: params

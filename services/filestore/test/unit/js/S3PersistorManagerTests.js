@@ -37,6 +37,7 @@ describe('S3PersistorManagerTests', function() {
     S3Client,
     S3ReadStream,
     S3NotFoundError,
+    S3AccessDeniedError,
     FileNotFoundError,
     EmptyPromise,
     settings
@@ -83,6 +84,9 @@ describe('S3PersistorManagerTests', function() {
 
     S3NotFoundError = new Error('not found')
     S3NotFoundError.code = 'NoSuchKey'
+
+    S3AccessDeniedError = new Error('access denied')
+    S3AccessDeniedError.code = 'AccessDenied'
 
     S3ReadStream = {
       on: sinon.stub(),
@@ -284,6 +288,36 @@ describe('S3PersistorManagerTests', function() {
 
       it('wraps the error from S3', function() {
         expect(error.cause).to.equal(S3NotFoundError)
+      })
+
+      it('stores the bucket and key in the error', function() {
+        expect(error.info).to.deep.equal({ Bucket: bucket, Key: key })
+      })
+    })
+
+    describe('when access to the file is denied', function() {
+      let error, stream
+
+      beforeEach(async function() {
+        S3ReadStream.on = sinon.stub()
+        S3ReadStream.on.withArgs('error').yields(S3AccessDeniedError)
+        try {
+          stream = await S3PersistorManager.promises.getFileStream(bucket, key)
+        } catch (err) {
+          error = err
+        }
+      })
+
+      it('does not return a stream', function() {
+        expect(stream).not.to.exist
+      })
+
+      it('throws a NotFoundError', function() {
+        expect(error).to.be.an.instanceOf(Errors.NotFoundError)
+      })
+
+      it('wraps the error from S3', function() {
+        expect(error.cause).to.equal(S3AccessDeniedError)
       })
 
       it('stores the bucket and key in the error', function() {
