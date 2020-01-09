@@ -62,8 +62,16 @@ function getFile(req, res, next) {
 
     logger.log({ key, bucket, format, style }, 'sending file to response')
 
-    // pass 'next' as a callback to 'pipeline' to receive any errors
-    pipeline(fileStream, res, next)
+    pipeline(fileStream, res, err => {
+      if (err && err.code !== 'ERR_STREAM_PREMATURE_CLOSE') {
+        logger.err(
+          new Errors.ReadError({
+            message: 'error transferring stream',
+            info: { bucket, key, format, style }
+          }).withCause(err)
+        )
+      }
+    })
   })
 }
 
