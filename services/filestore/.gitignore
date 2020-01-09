@@ -36,28 +36,11 @@ Icon?
 Thumbs.db
 
 /node_modules/*
-test/IntergrationTests/js/*
 data/*/*
 
-app.js
 **/*.map
-cluster.js
-app/js/*
-test/IntergrationTests/js/*
-test/UnitTests/js/*
 cookies.txt
 uploads/*
-public/js/editor.js
-public/js/home.js
-public/js/forms.js
-public/js/gui.js
-public/js/admin.js
-public/stylesheets/mainStyle.css
-public/minjs/
-test/unit/js/
-test/acceptence/js
-cluster.js
-test/acceptance/js/
 
 user_files/*
 template_files/*
