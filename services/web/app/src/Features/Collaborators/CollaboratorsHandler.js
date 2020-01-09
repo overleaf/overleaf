@@ -2,6 +2,7 @@ const { callbackify } = require('util')
 const OError = require('@overleaf/o-error')
 const { Project } = require('../../models/Project')
 const ProjectGetter = require('../Project/ProjectGetter')
+const ProjectHelper = require('../Project/ProjectHelper')
 const logger = require('logger-sharelatex')
 const ContactManager = require('../Contacts/ContactManager')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
@@ -27,17 +28,47 @@ module.exports = {
 
 async function removeUserFromProject(projectId, userId) {
   try {
-    await Project.update(
-      { _id: projectId },
-      {
-        $pull: {
-          collaberator_refs: userId,
-          readOnly_refs: userId,
-          tokenAccessReadOnly_refs: userId,
-          tokenAccessReadAndWrite_refs: userId
+    const project = await Project.findOne({ _id: projectId }).exec()
+
+    // Deal with the old type of boolean value for archived
+    // In order to clear it
+    if (typeof project.archived === 'boolean') {
+      let archived = ProjectHelper.calculateArchivedArray(
+        project,
+        userId,
+        'ARCHIVE'
+      )
+
+      archived = archived.filter(id => id.toString() !== userId.toString())
+
+      await Project.update(
+        { _id: projectId },
+        {
+          $set: { archived: archived },
+          $pull: {
+            collaberator_refs: userId,
+            readOnly_refs: userId,
+            tokenAccessReadOnly_refs: userId,
+            tokenAccessReadAndWrite_refs: userId,
+            trashed: userId
+          }
         }
-      }
-    ).exec()
+      )
+    } else {
+      await Project.update(
+        { _id: projectId },
+        {
+          $pull: {
+            collaberator_refs: userId,
+            readOnly_refs: userId,
+            tokenAccessReadOnly_refs: userId,
+            tokenAccessReadAndWrite_refs: userId,
+            archived: userId,
+            trashed: userId
+          }
+        }
+      )
+    }
   } catch (err) {
     throw new OError({
       message: 'problem removing user from project collaborators',

@@ -27,6 +27,16 @@ describe('CollaboratorsHandler', function() {
       _id: ObjectId()
     }
 
+    this.archivedProject = {
+      _id: ObjectId(),
+      archived: [ObjectId(this.userId)]
+    }
+
+    this.oldArchivedProject = {
+      _id: ObjectId(),
+      archived: true
+    }
+
     this.UserGetter = {
       promises: {
         getUser: sinon.stub().resolves(null)
@@ -46,6 +56,10 @@ describe('CollaboratorsHandler', function() {
         getProject: sinon.stub().resolves(this.project)
       }
     }
+
+    this.ProjectHelper = {
+      calculateArchivedArray: sinon.stub()
+    }
     this.CollaboratorsGetter = {
       promises: {
         getProjectsUserIsMemberOf: sinon.stub()
@@ -62,6 +76,7 @@ describe('CollaboratorsHandler', function() {
         '../../models/Project': { Project },
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../Project/ProjectGetter': this.ProjectGetter,
+        '../Project/ProjectHelper': this.ProjectHelper,
         '../Errors/Errors': Errors,
         './CollaboratorsGetter': this.CollaboratorsGetter
       }
@@ -73,29 +88,115 @@ describe('CollaboratorsHandler', function() {
   })
 
   describe('removeUserFromProject', function() {
-    beforeEach(function() {})
-
-    it('should remove the user from mongo', async function() {
-      this.ProjectMock.expects('update')
-        .withArgs(
-          {
+    describe('a non-archived project', function() {
+      beforeEach(function() {
+        this.ProjectMock.expects('findOne')
+          .withArgs({
             _id: this.project._id
-          },
-          {
-            $pull: {
-              collaberator_refs: this.userId,
-              readOnly_refs: this.userId,
-              tokenAccessReadOnly_refs: this.userId,
-              tokenAccessReadAndWrite_refs: this.userId
+          })
+          .chain('exec')
+          .resolves(this.project)
+      })
+
+      it('should remove the user from mongo', async function() {
+        this.ProjectMock.expects('update')
+          .withArgs(
+            {
+              _id: this.project._id
+            },
+            {
+              $pull: {
+                collaberator_refs: this.userId,
+                readOnly_refs: this.userId,
+                tokenAccessReadOnly_refs: this.userId,
+                tokenAccessReadAndWrite_refs: this.userId,
+                archived: this.userId,
+                trashed: this.userId
+              }
             }
-          }
+          )
+          .chain('exec')
+          .resolves()
+        await this.CollaboratorsHandler.promises.removeUserFromProject(
+          this.project._id,
+          this.userId
         )
-        .chain('exec')
-        .resolves()
-      await this.CollaboratorsHandler.promises.removeUserFromProject(
-        this.project._id,
-        this.userId
-      )
+      })
+    })
+
+    describe('an archived project, archived with a boolean value', function() {
+      beforeEach(function() {
+        let archived = [ObjectId(this.userId)]
+        this.ProjectHelper.calculateArchivedArray.returns(archived)
+
+        this.ProjectMock.expects('findOne')
+          .withArgs({
+            _id: this.oldArchivedProject._id
+          })
+          .chain('exec')
+          .resolves(this.oldArchivedProject)
+      })
+
+      it('should remove the user from mongo', async function() {
+        this.ProjectMock.expects('update')
+          .withArgs(
+            {
+              _id: this.oldArchivedProject._id
+            },
+            {
+              $set: {
+                archived: []
+              },
+              $pull: {
+                collaberator_refs: this.userId,
+                readOnly_refs: this.userId,
+                tokenAccessReadOnly_refs: this.userId,
+                tokenAccessReadAndWrite_refs: this.userId,
+                trashed: this.userId
+              }
+            }
+          )
+          .resolves()
+        await this.CollaboratorsHandler.promises.removeUserFromProject(
+          this.oldArchivedProject._id,
+          this.userId
+        )
+      })
+    })
+
+    describe('an archived project, archived with an array value', function() {
+      beforeEach(function() {
+        this.ProjectMock.expects('findOne')
+          .withArgs({
+            _id: this.archivedProject._id
+          })
+          .chain('exec')
+          .resolves(this.archivedProject)
+      })
+
+      it('should remove the user from mongo', async function() {
+        this.ProjectMock.expects('update')
+          .withArgs(
+            {
+              _id: this.archivedProject._id
+            },
+            {
+              $pull: {
+                collaberator_refs: this.userId,
+                readOnly_refs: this.userId,
+                tokenAccessReadOnly_refs: this.userId,
+                tokenAccessReadAndWrite_refs: this.userId,
+                archived: this.userId,
+                trashed: this.userId
+              }
+            }
+          )
+          .resolves()
+        await this.CollaboratorsHandler.promises.removeUserFromProject(
+          this.archivedProject._id,
+          this.userId
+        )
+      })
     })
   })
 
@@ -240,6 +341,13 @@ describe('CollaboratorsHandler', function() {
         'token-read-only-1'
       ]
       for (const projectId of expectedProjects) {
+        this.ProjectMock.expects('findOne')
+          .withArgs({
+            _id: projectId
+          })
+          .chain('exec')
+          .resolves({ _id: projectId })
+
         this.ProjectMock.expects('update')
           .withArgs(
             {
@@ -250,11 +358,12 @@ describe('CollaboratorsHandler', function() {
                 collaberator_refs: this.userId,
                 readOnly_refs: this.userId,
                 tokenAccessReadOnly_refs: this.userId,
-                tokenAccessReadAndWrite_refs: this.userId
+                tokenAccessReadAndWrite_refs: this.userId,
+                archived: this.userId,
+                trashed: this.userId
               }
             }
           )
-          .chain('exec')
           .resolves()
       }
       await this.CollaboratorsHandler.promises.removeUserFromAllProjects(
