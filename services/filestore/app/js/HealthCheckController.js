@@ -1,4 +1,4 @@
-const fs = require('fs-extra')
+const fs = require('fs')
 const path = require('path')
 const Settings = require('settings-sharelatex')
 const streamBuffers = require('stream-buffers')
@@ -6,7 +6,7 @@ const { promisify } = require('util')
 const Stream = require('stream')
 
 const pipeline = promisify(Stream.pipeline)
-const fsCopy = promisify(fs.copy)
+const fsCopy = promisify(fs.copyFile)
 const fsUnlink = promisify(fs.unlink)
 
 const { HealthCheckError } = require('./Errors')
