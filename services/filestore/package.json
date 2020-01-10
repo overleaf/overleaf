@@ -27,6 +27,7 @@
     "express": "^4.2.0",
     "glob": "^7.1.6",
     "heapdump": "^0.3.2",
+    "lodash.once": "^4.1.1",
     "logger-sharelatex": "^1.7.0",
     "metrics-sharelatex": "^2.2.0",
     "mocha": "5.2.0",
@@ -38,8 +39,7 @@
     "rimraf": "2.2.8",
     "settings-sharelatex": "^1.1.0",
     "stream-buffers": "~0.2.5",
-    "stream-meter": "^1.0.4",
-    "underscore": "~1.5.2"
+    "stream-meter": "^1.0.4"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.3",
