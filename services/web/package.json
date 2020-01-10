@@ -33,6 +33,7 @@
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
     "@overleaf/o-error": "^2.1.0",
+    "algoliasearch": "^3.35.1",
     "angular": "~1.6.10",
     "angular-sanitize": "~1.6.10",
     "archiver": "0.9.0",

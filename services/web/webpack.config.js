@@ -175,19 +175,6 @@ module.exports = {
             options: '_'
           }
         ]
-      },
-      {
-        // Expose Algolia global variable
-        test: path.join(
-          __dirname,
-          `frontend/js/vendor/libs/${PackageVersions.lib('algolia')}.js`
-        ),
-        use: [
-          {
-            loader: 'expose-loader',
-            options: 'AlgoliaSearch'
-          }
-        ]
       }
     ]
   },

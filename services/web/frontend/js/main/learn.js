@@ -95,6 +95,9 @@ define(['base', 'directives/mathjax', 'services/algolia-search'], function(
 
       return algoliaSearch.searchWiki(
         query,
+        {
+          hitsPerPage: $scope.config_hits_per_page
+        },
         function(err, response) {
           $scope.processingSearch = false
           if (response.hits.length === 0) {
@@ -103,9 +106,6 @@ define(['base', 'directives/mathjax', 'services/algolia-search'], function(
             const hits = _.map(response.hits, buildHitViewModel)
             return updateHits(hits, response.nbHits)
           }
-        },
-        {
-          hitsPerPage: $scope.config_hits_per_page
         }
       )
     }

@@ -103,7 +103,6 @@
         "_": true,
         "ace": true,
         "ga": true,
-        "AlgoliaSearch": true,
         "sl_console": true,
         "sl_debugging": true,
         // Injected in layout.pug

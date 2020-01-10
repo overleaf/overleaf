@@ -12,9 +12,9 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'libs/algolia-2.5.2'], function(App, algolia) {
+define(['base', 'algoliasearch'], function(App, AlgoliaSearch) {
   App.factory('Institutions', () =>
-    new AlgoliaSearch(
+    AlgoliaSearch(
       window.algolia.institutions.app_id,
       window.algolia.institutions.api_key
     ).initIndex('institutions')

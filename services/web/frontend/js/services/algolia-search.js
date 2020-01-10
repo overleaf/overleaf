@@ -11,7 +11,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base'], App =>
+define(['base', 'algoliasearch'], (App, AlgoliaSearch) =>
   App.factory('algoliaSearch', function() {
     let kbIdx, wikiIdx
     if (
@@ -24,7 +24,7 @@ define(['base'], App =>
         x => x.wiki
       ) != null
     ) {
-      const client = new AlgoliaSearch(
+      const client = AlgoliaSearch(
         window.sharelatex.algolia != null
           ? window.sharelatex.algolia.app_id
           : undefined,

@@ -7,8 +7,7 @@
  */
 const version = {
   ace: '1.4.5', // Upgrade instructions: https://github.com/overleaf/write_latex/wiki/Upgrading-Ace
-  fineuploader: '5.15.4',
-  algolia: '2.5.2'
+  fineuploader: '5.15.4'
 }
 
 module.exports = {
