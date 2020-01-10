@@ -38,6 +38,7 @@ settings =
 				key: process.env['AWS_ACCESS_KEY_ID']
 				secret: process.env['AWS_SECRET_ACCESS_KEY']
 				endpoint: process.env['AWS_S3_ENDPOINT']
+				pathStyle: process.env['AWS_S3_PATH_STYLE']
 				partSize: process.env['AWS_S3_PARTSIZE'] or (100 * 1024 * 1024)
 
 		stores:
