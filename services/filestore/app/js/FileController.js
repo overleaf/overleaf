@@ -27,15 +27,21 @@ function getFile(req, res, next) {
   }
 
   metrics.inc('getFile')
-  res.logMsg = 'getting file'
-  res.logInfo = { key, bucket, format, style, cacheWarm: req.query.cacheWarm }
+  req.setLogMessage('getting file')
+  req.addLogFields({
+    key,
+    bucket,
+    format,
+    style,
+    cacheWarm: req.query.cacheWarm
+  })
 
   if (req.headers.range) {
     const range = _getRange(req.headers.range)
     if (range) {
       options.start = range.start
       options.end = range.end
-      res.logInfo.range = range
+      req.addLogField('range', range)
     }
   }
 
@@ -43,8 +49,6 @@ function getFile(req, res, next) {
     if (err) {
       if (err instanceof Errors.NotFoundError) {
         res.sendStatus(404)
-        res.logInfo.notFound = true
-        next()
       } else {
         next(err)
       }
@@ -52,8 +56,7 @@ function getFile(req, res, next) {
     }
 
     if (req.query.cacheWarm) {
-      res.sendStatus(200)
-      return next()
+      return res.sendStatus(200).end()
     }
 
     pipeline(fileStream, res, err => {
@@ -64,8 +67,6 @@ function getFile(req, res, next) {
             info: { bucket, key, format, style }
           }).withCause(err)
         )
-      } else {
-        next()
       }
     })
   })
@@ -75,15 +76,13 @@ function getFileHead(req, res, next) {
   const { key, bucket } = req
 
   metrics.inc('getFileSize')
-  res.logMsg = 'getting file size'
-  res.logInfo = { key, bucket }
+  req.setLogMessage('getting file size')
+  req.addLogFields({ key, bucket })
 
   FileHandler.getFileSize(bucket, key, function(err, fileSize) {
     if (err) {
       if (err instanceof Errors.NotFoundError) {
         res.sendStatus(404)
-        res.logInfo.notFound = true
-        next()
       } else {
         next(err)
       }
@@ -91,7 +90,6 @@ function getFileHead(req, res, next) {
     }
     res.set('Content-Length', fileSize)
     res.status(200).end()
-    next()
   })
 }
 
@@ -99,15 +97,14 @@ function insertFile(req, res, next) {
   metrics.inc('insertFile')
   const { key, bucket } = req
 
-  res.logMsg = 'inserting file'
-  res.logInfo = { key, bucket }
+  req.setLogMessage('inserting file')
+  req.addLogFields({ key, bucket })
 
   FileHandler.insertFile(bucket, key, req, function(err) {
     if (err) {
       next(err)
     } else {
       res.sendStatus(200)
-      next()
     }
   })
 }
@@ -118,13 +115,13 @@ function copyFile(req, res, next) {
   const oldProjectId = req.body.source.project_id
   const oldFileId = req.body.source.file_id
 
-  req.logInfo = {
+  req.addLogFields({
     key,
     bucket,
     oldProject_id: oldProjectId,
     oldFile_id: oldFileId
-  }
-  req.logMsg = 'copying file'
+  })
+  req.setLogMessage('copying file')
 
   PersistorManager.copyFile(
     bucket,
@@ -134,8 +131,6 @@ function copyFile(req, res, next) {
       if (err) {
         if (err instanceof Errors.NotFoundError) {
           res.sendStatus(404)
-          res.logInfo.notFound = true
-          next()
         } else {
           next(err)
         }
@@ -143,7 +138,6 @@ function copyFile(req, res, next) {
       }
 
       res.sendStatus(200)
-      next()
     }
   )
 }
@@ -152,15 +146,14 @@ function deleteFile(req, res, next) {
   metrics.inc('deleteFile')
   const { key, bucket } = req
 
-  req.logInfo = { key, bucket }
-  req.logMsg = 'deleting file'
+  req.addLogFields({ key, bucket })
+  req.setLogMessage('deleting file')
 
   FileHandler.deleteFile(bucket, key, function(err) {
     if (err) {
       next(err)
     } else {
       res.sendStatus(204)
-      next()
     }
   })
 }
@@ -169,8 +162,8 @@ function directorySize(req, res, next) {
   metrics.inc('projectSize')
   const { project_id: projectId, bucket } = req
 
-  req.logMsg = 'getting project size'
-  req.logInfo = { projectId, bucket }
+  req.setLogMessage('getting project size')
+  req.addLogFields({ projectId, bucket })
 
   FileHandler.getDirectorySize(bucket, projectId, function(err, size) {
     if (err) {
@@ -178,8 +171,7 @@ function directorySize(req, res, next) {
     }
 
     res.json({ 'total bytes': size })
-    req.logInfo.size = size
-    next()
+    req.addLogField('size', size)
   })
 }
 
