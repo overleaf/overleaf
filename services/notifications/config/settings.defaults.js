@@ -1,8 +1,13 @@
-module.exports = Settings =
-	internal:
-		notifications:
-			port: 3042
-			host: process.env["LISTEN_ADDRESS"] or "localhost"
+let Settings;
+module.exports = (Settings = {
+	internal: {
+		notifications: {
+			port: 3042,
+			host: process.env["LISTEN_ADDRESS"] || "localhost"
+		}
+	},
 
-	mongo:
-		url: process.env['MONGO_CONNECTION_STRING'] or "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"
+	mongo: {
+		url: process.env['MONGO_CONNECTION_STRING'] || `mongodb://${process.env["MONGO_HOST"] || "localhost"}/sharelatex`
+	}
+});
