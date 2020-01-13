@@ -92,6 +92,27 @@ const FileTypeManager = {
     })
   },
 
+  getStrictTypeFromContent(name, contents) {
+    const isText = _isTextFilename(name)
+
+    if (!isText) {
+      return false
+    }
+    if (
+      Buffer.byteLength(contents, 'utf8') > FileTypeManager.MAX_TEXT_FILE_SIZE
+    ) {
+      return false
+    }
+    if (contents.indexOf('\x00') !== -1) {
+      return false
+    }
+    if (/[\uD800-\uDFFF]/.test(contents)) {
+      // non-BMP characters (high and low surrogate characters)
+      return false
+    }
+    return true
+  },
+
   shouldIgnore(path, callback) {
     const name = Path.basename(path)
     let extension = Path.extname(name).toLowerCase()
