@@ -31,11 +31,12 @@ let makeAppend
 const p = function () {} // require('util').debug
 const i = function () {} // require('util').inspect
 
-const exports = typeof WEB !== 'undefined' && WEB !== null ? {} : module.exports
+const moduleExport =
+  typeof WEB !== 'undefined' && WEB !== null ? {} : module.exports
 
-exports.name = 'text-composable'
+moduleExport.name = 'text-composable'
 
-exports.create = () => ''
+moduleExport.create = () => ''
 
 // -------- Utility methods
 
@@ -74,7 +75,7 @@ const checkOp = function (op) {
 
 // Makes a function for appending components to a given op.
 // Exported for the randomOpGenerator.
-exports._makeAppend = makeAppend = (op) =>
+moduleExport._makeAppend = makeAppend = (op) =>
   function (component) {
     if (component === 0 || component.i === '' || component.d === '') {
     } else if (op.length === 0) {
@@ -161,7 +162,7 @@ const componentLength = function (component) {
 
 // Normalize an op, removing all empty skips and empty inserts / deletes. Concatenate
 // adjacent inserts and deletes.
-exports.normalize = function (op) {
+moduleExport.normalize = function (op) {
   const newOp = []
   const append = makeAppend(newOp)
   for (const component of Array.from(op)) {
@@ -171,7 +172,7 @@ exports.normalize = function (op) {
 }
 
 // Apply the op to the string. Returns the new string.
-exports.apply = function (str, op) {
+moduleExport.apply = function (str, op) {
   p(`Applying ${i(op)} to '${str}'`)
   if (typeof str !== 'string') {
     throw new Error('Snapshot should be a string')
@@ -214,8 +215,7 @@ exports.apply = function (str, op) {
 
 // transform op1 by op2. Return transformed version of op1.
 // op1 and op2 are unchanged by transform.
-exports.transform = function (op, otherOp, side) {
-  let component
+moduleExport.transform = function (op, otherOp, side) {
   if (side !== 'left' && side !== 'right') {
     throw new Error(`side (${side} must be 'left' or 'right'`)
   }
@@ -294,8 +294,7 @@ exports.transform = function (op, otherOp, side) {
 }
 
 // Compose 2 ops into 1 op.
-exports.compose = function (op1, op2) {
-  let component
+moduleExport.compose = function (op1, op2) {
   p(`COMPOSE ${i(op1)} + ${i(op2)}`)
   checkOp(op1)
   checkOp(op2)
@@ -377,7 +376,7 @@ const invertComponent = function (c) {
 }
 
 // Invert an op
-exports.invert = function (op) {
+moduleExport.invert = function (op) {
   const result = []
   const append = makeAppend(result)
 
@@ -395,5 +394,5 @@ if (typeof window !== 'undefined' && window !== null) {
   if (!window.ot.types) {
     window.ot.types = {}
   }
-  window.ot.types.text = exports
+  window.ot.types.text = moduleExport
 }
