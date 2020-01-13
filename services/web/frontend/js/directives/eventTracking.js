@@ -84,18 +84,18 @@ define(['base'], App =>
             timer = setTimeout(() => sendEvent(), timeoutAmt)
           })
           .on('mouseleave', () => clearTimeout(timer))
-      } else if (attrs.eventTrackingTrigger === 'scroll') {
-        if (!eventTracking.eventInCache(scope.eventTracking)) {
-          return $(window).on('resize scroll', () =>
-            _.throttle(
-              isInViewport(element) &&
-              !eventTracking.eventInCache(scope.eventTracking)
-                ? sendEvent(true)
-                : undefined,
-              500
-            )
-          )
-        }
+      } else if (
+        attrs.eventTrackingTrigger === 'scroll' &&
+        !eventTracking.eventInCache(scope.eventTracking)
+      ) {
+        $(window).on(
+          'resize scroll',
+          _.throttle(() => {
+            if (isInViewport(element)) {
+              sendEvent(true)
+            }
+          }, 500)
+        )
       }
     }
   })))
