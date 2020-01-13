@@ -15,7 +15,6 @@ RUN npm install --quiet
 COPY . /app
 
 
-RUN npm run compile:all
 
 FROM node:10.16.3
 

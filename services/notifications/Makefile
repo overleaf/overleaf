@@ -16,12 +16,17 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 clean:
 	docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	docker rmi gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
-	rm -f app.js
-	rm -rf app/js
-	rm -rf test/unit/js
-	rm -rf test/acceptance/js
 
-test: test_unit test_acceptance
+format:
+	$(DOCKER_COMPOSE) run --rm test_unit npm run format
+
+format_fix:
+	$(DOCKER_COMPOSE) run --rm test_unit npm run format:fix
+
+lint:
+	$(DOCKER_COMPOSE) run --rm test_unit npm run lint
+
+test: format lint test_unit test_acceptance
 
 test_unit:
 	@[ ! -d test/unit ] && echo "notifications has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit

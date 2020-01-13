@@ -1,6 +1,6 @@
 notifications
 --public-repo=True
---language=coffeescript
+--language=es
 --env-add=
 --node-version=10.16.3
 --acceptance-creds=None
