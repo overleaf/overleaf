@@ -1,203 +1,249 @@
-sinon = require('sinon')
-chai = require('chai')
-expect = chai.should
-should = chai.should()
-modulePath = "../../../app/js/Notifications.js"
-SandboxedModule = require('sandboxed-module')
-assert = require('assert')
-ObjectId = require("mongojs").ObjectId
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.should;
+const should = chai.should();
+const modulePath = "../../../app/js/Notifications.js";
+const SandboxedModule = require('sandboxed-module');
+const assert = require('assert');
+const { ObjectId } = require("mongojs");
 
-user_id = "51dc93e6fb625a261300003b"
-notification_id = "fb625a26f09d"
-notification_key = "notification-key"
+const user_id = "51dc93e6fb625a261300003b";
+const notification_id = "fb625a26f09d";
+const notification_key = "notification-key";
 
-describe 'Notifications Tests', ->
-	beforeEach ->
-		self = @
-		@findStub = sinon.stub()
-		@insertStub = sinon.stub()
-		@countStub = sinon.stub()
-		@updateStub = sinon.stub()
-		@removeStub = sinon.stub()
-		@mongojs = =>
-			notifications:
-				update: self.mongojsUpdate
-				find: @findStub
-				insert: @insertStub
-				count: @countStub
-				update: @updateStub
-				remove: @removeStub
-		@mongojs.ObjectId = ObjectId
-
-		@notifications = SandboxedModule.require modulePath,
-			requires:
-				'logger-sharelatex': {
-					log:()->
-					error:()->
+describe('Notifications Tests', function() {
+	beforeEach(function() {
+		const self = this;
+		this.findStub = sinon.stub();
+		this.insertStub = sinon.stub();
+		this.countStub = sinon.stub();
+		this.updateStub = sinon.stub();
+		this.removeStub = sinon.stub();
+		this.mongojs = () => {
+			return {
+				notifications: {
+					update: self.mongojsUpdate,
+					find: this.findStub,
+					insert: this.insertStub,
+					count: this.countStub,
+					update: this.updateStub,
+					remove: this.removeStub
 				}
-				'settings-sharelatex': {}
-				'mongojs':@mongojs
+			};
+		};
+		this.mongojs.ObjectId = ObjectId;
+
+		this.notifications = SandboxedModule.require(modulePath, {
+			requires: {
+				'logger-sharelatex': {
+					log(){},
+					error(){}
+				},
+				'settings-sharelatex': {},
+				'mongojs':this.mongojs,
 				'metrics-sharelatex': {timeAsyncMethod: sinon.stub()}
-			globals:
-				console: console
+			},
+			globals: {
+				console
+			}
+		}
+		);
 
-		@stubbedNotification = {user_id: ObjectId(user_id), key:"notification-key", messageOpts:"some info", templateKey:"template-key"}
-		@stubbedNotificationArray = [@stubbedNotification]
+		this.stubbedNotification = {user_id: ObjectId(user_id), key:"notification-key", messageOpts:"some info", templateKey:"template-key"};
+		return this.stubbedNotificationArray = [this.stubbedNotification];});
 
-	describe 'getUserNotifications', ->
-		it "should find all notifications and return i", (done)->
-			@findStub.callsArgWith(1, null, @stubbedNotificationArray)
-			@notifications.getUserNotifications user_id, (err, notifications)=>
-				notifications.should.equal @stubbedNotificationArray
-				assert.deepEqual(@findStub.args[0][0], {"user_id" :ObjectId(user_id), "templateKey": {"$exists":true}})
-				done()
+	describe('getUserNotifications', () =>
+		it("should find all notifications and return i", function(done){
+			this.findStub.callsArgWith(1, null, this.stubbedNotificationArray);
+			return this.notifications.getUserNotifications(user_id, (err, notifications)=> {
+				notifications.should.equal(this.stubbedNotificationArray);
+				assert.deepEqual(this.findStub.args[0][0], {"user_id" :ObjectId(user_id), "templateKey": {"$exists":true}});
+				return done();
+			});
+		})
+	);
 
-	describe 'addNotification', ->
-		beforeEach ->
-			@stubbedNotification = {
+	describe('addNotification', function() {
+		beforeEach(function() {
+			this.stubbedNotification = {
 				user_id: ObjectId(user_id),
 				key:"notification-key",
 				messageOpts:"some info",
 				templateKey:"template-key"
-			}
-			@expectedDocument = {
-				user_id: @stubbedNotification.user_id,
+			};
+			this.expectedDocument = {
+				user_id: this.stubbedNotification.user_id,
 				key:"notification-key",
 				messageOpts:"some info",
 				templateKey:"template-key"
-			}
-			@expectedQuery = {
-				user_id: @stubbedNotification.user_id,
+			};
+			this.expectedQuery = {
+				user_id: this.stubbedNotification.user_id,
 				key:"notification-key",
-			}
-			@updateStub.yields()
-			@countStub.yields(null, 0)
+			};
+			this.updateStub.yields();
+			return this.countStub.yields(null, 0);
+		});
 
-		it 'should insert the notification into the collection', (done)->
-			@notifications.addNotification user_id, @stubbedNotification, (err)=>
-				expect(err).not.exists
-				sinon.assert.calledWith(@updateStub, @expectedQuery, @expectedDocument, { upsert: true })
-				done()
+		it('should insert the notification into the collection', function(done){
+			return this.notifications.addNotification(user_id, this.stubbedNotification, err=> {
+				expect(err).not.exists;
+				sinon.assert.calledWith(this.updateStub, this.expectedQuery, this.expectedDocument, { upsert: true });
+				return done();
+			});
+		});
 
-		describe 'when there is an existing notification', (done) ->
-			beforeEach ->
-				@countStub.yields(null, 1)
+		describe('when there is an existing notification', function(done) {
+			beforeEach(function() {
+				return this.countStub.yields(null, 1);
+			});
 
-			it 'should fail to insert', (done)->
-				@notifications.addNotification user_id, @stubbedNotification, (err)=>
-					expect(err).not.exists
-					sinon.assert.notCalled(@updateStub)
-					done()
+			it('should fail to insert', function(done){
+				return this.notifications.addNotification(user_id, this.stubbedNotification, err=> {
+					expect(err).not.exists;
+					sinon.assert.notCalled(this.updateStub);
+					return done();
+				});
+			});
 
-			it "should update the key if forceCreate is true", (done) ->
-				@stubbedNotification.forceCreate = true
-				@notifications.addNotification user_id, @stubbedNotification, (err)=>
-					expect(err).not.exists
-					sinon.assert.calledWith(@updateStub, @expectedQuery, @expectedDocument, { upsert: true })
-					done()
+			return it("should update the key if forceCreate is true", function(done) {
+				this.stubbedNotification.forceCreate = true;
+				return this.notifications.addNotification(user_id, this.stubbedNotification, err=> {
+					expect(err).not.exists;
+					sinon.assert.calledWith(this.updateStub, this.expectedQuery, this.expectedDocument, { upsert: true });
+					return done();
+				});
+			});
+		});
 
-		describe 'when the notification is set to expire', () ->
-			beforeEach ->
-				@stubbedNotification = {
+		describe('when the notification is set to expire', function() {
+			beforeEach(function() {
+				this.stubbedNotification = {
 					user_id: ObjectId(user_id),
 					key:"notification-key",
 					messageOpts:"some info",
 					templateKey:"template-key",
 					expires: '2922-02-13T09:32:56.289Z'
-				}
-				@expectedDocument = {
-					user_id: @stubbedNotification.user_id,
+				};
+				this.expectedDocument = {
+					user_id: this.stubbedNotification.user_id,
 					key:"notification-key",
 					messageOpts:"some info",
 					templateKey:"template-key",
-					expires: new Date(@stubbedNotification.expires),
-				}
-				@expectedQuery = {
-					user_id: @stubbedNotification.user_id,
+					expires: new Date(this.stubbedNotification.expires),
+				};
+				return this.expectedQuery = {
+					user_id: this.stubbedNotification.user_id,
 					key:"notification-key",
-				}
+				};});
 
-			it 'should add an `expires` Date field to the document', (done)->
-				@notifications.addNotification user_id, @stubbedNotification, (err)=>
-					expect(err).not.exists
-					sinon.assert.calledWith(@updateStub, @expectedQuery, @expectedDocument, { upsert: true })
-					done()
+			return it('should add an `expires` Date field to the document', function(done){
+				return this.notifications.addNotification(user_id, this.stubbedNotification, err=> {
+					expect(err).not.exists;
+					sinon.assert.calledWith(this.updateStub, this.expectedQuery, this.expectedDocument, { upsert: true });
+					return done();
+				});
+			});
+		});
 
-		describe 'when the notification has a nonsensical expires field', () ->
-			beforeEach ->
-				@stubbedNotification = {
+		return describe('when the notification has a nonsensical expires field', function() {
+			beforeEach(function() {
+				this.stubbedNotification = {
 					user_id: ObjectId(user_id),
 					key:"notification-key",
 					messageOpts:"some info",
 					templateKey:"template-key",
 					expires: 'WAT'
-				}
-				@expectedDocument = {
-					user_id: @stubbedNotification.user_id,
+				};
+				return this.expectedDocument = {
+					user_id: this.stubbedNotification.user_id,
 					key:"notification-key",
 					messageOpts:"some info",
 					templateKey:"template-key",
-					expires: new Date(@stubbedNotification.expires),
-				}
+					expires: new Date(this.stubbedNotification.expires),
+				};});
 
-			it 'should produce an error', (done)->
-				@notifications.addNotification user_id, @stubbedNotification, (err)=>
-					(err instanceof Error).should.equal true
-					sinon.assert.notCalled(@updateStub)
-					done()
+			return it('should produce an error', function(done){
+				return this.notifications.addNotification(user_id, this.stubbedNotification, err=> {
+					(err instanceof Error).should.equal(true);
+					sinon.assert.notCalled(this.updateStub);
+					return done();
+				});
+			});
+		});
+	});
 
-	describe 'removeNotificationId', ->
-		it 'should mark the notification id as read', (done)->
-			@updateStub.callsArgWith(2, null)
+	describe('removeNotificationId', () =>
+		it('should mark the notification id as read', function(done){
+			this.updateStub.callsArgWith(2, null);
 
-			@notifications.removeNotificationId user_id, notification_id, (err)=>
-				searchOps =
-					user_id:ObjectId(user_id)
+			return this.notifications.removeNotificationId(user_id, notification_id, err=> {
+				const searchOps = {
+					user_id:ObjectId(user_id),
 					_id:ObjectId(notification_id)
-				updateOperation =
-					"$unset": {templateKey:true, messageOpts:true}
-				assert.deepEqual(@updateStub.args[0][0], searchOps)
-				assert.deepEqual(@updateStub.args[0][1], updateOperation)
-				done()
+				};
+				const updateOperation =
+					{"$unset": {templateKey:true, messageOpts:true}};
+				assert.deepEqual(this.updateStub.args[0][0], searchOps);
+				assert.deepEqual(this.updateStub.args[0][1], updateOperation);
+				return done();
+			});
+		})
+	);
 
-	describe 'removeNotificationKey', ->
-		it 'should mark the notification key as read', (done)->
-			@updateStub.callsArgWith(2, null)
+	describe('removeNotificationKey', () =>
+		it('should mark the notification key as read', function(done){
+			this.updateStub.callsArgWith(2, null);
 
-			@notifications.removeNotificationKey user_id, notification_key, (err)=>
-				searchOps = {
-					user_id:ObjectId(user_id)
+			return this.notifications.removeNotificationKey(user_id, notification_key, err=> {
+				const searchOps = {
+					user_id:ObjectId(user_id),
 					key: notification_key
-				}
-				updateOperation = {
+				};
+				const updateOperation = {
 					"$unset": {templateKey:true}
-				}
-				assert.deepEqual(@updateStub.args[0][0], searchOps)
-				assert.deepEqual(@updateStub.args[0][1], updateOperation)
-				done()
+				};
+				assert.deepEqual(this.updateStub.args[0][0], searchOps);
+				assert.deepEqual(this.updateStub.args[0][1], updateOperation);
+				return done();
+			});
+		})
+	);
 
-	describe 'removeNotificationByKeyOnly', ->
-		it 'should mark the notification key as read', (done)->
-			@updateStub.callsArgWith(2, null)
+	describe('removeNotificationByKeyOnly', () =>
+		it('should mark the notification key as read', function(done){
+			this.updateStub.callsArgWith(2, null);
 
-			@notifications.removeNotificationByKeyOnly notification_key, (err)=>
-				searchOps =
-					key: notification_key
-				updateOperation =
-					"$unset": {templateKey:true}
-				assert.deepEqual(@updateStub.args[0][0], searchOps)
-				assert.deepEqual(@updateStub.args[0][1], updateOperation)
-				done()
+			return this.notifications.removeNotificationByKeyOnly(notification_key, err=> {
+				const searchOps =
+					{key: notification_key};
+				const updateOperation =
+					{"$unset": {templateKey:true}};
+				assert.deepEqual(this.updateStub.args[0][0], searchOps);
+				assert.deepEqual(this.updateStub.args[0][1], updateOperation);
+				return done();
+			});
+		})
+	);
 
-	describe 'deleteNotificationByKeyOnly', ->
-		it 'should completely remove the notification', (done)->
-			@removeStub.callsArgWith(2, null)
+	return describe('deleteNotificationByKeyOnly', () =>
+		it('should completely remove the notification', function(done){
+			this.removeStub.callsArgWith(2, null);
 
-			@notifications.deleteNotificationByKeyOnly notification_key, (err)=>
-				searchOps =
-					key: notification_key
-				opts =
-					justOne: true
-				assert.deepEqual(@removeStub.args[0][0], searchOps)
-				assert.deepEqual(@removeStub.args[0][1], opts)
-				done()
+			return this.notifications.deleteNotificationByKeyOnly(notification_key, err=> {
+				const searchOps =
+					{key: notification_key};
+				const opts =
+					{justOne: true};
+				assert.deepEqual(this.removeStub.args[0][0], searchOps);
+				assert.deepEqual(this.removeStub.args[0][1], opts);
+				return done();
+			});
+		})
+	);
+});
