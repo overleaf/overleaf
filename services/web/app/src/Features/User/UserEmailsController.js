@@ -137,14 +137,15 @@ module.exports = UserEmailsController = {
   confirm(req, res, next) {
     const { token } = req.body
     if (!token) {
-      return res.sendStatus(422)
+      return res.status(422).json({
+        message: req.i18n.translate('confirmation_link_broken')
+      })
     }
     UserEmailsConfirmationHandler.confirmEmailFromToken(token, function(error) {
       if (error) {
         if (error instanceof Errors.NotFoundError) {
           res.status(404).json({
-            message:
-              'Sorry, your confirmation token is invalid or has expired. Please request a new email confirmation link.'
+            message: req.i18n.translate('confirmation_token_invalid')
           })
         } else {
           next(error)

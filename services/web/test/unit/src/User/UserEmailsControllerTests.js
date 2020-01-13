@@ -303,7 +303,7 @@ describe('UserEmailsController', function() {
       })
 
       it('should return a 422 status', function() {
-        return this.res.sendStatus.calledWith(422).should.equal(true)
+        return this.res.status.calledWith(422).should.equal(true)
       })
     })
 
@@ -319,8 +319,7 @@ describe('UserEmailsController', function() {
         this.res.status.calledWith(404).should.equal(true)
         return this.res.json
           .calledWith({
-            message:
-              'Sorry, your confirmation token is invalid or has expired. Please request a new email confirmation link.'
+            message: this.req.i18n.translate('confirmation_token_invalid')
           })
           .should.equal(true)
       })
