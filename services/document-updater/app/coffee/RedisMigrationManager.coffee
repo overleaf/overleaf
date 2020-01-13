@@ -97,6 +97,14 @@ class Multi
 	exec: (callback) ->
 		# decide which client to use
 		project_id = getProjectId(@queueKey)
+		# Put a lock around finding and updating the queue to avoid time-of-check to
+		# time-of-use problems. When running in the "switch" phase we need a lock to
+		# guarantee the order of operations. (Example: docupdater A sees an old
+		# queue at t=t0 and pushes onto it at t=t1, project history clears the queue
+		# between t0 and t1, and docupdater B sees the empty queue, sets the
+		# migration flag and pushes onto the new queue at t2. Without a lock it's
+		# possible to have t2 < t1 if docupdater A is slower than B - then there
+		# would be entries in the old and new queues, which we want to avoid.)
 		LockManager.getLock project_id, (error, lockValue) =>
 			return callback(error) if error?
 			releaseLock = (args...) =>
