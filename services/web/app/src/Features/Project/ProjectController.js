@@ -6,7 +6,6 @@ const logger = require('logger-sharelatex')
 const ProjectDeleter = require('./ProjectDeleter')
 const ProjectDuplicator = require('./ProjectDuplicator')
 const ProjectCreationHandler = require('./ProjectCreationHandler')
-const ProjectHistoryHandler = require('./ProjectHistoryHandler')
 const EditorController = require('../Editor/EditorController')
 const ProjectHelper = require('./ProjectHelper')
 const metrics = require('metrics-sharelatex')
@@ -699,9 +698,6 @@ const ProjectController = {
         },
         activate(cb) {
           InactiveProjectManager.reactivateProjectIfRequired(projectId, cb)
-        },
-        ensureHistoryExists(cb) {
-          ProjectHistoryHandler.ensureHistoryExistsForProject(projectId, cb)
         },
         markAsOpened(cb) {
           // don't need to wait for this to complete
