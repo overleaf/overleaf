@@ -1,9 +1,9 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.1.21
+# Version: 1.3.1
 
-version: "2"
+version: "2.1"
 
 services:
   test_unit:
@@ -18,7 +18,7 @@ services:
     user: node
 
   test_acceptance:
-    build: .
+    image: node:10.16.3
     volumes:
       - .:/app
     working_dir: /app
@@ -32,22 +32,15 @@ services:
       NODE_ENV: test
     user: node
     depends_on:
-      - mongo
-      - redis
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     command: npm run test:acceptance
-
-
-
-  tar:
-    build: .
-    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
-    volumes:
-      - ./:/tmp/build/
-    command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
-    user: root
 
   redis:
     image: redis
 
   mongo:
-    image: mongo:3.4
+    image: mongo:3.6
+

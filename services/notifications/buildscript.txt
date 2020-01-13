@@ -1,8 +1,10 @@
 notifications
+--public-repo=True
 --language=coffeescript
---node-version=6.14.1
+--env-add=
+--node-version=10.16.3
 --acceptance-creds=None
 --dependencies=mongo,redis
 --docker-repos=gcr.io/overleaf-ops
---build-target=docker
---script-version=1.1.21
+--env-pass-through=
+--script-version=1.3.1
