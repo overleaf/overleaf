@@ -15,6 +15,7 @@ describe "PersistenceManager", ->
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
+				inc: sinon.stub()
 			"logger-sharelatex": @logger = {log: sinon.stub(), err: sinon.stub()}
 		@project_id = "project-id-123"
 		@projectHistoryId = "history-id-123"
@@ -71,9 +72,14 @@ describe "PersistenceManager", ->
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
 
+			it "should increment the metric", ->
+				@Metrics.inc.calledWith("getDoc", 1, {status: 200}).should.equal true
+
 		describe "when request returns an error", ->
 			beforeEach ->
-				@request.callsArgWith(1, @error = new Error("oops"), null, null)
+				@error = new Error("oops")
+				@error.code = "EOOPS"
+				@request.callsArgWith(1, @error, null, null)
 				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
 
 			it "should return the error", ->
@@ -81,6 +87,9 @@ describe "PersistenceManager", ->
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
+
+			it "should increment the metric", ->
+				@Metrics.inc.calledWith("getDoc", 1, {status: "EOOPS"}).should.equal true
 
 		describe "when the request returns 404", ->
 			beforeEach ->
@@ -93,6 +102,9 @@ describe "PersistenceManager", ->
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
 
+			it "should increment the metric", ->
+				@Metrics.inc.calledWith("getDoc", 1, {status: 404}).should.equal true
+
 		describe "when the request returns an error status code", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 500}, "")
@@ -103,6 +115,9 @@ describe "PersistenceManager", ->
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
+
+			it "should increment the metric", ->
+				@Metrics.inc.calledWith("getDoc", 1, {status: 500}).should.equal true
 
 		describe "when request returns an doc without lines", ->
 			beforeEach ->
@@ -163,9 +178,14 @@ describe "PersistenceManager", ->
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
 
+			it "should increment the metric", ->
+				@Metrics.inc.calledWith("setDoc", 1, {status: 200}).should.equal true
+
 		describe "when request returns an error", ->
 			beforeEach ->
-				@request.callsArgWith(1, @error = new Error("oops"), null, null)
+				@error = new Error("oops")
+				@error.code = "EOOPS"
+				@request.callsArgWith(1, @error, null, null)
 				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback)
 
 			it "should return the error", ->
@@ -173,6 +193,9 @@ describe "PersistenceManager", ->
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
+
+			it "should increment the metric", ->
+				@Metrics.inc.calledWith("setDoc", 1, {status: "EOOPS"}).should.equal true
 
 		describe "when the request returns 404", ->
 			beforeEach ->
@@ -185,6 +208,9 @@ describe "PersistenceManager", ->
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
 
+			it "should increment the metric", ->
+				@Metrics.inc.calledWith("setDoc", 1, {status: 404}).should.equal true
+
 		describe "when the request returns an error status code", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 500}, "")
@@ -196,3 +222,5 @@ describe "PersistenceManager", ->
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
 
+			it "should increment the metric", ->
+				@Metrics.inc.calledWith("setDoc", 1, {status: 500}).should.equal true
