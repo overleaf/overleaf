@@ -30,7 +30,6 @@ if (Metrics.event_loop) {
 
 app.use(function(req, res, next) {
   Metrics.inc('http-request')
-  res.logInfo = {}
   next()
 })
 
