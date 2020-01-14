@@ -73,7 +73,7 @@ describe "PersistenceManager", ->
 				@Metrics.Timer::done.called.should.equal true
 
 			it "should increment the metric", ->
-				@Metrics.inc.calledWith("getDoc", {status: 200}).should.equal true
+				@Metrics.inc.calledWith("getDoc", 1, {status: 200}).should.equal true
 
 		describe "when request returns an error", ->
 			beforeEach ->
@@ -89,7 +89,7 @@ describe "PersistenceManager", ->
 				@Metrics.Timer::done.called.should.equal true
 
 			it "should increment the metric", ->
-				@Metrics.inc.calledWith("getDoc", {status: "EOOPS"}).should.equal true
+				@Metrics.inc.calledWith("getDoc", 1, {status: "EOOPS"}).should.equal true
 
 		describe "when the request returns 404", ->
 			beforeEach ->
@@ -103,7 +103,7 @@ describe "PersistenceManager", ->
 				@Metrics.Timer::done.called.should.equal true
 
 			it "should increment the metric", ->
-				@Metrics.inc.calledWith("getDoc", {status: 404}).should.equal true
+				@Metrics.inc.calledWith("getDoc", 1, {status: 404}).should.equal true
 
 		describe "when the request returns an error status code", ->
 			beforeEach ->
@@ -117,7 +117,7 @@ describe "PersistenceManager", ->
 				@Metrics.Timer::done.called.should.equal true
 
 			it "should increment the metric", ->
-				@Metrics.inc.calledWith("getDoc", {status: 500}).should.equal true
+				@Metrics.inc.calledWith("getDoc", 1, {status: 500}).should.equal true
 
 		describe "when request returns an doc without lines", ->
 			beforeEach ->
@@ -179,7 +179,7 @@ describe "PersistenceManager", ->
 				@Metrics.Timer::done.called.should.equal true
 
 			it "should increment the metric", ->
-				@Metrics.inc.calledWith("setDoc", {status: 200}).should.equal true
+				@Metrics.inc.calledWith("setDoc", 1, {status: 200}).should.equal true
 
 		describe "when request returns an error", ->
 			beforeEach ->
@@ -195,7 +195,7 @@ describe "PersistenceManager", ->
 				@Metrics.Timer::done.called.should.equal true
 
 			it "should increment the metric", ->
-				@Metrics.inc.calledWith("setDoc", {status: "EOOPS"}).should.equal true
+				@Metrics.inc.calledWith("setDoc", 1, {status: "EOOPS"}).should.equal true
 
 		describe "when the request returns 404", ->
 			beforeEach ->
@@ -209,7 +209,7 @@ describe "PersistenceManager", ->
 				@Metrics.Timer::done.called.should.equal true
 
 			it "should increment the metric", ->
-				@Metrics.inc.calledWith("setDoc", {status: 404}).should.equal true
+				@Metrics.inc.calledWith("setDoc", 1, {status: 404}).should.equal true
 
 		describe "when the request returns an error status code", ->
 			beforeEach ->
@@ -223,4 +223,4 @@ describe "PersistenceManager", ->
 				@Metrics.Timer::done.called.should.equal true
 
 			it "should increment the metric", ->
-				@Metrics.inc.calledWith("setDoc", {status: 500}).should.equal true
+				@Metrics.inc.calledWith("setDoc", 1, {status: 500}).should.equal true

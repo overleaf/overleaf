@@ -21,11 +21,11 @@ updateMetric = (method, error, response) ->
 			error.code
 		else if response?
 			response.statusCode
-	Metrics.inc method, {status: status}
-	if error?.attempts > 0
-		Metrics.inc "#{method}-attempts", {status: 'error'}
-	if response?.attempts > 0
-		Metrics.inc "#{method}-attempts", {status: 'success'}
+	Metrics.inc method, 1, {status: status}
+	if error?.attempts > 1
+		Metrics.inc "#{method}-retries", 1, {status: 'error'}
+	if response?.attempts > 1
+		Metrics.inc "#{method}-retries", 1, {status: 'success'}
 
 module.exports = PersistenceManager =
 	getDoc: (project_id, doc_id, _callback = (error, lines, version, ranges, pathname, projectHistoryId, projectHistoryType) ->) ->
