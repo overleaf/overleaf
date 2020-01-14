@@ -3,23 +3,8 @@ const metrics = require('metrics-sharelatex')
 
 class RequestLogger {
   constructor() {
-    this.errorHandler = this.errorHandler.bind(this)
-    this.middleware = this.middleware.bind(this)
     this._logInfo = {}
     this._logMessage = 'http request'
-  }
-
-  attach(app) {
-    app.use(this.middleware)
-    app.use(this.errorHandler)
-  }
-
-  errorHandler(err, req, res, next) {
-    this._logInfo.error = err
-    res
-      .send(err.message)
-      .status(500)
-      .end()
   }
 
   addFields(fields) {
@@ -30,9 +15,22 @@ class RequestLogger {
     this._logMessage = message
   }
 
-  middleware(req, res, next) {
+  static attach(app) {
+    app.use(RequestLogger.middleware)
+    app.use(RequestLogger.errorHandler)
+  }
+
+  static errorHandler(err, req, res, next) {
+    this._logInfo.error = err
+    res
+      .send(err.message)
+      .status(500)
+      .end()
+  }
+
+  static middleware(req, res, next) {
     const startTime = new Date()
-    req.requestLogger = this
+    req.requestLogger = new RequestLogger()
 
     // override the 'end' method to log and record metrics
     const end = res.end
@@ -77,9 +75,9 @@ class RequestLogger {
             statusCode: res.statusCode,
             'response-time': responseTime
           },
-          info: this._logInfo
+          info: req.requestLogger._logInfo
         },
-        this._logMessage
+        req.requestLogger._logMessage
       )
     }
 

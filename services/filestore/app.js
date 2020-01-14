@@ -16,8 +16,7 @@ const RequestLogger = require('./app/js/RequestLogger')
 
 const app = express()
 
-const requestLogger = new RequestLogger()
-requestLogger.attach(app)
+RequestLogger.attach(app)
 
 if (settings.sentry && settings.sentry.dsn) {
   logger.initializeErrorReporting(settings.sentry.dsn)
