@@ -12,6 +12,21 @@ request = (require("requestretry")).defaults({
 # hold us up, and need to bail out quickly if there is a problem.
 MAX_HTTP_REQUEST_LENGTH = 5000 # 5 seconds
 
+updateMetric = (method, error, response) ->
+	# find the status, with special handling for connection timeouts
+	# https://github.com/request/request#timeouts
+	status = if error?.connect is true
+			"#{error.code} (connect)"
+		else if error?
+			error.code
+		else if response?
+			response.statusCode
+	Metrics.inc method, {status: status}
+	if error?.attempts > 0
+		Metrics.inc "#{method}-attempts", {status: 'error'}
+	if response?.attempts > 0
+		Metrics.inc "#{method}-attempts", {status: 'success'}
+
 module.exports = PersistenceManager =
 	getDoc: (project_id, doc_id, _callback = (error, lines, version, ranges, pathname, projectHistoryId, projectHistoryType) ->) ->
 		timer = new Metrics.Timer("persistenceManager.getDoc")
@@ -32,6 +47,7 @@ module.exports = PersistenceManager =
 			jar: false
 			timeout: MAX_HTTP_REQUEST_LENGTH
 		}, (error, res, body) ->
+			updateMetric('getDoc', error, res)
 			return callback(error) if error?
 			if res.statusCode >= 200 and res.statusCode < 300
 				try
@@ -73,6 +89,7 @@ module.exports = PersistenceManager =
 			jar: false
 			timeout: MAX_HTTP_REQUEST_LENGTH
 		}, (error, res, body) ->
+			updateMetric('setDoc', error, res)
 			return callback(error) if error?
 			if res.statusCode >= 200 and res.statusCode < 300
 				return callback null
