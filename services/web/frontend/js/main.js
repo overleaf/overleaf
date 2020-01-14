@@ -11,7 +11,6 @@
  */
 define([
   'main/project-list/index',
-  'main/user-details',
   'main/account-settings',
   'main/clear-sessions',
   'main/account-upgrade',
