@@ -16,6 +16,9 @@ const RequestLogger = require('./app/js/RequestLogger')
 
 const app = express()
 
+const requestLogger = new RequestLogger()
+requestLogger.attach(app)
+
 if (settings.sentry && settings.sentry.dsn) {
   logger.initializeErrorReporting(settings.sentry.dsn)
 }
@@ -25,9 +28,6 @@ Metrics.memory.monitor(logger)
 if (Metrics.event_loop) {
   Metrics.event_loop.monitor(logger)
 }
-
-app.use(RequestLogger.middleware)
-app.use(RequestLogger.errorHandler)
 
 app.use(function(req, res, next) {
   Metrics.inc('http-request')

@@ -73,9 +73,10 @@ describe('FileController', function() {
         file_id: fileId
       },
       headers: {},
-      setLogMessage: sinon.stub(),
-      addLogField: sinon.stub(),
-      addLogFields: sinon.stub()
+      requestLogger: {
+        setMessage: sinon.stub(),
+        addFields: sinon.stub()
+      }
     }
 
     res = {

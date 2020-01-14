@@ -27,8 +27,8 @@ function getFile(req, res, next) {
   }
 
   metrics.inc('getFile')
-  req.setLogMessage('getting file')
-  req.addLogFields({
+  req.requestLogger.setMessage('getting file')
+  req.requestLogger.addFields({
     key,
     bucket,
     format,
@@ -41,7 +41,7 @@ function getFile(req, res, next) {
     if (range) {
       options.start = range.start
       options.end = range.end
-      req.addLogField('range', range)
+      req.requestLogger.addFields({ range })
     }
   }
 
@@ -76,8 +76,8 @@ function getFileHead(req, res, next) {
   const { key, bucket } = req
 
   metrics.inc('getFileSize')
-  req.setLogMessage('getting file size')
-  req.addLogFields({ key, bucket })
+  req.requestLogger.setMessage('getting file size')
+  req.requestLogger.addFields({ key, bucket })
 
   FileHandler.getFileSize(bucket, key, function(err, fileSize) {
     if (err) {
@@ -97,8 +97,8 @@ function insertFile(req, res, next) {
   metrics.inc('insertFile')
   const { key, bucket } = req
 
-  req.setLogMessage('inserting file')
-  req.addLogFields({ key, bucket })
+  req.requestLogger.setMessage('inserting file')
+  req.requestLogger.addFields({ key, bucket })
 
   FileHandler.insertFile(bucket, key, req, function(err) {
     if (err) {
@@ -115,13 +115,13 @@ function copyFile(req, res, next) {
   const oldProjectId = req.body.source.project_id
   const oldFileId = req.body.source.file_id
 
-  req.addLogFields({
+  req.requestLogger.addFields({
     key,
     bucket,
     oldProject_id: oldProjectId,
     oldFile_id: oldFileId
   })
-  req.setLogMessage('copying file')
+  req.requestLogger.setMessage('copying file')
 
   PersistorManager.copyFile(
     bucket,
@@ -146,8 +146,8 @@ function deleteFile(req, res, next) {
   metrics.inc('deleteFile')
   const { key, bucket } = req
 
-  req.addLogFields({ key, bucket })
-  req.setLogMessage('deleting file')
+  req.requestLogger.addFields({ key, bucket })
+  req.requestLogger.setMessage('deleting file')
 
   FileHandler.deleteFile(bucket, key, function(err) {
     if (err) {
@@ -162,8 +162,8 @@ function directorySize(req, res, next) {
   metrics.inc('projectSize')
   const { project_id: projectId, bucket } = req
 
-  req.setLogMessage('getting project size')
-  req.addLogFields({ projectId, bucket })
+  req.requestLogger.setMessage('getting project size')
+  req.requestLogger.addFields({ projectId, bucket })
 
   FileHandler.getDirectorySize(bucket, projectId, function(err, size) {
     if (err) {
@@ -171,7 +171,7 @@ function directorySize(req, res, next) {
     }
 
     res.json({ 'total bytes': size })
-    req.addLogField('size', size)
+    req.requestLogger.addFields({ size })
   })
 }
 
