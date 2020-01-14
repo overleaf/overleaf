@@ -5,9 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const base = require('./webpack.config')
 
-// Use "smart" merge: attempts to combine loaders targeting the same file type,
-// overriding the base config
-module.exports = merge.smart(base, {
+module.exports = merge(base, {
   mode: 'production',
 
   // Enable a full source map. Generates a comment linking to the source map
@@ -16,26 +14,6 @@ module.exports = merge.smart(base, {
   output: {
     // Override filename to include hash for immutable caching
     filename: 'js/[name]-[chunkhash].js'
-  },
-
-  module: {
-    rules: [
-      {
-        // Override base font loading to add hash to filename so that we can
-        // use "immutable" caching
-        test: /\.(woff|woff2)$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              outputPath: 'fonts',
-              publicPath: '/fonts/',
-              name: '[name]-[hash].[ext]'
-            }
-          }
-        ]
-      }
-    ]
   },
 
   optimization: {
