@@ -114,6 +114,21 @@ module.exports = {
         ]
       },
       {
+        // Load fonts
+        test: /\.(woff|woff2)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              // Output to public/font
+              outputPath: 'fonts',
+              publicPath: '/fonts/',
+              name: '[name].[ext]'
+            }
+          }
+        ]
+      },
+      {
         // These options are necessary for handlebars to have access to helper
         // methods
         test: /\.handlebars$/,

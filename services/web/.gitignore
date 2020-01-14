@@ -47,6 +47,7 @@ public/manifest.json
 public/js
 public/minjs
 public/stylesheets
+public/fonts
 
 Gemfile.lock
 
