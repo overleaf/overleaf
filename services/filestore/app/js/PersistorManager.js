@@ -14,10 +14,10 @@ if (!settings.filestore.backend) {
 switch (settings.filestore.backend) {
   case 'aws-sdk':
   case 's3':
-    module.exports = require('./S3PersistorManager')
+    module.exports = require('./S3Persistor')
     break
   case 'fs':
-    module.exports = require('./FSPersistorManager')
+    module.exports = require('./FSPersistor')
     break
   default:
     throw new Error(`unknown filestore backend: ${settings.filestore.backend}`)
