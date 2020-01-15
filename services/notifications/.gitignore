@@ -36,35 +36,12 @@ Thumbs.db
 node_modules/*
 data/*
 
-app.js
-example.js
-app/js/*
-**/*.map
-test/unit/js/*
-test/smoke/js/*
 cookies.txt
-requestQueueWorker.js
-TpdsWorker.js
-BackgroundJobsWorker.js
 UserAndProjectPopulator.coffee
 
-public/js/history/versiondetail.js
-!public/js/libs/
-public/js/*
-!public/js/ace/*
-!public/js/libs/
-public/js/libs/sharejs.js
-public/js/editor.js
-public/js/home.js
-public/js/forms.js
-public/js/gui.js
-public/js/admin.js
-public/js/history/*
 public/stylesheets/style.css
 public/brand/plans.css
-public/minjs/
 
-public/js/main.js
 Gemfile.lock
 
 *.swp

@@ -1,0 +1,74 @@
+// this file was auto-generated, do not edit it directly.
+// instead run bin/update_build_scripts from
+// https://github.com/sharelatex/sharelatex-dev-environment
+// Version: 1.3.1
+{
+  "extends": [
+    "standard",
+    "prettier",
+    "prettier/standard"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2017
+  },
+  "plugins": [
+    "mocha",
+    "chai-expect",
+    "chai-friendly"
+  ],
+  "env": {
+    "node": true,
+    "mocha": true
+  },
+  "rules": {
+    // Swap the no-unused-expressions rule with a more chai-friendly one
+    "no-unused-expressions": 0,
+    "chai-friendly/no-unused-expressions": "error"
+  },
+  "overrides": [
+    {
+      // Test specific rules
+      "files": ["**/test/*/src/**/*.js"],
+      "globals": {
+        "expect": true
+      },
+      "rules": {
+        // mocha-specific rules
+        "mocha/handle-done-callback": "error",
+        "mocha/no-exclusive-tests": "error",
+        "mocha/no-global-tests": "error",
+        "mocha/no-identical-title": "error",
+        "mocha/no-nested-tests": "error",
+        "mocha/no-pending-tests": "error",
+        "mocha/no-skipped-tests": "error",
+        "mocha/no-mocha-arrows": "error",
+
+        // chai-specific rules
+        "chai-expect/missing-assertion": "error",
+        "chai-expect/terminating-properties": "error",
+
+        // prefer-arrow-callback applies to all callbacks, not just ones in mocha tests.
+        // we don't enforce this at the top-level - just in tests to manage `this` scope
+        // based on mocha's context mechanism
+        "mocha/prefer-arrow-callback": "error"
+      }
+    },
+    {
+      // Frontend test specific rules
+      "files": ["**/test/frontend/**/*.js"],
+      "globals": {
+        "expect": true,
+        "define": true,
+        "$": true
+      }
+    },
+    {
+      // Backend specific rules
+      "files": ["**/app/src/**/*.js"],
+      "rules": {
+        // don't allow console.log in backend code
+        "no-console": "error"
+      }
+    }
+  ]
+}

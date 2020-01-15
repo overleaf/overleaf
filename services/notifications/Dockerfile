@@ -1,3 +1,8 @@
+# This file was auto-generated, do not edit it directly.
+# Instead run bin/update_build_scripts from
+# https://github.com/sharelatex/sharelatex-dev-environment
+# Version: 1.3.1
+
 FROM node:10.16.3 as app
 
 WORKDIR /app
@@ -10,7 +15,6 @@ RUN npm install --quiet
 COPY . /app
 
 
-RUN npm run compile:all
 
 FROM node:10.16.3
 

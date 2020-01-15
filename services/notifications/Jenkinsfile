@@ -16,6 +16,7 @@ pipeline {
   }
 
   stages {
+
     stage('Install') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
@@ -33,6 +34,13 @@ pipeline {
     stage('Build') {
       steps {
         sh 'make build'
+      }
+    }
+
+    stage('Linting') {
+      steps {
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make format'
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make lint'
       }
     }
 
