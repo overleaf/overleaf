@@ -36,7 +36,7 @@ define(function() {
   SINGLELINE_WARNING_REGEX = /^Warning--(.+)$/m;
   MULTILINE_ERROR_REGEX = /^(.*)---line (\d+) of file (.*)\n([^]+?)\nI'm skipping whatever remains of this entry$/m;
   BAD_CROSS_REFERENCE_REGEX = /^(A bad cross reference---entry ".+?"\nrefers to entry.+?, which doesn't exist)$/m;
-  MULTILINE_COMMAND_ERROR_REGEX = /^(.*)\n---line (\d+) of file (.*)\n([^]+?)\nI'm skipping whatever remains of this command$/m;
+  MULTILINE_COMMAND_ERROR_REGEX = /^(.*)\n?---line (\d+) of file (.*)\n([^]+?)\nI'm skipping whatever remains of this command$/m;
   warningParsers = [
     [
       MULTILINE_WARNING_REGEX, function(match) {
