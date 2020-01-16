@@ -1,4 +1,6 @@
 define([
+  'core-js/stable/array/fill',
+  'core-js/stable/array/includes',
   'jquery',
   'angular',
   'angular-sanitize',
