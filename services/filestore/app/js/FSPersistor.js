@@ -103,12 +103,17 @@ async function deleteFile(location, name) {
   try {
     await fsUnlink(`${location}/${filteredName}`)
   } catch (err) {
-    throw _wrapError(
+    const wrappedError = _wrapError(
       err,
       'failed to delete file',
       { location, filteredName },
       WriteError
     )
+    if (!(wrappedError instanceof NotFoundError)) {
+      // S3 doesn't give us a 404 when a file wasn't there to be deleted, so we
+      // should be consistent here as well
+      throw wrappedError
+    }
   }
 }
 

@@ -173,6 +173,7 @@ async function deleteFile(bucketName, key) {
       .deleteObject({ Bucket: bucketName, Key: key })
       .promise()
   } catch (err) {
+    // s3 does not give us a NotFoundError here
     throw _wrapError(
       err,
       'failed to delete file in S3',
@@ -232,8 +233,12 @@ async function directorySize(bucketName, key) {
 }
 
 function _wrapError(error, message, params, ErrorType) {
+  // the AWS client can return one of 'NoSuchKey', 'NotFound' or 404 (integer)
+  // when something is not found, depending on the endpoint
   if (
-    ['NoSuchKey', 'NotFound', 'AccessDenied', 'ENOENT'].includes(error.code)
+    ['NoSuchKey', 'NotFound', 404, 'AccessDenied', 'ENOENT'].includes(
+      error.code
+    )
   ) {
     return new NotFoundError({
       message: 'no such file',

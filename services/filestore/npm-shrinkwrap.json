@@ -5055,6 +5055,12 @@
       "resolved": "https://registry.npmjs.org/stream-shift/-/stream-shift-1.0.0.tgz",
       "integrity": "sha1-1cdSgl5TZ+eG944Y5EXqIjoVWVI="
     },
+    "streamifier": {
+      "version": "0.1.1",
+      "resolved": "https://registry.npmjs.org/streamifier/-/streamifier-0.1.1.tgz",
+      "integrity": "sha1-l+mNj6TRBdYqJpHR3AfoINuN/E8=",
+      "dev": true
+    },
     "string-width": {
       "version": "2.1.1",
       "resolved": "https://registry.npmjs.org/string-width/-/string-width-2.1.1.tgz",
