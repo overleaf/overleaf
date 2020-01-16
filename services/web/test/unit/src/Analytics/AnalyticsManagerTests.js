@@ -102,17 +102,5 @@ describe('AnalyticsManager', function() {
         }
       )
     })
-
-    it('getLastOccurrence', function(done) {
-      const event = 'fake-event'
-      this.AnalyticsManager.getLastOccurrence(this.fakeUserId, event, error => {
-        expect(error).to.not.exist
-        sinon.assert.calledWithMatch(this.request, {
-          body: { event },
-          url: 'analytics.test/user/123abc/event/last_occurrence'
-        })
-        done()
-      })
-    })
   })
 })

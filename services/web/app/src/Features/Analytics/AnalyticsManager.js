@@ -1,6 +1,4 @@
 const settings = require('settings-sharelatex')
-const logger = require('logger-sharelatex')
-const request = require('request')
 const FaultTolerantRequest = require('../../infrastructure/FaultTolerantRequest')
 const Errors = require('../Errors/Errors')
 
@@ -59,18 +57,6 @@ const makeAnalyticsBackgroundRequest = function(userId, options, callback) {
   options.backoffMultiplier = options.backoffMultiplier || 3
 
   FaultTolerantRequest.backgroundRequest(options, callback)
-}
-
-// make synchronous request to analytics without retries after checking and
-// preparing it.
-const makeAnalyticsRequest = function(userId, options, callback) {
-  let { error, skip } = checkAnalyticsRequest(userId)
-  if (error || skip) {
-    return callback(error)
-  }
-  prepareAnalyticsRequest(options)
-
-  request(options, callback)
 }
 
 module.exports = {
@@ -138,25 +124,5 @@ module.exports = {
     }
 
     makeAnalyticsBackgroundRequest(userId, opts, callback)
-  },
-
-  getLastOccurrence(userId, event, callback) {
-    const opts = {
-      body: {
-        event
-      },
-      json: true,
-      method: 'POST',
-      timeout: 1000,
-      url: `/user/${userId}/event/last_occurrence`
-    }
-    makeAnalyticsRequest(userId, opts, function(err, response, body) {
-      if (err != null) {
-        logger.warn({ userId, err }, 'error getting last occurance of event')
-        callback(err)
-      } else {
-        callback(null, body)
-      }
-    })
   }
 }

@@ -24,7 +24,6 @@ define([
   'main/subscription-dashboard',
   'main/new-subscription',
   'main/annual-upgrade',
-  'main/announcements',
   'main/register-users',
   'main/subscription/team-invite-controller',
   'main/contact-us',

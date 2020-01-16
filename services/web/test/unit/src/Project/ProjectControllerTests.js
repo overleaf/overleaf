@@ -87,7 +87,6 @@ describe('ProjectController', function() {
     this.UserController = {
       logout: sinon.stub()
     }
-    this.AnalyticsManager = { getLastOccurrence: sinon.stub() }
     this.TokenAccessHandler = {
       getRequestToken: sinon.stub().returns(this.token),
       protectTokens: sinon.stub()
@@ -174,7 +173,6 @@ describe('ProjectController', function() {
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
-        '../Analytics/AnalyticsManager': this.AnalyticsManager,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../../infrastructure/Modules': this.Modules,
@@ -1055,7 +1053,6 @@ describe('ProjectController', function() {
       )
       this.ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
       this.InactiveProjectManager.reactivateProjectIfRequired.callsArgWith(1)
-      this.AnalyticsManager.getLastOccurrence.yields(null, { mock: 'event' })
       this.ProjectUpdateHandler.markAsOpened.callsArgWith(1)
     })
 

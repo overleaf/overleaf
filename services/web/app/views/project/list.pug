@@ -16,46 +16,6 @@ block content
 			}
 		};
 
-	if uiConfig.renderAnnouncements
-		.announcements(
-			ng-controller="AnnouncementsController"
-			ng-class="{ 'announcements-open': ui.isOpen }"
-			ng-cloak
-		)
-			.announcements-backdrop(
-				ng-if="ui.isOpen"
-				ng-click="toggleAnnouncementsUI();"
-			)
-			a.announcements-btn(
-				href
-				ng-if="announcements.length"
-				ng-click="toggleAnnouncementsUI();"
-				ng-class="{ 'announcements-btn-open': ui.isOpen, 'announcements-btn-has-new': ui.newItems }"
-			)
-				span.announcements-badge(ng-if="ui.newItems") {{ ui.newItems }}
-			.announcements-body(
-				ng-if="ui.isOpen"
-			)
-				.announcements-scroller
-					.announcement(
-						ng-repeat="announcement in announcements | filter:(ui.newItems ? { read: false } : '') track by announcement.id"
-					)
-						h2.announcement-header {{ announcement.title }}
-						p.announcement-description(ng-bind-html="announcement.excerpt")
-						.announcement-meta
-							p.announcement-date {{ announcement.date | date:"longDate" }}
-							a.announcement-link(
-								ng-href="{{ announcement.url }}"
-								ng-click="logAnnouncementClick()",
-								target="_blank"
-							) Read more
-					div.text-center(
-						ng-if="ui.newItems > 0 && ui.newItems < announcements.length"
-					)
-						a.btn.btn-default.btn-sm(
-							href
-							ng-click="showAll();"
-						) Show all
 	main.content.content-alt.project-list-page(
 		ng-controller="ProjectPageController"
 		role="main"
@@ -77,7 +37,7 @@ block content
 						span(aria-hidden="true") &times;
 						span.sr-only #{translate("close")}
 					.system-message-content(ng-bind-html="htmlContent")
-			
+
 			include ../translations/translation_message
 
 		.project-list-content(event-tracking=settings.overleaf ? "loads_v2_dash" : "", onboard=settings.overleaf ? "true" : "", event-tracking-trigger=settings.overleaf ? "load" : "", event-tracking-mb="true", event-segmentation="{location: 'dash', v2_onboard: true}")
@@ -90,7 +50,7 @@ block content
 					.project-list-main.col-md-10.col-xs-9
 						include ./list/notifications
 						include ./list/project-list
-				
+
 				.project-list-empty.row(ng-if="projects.length === 0")
 					.project-list-empty-col.col-md-offset-2.col-md-8.col-md-offset-2.col-xs-8.col-xs-offset-2
 						include ./list/empty-project-list

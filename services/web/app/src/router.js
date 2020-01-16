@@ -42,7 +42,6 @@ const BetaProgramController = require('./Features/BetaProgram/BetaProgramControl
 const SudoModeController = require('./Features/SudoMode/SudoModeController')
 const SudoModeMiddleware = require('./Features/SudoMode/SudoModeMiddleware')
 const AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
-const AnnouncementsController = require('./Features/Announcements/AnnouncementsController')
 const MetaController = require('./Features/Metadata/MetaController')
 const TokenAccessController = require('./Features/TokenAccess/TokenAccessController')
 const Features = require('./infrastructure/Features')
@@ -686,12 +685,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/notifications/:notification_id',
     AuthenticationController.requireLogin(),
     NotificationsController.markNotificationAsRead
-  )
-
-  webRouter.get(
-    '/announcements',
-    AuthenticationController.requireLogin(),
-    AnnouncementsController.getUndreadAnnouncements
   )
 
   // Deprecated in favour of /internal/project/:project_id but still used by versioning
