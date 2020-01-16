@@ -44,19 +44,24 @@ define(['base'], App =>
       } else {
         entities = [$(ui.draggable).scope().entity]
       }
+
+      const ids = $scope.entity.children.map(entity => entity.id)
+
       for (let dropped_entity of Array.from(entities)) {
-        try {
-          ide.fileTreeManager.moveEntity(dropped_entity, $scope.entity)
-        } catch (err) {
-          $modal.open({
-            templateUrl: 'duplicateFileModalTemplate',
-            controller: 'DuplicateFileModalController',
-            resolve: {
-              fileName() {
-                return dropped_entity.name
+        if (!ids.includes(dropped_entity.id)) {
+          try {
+            ide.fileTreeManager.moveEntity(dropped_entity, $scope.entity)
+          } catch (err) {
+            $modal.open({
+              templateUrl: 'duplicateFileModalTemplate',
+              controller: 'DuplicateFileModalController',
+              resolve: {
+                fileName() {
+                  return dropped_entity.name
+                }
               }
-            }
-          })
+            })
+          }
         }
       }
       $scope.$digest()
