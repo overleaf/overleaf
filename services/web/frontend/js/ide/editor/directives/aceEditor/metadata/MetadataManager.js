@@ -53,13 +53,13 @@ define(['ace/ace'], function() {
         }
         const commandFragment = getLastCommandFragment(lineUpToCursor)
 
-        const linesContainPackage = _.any(change.lines, line =>
+        const linesContainPackage = _.some(change.lines, line =>
           line.match(/^\\usepackage(?:\[.{0,80}?])?{(.{0,80}?)}/)
         )
-        const linesContainReqPackage = _.any(change.lines, line =>
+        const linesContainReqPackage = _.some(change.lines, line =>
           line.match(/^\\RequirePackage(?:\[.{0,80}?])?{(.{0,80}?)}/)
         )
-        const linesContainLabel = _.any(change.lines, line =>
+        const linesContainLabel = _.some(change.lines, line =>
           line.match(/\\label{(.{0,80}?)}/)
         )
         const linesContainMeta =
