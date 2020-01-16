@@ -25,6 +25,17 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
         newValue === 'ownerName' ? ownerNameComparator : defaultComparator
     })
 
+    $scope.shouldShowSurveyLink = true
+
+    if (localStorage('dismissed-db-survey') === true) {
+      $scope.shouldShowSurveyLink = false
+    }
+
+    $scope.dismissSurvey = () => {
+      localStorage('dismissed-db-survey', true)
+      $scope.shouldShowSurveyLink = false
+    }
+
     $timeout(() => recalculateProjectListHeight(), 10)
 
     $scope.$watch(
