@@ -1017,8 +1017,9 @@ define([
       }
       ide.editorManager.openDoc(entity, {
         gotoLine: line,
-        gotoColumn: column,
-        forceReopen: true
+        gotoColumn: column
+        // commented out because it causes an out of sync error
+        // forceReopen: true
       })
     }
   })
