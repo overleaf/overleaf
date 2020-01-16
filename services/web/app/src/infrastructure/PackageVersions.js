@@ -7,7 +7,9 @@
  */
 const version = {
   ace: '1.4.5', // Upgrade instructions: https://github.com/overleaf/write_latex/wiki/Upgrading-Ace
-  fineuploader: '5.15.4'
+  fineuploader: '5.15.4',
+  // For frontend. Backend has a different version defined in package.json
+  underscore: '1.9.1'
 }
 
 module.exports = {

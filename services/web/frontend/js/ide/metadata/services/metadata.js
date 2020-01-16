@@ -38,7 +38,7 @@ define(['base'], App =>
     }
 
     metadata.getAllLabels = () =>
-      _.flattenDeep(
+      _.flatten(
         (() => {
           const result = []
           for (let docId in state.documents) {

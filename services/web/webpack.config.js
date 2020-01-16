@@ -167,8 +167,11 @@ module.exports = {
         ]
       },
       {
-        // Expose lodash global variable
-        test: require.resolve('lodash'),
+        // Expose underscore global variable
+        test: path.join(
+          __dirname,
+          `frontend/js/vendor/libs/${PackageVersions.lib('underscore')}.js`
+        ),
         use: [
           {
             loader: 'expose-loader',
@@ -254,5 +257,11 @@ module.exports = {
       // to provide support for non-Latin characters
       { from: 'node_modules/pdfjs-dist/cmaps', to: 'js/cmaps' }
     ])
-  ]
+  ],
+
+  // If underscore is required by another dependency *don't* include in the
+  // bundle and use the relevant global variable instead
+  externals: {
+    underscore: '_'
+  }
 }
