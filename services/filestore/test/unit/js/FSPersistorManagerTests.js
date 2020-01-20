@@ -44,10 +44,6 @@ describe('FSPersistorManagerTests', function() {
     FSPersistorManager = SandboxedModule.require(modulePath, {
       requires: {
         './LocalFileWriter': LocalFileWriter,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        },
         './Errors': Errors,
         fs,
         glob,

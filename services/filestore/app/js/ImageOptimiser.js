@@ -12,8 +12,6 @@ module.exports = {
 
 async function compressPng(localPath, callback) {
   const timer = new metrics.Timer('compressPng')
-  logger.log({ localPath }, 'optimising png path')
-
   const args = ['optipng', localPath]
   const opts = {
     timeout: 30 * 1000,
@@ -23,7 +21,6 @@ async function compressPng(localPath, callback) {
   try {
     await safeExec(args, opts)
     timer.done()
-    logger.log({ localPath }, 'finished compressing png')
   } catch (err) {
     if (err.code === 'SIGKILL') {
       logger.warn(
@@ -31,10 +28,6 @@ async function compressPng(localPath, callback) {
         'optimiser timeout reached'
       )
     } else {
-      logger.err(
-        { err, stderr: err.stderr, localPath },
-        'something went wrong compressing png'
-      )
       throw err
     }
   }

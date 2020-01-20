@@ -1,5 +1,4 @@
 const metrics = require('metrics-sharelatex')
-const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
 const { callbackify } = require('util')
 
@@ -69,8 +68,6 @@ async function preview(sourcePath) {
 }
 
 async function _convert(sourcePath, requestedFormat, command) {
-  logger.log({ sourcePath, requestedFormat }, 'converting file format')
-
   if (!APPROVED_FORMATS.includes(requestedFormat)) {
     throw new ConversionError({
       message: 'invalid format requested',
@@ -97,9 +94,5 @@ async function _convert(sourcePath, requestedFormat, command) {
   }
 
   timer.done()
-  logger.log(
-    { sourcePath, requestedFormat, destPath },
-    'finished converting file'
-  )
   return destPath
 }

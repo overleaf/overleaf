@@ -12,7 +12,11 @@ const fileController = require('./app/js/FileController')
 const keyBuilder = require('./app/js/KeyBuilder')
 const healthCheckController = require('./app/js/HealthCheckController')
 
+const RequestLogger = require('./app/js/RequestLogger')
+
 const app = express()
+
+RequestLogger.attach(app)
 
 if (settings.sentry && settings.sentry.dsn) {
   logger.initializeErrorReporting(settings.sentry.dsn)
@@ -24,7 +28,6 @@ if (Metrics.event_loop) {
   Metrics.event_loop.monitor(logger)
 }
 
-app.use(Metrics.http.monitor(logger))
 app.use(function(req, res, next) {
   Metrics.inc('http-request')
   next()

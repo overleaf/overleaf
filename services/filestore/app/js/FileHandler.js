@@ -2,17 +2,11 @@ const { promisify } = require('util')
 const fs = require('fs')
 const PersistorManager = require('./PersistorManager')
 const LocalFileWriter = require('./LocalFileWriter')
-const logger = require('logger-sharelatex')
 const FileConverter = require('./FileConverter')
 const KeyBuilder = require('./KeyBuilder')
 const async = require('async')
 const ImageOptimiser = require('./ImageOptimiser')
-const {
-  WriteError,
-  ReadError,
-  ConversionError,
-  NotFoundError
-} = require('./Errors')
+const { ConversionError } = require('./Errors')
 
 module.exports = {
   insertFile,
@@ -33,7 +27,7 @@ function insertFile(bucket, key, stream, callback) {
   const convertedKey = KeyBuilder.getConvertedFolderKey(key)
   PersistorManager.deleteDirectory(bucket, convertedKey, function(error) {
     if (error) {
-      return callback(new WriteError('error inserting file').withCause(error))
+      return callback(error)
     }
     PersistorManager.sendStream(bucket, key, stream, callback)
   })
@@ -51,13 +45,9 @@ function deleteFile(bucket, key, callback) {
 }
 
 function getFile(bucket, key, opts, callback) {
-  // In this call, opts can contain credentials
-  if (!opts) {
-    opts = {}
-  }
-  logger.log({ bucket, key, opts: _scrubSecrets(opts) }, 'getting file')
+  opts = opts || {}
   if (!opts.format && !opts.style) {
-    _getStandardFile(bucket, key, opts, callback)
+    PersistorManager.getFileStream(bucket, key, opts, callback)
   } else {
     _getConvertedFile(bucket, key, opts, callback)
   }
@@ -68,27 +58,7 @@ function getFileSize(bucket, key, callback) {
 }
 
 function getDirectorySize(bucket, projectId, callback) {
-  logger.log({ bucket, project_id: projectId }, 'getting project size')
-  PersistorManager.directorySize(bucket, projectId, function(err, size) {
-    if (err) {
-      return callback(
-        new ReadError('error getting project size').withCause(err)
-      )
-    }
-    callback(null, size)
-  })
-}
-
-function _getStandardFile(bucket, key, opts, callback) {
-  PersistorManager.getFileStream(bucket, key, opts, function(err, fileStream) {
-    if (err && !(err instanceof NotFoundError)) {
-      logger.err(
-        { bucket, key, opts: _scrubSecrets(opts) },
-        'error getting fileStream'
-      )
-    }
-    callback(err, fileStream)
-  })
+  PersistorManager.directorySize(bucket, projectId, callback)
 }
 
 function _getConvertedFile(bucket, key, opts, callback) {
@@ -124,7 +94,10 @@ function _getConvertedFileAndCache(bucket, key, convertedKey, opts, callback) {
       if (err) {
         LocalFileWriter.deleteFile(convertedFsPath, function() {})
         return callback(
-          new ConversionError('failed to convert file').withCause(err)
+          new ConversionError({
+            message: 'failed to convert file',
+            info: { opts, bucket, key, convertedKey }
+          }).withCause(err)
         )
       }
       // Send back the converted file from the local copy to avoid problems
@@ -152,25 +125,25 @@ function _convertFile(bucket, originalKey, opts, callback) {
   _writeFileToDisk(bucket, originalKey, opts, function(err, originalFsPath) {
     if (err) {
       return callback(
-        new ConversionError('unable to write file to disk').withCause(err)
+        new ConversionError({
+          message: 'unable to write file to disk',
+          info: { bucket, originalKey, opts }
+        }).withCause(err)
       )
     }
 
     const done = function(err, destPath) {
       if (err) {
-        logger.err(
-          { err, bucket, originalKey, opts: _scrubSecrets(opts) },
-          'error converting file'
-        )
         return callback(
-          new ConversionError('error converting file').withCause(err)
+          new ConversionError({
+            message: 'error converting file',
+            info: { bucket, originalKey, opts }
+          }).withCause(err)
         )
       }
       LocalFileWriter.deleteFile(originalFsPath, function() {})
       callback(err, destPath)
     }
-
-    logger.log({ opts }, 'converting file depending on opts')
 
     if (opts.format) {
       FileConverter.convert(originalFsPath, opts.format, done)
@@ -180,11 +153,14 @@ function _convertFile(bucket, originalKey, opts, callback) {
       FileConverter.preview(originalFsPath, done)
     } else {
       callback(
-        new ConversionError(
-          `should have specified opts to convert file with ${JSON.stringify(
+        new ConversionError({
+          message: 'invalid file conversion options',
+          info: {
+            bucket,
+            originalKey,
             opts
-          )}`
-        )
+          }
+        })
       )
     }
   })
@@ -193,16 +169,8 @@ function _convertFile(bucket, originalKey, opts, callback) {
 function _writeFileToDisk(bucket, key, opts, callback) {
   PersistorManager.getFileStream(bucket, key, opts, function(err, fileStream) {
     if (err) {
-      return callback(
-        new ReadError('unable to get read stream for file').withCause(err)
-      )
+      return callback(err)
     }
     LocalFileWriter.writeStream(fileStream, key, callback)
   })
-}
-
-function _scrubSecrets(opts) {
-  const safe = Object.assign({}, opts)
-  delete safe.credentials
-  return safe
 }

@@ -26,10 +26,6 @@ describe('LocalFileWriter', function() {
       requires: {
         fs,
         stream,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        },
         'settings-sharelatex': settings,
         'metrics-sharelatex': {
           inc: sinon.stub(),

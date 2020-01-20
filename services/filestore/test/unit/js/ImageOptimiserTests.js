@@ -6,21 +6,20 @@ const { FailedCommandError } = require('../../../app/js/Errors')
 const SandboxedModule = require('sandboxed-module')
 
 describe('ImageOptimiser', function() {
-  let ImageOptimiser, SafeExec
+  let ImageOptimiser, SafeExec, logger
   const sourcePath = '/wombat/potato.eps'
 
   beforeEach(function() {
     SafeExec = {
       promises: sinon.stub().resolves()
     }
+    logger = {
+      warn: sinon.stub()
+    }
     ImageOptimiser = SandboxedModule.require(modulePath, {
       requires: {
         './SafeExec': SafeExec,
-        'logger-sharelatex': {
-          log() {},
-          err() {},
-          warn() {}
-        }
+        'logger-sharelatex': logger
       }
     })
   })
@@ -47,13 +46,23 @@ describe('ImageOptimiser', function() {
   })
 
   describe('when optimiser is sigkilled', function() {
-    it('should not produce an error', function(done) {
-      const error = new FailedCommandError('', 'SIGKILL', '', '')
-      SafeExec.promises.rejects(error)
+    const expectedError = new FailedCommandError('', 'SIGKILL', '', '')
+    let error
+
+    beforeEach(function(done) {
+      SafeExec.promises.rejects(expectedError)
       ImageOptimiser.compressPng(sourcePath, err => {
-        expect(err).not.to.exist
+        error = err
         done()
       })
+    })
+
+    it('should not produce an error', function() {
+      expect(error).not.to.exist
+    })
+
+    it('should log a warning', function() {
+      expect(logger.warn).to.have.been.calledOnce
     })
   })
 })

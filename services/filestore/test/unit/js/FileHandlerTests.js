@@ -67,11 +67,7 @@ describe('FileHandler', function() {
         './FileConverter': FileConverter,
         './KeyBuilder': KeyBuilder,
         './ImageOptimiser': ImageOptimiser,
-        fs: fs,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
+        fs: fs
       },
       globals: { console }
     })

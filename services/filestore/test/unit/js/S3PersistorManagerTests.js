@@ -122,10 +122,6 @@ describe('S3PersistorManagerTests', function() {
         './Errors': Errors,
         fs: Fs,
         'stream-meter': Meter,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        },
         'metrics-sharelatex': Metrics
       },
       globals: { console }

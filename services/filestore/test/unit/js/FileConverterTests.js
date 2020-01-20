@@ -25,10 +25,6 @@ describe('FileConverter', function() {
     FileConverter = SandboxedModule.require(modulePath, {
       requires: {
         './SafeExec': SafeExec,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        },
         'metrics-sharelatex': {
           inc: sinon.stub(),
           Timer: sinon.stub().returns({ done: sinon.stub() })

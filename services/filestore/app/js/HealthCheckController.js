@@ -1,6 +1,5 @@
 const fs = require('fs-extra')
 const path = require('path')
-const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
 const streamBuffers = require('stream-buffers')
 const { promisify } = require('util')
@@ -60,13 +59,11 @@ async function checkFileConvert() {
 }
 
 module.exports = {
-  check(req, res) {
-    logger.log({}, 'performing health check')
+  check(req, res, next) {
     Promise.all([checkCanGetFiles(), checkFileConvert()])
       .then(() => res.sendStatus(200))
       .catch(err => {
-        logger.err({ err }, 'Health check: error running')
-        res.sendStatus(500)
+        next(err)
       })
   }
 }
