@@ -53,14 +53,15 @@ module.exports = {
   },
 
   validationMiddleware(req, res, next) {
-    if (!checkValidationToken(req)) {
-      // the session must exist for it to fail validation
-      req.session.destroy(() => {
-        return next(new Error('invalid session'))
-      })
-    } else {
-      return next()
+    if (!req.session.noSessionCallback) {
+      if (!checkValidationToken(req)) {
+        // the session must exist for it to fail validation
+        return req.session.destroy(() => {
+          return next(new Error('invalid session'))
+        })
+      }
     }
+    next()
   },
 
   hasValidationToken(req) {

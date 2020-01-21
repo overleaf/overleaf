@@ -390,6 +390,11 @@ module.exports = settings =
 	# cookie with a secure flag (recommended).
 	secureCookie: false
 
+	# 'SameSite' cookie setting. Can be set to 'lax', 'none' or 'strict'
+	# 'lax' is recommended, as 'strict' will prevent people linking to projects
+	# https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-03#section-4.1.2.7
+	sameSiteCookie: 'lax'
+
 	# If you are running ShareLaTeX behind a proxy (like Apache, Nginx, etc)
 	# then set this to true to allow it to correctly detect the forwarded IP
 	# address and http/https protocol information.
