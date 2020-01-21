@@ -28,7 +28,7 @@ block content
 											i.fa.fa-fw.fa-2x.fa-twitter(aria-hidden)
 											|
 											| Tweet
-									
+
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
@@ -78,7 +78,7 @@ block content
 										.progress-bar.progress-bar-info(style="width: "+refered_user_count+"0%")
 
 							.row.ab-bonus
-								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 70px;")
+								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 110px;")
 									.perk(style="left: 10%;", class = refered_user_count >= 1 ? "active" : "") #{translate("one_free_collab")}
 									.perk(style="left: 30%;", class = refered_user_count >= 3 ? "active" : "") #{translate("three_free_collab")}
 									.perk(style="left: 60%;", class = refered_user_count >= 6 ? "active" : "") #{translate("free_dropbox_and_history")} + #{translate("three_free_collab")}
@@ -93,7 +93,7 @@ block content
 										p.thanks !{translate("you_introed_small_number", {numberOfPeople:"<strong>" + refered_user_count + "</strong>"})}
 									- else
 										p.thanks !{translate("you_introed_high_number", {numberOfPeople:"<strong>" + refered_user_count + "</strong>"})}
-						
+
 						script(type="text/ng-template", id="BonusLinkToUsModal")
 							.modal-header
 								button.close(
@@ -163,4 +163,3 @@ block append foot-scripts
 				ga('send', 'event', 'referal-button', 'clicked', "direct-link")
 			});
 		});
-
