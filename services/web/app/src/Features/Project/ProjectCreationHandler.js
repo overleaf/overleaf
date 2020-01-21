@@ -96,7 +96,7 @@ const ProjectCreationHandler = {
     }
     const rootFolder = new Folder({ name: 'rootFolder' })
 
-    attributes.owner_ref = new ObjectId(owner_id)
+    attributes.lastUpdatedBy = attributes.owner_ref = new ObjectId(owner_id)
     attributes.name = projectName
     const project = new Project(attributes)
 
