@@ -106,7 +106,8 @@ webRouter.use(
     cookie: {
       domain: Settings.cookieDomain,
       maxAge: Settings.cookieSessionLength, // in milliseconds, see https://github.com/expressjs/session#cookiemaxage
-      secure: Settings.secureCookie
+      secure: Settings.secureCookie,
+      sameSite: Settings.sameSiteCookie
     },
     store: sessionStore,
     key: Settings.cookieName,
