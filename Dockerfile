@@ -22,7 +22,7 @@ RUN git clone https://github.com/overleaf/overleaf.git \
 # Install dependencies needed to run configuration scripts
 # --------------------------------------------------------
 ADD ${baseDir}/package.json /var/www/package.json
-ADD ${baseDir}/git-revision.js /var/www/git-revision.js
+ADD ${baseDir}/git-revision.sh /var/www/git-revision.sh
 RUN cd /var/www && npm install
 
 
@@ -78,7 +78,7 @@ COPY ${baseDir}/init_scripts/ /etc/my_init.d/
 
 # Stores the version installed for each service
 # ---------------------------------------------
-RUN cd /var/www && node git-revision > revisions.txt
+RUN cd /var/www && ./git-revision.sh > revisions.txt
 
 
 # Set Environment Variables
