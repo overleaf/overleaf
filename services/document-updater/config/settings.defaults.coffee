@@ -60,7 +60,7 @@ module.exports =
 				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:{#{project_id}}"
 				projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:{#{project_id}}"
 				projectHistoryMigrationKey: ({project_id}) -> "ProjectHistory:MigrationKey:{#{project_id}}"
-			migration_phase: "prepare"
+			migration_phase: process.env["PROJECT_HISTORY_MIGRATION_PHASE"] or "prepare"
 			tls: if process.env['NEW_HISTORY_REDIS_CA_CERT'] && process.env['NEW_HISTORY_REDIS_CLIENT_CERT'] && process.env['NEW_HISTORY_REDIS_CLIENT_KEY']
 				ca: fs.readFileSync(process.env['NEW_HISTORY_REDIS_CA_CERT']),
 				cert: fs.readFileSync(
