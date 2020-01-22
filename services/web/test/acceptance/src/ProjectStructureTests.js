@@ -1113,48 +1113,55 @@ describe('ProjectStructureChanges', function() {
                 }
                 this.project0 = project
                 done()
-            })
+              }
+            )
           })
         })
       })
     })
 
-    describe('when rootDoc_id matches doc being deleted', () => {
+    describe('when rootDoc_id matches doc being deleted', function() {
       beforeEach(function(done) {
-        Project.update({_id: this.exampleProjectId}, {$set: {rootDoc_id: this.exampleDocId}}, done)
+        Project.update(
+          { _id: this.exampleProjectId },
+          { $set: { rootDoc_id: this.exampleDocId } },
+          done
+        )
       })
 
       it('should clear rootDoc_id', function(done) {
         deleteItem(this, 'doc', this.exampleDocId, () => {
-          ProjectGetter.getProject(
-            this.exampleProjectId,
-            (error, project) => {
-              if (error) {
-                throw error
-              }
-              expect(project.rootDoc_id).to.be.undefined
-              done()
+          ProjectGetter.getProject(this.exampleProjectId, (error, project) => {
+            if (error) {
+              throw error
+            }
+            expect(project.rootDoc_id).to.be.undefined
+            done()
           })
         })
       })
     })
 
-    describe('when rootDoc_id does not match doc being deleted', () => {
+    describe('when rootDoc_id does not match doc being deleted', function() {
       beforeEach(function(done) {
         this.exampleRootDocId = new ObjectId()
-        Project.update({_id: this.exampleProjectId}, {$set: {rootDoc_id: this.exampleRootDocId}}, done)
+        Project.update(
+          { _id: this.exampleProjectId },
+          { $set: { rootDoc_id: this.exampleRootDocId } },
+          done
+        )
       })
 
       it('should not clear rootDoc_id', function(done) {
         deleteItem(this, 'doc', this.exampleDocId, () => {
-          ProjectGetter.getProject(
-            this.exampleProjectId,
-            (error, project) => {
-              if (error) {
-                throw error
-              }
-              expect(project.rootDoc_id.toString()).to.equal(this.exampleRootDocId.toString())
-              done()
+          ProjectGetter.getProject(this.exampleProjectId, (error, project) => {
+            if (error) {
+              throw error
+            }
+            expect(project.rootDoc_id.toString()).to.equal(
+              this.exampleRootDocId.toString()
+            )
+            done()
           })
         })
       })
