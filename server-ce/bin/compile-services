@@ -12,7 +12,7 @@ grep 'name:' config/services.js | \
 			web)
 				npm run webpack:production
 				;;
-			chat)
+			chat|filestore|notifications)
 				echo "$service doesn't require a compilation"
 				;;	
 			*)
