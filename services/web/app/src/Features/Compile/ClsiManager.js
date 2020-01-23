@@ -471,8 +471,9 @@ const ClsiManager = {
     }
     ProjectGetter.getProject(
       projectId,
-      { compiler: 1, rootDoc_id: 1, imageName: 1, rootFolder: 1 },
+      { compiler: 1, rootDoc_id: 1, imageName: 1, rootFolder: 1, rootDoc_id: 1 },
       (err, project) => {
+        console.log("GGGG", project)
         if (err != null) {
           return callback(
             new OError({
