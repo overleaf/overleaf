@@ -133,7 +133,7 @@ class MigrationClient
 		@rclient_new = redis.createClient(@new_settings)
 		@new_key_schema = new_settings.key_schema
 		# check that migration phase is valid on startup
-		@getMigrationPhase()
+		logger.warn {migration_phase: @getMigrationPhase()}, "running with RedisMigrationManager"
 
 	getMigrationPhase: () ->
 		@migration_phase = @new_settings.migration_phase  # FIXME: allow setting migration phase while running for testing
