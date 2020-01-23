@@ -45,6 +45,12 @@ async = require("async")
 # - when all docupdaters are setting the flag (and writing to the new redis),
 #   finish the migration by writing all data to the new redis
 #
+# Final stage
+#
+# When all the queues are migrated, remove the migration code and return to a
+# single client pointing at the new redis.  Delete the
+# ProjectHistory:MigrationKey:* entries in the new redis.
+#
 # Rollback
 #
 # Under the scheme above a project should only ever have data in the old redis
