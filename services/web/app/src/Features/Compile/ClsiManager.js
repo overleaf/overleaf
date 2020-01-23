@@ -3,6 +3,7 @@ const Settings = require('settings-sharelatex')
 const request = require('request')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
+const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
 const logger = require('logger-sharelatex')
 const Url = require('url')
 const OError = require('@overleaf/o-error')
@@ -465,15 +466,35 @@ const ClsiManager = {
     return outputFiles
   },
 
+  _ensureRootDocumentIsValid(project, callback) {
+    // if root doc is set and id is contained somewhere in directory tree then accept it
+    try {
+      if (
+        project.rootDoc_id &&
+        project.rootFolder &&
+        JSON.stringify(project.rootFolder).includes(project.rootDoc_id)
+      ) {
+        return callback()
+      }
+    } catch (err) {
+      // ignore errors here, which are very unlikely, and just attempt to set the root doc again
+    }
+    ProjectRootDocManager.setRootDocAutomatically(project._id, callback)
+  },
+
   _buildRequest(projectId, options, callback) {
     if (options == null) {
       options = {}
     }
     ProjectGetter.getProject(
       projectId,
-      { compiler: 1, rootDoc_id: 1, imageName: 1, rootFolder: 1, rootDoc_id: 1 },
+      {
+        compiler: 1,
+        rootDoc_id: 1,
+        imageName: 1,
+        rootFolder: 1
+      },
       (err, project) => {
-        console.log("GGGG", project)
         if (err != null) {
           return callback(
             new OError({
@@ -491,71 +512,84 @@ const ClsiManager = {
           project.compiler = 'pdflatex'
         }
 
-        if (options.incrementalCompilesEnabled || options.syncType != null) {
-          // new way, either incremental or full
-          const timer = new Metrics.Timer('editor.compile-getdocs-redis')
-          ClsiManager.getContentFromDocUpdaterIfMatch(
-            projectId,
-            project,
-            options,
-            (err, projectStateHash, docUpdaterDocs) => {
+        ClsiManager._ensureRootDocumentIsValid(project, err => {
+          if (err != null) {
+            return callback(
+              new OError({
+                message: 'error setting rootDoc_id',
+                info: { projectId }
+              }).withCause(err)
+            )
+          }
+          if (options.incrementalCompilesEnabled || options.syncType != null) {
+            // new way, either incremental or full
+            const timer = new Metrics.Timer('editor.compile-getdocs-redis')
+            ClsiManager.getContentFromDocUpdaterIfMatch(
+              projectId,
+              project,
+              options,
+              (err, projectStateHash, docUpdaterDocs) => {
+                timer.done()
+                if (err != null) {
+                  logger.error(
+                    { err, projectId },
+                    'error checking project state'
+                  )
+                  // note: we don't bail out when there's an error getting
+                  // incremental files from the docupdater, we just fall back
+                  // to a normal compile below
+                }
+                // see if we can send an incremental update to the CLSI
+                if (
+                  docUpdaterDocs != null &&
+                  options.syncType !== 'full' &&
+                  err == null
+                ) {
+                  Metrics.inc('compile-from-redis')
+                  ClsiManager._buildRequestFromDocupdater(
+                    projectId,
+                    options,
+                    project,
+                    projectStateHash,
+                    docUpdaterDocs,
+                    callback
+                  )
+                } else {
+                  Metrics.inc('compile-from-mongo')
+                  ClsiManager._buildRequestFromMongo(
+                    projectId,
+                    options,
+                    project,
+                    projectStateHash,
+                    callback
+                  )
+                }
+              }
+            )
+          } else {
+            // old way, always from mongo
+            const timer = new Metrics.Timer('editor.compile-getdocs-mongo')
+            ClsiManager._getContentFromMongo(projectId, (err, docs, files) => {
               timer.done()
               if (err != null) {
-                logger.error({ err, projectId }, 'error checking project state')
-                // note: we don't bail out when there's an error getting
-                // incremental files from the docupdater, we just fall back
-                // to a normal compile below
-              }
-              // see if we can send an incremental update to the CLSI
-              if (
-                docUpdaterDocs != null &&
-                options.syncType !== 'full' &&
-                err == null
-              ) {
-                Metrics.inc('compile-from-redis')
-                ClsiManager._buildRequestFromDocupdater(
-                  projectId,
-                  options,
-                  project,
-                  projectStateHash,
-                  docUpdaterDocs,
-                  callback
-                )
-              } else {
-                Metrics.inc('compile-from-mongo')
-                ClsiManager._buildRequestFromMongo(
-                  projectId,
-                  options,
-                  project,
-                  projectStateHash,
-                  callback
+                return callback(
+                  new OError({
+                    message: 'failed to get contents from Mongo',
+                    info: { projectId }
+                  }).withCause(err)
                 )
               }
-            }
-          )
-        } else {
-          // old way, always from mongo
-          const timer = new Metrics.Timer('editor.compile-getdocs-mongo')
-          ClsiManager._getContentFromMongo(projectId, (err, docs, files) => {
-            timer.done()
-            if (err != null) {
-              return callback(
-                new OError({
-                  message: 'failed to get contents from Mongo',
-                  info: { projectId }
-                }).withCause(err)
+              ClsiManager._finaliseRequest(
+                projectId,
+                options,
+                project,
+                docs,
+                files,
+                callback
               )
-            }
-            ClsiManager._finaliseRequest(
-              projectId,
-              options,
-              project,
-              docs,
-              files,
-              callback
-            )
-          })
-        }
+            })
+          }
+        })
       }
     )
   },
