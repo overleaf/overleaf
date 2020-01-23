@@ -81,7 +81,8 @@ async = require("async")
 #  - deploy project history with the "old queue" pointing to the new redis and
 #    the "new queue" to the old redis to clear the new queue before processing
 #    the new queue (i.e. add a rollback:true property in new_project_history in
-#    the project-history settings)
+#    the project-history settings via the environment variable
+#    MIGRATION_PHASE="rollback").
 #  - projects will now clear gradually from the new redis back to the old redis
 #  - get a list of all the projects in the new redis and flush them, which will
 #    cause the new queues to be cleared and the old redis to be used for those
