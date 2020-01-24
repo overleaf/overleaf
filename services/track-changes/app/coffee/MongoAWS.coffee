@@ -14,6 +14,8 @@ createStream = (streamConstructor, project_id, doc_id, pack_id) ->
 	AWS_CONFIG =
 		accessKeyId: settings.trackchanges.s3.key
 		secretAccessKey: settings.trackchanges.s3.secret
+		endpoint: settings.trackchanges.s3.endpoint
+		s3ForcePathStyle: settings.trackchanges.s3.pathStyle
 
 	return streamConstructor new AWS.S3(AWS_CONFIG), {
 		"Bucket": settings.trackchanges.stores.doc_history,
