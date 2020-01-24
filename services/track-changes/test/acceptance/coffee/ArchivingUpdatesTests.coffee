@@ -20,6 +20,9 @@ describe "Archiving updates", ->
 			message = new Error("s3 keys not setup, this test setup will fail")
 			return done(message)
 
+		TrackChangesClient.waitForS3 done
+
+	before (done) ->
 		@now = Date.now()
 		@to = @now
 		@user_id = ObjectId().toString()
