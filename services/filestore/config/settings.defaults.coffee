@@ -17,8 +17,8 @@ unless process.env['BACKEND']?
 	else
 		process.env['BACKEND'] = "fs"
 		process.env['USER_FILES_BUCKET_NAME'] = Path.resolve(__dirname + "/../user_files")
-		process.env['TEMPLATE_FILES_BUCKET_NAME'] = Path.resolve(__dirname + "/../public_files")
-		process.env['PUBLIC_FILES_BUCKET_NAME'] = Path.resolve(__dirname + "/../template_files")
+		process.env['TEMPLATE_FILES_BUCKET_NAME'] = Path.resolve(__dirname + "/../template_files")
+		process.env['PUBLIC_FILES_BUCKET_NAME'] = Path.resolve(__dirname + "/../public_files")
 
 settings =
 	internal:
@@ -51,8 +51,8 @@ settings =
 				backend: process.env['FALLBACK_BACKEND']
 				# mapping of bucket names on the fallback, to bucket names on the primary.
 				# e.g. { myS3UserFilesBucketName: 'myGoogleUserFilesBucketName' }
-				buckets: JSON.parse process.env['FALLBACK_BUCKET_MAPPING'] if process.env['FALLBACK_BUCKET_MAPPING']?
-				copyOnMiss: if process.env['COPY_ON_MISS'] == 'true' then true else false
+				buckets: JSON.parse(process.env['FALLBACK_BUCKET_MAPPING'] || '{}')
+				copyOnMiss: process.env['COPY_ON_MISS'] == 'true'
 
 	path:
 		uploadFolder: Path.resolve(__dirname + "/../uploads")

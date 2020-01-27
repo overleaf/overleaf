@@ -21,35 +21,53 @@ describe('MigrationPersistorTests', function() {
   const genericError = new Error('guru meditation error')
   const notFoundError = new Errors.NotFoundError('not found')
   const size = 33
-  const fileStream = 'fileStream'
+  const md5 = 'ffffffff'
 
-  function newPersistor(hasFile) {
-    return {
-      promises: {
-        sendFile: sinon.stub().resolves(),
-        sendStream: sinon.stub().resolves(),
-        getFileStream: hasFile
-          ? sinon.stub().resolves(fileStream)
-          : sinon.stub().rejects(notFoundError),
-        deleteDirectory: sinon.stub().resolves(),
-        getFileSize: hasFile
-          ? sinon.stub().resolves(size)
-          : sinon.stub().rejects(notFoundError),
-        deleteFile: sinon.stub().resolves(),
-        copyFile: hasFile
-          ? sinon.stub().resolves()
-          : sinon.stub().rejects(notFoundError),
-        checkIfFileExists: sinon.stub().resolves(hasFile),
-        directorySize: hasFile
-          ? sinon.stub().resolves(size)
-          : sinon.stub().rejects(notFoundError)
-      }
-    }
-  }
-
-  let Metrics, Settings, Logger, MigrationPersistor
+  let Metrics,
+    Settings,
+    Logger,
+    MigrationPersistor,
+    Minipass,
+    fileStream,
+    newPersistor
 
   beforeEach(function() {
+    fileStream = {
+      name: 'fileStream',
+      on: sinon
+        .stub()
+        .withArgs('end')
+        .yields(),
+      pipe: sinon.stub()
+    }
+
+    newPersistor = function(hasFile) {
+      return {
+        promises: {
+          sendFile: sinon.stub().resolves(),
+          sendStream: sinon.stub().resolves(),
+          getFileStream: hasFile
+            ? sinon.stub().resolves(fileStream)
+            : sinon.stub().rejects(notFoundError),
+          deleteDirectory: sinon.stub().resolves(),
+          getFileSize: hasFile
+            ? sinon.stub().resolves(size)
+            : sinon.stub().rejects(notFoundError),
+          deleteFile: sinon.stub().resolves(),
+          copyFile: hasFile
+            ? sinon.stub().resolves()
+            : sinon.stub().rejects(notFoundError),
+          checkIfFileExists: sinon.stub().resolves(hasFile),
+          directorySize: hasFile
+            ? sinon.stub().resolves(size)
+            : sinon.stub().rejects(notFoundError),
+          getFileMd5Hash: hasFile
+            ? sinon.stub().resolves(md5)
+            : sinon.stub().rejects(notFoundError)
+        }
+      }
+    }
+
     Settings = {
       filestore: {
         fallback: {
@@ -68,12 +86,20 @@ describe('MigrationPersistorTests', function() {
       warn: sinon.stub()
     }
 
+    Minipass = sinon.stub()
+    Minipass.prototype.on = sinon
+      .stub()
+      .withArgs('end')
+      .yields()
+    Minipass.prototype.pipe = sinon.stub()
+
     MigrationPersistor = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': Settings,
         './Errors': Errors,
         'metrics-sharelatex': Metrics,
-        'logger-sharelatex': Logger
+        'logger-sharelatex': Logger,
+        minipass: Minipass
       },
       globals: { console }
     })
@@ -144,7 +170,7 @@ describe('MigrationPersistorTests', function() {
         ).to.have.been.calledWithExactly(fallbackBucket, key, options)
       })
 
-      it('should only create one stream', function() {
+      it('should create one read stream', function() {
         expect(fallbackPersistor.promises.getFileStream).to.have.been.calledOnce
       })
 
@@ -154,7 +180,10 @@ describe('MigrationPersistorTests', function() {
     })
 
     describe('when the file should be copied to the primary', function() {
-      let primaryPersistor, fallbackPersistor, migrationPersistor
+      let primaryPersistor,
+        fallbackPersistor,
+        migrationPersistor,
+        returnedStream
       beforeEach(async function() {
         primaryPersistor = newPersistor(false)
         fallbackPersistor = newPersistor(true)
@@ -163,18 +192,36 @@ describe('MigrationPersistorTests', function() {
           fallbackPersistor
         )
         Settings.filestore.fallback.copyOnMiss = true
-        return migrationPersistor.promises.getFileStream(bucket, key, options)
+        returnedStream = await migrationPersistor.promises.getFileStream(
+          bucket,
+          key,
+          options
+        )
       })
 
-      it('should create two streams', function() {
-        expect(fallbackPersistor.promises.getFileStream).to.have.been
-          .calledTwice
+      it('should create one read stream', function() {
+        expect(fallbackPersistor.promises.getFileStream).to.have.been.calledOnce
       })
 
-      it('should send one of the streams to the primary', function() {
+      it('should get the md5 hash from the source', function() {
+        expect(
+          fallbackPersistor.promises.getFileMd5Hash
+        ).to.have.been.calledWith(fallbackBucket, key)
+      })
+
+      it('should send a stream to the primary', function() {
         expect(
           primaryPersistor.promises.sendStream
-        ).to.have.been.calledWithExactly(bucket, key, fileStream)
+        ).to.have.been.calledWithExactly(
+          bucket,
+          key,
+          sinon.match.instanceOf(Minipass),
+          md5
+        )
+      })
+
+      it('should send a stream to the client', function() {
+        expect(returnedStream).to.be.an.instanceOf(Minipass)
       })
     })
 
@@ -420,10 +467,16 @@ describe('MigrationPersistorTests', function() {
         ).not.to.have.been.calledWithExactly(fallbackBucket, key)
       })
 
+      it('should get the md5 hash from the source', function() {
+        expect(
+          fallbackPersistor.promises.getFileMd5Hash
+        ).to.have.been.calledWith(fallbackBucket, key)
+      })
+
       it('should send the file to the primary', function() {
         expect(
           primaryPersistor.promises.sendStream
-        ).to.have.been.calledWithExactly(bucket, destKey, fileStream)
+        ).to.have.been.calledWithExactly(bucket, destKey, fileStream, md5)
       })
     })
 

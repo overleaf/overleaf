@@ -26,8 +26,10 @@ describe('S3PersistorTests', function() {
     { Key: 'hippo', Size: 22 }
   ]
   const filesSize = 33
+  const md5 = 'ffffffff00000000ffffffff00000000'
 
   let Metrics,
+    Logger,
     S3,
     Fs,
     Meter,
@@ -40,7 +42,10 @@ describe('S3PersistorTests', function() {
     S3AccessDeniedError,
     FileNotFoundError,
     EmptyPromise,
-    settings
+    settings,
+    Minipass,
+    Hash,
+    crypto
 
   beforeEach(function() {
     settings = {
@@ -100,7 +105,8 @@ describe('S3PersistorTests', function() {
       }),
       headObject: sinon.stub().returns({
         promise: sinon.stub().resolves({
-          ContentLength: objectSize
+          ContentLength: objectSize,
+          ETag: md5
         })
       }),
       listObjects: sinon.stub().returns({
@@ -108,21 +114,46 @@ describe('S3PersistorTests', function() {
           Contents: files
         })
       }),
-      upload: sinon.stub().returns(EmptyPromise),
+      upload: sinon
+        .stub()
+        .returns({ promise: sinon.stub().resolves({ ETag: `"${md5}"` }) }),
       copyObject: sinon.stub().returns(EmptyPromise),
       deleteObject: sinon.stub().returns(EmptyPromise),
       deleteObjects: sinon.stub().returns(EmptyPromise)
     }
     S3 = sinon.stub().returns(S3Client)
 
+    Hash = {
+      end: sinon.stub(),
+      read: sinon.stub().returns(md5),
+      setEncoding: sinon.stub()
+    }
+    crypto = {
+      createHash: sinon.stub().returns(Hash)
+    }
+
+    Minipass = sinon.stub()
+    Minipass.prototype.on = sinon
+      .stub()
+      .withArgs('end')
+      .yields()
+    Minipass.prototype.pipe = sinon.stub()
+
+    Logger = {
+      warn: sinon.stub()
+    }
+
     S3Persistor = SandboxedModule.require(modulePath, {
       requires: {
         'aws-sdk/clients/s3': S3,
         'settings-sharelatex': settings,
+        'logger-sharelatex': Logger,
         './Errors': Errors,
         fs: Fs,
         'stream-meter': Meter,
-        'metrics-sharelatex': Metrics
+        'metrics-sharelatex': Metrics,
+        minipass: Minipass,
+        crypto
       },
       globals: { console }
     })
@@ -420,16 +451,48 @@ describe('S3PersistorTests', function() {
         expect(S3Client.upload).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
-          Body: 'readStream'
+          Body: MeteredStream
         })
       })
 
       it('should meter the stream', function() {
-        expect(ReadStream.pipe).to.have.been.calledWith(MeteredStream)
+        expect(Minipass.prototype.pipe).to.have.been.calledWith(MeteredStream)
       })
 
       it('should record an egress metric', function() {
         expect(Metrics.count).to.have.been.calledWith('s3.egress', objectSize)
+      })
+
+      it('calculates the md5 hash of the file', function() {
+        expect(Minipass.prototype.pipe).to.have.been.calledWith(Hash)
+      })
+    })
+
+    describe('when a hash is supploed', function() {
+      beforeEach(async function() {
+        return S3Persistor.promises.sendStream(
+          bucket,
+          key,
+          ReadStream,
+          'aaaaaaaabbbbbbbbaaaaaaaabbbbbbbb'
+        )
+      })
+
+      it('should not calculate the md5 hash of the file', function() {
+        expect(Minipass.prototype.pipe).not.to.have.been.calledWith(Hash)
+      })
+
+      it('sends the hash in base64', function() {
+        expect(S3Client.upload).to.have.been.calledWith({
+          Bucket: bucket,
+          Key: key,
+          Body: MeteredStream,
+          ContentMD5: 'qqqqqru7u7uqqqqqu7u7uw=='
+        })
+      })
+
+      it('does not fetch the md5 hash of the uploaded file', function() {
+        expect(S3Client.headObject).not.to.have.been.called
       })
     })
 
@@ -466,7 +529,7 @@ describe('S3PersistorTests', function() {
         expect(S3Client.upload).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
-          Body: 'readStream'
+          Body: MeteredStream
         })
       })
     })

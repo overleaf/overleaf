@@ -12,19 +12,32 @@ const modulePath = '../../../app/js/FSPersistor.js'
 describe('FSPersistorTests', function() {
   const stat = { size: 4, isFile: sinon.stub().returns(true) }
   const fd = 1234
-  const readStream = 'readStream'
   const writeStream = 'writeStream'
   const remoteStream = 'remoteStream'
   const tempFile = '/tmp/potato.txt'
   const location = '/foo'
   const error = new Error('guru meditation error')
+  const md5 = 'ffffffff'
 
   const files = ['animals/wombat.tex', 'vegetables/potato.tex']
   const globs = [`${location}/${files[0]}`, `${location}/${files[1]}`]
   const filteredFilenames = ['animals_wombat.tex', 'vegetables_potato.tex']
-  let fs, rimraf, stream, LocalFileWriter, FSPersistor, glob
+  let fs,
+    rimraf,
+    stream,
+    LocalFileWriter,
+    FSPersistor,
+    glob,
+    readStream,
+    crypto,
+    Hash
 
   beforeEach(function() {
+    readStream = {
+      name: 'readStream',
+      on: sinon.stub().yields(),
+      pipe: sinon.stub()
+    }
     fs = {
       createReadStream: sinon.stub().returns(readStream),
       createWriteStream: sinon.stub().returns(writeStream),
@@ -41,6 +54,14 @@ describe('FSPersistorTests', function() {
         deleteFile: sinon.stub().resolves()
       }
     }
+    Hash = {
+      end: sinon.stub(),
+      read: sinon.stub().returns(md5),
+      setEncoding: sinon.stub()
+    }
+    crypto = {
+      createHash: sinon.stub().returns(Hash)
+    }
     FSPersistor = SandboxedModule.require(modulePath, {
       requires: {
         './LocalFileWriter': LocalFileWriter,
@@ -48,7 +69,8 @@ describe('FSPersistorTests', function() {
         fs,
         glob,
         rimraf,
-        stream
+        stream,
+        crypto
       },
       globals: { console }
     })
@@ -102,6 +124,35 @@ describe('FSPersistorTests', function() {
     it('should send the temporary file to the filestore', async function() {
       await FSPersistor.promises.sendStream(location, files[0], remoteStream)
       expect(fs.createReadStream).to.have.been.calledWith(tempFile)
+    })
+
+    describe('when the md5 hash does not match', function() {
+      it('should return a write error', async function() {
+        await expect(
+          FSPersistor.promises.sendStream(
+            location,
+            files[0],
+            remoteStream,
+            '00000000'
+          )
+        )
+          .to.eventually.be.rejected.and.be.an.instanceOf(Errors.WriteError)
+          .and.have.property('message', 'md5 hash mismatch')
+      })
+
+      it('deletes the copied file', async function() {
+        try {
+          await FSPersistor.promises.sendStream(
+            location,
+            files[0],
+            remoteStream,
+            '00000000'
+          )
+        } catch (_) {}
+        expect(LocalFileWriter.promises.deleteFile).to.have.been.calledWith(
+          `${location}/${filteredFilenames[0]}`
+        )
+      })
     })
   })
 

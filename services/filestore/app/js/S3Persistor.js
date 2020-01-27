@@ -5,8 +5,11 @@ https.globalAgent.maxSockets = 300
 
 const settings = require('settings-sharelatex')
 const metrics = require('metrics-sharelatex')
+const logger = require('logger-sharelatex')
 
+const Minipass = require('minipass')
 const meter = require('stream-meter')
+const crypto = require('crypto')
 const fs = require('fs')
 const S3 = require('aws-sdk/clients/s3')
 const { URL } = require('url')
@@ -22,6 +25,7 @@ module.exports = {
   sendFile: callbackify(sendFile),
   sendStream: callbackify(sendStream),
   getFileStream: callbackify(getFileStream),
+  getFileMd5Hash: callbackify(getFileMd5Hash),
   deleteDirectory: callbackify(deleteDirectory),
   getFileSize: callbackify(getFileSize),
   deleteFile: callbackify(deleteFile),
@@ -32,6 +36,7 @@ module.exports = {
     sendFile,
     sendStream,
     getFileStream,
+    getFileMd5Hash,
     deleteDirectory,
     getFileSize,
     deleteFile,
@@ -39,6 +44,10 @@ module.exports = {
     checkIfFileExists,
     directorySize
   }
+}
+
+function hexToBase64(hex) {
+  return Buffer.from(hex, 'hex').toString('base64')
 }
 
 async function sendFile(bucketName, key, fsPath) {
@@ -56,20 +65,79 @@ async function sendFile(bucketName, key, fsPath) {
   return sendStream(bucketName, key, readStream)
 }
 
-async function sendStream(bucketName, key, readStream) {
+async function sendStream(bucketName, key, readStream, sourceMd5) {
   try {
+    // if there is no supplied md5 hash, we calculate the hash as the data passes through
+    const passthroughStream = new Minipass()
+    let hashPromise
+    let b64Hash
+
+    if (sourceMd5) {
+      b64Hash = hexToBase64(sourceMd5)
+    } else {
+      const hash = crypto.createHash('md5')
+      hash.setEncoding('hex')
+      passthroughStream.pipe(hash)
+      hashPromise = new Promise((resolve, reject) => {
+        passthroughStream.on('end', () => {
+          hash.end()
+          resolve(hash.read())
+        })
+        passthroughStream.on('error', err => {
+          reject(err)
+        })
+      })
+    }
+
     const meteredStream = meter()
+    passthroughStream.pipe(meteredStream)
     meteredStream.on('finish', () => {
       metrics.count('s3.egress', meteredStream.bytes)
     })
 
-    await _getClientForBucket(bucketName)
-      .upload({
-        Bucket: bucketName,
-        Key: key,
-        Body: readStream.pipe(meteredStream)
-      })
+    // pipe the readstream through minipass, which can write to both the metered
+    // stream (which goes on to S3) and the md5 generator if necessary
+    // - we do this last so that a listener streams does not consume data meant
+    // for both destinations
+    readStream.pipe(passthroughStream)
+
+    // if we have an md5 hash, pass this to S3 to verify the upload
+    const uploadOptions = {
+      Bucket: bucketName,
+      Key: key,
+      Body: meteredStream
+    }
+    if (b64Hash) {
+      uploadOptions.ContentMD5 = b64Hash
+    }
+
+    const response = await _getClientForBucket(bucketName)
+      .upload(uploadOptions)
       .promise()
+    const destMd5 = _md5FromResponse(response)
+
+    // if we didn't have an md5 hash, compare our computed one with S3's
+    if (hashPromise) {
+      sourceMd5 = await hashPromise
+
+      if (sourceMd5 !== destMd5) {
+        try {
+          await deleteFile(bucketName, key)
+        } catch (err) {
+          logger.warn(err, 'error deleting file for invalid upload')
+        }
+
+        throw new WriteError({
+          message: 'source and destination hashes do not match',
+          info: {
+            sourceMd5,
+            destMd5,
+            bucketName,
+            key
+          }
+        })
+      }
+    }
   } catch (err) {
     throw _wrapError(
       err,
@@ -161,6 +229,23 @@ async function getFileSize(bucketName, key) {
     throw _wrapError(
       err,
       'error getting size of s3 object',
+      { bucketName, key },
+      ReadError
+    )
+  }
+}
+
+async function getFileMd5Hash(bucketName, key) {
+  try {
+    const response = await _getClientForBucket(bucketName)
+      .headObject({ Bucket: bucketName, Key: key })
+      .promise()
+    const md5 = _md5FromResponse(response)
+    return md5
+  } catch (err) {
+    throw _wrapError(
+      err,
+      'error getting hash of s3 object',
       { bucketName, key },
       ReadError
     )
@@ -313,4 +398,19 @@ function _buildClientOptions(bucketCredentials) {
   }
 
   return options
+}
+
+function _md5FromResponse(response) {
+  const md5 = (response.ETag || '').replace(/[ "]/g, '')
+  if (!md5.match(/^[a-f0-9]{32}$/)) {
+    throw new ReadError({
+      message: 's3 etag not in md5-hash format',
+      info: {
+        md5,
+        eTag: response.ETag
+      }
+    })
+  }
+
+  return md5
 }

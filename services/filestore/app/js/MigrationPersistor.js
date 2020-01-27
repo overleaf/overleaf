@@ -1,8 +1,9 @@
 const metrics = require('metrics-sharelatex')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
+const Minipass = require('minipass')
 const { callbackify } = require('util')
-const { NotFoundError } = require('./Errors')
+const { NotFoundError, WriteError } = require('./Errors')
 
 // Persistor that wraps two other persistors. Talks to the 'primary' by default,
 // but will fall back to an older persistor in the case of a not-found error.
@@ -14,7 +15,7 @@ const { NotFoundError } = require('./Errors')
 // e.g.
 // Settings.filestore.fallback.buckets = {
 //   myBucketOnS3: 'myBucketOnGCS'
-// }s
+// }
 
 module.exports = function(primary, fallback) {
   function _wrapMethodOnBothPersistors(method) {
@@ -40,10 +41,7 @@ module.exports = function(primary, fallback) {
   }
 
   function _getFallbackBucket(bucket) {
-    return (
-      Settings.filestore.fallback.buckets &&
-      Settings.filestore.fallback.buckets[bucket]
-    )
+    return Settings.filestore.fallback.buckets[bucket]
   }
 
   function _wrapFallbackMethod(method, enableCopy = true) {
@@ -68,20 +66,130 @@ module.exports = function(primary, fallback) {
     }
   }
 
-  async function _copyFileFromFallback(
+  async function _getFileStreamAndCopyIfRequired(bucketName, key, opts) {
+    const shouldCopy =
+      Settings.filestore.fallback.copyOnMiss && !opts.start && !opts.end
+
+    try {
+      return await primary.promises.getFileStream(bucketName, key, opts)
+    } catch (err) {
+      if (err instanceof NotFoundError) {
+        const fallbackBucket = _getFallbackBucket(bucketName)
+        if (shouldCopy) {
+          return _copyFileFromFallback(
+            fallbackBucket,
+            bucketName,
+            key,
+            key,
+            true
+          )
+        } else {
+          return fallback.promises.getFileStream(fallbackBucket, key, opts)
+        }
+      }
+      throw err
+    }
+  }
+
+  async function _copyFromFallbackStreamAndVerify(
+    stream,
     sourceBucket,
     destBucket,
     sourceKey,
     destKey
   ) {
+    try {
+      let sourceMd5
+      try {
+        sourceMd5 = await fallback.promises.getFileMd5Hash(
+          sourceBucket,
+          sourceKey
+        )
+      } catch (err) {
+        logger.warn(err, 'error getting md5 hash from fallback persistor')
+      }
+
+      await primary.promises.sendStream(destBucket, destKey, stream, sourceMd5)
+    } catch (err) {
+      let error = err
+      metrics.inc('fallback.copy.failure')
+
+      try {
+        await primary.promises.deleteFile(destBucket, destKey)
+      } catch (err) {
+        error = new WriteError({
+          message: 'unable to clean up destination copy artifact',
+          info: {
+            destBucket,
+            destKey
+          }
+        }).withCause(err)
+      }
+
+      error = new WriteError({
+        message: 'unable to copy file to destination persistor',
+        info: {
+          sourceBucket,
+          destBucket,
+          sourceKey,
+          destKey
+        }
+      }).withCause(error)
+
+      logger.warn({ error }, 'failed to copy file from fallback')
+      throw error
+    }
+  }
+
+  async function _copyFileFromFallback(
+    sourceBucket,
+    destBucket,
+    sourceKey,
+    destKey,
+    returnStream = false
+  ) {
+    metrics.inc('fallback.copy')
     const sourceStream = await fallback.promises.getFileStream(
       sourceBucket,
       sourceKey,
       {}
     )
 
-    await primary.promises.sendStream(destBucket, destKey, sourceStream)
-    metrics.inc('fallback.copy')
+    if (!returnStream) {
+      return _copyFromFallbackStreamAndVerify(
+        sourceStream,
+        sourceBucket,
+        destBucket,
+        sourceKey,
+        destKey
+      )
+    }
+
+    const tee = new Minipass()
+    const clientStream = new Minipass()
+    const copyStream = new Minipass()
+
+    tee.pipe(clientStream)
+    tee.pipe(copyStream)
+
+    // copy the file in the background
+    _copyFromFallbackStreamAndVerify(
+      copyStream,
+      sourceBucket,
+      destBucket,
+      sourceKey,
+      destKey
+    ).catch(
+      // the error handler in this method will log a metric and a warning, so
+      // we don't need to do anything extra here, but catching it will prevent
+      // unhandled promise rejection warnings
+      () => {}
+    )
+
+    // start piping the source stream into the tee after everything is set up,
+    // otherwise one stream may consume bytes that don't arrive at the other
+    sourceStream.pipe(tee)
+    return clientStream
   }
 
   return {
@@ -89,7 +197,8 @@ module.exports = function(primary, fallback) {
     fallbackPersistor: fallback,
     sendFile: primary.sendFile,
     sendStream: primary.sendStream,
-    getFileStream: callbackify(_wrapFallbackMethod('getFileStream')),
+    getFileStream: callbackify(_getFileStreamAndCopyIfRequired),
+    getFileMd5Hash: callbackify(_wrapFallbackMethod('getFileMd5Hash')),
     deleteDirectory: callbackify(
       _wrapMethodOnBothPersistors('deleteDirectory')
     ),
@@ -97,17 +206,18 @@ module.exports = function(primary, fallback) {
     deleteFile: callbackify(_wrapMethodOnBothPersistors('deleteFile')),
     copyFile: callbackify(copyFileWithFallback),
     checkIfFileExists: callbackify(_wrapFallbackMethod('checkIfFileExists')),
-    directorySize: callbackify(_wrapFallbackMethod('directorySize', false)),
+    directorySize: callbackify(_wrapFallbackMethod('directorySize')),
     promises: {
       sendFile: primary.promises.sendFile,
       sendStream: primary.promises.sendStream,
-      getFileStream: _wrapFallbackMethod('getFileStream'),
+      getFileStream: _getFileStreamAndCopyIfRequired,
+      getFileMd5Hash: _wrapFallbackMethod('getFileMd5Hash'),
       deleteDirectory: _wrapMethodOnBothPersistors('deleteDirectory'),
       getFileSize: _wrapFallbackMethod('getFileSize'),
       deleteFile: _wrapMethodOnBothPersistors('deleteFile'),
       copyFile: copyFileWithFallback,
       checkIfFileExists: _wrapFallbackMethod('checkIfFileExists'),
-      directorySize: _wrapFallbackMethod('directorySize', false)
+      directorySize: _wrapFallbackMethod('directorySize')
     }
   }
 }

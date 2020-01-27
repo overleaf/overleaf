@@ -84,11 +84,11 @@ const BackendSettings = {
           __dirname,
           '../../../user_files'
         ),
-        [process.env.AWS_S3_TEMPLATE_FILES_BUCKET_NAME]: Path.resolve(
+        [process.env.AWS_S3_PUBLIC_FILES_BUCKET_NAME]: Path.resolve(
           __dirname,
           '../../../public_files'
         ),
-        [process.env.AWS_S3_PUBLIC_FILES_BUCKET_NAME]: Path.resolve(
+        [process.env.AWS_S3_TEMPLATE_FILES_BUCKET_NAME]: Path.resolve(
           __dirname,
           '../../../template_files'
         )
@@ -114,9 +114,9 @@ const BackendSettings = {
         [Path.resolve(__dirname, '../../../user_files')]: process.env
           .AWS_S3_USER_FILES_BUCKET_NAME,
         [Path.resolve(__dirname, '../../../public_files')]: process.env
-          .AWS_S3_TEMPLATE_FILES_BUCKET_NAME,
+          .AWS_S3_PUBLIC_FILES_BUCKET_NAME,
         [Path.resolve(__dirname, '../../../template_files')]: process.env
-          .AWS_S3_PUBLIC_FILES_BUCKET_NAME
+          .AWS_S3_TEMPLATE_FILES_BUCKET_NAME
       }
     }
   }
@@ -130,7 +130,7 @@ describe('Filestore', function() {
   // redefine the test suite for every available backend
   Object.keys(BackendSettings).forEach(backend => {
     describe(backend, function() {
-      let app, previousEgress, previousIngress
+      let app, previousEgress, previousIngress, projectId
 
       before(async function() {
         // create the app with the relevant filestore settings
@@ -151,6 +151,7 @@ describe('Filestore', function() {
             getMetric(filestoreUrl, 's3_ingress')
           ])
         }
+        projectId = `acceptance_tests_${Math.random()}`
       })
 
       it('should send a 200 for the status endpoint', async function() {
@@ -174,7 +175,7 @@ describe('Filestore', function() {
 
         beforeEach(async function() {
           fileId = Math.random()
-          fileUrl = `${filestoreUrl}/project/acceptance_tests/file/${directoryName}%2F${fileId}`
+          fileUrl = `${filestoreUrl}/project/${projectId}/file/${directoryName}%2F${fileId}`
           constantFileContent = [
             'hello world',
             `line 2 goes here ${Math.random()}`,
@@ -242,7 +243,7 @@ describe('Filestore', function() {
         })
 
         it('should be able to copy files', async function() {
-          const newProjectID = 'acceptance_tests_copied_project'
+          const newProjectID = `acceptance_tests_copied_project_${Math.random()}`
           const newFileId = Math.random()
           const newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${directoryName}%2F${newFileId}`
           const opts = {
@@ -250,7 +251,7 @@ describe('Filestore', function() {
             uri: newFileUrl,
             json: {
               source: {
-                project_id: 'acceptance_tests',
+                project_id: projectId,
                 file_id: `${directoryName}/${fileId}`
               }
             }
@@ -304,7 +305,7 @@ describe('Filestore', function() {
       })
 
       describe('with multiple files', function() {
-        let fileIds, fileUrls, project
+        let fileIds, fileUrls
         const directoryName = 'directory'
         const localFileReadPaths = [
           '/tmp/filestore_acceptance_tests_file_read_1.txt',
@@ -331,11 +332,10 @@ describe('Filestore', function() {
         })
 
         beforeEach(async function() {
-          project = `acceptance_tests_${Math.random()}`
           fileIds = [Math.random(), Math.random()]
           fileUrls = [
-            `${filestoreUrl}/project/${project}/file/${directoryName}%2F${fileIds[0]}`,
-            `${filestoreUrl}/project/${project}/file/${directoryName}%2F${fileIds[1]}`
+            `${filestoreUrl}/project/${projectId}/file/${directoryName}%2F${fileIds[0]}`,
+            `${filestoreUrl}/project/${projectId}/file/${directoryName}%2F${fileIds[1]}`
           ]
 
           const writeStreams = [
@@ -359,7 +359,7 @@ describe('Filestore', function() {
 
         it('should get the directory size', async function() {
           const response = await rp.get(
-            `${filestoreUrl}/project/${project}/size`
+            `${filestoreUrl}/project/${projectId}/size`
           )
           expect(parseInt(JSON.parse(response.body)['total bytes'])).to.equal(
             constantFileContents[0].length + constantFileContents[1].length
@@ -459,7 +459,6 @@ describe('Filestore', function() {
             fileUrl,
             bucket,
             fallbackBucket
-          const projectId = 'acceptance_tests'
 
           beforeEach(function() {
             constantFileContent = `This is yet more file content ${Math.random()}`
@@ -503,14 +502,20 @@ describe('Filestore', function() {
               expect(res.body).to.equal(constantFileContent)
             })
 
-            it('should not copy the file to the primary', async function() {
-              await rp.get(fileUrl)
+            describe('when copyOnMiss is disabled', function() {
+              beforeEach(function() {
+                Settings.filestore.fallback.copyOnMiss = false
+              })
 
-              await expectPersistorNotToHaveFile(
-                app.persistor.primaryPersistor,
-                bucket,
-                fileKey
-              )
+              it('should not copy the file to the primary', async function() {
+                await rp.get(fileUrl)
+
+                await expectPersistorNotToHaveFile(
+                  app.persistor.primaryPersistor,
+                  bucket,
+                  fileKey
+                )
+              })
             })
 
             describe('when copyOnMiss is enabled', function() {
@@ -534,9 +539,9 @@ describe('Filestore', function() {
 
             describe('when copying a file', function() {
               let newFileId, newFileUrl, newFileKey
-              const newProjectID = 'acceptance_tests_copied_project'
 
               beforeEach(async function() {
+                const newProjectID = `acceptance_tests_copied_project_${Math.random()}`
                 newFileId = Math.random()
                 newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${directoryName}%2F${newFileId}`
                 newFileKey = `${newProjectID}/${directoryName}/${newFileId}`
@@ -546,7 +551,7 @@ describe('Filestore', function() {
                   uri: newFileUrl,
                   json: {
                     source: {
-                      project_id: 'acceptance_tests',
+                      project_id: projectId,
                       file_id: `${directoryName}/${fileId}`
                     }
                   }
@@ -616,7 +621,7 @@ describe('Filestore', function() {
               await expectPersistorNotToHaveFile(
                 app.persistor.fallbackPersistor,
                 fallbackBucket,
-                `acceptance_tests/${directoryName}/${fileId}`
+                `${projectId}/${directoryName}/${fileId}`
               )
             })
           })
@@ -706,7 +711,7 @@ describe('Filestore', function() {
 
         beforeEach(async function() {
           fileId = Math.random()
-          fileUrl = `${filestoreUrl}/project/acceptance_tests/file/${directoryName}%2F${fileId}`
+          fileUrl = `${filestoreUrl}/project/${projectId}/file/${directoryName}%2F${fileId}`
           const stat = await fsStat(localFileReadPath)
           localFileSize = stat.size
           const writeStream = request.post(fileUrl)

@@ -1,6 +1,7 @@
 const fs = require('fs')
 const glob = require('glob')
 const path = require('path')
+const crypto = require('crypto')
 const rimraf = require('rimraf')
 const Stream = require('stream')
 const { promisify, callbackify } = require('util')
@@ -36,11 +37,22 @@ async function sendFile(location, target, source) {
   }
 }
 
-async function sendStream(location, target, sourceStream) {
+async function sendStream(location, target, sourceStream, sourceMd5) {
   const fsPath = await LocalFileWriter.writeStream(sourceStream)
+  if (!sourceMd5) {
+    sourceMd5 = await _getFileMd5HashForPath(fsPath)
+  }
 
   try {
     await sendFile(location, target, fsPath)
+    const destMd5 = await getFileMd5Hash(location, target)
+    if (sourceMd5 !== destMd5) {
+      await LocalFileWriter.deleteFile(`${location}/${filterName(target)}`)
+      throw new WriteError({
+        message: 'md5 hash mismatch',
+        info: { sourceMd5, destMd5, location, target }
+      })
+    }
   } finally {
     await LocalFileWriter.deleteFile(fsPath)
   }
@@ -78,6 +90,31 @@ async function getFileSize(location, filename) {
       ReadError
     )
   }
+}
+
+async function getFileMd5Hash(location, filename) {
+  const fullPath = path.join(location, filterName(filename))
+  try {
+    return await _getFileMd5HashForPath(fullPath)
+  } catch (err) {
+    throw new ReadError({
+      message: 'unable to get md5 hash from file',
+      info: { location, filename }
+    }).withCause(err)
+  }
+}
+
+async function _getFileMd5HashForPath(fullPath) {
+  return new Promise((resolve, reject) => {
+    const readStream = fs.createReadStream(fullPath)
+    const hash = crypto.createHash('md5')
+    hash.setEncoding('hex')
+    readStream.on('end', () => {
+      hash.end()
+      resolve(hash.read())
+    })
+    pipeline(readStream, hash).catch(reject)
+  })
 }
 
 async function copyFile(location, fromName, toName) {
@@ -202,6 +239,7 @@ module.exports = {
   sendStream: callbackify(sendStream),
   getFileStream: callbackify(getFileStream),
   getFileSize: callbackify(getFileSize),
+  getFileMd5Hash: callbackify(getFileMd5Hash),
   copyFile: callbackify(copyFile),
   deleteFile: callbackify(deleteFile),
   deleteDirectory: callbackify(deleteDirectory),
@@ -212,6 +250,7 @@ module.exports = {
     sendStream,
     getFileStream,
     getFileSize,
+    getFileMd5Hash,
     copyFile,
     deleteFile,
     deleteDirectory,
