@@ -1,3 +1,4 @@
+
 doctype html
 html(
 	lang=(currentLngCode || 'en')
@@ -80,7 +81,7 @@ html(
 
 
 	body
-		if(settings.recaptcha)
+		if(settings.recaptcha && (settings.recaptcha.siteKey || settings.recaptcha.siteKeyV3))
 			if (settings.recaptcha.siteKeyV3)
 				script(src="https://www.google.com/recaptcha/api.js?render="+settings.recaptcha.siteKeyV3)
 			else
