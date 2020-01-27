@@ -278,6 +278,7 @@ module.exports = {
       plan =>
         !plan.groupPlan &&
         !plan.annual &&
+        plan.planCode !== 'personal' && // Prevent the personal plan from appearing on the change-plans page
         plan.planCode.indexOf('student') === -1
     )
 
