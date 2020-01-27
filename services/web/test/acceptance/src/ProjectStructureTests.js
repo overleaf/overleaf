@@ -14,40 +14,41 @@ require('./helpers/MockProjectHistoryApi')
 const User = require('./helpers/User')
 
 describe('ProjectStructureChanges', function() {
+  let owner
+
   beforeEach(function(done) {
-    this.owner = new User()
-    this.owner.login(done)
+    owner = new User()
+    owner.login(done)
   })
 
-  function createExampleProject(test, callback) {
-    test.owner.createProject(
+  function createExampleProject(owner, callback) {
+    owner.createProject(
       'example-project',
       { template: 'example' },
       (error, projectId) => {
         if (error) {
-          throw error
+          return callback(error)
         }
-        test.exampleProjectId = projectId
 
-        ProjectGetter.getProject(test.exampleProjectId, (error, project) => {
+        ProjectGetter.getProject(projectId, (error, project) => {
           if (error) {
-            throw error
+            return callback(error)
           }
-          test.rootFolderId = project.rootFolder[0]._id.toString()
-          callback()
+          const rootFolderId = project.rootFolder[0]._id.toString()
+          callback(null, projectId, rootFolderId)
         })
       }
     )
   }
 
-  function createExampleDoc(test, callback) {
-    ProjectGetter.getProject(test.exampleProjectId, (error, project) => {
+  function createExampleDoc(owner, projectId, callback) {
+    ProjectGetter.getProject(projectId, (error, project) => {
       if (error) {
-        throw error
+        return callback(error)
       }
-      test.owner.request.post(
+      owner.request.post(
         {
-          uri: `project/${test.exampleProjectId}/doc`,
+          uri: `project/${projectId}/doc`,
           json: {
             name: 'new.tex',
             parent_folder_id: project.rootFolder[0]._id
@@ -55,49 +56,55 @@ describe('ProjectStructureChanges', function() {
         },
         (error, res, body) => {
           if (error) {
-            throw error
+            return callback(error)
           }
           if (res.statusCode < 200 || res.statusCode >= 300) {
-            throw new Error(`failed to add doc ${res.statusCode}`)
+            return callback(new Error(`failed to add doc ${res.statusCode}`))
           }
-          test.exampleDocId = body._id
-          callback()
+          callback(null, body._id)
         }
       )
     })
   }
 
-  function createExampleFolder(test, callback) {
-    test.owner.request.post(
+  function createExampleFolder(owner, projectId, callback) {
+    owner.request.post(
       {
-        uri: `project/${test.exampleProjectId}/folder`,
+        uri: `project/${projectId}/folder`,
         json: {
           name: 'foo'
         }
       },
       (error, res, body) => {
         if (error) {
-          throw error
+          return callback(error)
         }
         if (res.statusCode < 200 || res.statusCode >= 300) {
-          throw new Error(`failed to add doc ${res.statusCode}`)
+          return callback(new Error(`failed to add doc ${res.statusCode}`))
         }
-        test.exampleFolderId = body._id
-        callback()
+        callback(null, body._id)
       }
     )
   }
 
-  function uploadFile(test, file, name, contentType, callback) {
+  function uploadFile(
+    owner,
+    projectId,
+    folderId,
+    file,
+    name,
+    contentType,
+    callback
+  ) {
     const imageFile = fs.createReadStream(
       Path.resolve(Path.join(__dirname, '..', 'files', file))
     )
 
-    test.owner.request.post(
+    owner.request.post(
       {
-        uri: `project/${test.exampleProjectId}/upload`,
+        uri: `project/${projectId}/upload`,
         qs: {
-          folder_id: test.rootFolderId
+          folder_id: folderId
         },
         formData: {
           qqfile: {
@@ -111,23 +118,30 @@ describe('ProjectStructureChanges', function() {
       },
       (error, res, body) => {
         if (error) {
-          throw error
+          return callback(error)
         }
         if (res.statusCode < 200 || res.statusCode >= 300) {
-          throw new Error(`failed to upload file ${res.statusCode}`)
+          return callback(new Error(`failed to upload file ${res.statusCode}`))
         }
 
-        test.exampleFileId = JSON.parse(body).entity_id
-        callback()
+        callback(null, JSON.parse(body).entity_id)
       }
     )
   }
 
-  function uploadExampleFile(test, callback) {
-    uploadFile(test, '1pixel.png', '1pixel.png', 'image/png', callback)
+  function uploadExampleFile(owner, projectId, folderId, callback) {
+    uploadFile(
+      owner,
+      projectId,
+      folderId,
+      '1pixel.png',
+      '1pixel.png',
+      'image/png',
+      callback
+    )
   }
 
-  function uploadExampleProject(test, zipFilename, options, callback) {
+  function uploadExampleProject(owner, zipFilename, options, callback) {
     if (typeof options === 'function') {
       callback = options
       options = {}
@@ -137,7 +151,7 @@ describe('ProjectStructureChanges', function() {
       Path.resolve(Path.join(__dirname, '..', 'files', zipFilename))
     )
 
-    test.owner.request.post(
+    owner.request.post(
       {
         uri: 'project/new/upload',
         formData: {
@@ -146,35 +160,33 @@ describe('ProjectStructureChanges', function() {
       },
       (error, res, body) => {
         if (error) {
-          throw error
+          return callback(error)
         }
         if (
           !options.allowBadStatus &&
           (res.statusCode < 200 || res.statusCode >= 300)
         ) {
-          throw new Error(`failed to upload project ${res.statusCode}`)
+          return new Error(`failed to upload project ${res.statusCode}`)
         }
-        test.uploadedProjectId = JSON.parse(body).project_id
-        test.res = res
-        callback()
+        callback(null, JSON.parse(body).project_id, res)
       }
     )
   }
 
-  function moveItem(test, type, itemId, folderId, callback) {
-    test.owner.request.post(
+  function moveItem(owner, projectId, type, itemId, folderId, callback) {
+    owner.request.post(
       {
-        uri: `project/${test.exampleProjectId}/${type}/${itemId}/move`,
+        uri: `project/${projectId}/${type}/${itemId}/move`,
         json: {
           folder_id: folderId
         }
       },
       (error, res) => {
         if (error) {
-          throw error
+          return callback(error)
         }
         if (res.statusCode < 200 || res.statusCode >= 300) {
-          throw new Error(`failed to move ${type} ${res.statusCode}`)
+          return callback(new Error(`failed to move ${type} ${res.statusCode}`))
         }
 
         callback()
@@ -182,20 +194,22 @@ describe('ProjectStructureChanges', function() {
     )
   }
 
-  function renameItem(test, type, itemId, name, callback) {
-    test.owner.request.post(
+  function renameItem(owner, projectId, type, itemId, name, callback) {
+    owner.request.post(
       {
-        uri: `project/${test.exampleProjectId}/${type}/${itemId}/rename`,
+        uri: `project/${projectId}/${type}/${itemId}/rename`,
         json: {
           name: name
         }
       },
       (error, res) => {
         if (error) {
-          throw error
+          return callback(error)
         }
         if (res.statusCode < 200 || res.statusCode >= 300) {
-          throw new Error(`failed to rename ${type} ${res.statusCode}`)
+          return callback(
+            new Error(`failed to rename ${type} ${res.statusCode}`)
+          )
         }
 
         callback()
@@ -203,50 +217,63 @@ describe('ProjectStructureChanges', function() {
     )
   }
 
-  function deleteItem(test, type, itemId, callback) {
-    test.owner.request.delete(
+  function deleteItem(owner, projectId, type, itemId, callback) {
+    owner.request.delete(
       {
-        uri: `project/${test.exampleProjectId}/${type}/${itemId}`
+        uri: `project/${projectId}/${type}/${itemId}`
       },
       (error, res) => {
         if (error) {
-          throw error
+          return callback(error)
         }
         if (res.statusCode < 200 || res.statusCode >= 300) {
-          throw new Error(`failed to delete folder ${res.statusCode}`)
+          return callback(
+            new Error(`failed to delete folder ${res.statusCode}`)
+          )
         }
         callback()
       }
     )
   }
 
-  function verifyVersionIncremented(test, updateVersion, increment, callback) {
-    expect(updateVersion).to.equal(test.project0.version + increment)
+  function verifyVersionIncremented(
+    projectId,
+    oldVersion,
+    updateVersion,
+    increment,
+    callback
+  ) {
+    expect(updateVersion).to.equal(oldVersion + increment)
 
-    ProjectGetter.getProject(test.exampleProjectId, (error, newProject) => {
+    ProjectGetter.getProject(projectId, (error, newProject) => {
       if (error) {
-        throw error
+        return callback(error)
       }
 
-      expect(newProject.version).to.equal(test.project0.version + increment)
+      expect(newProject.version).to.equal(updateVersion)
       callback()
     })
   }
 
   describe('creating a project from the example template', function() {
+    let exampleProjectId
+
     beforeEach(function(done) {
       MockDocUpdaterApi.clearProjectStructureUpdates()
-      createExampleProject(this, done)
+      createExampleProject(owner, (err, projectId) => {
+        exampleProjectId = projectId
+        done(err)
+      })
     })
 
     it('should version creating a doc', function() {
       const {
         docUpdates: updates,
         version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
+      } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
       expect(updates.length).to.equal(2)
       _.each(updates, update => {
-        expect(update.userId).to.equal(this.owner._id)
+        expect(update.userId).to.equal(owner._id)
         expect(update.docLines).to.be.a('string')
       })
       expect(_.where(updates, { pathname: '/main.tex' }).length).to.equal(1)
@@ -260,10 +287,10 @@ describe('ProjectStructureChanges', function() {
       const {
         fileUpdates: updates,
         version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
+      } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
       expect(updates.length).to.equal(1)
       const update = updates[0]
-      expect(update.userId).to.equal(this.owner._id)
+      expect(update.userId).to.equal(owner._id)
       expect(update.pathname).to.equal('/universe.jpg')
       expect(update.url).to.be.a('string')
       expect(version).to.equal(3)
@@ -271,12 +298,17 @@ describe('ProjectStructureChanges', function() {
   })
 
   describe('duplicating a project', function() {
+    let dupProjectId
+
     beforeEach(function(done) {
       MockDocUpdaterApi.clearProjectStructureUpdates()
-      createExampleProject(this, () => {
-        this.owner.request.post(
+      createExampleProject(owner, (err, projectId) => {
+        if (err) {
+          return done(err)
+        }
+        owner.request.post(
           {
-            uri: `/Project/${this.exampleProjectId}/clone`,
+            uri: `/Project/${projectId}/clone`,
             json: {
               projectName: 'new.tex'
             }
@@ -288,7 +320,7 @@ describe('ProjectStructureChanges', function() {
             if (res.statusCode < 200 || res.statusCode >= 300) {
               throw new Error(`failed to clone project ${res.statusCode}`)
             }
-            this.dupProjectId = body.project_id
+            dupProjectId = body.project_id
             done()
           }
         )
@@ -299,10 +331,10 @@ describe('ProjectStructureChanges', function() {
       const {
         docUpdates: updates,
         version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(this.dupProjectId)
+      } = MockDocUpdaterApi.getProjectStructureUpdates(dupProjectId)
       expect(updates.length).to.equal(2)
       _.each(updates, update => {
-        expect(update.userId).to.equal(this.owner._id)
+        expect(update.userId).to.equal(owner._id)
         expect(update.docLines).to.be.a('string')
       })
       expect(_.where(updates, { pathname: '/main.tex' }).length).to.equal(1)
@@ -316,10 +348,10 @@ describe('ProjectStructureChanges', function() {
       const {
         fileUpdates: updates,
         version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(this.dupProjectId)
+      } = MockDocUpdaterApi.getProjectStructureUpdates(dupProjectId)
       expect(updates.length).to.equal(1)
       const update = updates[0]
-      expect(update.userId).to.equal(this.owner._id)
+      expect(update.userId).to.equal(owner._id)
       expect(update.pathname).to.equal('/universe.jpg')
       expect(update.url).to.be.a('string')
       expect(version).to.equal(3)
@@ -327,15 +359,22 @@ describe('ProjectStructureChanges', function() {
   })
 
   describe('adding a doc', function() {
+    let exampleProjectId, oldVersion
+
     beforeEach(function(done) {
-      createExampleProject(this, () => {
+      createExampleProject(owner, (err, projectId) => {
+        if (err) {
+          return done(err)
+        }
+        exampleProjectId = projectId
         MockDocUpdaterApi.clearProjectStructureUpdates()
-        ProjectGetter.getProject(this.exampleProjectId, (error, project) => {
+
+        ProjectGetter.getProject(projectId, (error, project) => {
           if (error) {
-            throw error
+            return done(error)
           }
-          this.project0 = project
-          createExampleDoc(this, done)
+          oldVersion = project.version
+          createExampleDoc(owner, projectId, done)
         })
       })
     })
@@ -343,31 +382,45 @@ describe('ProjectStructureChanges', function() {
     it('should version the doc added', function(done) {
       const {
         docUpdates: updates,
-        version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
+        version: newVersion
+      } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
       expect(updates.length).to.equal(1)
       const update = updates[0]
-      expect(update.userId).to.equal(this.owner._id)
+      expect(update.userId).to.equal(owner._id)
       expect(update.pathname).to.equal('/new.tex')
       expect(update.docLines).to.be.a('string')
 
-      verifyVersionIncremented(this, version, 1, done)
+      verifyVersionIncremented(
+        exampleProjectId,
+        oldVersion,
+        newVersion,
+        1,
+        done
+      )
     })
   })
 
   describe('uploading a project', function() {
+    let exampleProjectId
+
     beforeEach(function(done) {
-      uploadExampleProject(this, 'test_project.zip', done)
+      uploadExampleProject(owner, 'test_project.zip', (err, projectId) => {
+        if (err) {
+          return done(err)
+        }
+        exampleProjectId = projectId
+        done()
+      })
     })
 
     it('should version the docs created', function() {
       const {
         docUpdates: updates,
         version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(this.uploadedProjectId)
+      } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
       expect(updates.length).to.equal(1)
       const update = updates[0]
-      expect(update.userId).to.equal(this.owner._id)
+      expect(update.userId).to.equal(owner._id)
       expect(update.pathname).to.equal('/main.tex')
       expect(update.docLines).to.equal('Test')
       expect(version).to.equal(2)
@@ -377,10 +430,10 @@ describe('ProjectStructureChanges', function() {
       const {
         fileUpdates: updates,
         version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(this.uploadedProjectId)
+      } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
       expect(updates.length).to.equal(1)
       const update = updates[0]
-      expect(update.userId).to.equal(this.owner._id)
+      expect(update.userId).to.equal(owner._id)
       expect(update.pathname).to.equal('/1pixel.png')
       expect(update.url).to.be.a('string')
       expect(version).to.equal(2)
@@ -388,76 +441,125 @@ describe('ProjectStructureChanges', function() {
   })
 
   describe('uploading a project with a name', function() {
+    let exampleProjectId
+    const testProjectName = 'wombat'
+
     beforeEach(function(done) {
-      this.testProjectName = 'wombat'
-      uploadExampleProject(this, 'test_project_with_name.zip', done)
+      uploadExampleProject(
+        owner,
+        'test_project_with_name.zip',
+        (err, projectId) => {
+          if (err) {
+            return done(err)
+          }
+          exampleProjectId = projectId
+          done()
+        }
+      )
     })
 
     it('should set the project name from the zip contents', function(done) {
-      ProjectGetter.getProject(this.uploadedProjectId, (error, project) => {
+      ProjectGetter.getProject(exampleProjectId, (error, project) => {
         expect(error).not.to.exist
-        expect(project.name).to.equal(this.testProjectName)
+        expect(project.name).to.equal(testProjectName)
         done()
       })
     })
   })
 
   describe('uploading a project with an invalid name', function() {
+    let exampleProjectId
+    const testProjectMatch = /^bad[^\\]+name$/
+
     beforeEach(function(done) {
-      this.testProjectMatch = /^bad[^\\]+name$/
-      uploadExampleProject(this, 'test_project_with_invalid_name.zip', done)
+      uploadExampleProject(
+        owner,
+        'test_project_with_invalid_name.zip',
+        (error, projectId) => {
+          if (error) {
+            return done(error)
+          }
+          exampleProjectId = projectId
+          done()
+        }
+      )
     })
 
     it('should set the project name from the zip contents', function(done) {
-      ProjectGetter.getProject(this.uploadedProjectId, (error, project) => {
+      ProjectGetter.getProject(exampleProjectId, (error, project) => {
         expect(error).not.to.exist
-        expect(project.name).to.match(this.testProjectMatch)
+        expect(project.name).to.match(testProjectMatch)
         done()
       })
     })
   })
 
   describe('uploading an empty zipfile', function() {
+    let res
+
     beforeEach(function(done) {
       uploadExampleProject(
-        this,
+        owner,
         'test_project_empty.zip',
         { allowBadStatus: true },
-        done
+        (err, projectId, response) => {
+          if (err) {
+            return done(err)
+          }
+          res = response
+          done()
+        }
       )
     })
 
     it('should fail with 422 error', function() {
-      expect(this.res.statusCode).to.equal(422)
+      expect(res.statusCode).to.equal(422)
     })
   })
 
   describe('uploading a zipfile containing only empty directories', function() {
+    let res
+
     beforeEach(function(done) {
       uploadExampleProject(
-        this,
+        owner,
         'test_project_with_empty_folder.zip',
         { allowBadStatus: true },
-        done
+
+        (err, projectId, response) => {
+          if (err) {
+            return done(err)
+          }
+          res = response
+          done()
+        }
       )
     })
 
     it('should fail with 422 error', function() {
-      expect(this.res.statusCode).to.equal(422)
+      expect(res.statusCode).to.equal(422)
     })
   })
 
   describe('uploading a project with a shared top-level folder', function() {
+    let exampleProjectId
+
     beforeEach(function(done) {
       uploadExampleProject(
-        this,
+        owner,
         'test_project_with_shared_top_level_folder.zip',
-        done
+        (err, projectId) => {
+          if (err) {
+            return done(err)
+          }
+          exampleProjectId = projectId
+          done()
+        }
       )
     })
 
     it('should not create the top-level folder', function(done) {
-      ProjectGetter.getProject(this.uploadedProjectId, (error, project) => {
+      ProjectGetter.getProject(exampleProjectId, (error, project) => {
         expect(error).not.to.exist
         expect(project.rootFolder[0].folders.length).to.equal(0)
         expect(project.rootFolder[0].docs.length).to.equal(2)
@@ -467,16 +569,24 @@ describe('ProjectStructureChanges', function() {
   })
 
   describe('uploading a project with backslashes in the path names', function() {
+    let exampleProjectId
+
     beforeEach(function(done) {
       uploadExampleProject(
-        this,
+        owner,
         'test_project_with_backslash_in_filename.zip',
-        done
+        (err, projectId) => {
+          if (err) {
+            return done(err)
+          }
+          exampleProjectId = projectId
+          done()
+        }
       )
     })
 
     it('should treat the backslash as a directory separator', function(done) {
-      ProjectGetter.getProject(this.uploadedProjectId, (error, project) => {
+      ProjectGetter.getProject(exampleProjectId, (error, project) => {
         expect(error).not.to.exist
         expect(project.rootFolder[0].folders[0].name).to.equal('styles')
         expect(project.rootFolder[0].folders[0].docs[0].name).to.equal('ao.sty')
@@ -486,16 +596,22 @@ describe('ProjectStructureChanges', function() {
   })
 
   describe('uploading a project with files in different encodings', function() {
+    let docUpdates
     beforeEach(function(done) {
-      uploadExampleProject(this, 'charsets/charsets.zip', done)
+      uploadExampleProject(owner, 'charsets/charsets.zip', (err, projectId) => {
+        if (err) {
+          return done(err)
+        }
+
+        docUpdates = MockDocUpdaterApi.getProjectStructureUpdates(projectId)
+          .docUpdates
+        done()
+      })
     })
 
     it('should correctly parse windows-1252', function() {
-      const {
-        docUpdates: updates
-      } = MockDocUpdaterApi.getProjectStructureUpdates(this.uploadedProjectId)
       const update = _.find(
-        updates,
+        docUpdates,
         update => update.pathname === '/test-german-windows-1252.tex'
       )
       expect(update.docLines).to.contain(
@@ -504,11 +620,8 @@ describe('ProjectStructureChanges', function() {
     })
 
     it('should correctly parse German utf8', function() {
-      const {
-        docUpdates: updates
-      } = MockDocUpdaterApi.getProjectStructureUpdates(this.uploadedProjectId)
       const update = _.find(
-        updates,
+        docUpdates,
         update => update.pathname === '/test-german-utf8x.tex'
       )
       expect(update.docLines).to.contain(
@@ -517,11 +630,8 @@ describe('ProjectStructureChanges', function() {
     })
 
     it('should correctly parse little-endian utf16', function() {
-      const {
-        docUpdates: updates
-      } = MockDocUpdaterApi.getProjectStructureUpdates(this.uploadedProjectId)
       const update = _.find(
-        updates,
+        docUpdates,
         update => update.pathname === '/test-greek-utf16-le-bom.tex'
       )
       expect(update.docLines).to.contain(
@@ -530,11 +640,8 @@ describe('ProjectStructureChanges', function() {
     })
 
     it('should correctly parse Greek utf8', function() {
-      const {
-        docUpdates: updates
-      } = MockDocUpdaterApi.getProjectStructureUpdates(this.uploadedProjectId)
       const update = _.find(
-        updates,
+        docUpdates,
         update => update.pathname === '/test-greek-utf8x.tex'
       )
       expect(update.docLines).to.contain(
@@ -544,15 +651,24 @@ describe('ProjectStructureChanges', function() {
   })
 
   describe('uploading a file', function() {
+    let exampleProjectId, oldVersion, rootFolderId
+
     beforeEach(function(done) {
-      createExampleProject(this, () => {
+      createExampleProject(owner, (err, projectId, folderId) => {
+        if (err) {
+          return done(err)
+        }
+        exampleProjectId = projectId
+        rootFolderId = folderId
         MockDocUpdaterApi.clearProjectStructureUpdates()
-        ProjectGetter.getProject(this.exampleProjectId, (error, project) => {
+        ProjectGetter.getProject(projectId, (error, project) => {
           if (error) {
             throw error
           }
-          this.project0 = project
-          uploadExampleFile(this, done)
+
+          oldVersion = project.version
+
+          uploadExampleFile(owner, projectId, rootFolderId, done)
         })
       })
     })
@@ -561,57 +677,91 @@ describe('ProjectStructureChanges', function() {
       const {
         fileUpdates: updates,
         version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
+      } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
       expect(updates.length).to.equal(1)
       const update = updates[0]
-      expect(update.userId).to.equal(this.owner._id)
+      expect(update.userId).to.equal(owner._id)
       expect(update.pathname).to.equal('/1pixel.png')
       expect(update.url).to.be.a('string')
 
       // one file upload
-      verifyVersionIncremented(this, version, 1, done)
+      verifyVersionIncremented(exampleProjectId, oldVersion, version, 1, done)
     })
 
     it('should version a replacement file', function(done) {
       MockDocUpdaterApi.clearProjectStructureUpdates()
 
-      uploadFile(this, '2pixel.png', '1pixel.png', 'image/png', () => {
-        const {
-          fileUpdates: updates,
-          version
-        } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
-        expect(updates.length).to.equal(2)
-        let update = updates[0]
-        expect(update.userId).to.equal(this.owner._id)
-        expect(update.pathname).to.equal('/1pixel.png')
-        update = updates[1]
-        expect(update.userId).to.equal(this.owner._id)
-        expect(update.pathname).to.equal('/1pixel.png')
-        expect(update.url).to.be.a('string')
+      uploadFile(
+        owner,
+        exampleProjectId,
+        rootFolderId,
+        '2pixel.png',
+        '1pixel.png',
+        'image/png',
+        () => {
+          const {
+            fileUpdates: updates,
+            version
+          } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
+          expect(updates.length).to.equal(2)
+          let update = updates[0]
+          expect(update.userId).to.equal(owner._id)
+          expect(update.pathname).to.equal('/1pixel.png')
+          update = updates[1]
+          expect(update.userId).to.equal(owner._id)
+          expect(update.pathname).to.equal('/1pixel.png')
+          expect(update.url).to.be.a('string')
 
-        // two file uploads
-        verifyVersionIncremented(this, version, 2, done)
-      })
+          // two file uploads
+          verifyVersionIncremented(
+            exampleProjectId,
+            oldVersion,
+            version,
+            2,
+            done
+          )
+        }
+      )
     })
   })
 
   describe('moving entities', function() {
+    let exampleProjectId,
+      oldVersion,
+      exampleDocId,
+      exampleFileId,
+      exampleFolderId
+
     beforeEach(function(done) {
-      createExampleProject(this, () => {
-        createExampleDoc(this, () => {
-          uploadExampleFile(this, () => {
-            createExampleFolder(this, () => {
-              ProjectGetter.getProject(
-                this.exampleProjectId,
-                (error, project) => {
-                  if (error) {
-                    throw error
-                  }
-                  this.project0 = project
-                  MockDocUpdaterApi.clearProjectStructureUpdates()
-                  done()
+      createExampleProject(owner, (err, projectId, rootFolderId) => {
+        if (err) {
+          return done(err)
+        }
+        exampleProjectId = projectId
+        createExampleDoc(owner, projectId, (err, docId) => {
+          if (err) {
+            return done(err)
+          }
+          exampleDocId = docId
+          uploadExampleFile(owner, projectId, rootFolderId, (err, fileId) => {
+            if (err) {
+              return done(err)
+            }
+            exampleFileId = fileId
+            createExampleFolder(owner, projectId, (err, folderId) => {
+              if (err) {
+                return done(err)
+              }
+              exampleFolderId = folderId
+
+              ProjectGetter.getProject(projectId, (error, project) => {
+                if (error) {
+                  throw error
                 }
-              )
+                oldVersion = project.version
+                MockDocUpdaterApi.clearProjectStructureUpdates()
+                done()
+              })
             })
           })
         })
@@ -619,111 +769,167 @@ describe('ProjectStructureChanges', function() {
     })
 
     it('should version moving a doc', function(done) {
-      moveItem(this, 'doc', this.exampleDocId, this.exampleFolderId, () => {
-        const {
-          docUpdates: updates,
-          version
-        } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
-        expect(updates.length).to.equal(1)
-        const update = updates[0]
-        expect(update.userId).to.equal(this.owner._id)
-        expect(update.pathname).to.equal('/new.tex')
-        expect(update.newPathname).to.equal('/foo/new.tex')
+      moveItem(
+        owner,
+        exampleProjectId,
+        'doc',
+        exampleDocId,
+        exampleFolderId,
+        () => {
+          const {
+            docUpdates: updates,
+            version
+          } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
+          expect(updates.length).to.equal(1)
+          const update = updates[0]
+          expect(update.userId).to.equal(owner._id)
+          expect(update.pathname).to.equal('/new.tex')
+          expect(update.newPathname).to.equal('/foo/new.tex')
 
-        // 2, because it's a delete and then add
-        verifyVersionIncremented(this, version, 2, done)
-      })
+          // 2, because it's a delete and then add
+          verifyVersionIncremented(
+            exampleProjectId,
+            oldVersion,
+            version,
+            2,
+            done
+          )
+        }
+      )
     })
 
     it('should version moving a file', function(done) {
-      moveItem(this, 'file', this.exampleFileId, this.exampleFolderId, () => {
-        const {
-          fileUpdates: updates,
-          version
-        } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
-        expect(updates.length).to.equal(1)
-        const update = updates[0]
-        expect(update.userId).to.equal(this.owner._id)
-        expect(update.pathname).to.equal('/1pixel.png')
-        expect(update.newPathname).to.equal('/foo/1pixel.png')
+      moveItem(
+        owner,
+        exampleProjectId,
+        'file',
+        exampleFileId,
+        exampleFolderId,
+        () => {
+          const {
+            fileUpdates: updates,
+            version
+          } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
+          expect(updates.length).to.equal(1)
+          const update = updates[0]
+          expect(update.userId).to.equal(owner._id)
+          expect(update.pathname).to.equal('/1pixel.png')
+          expect(update.newPathname).to.equal('/foo/1pixel.png')
 
-        // 2, because it's a delete and then add
-        verifyVersionIncremented(this, version, 2, done)
-      })
+          // 2, because it's a delete and then add
+          verifyVersionIncremented(
+            exampleProjectId,
+            oldVersion,
+            version,
+            2,
+            done
+          )
+        }
+      )
     })
 
     it('should version moving a folder', function(done) {
-      moveItem(this, 'doc', this.exampleDocId, this.exampleFolderId, () => {
-        MockDocUpdaterApi.clearProjectStructureUpdates()
+      moveItem(
+        owner,
+        exampleProjectId,
+        'doc',
+        exampleDocId,
+        exampleFolderId,
+        () => {
+          MockDocUpdaterApi.clearProjectStructureUpdates()
 
-        this.owner.request.post(
-          {
-            uri: `project/${this.exampleProjectId}/folder`,
-            json: {
-              name: 'bar'
-            }
-          },
-          (error, res, body) => {
-            if (error) {
-              throw error
-            }
-            const newFolderId = body._id
+          owner.request.post(
+            {
+              uri: `project/${exampleProjectId}/folder`,
+              json: {
+                name: 'bar'
+              }
+            },
+            (error, res, body) => {
+              if (error) {
+                throw error
+              }
+              const newFolderId = body._id
 
-            moveItem(this, 'folder', this.exampleFolderId, newFolderId, () => {
-              const {
-                docUpdates: updates,
-                version
-              } = MockDocUpdaterApi.getProjectStructureUpdates(
-                this.exampleProjectId
+              moveItem(
+                owner,
+                exampleProjectId,
+                'folder',
+                exampleFolderId,
+                newFolderId,
+                () => {
+                  const {
+                    docUpdates: updates,
+                    version
+                  } = MockDocUpdaterApi.getProjectStructureUpdates(
+                    exampleProjectId
+                  )
+                  expect(updates.length).to.equal(1)
+                  let update = updates[0]
+                  expect(update.userId).to.equal(owner._id)
+                  expect(update.pathname).to.equal('/foo/new.tex')
+                  expect(update.newPathname).to.equal('/bar/foo/new.tex')
+
+                  // 5, because it's two file moves plus a folder
+                  verifyVersionIncremented(
+                    exampleProjectId,
+                    oldVersion,
+                    version,
+                    5,
+                    done
+                  )
+                }
               )
-              expect(updates.length).to.equal(1)
-              let update = updates[0]
-              expect(update.userId).to.equal(this.owner._id)
-              expect(update.pathname).to.equal('/foo/new.tex')
-              expect(update.newPathname).to.equal('/bar/foo/new.tex')
-
-              // 5, because it's two file moves plus a folder
-              verifyVersionIncremented(this, version, 5, done)
-            })
-          }
-        )
-      })
+            }
+          )
+        }
+      )
     })
   })
 
   describe('renaming entities', function() {
+    let exampleProjectId,
+      exampleDocId,
+      exampleFileId,
+      exampleFolderId,
+      oldVersion
+
     beforeEach(function(done) {
-      createExampleProject(this, () => {
-        createExampleDoc(this, () => {
-          uploadExampleFile(this, () => {
-            createExampleFolder(this, () => {
-              moveItem(
-                this,
-                'doc',
-                this.exampleDocId,
-                this.exampleFolderId,
-                () => {
-                  moveItem(
-                    this,
-                    'file',
-                    this.exampleFileId,
-                    this.exampleFolderId,
-                    () => {
-                      MockDocUpdaterApi.clearProjectStructureUpdates()
-                      ProjectGetter.getProject(
-                        this.exampleProjectId,
-                        (error, project) => {
-                          if (error) {
-                            throw error
-                          }
-                          this.project0 = project
-                          done()
-                        }
-                      )
+      createExampleProject(owner, (err, projectId, rootFolderId) => {
+        if (err) {
+          return done(err)
+        }
+        exampleProjectId = projectId
+        createExampleDoc(owner, projectId, (err, docId) => {
+          if (err) {
+            return done(err)
+          }
+          exampleDocId = docId
+          uploadExampleFile(owner, projectId, rootFolderId, (err, fileId) => {
+            if (err) {
+              return done(err)
+            }
+            exampleFileId = fileId
+            createExampleFolder(owner, projectId, (err, folderId) => {
+              if (err) {
+                return done(err)
+              }
+              exampleFolderId = folderId
+              moveItem(owner, projectId, 'doc', docId, folderId, () => {
+                moveItem(owner, projectId, 'file', fileId, folderId, () => {
+                  MockDocUpdaterApi.clearProjectStructureUpdates()
+                  ProjectGetter.getProject(
+                    exampleProjectId,
+                    (error, project) => {
+                      if (error) {
+                        throw error
+                      }
+                      oldVersion = project.version
+                      done()
                     }
                   )
-                }
-              )
+                })
+              })
             })
           })
         })
@@ -731,94 +937,137 @@ describe('ProjectStructureChanges', function() {
     })
 
     it('should version renaming a doc', function(done) {
-      renameItem(this, 'Doc', this.exampleDocId, 'wombat.tex', () => {
-        const {
-          docUpdates: updates,
-          version
-        } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
-        expect(updates.length).to.equal(1)
-        const update = updates[0]
-        expect(update.userId).to.equal(this.owner._id)
-        expect(update.pathname).to.equal('/foo/new.tex')
-        expect(update.newPathname).to.equal('/foo/wombat.tex')
+      renameItem(
+        owner,
+        exampleProjectId,
+        'Doc',
+        exampleDocId,
+        'wombat.tex',
+        () => {
+          const {
+            docUpdates: updates,
+            version
+          } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
+          expect(updates.length).to.equal(1)
+          const update = updates[0]
+          expect(update.userId).to.equal(owner._id)
+          expect(update.pathname).to.equal('/foo/new.tex')
+          expect(update.newPathname).to.equal('/foo/wombat.tex')
 
-        verifyVersionIncremented(this, version, 1, done)
-      })
+          verifyVersionIncremented(
+            exampleProjectId,
+            oldVersion,
+            version,
+            1,
+            done
+          )
+        }
+      )
     })
 
     it('should version renaming a file', function(done) {
-      renameItem(this, 'file', this.exampleFileId, 'potato.png', () => {
-        const {
-          fileUpdates: updates,
-          version
-        } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
-        expect(updates.length).to.equal(1)
-        const update = updates[0]
-        expect(update.userId).to.equal(this.owner._id)
-        expect(update.pathname).to.equal('/foo/1pixel.png')
-        expect(update.newPathname).to.equal('/foo/potato.png')
+      renameItem(
+        owner,
+        exampleProjectId,
+        'file',
+        exampleFileId,
+        'potato.png',
+        () => {
+          const {
+            fileUpdates: updates,
+            version
+          } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
+          expect(updates.length).to.equal(1)
+          const update = updates[0]
+          expect(update.userId).to.equal(owner._id)
+          expect(update.pathname).to.equal('/foo/1pixel.png')
+          expect(update.newPathname).to.equal('/foo/potato.png')
 
-        verifyVersionIncremented(this, version, 1, done)
-      })
+          verifyVersionIncremented(
+            exampleProjectId,
+            oldVersion,
+            version,
+            1,
+            done
+          )
+        }
+      )
     })
 
     it('should version renaming a folder', function(done) {
-      renameItem(this, 'folder', this.exampleFolderId, 'giraffe', () => {
-        const {
-          docUpdates,
-          fileUpdates,
-          version
-        } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
-        expect(docUpdates.length).to.equal(1)
-        const docUpdate = docUpdates[0]
-        expect(docUpdate.userId).to.equal(this.owner._id)
-        expect(docUpdate.pathname).to.equal('/foo/new.tex')
-        expect(docUpdate.newPathname).to.equal('/giraffe/new.tex')
+      renameItem(
+        owner,
+        exampleProjectId,
+        'folder',
+        exampleFolderId,
+        'giraffe',
+        () => {
+          const {
+            docUpdates,
+            fileUpdates,
+            version
+          } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
+          expect(docUpdates.length).to.equal(1)
+          const docUpdate = docUpdates[0]
+          expect(docUpdate.userId).to.equal(owner._id)
+          expect(docUpdate.pathname).to.equal('/foo/new.tex')
+          expect(docUpdate.newPathname).to.equal('/giraffe/new.tex')
 
-        expect(fileUpdates.length).to.equal(1)
-        const fileUpdate = fileUpdates[0]
-        expect(fileUpdate.userId).to.equal(this.owner._id)
-        expect(fileUpdate.pathname).to.equal('/foo/1pixel.png')
-        expect(fileUpdate.newPathname).to.equal('/giraffe/1pixel.png')
+          expect(fileUpdates.length).to.equal(1)
+          const fileUpdate = fileUpdates[0]
+          expect(fileUpdate.userId).to.equal(owner._id)
+          expect(fileUpdate.pathname).to.equal('/foo/1pixel.png')
+          expect(fileUpdate.newPathname).to.equal('/giraffe/1pixel.png')
 
-        verifyVersionIncremented(this, version, 1, done)
-      })
+          verifyVersionIncremented(
+            exampleProjectId,
+            oldVersion,
+            version,
+            1,
+            done
+          )
+        }
+      )
     })
   })
 
   describe('deleting entities', function() {
+    let exampleProjectId, oldVersion, exampleFolderId
+
     beforeEach(function(done) {
-      createExampleProject(this, () => {
-        createExampleFolder(this, () => {
-          createExampleDoc(this, () => {
-            uploadExampleFile(this, () => {
-              moveItem(
-                this,
-                'doc',
-                this.exampleDocId,
-                this.exampleFolderId,
-                () => {
-                  moveItem(
-                    this,
-                    'file',
-                    this.exampleFileId,
-                    this.exampleFolderId,
-                    () => {
-                      MockDocUpdaterApi.clearProjectStructureUpdates()
-                      ProjectGetter.getProject(
-                        this.exampleProjectId,
-                        (error, project) => {
-                          if (error) {
-                            throw error
-                          }
-                          this.project0 = project
-                          done()
-                        }
-                      )
+      createExampleProject(owner, (err, projectId) => {
+        if (err) {
+          return done(err)
+        }
+        exampleProjectId = projectId
+        createExampleFolder(owner, exampleProjectId, (err, folderId) => {
+          if (err) {
+            return done(err)
+          }
+          exampleFolderId = folderId
+          createExampleDoc(owner, projectId, (err, docId) => {
+            if (err) {
+              return done(err)
+            }
+            uploadExampleFile(owner, projectId, folderId, (err, fileId) => {
+              if (err) {
+                return done(err)
+              }
+              moveItem(owner, projectId, 'doc', docId, folderId, () => {
+                moveItem(owner, projectId, 'file', fileId, folderId, () => {
+                  MockDocUpdaterApi.clearProjectStructureUpdates()
+                  ProjectGetter.getProject(
+                    exampleProjectId,
+                    (error, project) => {
+                      if (error) {
+                        throw error
+                      }
+                      oldVersion = project.version
+                      done()
                     }
                   )
-                }
-              )
+                })
+              })
             })
           })
         })
@@ -826,45 +1075,47 @@ describe('ProjectStructureChanges', function() {
     })
 
     it('should version deleting a folder', function(done) {
-      deleteItem(this, 'folder', this.exampleFolderId, () => {
+      deleteItem(owner, exampleProjectId, 'folder', exampleFolderId, () => {
         const {
           docUpdates,
           fileUpdates,
           version
-        } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
+        } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
         expect(docUpdates.length).to.equal(1)
         const docUpdate = docUpdates[0]
-        expect(docUpdate.userId).to.equal(this.owner._id)
+        expect(docUpdate.userId).to.equal(owner._id)
         expect(docUpdate.pathname).to.equal('/foo/new.tex')
         expect(docUpdate.newPathname).to.equal('')
 
         expect(fileUpdates.length).to.equal(1)
         const fileUpdate = fileUpdates[0]
-        expect(fileUpdate.userId).to.equal(this.owner._id)
+        expect(fileUpdate.userId).to.equal(owner._id)
         expect(fileUpdate.pathname).to.equal('/foo/1pixel.png')
         expect(fileUpdate.newPathname).to.equal('')
 
-        verifyVersionIncremented(this, version, 1, done)
+        verifyVersionIncremented(exampleProjectId, oldVersion, version, 1, done)
       })
     })
   })
 
   describe('tpds', function() {
+    let projectName, exampleProjectId, oldVersion, rootFolderId
+
     beforeEach(function(done) {
-      this.tpdsProjectName = `tpds-project-${new ObjectId().toString()}`
-      this.owner.createProject(this.tpdsProjectName, (error, projectId) => {
+      projectName = `tpds-project-${new ObjectId().toString()}`
+      owner.createProject(projectName, (error, projectId) => {
         if (error) {
           throw error
         }
-        this.exampleProjectId = projectId
+        exampleProjectId = projectId
         mkdirp(Settings.path.dumpFolder, () => {
-          ProjectGetter.getProject(this.exampleProjectId, (error, project) => {
+          ProjectGetter.getProject(exampleProjectId, (error, project) => {
             if (error) {
               throw error
             }
             MockDocUpdaterApi.clearProjectStructureUpdates()
-            this.rootFolderId = project.rootFolder[0]._id.toString()
-            this.project0 = project
+            rootFolderId = project.rootFolder[0]._id.toString()
+            oldVersion = project.version
             done()
           })
         })
@@ -876,8 +1127,8 @@ describe('ProjectStructureChanges', function() {
         Path.resolve(Path.join(__dirname, '..', 'files', 'test.tex'))
       )
 
-      const req = this.owner.request.post({
-        uri: `/user/${this.owner._id}/update/${this.tpdsProjectName}/test.tex`,
+      const req = owner.request.post({
+        uri: `/user/${owner._id}/update/${projectName}/test.tex`,
         auth: {
           user: _.keys(Settings.httpAuthUsers)[0],
           pass: _.values(Settings.httpAuthUsers)[0],
@@ -901,14 +1152,14 @@ describe('ProjectStructureChanges', function() {
         const {
           docUpdates: updates,
           version
-        } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
+        } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
         expect(updates.length).to.equal(1)
         const update = updates[0]
-        expect(update.userId).to.equal(this.owner._id)
+        expect(update.userId).to.equal(owner._id)
         expect(update.pathname).to.equal('/test.tex')
         expect(update.docLines).to.equal('Test')
 
-        verifyVersionIncremented(this, version, 1, done)
+        verifyVersionIncremented(exampleProjectId, oldVersion, version, 1, done)
       })
 
       texFile.pipe(req)
@@ -919,10 +1170,8 @@ describe('ProjectStructureChanges', function() {
         Path.resolve(Path.join(__dirname, '..', 'files', '1pixel.png'))
       )
 
-      const req = this.owner.request.post({
-        uri: `/user/${this.owner._id}/update/${
-          this.tpdsProjectName
-        }/1pixel.png`,
+      const req = owner.request.post({
+        uri: `/user/${owner._id}/update/${projectName}/1pixel.png`,
         auth: {
           user: _.keys(Settings.httpAuthUsers)[0],
           pass: _.values(Settings.httpAuthUsers)[0],
@@ -946,14 +1195,14 @@ describe('ProjectStructureChanges', function() {
         const {
           fileUpdates: updates,
           version
-        } = MockDocUpdaterApi.getProjectStructureUpdates(this.exampleProjectId)
+        } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
         expect(updates.length).to.equal(1)
         const update = updates[0]
-        expect(update.userId).to.equal(this.owner._id)
+        expect(update.userId).to.equal(owner._id)
         expect(update.pathname).to.equal('/1pixel.png')
         expect(update.url).to.be.a('string')
 
-        verifyVersionIncremented(this, version, 1, done)
+        verifyVersionIncremented(exampleProjectId, oldVersion, version, 1, done)
       })
 
       imageFile.pipe(req)
@@ -961,19 +1210,16 @@ describe('ProjectStructureChanges', function() {
 
     describe('when there are files in the project', function() {
       beforeEach(function(done) {
-        uploadExampleFile(this, () => {
-          createExampleDoc(this, () => {
-            ProjectGetter.getProject(
-              this.exampleProjectId,
-              (error, project) => {
-                if (error) {
-                  throw error
-                }
-                MockDocUpdaterApi.clearProjectStructureUpdates()
-                this.project0 = project
-                done()
+        uploadExampleFile(owner, exampleProjectId, rootFolderId, () => {
+          createExampleDoc(owner, exampleProjectId, () => {
+            ProjectGetter.getProject(exampleProjectId, (error, project) => {
+              if (error) {
+                throw error
               }
-            )
+              MockDocUpdaterApi.clearProjectStructureUpdates()
+              oldVersion = project.version
+              done()
+            })
           })
         })
       })
@@ -983,10 +1229,8 @@ describe('ProjectStructureChanges', function() {
           Path.resolve(Path.join(__dirname, '..', 'files', '2pixel.png'))
         )
 
-        const req = this.owner.request.post({
-          uri: `/user/${this.owner._id}/update/${
-            this.tpdsProjectName
-          }/1pixel.png`,
+        const req = owner.request.post({
+          uri: `/user/${owner._id}/update/${projectName}/1pixel.png`,
           auth: {
             user: _.keys(Settings.httpAuthUsers)[0],
             pass: _.values(Settings.httpAuthUsers)[0],
@@ -1010,31 +1254,33 @@ describe('ProjectStructureChanges', function() {
           const {
             fileUpdates: updates,
             version
-          } = MockDocUpdaterApi.getProjectStructureUpdates(
-            this.exampleProjectId
-          )
+          } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(2)
           let update = updates[0]
-          expect(update.userId).to.equal(this.owner._id)
+          expect(update.userId).to.equal(owner._id)
           expect(update.pathname).to.equal('/1pixel.png')
           // expect(update.url).to.be.a('string');
           update = updates[1]
-          expect(update.userId).to.equal(this.owner._id)
+          expect(update.userId).to.equal(owner._id)
           expect(update.pathname).to.equal('/1pixel.png')
           expect(update.url).to.be.a('string')
 
-          verifyVersionIncremented(this, version, 1, done)
+          verifyVersionIncremented(
+            exampleProjectId,
+            oldVersion,
+            version,
+            1,
+            done
+          )
         })
 
         imageFile.pipe(req)
       })
 
       it('should version deleting a doc', function(done) {
-        this.owner.request.delete(
+        owner.request.delete(
           {
-            uri: `/user/${this.owner._id}/update/${
-              this.tpdsProjectName
-            }/new.tex`,
+            uri: `/user/${owner._id}/update/${projectName}/new.tex`,
             auth: {
               user: _.keys(Settings.httpAuthUsers)[0],
               pass: _.values(Settings.httpAuthUsers)[0],
@@ -1052,16 +1298,20 @@ describe('ProjectStructureChanges', function() {
             const {
               docUpdates: updates,
               version
-            } = MockDocUpdaterApi.getProjectStructureUpdates(
-              this.exampleProjectId
-            )
+            } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
             expect(updates.length).to.equal(1)
             const update = updates[0]
-            expect(update.userId).to.equal(this.owner._id)
+            expect(update.userId).to.equal(owner._id)
             expect(update.pathname).to.equal('/new.tex')
             expect(update.newPathname).to.equal('')
 
-            verifyVersionIncremented(this, version, 1, done)
+            verifyVersionIncremented(
+              exampleProjectId,
+              oldVersion,
+              version,
+              1,
+              done
+            )
           }
         )
       })
@@ -1069,8 +1319,14 @@ describe('ProjectStructureChanges', function() {
   })
 
   describe('uploading a document', function() {
+    let exampleProjectId, rootFolderId
     beforeEach(function(done) {
-      createExampleProject(this, () => {
+      createExampleProject(owner, (err, projectId, folderId) => {
+        if (err) {
+          return done(err)
+        }
+        exampleProjectId = projectId
+        rootFolderId = folderId
         MockDocUpdaterApi.clearProjectStructureUpdates()
         done()
       })
@@ -1079,16 +1335,16 @@ describe('ProjectStructureChanges', function() {
     describe('with an unusual character set', function() {
       it('should correctly handle utf16-le data', function(done) {
         uploadFile(
-          this,
+          owner,
+          exampleProjectId,
+          rootFolderId,
           'charsets/test-greek-utf16-le-bom.tex',
           'test-greek-utf16-le-bom.tex',
           'text/x-tex',
           () => {
             const {
               docUpdates: updates
-            } = MockDocUpdaterApi.getProjectStructureUpdates(
-              this.exampleProjectId
-            )
+            } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
             expect(updates.length).to.equal(1)
             const update = updates[0]
             expect(update.pathname).to.equal('/test-greek-utf16-le-bom.tex')
@@ -1102,16 +1358,16 @@ describe('ProjectStructureChanges', function() {
 
       it('should correctly handle windows1252/iso-8859-1/latin1 data', function(done) {
         uploadFile(
-          this,
+          owner,
+          exampleProjectId,
+          rootFolderId,
           'charsets/test-german-windows-1252.tex',
           'test-german-windows-1252.tex',
           'text/x-tex',
           () => {
             const {
               docUpdates: updates
-            } = MockDocUpdaterApi.getProjectStructureUpdates(
-              this.exampleProjectId
-            )
+            } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
             expect(updates.length).to.equal(1)
             const update = updates[0]
             expect(update.pathname).to.equal('/test-german-windows-1252.tex')
