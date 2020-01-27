@@ -31,7 +31,8 @@ td.project-list-table-name-cell(ng-if-start="!project.isV1Project")
 					button.label.label-default.tag-label-remove(
 						ng-click="removeProjectFromTag(project, tag)"
 						aria-label="Remove tag {{ tag.name }}"
-					) &times;
+					)
+						span(aria-hidden="true") &times;
 
 td.project-list-table-owner-cell
 	span.owner(ng-if='project.owner') {{getOwnerName(project)}}

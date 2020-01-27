@@ -11,7 +11,9 @@ script(type="text/ng-template", id="historyRestoreDiffModalTemplate")
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 #{translate("restore")} {{diff.doc.name}}
 	.modal-body.modal-body-share
 		p !{translate("sure_you_want_to_restore_before", {filename:"<strong>{{diff.doc.name}}</strong>", date:"{{diff.start_ts | formatDate}}"})}
@@ -47,7 +49,9 @@ script(type="text/ng-template", id="historyLabelTpl")
 			ng-if="$ctrl.isOwnedByCurrentUser && !$ctrl.isPseudoCurrentStateLabel"
 			stop-propagation="click"
 			ng-click="$ctrl.onLabelDelete()"
-		) &times;
+			aria-label=translate("delete")
+		)
+			span(aria-hidden="true") &times;
 
 script(type="text/ng-template", id="historyLabelTooltipTpl")
 	.history-label-tooltip

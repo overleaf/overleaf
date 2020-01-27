@@ -4,7 +4,9 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 #{translate("hotkeys")}
 	.modal-body.modal-hotkeys
 		h3 #{translate("common")}

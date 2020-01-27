@@ -4,7 +4,9 @@ script(type="text/ng-template", id="BonusLinkToUsModal")
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 Dropbox link
 	.modal-body.modal-body-share
 

@@ -100,7 +100,9 @@ block content
 									type="button"
 									data-dismiss="modal"
 									ng-click="cancel()"
-								) &times;
+									aria-label="Close"
+								)
+									span(aria-hidden="true") &times;
 								h3 #{translate("link_to_sl")}
 							.modal-body.modal-body-share.link-modal
 

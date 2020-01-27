@@ -4,7 +4,9 @@ script(type='text/ng-template', id='newTagModalTemplate')
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 #{translate("create_new_folder")}
 	.modal-body
 		form(name="newTagForm", novalidate)
@@ -40,7 +42,9 @@ script(type='text/ng-template', id='deleteTagModalTemplate')
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 #{translate("delete_folder")}
 	.modal-body
 		p #{translate("about_to_delete_folder")}
@@ -66,7 +70,9 @@ script(type='text/ng-template', id='renameTagModalTemplate')
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 #{translate("rename_folder")}
 	.modal-body
 		form(name="renameTagForm", novalidate)
@@ -95,7 +101,9 @@ script(type='text/ng-template', id='renameProjectModalTemplate')
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 #{translate("rename_project")}
 	.modal-body
 		.alert.alert-danger(ng-show="state.error.message") {{state.error.message}}
@@ -124,7 +132,9 @@ script(type='text/ng-template', id='cloneProjectModalTemplate')
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 #{translate("copy_project")}
 	.modal-body
 		.alert.alert-danger(ng-show="state.error.message") {{state.error.message === "invalid element name" ? "#{translate("invalid_element_name")}" : state.error.message}}
@@ -158,7 +168,9 @@ script(type='text/ng-template', id='newProjectModalTemplate')
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 #{translate("new_project")}
 	.modal-body
 		.alert.alert-danger(ng-show="state.error.message") {{state.error.message}}
@@ -190,7 +202,9 @@ script(type='text/ng-template', id='archiveTrashLeaveOrDeleteProjectsModalTempla
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3(ng-if="action === 'archive'") #{translate("archive_projects")}
 		h3(ng-if="action === 'trash'") #{translate("trash_projects")}
 		h3(ng-if="action === 'leave'") #{translate("leave_projects")}
@@ -264,7 +278,9 @@ script(type="text/ng-template", id="uploadProjectModalTemplate")
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 #{translate("upload_zipped_project")}
 	.modal-body(
 		fine-upload
@@ -284,65 +300,15 @@ script(type="text/ng-template", id="showErrorModalTemplate")
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 #{translate("generic_something_went_wrong")}
 	.modal-body
 		.alert.alert-danger(ng-show="error.message") {{error.message === "invalid element name" ? "#{translate("invalid_element_name")}" : error.message}}
 		.alert.alert-danger(ng-show="error && !error.message") #{translate("generic_something_went_wrong")}
 	.modal-footer
 		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
-
-script(type="text/ng-template", id="userProfileModalTemplate")
-	.modal-header
-		button.close(
-			type="button"
-			data-dismiss="modal"
-			ng-click="done()"
-		) &times;
-		h3 #{translate("your_profile")}
-	.modal-body
-		form(enctype='multipart/form-data', method='post')
-
-			.form-group
-				label(for="first_name") #{translate("first_name")}
-				input.form-control(
-					type='text',
-					name='first_name',
-					ng-model="userInfoForm.first_name",
-					placeholder="First Name",
-					select-when="formVisable"
-				)
-
-			.form-group
-				label(for="last_name") #{translate("last_name")}
-				input.form-control(
-					type='text',
-					name='last_name',
-					ng-model="userInfoForm.last_name",
-					placeholder='Last Name'
-				)
-
-			.form-group.user_details_auto_complete
-				label(for="institution") #{translate("institution")}
-				autocomplete(
-					ng-model="userInfoForm.institution",
-					name="institution",
-					data="institutions",
-					on-type="updateInstitutionsList",
-					attr-placeholder="Institution",
-					attr-inputclass="form-control"
-				)
-
-			.form-group.user_details_auto_complete
-				label(for="role") #{translate("role")}
-				autocomplete(
-					ng-model="userInfoForm.role",
-					name="role",
-					data="roles",
-					attr-placeholder="Role",
-					attr-inputclass="form-control"
-				)
-
 
 	.modal-footer
 		button.btn.btn-info(ng-click="done()") #{translate("done")}

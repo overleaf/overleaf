@@ -548,7 +548,9 @@ script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 #{translate("upgrade_to_track_changes")}
 	.modal-body
 		.teaser-video-container
@@ -597,7 +599,9 @@ script(type="text/ng-template", id="bulkActionsModalTemplate")
 			type="button"
 			data-dismiss="modal"
 			ng-click="cancel()"
-		) &times;
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
 		h3 {{ isAccept ? '#{translate("accept_all")}' : '#{translate("reject_all")}' }}
 	.modal-body 
 		p(ng-if="isAccept") #{translate("bulk_accept_confirm", { nChanges: "{{ nChanges }}"})}
