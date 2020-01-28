@@ -24,7 +24,7 @@ exports.expectError = function OErrorExpectError (e, expected) {
   expect(e.toString()).to.equal(expected.message)
 
   // stack should start with the default error message formatting
-  expect(e.stack.split('\n')[0], expected.name)
+  expect(e.stack.split('\n')[0]).to.match(new RegExp(`^${expected.name}:`))
 
   // first stack frame should be the function where the error was thrown
   expect(e.stack.split('\n')[1]).to.match(expected.firstFrameRx)
