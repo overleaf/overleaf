@@ -84,8 +84,6 @@ RUN cd /var/www && ./git-revision.sh > revisions.txt
 # Set Environment Variables
 # --------------------------------
 ENV WEB_API_USER "sharelatex"
-# password is regenerated in init_scripts/00_regen_sharelatex_secrets.sh
-ENV WEB_API_PASSWORD "password"
 
 ENV SHARELATEX_APP_NAME "Overleaf Community Edition"
 
