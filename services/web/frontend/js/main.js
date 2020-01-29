@@ -15,6 +15,7 @@ define([
   'main/clear-sessions',
   'main/account-upgrade',
   'main/plans',
+  'main/post-gateway',
   'main/user-membership',
   'main/scribtex-popup',
   'main/event',

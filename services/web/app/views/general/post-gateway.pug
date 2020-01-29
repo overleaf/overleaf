@@ -1,0 +1,20 @@
+extends ../layout
+
+block vars
+	- var suppressNavbar = true
+	- var suppressFooter = true
+
+block content
+	script(type="template", id="gateway-data")!= StringHelper.stringifyJsonForScript({ params: form_data })
+
+	.content.content-alt
+		.container
+			.row
+				.col-md-6.col-md-offset-3
+					.card
+						p.text-center #{translate('processing_your_request')}
+
+	form(
+		ng-controller="PostGatewayController",
+		ng-init="handleGateway();"
+		id='gateway' method='POST')

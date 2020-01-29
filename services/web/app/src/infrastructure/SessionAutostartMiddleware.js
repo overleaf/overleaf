@@ -1,4 +1,5 @@
 const Settings = require('settings-sharelatex')
+const Errors = require('../Features/Errors/Errors')
 
 // SessionAutostartMiddleware provides a mechanism to force certain routes not
 // to get an automatic session where they don't have one already. This allows us
@@ -36,6 +37,14 @@ class SessionAutostartMiddleware {
     this._noAutostartCallbacks[route][method] = callback
   }
 
+  applyDefaultPostGatewayForRoute(route) {
+    this.disableSessionAutostartForRoute(
+      route,
+      'POST',
+      SessionAutostartMiddleware.genericPostGatewayMiddleware
+    )
+  }
+
   autostartCallbackForRequest(req) {
     return (
       this._noAutostartCallbacks[req.path] &&
@@ -61,6 +70,26 @@ class SessionAutostartMiddleware {
       return req.session.noSessionCallback(req, res, next)
     }
     next()
+  }
+
+  static genericPostGatewayMiddleware(req, res, next) {
+    if (req.method !== 'POST') {
+      return next(
+        new Errors.OError({
+          message: 'post gateway invoked for non-POST request',
+          info: {
+            path: req.path,
+            method: req.method
+          }
+        })
+      )
+    }
+
+    if (req.body.viaGateway) {
+      return next()
+    }
+
+    res.render('general/post-gateway', { form_data: req.body })
   }
 }
 
