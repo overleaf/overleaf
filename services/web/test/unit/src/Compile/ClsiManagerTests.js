@@ -25,7 +25,7 @@ describe('ClsiManager', function() {
       getProjectDocsIfMatch: sinon.stub().callsArgWith(2, null, null)
     }
     this.ProjectRootDocManager = {
-      setRootDocAutomatically: sinon.stub().yields()
+      ensureRootDocumentIsValidForProject: sinon.stub().yields()
     }
     this.logger = {
       log: sinon.stub(),
