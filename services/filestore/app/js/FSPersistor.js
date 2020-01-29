@@ -8,6 +8,7 @@ const { promisify, callbackify } = require('util')
 
 const LocalFileWriter = require('./LocalFileWriter').promises
 const { NotFoundError, ReadError, WriteError } = require('./Errors')
+const PersistorHelper = require('./PersistorHelper')
 
 const pipeline = promisify(Stream.pipeline)
 const fsUnlink = promisify(fs.unlink)
@@ -28,7 +29,7 @@ async function sendFile(location, target, source) {
     const targetStream = fs.createWriteStream(`${location}/${filteredTarget}`)
     await pipeline(sourceStream, targetStream)
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to copy the specified file',
       { location, target, source },
@@ -65,7 +66,7 @@ async function getFileStream(location, name, opts) {
   try {
     opts.fd = await fsOpen(`${location}/${filteredName}`, 'r')
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to open file for streaming',
       { location, filteredName, opts },
@@ -83,7 +84,7 @@ async function getFileSize(location, filename) {
     const stat = await fsStat(fullPath)
     return stat.size
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to stat file',
       { location, filename },
@@ -126,7 +127,7 @@ async function copyFile(location, fromName, toName) {
     const targetStream = fs.createWriteStream(`${location}/${filteredToName}`)
     await pipeline(sourceStream, targetStream)
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to copy file',
       { location, filteredFromName, filteredToName },
@@ -140,7 +141,7 @@ async function deleteFile(location, name) {
   try {
     await fsUnlink(`${location}/${filteredName}`)
   } catch (err) {
-    const wrappedError = _wrapError(
+    const wrappedError = PersistorHelper.wrapError(
       err,
       'failed to delete file',
       { location, filteredName },
@@ -161,7 +162,7 @@ async function deleteDirectory(location, name) {
   try {
     await rmrf(`${location}/${filteredName}`)
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to delete directory',
       { location, filteredName },
@@ -179,7 +180,7 @@ async function checkIfFileExists(location, name) {
     if (err.code === 'ENOENT') {
       return false
     }
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to stat file',
       { location, filteredName },
@@ -209,7 +210,7 @@ async function directorySize(location, name) {
       }
     }
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to get directory size',
       { location, name },
@@ -218,20 +219,6 @@ async function directorySize(location, name) {
   }
 
   return size
-}
-
-function _wrapError(error, message, params, ErrorType) {
-  if (error.code === 'ENOENT') {
-    return new NotFoundError({
-      message: 'no such file or directory',
-      info: params
-    }).withCause(error)
-  } else {
-    return new ErrorType({
-      message: message,
-      info: params
-    }).withCause(error)
-  }
 }
 
 module.exports = {

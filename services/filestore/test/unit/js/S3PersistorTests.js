@@ -89,6 +89,7 @@ describe('S3PersistorTests', function() {
     }
 
     MeteredStream = {
+      type: 'metered',
       on: sinon.stub(),
       bytes: objectSize
     }
@@ -103,7 +104,7 @@ describe('S3PersistorTests', function() {
 
     S3ReadStream = {
       on: sinon.stub(),
-      pipe: sinon.stub().returns('s3Stream'),
+      pipe: sinon.stub(),
       removeListener: sinon.stub()
     }
     S3ReadStream.on.withArgs('readable').yields()
@@ -168,8 +169,8 @@ describe('S3PersistorTests', function() {
         stream = await S3Persistor.promises.getFileStream(bucket, key)
       })
 
-      it('returns a stream', function() {
-        expect(stream).to.equal('s3Stream')
+      it('returns a metered stream', function() {
+        expect(stream).to.equal(MeteredStream)
       })
 
       it('sets the AWS client up with credentials from settings', function() {
@@ -184,7 +185,10 @@ describe('S3PersistorTests', function() {
       })
 
       it('pipes the stream through the meter', function() {
-        expect(S3ReadStream.pipe).to.have.been.calledWith(MeteredStream)
+        expect(Stream.pipeline).to.have.been.calledWith(
+          S3ReadStream,
+          MeteredStream
+        )
       })
 
       it('records an ingress metric', function() {
@@ -202,8 +206,8 @@ describe('S3PersistorTests', function() {
         })
       })
 
-      it('returns a stream', function() {
-        expect(stream).to.equal('s3Stream')
+      it('returns a metered stream', function() {
+        expect(stream).to.equal(MeteredStream)
       })
 
       it('passes the byte range on to S3', function() {
@@ -236,8 +240,8 @@ describe('S3PersistorTests', function() {
         stream = await S3Persistor.promises.getFileStream(bucket, key)
       })
 
-      it('returns a stream', function() {
-        expect(stream).to.equal('s3Stream')
+      it('returns a metered stream', function() {
+        expect(stream).to.equal(MeteredStream)
       })
 
       it('sets the AWS client up with the alternative credentials', function() {
@@ -305,12 +309,12 @@ describe('S3PersistorTests', function() {
         expect(error).to.be.an.instanceOf(Errors.NotFoundError)
       })
 
-      it('wraps the error from S3', function() {
-        expect(error.cause).to.equal(S3NotFoundError)
+      it('wraps the error', function() {
+        expect(error.cause).to.exist
       })
 
       it('stores the bucket and key in the error', function() {
-        expect(error.info).to.deep.equal({ Bucket: bucket, Key: key })
+        expect(error.info).to.include({ bucketName: bucket, key: key })
       })
     })
 
@@ -335,12 +339,12 @@ describe('S3PersistorTests', function() {
         expect(error).to.be.an.instanceOf(Errors.NotFoundError)
       })
 
-      it('wraps the error from S3', function() {
-        expect(error.cause).to.equal(S3AccessDeniedError)
+      it('wraps the error', function() {
+        expect(error.cause).to.exist
       })
 
       it('stores the bucket and key in the error', function() {
-        expect(error.info).to.deep.equal({ Bucket: bucket, Key: key })
+        expect(error.info).to.include({ bucketName: bucket, key: key })
       })
     })
 
@@ -365,12 +369,12 @@ describe('S3PersistorTests', function() {
         expect(error).to.be.an.instanceOf(Errors.ReadError)
       })
 
-      it('wraps the error from S3', function() {
-        expect(error.cause).to.equal(genericError)
+      it('wraps the error', function() {
+        expect(error.cause).to.exist
       })
 
       it('stores the bucket and key in the error', function() {
-        expect(error.info).to.deep.equal({ Bucket: bucket, Key: key })
+        expect(error.info).to.include({ bucketName: bucket, key: key })
       })
     })
   })
