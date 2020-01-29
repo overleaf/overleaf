@@ -47,6 +47,8 @@ define(['base'], function(App) {
       if (meta == null) {
         meta = {}
       }
+      meta.user_id = window.user_id
+      meta.project_id = window.project_id
       meta.client_id = __guard__(
         this.socket != null ? this.socket.socket : undefined,
         x => x.sessionid
