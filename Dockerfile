@@ -26,7 +26,7 @@ ADD ${baseDir}/git-revision.sh /var/www/git-revision.sh
 RUN cd /var/www && npm install
 
 
-# Replace overleaf/config/services.js with the list of available 
+# Replace overleaf/config/services.js with the list of available
 # services in Overleaf Community Edition
 # --------------------------------------------------------------
 ADD ${baseDir}/services.js /var/www/sharelatex/config/services.js
@@ -47,11 +47,6 @@ RUN bash -c 'cd /var/www/sharelatex && source ./bin/compile-services'
 # Links CLSI sycntex to its default location
 # ------------------------------------------
 RUN ln -s /var/www/sharelatex/clsi/bin/synctex /opt/synctex
-
-
-# Change application ownership to www-data
-# ----------------------------------------
-RUN	chown -R www-data:www-data /var/www/sharelatex;
 
 
 # Copy runit service startup scripts to its location
