@@ -145,6 +145,9 @@ define([
           }
         }
 
+        // If we already have the document open we can return at this point.
+        // Note: only use forceReopen:true to override this when the document is
+        // is out of sync and needs to be reloaded from the server.
         if (doc.id === this.$scope.editor.open_doc_id && !options.forceReopen) {
           // automatically update the file tree whenever the file is opened
           this.ide.fileTreeManager.selectEntity(doc)
@@ -154,6 +157,7 @@ define([
           return
         }
 
+        // We're now either opening a new document or reloading a broken one.
         this.$scope.editor.open_doc_id = doc.id
         this.$scope.editor.open_doc_name = doc.name
 
@@ -188,13 +192,18 @@ define([
         }
         sl_console.log('[_openNewDocument] Opening...')
         const current_sharejs_doc = this.$scope.editor.sharejs_doc
-        if (current_sharejs_doc != null) {
+        const new_sharejs_doc = Document.getDocument(this.ide, doc.id)
+        // Leave the current document only when we are opening a different new
+        // one, to avoid race conditions between leaving and joining the same
+        // document.
+        if (
+          current_sharejs_doc != null &&
+          current_sharejs_doc !== new_sharejs_doc
+        ) {
           sl_console.log('[_openNewDocument] Leaving existing open doc...')
           current_sharejs_doc.leaveAndCleanUp()
           this._unbindFromDocumentEvents(current_sharejs_doc)
         }
-
-        const new_sharejs_doc = Document.getDocument(this.ide, doc.id)
 
         return new_sharejs_doc.join(error => {
           if (error != null) {
