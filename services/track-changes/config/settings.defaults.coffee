@@ -38,6 +38,8 @@ module.exports =
 		s3:
 			key: process.env['AWS_ACCESS_KEY_ID']
 			secret: process.env['AWS_SECRET_ACCESS_KEY']
+			endpoint: process.env['AWS_S3_ENDPOINT']
+			pathStyle: process.env['AWS_S3_PATH_STYLE'] == 'true'
 		stores:
 			doc_history: process.env['AWS_BUCKET']
 		continueOnError: process.env['TRACK_CHANGES_CONTINUE_ON_ERROR'] or false

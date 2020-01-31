@@ -17,9 +17,12 @@ MockWebApi = require "./helpers/MockWebApi"
 describe "Archiving updates", ->
 	before (done) ->
 		if Settings?.trackchanges?.s3?.key.length < 1
-			message = "s3 keys not setup, this test setup will fail"
+			message = new Error("s3 keys not setup, this test setup will fail")
 			return done(message)
 
+		TrackChangesClient.waitForS3 done
+
+	before (done) ->
 		@now = Date.now()
 		@to = @now
 		@user_id = ObjectId().toString()

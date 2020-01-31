@@ -1,9 +1,9 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.1.24
+# Version: 1.3.4
 
-version: "2"
+version: "2.1"
 
 services:
   test_unit:
@@ -22,17 +22,22 @@ services:
       REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_S3_ENDPOINT: http://s3:9090
+      AWS_S3_PATH_STYLE: 'true'
+      AWS_ACCESS_KEY_ID: fake
+      AWS_SECRET_ACCESS_KEY: fake
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
+      AWS_BUCKET: bucket
     depends_on:
-      - mongo
-      - redis
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      s3:
+        condition: service_healthy
     user: node
     command: npm run test:acceptance:_run
-
 
 
   tar:
@@ -42,9 +47,14 @@ services:
       - ./:/tmp/build/
     command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
     user: root
-
   redis:
     image: redis
 
   mongo:
-    image: mongo:3.4
+    image: mongo:3.6
+  s3:
+    image: adobe/s3mock
+    environment:
+      - initialBuckets=fake_user_files,fake_template_files,fake_public_files,bucket
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090"]

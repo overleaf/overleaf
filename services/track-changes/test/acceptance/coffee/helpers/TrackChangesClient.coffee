@@ -6,6 +6,15 @@ rclient = require("redis-sharelatex").createClient(Settings.redis.history) # Onl
 Keys = Settings.redis.history.key_schema
 {db, ObjectId} = require "../../../../app/js/mongojs"
 
+aws = require "aws-sdk"
+s3 = new aws.S3(
+	accessKeyId: Settings.trackchanges.s3.key
+	secretAccessKey: Settings.trackchanges.s3.secret
+	endpoint: Settings.trackchanges.s3.endpoint
+	s3ForcePathStyle: Settings.trackchanges.s3.pathStyle
+)
+S3_BUCKET = Settings.trackchanges.stores.doc_history
+
 module.exports = TrackChangesClient =
 	flushAndGetCompressedUpdates: (project_id, doc_id, callback = (error, updates) ->) ->
 		TrackChangesClient.flushDoc project_id, doc_id, (error) ->
@@ -91,32 +100,45 @@ module.exports = TrackChangesClient =
 			response.statusCode.should.equal 204
 			callback(error)
 
-	buildS3Options: (content, key)->
-		return {
-				aws:
-					key: Settings.trackchanges.s3.key
-					secret: Settings.trackchanges.s3.secret
-					bucket: Settings.trackchanges.stores.doc_history
-				timeout: 30 * 1000
-				json: content
-				uri:"https://#{Settings.trackchanges.stores.doc_history}.s3.amazonaws.com/#{key}"
-		}
+	waitForS3: (done, retries=42) ->
+		if !Settings.trackchanges.s3.endpoint
+			return done()
+
+		request.get "#{Settings.trackchanges.s3.endpoint}/", (err, res) ->
+			if res && res.statusCode < 500
+				return done()
+
+			if retries == 0
+				return done(err or new Error("s3 returned #{res.statusCode}"))
+
+			setTimeout () ->
+				TrackChangesClient.waitForS3(done, --retries)
+			, 1000
 
 	getS3Doc: (project_id, doc_id, pack_id, callback = (error, body) ->) ->
-		options = TrackChangesClient.buildS3Options(true, project_id+"/changes-"+doc_id+"/pack-"+pack_id)
-		options.encoding = null
-		request.get options, (err, res, body) ->
+		params =
+			Bucket: S3_BUCKET
+			Key: "#{project_id}/changes-#{doc_id}/pack-#{pack_id}"
+
+		s3.getObject params, (error, data) ->
 			return callback(error) if error?
+			body = data.Body
 			return callback(new Error("empty response from s3")) if not body?
 			zlib.gunzip body, (err, result) ->
 				return callback(err) if err?
 				callback(null, JSON.parse(result.toString()))
 
 	removeS3Doc: (project_id, doc_id, callback = (error, res, body) ->) ->
-		options = TrackChangesClient.buildS3Options(true, "?prefix=" + project_id + "/changes-" +doc_id)
-		request.get options, (error, res, body) ->
-			keys = body.match /[0-9a-f]{24}\/changes-[0-9a-f]{24}\/pack-[0-9a-f]{24}/g
-			async.eachSeries keys, (key, cb) ->
-				options = TrackChangesClient.buildS3Options(true, key)
-				request.del options, cb
-			, callback
+		params =
+			Bucket: S3_BUCKET
+			Prefix: "#{project_id}/changes-#{doc_id}"
+
+		s3.listObjects params, (error, data) ->
+			return callback(error) if error?
+
+			params =
+				Bucket: S3_BUCKET
+				Delete:
+					Objects: data.Contents.map((s3object) -> {Key: s3object.Key})
+
+			s3.deleteObjects params, callback
