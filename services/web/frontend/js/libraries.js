@@ -1,5 +1,6 @@
 define([
   'core-js/stable/array/fill',
+  'core-js/stable/array/from',
   'core-js/stable/array/includes',
   'jquery',
   'angular',
