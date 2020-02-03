@@ -278,6 +278,28 @@ const FeaturesUpdater = {
     }
 
     return mismatchReasons
+  },
+
+  doSyncFromV1(v1UserId, callback) {
+    logger.log({ v1UserId }, '[AccountSync] starting account sync')
+    return UserGetter.getUser({ 'overleaf.id': v1UserId }, { _id: 1 }, function(
+      err,
+      user
+    ) {
+      if (err != null) {
+        logger.warn({ v1UserId }, '[AccountSync] error getting user')
+        return callback(err)
+      }
+      if ((user != null ? user._id : undefined) == null) {
+        logger.warn({ v1UserId }, '[AccountSync] no user found for v1 id')
+        return callback(null)
+      }
+      logger.log(
+        { v1UserId, userId: user._id },
+        '[AccountSync] updating user subscription and features'
+      )
+      return FeaturesUpdater.refreshFeatures(user._id, callback)
+    })
   }
 }
 

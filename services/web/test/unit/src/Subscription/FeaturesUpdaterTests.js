@@ -31,7 +31,10 @@ describe('FeaturesUpdater', function() {
         './SubscriptionLocator': (this.SubscriptionLocator = {}),
         './PlansLocator': (this.PlansLocator = {}),
         'logger-sharelatex': {
-          log() {}
+          log() {},
+          warn(obj, text) {
+            console.log(text)
+          }
         },
         'settings-sharelatex': (this.Settings = {}),
         '../Referal/ReferalFeatures': (this.ReferalFeatures = {}),
@@ -315,6 +318,95 @@ describe('FeaturesUpdater', function() {
         )
       ).to.deep.equal({
         github: false
+      })
+    })
+  })
+
+  describe('doSyncFromV1', function() {
+    beforeEach(function() {
+      this.v1UserId = 1
+      this.user = {
+        _id: this.user_id,
+        email: 'user@example.com',
+        overleaf: {
+          id: this.v1UserId
+        }
+      }
+
+      this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, this.user)
+      this.FeaturesUpdater.refreshFeatures = sinon.stub().yields(null)
+      return (this.call = cb => {
+        return this.FeaturesUpdater.doSyncFromV1(this.v1UserId, cb)
+      })
+    })
+
+    describe('when all goes well', function() {
+      it('should call getUser', function(done) {
+        return this.call(() => {
+          expect(this.UserGetter.getUser.callCount).to.equal(1)
+          expect(
+            this.UserGetter.getUser.calledWith({ 'overleaf.id': this.v1UserId })
+          ).to.equal(true)
+          return done()
+        })
+      })
+
+      it('should call refreshFeatures', function(done) {
+        return this.call(() => {
+          expect(this.FeaturesUpdater.refreshFeatures.callCount).to.equal(1)
+          expect(
+            this.FeaturesUpdater.refreshFeatures.calledWith(this.user_id)
+          ).to.equal(true)
+          return done()
+        })
+      })
+
+      it('should not produce an error', function(done) {
+        return this.call(err => {
+          expect(err).to.not.exist
+          return done()
+        })
+      })
+    })
+
+    describe('when getUser produces an error', function() {
+      beforeEach(function() {
+        return (this.UserGetter.getUser = sinon
+          .stub()
+          .callsArgWith(2, new Error('woops')))
+      })
+
+      it('should not call refreshFeatures', function() {
+        expect(this.FeaturesUpdater.refreshFeatures.callCount).to.equal(0)
+      })
+
+      it('should produce an error', function(done) {
+        return this.call(err => {
+          expect(err).to.exist
+          return done()
+        })
+      })
+    })
+
+    describe('when getUser does not find a user', function() {
+      beforeEach(function() {
+        return (this.UserGetter.getUser = sinon
+          .stub()
+          .callsArgWith(2, null, null))
+      })
+
+      it('should not call refreshFeatures', function(done) {
+        return this.call(() => {
+          expect(this.FeaturesUpdater.refreshFeatures.callCount).to.equal(0)
+          return done()
+        })
+      })
+
+      it('should not produce an error', function(done) {
+        return this.call(err => {
+          expect(err).to.not.exist
+          return done()
+        })
       })
     })
   })
