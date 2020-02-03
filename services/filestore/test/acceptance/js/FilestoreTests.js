@@ -543,7 +543,7 @@ describe('Filestore', function() {
             })
 
             describe('when copying a file', function() {
-              let newFileId, newFileUrl, newFileKey
+              let newFileId, newFileUrl, newFileKey, opts
 
               beforeEach(async function() {
                 const newProjectID = `acceptance_tests_copied_project_${Math.random()}`
@@ -551,7 +551,7 @@ describe('Filestore', function() {
                 newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${directoryName}%2F${newFileId}`
                 newFileKey = `${newProjectID}/${directoryName}/${newFileId}`
 
-                const opts = {
+                opts = {
                   method: 'put',
                   uri: newFileUrl,
                   json: {
@@ -561,31 +561,31 @@ describe('Filestore', function() {
                     }
                   }
                 }
-
-                const response = await rp(opts)
-                expect(response.statusCode).to.equal(200)
-              })
-
-              it('should leave the old file in the old bucket', async function() {
-                await expectPersistorToHaveFile(
-                  app.persistor.fallbackPersistor,
-                  fallbackBucket,
-                  fileKey,
-                  constantFileContent
-                )
-              })
-
-              it('should not create a new file in the old bucket', async function() {
-                await expectPersistorNotToHaveFile(
-                  app.persistor.fallbackPersistor,
-                  fallbackBucket,
-                  newFileKey
-                )
               })
 
               describe('when copyOnMiss is false', function() {
-                beforeEach(function() {
+                beforeEach(async function() {
                   Settings.filestore.fallback.copyOnMiss = false
+
+                  const response = await rp(opts)
+                  expect(response.statusCode).to.equal(200)
+                })
+
+                it('should leave the old file in the old bucket', async function() {
+                  await expectPersistorToHaveFile(
+                    app.persistor.fallbackPersistor,
+                    fallbackBucket,
+                    fileKey,
+                    constantFileContent
+                  )
+                })
+
+                it('should not create a new file in the old bucket', async function() {
+                  await expectPersistorNotToHaveFile(
+                    app.persistor.fallbackPersistor,
+                    fallbackBucket,
+                    newFileKey
+                  )
                 })
 
                 it('should create a new file in the new bucket', async function() {
@@ -598,6 +598,9 @@ describe('Filestore', function() {
                 })
 
                 it('should not copy the old file to the primary with the old key', async function() {
+                  // wait for the file to copy in the background
+                  await promisify(setTimeout)(1000)
+
                   await expectPersistorNotToHaveFile(
                     app.persistor.primaryPersistor,
                     bucket,
@@ -607,8 +610,28 @@ describe('Filestore', function() {
               })
 
               describe('when copyOnMiss is true', function() {
-                beforeEach(function() {
+                beforeEach(async function() {
                   Settings.filestore.fallback.copyOnMiss = true
+
+                  const response = await rp(opts)
+                  expect(response.statusCode).to.equal(200)
+                })
+
+                it('should leave the old file in the old bucket', async function() {
+                  await expectPersistorToHaveFile(
+                    app.persistor.fallbackPersistor,
+                    fallbackBucket,
+                    fileKey,
+                    constantFileContent
+                  )
+                })
+
+                it('should not create a new file in the old bucket', async function() {
+                  await expectPersistorNotToHaveFile(
+                    app.persistor.fallbackPersistor,
+                    fallbackBucket,
+                    newFileKey
+                  )
                 })
 
                 it('should create a new file in the new bucket', async function() {
@@ -621,6 +644,9 @@ describe('Filestore', function() {
                 })
 
                 it('should copy the old file to the primary with the old key', async function() {
+                  // wait for the file to copy in the background
+                  await promisify(setTimeout)(1000)
+
                   await expectPersistorToHaveFile(
                     app.persistor.primaryPersistor,
                     bucket,
