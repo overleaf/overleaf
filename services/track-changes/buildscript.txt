@@ -2,7 +2,7 @@ track-changes
 --public-repo=True
 --language=coffeescript
 --env-add=AWS_BUCKET=bucket
---node-version=6.11.2
+--node-version=10.18.1
 --acceptance-creds=None
 --dependencies=mongo,redis,s3
 --docker-repos=gcr.io/overleaf-ops
