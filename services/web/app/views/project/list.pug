@@ -47,28 +47,6 @@ block content
 						aside.project-list-sidebar
 							include ./list/side-bar
 
-						.project-list-sidebar-survey(
-							ng-if="shouldShowSurveyLink"
-							ng-cloak
-						)
-							| What would you like to see next in Overleaf?
-							| 
-							|
-							a.project-list-sidebar-survey-link(
-								href="https://forms.gle/om5t48UUj7LecHMP8"
-								target="_blank"
-								rel="noreferrer noopener"
-							) Take our short survey
-							| .
-							button.project-list-sidebar-survey-dismiss(
-								type="button"
-								title="Dismiss Overleaf survey"
-								ng-click="dismissSurvey()"
-							)
-								span(
-									aria-hidden="true"
-								) &times;
-
 					.project-list-main.col-md-10.col-xs-9
 						include ./list/notifications
 						include ./list/project-list
