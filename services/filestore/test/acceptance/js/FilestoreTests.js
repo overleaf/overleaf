@@ -545,7 +545,7 @@ describe('Filestore', function() {
             describe('when copying a file', function() {
               let newFileId, newFileUrl, newFileKey, opts
 
-              beforeEach(async function() {
+              beforeEach(function() {
                 const newProjectID = `acceptance_tests_copied_project_${Math.random()}`
                 newFileId = Math.random()
                 newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${directoryName}%2F${newFileId}`
