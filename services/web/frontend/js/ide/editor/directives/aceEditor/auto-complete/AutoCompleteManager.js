@@ -107,9 +107,10 @@ define([
               for (let file of Files.getTeXFiles()) {
                 if (file.id !== this.$scope.docId) {
                   const { path } = file
+                  let cleanPath = path.replace(/(.+)\.tex$/i, '$1')
                   result.push({
                     caption: `\\${commandName}{${path}}`,
-                    value: `\\${commandName}{${path}}`,
+                    value: `\\${commandName}{${cleanPath}}`,
                     meta: 'file',
                     score: 50
                   })
