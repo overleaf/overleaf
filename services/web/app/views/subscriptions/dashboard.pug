@@ -50,4 +50,4 @@ block content
 							-else
 								p(ng-non-bindable) You're on the #{settings.appName} Free plan.
 								|
-								a(href="/user/subscription/plans").btn.btn-primary Upgrade now
+								a(ng-controller="UpgradeSubscriptionController" href="/user/subscription/plans" ng-click="upgradeSubscription()").btn.btn-primary Upgrade now
