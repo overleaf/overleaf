@@ -1,9 +1,11 @@
 const metrics = require('metrics-sharelatex')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
-const Minipass = require('minipass')
-const { callbackify } = require('util')
+const Stream = require('stream')
+const { callbackify, promisify } = require('util')
 const { NotFoundError, WriteError } = require('./Errors')
+
+const pipeline = promisify(Stream.pipeline)
 
 // Persistor that wraps two other persistors. Talks to the 'primary' by default,
 // but will fall back to an older persistor in the case of a not-found error.
@@ -29,14 +31,86 @@ module.exports = function(primary, fallback) {
     }
   }
 
+  async function getFileStreamWithFallback(bucket, key, opts) {
+    const shouldCopy =
+      Settings.filestore.fallback.copyOnMiss && !opts.start && !opts.end
+
+    try {
+      return await primary.promises.getFileStream(bucket, key, opts)
+    } catch (err) {
+      if (err instanceof NotFoundError) {
+        const fallbackBucket = _getFallbackBucket(bucket)
+        const fallbackStream = await fallback.promises.getFileStream(
+          fallbackBucket,
+          key,
+          opts
+        )
+        // tee the stream to the client, and as a copy to the primary (if necessary)
+        // start listening on both straight away so that we don't consume bytes
+        // in one place before the other
+        const returnStream = new Stream.PassThrough()
+        pipeline(fallbackStream, returnStream)
+
+        if (shouldCopy) {
+          const copyStream = new Stream.PassThrough()
+          pipeline(fallbackStream, copyStream)
+
+          _copyStreamFromFallbackAndVerify(
+            copyStream,
+            fallbackBucket,
+            bucket,
+            key,
+            key
+          ).catch(() => {
+            // swallow errors, as this runs in the background and will log a warning
+          })
+        }
+        return returnStream
+      }
+      throw err
+    }
+  }
+
   async function copyFileWithFallback(bucket, sourceKey, destKey) {
     try {
       return await primary.promises.copyFile(bucket, sourceKey, destKey)
     } catch (err) {
       if (err instanceof NotFoundError) {
         const fallbackBucket = _getFallbackBucket(bucket)
-        return _copyFileFromFallback(fallbackBucket, bucket, sourceKey, destKey)
+        const fallbackStream = await fallback.promises.getFileStream(
+          fallbackBucket,
+          sourceKey,
+          {}
+        )
+
+        const copyStream = new Stream.PassThrough()
+        pipeline(fallbackStream, copyStream)
+
+        if (Settings.filestore.fallback.copyOnMiss) {
+          const missStream = new Stream.PassThrough()
+          pipeline(fallbackStream, missStream)
+
+          // copy from sourceKey -> sourceKey
+          _copyStreamFromFallbackAndVerify(
+            missStream,
+            fallbackBucket,
+            bucket,
+            sourceKey,
+            sourceKey
+          ).then(() => {
+            // swallow errors, as this runs in the background and will log a warning
+          })
+        }
+        // copy from sourceKey -> destKey
+        return _copyStreamFromFallbackAndVerify(
+          copyStream,
+          fallbackBucket,
+          bucket,
+          sourceKey,
+          destKey
+        )
       }
+      throw err
     }
   }
 
@@ -44,20 +118,29 @@ module.exports = function(primary, fallback) {
     return Settings.filestore.fallback.buckets[bucket]
   }
 
-  function _wrapFallbackMethod(method, enableCopy = true) {
+  function _wrapFallbackMethod(method) {
     return async function(bucket, key, ...moreArgs) {
       try {
         return await primary.promises[method](bucket, key, ...moreArgs)
       } catch (err) {
         if (err instanceof NotFoundError) {
           const fallbackBucket = _getFallbackBucket(bucket)
-          if (Settings.filestore.fallback.copyOnMiss && enableCopy) {
-            // run in background
-            _copyFileFromFallback(fallbackBucket, bucket, key, key).catch(
-              err => {
-                logger.warn({ err }, 'failed to copy file from fallback')
-              }
+          if (Settings.filestore.fallback.copyOnMiss) {
+            const fallbackStream = await fallback.promises.getFileStream(
+              fallbackBucket,
+              key,
+              {}
             )
+            // run in background
+            _copyStreamFromFallbackAndVerify(
+              fallbackStream,
+              fallbackBucket,
+              bucket,
+              key,
+              key
+            ).catch(err => {
+              logger.warn({ err }, 'failed to copy file from fallback')
+            })
           }
           return fallback.promises[method](fallbackBucket, key, ...moreArgs)
         }
@@ -66,32 +149,7 @@ module.exports = function(primary, fallback) {
     }
   }
 
-  async function _getFileStreamAndCopyIfRequired(bucketName, key, opts) {
-    const shouldCopy =
-      Settings.filestore.fallback.copyOnMiss && !opts.start && !opts.end
-
-    try {
-      return await primary.promises.getFileStream(bucketName, key, opts)
-    } catch (err) {
-      if (err instanceof NotFoundError) {
-        const fallbackBucket = _getFallbackBucket(bucketName)
-        if (shouldCopy) {
-          return _copyFileFromFallback(
-            fallbackBucket,
-            bucketName,
-            key,
-            key,
-            true
-          )
-        } else {
-          return fallback.promises.getFileStream(fallbackBucket, key, opts)
-        }
-      }
-      throw err
-    }
-  }
-
-  async function _copyFromFallbackStreamAndVerify(
+  async function _copyStreamFromFallbackAndVerify(
     stream,
     sourceBucket,
     destBucket,
@@ -139,63 +197,12 @@ module.exports = function(primary, fallback) {
     }
   }
 
-  async function _copyFileFromFallback(
-    sourceBucket,
-    destBucket,
-    sourceKey,
-    destKey,
-    returnStream = false
-  ) {
-    metrics.inc('fallback.copy')
-    const sourceStream = await fallback.promises.getFileStream(
-      sourceBucket,
-      sourceKey,
-      {}
-    )
-
-    if (!returnStream) {
-      return _copyFromFallbackStreamAndVerify(
-        sourceStream,
-        sourceBucket,
-        destBucket,
-        sourceKey,
-        destKey
-      )
-    }
-
-    const tee = new Minipass()
-    const clientStream = new Minipass()
-    const copyStream = new Minipass()
-
-    tee.pipe(clientStream)
-    tee.pipe(copyStream)
-
-    // copy the file in the background
-    _copyFromFallbackStreamAndVerify(
-      copyStream,
-      sourceBucket,
-      destBucket,
-      sourceKey,
-      destKey
-    ).catch(
-      // the error handler in this method will log a metric and a warning, so
-      // we don't need to do anything extra here, but catching it will prevent
-      // unhandled promise rejection warnings
-      () => {}
-    )
-
-    // start piping the source stream into the tee after everything is set up,
-    // otherwise one stream may consume bytes that don't arrive at the other
-    sourceStream.pipe(tee)
-    return clientStream
-  }
-
   return {
     primaryPersistor: primary,
     fallbackPersistor: fallback,
     sendFile: primary.sendFile,
     sendStream: primary.sendStream,
-    getFileStream: callbackify(_getFileStreamAndCopyIfRequired),
+    getFileStream: callbackify(getFileStreamWithFallback),
     getFileMd5Hash: callbackify(_wrapFallbackMethod('getFileMd5Hash')),
     deleteDirectory: callbackify(
       _wrapMethodOnBothPersistors('deleteDirectory')
@@ -208,7 +215,7 @@ module.exports = function(primary, fallback) {
     promises: {
       sendFile: primary.promises.sendFile,
       sendStream: primary.promises.sendStream,
-      getFileStream: _getFileStreamAndCopyIfRequired,
+      getFileStream: getFileStreamWithFallback,
       getFileMd5Hash: _wrapFallbackMethod('getFileMd5Hash'),
       deleteDirectory: _wrapMethodOnBothPersistors('deleteDirectory'),
       getFileSize: _wrapFallbackMethod('getFileSize'),

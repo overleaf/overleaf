@@ -26,8 +26,8 @@ describe('MigrationPersistorTests', function() {
   let Metrics,
     Settings,
     Logger,
+    Stream,
     MigrationPersistor,
-    Minipass,
     fileStream,
     newPersistor
 
@@ -82,24 +82,22 @@ describe('MigrationPersistorTests', function() {
       inc: sinon.stub()
     }
 
+    Stream = {
+      pipeline: sinon.stub().yields(),
+      PassThrough: sinon.stub()
+    }
+
     Logger = {
       warn: sinon.stub()
     }
 
-    Minipass = sinon.stub()
-    Minipass.prototype.on = sinon
-      .stub()
-      .withArgs('end')
-      .yields()
-    Minipass.prototype.pipe = sinon.stub()
-
     MigrationPersistor = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': Settings,
+        stream: Stream,
         './Errors': Errors,
         'metrics-sharelatex': Metrics,
-        'logger-sharelatex': Logger,
-        minipass: Minipass
+        'logger-sharelatex': Logger
       },
       globals: { console }
     })
@@ -155,7 +153,7 @@ describe('MigrationPersistorTests', function() {
       })
 
       it('should return the file stream', function() {
-        expect(response).to.equal(fileStream)
+        expect(response).to.be.an.instanceOf(Stream.PassThrough)
       })
 
       it('should fetch the file from the primary persistor with the correct options', function() {
@@ -215,13 +213,13 @@ describe('MigrationPersistorTests', function() {
         ).to.have.been.calledWithExactly(
           bucket,
           key,
-          sinon.match.instanceOf(Minipass),
+          sinon.match.instanceOf(Stream.PassThrough),
           md5
         )
       })
 
       it('should send a stream to the client', function() {
-        expect(returnedStream).to.be.an.instanceOf(Minipass)
+        expect(returnedStream).to.be.an.instanceOf(Stream.PassThrough)
       })
     })
 
@@ -476,7 +474,12 @@ describe('MigrationPersistorTests', function() {
       it('should send the file to the primary', function() {
         expect(
           primaryPersistor.promises.sendStream
-        ).to.have.been.calledWithExactly(bucket, destKey, fileStream, md5)
+        ).to.have.been.calledWithExactly(
+          bucket,
+          destKey,
+          sinon.match.instanceOf(Stream.PassThrough),
+          md5
+        )
       })
     })
 

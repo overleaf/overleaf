@@ -497,14 +497,14 @@ describe('Filestore', function() {
               )
             })
 
-            it('should fetch the file', async function() {
-              const res = await rp.get(fileUrl)
-              expect(res.body).to.equal(constantFileContent)
-            })
-
             describe('when copyOnMiss is disabled', function() {
               beforeEach(function() {
                 Settings.filestore.fallback.copyOnMiss = false
+              })
+
+              it('should fetch the file', async function() {
+                const res = await rp.get(fileUrl)
+                expect(res.body).to.equal(constantFileContent)
               })
 
               it('should not copy the file to the primary', async function() {
@@ -521,6 +521,11 @@ describe('Filestore', function() {
             describe('when copyOnMiss is enabled', function() {
               beforeEach(function() {
                 Settings.filestore.fallback.copyOnMiss = true
+              })
+
+              it('should fetch the file', async function() {
+                const res = await rp.get(fileUrl)
+                expect(res.body).to.equal(constantFileContent)
               })
 
               it('copies the file to the primary', async function() {
@@ -578,21 +583,51 @@ describe('Filestore', function() {
                 )
               })
 
-              it('should not copy the old file to the new bucket', async function() {
-                await expectPersistorNotToHaveFile(
-                  app.persistor.primaryPersistor,
-                  bucket,
-                  fileKey
-                )
+              describe('when copyOnMiss is false', function() {
+                beforeEach(function() {
+                  Settings.filestore.fallback.copyOnMiss = false
+                })
+
+                it('should create a new file in the new bucket', async function() {
+                  await expectPersistorToHaveFile(
+                    app.persistor.primaryPersistor,
+                    bucket,
+                    newFileKey,
+                    constantFileContent
+                  )
+                })
+
+                it('should not copy the old file to the primary with the old key', async function() {
+                  await expectPersistorNotToHaveFile(
+                    app.persistor.primaryPersistor,
+                    bucket,
+                    fileKey
+                  )
+                })
               })
 
-              it('should create a new file in the new bucket', async function() {
-                await expectPersistorToHaveFile(
-                  app.persistor.primaryPersistor,
-                  bucket,
-                  newFileKey,
-                  constantFileContent
-                )
+              describe('when copyOnMiss is true', function() {
+                beforeEach(function() {
+                  Settings.filestore.fallback.copyOnMiss = true
+                })
+
+                it('should create a new file in the new bucket', async function() {
+                  await expectPersistorToHaveFile(
+                    app.persistor.primaryPersistor,
+                    bucket,
+                    newFileKey,
+                    constantFileContent
+                  )
+                })
+
+                it('should copy the old file to the primary with the old key', async function() {
+                  await expectPersistorToHaveFile(
+                    app.persistor.primaryPersistor,
+                    bucket,
+                    fileKey,
+                    constantFileContent
+                  )
+                })
               })
             })
           })

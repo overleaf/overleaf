@@ -7,13 +7,13 @@ const settings = require('settings-sharelatex')
 const metrics = require('metrics-sharelatex')
 const logger = require('logger-sharelatex')
 
-const Minipass = require('minipass')
 const meter = require('stream-meter')
+const Stream = require('stream')
 const crypto = require('crypto')
 const fs = require('fs')
 const S3 = require('aws-sdk/clients/s3')
 const { URL } = require('url')
-const { callbackify } = require('util')
+const { callbackify, promisify } = require('util')
 const {
   WriteError,
   ReadError,
@@ -46,6 +46,8 @@ module.exports = {
   }
 }
 
+const pipeline = promisify(Stream.pipeline)
+
 function hexToBase64(hex) {
   return Buffer.from(hex, 'hex').toString('base64')
 }
@@ -68,7 +70,6 @@ async function sendFile(bucketName, key, fsPath) {
 async function sendStream(bucketName, key, readStream, sourceMd5) {
   try {
     // if there is no supplied md5 hash, we calculate the hash as the data passes through
-    const passthroughStream = new Minipass()
     let hashPromise
     let b64Hash
 
@@ -77,29 +78,24 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
     } else {
       const hash = crypto.createHash('md5')
       hash.setEncoding('hex')
-      passthroughStream.pipe(hash)
+      pipeline(readStream, hash)
       hashPromise = new Promise((resolve, reject) => {
-        passthroughStream.on('end', () => {
+        readStream.on('end', () => {
           hash.end()
           resolve(hash.read())
         })
-        passthroughStream.on('error', err => {
+        readStream.on('error', err => {
           reject(err)
         })
       })
     }
 
     const meteredStream = meter()
-    passthroughStream.pipe(meteredStream)
     meteredStream.on('finish', () => {
       metrics.count('s3.egress', meteredStream.bytes)
     })
 
-    // pipe the readstream through minipass, which can write to both the metered
-    // stream (which goes on to S3) and the md5 generator if necessary
-    // - we do this last so that a listener streams does not consume data meant
-    // for both destinations
-    readStream.pipe(passthroughStream)
+    pipeline(readStream, meteredStream)
 
     // if we have an md5 hash, pass this to S3 to verify the upload
     const uploadOptions = {

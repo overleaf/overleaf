@@ -35,6 +35,7 @@ describe('S3PersistorTests', function() {
     Meter,
     MeteredStream,
     ReadStream,
+    Stream,
     S3Persistor,
     S3Client,
     S3ReadStream,
@@ -43,7 +44,6 @@ describe('S3PersistorTests', function() {
     FileNotFoundError,
     EmptyPromise,
     settings,
-    Minipass,
     Hash,
     crypto
 
@@ -61,6 +61,10 @@ describe('S3PersistorTests', function() {
       }
     }
 
+    Stream = {
+      pipeline: sinon.stub().yields()
+    }
+
     EmptyPromise = {
       promise: sinon.stub().resolves()
     }
@@ -70,7 +74,11 @@ describe('S3PersistorTests', function() {
     }
 
     ReadStream = {
-      pipe: sinon.stub().returns('readStream')
+      pipe: sinon.stub().returns('readStream'),
+      on: sinon
+        .stub()
+        .withArgs('end')
+        .yields()
     }
 
     FileNotFoundError = new Error('File not found')
@@ -132,13 +140,6 @@ describe('S3PersistorTests', function() {
       createHash: sinon.stub().returns(Hash)
     }
 
-    Minipass = sinon.stub()
-    Minipass.prototype.on = sinon
-      .stub()
-      .withArgs('end')
-      .yields()
-    Minipass.prototype.pipe = sinon.stub()
-
     Logger = {
       warn: sinon.stub()
     }
@@ -151,8 +152,8 @@ describe('S3PersistorTests', function() {
         './Errors': Errors,
         fs: Fs,
         'stream-meter': Meter,
+        stream: Stream,
         'metrics-sharelatex': Metrics,
-        minipass: Minipass,
         crypto
       },
       globals: { console }
@@ -456,7 +457,10 @@ describe('S3PersistorTests', function() {
       })
 
       it('should meter the stream', function() {
-        expect(Minipass.prototype.pipe).to.have.been.calledWith(MeteredStream)
+        expect(Stream.pipeline).to.have.been.calledWith(
+          ReadStream,
+          MeteredStream
+        )
       })
 
       it('should record an egress metric', function() {
@@ -464,7 +468,7 @@ describe('S3PersistorTests', function() {
       })
 
       it('calculates the md5 hash of the file', function() {
-        expect(Minipass.prototype.pipe).to.have.been.calledWith(Hash)
+        expect(Stream.pipeline).to.have.been.calledWith(ReadStream, Hash)
       })
     })
 
@@ -479,7 +483,10 @@ describe('S3PersistorTests', function() {
       })
 
       it('should not calculate the md5 hash of the file', function() {
-        expect(Minipass.prototype.pipe).not.to.have.been.calledWith(Hash)
+        expect(Stream.pipeline).not.to.have.been.calledWith(
+          sinon.match.any,
+          Hash
+        )
       })
 
       it('sends the hash in base64', function() {
