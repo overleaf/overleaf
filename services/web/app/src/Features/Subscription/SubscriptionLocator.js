@@ -31,6 +31,17 @@ const SubscriptionLocator = {
     })
   },
 
+  getUserIndividualSubscription(user_or_id, callback) {
+    const user_id = SubscriptionLocator._getUserId(user_or_id)
+    return Subscription.findOne(
+      { admin_id: user_id, groupPlan: false },
+      function(err, subscription) {
+        logger.log({ user_id }, 'got users individual subscription')
+        return callback(err, subscription)
+      }
+    )
+  },
+
   findManagedSubscription(managerId, callback) {
     return Subscription.findOne({ manager_ids: managerId }, callback)
   },
@@ -107,6 +118,9 @@ const SubscriptionLocator = {
 
 SubscriptionLocator.promises = {
   getUsersSubscription: promisify(SubscriptionLocator.getUsersSubscription),
+  getUserIndividualSubscription: promisify(
+    SubscriptionLocator.getUserIndividualSubscription
+  ),
   findManagedSubscription: promisify(
     SubscriptionLocator.findManagedSubscription
   ),

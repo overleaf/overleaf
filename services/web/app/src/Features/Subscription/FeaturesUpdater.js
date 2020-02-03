@@ -94,7 +94,7 @@ const FeaturesUpdater = {
   },
 
   _getIndividualFeatures(userId, callback) {
-    SubscriptionLocator.getUsersSubscription(userId, (err, sub) =>
+    SubscriptionLocator.getUserIndividualSubscription(userId, (err, sub) =>
       callback(err, FeaturesUpdater._subscriptionToFeatures(sub))
     )
   },
