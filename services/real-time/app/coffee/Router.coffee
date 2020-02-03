@@ -43,7 +43,7 @@ module.exports = Router =
 
 		session.on 'connection', (error, client, session) ->
 			client?.on "error", (err) ->
-				logger.err "socket.io client error", { err }
+				logger.err { err }, "socket.io client error"
 				if client.connected
 					client.emit("reconnectGracefully")
 					client.disconnect()
