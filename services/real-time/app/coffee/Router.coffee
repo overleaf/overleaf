@@ -42,6 +42,12 @@ module.exports = Router =
 		app.post "/drain", httpAuth, HttpApiController.startDrain
 
 		session.on 'connection', (error, client, session) ->
+			client?.on "error", (err) ->
+				logger.err { clientErr: err }, "socket.io client error"
+				if client.connected
+					client.emit("reconnectGracefully")
+					client.disconnect()
+
 			if settings.shutDownInProgress
 				client.emit("connectionRejected", {message: "retry"})
 				client.disconnect()
