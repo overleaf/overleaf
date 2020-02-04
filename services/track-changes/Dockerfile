@@ -3,7 +3,7 @@
 # https://github.com/sharelatex/sharelatex-dev-environment
 # Version: 1.3.4
 
-FROM node:10.18.1 as app
+FROM gcr.io/overleaf-ops/node:10.18.1 as app
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY . /app
 
 RUN npm run compile:all
 
-FROM node:10.18.1
+FROM gcr.io/overleaf-ops/node:10.18.1
 
 COPY --from=app /app /app
 
