@@ -142,7 +142,7 @@ if Settings.shutdownDrainTimeWindow?
 		process.removeAllListeners('uncaughtException')
 		process.on 'uncaughtException', (error) ->
 			if ['EPIPE', 'ECONNRESET'].includes(error.code)
-				Metrics.inc('disconnected_write')
+				Metrics.inc('disconnected_write', 1, {status: error.code})
 				return logger.warn err: error, 'attempted to write to disconnected client'
 			logger.error err: error, 'uncaught exception'
 			if Settings.errors?.shutdownOnUncaughtError
