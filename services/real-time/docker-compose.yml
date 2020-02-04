@@ -7,7 +7,7 @@ version: "2"
 
 services:
   test_unit:
-    image: node:6.15.1
+    image: gcr.io/overleaf-ops/node:10.18.1
     volumes:
       - .:/app
     working_dir: /app
@@ -36,8 +36,6 @@ services:
       - redis
     command: npm run test:acceptance
 
-
-
   tar:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
@@ -51,5 +49,3 @@ services:
 
   mongo:
     image: mongo:3.4
-
-
