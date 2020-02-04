@@ -111,17 +111,17 @@ Error.stackTraceLimit = 10
 shutdownCleanly = (signal) ->
 	connectedClients = io.sockets.clients()?.length
 	if connectedClients == 0
-		logger.log("no clients connected, exiting")
+		logger.warn("no clients connected, exiting")
 		process.exit()
 	else
-		logger.log {connectedClients}, "clients still connected, not shutting down yet"
+		logger.warn {connectedClients}, "clients still connected, not shutting down yet"
 		setTimeout () ->
 			shutdownCleanly(signal)
-		, 10000
+		, 30 * 1000
 
 drainAndShutdown = (signal) ->
 	if Settings.shutDownInProgress
-		logger.log signal: signal, "shutdown already in progress, ignoring signal"
+		logger.warn signal: signal, "shutdown already in progress, ignoring signal"
 		return
 	else
 		Settings.shutDownInProgress = true
