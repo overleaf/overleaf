@@ -67,7 +67,10 @@ module.exports = WebsocketLoadBalancer =
 				logger.error {err: error, channel}, "error parsing JSON"
 				return
 			if message.room_id == "all"
-				io.sockets.emit(message.message, message.payload...)
+				try
+					io.sockets.emit(message.message, message.payload...)
+				catch error
+					logger.warn message: message, error: error, "error sending message to clients"
 			else if message.message is 'clientTracking.refresh' && message.room_id?
 				clientList = io.sockets.clients(message.room_id)
 				logger.log {channel:channel, message: message.message, room_id: message.room_id, message_id: message._id, socketIoClients: (client.id for client in clientList)}, "refreshing client list"
@@ -96,10 +99,16 @@ module.exports = WebsocketLoadBalancer =
 					, (client, cb) ->
 						Utils.getClientAttributes client, ['is_restricted_user'], (err, {is_restricted_user}) ->
 							return cb(err) if err?
+							if client.disconnected
+								logger.warn {channel:channel, client: client.id}, "skipping emit, client not connected"
+								return cb()
 							if !seen[client.id]
 								seen[client.id] = true
 								if !(is_restricted_user && message.message not in RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST)
-									client.emit(message.message, message.payload...)
+									try
+										client.emit(message.message, message.payload...)
+									catch error
+										console.log(message: message, client_id: client.id, error: error, "error sending message to client")
 							cb()
 					, (err) ->
 						if err?

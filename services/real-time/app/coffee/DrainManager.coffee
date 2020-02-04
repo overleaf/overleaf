@@ -30,7 +30,10 @@ module.exports = DrainManager =
 			if !@RECONNECTED_CLIENTS[client.id]
 				@RECONNECTED_CLIENTS[client.id] = true
 				logger.log {client_id: client.id}, "Asking client to reconnect gracefully"
-				client.emit "reconnectGracefully"
+				try
+					client.emit "reconnectGracefully"
+				catch err
+					logger.warn client_id: client.id, err: err, "error asking client to reconnect gracefully"
 				drainedCount++
 			haveDrainedNClients = (drainedCount == N)
 			if haveDrainedNClients
