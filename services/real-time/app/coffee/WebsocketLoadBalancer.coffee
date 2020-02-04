@@ -96,7 +96,7 @@ module.exports = WebsocketLoadBalancer =
 					, (client, cb) ->
 						Utils.getClientAttributes client, ['is_restricted_user'], (err, {is_restricted_user}) ->
 							return cb(err) if err?
-							if !client.connected
+							if client.disconnected
 								logger.warn {channel:channel, client: client.id}, "skipping emit, client not connected"
 								return cb()
 							if !seen[client.id]
