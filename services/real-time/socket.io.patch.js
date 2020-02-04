@@ -6,7 +6,7 @@ if(process.versions.node.split('.')[0] >= 7) {
 
 var io = require("socket.io");
 
-if (io.version === "0.9.16") {
+if (io.version === "0.9.16" || io.version === "0.9.19") {
   console.log("patching socket.io hybi-16 transport frame prototype");
   var transports = require("socket.io/lib/transports/websocket/hybi-16.js");
   transports.prototype.frame = patchedFrameHandler;
