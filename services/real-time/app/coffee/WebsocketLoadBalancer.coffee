@@ -96,6 +96,9 @@ module.exports = WebsocketLoadBalancer =
 					, (client, cb) ->
 						Utils.getClientAttributes client, ['is_restricted_user'], (err, {is_restricted_user}) ->
 							return cb(err) if err?
+							if !client.connected
+								logger.warn {channel:channel, client: client.id}, "skipping emit, client not connected"
+								return cb()
 							if !seen[client.id]
 								seen[client.id] = true
 								if !(is_restricted_user && message.message not in RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST)
