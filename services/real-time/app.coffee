@@ -135,8 +135,7 @@ if Settings.shutdownDrainTimeWindow?
 	shutdownDrainTimeWindow = parseInt(Settings.shutdownDrainTimeWindow, 10)
 	logger.log shutdownDrainTimeWindow: shutdownDrainTimeWindow,"shutdownDrainTimeWindow enabled"
 	for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
-		process.on signal, ->
-			drainAndShutdown(signal)
+		process.on signal, drainAndShutdown  # signal is passed as argument to event handler
 
 	# global exception handler
 	if Settings.errors?.catchUncaughtErrors
