@@ -1,4 +1,4 @@
-FROM node:10.16.0 as app
+FROM gcr.io/overleaf-ops/node:10.18.1 as app
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY . /app
 
 
 
-FROM node:10.16.0
+FROM gcr.io/overleaf-ops/node:10.18.1
 
 COPY --from=app /app /app
 
