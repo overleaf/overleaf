@@ -42,6 +42,15 @@ html(
 			if gaOptimize === true && typeof(gaOptimizeId) != "undefined"
 				script(type='text/javascript').
 					ga('require', '#{gaOptimizeId}')
+				//- Anti-flicker snippet
+				style(type='text/css') .async-hide { opacity: 0 !important}
+				script(type='text/javascript').
+					(function(a,s,y,n,c,h,i,d,e){s.className+=' '+y;h.start=1*new Date;
+					h.end=i=function(){s.className=s.className.replace(RegExp(' ?'+y),'')};
+					(a[n]=a[n]||[]).hide=h;setTimeout(function(){i();h.end=null},c);h.timeout=c;
+					})(window,document.documentElement,'async-hide','dataLayer',4000,
+					{'#{gaOptimizeId}':true});
+
 		- else
 			script(type='text/javascript').
 				window.ga = function() { console.log("would send to GA", arguments) };
