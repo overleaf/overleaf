@@ -477,7 +477,11 @@ const ClsiManager = {
         return callback()
       }
     } catch (err) {
-      // ignore errors here, which are very unlikely, and just attempt to set the root doc again
+      // continue on errors, which are very unlikely, and just attempt to set the root doc again
+      logger.error(
+        { err, project_id: project._id, rootDoc_id: project.rootDoc_id },
+        'error validating rootDoc_id'
+      )
     }
     ProjectRootDocManager.setRootDocAutomatically(project._id, callback)
   },
