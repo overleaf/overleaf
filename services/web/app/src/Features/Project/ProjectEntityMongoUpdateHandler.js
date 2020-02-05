@@ -316,7 +316,10 @@ async function deleteEntity(projectId, entityId, entityType, callback) {
     projectId,
     { name: true, rootFolder: true, overleaf: true, rootDoc_id: true }
   )
-  const deleteRootDoc = project.rootDoc_id && entityId && project.rootDoc_id.toString() === entityId.toString()
+  const deleteRootDoc =
+    project.rootDoc_id &&
+    entityId &&
+    project.rootDoc_id.toString() === entityId.toString()
   const { element: entity, path } = await ProjectLocator.promises.findElement({
     project,
     element_id: entityId,
@@ -416,7 +419,13 @@ async function _insertDeletedFileReference(projectId, fileRef) {
   ).exec()
 }
 
-async function _removeElementFromMongoArray(model, modelId, path, elementId, deleteRootDoc=false) {
+async function _removeElementFromMongoArray(
+  model,
+  modelId,
+  path,
+  elementId,
+  deleteRootDoc = false
+) {
   const nonArrayPath = path.slice(0, path.lastIndexOf('.'))
   const options = { new: true }
   const query = { _id: modelId }
