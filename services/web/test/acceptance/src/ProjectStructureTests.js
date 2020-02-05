@@ -1101,9 +1101,21 @@ describe('ProjectStructureChanges', function() {
 
   describe('deleting docs', function() {
     beforeEach(function(done) {
-      createExampleProject(this, () => {
-        createExampleFolder(this, () => {
-          createExampleDoc(this, () => {
+      createExampleProject(owner, (err, projectId) => {
+        if (err) {
+          return done(err)
+        }
+        this.exampleProjectId = projectId
+        createExampleFolder(owner, projectId, (err, folderId) => {
+          if (err) {
+            return done(err)
+          }
+          this.exampleFolderId = folderId
+          createExampleDoc(owner, projectId, (err, docId) => {
+            if (err) {
+              return done(err)
+            }
+            this.exampleDocId = docId
             MockDocUpdaterApi.clearProjectStructureUpdates()
             ProjectGetter.getProject(
               this.exampleProjectId,
@@ -1130,7 +1142,7 @@ describe('ProjectStructureChanges', function() {
       })
 
       it('should clear rootDoc_id', function(done) {
-        deleteItem(this, 'doc', this.exampleDocId, () => {
+        deleteItem(owner, this.exampleProjectId, 'doc', this.exampleDocId, () => {
           ProjectGetter.getProject(this.exampleProjectId, (error, project) => {
             if (error) {
               throw error
@@ -1153,7 +1165,7 @@ describe('ProjectStructureChanges', function() {
       })
 
       it('should not clear rootDoc_id', function(done) {
-        deleteItem(this, 'doc', this.exampleDocId, () => {
+        deleteItem(owner, this.exampleProjectId, 'doc', this.exampleDocId, () => {
           ProjectGetter.getProject(this.exampleProjectId, (error, project) => {
             if (error) {
               throw error
