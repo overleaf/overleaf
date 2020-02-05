@@ -4,16 +4,6 @@
     no-undef,
     no-useless-escape,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 
 define(['base'], App =>
   App.controller('UserAffiliationsController', function(
@@ -36,11 +26,10 @@ define(['base'], App =>
     const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\ ".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA -Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
     const _matchLocalAndDomain = function(userEmailInput) {
-      const match =
-        userEmailInput != null
-          ? userEmailInput.match(LOCAL_AND_DOMAIN_REGEX)
-          : undefined
-      if (match != null) {
+      const match = userEmailInput
+        ? userEmailInput.match(LOCAL_AND_DOMAIN_REGEX)
+        : undefined
+      if (match) {
         return { local: match[1], domain: match[2] }
       } else {
         return { local: null, domain: null }
@@ -75,7 +64,7 @@ define(['base'], App =>
       $scope.ui.isValidEmail = EMAIL_REGEX.test(userInput)
       $scope.ui.isBlacklistedEmail = false
       $scope.ui.showManualUniversitySelectionUI = false
-      if (userInputLocalAndDomain.domain != null) {
+      if (userInputLocalAndDomain.domain) {
         $scope.ui.isBlacklistedEmail = UserAffiliationsDataService.isDomainBlacklisted(
           userInputLocalAndDomain.domain
         )
@@ -123,18 +112,11 @@ define(['base'], App =>
 
     $scope.selectUniversityManually = function() {
       _resetAffiliationSuggestion()
-      return ($scope.ui.showManualUniversitySelectionUI = true)
+      $scope.ui.showManualUniversitySelectionUI = true
     }
 
     $scope.changeAffiliation = function(userEmail) {
-      if (
-        __guard__(
-          userEmail.affiliation != null
-            ? userEmail.affiliation.institution
-            : undefined,
-          x => x.id
-        ) != null
-      ) {
+      if (_.get(userEmail, ['affiliation', 'institution', 'id'])) {
         UserAffiliationsDataService.getUniversityDetails(
           userEmail.affiliation.institution.id
         ).then(
@@ -145,8 +127,7 @@ define(['base'], App =>
 
       $scope.affiliationToChange.email = userEmail.email
       $scope.affiliationToChange.role = userEmail.affiliation.role
-      return ($scope.affiliationToChange.department =
-        userEmail.affiliation.department)
+      $scope.affiliationToChange.department = userEmail.affiliation.department
     }
 
     $scope.saveAffiliationChange = function(userEmail) {
@@ -171,7 +152,7 @@ define(['base'], App =>
 
     $scope.addNewEmail = function() {
       let addEmailPromise
-      if ($scope.newAffiliation.university == null) {
+      if (!$scope.newAffiliation.university) {
         addEmailPromise = UserAffiliationsDataService.addUserEmail(
           $scope.newAffiliation.email
         )
@@ -200,7 +181,7 @@ define(['base'], App =>
         .then(function() {
           _resetNewAffiliation()
           _resetAddingEmail()
-          return setTimeout(() => _getUserEmails())
+          setTimeout(() => _getUserEmails())
         })
         .finally(() => ($scope.ui.isAddingNewEmail = false))
     }
@@ -209,10 +190,10 @@ define(['base'], App =>
       _monitorRequest(
         UserAffiliationsDataService.setDefaultUserEmail(userEmail.email)
       ).then(function() {
-        for (let email of Array.from($scope.userEmails || [])) {
+        for (let email of $scope.userEmails || []) {
           email.default = false
         }
-        return (userEmail.default = true)
+        userEmail.default = true
       })
 
     $scope.removeUserEmail = function(userEmail) {
@@ -256,7 +237,7 @@ define(['base'], App =>
       $scope.ui.showAddEmailUI = false
       $scope.ui.isValidEmail = false
       $scope.ui.isBlacklistedEmail = false
-      return ($scope.ui.showManualUniversitySelectionUI = false)
+      $scope.ui.showManualUniversitySelectionUI = false
     }
 
     var _resetAffiliationSuggestion = () => {
@@ -292,10 +273,7 @@ define(['base'], App =>
       promise
         .catch(function(response) {
           $scope.ui.hasError = true
-          return ($scope.ui.errorMessage = __guard__(
-            response != null ? response.data : undefined,
-            x => x.message
-          ))
+          $scope.ui.errorMessage = _.get(response, ['data', 'message'])
         })
         .finally(() => ($scope.ui.isMakingRequest = false))
       return promise
@@ -332,10 +310,5 @@ define(['base'], App =>
         })
         .finally(() => ($scope.ui.isLoadingEmails = false))
     }
-    return _getUserEmails()
+    _getUserEmails()
   }))
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
