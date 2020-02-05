@@ -204,50 +204,52 @@ module.exports = ProjectRootDocManager = {
     if (callback == null) {
       callback = function(error) {}
     }
-    return ProjectGetter.getProject(project_id, { rootDoc_id: 1 }, function(
-      error,
-      project
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (project == null) {
-        return callback(new Error('project not found'))
-      }
-
-      if (project.rootDoc_id != null) {
-        return ProjectEntityHandler.getAllDocPathsFromProjectById(
-          project_id,
-          function(error, docPaths) {
-            if (error != null) {
-              return callback(error)
-            }
-            let rootDocValid = false
-            for (let doc_id in docPaths) {
-              const _path = docPaths[doc_id]
-              if (doc_id === project.rootDoc_id) {
-                rootDocValid = true
-              }
-            }
-            if (rootDocValid) {
-              return callback()
-            } else {
-              return ProjectEntityUpdateHandler.unsetRootDoc(project_id, () =>
-                ProjectRootDocManager.setRootDocAutomatically(
-                  project_id,
-                  callback
-                )
-              )
-            }
-          }
-        )
-      } else {
-        return ProjectRootDocManager.setRootDocAutomatically(
-          project_id,
+    return ProjectGetter.getProject(
+      project_id,
+      { rootDoc_id: 1, rootFolder: 1 },
+      function(error, project) {
+        if (error != null) {
+          return callback(error)
+        }
+        if (project == null) {
+          return callback(new Error('project not found'))
+        }
+        ProjectRootDocManager.ensureRootDocumentIsValidForProject(
+          project,
           callback
         )
       }
-    })
+    )
+  },
+
+  ensureRootDocumentIsValidForProject(project, callback) {
+    const project_id = project._id
+    if (project.rootDoc_id != null) {
+      return ProjectEntityHandler.getAllDocPathsFromProject(project, function(
+        error,
+        docPaths
+      ) {
+        if (error != null) {
+          return callback(error)
+        }
+        let rootDocValid = false
+        for (let doc_id in docPaths) {
+          const _path = docPaths[doc_id]
+          if (doc_id === project.rootDoc_id) {
+            rootDocValid = true
+          }
+        }
+        if (rootDocValid) {
+          return callback()
+        } else {
+          return ProjectEntityUpdateHandler.unsetRootDoc(project_id, () =>
+            ProjectRootDocManager.setRootDocAutomatically(project_id, callback)
+          )
+        }
+      })
+    } else {
+      return ProjectRootDocManager.setRootDocAutomatically(project_id, callback)
+    }
   },
 
   _sortFileList(listToSort, rootDirectory, callback) {
