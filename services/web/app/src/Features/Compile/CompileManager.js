@@ -62,7 +62,7 @@ module.exports = CompileManager = {
               return callback(null, 'autocompile-backoff', [])
             }
 
-            return ProjectRootDocManager.ensureRootDocumentIsValid(
+            return ProjectRootDocManager.ensureRootDocumentIsSet(
               project_id,
               function(error) {
                 if (error != null) {

@@ -76,7 +76,7 @@ describe('CompileManager', function() {
       this.CompileManager._checkIfRecentlyCompiled = sinon
         .stub()
         .callsArgWith(2, null, false)
-      this.ProjectRootDocManager.ensureRootDocumentIsValid = sinon
+      this.ProjectRootDocManager.ensureRootDocumentIsSet = sinon
         .stub()
         .callsArgWith(1, null)
       this.CompileManager.getProjectCompileLimits = sinon
@@ -115,7 +115,7 @@ describe('CompileManager', function() {
       })
 
       it('should ensure that the root document is set', function() {
-        return this.ProjectRootDocManager.ensureRootDocumentIsValid
+        return this.ProjectRootDocManager.ensureRootDocumentIsSet
           .calledWith(this.project_id)
           .should.equal(true)
       })
