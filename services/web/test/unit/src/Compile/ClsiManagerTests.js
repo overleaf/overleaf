@@ -24,9 +24,6 @@ describe('ClsiManager', function() {
     this.DocumentUpdaterHandler = {
       getProjectDocsIfMatch: sinon.stub().callsArgWith(2, null, null)
     }
-    this.ProjectRootDocManager = {
-      setRootDocAutomatically: sinon.stub().yields()
-    }
     this.logger = {
       log: sinon.stub(),
       error: sinon.stub(),
@@ -66,7 +63,6 @@ describe('ClsiManager', function() {
         },
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../Project/ProjectGetter': this.ProjectGetter,
-        '../Project/ProjectRootDocManager': this.ProjectRootDocManager,
         '../DocumentUpdater/DocumentUpdaterHandler': this
           .DocumentUpdaterHandler,
         './ClsiCookieManager': () => this.ClsiCookieManager,
