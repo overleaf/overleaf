@@ -44,10 +44,7 @@ module.exports = CompileController = {
 
     if (req.body.rootDoc_id) {
       options.rootDoc_id = req.body.rootDoc_id
-    } else if (
-      req.body.settingsOverride &&
-      req.body.settingsOverride.rootDoc_id
-    ) {
+    } else if (req.body.settingsOverride && req.body.settingsOverride.rootDoc_id) {
       // Can be removed after deploy
       options.rootDoc_id = req.body.settingsOverride.rootDoc_id
     }
@@ -57,38 +54,35 @@ module.exports = CompileController = {
     if (req.body.draft) {
       options.draft = req.body.draft
     }
-    if (['validate', 'error', 'silent'].includes(req.body.check)) {
+    if (
+      ['validate', 'error', 'silent'].includes(req.body.check)
+    ) {
       options.check = req.body.check
     }
     if (req.body.incrementalCompilesEnabled) {
       options.incrementalCompilesEnabled = true
     }
 
-    CompileManager.compile(
-      project_id,
-      user_id,
-      options,
-      (
-        error,
+    CompileManager.compile(project_id, user_id, options, (
+      error,
+      status,
+      outputFiles,
+      clsiServerId,
+      limits,
+      validationProblems
+    ) => {
+      if (error) {
+        return next(error)
+      }
+      res.json({
         status,
         outputFiles,
+        compileGroup: limits != null ? limits.compileGroup : undefined,
         clsiServerId,
-        limits,
-        validationProblems
-      ) => {
-        if (error) {
-          return next(error)
-        }
-        res.json({
-          status,
-          outputFiles,
-          compileGroup: limits != null ? limits.compileGroup : undefined,
-          clsiServerId,
-          validationProblems,
-          pdfDownloadDomain: Settings.pdfDownloadDomain
-        })
-      }
-    )
+        validationProblems,
+        pdfDownloadDomain: Settings.pdfDownloadDomain
+      })
+    })
   },
 
   stopCompile(req, res, next) {
