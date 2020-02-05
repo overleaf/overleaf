@@ -250,7 +250,7 @@ module.exports = {
     )
   },
 
-  buildViewModel() {
+  buildPlansList() {
     const { plans } = Settings
 
     const allPlans = {}

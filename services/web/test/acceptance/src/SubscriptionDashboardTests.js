@@ -27,6 +27,15 @@ describe('Subscriptions', function() {
       return this.user.ensureUserExists(done)
     })
 
+    it('should not list personal plan', function() {
+      const plans = SubscriptionViewModelBuilder.buildPlansList()
+      expect(plans.individualMonthlyPlans).to.be.a('Array')
+      const personalMonthlyPlan = plans.individualMonthlyPlans.find(
+        plan => plan.planCode === 'personal'
+      )
+      expect(personalMonthlyPlan).to.be.undefined
+    })
+
     describe('when the user has no subscription', function() {
       beforeEach(function(done) {
         return SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel(

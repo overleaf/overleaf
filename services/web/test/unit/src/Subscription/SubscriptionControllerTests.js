@@ -76,7 +76,7 @@ describe('SubscriptionController', function() {
 
     this.SubscriptionViewModelBuilder = {
       buildUsersSubscriptionViewModel: sinon.stub().callsArgWith(1, null, {}),
-      buildViewModel: sinon.stub()
+      buildPlansList: sinon.stub()
     }
     this.settings = {
       coupon_codes: {
@@ -339,7 +339,7 @@ describe('SubscriptionController', function() {
           })
         }
       )
-      this.SubscriptionViewModelBuilder.buildViewModel.returns(
+      this.SubscriptionViewModelBuilder.buildPlansList.returns(
         (this.plans = { plans: 'mock' })
       )
       this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(

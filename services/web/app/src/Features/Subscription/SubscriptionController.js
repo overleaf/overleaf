@@ -35,7 +35,7 @@ const HttpErrors = require('@overleaf/o-error/http')
 
 module.exports = SubscriptionController = {
   plansPage(req, res, next) {
-    const plans = SubscriptionViewModelBuilder.buildViewModel()
+    const plans = SubscriptionViewModelBuilder.buildPlansList()
     let viewName = 'subscriptions/plans'
     if (req.query.v != null) {
       viewName = `${viewName}_${req.query.v}`
@@ -167,7 +167,7 @@ module.exports = SubscriptionController = {
             return next(error)
           }
           const fromPlansPage = req.query.hasSubscription
-          const plans = SubscriptionViewModelBuilder.buildViewModel()
+          const plans = SubscriptionViewModelBuilder.buildPlansList()
           const data = {
             title: 'your_subscription',
             plans,
