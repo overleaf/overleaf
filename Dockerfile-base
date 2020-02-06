@@ -28,15 +28,6 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo bash -
 RUN apt-get install -y nodejs
 RUN npm install -g grunt-cli
 
-
-# Install Node6 (required by some services)
-# -----------------------------------------
-RUN wget https://nodejs.org/dist/v6.17.1/node-v6.17.1-linux-x64.tar.gz && \
-	mkdir -p /opt/nodejs && tar -xzf node-v6.17.1-linux-x64.tar.gz -C /opt/nodejs/ && \
-    cd /opt/nodejs && mv node-v6.17.1-linux-x64 6.17.1 && \
-    ln -s /opt/nodejs/6.17.1/bin/node /usr/bin/node6
-
-
 # Install TexLive
 # ---------------
 RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz && \
