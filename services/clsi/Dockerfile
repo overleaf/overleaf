@@ -1,4 +1,4 @@
-FROM gcr.io/overleaf-ops/node:10.18.1 as app
+FROM gcr.io/overleaf-ops/node:10.19.0 as app
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY . /app
 
 RUN npm run compile:all
 
-FROM gcr.io/overleaf-ops/node:10.18.1
+FROM gcr.io/overleaf-ops/node:10.19.0
 
 COPY --from=app /app /app
 
