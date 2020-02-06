@@ -149,9 +149,11 @@ module.exports = DockerRunner =
 				"CapDrop": "ALL"
 				"SecurityOpt": ["no-new-privileges"]
 
-
 		if Settings.path?.synctexBinHostPath?
 			options["HostConfig"]["Binds"].push("#{Settings.path.synctexBinHostPath}:/opt/synctex:ro")
+
+		if Settings.clsi.docker.runtime?
+			options["HostConfig"]["Runtime"] = Settings.clsi.docker.runtime
 
 		if Settings.clsi.docker.seccomp_profile?
 			options.HostConfig.SecurityOpt.push "seccomp=#{Settings.clsi.docker.seccomp_profile}"
