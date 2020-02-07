@@ -3,7 +3,7 @@ filestore
 --dependencies=s3
 --acceptance-creds=
 --script-version=1.3
---node-version=10.17.0
+--node-version=10.19.0
 --language=es
 --docker-repos=gcr.io/overleaf-ops
 --public-repo=True
