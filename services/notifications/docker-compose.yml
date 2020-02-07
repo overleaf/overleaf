@@ -7,7 +7,7 @@ version: "2.1"
 
 services:
   test_unit:
-    image: node:10.16.3
+    image: node:10.19.0
     volumes:
       - .:/app
     working_dir: /app
@@ -18,7 +18,7 @@ services:
     user: node
 
   test_acceptance:
-    image: node:10.16.3
+    image: node:10.19.0
     volumes:
       - .:/app
     working_dir: /app

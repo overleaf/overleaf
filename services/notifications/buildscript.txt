@@ -2,7 +2,7 @@ notifications
 --public-repo=True
 --language=es
 --env-add=
---node-version=10.16.3
+--node-version=10.19.0
 --acceptance-creds=None
 --dependencies=mongo,redis
 --docker-repos=gcr.io/overleaf-ops
