@@ -1142,15 +1142,24 @@ describe('ProjectStructureChanges', function() {
       })
 
       it('should clear rootDoc_id', function(done) {
-        deleteItem(owner, this.exampleProjectId, 'doc', this.exampleDocId, () => {
-          ProjectGetter.getProject(this.exampleProjectId, (error, project) => {
-            if (error) {
-              throw error
-            }
-            expect(project.rootDoc_id).to.be.undefined
-            done()
-          })
-        })
+        deleteItem(
+          owner,
+          this.exampleProjectId,
+          'doc',
+          this.exampleDocId,
+          () => {
+            ProjectGetter.getProject(
+              this.exampleProjectId,
+              (error, project) => {
+                if (error) {
+                  throw error
+                }
+                expect(project.rootDoc_id).to.be.undefined
+                done()
+              }
+            )
+          }
+        )
       })
     })
 
@@ -1165,17 +1174,26 @@ describe('ProjectStructureChanges', function() {
       })
 
       it('should not clear rootDoc_id', function(done) {
-        deleteItem(owner, this.exampleProjectId, 'doc', this.exampleDocId, () => {
-          ProjectGetter.getProject(this.exampleProjectId, (error, project) => {
-            if (error) {
-              throw error
-            }
-            expect(project.rootDoc_id.toString()).to.equal(
-              this.exampleRootDocId.toString()
+        deleteItem(
+          owner,
+          this.exampleProjectId,
+          'doc',
+          this.exampleDocId,
+          () => {
+            ProjectGetter.getProject(
+              this.exampleProjectId,
+              (error, project) => {
+                if (error) {
+                  throw error
+                }
+                expect(project.rootDoc_id.toString()).to.equal(
+                  this.exampleRootDocId.toString()
+                )
+                done()
+              }
             )
-            done()
-          })
-        })
+          }
+        )
       })
     })
   })
