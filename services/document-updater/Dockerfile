@@ -3,7 +3,7 @@
 # https://github.com/sharelatex/sharelatex-dev-environment
 # Version: 1.3.2
 
-FROM node:10.18.1 as app
+FROM node:10.19.0 as app
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY . /app
 
 RUN npm run compile:all
 
-FROM node:10.18.1
+FROM node:10.19.0
 
 COPY --from=app /app /app
 
