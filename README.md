@@ -8,9 +8,9 @@
 <p align="center">
   <a href="#key-features">Key Features</a> •
   <a href="https://github.com/overleaf/overleaf/wiki">Wiki</a> •
-  <a href="https://www.sharelatex.com/i/university/onsite">Server Pro</a> •
+  <a href="https://www.overleaf.com/for/enterprises">Server Pro</a> •
   <a href="#contributing">Contributing</a> •
-  <a href="https://www.overleaf.com/for/enterprises">Mailing List</a> •
+  <a href="https://mailchi.mp/overleaf.com/community-edition-and-server-pro">Mailing List</a> •
   <a href="#authors">Authors</a> •
   <a href="#license">License</a>
 </p>
