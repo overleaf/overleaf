@@ -45,45 +45,29 @@ module.exports = Router =
 			client?.on "error", (err) ->
 				logger.err { clientErr: err }, "socket.io client error"
 				if client.connected
-					try
-						client.emit("reconnectGracefully")
-						client.disconnect()
-					catch error
-						logger.warn error: error, cause: err, client_id: client.id, "error telling client to reconnect after error"
+					client.emit("reconnectGracefully")
+					client.disconnect()
 
 			if settings.shutDownInProgress
-				try
-					client.emit("connectionRejected", {message: "retry"})
-					client.disconnect()
-				catch error
-					logger.warn error: error, client_id: client.id, message: "retry", "error rejecting client connection"
+				client.emit("connectionRejected", {message: "retry"})
+				client.disconnect()
 				return
 
 			if client? and error?.message?.match(/could not look up session by key/)
 				logger.warn err: error, client: client?, session: session?, "invalid session"
 				# tell the client to reauthenticate if it has an invalid session key
-				try
-					client.emit("connectionRejected", {message: "invalid session"})
-					client.disconnect()
-				catch error
-					logger.warn error: error, client_id: client.id, message: "invalid session", "error rejecting client connection"
+				client.emit("connectionRejected", {message: "invalid session"})
+				client.disconnect()
 				return
 
 			if error?
 				logger.err err: error, client: client?, session: session?, "error when client connected"
-				try
-					client?.emit("connectionRejected", {message: "error"})
-					client?.disconnect()
-				catch error
-					logger.warn error: error, client_id: client?.id, message: "error", "error rejecting client connection"
+				client?.emit("connectionRejected", {message: "error"})
+				client?.disconnect()
 				return
 
 			# send positive confirmation that the client has a valid connection
-			try
-				client.emit("connectionAccepted")
-			catch error
-				logger.warn error: error, client_id: client.id, "error accepting client connection"
-				return
+			client.emit("connectionAccepted")
 
 			metrics.inc('socket-io.connection')
 			metrics.gauge('socket-io.clients', io.sockets.clients()?.length)
