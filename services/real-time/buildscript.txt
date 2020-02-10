@@ -1,6 +1,6 @@
 real-time
 --language=coffeescript
---node-version=6.15.1
+--node-version=10.19.0
 --acceptance-creds=None
 --dependencies=mongo,redis
 --docker-repos=gcr.io/overleaf-ops
