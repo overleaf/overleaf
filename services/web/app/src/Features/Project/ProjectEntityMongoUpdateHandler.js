@@ -314,9 +314,8 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
 async function deleteEntity(projectId, entityId, entityType, callback) {
   const project = await ProjectGetter.promises.getProjectWithoutLock(
     projectId,
-    { name: true, rootFolder: true, overleaf: true, rootDoc_id: true }
+    { name: true, rootFolder: true, overleaf: true }
   )
-  const deleteRootDoc = project.rootDoc_id && entityId && project.rootDoc_id.toString() === entityId.toString()
   const { element: entity, path } = await ProjectLocator.promises.findElement({
     project,
     element_id: entityId,
@@ -326,8 +325,7 @@ async function deleteEntity(projectId, entityId, entityType, callback) {
     Project,
     projectId,
     path.mongo,
-    entityId,
-    deleteRootDoc
+    entityId
   )
   return { entity, path, projectBeforeDeletion: project, newProject }
 }
@@ -416,18 +414,19 @@ async function _insertDeletedFileReference(projectId, fileRef) {
   ).exec()
 }
 
-async function _removeElementFromMongoArray(model, modelId, path, elementId, deleteRootDoc=false) {
+async function _removeElementFromMongoArray(model, modelId, path, elementId) {
   const nonArrayPath = path.slice(0, path.lastIndexOf('.'))
-  const options = { new: true }
-  const query = { _id: modelId }
-  const update = {
-    $pull: { [nonArrayPath]: { _id: elementId } },
-    $inc: { version: 1 }
-  }
-  if (deleteRootDoc) {
-    update.$unset = { rootDoc_id: 1 }
-  }
-  return model.findOneAndUpdate(query, update, options).exec()
+  const newDoc = model
+    .findOneAndUpdate(
+      { _id: modelId },
+      {
+        $pull: { [nonArrayPath]: { _id: elementId } },
+        $inc: { version: 1 }
+      },
+      { new: true }
+    )
+    .exec()
+  return newDoc
 }
 
 function _countElements(project) {
