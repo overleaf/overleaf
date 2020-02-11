@@ -10,6 +10,7 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
+ * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -34,54 +35,67 @@ const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
 
 module.exports = CompileController = {
   compile(req, res, next) {
+    if (next == null) {
+      next = function(error) {}
+    }
     res.setTimeout(COMPILE_TIMEOUT_MS)
     const project_id = req.params.Project_id
-    const isAutoCompile = !!req.query.auto_compile
+    const isAutoCompile = !!(req.query != null
+      ? req.query.auto_compile
+      : undefined)
     const user_id = AuthenticationController.getLoggedInUserId(req)
     const options = {
       isAutoCompile
     }
-
-    if (req.body.rootDoc_id) {
+    if ((req.body != null ? req.body.rootDoc_id : undefined) != null) {
       options.rootDoc_id = req.body.rootDoc_id
-    } else if (req.body.settingsOverride && req.body.settingsOverride.rootDoc_id) {
+    } else if (
+      __guard__(
+        req.body != null ? req.body.settingsOverride : undefined,
+        x => x.rootDoc_id
+      ) != null
+    ) {
       // Can be removed after deploy
       options.rootDoc_id = req.body.settingsOverride.rootDoc_id
     }
-    if (req.body.compiler) {
+    if (req.body != null ? req.body.compiler : undefined) {
       options.compiler = req.body.compiler
     }
-    if (req.body.draft) {
+    if (req.body != null ? req.body.draft : undefined) {
       options.draft = req.body.draft
     }
     if (
-      ['validate', 'error', 'silent'].includes(req.body.check)
+      ['validate', 'error', 'silent'].includes(
+        req.body != null ? req.body.check : undefined
+      )
     ) {
       options.check = req.body.check
     }
-    if (req.body.incrementalCompilesEnabled) {
+    if (req.body != null ? req.body.incrementalCompilesEnabled : undefined) {
       options.incrementalCompilesEnabled = true
     }
-
-    CompileManager.compile(project_id, user_id, options, (
+    return CompileManager.compile(project_id, user_id, options, function(
       error,
       status,
       outputFiles,
       clsiServerId,
       limits,
       validationProblems
-    ) => {
-      if (error) {
+    ) {
+      if (error != null) {
         return next(error)
       }
-      res.json({
-        status,
-        outputFiles,
-        compileGroup: limits != null ? limits.compileGroup : undefined,
-        clsiServerId,
-        validationProblems,
-        pdfDownloadDomain: Settings.pdfDownloadDomain
-      })
+      res.contentType('application/json')
+      return res.status(200).send(
+        JSON.stringify({
+          status,
+          outputFiles,
+          compileGroup: limits != null ? limits.compileGroup : undefined,
+          clsiServerId,
+          validationProblems,
+          pdfDownloadDomain: Settings.pdfDownloadDomain
+        })
+      )
     })
   },
 
@@ -525,4 +539,10 @@ module.exports = CompileController = {
       })
     })
   }
+}
+
+function __guard__(value, transform) {
+  return typeof value !== 'undefined' && value !== null
+    ? transform(value)
+    : undefined
 }
