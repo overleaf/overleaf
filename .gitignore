@@ -1,3 +1,7 @@
+node_modules/
+api-data
+versions/
+
 /config
 config-local
 node_modules
