@@ -22,7 +22,6 @@ define(['base', './pdfJsLoader'], (App, PDFJS) =>
   // App = angular.module 'PDFRenderer', ['pdfAnnotations', 'pdfTextLayer']
 
   App.factory('PDFRenderer', function(
-    $q,
     $timeout,
     pdfAnnotations,
     pdfTextLayer,
@@ -76,11 +75,11 @@ define(['base', './pdfJsLoader'], (App, PDFJS) =>
             disableStream: !!this.options.disableAutoFetch
           })
           this.pdfjs.onProgress = this.options.progressCallback
-          this.document = $q.when(this.pdfjs)
+          this.document = this.pdfjs
           this.navigateFn = this.options.navigateFn
           this.spinner = new pdfSpinner()
           this.resetState()
-          this.document.then(pdfDocument => {
+          this.document.promise.then(pdfDocument => {
             return pdfDocument.getDownloadInfo().then(() => {
               return this.options.loadedCallback()
             })
@@ -116,22 +115,24 @@ define(['base', './pdfJsLoader'], (App, PDFJS) =>
         }
 
         getNumPages() {
-          return this.document.then(pdfDocument => pdfDocument.numPages)
+          return this.document.promise.then(pdfDocument => pdfDocument.numPages)
         }
 
         getPage(pageNum) {
-          return this.document.then(pdfDocument => pdfDocument.getPage(pageNum))
+          return this.document.promise.then(pdfDocument =>
+            pdfDocument.getPage(pageNum)
+          )
         }
 
         getPdfViewport(pageNum, scale) {
           if (scale == null) {
             ;({ scale } = this)
           }
-          return this.document.then(pdfDocument => {
+          return this.document.promise.then(pdfDocument => {
             return pdfDocument.getPage(pageNum).then(
               function(page) {
                 let viewport
-                return (viewport = page.getViewport(scale))
+                return (viewport = page.getViewport({ scale: scale }))
               },
               error => {
                 return typeof this.errorCallback === 'function'
@@ -143,13 +144,13 @@ define(['base', './pdfJsLoader'], (App, PDFJS) =>
         }
 
         getDestinations() {
-          return this.document.then(pdfDocument =>
+          return this.document.promise.then(pdfDocument =>
             pdfDocument.getDestinations()
           )
         }
 
         getDestination(dest) {
-          return this.document.then(
+          return this.document.promise.then(
             pdfDocument => pdfDocument.getDestination(dest),
             error => {
               return typeof this.errorCallback === 'function'
@@ -160,7 +161,7 @@ define(['base', './pdfJsLoader'], (App, PDFJS) =>
         }
 
         getPageIndex(ref) {
-          return this.document.then(pdfDocument => {
+          return this.document.promise.then(pdfDocument => {
             return pdfDocument.getPageIndex(ref).then(
               idx => idx,
               error => {
@@ -366,7 +367,7 @@ define(['base', './pdfJsLoader'], (App, PDFJS) =>
                 return
               } // return from cancelled page load
               pageState.renderTask = this.doRender(element, pagenum, pageObject)
-              return pageState.renderTask.then(
+              return pageState.renderTask.promise.then(
                 () => {
                   // render task success
                   this.clearIndicator(page)
@@ -409,7 +410,7 @@ define(['base', './pdfJsLoader'], (App, PDFJS) =>
           // when rendering was complete.
           element.canvas.replaceWith(canvas)
 
-          const viewport = page.getViewport(scale)
+          const viewport = page.getViewport({ scale: scale })
 
           const devicePixelRatio = window.devicePixelRatio || 1
 
@@ -467,7 +468,7 @@ define(['base', './pdfJsLoader'], (App, PDFJS) =>
 
           const textLayerTimeout = this.TEXTLAYER_TIMEOUT
 
-          result
+          result.promise
             .then(function() {
               // page render success
               canvas.removeClass('pdfng-rendering')
@@ -508,7 +509,7 @@ define(['base', './pdfJsLoader'], (App, PDFJS) =>
         destroy() {
           this.shuttingDown = true
           this.resetState()
-          return this.pdfjs.then(function(document) {
+          return this.pdfjs.promise.then(function(document) {
             document.cleanup()
             return document.destroy()
           })

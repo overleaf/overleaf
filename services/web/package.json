@@ -100,7 +100,7 @@
     "passport-orcid": "0.0.3",
     "passport-saml": "^1.1.0",
     "passport-twitter": "^1.0.4",
-    "pdfjs-dist": "^2.0.943",
+    "pdfjs-dist": "^2.2.228",
     "pug": "^2.0.0-beta6",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",

@@ -12,7 +12,7 @@
   overflow: hidden;
   pointer-events: none;
 }
-.plv-text-layer > div {
+.plv-text-layer > span {
   color: transparent;
   position: absolute;
   line-height: 1;
@@ -25,9 +25,9 @@
   -ms-transform-origin: 0% 0%;
   transform-origin: 0% 0%;
 }
-.plv-text-layer > div::selection {
-  background:rgba(0,0,255,0.3);
+.plv-text-layer > span::selection {
+  background: rgba(0, 0, 255, 0.3);
 }
-.plv-text-layer > div::-moz-selection {
-  background:rgba(0,0,255,0.3);
+.plv-text-layer > span::-moz-selection {
+  background: rgba(0, 0, 255, 0.3);
 }
