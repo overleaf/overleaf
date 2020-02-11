@@ -44,8 +44,8 @@ describe('Notifications Controller', function() {
     ])
   })
 
-  describe('getUserNotifications', () =>
-    it('should ask the notifications for the users notifications', function(done) {
+  describe('getUserNotifications', function() {
+    return it('should ask the notifications for the users notifications', function(done) {
       this.notifications.getUserNotifications = sinon
         .stub()
         .callsArgWith(1, null, this.stubbedNotification)
@@ -63,10 +63,11 @@ describe('Notifications Controller', function() {
           return done()
         }
       })
-    }))
+    })
+  })
 
-  describe('addNotification', () =>
-    it('should tell the notifications to add the notification for the user', function(done) {
+  describe('addNotification', function() {
+    return it('should tell the notifications to add the notification for the user', function(done) {
       this.notifications.addNotification = sinon.stub().callsArgWith(2)
       const req = {
         params: {
@@ -82,10 +83,11 @@ describe('Notifications Controller', function() {
           return done()
         }
       })
-    }))
+    })
+  })
 
-  describe('removeNotificationId', () =>
-    it('should tell the notifications to mark the notification Id as read', function(done) {
+  describe('removeNotificationId', function() {
+    return it('should tell the notifications to mark the notification Id as read', function(done) {
       this.notifications.removeNotificationId = sinon.stub().callsArgWith(2)
       const req = {
         params: {
@@ -101,10 +103,11 @@ describe('Notifications Controller', function() {
           return done()
         }
       })
-    }))
+    })
+  })
 
-  describe('removeNotificationKey', () =>
-    it('should tell the notifications to mark the notification Key as read', function(done) {
+  describe('removeNotificationKey', function() {
+    return it('should tell the notifications to mark the notification Key as read', function(done) {
       this.notifications.removeNotificationKey = sinon.stub().callsArgWith(2)
       const req = {
         params: {
@@ -120,10 +123,11 @@ describe('Notifications Controller', function() {
           return done()
         }
       })
-    }))
+    })
+  })
 
-  return describe('removeNotificationByKeyOnly', () =>
-    it('should tell the notifications to mark the notification Key as read', function(done) {
+  return describe('removeNotificationByKeyOnly', function() {
+    return it('should tell the notifications to mark the notification Key as read', function(done) {
       this.notifications.removeNotificationByKeyOnly = sinon
         .stub()
         .callsArgWith(1)
@@ -140,5 +144,6 @@ describe('Notifications Controller', function() {
           return done()
         }
       })
-    }))
+    })
+  })
 })
