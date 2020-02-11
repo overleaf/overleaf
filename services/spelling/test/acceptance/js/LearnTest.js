@@ -32,13 +32,13 @@ const deleteDict = () =>
     url: `/user/${USER_ID}`
   })
 
-describe('learning words', () => {
-  it('should return status 204 when posting a word successfully', async () => {
+describe('learning words', function() {
+  it('should return status 204 when posting a word successfully', async function () {
     const response = await learnWord('abcd')
     expect(response.statusCode).to.equal(204)
   })
 
-  it('should return no misspellings after a word is learnt', async () => {
+  it('should return no misspellings after a word is learnt', async function () {
     const response = await checkWord(['abv'])
     const responseBody = JSON.parse(response.body)
     expect(responseBody.misspellings.length).to.equals(1)
@@ -50,7 +50,7 @@ describe('learning words', () => {
     expect(responseBody2.misspellings.length).to.equals(0)
   })
 
-  it('should return misspellings again after a personal dictionary is deleted', async () => {
+  it('should return misspellings again after a personal dictionary is deleted', async function () {
     await learnWord('bvc')
     await deleteDict()
 
@@ -60,13 +60,13 @@ describe('learning words', () => {
   })
 })
 
-describe('unlearning words', () => {
-  it('should return status 204 when posting a word successfully', async () => {
+describe('unlearning words', function() {
+  it('should return status 204 when posting a word successfully', async function () {
     const response = await unlearnWord('anything')
     expect(response.statusCode).to.equal(204)
   })
 
-  it('should return misspellings after a word is unlearnt', async () => {
+  it('should return misspellings after a word is unlearnt', async function () {
     await learnWord('abv')
 
     const response = await checkWord(['abv'])

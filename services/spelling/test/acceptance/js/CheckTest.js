@@ -12,19 +12,19 @@ const checkWord = (words, language) =>
     })
   })
 
-describe('checking words', () => {
+describe('checking words', function() {
   let response
 
-  describe('on successful response', () => {
-    beforeEach(async () => {
+  describe('on successful response', function() {
+    beforeEach(async function () {
       response = await checkWord(['anather'])
     })
 
-    it('should return status 200', async () => {
+    it('should return status 200', async function () {
       expect(response.statusCode).to.equal(200)
     })
 
-    it('should return the list of misspellings', async () => {
+    it('should return the list of misspellings', async function () {
       const body = JSON.parse(response.body)
       expect(body).to.deep.equal({
         misspellings: [{ index: 0, suggestions: ['anther', 'another'] }]
@@ -32,23 +32,23 @@ describe('checking words', () => {
     })
   })
 
-  describe('when multiple words are submitted', () => {
-    beforeEach(async () => {
+  describe('when multiple words are submitted', function() {
+    beforeEach(async function () {
       response = await checkWord(['anather', 'anather', 'theorie'])
     })
 
-    it('should return the misspellings for all the words', async () => {
+    it('should return the misspellings for all the words', async function () {
       const body = JSON.parse(response.body)
       expect(body.misspellings.length).to.equal(3)
     })
 
-    it('should have misspelling suggestions with consecutive indexes', async () => {
+    it('should have misspelling suggestions with consecutive indexes', async function () {
       const body = JSON.parse(response.body)
       const indexes = body.misspellings.map(mspl => mspl.index)
       expect(indexes).to.deep.equal([0, 1, 2])
     })
 
-    it('should return identical suggestions for the same entry', async () => {
+    it('should return identical suggestions for the same entry', async function () {
       const body = JSON.parse(response.body)
       expect(body.misspellings[0].suggestions).to.deep.equal(
         body.misspellings[1].suggestions
@@ -56,8 +56,8 @@ describe('checking words', () => {
     })
   })
 
-  describe('when a very long list of words if submitted', () => {
-    beforeEach(async () => {
+  describe('when a very long list of words if submitted', function() {
+    beforeEach(async function () {
       let words = []
       for (let i = 0; i <= 20000; i++) {
         words.push('anather')
@@ -65,12 +65,12 @@ describe('checking words', () => {
       response = await checkWord(words)
     })
 
-    it('should return misspellings for the first 10K results only', async () => {
+    it('should return misspellings for the first 10K results only', async function () {
       const body = JSON.parse(response.body)
       expect(body.misspellings.length).to.equal(10000)
     })
 
-    it('should have misspelling suggestions with consecutive indexes', async () => {
+    it('should have misspelling suggestions with consecutive indexes', async function () {
       const body = JSON.parse(response.body)
       const indexList = body.misspellings.map(mspl => mspl.index)
       expect(indexList.length).to.equal(10000) // avoid testing over an incorrect array
@@ -80,8 +80,8 @@ describe('checking words', () => {
     })
   })
 
-  describe('when a very long list of words with utf8 responses', () => {
-    beforeEach(async () => {
+  describe('when a very long list of words with utf8 responses', function() {
+    beforeEach(async function () {
       let words = []
       for (let i = 0; i <= 20000; i++) {
         words.push('anéther')
@@ -89,12 +89,12 @@ describe('checking words', () => {
       response = await checkWord(words, 'bg') // use Bulgarian to generate utf8 response
     })
 
-    it('should return misspellings for the first 10K results only', async () => {
+    it('should return misspellings for the first 10K results only', async function () {
       const body = JSON.parse(response.body)
       expect(body.misspellings.length).to.equal(10000)
     })
 
-    it('should have misspelling suggestions with consecutive indexes', async () => {
+    it('should have misspelling suggestions with consecutive indexes', async function () {
       const body = JSON.parse(response.body)
       const indexList = body.misspellings.map(mspl => mspl.index)
       expect(indexList.length).to.equal(10000) // avoid testing over an incorrect array
@@ -104,23 +104,23 @@ describe('checking words', () => {
     })
   })
 
-  describe('when multiple words with utf8 are submitted', () => {
-    beforeEach(async () => {
+  describe('when multiple words with utf8 are submitted', function() {
+    beforeEach(async function () {
       response = await checkWord(['mneá', 'meniésn', 'meônoi', 'mneá'], 'pt_BR')
     })
 
-    it('should return the misspellings for all the words', async () => {
+    it('should return the misspellings for all the words', async function () {
       const body = JSON.parse(response.body)
       expect(body.misspellings.length).to.equal(4)
     })
 
-    it('should have misspelling suggestions with consecutive indexes', async () => {
+    it('should have misspelling suggestions with consecutive indexes', async function () {
       const body = JSON.parse(response.body)
       const indexes = body.misspellings.map(mspl => mspl.index)
       expect(indexes).to.deep.equal([0, 1, 2, 3])
     })
 
-    it('should return identical suggestions for the same entry', async () => {
+    it('should return identical suggestions for the same entry', async function () {
       const body = JSON.parse(response.body)
       expect(body.misspellings[0].suggestions).to.deep.equal(
         body.misspellings[3].suggestions
