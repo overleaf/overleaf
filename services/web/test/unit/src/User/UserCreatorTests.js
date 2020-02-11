@@ -123,18 +123,6 @@ describe('UserCreator', function() {
           done()
         })
       })
-
-      it('should not add affiliation if skipping', function(done) {
-        const attributes = { email: this.email }
-        const options = { skip_affiliation: true }
-        this.UserCreator.createNewUser(attributes, options, (err, user) => {
-          assert.ifError(err)
-          process.nextTick(() => {
-            sinon.assert.notCalled(this.addAffiliation)
-            done()
-          })
-        })
-      })
     })
 
     describe('with promises', function() {
@@ -154,13 +142,6 @@ describe('UserCreator', function() {
         const user = await this.UserCreator.promises.createNewUser(attributes)
         sinon.assert.calledOnce(this.addAffiliation)
         sinon.assert.calledWithMatch(this.addAffiliation, user._id, this.email)
-      })
-
-      it('should not add affiliation if skipping', async function() {
-        const attributes = { email: this.email }
-        const opts = { skip_affiliation: true }
-        await this.UserCreator.promises.createNewUser(attributes, opts)
-        sinon.assert.notCalled(this.addAffiliation)
       })
 
       it('should include SAML provider ID with email', async function() {

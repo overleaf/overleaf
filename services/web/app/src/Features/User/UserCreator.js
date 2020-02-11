@@ -3,7 +3,7 @@ const util = require('util')
 const { User } = require('../../models/User')
 const { addAffiliation } = require('../Institutions/InstitutionsAPI')
 
-async function createNewUser(attributes, options = {}) {
+async function createNewUser(attributes) {
   let user = new User()
 
   if (attributes.first_name == null || attributes.first_name === '') {
@@ -40,17 +40,14 @@ async function createNewUser(attributes, options = {}) {
 
   user = await user.save()
 
-  if (!options.skip_affiliation) {
-    // There is no guarantee this will complete so we must not rely on it
-    addAffiliation(user._id, user.email, err => {
-      if (err) {
-        logger.error(
-          { userId: user._id, email: user.email },
-          "couldn't add affiliation for user on create"
-        )
-      }
-    })
-  }
+  addAffiliation(user._id, user.email, err => {
+    if (err) {
+      logger.error(
+        { userId: user._id, email: user.email },
+        "couldn't add affiliation for user on create"
+      )
+    }
+  })
 
   return user
 }

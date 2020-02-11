@@ -141,14 +141,10 @@ class UserHelper {
    * @param {object} options options for UserCreator
    * @returns {UserHelper}
    */
-  static async createUser(attributes = {}, options = {}) {
+  static async createUser(attributes = {}) {
     const userHelper = new UserHelper()
     attributes = userHelper.getDefaultEmailPassword(attributes)
-    // skip creating affiliations by default because it requires an
-    // API call that will usually not be mocked in testing env
-    if (attributes.skip_affiliation !== false) {
-      attributes.skip_affiliation = true
-    }
+
     // hash password and delete plaintext if set
     if (attributes.password) {
       attributes.hashedPassword = await AuthenticationManager.promises.hashPassword(
@@ -157,10 +153,7 @@ class UserHelper {
       delete attributes.password
     }
 
-    userHelper.user = await UserCreator.promises.createNewUser(
-      attributes,
-      options
-    )
+    userHelper.user = await UserCreator.promises.createNewUser(attributes)
 
     return userHelper
   }
