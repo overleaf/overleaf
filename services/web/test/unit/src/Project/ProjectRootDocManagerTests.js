@@ -575,13 +575,13 @@ describe('ProjectRootDocManager', function() {
 
   describe('ensureRootDocumentIsValid', function() {
     beforeEach(function() {
-      this.project = { _id: this.project_id }
+      this.project = {}
       this.ProjectGetter.getProject = sinon
         .stub()
         .callsArgWith(2, null, this.project)
       this.ProjectEntityUpdateHandler.setRootDoc = sinon.stub().yields()
       this.ProjectEntityUpdateHandler.unsetRootDoc = sinon.stub().yields()
-      this.ProjectEntityHandler.getAllDocPathsFromProject = sinon
+      this.ProjectEntityHandler.getAllDocPathsFromProjectById = sinon
         .stub()
         .callsArgWith(1, null, this.docPaths)
       return (this.ProjectRootDocManager.setRootDocAutomatically = sinon
@@ -599,9 +599,9 @@ describe('ProjectRootDocManager', function() {
           )
         })
 
-        it('should find the project fetching only the rootDoc_id and rootFolder fields', function() {
+        it('should find the project fetching only the rootDoc_id field', function() {
           return this.ProjectGetter.getProject
-            .calledWith(this.project_id, { rootDoc_id: 1, rootFolder: 1 })
+            .calledWith(this.project_id, { rootDoc_id: 1 })
             .should.equal(true)
         })
 
@@ -625,9 +625,9 @@ describe('ProjectRootDocManager', function() {
           )
         })
 
-        it('should find the project fetching only the rootDoc_id and rootFolder fields', function() {
+        it('should find the project fetching only the rootDoc_id field', function() {
           return this.ProjectGetter.getProject
-            .calledWith(this.project_id, { rootDoc_id: 1, rootFolder: 1 })
+            .calledWith(this.project_id, { rootDoc_id: 1 })
             .should.equal(true)
         })
 
