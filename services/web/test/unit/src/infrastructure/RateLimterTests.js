@@ -132,12 +132,9 @@ describe('RateLimiter', function() {
       return this.limiter.addCount(
         { endpointName: this.endpointName },
         (err, should) => {
-          sinon.assert.calledWith(
-            this.Metrics.inc,
-            `rate-limit-hit.${this.endpointName}`,
-            1,
-            { path: this.endpointName }
-          )
+          sinon.assert.calledWith(this.Metrics.inc, `rate-limit-hit`, 1, {
+            path: this.endpointName
+          })
           return done()
         }
       )

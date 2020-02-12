@@ -27,7 +27,7 @@ const RateLimiter = {
       }
       const allowed = timeLeft === 0
       if (!allowed) {
-        Metrics.inc(`rate-limit-hit.${opts.endpointName}`, 1, {
+        Metrics.inc('rate-limit-hit', 1, {
           path: opts.endpointName
         })
       }
