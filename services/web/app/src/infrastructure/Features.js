@@ -21,6 +21,10 @@ const supportModuleAvailable = fs.existsSync(
   `${__dirname}/../../../modules/support`
 )
 
+const trackChangesModuleAvailable = fs.existsSync(
+  `${__dirname}/../../../modules/track-changes`
+)
+
 module.exports = Features = {
   externalAuthenticationSystemUsed() {
     return (
@@ -69,6 +73,8 @@ module.exports = Features = {
         return publicRegistrationModuleAvailable
       case 'support':
         return supportModuleAvailable
+      case 'track-changes':
+        return trackChangesModuleAvailable
       default:
         throw new Error(`unknown feature: ${feature}`)
     }
