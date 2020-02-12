@@ -19,6 +19,8 @@ function getPersistor(backend) {
       return require('./S3Persistor')
     case 'fs':
       return require('./FSPersistor')
+    case 'gcs':
+      return require('./GcsPersistor')
     default:
       throw new Error(`unknown filestore backend: ${backend}`)
   }
