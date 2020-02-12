@@ -4,6 +4,15 @@ const logger = require('logger-sharelatex')
 
 const POOL_SIZE = Settings.mongo.poolSize
 
+if (
+  typeof global.beforeEach === 'function' &&
+  process.argv.join(' ').match(/unit/)
+) {
+  throw new Error(
+    'It looks like unit tests are running, but you are connecting to Mongo. Missing a stub?'
+  )
+}
+
 mongoose.connect(
   Settings.mongo.url,
   {

@@ -40,6 +40,7 @@ describe('RateLimiterMiddleware', function() {
         'settings-sharelatex': (this.settings = {}),
         '../../infrastructure/RateLimiter': (this.RateLimiter = {}),
         'logger-sharelatex': (this.logger = { warn: sinon.stub() }),
+        './LoginRateLimiter': {},
         '../Authentication/AuthenticationController': this
           .AuthenticationController
       }

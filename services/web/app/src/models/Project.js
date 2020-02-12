@@ -1,6 +1,6 @@
 const mongoose = require('../infrastructure/Mongoose')
 const _ = require('underscore')
-const { FolderSchema } = require('./Folder.js')
+const { FolderSchema } = require('./Folder')
 const Errors = require('../Features/Errors/Errors')
 
 const concreteObjectId = mongoose.Types.ObjectId
