@@ -445,13 +445,12 @@ describe "RedisManager", ->
 
 			describe "with project history disabled", ->
 				beforeEach ->
-					@rclient.rpush = sinon.stub()
 					@settings.apis.project_history.enabled = false
 					@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
 					@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, @ops, @ranges, @updateMeta, @callback
 
 				it "should not push the updates into the project history ops list", ->
-					@rclient.rpush.called.should.equal false
+					@ProjectHistoryRedisManager.queueOps.called.should.equal false
 
 				it "should call the callback", ->
 					@callback
@@ -493,7 +492,6 @@ describe "RedisManager", ->
 
 		describe "with no updates", ->
 			beforeEach ->
-				@rclient.rpush = sinon.stub().callsArgWith(1, null, @project_update_list_length)
 				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version)
 				@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, [], @ranges, @updateMeta, @callback
 
@@ -503,7 +501,7 @@ describe "RedisManager", ->
 					.should.equal false
 
 			it "should not try to enqueue project updates", ->
-				@rclient.rpush
+				@ProjectHistoryRedisManager.queueOps
 					.called
 					.should.equal false
 
