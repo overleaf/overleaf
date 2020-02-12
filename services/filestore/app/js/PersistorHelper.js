@@ -20,16 +20,7 @@ function calculateStreamMd5(stream) {
   const hash = crypto.createHash('md5')
   hash.setEncoding('hex')
 
-  return new Promise((resolve, reject) => {
-    pipeline(stream, hash)
-      .then(() => {
-        hash.end()
-        resolve(hash.read())
-      })
-      .catch(err => {
-        reject(err)
-      })
-  })
+  return pipeline(stream, hash).then(() => hash.read())
 }
 
 // verifies the md5 hash of a file against the supplied md5 or the one stored in

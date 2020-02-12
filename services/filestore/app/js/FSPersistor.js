@@ -1,7 +1,6 @@
 const fs = require('fs')
 const glob = require('glob')
 const path = require('path')
-const crypto = require('crypto')
 const rimraf = require('rimraf')
 const Stream = require('stream')
 const { promisify, callbackify } = require('util')
@@ -103,19 +102,6 @@ async function getFileMd5Hash(location, filename) {
       info: { location, filename }
     }).withCause(err)
   }
-}
-
-async function _getFileMd5HashForPath(fullPath) {
-  return new Promise((resolve, reject) => {
-    const readStream = fs.createReadStream(fullPath)
-    const hash = crypto.createHash('md5')
-    hash.setEncoding('hex')
-    readStream.on('end', () => {
-      hash.end()
-      resolve(hash.read())
-    })
-    pipeline(readStream, hash).catch(reject)
-  })
 }
 
 async function copyFile(location, fromName, toName) {
@@ -244,4 +230,9 @@ module.exports = {
     checkIfFileExists,
     directorySize
   }
+}
+
+async function _getFileMd5HashForPath(fullPath) {
+  const stream = fs.createReadStream(fullPath)
+  return PersistorHelper.calculateStreamMd5(stream)
 }
