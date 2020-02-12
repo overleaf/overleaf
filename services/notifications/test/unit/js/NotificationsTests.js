@@ -71,8 +71,8 @@ describe('Notifications Tests', function() {
     return (this.stubbedNotificationArray = [this.stubbedNotification])
   })
 
-  describe('getUserNotifications', () =>
-    it('should find all notifications and return i', function(done) {
+  describe('getUserNotifications', function() {
+    return it('should find all notifications and return i', function(done) {
       this.findStub.callsArgWith(1, null, this.stubbedNotificationArray)
       return this.notifications.getUserNotifications(
         user_id,
@@ -85,7 +85,8 @@ describe('Notifications Tests', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 
   describe('addNotification', function() {
     beforeEach(function() {
@@ -234,8 +235,8 @@ describe('Notifications Tests', function() {
     })
   })
 
-  describe('removeNotificationId', () =>
-    it('should mark the notification id as read', function(done) {
+  describe('removeNotificationId', function() {
+    return it('should mark the notification id as read', function(done) {
       this.updateStub.callsArgWith(2, null)
 
       return this.notifications.removeNotificationId(
@@ -254,10 +255,11 @@ describe('Notifications Tests', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 
-  describe('removeNotificationKey', () =>
-    it('should mark the notification key as read', function(done) {
+  describe('removeNotificationKey', function() {
+    return it('should mark the notification key as read', function(done) {
       this.updateStub.callsArgWith(2, null)
 
       return this.notifications.removeNotificationKey(
@@ -276,10 +278,11 @@ describe('Notifications Tests', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 
-  describe('removeNotificationByKeyOnly', () =>
-    it('should mark the notification key as read', function(done) {
+  describe('removeNotificationByKeyOnly', function() {
+    return it('should mark the notification key as read', function(done) {
       this.updateStub.callsArgWith(2, null)
 
       return this.notifications.removeNotificationByKeyOnly(
@@ -292,10 +295,11 @@ describe('Notifications Tests', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 
-  return describe('deleteNotificationByKeyOnly', () =>
-    it('should completely remove the notification', function(done) {
+  return describe('deleteNotificationByKeyOnly', function() {
+    return it('should completely remove the notification', function(done) {
       this.removeStub.callsArgWith(2, null)
 
       return this.notifications.deleteNotificationByKeyOnly(
@@ -308,5 +312,6 @@ describe('Notifications Tests', function() {
           return done()
         }
       )
-    }))
+    })
+  })
 })

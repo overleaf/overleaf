@@ -7,4 +7,4 @@ notifications
 --dependencies=mongo,redis
 --docker-repos=gcr.io/overleaf-ops
 --env-pass-through=
---script-version=1.3.1
+--script-version=1.3.5

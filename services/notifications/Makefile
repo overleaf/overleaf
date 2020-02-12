@@ -1,7 +1,7 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.3.1
+# Version: 1.3.5
 
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
@@ -33,8 +33,13 @@ test_unit:
 
 test_acceptance: test_clean test_acceptance_pre_run test_acceptance_run
 
+test_acceptance_debug: test_clean test_acceptance_pre_run test_acceptance_run_debug
+
 test_acceptance_run:
 	@[ ! -d test/acceptance ] && echo "notifications has no acceptance tests" || $(DOCKER_COMPOSE) run --rm test_acceptance
+
+test_acceptance_run_debug:
+	@[ ! -d test/acceptance ] && echo "notifications has no acceptance tests" || $(DOCKER_COMPOSE) run -p 127.0.0.9:19999:19999 --rm test_acceptance npm run test:acceptance -- --inspect=0.0.0.0:19999 --inspect-brk
 
 test_clean:
 	$(DOCKER_COMPOSE) down -v -t 0
