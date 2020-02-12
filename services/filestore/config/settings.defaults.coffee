@@ -31,6 +31,7 @@ settings =
 		# Choices are
 		# s3 - Amazon S3
 		# fs - local filesystem
+		# gcs - Google Cloud Storage
 		backend: process.env['BACKEND']
 
 		s3:
@@ -40,6 +41,9 @@ settings =
 				endpoint: process.env['AWS_S3_ENDPOINT']
 				pathStyle: process.env['AWS_S3_PATH_STYLE']
 				partSize: process.env['AWS_S3_PARTSIZE'] or (100 * 1024 * 1024)
+
+		# GCS should be configured by the service account on the kubernetes pod. See GOOGLE_APPLICATION_CREDENTIALS,
+		# which will be picked up automatically.
 
 		stores:
 			user_files: process.env['USER_FILES_BUCKET_NAME']
