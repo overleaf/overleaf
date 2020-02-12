@@ -16,6 +16,7 @@ pipeline {
   }
 
   stages {
+
     stage('Install') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
