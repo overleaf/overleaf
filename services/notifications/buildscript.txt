@@ -4,7 +4,7 @@ notifications
 --env-add=
 --node-version=10.19.0
 --acceptance-creds=None
---dependencies=mongo,redis
+--dependencies=mongo
 --docker-repos=gcr.io/overleaf-ops
 --env-pass-through=
 --script-version=1.3.5
