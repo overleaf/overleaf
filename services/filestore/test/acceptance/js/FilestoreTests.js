@@ -11,6 +11,7 @@ const S3 = require('aws-sdk/clients/s3')
 const Stream = require('stream')
 const request = require('request')
 const { promisify } = require('util')
+const { Storage } = require('@google-cloud/storage')
 const streamifier = require('streamifier')
 chai.use(require('chai-as-promised'))
 
@@ -42,89 +43,7 @@ function streamToString(stream) {
 
 // store settings for multiple backends, so that we can test each one.
 // fs will always be available - add others if they are configured
-const BackendSettings = {
-  FSPersistor: {
-    backend: 'fs',
-    stores: {
-      user_files: Path.resolve(__dirname, '../../../user_files'),
-      public_files: Path.resolve(__dirname, '../../../public_files'),
-      template_files: Path.resolve(__dirname, '../../../template_files')
-    }
-  },
-  S3Persistor: {
-    backend: 's3',
-    s3: {
-      key: process.env.AWS_ACCESS_KEY_ID,
-      secret: process.env.AWS_SECRET_ACCESS_KEY,
-      endpoint: process.env.AWS_S3_ENDPOINT,
-      pathStyle: true,
-      partSize: 100 * 1024 * 1024
-    },
-    stores: {
-      user_files: process.env.AWS_S3_USER_FILES_BUCKET_NAME,
-      template_files: process.env.AWS_S3_TEMPLATE_FILES_BUCKET_NAME,
-      public_files: process.env.AWS_S3_PUBLIC_FILES_BUCKET_NAME
-    }
-  },
-  FallbackS3ToFSPersistor: {
-    backend: 's3',
-    s3: {
-      key: process.env.AWS_ACCESS_KEY_ID,
-      secret: process.env.AWS_SECRET_ACCESS_KEY,
-      endpoint: process.env.AWS_S3_ENDPOINT,
-      pathStyle: true,
-      partSize: 100 * 1024 * 1024
-    },
-    stores: {
-      user_files: process.env.AWS_S3_USER_FILES_BUCKET_NAME,
-      template_files: process.env.AWS_S3_TEMPLATE_FILES_BUCKET_NAME,
-      public_files: process.env.AWS_S3_PUBLIC_FILES_BUCKET_NAME
-    },
-    fallback: {
-      backend: 'fs',
-      buckets: {
-        [process.env.AWS_S3_USER_FILES_BUCKET_NAME]: Path.resolve(
-          __dirname,
-          '../../../user_files'
-        ),
-        [process.env.AWS_S3_PUBLIC_FILES_BUCKET_NAME]: Path.resolve(
-          __dirname,
-          '../../../public_files'
-        ),
-        [process.env.AWS_S3_TEMPLATE_FILES_BUCKET_NAME]: Path.resolve(
-          __dirname,
-          '../../../template_files'
-        )
-      }
-    }
-  },
-  FallbackFSToS3Persistor: {
-    backend: 'fs',
-    s3: {
-      key: process.env.AWS_ACCESS_KEY_ID,
-      secret: process.env.AWS_SECRET_ACCESS_KEY,
-      endpoint: process.env.AWS_S3_ENDPOINT,
-      pathStyle: true,
-      partSize: 100 * 1024 * 1024
-    },
-    stores: {
-      user_files: Path.resolve(__dirname, '../../../user_files'),
-      public_files: Path.resolve(__dirname, '../../../public_files'),
-      template_files: Path.resolve(__dirname, '../../../template_files')
-    },
-    fallback: {
-      backend: 's3',
-      buckets: {
-        [Path.resolve(__dirname, '../../../user_files')]: process.env
-          .AWS_S3_USER_FILES_BUCKET_NAME,
-        [Path.resolve(__dirname, '../../../public_files')]: process.env
-          .AWS_S3_PUBLIC_FILES_BUCKET_NAME,
-        [Path.resolve(__dirname, '../../../template_files')]: process.env
-          .AWS_S3_TEMPLATE_FILES_BUCKET_NAME
-      }
-    }
-  }
-}
+const BackendSettings = require('./TestConfig')
 
 describe('Filestore', function() {
   this.timeout(1000 * 10)
@@ -134,7 +53,7 @@ describe('Filestore', function() {
   // redefine the test suite for every available backend
   Object.keys(BackendSettings).forEach(backend => {
     describe(backend, function() {
-      let app, previousEgress, previousIngress, projectId
+      let app, previousEgress, previousIngress, metricPrefix, projectId
 
       before(async function() {
         // create the app with the relevant filestore settings
@@ -143,13 +62,27 @@ describe('Filestore', function() {
         await app.runServer()
       })
 
+      if (BackendSettings[backend].gcs) {
+        before(async function() {
+          const storage = new Storage(Settings.filestore.gcs)
+          await storage.createBucket(process.env.GCS_USER_FILES_BUCKET_NAME)
+          await storage.createBucket(process.env.GCS_PUBLIC_FILES_BUCKET_NAME)
+          await storage.createBucket(process.env.GCS_TEMPLATE_FILES_BUCKET_NAME)
+        })
+      }
+
       after(async function() {
         return app.stop()
       })
 
       beforeEach(async function() {
-        if (Settings.filestore.backend === 's3') {
-          previousEgress = await getMetric(filestoreUrl, 's3_egress')
+        // retrieve previous metrics from the app
+        if (['s3', 'gcs'].includes(Settings.filestore.backend)) {
+          metricPrefix = Settings.filestore.backend
+          previousEgress = await getMetric(
+            filestoreUrl,
+            `${metricPrefix}_egress`
+          )
         }
         projectId = `acceptance_tests_${Math.random()}`
       })
@@ -195,8 +128,11 @@ describe('Filestore', function() {
           // The upload request can bump the ingress metric.
           // The content hash validation might require a full download
           //  in case the ETag field of the upload response is not a md5 sum.
-          if (Settings.filestore.backend === 's3') {
-            previousIngress = await getMetric(filestoreUrl, 's3_ingress')
+          if (['s3', 'gcs'].includes(Settings.filestore.backend)) {
+            previousIngress = await getMetric(
+              filestoreUrl,
+              `${metricPrefix}_ingress`
+            )
           }
         })
 
@@ -285,15 +221,21 @@ describe('Filestore', function() {
           expect(response.body).to.equal(newContent)
         })
 
-        if (backend === 'S3Persistor') {
+        if (['S3Persistor', 'GcsPersistor'].includes(backend)) {
           it('should record an egress metric for the upload', async function() {
-            const metric = await getMetric(filestoreUrl, 's3_egress')
+            const metric = await getMetric(
+              filestoreUrl,
+              `${metricPrefix}_egress`
+            )
             expect(metric - previousEgress).to.equal(constantFileContent.length)
           })
 
           it('should record an ingress metric when downloading the file', async function() {
             await rp.get(fileUrl)
-            const metric = await getMetric(filestoreUrl, 's3_ingress')
+            const metric = await getMetric(
+              filestoreUrl,
+              `${metricPrefix}_ingress`
+            )
             expect(metric - previousIngress).to.equal(
               constantFileContent.length
             )
@@ -307,7 +249,10 @@ describe('Filestore', function() {
               }
             }
             await rp.get(options)
-            const metric = await getMetric(filestoreUrl, 's3_ingress')
+            const metric = await getMetric(
+              filestoreUrl,
+              `${metricPrefix}_ingress`
+            )
             expect(metric - previousIngress).to.equal(9)
           })
         }
@@ -827,9 +772,12 @@ describe('Filestore', function() {
           expect(response.body.substring(0, 8)).to.equal('%PDF-1.5')
         })
 
-        if (backend === 'S3Persistor') {
+        if (['S3Persistor', 'GcsPersistor'].includes(backend)) {
           it('should record an egress metric for the upload', async function() {
-            const metric = await getMetric(filestoreUrl, 's3_egress')
+            const metric = await getMetric(
+              filestoreUrl,
+              `${metricPrefix}_egress`
+            )
             expect(metric - previousEgress).to.equal(localFileSize)
           })
         }
