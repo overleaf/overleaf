@@ -23,7 +23,6 @@
     "logger-sharelatex": "^1.7.0",
     "metrics-sharelatex": "^2.2.0",
     "mongojs": "2.4.0",
-    "redis": "~0.10.1",
     "request": "^2.79.0",
     "settings-sharelatex": "^1.1.0"
   },
