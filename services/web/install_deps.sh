@@ -12,13 +12,3 @@ wait $LINT && echo "Lint complete" || exit 1
 wait $FORMAT && echo "Format complete" || exit 1
 wait $TRANSLATIONS && echo "Translations install complete" || exit 1
 wait $WEBPACK && echo "Webpack complete" || exit 1
-
-chmod -R 0755 /app/public
-chown -R node:node /app/public
-
-set -B
-
-rm -rf /app/data
-mkdir -p /app/data/{dumpFolder,logs,pdf,uploads,zippedProjects}
-chmod -R 0755 /app/data/
-chown -R node:node /app/data/
