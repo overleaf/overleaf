@@ -34,7 +34,6 @@
     "metrics-sharelatex": "^2.2.0",
     "mongojs": "2.4.0",
     "node-statsd": "0.0.3",
-    "redis": "~0.8.4",
     "request": "^2.88.0",
     "settings-sharelatex": "^1.1.0",
     "underscore": "1.9.1"
