@@ -13,7 +13,7 @@ describe "DispatchManager", ->
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 			"settings-sharelatex": @settings =
 				redis:
-					realtime: {}
+					documentupdater: {}
 			"redis-sharelatex": @redis = {}
 			"./RateLimitManager": {}
 			"./Errors": Errors
