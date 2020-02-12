@@ -9,9 +9,7 @@ describe "RateLimitManager", ->
 	beforeEach ->
 		@RateLimitManager = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger = { log: sinon.stub() }
-			"settings-sharelatex": @settings =
-				redis:
-					realtime: {}
+			"settings-sharelatex": @settings = {}
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
