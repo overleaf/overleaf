@@ -8,12 +8,10 @@ const metrics = require('metrics-sharelatex')
 
 const PersistorHelper = require('./PersistorHelper')
 
-const meter = require('stream-meter')
-const Stream = require('stream')
 const fs = require('fs')
 const S3 = require('aws-sdk/clients/s3')
 const { URL } = require('url')
-const { callbackify, promisify } = require('util')
+const { callbackify } = require('util')
 const {
   WriteError,
   ReadError,
@@ -48,8 +46,6 @@ const S3Persistor = {
 
 module.exports = S3Persistor
 
-const pipeline = promisify(Stream.pipeline)
-
 function hexToBase64(hex) {
   return Buffer.from(hex, 'hex').toString('base64')
 }
@@ -81,10 +77,13 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
       hashPromise = PersistorHelper.calculateStreamMd5(readStream)
     }
 
-    const meteredStream = PersistorHelper.getMeteredStream(readStream, (_, byteCount) => {
-      // ignore the error parameter and just log the byte count
-      metrics.count('s3.egress', byteCount)
-    })
+    const meteredStream = PersistorHelper.getMeteredStream(
+      readStream,
+      (_, byteCount) => {
+        // ignore the error parameter and just log the byte count
+        metrics.count('s3.egress', byteCount)
+      }
+    )
 
     // if we have an md5 hash, pass this to S3 to verify the upload
     const uploadOptions = {
