@@ -25,8 +25,6 @@ services:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
     depends_on:
-      mongo:
-        condition: service_healthy
       redis:
         condition: service_healthy
     user: node
@@ -43,5 +41,3 @@ services:
   redis:
     image: redis
 
-  mongo:
-    image: mongo:3.6
