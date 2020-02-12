@@ -786,7 +786,7 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
     const _deleteProject = function(project) {
       return queuedHttp({
         method: 'DELETE',
-        url: `/project/${project.id}?forever=true`,
+        url: `/project/${project.id}`,
         headers: {
           'X-CSRF-Token': window.csrfToken
         }

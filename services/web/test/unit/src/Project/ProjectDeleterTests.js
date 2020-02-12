@@ -431,28 +431,6 @@ describe('ProjectDeleter', function() {
     })
   })
 
-  describe('legacyArchiveProject', function() {
-    beforeEach(function() {
-      this.ProjectMock.expects('update')
-        .withArgs(
-          {
-            _id: this.project_id
-          },
-          {
-            $set: { archived: true }
-          }
-        )
-        .yields()
-    })
-
-    it('should update the project', function(done) {
-      this.ProjectDeleter.legacyArchiveProject(this.project_id, () => {
-        this.ProjectMock.verify()
-        done()
-      })
-    })
-  })
-
   describe('archiveProject', function() {
     beforeEach(function() {
       let archived = [ObjectId(this.user._id)]

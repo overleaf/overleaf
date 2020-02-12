@@ -361,7 +361,7 @@ class User {
   deleteProject(projectId, callback) {
     this.request.delete(
       {
-        url: `/project/${projectId}?forever=true`
+        url: `/project/${projectId}`
       },
       (error, response, body) => {
         if (error != null) {

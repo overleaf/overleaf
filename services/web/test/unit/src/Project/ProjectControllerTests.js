@@ -40,7 +40,6 @@ describe('ProjectController', function() {
     }
     this.token = 'some-token'
     this.ProjectDeleter = {
-      legacyArchiveProject: sinon.stub().callsArg(1),
       deleteProject: sinon.stub().callsArg(2),
       restoreProject: sinon.stub().callsArg(1),
       findArchivedProjects: sinon.stub()
@@ -305,19 +304,7 @@ describe('ProjectController', function() {
   })
 
   describe('deleteProject', function() {
-    it('should tell the project deleter to archive when forever=false', function(done) {
-      this.res.sendStatus = code => {
-        this.ProjectDeleter.legacyArchiveProject
-          .calledWith(this.project_id)
-          .should.equal(true)
-        code.should.equal(200)
-        done()
-      }
-      this.ProjectController.deleteProject(this.req, this.res)
-    })
-
-    it('should tell the project deleter to delete when forever=true', function(done) {
-      this.req.query = { forever: 'true' }
+    it('should call the project deleter', function(done) {
       this.res.sendStatus = code => {
         this.ProjectDeleter.deleteProject
           .calledWith(this.project_id, {

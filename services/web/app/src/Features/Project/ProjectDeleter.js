@@ -118,23 +118,6 @@ const ProjectDeleter = {
     )
   },
 
-  legacyArchiveProject(project_id, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return Project.update(
-      { _id: project_id },
-      { $set: { archived: true } },
-      function(err) {
-        if (err != null) {
-          logger.warn({ err }, 'problem archived project')
-          return callback(err)
-        }
-        return callback()
-      }
-    )
-  },
-
   restoreProject(project_id, callback) {
     if (callback == null) {
       callback = function(error) {}
