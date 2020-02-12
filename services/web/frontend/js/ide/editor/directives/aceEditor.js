@@ -154,12 +154,9 @@ define([
 
         if (scope.spellCheck) {
           // only enable spellcheck when explicitly required
-          const spellCheckCache =
-            $cacheFactory.get(`spellCheck-${scope.name}`) ||
-            $cacheFactory(`spellCheck-${scope.name}`, { capacity: 1000 })
           spellCheckManager = new SpellCheckManager(
             scope,
-            spellCheckCache,
+            $cacheFactory,
             $http,
             $q,
             new SpellCheckAdapter(editor)
@@ -893,63 +890,63 @@ define([
 
       template: `\
 <div class="ace-editor-wrapper">
-	<div
-		class="undo-conflict-warning alert alert-danger small"
-		ng-show="undo.show_remote_warning"
-	>
-		<strong>Watch out!</strong>
-		We had to undo some of your collaborators changes before we could undo yours.
-		<a
-			href="#"
-			class="pull-right"
-			ng-click="undo.show_remote_warning = false"
-		>Dismiss</a>
-	</div>
-	<div class="ace-editor-body"></div>
-	<spell-menu
-		open="spellMenu.open"
-		top="spellMenu.top"
-		left="spellMenu.left"
-		layout-from-bottom="spellMenu.layoutFromBottom"
-		highlight="spellMenu.highlight"
-		replace-word="replaceWord(highlight, suggestion)"
-		learn-word="learnWord(highlight)"
-	></spell-menu>
-	<div
-		class="annotation-label"
-		ng-show="annotationLabel.show"
-		ng-style="{
-			position: 'absolute',
-			left:     annotationLabel.left,
-			right:    annotationLabel.right,
-			bottom:   annotationLabel.bottom,
-			top:      annotationLabel.top,
-			'background-color': annotationLabel.backgroundColor
-		}"
-	>
-		{{ annotationLabel.text }}
-	</div>
+  <div
+    class="undo-conflict-warning alert alert-danger small"
+    ng-show="undo.show_remote_warning"
+  >
+    <strong>Watch out!</strong>
+    We had to undo some of your collaborators changes before we could undo yours.
+    <a
+      href="#"
+      class="pull-right"
+      ng-click="undo.show_remote_warning = false"
+    >Dismiss</a>
+  </div>
+  <div class="ace-editor-body"></div>
+  <spell-menu
+    open="spellMenu.open"
+    top="spellMenu.top"
+    left="spellMenu.left"
+    layout-from-bottom="spellMenu.layoutFromBottom"
+    highlight="spellMenu.highlight"
+    replace-word="replaceWord(highlight, suggestion)"
+    learn-word="learnWord(highlight)"
+  ></spell-menu>
+  <div
+    class="annotation-label"
+    ng-show="annotationLabel.show"
+    ng-style="{
+      position: 'absolute',
+      left:     annotationLabel.left,
+      right:    annotationLabel.right,
+      bottom:   annotationLabel.bottom,
+      top:      annotationLabel.top,
+      'background-color': annotationLabel.backgroundColor
+    }"
+  >
+    {{ annotationLabel.text }}
+  </div>
 
-	<a
-		href
-		class="highlights-before-label btn btn-info btn-xs"
-		ng-show="updateLabels.highlightsBefore > 0"
-		ng-click="gotoHighlightAbove()"
-	>
-		<i class="fa fa-fw fa-arrow-up"></i>
-		{{ updateLabels.highlightsBefore }} more update{{ updateLabels.highlightsBefore > 1 && "" || "s" }} above
-	</a>
+  <a
+    href
+    class="highlights-before-label btn btn-info btn-xs"
+    ng-show="updateLabels.highlightsBefore > 0"
+    ng-click="gotoHighlightAbove()"
+  >
+    <i class="fa fa-fw fa-arrow-up"></i>
+    {{ updateLabels.highlightsBefore }} more update{{ updateLabels.highlightsBefore > 1 && "" || "s" }} above
+  </a>
 
-	<a
-		href
-		class="highlights-after-label btn btn-info btn-xs"
-		ng-show="updateLabels.highlightsAfter > 0"
-		ng-click="gotoHighlightBelow()"
-	>
-		<i class="fa fa-fw fa-arrow-down"></i>
-		{{ updateLabels.highlightsAfter }} more update{{ updateLabels.highlightsAfter > 1 && "" || "s" }} below
+  <a
+    href
+    class="highlights-after-label btn btn-info btn-xs"
+    ng-show="updateLabels.highlightsAfter > 0"
+    ng-click="gotoHighlightBelow()"
+  >
+    <i class="fa fa-fw fa-arrow-down"></i>
+    {{ updateLabels.highlightsAfter }} more update{{ updateLabels.highlightsAfter > 1 && "" || "s" }} below
 
-	</a>
+  </a>
 </div>\
 `
     }
@@ -958,37 +955,37 @@ define([
   function monkeyPatchSearch($rootScope, $compile) {
     const searchHtml = `\
 <div class="ace_search right">
-	<a href type="button" action="hide" class="ace_searchbtn_close">
-		<i class="fa fa-fw fa-times"></i>
-	</a>
-	<div class="ace_search_form">
-		<input class="ace_search_field form-control input-sm" placeholder="Search for" spellcheck="false"></input>
-		<div class="btn-group">
-			<button type="button" action="findNext" class="ace_searchbtn next btn btn-default btn-sm">
-				<i class="fa fa-chevron-down fa-fw"></i>
-			</button>
-			<button type="button" action="findPrev" class="ace_searchbtn prev btn btn-default btn-sm">
-				<i class="fa fa-chevron-up fa-fw"></i>
-			</button>
-		</div>
-	</div>
-	<div class="ace_replace_form">
-		<input class="ace_search_field form-control input-sm" placeholder="Replace with" spellcheck="false"></input>
-		<div class="btn-group">
-			<button type="button" action="replaceAndFindNext" class="ace_replacebtn btn btn-default btn-sm">Replace</button>
-			<button type="button" action="replaceAll" class="ace_replacebtn btn btn-default btn-sm">All</button>
-		</div>
-	</div>
-	<div class="ace_search_options">
-		<div class="btn-group">
-			<button action="toggleRegexpMode" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="RegExp Search">.*</button>
-			<button action="toggleCaseSensitive" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="CaseSensitive Search">Aa</button>
-			<button action="toggleWholeWords" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="Whole Word Search">"..."</button>
-			<button action="searchInSelection" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="Search Within Selection"><i class="fa fa-align-left"></i></button>
-		</div>
-		<span class="ace_search_counter"></span>
-	</div>
-	<div action="toggleReplace" class="hidden"></div>
+  <a href type="button" action="hide" class="ace_searchbtn_close">
+    <i class="fa fa-fw fa-times"></i>
+  </a>
+  <div class="ace_search_form">
+    <input class="ace_search_field form-control input-sm" placeholder="Search for" spellcheck="false"></input>
+    <div class="btn-group">
+      <button type="button" action="findNext" class="ace_searchbtn next btn btn-default btn-sm">
+        <i class="fa fa-chevron-down fa-fw"></i>
+      </button>
+      <button type="button" action="findPrev" class="ace_searchbtn prev btn btn-default btn-sm">
+        <i class="fa fa-chevron-up fa-fw"></i>
+      </button>
+    </div>
+  </div>
+  <div class="ace_replace_form">
+    <input class="ace_search_field form-control input-sm" placeholder="Replace with" spellcheck="false"></input>
+    <div class="btn-group">
+      <button type="button" action="replaceAndFindNext" class="ace_replacebtn btn btn-default btn-sm">Replace</button>
+      <button type="button" action="replaceAll" class="ace_replacebtn btn btn-default btn-sm">All</button>
+    </div>
+  </div>
+  <div class="ace_search_options">
+    <div class="btn-group">
+      <button action="toggleRegexpMode" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="RegExp Search">.*</button>
+      <button action="toggleCaseSensitive" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="CaseSensitive Search">Aa</button>
+      <button action="toggleWholeWords" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="Whole Word Search">"..."</button>
+      <button action="searchInSelection" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="Search Within Selection"><i class="fa fa-align-left"></i></button>
+    </div>
+    <span class="ace_search_counter"></span>
+  </div>
+  <div action="toggleReplace" class="hidden"></div>
 </div>\
 `
 

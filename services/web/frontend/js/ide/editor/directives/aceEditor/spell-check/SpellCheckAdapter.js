@@ -1,23 +1,10 @@
-/* eslint-disable
-    max-len,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 define([
   'ace/ace',
   'ide/editor/directives/aceEditor/spell-check/HighlightedWordManager'
 ], function(Ace, HighlightedWordManager) {
-  let SpellCheckAdapter
   const { Range } = ace.require('ace/range')
 
-  return (SpellCheckAdapter = class SpellCheckAdapter {
+  class SpellCheckAdapter {
     constructor(editor) {
       this.replaceWord = this.replaceWord.bind(this)
       this.editor = editor
@@ -26,6 +13,22 @@ define([
 
     getLines() {
       return this.editor.getValue().split('\n')
+    }
+
+    getLineCount() {
+      return this.editor.session.getLength()
+    }
+
+    getFirstVisibleRowNum() {
+      return this.editor.renderer.layerConfig.firstRow
+    }
+
+    getLastVisibleRowNum() {
+      return this.editor.renderer.layerConfig.lastRow
+    }
+
+    getLinesByRows(rows) {
+      return rows.map(rowIdx => this.editor.session.doc.getLine(rowIdx))
     }
 
     normalizeChangeEvent(e) {
@@ -41,7 +44,7 @@ define([
     }
 
     preventContextMenuEventDefault(e) {
-      return e.domEvent.preventDefault()
+      e.domEvent.preventDefault()
     }
 
     getHighlightFromCoords(coords) {
@@ -68,7 +71,7 @@ define([
       const startColumn = highlight.range.start.column
       const endColumn = highlight.range.end.column
 
-      return this.editor
+      this.editor
         .getSession()
         .getSelection()
         .setSelectionRange(new Range(row, startColumn, row, endColumn))
@@ -84,7 +87,9 @@ define([
         .replace(new Range(row, startColumn, row, endColumn), newWord)
 
       // Bring editor back into focus after clicking on suggestion
-      return this.editor.focus()
+      this.editor.focus()
     }
-  })
+  }
+
+  return SpellCheckAdapter
 })

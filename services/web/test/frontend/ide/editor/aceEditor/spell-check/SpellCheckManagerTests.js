@@ -15,7 +15,6 @@ define([
   describe('SpellCheckManager', function() {
     beforeEach(function(done) {
       this.timelord = sinon.useFakeTimers()
-
       window.user = { id: 1 }
       window.csrfToken = 'token'
       this.scope = {
@@ -29,17 +28,19 @@ define([
         addHighlight: sinon.stub()
       }
       this.adapter = {
-        getLines: sinon.stub(),
+        getLineCount: sinon.stub(),
+        getFirstVisibleRowNum: sinon.stub(),
+        getLastVisibleRowNum: sinon.stub(),
+        getLinesByRows: sinon.stub(),
         highlightedWordManager: this.highlightedWordManager
       }
       return inject(($q, $http, $httpBackend, $cacheFactory) => {
         this.$http = $http
         this.$q = $q
         this.$httpBackend = $httpBackend
-        const cache = $cacheFactory('spellCheckTest', { capacity: 1000 })
         this.spellCheckManager = new SpellCheckManager(
           this.scope,
-          cache,
+          $cacheFactory,
           $http,
           $q,
           this.adapter
@@ -52,7 +53,7 @@ define([
       return this.timelord.restore()
     })
 
-    it('runs a full check soon after init', function() {
+    it('adds an highlight when a misspelling is found', function() {
       this.$httpBackend.when('POST', '/spelling/check').respond({
         misspellings: [
           {
@@ -61,11 +62,225 @@ define([
           }
         ]
       })
-      this.adapter.getLines.returns(['oppozition'])
+      this.adapter.getLinesByRows.returns(['oppozition'])
       this.spellCheckManager.init()
       this.timelord.tick(200)
       this.$httpBackend.flush()
-      return expect(this.highlightedWordManager.addHighlight).to.have.been
-        .called
+      expect(this.highlightedWordManager.addHighlight).to.have.been.called
+    })
+
+    describe('runSpellCheck', function() {
+      beforeEach(function() {
+        this.adapter.getLineCount.returns(10)
+        this.adapter.getFirstVisibleRowNum.returns(3)
+        this.adapter.getLastVisibleRowNum.returns(5)
+        this.adapter.getLinesByRows.returns([
+          'Lorem ipsum dolor sit amet',
+          'consectetur adipisicing elit',
+          'sed do eiusmod'
+        ])
+        this.$httpBackend.when('POST', '/spelling/check').respond({
+          misspellings: [
+            {
+              index: 0,
+              suggestions: ['opposition']
+            }
+          ]
+        })
+      })
+      it('only checks visible lines', function() {
+        this.spellCheckManager.init()
+        this.timelord.tick(200)
+        this.$httpBackend.flush()
+        expect(this.adapter.getLinesByRows).to.have.been.calledWith([3, 4, 5])
+      })
+
+      it('ignores updated lines', function() {
+        this.spellCheckManager.init()
+        this.spellCheckManager.changedLines[4] = false
+        this.timelord.tick(200)
+        this.$httpBackend.flush()
+        expect(this.adapter.getLinesByRows).to.have.been.calledWith([3, 5])
+      })
+
+      it('clears highlights for changed lines', function() {
+        this.spellCheckManager.init()
+        this.timelord.tick(200)
+        this.$httpBackend.flush()
+        expect(
+          this.highlightedWordManager.clearRow.getCall(0).args[0]
+        ).to.equal(3)
+        expect(
+          this.highlightedWordManager.clearRow.getCall(1).args[0]
+        ).to.equal(4)
+        expect(
+          this.highlightedWordManager.clearRow.getCall(2).args[0]
+        ).to.equal(5)
+      })
+
+      it('initially flags all lines as dirty', function() {
+        this.spellCheckManager.init()
+        expect(this.spellCheckManager.changedLines)
+          .to.have.lengthOf(10)
+          .and.to.not.include(false)
+      })
+
+      it('initially flags checked lines as non-dirty', function() {
+        this.spellCheckManager.init()
+        this.timelord.tick(200)
+        this.$httpBackend.flush()
+        expect(this.spellCheckManager.changedLines[2]).to.equal(true)
+        expect(this.spellCheckManager.changedLines[3]).to.equal(false)
+        expect(this.spellCheckManager.changedLines[4]).to.equal(false)
+        expect(this.spellCheckManager.changedLines[5]).to.equal(false)
+        expect(this.spellCheckManager.changedLines[6]).to.equal(true)
+      })
+    })
+
+    describe('cache', function() {
+      beforeEach(function() {
+        this.adapter.getLineCount.returns(1)
+        this.adapter.getFirstVisibleRowNum.returns(1)
+        this.adapter.getLastVisibleRowNum.returns(1)
+        this.adapter.getLinesByRows.returns(['Lorem ipsum dolor'])
+        this.$httpBackend.when('POST', '/spelling/check').respond({
+          misspellings: [
+            {
+              index: 0,
+              suggestions: ['foobarbaz']
+            }
+          ]
+        })
+      })
+
+      it('adds already checked words to the spellchecker cache', function() {
+        expect(this.spellCheckManager.cache.info().size).to.equal(0)
+        this.spellCheckManager.init()
+        this.timelord.tick(200)
+        this.$httpBackend.flush()
+        expect(this.spellCheckManager.cache.info().size).to.equal(3)
+      })
+
+      it('adds misspeled word suggestions to the cache', function() {
+        this.spellCheckManager.init()
+        this.timelord.tick(200)
+        this.$httpBackend.flush()
+
+        expect(
+          this.spellCheckManager.cache.get(
+            `${this.scope.spellCheckLanguage}:Lorem`
+          )
+        ).to.eql(['foobarbaz'])
+      })
+
+      it('adds non-misspeled words to the cache as a boolean', function() {
+        this.spellCheckManager.init()
+        this.timelord.tick(200)
+        this.$httpBackend.flush()
+        expect(
+          this.spellCheckManager.cache.get(
+            `${this.scope.spellCheckLanguage}:ipsum`
+          )
+        ).to.equal(true)
+      })
+    })
+
+    describe('backend', function() {
+      beforeEach(function() {
+        this.adapter.getLineCount.returns(1)
+        this.adapter.getFirstVisibleRowNum.returns(1)
+        this.adapter.getLastVisibleRowNum.returns(1)
+        this.adapter.getLinesByRows.returns(['Lorem ipsum dolor'])
+      })
+
+      it('hits the backend with all words at startup', function() {
+        this.$httpBackend
+          .expect('POST', '/spelling/check', {
+            language: this.scope.spellCheckLanguage,
+            words: ['Lorem', 'ipsum', 'dolor'],
+            token: window.user.id,
+            _csrf: window.csrfToken
+          })
+          .respond({
+            misspellings: [
+              {
+                index: 0,
+                suggestions: ['foobarbaz']
+              }
+            ]
+          })
+        this.spellCheckManager.init()
+        this.timelord.tick(200)
+        this.$httpBackend.flush()
+      })
+
+      it('does not hit the backend when all words are already in the cache', function() {
+        this.$httpBackend
+          .expect('POST', '/spelling/check', {
+            language: this.scope.spellCheckLanguage,
+            words: ['Lorem', 'ipsum', 'dolor'],
+            token: window.user.id,
+            _csrf: window.csrfToken
+          })
+          .respond({
+            misspellings: [
+              {
+                index: 0,
+                suggestions: ['foobarbaz']
+              }
+            ]
+          })
+        this.spellCheckManager.init()
+        this.timelord.tick(200)
+        this.$httpBackend.flush()
+        this.spellCheckManager.init()
+        this.timelord.tick(200)
+      })
+
+      it('hits the backend only with non-cached words', function() {
+        this.$httpBackend
+          .expect('POST', '/spelling/check', {
+            language: this.scope.spellCheckLanguage,
+            words: ['Lorem', 'ipsum', 'dolor'],
+            token: window.user.id,
+            _csrf: window.csrfToken
+          })
+          .respond({
+            misspellings: [
+              {
+                index: 0,
+                suggestions: ['foobarbaz']
+              }
+            ]
+          })
+        this.spellCheckManager.init()
+        this.timelord.tick(200)
+        this.$httpBackend.flush()
+
+        this.adapter.getLinesByRows.returns(['Lorem ipsum dolor sit amet'])
+        this.$httpBackend
+          .expect('POST', '/spelling/check', {
+            language: this.scope.spellCheckLanguage,
+            words: ['sit', 'amet'],
+            token: window.user.id,
+            _csrf: window.csrfToken
+          })
+          .respond({
+            misspellings: [
+              {
+                index: 0,
+                suggestions: ['bazbarfoo']
+              }
+            ]
+          })
+        this.spellCheckManager.init()
+        this.timelord.tick(200)
+        this.$httpBackend.flush()
+      })
+
+      afterEach(function() {
+        this.$httpBackend.verifyNoOutstandingRequest()
+        this.$httpBackend.verifyNoOutstandingExpectation()
+      })
     })
   }))
