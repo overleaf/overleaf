@@ -20,7 +20,16 @@ const FileTypeManager = {
     '.lbx',
     '.bbx',
     '.cbx',
-    '.m'
+    '.m',
+    '.lco',
+    '.dtx',
+    '.ins',
+    '.ist',
+    '.def',
+    '.clo',
+    '.ldf',
+    '.rmd',
+    '.lua'
   ],
 
   IGNORE_EXTENSIONS: [
