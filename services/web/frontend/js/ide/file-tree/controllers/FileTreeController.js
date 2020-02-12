@@ -192,12 +192,6 @@ define(['base'], function(App) {
   App.controller('NewDocModalController', function($scope, ide, $timeout) {
     $scope.inputs = { name: 'name.tex' }
 
-    const validate = function() {
-      const { name } = $scope.inputs
-      $scope.state.valid = name != null && name.length > 0
-    }
-    $scope.$watch('inputs.name', validate)
-
     $timeout(() => $scope.$broadcast('open'), 200)
 
     return $scope.$on('create', function() {

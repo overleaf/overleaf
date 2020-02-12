@@ -47,7 +47,7 @@ script(type='text/ng-template', id='newFileModalTemplate')
 							div(ng-switch="error")
 								span(ng-switch-when="already exists") #{translate("file_already_exists")}
 								span(ng-switch-default) {{error}}
-						div.alert.alert-danger.row-spaced-small(ng-show="newDocForm.name.$error.validFile")
+						div.alert.alert-danger.row-spaced-small(ng-show="newDocForm.name.$error.validFile && newDocForm.name.$viewValue.length")
 							| #{translate('files_cannot_include_invalid_characters')}
 					div(ng-if="type == 'upload'", ng-controller="UploadFileModalController")
 						.alert.alert-warning.small(ng-if="tooManyFiles") #{translate("maximum_files_uploaded_together", {max:"{{max_files}}"})}
