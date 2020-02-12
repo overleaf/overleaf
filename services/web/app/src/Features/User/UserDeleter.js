@@ -88,22 +88,26 @@ async function ensureCanDeleteUser(user) {
 }
 
 async function _createDeletedUser(user, options) {
-  await DeletedUser.create({
-    user: user,
-    deleterData: {
-      deletedAt: new Date(),
-      deleterId: options.deleterUser ? options.deleterUser._id : undefined,
-      deleterIpAddress: options.ipAddress,
-      deletedUserId: user._id,
-      deletedUserLastLoggedIn: user.lastLoggedIn,
-      deletedUserSignUpDate: user.signUpDate,
-      deletedUserLoginCount: user.loginCount,
-      deletedUserReferralId: user.referal_id,
-      deletedUserReferredUsers: user.refered_users,
-      deletedUserReferredUserCount: user.refered_user_count,
-      deletedUserOverleafId: user.overleaf ? user.overleaf.id : undefined
-    }
-  })
+  await DeletedUser.update(
+    { 'deleterData.deletedUserId': user._id },
+    {
+      user: user,
+      deleterData: {
+        deletedAt: new Date(),
+        deleterId: options.deleterUser ? options.deleterUser._id : undefined,
+        deleterIpAddress: options.ipAddress,
+        deletedUserId: user._id,
+        deletedUserLastLoggedIn: user.lastLoggedIn,
+        deletedUserSignUpDate: user.signUpDate,
+        deletedUserLoginCount: user.loginCount,
+        deletedUserReferralId: user.referal_id,
+        deletedUserReferredUsers: user.refered_users,
+        deletedUserReferredUserCount: user.refered_user_count,
+        deletedUserOverleafId: user.overleaf ? user.overleaf.id : undefined
+      }
+    },
+    { upsert: true }
+  )
 }
 
 async function _cleanupUser(user) {

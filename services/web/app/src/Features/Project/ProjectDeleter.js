@@ -1,16 +1,3 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { db, ObjectId } = require('../../infrastructure/mongojs')
 const { promisify, callbackify } = require('util')
 const { Project } = require('../../models/Project')
@@ -27,52 +14,60 @@ const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const moment = require('moment')
 
-const ProjectDeleter = {
-  markAsDeletedByExternalSource(project_id, callback) {
-    if (callback == null) {
-      callback = function(error) {}
+function logWarningOnError(msg) {
+  return function(err) {
+    if (err) {
+      logger.warn({ err }, msg)
     }
+  }
+}
+
+const ProjectDeleter = {
+  markAsDeletedByExternalSource(projectId, callback) {
+    callback =
+      callback ||
+      logWarningOnError('error marking project as deleted by external source')
     logger.log(
-      { project_id },
+      { project_id: projectId },
       'marking project as deleted by external data source'
     )
-    const conditions = { _id: project_id }
+    const conditions = { _id: projectId }
     const update = { deletedByExternalDataSource: true }
 
-    return Project.update(conditions, update, {}, err =>
+    Project.update(conditions, update, {}, err => {
+      if (err) {
+        return callback(err)
+      }
       require('../Editor/EditorController').notifyUsersProjectHasBeenDeletedOrRenamed(
-        project_id,
-        () => callback()
+        projectId,
+        () => callback() // don't return error, as project has been updated
       )
-    )
+    })
   },
 
-  unmarkAsDeletedByExternalSource(project_id, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-
-    const conditions = { _id: project_id }
+  unmarkAsDeletedByExternalSource(projectId, callback) {
+    callback =
+      callback ||
+      logWarningOnError('error unmarking project as deleted by external source')
+    const conditions = { _id: projectId }
     const update = { deletedByExternalDataSource: false }
-    return Project.update(conditions, update, {}, callback)
+    Project.update(conditions, update, {}, callback)
   },
 
-  deleteUsersProjects(user_id, callback) {
-    return Project.find({ owner_ref: user_id }, function(error, projects) {
-      if (error != null) {
+  deleteUsersProjects(userId, callback) {
+    Project.find({ owner_ref: userId }, function(error, projects) {
+      if (error) {
         return callback(error)
       }
-      return async.each(
+      async.eachLimit(
         projects,
+        5,
         (project, cb) => ProjectDeleter.deleteProject(project._id, cb),
         function(err) {
-          if (err != null) {
+          if (err) {
             return callback(err)
           }
-          return CollaboratorsHandler.removeUserFromAllProjects(
-            user_id,
-            callback
-          )
+          CollaboratorsHandler.removeUserFromAllProjects(userId, callback)
         }
       )
     })
@@ -90,43 +85,27 @@ const ProjectDeleter = {
         }
       },
       function(err, deletedProjects) {
-        if (err != null) {
+        if (err) {
           logger.err({ err }, 'Problem with finding deletedProject')
           return callback(err)
         }
 
-        if (deletedProjects.length) {
-          async.eachSeries(
-            deletedProjects,
-            function(deletedProject, cb) {
-              ProjectDeleter.expireDeletedProject(
-                deletedProject.deleterData.deletedProjectId,
-                cb
-              )
-            },
-            function(err) {
-              if (err != null) {
-                logger.err({ err })
-              }
-              callback(err)
-            }
-          )
-        } else {
-          callback(err)
-        }
+        async.eachSeries(
+          deletedProjects,
+          function(deletedProject, cb) {
+            ProjectDeleter.expireDeletedProject(
+              deletedProject.deleterData.deletedProjectId,
+              cb
+            )
+          },
+          callback
+        )
       }
     )
   },
 
-  restoreProject(project_id, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return Project.update(
-      { _id: project_id },
-      { $unset: { archived: true } },
-      callback
-    )
+  restoreProject(projectId, callback) {
+    Project.update({ _id: projectId }, { $unset: { archived: true } }, callback)
   }
 }
 
@@ -211,14 +190,14 @@ async function untrashProject(projectId, userId) {
   }
 }
 
-async function deleteProject(project_id, options = {}) {
+async function deleteProject(projectId, options = {}) {
   try {
-    let project = await Project.findOne({ _id: project_id }).exec()
+    const project = await Project.findOne({ _id: projectId }).exec()
     if (!project) {
       throw new Errors.NotFoundError('project not found')
     }
 
-    let deleterData = {
+    const deleterData = {
       deletedAt: new Date(),
       deleterId:
         options.deleterUser != null ? options.deleterUser._id : undefined,
@@ -246,35 +225,36 @@ async function deleteProject(project_id, options = {}) {
       key => (deleterData[key] === undefined ? delete deleterData[key] : '')
     )
 
-    await DeletedProject.create({
-      project: project,
-      deleterData: deleterData
-    })
+    await DeletedProject.update(
+      { 'deleterData.deletedProjectId': projectId },
+      { project, deleterData },
+      { upsert: true }
+    )
 
     const flushProjectToMongoAndDelete = promisify(
       DocumentUpdaterHandler.flushProjectToMongoAndDelete
     )
-    await flushProjectToMongoAndDelete(project_id)
+    await flushProjectToMongoAndDelete(projectId)
 
-    let member_ids = await CollaboratorsGetter.promises.getMemberIds(project_id)
+    const memberIds = await CollaboratorsGetter.promises.getMemberIds(projectId)
 
     // fire these jobs in the background
-    Array.from(member_ids).forEach(member_id =>
-      TagsHandler.removeProjectFromAllTags(member_id, project_id, () => {})
+    Array.from(memberIds).forEach(memberId =>
+      TagsHandler.removeProjectFromAllTags(memberId, projectId, () => {})
     )
 
-    await Project.remove({ _id: project_id }).exec()
+    await Project.remove({ _id: projectId }).exec()
   } catch (err) {
     logger.warn({ err }, 'problem deleting project')
     throw err
   }
 
-  logger.log({ project_id }, 'successfully deleted project')
+  logger.log({ project_id: projectId }, 'successfully deleted project')
 }
 
-async function undeleteProject(project_id) {
+async function undeleteProject(projectId) {
   let deletedProject = await DeletedProject.findOne({
-    'deleterData.deletedProjectId': project_id
+    'deleterData.deletedProjectId': projectId
   }).exec()
 
   if (!deletedProject) {
