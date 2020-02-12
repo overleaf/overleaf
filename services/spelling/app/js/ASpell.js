@@ -32,7 +32,7 @@ try {
 }
 
 // write the cache every 30 minutes
-setInterval(function() {
+const cacheDump = setInterval(function() {
   const dump = JSON.stringify(cache.dump())
   return fs.writeFile(cacheFsPathTmp, dump, function(err) {
     if (err != null) {
@@ -186,3 +186,4 @@ ASpell.promises = promises
 module.exports = ASpell
 
 var WorkerPool = new ASpellWorkerPool()
+module.exports.cacheDump = cacheDump

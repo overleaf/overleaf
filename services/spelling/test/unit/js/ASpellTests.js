@@ -30,6 +30,9 @@ describe('ASpell', function() {
       }
     }))
   })
+  afterEach(function () {
+    clearInterval(this.ASpell.cacheDump)
+  })
 
   describe('a correctly spelled word', function() {
     beforeEach(function(done) {
