@@ -1,4 +1,6 @@
 #!/bin/sh
+set -e
+
 which node
 which grunt
 ls -al /var/www/sharelatex/migrations

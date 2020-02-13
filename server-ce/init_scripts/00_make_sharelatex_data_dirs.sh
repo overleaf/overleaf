@@ -1,4 +1,6 @@
 #!/bin/sh
+set -e
+
 mkdir -p /var/lib/sharelatex/data
 chown www-data:www-data /var/lib/sharelatex/data
 

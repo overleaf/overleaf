@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+set -e -o pipefail
 
 # generate secrets and defines them as environment variables
 # https://github.com/phusion/baseimage-docker#centrally-defining-your-own-environment-variables
