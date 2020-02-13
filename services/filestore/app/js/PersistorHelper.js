@@ -12,7 +12,9 @@ module.exports = {
   verifyMd5,
   getMeteredStream,
   waitForStreamReady,
-  wrapError
+  wrapError,
+  hexToBase64,
+  base64ToHex
 }
 
 // returns a promise which resolves with the md5 hash of the stream
@@ -102,4 +104,12 @@ function wrapError(error, message, params, ErrorType) {
       info: params
     }).withCause(error)
   }
+}
+
+function base64ToHex(base64) {
+  return Buffer.from(base64, 'base64').toString('hex')
+}
+
+function hexToBase64(hex) {
+  return Buffer.from(hex, 'hex').toString('base64')
 }

@@ -10,16 +10,12 @@ const PersistorHelper = require('./PersistorHelper')
 
 const pipeline = promisify(Stream.pipeline)
 
-function base64ToHex(base64) {
-  return Buffer.from(base64, 'base64').toString('hex')
-}
-
 // both of these settings will be null by default except for tests
 // that's OK - GCS uses the locally-configured service account by default
 const storage = new Storage(settings.filestore.gcs)
 // workaround for broken uploads with custom endpoints:
 // https://github.com/googleapis/nodejs-storage/issues/898
-if (settings.filestore.gcs.apiEndpoint) {
+if (settings.filestore.gcs && settings.filestore.gcs.apiEndpoint) {
   storage.interceptors.push({
     request: function(reqOpts) {
       const url = new URL(reqOpts.uri)
@@ -95,7 +91,7 @@ async function sendStream(bucket, key, readStream, sourceMd5) {
     if (sourceMd5) {
       writeOptions.validation = 'md5'
       writeOptions.metadata = {
-        md5Hash: sourceMd5
+        md5Hash: PersistorHelper.hexToBase64(sourceMd5)
       }
     }
 
@@ -123,7 +119,7 @@ async function sendStream(bucket, key, readStream, sourceMd5) {
   }
 }
 
-async function getFileStream(bucket, key, opts) {
+async function getFileStream(bucket, key, opts = {}) {
   if (opts.end) {
     // S3 (and http range headers) treat 'end' as inclusive, so increase this by 1
     opts.end++
@@ -174,7 +170,7 @@ async function getFileMd5Hash(bucket, key) {
       .bucket(bucket)
       .file(key)
       .getMetadata()
-    return base64ToHex(metadata[0].md5Hash)
+    return PersistorHelper.base64ToHex(metadata[0].md5Hash)
   } catch (err) {
     throw PersistorHelper.wrapError(
       err,

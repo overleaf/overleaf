@@ -46,10 +46,6 @@ const S3Persistor = {
 
 module.exports = S3Persistor
 
-function hexToBase64(hex) {
-  return Buffer.from(hex, 'hex').toString('base64')
-}
-
 async function sendFile(bucketName, key, fsPath) {
   let readStream
   try {
@@ -72,7 +68,7 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
     let b64Hash
 
     if (sourceMd5) {
-      b64Hash = hexToBase64(sourceMd5)
+      b64Hash = PersistorHelper.hexToBase64(sourceMd5)
     } else {
       hashPromise = PersistorHelper.calculateStreamMd5(readStream)
     }
