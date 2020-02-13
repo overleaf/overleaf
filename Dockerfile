@@ -4,12 +4,6 @@
 
 FROM sharelatex/sharelatex-base:latest
 
-ENV baseDir .
-
-
-# Install app settings files
-# --------------------------
-ADD ${baseDir}/settings.coffee /etc/sharelatex/settings.coffee
 ENV SHARELATEX_CONFIG /etc/sharelatex/settings.coffee
 
 
@@ -19,30 +13,43 @@ RUN git clone https://github.com/overleaf/overleaf.git \
 	--depth 1 /var/www/sharelatex
 
 
-# Install dependencies needed to run configuration scripts
-# --------------------------------------------------------
-ADD ${baseDir}/package.json /var/www/package.json
+# Copy build dependencies
+# -----------------------
 ADD ${baseDir}/git-revision.sh /var/www/git-revision.sh
-RUN cd /var/www && npm install
-
-
-# Replace overleaf/config/services.js with the list of available
-# services in Overleaf Community Edition
-# --------------------------------------------------------------
 ADD ${baseDir}/services.js /var/www/sharelatex/config/services.js
 
 
 # Checkout services
 # -----------------
-RUN cd /var/www/sharelatex && \
-	npm install && grunt install;
-
-
-# install and compile services
+RUN cd /var/www/sharelatex \
+&&    npm install \
+&&    grunt install \
+  \
+# Cleanup not needed artifacts
 # ----------------------------
-RUN bash -c 'cd /var/www/sharelatex && source ./bin/install-services'
-RUN bash -c 'cd /var/www/sharelatex && source ./bin/compile-services'
+&&  rm -rf /root/.cache /root/.npm $(find /tmp/ -mindepth 1 -maxdepth 1) \
+# Stores the version installed for each service
+# ---------------------------------------------
+&&  cd /var/www \
+&&    ./git-revision.sh > revisions.txt \
+  \
+# Cleanup the git history
+# -------------------
+&&  rm -rf $(find /var/www/sharelatex -name .git)
 
+# Install npm dependencies
+# ------------------------
+RUN cd /var/www/sharelatex \
+&&    bash ./bin/install-services \
+  \
+# Cleanup not needed artifacts
+# ----------------------------
+&&  rm -rf /root/.cache /root/.npm $(find /tmp/ -mindepth 1 -maxdepth 1)
+
+# Compile CoffeeScript
+# --------------------
+RUN cd /var/www/sharelatex \
+&&    bash ./bin/compile-services
 
 # Links CLSI sycntex to its default location
 # ------------------------------------------
@@ -69,11 +76,9 @@ ADD ${baseDir}/logrotate/sharelatex /etc/logrotate.d/sharelatex
 # --------------------------------------------------
 COPY ${baseDir}/init_scripts/ /etc/my_init.d/
 
-
-# Stores the version installed for each service
-# ---------------------------------------------
-RUN cd /var/www && ./git-revision.sh > revisions.txt
-
+# Copy app settings files
+# -----------------------
+COPY ${baseDir}/settings.coffee /etc/sharelatex/settings.coffee
 
 # Set Environment Variables
 # --------------------------------
