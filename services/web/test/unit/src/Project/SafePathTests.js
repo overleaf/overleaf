@@ -112,6 +112,18 @@ describe('SafePath', function() {
       const result = this.SafePath.isCleanFilename('foo\\bar')
       return result.should.equal(false)
     })
+
+    it('should reject filenames regardless of order  (/g) for bad characters', function() {
+      const result1 = this.SafePath.isCleanFilename('foo*bar.tex') // * is not allowed
+      const result2 = this.SafePath.isCleanFilename('*foobar.tex') // bad char location is before previous match
+      return result1.should.equal(false) && result2.should.equal(false)
+    })
+
+    it('should reject filenames regardless of order (/g) for bad filenames', function() {
+      const result1 = this.SafePath.isCleanFilename('foo ') // trailing space
+      const result2 = this.SafePath.isCleanFilename(' foobar') // leading space, match location is before previous match
+      return result1.should.equal(false) && result2.should.equal(false)
+    })
   })
 
   describe('isCleanPath', function() {

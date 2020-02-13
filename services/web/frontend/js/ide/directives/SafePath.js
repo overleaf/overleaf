@@ -86,8 +86,8 @@ prototype\
     isCleanFilename(filename) {
       return (
         SafePath.isAllowedLength(filename) &&
-        !BADCHAR_RX.test(filename) &&
-        !BADFILE_RX.test(filename)
+        !filename.match(BADCHAR_RX) &&
+        !filename.match(BADFILE_RX)
       )
     },
 
