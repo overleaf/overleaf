@@ -81,6 +81,9 @@ settings =
 		lock: redisConfig
 		history: redisConfig
 		websessions: redisConfig
+		api: redisConfig
+		pubsub: redisConfig
+		project_history: redisConfig
 
 	# The compile server (the clsi) uses a SQL database to cache files and
 	# meta-data. sqllite is the default, and the load is low enough that this will
