@@ -70,7 +70,10 @@ describe('FSPersistorTests', function() {
         glob,
         rimraf,
         stream,
-        crypto
+        crypto,
+        // imported by PersistorHelper but otherwise unused here
+        'stream-meter': {},
+        'logger-sharelatex': {}
       },
       globals: { console }
     })
