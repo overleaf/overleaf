@@ -675,25 +675,6 @@ describe('S3PersistorTests', function() {
         })
       })
     })
-
-    describe('when the file does not exist', function() {
-      let error
-
-      beforeEach(async function() {
-        S3Client.deleteObject = sinon.stub().returns({
-          promise: sinon.stub().rejects(S3NotFoundError)
-        })
-        try {
-          await S3Persistor.promises.deleteFile(bucket, key)
-        } catch (err) {
-          error = err
-        }
-      })
-
-      it('should throw a NotFoundError', function() {
-        expect(error).to.be.an.instanceOf(Errors.NotFoundError)
-      })
-    })
   })
 
   describe('deleteDirectory', function() {
