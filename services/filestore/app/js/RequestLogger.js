@@ -15,13 +15,8 @@ class RequestLogger {
     this._logMessage = message
   }
 
-  static attach(app) {
-    app.use(RequestLogger.middleware)
-    app.use(RequestLogger.errorHandler)
-  }
-
   static errorHandler(err, req, res, next) {
-    req.requestLogger._logInfo.error = err
+    req.requestLogger.addFields({ error: err })
     res
       .send(err.message)
       .status(500)
