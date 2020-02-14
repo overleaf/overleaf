@@ -16,7 +16,7 @@ const RequestLogger = require('./app/js/RequestLogger')
 
 const app = express()
 
-RequestLogger.attach(app)
+app.use(RequestLogger.middleware)
 
 if (settings.sentry && settings.sentry.dsn) {
   logger.initializeErrorReporting(settings.sentry.dsn)
@@ -139,6 +139,8 @@ app.get('/status', function(req, res) {
 })
 
 app.get('/health_check', healthCheckController.check)
+
+app.use(RequestLogger.errorHandler)
 
 const port = settings.internal.filestore.port || 3009
 const host = '0.0.0.0'
