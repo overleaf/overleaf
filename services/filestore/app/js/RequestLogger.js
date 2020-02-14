@@ -21,7 +21,7 @@ class RequestLogger {
   }
 
   static errorHandler(err, req, res, next) {
-    this._logInfo.error = err
+    req.requestLogger._logInfo.error = err
     res
       .send(err.message)
       .status(500)
