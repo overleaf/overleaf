@@ -98,7 +98,7 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
     const response = await _getClientForBucket(bucketName)
       .upload(uploadOptions, { partSize: 100 * 1024 * 1024 })
       .promise()
-    const destMd5 = _md5FromResponse(response)
+    const destMd5 = await _md5FromResponse(response)
 
     // if we didn't have an md5 hash, we should compare our computed one with S3's
     // as we couldn't tell S3 about it beforehand
@@ -219,7 +219,7 @@ async function getFileMd5Hash(bucketName, key) {
     const response = await _getClientForBucket(bucketName)
       .headObject({ Bucket: bucketName, Key: key })
       .promise()
-    const md5 = _md5FromResponse(response)
+    const md5 = await _md5FromResponse(response)
     return md5
   } catch (err) {
     throw PersistorHelper.wrapError(
@@ -364,16 +364,12 @@ function _buildClientOptions(bucketCredentials) {
   return options
 }
 
-function _md5FromResponse(response) {
-  const md5 = (response.ETag || '').replace(/[ "]/g, '')
+async function _md5FromResponse(response) {
+  let md5 = (response.ETag || '').replace(/[ "]/g, '')
   if (!md5.match(/^[a-f0-9]{32}$/)) {
-    throw new ReadError({
-      message: 's3 etag not in md5-hash format',
-      info: {
-        md5,
-        eTag: response.ETag
-      }
-    })
+    // the eTag isn't in md5 format so we need to calculate it ourselves
+    const stream = await getFileStream(response.Bucket, response.Key, {})
+    md5 = await PersistorHelper.calculateStreamMd5(stream)
   }
 
   return md5

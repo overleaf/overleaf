@@ -530,6 +530,38 @@ describe('S3PersistorTests', function() {
         expect(error).to.be.an.instanceOf(Errors.WriteError)
       })
     })
+
+    describe("when the etag isn't a valid md5 hash", function() {
+      beforeEach(async function() {
+        S3Client.upload = sinon.stub().returns({
+          promise: sinon.stub().resolves({
+            ETag: 'somethingthatisntanmd5',
+            Bucket: bucket,
+            Key: key
+          })
+        })
+
+        await S3Persistor.promises.sendStream(bucket, key, ReadStream)
+      })
+
+      it('should re-fetch the file to verify it', function() {
+        expect(S3Client.getObject).to.have.been.calledWith({
+          Bucket: bucket,
+          Key: key
+        })
+      })
+
+      it('should meter the download', function() {
+        expect(Stream.pipeline).to.have.been.calledWith(
+          S3ReadStream,
+          MeteredStream
+        )
+      })
+
+      it('should calculate the md5 hash from the file', function() {
+        expect(Stream.pipeline).to.have.been.calledWith(MeteredStream, Hash)
+      })
+    })
   })
 
   describe('sendFile', function() {
