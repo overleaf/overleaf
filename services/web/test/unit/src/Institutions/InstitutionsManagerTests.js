@@ -50,6 +50,9 @@ describe('InstitutionsManager', function() {
       }
     }
     this.subscriptionExec = sinon.stub().yields()
+    this.SAMLIdentityManager = {
+      userHasEntitlement: sinon.stub().returns(false)
+    }
     const SubscriptionModel = {
       Subscription: {
         find: () => {
@@ -80,7 +83,8 @@ describe('InstitutionsManager', function() {
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
         '../../models/Institution': this.InstitutionModel,
         '../../models/Subscription': SubscriptionModel,
-        '../../infrastructure/mongojs': this.Mongo
+        '../../infrastructure/mongojs': this.Mongo,
+        '../User/SAMLIdentityManager': this.SAMLIdentityManager
       }
     }))
   })
@@ -176,16 +180,27 @@ describe('InstitutionsManager', function() {
       ]
       this.getInstitutionAffiliations.yields(null, affiliations)
       this.UserGetter.getUsersByAnyConfirmedEmail.yields(null, stubbedUsers)
+      this.SAMLIdentityManager.userHasEntitlement.onCall(0).returns(true)
+      this.SAMLIdentityManager.userHasEntitlement.onCall(1).returns(true)
+      this.SAMLIdentityManager.userHasEntitlement.onCall(2).returns(false)
       return this.InstitutionsManager.checkInstitutionUsers(
         this.institutionId,
         (error, usersSummary) => {
           should.not.exist(error)
-          usersSummary.totalConfirmedUsers.should.equal(3)
-          usersSummary.totalConfirmedProUsers.should.equal(1)
-          usersSummary.totalConfirmedNonProUsers.should.equal(2)
-          expect(usersSummary.confirmedNonProUsers).to.deep.equal([
+
+          usersSummary.confirmedEmailUsers.total.should.equal(3)
+          usersSummary.confirmedEmailUsers.totalProUsers.should.equal(1)
+          usersSummary.confirmedEmailUsers.totalNonProUsers.should.equal(2)
+          expect(usersSummary.confirmedEmailUsers.nonProUsers).to.deep.equal([
             '456def456def456def456def',
             '789def789def789def789def'
+          ])
+
+          usersSummary.entitledSSOUsers.total.should.equal(2)
+          usersSummary.entitledSSOUsers.totalProUsers.should.equal(1)
+          usersSummary.entitledSSOUsers.totalNonProUsers.should.equal(1)
+          expect(usersSummary.entitledSSOUsers.nonProUsers).to.deep.equal([
+            '456def456def456def456def'
           ])
           return done()
         }

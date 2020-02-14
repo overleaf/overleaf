@@ -21,6 +21,7 @@ const { ObjectId } = require('../../infrastructure/mongojs')
 const { getInstitutionAffiliations } = require('./InstitutionsAPI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const UserGetter = require('../User/UserGetter')
+const SAMLIdentityManager = require('../User/SAMLIdentityManager')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const { Institution } = require('../../models/Institution')
@@ -60,8 +61,8 @@ module.exports = InstitutionsManager = {
     return getInstitutionAffiliations(institutionId, (error, affiliations) =>
       UserGetter.getUsersByAnyConfirmedEmail(
         affiliations.map(affiliation => affiliation.email),
-        { features: 1 },
-        (error, users) => callback(error, checkFeatures(users))
+        { features: 1, samlIdentifiers: 1 },
+        (error, users) => callback(error, checkFeatures(institutionId, users))
       )
     )
   },
@@ -170,19 +171,45 @@ var notifyUser = (user, affiliation, subscription, featuresChanged, callback) =>
     callback
   )
 
-var checkFeatures = function(users) {
+var checkFeatures = function(institutionId, users) {
   const usersSummary = {
-    totalConfirmedUsers: users.length,
-    totalConfirmedProUsers: 0,
-    totalConfirmedNonProUsers: 0,
-    confirmedNonProUsers: []
+    confirmedEmailUsers: {
+      total: users.length, // all users are confirmed email users
+      totalProUsers: 0,
+      totalNonProUsers: 0,
+      nonProUsers: []
+    },
+    entitledSSOUsers: {
+      total: 0,
+      totalProUsers: 0,
+      totalNonProUsers: 0,
+      nonProUsers: []
+    }
   }
   users.forEach(function(user) {
+    let isSSOEntitled = SAMLIdentityManager.userHasEntitlement(
+      user,
+      institutionId
+    )
+
+    if (isSSOEntitled) {
+      usersSummary.entitledSSOUsers.total += 1
+    }
+
     if (user.features.collaborators === -1 && user.features.trackChanges) {
-      return (usersSummary.totalConfirmedProUsers += 1)
+      // user is on Pro
+      usersSummary.confirmedEmailUsers.totalProUsers += 1
+      if (isSSOEntitled) {
+        usersSummary.entitledSSOUsers.totalProUsers += 1
+      }
     } else {
-      usersSummary.totalConfirmedNonProUsers += 1
-      return usersSummary.confirmedNonProUsers.push(user._id)
+      // user is not on Pro
+      usersSummary.confirmedEmailUsers.totalNonProUsers += 1
+      usersSummary.confirmedEmailUsers.nonProUsers.push(user._id)
+      if (isSSOEntitled) {
+        usersSummary.entitledSSOUsers.totalNonProUsers += 1
+        usersSummary.entitledSSOUsers.nonProUsers.push(user._id)
+      }
     }
   })
   return usersSummary
