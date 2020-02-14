@@ -34,12 +34,7 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     command: npm run test:acceptance
-
-  redis:
-    image: redis
 
   mongo:
     image: mongo:3.6

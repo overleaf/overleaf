@@ -23,7 +23,6 @@
     "logger-sharelatex": "^1.7.0",
     "metrics-sharelatex": "^2.2.0",
     "mongojs": "2.4.0",
-    "redis": "~0.10.1",
     "request": "^2.79.0",
     "settings-sharelatex": "^1.1.0"
   },
@@ -31,7 +30,7 @@
     "acorn": "^6.1.1",
     "ajv": "^5.5.2",
     "bunyan": "^1.0.0",
-    "chai": "",
+    "chai": "^4.2.0",
     "eslint": "^5.11.1",
     "eslint-config-prettier": "^3.3.0",
     "eslint-config-standard": "^12.0.0",
@@ -46,8 +45,8 @@
     "mocha": "^4.1.0",
     "nodemon": "^1.14.11",
     "prettier-eslint-cli": "^4.7.1",
-    "sandboxed-module": "",
-    "sinon": "",
-    "timekeeper": ""
+    "sandboxed-module": "^2.0.3",
+    "sinon": "^8.1.1",
+    "timekeeper": "^2.2.0"
   }
 }
