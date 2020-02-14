@@ -96,7 +96,7 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
     }
 
     const response = await _getClientForBucket(bucketName)
-      .upload(uploadOptions)
+      .upload(uploadOptions, { partSize: 100 * 1024 * 1024 })
       .promise()
     const destMd5 = _md5FromResponse(response)
 
