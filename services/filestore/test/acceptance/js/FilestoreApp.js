@@ -56,7 +56,6 @@ class FilestoreApp {
     }
 
     this.initing = false
-    this.persistor = require('../../../app/js/PersistorManager')
   }
 
   async waitForInit() {

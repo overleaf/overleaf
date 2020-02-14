@@ -6,8 +6,7 @@ https.globalAgent.maxSockets = 300
 const settings = require('settings-sharelatex')
 const metrics = require('metrics-sharelatex')
 
-const PersistorHelper = require('./PersistorHelper')
-
+const meter = require('stream-meter')
 const fs = require('fs')
 const S3 = require('aws-sdk/clients/s3')
 const { URL } = require('url')
@@ -19,11 +18,10 @@ const {
   SettingsError
 } = require('./Errors')
 
-const S3Persistor = {
+module.exports = {
   sendFile: callbackify(sendFile),
   sendStream: callbackify(sendStream),
   getFileStream: callbackify(getFileStream),
-  getFileMd5Hash: callbackify(getFileMd5Hash),
   deleteDirectory: callbackify(deleteDirectory),
   getFileSize: callbackify(getFileSize),
   deleteFile: callbackify(deleteFile),
@@ -34,7 +32,6 @@ const S3Persistor = {
     sendFile,
     sendStream,
     getFileStream,
-    getFileMd5Hash,
     deleteDirectory,
     getFileSize,
     deleteFile,
@@ -44,18 +41,12 @@ const S3Persistor = {
   }
 }
 
-module.exports = S3Persistor
-
-function hexToBase64(hex) {
-  return Buffer.from(hex, 'hex').toString('base64')
-}
-
 async function sendFile(bucketName, key, fsPath) {
   let readStream
   try {
     readStream = fs.createReadStream(fsPath)
   } catch (err) {
-    throw PersistorHelper.wrapError(
+    throw _wrapError(
       err,
       'error reading file from disk',
       { bucketName, key, fsPath },
@@ -65,56 +56,22 @@ async function sendFile(bucketName, key, fsPath) {
   return sendStream(bucketName, key, readStream)
 }
 
-async function sendStream(bucketName, key, readStream, sourceMd5) {
+async function sendStream(bucketName, key, readStream) {
   try {
-    // if there is no supplied md5 hash, we calculate the hash as the data passes through
-    let hashPromise
-    let b64Hash
+    const meteredStream = meter()
+    meteredStream.on('finish', () => {
+      metrics.count('s3.egress', meteredStream.bytes)
+    })
 
-    if (sourceMd5) {
-      b64Hash = hexToBase64(sourceMd5)
-    } else {
-      hashPromise = PersistorHelper.calculateStreamMd5(readStream)
-    }
-
-    const meteredStream = PersistorHelper.getMeteredStream(
-      readStream,
-      (_, byteCount) => {
-        // ignore the error parameter and just log the byte count
-        metrics.count('s3.egress', byteCount)
-      }
-    )
-
-    // if we have an md5 hash, pass this to S3 to verify the upload
-    const uploadOptions = {
-      Bucket: bucketName,
-      Key: key,
-      Body: meteredStream
-    }
-    if (b64Hash) {
-      uploadOptions.ContentMD5 = b64Hash
-    }
-
-    const response = await _getClientForBucket(bucketName)
-      .upload(uploadOptions)
+    await _getClientForBucket(bucketName)
+      .upload({
+        Bucket: bucketName,
+        Key: key,
+        Body: readStream.pipe(meteredStream)
+      })
       .promise()
-    const destMd5 = _md5FromResponse(response)
-
-    // if we didn't have an md5 hash, we should compare our computed one with S3's
-    // as we couldn't tell S3 about it beforehand
-    if (hashPromise) {
-      sourceMd5 = await hashPromise
-      // throws on mismatch
-      await PersistorHelper.verifyMd5(
-        S3Persistor,
-        bucketName,
-        key,
-        sourceMd5,
-        destMd5
-      )
-    }
   } catch (err) {
-    throw PersistorHelper.wrapError(
+    throw _wrapError(
       err,
       'upload to S3 failed',
       { bucketName, key },
@@ -134,29 +91,25 @@ async function getFileStream(bucketName, key, opts) {
     params.Range = `bytes=${opts.start}-${opts.end}`
   }
 
-  const stream = _getClientForBucket(bucketName)
-    .getObject(params)
-    .createReadStream()
+  return new Promise((resolve, reject) => {
+    const stream = _getClientForBucket(bucketName)
+      .getObject(params)
+      .createReadStream()
 
-  const meteredStream = PersistorHelper.getMeteredStream(
-    stream,
-    (_, byteCount) => {
-      // ignore the error parameter and just log the byte count
-      metrics.count('s3.ingress', byteCount)
+    const meteredStream = meter()
+    meteredStream.on('finish', () => {
+      metrics.count('s3.ingress', meteredStream.bytes)
+    })
+
+    const onStreamReady = function() {
+      stream.removeListener('readable', onStreamReady)
+      resolve(stream.pipe(meteredStream))
     }
-  )
-
-  try {
-    await PersistorHelper.waitForStreamReady(stream)
-    return meteredStream
-  } catch (err) {
-    throw PersistorHelper.wrapError(
-      err,
-      'error reading file from S3',
-      { bucketName, key, opts },
-      ReadError
-    )
-  }
+    stream.on('readable', onStreamReady)
+    stream.on('error', err => {
+      reject(_wrapError(err, 'error reading from S3', params, ReadError))
+    })
+  })
 }
 
 async function deleteDirectory(bucketName, key) {
@@ -167,7 +120,7 @@ async function deleteDirectory(bucketName, key) {
       .listObjects({ Bucket: bucketName, Prefix: key })
       .promise()
   } catch (err) {
-    throw PersistorHelper.wrapError(
+    throw _wrapError(
       err,
       'failed to list objects in S3',
       { bucketName, key },
@@ -188,7 +141,7 @@ async function deleteDirectory(bucketName, key) {
         })
         .promise()
     } catch (err) {
-      throw PersistorHelper.wrapError(
+      throw _wrapError(
         err,
         'failed to delete objects in S3',
         { bucketName, key },
@@ -205,26 +158,9 @@ async function getFileSize(bucketName, key) {
       .promise()
     return response.ContentLength
   } catch (err) {
-    throw PersistorHelper.wrapError(
+    throw _wrapError(
       err,
       'error getting size of s3 object',
-      { bucketName, key },
-      ReadError
-    )
-  }
-}
-
-async function getFileMd5Hash(bucketName, key) {
-  try {
-    const response = await _getClientForBucket(bucketName)
-      .headObject({ Bucket: bucketName, Key: key })
-      .promise()
-    const md5 = _md5FromResponse(response)
-    return md5
-  } catch (err) {
-    throw PersistorHelper.wrapError(
-      err,
-      'error getting hash of s3 object',
       { bucketName, key },
       ReadError
     )
@@ -237,8 +173,7 @@ async function deleteFile(bucketName, key) {
       .deleteObject({ Bucket: bucketName, Key: key })
       .promise()
   } catch (err) {
-    // s3 does not give us a NotFoundError here
-    throw PersistorHelper.wrapError(
+    throw _wrapError(
       err,
       'failed to delete file in S3',
       { bucketName, key },
@@ -258,12 +193,7 @@ async function copyFile(bucketName, sourceKey, destKey) {
       .copyObject(params)
       .promise()
   } catch (err) {
-    throw PersistorHelper.wrapError(
-      err,
-      'failed to copy file in S3',
-      params,
-      WriteError
-    )
+    throw _wrapError(err, 'failed to copy file in S3', params, WriteError)
   }
 }
 
@@ -275,7 +205,7 @@ async function checkIfFileExists(bucketName, key) {
     if (err instanceof NotFoundError) {
       return false
     }
-    throw PersistorHelper.wrapError(
+    throw _wrapError(
       err,
       'error checking whether S3 object exists',
       { bucketName, key },
@@ -292,12 +222,28 @@ async function directorySize(bucketName, key) {
 
     return response.Contents.reduce((acc, item) => item.Size + acc, 0)
   } catch (err) {
-    throw PersistorHelper.wrapError(
+    throw _wrapError(
       err,
       'error getting directory size in S3',
       { bucketName, key },
       ReadError
     )
+  }
+}
+
+function _wrapError(error, message, params, ErrorType) {
+  if (
+    ['NoSuchKey', 'NotFound', 'AccessDenied', 'ENOENT'].includes(error.code)
+  ) {
+    return new NotFoundError({
+      message: 'no such file',
+      info: params
+    }).withCause(error)
+  } else {
+    return new ErrorType({
+      message: message,
+      info: params
+    }).withCause(error)
   }
 }
 
@@ -362,19 +308,4 @@ function _buildClientOptions(bucketCredentials) {
   }
 
   return options
-}
-
-function _md5FromResponse(response) {
-  const md5 = (response.ETag || '').replace(/[ "]/g, '')
-  if (!md5.match(/^[a-f0-9]{32}$/)) {
-    throw new ReadError({
-      message: 's3 etag not in md5-hash format',
-      info: {
-        md5,
-        eTag: response.ETag
-      }
-    })
-  }
-
-  return md5
 }

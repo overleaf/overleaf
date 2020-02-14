@@ -3,8 +3,7 @@ const logger = require('logger-sharelatex')
 
 logger.log(
   {
-    backend: settings.filestore.backend,
-    fallback: settings.filestore.fallback && settings.filestore.fallback.backend
+    backend: settings.filestore.backend
   },
   'Loading backend'
 )
@@ -12,26 +11,14 @@ if (!settings.filestore.backend) {
   throw new Error('no backend specified - config incomplete')
 }
 
-function getPersistor(backend) {
-  switch (backend) {
-    case 'aws-sdk':
-    case 's3':
-      return require('./S3Persistor')
-    case 'fs':
-      return require('./FSPersistor')
-    default:
-      throw new Error(`unknown filestore backend: ${backend}`)
-  }
+switch (settings.filestore.backend) {
+  case 'aws-sdk':
+  case 's3':
+    module.exports = require('./S3PersistorManager')
+    break
+  case 'fs':
+    module.exports = require('./FSPersistorManager')
+    break
+  default:
+    throw new Error(`unknown filestore backend: ${settings.filestore.backend}`)
 }
-
-let persistor = getPersistor(settings.filestore.backend)
-
-if (settings.filestore.fallback && settings.filestore.fallback.backend) {
-  const migrationPersistor = require('./MigrationPersistor')
-  persistor = migrationPersistor(
-    persistor,
-    getPersistor(settings.filestore.fallback.backend)
-  )
-}
-
-module.exports = persistor
