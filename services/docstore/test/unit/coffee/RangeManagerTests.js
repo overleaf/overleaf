@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -137,20 +144,20 @@ describe("RangeManager", function() {
 			return this.ranges_copy = this.RangeManager.jsonRangesToMongo(JSON.parse(JSON.stringify(this.ranges)));
 		});
 
-		describe("with a blank new range", () => it("should throw an error", function() {
+		describe("with a blank new range", function() { return it("should throw an error", function() {
             return expect(() => {
                 return this.RangeManager.shouldUpdateRanges(this.ranges, null);
             }).to.throw(Error);
-        }));
+        }); });
 		
-		describe("with a blank old range", () => it("should treat it like {}", function() {
+		describe("with a blank old range", function() { return it("should treat it like {}", function() {
             this.RangeManager.shouldUpdateRanges(null, {}).should.equal(false);
             return this.RangeManager.shouldUpdateRanges(null, this.ranges).should.equal(true);
-        }));
+        }); });
 		
-		describe("with no changes", () => it("should return false", function() {
+		describe("with no changes", function() { return it("should return false", function() {
             return this.RangeManager.shouldUpdateRanges(this.ranges, this.ranges_copy).should.equal(false);
-        }));
+        }); });
 		
 		return describe("with changes", function() {
 			it("should return true when the change id changes", function() {

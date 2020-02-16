@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -222,7 +228,7 @@ describe("HttpController", function() {
 		});
 	});
 
-	describe("getAllRanges", () => describe("normally", function() {
+	describe("getAllRanges", function() { return describe("normally", function() {
         beforeEach(function() {
             this.req.params =
                 {project_id: this.project_id};
@@ -254,7 +260,7 @@ describe("HttpController", function() {
                 }])
                 .should.equal(true);
         });
-    }));
+    }); });
 
 	describe("updateDoc", function() {
 		beforeEach(function() {

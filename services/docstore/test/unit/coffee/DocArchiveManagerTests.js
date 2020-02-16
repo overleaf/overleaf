@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -261,7 +269,7 @@ describe("DocArchiveManager", function() {
 			this.MongoManager.getArchivedProjectDocs = sinon.stub().callsArgWith(1, null, this.archivedDocs);
 			this.DocArchiveManager.unarchiveDoc = sinon.stub().callsArgWith(2, null);
 			return this.DocArchiveManager.unArchiveAllDocs(this.project_id, err=> {
-				for (let doc of Array.from(this.archivedDocs)) {
+				for (const doc of Array.from(this.archivedDocs)) {
 					this.DocArchiveManager.unarchiveDoc.calledWith(this.project_id, doc._id).should.equal(true);
 				}
 				should.not.exist(err);
@@ -299,7 +307,7 @@ describe("DocArchiveManager", function() {
 		it("should destroy all the docs", function(done){
 			this.DocArchiveManager.destroyDoc = sinon.stub().callsArgWith(2, null);
 			return this.DocArchiveManager.destroyAllDocs(this.project_id, err=> {
-				for (let doc of Array.from(this.mixedDocs)) {
+				for (const doc of Array.from(this.mixedDocs)) {
 					this.DocArchiveManager.destroyDoc.calledWith(this.project_id, doc._id).should.equal(true);
 				}
 				should.not.exist(err);
@@ -337,7 +345,7 @@ describe("DocArchiveManager", function() {
 				return expect(err).not.to.exist;
 			});
 
-			for (let doc of Array.from(this.mixedDocs)) {
+			for (const doc of Array.from(this.mixedDocs)) {
 				sinon.assert.calledWith(this.MongoManager.destroyDoc, doc._id);
 			}
 
@@ -346,14 +354,14 @@ describe("DocArchiveManager", function() {
 	});
 	
 	describe("_s3DocToMongoDoc", function() {
-		describe("with the old schema", () => it("should return the docs lines", function(done) {
-            return this.DocArchiveManager._s3DocToMongoDoc(["doc", "lines"], function(error, doc) {
+		describe("with the old schema", function() { return it("should return the docs lines", function(done) {
+            return this.DocArchiveManager._s3DocToMongoDoc(["doc", "lines"], (error, doc) => {
                 expect(doc).to.deep.equal({
                     lines: ["doc", "lines"]
                 });
                 return done();
             });
-        }));
+        }); });
 		
 		describe("with the new schema", function() {
 			it("should return the doc lines and ranges", function(done) {
@@ -362,7 +370,7 @@ describe("DocArchiveManager", function() {
 					lines: ["doc", "lines"],
 					ranges: {"json": "ranges"},
 					schema_v: 1
-				}, function(error, doc) {
+				}, (error, doc) => {
 					expect(doc).to.deep.equal({
 						lines: ["doc", "lines"],
 						ranges: {"mongo": "ranges"}
@@ -375,7 +383,7 @@ describe("DocArchiveManager", function() {
 				return this.DocArchiveManager._s3DocToMongoDoc({
 					lines: ["doc", "lines"],
 					schema_v: 1
-				}, function(error, doc) {
+				}, (error, doc) => {
 					expect(doc).to.deep.equal({
 						lines: ["doc", "lines"]
 					});
@@ -384,23 +392,23 @@ describe("DocArchiveManager", function() {
 			});
 		});
 		
-		return describe("with an unrecognised schema", () => it("should return an error", function(done) {
+		return describe("with an unrecognised schema", function() { return it("should return an error", function(done) {
             return this.DocArchiveManager._s3DocToMongoDoc({
                 schema_v: 2
-            }, function(error, doc) {
+            }, (error, doc) => {
                 expect(error).to.exist;
                 return done();
             });
-        }));
+        }); });
 	});
 	
 	return describe("_mongoDocToS3Doc", function() {
-		describe("with a valid doc", () => it("should return the json version", function(done) {
+		describe("with a valid doc", function() { return it("should return the json version", function(done) {
             let doc;
             return this.DocArchiveManager._mongoDocToS3Doc((doc = {
                 lines: ["doc", "lines"],
                 ranges: { "mock": "ranges" }
-            }), function(err, s3_doc) {
+            }), (err, s3_doc) => {
                 expect(s3_doc).to.equal(JSON.stringify({
                     lines: ["doc", "lines"],
                     ranges: { "mock": "ranges" },
@@ -409,7 +417,7 @@ describe("DocArchiveManager", function() {
                 );
                 return done();
             });
-        }));
+        }); });
 			
 		describe("with null bytes in the result", function() {
 			beforeEach(function() {
@@ -425,19 +433,19 @@ describe("DocArchiveManager", function() {
 				return this.DocArchiveManager._mongoDocToS3Doc({
 					lines: ["doc", "lines"],
 					ranges: { "mock": "ranges" }
-				}, function(err, s3_doc) {
+				}, (err, s3_doc) => {
 					expect(err).to.exist;
 					return done();
 				});
 			});
 		});
 		
-		return describe("without doc lines", () => it("should return an error", function(done) {
-            return this.DocArchiveManager._mongoDocToS3Doc({}, function(err, s3_doc) {
+		return describe("without doc lines", function() { return it("should return an error", function(done) {
+            return this.DocArchiveManager._mongoDocToS3Doc({}, (err, s3_doc) => {
                 expect(err).to.exist;
                 return done();
             });
-        }));
+        }); });
 	});
 });
 			

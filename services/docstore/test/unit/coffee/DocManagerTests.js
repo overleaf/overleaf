@@ -1,3 +1,12 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-dupe-keys,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -143,7 +152,7 @@ describe("DocManager", function() {
 			});
 
 			it("should error if inS3 is not set to true", function(done){
-				return this.DocManager._getDoc(this.project_id, this.doc_id, {inS3: false}, function(err){
+				return this.DocManager._getDoc(this.project_id, this.doc_id, {inS3: false}, (err) => {
 					expect(err).to.exist;
 					return done();
 				});
@@ -158,7 +167,7 @@ describe("DocManager", function() {
 			});
 
 			return it("should not error if inS3 is set to true", function(done){
-				return this.DocManager._getDoc(this.project_id, this.doc_id, {inS3: true}, function(err){
+				return this.DocManager._getDoc(this.project_id, this.doc_id, {inS3: true}, (err) => {
 					expect(err).to.not.exist;
 					return done();
 				});

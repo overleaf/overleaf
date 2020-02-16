@@ -1,3 +1,9 @@
+/* eslint-disable
+    handle-callback-err,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -111,9 +117,9 @@ describe("MongoManager", function() {
 			return this.MongoManager.upsertIntoDocCollection(this.project_id, this.doc_id, {lines: this.lines}, err=> {
 				const args = this.db.docs.update.args[0];
 				assert.deepEqual(args[0], {_id: ObjectId(this.doc_id)});
-				assert.equal(args[1]["$set"]["lines"], this.lines);
-				assert.equal(args[1]["$inc"]["rev"], 1);
-				assert.deepEqual(args[1]["$set"]["project_id"], ObjectId(this.project_id));
+				assert.equal(args[1].$set.lines, this.lines);
+				assert.equal(args[1].$inc.rev, 1);
+				assert.deepEqual(args[1].$set.project_id, ObjectId(this.project_id));
 				return done();
 			});
 		});
@@ -136,7 +142,7 @@ describe("MongoManager", function() {
 			return this.MongoManager.markDocAsDeleted(this.project_id, this.doc_id, err=> {
 				const args = this.db.docs.update.args[0];
 				assert.deepEqual(args[0], {_id: ObjectId(this.doc_id), project_id: ObjectId(this.project_id)});
-				assert.equal(args[1]["$set"]["deleted"], true);
+				assert.equal(args[1].$set.deleted, true);
 				return done();
 			});
 		});
