@@ -21,7 +21,6 @@
   "dependencies": {
     "async": "~0.8.0",
     "body-parser": "~1.0.2",
-    "coffee-script": "^1.12.7",
     "express": "~4.1.1",
     "logger-sharelatex": "^1.7.0",
     "metrics-sharelatex": "^2.2.0",
