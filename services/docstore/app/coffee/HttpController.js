@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    valid-typeof,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -150,7 +157,7 @@ module.exports = (HttpController = {
 
 	_buildDocView(doc) { 
 		const doc_view = { _id: (doc._id != null ? doc._id.toString() : undefined) };
-		for (let attribute of ["lines", "rev", "version", "ranges", "deleted"]) {
+		for (const attribute of ["lines", "rev", "version", "ranges", "deleted"]) {
 			if (doc[attribute] != null) {
 				doc_view[attribute] = doc[attribute];
 			}
@@ -164,7 +171,7 @@ module.exports = (HttpController = {
 	
 	_buildDocsArrayView(project_id, docs) {
 		const docViews = [];
-		for (let doc of Array.from(docs)) {
+		for (const doc of Array.from(docs)) {
 			if (doc != null) { // There can end up being null docs for some reason :( (probably a race condition)
 				docViews.push(HttpController._buildDocView(doc));
 			} else {

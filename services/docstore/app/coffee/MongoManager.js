@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -46,7 +52,7 @@ module.exports = (MongoManager = {
 				inS3: true
 			}
 		};
-		update.$set["project_id"] = ObjectId(project_id);
+		update.$set.project_id = ObjectId(project_id);
 		return db.docs.update({_id: ObjectId(doc_id)}, update, {upsert: true}, callback);
 	},
 
@@ -64,9 +70,9 @@ module.exports = (MongoManager = {
 			$set: {},
 			$unset: {}
 		};
-		update.$set["inS3"] = true;
-		update.$unset["lines"] = true;
-		update.$unset["ranges"] = true;
+		update.$set.inS3 = true;
+		update.$unset.lines = true;
+		update.$unset.ranges = true;
 		const query = {
 			_id: doc_id,
 			rev
