@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -36,22 +43,22 @@ describe("Getting a doc", function() {
 		});
 	});
 
-	describe("when the doc exists", () => it("should get the doc lines and version", function(done) {
+	describe("when the doc exists", function() { return it("should get the doc lines and version", function(done) {
         return DocstoreClient.getDoc(this.project_id, this.doc_id, {}, (error, res, doc) => {
             doc.lines.should.deep.equal(this.lines);
             doc.version.should.equal(this.version);
             doc.ranges.should.deep.equal(this.ranges);
             return done();
         });
-    }));
+    }); });
 
-	describe("when the doc does not exist", () => it("should return a 404", function(done) {
+	describe("when the doc does not exist", function() { return it("should return a 404", function(done) {
         const missing_doc_id = ObjectId();
-        return DocstoreClient.getDoc(this.project_id, missing_doc_id, {}, function(error, res, doc) {
+        return DocstoreClient.getDoc(this.project_id, missing_doc_id, {}, (error, res, doc) => {
             res.statusCode.should.equal(404);
             return done();
         });
-    }));
+    }); });
 
 	return describe("when the doc is a deleted doc", function() {
 		beforeEach(function(done) {

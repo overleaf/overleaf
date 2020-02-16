@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -52,13 +59,13 @@ describe("Deleting a doc", function() {
 		});
 	});
 
-	return describe("when the doc does not exist", () => it("should return a 404", function(done) {
+	return describe("when the doc does not exist", function() { return it("should return a 404", function(done) {
         const missing_doc_id = ObjectId();
-        return DocstoreClient.deleteDoc(this.project_id, missing_doc_id, function(error, res, doc) {
+        return DocstoreClient.deleteDoc(this.project_id, missing_doc_id, (error, res, doc) => {
             res.statusCode.should.equal(404);
             return done();
         });
-    }));
+    }); });
 });
 
 describe("Destroying a project's documents", function() {
@@ -71,7 +78,7 @@ describe("Destroying a project's documents", function() {
 		});
 
 		it("should remove the doc from the docs collection", function(done) {
-			return db.docs.find({_id: this.doc_id}, function(err, docs) {
+			return db.docs.find({_id: this.doc_id}, (err, docs) => {
 				expect(err).not.to.exist;
 				expect(docs).to.deep.equal([]);
 				return done();
@@ -79,7 +86,7 @@ describe("Destroying a project's documents", function() {
 		});
 
 		return it("should remove the docOps from the docOps collection", function(done) {
-			return db.docOps.find({doc_id: this.doc_id}, function(err, docOps) {
+			return db.docOps.find({doc_id: this.doc_id}, (err, docOps) => {
 				expect(err).not.to.exist;
 				expect(docOps).to.deep.equal([]);
 				return done();
@@ -96,7 +103,7 @@ describe("Destroying a project's documents", function() {
 		});
 
 		it("should remove the doc from the docs collection", function(done) {
-			return db.docs.find({_id: this.doc_id}, function(err, docs) {
+			return db.docs.find({_id: this.doc_id}, (err, docs) => {
 				expect(err).not.to.exist;
 				expect(docs).to.deep.equal([]);
 				return done();
@@ -104,7 +111,7 @@ describe("Destroying a project's documents", function() {
 		});
 
 		it("should remove the docOps from the docOps collection", function(done) {
-			return db.docOps.find({doc_id: this.doc_id}, function(err, docOps) {
+			return db.docOps.find({doc_id: this.doc_id}, (err, docOps) => {
 				expect(err).not.to.exist;
 				expect(docOps).to.deep.equal([]);
 				return done();

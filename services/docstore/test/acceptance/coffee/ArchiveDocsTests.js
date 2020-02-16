@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -19,7 +26,7 @@ const DocstoreClient = require("./helpers/DocstoreClient");
 
 describe("Archiving", function() {
 
-	before(done => DocstoreApp.ensureRunning(done));
+	before(function(done) { return DocstoreApp.ensureRunning(done); });
 
 	describe("multiple docs in a project", function() {
 		before(function(done) {
