@@ -12,7 +12,6 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const Errors = require('./app/js/Errors')
 const HttpController = require('./app/js/HttpController')
-const Path = require('path')
 
 logger.initialize('docstore')
 if (Metrics.event_loop != null) {
@@ -25,16 +24,16 @@ app.use(Metrics.http.monitor(logger))
 
 Metrics.injectMetricsRoute(app)
 
-app.param('project_id', function(req, res, next, project_id) {
-  if (project_id != null ? project_id.match(/^[0-9a-f]{24}$/) : undefined) {
+app.param('project_id', function(req, res, next, projectId) {
+  if (projectId != null ? projectId.match(/^[0-9a-f]{24}$/) : undefined) {
     return next()
   } else {
     return next(new Error('invalid project id'))
   }
 })
 
-app.param('doc_id', function(req, res, next, doc_id) {
-  if (doc_id != null ? doc_id.match(/^[0-9a-f]{24}$/) : undefined) {
+app.param('doc_id', function(req, res, next, docId) {
+  if (docId != null ? docId.match(/^[0-9a-f]{24}$/) : undefined) {
     return next()
   } else {
     return next(new Error('invalid doc id'))
