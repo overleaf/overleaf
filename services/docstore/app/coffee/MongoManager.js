@@ -1,85 +1,118 @@
-{db, ObjectId} = require "./mongojs"
-logger = require 'logger-sharelatex'
-metrics = require 'metrics-sharelatex'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let MongoManager;
+const {db, ObjectId} = require("./mongojs");
+const logger = require('logger-sharelatex');
+const metrics = require('metrics-sharelatex');
 
-module.exports = MongoManager =
+module.exports = (MongoManager = {
 
-	findDoc: (project_id, doc_id, filter, callback = (error, doc) ->) ->
-		db.docs.find {_id: ObjectId(doc_id.toString()), project_id: ObjectId(project_id.toString())}, filter, (error, docs = []) ->
-			callback error, docs[0]
+	findDoc(project_id, doc_id, filter, callback) {
+		if (callback == null) { callback = function(error, doc) {}; }
+		return db.docs.find({_id: ObjectId(doc_id.toString()), project_id: ObjectId(project_id.toString())}, filter, function(error, docs) {
+			if (docs == null) { docs = []; }
+			return callback(error, docs[0]);
+	});
+	},
 
-	getProjectsDocs: (project_id, options = {include_deleted: true}, filter, callback)->
-		query = {project_id: ObjectId(project_id.toString())}
-		if !options.include_deleted
-			query.deleted = { $ne: true }
-		db.docs.find query, filter, callback
+	getProjectsDocs(project_id, options, filter, callback){
+		if (options == null) { options = {include_deleted: true}; }
+		const query = {project_id: ObjectId(project_id.toString())};
+		if (!options.include_deleted) {
+			query.deleted = { $ne: true };
+		}
+		return db.docs.find(query, filter, callback);
+	},
 
-	getArchivedProjectDocs: (project_id, callback)->
-		query =
-			project_id: ObjectId(project_id.toString())
+	getArchivedProjectDocs(project_id, callback){
+		const query = {
+			project_id: ObjectId(project_id.toString()),
 			inS3: true
-		db.docs.find query, {}, callback
+		};
+		return db.docs.find(query, {}, callback);
+	},
 
-	upsertIntoDocCollection: (project_id, doc_id, updates, callback)->
-		update =
-			$set: updates
-			$inc:
+	upsertIntoDocCollection(project_id, doc_id, updates, callback){
+		const update = {
+			$set: updates,
+			$inc: {
 				rev: 1
-			$unset:
+			},
+			$unset: {
 				inS3: true
-		update.$set["project_id"] = ObjectId(project_id)
-		db.docs.update _id: ObjectId(doc_id), update, {upsert: true}, callback
+			}
+		};
+		update.$set["project_id"] = ObjectId(project_id);
+		return db.docs.update({_id: ObjectId(doc_id)}, update, {upsert: true}, callback);
+	},
 
-	markDocAsDeleted: (project_id, doc_id, callback)->
-		db.docs.update {
+	markDocAsDeleted(project_id, doc_id, callback){
+		return db.docs.update({
 			_id: ObjectId(doc_id),
 			project_id: ObjectId(project_id) 
 		}, {
 			$set: { deleted: true }
-		}, callback
+		}, callback);
+	},
 
-	markDocAsArchived: (doc_id, rev, callback)->
-		update =
-			$set: {}
+	markDocAsArchived(doc_id, rev, callback){
+		const update = {
+			$set: {},
 			$unset: {}
-		update.$set["inS3"] = true
-		update.$unset["lines"] = true
-		update.$unset["ranges"] = true
-		query =
-			_id: doc_id
-			rev: rev
-		db.docs.update query, update, (err)->
-			callback(err)
+		};
+		update.$set["inS3"] = true;
+		update.$unset["lines"] = true;
+		update.$unset["ranges"] = true;
+		const query = {
+			_id: doc_id,
+			rev
+		};
+		return db.docs.update(query, update, err => callback(err));
+	},
 	
-	getDocVersion: (doc_id, callback = (error, version) ->) ->
-		db.docOps.find {
+	getDocVersion(doc_id, callback) {
+		if (callback == null) { callback = function(error, version) {}; }
+		return db.docOps.find({
 			doc_id: ObjectId(doc_id)
 		}, {
 			version: 1
-		}, (error, docs) ->
-			return callback(error) if error?
-			if docs.length < 1 or !docs[0].version?
-				return callback null, 0
-			else
-				return callback null, docs[0].version
+		}, function(error, docs) {
+			if (error != null) { return callback(error); }
+			if ((docs.length < 1) || (docs[0].version == null)) {
+				return callback(null, 0);
+			} else {
+				return callback(null, docs[0].version);
+			}
+		});
+	},
 
-	setDocVersion: (doc_id, version, callback = (error) ->) ->
-		db.docOps.update {
+	setDocVersion(doc_id, version, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return db.docOps.update({
 			doc_id: ObjectId(doc_id)
 		}, {
-			$set: version: version
+			$set: { version
+		}
 		}, {
 			upsert: true
-		}, callback
+		}, callback);
+	},
 
-	destroyDoc: (doc_id, callback) ->
-		db.docs.remove {
+	destroyDoc(doc_id, callback) {
+		return db.docs.remove({
 			_id: ObjectId(doc_id)
-		}, (err) ->
-			return callback(err) if err?
-			db.docOps.remove {
+		}, function(err) {
+			if (err != null) { return callback(err); }
+			return db.docOps.remove({
 				doc_id: ObjectId(doc_id)
-			}, callback
+			}, callback);
+		});
+	}
+});
 
 [
 	'findDoc',
@@ -89,5 +122,4 @@ module.exports = MongoManager =
 	'markDocAsArchived',
 	'getDocVersion',
 	'setDocVersion'
-].map (method) ->
-	metrics.timeAsyncMethod(MongoManager, method, 'mongo.MongoManager', logger)
+].map(method => metrics.timeAsyncMethod(MongoManager, method, 'mongo.MongoManager', logger));
