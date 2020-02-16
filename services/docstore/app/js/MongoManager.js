@@ -162,7 +162,6 @@ module.exports = MongoManager = {
     )
   }
 }
-
 ;[
   'findDoc',
   'getProjectsDocs',
