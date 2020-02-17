@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-undef,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -64,7 +72,7 @@ describe("Archiving updates", function() {
 		sinon.spy(MockDocStoreApi, "getAllDoc");
 
 		this.updates = [];
-		for (let i = 0, end = 512+10, asc = 0 <= end; asc ? i <= end : i >= end; asc ? i++ : i--) {
+		for (let i = 0, end = 512+10, asc = end >= 0; asc ? i <= end : i >= end; asc ? i++ : i--) {
 			this.updates.push({
 				op: [{ i: "a", p: 0 }],
 				meta: { ts: this.now + ((i-2048) * this.hours), user_id: this.user_id },
@@ -79,7 +87,7 @@ describe("Archiving updates", function() {
 		TrackChangesApp.ensureRunning(() => {
 			return TrackChangesClient.pushRawUpdates(this.project_id, this.doc_id, this.updates, error => {
 				if (error != null) { throw error; }
-				return TrackChangesClient.flushDoc(this.project_id, this.doc_id, function(error) {
+				return TrackChangesClient.flushDoc(this.project_id, this.doc_id, (error) => {
 					if (error != null) { throw error; }
 					return done();
 				});
@@ -99,7 +107,7 @@ describe("Archiving updates", function() {
 
 	describe("archiving a doc's updates", function() {
 		before(function(done) {
-			TrackChangesClient.pushDocHistory(this.project_id, this.doc_id, function(error) {
+			TrackChangesClient.pushDocHistory(this.project_id, this.doc_id, (error) => {
 				if (error != null) { throw error; }
 				return done();
 			});
@@ -107,7 +115,7 @@ describe("Archiving updates", function() {
 		});
 
 		it("should have one cached pack", function(done) {
-			return db.docHistory.count({ doc_id: ObjectId(this.doc_id), expiresAt:{$exists:true}}, function(error, count) {
+			return db.docHistory.count({ doc_id: ObjectId(this.doc_id), expiresAt:{$exists:true}}, (error, count) => {
 				if (error != null) { throw error; }
 				count.should.equal(1);
 				return done();
@@ -120,7 +128,7 @@ describe("Archiving updates", function() {
 				expiresAt:{$exists:true}
 			}, (err, result) => {
 				if (typeof error !== 'undefined' && error !== null) { throw error; }
-				return db.docHistory.count({ doc_id: ObjectId(this.doc_id)}, function(error, count) {
+				return db.docHistory.count({ doc_id: ObjectId(this.doc_id)}, (error, count) => {
 					if (error != null) { throw error; }
 					count.should.equal(1);
 					return done();
@@ -129,7 +137,7 @@ describe("Archiving updates", function() {
 		});
 
 		it("should have a docHistoryIndex entry marked as inS3", function(done) {
-			return db.docHistoryIndex.findOne({ _id: ObjectId(this.doc_id) }, function(error, index) {
+			return db.docHistoryIndex.findOne({ _id: ObjectId(this.doc_id) }, (error, index) => {
 				if (error != null) { throw error; }
 				index.packs[0].inS3.should.equal(true);
 				return done();
@@ -137,7 +145,7 @@ describe("Archiving updates", function() {
 		});
 
 		it("should have a docHistoryIndex entry with the last version", function(done) {
-			return db.docHistoryIndex.findOne({ _id: ObjectId(this.doc_id) }, function(error, index) {
+			return db.docHistoryIndex.findOne({ _id: ObjectId(this.doc_id) }, (error, index) => {
 				if (error != null) { throw error; }
 				index.packs[0].v_end.should.equal(1024);
 				return done();
@@ -159,7 +167,7 @@ describe("Archiving updates", function() {
 
 	return describe("unarchiving a doc's updates", function() {
 		before(function(done) {
-			TrackChangesClient.pullDocHistory(this.project_id, this.doc_id, function(error) {
+			TrackChangesClient.pullDocHistory(this.project_id, this.doc_id, (error) => {
 				if (error != null) { throw error; }
 				return done();
 			});
@@ -167,7 +175,7 @@ describe("Archiving updates", function() {
 		});
 
 		return it("should restore both packs", function(done) {
-			return db.docHistory.count({ doc_id: ObjectId(this.doc_id) }, function(error, count) {
+			return db.docHistory.count({ doc_id: ObjectId(this.doc_id) }, (error, count) => {
 				if (error != null) { throw error; }
 				count.should.equal(2);
 				return done();

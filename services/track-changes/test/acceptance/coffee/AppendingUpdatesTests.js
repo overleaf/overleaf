@@ -1,3 +1,9 @@
+/* eslint-disable
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -19,7 +25,7 @@ const TrackChangesClient = require("./helpers/TrackChangesClient");
 const MockWebApi = require("./helpers/MockWebApi");
 
 describe("Appending doc ops to the history", function() {
-	before(done=> TrackChangesApp.ensureRunning(done));
+	before(function(done) { return TrackChangesApp.ensureRunning(done); });
 
 	describe("when the history does not exist yet", function() {
 		before(function(done) {
@@ -69,7 +75,7 @@ describe("Appending doc ops to the history", function() {
 		});
 
 		return it("should clear the doc from the DocsWithHistoryOps set", function(done) {
-			rclient.sismember(`DocsWithHistoryOps:${this.project_id}`, this.doc_id, function(error, member) {
+			rclient.sismember(`DocsWithHistoryOps:${this.project_id}`, this.doc_id, (error, member) => {
 				member.should.equal(0);
 				return done();
 			});

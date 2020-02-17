@@ -1,3 +1,9 @@
+/* eslint-disable
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -19,7 +25,7 @@ const TrackChangesClient = require("./helpers/TrackChangesClient");
 const MockWebApi = require("./helpers/MockWebApi");
 
 describe("Flushing updates", function() {
-	before(done=> TrackChangesApp.ensureRunning(done));
+	before(function(done) { return TrackChangesApp.ensureRunning(done); });
 
 	describe("flushing a doc's updates", function() {
 		before(function(done) {
@@ -34,7 +40,7 @@ describe("Flushing updates", function() {
 				v: 3
 			}], error => {
 				if (error != null) { throw error; }
-				return TrackChangesClient.flushDoc(this.project_id, this.doc_id, function(error) {
+				return TrackChangesClient.flushDoc(this.project_id, this.doc_id, (error) => {
 					if (error != null) { throw error; }
 					return done();
 				});
@@ -43,7 +49,7 @@ describe("Flushing updates", function() {
 		});
 
 		return it("should flush the op into mongo", function(done) {
-			TrackChangesClient.getCompressedUpdates(this.doc_id, function(error, updates) {
+			TrackChangesClient.getCompressedUpdates(this.doc_id, (error, updates) => {
 				expect(updates[0].pack[0].op).to.deep.equal([{
 					p: 3, i: "f"
 				}]);
@@ -78,7 +84,7 @@ describe("Flushing updates", function() {
 					v: 3
 				}], error => {
 					if (error != null) { throw error; }
-					return TrackChangesClient.flushProject(this.project_id, function(error) {
+					return TrackChangesClient.flushProject(this.project_id, (error) => {
 						if (error != null) { throw error; }
 						return done();
 					});
@@ -87,7 +93,7 @@ describe("Flushing updates", function() {
 			});
 
 			it("should not mark the updates for deletion", function(done) {
-				TrackChangesClient.getCompressedUpdates(this.doc_id, function(error, updates) {
+				TrackChangesClient.getCompressedUpdates(this.doc_id, (error, updates) => {
 					expect(updates[0].expiresAt).to.not.exist;
 					return done();
 				});
@@ -95,7 +101,7 @@ describe("Flushing updates", function() {
 			});
 
 			return it("should preserve history forever", function(done) {
-				TrackChangesClient.getProjectMetaData(this.project_id, function(error, project) {
+				TrackChangesClient.getProjectMetaData(this.project_id, (error, project) => {
 					expect(project.preserveHistory).to.equal(true);
 					return done();
 				});
@@ -127,7 +133,7 @@ describe("Flushing updates", function() {
 					v: 3
 				}], error => {
 					if (error != null) { throw error; }
-					return TrackChangesClient.flushProject(this.project_id, function(error) {
+					return TrackChangesClient.flushProject(this.project_id, (error) => {
 						if (error != null) { throw error; }
 						return done();
 					});
@@ -136,7 +142,7 @@ describe("Flushing updates", function() {
 			});
 
 			return it("should mark the updates for deletion", function(done) {
-				TrackChangesClient.getCompressedUpdates(this.doc_id, function(error, updates) {
+				TrackChangesClient.getCompressedUpdates(this.doc_id, (error, updates) => {
 					expect(updates[0].expiresAt).to.exist;
 					return done();
 				});
@@ -170,7 +176,7 @@ describe("Flushing updates", function() {
 						v: 3
 					}], error => {
 						if (error != null) { throw error; }
-						return TrackChangesClient.flushProject(this.project_id, function(error) {
+						return TrackChangesClient.flushProject(this.project_id, (error) => {
 							if (error != null) { throw error; }
 							return done();
 						});
@@ -180,7 +186,7 @@ describe("Flushing updates", function() {
 			});
 
 			return it("should not mark the updates for deletion", function(done) {
-				TrackChangesClient.getCompressedUpdates(this.doc_id, function(error, updates) {
+				TrackChangesClient.getCompressedUpdates(this.doc_id, (error, updates) => {
 					expect(updates[0].expiresAt).to.not.exist;
 					return done();
 				});

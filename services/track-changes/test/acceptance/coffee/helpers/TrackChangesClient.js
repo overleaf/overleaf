@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -26,7 +33,7 @@ const S3_BUCKET = Settings.trackchanges.stores.doc_history;
 module.exports = (TrackChangesClient = {
 	flushAndGetCompressedUpdates(project_id, doc_id, callback) {
 		if (callback == null) { callback = function(error, updates) {}; }
-		return TrackChangesClient.flushDoc(project_id, doc_id, function(error) {
+		return TrackChangesClient.flushDoc(project_id, doc_id, (error) => {
 			if (error != null) { return callback(error); }
 			return TrackChangesClient.getCompressedUpdates(doc_id, callback);
 		});
@@ -82,7 +89,7 @@ module.exports = (TrackChangesClient = {
 
 	pushRawUpdates(project_id, doc_id, updates, callback) {
 		if (callback == null) { callback = function(error) {}; }
-		return rclient.sadd(Keys.docsWithHistoryOps({project_id}), doc_id, function(error) {
+		return rclient.sadd(Keys.docsWithHistoryOps({project_id}), doc_id, (error) => {
 			if (error != null) { return callback(error); }
 			return rclient.rpush(Keys.uncompressedHistoryOps({doc_id}), ...Array.from(((Array.from(updates).map((u) => JSON.stringify(u))))), callback);
 		});
@@ -147,7 +154,7 @@ module.exports = (TrackChangesClient = {
 			return done();
 		}
 
-		return request.get(`${Settings.trackchanges.s3.endpoint}/`, function(err, res) {
+		return request.get(`${Settings.trackchanges.s3.endpoint}/`, (err, res) => {
 			if (res && (res.statusCode < 500)) {
 				return done();
 			}
@@ -168,11 +175,11 @@ module.exports = (TrackChangesClient = {
 			Key: `${project_id}/changes-${doc_id}/pack-${pack_id}`
 		};
 
-		return s3.getObject(params, function(error, data) {
+		return s3.getObject(params, (error, data) => {
 			if (error != null) { return callback(error); }
 			const body = data.Body;
 			if ((body == null)) { return callback(new Error("empty response from s3")); }
-			return zlib.gunzip(body, function(err, result) {
+			return zlib.gunzip(body, (err, result) => {
 				if (err != null) { return callback(err); }
 				return callback(null, JSON.parse(result.toString()));
 			});
@@ -186,7 +193,7 @@ module.exports = (TrackChangesClient = {
 			Prefix: `${project_id}/changes-${doc_id}`
 		};
 
-		return s3.listObjects(params, function(error, data) {
+		return s3.listObjects(params, (error, data) => {
 			if (error != null) { return callback(error); }
 
 			params = {

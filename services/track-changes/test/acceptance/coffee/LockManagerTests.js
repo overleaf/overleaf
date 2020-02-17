@@ -1,3 +1,9 @@
+/* eslint-disable
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -31,7 +37,7 @@ describe("Locking document", function() {
 					LockManager.runWithLock("doc123", releaseB => {
 						return releaseA();
 					}  // try to release lock A to see if it wipes out lock B
-					, function(error) {})
+					, (error) => {})
 				
 						// we never release lock B so nothing should happen here
 				, 1500);
@@ -44,7 +50,7 @@ describe("Locking document", function() {
 		});
 
 		return it("the new lock should not be removed by the expired locker", function(done) {
-			LockManager.checkLock("doc123", function(err, isFree) {
+			LockManager.checkLock("doc123", (err, isFree) => {
 					expect(isFree).to.equal(false);
 					return done();
 			});

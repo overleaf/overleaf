@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -25,7 +31,7 @@ module.exports = (MockWebApi = {
 
 	run() {
 		app.get("/user/:user_id/personal_info", (req, res, next) => {
-			return this.getUserInfo(req.params.user_id, function(error, user) {
+			return this.getUserInfo(req.params.user_id, (error, user) => {
 				if (error != null) {
 					res.send(500);
 				}
@@ -38,7 +44,7 @@ module.exports = (MockWebApi = {
 		});
 
 		app.get("/project/:project_id/details", (req, res, next) => {
-			return this.getProjectDetails(req.params.project_id, function(error, project) {
+			return this.getProjectDetails(req.params.project_id, (error, project) => {
 				if (error != null) {
 					res.send(500);
 				}
@@ -50,9 +56,9 @@ module.exports = (MockWebApi = {
 			});
 		});
 
-		return app.listen(3000, function(error) {
+		return app.listen(3000, (error) => {
 			if (error != null) { throw error; }
-	}).on("error", function(error) {
+	}).on("error", (error) => {
 			console.error("error starting MockWebApiServer:", error.message);
 			return process.exit(1);
 		});
