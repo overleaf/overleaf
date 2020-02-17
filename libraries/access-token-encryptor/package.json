@@ -9,9 +9,7 @@
   },
   "author": "",
   "license": "Proprietary",
-  "dependencies": {
-    "coffee-script": "^1.10.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "bunyan": "~0.22.3",
     "chai": "",
