@@ -9,86 +9,112 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const sinon = require("sinon");
-const chai = require("chai");
-chai.should();
-const { expect } = chai;
-const mongojs = require("../../../app/js/mongojs");
-const { db } = mongojs;
-const { ObjectId } = mongojs;
-const Settings = require("settings-sharelatex");
+const sinon = require('sinon')
+const chai = require('chai')
+chai.should()
+const { expect } = chai
+const mongojs = require('../../../app/js/mongojs')
+const { db } = mongojs
+const { ObjectId } = mongojs
+const Settings = require('settings-sharelatex')
 
-const TrackChangesApp = require("./helpers/TrackChangesApp");
-const TrackChangesClient = require("./helpers/TrackChangesClient");
-const MockDocUpdaterApi = require("./helpers/MockDocUpdaterApi");
-const MockWebApi = require("./helpers/MockWebApi");
+const TrackChangesApp = require('./helpers/TrackChangesApp')
+const TrackChangesClient = require('./helpers/TrackChangesClient')
+const MockDocUpdaterApi = require('./helpers/MockDocUpdaterApi')
+const MockWebApi = require('./helpers/MockWebApi')
 
-describe("Restoring a version", function() {
-	before(function(done) {
-		sinon.spy(MockDocUpdaterApi, "setDoc");
+describe('Restoring a version', function() {
+  before(function(done) {
+    sinon.spy(MockDocUpdaterApi, 'setDoc')
 
-		this.now = Date.now();
-		this.user_id = ObjectId().toString();
-		this.doc_id = ObjectId().toString();
-		this.project_id = ObjectId().toString();
-		MockWebApi.projects[this.project_id] = {features: {versioning: true}};
-		
-		const minutes = 60 * 1000;
+    this.now = Date.now()
+    this.user_id = ObjectId().toString()
+    this.doc_id = ObjectId().toString()
+    this.project_id = ObjectId().toString()
+    MockWebApi.projects[this.project_id] = { features: { versioning: true } }
 
-		this.updates = [{
-			op: [{ i: "one ", p: 0 }],
-			meta: { ts: this.now - (6 * minutes), user_id: this.user_id },
-			v: 3
-		}, {
-			op: [{ i: "two ", p: 4 }],
-			meta: { ts: this.now - (4 * minutes), user_id: this.user_id },
-			v: 4
-		}, {
-			op: [{ i: "three ", p: 8 }],
-			meta: { ts: this.now - (2 * minutes), user_id: this.user_id },
-			v: 5
-		}, {
-			op: [{ i: "four", p: 14 }],
-			meta: { ts: this.now, user_id: this.user_id },
-			v: 6
-		}];
-		this.lines = ["one two three four"];
-		this.restored_lines = ["one two "];
-		this.beforeVersion = 5;
+    const minutes = 60 * 1000
 
-		MockWebApi.users[this.user_id] = (this.user = {
-			email: "user@sharelatex.com",
-			first_name: "Leo",
-			last_name: "Lion",
-			id: this.user_id
-		});
+    this.updates = [
+      {
+        op: [{ i: 'one ', p: 0 }],
+        meta: { ts: this.now - 6 * minutes, user_id: this.user_id },
+        v: 3
+      },
+      {
+        op: [{ i: 'two ', p: 4 }],
+        meta: { ts: this.now - 4 * minutes, user_id: this.user_id },
+        v: 4
+      },
+      {
+        op: [{ i: 'three ', p: 8 }],
+        meta: { ts: this.now - 2 * minutes, user_id: this.user_id },
+        v: 5
+      },
+      {
+        op: [{ i: 'four', p: 14 }],
+        meta: { ts: this.now, user_id: this.user_id },
+        v: 6
+      }
+    ]
+    this.lines = ['one two three four']
+    this.restored_lines = ['one two ']
+    this.beforeVersion = 5
 
-		MockDocUpdaterApi.docs[this.doc_id] = {
-			lines: this.lines,
-			version: 7
-		};
+    MockWebApi.users[this.user_id] = this.user = {
+      email: 'user@sharelatex.com',
+      first_name: 'Leo',
+      last_name: 'Lion',
+      id: this.user_id
+    }
 
-		TrackChangesApp.ensureRunning(() => {
-			return TrackChangesClient.pushRawUpdates(this.project_id, this.doc_id, this.updates, error => {
-				if (error != null) { throw error; }
-				return TrackChangesClient.restoreDoc(this.project_id, this.doc_id, this.beforeVersion, this.user_id, error => {
-					if (error != null) { throw error; }
-					return done();
-				});
-			});
-		});
-		return null;
-	});
+    MockDocUpdaterApi.docs[this.doc_id] = {
+      lines: this.lines,
+      version: 7
+    }
 
-	after(function() {
-		MockDocUpdaterApi.setDoc.restore();
-		return null;
-	});
+    TrackChangesApp.ensureRunning(() => {
+      return TrackChangesClient.pushRawUpdates(
+        this.project_id,
+        this.doc_id,
+        this.updates,
+        error => {
+          if (error != null) {
+            throw error
+          }
+          return TrackChangesClient.restoreDoc(
+            this.project_id,
+            this.doc_id,
+            this.beforeVersion,
+            this.user_id,
+            error => {
+              if (error != null) {
+                throw error
+              }
+              return done()
+            }
+          )
+        }
+      )
+    })
+    return null
+  })
 
-	return it("should set the doc in the doc updater", function() {
-		MockDocUpdaterApi.setDoc
-			.calledWith(this.project_id, this.doc_id, this.restored_lines, this.user_id, true)
-			.should.equal(true);
-		return null;
-	});
-});
+  after(function() {
+    MockDocUpdaterApi.setDoc.restore()
+    return null
+  })
+
+  return it('should set the doc in the doc updater', function() {
+    MockDocUpdaterApi.setDoc
+      .calledWith(
+        this.project_id,
+        this.doc_id,
+        this.restored_lines,
+        this.user_id,
+        true
+      )
+      .should.equal(true)
+    return null
+  })
+})
