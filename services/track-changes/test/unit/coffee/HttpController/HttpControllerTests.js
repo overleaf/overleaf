@@ -1,135 +1,177 @@
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-expect = chai.expect
-modulePath = "../../../../app/js/HttpController.js"
-SandboxedModule = require('sandboxed-module')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const { expect } = chai;
+const modulePath = "../../../../app/js/HttpController.js";
+const SandboxedModule = require('sandboxed-module');
 
-describe "HttpController", ->
-	beforeEach ->
-		@HttpController = SandboxedModule.require modulePath, requires:
-			"logger-sharelatex": { log: sinon.stub() }
-			"./UpdatesManager": @UpdatesManager = {}
-			"./DiffManager": @DiffManager = {}
-			"./RestoreManager": @RestoreManager = {}
-			"./PackManager": @PackManager = {}
-			"./DocArchiveManager": @DocArchiveManager = {}
-			"./HealthChecker": @HealthChecker = {}
-		@doc_id = "doc-id-123"
-		@project_id = "project-id-123"
-		@next = sinon.stub()
-		@user_id = "mock-user-123"
-		@now = Date.now()
+describe("HttpController", function() {
+	beforeEach(function() {
+		this.HttpController = SandboxedModule.require(modulePath, { requires: {
+			"logger-sharelatex": { log: sinon.stub() },
+			"./UpdatesManager": (this.UpdatesManager = {}),
+			"./DiffManager": (this.DiffManager = {}),
+			"./RestoreManager": (this.RestoreManager = {}),
+			"./PackManager": (this.PackManager = {}),
+			"./DocArchiveManager": (this.DocArchiveManager = {}),
+			"./HealthChecker": (this.HealthChecker = {})
+		}
+	});
+		this.doc_id = "doc-id-123";
+		this.project_id = "project-id-123";
+		this.next = sinon.stub();
+		this.user_id = "mock-user-123";
+		return this.now = Date.now();
+	});
 
-	describe "flushDoc", ->
-		beforeEach ->
-			@req =
-				params:
-					doc_id: @doc_id
-					project_id: @project_id
-			@res =
-				send: sinon.stub()
-			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2)
-			@HttpController.flushDoc @req, @res, @next
+	describe("flushDoc", function() {
+		beforeEach(function() {
+			this.req = {
+				params: {
+					doc_id: this.doc_id,
+					project_id: this.project_id
+				}
+			};
+			this.res =
+				{send: sinon.stub()};
+			this.UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2);
+			return this.HttpController.flushDoc(this.req, this.res, this.next);
+		});
 
-		it "should process the updates", ->
-			@UpdatesManager.processUncompressedUpdatesWithLock
-				.calledWith(@project_id, @doc_id)
-				.should.equal true
+		it("should process the updates", function() {
+			return this.UpdatesManager.processUncompressedUpdatesWithLock
+				.calledWith(this.project_id, this.doc_id)
+				.should.equal(true);
+		});
 
-		it "should return a success code", ->
-			@res.send.calledWith(204).should.equal true
+		return it("should return a success code", function() {
+			return this.res.send.calledWith(204).should.equal(true);
+		});
+	});
 
-	describe "flushProject", ->
-		beforeEach ->
-			@req =
-				params:
-					project_id: @project_id
-			@res =
-				send: sinon.stub()
-			@UpdatesManager.processUncompressedUpdatesForProject = sinon.stub().callsArg(1)
-			@HttpController.flushProject @req, @res, @next
+	describe("flushProject", function() {
+		beforeEach(function() {
+			this.req = {
+				params: {
+					project_id: this.project_id
+				}
+			};
+			this.res =
+				{send: sinon.stub()};
+			this.UpdatesManager.processUncompressedUpdatesForProject = sinon.stub().callsArg(1);
+			return this.HttpController.flushProject(this.req, this.res, this.next);
+		});
 
-		it "should process the updates", ->
-			@UpdatesManager.processUncompressedUpdatesForProject
-				.calledWith(@project_id)
-				.should.equal true
+		it("should process the updates", function() {
+			return this.UpdatesManager.processUncompressedUpdatesForProject
+				.calledWith(this.project_id)
+				.should.equal(true);
+		});
 
-		it "should return a success code", ->
-			@res.send.calledWith(204).should.equal true
+		return it("should return a success code", function() {
+			return this.res.send.calledWith(204).should.equal(true);
+		});
+	});
 
 
-	describe "getDiff", ->
-		beforeEach ->
-			@from = 42
-			@to = 45
-			@req =
-				params:
-					doc_id: @doc_id
-					project_id: @project_id
-				query:
-					from: @from.toString()
-					to: @to.toString()
-			@res =
-				json: sinon.stub()
-			@diff = [ u: "mock-diff" ]
-			@DiffManager.getDiff = sinon.stub().callsArgWith(4, null, @diff)
-			@HttpController.getDiff @req, @res, @next
+	describe("getDiff", function() {
+		beforeEach(function() {
+			this.from = 42;
+			this.to = 45;
+			this.req = {
+				params: {
+					doc_id: this.doc_id,
+					project_id: this.project_id
+				},
+				query: {
+					from: this.from.toString(),
+					to: this.to.toString()
+				}
+			};
+			this.res =
+				{json: sinon.stub()};
+			this.diff = [ {u: "mock-diff"} ];
+			this.DiffManager.getDiff = sinon.stub().callsArgWith(4, null, this.diff);
+			return this.HttpController.getDiff(this.req, this.res, this.next);
+		});
 
-		it "should get the diff", ->
-			@DiffManager.getDiff
-				.calledWith(@project_id, @doc_id, parseInt(@from, 10), parseInt(@to, 10))
-				.should.equal true
+		it("should get the diff", function() {
+			return this.DiffManager.getDiff
+				.calledWith(this.project_id, this.doc_id, parseInt(this.from, 10), parseInt(this.to, 10))
+				.should.equal(true);
+		});
 
-		it "should return the diff", ->
-			@res.json.calledWith({diff: @diff}).should.equal true
+		return it("should return the diff", function() {
+			return this.res.json.calledWith({diff: this.diff}).should.equal(true);
+		});
+	});
 
-	describe "getUpdates", ->
-		beforeEach ->
-			@before = Date.now()
-			@nextBeforeTimestamp = @before - 100
-			@min_count = 10
-			@req =
-				params:
-					project_id: @project_id
-				query:
-					before:    @before.toString()
-					min_count: @min_count.toString()
-			@res =
-				json: sinon.stub()
-			@updates = ["mock-summarized-updates"]
-			@UpdatesManager.getSummarizedProjectUpdates = sinon.stub().callsArgWith(2, null, @updates, @nextBeforeTimestamp)
-			@HttpController.getUpdates @req, @res, @next
+	describe("getUpdates", function() {
+		beforeEach(function() {
+			this.before = Date.now();
+			this.nextBeforeTimestamp = this.before - 100;
+			this.min_count = 10;
+			this.req = {
+				params: {
+					project_id: this.project_id
+				},
+				query: {
+					before:    this.before.toString(),
+					min_count: this.min_count.toString()
+				}
+			};
+			this.res =
+				{json: sinon.stub()};
+			this.updates = ["mock-summarized-updates"];
+			this.UpdatesManager.getSummarizedProjectUpdates = sinon.stub().callsArgWith(2, null, this.updates, this.nextBeforeTimestamp);
+			return this.HttpController.getUpdates(this.req, this.res, this.next);
+		});
 
-		it "should get the updates", ->
-			@UpdatesManager.getSummarizedProjectUpdates
-				.calledWith(@project_id, before: @before, min_count: @min_count)
-				.should.equal true
+		it("should get the updates", function() {
+			return this.UpdatesManager.getSummarizedProjectUpdates
+				.calledWith(this.project_id, {before: this.before, min_count: this.min_count})
+				.should.equal(true);
+		});
 
-		it "should return the formatted updates", ->
-			@res.json.calledWith({updates: @updates, nextBeforeTimestamp: @nextBeforeTimestamp}).should.equal true
+		return it("should return the formatted updates", function() {
+			return this.res.json.calledWith({updates: this.updates, nextBeforeTimestamp: this.nextBeforeTimestamp}).should.equal(true);
+		});
+	});
 
-	describe "RestoreManager", ->
-		beforeEach ->
-			@version = "42"
-			@req =
-				params:
-					doc_id: @doc_id
-					project_id: @project_id
-					version: @version
-				headers:
-					"x-user-id": @user_id
-			@res =
-				send: sinon.stub()
+	return describe("RestoreManager", function() {
+		beforeEach(function() {
+			this.version = "42";
+			this.req = {
+				params: {
+					doc_id: this.doc_id,
+					project_id: this.project_id,
+					version: this.version
+				},
+				headers: {
+					"x-user-id": this.user_id
+				}
+			};
+			this.res =
+				{send: sinon.stub()};
 
-			@RestoreManager.restoreToBeforeVersion = sinon.stub().callsArg(4)
-			@HttpController.restore @req, @res, @next
+			this.RestoreManager.restoreToBeforeVersion = sinon.stub().callsArg(4);
+			return this.HttpController.restore(this.req, this.res, this.next);
+		});
 
-		it "should restore the document", ->
-			@RestoreManager.restoreToBeforeVersion
-				.calledWith(@project_id, @doc_id, parseInt(@version, 10), @user_id)
-				.should.equal true
+		it("should restore the document", function() {
+			return this.RestoreManager.restoreToBeforeVersion
+				.calledWith(this.project_id, this.doc_id, parseInt(this.version, 10), this.user_id)
+				.should.equal(true);
+		});
 
-		it "should return a success code", ->
-			@res.send.calledWith(204).should.equal true
+		return it("should return a success code", function() {
+			return this.res.send.calledWith(204).should.equal(true);
+		});
+	});
+});
 

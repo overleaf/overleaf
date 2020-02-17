@@ -1,39 +1,53 @@
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-expect = chai.expect
-modulePath = "../../../../app/js/RestoreManager.js"
-SandboxedModule = require('sandboxed-module')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const { expect } = chai;
+const modulePath = "../../../../app/js/RestoreManager.js";
+const SandboxedModule = require('sandboxed-module');
 
-describe "RestoreManager", ->
-	beforeEach ->
-		@RestoreManager = SandboxedModule.require modulePath, requires:
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
-			"./DocumentUpdaterManager": @DocumentUpdaterManager = {}
-			"./DiffManager": @DiffManager = {}
-		@callback = sinon.stub()
-		@project_id = "mock-project-id"
-		@doc_id = "mock-doc-id"
-		@user_id = "mock-user-id"
-		@version = 42
+describe("RestoreManager", function() {
+	beforeEach(function() {
+		this.RestoreManager = SandboxedModule.require(modulePath, { requires: {
+			"logger-sharelatex": (this.logger = { log: sinon.stub(), error: sinon.stub() }),
+			"./DocumentUpdaterManager": (this.DocumentUpdaterManager = {}),
+			"./DiffManager": (this.DiffManager = {})
+		}
+	});
+		this.callback = sinon.stub();
+		this.project_id = "mock-project-id";
+		this.doc_id = "mock-doc-id";
+		this.user_id = "mock-user-id";
+		return this.version = 42;
+	});
 
-	describe "restoreToBeforeVersion", ->
-		beforeEach ->
-			@content = "mock content"
-			@DocumentUpdaterManager.setDocument = sinon.stub().callsArg(4)
-			@DiffManager.getDocumentBeforeVersion = sinon.stub().callsArgWith(3, null, @content)
-			@RestoreManager.restoreToBeforeVersion @project_id, @doc_id, @version, @user_id, @callback
+	return describe("restoreToBeforeVersion", function() {
+		beforeEach(function() {
+			this.content = "mock content";
+			this.DocumentUpdaterManager.setDocument = sinon.stub().callsArg(4);
+			this.DiffManager.getDocumentBeforeVersion = sinon.stub().callsArgWith(3, null, this.content);
+			return this.RestoreManager.restoreToBeforeVersion(this.project_id, this.doc_id, this.version, this.user_id, this.callback);
+		});
 
-		it "should get the content before the requested version", ->
-			@DiffManager.getDocumentBeforeVersion
-				.calledWith(@project_id, @doc_id, @version)
-				.should.equal true
+		it("should get the content before the requested version", function() {
+			return this.DiffManager.getDocumentBeforeVersion
+				.calledWith(this.project_id, this.doc_id, this.version)
+				.should.equal(true);
+		});
 
-		it "should set the document in the document updater", ->
-			@DocumentUpdaterManager.setDocument
-				.calledWith(@project_id, @doc_id, @content, @user_id)
-				.should.equal true
+		it("should set the document in the document updater", function() {
+			return this.DocumentUpdaterManager.setDocument
+				.calledWith(this.project_id, this.doc_id, this.content, this.user_id)
+				.should.equal(true);
+		});
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+		return it("should call the callback", function() {
+			return this.callback.called.should.equal(true);
+		});
+	});
+});
 			

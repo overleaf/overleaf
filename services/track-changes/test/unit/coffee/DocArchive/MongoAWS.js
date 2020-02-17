@@ -1,70 +1,90 @@
-chai = require('chai')
-chai.should()
-sinon = require("sinon")
-modulePath = "../../../../app/js/MongoAWS.js"
-SandboxedModule = require('sandboxed-module')
-{ObjectId} = require("mongojs")
-MemoryStream = require('memorystream')
-zlib = require "zlib"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const chai = require('chai');
+chai.should();
+const sinon = require("sinon");
+const modulePath = "../../../../app/js/MongoAWS.js";
+const SandboxedModule = require('sandboxed-module');
+const {ObjectId} = require("mongojs");
+const MemoryStream = require('memorystream');
+const zlib = require("zlib");
 
-describe "MongoAWS", ->
-	beforeEach ->
-		@MongoAWS = SandboxedModule.require modulePath, requires:
-			"settings-sharelatex": @settings =
-				trackchanges:
-					s3:
-						secret: "s3-secret"
+describe("MongoAWS", function() {
+	beforeEach(function() {
+		this.MongoAWS = SandboxedModule.require(modulePath, { requires: {
+			"settings-sharelatex": (this.settings = {
+				trackchanges: {
+					s3: {
+						secret: "s3-secret",
 						key: "s3-key"
-					stores:
+					},
+					stores: {
 						doc_history: "s3-bucket"
-			"child_process": @child_process = {}
-			"mongo-uri": @mongouri = {}
-			"logger-sharelatex": @logger = {log: sinon.stub(), error: sinon.stub(), err:->}
-			"aws-sdk": @awssdk = {}
-			"fs": @fs = {}
-			"s3-streams": @S3S = {}
-			"./mongojs" : { db: @db = {}, ObjectId: ObjectId }
-			"JSONStream": @JSONStream = {}
-			"readline-stream": @readline = sinon.stub()
-			'metrics-sharelatex': {inc: ()->}
+					}
+				}
+			}),
+			"child_process": (this.child_process = {}),
+			"mongo-uri": (this.mongouri = {}),
+			"logger-sharelatex": (this.logger = {log: sinon.stub(), error: sinon.stub(), err() {}}),
+			"aws-sdk": (this.awssdk = {}),
+			"fs": (this.fs = {}),
+			"s3-streams": (this.S3S = {}),
+			"./mongojs" : { db: (this.db = {}), ObjectId },
+			"JSONStream": (this.JSONStream = {}),
+			"readline-stream": (this.readline = sinon.stub()),
+			'metrics-sharelatex': {inc(){}}
+		}
+	});
 
-		@project_id = ObjectId().toString()
-		@doc_id = ObjectId().toString()
-		@pack_id = ObjectId()
-		@update = { v:123 }
-		@callback = sinon.stub()
+		this.project_id = ObjectId().toString();
+		this.doc_id = ObjectId().toString();
+		this.pack_id = ObjectId();
+		this.update = { v:123 };
+		return this.callback = sinon.stub();
+	});
 
-	describe "archivePack", ->
+	describe("archivePack", function() {
 
-		beforeEach (done) ->
-			@awssdk.config = { update: sinon.stub() }
-			@awssdk.S3 = sinon.stub()
-			@S3S.WriteStream = () ->
-				MemoryStream.createWriteStream()
-			@db.docHistory = {}
-			@db.docHistory.findOne = sinon.stub().callsArgWith(1, null, {"pack":"hello"})
+		beforeEach(function(done) {
+			this.awssdk.config = { update: sinon.stub() };
+			this.awssdk.S3 = sinon.stub();
+			this.S3S.WriteStream = () => MemoryStream.createWriteStream();
+			this.db.docHistory = {};
+			this.db.docHistory.findOne = sinon.stub().callsArgWith(1, null, {"pack":"hello"});
 
-			@MongoAWS.archivePack @project_id, @doc_id, @pack_id, (err, result) =>
-				@callback()
-				done()
+			return this.MongoAWS.archivePack(this.project_id, this.doc_id, this.pack_id, (err, result) => {
+				this.callback();
+				return done();
+			});
+		});
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+		return it("should call the callback", function() {
+			return this.callback.called.should.equal(true);
+		});
+	});
 
-	describe "unArchivePack", ->
+	return describe("unArchivePack", function() {
 
-		beforeEach (done) ->
-			zlib.gzip '{"pack":"123"}', (err, zbuf) =>
-				@awssdk.config = { update: sinon.stub() }
-				@awssdk.S3 = sinon.stub()
-				@S3S.ReadStream = () ->
-					MemoryStream.createReadStream(zbuf, {readable:true})
-				@db.docHistory = {}
-				@db.docHistory.insert = sinon.stub().callsArgWith(1, null, "pack")
+		beforeEach(function(done) {
+			return zlib.gzip('{"pack":"123"}', (err, zbuf) => {
+				this.awssdk.config = { update: sinon.stub() };
+				this.awssdk.S3 = sinon.stub();
+				this.S3S.ReadStream = () => MemoryStream.createReadStream(zbuf, {readable:true});
+				this.db.docHistory = {};
+				this.db.docHistory.insert = sinon.stub().callsArgWith(1, null, "pack");
 
-				@MongoAWS.unArchivePack @project_id, @doc_id, @pack_id, (err, result) =>
-					@callback()
-					done()
+				return this.MongoAWS.unArchivePack(this.project_id, this.doc_id, this.pack_id, (err, result) => {
+					this.callback();
+					return done();
+				});
+			});
+		});
 
-		it "should call db.docHistory.insert", ->
-			@db.docHistory.insert.called.should.equal true
+		return it("should call db.docHistory.insert", function() {
+			return this.db.docHistory.insert.called.should.equal(true);
+		});
+	});
+});

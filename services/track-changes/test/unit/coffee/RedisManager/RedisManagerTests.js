@@ -1,87 +1,121 @@
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-expect = chai.expect
-modulePath = "../../../../app/js/RedisManager.js"
-SandboxedModule = require('sandboxed-module')
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const { expect } = chai;
+const modulePath = "../../../../app/js/RedisManager.js";
+const SandboxedModule = require('sandboxed-module');
 
-describe "RedisManager", ->
-	beforeEach ->
-		@RedisManager = SandboxedModule.require modulePath, requires:
-			"redis-sharelatex" : 
-				createClient: () => @rclient =
-					auth: sinon.stub()
-					multi: () => @rclient
-			"settings-sharelatex":
-				redis:
-					history:
-						key_schema:
-							uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
-							docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
-		@doc_id = "doc-id-123"
-		@project_id = "project-id-123"
-		@batchSize = 100
-		@callback = sinon.stub()
+describe("RedisManager", function() {
+	beforeEach(function() {
+		this.RedisManager = SandboxedModule.require(modulePath, { requires: {
+			"redis-sharelatex" : { 
+				createClient: () => { return this.rclient = {
+					auth: sinon.stub(),
+					multi: () => this.rclient
+				}; }
+			},
+			"settings-sharelatex": {
+				redis: {
+					history: {
+						key_schema: {
+							uncompressedHistoryOps({doc_id}) { return `UncompressedHistoryOps:${doc_id}`; },
+							docsWithHistoryOps({project_id}) { return `DocsWithHistoryOps:${project_id}`; }
+						}
+					}
+				}
+			}
+		}
+	}
+		);
+		this.doc_id = "doc-id-123";
+		this.project_id = "project-id-123";
+		this.batchSize = 100;
+		return this.callback = sinon.stub();
+	});
 
-	describe "getOldestDocUpdates", ->
-		beforeEach ->
-			@rawUpdates = [ {v: 42, op: "mock-op-42"}, { v: 45, op: "mock-op-45" }]
-			@jsonUpdates = (JSON.stringify(update) for update in @rawUpdates)
-			@rclient.lrange = sinon.stub().callsArgWith(3, null, @jsonUpdates)
-			@RedisManager.getOldestDocUpdates @doc_id, @batchSize, @callback
+	describe("getOldestDocUpdates", function() {
+		beforeEach(function() {
+			this.rawUpdates = [ {v: 42, op: "mock-op-42"}, { v: 45, op: "mock-op-45" }];
+			this.jsonUpdates = (Array.from(this.rawUpdates).map((update) => JSON.stringify(update)));
+			this.rclient.lrange = sinon.stub().callsArgWith(3, null, this.jsonUpdates);
+			return this.RedisManager.getOldestDocUpdates(this.doc_id, this.batchSize, this.callback);
+		});
 
-		it "should read the updates from redis", ->
-			@rclient.lrange
-				.calledWith("UncompressedHistoryOps:#{@doc_id}", 0, @batchSize - 1)
-				.should.equal true
+		it("should read the updates from redis", function() {
+			return this.rclient.lrange
+				.calledWith(`UncompressedHistoryOps:${this.doc_id}`, 0, this.batchSize - 1)
+				.should.equal(true);
+		});
 
-		it "should call the callback with the unparsed ops", ->
-			@callback.calledWith(null, @jsonUpdates).should.equal true
-
-
-		describe "expandDocUpdates", ->
-			beforeEach ->
-				@RedisManager.expandDocUpdates @jsonUpdates, @callback
-
-			it "should call the callback with the parsed ops", ->
-				@callback.calledWith(null, @rawUpdates).should.equal true
+		it("should call the callback with the unparsed ops", function() {
+			return this.callback.calledWith(null, this.jsonUpdates).should.equal(true);
+		});
 
 
-		describe "deleteAppliedDocUpdates", ->
-			beforeEach ->
-				@rclient.lrem = sinon.stub()
-				@rclient.srem = sinon.stub()
-				@rclient.exec = sinon.stub().callsArgWith(0)
-				@RedisManager.deleteAppliedDocUpdates @project_id, @doc_id, @jsonUpdates, @callback
+		describe("expandDocUpdates", function() {
+			beforeEach(function() {
+				return this.RedisManager.expandDocUpdates(this.jsonUpdates, this.callback);
+			});
 
-			it "should delete the first update from redis", ->
-				@rclient.lrem
-					.calledWith("UncompressedHistoryOps:#{@doc_id}", 1, @jsonUpdates[0])
-					.should.equal true
+			return it("should call the callback with the parsed ops", function() {
+				return this.callback.calledWith(null, this.rawUpdates).should.equal(true);
+			});
+		});
 
-			it "should delete the second update from redis", ->
-				@rclient.lrem
-					.calledWith("UncompressedHistoryOps:#{@doc_id}", 1, @jsonUpdates[1])
-					.should.equal true
 
-			it "should delete the doc from the set of docs with history ops", ->
-				@rclient.srem
-					.calledWith("DocsWithHistoryOps:#{@project_id}", @doc_id)
-					.should.equal true
+		return describe("deleteAppliedDocUpdates", function() {
+			beforeEach(function() {
+				this.rclient.lrem = sinon.stub();
+				this.rclient.srem = sinon.stub();
+				this.rclient.exec = sinon.stub().callsArgWith(0);
+				return this.RedisManager.deleteAppliedDocUpdates(this.project_id, this.doc_id, this.jsonUpdates, this.callback);
+			});
 
-			it "should call the callback ", ->
-				@callback.called.should.equal true
+			it("should delete the first update from redis", function() {
+				return this.rclient.lrem
+					.calledWith(`UncompressedHistoryOps:${this.doc_id}`, 1, this.jsonUpdates[0])
+					.should.equal(true);
+			});
 
-	describe "getDocIdsWithHistoryOps", ->
-		beforeEach ->
-			@doc_ids = ["mock-id-1", "mock-id-2"]
-			@rclient.smembers = sinon.stub().callsArgWith(1, null, @doc_ids)
-			@RedisManager.getDocIdsWithHistoryOps @project_id, @callback
+			it("should delete the second update from redis", function() {
+				return this.rclient.lrem
+					.calledWith(`UncompressedHistoryOps:${this.doc_id}`, 1, this.jsonUpdates[1])
+					.should.equal(true);
+			});
 
-		it "should read the doc_ids from redis", ->
-			@rclient.smembers
-				.calledWith("DocsWithHistoryOps:#{@project_id}")
-				.should.equal true
+			it("should delete the doc from the set of docs with history ops", function() {
+				return this.rclient.srem
+					.calledWith(`DocsWithHistoryOps:${this.project_id}`, this.doc_id)
+					.should.equal(true);
+			});
 
-		it "should call the callback with the doc_ids", ->
-			@callback.calledWith(null, @doc_ids).should.equal true
+			return it("should call the callback ", function() {
+				return this.callback.called.should.equal(true);
+			});
+		});
+	});
+
+	return describe("getDocIdsWithHistoryOps", function() {
+		beforeEach(function() {
+			this.doc_ids = ["mock-id-1", "mock-id-2"];
+			this.rclient.smembers = sinon.stub().callsArgWith(1, null, this.doc_ids);
+			return this.RedisManager.getDocIdsWithHistoryOps(this.project_id, this.callback);
+		});
+
+		it("should read the doc_ids from redis", function() {
+			return this.rclient.smembers
+				.calledWith(`DocsWithHistoryOps:${this.project_id}`)
+				.should.equal(true);
+		});
+
+		return it("should call the callback with the doc_ids", function() {
+			return this.callback.calledWith(null, this.doc_ids).should.equal(true);
+		});
+	});
+});

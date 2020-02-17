@@ -1,198 +1,275 @@
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-expect = chai.expect
-modulePath = "../../../../app/js/LockManager.js"
-SandboxedModule = require('sandboxed-module')
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const { expect } = chai;
+const modulePath = "../../../../app/js/LockManager.js";
+const SandboxedModule = require('sandboxed-module');
 
-describe "LockManager", ->
-	beforeEach ->
-		@Settings = 		
-			redis:
+describe("LockManager", function() {
+	beforeEach(function() {
+		this.Settings = { 		
+			redis: {
 				lock:{}
-		@LockManager = SandboxedModule.require modulePath, requires:
-			"redis-sharelatex":
-				createClient: () => @rclient =
-					auth: sinon.stub()
-			"settings-sharelatex": @Settings
-			"logger-sharelatex": {error: ->}
+			}
+		};
+		this.LockManager = SandboxedModule.require(modulePath, { requires: {
+			"redis-sharelatex": {
+				createClient: () => { return this.rclient =
+					{auth: sinon.stub()}; }
+			},
+			"settings-sharelatex": this.Settings,
+			"logger-sharelatex": {error() {}}
+		}
+	});
 
-		@key = "lock-key"
-		@callback = sinon.stub()
+		this.key = "lock-key";
+		return this.callback = sinon.stub();
+	});
 
-	describe "checkLock", ->
-		describe "when the lock is taken", ->
-			beforeEach ->
-				@rclient.exists = sinon.stub().callsArgWith(1, null, "1")
-				@LockManager.checkLock @key, @callback
+	describe("checkLock", function() {
+		describe("when the lock is taken", function() {
+			beforeEach(function() {
+				this.rclient.exists = sinon.stub().callsArgWith(1, null, "1");
+				return this.LockManager.checkLock(this.key, this.callback);
+			});
 
-			it "should check the lock in redis", ->
-				@rclient.exists
-					.calledWith(@key)
-					.should.equal true
+			it("should check the lock in redis", function() {
+				return this.rclient.exists
+					.calledWith(this.key)
+					.should.equal(true);
+			});
 
-			it "should return the callback with false", ->
-				@callback.calledWith(null, false).should.equal true
+			return it("should return the callback with false", function() {
+				return this.callback.calledWith(null, false).should.equal(true);
+			});
+		});
 
-		describe "when the lock is free", ->
-			beforeEach ->
-				@rclient.exists = sinon.stub().callsArgWith(1, null, "0")
-				@LockManager.checkLock @key, @callback
+		return describe("when the lock is free", function() {
+			beforeEach(function() {
+				this.rclient.exists = sinon.stub().callsArgWith(1, null, "0");
+				return this.LockManager.checkLock(this.key, this.callback);
+			});
 
-			it "should return the callback with true", ->
-				@callback.calledWith(null, true).should.equal true
+			return it("should return the callback with true", function() {
+				return this.callback.calledWith(null, true).should.equal(true);
+			});
+		});
+	});
 
 
-	describe "tryLock", ->
-		describe "when the lock is taken", ->
-			beforeEach ->
-				@rclient.set = sinon.stub().callsArgWith(5, null, null)
-				@LockManager.randomLock = sinon.stub().returns "locked-random-value"
-				@LockManager.tryLock @key, @callback
+	describe("tryLock", function() {
+		describe("when the lock is taken", function() {
+			beforeEach(function() {
+				this.rclient.set = sinon.stub().callsArgWith(5, null, null);
+				this.LockManager.randomLock = sinon.stub().returns("locked-random-value");
+				return this.LockManager.tryLock(this.key, this.callback);
+			});
 
-			it "should check the lock in redis", ->
-				@rclient.set
-					.calledWith(@key, "locked-random-value", "EX", @LockManager.LOCK_TTL, "NX")
-					.should.equal true
+			it("should check the lock in redis", function() {
+				return this.rclient.set
+					.calledWith(this.key, "locked-random-value", "EX", this.LockManager.LOCK_TTL, "NX")
+					.should.equal(true);
+			});
 
-			it "should return the callback with false", ->
-				@callback.calledWith(null, false).should.equal true
+			return it("should return the callback with false", function() {
+				return this.callback.calledWith(null, false).should.equal(true);
+			});
+		});
 
-		describe "when the lock is free", ->
-			beforeEach ->
-				@rclient.set = sinon.stub().callsArgWith(5, null, "OK")
-				@LockManager.tryLock @key, @callback
+		return describe("when the lock is free", function() {
+			beforeEach(function() {
+				this.rclient.set = sinon.stub().callsArgWith(5, null, "OK");
+				return this.LockManager.tryLock(this.key, this.callback);
+			});
 
-			it "should return the callback with true", ->
-				@callback.calledWith(null, true).should.equal true
+			return it("should return the callback with true", function() {
+				return this.callback.calledWith(null, true).should.equal(true);
+			});
+		});
+	});
 
-	describe "deleteLock", ->
-		beforeEach -> 
-			beforeEach ->
-				@rclient.del = sinon.stub().callsArg(1)
-				@LockManager.deleteLock @key, @callback
+	describe("deleteLock", () =>
+		beforeEach(function() { 
+			beforeEach(function() {
+				this.rclient.del = sinon.stub().callsArg(1);
+				return this.LockManager.deleteLock(this.key, this.callback);
+			});
 
-			it "should delete the lock in redis", ->
-				@rclient.del
+			it("should delete the lock in redis", function() {
+				return this.rclient.del
 					.calledWith(key)
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should call the callback", ->
-				@callback.called.should.equal true
+			return it("should call the callback", function() {
+				return this.callback.called.should.equal(true);
+			});
+		})
+	);
 
-	describe "getLock", ->
-		describe "when the lock is not taken", ->
-			beforeEach (done) ->
-				@LockManager.tryLock = sinon.stub().callsArgWith(1, null, true)
-				@LockManager.getLock @key, (args...) =>
-					@callback(args...)
-					done()
+	describe("getLock", function() {
+		describe("when the lock is not taken", function() {
+			beforeEach(function(done) {
+				this.LockManager.tryLock = sinon.stub().callsArgWith(1, null, true);
+				return this.LockManager.getLock(this.key, (...args) => {
+					this.callback(...Array.from(args || []));
+					return done();
+				});
+			});
 
-			it "should try to get the lock", ->
-				@LockManager.tryLock
-					.calledWith(@key)
-					.should.equal true
+			it("should try to get the lock", function() {
+				return this.LockManager.tryLock
+					.calledWith(this.key)
+					.should.equal(true);
+			});
 
-			it "should only need to try once", ->
-				@LockManager.tryLock.callCount.should.equal 1
+			it("should only need to try once", function() {
+				return this.LockManager.tryLock.callCount.should.equal(1);
+			});
 
-			it "should return the callback", ->
-				@callback.calledWith(null).should.equal true
+			return it("should return the callback", function() {
+				return this.callback.calledWith(null).should.equal(true);
+			});
+		});
 
-		describe "when the lock is initially set", ->
-			beforeEach (done) ->
-				startTime = Date.now()
-				@LockManager.LOCK_TEST_INTERVAL = 5
-				@LockManager.tryLock = (doc_id, callback = (error, isFree) ->) ->
-					if Date.now() - startTime < 100
-						callback null, false
-					else
-						callback null, true
-				sinon.spy @LockManager, "tryLock"
+		describe("when the lock is initially set", function() {
+			beforeEach(function(done) {
+				const startTime = Date.now();
+				this.LockManager.LOCK_TEST_INTERVAL = 5;
+				this.LockManager.tryLock = function(doc_id, callback) {
+					if (callback == null) { callback = function(error, isFree) {}; }
+					if ((Date.now() - startTime) < 100) {
+						return callback(null, false);
+					} else {
+						return callback(null, true);
+					}
+				};
+				sinon.spy(this.LockManager, "tryLock");
 
-				@LockManager.getLock @key, (args...) =>
-					@callback(args...)
-					done()
+				return this.LockManager.getLock(this.key, (...args) => {
+					this.callback(...Array.from(args || []));
+					return done();
+				});
+			});
 
-			it "should call tryLock multiple times until free", ->
-				(@LockManager.tryLock.callCount > 1).should.equal true
+			it("should call tryLock multiple times until free", function() {
+				return (this.LockManager.tryLock.callCount > 1).should.equal(true);
+			});
 
-			it "should return the callback", ->
-				@callback.calledWith(null).should.equal true
+			return it("should return the callback", function() {
+				return this.callback.calledWith(null).should.equal(true);
+			});
+		});
 
-		describe "when the lock times out", ->
-			beforeEach (done) ->
-				time = Date.now()
-				@LockManager.MAX_LOCK_WAIT_TIME = 5
-				@LockManager.tryLock = sinon.stub().callsArgWith(1, null, false)
-				@LockManager.getLock @key, (args...) =>
-					@callback(args...)
-					done()
+		return describe("when the lock times out", function() {
+			beforeEach(function(done) {
+				const time = Date.now();
+				this.LockManager.MAX_LOCK_WAIT_TIME = 5;
+				this.LockManager.tryLock = sinon.stub().callsArgWith(1, null, false);
+				return this.LockManager.getLock(this.key, (...args) => {
+					this.callback(...Array.from(args || []));
+					return done();
+				});
+			});
 
-			it "should return the callback with an error", ->
-				@callback.calledWith(sinon.match.instanceOf(Error)).should.equal true
+			return it("should return the callback with an error", function() {
+				return this.callback.calledWith(sinon.match.instanceOf(Error)).should.equal(true);
+			});
+		});
+	});
 
-	describe "runWithLock", ->
-		describe "with successful run", ->
-			beforeEach ->
-				@runner = (releaseLock = (error) ->) ->
-					releaseLock()
-				sinon.spy @, "runner"
-				@LockManager.getLock = sinon.stub().callsArg(1)
-				@LockManager.releaseLock = sinon.stub().callsArg(2)
-				@LockManager.runWithLock @key, @runner, @callback
+	return describe("runWithLock", function() {
+		describe("with successful run", function() {
+			beforeEach(function() {
+				this.runner = function(releaseLock) {
+					if (releaseLock == null) { releaseLock = function(error) {}; }
+					return releaseLock();
+				};
+				sinon.spy(this, "runner");
+				this.LockManager.getLock = sinon.stub().callsArg(1);
+				this.LockManager.releaseLock = sinon.stub().callsArg(2);
+				return this.LockManager.runWithLock(this.key, this.runner, this.callback);
+			});
 
-			it "should get the lock", ->
-				@LockManager.getLock
-					.calledWith(@key)
-					.should.equal true
+			it("should get the lock", function() {
+				return this.LockManager.getLock
+					.calledWith(this.key)
+					.should.equal(true);
+			});
 
-			it "should run the passed function", ->
-				@runner.called.should.equal true
+			it("should run the passed function", function() {
+				return this.runner.called.should.equal(true);
+			});
 
-			it "should release the lock", ->
-				@LockManager.releaseLock
-					.calledWith(@key)
-					.should.equal true
+			it("should release the lock", function() {
+				return this.LockManager.releaseLock
+					.calledWith(this.key)
+					.should.equal(true);
+			});
 
-			it "should call the callback", ->
-				@callback.called.should.equal true
+			return it("should call the callback", function() {
+				return this.callback.called.should.equal(true);
+			});
+		});
 
-		describe "when the runner function returns an error", ->
-			beforeEach ->
-				@error = new Error("oops")
-				@runner = (releaseLock = (error) ->) =>
-					releaseLock(@error)
-				sinon.spy @, "runner"
-				@LockManager.getLock = sinon.stub().callsArg(1)
-				@LockManager.releaseLock = sinon.stub().callsArg(2)
-				@LockManager.runWithLock @key, @runner, @callback
+		describe("when the runner function returns an error", function() {
+			beforeEach(function() {
+				this.error = new Error("oops");
+				this.runner = releaseLock => {
+					if (releaseLock == null) { releaseLock = function(error) {}; }
+					return releaseLock(this.error);
+				};
+				sinon.spy(this, "runner");
+				this.LockManager.getLock = sinon.stub().callsArg(1);
+				this.LockManager.releaseLock = sinon.stub().callsArg(2);
+				return this.LockManager.runWithLock(this.key, this.runner, this.callback);
+			});
 
-			it "should release the lock", ->
-				@LockManager.releaseLock
-					.calledWith(@key)
-					.should.equal true
+			it("should release the lock", function() {
+				return this.LockManager.releaseLock
+					.calledWith(this.key)
+					.should.equal(true);
+			});
 
-			it "should call the callback with the error", ->
-				@callback.calledWith(@error).should.equal true
+			return it("should call the callback with the error", function() {
+				return this.callback.calledWith(this.error).should.equal(true);
+			});
+		});
 
-		describe "releaseLock", ->
-			describe "when the lock is current", ->
-				beforeEach ->
-					@rclient.eval = sinon.stub().yields(null, 1)
-					@LockManager.releaseLock @key, @lockValue, @callback
+		return describe("releaseLock", function() {
+			describe("when the lock is current", function() {
+				beforeEach(function() {
+					this.rclient.eval = sinon.stub().yields(null, 1);
+					return this.LockManager.releaseLock(this.key, this.lockValue, this.callback);
+				});
 
-				it 'should clear the data from redis', ->
-					@rclient.eval.calledWith(@LockManager.unlockScript, 1, @key, @lockValue).should.equal true
+				it('should clear the data from redis', function() {
+					return this.rclient.eval.calledWith(this.LockManager.unlockScript, 1, this.key, this.lockValue).should.equal(true);
+				});
 
-				it 'should call the callback', ->
-					@callback.called.should.equal true
+				return it('should call the callback', function() {
+					return this.callback.called.should.equal(true);
+				});
+			});
 
-			describe "when the lock has expired", ->
-				beforeEach ->
-					@rclient.eval = sinon.stub().yields(null, 0)
-					@LockManager.releaseLock @key, @lockValue, @callback
+			return describe("when the lock has expired", function() {
+				beforeEach(function() {
+					this.rclient.eval = sinon.stub().yields(null, 0);
+					return this.LockManager.releaseLock(this.key, this.lockValue, this.callback);
+				});
 
-				it 'should return an error if the lock has expired', ->
-					@callback.calledWith(sinon.match.has('message', "tried to release timed out lock")).should.equal true
+				return it('should return an error if the lock has expired', function() {
+					return this.callback.calledWith(sinon.match.has('message', "tried to release timed out lock")).should.equal(true);
+				});
+			});
+		});
+	});
+});
 
