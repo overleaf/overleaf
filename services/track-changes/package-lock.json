@@ -1080,12 +1080,6 @@
       "resolved": "https://registry.npmjs.org/cluster-key-slot/-/cluster-key-slot-1.0.12.tgz",
       "integrity": "sha1-1d7/KlIHF7yYMTl5tocwmy02jik="
     },
-    "coffee-script": {
-      "version": "1.12.4",
-      "resolved": "https://registry.npmjs.org/coffee-script/-/coffee-script-1.12.4.tgz",
-      "integrity": "sha1-/hvO2X/h+zknuZjytFYW4GWL4f8=",
-      "dev": true
-    },
     "color-convert": {
       "version": "1.9.3",
       "resolved": "https://registry.npmjs.org/color-convert/-/color-convert-1.9.3.tgz",

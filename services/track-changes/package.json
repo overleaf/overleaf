@@ -43,7 +43,6 @@
     "babel-eslint": "^10.0.3",
     "bunyan": "~2.0.2",
     "chai": "~4.1.1",
-    "coffee-script": "^1.7.1",
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-config-standard": "^14.1.0",
