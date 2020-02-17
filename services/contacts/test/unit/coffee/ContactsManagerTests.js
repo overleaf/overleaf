@@ -1,86 +1,118 @@
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-expect = chai.expect
-modulePath = "../../../app/js/ContactManager.js"
-SandboxedModule = require('sandboxed-module')
-ObjectId = require("mongojs").ObjectId
-tk = require("timekeeper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const {
+    expect
+} = chai;
+const modulePath = "../../../app/js/ContactManager.js";
+const SandboxedModule = require('sandboxed-module');
+const {
+    ObjectId
+} = require("mongojs");
+const tk = require("timekeeper");
 
-describe "ContactManager", ->
-	beforeEach ->
-		tk.freeze(Date.now())
-		@ContactManager = SandboxedModule.require modulePath, requires:
+describe("ContactManager", function() {
+	beforeEach(function() {
+		tk.freeze(Date.now());
+		this.ContactManager = SandboxedModule.require(modulePath, { requires: {
 			"./mongojs": {
-				db: @db = contacts: {}
-				ObjectId: ObjectId
+				db: (this.db = {contacts: {}}),
+				ObjectId
 			},
 			'logger-sharelatex': {log: sinon.stub()},
 			'metrics-sharelatex': {timeAsyncMethod: sinon.stub()}
-		@user_id = ObjectId().toString()
-		@contact_id = ObjectId().toString()
-		@callback = sinon.stub()
+		}
+	});
+		this.user_id = ObjectId().toString();
+		this.contact_id = ObjectId().toString();
+		return this.callback = sinon.stub();
+	});
 	
-	afterEach ->
-		tk.reset()
+	afterEach(() => tk.reset());
 
-	describe "touchContact", ->
-		beforeEach ->
-			@db.contacts.update = sinon.stub().callsArg(3)
+	describe("touchContact", function() {
+		beforeEach(function() {
+			return this.db.contacts.update = sinon.stub().callsArg(3);
+		});
 		
-		describe "with a valid user_id", ->
-			beforeEach ->
-				@ContactManager.touchContact @user_id, @contact_id = "mock_contact", @callback
+		describe("with a valid user_id", function() {
+			beforeEach(function() {
+				return this.ContactManager.touchContact(this.user_id, (this.contact_id = "mock_contact"), this.callback);
+			});
 			
-			it "should increment the contact count and timestamp", ->
-				@db.contacts.update
+			it("should increment the contact count and timestamp", function() {
+				return this.db.contacts.update
 					.calledWith({
-						user_id: sinon.match((o) => o.toString() == @user_id.toString())
+						user_id: sinon.match(o => o.toString() === this.user_id.toString())
 					}, {
-						$inc:
+						$inc: {
 							"contacts.mock_contact.n": 1
-						$set:
+						},
+						$set: {
 							"contacts.mock_contact.ts": new Date()
+						}
 					}, {
 						upsert: true
 					})
-					.should.equal true
+					.should.equal(true);
+			});
 			
-			it "should call the callback", ->
-				@callback.called.should.equal true
+			return it("should call the callback", function() {
+				return this.callback.called.should.equal(true);
+			});
+		});
 		
-		describe "with an invalid user id", ->
-			beforeEach ->
-				@ContactManager.touchContact "not-valid-object-id", @contact_id, @callback
+		return describe("with an invalid user id", function() {
+			beforeEach(function() {
+				return this.ContactManager.touchContact("not-valid-object-id", this.contact_id, this.callback);
+			});
 			
-			it "should call the callback with an error", ->
-				@callback.calledWith(new Error()).should.equal true
+			return it("should call the callback with an error", function() {
+				return this.callback.calledWith(new Error()).should.equal(true);
+			});
+		});
+	});
 	
-	describe "getContacts", ->
-		beforeEach ->
-			@user = {
+	return describe("getContacts", function() {
+		beforeEach(function() {
+			this.user = {
 				contacts: ["mock", "contacts"]
-			}
-			@db.contacts.findOne = sinon.stub().callsArgWith(1, null, @user)
+			};
+			return this.db.contacts.findOne = sinon.stub().callsArgWith(1, null, this.user);
+		});
 		
-		describe "with a valid user_id", ->
-			beforeEach ->
-				@ContactManager.getContacts @user_id, @callback
+		describe("with a valid user_id", function() {
+			beforeEach(function() {
+				return this.ContactManager.getContacts(this.user_id, this.callback);
+			});
 			
-			it "should find the user's contacts", ->
-				@db.contacts.findOne
+			it("should find the user's contacts", function() {
+				return this.db.contacts.findOne
 					.calledWith({
-						user_id: sinon.match((o) => o.toString() == @user_id.toString())
+						user_id: sinon.match(o => o.toString() === this.user_id.toString())
 					})
-					.should.equal true
+					.should.equal(true);
+			});
 			
-			it "should call the callback with the contacts", ->
-				@callback.calledWith(null, @user.contacts).should.equal true
+			return it("should call the callback with the contacts", function() {
+				return this.callback.calledWith(null, this.user.contacts).should.equal(true);
+			});
+		});
 		
-		describe "with an invalid user id", ->
-			beforeEach ->
-				@ContactManager.getContacts "not-valid-object-id", @callback
+		return describe("with an invalid user id", function() {
+			beforeEach(function() {
+				return this.ContactManager.getContacts("not-valid-object-id", this.callback);
+			});
 			
-			it "should call the callback with an error", ->
-				@callback.calledWith(new Error()).should.equal true
+			return it("should call the callback with an error", function() {
+				return this.callback.calledWith(new Error()).should.equal(true);
+			});
+		});
+	});
+});
 		
