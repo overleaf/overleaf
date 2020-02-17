@@ -53,7 +53,8 @@ describe('S3PersistorTests', function() {
         backend: 's3',
         s3: {
           secret: defaultS3Secret,
-          key: defaultS3Key
+          key: defaultS3Key,
+          partSize: 100 * 1024 * 1024
         },
         stores: {
           user_files: 'sl_user_files'

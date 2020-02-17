@@ -38,6 +38,7 @@ settings =
 				key: process.env['AWS_ACCESS_KEY_ID']
 				secret: process.env['AWS_SECRET_ACCESS_KEY']
 				endpoint: process.env['AWS_S3_ENDPOINT']
+				partSize: process.env['S3_PARTSIZE'] or (100 * 1024 * 1024)
 
 		stores:
 			user_files: process.env['USER_FILES_BUCKET_NAME']

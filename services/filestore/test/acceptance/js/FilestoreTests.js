@@ -57,7 +57,8 @@ const BackendSettings = {
       key: process.env.AWS_ACCESS_KEY_ID,
       secret: process.env.AWS_SECRET_ACCESS_KEY,
       endpoint: process.env.AWS_S3_ENDPOINT,
-      pathStyle: true
+      pathStyle: true,
+      partSize: 100 * 1024 * 1024
     },
     stores: {
       user_files: process.env.AWS_S3_USER_FILES_BUCKET_NAME,
@@ -71,7 +72,8 @@ const BackendSettings = {
       key: process.env.AWS_ACCESS_KEY_ID,
       secret: process.env.AWS_SECRET_ACCESS_KEY,
       endpoint: process.env.AWS_S3_ENDPOINT,
-      pathStyle: true
+      pathStyle: true,
+      partSize: 100 * 1024 * 1024
     },
     stores: {
       user_files: process.env.AWS_S3_USER_FILES_BUCKET_NAME,
@@ -102,7 +104,8 @@ const BackendSettings = {
       key: process.env.AWS_ACCESS_KEY_ID,
       secret: process.env.AWS_SECRET_ACCESS_KEY,
       endpoint: process.env.AWS_S3_ENDPOINT,
-      pathStyle: true
+      pathStyle: true,
+      partSize: 100 * 1024 * 1024
     },
     stores: {
       user_files: Path.resolve(__dirname, '../../../user_files'),
