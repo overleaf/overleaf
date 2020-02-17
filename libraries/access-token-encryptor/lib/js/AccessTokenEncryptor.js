@@ -9,6 +9,8 @@
  */
 const crypto = require('crypto');
 
+const Buffer = require('buffer').Buffer;
+
 const ALGORITHM = 'aes-256-ctr';
 
 const keyFn = (password, salt, callback)=> crypto.pbkdf2(password, salt, 10000, 64, 'sha1', callback);

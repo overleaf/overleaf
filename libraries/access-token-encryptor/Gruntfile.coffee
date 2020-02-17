@@ -2,35 +2,13 @@ spawn = require("child_process").spawn
 
 module.exports = (grunt) ->
 	grunt.initConfig
-		coffee:
-			# app_src:
-			# 	expand: true,
-			# 	cwd: "app/coffee"
-			# 	src: ['**/*.coffee'],
-			# 	dest: 'app/js/',
-			# 	ext: '.js'
-
-			# app:
-			# 	src: "app.coffee"
-			# 	dest: "app.js"
 
 			unit_tests:
 				expand: true
-				cwd:  "test/unit/coffee"
+				cwd:  "test/unit/js"
 				src: ["**/*.coffee"]
 				dest: "test/unit/js/"
 				ext:  ".js"
-
-			# acceptance_tests:
-			# 	expand: true
-			# 	cwd:  "test/acceptance/coffee"
-			# 	src: ["**/*.coffee"]
-			# 	dest: "test/acceptance/js/"
-			# 	ext:  ".js"
-
-		clean:
-			app: ["lib/js/"]
-			unit_tests: ["test/unit/js"]
 
 		mochaTest:
 			unit:
