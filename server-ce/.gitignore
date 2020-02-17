@@ -1,6 +1,9 @@
 /config
 config-local
-node_modules
+
+node_modules/
+api-data
+versions/
 
 web
 document-updater
