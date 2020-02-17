@@ -1,126 +1,157 @@
-sinon = require "sinon"
-chai = require("chai")
-chai.should()
-expect = chai.expect
-mongojs = require "../../../app/js/mongojs"
-db = mongojs.db
-ObjectId = mongojs.ObjectId
-Settings = require "settings-sharelatex"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require("sinon");
+const chai = require("chai");
+chai.should();
+const { expect } = chai;
+const mongojs = require("../../../app/js/mongojs");
+const { db } = mongojs;
+const { ObjectId } = mongojs;
+const Settings = require("settings-sharelatex");
 
-TrackChangesApp = require "./helpers/TrackChangesApp"
-TrackChangesClient = require "./helpers/TrackChangesClient"
-MockWebApi = require "./helpers/MockWebApi"
+const TrackChangesApp = require("./helpers/TrackChangesApp");
+const TrackChangesClient = require("./helpers/TrackChangesClient");
+const MockWebApi = require("./helpers/MockWebApi");
 
-describe "Getting updates", ->
-	before (done) ->
-		@now = Date.now()
-		@to = @now
-		@user_id = ObjectId().toString()
-		@deleted_user_id = 'deleted_user'
-		@doc_id = ObjectId().toString()
-		@project_id = ObjectId().toString()
+describe("Getting updates", function() {
+	before(function(done) {
+		this.now = Date.now();
+		this.to = this.now;
+		this.user_id = ObjectId().toString();
+		this.deleted_user_id = 'deleted_user';
+		this.doc_id = ObjectId().toString();
+		this.project_id = ObjectId().toString();
 
-		@minutes = 60 * 1000
-		@hours = 60 * @minutes
+		this.minutes = 60 * 1000;
+		this.hours = 60 * this.minutes;
 
-		MockWebApi.projects[@project_id] =
-			features:
+		MockWebApi.projects[this.project_id] = {
+			features: {
 				versioning: true
-
-		MockWebApi.users[@user_id] = @user =
-			email: "user@sharelatex.com"
-			first_name: "Leo"
-			last_name: "Lion"
-			id: @user_id
-		sinon.spy MockWebApi, "getUserInfo"
-
-		@updates = []
-		for i in [0..9]
-			@updates.push {
-				op: [{ i: "a", p: 0 }]
-				meta: { ts: @now - (9 - i) * @hours - 2 * @minutes, user_id: @user_id }
-				v: 2 * i + 1
 			}
-			@updates.push {
-				op: [{ i: "b", p: 0 }]
-				meta: { ts: @now - (9 - i) * @hours, user_id: @user_id }
-				v: 2 * i + 2
-			}
-		@updates[0].meta.user_id = @deleted_user_id
+		};
 
-		TrackChangesApp.ensureRunning =>
-			TrackChangesClient.pushRawUpdates @project_id, @doc_id, @updates, (error) =>
-				throw error if error?
-				done()
-		return null
+		MockWebApi.users[this.user_id] = (this.user = {
+			email: "user@sharelatex.com",
+			first_name: "Leo",
+			last_name: "Lion",
+			id: this.user_id
+		});
+		sinon.spy(MockWebApi, "getUserInfo");
 
-	after: () ->
-		MockWebApi.getUserInfo.restore()
-		return null
+		this.updates = [];
+		for (let i = 0; i <= 9; i++) {
+			this.updates.push({
+				op: [{ i: "a", p: 0 }],
+				meta: { ts: this.now - ((9 - i) * this.hours) - (2 * this.minutes), user_id: this.user_id },
+				v: (2 * i) + 1
+			});
+			this.updates.push({
+				op: [{ i: "b", p: 0 }],
+				meta: { ts: this.now - ((9 - i) * this.hours), user_id: this.user_id },
+				v: (2 * i) + 2
+			});
+		}
+		this.updates[0].meta.user_id = this.deleted_user_id;
 
-	describe "getting updates up to the limit", ->
-		before (done) ->
-			TrackChangesClient.getUpdates @project_id, { before: @to + 1, min_count: 3 }, (error, body) =>
-				throw error if error?
-				@updates = body.updates
-				done()
-			return null
+		TrackChangesApp.ensureRunning(() => {
+			return TrackChangesClient.pushRawUpdates(this.project_id, this.doc_id, this.updates, error => {
+				if (error != null) { throw error; }
+				return done();
+			});
+		});
+		return null;
+	});
 
-		it "should fetch the user details from the web api", ->
-			MockWebApi.getUserInfo
-				.calledWith(@user_id)
-				.should.equal true
+	({
+		after() {
+			MockWebApi.getUserInfo.restore();
+			return null;
+		}
+	});
 
-		it "should return at least the min_count number of summarized updates", ->
-			docs1 = {}
-			docs1[@doc_id] = toV: 20, fromV: 19
-			docs2 = {}
-			docs2[@doc_id] = toV: 18, fromV: 17
-			docs3 = {}
-			docs3[@doc_id] = toV: 16, fromV: 15
-			expect(@updates.slice(0,3)).to.deep.equal [{
-				docs: docs1
-				meta:
-					start_ts: @to - 2 * @minutes
-					end_ts: @to
-					users: [@user]
+	describe("getting updates up to the limit", function() {
+		before(function(done) {
+			TrackChangesClient.getUpdates(this.project_id, { before: this.to + 1, min_count: 3 }, (error, body) => {
+				if (error != null) { throw error; }
+				this.updates = body.updates;
+				return done();
+			});
+			return null;
+		});
+
+		it("should fetch the user details from the web api", function() {
+			return MockWebApi.getUserInfo
+				.calledWith(this.user_id)
+				.should.equal(true);
+		});
+
+		return it("should return at least the min_count number of summarized updates", function() {
+			const docs1 = {};
+			docs1[this.doc_id] = {toV: 20, fromV: 19};
+			const docs2 = {};
+			docs2[this.doc_id] = {toV: 18, fromV: 17};
+			const docs3 = {};
+			docs3[this.doc_id] = {toV: 16, fromV: 15};
+			return expect(this.updates.slice(0,3)).to.deep.equal([{
+				docs: docs1,
+				meta: {
+					start_ts: this.to - (2 * this.minutes),
+					end_ts: this.to,
+					users: [this.user]
+				}
 			}, {
-				docs: docs2
-				meta:
-					start_ts: @to - 1 * @hours - 2 * @minutes
-					end_ts: @to - 1 * @hours
-					users: [@user]
+				docs: docs2,
+				meta: {
+					start_ts: this.to - (1 * this.hours) - (2 * this.minutes),
+					end_ts: this.to - (1 * this.hours),
+					users: [this.user]
+				}
 			}, {
-				docs: docs3
-				meta:
-					start_ts: @to - 2 * @hours - 2 * @minutes
-					end_ts: @to - 2 * @hours
-					users: [@user]
-			}]
+				docs: docs3,
+				meta: {
+					start_ts: this.to - (2 * this.hours) - (2 * this.minutes),
+					end_ts: this.to - (2 * this.hours),
+					users: [this.user]
+				}
+			}]);
+	});
+});
 
-	describe "getting updates beyond the end of the database", ->
-		before (done) ->
-			TrackChangesClient.getUpdates @project_id, { before: @to - 8 * @hours + 1, min_count: 30 }, (error, body) =>
-				throw error if error?
-				@updates = body.updates
-				done()
-			return null
+	return describe("getting updates beyond the end of the database", function() {
+		before(function(done) {
+			TrackChangesClient.getUpdates(this.project_id, { before: (this.to - (8 * this.hours)) + 1, min_count: 30 }, (error, body) => {
+				if (error != null) { throw error; }
+				this.updates = body.updates;
+				return done();
+			});
+			return null;
+		});
 
-		it "should return as many updates as it can", ->
-			docs1 = {}
-			docs1[@doc_id] = toV: 4, fromV: 3
-			docs2 = {}
-			docs2[@doc_id] = toV: 2, fromV: 1
-			expect(@updates).to.deep.equal [{
-				docs: docs1
-				meta:
-					start_ts: @to - 8 * @hours - 2 * @minutes
-					end_ts: @to - 8 * @hours
-					users: [@user]
+		return it("should return as many updates as it can", function() {
+			const docs1 = {};
+			docs1[this.doc_id] = {toV: 4, fromV: 3};
+			const docs2 = {};
+			docs2[this.doc_id] = {toV: 2, fromV: 1};
+			return expect(this.updates).to.deep.equal([{
+				docs: docs1,
+				meta: {
+					start_ts: this.to - (8 * this.hours) - (2 * this.minutes),
+					end_ts: this.to - (8 * this.hours),
+					users: [this.user]
+				}
 			}, {
-				docs: docs2
-				meta:
-					start_ts: @to - 9 * @hours - 2 * @minutes
-					end_ts: @to - 9 * @hours
-					users: [@user, null]
-			}]
+				docs: docs2,
+				meta: {
+					start_ts: this.to - (9 * this.hours) - (2 * this.minutes),
+					end_ts: this.to - (9 * this.hours),
+					users: [this.user, null]
+				}
+			}]);
+	});
+});
+});
