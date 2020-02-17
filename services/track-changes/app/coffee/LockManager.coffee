@@ -66,7 +66,7 @@ module.exports = LockManager =
 				return callback(new Error("tried to release timed out lock"))
 			callback(err,result)
 
-	runWithLock: (key, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
+	runWithLock: (key, runner, callback = ( (error) -> )) ->
 		LockManager.getLock key, (error, lockValue) ->
 			return callback(error) if error?
 			runner (error1) ->
