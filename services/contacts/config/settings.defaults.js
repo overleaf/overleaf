@@ -1,11 +1,15 @@
-http = require('http')
-http.globalAgent.maxSockets = 300
+const http = require('http');
+http.globalAgent.maxSockets = 300;
 
-module.exports =
-	internal:
-		contacts:
-			port: 3036
-			host: process.env["LISTEN_ADDRESS"] or "localhost"
+module.exports = {
+	internal: {
+		contacts: {
+			port: 3036,
+			host: process.env["LISTEN_ADDRESS"] || "localhost"
+		}
+	},
 
-	mongo:
-		url: process.env['MONGO_CONNECTION_STRING'] or "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"
+	mongo: {
+		url: process.env['MONGO_CONNECTION_STRING'] || `mongodb://${process.env["MONGO_HOST"] || "localhost"}/sharelatex`
+	}
+};
