@@ -368,6 +368,38 @@ describe('Filestore', function() {
         })
       })
 
+      describe('with a large file', function() {
+        let fileId, fileUrl, largeFileContent, error
+
+        beforeEach(async function() {
+          fileId = Math.random()
+          fileUrl = `${filestoreUrl}/project/${projectId}/file/${directoryName}%2F${fileId}`
+
+          largeFileContent = '_wombat_'.repeat(1024 * 1024) // 8 megabytes
+          largeFileContent += Math.random()
+
+          const writeStream = request.post(fileUrl)
+          const readStream = streamifier.createReadStream(largeFileContent)
+          // hack to consume the result to ensure the http request has been fully processed
+          const resultStream = fs.createWriteStream('/dev/null')
+
+          try {
+            await pipeline(readStream, writeStream, resultStream)
+          } catch (err) {
+            error = err
+          }
+        })
+
+        it('should be able to get the file back', async function() {
+          const response = await rp.get(fileUrl)
+          expect(response.body).to.equal(largeFileContent)
+        })
+
+        it('should not throw an error', function() {
+          expect(error).not.to.exist
+        })
+      })
+
       if (backend === 'S3Persistor') {
         describe('with a file in a specific bucket', function() {
           let constantFileContent, fileId, fileUrl, bucketName
