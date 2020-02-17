@@ -23,7 +23,8 @@
   "rules": {
     // Swap the no-unused-expressions rule with a more chai-friendly one
     "no-unused-expressions": 0,
-    "chai-friendly/no-unused-expressions": "error"
+    "chai-friendly/no-unused-expressions": "error",
+    "no-console": "error"
   },
   "overrides": [
     {

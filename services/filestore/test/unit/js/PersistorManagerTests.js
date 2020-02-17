@@ -6,18 +6,14 @@ const SandboxedModule = require('sandboxed-module')
 const modulePath = '../../../app/js/PersistorManager.js'
 
 describe('PersistorManager', function() {
-  let PersistorManager,
-    FSPersistorManager,
-    S3PersistorManager,
-    settings,
-    requires
+  let PersistorManager, FSPersistor, S3Persistor, settings, requires
 
   beforeEach(function() {
-    FSPersistorManager = {
-      wrappedMethod: sinon.stub().returns('FSPersistorManager')
+    FSPersistor = {
+      wrappedMethod: sinon.stub().returns('FSPersistor')
     }
-    S3PersistorManager = {
-      wrappedMethod: sinon.stub().returns('S3PersistorManager')
+    S3Persistor = {
+      wrappedMethod: sinon.stub().returns('S3Persistor')
     }
 
     settings = {
@@ -25,8 +21,8 @@ describe('PersistorManager', function() {
     }
 
     requires = {
-      './S3PersistorManager': S3PersistorManager,
-      './FSPersistorManager': FSPersistorManager,
+      './S3Persistor': S3Persistor,
+      './FSPersistor': FSPersistor,
       'settings-sharelatex': settings,
       'logger-sharelatex': {
         log() {},
@@ -40,7 +36,7 @@ describe('PersistorManager', function() {
     PersistorManager = SandboxedModule.require(modulePath, { requires })
 
     expect(PersistorManager).to.respondTo('wrappedMethod')
-    expect(PersistorManager.wrappedMethod()).to.equal('S3PersistorManager')
+    expect(PersistorManager.wrappedMethod()).to.equal('S3Persistor')
   })
 
   it("should implement the S3 wrapped method when 'aws-sdk' is configured", function() {
@@ -48,7 +44,7 @@ describe('PersistorManager', function() {
     PersistorManager = SandboxedModule.require(modulePath, { requires })
 
     expect(PersistorManager).to.respondTo('wrappedMethod')
-    expect(PersistorManager.wrappedMethod()).to.equal('S3PersistorManager')
+    expect(PersistorManager.wrappedMethod()).to.equal('S3Persistor')
   })
 
   it('should implement the FS wrapped method when FS is configured', function() {
@@ -56,7 +52,7 @@ describe('PersistorManager', function() {
     PersistorManager = SandboxedModule.require(modulePath, { requires })
 
     expect(PersistorManager).to.respondTo('wrappedMethod')
-    expect(PersistorManager.wrappedMethod()).to.equal('FSPersistorManager')
+    expect(PersistorManager.wrappedMethod()).to.equal('FSPersistor')
   })
 
   it('should throw an error when the backend is not configured', function() {

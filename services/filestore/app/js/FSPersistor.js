@@ -7,6 +7,7 @@ const { promisify, callbackify } = require('util')
 
 const LocalFileWriter = require('./LocalFileWriter').promises
 const { NotFoundError, ReadError, WriteError } = require('./Errors')
+const PersistorHelper = require('./PersistorHelper')
 
 const pipeline = promisify(Stream.pipeline)
 const fsUnlink = promisify(fs.unlink)
@@ -27,7 +28,7 @@ async function sendFile(location, target, source) {
     const targetStream = fs.createWriteStream(`${location}/${filteredTarget}`)
     await pipeline(sourceStream, targetStream)
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to copy the specified file',
       { location, target, source },
@@ -36,11 +37,22 @@ async function sendFile(location, target, source) {
   }
 }
 
-async function sendStream(location, target, sourceStream) {
+async function sendStream(location, target, sourceStream, sourceMd5) {
   const fsPath = await LocalFileWriter.writeStream(sourceStream)
+  if (!sourceMd5) {
+    sourceMd5 = await _getFileMd5HashForPath(fsPath)
+  }
 
   try {
     await sendFile(location, target, fsPath)
+    const destMd5 = await getFileMd5Hash(location, target)
+    if (sourceMd5 !== destMd5) {
+      await LocalFileWriter.deleteFile(`${location}/${filterName(target)}`)
+      throw new WriteError({
+        message: 'md5 hash mismatch',
+        info: { sourceMd5, destMd5, location, target }
+      })
+    }
   } finally {
     await LocalFileWriter.deleteFile(fsPath)
   }
@@ -53,7 +65,7 @@ async function getFileStream(location, name, opts) {
   try {
     opts.fd = await fsOpen(`${location}/${filteredName}`, 'r')
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to open file for streaming',
       { location, filteredName, opts },
@@ -71,12 +83,24 @@ async function getFileSize(location, filename) {
     const stat = await fsStat(fullPath)
     return stat.size
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to stat file',
       { location, filename },
       ReadError
     )
+  }
+}
+
+async function getFileMd5Hash(location, filename) {
+  const fullPath = path.join(location, filterName(filename))
+  try {
+    return await _getFileMd5HashForPath(fullPath)
+  } catch (err) {
+    throw new ReadError({
+      message: 'unable to get md5 hash from file',
+      info: { location, filename }
+    }).withCause(err)
   }
 }
 
@@ -89,7 +113,7 @@ async function copyFile(location, fromName, toName) {
     const targetStream = fs.createWriteStream(`${location}/${filteredToName}`)
     await pipeline(sourceStream, targetStream)
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to copy file',
       { location, filteredFromName, filteredToName },
@@ -103,12 +127,17 @@ async function deleteFile(location, name) {
   try {
     await fsUnlink(`${location}/${filteredName}`)
   } catch (err) {
-    throw _wrapError(
+    const wrappedError = PersistorHelper.wrapError(
       err,
       'failed to delete file',
       { location, filteredName },
       WriteError
     )
+    if (!(wrappedError instanceof NotFoundError)) {
+      // S3 doesn't give us a 404 when a file wasn't there to be deleted, so we
+      // should be consistent here as well
+      throw wrappedError
+    }
   }
 }
 
@@ -119,7 +148,7 @@ async function deleteDirectory(location, name) {
   try {
     await rmrf(`${location}/${filteredName}`)
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to delete directory',
       { location, filteredName },
@@ -137,7 +166,7 @@ async function checkIfFileExists(location, name) {
     if (err.code === 'ENOENT') {
       return false
     }
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to stat file',
       { location, filteredName },
@@ -167,7 +196,7 @@ async function directorySize(location, name) {
       }
     }
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to get directory size',
       { location, name },
@@ -178,25 +207,12 @@ async function directorySize(location, name) {
   return size
 }
 
-function _wrapError(error, message, params, ErrorType) {
-  if (error.code === 'ENOENT') {
-    return new NotFoundError({
-      message: 'no such file or directory',
-      info: params
-    }).withCause(error)
-  } else {
-    return new ErrorType({
-      message: message,
-      info: params
-    }).withCause(error)
-  }
-}
-
 module.exports = {
   sendFile: callbackify(sendFile),
   sendStream: callbackify(sendStream),
   getFileStream: callbackify(getFileStream),
   getFileSize: callbackify(getFileSize),
+  getFileMd5Hash: callbackify(getFileMd5Hash),
   copyFile: callbackify(copyFile),
   deleteFile: callbackify(deleteFile),
   deleteDirectory: callbackify(deleteDirectory),
@@ -207,10 +223,16 @@ module.exports = {
     sendStream,
     getFileStream,
     getFileSize,
+    getFileMd5Hash,
     copyFile,
     deleteFile,
     deleteDirectory,
     checkIfFileExists,
     directorySize
   }
+}
+
+async function _getFileMd5HashForPath(fullPath) {
+  const stream = fs.createReadStream(fullPath)
+  return PersistorHelper.calculateStreamMd5(stream)
 }
