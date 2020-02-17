@@ -1,3 +1,10 @@
+/* eslint-disable
+    mocha/no-pending-tests,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -147,6 +154,6 @@ describe("HttpController", function() {
 			});
 		});
 		
-		return describe("with a holding account", () => it("should not return holding accounts"));
+		return describe("with a holding account", function() { return it("should not return holding accounts"); });
 	});
 });

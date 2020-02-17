@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -33,7 +39,7 @@ describe("ContactManager", function() {
 		return this.callback = sinon.stub();
 	});
 	
-	afterEach(() => tk.reset());
+	afterEach(function() { return tk.reset(); });
 
 	describe("touchContact", function() {
 		beforeEach(function() {
