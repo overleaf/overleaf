@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -41,7 +47,7 @@ module.exports = (DiffManager = {
 			}
 
 			const updatesToApply = [];
-			for (let update of Array.from(updates.slice().reverse())) {
+			for (const update of Array.from(updates.slice().reverse())) {
 				if (update.v <= toVersion) {
 					updatesToApply.push(update);
 				}
@@ -93,7 +99,7 @@ module.exports = (DiffManager = {
 			if (error != null) { return callback(error); }
 
 			// bail out if we hit a broken update
-			for (let u of Array.from(updates)) {
+			for (const u of Array.from(updates)) {
 				if (u.broken) {
 					return callback(new Error("broken-history"));
 				}

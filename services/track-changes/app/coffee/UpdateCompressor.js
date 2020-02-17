@@ -1,3 +1,12 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    new-cap,
+    no-throw-literal,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -31,7 +40,7 @@ module.exports = (UpdateCompressor = {
 	// }]
 	convertToSingleOpUpdates(updates) {
 		const splitUpdates = [];
-		for (let update of Array.from(updates)) {
+		for (const update of Array.from(updates)) {
 			// Reject any non-insert or delete ops, i.e. comments
 			const ops = update.op.filter(o => (o.i != null) || (o.d != null));
 			if (ops.length === 0) {
@@ -45,7 +54,7 @@ module.exports = (UpdateCompressor = {
 					v: update.v
 				});
 			} else {
-				for (let op of Array.from(ops)) {
+				for (const op of Array.from(ops)) {
 					splitUpdates.push({
 						op,
 						meta: {
@@ -63,7 +72,7 @@ module.exports = (UpdateCompressor = {
 
 	concatUpdatesWithSameVersion(updates) {
 		const concattedUpdates = [];
-		for (let update of Array.from(updates)) {
+		for (const update of Array.from(updates)) {
 			const lastUpdate = concattedUpdates[concattedUpdates.length - 1];
 			if ((lastUpdate != null) && (lastUpdate.v === update.v)) {
 				if (update.op !== UpdateCompressor.NOOP) { lastUpdate.op.push(update.op); }
@@ -98,7 +107,7 @@ module.exports = (UpdateCompressor = {
 		if (updates.length === 0) { return []; }
 
 		let compressedUpdates = [updates.shift()];
-		for (let update of Array.from(updates)) {
+		for (const update of Array.from(updates)) {
 			const lastCompressedUpdate = compressedUpdates.pop();
 			if (lastCompressedUpdate != null) {
 				compressedUpdates = compressedUpdates.concat(UpdateCompressor._concatTwoUpdates(lastCompressedUpdate, update));
@@ -249,7 +258,7 @@ module.exports = (UpdateCompressor = {
 
 		const ops = [];
 		let position = 0;
-		for (let diff of Array.from(diffs)) {
+		for (const diff of Array.from(diffs)) {
 			const type = diff[0];
 			const content = diff[1];
 			if (type === this.ADDED) {

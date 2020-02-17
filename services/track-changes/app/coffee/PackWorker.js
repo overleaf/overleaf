@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -40,7 +46,7 @@ if (!source.match(/^[0-9]+$/)) {
 	const file = fs.readFileSync(source);
 	const result = (() => {
 		const result1 = [];
-		for (let line of Array.from(file.toString().split('\n'))) {
+		for (const line of Array.from(file.toString().split('\n'))) {
 			[project_id, doc_id] = Array.from(line.split(' '));
 			result1.push({doc_id, project_id});
 		}

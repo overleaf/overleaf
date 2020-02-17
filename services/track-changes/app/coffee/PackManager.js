@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -191,23 +198,23 @@ module.exports = (PackManager = {
 			const query = {doc_id:ObjectId(doc_id.toString())};
 			if (toVersion != null) { query.v = {$lte:toVersion}; }
 			if (fromVersion != null) { query.v_end = {$gte:fromVersion}; }
-			//console.log "query:", query
+			// console.log "query:", query
 			return db.docHistory.find(query).sort({v:-1}, function(err, result) {
 				if (err != null) { return callback(err); }
-				//console.log "getOpsByVersionRange:", err, result
+				// console.log "getOpsByVersionRange:", err, result
 				const updates = [];
 				const opInRange = function(op, from, to) {
 					if ((fromVersion != null) && (op.v < fromVersion)) { return false; }
 					if ((toVersion != null) && (op.v > toVersion)) { return false; }
 					return true;
 				};
-				for (let docHistory of Array.from(result)) {
-					//console.log 'adding', docHistory.pack
-					for (let op of Array.from(docHistory.pack.reverse())) {
+				for (const docHistory of Array.from(result)) {
+					// console.log 'adding', docHistory.pack
+					for (const op of Array.from(docHistory.pack.reverse())) {
 						if (opInRange(op, fromVersion, toVersion)) {
 							op.project_id = docHistory.project_id;
 							op.doc_id = docHistory.doc_id;
-							//console.log "added op", op.v, fromVersion, toVersion
+							// console.log "added op", op.v, fromVersion, toVersion
 							updates.push(op);
 						}
 					}
@@ -286,7 +293,7 @@ module.exports = (PackManager = {
 			}
 			return db.docHistoryIndex.find({project_id: ObjectId(project_id)}, function(err, indexes) {
 				if (err != null) { return callback(err); }
-				for (let index of Array.from(indexes)) {
+				for (const index of Array.from(indexes)) {
 					for (pack of Array.from(index.packs)) {
 						if (!seenIds[pack._id]) {
 							pack.project_id = index.project_id;
@@ -353,7 +360,7 @@ module.exports = (PackManager = {
 		return PackManager.getIndex(doc_id, function(err, index) {
 			if (err != null) { return callback(err); }
 			if ((index == null)) { return callback(); }
-			for (let pack of Array.from((index != null ? index.packs : undefined) || [])) {
+			for (const pack of Array.from((index != null ? index.packs : undefined) || [])) {
 				index[pack._id] = pack;
 			}
 			return callback(null, index);
@@ -362,7 +369,7 @@ module.exports = (PackManager = {
 
 	initialiseIndex(project_id, doc_id, callback) {
 		return PackManager.findCompletedPacks(project_id, doc_id, function(err, packs) {
-			//console.log 'err', err, 'packs', packs, packs?.length
+			// console.log 'err', err, 'packs', packs, packs?.length
 			if (err != null) { return callback(err); }
 			if ((packs == null)) { return callback(); }
 			return PackManager.insertPacksIntoIndexWithLock(project_id, doc_id, packs, callback);
@@ -492,7 +499,7 @@ module.exports = (PackManager = {
 				delete result.last_checked;
 				delete pack.last_checked;
 				// need to compare ids as ObjectIds with .equals()
-				for (let key of ['_id', 'project_id', 'doc_id']) {
+				for (const key of ['_id', 'project_id', 'doc_id']) {
 					if (result[key].equals(pack[key])) { result[key] = pack[key]; }
 				}
 				for (let i = 0; i < result.pack.length; i++) {
@@ -621,7 +628,7 @@ module.exports = (PackManager = {
 			const indexPacks = (indexResult != null ? indexResult.packs : undefined) || [];
 			const unArchivedPacks = ((() => {
 				const result = [];
-				for (let pack of Array.from(indexPacks)) { 					if ((pack.inS3 == null)) {
+				for (const pack of Array.from(indexPacks)) { 					if ((pack.inS3 == null)) {
 						result.push(pack);
 					}
 				}

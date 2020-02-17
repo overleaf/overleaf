@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -78,8 +85,8 @@ module.exports = (HttpController = {
 		return DiffManager.getDocumentBeforeVersion(project_id, doc_id, 1, function(error, document, rewoundUpdates) {
 			if (error != null) { return next(error); }
 			const broken = [];
-			for (let update of Array.from(rewoundUpdates)) {
-				for (let op of Array.from(update.op)) {
+			for (const update of Array.from(rewoundUpdates)) {
+				for (const op of Array.from(update.op)) {
 					if (op.broken === true) {
 						broken.push(op);
 					}

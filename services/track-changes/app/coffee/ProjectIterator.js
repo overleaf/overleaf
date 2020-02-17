@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-unmodified-loop-condition,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -21,7 +27,7 @@ module.exports = (ProjectIterator =
 
 		next(callback) {
 			//  what's up next
-			//console.log ">>> top item", iterator.packs[0]
+			// console.log ">>> top item", iterator.packs[0]
 			const iterator = this;
 			const { before } = this;
 			const { queue } = iterator;
@@ -30,10 +36,10 @@ module.exports = (ProjectIterator =
 			let lowWaterMark = (nextPack != null ? nextPack.meta.end_ts : undefined) || 0;
 			let nextItem = queue.peek();
 
-			//console.log "queue empty?", queue.empty()
-			//console.log "nextItem", nextItem
-			//console.log "nextItem.meta.end_ts", nextItem?.meta.end_ts
-			//console.log "lowWaterMark", lowWaterMark
+			// console.log "queue empty?", queue.empty()
+			// console.log "nextItem", nextItem
+			// console.log "nextItem.meta.end_ts", nextItem?.meta.end_ts
+			// console.log "lowWaterMark", lowWaterMark
 
 			while ((before != null) && ((nextPack != null ? nextPack.meta.start_ts : undefined) > before)) {
 				// discard pack that is outside range
@@ -47,9 +53,9 @@ module.exports = (ProjectIterator =
 				return this.getPackByIdFn(nextPack.project_id, nextPack.doc_id, nextPack._id, function(err, pack) {
 					if (err != null) { return callback(err); }
 					iterator.packs.shift(); // have now retrieved this pack, remove it
-					//console.log "got pack", pack
-					for (let op of Array.from(pack.pack)) {
-						//console.log "adding op", op
+					// console.log "got pack", pack
+					for (const op of Array.from(pack.pack)) {
+						// console.log "adding op", op
 						if ((before == null) || (op.meta.end_ts < before)) {
 							op.doc_id = nextPack.doc_id;
 							op.project_id = nextPack.project_id;
@@ -61,15 +67,15 @@ module.exports = (ProjectIterator =
 				});
 			}
 
-			//console.log "nextItem", nextItem, "lowWaterMark", lowWaterMark
+			// console.log "nextItem", nextItem, "lowWaterMark", lowWaterMark
 			while ((nextItem != null) && ((nextItem != null ? nextItem.meta.end_ts : undefined) > lowWaterMark)) {
 				opsToReturn.push(nextItem);
 				queue.pop();
 				nextItem = queue.peek();
 			}
 
-			//console.log "queue empty?", queue.empty()
-			//console.log "nextPack", nextPack?
+			// console.log "queue empty?", queue.empty()
+			// console.log "nextPack", nextPack?
 
 			if (queue.empty() && (nextPack == null)) { // got everything
 				iterator._done = true;

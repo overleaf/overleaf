@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -36,7 +42,7 @@ module.exports = (RedisManager = {
 		if (callback == null) { callback = function(error) {}; }
 		const multi = rclient.multi();
 		// Delete all the updates which have been applied (exact match)
-		for (let update of Array.from(docUpdates || [])) {
+		for (const update of Array.from(docUpdates || [])) {
 			multi.lrem(Keys.uncompressedHistoryOps({doc_id}), 1, update);
 		}
 		return multi.exec(function(error, results) {
@@ -72,7 +78,7 @@ module.exports = (RedisManager = {
 				let keys;
 				if (error != null) { return callback(error); }
 				[cursor, keys] = Array.from(reply);
-				for (let key of Array.from(keys)) {
+				for (const key of Array.from(keys)) {
 					keySet[key] = true;
 				}
 				if (cursor === '0') {  // note redis returns string result not numeric
@@ -90,7 +96,7 @@ module.exports = (RedisManager = {
 	_extractIds(keyList) {
 		const ids = (() => {
 			const result = [];
-			for (let key of Array.from(keyList)) {
+			for (const key of Array.from(keyList)) {
 				const m = key.match(/:\{?([0-9a-f]{24})\}?/); // extract object id
 				result.push(m[1]);
 			}

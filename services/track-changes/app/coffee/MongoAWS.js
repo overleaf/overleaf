@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -119,7 +127,7 @@ module.exports = (MongoAWS = {
 			object._id = ObjectId(object._id);
 			object.doc_id = ObjectId(object.doc_id);
 			object.project_id = ObjectId(object.project_id);
-			for (let op of Array.from(object.pack)) {
+			for (const op of Array.from(object.pack)) {
 				if (op._id != null) { op._id = ObjectId(op._id); }
 			}
 			return callback(null, object);
