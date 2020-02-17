@@ -1,88 +1,128 @@
-UpdatesManager = require "./UpdatesManager"
-DocumentUpdaterManager = require "./DocumentUpdaterManager"
-DiffGenerator = require "./DiffGenerator"
-logger = require "logger-sharelatex"
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let DiffManager;
+const UpdatesManager = require("./UpdatesManager");
+const DocumentUpdaterManager = require("./DocumentUpdaterManager");
+const DiffGenerator = require("./DiffGenerator");
+const logger = require("logger-sharelatex");
 
-module.exports = DiffManager =
-	getLatestDocAndUpdates: (project_id, doc_id, fromVersion, callback = (error, content, version, updates) ->) ->
-		# Get updates last, since then they must be ahead and it
-		# might be possible to rewind to the same version as the doc.
-		DocumentUpdaterManager.getDocument project_id, doc_id, (error, content, version) ->
-			return callback(error) if error?
-			if !fromVersion? # If we haven't been given a version, just return lastest doc and no updates
-				return callback(null, content, version, [])
-			UpdatesManager.getDocUpdatesWithUserInfo project_id, doc_id, from: fromVersion, (error, updates) ->
-				return callback(error) if error?
-				callback(null, content, version, updates)
+module.exports = (DiffManager = {
+	getLatestDocAndUpdates(project_id, doc_id, fromVersion, callback) {
+		// Get updates last, since then they must be ahead and it
+		// might be possible to rewind to the same version as the doc.
+		if (callback == null) { callback = function(error, content, version, updates) {}; }
+		return DocumentUpdaterManager.getDocument(project_id, doc_id, function(error, content, version) {
+			if (error != null) { return callback(error); }
+			if ((fromVersion == null)) { // If we haven't been given a version, just return lastest doc and no updates
+				return callback(null, content, version, []);
+			}
+			return UpdatesManager.getDocUpdatesWithUserInfo(project_id, doc_id, {from: fromVersion}, function(error, updates) {
+				if (error != null) { return callback(error); }
+				return callback(null, content, version, updates);
+			});
+		});
+	},
 	
-	getDiff: (project_id, doc_id, fromVersion, toVersion, callback = (error, diff) ->) ->
-		DiffManager.getDocumentBeforeVersion project_id, doc_id, fromVersion, (error, startingContent, updates) ->
-			if error?
-				if error.message == "broken-history"
-					return callback(null, "history unavailable")
-				else
-					return callback(error)
+	getDiff(project_id, doc_id, fromVersion, toVersion, callback) {
+		if (callback == null) { callback = function(error, diff) {}; }
+		return DiffManager.getDocumentBeforeVersion(project_id, doc_id, fromVersion, function(error, startingContent, updates) {
+			let diff;
+			if (error != null) {
+				if (error.message === "broken-history") {
+					return callback(null, "history unavailable");
+				} else {
+					return callback(error);
+				}
+			}
 
-			updatesToApply = []
-			for update in updates.slice().reverse()
-				if update.v <= toVersion
-					updatesToApply.push update
+			const updatesToApply = [];
+			for (let update of Array.from(updates.slice().reverse())) {
+				if (update.v <= toVersion) {
+					updatesToApply.push(update);
+				}
+			}
 
-			try
-				diff = DiffGenerator.buildDiff startingContent, updatesToApply
-			catch e
-				return callback(e)
+			try {
+				diff = DiffGenerator.buildDiff(startingContent, updatesToApply);
+			} catch (e) {
+				return callback(e);
+			}
 			
-			callback(null, diff)
+			return callback(null, diff);
+		});
+	},
 
-	getDocumentBeforeVersion: (project_id, doc_id, version, _callback = (error, document, rewoundUpdates) ->) ->
-		# Whichever order we get the latest document and the latest updates,
-		# there is potential for updates to be applied between them so that
-		# they do not return the same 'latest' versions.
-		# If this happens, we just retry and hopefully get them at the compatible
-		# versions.
-		retries = 3
-		callback = (error, args...) ->
-			if error?
-				if error.retry and retries > 0
-					logger.warn {error, project_id, doc_id, version, retries}, "retrying getDocumentBeforeVersion"
-					retry()
-				else
-					_callback(error)
-			else
-				_callback(null, args...)
+	getDocumentBeforeVersion(project_id, doc_id, version, _callback) {
+		// Whichever order we get the latest document and the latest updates,
+		// there is potential for updates to be applied between them so that
+		// they do not return the same 'latest' versions.
+		// If this happens, we just retry and hopefully get them at the compatible
+		// versions.
+		let retry;
+		if (_callback == null) { _callback = function(error, document, rewoundUpdates) {}; }
+		let retries = 3;
+		const callback = function(error, ...args) {
+			if (error != null) {
+				if (error.retry && (retries > 0)) {
+					logger.warn({error, project_id, doc_id, version, retries}, "retrying getDocumentBeforeVersion");
+					return retry();
+				} else {
+					return _callback(error);
+				}
+			} else {
+				return _callback(null, ...Array.from(args));
+			}
+		};
 
-		do retry = () ->
-			retries--
-			DiffManager._tryGetDocumentBeforeVersion(project_id, doc_id, version, callback)
+		return (retry = function() {
+			retries--;
+			return DiffManager._tryGetDocumentBeforeVersion(project_id, doc_id, version, callback);
+		})();
+	},
 
-	_tryGetDocumentBeforeVersion: (project_id, doc_id, version, callback = (error, document, rewoundUpdates) ->) ->
-		logger.log project_id: project_id, doc_id: doc_id, version: version, "getting document before version"
-		DiffManager.getLatestDocAndUpdates project_id, doc_id, version, (error, content, version, updates) ->
-			return callback(error) if error?
+	_tryGetDocumentBeforeVersion(project_id, doc_id, version, callback) {
+		if (callback == null) { callback = function(error, document, rewoundUpdates) {}; }
+		logger.log({project_id, doc_id, version}, "getting document before version");
+		return DiffManager.getLatestDocAndUpdates(project_id, doc_id, version, function(error, content, version, updates) {
+			let startingContent;
+			if (error != null) { return callback(error); }
 
-			# bail out if we hit a broken update
-			for u in updates when u.broken
-				return callback new Error "broken-history"
+			// bail out if we hit a broken update
+			for (let u of Array.from(updates)) {
+				if (u.broken) {
+					return callback(new Error("broken-history"));
+				}
+			}
 
-			# discard any updates which are ahead of this document version
-			while updates[0]?.v >= version
-				updates.shift()
+			// discard any updates which are ahead of this document version
+			while ((updates[0] != null ? updates[0].v : undefined) >= version) {
+				updates.shift();
+			}
 
-			lastUpdate = updates[0]
-			if lastUpdate? and lastUpdate.v != version - 1
-				error = new Error("latest update version, #{lastUpdate.v}, does not match doc version, #{version}")
-				error.retry = true
-				return callback error
+			const lastUpdate = updates[0];
+			if ((lastUpdate != null) && (lastUpdate.v !== (version - 1))) {
+				error = new Error(`latest update version, ${lastUpdate.v}, does not match doc version, ${version}`);
+				error.retry = true;
+				return callback(error);
+			}
 			
-			logger.log {docVersion: version, lastUpdateVersion: lastUpdate?.v, updateCount: updates.length}, "rewinding updates"
+			logger.log({docVersion: version, lastUpdateVersion: (lastUpdate != null ? lastUpdate.v : undefined), updateCount: updates.length}, "rewinding updates");
 
-			tryUpdates = updates.slice().reverse()
+			const tryUpdates = updates.slice().reverse();
 
-			try
-				startingContent = DiffGenerator.rewindUpdates content, tryUpdates
-				# tryUpdates is reversed, and any unapplied ops are marked as broken
-			catch e
-				return callback(e)
+			try {
+				startingContent = DiffGenerator.rewindUpdates(content, tryUpdates);
+				// tryUpdates is reversed, and any unapplied ops are marked as broken
+			} catch (e) {
+				return callback(e);
+			}
 
-			callback(null, startingContent, tryUpdates)
+			return callback(null, startingContent, tryUpdates);
+		});
+	}
+});
