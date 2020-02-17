@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-undef,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -29,7 +37,7 @@ describe("Getting Contacts", function() {
 				method: "GET",
 				url: `${HOST}/user/${this.user_id}/contacts`,
 				json: true
-			}, function(error, response, body) {
+			}, (error, response, body) => {
 				response.statusCode.should.equal(200);
 				body.contact_ids.should.deep.equal([]);
 				return done();
