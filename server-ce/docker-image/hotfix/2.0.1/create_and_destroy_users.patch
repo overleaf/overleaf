@@ -1,0 +1,11 @@
+--- CreateAndDestoryUsers.coffee
++++ CreateAndDestoryUsers.coffee
+@@ -21,7 +21,7 @@ module.exports = (grunt) ->
+ 			user.save (error) ->
+ 				throw error if error?
+ 				ONE_WEEK = 7 * 24 * 60 * 60 # seconds
+-				OneTimeTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
++				OneTimeTokenHandler.getNewToken "password", { expiresIn: ONE_WEEK, email:user.email, user_id: user._id.toString() }, (err, token)->
+ 					return next(err) if err?
+
+ 					console.log ""
