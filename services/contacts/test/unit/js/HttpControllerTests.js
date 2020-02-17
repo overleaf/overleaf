@@ -146,9 +146,5 @@ describe('HttpController', function() {
           .should.equal(true)
       })
     })
-
-    return describe('with a holding account', function() {
-      return it('should not return holding accounts')
-    })
   })
 })
