@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -28,7 +34,7 @@ describe("MongoManager", function() {
 		return this.project_id = ObjectId().toString();
 	});
 
-	afterEach(() => tk.reset());
+	afterEach(function() { return tk.reset(); });
 
 	describe("getLastCompressedUpdate", function() {
 		beforeEach(function() {

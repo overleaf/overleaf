@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -494,8 +500,7 @@ describe("UpdateCompressor", function() {
 		});
 	});
 
-		describe("noop - insert", () =>
-			it("should leave them untouched", function() {
+		describe("noop - insert", function() { return it("should leave them untouched", function() {
 				return expect(this.UpdateCompressor.compressUpdates([{
 					op: this.UpdateCompressor.NOOP,
 					meta: { ts: this.ts1, user_id: this.user_id
@@ -518,11 +523,10 @@ describe("UpdateCompressor", function() {
 				},
 					v: 43
 				}]);
-		})
+		}); }
 	);
 
-		return describe("noop - delete", () =>
-			it("should leave them untouched", function() {
+		return describe("noop - delete", function() { return it("should leave them untouched", function() {
 				return expect(this.UpdateCompressor.compressUpdates([{
 					op: this.UpdateCompressor.NOOP,
 					meta: { ts: this.ts1, user_id: this.user_id
@@ -545,13 +549,11 @@ describe("UpdateCompressor", function() {
 				},
 					v: 43
 				}]);
-		})
+		}); }
 	);
 });
 
-	return describe("compressRawUpdates", () =>
-		describe("merging in-place with an array op", () =>
-			it("should not change the existing last updates", function() {
+	return describe("compressRawUpdates", function() { return describe("merging in-place with an array op", function() { return it("should not change the existing last updates", function() {
 				return expect(this.UpdateCompressor.compressRawUpdates({
 					op: [ {"p":1000,"d":"hello"}, {"p":1000,"i":"HELLO()"} ],
 					meta: { start_ts: this.ts1, end_ts: this.ts1, user_id: this.user_id
@@ -574,15 +576,15 @@ describe("UpdateCompressor", function() {
 				},
 					v: 43
 				}]);
-		})
-	)
+		}); }
+	); }
 );
 });
 
 function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
+  const range = [];
+  const ascending = left < right;
+  const end = !inclusive ? right : ascending ? right + 1 : right - 1;
   for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
     range.push(i);
   }

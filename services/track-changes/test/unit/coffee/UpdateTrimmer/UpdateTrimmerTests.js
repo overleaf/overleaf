@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -27,7 +33,7 @@ describe("UpdateTrimmer", function() {
 		return this.project_id = "mock-project-id";
 	});
 
-	afterEach(() => tk.reset());
+	afterEach(function() { return tk.reset(); });
 
 	return describe("shouldTrimUpdates", function() {
 		beforeEach(function() {

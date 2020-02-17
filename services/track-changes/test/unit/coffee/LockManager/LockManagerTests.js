@@ -1,3 +1,13 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    mocha/no-nested-tests,
+    no-return-assign,
+    no-undef,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -95,8 +105,7 @@ describe("LockManager", function() {
 		});
 	});
 
-	describe("deleteLock", () =>
-		beforeEach(function() { 
+	describe("deleteLock", function() { return beforeEach(function() { 
 			beforeEach(function() {
 				this.rclient.del = sinon.stub().callsArg(1);
 				return this.LockManager.deleteLock(this.key, this.callback);
@@ -111,7 +120,7 @@ describe("LockManager", function() {
 			return it("should call the callback", function() {
 				return this.callback.called.should.equal(true);
 			});
-		})
+		}); }
 	);
 
 	describe("getLock", function() {
