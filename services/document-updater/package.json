@@ -31,9 +31,7 @@
     "redis-sharelatex": "^1.0.11",
     "request": "2.47.0",
     "requestretry": "^1.12.0",
-    "sandboxed-module": "~0.2.0",
-    "settings-sharelatex": "^1.1.0",
-    "sinon": "~1.5.2"
+    "settings-sharelatex": "^1.1.0"
   },
   "devDependencies": {
     "bunyan": "~0.22.1",
@@ -41,6 +39,8 @@
     "chai-spies": "^0.7.1",
     "cluster-key-slot": "^1.0.5",
     "mocha": "^5.0.1",
+    "sandboxed-module": "~0.2.0",
+    "sinon": "~1.5.2",
     "timekeeper": "^2.0.0"
   }
 }
