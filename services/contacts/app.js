@@ -14,8 +14,6 @@ const bodyParser = require('body-parser')
 const Errors = require('./app/js/Errors')
 const HttpController = require('./app/js/HttpController')
 
-const Path = require('path')
-
 logger.initialize('contacts')
 if (Metrics.event_loop != null) {
   Metrics.event_loop.monitor(logger)
