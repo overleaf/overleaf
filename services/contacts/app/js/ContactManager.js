@@ -67,7 +67,6 @@ module.exports = ContactManager = {
     )
   }
 }
-
 ;['touchContact', 'getContacts'].map(method =>
   metrics.timeAsyncMethod(
     ContactManager,
