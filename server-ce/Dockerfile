@@ -7,10 +7,16 @@ FROM sharelatex/sharelatex-base:latest
 ENV SHARELATEX_CONFIG /etc/sharelatex/settings.coffee
 
 
-# Checkout Overleaf Community Edition repo
-# ----------------------------------------
-RUN git clone https://github.com/overleaf/overleaf.git \
-	--depth 1 /var/www/sharelatex
+# Add required source files
+# -------------------------
+ADD ${baseDir}/bin /var/www/sharelatex/bin
+ADD ${baseDir}/doc /var/www/sharelatex/doc
+ADD ${baseDir}/migrations /var/www/sharelatex/migrations
+ADD ${baseDir}/tasks /var/www/sharelatex/tasks
+ADD ${baseDir}/Gruntfile.coffee /var/www/sharelatex/Gruntfile.coffee
+ADD ${baseDir}/package.json /var/www/sharelatex/package.json
+ADD ${baseDir}/npm-shrinkwrap.json /var/www/sharelatex/npm-shrinkwrap.json
+ADD ${baseDir}/services.js /var/www/sharelatex/config/services.js
 
 
 # Copy build dependencies
