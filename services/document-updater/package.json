@@ -25,7 +25,6 @@
     "express": "3.11.0",
     "lodash": "^4.17.13",
     "logger-sharelatex": "^1.7.0",
-    "lynx": "0.0.11",
     "metrics-sharelatex": "^2.2.0",
     "mongojs": "^2.6.0",
     "redis-sharelatex": "^1.0.11",
