@@ -22,7 +22,7 @@ const modulePath = require('path').join(
 
 describe('InstitutionsFeatures', function() {
   beforeEach(function() {
-    this.InstitutionsGetter = { getConfirmedInstitutions: sinon.stub() }
+    this.InstitutionsGetter = { getConfirmedAffiliations: sinon.stub() }
     this.PlansLocator = { findLocalPlanInSettings: sinon.stub() }
     this.institutionPlanCode = 'institution_plan_code'
     this.InstitutionsFeatures = SandboxedModule.require(modulePath, {
@@ -47,7 +47,7 @@ describe('InstitutionsFeatures', function() {
 
   describe('hasLicence', function() {
     it('should handle error', function(done) {
-      this.InstitutionsGetter.getConfirmedInstitutions.yields(new Error('Nope'))
+      this.InstitutionsGetter.getConfirmedAffiliations.yields(new Error('Nope'))
       return this.InstitutionsFeatures.hasLicence(
         this.userId,
         (error, hasLicence) => {
@@ -58,10 +58,10 @@ describe('InstitutionsFeatures', function() {
     })
 
     it('should return false if user has no confirmed affiliations', function(done) {
-      const institutions = []
-      this.InstitutionsGetter.getConfirmedInstitutions.yields(
+      const affiliations = []
+      this.InstitutionsGetter.getConfirmedAffiliations.yields(
         null,
-        institutions
+        affiliations
       )
       return this.InstitutionsFeatures.hasLicence(
         this.userId,
@@ -74,10 +74,10 @@ describe('InstitutionsFeatures', function() {
     })
 
     it('should return false if user has no paid affiliations', function(done) {
-      const institutions = [{ licence: 'free' }]
-      this.InstitutionsGetter.getConfirmedInstitutions.yields(
+      const affiliations = [{ licence: 'free' }]
+      this.InstitutionsGetter.getConfirmedAffiliations.yields(
         null,
-        institutions
+        affiliations
       )
       return this.InstitutionsFeatures.hasLicence(
         this.userId,
@@ -90,15 +90,15 @@ describe('InstitutionsFeatures', function() {
     })
 
     it('should return true if user has confirmed paid affiliation', function(done) {
-      const institutions = [
+      const affiliations = [
         { licence: 'pro_plus' },
         { licence: 'free' },
         { licence: 'pro' },
         { licence: null }
       ]
-      this.InstitutionsGetter.getConfirmedInstitutions.yields(
+      this.InstitutionsGetter.getConfirmedAffiliations.yields(
         null,
-        institutions
+        affiliations
       )
       return this.InstitutionsFeatures.hasLicence(
         this.userId,

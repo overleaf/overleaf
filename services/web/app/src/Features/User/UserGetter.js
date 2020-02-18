@@ -155,8 +155,14 @@ var decorateFullEmails = (defaultEmail, emailsData, affiliationsData) =>
       aff => aff.email === emailData.email
     )
     if (affiliation) {
-      const { institution, inferred, role, department } = affiliation
-      emailData.affiliation = { institution, inferred, role, department }
+      const { institution, inferred, role, department, licence } = affiliation
+      emailData.affiliation = {
+        institution,
+        inferred,
+        role,
+        department,
+        licence
+      }
     } else {
       emailsData.affiliation = null
     }

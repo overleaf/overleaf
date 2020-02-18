@@ -53,16 +53,16 @@ module.exports = InstitutionsFeatures = {
     if (callback == null) {
       callback = function(error, hasLicence) {}
     }
-    return InstitutionsGetter.getConfirmedInstitutions(userId, function(
+    return InstitutionsGetter.getConfirmedAffiliations(userId, function(
       error,
-      institutions
+      affiliations
     ) {
       if (error != null) {
         return callback(error)
       }
 
-      const hasLicence = institutions.some(
-        institution => institution.licence && institution.licence !== 'free'
+      const hasLicence = affiliations.some(
+        affiliation => affiliation.licence && affiliation.licence !== 'free'
       )
 
       return callback(null, hasLicence)

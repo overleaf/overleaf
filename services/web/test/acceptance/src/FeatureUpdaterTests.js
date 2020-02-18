@@ -156,7 +156,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
       this.email = this.user.emails[0].email
       return (this.affiliationData = {
         email: this.email,
-        institution: { licence: 'pro_plus', confirmed: true }
+        licence: 'pro_plus',
+        institution: { confirmed: true }
       })
     })
 

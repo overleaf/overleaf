@@ -143,6 +143,7 @@ describe('UserGetter', function() {
           role: 'Prof',
           department: 'Maths',
           inferred: false,
+          licence: 'pro_plus',
           institution: { name: 'University Name', isUniversity: true }
         }
       ]
@@ -159,7 +160,8 @@ describe('UserGetter', function() {
                 institution: affiliationsData[0].institution,
                 inferred: affiliationsData[0].inferred,
                 department: affiliationsData[0].department,
-                role: affiliationsData[0].role
+                role: affiliationsData[0].role,
+                licence: affiliationsData[0].licence
               }
             },
             {

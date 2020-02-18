@@ -20,7 +20,7 @@ const UserMembershipEntityConfigs = require('../UserMembership/UserMembershipEnt
 const logger = require('logger-sharelatex')
 
 module.exports = InstitutionsGetter = {
-  getConfirmedInstitutions(userId, callback) {
+  getConfirmedAffiliations(userId, callback) {
     if (callback == null) {
       callback = function(error, institutions) {}
     }
@@ -29,7 +29,7 @@ module.exports = InstitutionsGetter = {
         return callback(error)
       }
 
-      const confirmedInstitutions = emailsData
+      const confirmedAffiliations = emailsData
         .filter(
           emailData =>
             emailData.confirmedAt != null &&
@@ -40,15 +40,33 @@ module.exports = InstitutionsGetter = {
               x => x.confirmed
             )
         )
-        .map(
-          emailData =>
-            emailData.affiliation != null
-              ? emailData.affiliation.institution
+        .map(emailData => emailData.affiliation)
+
+      return callback(null, confirmedAffiliations)
+    })
+  },
+
+  getConfirmedInstitutions(userId, callback) {
+    if (callback == null) {
+      callback = function(error, institutions) {}
+    }
+    InstitutionsGetter.getConfirmedAffiliations(
+      userId,
+      (error, confirmedAffiliations) => {
+        if (error != null) {
+          return callback(error)
+        }
+
+        const confirmedInstitutions = confirmedAffiliations.map(
+          confirmedAffiliation =>
+            confirmedAffiliation != null
+              ? confirmedAffiliation.institution
               : undefined
         )
 
-      return callback(null, confirmedInstitutions)
-    })
+        return callback(null, confirmedInstitutions)
+      }
+    )
   },
 
   getManagedInstitutions(user_id, callback) {
