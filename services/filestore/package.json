@@ -28,21 +28,16 @@
     "fs-extra": "^1.0.0",
     "glob": "^7.1.6",
     "heapdump": "^0.3.2",
-    "knox": "~0.9.1",
     "logger-sharelatex": "^1.7.0",
     "metrics-sharelatex": "^2.2.0",
     "mocha": "5.2.0",
-    "node-transloadit": "0.0.4",
     "node-uuid": "~1.4.1",
     "pngcrush": "0.0.3",
     "range-parser": "^1.0.2",
-    "recluster": "^0.3.7",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.8",
-    "response": "0.14.0",
     "rimraf": "2.2.8",
     "settings-sharelatex": "^1.1.0",
-    "stream-browserify": "^2.0.1",
     "stream-buffers": "~0.2.5",
     "stream-meter": "^1.0.4",
     "underscore": "~1.5.2"
@@ -68,6 +63,7 @@
     "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "2.0.3",
     "sinon": "7.1.1",
-    "sinon-chai": "^3.3.0"
+    "sinon-chai": "^3.3.0",
+    "streamifier": "^0.1.1"
   }
 }

@@ -6,7 +6,8 @@ https.globalAgent.maxSockets = 300
 const settings = require('settings-sharelatex')
 const metrics = require('metrics-sharelatex')
 
-const meter = require('stream-meter')
+const PersistorHelper = require('./PersistorHelper')
+
 const fs = require('fs')
 const S3 = require('aws-sdk/clients/s3')
 const { URL } = require('url')
@@ -18,10 +19,11 @@ const {
   SettingsError
 } = require('./Errors')
 
-module.exports = {
+const S3Persistor = {
   sendFile: callbackify(sendFile),
   sendStream: callbackify(sendStream),
   getFileStream: callbackify(getFileStream),
+  getFileMd5Hash: callbackify(getFileMd5Hash),
   deleteDirectory: callbackify(deleteDirectory),
   getFileSize: callbackify(getFileSize),
   deleteFile: callbackify(deleteFile),
@@ -32,6 +34,7 @@ module.exports = {
     sendFile,
     sendStream,
     getFileStream,
+    getFileMd5Hash,
     deleteDirectory,
     getFileSize,
     deleteFile,
@@ -41,12 +44,18 @@ module.exports = {
   }
 }
 
+module.exports = S3Persistor
+
+function hexToBase64(hex) {
+  return Buffer.from(hex, 'hex').toString('base64')
+}
+
 async function sendFile(bucketName, key, fsPath) {
   let readStream
   try {
     readStream = fs.createReadStream(fsPath)
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'error reading file from disk',
       { bucketName, key, fsPath },
@@ -56,22 +65,65 @@ async function sendFile(bucketName, key, fsPath) {
   return sendStream(bucketName, key, readStream)
 }
 
-async function sendStream(bucketName, key, readStream) {
+async function sendStream(bucketName, key, readStream, sourceMd5) {
   try {
-    const meteredStream = meter()
-    meteredStream.on('finish', () => {
-      metrics.count('s3.egress', meteredStream.bytes)
-    })
+    // if there is no supplied md5 hash, we calculate the hash as the data passes through
+    let hashPromise
+    let b64Hash
 
-    await _getClientForBucket(bucketName)
-      .upload({
-        Bucket: bucketName,
-        Key: key,
-        Body: readStream.pipe(meteredStream)
-      })
+    if (sourceMd5) {
+      b64Hash = hexToBase64(sourceMd5)
+    } else {
+      hashPromise = PersistorHelper.calculateStreamMd5(readStream)
+    }
+
+    const meteredStream = PersistorHelper.getMeteredStream(
+      readStream,
+      (_, byteCount) => {
+        // ignore the error parameter and just log the byte count
+        metrics.count('s3.egress', byteCount)
+      }
+    )
+
+    // if we have an md5 hash, pass this to S3 to verify the upload
+    const uploadOptions = {
+      Bucket: bucketName,
+      Key: key,
+      Body: meteredStream
+    }
+    if (b64Hash) {
+      uploadOptions.ContentMD5 = b64Hash
+    }
+
+    const response = await _getClientForBucket(bucketName)
+      .upload(uploadOptions, { partSize: settings.filestore.s3.partSize })
       .promise()
+    let destMd5 = _md5FromResponse(response)
+    if (!destMd5) {
+      // the eTag isn't in md5 format so we need to calculate it ourselves
+      const verifyStream = await getFileStream(
+        response.Bucket,
+        response.Key,
+        {}
+      )
+      destMd5 = await PersistorHelper.calculateStreamMd5(verifyStream)
+    }
+
+    // if we didn't have an md5 hash, we should compare our computed one with S3's
+    // as we couldn't tell S3 about it beforehand
+    if (hashPromise) {
+      sourceMd5 = await hashPromise
+      // throws on mismatch
+      await PersistorHelper.verifyMd5(
+        S3Persistor,
+        bucketName,
+        key,
+        sourceMd5,
+        destMd5
+      )
+    }
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'upload to S3 failed',
       { bucketName, key },
@@ -91,25 +143,29 @@ async function getFileStream(bucketName, key, opts) {
     params.Range = `bytes=${opts.start}-${opts.end}`
   }
 
-  return new Promise((resolve, reject) => {
-    const stream = _getClientForBucket(bucketName)
-      .getObject(params)
-      .createReadStream()
+  const stream = _getClientForBucket(bucketName)
+    .getObject(params)
+    .createReadStream()
 
-    const meteredStream = meter()
-    meteredStream.on('finish', () => {
-      metrics.count('s3.ingress', meteredStream.bytes)
-    })
-
-    const onStreamReady = function() {
-      stream.removeListener('readable', onStreamReady)
-      resolve(stream.pipe(meteredStream))
+  const meteredStream = PersistorHelper.getMeteredStream(
+    stream,
+    (_, byteCount) => {
+      // ignore the error parameter and just log the byte count
+      metrics.count('s3.ingress', byteCount)
     }
-    stream.on('readable', onStreamReady)
-    stream.on('error', err => {
-      reject(_wrapError(err, 'error reading from S3', params, ReadError))
-    })
-  })
+  )
+
+  try {
+    await PersistorHelper.waitForStreamReady(stream)
+    return meteredStream
+  } catch (err) {
+    throw PersistorHelper.wrapError(
+      err,
+      'error reading file from S3',
+      { bucketName, key, opts },
+      ReadError
+    )
+  }
 }
 
 async function deleteDirectory(bucketName, key) {
@@ -120,7 +176,7 @@ async function deleteDirectory(bucketName, key) {
       .listObjects({ Bucket: bucketName, Prefix: key })
       .promise()
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'failed to list objects in S3',
       { bucketName, key },
@@ -141,7 +197,7 @@ async function deleteDirectory(bucketName, key) {
         })
         .promise()
     } catch (err) {
-      throw _wrapError(
+      throw PersistorHelper.wrapError(
         err,
         'failed to delete objects in S3',
         { bucketName, key },
@@ -158,9 +214,25 @@ async function getFileSize(bucketName, key) {
       .promise()
     return response.ContentLength
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'error getting size of s3 object',
+      { bucketName, key },
+      ReadError
+    )
+  }
+}
+
+async function getFileMd5Hash(bucketName, key) {
+  try {
+    const response = await _getClientForBucket(bucketName)
+      .headObject({ Bucket: bucketName, Key: key })
+      .promise()
+    return _md5FromResponse(response)
+  } catch (err) {
+    throw PersistorHelper.wrapError(
+      err,
+      'error getting hash of s3 object',
       { bucketName, key },
       ReadError
     )
@@ -173,7 +245,8 @@ async function deleteFile(bucketName, key) {
       .deleteObject({ Bucket: bucketName, Key: key })
       .promise()
   } catch (err) {
-    throw _wrapError(
+    // s3 does not give us a NotFoundError here
+    throw PersistorHelper.wrapError(
       err,
       'failed to delete file in S3',
       { bucketName, key },
@@ -193,7 +266,12 @@ async function copyFile(bucketName, sourceKey, destKey) {
       .copyObject(params)
       .promise()
   } catch (err) {
-    throw _wrapError(err, 'failed to copy file in S3', params, WriteError)
+    throw PersistorHelper.wrapError(
+      err,
+      'failed to copy file in S3',
+      params,
+      WriteError
+    )
   }
 }
 
@@ -205,7 +283,7 @@ async function checkIfFileExists(bucketName, key) {
     if (err instanceof NotFoundError) {
       return false
     }
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'error checking whether S3 object exists',
       { bucketName, key },
@@ -222,28 +300,12 @@ async function directorySize(bucketName, key) {
 
     return response.Contents.reduce((acc, item) => item.Size + acc, 0)
   } catch (err) {
-    throw _wrapError(
+    throw PersistorHelper.wrapError(
       err,
       'error getting directory size in S3',
       { bucketName, key },
       ReadError
     )
-  }
-}
-
-function _wrapError(error, message, params, ErrorType) {
-  if (
-    ['NoSuchKey', 'NotFound', 'AccessDenied', 'ENOENT'].includes(error.code)
-  ) {
-    return new NotFoundError({
-      message: 'no such file',
-      info: params
-    }).withCause(error)
-  } else {
-    return new ErrorType({
-      message: message,
-      info: params
-    }).withCause(error)
   }
 }
 
@@ -308,4 +370,13 @@ function _buildClientOptions(bucketCredentials) {
   }
 
   return options
+}
+
+function _md5FromResponse(response) {
+  const md5 = (response.ETag || '').replace(/[ "]/g, '')
+  if (!md5.match(/^[a-f0-9]{32}$/)) {
+    return null
+  }
+
+  return md5
 }
