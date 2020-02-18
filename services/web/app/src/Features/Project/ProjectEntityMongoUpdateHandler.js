@@ -485,7 +485,7 @@ async function _putElement(project, folderId, element, type) {
       'project too big, stopping insertions'
     )
     CooldownManager.putProjectOnCooldown(project._id)
-    throw new Error('project_has_to_many_files')
+    throw new Error('project_has_too_many_files')
   }
 
   const { element: folder, path } = await ProjectLocator.promises.findElement({

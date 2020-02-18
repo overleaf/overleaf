@@ -225,7 +225,7 @@ describe('ProjectUploadController', function() {
       })
     })
 
-    describe('when FileSystemImportManager.addEntity returns an error', function() {
+    describe('when FileSystemImportManager.addEntity returns a generic error', function() {
       beforeEach(function() {
         this.FileSystemImportManager.addEntity = sinon
           .stub()
@@ -236,6 +236,22 @@ describe('ProjectUploadController', function() {
       it('should return an unsuccessful response to the FileUploader client', function() {
         return expect(this.res.body).to.deep.equal({
           success: false
+        })
+      })
+    })
+
+    describe('when FileSystemImportManager.addEntity returns a too many files error', function() {
+      beforeEach(function() {
+        this.FileSystemImportManager.addEntity = sinon
+          .stub()
+          .callsArgWith(6, new Error('project_has_too_many_files'))
+        return this.ProjectUploadController.uploadFile(this.req, this.res)
+      })
+
+      it('should return an unsuccessful response to the FileUploader client', function() {
+        return expect(this.res.body).to.deep.equal({
+          success: false,
+          error: 'project_has_too_many_files'
         })
       })
     })

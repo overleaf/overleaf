@@ -150,10 +150,10 @@ module.exports = EditorHttpController = {
       'editor',
       userId,
       function(error, doc) {
-        if (error && error.message === 'project_has_to_many_files') {
+        if (error && error.message === 'project_has_too_many_files') {
           return res
             .status(400)
-            .json(req.i18n.translate('project_has_to_many_files'))
+            .json(req.i18n.translate('project_has_too_many_files'))
         } else if (error) {
           return next(error)
         } else {
@@ -176,10 +176,10 @@ module.exports = EditorHttpController = {
       name,
       'editor',
       function(error, doc) {
-        if (error && error.message === 'project_has_to_many_files') {
+        if (error && error.message === 'project_has_too_many_files') {
           return res
             .status(400)
-            .json(req.i18n.translate('project_has_to_many_files'))
+            .json(req.i18n.translate('project_has_too_many_files'))
         } else if (error && error.message === 'invalid element name') {
           return res.status(400).json(req.i18n.translate('invalid_file_name'))
         } else if (error) {

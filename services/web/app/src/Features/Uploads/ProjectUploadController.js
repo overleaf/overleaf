@@ -113,7 +113,14 @@ module.exports = ProjectUploadController = {
             },
             'error uploading file'
           )
-          return res.send({ success: false })
+          if (error.message === 'project_has_too_many_files') {
+            return res.send({
+              success: false,
+              error: req.i18n.translate('project_has_too_many_files')
+            })
+          } else {
+            return res.send({ success: false })
+          }
         } else {
           return res.send({
             success: true,

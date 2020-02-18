@@ -153,6 +153,7 @@ script(type='text/ng-template', id='newFileModalTemplate')
 						div.alert.alert-danger.row-spaced-small(ng-if="error")
 							div(ng-switch="error")
 								span(ng-switch-when="already exists") #{translate("file_already_exists")}
+								span(ng-switch-when="too many files") #{translate("project_has_too_many_files")}
 								span(ng-switch-default) Error, something went wrong!
 					div(ng-if="type == 'url'", ng-controller="UrlLinkedFileModalController")
 						form(novalidate, name="newLinkedFileForm")
@@ -183,6 +184,7 @@ script(type='text/ng-template', id='newFileModalTemplate')
 						div.alert.alert-danger.row-spaced-small(ng-if="error")
 							div(ng-switch="error")
 								span(ng-switch-when="already exists") #{translate("file_already_exists")}
+								span(ng-switch-when="too many files") #{translate("project_has_too_many_files")}
 								span(ng-switch-default) {{error}}
 
 					!= moduleIncludes("newFileModal:panel", locals)

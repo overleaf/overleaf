@@ -174,6 +174,8 @@ module.exports = LinkedFilesController = {
       return res.status(502).send('The remote service produced an error')
     } else if (error instanceof FileCannotRefreshError) {
       return res.status(400).send('This file cannot be refreshed')
+    } else if (error.message === 'project_has_too_many_files') {
+      return res.status(400).send('too many files')
     } else {
       return next(error)
     }

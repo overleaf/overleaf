@@ -388,14 +388,14 @@ describe('EditorHttpController', function() {
 
       it('handle too many files', function() {
         this.EditorController.addDoc.yields(
-          new Error('project_has_to_many_files')
+          new Error('project_has_too_many_files')
         )
         let res = {
           status: status => {
             status.should.equal(400)
             return {
               json: json => {
-                json.should.equal('project_has_to_many_files')
+                json.should.equal('project_has_too_many_files')
               }
             }
           }
@@ -448,14 +448,14 @@ describe('EditorHttpController', function() {
 
       it('handle too many files', function() {
         this.EditorController.addFolder.yields(
-          new Error('project_has_to_many_files')
+          new Error('project_has_too_many_files')
         )
         let res = {
           status: status => {
             status.should.equal(400)
             return {
               json: json => {
-                json.should.equal('project_has_to_many_files')
+                json.should.equal('project_has_too_many_files')
               }
             }
           }
