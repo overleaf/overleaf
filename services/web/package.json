@@ -81,7 +81,7 @@
     "mocha": "^6.2.2",
     "moment": "^2.24.0",
     "mongojs": "2.4.0",
-    "mongoose": "4.11.4",
+    "mongoose": "^4.13.19",
     "multer": "git+https://github.com/overleaf/multer.git",
     "node-html-encoder": "0.0.2",
     "nodemailer": "2.1.0",
