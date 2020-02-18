@@ -51,7 +51,7 @@ describe('LearnedWordsManager', function() {
             token: this.token
           },
           {
-            $push: { learnedWords: this.word }
+            $addToSet: { learnedWords: this.word }
           },
           {
             upsert: true

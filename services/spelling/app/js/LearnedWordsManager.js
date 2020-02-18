@@ -15,7 +15,7 @@ const LearnedWordsManager = {
         token: userToken
       },
       {
-        $push: { learnedWords: word }
+        $addToSet: { learnedWords: word }
       },
       {
         upsert: true
