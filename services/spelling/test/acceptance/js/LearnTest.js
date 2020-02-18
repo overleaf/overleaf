@@ -54,6 +54,8 @@ describe('learning words', function() {
 
     const dictResponse = await getDict()
     const responseBody = JSON.parse(dictResponse.body)
+    // the response from getlearnedwords filters out duplicates, so this test
+    // can succeed even if the word is stored twice in the database
     expect(responseBody.length).to.equals(1)
   })
 

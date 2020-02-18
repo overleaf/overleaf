@@ -60,8 +60,14 @@ const LearnedWordsManager = {
       if (error != null) {
         return callback(error)
       }
-      const words =
+      let words =
         (preferences != null ? preferences.learnedWords : undefined) || []
+      if (words) {
+        // remove duplicates
+        words = words.filter(
+          (value, index, self) => self.indexOf(value) === index
+        )
+      }
       mongoCache.set(userToken, words)
       callback(null, words)
     })
