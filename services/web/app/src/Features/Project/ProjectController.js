@@ -556,7 +556,9 @@ const ProjectController = {
             user,
             userAffiliations,
             hasSubscription: results.hasSubscription,
-            isShowingV1Projects: results.v1Projects != null,
+            isShowingV1Projects:
+              results.v1Projects != null &&
+              results.v1Projects.projects.length > 0,
             warnings,
             zipFileSizeLimit: Settings.maxUploadSize
           }
