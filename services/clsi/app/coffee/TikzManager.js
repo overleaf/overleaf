@@ -1,3 +1,9 @@
+/* eslint-disable
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -21,7 +27,7 @@ module.exports = (TikzManager = {
 	checkMainFile(compileDir, mainFile, resources, callback) {
 		// if there's already an output.tex file, we don't want to touch it
 		if (callback == null) { callback = function(error, needsMainFile) {}; }
-		for (let resource of Array.from(resources)) {
+		for (const resource of Array.from(resources)) {
 			if (resource.path === "output.tex") {
 				logger.log({compileDir, mainFile}, "output.tex already in resources");
 				return callback(null, false);

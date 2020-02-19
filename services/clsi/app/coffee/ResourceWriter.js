@@ -1,3 +1,12 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+    no-unused-vars,
+    no-useless-escape,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -105,7 +114,7 @@ module.exports = (ResourceWriter = {
 			if (error != null) { return callback(error); }
 
 			const jobs = [];
-			for (let file of Array.from(outputFiles || [])) {
+			for (const file of Array.from(outputFiles || [])) {
 				(function(file) {
 					const { path } = file;
 					let should_delete = true;
@@ -182,7 +191,7 @@ module.exports = (ResourceWriter = {
 							logger.err({err, project_id, path, resource_url:resource.url, modified:resource.modified}, "error downloading file for resources");
 						}
 						return callback();
-					}); //try and continue compiling even if http resource can not be downloaded at this time
+					}); // try and continue compiling even if http resource can not be downloaded at this time
 				} else {
 					const process = require("process");
 					fs.writeFile(path, resource.content, callback);

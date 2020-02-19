@@ -1,3 +1,14 @@
+/* eslint-disable
+    handle-callback-err,
+    no-control-regex,
+    no-throw-literal,
+    no-unused-vars,
+    no-useless-escape,
+    standard/no-callback-literal,
+    valid-typeof,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -172,7 +183,7 @@ module.exports = (RequestParser = {
 
 	_checkPath(path) {
 		// check that the request does not use a relative path
-		for (let dir of Array.from(path.split('/'))) {
+		for (const dir of Array.from(path.split('/'))) {
 			if (dir === '..') {
 				throw "relative path in root resource";
 			}

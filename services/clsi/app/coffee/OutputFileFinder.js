@@ -1,3 +1,11 @@
+/* eslint-disable
+    handle-callback-err,
+    no-return-assign,
+    no-unused-vars,
+    no-useless-escape,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -17,7 +25,7 @@ module.exports = (OutputFileFinder = {
 	findOutputFiles(resources, directory, callback) {
 		if (callback == null) { callback = function(error, outputFiles, allFiles) {}; }
 		const incomingResources = {};
-		for (let resource of Array.from(resources)) {
+		for (const resource of Array.from(resources)) {
 			incomingResources[resource.path] = true;
 		}
 			
@@ -28,7 +36,7 @@ module.exports = (OutputFileFinder = {
 				return callback(error);
 			}
 			const outputFiles = [];
-			for (let file of Array.from(allFiles)) {
+			for (const file of Array.from(allFiles)) {
 				if (!incomingResources[file]) {
 					outputFiles.push({
 						path: file,

@@ -1,3 +1,9 @@
+/* eslint-disable
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -62,10 +68,10 @@ module.exports = (ResourceStateManager = {
 			if (bytesRead === size) {
 				logger.error({file:stateFile, size, bytesRead}, "project state file truncated");
 			}
-			const array = __guard__(result != null ? result.toString() : undefined, x => x.split("\n")) || [],
-				adjustedLength = Math.max(array.length, 1),
-				resourceList = array.slice(0, adjustedLength - 1),
-				oldState = array[adjustedLength - 1];
+			const array = __guard__(result != null ? result.toString() : undefined, x => x.split("\n")) || [];
+				const adjustedLength = Math.max(array.length, 1);
+				const resourceList = array.slice(0, adjustedLength - 1);
+				const oldState = array[adjustedLength - 1];
 			const newState = `stateHash:${state}`;
 			logger.log({state, oldState, basePath, stateMatches: (newState === oldState)}, "checking sync state");
 			if (newState !== oldState) {
@@ -82,7 +88,7 @@ module.exports = (ResourceStateManager = {
 		let file;
 		if (callback == null) { callback = function(error) {}; }
 		for (file of Array.from(resources || [])) {
-			for (let dir of Array.from(__guard__(file != null ? file.path : undefined, x => x.split('/')))) {
+			for (const dir of Array.from(__guard__(file != null ? file.path : undefined, x => x.split('/')))) {
 				if (dir === '..') {
 					return callback(new Error("relative path in resource file list"));
 				}

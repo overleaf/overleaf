@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -140,7 +148,7 @@ module.exports = (DockerRunner = {
 					return callback(err);
 				}
 				containerReturned = true;
-				__guard__(options != null ? options.HostConfig : undefined, x => x.SecurityOpt = null); //small log line
+				__guard__(options != null ? options.HostConfig : undefined, x => x.SecurityOpt = null); // small log line
 				logger.log({err, exitCode, options}, "docker container has exited");
 				return callbackIfFinished();
 			});
@@ -164,7 +172,7 @@ module.exports = (DockerRunner = {
 
 		// merge settings and environment parameter
 		const env = {};
-		for (let src of [Settings.clsi.docker.env, environment || {}]) {
+		for (const src of [Settings.clsi.docker.env, environment || {}]) {
 			for (key in src) { value = src[key]; env[key] = value; }
 		}
 		// set the path based on the image year
@@ -173,7 +181,7 @@ module.exports = (DockerRunner = {
 		} else {
 			year = "2014";
 		}
-		env['PATH'] = `/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/${year}/bin/x86_64-linux/`;
+		env.PATH = `/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/${year}/bin/x86_64-linux/`;
 		const options = {
 			"Cmd"             : command,
 			"Image"           : image,
@@ -208,7 +216,7 @@ module.exports = (DockerRunner = {
 
 
 		if ((Settings.path != null ? Settings.path.synctexBinHostPath : undefined) != null) {
-			options["HostConfig"]["Binds"].push(`${Settings.path.synctexBinHostPath}:/opt/synctex:ro`);
+			options.HostConfig.Binds.push(`${Settings.path.synctexBinHostPath}:/opt/synctex:ro`);
 		}
 
 		if (Settings.clsi.docker.seccomp_profile != null) {
@@ -254,7 +262,7 @@ module.exports = (DockerRunner = {
 			})
 		;
 		const jobs = [];
-		for (let vol in volumes) {
+		for (const vol in volumes) {
 			(vol => jobs.push(cb => checkVolume(vol, cb)))(vol);
 		}
 		return async.series(jobs, callback);
@@ -279,7 +287,7 @@ module.exports = (DockerRunner = {
 			DockerRunner.attachToContainer(options.name, attachStreamHandler, function(error){
 				if (error != null) { return callback(error); }
 				return container.start(function(error) {
-					if ((error != null) && ((error != null ? error.statusCode : undefined) !== 304)) { //already running
+					if ((error != null) && ((error != null ? error.statusCode : undefined) !== 304)) { // already running
 						return callback(error);
 					} else {
 						return callback();
@@ -434,7 +442,7 @@ module.exports = (DockerRunner = {
 		return dockerode.listContainers({all: true}, function(error, containers) {
 			if (error != null) { return callback(error); }
 			const jobs = [];
-			for (let container of Array.from(containers || [])) {
+			for (const container of Array.from(containers || [])) {
 				(container =>
 					DockerRunner.examineOldContainer(container, function(err, name, id, ttl) {
 						if ((name.slice(0, 9) === '/project-') && (ttl <= 0)) {

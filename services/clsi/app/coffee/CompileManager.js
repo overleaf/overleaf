@@ -1,3 +1,12 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+    no-undef,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -88,13 +97,13 @@ module.exports = (CompileManager = {
 			// only run chktex on LaTeX files (not knitr .Rtex files or any others)
 			const isLaTeXFile = request.rootResourcePath != null ? request.rootResourcePath.match(/\.tex$/i) : undefined;
 			if ((request.check != null) && isLaTeXFile) {
-				env['CHKTEX_OPTIONS'] = '-nall -e9 -e10 -w15 -w16';
-				env['CHKTEX_ULIMIT_OPTIONS'] = '-t 5 -v 64000';
+				env.CHKTEX_OPTIONS = '-nall -e9 -e10 -w15 -w16';
+				env.CHKTEX_ULIMIT_OPTIONS = '-t 5 -v 64000';
 				if (request.check === 'error') {
-					env['CHKTEX_EXIT_ON_ERROR'] =  1;
+					env.CHKTEX_EXIT_ON_ERROR =  1;
 				}
 				if (request.check === 'validate') {
-					env['CHKTEX_VALIDATE'] =  1;
+					env.CHKTEX_VALIDATE =  1;
 				}
 			}
 
@@ -337,7 +346,7 @@ module.exports = (CompileManager = {
 
 	_parseSynctexFromCodeOutput(output) {
 		const results = [];
-		for (let line of Array.from(output.split("\n"))) {
+		for (const line of Array.from(output.split("\n"))) {
 			const [node, page, h, v, width, height] = Array.from(line.split("\t"));
 			if (node === "NODE") {
 				results.push({
@@ -387,7 +396,7 @@ module.exports = (CompileManager = {
 				if (error != null) { return callback(error); }
 				return fs.readFile(compileDir + "/" + file_name + ".wc", "utf-8", function(err, stdout) {
 					if (err != null) {
-						//call it node_err so sentry doesn't use random path error as unique id so it can't be ignored
+						// call it node_err so sentry doesn't use random path error as unique id so it can't be ignored
 						logger.err({node_err:err, command, compileDir, project_id, user_id}, "error reading word count output");
 						return callback(err);
 					}
@@ -412,37 +421,37 @@ module.exports = (CompileManager = {
 			errors: 0,
 			messages: ""
 		};
-		for (let line of Array.from(output.split("\n"))) {
+		for (const line of Array.from(output.split("\n"))) {
 			const [data, info] = Array.from(line.split(":"));
 			if (data.indexOf("Encoding") > -1) {
-				results['encode'] = info.trim();
+				results.encode = info.trim();
 			}
 			if (data.indexOf("in text") > -1) {
-				results['textWords'] = parseInt(info, 10);
+				results.textWords = parseInt(info, 10);
 			}
 			if (data.indexOf("in head") > -1) {
-				results['headWords'] = parseInt(info, 10);
+				results.headWords = parseInt(info, 10);
 			}
 			if (data.indexOf("outside") > -1) {
-				results['outside'] = parseInt(info, 10);
+				results.outside = parseInt(info, 10);
 			}
 			if (data.indexOf("of head") > -1) {
-				results['headers'] = parseInt(info, 10);
+				results.headers = parseInt(info, 10);
 			}
 			if (data.indexOf("Number of floats/tables/figures") > -1) {
-				results['elements'] = parseInt(info, 10);
+				results.elements = parseInt(info, 10);
 			}
 			if (data.indexOf("Number of math inlines") > -1) {
-				results['mathInline'] = parseInt(info, 10);
+				results.mathInline = parseInt(info, 10);
 			}
 			if (data.indexOf("Number of math displayed") > -1) {
-				results['mathDisplay'] = parseInt(info, 10);
+				results.mathDisplay = parseInt(info, 10);
 			}
 			if (data === "(errors") {  // errors reported as (errors:123)
-				results['errors'] = parseInt(info, 10);
+				results.errors = parseInt(info, 10);
 			}
 			if (line.indexOf("!!! ") > -1) {  // errors logged as !!! message !!!
-				results['messages'] += line + "\n";
+				results.messages += line + "\n";
 			}
 		}
 		return results;

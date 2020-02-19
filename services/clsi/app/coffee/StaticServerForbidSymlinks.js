@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    no-cond-assign,
+    no-unused-vars,
+    node/no-deprecated-api,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -28,7 +36,7 @@ module.exports = (ForbidSymlinks = function(staticFn, root, options) {
 			return res.sendStatus(404);
 		}
 		// check that the file does not use a relative path
-		for (let dir of Array.from(file.split('/'))) {
+		for (const dir of Array.from(file.split('/'))) {
 			if (dir === '..') {
 				logger.warn({path}, "attempt to use a relative path");
 				return res.sendStatus(404);
