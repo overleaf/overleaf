@@ -1,57 +1,77 @@
-SandboxedModule = require('sandboxed-module')
-sinon = require('sinon')
-require('chai').should()
-modulePath = require('path').join __dirname, '../../../app/js/LockManager'
-Path = require "path"
-Errors = require "../../../app/js/Errors"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const SandboxedModule = require('sandboxed-module');
+const sinon = require('sinon');
+require('chai').should();
+const modulePath = require('path').join(__dirname, '../../../app/js/LockManager');
+const Path = require("path");
+const Errors = require("../../../app/js/Errors");
 
-describe "DockerLockManager", ->
-	beforeEach ->
-		@LockManager = SandboxedModule.require modulePath, requires:
-			"settings-sharelatex": {}
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), err:-> }
-			"fs":
-				lstat:sinon.stub().callsArgWith(1)
+describe("DockerLockManager", function() {
+	beforeEach(function() {
+		this.LockManager = SandboxedModule.require(modulePath, { requires: {
+			"settings-sharelatex": {},
+			"logger-sharelatex": (this.logger = { log: sinon.stub(), error: sinon.stub(), err() {} }),
+			"fs": {
+				lstat:sinon.stub().callsArgWith(1),
 				readdir: sinon.stub().callsArgWith(1)
-			"lockfile": @Lockfile = {}
-		@lockFile = "/local/compile/directory/.project-lock"
+			},
+			"lockfile": (this.Lockfile = {})
+		}
+	});
+		return this.lockFile = "/local/compile/directory/.project-lock";
+	});
 
-	describe "runWithLock", ->
-		beforeEach ->
-			@runner = sinon.stub().callsArgWith(0, null, "foo", "bar")
-			@callback = sinon.stub()
+	return describe("runWithLock", function() {
+		beforeEach(function() {
+			this.runner = sinon.stub().callsArgWith(0, null, "foo", "bar");
+			return this.callback = sinon.stub();
+		});
 
-		describe "normally", ->
-			beforeEach ->
-				@Lockfile.lock = sinon.stub().callsArgWith(2, null)
-				@Lockfile.unlock = sinon.stub().callsArgWith(1, null)
-				@LockManager.runWithLock @lockFile, @runner, @callback
+		describe("normally", function() {
+			beforeEach(function() {
+				this.Lockfile.lock = sinon.stub().callsArgWith(2, null);
+				this.Lockfile.unlock = sinon.stub().callsArgWith(1, null);
+				return this.LockManager.runWithLock(this.lockFile, this.runner, this.callback);
+			});
 
-			it "should run the compile", ->
-				@runner
+			it("should run the compile", function() {
+				return this.runner
 					.calledWith()
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should call the callback with the response from the compile", ->
-				@callback
+			return it("should call the callback with the response from the compile", function() {
+				return this.callback
 					.calledWithExactly(null, "foo", "bar")
-					.should.equal true
+					.should.equal(true);
+			});
+		});
 
-		describe "when the project is locked", ->
-			beforeEach ->
-				@error = new Error()
-				@error.code =  "EEXIST"
-				@Lockfile.lock = sinon.stub().callsArgWith(2,@error)
-				@Lockfile.unlock = sinon.stub().callsArgWith(1, null)
-				@LockManager.runWithLock @lockFile, @runner, @callback
+		return describe("when the project is locked", function() {
+			beforeEach(function() {
+				this.error = new Error();
+				this.error.code =  "EEXIST";
+				this.Lockfile.lock = sinon.stub().callsArgWith(2,this.error);
+				this.Lockfile.unlock = sinon.stub().callsArgWith(1, null);
+				return this.LockManager.runWithLock(this.lockFile, this.runner, this.callback);
+			});
 
-			it "should not run the compile", ->
-				@runner
+			it("should not run the compile", function() {
+				return this.runner
 					.called
-					.should.equal false
+					.should.equal(false);
+			});
 
-			it "should return an error", ->
-				error = new Errors.AlreadyCompilingError()
-				@callback
+			return it("should return an error", function() {
+				const error = new Errors.AlreadyCompilingError();
+				return this.callback
 					.calledWithExactly(error)
-					.should.equal true
+					.should.equal(true);
+			});
+		});
+	});
+});

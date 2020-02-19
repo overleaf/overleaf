@@ -1,62 +1,82 @@
-SandboxedModule = require('sandboxed-module')
-sinon = require('sinon')
-require('chai').should()
-modulePath = require('path').join __dirname, '../../../app/js/ProjectPersistenceManager'
-tk = require("timekeeper")
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const SandboxedModule = require('sandboxed-module');
+const sinon = require('sinon');
+require('chai').should();
+const modulePath = require('path').join(__dirname, '../../../app/js/ProjectPersistenceManager');
+const tk = require("timekeeper");
 
-describe "ProjectPersistenceManager", ->
-	beforeEach ->
-		@ProjectPersistenceManager = SandboxedModule.require modulePath, requires:
-			"./UrlCache": @UrlCache = {}
-			"./CompileManager": @CompileManager = {}
-			"logger-sharelatex": @logger = { log: sinon.stub() }
-			"./db": @db = {}
-		@callback = sinon.stub()
-		@project_id = "project-id-123"
-		@user_id = "1234"
+describe("ProjectPersistenceManager", function() {
+	beforeEach(function() {
+		this.ProjectPersistenceManager = SandboxedModule.require(modulePath, { requires: {
+			"./UrlCache": (this.UrlCache = {}),
+			"./CompileManager": (this.CompileManager = {}),
+			"logger-sharelatex": (this.logger = { log: sinon.stub() }),
+			"./db": (this.db = {})
+		}
+	});
+		this.callback = sinon.stub();
+		this.project_id = "project-id-123";
+		return this.user_id = "1234";
+	});
 
-	describe "clearExpiredProjects", ->
-		beforeEach ->
-			@project_ids = [
-				"project-id-1"
+	describe("clearExpiredProjects", function() {
+		beforeEach(function() {
+			this.project_ids = [
+				"project-id-1",
 				"project-id-2"
-			]
-			@ProjectPersistenceManager._findExpiredProjectIds = sinon.stub().callsArgWith(0, null, @project_ids)
-			@ProjectPersistenceManager.clearProjectFromCache = sinon.stub().callsArg(1)
-			@CompileManager.clearExpiredProjects = sinon.stub().callsArg(1)
-			@ProjectPersistenceManager.clearExpiredProjects @callback
+			];
+			this.ProjectPersistenceManager._findExpiredProjectIds = sinon.stub().callsArgWith(0, null, this.project_ids);
+			this.ProjectPersistenceManager.clearProjectFromCache = sinon.stub().callsArg(1);
+			this.CompileManager.clearExpiredProjects = sinon.stub().callsArg(1);
+			return this.ProjectPersistenceManager.clearExpiredProjects(this.callback);
+		});
 
-		it "should clear each expired project", ->
-			for project_id in @project_ids
-				@ProjectPersistenceManager.clearProjectFromCache
+		it("should clear each expired project", function() {
+			return Array.from(this.project_ids).map((project_id) =>
+				this.ProjectPersistenceManager.clearProjectFromCache
 					.calledWith(project_id)
-					.should.equal true
+					.should.equal(true));
+		});
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+		return it("should call the callback", function() {
+			return this.callback.called.should.equal(true);
+		});
+	});
 
-	describe "clearProject", ->
-		beforeEach ->
-			@ProjectPersistenceManager._clearProjectFromDatabase = sinon.stub().callsArg(1)
-			@UrlCache.clearProject = sinon.stub().callsArg(1)
-			@CompileManager.clearProject = sinon.stub().callsArg(2)
-			@ProjectPersistenceManager.clearProject @project_id, @user_id, @callback
+	return describe("clearProject", function() {
+		beforeEach(function() {
+			this.ProjectPersistenceManager._clearProjectFromDatabase = sinon.stub().callsArg(1);
+			this.UrlCache.clearProject = sinon.stub().callsArg(1);
+			this.CompileManager.clearProject = sinon.stub().callsArg(2);
+			return this.ProjectPersistenceManager.clearProject(this.project_id, this.user_id, this.callback);
+		});
 
-		it "should clear the project from the database", ->
-			@ProjectPersistenceManager._clearProjectFromDatabase
-				.calledWith(@project_id)
-				.should.equal true
+		it("should clear the project from the database", function() {
+			return this.ProjectPersistenceManager._clearProjectFromDatabase
+				.calledWith(this.project_id)
+				.should.equal(true);
+		});
 
-		it "should clear all the cached Urls for the project", ->
-			@UrlCache.clearProject
-				.calledWith(@project_id)
-				.should.equal true
+		it("should clear all the cached Urls for the project", function() {
+			return this.UrlCache.clearProject
+				.calledWith(this.project_id)
+				.should.equal(true);
+		});
 
-		it "should clear the project compile folder", ->
-			@CompileManager.clearProject
-				.calledWith(@project_id, @user_id)
-				.should.equal true
+		it("should clear the project compile folder", function() {
+			return this.CompileManager.clearProject
+				.calledWith(this.project_id, this.user_id)
+				.should.equal(true);
+		});
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+		return it("should call the callback", function() {
+			return this.callback.called.should.equal(true);
+		});
+	});
+});
 			

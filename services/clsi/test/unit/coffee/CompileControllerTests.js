@@ -1,217 +1,269 @@
-SandboxedModule = require('sandboxed-module')
-sinon = require('sinon')
-require('chai').should()
-modulePath = require('path').join __dirname, '../../../app/js/CompileController'
-tk = require("timekeeper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const SandboxedModule = require('sandboxed-module');
+const sinon = require('sinon');
+require('chai').should();
+const modulePath = require('path').join(__dirname, '../../../app/js/CompileController');
+const tk = require("timekeeper");
 
-describe "CompileController", ->
-	beforeEach ->
-		@CompileController = SandboxedModule.require modulePath, requires:
-			"./CompileManager": @CompileManager = {}
-			"./RequestParser": @RequestParser = {}
-			"settings-sharelatex": @Settings =
-				apis:
-					clsi:
+describe("CompileController", function() {
+	beforeEach(function() {
+		this.CompileController = SandboxedModule.require(modulePath, { requires: {
+			"./CompileManager": (this.CompileManager = {}),
+			"./RequestParser": (this.RequestParser = {}),
+			"settings-sharelatex": (this.Settings = {
+				apis: {
+					clsi: {
 						url: "http://clsi.example.com"
-			"./ProjectPersistenceManager": @ProjectPersistenceManager = {}
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), err:sinon.stub(), warn: sinon.stub()}
-		@Settings.externalUrl = "http://www.example.com"
-		@req = {}
-		@res = {}
-		@next = sinon.stub()
+					}
+				}
+			}),
+			"./ProjectPersistenceManager": (this.ProjectPersistenceManager = {}),
+			"logger-sharelatex": (this.logger = { log: sinon.stub(), error: sinon.stub(), err:sinon.stub(), warn: sinon.stub()})
+		}
+	});
+		this.Settings.externalUrl = "http://www.example.com";
+		this.req = {};
+		this.res = {};
+		return this.next = sinon.stub();
+	});
 
-	describe "compile", ->
-		beforeEach ->
-			@req.body = {
+	describe("compile", function() {
+		beforeEach(function() {
+			this.req.body = {
 				compile: "mock-body"
-			}
-			@req.params =
-				project_id: @project_id = "project-id-123"
-			@request = {
+			};
+			this.req.params =
+				{project_id: (this.project_id = "project-id-123")};
+			this.request = {
 				compile: "mock-parsed-request"
-			}
-			@request_with_project_id =
-				compile: @request.compile
-				project_id: @project_id
-			@output_files = [{
-				path: "output.pdf"
-				type: "pdf"
+			};
+			this.request_with_project_id = {
+				compile: this.request.compile,
+				project_id: this.project_id
+			};
+			this.output_files = [{
+				path: "output.pdf",
+				type: "pdf",
 				build: 1234
 			}, {
-				path: "output.log"
-				type: "log"
+				path: "output.log",
+				type: "log",
 				build: 1234
-			}]
-			@RequestParser.parse = sinon.stub().callsArgWith(1, null, @request)
-			@ProjectPersistenceManager.markProjectAsJustAccessed = sinon.stub().callsArg(1)
-			@res.status = sinon.stub().returnsThis()
-			@res.send = sinon.stub()
+			}];
+			this.RequestParser.parse = sinon.stub().callsArgWith(1, null, this.request);
+			this.ProjectPersistenceManager.markProjectAsJustAccessed = sinon.stub().callsArg(1);
+			this.res.status = sinon.stub().returnsThis();
+			return this.res.send = sinon.stub();
+		});
 
-		describe "successfully", ->
-			beforeEach ->
-				@CompileManager.doCompileWithLock = sinon.stub().callsArgWith(1, null, @output_files)
-				@CompileController.compile @req, @res
+		describe("successfully", function() {
+			beforeEach(function() {
+				this.CompileManager.doCompileWithLock = sinon.stub().callsArgWith(1, null, this.output_files);
+				return this.CompileController.compile(this.req, this.res);
+			});
 
-			it "should parse the request", ->
-				@RequestParser.parse
-					.calledWith(@req.body)
-					.should.equal true
+			it("should parse the request", function() {
+				return this.RequestParser.parse
+					.calledWith(this.req.body)
+					.should.equal(true);
+			});
 
-			it "should run the compile for the specified project", ->
-				@CompileManager.doCompileWithLock
-					.calledWith(@request_with_project_id)
-					.should.equal true
+			it("should run the compile for the specified project", function() {
+				return this.CompileManager.doCompileWithLock
+					.calledWith(this.request_with_project_id)
+					.should.equal(true);
+			});
 
-			it "should mark the project as accessed", ->
-				@ProjectPersistenceManager.markProjectAsJustAccessed
-					.calledWith(@project_id)
-					.should.equal true
+			it("should mark the project as accessed", function() {
+				return this.ProjectPersistenceManager.markProjectAsJustAccessed
+					.calledWith(this.project_id)
+					.should.equal(true);
+			});
 
-			it "should return the JSON response", ->
-				@res.status.calledWith(200).should.equal true
-				@res.send
-					.calledWith(
-						compile:
-							status: "success"
-							error: null
-							outputFiles: @output_files.map (file) =>
-								url: "#{@Settings.apis.clsi.url}/project/#{@project_id}/build/#{file.build}/output/#{file.path}"
-								path: file.path
-								type: file.type
-								build: file.build
-					)
-					.should.equal true
+			return it("should return the JSON response", function() {
+				this.res.status.calledWith(200).should.equal(true);
+				return this.res.send
+					.calledWith({
+						compile: {
+							status: "success",
+							error: null,
+							outputFiles: this.output_files.map(file => {
+								return {
+									url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+									path: file.path,
+									type: file.type,
+									build: file.build
+								};
+						})
+						}
+					})
+					.should.equal(true);
+			});
+		});
 			
-		describe "with an error", ->
-			beforeEach ->
-				@CompileManager.doCompileWithLock = sinon.stub().callsArgWith(1, new Error(@message = "error message"), null)
-				@CompileController.compile @req, @res
+		describe("with an error", function() {
+			beforeEach(function() {
+				this.CompileManager.doCompileWithLock = sinon.stub().callsArgWith(1, new Error(this.message = "error message"), null);
+				return this.CompileController.compile(this.req, this.res);
+			});
 		
-			it "should return the JSON response with the error", ->
-				@res.status.calledWith(500).should.equal true
-				@res.send
-					.calledWith(
-						compile:
-							status: "error"
-							error:  @message
+			return it("should return the JSON response with the error", function() {
+				this.res.status.calledWith(500).should.equal(true);
+				return this.res.send
+					.calledWith({
+						compile: {
+							status: "error",
+							error:  this.message,
 							outputFiles: []
-					)
-					.should.equal true
+						}
+					})
+					.should.equal(true);
+			});
+		});
 
-		describe "when the request times out", ->
-			beforeEach ->
-				@error = new Error(@message = "container timed out")
-				@error.timedout = true
-				@CompileManager.doCompileWithLock = sinon.stub().callsArgWith(1, @error, null)
-				@CompileController.compile @req, @res
+		describe("when the request times out", function() {
+			beforeEach(function() {
+				this.error = new Error(this.message = "container timed out");
+				this.error.timedout = true;
+				this.CompileManager.doCompileWithLock = sinon.stub().callsArgWith(1, this.error, null);
+				return this.CompileController.compile(this.req, this.res);
+			});
 		
-			it "should return the JSON response with the timeout status", ->
-				@res.status.calledWith(200).should.equal true
-				@res.send
-					.calledWith(
-						compile:
-							status: "timedout"
-							error: @message
+			return it("should return the JSON response with the timeout status", function() {
+				this.res.status.calledWith(200).should.equal(true);
+				return this.res.send
+					.calledWith({
+						compile: {
+							status: "timedout",
+							error: this.message,
 							outputFiles: []
-					)
-					.should.equal true
+						}
+					})
+					.should.equal(true);
+			});
+		});
 
-		describe "when the request returns no output files", ->
-			beforeEach ->
-				@CompileManager.doCompileWithLock = sinon.stub().callsArgWith(1, null, [])
-				@CompileController.compile @req, @res
+		return describe("when the request returns no output files", function() {
+			beforeEach(function() {
+				this.CompileManager.doCompileWithLock = sinon.stub().callsArgWith(1, null, []);
+				return this.CompileController.compile(this.req, this.res);
+			});
 		
-			it "should return the JSON response with the failure status", ->
-				@res.status.calledWith(200).should.equal true
-				@res.send
-					.calledWith(
-						compile:
-							error: null
-							status: "failure"
+			return it("should return the JSON response with the failure status", function() {
+				this.res.status.calledWith(200).should.equal(true);
+				return this.res.send
+					.calledWith({
+						compile: {
+							error: null,
+							status: "failure",
 							outputFiles: []
-					)
-					.should.equal true
+						}
+					})
+					.should.equal(true);
+			});
+		});
+	});
 
-	describe "syncFromCode", ->
-		beforeEach ->
-			@file = "main.tex"
-			@line = 42
-			@column = 5
-			@project_id = "mock-project-id"
-			@req.params =
-				project_id: @project_id
-			@req.query =
-				file: @file
-				line: @line.toString()
-				column: @column.toString()
-			@res.json = sinon.stub()
+	describe("syncFromCode", function() {
+		beforeEach(function() {
+			this.file = "main.tex";
+			this.line = 42;
+			this.column = 5;
+			this.project_id = "mock-project-id";
+			this.req.params =
+				{project_id: this.project_id};
+			this.req.query = {
+				file: this.file,
+				line: this.line.toString(),
+				column: this.column.toString()
+			};
+			this.res.json = sinon.stub();
 
-			@CompileManager.syncFromCode = sinon.stub().callsArgWith(5, null, @pdfPositions = ["mock-positions"])
-			@CompileController.syncFromCode @req, @res, @next
+			this.CompileManager.syncFromCode = sinon.stub().callsArgWith(5, null, (this.pdfPositions = ["mock-positions"]));
+			return this.CompileController.syncFromCode(this.req, this.res, this.next);
+		});
 
-		it "should find the corresponding location in the PDF", ->
-			@CompileManager.syncFromCode
-				.calledWith(@project_id, undefined, @file, @line, @column)
-				.should.equal true
+		it("should find the corresponding location in the PDF", function() {
+			return this.CompileManager.syncFromCode
+				.calledWith(this.project_id, undefined, this.file, this.line, this.column)
+				.should.equal(true);
+		});
 
-		it "should return the positions", ->
-			@res.json
-				.calledWith(
-					pdf: @pdfPositions
-				)
-				.should.equal true
+		return it("should return the positions", function() {
+			return this.res.json
+				.calledWith({
+					pdf: this.pdfPositions
+				})
+				.should.equal(true);
+		});
+	});
 
-	describe "syncFromPdf", ->
-		beforeEach ->
-			@page = 5
-			@h = 100.23
-			@v = 45.67
-			@project_id = "mock-project-id"
-			@req.params =
-				project_id: @project_id
-			@req.query =
-				page: @page.toString()
-				h: @h.toString()
-				v: @v.toString()
-			@res.json = sinon.stub()
+	describe("syncFromPdf", function() {
+		beforeEach(function() {
+			this.page = 5;
+			this.h = 100.23;
+			this.v = 45.67;
+			this.project_id = "mock-project-id";
+			this.req.params =
+				{project_id: this.project_id};
+			this.req.query = {
+				page: this.page.toString(),
+				h: this.h.toString(),
+				v: this.v.toString()
+			};
+			this.res.json = sinon.stub();
 
-			@CompileManager.syncFromPdf = sinon.stub().callsArgWith(5, null, @codePositions = ["mock-positions"])
-			@CompileController.syncFromPdf @req, @res, @next
+			this.CompileManager.syncFromPdf = sinon.stub().callsArgWith(5, null, (this.codePositions = ["mock-positions"]));
+			return this.CompileController.syncFromPdf(this.req, this.res, this.next);
+		});
 
-		it "should find the corresponding location in the code", ->
-			@CompileManager.syncFromPdf
-				.calledWith(@project_id, undefined, @page, @h, @v)
-				.should.equal true
+		it("should find the corresponding location in the code", function() {
+			return this.CompileManager.syncFromPdf
+				.calledWith(this.project_id, undefined, this.page, this.h, this.v)
+				.should.equal(true);
+		});
 
-		it "should return the positions", ->
-			@res.json
-				.calledWith(
-					code: @codePositions
-				)
-				.should.equal true
+		return it("should return the positions", function() {
+			return this.res.json
+				.calledWith({
+					code: this.codePositions
+				})
+				.should.equal(true);
+		});
+	});
 
-	describe "wordcount", ->
-		beforeEach ->
-			@file = "main.tex"
-			@project_id = "mock-project-id"
-			@req.params =
-				project_id: @project_id
-			@req.query =
-				file: @file
-				image: @image = "example.com/image"
-			@res.json = sinon.stub()
+	return describe("wordcount", function() {
+		beforeEach(function() {
+			this.file = "main.tex";
+			this.project_id = "mock-project-id";
+			this.req.params =
+				{project_id: this.project_id};
+			this.req.query = {
+				file: this.file,
+				image: (this.image = "example.com/image")
+			};
+			this.res.json = sinon.stub();
 
-			@CompileManager.wordcount = sinon.stub().callsArgWith(4, null, @texcount = ["mock-texcount"])
-			@CompileController.wordcount @req, @res, @next
+			this.CompileManager.wordcount = sinon.stub().callsArgWith(4, null, (this.texcount = ["mock-texcount"]));
+			return this.CompileController.wordcount(this.req, this.res, this.next);
+		});
 
-		it "should return the word count of a file", ->
-			@CompileManager.wordcount
-				.calledWith(@project_id, undefined, @file, @image)
-				.should.equal true
+		it("should return the word count of a file", function() {
+			return this.CompileManager.wordcount
+				.calledWith(this.project_id, undefined, this.file, this.image)
+				.should.equal(true);
+		});
 
-		it "should return the texcount info", ->
-			@res.json
-				.calledWith(
-					texcount: @texcount
-				)
-				.should.equal true
+		return it("should return the texcount info", function() {
+			return this.res.json
+				.calledWith({
+					texcount: this.texcount
+				})
+				.should.equal(true);
+		});
+	});
+});

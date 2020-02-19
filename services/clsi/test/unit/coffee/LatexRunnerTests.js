@@ -1,79 +1,105 @@
-SandboxedModule = require('sandboxed-module')
-sinon = require('sinon')
-require('chai').should()
-modulePath = require('path').join __dirname, '../../../app/js/LatexRunner'
-Path = require "path"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const SandboxedModule = require('sandboxed-module');
+const sinon = require('sinon');
+require('chai').should();
+const modulePath = require('path').join(__dirname, '../../../app/js/LatexRunner');
+const Path = require("path");
 
-describe "LatexRunner", ->
-	beforeEach ->
-		@LatexRunner = SandboxedModule.require modulePath, requires:
-			"settings-sharelatex": @Settings =
-				docker:
+describe("LatexRunner", function() {
+	beforeEach(function() {
+		let Timer;
+		this.LatexRunner = SandboxedModule.require(modulePath, { requires: {
+			"settings-sharelatex": (this.Settings = {
+				docker: {
 					socketPath: "/var/run/docker.sock"
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
-			"./Metrics":
-				Timer: class Timer
-					done: () ->
-			"./CommandRunner": @CommandRunner = {}
+				}
+			}),
+			"logger-sharelatex": (this.logger = { log: sinon.stub(), error: sinon.stub() }),
+			"./Metrics": {
+				Timer: (Timer = class Timer {
+					done() {}
+				})
+			},
+			"./CommandRunner": (this.CommandRunner = {})
+		}
+	});
 
-		@directory = "/local/compile/directory"
-		@mainFile  = "main-file.tex"
-		@compiler  = "pdflatex"
-		@image     = "example.com/image"
-		@callback  = sinon.stub()
-		@project_id = "project-id-123"
-		@env       = {'foo': '123'}
+		this.directory = "/local/compile/directory";
+		this.mainFile  = "main-file.tex";
+		this.compiler  = "pdflatex";
+		this.image     = "example.com/image";
+		this.callback  = sinon.stub();
+		this.project_id = "project-id-123";
+		return this.env       = {'foo': '123'};});
 
-	describe "runLatex", ->
-		beforeEach ->
-			@CommandRunner.run = sinon.stub().callsArg(6)
+	return describe("runLatex", function() {
+		beforeEach(function() {
+			return this.CommandRunner.run = sinon.stub().callsArg(6);
+		});
 
-		describe "normally", ->
-			beforeEach ->
-				@LatexRunner.runLatex @project_id,
-					directory: @directory
-					mainFile:  @mainFile
-					compiler:  @compiler
-					timeout:   @timeout = 42000
-					image:     @image
-					environment: @env
-					@callback
+		describe("normally", function() {
+			beforeEach(function() {
+				return this.LatexRunner.runLatex(this.project_id, {
+					directory: this.directory,
+					mainFile:  this.mainFile,
+					compiler:  this.compiler,
+					timeout:   (this.timeout = 42000),
+					image:     this.image,
+					environment: this.env
+				},
+					this.callback);
+			});
 
-			it "should run the latex command", ->
-				@CommandRunner.run
-					.calledWith(@project_id, sinon.match.any, @directory, @image, @timeout, @env)
-					.should.equal true
+			return it("should run the latex command", function() {
+				return this.CommandRunner.run
+					.calledWith(this.project_id, sinon.match.any, this.directory, this.image, this.timeout, this.env)
+					.should.equal(true);
+			});
+		});
 
-		describe "with an .Rtex main file", ->
-			beforeEach ->
-				@LatexRunner.runLatex @project_id,
-					directory: @directory
-					mainFile:  "main-file.Rtex"
-					compiler:  @compiler
-					image:     @image
-					timeout:   @timeout = 42000
-					@callback
+		describe("with an .Rtex main file", function() {
+			beforeEach(function() {
+				return this.LatexRunner.runLatex(this.project_id, {
+					directory: this.directory,
+					mainFile:  "main-file.Rtex",
+					compiler:  this.compiler,
+					image:     this.image,
+					timeout:   (this.timeout = 42000)
+				},
+					this.callback);
+			});
 
-			it "should run the latex command on the equivalent .tex file", ->
-				command = @CommandRunner.run.args[0][1]
-				mainFile = command.slice(-1)[0]
-				mainFile.should.equal "$COMPILE_DIR/main-file.tex"
+			return it("should run the latex command on the equivalent .tex file", function() {
+				const command = this.CommandRunner.run.args[0][1];
+				const mainFile = command.slice(-1)[0];
+				return mainFile.should.equal("$COMPILE_DIR/main-file.tex");
+			});
+		});
 
-		describe "with a flags option", ->
-			beforeEach ->
-				@LatexRunner.runLatex @project_id,
-					directory: @directory
-					mainFile:  @mainFile
-					compiler:  @compiler
-					image:     @image
-					timeout:   @timeout = 42000
+		return describe("with a flags option", function() {
+			beforeEach(function() {
+				return this.LatexRunner.runLatex(this.project_id, {
+					directory: this.directory,
+					mainFile:  this.mainFile,
+					compiler:  this.compiler,
+					image:     this.image,
+					timeout:   (this.timeout = 42000),
 					flags:     ["-file-line-error", "-halt-on-error"]
-					@callback
+				},
+					this.callback);
+			});
 
-			it "should include the flags in the command", ->
-				command = @CommandRunner.run.args[0][1]
-				flags = command.filter (arg) ->
-					(arg == "-file-line-error") || (arg == "-halt-on-error")
-				flags.length.should.equal 2
-				flags[0].should.equal "-file-line-error"
-				flags[1].should.equal "-halt-on-error"
+			return it("should include the flags in the command", function() {
+				const command = this.CommandRunner.run.args[0][1];
+				const flags = command.filter(arg => (arg === "-file-line-error") || (arg === "-halt-on-error"));
+				flags.length.should.equal(2);
+				flags[0].should.equal("-file-line-error");
+				return flags[1].should.equal("-halt-on-error");
+			});
+		});
+	});
+});

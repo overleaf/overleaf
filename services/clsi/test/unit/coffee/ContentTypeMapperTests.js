@@ -1,55 +1,75 @@
-SandboxedModule = require('sandboxed-module')
-sinon = require('sinon')
-require('chai').should()
-modulePath = require('path').join __dirname, '../../../app/js/ContentTypeMapper'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const SandboxedModule = require('sandboxed-module');
+const sinon = require('sinon');
+require('chai').should();
+const modulePath = require('path').join(__dirname, '../../../app/js/ContentTypeMapper');
 
-describe 'ContentTypeMapper', ->
+describe('ContentTypeMapper', function() {
 
-	beforeEach ->
-		@ContentTypeMapper = SandboxedModule.require modulePath
+	beforeEach(function() {
+		return this.ContentTypeMapper = SandboxedModule.require(modulePath);
+	});
 
-	describe 'map', ->
+	return describe('map', function() {
 
-		it 'should map .txt to text/plain', ->
-			content_type = @ContentTypeMapper.map('example.txt')
-			content_type.should.equal 'text/plain'
+		it('should map .txt to text/plain', function() {
+			const content_type = this.ContentTypeMapper.map('example.txt');
+			return content_type.should.equal('text/plain');
+		});
 
-		it 'should map .csv to text/csv', ->
-			content_type = @ContentTypeMapper.map('example.csv')
-			content_type.should.equal 'text/csv'
+		it('should map .csv to text/csv', function() {
+			const content_type = this.ContentTypeMapper.map('example.csv');
+			return content_type.should.equal('text/csv');
+		});
 
-		it 'should map .pdf to application/pdf', ->
-			content_type = @ContentTypeMapper.map('example.pdf')
-			content_type.should.equal 'application/pdf'
+		it('should map .pdf to application/pdf', function() {
+			const content_type = this.ContentTypeMapper.map('example.pdf');
+			return content_type.should.equal('application/pdf');
+		});
 
-		it 'should fall back to octet-stream', ->
-			content_type = @ContentTypeMapper.map('example.unknown')
-			content_type.should.equal 'application/octet-stream'
+		it('should fall back to octet-stream', function() {
+			const content_type = this.ContentTypeMapper.map('example.unknown');
+			return content_type.should.equal('application/octet-stream');
+		});
 
-		describe 'coercing web files to plain text', ->
+		describe('coercing web files to plain text', function() {
 
-			it 'should map .js to plain text', ->
-				content_type = @ContentTypeMapper.map('example.js')
-				content_type.should.equal 'text/plain'
+			it('should map .js to plain text', function() {
+				const content_type = this.ContentTypeMapper.map('example.js');
+				return content_type.should.equal('text/plain');
+			});
 
-			it 'should map .html to plain text', ->
-				content_type = @ContentTypeMapper.map('example.html')
-				content_type.should.equal 'text/plain'
+			it('should map .html to plain text', function() {
+				const content_type = this.ContentTypeMapper.map('example.html');
+				return content_type.should.equal('text/plain');
+			});
 
-			it 'should map .css to plain text', ->
-				content_type = @ContentTypeMapper.map('example.css')
-				content_type.should.equal 'text/plain'
+			return it('should map .css to plain text', function() {
+				const content_type = this.ContentTypeMapper.map('example.css');
+				return content_type.should.equal('text/plain');
+			});
+		});
 
-		describe 'image files', ->
+		return describe('image files', function() {
 
-			it 'should map .png to image/png', ->
-				content_type = @ContentTypeMapper.map('example.png')
-				content_type.should.equal 'image/png'
+			it('should map .png to image/png', function() {
+				const content_type = this.ContentTypeMapper.map('example.png');
+				return content_type.should.equal('image/png');
+			});
 
-			it 'should map .jpeg to image/jpeg', ->
-				content_type = @ContentTypeMapper.map('example.jpeg')
-				content_type.should.equal 'image/jpeg'
+			it('should map .jpeg to image/jpeg', function() {
+				const content_type = this.ContentTypeMapper.map('example.jpeg');
+				return content_type.should.equal('image/jpeg');
+			});
 				
-			it 'should map .svg to text/plain to protect against XSS (SVG can execute JS)', ->
-				content_type = @ContentTypeMapper.map('example.svg')
-				content_type.should.equal 'text/plain'
+			return it('should map .svg to text/plain to protect against XSS (SVG can execute JS)', function() {
+				const content_type = this.ContentTypeMapper.map('example.svg');
+				return content_type.should.equal('text/plain');
+			});
+		});
+	});
+});
