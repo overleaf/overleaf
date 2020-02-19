@@ -9,7 +9,7 @@ module.exports = {
       username: 'clsi',
       dialect: 'sqlite',
       storage:
-        process.env.SQLITE_PATH || Path.resolve(__dirname + '/../db.sqlite'),
+        process.env.SQLITE_PATH || Path.resolve(__dirname + '/../db/db.sqlite'),
       pool: {
         max: 1,
         min: 1
@@ -65,8 +65,7 @@ if (process.env.DOCKER_RUNNER) {
     dockerRunner: process.env.DOCKER_RUNNER === 'true',
     docker: {
       image:
-        process.env.TEXLIVE_IMAGE ||
-        'quay.io/sharelatex/texlive-full:2017.1',
+        process.env.TEXLIVE_IMAGE || 'quay.io/sharelatex/texlive-full:2017.1',
       env: {
         HOME: '/tmp'
       },
@@ -93,8 +92,7 @@ if (process.env.DOCKER_RUNNER) {
 
   module.exports.path.synctexBaseDir = () => '/compile'
 
-  module.exports.path.sandboxedCompilesHostDir =
-    process.env.COMPILES_HOST_DIR
+  module.exports.path.sandboxedCompilesHostDir = process.env.COMPILES_HOST_DIR
 
   module.exports.path.synctexBinHostPath = process.env.SYNCTEX_BIN_HOST_PATH
 }

@@ -5,3 +5,4 @@ gitrev
 .npm
 .nvmrc
 nodemon.json
+db/
