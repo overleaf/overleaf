@@ -15,7 +15,7 @@ require('chai').should()
 require('coffee-script')
 const modulePath = require('path').join(
   __dirname,
-  '../../../app/coffee/DockerLockManager'
+  '../../../app/js/DockerLockManager'
 )
 
 describe('LockManager', function() {

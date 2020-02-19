@@ -20,7 +20,7 @@ const { expect } = require('chai')
 require('coffee-script')
 const modulePath = require('path').join(
   __dirname,
-  '../../../app/coffee/DockerRunner'
+  '../../../app/js/DockerRunner'
 )
 const Path = require('path')
 
