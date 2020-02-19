@@ -22,6 +22,9 @@ describe('LearnedWordsManager', function() {
       del: sinon.stub()
     }
     this.LearnedWordsManager = SandboxedModule.require(modulePath, {
+      globals: {
+        console: console
+      },
       requires: {
         './DB': this.db,
         './MongoCache': this.cache,
@@ -51,7 +54,7 @@ describe('LearnedWordsManager', function() {
             token: this.token
           },
           {
-            $push: { learnedWords: this.word }
+            $addToSet: { learnedWords: this.word }
           },
           {
             upsert: true
@@ -92,8 +95,10 @@ describe('LearnedWordsManager', function() {
   describe('getLearnedWords', function() {
     beforeEach(function() {
       this.wordList = ['apples', 'bananas', 'pears']
+      this.wordListWithDuplicates = this.wordList.slice()
+      this.wordListWithDuplicates.push('bananas')
       this.db.spellingPreferences.findOne = (conditions, callback) => {
-        callback(null, { learnedWords: this.wordList })
+        callback(null, { learnedWords: this.wordListWithDuplicates })
       }
       sinon.spy(this.db.spellingPreferences, 'findOne')
       this.LearnedWordsManager.getLearnedWords(this.token, this.callback)
@@ -105,7 +110,7 @@ describe('LearnedWordsManager', function() {
       ).to.equal(true)
     })
 
-    it('should return the word list in the callback', function() {
+    it('should return the word list in the callback without duplicates', function() {
       expect(this.callback.calledWith(null, this.wordList)).to.equal(true)
     })
   })
