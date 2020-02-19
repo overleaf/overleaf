@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -35,7 +42,7 @@ module.exports = (Client = {
 	},
 
 	getOutputFile(response, type) {
-		for (let file of Array.from(response.compile.outputFiles)) {
+		for (const file of Array.from(response.compile.outputFiles)) {
 			if ((file.type === type) && file.url.match(`output.${type}`)) {
 				return file;
 			}
@@ -48,7 +55,7 @@ module.exports = (Client = {
 		const app = express();
 		app.use(express.static(directory));
 		console.log("starting test server on", port, host);
-		return app.listen(port, host).on("error", function(error) {
+		return app.listen(port, host).on("error", (error) => {
 			console.error("error starting server:", error.message);
 			return process.exit(1);
 		});
@@ -64,7 +71,7 @@ module.exports = (Client = {
 				line,
 				column
 			}
-		}, function(error, response, body) {
+		}, (error, response, body) => {
 			if (error != null) { return callback(error); }
 			return callback(null, JSON.parse(body));
 		});
@@ -78,7 +85,7 @@ module.exports = (Client = {
 				page,
 				h, v
 			}
-		}, function(error, response, body) {
+		}, (error, response, body) => {
 			if (error != null) { return callback(error); }
 			return callback(null, JSON.parse(body));
 		});
@@ -93,7 +100,7 @@ module.exports = (Client = {
 			var entity = entities.pop();
 			const stat = fs.statSync(`${baseDirectory}/${directory}/${entity}`);
 			if (stat.isDirectory()) {
-				entities = entities.concat(fs.readdirSync(`${baseDirectory}/${directory}/${entity}`).map(function(subEntity) {
+				entities = entities.concat(fs.readdirSync(`${baseDirectory}/${directory}/${entity}`).map((subEntity) => {
 					if (subEntity === "main.tex") {
 						rootResourcePath = `${entity}/${subEntity}`;
 					}
@@ -139,7 +146,7 @@ module.exports = (Client = {
 			qs: {
 				file
 			}
-		}, function(error, response, body) {
+		}, (error, response, body) => {
 			if (error != null) { return callback(error); }
 			return callback(null, JSON.parse(body));
 		});

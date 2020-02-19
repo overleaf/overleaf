@@ -1,3 +1,8 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -27,9 +32,8 @@ describe("Syncing", function() {
 		});
 	});
 
-	return describe("wordcount file", () =>
-		it("should return wordcount info", function(done) {
-			return Client.wordcount(this.project_id, "main.tex", function(error, result) {
+	return describe("wordcount file", function() { return it("should return wordcount info", function(done) {
+			return Client.wordcount(this.project_id, "main.tex", (error, result) => {
 				if (error != null) { throw error; }
 				expect(result).to.deep.equal({
 					texcount: { 
@@ -47,6 +51,6 @@ describe("Syncing", function() {
 				});
 				return done();
 			});
-		})
+		}); }
 	);
 });

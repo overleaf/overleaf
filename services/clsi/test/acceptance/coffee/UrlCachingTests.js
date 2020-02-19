@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-path-concat,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -63,7 +69,7 @@ describe("Url Caching", function() {
 			});
 		});
 
-		afterEach(() => Server.getFile.restore());
+		afterEach(function() { return Server.getFile.restore(); });
 
 		return it("should download the image", function() {
 			return Server.getFile
@@ -107,9 +113,9 @@ describe("Url Caching", function() {
 			});
 		});
 
-		after(() => Server.getFile.restore());
+		after(function() { return Server.getFile.restore(); });
 
-		return it("should not download the image again", () => Server.getFile.called.should.equal(false));
+		return it("should not download the image again", function() { return Server.getFile.called.should.equal(false); });
 	});
 
 	describe("When an image is in the cache and the last modified date is advanced", function() {
@@ -148,9 +154,9 @@ describe("Url Caching", function() {
 			});
 		});
 
-		afterEach(() => Server.getFile.restore());
+		afterEach(function() { return Server.getFile.restore(); });
 
-		return it("should download the image again", () => Server.getFile.called.should.equal(true));
+		return it("should download the image again", function() { return Server.getFile.called.should.equal(true); });
 	});
 
 	describe("When an image is in the cache and the last modified date is further in the past", function() {
@@ -189,9 +195,9 @@ describe("Url Caching", function() {
 			});
 		});
 
-		afterEach(() => Server.getFile.restore());
+		afterEach(function() { return Server.getFile.restore(); });
 
-		return it("should not download the image again", () => Server.getFile.called.should.equal(false));
+		return it("should not download the image again", function() { return Server.getFile.called.should.equal(false); });
 	});
 
 	describe("When an image is in the cache and the last modified date is not specified", function() {
@@ -230,9 +236,9 @@ describe("Url Caching", function() {
 			});
 		});
 
-		afterEach(() => Server.getFile.restore());
+		afterEach(function() { return Server.getFile.restore(); });
 
-		return it("should download the image again", () => Server.getFile.called.should.equal(true));
+		return it("should download the image again", function() { return Server.getFile.called.should.equal(true); });
 	});
 		
 	return describe("After clearing the cache", function() {
@@ -271,9 +277,9 @@ describe("Url Caching", function() {
 			});
 		});
 
-		afterEach(() => Server.getFile.restore());
+		afterEach(function() { return Server.getFile.restore(); });
 
-		return it("should download the image again", () => Server.getFile.called.should.equal(true));
+		return it("should download the image again", function() { return Server.getFile.called.should.equal(true); });
 	});
 });
 		

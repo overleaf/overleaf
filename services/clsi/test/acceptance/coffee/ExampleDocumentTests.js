@@ -1,3 +1,12 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-path-concat,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -45,10 +54,10 @@ const compare = function(originalPath, generatedPath, callback) {
 	const proc = ChildProcess.exec(`compare -metric mae ${fixturePath(originalPath)} ${fixturePath(generatedPath)} ${diff_file}`);
 	let stderr = "";
 	proc.stderr.on("data", chunk => stderr += chunk);
-	return proc.on("exit", function() {
+	return proc.on("exit", () => {
 		if (stderr.trim() === "0 (0)") {
 			// remove output diff if test matches expected image
-			fs.unlink(diff_file, function(err) {
+			fs.unlink(diff_file, (err) => {
 				if (err) {
 					throw err;
 				}
@@ -67,7 +76,7 @@ const checkPdfInfo = function(pdfPath, callback) {
 	let stdout = "";
 	proc.stdout.on("data", chunk => stdout += chunk);
 	proc.stderr.on("data", chunk => console.log("STDERR", chunk.toString()));
-	return proc.on("exit", function() {
+	return proc.on("exit", () => {
 		if (stdout.match(/Optimized:\s+yes/)) {
 			return callback(null, true);
 		} else {
@@ -80,7 +89,7 @@ const compareMultiplePages = function(project_id, callback) {
 	if (callback == null) { callback = function(error) {}; }
 	var compareNext = function(page_no, callback) {
 		const path = `tmp/${project_id}-source-${page_no}.png`;
-		return fs.stat(fixturePath(path), function(error, stat) {
+		return fs.stat(fixturePath(path), (error, stat) => {
 			if (error != null) {
 				return callback();
 			} else {
@@ -111,7 +120,7 @@ const comparePdf = function(project_id, example_dir, callback) {
 						return callback();
 					});
 				} else {
-					return compareMultiplePages(project_id, function(error) {
+					return compareMultiplePages(project_id, (error) => {
 						if (error != null) { throw error; }
 						return callback();
 					});
@@ -138,8 +147,7 @@ const downloadAndComparePdf = function(project_id, example_dir, url, callback) {
 Client.runServer(4242, fixturePath("examples"));
 
 describe("Example Documents", function() {
-	before(done =>
-		ChildProcess.exec("rm test/acceptance/fixtures/tmp/*").on("exit", () => ClsiApp.ensureRunning(done))
+	before(function(done) { return ChildProcess.exec("rm test/acceptance/fixtures/tmp/*").on("exit", () => ClsiApp.ensureRunning(done)); }
 	);
 
 

@@ -1,3 +1,8 @@
+/* eslint-disable
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -40,7 +45,7 @@ Hello world
 
 	it("should provide the pdf for download", function(done) {
 		const pdf = Client.getOutputFile(this.body, "pdf");
-		return request.get(pdf.url, function(error, res, body) {
+		return request.get(pdf.url, (error, res, body) => {
 			res.statusCode.should.equal(200);
 			return done();
 		});
@@ -48,7 +53,7 @@ Hello world
 		
 	return it("should provide the log for download", function(done) {
 		const log = Client.getOutputFile(this.body, "pdf");
-		return request.get(log.url, function(error, res, body) {
+		return request.get(log.url, (error, res, body) => {
 			res.statusCode.should.equal(200);
 			return done();
 		});

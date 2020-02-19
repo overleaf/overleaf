@@ -1,3 +1,8 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -32,20 +37,18 @@ Hello world
 		});
 	});
 
-	describe("from code to pdf", () =>
-		it("should return the correct location", function(done) {
-			return Client.syncFromCode(this.project_id, "main.tex", 3, 5, function(error, pdfPositions) {
+	describe("from code to pdf", function() { return it("should return the correct location", function(done) {
+			return Client.syncFromCode(this.project_id, "main.tex", 3, 5, (error, pdfPositions) => {
 				if (error != null) { throw error; }
 				expect(pdfPositions).to.deep.equal({
 					pdf: [ { page: 1, h: 133.77, v: 134.76, height: 6.92, width: 343.71 } ]
 				});
 				return done();
 			});
-		})
+		}); }
 	);
 
-	return describe("from pdf to code", () =>
-		it("should return the correct location", function(done) {
+	return describe("from pdf to code", function() { return it("should return the correct location", function(done) {
 			return Client.syncFromPdf(this.project_id, 1, 100, 200, (error, codePositions) => {
 				if (error != null) { throw error; }
 				expect(codePositions).to.deep.equal({
@@ -53,6 +56,6 @@ Hello world
 				});
 				return done();
 			});
-		})
+		}); }
 	);
 });
