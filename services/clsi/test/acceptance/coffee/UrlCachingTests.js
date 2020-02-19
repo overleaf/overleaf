@@ -1,222 +1,280 @@
-Client = require "./helpers/Client"
-request = require "request"
-require("chai").should()
-sinon = require "sinon"
-ClsiApp = require "./helpers/ClsiApp"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const Client = require("./helpers/Client");
+const request = require("request");
+require("chai").should();
+const sinon = require("sinon");
+const ClsiApp = require("./helpers/ClsiApp");
 
-host = "localhost"
+const host = "localhost";
 
-Server =
-	run: () ->
-		express = require "express"
-		app = express()
+const Server = {
+	run() {
+		const express = require("express");
+		const app = express();
 
-		staticServer = express.static __dirname + "/../fixtures/"
-		app.get "/:random_id/*", (req, res, next) =>
-			@getFile(req.url)
-			req.url = "/" + req.params[0]
-			staticServer(req, res, next)
+		const staticServer = express.static(__dirname + "/../fixtures/");
+		app.get("/:random_id/*", (req, res, next) => {
+			this.getFile(req.url);
+			req.url = `/${req.params[0]}`;
+			return staticServer(req, res, next);
+		});
 
-		app.listen 31415, host
+		return app.listen(31415, host);
+	},
 
-	getFile: () ->
+	getFile() {},
 
-	randomId: () ->
-		Math.random().toString(16).slice(2)
+	randomId() {
+		return Math.random().toString(16).slice(2);
+	}
+};
 
-Server.run()
+Server.run();
 
-describe "Url Caching", ->
-	describe "Downloading an image for the first time", ->
-		before (done) ->
-			@project_id = Client.randomId()
-			@file = "#{Server.randomId()}/lion.png"
-			@request =
+describe("Url Caching", function() {
+	describe("Downloading an image for the first time", function() {
+		before(function(done) {
+			this.project_id = Client.randomId();
+			this.file = `${Server.randomId()}/lion.png`;
+			this.request = {
 				resources: [{
-					path: "main.tex"
-					content: '''
-						\\documentclass{article}
-						\\usepackage{graphicx}
-						\\begin{document}
-						\\includegraphics{lion.png}
-						\\end{document}
-					'''
+					path: "main.tex",
+					content: `\
+\\documentclass{article}
+\\usepackage{graphicx}
+\\begin{document}
+\\includegraphics{lion.png}
+\\end{document}\
+`
 				}, {
-					path: "lion.png"
-					url: "http://#{host}:31415/#{@file}"
+					path: "lion.png",
+					url: `http://${host}:31415/${this.file}`
 				}]
+			};
 
-			sinon.spy Server, "getFile"
-			ClsiApp.ensureRunning =>
-				Client.compile @project_id, @request, (@error, @res, @body) => done()
+			sinon.spy(Server, "getFile");
+			return ClsiApp.ensureRunning(() => {
+				return Client.compile(this.project_id, this.request, (error, res, body) => { this.error = error; this.res = res; this.body = body; return done(); });
+			});
+		});
 
-		afterEach ->
-			Server.getFile.restore()
+		afterEach(() => Server.getFile.restore());
 
-		it "should download the image", ->
-			Server.getFile
-				.calledWith("/" + @file)
-				.should.equal true
+		return it("should download the image", function() {
+			return Server.getFile
+				.calledWith(`/${this.file}`)
+				.should.equal(true);
+		});
+	});
 				
-	describe "When an image is in the cache and the last modified date is unchanged", ->
-		before (done) ->
-			@project_id = Client.randomId()
-			@file = "#{Server.randomId()}/lion.png"
-			@request =
+	describe("When an image is in the cache and the last modified date is unchanged", function() {
+		before(function(done) {
+			this.project_id = Client.randomId();
+			this.file = `${Server.randomId()}/lion.png`;
+			this.request = {
 				resources: [{
-					path: "main.tex"
-					content: '''
-						\\documentclass{article}
-						\\usepackage{graphicx}
-						\\begin{document}
-						\\includegraphics{lion.png}
-						\\end{document}
-					'''
-				}, @image_resource = {
-					path: "lion.png"
-					url: "http://#{host}:31415/#{@file}"
+					path: "main.tex",
+					content: `\
+\\documentclass{article}
+\\usepackage{graphicx}
+\\begin{document}
+\\includegraphics{lion.png}
+\\end{document}\
+`
+				}, (this.image_resource = {
+					path: "lion.png",
+					url: `http://${host}:31415/${this.file}`,
 					modified: Date.now()
-				}]
+				})]
+			};
 
-			Client.compile @project_id, @request, (@error, @res, @body) =>
-				sinon.spy Server, "getFile"
-				Client.compile @project_id, @request, (@error, @res, @body) =>
-					done()
+			return Client.compile(this.project_id, this.request, (error, res, body) => {
+				this.error = error;
+				this.res = res;
+				this.body = body;
+				sinon.spy(Server, "getFile");
+				return Client.compile(this.project_id, this.request, (error1, res1, body1) => {
+					this.error = error1;
+					this.res = res1;
+					this.body = body1;
+					return done();
+				});
+			});
+		});
 
-		after ->
-			Server.getFile.restore()
+		after(() => Server.getFile.restore());
 
-		it "should not download the image again", ->
-			Server.getFile.called.should.equal false
+		return it("should not download the image again", () => Server.getFile.called.should.equal(false));
+	});
 
-	describe "When an image is in the cache and the last modified date is advanced", ->
-		before (done) ->
-			@project_id = Client.randomId()
-			@file = "#{Server.randomId()}/lion.png"
-			@request =
+	describe("When an image is in the cache and the last modified date is advanced", function() {
+		before(function(done) {
+			this.project_id = Client.randomId();
+			this.file = `${Server.randomId()}/lion.png`;
+			this.request = {
 				resources: [{
-					path: "main.tex"
-					content: '''
-						\\documentclass{article}
-						\\usepackage{graphicx}
-						\\begin{document}
-						\\includegraphics{lion.png}
-						\\end{document}
-					'''
-				}, @image_resource = {
-					path: "lion.png"
-					url: "http://#{host}:31415/#{@file}"
-					modified: @last_modified = Date.now()
-				}]
+					path: "main.tex",
+					content: `\
+\\documentclass{article}
+\\usepackage{graphicx}
+\\begin{document}
+\\includegraphics{lion.png}
+\\end{document}\
+`
+				}, (this.image_resource = {
+					path: "lion.png",
+					url: `http://${host}:31415/${this.file}`,
+					modified: (this.last_modified = Date.now())
+				})]
+			};
 
-			Client.compile @project_id, @request, (@error, @res, @body) =>
-				sinon.spy Server, "getFile"
-				@image_resource.modified = new Date(@last_modified + 3000)
-				Client.compile @project_id, @request, (@error, @res, @body) =>
-					done()
+			return Client.compile(this.project_id, this.request, (error, res, body) => {
+				this.error = error;
+				this.res = res;
+				this.body = body;
+				sinon.spy(Server, "getFile");
+				this.image_resource.modified = new Date(this.last_modified + 3000);
+				return Client.compile(this.project_id, this.request, (error1, res1, body1) => {
+					this.error = error1;
+					this.res = res1;
+					this.body = body1;
+					return done();
+				});
+			});
+		});
 
-		afterEach ->
-			Server.getFile.restore()
+		afterEach(() => Server.getFile.restore());
 
-		it "should download the image again", ->
-			Server.getFile.called.should.equal true
+		return it("should download the image again", () => Server.getFile.called.should.equal(true));
+	});
 
-	describe "When an image is in the cache and the last modified date is further in the past", ->
-		before (done) ->
-			@project_id = Client.randomId()
-			@file = "#{Server.randomId()}/lion.png"
-			@request =
+	describe("When an image is in the cache and the last modified date is further in the past", function() {
+		before(function(done) {
+			this.project_id = Client.randomId();
+			this.file = `${Server.randomId()}/lion.png`;
+			this.request = {
 				resources: [{
-					path: "main.tex"
-					content: '''
-						\\documentclass{article}
-						\\usepackage{graphicx}
-						\\begin{document}
-						\\includegraphics{lion.png}
-						\\end{document}
-					'''
-				}, @image_resource = {
-					path: "lion.png"
-					url: "http://#{host}:31415/#{@file}"
-					modified: @last_modified = Date.now()
-				}]
+					path: "main.tex",
+					content: `\
+\\documentclass{article}
+\\usepackage{graphicx}
+\\begin{document}
+\\includegraphics{lion.png}
+\\end{document}\
+`
+				}, (this.image_resource = {
+					path: "lion.png",
+					url: `http://${host}:31415/${this.file}`,
+					modified: (this.last_modified = Date.now())
+				})]
+			};
 
-			Client.compile @project_id, @request, (@error, @res, @body) =>
-				sinon.spy Server, "getFile"
-				@image_resource.modified = new Date(@last_modified - 3000)
-				Client.compile @project_id, @request, (@error, @res, @body) =>
-					done()
+			return Client.compile(this.project_id, this.request, (error, res, body) => {
+				this.error = error;
+				this.res = res;
+				this.body = body;
+				sinon.spy(Server, "getFile");
+				this.image_resource.modified = new Date(this.last_modified - 3000);
+				return Client.compile(this.project_id, this.request, (error1, res1, body1) => {
+					this.error = error1;
+					this.res = res1;
+					this.body = body1;
+					return done();
+				});
+			});
+		});
 
-		afterEach ->
-			Server.getFile.restore()
+		afterEach(() => Server.getFile.restore());
 
-		it "should not download the image again", ->
-			Server.getFile.called.should.equal false
+		return it("should not download the image again", () => Server.getFile.called.should.equal(false));
+	});
 
-	describe "When an image is in the cache and the last modified date is not specified", ->
-		before (done) ->
-			@project_id = Client.randomId()
-			@file = "#{Server.randomId()}/lion.png"
-			@request =
+	describe("When an image is in the cache and the last modified date is not specified", function() {
+		before(function(done) {
+			this.project_id = Client.randomId();
+			this.file = `${Server.randomId()}/lion.png`;
+			this.request = {
 				resources: [{
-					path: "main.tex"
-					content: '''
-						\\documentclass{article}
-						\\usepackage{graphicx}
-						\\begin{document}
-						\\includegraphics{lion.png}
-						\\end{document}
-					'''
-				}, @image_resource = {
-					path: "lion.png"
-					url: "http://#{host}:31415/#{@file}"
-					modified: @last_modified = Date.now()
-				}]
+					path: "main.tex",
+					content: `\
+\\documentclass{article}
+\\usepackage{graphicx}
+\\begin{document}
+\\includegraphics{lion.png}
+\\end{document}\
+`
+				}, (this.image_resource = {
+					path: "lion.png",
+					url: `http://${host}:31415/${this.file}`,
+					modified: (this.last_modified = Date.now())
+				})]
+			};
 
-			Client.compile @project_id, @request, (@error, @res, @body) =>
-				sinon.spy Server, "getFile"
-				delete @image_resource.modified
-				Client.compile @project_id, @request, (@error, @res, @body) =>
-					done()
+			return Client.compile(this.project_id, this.request, (error, res, body) => {
+				this.error = error;
+				this.res = res;
+				this.body = body;
+				sinon.spy(Server, "getFile");
+				delete this.image_resource.modified;
+				return Client.compile(this.project_id, this.request, (error1, res1, body1) => {
+					this.error = error1;
+					this.res = res1;
+					this.body = body1;
+					return done();
+				});
+			});
+		});
 
-		afterEach ->
-			Server.getFile.restore()
+		afterEach(() => Server.getFile.restore());
 
-		it "should download the image again", ->
-			Server.getFile.called.should.equal true
+		return it("should download the image again", () => Server.getFile.called.should.equal(true));
+	});
 		
-	describe "After clearing the cache", ->
-		before (done) ->
-			@project_id = Client.randomId()
-			@file = "#{Server.randomId()}/lion.png"
-			@request =
+	return describe("After clearing the cache", function() {
+		before(function(done) {
+			this.project_id = Client.randomId();
+			this.file = `${Server.randomId()}/lion.png`;
+			this.request = {
 				resources: [{
-					path: "main.tex"
-					content: '''
-						\\documentclass{article}
-						\\usepackage{graphicx}
-						\\begin{document}
-						\\includegraphics{lion.png}
-						\\end{document}
-					'''
-				}, @image_resource = {
-					path: "lion.png"
-					url: "http://#{host}:31415/#{@file}"
-					modified: @last_modified = Date.now()
-				}]
+					path: "main.tex",
+					content: `\
+\\documentclass{article}
+\\usepackage{graphicx}
+\\begin{document}
+\\includegraphics{lion.png}
+\\end{document}\
+`
+				}, (this.image_resource = {
+					path: "lion.png",
+					url: `http://${host}:31415/${this.file}`,
+					modified: (this.last_modified = Date.now())
+				})]
+			};
 
-			Client.compile @project_id, @request, (error) =>
-				throw error if error?
-				Client.clearCache @project_id, (error, res, body) =>
-					throw error if error?
-					sinon.spy Server, "getFile"
-					Client.compile @project_id, @request, (@error, @res, @body) =>
-						done()
+			return Client.compile(this.project_id, this.request, error => {
+				if (error != null) { throw error; }
+				return Client.clearCache(this.project_id, (error, res, body) => {
+					if (error != null) { throw error; }
+					sinon.spy(Server, "getFile");
+					return Client.compile(this.project_id, this.request, (error1, res1, body1) => {
+						this.error = error1;
+						this.res = res1;
+						this.body = body1;
+						return done();
+					});
+				});
+			});
+		});
 
-		afterEach ->
-			Server.getFile.restore()
+		afterEach(() => Server.getFile.restore());
 
-		it "should download the image again", ->
-			Server.getFile.called.should.equal true
+		return it("should download the image again", () => Server.getFile.called.should.equal(true));
+	});
+});
 		
 				
