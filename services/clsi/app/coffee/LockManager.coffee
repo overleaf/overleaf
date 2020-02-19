@@ -9,7 +9,7 @@ module.exports = LockManager =
 	MAX_LOCK_WAIT_TIME: 15000 # 10s maximum time to spend trying to get the lock
 	LOCK_STALE: 5*60*1000 # 5 mins time until lock auto expires
 
-	runWithLock: (path, runner = ((releaseLock = (error) ->) ->), callback = ((error) ->)) ->
+	runWithLock: (path, runner, callback = ((error) ->)) ->
 		lockOpts =
 			wait: @MAX_LOCK_WAIT_TIME
 			pollPeriod: @LOCK_TEST_INTERVAL

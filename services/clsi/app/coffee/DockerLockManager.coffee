@@ -46,7 +46,7 @@ module.exports = LockManager =
 			logger.error {key:key, lock: existingLock}, "tried to release lock that has gone"
 			callback()
 
-	runWithLock: (key, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
+	runWithLock: (key, runner, callback = ( (error) -> )) ->
 		LockManager.getLock key, (error, lockValue) ->
 			return callback(error) if error?
 			runner (error1, args...) ->
