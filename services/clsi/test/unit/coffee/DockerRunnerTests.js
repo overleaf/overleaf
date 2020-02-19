@@ -1,3 +1,10 @@
+/* eslint-disable
+    handle-callback-err,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -247,7 +254,7 @@ describe("DockerRunner", function() {
 				this.container.inspect = sinon.stub().callsArgWith(0);
 				this.container.start = sinon.stub().yields();
 
-				return this.DockerRunner.startContainer(this.options, this.volumes, this.callback, function() {});
+				return this.DockerRunner.startContainer(this.options, this.volumes, this.callback, () => {});
 			});
 
 			it("should start the container with the given name", function() {
