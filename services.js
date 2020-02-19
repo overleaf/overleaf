@@ -1,4 +1,4 @@
-module.exports = 
+module.exports =
 
 [{
 	name: "web",
@@ -48,5 +48,4 @@ module.exports =
 	name: "notifications",
 	repo: "https://github.com/sharelatex/notifications-sharelatex.git",
 	version: "master"
-}
-]
+}]
