@@ -5,16 +5,16 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let commandRunnerPath;
-const Settings = require("settings-sharelatex");
-const logger = require("logger-sharelatex");
+let commandRunnerPath
+const Settings = require('settings-sharelatex')
+const logger = require('logger-sharelatex')
 
 if ((Settings.clsi != null ? Settings.clsi.dockerRunner : undefined) === true) {
-	commandRunnerPath = "./DockerRunner";
-} else { 
-	commandRunnerPath = "./LocalCommandRunner";
+  commandRunnerPath = './DockerRunner'
+} else {
+  commandRunnerPath = './LocalCommandRunner'
 }
-logger.info({commandRunnerPath}, "selecting command runner for clsi");
-const CommandRunner = require(commandRunnerPath);
+logger.info({ commandRunnerPath }, 'selecting command runner for clsi')
+const CommandRunner = require(commandRunnerPath)
 
-module.exports = CommandRunner;
+module.exports = CommandRunner
