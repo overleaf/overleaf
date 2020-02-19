@@ -17,7 +17,7 @@ const request = require('request')
 const logger = require('logger-sharelatex')
 const { promisifyAll } = require('../../util/promises')
 
-const TIMEOUT = 1000
+const TIMEOUT = 10000
 const TagsHandler = {
   getAllTags(user_id, callback) {
     this._requestTags(user_id, (err, allTags) => {

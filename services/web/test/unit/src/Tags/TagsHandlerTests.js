@@ -59,7 +59,7 @@ describe('TagsHandler', function() {
         this.request.del
           .calledWith({
             url: `${tagsUrl}/user/${user_id}/project/${project_id}`,
-            timeout: 1000
+            timeout: 10000
           })
           .should.equal(true)
         return done()
@@ -136,7 +136,7 @@ describe('TagsHandler', function() {
         const getOpts = {
           url: `${tagsUrl}/user/${user_id}/tag`,
           json: true,
-          timeout: 1000
+          timeout: 10000
         }
         this.request.get.calledWith(getOpts).should.equal(true)
         return done()
@@ -174,7 +174,7 @@ describe('TagsHandler', function() {
           json: {
             name: this.name
           },
-          timeout: 1000
+          timeout: 10000
         })
         .should.equal(true)
     })
@@ -197,7 +197,7 @@ describe('TagsHandler', function() {
         return this.request.del
           .calledWith({
             url: `${tagsUrl}/user/${user_id}/tag/${tag_id}`,
-            timeout: 1000
+            timeout: 10000
           })
           .should.equal(true)
       })
@@ -244,7 +244,7 @@ describe('TagsHandler', function() {
             json: {
               name: this.name
             },
-            timeout: 1000
+            timeout: 10000
           })
           .should.equal(true)
       })
@@ -288,7 +288,7 @@ describe('TagsHandler', function() {
         return this.request.del
           .calledWith({
             url: `${tagsUrl}/user/${user_id}/tag/${tag_id}/project/${project_id}`,
-            timeout: 1000
+            timeout: 10000
           })
           .should.equal(true)
       })
@@ -337,7 +337,7 @@ describe('TagsHandler', function() {
         return this.request.post
           .calledWith({
             url: `${tagsUrl}/user/${user_id}/tag/${tag_id}/project/${project_id}`,
-            timeout: 1000
+            timeout: 10000
           })
           .should.equal(true)
       })
@@ -389,7 +389,7 @@ describe('TagsHandler', function() {
               name: tag
             },
             url: `${tagsUrl}/user/${user_id}/tag/project/${project_id}`,
-            timeout: 1000
+            timeout: 10000
           })
           .should.equal(true)
       })
@@ -440,7 +440,7 @@ describe('TagsHandler', function() {
               user_id: 'new-user-id'
             },
             url: `${tagsUrl}/user/old-user-id/tag`,
-            timeout: 1000
+            timeout: 10000
           })
           .should.equal(true)
       })
