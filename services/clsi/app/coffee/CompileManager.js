@@ -1,345 +1,454 @@
-ResourceWriter = require "./ResourceWriter"
-LatexRunner = require "./LatexRunner"
-OutputFileFinder = require "./OutputFileFinder"
-OutputCacheManager = require "./OutputCacheManager"
-Settings = require("settings-sharelatex")
-Path = require "path"
-logger = require "logger-sharelatex"
-Metrics = require "./Metrics"
-child_process = require "child_process"
-DraftModeManager = require "./DraftModeManager"
-TikzManager = require "./TikzManager"
-LockManager = require "./LockManager"
-fs = require("fs")
-fse = require "fs-extra"
-os = require("os")
-async = require "async"
-Errors = require './Errors'
-CommandRunner = require "./CommandRunner"
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS103: Rewrite code to no longer use __guard__
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let CompileManager;
+const ResourceWriter = require("./ResourceWriter");
+const LatexRunner = require("./LatexRunner");
+const OutputFileFinder = require("./OutputFileFinder");
+const OutputCacheManager = require("./OutputCacheManager");
+const Settings = require("settings-sharelatex");
+const Path = require("path");
+const logger = require("logger-sharelatex");
+const Metrics = require("./Metrics");
+const child_process = require("child_process");
+const DraftModeManager = require("./DraftModeManager");
+const TikzManager = require("./TikzManager");
+const LockManager = require("./LockManager");
+const fs = require("fs");
+const fse = require("fs-extra");
+const os = require("os");
+const async = require("async");
+const Errors = require('./Errors');
+const CommandRunner = require("./CommandRunner");
 
-getCompileName = (project_id, user_id) ->
-	if user_id? then "#{project_id}-#{user_id}" else project_id
+const getCompileName = function(project_id, user_id) {
+	if (user_id != null) { return `${project_id}-${user_id}`; } else { return project_id; }
+};
 
-getCompileDir = (project_id, user_id) ->
-	Path.join(Settings.path.compilesDir, getCompileName(project_id, user_id))
+const getCompileDir = (project_id, user_id) => Path.join(Settings.path.compilesDir, getCompileName(project_id, user_id));
 
-module.exports = CompileManager =
+module.exports = (CompileManager = {
 
-	doCompileWithLock: (request, callback = (error, outputFiles) ->) ->
-		compileDir = getCompileDir(request.project_id, request.user_id)
-		lockFile = Path.join(compileDir, ".project-lock")
-		# use a .project-lock file in the compile directory to prevent
-		# simultaneous compiles
-		fse.ensureDir compileDir, (error) ->
-			return callback(error) if error?
-			LockManager.runWithLock lockFile, (releaseLock) ->
-				CompileManager.doCompile(request, releaseLock)
-			, callback
+	doCompileWithLock(request, callback) {
+		if (callback == null) { callback = function(error, outputFiles) {}; }
+		const compileDir = getCompileDir(request.project_id, request.user_id);
+		const lockFile = Path.join(compileDir, ".project-lock");
+		// use a .project-lock file in the compile directory to prevent
+		// simultaneous compiles
+		return fse.ensureDir(compileDir, function(error) {
+			if (error != null) { return callback(error); }
+			return LockManager.runWithLock(lockFile, releaseLock => CompileManager.doCompile(request, releaseLock)
+			, callback);
+		});
+	},
 
-	doCompile: (request, callback = (error, outputFiles) ->) ->
-		compileDir = getCompileDir(request.project_id, request.user_id)
-		timer = new Metrics.Timer("write-to-disk")
-		logger.log project_id: request.project_id, user_id: request.user_id, "syncing resources to disk"
-		ResourceWriter.syncResourcesToDisk request, compileDir, (error, resourceList) ->
-			# NOTE: resourceList is insecure, it should only be used to exclude files from the output list
-			if error? and error instanceof Errors.FilesOutOfSyncError
-				logger.warn project_id: request.project_id, user_id: request.user_id, "files out of sync, please retry"
-				return callback(error)
-			else if error?
-				logger.err err:error, project_id: request.project_id, user_id: request.user_id, "error writing resources to disk"
-				return callback(error)
-			logger.log project_id: request.project_id, user_id: request.user_id, time_taken: Date.now() - timer.start, "written files to disk"
-			timer.done()
+	doCompile(request, callback) {
+		if (callback == null) { callback = function(error, outputFiles) {}; }
+		const compileDir = getCompileDir(request.project_id, request.user_id);
+		let timer = new Metrics.Timer("write-to-disk");
+		logger.log({project_id: request.project_id, user_id: request.user_id}, "syncing resources to disk");
+		return ResourceWriter.syncResourcesToDisk(request, compileDir, function(error, resourceList) {
+			// NOTE: resourceList is insecure, it should only be used to exclude files from the output list
+			if ((error != null) && error instanceof Errors.FilesOutOfSyncError) {
+				logger.warn({project_id: request.project_id, user_id: request.user_id}, "files out of sync, please retry");
+				return callback(error);
+			} else if (error != null) {
+				logger.err({err:error, project_id: request.project_id, user_id: request.user_id}, "error writing resources to disk");
+				return callback(error);
+			}
+			logger.log({project_id: request.project_id, user_id: request.user_id, time_taken: Date.now() - timer.start}, "written files to disk");
+			timer.done();
 
-			injectDraftModeIfRequired = (callback) ->
-				if request.draft
-					DraftModeManager.injectDraftMode Path.join(compileDir, request.rootResourcePath), callback
-				else
-					callback()
+			const injectDraftModeIfRequired = function(callback) {
+				if (request.draft) {
+					return DraftModeManager.injectDraftMode(Path.join(compileDir, request.rootResourcePath), callback);
+				} else {
+					return callback();
+				}
+			};
 
-			createTikzFileIfRequired = (callback) ->
-				TikzManager.checkMainFile compileDir, request.rootResourcePath, resourceList, (error, needsMainFile) ->
-					return callback(error) if error?
-					if needsMainFile
-						TikzManager.injectOutputFile compileDir, request.rootResourcePath, callback
-					else
-						callback()
+			const createTikzFileIfRequired = callback =>
+				TikzManager.checkMainFile(compileDir, request.rootResourcePath, resourceList, function(error, needsMainFile) {
+					if (error != null) { return callback(error); }
+					if (needsMainFile) {
+						return TikzManager.injectOutputFile(compileDir, request.rootResourcePath, callback);
+					} else {
+						return callback();
+					}
+				})
+			;
 
-			# set up environment variables for chktex
-			env = {}
-			# only run chktex on LaTeX files (not knitr .Rtex files or any others)
-			isLaTeXFile = request.rootResourcePath?.match(/\.tex$/i)
-			if request.check? and isLaTeXFile
-				env['CHKTEX_OPTIONS'] = '-nall -e9 -e10 -w15 -w16'
-				env['CHKTEX_ULIMIT_OPTIONS'] = '-t 5 -v 64000'
-				if request.check is 'error'
-					env['CHKTEX_EXIT_ON_ERROR'] =  1
-				if request.check is 'validate'
-					env['CHKTEX_VALIDATE'] =  1
+			// set up environment variables for chktex
+			const env = {};
+			// only run chktex on LaTeX files (not knitr .Rtex files or any others)
+			const isLaTeXFile = request.rootResourcePath != null ? request.rootResourcePath.match(/\.tex$/i) : undefined;
+			if ((request.check != null) && isLaTeXFile) {
+				env['CHKTEX_OPTIONS'] = '-nall -e9 -e10 -w15 -w16';
+				env['CHKTEX_ULIMIT_OPTIONS'] = '-t 5 -v 64000';
+				if (request.check === 'error') {
+					env['CHKTEX_EXIT_ON_ERROR'] =  1;
+				}
+				if (request.check === 'validate') {
+					env['CHKTEX_VALIDATE'] =  1;
+				}
+			}
 
-			# apply a series of file modifications/creations for draft mode and tikz
-			async.series [injectDraftModeIfRequired, createTikzFileIfRequired], (error) ->
-				return callback(error) if error?
-				timer = new Metrics.Timer("run-compile")
-				# find the image tag to log it as a metric, e.g. 2015.1 (convert . to - for graphite)
-				tag = request.imageName?.match(/:(.*)/)?[1]?.replace(/\./g,'-') or "default"
-				tag = "other" if not request.project_id.match(/^[0-9a-f]{24}$/) # exclude smoke test
-				Metrics.inc("compiles")
-				Metrics.inc("compiles-with-image.#{tag}")
-				compileName = getCompileName(request.project_id, request.user_id)
-				LatexRunner.runLatex compileName, {
-					directory: compileDir
-					mainFile:  request.rootResourcePath
-					compiler:  request.compiler
-					timeout:   request.timeout
-					image:     request.imageName
-					flags:     request.flags
+			// apply a series of file modifications/creations for draft mode and tikz
+			return async.series([injectDraftModeIfRequired, createTikzFileIfRequired], function(error) {
+				if (error != null) { return callback(error); }
+				timer = new Metrics.Timer("run-compile");
+				// find the image tag to log it as a metric, e.g. 2015.1 (convert . to - for graphite)
+				let tag = __guard__(__guard__(request.imageName != null ? request.imageName.match(/:(.*)/) : undefined, x1 => x1[1]), x => x.replace(/\./g,'-')) || "default";
+				if (!request.project_id.match(/^[0-9a-f]{24}$/)) { tag = "other"; } // exclude smoke test
+				Metrics.inc("compiles");
+				Metrics.inc(`compiles-with-image.${tag}`);
+				const compileName = getCompileName(request.project_id, request.user_id);
+				return LatexRunner.runLatex(compileName, {
+					directory: compileDir,
+					mainFile:  request.rootResourcePath,
+					compiler:  request.compiler,
+					timeout:   request.timeout,
+					image:     request.imageName,
+					flags:     request.flags,
 					environment: env
-				}, (error, output, stats, timings) ->
-					# request was for validation only
-					if request.check is "validate"
-						result = if error?.code then "fail" else "pass"
-						error = new Error("validation")
-						error.validate = result
-					# request was for compile, and failed on validation
-					if request.check is "error" and error?.message is 'exited'
-						error = new Error("compilation")
-						error.validate = "fail"
-					# compile was killed by user, was a validation, or a compile which failed validation
-					if error?.terminated or error?.validate or error?.timedout
-						OutputFileFinder.findOutputFiles resourceList, compileDir, (err, outputFiles) ->
-							return callback(err) if err?
-							error.outputFiles = outputFiles  # return output files so user can check logs
-							callback(error)
-						return
-					# compile completed normally
-					return callback(error) if error?
-					Metrics.inc("compiles-succeeded")
-					for metric_key, metric_value of stats or {}
-						Metrics.count(metric_key, metric_value)
-					for metric_key, metric_value of timings or {}
-						Metrics.timing(metric_key, metric_value)
-					loadavg = os.loadavg?()
-					Metrics.gauge("load-avg", loadavg[0]) if loadavg?
-					ts = timer.done()
-					logger.log {project_id: request.project_id, user_id: request.user_id, time_taken: ts, stats:stats, timings:timings, loadavg:loadavg}, "done compile"
-					if stats?["latex-runs"] > 0
-						Metrics.timing("run-compile-per-pass", ts / stats["latex-runs"])
-					if stats?["latex-runs"] > 0 and timings?["cpu-time"] > 0
-						Metrics.timing("run-compile-cpu-time-per-pass", timings["cpu-time"] / stats["latex-runs"])
+				}, function(error, output, stats, timings) {
+					// request was for validation only
+					let metric_key, metric_value;
+					if (request.check === "validate") {
+						const result = (error != null ? error.code : undefined) ? "fail" : "pass";
+						error = new Error("validation");
+						error.validate = result;
+					}
+					// request was for compile, and failed on validation
+					if ((request.check === "error") && ((error != null ? error.message : undefined) === 'exited')) {
+						error = new Error("compilation");
+						error.validate = "fail";
+					}
+					// compile was killed by user, was a validation, or a compile which failed validation
+					if ((error != null ? error.terminated : undefined) || (error != null ? error.validate : undefined) || (error != null ? error.timedout : undefined)) {
+						OutputFileFinder.findOutputFiles(resourceList, compileDir, function(err, outputFiles) {
+							if (err != null) { return callback(err); }
+							error.outputFiles = outputFiles;  // return output files so user can check logs
+							return callback(error);
+						});
+						return;
+					}
+					// compile completed normally
+					if (error != null) { return callback(error); }
+					Metrics.inc("compiles-succeeded");
+					const object = stats || {};
+					for (metric_key in object) {
+						metric_value = object[metric_key];
+						Metrics.count(metric_key, metric_value);
+					}
+					const object1 = timings || {};
+					for (metric_key in object1) {
+						metric_value = object1[metric_key];
+						Metrics.timing(metric_key, metric_value);
+					}
+					const loadavg = typeof os.loadavg === 'function' ? os.loadavg() : undefined;
+					if (loadavg != null) { Metrics.gauge("load-avg", loadavg[0]); }
+					const ts = timer.done();
+					logger.log({project_id: request.project_id, user_id: request.user_id, time_taken: ts, stats, timings, loadavg}, "done compile");
+					if ((stats != null ? stats["latex-runs"] : undefined) > 0) {
+						Metrics.timing("run-compile-per-pass", ts / stats["latex-runs"]);
+					}
+					if (((stats != null ? stats["latex-runs"] : undefined) > 0) && ((timings != null ? timings["cpu-time"] : undefined) > 0)) {
+						Metrics.timing("run-compile-cpu-time-per-pass", timings["cpu-time"] / stats["latex-runs"]);
+					}
 
-					OutputFileFinder.findOutputFiles resourceList, compileDir, (error, outputFiles) ->
-						return callback(error) if error?
-						OutputCacheManager.saveOutputFiles outputFiles, compileDir,  (error, newOutputFiles) ->
-							callback null, newOutputFiles
+					return OutputFileFinder.findOutputFiles(resourceList, compileDir, function(error, outputFiles) {
+						if (error != null) { return callback(error); }
+						return OutputCacheManager.saveOutputFiles(outputFiles, compileDir,  (error, newOutputFiles) => callback(null, newOutputFiles));
+					});
+				});
+			});
+		});
+	},
 
-	stopCompile: (project_id, user_id, callback = (error) ->) ->
-		compileName = getCompileName(project_id, user_id)
-		LatexRunner.killLatex compileName, callback
+	stopCompile(project_id, user_id, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		const compileName = getCompileName(project_id, user_id);
+		return LatexRunner.killLatex(compileName, callback);
+	},
 
-	clearProject: (project_id, user_id, _callback = (error) ->) ->
-		callback = (error) ->
-			_callback(error)
-			_callback = () ->
+	clearProject(project_id, user_id, _callback) {
+		if (_callback == null) { _callback = function(error) {}; }
+		const callback = function(error) {
+			_callback(error);
+			return _callback = function() {};
+		};
 
-		compileDir = getCompileDir(project_id, user_id)
+		const compileDir = getCompileDir(project_id, user_id);
 
-		CompileManager._checkDirectory compileDir, (err, exists) ->
-			return callback(err) if err?
-			return callback() if not exists # skip removal if no directory present
+		return CompileManager._checkDirectory(compileDir, function(err, exists) {
+			if (err != null) { return callback(err); }
+			if (!exists) { return callback(); } // skip removal if no directory present
 
-			proc = child_process.spawn "rm", ["-r", compileDir]
+			const proc = child_process.spawn("rm", ["-r", compileDir]);
 
-			proc.on "error", callback
+			proc.on("error", callback);
 
-			stderr = ""
-			proc.stderr.on "data", (chunk) -> stderr += chunk.toString()
+			let stderr = "";
+			proc.stderr.on("data", chunk => stderr += chunk.toString());
 
-			proc.on "close", (code) ->
-				if code == 0
-					return callback(null)
-				else
-					return callback(new Error("rm -r #{compileDir} failed: #{stderr}"))
+			return proc.on("close", function(code) {
+				if (code === 0) {
+					return callback(null);
+				} else {
+					return callback(new Error(`rm -r ${compileDir} failed: ${stderr}`));
+				}
+			});
+		});
+	},
 
-	_findAllDirs: (callback = (error, allDirs) ->) ->
-		root = Settings.path.compilesDir
-		fs.readdir root, (err, files) ->
-			return callback(err) if err?
-			allDirs = (Path.join(root, file) for file in files)
-			callback(null, allDirs)
+	_findAllDirs(callback) {
+		if (callback == null) { callback = function(error, allDirs) {}; }
+		const root = Settings.path.compilesDir;
+		return fs.readdir(root, function(err, files) {
+			if (err != null) { return callback(err); }
+			const allDirs = (Array.from(files).map((file) => Path.join(root, file)));
+			return callback(null, allDirs);
+		});
+	},
 
-	clearExpiredProjects: (max_cache_age_ms, callback = (error) ->) ->
-		now = Date.now()
-		# action for each directory
-		expireIfNeeded = (checkDir, cb) ->
-			fs.stat checkDir, (err, stats) ->
-				return cb() if err?  # ignore errors checking directory
-				age = now - stats.mtime
-				hasExpired = (age > max_cache_age_ms)
-				if hasExpired then fse.remove(checkDir, cb) else cb()
-		# iterate over all project directories
-		CompileManager._findAllDirs (error, allDirs) ->
-			return callback() if error?
-			async.eachSeries allDirs, expireIfNeeded,	callback
+	clearExpiredProjects(max_cache_age_ms, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		const now = Date.now();
+		// action for each directory
+		const expireIfNeeded = (checkDir, cb) =>
+			fs.stat(checkDir, function(err, stats) {
+				if (err != null) { return cb(); }  // ignore errors checking directory
+				const age = now - stats.mtime;
+				const hasExpired = (age > max_cache_age_ms);
+				if (hasExpired) { return fse.remove(checkDir, cb); } else { return cb(); }
+			})
+		;
+		// iterate over all project directories
+		return CompileManager._findAllDirs(function(error, allDirs) {
+			if (error != null) { return callback(); }
+			return async.eachSeries(allDirs, expireIfNeeded,	callback);
+		});
+	},
 
-	_checkDirectory: (compileDir, callback = (error, exists) ->) ->
-		fs.lstat compileDir, (err, stats) ->
-			if err?.code is 'ENOENT'
-				return callback(null, false) #  directory does not exist
-			else if err?
-				logger.err {dir: compileDir, err:err}, "error on stat of project directory for removal"
-				return callback(err)
-			else if not stats?.isDirectory()
-				logger.err {dir: compileDir, stats:stats}, "bad project directory for removal"
-				return callback new Error("project directory is not directory")
-			else
-				callback(null, true) # directory exists
+	_checkDirectory(compileDir, callback) {
+		if (callback == null) { callback = function(error, exists) {}; }
+		return fs.lstat(compileDir, function(err, stats) {
+			if ((err != null ? err.code : undefined) === 'ENOENT') {
+				return callback(null, false); //  directory does not exist
+			} else if (err != null) {
+				logger.err({dir: compileDir, err}, "error on stat of project directory for removal");
+				return callback(err);
+			} else if (!(stats != null ? stats.isDirectory() : undefined)) {
+				logger.err({dir: compileDir, stats}, "bad project directory for removal");
+				return callback(new Error("project directory is not directory"));
+			} else {
+				return callback(null, true);
+			}
+		});
+	}, // directory exists
 
-	syncFromCode: (project_id, user_id, file_name, line, column, callback = (error, pdfPositions) ->) ->
-		# If LaTeX was run in a virtual environment, the file path that synctex expects
-		# might not match the file path on the host. The .synctex.gz file however, will be accessed
-		# wherever it is on the host.
-		compileName = getCompileName(project_id, user_id)
-		base_dir = Settings.path.synctexBaseDir(compileName)
-		file_path = base_dir + "/" + file_name
-		compileDir = getCompileDir(project_id, user_id)
-		synctex_path =  "#{base_dir}/output.pdf"
-		command = ["code", synctex_path, file_path, line, column]
-		fse.ensureDir compileDir, (error) ->
-			if error?
-				logger.err {error, project_id, user_id, file_name}, "error ensuring dir for sync from code"
-				return callback(error)
-			CompileManager._runSynctex project_id, user_id, command, (error, stdout) ->
-				return callback(error) if error?
-				logger.log project_id: project_id, user_id:user_id, file_name: file_name, line: line, column: column, command:command, stdout: stdout, "synctex code output"
-				callback null, CompileManager._parseSynctexFromCodeOutput(stdout)
+	syncFromCode(project_id, user_id, file_name, line, column, callback) {
+		// If LaTeX was run in a virtual environment, the file path that synctex expects
+		// might not match the file path on the host. The .synctex.gz file however, will be accessed
+		// wherever it is on the host.
+		if (callback == null) { callback = function(error, pdfPositions) {}; }
+		const compileName = getCompileName(project_id, user_id);
+		const base_dir = Settings.path.synctexBaseDir(compileName);
+		const file_path = base_dir + "/" + file_name;
+		const compileDir = getCompileDir(project_id, user_id);
+		const synctex_path =  `${base_dir}/output.pdf`;
+		const command = ["code", synctex_path, file_path, line, column];
+		return fse.ensureDir(compileDir, function(error) {
+			if (error != null) {
+				logger.err({error, project_id, user_id, file_name}, "error ensuring dir for sync from code");
+				return callback(error);
+			}
+			return CompileManager._runSynctex(project_id, user_id, command, function(error, stdout) {
+				if (error != null) { return callback(error); }
+				logger.log({project_id, user_id, file_name, line, column, command, stdout}, "synctex code output");
+				return callback(null, CompileManager._parseSynctexFromCodeOutput(stdout));
+			});
+		});
+	},
 
-	syncFromPdf: (project_id, user_id, page, h, v, callback = (error, filePositions) ->) ->
-		compileName = getCompileName(project_id, user_id)
-		compileDir = getCompileDir(project_id, user_id)
-		base_dir = Settings.path.synctexBaseDir(compileName)
-		synctex_path =  "#{base_dir}/output.pdf"
-		command = ["pdf", synctex_path, page, h, v]
-		fse.ensureDir compileDir, (error) ->
-			if error?
-				logger.err {error, project_id, user_id, file_name}, "error ensuring dir for sync to code"
-				return callback(error)
-			CompileManager._runSynctex  project_id, user_id, command, (error, stdout) ->
-				return callback(error) if error?
-				logger.log project_id: project_id, user_id:user_id, page: page, h: h, v:v, stdout: stdout, "synctex pdf output"
-				callback null, CompileManager._parseSynctexFromPdfOutput(stdout, base_dir)
+	syncFromPdf(project_id, user_id, page, h, v, callback) {
+		if (callback == null) { callback = function(error, filePositions) {}; }
+		const compileName = getCompileName(project_id, user_id);
+		const compileDir = getCompileDir(project_id, user_id);
+		const base_dir = Settings.path.synctexBaseDir(compileName);
+		const synctex_path =  `${base_dir}/output.pdf`;
+		const command = ["pdf", synctex_path, page, h, v];
+		return fse.ensureDir(compileDir, function(error) {
+			if (error != null) {
+				logger.err({error, project_id, user_id, file_name}, "error ensuring dir for sync to code");
+				return callback(error);
+			}
+			return CompileManager._runSynctex(project_id, user_id, command, function(error, stdout) {
+				if (error != null) { return callback(error); }
+				logger.log({project_id, user_id, page, h, v, stdout}, "synctex pdf output");
+				return callback(null, CompileManager._parseSynctexFromPdfOutput(stdout, base_dir));
+			});
+		});
+	},
 
-	_checkFileExists: (path, callback = (error) ->) ->
-		synctexDir = Path.dirname(path)
-		synctexFile = Path.join(synctexDir, "output.synctex.gz")
-		fs.stat synctexDir, (error, stats) ->
-			if error?.code is 'ENOENT'
-				return callback(new Errors.NotFoundError("called synctex with no output directory"))
-			return callback(error) if error?
-			fs.stat synctexFile, (error, stats) ->
-				if error?.code is 'ENOENT'
-					return callback(new Errors.NotFoundError("called synctex with no output file"))
-				return callback(error) if error?
-				return callback(new Error("not a file")) if not stats?.isFile()
-				callback()
+	_checkFileExists(path, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		const synctexDir = Path.dirname(path);
+		const synctexFile = Path.join(synctexDir, "output.synctex.gz");
+		return fs.stat(synctexDir, function(error, stats) {
+			if ((error != null ? error.code : undefined) === 'ENOENT') {
+				return callback(new Errors.NotFoundError("called synctex with no output directory"));
+			}
+			if (error != null) { return callback(error); }
+			return fs.stat(synctexFile, function(error, stats) {
+				if ((error != null ? error.code : undefined) === 'ENOENT') {
+					return callback(new Errors.NotFoundError("called synctex with no output file"));
+				}
+				if (error != null) { return callback(error); }
+				if (!(stats != null ? stats.isFile() : undefined)) { return callback(new Error("not a file")); }
+				return callback();
+			});
+		});
+	},
 
-	_runSynctex: (project_id, user_id, command, callback = (error, stdout) ->) ->
-		seconds = 1000
+	_runSynctex(project_id, user_id, command, callback) {
+		if (callback == null) { callback = function(error, stdout) {}; }
+		const seconds = 1000;
 
-		command.unshift("/opt/synctex")
+		command.unshift("/opt/synctex");
 
-		directory = getCompileDir(project_id, user_id)
-		timeout = 60 * 1000 # increased to allow for large projects
-		compileName = getCompileName(project_id, user_id)
-		CommandRunner.run compileName, command, directory, Settings.clsi?.docker.image, timeout, {}, (error, output) ->
-			if error?
-				logger.err err:error, command:command, project_id:project_id, user_id:user_id, "error running synctex"
-				return callback(error)
-			callback(null, output.stdout)
+		const directory = getCompileDir(project_id, user_id);
+		const timeout = 60 * 1000; // increased to allow for large projects
+		const compileName = getCompileName(project_id, user_id);
+		return CommandRunner.run(compileName, command, directory, Settings.clsi != null ? Settings.clsi.docker.image : undefined, timeout, {}, function(error, output) {
+			if (error != null) {
+				logger.err({err:error, command, project_id, user_id}, "error running synctex");
+				return callback(error);
+			}
+			return callback(null, output.stdout);
+		});
+	},
 
-	_parseSynctexFromCodeOutput: (output) ->
-		results = []
-		for line in output.split("\n")
-			[node, page, h, v, width, height] = line.split("\t")
-			if node == "NODE"
-				results.push {
-					page:   parseInt(page, 10)
-					h:      parseFloat(h)
-					v:      parseFloat(v)
-					height: parseFloat(height)
+	_parseSynctexFromCodeOutput(output) {
+		const results = [];
+		for (let line of Array.from(output.split("\n"))) {
+			const [node, page, h, v, width, height] = Array.from(line.split("\t"));
+			if (node === "NODE") {
+				results.push({
+					page:   parseInt(page, 10),
+					h:      parseFloat(h),
+					v:      parseFloat(v),
+					height: parseFloat(height),
 					width:  parseFloat(width)
-				}
-		return results
-
-	_parseSynctexFromPdfOutput: (output, base_dir) ->
-		results = []
-		for line in output.split("\n")
-			[node, file_path, line, column] = line.split("\t")
-			if node == "NODE"
-				file = file_path.slice(base_dir.length + 1)
-				results.push {
-					file: file
-					line: parseInt(line, 10)
-					column: parseInt(column, 10)
-				}
-		return results
-
-
-	wordcount: (project_id, user_id, file_name, image, callback = (error, pdfPositions) ->) ->
-		logger.log project_id:project_id, user_id:user_id, file_name:file_name, image:image, "running wordcount"
-		file_path = "$COMPILE_DIR/" + file_name
-		command = [ "texcount", '-nocol', '-inc', file_path, "-out=" + file_path + ".wc"]
-		compileDir = getCompileDir(project_id, user_id)
-		timeout = 60 * 1000
-		compileName = getCompileName(project_id, user_id)
-		fse.ensureDir compileDir, (error) ->
-			if error?
-				logger.err {error, project_id, user_id, file_name}, "error ensuring dir for sync from code"
-				return callback(error)
-			CommandRunner.run compileName, command, compileDir, image, timeout, {}, (error) ->
-				return callback(error) if error?
-				fs.readFile compileDir + "/" + file_name + ".wc", "utf-8", (err, stdout) ->
-					if err?
-						#call it node_err so sentry doesn't use random path error as unique id so it can't be ignored
-						logger.err node_err:err, command:command, compileDir:compileDir, project_id:project_id, user_id:user_id, "error reading word count output"
-						return callback(err)
-					results = CompileManager._parseWordcountFromOutput(stdout)
-					logger.log project_id:project_id, user_id:user_id, wordcount: results, "word count results"
-					callback null, results
-
-	_parseWordcountFromOutput: (output) ->
-		results = {
-			encode: ""
-			textWords: 0
-			headWords: 0
-			outside: 0
-			headers: 0
-			elements: 0
-			mathInline: 0
-			mathDisplay: 0
-			errors: 0
-			messages: ""
+				});
+			}
 		}
-		for line in output.split("\n")
-			[data, info] = line.split(":")
-			if data.indexOf("Encoding") > -1
-				results['encode'] = info.trim()
-			if data.indexOf("in text") > -1
-				results['textWords'] = parseInt(info, 10)
-			if data.indexOf("in head") > -1
-				results['headWords'] = parseInt(info, 10)
-			if data.indexOf("outside") > -1
-				results['outside'] = parseInt(info, 10)
-			if data.indexOf("of head") > -1
-				results['headers'] = parseInt(info, 10)
-			if data.indexOf("Number of floats/tables/figures") > -1
-				results['elements'] = parseInt(info, 10)
-			if data.indexOf("Number of math inlines") > -1
-				results['mathInline'] = parseInt(info, 10)
-			if data.indexOf("Number of math displayed") > -1
-				results['mathDisplay'] = parseInt(info, 10)
-			if data is "(errors"  # errors reported as (errors:123)
-				results['errors'] = parseInt(info, 10)
-			if line.indexOf("!!! ") > -1  # errors logged as !!! message !!!
-				results['messages'] += line + "\n"
-		return results
+		return results;
+	},
+
+	_parseSynctexFromPdfOutput(output, base_dir) {
+		const results = [];
+		for (let line of Array.from(output.split("\n"))) {
+			let column, file_path, node;
+			[node, file_path, line, column] = Array.from(line.split("\t"));
+			if (node === "NODE") {
+				const file = file_path.slice(base_dir.length + 1);
+				results.push({
+					file,
+					line: parseInt(line, 10),
+					column: parseInt(column, 10)
+				});
+			}
+		}
+		return results;
+	},
+
+
+	wordcount(project_id, user_id, file_name, image, callback) {
+		if (callback == null) { callback = function(error, pdfPositions) {}; }
+		logger.log({project_id, user_id, file_name, image}, "running wordcount");
+		const file_path = `$COMPILE_DIR/${file_name}`;
+		const command = [ "texcount", '-nocol', '-inc', file_path, `-out=${file_path}.wc`];
+		const compileDir = getCompileDir(project_id, user_id);
+		const timeout = 60 * 1000;
+		const compileName = getCompileName(project_id, user_id);
+		return fse.ensureDir(compileDir, function(error) {
+			if (error != null) {
+				logger.err({error, project_id, user_id, file_name}, "error ensuring dir for sync from code");
+				return callback(error);
+			}
+			return CommandRunner.run(compileName, command, compileDir, image, timeout, {}, function(error) {
+				if (error != null) { return callback(error); }
+				return fs.readFile(compileDir + "/" + file_name + ".wc", "utf-8", function(err, stdout) {
+					if (err != null) {
+						//call it node_err so sentry doesn't use random path error as unique id so it can't be ignored
+						logger.err({node_err:err, command, compileDir, project_id, user_id}, "error reading word count output");
+						return callback(err);
+					}
+					const results = CompileManager._parseWordcountFromOutput(stdout);
+					logger.log({project_id, user_id, wordcount: results}, "word count results");
+					return callback(null, results);
+				});
+			});
+		});
+	},
+
+	_parseWordcountFromOutput(output) {
+		const results = {
+			encode: "",
+			textWords: 0,
+			headWords: 0,
+			outside: 0,
+			headers: 0,
+			elements: 0,
+			mathInline: 0,
+			mathDisplay: 0,
+			errors: 0,
+			messages: ""
+		};
+		for (let line of Array.from(output.split("\n"))) {
+			const [data, info] = Array.from(line.split(":"));
+			if (data.indexOf("Encoding") > -1) {
+				results['encode'] = info.trim();
+			}
+			if (data.indexOf("in text") > -1) {
+				results['textWords'] = parseInt(info, 10);
+			}
+			if (data.indexOf("in head") > -1) {
+				results['headWords'] = parseInt(info, 10);
+			}
+			if (data.indexOf("outside") > -1) {
+				results['outside'] = parseInt(info, 10);
+			}
+			if (data.indexOf("of head") > -1) {
+				results['headers'] = parseInt(info, 10);
+			}
+			if (data.indexOf("Number of floats/tables/figures") > -1) {
+				results['elements'] = parseInt(info, 10);
+			}
+			if (data.indexOf("Number of math inlines") > -1) {
+				results['mathInline'] = parseInt(info, 10);
+			}
+			if (data.indexOf("Number of math displayed") > -1) {
+				results['mathDisplay'] = parseInt(info, 10);
+			}
+			if (data === "(errors") {  // errors reported as (errors:123)
+				results['errors'] = parseInt(info, 10);
+			}
+			if (line.indexOf("!!! ") > -1) {  // errors logged as !!! message !!!
+				results['messages'] += line + "\n";
+			}
+		}
+		return results;
+	}
+});
+
+function __guard__(value, transform) {
+  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+}

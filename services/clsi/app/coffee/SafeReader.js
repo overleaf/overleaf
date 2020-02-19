@@ -1,25 +1,40 @@
-fs = require "fs"
-logger = require "logger-sharelatex"
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let SafeReader;
+const fs = require("fs");
+const logger = require("logger-sharelatex");
 
-module.exports = SafeReader =
+module.exports = (SafeReader = {
 
-	# safely read up to size bytes from a file and return result as a
-	# string
+	// safely read up to size bytes from a file and return result as a
+	// string
 
-	readFile: (file, size, encoding, callback = (error, result) ->) ->
-		fs.open file, 'r', (err, fd) ->
-			return callback() if err? and err.code is 'ENOENT'
-			return callback(err) if err?
+	readFile(file, size, encoding, callback) {
+		if (callback == null) { callback = function(error, result) {}; }
+		return fs.open(file, 'r', function(err, fd) {
+			if ((err != null) && (err.code === 'ENOENT')) { return callback(); }
+			if (err != null) { return callback(err); }
 
-			# safely return always closing the file
-			callbackWithClose = (err, result...) ->
-				fs.close fd, (err1) ->
-					return callback(err) if err?
-					return callback(err1) if err1?
-					callback(null, result...)
+			// safely return always closing the file
+			const callbackWithClose = (err, ...result) =>
+				fs.close(fd, function(err1) {
+					if (err != null) { return callback(err); }
+					if (err1 != null) { return callback(err1); }
+					return callback(null, ...Array.from(result));
+				})
+			;
 
-			buff = new Buffer(size, 0) # fill with zeros
-			fs.read fd, buff, 0, buff.length, 0, (err, bytesRead, buffer) ->
-				return callbackWithClose(err) if err?
-				result = buffer.toString(encoding, 0, bytesRead)
-				callbackWithClose(null, result, bytesRead)
+			const buff = new Buffer(size, 0); // fill with zeros
+			return fs.read(fd, buff, 0, buff.length, 0, function(err, bytesRead, buffer) {
+				if (err != null) { return callbackWithClose(err); }
+				const result = buffer.toString(encoding, 0, bytesRead);
+				return callbackWithClose(null, result, bytesRead);
+			});
+		});
+	}
+});

@@ -1,142 +1,206 @@
-UrlCache = require "./UrlCache"
-Path = require "path"
-fs = require "fs"
-async = require "async"
-mkdirp = require "mkdirp"
-OutputFileFinder = require "./OutputFileFinder"
-ResourceStateManager = require "./ResourceStateManager"
-Metrics = require "./Metrics"
-logger = require "logger-sharelatex"
-settings = require("settings-sharelatex")
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let ResourceWriter;
+const UrlCache = require("./UrlCache");
+const Path = require("path");
+const fs = require("fs");
+const async = require("async");
+const mkdirp = require("mkdirp");
+const OutputFileFinder = require("./OutputFileFinder");
+const ResourceStateManager = require("./ResourceStateManager");
+const Metrics = require("./Metrics");
+const logger = require("logger-sharelatex");
+const settings = require("settings-sharelatex");
 
-parallelFileDownloads = settings.parallelFileDownloads or 1
+const parallelFileDownloads = settings.parallelFileDownloads || 1;
 
-module.exports = ResourceWriter =
+module.exports = (ResourceWriter = {
 
-	syncResourcesToDisk: (request, basePath, callback = (error, resourceList) ->) ->
-		if request.syncType is "incremental"
-			logger.log project_id: request.project_id, user_id: request.user_id, "incremental sync"
-			ResourceStateManager.checkProjectStateMatches request.syncState, basePath, (error, resourceList) ->
-				return callback(error) if error?
-				ResourceWriter._removeExtraneousFiles resourceList, basePath, (error, outputFiles, allFiles) ->
-					return callback(error) if error?
-					ResourceStateManager.checkResourceFiles resourceList, allFiles, basePath, (error) ->
-						return callback(error) if error?
-						ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, (error) ->
-							return callback(error) if error?
-							callback(null, resourceList)
-		else
-			logger.log project_id: request.project_id, user_id: request.user_id, "full sync"
-			@saveAllResourcesToDisk request.project_id, request.resources, basePath, (error) ->
-				return callback(error) if error?
-				ResourceStateManager.saveProjectState request.syncState, request.resources, basePath, (error) ->
-					return callback(error) if error?
-					callback(null, request.resources)
+	syncResourcesToDisk(request, basePath, callback) {
+		if (callback == null) { callback = function(error, resourceList) {}; }
+		if (request.syncType === "incremental") {
+			logger.log({project_id: request.project_id, user_id: request.user_id}, "incremental sync");
+			return ResourceStateManager.checkProjectStateMatches(request.syncState, basePath, function(error, resourceList) {
+				if (error != null) { return callback(error); }
+				return ResourceWriter._removeExtraneousFiles(resourceList, basePath, function(error, outputFiles, allFiles) {
+					if (error != null) { return callback(error); }
+					return ResourceStateManager.checkResourceFiles(resourceList, allFiles, basePath, function(error) {
+						if (error != null) { return callback(error); }
+						return ResourceWriter.saveIncrementalResourcesToDisk(request.project_id, request.resources, basePath, function(error) {
+							if (error != null) { return callback(error); }
+							return callback(null, resourceList);
+						});
+					});
+				});
+			});
+		} else {
+			logger.log({project_id: request.project_id, user_id: request.user_id}, "full sync");
+			return this.saveAllResourcesToDisk(request.project_id, request.resources, basePath, function(error) {
+				if (error != null) { return callback(error); }
+				return ResourceStateManager.saveProjectState(request.syncState, request.resources, basePath, function(error) {
+					if (error != null) { return callback(error); }
+					return callback(null, request.resources);
+				});
+			});
+		}
+	},
 
-	saveIncrementalResourcesToDisk: (project_id, resources, basePath, callback = (error) ->) ->
-		@_createDirectory basePath, (error) =>
-			return callback(error) if error?
-			jobs = for resource in resources
-				do (resource) =>
-					(callback) => @_writeResourceToDisk(project_id, resource, basePath, callback)
-			async.parallelLimit jobs, parallelFileDownloads, callback
+	saveIncrementalResourcesToDisk(project_id, resources, basePath, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return this._createDirectory(basePath, error => {
+			if (error != null) { return callback(error); }
+			const jobs = Array.from(resources).map((resource) =>
+				(resource => {
+					return callback => this._writeResourceToDisk(project_id, resource, basePath, callback);
+				})(resource));
+			return async.parallelLimit(jobs, parallelFileDownloads, callback);
+		});
+	},
 
-	saveAllResourcesToDisk: (project_id, resources, basePath, callback = (error) ->) ->
-		@_createDirectory basePath, (error) =>
-			return callback(error) if error?
-			@_removeExtraneousFiles resources, basePath, (error) =>
-				return callback(error) if error?
-				jobs = for resource in resources
-					do (resource) =>
-						(callback) => @_writeResourceToDisk(project_id, resource, basePath, callback)
-				async.parallelLimit jobs, parallelFileDownloads, callback
+	saveAllResourcesToDisk(project_id, resources, basePath, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return this._createDirectory(basePath, error => {
+			if (error != null) { return callback(error); }
+			return this._removeExtraneousFiles(resources, basePath, error => {
+				if (error != null) { return callback(error); }
+				const jobs = Array.from(resources).map((resource) =>
+					(resource => {
+						return callback => this._writeResourceToDisk(project_id, resource, basePath, callback);
+					})(resource));
+				return async.parallelLimit(jobs, parallelFileDownloads, callback);
+			});
+		});
+	},
 
-	_createDirectory: (basePath, callback = (error) ->) ->
-		fs.mkdir basePath, (err) ->
-			if err?
-				if err.code is 'EEXIST'
-					return callback()
-				else
-					logger.log {err: err, dir:basePath}, "error creating directory"
-					return callback(err)
-			else
-				return callback()
+	_createDirectory(basePath, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return fs.mkdir(basePath, function(err) {
+			if (err != null) {
+				if (err.code === 'EEXIST') {
+					return callback();
+				} else {
+					logger.log({err, dir:basePath}, "error creating directory");
+					return callback(err);
+				}
+			} else {
+				return callback();
+			}
+		});
+	},
 
-	_removeExtraneousFiles: (resources, basePath, _callback = (error, outputFiles, allFiles) ->) ->
-		timer = new Metrics.Timer("unlink-output-files")
-		callback = (error, result...) ->
-			timer.done()
-			_callback(error, result...)
+	_removeExtraneousFiles(resources, basePath, _callback) {
+		if (_callback == null) { _callback = function(error, outputFiles, allFiles) {}; }
+		const timer = new Metrics.Timer("unlink-output-files");
+		const callback = function(error, ...result) {
+			timer.done();
+			return _callback(error, ...Array.from(result));
+		};
 
-		OutputFileFinder.findOutputFiles resources, basePath, (error, outputFiles, allFiles) ->
-			return callback(error) if error?
+		return OutputFileFinder.findOutputFiles(resources, basePath, function(error, outputFiles, allFiles) {
+			if (error != null) { return callback(error); }
 
-			jobs = []
-			for file in outputFiles or []
-				do (file) ->
-					path = file.path
-					should_delete = true
-					if path.match(/^output\./) or path.match(/\.aux$/) or path.match(/^cache\//) # knitr cache
-						should_delete = false
-					if path.match(/^output-.*/) # Tikz cached figures (default case)
-						should_delete = false
-					if path.match(/\.(pdf|dpth|md5)$/) # Tikz cached figures (by extension)
-						should_delete = false
-					if path.match(/\.(pygtex|pygstyle)$/) or path.match(/(^|\/)_minted-[^\/]+\//) # minted files/directory
-						should_delete = false
-					if path.match(/\.md\.tex$/) or path.match(/(^|\/)_markdown_[^\/]+\//) # markdown files/directory
-						should_delete = false
-					if path.match(/-eps-converted-to\.pdf$/) # Epstopdf generated files
-						should_delete = false 
-					if path == "output.pdf" or path == "output.dvi" or path == "output.log" or path == "output.xdv"
-						should_delete = true
-					if path == "output.tex" # created by TikzManager if present in output files
-						should_delete = true
-					if should_delete
-						jobs.push (callback) -> ResourceWriter._deleteFileIfNotDirectory Path.join(basePath, path), callback
+			const jobs = [];
+			for (let file of Array.from(outputFiles || [])) {
+				(function(file) {
+					const { path } = file;
+					let should_delete = true;
+					if (path.match(/^output\./) || path.match(/\.aux$/) || path.match(/^cache\//)) { // knitr cache
+						should_delete = false;
+					}
+					if (path.match(/^output-.*/)) { // Tikz cached figures (default case)
+						should_delete = false;
+					}
+					if (path.match(/\.(pdf|dpth|md5)$/)) { // Tikz cached figures (by extension)
+						should_delete = false;
+					}
+					if (path.match(/\.(pygtex|pygstyle)$/) || path.match(/(^|\/)_minted-[^\/]+\//)) { // minted files/directory
+						should_delete = false;
+					}
+					if (path.match(/\.md\.tex$/) || path.match(/(^|\/)_markdown_[^\/]+\//)) { // markdown files/directory
+						should_delete = false;
+					}
+					if (path.match(/-eps-converted-to\.pdf$/)) { // Epstopdf generated files
+						should_delete = false; 
+					}
+					if ((path === "output.pdf") || (path === "output.dvi") || (path === "output.log") || (path === "output.xdv")) {
+						should_delete = true;
+					}
+					if (path === "output.tex") { // created by TikzManager if present in output files
+						should_delete = true;
+					}
+					if (should_delete) {
+						return jobs.push(callback => ResourceWriter._deleteFileIfNotDirectory(Path.join(basePath, path), callback));
+					}
+				})(file);
+			}
 
-			async.series jobs, (error) ->
-				return callback(error) if error?
-				callback(null, outputFiles, allFiles)
+			return async.series(jobs, function(error) {
+				if (error != null) { return callback(error); }
+				return callback(null, outputFiles, allFiles);
+			});
+		});
+	},
 
-	_deleteFileIfNotDirectory: (path, callback = (error) ->) ->
-		fs.stat path, (error, stat) ->
-			if error? and error.code is 'ENOENT'
-				return callback()
-			else if error?
-				logger.err {err: error, path: path}, "error stating file in deleteFileIfNotDirectory"
-				return callback(error)
-			else if stat.isFile()
-				fs.unlink path, (error) ->
-					if error?
-						logger.err {err: error, path: path}, "error removing file in deleteFileIfNotDirectory"
-						callback(error)
-					else
-						callback()
-			else
-				callback()
+	_deleteFileIfNotDirectory(path, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return fs.stat(path, function(error, stat) {
+			if ((error != null) && (error.code === 'ENOENT')) {
+				return callback();
+			} else if (error != null) {
+				logger.err({err: error, path}, "error stating file in deleteFileIfNotDirectory");
+				return callback(error);
+			} else if (stat.isFile()) {
+				return fs.unlink(path, function(error) {
+					if (error != null) {
+						logger.err({err: error, path}, "error removing file in deleteFileIfNotDirectory");
+						return callback(error);
+					} else {
+						return callback();
+					}
+				});
+			} else {
+				return callback();
+			}
+		});
+	},
 
-	_writeResourceToDisk: (project_id, resource, basePath, callback = (error) ->) ->
-		ResourceWriter.checkPath basePath, resource.path, (error, path) ->
-			return callback(error) if error?
-			mkdirp Path.dirname(path), (error) ->
-				return callback(error) if error?
-				# TODO: Don't overwrite file if it hasn't been modified
-				if resource.url?
-					UrlCache.downloadUrlToFile project_id, resource.url, path, resource.modified, (err)->
-						if err?
-							logger.err err:err, project_id:project_id, path:path, resource_url:resource.url, modified:resource.modified, "error downloading file for resources"
-						callback() #try and continue compiling even if http resource can not be downloaded at this time
-				else
-					process = require("process")
-					fs.writeFile path, resource.content, callback
-					try 
-						result = fs.lstatSync(path)
-					catch e
+	_writeResourceToDisk(project_id, resource, basePath, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return ResourceWriter.checkPath(basePath, resource.path, function(error, path) {
+			if (error != null) { return callback(error); }
+			return mkdirp(Path.dirname(path), function(error) {
+				if (error != null) { return callback(error); }
+				// TODO: Don't overwrite file if it hasn't been modified
+				if (resource.url != null) {
+					return UrlCache.downloadUrlToFile(project_id, resource.url, path, resource.modified, function(err){
+						if (err != null) {
+							logger.err({err, project_id, path, resource_url:resource.url, modified:resource.modified}, "error downloading file for resources");
+						}
+						return callback();
+					}); //try and continue compiling even if http resource can not be downloaded at this time
+				} else {
+					const process = require("process");
+					fs.writeFile(path, resource.content, callback);
+					try { 
+						let result;
+						return result = fs.lstatSync(path);
+					} catch (e) {}
+				}
+			});
+		});
+	},
 
-	checkPath: (basePath, resourcePath, callback) ->
-		path = Path.normalize(Path.join(basePath, resourcePath))
-		if (path.slice(0, basePath.length + 1) != basePath + "/")
-			return callback new Error("resource path is outside root directory")
-		else
-			return callback(null, path)
+	checkPath(basePath, resourcePath, callback) {
+		const path = Path.normalize(Path.join(basePath, resourcePath));
+		if (path.slice(0, basePath.length + 1) !== (basePath + "/")) {
+			return callback(new Error("resource path is outside root directory"));
+		} else {
+			return callback(null, path);
+		}
+	}
+});

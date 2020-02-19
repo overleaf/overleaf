@@ -1,134 +1,189 @@
-db = require("./db")
-dbQueue = require "./DbQueue"
-UrlFetcher = require("./UrlFetcher")
-Settings = require("settings-sharelatex")
-crypto = require("crypto")
-fs = require("fs")
-logger = require "logger-sharelatex"
-async = require "async"
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let UrlCache;
+const db = require("./db");
+const dbQueue = require("./DbQueue");
+const UrlFetcher = require("./UrlFetcher");
+const Settings = require("settings-sharelatex");
+const crypto = require("crypto");
+const fs = require("fs");
+const logger = require("logger-sharelatex");
+const async = require("async");
 
-module.exports = UrlCache =
-	downloadUrlToFile: (project_id, url, destPath, lastModified, callback = (error) ->) ->
-		UrlCache._ensureUrlIsInCache project_id, url, lastModified, (error, pathToCachedUrl) =>
-			return callback(error) if error?
-			UrlCache._copyFile pathToCachedUrl, destPath, (error) ->
-				if error?
-					UrlCache._clearUrlDetails project_id, url, () ->
-						callback(error)
-				else
-					callback(error)
+module.exports = (UrlCache = {
+	downloadUrlToFile(project_id, url, destPath, lastModified, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return UrlCache._ensureUrlIsInCache(project_id, url, lastModified, (error, pathToCachedUrl) => {
+			if (error != null) { return callback(error); }
+			return UrlCache._copyFile(pathToCachedUrl, destPath, function(error) {
+				if (error != null) {
+					return UrlCache._clearUrlDetails(project_id, url, () => callback(error));
+				} else {
+					return callback(error);
+				}
+			});
+		});
+	},
 
-	clearProject: (project_id, callback = (error) ->) ->
-		UrlCache._findAllUrlsInProject project_id, (error, urls) ->
-			logger.log project_id: project_id, url_count: urls.length, "clearing project URLs"
-			return callback(error) if error?
-			jobs = for url in (urls or [])
-				do (url) ->
-					(callback) ->
-						UrlCache._clearUrlFromCache project_id, url, (error) ->
-							if error?
-								logger.error err: error, project_id: project_id, url: url, "error clearing project URL"
-							callback()
-			async.series jobs, callback
+	clearProject(project_id, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return UrlCache._findAllUrlsInProject(project_id, function(error, urls) {
+			logger.log({project_id, url_count: urls.length}, "clearing project URLs");
+			if (error != null) { return callback(error); }
+			const jobs = (Array.from(urls || [])).map((url) =>
+				(url =>
+					callback =>
+						UrlCache._clearUrlFromCache(project_id, url, function(error) {
+							if (error != null) {
+								logger.error({err: error, project_id, url}, "error clearing project URL");
+							}
+							return callback();
+						})
+					
+				)(url));
+			return async.series(jobs, callback);
+		});
+	},
 
-	_ensureUrlIsInCache: (project_id, url, lastModified, callback = (error, pathOnDisk) ->) ->
-		if lastModified?
-			# MYSQL only stores dates to an accuracy of a second but the incoming lastModified might have milliseconds.
-			# So round down to seconds
-			lastModified = new Date(Math.floor(lastModified.getTime() / 1000) * 1000)
-		UrlCache._doesUrlNeedDownloading project_id, url, lastModified, (error, needsDownloading) =>
-			return callback(error) if error?
-			if needsDownloading
-				logger.log url: url, lastModified: lastModified, "downloading URL"
-				UrlFetcher.pipeUrlToFile url, UrlCache._cacheFilePathForUrl(project_id, url), (error) =>
-					return callback(error) if error?
-					UrlCache._updateOrCreateUrlDetails project_id, url, lastModified, (error) =>
-						return callback(error) if error?
-						callback null, UrlCache._cacheFilePathForUrl(project_id, url)
-			else
-				logger.log url: url, lastModified: lastModified, "URL is up to date in cache"
-				callback null, UrlCache._cacheFilePathForUrl(project_id, url)
+	_ensureUrlIsInCache(project_id, url, lastModified, callback) {
+		if (callback == null) { callback = function(error, pathOnDisk) {}; }
+		if (lastModified != null) {
+			// MYSQL only stores dates to an accuracy of a second but the incoming lastModified might have milliseconds.
+			// So round down to seconds
+			lastModified = new Date(Math.floor(lastModified.getTime() / 1000) * 1000);
+		}
+		return UrlCache._doesUrlNeedDownloading(project_id, url, lastModified, (error, needsDownloading) => {
+			if (error != null) { return callback(error); }
+			if (needsDownloading) {
+				logger.log({url, lastModified}, "downloading URL");
+				return UrlFetcher.pipeUrlToFile(url, UrlCache._cacheFilePathForUrl(project_id, url), error => {
+					if (error != null) { return callback(error); }
+					return UrlCache._updateOrCreateUrlDetails(project_id, url, lastModified, error => {
+						if (error != null) { return callback(error); }
+						return callback(null, UrlCache._cacheFilePathForUrl(project_id, url));
+					});
+				});
+			} else {
+				logger.log({url, lastModified}, "URL is up to date in cache");
+				return callback(null, UrlCache._cacheFilePathForUrl(project_id, url));
+			}
+		});
+	},
 	
-	_doesUrlNeedDownloading: (project_id, url, lastModified, callback = (error, needsDownloading) ->) ->
-		if !lastModified?
-			return callback null, true
-		UrlCache._findUrlDetails project_id, url, (error, urlDetails) ->
-			return callback(error) if error?
-			if !urlDetails? or !urlDetails.lastModified? or urlDetails.lastModified.getTime() < lastModified.getTime()
-				return callback null, true
-			else
-				return callback null, false
+	_doesUrlNeedDownloading(project_id, url, lastModified, callback) {
+		if (callback == null) { callback = function(error, needsDownloading) {}; }
+		if ((lastModified == null)) {
+			return callback(null, true);
+		}
+		return UrlCache._findUrlDetails(project_id, url, function(error, urlDetails) {
+			if (error != null) { return callback(error); }
+			if ((urlDetails == null) || (urlDetails.lastModified == null) || (urlDetails.lastModified.getTime() < lastModified.getTime())) {
+				return callback(null, true);
+			} else {
+				return callback(null, false);
+			}
+		});
+	},
 
-	_cacheFileNameForUrl: (project_id, url) ->
-		project_id + ":" + crypto.createHash("md5").update(url).digest("hex")
+	_cacheFileNameForUrl(project_id, url) {
+		return project_id + ":" + crypto.createHash("md5").update(url).digest("hex");
+	},
 
-	_cacheFilePathForUrl: (project_id, url) ->
-		"#{Settings.path.clsiCacheDir}/#{UrlCache._cacheFileNameForUrl(project_id, url)}"
+	_cacheFilePathForUrl(project_id, url) {
+		return `${Settings.path.clsiCacheDir}/${UrlCache._cacheFileNameForUrl(project_id, url)}`;
+	},
 
-	_copyFile: (from, to, _callback = (error) ->) ->
-		callbackOnce = (error) ->
-			if error?
-				logger.error err: error, from:from, to:to, "error copying file from cache"
-			_callback(error)
-			_callback = () ->
-		writeStream = fs.createWriteStream(to)
-		readStream = fs.createReadStream(from)
-		writeStream.on "error", callbackOnce
-		readStream.on "error", callbackOnce
-		writeStream.on "close", callbackOnce
-		writeStream.on "open", () ->
-			readStream.pipe(writeStream)
+	_copyFile(from, to, _callback) {
+		if (_callback == null) { _callback = function(error) {}; }
+		const callbackOnce = function(error) {
+			if (error != null) {
+				logger.error({err: error, from, to}, "error copying file from cache");
+			}
+			_callback(error);
+			return _callback = function() {};
+		};
+		const writeStream = fs.createWriteStream(to);
+		const readStream = fs.createReadStream(from);
+		writeStream.on("error", callbackOnce);
+		readStream.on("error", callbackOnce);
+		writeStream.on("close", callbackOnce);
+		return writeStream.on("open", () => readStream.pipe(writeStream));
+	},
 
-	_clearUrlFromCache: (project_id, url, callback = (error) ->) ->
-		UrlCache._clearUrlDetails project_id, url, (error) ->
-			return callback(error) if error?
-			UrlCache._deleteUrlCacheFromDisk project_id, url, (error) ->
-				return callback(error) if error?
-				callback null
+	_clearUrlFromCache(project_id, url, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return UrlCache._clearUrlDetails(project_id, url, function(error) {
+			if (error != null) { return callback(error); }
+			return UrlCache._deleteUrlCacheFromDisk(project_id, url, function(error) {
+				if (error != null) { return callback(error); }
+				return callback(null);
+			});
+		});
+	},
 
-	_deleteUrlCacheFromDisk: (project_id, url, callback = (error) ->) ->
-		fs.unlink UrlCache._cacheFilePathForUrl(project_id, url), (error) ->
-			if error? and error.code != 'ENOENT' # no error if the file isn't present
-				return callback(error)
-			else
-				return callback()
+	_deleteUrlCacheFromDisk(project_id, url, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return fs.unlink(UrlCache._cacheFilePathForUrl(project_id, url), function(error) {
+			if ((error != null) && (error.code !== 'ENOENT')) { // no error if the file isn't present
+				return callback(error);
+			} else {
+				return callback();
+			}
+		});
+	},
 
-	_findUrlDetails: (project_id, url, callback = (error, urlDetails) ->) ->
-		job = (cb)->
-			db.UrlCache.find(where: { url: url, project_id: project_id })
-				.then((urlDetails) -> cb null, urlDetails)
-				.error cb
-		dbQueue.queue.push job, callback
+	_findUrlDetails(project_id, url, callback) {
+		if (callback == null) { callback = function(error, urlDetails) {}; }
+		const job = cb=>
+			db.UrlCache.find({where: { url, project_id }})
+				.then(urlDetails => cb(null, urlDetails))
+				.error(cb)
+		;
+		return dbQueue.queue.push(job, callback);
+	},
 
-	_updateOrCreateUrlDetails: (project_id, url, lastModified, callback = (error) ->) ->
-		job = (cb)->
-			db.UrlCache.findOrCreate(where: {url: url, project_id: project_id})
+	_updateOrCreateUrlDetails(project_id, url, lastModified, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		const job = cb=>
+			db.UrlCache.findOrCreate({where: {url, project_id}})
 				.spread(
-					(urlDetails, created) ->
-						urlDetails.updateAttributes(lastModified: lastModified)
-							.then(() -> cb())
+					(urlDetails, created) =>
+						urlDetails.updateAttributes({lastModified})
+							.then(() => cb())
 							.error(cb)
 				)
-				.error cb
-		dbQueue.queue.push(job, callback)
+				.error(cb)
+		;
+		return dbQueue.queue.push(job, callback);
+	},
 
-	_clearUrlDetails: (project_id, url, callback = (error) ->) ->
-		job = (cb)->
-			db.UrlCache.destroy(where: {url: url, project_id: project_id})
-				.then(() -> cb null)
-				.error cb
-		dbQueue.queue.push(job, callback)
+	_clearUrlDetails(project_id, url, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		const job = cb=>
+			db.UrlCache.destroy({where: {url, project_id}})
+				.then(() => cb(null))
+				.error(cb)
+		;
+		return dbQueue.queue.push(job, callback);
+	},
 
 
-	_findAllUrlsInProject: (project_id, callback = (error, urls) ->) ->
-		job = (cb)->
-			db.UrlCache.findAll(where: { project_id: project_id })
+	_findAllUrlsInProject(project_id, callback) {
+		if (callback == null) { callback = function(error, urls) {}; }
+		const job = cb=>
+			db.UrlCache.findAll({where: { project_id }})
 				.then(
-					(urlEntries) ->
-						cb null, urlEntries.map((entry) -> entry.url)
-				)
-				.error cb
-		dbQueue.queue.push(job, callback)
+					urlEntries => cb(null, urlEntries.map(entry => entry.url)))
+				.error(cb)
+		;
+		return dbQueue.queue.push(job, callback);
+	}
+});
 
 		
 		

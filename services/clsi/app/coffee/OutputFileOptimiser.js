@@ -1,55 +1,77 @@
-fs = require "fs"
-Path = require "path"
-spawn = require("child_process").spawn
-logger = require "logger-sharelatex"
-Metrics = require "./Metrics"
-_ = require "underscore"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let OutputFileOptimiser;
+const fs = require("fs");
+const Path = require("path");
+const { spawn } = require("child_process");
+const logger = require("logger-sharelatex");
+const Metrics = require("./Metrics");
+const _ = require("underscore");
 
-module.exports = OutputFileOptimiser =
+module.exports = (OutputFileOptimiser = {
 
-	optimiseFile: (src, dst, callback = (error) ->) ->
-		# check output file (src) and see if we can optimise it, storing
-		# the result in the build directory (dst)
-		if src.match(/\/output\.pdf$/)
-			OutputFileOptimiser.checkIfPDFIsOptimised src, (err, isOptimised) ->
-				return callback(null) if err? or isOptimised
-				OutputFileOptimiser.optimisePDF src, dst, callback
-		else
-			callback (null)
+	optimiseFile(src, dst, callback) {
+		// check output file (src) and see if we can optimise it, storing
+		// the result in the build directory (dst)
+		if (callback == null) { callback = function(error) {}; }
+		if (src.match(/\/output\.pdf$/)) {
+			return OutputFileOptimiser.checkIfPDFIsOptimised(src, function(err, isOptimised) {
+				if ((err != null) || isOptimised) { return callback(null); }
+				return OutputFileOptimiser.optimisePDF(src, dst, callback);
+			});
+		} else {
+			return callback((null));
+		}
+	},
 
-	checkIfPDFIsOptimised: (file, callback) ->
-		SIZE = 16*1024 # check the header of the pdf
-		result = new Buffer(SIZE)
-		result.fill(0) # prevent leakage of uninitialised buffer
-		fs.open file, "r", (err, fd) ->
-			return callback(err) if err?
-			fs.read fd, result, 0, SIZE, 0, (errRead, bytesRead, buffer) ->
-				fs.close fd, (errClose) ->
-					return callback(errRead) if errRead?
-					return callback(errClose) if errReadClose?
-					isOptimised = buffer.toString('ascii').indexOf("/Linearized 1") >= 0
-					callback(null, isOptimised)
+	checkIfPDFIsOptimised(file, callback) {
+		const SIZE = 16*1024; // check the header of the pdf
+		const result = new Buffer(SIZE);
+		result.fill(0); // prevent leakage of uninitialised buffer
+		return fs.open(file, "r", function(err, fd) {
+			if (err != null) { return callback(err); }
+			return fs.read(fd, result, 0, SIZE, 0, (errRead, bytesRead, buffer) =>
+				fs.close(fd, function(errClose) {
+					if (errRead != null) { return callback(errRead); }
+					if (typeof errReadClose !== 'undefined' && errReadClose !== null) { return callback(errClose); }
+					const isOptimised = buffer.toString('ascii').indexOf("/Linearized 1") >= 0;
+					return callback(null, isOptimised);
+				})
+			);
+		});
+	},
 
-	optimisePDF: (src, dst, callback = (error) ->) ->
-		tmpOutput = dst + '.opt'
-		args = ["--linearize", src, tmpOutput]
-		logger.log args: args, "running qpdf command"
+	optimisePDF(src, dst, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		const tmpOutput = dst + '.opt';
+		const args = ["--linearize", src, tmpOutput];
+		logger.log({args}, "running qpdf command");
 
-		timer = new Metrics.Timer("qpdf")
-		proc = spawn("qpdf", args)
-		stdout = ""
-		proc.stdout.on "data", (chunk) ->
-			stdout += chunk.toString()
-		callback = _.once(callback) # avoid double call back for error and close event
-		proc.on "error", (err) ->
-			logger.warn {err, args}, "qpdf failed"
-			callback(null) # ignore the error
-		proc.on "close", (code) ->
-			timer.done()
-			if code != 0
-				logger.warn {code, args}, "qpdf returned error"
-				return callback(null) # ignore the error
-			fs.rename tmpOutput, dst, (err) ->
-				if err?
-					logger.warn {tmpOutput, dst}, "failed to rename output of qpdf command"
-				callback(null) # ignore the error
+		const timer = new Metrics.Timer("qpdf");
+		const proc = spawn("qpdf", args);
+		let stdout = "";
+		proc.stdout.on("data", chunk => stdout += chunk.toString());
+		callback = _.once(callback); // avoid double call back for error and close event
+		proc.on("error", function(err) {
+			logger.warn({err, args}, "qpdf failed");
+			return callback(null);
+		}); // ignore the error
+		return proc.on("close", function(code) {
+			timer.done();
+			if (code !== 0) {
+				logger.warn({code, args}, "qpdf returned error");
+				return callback(null); // ignore the error
+			}
+			return fs.rename(tmpOutput, dst, function(err) {
+				if (err != null) {
+					logger.warn({tmpOutput, dst}, "failed to rename output of qpdf command");
+				}
+				return callback(null);
+			});
+		});
+	} // ignore the error
+});

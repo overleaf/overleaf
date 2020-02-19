@@ -1,24 +1,37 @@
-fs = require "fs"
-logger = require "logger-sharelatex"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let DraftModeManager;
+const fs = require("fs");
+const logger = require("logger-sharelatex");
 
-module.exports = DraftModeManager =
-	injectDraftMode: (filename, callback = (error) ->) ->
-		fs.readFile filename, "utf8", (error, content) ->
-			return callback(error) if error?
-			# avoid adding draft mode more than once
-			if content?.indexOf("\\documentclass\[draft") >= 0
-				return callback()
-			modified_content = DraftModeManager._injectDraftOption content
-			logger.log {
-				content: content.slice(0,1024), # \documentclass is normally v near the top
+module.exports = (DraftModeManager = {
+	injectDraftMode(filename, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return fs.readFile(filename, "utf8", function(error, content) {
+			if (error != null) { return callback(error); }
+			// avoid adding draft mode more than once
+			if ((content != null ? content.indexOf("\\documentclass\[draft") : undefined) >= 0) {
+				return callback();
+			}
+			const modified_content = DraftModeManager._injectDraftOption(content);
+			logger.log({
+				content: content.slice(0,1024), // \documentclass is normally v near the top
 				modified_content: modified_content.slice(0,1024),
 				filename
-			}, "injected draft class"
-			fs.writeFile filename, modified_content, callback
+			}, "injected draft class");
+			return fs.writeFile(filename, modified_content, callback);
+		});
+	},
 	
-	_injectDraftOption: (content) ->
-		content
-			# With existing options (must be first, otherwise both are applied)
+	_injectDraftOption(content) {
+		return content
+			// With existing options (must be first, otherwise both are applied)
 			.replace(/\\documentclass\[/g, "\\documentclass[draft,")
-			# Without existing options
-			.replace(/\\documentclass\{/g, "\\documentclass[draft]{")
+			// Without existing options
+			.replace(/\\documentclass\{/g, "\\documentclass[draft]{");
+	}
+});

@@ -1,11 +1,18 @@
-Settings = require "settings-sharelatex"
-logger = require "logger-sharelatex"
+/*
+ * decaffeinate suggestions:
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let commandRunnerPath;
+const Settings = require("settings-sharelatex");
+const logger = require("logger-sharelatex");
 
-if Settings.clsi?.dockerRunner == true
-	commandRunnerPath = "./DockerRunner"
-else 
-	commandRunnerPath = "./LocalCommandRunner"
-logger.info commandRunnerPath:commandRunnerPath, "selecting command runner for clsi"
-CommandRunner = require(commandRunnerPath)
+if ((Settings.clsi != null ? Settings.clsi.dockerRunner : undefined) === true) {
+	commandRunnerPath = "./DockerRunner";
+} else { 
+	commandRunnerPath = "./LocalCommandRunner";
+}
+logger.info({commandRunnerPath}, "selecting command runner for clsi");
+const CommandRunner = require(commandRunnerPath);
 
-module.exports = CommandRunner
+module.exports = CommandRunner;
