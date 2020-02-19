@@ -1,7 +1,6 @@
 Path = require('path')
 http = require('http')
 http.globalAgent.maxSockets = 300
-fs = require('fs')
 
 module.exports =
 	internal:
@@ -45,12 +44,6 @@ module.exports =
 			key_schema:
 				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:{#{project_id}}"
 				projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:{#{project_id}}"
-			tls: if process.env['REDIS_CA_CERT'] && process.env['REDIS_CLIENT_CERT'] && process.env['REDIS_CLIENT_KEY']
-				ca: fs.readFileSync(process.env['REDIS_CA_CERT']),
-				cert: fs.readFileSync(
-					process.env['REDIS_CLIENT_CERT']
-				),
-				key: fs.readFileSync(process.env['REDIS_CLIENT_KEY'])
 
 		new_project_history:
 			port: process.env["NEW_HISTORY_REDIS_PORT"] or "6379"
@@ -61,12 +54,6 @@ module.exports =
 				projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:{#{project_id}}"
 				projectHistoryMigrationKey: ({project_id}) -> "ProjectHistory:MigrationKey:{#{project_id}}"
 			migration_phase: process.env["PROJECT_HISTORY_MIGRATION_PHASE"] or "prepare"
-			tls: if process.env['NEW_HISTORY_REDIS_CA_CERT'] && process.env['NEW_HISTORY_REDIS_CLIENT_CERT'] && process.env['NEW_HISTORY_REDIS_CLIENT_KEY']
-				ca: fs.readFileSync(process.env['NEW_HISTORY_REDIS_CA_CERT']),
-				cert: fs.readFileSync(
-					process.env['NEW_HISTORY_REDIS_CLIENT_CERT']
-				),
-				key: fs.readFileSync(process.env['NEW_HISTORY_REDIS_CLIENT_KEY'])
 			redisOptions:
 				keepAlive: 100
 
