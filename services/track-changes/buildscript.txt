@@ -1,6 +1,6 @@
 track-changes
 --public-repo=True
---language=coffeescript
+--language=es
 --env-add=AWS_BUCKET=bucket
 --node-version=10.19.0
 --acceptance-creds=None
