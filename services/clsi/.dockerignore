@@ -5,4 +5,6 @@ gitrev
 .npm
 .nvmrc
 nodemon.json
+cache/
+compiles/
 db/
