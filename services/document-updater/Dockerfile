@@ -17,7 +17,6 @@ FROM node:6.9.5
 COPY --from=app /app /app
 
 WORKDIR /app
-RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
 USER node
 
 CMD ["node", "--expose-gc", "app.js"]
