@@ -19,7 +19,11 @@ services:
             - redis
         volumes:
             - ~/sharelatex_data:/var/lib/sharelatex
-            - /var/run/docker.sock:/var/run/docker.sock
+            ########################################################################
+            ####  Server Pro: Un-comment the following line to mount the docker ####
+            ####             socket, required for Sibling Containers to work    ####
+            ########################################################################
+            # - /var/run/docker.sock:/var/run/docker.sock
         environment:
 
             SHARELATEX_APP_NAME: Overleaf Community Edition
