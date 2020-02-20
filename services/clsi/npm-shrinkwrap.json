@@ -1536,12 +1536,6 @@
       "resolved": "https://registry.npmjs.org/coffee-script/-/coffee-script-1.6.0.tgz",
       "integrity": "sha1-gIs5bhEPU9AhoZpO8fZb4OjjX6M="
     },
-    "coffeescript": {
-      "version": "1.6.0",
-      "resolved": "https://registry.npmjs.org/coffeescript/-/coffeescript-1.6.0.tgz",
-      "integrity": "sha1-bdTeHrYveE2MjYCWdVLLpUf/2d4=",
-      "dev": true
-    },
     "color-convert": {
       "version": "1.9.3",
       "resolved": "https://registry.npmjs.org/color-convert/-/color-convert-1.9.3.tgz",

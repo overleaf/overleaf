@@ -17,7 +17,6 @@ const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 require('chai').should()
 const { expect } = require('chai')
-require('coffee-script')
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/DockerRunner'
@@ -87,6 +86,10 @@ describe('DockerRunner', function() {
     this.volumes = { '/local/compile/directory': '/compile' }
     this.Settings.clsi.docker.image = this.defaultImage = 'default-image'
     return (this.Settings.clsi.docker.env = { PATH: 'mock-path' })
+  })
+
+  afterEach(function() {
+    this.DockerRunner.stopContainerMonitor()
   })
 
   describe('run', function() {

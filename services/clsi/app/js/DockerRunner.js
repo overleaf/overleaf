@@ -35,6 +35,9 @@ const usingSiblingContainers = () =>
     x => x.sandboxedCompilesHostDir
   ) != null
 
+let containerMonitorTimeout
+let containerMonitorInterval
+
 module.exports = DockerRunner = {
   ERR_NOT_DIRECTORY: new Error('not a directory'),
   ERR_TERMINATED: new Error('terminated'),
@@ -646,17 +649,29 @@ module.exports = DockerRunner = {
       { maxAge: DockerRunner.MAX_CONTAINER_AGE },
       'starting container expiry'
     )
+
+    // guarantee only one monitor is running
+    DockerRunner.stopContainerMonitor()
+
     // randomise the start time
     const randomDelay = Math.floor(Math.random() * 5 * 60 * 1000)
-    return setTimeout(
-      () =>
-        setInterval(
-          () => DockerRunner.destroyOldContainers(),
-          (oneHour = 60 * 60 * 1000)
-        ),
+    containerMonitorTimeout = setTimeout(() => {
+      containerMonitorInterval = setInterval(
+        () => DockerRunner.destroyOldContainers(),
+        (oneHour = 60 * 60 * 1000)
+      )
+    }, randomDelay)
+  },
 
-      randomDelay
-    )
+  stopContainerMonitor() {
+    if (containerMonitorTimeout) {
+      clearTimeout(containerMonitorTimeout)
+      containerMonitorTimeout = undefined
+    }
+    if (containerMonitorInterval) {
+      clearInterval(containerMonitorTimeout)
+      containerMonitorTimeout = undefined
+    }
   }
 }
 
