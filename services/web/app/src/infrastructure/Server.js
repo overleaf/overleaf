@@ -182,6 +182,11 @@ if (app.get('env') === 'production') {
 webRouter.use(function(req, res, next) {
   if (Settings.siteIsOpen) {
     next()
+  } else if (
+    AuthenticationController.getSessionUser(req) &&
+    AuthenticationController.getSessionUser(req).isAdmin
+  ) {
+    next()
   } else {
     res.status(503)
     res.render('general/closed', { title: 'maintenance' })
