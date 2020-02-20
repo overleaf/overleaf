@@ -16,6 +16,7 @@ const OError = require('@overleaf/o-error')
 const HttpErrors = require('@overleaf/o-error/http')
 const EmailHandler = require('../Email/EmailHandler')
 const UrlHelper = require('../Helpers/UrlHelper')
+const { promisify } = require('util')
 
 const UserController = {
   tryDeleteUser(req, res, next) {
@@ -231,7 +232,7 @@ const UserController = {
     })
   },
 
-  _doLogout(req, cb) {
+  doLogout(req, cb) {
     metrics.inc('user.logout')
     const user = AuthenticationController.getSessionUser(req)
     logger.log({ user }, 'logging out')
@@ -258,7 +259,7 @@ const UserController = {
       : undefined
     const redirectUrl = requestedRedirect || '/login'
 
-    UserController._doLogout(req, err => {
+    UserController.doLogout(req, err => {
       if (err != null) {
         return next(err)
       }
@@ -395,6 +396,10 @@ const UserController = {
       }
     )
   }
+}
+
+UserController.promises = {
+  doLogout: promisify(UserController.doLogout)
 }
 
 module.exports = UserController

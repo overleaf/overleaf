@@ -44,6 +44,7 @@ describe('UserController', function() {
           email: 'old@something.com'
         }
       },
+      sessionID: '123',
       body: {},
       i18n: {
         translate: text => text
@@ -454,6 +455,21 @@ describe('UserController', function() {
         this.SudoModeHandler.clearSudoMode.callCount.should.equal(1)
         this.SudoModeHandler.clearSudoMode
           .calledWith(this.user._id)
+          .should.equal(true)
+        return done()
+      }
+
+      return this.UserController.logout(this.req, this.res)
+    })
+
+    it('should untrack session', function(done) {
+      this.req.session.destroy = sinon.stub().callsArgWith(0)
+      this.SudoModeHandler.clearSudoMode = sinon.stub()
+      this.res.redirect = url => {
+        url.should.equal('/login')
+        this.UserSessionsManager.untrackSession.callCount.should.equal(1)
+        this.UserSessionsManager.untrackSession
+          .calledWith(sinon.match(this.req.user), this.req.sessionID)
           .should.equal(true)
         return done()
       }
