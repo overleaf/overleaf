@@ -1,25 +1,11 @@
 /* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
+    handle-callback-err
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+
 const { expect } = require('chai')
 const { assert } = require('chai')
 const async = require('async')
 const User = require('./helpers/User')
-const request = require('./helpers/request')
-const settings = require('settings-sharelatex')
 const redis = require('./helpers/redis')
 const _ = require('lodash')
 const Features = require('../../../app/src/infrastructure/Features')
@@ -33,7 +19,7 @@ const expectProjectAccess = function(user, projectId, callback) {
   if (callback == null) {
     callback = function(err, result) {}
   }
-  return user.openProject(projectId, err => {
+  user.openProject(projectId, err => {
     expect(err).to.be.oneOf([null, undefined])
     return callback()
   })
@@ -44,7 +30,7 @@ const expectNoProjectAccess = function(user, projectId, callback) {
   if (callback == null) {
     callback = function(err, result) {}
   }
-  return user.openProject(projectId, err => {
+  user.openProject(projectId, err => {
     expect(err).to.be.instanceof(Error)
     return callback()
   })
@@ -60,11 +46,11 @@ const tryLoginThroughRegistrationForm = function(
   if (callback == null) {
     callback = function(err, response, body) {}
   }
-  return user.getCsrfToken(err => {
+  user.getCsrfToken(err => {
     if (err != null) {
       return callback(err)
     }
-    return user.request.post(
+    user.request.post(
       {
         url: '/register',
         json: {
@@ -82,19 +68,19 @@ describe('Registration', function() {
     beforeEach(function() {
       this.user = new User()
       this.badEmail = 'bademail@example.com'
-      return (this.badPassword = 'badpassword')
+      this.badPassword = 'badpassword'
     })
 
     it('should rate limit login attempts after 10 within two minutes', function(done) {
-      return this.user.request.get('/login', (err, res, body) => {
-        return async.timesSeries(
+      this.user.request.get('/login', (err, res, body) => {
+        async.timesSeries(
           15,
           (n, cb) => {
-            return this.user.getCsrfToken(error => {
+            this.user.getCsrfToken(error => {
               if (error != null) {
                 return cb(error)
               }
-              return this.user.request.post(
+              this.user.request.post(
                 {
                   url: '/login',
                   json: {
@@ -103,13 +89,8 @@ describe('Registration', function() {
                   }
                 },
                 (err, response, body) => {
-                  return cb(
-                    null,
-                    __guard__(
-                      body != null ? body.message : undefined,
-                      x => x.text
-                    )
-                  )
+                  const message = body && body.message && body.message.text
+                  return cb(null, message)
                 }
               )
             })
@@ -147,17 +128,17 @@ describe('Registration', function() {
     beforeEach(function() {
       this.user = new User()
       this.email = `test+${Math.random()}@example.com`
-      return (this.password = 'password11')
+      this.password = 'password11'
     })
 
     afterEach(function(done) {
-      return this.user.fullDeleteUser(this.email, done)
+      this.user.fullDeleteUser(this.email, done)
     })
 
     it('should register with the csrf token', function(done) {
-      return this.user.request.get('/login', (err, res, body) => {
-        return this.user.getCsrfToken(error => {
-          return this.user.request.post(
+      this.user.request.get('/login', (err, res, body) => {
+        this.user.getCsrfToken(error => {
+          this.user.request.post(
             {
               url: '/register',
               json: {
@@ -179,9 +160,9 @@ describe('Registration', function() {
     })
 
     it('should fail with no csrf token', function(done) {
-      return this.user.request.get('/login', (err, res, body) => {
-        return this.user.getCsrfToken(error => {
-          return this.user.request.post(
+      this.user.request.get('/login', (err, res, body) => {
+        this.user.getCsrfToken(error => {
+          this.user.request.post(
             {
               url: '/register',
               json: {
@@ -202,11 +183,11 @@ describe('Registration', function() {
     })
 
     it('should fail with a stale csrf token', function(done) {
-      return this.user.request.get('/login', (err, res, body) => {
-        return this.user.getCsrfToken(error => {
+      this.user.request.get('/login', (err, res, body) => {
+        this.user.getCsrfToken(error => {
           const oldCsrfToken = this.user.csrfToken
-          return this.user.logout(err => {
-            return this.user.request.post(
+          this.user.logout(err => {
+            this.user.request.post(
               {
                 url: '/register',
                 json: {
@@ -236,11 +217,11 @@ describe('Registration', function() {
     })
 
     beforeEach(function() {
-      return (this.user = new User())
+      this.user = new User()
     })
 
     it('Set emails attribute', function(done) {
-      return this.user.register((error, user) => {
+      this.user.register((error, user) => {
         expect(error).to.not.exist
         user.email.should.equal(this.user.email)
         user.emails.should.exist
@@ -262,7 +243,7 @@ describe('Registration', function() {
     beforeEach(function(done) {
       this.user1 = new User()
       this.user2 = new User()
-      return async.series(
+      async.series(
         [
           cb => this.user1.register(cb),
           cb =>
@@ -276,7 +257,7 @@ describe('Registration', function() {
     })
 
     it('Adds a referal when an id is supplied and the referal source is "bonus"', function(done) {
-      return this.user1.get((error, user) => {
+      this.user1.get((error, user) => {
         expect(error).to.not.exist
         user.refered_user_count.should.eql(1)
 
@@ -301,7 +282,7 @@ describe('Registration', function() {
         ],
         done
       )
-      return (this.project_id = null)
+      this.project_id = null
     })
 
     describe('[Security] Trying to register/login as another user', function() {
@@ -313,10 +294,10 @@ describe('Registration', function() {
 
       it('should not allow sign in with secondary email', function(done) {
         const secondaryEmail = 'acceptance-test-secondary@example.com'
-        return this.user1.addEmail(secondaryEmail, err => {
-          return this.user1.loginWith(secondaryEmail, err => {
+        this.user1.addEmail(secondaryEmail, err => {
+          this.user1.loginWith(secondaryEmail, err => {
             expect(err != null).to.equal(false)
-            return this.user1.isLoggedIn((err, isLoggedIn) => {
+            this.user1.isLoggedIn((err, isLoggedIn) => {
               expect(isLoggedIn).to.equal(false)
               return done()
             })
@@ -368,9 +349,3 @@ describe('Registration', function() {
     })
   })
 })
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}

@@ -20,7 +20,8 @@ const UserSchema = new Schema({
         }
       },
       confirmedAt: { type: Date },
-      samlProviderId: { type: String }
+      samlProviderId: { type: String },
+      affiliationUnchecked: { type: Boolean }
     }
   ],
   first_name: { type: String, default: '' },
