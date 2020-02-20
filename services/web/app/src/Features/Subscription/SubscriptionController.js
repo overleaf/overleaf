@@ -154,7 +154,7 @@ module.exports = SubscriptionController = {
           personalSubscription,
           memberGroupSubscriptions,
           managedGroupSubscriptions,
-          confirmedMemberInstitutions,
+          confirmedMemberAffiliations,
           managedInstitutions,
           managedPublishers,
           v1SubscriptionStatus
@@ -177,7 +177,7 @@ module.exports = SubscriptionController = {
             personalSubscription,
             memberGroupSubscriptions,
             managedGroupSubscriptions,
-            confirmedMemberInstitutions,
+            confirmedMemberAffiliations,
             managedInstitutions,
             managedPublishers,
             v1SubscriptionStatus

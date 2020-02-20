@@ -113,8 +113,8 @@ module.exports = {
         managedGroupSubscriptions(cb) {
           return SubscriptionLocator.getManagedGroupSubscriptions(user, cb)
         },
-        confirmedMemberInstitutions(cb) {
-          return InstitutionsGetter.getConfirmedInstitutions(user._id, cb)
+        confirmedMemberAffiliations(cb) {
+          return InstitutionsGetter.getConfirmedAffiliations(user._id, cb)
         },
         managedInstitutions(cb) {
           return InstitutionsGetter.getManagedInstitutions(user._id, cb)
@@ -142,7 +142,7 @@ module.exports = {
           personalSubscription,
           memberGroupSubscriptions,
           managedGroupSubscriptions,
-          confirmedMemberInstitutions,
+          confirmedMemberAffiliations,
           managedInstitutions,
           managedPublishers,
           v1SubscriptionStatus,
@@ -156,8 +156,8 @@ module.exports = {
         if (managedGroupSubscriptions == null) {
           managedGroupSubscriptions = []
         }
-        if (confirmedMemberInstitutions == null) {
-          confirmedMemberInstitutions = []
+        if (confirmedMemberAffiliations == null) {
+          confirmedMemberAffiliations = []
         }
         if (managedInstitutions == null) {
           managedInstitutions = []
@@ -241,7 +241,7 @@ module.exports = {
           personalSubscription,
           managedGroupSubscriptions,
           memberGroupSubscriptions,
-          confirmedMemberInstitutions,
+          confirmedMemberAffiliations,
           managedInstitutions,
           managedPublishers,
           v1SubscriptionStatus

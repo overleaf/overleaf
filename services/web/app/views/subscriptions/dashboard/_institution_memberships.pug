@@ -1,5 +1,5 @@
-each institution in confirmedMemberInstitutions
-	if (institution.licence != 'free')
+each affiliation in confirmedMemberAffiliations
+	if (affiliation.licence && affiliation.licence != 'free')
 		-hasDisplayedSubscription = true
 		p
 			| You have a
@@ -8,6 +8,6 @@ each institution in confirmedMemberInstitutions
 			|
 			| #{settings.appName} account as a confirmed member of
 			|
-			strong= institution.name
+			strong= affiliation.institution.name
 		hr
 

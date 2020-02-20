@@ -40,10 +40,10 @@ form.row(
 								ng-click="resendConfirmationEmail(userEmail)",
 								ng-if="!userEmail.ssoAvailable"
 							) #{translate('resend_confirmation_email')}
-						div(ng-if="userEmail.confirmedAt && userEmail.affiliation.institution && userEmail.affiliation.institution.confirmed && userEmail.affiliation.institution.licence != 'free'").small
+						div(ng-if="userEmail.confirmedAt && userEmail.affiliation.institution && userEmail.affiliation.institution.confirmed && userEmail.affiliation.licence && userEmail.affiliation.licence != 'free'").small
 							span.label.label-primary #{translate("professional")}
-					td 
-						div(ng-if="userEmail.affiliation.institution") 
+					td
+						div(ng-if="userEmail.affiliation.institution")
 							div {{ userEmail.affiliation.institution.name }}
 							span.small
 								a(
@@ -55,7 +55,7 @@ form.row(
 								ng-if="!isChangingAffiliation(userEmail.email) && (userEmail.affiliation.role || userEmail.affiliation.department)"
 							)
 								span(ng-if="userEmail.affiliation.role") {{ userEmail.affiliation.role }}
-								span(ng-if="userEmail.affiliation.role && userEmail.affiliation.department") , 
+								span(ng-if="userEmail.affiliation.role && userEmail.affiliation.department") ,
 								span(ng-if="userEmail.affiliation.department") {{ userEmail.affiliation.department }}
 								br
 								a(
@@ -206,13 +206,13 @@ form.row(
 				tr.affiliations-table-highlighted-row(
 					ng-if="ui.isMakingRequest"
 				)
-					td.text-center(colspan="3", ng-if="ui.isLoadingEmails") 
+					td.text-center(colspan="3", ng-if="ui.isLoadingEmails")
 						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
 						| &nbsp;#{translate("loading")}...
-					td.text-center(colspan="3", ng-if="ui.isResendingConfirmation") 
+					td.text-center(colspan="3", ng-if="ui.isResendingConfirmation")
 						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
 						| &nbsp;#{translate("sending")}...
-					td.text-center.text-capitalize(colspan="3", ng-if="ui.isProcessing") 
+					td.text-center.text-capitalize(colspan="3", ng-if="ui.isProcessing")
 						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
 						| &nbsp;#{translate("processing")}
 					td.text-center(colspan="3", ng-if="!ui.isLoadingEmails && !ui.isResendingConfirmation && !ui.isProcessing")
@@ -221,7 +221,7 @@ form.row(
 				tr.affiliations-table-error-row(
 					ng-if="ui.hasError"
 				)
-					td.text-center(colspan="3") 
+					td.text-center(colspan="3")
 						div
 							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
 							span(ng-if="!ui.errorMessage") &nbsp;#{translate("error_performing_request")}
