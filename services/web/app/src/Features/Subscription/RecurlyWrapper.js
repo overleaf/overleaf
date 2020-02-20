@@ -574,6 +574,27 @@ module.exports = RecurlyWrapper = {
     )
   },
 
+  updateAccountEmailAddress(accountId, newEmail, callback) {
+    const data = {
+      email: newEmail
+    }
+    const requestBody = RecurlyWrapper._buildXml('account', data)
+
+    RecurlyWrapper.apiRequest(
+      {
+        url: `accounts/${accountId}`,
+        method: 'PUT',
+        body: requestBody
+      },
+      (error, response, body) => {
+        if (error != null) {
+          return callback(error)
+        }
+        RecurlyWrapper._parseAccountXml(body, callback)
+      }
+    )
+  },
+
   getAccountActiveCoupons(accountId, callback) {
     return RecurlyWrapper.apiRequest(
       {

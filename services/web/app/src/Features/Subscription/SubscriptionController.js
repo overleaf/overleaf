@@ -326,6 +326,18 @@ module.exports = SubscriptionController = {
     )
   },
 
+  updateAccountEmailAddress(req, res, next) {
+    const user = AuthenticationController.getSessionUser(req)
+    RecurlyWrapper.updateAccountEmailAddress(user._id, user.email, function(
+      error
+    ) {
+      if (error) {
+        return next(new HttpErrors.InternalServerError({}).withCause(error))
+      }
+      res.sendStatus(200)
+    })
+  },
+
   reactivateSubscription(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
     logger.log({ user_id: user._id }, 'reactivating subscription')

@@ -14,6 +14,7 @@ let MockRecurlyApi
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
+const SubscriptionController = require('../../../../app/src/Features/Subscription/SubscriptionController')
 
 app.use(bodyParser.json())
 
@@ -69,10 +70,29 @@ module.exports = MockRecurlyApi = {
 <account>
 	<account_code>${req.params.id}</account_code>
 	<hosted_login_token>${account.hosted_login_token}</hosted_login_token>
+	<email>${account.email}</email>
 </account>\
 `)
       }
     })
+
+    app.put(
+      '/accounts/:id',
+      SubscriptionController.recurlyNotificationParser, // required to parse XML requests
+      (req, res, next) => {
+        const account = this.accounts[req.params.id]
+        if (account == null) {
+          return res.status(404).end()
+        } else {
+          return res.send(`\
+<account>
+	<account_code>${req.params.id}</account_code>
+	<email>${account.email}</email>
+</account>\
+`)
+        }
+      }
+    )
 
     app.get('/coupons/:code', (req, res, next) => {
       const coupon = this.coupons[req.params.code]

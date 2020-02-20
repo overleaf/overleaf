@@ -10,6 +10,9 @@ class RecurlySubscription {
     this.uuid = ObjectId().toString()
     this.accountId = this.subscription.admin_id.toString()
     this.state = options.state || 'active'
+    this.account = {
+      email: options.account && options.account.email
+    }
   }
 
   ensureExists(callback) {
@@ -22,7 +25,10 @@ class RecurlySubscription {
         account_id: this.accountId,
         state: this.state
       })
-      MockRecurlyApi.addAccount({ id: this.accountId })
+      MockRecurlyApi.addAccount({
+        id: this.accountId,
+        email: this.account.email
+      })
       callback()
     })
   }

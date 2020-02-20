@@ -223,7 +223,8 @@ module.exports = {
                 : undefined
             ),
             trial_ends_at: recurlySubscription.trial_ends_at,
-            activeCoupons: recurlyCoupons
+            activeCoupons: recurlyCoupons,
+            account: recurlySubscription.account
           }
         }
 

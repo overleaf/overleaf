@@ -62,7 +62,8 @@ describe('Subscriptions', function() {
     describe('when the user has a subscription with recurly', function() {
       beforeEach(function(done) {
         MockRecurlyApi.accounts['mock-account-id'] = this.accounts = {
-          hosted_login_token: 'mock-login-token'
+          hosted_login_token: 'mock-login-token',
+          email: 'mock@email.com'
         }
         MockRecurlyApi.subscriptions[
           'mock-subscription-id'
@@ -138,7 +139,12 @@ describe('Subscriptions', function() {
           tax: 100,
           taxRate: 0.2,
           trial_ends_at: new Date(2018, 6, 7),
-          trialEndsAtFormatted: '7th July 2018'
+          trialEndsAtFormatted: '7th July 2018',
+          account: {
+            account_code: 'mock-account-id',
+            email: 'mock@email.com',
+            hosted_login_token: 'mock-login-token'
+          }
         })
       })
 
@@ -174,6 +180,12 @@ describe('Subscriptions', function() {
             ])
             return done()
           }
+        )
+      })
+
+      it('should return Recurly account email', function() {
+        expect(this.data.personalSubscription.recurly.account.email).to.equal(
+          'mock@email.com'
         )
       })
     })

@@ -257,6 +257,49 @@ describe('RecurlyWrapper', function() {
     })
   })
 
+  describe('updateAccountEmailAddress', function() {
+    beforeEach(function(done) {
+      this.recurlyAccountId = 'account-id-123'
+      this.newEmail = 'example@overleaf.com'
+      this.apiRequest = sinon
+        .stub(this.RecurlyWrapper, 'apiRequest')
+        .callsFake((options, callback) => {
+          this.requestOptions = options
+          callback(null, {}, fixtures['accounts/104'])
+        })
+
+      this.RecurlyWrapper.updateAccountEmailAddress(
+        this.recurlyAccountId,
+        this.newEmail,
+        (error, recurlyAccount) => {
+          this.recurlyAccount = recurlyAccount
+          done()
+        }
+      )
+    })
+
+    afterEach(function() {
+      return this.RecurlyWrapper.apiRequest.restore()
+    })
+
+    it('sends correct XML', function() {
+      this.apiRequest.called.should.equal(true)
+      const { body } = this.apiRequest.lastCall.args[0]
+      expect(body).to.equal(`\
+<account>
+	<email>example@overleaf.com</email>
+</account>\
+`)
+      this.requestOptions.url.should.equal(`accounts/${this.recurlyAccountId}`)
+      this.requestOptions.method.should.equal('PUT')
+    })
+
+    it('should return the updated account', function() {
+      should.exist(this.recurlyAccount)
+      this.recurlyAccount.account_code.should.equal('104')
+    })
+  })
+
   describe('updateSubscription', function() {
     beforeEach(function(done) {
       this.recurlySubscriptionId = 'subscription-id-123'

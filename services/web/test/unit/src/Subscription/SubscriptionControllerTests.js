@@ -115,7 +115,9 @@ describe('SubscriptionController', function() {
         },
         'settings-sharelatex': this.settings,
         '../User/UserGetter': this.UserGetter,
-        './RecurlyWrapper': (this.RecurlyWrapper = {}),
+        './RecurlyWrapper': (this.RecurlyWrapper = {
+          updateAccountEmailAddress: sinon.stub().yields()
+        }),
         './FeaturesUpdater': (this.FeaturesUpdater = {}),
         './GroupPlansData': (this.GroupPlansData = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
@@ -474,6 +476,28 @@ describe('SubscriptionController', function() {
     it('should redurect to the subscription page', function(done) {
       this.res.redirect.calledWith('/user/subscription').should.equal(true)
       return done()
+    })
+  })
+
+  describe('updateAccountEmailAddress via put', function() {
+    beforeEach(function(done) {
+      this.res = {
+        sendStatus() {
+          return done()
+        }
+      }
+      sinon.spy(this.res, 'sendStatus')
+      this.SubscriptionController.updateAccountEmailAddress(this.req, this.res)
+    })
+
+    it('should send the user and subscriptionId to RecurlyWrapper', function() {
+      this.RecurlyWrapper.updateAccountEmailAddress
+        .calledWith(this.user._id, this.user.email)
+        .should.equal(true)
+    })
+
+    it('shouldrespond with 200', function() {
+      this.res.sendStatus.calledWith(200).should.equal(true)
     })
   })
 
