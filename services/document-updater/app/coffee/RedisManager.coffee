@@ -36,6 +36,8 @@ module.exports = RedisManager =
 		docLines = JSON.stringify(docLines)
 		if docLines.indexOf("\u0000") != -1
 			error = new Error("null bytes found in doc lines")
+			# this check was added to catch memory corruption in JSON.stringify.
+			# It sometimes returned null bytes at the end of the string.
 			logger.error {err: error, doc_id: doc_id, docLines: docLines}, error.message
 			return callback(error)
 		docHash = RedisManager._computeHash(docLines)
@@ -224,12 +226,14 @@ module.exports = RedisManager =
 			for op in jsonOps
 				if op.indexOf("\u0000") != -1
 					error = new Error("null bytes found in jsonOps")
+					# this check was added to catch memory corruption in JSON.stringify
 					logger.error {err: error, doc_id: doc_id, jsonOps: jsonOps}, error.message
 					return callback(error)
 
 			newDocLines = JSON.stringify(docLines)
 			if newDocLines.indexOf("\u0000") != -1
 				error = new Error("null bytes found in doc lines")
+				# this check was added to catch memory corruption in JSON.stringify
 				logger.error {err: error, doc_id: doc_id, newDocLines: newDocLines}, error.message
 				return callback(error)
 			newHash = RedisManager._computeHash(newDocLines)
@@ -243,6 +247,7 @@ module.exports = RedisManager =
 					return callback(error)
 				if ranges? and ranges.indexOf("\u0000") != -1
 					error = new Error("null bytes found in ranges")
+					# this check was added to catch memory corruption in JSON.stringify
 					logger.error err: error, doc_id: doc_id, ranges: ranges, error.message
 					return callback(error)
 				multi = rclient.multi()
