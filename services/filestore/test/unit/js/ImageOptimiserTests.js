@@ -19,7 +19,10 @@ describe('ImageOptimiser', function() {
     ImageOptimiser = SandboxedModule.require(modulePath, {
       requires: {
         './SafeExec': SafeExec,
-        'logger-sharelatex': logger
+        'logger-sharelatex': logger,
+        'metrics-sharelatex': {
+          Timer: sinon.stub().returns({ done: sinon.stub() })
+        }
       }
     })
   })
