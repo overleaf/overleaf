@@ -30,7 +30,6 @@
     "logger-sharelatex": "^1.7.0",
     "metrics-sharelatex": "^2.2.0",
     "node-uuid": "~1.4.1",
-    "pngcrush": "0.0.3",
     "range-parser": "^1.0.2",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.8",
