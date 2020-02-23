@@ -10,7 +10,6 @@ filestore acts as a proxy between the CLSIs and (currently) Amazon S3 storage, p
 * `/project/:project_id/public/:public_file_id`
 * `/project/:project_id/size`
 * `/bucket/:bucket/key/*`
-* `/heapdump`
 * `/shutdown`
 * `/status` - returns `filestore sharelatex up` or `server is being shut down` (HTTP 500)
 * `/health_check` 
