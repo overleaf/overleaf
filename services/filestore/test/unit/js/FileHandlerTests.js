@@ -4,6 +4,9 @@ const { expect } = chai
 const modulePath = '../../../app/js/FileHandler.js'
 const SandboxedModule = require('sandboxed-module')
 
+chai.use(require('sinon-chai'))
+chai.use(require('chai-as-promised'))
+
 describe('FileHandler', function() {
   let PersistorManager,
     LocalFileWriter,
@@ -32,29 +35,41 @@ describe('FileHandler', function() {
 
   beforeEach(function() {
     PersistorManager = {
-      getFileStream: sinon.stub().yields(null, sourceStream),
-      checkIfFileExists: sinon.stub().yields(),
-      deleteFile: sinon.stub().yields(),
-      deleteDirectory: sinon.stub().yields(),
-      sendStream: sinon.stub().yields(),
-      insertFile: sinon.stub().yields(),
-      sendFile: sinon.stub().yields(),
-      directorySize: sinon.stub().yields()
+      promises: {
+        getFileStream: sinon.stub().resolves(sourceStream),
+        checkIfFileExists: sinon.stub().resolves(),
+        deleteFile: sinon.stub().resolves(),
+        deleteDirectory: sinon.stub().resolves(),
+        sendStream: sinon.stub().resolves(),
+        insertFile: sinon.stub().resolves(),
+        sendFile: sinon.stub().resolves(),
+        directorySize: sinon.stub().resolves()
+      }
     }
     LocalFileWriter = {
-      writeStream: sinon.stub().yields(),
-      deleteFile: sinon.stub().yields()
+      // the callback style is used for detached cleanup calls
+      deleteFile: sinon.stub().yields(),
+      promises: {
+        writeStream: sinon.stub().resolves(),
+        deleteFile: sinon.stub().resolves()
+      }
     }
     FileConverter = {
-      convert: sinon.stub().yields(),
-      thumbnail: sinon.stub().yields(),
-      preview: sinon.stub().yields()
+      promises: {
+        convert: sinon.stub().resolves(),
+        thumbnail: sinon.stub().resolves(),
+        preview: sinon.stub().resolves()
+      }
     }
     KeyBuilder = {
       addCachingToKey: sinon.stub().returns(convertedKey),
       getConvertedFolderKey: sinon.stub().returns(convertedFolderKey)
     }
-    ImageOptimiser = { compressPng: sinon.stub().yields() }
+    ImageOptimiser = {
+      promises: {
+        compressPng: sinon.stub().resolves()
+      }
+    }
     fs = {
       createReadStream: sinon.stub().returns(readStream)
     }
@@ -79,7 +94,7 @@ describe('FileHandler', function() {
     it('should send file to the filestore', function(done) {
       FileHandler.insertFile(bucket, key, stream, err => {
         expect(err).not.to.exist
-        expect(PersistorManager.sendStream).to.have.been.calledWith(
+        expect(PersistorManager.promises.sendStream).to.have.been.calledWith(
           bucket,
           key,
           stream
@@ -91,10 +106,9 @@ describe('FileHandler', function() {
     it('should delete the convertedKey folder', function(done) {
       FileHandler.insertFile(bucket, key, stream, err => {
         expect(err).not.to.exist
-        expect(PersistorManager.deleteDirectory).to.have.been.calledWith(
-          bucket,
-          convertedFolderKey
-        )
+        expect(
+          PersistorManager.promises.deleteDirectory
+        ).to.have.been.calledWith(bucket, convertedFolderKey)
         done()
       })
     })
@@ -104,7 +118,10 @@ describe('FileHandler', function() {
     it('should tell the filestore manager to delete the file', function(done) {
       FileHandler.deleteFile(bucket, key, err => {
         expect(err).not.to.exist
-        expect(PersistorManager.deleteFile).to.have.been.calledWith(bucket, key)
+        expect(PersistorManager.promises.deleteFile).to.have.been.calledWith(
+          bucket,
+          key
+        )
         done()
       })
     })
@@ -112,10 +129,9 @@ describe('FileHandler', function() {
     it('should tell the filestore manager to delete the cached folder', function(done) {
       FileHandler.deleteFile(bucket, key, err => {
         expect(err).not.to.exist
-        expect(PersistorManager.deleteDirectory).to.have.been.calledWith(
-          bucket,
-          convertedFolderKey
-        )
+        expect(
+          PersistorManager.promises.deleteDirectory
+        ).to.have.been.calledWith(bucket, convertedFolderKey)
         done()
       })
     })
@@ -134,7 +150,7 @@ describe('FileHandler', function() {
       const options = { start: 0, end: 8 }
       FileHandler.getFile(bucket, key, options, err => {
         expect(err).not.to.exist
-        expect(PersistorManager.getFileStream).to.have.been.calledWith(
+        expect(PersistorManager.promises.getFileStream).to.have.been.calledWith(
           bucket,
           key,
           options
@@ -155,23 +171,27 @@ describe('FileHandler', function() {
         })
 
         it('should convert the file', function() {
-          expect(FileConverter.convert).to.have.been.called
-          expect(ImageOptimiser.compressPng).to.have.been.called
+          expect(FileConverter.promises.convert).to.have.been.called
+        })
+
+        it('should compress the converted file', function() {
+          expect(ImageOptimiser.promises.compressPng).to.have.been.called
         })
 
         it('should return the the converted stream', function() {
           expect(result.err).not.to.exist
           expect(result.stream).to.equal(readStream)
-          expect(PersistorManager.getFileStream).to.have.been.calledWith(
-            bucket,
-            key
-          )
+          expect(
+            PersistorManager.promises.getFileStream
+          ).to.have.been.calledWith(bucket, key)
         })
       })
 
       describe('when the file is cached', function() {
         beforeEach(function(done) {
-          PersistorManager.checkIfFileExists = sinon.stub().yields(null, true)
+          PersistorManager.promises.checkIfFileExists = sinon
+            .stub()
+            .resolves(true)
           FileHandler.getFile(bucket, key, { format: 'png' }, (err, stream) => {
             result = { err, stream }
             done()
@@ -179,17 +199,19 @@ describe('FileHandler', function() {
         })
 
         it('should not convert the file', function() {
-          expect(FileConverter.convert).not.to.have.been.called
-          expect(ImageOptimiser.compressPng).not.to.have.been.called
+          expect(FileConverter.promises.convert).not.to.have.been.called
+        })
+
+        it('should not compress the converted file again', function() {
+          expect(ImageOptimiser.promises.compressPng).not.to.have.been.called
         })
 
         it('should return the cached stream', function() {
           expect(result.err).not.to.exist
           expect(result.stream).to.equal(sourceStream)
-          expect(PersistorManager.getFileStream).to.have.been.calledWith(
-            bucket,
-            convertedKey
-          )
+          expect(
+            PersistorManager.promises.getFileStream
+          ).to.have.been.calledWith(bucket, convertedKey)
         })
       })
     })
@@ -198,8 +220,8 @@ describe('FileHandler', function() {
       it('generates a thumbnail when requested', function(done) {
         FileHandler.getFile(bucket, key, { style: 'thumbnail' }, err => {
           expect(err).not.to.exist
-          expect(FileConverter.thumbnail).to.have.been.called
-          expect(FileConverter.preview).not.to.have.been.called
+          expect(FileConverter.promises.thumbnail).to.have.been.called
+          expect(FileConverter.promises.preview).not.to.have.been.called
           done()
         })
       })
@@ -207,8 +229,8 @@ describe('FileHandler', function() {
       it('generates a preview when requested', function(done) {
         FileHandler.getFile(bucket, key, { style: 'preview' }, err => {
           expect(err).not.to.exist
-          expect(FileConverter.thumbnail).not.to.have.been.called
-          expect(FileConverter.preview).to.have.been.called
+          expect(FileConverter.promises.thumbnail).not.to.have.been.called
+          expect(FileConverter.promises.preview).to.have.been.called
           done()
         })
       })
@@ -219,7 +241,7 @@ describe('FileHandler', function() {
     it('should call the filestore manager to get directory size', function(done) {
       FileHandler.getDirectorySize(bucket, key, err => {
         expect(err).not.to.exist
-        expect(PersistorManager.directorySize).to.have.been.calledWith(
+        expect(PersistorManager.promises.directorySize).to.have.been.calledWith(
           bucket,
           key
         )
