@@ -62,6 +62,7 @@ class FilestoreApp {
   }
 
   async stop() {
+    if (!this.server) return
     const closeServer = promisify(this.server.close).bind(this.server)
     try {
       await closeServer()
