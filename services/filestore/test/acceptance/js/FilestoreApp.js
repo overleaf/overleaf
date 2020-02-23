@@ -4,11 +4,7 @@ const fs = require('fs')
 const Path = require('path')
 const { promisify } = require('util')
 const disrequire = require('disrequire')
-const rp = require('request-promise-native').defaults({
-  resolveWithFullResponse: true
-})
-
-const S3_TRIES = 30
+const AWS = require('aws-sdk')
 
 logger.logger.level('info')
 
@@ -80,21 +76,31 @@ class FilestoreApp {
       return
     }
 
-    let s3Available = false
+    const s3 = new AWS.S3({
+      accessKeyId: Settings.filestore.s3.key,
+      secretAccessKey: Settings.filestore.s3.secret,
+      endpoint: Settings.filestore.s3.endpoint,
+      s3ForcePathStyle: true,
+      signatureVersion: 'v4'
+    })
 
-    while (tries < S3_TRIES && !s3Available) {
+    while (true) {
       try {
-        const response = await rp.get(`${Settings.filestore.s3.endpoint}/`)
-        if ([200, 404].includes(response.statusCode)) {
-          s3Available = true
-        }
+        return await s3
+          .putObject({
+            Key: 'startup',
+            Body: '42',
+            Bucket: Settings.filestore.stores.user_files
+          })
+          .promise()
       } catch (err) {
         // swallow errors, as we may experience them until fake-s3 is running
-      } finally {
-        tries++
-        if (!s3Available) {
-          await sleep(1000)
+        if (tries === 9) {
+          // throw just before hitting the 10s test timeout
+          throw err
         }
+        tries++
+        await sleep(1000)
       }
     }
   }
