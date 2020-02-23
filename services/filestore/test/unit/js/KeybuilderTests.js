@@ -2,7 +2,7 @@ const SandboxedModule = require('sandboxed-module')
 
 const modulePath = '../../../app/js/KeyBuilder.js'
 
-describe('LocalFileWriter', function() {
+describe('KeybuilderTests', function() {
   let KeyBuilder
   const key = 'wombat/potato'
 
