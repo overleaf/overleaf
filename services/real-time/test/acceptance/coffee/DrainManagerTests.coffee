@@ -29,6 +29,18 @@ describe "DrainManagerTests", ->
 		}, (e, {@project_id, @user_id}) => done()
 		return null
 
+	before (done) ->
+		# cleanup to speedup reconnecting
+		@timeout(10000)
+		RealTimeClient.disconnectAllClients done
+
+	# trigger and check cleanup
+	it "should have disconnected all previous clients", (done) ->
+		RealTimeClient.getConnectedClients (error, data) ->
+			return done(error) if error
+			expect(data.length).to.equal(0)
+			done()
+
 	describe "with two clients in the project", ->
 		beforeEach (done) ->
 			async.series [
@@ -48,8 +60,6 @@ describe "DrainManagerTests", ->
 			], done
 
 		describe "starting to drain", () ->
-			# there is an internal delay of 1000ms, shift accordingly
-			@timeout(5000)
 			beforeEach (done) ->
 				async.parallel [
 					(cb) =>
