@@ -5,5 +5,3 @@ gitrev
 .npm
 .nvmrc
 nodemon.json
-app.js
-**/js/*
