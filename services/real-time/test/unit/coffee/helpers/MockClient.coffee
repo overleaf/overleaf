@@ -4,15 +4,10 @@ idCounter = 0
 
 module.exports = class MockClient
 	constructor: () ->
-		@attributes = {}
+		@ol_context = {}
 		@join = sinon.stub()
 		@emit = sinon.stub()
 		@disconnect = sinon.stub()
 		@id = idCounter++
 		@publicId = idCounter++
-	set : (key, value, callback) ->
-		@attributes[key] = value
-		callback() if callback?
-	get : (key, callback) ->
-		callback null, @attributes[key]
 	disconnect: () ->

@@ -7,7 +7,6 @@ HealthCheckManager = require "./HealthCheckManager"
 RoomManager = require "./RoomManager"
 ChannelManager = require "./ChannelManager"
 ConnectedUsersManager = require "./ConnectedUsersManager"
-Utils = require './Utils'
 Async = require 'async'
 
 RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
@@ -94,8 +93,7 @@ module.exports = WebsocketLoadBalancer =
 				Async.eachLimit clientList
 					, 2
 					, (client, cb) ->
-						Utils.getClientAttributes client, ['is_restricted_user'], (err, {is_restricted_user}) ->
-							return cb(err) if err?
+							is_restricted_user = client.ol_context['is_restricted_user']
 							if !seen[client.id]
 								seen[client.id] = true
 								if !(is_restricted_user && message.message not in RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST)

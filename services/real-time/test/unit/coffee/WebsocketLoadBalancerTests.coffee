@@ -18,12 +18,6 @@ describe "WebsocketLoadBalancer", ->
 			"./RoomManager" : @RoomManager = {eventSource: sinon.stub().returns @RoomEvents}
 			"./ChannelManager": @ChannelManager = {publish: sinon.stub()}
 			"./ConnectedUsersManager": @ConnectedUsersManager = {refreshClient: sinon.stub()}
-			"./Utils": @Utils = {
-				getClientAttributes: sinon.spy(
-					(client, _attrs, callback) ->
-						callback(null, {is_restricted_user: !!client.__isRestricted})
-				)
-			}
 		@io = {}
 		@WebsocketLoadBalancer.rclientPubList = [{publish: sinon.stub()}]
 		@WebsocketLoadBalancer.rclientSubList = [{
@@ -87,9 +81,9 @@ describe "WebsocketLoadBalancer", ->
 			beforeEach ->
 				@io.sockets =
 					clients: sinon.stub().returns([
-						{id: 'client-id-1', emit: @emit1 = sinon.stub()}
-						{id: 'client-id-2', emit: @emit2 = sinon.stub()}
-						{id: 'client-id-1', emit: @emit3 = sinon.stub()} # duplicate client
+						{id: 'client-id-1', emit: @emit1 = sinon.stub(), ol_context: {}}
+						{id: 'client-id-2', emit: @emit2 = sinon.stub(), ol_context: {}}
+						{id: 'client-id-1', emit: @emit3 = sinon.stub(), ol_context: {}} # duplicate client
 					])
 				data = JSON.stringify
 					room_id: @room_id
@@ -109,10 +103,10 @@ describe "WebsocketLoadBalancer", ->
 			beforeEach ->
 				@io.sockets =
 					clients: sinon.stub().returns([
-						{id: 'client-id-1', emit: @emit1 = sinon.stub()}
-						{id: 'client-id-2', emit: @emit2 = sinon.stub()}
-						{id: 'client-id-1', emit: @emit3 = sinon.stub()} # duplicate client
-						{id: 'client-id-4', emit: @emit4 = sinon.stub(), __isRestricted: true}
+						{id: 'client-id-1', emit: @emit1 = sinon.stub(), ol_context: {}}
+						{id: 'client-id-2', emit: @emit2 = sinon.stub(), ol_context: {}}
+						{id: 'client-id-1', emit: @emit3 = sinon.stub(), ol_context: {}} # duplicate client
+						{id: 'client-id-4', emit: @emit4 = sinon.stub(), ol_context: {is_restricted_user: true}}
 					])
 				data = JSON.stringify
 					room_id: @room_id
@@ -133,10 +127,10 @@ describe "WebsocketLoadBalancer", ->
 			beforeEach ->
 				@io.sockets =
 					clients: sinon.stub().returns([
-						{id: 'client-id-1', emit: @emit1 = sinon.stub()}
-						{id: 'client-id-2', emit: @emit2 = sinon.stub()}
-						{id: 'client-id-1', emit: @emit3 = sinon.stub()} # duplicate client
-						{id: 'client-id-4', emit: @emit4 = sinon.stub(), __isRestricted: true}
+						{id: 'client-id-1', emit: @emit1 = sinon.stub(), ol_context: {}}
+						{id: 'client-id-2', emit: @emit2 = sinon.stub(), ol_context: {}}
+						{id: 'client-id-1', emit: @emit3 = sinon.stub(), ol_context: {}} # duplicate client
+						{id: 'client-id-4', emit: @emit4 = sinon.stub(), ol_context: {is_restricted_user: true}}
 					])
 				data = JSON.stringify
 					room_id: @room_id

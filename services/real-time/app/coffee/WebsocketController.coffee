@@ -7,7 +7,6 @@ DocumentUpdaterManager = require "./DocumentUpdaterManager"
 ConnectedUsersManager = require "./ConnectedUsersManager"
 WebsocketLoadBalancer = require "./WebsocketLoadBalancer"
 RoomManager = require "./RoomManager"
-Utils = require "./Utils"
 
 module.exports = WebsocketController =
 	# If the protocol version changes when the client reconnects,
@@ -34,17 +33,17 @@ module.exports = WebsocketController =
 				logger.warn {err, project_id, user_id, client_id: client.id}, "user is not authorized to join project"
 				return callback(err)
 
-			client.set("privilege_level", privilegeLevel)
-			client.set("user_id", user_id)
-			client.set("project_id", project_id)
-			client.set("owner_id", project?.owner?._id)
-			client.set("first_name", user?.first_name)
-			client.set("last_name", user?.last_name)
-			client.set("email", user?.email)
-			client.set("connected_time", new Date())
-			client.set("signup_date", user?.signUpDate)
-			client.set("login_count", user?.loginCount)
-			client.set("is_restricted_user", !!(isRestrictedUser))
+			client.ol_context["privilege_level"] = privilegeLevel
+			client.ol_context["user_id"] = user_id
+			client.ol_context["project_id"] = project_id
+			client.ol_context["owner_id"] = project?.owner?._id
+			client.ol_context["first_name"] = user?.first_name
+			client.ol_context["last_name"] = user?.last_name
+			client.ol_context["email"] = user?.email
+			client.ol_context["connected_time"] = new Date()
+			client.ol_context["signup_date"] = user?.signUpDate
+			client.ol_context["login_count"] = user?.loginCount
+			client.ol_context["is_restricted_user"] = !!(isRestrictedUser)
 
 			RoomManager.joinProject client, project_id, (err) ->
 				return callback(err) if err
@@ -59,8 +58,7 @@ module.exports = WebsocketController =
 	# is determined by FLUSH_IF_EMPTY_DELAY.
 	FLUSH_IF_EMPTY_DELAY: 500 #ms
 	leaveProject: (io, client, callback = (error) ->) ->
-		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
-			return callback(error) if error?
+			{project_id, user_id} = client.ol_context
 			return callback() unless project_id # client did not join project
 
 			metrics.inc "editor.leave-project"
@@ -84,13 +82,12 @@ module.exports = WebsocketController =
 			, WebsocketController.FLUSH_IF_EMPTY_DELAY
 
 	joinDoc: (client, doc_id, fromVersion = -1, options, callback = (error, doclines, version, ops, ranges) ->) ->
-		if client.disconnected
+			if client.disconnected
 				metrics.inc('editor.join-doc.disconnected', 1, {status: 'immediately'})
 				return callback()
 
-		metrics.inc "editor.join-doc"
-		Utils.getClientAttributes client, ["project_id", "user_id", "is_restricted_user"], (error, {project_id, user_id, is_restricted_user}) ->
-			return callback(error) if error?
+			metrics.inc "editor.join-doc"
+			{project_id, user_id, is_restricted_user} = client.ol_context
 			return callback(new Error("no project_id found on client")) if !project_id?
 			logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joining doc"
 
@@ -142,9 +139,9 @@ module.exports = WebsocketController =
 						callback null, escapedLines, version, ops, ranges
 
 	leaveDoc: (client, doc_id, callback = (error) ->) ->
-		# client may have disconnected, but we have to cleanup internal state.
-		metrics.inc "editor.leave-doc"
-		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
+			# client may have disconnected, but we have to cleanup internal state.
+			metrics.inc "editor.leave-doc"
+			{project_id, user_id} = client.ol_context
 			logger.log {user_id, project_id, doc_id, client_id: client.id}, "client leaving doc"
 			RoomManager.leaveDoc(client, doc_id)
 			# we could remove permission when user leaves a doc, but because
@@ -153,15 +150,12 @@ module.exports = WebsocketController =
 			## AuthorizationManager.removeAccessToDoc client, doc_id
 			callback()
 	updateClientPosition: (client, cursorData, callback = (error) ->) ->
-		if client.disconnected
+			if client.disconnected
 				# do not create a ghost entry in redis
 				return callback()
 
-		metrics.inc "editor.update-client-position", 0.1
-		Utils.getClientAttributes client, [
-			"project_id", "first_name", "last_name", "email", "user_id"
-		], (error, {project_id, first_name, last_name, email, user_id}) ->
-			return callback(error) if error?
+			metrics.inc "editor.update-client-position", 0.1
+			{project_id, first_name, last_name, email, user_id} = client.ol_context
 			logger.log {user_id, project_id, client_id: client.id, cursorData: cursorData}, "updating client position"
 
 			AuthorizationManager.assertClientCanViewProjectAndDoc client, cursorData.doc_id, (error) ->
@@ -198,14 +192,12 @@ module.exports = WebsocketController =
 
 	CLIENT_REFRESH_DELAY: 1000
 	getConnectedUsers: (client, callback = (error, users) ->) ->
-		if client.disconnected
+			if client.disconnected
 				# they are not interested anymore, skip the redis lookups
 				return callback()
 
-		metrics.inc "editor.get-connected-users"
-		Utils.getClientAttributes client, ["project_id", "user_id", "is_restricted_user"], (error, clientAttributes) ->
-			return callback(error) if error?
-			{project_id, user_id, is_restricted_user} = clientAttributes
+			metrics.inc "editor.get-connected-users"
+			{project_id, user_id, is_restricted_user} = client.ol_context
 			if is_restricted_user
 				return callback(null, [])
 			return callback(new Error("no project_id found on client")) if !project_id?
@@ -221,9 +213,8 @@ module.exports = WebsocketController =
 				, WebsocketController.CLIENT_REFRESH_DELAY
 
 	applyOtUpdate: (client, doc_id, update, callback = (error) ->) ->
-		# client may have disconnected, but we can submit their update to doc-updater anyways.
-		Utils.getClientAttributes client, ["user_id", "project_id"], (error, {user_id, project_id}) ->
-			return callback(error) if error?
+			# client may have disconnected, but we can submit their update to doc-updater anyways.
+			{user_id, project_id} = client.ol_context
 			return callback(new Error("no project_id found on client")) if !project_id?
 
 			WebsocketController._assertClientCanApplyUpdate client, doc_id, update, (error) ->
