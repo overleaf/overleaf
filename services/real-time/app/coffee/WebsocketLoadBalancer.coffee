@@ -77,8 +77,15 @@ module.exports = WebsocketLoadBalancer =
 					status = EventLogger.checkEventOrder("editor-events", message._id, message)
 					if status is "duplicate"
 						return # skip duplicate events
+
+				is_restricted_message = message.message not in RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST
+
 				# send messages only to unique clients (due to duplicate entries in io.sockets.clients)
 				clientList = io.sockets.clients(message.room_id)
+				.filter((client) ->
+					!(is_restricted_message && client.ol_context['is_restricted_user'])
+				)
+
 				# avoid unnecessary work if no clients are connected
 				return if clientList.length is 0
 				logger.log {
@@ -93,11 +100,9 @@ module.exports = WebsocketLoadBalancer =
 				Async.eachLimit clientList
 					, 2
 					, (client, cb) ->
-							is_restricted_user = client.ol_context['is_restricted_user']
 							if !seen[client.id]
 								seen[client.id] = true
-								if !(is_restricted_user && message.message not in RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST)
-									client.emit(message.message, message.payload...)
+								client.emit(message.message, message.payload...)
 							cb()
 					, (err) ->
 						if err?
