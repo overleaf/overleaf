@@ -30,8 +30,10 @@ module.exports = HttpController =
 	getConnectedClient: (req, res, next) ->
 		{client_id} = req.params
 		io = req.app.get("io")
-		ioClient = io.sockets.socket(client_id)
+		ioClient = io.sockets.sockets[client_id]
+		if !ioClient
+			res.sendStatus(404)
+			return
 		HttpController._getConnectedClientView ioClient, (error, client) ->
 			return next(error) if error?
 			res.json client
-		
