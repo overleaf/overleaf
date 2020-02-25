@@ -4,7 +4,7 @@ clsi
 --env-add=
 --node-version=10.19.0
 --acceptance-creds=None
---dependencies=mongo,redis
+--dependencies=
 --docker-repos=gcr.io/overleaf-ops
 --env-pass-through=TEXLIVE_IMAGE
 --script-version=1.3.5
