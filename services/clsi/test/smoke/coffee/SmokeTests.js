@@ -1,3 +1,8 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -69,14 +74,14 @@ describe("Running a compile", function() {
 	});
 
 	it("should return the pdf", function() {
-		for (let file of Array.from(this.body.compile.outputFiles)) {
+		for (const file of Array.from(this.body.compile.outputFiles)) {
 			if (file.type === "pdf") { return; }
 		}
 		throw new Error("no pdf returned");
 	});
 	
 	return it("should return the log", function() {
-		for (let file of Array.from(this.body.compile.outputFiles)) {
+		for (const file of Array.from(this.body.compile.outputFiles)) {
 			if (file.type === "log") { return; }
 		}
 		throw new Error("no log returned");
