@@ -908,7 +908,14 @@ describe('TokenAccess', function() {
                   expect(body).to.equal('Forbidden')
                 },
                 cb
-              )
+              ),
+            cb =>
+              this.anon.login((err, response, body) => {
+                expect(err).to.not.exist
+                expect(response.statusCode).to.equal(200)
+                expect(body.redir).to.equal(`/${this.tokens.readAndWrite}`)
+                cb()
+              })
           ],
           done
         )

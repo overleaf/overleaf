@@ -29,6 +29,25 @@ const TokenAccessHandler = {
   READ_ONLY_TOKEN_REGEX: new RegExp(`^${READ_ONLY_TOKEN_PATTERN}$`),
   READ_ONLY_URL_REGEX: new RegExp(`^/read/${READ_ONLY_TOKEN_PATTERN}$`),
 
+  makeReadAndWriteTokenUrl(token) {
+    return `/${token}`
+  },
+
+  makeReadOnlyTokenUrl(token) {
+    return `/read/${token}`
+  },
+
+  makeTokenUrl(token) {
+    const tokenType = TokenAccessHandler.getTokenType(token)
+    if (tokenType === TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE) {
+      return TokenAccessHandler.makeReadAndWriteTokenUrl(token)
+    } else if (tokenType === TokenAccessHandler.TOKEN_TYPES.READ_ONLY) {
+      return TokenAccessHandler.makeReadOnlyTokenUrl(token)
+    } else {
+      throw new Error('invalid token type')
+    }
+  },
+
   getTokenType(token) {
     if (!token) {
       return null

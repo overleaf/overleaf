@@ -158,7 +158,10 @@ async function checkAndGetProjectOrResponseAction(
           { token, projectId },
           '[TokenAccess] deny anonymous read-and-write token access'
         )
-        AuthenticationController.setRedirectInSession(req)
+        AuthenticationController.setRedirectInSession(
+          req,
+          TokenAccessHandler.makeTokenUrl(token)
+        )
         return [
           null,
           () => {
