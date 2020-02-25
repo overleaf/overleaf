@@ -1,22 +1,29 @@
-chai = require("chai")
-chai.should() unless Object.prototype.should?
-expect = chai.expect
-request = require "request"
-Settings = require "settings-sharelatex"
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const chai = require("chai");
+if (Object.prototype.should == null) { chai.should(); }
+const { expect } = chai;
+const request = require("request");
+const Settings = require("settings-sharelatex");
 
-buildUrl = (path) -> "http://#{Settings.internal.clsi.host}:#{Settings.internal.clsi.port}/#{path}"
+const buildUrl = path => `http://${Settings.internal.clsi.host}:${Settings.internal.clsi.port}/${path}`;
 
-url = buildUrl("project/smoketest-#{process.pid}/compile")
+const url = buildUrl(`project/smoketest-${process.pid}/compile`);
 
-describe "Running a compile", ->
-	before (done) ->
-		request.post {
-			url: url
-			json:
-				compile:
-					resources: [
-						path: "main.tex"
-						content: """
+describe("Running a compile", function() {
+	before(function(done) {
+		return request.post({
+			url,
+			json: {
+				compile: {
+					resources: [{
+						path: "main.tex",
+						content: `\
 % Membrane-like surface
 % Author: Yotam Avital
 \\documentclass{article}
@@ -47,18 +54,31 @@ describe "Running a compile", ->
     }
   }
 \\end{tikzpicture}
-\\end{document}
-						"""
+\\end{document}\
+`
+					}
 					]
-		}, (@error, @response, @body) =>
-			done()
+				}
+			}
+		}, (error, response, body) => {
+			this.error = error;
+			this.response = response;
+			this.body = body;
+			return done();
+		});
+	});
 
-	it "should return the pdf", ->
-		for file in @body.compile.outputFiles
-			return if file.type == "pdf"
-		throw new Error("no pdf returned")
+	it("should return the pdf", function() {
+		for (let file of Array.from(this.body.compile.outputFiles)) {
+			if (file.type === "pdf") { return; }
+		}
+		throw new Error("no pdf returned");
+	});
 	
-	it "should return the log", ->
-		for file in @body.compile.outputFiles
-			return if file.type == "log"
-		throw new Error("no log returned")
+	return it("should return the log", function() {
+		for (let file of Array.from(this.body.compile.outputFiles)) {
+			if (file.type === "log") { return; }
+		}
+		throw new Error("no log returned");
+	});
+});
