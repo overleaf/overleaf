@@ -1,3 +1,8 @@
+/* eslint-disable
+    standard/no-callback-literal,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -50,7 +55,7 @@ ${bodyContent}
 				]
 			}
 		}
-		}, function(err, response, body){
+		}, (err, response, body) => {
 			if (response.statusCode !== 200) {
 				failedCount++;
 				return callback(`compile ${compileNumber} failed`);
@@ -72,7 +77,7 @@ const jobs = _.map(__range__(1, totalCompiles, true), i=>
 );
 
 const startTime = new Date();
-async.parallelLimit(jobs, concurentCompiles, function(err){
+async.parallelLimit(jobs, concurentCompiles, (err) => {
 	if (err != null) {
 		console.error(err);
 	}
@@ -87,9 +92,9 @@ async.parallelLimit(jobs, concurentCompiles, function(err){
 
 
 function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
+  const range = [];
+  const ascending = left < right;
+  const end = !inclusive ? right : ascending ? right + 1 : right - 1;
   for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
     range.push(i);
   }
