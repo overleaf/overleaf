@@ -29,6 +29,7 @@ services:
       ENABLED_LINKED_FILE_TYPES: 'url,project_file,project_output_file,mendeley,zotero'
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
+      # SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
       SHARELATEX_CONFIG:
     command: npm run test:acceptance:app
     depends_on:

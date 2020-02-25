@@ -25,11 +25,12 @@ const { ObjectId } = require('mongojs')
 
 describe('TokenAccessHandler', function() {
   beforeEach(function() {
-    this.token = 'sometokenthing'
+    this.token = 'abcdefabcdef'
     this.projectId = ObjectId()
     this.project = {
       _id: this.projectId,
-      publicAccesLevel: 'tokenBased'
+      publicAccesLevel: 'tokenBased',
+      owner_ref: ObjectId()
     }
     this.userId = ObjectId()
     this.req = {}
@@ -44,414 +45,78 @@ describe('TokenAccessHandler', function() {
         '../User/UserGetter': (this.UserGetter = {}),
         '../V1/V1Api': (this.V1Api = {
           request: sinon.stub()
-        })
+        }),
+        crypto: (this.Crypto = require('crypto'))
       }
     }))
   })
 
-  describe('findProjectWithReadOnlyToken', function() {
-    beforeEach(function() {
-      return (this.Project.findOne = sinon
-        .stub()
-        .callsArgWith(2, null, this.project))
-    })
-
-    it('should call Project.findOne', function(done) {
-      return this.TokenAccessHandler.findProjectWithReadOnlyToken(
-        this.token,
-        (err, project) => {
-          expect(this.Project.findOne.callCount).to.equal(1)
-          expect(
-            this.Project.findOne.calledWith({
-              'tokens.readOnly': this.token
-            })
-          ).to.equal(true)
-          return done()
-        }
-      )
-    })
-
-    it('should produce a project object with no error', function(done) {
-      return this.TokenAccessHandler.findProjectWithReadOnlyToken(
-        this.token,
-        (err, project) => {
-          expect(err).to.not.exist
-          expect(project).to.exist
-          expect(project).to.deep.equal(this.project)
-          return done()
-        }
-      )
-    })
-
-    it('should return projectExists flag as true', function(done) {
-      return this.TokenAccessHandler.findProjectWithReadOnlyToken(
-        this.token,
-        (err, project, projectExists) => {
-          expect(projectExists).to.equal(true)
-          return done()
-        }
-      )
-    })
-
-    describe('when Project.findOne produces an error', function() {
-      beforeEach(function() {
-        return (this.Project.findOne = sinon
-          .stub()
-          .callsArgWith(2, new Error('woops')))
-      })
-
-      it('should produce an error', function(done) {
-        return this.TokenAccessHandler.findProjectWithReadOnlyToken(
-          this.token,
-          (err, project) => {
-            expect(err).to.exist
-            expect(project).to.not.exist
-            expect(err).to.be.instanceof(Error)
-            return done()
-          }
-        )
-      })
-    })
-
-    describe('when project does not have tokenBased access level', function() {
-      beforeEach(function() {
-        this.project.publicAccesLevel = 'private'
-        return (this.Project.findOne = sinon
-          .stub()
-          .callsArgWith(2, null, this.project, true))
-      })
-
-      it('should not return a project', function(done) {
-        return this.TokenAccessHandler.findProjectWithReadOnlyToken(
-          this.token,
-          (err, project) => {
-            expect(err).to.not.exist
-            expect(project).to.not.exist
-            return done()
-          }
-        )
-      })
-
-      it('should return projectExists flag as true', function(done) {
-        return this.TokenAccessHandler.findProjectWithReadOnlyToken(
-          this.token,
-          (err, project, projectExists) => {
-            expect(projectExists).to.equal(true)
-            return done()
-          }
-        )
-      })
-    })
-
-    describe('when project does not exist', function() {
-      beforeEach(function() {
-        return (this.Project.findOne = sinon.stub().callsArgWith(2, null, null))
-      })
-
-      it('should not return a project', function(done) {
-        return this.TokenAccessHandler.findProjectWithReadOnlyToken(
-          this.token,
-          (err, project) => {
-            expect(err).to.not.exist
-            expect(project).to.not.exist
-            return done()
-          }
-        )
-      })
-
-      it('should return projectExists flag as false', function(done) {
-        return this.TokenAccessHandler.findProjectWithReadOnlyToken(
-          this.token,
-          (err, project, projectExists) => {
-            expect(projectExists).to.equal(false)
-            return done()
-          }
-        )
-      })
-    })
-  })
-
-  describe('findProjectWithReadAndWriteToken', function() {
-    beforeEach(function() {
-      this.token = '1234bcdf'
-      this.tokenPrefix = '1234'
-      this.project.tokens = {
-        readOnly: 'atntntn',
-        readAndWrite: this.token,
-        readAndWritePrefix: this.tokenPrefix
+  describe('getTokenType', function() {
+    it('should determine tokens correctly', function() {
+      const specs = {
+        abcdefabcdef: 'readOnly',
+        aaaaaabbbbbb: 'readOnly',
+        '54325aaaaaa': 'readAndWrite',
+        '54325aaaaaabbbbbb': 'readAndWrite',
+        '': null,
+        abc123def: null
       }
-      return (this.Project.findOne = sinon
-        .stub()
-        .callsArgWith(2, null, this.project))
+      for (var token of Object.keys(specs)) {
+        expect(this.TokenAccessHandler.getTokenType(token)).to.equal(
+          specs[token]
+        )
+      }
+    })
+  })
+
+  describe('getProjectByReadOnlyToken', function() {
+    beforeEach(function() {
+      this.token = 'abcdefabcdef'
+      this.Project.findOne = sinon.stub().callsArgWith(2, null, this.project)
     })
 
-    it('should call Project.findOne', function(done) {
-      return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
-        this.token,
-        (err, project) => {
-          expect(this.Project.findOne.callCount).to.equal(1)
-          expect(
-            this.Project.findOne.calledWith({
-              'tokens.readAndWritePrefix': this.tokenPrefix
-            })
-          ).to.equal(true)
-          return done()
-        }
-      )
-    })
-
-    it('should produce a project object with no error', function(done) {
-      return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
+    it('should get the project', function(done) {
+      this.TokenAccessHandler.getProjectByReadOnlyToken(
         this.token,
         (err, project) => {
           expect(err).to.not.exist
           expect(project).to.exist
-          expect(project).to.deep.equal(this.project)
-          return done()
+          expect(this.Project.findOne.callCount).to.equal(1)
+          done()
         }
       )
-    })
-
-    it('should return projectExists flag as true', function(done) {
-      return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
-        this.token,
-        (err, project, projectExists) => {
-          expect(projectExists).to.equal(true)
-          return done()
-        }
-      )
-    })
-
-    describe('when Project.findOne produces an error', function() {
-      beforeEach(function() {
-        return (this.Project.findOne = sinon
-          .stub()
-          .callsArgWith(2, new Error('woops')))
-      })
-
-      it('should produce an error', function(done) {
-        return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
-          this.token,
-          (err, project) => {
-            expect(err).to.exist
-            expect(project).to.not.exist
-            expect(err).to.be.instanceof(Error)
-            return done()
-          }
-        )
-      })
-    })
-
-    describe('when project does not have tokenBased access level', function() {
-      beforeEach(function() {
-        this.project.publicAccesLevel = 'private'
-        return (this.Project.findOne = sinon
-          .stub()
-          .callsArgWith(2, null, this.project, true))
-      })
-
-      it('should not return a project', function(done) {
-        return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
-          this.token,
-          (err, project) => {
-            expect(err).to.not.exist
-            expect(project).to.not.exist
-            return done()
-          }
-        )
-      })
-
-      it('should return projectExists flag as true', function(done) {
-        return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
-          this.token,
-          (err, project, projectExists) => {
-            expect(projectExists).to.equal(true)
-            return done()
-          }
-        )
-      })
-    })
-
-    describe('when the tokens have different lengths', function() {
-      beforeEach(function() {
-        this.project.tokens = {
-          readOnly: 'atntntn',
-          readAndWrite: this.token + 'some-other-characters',
-          readAndWritePrefix: this.tokenPrefix
-        }
-        return (this.Project.findOne = sinon
-          .stub()
-          .callsArgWith(2, null, this.project))
-      })
-
-      it('should not return a project', function(done) {
-        return this.TokenAccessHandler.findProjectWithReadAndWriteToken(
-          this.token,
-          (err, project) => {
-            expect(err).to.not.exist
-            expect(project).to.not.exist
-            return done()
-          }
-        )
-      })
     })
   })
 
-  describe('findProjectWithHigherAccess', function() {
-    describe('when user does have higher access', function() {
-      beforeEach(function() {
-        this.Project.findOne = sinon.stub().callsArgWith(2, null, this.project)
-        return (this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
-          .stub()
-          .callsArgWith(2, null, true))
-      })
-
-      it('should call Project.findOne', function(done) {
-        return this.TokenAccessHandler.findProjectWithHigherAccess(
-          this.token,
-          this.userId,
-          (err, project) => {
-            expect(this.Project.findOne.callCount).to.equal(1)
-            expect(
-              this.Project.findOne.calledWith({
-                'tokens.readOnly': this.token
-              })
-            ).to.equal(true)
-            return done()
-          }
-        )
-      })
-
-      it('should call isUserInvitedMemberOfProject', function(done) {
-        return this.TokenAccessHandler.findProjectWithHigherAccess(
-          this.token,
-          this.userId,
-          (err, project) => {
-            expect(
-              this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount
-            ).to.equal(1)
-            expect(
-              this.CollaboratorsGetter.isUserInvitedMemberOfProject.calledWith(
-                this.userId,
-                this.project._id
-              )
-            ).to.equal(true)
-            return done()
-          }
-        )
-      })
-
-      it('should produce a project object', function(done) {
-        return this.TokenAccessHandler.findProjectWithHigherAccess(
-          this.token,
-          this.userId,
-          (err, project) => {
-            expect(err).to.not.exist
-            expect(project).to.exist
-            expect(project).to.deep.equal(this.project)
-            return done()
-          }
-        )
-      })
+  describe('getProjectByReadAndWriteToken', function() {
+    beforeEach(function() {
+      sinon.spy(this.Crypto, 'timingSafeEqual')
+      this.token = '1234abcdefabcdef'
+      this.project.tokens = {
+        readAndWrite: this.token,
+        readAndWritePrefix: '1234'
+      }
+      this.Project.findOne = sinon.stub().callsArgWith(2, null, this.project)
     })
 
-    describe('when user does not have higher access', function() {
-      beforeEach(function() {
-        this.Project.findOne = sinon.stub().callsArgWith(2, null, this.project)
-        return (this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
-          .stub()
-          .callsArgWith(2, null, false))
-      })
-
-      it('should call Project.findOne', function(done) {
-        return this.TokenAccessHandler.findProjectWithHigherAccess(
-          this.token,
-          this.userId,
-          (err, project) => {
-            expect(this.Project.findOne.callCount).to.equal(1)
-            expect(
-              this.Project.findOne.calledWith({
-                'tokens.readOnly': this.token
-              })
-            ).to.equal(true)
-            return done()
-          }
-        )
-      })
-
-      it('should call isUserInvitedMemberOfProject', function(done) {
-        return this.TokenAccessHandler.findProjectWithHigherAccess(
-          this.token,
-          this.userId,
-          (err, project) => {
-            expect(
-              this.CollaboratorsGetter.isUserInvitedMemberOfProject.callCount
-            ).to.equal(1)
-            expect(
-              this.CollaboratorsGetter.isUserInvitedMemberOfProject.calledWith(
-                this.userId,
-                this.project._id
-              )
-            ).to.equal(true)
-            return done()
-          }
-        )
-      })
-
-      it('should not produce a project', function(done) {
-        return this.TokenAccessHandler.findProjectWithHigherAccess(
-          this.token,
-          this.userId,
-          (err, project) => {
-            expect(err).to.not.exist
-            expect(project).to.not.exist
-            return done()
-          }
-        )
-      })
+    afterEach(function() {
+      this.Crypto.timingSafeEqual.restore()
     })
 
-    describe('when Project.findOne produces an error', function() {
-      beforeEach(function() {
-        return (this.Project.findOne = sinon
-          .stub()
-          .callsArgWith(2, new Error('woops')))
-      })
-
-      it('should produce an error', function(done) {
-        return this.TokenAccessHandler.findProjectWithHigherAccess(
-          this.token,
-          this.userId,
-          (err, project) => {
-            expect(err).to.exist
-            expect(project).to.not.exist
-            expect(err).to.be.instanceof(Error)
-            return done()
-          }
-        )
-      })
-    })
-
-    describe('when isUserInvitedMemberOfProject produces an error', function() {
-      beforeEach(function() {
-        this.Project.findOne = sinon.stub().callsArgWith(2, null, this.project)
-        return (this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
-          .stub()
-          .callsArgWith(2, new Error('woops')))
-      })
-
-      it('should produce an error', function(done) {
-        return this.TokenAccessHandler.findProjectWithHigherAccess(
-          this.token,
-          this.userId,
-          (err, project) => {
-            expect(err).to.exist
-            expect(project).to.not.exist
-            expect(err).to.be.instanceof(Error)
-            return done()
-          }
-        )
-      })
+    it('should get the project and do timing-safe comparison', function(done) {
+      this.TokenAccessHandler.getProjectByReadAndWriteToken(
+        this.token,
+        (err, project) => {
+          expect(err).to.not.exist
+          expect(project).to.exist
+          expect(this.Crypto.timingSafeEqual.callCount).to.equal(1)
+          expect(
+            this.Crypto.timingSafeEqual.calledWith(Buffer.from(this.token))
+          ).to.equal(true)
+          expect(this.Project.findOne.callCount).to.equal(1)
+          done()
+        }
+      )
     })
   })
 
@@ -583,27 +248,22 @@ describe('TokenAccessHandler', function() {
     })
   })
 
-  describe('isValidToken', function() {
+  describe('validateTokenForAnonymousAccess', function() {
     describe('when a read-only project is found', function() {
       beforeEach(function() {
-        this.TokenAccessHandler.findProjectWithReadAndWriteToken = sinon
+        this.TokenAccessHandler.getTokenType = sinon.stub().returns('readOnly')
+        this.TokenAccessHandler.getProjectByToken = sinon
           .stub()
-          .callsArgWith(1, null, null)
-        return (this.TokenAccessHandler.findProjectWithReadOnlyToken = sinon
-          .stub()
-          .callsArgWith(1, null, this.project))
+          .callsArgWith(2, null, this.project)
       })
 
       it('should try to find projects with both kinds of token', function(done) {
-        return this.TokenAccessHandler.isValidToken(
+        return this.TokenAccessHandler.validateTokenForAnonymousAccess(
           this.projectId,
           this.token,
           (err, allowed) => {
             expect(
-              this.TokenAccessHandler.findProjectWithReadAndWriteToken.callCount
-            ).to.equal(1)
-            expect(
-              this.TokenAccessHandler.findProjectWithReadOnlyToken.callCount
+              this.TokenAccessHandler.getProjectByToken.callCount
             ).to.equal(1)
             return done()
           }
@@ -611,7 +271,7 @@ describe('TokenAccessHandler', function() {
       })
 
       it('should allow read-only access', function(done) {
-        return this.TokenAccessHandler.isValidToken(
+        return this.TokenAccessHandler.validateTokenForAnonymousAccess(
           this.projectId,
           this.token,
           (err, rw, ro) => {
@@ -626,64 +286,93 @@ describe('TokenAccessHandler', function() {
 
     describe('when a read-and-write project is found', function() {
       beforeEach(function() {
-        this.TokenAccessHandler.findProjectWithReadAndWriteToken = sinon
+        this.TokenAccessHandler.getTokenType = sinon
           .stub()
-          .callsArgWith(1, null, this.project)
-        return (this.TokenAccessHandler.findProjectWithReadOnlyToken = sinon
+          .returns('readAndWrite')
+        this.TokenAccessHandler.getProjectByToken = sinon
           .stub()
-          .callsArgWith(1, null, null))
+          .callsArgWith(2, null, this.project)
       })
 
-      it('should try to find projects with both kinds of token', function(done) {
-        return this.TokenAccessHandler.isValidToken(
-          this.projectId,
-          this.token,
-          (err, allowed) => {
-            expect(
-              this.TokenAccessHandler.findProjectWithReadAndWriteToken.callCount
-            ).to.equal(1)
-            expect(
-              this.TokenAccessHandler.findProjectWithReadOnlyToken.callCount
-            ).to.equal(1)
-            return done()
-          }
-        )
+      describe('when Anonymous token access is not enabled', function(done) {
+        beforeEach(function() {
+          this.TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = false
+        })
+
+        it('should try to find projects with both kinds of token', function(done) {
+          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+            this.projectId,
+            this.token,
+            (err, rw, ro) => {
+              expect(
+                this.TokenAccessHandler.getProjectByToken.callCount
+              ).to.equal(1)
+              return done()
+            }
+          )
+        })
+
+        it('should not allow read-and-write access', function(done) {
+          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+            this.projectId,
+            this.token,
+            (err, rw, ro) => {
+              expect(err).to.not.exist
+              expect(rw).to.equal(false)
+              expect(ro).to.equal(false)
+              return done()
+            }
+          )
+        })
       })
 
-      it('should allow read-and-write access', function(done) {
-        return this.TokenAccessHandler.isValidToken(
-          this.projectId,
-          this.token,
-          (err, rw, ro) => {
-            expect(err).to.not.exist
-            expect(rw).to.equal(true)
-            expect(ro).to.equal(false)
-            return done()
-          }
-        )
+      describe('when anonymous token access is enabled', function(done) {
+        beforeEach(function() {
+          this.TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = true
+        })
+
+        it('should try to find projects with both kinds of token', function(done) {
+          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+            this.projectId,
+            this.token,
+            (err, rw, ro) => {
+              expect(
+                this.TokenAccessHandler.getProjectByToken.callCount
+              ).to.equal(1)
+              return done()
+            }
+          )
+        })
+
+        it('should allow read-and-write access', function(done) {
+          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+            this.projectId,
+            this.token,
+            (err, rw, ro) => {
+              expect(err).to.not.exist
+              expect(rw).to.equal(true)
+              expect(ro).to.equal(false)
+              return done()
+            }
+          )
+        })
       })
     })
 
     describe('when no project is found', function() {
       beforeEach(function() {
-        this.TokenAccessHandler.findProjectWithReadAndWriteToken = sinon
+        this.TokenAccessHandler.getProjectByToken = sinon
           .stub()
-          .callsArgWith(1, null, null)
-        return (this.TokenAccessHandler.findProjectWithReadOnlyToken = sinon
-          .stub()
-          .callsArgWith(1, null, null))
+          .callsArgWith(2, null, null, null)
       })
 
       it('should try to find projects with both kinds of token', function(done) {
-        return this.TokenAccessHandler.isValidToken(
+        return this.TokenAccessHandler.validateTokenForAnonymousAccess(
           this.projectId,
           this.token,
           (err, allowed) => {
             expect(
-              this.TokenAccessHandler.findProjectWithReadAndWriteToken.callCount
-            ).to.equal(1)
-            expect(
-              this.TokenAccessHandler.findProjectWithReadOnlyToken.callCount
+              this.TokenAccessHandler.getProjectByToken.callCount
             ).to.equal(1)
             return done()
           }
@@ -691,7 +380,7 @@ describe('TokenAccessHandler', function() {
       })
 
       it('should not allow any access', function(done) {
-        return this.TokenAccessHandler.isValidToken(
+        return this.TokenAccessHandler.validateTokenForAnonymousAccess(
           this.projectId,
           this.token,
           (err, rw, ro) => {
@@ -706,24 +395,18 @@ describe('TokenAccessHandler', function() {
 
     describe('when findProject produces an error', function() {
       beforeEach(function() {
-        this.TokenAccessHandler.findProjectWithReadAndWriteToken = sinon
+        this.TokenAccessHandler.getProjectByToken = sinon
           .stub()
-          .callsArgWith(1, null, null)
-        return (this.TokenAccessHandler.findProjectWithReadOnlyToken = sinon
-          .stub()
-          .callsArgWith(1, new Error('woops')))
+          .callsArgWith(2, new Error('woops'))
       })
 
       it('should try to find projects with both kinds of token', function(done) {
-        return this.TokenAccessHandler.isValidToken(
+        return this.TokenAccessHandler.validateTokenForAnonymousAccess(
           this.projectId,
           this.token,
           (err, allowed) => {
             expect(
-              this.TokenAccessHandler.findProjectWithReadAndWriteToken.callCount
-            ).to.equal(1)
-            expect(
-              this.TokenAccessHandler.findProjectWithReadOnlyToken.callCount
+              this.TokenAccessHandler.getProjectByToken.callCount
             ).to.equal(1)
             return done()
           }
@@ -731,7 +414,7 @@ describe('TokenAccessHandler', function() {
       })
 
       it('should produce an error and not allow access', function(done) {
-        return this.TokenAccessHandler.isValidToken(
+        return this.TokenAccessHandler.validateTokenForAnonymousAccess(
           this.projectId,
           this.token,
           (err, rw, ro) => {
@@ -752,33 +435,16 @@ describe('TokenAccessHandler', function() {
 
       describe('for read-and-write project', function() {
         beforeEach(function() {
-          this.TokenAccessHandler.findProjectWithReadAndWriteToken = sinon
+          this.TokenAccessHandler.getTokenType = sinon
             .stub()
-            .callsArgWith(1, null, this.project)
-          return (this.TokenAccessHandler.findProjectWithReadOnlyToken = sinon
+            .returns('readAndWrite')
+          this.TokenAccessHandler.getProjectByToken = sinon
             .stub()
-            .callsArgWith(1, null, null))
-        })
-
-        it('should try to find projects with both kinds of token', function(done) {
-          return this.TokenAccessHandler.isValidToken(
-            this.projectId,
-            this.token,
-            (err, allowed) => {
-              expect(
-                this.TokenAccessHandler.findProjectWithReadAndWriteToken
-                  .callCount
-              ).to.equal(1)
-              expect(
-                this.TokenAccessHandler.findProjectWithReadOnlyToken.callCount
-              ).to.equal(1)
-              return done()
-            }
-          )
+            .callsArgWith(2, null, this.project)
         })
 
         it('should not allow any access', function(done) {
-          return this.TokenAccessHandler.isValidToken(
+          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
             this.projectId,
             this.token,
             (err, rw, ro) => {
@@ -793,33 +459,16 @@ describe('TokenAccessHandler', function() {
 
       describe('for read-only project', function() {
         beforeEach(function() {
-          this.TokenAccessHandler.findProjectWithReadAndWriteToken = sinon
+          this.TokenAccessHandler.getTokenType = sinon
             .stub()
-            .callsArgWith(1, null, null)
-          return (this.TokenAccessHandler.findProjectWithReadOnlyToken = sinon
+            .returns('readOnly')
+          this.TokenAccessHandler.getProjectByToken = sinon
             .stub()
-            .callsArgWith(1, null, this.project))
-        })
-
-        it('should try to find projects with both kinds of token', function(done) {
-          return this.TokenAccessHandler.isValidToken(
-            this.projectId,
-            this.token,
-            (err, allowed) => {
-              expect(
-                this.TokenAccessHandler.findProjectWithReadAndWriteToken
-                  .callCount
-              ).to.equal(1)
-              expect(
-                this.TokenAccessHandler.findProjectWithReadOnlyToken.callCount
-              ).to.equal(1)
-              return done()
-            }
-          )
+            .callsArgWith(2, null, this.project)
         })
 
         it('should not allow any access', function(done) {
-          return this.TokenAccessHandler.isValidToken(
+          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
             this.projectId,
             this.token,
             (err, rw, ro) => {
@@ -831,58 +480,26 @@ describe('TokenAccessHandler', function() {
           )
         })
       })
-    })
 
-    describe('with nothing', function() {
-      beforeEach(function() {
-        this.TokenAccessHandler.findProjectWithReadAndWriteToken = sinon
-          .stub()
-          .callsArgWith(1, null, this.project)
-        return (this.TokenAccessHandler.findProjectWithReadOnlyToken = sinon
-          .stub()
-          .callsArgWith(1, null, null))
-      })
+      describe('with nothing', function() {
+        beforeEach(function() {
+          this.TokenAccessHandler.getProjectByToken = sinon
+            .stub()
+            .callsArgWith(1, null, null, null)
+        })
 
-      it('should not call findProjectWithReadOnlyToken', function(done) {
-        return this.TokenAccessHandler.isValidToken(
-          this.projectId,
-          null,
-          (err, allowed) => {
-            expect(
-              this.TokenAccessHandler.findProjectWithReadOnlyToken.callCount
-            ).to.equal(0)
-            return done()
-          }
-        )
-      })
-
-      it('should try to find projects with both kinds of token', function(done) {
-        return this.TokenAccessHandler.isValidToken(
-          this.projectId,
-          null,
-          (err, allowed) => {
-            expect(
-              this.TokenAccessHandler.findProjectWithReadAndWriteToken.callCount
-            ).to.equal(0)
-            expect(
-              this.TokenAccessHandler.findProjectWithReadOnlyToken.callCount
-            ).to.equal(0)
-            return done()
-          }
-        )
-      })
-
-      it('should not allow any access', function(done) {
-        return this.TokenAccessHandler.isValidToken(
-          this.projectId,
-          null,
-          (err, rw, ro) => {
-            expect(err).to.not.exist
-            expect(rw).to.equal(false)
-            expect(ro).to.equal(false)
-            return done()
-          }
-        )
+        it('should not allow any access', function(done) {
+          return this.TokenAccessHandler.validateTokenForAnonymousAccess(
+            this.projectId,
+            null,
+            (err, rw, ro) => {
+              expect(err).to.not.exist
+              expect(rw).to.equal(false)
+              expect(ro).to.equal(false)
+              return done()
+            }
+          )
+        })
       })
     })
   })

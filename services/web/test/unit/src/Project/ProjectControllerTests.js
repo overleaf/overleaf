@@ -1323,11 +1323,6 @@ describe('ProjectController', function() {
           archived: false,
           trashed: false,
           owner_ref: 'defg',
-          tokens: {
-            readAndWrite: '1abcd',
-            readAndWritePrefix: '1',
-            readOnly: 'neiotsranteoia'
-          },
           isV1Project: false
         })
       })
@@ -1359,11 +1354,6 @@ describe('ProjectController', function() {
           archived: true,
           trashed: false,
           owner_ref: 'defg',
-          tokens: {
-            readAndWrite: '1abcd',
-            readAndWritePrefix: '1',
-            readOnly: 'neiotsranteoia'
-          },
           isV1Project: false
         })
       })
@@ -1390,11 +1380,6 @@ describe('ProjectController', function() {
           archived: false,
           trashed: false,
           owner_ref: null,
-          tokens: {
-            readAndWrite: '1abcd',
-            readAndWritePrefix: '1',
-            readOnly: 'neiotsranteoia'
-          },
           isV1Project: false
         })
       })

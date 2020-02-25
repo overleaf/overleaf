@@ -1,277 +1,306 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let TokenAccessController
-const ProjectController = require('../Project/ProjectController')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const TokenAccessHandler = require('./TokenAccessHandler')
 const Errors = require('../Errors/Errors')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
+const OError = require('@overleaf/o-error')
+const { expressify } = require('../../util/promises')
+const AuthorizationManager = require('../Authorization/AuthorizationManager')
+const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 
-module.exports = TokenAccessController = {
-  _loadEditor(projectId, req, res, next) {
-    req.params.Project_id = projectId.toString()
-    return ProjectController.loadEditor(req, res, next)
-  },
+const orderedPrivilegeLevels = [
+  PrivilegeLevels.NONE,
+  PrivilegeLevels.READ_ONLY,
+  PrivilegeLevels.READ_AND_WRITE,
+  PrivilegeLevels.OWNER
+]
 
-  _tryHigherAccess(token, userId, req, res, next) {
-    return TokenAccessHandler.findProjectWithHigherAccess(
+async function _userAlreadyHasHigherPrivilege(
+  userId,
+  projectId,
+  token,
+  tokenType
+) {
+  if (!Object.values(TokenAccessHandler.TOKEN_TYPES).includes(tokenType)) {
+    throw new Error('bad token type')
+  }
+  const privilegeLevel = await AuthorizationManager.promises.getPrivilegeLevelForProject(
+    userId,
+    projectId,
+    token
+  )
+  return (
+    orderedPrivilegeLevels.indexOf(privilegeLevel) >=
+    orderedPrivilegeLevels.indexOf(tokenType)
+  )
+}
+
+const makePostUrl = token => {
+  if (TokenAccessHandler.isReadAndWriteToken(token)) {
+    return `/${token}/grant`
+  } else if (TokenAccessHandler.isReadOnlyToken(token)) {
+    return `/read/${token}/grant`
+  } else {
+    throw new Error('invalid token type')
+  }
+}
+
+async function _handleV1Project(token, userId) {
+  if (!userId) {
+    return { v1Import: { status: 'mustLogin' } }
+  } else {
+    const docInfo = await TokenAccessHandler.promises.getV1DocInfo(
       token,
-      userId,
-      function(err, project) {
-        if (err != null) {
-          logger.warn(
-            { err, token, userId },
-            '[TokenAccess] error finding project with higher access'
-          )
-          return next(err)
-        }
-        if (project == null) {
-          logger.log(
-            { token, userId },
-            '[TokenAccess] no project with higher access found for this user and token'
-          )
-          return next(new Errors.NotFoundError())
-        }
-        logger.log(
-          { token, userId, projectId: project._id },
-          '[TokenAccess] user has higher access to project, redirecting'
-        )
-        return res.redirect(302, `/project/${project._id}`)
-      }
+      userId
     )
-  },
-
-  readAndWriteToken(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
-    const token = req.params['read_and_write_token']
-    logger.log(
-      { userId, token },
-      '[TokenAccess] requesting read-and-write token access'
-    )
-    return TokenAccessHandler.findProjectWithReadAndWriteToken(token, function(
-      err,
-      project,
-      projectExists
-    ) {
-      if (err != null) {
-        logger.warn(
-          { err, token, userId },
-          '[TokenAccess] error getting project by readAndWrite token'
-        )
-        return next(err)
+    if (!docInfo) {
+      return { v1Import: { status: 'cannotImport' } }
+    }
+    if (!docInfo.exists) {
+      return null
+    }
+    if (docInfo.exported) {
+      return null
+    }
+    return {
+      v1Import: {
+        status: 'canImport',
+        projectId: token,
+        hasOwner: docInfo.has_owner,
+        name: docInfo.name || 'Untitled',
+        hasAssignment: docInfo.has_assignment,
+        brandInfo: docInfo.brand_info
       }
-      if (!projectExists && settings.overleaf) {
-        logger.log(
-          { token, userId },
-          '[TokenAccess] no project found for this token'
-        )
-        return TokenAccessController._handleV1Project(
-          token,
-          userId,
-          `/${token}`,
-          res,
-          next
-        )
-      } else if (project == null) {
-        if (userId == null) {
-          return next(new Errors.NotFoundError())
-        }
-        return TokenAccessController._tryHigherAccess(
-          token,
-          userId,
-          req,
-          res,
-          next
-        )
-      } else {
-        if (userId == null) {
-          if (TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED) {
-            TokenAccessHandler.grantSessionTokenAccess(req, project._id, token)
-            req._anonymousAccessToken = token
-            return TokenAccessController._loadEditor(
-              project._id,
-              req,
-              res,
-              next
-            )
-          } else {
-            logger.log(
-              { token, projectId: project._id },
-              '[TokenAccess] deny anonymous read-and-write token access'
-            )
-            AuthenticationController.setRedirectInSession(req)
-            return res.redirect('/restricted')
-          }
-        }
-        if (project.owner_ref.toString() === userId) {
-          logger.log(
-            { userId, projectId: project._id },
-            '[TokenAccess] user is already project owner'
-          )
-          return TokenAccessController._loadEditor(project._id, req, res, next)
-        }
-        logger.log(
-          { userId, projectId: project._id },
-          '[TokenAccess] adding user to project with readAndWrite token'
-        )
-        return TokenAccessHandler.addReadAndWriteUserToProject(
-          userId,
-          project._id,
-          function(err) {
-            if (err != null) {
-              logger.warn(
-                { err, token, userId, projectId: project._id },
-                '[TokenAccess] error adding user to project with readAndWrite token'
-              )
-              return next(err)
-            }
-            return TokenAccessController._loadEditor(
-              project._id,
-              req,
-              res,
-              next
-            )
-          }
-        )
-      }
-    })
-  },
-
-  readOnlyToken(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
-    const token = req.params['read_only_token']
-
-    return TokenAccessHandler.getV1DocPublishedInfo(token, function(
-      err,
-      doc_published_info
-    ) {
-      if (err != null) {
-        return next(err)
-      }
-      if (doc_published_info.allow === false) {
-        return res.redirect(doc_published_info.published_path)
-      }
-
-      return TokenAccessHandler.findProjectWithReadOnlyToken(token, function(
-        err,
-        project,
-        projectExists
-      ) {
-        if (err != null) {
-          logger.warn(
-            { err, token, userId },
-            '[TokenAccess] error getting project by readOnly token'
-          )
-          return next(err)
-        }
-        if (!projectExists && settings.overleaf) {
-          logger.log(
-            { token, userId },
-            '[TokenAccess] no project found for this token'
-          )
-          return TokenAccessController._handleV1Project(
-            token,
-            userId,
-            `/read/${token}`,
-            res,
-            next
-          )
-        } else if (project == null) {
-          if (userId == null) {
-            return next(new Errors.NotFoundError())
-          }
-          return TokenAccessController._tryHigherAccess(
-            token,
-            userId,
-            req,
-            res,
-            next
-          )
-        } else {
-          if (userId == null) {
-            TokenAccessHandler.grantSessionTokenAccess(req, project._id, token)
-            req._anonymousAccessToken = token
-            return TokenAccessController._loadEditor(
-              project._id,
-              req,
-              res,
-              next
-            )
-          } else {
-            if (project.owner_ref.toString() === userId) {
-              return TokenAccessController._loadEditor(
-                project._id,
-                req,
-                res,
-                next
-              )
-            }
-            logger.log(
-              { userId, projectId: project._id },
-              '[TokenAccess] adding user to project with readOnly token'
-            )
-            return TokenAccessHandler.addReadOnlyUserToProject(
-              userId,
-              project._id,
-              function(err) {
-                if (err != null) {
-                  logger.warn(
-                    { err, token, userId, projectId: project._id },
-                    '[TokenAccess] error adding user to project with readAndWrite token'
-                  )
-                  return next(err)
-                }
-                return TokenAccessController._loadEditor(
-                  project._id,
-                  req,
-                  res,
-                  next
-                )
-              }
-            )
-          }
-        }
-      })
-    })
-  },
-
-  _handleV1Project(token, userId, redirectPath, res, next) {
-    if (userId == null) {
-      return res.render('project/v2-import', { loginRedirect: redirectPath })
-    } else {
-      TokenAccessHandler.getV1DocInfo(token, userId, function(err, doc_info) {
-        if (err != null) {
-          return next(err)
-        }
-        if (!doc_info) {
-          res.status(400)
-          return res.render('project/cannot-import-v1-project')
-        }
-        if (!doc_info.exists) {
-          return next(new Errors.NotFoundError())
-        }
-        if (doc_info.exported) {
-          return next(new Errors.NotFoundError())
-        }
-        return res.render('project/v2-import', {
-          projectId: token,
-          hasOwner: doc_info.has_owner,
-          name: doc_info.name || 'Untitled',
-          hasAssignment: doc_info.has_assignment,
-          brandInfo: doc_info.brand_info
-        })
-      })
     }
   }
+}
+
+async function tokenAccessPage(req, res, next) {
+  const { token } = req.params
+  if (!TokenAccessHandler.isValidToken(token)) {
+    return next(new Errors.NotFoundError())
+  }
+  try {
+    if (TokenAccessHandler.isReadOnlyToken(token)) {
+      const docPublishedInfo = await TokenAccessHandler.promises.getV1DocPublishedInfo(
+        token
+      )
+      if (docPublishedInfo.allow === false) {
+        return res.redirect(302, docPublishedInfo.published_path)
+      }
+    }
+    res.render('project/token/access', {
+      postUrl: makePostUrl(token)
+    })
+  } catch (err) {
+    return next(
+      new OError({
+        message: 'error while rendering token access page',
+        info: { token }
+      }).withCause(err)
+    )
+  }
+}
+
+async function checkAndGetProjectOrResponseAction(
+  tokenType,
+  token,
+  userId,
+  req,
+  res,
+  next
+) {
+  // Try to get the project, and/or an alternative action to take.
+  // Returns a tuple of [project, action]
+  const project = await TokenAccessHandler.promises.getProjectByToken(
+    tokenType,
+    token
+  )
+  if (!project) {
+    if (settings.overleaf) {
+      const v1ImportData = await _handleV1Project(token, userId)
+      return [
+        null,
+        () => {
+          if (v1ImportData) {
+            res.json(v1ImportData)
+          } else {
+            res.sendStatus(404)
+          }
+        }
+      ]
+    } else {
+      return [null, null]
+    }
+  }
+
+  const projectId = project._id
+  const isAnonymousUser = !userId
+  const tokenAccessEnabled = TokenAccessHandler.tokenAccessEnabledForProject(
+    project
+  )
+  if (isAnonymousUser && tokenAccessEnabled) {
+    if (tokenType === TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE) {
+      if (TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED) {
+        logger.info({ projectId }, 'granting read-write anonymous access')
+        TokenAccessHandler.grantSessionTokenAccess(req, projectId, token)
+        return [
+          null,
+          () => {
+            res.json({
+              redirect: `/project/${projectId}`,
+              grantAnonymousAccess: tokenType
+            })
+          }
+        ]
+      } else {
+        logger.warn(
+          { token, projectId },
+          '[TokenAccess] deny anonymous read-and-write token access'
+        )
+        AuthenticationController.setRedirectInSession(req)
+        return [
+          null,
+          () => {
+            res.json({
+              redirect: '/restricted',
+              anonWriteAccessDenied: true
+            })
+          }
+        ]
+      }
+    } else if (tokenType === TokenAccessHandler.TOKEN_TYPES.READ_ONLY) {
+      logger.info({ projectId }, 'granting read-only anonymous access')
+      TokenAccessHandler.grantSessionTokenAccess(req, projectId, token)
+      return [
+        null,
+        () => {
+          res.json({
+            redirect: `/project/${projectId}`,
+            grantAnonymousAccess: tokenType
+          })
+        }
+      ]
+    } else {
+      throw new Error('unreachable')
+    }
+  }
+  const userHasPrivilege = await _userAlreadyHasHigherPrivilege(
+    userId,
+    projectId,
+    token,
+    tokenType
+  )
+  if (userHasPrivilege) {
+    return [
+      null,
+      () => {
+        res.json({ redirect: `/project/${project._id}`, higherAccess: true })
+      }
+    ]
+  }
+  if (!tokenAccessEnabled) {
+    return [
+      null,
+      () => {
+        next(new Errors.NotFoundError())
+      }
+    ]
+  }
+  return [project, null]
+}
+
+async function grantTokenAccessReadAndWrite(req, res, next) {
+  const { token } = req.params
+  const userId = AuthenticationController.getLoggedInUserId(req)
+  if (!TokenAccessHandler.isReadAndWriteToken(token)) {
+    return res.sendStatus(400)
+  }
+  const tokenType = TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE
+  try {
+    const [project, action] = await checkAndGetProjectOrResponseAction(
+      tokenType,
+      token,
+      userId,
+      req,
+      res,
+      next
+    )
+    if (action) {
+      return action()
+    }
+    if (!project) {
+      return next(new Errors.NotFoundError())
+    }
+    await TokenAccessHandler.promises.addReadAndWriteUserToProject(
+      userId,
+      project._id
+    )
+    return res.json({
+      redirect: `/project/${project._id}`,
+      tokenAccessGranted: tokenType
+    })
+  } catch (err) {
+    return next(
+      new OError({
+        message: 'error while trying to grant read-and-write token access',
+        info: { token }
+      }).withCause(err)
+    )
+  }
+}
+
+async function grantTokenAccessReadOnly(req, res, next) {
+  const { token } = req.params
+  const userId = AuthenticationController.getLoggedInUserId(req)
+  if (!TokenAccessHandler.isReadOnlyToken(token)) {
+    return res.sendStatus(400)
+  }
+  const tokenType = TokenAccessHandler.TOKEN_TYPES.READ_ONLY
+  const docPublishedInfo = await TokenAccessHandler.promises.getV1DocPublishedInfo(
+    token
+  )
+  if (docPublishedInfo.allow === false) {
+    return res.json({ redirect: docPublishedInfo.published_path })
+  }
+  try {
+    const [project, action] = await checkAndGetProjectOrResponseAction(
+      tokenType,
+      token,
+      userId,
+      req,
+      res,
+      next
+    )
+    if (action) {
+      return action()
+    }
+    if (!project) {
+      return next(new Errors.NotFoundError())
+    }
+    await TokenAccessHandler.promises.addReadOnlyUserToProject(
+      userId,
+      project._id
+    )
+    return res.json({
+      redirect: `/project/${project._id}`,
+      tokenAccessGranted: tokenType
+    })
+  } catch (err) {
+    return next(
+      new OError({
+        message: 'error while trying to grant read-only token access',
+        info: { token }
+      }).withCause(err)
+    )
+  }
+}
+
+module.exports = {
+  READ_ONLY_TOKEN_PATTERN: TokenAccessHandler.READ_ONLY_TOKEN_PATTERN,
+  READ_AND_WRITE_TOKEN_PATTERN: TokenAccessHandler.READ_AND_WRITE_TOKEN_PATTERN,
+
+  tokenAccessPage: expressify(tokenAccessPage),
+  grantTokenAccessReadOnly: expressify(grantTokenAccessReadOnly),
+  grantTokenAccessReadAndWrite: expressify(grantTokenAccessReadAndWrite)
 }

@@ -33,6 +33,16 @@ module.exports = MockV1Api = {
     return (this.users[id] = user)
   },
 
+  docInfo: {},
+
+  getDocInfo(token) {
+    return this.docInfo[token] || null
+  },
+
+  setDocInfo(token, info) {
+    this.docInfo[token] = info
+  },
+
   exportId: null,
 
   exportParams: null,
@@ -241,10 +251,11 @@ module.exports = MockV1Api = {
     app.get(
       '/api/v1/sharelatex/users/:user_id/docs/:token/info',
       (req, res, next) => {
-        return res.json({
-          exists: true,
+        const info = this.getDocInfo(req.params.token) || {
+          exists: false,
           exported: false
-        })
+        }
+        return res.json(info)
       }
     )
 

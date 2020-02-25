@@ -4,10 +4,11 @@ const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const ProjectGetter = require('../Project/ProjectGetter')
 const { User } = require('../../models/User')
 const PrivilegeLevels = require('./PrivilegeLevels')
+const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const PublicAccessLevels = require('./PublicAccessLevels')
 const Errors = require('../Errors/Errors')
 const { ObjectId } = require('mongojs')
-const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
+const { promisify } = require('util')
 
 module.exports = AuthorizationManager = {
   isRestrictedUser(userId, privilegeLevel, isTokenMember) {
@@ -163,28 +164,25 @@ module.exports = AuthorizationManager = {
     // Anonymous users can have read-only access to token-based projects,
     // while read-write access must be logged in,
     // unless the `enableAnonymousReadAndWriteSharing` setting is enabled
-    TokenAccessHandler.isValidToken(projectId, token, function(
-      err,
-      isValidReadAndWrite,
-      isValidReadOnly
-    ) {
-      if (err) {
-        return callback(err)
+    TokenAccessHandler.validateTokenForAnonymousAccess(
+      projectId,
+      token,
+      function(err, isValidReadAndWrite, isValidReadOnly) {
+        if (err) {
+          return callback(err)
+        }
+        if (isValidReadOnly) {
+          // Grant anonymous user read-only access
+          return callback(null, PrivilegeLevels.READ_ONLY, false, false)
+        }
+        if (isValidReadAndWrite) {
+          // Grant anonymous user read-and-write access
+          return callback(null, PrivilegeLevels.READ_AND_WRITE, false, false)
+        }
+        // Deny anonymous access
+        callback(null, PrivilegeLevels.NONE, false, false)
       }
-      if (isValidReadOnly) {
-        // Grant anonymous user read-only access
-        return callback(null, PrivilegeLevels.READ_ONLY, false, false)
-      }
-      if (
-        isValidReadAndWrite &&
-        TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED
-      ) {
-        // Grant anonymous user read-and-write access
-        return callback(null, PrivilegeLevels.READ_AND_WRITE, false, false)
-      }
-      // Deny anonymous access
-      callback(null, PrivilegeLevels.NONE, false, false)
-    })
+    )
   },
 
   canUserReadProject(userId, projectId, token, callback) {
@@ -279,4 +277,10 @@ module.exports = AuthorizationManager = {
       callback(null, (user && user.isAdmin) === true)
     })
   }
+}
+
+AuthorizationManager.promises = {
+  getPrivilegeLevelForProject: promisify(
+    AuthorizationManager.getPrivilegeLevelForProject
+  )
 }

@@ -1,5 +1,4 @@
 const { Project } = require('../../models/Project')
-const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const UserGetter = require('../User/UserGetter')
@@ -8,63 +7,100 @@ const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const V1Api = require('../V1/V1Api')
 const crypto = require('crypto')
+const { promisifyAll } = require('../../util/promises')
+
+const READ_AND_WRITE_TOKEN_PATTERN = '([0-9]+[a-z]{6,12})'
+const READ_ONLY_TOKEN_PATTERN = '([a-z]{12})'
 
 const TokenAccessHandler = {
+  TOKEN_TYPES: {
+    READ_ONLY: PrivilegeLevels.READ_ONLY,
+    READ_AND_WRITE: PrivilegeLevels.READ_AND_WRITE
+  },
+
   ANONYMOUS_READ_AND_WRITE_ENABLED:
     Settings.allowAnonymousReadAndWriteSharing === true,
-  READ_AND_WRITE_TOKEN_REGEX: /^(\d+)(\w+)$/,
-  READ_AND_WRITE_URL_REGEX: /^\/(\d+)(\w+)$/,
-  READ_ONLY_TOKEN_REGEX: /^([a-z]{12})$/,
-  READ_ONLY_URL_REGEX: /^\/read\/([a-z]{12})$/,
+
+  READ_AND_WRITE_TOKEN_PATTERN,
+  READ_AND_WRITE_TOKEN_REGEX: new RegExp(`^${READ_AND_WRITE_TOKEN_PATTERN}$`),
+  READ_AND_WRITE_URL_REGEX: new RegExp(`^/${READ_AND_WRITE_TOKEN_PATTERN}$`),
+
+  READ_ONLY_TOKEN_PATTERN,
+  READ_ONLY_TOKEN_REGEX: new RegExp(`^${READ_ONLY_TOKEN_PATTERN}$`),
+  READ_ONLY_URL_REGEX: new RegExp(`^/read/${READ_ONLY_TOKEN_PATTERN}$`),
+
+  getTokenType(token) {
+    if (!token) {
+      return null
+    }
+    if (token.match(`^${TokenAccessHandler.READ_ONLY_TOKEN_PATTERN}$`)) {
+      return TokenAccessHandler.TOKEN_TYPES.READ_ONLY
+    } else if (
+      token.match(`^${TokenAccessHandler.READ_AND_WRITE_TOKEN_PATTERN}$`)
+    ) {
+      return TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE
+    }
+    return null
+  },
+
+  isReadOnlyToken(token) {
+    return (
+      TokenAccessHandler.getTokenType(token) ===
+      TokenAccessHandler.TOKEN_TYPES.READ_ONLY
+    )
+  },
+
+  isReadAndWriteToken(token) {
+    return (
+      TokenAccessHandler.getTokenType(token) ===
+      TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE
+    )
+  },
+
+  isValidToken(token) {
+    return TokenAccessHandler.getTokenType(token) != null
+  },
+
+  tokenAccessEnabledForProject(project) {
+    return project.publicAccesLevel === PublicAccessLevels.TOKEN_BASED
+  },
+
+  _projectFindOne(query, callback) {
+    Project.findOne(
+      query,
+      {
+        _id: 1,
+        tokens: 1,
+        publicAccesLevel: 1,
+        owner_ref: 1,
+        name: 1
+      },
+      callback
+    )
+  },
+
+  getProjectByReadOnlyToken(token, callback) {
+    TokenAccessHandler._projectFindOne({ 'tokens.readOnly': token }, callback)
+  },
 
   _extractNumericPrefix(token) {
     return token.match(/^(\d+)\w+/)
   },
 
-  _getProjectByReadOnlyToken(token, callback) {
-    Project.findOne(
-      {
-        'tokens.readOnly': token
-      },
-      { _id: 1, tokens: 1, publicAccesLevel: 1, owner_ref: 1 },
-      callback
-    )
+  _extractStringSuffix(token) {
+    return token.match(/^\d+(\w+)/)
   },
 
-  _getProjectByEitherToken(token, callback) {
-    TokenAccessHandler._getProjectByReadOnlyToken(token, function(
-      err,
-      project
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      if (project != null) {
-        return callback(null, project)
-      }
-      TokenAccessHandler._getProjectByReadAndWriteToken(token, function(
-        err,
-        project
-      ) {
-        if (err != null) {
-          return callback(err)
-        }
-        callback(null, project)
-      })
-    })
-  },
-
-  _getProjectByReadAndWriteToken(token, callback) {
+  getProjectByReadAndWriteToken(token, callback) {
     const numericPrefixMatch = TokenAccessHandler._extractNumericPrefix(token)
     if (!numericPrefixMatch) {
       return callback(null, null)
     }
     const numerics = numericPrefixMatch[1]
-    Project.findOne(
+    TokenAccessHandler._projectFindOne(
       {
         'tokens.readAndWritePrefix': numerics
       },
-      { _id: 1, tokens: 1, publicAccesLevel: 1, owner_ref: 1 },
       function(err, project) {
         if (err != null) {
           return callback(err)
@@ -96,69 +132,14 @@ const TokenAccessHandler = {
     )
   },
 
-  findProjectWithReadOnlyToken(token, callback) {
-    TokenAccessHandler._getProjectByReadOnlyToken(token, function(
-      err,
-      project
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      if (project == null) {
-        return callback(null, null, false) // Project doesn't exist, so we handle differently
-      }
-      if (project.publicAccesLevel !== PublicAccessLevels.TOKEN_BASED) {
-        return callback(null, null, true) // Project does exist, but it isn't token based
-      }
-      callback(null, project, true)
-    })
-  },
-
-  findProjectWithReadAndWriteToken(token, callback) {
-    TokenAccessHandler._getProjectByReadAndWriteToken(token, function(
-      err,
-      project
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      if (project == null) {
-        return callback(null, null, false) // Project doesn't exist, so we handle differently
-      }
-      if (project.publicAccesLevel !== PublicAccessLevels.TOKEN_BASED) {
-        return callback(null, null, true) // Project does exist, but it isn't token based
-      }
-      callback(null, project, true)
-    })
-  },
-
-  _userIsMember(userId, projectId, callback) {
-    CollaboratorsGetter.isUserInvitedMemberOfProject(
-      userId,
-      projectId,
-      callback
-    )
-  },
-
-  findProjectWithHigherAccess(token, userId, callback) {
-    TokenAccessHandler._getProjectByEitherToken(token, function(err, project) {
-      if (err != null) {
-        return callback(err)
-      }
-      if (project == null) {
-        return callback(null, null)
-      }
-      const projectId = project._id
-      TokenAccessHandler._userIsMember(userId, projectId, function(
-        err,
-        isMember
-      ) {
-        if (err != null) {
-          return callback(err)
-        }
-        callback(null, isMember === true ? project : null)
-      })
-    })
+  getProjectByToken(tokenType, token, callback) {
+    if (tokenType === TokenAccessHandler.TOKEN_TYPES.READ_ONLY) {
+      TokenAccessHandler.getProjectByReadOnlyToken(token, callback)
+    } else if (tokenType === TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE) {
+      TokenAccessHandler.getProjectByReadAndWriteToken(token, callback)
+    } else {
+      return callback(new Error('invalid token type'))
+    }
   },
 
   addReadOnlyUserToProject(userId, projectId, callback) {
@@ -196,7 +177,7 @@ const TokenAccessHandler = {
     if (!req.session.anonTokenAccess) {
       req.session.anonTokenAccess = {}
     }
-    req.session.anonTokenAccess[projectId.toString()] = token.toString()
+    req.session.anonTokenAccess[projectId.toString()] = token
   },
 
   getRequestToken(req, projectId) {
@@ -208,32 +189,32 @@ const TokenAccessHandler = {
     return token
   },
 
-  isValidToken(projectId, token, callback) {
+  validateTokenForAnonymousAccess(projectId, token, callback) {
     if (!token) {
       return callback(null, false, false)
     }
-    const _validate = project =>
-      project != null &&
-      project.publicAccesLevel === PublicAccessLevels.TOKEN_BASED &&
-      project._id.toString() === projectId.toString()
-    TokenAccessHandler.findProjectWithReadAndWriteToken(token, function(
-      err,
-      readAndWriteProject
-    ) {
-      if (err != null) {
+    const tokenType = TokenAccessHandler.getTokenType(token)
+    if (!tokenType) {
+      return callback(new Error('invalid token type'))
+    }
+    TokenAccessHandler.getProjectByToken(tokenType, token, (err, project) => {
+      if (err) {
         return callback(err)
       }
-      const isValidReadAndWrite = _validate(readAndWriteProject)
-      TokenAccessHandler.findProjectWithReadOnlyToken(token, function(
-        err,
-        readOnlyProject
+      if (
+        !project ||
+        !TokenAccessHandler.tokenAccessEnabledForProject(project) ||
+        project._id.toString() !== projectId.toString()
       ) {
-        if (err != null) {
-          return callback(err)
-        }
-        const isValidReadOnly = _validate(readOnlyProject)
-        callback(null, isValidReadAndWrite, isValidReadOnly)
-      })
+        return callback(null, false, false)
+      }
+      // TODO: think about cleaning up this interface and its usage in AuthorizationManager
+      return callback(
+        null,
+        tokenType === TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE &&
+          TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED,
+        tokenType === TokenAccessHandler.TOKEN_TYPES.READ_ONLY
+      )
     })
   },
 
@@ -296,5 +277,19 @@ const TokenAccessHandler = {
     })
   }
 }
+
+TokenAccessHandler.promises = promisifyAll(TokenAccessHandler, {
+  without: [
+    'getTokenType',
+    'tokenAccessEnabledForProject',
+    '_extractNumericPrefix',
+    '_extractStringSuffix',
+    '_projectFindOne',
+    'grantSessionTokenAccess',
+    'getRequestToken',
+    'protectTokens',
+    'validateTokenForAnonymousAccess'
+  ]
+})
 
 module.exports = TokenAccessHandler

@@ -1,0 +1,155 @@
+extends ../../layout
+
+block vars
+	- metadata = { viewport: true }
+
+block content
+
+	script(type="template", id="overleaf-token-access-data")!= StringHelper.stringifyJsonForScript({ postUrl: postUrl, csrfToken: csrfToken})
+
+	div(
+		ng-controller="TokenAccessPageController",
+		ng-init="post()"
+	)
+		.editor.full-size
+			div
+				| &nbsp;
+				a(href="/project" style="font-size: 2rem; margin-left: 1rem; color: #ddd;")
+					i.fa.fa-arrow-left
+
+			.loading-screen(
+				ng-show="mode == 'accessAttempt'"
+			)
+				.loading-screen-brand-container
+					.loading-screen-brand()
+
+				h3.loading-screen-label.text-center
+					| #{translate('join_project')}
+					span(ng-show="accessInFlight == true")
+						span.loading-screen-ellip .
+						span.loading-screen-ellip .
+						span.loading-screen-ellip .
+
+
+				.global-alerts.text-center(ng-cloak)
+					div(ng-show="accessError", ng-cloak)
+						br
+						div(ng-switch="accessError", ng-cloak)
+							div(ng-switch-when="not_found")
+								h4(aria-live="assertive")
+									| Project not found
+
+							div(ng-switch-default)
+								.alert.alert-danger(aria-live="assertive") #{translate('token_access_failure')}
+								p
+									a(href="/") #{translate('home')}
+
+			.loading-screen(
+				ng-show="mode == 'v1Import'"
+			)
+				.container
+					.row
+						.col-sm-8.col-sm-offset-2
+							h1.text-center Move project to Overleaf v2
+							img.v2-import__img(
+								src="/img/v1-import/v2-editor.png"
+								alt="The new V2 editor."
+							)
+
+							div(ng-if="v1ImportData.status == 'cannotImport'")
+								h2.text-center
+									| Cannot Access Overleaf v1 Project
+								p.text-center.row-spaced-small
+									| The project you are attempting to access must be imported to Overleaf v2 before it can be accessed. Please contact the project owner or
+									|
+									a(href="/contact") contact support
+									|
+									| for assistance.
+
+							div(ng-if="v1ImportData.status == 'mustLogin'")
+								p.text-center.row-spaced-small
+									| This project has not yet been moved into the new version of
+									| Overleaf. You will need to log in and move it in order to
+									| continue working on it.
+
+								.row-spaced.text-center
+									a.btn.btn-primary(
+										href="/login?redir={{ currentPath() }}"
+									) Log In To Move Project
+
+							div(ng-if="v1ImportData.status == 'canImport'")
+								div(ng-if="v1ImportData.hasOwner")
+									p.text-center.row-spaced-small
+										| #[strong() {{ getProjectName() }}] has not yet been moved into
+										| the new version of Overleaf. You will need to move it in order
+										| to continue working on it. It should only take a few seconds.
+
+									form(
+										async-form="v2Import"
+										name="v2ImportForm"
+										action="{{ buildFormImportPath(v1ImportData.projectId) }}"
+										method="POST"
+										ng-cloak
+									)
+										input(name='_csrf', type='hidden', value=csrfToken)
+										form-messages(for="v2ImportForm")
+										input.row-spaced.btn.btn-primary.text-center.center-block(
+											type="submit"
+											ng-value="v2ImportForm.inflight || v2ImportForm.response.success ? 'Moving to v2...' : 'Move Project and Continue'"
+											ng-disabled="v2ImportForm.inflight || v2ImportForm.response.success"
+										)
+
+									.row-spaced-small.text-center
+										a(href="{{ buildZipDownloadPath(v1ImportData.projectId) }}")
+											| Download project zip file
+								div(ng-if="!v1ImportData.hasOwner")
+									p.text-center.row-spaced.small
+										| #[strong() {{ getProjectName() }}] has not yet been moved into
+										| the new version of Overleaf. This project was created
+										| anonymously and therefore cannot be automatically imported.
+										| Please download a zip file of the project and upload that to
+										| continue editing it. If you would like to delete this project
+										| after you have made a copy, please contact support.
+
+									.row-spaced.text-center
+										a.btn.btn-primary(href="{{ buildZipDownloadPath(v1ImportData.projectId) }}")
+											| Download project zip file
+
+							.row-spaced.text-center
+								div(ng-if="v1ImportData.hasAssignment")
+									p
+										| #[span.fa.fa-exclamation-triangle]
+										| This project is an assignment, and the assignment toolkit is
+										| no longer supported in Overleaf v2. When you move it to
+										| Overleaf v2, it will become a normal project.
+										| #[a(href="https://www.overleaf.com/learn/how-to/Overleaf_v2_FAQ#assignment-tools") Please see our FAQ]
+										| for more information or contact your instructor if you haven't
+										| already submitted it.
+								div(ng-if="!v1ImportData.hasAssignment")
+									div(ng-switch="v1ImportData.brandInfo")
+										div(ng-switch-when="'f1000'")
+											p
+												| #[span.fa.fa-exclamation-triangle]
+												| This project is an F1000Research article, and our integration
+												| with F1000Research has changed in Overleaf v2.
+												| #[a(href="https://www.overleaf.com/learn/how-to/Overleaf_v2_FAQ#f1000research") Find out more about moving to Overleaf v2]
+										div(ng-switch-when="'wellcome'")
+											p
+												| #[span.fa.fa-exclamation-triangle]
+												| This project is an Wellcome Open Research article, and our
+												| integration with Wellcome Open Research has changed in
+												| Overleaf v2.
+												| #[a(href="https://www.overleaf.com/learn/how-to/Overleaf_v2_FAQ#f1000research") Find out more about moving to Overleaf v2]
+										div(ng-switch-default)
+											a(href="https://www.overleaf.com/learn/how-to/Overleaf_v2_FAQ")
+												| Find out more about moving to Overleaf v2
+
+
+block append foot-scripts
+	script.
+		$(document).ready(function () {
+			setTimeout(function() {
+				$('.loading-screen-brand').css('height', '20%')
+			}, 500);
+		});
+

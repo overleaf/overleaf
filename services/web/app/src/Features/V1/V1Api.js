@@ -10,10 +10,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let V1Api
 const request = require('request')
 const settings = require('settings-sharelatex')
 const Errors = require('../Errors/Errors')
+const { promisifyAll } = require('../../util/promises')
 
 // TODO: check what happens when these settings aren't defined
 const DEFAULT_V1_PARAMS = {
@@ -36,7 +36,7 @@ const DEFAULT_V1_OAUTH_PARAMS = {
 
 const v1OauthRequest = request.defaults(DEFAULT_V1_OAUTH_PARAMS)
 
-module.exports = V1Api = {
+const V1Api = {
   request(options, callback) {
     if (callback == null) {
       return request(options)
@@ -103,3 +103,11 @@ module.exports = V1Api = {
     }
   }
 }
+
+V1Api.promises = promisifyAll(V1Api, {
+  multiResult: {
+    request: ['response', 'body'],
+    oauthRequest: ['response', 'body']
+  }
+})
+module.exports = V1Api

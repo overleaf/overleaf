@@ -736,12 +736,15 @@ const ProjectController = {
         const { subscription } = results
         const { brandVariation } = results
 
-        const token = TokenAccessHandler.getRequestToken(req, projectId)
+        const anonRequestToken = TokenAccessHandler.getRequestToken(
+          req,
+          projectId
+        )
         const { isTokenMember } = results
         AuthorizationManager.getPrivilegeLevelForProject(
           userId,
           projectId,
-          token,
+          anonRequestToken,
           (error, privilegeLevel) => {
             let allowedFreeTrial
             if (error != null) {
@@ -804,7 +807,7 @@ const ProjectController = {
               privilegeLevel,
               chatUrl: Settings.apis.chat.url,
               anonymous,
-              anonymousAccessToken: req._anonymousAccessToken,
+              anonymousAccessToken: anonymous ? anonRequestToken : null,
               isTokenMember,
               isRestrictedTokenMember: AuthorizationManager.isRestrictedUser(
                 userId,
@@ -931,7 +934,6 @@ const ProjectController = {
       archived,
       trashed,
       owner_ref: project.owner_ref,
-      tokens: project.tokens,
       isV1Project: false
     }
     if (accessLevel === PrivilegeLevels.READ_ONLY && source === Sources.TOKEN) {

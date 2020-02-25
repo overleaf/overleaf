@@ -35,7 +35,9 @@ describe('AuthorizationManager', function() {
         },
         '../Errors/Errors': Errors,
         '../TokenAccess/TokenAccessHandler': (this.TokenAccessHandler = {
-          isValidToken: sinon.stub().callsArgWith(2, null, false, false)
+          validateTokenForAnonymousAccess: sinon
+            .stub()
+            .callsArgWith(2, null, false, false)
         }),
         'settings-sharelatex': { passwordStrengthOptions: {} }
       }
@@ -160,7 +162,7 @@ describe('AuthorizationManager', function() {
       describe('with no user (anonymous)', function() {
         describe('when the token is not valid', function() {
           beforeEach(function() {
-            this.TokenAccessHandler.isValidToken = sinon
+            this.TokenAccessHandler.validateTokenForAnonymousAccess = sinon
               .stub()
               .withArgs(this.project_id, this.token)
               .yields(null, false, false)
@@ -185,7 +187,7 @@ describe('AuthorizationManager', function() {
           })
 
           it('should check if the token is valid', function() {
-            return this.TokenAccessHandler.isValidToken
+            return this.TokenAccessHandler.validateTokenForAnonymousAccess
               .calledWith(this.project_id, this.token)
               .should.equal(true)
           })
@@ -198,90 +200,47 @@ describe('AuthorizationManager', function() {
         })
 
         describe('when the token is valid for read-and-write', function() {
-          describe('when read-write-sharing is not enabled', function() {
-            beforeEach(function() {
-              this.TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = false
-              this.TokenAccessHandler.isValidToken = sinon
-                .stub()
-                .withArgs(this.project_id, this.token)
-                .yields(null, true, false)
-              return this.AuthorizationManager.getPrivilegeLevelForProject(
-                null,
-                this.project_id,
-                this.token,
-                this.callback
-              )
-            })
-
-            it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function() {
-              return this.CollaboratorsGetter.getMemberIdPrivilegeLevel.called.should.equal(
-                false
-              )
-            })
-
-            it('should not call AuthorizationManager.isUserSiteAdmin', function() {
-              return this.AuthorizationManager.isUserSiteAdmin.called.should.equal(
-                false
-              )
-            })
-
-            it('should check if the token is valid', function() {
-              return this.TokenAccessHandler.isValidToken
-                .calledWith(this.project_id, this.token)
-                .should.equal(true)
-            })
-
-            it('should deny access', function() {
-              return this.callback
-                .calledWith(null, false, false, false)
-                .should.equal(true)
-            })
+          beforeEach(function() {
+            this.TokenAccessHandler.validateTokenForAnonymousAccess = sinon
+              .stub()
+              .withArgs(this.project_id, this.token)
+              .yields(null, true, false)
+            return this.AuthorizationManager.getPrivilegeLevelForProject(
+              null,
+              this.project_id,
+              this.token,
+              this.callback
+            )
           })
 
-          describe('when read-write-sharing is enabled', function() {
-            beforeEach(function() {
-              this.TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = true
-              this.TokenAccessHandler.isValidToken = sinon
-                .stub()
-                .withArgs(this.project_id, this.token)
-                .yields(null, true, false)
-              return this.AuthorizationManager.getPrivilegeLevelForProject(
-                null,
-                this.project_id,
-                this.token,
-                this.callback
-              )
-            })
+          it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function() {
+            return this.CollaboratorsGetter.getMemberIdPrivilegeLevel.called.should.equal(
+              false
+            )
+          })
 
-            it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function() {
-              return this.CollaboratorsGetter.getMemberIdPrivilegeLevel.called.should.equal(
-                false
-              )
-            })
+          it('should not call AuthorizationManager.isUserSiteAdmin', function() {
+            return this.AuthorizationManager.isUserSiteAdmin.called.should.equal(
+              false
+            )
+          })
 
-            it('should not call AuthorizationManager.isUserSiteAdmin', function() {
-              return this.AuthorizationManager.isUserSiteAdmin.called.should.equal(
-                false
-              )
-            })
+          it('should check if the token is valid', function() {
+            return this.TokenAccessHandler.validateTokenForAnonymousAccess
+              .calledWith(this.project_id, this.token)
+              .should.equal(true)
+          })
 
-            it('should check if the token is valid', function() {
-              return this.TokenAccessHandler.isValidToken
-                .calledWith(this.project_id, this.token)
-                .should.equal(true)
-            })
-
-            it('should give read-write access', function() {
-              return this.callback
-                .calledWith(null, 'readAndWrite', false)
-                .should.equal(true)
-            })
+          it('should give read-write access', function() {
+            return this.callback
+              .calledWith(null, 'readAndWrite', false)
+              .should.equal(true)
           })
         })
 
         describe('when the token is valid for read-only', function() {
           beforeEach(function() {
-            this.TokenAccessHandler.isValidToken = sinon
+            this.TokenAccessHandler.validateTokenForAnonymousAccess = sinon
               .stub()
               .withArgs(this.project_id, this.token)
               .yields(null, false, true)
@@ -306,7 +265,7 @@ describe('AuthorizationManager', function() {
           })
 
           it('should check if the token is valid', function() {
-            return this.TokenAccessHandler.isValidToken
+            return this.TokenAccessHandler.validateTokenForAnonymousAccess
               .calledWith(this.project_id, this.token)
               .should.equal(true)
           })

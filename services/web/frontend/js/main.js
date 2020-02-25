@@ -10,6 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define([
+  'main/token-access',
   'main/project-list/index',
   'main/account-settings',
   'main/clear-sessions',

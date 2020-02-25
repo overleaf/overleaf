@@ -1037,23 +1037,43 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.get(
-    '/read/:read_only_token([a-z]+)',
+    `/read/:token(${TokenAccessController.READ_ONLY_TOKEN_PATTERN})`,
     RateLimiterMiddleware.rateLimit({
       endpointName: 'read-only-token',
       maxRequests: 15,
       timeInterval: 60
     }),
-    TokenAccessController.readOnlyToken
+    TokenAccessController.tokenAccessPage
   )
 
   webRouter.get(
-    '/:read_and_write_token([0-9]+[a-z]+)',
+    `/:token(${TokenAccessController.READ_AND_WRITE_TOKEN_PATTERN})`,
     RateLimiterMiddleware.rateLimit({
       endpointName: 'read-and-write-token',
       maxRequests: 15,
       timeInterval: 60
     }),
-    TokenAccessController.readAndWriteToken
+    TokenAccessController.tokenAccessPage
+  )
+
+  webRouter.post(
+    `/:token(${TokenAccessController.READ_AND_WRITE_TOKEN_PATTERN})/grant`,
+    RateLimiterMiddleware.rateLimit({
+      endpointName: 'grant-token-access-read-write',
+      maxRequests: 10,
+      timeInterval: 60
+    }),
+    TokenAccessController.grantTokenAccessReadAndWrite
+  )
+
+  webRouter.post(
+    `/read/:token(${TokenAccessController.READ_ONLY_TOKEN_PATTERN})/grant`,
+    RateLimiterMiddleware.rateLimit({
+      endpointName: 'grant-token-access-read-only',
+      maxRequests: 10,
+      timeInterval: 60
+    }),
+    TokenAccessController.grantTokenAccessReadOnly
   )
 
   webRouter.get('*', ErrorController.notFound)
