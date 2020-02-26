@@ -146,6 +146,29 @@ describe "receiveUpdate", ->
 				v: @version, doc: @doc_id_second
 			}]
 
+	describe "with an update from a remote client for project 1", ->
+		beforeEach (done) ->
+			@update = {
+				doc_id: @doc_id
+				op:
+					meta:
+						source: 'this-is-a-remote-client-id'
+					v: @version
+					doc: @doc_id
+					op: [{i: "foo", p: 50}]
+			}
+			rclient.publish "applied-ops", JSON.stringify(@update)
+			setTimeout done, 200 # Give clients time to get message
+
+		it "should send the full op to clientA", ->
+			@clientAUpdates.should.deep.equal [@update.op]
+			
+		it "should send the full op to clientB", ->
+			@clientBUpdates.should.deep.equal [@update.op]
+
+		it "should send nothing to clientC", ->
+			@clientCUpdates.should.deep.equal []
+
 	describe "with an error for the first project", ->
 		beforeEach (done) ->
 			rclient.publish "applied-ops", JSON.stringify({doc_id: @doc_id, error: @error = "something went wrong"})
