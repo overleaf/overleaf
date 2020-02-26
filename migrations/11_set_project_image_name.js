@@ -1,6 +1,6 @@
 const Settings = require('settings-sharelatex')
 const mongojs = require('mongojs')
-const db = mongojs(Settings.mongo.url, ['users'])
+const db = mongojs(Settings.mongo.url, ['projects'])
 
 exports.migrate = (client, done) => {
     console.log(`>> Setting 'imageName' in projects`)
