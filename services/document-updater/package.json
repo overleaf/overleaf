@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "async": "^2.5.0",
+    "bunyan": "~0.22.1",
     "coffee-script": "~1.7.0",
     "express": "3.11.0",
     "lodash": "^4.17.13",
@@ -33,7 +34,6 @@
     "settings-sharelatex": "^1.1.0"
   },
   "devDependencies": {
-    "bunyan": "~0.22.1",
     "chai": "^3.5.0",
     "chai-spies": "^0.7.1",
     "cluster-key-slot": "^1.0.5",
