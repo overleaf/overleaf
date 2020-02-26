@@ -173,12 +173,6 @@ expressLocals(webRouter, privateApiRouter, publicApiRouter)
 
 webRouter.use(SessionAutostartMiddleware.invokeCallbackMiddleware)
 
-if (app.get('env') === 'production') {
-  logger.info('Production Enviroment')
-  app.enable('view cache')
-  Views.precompileViews(app)
-}
-
 webRouter.use(function(req, res, next) {
   if (Settings.siteIsOpen) {
     next()
@@ -239,6 +233,11 @@ const enableWebRouter =
   Settings.web != null ? Settings.web.enableWebRouter : undefined
 if (enableWebRouter || notDefined(enableWebRouter)) {
   logger.info('providing web router')
+
+  if (app.get('env') === 'production') {
+    logger.info('precompiling views for web in production environment')
+    Views.precompileViews(app)
+  }
 
   app.use(publicApiRouter) // public API goes with web router for public access
   app.use(Validation.errorMiddleware)
