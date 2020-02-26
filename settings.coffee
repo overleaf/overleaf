@@ -195,7 +195,6 @@ settings =
 		defaultLng: process.env["SHARELATEX_SITE_LANGUAGE"] or "en"
 
 	currentImageName: process.env["TEX_LIVE_DOCKER_IMAGE"]
-	importedImageName: process.env["TEX_LIVE_DOCKER_IMAGE"]
 
 	apis:
 		web:
