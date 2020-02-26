@@ -36,7 +36,6 @@ const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandle
 const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
 const V1Handler = require('../V1/V1Handler')
 const UserController = require('../User/UserController')
-const SystemMessageManager = require('../SystemMessages/SystemMessageManager')
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false
@@ -357,9 +356,6 @@ const ProjectController = {
     let noV1Connection = false
     async.parallel(
       {
-        systemMessages(cb) {
-          SystemMessageManager.getMessages(cb)
-        },
         tags(cb) {
           TagsHandler.getAllTags(userId, cb)
         },
@@ -547,7 +543,6 @@ const ProjectController = {
           const viewModel = {
             title: 'your_projects',
             priority_title: true,
-            systemMessages: results.systemMessages,
             projects,
             tags,
             notifications: notifications || [],

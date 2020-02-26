@@ -59,6 +59,7 @@ define([
   'main/event',
   'main/account-upgrade',
   'main/exposed-settings',
+  'main/system-messages',
   '../../modules/modules-ide.js'
 ], function(
   App,

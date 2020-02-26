@@ -20,26 +20,19 @@ block content
 		ng-controller="ProjectPageController"
 		role="main"
 	)
-		- if(typeof(suppressSystemMessages) == "undefined")
-			script.
-				window.systemMessages = !{StringHelper.stringifyJsonForScript(systemMessages)};
-			- if(settings.siteIsOpen == false && getSessionUser() && getSessionUser().isAdmin)
-				script.
-					window.systemMessages.push({content: "SITE IS CLOSED TO PUBLIC. OPEN ONLY FOR SITE ADMINS", _id:"siteclosed"})
-
-			.system-messages(
-				ng-cloak
-				ng-controller="SystemMessagesController"
+		.system-messages(
+			ng-cloak
+			ng-controller="SystemMessagesController"
+		)
+			.system-message(
+				ng-repeat="message in messages"
+				ng-controller="SystemMessageController"
+				ng-hide="hidden"
 			)
-				.system-message(
-					ng-repeat="message in messages"
-					ng-controller="SystemMessageController"
-					ng-hide="hidden"
-				)
-					button(ng-click="hide()").close.pull-right
-						span(aria-hidden="true") &times;
-						span.sr-only #{translate("close")}
-					.system-message-content(ng-bind-html="htmlContent")
+				button(ng-hide="protected",ng-click="hide()").close.pull-right
+					span(aria-hidden="true") &times;
+					span.sr-only #{translate("close")}
+				.system-message-content(ng-bind-html="htmlContent")
 
 			include ../translations/translation_message
 

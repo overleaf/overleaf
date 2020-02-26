@@ -3,7 +3,6 @@ extends ../layout
 block vars
 	- var suppressNavbar = true
 	- var suppressFooter = true
-	- var suppressSystemMessages = true
 	- metadata.robotsNoindexNofollow = true
 
 block content
@@ -48,6 +47,17 @@ block content
 
 			.div(ng-controller="SavingNotificationController")
 				.alert.alert-warning.small(ng-repeat="(doc_id, state) in docSavingStatus" ng-if="state.unsavedSeconds > 8") #{translate("saving_notification_with_seconds", {docname:"{{ state.doc.name }}", seconds:"{{ state.unsavedSeconds }}"})}
+
+			.div(ng-controller="SystemMessagesController")
+				.alert.alert-warning.system-message(
+					ng-repeat="message in messages"
+					ng-controller="SystemMessageController"
+					ng-hide="hidden"
+				)
+					button(ng-hide="protected",ng-click="hide()").close.pull-right
+						span(aria-hidden="true") &times;
+						span.sr-only #{translate("close")}
+					.system-message-content(ng-bind-html="htmlContent")
 
 		include ./editor/left-menu
 

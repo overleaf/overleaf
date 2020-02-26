@@ -49,6 +49,7 @@ const LinkedFilesRouter = require('./Features/LinkedFiles/LinkedFilesRouter')
 const TemplatesRouter = require('./Features/Templates/TemplatesRouter')
 const InstitutionsController = require('./Features/Institutions/InstitutionsController')
 const UserMembershipRouter = require('./Features/UserMembership/UserMembershipRouter')
+const SystemMessageController = require('./Features/SystemMessages/SystemMessageController')
 
 const logger = require('logger-sharelatex')
 const _ = require('underscore')
@@ -107,6 +108,12 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get('/user/activate', UserPagesController.activateAccountPage)
   AuthenticationController.addEndpointToLoginWhitelist('/user/activate')
+
+  webRouter.get(
+    '/system/messages',
+    AuthenticationController.requireLogin(),
+    SystemMessageController.getMessages
+  )
 
   webRouter.get(
     '/user/settings',
