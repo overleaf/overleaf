@@ -7,7 +7,6 @@ HealthCheckManager = require "./HealthCheckManager"
 RoomManager = require "./RoomManager"
 ChannelManager = require "./ChannelManager"
 ConnectedUsersManager = require "./ConnectedUsersManager"
-Async = require 'async'
 
 RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
 	'connectionAccepted',
@@ -96,17 +95,10 @@ module.exports = WebsocketLoadBalancer =
 					socketIoClients: (client.id for client in clientList)
 				}, "distributing event to clients"
 				seen = {}
-				# Send the messages to clients async, don't wait for them all to finish
-				Async.eachLimit clientList
-					, 2
-					, (client, cb) ->
+				for client in clientList
 							if !seen[client.id]
 								seen[client.id] = true
 								client.emit(message.message, message.payload...)
-							cb()
-					, (err) ->
-						if err?
-							logger.err {err, message}, "Error sending message to clients"
 			else if message.health_check?
 				logger.debug {message}, "got health check message in editor events channel"
 				HealthCheckManager.check channel, message.key
