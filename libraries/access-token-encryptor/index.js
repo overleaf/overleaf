@@ -1,2 +1,1 @@
-require('coffee-script');
-module.exports = require('./lib/coffee/AccessTokenEncryptor.coffee');
+module.exports = require('./lib/js/AccessTokenEncryptor');
