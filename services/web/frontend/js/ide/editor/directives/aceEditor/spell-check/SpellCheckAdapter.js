@@ -31,6 +31,10 @@ define([
       return rows.map(rowIdx => this.editor.session.doc.getLine(rowIdx))
     }
 
+    getSelectionContents() {
+      return this.editor.getSelectedText()
+    }
+
     normalizeChangeEvent(e) {
       return e
     }

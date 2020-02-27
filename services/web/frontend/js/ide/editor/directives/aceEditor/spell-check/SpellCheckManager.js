@@ -54,6 +54,8 @@ define([], function() {
           capacity: 10000
         })
 
+      this.selectedHighlightContents = null
+
       $(document).on('click', e => {
         if (e.which !== 3) {
           this.closeContextMenu()
@@ -84,6 +86,15 @@ define([], function() {
 
     onChange(e) {
       if (this.isSpellCheckEnabled()) {
+        this.$scope.$applyAsync(() => {
+          if (
+            this.selectedHighlightContents &&
+            this.selectedHighlightContents !==
+              this.adapter.getSelectionContents()
+          ) {
+            this.closeContextMenu()
+          }
+        })
         this.markLinesAsUpdated(this.adapter.normalizeChangeEvent(e))
         this.adapter.highlightedWordManager.clearHighlightTouchingRange(e)
         this.runSpellCheckSoon(200)
@@ -122,7 +133,8 @@ define([], function() {
       if (highlight) {
         this.adapter.preventContextMenuEventDefault(e)
         this.adapter.selectHighlightedWord(highlight)
-        this.$scope.$apply(() => {
+        this.$scope.$applyAsync(() => {
+          this.selectedHighlightContents = this.adapter.getSelectionContents()
           this.$scope.spellMenu = {
             open: true,
             top: coords.y + 'px',
@@ -141,7 +153,8 @@ define([], function() {
         (this.$scope != null ? this.$scope.spellMenu : undefined) &&
         this.$scope.spellMenu.open !== false
       ) {
-        this.$scope.$apply(() => {
+        this.selectedHighlightContents = null
+        this.$scope.$applyAsync(() => {
           this.$scope.spellMenu.open = false
         })
       }
