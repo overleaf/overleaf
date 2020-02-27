@@ -1,210 +1,156 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const settings = require('settings-sharelatex')
 const request = require('request')
 const logger = require('logger-sharelatex')
 const { promisifyAll } = require('../../util/promises')
 
 const TIMEOUT = 10000
-const TagsHandler = {
-  getAllTags(user_id, callback) {
-    this._requestTags(user_id, (err, allTags) => {
-      if (allTags == null) {
-        allTags = []
-      }
-      callback(err, allTags)
-    })
-  },
 
-  createTag(user_id, name, callback) {
-    if (callback == null) {
-      callback = function(error, tag) {}
-    }
-    const opts = {
-      url: `${settings.apis.tags.url}/user/${user_id}/tag`,
+function getAllTags(userId, callback) {
+  const opts = {
+    url: `${settings.apis.tags.url}/user/${userId}/tag`,
+    json: true,
+    timeout: TIMEOUT
+  }
+  request.get(opts, (err, res, body) =>
+    _handleResponse(err, res, { userId }, function(error) {
+      if (error != null) {
+        return callback(error, [])
+      }
+      callback(null, body || [])
+    })
+  )
+}
+
+function createTag(userId, name, callback) {
+  const opts = {
+    url: `${settings.apis.tags.url}/user/${userId}/tag`,
+    json: {
+      name
+    },
+    timeout: TIMEOUT
+  }
+  request.post(opts, (err, res, body) =>
+    _handleResponse(err, res, { userId }, function(error) {
+      if (error != null) {
+        return callback(error)
+      }
+      callback(null, body || {})
+    })
+  )
+}
+
+function renameTag(userId, tagId, name, callback) {
+  const url = `${settings.apis.tags.url}/user/${userId}/tag/${tagId}/rename`
+  request.post(
+    {
+      url,
       json: {
         name
       },
       timeout: TIMEOUT
-    }
-    return request.post(opts, (err, res, body) =>
-      TagsHandler._handleResponse(err, res, { user_id }, function(error) {
-        if (error != null) {
-          return callback(error)
-        }
-        return callback(null, body || {})
-      })
-    )
-  },
+    },
+    (err, res, body) =>
+      _handleResponse(err, res, { url, userId, tagId, name }, callback)
+  )
+}
 
-  renameTag(user_id, tag_id, name, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    const url = `${settings.apis.tags.url}/user/${user_id}/tag/${tag_id}/rename`
-    return request.post(
-      {
-        url,
-        json: {
-          name
-        },
-        timeout: TIMEOUT
-      },
-      (err, res, body) =>
-        TagsHandler._handleResponse(
-          err,
-          res,
-          { url, user_id, tag_id, name },
-          callback
-        )
-    )
-  },
+function deleteTag(userId, tagId, callback) {
+  const url = `${settings.apis.tags.url}/user/${userId}/tag/${tagId}`
+  request.del({ url, timeout: TIMEOUT }, (err, res, body) =>
+    _handleResponse(err, res, { url, userId, tagId }, callback)
+  )
+}
 
-  deleteTag(user_id, tag_id, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    const url = `${settings.apis.tags.url}/user/${user_id}/tag/${tag_id}`
-    return request.del({ url, timeout: TIMEOUT }, (err, res, body) =>
-      TagsHandler._handleResponse(err, res, { url, user_id, tag_id }, callback)
-    )
-  },
+function updateTagUserIds(oldUserId, newUserId, callback) {
+  const opts = {
+    url: `${settings.apis.tags.url}/user/${oldUserId}/tag`,
+    json: {
+      user_id: newUserId
+    },
+    timeout: TIMEOUT
+  }
+  request.put(opts, (err, res, body) =>
+    _handleResponse(err, res, { oldUserId, newUserId }, callback)
+  )
+}
 
-  updateTagUserIds(old_user_id, new_user_id, callback) {
-    const opts = {
-      url: `${settings.apis.tags.url}/user/${old_user_id}/tag`,
-      json: {
-        user_id: new_user_id
-      },
-      timeout: TIMEOUT
-    }
-    return request.put(opts, (err, res, body) =>
-      TagsHandler._handleResponse(
-        err,
-        res,
-        { old_user_id, new_user_id },
-        callback
-      )
-    )
-  },
+function removeProjectFromTag(userId, tagId, projectId, callback) {
+  const url = `${
+    settings.apis.tags.url
+  }/user/${userId}/tag/${tagId}/project/${projectId}`
+  request.del({ url, timeout: TIMEOUT }, (err, res, body) =>
+    _handleResponse(err, res, { url, userId, tagId, projectId }, callback)
+  )
+}
 
-  removeProjectFromTag(user_id, tag_id, project_id, callback) {
-    const url = `${
-      settings.apis.tags.url
-    }/user/${user_id}/tag/${tag_id}/project/${project_id}`
-    return request.del({ url, timeout: TIMEOUT }, (err, res, body) =>
-      TagsHandler._handleResponse(
-        err,
-        res,
-        { url, user_id, tag_id, project_id },
-        callback
-      )
-    )
-  },
+function addProjectToTag(userId, tagId, projectId, callback) {
+  const url = `${
+    settings.apis.tags.url
+  }/user/${userId}/tag/${tagId}/project/${projectId}`
+  request.post({ url, timeout: TIMEOUT }, (err, res, body) =>
+    _handleResponse(err, res, { url, userId, tagId, projectId }, callback)
+  )
+}
 
-  addProjectToTag(user_id, tag_id, project_id, callback) {
-    const url = `${
-      settings.apis.tags.url
-    }/user/${user_id}/tag/${tag_id}/project/${project_id}`
-    return request.post({ url, timeout: TIMEOUT }, (err, res, body) =>
-      TagsHandler._handleResponse(
-        err,
-        res,
-        { url, user_id, tag_id, project_id },
-        callback
-      )
-    )
-  },
+function addProjectToTagName(userId, name, projectId, callback) {
+  const url = `${
+    settings.apis.tags.url
+  }/user/${userId}/tag/project/${projectId}`
+  const opts = {
+    json: { name },
+    timeout: TIMEOUT,
+    url
+  }
+  request.post(opts, (err, res, body) =>
+    _handleResponse(err, res, { url, userId, name, projectId }, callback)
+  )
+}
 
-  addProjectToTagName(user_id, name, project_id, callback) {
-    const url = `${
-      settings.apis.tags.url
-    }/user/${user_id}/tag/project/${project_id}`
-    const opts = {
-      json: { name },
-      timeout: TIMEOUT,
-      url
-    }
-    return request.post(opts, (err, res, body) =>
-      TagsHandler._handleResponse(
-        err,
-        res,
-        { url, user_id, name, project_id },
-        callback
-      )
-    )
-  },
+function removeProjectFromAllTags(userId, projectId, callback) {
+  const url = `${settings.apis.tags.url}/user/${userId}/project/${projectId}`
+  const opts = {
+    url,
+    timeout: TIMEOUT
+  }
+  request.del(opts, (err, res, body) =>
+    _handleResponse(err, res, { url, userId, projectId }, callback)
+  )
+}
 
-  removeProjectFromAllTags(user_id, project_id, callback) {
-    const url = `${
-      settings.apis.tags.url
-    }/user/${user_id}/project/${project_id}`
-    const opts = {
-      url,
-      timeout: TIMEOUT
-    }
-    return request.del(opts, (err, res, body) =>
-      TagsHandler._handleResponse(
-        err,
-        res,
-        { url, user_id, project_id },
-        callback
-      )
+function _handleResponse(err, res, params, callback) {
+  if (err != null) {
+    params.err = err
+    logger.warn(params, 'error in tag api')
+    return callback(err)
+  } else if (res != null && res.statusCode >= 200 && res.statusCode < 300) {
+    return callback(null)
+  } else {
+    err = new Error(
+      `tags api returned a failure status code: ${
+        res != null ? res.statusCode : undefined
+      }`
     )
-  },
-
-  _handleResponse(err, res, params, callback) {
-    if (err != null) {
-      params.err = err
-      logger.warn(params, 'error in tag api')
-      return callback(err)
-    } else if (res != null && res.statusCode >= 200 && res.statusCode < 300) {
-      return callback(null)
-    } else {
-      err = new Error(
-        `tags api returned a failure status code: ${
-          res != null ? res.statusCode : undefined
-        }`
-      )
-      params.err = err
-      logger.warn(
-        params,
-        `tags api returned failure status code: ${
-          res != null ? res.statusCode : undefined
-        }`
-      )
-      return callback(err)
-    }
-  },
-
-  _requestTags(user_id, callback) {
-    const opts = {
-      url: `${settings.apis.tags.url}/user/${user_id}/tag`,
-      json: true,
-      timeout: TIMEOUT
-    }
-    return request.get(opts, (err, res, body) =>
-      TagsHandler._handleResponse(err, res, { user_id }, function(error) {
-        if (error != null) {
-          return callback(error, [])
-        }
-        return callback(null, body || [])
-      })
+    params.err = err
+    logger.warn(
+      params,
+      `tags api returned failure status code: ${
+        res != null ? res.statusCode : undefined
+      }`
     )
+    callback(err)
   }
 }
 
+const TagsHandler = {
+  getAllTags,
+  createTag,
+  renameTag,
+  deleteTag,
+  updateTagUserIds,
+  removeProjectFromTag,
+  addProjectToTag,
+  addProjectToTagName,
+  removeProjectFromAllTags
+}
 TagsHandler.promises = promisifyAll(TagsHandler)
 module.exports = TagsHandler

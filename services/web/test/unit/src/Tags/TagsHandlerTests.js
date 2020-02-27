@@ -1,16 +1,3 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const { assert } = require('chai')
 require('chai').should()
@@ -19,12 +6,10 @@ const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Tags/TagsHandler.js'
 )
-const _ = require('underscore')
-
 describe('TagsHandler', function() {
-  const user_id = 'user-id-123'
-  const tag_id = 'tag-id-123'
-  const project_id = 'project-id-123'
+  const userId = 'user-id-123'
+  const tagId = 'tag-id-123'
+  const projectId = 'project-id-123'
   const tagsUrl = 'tags.sharelatex.testing'
   const tag = 'tag_name'
 
@@ -35,7 +20,7 @@ describe('TagsHandler', function() {
       get: sinon.stub()
     }
     this.callback = sinon.stub()
-    return (this.handler = SandboxedModule.require(modulePath, {
+    this.handler = SandboxedModule.require(modulePath, {
       globals: {
         console: console
       },
@@ -50,72 +35,19 @@ describe('TagsHandler', function() {
           err() {}
         }
       }
-    }))
+    })
   })
 
   describe('removeProjectFromAllTags', function() {
     it('should tell the tags api to remove the project_id from all the users tags', function(done) {
-      return this.handler.removeProjectFromAllTags(user_id, project_id, () => {
+      this.handler.removeProjectFromAllTags(userId, projectId, () => {
         this.request.del
           .calledWith({
-            url: `${tagsUrl}/user/${user_id}/project/${project_id}`,
+            url: `${tagsUrl}/user/${userId}/project/${projectId}`,
             timeout: 10000
           })
           .should.equal(true)
-        return done()
-      })
-    })
-  })
-
-  describe('_requestTags', function() {
-    it('should return an err and empty array on error', function(done) {
-      this.request.get.callsArgWith(
-        1,
-        { something: 'wrong' },
-        { statusCode: 200 },
-        []
-      )
-      return this.handler._requestTags(user_id, (err, allTags) => {
-        allTags.length.should.equal(0)
-        assert.isDefined(err)
-        return done()
-      })
-    })
-
-    it('should return an err and empty array on no body', function(done) {
-      this.request.get.callsArgWith(
-        1,
-        { something: 'wrong' },
-        { statusCode: 200 },
-        undefined
-      )
-      return this.handler._requestTags(user_id, (err, allTags) => {
-        allTags.length.should.equal(0)
-        assert.isDefined(err)
-        return done()
-      })
-    })
-
-    it('should return an err and empty array on non 200 response', function(done) {
-      this.request.get.callsArgWith(1, null, { statusCode: 201 }, [])
-      return this.handler._requestTags(user_id, (err, allTags) => {
-        allTags.length.should.equal(0)
-        assert.isDefined(err)
-        return done()
-      })
-    })
-
-    it('should return an err and empty array on no body and no response', function(done) {
-      this.request.get.callsArgWith(
-        1,
-        { something: 'wrong' },
-        undefined,
-        undefined
-      )
-      return this.handler._requestTags(user_id, (err, allTags) => {
-        allTags.length.should.equal(0)
-        assert.isDefined(err)
-        return done()
+        done()
       })
     })
   })
@@ -131,27 +63,68 @@ describe('TagsHandler', function() {
         { statusCode: 200 },
         stubbedAllTags
       )
-      return this.handler.getAllTags(user_id, (err, allTags) => {
+      this.handler.getAllTags(userId, (err, allTags) => {
+        assert.notExists(err)
         stubbedAllTags.should.deep.equal(allTags)
         const getOpts = {
-          url: `${tagsUrl}/user/${user_id}/tag`,
+          url: `${tagsUrl}/user/${userId}/tag`,
           json: true,
           timeout: 10000
         }
         this.request.get.calledWith(getOpts).should.equal(true)
-        return done()
+        done()
       })
     })
 
-    it('should return empty arrays if there are no tags', function() {
-      this.request.get.callsArgWith(1, null, { statusCode: 200 }, null)
-      return this.handler.getAllTags(
-        user_id,
-        (err, allTags, projectGroupedTags) => {
-          allTags.length.should.equal(0)
-          return _.size(projectGroupedTags).should.equal(0)
-        }
+    it('should callback with an empty array on error', function(done) {
+      this.request.get.callsArgWith(
+        1,
+        { something: 'wrong' },
+        { statusCode: 200 },
+        []
       )
+      this.handler.getAllTags(userId, (err, allTags) => {
+        allTags.length.should.equal(0)
+        assert.isDefined(err)
+        done()
+      })
+    })
+
+    it('should callback with an empty array if there are no tags', function(done) {
+      this.request.get.callsArgWith(
+        1,
+        { something: 'wrong' },
+        { statusCode: 200 },
+        undefined
+      )
+      this.handler.getAllTags(userId, (err, allTags) => {
+        allTags.length.should.equal(0)
+        assert.isDefined(err)
+        done()
+      })
+    })
+
+    it('should callback with an empty array on a non 200 response', function(done) {
+      this.request.get.callsArgWith(1, null, { statusCode: 201 }, [])
+      this.handler.getAllTags(userId, (err, allTags) => {
+        allTags.length.should.equal(0)
+        assert.isDefined(err)
+        done()
+      })
+    })
+
+    it('should callback with an empty array on no body and no response', function(done) {
+      this.request.get.callsArgWith(
+        1,
+        { something: 'wrong' },
+        undefined,
+        undefined
+      )
+      this.handler.getAllTags(userId, (err, allTags) => {
+        allTags.length.should.equal(0)
+        assert.isDefined(err)
+        done()
+      })
     })
   })
 
@@ -160,17 +133,13 @@ describe('TagsHandler', function() {
       this.request.post = sinon
         .stub()
         .callsArgWith(1, null, { statusCode: 204 }, '')
-      return this.handler.createTag(
-        user_id,
-        (this.name = 'tag_name'),
-        this.callback
-      )
+      this.handler.createTag(userId, (this.name = 'tag_name'), this.callback)
     })
 
     it('should send a request to the tag backend', function() {
-      return this.request.post
+      this.request.post
         .calledWith({
-          url: `${tagsUrl}/user/${user_id}/tag`,
+          url: `${tagsUrl}/user/${userId}/tag`,
           json: {
             name: this.name
           },
@@ -180,7 +149,7 @@ describe('TagsHandler', function() {
     })
 
     it('should call the callback with no error', function() {
-      return this.callback.calledWith(null).should.equal(true)
+      this.callback.calledWith(null).should.equal(true)
     })
   })
 
@@ -190,20 +159,20 @@ describe('TagsHandler', function() {
         this.request.del = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, '')
-        return this.handler.deleteTag(user_id, tag_id, this.callback)
+        this.handler.deleteTag(userId, tagId, this.callback)
       })
 
       it('should send a request to the tag backend', function() {
-        return this.request.del
+        this.request.del
           .calledWith({
-            url: `${tagsUrl}/user/${user_id}/tag/${tag_id}`,
+            url: `${tagsUrl}/user/${userId}/tag/${tagId}`,
             timeout: 10000
           })
           .should.equal(true)
       })
 
       it('should call the callback with no error', function() {
-        return this.callback.calledWith(null).should.equal(true)
+        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -212,11 +181,11 @@ describe('TagsHandler', function() {
         this.request.del = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        return this.handler.deleteTag(user_id, tag_id, this.callback)
+        this.handler.deleteTag(userId, tagId, this.callback)
       })
 
       it('should call the callback with an Error', function() {
-        return this.callback
+        this.callback
           .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
@@ -229,18 +198,18 @@ describe('TagsHandler', function() {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, '')
-        return this.handler.renameTag(
-          user_id,
-          tag_id,
+        this.handler.renameTag(
+          userId,
+          tagId,
           (this.name = 'new-name'),
           this.callback
         )
       })
 
       it('should send a request to the tag backend', function() {
-        return this.request.post
+        this.request.post
           .calledWith({
-            url: `${tagsUrl}/user/${user_id}/tag/${tag_id}/rename`,
+            url: `${tagsUrl}/user/${userId}/tag/${tagId}/rename`,
             json: {
               name: this.name
             },
@@ -250,7 +219,7 @@ describe('TagsHandler', function() {
       })
 
       it('should call the callback with no error', function() {
-        return this.callback.calledWith(null).should.equal(true)
+        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -259,11 +228,11 @@ describe('TagsHandler', function() {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        return this.handler.renameTag(user_id, tag_id, 'name', this.callback)
+        this.handler.renameTag(userId, tagId, 'name', this.callback)
       })
 
       it('should call the callback with an Error', function() {
-        return this.callback
+        this.callback
           .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
@@ -276,25 +245,25 @@ describe('TagsHandler', function() {
         this.request.del = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, '')
-        return this.handler.removeProjectFromTag(
-          user_id,
-          tag_id,
-          project_id,
+        this.handler.removeProjectFromTag(
+          userId,
+          tagId,
+          projectId,
           this.callback
         )
       })
 
       it('should send a request to the tag backend', function() {
-        return this.request.del
+        this.request.del
           .calledWith({
-            url: `${tagsUrl}/user/${user_id}/tag/${tag_id}/project/${project_id}`,
+            url: `${tagsUrl}/user/${userId}/tag/${tagId}/project/${projectId}`,
             timeout: 10000
           })
           .should.equal(true)
       })
 
       it('should call the callback with no error', function() {
-        return this.callback.calledWith(null).should.equal(true)
+        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -303,16 +272,16 @@ describe('TagsHandler', function() {
         this.request.del = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        return this.handler.removeProjectFromTag(
-          user_id,
-          tag_id,
-          project_id,
+        this.handler.removeProjectFromTag(
+          userId,
+          tagId,
+          projectId,
           this.callback
         )
       })
 
       it('should call the callback with an Error', function() {
-        return this.callback
+        this.callback
           .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
@@ -325,25 +294,20 @@ describe('TagsHandler', function() {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, '')
-        return this.handler.addProjectToTag(
-          user_id,
-          tag_id,
-          project_id,
-          this.callback
-        )
+        this.handler.addProjectToTag(userId, tagId, projectId, this.callback)
       })
 
       it('should send a request to the tag backend', function() {
-        return this.request.post
+        this.request.post
           .calledWith({
-            url: `${tagsUrl}/user/${user_id}/tag/${tag_id}/project/${project_id}`,
+            url: `${tagsUrl}/user/${userId}/tag/${tagId}/project/${projectId}`,
             timeout: 10000
           })
           .should.equal(true)
       })
 
       it('should call the callback with no error', function() {
-        return this.callback.calledWith(null).should.equal(true)
+        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -352,16 +316,11 @@ describe('TagsHandler', function() {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        return this.handler.addProjectToTag(
-          user_id,
-          tag_id,
-          project_id,
-          this.callback
-        )
+        this.handler.addProjectToTag(userId, tagId, projectId, this.callback)
       })
 
       it('should call the callback with an Error', function() {
-        return this.callback
+        this.callback
           .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
@@ -374,28 +333,23 @@ describe('TagsHandler', function() {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, '')
-        return this.handler.addProjectToTagName(
-          user_id,
-          tag,
-          project_id,
-          this.callback
-        )
+        this.handler.addProjectToTagName(userId, tag, projectId, this.callback)
       })
 
       it('should send a request to the tag backend', function() {
-        return this.request.post
+        this.request.post
           .calledWith({
             json: {
               name: tag
             },
-            url: `${tagsUrl}/user/${user_id}/tag/project/${project_id}`,
+            url: `${tagsUrl}/user/${userId}/tag/project/${projectId}`,
             timeout: 10000
           })
           .should.equal(true)
       })
 
       it('should call the callback with no error', function() {
-        return this.callback.calledWith(null).should.equal(true)
+        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -404,16 +358,16 @@ describe('TagsHandler', function() {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        return this.handler.addProjectToTagName(
-          user_id,
-          tag_id,
-          project_id,
+        this.handler.addProjectToTagName(
+          userId,
+          tagId,
+          projectId,
           this.callback
         )
       })
 
       it('should call the callback with an Error', function() {
-        return this.callback
+        this.callback
           .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
@@ -426,7 +380,7 @@ describe('TagsHandler', function() {
         this.request.put = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, '')
-        return this.handler.updateTagUserIds(
+        this.handler.updateTagUserIds(
           'old-user-id',
           'new-user-id',
           this.callback
@@ -434,7 +388,7 @@ describe('TagsHandler', function() {
       })
 
       it('should send a request to the tag backend', function() {
-        return this.request.put
+        this.request.put
           .calledWith({
             json: {
               user_id: 'new-user-id'
@@ -446,7 +400,7 @@ describe('TagsHandler', function() {
       })
 
       it('should call the callback with no error', function() {
-        return this.callback.calledWith(null).should.equal(true)
+        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -455,7 +409,7 @@ describe('TagsHandler', function() {
         this.request.put = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        return this.handler.updateTagUserIds(
+        this.handler.updateTagUserIds(
           'old-user-id',
           'new-user-id',
           this.callback
@@ -463,7 +417,7 @@ describe('TagsHandler', function() {
       })
 
       it('should call the callback with an Error', function() {
-        return this.callback
+        this.callback
           .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
