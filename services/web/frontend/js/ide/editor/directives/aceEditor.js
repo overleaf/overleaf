@@ -201,28 +201,24 @@ define([
         // you can modify the input or reject the event with e.preventDefault()
         editor.commands.on('exec', function(e) {
           // replace bad characters in paste content
-          if (
-            e.command &&
-            e.command.name === 'paste' &&
-            e.args &&
-            BAD_CHARS_REGEXP.test(e.args.text)
-          ) {
-            e.args.text = e.args.text.replace(
-              BAD_CHARS_REGEXP,
-              BAD_CHARS_REPLACEMENT_CHAR
-            )
+          if (e.command && e.command.name === 'paste') {
+            BAD_CHARS_REGEXP.lastIndex = 0 // reset stateful regexp for this usage
+            if (e.args && BAD_CHARS_REGEXP.test(e.args.text)) {
+              e.args.text = e.args.text.replace(
+                BAD_CHARS_REGEXP,
+                BAD_CHARS_REPLACEMENT_CHAR
+              )
+            }
           }
           // replace bad characters in keyboard input
-          if (
-            e.command &&
-            e.command.name === 'insertstring' &&
-            e.args &&
-            BAD_CHARS_REGEXP.test(e.args)
-          ) {
-            e.args = e.args.replace(
-              BAD_CHARS_REGEXP,
-              BAD_CHARS_REPLACEMENT_CHAR
-            )
+          if (e.command && e.command.name === 'insertstring') {
+            BAD_CHARS_REGEXP.lastIndex = 0 // reset stateful regexp for this usage
+            if (e.args && BAD_CHARS_REGEXP.test(e.args)) {
+              e.args = e.args.replace(
+                BAD_CHARS_REGEXP,
+                BAD_CHARS_REPLACEMENT_CHAR
+              )
+            }
           }
         })
 
