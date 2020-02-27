@@ -16,6 +16,7 @@ const User = require('./helpers/User')
 const { Subscription } = require('../../../app/src/models/Subscription')
 const { Institution } = require('../../../app/src/models/Institution')
 const SubscriptionViewModelBuilder = require('../../../app/src/Features/Subscription/SubscriptionViewModelBuilder')
+const RecurlySubscription = require('./helpers/RecurlySubscription')
 
 const MockRecurlyApi = require('./helpers/MockRecurlyApi')
 const MockV1Api = require('./helpers/MockV1Api')
@@ -61,56 +62,45 @@ describe('Subscriptions', function() {
 
     describe('when the user has a subscription with recurly', function() {
       beforeEach(function(done) {
-        MockRecurlyApi.accounts['mock-account-id'] = this.accounts = {
-          hosted_login_token: 'mock-login-token',
-          email: 'mock@email.com'
-        }
-        MockRecurlyApi.subscriptions[
-          'mock-subscription-id'
-        ] = this.subscription = {
-          plan_code: 'collaborator',
+        this.recurlySubscription = new RecurlySubscription({
+          adminId: this.user._id,
+          planCode: 'collaborator',
           tax_in_cents: 100,
           tax_rate: 0.2,
           unit_amount_in_cents: 500,
           currency: 'GBP',
           current_period_ends_at: new Date(2018, 4, 5),
           state: 'active',
-          account_id: 'mock-account-id',
-          trial_ends_at: new Date(2018, 6, 7)
-        }
+          trial_ends_at: new Date(2018, 6, 7),
+          account: {
+            hosted_login_token: 'mock-login-token',
+            email: 'mock@email.com'
+          }
+        })
         MockRecurlyApi.coupons = this.coupons = {
           'test-coupon-1': { description: 'Test Coupon 1' },
           'test-coupon-2': { description: 'Test Coupon 2' },
           'test-coupon-3': { name: 'TestCoupon3' }
         }
-        Subscription.create(
-          {
-            admin_id: this.user._id,
-            manager_ids: [this.user._id],
-            recurlySubscription_id: 'mock-subscription-id',
-            planCode: 'collaborator'
-          },
-          error => {
-            if (error != null) {
-              return done(error)
-            }
-            return SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel(
-              this.user,
-              (error, data) => {
-                this.data = data
-                if (error != null) {
-                  return done(error)
-                }
-                return done()
-              }
-            )
+        this.recurlySubscription.ensureExists(error => {
+          if (error != null) {
+            return done(error)
           }
-        )
+          return SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel(
+            this.user,
+            (error, data) => {
+              this.data = data
+              if (error != null) {
+                return done(error)
+              }
+              return done()
+            }
+          )
+        })
       })
 
       after(function(done) {
-        MockRecurlyApi.accounts = {}
-        MockRecurlyApi.subscriptions = {}
+        MockRecurlyApi.mockSubscriptions = []
         MockRecurlyApi.coupons = {}
         MockRecurlyApi.redemptions = {}
         Subscription.remove(
@@ -141,7 +131,7 @@ describe('Subscriptions', function() {
           trial_ends_at: new Date(2018, 6, 7),
           trialEndsAtFormatted: '7th July 2018',
           account: {
-            account_code: 'mock-account-id',
+            account_code: this.user._id,
             email: 'mock@email.com',
             hosted_login_token: 'mock-login-token'
           }
@@ -153,7 +143,7 @@ describe('Subscriptions', function() {
       })
 
       it('should include redeemed coupons', function(done) {
-        MockRecurlyApi.redemptions['mock-account-id'] = [
+        MockRecurlyApi.redemptions[this.user._id] = [
           { state: 'active', coupon_code: 'test-coupon-1' },
           { state: 'inactive', coupon_code: 'test-coupon-2' },
           { state: 'active', coupon_code: 'test-coupon-3' }

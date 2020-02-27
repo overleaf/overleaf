@@ -19,25 +19,31 @@ const SubscriptionController = require('../../../../app/src/Features/Subscriptio
 app.use(bodyParser.json())
 
 module.exports = MockRecurlyApi = {
-  subscriptions: {},
-
-  accounts: {},
+  mockSubscriptions: [],
 
   redemptions: {},
 
   coupons: {},
 
-  addSubscription(subscription) {
-    this.subscriptions[subscription.uuid] = subscription
+  addMockSubscription(recurlySubscription) {
+    this.mockSubscriptions.push(recurlySubscription)
   },
 
-  addAccount(account) {
-    this.accounts[account.id] = account
+  getMockSubscriptionByAccountId(accountId) {
+    return this.mockSubscriptions.find(
+      mockSubscription => mockSubscription.account.id === accountId
+    )
+  },
+
+  getMockSubscriptionById(uuid) {
+    return this.mockSubscriptions.find(
+      mockSubscription => mockSubscription.uuid === uuid
+    )
   },
 
   run() {
     app.get('/subscriptions/:id', (req, res, next) => {
-      const subscription = this.subscriptions[req.params.id]
+      const subscription = this.getMockSubscriptionById(req.params.id)
       if (subscription == null) {
         return res.status(404).end()
       } else {
@@ -54,7 +60,7 @@ module.exports = MockRecurlyApi = {
 	<unit_amount_in_cents type="integer">${
     subscription.unit_amount_in_cents
   }</unit_amount_in_cents>
-	<account href="accounts/${subscription.account_id}" />
+	<account href="accounts/${subscription.account.id}" />
 	<trial_ends_at type="datetime">${subscription.trial_ends_at}</trial_ends_at>
 </subscription>\
 `)
@@ -62,15 +68,17 @@ module.exports = MockRecurlyApi = {
     })
 
     app.get('/accounts/:id', (req, res, next) => {
-      const account = this.accounts[req.params.id]
-      if (account == null) {
+      const subscription = this.getMockSubscriptionByAccountId(req.params.id)
+      if (subscription == null) {
         return res.status(404).end()
       } else {
         return res.send(`\
 <account>
 	<account_code>${req.params.id}</account_code>
-	<hosted_login_token>${account.hosted_login_token}</hosted_login_token>
-	<email>${account.email}</email>
+	<hosted_login_token>${
+    subscription.account.hosted_login_token
+  }</hosted_login_token>
+	<email>${subscription.account.email}</email>
 </account>\
 `)
       }
@@ -80,14 +88,15 @@ module.exports = MockRecurlyApi = {
       '/accounts/:id',
       SubscriptionController.recurlyNotificationParser, // required to parse XML requests
       (req, res, next) => {
-        const account = this.accounts[req.params.id]
-        if (account == null) {
+        const subscription = this.getMockSubscriptionByAccountId(req.params.id)
+        if (subscription == null) {
           return res.status(404).end()
         } else {
+          Object.assign(subscription.account, req.body.account)
           return res.send(`\
 <account>
 	<account_code>${req.params.id}</account_code>
-	<email>${account.email}</email>
+	<email>${subscription.account.email}</email>
 </account>\
 `)
         }

@@ -34,8 +34,9 @@ describe('Subscriptions', function() {
           return done(error)
         }
         expect(statusCode).to.equal(200)
-        // the actual email update is not tested as the mocked Recurly API
-        // doesn't handle it
+        expect(this.recurlyUser.email).to.equal(
+          this.recurlySubscription.account.email
+        )
         done()
       })
     })

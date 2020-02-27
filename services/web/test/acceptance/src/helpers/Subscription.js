@@ -16,6 +16,7 @@ class Subscription {
     this.invited_emails = options.invitedEmails || []
     this.teamInvites = options.teamInvites || []
     this.planCode = options.planCode
+    this.recurlySubscription_id = options.recurlySubscription_id
   }
 
   ensureExists(callback) {
