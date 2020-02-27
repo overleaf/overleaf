@@ -120,14 +120,12 @@ describe('CompileController', function() {
       })
 
       it('should set the content-type of the response to application/json', function() {
-        return this.res.contentType
-          .calledWith('application/json')
-          .should.equal(true)
+        this.res.type.should.equal('application/json')
       })
 
       it('should send a successful response reporting the status and files', function() {
         this.res.statusCode.should.equal(200)
-        return this.res.body.should.equal(
+        this.res.body.should.equal(
           JSON.stringify({
             status: this.status,
             outputFiles: this.outputFiles

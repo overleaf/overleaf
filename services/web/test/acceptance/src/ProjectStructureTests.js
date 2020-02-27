@@ -6,6 +6,7 @@ const fs = require('fs')
 const Settings = require('settings-sharelatex')
 const _ = require('underscore')
 
+const { Project } = require('../../../app/src/models/Project')
 const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter.js')
 
 const MockDocUpdaterApi = require('./helpers/MockDocUpdaterApi')
@@ -1094,6 +1095,105 @@ describe('ProjectStructureChanges', function() {
         expect(fileUpdate.newPathname).to.equal('')
 
         verifyVersionIncremented(exampleProjectId, oldVersion, version, 1, done)
+      })
+    })
+  })
+
+  describe('deleting docs', function() {
+    beforeEach(function(done) {
+      createExampleProject(owner, (err, projectId) => {
+        if (err) {
+          return done(err)
+        }
+        this.exampleProjectId = projectId
+        createExampleFolder(owner, projectId, (err, folderId) => {
+          if (err) {
+            return done(err)
+          }
+          this.exampleFolderId = folderId
+          createExampleDoc(owner, projectId, (err, docId) => {
+            if (err) {
+              return done(err)
+            }
+            this.exampleDocId = docId
+            MockDocUpdaterApi.clearProjectStructureUpdates()
+            ProjectGetter.getProject(
+              this.exampleProjectId,
+              (error, project) => {
+                if (error) {
+                  throw error
+                }
+                this.project0 = project
+                done()
+              }
+            )
+          })
+        })
+      })
+    })
+
+    describe('when rootDoc_id matches doc being deleted', function() {
+      beforeEach(function(done) {
+        Project.update(
+          { _id: this.exampleProjectId },
+          { $set: { rootDoc_id: this.exampleDocId } },
+          done
+        )
+      })
+
+      it('should clear rootDoc_id', function(done) {
+        deleteItem(
+          owner,
+          this.exampleProjectId,
+          'doc',
+          this.exampleDocId,
+          () => {
+            ProjectGetter.getProject(
+              this.exampleProjectId,
+              (error, project) => {
+                if (error) {
+                  throw error
+                }
+                expect(project.rootDoc_id).to.be.undefined
+                done()
+              }
+            )
+          }
+        )
+      })
+    })
+
+    describe('when rootDoc_id does not match doc being deleted', function() {
+      beforeEach(function(done) {
+        this.exampleRootDocId = new ObjectId()
+        Project.update(
+          { _id: this.exampleProjectId },
+          { $set: { rootDoc_id: this.exampleRootDocId } },
+          done
+        )
+      })
+
+      it('should not clear rootDoc_id', function(done) {
+        deleteItem(
+          owner,
+          this.exampleProjectId,
+          'doc',
+          this.exampleDocId,
+          () => {
+            ProjectGetter.getProject(
+              this.exampleProjectId,
+              (error, project) => {
+                if (error) {
+                  throw error
+                }
+                expect(project.rootDoc_id.toString()).to.equal(
+                  this.exampleRootDocId.toString()
+                )
+                done()
+              }
+            )
+          }
+        )
       })
     })
   })
