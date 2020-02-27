@@ -1,15 +1,3 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { ObjectId } = require('mongojs')
 const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
@@ -47,7 +35,7 @@ describe('UserGetter', function() {
     const settings = { apis: { v1: { url: 'v1.url', user: '', pass: '' } } }
     this.getUserAffiliations = sinon.stub().callsArgWith(1, null, [])
 
-    return (this.UserGetter = SandboxedModule.require(modulePath, {
+    this.UserGetter = SandboxedModule.require(modulePath, {
       globals: {
         console: console
       },
@@ -68,25 +56,26 @@ describe('UserGetter', function() {
         },
         '../Errors/Errors': Errors
       }
-    }))
+    })
   })
 
   describe('getUser', function() {
     it('should get user', function(done) {
       const query = { _id: 'foo' }
       const projection = { email: 1 }
-      return this.UserGetter.getUser(query, projection, (error, user) => {
+      this.UserGetter.getUser(query, projection, (error, user) => {
+        expect(error).to.not.exist
         this.findOne.called.should.equal(true)
         this.findOne.calledWith(query, projection).should.equal(true)
         user.should.deep.equal(this.fakeUser)
-        return done()
+        done()
       })
     })
 
     it('should not allow null query', function(done) {
-      return this.UserGetter.getUser(null, {}, (error, user) => {
+      this.UserGetter.getUser(null, {}, (error, user) => {
         error.should.exist
-        return done()
+        done()
       })
     })
   })
@@ -97,14 +86,15 @@ describe('UserGetter', function() {
         .stub()
         .callsArgWith(2, null, this.fakeUser)
       const projection = { email: 1, emails: 1 }
-      return this.UserGetter.getUserFullEmails(
+      this.UserGetter.getUserFullEmails(
         this.fakeUser._id,
         (error, fullEmails) => {
+          expect(error).to.not.exist
           this.UserGetter.getUser.called.should.equal(true)
           this.UserGetter.getUser
             .calledWith(this.fakeUser._id, projection)
             .should.equal(true)
-          return done()
+          done()
         }
       )
     })
@@ -113,9 +103,10 @@ describe('UserGetter', function() {
       this.UserGetter.getUser = sinon
         .stub()
         .callsArgWith(2, null, this.fakeUser)
-      return this.UserGetter.getUserFullEmails(
+      this.UserGetter.getUserFullEmails(
         this.fakeUser._id,
         (error, fullEmails) => {
+          expect(error).to.not.exist
           assert.deepEqual(fullEmails, [
             {
               email: 'email1@foo.bar',
@@ -128,7 +119,7 @@ describe('UserGetter', function() {
               default: true
             }
           ])
-          return done()
+          done()
         }
       )
     })
@@ -148,9 +139,10 @@ describe('UserGetter', function() {
         }
       ]
       this.getUserAffiliations.callsArgWith(1, null, affiliationsData)
-      return this.UserGetter.getUserFullEmails(
+      this.UserGetter.getUserFullEmails(
         this.fakeUser._id,
         (error, fullEmails) => {
+          expect(error).to.not.exist
           assert.deepEqual(fullEmails, [
             {
               email: 'email1@foo.bar',
@@ -170,7 +162,7 @@ describe('UserGetter', function() {
               default: true
             }
           ])
-          return done()
+          done()
         }
       )
     })
@@ -184,15 +176,16 @@ describe('UserGetter', function() {
         .stub()
         .callsArgWith(2, null, this.fakeUser)
       const projection = { email: 1, emails: 1 }
-      return this.UserGetter.getUserFullEmails(
+      this.UserGetter.getUserFullEmails(
         this.fakeUser._id,
         (error, fullEmails) => {
+          expect(error).to.not.exist
           this.UserGetter.getUser.called.should.equal(true)
           this.UserGetter.getUser
             .calledWith(this.fakeUser._id, projection)
             .should.equal(true)
           assert.deepEqual(fullEmails, [])
-          return done()
+          done()
         }
       )
     })
@@ -202,31 +195,30 @@ describe('UserGetter', function() {
     it('query user by main email', function(done) {
       const email = 'hello@world.com'
       const projection = { emails: 1 }
-      return this.UserGetter.getUserByMainEmail(
-        email,
-        projection,
-        (error, user) => {
-          this.findOne.called.should.equal(true)
-          this.findOne.calledWith({ email }, projection).should.equal(true)
-          return done()
-        }
-      )
+      this.UserGetter.getUserByMainEmail(email, projection, (error, user) => {
+        expect(error).to.not.exist
+        this.findOne.called.should.equal(true)
+        this.findOne.calledWith({ email }, projection).should.equal(true)
+        done()
+      })
     })
 
     it('return user if found', function(done) {
       const email = 'hello@world.com'
-      return this.UserGetter.getUserByMainEmail(email, (error, user) => {
+      this.UserGetter.getUserByMainEmail(email, (error, user) => {
+        expect(error).to.not.exist
         user.should.deep.equal(this.fakeUser)
-        return done()
+        done()
       })
     })
 
     it('trim email', function(done) {
       const email = 'hello@world.com'
-      return this.UserGetter.getUserByMainEmail(` ${email} `, (error, user) => {
+      this.UserGetter.getUserByMainEmail(` ${email} `, (error, user) => {
+        expect(error).to.not.exist
         this.findOne.called.should.equal(true)
         this.findOne.calledWith({ email }).should.equal(true)
-        return done()
+        done()
       })
     })
   })
@@ -239,13 +231,14 @@ describe('UserGetter', function() {
         'emails.email': email
       }
       const projection = { emails: 1 }
-      return this.UserGetter.getUserByAnyEmail(
+      this.UserGetter.getUserByAnyEmail(
         ` ${email} `,
         projection,
         (error, user) => {
+          expect(error).to.not.exist
           this.findOne.calledWith(expectedQuery, projection).should.equal(true)
           user.should.deep.equal(this.fakeUser)
-          return done()
+          done()
         }
       )
     })
@@ -255,9 +248,10 @@ describe('UserGetter', function() {
         emails: { $exists: true },
         'emails.email': ''
       }
-      return this.UserGetter.getUserByAnyEmail('', {}, (error, user) => {
+      this.UserGetter.getUserByAnyEmail('', {}, (error, user) => {
+        expect(error).to.not.exist
         this.findOne.calledWith(expectedQuery, {}).should.equal(true)
-        return done()
+        done()
       })
     })
 
@@ -265,13 +259,14 @@ describe('UserGetter', function() {
       this.findOne.callsArgWith(2, null, null)
       const email = 'hello@world.com'
       const projection = { emails: 1 }
-      return this.UserGetter.getUserByAnyEmail(
+      this.UserGetter.getUserByAnyEmail(
         ` ${email} `,
         projection,
         (error, user) => {
+          expect(error).to.not.exist
           this.findOne.calledTwice.should.equal(true)
           this.findOne.calledWith({ email }, projection).should.equal(true)
-          return done()
+          done()
         }
       )
     })
@@ -288,13 +283,14 @@ describe('UserGetter', function() {
           .join('')
       }
       const projection = { emails: 1 }
-      return this.UserGetter.getUsersByHostname(
+      this.UserGetter.getUsersByHostname(
         hostname,
         projection,
         (error, users) => {
+          expect(error).to.not.exist
           this.find.calledOnce.should.equal(true)
           this.find.calledWith(expectedQuery, projection).should.equal(true)
-          return done()
+          done()
         }
       )
     })
@@ -307,37 +303,34 @@ describe('UserGetter', function() {
         'overleaf.id': { $in: v1Ids }
       }
       const projection = { emails: 1 }
-      return this.UserGetter.getUsersByV1Ids(
-        v1Ids,
-        projection,
-        (error, users) => {
-          this.find.calledOnce.should.equal(true)
-          this.find.calledWith(expectedQuery, projection).should.equal(true)
-          return done()
-        }
-      )
+      this.UserGetter.getUsersByV1Ids(v1Ids, projection, (error, users) => {
+        expect(error).to.not.exist
+        this.find.calledOnce.should.equal(true)
+        this.find.calledWith(expectedQuery, projection).should.equal(true)
+        done()
+      })
     })
   })
 
   describe('ensureUniqueEmailAddress', function() {
     beforeEach(function() {
-      return (this.UserGetter.getUserByAnyEmail = sinon.stub())
+      this.UserGetter.getUserByAnyEmail = sinon.stub()
     })
 
     it('should return error if existing user is found', function(done) {
       this.UserGetter.getUserByAnyEmail.callsArgWith(1, null, this.fakeUser)
-      return this.UserGetter.ensureUniqueEmailAddress(this.newEmail, err => {
+      this.UserGetter.ensureUniqueEmailAddress(this.newEmail, err => {
         should.exist(err)
         expect(err).to.be.an.instanceof(Errors.EmailExistsError)
-        return done()
+        done()
       })
     })
 
     it('should return null if no user is found', function(done) {
       this.UserGetter.getUserByAnyEmail.callsArgWith(1)
-      return this.UserGetter.ensureUniqueEmailAddress(this.newEmail, err => {
+      this.UserGetter.ensureUniqueEmailAddress(this.newEmail, err => {
         should.not.exist(err)
-        return done()
+        done()
       })
     })
   })

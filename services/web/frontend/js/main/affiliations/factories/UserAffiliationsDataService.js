@@ -1,17 +1,3 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 define(['base'], function(App) {
   const countriesList = [
     { code: 'af', name: 'Afghanistan' },
@@ -408,13 +394,13 @@ define(['base'], function(App) {
     '126'
   ]
 
-  for (let domain of Array.from(commonDomains)) {
-    for (let tld of Array.from(commonTLDs)) {
+  for (let domain of commonDomains) {
+    for (let tld of commonTLDs) {
       domainsBlackList[`${domain}.${tld}`] = true
     }
   }
 
-  return App.factory('UserAffiliationsDataService', function($http, $q, _) {
+  App.factory('UserAffiliationsDataService', function($http, $q, _) {
     const getCountries = () => $q.resolve(countriesList)
 
     const getDefaultRoleHints = () => $q.resolve(defaultRoleHints)
