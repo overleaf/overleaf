@@ -337,6 +337,7 @@ define([], function() {
         let rowIdx = changedRowNums[row]
         line = this.blankOutBlacklistedCommands(line)
         var result
+        WORD_REGEX.lastIndex = 0 // reset global stateful regexp for this usage
         while ((result = WORD_REGEX.exec(line))) {
           let word = result[0]
           if (word[0] === "'") {
