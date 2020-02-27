@@ -32,6 +32,7 @@ describe('UserUpdater', function() {
     this.removeAffiliation = sinon.stub().callsArgWith(2, null)
     this.refreshFeatures = sinon.stub().yields()
     this.NewsletterManager = { changeEmail: sinon.stub() }
+    this.RecurlyWrapper = { updateAccountEmailAddress: sinon.stub() }
     this.UserUpdater = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -55,7 +56,8 @@ describe('UserUpdater', function() {
         },
         'settings-sharelatex': (this.settings = {}),
         request: (this.request = {}),
-        '../Newsletter/NewsletterManager': this.NewsletterManager
+        '../Newsletter/NewsletterManager': this.NewsletterManager,
+        '../Subscription/RecurlyWrapper': this.RecurlyWrapper
       }
     })
 
@@ -350,6 +352,7 @@ describe('UserUpdater', function() {
       ]
       this.UserGetter.getUser = sinon.stub().yields(null, this.stubbedUser)
       this.NewsletterManager.changeEmail.callsArgWith(2, null)
+      this.RecurlyWrapper.updateAccountEmailAddress.yields(null)
     })
 
     it('set default', function(done) {
@@ -381,6 +384,9 @@ describe('UserUpdater', function() {
           should.not.exist(err)
           this.NewsletterManager.changeEmail
             .calledWith(this.stubbedUser, this.newEmail)
+            .should.equal(true)
+          this.RecurlyWrapper.updateAccountEmailAddress
+            .calledWith(this.stubbedUser._id, this.newEmail)
             .should.equal(true)
           done()
         }

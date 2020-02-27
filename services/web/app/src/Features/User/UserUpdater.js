@@ -15,6 +15,7 @@ const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const EmailHelper = require('../Helpers/EmailHelper')
 const Errors = require('../Errors/Errors')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
+const RecurlyWrapper = require('../Subscription/RecurlyWrapper')
 
 const UserUpdater = {
   addAffiliationForNewUser(userId, email, callback) {
@@ -202,6 +203,9 @@ const UserUpdater = {
               'Failed to change email in newsletter subscription'
             )
           }
+        })
+        RecurlyWrapper.updateAccountEmailAddress(user._id, email, _error => {
+          // errors are ignored
         })
         callback()
       })
