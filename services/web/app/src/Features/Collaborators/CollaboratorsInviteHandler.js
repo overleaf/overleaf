@@ -11,7 +11,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let CollaboratorsInviteHandler
 const { ProjectInvite } = require('../../models/ProjectInvite')
 const logger = require('logger-sharelatex')
 const CollaboratorsEmailHandler = require('./CollaboratorsEmailHandler')
@@ -23,8 +22,9 @@ const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const Errors = require('../Errors/Errors')
 const Crypto = require('crypto')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
+const { promisifyAll } = require('../../util/promises')
 
-module.exports = CollaboratorsInviteHandler = {
+const CollaboratorsInviteHandler = {
   getAllInvites(projectId, callback) {
     if (callback == null) {
       callback = function(err, invites) {}
@@ -328,3 +328,6 @@ module.exports = CollaboratorsInviteHandler = {
     )
   }
 }
+
+module.exports = CollaboratorsInviteHandler
+module.exports.promises = promisifyAll(CollaboratorsInviteHandler)

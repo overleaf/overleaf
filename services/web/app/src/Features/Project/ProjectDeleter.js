@@ -339,7 +339,10 @@ const promises = {
   deleteProject: deleteProject,
   undeleteProject: undeleteProject,
   expireDeletedProject: expireDeletedProject,
-  deleteUsersProjects: promisify(ProjectDeleter.deleteUsersProjects)
+  deleteUsersProjects: promisify(ProjectDeleter.deleteUsersProjects),
+  unmarkAsDeletedByExternalSource: promisify(
+    ProjectDeleter.unmarkAsDeletedByExternalSource
+  )
 }
 
 ProjectDeleter.promises = promises

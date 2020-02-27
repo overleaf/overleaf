@@ -1,4 +1,3 @@
-let AuthorizationManager
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const ProjectGetter = require('../Project/ProjectGetter')
@@ -8,9 +7,9 @@ const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const PublicAccessLevels = require('./PublicAccessLevels')
 const Errors = require('../Errors/Errors')
 const { ObjectId } = require('mongojs')
-const { promisify } = require('util')
+const { promisifyAll } = require('../../util/promises')
 
-module.exports = AuthorizationManager = {
+const AuthorizationManager = {
   isRestrictedUser(userId, privilegeLevel, isTokenMember) {
     if (privilegeLevel === PrivilegeLevels.NONE) {
       return true
@@ -21,7 +20,7 @@ module.exports = AuthorizationManager = {
   },
 
   isRestrictedUserForProject(userId, projectId, token, callback) {
-    this.getPrivilegeLevelForProject(
+    AuthorizationManager.getPrivilegeLevelForProject(
       userId,
       projectId,
       token,
@@ -38,7 +37,11 @@ module.exports = AuthorizationManager = {
             }
             callback(
               null,
-              this.isRestrictedUser(userId, privilegeLevel, isTokenMember)
+              AuthorizationManager.isRestrictedUser(
+                userId,
+                privilegeLevel,
+                isTokenMember
+              )
             )
           }
         )
@@ -279,8 +282,7 @@ module.exports = AuthorizationManager = {
   }
 }
 
-AuthorizationManager.promises = {
-  getPrivilegeLevelForProject: promisify(
-    AuthorizationManager.getPrivilegeLevelForProject
-  )
-}
+module.exports = AuthorizationManager
+module.exports.promises = promisifyAll(AuthorizationManager, {
+  without: 'isRestrictedUser'
+})
