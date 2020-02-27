@@ -33,7 +33,7 @@ block content
 														required,
 														ng-model="email",
 														ng-init="email = "+JSON.stringify(user.email),
-														ng-model-options="{ pdateOn: 'blur' }"
+														ng-model-options="{ updateOn: 'blur' }"
 													)
 													span.small.text-danger(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
 														|  #{translate("must_be_email_address")}
