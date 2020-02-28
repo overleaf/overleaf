@@ -12,7 +12,10 @@ const { DeletedSubscription } = require('../../models/DeletedSubscription')
 
 const SubscriptionUpdater = {
   /**
-   * Change the admin of the given subscription
+   * Change the admin of the given subscription.
+   *
+   * If the subscription is a group, add the new admin as manager while keeping
+   * the old admin. Otherwise, replace the manager.
    *
    * Validation checks are assumed to have been made:
    *   * subscription exists
@@ -22,14 +25,18 @@ const SubscriptionUpdater = {
    *
    * If the subscription is Recurly, we silently do nothing.
    */
-  updateAdmin(subscriptionId, adminId, callback) {
+  updateAdmin(subscription, adminId, callback) {
     const query = {
-      _id: ObjectId(subscriptionId),
+      _id: ObjectId(subscription._id),
       customAccount: true
     }
     const update = {
-      $set: { admin_id: ObjectId(adminId) },
-      $addToSet: { manager_ids: ObjectId(adminId) }
+      $set: { admin_id: ObjectId(adminId) }
+    }
+    if (subscription.groupPlan) {
+      update.$addToSet = { manager_ids: ObjectId(adminId) }
+    } else {
+      update.$set.manager_ids = [ObjectId(adminId)]
     }
     Subscription.update(query, update, callback)
   },

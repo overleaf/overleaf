@@ -120,8 +120,9 @@ describe('SubscriptionUpdater', function() {
 
   describe('updateAdmin', function() {
     it('should update the subscription admin', function(done) {
+      this.subscription.groupPlan = true
       this.SubscriptionUpdater.updateAdmin(
-        this.subscription._id,
+        this.subscription,
         this.otherUserId,
         err => {
           if (err != null) {
@@ -134,6 +135,34 @@ describe('SubscriptionUpdater', function() {
           const update = {
             $set: { admin_id: ObjectId(this.otherUserId) },
             $addToSet: { manager_ids: ObjectId(this.otherUserId) }
+          }
+          this.SubscriptionModel.update.should.have.been.calledOnce
+          this.SubscriptionModel.update.should.have.been.calledWith(
+            query,
+            update
+          )
+          done()
+        }
+      )
+    })
+
+    it('should remove the manager for non-group subscriptions', function(done) {
+      this.SubscriptionUpdater.updateAdmin(
+        this.subscription,
+        this.otherUserId,
+        err => {
+          if (err != null) {
+            return done(err)
+          }
+          const query = {
+            _id: ObjectId(this.subscription._id),
+            customAccount: true
+          }
+          const update = {
+            $set: {
+              admin_id: ObjectId(this.otherUserId),
+              manager_ids: [ObjectId(this.otherUserId)]
+            }
           }
           this.SubscriptionModel.update.should.have.been.calledOnce
           this.SubscriptionModel.update.should.have.been.calledWith(
