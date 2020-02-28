@@ -1,5 +1,6 @@
 const chai = require('chai')
 const { expect } = chai
+const SandboxedModule = require('sandboxed-module')
 
 describe('Settings', function() {
   describe('s3', function() {
@@ -11,8 +12,9 @@ describe('Settings', function() {
         }
       }
       process.env.S3_BUCKET_CREDENTIALS = JSON.stringify(s3Settings)
-
-      const settings = require('settings-sharelatex')
+      const settings = SandboxedModule.require('settings-sharelatex', {
+        globals: { console }
+      })
       expect(settings.filestore.s3BucketCreds).to.deep.equal(s3Settings)
     })
   })
