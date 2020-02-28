@@ -148,12 +148,8 @@ describe('Filestore', function() {
       })
 
       beforeEach(async function() {
-        // retrieve previous metrics from the app
         if (Settings.filestore.backend === 's3') {
-          ;[previousEgress, previousIngress] = await Promise.all([
-            getMetric(filestoreUrl, 's3_egress'),
-            getMetric(filestoreUrl, 's3_ingress')
-          ])
+          previousEgress = await getMetric(filestoreUrl, 's3_egress')
         }
         projectId = `acceptance_tests_${Math.random()}`
       })
@@ -193,6 +189,15 @@ describe('Filestore', function() {
           // hack to consume the result to ensure the http request has been fully processed
           const resultStream = fs.createWriteStream('/dev/null')
           await pipeline(readStream, writeStream, resultStream)
+        })
+
+        beforeEach(async function retrievePreviousIngressMetrics() {
+          // The upload request can bump the ingress metric.
+          // The content hash validation might require a full download
+          //  in case the ETag field of the upload response is not a md5 sum.
+          if (Settings.filestore.backend === 's3') {
+            previousIngress = await getMetric(filestoreUrl, 's3_ingress')
+          }
         })
 
         it('should return 404 for a non-existant id', async function() {
