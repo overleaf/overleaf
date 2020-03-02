@@ -1,5 +1,5 @@
 .diff-panel.full-size(
-	ng-if="history.isV2 && history.viewMode === HistoryViewModes.COMPARE"
+	ng-if="history.isV2 && history.viewMode === HistoryViewModes.COMPARE && history.updates.length !== 0"
 )
 	.diff(
 		ng-show="!!history.selection.diff && !isHistoryLoading() && !history.selection.diff.error",
@@ -26,7 +26,7 @@
 		.alert.alert-danger #{translate("generic_something_went_wrong")}
 
 .point-in-time-panel.full-size(
-	ng-if="history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME"
+	ng-if="history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME && history.updates.length !== 0"
 )
 	.point-in-time-editor-container(
 		ng-if="!!history.selection.file && !history.selection.file.loading && !history.selection.file.error"

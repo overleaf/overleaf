@@ -1,10 +1,14 @@
-div#history(ng-show="ui.view == 'history'")
+div#history(ng-show="ui.view == 'history' && history.updates.length > 0")
 	include ./history/entriesListV1
 	include ./history/entriesListV2
 
 	include ./history/diffPanelV1
 	include ./history/previewPanelV2
 
+.full-size(ng-if="ui.view == 'history' && history.updates.length === 0 && !isHistoryLoading()")
+	.no-history-available
+		h3
+			| #{translate('no_history_available')}
 script(type="text/ng-template", id="historyRestoreDiffModalTemplate")
 	.modal-header
 		button.close(

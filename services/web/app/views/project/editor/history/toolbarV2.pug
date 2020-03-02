@@ -40,7 +40,7 @@
 
 	//- point-in-time mode actions
 	div.history-toolbar-actions(
-		ng-if="history.viewMode === HistoryViewModes.POINT_IN_TIME && !history.error"
+		ng-if="history.viewMode === HistoryViewModes.POINT_IN_TIME && !history.error && history.updates.length > 0"
 	)
 		button.history-toolbar-btn(
 			ng-click="showAddLabelDialog();"
@@ -68,7 +68,7 @@
 
 	//- compare mode actions
 	div.history-toolbar-actions(
-		ng-if="history.viewMode === HistoryViewModes.COMPARE && !history.error"
+		ng-if="history.viewMode === HistoryViewModes.COMPARE && !history.error && history.updates.length > 0"
 	)
 		button.history-toolbar-btn(
 			ng-click="toggleHistoryViewMode();"
@@ -91,7 +91,7 @@
 			| Error restoring, sorry
 
 	.history-toolbar-entries-list(
-		ng-if="!history.error"
+		ng-if="!history.error && history.updates.length > 0"
 	)
 		toggle-switch(
 			ng-model="toolbarUIConfig.showOnlyLabels"

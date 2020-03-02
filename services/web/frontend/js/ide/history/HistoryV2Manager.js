@@ -189,7 +189,6 @@ define([
         }
         this.$scope.history.error = null
         this.$scope.history.showOnlyLabels = this._getShowOnlyLabelsUserPref()
-        this.$scope.history.loadingFileTree = true
       }
 
       toggleHistoryViewMode() {
