@@ -21,7 +21,7 @@
     "start": "node $NODE_APP_OPTIONS app.js",
     "nodemon": "nodemon --config nodemon.json",
     "webpack": "webpack-dev-server --config webpack.config.dev.js",
-    "webpack:production": "webpack --config webpack.config.prod.js && cp -R public/js public/minjs",
+    "webpack:production": "webpack --config webpack.config.prod.js",
     "lint": "eslint -f unix .",
     "format": "prettier-eslint '**/*.{js,less}' --list-different",
     "format:fix": "prettier-eslint '**/*.{js,less}' --write",
