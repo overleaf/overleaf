@@ -14,8 +14,8 @@
     "start": "node $NODE_APP_OPTIONS app.js",
     "nodemon": "nodemon --config nodemon.json",
     "lint": "node_modules/.bin/eslint .",
-    "format": "node_modules/.bin/prettier-eslint '**/*.js' --list-different",
-    "format:fix": "node_modules/.bin/prettier-eslint '**/*.js' --write",
+    "format": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --list-different",
+    "format:fix": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --write",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js"
   },
