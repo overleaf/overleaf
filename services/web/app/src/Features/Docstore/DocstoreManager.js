@@ -12,15 +12,15 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let DocstoreManager
 const request = require('request').defaults({ jar: false })
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const Errors = require('../Errors/Errors')
+const { promisifyAll } = require('../../util/promises')
 
 const TIMEOUT = 30 * 1000 // request timeout
 
-module.exports = DocstoreManager = {
+const DocstoreManager = {
   deleteDoc(project_id, doc_id, callback) {
     if (callback == null) {
       callback = function(error) {}
@@ -255,3 +255,11 @@ module.exports = DocstoreManager = {
     })
   }
 }
+
+module.exports = DocstoreManager
+module.exports.promises = promisifyAll(DocstoreManager, {
+  multiResult: {
+    getDoc: ['lines', 'rev', 'version', 'ranges'],
+    updateDoc: ['modified', 'rev']
+  }
+})

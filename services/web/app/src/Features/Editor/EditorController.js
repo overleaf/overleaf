@@ -416,14 +416,6 @@ const EditorController = {
     )
   },
 
-  notifyUsersProjectHasBeenDeletedOrRenamed(project_id, callback) {
-    EditorRealTimeController.emitToRoom(
-      project_id,
-      'projectRenamedOrDeletedByExternalSource'
-    )
-    return callback()
-  },
-
   updateProjectDescription(project_id, description, callback) {
     if (callback == null) {
       callback = function() {}

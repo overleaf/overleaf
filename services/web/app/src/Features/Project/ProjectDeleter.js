@@ -1,115 +1,99 @@
 const { db, ObjectId } = require('../../infrastructure/mongojs')
-const { promisify, callbackify } = require('util')
+const { callbackify } = require('util')
 const { Project } = require('../../models/Project')
 const { DeletedProject } = require('../../models/DeletedProject')
 const Errors = require('../Errors/Errors')
 const logger = require('logger-sharelatex')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const TagsHandler = require('../Tags/TagsHandler')
-const async = require('async')
 const ProjectHelper = require('./ProjectHelper')
 const ProjectDetailsHandler = require('./ProjectDetailsHandler')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const DocstoreManager = require('../Docstore/DocstoreManager')
+const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const moment = require('moment')
+const { promiseMapWithLimit } = require('../../util/promises')
 
-function logWarningOnError(msg) {
-  return function(err) {
-    if (err) {
-      logger.warn({ err }, msg)
-    }
+const EXPIRE_PROJECTS_AFTER_DAYS = 90
+
+module.exports = {
+  markAsDeletedByExternalSource: callbackify(markAsDeletedByExternalSource),
+  unmarkAsDeletedByExternalSource: callbackify(unmarkAsDeletedByExternalSource),
+  deleteUsersProjects: callbackify(deleteUsersProjects),
+  expireDeletedProjectsAfterDuration: callbackify(
+    expireDeletedProjectsAfterDuration
+  ),
+  restoreProject: callbackify(restoreProject),
+  archiveProject: callbackify(archiveProject),
+  unarchiveProject: callbackify(unarchiveProject),
+  trashProject: callbackify(trashProject),
+  untrashProject: callbackify(untrashProject),
+  deleteProject: callbackify(deleteProject),
+  undeleteProject: callbackify(undeleteProject),
+  expireDeletedProject: callbackify(expireDeletedProject),
+  promises: {
+    archiveProject,
+    unarchiveProject,
+    trashProject,
+    untrashProject,
+    deleteProject,
+    undeleteProject,
+    expireDeletedProject,
+    markAsDeletedByExternalSource,
+    unmarkAsDeletedByExternalSource,
+    deleteUsersProjects,
+    expireDeletedProjectsAfterDuration,
+    restoreProject
   }
 }
 
-const ProjectDeleter = {
-  markAsDeletedByExternalSource(projectId, callback) {
-    callback =
-      callback ||
-      logWarningOnError('error marking project as deleted by external source')
-    logger.log(
-      { project_id: projectId },
-      'marking project as deleted by external data source'
-    )
-    const conditions = { _id: projectId }
-    const update = { deletedByExternalDataSource: true }
+async function markAsDeletedByExternalSource(projectId) {
+  logger.log(
+    { project_id: projectId },
+    'marking project as deleted by external data source'
+  )
+  await Project.update(
+    { _id: projectId },
+    { deletedByExternalDataSource: true }
+  ).exec()
+  EditorRealTimeController.emitToRoom(
+    projectId,
+    'projectRenamedOrDeletedByExternalSource'
+  )
+}
 
-    Project.update(conditions, update, {}, err => {
-      if (err) {
-        return callback(err)
-      }
-      require('../Editor/EditorController').notifyUsersProjectHasBeenDeletedOrRenamed(
-        projectId,
-        () => callback() // don't return error, as project has been updated
-      )
-    })
-  },
+async function unmarkAsDeletedByExternalSource(projectId) {
+  await Project.update(
+    { _id: projectId },
+    { deletedByExternalDataSource: false }
+  ).exec()
+}
 
-  unmarkAsDeletedByExternalSource(projectId, callback) {
-    callback =
-      callback ||
-      logWarningOnError('error unmarking project as deleted by external source')
-    const conditions = { _id: projectId }
-    const update = { deletedByExternalDataSource: false }
-    Project.update(conditions, update, {}, callback)
-  },
+async function deleteUsersProjects(userId) {
+  const projects = await Project.find({ owner_ref: userId }).exec()
+  await promiseMapWithLimit(5, projects, project => deleteProject(project._id))
+  await CollaboratorsHandler.promises.removeUserFromAllProjects(userId)
+}
 
-  deleteUsersProjects(userId, callback) {
-    Project.find({ owner_ref: userId }, function(error, projects) {
-      if (error) {
-        return callback(error)
-      }
-      async.eachLimit(
-        projects,
-        5,
-        (project, cb) => ProjectDeleter.deleteProject(project._id, cb),
-        function(err) {
-          if (err) {
-            return callback(err)
-          }
-          CollaboratorsHandler.removeUserFromAllProjects(userId, callback)
-        }
-      )
-    })
-  },
-
-  expireDeletedProjectsAfterDuration(callback) {
-    const DURATION = 90
-    DeletedProject.find(
-      {
-        'deleterData.deletedAt': {
-          $lt: new Date(moment().subtract(DURATION, 'days'))
-        },
-        project: {
-          $ne: null
-        }
-      },
-      function(err, deletedProjects) {
-        if (err) {
-          logger.err({ err }, 'Problem with finding deletedProject')
-          return callback(err)
-        }
-
-        async.eachSeries(
-          deletedProjects,
-          function(deletedProject, cb) {
-            ProjectDeleter.expireDeletedProject(
-              deletedProject.deleterData.deletedProjectId,
-              cb
-            )
-          },
-          callback
-        )
-      }
-    )
-  },
-
-  restoreProject(projectId, callback) {
-    Project.update({ _id: projectId }, { $unset: { archived: true } }, callback)
+async function expireDeletedProjectsAfterDuration() {
+  const deletedProjects = await DeletedProject.find({
+    'deleterData.deletedAt': {
+      $lt: new Date(moment().subtract(EXPIRE_PROJECTS_AFTER_DAYS, 'days'))
+    },
+    project: { $ne: null }
+  })
+  for (const deletedProject of deletedProjects) {
+    await expireDeletedProject(deletedProject.deleterData.deletedProjectId)
   }
 }
 
-// Async methods
+async function restoreProject(projectId) {
+  await Project.update(
+    { _id: projectId },
+    { $unset: { archived: true } }
+  ).exec()
+}
 
 async function archiveProject(projectId, userId) {
   try {
@@ -231,17 +215,23 @@ async function deleteProject(projectId, options = {}) {
       { upsert: true }
     )
 
-    const flushProjectToMongoAndDelete = promisify(
-      DocumentUpdaterHandler.flushProjectToMongoAndDelete
+    await DocumentUpdaterHandler.promises.flushProjectToMongoAndDelete(
+      projectId
     )
-    await flushProjectToMongoAndDelete(projectId)
 
     const memberIds = await CollaboratorsGetter.promises.getMemberIds(projectId)
 
     // fire these jobs in the background
-    Array.from(memberIds).forEach(memberId =>
-      TagsHandler.removeProjectFromAllTags(memberId, projectId, () => {})
-    )
+    for (const memberId of memberIds) {
+      TagsHandler.promises
+        .removeProjectFromAllTags(memberId, projectId)
+        .catch(err => {
+          logger.err(
+            { err, memberId, projectId },
+            'failed to remove project from tags'
+          )
+        })
+    }
 
     await Project.remove({ _id: projectId }).exec()
   } catch (err) {
@@ -309,8 +299,7 @@ async function expireDeletedProject(projectId) {
       return
     }
 
-    const destroyProject = promisify(DocstoreManager.destroyProject)
-    await destroyProject(deletedProject.project._id)
+    await DocstoreManager.promises.destroyProject(deletedProject.project._id)
 
     await DeletedProject.update(
       {
@@ -328,30 +317,3 @@ async function expireDeletedProject(projectId) {
     throw error
   }
 }
-
-// Exported class
-
-const promises = {
-  archiveProject: archiveProject,
-  unarchiveProject: unarchiveProject,
-  trashProject: trashProject,
-  untrashProject: untrashProject,
-  deleteProject: deleteProject,
-  undeleteProject: undeleteProject,
-  expireDeletedProject: expireDeletedProject,
-  deleteUsersProjects: promisify(ProjectDeleter.deleteUsersProjects),
-  unmarkAsDeletedByExternalSource: promisify(
-    ProjectDeleter.unmarkAsDeletedByExternalSource
-  )
-}
-
-ProjectDeleter.promises = promises
-ProjectDeleter.archiveProject = callbackify(archiveProject)
-ProjectDeleter.unarchiveProject = callbackify(unarchiveProject)
-ProjectDeleter.trashProject = callbackify(trashProject)
-ProjectDeleter.untrashProject = callbackify(untrashProject)
-ProjectDeleter.deleteProject = callbackify(deleteProject)
-ProjectDeleter.undeleteProject = callbackify(undeleteProject)
-ProjectDeleter.expireDeletedProject = callbackify(expireDeletedProject)
-
-module.exports = ProjectDeleter

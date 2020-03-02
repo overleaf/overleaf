@@ -632,23 +632,6 @@ describe('EditorController', function() {
     })
   })
 
-  describe('notifyUsersProjectHasBeenDeletedOrRenamed', function() {
-    it('should emmit a message to all users in a project', function(done) {
-      return this.EditorController.notifyUsersProjectHasBeenDeletedOrRenamed(
-        this.project_id,
-        err => {
-          this.EditorRealTimeController.emitToRoom
-            .calledWith(
-              this.project_id,
-              'projectRenamedOrDeletedByExternalSource'
-            )
-            .should.equal(true)
-          return done()
-        }
-      )
-    })
-  })
-
   describe('updateProjectDescription', function() {
     beforeEach(function() {
       this.description = 'new description'
