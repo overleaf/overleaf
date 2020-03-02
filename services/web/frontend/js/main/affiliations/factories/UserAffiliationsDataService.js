@@ -410,6 +410,11 @@ define(['base'], function(App) {
     const getUserEmails = () =>
       $http.get('/user/emails').then(response => response.data)
 
+    const getUserEmailsEnsureAffiliations = () =>
+      $http
+        .get('/user/emails?ensureAffiliations=true')
+        .then(response => response.data)
+
     const getUserDefaultEmail = () =>
       getUserEmails().then(userEmails =>
         _.find(userEmails, userEmail => userEmail.default)
@@ -527,6 +532,7 @@ define(['base'], function(App) {
       getDefaultRoleHints,
       getDefaultDepartmentHints,
       getUserEmails,
+      getUserEmailsEnsureAffiliations,
       getUserDefaultEmail,
       getUniversitiesFromCountry,
       getUniversityDomainFromPartialDomainInput,

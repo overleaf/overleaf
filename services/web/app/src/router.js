@@ -139,6 +139,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get(
     '/user/emails',
     AuthenticationController.requireLogin(),
+    UserController.promises.ensureAffiliationsMiddleware,
     UserEmailsController.list
   )
   webRouter.get('/user/emails/confirm', UserEmailsController.showConfirm)

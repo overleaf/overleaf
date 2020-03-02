@@ -1,26 +1,8 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const chai = require('chai')
-const should = chai.should()
 const { expect } = chai
 const modulePath = '../../../../app/src/Features/User/UserController.js'
 const SandboxedModule = require('sandboxed-module')
-const events = require('events')
-const MockResponse = require('../helpers/MockResponse')
-const MockRequest = require('../helpers/MockRequest')
-const { ObjectId } = require('mongojs')
-const assert = require('assert')
 const OError = require('@overleaf/o-error')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const HttpErrors = require('@overleaf/o-error/http')
@@ -48,11 +30,15 @@ describe('UserController', function() {
       body: {},
       i18n: {
         translate: text => text
-      }
+      },
+      query: {}
     }
 
     this.UserDeleter = { deleteUser: sinon.stub().yields() }
-    this.UserGetter = { getUser: sinon.stub().callsArgWith(1, null, this.user) }
+    this.UserGetter = {
+      getUser: sinon.stub().callsArgWith(1, null, this.user),
+      promises: { getUser: sinon.stub().resolves(this.user) }
+    }
     this.User = { findById: sinon.stub().callsArgWith(1, null, this.user) }
     this.NewsLetterManager = { unsubscribe: sinon.stub().callsArgWith(1) }
     this.UserRegistrationHandler = { registerNewUser: sinon.stub() }
@@ -69,7 +55,13 @@ describe('UserController', function() {
     }
     this.ReferalAllocator = { allocate: sinon.stub() }
     this.SubscriptionDomainHandler = { autoAllocate: sinon.stub() }
-    this.UserUpdater = { changeEmailAddress: sinon.stub() }
+    this.UserUpdater = {
+      changeEmailAddress: sinon.stub(),
+      promises: {
+        confirmEmail: sinon.stub().resolves(),
+        addAffiliationForNewUser: sinon.stub().resolves()
+      }
+    }
     this.settings = { siteUrl: 'sharelatex.example.com' }
     this.UserHandler = { populateTeamInvites: sinon.stub().callsArgWith(1) }
     this.UserSessionsManager = {
@@ -94,6 +86,9 @@ describe('UserController', function() {
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         '../Authentication/AuthenticationManager': this.AuthenticationManager,
+        '../../infrastructure/Features': (this.Features = {
+          hasFeature: sinon.stub()
+        }),
         '../Referal/ReferalAllocator': this.ReferalAllocator,
         '../Subscription/SubscriptionDomainHandler': this
           .SubscriptionDomainHandler,
@@ -104,12 +99,14 @@ describe('UserController', function() {
         'logger-sharelatex': {
           log() {},
           warn() {},
-          err() {}
+          err() {},
+          error() {}
         },
         'metrics-sharelatex': {
           inc() {}
         },
         '../Errors/Errors': Errors,
+        '@overleaf/o-error': OError,
         '@overleaf/o-error/http': HttpErrors,
         '../Email/EmailHandler': { sendEmail: sinon.stub() }
       }
@@ -142,9 +139,9 @@ describe('UserController', function() {
     it('should send 200', function(done) {
       this.res.sendStatus = code => {
         code.should.equal(200)
-        return done()
+        done()
       }
-      return this.UserController.tryDeleteUser(this.req, this.res, this.next)
+      this.UserController.tryDeleteUser(this.req, this.res, this.next)
     })
 
     it('should try to authenticate user', function(done) {
@@ -153,89 +150,87 @@ describe('UserController', function() {
         this.AuthenticationManager.authenticate
           .calledWith({ _id: this.user._id }, this.req.body.password)
           .should.equal(true)
-        return done()
+        done()
       }
-      return this.UserController.tryDeleteUser(this.req, this.res, this.next)
+      this.UserController.tryDeleteUser(this.req, this.res, this.next)
     })
 
     it('should delete the user', function(done) {
       this.res.sendStatus = code => {
         this.UserDeleter.deleteUser.callCount.should.equal(1)
         this.UserDeleter.deleteUser.calledWith(this.user._id).should.equal(true)
-        return done()
+        done()
       }
-      return this.UserController.tryDeleteUser(this.req, this.res, this.next)
+      this.UserController.tryDeleteUser(this.req, this.res, this.next)
     })
 
     describe('when no password is supplied', function() {
       beforeEach(function() {
-        return (this.req.body.password = '')
+        this.req.body.password = ''
       })
 
       it('should return 403', function(done) {
         this.res.sendStatus = code => {
           code.should.equal(403)
-          return done()
+          done()
         }
-        return this.UserController.tryDeleteUser(this.req, this.res, this.next)
+        this.UserController.tryDeleteUser(this.req, this.res, this.next)
       })
     })
 
     describe('when authenticate produces an error', function() {
       beforeEach(function() {
-        return (this.AuthenticationManager.authenticate = sinon
+        this.AuthenticationManager.authenticate = sinon
           .stub()
-          .callsArgWith(2, new Error('woops')))
+          .callsArgWith(2, new Error('woops'))
       })
 
       it('should call next with an error', function(done) {
         this.next = err => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
-          return done()
+          done()
         }
-        return this.UserController.tryDeleteUser(this.req, this.res, this.next)
+        this.UserController.tryDeleteUser(this.req, this.res, this.next)
       })
     })
 
     describe('when authenticate does not produce a user', function() {
       beforeEach(function() {
-        return (this.AuthenticationManager.authenticate = sinon
+        this.AuthenticationManager.authenticate = sinon
           .stub()
-          .callsArgWith(2, null, null))
+          .callsArgWith(2, null, null)
       })
 
       it('should return 403', function(done) {
         this.res.sendStatus = code => {
           code.should.equal(403)
-          return done()
+          done()
         }
-        return this.UserController.tryDeleteUser(this.req, this.res, this.next)
+        this.UserController.tryDeleteUser(this.req, this.res, this.next)
       })
     })
 
     describe('when deleteUser produces an error', function() {
       beforeEach(function() {
-        return (this.UserDeleter.deleteUser = sinon
-          .stub()
-          .yields(new Error('woops')))
+        this.UserDeleter.deleteUser = sinon.stub().yields(new Error('woops'))
       })
 
       it('should call next with an error', function(done) {
         this.next = err => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
-          return done()
+          done()
         }
-        return this.UserController.tryDeleteUser(this.req, this.res, this.next)
+        this.UserController.tryDeleteUser(this.req, this.res, this.next)
       })
     })
 
     describe('when deleteUser produces a known error', function() {
       beforeEach(function() {
-        return (this.UserDeleter.deleteUser = sinon
+        this.UserDeleter.deleteUser = sinon
           .stub()
-          .yields(new Errors.SubscriptionAdminDeletionError()))
+          .yields(new Errors.SubscriptionAdminDeletionError())
       })
 
       it('should return a json error', function(done) {
@@ -254,18 +249,18 @@ describe('UserController', function() {
 
     describe('when session.destroy produces an error', function() {
       beforeEach(function() {
-        return (this.req.session.destroy = sinon
+        this.req.session.destroy = sinon
           .stub()
-          .callsArgWith(0, new Error('woops')))
+          .callsArgWith(0, new Error('woops'))
       })
 
       it('should call next with an error', function(done) {
         this.next = err => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
-          return done()
+          done()
         }
-        return this.UserController.tryDeleteUser(this.req, this.res, this.next)
+        this.UserController.tryDeleteUser(this.req, this.res, this.next)
       })
     })
   })
@@ -276,90 +271,88 @@ describe('UserController', function() {
         this.NewsLetterManager.unsubscribe
           .calledWith(this.user)
           .should.equal(true)
-        return done()
+        done()
       }
-      return this.UserController.unsubscribe(this.req, this.res)
+      this.UserController.unsubscribe(this.req, this.res)
     })
   })
 
   describe('updateUserSettings', function() {
     beforeEach(function() {
       this.newEmail = 'hello@world.com'
-      return (this.req.externalAuthenticationSystemUsed = sinon
-        .stub()
-        .returns(false))
+      this.req.externalAuthenticationSystemUsed = sinon.stub().returns(false)
     })
 
     it('should call save', function(done) {
       this.req.body = {}
       this.res.sendStatus = code => {
         this.user.save.called.should.equal(true)
-        return done()
+        done()
       }
-      return this.UserController.updateUserSettings(this.req, this.res)
+      this.UserController.updateUserSettings(this.req, this.res)
     })
 
     it('should set the first name', function(done) {
       this.req.body = { first_name: 'bobby  ' }
       this.res.sendStatus = code => {
         this.user.first_name.should.equal('bobby')
-        return done()
+        done()
       }
-      return this.UserController.updateUserSettings(this.req, this.res)
+      this.UserController.updateUserSettings(this.req, this.res)
     })
 
     it('should set the role', function(done) {
       this.req.body = { role: 'student' }
       this.res.sendStatus = code => {
         this.user.role.should.equal('student')
-        return done()
+        done()
       }
-      return this.UserController.updateUserSettings(this.req, this.res)
+      this.UserController.updateUserSettings(this.req, this.res)
     })
 
     it('should set the institution', function(done) {
       this.req.body = { institution: 'MIT' }
       this.res.sendStatus = code => {
         this.user.institution.should.equal('MIT')
-        return done()
+        done()
       }
-      return this.UserController.updateUserSettings(this.req, this.res)
+      this.UserController.updateUserSettings(this.req, this.res)
     })
 
     it('should set some props on ace', function(done) {
       this.req.body = { editorTheme: 'something' }
       this.res.sendStatus = code => {
         this.user.ace.theme.should.equal('something')
-        return done()
+        done()
       }
-      return this.UserController.updateUserSettings(this.req, this.res)
+      this.UserController.updateUserSettings(this.req, this.res)
     })
 
     it('should set the overall theme', function(done) {
       this.req.body = { overallTheme: 'green-ish' }
       this.res.sendStatus = code => {
         this.user.ace.overallTheme.should.equal('green-ish')
-        return done()
+        done()
       }
-      return this.UserController.updateUserSettings(this.req, this.res)
+      this.UserController.updateUserSettings(this.req, this.res)
     })
 
     it('should send an error if the email is 0 len', function(done) {
       this.req.body.email = ''
       this.res.sendStatus = function(code) {
         code.should.equal(400)
-        return done()
+        done()
       }
-      return this.UserController.updateUserSettings(this.req, this.res)
+      this.UserController.updateUserSettings(this.req, this.res)
     })
 
     it('should send an error if the email does not contain an @', function(done) {
       this.req.body.email = 'bob at something dot com'
       this.res.sendStatus = function(code) {
         code.should.equal(400)
-        return done()
+        done()
       }
-      return this.UserController.updateUserSettings(this.req, this.res)
+      this.UserController.updateUserSettings(this.req, this.res)
     })
 
     it('should call the user updater with the new email and user _id', function(done) {
@@ -370,9 +363,9 @@ describe('UserController', function() {
         this.UserUpdater.changeEmailAddress
           .calledWith(this.user_id, this.newEmail)
           .should.equal(true)
-        return done()
+        done()
       }
-      return this.UserController.updateUserSettings(this.req, this.res)
+      this.UserController.updateUserSettings(this.req, this.res)
     })
 
     it('should update the email on the session', function(done) {
@@ -383,7 +376,7 @@ describe('UserController', function() {
         if (++callcount === 2) {
           this.user.email = this.newEmail
         }
-        return cb(null, this.user)
+        cb(null, this.user)
       }
       this.res.sendStatus = code => {
         code.should.equal(200)
@@ -394,9 +387,9 @@ describe('UserController', function() {
             last_name: undefined
           })
           .should.equal(true)
-        return done()
+        done()
       }
-      return this.UserController.updateUserSettings(this.req, this.res)
+      this.UserController.updateUserSettings(this.req, this.res)
     })
 
     it('should call populateTeamInvites', function(done) {
@@ -407,18 +400,16 @@ describe('UserController', function() {
         this.UserHandler.populateTeamInvites
           .calledWith(this.user)
           .should.equal(true)
-        return done()
+        done()
       }
-      return this.UserController.updateUserSettings(this.req, this.res)
+      this.UserController.updateUserSettings(this.req, this.res)
     })
 
     describe('when using an external auth source', function() {
       beforeEach(function() {
         this.UserUpdater.changeEmailAddress.callsArgWith(2)
         this.newEmail = 'someone23@example.com'
-        return (this.req.externalAuthenticationSystemUsed = sinon
-          .stub()
-          .returns(true))
+        this.req.externalAuthenticationSystemUsed = sinon.stub().returns(true)
       })
 
       it('should not set a new email', function(done) {
@@ -428,9 +419,9 @@ describe('UserController', function() {
           this.UserUpdater.changeEmailAddress
             .calledWith(this.user_id, this.newEmail)
             .should.equal(false)
-          return done()
+          done()
         }
-        return this.UserController.updateUserSettings(this.req, this.res)
+        this.UserController.updateUserSettings(this.req, this.res)
       })
     })
   })
@@ -441,10 +432,10 @@ describe('UserController', function() {
       this.res.redirect = url => {
         url.should.equal('/login')
         this.req.session.destroy.called.should.equal(true)
-        return done()
+        done()
       }
 
-      return this.UserController.logout(this.req, this.res)
+      this.UserController.logout(this.req, this.res)
     })
 
     it('should clear sudo-mode', function(done) {
@@ -456,10 +447,10 @@ describe('UserController', function() {
         this.SudoModeHandler.clearSudoMode
           .calledWith(this.user._id)
           .should.equal(true)
-        return done()
+        done()
       }
 
-      return this.UserController.logout(this.req, this.res)
+      this.UserController.logout(this.req, this.res)
     })
 
     it('should untrack session', function(done) {
@@ -471,10 +462,10 @@ describe('UserController', function() {
         this.UserSessionsManager.untrackSession
           .calledWith(sinon.match(this.req.user), this.req.sessionID)
           .should.equal(true)
-        return done()
+        done()
       }
 
-      return this.UserController.logout(this.req, this.res)
+      this.UserController.logout(this.req, this.res)
     })
 
     it('should redirect after logout', function(done) {
@@ -483,9 +474,9 @@ describe('UserController', function() {
       this.SudoModeHandler.clearSudoMode = sinon.stub()
       this.res.redirect = url => {
         url.should.equal(this.req.body.redirect)
-        return done()
+        done()
       }
-      return this.UserController.logout(this.req, this.res)
+      this.UserController.logout(this.req, this.res)
     })
 
     it('should redirect to login after logout when no redirect set', function(done) {
@@ -493,9 +484,9 @@ describe('UserController', function() {
       this.SudoModeHandler.clearSudoMode = sinon.stub()
       this.res.redirect = url => {
         url.should.equal('/login')
-        return done()
+        done()
       }
-      return this.UserController.logout(this.req, this.res)
+      this.UserController.logout(this.req, this.res)
     })
   })
 
@@ -505,17 +496,17 @@ describe('UserController', function() {
         .stub()
         .callsArgWith(1, null, this.user, (this.url = 'mock/url'))
       this.req.body.email = this.user.email = this.email = 'email@example.com'
-      return this.UserController.register(this.req, this.res)
+      this.UserController.register(this.req, this.res)
     })
 
     it('should register the user and send them an email', function() {
-      return this.UserRegistrationHandler.registerNewUserAndSendActivationEmail
+      this.UserRegistrationHandler.registerNewUserAndSendActivationEmail
         .calledWith(this.email)
         .should.equal(true)
     })
 
     it('should return the user and activation url', function() {
-      return this.res.json
+      this.res.json
         .calledWith({
           email: this.email,
           setNewPasswordUrl: this.url
@@ -528,15 +519,15 @@ describe('UserController', function() {
     it('should call revokeAllUserSessions', function(done) {
       this.UserController.clearSessions(this.req, this.res)
       this.UserSessionsManager.revokeAllUserSessions.callCount.should.equal(1)
-      return done()
+      done()
     })
 
     it('send a 201 response', function(done) {
       this.res.sendStatus = status => {
         status.should.equal(201)
-        return done()
+        done()
       }
-      return this.UserController.clearSessions(this.req, this.res)
+      this.UserController.clearSessions(this.req, this.res)
     })
 
     describe('when revokeAllUserSessions produces an error', function() {
@@ -548,9 +539,9 @@ describe('UserController', function() {
         const next = err => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
-          return done()
+          done()
         }
-        return this.UserController.clearSessions(this.req, this.res, next)
+        this.UserController.clearSessions(this.req, this.res, next)
       })
     })
   })
@@ -609,6 +600,163 @@ describe('UserController', function() {
           type: 'error',
           text: 'validation-error'
         }
+      })
+    })
+  })
+
+  describe('ensureAffiliationsMiddleware', function() {
+    describe('without affiliations feature', function() {
+      beforeEach(async function() {
+        await this.UserController.promises.ensureAffiliationsMiddleware(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+      it('should not run affiliation check', function() {
+        expect(this.UserGetter.promises.getUser).to.not.have.been.called
+        expect(this.UserUpdater.promises.confirmEmail).to.not.have.been.called
+        expect(this.UserUpdater.promises.addAffiliationForNewUser).to.not.have
+          .been.called
+      })
+      it('should not return an error', function() {
+        expect(this.next).to.be.calledWith()
+      })
+    })
+    describe('without ensureAffiliations query parameter', function() {
+      beforeEach(async function() {
+        this.Features.hasFeature.withArgs('affiliations').returns(true)
+        await this.UserController.promises.ensureAffiliationsMiddleware(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+      it('should not run middleware', function() {
+        expect(this.UserGetter.promises.getUser).to.not.have.been.called
+        expect(this.UserUpdater.promises.confirmEmail).to.not.have.been.called
+        expect(this.UserUpdater.promises.addAffiliationForNewUser).to.not.have
+          .been.called
+      })
+      it('should not return an error', function() {
+        expect(this.next).to.be.calledWith()
+      })
+    })
+    describe('no flagged email', function() {
+      beforeEach(async function() {
+        const email = 'unit-test@overleaf.com'
+        this.user.email = email
+        this.user.emails = [
+          {
+            email
+          }
+        ]
+        this.Features.hasFeature.withArgs('affiliations').returns(true)
+        this.req.query.ensureAffiliations = true
+        await this.UserController.promises.ensureAffiliationsMiddleware(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+      it('should get the user', function() {
+        expect(this.UserGetter.promises.getUser).to.have.been.calledWith(
+          this.user._id
+        )
+      })
+      it('should not try to add affiliation or update user', function() {
+        expect(this.UserUpdater.promises.addAffiliationForNewUser).to.not.have
+          .been.called
+      })
+      it('should not return an error', function() {
+        expect(this.next).to.be.calledWith()
+      })
+    })
+    describe('flagged non-SSO email', function() {
+      let emailFlagged
+      beforeEach(async function() {
+        emailFlagged = 'flagged@overleaf.com'
+        this.user.email = emailFlagged
+        this.user.emails = [
+          {
+            email: emailFlagged,
+            affiliationUnchecked: true
+          }
+        ]
+        this.Features.hasFeature.withArgs('affiliations').returns(true)
+        this.req.query.ensureAffiliations = true
+        await this.UserController.promises.ensureAffiliationsMiddleware(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+      it('should unflag the emails but not confirm', function() {
+        expect(
+          this.UserUpdater.promises.addAffiliationForNewUser
+        ).to.have.been.calledWith(this.user._id, emailFlagged)
+        expect(
+          this.UserUpdater.promises.confirmEmail
+        ).to.not.have.been.calledWith(this.user._id, emailFlagged)
+      })
+      it('should not return an error', function() {
+        expect(this.next).to.be.calledWith()
+      })
+    })
+    describe('flagged SSO email', function() {
+      let emailFlagged
+      beforeEach(async function() {
+        emailFlagged = 'flagged@overleaf.com'
+        this.user.email = emailFlagged
+        this.user.emails = [
+          {
+            email: emailFlagged,
+            affiliationUnchecked: true,
+            samlProviderId: '123'
+          }
+        ]
+        this.Features.hasFeature.withArgs('affiliations').returns(true)
+        this.req.query.ensureAffiliations = true
+        await this.UserController.promises.ensureAffiliationsMiddleware(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+      it('should add affiliation to v1, unflag and confirm on v2', function() {
+        expect(this.UserUpdater.promises.addAffiliationForNewUser).to.have.not
+          .been.called
+        expect(this.UserUpdater.promises.confirmEmail).to.have.been.calledWith(
+          this.user._id,
+          emailFlagged
+        )
+      })
+      it('should not return an error', function() {
+        expect(this.next).to.be.calledWith()
+      })
+    })
+    describe('when v1 returns an error', function() {
+      let emailFlagged
+      beforeEach(async function() {
+        this.UserUpdater.promises.addAffiliationForNewUser.rejects()
+        emailFlagged = 'flagged@overleaf.com'
+        this.user.email = emailFlagged
+        this.user.emails = [
+          {
+            email: emailFlagged,
+            affiliationUnchecked: true
+          }
+        ]
+        this.Features.hasFeature.withArgs('affiliations').returns(true)
+        this.req.query.ensureAffiliations = true
+        await this.UserController.promises.ensureAffiliationsMiddleware(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+      it('should return the error', function() {
+        expect(this.next).to.be.calledWith(sinon.match.instanceOf(Error))
       })
     })
   })
