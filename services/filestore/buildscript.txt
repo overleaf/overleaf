@@ -8,4 +8,4 @@ filestore
 --docker-repos=gcr.io/overleaf-ops
 --env-pass-through=
 --data-dirs=uploads,user_files,template_files
---script-version=1.3.5
+--script-version=1.3.6
