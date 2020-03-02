@@ -22,7 +22,7 @@
   "dependencies": {
     "@overleaf/o-error": "^2.1.0",
     "async": "~0.2.10",
-    "aws-sdk": "^2.1.39",
+    "aws-sdk": "^2.628.0",
     "body-parser": "^1.2.0",
     "express": "^4.2.0",
     "fs-extra": "^1.0.0",
