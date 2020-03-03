@@ -64,6 +64,7 @@ define(['base'], function(App) {
     $scope.userEmails = []
     const _ssoAvailable = email => {
       if (!ExposedSettings.hasSamlFeature) return false
+      if (email.samlProviderId) return true
       if (!email.affiliation || !email.affiliation.institution) return false
       if (email.affiliation.institution.ssoEnabled) return true
       if (
