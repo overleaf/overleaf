@@ -10,6 +10,8 @@ exports.migrate = (client, done) => {
         return done()
     }
 
+    console.log(`>> Setting 'imageName' = ${Settings.currentImageName}`)
+
     db.projects.update(
         { imageName: { $exists: false } },
         { $set: { imageName: Settings.currentImageName } },
