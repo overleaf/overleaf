@@ -13,6 +13,12 @@ RUN npm install --quiet
 
 COPY . /app
 
+# Set environment variables for Sentry
+ARG SENTRY_RELEASE
+ARG BRANCH_NAME
+ENV SENTRY_RELEASE=$SENTRY_RELEASE
+ENV BRANCH_NAME=$BRANCH_NAME
+
 RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
 
 FROM base
