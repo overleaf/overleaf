@@ -154,5 +154,34 @@ module.exports = {
         return NotificationsHandler.markAsReadWithKey(userId, key, callback)
       }
     }
+  },
+
+  tpdsFileLimit(user_id) {
+    return {
+      key: `tpdsFileLimit-${user_id}`,
+      create(projectName, callback) {
+        if (callback == null) {
+          callback = function() {}
+        }
+        const messageOpts = {
+          projectName: projectName
+        }
+        return NotificationsHandler.createNotification(
+          user_id,
+          this.key,
+          'notification_tpds_file_limit',
+          messageOpts,
+          null,
+          true,
+          callback
+        )
+      },
+      read(callback) {
+        if (callback == null) {
+          callback = function() {}
+        }
+        return NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
+      }
+    }
   }
 }

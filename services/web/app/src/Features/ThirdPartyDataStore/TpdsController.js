@@ -1,8 +1,8 @@
 /* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-*/
+   camelcase,
+   handle-callback-err,
+   max-len,
+ */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -17,6 +17,7 @@ const UpdateMerger = require('./UpdateMerger')
 const logger = require('logger-sharelatex')
 const Path = require('path')
 const metrics = require('metrics-sharelatex')
+const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 
 module.exports = {
   // mergeUpdate and deleteUpdate are used by Dropbox, where the project is only passed as the name, as the
@@ -41,6 +42,13 @@ module.exports = {
               'tpds update failed to be processed, too many requests'
             )
             return res.sendStatus(429)
+          } else if (err.message === 'project_has_too_many_files') {
+            logger.warn(
+              { err, user_id, filePath },
+              'tpds trying to append to project over file limit'
+            )
+            NotificationsBuilder.tpdsFileLimit(user_id).create(projectName)
+            return res.sendStatus(400)
           } else {
             logger.err(
               { err, user_id, filePath },

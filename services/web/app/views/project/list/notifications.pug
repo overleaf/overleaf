@@ -39,15 +39,31 @@
 					ng-switch-when="notification_ip_matched_affiliation"
 				)
 					.notification-body
-						| It looks like you're at 
+						| It looks like you're at
 						strong {{ notification.messageOpts.university_name }}! <br/>
 						|	Did you know that {{notification.messageOpts.university_name}} is providing
-						strong  free Overleaf Professional accounts 
+						strong  free Overleaf Professional accounts
 						|	 to everyone at {{notification.messageOpts.university_name}}? <br/>
 						|	Add an institutional email address to claim your account.
 					.notification-action
 						a.pull-right.btn.btn-sm.btn-info(href="/user/settings")
 							| Add Affiliation
+					.notification-close
+						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+				.alert.alert-danger(
+					ng-switch-when="notification_tpds_file_limit"
+				)
+					.notification-body
+						| Error: Your project
+						strong  {{ notification.messageOpts.projectName }}
+						|	has gone over the 2000 file limit using an integration (e.g. Dropbox or Github) <br/>
+						| Please decrease the size of your project to prevent further errors.
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(href="/user/settings")
+							| Account Settings
 					.notification-close
 						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;
@@ -98,7 +114,7 @@
 					ng-switch-when="notification_institution_sso_non_canonical"
 				)
 					.notification-body
-						div 
+						div
 							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
 							| !{translate("tried_to_log_in_with_email", {email: "{{notification.requestedEmail}}"})} !{translate("in_order_to_match_institutional_metadata_associated", {email: "{{notification.institutionEmail}}"})}
 					.notification-close
@@ -124,7 +140,7 @@
 					ng-switch-when="notification_institution_sso_linked_by_another"
 				)
 					.notification-body
-						div 
+						div
 							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
 							| !{translate("institution_account_tried_to_add_already_registered")}
 					.notification-close

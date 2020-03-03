@@ -28,6 +28,9 @@ describe('TpdsController', function() {
       requires: {
         './TpdsUpdateHandler': this.TpdsUpdateHandler,
         './UpdateMerger': (this.UpdateMerger = {}),
+        '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
+          tpdsFileLimit: sinon.stub().returns({ create: sinon.stub() })
+        }),
         'logger-sharelatex': {
           log() {},
           warn() {},
@@ -93,6 +96,31 @@ describe('TpdsController', function() {
       }
       this.TpdsController.mergeUpdate(req, res)
       res.sendStatus.calledWith(500).should.equal(true)
+    })
+
+    it('should return a 400 error when the project is too big', function() {
+      const path = '/projectName/here.txt'
+      const req = {
+        pause() {},
+        params: { 0: path, user_id: this.user_id, projectName: 'projectName' },
+        session: {
+          destroy() {}
+        },
+        headers: {
+          'x-sl-update-source': (this.source = 'dropbox')
+        }
+      }
+      this.TpdsUpdateHandler.newUpdate = sinon
+        .stub()
+        .callsArgWith(5, { message: 'project_has_too_many_files' })
+      const res = {
+        sendStatus: sinon.stub()
+      }
+      this.TpdsController.mergeUpdate(req, res)
+      res.sendStatus.calledWith(400).should.equal(true)
+      this.NotificationsBuilder.tpdsFileLimit
+        .calledWith(this.user_id)
+        .should.equal(true)
     })
 
     it('should return a 429 error when the update receiver fails due to too many requests error', function() {
