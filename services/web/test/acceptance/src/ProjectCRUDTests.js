@@ -1,6 +1,7 @@
 const { expect } = require('chai')
 const User = require('./helpers/User').promises
 const { Project } = require('../../../app/src/models/Project')
+const { ObjectId } = require('../../../app/src/infrastructure/mongojs')
 
 describe('Project CRUD', function() {
   beforeEach(async function() {
@@ -49,14 +50,52 @@ describe('Project CRUD', function() {
       const trashedProject = await Project.findById(this.projectId).exec()
       expectObjectIdArrayEqual(trashedProject.trashed, [this.user._id])
     })
+
+    describe('with an array archived state', function() {
+      it('should mark the project as not archived for the user', async function() {
+        await Project.update(
+          { _id: this.projectId },
+          { $set: { archived: [ObjectId(this.user._id)] } }
+        ).exec()
+
+        const { response } = await this.user.doRequest(
+          'POST',
+          `/project/${this.projectId}/trash`
+        )
+
+        expect(response.statusCode).to.equal(200)
+
+        const trashedProject = await Project.findById(this.projectId).exec()
+        expectObjectIdArrayEqual(trashedProject.archived, [])
+      })
+    })
+
+    describe('with a legacy boolean state', function() {
+      it('should mark the project as not archived for the user', async function() {
+        await Project.update(
+          { _id: this.projectId },
+          { $set: { archived: true } }
+        ).exec()
+
+        const { response } = await this.user.doRequest(
+          'POST',
+          `/project/${this.projectId}/trash`
+        )
+
+        expect(response.statusCode).to.equal(200)
+
+        const trashedProject = await Project.findById(this.projectId).exec()
+        expectObjectIdArrayEqual(trashedProject.archived, [])
+      })
+    })
   })
 
   describe('when untrashing a project', function() {
     it('should mark the project as untrashed for the user', async function() {
       await Project.update(
         { _id: this.projectId },
-        { trashed: [this.user._id] }
-      )
+        { trashed: [ObjectId(this.user._id)] }
+      ).exec()
       const { response } = await this.user.doRequest(
         'DELETE',
         `/project/${this.projectId}/trash`
@@ -70,8 +109,8 @@ describe('Project CRUD', function() {
     it('does nothing if the user has already untrashed the project', async function() {
       await Project.update(
         { _id: this.projectId },
-        { trashed: [this.user._id] }
-      )
+        { trashed: [ObjectId(this.user._id)] }
+      ).exec()
       // Mark as untrashed the first time
       await this.user.doRequest('DELETE', `/project/${this.projectId}/trash`)
 

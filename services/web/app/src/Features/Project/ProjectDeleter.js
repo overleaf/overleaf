@@ -144,11 +144,17 @@ async function trashProject(projectId, userId) {
       throw new Errors.NotFoundError('project not found')
     }
 
+    const archived = ProjectHelper.calculateArchivedArray(
+      project,
+      userId,
+      'UNARCHIVE'
+    )
+
     await Project.update(
       { _id: projectId },
       {
         $addToSet: { trashed: ObjectId(userId) },
-        $pull: { archived: ObjectId(userId) }
+        $set: { archived: archived }
       }
     )
   } catch (err) {

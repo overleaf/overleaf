@@ -453,6 +453,18 @@ describe('ProjectDeleter', function() {
       )
       this.ProjectMock.verify()
     })
+
+    it('calculates the archived array', async function() {
+      await this.ProjectDeleter.promises.archiveProject(
+        this.project._id,
+        this.user._id
+      )
+      expect(this.ProjectHelper.calculateArchivedArray).to.have.been.calledWith(
+        this.project,
+        this.user._id,
+        'ARCHIVE'
+      )
+    })
   })
 
   describe('unarchiveProject', function() {
@@ -477,10 +489,25 @@ describe('ProjectDeleter', function() {
       )
       this.ProjectMock.verify()
     })
+
+    it('calculates the archived array', async function() {
+      await this.ProjectDeleter.promises.unarchiveProject(
+        this.project._id,
+        this.user._id
+      )
+      expect(this.ProjectHelper.calculateArchivedArray).to.have.been.calledWith(
+        this.project,
+        this.user._id,
+        'UNARCHIVE'
+      )
+    })
   })
 
   describe('trashProject', function() {
     beforeEach(function() {
+      let archived = [ObjectId(this.user._id)]
+      this.ProjectHelper.calculateArchivedArray.returns(archived)
+
       this.ProjectMock.expects('findOne')
         .withArgs({ _id: this.project._id })
         .chain('exec')
@@ -491,7 +518,7 @@ describe('ProjectDeleter', function() {
           { _id: this.project._id },
           {
             $addToSet: { trashed: ObjectId(this.user._id) },
-            $pull: { archived: ObjectId(this.user._id) }
+            $set: { archived: archived }
           }
         )
         .resolves()
@@ -503,6 +530,18 @@ describe('ProjectDeleter', function() {
         this.user._id
       )
       this.ProjectMock.verify()
+    })
+
+    it('unarchives the project', async function() {
+      await this.ProjectDeleter.promises.trashProject(
+        this.project._id,
+        this.user._id
+      )
+      expect(this.ProjectHelper.calculateArchivedArray).to.have.been.calledWith(
+        this.project,
+        this.user._id,
+        'UNARCHIVE'
+      )
     })
   })
 
