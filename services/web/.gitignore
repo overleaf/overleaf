@@ -59,6 +59,3 @@ docker-shared.yml
 config/*.coffee
 
 modules/**/Makefile
-
-# Sentry secrets file (injected by CI)
-.sentryclirc

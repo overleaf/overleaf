@@ -365,8 +365,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
         Settings.recaptcha != null ? Settings.recaptcha.siteKeyV3 : undefined,
       recaptchaDisabled:
         Settings.recaptcha != null ? Settings.recaptcha.disabled : undefined,
-      validRootDocExtensions: Settings.validRootDocExtensions,
-      sentryDsn: Settings.sentry != null ? Settings.sentry.publicDSN : undefined
+      validRootDocExtensions: Settings.validRootDocExtensions
     }
     next()
   })
