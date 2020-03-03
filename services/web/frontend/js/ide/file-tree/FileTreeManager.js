@@ -167,6 +167,14 @@ define([
       return entities
     }
 
+    getFullCount() {
+      const entities = []
+      this.forEachEntity(function(e) {
+        return entities.push(e)
+      })
+      return entities.length
+    }
+
     getMultiSelectedEntityChildNodes() {
       // use pathnames with a leading slash to avoid
       // problems with reserved Object properties

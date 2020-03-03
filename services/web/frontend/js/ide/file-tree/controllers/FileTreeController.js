@@ -143,6 +143,7 @@ define(['base'], function(App) {
     projectFeatures,
     userFeatures
   ) {
+    $scope.file_count = ide.fileTreeManager.getFullCount()
     $scope.type = type
     $scope.parent_folder = parent_folder
     $scope.state = {

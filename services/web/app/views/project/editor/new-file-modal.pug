@@ -1,7 +1,7 @@
 script(type='text/ng-template', id='newFileModalTemplate')
 	.modal-header
 		h3 Add Files
-	.modal-body.modal-new-file
+	.modal-body.modal-new-file(ng-if="file_count < 2000")
 		table
 			tr
 				td.modal-new-file--list
@@ -190,6 +190,10 @@ script(type='text/ng-template', id='newFileModalTemplate')
 					!= moduleIncludes("newFileModal:panel", locals)
 
 	.modal-footer
+		.modal-footer-left.approaching-file-limit(ng-if="file_count > 1900 && file_count < 2000")
+			|	#{translate("project_approaching_file_limit")} ({{file_count}}/2000)
+		.alert.alert-warning.at-file-limit(ng-if="file_count >= 2000")
+			|	#{translate("project_has_too_many_files")}
 		button.btn.btn-default(
 			ng-disabled="state.inflight"
 			ng-click="cancel()"
