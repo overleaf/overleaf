@@ -3,7 +3,7 @@
 # https://github.com/sharelatex/sharelatex-dev-environment
 # Version: 1.3.6
 
-FROM node:10.19.0 as base
+FROM node:12.16.1 as base
 
 WORKDIR /app
 COPY install_deps.sh /app
