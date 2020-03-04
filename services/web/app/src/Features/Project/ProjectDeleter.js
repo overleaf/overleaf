@@ -12,6 +12,7 @@ const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
+const HistoryManager = require('../History/HistoryManager')
 const moment = require('moment')
 const { promiseMapWithLimit } = require('../../util/promises')
 
@@ -306,6 +307,7 @@ async function expireDeletedProject(projectId) {
     }
 
     await DocstoreManager.promises.destroyProject(deletedProject.project._id)
+    await HistoryManager.promises.deleteProject(deletedProject.project._id)
 
     await DeletedProject.update(
       {

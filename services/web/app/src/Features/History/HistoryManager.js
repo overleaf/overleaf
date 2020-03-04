@@ -8,11 +8,13 @@ module.exports = {
   initializeProject: callbackify(initializeProject),
   flushProject: callbackify(flushProject),
   resyncProject: callbackify(resyncProject),
+  deleteProject: callbackify(deleteProject),
   injectUserDetails: callbackify(injectUserDetails),
   promises: {
     initializeProject,
     flushProject,
     resyncProject,
+    deleteProject,
     injectUserDetails
   }
 }
@@ -64,6 +66,19 @@ async function resyncProject(projectId) {
   } catch (err) {
     throw new OError({
       message: 'failed to resync project history',
+      info: { projectId }
+    })
+  }
+}
+
+async function deleteProject(projectId) {
+  try {
+    await request.delete(
+      `${settings.apis.project_history.url}/project/${projectId}`
+    )
+  } catch (err) {
+    throw new OError({
+      message: 'failed to clear project history',
       info: { projectId }
     })
   }

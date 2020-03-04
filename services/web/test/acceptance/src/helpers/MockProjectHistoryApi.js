@@ -1,16 +1,3 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let MockProjectHistoryApi
 const _ = require('lodash')
 const express = require('express')
@@ -29,133 +16,137 @@ module.exports = MockProjectHistoryApi = {
 
   projectSnapshots: {},
 
-  addOldFile(project_id, version, pathname, content) {
-    return (this.oldFiles[`${project_id}:${version}:${pathname}`] = content)
+  addOldFile(projectId, version, pathname, content) {
+    this.oldFiles[`${projectId}:${version}:${pathname}`] = content
   },
 
-  addProjectSnapshot(project_id, version, snapshot) {
-    return (this.projectSnapshots[`${project_id}:${version}`] = snapshot)
+  addProjectSnapshot(projectId, version, snapshot) {
+    this.projectSnapshots[`${projectId}:${version}`] = snapshot
   },
 
-  setProjectVersion(project_id, version) {
-    return (this.projectVersions[project_id] = { version })
+  setProjectVersion(projectId, version) {
+    this.projectVersions[projectId] = { version }
   },
 
-  setProjectVersionInfo(project_id, versionInfo) {
-    return (this.projectVersions[project_id] = versionInfo)
+  setProjectVersionInfo(projectId, versionInfo) {
+    this.projectVersions[projectId] = versionInfo
   },
 
-  addLabel(project_id, label) {
+  addLabel(projectId, label) {
     if (label.id == null) {
       label.id = new ObjectId().toString()
     }
-    if (this.labels[project_id] == null) {
-      this.labels[project_id] = {}
+    if (this.labels[projectId] == null) {
+      this.labels[projectId] = {}
     }
-    return (this.labels[project_id][label.id] = label)
+    this.labels[projectId][label.id] = label
   },
 
-  deleteLabel(project_id, label_id) {
-    return delete this.labels[project_id][label_id]
+  deleteLabel(projectId, labelId) {
+    delete this.labels[projectId][labelId]
   },
 
-  getLabels(project_id) {
-    if (this.labels[project_id] == null) {
+  getLabels(projectId) {
+    if (this.labels[projectId] == null) {
       return null
     }
-    return _.values(this.labels[project_id])
+    return _.values(this.labels[projectId])
   },
 
   reset() {
     this.oldFiles = {}
     this.projectHistoryId = 1
     this.projectVersions = {}
-    return (this.labels = {})
+    this.labels = {}
   },
 
   run() {
     this.reset()
 
     app.post('/project', (req, res, next) => {
-      return res.json({ project: { id: this.projectHistoryId++ } })
+      res.json({ project: { id: this.projectHistoryId++ } })
+    })
+
+    app.delete('/project/:projectId', (req, res, next) => {
+      res.sendStatus(204)
     })
 
     app.get(
-      '/project/:project_id/version/:version/:pathname',
+      '/project/:projectId/version/:version/:pathname',
       (req, res, next) => {
-        const { project_id, version, pathname } = req.params
-        const key = `${project_id}:${version}:${pathname}`
+        const { projectId, version, pathname } = req.params
+        const key = `${projectId}:${version}:${pathname}`
         if (this.oldFiles[key] != null) {
-          return res.send(this.oldFiles[key])
+          res.send(this.oldFiles[key])
         } else {
-          return res.send(404)
+          res.send(404)
         }
       }
     )
 
-    app.get('/project/:project_id/version/:version', (req, res, next) => {
-      const { project_id, version } = req.params
-      const key = `${project_id}:${version}`
+    app.get('/project/:projectId/version/:version', (req, res, next) => {
+      const { projectId, version } = req.params
+      const key = `${projectId}:${version}`
       if (this.projectSnapshots[key] != null) {
-        return res.json(this.projectSnapshots[key])
+        res.json(this.projectSnapshots[key])
       } else {
-        return res.sendStatus(404)
+        res.sendStatus(404)
       }
     })
 
-    app.get('/project/:project_id/version', (req, res, next) => {
-      const { project_id } = req.params
-      if (this.projectVersions[project_id] != null) {
-        return res.json(this.projectVersions[project_id])
+    app.get('/project/:projectId/version', (req, res, next) => {
+      const { projectId } = req.params
+      if (this.projectVersions[projectId] != null) {
+        res.json(this.projectVersions[projectId])
       } else {
-        return res.send(404)
+        res.send(404)
       }
     })
 
-    app.get('/project/:project_id/labels', (req, res, next) => {
-      const { project_id } = req.params
-      const labels = this.getLabels(project_id)
+    app.get('/project/:projectId/labels', (req, res, next) => {
+      const { projectId } = req.params
+      const labels = this.getLabels(projectId)
       if (labels != null) {
-        return res.json(labels)
+        res.json(labels)
       } else {
-        return res.send(404)
+        res.send(404)
       }
     })
 
     app.post(
-      '/project/:project_id/user/:user_id/labels',
+      '/project/:projectId/user/:user_id/labels',
       bodyParser.json(),
       (req, res, next) => {
-        const { project_id } = req.params
+        const { projectId } = req.params
         const { comment, version } = req.body
-        const label_id = new ObjectId().toString()
-        this.addLabel(project_id, { id: label_id, comment, version })
-        return res.json({ label_id, comment, version })
+        const labelId = new ObjectId().toString()
+        this.addLabel(projectId, { id: labelId, comment, version })
+        res.json({ label_id: labelId, comment, version })
       }
     )
 
     app.delete(
-      '/project/:project_id/user/:user_id/labels/:label_id',
+      '/project/:projectId/user/:user_id/labels/:labelId',
       (req, res, next) => {
-        const { project_id, label_id } = req.params
+        const { projectId, labelId } = req.params
         const label =
-          this.labels[project_id] != null
-            ? this.labels[project_id][label_id]
+          this.labels[projectId] != null
+            ? this.labels[projectId][labelId]
             : undefined
         if (label != null) {
-          this.deleteLabel(project_id, label_id)
-          return res.send(204)
+          this.deleteLabel(projectId, labelId)
+          res.send(204)
         } else {
-          return res.send(404)
+          res.send(404)
         }
       }
     )
 
-    app.post('/project/:project_id/flush', (req, res, next) => {
-      return res.sendStatus(200)
+    app.post('/project/:projectId/flush', (req, res, next) => {
+      res.sendStatus(200)
     })
 
-    return app
+    app
       .listen(3054, error => {
         if (error != null) {
           throw error
@@ -163,7 +154,7 @@ module.exports = MockProjectHistoryApi = {
       })
       .on('error', error => {
         console.error('error starting MockProjectHistoryApi:', error.message)
-        return process.exit(1)
+        process.exit(1)
       })
   }
 }

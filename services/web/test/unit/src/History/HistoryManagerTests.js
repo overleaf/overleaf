@@ -1,6 +1,7 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
+const { ObjectId } = require('mongodb')
 
 const MODULE_PATH = '../../../../app/src/Features/History/HistoryManager'
 
@@ -11,8 +12,10 @@ describe('HistoryManager', function() {
       getLoggedInUserId: sinon.stub().returns(this.user_id)
     }
     this.request = {
-      post: sinon.stub()
+      post: sinon.stub(),
+      delete: sinon.stub().resolves()
     }
+    this.projectHistoryUrl = 'http://project_history.example.com'
     this.settings = {
       apis: {
         trackchanges: {
@@ -20,7 +23,7 @@ describe('HistoryManager', function() {
           url: 'http://trackchanges.example.com'
         },
         project_history: {
-          url: 'http://project_history.example.com'
+          url: this.projectHistoryUrl
         }
       }
     }
@@ -240,6 +243,16 @@ describe('HistoryManager', function() {
         expect(updates.updates[0].meta.users).to.deep.equal([this.user1_view])
         expect(updates.updates[1].meta.users).to.deep.equal([this.user2_view])
       })
+    })
+  })
+
+  describe('deleteProject', function() {
+    it('should call the project-history service', async function() {
+      const projectId = new ObjectId()
+      await this.HistoryManager.promises.deleteProject(projectId)
+      expect(this.request.delete).to.have.been.calledWith(
+        `${this.projectHistoryUrl}/project/${projectId}`
+      )
     })
   })
 })

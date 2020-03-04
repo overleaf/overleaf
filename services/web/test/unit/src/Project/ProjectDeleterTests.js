@@ -115,6 +115,11 @@ describe('ProjectDeleter', function() {
         destroyProject: sinon.stub().resolves()
       }
     }
+    this.HistoryManager = {
+      promises: {
+        deleteProject: sinon.stub().resolves()
+      }
+    }
 
     this.ProjectMock = sinon.mock(Project)
     this.DeletedProjectMock = sinon.mock(DeletedProject)
@@ -134,6 +139,7 @@ describe('ProjectDeleter', function() {
         '../Docstore/DocstoreManager': this.DocstoreManager,
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
         '../../infrastructure/mongojs': { db: this.db, ObjectId },
+        '../History/HistoryManager': this.HistoryManager,
         'logger-sharelatex': this.logger,
         '../Errors/Errors': Errors
       },
@@ -421,6 +427,12 @@ describe('ProjectDeleter', function() {
     it('should destroy the docs in docstore', function() {
       expect(
         this.DocstoreManager.promises.destroyProject
+      ).to.have.been.calledWith(this.deletedProjects[0].project._id)
+    })
+
+    it('should delete the project in project-history', function() {
+      expect(
+        this.HistoryManager.promises.deleteProject
       ).to.have.been.calledWith(this.deletedProjects[0].project._id)
     })
   })

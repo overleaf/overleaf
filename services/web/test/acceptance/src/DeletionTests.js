@@ -9,6 +9,7 @@ const SubscriptionViewModelBuilder = require('../../../app/src/Features/Subscrip
 const MockDocstoreApi = require('./helpers/MockDocstoreApi')
 require('./helpers/MockTagsApi')
 require('./helpers/MockV1Api')
+require('./helpers/MockProjectHistoryApi')
 
 describe('Deleting a user', function() {
   beforeEach(function(done) {
