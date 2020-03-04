@@ -583,48 +583,6 @@ describe('S3PersistorTests', function() {
         })
       })
     })
-
-    describe('when the file does not exist', function() {
-      let error
-
-      beforeEach(async function() {
-        Fs.createReadStream = sinon.stub().throws(FileNotFoundError)
-        try {
-          await S3Persistor.promises.sendFile(bucket, key, filename)
-        } catch (err) {
-          error = err
-        }
-      })
-
-      it('returns a NotFoundError', function() {
-        expect(error).to.be.an.instanceOf(Errors.NotFoundError)
-      })
-
-      it('wraps the error', function() {
-        expect(error.cause).to.equal(FileNotFoundError)
-      })
-    })
-
-    describe('when reading the file throws an error', function() {
-      let error
-
-      beforeEach(async function() {
-        Fs.createReadStream = sinon.stub().throws(genericError)
-        try {
-          await S3Persistor.promises.sendFile(bucket, key, filename)
-        } catch (err) {
-          error = err
-        }
-      })
-
-      it('returns a ReadError', function() {
-        expect(error).to.be.an.instanceOf(Errors.ReadError)
-      })
-
-      it('wraps the error', function() {
-        expect(error.cause).to.equal(genericError)
-      })
-    })
   })
 
   describe('copyFile', function() {

@@ -46,18 +46,7 @@ const S3Persistor = {
 module.exports = S3Persistor
 
 async function sendFile(bucketName, key, fsPath) {
-  let readStream
-  try {
-    readStream = fs.createReadStream(fsPath)
-  } catch (err) {
-    throw PersistorHelper.wrapError(
-      err,
-      'error reading file from disk',
-      { bucketName, key, fsPath },
-      ReadError
-    )
-  }
-  return sendStream(bucketName, key, readStream)
+  return sendStream(bucketName, key, fs.createReadStream(fsPath))
 }
 
 async function sendStream(bucketName, key, readStream, sourceMd5) {
