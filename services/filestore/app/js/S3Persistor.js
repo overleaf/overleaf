@@ -74,7 +74,7 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
 
     const meteredStream = PersistorHelper.getMeteredStream(
       readStream,
-      's3.egress'
+      's3.egress' // egress from us to s3
     )
 
     // if we have an md5 hash, pass this to S3 to verify the upload
@@ -139,7 +139,10 @@ async function getFileStream(bucketName, key, opts) {
     .getObject(params)
     .createReadStream()
 
-  const meteredStream = PersistorHelper.getMeteredStream(stream, 's3.ingress')
+  const meteredStream = PersistorHelper.getMeteredStream(
+    stream,
+    's3.ingress' // ingress to us from s3
+  )
 
   try {
     await PersistorHelper.waitForStreamReady(stream)

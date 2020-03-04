@@ -78,11 +78,12 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
 
     const meteredStream = PersistorHelper.getMeteredStream(
       readStream,
-      'gcs.egress'
+      'gcs.egress' // egress from us to gcs
     )
 
     const writeOptions = {
-      resumable: false // recommended by Google
+      // disabling of resumable uploads is recommended by Google:
+      resumable: false
     }
 
     if (sourceMd5) {
@@ -126,7 +127,10 @@ async function getFileStream(bucketName, key, opts = {}) {
     .file(key)
     .createReadStream(opts)
 
-  const meteredStream = PersistorHelper.getMeteredStream(stream, 'gcs.ingress')
+  const meteredStream = PersistorHelper.getMeteredStream(
+    stream,
+    'gcs.ingress' // ingress to us from gcs
+  )
 
   try {
     await PersistorHelper.waitForStreamReady(stream)
