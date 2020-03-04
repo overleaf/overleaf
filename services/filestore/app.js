@@ -122,18 +122,6 @@ app.get(
   fileController.getFile
 )
 
-app.get('/heapdump', (req, res, next) =>
-  require('heapdump').writeSnapshot(
-    '/tmp/' + Date.now() + '.filestore.heapsnapshot',
-    (err, filename) => {
-      if (err) {
-        return next(err)
-      }
-      res.send(filename)
-    }
-  )
-)
-
 app.get('/status', function(req, res) {
   res.send('filestore sharelatex up')
 })

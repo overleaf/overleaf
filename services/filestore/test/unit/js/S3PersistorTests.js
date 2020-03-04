@@ -158,7 +158,7 @@ describe('S3PersistorTests', function() {
         'metrics-sharelatex': Metrics,
         crypto
       },
-      globals: { console }
+      globals: { console, Buffer }
     })
   })
 

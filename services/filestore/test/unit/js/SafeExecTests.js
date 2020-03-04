@@ -12,6 +12,7 @@ describe('SafeExec', function() {
     options = { timeout: 10 * 1000, killSignal: 'SIGTERM' }
 
     safeExec = SandboxedModule.require(modulePath, {
+      globals: { process },
       requires: {
         'settings-sharelatex': settings
       }

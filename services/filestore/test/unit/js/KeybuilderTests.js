@@ -2,12 +2,14 @@ const SandboxedModule = require('sandboxed-module')
 
 const modulePath = '../../../app/js/KeyBuilder.js'
 
-describe('LocalFileWriter', function() {
+describe('KeybuilderTests', function() {
   let KeyBuilder
   const key = 'wombat/potato'
 
   beforeEach(function() {
-    KeyBuilder = SandboxedModule.require(modulePath)
+    KeyBuilder = SandboxedModule.require(modulePath, {
+      requires: { 'settings-sharelatex': {} }
+    })
   })
 
   describe('cachedKey', function() {

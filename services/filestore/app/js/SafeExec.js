@@ -1,4 +1,4 @@
-const _ = require('underscore')
+const lodashOnce = require('lodash.once')
 const childProcess = require('child_process')
 const Settings = require('settings-sharelatex')
 const { ConversionsDisabledError, FailedCommandError } = require('./Errors')
@@ -28,7 +28,7 @@ function safeExec(command, options, callback) {
 
   let killTimer
 
-  const cleanup = _.once(function(err) {
+  const cleanup = lodashOnce(function(err) {
     if (killTimer) {
       clearTimeout(killTimer)
     }
