@@ -19,6 +19,9 @@ if (settings.filestore.gcs && settings.filestore.gcs.apiEndpoint) {
     request: function(reqOpts) {
       const url = new URL(reqOpts.uri)
       url.host = settings.filestore.gcs.apiEndpoint
+      if (settings.filestore.gcs.apiScheme) {
+        url.protocol = settings.filestore.gcs.apiScheme
+      }
       reqOpts.uri = url.toString()
       return reqOpts
     }

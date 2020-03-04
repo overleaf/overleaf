@@ -22,6 +22,7 @@ function s3Stores() {
 function gcsConfig() {
   return {
     apiEndpoint: process.env.GCS_API_ENDPOINT,
+    apiScheme: process.env.GCS_API_SCHEME,
     projectId: 'fake'
   }
 }
