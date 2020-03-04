@@ -1,7 +1,7 @@
 script(type='text/ng-template', id='newFileModalTemplate')
 	.modal-header
 		h3 Add Files
-	.modal-body.modal-new-file(ng-if="file_count < 2000")
+	.modal-body.modal-new-file(ng-show="file_count < 2000")
 		table
 			tr
 				td.modal-new-file--list
