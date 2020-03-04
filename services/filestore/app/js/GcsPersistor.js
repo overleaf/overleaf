@@ -1,5 +1,4 @@
 const settings = require('settings-sharelatex')
-const metrics = require('metrics-sharelatex')
 const fs = require('fs')
 const { promisify } = require('util')
 const Stream = require('stream')
@@ -79,9 +78,7 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
 
     const meteredStream = PersistorHelper.getMeteredStream(
       readStream,
-      (_, byteCount) => {
-        metrics.count('gcs.egress', byteCount)
-      }
+      'gcs.egress'
     )
 
     const writeOptions = {
@@ -129,10 +126,7 @@ async function getFileStream(bucketName, key, opts = {}) {
     .file(key)
     .createReadStream(opts)
 
-  const meteredStream = PersistorHelper.getMeteredStream(stream, (_, bytes) => {
-    // ignore the error parameter and just log the byte count
-    metrics.count('gcs.ingress', bytes)
-  })
+  const meteredStream = PersistorHelper.getMeteredStream(stream, 'gcs.ingress')
 
   try {
     await PersistorHelper.waitForStreamReady(stream)

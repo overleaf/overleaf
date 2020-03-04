@@ -4,7 +4,6 @@ http.globalAgent.maxSockets = 300
 https.globalAgent.maxSockets = 300
 
 const settings = require('settings-sharelatex')
-const metrics = require('metrics-sharelatex')
 
 const PersistorHelper = require('./PersistorHelper')
 
@@ -75,10 +74,7 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
 
     const meteredStream = PersistorHelper.getMeteredStream(
       readStream,
-      (_, byteCount) => {
-        // ignore the error parameter and just log the byte count
-        metrics.count('s3.egress', byteCount)
-      }
+      's3.egress'
     )
 
     // if we have an md5 hash, pass this to S3 to verify the upload
@@ -143,13 +139,7 @@ async function getFileStream(bucketName, key, opts) {
     .getObject(params)
     .createReadStream()
 
-  const meteredStream = PersistorHelper.getMeteredStream(
-    stream,
-    (_, byteCount) => {
-      // ignore the error parameter and just log the byte count
-      metrics.count('s3.ingress', byteCount)
-    }
-  )
+  const meteredStream = PersistorHelper.getMeteredStream(stream, 's3.ingress')
 
   try {
     await PersistorHelper.waitForStreamReady(stream)

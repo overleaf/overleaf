@@ -73,7 +73,8 @@ describe('FSPersistorTests', function() {
         crypto,
         // imported by PersistorHelper but otherwise unused here
         'stream-meter': {},
-        'logger-sharelatex': {}
+        'logger-sharelatex': {},
+        'metrics-sharelatex': {}
       },
       globals: { console }
     })
