@@ -220,7 +220,7 @@ describe('GcsPersistorTests', function() {
       })
 
       it('stores the bucket and key in the error', function() {
-        expect(error.info).to.include({ bucket: bucket, key: key })
+        expect(error.info).to.include({ bucketName: bucket, key: key })
       })
     })
 
@@ -250,7 +250,7 @@ describe('GcsPersistorTests', function() {
       })
 
       it('stores the bucket and key in the error', function() {
-        expect(error.info).to.include({ bucket: bucket, key: key })
+        expect(error.info).to.include({ bucketName: bucket, key: key })
       })
     })
   })

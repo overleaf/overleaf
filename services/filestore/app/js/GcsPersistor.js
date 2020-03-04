@@ -53,7 +53,7 @@ const GcsPersistor = {
 
 module.exports = GcsPersistor
 
-async function sendFile(bucket, key, fsPath) {
+async function sendFile(bucketName, key, fsPath) {
   let readStream
   try {
     readStream = fs.createReadStream(fsPath)
@@ -61,14 +61,14 @@ async function sendFile(bucket, key, fsPath) {
     throw PersistorHelper.wrapError(
       err,
       'error reading file from disk',
-      { bucketName: bucket, key, fsPath },
+      { bucketName, key, fsPath },
       ReadError
     )
   }
-  return sendStream(bucket, key, readStream)
+  return sendStream(bucketName, key, readStream)
 }
 
-async function sendStream(bucket, key, readStream, sourceMd5) {
+async function sendStream(bucketName, key, readStream, sourceMd5) {
   try {
     let hashPromise
 
@@ -96,7 +96,7 @@ async function sendStream(bucket, key, readStream, sourceMd5) {
     }
 
     const uploadStream = storage
-      .bucket(bucket)
+      .bucket(bucketName)
       .file(key)
       .createWriteStream(writeOptions)
 
@@ -107,25 +107,25 @@ async function sendStream(bucket, key, readStream, sourceMd5) {
     if (hashPromise) {
       sourceMd5 = await hashPromise
       // throws on mismatch
-      await PersistorHelper.verifyMd5(GcsPersistor, bucket, key, sourceMd5)
+      await PersistorHelper.verifyMd5(GcsPersistor, bucketName, key, sourceMd5)
     }
   } catch (err) {
     throw PersistorHelper.wrapError(
       err,
       'upload to GCS failed',
-      { bucket, key },
+      { bucketName, key },
       WriteError
     )
   }
 }
 
-async function getFileStream(bucket, key, opts = {}) {
+async function getFileStream(bucketName, key, opts = {}) {
   if (opts.end) {
     // S3 (and http range headers) treat 'end' as inclusive, so increase this by 1
     opts.end++
   }
   const stream = storage
-    .bucket(bucket)
+    .bucket(bucketName)
     .file(key)
     .createReadStream(opts)
 
@@ -141,16 +141,16 @@ async function getFileStream(bucket, key, opts = {}) {
     throw PersistorHelper.wrapError(
       err,
       'error reading file from GCS',
-      { bucket, key, opts },
+      { bucketName, key, opts },
       ReadError
     )
   }
 }
 
-async function getFileSize(bucket, key) {
+async function getFileSize(bucketName, key) {
   try {
     const metadata = await storage
-      .bucket(bucket)
+      .bucket(bucketName)
       .file(key)
       .getMetadata()
     return metadata[0].size
@@ -158,16 +158,16 @@ async function getFileSize(bucket, key) {
     throw PersistorHelper.wrapError(
       err,
       'error getting size of GCS object',
-      { bucket, key },
+      { bucketName, key },
       ReadError
     )
   }
 }
 
-async function getFileMd5Hash(bucket, key) {
+async function getFileMd5Hash(bucketName, key) {
   try {
     const metadata = await storage
-      .bucket(bucket)
+      .bucket(bucketName)
       .file(key)
       .getMetadata()
     return PersistorHelper.base64ToHex(metadata[0].md5Hash)
@@ -175,23 +175,23 @@ async function getFileMd5Hash(bucket, key) {
     throw PersistorHelper.wrapError(
       err,
       'error getting hash of GCS object',
-      { bucket, key },
+      { bucketName, key },
       ReadError
     )
   }
 }
 
-async function deleteFile(bucket, key) {
+async function deleteFile(bucketName, key) {
   try {
     await storage
-      .bucket(bucket)
+      .bucket(bucketName)
       .file(key)
       .delete()
   } catch (err) {
     const error = PersistorHelper.wrapError(
       err,
       'error deleting GCS object',
-      { bucket, key },
+      { bucketName, key },
       WriteError
     )
     if (!(error instanceof NotFoundError)) {
@@ -200,17 +200,19 @@ async function deleteFile(bucket, key) {
   }
 }
 
-async function deleteDirectory(bucket, key) {
+async function deleteDirectory(bucketName, key) {
   let files
 
   try {
-    const response = await storage.bucket(bucket).getFiles({ directory: key })
+    const response = await storage
+      .bucket(bucketName)
+      .getFiles({ directory: key })
     files = response[0]
   } catch (err) {
     const error = PersistorHelper.wrapError(
       err,
       'failed to list objects in GCS',
-      { bucket, key },
+      { bucketName, key },
       ReadError
     )
     if (error instanceof NotFoundError) {
@@ -226,7 +228,7 @@ async function deleteDirectory(bucket, key) {
       const error = PersistorHelper.wrapError(
         err,
         'failed to delete object in GCS',
-        { bucket, key },
+        { bucketName, key },
         WriteError
       )
       if (!(error instanceof NotFoundError)) {
@@ -236,17 +238,19 @@ async function deleteDirectory(bucket, key) {
   }
 }
 
-async function directorySize(bucket, key) {
+async function directorySize(bucketName, key) {
   let files
 
   try {
-    const response = await storage.bucket(bucket).getFiles({ directory: key })
+    const response = await storage
+      .bucket(bucketName)
+      .getFiles({ directory: key })
     files = response[0]
   } catch (err) {
     throw PersistorHelper.wrapError(
       err,
       'failed to list objects in GCS',
-      { bucket, key },
+      { bucketName, key },
       ReadError
     )
   }
@@ -254,10 +258,10 @@ async function directorySize(bucket, key) {
   return files.reduce((acc, file) => Number(file.metadata.size) + acc, 0)
 }
 
-async function checkIfFileExists(bucket, key) {
+async function checkIfFileExists(bucketName, key) {
   try {
     const response = await storage
-      .bucket(bucket)
+      .bucket(bucketName)
       .file(key)
       .exists()
     return response[0]
@@ -265,16 +269,16 @@ async function checkIfFileExists(bucket, key) {
     throw PersistorHelper.wrapError(
       err,
       'error checking if file exists in GCS',
-      { bucket, key },
+      { bucketName, key },
       ReadError
     )
   }
 }
 
-async function copyFile(bucket, sourceKey, destKey) {
+async function copyFile(bucketName, sourceKey, destKey) {
   try {
-    const src = storage.bucket(bucket).file(sourceKey)
-    const dest = storage.bucket(bucket).file(destKey)
+    const src = storage.bucket(bucketName).file(sourceKey)
+    const dest = storage.bucket(bucketName).file(destKey)
     await src.copy(dest)
   } catch (err) {
     // fake-gcs-server has a bug that returns an invalid response when the file does not exist
@@ -284,7 +288,7 @@ async function copyFile(bucket, sourceKey, destKey) {
     throw PersistorHelper.wrapError(
       err,
       'failed to copy file in GCS',
-      { bucket, sourceKey, destKey },
+      { bucketName, sourceKey, destKey },
       WriteError
     )
   }
