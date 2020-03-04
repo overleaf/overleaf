@@ -13,7 +13,7 @@ describe('Settings', function() {
       }
       process.env.S3_BUCKET_CREDENTIALS = JSON.stringify(s3Settings)
       const settings = SandboxedModule.require('settings-sharelatex', {
-        globals: { console }
+        globals: { console, process }
       })
       expect(settings.filestore.s3BucketCreds).to.deep.equal(s3Settings)
     })
