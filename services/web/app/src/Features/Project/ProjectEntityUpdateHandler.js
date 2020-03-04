@@ -3,6 +3,7 @@ const async = require('async')
 const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
 const Path = require('path')
+const fs = require('fs')
 const { Doc } = require('../../models/Doc')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const DocumentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
@@ -18,6 +19,9 @@ const ProjectUpdateHandler = require('./ProjectUpdateHandler')
 const ProjectEntityMongoUpdateHandler = require('./ProjectEntityMongoUpdateHandler')
 const SafePath = require('./SafePath')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
+const FileWriter = require('../../infrastructure/FileWriter')
+const EditorRealTimeController = require('../Editor/EditorRealTimeController')
+const { promisifyAll } = require('../../util/promises')
 
 const LOCK_NAMESPACE = 'sequentialProjectStructureUpdateLock'
 const VALID_ROOT_DOC_EXTENSIONS = Settings.validRootDocExtensions
@@ -1512,7 +1516,146 @@ const ProjectEntityUpdateHandler = {
     })
 
     async.series(jobs, callback)
-  }
+  },
+
+  convertDocToFile: wrapWithLock({
+    beforeLock(next) {
+      return function(projectId, docId, userId, callback) {
+        DocumentUpdaterHandler.deleteDoc(projectId, docId, err => {
+          if (err) {
+            return callback(err)
+          }
+          ProjectLocator.findElement(
+            { project_id: projectId, element_id: docId, type: 'doc' },
+            (err, doc, path) => {
+              const docPath = path.fileSystem
+              if (err) {
+                return callback(err)
+              }
+              DocstoreManager.getDoc(projectId, docId, (err, docLines) => {
+                if (err) {
+                  return callback(err)
+                }
+                FileWriter.writeLinesToDisk(
+                  projectId,
+                  docLines,
+                  (err, fsPath) => {
+                    if (err) {
+                      return callback(err)
+                    }
+                    FileStoreHandler.uploadFileFromDisk(
+                      projectId,
+                      { name: doc.name },
+                      fsPath,
+                      (err, fileStoreUrl, fileRef) => {
+                        if (err) {
+                          return callback(err)
+                        }
+                        fs.unlink(fsPath, err => {
+                          if (err) {
+                            logger.warn(
+                              { err, path: fsPath },
+                              'failed to clean up temporary file'
+                            )
+                          }
+                          next(
+                            projectId,
+                            doc,
+                            docPath,
+                            fileRef,
+                            fileStoreUrl,
+                            userId,
+                            callback
+                          )
+                        })
+                      }
+                    )
+                  }
+                )
+              })
+            }
+          )
+        })
+      }
+    },
+    withLock(projectId, doc, path, fileRef, fileStoreUrl, userId, callback) {
+      ProjectEntityMongoUpdateHandler.replaceDocWithFile(
+        projectId,
+        doc._id,
+        fileRef,
+        (err, project) => {
+          if (err) {
+            return callback(err)
+          }
+          const projectHistoryId =
+            project.overleaf &&
+            project.overleaf.history &&
+            project.overleaf.history.id
+          DocumentUpdaterHandler.updateProjectStructure(
+            projectId,
+            projectHistoryId,
+            userId,
+            {
+              oldDocs: [{ doc, path }],
+              newFiles: [{ file: fileRef, path, url: fileStoreUrl }],
+              newProject: project
+            },
+            err => {
+              if (err) {
+                return callback(err)
+              }
+              ProjectLocator.findElement(
+                {
+                  project_id: projectId,
+                  element_id: fileRef._id,
+                  type: 'file'
+                },
+                (err, element, path, folder) => {
+                  if (err) {
+                    return callback(err)
+                  }
+                  EditorRealTimeController.emitToRoom(
+                    projectId,
+                    'removeEntity',
+                    doc._id,
+                    'convertDocToFile'
+                  )
+                  EditorRealTimeController.emitToRoom(
+                    projectId,
+                    'reciveNewFile',
+                    folder._id,
+                    fileRef,
+                    'convertDocToFile',
+                    null
+                  )
+                  callback(null, fileRef)
+                }
+              )
+            }
+          )
+        }
+      )
+    }
+  })
 }
 
 module.exports = ProjectEntityUpdateHandler
+module.exports.promises = promisifyAll(ProjectEntityUpdateHandler, {
+  without: ['isPathValidForRootDoc'],
+  multiResult: {
+    copyFileFromExistingProjectWithProject: ['fileRef', 'folderId'],
+    _addDocAndSendToTpds: ['result', 'project'],
+    addDoc: ['doc', 'folderId'],
+    addDocWithRanges: ['doc', 'folderId'],
+    _uploadFile: ['fileStoreUrl', 'fileRef'],
+    _addFileAndSendToTpds: ['result', 'project'],
+    addFile: ['fileRef', 'folderId'],
+    upsertDoc: ['doc', 'isNew'],
+    upsertFile: ['fileRef', 'isNew', 'oldFileRef'],
+    upsertDocWithPath: ['doc', 'isNew', 'newFolders', 'folder'],
+    upsertFileWithPath: ['fileRef', 'isNew', 'oldFile', 'newFolders', 'folder'],
+    mkdirp: ['newFolders', 'folder'],
+    mkdirpWithExactCase: ['newFolders', 'folder'],
+    addFolder: ['folder', 'parentFolderId']
+  }
+})

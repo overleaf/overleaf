@@ -29,8 +29,9 @@ describe('EditorHttpController', function() {
       _id: this.projectView._id,
       owner: { _id: this.projectView.owner._id }
     }
-    this.doc = { mock: 'doc' }
-    this.folder = { mock: 'folder' }
+    this.doc = { _id: new ObjectId(), name: 'excellent-original-idea.tex' }
+    this.file = { _id: new ObjectId() }
+    this.folder = { _id: new ObjectId() }
 
     this.parentFolderId = 'mock-folder-id'
     this.req = { i18n: { translate: string => string } }
@@ -42,6 +43,7 @@ describe('EditorHttpController', function() {
     }
     this.next = sinon.stub()
     this.token = null
+    this.docLines = ['hello', 'overleaf']
 
     this.AuthorizationManager = {
       isRestrictedUser: sinon.stub().returns(false),
@@ -82,6 +84,7 @@ describe('EditorHttpController', function() {
     this.EditorController = {
       promises: {
         addDoc: sinon.stub().resolves(this.doc),
+        addFile: sinon.stub().resolves(this.file),
         addFolder: sinon.stub().resolves(this.folder),
         renameEntity: sinon.stub().resolves(),
         moveEntity: sinon.stub().resolves(),
@@ -113,6 +116,11 @@ describe('EditorHttpController', function() {
     this.AuthenticationController = {
       getLoggedInUserId: sinon.stub().returns(this.user._id)
     }
+    this.ProjectEntityUpdateHandler = {
+      promises: {
+        convertDocToFile: sinon.stub().resolves(this.file)
+      }
+    }
     this.EditorHttpController = SandboxedModule.require(MODULE_PATH, {
       globals: {
         console: console
@@ -132,6 +140,9 @@ describe('EditorHttpController', function() {
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
+        '../../infrastructure/FileWriter': this.FileWriter,
+        '../Project/ProjectEntityUpdateHandler': this
+          .ProjectEntityUpdateHandler,
         '../Errors/Errors': Errors
       }
     })
@@ -494,6 +505,34 @@ describe('EditorHttpController', function() {
 
     it('should send back a success response', function() {
       expect(this.res.sendStatus).to.have.been.calledWith(204)
+    })
+  })
+
+  describe('convertDocToFile', function() {
+    beforeEach(function(done) {
+      this.req.params = {
+        Project_id: this.project._id.toString(),
+        entity_id: this.doc._id.toString()
+      }
+      this.req.body = { userId: this.user._id.toString() }
+      this.res.json.callsFake(() => done())
+      this.EditorHttpController.convertDocToFile(this.req, this.res)
+    })
+
+    it('should convert the doc to a file', function() {
+      expect(
+        this.ProjectEntityUpdateHandler.promises.convertDocToFile
+      ).to.have.been.calledWith(
+        this.project._id.toString(),
+        this.doc._id.toString(),
+        this.user._id.toString()
+      )
+    })
+
+    it('should return the file id in the response', function() {
+      expect(this.res.json).to.have.been.calledWith({
+        fileId: this.file._id.toString()
+      })
     })
   })
 })

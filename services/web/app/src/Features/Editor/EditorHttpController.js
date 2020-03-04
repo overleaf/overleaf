@@ -1,3 +1,4 @@
+const HttpErrors = require('@overleaf/o-error/http')
 const ProjectDeleter = require('../Project/ProjectDeleter')
 const EditorController = require('./EditorController')
 const ProjectGetter = require('../Project/ProjectGetter')
@@ -11,6 +12,7 @@ const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const Errors = require('../Errors/Errors')
+const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
 const { expressify } = require('../../util/promises')
 
 module.exports = {
@@ -23,6 +25,7 @@ module.exports = {
   deleteFile: expressify(deleteFile),
   deleteFolder: expressify(deleteFolder),
   deleteEntity: expressify(deleteEntity),
+  convertDocToFile: expressify(convertDocToFile),
   _nameIsAcceptableLength
 }
 
@@ -220,4 +223,26 @@ async function deleteEntity(req, res, next) {
     userId
   )
   res.sendStatus(204)
+}
+
+async function convertDocToFile(req, res, next) {
+  const projectId = req.params.Project_id
+  const docId = req.params.entity_id
+  const { userId } = req.body
+  try {
+    const fileRef = await ProjectEntityUpdateHandler.promises.convertDocToFile(
+      projectId,
+      docId,
+      userId
+    )
+    res.json({ fileId: fileRef._id.toString() })
+  } catch (err) {
+    if (err instanceof Errors.NotFoundError) {
+      throw new HttpErrors.NotFoundError({
+        info: { public: { message: 'Document not found' } }
+      })
+    } else {
+      throw err
+    }
+  }
 }

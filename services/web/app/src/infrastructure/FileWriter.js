@@ -10,15 +10,15 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let FileWriter
 const fs = require('fs')
 const logger = require('logger-sharelatex')
 const uuid = require('uuid')
 const _ = require('underscore')
 const Settings = require('settings-sharelatex')
 const request = require('request')
+const { promisifyAll } = require('../util/promises')
 
-module.exports = FileWriter = {
+const FileWriter = {
   ensureDumpFolderExists(callback) {
     if (callback == null) {
       callback = function(error) {}
@@ -123,3 +123,6 @@ module.exports = FileWriter = {
     })
   }
 }
+
+module.exports = FileWriter
+module.exports.promises = promisifyAll(FileWriter)

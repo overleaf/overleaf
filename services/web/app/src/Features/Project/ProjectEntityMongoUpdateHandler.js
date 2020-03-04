@@ -47,6 +47,7 @@ module.exports = {
     'path',
     'newProject'
   ]),
+  replaceDocWithFile: callbackify(replaceDocWithFile),
   mkdirp: callbackifyMultiResult(wrapWithLock(mkdirp), [
     'newFolders',
     'folder'
@@ -81,6 +82,7 @@ module.exports = {
     addFile: wrapWithLock(addFile),
     addFolder: wrapWithLock(addFolder),
     replaceFileWithNew: wrapWithLock(replaceFileWithNew),
+    replaceDocWithFile: wrapWithLock(replaceDocWithFile),
     mkdirp: wrapWithLock(mkdirp),
     moveEntity: wrapWithLock(moveEntity),
     deleteEntity: wrapWithLock(deleteEntity),
@@ -184,6 +186,33 @@ async function replaceFileWithNew(projectId, fileId, newFileRef) {
   // We are using Mongoose here, but if we ever switch to a direct mongo call
   // the next line will need to be updated.
   return { oldFileRef: fileRef, project, path, newProject }
+}
+
+async function replaceDocWithFile(projectId, docId, fileRef) {
+  const project = await ProjectGetter.promises.getProjectWithoutLock(
+    projectId,
+    { rootFolder: true, name: true, overleaf: true }
+  )
+  const { path } = await ProjectLocator.promises.findElement({
+    project,
+    element_id: docId,
+    type: 'doc'
+  })
+  const folderMongoPath = _getParentMongoPath(path.mongo)
+  const newProject = await Project.findOneAndUpdate(
+    { _id: project._id },
+    {
+      $pull: {
+        [`${folderMongoPath}.docs`]: { _id: docId }
+      },
+      $push: {
+        [`${folderMongoPath}.fileRefs`]: fileRef
+      },
+      $inc: { version: 1 }
+    },
+    { new: true }
+  ).exec()
+  return newProject
 }
 
 async function mkdirp(projectId, path, options = {}) {
@@ -636,4 +665,15 @@ async function createNewFolderStructure(projectId, docUploads, fileUploads) {
       info: { projectId }
     }).withCause(err)
   }
+}
+
+/**
+ * Given a Mongo path to an entity, return the Mongo path to the parent folder
+ */
+function _getParentMongoPath(mongoPath) {
+  const segments = mongoPath.split('.')
+  if (segments.length <= 2) {
+    throw new Error('Root folder has no parents')
+  }
+  return segments.slice(0, -2).join('.')
 }
