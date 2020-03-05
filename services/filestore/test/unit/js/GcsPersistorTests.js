@@ -21,7 +21,7 @@ describe('GcsPersistorTests', function() {
     Logger,
     Storage,
     Fs,
-    NotFoundError,
+    GcsNotFoundError,
     Meter,
     MeteredStream,
     ReadStream,
@@ -94,8 +94,8 @@ describe('GcsPersistorTests', function() {
     }
     Storage.prototype.bucket = sinon.stub().returns(GcsBucket)
 
-    NotFoundError = new Error('File not found')
-    NotFoundError.code = 404
+    GcsNotFoundError = new Error('File not found')
+    GcsNotFoundError.code = 404
 
     Fs = {
       createReadStream: sinon.stub().returns(ReadStream)
@@ -199,7 +199,7 @@ describe('GcsPersistorTests', function() {
 
       beforeEach(async function() {
         ReadStream.on = sinon.stub()
-        ReadStream.on.withArgs('error').yields(NotFoundError)
+        ReadStream.on.withArgs('error').yields(GcsNotFoundError)
         try {
           stream = await GcsPersistor.promises.getFileStream(bucket, key)
         } catch (err) {
@@ -278,7 +278,7 @@ describe('GcsPersistorTests', function() {
       let error
 
       beforeEach(async function() {
-        GcsFile.getMetadata = sinon.stub().rejects(NotFoundError)
+        GcsFile.getMetadata = sinon.stub().rejects(GcsNotFoundError)
         try {
           await GcsPersistor.promises.getFileSize(bucket, key)
         } catch (err) {
@@ -291,7 +291,7 @@ describe('GcsPersistorTests', function() {
       })
 
       it('should wrap the error', function() {
-        expect(error.cause).to.equal(NotFoundError)
+        expect(error.cause).to.equal(GcsNotFoundError)
       })
     })
 
@@ -443,10 +443,10 @@ describe('GcsPersistorTests', function() {
   })
 
   describe('copyFile', function() {
-    const DestinationFile = 'destFile'
+    const destinationFile = 'destFile'
 
     beforeEach(function() {
-      GcsBucket.file.withArgs(destKey).returns(DestinationFile)
+      GcsBucket.file.withArgs(destKey).returns(destinationFile)
     })
 
     describe('with valid parameters', function() {
@@ -457,7 +457,7 @@ describe('GcsPersistorTests', function() {
       it('should copy the object', function() {
         expect(Storage.prototype.bucket).to.have.been.calledWith(bucket)
         expect(GcsBucket.file).to.have.been.calledWith(key)
-        expect(GcsFile.copy).to.have.been.calledWith(DestinationFile)
+        expect(GcsFile.copy).to.have.been.calledWith(destinationFile)
       })
     })
 
@@ -465,7 +465,7 @@ describe('GcsPersistorTests', function() {
       let error
 
       beforeEach(async function() {
-        GcsFile.copy = sinon.stub().rejects(NotFoundError)
+        GcsFile.copy = sinon.stub().rejects(GcsNotFoundError)
         try {
           await GcsPersistor.promises.copyFile(bucket, key, destKey)
         } catch (err) {
@@ -496,7 +496,7 @@ describe('GcsPersistorTests', function() {
       let error
 
       beforeEach(async function() {
-        GcsFile.delete = sinon.stub().rejects(NotFoundError)
+        GcsFile.delete = sinon.stub().rejects(GcsNotFoundError)
         try {
           await GcsPersistor.promises.deleteFile(bucket, key)
         } catch (err) {

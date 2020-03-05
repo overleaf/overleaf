@@ -139,11 +139,11 @@ async function getFileStream(bucketName, key, opts = {}) {
 
 async function getFileSize(bucketName, key) {
   try {
-    const metadata = await storage
+    const [metadata] = await storage
       .bucket(bucketName)
       .file(key)
       .getMetadata()
-    return metadata[0].size
+    return metadata.size
   } catch (err) {
     throw PersistorHelper.wrapError(
       err,
@@ -156,11 +156,11 @@ async function getFileSize(bucketName, key) {
 
 async function getFileMd5Hash(bucketName, key) {
   try {
-    const metadata = await storage
+    const [metadata] = await storage
       .bucket(bucketName)
       .file(key)
       .getMetadata()
-    return PersistorHelper.base64ToHex(metadata[0].md5Hash)
+    return PersistorHelper.base64ToHex(metadata.md5Hash)
   } catch (err) {
     throw PersistorHelper.wrapError(
       err,
@@ -194,10 +194,10 @@ async function deleteDirectory(bucketName, key) {
   let files
 
   try {
-    const response = await storage
+    const [response] = await storage
       .bucket(bucketName)
       .getFiles({ directory: key })
-    files = response[0]
+    files = response
   } catch (err) {
     const error = PersistorHelper.wrapError(
       err,
@@ -232,10 +232,10 @@ async function directorySize(bucketName, key) {
   let files
 
   try {
-    const response = await storage
+    const [response] = await storage
       .bucket(bucketName)
       .getFiles({ directory: key })
-    files = response[0]
+    files = response
   } catch (err) {
     throw PersistorHelper.wrapError(
       err,
@@ -250,11 +250,11 @@ async function directorySize(bucketName, key) {
 
 async function checkIfFileExists(bucketName, key) {
   try {
-    const response = await storage
+    const [response] = await storage
       .bucket(bucketName)
       .file(key)
       .exists()
-    return response[0]
+    return response
   } catch (err) {
     throw PersistorHelper.wrapError(
       err,
