@@ -31,7 +31,7 @@ define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
         if (!project) return acc
 
         // Ignore archived projects as they are not shown in the filter
-        if (!project.archived) {
+        if (!(project.archived || project.trashed)) {
           return acc + 1
         } else {
           return acc
