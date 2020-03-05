@@ -34,6 +34,12 @@ settings =
 		# gcs - Google Cloud Storage
 		backend: process.env['BACKEND']
 
+		gcs:
+			if process.env['GCS_API_ENDPOINT']
+				apiEndpoint: process.env['GCS_API_ENDPOINT']
+				apiScheme: process.env['GCS_API_SCHEME']
+				projectId: process.env['GCS_PROJECT_ID']
+
 		s3:
 			if process.env['AWS_ACCESS_KEY_ID']? or process.env['S3_BUCKET_CREDENTIALS']?
 				key: process.env['AWS_ACCESS_KEY_ID']
@@ -71,7 +77,7 @@ settings =
 
 	sentry:
 		dsn: process.env.SENTRY_DSN
-		
+
 # Filestore health check
 # ----------------------
 # Project and file details to check in persistor when calling /health_check
