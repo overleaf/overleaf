@@ -191,40 +191,28 @@ async function deleteFile(bucketName, key) {
 }
 
 async function deleteDirectory(bucketName, key) {
-  let files
+  if (!key.match(/^[a-z0-9_-]+/i)) {
+    throw new NotFoundError({
+      message: 'deleteDirectoryKey is invalid or missing',
+      info: { bucketName, key }
+    })
+  }
 
   try {
-    const [response] = await storage
+    await storage
       .bucket(bucketName)
-      .getFiles({ directory: key })
-    files = response
+      .deleteFiles({ directory: key, force: true })
   } catch (err) {
     const error = PersistorHelper.wrapError(
       err,
-      'failed to list objects in GCS',
+      'failed to delete directory in GCS',
       { bucketName, key },
-      ReadError
+      WriteError
     )
     if (error instanceof NotFoundError) {
       return
     }
     throw error
-  }
-
-  for (const index in files) {
-    try {
-      await files[index].delete()
-    } catch (err) {
-      const error = PersistorHelper.wrapError(
-        err,
-        'failed to delete object in GCS',
-        { bucketName, key },
-        WriteError
-      )
-      if (!(error instanceof NotFoundError)) {
-        throw error
-      }
-    }
   }
 }
 
