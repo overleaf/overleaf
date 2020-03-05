@@ -112,7 +112,12 @@ async function injectUserDetails(data) {
   // service. v1 ids will be `numbers`
   let userIds = new Set()
   let v1UserIds = new Set()
-  for (const entry of data.diff || data.updates || []) {
+  const entries = Array.isArray(data.diff)
+    ? data.diff
+    : Array.isArray(data.updates)
+      ? data.updates
+      : []
+  for (const entry of entries) {
     for (const user of (entry.meta && entry.meta.users) || []) {
       if (typeof user === 'string') {
         userIds.add(user)
@@ -138,7 +143,7 @@ async function injectUserDetails(data) {
   for (const user of v1IdentifiedUsersArray) {
     users[user.overleaf.id] = _userView(user)
   }
-  for (const entry of data.diff || data.updates || []) {
+  for (const entry of entries) {
     if (entry.meta != null) {
       entry.meta.users = ((entry.meta && entry.meta.users) || []).map(user => {
         if (typeof user === 'string' || typeof user === 'number') {

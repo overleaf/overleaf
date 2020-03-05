@@ -195,6 +195,13 @@ describe('HistoryManager', function() {
         expect(diff.diff[0].meta.users).to.deep.equal([this.user1_view])
         expect(diff.diff[1].meta.users).to.deep.equal([this.user2_view])
       })
+
+      it('should handle a binary diff marker', async function() {
+        const diff = await this.HistoryManager.promises.injectUserDetails({
+          diff: { binary: true }
+        })
+        expect(diff.diff.binary).to.be.true
+      })
     })
 
     describe('with a list of updates', function() {
