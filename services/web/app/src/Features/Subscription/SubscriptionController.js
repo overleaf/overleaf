@@ -206,7 +206,7 @@ module.exports = SubscriptionController = {
       }
       if (hasSubscription) {
         logger.warn({ user_id: user._id }, 'user already has subscription')
-        res.sendStatus(409) // conflict
+        return res.sendStatus(409) // conflict
       }
       return SubscriptionHandler.createSubscription(
         user,

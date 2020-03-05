@@ -419,6 +419,18 @@ describe('SubscriptionController', function() {
   })
 
   describe('createSubscription with errors', function() {
+    it('should handle users with subscription', function(done) {
+      this.LimitationsManager.userHasV1OrV2Subscription.yields(null, true)
+      this.SubscriptionController.createSubscription(this.req, {
+        sendStatus: status => {
+          expect(status).to.equal(409)
+          this.SubscriptionHandler.createSubscription.called.should.equal(false)
+
+          done()
+        }
+      })
+    })
+
     it('should handle 3DSecure errors', function(done) {
       this.next = sinon.stub()
       this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
