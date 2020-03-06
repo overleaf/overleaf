@@ -50,7 +50,7 @@ module.exports = ThreadManager = {
       }
     }
 
-    return db.rooms.update(query, update, { upsert: true }, function(error) {
+    return db.rooms.update(query, {'$set' : update}, { upsert: true }, function(error) {
       if (error != null) {
         return callback(error)
       }
