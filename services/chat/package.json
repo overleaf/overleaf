@@ -18,7 +18,7 @@
     "format:fix": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --write"
   },
   "dependencies": {
-    "async": "0.2.9",
+    "async": "3.2.0",
     "express": "3.3.1",
     "logger-sharelatex": "^1.9.0",
     "metrics-sharelatex": "^2.5.0",
@@ -27,7 +27,7 @@
     "settings-sharelatex": "^1.1.0"
   },
   "devDependencies": {
-    "acorn": "^6.1.1",
+    "acorn": "^7.1.1",
     "ajv": "^5.5.2",
     "bunyan": "^1.8.12",
     "chai": "^4.2.0",
@@ -46,7 +46,7 @@
     "nodemon": "^2.0.2",
     "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "^2.0.3",
-    "sinon": "^8.1.1",
+    "sinon": "^9.0.0",
     "timekeeper": "^2.2.0"
   }
 }
