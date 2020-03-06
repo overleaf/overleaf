@@ -42,7 +42,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^4.1.0",
+    "mocha": "^7.1.0",
     "nodemon": "^2.0.2",
     "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "^2.0.3",
