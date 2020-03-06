@@ -81,7 +81,7 @@ module.exports = MessageHttpController = {
       if (error != null) {
         return next(error)
       }
-      return res.send(204)
+      return res.sendStatus(204)
     })
   }, // No content
 
@@ -92,7 +92,7 @@ module.exports = MessageHttpController = {
       if (error != null) {
         return next(error)
       }
-      return res.send(204)
+      return res.sendStatus(204)
     })
   }, // No content
 
@@ -110,7 +110,7 @@ module.exports = MessageHttpController = {
         if (error != null) {
           return next(error)
         }
-        return res.send(204)
+        return res.sendStatus(204)
       })
     })
   }, // No content
@@ -138,7 +138,7 @@ module.exports = MessageHttpController = {
           if (error != null) {
             return next(error)
           }
-          return res.send(204)
+          return res.sendStatus(204)
         }
       )
     })
@@ -161,7 +161,7 @@ module.exports = MessageHttpController = {
         if (error != null) {
           return next(error)
         }
-        return res.send(204)
+        return res.status(204).send()
       })
     })
   },
@@ -170,16 +170,15 @@ module.exports = MessageHttpController = {
     const { user_id, content } = req != null ? req.body : undefined
     const { project_id } = req.params
     if (!ObjectId.isValid(user_id)) {
-      return res.send(400, 'Invalid user_id')
+      return res.status(400).send('Invalid user_id')
     }
     if (content == null) {
-      return res.send(400, 'No content provided')
+      return res.status(400).send('No content provided')
     }
     if (content.length > this.MAX_MESSAGE_LENGTH) {
-      return res.send(
-        400,
-        `Content too long (> ${this.MAX_MESSAGE_LENGTH} bytes)`
-      )
+      return res
+        .status(400)
+        .send(`Content too long (> ${this.MAX_MESSAGE_LENGTH} bytes)`)
     }
     logger.log(
       { client_thread_id, project_id, user_id, content },
@@ -203,7 +202,7 @@ module.exports = MessageHttpController = {
             }
             message = MessageFormatter.formatMessageForClientSide(message)
             message.room_id = project_id
-            return res.send(201, message)
+            return res.status(201).send(message)
           }
         )
       }
@@ -249,7 +248,7 @@ module.exports = MessageHttpController = {
             }
             messages = MessageFormatter.formatMessagesForClientSide(messages)
             logger.log({ project_id, messages }, 'got messages')
-            return res.send(200, messages)
+            return res.status(200).send(messages)
           }
         )
       }

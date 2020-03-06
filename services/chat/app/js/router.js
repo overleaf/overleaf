@@ -20,7 +20,7 @@ module.exports = Router = {
       if (ObjectId.isValid(project_id)) {
         return next()
       } else {
-        return res.send(400, 'Invalid project_id')
+        return res.status(400).send('Invalid project_id')
       }
     })
 
@@ -28,7 +28,7 @@ module.exports = Router = {
       if (ObjectId.isValid(thread_id)) {
         return next()
       } else {
-        return res.send(400, 'Invalid thread_id')
+        return res.status(400).send('Invalid thread_id')
       }
     })
 
@@ -61,7 +61,7 @@ module.exports = Router = {
       '/project/:project_id/thread/:thread_id/messages/:message_id/edit',
       MessageHttpController.editMessage
     )
-    app.del(
+    app.delete(
       '/project/:project_id/thread/:thread_id/messages/:message_id',
       MessageHttpController.deleteMessage
     )
@@ -74,7 +74,7 @@ module.exports = Router = {
       '/project/:project_id/thread/:thread_id/reopen',
       MessageHttpController.reopenThread
     )
-    app.del(
+    app.delete(
       '/project/:project_id/thread/:thread_id',
       MessageHttpController.deleteThread
     )
