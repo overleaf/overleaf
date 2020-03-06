@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "acorn": "^7.1.1",
-    "ajv": "^5.5.2",
+    "ajv": "^6.12.0",
     "bunyan": "^1.8.12",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
