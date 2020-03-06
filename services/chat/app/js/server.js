@@ -23,12 +23,10 @@ app.use(metrics.http.monitor(logger))
 metrics.injectMetricsRoute(app)
 
 if (app.get('env') === 'development') {
-  console.log('Development Enviroment')
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }))
 }
 
 if (app.get('env') === 'production') {
-  console.log('Production Enviroment')
   app.use(express.logger())
   app.use(express.errorHandler())
 }
