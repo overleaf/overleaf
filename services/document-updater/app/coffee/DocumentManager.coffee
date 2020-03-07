@@ -222,6 +222,10 @@ module.exports = DocumentManager =
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.flushAndDeleteDoc, project_id, doc_id, callback
 
+	deleteDocWithLock: (project_id, doc_id, callback) ->
+		UpdateManager = require "./UpdateManager"
+		UpdateManager.lockUpdatesAndDo RedisManager.removeDocFromMemory, project_id, doc_id, callback
+
 	acceptChangesWithLock: (project_id, doc_id, change_ids, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.acceptChanges, project_id, doc_id, change_ids, callback

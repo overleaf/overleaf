@@ -264,18 +264,19 @@ describe "HttpController", ->
 				@next
 					.calledWith(new Error("oops"))
 					.should.equal true
-	
-	describe "flushAndDeleteDoc", ->
+
+	describe "deleteDoc", ->
 		beforeEach ->
 			@req =
 				params:
 					project_id: @project_id
 					doc_id: @doc_id
+				body: {}
 
 		describe "successfully", ->
 			beforeEach ->
 				@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArgWith(2)
-				@HttpController.flushAndDeleteDoc(@req, @res, @next)
+				@HttpController.deleteDoc(@req, @res, @next)
 
 			it "should flush and delete the doc", ->
 				@DocumentManager.flushAndDeleteDocWithLock
@@ -294,16 +295,28 @@ describe "HttpController", ->
 
 			it "should log the request", ->
 				@logger.log
-					.calledWith(doc_id: @doc_id, project_id: @project_id, "deleting doc via http")
+					.calledWith(doc_id: @doc_id, project_id: @project_id, flush: true, "deleting doc via http")
 					.should.equal true
 
 			it "should time the request", ->
 				@Metrics.Timer::done.called.should.equal true
 
+		describe "without flush", ->
+			beforeEach ->
+				@req.body.flush = false
+				@DocumentManager.deleteDocWithLock = sinon.stub().yields()
+				@HttpController.deleteDoc(@req, @res, @next)
+
+			it "should delete the doc", ->
+				@DocumentManager.deleteDocWithLock.calledWith(@project_id, @doc_id).should.equal true
+
+			it "should return a successful No Content response", ->
+				@res.send.calledWith(204).should.equal true
+
 		describe "when an errors occurs", ->
 			beforeEach ->
 				@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArgWith(2, new Error("oops"))
-				@HttpController.flushAndDeleteDoc(@req, @res, @next)
+				@HttpController.deleteDoc(@req, @res, @next)
 
 			it "should flush project history", ->
 				@HistoryManager.flushProjectChangesAsync
