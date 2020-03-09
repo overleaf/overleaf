@@ -10,7 +10,8 @@ const db = mongojs(Settings.mongo.url, [
   'users',
   'tokens',
   'docSnapshots',
-  'projectHistoryFailures'
+  'projectHistoryFailures',
+  'deletedProjects'
 ])
 module.exports = {
   db,
