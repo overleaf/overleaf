@@ -331,4 +331,36 @@ describe('ProjectEntityHandler', function() {
         .should.equal(true)
     })
   })
+
+  describe('promises.getDoc', function() {
+    let result
+
+    beforeEach(async function() {
+      this.lines = ['mock', 'doc', 'lines']
+      this.rev = 5
+      this.version = 42
+      this.ranges = { mock: 'ranges' }
+
+      this.DocstoreManager.getDoc = sinon
+        .stub()
+        .callsArgWith(3, null, this.lines, this.rev, this.version, this.ranges)
+      result = await this.ProjectEntityHandler.promises.getDoc(
+        project_id,
+        doc_id
+      )
+    })
+
+    it('should call the docstore', function() {
+      this.DocstoreManager.getDoc
+        .calledWith(project_id, doc_id)
+        .should.equal(true)
+    })
+
+    it('should return the lines, rev, version and ranges', function() {
+      expect(result.lines).to.equal(this.lines)
+      expect(result.rev).to.equal(this.rev)
+      expect(result.version).to.equal(this.version)
+      expect(result.ranges).to.equal(this.ranges)
+    })
+  })
 })
