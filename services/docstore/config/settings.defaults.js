@@ -22,7 +22,7 @@ const Settings = {
     }
   },
 
-  max_doc_length: 2 * 1024 * 1024 // 2mb
+  max_doc_length: parseInt(process.env.MAX_DOC_LENGTH) || 2 * 1024 * 1024 // 2mb
 }
 
 if (process.env.MONGO_CONNECTION_STRING != null) {
