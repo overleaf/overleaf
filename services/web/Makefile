@@ -17,11 +17,7 @@ MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
 MODULE_NAME=$(shell basename $(MODULE))
 
 $(MODULE_MAKEFILES): Makefile.module
-	@set -e; \
-	for makefile in $(MODULE_MAKEFILES); \
-	do \
-		cp Makefile.module $$makefile; \
-	done
+	cp Makefile.module $@
 
 #
 # Clean
@@ -52,21 +48,12 @@ test_unit_app:
 	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
 	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
-test_unit_modules:
-	@set -e; \
-	for dir in $(MODULE_DIRS); \
-	do \
-		if [ -e $$dir/test/unit ]; then \
-			$(MAKE) test_unit_module MODULE=$$dir; \
-		fi; \
-	done
+TEST_UNIT_MODULES = $(MODULE_DIRS:=/test_unit)
+$(TEST_UNIT_MODULES): %/test_unit: %/Makefile
+test_unit_modules: $(TEST_UNIT_MODULES)
 
-test_unit_module: $(MODULE_MAKEFILES)
-	@if [ -e modules/$(MODULE_NAME)/test/unit ]; then \
-		COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) $(DOCKER_COMPOSE) down -v -t 0 \
-		&& cd modules/$(MODULE_NAME) && COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) $(MAKE) test_unit \
-		&& cd $(CURDIR) && COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) $(DOCKER_COMPOSE) down -v -t 0; \
-	fi
+test_unit_module:
+	$(MAKE) modules/$(MODULE_NAME)/test_unit
 
 #
 # Frontend unit tests
@@ -92,21 +79,17 @@ test_acceptance_app:
 	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_acceptance
 	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
-test_acceptance_modules:
-	@set -e; \
-	for dir in $(MODULE_DIRS); \
-	do \
-		if [ -e $$dir/test/acceptance ]; then \
-			$(MAKE) test_acceptance_module MODULE=$$dir; \
-		fi; \
-	done
+TEST_ACCEPTANCE_MODULES = $(MODULE_DIRS:=/test_acceptance)
+$(TEST_ACCEPTANCE_MODULES): %/test_acceptance: %/Makefile
+test_acceptance_modules: $(TEST_ACCEPTANCE_MODULES)
 
-test_acceptance_module: $(MODULE_MAKEFILES)
-	@if [ -e modules/$(MODULE_NAME)/test/acceptance ]; then \
-		COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) $(DOCKER_COMPOSE) down -v -t 0 \
-		&& cd modules/$(MODULE_NAME) && COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) $(MAKE) test_acceptance \
-		&& cd $(CURDIR) && COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) $(DOCKER_COMPOSE) down -v -t 0; \
-	fi
+CLEAN_TEST_ACCEPTANCE_MODULES = $(MODULE_DIRS:=/clean_test_acceptance)
+$(CLEAN_TEST_ACCEPTANCE_MODULES): %/clean_test_acceptance: %/Makefile
+clean_test_acceptance_modules: $(CLEAN_TEST_ACCEPTANCE_MODULES)
+clean_ci: clean_test_acceptance_modules
+
+test_acceptance_module:
+	$(MAKE) modules/$(MODULE_NAME)/test_acceptance
 
 #
 # CI tests
@@ -148,7 +131,16 @@ tar:
 	COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm tar
 	COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
+MODULE_TARGETS = \
+	$(TEST_ACCEPTANCE_MODULES) \
+	$(CLEAN_TEST_ACCEPTANCE_MODULES) \
+	$(TEST_UNIT_MODULES) \
+
+$(MODULE_TARGETS):
+	$(MAKE) -C $(dir $@) $(notdir $@) BUILD_DIR_NAME=$(BUILD_DIR_NAME)
+
 .PHONY:
+	$(MODULE_TARGETS) \
 	compile_modules compile_modules_full clean_ci \
 	test test_module test_unit test_unit_app \
 	test_unit_modules test_unit_module test_frontend test_frontend_run \
