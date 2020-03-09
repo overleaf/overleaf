@@ -30,7 +30,7 @@ module.exports = DocumentManager =
 						return callback(error) if error?
 						RedisManager.setHistoryType doc_id, projectHistoryType, (error) ->
 							return callback(error) if error?
-							callback null, lines, version, ranges, pathname, projectHistoryId, null, false
+							callback null, lines, version, ranges || {}, pathname, projectHistoryId, null, false
 			else
 				callback null, lines, version, ranges, pathname, projectHistoryId, unflushedTime, true
 
