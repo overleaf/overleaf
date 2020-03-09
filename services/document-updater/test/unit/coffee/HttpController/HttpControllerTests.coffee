@@ -271,7 +271,7 @@ describe "HttpController", ->
 				params:
 					project_id: @project_id
 					doc_id: @doc_id
-				body: {}
+				query: {}
 
 		describe "successfully", ->
 			beforeEach ->
@@ -295,7 +295,7 @@ describe "HttpController", ->
 
 			it "should log the request", ->
 				@logger.log
-					.calledWith(doc_id: @doc_id, project_id: @project_id, flush: true, "deleting doc via http")
+					.calledWith(doc_id: @doc_id, project_id: @project_id, "deleting doc via http")
 					.should.equal true
 
 			it "should time the request", ->
@@ -303,7 +303,7 @@ describe "HttpController", ->
 
 		describe "without flush", ->
 			beforeEach ->
-				@req.body.flush = false
+				@req.query.skip_flush = 'true'
 				@DocumentManager.deleteDocWithLock = sinon.stub().yields()
 				@HttpController.deleteDoc(@req, @res, @next)
 

@@ -106,22 +106,27 @@ module.exports = HttpController =
 	deleteDoc: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
 		project_id = req.params.project_id
-		flush = req.body.flush ? true
-		logger.log project_id: project_id, doc_id: doc_id, flush: flush, "deleting doc via http"
+		skip_flush = req.query.skip_flush == 'true'
 		timer = new Metrics.Timer("http.deleteDoc")
-		if flush
+		if skip_flush
+			logger.log project_id: project_id, doc_id: doc_id, "deleting doc skipping flush via http (contents may be lost)"
+
+			# Warning: This action is destructive. Skipping the flush will lose
+			# contents that have not been flushed yet. Use this to fix a document in a
+			# bad state that can't be flushed anyway.
+			DocumentManager.deleteDocWithLock project_id, doc_id, (error) ->
+				timer.done()
+				return next(error) if error?
+				logger.log project_id: project_id, doc_id: doc_id, "deleted doc via http"
+				res.send 204 # No Content
+		else
+			logger.log project_id: project_id, doc_id: doc_id, "deleting doc via http"
 			DocumentManager.flushAndDeleteDocWithLock project_id, doc_id, (error) ->
 				timer.done()
 				# There is no harm in flushing project history if the previous call
 				# failed and sometimes it is required
 				HistoryManager.flushProjectChangesAsync project_id
 
-				return next(error) if error?
-				logger.log project_id: project_id, doc_id: doc_id, "deleted doc via http"
-				res.send 204 # No Content
-		else
-			DocumentManager.deleteDocWithLock project_id, doc_id, (error) ->
-				timer.done()
 				return next(error) if error?
 				logger.log project_id: project_id, doc_id: doc_id, "deleted doc via http"
 				res.send 204 # No Content
@@ -212,7 +217,7 @@ module.exports = HttpController =
 
 	flushAllProjects: (req, res, next = (error)-> )->
 		res.setTimeout(5 * 60 * 1000)
-		options = 
+		options =
 			limit : req.query.limit || 1000
 			concurrency : req.query.concurrency || 5
 			dryRun : req.query.dryRun || false
@@ -225,7 +230,7 @@ module.exports = HttpController =
 
 	flushQueuedProjects: (req, res, next = (error) ->) ->
 		res.setTimeout(10 * 60 * 1000)
-		options = 
+		options =
 			limit : req.query.limit || 1000
 			timeout: 5 * 60 * 1000
 			min_delete_age: req.query.min_delete_age || 5 * 60 * 1000
