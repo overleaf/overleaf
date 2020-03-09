@@ -9,38 +9,38 @@
 					a(href="/learn")  #{translate("latex_help_guide")}
 
 
-					.row
-						.col-md-offset-4.col-md-4
-							.dropdown.minimal-create-proj-dropdown(dropdown)
-								a.btn.btn-success.dropdown-toggle(
-									href="#",
-									data-toggle="dropdown",
-									dropdown-toggle
-								)
-									| Create First Project
+				.row
+					.col-md-offset-4.col-md-4
+						.dropdown.minimal-create-proj-dropdown(dropdown)
+							a.btn.btn-success.dropdown-toggle(
+								href="#",
+								data-toggle="dropdown",
+								dropdown-toggle
+							)
+								| Create First Project
 
-								ul.dropdown-menu.minimal-create-proj-dropdown-menu(role="menu")
-									li
-										a(
-											href,
-											ng-click="openCreateProjectModal()"
-										) #{translate("blank_project")}
-									li
-										a(
-											href,
-											ng-click="openCreateProjectModal('example')"
-										) #{translate("example_project")}
-									li
-										a(
-											href,
-											ng-click="openUploadProjectModal()"
-										) #{translate("upload_project")}
-									!= moduleIncludes("newProjectMenu", locals)
-									if (templates)
-										li.divider
-										li.dropdown-header #{translate("templates")}
-										each item in templates
-											li
-												a.menu-indent(href=item.url) #{translate(item.name)}
+							ul.dropdown-menu.minimal-create-proj-dropdown-menu(role="menu")
+								li
+									a(
+										href,
+										ng-click="openCreateProjectModal()"
+									) #{translate("blank_project")}
+								li
+									a(
+										href,
+										ng-click="openCreateProjectModal('example')"
+									) #{translate("example_project")}
+								li
+									a(
+										href,
+										ng-click="openUploadProjectModal()"
+									) #{translate("upload_project")}
+								!= moduleIncludes("newProjectMenu", locals)
+								if (templates)
+									li.divider
+									li.dropdown-header #{translate("templates")}
+									each item in templates
+										li
+											a.menu-indent(href=item.url) #{translate(item.name)}
 
 							
