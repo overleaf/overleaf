@@ -57,6 +57,26 @@ module.exports = HealthCheckController = {
     })
   },
 
+  checkApi(req, res, next) {
+    rclient.healthCheck(err => {
+      if (err) {
+        logger.err({ err }, 'failed api redis health check')
+        return res.sendStatus(500)
+      }
+      UserGetter.getUserEmail(settings.smokeTest.userId, (err, email) => {
+        if (err) {
+          logger.err({ err }, 'failed api mongo health check')
+          return res.sendStatus(500)
+        }
+        if (email == null) {
+          logger.err({ err }, 'failed api mongo health check (no email)')
+          return res.sendStatus(500)
+        }
+        res.sendStatus(200)
+      })
+    })
+  },
+
   checkRedis(req, res, next) {
     return rclient.healthCheck(function(error) {
       if (error != null) {

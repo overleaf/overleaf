@@ -969,7 +969,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get('/dev/csrf', (req, res) => res.send(res.locals.csrfToken))
 
   publicApiRouter.get('/health_check', HealthCheckController.check)
-  privateApiRouter.get('/health_check', HealthCheckController.check)
+  privateApiRouter.get('/health_check', HealthCheckController.checkApi)
 
   publicApiRouter.get('/health_check/redis', HealthCheckController.checkRedis)
   privateApiRouter.get('/health_check/redis', HealthCheckController.checkRedis)
