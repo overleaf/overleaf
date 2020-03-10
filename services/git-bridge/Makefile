@@ -6,7 +6,7 @@ run: package
 
 
 build:
-	mvn package
+	mvn package -DskipTests
 
 
 test:
@@ -18,7 +18,7 @@ clean:
 
 
 package: clean
-	mvn package
+	mvn package -DskipTests
 
 
 .PHONY: run package build clean test
