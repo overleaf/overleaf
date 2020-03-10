@@ -275,12 +275,12 @@ describe "HttpController", ->
 
 		describe "successfully", ->
 			beforeEach ->
-				@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArgWith(2)
+				@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArgWith(3)
 				@HttpController.deleteDoc(@req, @res, @next)
 
 			it "should flush and delete the doc", ->
 				@DocumentManager.flushAndDeleteDocWithLock
-					.calledWith(@project_id, @doc_id)
+					.calledWith(@project_id, @doc_id, { ignoreFlushErrors: false })
 					.should.equal true
 
 			it "should flush project history", ->
@@ -301,21 +301,23 @@ describe "HttpController", ->
 			it "should time the request", ->
 				@Metrics.Timer::done.called.should.equal true
 
-		describe "without flush", ->
+		describe "ignoring errors", ->
 			beforeEach ->
-				@req.query.skip_flush = 'true'
-				@DocumentManager.deleteDocWithLock = sinon.stub().yields()
+				@req.query.ignore_flush_errors = 'true'
+				@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().yields()
 				@HttpController.deleteDoc(@req, @res, @next)
 
 			it "should delete the doc", ->
-				@DocumentManager.deleteDocWithLock.calledWith(@project_id, @doc_id).should.equal true
+				@DocumentManager.flushAndDeleteDocWithLock
+					.calledWith(@project_id, @doc_id, { ignoreFlushErrors: true })
+					.should.equal true
 
 			it "should return a successful No Content response", ->
 				@res.send.calledWith(204).should.equal true
 
 		describe "when an errors occurs", ->
 			beforeEach ->
-				@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArgWith(2, new Error("oops"))
+				@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArgWith(3, new Error("oops"))
 				@HttpController.deleteDoc(@req, @res, @next)
 
 			it "should flush project history", ->

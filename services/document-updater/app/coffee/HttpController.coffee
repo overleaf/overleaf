@@ -106,30 +106,18 @@ module.exports = HttpController =
 	deleteDoc: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
 		project_id = req.params.project_id
-		skip_flush = req.query.skip_flush == 'true'
+		ignoreFlushErrors = req.query.ignore_flush_errors == 'true'
 		timer = new Metrics.Timer("http.deleteDoc")
-		if skip_flush
-			logger.log project_id: project_id, doc_id: doc_id, "deleting doc skipping flush via http (contents may be lost)"
+		logger.log project_id: project_id, doc_id: doc_id, "deleting doc via http"
+		DocumentManager.flushAndDeleteDocWithLock project_id, doc_id, { ignoreFlushErrors: ignoreFlushErrors }, (error) ->
+			timer.done()
+			# There is no harm in flushing project history if the previous call
+			# failed and sometimes it is required
+			HistoryManager.flushProjectChangesAsync project_id
 
-			# Warning: This action is destructive. Skipping the flush will lose
-			# contents that have not been flushed yet. Use this to fix a document in a
-			# bad state that can't be flushed anyway.
-			DocumentManager.deleteDocWithLock project_id, doc_id, (error) ->
-				timer.done()
-				return next(error) if error?
-				logger.log project_id: project_id, doc_id: doc_id, "deleted doc via http"
-				res.send 204 # No Content
-		else
-			logger.log project_id: project_id, doc_id: doc_id, "deleting doc via http"
-			DocumentManager.flushAndDeleteDocWithLock project_id, doc_id, (error) ->
-				timer.done()
-				# There is no harm in flushing project history if the previous call
-				# failed and sometimes it is required
-				HistoryManager.flushProjectChangesAsync project_id
-
-				return next(error) if error?
-				logger.log project_id: project_id, doc_id: doc_id, "deleted doc via http"
-				res.send 204 # No Content
+			return next(error) if error?
+			logger.log project_id: project_id, doc_id: doc_id, "deleted doc via http"
+			res.send 204 # No Content
 
 	flushProject: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
