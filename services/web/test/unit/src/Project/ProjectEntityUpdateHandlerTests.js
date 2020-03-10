@@ -2067,7 +2067,7 @@ describe('ProjectEntityUpdateHandler', function() {
   })
 
   describe('convertDocToFile', function() {
-    beforeEach(function(done) {
+    beforeEach(function() {
       this.docPath = '/folder/doc.tex'
       this.docLines = ['line one', 'line two']
       this.tmpFilePath = '/tmp/file'
@@ -2100,74 +2100,103 @@ describe('ProjectEntityUpdateHandler', function() {
         null,
         this.project
       )
-      this.ProjectEntityUpdateHandler.convertDocToFile(
-        this.project._id,
-        this.doc._id,
-        this.user._id,
-        done
-      )
     })
 
-    it('deletes the document in doc updater', function() {
-      expect(this.DocumentUpdaterHandler.deleteDoc).to.have.been.calledWith(
-        this.project._id,
-        this.doc._id
-      )
+    describe('successfully', function() {
+      beforeEach(function(done) {
+        this.ProjectEntityUpdateHandler.convertDocToFile(
+          this.project._id,
+          this.doc._id,
+          this.user._id,
+          done
+        )
+      })
+
+      it('deletes the document in doc updater', function() {
+        expect(this.DocumentUpdaterHandler.deleteDoc).to.have.been.calledWith(
+          this.project._id,
+          this.doc._id
+        )
+      })
+
+      it('uploads the file to filestore', function() {
+        expect(
+          this.FileStoreHandler.uploadFileFromDisk
+        ).to.have.been.calledWith(
+          this.project._id,
+          { name: this.doc.name },
+          this.tmpFilePath
+        )
+      })
+
+      it('cleans up the temporary file', function() {
+        expect(this.fs.unlink).to.have.been.calledWith(this.tmpFilePath)
+      })
+
+      it('replaces the doc with the file', function() {
+        expect(
+          this.ProjectEntityMongoUpdateHandler.replaceDocWithFile
+        ).to.have.been.calledWith(this.project._id, this.doc._id, this.file)
+      })
+
+      it('notifies document updater of changes', function() {
+        expect(
+          this.DocumentUpdaterHandler.updateProjectStructure
+        ).to.have.been.calledWith(
+          this.project._id,
+          this.project.overleaf.history.id,
+          this.user._id,
+          {
+            oldDocs: [{ doc: this.doc, path: this.path }],
+            newFiles: [
+              { file: this.file, path: this.path, url: this.fileStoreUrl }
+            ],
+            newProject: this.project
+          }
+        )
+      })
+
+      it('should notify real-time of the doc deletion', function() {
+        expect(
+          this.EditorRealTimeController.emitToRoom
+        ).to.have.been.calledWith(
+          this.project._id,
+          'removeEntity',
+          this.doc._id,
+          'convertDocToFile'
+        )
+      })
+
+      it('should notify real-time of the file creation', function() {
+        expect(
+          this.EditorRealTimeController.emitToRoom
+        ).to.have.been.calledWith(
+          this.project._id,
+          'reciveNewFile',
+          this.folder._id,
+          this.file,
+          'convertDocToFile',
+          null
+        )
+      })
     })
 
-    it('uploads the file to filestore', function() {
-      expect(this.FileStoreHandler.uploadFileFromDisk).to.have.been.calledWith(
-        this.project._id,
-        { name: this.doc.name },
-        this.tmpFilePath
-      )
-    })
-
-    it('cleans up the temporary file', function() {
-      expect(this.fs.unlink).to.have.been.calledWith(this.tmpFilePath)
-    })
-
-    it('replaces the doc with the file', function() {
-      expect(
-        this.ProjectEntityMongoUpdateHandler.replaceDocWithFile
-      ).to.have.been.calledWith(this.project._id, this.doc._id, this.file)
-    })
-
-    it('notifies document updater of changes', function() {
-      expect(
-        this.DocumentUpdaterHandler.updateProjectStructure
-      ).to.have.been.calledWith(
-        this.project._id,
-        this.project.overleaf.history.id,
-        this.user._id,
-        {
-          oldDocs: [{ doc: this.doc, path: this.path }],
-          newFiles: [
-            { file: this.file, path: this.path, url: this.fileStoreUrl }
-          ],
-          newProject: this.project
-        }
-      )
-    })
-
-    it('should notify real-time of the doc deletion', function() {
-      expect(this.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
-        this.project._id,
-        'removeEntity',
-        this.doc._id,
-        'convertDocToFile'
-      )
-    })
-
-    it('should notify real-time of the file creation', function() {
-      expect(this.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
-        this.project._id,
-        'reciveNewFile',
-        this.folder._id,
-        this.file,
-        'convertDocToFile',
-        null
-      )
+    describe('when the doc has ranges', function() {
+      it('should throw a DocHasRangesError', function(done) {
+        this.ranges = { comments: [{ id: 123 }] }
+        this.DocstoreManager.getDoc
+          .withArgs(this.project._id, this.doc._id)
+          .yields(null, this.docLines, 'rev', 'version', this.ranges)
+        this.ProjectEntityUpdateHandler.convertDocToFile(
+          this.project._id,
+          this.doc._id,
+          this.user._id,
+          err => {
+            expect(err).to.be.instanceof(Errors.DocHasRangesError)
+            done()
+          }
+        )
+      })
     })
   })
 })

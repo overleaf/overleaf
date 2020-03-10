@@ -138,6 +138,12 @@ class UserNotCollaboratorError extends OError {
   }
 }
 
+class DocHasRangesError extends OError {
+  constructor(options) {
+    super({ message: 'document has ranges', ...options })
+  }
+}
+
 module.exports = {
   OError,
   BackwardCompatibleError,
@@ -164,5 +170,6 @@ module.exports = {
   SubscriptionAdminDeletionError,
   ProjectNotFoundError,
   UserNotFoundError,
-  UserNotCollaboratorError
+  UserNotCollaboratorError,
+  DocHasRangesError
 }

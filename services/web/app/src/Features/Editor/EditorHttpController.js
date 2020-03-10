@@ -241,6 +241,12 @@ async function convertDocToFile(req, res, next) {
       throw new HttpErrors.NotFoundError({
         info: { public: { message: 'Document not found' } }
       })
+    } else if (err instanceof Errors.DocHasRangesError) {
+      throw new HttpErrors.UnprocessableEntityError({
+        info: {
+          public: { message: 'Document has comments or tracked changes' }
+        }
+      })
     } else {
       throw err
     }

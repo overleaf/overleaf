@@ -3,6 +3,7 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
+const HttpErrors = require('@overleaf/o-error/http')
 
 const MODULE_PATH = '../../../../app/src/Features/Editor/EditorHttpController'
 
@@ -143,7 +144,8 @@ describe('EditorHttpController', function() {
         '../../infrastructure/FileWriter': this.FileWriter,
         '../Project/ProjectEntityUpdateHandler': this
           .ProjectEntityUpdateHandler,
-        '../Errors/Errors': Errors
+        '../Errors/Errors': Errors,
+        '@overleaf/o-error/http': HttpErrors
       }
     })
   })
@@ -519,19 +521,33 @@ describe('EditorHttpController', function() {
       this.EditorHttpController.convertDocToFile(this.req, this.res)
     })
 
-    it('should convert the doc to a file', function() {
-      expect(
-        this.ProjectEntityUpdateHandler.promises.convertDocToFile
-      ).to.have.been.calledWith(
-        this.project._id.toString(),
-        this.doc._id.toString(),
-        this.user._id.toString()
-      )
+    describe('when successful', function() {
+      it('should convert the doc to a file', function() {
+        expect(
+          this.ProjectEntityUpdateHandler.promises.convertDocToFile
+        ).to.have.been.calledWith(
+          this.project._id.toString(),
+          this.doc._id.toString(),
+          this.user._id.toString()
+        )
+      })
+
+      it('should return the file id in the response', function() {
+        expect(this.res.json).to.have.been.calledWith({
+          fileId: this.file._id.toString()
+        })
+      })
     })
 
-    it('should return the file id in the response', function() {
-      expect(this.res.json).to.have.been.calledWith({
-        fileId: this.file._id.toString()
+    describe('when the doc has ranges', function() {
+      it('should return a 422', function(done) {
+        this.ProjectEntityUpdateHandler.promises.convertDocToFile.rejects(
+          new Errors.DocHasRangesError({})
+        )
+        this.EditorHttpController.convertDocToFile(this.req, this.res, err => {
+          expect(err).to.be.instanceof(HttpErrors.UnprocessableEntityError)
+          done()
+        })
       })
     })
   })

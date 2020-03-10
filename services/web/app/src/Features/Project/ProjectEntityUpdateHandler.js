@@ -1521,7 +1521,7 @@ const ProjectEntityUpdateHandler = {
   convertDocToFile: wrapWithLock({
     beforeLock(next) {
       return function(projectId, docId, userId, callback) {
-        DocumentUpdaterHandler.deleteDoc(projectId, docId, err => {
+        DocumentUpdaterHandler.flushDocToMongo(projectId, docId, err => {
           if (err) {
             return callback(err)
           }
@@ -1532,47 +1532,59 @@ const ProjectEntityUpdateHandler = {
               if (err) {
                 return callback(err)
               }
-              DocstoreManager.getDoc(projectId, docId, (err, docLines) => {
-                if (err) {
-                  return callback(err)
-                }
-                FileWriter.writeLinesToDisk(
-                  projectId,
-                  docLines,
-                  (err, fsPath) => {
+              DocstoreManager.getDoc(
+                projectId,
+                docId,
+                (err, docLines, rev, version, ranges) => {
+                  if (err) {
+                    return callback(err)
+                  }
+                  if (!_.isEmpty(ranges)) {
+                    return callback(new Errors.DocHasRangesError({}))
+                  }
+                  DocumentUpdaterHandler.deleteDoc(projectId, docId, err => {
                     if (err) {
                       return callback(err)
                     }
-                    FileStoreHandler.uploadFileFromDisk(
+                    FileWriter.writeLinesToDisk(
                       projectId,
-                      { name: doc.name },
-                      fsPath,
-                      (err, fileStoreUrl, fileRef) => {
+                      docLines,
+                      (err, fsPath) => {
                         if (err) {
                           return callback(err)
                         }
-                        fs.unlink(fsPath, err => {
-                          if (err) {
-                            logger.warn(
-                              { err, path: fsPath },
-                              'failed to clean up temporary file'
-                            )
+                        FileStoreHandler.uploadFileFromDisk(
+                          projectId,
+                          { name: doc.name },
+                          fsPath,
+                          (err, fileStoreUrl, fileRef) => {
+                            if (err) {
+                              return callback(err)
+                            }
+                            fs.unlink(fsPath, err => {
+                              if (err) {
+                                logger.warn(
+                                  { err, path: fsPath },
+                                  'failed to clean up temporary file'
+                                )
+                              }
+                              next(
+                                projectId,
+                                doc,
+                                docPath,
+                                fileRef,
+                                fileStoreUrl,
+                                userId,
+                                callback
+                              )
+                            })
                           }
-                          next(
-                            projectId,
-                            doc,
-                            docPath,
-                            fileRef,
-                            fileStoreUrl,
-                            userId,
-                            callback
-                          )
-                        })
+                        )
                       }
                     )
-                  }
-                )
-              })
+                  })
+                }
+              )
             }
           )
         })
