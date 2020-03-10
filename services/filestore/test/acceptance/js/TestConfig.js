@@ -23,7 +23,8 @@ function gcsConfig() {
   return {
     apiEndpoint: process.env.GCS_API_ENDPOINT,
     apiScheme: process.env.GCS_API_SCHEME,
-    projectId: 'fake'
+    projectId: 'fake',
+    directoryKeyRegex: new RegExp('^[0-9a-fA-F]{24}/[0-9a-fA-F]{24}')
   }
 }
 

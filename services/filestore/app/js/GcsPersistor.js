@@ -191,7 +191,7 @@ async function deleteFile(bucketName, key) {
 }
 
 async function deleteDirectory(bucketName, key) {
-  if (!key.match(/^[a-z0-9_-]+/i)) {
+  if (!key.match(settings.filestore.gcs.directoryKeyRegex)) {
     throw new NotFoundError({
       message: 'deleteDirectoryKey is invalid or missing',
       info: { bucketName, key }

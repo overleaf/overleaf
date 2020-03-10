@@ -39,6 +39,8 @@ settings =
 				apiEndpoint: process.env['GCS_API_ENDPOINT']
 				apiScheme: process.env['GCS_API_SCHEME']
 				projectId: process.env['GCS_PROJECT_ID']
+				# only keys that match this regex can be deleted
+				directoryKeyRegex: new RegExp(process.env['GCS_DIRECTORY_KEY_REGEX'] || "^[0-9a-fA-F]{24}/[0-9a-fA-F]{24}")
 
 		s3:
 			if process.env['AWS_ACCESS_KEY_ID']? or process.env['S3_BUCKET_CREDENTIALS']?

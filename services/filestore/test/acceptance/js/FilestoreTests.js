@@ -14,6 +14,7 @@ const { promisify } = require('util')
 const { Storage } = require('@google-cloud/storage')
 const streamifier = require('streamifier')
 chai.use(require('chai-as-promised'))
+const { ObjectId } = require('mongodb')
 
 const fsWriteFile = promisify(fs.writeFile)
 const fsStat = promisify(fs.stat)
@@ -48,7 +49,6 @@ const BackendSettings = require('./TestConfig')
 describe('Filestore', function() {
   this.timeout(1000 * 10)
   const filestoreUrl = `http://localhost:${Settings.internal.filestore.port}`
-  const directoryName = 'directory'
 
   // redefine the test suite for every available backend
   Object.keys(BackendSettings).forEach(backend => {
@@ -84,7 +84,7 @@ describe('Filestore', function() {
             `${metricPrefix}_egress`
           )
         }
-        projectId = `acceptance_tests_${Math.random()}`
+        projectId = ObjectId().toString()
       })
 
       it('should send a 200 for the status endpoint', async function() {
@@ -107,8 +107,8 @@ describe('Filestore', function() {
           '/tmp/filestore_acceptance_tests_file_read.txt'
 
         beforeEach(async function() {
-          fileId = Math.random()
-          fileUrl = `${filestoreUrl}/project/${projectId}/file/${directoryName}%2F${fileId}`
+          fileId = ObjectId().toString()
+          fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
           constantFileContent = [
             'hello world',
             `line 2 goes here ${Math.random()}`,
@@ -188,16 +188,16 @@ describe('Filestore', function() {
         })
 
         it('should be able to copy files', async function() {
-          const newProjectID = `acceptance_tests_copied_project_${Math.random()}`
-          const newFileId = Math.random()
-          const newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${directoryName}%2F${newFileId}`
+          const newProjectID = ObjectId().toString()
+          const newFileId = ObjectId().toString()
+          const newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${newFileId}`
           const opts = {
             method: 'put',
             uri: newFileUrl,
             json: {
               source: {
                 project_id: projectId,
-                file_id: `${directoryName}/${fileId}`
+                file_id: fileId
               }
             }
           }
@@ -260,7 +260,6 @@ describe('Filestore', function() {
 
       describe('with multiple files', function() {
         let fileIds, fileUrls
-        const directoryName = 'directory'
         const localFileReadPaths = [
           '/tmp/filestore_acceptance_tests_file_read_1.txt',
           '/tmp/filestore_acceptance_tests_file_read_2.txt'
@@ -286,10 +285,10 @@ describe('Filestore', function() {
         })
 
         beforeEach(async function() {
-          fileIds = [Math.random(), Math.random()]
+          fileIds = [ObjectId().toString(), ObjectId().toString()]
           fileUrls = [
-            `${filestoreUrl}/project/${projectId}/file/${directoryName}%2F${fileIds[0]}`,
-            `${filestoreUrl}/project/${projectId}/file/${directoryName}%2F${fileIds[1]}`
+            `${filestoreUrl}/project/${projectId}/file/${fileIds[0]}`,
+            `${filestoreUrl}/project/${projectId}/file/${fileIds[1]}`
           ]
 
           const writeStreams = [
@@ -325,8 +324,8 @@ describe('Filestore', function() {
         let fileId, fileUrl, largeFileContent, error
 
         beforeEach(async function() {
-          fileId = Math.random()
-          fileUrl = `${filestoreUrl}/project/${projectId}/file/${directoryName}%2F${fileId}`
+          fileId = ObjectId().toString()
+          fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
 
           largeFileContent = '_wombat_'.repeat(1024 * 1024) // 8 megabytes
           largeFileContent += Math.random()
@@ -359,8 +358,8 @@ describe('Filestore', function() {
 
           beforeEach(async function() {
             constantFileContent = `This is a file in a different S3 bucket ${Math.random()}`
-            fileId = Math.random().toString()
-            bucketName = Math.random().toString()
+            fileId = ObjectId().toString()
+            bucketName = ObjectId().toString()
             fileUrl = `${filestoreUrl}/bucket/${bucketName}/key/${fileId}`
 
             const s3ClientSettings = {
@@ -448,9 +447,9 @@ describe('Filestore', function() {
 
           beforeEach(function() {
             constantFileContent = `This is yet more file content ${Math.random()}`
-            fileId = Math.random().toString()
-            fileKey = `${projectId}/${directoryName}/${fileId}`
-            fileUrl = `${filestoreUrl}/project/${projectId}/file/${directoryName}%2F${fileId}`
+            fileId = ObjectId().toString()
+            fileKey = `${projectId}/${fileId}`
+            fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
 
             bucket = Settings.filestore.stores.user_files
             fallbackBucket = Settings.filestore.fallback.buckets[bucket]
@@ -532,10 +531,10 @@ describe('Filestore', function() {
               let newFileId, newFileUrl, newFileKey, opts
 
               beforeEach(function() {
-                const newProjectID = `acceptance_tests_copied_project_${Math.random()}`
-                newFileId = Math.random()
-                newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${directoryName}%2F${newFileId}`
-                newFileKey = `${newProjectID}/${directoryName}/${newFileId}`
+                const newProjectID = ObjectId().toString()
+                newFileId = ObjectId().toString()
+                newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${newFileId}`
+                newFileKey = `${newProjectID}/${newFileId}`
 
                 opts = {
                   method: 'put',
@@ -543,7 +542,7 @@ describe('Filestore', function() {
                   json: {
                     source: {
                       project_id: projectId,
-                      file_id: `${directoryName}/${fileId}`
+                      file_id: fileId
                     }
                   }
                 }
@@ -668,7 +667,7 @@ describe('Filestore', function() {
               await expectPersistorNotToHaveFile(
                 app.persistor.fallbackPersistor,
                 fallbackBucket,
-                `${projectId}/${directoryName}/${fileId}`
+                `${projectId}/${fileId}`
               )
             })
           })
@@ -757,8 +756,8 @@ describe('Filestore', function() {
         )
 
         beforeEach(async function() {
-          fileId = Math.random()
-          fileUrl = `${filestoreUrl}/project/${projectId}/file/${directoryName}%2F${fileId}`
+          fileId = ObjectId().toString()
+          fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
           const stat = await fsStat(localFileReadPath)
           localFileSize = stat.size
           const writeStream = request.post(fileUrl)

@@ -3,6 +3,7 @@ const chai = require('chai')
 const { expect } = chai
 const modulePath = '../../../app/js/GcsPersistor.js'
 const SandboxedModule = require('sandboxed-module')
+const { ObjectId } = require('mongodb')
 
 const Errors = require('../../../app/js/Errors')
 
@@ -41,6 +42,9 @@ describe('GcsPersistorTests', function() {
         backend: 'gcs',
         stores: {
           user_files: 'user_files'
+        },
+        gcs: {
+          directoryKeyRegex: /^[0-9a-fA-F]{24}\/[0-9a-fA-F]{24}/
         }
       }
     }
@@ -512,15 +516,17 @@ describe('GcsPersistorTests', function() {
   })
 
   describe('deleteDirectory', function() {
+    const directoryName = `${ObjectId()}/${ObjectId()}`
     describe('with valid parameters', function() {
       beforeEach(async function() {
-        return GcsPersistor.promises.deleteDirectory(bucket, key)
+        console.log(key)
+        return GcsPersistor.promises.deleteDirectory(bucket, directoryName)
       })
 
       it('should delete the objects in the directory', function() {
         expect(Storage.prototype.bucket).to.have.been.calledWith(bucket)
         expect(GcsBucket.deleteFiles).to.have.been.calledWith({
-          directory: key,
+          directory: directoryName,
           force: true
         })
       })
@@ -532,7 +538,7 @@ describe('GcsPersistorTests', function() {
       beforeEach(async function() {
         GcsBucket.deleteFiles = sinon.stub().rejects(genericError)
         try {
-          await GcsPersistor.promises.deleteDirectory(bucket, key)
+          await GcsPersistor.promises.deleteDirectory(bucket, directoryName)
         } catch (err) {
           error = err
         }
@@ -544,6 +550,22 @@ describe('GcsPersistorTests', function() {
 
       it('should wrap the error', function() {
         expect(error.cause).to.equal(genericError)
+      })
+    })
+
+    describe('when the directory name is in the wrong format', function() {
+      let error
+
+      beforeEach(async function() {
+        try {
+          await GcsPersistor.promises.deleteDirectory(bucket, 'carbonara')
+        } catch (err) {
+          error = err
+        }
+      })
+
+      it('should throw a NotFoundError', function() {
+        expect(error).to.be.an.instanceOf(Errors.NotFoundError)
       })
     })
   })

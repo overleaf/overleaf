@@ -56,6 +56,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "mocha": "5.2.0",
+    "mongodb": "^3.5.4",
     "prettier-eslint": "^9.0.1",
     "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "2.0.3",
