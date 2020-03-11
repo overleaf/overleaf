@@ -55,7 +55,7 @@ class MetricWrapper
 				new prom.Summary({
 					name: name,
 					help: name,
-					maxAgeSeconds: 600,
+					maxAgeSeconds: 60,
 					ageBuckets: 10,
 					labelNames: ['app', 'host', 'path', 'status_code', 'method', 'collection', 'query']
 				})
