@@ -604,10 +604,10 @@ describe('UserController', function() {
     })
   })
 
-  describe('ensureAffiliationsMiddleware', function() {
+  describe('ensureAffiliationMiddleware', function() {
     describe('without affiliations feature', function() {
       beforeEach(async function() {
-        await this.UserController.promises.ensureAffiliationsMiddleware(
+        await this.UserController.promises.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
@@ -623,10 +623,10 @@ describe('UserController', function() {
         expect(this.next).to.be.calledWith()
       })
     })
-    describe('without ensureAffiliations query parameter', function() {
+    describe('without ensureAffiliation query parameter', function() {
       beforeEach(async function() {
         this.Features.hasFeature.withArgs('affiliations').returns(true)
-        await this.UserController.promises.ensureAffiliationsMiddleware(
+        await this.UserController.promises.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
@@ -652,8 +652,8 @@ describe('UserController', function() {
           }
         ]
         this.Features.hasFeature.withArgs('affiliations').returns(true)
-        this.req.query.ensureAffiliations = true
-        await this.UserController.promises.ensureAffiliationsMiddleware(
+        this.req.query.ensureAffiliation = true
+        await this.UserController.promises.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
@@ -684,8 +684,8 @@ describe('UserController', function() {
           }
         ]
         this.Features.hasFeature.withArgs('affiliations').returns(true)
-        this.req.query.ensureAffiliations = true
-        await this.UserController.promises.ensureAffiliationsMiddleware(
+        this.req.query.ensureAffiliation = true
+        await this.UserController.promises.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
@@ -716,8 +716,8 @@ describe('UserController', function() {
           }
         ]
         this.Features.hasFeature.withArgs('affiliations').returns(true)
-        this.req.query.ensureAffiliations = true
-        await this.UserController.promises.ensureAffiliationsMiddleware(
+        this.req.query.ensureAffiliation = true
+        await this.UserController.promises.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
@@ -748,8 +748,8 @@ describe('UserController', function() {
           }
         ]
         this.Features.hasFeature.withArgs('affiliations').returns(true)
-        this.req.query.ensureAffiliations = true
-        await this.UserController.promises.ensureAffiliationsMiddleware(
+        this.req.query.ensureAffiliation = true
+        await this.UserController.promises.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next

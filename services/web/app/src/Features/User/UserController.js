@@ -19,7 +19,7 @@ const EmailHandler = require('../Email/EmailHandler')
 const UrlHelper = require('../Helpers/UrlHelper')
 const { promisify } = require('util')
 
-async function _ensureAffiliations(userId, emailData) {
+async function _ensureAffiliation(userId, emailData) {
   if (emailData.samlProviderId) {
     await UserUpdater.promises.confirmEmail(userId, emailData.email)
   } else {
@@ -27,13 +27,9 @@ async function _ensureAffiliations(userId, emailData) {
   }
 }
 
-async function ensureAffiliations(userId) {
+async function ensureAffiliation(user) {
   if (!Features.hasFeature('affiliations')) {
     return
-  }
-  const user = await UserGetter.promises.getUser(userId)
-  if (!user) {
-    return new Errors.UserNotFoundError({ info: { userId } })
   }
 
   const flaggedEmails = user.emails.filter(email => email.affiliationUnchecked)
@@ -43,21 +39,27 @@ async function ensureAffiliations(userId) {
 
   if (flaggedEmails.length > 1) {
     logger.error(
-      { userId },
+      { userId: user._id },
       `Unexpected number of flagged emails: ${flaggedEmails.length}`
     )
   }
 
-  await _ensureAffiliations(userId, flaggedEmails[0])
+  await _ensureAffiliation(user._id, flaggedEmails[0])
 }
 
-async function ensureAffiliationsMiddleware(req, res, next) {
-  if (!Features.hasFeature('affiliations') || !req.query.ensureAffiliations) {
+async function ensureAffiliationMiddleware(req, res, next) {
+  let user
+  if (!Features.hasFeature('affiliations') || !req.query.ensureAffiliation) {
     return next()
   }
   const userId = AuthenticationController.getLoggedInUserId(req)
   try {
-    await ensureAffiliations(userId)
+    user = await UserGetter.promises.getUser(userId)
+  } catch (error) {
+    return new Errors.UserNotFoundError({ info: { userId } })
+  }
+  try {
+    await ensureAffiliation(user)
   } catch (error) {
     return next(error)
   }
@@ -446,8 +448,8 @@ const UserController = {
 
 UserController.promises = {
   doLogout: promisify(UserController.doLogout),
-  ensureAffiliations,
-  ensureAffiliationsMiddleware
+  ensureAffiliation,
+  ensureAffiliationMiddleware
 }
 
 module.exports = UserController

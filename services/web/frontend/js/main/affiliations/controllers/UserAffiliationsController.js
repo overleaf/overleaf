@@ -295,7 +295,7 @@ define(['base'], App =>
       _resetMakingRequestType()
       $scope.ui.isLoadingEmails = true
       _monitorRequest(
-        UserAffiliationsDataService.getUserEmailsEnsureAffiliations()
+        UserAffiliationsDataService.getUserEmailsEnsureAffiliation()
       )
         .then(emails => {
           $scope.userEmails = emails.map(email => {
