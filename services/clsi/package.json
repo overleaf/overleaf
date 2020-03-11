@@ -29,7 +29,7 @@
     "logger-sharelatex": "^1.9.0",
     "lynx": "0.2.0",
     "metrics-sharelatex": "^2.5.1",
-    "mkdirp": "0.3.5",
+    "mkdirp": "1.0.3",
     "mysql": "^2.18.1",
     "request": "^2.88.2",
     "sequelize": "^4.44.4",
