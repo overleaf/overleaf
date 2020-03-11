@@ -91,6 +91,14 @@ module.exports = Metrics =
 		if process.env['DEBUG_METRICS']
 			console.log("doing count/inc", key, opts)
 
+	summary : (key, value, opts = {})->
+		key = Metrics.buildPromKey(key)
+		opts.app = appname
+		opts.host = hostname
+		prom.metric('summary', key).observe(opts, value)
+		if process.env['DEBUG_METRICS']
+			console.log("doing summary", key, value, opts)
+
 	timing: (key, timeSpan, sampleRate, opts = {})->
 		key = Metrics.buildPromKey("timer_" + key)
 		opts.app = appname
