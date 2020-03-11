@@ -20,6 +20,17 @@ To be run from the base directory:
 **Clean**:
 `mvn clean`
 
+To be run from the dev-environment:
+
+**Build jar**:
+`bin/run git-bridge make package`
+
+**Run tests**:
+`bin/run git-bridge make test`
+
+**Clean**:
+`bin/run git-bridge make clean`
+
 Installation
 ------------
 
