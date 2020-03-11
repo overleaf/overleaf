@@ -21,4 +21,6 @@ chown -R node:node /app
 
 chown -R node:node /app/bin
 
+cp /app/bin/synctex /app/bin/synctex-mount/synctex
+
 exec runuser -u node -- "$@"
