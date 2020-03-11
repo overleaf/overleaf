@@ -1,3 +1,5 @@
+include ../../_mixins/saml
+
 .user-notifications(ng-controller="NotificationsController")
 	ul.list-unstyled(
 		ng-if="notifications.length > 0 && projects.length > 0",
@@ -147,6 +149,16 @@
 						button(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
+
+				if institutionLinkingError
+					.alert.alert-danger(ng-switch-when="notification_institution_sso_error")
+						.notification-body
+							div
+								+samlErrorLoggedIn(institutionLinkingError)
+						.notification-close
+							button(ng-click="dismiss(notification)").close.pull-right
+								span(aria-hidden="true") &times;
+								span.sr-only #{translate("close")}
 
 	ul.list-unstyled(
 		ng-controller="EmailNotificationController",

@@ -1,4 +1,5 @@
 const OError = require('@overleaf/o-error')
+const settings = require('settings-sharelatex')
 
 // Error class for legacy errors so they inherit OError while staying
 // backward-compatible (can be instantiated with string as argument instead
@@ -67,9 +68,37 @@ class SAMLIdentityExistsError extends BackwardCompatibleError {
 class SAMLSessionDataMissing extends BackwardCompatibleError {
   constructor(arg) {
     super(arg)
-    if (!this.message) {
-      this.message =
-        'Please resubmit your institutional email.<br/><a href="/institutional-login">institutional login</a>'
+
+    const samlSession =
+      typeof arg === 'object' && arg !== null && arg.samlSession
+        ? arg.samlSession
+        : {}
+    this.tryAgain = true
+    const institutionsWithoutEmail = settings.samlInstitutionsWithoutEmail || []
+    const {
+      universityId,
+      universityName,
+      externalUserId,
+      institutionEmail
+    } = samlSession
+
+    if (
+      !universityId &&
+      !universityName &&
+      !externalUserId &&
+      !institutionEmail
+    ) {
+      this.message = 'Missing session data.'
+    } else if (
+      !institutionEmail &&
+      institutionsWithoutEmail.includes(samlSession.universityId)
+    ) {
+      this.tryAgain = false
+      this.message = `Your account settings at your institution prevent us from accessing your email. You will need to make your email public at your institution in order to link with ${
+        settings.appName
+      }. Please contact your IT department if you have any questions.`
+    } else if (!institutionEmail) {
+      this.message = 'Unable to confirm your institution email.'
     }
   }
 }

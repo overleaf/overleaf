@@ -127,6 +127,7 @@ const UserPagesController = {
       'saml',
       'requestedEmail'
     ])
+    const institutionLinkingError = _.get(req.session, ['saml', 'error'])
     delete req.session.saml
     let shouldAllowEditingDetails = true
     if (Settings.ldap && Settings.ldap.updateUserDetailsOnLogin) {
@@ -159,6 +160,7 @@ const UserPagesController = {
           institutionEmailNonCanonical && institutionRequestedEmail
             ? institutionEmailNonCanonical
             : undefined,
+        institutionLinkingError,
         samlBeta: req.session.samlBeta,
         ssoError: ssoError,
         thirdPartyIds: UserPagesController._restructureThirdPartyIds(user)

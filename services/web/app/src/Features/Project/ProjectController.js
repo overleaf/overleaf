@@ -354,6 +354,7 @@ const ProjectController = {
     const userId = AuthenticationController.getLoggedInUserId(req)
     const currentUser = AuthenticationController.getSessionUser(req)
     let noV1Connection = false
+    let institutionLinkingError
     async.parallel(
       {
         tags(cb) {
@@ -515,6 +516,16 @@ const ProjectController = {
                 templateKey: 'notification_institution_sso_linked_by_another'
               })
             }
+
+            // Notification: When there is a session error
+            if (samlSession.error) {
+              institutionLinkingError = samlSession.error
+              notificationsInstitution.push({
+                message: samlSession.error.message,
+                templateKey: 'notification_institution_sso_error',
+                tryAgain: samlSession.error.tryAgain
+              })
+            }
           }
           delete req.session.saml
         }
@@ -551,6 +562,7 @@ const ProjectController = {
             user,
             userAffiliations,
             hasSubscription: results.hasSubscription,
+            institutionLinkingError,
             isShowingV1Projects:
               results.v1Projects != null &&
               results.v1Projects.projects.length > 0,
