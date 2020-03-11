@@ -14,8 +14,8 @@
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "nodemon": "nodemon --config nodemon.json",
     "lint": "node_modules/.bin/eslint .",
-    "format": "node_modules/.bin/prettier-eslint '**/*.js' --list-different",
-    "format:fix": "node_modules/.bin/prettier-eslint '**/*.js' --write"
+    "format": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --list-different",
+    "format:fix": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --write"
   },
   "author": "James Allen <james@sharelatex.com>",
   "dependencies": {
@@ -35,7 +35,7 @@
     "sequelize": "^4.38.0",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.1.0",
     "smoke-test-sharelatex": "git+https://github.com/sharelatex/smoke-test-sharelatex.git#v0.2.0",
-    "sqlite3": "^4.0.6",
+    "sqlite3": "^4.1.1",
     "underscore": "^1.8.2",
     "v8-profiler-node8": "^6.0.1",
     "wrench": "~1.5.4"
@@ -44,7 +44,7 @@
     "babel-eslint": "^10.0.3",
     "bunyan": "^0.22.1",
     "chai": "~1.8.1",
-    "eslint": "^6.6.0",
+    "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-config-standard-jsx": "^8.1.0",
@@ -53,7 +53,7 @@
     "eslint-plugin-chai-friendly": "^0.5.0",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-mocha": "^6.2.2",
+    "eslint-plugin-mocha": "^6.3.0",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-promise": "^4.2.1",
