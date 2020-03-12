@@ -31,7 +31,6 @@ describe('ResourceWriter', function() {
         './ResourceStateManager': (this.ResourceStateManager = {}),
         wrench: (this.wrench = {}),
         './UrlCache': (this.UrlCache = {}),
-        mkdirp: (this.mkdirp = sinon.stub().callsArg(1)),
         './OutputFileFinder': (this.OutputFileFinder = {}),
         'logger-sharelatex': { log: sinon.stub(), err: sinon.stub() },
         './Metrics': (this.Metrics = {
@@ -346,6 +345,7 @@ describe('ResourceWriter', function() {
   describe('_writeResourceToDisk', function() {
     describe('with a url based resource', function() {
       beforeEach(function() {
+        this.fs.mkdir = sinon.stub().callsArg(2)
         this.resource = {
           path: 'main.tex',
           url: 'http://www.example.com/main.tex',
@@ -363,7 +363,7 @@ describe('ResourceWriter', function() {
       })
 
       it('should ensure the directory exists', function() {
-        return this.mkdirp
+        this.fs.mkdir
           .calledWith(
             path.dirname(path.join(this.basePath, this.resource.path))
           )
@@ -397,6 +397,7 @@ describe('ResourceWriter', function() {
           content: 'Hello world'
         }
         this.fs.writeFile = sinon.stub().callsArg(2)
+        this.fs.mkdir = sinon.stub().callsArg(2)
         return this.ResourceWriter._writeResourceToDisk(
           this.project_id,
           this.resource,
@@ -406,7 +407,7 @@ describe('ResourceWriter', function() {
       })
 
       it('should ensure the directory exists', function() {
-        return this.mkdirp
+        return this.fs.mkdir
           .calledWith(
             path.dirname(path.join(this.basePath, this.resource.path))
           )
