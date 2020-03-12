@@ -17,7 +17,7 @@ module.exports.monitor = (logger) ->
 				routePath = req.route.path.toString().replace(/\//g, '_').replace(/\:/g, '').slice(1)
 				Metrics.timing("http_request", responseTimeMs, null, {method:req.method, status_code: res.statusCode, path:routePath})
 				if requestSize
-					Metrics.summary("http_request_size_bytes", requestSize, {method:req.method, path:routePath})
+					Metrics.summary("http_request_size_bytes", requestSize, {method:req.method, status_code: res.statusCode, path:routePath})
 				remoteIp = req.ip || req.socket?.socket?.remoteAddress || req.socket?.remoteAddress
 				reqUrl = req.originalUrl || req.url
 				referrer = req.headers['referer'] || req.headers['referrer']
