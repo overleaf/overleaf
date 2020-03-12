@@ -29,6 +29,9 @@ module.exports = Metrics =
 	count : (key, count, sampleRate = 1)->
 		statsd.count buildKey(key), count, sampleRate
 
+	summary : (key, value)->
+		# not supported
+
 	timing: (key, timeSpan, sampleRate)->
 		statsd.timing(buildKey(key), timeSpan, sampleRate)
 
