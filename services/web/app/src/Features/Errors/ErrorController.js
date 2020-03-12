@@ -29,6 +29,7 @@ module.exports = ErrorController = {
           message: error && error.message,
           stack: error && error.stack
         },
+        body: req.body,
         path: req.path,
         query: req.query,
         saml: req.session.saml,
