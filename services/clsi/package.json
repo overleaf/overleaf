@@ -58,11 +58,11 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^4.0.1",
+    "mocha": "^7.1.0",
     "prettier": "^1.19.1",
     "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "~0.3.0",
-    "sinon": "~1.7.3",
+    "sinon": "~9.0.1",
     "timekeeper": "2.2.0"
   }
 }
