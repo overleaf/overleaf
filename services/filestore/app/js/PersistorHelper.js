@@ -93,7 +93,8 @@ function wrapError(error, message, params, ErrorType) {
     error instanceof NotFoundError ||
     ['NoSuchKey', 'NotFound', 404, 'AccessDenied', 'ENOENT'].includes(
       error.code
-    )
+    ) ||
+    (error.response && error.response.statusCode === 404)
   ) {
     return new NotFoundError({
       message: 'no such file',

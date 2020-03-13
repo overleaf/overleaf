@@ -21,10 +21,14 @@ function s3Stores() {
 
 function gcsConfig() {
   return {
-    apiEndpoint: process.env.GCS_API_ENDPOINT,
-    apiScheme: process.env.GCS_API_SCHEME,
-    projectId: 'fake',
-    directoryKeyRegex: new RegExp('^[0-9a-fA-F]{24}/[0-9a-fA-F]{24}')
+    endpoint: {
+      apiEndpoint: process.env.GCS_API_ENDPOINT,
+      apiScheme: process.env.GCS_API_SCHEME,
+      projectId: 'fake'
+    },
+    directoryKeyRegex: new RegExp('^[0-9a-fA-F]{24}/[0-9a-fA-F]{24}'),
+    unlockBeforeDelete: false, // fake-gcs does not support this
+    deletedBucketSuffix: '-deleted'
   }
 }
 

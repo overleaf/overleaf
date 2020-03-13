@@ -35,12 +35,15 @@ settings =
 		backend: process.env['BACKEND']
 
 		gcs:
-			if process.env['GCS_API_ENDPOINT']
-				apiEndpoint: process.env['GCS_API_ENDPOINT']
-				apiScheme: process.env['GCS_API_SCHEME']
-				projectId: process.env['GCS_PROJECT_ID']
-				# only keys that match this regex can be deleted
-				directoryKeyRegex: new RegExp(process.env['GCS_DIRECTORY_KEY_REGEX'] || "^[0-9a-fA-F]{24}/[0-9a-fA-F]{24}")
+			endpoint:
+				if process.env['GCS_API_ENDPOINT']
+					apiEndpoint: process.env['GCS_API_ENDPOINT']
+					apiScheme: process.env['GCS_API_SCHEME']
+					projectId: process.env['GCS_PROJECT_ID']
+			# only keys that match this regex can be deleted
+			directoryKeyRegex: new RegExp(process.env['GCS_DIRECTORY_KEY_REGEX'] || "^[0-9a-fA-F]{24}/[0-9a-fA-F]{24}")
+			unlockBeforeDelete: process.env['GCS_UNLOCK_BEFORE_DELETE'] == "true"  # unlock an event-based hold before deleting. default false
+			deletedBucketSuffix: process.env['GCS_DELETED_BUCKET_SUFFIX']          # if present, copy file to another bucket on delete. default null
 
 		s3:
 			if process.env['AWS_ACCESS_KEY_ID']? or process.env['S3_BUCKET_CREDENTIALS']?

@@ -88,8 +88,7 @@ describe('GcsPersistorTests', function() {
 
     GcsBucket = {
       file: sinon.stub().returns(GcsFile),
-      getFiles: sinon.stub().resolves([files]),
-      deleteFiles: sinon.stub().resolves()
+      getFiles: sinon.stub().resolves([files])
     }
 
     Storage = class {
@@ -523,20 +522,23 @@ describe('GcsPersistorTests', function() {
         return GcsPersistor.promises.deleteDirectory(bucket, directoryName)
       })
 
-      it('should delete the objects in the directory', function() {
+      it('should list the objects in the directory', function() {
         expect(Storage.prototype.bucket).to.have.been.calledWith(bucket)
-        expect(GcsBucket.deleteFiles).to.have.been.calledWith({
-          directory: directoryName,
-          force: true
+        expect(GcsBucket.getFiles).to.have.been.calledWith({
+          directory: directoryName
         })
+      })
+
+      it('should delete the files', function() {
+        expect(GcsFile.delete).to.have.been.calledTwice
       })
     })
 
-    describe('when there is an error deleting the objects', function() {
+    describe('when there is an error listing the objects', function() {
       let error
 
       beforeEach(async function() {
-        GcsBucket.deleteFiles = sinon.stub().rejects(genericError)
+        GcsBucket.getFiles = sinon.stub().rejects(genericError)
         try {
           await GcsPersistor.promises.deleteDirectory(bucket, directoryName)
         } catch (err) {

@@ -9,18 +9,21 @@ const PersistorHelper = require('./PersistorHelper')
 
 const pipeline = promisify(Stream.pipeline)
 
-// both of these settings will be null by default except for tests
+// endpoint settings will be null by default except for tests
 // that's OK - GCS uses the locally-configured service account by default
-const storage = new Storage(settings.filestore.gcs)
+const storage = new Storage(settings.filestore.gcs.endpoint)
 // workaround for broken uploads with custom endpoints:
 // https://github.com/googleapis/nodejs-storage/issues/898
-if (settings.filestore.gcs && settings.filestore.gcs.apiEndpoint) {
+if (
+  settings.filestore.gcs.endpoint &&
+  settings.filestore.gcs.endpoint.apiEndpoint
+) {
   storage.interceptors.push({
     request: function(reqOpts) {
       const url = new URL(reqOpts.uri)
-      url.host = settings.filestore.gcs.apiEndpoint
-      if (settings.filestore.gcs.apiScheme) {
-        url.protocol = settings.filestore.gcs.apiScheme
+      url.host = settings.filestore.gcs.endpoint.apiEndpoint
+      if (settings.filestore.gcs.endpoint.apiScheme) {
+        url.protocol = settings.filestore.gcs.endpoint.apiScheme
       }
       reqOpts.uri = url.toString()
       return reqOpts
@@ -173,10 +176,19 @@ async function getFileMd5Hash(bucketName, key) {
 
 async function deleteFile(bucketName, key) {
   try {
-    await storage
-      .bucket(bucketName)
-      .file(key)
-      .delete()
+    const file = storage.bucket(bucketName).file(key)
+
+    if (settings.filestore.gcs.unlockBeforeDelete) {
+      await file.setMetadata({ eventBasedHold: false })
+    }
+    if (settings.filestore.gcs.deletedBucketSuffix) {
+      await file.copy(
+        storage.bucket(
+          `${bucketName}${settings.filestore.gcs.deletedBucketSuffix}`
+        )
+      )
+    }
+    await file.delete()
   } catch (err) {
     const error = PersistorHelper.wrapError(
       err,
@@ -199,9 +211,13 @@ async function deleteDirectory(bucketName, key) {
   }
 
   try {
-    await storage
+    const [files] = await storage
       .bucket(bucketName)
-      .deleteFiles({ directory: key, force: true })
+      .getFiles({ directory: key })
+
+    for (const file of files) {
+      await deleteFile(bucketName, file.name)
+    }
   } catch (err) {
     const error = PersistorHelper.wrapError(
       err,

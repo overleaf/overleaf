@@ -4,6 +4,7 @@ const fs = require('fs')
 const Settings = require('settings-sharelatex')
 const Path = require('path')
 const FilestoreApp = require('./FilestoreApp')
+const TestHelper = require('./TestHelper')
 const rp = require('request-promise-native').defaults({
   resolveWithFullResponse: true
 })
@@ -20,26 +21,8 @@ const fsWriteFile = promisify(fs.writeFile)
 const fsStat = promisify(fs.stat)
 const pipeline = promisify(Stream.pipeline)
 
-async function getMetric(filestoreUrl, metric) {
-  const res = await rp.get(`${filestoreUrl}/metrics`)
-  expect(res.statusCode).to.equal(200)
-  const metricRegex = new RegExp(`^${metric}{[^}]+} ([0-9]+)$`, 'm')
-  const found = metricRegex.exec(res.body)
-  return parseInt(found ? found[1] : 0) || 0
-}
-
 if (!process.env.AWS_ACCESS_KEY_ID) {
   throw new Error('please provide credentials for the AWS S3 test server')
-}
-
-function streamToString(stream) {
-  const chunks = []
-  return new Promise((resolve, reject) => {
-    stream.on('data', chunk => chunks.push(chunk))
-    stream.on('error', reject)
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
-    stream.resume()
-  })
 }
 
 // store settings for multiple backends, so that we can test each one.
@@ -64,10 +47,19 @@ describe('Filestore', function() {
 
       if (BackendSettings[backend].gcs) {
         before(async function() {
-          const storage = new Storage(Settings.filestore.gcs)
+          const storage = new Storage(Settings.filestore.gcs.endpoint)
           await storage.createBucket(process.env.GCS_USER_FILES_BUCKET_NAME)
           await storage.createBucket(process.env.GCS_PUBLIC_FILES_BUCKET_NAME)
           await storage.createBucket(process.env.GCS_TEMPLATE_FILES_BUCKET_NAME)
+          await storage.createBucket(
+            `${process.env.GCS_USER_FILES_BUCKET_NAME}-deleted`
+          )
+          await storage.createBucket(
+            `${process.env.GCS_PUBLIC_FILES_BUCKET_NAME}-deleted`
+          )
+          await storage.createBucket(
+            `${process.env.GCS_TEMPLATE_FILES_BUCKET_NAME}-deleted`
+          )
         })
       }
 
@@ -79,7 +71,7 @@ describe('Filestore', function() {
         // retrieve previous metrics from the app
         if (['s3', 'gcs'].includes(Settings.filestore.backend)) {
           metricPrefix = Settings.filestore.backend
-          previousEgress = await getMetric(
+          previousEgress = await TestHelper.getMetric(
             filestoreUrl,
             `${metricPrefix}_egress`
           )
@@ -129,7 +121,7 @@ describe('Filestore', function() {
           // The content hash validation might require a full download
           //  in case the ETag field of the upload response is not a md5 sum.
           if (['s3', 'gcs'].includes(Settings.filestore.backend)) {
-            previousIngress = await getMetric(
+            previousIngress = await TestHelper.getMetric(
               filestoreUrl,
               `${metricPrefix}_ingress`
             )
@@ -223,7 +215,7 @@ describe('Filestore', function() {
 
         if (['S3Persistor', 'GcsPersistor'].includes(backend)) {
           it('should record an egress metric for the upload', async function() {
-            const metric = await getMetric(
+            const metric = await TestHelper.getMetric(
               filestoreUrl,
               `${metricPrefix}_egress`
             )
@@ -232,7 +224,7 @@ describe('Filestore', function() {
 
           it('should record an ingress metric when downloading the file', async function() {
             await rp.get(fileUrl)
-            const metric = await getMetric(
+            const metric = await TestHelper.getMetric(
               filestoreUrl,
               `${metricPrefix}_ingress`
             )
@@ -249,7 +241,7 @@ describe('Filestore', function() {
               }
             }
             await rp.get(options)
-            const metric = await getMetric(
+            const metric = await TestHelper.getMetric(
               filestoreUrl,
               `${metricPrefix}_ingress`
             )
@@ -394,50 +386,54 @@ describe('Filestore', function() {
         })
       }
 
+      if (backend === 'GcsPersistor') {
+        describe('when deleting a file in GCS', function() {
+          let fileId, fileUrl, content, error
+
+          beforeEach(async function() {
+            fileId = ObjectId()
+            fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
+
+            content = '_wombat_' + Math.random()
+
+            const writeStream = request.post(fileUrl)
+            const readStream = streamifier.createReadStream(content)
+            // hack to consume the result to ensure the http request has been fully processed
+            const resultStream = fs.createWriteStream('/dev/null')
+
+            try {
+              await pipeline(readStream, writeStream, resultStream)
+              await rp.delete(fileUrl)
+            } catch (err) {
+              error = err
+            }
+          })
+
+          it('should not throw an error', function() {
+            expect(error).not.to.exist
+          })
+
+          it('should copy the file to the deleted-files bucket', async function() {
+            await TestHelper.expectPersistorToHaveFile(
+              app.persistor,
+              `${Settings.filestore.stores.user_files}-deleted`,
+              `${projectId}/${fileId}`,
+              content
+            )
+          })
+
+          it('should remove the file from the original bucket', async function() {
+            await TestHelper.expectPersistorNotToHaveFile(
+              app.persistor,
+              Settings.filestore.stores.user_files,
+              `${projectId}/${fileId}`
+            )
+          })
+        })
+      }
+
       if (BackendSettings[backend].fallback) {
         describe('with a fallback', function() {
-          async function uploadStringToPersistor(
-            persistor,
-            bucket,
-            key,
-            content
-          ) {
-            const fileStream = streamifier.createReadStream(content)
-            await persistor.promises.sendStream(bucket, key, fileStream)
-          }
-
-          async function getStringFromPersistor(persistor, bucket, key) {
-            const stream = await persistor.promises.getFileStream(
-              bucket,
-              key,
-              {}
-            )
-            return streamToString(stream)
-          }
-
-          async function expectPersistorToHaveFile(
-            persistor,
-            bucket,
-            key,
-            content
-          ) {
-            const foundContent = await getStringFromPersistor(
-              persistor,
-              bucket,
-              key
-            )
-            expect(foundContent).to.equal(content)
-          }
-
-          async function expectPersistorNotToHaveFile(persistor, bucket, key) {
-            await expect(
-              getStringFromPersistor(persistor, bucket, key)
-            ).to.eventually.have.been.rejected.with.property(
-              'name',
-              'NotFoundError'
-            )
-          }
-
           let constantFileContent,
             fileId,
             fileKey,
@@ -457,7 +453,7 @@ describe('Filestore', function() {
 
           describe('with a file in the fallback bucket', function() {
             beforeEach(async function() {
-              await uploadStringToPersistor(
+              await TestHelper.uploadStringToPersistor(
                 app.persistor.fallbackPersistor,
                 fallbackBucket,
                 fileKey,
@@ -466,7 +462,7 @@ describe('Filestore', function() {
             })
 
             it('should not find file in the primary', async function() {
-              await expectPersistorNotToHaveFile(
+              await TestHelper.expectPersistorNotToHaveFile(
                 app.persistor.primaryPersistor,
                 bucket,
                 fileKey
@@ -474,7 +470,7 @@ describe('Filestore', function() {
             })
 
             it('should find the file in the fallback', async function() {
-              await expectPersistorToHaveFile(
+              await TestHelper.expectPersistorToHaveFile(
                 app.persistor.fallbackPersistor,
                 fallbackBucket,
                 fileKey,
@@ -495,7 +491,7 @@ describe('Filestore', function() {
               it('should not copy the file to the primary', async function() {
                 await rp.get(fileUrl)
 
-                await expectPersistorNotToHaveFile(
+                await TestHelper.expectPersistorNotToHaveFile(
                   app.persistor.primaryPersistor,
                   bucket,
                   fileKey
@@ -518,7 +514,7 @@ describe('Filestore', function() {
                 // wait for the file to copy in the background
                 await promisify(setTimeout)(1000)
 
-                await expectPersistorToHaveFile(
+                await TestHelper.expectPersistorToHaveFile(
                   app.persistor.primaryPersistor,
                   bucket,
                   fileKey,
@@ -557,7 +553,7 @@ describe('Filestore', function() {
                 })
 
                 it('should leave the old file in the old bucket', async function() {
-                  await expectPersistorToHaveFile(
+                  await TestHelper.expectPersistorToHaveFile(
                     app.persistor.fallbackPersistor,
                     fallbackBucket,
                     fileKey,
@@ -566,7 +562,7 @@ describe('Filestore', function() {
                 })
 
                 it('should not create a new file in the old bucket', async function() {
-                  await expectPersistorNotToHaveFile(
+                  await TestHelper.expectPersistorNotToHaveFile(
                     app.persistor.fallbackPersistor,
                     fallbackBucket,
                     newFileKey
@@ -574,7 +570,7 @@ describe('Filestore', function() {
                 })
 
                 it('should create a new file in the new bucket', async function() {
-                  await expectPersistorToHaveFile(
+                  await TestHelper.expectPersistorToHaveFile(
                     app.persistor.primaryPersistor,
                     bucket,
                     newFileKey,
@@ -586,7 +582,7 @@ describe('Filestore', function() {
                   // wait for the file to copy in the background
                   await promisify(setTimeout)(1000)
 
-                  await expectPersistorNotToHaveFile(
+                  await TestHelper.expectPersistorNotToHaveFile(
                     app.persistor.primaryPersistor,
                     bucket,
                     fileKey
@@ -603,7 +599,7 @@ describe('Filestore', function() {
                 })
 
                 it('should leave the old file in the old bucket', async function() {
-                  await expectPersistorToHaveFile(
+                  await TestHelper.expectPersistorToHaveFile(
                     app.persistor.fallbackPersistor,
                     fallbackBucket,
                     fileKey,
@@ -612,7 +608,7 @@ describe('Filestore', function() {
                 })
 
                 it('should not create a new file in the old bucket', async function() {
-                  await expectPersistorNotToHaveFile(
+                  await TestHelper.expectPersistorNotToHaveFile(
                     app.persistor.fallbackPersistor,
                     fallbackBucket,
                     newFileKey
@@ -620,7 +616,7 @@ describe('Filestore', function() {
                 })
 
                 it('should create a new file in the new bucket', async function() {
-                  await expectPersistorToHaveFile(
+                  await TestHelper.expectPersistorToHaveFile(
                     app.persistor.primaryPersistor,
                     bucket,
                     newFileKey,
@@ -632,7 +628,7 @@ describe('Filestore', function() {
                   // wait for the file to copy in the background
                   await promisify(setTimeout)(1000)
 
-                  await expectPersistorToHaveFile(
+                  await TestHelper.expectPersistorToHaveFile(
                     app.persistor.primaryPersistor,
                     bucket,
                     fileKey,
@@ -655,7 +651,7 @@ describe('Filestore', function() {
             })
 
             it('should store the file on the primary', async function() {
-              await expectPersistorToHaveFile(
+              await TestHelper.expectPersistorToHaveFile(
                 app.persistor.primaryPersistor,
                 bucket,
                 fileKey,
@@ -664,7 +660,7 @@ describe('Filestore', function() {
             })
 
             it('should not store the file on the fallback', async function() {
-              await expectPersistorNotToHaveFile(
+              await TestHelper.expectPersistorNotToHaveFile(
                 app.persistor.fallbackPersistor,
                 fallbackBucket,
                 `${projectId}/${fileId}`
@@ -675,7 +671,7 @@ describe('Filestore', function() {
           describe('when deleting a file', function() {
             describe('when the file exists on the primary', function() {
               beforeEach(async function() {
-                await uploadStringToPersistor(
+                await TestHelper.uploadStringToPersistor(
                   app.persistor.primaryPersistor,
                   bucket,
                   fileKey,
@@ -694,7 +690,7 @@ describe('Filestore', function() {
 
             describe('when the file exists on the fallback', function() {
               beforeEach(async function() {
-                await uploadStringToPersistor(
+                await TestHelper.uploadStringToPersistor(
                   app.persistor.fallbackPersistor,
                   fallbackBucket,
                   fileKey,
@@ -713,13 +709,13 @@ describe('Filestore', function() {
 
             describe('when the file exists on both the primary and the fallback', function() {
               beforeEach(async function() {
-                await uploadStringToPersistor(
+                await TestHelper.uploadStringToPersistor(
                   app.persistor.primaryPersistor,
                   bucket,
                   fileKey,
                   constantFileContent
                 )
-                await uploadStringToPersistor(
+                await TestHelper.uploadStringToPersistor(
                   app.persistor.fallbackPersistor,
                   fallbackBucket,
                   fileKey,
@@ -773,7 +769,7 @@ describe('Filestore', function() {
 
         if (['S3Persistor', 'GcsPersistor'].includes(backend)) {
           it('should record an egress metric for the upload', async function() {
-            const metric = await getMetric(
+            const metric = await TestHelper.getMetric(
               filestoreUrl,
               `${metricPrefix}_egress`
             )
