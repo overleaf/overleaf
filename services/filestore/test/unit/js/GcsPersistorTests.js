@@ -4,6 +4,7 @@ const { expect } = chai
 const modulePath = '../../../app/js/GcsPersistor.js'
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
+const asyncPool = require('tiny-async-pool')
 
 const Errors = require('../../../app/js/Errors')
 
@@ -135,6 +136,7 @@ describe('GcsPersistorTests', function() {
         '@google-cloud/storage': { Storage },
         'settings-sharelatex': settings,
         'logger-sharelatex': Logger,
+        'tiny-async-pool': asyncPool,
         './Errors': Errors,
         fs: Fs,
         'stream-meter': Meter,

@@ -5,6 +5,7 @@ const Stream = require('stream')
 const { Storage } = require('@google-cloud/storage')
 const { callbackify } = require('util')
 const { WriteError, ReadError, NotFoundError } = require('./Errors')
+const asyncPool = require('tiny-async-pool')
 const PersistorHelper = require('./PersistorHelper')
 
 const pipeline = promisify(Stream.pipeline)
@@ -215,9 +216,9 @@ async function deleteDirectory(bucketName, key) {
       .bucket(bucketName)
       .getFiles({ directory: key })
 
-    for (const file of files) {
+    await asyncPool(50, files, async file => {
       await deleteFile(bucketName, file.name)
-    }
+    })
   } catch (err) {
     const error = PersistorHelper.wrapError(
       err,
