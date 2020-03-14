@@ -16,6 +16,7 @@ const { Storage } = require('@google-cloud/storage')
 const streamifier = require('streamifier')
 chai.use(require('chai-as-promised'))
 const { ObjectId } = require('mongodb')
+const tk = require('timekeeper')
 
 const fsWriteFile = promisify(fs.writeFile)
 const fsStat = promisify(fs.stat)
@@ -388,9 +389,11 @@ describe('Filestore', function() {
 
       if (backend === 'GcsPersistor') {
         describe('when deleting a file in GCS', function() {
-          let fileId, fileUrl, content, error
+          let fileId, fileUrl, content, error, date
 
           beforeEach(async function() {
+            date = new Date()
+            tk.freeze(date)
             fileId = ObjectId()
             fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
 
@@ -409,6 +412,10 @@ describe('Filestore', function() {
             }
           })
 
+          afterEach(function() {
+            tk.reset()
+          })
+
           it('should not throw an error', function() {
             expect(error).not.to.exist
           })
@@ -417,7 +424,7 @@ describe('Filestore', function() {
             await TestHelper.expectPersistorToHaveFile(
               app.persistor,
               `${Settings.filestore.stores.user_files}-deleted`,
-              `${projectId}/${fileId}`,
+              `${projectId}/${fileId}-${date}`,
               content
             )
           })

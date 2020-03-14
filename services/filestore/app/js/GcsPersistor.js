@@ -184,9 +184,9 @@ async function deleteFile(bucketName, key) {
     }
     if (settings.filestore.gcs.deletedBucketSuffix) {
       await file.copy(
-        storage.bucket(
-          `${bucketName}${settings.filestore.gcs.deletedBucketSuffix}`
-        )
+        storage
+          .bucket(`${bucketName}${settings.filestore.gcs.deletedBucketSuffix}`)
+          .file(`${key}-${new Date()}`)
       )
     }
     await file.delete()
