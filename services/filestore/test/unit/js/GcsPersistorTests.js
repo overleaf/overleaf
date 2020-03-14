@@ -556,22 +556,6 @@ describe('GcsPersistorTests', function() {
         expect(error.cause).to.equal(genericError)
       })
     })
-
-    describe('when the directory name is in the wrong format', function() {
-      let error
-
-      beforeEach(async function() {
-        try {
-          await GcsPersistor.promises.deleteDirectory(bucket, 'carbonara')
-        } catch (err) {
-          error = err
-        }
-      })
-
-      it('should throw a NotFoundError', function() {
-        expect(error).to.be.an.instanceOf(Errors.NotFoundError)
-      })
-    })
   })
 
   describe('directorySize', function() {
