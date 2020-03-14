@@ -27,6 +27,7 @@ describe('FileHandler', function() {
   const bucket = 'my_bucket'
   const key = `${ObjectId()}/${ObjectId()}`
   const convertedFolderKey = `${ObjectId()}/${ObjectId()}`
+  const projectKey = `${ObjectId()}/`
   const sourceStream = 'sourceStream'
   const convertedKey = 'convertedKey'
   const readStream = {
@@ -148,6 +149,26 @@ describe('FileHandler', function() {
     it('should throw an error when the key is in the wrong format', function(done) {
       KeyBuilder.getConvertedFolderKey.returns('wombat')
       FileHandler.deleteFile(bucket, key, err => {
+        expect(err).to.exist
+        done()
+      })
+    })
+  })
+
+  describe('deleteProject', function() {
+    it('should tell the filestore manager to delete the folder', function(done) {
+      FileHandler.deleteProject(bucket, projectKey, err => {
+        expect(err).not.to.exist
+        expect(PersistorManager.promises.deleteDirectory).to.have.been.calledWith(
+          bucket,
+          projectKey
+        )
+        done()
+      })
+    })
+
+    it('should throw an error when the key is in the wrong format', function(done) {
+      FileHandler.deleteProject(bucket, 'wombat', err => {
         expect(err).to.exist
         done()
       })

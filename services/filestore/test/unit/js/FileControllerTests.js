@@ -40,6 +40,7 @@ describe('FileController', function() {
       getFile: sinon.stub().yields(null, fileStream),
       getFileSize: sinon.stub().yields(null, fileSize),
       deleteFile: sinon.stub().yields(),
+      deleteProject: sinon.stub().yields(),
       insertFile: sinon.stub().yields(),
       getDirectorySize: sinon.stub().yields(null, fileSize)
     }
@@ -67,6 +68,7 @@ describe('FileController', function() {
     req = {
       key: key,
       bucket: bucket,
+      project_id: projectId,
       query: {},
       params: {
         project_id: projectId,
@@ -253,6 +255,23 @@ describe('FileController', function() {
     it('should send a 500 if there was an error', function() {
       FileHandler.deleteFile.yields(error)
       FileController.deleteFile(req, res, next)
+      expect(next).to.have.been.calledWith(error)
+    })
+  })
+
+  describe('delete project', function() {
+    it('should tell the file handler', function(done) {
+      res.sendStatus = code => {
+        code.should.equal(204)
+        expect(FileHandler.deleteProject).to.have.been.calledWith(bucket, projectId)
+        done()
+      }
+      FileController.deleteProject(req, res, next)
+    })
+
+    it('should send a 500 if there was an error', function() {
+      FileHandler.deleteProject.yields(error)
+      FileController.deleteProject(req, res, next)
       expect(next).to.have.been.calledWith(error)
     })
   })

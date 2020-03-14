@@ -13,6 +13,7 @@ module.exports = {
   insertFile,
   copyFile,
   deleteFile,
+  deleteProject,
   directorySize
 }
 
@@ -150,6 +151,22 @@ function deleteFile(req, res, next) {
   req.requestLogger.setMessage('deleting file')
 
   FileHandler.deleteFile(bucket, key, function(err) {
+    if (err) {
+      next(err)
+    } else {
+      res.sendStatus(204)
+    }
+  })
+}
+
+function deleteProject(req, res, next) {
+  metrics.inc('deleteProject')
+  const { project_id: projectId, bucket } = req
+
+  req.requestLogger.setMessage('getting project size')
+  req.requestLogger.addFields({ projectId, bucket })
+
+  FileHandler.deleteProject(bucket, projectId, function(err) {
     if (err) {
       next(err)
     } else {

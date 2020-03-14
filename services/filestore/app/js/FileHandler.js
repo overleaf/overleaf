@@ -10,6 +10,7 @@ const { ConversionError, WriteError } = require('./Errors')
 module.exports = {
   insertFile: callbackify(insertFile),
   deleteFile: callbackify(deleteFile),
+  deleteProject: callbackify(deleteProject),
   getFile: callbackify(getFile),
   getFileSize: callbackify(getFileSize),
   getDirectorySize: callbackify(getDirectorySize),
@@ -17,6 +18,7 @@ module.exports = {
     getFile,
     insertFile,
     deleteFile,
+    deleteProject,
     getFileSize,
     getDirectorySize
   }
@@ -46,6 +48,16 @@ async function deleteFile(bucket, key) {
     PersistorManager.promises.deleteFile(bucket, key),
     PersistorManager.promises.deleteDirectory(bucket, convertedKey)
   ])
+}
+
+async function deleteProject(bucket, key) {
+  if (!key.match(/^[0-9a-f]{24}\//i)) {
+    throw new WriteError({
+      message: 'key does not match validation regex',
+      info: { bucket, key }
+    })
+  }
+  await PersistorManager.promises.deleteDirectory(bucket, key)
 }
 
 async function getFile(bucket, key, opts) {
