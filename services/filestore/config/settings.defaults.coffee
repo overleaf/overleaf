@@ -42,6 +42,7 @@ settings =
 					projectId: process.env['GCS_PROJECT_ID']
 			unlockBeforeDelete: process.env['GCS_UNLOCK_BEFORE_DELETE'] == "true"  # unlock an event-based hold before deleting. default false
 			deletedBucketSuffix: process.env['GCS_DELETED_BUCKET_SUFFIX']          # if present, copy file to another bucket on delete. default null
+			deleteConcurrency: parseInt(process.env['GCS_DELETE_CONCURRENCY']) || 50
 
 		s3:
 			if process.env['AWS_ACCESS_KEY_ID']? or process.env['S3_BUCKET_CREDENTIALS']?

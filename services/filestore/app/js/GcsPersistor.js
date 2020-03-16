@@ -209,9 +209,13 @@ async function deleteDirectory(bucketName, key) {
       .bucket(bucketName)
       .getFiles({ directory: key })
 
-    await asyncPool(50, files, async file => {
-      await deleteFile(bucketName, file.name)
-    })
+    await asyncPool(
+      settings.filestore.gcs.deleteConcurrency,
+      files,
+      async file => {
+        await deleteFile(bucketName, file.name)
+      }
+    )
   } catch (err) {
     const error = PersistorHelper.wrapError(
       err,
