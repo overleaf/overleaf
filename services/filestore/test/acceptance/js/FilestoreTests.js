@@ -252,7 +252,7 @@ describe('Filestore', function() {
       })
 
       describe('with multiple files', function() {
-        let fileIds, fileUrls
+        let fileIds, fileUrls, projectUrl
         const localFileReadPaths = [
           '/tmp/filestore_acceptance_tests_file_read_1.txt',
           '/tmp/filestore_acceptance_tests_file_read_2.txt'
@@ -278,10 +278,11 @@ describe('Filestore', function() {
         })
 
         beforeEach(async function() {
+          projectUrl = `${filestoreUrl}/project/${projectId}`
           fileIds = [ObjectId().toString(), ObjectId().toString()]
           fileUrls = [
-            `${filestoreUrl}/project/${projectId}/file/${fileIds[0]}`,
-            `${filestoreUrl}/project/${projectId}/file/${fileIds[1]}`
+            `${projectUrl}/file/${fileIds[0]}`,
+            `${projectUrl}/file/${fileIds[1]}`
           ]
 
           const writeStreams = [
@@ -310,6 +311,34 @@ describe('Filestore', function() {
           expect(parseInt(JSON.parse(response.body)['total bytes'])).to.equal(
             constantFileContents[0].length + constantFileContents[1].length
           )
+        })
+
+        it('should store the files', async function() {
+          for (const index in fileUrls) {
+            await expect(rp.get(fileUrls[index])).to.eventually.have.property(
+              'body',
+              constantFileContents[index]
+            )
+          }
+        })
+
+        it('should be able to delete the project', async function() {
+          await expect(rp.delete(projectUrl)).to.eventually.have.property(
+            'statusCode',
+            204
+          )
+
+          for (const index in fileUrls) {
+            await expect(
+              rp.get(fileUrls[index])
+            ).to.eventually.be.rejected.and.have.property('statusCode', 404)
+          }
+        })
+
+        it('should not delete a partial project id', async function() {
+          await expect(
+            rp.delete(`${filestoreUrl}/project/5`)
+          ).to.eventually.be.rejected.and.have.property('statusCode', 400)
         })
       })
 
