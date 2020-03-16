@@ -227,7 +227,7 @@ module.exports = UrlCache = {
       callback = function(error, urlDetails) {}
     }
     const job = cb =>
-      db.UrlCache.find({ where: { url, project_id } })
+      db.UrlCache.findOne({ where: { url, project_id } })
         .then(urlDetails => cb(null, urlDetails))
         .error(cb)
     return dbQueue.queue.push(job, callback)
@@ -241,7 +241,7 @@ module.exports = UrlCache = {
       db.UrlCache.findOrCreate({ where: { url, project_id } })
         .spread((urlDetails, created) =>
           urlDetails
-            .updateAttributes({ lastModified })
+            .update({ lastModified })
             .then(() => cb())
             .error(cb)
         )
