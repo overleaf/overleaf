@@ -33,7 +33,6 @@
     "range-parser": "^1.0.2",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.8",
-    "rimraf": "2.2.8",
     "settings-sharelatex": "^1.1.0",
     "stream-buffers": "~0.2.5",
     "stream-meter": "^1.0.4",
