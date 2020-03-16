@@ -2073,6 +2073,7 @@ describe('ProjectEntityUpdateHandler', function() {
       this.tmpFilePath = '/tmp/file'
       this.fileStoreUrl = 'http://filestore/file'
       this.folder = { _id: new ObjectId() }
+      this.rev = 3
       this.ProjectLocator.findElement
         .withArgs({
           project_id: this.project._id,
@@ -2089,7 +2090,7 @@ describe('ProjectEntityUpdateHandler', function() {
         .yields(null, this.file, this.docPath, this.folder)
       this.DocstoreManager.getDoc
         .withArgs(this.project._id, this.doc._id)
-        .yields(null, this.docLines)
+        .yields(null, this.docLines, this.rev)
       this.FileWriter.writeLinesToDisk.yields(null, this.tmpFilePath)
       this.FileStoreHandler.uploadFileFromDisk.yields(
         null,
@@ -2124,7 +2125,7 @@ describe('ProjectEntityUpdateHandler', function() {
           this.FileStoreHandler.uploadFileFromDisk
         ).to.have.been.calledWith(
           this.project._id,
-          { name: this.doc.name },
+          { name: this.doc.name, rev: this.rev + 1 },
           this.tmpFilePath
         )
       })

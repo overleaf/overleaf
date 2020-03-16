@@ -1555,7 +1555,7 @@ const ProjectEntityUpdateHandler = {
                         }
                         FileStoreHandler.uploadFileFromDisk(
                           projectId,
-                          { name: doc.name },
+                          { name: doc.name, rev: rev + 1 },
                           fsPath,
                           (err, fileStoreUrl, fileRef) => {
                             if (err) {
