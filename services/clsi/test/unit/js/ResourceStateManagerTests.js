@@ -23,6 +23,7 @@ const Errors = require('../../../app/js/Errors')
 describe('ResourceStateManager', function() {
   beforeEach(function() {
     this.ResourceStateManager = SandboxedModule.require(modulePath, {
+      singleOnly: true,
       requires: {
         fs: (this.fs = {}),
         'logger-sharelatex': { log: sinon.stub(), err: sinon.stub() },

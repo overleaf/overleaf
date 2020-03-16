@@ -28,7 +28,7 @@
     "lockfile": "^1.0.4",
     "logger-sharelatex": "^1.9.0",
     "lynx": "0.2.0",
-    "metrics-sharelatex": "^2.5.1",
+    "metrics-sharelatex": "^2.6.0",
     "mysql": "^2.18.1",
     "request": "^2.88.2",
     "sequelize": "^5.21.5",
@@ -42,7 +42,7 @@
   "devDependencies": {
     "babel-eslint": "^10.1.0",
     "bunyan": "^1.8.12",
-    "chai": "~1.8.1",
+    "chai": "~4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-config-standard": "^14.1.0",
@@ -61,7 +61,7 @@
     "mocha": "^7.1.0",
     "prettier": "^1.19.1",
     "prettier-eslint-cli": "^5.0.0",
-    "sandboxed-module": "~0.3.0",
+    "sandboxed-module": "^2.0.3",
     "sinon": "~9.0.1",
     "timekeeper": "2.2.0"
   }

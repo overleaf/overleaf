@@ -24,6 +24,7 @@ describe('ResourceWriter', function() {
   beforeEach(function() {
     let Timer
     this.ResourceWriter = SandboxedModule.require(modulePath, {
+      singleOnly: true,
       requires: {
         fs: (this.fs = {
           mkdir: sinon.stub().callsArg(1),
