@@ -59,7 +59,7 @@ module.exports = ProjectUploadController = {
         timer.done()
         if (error != null) {
           logger.error(
-            { err: error, file_path: path, file_name: name },
+            { err: error, filePath: path, fileName: name },
             'error uploading project'
           )
           if (error instanceof InvalidZipFileError) {
@@ -87,7 +87,10 @@ module.exports = ProjectUploadController = {
     const project_id = req.params.Project_id
     const { folder_id } = req.query
     if (name == null || name.length === 0 || name.length > 150) {
-      logger.err({ project_id, name }, 'bad name when trying to upload file')
+      logger.err(
+        { projectId: project_id, fileName: name },
+        'bad name when trying to upload file'
+      )
       return res.send({ success: false })
     }
     const user_id = AuthenticationController.getLoggedInUserId(req)
@@ -106,10 +109,10 @@ module.exports = ProjectUploadController = {
           logger.error(
             {
               err: error,
-              project_id,
-              file_path: path,
-              file_name: name,
-              folder_id
+              projectId: project_id,
+              filePath: path,
+              fileName: name,
+              folderId: folder_id
             },
             'error uploading file'
           )
