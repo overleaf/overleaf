@@ -184,7 +184,7 @@ async function deleteFile(bucketName, key) {
       await file.copy(
         storage
           .bucket(`${bucketName}${settings.filestore.gcs.deletedBucketSuffix}`)
-          .file(`${key}-${new Date()}`)
+          .file(`${key}-${new Date().toISOString()}`)
       )
     }
     if (settings.filestore.gcs.unlockBeforeDelete) {

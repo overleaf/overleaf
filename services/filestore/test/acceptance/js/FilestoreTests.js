@@ -453,7 +453,7 @@ describe('Filestore', function() {
             await TestHelper.expectPersistorToHaveFile(
               app.persistor,
               `${Settings.filestore.stores.user_files}-deleted`,
-              `${projectId}/${fileId}-${date}`,
+              `${projectId}/${fileId}-${date.toISOString()}`,
               content
             )
           })
