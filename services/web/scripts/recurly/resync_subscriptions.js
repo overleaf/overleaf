@@ -4,6 +4,10 @@ const SubscriptionUpdater = require('../../app/src/Features/Subscription/Subscri
 const async = require('async')
 const minimist = require('minimist')
 
+// make sure all `allMismatchReasons` are displayed in the output
+const util = require('util')
+util.inspect.defaultOptions.maxArrayLength = null
+
 const ScriptLogger = {
   checkedSubscriptionsCount: 0,
   mismatchSubscriptionsCount: 0,
@@ -55,10 +59,15 @@ const ScriptLogger = {
 
 const slowCallback = callback => setTimeout(callback, 80)
 
-const handleAPIError = (subscriptionId, error, callback) => {
-  console.warn(`Errors with subscription id=${subscriptionId}:`, error)
+const handleSyncSubscriptionError = (subscription, error, callback) => {
+  console.warn(`Errors with subscription id=${subscription._id}:`, error)
   if (typeof error === 'string' && error.match(/429$/)) {
     return setTimeout(callback, 1000 * 60 * 5)
+  }
+  if (typeof error === 'string' && error.match(/5\d\d$/)) {
+    return setTimeout(() => {
+      syncSubscription(subscription, callback)
+    }, 1000 * 60)
   }
   slowCallback(callback)
 }
@@ -68,7 +77,7 @@ const syncSubscription = (subscription, callback) => {
     subscription.recurlySubscription_id,
     (error, recurlySubscription) => {
       if (error) {
-        return handleAPIError(subscription._id, error, callback)
+        return handleSyncSubscriptionError(subscription, error, callback)
       }
 
       ScriptLogger.recordMismatch(subscription, recurlySubscription)
@@ -83,7 +92,7 @@ const syncSubscription = (subscription, callback) => {
         {},
         error => {
           if (error) {
-            return handleAPIError(subscription._id, error, callback)
+            return handleSyncSubscriptionError(subscription, error, callback)
           }
           slowCallback(callback)
         }
@@ -97,7 +106,9 @@ const syncSubscriptions = (subscriptions, callback) => {
 }
 
 const loopForSubscriptions = (skip, callback) => {
-  Subscription.find({ recurlySubscription_id: { $exists: true } })
+  Subscription.find({
+    recurlySubscription_id: { $exists: true, $ne: '' }
+  })
     .sort('_id')
     .skip(skip)
     .limit(FETCH_LIMIT)
