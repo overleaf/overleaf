@@ -48,8 +48,7 @@ describe('LaunchpadController', function() {
         '../../../../app/src/Features/Email/EmailHandler': (this.EmailHandler = {}),
         '../../../../app/src/Features/User/UserGetter': (this.UserGetter = {}),
         '../../../../app/src/models/User': { User: this.User },
-        '../../../../app/src/Features/Authentication/AuthenticationController': (this.AuthenticationController = {}),
-        '../../../overleaf-integration/app/src/SharelatexAuth/SharelatexAuthController': (this.SharelatexAuthController = {})
+        '../../../../app/src/Features/Authentication/AuthenticationController': (this.AuthenticationController = {})
       }
     })
 
@@ -646,9 +645,6 @@ describe('LaunchpadController', function() {
           .callsArgWith(1, null, this.user)
         this.User.update = sinon.stub().callsArgWith(2, null)
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        this.SharelatexAuthController._createBackingAccountIfNeeded = sinon
-          .stub()
-          .callsArgWith(2, null)
         this.UserGetter.getUser = sinon
           .stub()
           .callsArgWith(1, null, { _id: '1234' })
@@ -675,12 +671,6 @@ describe('LaunchpadController', function() {
         return this.UserRegistrationHandler.registerNewUser
           .calledWith({ email: this.email, password: this.password })
           .should.equal(true)
-      })
-
-      it('should have created a backing account for the user', function() {
-        return this.SharelatexAuthController._createBackingAccountIfNeeded.callCount.should.equal(
-          1
-        )
       })
 
       it('should have updated the user to make them an admin', function() {

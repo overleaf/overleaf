@@ -221,67 +221,38 @@ module.exports = LaunchpadController = {
         }
 
         logger.log({ user_id: user._id }, 'making user an admin')
-        const proceed = () =>
-          User.update(
-            { _id: user._id },
-            {
-              $set: {
-                isAdmin: true,
-                emails: [{ email }]
-              }
-            },
-            function(err) {
-              if (err != null) {
-                logger.err(
-                  { user_id: user._id, err },
-                  'error setting user to admin'
-                )
-                return next(err)
-              }
-
-              AuthenticationController.setRedirectInSession(req, '/launchpad')
-              logger.log(
-                { email, user_id: user._id },
-                'created first admin account'
-              )
-              return res.json({
-                redir: '',
-                id: user._id.toString(),
-                first_name: user.first_name,
-                last_name: user.last_name,
-                email: user.email,
-                created: Date.now()
-              })
+        User.update(
+          { _id: user._id },
+          {
+            $set: {
+              isAdmin: true,
+              emails: [{ email }]
             }
-          )
-
-        if (
-          Settings.overleaf != null &&
-          Settings.createV1AccountOnLogin != null
-        ) {
-          logger.log(
-            { user_id: user._id },
-            'Creating backing account in v1 for new admin user'
-          )
-          const SharelatexAuthController = require('../../../overleaf-integration/app/src/SharelatexAuth/SharelatexAuthController')
-          return UserGetter.getUser(user._id, function(err, user) {
+          },
+          function(err) {
             if (err != null) {
+              logger.err(
+                { user_id: user._id, err },
+                'error setting user to admin'
+              )
               return next(err)
             }
-            return SharelatexAuthController._createBackingAccountIfNeeded(
-              user,
-              req,
-              function(err) {
-                if (err != null) {
-                  return next(err)
-                }
-                return proceed()
-              }
+
+            AuthenticationController.setRedirectInSession(req, '/launchpad')
+            logger.log(
+              { email, user_id: user._id },
+              'created first admin account'
             )
-          })
-        } else {
-          return proceed()
-        }
+            return res.json({
+              redir: '',
+              id: user._id.toString(),
+              first_name: user.first_name,
+              last_name: user.last_name,
+              email: user.email,
+              created: Date.now()
+            })
+          }
+        )
       })
     })
   }
