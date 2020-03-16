@@ -159,10 +159,9 @@ describe('FileHandler', function() {
     it('should tell the filestore manager to delete the folder', function(done) {
       FileHandler.deleteProject(bucket, projectKey, err => {
         expect(err).not.to.exist
-        expect(PersistorManager.promises.deleteDirectory).to.have.been.calledWith(
-          bucket,
-          projectKey
-        )
+        expect(
+          PersistorManager.promises.deleteDirectory
+        ).to.have.been.calledWith(bucket, projectKey)
         done()
       })
     })

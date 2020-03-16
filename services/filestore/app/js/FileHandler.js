@@ -5,7 +5,7 @@ const LocalFileWriter = require('./LocalFileWriter')
 const FileConverter = require('./FileConverter')
 const KeyBuilder = require('./KeyBuilder')
 const ImageOptimiser = require('./ImageOptimiser')
-const { ConversionError, WriteError } = require('./Errors')
+const { ConversionError, InvalidParametersError } = require('./Errors')
 
 module.exports = {
   insertFile: callbackify(insertFile),
@@ -27,7 +27,7 @@ module.exports = {
 async function insertFile(bucket, key, stream) {
   const convertedKey = KeyBuilder.getConvertedFolderKey(key)
   if (!convertedKey.match(/^[0-9a-f]{24}\/[0-9a-f]{24}/i)) {
-    throw new WriteError({
+    throw new InvalidParametersError({
       message: 'key does not match validation regex',
       info: { bucket, key, convertedKey }
     })
@@ -39,7 +39,7 @@ async function insertFile(bucket, key, stream) {
 async function deleteFile(bucket, key) {
   const convertedKey = KeyBuilder.getConvertedFolderKey(key)
   if (!convertedKey.match(/^[0-9a-f]{24}\/[0-9a-f]{24}/i)) {
-    throw new WriteError({
+    throw new InvalidParametersError({
       message: 'key does not match validation regex',
       info: { bucket, key, convertedKey }
     })
@@ -52,7 +52,7 @@ async function deleteFile(bucket, key) {
 
 async function deleteProject(bucket, key) {
   if (!key.match(/^[0-9a-f]{24}\//i)) {
-    throw new WriteError({
+    throw new InvalidParametersError({
       message: 'key does not match validation regex',
       info: { bucket, key }
     })

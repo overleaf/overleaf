@@ -263,7 +263,7 @@ describe('FileController', function() {
     it('should tell the file handler', function(done) {
       res.sendStatus = code => {
         code.should.equal(204)
-        expect(FileHandler.deleteProject).to.have.been.calledWith(bucket, projectId)
+        expect(FileHandler.deleteProject).to.have.been.calledWith(bucket, key)
         done()
       }
       FileController.deleteProject(req, res, next)

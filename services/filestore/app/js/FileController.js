@@ -161,13 +161,16 @@ function deleteFile(req, res, next) {
 
 function deleteProject(req, res, next) {
   metrics.inc('deleteProject')
-  const { project_id: projectId, bucket } = req
+  const { key, bucket } = req
 
-  req.requestLogger.setMessage('getting project size')
-  req.requestLogger.addFields({ projectId, bucket })
+  req.requestLogger.setMessage('deleting project')
+  req.requestLogger.addFields({ key, bucket })
 
-  FileHandler.deleteProject(bucket, projectId, function(err) {
+  FileHandler.deleteProject(bucket, key, function(err) {
     if (err) {
+      if (err instanceof Errors.InvalidParametersError) {
+        return res.sendStatus(400)
+      }
       next(err)
     } else {
       res.sendStatus(204)
