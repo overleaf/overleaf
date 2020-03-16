@@ -455,7 +455,7 @@ define([
           )
         }
         // check if we need to bust cache (build id is unique so don't need it in that case)
-        if (fileByPath['output.pdf'] && fileByPath['output.pdf'].build) {
+        if (!(fileByPath['output.pdf'] && fileByPath['output.pdf'].build)) {
           qs.cache_bust = `${Date.now()}`
         }
         // convert the qs hash into a query string and append it
@@ -538,7 +538,7 @@ define([
           opts.url = `/project/${$scope.project_id}/output/${name}`
         }
         // check if we need to bust cache (build id is unique so don't need it in that case)
-        if (file && file.build) {
+        if (!(file && file.build)) {
           opts.params.cache_bust = `${Date.now()}`
         }
         opts.url = buildPdfDownloadUrl(options.pdfDownloadDomain, opts.url)
