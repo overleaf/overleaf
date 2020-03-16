@@ -179,15 +179,15 @@ async function deleteFile(bucketName, key) {
   try {
     const file = storage.bucket(bucketName).file(key)
 
-    if (settings.filestore.gcs.unlockBeforeDelete) {
-      await file.setMetadata({ eventBasedHold: false })
-    }
     if (settings.filestore.gcs.deletedBucketSuffix) {
       await file.copy(
         storage
           .bucket(`${bucketName}${settings.filestore.gcs.deletedBucketSuffix}`)
           .file(`${key}-${new Date()}`)
       )
+    }
+    if (settings.filestore.gcs.unlockBeforeDelete) {
+      await file.setMetadata({ eventBasedHold: false })
     }
     await file.delete()
   } catch (err) {
