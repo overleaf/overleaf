@@ -14,23 +14,25 @@ const logger = require('logger-sharelatex')
 logger.initialize('chat')
 const Path = require('path')
 const express = require('express')
+const bodyParser = require('body-parser')
+const errorHandler = require('errorhandler')
+const morganLogger = require('morgan')
 const app = express()
 const server = require('http').createServer(app)
 const Router = require('./router')
 
-app.use(express.bodyParser())
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(metrics.http.monitor(logger))
 metrics.injectMetricsRoute(app)
 
 if (app.get('env') === 'development') {
-  console.log('Development Enviroment')
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }))
+  app.use(errorHandler({ dumpExceptions: true, showStack: true }))
 }
 
 if (app.get('env') === 'production') {
-  console.log('Production Enviroment')
-  app.use(express.logger())
-  app.use(express.errorHandler())
+  app.use(morganLogger('tiny'))
+  app.use(errorHandler())
 }
 
 Router.route(app)

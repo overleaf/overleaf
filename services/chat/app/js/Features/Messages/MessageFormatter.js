@@ -60,7 +60,7 @@ module.exports = MessageFormatter = {
       }
     }
 
-    for (let message of Array.from(messages)) {
+    for (const message of Array.from(messages)) {
       room = rooms_by_id[message.room_id.toString()]
       if (room != null) {
         thread = getThread(room)
@@ -70,7 +70,7 @@ module.exports = MessageFormatter = {
       }
     }
 
-    for (let thread_id in threads) {
+    for (const thread_id in threads) {
       thread = threads[thread_id]
       thread.messages.sort((a, b) => a.timestamp - b.timestamp)
     }
