@@ -16,7 +16,6 @@ const Path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 const errorHandler = require('errorhandler')
-const morganLogger = require('morgan')
 const app = express()
 const server = require('http').createServer(app)
 const Router = require('./router')
@@ -31,7 +30,6 @@ if (app.get('env') === 'development') {
 }
 
 if (app.get('env') === 'production') {
-  app.use(morganLogger('tiny'))
   app.use(errorHandler())
 }
 
