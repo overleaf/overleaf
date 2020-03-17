@@ -25,7 +25,6 @@
     "logger-sharelatex": "^1.9.0",
     "metrics-sharelatex": "^2.5.0",
     "mongojs": "3.1.0",
-    "morgan": "^1.9.1",
     "request": "^2.88.2",
     "settings-sharelatex": "^1.1.0"
   },
