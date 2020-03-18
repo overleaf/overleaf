@@ -877,14 +877,84 @@ const ProjectEntityUpdateHandler = {
           if (folder == null) {
             return callback(new Error("Couldn't find folder"))
           }
-          let existingFile = null
-          for (let fileRef of folder.fileRefs) {
-            if (fileRef.name === fileName) {
-              existingFile = fileRef
-              break
-            }
-          }
-          if (existingFile != null) {
+          const existingFile = folder.fileRefs.find(
+            ({ name }) => name === fileName
+          )
+          const existingDoc = folder.docs.find(({ name }) => name === fileName)
+
+          if (existingDoc) {
+            ProjectLocator.findElement(
+              {
+                project_id: projectId,
+                element_id: existingDoc._id,
+                type: 'doc'
+              },
+              (err, doc, path) => {
+                if (err) {
+                  return callback(new Error('coudnt find existing file'))
+                }
+                ProjectEntityMongoUpdateHandler.replaceDocWithFile(
+                  projectId,
+                  existingDoc._id,
+                  newFileRef,
+                  (err, project) => {
+                    if (err) {
+                      return callback(err)
+                    }
+                    const projectHistoryId =
+                      project.overleaf &&
+                      project.overleaf.history &&
+                      project.overleaf.history.id
+                    TpdsUpdateSender.addFile(
+                      {
+                        project_id: project._id,
+                        file_id: newFileRef._id,
+                        path: path.fileSystem,
+                        rev: newFileRef.rev,
+                        project_name: project.name
+                      },
+                      err => {
+                        if (err) {
+                          return callback(err)
+                        }
+                        DocumentUpdaterHandler.updateProjectStructure(
+                          projectId,
+                          projectHistoryId,
+                          userId,
+                          {
+                            oldDocs: [
+                              { doc: existingDoc, path: path.fileSystem }
+                            ],
+
+                            newFiles: [
+                              {
+                                file: newFileRef,
+                                path: path.fileSystem,
+                                url: fileStoreUrl
+                              }
+                            ],
+                            newProject: project
+                          },
+                          err => {
+                            if (err) {
+                              return callback(err)
+                            }
+                            EditorRealTimeController.emitToRoom(
+                              projectId,
+                              'removeEntity',
+                              existingDoc._id,
+                              'convertDocToFile'
+                            )
+                            callback(null, newFileRef, true, existingFile)
+                          }
+                        )
+                      }
+                    )
+                  }
+                )
+              }
+            )
+          } else if (existingFile) {
             // this calls directly into the replaceFile main task (without the beforeLock part)
             return ProjectEntityUpdateHandler.replaceFile.mainTask(
               projectId,

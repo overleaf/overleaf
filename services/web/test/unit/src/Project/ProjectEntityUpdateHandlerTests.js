@@ -1020,7 +1020,7 @@ describe('ProjectEntityUpdateHandler', function() {
     describe('updating an existing file', function() {
       beforeEach(function() {
         this.existingFile = { _id: fileId, name: this.fileName }
-        this.folder = { _id: folderId, fileRefs: [this.existingFile] }
+        this.folder = { _id: folderId, fileRefs: [this.existingFile], docs: [] }
         this.ProjectLocator.findElement.yields(null, this.folder)
         this.ProjectEntityUpdateHandler.replaceFile = {
           mainTask: sinon.stub().yields(null, this.newFile)
@@ -1038,15 +1038,15 @@ describe('ProjectEntityUpdateHandler', function() {
       })
 
       it('replaces the file', function() {
-        this.ProjectEntityUpdateHandler.replaceFile.mainTask
-          .calledWith(
-            projectId,
-            fileId,
-            this.fileSystemPath,
-            this.linkedFileData,
-            userId
-          )
-          .should.equal(true)
+        expect(
+          this.ProjectEntityUpdateHandler.replaceFile.mainTask
+        ).to.be.calledWith(
+          projectId,
+          fileId,
+          this.fileSystemPath,
+          this.linkedFileData,
+          userId
+        )
       })
 
       it('returns the file', function() {
@@ -1056,7 +1056,7 @@ describe('ProjectEntityUpdateHandler', function() {
 
     describe('creating a new file', function() {
       beforeEach(function() {
-        this.folder = { _id: folderId, fileRefs: [] }
+        this.folder = { _id: folderId, fileRefs: [], docs: [] }
         this.newFile = { _id: fileId }
         this.ProjectLocator.findElement.yields(null, this.folder)
         this.ProjectEntityUpdateHandler.addFile = {
@@ -1125,6 +1125,104 @@ describe('ProjectEntityUpdateHandler', function() {
       it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      })
+    })
+
+    describe('upserting file on top of a doc', function() {
+      beforeEach(function(done) {
+        this.path = '/path/to/doc'
+        this.existingDoc = { _id: new ObjectId(), name: this.fileName }
+        this.folder = {
+          _id: folderId,
+          fileRefs: [],
+          docs: [this.existingDoc]
+        }
+        this.ProjectLocator.findElement
+          .withArgs({
+            project_id: this.project._id.toString(),
+            element_id: folderId,
+            type: 'folder'
+          })
+          .yields(null, this.folder)
+        this.ProjectLocator.findElement
+          .withArgs({
+            project_id: this.project._id.toString(),
+            element_id: this.existingDoc._id,
+            type: 'doc'
+          })
+          .yields(null, this.existingDoc, { fileSystem: this.path })
+
+        this.newFileUrl = 'new-file-url'
+        this.newFile = {
+          _id: newFileId,
+          name: 'dummy-upload-filename',
+          rev: 0,
+          linkedFileData: this.linkedFileData
+        }
+        this.newProject = {
+          name: 'new project',
+          overleaf: { history: { id: projectHistoryId } }
+        }
+        this.FileStoreHandler.uploadFileFromDisk.yields(
+          null,
+          this.newFileUrl,
+          this.newFile
+        )
+        this.ProjectEntityMongoUpdateHandler.replaceDocWithFile.yields(
+          null,
+          this.newProject
+        )
+
+        this.ProjectEntityUpdateHandler.upsertFile(
+          projectId,
+          folderId,
+          this.fileName,
+          this.fileSystemPath,
+          this.linkedFileData,
+          userId,
+          done
+        )
+      })
+
+      it('replaces the existing doc with a file', function() {
+        expect(
+          this.ProjectEntityMongoUpdateHandler.replaceDocWithFile
+        ).to.have.been.calledWith(projectId, this.existingDoc._id, this.newFile)
+      })
+
+      it('updates the doc structure', function() {
+        const oldDocs = [
+          {
+            doc: this.existingDoc,
+            path: this.path
+          }
+        ]
+        const newFiles = [
+          {
+            file: this.newFile,
+            path: this.path,
+            url: this.newFileUrl
+          }
+        ]
+        const updates = {
+          oldDocs,
+          newFiles,
+          newProject: this.newProject
+        }
+        expect(
+          this.DocumentUpdaterHandler.updateProjectStructure
+        ).to.have.been.calledWith(projectId, projectHistoryId, userId, updates)
+      })
+
+      it('tells everyone in the room the doc is removed', function() {
+        expect(
+          this.EditorRealTimeController.emitToRoom
+        ).to.have.been.calledWith(
+          projectId,
+          'removeEntity',
+          this.existingDoc._id,
+          'convertDocToFile'
+        )
       })
     })
   })
