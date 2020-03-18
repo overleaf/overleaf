@@ -42,11 +42,27 @@ define(['base', 'ide/file-tree/util/iconTypeFromName'], function(
       $scope.$watch('entity.selected', function(isSelected) {
         if (isSelected) {
           $scope.$emit('entity-file:selected', $scope.entity)
-          $scope.$applyAsync(function() {
-            $element[0].scrollIntoView()
-          })
+          if (!_isEntryElVisible($element)) {
+            $scope.$applyAsync(function() {
+              $element[0].scrollIntoView()
+            })
+          }
         }
       })
+    }
+
+    function _isEntryElVisible($entryEl) {
+      const viewportEl = $('.file-tree-list')
+      const entryElTop = $entryEl.offset().top
+      const entryElBottom = entryElTop + $entryEl.outerHeight()
+      const entryListViewportElTop = viewportEl.offset().top
+      const entryListViewportElBottom =
+        entryListViewportElTop + viewportEl.height()
+
+      return (
+        entryElTop >= entryListViewportElTop &&
+        entryElBottom <= entryListViewportElBottom
+      )
     }
 
     $scope.draggableHelper = function() {
