@@ -64,7 +64,7 @@ define([
       })
       this.adapter.getLinesByRows.returns(['oppozition'])
       this.spellCheckManager.init()
-      this.timelord.tick(200)
+      this.timelord.tick(500)
       this.$httpBackend.flush()
       expect(this.highlightedWordManager.addHighlight).to.have.been.called
     })
@@ -88,52 +88,78 @@ define([
           ]
         })
       })
-      it('only checks visible lines', function() {
-        this.spellCheckManager.init()
-        this.timelord.tick(200)
-        this.$httpBackend.flush()
-        expect(this.adapter.getLinesByRows).to.have.been.calledWith([3, 4, 5])
+      describe('when doing the first check', function() {
+        beforeEach(function() {
+          this.spellCheckManager.init()
+        })
+        it('initially flags all lines as dirty ', function() {
+          expect(this.spellCheckManager.changedLines)
+            .to.have.lengthOf(10)
+            .and.to.not.include(false)
+        })
+        it('checks beyond the currently visible viewport', function() {
+          this.timelord.tick(500)
+          this.$httpBackend.flush()
+          expect(this.adapter.getLinesByRows).to.have.been.calledWith([
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ])
+        })
       })
+      describe('after the initial check', function() {
+        beforeEach(function() {
+          this.spellCheckManager.init()
+          this.spellCheckManager.firstCheck = false
+        })
 
-      it('ignores updated lines', function() {
-        this.spellCheckManager.init()
-        this.spellCheckManager.changedLines[4] = false
-        this.timelord.tick(200)
-        this.$httpBackend.flush()
-        expect(this.adapter.getLinesByRows).to.have.been.calledWith([3, 5])
-      })
+        it('only checks visible lines', function() {
+          this.spellCheckManager.runSpellCheck()
+          this.spellCheckManager.timeoutId = null
+          this.$httpBackend.flush()
+          expect(this.adapter.getLinesByRows).to.have.been.calledWith([3, 4, 5])
+        })
 
-      it('clears highlights for changed lines', function() {
-        this.spellCheckManager.init()
-        this.timelord.tick(200)
-        this.$httpBackend.flush()
-        expect(
-          this.highlightedWordManager.clearRow.getCall(0).args[0]
-        ).to.equal(3)
-        expect(
-          this.highlightedWordManager.clearRow.getCall(1).args[0]
-        ).to.equal(4)
-        expect(
-          this.highlightedWordManager.clearRow.getCall(2).args[0]
-        ).to.equal(5)
-      })
+        it('flags checked lines as non-dirty', function() {
+          this.spellCheckManager.runSpellCheck()
+          this.spellCheckManager.timeoutId = null
+          this.$httpBackend.flush()
+          expect(this.spellCheckManager.changedLines[2]).to.equal(true)
+          expect(this.spellCheckManager.changedLines[3]).to.equal(false)
+          expect(this.spellCheckManager.changedLines[4]).to.equal(false)
+          expect(this.spellCheckManager.changedLines[5]).to.equal(false)
+          expect(this.spellCheckManager.changedLines[6]).to.equal(true)
+        })
 
-      it('initially flags all lines as dirty', function() {
-        this.spellCheckManager.init()
-        expect(this.spellCheckManager.changedLines)
-          .to.have.lengthOf(10)
-          .and.to.not.include(false)
-      })
+        it('ignores updated lines', function() {
+          this.spellCheckManager.changedLines[4] = false
+          this.spellCheckManager.runSpellCheck()
+          this.spellCheckManager.timeoutId = null
+          this.$httpBackend.flush()
+          expect(this.adapter.getLinesByRows).to.have.been.calledWith([3, 5])
+        })
 
-      it('initially flags checked lines as non-dirty', function() {
-        this.spellCheckManager.init()
-        this.timelord.tick(200)
-        this.$httpBackend.flush()
-        expect(this.spellCheckManager.changedLines[2]).to.equal(true)
-        expect(this.spellCheckManager.changedLines[3]).to.equal(false)
-        expect(this.spellCheckManager.changedLines[4]).to.equal(false)
-        expect(this.spellCheckManager.changedLines[5]).to.equal(false)
-        expect(this.spellCheckManager.changedLines[6]).to.equal(true)
+        it('clears highlights for changed lines', function() {
+          this.spellCheckManager.runSpellCheck()
+          this.spellCheckManager.timeoutId = null
+          this.$httpBackend.flush()
+          expect(
+            this.highlightedWordManager.clearRow.getCall(0).args[0]
+          ).to.equal(3)
+          expect(
+            this.highlightedWordManager.clearRow.getCall(1).args[0]
+          ).to.equal(4)
+          expect(
+            this.highlightedWordManager.clearRow.getCall(2).args[0]
+          ).to.equal(5)
+        })
       })
     })
 
@@ -156,14 +182,14 @@ define([
       it('adds already checked words to the spellchecker cache', function() {
         expect(this.spellCheckManager.cache.info().size).to.equal(0)
         this.spellCheckManager.init()
-        this.timelord.tick(200)
+        this.timelord.tick(500)
         this.$httpBackend.flush()
         expect(this.spellCheckManager.cache.info().size).to.equal(3)
       })
 
       it('adds misspeled word suggestions to the cache', function() {
         this.spellCheckManager.init()
-        this.timelord.tick(200)
+        this.timelord.tick(500)
         this.$httpBackend.flush()
 
         expect(
@@ -175,7 +201,7 @@ define([
 
       it('adds non-misspeled words to the cache as a boolean', function() {
         this.spellCheckManager.init()
-        this.timelord.tick(200)
+        this.timelord.tick(500)
         this.$httpBackend.flush()
         expect(
           this.spellCheckManager.cache.get(
@@ -210,7 +236,7 @@ define([
             ]
           })
         this.spellCheckManager.init()
-        this.timelord.tick(200)
+        this.timelord.tick(500)
         this.$httpBackend.flush()
       })
 
@@ -231,10 +257,10 @@ define([
             ]
           })
         this.spellCheckManager.init()
-        this.timelord.tick(200)
+        this.timelord.tick(500)
         this.$httpBackend.flush()
         this.spellCheckManager.init()
-        this.timelord.tick(200)
+        this.timelord.tick(500)
       })
 
       it('hits the backend only with non-cached words', function() {
@@ -254,7 +280,7 @@ define([
             ]
           })
         this.spellCheckManager.init()
-        this.timelord.tick(200)
+        this.timelord.tick(500)
         this.$httpBackend.flush()
 
         this.adapter.getLinesByRows.returns(['Lorem ipsum dolor sit amet'])
@@ -274,7 +300,7 @@ define([
             ]
           })
         this.spellCheckManager.init()
-        this.timelord.tick(200)
+        this.timelord.tick(500)
         this.$httpBackend.flush()
       })
 
