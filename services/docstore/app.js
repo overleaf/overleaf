@@ -52,7 +52,7 @@ app.post(
   bodyParser.json({ limit: (Settings.max_doc_length + 64 * 1024) * 2 }),
   HttpController.updateDoc
 )
-app.del('/project/:project_id/doc/:doc_id', HttpController.deleteDoc)
+app.delete('/project/:project_id/doc/:doc_id', HttpController.deleteDoc)
 
 app.post('/project/:project_id/archive', HttpController.archiveAllDocs)
 app.post('/project/:project_id/unarchive', HttpController.unArchiveAllDocs)
@@ -65,9 +65,9 @@ app.get('/status', (req, res) => res.send('docstore is alive'))
 app.use(function (error, req, res, next) {
   logger.error({ err: error, req }, 'request errored')
   if (error instanceof Errors.NotFoundError) {
-    return res.send(404)
+    return res.sendStatus(404)
   } else {
-    return res.send(500, 'Oops, something went wrong')
+    return res.status(500).send('Oops, something went wrong')
   }
 })
 

@@ -35,9 +35,9 @@ module.exports = HttpController = {
       }
       logger.log({ doc_id, project_id }, 'got doc')
       if (doc == null) {
-        return res.send(404)
+        return res.sendStatus(404)
       } else if (doc.deleted && !include_deleted) {
-        return res.send(404)
+        return res.sendStatus(404)
       } else {
         return res.json(HttpController._buildDocView(doc))
       }
@@ -56,7 +56,7 @@ module.exports = HttpController = {
         return next(error)
       }
       if (doc == null) {
-        return res.send(404)
+        return res.sendStatus(404)
       } else {
         res.setHeader('content-type', 'text/plain')
         return res.send(HttpController._buildRawDocView(doc))
@@ -118,19 +118,19 @@ module.exports = HttpController = {
 
     if (lines == null || !(lines instanceof Array)) {
       logger.error({ project_id, doc_id }, 'no doc lines provided')
-      res.send(400) // Bad Request
+      res.sendStatus(400) // Bad Request
       return
     }
 
     if (version == null || typeof version === !'number') {
       logger.error({ project_id, doc_id }, 'no doc version provided')
-      res.send(400) // Bad Request
+      res.sendStatus(400) // Bad Request
       return
     }
 
     if (ranges == null) {
       logger.error({ project_id, doc_id }, 'no doc ranges provided')
-      res.send(400) // Bad Request
+      res.sendStatus(400) // Bad Request
       return
     }
 
@@ -174,7 +174,7 @@ module.exports = HttpController = {
       if (error != null) {
         return next(error)
       }
-      return res.send(204)
+      return res.sendStatus(204)
     })
   },
 
@@ -218,7 +218,7 @@ module.exports = HttpController = {
       if (error != null) {
         return next(error)
       }
-      return res.send(204)
+      return res.sendStatus(204)
     })
   },
 
@@ -232,7 +232,7 @@ module.exports = HttpController = {
       if (error != null) {
         return next(error)
       }
-      return res.send(200)
+      return res.sendStatus(200)
     })
   },
 
@@ -246,7 +246,7 @@ module.exports = HttpController = {
       if (error != null) {
         return next(error)
       }
-      return res.send(204)
+      return res.sendStatus(204)
     })
   },
 
@@ -254,9 +254,9 @@ module.exports = HttpController = {
     return HealthChecker.check(function (err) {
       if (err != null) {
         logger.err({ err }, 'error performing health check')
-        return res.send(500)
+        return res.sendStatus(500)
       } else {
-        return res.send(200)
+        return res.sendStatus(200)
       }
     })
   }
