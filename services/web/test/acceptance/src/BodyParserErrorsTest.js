@@ -2,7 +2,7 @@ const Settings = require('settings-sharelatex')
 const request = require('./helpers/request')
 
 // create a string that is longer than the max allowed (as defined in Server.js)
-const wayTooLongString = 'a'.repeat(2 * Settings.max_doc_length + 64 * 1024 + 1)
+const wayTooLongString = 'a'.repeat(Settings.max_json_request_size + 1)
 
 describe('BodyParserErrors', function() {
   describe('when request is too large', function() {

@@ -429,6 +429,17 @@ module.exports = settings =
 	# Maximum size of text documents in the real-time editing system.
 	max_doc_length: 2 * 1024 * 1024 # 2mb
 
+	# Maximum JSON size in HTTP requests
+  # We should be able to process twice the max doc length, to allow for
+  #   - the doc content
+  #   - text ranges spanning the whole doc
+	#
+  # There's also overhead required for the JSON encoding and the UTF-8 encoding,
+	# theoretically up to 3 times the max doc length. On the other hand, we don't
+	# want to block the event loop with JSON parsing, so we try to find a
+	# practical compromise.
+	max_json_request_size: parseInt(process.env["MAX_JSON_REQUEST_SIZE"]) || 6 * 1024 * 1024  # 6 MB
+
 	# Internal configs
 	# ----------------
 	path:

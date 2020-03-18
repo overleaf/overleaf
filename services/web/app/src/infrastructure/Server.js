@@ -83,11 +83,7 @@ app.set('view engine', 'pug')
 Modules.loadViewIncludes(app)
 
 app.use(bodyParser.urlencoded({ extended: true, limit: '2mb' }))
-// Make sure we can process twice the max doc length, to allow for
-// - the doc content
-// - text ranges spanning the whole doc
-// Also allow some overhead for JSON encoding
-app.use(bodyParser.json({ limit: 2 * Settings.max_doc_length + 64 * 1024 })) // 64kb overhead
+app.use(bodyParser.json({ limit: Settings.max_json_request_size }))
 app.use(methodOverride())
 app.use(bearerToken())
 
