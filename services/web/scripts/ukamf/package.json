@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "@fidm/x509": "^1.2.1"
+  }
+}
