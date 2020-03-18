@@ -37,9 +37,9 @@ app.get('/status', (req, res) => res.send('contacts is alive'))
 app.use(function (error, req, res, next) {
   logger.error({ err: error }, 'request errored')
   if (error instanceof Errors.NotFoundError) {
-    return res.send(404)
+    return res.sendStatus(404)
   } else {
-    return res.send(500, 'Oops, something went wrong')
+    return res.status(500).send('Oops, something went wrong')
   }
 })
 

@@ -33,7 +33,7 @@ module.exports = HttpController = {
         if (error != null) {
           return next(error)
         }
-        return res.status(204).end()
+        return res.sendStatus(204)
       })
     })
   },
