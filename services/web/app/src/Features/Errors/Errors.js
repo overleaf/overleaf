@@ -74,7 +74,6 @@ class SAMLSessionDataMissing extends BackwardCompatibleError {
         ? arg.samlSession
         : {}
     this.tryAgain = true
-    const institutionsWithoutEmail = settings.samlInstitutionsWithoutEmail || []
     const {
       universityId,
       universityName,
@@ -91,7 +90,8 @@ class SAMLSessionDataMissing extends BackwardCompatibleError {
       this.message = 'Missing session data.'
     } else if (
       !institutionEmail &&
-      institutionsWithoutEmail.includes(samlSession.universityId)
+      samlSession &&
+      samlSession.userEmailAttributeUnreliable
     ) {
       this.tryAgain = false
       this.message = `Your account settings at your institution prevent us from accessing your email. You will need to make your email public at your institution in order to link with ${
