@@ -374,7 +374,7 @@ describe('Filestore', function() {
         })
       })
 
-      if (backend === 'S3Persistor') {
+      if (backend === 'S3Persistor' || backend === 'FallbackGcsToS3Persistor') {
         describe('with a file in a specific bucket', function() {
           let constantFileContent, fileId, fileUrl, bucketName
 
