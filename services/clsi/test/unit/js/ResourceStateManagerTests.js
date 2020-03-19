@@ -11,6 +11,7 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
+const { expect } = require('chai')
 const should = require('chai').should()
 const modulePath = require('path').join(
   __dirname,
@@ -22,6 +23,7 @@ const Errors = require('../../../app/js/Errors')
 describe('ResourceStateManager', function() {
   beforeEach(function() {
     this.ResourceStateManager = SandboxedModule.require(modulePath, {
+      singleOnly: true,
       requires: {
         fs: (this.fs = {}),
         'logger-sharelatex': { log: sinon.stub(), err: sinon.stub() },
@@ -132,11 +134,13 @@ describe('ResourceStateManager', function() {
         )
       })
 
-      return it('should call the callback with an error', function() {
-        const error = new Errors.FilesOutOfSyncError(
-          'invalid state for incremental update'
-        )
-        return this.callback.calledWith(error).should.equal(true)
+      it('should call the callback with an error', function() {
+        this.callback
+          .calledWith(sinon.match(Errors.FilesOutOfSyncError))
+          .should.equal(true)
+
+        const message = this.callback.args[0][0].message
+        expect(message).to.include('invalid state for incremental update')
       })
     })
   })
@@ -174,11 +178,15 @@ describe('ResourceStateManager', function() {
         )
       })
 
-      return it('should call the callback with an error', function() {
-        const error = new Errors.FilesOutOfSyncError(
+      it('should call the callback with an error', function() {
+        this.callback
+          .calledWith(sinon.match(Errors.FilesOutOfSyncError))
+          .should.equal(true)
+
+        const message = this.callback.args[0][0].message
+        expect(message).to.include(
           'resource files missing in incremental update'
         )
-        return this.callback.calledWith(error).should.equal(true)
       })
     })
 
@@ -198,10 +206,11 @@ describe('ResourceStateManager', function() {
         )
       })
 
-      return it('should call the callback with an error', function() {
-        return this.callback
-          .calledWith(new Error('relative path in resource file list'))
-          .should.equal(true)
+      it('should call the callback with an error', function() {
+        this.callback.calledWith(sinon.match(Error)).should.equal(true)
+
+        const message = this.callback.args[0][0].message
+        expect(message).to.include('relative path in resource file list')
       })
     })
   })

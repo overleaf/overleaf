@@ -347,10 +347,10 @@ describe('CompileManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with an error from the stderr', function() {
-        this.callback.calledWith(new Error()).should.equal(true)
+      it('should call the callback with an error from the stderr', function() {
+        this.callback.calledWithExactly(sinon.match(Error)).should.equal(true)
 
-        return this.callback.args[0][0].message.should.equal(
+        this.callback.args[0][0].message.should.equal(
           `rm -r ${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id} failed: ${this.error}`
         )
       })
