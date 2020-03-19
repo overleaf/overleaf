@@ -21,15 +21,14 @@ mongojs = require "./app/js/mongojs"
 async = require "async"
 
 Path = require "path"
+bodyParser = require "body-parser"
 
 Metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
 Metrics.event_loop.monitor(logger, 100)
 
 app = express()
-app.configure ->
-	app.use(Metrics.http.monitor(logger));
-	app.use express.bodyParser({limit: (Settings.max_doc_length + 64 * 1024)})
-	app.use app.router
+app.use(Metrics.http.monitor(logger));
+app.use bodyParser({limit: (Settings.max_doc_length + 64 * 1024)})
 Metrics.injectMetricsRoute(app)
 
 DispatchManager.createAndStartDispatchers(Settings.dispatcherCount || 10)
@@ -68,11 +67,11 @@ app.get    '/flush_all_projects',                                       HttpCont
 app.get    '/flush_queued_projects', HttpController.flushQueuedProjects
 
 app.get '/total', (req, res)->
-	timer = new Metrics.Timer("http.allDocList")	
+	timer = new Metrics.Timer("http.allDocList")
 	RedisManager.getCountOfDocsInMemory (err, count)->
 		timer.done()
 		res.send {total:count}
-	
+
 app.get '/status', (req, res)->
 	if Settings.shuttingDown
 		res.send 503 # Service unavailable
@@ -87,7 +86,7 @@ app.get "/health_check/redis", (req, res, next) ->
 			res.send 500
 		else
 			res.send 200
-			
+
 docUpdaterRedisClient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
 app.get "/health_check/redis_cluster", (req, res, next) ->
 	docUpdaterRedisClient.healthCheck (error) ->
@@ -99,7 +98,7 @@ app.get "/health_check/redis_cluster", (req, res, next) ->
 
 app.get "/health_check", (req, res, next) ->
 	async.series [
-		(cb) -> 
+		(cb) ->
 			pubsubClient.healthCheck (error) ->
 				if error?
 					logger.err {err: error}, "failed redis health check"

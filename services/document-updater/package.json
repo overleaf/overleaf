@@ -21,9 +21,10 @@
   },
   "dependencies": {
     "async": "^2.5.0",
+    "body-parser": "^1.19.0",
     "bunyan": "~0.22.1",
     "coffee-script": "~1.7.0",
-    "express": "3.11.0",
+    "express": "4.17.1",
     "lodash": "^4.17.13",
     "logger-sharelatex": "^1.7.0",
     "metrics-sharelatex": "^2.5.1",
