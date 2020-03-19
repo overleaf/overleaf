@@ -115,7 +115,7 @@ module.exports = function(primary, fallback) {
   }
 
   function _getFallbackBucket(bucket) {
-    return Settings.filestore.fallback.buckets[bucket]
+    return Settings.filestore.fallback.buckets[bucket] || bucket
   }
 
   function _wrapFallbackMethod(method) {
