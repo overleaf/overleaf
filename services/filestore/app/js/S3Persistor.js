@@ -4,7 +4,6 @@ http.globalAgent.maxSockets = 300
 https.globalAgent.maxSockets = 300
 
 const settings = require('settings-sharelatex')
-const metrics = require('metrics-sharelatex')
 
 const PersistorHelper = require('./PersistorHelper')
 
@@ -46,23 +45,8 @@ const S3Persistor = {
 
 module.exports = S3Persistor
 
-function hexToBase64(hex) {
-  return Buffer.from(hex, 'hex').toString('base64')
-}
-
 async function sendFile(bucketName, key, fsPath) {
-  let readStream
-  try {
-    readStream = fs.createReadStream(fsPath)
-  } catch (err) {
-    throw PersistorHelper.wrapError(
-      err,
-      'error reading file from disk',
-      { bucketName, key, fsPath },
-      ReadError
-    )
-  }
-  return sendStream(bucketName, key, readStream)
+  return sendStream(bucketName, key, fs.createReadStream(fsPath))
 }
 
 async function sendStream(bucketName, key, readStream, sourceMd5) {
@@ -72,17 +56,14 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
     let b64Hash
 
     if (sourceMd5) {
-      b64Hash = hexToBase64(sourceMd5)
+      b64Hash = PersistorHelper.hexToBase64(sourceMd5)
     } else {
       hashPromise = PersistorHelper.calculateStreamMd5(readStream)
     }
 
     const meteredStream = PersistorHelper.getMeteredStream(
       readStream,
-      (_, byteCount) => {
-        // ignore the error parameter and just log the byte count
-        metrics.count('s3.egress', byteCount)
-      }
+      's3.egress' // egress from us to s3
     )
 
     // if we have an md5 hash, pass this to S3 to verify the upload
@@ -149,10 +130,7 @@ async function getFileStream(bucketName, key, opts) {
 
   const meteredStream = PersistorHelper.getMeteredStream(
     stream,
-    (_, byteCount) => {
-      // ignore the error parameter and just log the byte count
-      metrics.count('s3.ingress', byteCount)
-    }
+    's3.ingress' // ingress to us from s3
   )
 
   try {

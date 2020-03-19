@@ -3,6 +3,7 @@ const chai = require('chai')
 const { expect } = chai
 const modulePath = '../../../app/js/FileHandler.js'
 const SandboxedModule = require('sandboxed-module')
+const { ObjectId } = require('mongodb')
 
 chai.use(require('sinon-chai'))
 chai.use(require('chai-as-promised'))
@@ -24,8 +25,9 @@ describe('FileHandler', function() {
   }
 
   const bucket = 'my_bucket'
-  const key = 'key/here'
-  const convertedFolderKey = 'convertedFolder'
+  const key = `${ObjectId()}/${ObjectId()}`
+  const convertedFolderKey = `${ObjectId()}/${ObjectId()}`
+  const projectKey = `${ObjectId()}/`
   const sourceStream = 'sourceStream'
   const convertedKey = 'convertedKey'
   const readStream = {
@@ -112,6 +114,14 @@ describe('FileHandler', function() {
         done()
       })
     })
+
+    it('should throw an error when the key is in the wrong format', function(done) {
+      KeyBuilder.getConvertedFolderKey.returns('wombat')
+      FileHandler.insertFile(bucket, key, stream, err => {
+        expect(err).to.exist
+        done()
+      })
+    })
   })
 
   describe('deleteFile', function() {
@@ -132,6 +142,33 @@ describe('FileHandler', function() {
         expect(
           PersistorManager.promises.deleteDirectory
         ).to.have.been.calledWith(bucket, convertedFolderKey)
+        done()
+      })
+    })
+
+    it('should throw an error when the key is in the wrong format', function(done) {
+      KeyBuilder.getConvertedFolderKey.returns('wombat')
+      FileHandler.deleteFile(bucket, key, err => {
+        expect(err).to.exist
+        done()
+      })
+    })
+  })
+
+  describe('deleteProject', function() {
+    it('should tell the filestore manager to delete the folder', function(done) {
+      FileHandler.deleteProject(bucket, projectKey, err => {
+        expect(err).not.to.exist
+        expect(
+          PersistorManager.promises.deleteDirectory
+        ).to.have.been.calledWith(bucket, projectKey)
+        done()
+      })
+    })
+
+    it('should throw an error when the key is in the wrong format', function(done) {
+      FileHandler.deleteProject(bucket, 'wombat', err => {
+        expect(err).to.exist
         done()
       })
     })

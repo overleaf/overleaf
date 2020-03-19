@@ -20,6 +20,7 @@
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js"
   },
   "dependencies": {
+    "@google-cloud/storage": "^4.3.0",
     "@overleaf/o-error": "^2.1.0",
     "aws-sdk": "^2.628.0",
     "body-parser": "^1.2.0",
@@ -32,10 +33,10 @@
     "range-parser": "^1.0.2",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.8",
-    "rimraf": "2.2.8",
     "settings-sharelatex": "^1.1.0",
     "stream-buffers": "~0.2.5",
-    "stream-meter": "^1.0.4"
+    "stream-meter": "^1.0.4",
+    "tiny-async-pool": "^1.1.0"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.3",
@@ -55,11 +56,13 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "mocha": "5.2.0",
+    "mongodb": "^3.5.4",
     "prettier-eslint": "^9.0.1",
     "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "2.0.3",
     "sinon": "7.1.1",
     "sinon-chai": "^3.3.0",
-    "streamifier": "^0.1.1"
+    "streamifier": "^0.1.1",
+    "timekeeper": "^2.2.0"
   }
 }

@@ -61,6 +61,11 @@ app.delete(
   keyBuilder.userFileKeyMiddleware,
   fileController.deleteFile
 )
+app.delete(
+  '/project/:project_id',
+  keyBuilder.userProjectKeyMiddleware,
+  fileController.deleteProject
+)
 
 app.head(
   '/template/:template_id/v/:version/:format',

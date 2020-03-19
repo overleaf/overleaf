@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const metrics = require('metrics-sharelatex')
 const meter = require('stream-meter')
 const Stream = require('stream')
 const logger = require('logger-sharelatex')
@@ -12,7 +13,9 @@ module.exports = {
   verifyMd5,
   getMeteredStream,
   waitForStreamReady,
-  wrapError
+  wrapError,
+  hexToBase64,
+  base64ToHex
 }
 
 // returns a promise which resolves with the md5 hash of the stream
@@ -52,16 +55,16 @@ async function verifyMd5(persistor, bucket, key, sourceMd5, destMd5 = null) {
 
 // returns the next stream in the pipeline, and calls the callback with the byte count
 // when the stream finishes or receives an error
-function getMeteredStream(stream, callback) {
+function getMeteredStream(stream, metricName) {
   const meteredStream = meter()
 
   pipeline(stream, meteredStream)
     .then(() => {
-      callback(null, meteredStream.bytes)
+      metrics.count(metricName, meteredStream.bytes)
     })
-    .catch(err => {
+    .catch(() => {
       // on error, just send how many bytes we received before the stream stopped
-      callback(err, meteredStream.bytes)
+      metrics.count(metricName, meteredStream.bytes)
     })
 
   return meteredStream
@@ -90,7 +93,8 @@ function wrapError(error, message, params, ErrorType) {
     error instanceof NotFoundError ||
     ['NoSuchKey', 'NotFound', 404, 'AccessDenied', 'ENOENT'].includes(
       error.code
-    )
+    ) ||
+    (error.response && error.response.statusCode === 404)
   ) {
     return new NotFoundError({
       message: 'no such file',
@@ -102,4 +106,12 @@ function wrapError(error, message, params, ErrorType) {
       info: params
     }).withCause(error)
   }
+}
+
+function base64ToHex(base64) {
+  return Buffer.from(base64, 'base64').toString('hex')
+}
+
+function hexToBase64(hex) {
+  return Buffer.from(hex, 'hex').toString('base64')
 }

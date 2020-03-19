@@ -22,15 +22,7 @@ describe('FSPersistorTests', function() {
   const files = ['animals/wombat.tex', 'vegetables/potato.tex']
   const globs = [`${location}/${files[0]}`, `${location}/${files[1]}`]
   const filteredFilenames = ['animals_wombat.tex', 'vegetables_potato.tex']
-  let fs,
-    rimraf,
-    stream,
-    LocalFileWriter,
-    FSPersistor,
-    glob,
-    readStream,
-    crypto,
-    Hash
+  let fs, stream, LocalFileWriter, FSPersistor, glob, readStream, crypto, Hash
 
   beforeEach(function() {
     readStream = {
@@ -46,7 +38,6 @@ describe('FSPersistorTests', function() {
       stat: sinon.stub().yields(null, stat)
     }
     glob = sinon.stub().yields(null, globs)
-    rimraf = sinon.stub().yields()
     stream = { pipeline: sinon.stub().yields() }
     LocalFileWriter = {
       promises: {
@@ -68,12 +59,12 @@ describe('FSPersistorTests', function() {
         './Errors': Errors,
         fs,
         glob,
-        rimraf,
         stream,
         crypto,
         // imported by PersistorHelper but otherwise unused here
         'stream-meter': {},
-        'logger-sharelatex': {}
+        'logger-sharelatex': {},
+        'metrics-sharelatex': {}
       },
       globals: { console }
     })
@@ -270,15 +261,22 @@ describe('FSPersistorTests', function() {
   })
 
   describe('deleteDirectory', function() {
-    it('Should call rmdir(rimraf) with correct options', async function() {
+    it('Should call glob with correct options', async function() {
       await FSPersistor.promises.deleteDirectory(location, files[0])
-      expect(rimraf).to.have.been.calledWith(
-        `${location}/${filteredFilenames[0]}`
+      expect(glob).to.have.been.calledWith(
+        `${location}/${filteredFilenames[0]}*`
       )
     })
 
+    it('Should call unlink on the returned files', async function() {
+      await FSPersistor.promises.deleteDirectory(location, files[0])
+      for (const filename of globs) {
+        expect(fs.unlink).to.have.been.calledWith(filename)
+      }
+    })
+
     it('Should propagate the error', async function() {
-      rimraf.yields(error)
+      glob.yields(error)
       await expect(
         FSPersistor.promises.deleteDirectory(location, files[0])
       ).to.eventually.be.rejected.and.have.property('cause', error)

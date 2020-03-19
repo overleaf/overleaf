@@ -4,6 +4,7 @@ module.exports = {
   getConvertedFolderKey,
   addCachingToKey,
   userFileKeyMiddleware,
+  userProjectKeyMiddleware,
   publicFileKeyMiddleware,
   publicProjectKeyMiddleware,
   bucketFileKeyMiddleware,
@@ -33,6 +34,13 @@ function addCachingToKey(key, opts) {
 function userFileKeyMiddleware(req, res, next) {
   const { project_id: projectId, file_id: fileId } = req.params
   req.key = `${projectId}/${fileId}`
+  req.bucket = settings.filestore.stores.user_files
+  next()
+}
+
+function userProjectKeyMiddleware(req, res, next) {
+  const { project_id: projectId } = req.params
+  req.key = `${projectId}/`
   req.bucket = settings.filestore.stores.user_files
   next()
 }

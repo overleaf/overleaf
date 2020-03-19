@@ -1,7 +1,6 @@
 const fs = require('fs')
 const glob = require('glob')
 const path = require('path')
-const rimraf = require('rimraf')
 const Stream = require('stream')
 const { promisify, callbackify } = require('util')
 
@@ -14,7 +13,6 @@ const fsUnlink = promisify(fs.unlink)
 const fsOpen = promisify(fs.open)
 const fsStat = promisify(fs.stat)
 const fsGlob = promisify(glob)
-const rmrf = promisify(rimraf)
 
 const filterName = key => key.replace(/\//g, '_')
 
@@ -146,7 +144,9 @@ async function deleteDirectory(location, name) {
   const filteredName = filterName(name.replace(/\/$/, ''))
 
   try {
-    await rmrf(`${location}/${filteredName}`)
+    await Promise.all(
+      (await fsGlob(`${location}/${filteredName}*`)).map(file => fsUnlink(file))
+    )
   } catch (err) {
     throw PersistorHelper.wrapError(
       err,

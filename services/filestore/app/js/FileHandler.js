@@ -5,11 +5,12 @@ const LocalFileWriter = require('./LocalFileWriter')
 const FileConverter = require('./FileConverter')
 const KeyBuilder = require('./KeyBuilder')
 const ImageOptimiser = require('./ImageOptimiser')
-const { ConversionError } = require('./Errors')
+const { ConversionError, InvalidParametersError } = require('./Errors')
 
 module.exports = {
   insertFile: callbackify(insertFile),
   deleteFile: callbackify(deleteFile),
+  deleteProject: callbackify(deleteProject),
   getFile: callbackify(getFile),
   getFileSize: callbackify(getFileSize),
   getDirectorySize: callbackify(getDirectorySize),
@@ -17,6 +18,7 @@ module.exports = {
     getFile,
     insertFile,
     deleteFile,
+    deleteProject,
     getFileSize,
     getDirectorySize
   }
@@ -24,16 +26,38 @@ module.exports = {
 
 async function insertFile(bucket, key, stream) {
   const convertedKey = KeyBuilder.getConvertedFolderKey(key)
+  if (!convertedKey.match(/^[0-9a-f]{24}\/[0-9a-f]{24}/i)) {
+    throw new InvalidParametersError({
+      message: 'key does not match validation regex',
+      info: { bucket, key, convertedKey }
+    })
+  }
   await PersistorManager.promises.deleteDirectory(bucket, convertedKey)
   await PersistorManager.promises.sendStream(bucket, key, stream)
 }
 
 async function deleteFile(bucket, key) {
   const convertedKey = KeyBuilder.getConvertedFolderKey(key)
+  if (!convertedKey.match(/^[0-9a-f]{24}\/[0-9a-f]{24}/i)) {
+    throw new InvalidParametersError({
+      message: 'key does not match validation regex',
+      info: { bucket, key, convertedKey }
+    })
+  }
   await Promise.all([
     PersistorManager.promises.deleteFile(bucket, key),
     PersistorManager.promises.deleteDirectory(bucket, convertedKey)
   ])
+}
+
+async function deleteProject(bucket, key) {
+  if (!key.match(/^[0-9a-f]{24}\//i)) {
+    throw new InvalidParametersError({
+      message: 'key does not match validation regex',
+      info: { bucket, key }
+    })
+  }
+  await PersistorManager.promises.deleteDirectory(bucket, key)
 }
 
 async function getFile(bucket, key, opts) {
