@@ -28,7 +28,7 @@ Metrics.event_loop.monitor(logger, 100)
 
 app = express()
 app.use(Metrics.http.monitor(logger));
-app.use bodyParser({limit: (Settings.max_doc_length + 64 * 1024)})
+app.use bodyParser.json({limit: (Settings.max_doc_length + 64 * 1024)})
 Metrics.injectMetricsRoute(app)
 
 DispatchManager.createAndStartDispatchers(Settings.dispatcherCount || 10)
@@ -61,7 +61,7 @@ app.post   '/project/:project_id/history/resync',                       HttpCont
 app.post   '/project/:project_id/flush',                                HttpController.flushProject
 app.post   '/project/:project_id/doc/:doc_id/change/:change_id/accept', HttpController.acceptChanges
 app.post   '/project/:project_id/doc/:doc_id/change/accept',            HttpController.acceptChanges
-app.del    '/project/:project_id/doc/:doc_id/comment/:comment_id',      HttpController.deleteComment
+app.delete '/project/:project_id/doc/:doc_id/comment/:comment_id',      HttpController.deleteComment
 
 app.get    '/flush_all_projects',                                       HttpController.flushAllProjects
 app.get    '/flush_queued_projects', HttpController.flushQueuedProjects
@@ -74,7 +74,7 @@ app.get '/total', (req, res)->
 
 app.get '/status', (req, res)->
 	if Settings.shuttingDown
-		res.send 503 # Service unavailable
+		res.sendStatus 503 # Service unavailable
 	else
 		res.send('document updater is alive')
 
@@ -83,18 +83,18 @@ app.get "/health_check/redis", (req, res, next) ->
 	pubsubClient.healthCheck (error) ->
 		if error?
 			logger.err {err: error}, "failed redis health check"
-			res.send 500
+			res.sendStatus 500
 		else
-			res.send 200
+			res.sendStatus 200
 
 docUpdaterRedisClient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
 app.get "/health_check/redis_cluster", (req, res, next) ->
 	docUpdaterRedisClient.healthCheck (error) ->
 		if error?
 			logger.err {err: error}, "failed redis cluster health check"
-			res.send 500
+			res.sendStatus 500
 		else
-			res.send 200
+			res.sendStatus 200
 
 app.get "/health_check", (req, res, next) ->
 	async.series [
@@ -115,20 +115,20 @@ app.get "/health_check", (req, res, next) ->
 				cb(error)
 	] , (error) ->
 		if error?
-			res.send 500
+			res.sendStatus 500
 		else
-			res.send 200
+			res.sendStatus 200
 
 app.use (error, req, res, next) ->
 	if error instanceof Errors.NotFoundError
-		res.send 404
+		res.sendStatus 404
 	else if error instanceof Errors.OpRangeNotAvailableError
-		res.send 422 # Unprocessable Entity
+		res.sendStatus 422 # Unprocessable Entity
 	else if error.statusCode is 413
-		res.send(413, "request entity too large")
+		res.status(413).send("request entity too large")
 	else
 		logger.error err: error, req: req, "request errored"
-		res.send(500, "Oops, something went wrong")
+		res.status(500).send("Oops, something went wrong")
 
 shutdownCleanly = (signal) ->
 	return () ->
