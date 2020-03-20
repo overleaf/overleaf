@@ -49,10 +49,5 @@ module.exports.monitor = (logger) ->
 							"content-length": res._headers?["content-length"]
 							statusCode: res.statusCode
 						"response-time": responseTimeMs
-				if res.statusCode >= 500
-					logger.error(info, "%s %s", req.method, reqUrl)
-				else if res.statusCode >= 400 and res.statusCode < 500
-					logger.warn(info, "%s %s", req.method, reqUrl)
-				else
-					logger.info(info, "%s %s", req.method, reqUrl)
+				logger.info(info, "%s %s", req.method, reqUrl)
 		next()
