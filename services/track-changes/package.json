@@ -20,7 +20,7 @@
   "dependencies": {
     "JSONStream": "^1.3.5",
     "async": "~0.2.10",
-    "aws-sdk": "^2.102.0",
+    "aws-sdk": "^2.642.0",
     "bson": "^0.4.20",
     "byline": "^4.2.1",
     "cli": "^0.6.6",
@@ -30,7 +30,7 @@
     "logger-sharelatex": "^1.9.0",
     "metrics-sharelatex": "^2.6.1",
     "mongo-uri": "^0.1.2",
-    "mongojs": "2.4.0",
+    "mongojs": "3.1.0",
     "redis": "~0.10.1",
     "redis-sharelatex": "^1.0.11",
     "request": "~2.88.2",
