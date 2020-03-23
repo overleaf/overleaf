@@ -92,7 +92,7 @@ describe('ContactManager', function() {
       })
 
       return it('should call the callback with an error', function() {
-        return this.callback.calledWith(new Error()).should.equal(true)
+        return this.callback.calledWith(sinon.match(Error)).should.equal(true)
       })
     })
   })
@@ -136,7 +136,7 @@ describe('ContactManager', function() {
       })
 
       return it('should call the callback with an error', function() {
-        return this.callback.calledWith(new Error()).should.equal(true)
+        return this.callback.calledWith(sinon.match(Error)).should.equal(true)
       })
     })
   })
