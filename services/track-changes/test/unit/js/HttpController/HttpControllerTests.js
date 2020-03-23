@@ -19,6 +19,7 @@ const SandboxedModule = require('sandboxed-module')
 describe('HttpController', function() {
   beforeEach(function() {
     this.HttpController = SandboxedModule.require(modulePath, {
+      singleOnly: true,
       requires: {
         'logger-sharelatex': { log: sinon.stub() },
         './UpdatesManager': (this.UpdatesManager = {}),
