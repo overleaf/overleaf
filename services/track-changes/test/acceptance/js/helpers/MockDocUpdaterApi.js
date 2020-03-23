@@ -45,10 +45,10 @@ module.exports = MockDocUpdaterApi = {
         req.params.doc_id,
         (error, doc) => {
           if (error != null) {
-            res.send(500)
+            res.sendStatus(500)
           }
           if (doc == null) {
-            return res.send(404)
+            return res.sendStatus(404)
           } else {
             return res.send(JSON.stringify(doc))
           }
@@ -67,9 +67,9 @@ module.exports = MockDocUpdaterApi = {
           req.body.undoing,
           (errr, doc) => {
             if (typeof error !== 'undefined' && error !== null) {
-              return res.send(500)
+              return res.sendStatus(500)
             } else {
-              return res.send(204)
+              return res.sendStatus(204)
             }
           }
         )
