@@ -181,7 +181,7 @@ describe('DiffManager', function() {
       })
     })
 
-    return describe('when the updates are inconsistent', function() {
+    describe('when the updates are inconsistent', function() {
       beforeEach(function() {
         this.DiffManager.getLatestDocAndUpdates = sinon
           .stub()
@@ -189,7 +189,9 @@ describe('DiffManager', function() {
         this.DiffGenerator.buildDiff = sinon
           .stub()
           .throws((this.error = new Error('inconsistent!')))
-        return this.DiffManager.getDiff(
+        this.DiffGenerator.rewindUpdates = sinon
+            .stub()
+        this.DiffManager.getDiff(
           this.project_id,
           this.doc_id,
           this.fromVersion,
@@ -198,8 +200,10 @@ describe('DiffManager', function() {
         )
       })
 
-      return it('should call the callback with an error', function() {
-        return this.callback.calledWith(this.error).should.equal(true)
+      it('should call the callback with an error', function() {
+        this.callback.calledWith(sinon.match(Error)).should.equal(true)
+        const errorObj = this.callback.args[0][0]
+        expect(errorObj.message).to.include('inconsistent!')
       })
     })
   })
