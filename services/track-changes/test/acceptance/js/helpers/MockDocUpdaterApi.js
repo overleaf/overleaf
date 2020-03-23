@@ -13,7 +13,9 @@
  */
 let MockDocUpdaterApi
 const express = require('express')
+const bodyParser = require('body-parser')
 const app = express()
+app.use(bodyParser.json())
 
 module.exports = MockDocUpdaterApi = {
   docs: {},
@@ -56,7 +58,6 @@ module.exports = MockDocUpdaterApi = {
 
     app.post(
       '/project/:project_id/doc/:doc_id',
-      express.bodyParser(),
       (req, res, next) => {
         return this.setDoc(
           req.params.project_id,
