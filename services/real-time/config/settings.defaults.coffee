@@ -60,6 +60,8 @@ settings =
 	
 	publishOnIndividualChannels: process.env['PUBLISH_ON_INDIVIDUAL_CHANNELS'] or false
 
+	statusCheckInterval: parseInt(process.env['STATUS_CHECK_INTERVAL'] or '0')
+
 	sentry:
 		dsn: process.env.SENTRY_DSN
 
