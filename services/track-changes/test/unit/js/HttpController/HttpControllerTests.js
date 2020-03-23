@@ -44,7 +44,7 @@ describe('HttpController', function() {
           project_id: this.project_id
         }
       }
-      this.res = { send: sinon.stub() }
+      this.res = { sendStatus: sinon.stub() }
       this.UpdatesManager.processUncompressedUpdatesWithLock = sinon
         .stub()
         .callsArg(2)
@@ -58,7 +58,7 @@ describe('HttpController', function() {
     })
 
     return it('should return a success code', function() {
-      return this.res.send.calledWith(204).should.equal(true)
+      return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 
@@ -69,7 +69,7 @@ describe('HttpController', function() {
           project_id: this.project_id
         }
       }
-      this.res = { send: sinon.stub() }
+      this.res = { sendStatus: sinon.stub() }
       this.UpdatesManager.processUncompressedUpdatesForProject = sinon
         .stub()
         .callsArg(1)
@@ -83,7 +83,7 @@ describe('HttpController', function() {
     })
 
     return it('should return a success code', function() {
-      return this.res.send.calledWith(204).should.equal(true)
+      return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 
@@ -177,7 +177,7 @@ describe('HttpController', function() {
           'x-user-id': this.user_id
         }
       }
-      this.res = { send: sinon.stub() }
+      this.res = { sendStatus: sinon.stub() }
 
       this.RestoreManager.restoreToBeforeVersion = sinon.stub().callsArg(4)
       return this.HttpController.restore(this.req, this.res, this.next)
@@ -195,7 +195,7 @@ describe('HttpController', function() {
     })
 
     return it('should return a success code', function() {
-      return this.res.send.calledWith(204).should.equal(true)
+      return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 })
