@@ -19,18 +19,18 @@
     "format:fix": "node_modules/.bin/prettier-eslint '**/*.js' --write"
   },
   "dependencies": {
-    "async": "~0.8.0",
+    "async": "^2.6.3",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "logger-sharelatex": "^1.9.0",
     "metrics-sharelatex": "^2.6.1",
-    "mongojs": "2.4.0",
+    "mongojs": "3.1.0",
     "settings-sharelatex": "^1.1.0",
     "underscore": "~1.9.2"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
-    "bunyan": "~0.22.3",
+    "bunyan": "~1.8.12",
     "chai": "~4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
