@@ -25,7 +25,7 @@
     "coffee-script": "~1.7.0",
     "express": "3.11.0",
     "lodash": "^4.17.13",
-    "logger-sharelatex": "^1.7.0",
+    "logger-sharelatex": "^1.9.1",
     "metrics-sharelatex": "^2.5.1",
     "mongojs": "^2.6.0",
     "redis-sharelatex": "^1.0.11",
