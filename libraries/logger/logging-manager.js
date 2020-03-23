@@ -134,13 +134,11 @@ const Logger = (module.exports = {
         this.raven.captureException(error, { tags, extra, level })
 
         // put a flag on the errors to avoid reporting them multiple times
-        const result = []
         for (key in attributes) {
           value = attributes[key]
           if (value instanceof Error) {
             value.reportedToSentry = true
           }
-          return result
         }
       } catch (err) {
         // ignore Raven errors
