@@ -68,6 +68,60 @@ describe "applyOtUpdate", ->
 				(cb) => rclient.del redisSettings.documentupdater.key_schema.pendingUpdates(@doc_id), cb
 			], done
 		
+	describe "when authorized with a huge edit update", ->
+		before (done) ->
+			@update = {
+				op: {p: 12, t: "foo"},
+				junk: 'this update is too large'.repeat(1024 * 300) # >7MB
+			}
+			async.series [
+				(cb) =>
+					FixturesManager.setUpProject {
+						privilegeLevel: "readAndWrite"
+					}, (e, {@project_id, @user_id}) =>
+						cb(e)
+
+				(cb) =>
+					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
+						cb(e)
+
+				(cb) =>
+					@client = RealTimeClient.connect()
+					@client.on "connectionAccepted", cb
+					@client.on "otUpdateError", (@otUpdateError) =>
+
+				(cb) =>
+					@client.emit "joinProject", project_id: @project_id, cb
+
+				(cb) =>
+					@client.emit "joinDoc", @doc_id, cb
+
+				(cb) =>
+					@client.emit "applyOtUpdate", @doc_id, @update, (@error) =>
+						cb()
+			], done
+
+		it "should not return an error", ->
+			expect(@error).to.not.exist
+
+		it "should send an otUpdateError to the client", (done) ->
+			setTimeout () =>
+				expect(@otUpdateError).to.exist
+				done()
+			, 300
+
+		it "should disconnect the client", (done) ->
+			setTimeout () =>
+				@client.socket.connected.should.equal false
+				done()
+			, 300
+
+		it "should not put the update in redis", (done) ->
+			rclient.llen redisSettings.documentupdater.key_schema.pendingUpdates({@doc_id}), (error, len) =>
+				len.should.equal 0
+				done()
+			return null
+
 	describe "when authorized to read-only with an edit update", ->
 		before (done) ->
 			async.series [
