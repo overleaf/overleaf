@@ -242,10 +242,10 @@ block content
 							p #{translate("work_on_single_version")}. #{translate("view_collab_edits")} in real time.
 
 							h3 #{translate("full_doc_history")}
-							p #{translate("see_what_has_been")}
-								span.added #{translate("added")}
-								| #{translate("and")}
-								span.removed #{translate("removed")}.
+							p.track-changes-example
+								| #{translate("see_what_has_been")} #[span.added #{translate("added")}]
+								| &nbsp;#{translate("and")} #[span.removed #{translate("removed")}].
+							p
 								| #{translate("restore_to_any_older_version")}.
 
 							h3 #{translate("sync_to_dropbox")}
