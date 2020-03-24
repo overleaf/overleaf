@@ -8,7 +8,7 @@ describe 'SafeJsonParse', ->
 	beforeEach ->
 		@SafeJsonParse = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @Settings = {
-				max_doc_length: 16 * 1024
+				maxUpdateSize: 16 * 1024
 			}
 			"logger-sharelatex": @logger = {error: sinon.stub()}
 
@@ -27,7 +27,7 @@ describe 'SafeJsonParse', ->
 			# we have a 2k overhead on top of max size
 			big_blob = Array(16*1024).join("A")
 			data = "{\"foo\": \"#{big_blob}\"}"
-			@Settings.max_doc_length = 2 * 1024
+			@Settings.maxUpdateSize = 2 * 1024
 			@SafeJsonParse.parse data, (error, parsed) =>
 				@logger.error.called.should.equal true
 				expect(error).to.exist
