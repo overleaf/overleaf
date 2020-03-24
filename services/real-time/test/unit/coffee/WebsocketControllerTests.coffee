@@ -32,7 +32,6 @@ describe 'WebsocketController', ->
 			"./DocumentUpdaterManager": @DocumentUpdaterManager = {}
 			"./ConnectedUsersManager": @ConnectedUsersManager = {}
 			"./WebsocketLoadBalancer": @WebsocketLoadBalancer = {}
-			"settings-sharelatex": {maxUpdateSize: 7 * 1024 * 1024}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 			"metrics-sharelatex": @metrics =
 				inc: sinon.stub()
@@ -673,12 +672,11 @@ describe 'WebsocketController', ->
 			beforeEach (done) ->
 				@client.disconnect = sinon.stub()
 				@client.emit = sinon.stub()
-				@update = {
-					op: {p: 12, t: "foo"},
-					junk: 'this update is too large'.repeat(1024 * 300) # >7MB
-				}
 				@client.params.user_id = @user_id
 				@client.params.project_id = @project_id
+				error = new Error("update is too large")
+				error.updateSize = 7372835
+				@DocumentUpdaterManager.queueChange = sinon.stub().callsArgWith(3, error)
 				@WebsocketController.applyOtUpdate @client, @doc_id, @update, @callback
 				setTimeout ->
 					done()

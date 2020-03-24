@@ -71,8 +71,10 @@ describe "applyOtUpdate", ->
 	describe "when authorized with a huge edit update", ->
 		before (done) ->
 			@update = {
-				op: {p: 12, t: "foo"},
-				junk: 'this update is too large'.repeat(1024 * 300) # >7MB
+				op: {
+					p: 12,
+					t: "update is too large".repeat(1024 * 400) # >7MB
+				}
 			}
 			async.series [
 				(cb) =>

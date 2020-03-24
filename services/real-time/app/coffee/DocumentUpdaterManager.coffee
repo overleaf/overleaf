@@ -61,9 +61,17 @@ module.exports = DocumentUpdaterManager =
 		change = _.pick change, allowedKeys
 		jsonChange = JSON.stringify change
 		if jsonChange.indexOf("\u0000") != -1
+			# memory corruption check
 			error = new Error("null bytes found in op")
 			logger.error err: error, project_id: project_id, doc_id: doc_id, jsonChange: jsonChange, error.message
 			return callback(error)
+
+		updateSize = jsonChange.length
+		if updateSize > settings.maxUpdateSize
+			error = new Error("update is too large")
+			error.updateSize = updateSize
+			return callback(error)
+
 		doc_key = "#{project_id}:#{doc_id}"
 		# Push onto pendingUpdates for doc_id first, because once the doc updater
 		# gets an entry on pending-updates-list, it starts processing.
