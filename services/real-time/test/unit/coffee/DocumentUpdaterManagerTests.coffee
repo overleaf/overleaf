@@ -15,6 +15,7 @@ describe 'DocumentUpdaterManager', ->
 			redis: documentupdater:
 				key_schema:
 					pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
+			maxUpdateSize: 7 * 1024 * 1024
 		@rclient = {auth:->}
 
 		@DocumentUpdaterManager = SandboxedModule.require modulePath,
@@ -159,6 +160,20 @@ describe 'DocumentUpdaterManager', ->
 
 			it "should return an error", ->
 				@callback.calledWithExactly(sinon.match(Error)).should.equal true
+
+			it "should not push the change onto the pending-updates-list queue", ->
+				@rclient.rpush.called.should.equal false
+
+		describe "when the update is too large", ->
+			beforeEach ->
+				@change = {op: {p: 12,t: "update is too large".repeat(1024 * 400)}}
+				@DocumentUpdaterManager.queueChange(@project_id, @doc_id, @change, @callback)
+
+			it "should return an error", ->
+				@callback.calledWithExactly(sinon.match(Error)).should.equal true
+
+			it "should add the size to the error", ->
+				@callback.args[0][0].updateSize.should.equal 7782422
 
 			it "should not push the change onto the pending-updates-list queue", ->
 				@rclient.rpush.called.should.equal false

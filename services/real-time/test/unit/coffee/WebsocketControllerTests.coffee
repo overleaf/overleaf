@@ -668,6 +668,36 @@ describe 'WebsocketController', ->
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true
 
+		describe "update_too_large", ->
+			beforeEach (done) ->
+				@client.disconnect = sinon.stub()
+				@client.emit = sinon.stub()
+				@client.params.user_id = @user_id
+				@client.params.project_id = @project_id
+				error = new Error("update is too large")
+				error.updateSize = 7372835
+				@DocumentUpdaterManager.queueChange = sinon.stub().callsArgWith(3, error)
+				@WebsocketController.applyOtUpdate @client, @doc_id, @update, @callback
+				setTimeout ->
+					done()
+				, 201
+
+			it "should call the callback with no error", ->
+				@callback.called.should.equal true
+				@callback.args[0].should.deep.equal []
+
+			it "should log a warning with the size and context", ->
+				@logger.warn.called.should.equal true
+				@logger.warn.args[0].should.deep.equal [{
+					@user_id, @project_id, @doc_id, updateSize: 7372835
+				}, 'update is too large']
+
+			it "should send an otUpdateError the client", ->
+				@client.emit.calledWith('otUpdateError').should.equal true
+
+			it "should disconnect the client", ->
+				@client.disconnect.called.should.equal true
+
 	describe "_assertClientCanApplyUpdate", ->
 		beforeEach ->
 			@edit_update = { op: [{i: "foo", p: 42}, {c: "bar", p: 132}] } # comments may still be in an edit op

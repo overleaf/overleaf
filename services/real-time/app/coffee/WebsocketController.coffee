@@ -1,5 +1,6 @@
 logger = require "logger-sharelatex"
 metrics = require "metrics-sharelatex"
+settings = require "settings-sharelatex"
 WebApiManager = require "./WebApiManager"
 AuthorizationManager = require "./AuthorizationManager"
 DocumentUpdaterManager = require "./DocumentUpdaterManager"
@@ -202,6 +203,7 @@ module.exports = WebsocketController =
 		Utils.getClientAttributes client, ["user_id", "project_id"], (error, {user_id, project_id}) ->
 			return callback(error) if error?
 			return callback(new Error("no project_id found on client")) if !project_id?
+
 			WebsocketController._assertClientCanApplyUpdate client, doc_id, update, (error) ->
 				if error?
 					logger.warn {err: error, doc_id, client_id: client.id, version: update.v}, "client is not authorized to make update"
@@ -218,6 +220,22 @@ module.exports = WebsocketController =
 				logger.log {user_id, doc_id, project_id, client_id: client.id, version: update.v}, "sending update to doc updater"
 
 				DocumentUpdaterManager.queueChange project_id, doc_id, update, (error) ->
+					if error?.message == "update is too large"
+						metrics.inc "update_too_large"
+						updateSize = error.updateSize
+						logger.warn({user_id, project_id, doc_id, updateSize}, "update is too large")
+
+						# mark the update as received -- the client should not send it again!
+						callback()
+
+						# trigger an out-of-sync error
+						message = {project_id, doc_id, error: "update is too large"}
+						setTimeout () ->
+							client.emit "otUpdateError", message.error, message
+							client.disconnect()
+						, 100
+						return
+
 					if error?
 						logger.error {err: error, project_id, doc_id, client_id: client.id, version: update.v}, "document was not available for update"
 						client.disconnect()
