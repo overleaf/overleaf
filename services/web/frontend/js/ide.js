@@ -117,9 +117,7 @@ define([
       reviewPanelOpen: localStorage(`ui.reviewPanelOpen.${window.project_id}`),
       miniReviewPanelVisible: false,
       chatResizerSizeOpen: window.uiConfig.chatResizerSizeOpen,
-      chatResizerSizeClosed: window.uiConfig.chatResizerSizeClosed,
-      defaultFontFamily: window.uiConfig.defaultFontFamily,
-      defaultLineHeight: window.uiConfig.defaultLineHeight
+      chatResizerSizeClosed: window.uiConfig.chatResizerSizeClosed
     }
     $scope.user = window.user
 

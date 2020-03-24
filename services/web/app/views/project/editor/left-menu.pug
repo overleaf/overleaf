@@ -169,7 +169,6 @@ aside#left-menu.full-size(
 					name="fontFamily"
 					ng-model="settings.fontFamily"
 				)
-					option(value="", disabled) #{translate("default")}
 					each fontFamily in ['monaco', 'lucida']
 						option(value=fontFamily) #{capitalize(fontFamily)}
 
@@ -179,7 +178,6 @@ aside#left-menu.full-size(
 					name="lineHeight"
 					ng-model="settings.lineHeight"
 				)
-					option(value="", disabled) #{translate("default")}
 					each lineHeight in ['compact', 'normal', 'wide']
 						option(value=lineHeight) #{translate(lineHeight)}
 

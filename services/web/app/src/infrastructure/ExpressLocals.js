@@ -321,9 +321,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       chatMessageBorderSaturation: '85%',
       chatMessageBorderLightness: '40%',
       chatMessageBgSaturation: '85%',
-      chatMessageBgLightness: '40%',
-      defaultFontFamily: 'lucida',
-      defaultLineHeight: 'normal'
+      chatMessageBgLightness: '40%'
     }
     next()
   })

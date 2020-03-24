@@ -806,8 +806,8 @@ const ProjectController = {
                 autoPairDelimiters: user.ace.autoPairDelimiters,
                 pdfViewer: user.ace.pdfViewer,
                 syntaxValidation: user.ace.syntaxValidation,
-                fontFamily: user.ace.fontFamily,
-                lineHeight: user.ace.lineHeight,
+                fontFamily: user.ace.fontFamily || 'lucida',
+                lineHeight: user.ace.lineHeight || 'normal',
                 overallTheme: user.ace.overallTheme
               },
               trackChangesState: project.track_changes,
