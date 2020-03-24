@@ -54,8 +54,9 @@ settings =
 
 	# combine
 	# max_doc_length (2mb see above) * 2 (delete + insert)
-	# max_ranges_size (3mb see MAX_RANGES_SIZE in doc-updater) 
-	maxUpdateSize: parseInt(process.env['MAX_UPDATE_SIZE']) or 7 * 1024 * 1024
+	# max_ranges_size (3mb see MAX_RANGES_SIZE in document-updater)
+	# overhead for JSON serialization
+	maxUpdateSize: parseInt(process.env['MAX_UPDATE_SIZE']) or 7 * 1024 * 1024 + 64 * 1024
 
 	shutdownDrainTimeWindow: process.env['SHUTDOWN_DRAIN_TIME_WINDOW'] or 9
 
