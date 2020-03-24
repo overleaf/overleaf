@@ -1,425 +1,260 @@
 const SandboxedModule = require('sandboxed-module')
-const { assert } = require('chai')
+const { expect } = require('chai')
 require('chai').should()
 const sinon = require('sinon')
+const { Tag } = require('../helpers/models/Tag')
+const { ObjectId } = require('mongojs')
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Tags/TagsHandler.js'
 )
-describe('TagsHandler', function() {
-  const userId = 'user-id-123'
-  const tagId = 'tag-id-123'
-  const projectId = 'project-id-123'
-  const tagsUrl = 'tags.sharelatex.testing'
-  const tag = 'tag_name'
 
+describe('TagsHandler', function() {
   beforeEach(function() {
-    this.request = {
-      post: sinon.stub().callsArgWith(1),
-      del: sinon.stub().callsArgWith(1),
-      get: sinon.stub()
-    }
+    this.userId = ObjectId().toString()
     this.callback = sinon.stub()
-    this.handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
+
+    this.tag = { user_id: this.userId, name: 'some name' }
+    this.tagId = ObjectId().toString()
+    this.projectId = ObjectId().toString()
+
+    this.mongojs = { ObjectId: ObjectId }
+    this.TagMock = sinon.mock(Tag)
+
+    this.TagsHandler = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': {
-          apis: { tags: { url: tagsUrl } }
-        },
-        request: this.request,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err() {}
-        }
+        '../../infrastructure/mongojs': this.mongojs,
+        '../../models/Tag': { Tag: Tag }
       }
     })
   })
 
-  describe('removeProjectFromAllTags', function() {
-    it('should tell the tags api to remove the project_id from all the users tags', function(done) {
-      this.handler.removeProjectFromAllTags(userId, projectId, () => {
-        this.request.del
-          .calledWith({
-            url: `${tagsUrl}/user/${userId}/project/${projectId}`,
-            timeout: 10000
-          })
-          .should.equal(true)
-        done()
-      })
-    })
-  })
-
-  describe('getAllTags', function() {
-    it('should get all tags', function(done) {
-      const stubbedAllTags = [
-        { name: 'tag', project_ids: ['123423', '423423'] }
-      ]
-      this.request.get.callsArgWith(
-        1,
-        null,
-        { statusCode: 200 },
-        stubbedAllTags
-      )
-      this.handler.getAllTags(userId, (err, allTags) => {
-        assert.notExists(err)
-        stubbedAllTags.should.deep.equal(allTags)
-        const getOpts = {
-          url: `${tagsUrl}/user/${userId}/tag`,
-          json: true,
-          timeout: 10000
-        }
-        this.request.get.calledWith(getOpts).should.equal(true)
-        done()
-      })
-    })
-
-    it('should callback with an empty array on error', function(done) {
-      this.request.get.callsArgWith(
-        1,
-        { something: 'wrong' },
-        { statusCode: 200 },
-        []
-      )
-      this.handler.getAllTags(userId, (err, allTags) => {
-        allTags.length.should.equal(0)
-        assert.isDefined(err)
-        done()
-      })
-    })
-
-    it('should callback with an empty array if there are no tags', function(done) {
-      this.request.get.callsArgWith(
-        1,
-        { something: 'wrong' },
-        { statusCode: 200 },
-        undefined
-      )
-      this.handler.getAllTags(userId, (err, allTags) => {
-        allTags.length.should.equal(0)
-        assert.isDefined(err)
-        done()
-      })
-    })
-
-    it('should callback with an empty array on a non 200 response', function(done) {
-      this.request.get.callsArgWith(1, null, { statusCode: 201 }, [])
-      this.handler.getAllTags(userId, (err, allTags) => {
-        allTags.length.should.equal(0)
-        assert.isDefined(err)
-        done()
-      })
-    })
-
-    it('should callback with an empty array on no body and no response', function(done) {
-      this.request.get.callsArgWith(
-        1,
-        { something: 'wrong' },
-        undefined,
-        undefined
-      )
-      this.handler.getAllTags(userId, (err, allTags) => {
-        allTags.length.should.equal(0)
-        assert.isDefined(err)
+  describe('finding users tags', function() {
+    it('should find all the documents with that user id', function(done) {
+      const stubbedTags = [{ name: 'tag1' }, { name: 'tag2' }, { name: 'tag3' }]
+      this.TagMock.expects('find')
+        .once()
+        .withArgs({ user_id: this.userId })
+        .yields(null, stubbedTags)
+      this.TagsHandler.getAllTags(this.userId, (err, result) => {
+        expect(err).to.not.exist
+        this.TagMock.verify()
+        expect(result).to.deep.equal(stubbedTags)
         done()
       })
     })
   })
 
   describe('createTag', function() {
-    beforeEach(function() {
-      this.request.post = sinon
-        .stub()
-        .callsArgWith(1, null, { statusCode: 204 }, '')
-      this.handler.createTag(userId, (this.name = 'tag_name'), this.callback)
-    })
-
-    it('should send a request to the tag backend', function() {
-      this.request.post
-        .calledWith({
-          url: `${tagsUrl}/user/${userId}/tag`,
-          json: {
-            name: this.name
-          },
-          timeout: 10000
-        })
-        .should.equal(true)
-    })
-
-    it('should call the callback with no error', function() {
-      this.callback.calledWith(null).should.equal(true)
-    })
-  })
-
-  describe('deleteTag', function() {
-    describe('successfully', function() {
-      beforeEach(function() {
-        this.request.del = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, '')
-        this.handler.deleteTag(userId, tagId, this.callback)
-      })
-
-      it('should send a request to the tag backend', function() {
-        this.request.del
-          .calledWith({
-            url: `${tagsUrl}/user/${userId}/tag/${tagId}`,
-            timeout: 10000
-          })
-          .should.equal(true)
-      })
-
-      it('should call the callback with no error', function() {
-        this.callback.calledWith(null).should.equal(true)
-      })
-    })
-
-    describe('with error', function() {
-      beforeEach(function() {
-        this.request.del = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.deleteTag(userId, tagId, this.callback)
-      })
-
-      it('should call the callback with an Error', function() {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
-      })
-    })
-  })
-
-  describe('renameTag', function() {
-    describe('successfully', function() {
-      beforeEach(function() {
-        this.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, '')
-        this.handler.renameTag(
-          userId,
-          tagId,
-          (this.name = 'new-name'),
-          this.callback
+    describe('when insert succeeds', function() {
+      it('should call insert in mongo', function(done) {
+        this.TagMock.expects('create')
+          .withArgs(this.tag)
+          .once()
+          .yields(null, this.tag)
+        this.TagsHandler.createTag(
+          this.tag.user_id,
+          this.tag.name,
+          (err, resultTag) => {
+            expect(err).to.not.exist
+            this.TagMock.verify()
+            expect(resultTag.user_id).to.equal(this.tag.user_id)
+            expect(resultTag.name).to.equal(this.tag.name)
+            done()
+          }
         )
       })
-
-      it('should send a request to the tag backend', function() {
-        this.request.post
-          .calledWith({
-            url: `${tagsUrl}/user/${userId}/tag/${tagId}/rename`,
-            json: {
-              name: this.name
-            },
-            timeout: 10000
-          })
-          .should.equal(true)
-      })
-
-      it('should call the callback with no error', function() {
-        this.callback.calledWith(null).should.equal(true)
-      })
     })
 
-    describe('with error', function() {
+    describe('when insert has duplicate key error error', function() {
       beforeEach(function() {
-        this.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.renameTag(userId, tagId, 'name', this.callback)
+        this.duplicateKeyError = new Error('Duplicate')
+        this.duplicateKeyError.code = 11000
       })
 
-      it('should call the callback with an Error', function() {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
-      })
-    })
-  })
-
-  describe('removeProjectFromTag', function() {
-    describe('successfully', function() {
-      beforeEach(function() {
-        this.request.del = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, '')
-        this.handler.removeProjectFromTag(
-          userId,
-          tagId,
-          projectId,
-          this.callback
+      it('should get tag with findOne and return that tag', function(done) {
+        this.TagMock.expects('create')
+          .withArgs(this.tag)
+          .once()
+          .yields(this.duplicateKeyError)
+        this.TagMock.expects('findOne')
+          .withArgs({ user_id: this.tag.user_id, name: this.tag.name })
+          .once()
+          .yields(null, this.tag)
+        this.TagsHandler.createTag(
+          this.tag.user_id,
+          this.tag.name,
+          (err, resultTag) => {
+            expect(err).to.not.exist
+            this.TagMock.verify()
+            expect(resultTag.user_id).to.equal(this.tag.user_id)
+            expect(resultTag.name).to.equal(this.tag.name)
+            done()
+          }
         )
-      })
-
-      it('should send a request to the tag backend', function() {
-        this.request.del
-          .calledWith({
-            url: `${tagsUrl}/user/${userId}/tag/${tagId}/project/${projectId}`,
-            timeout: 10000
-          })
-          .should.equal(true)
-      })
-
-      it('should call the callback with no error', function() {
-        this.callback.calledWith(null).should.equal(true)
-      })
-    })
-
-    describe('with error', function() {
-      beforeEach(function() {
-        this.request.del = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.removeProjectFromTag(
-          userId,
-          tagId,
-          projectId,
-          this.callback
-        )
-      })
-
-      it('should call the callback with an Error', function() {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
       })
     })
   })
 
   describe('addProjectToTag', function() {
-    describe('successfully', function() {
-      beforeEach(function() {
-        this.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, '')
-        this.handler.addProjectToTag(userId, tagId, projectId, this.callback)
-      })
+    describe('with a valid tag_id', function() {
+      beforeEach(function() {})
 
-      it('should send a request to the tag backend', function() {
-        this.request.post
-          .calledWith({
-            url: `${tagsUrl}/user/${userId}/tag/${tagId}/project/${projectId}`,
-            timeout: 10000
-          })
-          .should.equal(true)
-      })
-
-      it('should call the callback with no error', function() {
-        this.callback.calledWith(null).should.equal(true)
-      })
-    })
-
-    describe('with error', function() {
-      beforeEach(function() {
-        this.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.addProjectToTag(userId, tagId, projectId, this.callback)
-      })
-
-      it('should call the callback with an Error', function() {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should call update in mongo', function(done) {
+        this.TagMock.expects('findOneAndUpdate')
+          .once()
+          .withArgs(
+            { _id: this.tagId, user_id: this.userId },
+            { $addToSet: { project_ids: this.projectId } }
+          )
+          .yields()
+        this.TagsHandler.addProjectToTag(
+          this.userId,
+          this.tagId,
+          this.projectId,
+          err => {
+            expect(err).to.not.exist
+            this.TagMock.verify()
+            done()
+          }
+        )
       })
     })
   })
 
   describe('addProjectToTagName', function() {
-    describe('successfully', function() {
-      beforeEach(function() {
-        this.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, '')
-        this.handler.addProjectToTagName(userId, tag, projectId, this.callback)
-      })
-
-      it('should send a request to the tag backend', function() {
-        this.request.post
-          .calledWith({
-            json: {
-              name: tag
-            },
-            url: `${tagsUrl}/user/${userId}/tag/project/${projectId}`,
-            timeout: 10000
-          })
-          .should.equal(true)
-      })
-
-      it('should call the callback with no error', function() {
-        this.callback.calledWith(null).should.equal(true)
-      })
-    })
-
-    describe('with error', function() {
-      beforeEach(function() {
-        this.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.addProjectToTagName(
-          userId,
-          tagId,
-          projectId,
-          this.callback
+    it('should call update in mongo', function(done) {
+      this.TagMock.expects('update')
+        .once()
+        .withArgs(
+          { name: this.tag.name, user_id: this.tag.userId },
+          { $addToSet: { project_ids: this.projectId } },
+          { upsert: true }
         )
-      })
-
-      it('should call the callback with an Error', function() {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
-      })
+        .yields()
+      this.TagsHandler.addProjectToTagName(
+        this.tag.userId,
+        this.tag.name,
+        this.projectId,
+        err => {
+          expect(err).to.not.exist
+          this.TagMock.verify()
+          done()
+        }
+      )
     })
   })
 
   describe('updateTagUserIds', function() {
-    describe('successfully', function() {
-      beforeEach(function() {
-        this.request.put = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, '')
-        this.handler.updateTagUserIds(
-          'old-user-id',
-          'new-user-id',
-          this.callback
+    it('should call update in mongo', function(done) {
+      this.newUserId = ObjectId().toString()
+      this.TagMock.expects('update')
+        .once()
+        .withArgs(
+          { user_id: this.userId },
+          { $set: { user_id: this.newUserId } },
+          { multi: true }
         )
-      })
-
-      it('should send a request to the tag backend', function() {
-        this.request.put
-          .calledWith({
-            json: {
-              user_id: 'new-user-id'
-            },
-            url: `${tagsUrl}/user/old-user-id/tag`,
-            timeout: 10000
-          })
-          .should.equal(true)
-      })
-
-      it('should call the callback with no error', function() {
-        this.callback.calledWith(null).should.equal(true)
+        .yields()
+      this.TagsHandler.updateTagUserIds(this.userId, this.newUserId, err => {
+        expect(err).to.not.exist
+        this.TagMock.verify()
+        done()
       })
     })
+  })
 
-    describe('with error', function() {
-      beforeEach(function() {
-        this.request.put = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
-        this.handler.updateTagUserIds(
-          'old-user-id',
-          'new-user-id',
-          this.callback
+  describe('removeProjectFromTag', function() {
+    describe('with a valid tag_id', function() {
+      it('should call update in mongo', function(done) {
+        this.TagMock.expects('update')
+          .once()
+          .withArgs(
+            {
+              _id: this.tagId,
+              user_id: this.userId
+            },
+            {
+              $pull: { project_ids: this.projectId }
+            }
+          )
+          .yields()
+        this.TagsHandler.removeProjectFromTag(
+          this.userId,
+          this.tagId,
+          this.projectId,
+          err => {
+            expect(err).to.not.exist
+            this.TagMock.verify()
+            done()
+          }
         )
       })
+    })
+  })
 
-      it('should call the callback with an Error', function() {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+  describe('removeProjectFromAllTags', function() {
+    it('should pull the project id from the tag', function(done) {
+      this.TagMock.expects('update')
+        .once()
+        .withArgs(
+          {
+            user_id: this.userId
+          },
+          {
+            $pull: { project_ids: this.projectId }
+          }
+        )
+        .yields()
+      this.TagsHandler.removeProjectFromAllTags(
+        this.userId,
+        this.projectId,
+        err => {
+          expect(err).to.not.exist
+          this.TagMock.verify()
+          done()
+        }
+      )
+    })
+  })
+
+  describe('deleteTag', function() {
+    describe('with a valid tag_id', function() {
+      it('should call remove in mongo', function(done) {
+        this.TagMock.expects('remove')
+          .once()
+          .withArgs({ _id: this.tagId, user_id: this.userId })
+          .yields()
+        this.TagsHandler.deleteTag(this.userId, this.tagId, err => {
+          expect(err).to.not.exist
+          this.TagMock.verify()
+          done()
+        })
+      })
+    })
+  })
+
+  describe('renameTag', function() {
+    describe('with a valid tag_id', function() {
+      it('should call remove in mongo', function(done) {
+        this.newName = 'new name'
+        this.TagMock.expects('update')
+          .once()
+          .withArgs(
+            { _id: this.tagId, user_id: this.userId },
+            { $set: { name: this.newName } }
+          )
+          .yields()
+        this.TagsHandler.renameTag(
+          this.userId,
+          this.tagId,
+          this.newName,
+          err => {
+            expect(err).to.not.exist
+            this.TagMock.verify()
+            done()
+          }
+        )
       })
     })
   })

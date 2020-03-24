@@ -21,8 +21,8 @@ const modulePath = require('path').join(
 )
 
 describe('TagsController', function() {
-  const user_id = '123nd3ijdks'
-  const project_id = '123njdskj9jlk'
+  const userId = '123nd3ijdks'
+  const projectId = '123njdskj9jlk'
   const tag = 'some_class101'
 
   beforeEach(function() {
@@ -54,11 +54,11 @@ describe('TagsController', function() {
     })
     this.req = {
       params: {
-        project_id
+        projectId
       },
       session: {
         user: {
-          _id: user_id
+          _id: userId
         }
       }
     }
@@ -76,7 +76,7 @@ describe('TagsController', function() {
       return this.controller.getAllTags(this.req, {
         json: body => {
           body.should.equal(allTags)
-          this.handler.getAllTags.calledWith(user_id).should.equal(true)
+          this.handler.getAllTags.calledWith(userId).should.equal(true)
           return done()
         }
       })
@@ -86,14 +86,14 @@ describe('TagsController', function() {
   describe('createTag', function() {
     beforeEach(function() {
       this.handler.createTag.callsArgWith(2, null, (this.tag = { mock: 'tag' }))
-      this.req.session.user._id = this.user_id = 'user-id-123'
+      this.req.session.user._id = this.userId = 'user-id-123'
       this.req.body = { name: (this.name = 'tag-name') }
       return this.controller.createTag(this.req, this.res)
     })
 
     it('should create the tag in the backend', function() {
       return this.handler.createTag
-        .calledWith(this.user_id, this.name)
+        .calledWith(this.userId, this.name)
         .should.equal(true)
     })
 
@@ -104,14 +104,14 @@ describe('TagsController', function() {
 
   describe('deleteTag', function() {
     beforeEach(function() {
-      this.req.params.tag_id = this.tag_id = 'tag-id-123'
-      this.req.session.user._id = this.user_id = 'user-id-123'
+      this.req.params.tagId = this.tagId = 'tag-id-123'
+      this.req.session.user._id = this.userId = 'user-id-123'
       return this.controller.deleteTag(this.req, this.res)
     })
 
     it('should delete the tag in the backend', function() {
       return this.handler.deleteTag
-        .calledWith(this.user_id, this.tag_id)
+        .calledWith(this.userId, this.tagId)
         .should.equal(true)
     })
 
@@ -123,8 +123,8 @@ describe('TagsController', function() {
 
   describe('renameTag', function() {
     beforeEach(function() {
-      this.req.params.tag_id = this.tag_id = 'tag-id-123'
-      return (this.req.session.user._id = this.user_id = 'user-id-123')
+      this.req.params.tagId = this.tagId = 'tag-id-123'
+      return (this.req.session.user._id = this.userId = 'user-id-123')
     })
 
     describe('with a name', function() {
@@ -135,7 +135,7 @@ describe('TagsController', function() {
 
       it('should delete the tag in the backend', function() {
         return this.handler.renameTag
-          .calledWith(this.user_id, this.tag_id, this.name)
+          .calledWith(this.userId, this.tagId, this.name)
           .should.equal(true)
       })
 
@@ -163,15 +163,15 @@ describe('TagsController', function() {
 
   describe('addProjectToTag', function() {
     beforeEach(function() {
-      this.req.params.tag_id = this.tag_id = 'tag-id-123'
-      this.req.params.project_id = this.project_id = 'project-id-123'
-      this.req.session.user._id = this.user_id = 'user-id-123'
+      this.req.params.tagId = this.tagId = 'tag-id-123'
+      this.req.params.projectId = this.projectId = 'project-id-123'
+      this.req.session.user._id = this.userId = 'user-id-123'
       return this.controller.addProjectToTag(this.req, this.res)
     })
 
     it('should add the tag to the project in the backend', function() {
       return this.handler.addProjectToTag
-        .calledWith(this.user_id, this.tag_id, this.project_id)
+        .calledWith(this.userId, this.tagId, this.projectId)
         .should.equal(true)
     })
 
@@ -183,15 +183,15 @@ describe('TagsController', function() {
 
   describe('removeProjectFromTag', function() {
     beforeEach(function() {
-      this.req.params.tag_id = this.tag_id = 'tag-id-123'
-      this.req.params.project_id = this.project_id = 'project-id-123'
-      this.req.session.user._id = this.user_id = 'user-id-123'
+      this.req.params.tagId = this.tagId = 'tag-id-123'
+      this.req.params.projectId = this.projectId = 'project-id-123'
+      this.req.session.user._id = this.userId = 'user-id-123'
       return this.controller.removeProjectFromTag(this.req, this.res)
     })
 
     it('should remove the tag from the project in the backend', function() {
       return this.handler.removeProjectFromTag
-        .calledWith(this.user_id, this.tag_id, this.project_id)
+        .calledWith(this.userId, this.tagId, this.projectId)
         .should.equal(true)
     })
 

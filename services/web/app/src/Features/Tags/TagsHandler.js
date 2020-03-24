@@ -1,144 +1,104 @@
-const settings = require('settings-sharelatex')
-const request = require('request')
-const logger = require('logger-sharelatex')
+const { Tag } = require('../../models/Tag')
 const { promisifyAll } = require('../../util/promises')
 
-const TIMEOUT = 10000
-
 function getAllTags(userId, callback) {
-  const opts = {
-    url: `${settings.apis.tags.url}/user/${userId}/tag`,
-    json: true,
-    timeout: TIMEOUT
-  }
-  request.get(opts, (err, res, body) =>
-    _handleResponse(err, res, { userId }, function(error) {
-      if (error != null) {
-        return callback(error, [])
-      }
-      callback(null, body || [])
-    })
-  )
+  Tag.find({ user_id: userId }, callback)
 }
 
 function createTag(userId, name, callback) {
-  const opts = {
-    url: `${settings.apis.tags.url}/user/${userId}/tag`,
-    json: {
-      name
-    },
-    timeout: TIMEOUT
+  if (!callback) {
+    callback = function() {}
   }
-  request.post(opts, (err, res, body) =>
-    _handleResponse(err, res, { userId }, function(error) {
-      if (error != null) {
-        return callback(error)
-      }
-      callback(null, body || {})
-    })
-  )
+  Tag.create({ user_id: userId, name }, function(err, tag) {
+    // on duplicate key error return existing tag
+    if (err && err.code === 11000) {
+      return Tag.findOne({ user_id: userId, name }, callback)
+    }
+    callback(err, tag)
+  })
 }
 
 function renameTag(userId, tagId, name, callback) {
-  const url = `${settings.apis.tags.url}/user/${userId}/tag/${tagId}/rename`
-  request.post(
+  if (!callback) {
+    callback = function() {}
+  }
+  Tag.update(
     {
-      url,
-      json: {
-        name
-      },
-      timeout: TIMEOUT
+      _id: tagId,
+      user_id: userId
     },
-    (err, res, body) =>
-      _handleResponse(err, res, { url, userId, tagId, name }, callback)
+    {
+      $set: {
+        name
+      }
+    },
+    callback
   )
 }
 
 function deleteTag(userId, tagId, callback) {
-  const url = `${settings.apis.tags.url}/user/${userId}/tag/${tagId}`
-  request.del({ url, timeout: TIMEOUT }, (err, res, body) =>
-    _handleResponse(err, res, { url, userId, tagId }, callback)
+  if (!callback) {
+    callback = function() {}
+  }
+  Tag.remove(
+    {
+      _id: tagId,
+      user_id: userId
+    },
+    callback
   )
 }
 
+// TODO: unused?
 function updateTagUserIds(oldUserId, newUserId, callback) {
-  const opts = {
-    url: `${settings.apis.tags.url}/user/${oldUserId}/tag`,
-    json: {
-      user_id: newUserId
-    },
-    timeout: TIMEOUT
+  if (!callback) {
+    callback = function() {}
   }
-  request.put(opts, (err, res, body) =>
-    _handleResponse(err, res, { oldUserId, newUserId }, callback)
-  )
+  const searchOps = { user_id: oldUserId }
+  const updateOperation = { $set: { user_id: newUserId } }
+  Tag.update(searchOps, updateOperation, { multi: true }, callback)
 }
 
 function removeProjectFromTag(userId, tagId, projectId, callback) {
-  const url = `${
-    settings.apis.tags.url
-  }/user/${userId}/tag/${tagId}/project/${projectId}`
-  request.del({ url, timeout: TIMEOUT }, (err, res, body) =>
-    _handleResponse(err, res, { url, userId, tagId, projectId }, callback)
-  )
+  if (!callback) {
+    callback = function() {}
+  }
+  const searchOps = {
+    _id: tagId,
+    user_id: userId
+  }
+  const deleteOperation = { $pull: { project_ids: projectId } }
+  Tag.update(searchOps, deleteOperation, callback)
 }
 
 function addProjectToTag(userId, tagId, projectId, callback) {
-  const url = `${
-    settings.apis.tags.url
-  }/user/${userId}/tag/${tagId}/project/${projectId}`
-  request.post({ url, timeout: TIMEOUT }, (err, res, body) =>
-    _handleResponse(err, res, { url, userId, tagId, projectId }, callback)
-  )
+  if (!callback) {
+    callback = function() {}
+  }
+  const searchOps = {
+    _id: tagId,
+    user_id: userId
+  }
+  const insertOperation = { $addToSet: { project_ids: projectId } }
+  Tag.findOneAndUpdate(searchOps, insertOperation, callback)
 }
 
 function addProjectToTagName(userId, name, projectId, callback) {
-  const url = `${
-    settings.apis.tags.url
-  }/user/${userId}/tag/project/${projectId}`
-  const opts = {
-    json: { name },
-    timeout: TIMEOUT,
-    url
+  if (!callback) {
+    callback = function() {}
   }
-  request.post(opts, (err, res, body) =>
-    _handleResponse(err, res, { url, userId, name, projectId }, callback)
-  )
+  const searchOps = {
+    name,
+    user_id: userId
+  }
+  const insertOperation = { $addToSet: { project_ids: projectId } }
+  Tag.update(searchOps, insertOperation, { upsert: true }, callback)
 }
 
 function removeProjectFromAllTags(userId, projectId, callback) {
-  const url = `${settings.apis.tags.url}/user/${userId}/project/${projectId}`
-  const opts = {
-    url,
-    timeout: TIMEOUT
-  }
-  request.del(opts, (err, res, body) =>
-    _handleResponse(err, res, { url, userId, projectId }, callback)
-  )
-}
-
-function _handleResponse(err, res, params, callback) {
-  if (err != null) {
-    params.err = err
-    logger.warn(params, 'error in tag api')
-    return callback(err)
-  } else if (res != null && res.statusCode >= 200 && res.statusCode < 300) {
-    return callback(null)
-  } else {
-    err = new Error(
-      `tags api returned a failure status code: ${
-        res != null ? res.statusCode : undefined
-      }`
-    )
-    params.err = err
-    logger.warn(
-      params,
-      `tags api returned failure status code: ${
-        res != null ? res.statusCode : undefined
-      }`
-    )
-    callback(err)
-  }
+  const searchOps = { user_id: userId }
+  const deleteOperation = { $pull: { project_ids: projectId } }
+  Tag.update(searchOps, deleteOperation, { multi: true }, callback)
 }
 
 const TagsHandler = {

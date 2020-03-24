@@ -18,14 +18,12 @@ const request = require('./helpers/request')
 const settings = require('settings-sharelatex')
 const redis = require('./helpers/redis')
 const MockV1Api = require('./helpers/MockV1Api')
-const MockTagsApi = require('./helpers/MockTagsApi')
 
 describe('Sessions', function() {
   beforeEach(function(done) {
     this.timeout(20000)
     this.user1 = new User()
     this.site_admin = new User({ email: 'admin@example.com' })
-    MockTagsApi.tags[this.user1] = []
     return async.series(
       [cb => this.user1.login(cb), cb => this.user1.logout(cb)],
       done

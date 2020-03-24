@@ -628,6 +628,11 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     UserController.expireDeletedUser
   )
 
+  privateApiRouter.get(
+    '/user/:userId/tag',
+    AuthenticationController.httpAuth,
+    TagsController.apiGetAllTags
+  )
   webRouter.get(
     '/tag',
     AuthenticationController.requireLogin(),
@@ -644,7 +649,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     TagsController.createTag
   )
   webRouter.post(
-    '/tag/:tag_id/rename',
+    '/tag/:tagId/rename',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit({
       endpointName: 'rename-tag',
@@ -654,7 +659,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     TagsController.renameTag
   )
   webRouter.delete(
-    '/tag/:tag_id',
+    '/tag/:tagId',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit({
       endpointName: 'delete-tag',
@@ -664,7 +669,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     TagsController.deleteTag
   )
   webRouter.post(
-    '/tag/:tag_id/project/:project_id',
+    '/tag/:tagId/project/:projectId',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit({
       endpointName: 'add-project-to-tag',
@@ -674,7 +679,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     TagsController.addProjectToTag
   )
   webRouter.delete(
-    '/tag/:tag_id/project/:project_id',
+    '/tag/:tagId/project/:projectId',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit({
       endpointName: 'remove-project-from-tag',
