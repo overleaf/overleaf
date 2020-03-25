@@ -36,7 +36,7 @@ module.exports = HttpController = {
         if (error != null) {
           return next(error)
         }
-        return res.send(204)
+        return res.sendStatus(204)
       }
     )
   },
@@ -53,7 +53,7 @@ module.exports = HttpController = {
         if (error != null) {
           return next(error)
         }
-        return res.send(204)
+        return res.sendStatus(204)
       }
     )
   },
@@ -134,7 +134,7 @@ module.exports = HttpController = {
       if (broken.length > 0) {
         return res.send(broken)
       } else {
-        return res.send(204)
+        return res.sendStatus(204)
       }
     })
   },
@@ -215,7 +215,7 @@ module.exports = HttpController = {
         if (error != null) {
           return next(error)
         }
-        return res.send(204)
+        return res.sendStatus(204)
       }
     )
   },
@@ -231,7 +231,7 @@ module.exports = HttpController = {
       if (error != null) {
         return next(error)
       }
-      return res.send(204)
+      return res.sendStatus(204)
     })
   },
 
@@ -246,7 +246,7 @@ module.exports = HttpController = {
       if (error != null) {
         return next(error)
       }
-      return res.send(204)
+      return res.sendStatus(204)
     })
   },
 
@@ -254,9 +254,9 @@ module.exports = HttpController = {
     return HealthChecker.check(function(err) {
       if (err != null) {
         logger.err({ err }, 'error performing health check')
-        return res.send(500)
+        return res.sendStatus(500)
       } else {
-        return res.send(200)
+        return res.sendStatus(200)
       }
     })
   },
@@ -265,9 +265,9 @@ module.exports = HttpController = {
     return HealthChecker.checkLock(function(err) {
       if (err != null) {
         logger.err({ err }, 'error performing lock check')
-        return res.send(500)
+        return res.sendStatus(500)
       } else {
-        return res.send(200)
+        return res.sendStatus(200)
       }
     })
   }

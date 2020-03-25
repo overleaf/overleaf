@@ -23,6 +23,7 @@ const SandboxedModule = require('sandboxed-module')
 describe('UpdatesManager', function() {
   beforeEach(function() {
     this.UpdatesManager = SandboxedModule.require(modulePath, {
+      singleOnly: true,
       requires: {
         './UpdateCompressor': (this.UpdateCompressor = {}),
         './MongoManager': (this.MongoManager = {}),

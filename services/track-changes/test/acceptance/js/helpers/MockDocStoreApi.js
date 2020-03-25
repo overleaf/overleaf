@@ -28,10 +28,10 @@ module.exports = MockDocUpdaterApi = {
     app.get('/project/:project_id/doc', (req, res, next) => {
       return this.getAllDoc(req.params.project_id, (error, docs) => {
         if (error != null) {
-          res.send(500)
+          res.sendStatus(500)
         }
         if (docs == null) {
-          return res.send(404)
+          return res.sendStatus(404)
         } else {
           return res.send(JSON.stringify(docs))
         }

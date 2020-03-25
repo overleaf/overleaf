@@ -37,10 +37,10 @@ module.exports = MockWebApi = {
     app.get('/user/:user_id/personal_info', (req, res, next) => {
       return this.getUserInfo(req.params.user_id, (error, user) => {
         if (error != null) {
-          res.send(500)
+          res.sendStatus(500)
         }
         if (user == null) {
-          return res.send(404)
+          return res.sendStatus(404)
         } else {
           return res.send(JSON.stringify(user))
         }
@@ -50,10 +50,10 @@ module.exports = MockWebApi = {
     app.get('/project/:project_id/details', (req, res, next) => {
       return this.getProjectDetails(req.params.project_id, (error, project) => {
         if (error != null) {
-          res.send(500)
+          res.sendStatus(500)
         }
         if (project == null) {
-          return res.send(404)
+          return res.sendStatus(404)
         } else {
           return res.send(JSON.stringify(project))
         }

@@ -21,6 +21,7 @@ const zlib = require('zlib')
 describe('MongoAWS', function() {
   beforeEach(function() {
     this.MongoAWS = SandboxedModule.require(modulePath, {
+      singleOnly: true,
       requires: {
         'settings-sharelatex': (this.settings = {
           trackchanges: {

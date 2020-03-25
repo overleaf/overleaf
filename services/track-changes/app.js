@@ -46,7 +46,11 @@ const child_process = require('child_process')
 
 const HttpController = require('./app/js/HttpController')
 const express = require('express')
+const bodyParser = require('body-parser');
+
 const app = express()
+
+app.use(bodyParser.json())
 
 app.use(Metrics.http.monitor(logger))
 
