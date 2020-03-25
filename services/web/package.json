@@ -75,7 +75,7 @@
     "mailchimp-api-v3": "^1.12.0",
     "marked": "^0.3.5",
     "method-override": "^2.3.3",
-    "metrics-sharelatex": "^2.6.1",
+    "metrics-sharelatex": "^2.6.2",
     "minimist": "1.2.0",
     "mmmagic": "^0.5.2",
     "mocha": "^6.2.2",
