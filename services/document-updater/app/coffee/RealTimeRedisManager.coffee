@@ -5,6 +5,7 @@ Keys = Settings.redis.documentupdater.key_schema
 logger = require('logger-sharelatex')
 os = require "os"
 crypto = require "crypto"
+metrics = require('./Metrics')
 
 HOST = os.hostname()
 RND = crypto.randomBytes(4).toString('hex') # generate a random key for this process
@@ -27,6 +28,8 @@ module.exports = RealTimeRedisManager =
 				catch e
 					return callback e
 				updates.push update
+				# record metric for updates removed from queue
+				metrics.summary "redis.pendingUpdates", jsonUpdate.length, {status: "pop"}
 			callback error, updates
 
 	getUpdatesLength: (doc_id, callback)->
