@@ -48,6 +48,7 @@ describe "RedisManager", ->
 					createClient: () => @rclient
 				"./Metrics": @metrics =
 					inc: sinon.stub()
+					summary: sinon.stub()
 					Timer: class Timer
 						constructor: () ->
 							this.start = new Date()
