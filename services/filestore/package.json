@@ -35,7 +35,6 @@
     "request-promise-native": "^1.0.8",
     "settings-sharelatex": "^1.1.0",
     "stream-buffers": "~0.2.5",
-    "stream-meter": "^1.0.4",
     "tiny-async-pool": "^1.1.0"
   },
   "devDependencies": {

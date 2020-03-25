@@ -3,6 +3,7 @@ const chai = require('chai')
 const { expect } = chai
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../app/js/Errors')
+const StreamModule = require('stream')
 
 chai.use(require('sinon-chai'))
 chai.use(require('chai-as-promised'))
@@ -38,7 +39,10 @@ describe('FSPersistorTests', function() {
       stat: sinon.stub().yields(null, stat)
     }
     glob = sinon.stub().yields(null, globs)
-    stream = { pipeline: sinon.stub().yields() }
+    stream = {
+      pipeline: sinon.stub().yields(),
+      Transform: StreamModule.Transform
+    }
     LocalFileWriter = {
       promises: {
         writeStream: sinon.stub().resolves(tempFile),
@@ -48,6 +52,7 @@ describe('FSPersistorTests', function() {
     Hash = {
       end: sinon.stub(),
       read: sinon.stub().returns(md5),
+      digest: sinon.stub().returns(md5),
       setEncoding: sinon.stub()
     }
     crypto = {
@@ -62,7 +67,6 @@ describe('FSPersistorTests', function() {
         stream,
         crypto,
         // imported by PersistorHelper but otherwise unused here
-        'stream-meter': {},
         'logger-sharelatex': {},
         'metrics-sharelatex': {}
       },
