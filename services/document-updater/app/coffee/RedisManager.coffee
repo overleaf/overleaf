@@ -41,6 +41,7 @@ module.exports = RedisManager =
 			logger.error {err: error, doc_id: doc_id, docLines: docLines}, error.message
 			return callback(error)
 		docHash = RedisManager._computeHash(docLines)
+		metrics.summary "redis.setDoc", docLines.length, {status: "set"}
 		logger.log {project_id, doc_id, version, docHash, pathname, projectHistoryId}, "putting doc in redis"
 		RedisManager._serializeRanges ranges, (error, ranges) ->
 			if error?
