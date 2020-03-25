@@ -11,7 +11,7 @@ module.exports.monitor = (logger) ->
 		res.end = () ->
 			end.apply(this, arguments)
 			responseTime = process.hrtime(startTime)
-			responseTimeMs = Math.round(responseTime[0] * 1000 + responseTime[1] / 1000)
+			responseTimeMs = Math.round(responseTime[0] * 1000 + responseTime[1] / 1000000)
 			requestSize = parseInt(req.headers["content-length"], 10)
 			if req.route?.path?
 				routePath = req.route.path.toString().replace(/\//g, '_').replace(/\:/g, '').slice(1)
