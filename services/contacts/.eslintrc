@@ -1,7 +1,6 @@
 // this file was auto-generated, do not edit it directly.
 // instead run bin/update_build_scripts from
 // https://github.com/sharelatex/sharelatex-dev-environment
-// Version: 1.3.5
 {
   "extends": [
     "standard",

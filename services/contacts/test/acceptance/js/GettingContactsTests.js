@@ -95,7 +95,7 @@ describe('Getting Contacts', function() {
       )
     })
 
-    return it('should respect a limit and only return top X contacts', function() {
+    return it('should respect a limit and only return top X contacts', function(done) {
       return request(
         {
           method: 'GET',
