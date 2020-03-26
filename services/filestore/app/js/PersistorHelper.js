@@ -50,7 +50,7 @@ module.exports = {
   ObserverStream,
   calculateStreamMd5,
   verifyMd5,
-  waitForStreamReady,
+  getReadyPipeline,
   wrapError,
   hexToBase64,
   base64ToHex
@@ -94,19 +94,33 @@ async function verifyMd5(persistor, bucket, key, sourceMd5, destMd5 = null) {
 
 // resolves when a stream is 'readable', or rejects if the stream throws an error
 // before that happens - this lets us handle protocol-level errors before trying
-// to read them
-function waitForStreamReady(stream) {
+// to read them - these can come from the call to pipeline or the stream itself
+function getReadyPipeline(...streams) {
   return new Promise((resolve, reject) => {
+    const lastStream = streams.slice(-1)[0]
+    let resolvedOrErrored = false
+
     const onError = function(err) {
-      reject(wrapError(err, 'error before stream became ready', {}, ReadError))
+      if (!resolvedOrErrored) {
+        resolvedOrErrored = true
+        reject(
+          wrapError(err, 'error before stream became ready', {}, ReadError)
+        )
+      }
     }
     const onStreamReady = function() {
-      stream.removeListener('readable', onStreamReady)
-      stream.removeListener('error', onError)
-      resolve(stream)
+      if (!resolvedOrErrored) {
+        resolvedOrErrored = true
+        lastStream.removeListener('readable', onStreamReady)
+        lastStream.removeListener('error', onError)
+        resolve(lastStream)
+      }
     }
-    stream.on('readable', onStreamReady)
-    stream.on('error', onError)
+
+    pipeline(...streams).catch(onError)
+
+    lastStream.on('readable', onStreamReady)
+    lastStream.on('error', onError)
   })
 }
 
