@@ -202,7 +202,7 @@ describe('GcsPersistorTests', function() {
 
       beforeEach(async function() {
         Transform.prototype.on = sinon.stub()
-        Transform.prototype.on.withArgs('error').yields(GcsNotFoundError)
+        Stream.pipeline.yields(GcsNotFoundError)
         try {
           stream = await GcsPersistor.promises.getFileStream(bucket, key)
         } catch (err) {
@@ -232,7 +232,7 @@ describe('GcsPersistorTests', function() {
 
       beforeEach(async function() {
         Transform.prototype.on = sinon.stub()
-        Transform.prototype.on.withArgs('error').yields(genericError)
+        Stream.pipeline.yields(genericError)
         try {
           stream = await GcsPersistor.promises.getFileStream(bucket, key)
         } catch (err) {

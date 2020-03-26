@@ -292,7 +292,7 @@ describe('S3PersistorTests', function() {
 
       beforeEach(async function() {
         Transform.prototype.on = sinon.stub()
-        Transform.prototype.on.withArgs('error').yields(S3NotFoundError)
+        Stream.pipeline.yields(S3NotFoundError)
         try {
           stream = await S3Persistor.promises.getFileStream(bucket, key)
         } catch (err) {
@@ -322,7 +322,7 @@ describe('S3PersistorTests', function() {
 
       beforeEach(async function() {
         Transform.prototype.on = sinon.stub()
-        Transform.prototype.on.withArgs('error').yields(S3AccessDeniedError)
+        Stream.pipeline.yields(S3AccessDeniedError)
         try {
           stream = await S3Persistor.promises.getFileStream(bucket, key)
         } catch (err) {
@@ -352,7 +352,7 @@ describe('S3PersistorTests', function() {
 
       beforeEach(async function() {
         Transform.prototype.on = sinon.stub()
-        Transform.prototype.on.withArgs('error').yields(genericError)
+        Stream.pipeline.yields(genericError)
         try {
           stream = await S3Persistor.promises.getFileStream(bucket, key)
         } catch (err) {

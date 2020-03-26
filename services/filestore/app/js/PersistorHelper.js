@@ -94,33 +94,28 @@ async function verifyMd5(persistor, bucket, key, sourceMd5, destMd5 = null) {
 
 // resolves when a stream is 'readable', or rejects if the stream throws an error
 // before that happens - this lets us handle protocol-level errors before trying
-// to read them - these can come from the call to pipeline or the stream itself
+// to read them
 function getReadyPipeline(...streams) {
   return new Promise((resolve, reject) => {
     const lastStream = streams.slice(-1)[0]
     let resolvedOrErrored = false
 
-    const onError = function(err) {
+    const handler = function(err) {
       if (!resolvedOrErrored) {
         resolvedOrErrored = true
-        reject(
-          wrapError(err, 'error before stream became ready', {}, ReadError)
-        )
-      }
-    }
-    const onStreamReady = function() {
-      if (!resolvedOrErrored) {
-        resolvedOrErrored = true
-        lastStream.removeListener('readable', onStreamReady)
-        lastStream.removeListener('error', onError)
+
+        lastStream.removeListener('readable', handler)
+        if (err) {
+          return reject(
+            wrapError(err, 'error before stream became ready', {}, ReadError)
+          )
+        }
         resolve(lastStream)
       }
     }
 
-    pipeline(...streams).catch(onError)
-
-    lastStream.on('readable', onStreamReady)
-    lastStream.on('error', onError)
+    pipeline(...streams).catch(handler)
+    lastStream.on('readable', handler)
   })
 }
 
