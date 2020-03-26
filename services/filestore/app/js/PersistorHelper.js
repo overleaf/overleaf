@@ -15,6 +15,7 @@ const pipeline = promisify(Stream.pipeline)
 //   the number of bytes transferred
 class ObserverStream extends Stream.Transform {
   constructor(options) {
+    options.autoDestroy = true
     super(options)
 
     this.bytes = 0
