@@ -27,7 +27,7 @@ if (!process.env.AWS_ACCESS_KEY_ID) {
 }
 
 process.on('unhandledRejection', e => {
-  // eslint-disable no-console
+  // eslint-disable-next-line no-console
   console.log('** Unhandled Promise Rejection **\n', e)
   throw e
 })
