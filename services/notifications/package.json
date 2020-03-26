@@ -23,7 +23,7 @@
     "logger-sharelatex": "^1.9.1",
     "metrics-sharelatex": "^2.6.2",
     "mongojs": "^2.4.0",
-    "node-statsd": "0.0.3",
+    "node-statsd": "0.1.1",
     "request": "^2.88.2",
     "settings-sharelatex": "^1.1.0",
     "underscore": "1.9.2"
@@ -47,10 +47,10 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^4.1.0",
-    "prettier": "^1.19.1",
+    "mocha": "^7.1.1",
+    "prettier": "^2.0.2",
     "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "^2.0.3",
-    "sinon": "^6.3.5"
+    "sinon": "^9.0.1"
   }
 }
