@@ -17,7 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "async": "^0.1.22",
+    "async": "^2.6.3",
     "coffee-script": "^1.12.7",
     "express": "3.1.0",
     "logger-sharelatex": "^1.9.1",
