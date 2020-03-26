@@ -3,6 +3,7 @@ const chai = require('chai')
 const { expect } = chai
 const modulePath = '../../../app/js/S3Persistor.js'
 const SandboxedModule = require('sandboxed-module')
+const StreamModule = require('stream')
 
 const Errors = require('../../../app/js/Errors')
 
@@ -32,8 +33,6 @@ describe('S3PersistorTests', function() {
     Logger,
     S3,
     Fs,
-    Meter,
-    MeteredStream,
     ReadStream,
     Stream,
     S3Persistor,
@@ -63,7 +62,8 @@ describe('S3PersistorTests', function() {
     }
 
     Stream = {
-      pipeline: sinon.stub().yields()
+      pipeline: sinon.stub().yields(),
+      Transform: StreamModule.Transform
     }
 
     EmptyPromise = {
@@ -88,14 +88,6 @@ describe('S3PersistorTests', function() {
     Fs = {
       createReadStream: sinon.stub().returns(ReadStream)
     }
-
-    MeteredStream = {
-      type: 'metered',
-      on: sinon.stub(),
-      bytes: objectSize
-    }
-    MeteredStream.on.withArgs('finish').yields()
-    Meter = sinon.stub().returns(MeteredStream)
 
     S3NotFoundError = new Error('not found')
     S3NotFoundError.code = 'NoSuchKey'
@@ -136,6 +128,7 @@ describe('S3PersistorTests', function() {
     Hash = {
       end: sinon.stub(),
       read: sinon.stub().returns(md5),
+      digest: sinon.stub().returns(md5),
       setEncoding: sinon.stub()
     }
     crypto = {
@@ -153,7 +146,6 @@ describe('S3PersistorTests', function() {
         'logger-sharelatex': Logger,
         './Errors': Errors,
         fs: Fs,
-        'stream-meter': Meter,
         stream: Stream,
         'metrics-sharelatex': Metrics,
         crypto
@@ -171,7 +163,7 @@ describe('S3PersistorTests', function() {
       })
 
       it('returns a metered stream', function() {
-        expect(stream).to.equal(MeteredStream)
+        expect(stream).to.be.instanceOf(StreamModule.Transform)
       })
 
       it('sets the AWS client up with credentials from settings', function() {
@@ -188,12 +180,8 @@ describe('S3PersistorTests', function() {
       it('pipes the stream through the meter', function() {
         expect(Stream.pipeline).to.have.been.calledWith(
           S3ReadStream,
-          MeteredStream
+          sinon.match.instanceOf(StreamModule.Transform)
         )
-      })
-
-      it('records an ingress metric', function() {
-        expect(Metrics.count).to.have.been.calledWith('s3.ingress', objectSize)
       })
     })
 
@@ -208,7 +196,7 @@ describe('S3PersistorTests', function() {
       })
 
       it('returns a metered stream', function() {
-        expect(stream).to.equal(MeteredStream)
+        expect(stream).to.be.instanceOf(Stream.Transform)
       })
 
       it('passes the byte range on to S3', function() {
@@ -242,7 +230,7 @@ describe('S3PersistorTests', function() {
       })
 
       it('returns a metered stream', function() {
-        expect(stream).to.equal(MeteredStream)
+        expect(stream).to.be.instanceOf(Stream.Transform)
       })
 
       it('sets the AWS client up with the alternative credentials', function() {
@@ -457,7 +445,7 @@ describe('S3PersistorTests', function() {
         expect(S3Client.upload).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
-          Body: MeteredStream
+          Body: sinon.match.instanceOf(Stream.Transform)
         })
       })
 
@@ -470,16 +458,12 @@ describe('S3PersistorTests', function() {
       it('should meter the stream', function() {
         expect(Stream.pipeline).to.have.been.calledWith(
           ReadStream,
-          MeteredStream
+          sinon.match.instanceOf(Stream.Transform)
         )
       })
 
-      it('should record an egress metric', function() {
-        expect(Metrics.count).to.have.been.calledWith('s3.egress', objectSize)
-      })
-
       it('calculates the md5 hash of the file', function() {
-        expect(Stream.pipeline).to.have.been.calledWith(ReadStream, Hash)
+        expect(Hash.digest).to.have.been.called
       })
     })
 
@@ -494,17 +478,14 @@ describe('S3PersistorTests', function() {
       })
 
       it('should not calculate the md5 hash of the file', function() {
-        expect(Stream.pipeline).not.to.have.been.calledWith(
-          sinon.match.any,
-          Hash
-        )
+        expect(Hash.digest).not.to.have.been.called
       })
 
       it('sends the hash in base64', function() {
         expect(S3Client.upload).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
-          Body: MeteredStream,
+          Body: sinon.match.instanceOf(StreamModule.Transform),
           ContentMD5: 'qqqqqru7u7uqqqqqu7u7uw=='
         })
       })
@@ -555,12 +536,12 @@ describe('S3PersistorTests', function() {
       it('should meter the download', function() {
         expect(Stream.pipeline).to.have.been.calledWith(
           S3ReadStream,
-          MeteredStream
+          sinon.match.instanceOf(Stream.Transform)
         )
       })
 
       it('should calculate the md5 hash from the file', function() {
-        expect(Stream.pipeline).to.have.been.calledWith(MeteredStream, Hash)
+        expect(Hash.digest).to.have.been.called
       })
     })
   })
@@ -579,7 +560,7 @@ describe('S3PersistorTests', function() {
         expect(S3Client.upload).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
-          Body: MeteredStream
+          Body: sinon.match.instanceOf(StreamModule.Transform)
         })
       })
     })

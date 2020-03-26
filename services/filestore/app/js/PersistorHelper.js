@@ -1,17 +1,54 @@
 const crypto = require('crypto')
-const metrics = require('metrics-sharelatex')
-const meter = require('stream-meter')
 const Stream = require('stream')
 const logger = require('logger-sharelatex')
+const metrics = require('metrics-sharelatex')
 const { WriteError, ReadError, NotFoundError } = require('./Errors')
 const { promisify } = require('util')
 
 const pipeline = promisify(Stream.pipeline)
 
+// Observes data that passes through and computes some metadata for it
+// - specifically, it computes the number of bytes transferred, and optionally
+//   computes a cryptographic hash based on the 'hash' option. e.g., pass
+//   { hash: 'md5' } to compute the md5 hash of the stream
+// - if 'metric' is supplied as an option, this metric will be incremented by
+//   the number of bytes transferred
+class ObserverStream extends Stream.Transform {
+  constructor(options) {
+    super(options)
+
+    this.bytes = 0
+
+    if (options.hash) {
+      this.hash = crypto.createHash(options.hash)
+    }
+    if (options.metric) {
+      const onEnd = () => {
+        metrics.count(options.metric, this.bytes)
+      }
+      this.once('error', onEnd)
+      this.once('end', onEnd)
+    }
+  }
+
+  _transform(chunk, encoding, done) {
+    if (this.hash) {
+      this.hash.update(chunk)
+    }
+    this.bytes += chunk.length
+    this.push(chunk)
+    done()
+  }
+
+  getHash() {
+    return this.hash && this.hash.digest('hex')
+  }
+}
+
 module.exports = {
+  ObserverStream,
   calculateStreamMd5,
   verifyMd5,
-  getMeteredStream,
   waitForStreamReady,
   wrapError,
   hexToBase64,
@@ -19,6 +56,7 @@ module.exports = {
 }
 
 // returns a promise which resolves with the md5 hash of the stream
+// - consumes the stream
 function calculateStreamMd5(stream) {
   const hash = crypto.createHash('md5')
   hash.setEncoding('hex')
@@ -51,23 +89,6 @@ async function verifyMd5(persistor, bucket, key, sourceMd5, destMd5 = null) {
       }
     })
   }
-}
-
-// returns the next stream in the pipeline, and calls the callback with the byte count
-// when the stream finishes or receives an error
-function getMeteredStream(stream, metricName) {
-  const meteredStream = meter()
-
-  pipeline(stream, meteredStream)
-    .then(() => {
-      metrics.count(metricName, meteredStream.bytes)
-    })
-    .catch(() => {
-      // on error, just send how many bytes we received before the stream stopped
-      metrics.count(metricName, meteredStream.bytes)
-    })
-
-  return meteredStream
 }
 
 // resolves when a stream is 'readable', or rejects if the stream throws an error

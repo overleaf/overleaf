@@ -5,6 +5,7 @@ const modulePath = '../../../app/js/GcsPersistor.js'
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
 const asyncPool = require('tiny-async-pool')
+const StreamModule = require('stream')
 
 const Errors = require('../../../app/js/Errors')
 
@@ -13,7 +14,6 @@ describe('GcsPersistorTests', function() {
   const bucket = 'womBucket'
   const key = 'monKey'
   const destKey = 'donKey'
-  const objectSize = 5555
   const genericError = new Error('guru meditation error')
   const filesSize = 33
   const md5 = 'ffffffff00000000ffffffff00000000'
@@ -24,8 +24,6 @@ describe('GcsPersistorTests', function() {
     Storage,
     Fs,
     GcsNotFoundError,
-    Meter,
-    MeteredStream,
     ReadStream,
     Stream,
     GcsBucket,
@@ -71,7 +69,8 @@ describe('GcsPersistorTests', function() {
     }
 
     Stream = {
-      pipeline: sinon.stub().yields()
+      pipeline: sinon.stub().yields(),
+      Transform: StreamModule.Transform
     }
 
     Metrics = {
@@ -109,18 +108,10 @@ describe('GcsPersistorTests', function() {
     FileNotFoundError = new Error('File not found')
     FileNotFoundError.code = 'ENOENT'
 
-    MeteredStream = {
-      type: 'metered',
-      on: sinon.stub(),
-      bytes: objectSize
-    }
-    MeteredStream.on.withArgs('finish').yields()
-    MeteredStream.on.withArgs('readable').yields()
-    Meter = sinon.stub().returns(MeteredStream)
-
     Hash = {
       end: sinon.stub(),
       read: sinon.stub().returns(md5),
+      digest: sinon.stub().returns(md5),
       setEncoding: sinon.stub()
     }
     crypto = {
@@ -139,7 +130,6 @@ describe('GcsPersistorTests', function() {
         'tiny-async-pool': asyncPool,
         './Errors': Errors,
         fs: Fs,
-        'stream-meter': Meter,
         stream: Stream,
         'metrics-sharelatex': Metrics,
         crypto
@@ -157,7 +147,7 @@ describe('GcsPersistorTests', function() {
       })
 
       it('returns a metered stream', function() {
-        expect(stream).to.equal(MeteredStream)
+        expect(stream).to.be.instanceOf(StreamModule.Transform)
       })
 
       it('fetches the right key from the right bucket', function() {
@@ -169,12 +159,8 @@ describe('GcsPersistorTests', function() {
       it('pipes the stream through the meter', function() {
         expect(Stream.pipeline).to.have.been.calledWith(
           ReadStream,
-          MeteredStream
+          sinon.match.instanceOf(StreamModule.Transform)
         )
-      })
-
-      it('records an ingress metric', function() {
-        expect(Metrics.count).to.have.been.calledWith('gcs.ingress', objectSize)
       })
     })
 
@@ -189,7 +175,7 @@ describe('GcsPersistorTests', function() {
       })
 
       it('returns a metered stream', function() {
-        expect(stream).to.equal(MeteredStream)
+        expect(stream).to.be.instanceOf(StreamModule.Transform)
       })
 
       it('passes the byte range on to GCS', function() {
@@ -341,26 +327,16 @@ describe('GcsPersistorTests', function() {
         })
       })
 
-      it('should meter the stream', function() {
+      it('should meter the stream and pass it to GCS', function() {
         expect(Stream.pipeline).to.have.been.calledWith(
           ReadStream,
-          MeteredStream
-        )
-      })
-
-      it('should pipe the metered stream to GCS', function() {
-        expect(Stream.pipeline).to.have.been.calledWith(
-          MeteredStream,
+          sinon.match.instanceOf(StreamModule.Transform),
           WriteStream
         )
       })
 
-      it('should record an egress metric', function() {
-        expect(Metrics.count).to.have.been.calledWith('gcs.egress', objectSize)
-      })
-
       it('calculates the md5 hash of the file', function() {
-        expect(Stream.pipeline).to.have.been.calledWith(ReadStream, Hash)
+        expect(Hash.digest).to.have.been.called
       })
     })
 
@@ -375,10 +351,7 @@ describe('GcsPersistorTests', function() {
       })
 
       it('should not calculate the md5 hash of the file', function() {
-        expect(Stream.pipeline).not.to.have.been.calledWith(
-          sinon.match.any,
-          Hash
-        )
+        expect(Hash.digest).not.to.have.been.called
       })
 
       it('sends the hash in base64', function() {
@@ -400,7 +373,12 @@ describe('GcsPersistorTests', function() {
       let error
       beforeEach(async function() {
         Stream.pipeline
-          .withArgs(MeteredStream, WriteStream, sinon.match.any)
+          .withArgs(
+            ReadStream,
+            sinon.match.instanceOf(StreamModule.Transform),
+            WriteStream,
+            sinon.match.any
+          )
           .yields(genericError)
         try {
           await GcsPersistor.promises.sendStream(bucket, key, ReadStream)
@@ -438,10 +416,7 @@ describe('GcsPersistorTests', function() {
       it('should upload the stream via the meter', function() {
         expect(Stream.pipeline).to.have.been.calledWith(
           ReadStream,
-          MeteredStream
-        )
-        expect(Stream.pipeline).to.have.been.calledWith(
-          MeteredStream,
+          sinon.match.instanceOf(StreamModule.Transform),
           WriteStream
         )
       })

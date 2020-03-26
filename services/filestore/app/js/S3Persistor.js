@@ -10,13 +10,15 @@ const PersistorHelper = require('./PersistorHelper')
 const fs = require('fs')
 const S3 = require('aws-sdk/clients/s3')
 const { URL } = require('url')
-const { callbackify } = require('util')
+const Stream = require('stream')
+const { promisify, callbackify } = require('util')
 const {
   WriteError,
   ReadError,
   NotFoundError,
   SettingsError
 } = require('./Errors')
+const pipeline = promisify(Stream.pipeline)
 
 const S3Persistor = {
   sendFile: callbackify(sendFile),
@@ -51,26 +53,25 @@ async function sendFile(bucketName, key, fsPath) {
 
 async function sendStream(bucketName, key, readStream, sourceMd5) {
   try {
-    // if there is no supplied md5 hash, we calculate the hash as the data passes through
-    let hashPromise
+    // egress from us to S3
+    const observeOptions = { metric: 's3.egress' }
     let b64Hash
 
     if (sourceMd5) {
       b64Hash = PersistorHelper.hexToBase64(sourceMd5)
     } else {
-      hashPromise = PersistorHelper.calculateStreamMd5(readStream)
+      // if there is no supplied md5 hash, we calculate the hash as the data passes through
+      observeOptions.hash = 'md5'
     }
 
-    const meteredStream = PersistorHelper.getMeteredStream(
-      readStream,
-      's3.egress' // egress from us to s3
-    )
+    const observer = new PersistorHelper.ObserverStream(observeOptions)
+    pipeline(readStream, observer)
 
     // if we have an md5 hash, pass this to S3 to verify the upload
     const uploadOptions = {
       Bucket: bucketName,
       Key: key,
-      Body: meteredStream
+      Body: observer
     }
     if (b64Hash) {
       uploadOptions.ContentMD5 = b64Hash
@@ -92,8 +93,8 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
 
     // if we didn't have an md5 hash, we should compare our computed one with S3's
     // as we couldn't tell S3 about it beforehand
-    if (hashPromise) {
-      sourceMd5 = await hashPromise
+    if (!sourceMd5) {
+      sourceMd5 = observer.getHash()
       // throws on mismatch
       await PersistorHelper.verifyMd5(
         S3Persistor,
@@ -128,14 +129,13 @@ async function getFileStream(bucketName, key, opts) {
     .getObject(params)
     .createReadStream()
 
-  const meteredStream = PersistorHelper.getMeteredStream(
-    stream,
-    's3.ingress' // ingress to us from s3
-  )
+  // ingress from S3 to us
+  const observer = new PersistorHelper.ObserverStream({ metric: 's3.ingress' })
+  pipeline(stream, observer)
 
   try {
     await PersistorHelper.waitForStreamReady(stream)
-    return meteredStream
+    return observer
   } catch (err) {
     throw PersistorHelper.wrapError(
       err,

@@ -65,17 +65,15 @@ async function sendFile(bucketName, key, fsPath) {
 
 async function sendStream(bucketName, key, readStream, sourceMd5) {
   try {
-    let hashPromise
+    // egress from us to gcs
+    const observeOptions = { metric: 'gcs.egress' }
 
-    // if there is no supplied md5 hash, we calculate the hash as the data passes through
     if (!sourceMd5) {
-      hashPromise = PersistorHelper.calculateStreamMd5(readStream)
+      // if there is no supplied md5 hash, we calculate the hash as the data passes through
+      observeOptions.hash = 'md5'
     }
 
-    const meteredStream = PersistorHelper.getMeteredStream(
-      readStream,
-      'gcs.egress' // egress from us to gcs
-    )
+    const observer = new PersistorHelper.ObserverStream(observeOptions)
 
     const writeOptions = {
       // disabling of resumable uploads is recommended by Google:
@@ -94,12 +92,12 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
       .file(key)
       .createWriteStream(writeOptions)
 
-    await pipeline(meteredStream, uploadStream)
+    await pipeline(readStream, observer, uploadStream)
 
     // if we didn't have an md5 hash, we should compare our computed one with Google's
     // as we couldn't tell GCS about it beforehand
-    if (hashPromise) {
-      sourceMd5 = await hashPromise
+    if (!sourceMd5) {
+      sourceMd5 = observer.getHash()
       // throws on mismatch
       await PersistorHelper.verifyMd5(GcsPersistor, bucketName, key, sourceMd5)
     }
@@ -124,14 +122,15 @@ async function getFileStream(bucketName, key, _opts = {}) {
     .file(key)
     .createReadStream(opts)
 
-  const meteredStream = PersistorHelper.getMeteredStream(
-    stream,
-    'gcs.ingress' // ingress to us from gcs
-  )
+  // ingress to us from gcs
+  const observer = new PersistorHelper.ObserverStream({
+    metric: 'gcs.ingress'
+  })
+  pipeline(stream, observer)
 
   try {
     await PersistorHelper.waitForStreamReady(stream)
-    return meteredStream
+    return observer
   } catch (err) {
     throw PersistorHelper.wrapError(
       err,
