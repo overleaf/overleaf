@@ -26,6 +26,12 @@ if (!process.env.AWS_ACCESS_KEY_ID) {
   throw new Error('please provide credentials for the AWS S3 test server')
 }
 
+process.on('unhandledRejection', e => {
+  // eslint-disable-next-line no-console
+  console.log('** Unhandled Promise Rejection **\n', e)
+  throw e
+})
+
 // store settings for multiple backends, so that we can test each one.
 // fs will always be available - add others if they are configured
 const BackendSettings = require('./TestConfig')

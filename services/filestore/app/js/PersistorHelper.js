@@ -15,6 +15,7 @@ const pipeline = promisify(Stream.pipeline)
 //   the number of bytes transferred
 class ObserverStream extends Stream.Transform {
   constructor(options) {
+    options.autoDestroy = true
     super(options)
 
     this.bytes = 0
@@ -49,7 +50,7 @@ module.exports = {
   ObserverStream,
   calculateStreamMd5,
   verifyMd5,
-  waitForStreamReady,
+  getReadyPipeline,
   wrapError,
   hexToBase64,
   base64ToHex
@@ -94,18 +95,27 @@ async function verifyMd5(persistor, bucket, key, sourceMd5, destMd5 = null) {
 // resolves when a stream is 'readable', or rejects if the stream throws an error
 // before that happens - this lets us handle protocol-level errors before trying
 // to read them
-function waitForStreamReady(stream) {
+function getReadyPipeline(...streams) {
   return new Promise((resolve, reject) => {
-    const onError = function(err) {
-      reject(wrapError(err, 'error before stream became ready', {}, ReadError))
+    const lastStream = streams.slice(-1)[0]
+    let resolvedOrErrored = false
+
+    const handler = function(err) {
+      if (!resolvedOrErrored) {
+        resolvedOrErrored = true
+
+        lastStream.removeListener('readable', handler)
+        if (err) {
+          return reject(
+            wrapError(err, 'error before stream became ready', {}, ReadError)
+          )
+        }
+        resolve(lastStream)
+      }
     }
-    const onStreamReady = function() {
-      stream.removeListener('readable', onStreamReady)
-      stream.removeListener('error', onError)
-      resolve(stream)
-    }
-    stream.on('readable', onStreamReady)
-    stream.on('error', onError)
+
+    pipeline(...streams).catch(handler)
+    lastStream.on('readable', handler)
   })
 }
 

@@ -3,7 +3,6 @@ const chai = require('chai')
 const { expect } = chai
 const modulePath = '../../../app/js/S3Persistor.js'
 const SandboxedModule = require('sandboxed-module')
-const StreamModule = require('stream')
 
 const Errors = require('../../../app/js/Errors')
 
@@ -31,6 +30,7 @@ describe('S3PersistorTests', function() {
 
   let Metrics,
     Logger,
+    Transform,
     S3,
     Fs,
     ReadStream,
@@ -61,9 +61,20 @@ describe('S3PersistorTests', function() {
       }
     }
 
+    Transform = class {
+      on(event, callback) {
+        if (event === 'readable') {
+          callback()
+        }
+      }
+
+      once() {}
+      removeListener() {}
+    }
+
     Stream = {
       pipeline: sinon.stub().yields(),
-      Transform: StreamModule.Transform
+      Transform: Transform
     }
 
     EmptyPromise = {
@@ -100,7 +111,6 @@ describe('S3PersistorTests', function() {
       pipe: sinon.stub(),
       removeListener: sinon.stub()
     }
-    S3ReadStream.on.withArgs('readable').yields()
     S3Client = {
       getObject: sinon.stub().returns({
         createReadStream: sinon.stub().returns(S3ReadStream)
@@ -163,7 +173,7 @@ describe('S3PersistorTests', function() {
       })
 
       it('returns a metered stream', function() {
-        expect(stream).to.be.instanceOf(StreamModule.Transform)
+        expect(stream).to.be.instanceOf(Transform)
       })
 
       it('sets the AWS client up with credentials from settings', function() {
@@ -180,7 +190,7 @@ describe('S3PersistorTests', function() {
       it('pipes the stream through the meter', function() {
         expect(Stream.pipeline).to.have.been.calledWith(
           S3ReadStream,
-          sinon.match.instanceOf(StreamModule.Transform)
+          sinon.match.instanceOf(Transform)
         )
       })
     })
@@ -281,8 +291,8 @@ describe('S3PersistorTests', function() {
       let error, stream
 
       beforeEach(async function() {
-        S3ReadStream.on = sinon.stub()
-        S3ReadStream.on.withArgs('error').yields(S3NotFoundError)
+        Transform.prototype.on = sinon.stub()
+        Stream.pipeline.yields(S3NotFoundError)
         try {
           stream = await S3Persistor.promises.getFileStream(bucket, key)
         } catch (err) {
@@ -311,8 +321,8 @@ describe('S3PersistorTests', function() {
       let error, stream
 
       beforeEach(async function() {
-        S3ReadStream.on = sinon.stub()
-        S3ReadStream.on.withArgs('error').yields(S3AccessDeniedError)
+        Transform.prototype.on = sinon.stub()
+        Stream.pipeline.yields(S3AccessDeniedError)
         try {
           stream = await S3Persistor.promises.getFileStream(bucket, key)
         } catch (err) {
@@ -341,8 +351,8 @@ describe('S3PersistorTests', function() {
       let error, stream
 
       beforeEach(async function() {
-        S3ReadStream.on = sinon.stub()
-        S3ReadStream.on.withArgs('error').yields(genericError)
+        Transform.prototype.on = sinon.stub()
+        Stream.pipeline.yields(genericError)
         try {
           stream = await S3Persistor.promises.getFileStream(bucket, key)
         } catch (err) {
@@ -485,7 +495,7 @@ describe('S3PersistorTests', function() {
         expect(S3Client.upload).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
-          Body: sinon.match.instanceOf(StreamModule.Transform),
+          Body: sinon.match.instanceOf(Transform),
           ContentMD5: 'qqqqqru7u7uqqqqqu7u7uw=='
         })
       })
@@ -560,7 +570,7 @@ describe('S3PersistorTests', function() {
         expect(S3Client.upload).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
-          Body: sinon.match.instanceOf(StreamModule.Transform)
+          Body: sinon.match.instanceOf(Transform)
         })
       })
     })

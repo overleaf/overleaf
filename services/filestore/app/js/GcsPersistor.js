@@ -126,10 +126,10 @@ async function getFileStream(bucketName, key, _opts = {}) {
   const observer = new PersistorHelper.ObserverStream({
     metric: 'gcs.ingress'
   })
-  pipeline(stream, observer)
 
   try {
-    await PersistorHelper.waitForStreamReady(stream)
+    // wait for the pipeline to be ready, to catch non-200s
+    await PersistorHelper.getReadyPipeline(stream, observer)
     return observer
   } catch (err) {
     throw PersistorHelper.wrapError(
