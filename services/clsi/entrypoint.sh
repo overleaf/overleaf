@@ -12,10 +12,6 @@ chown node:node /app/cache
 chown node:node /app/compiles
 chown node:node /app/db
 
-# acceptance tests
-mkdir -p /app/test/acceptance/fixtures/tmp/
-chown -R node:node /app/test/acceptance/fixtures
-
 # make synctex available for remount in compiles
 cp /app/bin/synctex /app/bin/synctex-mount/synctex
 
