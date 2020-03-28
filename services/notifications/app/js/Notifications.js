@@ -87,7 +87,7 @@ module.exports = Notifications = {
       }
       return db.notifications.update(
         { user_id: doc.user_id, key: notification.key },
-        doc,
+        { $set : doc },
         { upsert: true },
         callback
       )
