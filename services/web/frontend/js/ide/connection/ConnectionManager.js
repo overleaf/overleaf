@@ -258,6 +258,7 @@ The editor will refresh in automatically in 10 seconds.\
             // initial connection
           } else if (state === 'reconnecting') {
             // reconnection after a connection has failed
+            this.stopReconnectCountdownTimer()
             this.$scope.connection.reconnecting = true
             // if reconnecting takes more than 1s (it doesn't, usually) show the
             // 'reconnecting...' warning
@@ -278,10 +279,10 @@ The editor will refresh in automatically in 10 seconds.\
             // project has been joined
           } else if (state === 'waitingCountdown') {
             // disconnected and waiting to reconnect via the countdown timer
-            this.cancelReconnect()
+            this.stopReconnectCountdownTimer()
           } else if (state === 'waitingGracefully') {
             // disconnected and waiting to reconnect gracefully
-            this.cancelReconnect()
+            this.stopReconnectCountdownTimer()
           } else if (state === 'inactive') {
             // disconnected and not trying to reconnect (inactive)
           } else if (state === 'error') {
@@ -444,7 +445,7 @@ Something went wrong connecting to your project. Please refresh if this continue
         })
 
         setTimeout(() => {
-          if (!this.connected) {
+          if (!this.connected && !this.countdownTimeoutId) {
             this.countdownTimeoutId = setTimeout(
               () => this.decreaseCountdown(connectionId),
               1000
@@ -453,8 +454,7 @@ Something went wrong connecting to your project. Please refresh if this continue
         }, 200)
       }
 
-      cancelReconnect() {
-        this.disconnect()
+      stopReconnectCountdownTimer() {
         // clear timeout and set to null so we know there is no countdown running
         if (this.countdownTimeoutId != null) {
           sl_console.log(
