@@ -33,7 +33,7 @@
     "lru-cache": "^5.1.1",
     "metrics-sharelatex": "^2.6.2",
     "mongojs": "3.1.0",
-    "node-statsd": "0.0.3",
+    "node-statsd": "0.1.1",
     "request": "^2.88.2",
     "settings-sharelatex": "^1.1.0",
     "underscore": "1.9.2"
@@ -52,9 +52,9 @@
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^4.1.0",
+    "mocha": "^7.1.1",
     "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "",
-    "sinon": "^1.17.0"
+    "sinon": "^9.0.1"
   }
 }
