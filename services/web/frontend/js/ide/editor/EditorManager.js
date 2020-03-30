@@ -242,7 +242,10 @@ define([
               "Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a href='/learn/Kb/Editor_out_of_sync_problems'>Please see this help guide for more information</a>"
             )
           }
-          return this.openDoc(doc, { forceReopen: true })
+          const removeHandler = this.$scope.$on('project:joined', () => {
+            this.openDoc(doc, { forceReopen: true })
+            removeHandler()
+          })
         })
 
         return sharejs_doc.on('externalUpdate', update => {
