@@ -112,6 +112,11 @@ function getReadyPipeline(...streams) {
         }
         resolve(lastStream)
       }
+      if (err) {
+        for (const stream of streams) {
+          stream.destroy()
+        }
+      }
     }
 
     pipeline(...streams).catch(handler)
