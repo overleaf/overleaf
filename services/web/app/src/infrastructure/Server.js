@@ -234,6 +234,10 @@ if (enableWebRouter || notDefined(enableWebRouter)) {
     logger.info('precompiling views for web in production environment')
     Views.precompileViews(app)
   }
+  if (app.get('env') === 'test') {
+    logger.info('enabling view cache for acceptance tests')
+    app.enable('view cache')
+  }
 
   app.use(publicApiRouter) // public API goes with web router for public access
   app.use(Validation.errorMiddleware)
