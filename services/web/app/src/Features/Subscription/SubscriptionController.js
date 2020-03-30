@@ -81,6 +81,13 @@ module.exports = SubscriptionController = {
   paymentPage(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
     const plan = PlansLocator.findLocalPlanInSettings(req.query.planCode)
+    if (!plan) {
+      return next(
+        new HttpErrors.UnprocessableEntityError({
+          info: { public: { message: 'Plan not found' } }
+        })
+      )
+    }
     return LimitationsManager.userHasV1OrV2Subscription(user, function(
       err,
       hasSubscription
@@ -88,7 +95,7 @@ module.exports = SubscriptionController = {
       if (err != null) {
         return next(err)
       }
-      if (hasSubscription || plan == null) {
+      if (hasSubscription) {
         return res.redirect('/user/subscription?hasSubscription=true')
       } else {
         // LimitationsManager.userHasV2Subscription only checks Mongo. Double check with

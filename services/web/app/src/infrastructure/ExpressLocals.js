@@ -196,7 +196,9 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     }
     // Don't include the query string parameters, otherwise Google
     // treats ?nocdn=true as the canonical version
-    res.locals.currentUrl = Url.parse(req.originalUrl).pathname
+    const parsedOriginalUrl = Url.parse(req.originalUrl)
+    res.locals.currentUrl = parsedOriginalUrl.pathname
+    res.locals.currentUrlWithQueryParams = parsedOriginalUrl.path
     res.locals.capitalize = function(string) {
       if (string.length === 0) {
         return ''

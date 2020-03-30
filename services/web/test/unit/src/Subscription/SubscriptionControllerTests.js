@@ -225,6 +225,7 @@ describe('SubscriptionController', function() {
 
     describe('with a user with subscription', function() {
       it('should redirect to the subscription dashboard', function(done) {
+        this.PlansLocator.findLocalPlanInSettings.returns({})
         this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
           1,
           null,
@@ -239,18 +240,23 @@ describe('SubscriptionController', function() {
     })
 
     describe('with an invalid plan code', function() {
-      it('should redirect to the subscription dashboard', function(done) {
+      it('should return 422 error', function(done) {
         this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
           1,
           null,
           false
         )
         this.PlansLocator.findLocalPlanInSettings.returns(null)
-        this.res.redirect = url => {
-          url.should.equal('/user/subscription?hasSubscription=true')
-          return done()
+        this.next = error => {
+          expect(error).to.exist
+          expect(error.statusCode).to.equal(422)
+          done()
         }
-        return this.SubscriptionController.paymentPage(this.req, this.res)
+        return this.SubscriptionController.paymentPage(
+          this.req,
+          this.res,
+          this.next
+        )
       })
     })
 
@@ -295,6 +301,7 @@ describe('SubscriptionController', function() {
 
     describe('with a recurly subscription already', function() {
       it('should redirect to the subscription dashboard', function(done) {
+        this.PlansLocator.findLocalPlanInSettings.returns({})
         this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
           1,
           null,
