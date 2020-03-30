@@ -270,6 +270,8 @@ The editor will refresh in automatically in 10 seconds.\
                 this.$scope.connection.stillReconnecting = true
               }
             }, 1000)
+          } else if (state === 'reconnectFailed') {
+            // reconnect attempt failed
           } else if (state === 'authenticating') {
             // socket connection has been established, trying to authenticate
           } else if (state === 'joining') {
@@ -507,6 +509,24 @@ Something went wrong connecting to your project. Please refresh if this continue
         }
         this.updateConnectionManagerState('reconnecting')
         sl_console.log('[ConnectionManager] Starting new connection')
+
+        const removeHandler = () => {
+          this.ide.socket.removeListener('error', handleFailure)
+          this.ide.socket.removeListener('connect', handleSuccess)
+        }
+        const handleFailure = () => {
+          sl_console.log('[ConnectionManager] tryReconnect: failed')
+          removeHandler()
+          this.updateConnectionManagerState('reconnectFailed')
+          this.tryReconnectWithRateLimit({ force: true })
+        }
+        const handleSuccess = () => {
+          sl_console.log('[ConnectionManager] tryReconnect: success')
+          removeHandler()
+        }
+        this.ide.socket.on('error', handleFailure)
+        this.ide.socket.on('connect', handleSuccess)
+
         // use socket.io connect() here to make a single attempt, the
         // reconnect() method makes multiple attempts
         this.ide.socket.socket.connect()
