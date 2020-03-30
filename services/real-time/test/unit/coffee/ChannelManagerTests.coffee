@@ -10,7 +10,7 @@ describe 'ChannelManager', ->
 		@other_rclient = {}
 		@ChannelManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings = {}
-			"metrics-sharelatex": @metrics = {inc: sinon.stub()}
+			"metrics-sharelatex": @metrics = {inc: sinon.stub(), summary: sinon.stub()}
 			"logger-sharelatex": @logger = { log: sinon.stub(), warn: sinon.stub(), error: sinon.stub() }
 	
 	describe "subscribe", ->
@@ -106,3 +106,13 @@ describe 'ChannelManager', ->
 					@rclient.publish.calledWithExactly("applied-ops:1234567890abcdef", "random-message").should.equal true
 					@rclient.publish.calledOnce.should.equal true
 
+		describe "metrics", ->
+			beforeEach ->
+				@rclient.publish = sinon.stub()
+				@ChannelManager.publish @rclient, "applied-ops", "all", "random-message"
+
+			it "should track the payload size", ->
+				@metrics.summary.calledWithExactly(
+					"redis.publish.applied-ops",
+					"random-message".length
+				).should.equal true
