@@ -13,6 +13,7 @@
  */
 let EditorRealTimeController
 const Settings = require('settings-sharelatex')
+const Metrics = require('metrics-sharelatex')
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('pubsub')
 const os = require('os')
@@ -32,15 +33,14 @@ module.exports = EditorRealTimeController = {
     } else {
       channel = `editor-events:${room_id}`
     }
-    return rclient.publish(
-      channel,
-      JSON.stringify({
-        room_id,
-        message,
-        payload,
-        _id: message_id
-      })
-    )
+    const blob = JSON.stringify({
+      room_id,
+      message,
+      payload,
+      _id: message_id
+    })
+    Metrics.summary('redis.publish.editor-events', blob.length)
+    return rclient.publish(channel, blob)
   },
 
   emitToAll(message, ...payload) {

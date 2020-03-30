@@ -21,6 +21,7 @@ const modulePath = require('path').join(
 describe('EditorRealTimeController', function() {
   beforeEach(function() {
     this.rclient = { publish: sinon.stub() }
+    this.Metrics = { summary: sinon.stub() }
     this.EditorRealTimeController = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -33,6 +34,7 @@ describe('EditorRealTimeController', function() {
           io: (this.io = {})
         },
         'settings-sharelatex': { redis: {} },
+        'metrics-sharelatex': this.Metrics,
         crypto: (this.crypto = {
           randomBytes: sinon
             .stub()
@@ -68,6 +70,20 @@ describe('EditorRealTimeController', function() {
             payload: this.payload,
             _id: this.message_id
           })
+        )
+        .should.equal(true)
+    })
+
+    it('should track the payload size', function() {
+      this.Metrics.summary
+        .calledWith(
+          'redis.publish.editor-events',
+          JSON.stringify({
+            room_id: this.room_id,
+            message: this.message,
+            payload: this.payload,
+            _id: this.message_id
+          }).length
         )
         .should.equal(true)
     })
