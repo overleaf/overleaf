@@ -114,7 +114,9 @@ function getReadyPipeline(...streams) {
       }
       if (err) {
         for (const stream of streams) {
-          stream.destroy()
+          if (!stream.destroyed) {
+            stream.destroy()
+          }
         }
       }
     }

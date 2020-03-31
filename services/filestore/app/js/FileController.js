@@ -61,18 +61,18 @@ function getFile(req, res, next) {
     }
 
     pipeline(fileStream, res, err => {
-      if (err) {
+      if (!fileStream.destroyed) {
         fileStream.destroy()
-        if (err.code === 'ERR_STREAM_PREMATURE_CLOSE') {
-          res.end()
-        } else {
-          next(
-            new Errors.ReadError({
-              message: 'error transferring stream',
-              info: { bucket, key, format, style }
-            }).withCause(err)
-          )
-        }
+      }
+      if (err && err.code === 'ERR_STREAM_PREMATURE_CLOSE') {
+        res.end()
+      } else if (err) {
+        next(
+          new Errors.ReadError({
+            message: 'error transferring stream',
+            info: { bucket, key, format, style }
+          }).withCause(err)
+        )
       }
     })
   })
