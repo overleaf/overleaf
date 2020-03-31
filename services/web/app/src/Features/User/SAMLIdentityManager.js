@@ -171,6 +171,8 @@ async function linkAccounts(
   // update v1 affiliations record
   if (hasEntitlement) {
     await InstitutionsAPI.promises.addEntitlement(userId, institutionEmail)
+  } else {
+    await InstitutionsAPI.promises.removeEntitlement(userId, institutionEmail)
   }
 }
 
