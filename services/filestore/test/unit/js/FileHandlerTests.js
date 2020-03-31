@@ -15,14 +15,8 @@ describe('FileHandler', function() {
     KeyBuilder,
     ImageOptimiser,
     FileHandler,
+    Settings,
     fs
-  const settings = {
-    s3: {
-      buckets: {
-        user_files: 'user_files'
-      }
-    }
-  }
 
   const bucket = 'my_bucket'
   const key = `${ObjectId()}/${ObjectId()}`
@@ -72,18 +66,19 @@ describe('FileHandler', function() {
         compressPng: sinon.stub().resolves()
       }
     }
+    Settings = {}
     fs = {
       createReadStream: sinon.stub().returns(readStream)
     }
 
     FileHandler = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': settings,
         './PersistorManager': PersistorManager,
         './LocalFileWriter': LocalFileWriter,
         './FileConverter': FileConverter,
         './KeyBuilder': KeyBuilder,
         './ImageOptimiser': ImageOptimiser,
+        'settings-sharelatex': Settings,
         fs: fs
       },
       globals: { console }
@@ -105,12 +100,11 @@ describe('FileHandler', function() {
       })
     })
 
-    it('should delete the convertedKey folder', function(done) {
+    it('should not make a delete request for the convertedKey folder', function(done) {
       FileHandler.insertFile(bucket, key, stream, err => {
         expect(err).not.to.exist
-        expect(
-          PersistorManager.promises.deleteDirectory
-        ).to.have.been.calledWith(bucket, convertedFolderKey)
+        expect(PersistorManager.promises.deleteDirectory).not.to.have.been
+          .called
         done()
       })
     })
@@ -120,6 +114,22 @@ describe('FileHandler', function() {
       FileHandler.insertFile(bucket, key, stream, err => {
         expect(err).to.exist
         done()
+      })
+    })
+
+    describe('when conversions are enabled', function() {
+      beforeEach(function() {
+        Settings.enableConversions = true
+      })
+
+      it('should delete the convertedKey folder', function(done) {
+        FileHandler.insertFile(bucket, key, stream, err => {
+          expect(err).not.to.exist
+          expect(
+            PersistorManager.promises.deleteDirectory
+          ).to.have.been.calledWith(bucket, convertedFolderKey)
+          done()
+        })
       })
     })
   })
@@ -136,12 +146,11 @@ describe('FileHandler', function() {
       })
     })
 
-    it('should tell the filestore manager to delete the cached folder', function(done) {
+    it('should not tell the filestore manager to delete the cached folder', function(done) {
       FileHandler.deleteFile(bucket, key, err => {
         expect(err).not.to.exist
-        expect(
-          PersistorManager.promises.deleteDirectory
-        ).to.have.been.calledWith(bucket, convertedFolderKey)
+        expect(PersistorManager.promises.deleteDirectory).not.to.have.been
+          .called
         done()
       })
     })
@@ -151,6 +160,22 @@ describe('FileHandler', function() {
       FileHandler.deleteFile(bucket, key, err => {
         expect(err).to.exist
         done()
+      })
+    })
+
+    describe('when conversions are enabled', function() {
+      beforeEach(function() {
+        Settings.enableConversions = true
+      })
+
+      it('should delete the convertedKey folder', function(done) {
+        FileHandler.deleteFile(bucket, key, err => {
+          expect(err).not.to.exist
+          expect(
+            PersistorManager.promises.deleteDirectory
+          ).to.have.been.calledWith(bucket, convertedFolderKey)
+          done()
+        })
       })
     })
   })
