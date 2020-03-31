@@ -1,6 +1,6 @@
 {
   "name": "redis-sharelatex",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Redis wrapper for node which will either use cluster, sentinal, or single instance redis",
   "main": "index.js",
   "author": "ShareLaTeX",
@@ -8,7 +8,7 @@
   "dependencies": {
     "async": "^2.5.0",
     "coffee-script": "1.8.0",
-    "ioredis": "~4.14.1",
+    "ioredis": "~4.16.1",
     "redis-sentinel": "0.1.1",
     "underscore": "1.7.0"
   },
