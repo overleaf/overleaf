@@ -51,7 +51,7 @@ async function deleteFile(bucket, key) {
   if (Settings.enableConversions) {
     jobs.push(PersistorManager.promises.deleteDirectory(bucket, convertedKey))
   }
-  await Promise.all([jobs])
+  await Promise.all(jobs)
 }
 
 async function deleteProject(bucket, key) {
