@@ -106,11 +106,12 @@ function getReadyPipeline(...streams) {
 
         lastStream.removeListener('readable', handler)
         if (err) {
-          return reject(
+          reject(
             wrapError(err, 'error before stream became ready', {}, ReadError)
           )
+        } else {
+          resolve(lastStream)
         }
-        resolve(lastStream)
       }
       if (err) {
         for (const stream of streams) {
@@ -121,6 +122,9 @@ function getReadyPipeline(...streams) {
       }
     }
 
+    for (let index = 0; index < streams.length - 1; index++) {
+      streams[index + 1].on('close', () => streams[index].destroy())
+    }
     pipeline(...streams).catch(handler)
     lastStream.on('readable', handler)
   })
