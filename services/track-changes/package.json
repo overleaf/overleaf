@@ -32,7 +32,7 @@
     "mongo-uri": "^0.1.2",
     "mongojs": "3.1.0",
     "redis": "~0.10.1",
-    "redis-sharelatex": "^1.0.11",
+    "redis-sharelatex": "^1.0.12",
     "request": "~2.88.2",
     "requestretry": "^4.1.0",
     "s3-streams": "^0.4.0",
