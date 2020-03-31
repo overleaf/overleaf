@@ -10,6 +10,7 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
+const { expect } = require('chai')
 require('chai').should()
 const modulePath = require('path').join(__dirname, '../../../app/js/UrlFetcher')
 const { EventEmitter } = require('events')
@@ -140,10 +141,11 @@ describe('UrlFetcher', function() {
         return this.urlStream.emit('end')
       })
 
-      return it('should call the callback with an error', function() {
-        return this.callback
-          .calledWith(new Error('URL returned non-success status code: 404'))
-          .should.equal(true)
+      it('should call the callback with an error', function() {
+        this.callback.calledWith(sinon.match(Error)).should.equal(true)
+
+        const message = this.callback.args[0][0].message
+        expect(message).to.include('URL returned non-success status code: 404')
       })
     })
 

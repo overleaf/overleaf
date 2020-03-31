@@ -464,8 +464,8 @@ describe('DockerRunner', function() {
         return this.createContainer.called.should.equal(false)
       })
 
-      return it('should call the callback with an error', function() {
-        return this.callback.calledWith(new Error()).should.equal(true)
+      it('should call the callback with an error', function() {
+        this.callback.calledWith(sinon.match(Error)).should.equal(true)
       })
     })
 
@@ -488,8 +488,8 @@ describe('DockerRunner', function() {
         return this.createContainer.called.should.equal(false)
       })
 
-      return it('should call the callback with an error', function() {
-        return this.callback.calledWith(new Error()).should.equal(true)
+      it('should call the callback with an error', function() {
+        this.callback.calledWith(sinon.match(Error)).should.equal(true)
       })
     })
 
@@ -582,10 +582,12 @@ describe('DockerRunner', function() {
         return this.container.kill.called.should.equal(true)
       })
 
-      return it('should call the callback with an error', function() {
-        const error = new Error('container timed out')
-        error.timedout = true
-        return this.callback.calledWith(error).should.equal(true)
+      it('should call the callback with an error', function() {
+        this.callback.calledWith(sinon.match(Error)).should.equal(true)
+
+        const errorObj = this.callback.args[0][0]
+        expect(errorObj.message).to.include('container timed out')
+        expect(errorObj.timedout).equal(true)
       })
     })
   })

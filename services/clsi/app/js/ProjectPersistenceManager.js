@@ -32,7 +32,7 @@ module.exports = ProjectPersistenceManager = {
       db.Project.findOrCreate({ where: { project_id } })
         .spread((project, created) =>
           project
-            .updateAttributes({ lastAccessed: new Date() })
+            .update({ lastAccessed: new Date() })
             .then(() => cb())
             .error(cb)
         )

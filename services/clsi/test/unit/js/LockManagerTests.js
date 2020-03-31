@@ -84,9 +84,10 @@ describe('DockerLockManager', function() {
         return this.runner.called.should.equal(false)
       })
 
-      return it('should return an error', function() {
-        const error = new Errors.AlreadyCompilingError()
-        return this.callback.calledWithExactly(error).should.equal(true)
+      it('should return an error', function() {
+        this.callback
+          .calledWithExactly(sinon.match(Errors.AlreadyCompilingError))
+          .should.equal(true)
       })
     })
   })

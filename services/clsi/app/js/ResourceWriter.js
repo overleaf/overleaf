@@ -19,7 +19,6 @@ const UrlCache = require('./UrlCache')
 const Path = require('path')
 const fs = require('fs')
 const async = require('async')
-const mkdirp = require('mkdirp')
 const OutputFileFinder = require('./OutputFileFinder')
 const ResourceStateManager = require('./ResourceStateManager')
 const Metrics = require('./Metrics')
@@ -302,7 +301,7 @@ module.exports = ResourceWriter = {
       if (error != null) {
         return callback(error)
       }
-      return mkdirp(Path.dirname(path), function(error) {
+      return fs.mkdir(Path.dirname(path), { recursive: true }, function(error) {
         if (error != null) {
           return callback(error)
         }

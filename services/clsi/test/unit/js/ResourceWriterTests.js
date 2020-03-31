@@ -12,6 +12,7 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
+const { expect } = require('chai')
 const should = require('chai').should()
 const modulePath = require('path').join(
   __dirname,
@@ -23,6 +24,7 @@ describe('ResourceWriter', function() {
   beforeEach(function() {
     let Timer
     this.ResourceWriter = SandboxedModule.require(modulePath, {
+      singleOnly: true,
       requires: {
         fs: (this.fs = {
           mkdir: sinon.stub().callsArg(1),
@@ -31,7 +33,6 @@ describe('ResourceWriter', function() {
         './ResourceStateManager': (this.ResourceStateManager = {}),
         wrench: (this.wrench = {}),
         './UrlCache': (this.UrlCache = {}),
-        mkdirp: (this.mkdirp = sinon.stub().callsArg(1)),
         './OutputFileFinder': (this.OutputFileFinder = {}),
         'logger-sharelatex': { log: sinon.stub(), err: sinon.stub() },
         './Metrics': (this.Metrics = {
@@ -346,6 +347,7 @@ describe('ResourceWriter', function() {
   describe('_writeResourceToDisk', function() {
     describe('with a url based resource', function() {
       beforeEach(function() {
+        this.fs.mkdir = sinon.stub().callsArg(2)
         this.resource = {
           path: 'main.tex',
           url: 'http://www.example.com/main.tex',
@@ -363,7 +365,7 @@ describe('ResourceWriter', function() {
       })
 
       it('should ensure the directory exists', function() {
-        return this.mkdirp
+        this.fs.mkdir
           .calledWith(
             path.dirname(path.join(this.basePath, this.resource.path))
           )
@@ -397,6 +399,7 @@ describe('ResourceWriter', function() {
           content: 'Hello world'
         }
         this.fs.writeFile = sinon.stub().callsArg(2)
+        this.fs.mkdir = sinon.stub().callsArg(2)
         return this.ResourceWriter._writeResourceToDisk(
           this.project_id,
           this.resource,
@@ -406,7 +409,7 @@ describe('ResourceWriter', function() {
       })
 
       it('should ensure the directory exists', function() {
-        return this.mkdirp
+        return this.fs.mkdir
           .calledWith(
             path.dirname(path.join(this.basePath, this.resource.path))
           )
@@ -446,10 +449,11 @@ describe('ResourceWriter', function() {
         return this.fs.writeFile.called.should.equal(false)
       })
 
-      return it('should return an error', function() {
-        return this.callback
-          .calledWith(new Error('resource path is outside root directory'))
-          .should.equal(true)
+      it('should return an error', function() {
+        this.callback.calledWith(sinon.match(Error)).should.equal(true)
+
+        const message = this.callback.args[0][0].message
+        expect(message).to.include('resource path is outside root directory')
       })
     })
   })
@@ -467,21 +471,18 @@ describe('ResourceWriter', function() {
 
     describe('with an invalid path', function() {
       beforeEach(function() {
-        return this.ResourceWriter.checkPath(
-          'foo',
-          'baz/../../bar',
-          this.callback
-        )
+        this.ResourceWriter.checkPath('foo', 'baz/../../bar', this.callback)
       })
 
-      return it('should return an error', function() {
-        return this.callback
-          .calledWith(new Error('resource path is outside root directory'))
-          .should.equal(true)
+      it('should return an error', function() {
+        this.callback.calledWith(sinon.match(Error)).should.equal(true)
+
+        const message = this.callback.args[0][0].message
+        expect(message).to.include('resource path is outside root directory')
       })
     })
 
-    return describe('with another invalid path matching on a prefix', function() {
+    describe('with another invalid path matching on a prefix', function() {
       beforeEach(function() {
         return this.ResourceWriter.checkPath(
           'foo',
@@ -490,10 +491,11 @@ describe('ResourceWriter', function() {
         )
       })
 
-      return it('should return an error', function() {
-        return this.callback
-          .calledWith(new Error('resource path is outside root directory'))
-          .should.equal(true)
+      it('should return an error', function() {
+        this.callback.calledWith(sinon.match(Error)).should.equal(true)
+
+        const message = this.callback.args[0][0].message
+        expect(message).to.include('resource path is outside root directory')
       })
     })
   })
