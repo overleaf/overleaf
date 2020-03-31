@@ -1,3 +1,4 @@
+const Settings = require('settings-sharelatex')
 const { callbackify } = require('util')
 const fs = require('fs')
 const PersistorManager = require('./PersistorManager')
@@ -32,7 +33,9 @@ async function insertFile(bucket, key, stream) {
       info: { bucket, key, convertedKey }
     })
   }
-  await PersistorManager.promises.deleteDirectory(bucket, convertedKey)
+  if (Settings.enableConversions) {
+    await PersistorManager.promises.deleteDirectory(bucket, convertedKey)
+  }
   await PersistorManager.promises.sendStream(bucket, key, stream)
 }
 
@@ -44,10 +47,11 @@ async function deleteFile(bucket, key) {
       info: { bucket, key, convertedKey }
     })
   }
-  await Promise.all([
-    PersistorManager.promises.deleteFile(bucket, key),
-    PersistorManager.promises.deleteDirectory(bucket, convertedKey)
-  ])
+  const jobs = [PersistorManager.promises.deleteFile(bucket, key)]
+  if (Settings.enableConversions) {
+    jobs.push(PersistorManager.promises.deleteDirectory(bucket, convertedKey))
+  }
+  await Promise.all([jobs])
 }
 
 async function deleteProject(bucket, key) {
