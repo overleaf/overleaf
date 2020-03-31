@@ -119,6 +119,8 @@ lint:
 build:
 	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
+		--build-arg SENTRY_RELEASE=${COMMIT_SHA} \
+		--build-arg BRANCH_NAME=$(BRANCH_NAME) \
 		.
 
 build_test_frontend:
