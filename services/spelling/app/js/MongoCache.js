@@ -6,6 +6,6 @@ const cacheOpts = {
   maxAge: 1000 * 60 * 60 * 10
 }
 
-const cache = LRU(cacheOpts)
+const cache = new LRU(cacheOpts)
 
 module.exports = cache

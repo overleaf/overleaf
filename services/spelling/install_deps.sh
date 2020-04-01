@@ -1,7 +1,7 @@
 echo 'APT::Default-Release "stretch";' >/etc/apt/apt.conf.d/default-release
 
 # The following aspell packages exist in Ubuntu but not Debian:
-# aspell-af, aspell-id, aspell-nr, aspell-ns, aspell-ss, aspell-st, aspell-tn, 
+# aspell-af, aspell-id, aspell-nr, aspell-ns, aspell-ss, aspell-st, aspell-tn,
 # aspell-ts, aspell-xh, aspell-zu
 echo "deb http://us.archive.ubuntu.com/ubuntu/ bionic main universe" > /etc/apt/sources.list.d/bionic.list
 apt-key adv --no-tty --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32

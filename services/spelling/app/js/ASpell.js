@@ -17,7 +17,7 @@ const { promisify } = require('util')
 
 const OneMinute = 60 * 1000
 const opts = { max: 10000, maxAge: OneMinute * 60 * 10 }
-const cache = LRU(opts)
+const cache = new LRU(opts)
 
 const cacheFsPath = Path.resolve(settings.cacheDir, 'spell.cache')
 const cacheFsPathTmp = cacheFsPath + '.tmp'
