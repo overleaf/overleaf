@@ -11,14 +11,18 @@ html.full-height(itemscope, itemtype='http://schema.org/Product')
 			.container.full-height
 				.error-container.full-height
 					.error-details
-						p.error-status Something went wrong, sorry.
-						p.error-description(ng-non-bindable) Our staff are probably looking into this, but if it continues, please check our status page at
-							|
-							|
-							a(href="http://" + settings.statusPageUrl) #{settings.statusPageUrl}
-							|
-							| or contact us at
+						p.error-status I'm sorry, Dave. I'm afraid I can't do that.
+						p.error-description(ng-non-bindable) There was a problem with your latest request
+							if(message)
+								|: #{message}
+							|.
+							br
+							| Please go back and try again.
+						p.error-description(ng-non-bindable)
+							| If the problem persists, please contact us at
 							|
 							a(href="mailto:" + settings.adminEmail) #{settings.adminEmail}
 							| .
-						a.error-btn(href="/") Home
+						a.error-btn(href="javascript:history.back()") Back
+						| &nbsp;
+						a.btn.btn-default(href="/") Home

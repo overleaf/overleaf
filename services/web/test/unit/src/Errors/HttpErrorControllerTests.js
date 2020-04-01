@@ -94,14 +94,17 @@ describe('HttpErrorController', function() {
 
     it('renders HTML with info', function() {
       let cause = new Errors.SubscriptionAdminDeletionError()
-      let error = new HttpErrors.UnprocessableEntityError({}).withCause(cause)
+      let error = new HttpErrors.UnprocessableEntityError({
+        info: { public: { message: 'some public message' } }
+      }).withCause(cause)
       this.req.accepts = () => 'html'
 
       this.ErrorController.handleError(error, this.req, this.res)
       expect(this.res.statusCode).to.equal(422)
-      expect(this.res.renderedTemplate).to.equal('general/500')
+      expect(this.res.renderedTemplate).to.equal('general/400')
       expect(this.res.renderedVariables).to.deep.equal({
-        title: 'Client Error'
+        title: 'Client Error',
+        message: 'some public message'
       })
     })
   })

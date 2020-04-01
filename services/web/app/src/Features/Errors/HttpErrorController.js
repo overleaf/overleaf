@@ -10,7 +10,10 @@ function renderHTMLError(statusCode, publicInfo, res) {
   } else if (statusCode === 403) {
     res.render('user/restricted', { title: 'restricted' })
   } else if (statusCode >= 400 && statusCode < 500) {
-    res.render('general/500', { title: 'Client Error' })
+    res.render('general/400', {
+      title: 'Client Error',
+      message: publicInfo.message
+    })
   } else {
     res.render('general/500', { title: 'Server Error' })
   }
