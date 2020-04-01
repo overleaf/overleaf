@@ -1,7 +1,9 @@
+const { expect } = require('chai')
 const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
 const Settings = require('settings-sharelatex')
 const UserCreator = require('../../../../app/src/Features/User/UserCreator')
 const UserGetter = require('../../../../app/src/Features/User/UserGetter')
+const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')
 const request = require('request-promise-native')
 
 let globalUserNum = 1
@@ -81,6 +83,25 @@ class UserHelper {
   setRequestDefaults(defaults = {}) {
     // request-promise instance for making requests
     this.request = this.request.defaults(defaults)
+  }
+
+  /**
+   * Make a request for the user and run expectations on the response.
+   * @param {object} [requestOptions] options to pass to request
+   * @param {object} [responseExpectations] expectations:
+   *   - {Int} statusCode the expected status code
+   *   - {RegEx} message a matcher for the message
+   */
+  async expectErrorOnRequest(requestOptions, responseExpectations) {
+    let error
+    try {
+      await this.request(requestOptions)
+    } catch (e) {
+      error = e
+    }
+    expect(error).to.exist
+    expect(error.statusCode).to.equal(responseExpectations.statusCode)
+    expect(error.message).to.match(responseExpectations.message)
   }
 
   /* async http api call methods */
@@ -174,6 +195,22 @@ class UserHelper {
   }
 
   /**
+   * Update an existing user via UserUpdater and return the updated UserHelper
+   * instance.
+   * All args passed to UserUpdater.getUser.
+   * @returns {UserHelper}
+   */
+  static async updateUser(...args) {
+    const user = await UserUpdater.promises.updateUser(...args)
+
+    if (!user) {
+      throw new Error(`no user found for args: ${JSON.stringify([...args])}`)
+    }
+
+    return new UserHelper(user)
+  }
+
+  /**
    * Login to existing account via request and return UserHelper instance
    * @param {object} userData
    * @param {string} userData.email
@@ -203,6 +240,17 @@ class UserHelper {
     }
 
     return userHelper
+  }
+
+  /**
+   * Check if user is logged in by requesting an endpoint behind authentication.
+   * @returns {Boolean}
+   */
+  async isLoggedIn() {
+    const response = await this.request.get('/user/sessions', {
+      followRedirect: true
+    })
+    return response.request.path === '/user/sessions'
   }
 
   /**
