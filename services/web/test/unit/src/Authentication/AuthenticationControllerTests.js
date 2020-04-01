@@ -58,7 +58,7 @@ describe('AuthenticationController', function() {
           revokeAllUserSessions: sinon.stub().callsArgWith(1, null)
         }),
         '../../infrastructure/Modules': (this.Modules = {
-          hooks: { fire: sinon.stub().callsArgWith(2, null, []) }
+          hooks: { fire: sinon.stub().yields(null, []) }
         }),
         '../SudoMode/SudoModeHandler': (this.SudoModeHandler = {
           activateSudoMode: sinon.stub().callsArgWith(1, null)
@@ -1208,6 +1208,56 @@ describe('AuthenticationController', function() {
             this.req
           )
         ).to.equal(true)
+      })
+    })
+
+    describe('preFinishLogin hook', function() {
+      it('call hook and proceed', function() {
+        this.Modules.hooks.fire = sinon.stub().yields(null, [])
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          this.next
+        )
+        sinon.assert.calledWith(
+          this.Modules.hooks.fire,
+          'preFinishLogin',
+          this.req,
+          this.res,
+          this.user
+        )
+        expect(this.res.json.callCount).to.equal(1)
+      })
+
+      it('stop if hook has redirected', function(done) {
+        this.Modules.hooks.fire = sinon
+          .stub()
+          .yields(null, [{ doNotFinish: true }])
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          error => {
+            expect(error).to.not.exist
+            expect(this.res.json.callCount).to.equal(0)
+            done()
+          }
+        )
+      })
+
+      it('call next with hook errors', function(done) {
+        this.Modules.hooks.fire = sinon.stub().yields(new Error())
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          error => {
+            expect(error).to.exist
+            expect(this.res.json.callCount).to.equal(0)
+            done()
+          }
+        )
       })
     })
   })

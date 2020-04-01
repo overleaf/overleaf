@@ -113,31 +113,46 @@ const AuthenticationController = (module.exports = {
     if (user === false) {
       return res.redirect('/login')
     } // OAuth2 'state' mismatch
-    if (user.must_reconfirm) {
-      return AuthenticationController._redirectToReconfirmPage(req, res, user)
-    }
-    const redir =
-      AuthenticationController._getRedirectFromSession(req) || '/project'
-    AuthenticationController._loginAsyncHandlers(req, user)
-    AuthenticationController.afterLoginSessionSetup(req, user, function(err) {
-      if (err) {
-        return next(err)
+
+    const Modules = require('../../infrastructure/Modules')
+    Modules.hooks.fire('preFinishLogin', req, res, user, function(
+      error,
+      results
+    ) {
+      if (error) {
+        return next(error)
       }
-      SudoModeHandler.activateSudoMode(user._id, function(err) {
+      if (results.some(result => result && result.doNotFinish)) {
+        return next()
+      }
+
+      if (user.must_reconfirm) {
+        return AuthenticationController._redirectToReconfirmPage(req, res, user)
+      }
+
+      const redir =
+        AuthenticationController._getRedirectFromSession(req) || '/project'
+      AuthenticationController._loginAsyncHandlers(req, user)
+      AuthenticationController.afterLoginSessionSetup(req, user, function(err) {
         if (err) {
-          logger.err(
-            { err, user_id: user._id },
-            'Error activating Sudo Mode on login, continuing'
-          )
+          return next(err)
         }
-        AuthenticationController._clearRedirectFromSession(req)
-        if (
-          _.get(req, ['headers', 'accept'], '').match(/^application\/json.*$/)
-        ) {
-          res.json({ redir })
-        } else {
-          res.redirect(redir)
-        }
+        SudoModeHandler.activateSudoMode(user._id, function(err) {
+          if (err) {
+            logger.err(
+              { err, user_id: user._id },
+              'Error activating Sudo Mode on login, continuing'
+            )
+          }
+          AuthenticationController._clearRedirectFromSession(req)
+          if (
+            _.get(req, ['headers', 'accept'], '').match(/^application\/json.*$/)
+          ) {
+            res.json({ redir })
+          } else {
+            res.redirect(redir)
+          }
+        })
       })
     })
   },
