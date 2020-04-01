@@ -53,7 +53,7 @@ describe 'timeAsyncMethod', ->
 		@timeAsyncMethod @testObject, 'nextNumber', 'someContext.TestObject'
 		@testObject.nextNumber 2, (err, result) =>
 			expect(@metrics.inc.callCount).to.equal 1
-			expect(@metrics.inc.calledWith('someContext.TestObject.nextNumber.success')).to.equal true
+			expect(@metrics.inc.calledWith('someContext_result', 1, { method: 'TestObject_nextNumber', status: 'success'})).to.equal true
 			done()
 
 	describe 'when base method produces an error', ->
@@ -78,7 +78,7 @@ describe 'timeAsyncMethod', ->
 			@timeAsyncMethod @testObject, 'nextNumber', 'someContext.TestObject'
 			@testObject.nextNumber 2, (err, result) =>
 				expect(@metrics.inc.callCount).to.equal 1
-				expect(@metrics.inc.calledWith('someContext.TestObject.nextNumber.failure')).to.equal true
+				expect(@metrics.inc.calledWith('someContext_result', 1, { method: 'TestObject_nextNumber', status: 'failed'})).to.equal true
 				done()
 
 	describe 'when a logger is supplied', ->
