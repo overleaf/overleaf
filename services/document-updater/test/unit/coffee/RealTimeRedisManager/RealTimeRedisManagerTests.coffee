@@ -90,3 +90,6 @@ describe "RealTimeRedisManager", ->
 
 		it "should send the op with a message id", ->
 			@pubsubClient.publish.calledWith("applied-ops", JSON.stringify({op:"thisop",_id:@message_id})).should.equal true
+
+		it "should track the payload size", ->
+			@metrics.summary.calledWith("redis.publish.applied-ops", JSON.stringify({op:"thisop",_id:@message_id}).length).should.equal true
