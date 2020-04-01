@@ -21,6 +21,9 @@ module.exports = RealTimeRedisManager =
 		multi.exec (error, replys) ->
 			return callback(error) if error?
 			jsonUpdates = replys[0]
+			for jsonUpdate in jsonUpdates
+				# record metric for each update removed from queue
+				metrics.summary "redis.pendingUpdates", jsonUpdate.length, {status: "pop"}
 			updates = []
 			for jsonUpdate in jsonUpdates
 				try
@@ -28,8 +31,6 @@ module.exports = RealTimeRedisManager =
 				catch e
 					return callback e
 				updates.push update
-				# record metric for updates removed from queue
-				metrics.summary "redis.pendingUpdates", jsonUpdate.length, {status: "pop"}
 			callback error, updates
 
 	getUpdatesLength: (doc_id, callback)->
