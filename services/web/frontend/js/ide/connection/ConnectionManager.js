@@ -105,7 +105,7 @@ define([], function() {
         this.ide.socket = io.connect(
           parsedURL.origin,
           {
-            resource: parsedURL.pathname,
+            resource: parsedURL.pathname.slice(1),
             reconnect: false,
             'connect timeout': 30 * 1000,
             'force new connection': true
