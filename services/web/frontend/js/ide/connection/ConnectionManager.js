@@ -101,7 +101,16 @@ define([], function() {
 
         // initial connection attempt
         this.updateConnectionManagerState('connecting')
-        const parsedURL = new URL(this.wsUrl || '/socket.io', window.location)
+        let parsedURL
+        try {
+          parsedURL = new URL(this.wsUrl || '/socket.io', window.location)
+        } catch (e) {
+          // hello IE11
+          parsedURL = {
+            origin: null,
+            pathname: '/socket.io'
+          }
+        }
         this.ide.socket = io.connect(
           parsedURL.origin,
           {
