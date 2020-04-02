@@ -119,7 +119,7 @@ describe('Notifications Tests', function() {
           sinon.assert.calledWith(
             this.updateStub,
             this.expectedQuery,
-            this.expectedDocument,
+            { $set: this.expectedDocument },
             { upsert: true }
           )
           return done()
@@ -154,7 +154,7 @@ describe('Notifications Tests', function() {
             sinon.assert.calledWith(
               this.updateStub,
               this.expectedQuery,
-              this.expectedDocument,
+              { $set: this.expectedDocument },
               { upsert: true }
             )
             return done()
@@ -194,7 +194,7 @@ describe('Notifications Tests', function() {
             sinon.assert.calledWith(
               this.updateStub,
               this.expectedQuery,
-              this.expectedDocument,
+              { $set: this.expectedDocument },
               { upsert: true }
             )
             return done()
