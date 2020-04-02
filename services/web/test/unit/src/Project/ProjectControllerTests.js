@@ -129,6 +129,12 @@ describe('ProjectController', function() {
         }
       }
     ])
+    this.Metrics = {
+      Timer: class {
+        done() {}
+      },
+      inc: sinon.stub()
+    }
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
       globals: {
@@ -140,12 +146,7 @@ describe('ProjectController', function() {
           log() {},
           err() {}
         },
-        'metrics-sharelatex': {
-          Timer: class {
-            done() {}
-          },
-          inc() {}
-        },
+        'metrics-sharelatex': this.Metrics,
         '@overleaf/o-error/http': HttpErrors,
         './ProjectDeleter': this.ProjectDeleter,
         './ProjectDuplicator': this.ProjectDuplicator,
@@ -1144,6 +1145,81 @@ describe('ProjectController', function() {
         done()
       }
       this.ProjectController.loadEditor(this.req, this.res)
+    })
+
+    describe('wsUrl', function() {
+      function checkLoadEditorWsMetric(metric) {
+        it(`should inc metric ${metric}`, function(done) {
+          this.res.render = () => {
+            this.Metrics.inc.calledWith(metric).should.equal(true)
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+      }
+      function checkWsFallback(isBeta) {
+        describe('with ws=fallback', function() {
+          beforeEach(function() {
+            this.req.query = {}
+            this.req.query.ws = 'fallback'
+          })
+          it('should unset the wsUrl', function(done) {
+            this.res.render = (pageName, opts) => {
+              ;(opts.wsUrl || '/socket.io').should.equal('/socket.io')
+              done()
+            }
+            this.ProjectController.loadEditor(this.req, this.res)
+          })
+          checkLoadEditorWsMetric(
+            `load-editor-ws${isBeta ? '-beta' : ''}-fallback`
+          )
+        })
+      }
+
+      beforeEach(function() {
+        this.settings.wsUrl = '/other.socket.io'
+      })
+      it('should set the custom wsUrl', function(done) {
+        this.res.render = (pageName, opts) => {
+          opts.wsUrl.should.equal('/other.socket.io')
+          done()
+        }
+        this.ProjectController.loadEditor(this.req, this.res)
+      })
+      checkLoadEditorWsMetric('load-editor-ws')
+      checkWsFallback(false)
+
+      describe('beta program', function() {
+        beforeEach(function() {
+          this.settings.wsUrlBeta = '/beta.socket.io'
+        })
+        describe('for a normal user', function() {
+          it('should set the normal custom wsUrl', function(done) {
+            this.res.render = (pageName, opts) => {
+              opts.wsUrl.should.equal('/other.socket.io')
+              done()
+            }
+            this.ProjectController.loadEditor(this.req, this.res)
+          })
+          checkLoadEditorWsMetric('load-editor-ws')
+          checkWsFallback(false)
+        })
+
+        describe('for a beta user', function() {
+          beforeEach(function() {
+            this.user.betaProgram = true
+          })
+          it('should set the beta wsUrl', function(done) {
+            this.res.render = (pageName, opts) => {
+              opts.wsUrl.should.equal('/beta.socket.io')
+              done()
+            }
+            this.ProjectController.loadEditor(this.req, this.res)
+          })
+          checkLoadEditorWsMetric('load-editor-ws-beta')
+          checkWsFallback(true)
+        })
+      })
     })
   })
 

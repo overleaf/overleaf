@@ -160,7 +160,7 @@ block content
 			window.overallThemes = JSON.parse('!{StringHelper.stringifyJsonForScript(overallThemes)}');
 
 block foot-scripts
-	script(type="text/javascript" src='/socket.io/socket.io.js')
+	script(type="text/javascript" src=(wsUrl || '/socket.io') + '/socket.io.js')
 	script(src=mathJaxPath)
 	script(src=buildJsPath('libraries.js'))
 	script(src=buildJsPath('ide.js'))

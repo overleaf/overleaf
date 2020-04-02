@@ -196,6 +196,7 @@ module.exports = settings =
 	
 	# Optional separate location for websocket connections, if unset defaults to siteUrl.
 	wsUrl: process.env['WEBSOCKET_URL']
+	wsUrlBeta: process.env['WEBSOCKET_URL_BETA']
 
 	# cookie domain
 	# use full domain for cookies to only be accessible from that domain,

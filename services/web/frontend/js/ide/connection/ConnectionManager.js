@@ -101,9 +101,11 @@ define([], function() {
 
         // initial connection attempt
         this.updateConnectionManagerState('connecting')
+        const parsedURL = new URL(this.wsUrl || '/socket.io', window.location)
         this.ide.socket = io.connect(
-          this.wsUrl,
+          parsedURL.origin,
           {
+            resource: parsedURL.pathname,
             reconnect: false,
             'connect timeout': 30 * 1000,
             'force new connection': true

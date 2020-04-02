@@ -66,6 +66,7 @@ module.exports = LaunchpadController = {
           }
           if (user && user.isAdmin) {
             return res.render(Path.resolve(__dirname, '../views/launchpad'), {
+              wsUrl: Settings.wsUrl,
               adminUserExists,
               authMethod
             })

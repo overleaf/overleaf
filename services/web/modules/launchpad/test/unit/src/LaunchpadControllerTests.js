@@ -171,6 +171,7 @@ describe('LaunchpadController', function() {
           this.res.render.callCount.should.equal(1)
           return this.res.render
             .calledWith(viewPath, {
+              wsUrl: undefined,
               adminUserExists: true,
               authMethod: 'local'
             })

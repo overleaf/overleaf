@@ -622,11 +622,6 @@ const ProjectController = {
 
     const projectId = req.params.Project_id
 
-    // record failures to load the custom websocket
-    if ((req.query != null ? req.query.ws : undefined) === 'fallback') {
-      metrics.inc('load-editor-ws-fallback')
-    }
-
     async.auto(
       {
         project(cb) {
@@ -777,6 +772,23 @@ const ProjectController = {
               allowedFreeTrial = !!subscription.freeTrial.allowed || true
             }
 
+            let wsUrl = Settings.wsUrl
+            let metricName = 'load-editor-ws'
+            if (user.betaProgram && Settings.wsUrlBeta !== undefined) {
+              wsUrl = Settings.wsUrlBeta
+              metricName += '-beta'
+            }
+            if (req.query && req.query.ws === 'fallback') {
+              // `?ws=fallback` will connect to the bare origin, and ignore
+              //   the custom wsUrl. Hence it must load the client side
+              //   javascript from there too.
+              // Not resetting it here would possibly load a socket.io v2
+              //  client and connect to a v0 endpoint.
+              wsUrl = undefined
+              metricName += '-fallback'
+            }
+            metrics.inc(metricName)
+
             res.render('project/editor', {
               title: project.name,
               priority_title: true,
@@ -831,6 +843,7 @@ const ProjectController = {
               brandVariation,
               allowedImageNames: Settings.allowedImageNames || [],
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
+              wsUrl,
               showSupport: Features.hasFeature('support')
             })
             timer.done()

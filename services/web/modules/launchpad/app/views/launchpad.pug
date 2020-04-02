@@ -9,7 +9,7 @@ block content
 			authMethod: "!{authMethod}"
 		}
 
-	script(type="text/javascript" src='/socket.io/socket.io.js')
+	script(type="text/javascript" src=(wsUrl || '/socket.io') + '/socket.io.js')
 
 	style.
 		hr { margin-bottom: 5px; }
