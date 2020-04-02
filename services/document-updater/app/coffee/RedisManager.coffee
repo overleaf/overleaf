@@ -132,6 +132,9 @@ module.exports = RedisManager =
 			if timeSpan > MAX_REDIS_REQUEST_LENGTH
 				error = new Error("redis getDoc exceeded timeout")
 				return callback(error)
+			# record bytes loaded from redis
+			if docLines?
+				metrics.summary "redis.docLines", docLines.length, {status: "get"}
 			# check sha1 hash value if present
 			if docLines? and storedHash?
 				computedHash = RedisManager._computeHash(docLines)
@@ -247,7 +250,8 @@ module.exports = RedisManager =
 
 			opVersions = appliedOps.map (op) -> op?.v
 			logger.log doc_id: doc_id, version: newVersion, hash: newHash, op_versions: opVersions, "updating doc in redis"
-
+			# record bytes sent to redis in update
+			metrics.summary "redis.docLines", newDocLines.length, {status: "update"}
 			RedisManager._serializeRanges ranges, (error, ranges) ->
 				if error?
 					logger.error {err: error, doc_id}, error.message
