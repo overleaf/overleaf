@@ -61,12 +61,15 @@ describe('GcsPersistorTests', function() {
 
     ReadStream = {
       pipe: sinon.stub().returns('readStream'),
-      on: sinon
-        .stub()
-        .withArgs('end')
-        .yields(),
+      on: sinon.stub(),
       removeListener: sinon.stub()
     }
+    ReadStream.on.withArgs('end').yields()
+    ReadStream.on.withArgs('pipe').yields({
+      unpipe: sinon.stub(),
+      resume: sinon.stub(),
+      on: sinon.stub()
+    })
 
     Transform = class {
       on(event, callback) {
@@ -168,8 +171,7 @@ describe('GcsPersistorTests', function() {
       })
 
       it('pipes the stream through the meter', function() {
-        expect(Stream.pipeline).to.have.been.calledWith(
-          ReadStream,
+        expect(ReadStream.pipe).to.have.been.calledWith(
           sinon.match.instanceOf(Transform)
         )
       })
@@ -202,11 +204,11 @@ describe('GcsPersistorTests', function() {
 
       beforeEach(async function() {
         Transform.prototype.on = sinon.stub()
-        Stream.pipeline.yields(GcsNotFoundError)
+        ReadStream.on.withArgs('error').yields(GcsNotFoundError)
         try {
           stream = await GcsPersistor.promises.getFileStream(bucket, key)
-        } catch (err) {
-          error = err
+        } catch (e) {
+          error = e
         }
       })
 
@@ -232,7 +234,7 @@ describe('GcsPersistorTests', function() {
 
       beforeEach(async function() {
         Transform.prototype.on = sinon.stub()
-        Stream.pipeline.yields(genericError)
+        ReadStream.on.withArgs('error').yields(genericError)
         try {
           stream = await GcsPersistor.promises.getFileStream(bucket, key)
         } catch (err) {

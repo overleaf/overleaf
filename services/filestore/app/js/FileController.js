@@ -61,9 +61,6 @@ function getFile(req, res, next) {
     }
 
     pipeline(fileStream, res, err => {
-      if (!fileStream.destroyed) {
-        fileStream.destroy()
-      }
       if (err && err.code === 'ERR_STREAM_PREMATURE_CLOSE') {
         res.end()
       } else if (err) {

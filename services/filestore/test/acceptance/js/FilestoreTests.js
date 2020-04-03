@@ -17,10 +17,13 @@ const streamifier = require('streamifier')
 chai.use(require('chai-as-promised'))
 const { ObjectId } = require('mongodb')
 const tk = require('timekeeper')
+const ChildProcess = require('child_process')
 
 const fsWriteFile = promisify(fs.writeFile)
 const fsStat = promisify(fs.stat)
 const pipeline = promisify(Stream.pipeline)
+const exec = promisify(ChildProcess.exec)
+const msleep = promisify(setTimeout)
 
 if (!process.env.AWS_ACCESS_KEY_ID) {
   throw new Error('please provide credentials for the AWS S3 test server')
@@ -39,6 +42,41 @@ const BackendSettings = require('./TestConfig')
 describe('Filestore', function() {
   this.timeout(1000 * 10)
   const filestoreUrl = `http://localhost:${Settings.internal.filestore.port}`
+
+  const seenSockets = []
+  async function expectNoSockets() {
+    try {
+      await msleep(1000)
+      const { stdout } = await exec('ss -tnH')
+
+      const badSockets = []
+      for (const socket of stdout.split('\n')) {
+        const fields = socket.split(' ').filter(part => part !== '')
+        if (
+          fields.length > 2 &&
+          parseInt(fields[1]) &&
+          !seenSockets.includes(socket)
+        ) {
+          badSockets.push(socket)
+          seenSockets.push(socket)
+        }
+      }
+
+      if (badSockets.length) {
+        // eslint-disable-next-line no-console
+        console.error(
+          'ERR: Sockets still have receive buffer after connection closed'
+        )
+        for (const socket of badSockets) {
+          // eslint-disable-next-line no-console
+          console.error(socket)
+        }
+        throw new Error('Sockets still open after connection closed')
+      }
+    } catch (err) {
+      expect(err).not.to.exist
+    }
+  }
 
   // redefine the test suite for every available backend
   Object.keys(BackendSettings).forEach(backend => {
@@ -71,7 +109,8 @@ describe('Filestore', function() {
       }
 
       after(async function() {
-        return app.stop()
+        await msleep(3000)
+        await app.stop()
       })
 
       beforeEach(async function() {
@@ -154,6 +193,11 @@ describe('Filestore', function() {
         it('should be able get the file back', async function() {
           const res = await rp.get(fileUrl)
           expect(res.body).to.equal(constantFileContent)
+        })
+
+        it('should not leak a socket', async function() {
+          await rp.get(fileUrl)
+          await expectNoSockets()
         })
 
         it('should be able to get back the first 9 bytes of the file', async function() {
@@ -378,6 +422,30 @@ describe('Filestore', function() {
         it('should not throw an error', function() {
           expect(error).not.to.exist
         })
+
+        it('should not leak a socket', async function() {
+          await rp.get(fileUrl)
+          await expectNoSockets()
+        })
+
+        it('should not leak a socket if the connection is aborted', async function() {
+          this.timeout(20000)
+          for (let i = 0; i < 5; i++) {
+            // test is not 100% reliable, so repeat
+            // create a new connection and have it time out before reading any data
+            await new Promise(resolve => {
+              const streamThatHangs = new Stream.PassThrough()
+              const stream = request({ url: fileUrl, timeout: 1000 })
+              stream.pipe(streamThatHangs)
+              stream.on('error', () => {
+                stream.destroy()
+                streamThatHangs.destroy()
+                resolve()
+              })
+            })
+            await expectNoSockets()
+          }
+        })
       })
 
       if (backend === 'S3Persistor' || backend === 'FallbackGcsToS3Persistor') {
@@ -554,7 +622,7 @@ describe('Filestore', function() {
               it('copies the file to the primary', async function() {
                 await rp.get(fileUrl)
                 // wait for the file to copy in the background
-                await promisify(setTimeout)(1000)
+                await msleep(1000)
 
                 await TestHelper.expectPersistorToHaveFile(
                   app.persistor.primaryPersistor,
@@ -622,7 +690,7 @@ describe('Filestore', function() {
 
                 it('should not copy the old file to the primary with the old key', async function() {
                   // wait for the file to copy in the background
-                  await promisify(setTimeout)(1000)
+                  await msleep(1000)
 
                   await TestHelper.expectPersistorNotToHaveFile(
                     app.persistor.primaryPersistor,
@@ -668,7 +736,7 @@ describe('Filestore', function() {
 
                 it('should copy the old file to the primary with the old key', async function() {
                   // wait for the file to copy in the background
-                  await promisify(setTimeout)(1000)
+                  await msleep(1000)
 
                   await TestHelper.expectPersistorToHaveFile(
                     app.persistor.primaryPersistor,
