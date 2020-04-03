@@ -17,10 +17,7 @@ class RequestLogger {
 
   static errorHandler(err, req, res, next) {
     req.requestLogger.addFields({ error: err })
-    res
-      .send(err.message)
-      .status(500)
-      .end()
+    res.status(500).send(err.message)
   }
 
   static middleware(req, res, next) {
