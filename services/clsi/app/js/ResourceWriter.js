@@ -324,6 +324,7 @@ module.exports = ResourceWriter = {
                   },
                   'error downloading file for resources'
                 )
+                Metrics.inc('download-failed')
               }
               return callback()
             }
