@@ -202,9 +202,9 @@ describe('DockerRunner', function() {
           }
           if (firstTime) {
             firstTime = false
-            return callback(
-              new Error('HTTP code is 500 which indicates error: server error')
-            )
+            const error = new Error('(HTTP code 500) server error - ...')
+            error.statusCode = 500
+            return callback(error)
           } else {
             return callback(null, this.output)
           }
