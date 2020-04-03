@@ -36,6 +36,7 @@ describe('ResourceWriter', function() {
         './OutputFileFinder': (this.OutputFileFinder = {}),
         'logger-sharelatex': { log: sinon.stub(), err: sinon.stub() },
         './Metrics': (this.Metrics = {
+          inc: sinon.stub(),
           Timer: (Timer = (function() {
             Timer = class Timer {
               static initClass() {

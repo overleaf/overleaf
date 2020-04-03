@@ -99,11 +99,7 @@ module.exports = DockerRunner = {
       error,
       output
     ) {
-      if (
-        __guard__(error != null ? error.message : undefined, x =>
-          x.match('HTTP code is 500')
-        )
-      ) {
+      if (error && error.statusCode === 500) {
         logger.log(
           { err: error, project_id },
           'error running container so destroying and retrying'
