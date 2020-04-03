@@ -7,4 +7,4 @@ clsi
 --language=es
 --node-version=10.19.0
 --public-repo=True
---script-version=2.0.0
+--script-version=2.1.0
