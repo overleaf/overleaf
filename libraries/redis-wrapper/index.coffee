@@ -1,5 +1,4 @@
 _ = require("underscore")
-async = require "async"
 os = require('os')
 crypto = require('crypto')
 

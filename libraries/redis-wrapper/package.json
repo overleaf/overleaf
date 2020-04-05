@@ -6,7 +6,6 @@
   "author": "ShareLaTeX",
   "license": "ISC",
   "dependencies": {
-    "async": "^2.5.0",
     "coffee-script": "1.8.0",
     "ioredis": "~4.17.3",
     "underscore": "1.7.0"
