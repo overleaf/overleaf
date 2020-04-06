@@ -25,6 +25,7 @@ describe 'DocumentUpdaterManager', ->
 				'request': @request = {}
 				'redis-sharelatex' : createClient: () => @rclient
 				'metrics-sharelatex': @Metrics =
+					summary: sinon.stub()
 					Timer: class Timer
 						done: () ->
 			globals:
