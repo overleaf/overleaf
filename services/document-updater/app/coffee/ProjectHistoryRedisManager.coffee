@@ -2,9 +2,13 @@ Settings = require('settings-sharelatex')
 projectHistoryKeys = Settings.redis?.project_history?.key_schema
 rclient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
 logger = require('logger-sharelatex')
+metrics = require('./Metrics')
 
 module.exports = ProjectHistoryRedisManager =
 	queueOps: (project_id, ops..., callback = (error, projectUpdateCount) ->) ->
+		# Record metric for ops pushed onto queue
+		for op in ops
+			metrics.summary "redis.projectHistoryOps", op.length, {status: "push"}
 		multi = rclient.multi()
 		# Push the ops onto the project history queue
 		multi.rpush projectHistoryKeys.projectHistoryOps({project_id}), ops...

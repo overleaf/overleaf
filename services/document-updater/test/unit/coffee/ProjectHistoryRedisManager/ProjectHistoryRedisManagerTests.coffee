@@ -26,6 +26,7 @@ describe "ProjectHistoryRedisManager", ->
 					createClient: () => @rclient
 				"logger-sharelatex":
 					log:->
+				"./Metrics": @metrics = { summary: sinon.stub()}
 			globals:
 				JSON: @JSON = JSON
 
