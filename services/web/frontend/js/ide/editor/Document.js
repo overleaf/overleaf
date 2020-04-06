@@ -18,9 +18,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define([
-  'utils/EventEmitter',
-  'ide/editor/ShareJsDoc',
-  'ide/review-panel/RangesTracker'
+  '../../utils/EventEmitter',
+  './ShareJsDoc',
+  '../review-panel/RangesTracker'
 ], function(EventEmitter, ShareJsDoc, RangesTracker) {
   let Document
   return (Document = (function() {

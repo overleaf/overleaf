@@ -20,13 +20,13 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define([
-  'ide/file-tree/directives/fileEntity',
-  'ide/file-tree/directives/draggable',
-  'ide/file-tree/directives/droppable',
-  'ide/file-tree/controllers/FileTreeController',
-  'ide/file-tree/controllers/FileTreeEntityController',
-  'ide/file-tree/controllers/FileTreeFolderController',
-  'ide/file-tree/controllers/FileTreeRootFolderController'
+  './directives/fileEntity',
+  './directives/draggable',
+  './directives/droppable',
+  './controllers/FileTreeController',
+  './controllers/FileTreeEntityController',
+  './controllers/FileTreeFolderController',
+  './controllers/FileTreeRootFolderController'
 ], function() {
   let FileTreeManager
   return (FileTreeManager = class FileTreeManager {

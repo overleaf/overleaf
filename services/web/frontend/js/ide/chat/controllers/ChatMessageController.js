@@ -11,7 +11,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'ide/colors/ColorManager'], (App, ColorManager) =>
+define(['../../../base', '../../colors/ColorManager'], (App, ColorManager) =>
   App.controller('ChatMessageController', function($scope, ide) {
     const hslColorConfigs = {
       borderSaturation:

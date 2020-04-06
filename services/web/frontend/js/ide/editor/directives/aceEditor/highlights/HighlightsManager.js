@@ -16,7 +16,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['ace/ace', 'ide/colors/ColorManager'], function(_, ColorManager) {
+define(['ace/ace', '../../../../colors/ColorManager'], function(
+  _,
+  ColorManager
+) {
   let HighlightsManager
   const { Range } = ace.require('ace/range')
 

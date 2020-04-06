@@ -1,8 +1,8 @@
 define([
-  'ide/editor/directives/aceEditor/auto-complete/CommandManager',
-  'ide/editor/directives/aceEditor/auto-complete/EnvironmentManager',
-  'ide/editor/directives/aceEditor/auto-complete/PackageManager',
-  'ide/editor/directives/aceEditor/auto-complete/Helpers',
+  './CommandManager',
+  './EnvironmentManager',
+  './PackageManager',
+  './Helpers',
   'ace/ace',
   'ace/ext-language_tools'
 ], function(CommandManager, EnvironmentManager, PackageManager, Helpers) {

@@ -10,9 +10,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define([
-  'ide/editor/directives/aceEditor/auto-complete/snippets/Environments'
-], function(Environments) {
+define(['./snippets/Environments'], function(Environments) {
   let staticSnippets = Array.from(Environments.withoutSnippets).map(env => ({
     caption: `\\begin{${env}}...`,
     snippet: `\

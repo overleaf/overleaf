@@ -1,4 +1,4 @@
-define(['base'], function(App) {
+define(['../base'], function(App) {
   App.directive('bookmarkableTabset', ($location, _) => ({
     restrict: 'A',
     require: 'tabset',

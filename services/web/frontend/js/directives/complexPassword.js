@@ -2,7 +2,7 @@
     no-undef,
     max-len
 */
-define(['base', 'libs/passfield'], function(App) {
+define(['../base', 'libs/passfield'], function(App) {
   App.directive('complexPassword', () => ({
     require: ['^asyncForm', 'ngModel'],
 

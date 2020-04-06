@@ -1,4 +1,4 @@
-define(['base'], App =>
+define(['../../../base'], App =>
   App.controller('UserOauthController', function($http, $scope, $q) {
     const _reset = function() {
       $scope.ui = {

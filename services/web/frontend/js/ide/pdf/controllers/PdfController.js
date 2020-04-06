@@ -1,7 +1,7 @@
 define([
-  'base',
+  '../../../base',
   'ace/ace',
-  'ide/human-readable-logs/HumanReadableLogs',
+  '../../human-readable-logs/HumanReadableLogs',
   'libs/bib-log-parser'
 ], function(App, Ace, HumanReadableLogs, BibLogParser) {
   const AUTO_COMPILE_MAX_WAIT = 5000

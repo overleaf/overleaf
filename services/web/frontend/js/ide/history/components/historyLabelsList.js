@@ -11,9 +11,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define([
-  'base',
-  'ide/colors/ColorManager',
-  'ide/history/util/displayNameForUser'
+  '../../../base',
+  '../../colors/ColorManager',
+  '../util/displayNameForUser'
 ], function(App, ColorManager, displayNameForUser) {
   const historyLabelsListController = function($scope, $element, $attrs, _) {
     const ctrl = this

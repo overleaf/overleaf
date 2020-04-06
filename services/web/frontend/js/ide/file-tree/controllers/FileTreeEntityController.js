@@ -13,7 +13,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'ide/file-tree/util/iconTypeFromName'], function(
+define(['../../../base', '../util/iconTypeFromName'], function(
   App,
   iconTypeFromName
 ) {

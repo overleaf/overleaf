@@ -10,9 +10,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define([
-  'ide/pdf/controllers/PdfController',
-  'ide/pdf/controllers/PdfViewToggleController',
-  'ide/pdfng/directives/pdfJs'
+  './controllers/PdfController',
+  './controllers/PdfViewToggleController',
+  '../pdfng/directives/pdfJs'
 ], function() {
   let PdfManager
   return (PdfManager = class PdfManager {

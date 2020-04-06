@@ -1,4 +1,7 @@
-define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
+define(['../../base', '../../ide/colors/ColorManager'], function(
+  App,
+  ColorManager
+) {
   App.controller('TagListController', function($scope, $modal) {
     $scope.filterProjects = function(filter = 'all') {
       $scope._clearTags()

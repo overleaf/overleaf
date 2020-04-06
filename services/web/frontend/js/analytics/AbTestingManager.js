@@ -13,7 +13,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'crypto-js/md5'], function(App, CryptoJS) {
+define(['../base', 'crypto-js/md5'], function(App, CryptoJS) {
   const oldKeys = [
     'sl_abt_multi_currency_editor_eu-eu',
     'sl_abt_multi_currency_eu-eu',

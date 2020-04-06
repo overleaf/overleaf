@@ -11,7 +11,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'ide/chat/services/chatMessages'], App =>
+define(['../../../base', '../services/chatMessages'], App =>
   App.controller('ChatController', function(
     $scope,
     chatMessages,

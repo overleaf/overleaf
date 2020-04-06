@@ -1,4 +1,4 @@
-define(['base'], function(App) {
+define(['../../../base'], function(App) {
   const countriesList = [
     { code: 'af', name: 'Afghanistan' },
     { code: 'ax', name: 'Åland Islands' },

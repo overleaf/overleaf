@@ -10,7 +10,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base'], App =>
+define(['../base'], App =>
   App.factory('waitFor', function($q) {
     const waitFor = function(testFunction, timeout, pollInterval) {
       if (pollInterval == null) {

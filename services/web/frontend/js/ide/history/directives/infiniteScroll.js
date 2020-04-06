@@ -10,7 +10,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base'], App =>
+define(['../../../base'], App =>
   App.directive('infiniteScroll', () => ({
     link(scope, element, attrs, ctrl) {
       const innerElement = element.find('.infinite-scroll-inner')

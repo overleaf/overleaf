@@ -34,7 +34,7 @@ const isInViewport = function(element) {
   return elBtm > viewportTop && elTop < viewportBtm
 }
 
-define(['base'], App =>
+define(['../base'], App =>
   App.directive('eventTracking', eventTracking => ({
     scope: {
       eventTracking: '@',

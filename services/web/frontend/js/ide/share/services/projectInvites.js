@@ -1,4 +1,4 @@
-define(['base'], App =>
+define(['../../../base'], App =>
   App.factory('projectInvites', (ide, $http) => ({
     sendInvite(email, privileges, grecaptchaResponse) {
       return $http.post(`/project/${ide.project_id}/invite`, {

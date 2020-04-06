@@ -1,4 +1,4 @@
-define(['base'], function(App) {
+define(['../base'], function(App) {
   return App.factory('validateCaptchaV3', function() {
     const grecaptcha = window.grecaptcha
     const ExposedSettings = window.ExposedSettings

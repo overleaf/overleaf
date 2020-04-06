@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define([
-  'ide/editor/directives/aceEditor/spell-check/SpellCheckManager'
+  '../../../../../../frontend/js/ide/editor/directives/aceEditor/spell-check/SpellCheckManager'
 ], SpellCheckManager =>
   describe('SpellCheckManager', function() {
     beforeEach(function(done) {

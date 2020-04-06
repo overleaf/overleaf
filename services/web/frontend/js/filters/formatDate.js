@@ -9,7 +9,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'moment'], function(App, moment) {
+define(['../base', 'moment'], function(App, moment) {
   moment.updateLocale('en', {
     calendar: {
       lastDay: '[Yesterday]',

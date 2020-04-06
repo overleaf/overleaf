@@ -210,12 +210,7 @@ module.exports = {
         __dirname,
         `frontend/js/vendor/libs/${PackageVersions.lib('fineuploader')}`
       )
-    },
-    // Define what can be imported with out an absolute or relative path. This
-    // is because we need to override the default (which is just node_modules)
-    // to get AMD modules in public/src to work as they do not use relative/
-    // absolute paths for dependencies
-    modules: ['frontend/js', 'node_modules']
+    }
   },
 
   // Split out vendored dependencies that are shared between 2 or more "real

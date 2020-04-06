@@ -17,11 +17,11 @@
  */
 define([
   'moment',
-  'ide/colors/ColorManager',
-  'ide/history/util/displayNameForUser',
-  'ide/history/controllers/HistoryListController',
-  'ide/history/controllers/HistoryDiffController',
-  'ide/history/directives/infiniteScroll'
+  '../colors/ColorManager',
+  './util/displayNameForUser',
+  './controllers/HistoryListController',
+  './controllers/HistoryDiffController',
+  './directives/infiniteScroll'
 ], function(moment, ColorManager, displayNameForUser) {
   let HistoryManager
   return (HistoryManager = (function() {

@@ -1,4 +1,4 @@
-define(['base'], App => {
+define(['../../../base'], App => {
   App.controller('ShareController', function(
     $scope,
     $modal,

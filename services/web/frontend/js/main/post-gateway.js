@@ -1,4 +1,4 @@
-define(['base'], App =>
+define(['../base'], App =>
   App.controller('PostGatewayController', function($scope) {
     $scope.handleGateway = function() {
       const { params } = JSON.parse($('#gateway-data').text())

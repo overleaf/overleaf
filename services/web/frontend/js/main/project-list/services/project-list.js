@@ -1,7 +1,7 @@
 /* eslint-disable
     camelcase
 */
-define(['base'], App =>
+define(['../../../base'], App =>
   App.service('ProjectListService', () => ({
     getOwnerName(project) {
       if (project.accessLevel === 'owner') {

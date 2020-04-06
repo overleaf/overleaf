@@ -13,7 +13,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base'], function(App) {
+define(['../base'], function(App) {
   App.factory('ccUtils', function() {
     const defaultFormat = /(\d{1,4})/g
     const defaultInputFormat = /(?:^|\s)(\d{4})$/

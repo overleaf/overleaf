@@ -11,9 +11,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define([
-  'base',
-  'ide/file-tree/util/iconTypeFromName',
-  'ide/file-tree/util/fileOperationI18nNames'
+  '../../../base',
+  '../../file-tree/util/iconTypeFromName',
+  '../../file-tree/util/fileOperationI18nNames'
 ], function(App, iconTypeFromName, fileOperationI18nNames) {
   const historyFileEntityController = function($scope, $element, $attrs) {
     const ctrl = this

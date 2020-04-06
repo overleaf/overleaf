@@ -10,7 +10,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['utils/EventEmitter'], EventEmitter =>
+define(['../../../frontend/js/utils/EventEmitter'], EventEmitter =>
   describe('EventEmitter', function() {
     beforeEach(function() {
       return (this.eventEmitter = new EventEmitter())

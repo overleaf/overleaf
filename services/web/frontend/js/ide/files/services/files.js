@@ -1,4 +1,4 @@
-define(['base'], App =>
+define(['../../../base'], App =>
   App.factory('files', function(ide) {
     const Files = {
       getTeXFiles() {

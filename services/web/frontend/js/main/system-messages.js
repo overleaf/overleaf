@@ -10,7 +10,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base'], function(App) {
+define(['../base'], function(App) {
   const MESSAGE_POLL_INTERVAL = 15 * 60 * 1000
   // Controller for messages (array)
   App.controller('SystemMessagesController', ($http, $scope) => {

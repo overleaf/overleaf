@@ -19,23 +19,23 @@
  */
 define([
   'moment',
-  'ide/colors/ColorManager',
-  'ide/history/util/displayNameForUser',
-  'ide/history/util/HistoryViewModes',
-  'ide/history/controllers/HistoryV2ListController',
-  'ide/history/controllers/HistoryV2FileTreeController',
-  'ide/history/controllers/HistoryV2ToolbarController',
-  'ide/history/controllers/HistoryV2AddLabelModalController',
-  'ide/history/controllers/HistoryV2DeleteLabelModalController',
-  'ide/history/directives/infiniteScroll',
-  'ide/history/directives/historyDraggableBoundary',
-  'ide/history/directives/historyDroppableArea',
-  'ide/history/components/historyEntriesList',
-  'ide/history/components/historyEntry',
-  'ide/history/components/historyLabelsList',
-  'ide/history/components/historyLabel',
-  'ide/history/components/historyFileTree',
-  'ide/history/components/historyFileEntity'
+  '../colors/ColorManager',
+  './util/displayNameForUser',
+  './util/HistoryViewModes',
+  './controllers/HistoryV2ListController',
+  './controllers/HistoryV2FileTreeController',
+  './controllers/HistoryV2ToolbarController',
+  './controllers/HistoryV2AddLabelModalController',
+  './controllers/HistoryV2DeleteLabelModalController',
+  './directives/infiniteScroll',
+  './directives/historyDraggableBoundary',
+  './directives/historyDroppableArea',
+  './components/historyEntriesList',
+  './components/historyEntry',
+  './components/historyLabelsList',
+  './components/historyLabel',
+  './components/historyFileTree',
+  './components/historyFileEntity'
 ], function(moment, ColorManager, displayNameForUser, HistoryViewModes) {
   let HistoryManager
   return (HistoryManager = (function() {

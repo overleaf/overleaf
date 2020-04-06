@@ -1,7 +1,7 @@
-define([
-  'ace/ace',
-  'ide/editor/directives/aceEditor/spell-check/HighlightedWordManager'
-], function(Ace, HighlightedWordManager) {
+define(['ace/ace', './HighlightedWordManager'], function(
+  Ace,
+  HighlightedWordManager
+) {
   const { Range } = ace.require('ace/range')
 
   class SpellCheckAdapter {

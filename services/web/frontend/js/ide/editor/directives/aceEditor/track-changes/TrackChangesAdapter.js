@@ -1,7 +1,7 @@
 /* eslint-disable
     camelcase
  */
-define(['ace/ace', 'ide/editor/EditorShareJsCodec'], function(
+define(['ace/ace', '../../../EditorShareJsCodec'], function(
   _ignore,
   EditorShareJsCodec
 ) {

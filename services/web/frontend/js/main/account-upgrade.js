@@ -1,4 +1,4 @@
-define(['base'], App =>
+define(['../base'], App =>
   App.controller('FreeTrialModalController', function($scope, eventTracking) {
     $scope.buttonClass = 'btn-primary'
 

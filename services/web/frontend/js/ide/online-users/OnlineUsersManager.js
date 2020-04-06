@@ -16,9 +16,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define([
-  'ide/colors/ColorManager',
+  '../colors/ColorManager',
   'crypto-js/md5',
-  'ide/online-users/controllers/OnlineUsersController'
+  './controllers/OnlineUsersController'
 ], function(ColorManager) {
   let OnlineUsersManager
   return (OnlineUsersManager = (function() {

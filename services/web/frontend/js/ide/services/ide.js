@@ -13,7 +13,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base'], function(App) {
+define(['../../base'], function(App) {
   // We create and provide this as service so that we can access the global ide
   // from within other parts of the angular app.
   App.factory('ide', function(

@@ -1,4 +1,4 @@
-define(['base'], App =>
+define(['../../base'], App =>
   App.controller('UpgradeSubscriptionController', function(
     $scope,
     eventTracking

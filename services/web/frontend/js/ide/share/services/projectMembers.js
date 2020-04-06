@@ -1,4 +1,4 @@
-define(['base'], App => {
+define(['../../../base'], App => {
   App.factory('projectMembers', (ide, $http) => ({
     removeMember(member) {
       return $http({

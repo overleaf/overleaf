@@ -10,7 +10,7 @@
  * DS103: Rewrite code to no longer use __guard__
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base'], App =>
+define(['../../../base'], App =>
   App.factory('preamble', function(ide) {
     var Preamble = {
       getPreambleText() {

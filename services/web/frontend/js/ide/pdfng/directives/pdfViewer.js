@@ -19,13 +19,13 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define([
-  'base',
-  'ide/pdfng/directives/pdfTextLayer',
-  'ide/pdfng/directives/pdfAnnotations',
-  'ide/pdfng/directives/pdfHighlights',
-  'ide/pdfng/directives/pdfRenderer',
-  'ide/pdfng/directives/pdfPage',
-  'ide/pdfng/directives/pdfSpinner'
+  '../../../base',
+  './pdfTextLayer',
+  './pdfAnnotations',
+  './pdfHighlights',
+  './pdfRenderer',
+  './pdfPage',
+  './pdfSpinner'
 ], function(
   App,
   pdfTextLayer,

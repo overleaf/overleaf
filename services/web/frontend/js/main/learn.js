@@ -14,9 +14,11 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'directives/mathjax', 'services/algolia-search'], function(
-  App
-) {
+define([
+  '../base',
+  '../directives/mathjax',
+  '../services/algolia-search'
+], function(App) {
   App.controller('SearchWikiController', function(
     $scope,
     algoliaSearch,

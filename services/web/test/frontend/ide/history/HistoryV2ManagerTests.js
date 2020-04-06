@@ -10,7 +10,9 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['ide/history/HistoryV2Manager'], HistoryV2Manager =>
+define([
+  '../../../../frontend/js/ide/history/HistoryV2Manager'
+], HistoryV2Manager =>
   describe('HistoryV2Manager', function() {
     beforeEach(function(done) {
       this.defaultHistoryScope = {

@@ -4,7 +4,7 @@
     no-return-assign
 */
 /* global recurly */
-define(['base', 'directives/creditCards'], App =>
+define(['../base', '../directives/creditCards'], App =>
   App.controller('NewSubscriptionController', function(
     $scope,
     MultiCurrencyPricing,

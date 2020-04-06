@@ -14,7 +14,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'crypto-js/md5'], (App, CryptoJS) =>
+define(['../../../base', 'crypto-js/md5'], (App, CryptoJS) =>
   App.factory('chatMessages', function($http, ide) {
     const MESSAGES_URL = `/project/${ide.project_id}/messages`
     const MESSAGE_LIMIT = 50

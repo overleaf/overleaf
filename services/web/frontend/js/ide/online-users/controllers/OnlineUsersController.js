@@ -11,7 +11,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base'], App =>
+define(['../../../base'], App =>
   App.controller('OnlineUsersController', function($scope, ide) {
     $scope.gotoUser = function(user) {
       if (user.doc != null && user.row != null) {

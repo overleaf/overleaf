@@ -8,7 +8,7 @@
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  */
-define(['base'], App =>
+define(['../base'], App =>
   App.factory('validateCaptcha', function() {
     let _recaptchaCallbacks = []
     const onRecaptchaSubmit = function(token) {

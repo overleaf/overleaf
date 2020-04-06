@@ -4,9 +4,9 @@
  */
 define([
   'ace/ace',
-  'utils/EventEmitter',
-  'ide/colors/ColorManager',
-  'ide/editor/EditorShareJsCodec'
+  '../../../../../utils/EventEmitter',
+  '../../../../colors/ColorManager',
+  '../../../EditorShareJsCodec'
 ], function(_ignore, EventEmitter, ColorManager, EditorShareJsCodec) {
   const { Range } = ace.require('ace/range')
   class TrackChangesManager {

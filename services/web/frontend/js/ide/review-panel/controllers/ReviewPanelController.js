@@ -16,10 +16,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define([
-  'base',
-  'utils/EventEmitter',
-  'ide/colors/ColorManager',
-  'ide/review-panel/RangesTracker'
+  '../../../base',
+  '../../../utils/EventEmitter',
+  '../../colors/ColorManager',
+  '../RangesTracker'
 ], (App, EventEmitter, ColorManager, RangesTracker) =>
   App.controller('ReviewPanelController', function(
     $scope,

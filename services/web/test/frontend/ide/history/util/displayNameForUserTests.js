@@ -9,7 +9,9 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['ide/history/util/displayNameForUser'], displayNameForUser =>
+define([
+  '../../../../../frontend/js/ide/history/util/displayNameForUser'
+], displayNameForUser =>
   describe('displayNameForUser', function() {
     beforeEach(function() {
       return (window.user = { id: 42 })

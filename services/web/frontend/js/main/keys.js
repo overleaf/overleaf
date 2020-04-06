@@ -8,7 +8,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base'], App =>
+define(['../base'], App =>
   App.constant('Keys', {
     ENTER: 13,
     TAB: 9,

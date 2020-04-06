@@ -1,4 +1,4 @@
-define(['base'], App => {
+define(['../../../base'], App => {
   let content = ''
   App.directive('addCommentEntry', () => ({
     restrict: 'E',

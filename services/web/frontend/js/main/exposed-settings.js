@@ -1,3 +1,3 @@
-define(['base'], function(App) {
+define(['../base'], function(App) {
   App.constant('ExposedSettings', window.ExposedSettings)
 })

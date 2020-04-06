@@ -17,7 +17,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['utils/EventEmitter', 'libs/sharejs'], function(EventEmitter, ShareJs) {
+define(['../../utils/EventEmitter', 'libs/sharejs'], function(
+  EventEmitter,
+  ShareJs
+) {
   let ShareJsDoc
   const SINGLE_USER_FLUSH_DELAY = 1000 // ms
 

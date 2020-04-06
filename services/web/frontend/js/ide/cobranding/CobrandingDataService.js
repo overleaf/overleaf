@@ -12,7 +12,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base'], function(App) {
+define(['../../base'], function(App) {
   const _cobrandingData = window.brandVariation
 
   return App.factory('CobrandingDataService', function() {

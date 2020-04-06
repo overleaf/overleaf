@@ -2,7 +2,7 @@
     camelcase,
     max-len
 */
-define(['base'], function(App) {
+define(['../base'], function(App) {
   App.factory('MultiCurrencyPricing', function() {
     const currencyCode = window.recomendedCurrency
 

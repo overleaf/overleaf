@@ -12,7 +12,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'ide/editor/Document'], (App, Document) =>
+define(['../../../base', '../Document'], (App, Document) =>
   App.controller('SavingNotificationController', function(
     $scope,
     $interval,

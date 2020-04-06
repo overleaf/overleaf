@@ -1,6 +1,6 @@
 /* global MathJax */
 
-define(['base'], function(App) {
+define(['../base'], function(App) {
   return App.directive('mathjax', function($compile, $parse) {
     return {
       link(scope, element, attrs) {

@@ -15,11 +15,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define([
-  'ide/editor/Document',
-  'ide/editor/components/spellMenu',
-  'ide/editor/directives/aceEditor',
-  'ide/editor/directives/toggleSwitch',
-  'ide/editor/controllers/SavingNotificationController'
+  './Document',
+  './components/spellMenu',
+  './directives/aceEditor',
+  './directives/toggleSwitch',
+  './controllers/SavingNotificationController'
 ], function(Document) {
   let EditorManager
   return (EditorManager = (function() {

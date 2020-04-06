@@ -11,7 +11,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'algoliasearch'], (App, AlgoliaSearch) =>
+define(['../base', 'algoliasearch'], (App, AlgoliaSearch) =>
   App.factory('algoliaSearch', function() {
     let kbIdx, wikiIdx
     if (

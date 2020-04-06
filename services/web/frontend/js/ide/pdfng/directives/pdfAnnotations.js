@@ -1,4 +1,4 @@
-define(['base', './pdfJsLoader'], (App, PDFJS) => {
+define(['../../../base', './pdfJsLoader'], (App, PDFJS) => {
   const EXTERNAL_LINK_TARGET = '_blank'
   const REL_NOOPENER = 'noreferrer noopener'
 

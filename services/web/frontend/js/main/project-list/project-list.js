@@ -1,4 +1,4 @@
-define(['base', 'main/project-list/services/project-list'], function(App) {
+define(['../../base', './services/project-list'], function(App) {
   App.controller('ProjectPageController', function(
     $scope,
     $modal,

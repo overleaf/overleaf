@@ -5,7 +5,7 @@
     no-useless-escape,
 */
 
-define(['base'], App =>
+define(['../../../base'], App =>
   App.controller('UserAffiliationsController', function(
     $scope,
     UserAffiliationsDataService,

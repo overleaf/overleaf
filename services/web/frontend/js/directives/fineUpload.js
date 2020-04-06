@@ -9,7 +9,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'fineuploader'], (App, qq) =>
+define(['../base', 'fineuploader'], (App, qq) =>
   App.directive('fineUpload', $timeout => ({
     scope: {
       multiple: '=',

@@ -1,4 +1,4 @@
-define(['base'], function(App) {
+define(['../base'], function(App) {
   App.controller('AccountSettingsController', function(
     $scope,
     $http,
