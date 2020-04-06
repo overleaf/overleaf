@@ -109,7 +109,7 @@ describe('TpdsUpdateSender', function() {
       const file_id = '4545345'
       const path = '/some/path/here.jpg'
       this.updateSender._enqueue = function(uid, method, job, callback) {
-        uid.should.equal(project_id)
+        uid.should.equal(user_id)
         job.method.should.equal('post')
         job.streamOrigin.should.equal(
           `${filestoreUrl}/project/${project_id}/file/${file_id}`
@@ -135,7 +135,7 @@ describe('TpdsUpdateSender', function() {
       const lines = ['line1', 'line2', 'line3']
 
       this.updateSender._enqueue = (uid, method, job, callback) => {
-        uid.should.equal(project_id)
+        uid.should.equal(user_id)
         job.method.should.equal('post')
         const expectedUrl = `${thirdPartyDataStoreApiUrl}/user/${user_id}/entity/${encodeURIComponent(
           project_name
@@ -161,7 +161,7 @@ describe('TpdsUpdateSender', function() {
     it('deleting entity', function(done) {
       const path = '/path/here/t.tex'
       this.updateSender._enqueue = function(uid, method, job, callback) {
-        uid.should.equal(project_id)
+        uid.should.equal(user_id)
         job.method.should.equal('DELETE')
         const expectedUrl = `${thirdPartyDataStoreApiUrl}/user/${user_id}/entity/${encodeURIComponent(
           project_name
@@ -179,7 +179,7 @@ describe('TpdsUpdateSender', function() {
       const startPath = 'staring/here/file.tex'
       const endPath = 'ending/here/file.tex'
       this.updateSender._enqueue = function(uid, method, job, callback) {
-        uid.should.equal(project_id)
+        uid.should.equal(user_id)
         job.method.should.equal('put')
         job.uri.should.equal(
           `${thirdPartyDataStoreApiUrl}/user/${user_id}/entity`
@@ -203,7 +203,7 @@ describe('TpdsUpdateSender', function() {
       const oldProjectName = '/oldProjectName/'
       const newProjectName = '/newProjectName/'
       this.updateSender._enqueue = function(uid, method, job, callback) {
-        uid.should.equal(project_id)
+        uid.should.equal(user_id)
         job.method.should.equal('put')
         job.uri.should.equal(
           `${thirdPartyDataStoreApiUrl}/user/${user_id}/entity`
