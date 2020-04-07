@@ -143,7 +143,12 @@ const UserSchema = new Schema({
   awareOfV2: { type: Boolean, default: false },
   samlIdentifiers: { type: Array, default: [] },
   thirdPartyIdentifiers: { type: Array, default: [] },
-  migratedAt: { type: Date }
+  migratedAt: { type: Date },
+  twoFactorAuthentication: {
+    createdAt: { type: Date },
+    enrolledAt: { type: Date },
+    secret: { type: String }
+  }
 })
 
 exports.User = mongoose.model('User', UserSchema)

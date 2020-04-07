@@ -224,6 +224,10 @@ module.exports = settings =
 
 	httpAuthUsers: httpAuthUsers
 
+	twoFactorAuthentication:
+		enabled: false
+		requiredForStaff: false
+
 	# Default features
 	# ----------------
 	#

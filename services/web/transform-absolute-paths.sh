@@ -9,7 +9,7 @@ npx jscodeshift \
   --ignore-pattern=test/frontend/import_tests.js \
   test/frontend
 
-for MODULE in admin-panel cms dropbox git-bridge github-sync launchpad metrics open-in-overleaf overleaf-integration portals references-search support templates tpr-webmodule v2-templates
+for MODULE in admin-panel cms dropbox git-bridge github-sync launchpad metrics open-in-overleaf overleaf-integration portals references-search support templates tpr-webmodule v2-templates two-factor-authentication
 do
   npx jscodeshift \
   -t transform.js \

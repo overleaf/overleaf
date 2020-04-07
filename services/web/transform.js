@@ -11,7 +11,8 @@ function getRelativePath(importPath, filePath) {
   if (
     importPath.startsWith('crypto-js') ||
     importPath.startsWith('moment') ||
-    importPath.startsWith('algoliasearch')
+    importPath.startsWith('algoliasearch') ||
+    importPath.startsWith('qrcode')
   ) {
     return importPath
   }
