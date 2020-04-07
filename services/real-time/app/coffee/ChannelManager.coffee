@@ -48,6 +48,7 @@ module.exports = ChannelManager =
             metrics.inc "unsubscribe.#{baseChannel}"
 
     publish: (rclient, baseChannel, id, data) ->
+        metrics.summary "redis.publish.#{baseChannel}", data.length
         if id is 'all' or !settings.publishOnIndividualChannels
             channel = baseChannel
         else

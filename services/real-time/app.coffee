@@ -163,10 +163,13 @@ if Settings.continualPubsubTraffic
 		checker = new HealthCheckManager(channel)
 		logger.debug {channel:channel}, "sending pub to keep connection alive"
 		json = JSON.stringify({health_check:true, key: checker.id, date: new Date().toString()})
+		Metrics.summary "redis.publish.#{channel}", json.length
 		pubsubClient.publish channel, json, (err)->
 			if err?
 				logger.err {err, channel}, "error publishing pubsub traffic to redis"
-			clusterClient.publish "cluster-continual-traffic", {keep: "alive"}, callback
+			blob = JSON.stringify({keep: "alive"})
+			Metrics.summary "redis.publish.cluster-continual-traffic", blob.length
+			clusterClient.publish "cluster-continual-traffic", blob, callback
 
 
 	runPubSubTraffic = ->
