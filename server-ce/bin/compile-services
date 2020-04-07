@@ -12,11 +12,11 @@ grep 'name:' config/services.js | \
 			web)
 				npm run webpack:production
 				;;
-			chat|filestore|notifications|tags)
-				echo "$service doesn't require a compilation"
+			real-time|document-updater)
+				npm run compile:all
 				;;	
 			*)
-				npm run compile:all
+				echo "$service doesn't require a compilation"
 				;;
 		esac	
 		popd
