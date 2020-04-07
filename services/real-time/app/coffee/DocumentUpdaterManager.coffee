@@ -72,6 +72,9 @@ module.exports = DocumentUpdaterManager =
 			error.updateSize = updateSize
 			return callback(error)
 
+		# record metric for each update added to queue
+		metrics.summary 'redis.pendingUpdates', updateSize, {status: 'push'}
+
 		doc_key = "#{project_id}:#{doc_id}"
 		# Push onto pendingUpdates for doc_id first, because once the doc updater
 		# gets an entry on pending-updates-list, it starts processing.
