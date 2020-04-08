@@ -1,6 +1,7 @@
 const fs = require('fs')
 const Path = require('path')
 const isUtf8 = require('utf-8-validate')
+const { promisifyAll } = require('../../util/promises')
 
 const FileTypeManager = {
   TEXT_EXTENSIONS: [
@@ -159,3 +160,6 @@ function _detectEncoding(bytes) {
 }
 
 module.exports = FileTypeManager
+module.exports.promises = promisifyAll(FileTypeManager, {
+  without: ['getStrictTypeFromContent']
+})
