@@ -57,7 +57,7 @@ form.row(
 								ng-if="!isChangingAffiliation(userEmail.email) && (userEmail.affiliation.role || userEmail.affiliation.department)"
 							)
 								span(ng-if="userEmail.affiliation.role") {{ userEmail.affiliation.role }}
-								span(ng-if="userEmail.affiliation.role && userEmail.affiliation.department") ,
+								span(ng-if="userEmail.affiliation.role && userEmail.affiliation.department") ,&ensp;
 								span(ng-if="userEmail.affiliation.department") {{ userEmail.affiliation.department }}
 								br
 								a(
