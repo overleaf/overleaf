@@ -537,6 +537,18 @@ if process.env["SHARELATEX_ELASTICSEARCH_URL"]?
 	settings.references.elasticsearch =
 			host: process.env["SHARELATEX_ELASTICSEARCH_URL"]
 
+# TeX Live Images
+# -----------
+if process.env["ALL_TEX_LIVE_DOCKER_IMAGES"]?
+	allTexLiveDockerImages = process.env["ALL_TEX_LIVE_DOCKER_IMAGES"].split(',')
+if process.env["ALL_TEX_LIVE_DOCKER_IMAGE_NAMES"]?
+	allTexLiveDockerImageNames = process.env["ALL_TEX_LIVE_DOCKER_IMAGE_NAMES"].split(',')
+if allTexLiveDockerImages?
+	settings.allowedImageNames = []
+	for fullImageName, index in allTexLiveDockerImages
+		imageName = Path.basename(fullImageName)
+		imageDesc = if allTexLiveDockerImageNames? then allTexLiveDockerImageNames[index] else imageName
+		settings.allowedImageNames.push({ imageName, imageDesc })
 
 # With lots of incoming and outgoing HTTP connections to different services,
 # sometimes long running, it is a good idea to increase the default number
