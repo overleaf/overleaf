@@ -113,7 +113,7 @@ describe('ProjectRootDocManager', function() {
     })
 
     describe('when the root doc is an Rtex file', function() {
-      beforeEach(function() {
+      beforeEach(function(done) {
         this.docs = {
           '/chapter1.tex': {
             _id: 'doc-id-1',
@@ -129,7 +129,7 @@ describe('ProjectRootDocManager', function() {
           .callsArgWith(1, null, this.docs)
         return this.ProjectRootDocManager.setRootDocAutomatically(
           this.project_id,
-          this.callback
+          done
         )
       })
 

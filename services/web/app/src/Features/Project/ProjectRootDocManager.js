@@ -43,9 +43,13 @@ module.exports = ProjectRootDocManager = {
               ProjectEntityUpdateHandler.isPathValidForRootDoc(path) &&
               DocumentHelper.contentHasDocumentclass(doc.lines)
             ) {
-              return cb(doc._id)
+              async.setImmediate(function() {
+                cb(doc._id)
+              })
             } else {
-              return cb(null)
+              async.setImmediate(function() {
+                cb(null)
+              })
             }
           }
       )
