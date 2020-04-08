@@ -16,7 +16,7 @@ module.exports = merge.smart(
     mode: 'production',
 
     // Enable a full source map. Generates a comment linking to the source map
-    devtool: 'source-map',
+    devtool: 'hidden-source-map',
 
     output: {
       // Override filename to include hash for immutable caching
