@@ -4,7 +4,6 @@ const metrics = require('metrics-sharelatex')
 const Settings = require('settings-sharelatex')
 const nodemailer = require('nodemailer')
 const sesTransport = require('nodemailer-ses-transport')
-const sgTransport = require('nodemailer-sendgrid-transport')
 const mandrillTransport = require('nodemailer-mandrill-transport')
 const OError = require('@overleaf/o-error')
 const RateLimiter = require('../../infrastructure/RateLimiter')
@@ -29,14 +28,10 @@ function getClient() {
       logger.log('using aws ses for email')
       client = nodemailer.createTransport(sesTransport(emailParameters))
     } else if (emailParameters.sendgridApiKey) {
-      logger.log('using sendgrid for email')
-      client = nodemailer.createTransport(
-        sgTransport({
-          auth: {
-            api_key: emailParameters.sendgridApiKey
-          }
-        })
-      )
+      throw new OError({
+        message:
+          'sendgridApiKey configuration option is deprecated, use SMTP instead'
+      })
     } else if (emailParameters.MandrillApiKey) {
       logger.log('using mandril for email')
       client = nodemailer.createTransport(

@@ -87,7 +87,6 @@
     "node-html-encoder": "0.0.2",
     "nodemailer": "2.1.0",
     "nodemailer-mandrill-transport": "^1.2.0",
-    "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemailer-ses-transport": "^1.3.0",
     "nvd3": "^1.8.6",
     "oauth2-server": "^3.0.1",

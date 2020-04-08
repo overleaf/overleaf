@@ -39,7 +39,6 @@ describe('EmailSender', function() {
       requires: {
         nodemailer: this.ses,
         'nodemailer-mandrill-transport': {},
-        'nodemailer-sendgrid-transport': {},
         'settings-sharelatex': this.Settings,
         '../../infrastructure/RateLimiter': this.RateLimiter,
         'logger-sharelatex': {
