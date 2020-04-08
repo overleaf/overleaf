@@ -173,6 +173,16 @@ module.exports = UserEmailsController = {
           }
         }).withCause(error)
       )
+    } else if (error.message === '422: Email does not belong to university') {
+      return next(
+        new HttpErrors.ConflictError({
+          info: {
+            public: {
+              message: req.i18n.translate('email_does_not_belong_to_university')
+            }
+          }
+        }).withCause(error)
+      )
     }
     next(new HttpErrors.InternalServerError().withCause(error))
   }
