@@ -50,12 +50,12 @@ define(['../../base'], function(App) {
       meta.user_id = window.user_id
       meta.project_id = window.project_id
       meta.client_id = __guard__(
-        this.socket != null ? this.socket.socket : undefined,
+        ide.socket != null ? ide.socket.socket : undefined,
         x => x.sessionid
       )
       meta.transport = __guard__(
         __guard__(
-          this.socket != null ? this.socket.socket : undefined,
+          ide.socket != null ? ide.socket.socket : undefined,
           x2 => x2.transport
         ),
         x1 => x1.name
