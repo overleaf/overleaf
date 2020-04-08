@@ -251,6 +251,7 @@ if (enableWebRouter || notDefined(enableWebRouter)) {
 }
 
 metrics.injectMetricsRoute(webRouter)
+metrics.injectMetricsRoute(privateApiRouter)
 
 Router.initialize(webRouter, privateApiRouter, publicApiRouter)
 
