@@ -423,18 +423,6 @@ module.exports = RecurlyWrapper = {
         // TODO: this should be an Error object not a string
         error = `Recurly API returned with status code: ${response.statusCode}`
       }
-      if (response.statusCode === 404 && expect404) {
-        logger.log(
-          { url: options.url, method: options.method },
-          'got 404 response from recurly, expected as valid response'
-        )
-      }
-      if (response.statusCode === 422 && expect422) {
-        logger.log(
-          { url: options.url, method: options.method },
-          'got 422 response from recurly, expected as valid response'
-        )
-      }
       return callback(error, response, body)
     })
   },
