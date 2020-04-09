@@ -203,6 +203,7 @@ module.exports = function(primary, fallback) {
     sendFile: primary.sendFile,
     sendStream: primary.sendStream,
     getFileStream: callbackify(getFileStreamWithFallback),
+    getRedirectUrl: primary.getRedirectUrl,
     getFileMd5Hash: callbackify(_wrapFallbackMethod('getFileMd5Hash')),
     deleteDirectory: callbackify(
       _wrapMethodOnBothPersistors('deleteDirectory')
@@ -216,6 +217,7 @@ module.exports = function(primary, fallback) {
       sendFile: primary.promises.sendFile,
       sendStream: primary.promises.sendStream,
       getFileStream: getFileStreamWithFallback,
+      getRedirectUrl: primary.promises.getRedirectUrl,
       getFileMd5Hash: _wrapFallbackMethod('getFileMd5Hash'),
       deleteDirectory: _wrapMethodOnBothPersistors('deleteDirectory'),
       getFileSize: _wrapFallbackMethod('getFileSize'),

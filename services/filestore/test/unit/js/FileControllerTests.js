@@ -42,7 +42,8 @@ describe('FileController', function() {
       deleteFile: sinon.stub().yields(),
       deleteProject: sinon.stub().yields(),
       insertFile: sinon.stub().yields(),
-      getDirectorySize: sinon.stub().yields(null, fileSize)
+      getDirectorySize: sinon.stub().yields(null, fileSize),
+      getRedirectUrl: sinon.stub().yields(null, null)
     }
 
     LocalFileWriter = {}
@@ -91,6 +92,11 @@ describe('FileController', function() {
   })
 
   describe('getFile', function() {
+    it('should try and get a redirect url first', function() {
+      FileController.getFile(req, res, next)
+      expect(FileHandler.getRedirectUrl).to.have.been.calledWith(bucket, key)
+    })
+
     it('should pipe the stream', function() {
       FileController.getFile(req, res, next)
       expect(stream.pipeline).to.have.been.calledWith(fileStream, res)
@@ -109,6 +115,46 @@ describe('FileController', function() {
       FileHandler.getFile.yields(error)
       FileController.getFile(req, res, next)
       expect(next).to.have.been.calledWith(error)
+    })
+
+    describe('with a redirect url', function() {
+      const redirectUrl = 'https://wombat.potato/giraffe'
+
+      beforeEach(function() {
+        FileHandler.getRedirectUrl.yields(null, redirectUrl)
+        res.redirect = sinon.stub()
+      })
+
+      it('should redirect', function() {
+        FileController.getFile(req, res, next)
+        expect(res.redirect).to.have.been.calledWith(redirectUrl)
+      })
+
+      it('should not get a file stream', function() {
+        FileController.getFile(req, res, next)
+        expect(FileHandler.getFile).not.to.have.been.called
+      })
+
+      describe('when there is an error getting the redirect url', function() {
+        beforeEach(function() {
+          FileHandler.getRedirectUrl.yields(new Error('wombat herding error'))
+        })
+
+        it('should not redirect', function() {
+          FileController.getFile(req, res, next)
+          expect(res.redirect).not.to.have.been.called
+        })
+
+        it('should not return an error', function() {
+          FileController.getFile(req, res, next)
+          expect(next).not.to.have.been.called
+        })
+
+        it('should proxy the file', function() {
+          FileController.getFile(req, res, next)
+          expect(FileHandler.getFile).to.have.been.calledWith(bucket, key)
+        })
+      })
     })
 
     describe('with a range header', function() {

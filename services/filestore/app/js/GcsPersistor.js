@@ -36,6 +36,7 @@ const GcsPersistor = {
   sendFile: callbackify(sendFile),
   sendStream: callbackify(sendStream),
   getFileStream: callbackify(getFileStream),
+  getRedirectUrl: callbackify(getRedirectUrl),
   getFileMd5Hash: callbackify(getFileMd5Hash),
   deleteDirectory: callbackify(deleteDirectory),
   getFileSize: callbackify(getFileSize),
@@ -47,6 +48,7 @@ const GcsPersistor = {
     sendFile,
     sendStream,
     getFileStream,
+    getRedirectUrl,
     getFileMd5Hash,
     deleteDirectory,
     getFileSize,
@@ -136,6 +138,26 @@ async function getFileStream(bucketName, key, _opts = {}) {
       err,
       'error reading file from GCS',
       { bucketName, key, opts },
+      ReadError
+    )
+  }
+}
+
+async function getRedirectUrl(bucketName, key) {
+  try {
+    const [url] = await storage
+      .bucket(bucketName)
+      .file(key)
+      .getSignedUrl({
+        action: 'read',
+        expires: new Date().getTime() + settings.filestore.signedUrlExpiryInMs
+      })
+    return url
+  } catch (err) {
+    throw PersistorHelper.wrapError(
+      err,
+      'error generating signed url for GCS file',
+      { bucketName, key },
       ReadError
     )
   }

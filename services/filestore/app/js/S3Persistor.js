@@ -24,6 +24,7 @@ const S3Persistor = {
   sendFile: callbackify(sendFile),
   sendStream: callbackify(sendStream),
   getFileStream: callbackify(getFileStream),
+  getRedirectUrl: callbackify(getRedirectUrl),
   getFileMd5Hash: callbackify(getFileMd5Hash),
   deleteDirectory: callbackify(deleteDirectory),
   getFileSize: callbackify(getFileSize),
@@ -35,6 +36,7 @@ const S3Persistor = {
     sendFile,
     sendStream,
     getFileStream,
+    getRedirectUrl,
     getFileMd5Hash,
     deleteDirectory,
     getFileSize,
@@ -144,6 +146,11 @@ async function getFileStream(bucketName, key, opts) {
       ReadError
     )
   }
+}
+
+async function getRedirectUrl() {
+  // not implemented
+  return null
 }
 
 async function deleteDirectory(bucketName, key) {

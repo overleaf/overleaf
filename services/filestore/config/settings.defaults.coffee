@@ -70,6 +70,9 @@ settings =
 				buckets: JSON.parse(process.env['FALLBACK_BUCKET_MAPPING'] || '{}')
 				copyOnMiss: process.env['COPY_ON_MISS'] == 'true'
 
+		allowRedirects: if process.env['ALLOW_REDIRECTS'] == 'true' then true else false
+		signedUrlExpiryInMs: parseInt(process.env['LINK_EXPIRY_TIMEOUT'] || 60000)
+
 	path:
 		uploadFolder: Path.resolve(__dirname + "/../uploads")
 
