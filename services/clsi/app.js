@@ -208,27 +208,34 @@ const resCacher = {
 }
 
 const startupTime = Date.now()
-const checkIfProcessIsTooOld = function() {
+const checkIfProcessIsTooOld = function(cont) {
+  if (typeof Settings.processLifespanLimitMs === 'string') {
+    Settings.processLifespanLimitMs = parseInt(Settings.processLifespanLimitMs)
+    Settings.processLifespanLimitMs +=
+      Settings.processLifespanLimitMs * (Math.random() / 10)
+  }
   if (
     Settings.processLifespanLimitMs &&
     startupTime + Settings.processLifespanLimitMs < Date.now()
   ) {
     logger.log('shutting down, process is too old')
     resCacher.send = function() {}
-    resCacher.statusCode = 500
+    resCacher.code = 500
     resCacher.body = { processToOld: true }
+  } else {
+    cont()
   }
 }
 
 if (Settings.smokeTest) {
   const runSmokeTest = function() {
-    checkIfProcessIsTooOld()
-    logger.log('running smoke tests')
-    smokeTest.run(require.resolve(__dirname + '/test/smoke/js/SmokeTests.js'))(
-      {},
-      resCacher
-    )
-    return setTimeout(runSmokeTest, 30 * 1000)
+    checkIfProcessIsTooOld(function() {
+      logger.log('running smoke tests')
+      smokeTest.run(
+        require.resolve(__dirname + '/test/smoke/js/SmokeTests.js')
+      )({}, resCacher)
+      return setTimeout(runSmokeTest, 30 * 1000)
+    })
   }
   runSmokeTest()
 }
