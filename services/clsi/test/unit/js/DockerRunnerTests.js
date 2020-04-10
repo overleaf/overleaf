@@ -36,6 +36,7 @@ describe('DockerRunner', function() {
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
           error: sinon.stub(),
+          err: sinon.stub(),
           info: sinon.stub(),
           warn: sinon.stub()
         }),
@@ -384,6 +385,63 @@ describe('DockerRunner', function() {
           this.DockerRunner.attachToContainer,
           this.container.start
         )
+      })
+    })
+
+    describe('when inspect always fails with EPIPE error', function() {
+      beforeEach(function() {
+        this.error = new Error('write EPIPE')
+        this.container.inspect = sinon.stub().yields(this.error)
+        this.container.start = sinon.stub().yields()
+
+        this.DockerRunner.startContainer(
+          this.options,
+          this.volumes,
+          () => {},
+          this.callback
+        )
+      })
+
+      it('should retry once', function() {
+        sinon.assert.callOrder(
+          this.container.inspect,
+          this.container.inspect,
+          this.callback
+        )
+      })
+
+      it('should call back with error', function() {
+        sinon.assert.calledWith(this.callback, this.error)
+      })
+    })
+
+    describe('when inspect fails once with EPIPE error', function() {
+      beforeEach(function() {
+        this.container.inspect = sinon.stub()
+        this.container.inspect.onFirstCall().yields(new Error('write EPIPE'))
+        this.container.inspect.onSecondCall().yields()
+        this.container.start = sinon.stub().yields()
+
+        this.DockerRunner.startContainer(
+          this.options,
+          this.volumes,
+          () => {},
+          this.callback
+        )
+      })
+
+      it('should retry once and start container', function() {
+        sinon.assert.callOrder(
+          this.container.inspect,
+          this.container.inspect,
+          this.DockerRunner.attachToContainer,
+          this.container.start,
+          this.callback
+        )
+      })
+
+      it('should call back without error', function() {
+        sinon.assert.calledWith(this.callback, null)
       })
     })
 

@@ -407,19 +407,29 @@ module.exports = DockerRunner = {
           })
         }
       )
-    return container.inspect(function(error, stats) {
-      if ((error != null ? error.statusCode : undefined) === 404) {
-        return createAndStartContainer()
-      } else if (error != null) {
-        logger.err(
-          { container_name: name, error },
-          'unable to inspect container to start'
-        )
-        return callback(error)
-      } else {
-        return startExistingContainer()
+
+    const callbackWithRetry = error => {
+      if (error.message.match(/EPIPE/)) {
+        return inspectContainer(container, callback)
       }
-    })
+      callback(error)
+    }
+
+    var inspectContainer = (container, innerCallback) =>
+      container.inspect(function(error, stats) {
+        if ((error != null ? error.statusCode : undefined) === 404) {
+          return createAndStartContainer()
+        } else if (error != null) {
+          logger.err(
+            { container_name: name, error },
+            'unable to inspect container to start'
+          )
+          return innerCallback(error)
+        } else {
+          return startExistingContainer()
+        }
+      })
+    inspectContainer(container, callbackWithRetry)
   },
 
   attachToContainer(containerId, attachStreamHandler, attachStartCallback) {
