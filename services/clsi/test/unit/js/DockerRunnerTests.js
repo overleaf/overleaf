@@ -357,8 +357,8 @@ describe('DockerRunner', function() {
         return this.DockerRunner.startContainer(
           this.options,
           this.volumes,
-          this.callback,
-          () => {}
+          () => {},
+          this.callback
         )
       })
 
