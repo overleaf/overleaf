@@ -26,6 +26,7 @@ const LockManager = require('./DockerLockManager')
 const fs = require('fs')
 const Path = require('path')
 const _ = require('underscore')
+const metrics = require('metrics-sharelatex')
 
 logger.info('using docker runner')
 
@@ -410,6 +411,7 @@ module.exports = DockerRunner = {
 
     const callbackWithRetry = error => {
       if (error.message.match(/EPIPE/)) {
+        metrics.inc('container-inspect-epipe-retry')
         return inspectContainer(container, callback)
       }
       callback(error)
@@ -420,6 +422,7 @@ module.exports = DockerRunner = {
         if ((error != null ? error.statusCode : undefined) === 404) {
           return createAndStartContainer()
         } else if (error != null) {
+          metrics.inc('container-inspect-epipe-error')
           logger.err(
             { container_name: name, error },
             'unable to inspect container to start'
