@@ -318,6 +318,12 @@ describe('UserPagesController', function() {
       return this.UserPagesController.activateAccountPage(this.req, this.res)
     })
 
+    it('should 403 for complex user_id', function(done) {
+      this.ErrorController.forbidden = () => done()
+      this.req.query.user_id = { first_name: 'X' }
+      return this.UserPagesController.activateAccountPage(this.req, this.res)
+    })
+
     it('should redirect activated users to login', function(done) {
       this.user.loginCount = 1
       this.res.redirect = url => {

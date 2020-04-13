@@ -34,6 +34,10 @@ const UserPagesController = {
       return ErrorController.notFound(req, res)
     }
 
+    if (typeof req.query.user_id !== 'string') {
+      return ErrorController.forbidden(req, res)
+    }
+
     UserGetter.getUser(
       req.query.user_id,
       { email: 1, loginCount: 1 },
