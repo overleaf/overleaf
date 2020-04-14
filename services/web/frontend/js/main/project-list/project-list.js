@@ -32,7 +32,8 @@ define(['../../base', './services/project-list'], function(App) {
         $scope.projects.filter(
           project =>
             (project.tags == null || project.tags.length === 0) &&
-            !project.archived
+            !project.archived &&
+            !project.trashed
         ).length,
       newVal => ($scope.nUntagged = newVal)
     )
