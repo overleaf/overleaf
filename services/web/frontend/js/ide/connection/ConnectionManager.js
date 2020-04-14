@@ -35,6 +35,11 @@ define([], function() {
         this.$scope = $scope
         this.wsUrl = ide.wsUrl || null // websocket url (if defined)
         if (typeof io === 'undefined' || io === null) {
+          if (this.wsUrl && !window.location.href.match(/ws=fallback/)) {
+            // if we tried to boot from a custom real-time backend and failed,
+            // try reloading and falling back to the siteUrl
+            window.location = window.location.href + '?ws=fallback'
+          }
           console.error(
             'Socket.io javascript not loaded. Please check that the real-time service is running and accessible.'
           )
