@@ -198,7 +198,10 @@ define(['../../../base'], App =>
       }
       // don't save on initialisation, Angular passes oldRootDoc_id as
       // undefined in this case.
-      if (typeof oldRootDoc_id === 'undefined') {
+      if (
+        typeof rootDoc_id === 'undefined' &&
+        typeof oldRootDoc_id === 'undefined'
+      ) {
         return
       }
       // otherwise only save changes, null values are allowed
