@@ -39,7 +39,9 @@ module.exports = EditorRealTimeController = {
       payload,
       _id: message_id
     })
-    Metrics.summary('redis.publish.editor-events', blob.length)
+    Metrics.summary('redis.publish.editor-events', blob.length, {
+      status: message
+    })
     return rclient.publish(channel, blob)
   },
 
