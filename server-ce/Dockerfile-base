@@ -41,7 +41,7 @@ RUN npm install -g \
 #     -f Dockerfile-base -t sharelatex/sharelatex-base .
 ARG TEXLIVE_MIRROR=http://mirror.ctan.org/systems/texlive/tlnet
 
-ENV PATH "${PATH}:/usr/local/texlive/2019/bin/x86_64-linux"
+ENV PATH "${PATH}:/usr/local/texlive/2020/bin/x86_64-linux"
 
 RUN mkdir /install-tl-unx \
 &&  curl -sSL \
