@@ -247,6 +247,12 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   // for /user/reconfirm POST, see password router
 
   webRouter.get(
+    '/user/tpds/queues',
+    AuthenticationController.requireLogin(),
+    TpdsController.getQueues
+  )
+
+  webRouter.get(
     '/user/projects',
     AuthenticationController.requireLogin(),
     ProjectController.userProjectsJson
