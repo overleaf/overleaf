@@ -15,7 +15,6 @@
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const fs = require('fs')
-const { promisify } = require('util')
 const Path = require('path')
 const fse = require('fs-extra')
 const yauzl = require('yauzl')
@@ -26,6 +25,7 @@ const {
   ZipContentsTooLargeError
 } = require('./ArchiveErrors')
 const _ = require('underscore')
+const { promisifyAll } = require('../../util/promises')
 
 const ONE_MEG = 1024 * 1024
 
@@ -257,10 +257,5 @@ const ArchiveManager = {
   }
 }
 
-const promises = {
-  extractZipArchive: promisify(ArchiveManager.extractZipArchive)
-}
-
-ArchiveManager.promises = promises
-
+ArchiveManager.promises = promisifyAll(ArchiveManager)
 module.exports = ArchiveManager
