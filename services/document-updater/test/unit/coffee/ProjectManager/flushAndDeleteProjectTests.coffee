@@ -23,7 +23,7 @@ describe "ProjectManager - flushAndDeleteProject", ->
 		beforeEach (done) ->
 			@doc_ids = ["doc-id-1", "doc-id-2", "doc-id-3"]
 			@RedisManager.getDocIdsInProject = sinon.stub().callsArgWith(1, null, @doc_ids)
-			@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArg(2)
+			@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArg(3)
 			@ProjectManager.flushAndDeleteProjectWithLocks @project_id, {}, (error) =>
 				@callback(error)
 				done()
@@ -36,7 +36,7 @@ describe "ProjectManager - flushAndDeleteProject", ->
 		it "should delete each doc in the project", ->
 			for doc_id in @doc_ids
 				@DocumentManager.flushAndDeleteDocWithLock
-					.calledWith(@project_id, doc_id)
+					.calledWith(@project_id, doc_id, {})
 					.should.equal true
 
 		it "should flush project history", ->
@@ -54,7 +54,7 @@ describe "ProjectManager - flushAndDeleteProject", ->
 		beforeEach (done) ->
 			@doc_ids = ["doc-id-1", "doc-id-2", "doc-id-3"]
 			@RedisManager.getDocIdsInProject = sinon.stub().callsArgWith(1, null, @doc_ids)
-			@DocumentManager.flushAndDeleteDocWithLock = sinon.spy (project_id, doc_id, callback = (error) ->) =>
+			@DocumentManager.flushAndDeleteDocWithLock = sinon.spy (project_id, doc_id, options, callback) =>
 				if doc_id == "doc-id-1"
 					callback(@error = new Error("oops, something went wrong"))
 				else
@@ -66,7 +66,7 @@ describe "ProjectManager - flushAndDeleteProject", ->
 		it "should still flush each doc in the project", ->
 			for doc_id in @doc_ids
 				@DocumentManager.flushAndDeleteDocWithLock
-					.calledWith(@project_id, doc_id)
+					.calledWith(@project_id, doc_id, {})
 					.should.equal true
 
 		it "should still flush project history", ->

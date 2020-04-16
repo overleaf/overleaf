@@ -16,7 +16,7 @@ describe "DocumentManager", ->
 			"./HistoryManager": @HistoryManager =
 				flushDocChangesAsync: sinon.stub()
 				flushProjectChangesAsync: sinon.stub()
-			"logger-sharelatex": @logger = {log: sinon.stub()}
+			"logger-sharelatex": @logger = {log: sinon.stub(), warn: sinon.stub()}
 			"./DocOpsManager": @DocOpsManager = {}
 			"./Metrics": @Metrics =
 				Timer: class Timer
@@ -47,7 +47,7 @@ describe "DocumentManager", ->
 			beforeEach ->
 				@RedisManager.removeDocFromMemory = sinon.stub().callsArg(2)
 				@DocumentManager.flushDocIfLoaded = sinon.stub().callsArgWith(2)
-				@DocumentManager.flushAndDeleteDoc @project_id, @doc_id, @callback
+				@DocumentManager.flushAndDeleteDoc @project_id, @doc_id, {}, @callback
 
 			it "should flush the doc", ->
 				@DocumentManager.flushDocIfLoaded
@@ -69,6 +69,25 @@ describe "DocumentManager", ->
 				@HistoryManager.flushDocChangesAsync
 					.calledWithExactly(@project_id, @doc_id)
 					.should.equal true
+
+		describe "when a flush error occurs", ->
+			beforeEach ->
+				@DocumentManager.flushDocIfLoaded = sinon.stub().callsArgWith(2, new Error("boom!"))
+				@RedisManager.removeDocFromMemory = sinon.stub().callsArg(2)
+
+			it "should not remove the doc from redis", (done) ->
+				@DocumentManager.flushAndDeleteDoc @project_id, @doc_id, {}, (error) =>
+					error.should.exist
+					@RedisManager.removeDocFromMemory.called.should.equal false
+					done()
+
+			describe "when ignoring flush errors", ->
+				it "should remove the doc from redis", (done) ->
+					@DocumentManager.flushAndDeleteDoc @project_id, @doc_id, { ignoreFlushErrors: true }, (error) =>
+						if error?
+							return done(error)
+						@RedisManager.removeDocFromMemory.called.should.equal true
+						done()
 
 	describe "flushDocIfLoaded", ->
 		describe "when the doc is in Redis", ->
@@ -220,7 +239,7 @@ describe "DocumentManager", ->
 				@DiffCodec.diffAsShareJsOp = sinon.stub().callsArgWith(2, null, @ops)
 				@UpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null)
 				@DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
-				@DocumentManager.flushAndDeleteDoc = sinon.stub().callsArg(2)
+				@DocumentManager.flushAndDeleteDoc = sinon.stub().callsArg(3)
 
 			describe "when already loaded", ->
 				beforeEach ->
@@ -276,7 +295,7 @@ describe "DocumentManager", ->
 
 				it "should flush and delete the doc from the doc updater", ->
 					@DocumentManager.flushAndDeleteDoc
-						.calledWith(@project_id, @doc_id)
+						.calledWith(@project_id, @doc_id, {})
 						.should.equal true
 
 				it "should not flush the project history", ->

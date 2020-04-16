@@ -21,26 +21,25 @@
   },
   "dependencies": {
     "async": "^2.5.0",
+    "bunyan": "~0.22.1",
     "coffee-script": "~1.7.0",
     "express": "3.11.0",
     "lodash": "^4.17.13",
-    "logger-sharelatex": "^1.7.0",
-    "lynx": "0.0.11",
-    "metrics-sharelatex": "^2.4.0",
+    "logger-sharelatex": "^1.9.1",
+    "metrics-sharelatex": "^2.6.2",
     "mongojs": "^2.6.0",
-    "redis-sharelatex": "^1.0.11",
-    "request": "2.47.0",
-    "requestretry": "^1.12.0",
-    "sandboxed-module": "~0.2.0",
-    "settings-sharelatex": "^1.1.0",
-    "sinon": "~1.5.2"
+    "redis-sharelatex": "^1.0.12",
+    "request": "^2.47.0",
+    "requestretry": "^4.1.0",
+    "settings-sharelatex": "^1.1.0"
   },
   "devDependencies": {
-    "bunyan": "~0.22.1",
     "chai": "^3.5.0",
     "chai-spies": "^0.7.1",
     "cluster-key-slot": "^1.0.5",
     "mocha": "^5.0.1",
+    "sandboxed-module": "~0.2.0",
+    "sinon": "~1.5.2",
     "timekeeper": "^2.0.0"
   }
 }

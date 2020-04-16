@@ -52,7 +52,7 @@ module.exports = ProjectManager =
 			for doc_id in (doc_ids or [])
 				do (doc_id) ->
 					jobs.push (callback) ->
-						DocumentManager.flushAndDeleteDocWithLock project_id, doc_id, (error) ->
+						DocumentManager.flushAndDeleteDocWithLock project_id, doc_id, {}, (error) ->
 							if error?
 								logger.error err: error, project_id: project_id, doc_id: doc_id, "error deleting doc"
 								errors.push(error)

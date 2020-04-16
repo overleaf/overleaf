@@ -103,12 +103,13 @@ module.exports = HttpController =
 			logger.log project_id: project_id, doc_id: doc_id, "flushed doc via http"
 			res.send 204 # No Content
 
-	flushAndDeleteDoc: (req, res, next = (error) ->) ->
+	deleteDoc: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
 		project_id = req.params.project_id
-		logger.log project_id: project_id, doc_id: doc_id, "deleting doc via http"
+		ignoreFlushErrors = req.query.ignore_flush_errors == 'true'
 		timer = new Metrics.Timer("http.deleteDoc")
-		DocumentManager.flushAndDeleteDocWithLock project_id, doc_id, (error) ->
+		logger.log project_id: project_id, doc_id: doc_id, "deleting doc via http"
+		DocumentManager.flushAndDeleteDocWithLock project_id, doc_id, { ignoreFlushErrors: ignoreFlushErrors }, (error) ->
 			timer.done()
 			# There is no harm in flushing project history if the previous call
 			# failed and sometimes it is required
@@ -204,7 +205,7 @@ module.exports = HttpController =
 
 	flushAllProjects: (req, res, next = (error)-> )->
 		res.setTimeout(5 * 60 * 1000)
-		options = 
+		options =
 			limit : req.query.limit || 1000
 			concurrency : req.query.concurrency || 5
 			dryRun : req.query.dryRun || false
@@ -217,7 +218,7 @@ module.exports = HttpController =
 
 	flushQueuedProjects: (req, res, next = (error) ->) ->
 		res.setTimeout(10 * 60 * 1000)
-		options = 
+		options =
 			limit : req.query.limit || 1000
 			timeout: 5 * 60 * 1000
 			min_delete_age: req.query.min_delete_age || 5 * 60 * 1000

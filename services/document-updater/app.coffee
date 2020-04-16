@@ -54,7 +54,7 @@ app.post   '/project/:project_id/get_and_flush_if_old',                 HttpCont
 app.post   '/project/:project_id/clearState',                           HttpController.clearProjectState
 app.post   '/project/:project_id/doc/:doc_id',                          HttpController.setDoc
 app.post   '/project/:project_id/doc/:doc_id/flush',                    HttpController.flushDocIfLoaded
-app.delete '/project/:project_id/doc/:doc_id',                          HttpController.flushAndDeleteDoc
+app.delete '/project/:project_id/doc/:doc_id',                          HttpController.deleteDoc
 app.delete '/project/:project_id',                                      HttpController.deleteProject
 app.delete '/project',                                                  HttpController.deleteMultipleProjects
 app.post   '/project/:project_id',                                      HttpController.updateProject

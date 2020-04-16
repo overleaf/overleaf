@@ -30,7 +30,7 @@ module.exports = DocumentManager =
 						return callback(error) if error?
 						RedisManager.setHistoryType doc_id, projectHistoryType, (error) ->
 							return callback(error) if error?
-							callback null, lines, version, ranges, pathname, projectHistoryId, null, false
+							callback null, lines, version, ranges || {}, pathname, projectHistoryId, null, false
 			else
 				callback null, lines, version, ranges, pathname, projectHistoryId, unflushedTime, true
 
@@ -91,7 +91,7 @@ module.exports = DocumentManager =
 							return callback(error) if error?
 							callback null
 					else
-						DocumentManager.flushAndDeleteDoc project_id, doc_id, (error) ->
+						DocumentManager.flushAndDeleteDoc project_id, doc_id, {}, (error) ->
 							# There is no harm in flushing project history if the previous
 							# call failed and sometimes it is required
 							HistoryManager.flushProjectChangesAsync project_id
@@ -115,14 +115,18 @@ module.exports = DocumentManager =
 					return callback(error) if error?
 					RedisManager.clearUnflushedTime doc_id, callback
 
-	flushAndDeleteDoc: (project_id, doc_id, _callback = (error) ->) ->
+	flushAndDeleteDoc: (project_id, doc_id, options, _callback) ->
 		timer = new Metrics.Timer("docManager.flushAndDeleteDoc")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 
 		DocumentManager.flushDocIfLoaded project_id, doc_id, (error) ->
-			return callback(error) if error?
+			if error?
+				if options.ignoreFlushErrors
+					logger.warn {project_id: project_id, doc_id: doc_id, err: error}, "ignoring flush error while deleting document"
+				else
+					return callback(error)
 
 			# Flush in the background since it requires a http request
 			HistoryManager.flushDocChangesAsync project_id, doc_id
@@ -218,9 +222,9 @@ module.exports = DocumentManager =
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.flushDocIfLoaded, project_id, doc_id, callback
 
-	flushAndDeleteDocWithLock: (project_id, doc_id, callback = (error) ->) ->
+	flushAndDeleteDocWithLock: (project_id, doc_id, options, callback) ->
 		UpdateManager = require "./UpdateManager"
-		UpdateManager.lockUpdatesAndDo DocumentManager.flushAndDeleteDoc, project_id, doc_id, callback
+		UpdateManager.lockUpdatesAndDo DocumentManager.flushAndDeleteDoc, project_id, doc_id, options, callback
 
 	acceptChangesWithLock: (project_id, doc_id, change_ids, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"

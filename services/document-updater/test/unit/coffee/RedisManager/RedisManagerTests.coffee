@@ -48,6 +48,7 @@ describe "RedisManager", ->
 					createClient: () => @rclient
 				"./Metrics": @metrics =
 					inc: sinon.stub()
+					summary: sinon.stub()
 					Timer: class Timer
 						constructor: () ->
 							this.start = new Date()
@@ -670,10 +671,16 @@ describe "RedisManager", ->
 
 	describe "removeDocFromMemory", ->
 		beforeEach (done) ->
+			@multi.strlen = sinon.stub()
 			@multi.del = sinon.stub()
 			@multi.srem = sinon.stub()
 			@multi.exec.yields()
 			@RedisManager.removeDocFromMemory @project_id, @doc_id, done
+
+		it "should check the length of the current doclines", ->
+			@multi.strlen
+				.calledWith("doclines:#{@doc_id}")
+				.should.equal true
 
 		it "should delete the lines", ->
 			@multi.del
