@@ -214,6 +214,16 @@ block content
 														| {{ monthlyBilling ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_now")}'}}
 													span(ng-if="paymentMethod.value !== 'credit_card'") #{translate("upgrade_paypal_btn")}
 
+											p.tos-agreement-notice
+												| By subscribing, you agree to our
+												|
+												a(
+													href="/legal#Terms"
+													target="_blank"
+													rel="noopener noreferrer"
+												) terms of service
+												| .
+
 					div.three-d-secure-container.card.card-highlighted.card-border(ng-show="threeDSecureFlow")
 						.alert.alert-info.small(aria-live="assertive")
 							strong #{translate('card_must_be_authenticated_by_3dsecure')}

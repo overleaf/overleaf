@@ -128,3 +128,18 @@
 .grecaptcha-badge {
   display: none;
 }
+
+.tos-agreement-notice {
+  text-align: center;
+  margin-top: (@line-height-computed / 4);
+  margin-bottom: 0;
+  font-size: @font-size-small;
+  &.tos-agreement-notice-homepage {
+    margin-top: (@line-height-computed / 2);
+    color: #fff;
+    & > a {
+      color: #fff;
+      text-decoration: underline;
+    }
+  }
+}
