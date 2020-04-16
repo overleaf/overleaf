@@ -133,13 +133,12 @@ module.exports = {
     })
   },
 
-  async getQueues(req, res) {
+  async getQueues(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
     try {
       res.json(await TdpsQueueManager.getQueues(userId))
     } catch (err) {
-      logger.error({ err, userId }, 'error getting queues')
-      res.json({ error: 'error getting queues' })
+      next(err)
     }
   },
 

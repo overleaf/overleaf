@@ -21,6 +21,14 @@ const modulePath = require('path').join(
 describe('TpdsController', function() {
   beforeEach(function() {
     this.TpdsUpdateHandler = {}
+    this.AuthenticationController = {
+      getLoggedInUserId: sinon.stub().returns('user-id')
+    }
+    this.TpdsQueueManager = {
+      promises: {
+        getQueues: sinon.stub().returns('queues')
+      }
+    }
     this.TpdsController = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -31,6 +39,9 @@ describe('TpdsController', function() {
         '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
           tpdsFileLimit: sinon.stub().returns({ create: sinon.stub() })
         }),
+        '../Authentication/AuthenticationController': this
+          .AuthenticationController,
+        './TpdsQueueManager': this.TpdsQueueManager,
         'logger-sharelatex': {
           log() {},
           warn() {},
@@ -264,6 +275,48 @@ describe('TpdsController', function() {
 
     it('should return a success', function() {
       this.res.sendStatus.calledWith(200).should.equal(true)
+    })
+  })
+
+  describe('getQueues', function() {
+    beforeEach(function() {
+      this.req = {}
+      this.res = { json: sinon.stub() }
+      this.next = sinon.stub()
+    })
+
+    describe('success', function() {
+      beforeEach(async function() {
+        await this.TpdsController.getQueues(this.req, this.res, this.next)
+      })
+
+      it('should use userId from session', function() {
+        this.AuthenticationController.getLoggedInUserId.should.have.been
+          .calledOnce
+        this.TpdsQueueManager.promises.getQueues.should.have.been.calledWith(
+          'user-id'
+        )
+      })
+
+      it('should call json with response', function() {
+        this.res.json.should.have.been.calledWith('queues')
+        this.next.should.not.have.been.called
+      })
+    })
+
+    describe('error', function() {
+      beforeEach(async function() {
+        this.err = new Error()
+        this.TpdsQueueManager.promises.getQueues = sinon
+          .stub()
+          .rejects(this.err)
+        await this.TpdsController.getQueues(this.req, this.res, this.next)
+      })
+
+      it('should call next with error', function() {
+        this.res.json.should.not.have.been.called
+        this.next.should.have.been.calledWith(this.err)
+      })
     })
   })
 })
