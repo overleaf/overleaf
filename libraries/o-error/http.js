@@ -1,8 +1,8 @@
 const OError = require('./index')
 
 class HttpError extends OError {
-  constructor(options) {
-    super(options)
+  constructor({ message, info, ...options }) {
+    super(message, info)
     this.statusCode = options.statusCode || 500
   }
 }

@@ -21,7 +21,7 @@ class OError extends Error {
    * @param {string} message as for built-in Error
    * @param {?object} info extra data to attach to the error
    */
-  constructor({ message, info }) {
+  constructor(message, info) {
     super(message)
     this.name = this.constructor.name
     if (info) {

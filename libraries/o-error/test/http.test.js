@@ -1,12 +1,22 @@
-const OError = require('..')
 const HttpErrors = require('../http')
 
+const { expectError } = require('./support')
+
 describe('OError/http', function () {
-  it('is instance of OError', function () {
-    try {
+  it('is a valid OError', function () {
+    function foo() {
       throw new HttpErrors.ConflictError()
-    } catch (e) {
-      expect(e).to.be.instanceof(OError)
+    }
+
+    try {
+      foo()
+    } catch (error) {
+      expectError(error, {
+        name: 'ConflictError',
+        klass: HttpErrors.ConflictError,
+        message: 'ConflictError: Conflict',
+        firstFrameRx: /foo/,
+      })
     }
   })
 
