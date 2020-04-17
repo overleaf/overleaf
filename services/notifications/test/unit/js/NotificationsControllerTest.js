@@ -76,10 +76,11 @@ describe('Notifications Controller', function() {
         body: this.stubbedNotification
       }
       return this.controller.addNotification(req, {
-        send: result => {
+        sendStatus: code => {
           this.notifications.addNotification
             .calledWith(user_id, this.stubbedNotification)
             .should.equal(true)
+          code.should.equal(200)
           return done()
         }
       })
@@ -96,10 +97,11 @@ describe('Notifications Controller', function() {
         }
       }
       return this.controller.removeNotificationId(req, {
-        send: result => {
+        sendStatus: code => {
           this.notifications.removeNotificationId
             .calledWith(user_id, notification_id)
             .should.equal(true)
+          code.should.equal(200)
           return done()
         }
       })
@@ -116,10 +118,11 @@ describe('Notifications Controller', function() {
         body: { key: notification_key }
       }
       return this.controller.removeNotificationKey(req, {
-        send: result => {
+        sendStatus: code => {
           this.notifications.removeNotificationKey
             .calledWith(user_id, notification_key)
             .should.equal(true)
+          code.should.equal(200)
           return done()
         }
       })
@@ -137,10 +140,11 @@ describe('Notifications Controller', function() {
         }
       }
       return this.controller.removeNotificationByKeyOnly(req, {
-        send: result => {
+        sendStatus: code => {
           this.notifications.removeNotificationByKeyOnly
             .calledWith(notification_key)
             .should.equal(true)
+          code.should.equal(200)
           return done()
         }
       })

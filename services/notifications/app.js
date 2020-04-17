@@ -33,12 +33,12 @@ metrics.injectMetricsRoute(app)
 
 app.post('/user/:user_id', controller.addNotification)
 app.get('/user/:user_id', controller.getUserNotifications)
-app.del(
+app.delete(
   '/user/:user_id/notification/:notification_id',
   controller.removeNotificationId
 )
-app.del('/user/:user_id', controller.removeNotificationKey)
-app.del('/key/:key', controller.removeNotificationByKeyOnly)
+app.delete('/user/:user_id', controller.removeNotificationKey)
+app.delete('/key/:key', controller.removeNotificationByKeyOnly)
 
 app.get('/status', (req, res) => res.send('notifications sharelatex up'))
 
@@ -46,14 +46,14 @@ app.get('/health_check', (req, res) =>
   HealthCheckController.check(function(err) {
     if (err != null) {
       logger.err({ err }, 'error performing health check')
-      return res.send(500)
+      return res.sendStatus(500)
     } else {
-      return res.send(200)
+      return res.sendStatus(200)
     }
   })
 )
 
-app.get('*', (req, res) => res.send(404))
+app.get('*', (req, res) => res.sendStatus(404))
 
 const host =
   __guard__(

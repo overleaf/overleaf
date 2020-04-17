@@ -40,7 +40,7 @@ module.exports = {
       if (err != null) {
         return res.sendStatus(500)
       } else {
-        return res.send()
+        return res.sendStatus(200)
       }
     })
   },
@@ -57,7 +57,7 @@ module.exports = {
     return Notifications.removeNotificationId(
       req.params.user_id,
       req.params.notification_id,
-      (err, notifications) => res.send()
+      (err, notifications) => res.sendStatus(200)
     )
   },
 
@@ -70,7 +70,7 @@ module.exports = {
     return Notifications.removeNotificationKey(
       req.params.user_id,
       req.body.key,
-      (err, notifications) => res.send()
+      (err, notifications) => res.sendStatus(200)
     )
   },
 
@@ -80,7 +80,7 @@ module.exports = {
     metrics.inc('removeNotificationKey')
     return Notifications.removeNotificationByKeyOnly(
       notification_key,
-      (err, notifications) => res.send()
+      (err, notifications) => res.sendStatus(200)
     )
   }
 }
