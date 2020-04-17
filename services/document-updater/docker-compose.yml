@@ -25,6 +25,7 @@ services:
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis
+      NEW_HISTORY_REDIS_HOST: new_redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
@@ -36,11 +37,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      new_redis:
+        condition: service_healthy
     command: npm run test:acceptance
 
   redis:
     image: redis
 
+  new_redis:
+    image: redis
+
   mongo:
     image: mongo:3.6
-

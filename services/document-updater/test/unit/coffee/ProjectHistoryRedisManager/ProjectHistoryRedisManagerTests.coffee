@@ -24,6 +24,8 @@ describe "ProjectHistoryRedisManager", ->
 				}
 				"redis-sharelatex":
 					createClient: () => @rclient
+				"./RedisMigrationManager":
+					createClient: () => @rclient
 				"logger-sharelatex":
 					log:->
 				"./Metrics": @metrics = { summary: sinon.stub()}

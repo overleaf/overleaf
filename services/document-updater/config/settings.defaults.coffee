@@ -45,6 +45,18 @@ module.exports =
 				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:{#{project_id}}"
 				projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:{#{project_id}}"
 
+		new_project_history:
+			port: process.env["NEW_HISTORY_REDIS_PORT"] or "6379"
+			host: process.env["NEW_HISTORY_REDIS_HOST"]
+			password: process.env["NEW_HISTORY_REDIS_PASSWORD"] or ""
+			key_schema:
+				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:{#{project_id}}"
+				projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:{#{project_id}}"
+				projectHistoryMigrationKey: ({project_id}) -> "ProjectHistory:MigrationKey:{#{project_id}}"
+			migration_phase: process.env["PROJECT_HISTORY_MIGRATION_PHASE"] or "prepare"
+			redisOptions:
+				keepAlive: 100
+
 		lock:
 			port: process.env["LOCK_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
 			host: process.env["LOCK_REDIS_HOST"] or process.env["REDIS_HOST"] or "localhost"
