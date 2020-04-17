@@ -2,24 +2,24 @@ const OError = require('..')
 const { expectError } = require('./support')
 
 class CustomError1 extends OError {
-  constructor (options) {
+  constructor(options) {
     super({ message: 'failed to foo', ...options })
   }
 }
 
 class CustomError2 extends OError {
-  constructor (options) {
+  constructor(options) {
     super({ message: 'failed to bar', ...options })
   }
 }
 
-describe('OError', () => {
-  it('handles a custom error type with a cause', () => {
-    function doSomethingBadInternally () {
+describe('OError', function () {
+  it('handles a custom error type with a cause', function () {
+    function doSomethingBadInternally() {
       throw new Error('internal error')
     }
 
-    function doSomethingBad () {
+    function doSomethingBad() {
       try {
         doSomethingBadInternally()
       } catch (err) {
@@ -35,25 +35,23 @@ describe('OError', () => {
         name: 'CustomError1',
         klass: CustomError1,
         message: 'CustomError1: failed to foo: internal error',
-        firstFrameRx: /doSomethingBad/
+        firstFrameRx: /doSomethingBad/,
       })
       expect(OError.getFullInfo(e)).to.deep.equal({ userId: 123 })
       const fullStack = OError.getFullStack(e)
       expect(fullStack).to.match(
         /^CustomError1: failed to foo: internal error$/m
       )
-      expect(fullStack).to.match(
-        /^caused by: Error: internal error$/m
-      )
+      expect(fullStack).to.match(/^caused by: Error: internal error$/m)
     }
   })
 
-  it('handles a custom error type with nested causes', () => {
-    function doSomethingBadInternally () {
+  it('handles a custom error type with nested causes', function () {
+    function doSomethingBadInternally() {
       throw new Error('internal error')
     }
 
-    function doBar () {
+    function doBar() {
       try {
         doSomethingBadInternally()
       } catch (err) {
@@ -61,7 +59,7 @@ describe('OError', () => {
       }
     }
 
-    function doFoo () {
+    function doFoo() {
       try {
         doBar()
       } catch (err) {
@@ -77,11 +75,11 @@ describe('OError', () => {
         name: 'CustomError1',
         klass: CustomError1,
         message: 'CustomError1: failed to foo: failed to bar: internal error',
-        firstFrameRx: /doFoo/
+        firstFrameRx: /doFoo/,
       })
       expect(OError.getFullInfo(e)).to.deep.equal({
         userId: 123,
-        database: 'a'
+        database: 'a',
       })
       const fullStack = OError.getFullStack(e)
       expect(fullStack).to.match(
@@ -90,18 +88,16 @@ describe('OError', () => {
       expect(fullStack).to.match(
         /^caused by: CustomError2: failed to bar: internal error$/m
       )
-      expect(fullStack).to.match(
-        /^caused by: Error: internal error$/m
-      )
+      expect(fullStack).to.match(/^caused by: Error: internal error$/m)
     }
   })
 
-  it('handles a custom error without info', () => {
+  it('handles a custom error without info', function () {
     try {
       throw new CustomError1({})
     } catch (e) {
       expect(OError.getFullInfo(e)).to.deep.equal({})
-      let infoKey = Object.keys(e).find(k => k === 'info')
+      let infoKey = Object.keys(e).find((k) => k === 'info')
       expect(infoKey).to.not.exist
     }
   })

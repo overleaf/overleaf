@@ -4,7 +4,7 @@ var chai = require('chai')
 
 global.expect = chai.expect
 
-exports.expectError = function OErrorExpectError (e, expected) {
+exports.expectError = function OErrorExpectError(e, expected) {
   // should set the name to the error's name
   expect(e.name).to.equal(expected.name)
 

@@ -85,5 +85,5 @@ module.exports = {
   NotAcceptableError,
   ConflictError,
   UnprocessableEntityError,
-  TooManyRequestsError
+  TooManyRequestsError,
 }
