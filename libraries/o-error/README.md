@@ -3,6 +3,7 @@
 [![CircleCI](https://circleci.com/gh/overleaf/o-error.svg?style=svg)](https://circleci.com/gh/overleaf/o-error)
 
 Make custom error classes that:
+
 - pass `instanceof` checks,
 - have stack traces,
 - support custom messages and properties (`info`), and
@@ -17,10 +18,10 @@ ES6 classes make it easy to define custom errors by subclassing `Error`. Subclas
 ```js
 const OError = require('@overleaf/o-error')
 
-function doSomethingBad () {
+function doSomethingBad() {
   throw new OError({
     message: 'did something bad',
-    info: { thing: 'foo' }
+    info: { thing: 'foo' },
   })
 }
 doSomethingBad()
@@ -35,12 +36,12 @@ doSomethingBad()
 
 ```js
 class FooError extends OError {
-  constructor (options) {
+  constructor(options) {
     super({ message: 'failed to foo', ...options })
   }
 }
 
-function doFoo () {
+function doFoo() {
   throw new FooError({ info: { foo: 'bar' } })
 }
 doFoo()
@@ -54,7 +55,7 @@ doFoo()
 ### Wrapping an inner error (cause)
 
 ```js
-function doFoo2 () {
+function doFoo2() {
   try {
     throw new Error('bad')
   } catch (err) {

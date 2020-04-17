@@ -21,7 +21,7 @@ class OError extends Error {
    * @param {string} message as for built-in Error
    * @param {?object} info extra data to attach to the error
    */
-  constructor ({ message, info }) {
+  constructor({ message, info }) {
     super(message)
     this.name = this.constructor.name
     if (info) {
@@ -35,7 +35,7 @@ class OError extends Error {
    * @param {Error} cause
    * @return {this}
    */
-  withCause (cause) {
+  withCause(cause) {
     this.cause = cause
     if (this.message && cause.message) {
       this.message += ': ' + cause.message
@@ -53,7 +53,7 @@ class OError extends Error {
  * @param {?Error} error assumed not to have circular causes
  * @return {Object}
  */
-function getFullInfo (error) {
+function getFullInfo(error) {
   if (!error) return {}
   const info = getFullInfo(error.cause)
   if (typeof error.info === 'object') Object.assign(info, error.info)
@@ -67,10 +67,10 @@ function getFullInfo (error) {
  * @param {?Error} error assumed not to have circular causes
  * @return {string}
  */
-function getFullStack (error) {
+function getFullStack(error) {
   if (!error) return ''
   const causeStack = getFullStack(error.cause)
-  if (causeStack) return (error.stack + '\ncaused by: ' + causeStack)
+  if (causeStack) return error.stack + '\ncaused by: ' + causeStack
   return error.stack
 }
 
@@ -81,7 +81,7 @@ function getFullStack (error) {
  * @param  {function} klass
  * @return {Boolean}
  */
-function hasCauseInstanceOf (error, klass) {
+function hasCauseInstanceOf(error, klass) {
   if (!error) return false
   return error instanceof klass || hasCauseInstanceOf(error.cause, klass)
 }
