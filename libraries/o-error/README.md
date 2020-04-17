@@ -1,5 +1,7 @@
 # @overleaf/o-error
 
+[![CircleCI](https://circleci.com/gh/overleaf/o-error.svg?style=svg)](https://circleci.com/gh/overleaf/o-error)
+
 Make custom error classes that:
 - pass `instanceof` checks,
 - have stack traces,
