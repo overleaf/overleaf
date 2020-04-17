@@ -15,7 +15,7 @@ exports.expectError = function OErrorExpectError(e, expected) {
   expect(e instanceof Error).to.be.true
 
   // should be recognised by util.isError
-  expect(require('util').isError(e)).to.be.true
+  expect(require('util').types.isNativeError(e)).to.be.true
 
   // should have a stack trace
   expect(e.stack).to.be.truthy

@@ -97,7 +97,7 @@ describe('OError', function () {
       throw new CustomError1({})
     } catch (e) {
       expect(OError.getFullInfo(e)).to.deep.equal({})
-      let infoKey = Object.keys(e).find((k) => k === 'info')
+      const infoKey = Object.keys(e).find((k) => k === 'info')
       expect(infoKey).to.not.exist
     }
   })

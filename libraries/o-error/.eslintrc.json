@@ -1,5 +1,6 @@
 {
   "extends": [
+    "standard",
     "plugin:prettier/recommended",
     "plugin:mocha/recommended",
     "plugin:chai-expect/recommended",
@@ -10,5 +11,16 @@
   },
   "parserOptions": {
     "ecmaVersion": 2018
-  }
+  },
+  "overrides": [
+    {
+      "files": ["test/**/*.js"],
+      "env": {
+        "mocha": true
+      },
+      "globals": {
+        "expect": "readonly"
+      }
+    }
+  ]
 }
