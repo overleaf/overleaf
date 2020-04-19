@@ -32,7 +32,8 @@ describe('HttpController', function() {
           error: sinon.stub()
         }),
         './HealthChecker': {}
-      }
+      },
+      globals: { process }
     })
     this.res = {
       send: sinon.stub(),
