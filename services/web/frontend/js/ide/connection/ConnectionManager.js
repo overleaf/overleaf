@@ -10,7 +10,7 @@
 
 /* global io */
 
-define([], function() {
+define(['./SocketIoShim'], function(SocketIoShim) {
   let ConnectionManager
   const ONEHOUR = 1000 * 60 * 60
 
@@ -43,7 +43,7 @@ define([], function() {
           console.error(
             'Socket.io javascript not loaded. Please check that the real-time service is running and accessible.'
           )
-          this.ide.socket = { on() {} }
+          this.ide.socket = SocketIoShim.stub()
           this.$scope.$apply(() => {
             return (this.$scope.state.error =
               'Could not connect to websocket server :(')
@@ -116,7 +116,7 @@ define([], function() {
             pathname: '/socket.io'
           }
         }
-        this.ide.socket = io.connect(
+        this.ide.socket = SocketIoShim.connect(
           parsedURL.origin,
           {
             resource: parsedURL.pathname.slice(1),
