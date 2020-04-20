@@ -20,7 +20,7 @@ const Path = require('path')
 const metrics = require('metrics-sharelatex')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const AuthenticationController = require('../Authentication/AuthenticationController')
-const TdpsQueueManager = require('./TpdsQueueManager').promises
+const TpdsQueueManager = require('./TpdsQueueManager').promises
 
 module.exports = {
   // mergeUpdate and deleteUpdate are used by Dropbox, where the project is only passed as the name, as the
@@ -136,7 +136,7 @@ module.exports = {
   async getQueues(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
     try {
-      res.json(await TdpsQueueManager.getQueues(userId))
+      res.json(await TpdsQueueManager.getQueues(userId))
     } catch (err) {
       next(err)
     }
