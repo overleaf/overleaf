@@ -23,7 +23,7 @@ MEGABYTES = 1024 * 1024
 MAX_RANGES_SIZE = 3 * MEGABYTES
 
 keys = Settings.redis.documentupdater.key_schema
-historyKeys = Settings.redis.history.key_schema
+historyKeys = Settings.redis.history.key_schema # note: this is track changes, not project-history
 
 module.exports = RedisManager =
 	rclient: rclient
