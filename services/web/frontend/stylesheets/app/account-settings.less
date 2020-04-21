@@ -100,3 +100,29 @@ tbody > tr.affiliations-table-warning-row > td {
 .btn-link-accounts {
   margin-bottom: (@line-height-computed / 2) - @table-cell-padding;
 }
+
+.dropbox-sync-icon {
+  position: relative;
+  font-size: 1.3em;
+  line-height: 1.3em;
+  vertical-align: top;
+  &.dropbox-sync-icon-error {
+    color: @alert-danger-bg;
+  }
+  &.dropbox-sync-icon-success {
+    color: @alert-success-bg;
+  }
+  &.dropbox-sync-icon-updating {
+    color: @alert-info-bg;
+    &::after {
+      content: '\f021';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      margin-left: -20%;
+      font-size: 60%;
+      color: #fff;
+      animation: fa-spin 2s infinite linear;
+    }
+  }
+}
