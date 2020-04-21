@@ -37,23 +37,12 @@ module.exports =
 				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:{#{project_id}}"
 
 		project_history:
-			port: process.env["HISTORY_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
-			host: process.env["HISTORY_REDIS_HOST"] or process.env["REDIS_HOST"] or "localhost"
-			password: process.env["HISTORY_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
-			maxRetriesPerRequest: parseInt(process.env['REDIS_MAX_RETRIES_PER_REQUEST'] or "20")
-			key_schema:
-				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:{#{project_id}}"
-				projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:{#{project_id}}"
-
-		new_project_history:
 			port: process.env["NEW_HISTORY_REDIS_PORT"] or "6379"
 			host: process.env["NEW_HISTORY_REDIS_HOST"]
 			password: process.env["NEW_HISTORY_REDIS_PASSWORD"] or ""
 			key_schema:
 				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:{#{project_id}}"
 				projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:{#{project_id}}"
-				projectHistoryMigrationKey: ({project_id}) -> "ProjectHistory:MigrationKey:{#{project_id}}"
-			migration_phase: process.env["PROJECT_HISTORY_MIGRATION_PHASE"] or "prepare"
 			redisOptions:
 				keepAlive: 100
 
