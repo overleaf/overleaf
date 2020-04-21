@@ -24,6 +24,7 @@ describe('FileHandler', function() {
   const projectKey = `${ObjectId()}/`
   const sourceStream = 'sourceStream'
   const convertedKey = 'convertedKey'
+  const redirectUrl = 'https://wombat.potato/giraffe'
   const readStream = {
     stream: 'readStream',
     on: sinon.stub()
@@ -33,6 +34,7 @@ describe('FileHandler', function() {
     PersistorManager = {
       promises: {
         getFileStream: sinon.stub().resolves(sourceStream),
+        getRedirectUrl: sinon.stub().resolves(redirectUrl),
         checkIfFileExists: sinon.stub().resolves(),
         deleteFile: sinon.stub().resolves(),
         deleteDirectory: sinon.stub().resolves(),
@@ -295,6 +297,64 @@ describe('FileHandler', function() {
           expect(FileConverter.promises.preview).to.have.been.called
           done()
         })
+      })
+    })
+  })
+
+  describe('getRedirectUrl', function() {
+    beforeEach(function() {
+      Settings.filestore = {
+        allowRedirects: true,
+        stores: {
+          userFiles: bucket
+        }
+      }
+    })
+
+    it('should return a redirect url', function(done) {
+      FileHandler.getRedirectUrl(bucket, key, (err, url) => {
+        expect(err).not.to.exist
+        expect(url).to.equal(redirectUrl)
+        done()
+      })
+    })
+
+    it('should call the persistor to get a redirect url', function(done) {
+      FileHandler.getRedirectUrl(bucket, key, () => {
+        expect(
+          PersistorManager.promises.getRedirectUrl
+        ).to.have.been.calledWith(bucket, key)
+        done()
+      })
+    })
+
+    it('should return null if options are supplied', function(done) {
+      FileHandler.getRedirectUrl(
+        bucket,
+        key,
+        { start: 100, end: 200 },
+        (err, url) => {
+          expect(err).not.to.exist
+          expect(url).to.be.null
+          done()
+        }
+      )
+    })
+
+    it('should return null if the bucket is not one of the defined ones', function(done) {
+      FileHandler.getRedirectUrl('a_different_bucket', key, (err, url) => {
+        expect(err).not.to.exist
+        expect(url).to.be.null
+        done()
+      })
+    })
+
+    it('should return null if redirects are not enabled', function(done) {
+      Settings.filestore.allowRedirects = false
+      FileHandler.getRedirectUrl(bucket, key, (err, url) => {
+        expect(err).not.to.exist
+        expect(url).to.be.null
+        done()
       })
     })
   })

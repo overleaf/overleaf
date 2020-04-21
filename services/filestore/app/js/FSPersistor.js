@@ -74,6 +74,11 @@ async function getFileStream(location, name, opts) {
   return fs.createReadStream(null, opts)
 }
 
+async function getRedirectUrl() {
+  // not implemented
+  return null
+}
+
 async function getFileSize(location, filename) {
   const fullPath = path.join(location, filterName(filename))
 
@@ -211,6 +216,7 @@ module.exports = {
   sendFile: callbackify(sendFile),
   sendStream: callbackify(sendStream),
   getFileStream: callbackify(getFileStream),
+  getRedirectUrl: callbackify(getRedirectUrl),
   getFileSize: callbackify(getFileSize),
   getFileMd5Hash: callbackify(getFileMd5Hash),
   copyFile: callbackify(copyFile),
@@ -222,6 +228,7 @@ module.exports = {
     sendFile,
     sendStream,
     getFileStream,
+    getRedirectUrl,
     getFileSize,
     getFileMd5Hash,
     copyFile,

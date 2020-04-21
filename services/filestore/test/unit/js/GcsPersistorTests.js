@@ -17,6 +17,7 @@ describe('GcsPersistorTests', function() {
   const filesSize = 33
   const md5 = 'ffffffff00000000ffffffff00000000'
   const WriteStream = 'writeStream'
+  const redirectUrl = 'https://wombat.potato/giraffe'
 
   let Metrics,
     Logger,
@@ -97,7 +98,8 @@ describe('GcsPersistorTests', function() {
       getMetadata: sinon.stub().resolves([files[0].metadata]),
       createWriteStream: sinon.stub().returns(WriteStream),
       copy: sinon.stub().resolves(),
-      exists: sinon.stub().resolves([true])
+      exists: sinon.stub().resolves([true]),
+      getSignedUrl: sinon.stub().resolves([redirectUrl])
     }
 
     GcsBucket = {
@@ -257,6 +259,22 @@ describe('GcsPersistorTests', function() {
       it('stores the bucket and key in the error', function() {
         expect(error.info).to.include({ bucketName: bucket, key: key })
       })
+    })
+  })
+
+  describe('getFile', function() {
+    let signedUrl
+
+    beforeEach(async function() {
+      signedUrl = await GcsPersistor.promises.getRedirectUrl(bucket, key)
+    })
+
+    it('should request a signed URL', function() {
+      expect(GcsFile.getSignedUrl).to.have.been.called
+    })
+
+    it('should return the url', function() {
+      expect(signedUrl).to.equal(redirectUrl)
     })
   })
 

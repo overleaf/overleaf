@@ -46,31 +46,42 @@ function getFile(req, res, next) {
     }
   }
 
-  FileHandler.getFile(bucket, key, options, function(err, fileStream) {
+  FileHandler.getRedirectUrl(bucket, key, options, function(err, redirectUrl) {
     if (err) {
-      if (err instanceof Errors.NotFoundError) {
-        res.sendStatus(404)
-      } else {
-        next(err)
-      }
-      return
+      metrics.inc('file_redirect_error')
     }
 
-    if (req.query.cacheWarm) {
-      return res.sendStatus(200).end()
+    if (redirectUrl) {
+      metrics.inc('file_redirect')
+      return res.redirect(redirectUrl)
     }
 
-    pipeline(fileStream, res, err => {
-      if (err && err.code === 'ERR_STREAM_PREMATURE_CLOSE') {
-        res.end()
-      } else if (err) {
-        next(
-          new Errors.ReadError({
-            message: 'error transferring stream',
-            info: { bucket, key, format, style }
-          }).withCause(err)
-        )
+    FileHandler.getFile(bucket, key, options, function(err, fileStream) {
+      if (err) {
+        if (err instanceof Errors.NotFoundError) {
+          res.sendStatus(404)
+        } else {
+          next(err)
+        }
+        return
       }
+
+      if (req.query.cacheWarm) {
+        return res.sendStatus(200).end()
+      }
+
+      pipeline(fileStream, res, err => {
+        if (err && err.code === 'ERR_STREAM_PREMATURE_CLOSE') {
+          res.end()
+        } else if (err) {
+          next(
+            new Errors.ReadError({
+              message: 'error transferring stream',
+              info: { bucket, key, format, style }
+            }).withCause(err)
+          )
+        }
+      })
     })
   })
 }

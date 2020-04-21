@@ -13,10 +13,12 @@ module.exports = {
   deleteFile: callbackify(deleteFile),
   deleteProject: callbackify(deleteProject),
   getFile: callbackify(getFile),
+  getRedirectUrl: callbackify(getRedirectUrl),
   getFileSize: callbackify(getFileSize),
   getDirectorySize: callbackify(getDirectorySize),
   promises: {
     getFile,
+    getRedirectUrl,
     insertFile,
     deleteFile,
     deleteProject,
@@ -71,6 +73,24 @@ async function getFile(bucket, key, opts) {
   } else {
     return _getConvertedFile(bucket, key, opts)
   }
+}
+
+async function getRedirectUrl(bucket, key, opts) {
+  // if we're doing anything unusual with options, or the request isn't for
+  // one of the default buckets, return null so that we proxy the file
+  opts = opts || {}
+  if (
+    !opts.start &&
+    !opts.end &&
+    !opts.format &&
+    !opts.style &&
+    Object.values(Settings.filestore.stores).includes(bucket) &&
+    Settings.filestore.allowRedirects
+  ) {
+    return PersistorManager.promises.getRedirectUrl(bucket, key)
+  }
+
+  return null
 }
 
 async function getFileSize(bucket, key) {
