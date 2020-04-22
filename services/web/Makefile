@@ -59,7 +59,7 @@ test_unit_module:
 # Frontend unit tests
 #
 
-test_frontend: compile build_test_frontend test_frontend_run
+test_frontend: build_test_frontend test_frontend_run
 
 test_frontend_run:
 	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
