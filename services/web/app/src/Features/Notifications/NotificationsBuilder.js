@@ -39,7 +39,7 @@ module.exports = {
         if (callback == null) {
           callback = function() {}
         }
-        return NotificationsHandler.markAsRead(this.key, callback)
+        return NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
       }
     }
   },
@@ -66,7 +66,7 @@ module.exports = {
         if (callback == null) {
           callback = function() {}
         }
-        return NotificationsHandler.markAsRead(this.key, callback)
+        return NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
       }
     }
   },
