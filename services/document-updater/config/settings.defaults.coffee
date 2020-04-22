@@ -40,6 +40,7 @@ module.exports =
 			port: process.env["NEW_HISTORY_REDIS_PORT"] or "6379"
 			host: process.env["NEW_HISTORY_REDIS_HOST"]
 			password: process.env["NEW_HISTORY_REDIS_PASSWORD"] or ""
+			maxRetriesPerRequest: parseInt(process.env['REDIS_MAX_RETRIES_PER_REQUEST'] or "20")
 			key_schema:
 				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:{#{project_id}}"
 				projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:{#{project_id}}"
