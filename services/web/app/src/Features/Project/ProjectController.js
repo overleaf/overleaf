@@ -40,6 +40,10 @@ const UserController = require('../User/UserController')
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false
 
+  // institution.confirmed is for the domain being confirmed, not the email
+  // Do not show SSO UI for unconfirmed domains
+  if (!affiliation.institution.confirmed) return false
+
   // Could have multiple emails at the same institution, and if any are
   // linked to the institution then do not show notification for others
   if (

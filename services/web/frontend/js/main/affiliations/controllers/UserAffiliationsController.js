@@ -35,27 +35,28 @@ define(['../../../base'], App =>
         return { local: null, domain: null }
       }
     }
-    const _ssoAvailable = affiliation => {
+
+    const _ssoAvailableForAffiliation = affiliation => {
+      if (!affiliation) return false
+      const institution = affiliation.institution
+      if (!_ssoAvailableForInstitution(institution)) return false
+      if (!institution.confirmed) return false // domain is confirmed, not the email
+      return true
+    }
+
+    const _ssoAvailableForDomain = domain => {
+      if (!domain) return false
+      if (!domain.confirmed) return false // domain is confirmed, not the email
+      const institution = domain.university
+      if (!_ssoAvailableForInstitution(institution)) return false
+      return true
+    }
+
+    const _ssoAvailableForInstitution = institution => {
       if (!ExposedSettings.hasSamlFeature) return false
-
-      if (!affiliation) {
-        return false
-      }
-
-      // university via v1 for new affiliations
-      const institution = affiliation.university || affiliation.institution
-      if (!institution) {
-        return false
-      }
-
-      if (institution && institution.ssoEnabled) {
-        return true
-      }
-
-      if ($scope.samlBetaSession && institution && institution.ssoBeta) {
-        return true
-      }
-
+      if (!institution) return false
+      if (institution.ssoEnabled) return true
+      if ($scope.samlBetaSession && institution.ssoBeta) return true
       return false
     }
 
@@ -81,7 +82,7 @@ define(['../../../base'], App =>
             ) {
               $scope.newAffiliation.university = universityDomain.university
               $scope.newAffiliation.department = universityDomain.department
-              $scope.newAffiliation.ssoAvailable = _ssoAvailable(
+              $scope.newAffiliation.ssoAvailable = _ssoAvailableForDomain(
                 universityDomain
               )
             } else {
@@ -299,7 +300,7 @@ define(['../../../base'], App =>
       )
         .then(emails => {
           $scope.userEmails = emails.map(email => {
-            email.ssoAvailable = _ssoAvailable(email.affiliation)
+            email.ssoAvailable = _ssoAvailableForAffiliation(email.affiliation)
             return email
           })
           $scope.linkedInstitutionIds = emails

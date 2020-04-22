@@ -123,6 +123,7 @@ describe('ProjectController', function() {
         email: 'test@overleaf.com',
         institution: {
           id: 1,
+          confirmed: true,
           name: 'Overleaf',
           ssoBeta: false,
           ssoEnabled: true
@@ -677,12 +678,12 @@ describe('ProjectController', function() {
         this.Features.hasFeature.withArgs('overleaf-integration').returns(true)
         done()
       })
-      it('should show institution SSO available notification', function() {
+      it('should show institution SSO available notification for confirmed domains', function() {
         this.res.render = (pageName, opts) => {
           expect(opts.notificationsInstitution).to.deep.include({
-            email: 'test@overleaf.com',
+            email: this.institutionEmail,
             institutionId: 1,
-            institutionName: 'Overleaf',
+            institutionName: this.institutionName,
             templateKey: 'notification_institution_sso_available'
           })
         }
@@ -792,6 +793,29 @@ describe('ProjectController', function() {
         }
         this.ProjectController.projectListPage(this.req, this.res)
       })
+      describe('for an unconfirmed domain for an SSO institution', function() {
+        beforeEach(function(done) {
+          this.getUserAffiliations.yields(null, [
+            {
+              email: 'test@overleaf-uncofirmed.com',
+              institution: {
+                id: 1,
+                confirmed: false,
+                name: 'Overleaf',
+                ssoBeta: false,
+                ssoEnabled: true
+              }
+            }
+          ])
+          done()
+        })
+        it('should not show institution SSO available notification', function() {
+          this.res.render = (pageName, opts) => {
+            expect(opts.notificationsInstitution.length).to.equal(0)
+          }
+          this.ProjectController.projectListPage(this.req, this.res)
+        })
+      })
       describe('when linking/logging in initiated on institution side', function() {
         it('should not show a linked another email notification', function() {
           // this is only used when initated on Overleaf,
@@ -821,6 +845,7 @@ describe('ProjectController', function() {
               email: 'beta@beta.com',
               institution: {
                 id: 2,
+                confirmed: true,
                 name: 'Beta University',
                 ssoBeta: true,
                 ssoEnabled: false
