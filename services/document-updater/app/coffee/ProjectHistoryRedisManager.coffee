@@ -1,7 +1,6 @@
 Settings = require('settings-sharelatex')
 projectHistoryKeys = Settings.redis?.project_history?.key_schema
-#rclient = require("redis-sharelatex").createClient(Settings.redis.project_history)
-rclient = require("./RedisMigrationManager").createClient(Settings.redis.project_history, Settings.redis.new_project_history)
+rclient = require("redis-sharelatex").createClient(Settings.redis.project_history)
 logger = require('logger-sharelatex')
 metrics = require('./Metrics')
 

@@ -2,7 +2,7 @@ sinon = require "sinon"
 chai = require("chai")
 chai.should()
 Settings = require('settings-sharelatex')
-rclient_history = require("redis-sharelatex").createClient(Settings.redis.history)
+rclient_project_history = require("redis-sharelatex").createClient(Settings.redis.project_history)
 ProjectHistoryKeys = Settings.redis.project_history.key_schema
 
 MockProjectHistoryApi = require "./helpers/MockProjectHistoryApi"
@@ -30,7 +30,7 @@ describe "Applying updates to a project's structure", ->
 					setTimeout done, 200
 
 		it "should push the applied file renames to the project history api", (done) ->
-			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+			rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
 				throw error if error?
 
 				update = JSON.parse(updates[0])
@@ -61,7 +61,7 @@ describe "Applying updates to a project's structure", ->
 				return null
 
 			it "should push the applied doc renames to the project history api", (done) ->
-				rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+				rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
 					throw error if error?
 
 					update = JSON.parse(updates[0])
@@ -97,7 +97,7 @@ describe "Applying updates to a project's structure", ->
 				return null
 
 			it "should push the applied doc renames to the project history api", (done) ->
-				rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+				rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
 					throw error if error?
 
 					update = JSON.parse(updates[0])
@@ -141,7 +141,7 @@ describe "Applying updates to a project's structure", ->
 				return null
 
 			it "should push the applied doc renames to the project history api", (done) ->
-				rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+				rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
 					throw error if error?
 
 					update = JSON.parse(updates[0])
@@ -194,7 +194,7 @@ describe "Applying updates to a project's structure", ->
 			return null
 
 		it "should push the file addition to the project history api", (done) ->
-			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+			rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
 				throw error if error?
 
 				update = JSON.parse(updates[0])
@@ -222,7 +222,7 @@ describe "Applying updates to a project's structure", ->
 			return null
 
 		it "should push the doc addition to the project history api", (done) ->
-			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+			rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
 				throw error if error?
 
 				update = JSON.parse(updates[0])
