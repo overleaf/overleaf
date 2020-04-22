@@ -124,7 +124,7 @@ const AuthenticationController = (module.exports = {
         return next(error)
       }
       if (results.some(result => result && result.doNotFinish)) {
-        return next()
+        return
       }
 
       if (user.must_reconfirm) {
