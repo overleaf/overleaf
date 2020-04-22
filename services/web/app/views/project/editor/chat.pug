@@ -12,7 +12,7 @@ aside.chat(
 		.infinite-scroll-inner
 			.loading(ng-show="chat.loading")
 				i.fa.fa-fw.fa-spin.fa-refresh
-				| &nbsp;&nbsp;#{translate("loading")}...
+				| &nbsp;&nbsp;#{translate("loading")}…
 			.no-messages.text-center.small(ng-show='!chat.loading && chat.messages.length == 0')
 				| #{translate("no_messages")}
 			.first-message.text-center(ng-show='!chat.loading && chat.messages.length == 0')
@@ -48,7 +48,7 @@ aside.chat(
 
 	.new-message
 		textarea(
-			placeholder=translate('your_message')+"...",
+			placeholder=translate('your_message')+"…",
 			on-enter="sendMessage()",
 			ng-model="newMessageContent",
 			ng-click="resetUnreadMessages()"

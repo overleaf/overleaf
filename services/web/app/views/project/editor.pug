@@ -31,7 +31,7 @@ block content
 				a#try-reconnect-now-button.alert-link-as-btn.pull-right(href, ng-click="tryReconnectNow()") #{translate("try_now")}
 
 			.alert.alert-warning.small(ng-if="connection.reconnecting && connection.stillReconnecting")
-				strong #{translate("reconnecting")}...
+				strong #{translate("reconnecting")}…
 
 			.alert.alert-warning.small(ng-if="sync_tex_error")
 				strong #{translate("synctex_failed")}.

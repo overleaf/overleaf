@@ -91,7 +91,7 @@ block content
 									.col-xs-4
 										button.btn.btn-primary(ng-click="addMembers()", ng-disabled="inputs.addMembers.inflightCount > 0")
 											span(ng-show="inputs.addMembers.inflightCount === 0") #{translate("add")}
-											span(ng-show="inputs.addMembers.inflightCount > 0") #{translate("adding")}...
+											span(ng-show="inputs.addMembers.inflightCount > 0") #{translate("adding")}…
 									.col-xs-2(ng-if="paths.exportMembers", ng-cloak)
 										a(href=paths.exportMembers) #{translate('export_csv')}
 								.row

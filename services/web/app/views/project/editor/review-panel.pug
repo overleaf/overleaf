@@ -274,14 +274,14 @@ script(type='text/ng-template', id='changeEntryTemplate')
 								href
 								ng-if="needsCollapsing"
 								ng-click="toggleCollapse();"
-							) {{ isCollapsed ? '... (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+							) {{ isCollapsed ? '… (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
 						span(ng-switch-when="delete") #{translate("tracked_change_deleted")}&nbsp;
 							del.rp-content-highlight {{ entry.content | limitTo:(isCollapsed ? contentLimit : entry.content.length) }}
 							a.rp-collapse-toggle(
 								href
 								ng-if="needsCollapsing"
 								ng-click="toggleCollapse();"
-							) {{ isCollapsed ? '... (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+							) {{ isCollapsed ? '… (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
 					.rp-entry-metadata
 						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}&nbsp;&bull;&nbsp;
 						span.rp-entry-user(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }}
@@ -316,7 +316,7 @@ script(type='text/ng-template', id='aggregateChangeEntryTemplate')
 							href
 							ng-if="deletionNeedsCollapsing"
 							ng-click="toggleDeletionCollapse();"
-						) {{ isDeletionCollapsed ? '... (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+						) {{ isDeletionCollapsed ? '… (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
 						|  #{translate("aggregate_to")}
 						ins.rp-content-highlight
 							| {{ entry.content | limitTo:(isInsertionCollapsed ? contentLimit : entry.contentlength) }}
@@ -324,7 +324,7 @@ script(type='text/ng-template', id='aggregateChangeEntryTemplate')
 							href
 							ng-if="insertionNeedsCollapsing"
 							ng-click="toggleInsertionCollapse();"
-						) {{ isInsertionCollapsed ? '... (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+						) {{ isInsertionCollapsed ? '… (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
 					.rp-entry-metadata
 						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}&nbsp;&bull;&nbsp;
 						span.rp-entry-user(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }}
@@ -423,7 +423,7 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 						href
 						ng-if="needsCollapsing"
 						ng-click="toggleCollapse();"
-					) &nbsp;{{ isCollapsed ? '... (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+					) &nbsp;{{ isCollapsed ? '… (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
 			.rp-comment(
 				ng-repeat="comment in thread.messages track by comment.id"
 			)

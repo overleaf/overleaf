@@ -18,7 +18,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				)
 				| &nbsp;&nbsp;
 				span(ng-show="!pdf.compiling") #{translate("recompile")}
-				span(ng-show="pdf.compiling") #{translate("compiling")}...
+				span(ng-show="pdf.compiling") #{translate("compiling")}…
 			a.btn.btn-recompile.dropdown-toggle(
 				href,
 				ng-disabled="pdf.compiling",
@@ -370,4 +370,4 @@ script(type='text/ng-template', id='clearCacheModalTemplate')
 			ng-disabled="state.inflight"
 		) 
 			span(ng-show="!state.inflight") #{translate("clear_cache")}
-			span(ng-show="state.inflight") #{translate("clearing")}...
+			span(ng-show="state.inflight") #{translate("clearing")}…

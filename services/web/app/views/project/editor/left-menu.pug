@@ -249,7 +249,7 @@ script(type='text/ng-template', id='cloneProjectModalTemplate')
 			ng-click="clone()"
 		)
 			span(ng-hide="state.inflight") #{translate("copy")}
-			span(ng-show="state.inflight") #{translate("copying")}...
+			span(ng-show="state.inflight") #{translate("copying")}…
 
 script(type='text/ng-template', id='wordCountModalTemplate')
 	.modal-header
@@ -258,7 +258,7 @@ script(type='text/ng-template', id='wordCountModalTemplate')
 		div(ng-if="status.loading")
 			.loading(ng-show="!status.error && status.loading")
 				i.fa.fa-refresh.fa-spin.fa-fw 
-				span &nbsp; #{translate("loading")}...  
+				span &nbsp; #{translate("loading")}…  
 			div.pdf-disabled(
 				ng-if="!pdf.url"
 				tooltip=translate('please_compile_pdf_before_word_count')

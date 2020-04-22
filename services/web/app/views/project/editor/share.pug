@@ -61,11 +61,11 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						div.access-token-wrapper
 							strong #{translate('anyone_with_link_can_edit')}
 							pre.access-token(ng-show="readAndWriteTokenLink") {{ readAndWriteTokenLink }}
-							pre.access-token(ng-hide="readAndWriteTokenLink") #{translate('loading')}...
+							pre.access-token(ng-hide="readAndWriteTokenLink") #{translate('loading')}…
 						div.access-token-wrapper
 							strong #{translate('anyone_with_link_can_view')}
 							pre.access-token(ng-show="readOnlyTokenLink") {{ readOnlyTokenLink }}
-							pre.access-token(ng-hide="readOnlyTokenLink") #{translate('loading')}...
+							pre.access-token(ng-hide="readOnlyTokenLink") #{translate('loading')}…
 
 				//- legacy public-access
 				.row.public-access-level(ng-show="isAdmin && (project.publicAccesLevel == 'readAndWrite' || project.publicAccesLevel == 'readOnly')")
@@ -143,7 +143,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						.form-group
 							tags-input(
 								template="shareTagTemplate"
-								placeholder=settings.customisation.shareProjectPlaceholder || 'joe@example.com, sue@example.com, ...'
+								placeholder=settings.customisation.shareProjectPlaceholder || 'joe@example.com, sue@example.com, …'
 								ng-model="inputs.contacts"
 								focus-on="open"
 								display-property="display"

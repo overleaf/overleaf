@@ -81,7 +81,7 @@ block content
 														ng-disabled="registerForm.inflight || registerForm.password.$error.required|| registerForm.password.$error.complexPassword || createAdminSuccess"
 													)
 														span(ng-show="!registerForm.inflight") #{translate("register")}
-														span(ng-show="registerForm.inflight") #{translate("registering")}...
+														span(ng-show="registerForm.inflight") #{translate("registering")}…
 
 										// Ldap Form
 										div(ng-if="authMethod == 'ldap'")
@@ -113,7 +113,7 @@ block content
 														ng-disabled="registerLdapForm.inflight || registerLdapForm.password.$error.required|| registerLdapForm.password.$error.complexPassword || createAdminSuccess"
 													)
 														span(ng-show="!registerLdapForm.inflight") #{translate("register")}
-														span(ng-show="registerLdapForm.inflight") #{translate("registering")}...
+														span(ng-show="registerLdapForm.inflight") #{translate("registering")}…
 
 
 										// Saml Form
@@ -146,7 +146,7 @@ block content
 														ng-disabled="registerSamlForm.inflight || registerSamlForm.password.$error.required|| registerSamlForm.password.$error.complexPassword || createAdminSuccess"
 													)
 														span(ng-show="!registerSamlForm.inflight") #{translate("register")}
-														span(ng-show="registerSamlForm.inflight") #{translate("registering")}...
+														span(ng-show="registerSamlForm.inflight") #{translate("registering")}…
 
 
 										<!-- success message -->
@@ -237,7 +237,7 @@ block content
 													input(type="text", name="emailInput" ng-model="testEmail.emailAddress").form-control
 												button(ng-click="sendTestEmail()", ng-disabled="testEmail.inflight").btn.btn-primary
 													span(ng-show="!testEmail.inflight") #{translate("send")}
-													span(ng-show="testEmail.inflight") #{translate("sending")}...
+													span(ng-show="testEmail.inflight") #{translate("sending")}…
 											div(ng-if="testEmail.status == 'ok'")
 												.alert.alert-success
 													| #{translate('email_sent')}

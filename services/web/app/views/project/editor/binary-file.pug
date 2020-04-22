@@ -28,13 +28,13 @@ div.binary-file.full-size(
 	
 	div(ng-if="isTextFile() && !textPreview.error")
 		div.text-loading(ng-show="textPreview.loading && !textPreview.error")
-			| #{translate('loading')}...
+			| #{translate('loading')}…
 		div.text-preview(ng-show="textPreview.data && !textPreview.loading && !textPreview.error")
 			div.scroll-container
 				p
 					| {{ textPreview.data }}
 				p(ng-show="textPreview.shouldShowDots")
-					| ...
+					| …
 
 	p.no-preview(
 		ng-if="failedLoad || textPreview.error || isUnpreviewableFile()"

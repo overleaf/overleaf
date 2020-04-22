@@ -34,7 +34,7 @@ script(type='text/ng-template', id='newTagModalTemplate')
 			stop-propagation="click"
 		)
 			span(ng-show="!state.inflight") #{translate("create")}
-			span(ng-show="state.inflight") #{translate("creating")}...
+			span(ng-show="state.inflight") #{translate("creating")}…
 
 script(type='text/ng-template', id='deleteTagModalTemplate')
 	.modal-header
@@ -61,7 +61,7 @@ script(type='text/ng-template', id='deleteTagModalTemplate')
 			ng-click="delete()",
 			ng-disabled="state.inflight"
 		)
-			span(ng-show="state.inflight") #{translate("deleting")}...
+			span(ng-show="state.inflight") #{translate("deleting")}…
 			span(ng-show="!state.inflight") #{translate("delete")}
 
 script(type='text/ng-template', id='renameTagModalTemplate')
@@ -93,7 +93,7 @@ script(type='text/ng-template', id='renameTagModalTemplate')
 			ng-disabled="renameTagForm.$invalid || state.inflight"
 		)
 			span(ng-show="!state.inflight") #{translate("rename")}
-			span(ng-show="state.inflight") #{translate("renaming")}...
+			span(ng-show="state.inflight") #{translate("renaming")}…
 
 script(type='text/ng-template', id='renameProjectModalTemplate')
 	.modal-header
@@ -124,7 +124,7 @@ script(type='text/ng-template', id='renameProjectModalTemplate')
 			ng-disabled="renameProjectForm.$invalid || state.inflight"
 		)
 			span(ng-show="!state.inflight") #{translate("rename")}
-			span(ng-show="state.inflight") #{translate("renaming")}...
+			span(ng-show="state.inflight") #{translate("renaming")}…
 
 script(type='text/ng-template', id='cloneProjectModalTemplate')
 	.modal-header
@@ -160,7 +160,7 @@ script(type='text/ng-template', id='cloneProjectModalTemplate')
 			ng-click="clone()"
 		)
 			span(ng-hide="state.inflight") #{translate("copy")}
-			span(ng-show="state.inflight") #{translate("copying")} ...
+			span(ng-show="state.inflight") #{translate("copying")} …
 
 script(type='text/ng-template', id='newProjectModalTemplate')
 	.modal-header
@@ -194,7 +194,7 @@ script(type='text/ng-template', id='newProjectModalTemplate')
 			ng-click="create()"
 		)
 			span(ng-hide="state.inflight") #{translate("create")}
-			span(ng-show="state.inflight") #{translate("creating")} ...
+			span(ng-show="state.inflight") #{translate("creating")} …
 
 script(type='text/ng-template', id='archiveTrashLeaveOrDeleteProjectsModalTemplate')
 	.modal-header

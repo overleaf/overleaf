@@ -56,7 +56,7 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 			)
 			.loading(ng-show="$ctrl.isLoading")
 				i.fa.fa-spin.fa-refresh
-				| &nbsp;&nbsp; #{translate("loading")}...
+				| &nbsp;&nbsp; #{translate("loading")}…
 			.history-entries-list-upgrade-prompt(
 				ng-if="$ctrl.freeHistoryLimitHit && $ctrl.currentUserIsOwner"
 				ng-controller="FreeTrialModalController"
@@ -248,4 +248,4 @@ script(type="text/ng-template", id="historyLabelsListTpl")
 			
 		.loading(ng-show="$ctrl.isLoading")
 			i.fa.fa-spin.fa-refresh
-			| &nbsp;&nbsp; #{translate("loading")}...
+			| &nbsp;&nbsp; #{translate("loading")}…
