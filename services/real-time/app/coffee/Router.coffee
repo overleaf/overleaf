@@ -55,7 +55,9 @@ module.exports = Router =
 		app.post "/client/:client_id/disconnect", httpAuth, HttpApiController.disconnectClient
 
 		session.on 'connection', (error, client, session) ->
-			client.ol_context = {} unless client.ol_context
+			# init client context, we may access it in Router._handleError before
+			#  setting any values
+			client.ol_context = {}
 
 			client?.on "error", (err) ->
 				logger.err { clientErr: err }, "socket.io client error"
