@@ -53,6 +53,8 @@ define(['../base', 'libs/passfield'], function(App) {
           formData['g-recaptcha-response'] = grecaptchaResponse
         }
 
+        // clear the response object which may be referenced downstream
+        Object.keys(response).forEach(field => delete response[field])
         scope[attrs.name].inflight = true
 
         // for asyncForm prevent automatic redirect to /login if
