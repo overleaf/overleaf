@@ -44,8 +44,6 @@ module.exports =
 			key_schema:
 				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:{#{project_id}}"
 				projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:{#{project_id}}"
-			redisOptions:
-				keepAlive: 100
 
 		lock:
 			port: process.env["LOCK_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
