@@ -323,11 +323,12 @@ define([
     this.setPdfPosition = function(page, position) {
       // console.log 'required pdf Position is', position
       return this.computeOffset(page, position).then(function(offset) {
-        $scope.pleaseScrollTo = offset
-        return ($scope.position = position)
+        return $scope.$apply(() => {
+          $scope.pleaseScrollTo = offset
+          $scope.position = position
+        })
       })
     }
-
     return this
   })
 
