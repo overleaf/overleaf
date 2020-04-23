@@ -405,6 +405,25 @@ describe('UserController', function() {
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
+    describe('when changeEmailAddress yields an error', function() {
+      it('should pass on an error and not send a success status', function(done) {
+        this.req.body.email = this.newEmail.toUpperCase()
+        this.UserUpdater.changeEmailAddress.callsArgWith(2, new Error())
+        const next = err => {
+          expect(err).to.exist
+          process.nextTick(() => {
+            // logic in User.findById
+            expect(this.res.send.called).to.equal(false)
+            expect(this.res.sendStatus.called).to.equal(false)
+            // logic after error handling
+            expect(this.User.findById.callCount).to.equal(1)
+            done()
+          })
+        }
+        this.UserController.updateUserSettings(this.req, this.res, next)
+      })
+    })
+
     describe('when using an external auth source', function() {
       beforeEach(function() {
         this.UserUpdater.changeEmailAddress.callsArgWith(2)

@@ -248,7 +248,7 @@ const UserController = {
                 errorData.info.public.message = req.i18n.translate(
                   'problem_changing_email_address'
                 )
-                next(
+                return next(
                   new HttpErrors.InternalServerError(errorData).withCause(err)
                 )
               }
