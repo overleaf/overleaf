@@ -424,7 +424,7 @@ describe('ProjectStructureChanges', function() {
       expect(update.userId).to.equal(owner._id)
       expect(update.pathname).to.equal('/main.tex')
       expect(update.docLines).to.equal('Test')
-      expect(version).to.equal(2)
+      expect(version).to.equal(1)
     })
 
     it('should version the files created', function() {
@@ -437,7 +437,7 @@ describe('ProjectStructureChanges', function() {
       expect(update.userId).to.equal(owner._id)
       expect(update.pathname).to.equal('/1pixel.png')
       expect(update.url).to.be.a('string')
-      expect(version).to.equal(2)
+      expect(version).to.equal(1)
     })
   })
 

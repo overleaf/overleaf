@@ -1045,7 +1045,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
       this.FolderStructureBuilder.buildFolderStructure
         .withArgs(this.docUploads, this.fileUploads)
         .returns(this.mockRootFolder)
-      this.updateExpectation = this.ProjectMock.expects('updateOne')
+      this.updateExpectation = this.ProjectMock.expects('findOneAndUpdate')
         .withArgs(
           {
             _id: this.project._id,
@@ -1053,14 +1053,15 @@ describe('ProjectEntityMongoUpdateHandler', function() {
             'rootFolder.0.docs.0': { $exists: false },
             'rootFolder.0.files.0': { $exists: false }
           },
-          { $set: { rootFolder: [this.mockRootFolder] }, $inc: { version: 1 } }
+          { $set: { rootFolder: [this.mockRootFolder] }, $inc: { version: 1 } },
+          { new: true, lean: true, fields: { version: 1 } }
         )
         .chain('exec')
     })
 
     describe('happy path', function() {
       beforeEach(async function() {
-        this.updateExpectation.resolves({ n: 1 })
+        this.updateExpectation.resolves({ version: 1 })
         await this.subject.promises.createNewFolderStructure(
           this.project._id,
           this.docUploads,
@@ -1075,7 +1076,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
 
     describe("when the update doesn't find a matching document", function() {
       beforeEach(async function() {
-        this.updateExpectation.resolves({ n: 0 })
+        this.updateExpectation.resolves(null)
       })
 
       it('throws an error', async function() {

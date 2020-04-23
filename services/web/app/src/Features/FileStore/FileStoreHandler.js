@@ -7,6 +7,7 @@ const Async = require('async')
 const FileHashManager = require('./FileHashManager')
 const { File } = require('../../models/File')
 const Errors = require('../Errors/Errors')
+const { promisifyAll } = require('../../util/promises')
 
 const ONE_MIN_IN_MS = 60 * 1000
 const FIVE_MINS_IN_MS = ONE_MIN_IN_MS * 5
@@ -227,3 +228,8 @@ const FileStoreHandler = {
 }
 
 module.exports = FileStoreHandler
+module.exports.promises = promisifyAll(FileStoreHandler, {
+  multiResult: {
+    uploadFileFromDisk: ['url', 'fileRef']
+  }
+})

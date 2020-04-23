@@ -1,8 +1,3 @@
-/* NOTE: this file is an async/await version of
- * ProjectEntityMongoUpdateHandler.js. It's temporarily separate from the
- * callback-style version so that we can test it in production for some code
- * paths only.
- */
 const { callbackify } = require('util')
 const { callbackifyMultiResult } = require('../../util/promises')
 const _ = require('underscore')
@@ -635,13 +630,24 @@ async function _checkValidMove(
   }
 }
 
-async function createNewFolderStructure(projectId, docUploads, fileUploads) {
+/**
+ * Create an initial file tree out of a list of doc and file entries
+ *
+ * Each entry specifies a path to the doc or file. Folders are automatically
+ * created.
+ *
+ * @param {ObjectId} projectId - id of the project
+ * @param {DocEntry[]} docEntries - list of docs to add
+ * @param {FileEntry[]} fileEntries - list of files to add
+ * @return {Promise<string>} the project version after the operation
+ */
+async function createNewFolderStructure(projectId, docEntries, fileEntries) {
   try {
     const rootFolder = FolderStructureBuilder.buildFolderStructure(
-      docUploads,
-      fileUploads
+      docEntries,
+      fileEntries
     )
-    const result = await Project.updateOne(
+    const project = await Project.findOneAndUpdate(
       {
         _id: projectId,
         'rootFolder.0.folders.0': { $exists: false },
@@ -651,14 +657,20 @@ async function createNewFolderStructure(projectId, docUploads, fileUploads) {
       {
         $set: { rootFolder: [rootFolder] },
         $inc: { version: 1 }
+      },
+      {
+        new: true,
+        lean: true,
+        fields: { version: 1 }
       }
     ).exec()
-    if (result.n !== 1) {
+    if (project == null) {
       throw new OError({
         message: 'project not found or folder structure already exists',
         info: { projectId }
       })
     }
+    return project.version
   } catch (err) {
     throw new OError({
       message: 'failed to create folder structure',

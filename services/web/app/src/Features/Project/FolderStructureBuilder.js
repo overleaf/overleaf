@@ -4,13 +4,13 @@ const { ObjectId } = require('mongodb')
 
 module.exports = { buildFolderStructure }
 
-function buildFolderStructure(docUploads, fileUploads) {
+function buildFolderStructure(docEntries, fileEntries) {
   const builder = new FolderStructureBuilder()
-  for (const docUpload of docUploads) {
-    builder.addDocUpload(docUpload)
+  for (const docEntry of docEntries) {
+    builder.addDocEntry(docEntry)
   }
-  for (const fileUpload of fileUploads) {
-    builder.addFileUpload(fileUpload)
+  for (const fileEntry of fileEntries) {
+    builder.addFileEntry(fileEntry)
   }
   return builder.rootFolder
 }
@@ -24,18 +24,18 @@ class FolderStructureBuilder {
     this.entityPaths.add('/')
   }
 
-  addDocUpload(docUpload) {
-    this.recordEntityPath(Path.join(docUpload.dirname, docUpload.doc.name))
-    const folder = this.mkdirp(docUpload.dirname)
-    folder.docs.push(docUpload.doc)
+  addDocEntry(docEntry) {
+    this.recordEntityPath(docEntry.path)
+    const folderPath = Path.dirname(docEntry.path)
+    const folder = this.mkdirp(folderPath)
+    folder.docs.push(docEntry.doc)
   }
 
-  addFileUpload(fileUpload) {
-    this.recordEntityPath(
-      Path.join(fileUpload.dirname, fileUpload.fileRef.name)
-    )
-    const folder = this.mkdirp(fileUpload.dirname)
-    folder.fileRefs.push(fileUpload.fileRef)
+  addFileEntry(fileEntry) {
+    this.recordEntityPath(fileEntry.path)
+    const folderPath = Path.dirname(fileEntry.path)
+    const folder = this.mkdirp(folderPath)
+    folder.fileRefs.push(fileEntry.file)
   }
 
   mkdirp(path) {

@@ -36,18 +36,18 @@ describe('FolderStructureBuilder', function() {
     describe('when given documents and files', function() {
       beforeEach(function() {
         const docUploads = [
-          { dirname: '/', doc: { _id: 'doc-1', name: 'main.tex' } },
-          { dirname: '/foo', doc: { _id: 'doc-2', name: 'other.tex' } },
-          { dirname: '/foo', doc: { _id: 'doc-3', name: 'other.bib' } },
+          { path: '/main.tex', doc: { _id: 'doc-1', name: 'main.tex' } },
+          { path: '/foo/other.tex', doc: { _id: 'doc-2', name: 'other.tex' } },
+          { path: '/foo/other.bib', doc: { _id: 'doc-3', name: 'other.bib' } },
           {
-            dirname: '/foo/foo1/foo2',
+            path: '/foo/foo1/foo2/another.tex',
             doc: { _id: 'doc-4', name: 'another.tex' }
           }
         ]
         const fileUploads = [
-          { dirname: '/', fileRef: { _id: 'file-1', name: 'aaa.jpg' } },
-          { dirname: '/foo', fileRef: { _id: 'file-2', name: 'bbb.jpg' } },
-          { dirname: '/bar', fileRef: { _id: 'file-3', name: 'ccc.jpg' } }
+          { path: '/aaa.jpg', file: { _id: 'file-1', name: 'aaa.jpg' } },
+          { path: '/foo/bbb.jpg', file: { _id: 'file-2', name: 'bbb.jpg' } },
+          { path: '/bar/ccc.jpg', file: { _id: 'file-3', name: 'ccc.jpg' } }
         ]
         this.result = this.FolderStructureBuilder.buildFolderStructure(
           docUploads,
@@ -103,8 +103,8 @@ describe('FolderStructureBuilder', function() {
     describe('when given duplicate files', function() {
       it('throws an error', function() {
         const docUploads = [
-          { dirname: '/foo', doc: { _id: 'doc-1', name: 'doc.tex' } },
-          { dirname: '/foo', doc: { _id: 'doc-2', name: 'doc.tex' } }
+          { path: '/foo/doc.tex', doc: { _id: 'doc-1', name: 'doc.tex' } },
+          { path: '/foo/doc.tex', doc: { _id: 'doc-2', name: 'doc.tex' } }
         ]
         expect(() =>
           this.FolderStructureBuilder.buildFolderStructure(docUploads, [])

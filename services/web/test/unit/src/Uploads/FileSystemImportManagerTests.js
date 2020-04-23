@@ -1,5 +1,6 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
+const mockFs = require('mock-fs')
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
 
@@ -13,50 +14,6 @@ describe('FileSystemImportManager', function() {
     this.newFolderId = new ObjectId()
     this.userId = new ObjectId()
 
-    this.folderPath = '/path/to/folder'
-    this.docName = 'test-doc.tex'
-    this.docPath = `/path/to/folder/${this.docName}`
-    this.docContent = 'one\ntwo\nthree'
-    this.docLines = this.docContent.split('\n')
-    this.fileName = 'test-file.jpg'
-    this.filePath = `/path/to/folder/${this.fileName}`
-    this.symlinkName = 'symlink'
-    this.symlinkPath = `/path/to/${this.symlinkName}`
-    this.ignoredName = '.DS_Store'
-    this.ignoredPath = `/path/to/folder/${this.ignoredName}`
-    this.folderEntries = [this.ignoredName, this.docName, this.fileName]
-
-    this.encoding = 'latin1'
-
-    this.fileStat = {
-      isFile: sinon.stub().returns(true),
-      isDirectory: sinon.stub().returns(false)
-    }
-    this.dirStat = {
-      isFile: sinon.stub().returns(false),
-      isDirectory: sinon.stub().returns(true)
-    }
-    this.symlinkStat = {
-      isFile: sinon.stub().returns(false),
-      isDirectory: sinon.stub().returns(false)
-    }
-    this.fs = {
-      promises: {
-        lstat: sinon.stub(),
-        readFile: sinon.stub(),
-        readdir: sinon.stub()
-      }
-    }
-    this.fs.promises.lstat.withArgs(this.filePath).resolves(this.fileStat)
-    this.fs.promises.lstat.withArgs(this.docPath).resolves(this.fileStat)
-    this.fs.promises.lstat.withArgs(this.symlinkPath).resolves(this.symlinkStat)
-    this.fs.promises.lstat.withArgs(this.folderPath).resolves(this.dirStat)
-    this.fs.promises.readFile
-      .withArgs(this.docPath, this.encoding)
-      .resolves(this.docContent)
-    this.fs.promises.readdir
-      .withArgs(this.folderPath)
-      .resolves(this.folderEntries)
     this.EditorController = {
       promises: {
         addDoc: sinon.stub().resolves(),
@@ -66,25 +23,6 @@ describe('FileSystemImportManager', function() {
         addFolder: sinon.stub().resolves({ _id: this.newFolderId })
       }
     }
-    this.FileTypeManager = {
-      promises: {
-        isDirectory: sinon.stub().resolves(false),
-        getType: sinon.stub(),
-        shouldIgnore: sinon.stub().resolves(false)
-      }
-    }
-    this.FileTypeManager.promises.getType
-      .withArgs(this.fileName, this.filePath)
-      .resolves({ binary: true })
-    this.FileTypeManager.promises.getType
-      .withArgs(this.docName, this.docPath)
-      .resolves({ binary: false, encoding: this.encoding })
-    this.FileTypeManager.promises.isDirectory
-      .withArgs(this.folderPath)
-      .resolves(true)
-    this.FileTypeManager.promises.shouldIgnore
-      .withArgs(this.ignoredName)
-      .resolves(true)
     this.logger = {
       log() {},
       err() {}
@@ -94,40 +32,165 @@ describe('FileSystemImportManager', function() {
         console: console
       },
       requires: {
-        fs: this.fs,
         '../Editor/EditorController': this.EditorController,
-        './FileTypeManager': this.FileTypeManager,
         'logger-sharelatex': this.logger
       }
     })
   })
 
-  describe('addFolderContents', function() {
-    describe('successfully', function() {
+  describe('importDir', function() {
+    beforeEach(async function() {
+      mockFs({
+        'import-test': {
+          'main.tex': 'My thesis',
+          'link-to-main.tex': mockFs.symlink({ path: 'import-test/main.tex' }),
+          '.DS_Store': 'Should be ignored',
+          images: {
+            'cat.jpg': Buffer.from([1, 2, 3, 4])
+          },
+          'line-endings': {
+            'unix.txt': 'one\ntwo\nthree',
+            'mac.txt': 'uno\rdos\rtres',
+            'windows.txt': 'ein\r\nzwei\r\ndrei',
+            'mixed.txt': 'uno\rdue\r\ntre\nquattro'
+          },
+          encodings: {
+            'utf16le.txt': Buffer.from('\ufeffétonnant!', 'utf16le'),
+            'latin1.txt': Buffer.from('tétanisant!', 'latin1')
+          }
+        },
+        symlink: mockFs.symlink({ path: 'import-test' })
+      })
+      this.entries = await this.FileSystemImportManager.promises.importDir(
+        'import-test'
+      )
+      this.projectPaths = this.entries.map(x => x.projectPath)
+    })
+
+    afterEach(function() {
+      mockFs.restore()
+    })
+
+    it('should import regular docs', function() {
+      expect(this.entries).to.deep.include({
+        type: 'doc',
+        projectPath: '/main.tex',
+        lines: ['My thesis']
+      })
+    })
+
+    it('should skip symlinks inside the import folder', function() {
+      expect(this.projectPaths).not.to.include('/link-to-main.tex')
+    })
+
+    it('should skip ignored files', function() {
+      expect(this.projectPaths).not.to.include('/.DS_Store')
+    })
+
+    it('should import binary files', function() {
+      expect(this.entries).to.deep.include({
+        type: 'file',
+        projectPath: '/images/cat.jpg',
+        fsPath: 'import-test/images/cat.jpg'
+      })
+    })
+
+    it('should deal with Mac/Windows/Unix line endings', function() {
+      expect(this.entries).to.deep.include({
+        type: 'doc',
+        projectPath: '/line-endings/unix.txt',
+        lines: ['one', 'two', 'three']
+      })
+      expect(this.entries).to.deep.include({
+        type: 'doc',
+        projectPath: '/line-endings/mac.txt',
+        lines: ['uno', 'dos', 'tres']
+      })
+      expect(this.entries).to.deep.include({
+        type: 'doc',
+        projectPath: '/line-endings/windows.txt',
+        lines: ['ein', 'zwei', 'drei']
+      })
+      expect(this.entries).to.deep.include({
+        type: 'doc',
+        projectPath: '/line-endings/mixed.txt',
+        lines: ['uno', 'due', 'tre', 'quattro']
+      })
+    })
+
+    it('should import documents with latin1 encoding', function() {
+      expect(this.entries).to.deep.include({
+        type: 'doc',
+        projectPath: '/encodings/latin1.txt',
+        lines: ['tétanisant!']
+      })
+    })
+
+    it('should import documents with utf16-le encoding', function() {
+      expect(this.entries).to.deep.include({
+        type: 'doc',
+        projectPath: '/encodings/utf16le.txt',
+        lines: ['\ufeffétonnant!']
+      })
+    })
+
+    it('should error when the root folder is a symlink', async function() {
+      await expect(this.FileSystemImportManager.promises.importDir('symlink'))
+        .to.be.rejected
+    })
+  })
+
+  describe('addEntity', function() {
+    describe('with directory', function() {
       beforeEach(async function() {
-        await this.FileSystemImportManager.promises.addFolderContents(
+        mockFs({
+          path: {
+            to: {
+              folder: {
+                'doc.tex': 'one\ntwo\nthree',
+                'image.jpg': Buffer.from([1, 2, 3, 4])
+              }
+            }
+          }
+        })
+
+        await this.FileSystemImportManager.promises.addEntity(
           this.userId,
           this.projectId,
           this.folderId,
-          this.folderPath,
+          'folder',
+          'path/to/folder',
           false
         )
       })
 
-      it('should add each file in the folder which is not ignored', function() {
-        this.EditorController.promises.addDoc.should.have.been.calledWith(
+      afterEach(function() {
+        mockFs.restore()
+      })
+
+      it('should add a folder to the project', function() {
+        this.EditorController.promises.addFolder.should.have.been.calledWith(
           this.projectId,
           this.folderId,
-          this.docName,
-          this.docLines,
+          'folder',
+          'upload'
+        )
+      })
+
+      it("should add the folder's contents", function() {
+        this.EditorController.promises.addDoc.should.have.been.calledWith(
+          this.projectId,
+          this.newFolderId,
+          'doc.tex',
+          ['one', 'two', 'three'],
           'upload',
           this.userId
         )
         this.EditorController.promises.addFile.should.have.been.calledWith(
           this.projectId,
-          this.folderId,
-          this.fileName,
-          this.filePath,
+          this.newFolderId,
+          'image.jpg',
+          'path/to/folder/image.jpg',
           null,
           'upload',
           this.userId
@@ -135,78 +198,23 @@ describe('FileSystemImportManager', function() {
       })
     })
 
-    describe('with symlink', function() {
-      it('should stop with an error', async function() {
-        await expect(
-          this.FileSystemImportManager.promises.addFolderContents(
-            this.userId,
-            this.projectId,
-            this.folderId,
-            this.symlinkPath,
-            false
-          )
-        ).to.be.rejectedWith('path is symlink')
-        this.EditorController.promises.addFolder.should.not.have.been.called
-        this.EditorController.promises.addDoc.should.not.have.been.called
-        this.EditorController.promises.addFile.should.not.have.been.called
-      })
-    })
-  })
-
-  describe('addEntity', function() {
-    describe('with directory', function() {
-      describe('successfully', function() {
-        beforeEach(async function() {
-          await this.FileSystemImportManager.promises.addEntity(
-            this.userId,
-            this.projectId,
-            this.folderId,
-            this.folderName,
-            this.folderPath,
-            false
-          )
-        })
-
-        it('should add a folder to the project', function() {
-          this.EditorController.promises.addFolder.should.have.been.calledWith(
-            this.projectId,
-            this.folderId,
-            this.folderName,
-            'upload'
-          )
-        })
-
-        it("should add the folder's contents", function() {
-          this.EditorController.promises.addDoc.should.have.been.calledWith(
-            this.projectId,
-            this.newFolderId,
-            this.docName,
-            this.docLines,
-            'upload',
-            this.userId
-          )
-          this.EditorController.promises.addFile.should.have.been.calledWith(
-            this.projectId,
-            this.newFolderId,
-            this.fileName,
-            this.filePath,
-            null,
-            'upload',
-            this.userId
-          )
-        })
-      })
-    })
-
     describe('with binary file', function() {
+      beforeEach(function() {
+        mockFs({ 'uploaded-file': Buffer.from([1, 2, 3, 4]) })
+      })
+
+      afterEach(function() {
+        mockFs.restore()
+      })
+
       describe('with replace set to false', function() {
         beforeEach(async function() {
           await this.FileSystemImportManager.promises.addEntity(
             this.userId,
             this.projectId,
             this.folderId,
-            this.fileName,
-            this.filePath,
+            'image.jpg',
+            'uploaded-file',
             false
           )
         })
@@ -215,8 +223,8 @@ describe('FileSystemImportManager', function() {
           this.EditorController.promises.addFile.should.have.been.calledWith(
             this.projectId,
             this.folderId,
-            this.fileName,
-            this.filePath,
+            'image.jpg',
+            'uploaded-file',
             null,
             'upload',
             this.userId
@@ -230,8 +238,8 @@ describe('FileSystemImportManager', function() {
             this.userId,
             this.projectId,
             this.folderId,
-            this.fileName,
-            this.filePath,
+            'image.jpg',
+            'uploaded-file',
             true
           )
         })
@@ -240,24 +248,42 @@ describe('FileSystemImportManager', function() {
           this.EditorController.promises.upsertFile.should.have.been.calledWith(
             this.projectId,
             this.folderId,
-            this.fileName,
-            this.filePath,
+            'image.jpg',
+            'uploaded-file',
             null,
             'upload',
             this.userId
           )
         })
       })
+    })
 
-      describe('with text file', function() {
+    for (const [lineEndingDescription, lineEnding] of [
+      ['Unix', '\n'],
+      ['Mac', '\r'],
+      ['Windows', '\r\n']
+    ]) {
+      describe(`with text file (${lineEndingDescription} line endings)`, function() {
+        beforeEach(function() {
+          mockFs({
+            path: {
+              to: { 'uploaded-file': `one${lineEnding}two${lineEnding}three` }
+            }
+          })
+        })
+
+        afterEach(function() {
+          mockFs.restore()
+        })
+
         describe('with replace set to false', function() {
           beforeEach(async function() {
             await this.FileSystemImportManager.promises.addEntity(
               this.userId,
               this.projectId,
               this.folderId,
-              this.docName,
-              this.docPath,
+              'doc.tex',
+              'path/to/uploaded-file',
               false
             )
           })
@@ -266,66 +292,8 @@ describe('FileSystemImportManager', function() {
             this.EditorController.promises.addDoc.should.have.been.calledWith(
               this.projectId,
               this.folderId,
-              this.docName,
-              this.docLines,
-              'upload',
-              this.userId
-            )
-          })
-        })
-
-        describe('with windows line ending', function() {
-          beforeEach(async function() {
-            this.docContent = 'one\r\ntwo\r\nthree'
-            this.docLines = ['one', 'two', 'three']
-            this.fs.promises.readFile
-              .withArgs(this.docPath, this.encoding)
-              .resolves(this.docContent)
-            await this.FileSystemImportManager.promises.addEntity(
-              this.userId,
-              this.projectId,
-              this.folderId,
-              this.docName,
-              this.docPath,
-              false
-            )
-          })
-
-          it('should strip the \\r characters before adding', function() {
-            this.EditorController.promises.addDoc.should.have.been.calledWith(
-              this.projectId,
-              this.folderId,
-              this.docName,
-              this.docLines,
-              'upload',
-              this.userId
-            )
-          })
-        })
-
-        describe('with \r line endings', function() {
-          beforeEach(async function() {
-            this.docContent = 'one\rtwo\rthree'
-            this.docLines = ['one', 'two', 'three']
-            this.fs.promises.readFile
-              .withArgs(this.docPath, this.encoding)
-              .resolves(this.docContent)
-            await this.FileSystemImportManager.promises.addEntity(
-              this.userId,
-              this.projectId,
-              this.folderId,
-              this.docName,
-              this.docPath,
-              false
-            )
-          })
-
-          it('should treat the \\r characters as newlines', function() {
-            this.EditorController.promises.addDoc.should.have.been.calledWith(
-              this.projectId,
-              this.folderId,
-              this.docName,
-              this.docLines,
+              'doc.tex',
+              ['one', 'two', 'three'],
               'upload',
               this.userId
             )
@@ -338,8 +306,8 @@ describe('FileSystemImportManager', function() {
               this.userId,
               this.projectId,
               this.folderId,
-              this.docName,
-              this.docPath,
+              'doc.tex',
+              'path/to/uploaded-file',
               true
             )
           })
@@ -348,25 +316,35 @@ describe('FileSystemImportManager', function() {
             this.EditorController.promises.upsertDoc.should.have.been.calledWith(
               this.projectId,
               this.folderId,
-              this.docName,
-              this.docLines,
+              'doc.tex',
+              ['one', 'two', 'three'],
               'upload',
               this.userId
             )
           })
         })
       })
-    })
+    }
 
     describe('with symlink', function() {
+      beforeEach(function() {
+        mockFs({
+          path: { to: { symlink: mockFs.symlink({ path: '/etc/passwd' }) } }
+        })
+      })
+
+      afterEach(function() {
+        mockFs.restore()
+      })
+
       it('should stop with an error', async function() {
         await expect(
           this.FileSystemImportManager.promises.addEntity(
             this.userId,
             this.projectId,
             this.folderId,
-            this.symlinkName,
-            this.symlinkPath,
+            'main.tex',
+            'path/to/symlink',
             false
           )
         ).to.be.rejectedWith('path is symlink')
