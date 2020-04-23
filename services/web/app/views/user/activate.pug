@@ -24,7 +24,6 @@ block content
 								name="passwordResetToken",
 								value=token
 							)
-							input(name='login_after', type='hidden', value="true")
 							.alert.alert-danger(ng-show="activationForm.response.error")
 								| #{translate("activation_token_expired")}
 							

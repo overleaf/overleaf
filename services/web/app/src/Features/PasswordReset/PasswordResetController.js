@@ -94,31 +94,22 @@ module.exports = {
             if (err != null) {
               return next(err)
             }
-            if (!req.body.login_after) {
+            if (!req.session.doLoginAfterPasswordReset) {
               return res.sendStatus(200)
             }
-            UserGetter.getUser(userId, { email: 1 }, (err, user) => {
+            UserGetter.getUser(userId, (err, user) => {
               if (err != null) {
                 return next(err)
               }
-              AuthenticationController.afterLoginSessionSetup(
-                req,
-                user,
-                err => {
-                  if (err != null) {
-                    logger.err(
-                      { err, email: user.email },
-                      'Error setting up session after setting password'
-                    )
-                    return next(err)
-                  }
-                  res.json({
-                    redir:
-                      AuthenticationController._getRedirectFromSession(req) ||
-                      '/project'
-                  })
+              AuthenticationController.finishLogin(user, req, res, err => {
+                if (err != null) {
+                  logger.err(
+                    { err, email: user.email },
+                    'Error setting up session after setting password'
+                  )
                 }
-              )
+                next(err)
+              })
             })
           })
         })

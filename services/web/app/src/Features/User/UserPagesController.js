@@ -54,6 +54,7 @@ const UserPagesController = {
           // as a way to log in which, if I know our users, they will.
           res.redirect(`/login?email=${encodeURIComponent(user.email)}`)
         } else {
+          req.session.doLoginAfterPasswordReset = true
           res.render('user/activate', {
             title: 'activate_account',
             email: user.email,

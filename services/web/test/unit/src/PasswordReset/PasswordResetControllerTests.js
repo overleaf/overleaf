@@ -1,6 +1,7 @@
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
+const { expect } = require('chai')
 
 const MODULE_PATH = path.join(
   __dirname,
@@ -258,35 +259,32 @@ describe('PasswordResetController', function() {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    describe('when login_after is set', function() {
+    describe('when doLoginAfterPasswordReset is set', function() {
       beforeEach(function() {
         this.UserGetter.getUser = sinon
           .stub()
-          .callsArgWith(2, null, { email: 'joe@example.com' })
-        this.req.body.login_after = 'true'
+          .callsArgWith(1, null, { email: 'joe@example.com' })
+        this.req.session.doLoginAfterPasswordReset = 'true'
         this.res.json = sinon.stub()
-        this.AuthenticationController.afterLoginSessionSetup = sinon
-          .stub()
-          .callsArgWith(2, null)
+        this.AuthenticationController.finishLogin = sinon.stub().yields()
         this.AuthenticationController._getRedirectFromSession = sinon
           .stub()
           .returns('/some/path')
       })
 
-      it('should login user if login_after is set', function(done) {
-        this.PasswordResetController.setNewUserPassword(this.req, this.res)
-        this.AuthenticationController.afterLoginSessionSetup.callCount.should.equal(
-          1
+      it('should login user', function(done) {
+        this.PasswordResetController.setNewUserPassword(
+          this.req,
+          this.res,
+          err => {
+            expect(err).to.not.exist
+            this.AuthenticationController.finishLogin.callCount.should.equal(1)
+            this.AuthenticationController.finishLogin
+              .calledWith({ email: 'joe@example.com' }, this.req)
+              .should.equal(true)
+            done()
+          }
         )
-        this.AuthenticationController.afterLoginSessionSetup
-          .calledWith(this.req, { email: 'joe@example.com' })
-          .should.equal(true)
-        this.AuthenticationController._getRedirectFromSession.callCount.should.equal(
-          1
-        )
-        this.res.json.callCount.should.equal(1)
-        this.res.json.calledWith({ redir: '/some/path' }).should.equal(true)
-        done()
       })
     })
   })
