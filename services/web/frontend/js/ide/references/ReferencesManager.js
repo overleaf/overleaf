@@ -49,20 +49,12 @@ define(['crypto-js/sha1'], function(CryptoJSSHA1) {
         // not on every reconnect
         if (!this.inited) {
           this.inited = true
-          return this.indexAllReferences(false)
+          this.ide.socket.on('references:keys:updated', keys =>
+            this._storeReferencesKeys(keys)
+          )
+          this.indexAllReferences(false)
         }
       })
-
-      setTimeout(
-        self =>
-          self.ide.socket.on('references:keys:updated', keys =>
-            // console.log '>> got keys from socket'
-            self._storeReferencesKeys(keys)
-          ),
-
-        1000,
-        this
-      )
     }
 
     _storeReferencesKeys(newKeys) {
