@@ -67,6 +67,7 @@ if (process.env.DOCKER_RUNNER) {
   module.exports.clsi = {
     dockerRunner: process.env.DOCKER_RUNNER === 'true',
     docker: {
+      runtime: process.env.DOCKER_RUNTIME,
       image:
         process.env.TEXLIVE_IMAGE || 'quay.io/sharelatex/texlive-full:2017.1',
       env: {

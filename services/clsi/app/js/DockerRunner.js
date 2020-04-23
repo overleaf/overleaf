@@ -306,6 +306,10 @@ module.exports = DockerRunner = {
       )
     }
 
+    if (Settings.clsi.docker.runtime) {
+      options.HostConfig.Runtime = Settings.clsi.docker.runtime
+    }
+
     return options
   },
 
