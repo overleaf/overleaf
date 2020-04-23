@@ -207,17 +207,16 @@ const resCacher = {
   setContentType: 'application/json'
 }
 
-const startupTime = Date.now()
+let shutdownTime
+if (Settings.processLifespanLimitMs) {
+  Settings.processLifespanLimitMs +=
+    Settings.processLifespanLimitMs * (Math.random() / 10)
+  shutdownTime = Date.now() + Settings.processLifespanLimitMs
+  logger.info('Lifespan limited to ', shutdownTime)
+}
+
 const checkIfProcessIsTooOld = function(cont) {
-  if (typeof Settings.processLifespanLimitMs === 'string') {
-    Settings.processLifespanLimitMs = parseInt(Settings.processLifespanLimitMs)
-    Settings.processLifespanLimitMs +=
-      Settings.processLifespanLimitMs * (Math.random() / 10)
-  }
-  if (
-    Settings.processLifespanLimitMs &&
-    startupTime + Settings.processLifespanLimitMs < Date.now()
-  ) {
+  if (shutdownTime && shutdownTime < Date.now()) {
     logger.log('shutting down, process is too old')
     resCacher.send = function() {}
     resCacher.code = 500

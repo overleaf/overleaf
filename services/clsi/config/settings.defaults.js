@@ -23,7 +23,7 @@ module.exports = {
   compileSizeLimit: process.env.COMPILE_SIZE_LIMIT || '7mb',
 
   processLifespanLimitMs:
-    process.env.PROCESS_LIFE_SPAN_LIMIT_MS || 60 * 60 * 24 * 1000 * 2,
+    parseInt(process.env.PROCESS_LIFE_SPAN_LIMIT_MS) || 60 * 60 * 24 * 1000 * 2,
 
   path: {
     compilesDir: Path.resolve(__dirname + '/../compiles'),
