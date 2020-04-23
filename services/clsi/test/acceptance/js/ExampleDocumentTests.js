@@ -19,11 +19,17 @@ const Client = require('./helpers/Client')
 const request = require('request')
 require('chai').should()
 const fs = require('fs')
+const fsExtra = require('fs-extra')
 const ChildProcess = require('child_process')
 const ClsiApp = require('./helpers/ClsiApp')
 const logger = require('logger-sharelatex')
 const Path = require('path')
-const fixturePath = path => Path.normalize(__dirname + '/../fixtures/' + path)
+const fixturePath = path => {
+  if (path.slice(0, 3) === 'tmp') {
+    return '/tmp/clsi_acceptance_tests' + path.slice(3)
+  }
+  return Path.normalize(__dirname + '/../fixtures/' + path)
+}
 const process = require('process')
 console.log(
   process.pid,
@@ -32,13 +38,6 @@ console.log(
   process.getgroups(),
   'PID'
 )
-try {
-  console.log('creating tmp directory', fixturePath('tmp'))
-  fs.mkdirSync(fixturePath('tmp'))
-} catch (error) {
-  const err = error
-  console.log(err, fixturePath('tmp'), 'unable to create fixture tmp path')
-}
 
 const MOCHA_LATEX_TIMEOUT = 60 * 1000
 
@@ -201,10 +200,16 @@ Client.runServer(4242, fixturePath('examples'))
 
 describe('Example Documents', function() {
   before(function(done) {
-    return ChildProcess.exec('rm test/acceptance/fixtures/tmp/*').on(
-      'exit',
-      () => ClsiApp.ensureRunning(done)
-    )
+    ClsiApp.ensureRunning(done)
+  })
+  before(function(done) {
+    fsExtra.remove(fixturePath('tmp'), done)
+  })
+  before(function(done) {
+    fs.mkdir(fixturePath('tmp'), done)
+  })
+  after(function(done) {
+    fsExtra.remove(fixturePath('tmp'), done)
   })
 
   return Array.from(fs.readdirSync(fixturePath('examples'))).map(example_dir =>
