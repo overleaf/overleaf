@@ -79,9 +79,17 @@ define([
             return $scope.$emit('loaded')
           },
           errorCallback(error) {
-            __guardMethod__(window.Raven, 'captureMessage', o =>
-              o.captureMessage(`pdfng error ${error}`)
-            )
+            if (window.Raven) {
+              // MissingPDFException is "expected" as the pdf file can be on a
+              // CLSI server that has been cycled out.
+              // Currently, there is NO error handling to handle this situation,
+              // but we plan to add this in the future
+              // (https://github.com/overleaf/issues/issues/2985) and this error
+              // is causing noise in Sentry so ignore it
+              if (!error.name === 'MissingPDFException') {
+                window.Raven.captureMessage(`pdfng error ${error}`)
+              }
+            }
             return $scope.$emit('pdf:error', error)
           },
           pageSizeChangeCallback(pageNum, deltaH) {
@@ -850,17 +858,6 @@ define([
   }))
 })
 
-function __guardMethod__(obj, methodName, transform) {
-  if (
-    typeof obj !== 'undefined' &&
-    obj !== null &&
-    typeof obj[methodName] === 'function'
-  ) {
-    return transform(obj, methodName)
-  } else {
-    return undefined
-  }
-}
 function __range__(left, right, inclusive) {
   let range = []
   let ascending = left < right
