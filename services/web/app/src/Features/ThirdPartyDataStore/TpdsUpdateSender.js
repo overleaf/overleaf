@@ -112,7 +112,7 @@ const TpdsUpdateSender = {
         streamOrigin: options.streamOrigin
       }
       return TpdsUpdateSender._enqueue(
-        user_id,
+        options.project_id,
         'pipeStreamFrom',
         postOptions,
         function(err) {
@@ -204,7 +204,7 @@ const TpdsUpdateSender = {
         }
       }
       return TpdsUpdateSender._enqueue(
-        user_id,
+        options.project_id,
         'standardHttpRequest',
         moveOptions,
         callback
@@ -237,7 +237,7 @@ const TpdsUpdateSender = {
         sl_all_user_ids: JSON.stringify(allUserIds)
       }
       return TpdsUpdateSender._enqueue(
-        user_id,
+        options.project_id,
         'standardHttpRequest',
         deleteOptions,
         callback
