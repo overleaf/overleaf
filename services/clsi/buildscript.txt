@@ -1,10 +1,11 @@
 clsi
---language=coffeescript
---node-version=10.15.0
 --acceptance-creds=None
---dependencies=mongo,redis
+--data-dirs=cache,compiles,db
+--dependencies=
 --docker-repos=gcr.io/overleaf-ops
+--env-add=
 --env-pass-through=TEXLIVE_IMAGE
---build-target=docker
---script-version=1.1.24
+--language=es
+--node-version=10.19.0
 --public-repo=True
+--script-version=2.1.0
