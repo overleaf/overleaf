@@ -22,6 +22,9 @@ module.exports = {
 
   compileSizeLimit: process.env.COMPILE_SIZE_LIMIT || '7mb',
 
+  processLifespanLimitMs:
+    parseInt(process.env.PROCESS_LIFE_SPAN_LIMIT_MS) || 60 * 60 * 24 * 1000 * 2,
+
   path: {
     compilesDir: Path.resolve(__dirname + '/../compiles'),
     clsiCacheDir: Path.resolve(__dirname + '/../cache'),
@@ -65,8 +68,7 @@ if (process.env.DOCKER_RUNNER) {
     dockerRunner: process.env.DOCKER_RUNNER === 'true',
     docker: {
       image:
-        process.env.TEXLIVE_IMAGE ||
-        'quay.io/sharelatex/texlive-full:2017.1',
+        process.env.TEXLIVE_IMAGE || 'quay.io/sharelatex/texlive-full:2017.1',
       env: {
         HOME: '/tmp'
       },
@@ -93,8 +95,7 @@ if (process.env.DOCKER_RUNNER) {
 
   module.exports.path.synctexBaseDir = () => '/compile'
 
-  module.exports.path.sandboxedCompilesHostDir =
-    process.env.COMPILES_HOST_DIR
+  module.exports.path.sandboxedCompilesHostDir = process.env.COMPILES_HOST_DIR
 
   module.exports.path.synctexBinHostPath = process.env.SYNCTEX_BIN_HOST_PATH
 }

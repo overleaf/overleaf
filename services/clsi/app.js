@@ -22,7 +22,6 @@ const ContentTypeMapper = require('./app/js/ContentTypeMapper')
 const Errors = require('./app/js/Errors')
 
 const Path = require('path')
-const fs = require('fs')
 
 Metrics.open_sockets.monitor(logger)
 Metrics.memory.monitor(logger)
@@ -208,46 +207,47 @@ const resCacher = {
   setContentType: 'application/json'
 }
 
+let shutdownTime
+if (Settings.processLifespanLimitMs) {
+  Settings.processLifespanLimitMs +=
+    Settings.processLifespanLimitMs * (Math.random() / 10)
+  shutdownTime = Date.now() + Settings.processLifespanLimitMs
+  logger.info('Lifespan limited to ', shutdownTime)
+}
+
+const checkIfProcessIsTooOld = function(cont) {
+  if (shutdownTime && shutdownTime < Date.now()) {
+    logger.log('shutting down, process is too old')
+    resCacher.send = function() {}
+    resCacher.code = 500
+    resCacher.body = { processToOld: true }
+  } else {
+    cont()
+  }
+}
+
 if (Settings.smokeTest) {
-  let runSmokeTest
-  ;(runSmokeTest = function() {
-    logger.log('running smoke tests')
-    smokeTest.run(require.resolve(__dirname + '/test/smoke/js/SmokeTests.js'))(
-      {},
-      resCacher
-    )
-    return setTimeout(runSmokeTest, 30 * 1000)
-  })()
+  const runSmokeTest = function() {
+    checkIfProcessIsTooOld(function() {
+      logger.log('running smoke tests')
+      smokeTest.run(
+        require.resolve(__dirname + '/test/smoke/js/SmokeTests.js')
+      )({}, resCacher)
+      return setTimeout(runSmokeTest, 30 * 1000)
+    })
+  }
+  runSmokeTest()
 }
 
 app.get('/health_check', function(req, res) {
-  res.contentType(resCacher != null ? resCacher.setContentType : undefined)
-  return res
-    .status(resCacher != null ? resCacher.code : undefined)
-    .send(resCacher != null ? resCacher.body : undefined)
+  res.contentType(resCacher.setContentType)
+  return res.status(resCacher.code).send(resCacher.body)
 })
 
 app.get('/smoke_test_force', (req, res) =>
   smokeTest.run(require.resolve(__dirname + '/test/smoke/js/SmokeTests.js'))(
     req,
     res
-  )
-)
-
-const profiler = require('v8-profiler-node8')
-app.get('/profile', function(req, res) {
-  const time = parseInt(req.query.time || '1000')
-  profiler.startProfiling('test')
-  return setTimeout(function() {
-    const profile = profiler.stopProfiling('test')
-    return res.json(profile)
-  }, time)
-})
-
-app.get('/heapdump', (req, res) =>
-  require('heapdump').writeSnapshot(
-    `/tmp/${Date.now()}.clsi.heapsnapshot`,
-    (err, filename) => res.send(filename)
   )
 )
 
