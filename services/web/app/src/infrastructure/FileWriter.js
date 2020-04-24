@@ -16,6 +16,7 @@ const uuid = require('uuid')
 const _ = require('underscore')
 const Settings = require('settings-sharelatex')
 const request = require('request')
+const parseDataUrl = require('parse-data-url')
 const { promisifyAll } = require('../util/promises')
 
 const FileWriter = {
@@ -104,6 +105,16 @@ const FileWriter = {
       callback = function(error, fsPath) {}
     }
     callback = _.once(callback)
+
+    const dataUrl = parseDataUrl(url)
+    if (dataUrl) {
+      return FileWriter.writeContentToDisk(
+        identifier,
+        dataUrl.toBuffer(),
+        callback
+      )
+    }
+
     const stream = request.get(url)
     stream.on('error', function(err) {
       logger.warn(
