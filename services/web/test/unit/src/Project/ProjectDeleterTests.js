@@ -123,6 +123,11 @@ describe('ProjectDeleter', function() {
 
     this.ProjectMock = sinon.mock(Project)
     this.DeletedProjectMock = sinon.mock(DeletedProject)
+    this.FileStoreHandler = {
+      promises: {
+        deleteProject: sinon.stub().resolves()
+      }
+    }
 
     this.ProjectDeleter = SandboxedModule.require(modulePath, {
       requires: {
@@ -133,7 +138,7 @@ describe('ProjectDeleter', function() {
         '../DocumentUpdater/DocumentUpdaterHandler': this
           .DocumentUpdaterHandler,
         '../Tags/TagsHandler': this.TagsHandler,
-        '../FileStore/FileStoreHandler': (this.FileStoreHandler = {}),
+        '../FileStore/FileStoreHandler': this.FileStoreHandler,
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../Docstore/DocstoreManager': this.DocstoreManager,
@@ -433,6 +438,12 @@ describe('ProjectDeleter', function() {
     it('should delete the project in project-history', function() {
       expect(
         this.HistoryManager.promises.deleteProject
+      ).to.have.been.calledWith(this.deletedProjects[0].project._id)
+    })
+
+    it('should destroy the files in filestore', function() {
+      expect(
+        this.FileStoreHandler.promises.deleteProject
       ).to.have.been.calledWith(this.deletedProjects[0].project._id)
     })
   })

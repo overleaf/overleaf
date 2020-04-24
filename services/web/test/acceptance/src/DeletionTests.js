@@ -7,6 +7,7 @@ const { db, ObjectId } = require('../../../app/src/infrastructure/mongojs')
 const { Subscription } = require('../../../app/src/models/Subscription')
 const SubscriptionViewModelBuilder = require('../../../app/src/Features/Subscription/SubscriptionViewModelBuilder')
 const MockDocstoreApi = require('./helpers/MockDocstoreApi')
+const MockFileStoreApi = require('./helpers/MockFileStoreApi')
 require('./helpers/MockV1Api')
 require('./helpers/MockProjectHistoryApi')
 
@@ -252,6 +253,9 @@ describe('Deleting a project', function() {
             done()
           }
         )
+        MockFileStoreApi.files[this.projectId.toString()] = {
+          dummyFile: 'wombat'
+        }
       })
     })
 
@@ -284,6 +288,29 @@ describe('Deleting a project', function() {
             expect(res.statusCode).to.equal(200)
 
             expect(MockDocstoreApi.docs[this.projectId.toString()]).not.to.exist
+            done()
+          }
+        )
+      })
+
+      it('Should destroy the files', function(done) {
+        expect(MockFileStoreApi.files[this.projectId.toString()]).to.exist
+
+        request.post(
+          `/internal/project/${this.projectId}/expire-deleted-project`,
+          {
+            auth: {
+              user: settings.apis.web.user,
+              pass: settings.apis.web.pass,
+              sendImmediately: true
+            }
+          },
+          (error, res) => {
+            expect(error).not.to.exist
+            expect(res.statusCode).to.equal(200)
+
+            expect(MockFileStoreApi.files[this.projectId.toString()]).not.to
+              .exist
             done()
           }
         )

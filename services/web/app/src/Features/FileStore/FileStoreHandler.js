@@ -183,6 +183,27 @@ const FileStoreHandler = {
     })
   },
 
+  deleteProject(projectId, callback) {
+    request(
+      {
+        method: 'delete',
+        uri: this._buildUrl(projectId),
+        timeout: FIVE_MINS_IN_MS
+      },
+      err => {
+        if (err) {
+          return callback(
+            new Errors.OError({
+              message: 'something went wrong deleting a project in filestore',
+              info: { projectId }
+            }).withCause(err)
+          )
+        }
+        callback()
+      }
+    )
+  },
+
   copyFile(oldProjectId, oldFileId, newProjectId, newFileId, callback) {
     logger.log(
       { oldProjectId, oldFileId, newProjectId, newFileId },
@@ -223,7 +244,10 @@ const FileStoreHandler = {
   },
 
   _buildUrl(projectId, fileId) {
-    return `${settings.apis.filestore.url}/project/${projectId}/file/${fileId}`
+    return (
+      `${settings.apis.filestore.url}/project/${projectId}` +
+      (fileId ? `/file/${fileId}` : '')
+    )
   }
 }
 

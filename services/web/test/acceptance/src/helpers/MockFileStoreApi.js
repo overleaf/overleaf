@@ -63,6 +63,12 @@ module.exports = MockFileStoreApi = {
       }
     )
 
+    app.delete('/project/:projectId', (req, res) => {
+      const { projectId } = req.params
+      delete this.files[projectId]
+      res.sendStatus(204)
+    })
+
     return app
       .listen(3009, error => {
         if (error != null) {

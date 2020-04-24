@@ -2,6 +2,7 @@ const { assert } = require('chai')
 const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
+const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 const MODULE_PATH = '../../../../app/src/Features/FileStore/FileStoreHandler.js'
 
@@ -41,6 +42,8 @@ describe('FileStoreHandler', function() {
     this.fsPath = 'uploads/myfile.eps'
     this.getFileUrl = (projectId, fileId) =>
       `${this.filestoreUrl}/project/${projectId}/file/${fileId}`
+    this.getProjectUrl = projectId =>
+      `${this.filestoreUrl}/project/${projectId}`
     this.FileModel = class File {
       constructor(options) {
         ;({ name: this.name, hash: this.hash } = options)
@@ -50,9 +53,6 @@ describe('FileStoreHandler', function() {
           this.linkedFileData = options.linkedFileData
         }
       }
-    }
-    this.Errors = {
-      NotFoundError: sinon.stub()
     }
     this.logger = {
       log: sinon.stub(),
@@ -75,7 +75,7 @@ describe('FileStoreHandler', function() {
         '../../models/File': {
           File: this.FileModel
         },
-        '../Errors/Errors': this.Errors,
+        '../Errors/Errors': Errors,
         fs: this.fs
       }
     })
@@ -269,6 +269,29 @@ describe('FileStoreHandler', function() {
     })
   })
 
+  describe('deleteProject', function() {
+    it('should send a delete request to filestore api', function(done) {
+      const projectUrl = this.getProjectUrl(this.projectId)
+      this.request.callsArgWith(1, null)
+
+      this.handler.deleteProject(this.projectId, err => {
+        assert.equal(err, undefined)
+        this.request.args[0][0].method.should.equal('delete')
+        this.request.args[0][0].uri.should.equal(projectUrl)
+        done()
+      })
+    })
+
+    it('should wrap the error if there is one', function(done) {
+      const error = 'my error'
+      this.request.callsArgWith(1, error)
+      this.handler.deleteProject(this.projectId, err => {
+        assert.equal(err.cause, error)
+        done()
+      })
+    })
+  })
+
   describe('getFileStream', function() {
     beforeEach(function() {
       this.query = {}
@@ -399,7 +422,7 @@ describe('FileStoreHandler', function() {
       this.request.head.yields(null, { statusCode: 404 })
 
       this.handler.getFileSize(this.projectId, this.fileId, err => {
-        expect(err).to.be.instanceof(this.Errors.NotFoundError)
+        expect(err).to.be.instanceof(Errors.NotFoundError)
         done()
       })
     })
