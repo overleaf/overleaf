@@ -111,9 +111,17 @@ define(['./SocketIoShim'], function(SocketIoShim) {
           parsedURL = new URL(this.wsUrl || '/socket.io', window.location)
         } catch (e) {
           // hello IE11
+          if (
+            this.wsUrl &&
+            this.wsUrl.indexOf('/') !== 0 &&
+            !window.location.href.match(/ws=fallback/)
+          ) {
+            // do not even try parsing the wsUrl, use the fallback
+            window.location = window.location.href + '?ws=fallback'
+          }
           parsedURL = {
             origin: null,
-            pathname: '/socket.io'
+            pathname: this.wsUrl || '/socket.io'
           }
         }
         this.ide.socket = SocketIoShim.connect(
