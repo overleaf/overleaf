@@ -60,14 +60,7 @@ async function main() {
     )}\n!!!!!!!!!!!!!\n`
   )
 
-  console.log(`UPDATE universities SET
-  sso_entity_id = '${samlConfig.entityId}',
-  sso_entry_point = '${samlConfig.entryPoint}',
-  sso_cert = '${samlConfig.cert}',
-  sso_user_id_attribute = 'eduPersonPrincipalName',
-  sso_user_email_attribute = 'mail',
-  sso_license_entitlement_attribute = 'eduPersonPrincipalName',
-  sso_license_entitlement_matcher = '.'
-  WHERE id =
-  `)
+  console.log(`SSO Entity ID: ${samlConfig.entityId}\n`)
+  console.log(`SSO Entry Point: ${samlConfig.entryPoint}\n`)
+  console.log(`SSO Certificate: ${samlConfig.cert}\n`)
 }
