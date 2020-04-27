@@ -23,7 +23,7 @@ MEGABYTES = 1024 * 1024
 MAX_RANGES_SIZE = 3 * MEGABYTES
 
 keys = Settings.redis.documentupdater.key_schema
-historyKeys = Settings.redis.history.key_schema
+historyKeys = Settings.redis.history.key_schema # note: this is track changes, not project-history
 
 module.exports = RedisManager =
 	rclient: rclient
@@ -41,6 +41,8 @@ module.exports = RedisManager =
 			logger.error {err: error, doc_id: doc_id, docLines: docLines}, error.message
 			return callback(error)
 		docHash = RedisManager._computeHash(docLines)
+		# record bytes sent to redis
+		metrics.summary "redis.docLines", docLines.length, {status: "set"}
 		logger.log {project_id, doc_id, version, docHash, pathname, projectHistoryId}, "putting doc in redis"
 		RedisManager._serializeRanges ranges, (error, ranges) ->
 			if error?
@@ -73,6 +75,7 @@ module.exports = RedisManager =
 				_callback()
 
 		multi = rclient.multi()
+		multi.strlen keys.docLines(doc_id:doc_id)
 		multi.del keys.docLines(doc_id:doc_id)
 		multi.del keys.projectKey(doc_id:doc_id)
 		multi.del keys.docVersion(doc_id:doc_id)
@@ -84,8 +87,12 @@ module.exports = RedisManager =
 		multi.del keys.unflushedTime(doc_id:doc_id)
 		multi.del keys.lastUpdatedAt(doc_id: doc_id)
 		multi.del keys.lastUpdatedBy(doc_id: doc_id)
-		multi.exec (error) ->
+		multi.exec (error, response) ->
 			return callback(error) if error?
+			length = response?[0]
+			if length > 0
+				# record bytes freed in redis
+				metrics.summary "redis.docLines", length, {status: "del"}
 			multi = rclient.multi()
 			multi.srem keys.docsInProject(project_id:project_id), doc_id
 			multi.del keys.projectState(project_id:project_id)
@@ -125,6 +132,9 @@ module.exports = RedisManager =
 			if timeSpan > MAX_REDIS_REQUEST_LENGTH
 				error = new Error("redis getDoc exceeded timeout")
 				return callback(error)
+			# record bytes loaded from redis
+			if docLines?
+				metrics.summary "redis.docLines", docLines.length, {status: "get"}
 			# check sha1 hash value if present
 			if docLines? and storedHash?
 				computedHash = RedisManager._computeHash(docLines)
@@ -240,7 +250,8 @@ module.exports = RedisManager =
 
 			opVersions = appliedOps.map (op) -> op?.v
 			logger.log doc_id: doc_id, version: newVersion, hash: newHash, op_versions: opVersions, "updating doc in redis"
-
+			# record bytes sent to redis in update
+			metrics.summary "redis.docLines", newDocLines.length, {status: "update"}
 			RedisManager._serializeRanges ranges, (error, ranges) ->
 				if error?
 					logger.error {err: error, doc_id}, error.message

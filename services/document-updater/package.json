@@ -29,7 +29,7 @@
     "logger-sharelatex": "^1.9.1",
     "metrics-sharelatex": "^2.6.2",
     "mongojs": "^3.1.0",
-    "redis-sharelatex": "^1.0.11",
+    "redis-sharelatex": "^1.0.12",
     "request": "^2.88.2",
     "requestretry": "^4.1.0",
     "settings-sharelatex": "^1.1.0"

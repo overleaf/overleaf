@@ -37,9 +37,9 @@ module.exports =
 				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:{#{project_id}}"
 
 		project_history:
-			port: process.env["HISTORY_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
-			host: process.env["HISTORY_REDIS_HOST"] or process.env["REDIS_HOST"] or "localhost"
-			password: process.env["HISTORY_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
+			port: process.env["NEW_HISTORY_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
+			host: process.env["NEW_HISTORY_REDIS_HOST"] or process.env["REDIS_HOST"] or "localhost"
+			password: process.env["NEW_HISTORY_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
 			maxRetriesPerRequest: parseInt(process.env['REDIS_MAX_RETRIES_PER_REQUEST'] or "20")
 			key_schema:
 				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:{#{project_id}}"

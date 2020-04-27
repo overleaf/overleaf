@@ -4,7 +4,8 @@ chai.should()
 expect = chai.expect
 async = require "async"
 Settings = require('settings-sharelatex')
-rclient_history = require("redis-sharelatex").createClient(Settings.redis.history)
+rclient_history = require("redis-sharelatex").createClient(Settings.redis.history) # note: this is track changes, not project-history
+rclient_project_history = require("redis-sharelatex").createClient(Settings.redis.project_history)
 rclient_du = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
 Keys = Settings.redis.documentupdater.key_schema
 HistoryKeys = Settings.redis.history.key_schema
@@ -65,14 +66,14 @@ describe "Applying updates to a doc", ->
 			return null
 
 		it "should push the applied updates to the project history changes api", (done) ->
-			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+			rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
 				throw error if error?
 				JSON.parse(updates[0]).op.should.deep.equal @update.op
 				done()
 			return null
 
 		it "should set the first op timestamp", (done) ->
-			rclient_history.get ProjectHistoryKeys.projectHistoryFirstOpTimestamp({@project_id}), (error, result) =>
+			rclient_project_history.get ProjectHistoryKeys.projectHistoryFirstOpTimestamp({@project_id}), (error, result) =>
 				throw error if error?
 				result.should.be.within(@startTime, Date.now())
 				@firstOpTimestamp = result
@@ -90,7 +91,7 @@ describe "Applying updates to a doc", ->
 				return null
 
 			it "should not change the first op timestamp", (done) ->
-				rclient_history.get ProjectHistoryKeys.projectHistoryFirstOpTimestamp({@project_id}), (error, result) =>
+				rclient_project_history.get ProjectHistoryKeys.projectHistoryFirstOpTimestamp({@project_id}), (error, result) =>
 					throw error if error?
 					result.should.equal @firstOpTimestamp
 					done()
@@ -130,7 +131,7 @@ describe "Applying updates to a doc", ->
 			return null
 
 		it "should push the applied updates to the project history changes api", (done) ->
-			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+			rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
 				JSON.parse(updates[0]).op.should.deep.equal @update.op
 				done()
 			return null
@@ -164,7 +165,7 @@ describe "Applying updates to a doc", ->
 			return null
 
 		it "should push the applied updates to the project history changes api", (done) ->
-			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+			rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
 				JSON.parse(updates[0]).op.should.deep.equal @update.op
 				done()
 			return null
