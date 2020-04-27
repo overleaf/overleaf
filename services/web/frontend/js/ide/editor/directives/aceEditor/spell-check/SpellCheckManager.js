@@ -59,9 +59,33 @@ define([], function() {
       this.selectedHighlightContents = null
 
       $(document).on('click', e => {
+        // There is a bug (?) in Safari when ctrl-clicking an element, and the
+        // the contextmenu event is preventDefault-ed. In this case, the
+        // contextmenu event *and* a click event propagate from the element.
+        // If the contextmenu is *not* preventDefault-ed, then only the
+        // contextmenu event propagates. The latter behaviour is what other
+        // browsers do no matter if the event is preventDefault-ed or not.
+        // See: https://stackoverflow.com/questions/53660359/preventing-default-on-contextmenu-event-triggers-subsequent-click-event
+        // This means that on Safari the spelling menu is opened in response to
+        // the contextmenu event, but then quickly closed due to the
+        // (propagated) click event.
+        // We still need to handle the click event, to enable the "click-away"
+        // behaviour. The workaround is to check if we're in Safari and the Ctrl
+        // key is pressed in the click handler, and if so, then prevent the
+        // spelling menu from closing.
+        // That when clicking as normal, the "click-away" behaviour still works
+        // as before.
+        // When ctrl-clicking, the click event is not propagated, so the handler
+        // is ignored. However this triggers another contextmenu event, which
+        // closes the previous spelling menu.
+        if (window._ide.browserIsSafari && e.ctrlKey) {
+          return
+        }
+
+        // Ignore if right click
         if (e.which !== 3) {
           this.closeContextMenu()
-        } // Ignore if right click
+        }
         return true
       })
     }
