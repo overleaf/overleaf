@@ -1113,4 +1113,27 @@ describe('ProjectEntityMongoUpdateHandler', function() {
       this.ProjectMock.verify()
     })
   })
+
+  describe('replaceFileWithDoc', function() {
+    it('should simultaneously remove the file and add the doc', async function() {
+      this.ProjectMock.expects('findOneAndUpdate')
+        .withArgs(
+          { _id: this.project._id },
+          {
+            $pull: { 'rootFolder.0.fileRefs': { _id: this.file._id } },
+            $push: { 'rootFolder.0.docs': this.doc },
+            $inc: { version: 1 }
+          },
+          { new: true }
+        )
+        .chain('exec')
+        .resolves(this.project)
+      await this.subject.promises.replaceFileWithDoc(
+        this.project._id,
+        this.file._id,
+        this.doc
+      )
+      this.ProjectMock.verify()
+    })
+  })
 })

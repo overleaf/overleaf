@@ -43,6 +43,7 @@ module.exports = {
     'newProject'
   ]),
   replaceDocWithFile: callbackify(replaceDocWithFile),
+  replaceFileWithDoc: callbackify(replaceFileWithDoc),
   mkdirp: callbackifyMultiResult(wrapWithLock(mkdirp), [
     'newFolders',
     'folder'
@@ -78,6 +79,7 @@ module.exports = {
     addFolder: wrapWithLock(addFolder),
     replaceFileWithNew: wrapWithLock(replaceFileWithNew),
     replaceDocWithFile: wrapWithLock(replaceDocWithFile),
+    replaceFileWithDoc: wrapWithLock(replaceFileWithDoc),
     mkdirp: wrapWithLock(mkdirp),
     moveEntity: wrapWithLock(moveEntity),
     deleteEntity: wrapWithLock(deleteEntity),
@@ -202,6 +204,33 @@ async function replaceDocWithFile(projectId, docId, fileRef) {
       },
       $push: {
         [`${folderMongoPath}.fileRefs`]: fileRef
+      },
+      $inc: { version: 1 }
+    },
+    { new: true }
+  ).exec()
+  return newProject
+}
+
+async function replaceFileWithDoc(projectId, fileId, newDoc) {
+  const project = await ProjectGetter.promises.getProjectWithoutLock(
+    projectId,
+    { rootFolder: true, name: true, overleaf: true }
+  )
+  const { path } = await ProjectLocator.promises.findElement({
+    project,
+    element_id: fileId,
+    type: 'file'
+  })
+  const folderMongoPath = _getParentMongoPath(path.mongo)
+  const newProject = await Project.findOneAndUpdate(
+    { _id: project._id },
+    {
+      $pull: {
+        [`${folderMongoPath}.fileRefs`]: { _id: fileId }
+      },
+      $push: {
+        [`${folderMongoPath}.docs`]: newDoc
       },
       $inc: { version: 1 }
     },

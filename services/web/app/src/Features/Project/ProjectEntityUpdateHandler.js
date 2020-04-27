@@ -754,21 +754,92 @@ const ProjectEntityUpdateHandler = {
     }
     ProjectLocator.findElement(
       { project_id: projectId, element_id: folderId, type: 'folder' },
-      (error, folder) => {
+      (error, folder, path) => {
         if (error != null) {
           return callback(error)
         }
         if (folder == null) {
           return callback(new Error("Couldn't find folder"))
         }
-        let existingDoc = null
-        for (let doc of folder.docs) {
-          if (doc.name === docName) {
-            existingDoc = doc
-            break
-          }
-        }
-        if (existingDoc != null) {
+        const existingDoc = folder.docs.find(({ name }) => name === docName)
+        const existingFile = folder.fileRefs.find(
+          ({ name }) => name === docName
+        )
+        if (existingFile) {
+          const doc = new Doc({ name: docName })
+          DocstoreManager.updateDoc(
+            projectId.toString(),
+            doc._id.toString(),
+            docLines,
+            0,
+            {},
+            (err, modified, rev) => {
+              if (err != null) {
+                return callback(err)
+              }
+              ProjectEntityMongoUpdateHandler.replaceFileWithDoc(
+                projectId,
+                existingFile._id,
+                doc,
+                (err, project) => {
+                  if (err) {
+                    return callback(err)
+                  }
+                  TpdsUpdateSender.addDoc(
+                    {
+                      project_id: projectId,
+                      doc_id: doc._id,
+                      path: path.fileSystem,
+                      project_name: project.name,
+                      rev: existingFile.rev + 1
+                    },
+                    err => {
+                      if (err) {
+                        return callback(err)
+                      }
+                      const docPath = path.fileSystem
+                      const projectHistoryId =
+                        project.overleaf &&
+                        project.overleaf.history &&
+                        project.overleaf.history.id
+                      const newDocs = [
+                        {
+                          doc,
+                          path: docPath,
+                          docLines: docLines.join('\n')
+                        }
+                      ]
+                      const oldFiles = [
+                        {
+                          file: existingFile,
+                          path: Path.join(path.fileSystem, existingFile.name)
+                        }
+                      ]
+                      DocumentUpdaterHandler.updateProjectStructure(
+                        projectId,
+                        projectHistoryId,
+                        userId,
+                        { oldFiles, newDocs, newProject: project },
+                        error => {
+                          if (error != null) {
+                            return callback(error)
+                          }
+                          EditorRealTimeController.emitToRoom(
+                            projectId,
+                            'removeEntity',
+                            existingFile._id,
+                            'convertFileToDoc'
+                          )
+                          callback(null, doc, true)
+                        }
+                      )
+                    }
+                  )
+                }
+              )
+            }
+          )
+        } else if (existingDoc) {
           DocumentUpdaterHandler.setDocument(
             projectId,
             existingDoc._id,

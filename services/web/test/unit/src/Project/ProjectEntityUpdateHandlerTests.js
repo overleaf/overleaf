@@ -126,7 +126,8 @@ describe('ProjectEntityUpdateHandler', function() {
       moveEntity: sinon.stub(),
       renameEntity: sinon.stub(),
       deleteEntity: sinon.stub(),
-      replaceDocWithFile: sinon.stub()
+      replaceDocWithFile: sinon.stub(),
+      replaceFileWithDoc: sinon.stub()
     }
     this.TpdsUpdateSender = {
       addFile: sinon.stub().yields(),
@@ -865,7 +866,12 @@ describe('ProjectEntityUpdateHandler', function() {
     describe('updating an existing doc', function() {
       beforeEach(function() {
         this.existingDoc = { _id: docId, name: this.docName }
-        this.folder = { _id: folderId, docs: [this.existingDoc] }
+        this.existingFile = { _id: fileId, name: this.fileName }
+        this.folder = {
+          _id: folderId,
+          docs: [this.existingDoc],
+          fileRefs: [this.existingFile]
+        }
         this.ProjectLocator.findElement.yields(null, this.folder)
         this.DocumentUpdaterHandler.setDocument.yields()
 
@@ -915,7 +921,7 @@ describe('ProjectEntityUpdateHandler', function() {
 
     describe('creating a new doc', function() {
       beforeEach(function() {
-        this.folder = { _id: folderId, docs: [] }
+        this.folder = { _id: folderId, docs: [], fileRefs: [] }
         this.newDoc = { _id: docId }
         this.ProjectLocator.findElement.yields(null, this.folder)
         this.ProjectEntityUpdateHandler.addDocWithRanges = {
@@ -963,7 +969,7 @@ describe('ProjectEntityUpdateHandler', function() {
 
     describe('upserting a new doc with an invalid name', function() {
       beforeEach(function() {
-        this.folder = { _id: folderId, docs: [] }
+        this.folder = { _id: folderId, docs: [], fileRefs: [] }
         this.newDoc = { _id: docId }
         this.ProjectLocator.findElement.yields(null, this.folder)
         this.ProjectEntityUpdateHandler.addDocWithRanges = {
@@ -984,6 +990,101 @@ describe('ProjectEntityUpdateHandler', function() {
       it('returns an error', function() {
         const errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
         this.callback.calledWithMatch(errorMatcher).should.equal(true)
+      })
+    })
+
+    describe('upserting a doc on top of a file', function() {
+      beforeEach(function() {
+        this.newProject = {
+          name: 'new project',
+          overleaf: { history: { id: projectHistoryId } }
+        }
+        this.existingFile = { _id: fileId, name: 'foo.tex', rev: 12 }
+        this.folder = { _id: folderId, docs: [], fileRefs: [this.existingFile] }
+        this.newDoc = { _id: docId }
+        this.docLines = ['line one', 'line two']
+        this.path = 'path/to/file'
+        this.ProjectLocator.findElement.yields(null, this.folder, {
+          fileSystem: this.path
+        })
+        this.DocstoreManager.updateDoc.yields()
+        this.ProjectEntityMongoUpdateHandler.replaceFileWithDoc.yields(
+          null,
+          this.newProject
+        )
+        this.TpdsUpdateSender.addDoc.yields()
+
+        this.ProjectEntityUpdateHandler.upsertDoc(
+          projectId,
+          folderId,
+          'foo.tex',
+          this.docLines,
+          this.source,
+          userId,
+          this.callback
+        )
+      })
+
+      it('notifies docstore of the new doc', function() {
+        expect(this.DocstoreManager.updateDoc).to.have.been.calledWith(
+          projectId,
+          this.newDoc._id,
+          this.docLines
+        )
+      })
+
+      it('adds the new doc and removes the file in one go', function() {
+        expect(
+          this.ProjectEntityMongoUpdateHandler.replaceFileWithDoc
+        ).to.have.been.calledWithMatch(
+          projectId,
+          this.existingFile._id,
+          this.newDoc
+        )
+      })
+
+      it('sends the doc to TPDS', function() {
+        expect(this.TpdsUpdateSender.addDoc).to.have.been.calledWith({
+          project_id: projectId,
+          doc_id: this.newDoc._id,
+          path: this.path,
+          project_name: this.newProject.name,
+          rev: this.existingFile.rev + 1
+        })
+      })
+
+      it('sends the updates to the doc updater', function() {
+        const oldFiles = [
+          {
+            file: this.existingFile,
+            path: `${this.path}/foo.tex`
+          }
+        ]
+        const newDocs = [
+          {
+            doc: sinon.match(this.newDoc),
+            path: this.path,
+            docLines: this.docLines.join('\n')
+          }
+        ]
+        expect(
+          this.DocumentUpdaterHandler.updateProjectStructure
+        ).to.have.been.calledWith(projectId, projectHistoryId, userId, {
+          oldFiles,
+          newDocs,
+          newProject: this.newProject
+        })
+      })
+
+      it('should notify everyone of the file deletion', function() {
+        expect(
+          this.EditorRealTimeController.emitToRoom
+        ).to.have.been.calledWith(
+          projectId,
+          'removeEntity',
+          this.existingFile._id,
+          'convertFileToDoc'
+        )
       })
     })
   })
