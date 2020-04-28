@@ -1,3 +1,5 @@
+const { expect } = require('chai')
+
 const HttpErrors = require('../http')
 
 const { expectError } = require('./support')

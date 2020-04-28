@@ -1,3 +1,5 @@
+const { expect } = require('chai')
+
 const OError = require('..')
 const { expectError } = require('./support')
 

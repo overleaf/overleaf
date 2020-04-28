@@ -1,8 +1,6 @@
-'use strict'
+const { expect } = require('chai')
 
-var chai = require('chai')
-
-global.expect = chai.expect
+const OError = require('../..')
 
 exports.expectError = function OErrorExpectError(e, expected) {
   // should set the name to the error's name

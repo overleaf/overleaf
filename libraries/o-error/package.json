@@ -5,12 +5,14 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
-    "test": "mocha --require test/support"
+    "test": "mocha",
+    "typecheck": "tsc --allowJs --checkJs --noEmit --moduleResolution node --target ES6 *.js test/**/*.js"
   },
   "author": "Overleaf (https://www.overleaf.com)",
   "license": "MIT",
   "repository": "github:overleaf/o-error",
   "devDependencies": {
+    "@types/node": "^13.13.2",
     "chai": "^3.3.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
@@ -24,6 +26,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "mocha": "^7.1.1",
-    "prettier": "^2.0.2"
+    "prettier": "^2.0.2",
+    "typescript": "^3.8.3"
   }
 }

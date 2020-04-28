@@ -1,4 +1,5 @@
 const { getFullInfo, getFullStack, hasCauseInstanceOf } = require('..')
+const { expect } = require('chai')
 
 describe('OError.getFullInfo', function () {
   it('works on a normal error', function () {
