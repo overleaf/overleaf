@@ -11,7 +11,6 @@
  * DS206: Consider reworking classes to avoid initClass
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require('coffee-script')
 const sinon = require('sinon')
 const assert = require('assert')
 const path = require('path')
