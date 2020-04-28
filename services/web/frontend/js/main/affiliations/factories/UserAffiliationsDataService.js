@@ -391,7 +391,12 @@ define(['../../../base'], function(App) {
     'qq',
     'o2',
     'libero',
-    '126'
+    '126',
+    'protonmail',
+    'yandex',
+    'yeah',
+    'web',
+    'foxmail'
   ]
 
   for (let domain of commonDomains) {
