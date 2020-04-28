@@ -29,33 +29,21 @@ module.exports = {
   redis: {
     pubsub: {
       host:
-        process.env.PUBSUB_REDIS_HOST ||
-        process.env.REDIS_HOST ||
-        'localhost',
-      port:
-        process.env.PUBSUB_REDIS_PORT || process.env.REDIS_PORT || '6379',
+        process.env.PUBSUB_REDIS_HOST || process.env.REDIS_HOST || 'localhost',
+      port: process.env.PUBSUB_REDIS_PORT || process.env.REDIS_PORT || '6379',
       password:
-        process.env.PUBSUB_REDIS_PASSWORD ||
-        process.env.REDIS_PASSWORD ||
-        '',
+        process.env.PUBSUB_REDIS_PASSWORD || process.env.REDIS_PASSWORD || '',
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       )
     },
 
     history: {
-      port:
-        process.env.HISTORY_REDIS_PORT ||
-        process.env.REDIS_PORT ||
-        '6379',
+      port: process.env.HISTORY_REDIS_PORT || process.env.REDIS_PORT || '6379',
       host:
-        process.env.HISTORY_REDIS_HOST ||
-        process.env.REDIS_HOST ||
-        'localhost',
+        process.env.HISTORY_REDIS_HOST || process.env.REDIS_HOST || 'localhost',
       password:
-        process.env.HISTORY_REDIS_PASSWORD ||
-        process.env.REDIS_PASSWORD ||
-        '',
+        process.env.HISTORY_REDIS_PASSWORD || process.env.REDIS_PASSWORD || '',
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
@@ -71,9 +59,7 @@ module.exports = {
 
     project_history: {
       port:
-        process.env.NEW_HISTORY_REDIS_PORT ||
-        process.env.REDIS_PORT ||
-        '6379',
+        process.env.NEW_HISTORY_REDIS_PORT || process.env.REDIS_PORT || '6379',
       host:
         process.env.NEW_HISTORY_REDIS_HOST ||
         process.env.REDIS_HOST ||
@@ -86,41 +72,34 @@ module.exports = {
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
       key_schema: {
-        projectHistoryOps({ project_id }) {
-          return `ProjectHistory:Ops:{${project_id}}`
+        projectHistoryOps({ project_id: projectId }) {
+          return `ProjectHistory:Ops:{${projectId}}`
         },
-        projectHistoryFirstOpTimestamp({ project_id }) {
-          return `ProjectHistory:FirstOpTimestamp:{${project_id}}`
+        projectHistoryFirstOpTimestamp({ project_id: projectId }) {
+          return `ProjectHistory:FirstOpTimestamp:{${projectId}}`
         }
       }
     },
 
     lock: {
-      port:
-        process.env.LOCK_REDIS_PORT || process.env.REDIS_PORT || '6379',
+      port: process.env.LOCK_REDIS_PORT || process.env.REDIS_PORT || '6379',
       host:
-        process.env.LOCK_REDIS_HOST ||
-        process.env.REDIS_HOST ||
-        'localhost',
+        process.env.LOCK_REDIS_HOST || process.env.REDIS_HOST || 'localhost',
       password:
-        process.env.LOCK_REDIS_PASSWORD ||
-        process.env.REDIS_PASSWORD ||
-        '',
+        process.env.LOCK_REDIS_PASSWORD || process.env.REDIS_PASSWORD || '',
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
       key_schema: {
-        blockingKey({ doc_id }) {
-          return `Blocking:{${doc_id}}`
+        blockingKey({ doc_id: docId }) {
+          return `Blocking:{${docId}}`
         }
       }
     },
 
     documentupdater: {
       port:
-        process.env.DOC_UPDATER_REDIS_PORT ||
-        process.env.REDIS_PORT ||
-        '6379',
+        process.env.DOC_UPDATER_REDIS_PORT || process.env.REDIS_PORT || '6379',
       host:
         process.env.DOC_UPDATER_REDIS_HOST ||
         process.env.REDIS_HOST ||
@@ -205,8 +184,7 @@ module.exports = {
   publishOnIndividualChannels:
     process.env.PUBLISH_ON_INDIVIDUAL_CHANNELS || false,
 
-  continuousBackgroundFlush:
-    process.env.CONTINUOUS_BACKGROUND_FLUSH || false,
+  continuousBackgroundFlush: process.env.CONTINUOUS_BACKGROUND_FLUSH || false,
 
   smoothingOffset: process.env.SMOOTHING_OFFSET || 1000, // milliseconds
 
