@@ -10,7 +10,6 @@ const Metrics = require('metrics-sharelatex')
 Metrics.initialize('doc-updater')
 
 const express = require('express')
-const http = require('http')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 logger.initialize('document-updater')
@@ -33,7 +32,7 @@ const Path = require('path')
 const bodyParser = require('body-parser')
 
 Metrics.mongodb.monitor(
-  Path.resolve(__dirname + '/node_modules/mongojs/node_modules/mongodb'),
+  Path.resolve(__dirname, '/node_modules/mongojs/node_modules/mongodb'),
   logger
 )
 Metrics.event_loop.monitor(logger, 100)
@@ -45,16 +44,16 @@ Metrics.injectMetricsRoute(app)
 
 DispatchManager.createAndStartDispatchers(Settings.dispatcherCount || 10)
 
-app.param('project_id', function (req, res, next, project_id) {
-  if (project_id != null ? project_id.match(/^[0-9a-f]{24}$/) : undefined) {
+app.param('project_id', function (req, res, next, projectId) {
+  if (projectId != null ? projectId.match(/^[0-9a-f]{24}$/) : undefined) {
     return next()
   } else {
     return next(new Error('invalid project id'))
   }
 })
 
-app.param('doc_id', function (req, res, next, doc_id) {
-  if (doc_id != null ? doc_id.match(/^[0-9a-f]{24}$/) : undefined) {
+app.param('doc_id', function (req, res, next, docId) {
+  if (docId != null ? docId.match(/^[0-9a-f]{24}$/) : undefined) {
     return next()
   } else {
     return next(new Error('invalid doc id'))
@@ -100,9 +99,12 @@ app.delete(
 app.get('/flush_all_projects', HttpController.flushAllProjects)
 app.get('/flush_queued_projects', HttpController.flushQueuedProjects)
 
-app.get('/total', function (req, res) {
+app.get('/total', function (req, res, next) {
   const timer = new Metrics.Timer('http.allDocList')
   return RedisManager.getCountOfDocsInMemory(function (err, count) {
+    if (err) {
+      return next(err)
+    }
     timer.done()
     return res.send({ total: count })
   })
@@ -203,8 +205,9 @@ const shutdownCleanly = (signal) =>
   }
 
 const watchForEvent = (eventName) =>
-  docUpdaterRedisClient.on(eventName, (e) =>
-    console.log(`redis event: ${eventName} ${e}`)
+  docUpdaterRedisClient.on(
+    eventName,
+    (e) => console.log(`redis event: ${eventName} ${e}`) // eslint-disable-line no-console
   )
 
 const events = ['connect', 'ready', 'error', 'close', 'reconnecting', 'end']
