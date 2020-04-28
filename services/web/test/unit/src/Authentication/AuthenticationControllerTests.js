@@ -36,7 +36,8 @@ describe('AuthenticationController', function() {
           setupLoginData: sinon.stub()
         }),
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
-          recordEvent: sinon.stub()
+          recordEvent: sinon.stub(),
+          identifyUser: sinon.stub()
         }),
         '../../infrastructure/SessionStoreManager': (this.SessionStoreManager = {}),
         'logger-sharelatex': (this.logger = {
@@ -248,86 +249,6 @@ describe('AuthenticationController', function() {
     })
   })
 
-  describe('afterLoginSessionSetup', function() {
-    beforeEach(function() {
-      this.req.login = sinon.stub().callsArgWith(1, null)
-      this.req.sessionID = 'thisisacryptographicallysecurerandomid'
-      this.req.session = {
-        passport: { user: { _id: 'one' } }
-      }
-      this.req.session.destroy = sinon.stub().callsArgWith(0, null)
-      this.req.session.save = sinon.stub().callsArgWith(0, null)
-      this.req.sessionStore = { generate: sinon.stub() }
-      this.UserSessionsManager.trackSession = sinon.stub()
-      this.call = callback => {
-        this.AuthenticationController.afterLoginSessionSetup(
-          this.req,
-          this.user,
-          callback
-        )
-      }
-    })
-
-    it('should not produce an error', function(done) {
-      this.call(err => {
-        expect(err).to.equal(null)
-        done()
-      })
-    })
-
-    it('should call req.login', function(done) {
-      this.call(err => {
-        if (err) {
-          return done(err)
-        }
-        this.req.login.callCount.should.equal(1)
-        done()
-      })
-    })
-
-    it('should call req.session.save', function(done) {
-      this.call(err => {
-        if (err) {
-          return done(err)
-        }
-        this.req.session.save.callCount.should.equal(1)
-        done()
-      })
-    })
-
-    it('should call UserSessionsManager.trackSession', function(done) {
-      this.call(err => {
-        if (err) {
-          return done(err)
-        }
-        this.UserSessionsManager.trackSession.callCount.should.equal(1)
-        done()
-      })
-    })
-
-    describe('when req.session.save produces an error', function() {
-      beforeEach(function() {
-        this.req.session.save = sinon.stub().callsArgWith(0, new Error('woops'))
-      })
-
-      it('should produce an error', function(done) {
-        this.call(err => {
-          expect(err).to.not.be.oneOf([null, undefined])
-          expect(err).to.be.instanceof(Error)
-          done()
-        })
-      })
-
-      it('should not call UserSessionsManager.trackSession', function(done) {
-        this.call(err => {
-          expect(err).to.exist
-          this.UserSessionsManager.trackSession.callCount.should.equal(0)
-          done()
-        })
-      })
-    })
-  })
-
   describe('doPassportLogin', function() {
     beforeEach(function() {
       this.AuthenticationController._recordFailedLogin = sinon.stub()
@@ -409,58 +330,6 @@ describe('AuthenticationController', function() {
 
       it("should establish the user's session", function() {
         this.cb.calledWith(null, this.user).should.equal(true)
-      })
-    })
-
-    describe('_loginAsyncHandlers', function() {
-      beforeEach(function() {
-        this.UserHandler.setupLoginData = sinon.stub()
-        this.LoginRateLimiter.recordSuccessfulLogin = sinon.stub()
-        this.AuthenticationController._recordSuccessfulLogin = sinon.stub()
-        this.AnalyticsManager.recordEvent = sinon.stub()
-        this.AnalyticsManager.identifyUser = sinon.stub()
-        this.AuthenticationController._loginAsyncHandlers(this.req, this.user)
-      })
-
-      it('should call identifyUser', function() {
-        this.AnalyticsManager.identifyUser
-          .calledWith(this.user._id, this.req.sessionID)
-          .should.equal(true)
-      })
-
-      it('should setup the user data in the background', function() {
-        this.UserHandler.setupLoginData.calledWith(this.user).should.equal(true)
-      })
-
-      it('should set res.session.justLoggedIn', function() {
-        this.req.session.justLoggedIn.should.equal(true)
-      })
-
-      it('should record the successful login', function() {
-        this.AuthenticationController._recordSuccessfulLogin
-          .calledWith(this.user._id)
-          .should.equal(true)
-      })
-
-      it('should tell the rate limiter that there was a success for that email', function() {
-        this.LoginRateLimiter.recordSuccessfulLogin
-          .calledWith(this.user.email)
-          .should.equal(true)
-      })
-
-      it('should log the successful login', function() {
-        this.logger.log
-          .calledWith(
-            { email: this.user.email, user_id: this.user._id.toString() },
-            'successful log in'
-          )
-          .should.equal(true)
-      })
-
-      it('should track the login event', function() {
-        this.AnalyticsManager.recordEvent
-          .calledWith(this.user._id, 'user-logged-in')
-          .should.equal(true)
       })
     })
 
@@ -1078,12 +947,24 @@ describe('AuthenticationController', function() {
       this.AuthenticationController._getRedirectFromSession = sinon
         .stub()
         .returns('/some/page')
-      this.AuthenticationController._loginAsyncHandlers = sinon.stub()
-      this.AuthenticationController.afterLoginSessionSetup = sinon
-        .stub()
-        .callsArgWith(2, null)
+
+      this.req.sessionID = 'thisisacryptographicallysecurerandomid'
+      this.req.session = {
+        passport: { user: { _id: 'one' } }
+      }
+      this.req.session.destroy = sinon.stub().callsArgWith(0, null)
+      this.req.session.save = sinon.stub().callsArgWith(0, null)
+      this.req.sessionStore = { generate: sinon.stub() }
+      this.req.login = sinon.stub().yields(null)
+
       this.AuthenticationController._clearRedirectFromSession = sinon.stub()
       this.AuthenticationController._redirectToReconfirmPage = sinon.stub()
+      this.UserSessionsManager.trackSession = sinon.stub()
+      this.UserHandler.setupLoginData = sinon.stub()
+      this.LoginRateLimiter.recordSuccessfulLogin = sinon.stub()
+      this.AuthenticationController._recordSuccessfulLogin = sinon.stub()
+      this.AnalyticsManager.recordEvent = sinon.stub()
+      this.AnalyticsManager.identifyUser = sinon.stub()
       this.req.headers = { accept: 'application/json, whatever' }
       this.res.json = sinon.stub()
       this.res.redirect = sinon.stub()
@@ -1102,42 +983,6 @@ describe('AuthenticationController', function() {
       expect(
         this.AuthenticationController._getRedirectFromSession.calledWith(
           this.req
-        )
-      ).to.equal(true)
-    })
-
-    it('should call the async handlers', function() {
-      this.AuthenticationController.finishLogin(
-        this.user,
-        this.req,
-        this.res,
-        this.next
-      )
-      expect(
-        this.AuthenticationController._loginAsyncHandlers.callCount
-      ).to.equal(1)
-      expect(
-        this.AuthenticationController._loginAsyncHandlers.calledWith(
-          this.req,
-          this.user
-        )
-      ).to.equal(true)
-    })
-
-    it('should call afterLoginSessionSetup', function() {
-      this.AuthenticationController.finishLogin(
-        this.user,
-        this.req,
-        this.res,
-        this.next
-      )
-      expect(
-        this.AuthenticationController.afterLoginSessionSetup.callCount
-      ).to.equal(1)
-      expect(
-        this.AuthenticationController.afterLoginSessionSetup.calledWith(
-          this.req,
-          this.user
         )
       ).to.equal(true)
     })
@@ -1257,6 +1102,126 @@ describe('AuthenticationController', function() {
             done()
           }
         )
+      })
+    })
+
+    describe('_afterLoginSessionSetup', function() {
+      beforeEach(function() {})
+
+      it('should call req.login', function() {
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          this.next
+        )
+        this.req.login.callCount.should.equal(1)
+      })
+
+      it('should call req.session.save', function() {
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          this.next
+        )
+        this.req.session.save.callCount.should.equal(1)
+      })
+
+      it('should call UserSessionsManager.trackSession', function() {
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          this.next
+        )
+        this.UserSessionsManager.trackSession.callCount.should.equal(1)
+      })
+
+      describe('when req.session.save produces an error', function() {
+        beforeEach(function() {
+          this.req.session.save = sinon
+            .stub()
+            .callsArgWith(0, new Error('woops'))
+        })
+
+        it('should produce an error', function(done) {
+          this.AuthenticationController.finishLogin(
+            this.user,
+            this.req,
+            this.res,
+            err => {
+              expect(err).to.not.be.oneOf([null, undefined])
+              expect(err).to.be.instanceof(Error)
+              done()
+            }
+          )
+        })
+
+        it('should not call UserSessionsManager.trackSession', function(done) {
+          this.AuthenticationController.finishLogin(
+            this.user,
+            this.req,
+            this.res,
+            err => {
+              expect(err).to.exist
+              this.UserSessionsManager.trackSession.callCount.should.equal(0)
+              done()
+            }
+          )
+        })
+      })
+    })
+
+    describe('_loginAsyncHandlers', function() {
+      beforeEach(function() {
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+
+      it('should call identifyUser', function() {
+        this.AnalyticsManager.identifyUser
+          .calledWith(this.user._id, this.req.sessionID)
+          .should.equal(true)
+      })
+
+      it('should setup the user data in the background', function() {
+        this.UserHandler.setupLoginData.calledWith(this.user).should.equal(true)
+      })
+
+      it('should set res.session.justLoggedIn', function() {
+        this.req.session.justLoggedIn.should.equal(true)
+      })
+
+      it('should record the successful login', function() {
+        this.AuthenticationController._recordSuccessfulLogin
+          .calledWith(this.user._id)
+          .should.equal(true)
+      })
+
+      it('should tell the rate limiter that there was a success for that email', function() {
+        this.LoginRateLimiter.recordSuccessfulLogin
+          .calledWith(this.user.email)
+          .should.equal(true)
+      })
+
+      it('should log the successful login', function() {
+        this.logger.log
+          .calledWith(
+            { email: this.user.email, user_id: this.user._id.toString() },
+            'successful log in'
+          )
+          .should.equal(true)
+      })
+
+      it('should track the login event', function() {
+        this.AnalyticsManager.recordEvent
+          .calledWith(this.user._id, 'user-logged-in')
+          .should.equal(true)
       })
     })
   })
