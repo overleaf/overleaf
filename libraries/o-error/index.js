@@ -1,32 +1,32 @@
-'use strict'
-
 /**
- * Make custom error types that pass `instanceof` checks, have stack traces,
- * support custom messages and properties, and support wrapping errors (causes).
- *
- * @module
- */
-
-/**
- * A base class for custom errors that handles:
- *
- * 1. Wrapping an optional 'cause'.
- * 2. Storing an 'info' object with additional data.
- * 3. Setting the name to the subclass name.
- *
- * @extends Error
+ * Light-weight helpers for handling JavaScript Errors in node.js and the
+ * browser. {@see README.md}
  */
 class OError extends Error {
   /**
    * @param {string} message as for built-in Error
-   * @param {?object} info extra data to attach to the error
+   * @param {Object} [info] extra data to attach to the error
+   * @param {Error} [cause]
    */
-  constructor(message, info) {
+  constructor(message, info, cause) {
     super(message)
     this.name = this.constructor.name
-    if (info) {
-      this.info = info
-    }
+    if (info) this.info = info
+    if (cause) this.cause = cause
+
+    /** @type {Array<TaggedError>} */
+    this._oErrorTags // eslint-disable-line
+  }
+
+  /**
+   * Set the extra info object for this error.
+   *
+   * @param {Object | null | undefined} info
+   * @return {this}
+   */
+  withInfo(info) {
+    this.info = info
+    return this
   }
 
   /**
@@ -37,57 +37,98 @@ class OError extends Error {
    */
   withCause(cause) {
     this.cause = cause
-    if (this.message && cause.message) {
-      this.message += ': ' + cause.message
-    }
     return this
+  }
+
+  /**
+   * Tag debugging information onto any error (whether an OError or not) and
+   * return it.
+   *
+   * @param {Error} error
+   * @param {string} [message]
+   * @param {Object} [info]
+   * @return {Error} the modified `error` argument
+   */
+  static tag(error, message, info) {
+    const oError = /** @type{OError} */ (error)
+
+    if (!oError._oErrorTags) oError._oErrorTags = []
+
+    const tag = new TaggedError(message, info)
+
+    // Hide this function in the stack trace.
+    if (Error.captureStackTrace) Error.captureStackTrace(tag, OError.tag)
+
+    oError._oErrorTags.push(tag)
+
+    return error
+  }
+
+  /**
+   * The merged info from any `tag`s on the given error.
+   *
+   * If an info property is repeated, the last one wins.
+   *
+   * @param {Error} error
+   * @return {Object}
+   */
+  static getFullInfo(error) {
+    const info = {}
+
+    if (!error) return info
+
+    const oError = /** @type{OError} */ (error)
+
+    if (typeof oError.info === 'object') Object.assign(info, oError.info)
+
+    if (oError._oErrorTags) {
+      for (const tag of oError._oErrorTags) {
+        Object.assign(info, tag.info)
+      }
+    }
+
+    return info
+  }
+
+  /**
+   * Return the `stack` property from `error`, including the `stack`s for any
+   * tagged errors added with `OError.tag` and for any `cause`s.
+   *
+   * @param {Error | null | undefined} error
+   * @return {string}
+   */
+  static getFullStack(error) {
+    if (!error) return ''
+
+    const oError = /** @type{OError} */ (error)
+
+    let stack = oError.stack
+
+    if (oError._oErrorTags) {
+      for (const tag of oError._oErrorTags) {
+        stack += `\n${tag.stack}`
+      }
+    }
+
+    const causeStack = oError.cause && OError.getFullStack(oError.cause)
+    if (causeStack) {
+      stack += '\ncaused by:\n' + indent(causeStack)
+    }
+
+    return stack
   }
 }
 
 /**
- * Return the `info` property from `error` and recursively merge the `info`
- * properties from the error's causes, if any.
+ * Used to record a stack trace every time we tag info onto an Error.
  *
- * If a property is repeated, the first one in the cause chain wins.
- *
- * @param {?Error} error assumed not to have circular causes
- * @return {Object}
+ * @private
+ * @extends OError
  */
-function getFullInfo(error) {
-  if (!error) return {}
-  const info = getFullInfo(error.cause)
-  if (typeof error.info === 'object') Object.assign(info, error.info)
-  return info
-}
+class TaggedError extends OError {}
 
-/**
- * Return the `stack` property from `error` and recursively append the `stack`
- * properties from the error's causes, if any.
- *
- * @param {?Error} error assumed not to have circular causes
- * @return {string}
- */
-function getFullStack(error) {
-  if (!error) return ''
-  const causeStack = getFullStack(error.cause)
-  if (causeStack) return error.stack + '\ncaused by: ' + causeStack
-  return error.stack
+function indent(string) {
+  return string.replace(/^/gm, '    ')
 }
-
-/**
- * Is `error` or one of its causes an instance of `klass`?
- *
- * @param  {?Error} error assumed not to have circular causes
- * @param  {function} klass
- * @return {Boolean}
- */
-function hasCauseInstanceOf(error, klass) {
-  if (!error) return false
-  return error instanceof klass || hasCauseInstanceOf(error.cause, klass)
-}
-
-OError.getFullInfo = getFullInfo
-OError.getFullStack = getFullStack
-OError.hasCauseInstanceOf = hasCauseInstanceOf
 
 module.exports = OError

@@ -27,3 +27,12 @@ exports.expectError = function OErrorExpectError(e, expected) {
   // first stack frame should be the function where the error was thrown
   expect(e.stack.split('\n')[1]).to.match(expected.firstFrameRx)
 }
+
+exports.expectFullStackWithoutStackFramesToEqual = function (error, expected) {
+  // But the stack contains all of the errors and tags.
+  const fullStack = OError.getFullStack(error)
+  const fullStackWithoutFrames = fullStack
+    .split('\n')
+    .filter((line) => !/^\s+at\s/.test(line))
+  expect(fullStackWithoutFrames).to.deep.equal(expected)
+}
