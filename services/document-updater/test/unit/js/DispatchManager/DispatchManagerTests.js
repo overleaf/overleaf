@@ -20,6 +20,7 @@ const Errors = require('../../../../app/js/Errors.js')
 
 describe('DispatchManager', function () {
   beforeEach(function () {
+    let Timer
     this.timeout(3000)
     this.DispatchManager = SandboxedModule.require(modulePath, {
       requires: {
@@ -37,11 +38,17 @@ describe('DispatchManager', function () {
         'redis-sharelatex': (this.redis = {}),
         './RateLimitManager': {},
         './Errors': Errors,
-        './Metrics': {
-          Timer() {
-            return { done() {} }
-          }
-        }
+        './Metrics': (this.Metrics = {
+          Timer: (Timer = (function () {
+            Timer = class Timer {
+              static initClass() {
+                this.prototype.done = sinon.stub()
+              }
+            }
+            Timer.initClass()
+            return Timer
+          })())
+        })
       }
     })
     this.callback = sinon.stub()
