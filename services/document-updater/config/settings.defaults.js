@@ -1,4 +1,3 @@
-const Path = require('path')
 const http = require('http')
 http.globalAgent.maxSockets = 300
 
@@ -61,11 +60,11 @@ module.exports = {
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
       key_schema: {
-        uncompressedHistoryOps({ doc_id }) {
-          return `UncompressedHistoryOps:{${doc_id}}`
+        uncompressedHistoryOps({ doc_id: docId }) {
+          return `UncompressedHistoryOps:{${docId}}`
         },
-        docsWithHistoryOps({ project_id }) {
-          return `DocsWithHistoryOps:{${project_id}}`
+        docsWithHistoryOps({ project_id: projectId }) {
+          return `DocsWithHistoryOps:{${projectId}}`
         }
       }
     },
@@ -134,56 +133,53 @@ module.exports = {
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
       key_schema: {
-        blockingKey({ doc_id }) {
-          return `Blocking:{${doc_id}}`
+        blockingKey({ doc_id: docId }) {
+          return `Blocking:{${docId}}`
         },
-        docLines({ doc_id }) {
-          return `doclines:{${doc_id}}`
+        docLines({ doc_id: docId }) {
+          return `doclines:{${docId}}`
         },
-        docOps({ doc_id }) {
-          return `DocOps:{${doc_id}}`
+        docOps({ doc_id: docId }) {
+          return `DocOps:{${docId}}`
         },
-        docVersion({ doc_id }) {
-          return `DocVersion:{${doc_id}}`
+        docVersion({ doc_id: docId }) {
+          return `DocVersion:{${docId}}`
         },
-        docHash({ doc_id }) {
-          return `DocHash:{${doc_id}}`
+        docHash({ doc_id: docId }) {
+          return `DocHash:{${docId}}`
         },
-        projectKey({ doc_id }) {
-          return `ProjectId:{${doc_id}}`
+        projectKey({ doc_id: docId }) {
+          return `ProjectId:{${docId}}`
         },
-        docsInProject({ project_id }) {
-          return `DocsIn:{${project_id}}`
+        docsInProject({ project_id: projectId }) {
+          return `DocsIn:{${projectId}}`
         },
-        ranges({ doc_id }) {
-          return `Ranges:{${doc_id}}`
+        ranges({ doc_id: docId }) {
+          return `Ranges:{${docId}}`
         },
-        unflushedTime({ doc_id }) {
-          return `UnflushedTime:{${doc_id}}`
+        unflushedTime({ doc_id: docId }) {
+          return `UnflushedTime:{${docId}}`
         },
-        pathname({ doc_id }) {
-          return `Pathname:{${doc_id}}`
+        pathname({ doc_id: docId }) {
+          return `Pathname:{${docId}}`
         },
-        projectHistoryId({ doc_id }) {
-          return `ProjectHistoryId:{${doc_id}}`
+        projectHistoryId({ doc_id: docId }) {
+          return `ProjectHistoryId:{${docId}}`
         },
-        projectHistoryType({ doc_id }) {
-          return `ProjectHistoryType:{${doc_id}}`
+        projectHistoryType({ doc_id: docId }) {
+          return `ProjectHistoryType:{${docId}}`
         },
-        projectState({ project_id }) {
-          return `ProjectState:{${project_id}}`
+        projectState({ project_id: projectId }) {
+          return `ProjectState:{${projectId}}`
         },
-        pendingUpdates({ doc_id }) {
-          return `PendingUpdates:{${doc_id}}`
+        pendingUpdates({ doc_id: docId }) {
+          return `PendingUpdates:{${docId}}`
         },
-        lastUpdatedBy({ doc_id }) {
-          return `lastUpdatedBy:{${doc_id}}`
+        lastUpdatedBy({ doc_id: docId }) {
+          return `lastUpdatedBy:{${docId}}`
         },
-        lastUpdatedAt({ doc_id }) {
-          return `lastUpdatedAt:{${doc_id}}`
-        },
-        pendingUpdates({ doc_id }) {
-          return `PendingUpdates:{${doc_id}}`
+        lastUpdatedAt({ doc_id: docId }) {
+          return `lastUpdatedAt:{${docId}}`
         },
         flushAndDeleteQueue() {
           return 'DocUpdaterFlushAndDeleteQueue'
