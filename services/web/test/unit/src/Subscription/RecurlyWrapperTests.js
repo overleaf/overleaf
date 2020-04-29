@@ -862,7 +862,10 @@ describe('RecurlyWrapper', function() {
         this.RecurlyWrapper._paypal,
         'createBillingInfo'
       )
-      this.setAddress = sinon.stub(this.RecurlyWrapper._paypal, 'setAddress')
+      this.setAddressAndCompanyBillingInfo = sinon.stub(
+        this.RecurlyWrapper._paypal,
+        'setAddressAndCompanyBillingInfo'
+      )
       this.createSubscription = sinon.stub(
         this.RecurlyWrapper._paypal,
         'createSubscription'
@@ -917,7 +920,7 @@ describe('RecurlyWrapper', function() {
         account: { accountCode: 'xx' },
         billingInfo: { token_id: 'abc' }
       })
-      this.setAddress.callsArgWith(1, null, {
+      this.setAddressAndCompanyBillingInfo.callsArgWith(1, null, {
         user,
         subscriptionDetails,
         recurlyTokenIds,
@@ -949,7 +952,7 @@ describe('RecurlyWrapper', function() {
       this.checkAccountExists.restore()
       this.createAccount.restore()
       this.createBillingInfo.restore()
-      this.setAddress.restore()
+      this.setAddressAndCompanyBillingInfo.restore()
       return this.createSubscription.restore()
     })
 
@@ -973,7 +976,7 @@ describe('RecurlyWrapper', function() {
         this.checkAccountExists.callCount.should.equal(1)
         this.createAccount.callCount.should.equal(1)
         this.createBillingInfo.callCount.should.equal(1)
-        this.setAddress.callCount.should.equal(1)
+        this.setAddressAndCompanyBillingInfo.callCount.should.equal(1)
         this.createSubscription.callCount.should.equal(1)
         return done()
       })
@@ -996,7 +999,7 @@ describe('RecurlyWrapper', function() {
           this.checkAccountExists.callCount.should.equal(1)
           this.createAccount.callCount.should.equal(1)
           this.createBillingInfo.callCount.should.equal(0)
-          this.setAddress.callCount.should.equal(0)
+          this.setAddressAndCompanyBillingInfo.callCount.should.equal(0)
           this.createSubscription.callCount.should.equal(0)
           return done()
         })
@@ -1414,12 +1417,15 @@ describe('RecurlyWrapper', function() {
       })
     })
 
-    describe('_paypal.setAddress', function() {
+    describe('_paypal.setAddressAndCompanyBillingInfo', function() {
       beforeEach(function() {
         this.cache.account = { account_code: 'abc' }
         this.cache.billingInfo = {}
         return (this.call = callback => {
-          return this.RecurlyWrapper._paypal.setAddress(this.cache, callback)
+          return this.RecurlyWrapper._paypal.setAddressAndCompanyBillingInfo(
+            this.cache,
+            callback
+          )
         })
       })
 

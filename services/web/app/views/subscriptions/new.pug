@@ -62,7 +62,6 @@ block content
 										novalidate
 									)
 
-
 										div.payment-method-toggle
 											a.payment-method-toggle-switch(
 												href
@@ -165,22 +164,42 @@ block content
 													ng-model="data.country"
 													name="country"
 													ng-change="updateCountry()"
-													required,
 													ng-selected="{{country.code == data.country}}"
+													ng-model-options="{ debounce: 200 }"
+													required
 												)
 													option(value='', disabled) #{translate("country")}
 													option(value='-', disabled) --------------
 													option(ng-repeat="country in countries" ng-bind-html="country.name" value="{{country.code}}")
 												span.input-feedback-message {{ simpleCCForm.country.$error.required ? 'This field is required' : '' }}
 
-											if (showVatField)
-												.form-group
-													label(for="vat-no") #{translate('vat_number')}
-													input#vat-no.form-control(
-														type="text"
-														ng-blur="applyVatNumber()"
-														ng-model="data.vat_number"
-													)
+											.form-group
+												.checkbox
+													label
+														input(
+															type="checkbox"
+															ng-model="ui.addCompanyDetails"
+														)
+														|
+														| #{translate("add_company_details")}
+
+											.form-group(ng-show="ui.addCompanyDetails")
+												label(for="company-name") #{translate("company_name")}
+												input#company-name.form-control(
+													type="text"
+													name="companyName"
+													ng-model="data.company"
+												)
+
+											.form-group(ng-show="ui.addCompanyDetails && price.taxes.length")
+												label(for="vat-number") #{translate("vat_number")}
+												input#vat-number.form-control(
+													type="text"
+													name="vatNumber"
+													ng-model="data.vat_number"
+													ng-blur="applyVatNumber()"
+												)
+
 											if (showCouponField)
 												.form-group
 													label(for="coupon-code") #{translate('coupon_code')}
@@ -192,11 +211,19 @@ block content
 
 											p(ng-if="paymentMethod.value === 'paypal'") #{translate("paypal_upgrade")}
 
-											div.price-breakdown(ng-if="price.next.tax !== '0.00'")
+											div.price-breakdown(
+												ng-show="price.taxes.length"
+											)
 												hr.thin
-												span Total:
-												strong {{availableCurrencies[currencyCode]['symbol']}}{{price.next.total}}
-												span ({{availableCurrencies[currencyCode]['symbol']}}{{price.next.subtotal}} + {{availableCurrencies[currencyCode]['symbol']}}{{price.next.tax}} tax)
+												span 
+													| Total:
+													|
+												strong 
+													| {{availableCurrencies[currencyCode]['symbol']}}{{price.next.total}}
+													|
+												span 
+													| ({{availableCurrencies[currencyCode]['symbol']}}{{price.next.subtotal}} + {{availableCurrencies[currencyCode]['symbol']}}{{price.next.tax}} tax)
+													|
 												span(ng-if="monthlyBilling") #{translate("every")} #{translate("month")}
 												span(ng-if="!monthlyBilling") #{translate("every")} #{translate("year")}
 												hr.thin

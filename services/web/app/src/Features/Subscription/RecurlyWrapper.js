@@ -86,7 +86,7 @@ module.exports = RecurlyWrapper = {
 
       let address
       try {
-        address = getAddressFromSubscriptionDetails(subscriptionDetails)
+        address = getAddressFromSubscriptionDetails(subscriptionDetails, false)
       } catch (error) {
         return next(error)
       }
@@ -173,25 +173,36 @@ module.exports = RecurlyWrapper = {
       )
     },
 
-    setAddress(cache, next) {
+    setAddressAndCompanyBillingInfo(cache, next) {
       const { user } = cache
       const { subscriptionDetails } = cache
-      logger.log({ user_id: user._id }, 'setting billing address in recurly')
+      logger.log(
+        { user_id: user._id },
+        'setting billing address and company info in recurly'
+      )
       const accountCode = __guard__(
         cache != null ? cache.account : undefined,
         x1 => x1.account_code
       )
       if (!accountCode) {
-        return next(new Error('no account code at setAddress stage'))
+        return next(
+          new Error('no account code at setAddressAndCompanyBillingInfo stage')
+        )
       }
 
-      let address
+      let addressAndCompanyBillingInfo
       try {
-        address = getAddressFromSubscriptionDetails(subscriptionDetails)
+        addressAndCompanyBillingInfo = getAddressFromSubscriptionDetails(
+          subscriptionDetails,
+          true
+        )
       } catch (error) {
         return next(error)
       }
-      const requestBody = RecurlyWrapper._buildXml('billing_info', address)
+      const requestBody = RecurlyWrapper._buildXml(
+        'billing_info',
+        addressAndCompanyBillingInfo
+      )
 
       return RecurlyWrapper.apiRequest(
         {
@@ -296,7 +307,7 @@ module.exports = RecurlyWrapper = {
         Async.apply(RecurlyWrapper._paypal.checkAccountExists, cache),
         RecurlyWrapper._paypal.createAccount,
         RecurlyWrapper._paypal.createBillingInfo,
-        RecurlyWrapper._paypal.setAddress,
+        RecurlyWrapper._paypal.setAddressAndCompanyBillingInfo,
         RecurlyWrapper._paypal.createSubscription
       ],
       function(err, result) {
@@ -1048,8 +1059,12 @@ function getCustomFieldsFromSubscriptionDetails(subscriptionDetails) {
   return { custom_field: customFields }
 }
 
-function getAddressFromSubscriptionDetails(subscriptionDetails) {
+function getAddressFromSubscriptionDetails(
+  subscriptionDetails,
+  includeCompanyInfo
+) {
   const { address } = subscriptionDetails
+
   if (!address || !address.country) {
     throw new Errors.InvalidError({
       message: 'Invalid country',
@@ -1068,6 +1083,21 @@ function getAddressFromSubscriptionDetails(subscriptionDetails) {
     state: address.state || '',
     zip: address.zip || '',
     country: address.country
+  }
+
+  if (
+    includeCompanyInfo &&
+    subscriptionDetails.billing_info &&
+    subscriptionDetails.billing_info.company &&
+    subscriptionDetails.billing_info.company !== ''
+  ) {
+    addressObject.company = subscriptionDetails.billing_info.company
+    if (
+      subscriptionDetails.billing_info.vat_number &&
+      subscriptionDetails.billing_info.vat_number !== ''
+    ) {
+      addressObject.vat_number = subscriptionDetails.billing_info.vat_number
+    }
   }
 
   return addressObject
