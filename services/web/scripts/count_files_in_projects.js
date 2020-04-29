@@ -11,6 +11,9 @@ async function countFiles() {
   for await (const projectId of rl) {
     try {
       const project = await ProjectGetter.promises.getProject(projectId)
+      if (!project) {
+        throw new Errors.NotFoundError('project not found')
+      }
       const {
         files,
         docs
