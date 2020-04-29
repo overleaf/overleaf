@@ -1,12 +1,12 @@
 /**
  * Light-weight helpers for handling JavaScript Errors in node.js and the
- * browser. {@see README.md}
+ * browser.
  */
 class OError extends Error {
   /**
    * @param {string} message as for built-in Error
    * @param {Object} [info] extra data to attach to the error
-   * @param {Error} [cause]
+   * @param {Error} [cause] the internal error that caused this error
    */
   constructor(message, info, cause) {
     super(message)
@@ -14,14 +14,14 @@ class OError extends Error {
     if (info) this.info = info
     if (cause) this.cause = cause
 
-    /** @type {Array<TaggedError>} */
+    /** @private @type {Array<TaggedError>} */
     this._oErrorTags // eslint-disable-line
   }
 
   /**
    * Set the extra info object for this error.
    *
-   * @param {Object | null | undefined} info
+   * @param {Object | null | undefined} info extra data to attach to the error
    * @return {this}
    */
   withInfo(info) {
@@ -32,7 +32,7 @@ class OError extends Error {
   /**
    * Wrap the given error, which caused this error.
    *
-   * @param {Error} cause
+   * @param {Error} cause the internal error that caused this error
    * @return {this}
    */
   withCause(cause) {
@@ -44,9 +44,9 @@ class OError extends Error {
    * Tag debugging information onto any error (whether an OError or not) and
    * return it.
    *
-   * @param {Error} error
-   * @param {string} [message]
-   * @param {Object} [info]
+   * @param {Error} error the error to tag
+   * @param {string} [message] message with which to tag `error`
+   * @param {Object} [info] extra data with wich to tag `error`
    * @return {Error} the modified `error` argument
    */
   static tag(error, message, info) {
@@ -69,7 +69,7 @@ class OError extends Error {
    *
    * If an info property is repeated, the last one wins.
    *
-   * @param {Error} error
+   * @param {Error | null | undefined} error any errror (may or may not be an `OError`)
    * @return {Object}
    */
   static getFullInfo(error) {
@@ -94,7 +94,7 @@ class OError extends Error {
    * Return the `stack` property from `error`, including the `stack`s for any
    * tagged errors added with `OError.tag` and for any `cause`s.
    *
-   * @param {Error | null | undefined} error
+   * @param {Error | null | undefined} error any error (may or may not be an `OError`)
    * @return {string}
    */
   static getFullStack(error) {
