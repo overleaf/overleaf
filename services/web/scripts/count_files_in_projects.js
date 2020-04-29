@@ -18,9 +18,9 @@ async function countFiles() {
       console.error(
         projectId,
         files.length,
-        project.deletedFiles.length,
+        (project.deletedFiles && project.deletedFiles.length) || 0,
         docs.length,
-        project.deletedDocs.length
+        (project.deletedDocs && project.deletedDocs.length) || 0
       )
     } catch (err) {
       if (err instanceof Errors.NotFoundError) {
