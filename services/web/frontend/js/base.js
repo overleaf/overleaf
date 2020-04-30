@@ -20,8 +20,8 @@
 __webpack_public_path__ = window.baseAssetPath
 
 define([
-  './utils/sentry',
   './libraries',
+  './utils/sentry',
   './modules/recursionHelper',
   './modules/errorCatcher',
   './modules/localStorage',
