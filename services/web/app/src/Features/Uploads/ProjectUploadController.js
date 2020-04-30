@@ -11,7 +11,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let err, ProjectUploadController
+let ProjectUploadController
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const fs = require('fs')
@@ -23,26 +23,12 @@ const Settings = require('settings-sharelatex')
 const { InvalidZipFileError } = require('./ArchiveErrors')
 const multer = require('multer')
 
-let upload = null
-
-try {
-  upload = multer({
-    dest: Settings.path.uploadFolder,
-    limits: {
-      fileSize: Settings.maxUploadSize
-    }
-  })
-} catch (error) {
-  err = error
-  if (err.message === 'EEXIST') {
-    logger.log(
-      { uploadFolder: Settings.path.uploadFolder },
-      'dir already exists, continuing'
-    )
-  } else {
-    logger.err({ err }, 'caught error from multer in uploads router')
+const upload = multer({
+  dest: Settings.path.uploadFolder,
+  limits: {
+    fileSize: Settings.maxUploadSize
   }
-}
+})
 
 module.exports = ProjectUploadController = {
   uploadProject(req, res, next) {
