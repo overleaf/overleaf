@@ -75,9 +75,11 @@ function getFile(req, res, next) {
           res.end()
         } else if (err) {
           next(
-            new Errors.ReadError({
-              message: 'error transferring stream',
-              info: { bucket, key, format, style }
+            new Errors.ReadError('error transferring stream', {
+              bucket,
+              key,
+              format,
+              style
             }).withCause(err)
           )
         }

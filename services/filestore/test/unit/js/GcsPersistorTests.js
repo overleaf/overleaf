@@ -44,6 +44,7 @@ describe('GcsPersistorTests', function() {
           user_files: 'user_files'
         },
         gcs: {
+          deleteConcurrency: 1,
           directoryKeyRegex: /^[0-9a-fA-F]{24}\/[0-9a-fA-F]{24}/
         }
       }
@@ -526,7 +527,6 @@ describe('GcsPersistorTests', function() {
     const directoryName = `${ObjectId()}/${ObjectId()}`
     describe('with valid parameters', function() {
       beforeEach(async function() {
-        console.log(key)
         return GcsPersistor.promises.deleteDirectory(bucket, directoryName)
       })
 

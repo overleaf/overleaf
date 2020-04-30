@@ -30,9 +30,10 @@ module.exports = {
 async function insertFile(bucket, key, stream) {
   const convertedKey = KeyBuilder.getConvertedFolderKey(key)
   if (!convertedKey.match(/^[0-9a-f]{24}\/([0-9a-f]{24}|v\/[0-9]+\/[a-z]+)/i)) {
-    throw new InvalidParametersError({
-      message: 'key does not match validation regex',
-      info: { bucket, key, convertedKey }
+    throw new InvalidParametersError('key does not match validation regex', {
+      bucket,
+      key,
+      convertedKey
     })
   }
   if (Settings.enableConversions) {
@@ -44,9 +45,10 @@ async function insertFile(bucket, key, stream) {
 async function deleteFile(bucket, key) {
   const convertedKey = KeyBuilder.getConvertedFolderKey(key)
   if (!convertedKey.match(/^[0-9a-f]{24}\/([0-9a-f]{24}|v\/[0-9]+\/[a-z]+)/i)) {
-    throw new InvalidParametersError({
-      message: 'key does not match validation regex',
-      info: { bucket, key, convertedKey }
+    throw new InvalidParametersError('key does not match validation regex', {
+      bucket,
+      key,
+      convertedKey
     })
   }
   const jobs = [PersistorManager.promises.deleteFile(bucket, key)]
@@ -58,9 +60,9 @@ async function deleteFile(bucket, key) {
 
 async function deleteProject(bucket, key) {
   if (!key.match(/^[0-9a-f]{24}\//i)) {
-    throw new InvalidParametersError({
-      message: 'key does not match validation regex',
-      info: { bucket, key }
+    throw new InvalidParametersError('key does not match validation regex', {
+      bucket,
+      key
     })
   }
   await PersistorManager.promises.deleteDirectory(bucket, key)
@@ -126,9 +128,11 @@ async function _getConvertedFileAndCache(bucket, key, convertedKey, opts) {
     )
   } catch (err) {
     LocalFileWriter.deleteFile(convertedFsPath, () => {})
-    throw new ConversionError({
-      message: 'failed to convert file',
-      info: { opts, bucket, key, convertedKey }
+    throw new ConversionError('failed to convert file', {
+      opts,
+      bucket,
+      key,
+      convertedKey
     }).withCause(err)
   }
   // Send back the converted file from the local copy to avoid problems
@@ -155,9 +159,10 @@ async function _convertFile(bucket, originalKey, opts) {
   try {
     originalFsPath = await _writeFileToDisk(bucket, originalKey, opts)
   } catch (err) {
-    throw new ConversionError({
-      message: 'unable to write file to disk',
-      info: { bucket, originalKey, opts }
+    throw new ConversionError('unable to write file to disk', {
+      bucket,
+      originalKey,
+      opts
     }).withCause(err)
   }
 
@@ -169,22 +174,20 @@ async function _convertFile(bucket, originalKey, opts) {
   } else if (opts.style === 'preview') {
     promise = FileConverter.promises.preview(originalFsPath)
   } else {
-    throw new ConversionError({
-      message: 'invalid file conversion options',
-      info: {
-        bucket,
-        originalKey,
-        opts
-      }
+    throw new ConversionError('invalid file conversion options', {
+      bucket,
+      originalKey,
+      opts
     })
   }
   let destPath
   try {
     destPath = await promise
   } catch (err) {
-    throw new ConversionError({
-      message: 'error converting file',
-      info: { bucket, originalKey, opts }
+    throw new ConversionError('error converting file', {
+      bucket,
+      originalKey,
+      opts
     }).withCause(err)
   }
   LocalFileWriter.deleteFile(originalFsPath, function() {})

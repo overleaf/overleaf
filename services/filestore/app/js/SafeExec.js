@@ -42,13 +42,10 @@ function safeExec(command, options, callback) {
         process.kill(-child.pid, options.killSignal || 'SIGTERM')
       } catch (error) {
         cleanup(
-          new FailedCommandError({
-            message: 'failed to kill process after timeout',
-            info: {
-              command,
-              options,
-              pid: child.pid
-            }
+          new FailedCommandError('failed to kill process after timeout', {
+            command,
+            options,
+            pid: child.pid
           })
         )
       }
