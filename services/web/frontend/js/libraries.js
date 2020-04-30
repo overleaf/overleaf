@@ -16,6 +16,7 @@ define([
   'core-js/stable/symbol/for',
   'core-js/stable/symbol/key-for',
   'core-js/stable/object/get-own-property-symbols',
+  'core-js/stable/promise',
   'core-js/stable/math/to-string-tag',
   'core-js/stable/array/fill',
   'core-js/stable/array/from',
