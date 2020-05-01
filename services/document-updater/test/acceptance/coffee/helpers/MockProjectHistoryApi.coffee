@@ -9,9 +9,9 @@ module.exports = MockProjectHistoryApi =
 		app.post "/project/:project_id/flush", (req, res, next) =>
 			@flushProject req.params.project_id, (error) ->
 				if error?
-					res.send 500
+					res.sendStatus 500
 				else
-					res.send 204
+					res.sendStatus 204
 
 		app.listen 3054, (error) ->
 			throw error if error?

@@ -24,8 +24,9 @@ describe "HttpController", ->
 		@next = sinon.stub()
 		@res =
 			send: sinon.stub()
+			sendStatus: sinon.stub()
 			json: sinon.stub()
-	
+
 	describe "getDoc", ->
 		beforeEach ->
 			@lines = ["one", "two", "three"]
@@ -119,7 +120,7 @@ describe "HttpController", ->
 				@next
 					.calledWith(new Error("oops"))
 					.should.equal true
-	
+
 	describe "setDoc", ->
 		beforeEach ->
 			@lines = ["one", "two", "three"]
@@ -147,7 +148,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should return a successful No Content response", ->
-				@res.send
+				@res.sendStatus
 					.calledWith(204)
 					.should.equal true
 
@@ -179,7 +180,7 @@ describe "HttpController", ->
 				@HttpController.setDoc(@req, @res, @next)
 
 			it 'should send back a 406 response', ->
-				@res.send.calledWith(406).should.equal true
+				@res.sendStatus.calledWith(406).should.equal true
 
 			it 'should not call setDocWithLock', ->
 				@DocumentManager.setDocWithLock.callCount.should.equal 0
@@ -201,7 +202,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should return a successful No Content response", ->
-				@res.send
+				@res.sendStatus
 					.calledWith(204)
 					.should.equal true
 
@@ -222,7 +223,7 @@ describe "HttpController", ->
 				@next
 					.calledWith(new Error("oops"))
 					.should.equal true
-	
+
 	describe "flushDocIfLoaded", ->
 		beforeEach ->
 			@lines = ["one", "two", "three"]
@@ -243,7 +244,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should return a successful No Content response", ->
-				@res.send
+				@res.sendStatus
 					.calledWith(204)
 					.should.equal true
 
@@ -289,7 +290,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should return a successful No Content response", ->
-				@res.send
+				@res.sendStatus
 					.calledWith(204)
 					.should.equal true
 
@@ -313,7 +314,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should return a successful No Content response", ->
-				@res.send.calledWith(204).should.equal true
+				@res.sendStatus.calledWith(204).should.equal true
 
 		describe "when an errors occurs", ->
 			beforeEach ->
@@ -329,7 +330,7 @@ describe "HttpController", ->
 				@next
 					.calledWith(new Error("oops"))
 					.should.equal true
-	
+
 	describe "deleteProject", ->
 		beforeEach ->
 			@req =
@@ -347,7 +348,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should return a successful No Content response", ->
-				@res.send
+				@res.sendStatus
 					.calledWith(204)
 					.should.equal true
 
@@ -379,7 +380,7 @@ describe "HttpController", ->
 				@next
 					.calledWith(new Error("oops"))
 					.should.equal true
-	
+
 	describe "acceptChanges", ->
 		beforeEach ->
 			@req =
@@ -399,7 +400,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should return a successful No Content response", ->
-				@res.send
+				@res.sendStatus
 					.calledWith(204)
 					.should.equal true
 
@@ -438,7 +439,7 @@ describe "HttpController", ->
 				@next
 					.calledWith(new Error("oops"))
 					.should.equal true
-	
+
 	describe "deleteComment", ->
 		beforeEach ->
 			@req =
@@ -458,7 +459,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should return a successful No Content response", ->
-				@res.send
+				@res.sendStatus
 					.calledWith(204)
 					.should.equal true
 
@@ -524,7 +525,7 @@ describe "HttpController", ->
 				@HttpController.getProjectDocsAndFlushIfOld(@req, @res, @next)
 
 			it "should return an HTTP 409 Conflict response", ->
-				@res.send
+				@res.sendStatus
 					.calledWith(409)
 					.should.equal true
 
@@ -561,7 +562,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should return a successful No Content response", ->
-				@res.send
+				@res.sendStatus
 					.calledWith(204)
 					.should.equal true
 
@@ -601,7 +602,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should return a successful No Content response", ->
-				@res.send
+				@res.sendStatus
 					.calledWith(204)
 					.should.equal true
 

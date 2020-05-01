@@ -9,9 +9,9 @@ module.exports = MockTrackChangesApi =
 		app.post "/project/:project_id/doc/:doc_id/flush", (req, res, next) =>
 			@flushDoc req.params.doc_id, (error) ->
 				if error?
-					res.send 500
+					res.sendStatus 500
 				else
-					res.send 204
+					res.sendStatus 204
 
 		app.listen 3015, (error) ->
 			throw error if error?
