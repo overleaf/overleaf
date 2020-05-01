@@ -1,20 +1,8 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+const { expect } = require('chai')
 const sinon = require('sinon')
-const chai = require('chai').should()
-const modulePath = '../../../../app/src/Features/Project/ProjectDuplicator.js'
 const SandboxedModule = require('sandboxed-module')
+
+const MODULE_PATH = '../../../../app/src/Features/Project/ProjectDuplicator.js'
 
 describe('ProjectDuplicator', function() {
   beforeEach(function() {
@@ -64,7 +52,9 @@ describe('ProjectDuplicator', function() {
       }
     ]
     this.DocstoreManager = {
-      getAllDocs: sinon.stub().callsArgWith(1, null, this.docContents)
+      promises: {
+        getAllDocs: sinon.stub().resolves(this.docContents)
+      }
     }
 
     this.owner = { _id: 'this_is_the_owner' }
@@ -76,19 +66,27 @@ describe('ProjectDuplicator', function() {
     }
     this.foundRootDoc = { _id: 'rootDocId', name: 'rootDocHere' }
 
-    this.creationHandler = {
-      createBlankProject: sinon
-        .stub()
-        .callsArgWith(2, null, this.stubbedNewProject)
+    this.ProjectCreationHandler = {
+      promises: {
+        createBlankProject: sinon.stub().resolves(this.stubbedNewProject)
+      }
     }
 
     this.newFolder = { _id: 'newFolderId' }
 
-    this.locator = {
-      findRootDoc: sinon.stub().callsArgWith(1, null, this.foundRootDoc, {})
+    this.ProjectLocator = {
+      promises: {
+        findRootDoc: sinon
+          .stub()
+          .resolves({ element: this.foundRootDoc, path: {} })
+      }
     }
 
-    this.projectOptionsHandler = { setCompiler: sinon.stub().callsArg(2) }
+    this.ProjectOptionsHandler = {
+      promises: {
+        setCompiler: sinon.stub().resolves()
+      }
+    }
     this.ProjectEntityUpdateHandler = {
       addDoc: sinon.stub().callsArgWith(5, null, { name: 'somDoc' }),
       copyFileFromExistingProjectWithProject: sinon.stub(),
@@ -129,14 +127,23 @@ describe('ProjectDuplicator', function() {
       .callsArg(6)
 
     this.DocumentUpdaterHandler = {
-      flushProjectToMongo: sinon.stub().callsArg(1)
+      promises: {
+        flushProjectToMongo: sinon.stub().resolves()
+      }
     }
 
     this.Project = {
-      findById: sinon.stub().callsArgWith(1, null, this.project)
+      promises: {
+        findById: sinon.stub().resolves(this.project)
+      }
     }
 
-    this.ProjectGetter = { getProject: sinon.stub() }
+    this.ProjectGetter = {
+      getProject: sinon.stub(),
+      promises: {
+        getProject: sinon.stub()
+      }
+    }
 
     this.ProjectGetter.getProject
       .withArgs(this.old_project_id, sinon.match.any)
@@ -144,10 +151,20 @@ describe('ProjectDuplicator', function() {
     this.ProjectGetter.getProject
       .withArgs(this.new_project_id, sinon.match.any)
       .callsArgWith(2, null, this.stubbedNewProject)
+    this.ProjectGetter.promises.getProject
+      .withArgs(this.old_project_id, sinon.match.any)
+      .resolves(this.project)
+    this.ProjectGetter.promises.getProject
+      .withArgs(this.new_project_id, sinon.match.any)
+      .resolves(this.stubbedNewProject)
 
-    this.ProjectDeleter = { deleteProject: sinon.stub().callsArgWith(1, null) }
+    this.ProjectDeleter = {
+      promises: {
+        deleteProject: sinon.stub().resolves()
+      }
+    }
 
-    return (this.duplicator = SandboxedModule.require(modulePath, {
+    this.ProjectDuplicator = SandboxedModule.require(MODULE_PATH, {
       globals: {
         console: console
       },
@@ -155,11 +172,11 @@ describe('ProjectDuplicator', function() {
         '../../models/Project': { Project: this.Project },
         '../DocumentUpdater/DocumentUpdaterHandler': this
           .DocumentUpdaterHandler,
-        './ProjectCreationHandler': this.creationHandler,
+        './ProjectCreationHandler': this.ProjectCreationHandler,
         './ProjectEntityUpdateHandler': this.ProjectEntityUpdateHandler,
-        './ProjectLocator': this.locator,
+        './ProjectLocator': this.ProjectLocator,
         './ProjectDeleter': this.ProjectDeleter,
-        './ProjectOptionsHandler': this.projectOptionsHandler,
+        './ProjectOptionsHandler': this.ProjectOptionsHandler,
         '../Docstore/DocstoreManager': this.DocstoreManager,
         './ProjectGetter': this.ProjectGetter,
         'logger-sharelatex': {
@@ -168,265 +185,204 @@ describe('ProjectDuplicator', function() {
           err() {}
         }
       }
-    }))
+    })
   })
 
   describe('when the copy succeeds', function() {
-    it('should look up the original project', function(done) {
+    it('should look up the original project', async function() {
       const newProjectName = 'someProj'
-      return this.duplicator.duplicate(
+      await this.ProjectDuplicator.promises.duplicate(
         this.owner,
         this.old_project_id,
-        newProjectName,
-        (err, newProject) => {
-          this.ProjectGetter.getProject
-            .calledWith(this.old_project_id)
-            .should.equal(true)
-          return done()
-        }
+        newProjectName
+      )
+      this.ProjectGetter.promises.getProject.should.have.been.calledWith(
+        this.old_project_id
       )
     })
 
-    it('should flush the original project to mongo', function(done) {
+    it('should flush the original project to mongo', async function() {
       const newProjectName = 'someProj'
-      return this.duplicator.duplicate(
+      await this.ProjectDuplicator.promises.duplicate(
         this.owner,
         this.old_project_id,
-        newProjectName,
-        (err, newProject) => {
-          this.DocumentUpdaterHandler.flushProjectToMongo
-            .calledWith(this.old_project_id)
-            .should.equal(true)
-          return done()
-        }
+        newProjectName
+      )
+      this.DocumentUpdaterHandler.promises.flushProjectToMongo.should.have.been.calledWith(
+        this.old_project_id
       )
     })
 
-    it('should create a blank project', function(done) {
+    it('should create a blank project', async function() {
       const newProjectName = 'someProj'
-      return this.duplicator.duplicate(
+      const newProject = await this.ProjectDuplicator.promises.duplicate(
         this.owner,
         this.old_project_id,
-        newProjectName,
-        (err, newProject) => {
-          newProject._id.should.equal(this.stubbedNewProject._id)
-          this.creationHandler.createBlankProject
-            .calledWith(this.owner._id, newProjectName)
-            .should.equal(true)
-          return done()
-        }
+        newProjectName
+      )
+      newProject._id.should.equal(this.stubbedNewProject._id)
+      this.ProjectCreationHandler.promises.createBlankProject.should.have.been.calledWith(
+        this.owner._id,
+        newProjectName
       )
     })
 
-    it('should use the same compiler', function(done) {
+    it('should use the same compiler', async function() {
       this.ProjectEntityUpdateHandler.addDoc.callsArgWith(
         5,
         null,
         this.rootFolder.docs[0],
         this.owner._id
       )
-      return this.duplicator.duplicate(
+      await this.ProjectDuplicator.promises.duplicate(
         this.owner,
         this.old_project_id,
-        '',
-        (err, newProject) => {
-          this.projectOptionsHandler.setCompiler
-            .calledWith(this.stubbedNewProject._id, this.project.compiler)
-            .should.equal(true)
-          return done()
-        }
+        ''
+      )
+      this.ProjectOptionsHandler.promises.setCompiler.should.have.been.calledWith(
+        this.stubbedNewProject._id,
+        this.project.compiler
       )
     })
 
-    it('should use the same root doc', function(done) {
+    it('should use the same root doc', async function() {
       this.ProjectEntityUpdateHandler.addDoc.callsArgWith(
         5,
         null,
         this.rootFolder.docs[0],
         this.owner._id
       )
-      return this.duplicator.duplicate(
+      await this.ProjectDuplicator.promises.duplicate(
         this.owner,
         this.old_project_id,
-        '',
-        (err, newProject) => {
-          this.ProjectEntityUpdateHandler.setRootDoc
-            .calledWith(this.stubbedNewProject._id, this.rootFolder.docs[0]._id)
-            .should.equal(true)
-          return done()
-        }
+        ''
+      )
+      this.ProjectEntityUpdateHandler.setRootDoc.should.have.been.calledWith(
+        this.stubbedNewProject._id,
+        this.rootFolder.docs[0]._id
       )
     })
 
-    it('should not copy the collaberators or read only refs', function(done) {
-      return this.duplicator.duplicate(
+    it('should not copy the collaberators or read only refs', async function() {
+      const newProject = await this.ProjectDuplicator.promises.duplicate(
         this.owner,
         this.old_project_id,
-        '',
-        (err, newProject) => {
-          newProject.collaberator_refs.length.should.equal(0)
-          newProject.readOnly_refs.length.should.equal(0)
-          return done()
-        }
+        ''
+      )
+      newProject.collaberator_refs.length.should.equal(0)
+      newProject.readOnly_refs.length.should.equal(0)
+    })
+
+    it('should copy all the folders', async function() {
+      await this.ProjectDuplicator.promises.duplicate(
+        this.owner,
+        this.old_project_id,
+        ''
+      )
+      this.ProjectEntityUpdateHandler.addFolder.should.have.been.calledWith(
+        this.new_project_id,
+        this.stubbedNewProject.rootFolder[0]._id,
+        this.level1folder.name
+      )
+      this.ProjectEntityUpdateHandler.addFolder.should.have.been.calledWith(
+        this.new_project_id,
+        this.newFolder._id,
+        this.level2folder.name
+      )
+      this.ProjectEntityUpdateHandler.addFolder.callCount.should.equal(2)
+    })
+
+    it('should copy all the docs', async function() {
+      await this.ProjectDuplicator.promises.duplicate(
+        this.owner,
+        this.old_project_id,
+        ''
+      )
+      this.DocstoreManager.promises.getAllDocs.should.have.been.calledWith(
+        this.old_project_id
+      )
+      this.ProjectEntityUpdateHandler.addDoc.should.have.been.calledWith(
+        this.new_project_id,
+        this.stubbedNewProject.rootFolder[0]._id,
+        this.doc0.name,
+        this.doc0_lines,
+        this.owner._id
+      )
+      this.ProjectEntityUpdateHandler.addDoc.should.have.been.calledWith(
+        this.new_project_id,
+        this.newFolder._id,
+        this.doc1.name,
+        this.doc1_lines,
+        this.owner._id
+      )
+      this.ProjectEntityUpdateHandler.addDoc.should.have.been.calledWith(
+        this.new_project_id,
+        this.newFolder._id,
+        this.doc2.name,
+        this.doc2_lines,
+        this.owner._id
       )
     })
 
-    it('should copy all the folders', function(done) {
-      return this.duplicator.duplicate(
+    it('should copy all the files', async function() {
+      await this.ProjectDuplicator.promises.duplicate(
         this.owner,
         this.old_project_id,
-        '',
-        (err, newProject) => {
-          this.ProjectEntityUpdateHandler.addFolder
-            .calledWith(
-              this.new_project_id,
-              this.stubbedNewProject.rootFolder[0]._id,
-              this.level1folder.name
-            )
-            .should.equal(true)
-          this.ProjectEntityUpdateHandler.addFolder
-            .calledWith(
-              this.new_project_id,
-              this.newFolder._id,
-              this.level2folder.name
-            )
-            .should.equal(true)
-          this.ProjectEntityUpdateHandler.addFolder.callCount.should.equal(2)
-          return done()
-        }
+        ''
       )
-    })
-
-    it('should copy all the docs', function(done) {
-      return this.duplicator.duplicate(
-        this.owner,
-        this.old_project_id,
-        '',
-        (err, newProject) => {
-          this.DocstoreManager.getAllDocs
-            .calledWith(this.old_project_id)
-            .should.equal(true)
-          this.ProjectEntityUpdateHandler.addDoc
-            .calledWith(
-              this.new_project_id,
-              this.stubbedNewProject.rootFolder[0]._id,
-              this.doc0.name,
-              this.doc0_lines,
-              this.owner._id
-            )
-            .should.equal(true)
-          this.ProjectEntityUpdateHandler.addDoc
-            .calledWith(
-              this.new_project_id,
-              this.newFolder._id,
-              this.doc1.name,
-              this.doc1_lines,
-              this.owner._id
-            )
-            .should.equal(true)
-          this.ProjectEntityUpdateHandler.addDoc
-            .calledWith(
-              this.new_project_id,
-              this.newFolder._id,
-              this.doc2.name,
-              this.doc2_lines,
-              this.owner._id
-            )
-            .should.equal(true)
-          return done()
-        }
+      this.ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject.should.have.been.calledWith(
+        this.stubbedNewProject._id,
+        this.stubbedNewProject,
+        this.stubbedNewProject.rootFolder[0]._id,
+        this.project._id,
+        this.rootFolder.fileRefs[0],
+        this.owner._id
       )
-    })
-
-    it('should copy all the files', function(done) {
-      return this.duplicator.duplicate(
-        this.owner,
-        this.old_project_id,
-        '',
-        (err, newProject) => {
-          this.ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject
-            .calledWith(
-              this.stubbedNewProject._id,
-              this.stubbedNewProject,
-              this.stubbedNewProject.rootFolder[0]._id,
-              this.project._id,
-              this.rootFolder.fileRefs[0],
-              this.owner._id
-            )
-            .should.equal(true)
-          this.ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject
-            .calledWith(
-              this.stubbedNewProject._id,
-              this.stubbedNewProject,
-              this.newFolder._id,
-              this.project._id,
-              this.level1folder.fileRefs[0],
-              this.owner._id
-            )
-            .should.equal(true)
-          this.ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject
-            .calledWith(
-              this.stubbedNewProject._id,
-              this.stubbedNewProject,
-              this.newFolder._id,
-              this.project._id,
-              this.level2folder.fileRefs[0],
-              this.owner._id
-            )
-            .should.equal(true)
-          return done()
-        }
+      this.ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject.should.have.been.calledWith(
+        this.stubbedNewProject._id,
+        this.stubbedNewProject,
+        this.newFolder._id,
+        this.project._id,
+        this.level1folder.fileRefs[0],
+        this.owner._id
+      )
+      this.ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject.should.have.been.calledWith(
+        this.stubbedNewProject._id,
+        this.stubbedNewProject,
+        this.newFolder._id,
+        this.project._id,
+        this.level2folder.fileRefs[0],
+        this.owner._id
       )
     })
   })
 
   describe('when there is an error', function() {
-    beforeEach(function() {
-      return (this.rootFolder.fileRefs = [
+    beforeEach(async function() {
+      this.rootFolder.fileRefs = [
         { name: 'file0', _id: 'file0' },
         'BROKEN-FILE',
         { name: 'file1', _id: 'file1' },
         { name: 'file2', _id: 'file2' }
-      ])
+      ]
+      await expect(
+        this.ProjectDuplicator.promises.duplicate(
+          this.owner,
+          this.old_project_id,
+          ''
+        )
+      ).to.be.rejected
     })
 
-    it('should delete the broken cloned project', function(done) {
-      return this.duplicator.duplicate(
-        this.owner,
-        this.old_project_id,
-        '',
-        (err, newProject) => {
-          this.ProjectDeleter.deleteProject
-            .calledWith(this.stubbedNewProject._id)
-            .should.equal(true)
-          return done()
-        }
+    it('should delete the broken cloned project', function() {
+      this.ProjectDeleter.promises.deleteProject.should.have.been.calledWith(
+        this.stubbedNewProject._id
       )
     })
 
-    it('should not delete the original project', function(done) {
-      return this.duplicator.duplicate(
-        this.owner,
-        this.old_project_id,
-        '',
-        (err, newProject) => {
-          this.ProjectDeleter.deleteProject
-            .calledWith(this.old_project_id)
-            .should.equal(false)
-          return done()
-        }
-      )
-    })
-
-    it('should return an error', function(done) {
-      return this.duplicator.duplicate(
-        this.owner,
-        this.old_project_id,
-        '',
-        (err, newProject) => {
-          err.should.not.equal(null)
-          return done()
-        }
+    it('should not delete the original project', function() {
+      this.ProjectDeleter.promises.deleteProject.should.not.have.been.calledWith(
+        this.old_project_id
       )
     })
   })
