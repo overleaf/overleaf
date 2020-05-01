@@ -120,6 +120,31 @@ block content
 		.modal-footer
 			button.btn.btn-info(ng-click="done()") #{translate("ok")}
 
+	script(type="text/ng-template", id="outOfSyncModalTemplate")
+		.modal-header
+			button.close(
+				type="button"
+				data-dismiss="modal"
+				ng-click="done()"
+				aria-label="Close"
+			)
+				span(aria-hidden="true") &times;
+			h3 {{ title }}
+		.modal-body(ng-bind-html="message")
+
+		.modal-body
+			button.btn.btn-info(
+				ng-init="showFileContents = false"
+				ng-click="showFileContents = !showFileContents"
+			)
+				| {{showFileContents ? "Hide" : "Show"}} Local File Contents
+			.text-preview(ng-show="showFileContents")
+				.scroll-container
+					| {{editorContent}}
+
+		.modal-footer
+			button.btn.btn-info(ng-click="done()") #{translate("ok")}
+
 	script(type="text/ng-template", id="lockEditorModalTemplate")
 		.modal-header
 			h3 {{ title }}

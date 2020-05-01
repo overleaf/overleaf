@@ -518,8 +518,32 @@ CodeMirror
 
 .modal.lock-editor-modal {
   display: flex !important;
+  background-color: rgba(0, 0, 0, 0.3);
+  overflow-y: hidden;
+  pointer-events: none;
   .modal-dialog {
-    margin: auto;
+    top: @line-height-computed;
+  }
+}
+
+.out-of-sync-modal {
+  .text-preview {
+    margin-top: @line-height-computed / 2;
+    .scroll-container {
+      max-height: 360px;
+      background-color: white;
+      font-size: 0.8em;
+      line-height: 1.1em;
+      overflow: auto;
+      border: 1px solid @gray-lighter;
+      padding-left: 12px;
+      padding-right: 12px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      text-align: left;
+      white-space: pre;
+      font-family: monospace;
+    }
   }
 }
 

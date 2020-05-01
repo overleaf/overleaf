@@ -26,6 +26,7 @@ define(['../../../base', '../Document'], (App, Document) =>
     })
 
     let lockEditorModal = null // modal showing "connection lost"
+    let originalPermissionsLevel
     const MAX_UNSAVED_SECONDS = 15 // lock the editor after this time if unsaved
 
     $scope.docSavingStatus = {}
@@ -62,11 +63,24 @@ define(['../../../base', '../Document'], (App, Document) =>
           'Connection lost',
           'Sorry, the connection to the server is down.'
         )
-        lockEditorModal.result.finally(() => (lockEditorModal = null)) // unset the modal if connection comes back
+
+        // put editor in readOnly mode
+        originalPermissionsLevel = ide.$scope.permissionsLevel
+        ide.$scope.permissionsLevel = 'readOnly'
+
+        lockEditorModal.result.finally(() => {
+          lockEditorModal = null // unset the modal if connection comes back
+          // restore original permissions
+          ide.$scope.permissionsLevel = originalPermissionsLevel
+        })
       }
 
       if (lockEditorModal && newUnsavedCount === 0) {
         lockEditorModal.dismiss('connection back up')
+        // restore original permissions if they were changed
+        if (originalPermissionsLevel) {
+          ide.$scope.permissionsLevel = originalPermissionsLevel
+        }
       }
 
       // for performance, only update the display if the old or new

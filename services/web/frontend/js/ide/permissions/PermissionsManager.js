@@ -27,6 +27,8 @@ define([], function() {
         if (permissionsLevel != null) {
           if (permissionsLevel === 'readOnly') {
             this.$scope.permissions.read = true
+            this.$scope.permissions.write = false
+            this.$scope.permissions.admin = false
             this.$scope.permissions.comment = true
           } else if (permissionsLevel === 'readAndWrite') {
             this.$scope.permissions.read = true

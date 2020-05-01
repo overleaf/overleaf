@@ -91,12 +91,30 @@ define(['../../base'], function(App) {
         }
       })
 
+    ide.showOutOfSyncModal = (title, message, editorContent) =>
+      $modal.open({
+        templateUrl: 'outOfSyncModalTemplate',
+        controller: 'OutOfSyncModalController',
+        resolve: {
+          title() {
+            return title
+          },
+          message() {
+            return message
+          },
+          editorContent() {
+            return editorContent
+          }
+        },
+        windowClass: 'out-of-sync-modal'
+      })
+
     ide.showLockEditorMessageModal = (title, message) =>
       // modal to block the editor when connection is down
       $modal.open({
         templateUrl: 'lockEditorModalTemplate',
         controller: 'GenericMessageModalController',
-        backdrop: 'static', // prevent dismiss by click on background
+        backdrop: false, // not dismissable by clicking background
         keyboard: false, // prevent dismiss via keyboard
         resolve: {
           title() {
@@ -112,7 +130,7 @@ define(['../../base'], function(App) {
     return ide
   })
 
-  return App.controller('GenericMessageModalController', function(
+  App.controller('GenericMessageModalController', function(
     $scope,
     $modalInstance,
     title,
@@ -120,6 +138,20 @@ define(['../../base'], function(App) {
   ) {
     $scope.title = title
     $scope.message = message
+
+    return ($scope.done = () => $modalInstance.close())
+  })
+
+  App.controller('OutOfSyncModalController', function(
+    $scope,
+    $modalInstance,
+    title,
+    message,
+    editorContent
+  ) {
+    $scope.title = title
+    $scope.message = message
+    $scope.editorContent = editorContent
 
     return ($scope.done = () => $modalInstance.close())
   })
