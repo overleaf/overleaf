@@ -12,3 +12,5 @@ wait $LINT && echo "Lint complete" || exit 1
 wait $FORMAT && echo "Format complete" || exit 1
 wait $TRANSLATIONS && echo "Translations install complete" || exit 1
 wait $WEBPACK && echo "Webpack complete" || exit 1
+
+rm .sentryclirc
