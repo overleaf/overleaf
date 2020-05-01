@@ -3,6 +3,8 @@ const ProjectEntityHandler = require('../app/src/Features/Project/ProjectEntityH
 const ProjectGetter = require('../app/src/Features/Project/ProjectGetter')
 const Errors = require('../app/src/Features/Errors/Errors')
 
+/* eslint-disable no-console */
+
 async function countFiles() {
   const rl = readline.createInterface({
     input: process.stdin
@@ -29,10 +31,17 @@ async function countFiles() {
       if (err instanceof Errors.NotFoundError) {
         console.error(projectId, 'NOTFOUND')
       } else {
-        throw err
+        console.log(projectId, 'ERROR', err.name, err.message)
       }
     }
   }
 }
 
-countFiles().then(() => process.exit(0))
+countFiles()
+  .then(() => {
+    process.exit(0)
+  })
+  .catch(err => {
+    console.log('Aiee, something went wrong!', err)
+    process.exit(1)
+  })
