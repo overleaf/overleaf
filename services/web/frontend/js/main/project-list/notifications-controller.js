@@ -18,6 +18,19 @@ define(['../../base'], function(App) {
       }).then(() => (notification.hide = true))
   })
 
+  App.controller('DismissableNotificationsController', function(
+    $scope,
+    localStorage
+  ) {
+    $scope.shouldShowNotification =
+      localStorage('dismissed-covid-19-notification') !== true
+
+    $scope.dismiss = () => {
+      localStorage('dismissed-covid-19-notification', true)
+      $scope.shouldShowNotification = false
+    }
+  })
+
   App.controller('ProjectInviteNotificationController', function(
     $scope,
     $http

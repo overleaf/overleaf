@@ -181,3 +181,23 @@ include ../../_mixins/saml
 					i.fa.fa-spinner.fa-spin(aria-hidden="true")
 					|
 					| #{translate('resending_confirmation_email')}&hellip;
+	- var hasPaidAffiliation = userAffiliations.some(affiliation => affiliation.licence && affiliation.licence !== 'free')
+	if settings.enableSubscriptions && !hasSubscription && !hasPaidAffiliation
+		ul.list-unstyled(
+			ng-controller="DismissableNotificationsController",
+			ng-cloak
+		)
+			li.notification-entry(
+				ng-if="shouldShowNotification && projects.length > 0"
+			)
+				.alert.alert-info
+					.notification-body
+						span In response to ongoing developments around #COVID19, we're providing free temporary upgrades to our Professional Account.
+						span &nbsp;&nbsp;
+							a(href="https://overleaf.com/blog/helping-you-collaborate-on-overleaf-during-the-coronavirus-pandemic") More info.
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(href="https://forms.gle/zWrVdF3GdoWovjd66") Upgrade
+					.notification-close
+						button(ng-click="dismiss()").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
