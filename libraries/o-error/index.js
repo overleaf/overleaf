@@ -54,10 +54,14 @@ class OError extends Error {
 
     if (!oError._oErrorTags) oError._oErrorTags = []
 
-    const tag = new TaggedError(message, info)
-
-    // Hide this function in the stack trace.
-    if (Error.captureStackTrace) Error.captureStackTrace(tag, OError.tag)
+    let tag
+    if (Error.captureStackTrace) {
+      // Hide this function in the stack trace.
+      tag = { name: 'TaggedError', message, info }
+      Error.captureStackTrace(tag, OError.tag)
+    } else {
+      tag = new TaggedError(message, info)
+    }
 
     oError._oErrorTags.push(tag)
 
