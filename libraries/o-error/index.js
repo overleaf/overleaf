@@ -56,8 +56,8 @@ class OError extends Error {
 
     let tag
     if (Error.captureStackTrace) {
-      // Hide this function in the stack trace.
-      tag = { name: 'TaggedError', message, info }
+      // Hide this function in the stack trace, and avoid capturing it twice.
+      tag = /** @type TaggedError */ ({ name: 'TaggedError', message, info })
       Error.captureStackTrace(tag, OError.tag)
     } else {
       tag = new TaggedError(message, info)
