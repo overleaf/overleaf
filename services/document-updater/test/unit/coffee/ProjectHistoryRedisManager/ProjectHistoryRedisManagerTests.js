@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -46,7 +53,7 @@ describe("ProjectHistoryRedisManager", function() {
 		);
 	});
 
-	afterEach(() => tk.reset());
+	afterEach(function() { return tk.reset(); });
 
 	describe("queueOps", function() {
 		beforeEach(function() {
@@ -145,8 +152,8 @@ describe("ProjectHistoryRedisManager", function() {
 				.should.equal(true);
 		});
 
-		describe("queueResyncProjectStructure", () => it("should queue an update", function() {}));
+		describe("queueResyncProjectStructure", function() { return it("should queue an update", function() {}); });
 
-		return describe("queueResyncDocContent", () => it("should queue an update", function() {}));
+		return describe("queueResyncDocContent", function() { return it("should queue an update", function() {}); });
 	});
 });

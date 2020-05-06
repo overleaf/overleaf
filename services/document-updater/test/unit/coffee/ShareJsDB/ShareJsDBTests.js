@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -107,7 +113,7 @@ describe("ShareJsDB", function() {
 		});
 	});
 
-	return describe("writeOps", () => describe("writing an op", function() {
+	return describe("writeOps", function() { return describe("writing an op", function() {
         beforeEach(function() {
             this.opData = {
                 op: {p: 20, t: "foo"},
@@ -125,5 +131,5 @@ describe("ShareJsDB", function() {
             this.callback.called.should.equal(true);
             return (this.callback.args[0][0] != null).should.equal(false);
         });
-    }));
+    }); });
 });

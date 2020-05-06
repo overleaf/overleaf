@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    mocha/no-identical-title,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -66,6 +74,7 @@ describe("RedisManager", function() {
 						constructor() {
 							this.start = new Date();
 						}
+
 						done() {
 							const timeSpan = new Date - this.start;
 							return timeSpan;
@@ -86,7 +95,7 @@ describe("RedisManager", function() {
 		return this.callback = sinon.stub();
 	});
 
-	afterEach(() => tk.reset());
+	afterEach(function() { return tk.reset(); });
 
 	describe("getDoc", function() {
 		beforeEach(function() {

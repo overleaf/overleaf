@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -60,7 +66,7 @@ describe("DocumentManager", function() {
 		return this.lastUpdatedBy = 'last-author-id';
 	});
 
-	afterEach(() => tk.reset());
+	afterEach(function() { return tk.reset(); });
 
 	describe("flushAndDeleteDoc", function() {
 		describe("successfully", function() {
@@ -111,7 +117,7 @@ describe("DocumentManager", function() {
 				});
 			});
 
-			return describe("when ignoring flush errors", () => it("should remove the doc from redis", function(done) {
+			return describe("when ignoring flush errors", function() { return it("should remove the doc from redis", function(done) {
                 return this.DocumentManager.flushAndDeleteDoc(this.project_id, this.doc_id, { ignoreFlushErrors: true }, error => {
                     if (error != null) {
                         return done(error);
@@ -119,7 +125,7 @@ describe("DocumentManager", function() {
                     this.RedisManager.removeDocFromMemory.called.should.equal(true);
                     return done();
                 });
-            }));
+            }); });
 		});
 	});
 
@@ -303,7 +309,7 @@ describe("DocumentManager", function() {
 		});
 	});
 
-	describe("setDoc", () => describe("with plain tex lines", function() {
+	describe("setDoc", function() { return describe("with plain tex lines", function() {
         beforeEach(function() {
             this.beforeLines = ["before", "lines"];
             this.afterLines = ["after", "lines"];
@@ -417,7 +423,7 @@ describe("DocumentManager", function() {
                     op.u.should.equal(true));
             });
         });
-    }));
+    }); });
 
 	describe("acceptChanges", function() {
 		beforeEach(function() {

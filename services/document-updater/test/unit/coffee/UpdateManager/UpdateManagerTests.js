@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -350,7 +356,7 @@ describe("UpdateManager", function() {
 	});
 
 
-	describe("_addProjectHistoryMetadataToOps", () => it("should add projectHistoryId, pathname and doc_length metadata to the ops", function() {
+	describe("_addProjectHistoryMetadataToOps", function() { return it("should add projectHistoryId, pathname and doc_length metadata to the ops", function() {
         const lines = [
             'some',
             'test',
@@ -387,7 +393,7 @@ describe("UpdateManager", function() {
                 doc_length: 23
             } // 14 - 'qux' + 'bazbaz'
         }]);
-}));
+}); });
 
 	return describe("lockUpdatesAndDo", function() {
 		beforeEach(function() {

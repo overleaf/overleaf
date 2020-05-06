@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    mocha/no-identical-title,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -218,38 +225,38 @@ describe("ShareJS text type", function() {
 		});
 	});
 	
-		describe("comment / insert", () => it("should not do anything", function() {
+		describe("comment / insert", function() { return it("should not do anything", function() {
             const dest = [];
             text._tc(dest, { i: "foo", p: 6 }, { c: "bar", p: 3 });
             return dest.should.deep.equal([{ i: "foo", p: 6 }]);
-    }));
+    }); });
 	
-		describe("comment / delete", () => it("should not do anything", function() {
+		describe("comment / delete", function() { return it("should not do anything", function() {
             const dest = [];
             text._tc(dest, { d: "foo", p: 6 }, { c: "bar", p: 3 });
             return dest.should.deep.equal([{ d: "foo", p: 6 }]);
-    }));
+    }); });
 	
-		return describe("comment / comment", () => it("should not do anything", function() {
+		return describe("comment / comment", function() { return it("should not do anything", function() {
             const dest = [];
             text._tc(dest, { c: "foo", p: 6 }, { c: "bar", p: 3 });
             return dest.should.deep.equal([{ c: "foo", p: 6 }]);
-    }));
+    }); });
 });
 
 	describe("apply", function() {
-		it("should apply an insert", () => text.apply("foo", [{ i: "bar", p: 2 }]).should.equal("fobaro"));
+		it("should apply an insert", function() { return text.apply("foo", [{ i: "bar", p: 2 }]).should.equal("fobaro"); });
 
-		it("should apply a delete", () => text.apply("foo123bar", [{ d: "123", p: 3 }]).should.equal("foobar"));
+		it("should apply a delete", function() { return text.apply("foo123bar", [{ d: "123", p: 3 }]).should.equal("foobar"); });
 
-		it("should do nothing with a comment", () => text.apply("foo123bar", [{ c: "123", p: 3 }]).should.equal("foo123bar"));
+		it("should do nothing with a comment", function() { return text.apply("foo123bar", [{ c: "123", p: 3 }]).should.equal("foo123bar"); });
 		
-		it("should throw an error when deleted content does not match", () => ((() => text.apply("foo123bar", [{ d: "456", p: 3 }]))).should.throw(Error));
+		it("should throw an error when deleted content does not match", function() { return ((() => text.apply("foo123bar", [{ d: "456", p: 3 }]))).should.throw(Error); });
 		
-		return it("should throw an error when comment content does not match", () => ((() => text.apply("foo123bar", [{ c: "456", p: 3 }]))).should.throw(Error));
+		return it("should throw an error when comment content does not match", function() { return ((() => text.apply("foo123bar", [{ c: "456", p: 3 }]))).should.throw(Error); });
 	});
 	
-	return describe("applying ops and comments in different orders", () => it("should not matter which op or comment is applied first", function() {
+	return describe("applying ops and comments in different orders", function() { return it("should not matter which op or comment is applied first", function() {
         let length, p;
         let asc, end;
         let asc1, end1;
@@ -263,7 +270,7 @@ describe("ShareJS text type", function() {
         const applySnapshot = (snapshot, op) => text.apply(snapshot, op);
         
         const applyRanges = function(rangesTracker, ops) {
-            for (let op of Array.from(ops)) {
+            for (const op of Array.from(ops)) {
                 rangesTracker.applyOp(op, {});
             }
             return rangesTracker;
@@ -271,14 +278,14 @@ describe("ShareJS text type", function() {
         
         const commentsEqual = function(comments1, comments2) {
             if (comments1.length !== comments2.length) { return false; }
-            comments1.sort(function(a,b) {
+            comments1.sort((a,b) => {
                 if ((a.offset - b.offset) === 0) {
                     return a.length - b.length;
                 } else {
                     return a.offset - b.offset;
                 }
             });
-            comments2.sort(function(a,b) {
+            comments2.sort((a,b) => {
                 if ((a.offset - b.offset) === 0) {
                     return a.length - b.length;
                 } else {
@@ -299,19 +306,19 @@ describe("ShareJS text type", function() {
         
         const OPS = [];
         // Insert ops
-        for (p = 0, end = SNAPSHOT.length, asc = 0 <= end; asc ? p <= end : p >= end; asc ? p++ : p--) {
+        for (p = 0, end = SNAPSHOT.length, asc = end >= 0; asc ? p <= end : p >= end; asc ? p++ : p--) {
             OPS.push({i: "a", p});
             OPS.push({i: "bc", p});
         }
-        for (p = 0, end1 = SNAPSHOT.length-1, asc1 = 0 <= end1; asc1 ? p <= end1 : p >= end1; asc1 ? p++ : p--) {
+        for (p = 0, end1 = SNAPSHOT.length-1, asc1 = end1 >= 0; asc1 ? p <= end1 : p >= end1; asc1 ? p++ : p--) {
             var asc2, end2;
-            for (length = 1, end2 = SNAPSHOT.length - p, asc2 = 1 <= end2; asc2 ? length <= end2 : length >= end2; asc2 ? length++ : length--) {
+            for (length = 1, end2 = SNAPSHOT.length - p, asc2 = end2 >= 1; asc2 ? length <= end2 : length >= end2; asc2 ? length++ : length--) {
                 OPS.push({d: SNAPSHOT.slice(p, p+length), p});
             }
         }
-        for (p = 0, end3 = SNAPSHOT.length-1, asc3 = 0 <= end3; asc3 ? p <= end3 : p >= end3; asc3 ? p++ : p--) {
+        for (p = 0, end3 = SNAPSHOT.length-1, asc3 = end3 >= 0; asc3 ? p <= end3 : p >= end3; asc3 ? p++ : p--) {
             var asc4, end4;
-            for (length = 1, end4 = SNAPSHOT.length - p, asc4 = 1 <= end4; asc4 ? length <= end4 : length >= end4; asc4 ? length++ : length--) {
+            for (length = 1, end4 = SNAPSHOT.length - p, asc4 = end4 >= 1; asc4 ? length <= end4 : length >= end4; asc4 ? length++ : length--) {
                 OPS.push({c: SNAPSHOT.slice(p, p+length), p, t: this.t});
             }
         }
@@ -321,7 +328,7 @@ describe("ShareJS text type", function() {
             for (var op1 of Array.from(OPS)) {
                 result.push((() => {
                     const result1 = [];
-                    for (let op2 of Array.from(OPS)) {
+                    for (const op2 of Array.from(OPS)) {
                         const op1_t = transform(op1, op2, "left");
                         const op2_t = transform(op2, op1, "right");
                 
@@ -354,5 +361,5 @@ describe("ShareJS text type", function() {
             }
             return result;
         })();
-    }));
+    }); });
 });

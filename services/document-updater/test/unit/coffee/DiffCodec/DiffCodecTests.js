@@ -1,3 +1,10 @@
+/* eslint-disable
+    handle-callback-err,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -22,7 +29,7 @@ describe("DiffCodec", function() {
 		it("should insert new text correctly", function(done) {
 			this.before = ["hello world"];
 			this.after  = ["hello beautiful world"];
-			return this.DiffCodec.diffAsShareJsOp(this.before, this.after, function(error, ops) {
+			return this.DiffCodec.diffAsShareJsOp(this.before, this.after, (error, ops) => {
 				expect(ops).to.deep.equal([{
 					i: "beautiful ",
 					p: 6
@@ -35,7 +42,7 @@ describe("DiffCodec", function() {
 		it("should shift later inserts by previous inserts", function(done) {
 			this.before = ["the boy played with the ball"];
 			this.after  = ["the tall boy played with the red ball"];
-			return this.DiffCodec.diffAsShareJsOp(this.before, this.after, function(error, ops) {
+			return this.DiffCodec.diffAsShareJsOp(this.before, this.after, (error, ops) => {
 				expect(ops).to.deep.equal([
 					{ i: "tall ", p: 4 },
 					{ i: "red ", p: 29 }
@@ -47,7 +54,7 @@ describe("DiffCodec", function() {
 		it("should delete text correctly", function(done) {
 			this.before  = ["hello beautiful world"];
 			this.after = ["hello world"];
-			return this.DiffCodec.diffAsShareJsOp(this.before, this.after, function(error, ops) {
+			return this.DiffCodec.diffAsShareJsOp(this.before, this.after, (error, ops) => {
 				expect(ops).to.deep.equal([{
 					d: "beautiful ",
 					p: 6
@@ -61,7 +68,7 @@ describe("DiffCodec", function() {
 		return it("should shift later deletes by the first deletes", function(done) {
 			this.before = ["the tall boy played with the red ball"];
 			this.after  = ["the boy played with the ball"];
-			return this.DiffCodec.diffAsShareJsOp(this.before, this.after, function(error, ops) {
+			return this.DiffCodec.diffAsShareJsOp(this.before, this.after, (error, ops) => {
 				expect(ops).to.deep.equal([
 					{ d: "tall ", p: 4 },
 					{ d: "red ", p: 24 }

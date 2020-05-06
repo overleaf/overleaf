@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -46,7 +53,7 @@ describe('LockManager - checking the lock', function(){
 
 	it('should return true if the key does not exists', function(done){
 		existsStub.yields(null, "0");
-		return LockManager.checkLock(doc_id, function(err, free){
+		return LockManager.checkLock(doc_id, (err, free) => {
 			free.should.equal(true);
 			return done();
 		});
@@ -54,7 +61,7 @@ describe('LockManager - checking the lock', function(){
 
 	return it('should return false if the key does exists', function(done){
 		existsStub.yields(null, "1");
-		return LockManager.checkLock(doc_id, function(err, free){
+		return LockManager.checkLock(doc_id, (err, free) => {
 			free.should.equal(false);
 			return done();
 		});
