@@ -1,3 +1,10 @@
+/* eslint-disable
+    no-return-assign,
+    no-undef,
+    no-useless-catch,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -67,7 +74,7 @@ json.apply = function(snapshot, op) {
       let elem = container;
       let key = 'data';
 
-      for (let p of Array.from(c.p)) {
+      for (const p of Array.from(c.p)) {
         parent = elem;
         parentkey = key;
         elem = elem[key];
@@ -187,7 +194,7 @@ json.compose = function(op1, op2) {
   json.checkValidOp(op2);
 
   const newOp = clone(op1);
-  for (let c of Array.from(op2)) { json.append(newOp, c); }
+  for (const c of Array.from(op2)) { json.append(newOp, c); }
 
   return newOp;
 };
@@ -197,7 +204,7 @@ json.normalize = function(op) {
   
   if (!isArray(op)) { op = [op]; }
 
-  for (let c of Array.from(op)) {
+  for (const c of Array.from(op)) {
     if (c.p == null) { c.p = []; }
     json.append(newOp, c);
   }
@@ -300,7 +307,7 @@ json.transformComponent = function(dest, c, otherC, type) {
           
         const res = [];
         text._tc(res, tc1, tc2, type);
-        for (let tc of Array.from(res)) {
+        for (const tc of Array.from(res)) {
           const jc = { p: c.p.slice(0, common) };
           jc.p.push(tc.p);
           if (tc.i != null) { jc.si = tc.i; }

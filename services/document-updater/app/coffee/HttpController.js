@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -58,7 +64,7 @@ module.exports = (HttpController = {
 
 	_getTotalSizeOfLines(lines) {
 		let size = 0;
-		for (let line of Array.from(lines)) {
+		for (const line of Array.from(lines)) {
 			size += (line.length + 1);
 		}
 		return size;
@@ -75,7 +81,7 @@ module.exports = (HttpController = {
 		logger.log({project_id, exclude: excludeItems}, "getting docs via http");
 		const timer = new Metrics.Timer("http.getAllDocs");
 		const excludeVersions = {};
-		for (let item of Array.from(excludeItems)) {
+		for (const item of Array.from(excludeItems)) {
 			const [id,version] = Array.from(item != null ? item.split(':') : undefined);
 			excludeVersions[id] = version;
 		}

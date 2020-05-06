@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -38,11 +44,11 @@ module.exports = (SnapshotManager = {
       }
     };
     
-    for (let change of Array.from(ranges.changes || [])) {
+    for (const change of Array.from(ranges.changes || [])) {
       change.id = SnapshotManager._safeObjectId(change.id);
       updateMetadata(change.metadata);
     }
-    for (let comment of Array.from(ranges.comments || [])) {
+    for (const comment of Array.from(ranges.comments || [])) {
       comment.id = SnapshotManager._safeObjectId(comment.id);
       if ((comment.op != null ? comment.op.t : undefined) != null) {
         comment.op.t = SnapshotManager._safeObjectId(comment.op.t);

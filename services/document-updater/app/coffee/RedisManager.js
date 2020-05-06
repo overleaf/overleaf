@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -299,7 +305,7 @@ module.exports = (RedisManager = {
 			}
 
 			const jsonOps = appliedOps.map(op => JSON.stringify(op));
-			for (let op of Array.from(jsonOps)) {
+			for (const op of Array.from(jsonOps)) {
 				if (op.indexOf("\u0000") !== -1) {
 					error = new Error("null bytes found in jsonOps");
 					// this check was added to catch memory corruption in JSON.stringify

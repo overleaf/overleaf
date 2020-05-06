@@ -1,3 +1,11 @@
+/* eslint-disable
+    no-cond-assign,
+    no-return-assign,
+    no-undef,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -43,7 +51,7 @@ var type = {
     const doc = type.create();
     doc.data = data;
     
-    for (let component of Array.from(data)) {
+    for (const component of Array.from(data)) {
       if (typeof component === 'string') {
         doc.charLength += component.length;
         doc.totalLength += component.length;
@@ -62,7 +70,7 @@ const checkOp = function(op) {
   let last = null;
   return (() => {
     const result = [];
-    for (let c of Array.from(op)) {
+    for (const c of Array.from(op)) {
       if (typeof(c) === 'object') {
         if (c.i !== undefined) {
           if (((typeof(c.i) !== 'string') || !(c.i.length > 0)) && ((typeof(c.i) !== 'number') || !(c.i > 0))) { throw new Error('Inserts must insert a string or a +ive number'); }
@@ -147,7 +155,7 @@ type.apply = function(doc, op) {
   const newDoc = type.create();
   const position = {index:0, offset:0};
 
-  for (let component of Array.from(op)) {
+  for (const component of Array.from(op)) {
     var part, remainder;
     if (typeof(component) === 'number') {
       remainder = component;
@@ -177,7 +185,7 @@ type.apply = function(doc, op) {
 // Exported for the randomOpGenerator.
 type._append = (append = function(op, component) {
   if ((component === 0) || (component.i === '') || (component.i === 0) || (component.d === 0)) {
-    return;
+    
   } else if (op.length === 0) {
     return op.push(component);
   } else {
@@ -257,7 +265,7 @@ const componentLength = function(component) {
 // adjacent inserts and deletes.
 type.normalize = function(op) {
   const newOp = [];
-  for (let component of Array.from(op)) { append(newOp, component); }
+  for (const component of Array.from(op)) { append(newOp, component); }
   return newOp;
 };
 

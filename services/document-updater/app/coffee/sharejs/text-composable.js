@@ -1,3 +1,11 @@
+/* eslint-disable
+    no-cond-assign,
+    no-return-assign,
+    no-undef,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -20,8 +28,8 @@
 // Snapshots are strings.
 
 let makeAppend;
-const p = function() {}; //require('util').debug
-const i = function() {}; //require('util').inspect
+const p = function() {}; // require('util').debug
+const i = function() {}; // require('util').inspect
 
 const exports = (typeof WEB !== 'undefined' && WEB !== null) ? {} : module.exports;
 
@@ -36,7 +44,7 @@ const checkOp = function(op) {
   let last = null;
   return (() => {
     const result = [];
-    for (let c of Array.from(op)) {
+    for (const c of Array.from(op)) {
       if (typeof(c) === 'object') {
         if (((c.i == null) || !(c.i.length > 0)) && ((c.d == null) || !(c.d.length > 0))) { throw new Error(`Invalid op component: ${i(c)}`); }
       } else {
@@ -55,7 +63,7 @@ const checkOp = function(op) {
 // Exported for the randomOpGenerator.
 exports._makeAppend = (makeAppend = op => (function(component) {
   if ((component === 0) || (component.i === '') || (component.d === '')) {
-    return;
+    
   } else if (op.length === 0) {
     return op.push(component);
   } else if ((typeof(component) === 'number') && (typeof(op[op.length - 1]) === 'number')) {
@@ -85,7 +93,7 @@ const makeTake = function(op) {
   const take = function(n, indivisableField) {
     let c;
     if (idx === op.length) { return null; }
-    //assert.notStrictEqual op.length, i, 'The op is too short to traverse the document'
+    // assert.notStrictEqual op.length, i, 'The op is too short to traverse the document'
 
     if (typeof(op[idx]) === 'number') {
       if ((n == null) || ((op[idx] - offset) <= n)) {
@@ -132,7 +140,7 @@ const componentLength = function(component) {
 exports.normalize = function(op) {
   const newOp = [];
   const append = makeAppend(newOp);
-  for (let component of Array.from(op)) { append(component); }
+  for (const component of Array.from(op)) { append(component); }
   return newOp;
 };
 
@@ -145,7 +153,7 @@ exports.apply = function(str, op) {
   const pos = 0;
   const newDoc = [];
 
-  for (let component of Array.from(op)) {
+  for (const component of Array.from(op)) {
     if (typeof(component) === 'number') {
       if (component > str.length) { throw new Error('The op is too long for this document'); }
       newDoc.push(str.slice(0, component));
@@ -158,7 +166,7 @@ exports.apply = function(str, op) {
     }
   }
   
-  if ('' !== str) { throw new Error("The applied op doesn't traverse the entire document"); }
+  if (str !== '') { throw new Error("The applied op doesn't traverse the entire document"); }
 
   return newDoc.join('');
 };
@@ -197,7 +205,7 @@ exports.transform = function(op, otherOp, side) {
       // Otherwise, skip the inserted text.
       append(component.i.length);
     } else { // Delete.
-      //assert.ok component.d
+      // assert.ok component.d
       ({
         length
       } = component.d);
@@ -210,7 +218,7 @@ exports.transform = function(op, otherOp, side) {
         } else if (chunk.i != null) {
           append(chunk);
         } else {
-          //assert.ok chunk.d
+          // assert.ok chunk.d
           // The delete is unnecessary now.
           length -= chunk.d.length;
         }
@@ -302,7 +310,7 @@ exports.invert = function(op) {
   const result = [];
   const append = makeAppend(result);
 
-  for (let component of Array.from(op)) { append(invertComponent(component)); }
+  for (const component of Array.from(op)) { append(invertComponent(component)); }
   
   return result;
 };

@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    no-return-assign,
+    no-undef,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -45,13 +52,13 @@ const checkValidComponent = function(c) {
 };
 
 const checkValidOp = function(op) {
-  for (let c of Array.from(op)) { checkValidComponent(c); }
+  for (const c of Array.from(op)) { checkValidComponent(c); }
   return true;
 };
 
 text.apply = function(snapshot, op) {
   checkValidOp(op);
-  for (let component of Array.from(op)) {
+  for (const component of Array.from(op)) {
     if (component.i != null) {
       snapshot = strInject(snapshot, component.p, component.i);
     } else {
@@ -92,7 +99,7 @@ text.compose = function(op1, op2) {
   checkValidOp(op2);
 
   const newOp = op1.slice();
-  for (let c of Array.from(op2)) { append(newOp, c); }
+  for (const c of Array.from(op2)) { append(newOp, c); }
 
   return newOp;
 };
@@ -111,7 +118,7 @@ text.normalize = function(op) {
   // so this is probably the least bad solution.
   if ((op.i != null) || (op.p != null)) { op = [op]; }
 
-  for (let c of Array.from(op)) {
+  for (const c of Array.from(op)) {
     if (c.p == null) { c.p = 0; }
     append(newOp, c);
   }
@@ -152,7 +159,7 @@ const transformPosition = function(pos, c, insertAfter) {
 // is pushed after an insert (true) or before it (false).
 text.transformCursor = function(position, op, side) {
   const insertAfter = side === 'right';
-  for (let c of Array.from(op)) { position = transformPosition(position, c, insertAfter); }
+  for (const c of Array.from(op)) { position = transformPosition(position, c, insertAfter); }
   return position;
 };
 

@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -39,7 +45,7 @@ var ProjectFlusher = {
             let keys;
             if (error != null) { return callback(error); }
             [cursor, keys] = Array.from(reply);
-            for (let key of Array.from(keys)) {
+            for (const key of Array.from(keys)) {
                 keySet[key] = true;
             }
             keys = Object.keys(keySet);
@@ -59,7 +65,7 @@ var ProjectFlusher = {
 	_extractIds(keyList) {
 		const ids = (() => {
 			const result = [];
-			for (let key of Array.from(keyList)) {
+			for (const key of Array.from(keyList)) {
 				const m = key.match(/:\{?([0-9a-f]{24})\}?/); // extract object id
 				result.push(m[1]);
 			}

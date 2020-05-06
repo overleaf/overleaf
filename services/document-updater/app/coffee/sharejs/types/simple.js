@@ -1,3 +1,5 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -27,7 +29,7 @@ module.exports = {
   //
   // The original snapshot should not be modified.
   apply(snapshot, op) {
-    if (!(0 <= op.position && op.position <= snapshot.str.length)) { throw new Error('Invalid position'); }
+    if (!(op.position >= 0 && op.position <= snapshot.str.length)) { throw new Error('Invalid position'); }
 
     let {
       str

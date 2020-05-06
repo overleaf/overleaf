@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    no-return-assign,
+    no-undef,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -88,7 +96,7 @@ const load = function() {
 		
 		getComment(comment_id) {
 			let comment = null;
-			for (let c of Array.from(this.comments)) {
+			for (const c of Array.from(this.comments)) {
 				if (c.id === comment_id) {
 					comment = c;
 					break;
@@ -107,7 +115,7 @@ const load = function() {
 		moveCommentId(comment_id, position, text) {
 			return (() => {
 				const result = [];
-				for (let comment of Array.from(this.comments)) {
+				for (const comment of Array.from(this.comments)) {
 					if (comment.id === comment_id) {
 						comment.op.p = position;
 						comment.op.c = text;
@@ -122,7 +130,7 @@ const load = function() {
 
 		getChange(change_id) {
 			let change = null;
-			for (let c of Array.from(this.changes)) {
+			for (const c of Array.from(this.changes)) {
 				if (c.id === change_id) {
 					change = c;
 					break;
@@ -135,11 +143,11 @@ const load = function() {
 			const changes_response = [];
 			const ids_map = {};
 
-			for (let change_id of Array.from(change_ids)) {
+			for (const change_id of Array.from(change_ids)) {
 				ids_map[change_id] = true;
 			}
 
-			for (let change of Array.from(this.changes)) {
+			for (const change of Array.from(this.changes)) {
 				if (ids_map[change.id]) {
 					delete ids_map[change.id];
 					changes_response.push(change);
@@ -159,13 +167,13 @@ const load = function() {
 			if (!(change_to_remove_ids != null ? change_to_remove_ids.length : undefined) > 0) { return; }
 			const i = this.changes.length;
 			const remove_change_id = {}; 
-			for (let change_id of Array.from(change_to_remove_ids)) {
+			for (const change_id of Array.from(change_to_remove_ids)) {
 				remove_change_id[change_id] = true;
 			}
 
 			const remaining_changes = [];
 
-			for (let change of Array.from(this.changes)) {
+			for (const change of Array.from(this.changes)) {
 				if (remove_change_id[change.id]) {
 					delete remove_change_id[change.id];
 					this._markAsDirty(change, "change", "removed");
@@ -179,7 +187,7 @@ const load = function() {
 		
 		validate(text) {
 			let content;
-			for (let change of Array.from(this.changes)) {
+			for (const change of Array.from(this.changes)) {
 				if (change.op.i != null) {
 					content = text.slice(change.op.p, change.op.p + change.op.i.length);
 					if (content !== change.op.i) {
@@ -187,7 +195,7 @@ const load = function() {
 					}
 				}
 			}
-			for (let comment of Array.from(this.comments)) {
+			for (const comment of Array.from(this.comments)) {
 				content = text.slice(comment.op.p, comment.op.p + comment.op.c.length);
 				if (content !== comment.op.c) {
 					throw new Error(`Comment (${JSON.stringify(comment)}) doesn't match text (${JSON.stringify(content)})`);
@@ -243,7 +251,7 @@ const load = function() {
 		applyInsertToComments(op) {
 			return (() => {
 				const result = [];
-				for (let comment of Array.from(this.comments)) {
+				for (const comment of Array.from(this.comments)) {
 					if (op.p <= comment.op.p) {
 						comment.op.p += op.i.length;
 						result.push(this._markAsDirty(comment, "comment", "moved"));
@@ -265,7 +273,7 @@ const load = function() {
 			const op_end = op.p + op_length;
 			return (() => {
 				const result = [];
-				for (let comment of Array.from(this.comments)) {
+				for (const comment of Array.from(this.comments)) {
 					const comment_start = comment.op.p;
 					const comment_end = comment.op.p + comment.op.c.length;
 					const comment_length = comment_end - comment_start;
@@ -419,7 +427,7 @@ const load = function() {
 							},
 							metadata: {}
 						};
-						for (let key in change.metadata) { const value = change.metadata[key]; after_change.metadata[key] = value; }
+						for (const key in change.metadata) { const value = change.metadata[key]; after_change.metadata[key] = value; }
 						new_changes.push(after_change);
 					}
 				}
@@ -636,7 +644,7 @@ const load = function() {
 				}
 			});
 
-			for (let modification of Array.from(op_modifications)) {
+			for (const modification of Array.from(op_modifications)) {
 				if (modification.i != null) {
 					content = content.slice(0, modification.p) + modification.i + content.slice(modification.p);
 				} else if (modification.d != null) {
@@ -656,7 +664,7 @@ const load = function() {
 			let previous_change = null;
 			const remove_changes = [];
 			const moved_changes = [];
-			for (let change of Array.from(this.changes)) {
+			for (const change of Array.from(this.changes)) {
 				if (((previous_change != null ? previous_change.op.i : undefined) != null) && (change.op.i != null)) {
 					const previous_change_end = previous_change.op.p + previous_change.op.i.length;
 					const previous_change_user_id = previous_change.metadata.user_id;
@@ -704,7 +712,7 @@ const load = function() {
 		
 		_clone(object) {
 			const clone = {};
-			for (let k in object) { const v = object[k]; clone[k] = v; }
+			for (const k in object) { const v = object[k]; clone[k] = v; }
 			return clone;
 		}
 	};

@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -96,7 +103,7 @@ module.exports = (DocumentManager = {
 			return DiffCodec.diffAsShareJsOp(oldLines, newLines, function(error, op) {
 				if (error != null) { return callback(error); }
 				if (undoing) {
-					for (let o of Array.from(op || [])) {
+					for (const o of Array.from(op || [])) {
 						o.u = true;
 					} // Turn on undo flag for each op for track changes
 				}

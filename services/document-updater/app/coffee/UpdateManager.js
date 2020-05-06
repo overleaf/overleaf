@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -145,7 +152,7 @@ module.exports = (UpdateManager = {
 	},
 
 	lockUpdatesAndDo(method, project_id, doc_id, ...rest) {
-		const adjustedLength = Math.max(rest.length, 1), args = rest.slice(0, adjustedLength - 1), callback = rest[adjustedLength - 1];
+		const adjustedLength = Math.max(rest.length, 1); const args = rest.slice(0, adjustedLength - 1); const callback = rest[adjustedLength - 1];
 		const profile = new Profiler("lockUpdatesAndDo", {project_id, doc_id});
 		return LockManager.getLock(doc_id, function(error, lockValue) {
 			profile.log("getLock");
@@ -185,7 +192,7 @@ module.exports = (UpdateManager = {
 		// 16-bit character of a blackboard bold character (http://www.fileformat.info/info/unicode/char/1d400/index.htm).
 		// Something must be going on client side that is screwing up the encoding and splitting the
 		// two 16-bit characters so that \uD835 is standalone.
-		for (let op of Array.from(update.op || [])) {
+		for (const op of Array.from(update.op || [])) {
 			if (op.i != null) {
 				// Replace high and low surrogate characters with 'replacement character' (\uFFFD)
 				op.i = op.i.replace(/[\uD800-\uDFFF]/g, "\uFFFD");
@@ -215,7 +222,7 @@ module.exports = (UpdateManager = {
 			// changes to it for the next update.
 			return (() => {
 				const result = [];
-				for (let op of Array.from(update.op)) {
+				for (const op of Array.from(update.op)) {
 					if (op.i != null) {
 						doc_length += op.i.length;
 					}

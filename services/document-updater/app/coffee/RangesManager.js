@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -22,12 +28,12 @@ module.exports = (RangesManager = {
 		const {changes, comments} = _.cloneDeep(entries);
 		const rangesTracker = new RangesTracker(changes, comments);
 		const emptyRangeCountBefore = RangesManager._emptyRangesCount(rangesTracker);
-		for (let update of Array.from(updates)) {
+		for (const update of Array.from(updates)) {
 			rangesTracker.track_changes = !!update.meta.tc;
-			if (!!update.meta.tc) {
+			if (update.meta.tc) {
 				rangesTracker.setIdSeed(update.meta.tc);
 			}
-			for (let op of Array.from(update.op)) {
+			for (const op of Array.from(update.op)) {
 				try {
 					rangesTracker.applyOp(op, { user_id: (update.meta != null ? update.meta.user_id : undefined) });
 				} catch (error1) {
@@ -95,12 +101,12 @@ module.exports = (RangesManager = {
 
 	_emptyRangesCount(ranges) {
 		let count = 0;
-		for (let comment of Array.from((ranges.comments || []))) {
+		for (const comment of Array.from((ranges.comments || []))) {
 			if (comment.op.c === "") {
 				count++;
 			}
 		}
-		for (let change of Array.from((ranges.changes || []))) {
+		for (const change of Array.from((ranges.changes || []))) {
 			if (change.op.i != null) {
 				if (change.op.i === "") {
 					count++;

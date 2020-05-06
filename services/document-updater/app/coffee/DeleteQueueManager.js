@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -41,7 +48,7 @@ module.exports = (DeleteQueueManager = {
                 return cb();
             }
             // are any of the timestamps newer than the time the project was flushed?
-            for (let timestamp of Array.from(timestamps)) {
+            for (const timestamp of Array.from(timestamps)) {
                 if (timestamp > flushTimestamp) {
                     metrics.inc("queued-delete-skipped");
                     logger.debug({project_id, timestamps, flushTimestamp}, "found newer timestamp, will skip delete");

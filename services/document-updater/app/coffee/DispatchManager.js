@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -71,7 +78,7 @@ module.exports = (DispatchManager = {
 		const RateLimiter = new RateLimitManager(number);
 		return (() => {
 			const result = [];
-			for (let i = 1, end = number, asc = 1 <= end; asc ? i <= end : i >= end; asc ? i++ : i--) {
+			for (let i = 1, end = number, asc = end >= 1; asc ? i <= end : i >= end; asc ? i++ : i--) {
 				const worker = DispatchManager.createDispatcher(RateLimiter);
 				result.push(worker.run());
 			}

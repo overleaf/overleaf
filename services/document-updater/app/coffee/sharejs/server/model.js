@@ -1,3 +1,10 @@
+/* eslint-disable
+    no-console,
+    no-return-assign,
+    standard/no-callback-literal,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -133,7 +140,7 @@ module.exports = (Model = function(db, options) {
       if (ops.length > 0) {
         try {
           // If there's enough ops, it might be worth spinning this out into a webworker thread.
-          for (let oldOp of Array.from(ops)) {
+          for (const oldOp of Array.from(ops)) {
             // Dup detection works by sending the id(s) the op has been submitted with previously.
             // If the id matches, we reject it. The client can also detect the op has been submitted
             // already if it sees its own previous id in the ops it sees when it does catchup.
@@ -175,7 +182,7 @@ module.exports = (Model = function(db, options) {
         return callback('Internal error');
       }
 
-      //newDocData = {snapshot, type:type.name, v:opVersion + 1, meta:docData.meta}
+      // newDocData = {snapshot, type:type.name, v:opVersion + 1, meta:docData.meta}
       const writeOp = (db != null ? db.writeOp : undefined) || ((docName, newOpData, callback) => callback());
 
       return writeOp(docName, opData, function(error) {
@@ -275,7 +282,7 @@ module.exports = (Model = function(db, options) {
       if (error) { return (typeof callback === 'function' ? callback(error) : undefined); }
 
       let v = start;
-      for (let op of Array.from(ops)) { op.v = v++; }
+      for (const op of Array.from(ops)) { op.v = v++; }
 
       return (typeof callback === 'function' ? callback(null, ops) : undefined);
     });
@@ -325,7 +332,7 @@ module.exports = (Model = function(db, options) {
           console.log(`Catchup ${docName} ${data.v} -> ${data.v + ops.length}`);
 
           try {
-            for (let op of Array.from(ops)) {
+            for (const op of Array.from(ops)) {
               data.snapshot = type.apply(data.snapshot, op.op);
               data.v++;
             }
@@ -624,7 +631,7 @@ module.exports = (Model = function(db, options) {
           }
           return (() => {
             const result = [];
-            for (let op of Array.from(data)) {
+            for (const op of Array.from(data)) {
               var needle;
               listener(op);
 
@@ -666,7 +673,7 @@ module.exports = (Model = function(db, options) {
 
     let pendingWrites = 0;
 
-    for (let docName in docs) {
+    for (const docName in docs) {
       const doc = docs[docName];
       if (doc.committedVersion < doc.v) {
         pendingWrites++;

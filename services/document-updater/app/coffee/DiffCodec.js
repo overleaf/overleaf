@@ -1,3 +1,12 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    new-cap,
+    no-throw-literal,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -23,7 +32,7 @@ module.exports = (DiffCodec = {
 
 		const ops = [];
 		let position = 0;
-		for (let diff of Array.from(diffs)) {
+		for (const diff of Array.from(diffs)) {
 			const type = diff[0];
 			const content = diff[1];
 			if (type === this.ADDED) {

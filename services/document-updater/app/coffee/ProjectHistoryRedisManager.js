@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -17,8 +23,8 @@ const metrics = require('./Metrics');
 module.exports = (ProjectHistoryRedisManager = {
 	queueOps(project_id, ...rest) {
 		// Record metric for ops pushed onto queue
-		const adjustedLength = Math.max(rest.length, 1), ops = rest.slice(0, adjustedLength - 1), val = rest[adjustedLength - 1], callback = val != null ? val : function(error, projectUpdateCount) {};
-		for (let op of Array.from(ops)) {
+		const adjustedLength = Math.max(rest.length, 1); const ops = rest.slice(0, adjustedLength - 1); const val = rest[adjustedLength - 1]; const callback = val != null ? val : function(error, projectUpdateCount) {};
+		for (const op of Array.from(ops)) {
 			metrics.summary("redis.projectHistoryOps", op.length, {status: "push"});
 		}
 		const multi = rclient.multi();

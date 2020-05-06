@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -12,7 +18,7 @@
 // Add transform and transformX functions for an OT type which has transformComponent defined.
 // transformComponent(destination array, component, other component, side)
 let bootstrapTransform;
-exports['_bt'] = (bootstrapTransform = function(type, transformComponent, checkValidOp, append) {
+exports._bt = (bootstrapTransform = function(type, transformComponent, checkValidOp, append) {
   let transformX;
   const transformComponentX = function(left, right, destLeft, destRight) {
     transformComponent(destLeft, left, right, 'left');
@@ -20,7 +26,7 @@ exports['_bt'] = (bootstrapTransform = function(type, transformComponent, checkV
   };
 
   // Transforms rightOp by leftOp. Returns ['rightOp', clientOp']
-  type.transformX = (type['transformX'] = (transformX = function(leftOp, rightOp) {
+  type.transformX = (type.transformX = (transformX = function(leftOp, rightOp) {
     checkValidOp(leftOp);
     checkValidOp(rightOp);
 
@@ -47,7 +53,7 @@ exports['_bt'] = (bootstrapTransform = function(type, transformComponent, checkV
           // Recurse.
           const [l_, r_] = Array.from(transformX(leftOp.slice(k), nextC));
           for (l of Array.from(l_)) { append(newLeftOp, l); }
-          for (let r of Array.from(r_)) { append(newRightOp, r); }
+          for (const r of Array.from(r_)) { append(newRightOp, r); }
           rightComponent = null;
           break;
         }
@@ -61,7 +67,7 @@ exports['_bt'] = (bootstrapTransform = function(type, transformComponent, checkV
   }));
 
   // Transforms op with specified type ('left' or 'right') by otherOp.
-  return type.transform = (type['transform'] = function(op, otherOp, type) {
+  return type.transform = (type.transform = function(op, otherOp, type) {
     let _;
     if ((type !== 'left') && (type !== 'right')) { throw new Error("type must be 'left' or 'right'"); }
 

@@ -1,3 +1,8 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS206: Consider reworking classes to avoid initClass
@@ -39,7 +44,7 @@ module.exports = (Profiler = (function() {
 			const totalTime = deltaMs(this.t, this.t0);
 			if (totalTime > this.LOG_CUTOFF_TIME) { // log anything greater than cutoff
 				const args = {};
-				for (let k in this.args) {
+				for (const k in this.args) {
 					const v = this.args[k];
 					args[k] = v;
 				}

@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    no-undef,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -32,6 +38,7 @@ class SubDoc {
     this.doc = doc;
     this.path = path;
   }
+
   at(...path) { return this.doc.at(this.path.concat(depath(path))); }
   get() { return this.doc.getAt(this.path); }
   // for objects and lists
@@ -57,7 +64,7 @@ const traverse = function(snapshot, path) {
   const container = {data:snapshot};
   let key = 'data';
   let elem = container;
-  for (let p of Array.from(path)) {
+  for (const p of Array.from(path)) {
     elem = elem[key];
     key = p;
     if (typeof elem === 'undefined') { throw new Error('bad path'); }
@@ -155,7 +162,7 @@ json.api = {
     this.on('change', function(op) {
       return (() => {
         const result = [];
-        for (let c of Array.from(op)) {
+        for (const c of Array.from(op)) {
           var i;
           if ((c.na !== undefined) || (c.si !== undefined) || (c.sd !== undefined)) {
             // no change to structure
@@ -197,7 +204,7 @@ json.api = {
           var match_path = c.na === undefined ? c.p.slice(0, c.p.length-1) : c.p;
           result.push((() => {
             const result1 = [];
-            for (let {path, event, cb} of Array.from(this._listeners)) {
+            for (const {path, event, cb} of Array.from(this._listeners)) {
               var common;
               if (pathEquals(path, match_path)) {
                 switch (event) {
