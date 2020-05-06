@@ -1,3 +1,12 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+    no-undef,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -199,7 +208,7 @@ class StressTestClient {
 	}
 
 	isContentValid(content) {
-		for (let chunk of Array.from(content.split('a'))) {
+		for (const chunk of Array.from(content.split('a'))) {
 			if ((chunk != null) && (chunk !== "")) {
 				if (!this.isChunkValid(chunk)) {
 					
@@ -225,7 +234,7 @@ const printSummary = function(doc_id, clients) {
 	console.log(`[${now}] [${doc_id.slice(0,4)} (slot: ${slot(doc_id)})] ${clients.length} clients...`);
 	return (() => {
 		const result = [];
-		for (let client of Array.from(clients)) {
+		for (const client of Array.from(clients)) {
 			console.log(`[${now}] \t[${client.client_id.slice(0,4)}] { local: ${client.counts.local_updates }, remote: ${client.counts.remote_updates}, conflicts: ${client.counts.conflicts}, max_delay: ${client.counts.max_delay} }`);
 			result.push(client.counts = {
 				local_updates: 0,
@@ -242,11 +251,11 @@ const CLIENT_COUNT = parseInt(process.argv[2], 10);
 const UPDATE_DELAY = parseInt(process.argv[3], 10);
 const SAMPLE_INTERVAL = parseInt(process.argv[4], 10);
 
-for (let doc_and_project_id of Array.from(process.argv.slice(5))) {
+for (const doc_and_project_id of Array.from(process.argv.slice(5))) {
 	(function(doc_and_project_id) {
 		const [project_id, doc_id] = Array.from(doc_and_project_id.split(":"));
 		console.log({project_id, doc_id});
-		return DocUpdaterClient.setDocLines(project_id, doc_id, [(new Array(CLIENT_COUNT + 2)).join('a')], null, null, function(error) {
+		return DocUpdaterClient.setDocLines(project_id, doc_id, [(new Array(CLIENT_COUNT + 2)).join('a')], null, null, (error) => {
 			if (error != null) { throw error; }
 			return DocUpdaterClient.getDoc(project_id, doc_id, (error, res, body) => {
 				let runBatch;
@@ -260,7 +269,7 @@ for (let doc_and_project_id of Array.from(process.argv.slice(5))) {
                 } = body;
 			
 				const clients = [];
-				for (let pos = 1, end = CLIENT_COUNT, asc = 1 <= end; asc ? pos <= end : pos >= end; asc ? pos++ : pos--) {
+				for (let pos = 1, end = CLIENT_COUNT, asc = end >= 1; asc ? pos <= end : pos >= end; asc ? pos++ : pos--) {
 					(function(pos) {
 						const client = new StressTestClient({doc_id, project_id, content, pos, version, updateDelay: UPDATE_DELAY});
 						return clients.push(client);
@@ -269,10 +278,10 @@ for (let doc_and_project_id of Array.from(process.argv.slice(5))) {
 				
 				return (runBatch = function() {
 					const jobs = clients.map(client => cb => client.runForNUpdates(SAMPLE_INTERVAL / UPDATE_DELAY, cb));
-					return async.parallel(jobs, function(error) {
+					return async.parallel(jobs, (error) => {
 						if (error != null) { throw error; }
 						printSummary(doc_id, clients);
-						return checkDocument(project_id, doc_id, clients, function(error) {
+						return checkDocument(project_id, doc_id, clients, (error) => {
 							if (error != null) { throw error; }
 							return runBatch();
 						});
