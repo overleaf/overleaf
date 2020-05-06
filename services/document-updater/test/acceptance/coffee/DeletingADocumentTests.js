@@ -1,3 +1,8 @@
+/* eslint-disable
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -118,7 +123,7 @@ describe("Deleting a document", function() {
 			return this.statusCode.should.equal(204);
 		});
 
-		it("should not need to send the updated document to the web api", () => MockWebApi.setDocument.called.should.equal(false));
+		it("should not need to send the updated document to the web api", function() { return MockWebApi.setDocument.called.should.equal(false); });
 
 		it("should need to reload the doc if read again", function(done) {
 			MockWebApi.getDocument.called.should.equal.false;

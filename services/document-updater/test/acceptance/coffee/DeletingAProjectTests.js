@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -45,7 +51,7 @@ describe("Deleting a project", function() {
 			},
 			updatedLines: ["four", "four and a half", "five", "six"]
 		}];
-		for (let doc of Array.from(this.docs)) {
+		for (const doc of Array.from(this.docs)) {
 			MockWebApi.insertDoc(this.project_id, doc.id, {
 				lines: doc.lines,
 				version: doc.update.v
@@ -110,7 +116,7 @@ describe("Deleting a project", function() {
 						return callback();
 				});
 				};
-			}), function() {
+			}), () => {
 				MockWebApi.getDocument.restore();
 				return done();
 			});
@@ -158,11 +164,11 @@ describe("Deleting a project", function() {
 			return this.statusCode.should.equal(204);
 		});
 
-		it("should not send any documents to the web api", () => MockWebApi.setDocument.called.should.equal(false));
+		it("should not send any documents to the web api", function() { return MockWebApi.setDocument.called.should.equal(false); });
 
-		it("should not flush any docs in track changes", () => MockTrackChangesApi.flushDoc.called.should.equal(false));
+		it("should not flush any docs in track changes", function() { return MockTrackChangesApi.flushDoc.called.should.equal(false); });
 
-		return it("should not flush to project history", () => MockProjectHistoryApi.flushProject.called.should.equal(false));
+		return it("should not flush to project history", function() { return MockProjectHistoryApi.flushProject.called.should.equal(false); });
 	});
 
 	return describe("with the background=true parameter from realtime and a request to flush the queue", function() {
@@ -211,7 +217,7 @@ describe("Deleting a project", function() {
 				MockTrackChangesApi.flushDoc.calledWith(doc.id).should.equal(true));
 		});
 
-		return it("should flush to project history", () => MockProjectHistoryApi.flushProject.called.should.equal(true));
+		return it("should flush to project history", function() { return MockProjectHistoryApi.flushProject.called.should.equal(true); });
 	});
 });
 

@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -43,7 +49,7 @@ describe("Flushing a project", function() {
 			},
 			updatedLines: ["four", "four and a half", "five", "six"]
 		}];
-		for (let doc of Array.from(this.docs)) {
+		for (const doc of Array.from(this.docs)) {
 			MockWebApi.insertDoc(this.project_id, doc.id, {
 				lines: doc.lines,
 				version: doc.update.v
@@ -77,7 +83,7 @@ describe("Flushing a project", function() {
 			});
 		});
 
-		after(() => MockWebApi.setDocument.restore());
+		after(function() { return MockWebApi.setDocument.restore(); });
 
 		it("should return a 204 status code", function() {
 			return this.statusCode.should.equal(204);

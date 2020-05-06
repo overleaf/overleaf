@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -16,7 +22,7 @@ module.exports = (MockProjectHistoryApi = {
 
 	run() {
 		app.post("/project/:project_id/flush", (req, res, next) => {
-			return this.flushProject(req.params.project_id, function(error) {
+			return this.flushProject(req.params.project_id, (error) => {
 				if (error != null) {
 					return res.sendStatus(500);
 				} else {
@@ -25,7 +31,7 @@ module.exports = (MockProjectHistoryApi = {
 			});
 		});
 
-		return app.listen(3054, function(error) {
+		return app.listen(3054, (error) => {
 			if (error != null) { throw error; }
 		});
 	}

@@ -1,3 +1,9 @@
+/* eslint-disable
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -19,7 +25,7 @@ const DocUpdaterClient = require("./helpers/DocUpdaterClient");
 const DocUpdaterApp = require("./helpers/DocUpdaterApp");
 
 describe("Ranges", function() {
-	before(done => DocUpdaterApp.ensureRunning(done));
+	before(function(done) { return DocUpdaterApp.ensureRunning(done); });
 
 	describe("tracking changes from ops", function() {
 		before(function(done) {
@@ -51,7 +57,7 @@ describe("Ranges", function() {
 				version: 0
 			});
 			const jobs = [];
-			for (let update of Array.from(this.updates)) {
+			for (const update of Array.from(this.updates)) {
 				(update => {
 					return jobs.push(callback => DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, update, callback));
 				})(update);
@@ -61,7 +67,7 @@ describe("Ranges", function() {
 				if (error != null) { throw error; }
 				return DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
 					if (error != null) { throw error; }
-					return async.series(jobs, function(error) {
+					return async.series(jobs, (error) => {
 						if (error != null) { throw error; }
 						return done();
 					});
@@ -102,14 +108,14 @@ describe("Ranges", function() {
 						version: 0
 					});
 					const jobs = [];
-					for (let update of Array.from(this.updates)) {
+					for (const update of Array.from(this.updates)) {
 						(update => {
 							return jobs.push(callback => DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, update, callback));
 						})(update);
 					}
 					return DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
 						if (error != null) { throw error; }
-						return async.series(jobs, function(error) {
+						return async.series(jobs, (error) => {
 							if (error != null) { throw error; }
 							return setTimeout(done, 200);
 						});
@@ -153,14 +159,14 @@ describe("Ranges", function() {
 						version: 0
 					});
 					const jobs = [];
-					for (let update of Array.from(this.updates)) {
+					for (const update of Array.from(this.updates)) {
 						(update => {
 							return jobs.push(callback => DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, update, callback));
 						})(update);
 					}
 					return DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
 						if (error != null) { throw error; }
-						return async.series(jobs, function(error) {
+						return async.series(jobs, (error) => {
 							if (error != null) { throw error; }
 							return setTimeout(done, 200);
 						});
@@ -212,7 +218,7 @@ describe("Ranges", function() {
 			});
 			return DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
 				if (error != null) { throw error; }
-				return DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, this.update, function(error) {
+				return DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, this.update, (error) => {
 					if (error != null) { throw error; }
 					return setTimeout(done, 200);
 				});
@@ -367,14 +373,14 @@ describe("Ranges", function() {
 				version: 0
 			});
 			const jobs = [];
-			for (let update of Array.from(this.updates)) {
+			for (const update of Array.from(this.updates)) {
 				(update => {
 					return jobs.push(callback => DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, update, callback));
 				})(update);
 			}
 			return DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
 				if (error != null) { throw error; }
-				return async.series(jobs, function(error) {
+				return async.series(jobs, (error) => {
 					if (error != null) { throw error; }
 					return setTimeout(done, 200);
 				});
@@ -423,7 +429,7 @@ describe("Ranges", function() {
 				meta: { user_id: this.user_id }
 			}];
 			const jobs = [];
-			for (let update of Array.from(this.updates)) {
+			for (const update of Array.from(this.updates)) {
 				(update => {
 					return jobs.push(callback => DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, update, callback));
 				})(update);

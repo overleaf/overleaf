@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -49,7 +57,7 @@ describe("Flushing a doc to Mongo", function() {
 			});
 		});
 
-		after(() => MockWebApi.setDocument.restore());
+		after(function() { return MockWebApi.setDocument.restore(); });
 
 		it("should flush the updated doc lines and version to the web api", function() {
 			return MockWebApi.setDocument
@@ -76,9 +84,9 @@ describe("Flushing a doc to Mongo", function() {
 			return DocUpdaterClient.flushDoc(this.project_id, this.doc_id, done);
 		});
 
-		after(() => MockWebApi.setDocument.restore());
+		after(function() { return MockWebApi.setDocument.restore(); });
 
-		return it("should not flush the doc to the web api", () => MockWebApi.setDocument.called.should.equal(false));
+		return it("should not flush the doc to the web api", function() { return MockWebApi.setDocument.called.should.equal(false); });
 	});
 
 	return describe("when the web api http request takes a long time on first request", function() {
@@ -89,7 +97,7 @@ describe("Flushing a doc to Mongo", function() {
 				version: this.version
 			});
 			let t = 30000;
-			sinon.stub(MockWebApi, "setDocument", function(project_id, doc_id, lines, version, ranges, lastUpdatedAt, lastUpdatedBy, callback) {
+			sinon.stub(MockWebApi, "setDocument", (project_id, doc_id, lines, version, ranges, lastUpdatedAt, lastUpdatedBy, callback) => {
 				if (callback == null) { callback = function(error) {}; }
 				setTimeout(callback, t);
 				return t = 0;
@@ -97,7 +105,7 @@ describe("Flushing a doc to Mongo", function() {
 			return DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, done);
 		});
 
-		after(() => MockWebApi.setDocument.restore());
+		after(function() { return MockWebApi.setDocument.restore(); });
 		
 		return it("should still work", function(done) {
 			const start = Date.now();

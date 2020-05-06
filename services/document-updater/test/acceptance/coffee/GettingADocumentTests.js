@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -33,7 +39,7 @@ describe("Getting a document", function() {
 			return DocUpdaterClient.getDoc(this.project_id, this.doc_id, (error, res, returnedDoc) => { this.returnedDoc = returnedDoc; return done(); });
 		});
 
-		after(() => MockWebApi.getDocument.restore());
+		after(function() { return MockWebApi.getDocument.restore(); });
 
 		it("should load the document from the web API", function() {
 			return MockWebApi.getDocument
@@ -62,9 +68,9 @@ describe("Getting a document", function() {
 			});
 		});
 
-		after(() => MockWebApi.getDocument.restore());
+		after(function() { return MockWebApi.getDocument.restore(); });
 
-		it("should not load the document from the web API", () => MockWebApi.getDocument.called.should.equal(false));
+		it("should not load the document from the web API", function() { return MockWebApi.getDocument.called.should.equal(false); });
 
 		return it("should return the document lines", function() {
 			return this.returnedDoc.lines.should.deep.equal(this.lines);
@@ -91,7 +97,7 @@ describe("Getting a document", function() {
 			});
 		});
 
-		after(() => MockWebApi.getDocument.restore());
+		after(function() { return MockWebApi.getDocument.restore(); });
 			
 		describe("when the ops are loaded", function() {
 			before(function(done) {
@@ -134,7 +140,7 @@ describe("Getting a document", function() {
 	describe("when the web api returns an error", function() {
 		before(function(done) {
 			[this.project_id, this.doc_id] = Array.from([DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]);
-			sinon.stub(MockWebApi, "getDocument", function(project_id, doc_id, callback) {
+			sinon.stub(MockWebApi, "getDocument", (project_id, doc_id, callback) => {
 				if (callback == null) { callback = function(error, doc) {}; }
 				return callback(new Error("oops"));
 			});
@@ -144,7 +150,7 @@ describe("Getting a document", function() {
 			});
 		});
 
-		after(() => MockWebApi.getDocument.restore());
+		after(function() { return MockWebApi.getDocument.restore(); });
 
 		return it("should return 500", function() {
 			return this.statusCode.should.equal(500);
@@ -155,14 +161,14 @@ describe("Getting a document", function() {
 		before(function(done) {
 			this.timeout = 10000;
 			[this.project_id, this.doc_id] = Array.from([DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]);
-			sinon.stub(MockWebApi, "getDocument", function(project_id, doc_id, callback) {
+			sinon.stub(MockWebApi, "getDocument", (project_id, doc_id, callback) => {
 				if (callback == null) { callback = function(error, doc) {}; }
 				return setTimeout(callback, 30000);
 			});
 			return done();
 		});
 
-		after(() => MockWebApi.getDocument.restore());
+		after(function() { return MockWebApi.getDocument.restore(); });
 		
 		return it("should return quickly(ish)", function(done) {
 			const start = Date.now();
@@ -178,9 +184,9 @@ describe("Getting a document", function() {
 
 
 function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
+  const range = [];
+  const ascending = left < right;
+  const end = !inclusive ? right : ascending ? right + 1 : right - 1;
   for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
     range.push(i);
   }

@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -33,7 +40,7 @@ describe("Applying updates to a project's structure", function() {
 			this.fileUpdates = [ this.fileUpdate ];
 			return DocUpdaterApp.ensureRunning(error => {
 				if (error != null) { throw error; }
-				return DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, [], this.fileUpdates, this.version, function(error) {
+				return DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, [], this.fileUpdates, this.version, (error) => {
 					if (error != null) { throw error; }
 					return setTimeout(done, 200);
 				});
@@ -70,7 +77,7 @@ describe("Applying updates to a project's structure", function() {
 		describe("when the document is not loaded", function() {
 			before(function(done) {
 				this.project_id = DocUpdaterClient.randomId();
-				DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, this.docUpdates, [], this.version, function(error) {
+				DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, this.docUpdates, [], this.version, (error) => {
 					if (error != null) { throw error; }
 					return setTimeout(done, 200);
 				});
@@ -102,7 +109,7 @@ describe("Applying updates to a project's structure", function() {
 				DocUpdaterClient.preloadDoc(this.project_id, this.docUpdate.id, error => {
 					if (error != null) { throw error; }
 					sinon.spy(MockWebApi, "getDocument");
-					return DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, this.docUpdates, [], this.version, function(error) {
+					return DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, this.docUpdates, [], this.version, (error) => {
 						if (error != null) { throw error; }
 						return setTimeout(done, 200);
 					});
@@ -110,7 +117,7 @@ describe("Applying updates to a project's structure", function() {
 				return null;
 			});
 
-			after(() => MockWebApi.getDocument.restore());
+			after(function() { return MockWebApi.getDocument.restore(); });
 
 			it("should update the doc", function(done) {
 				DocUpdaterClient.getDoc(this.project_id, this.docUpdate.id, (error, res, doc) => {
@@ -167,7 +174,7 @@ describe("Applying updates to a project's structure", function() {
 		return describe("when the documents are not loaded", function() {
 			before(function(done) {
 				this.project_id = DocUpdaterClient.randomId();
-				DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, this.docUpdates, this.fileUpdates, this.version, function(error) {
+				DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, this.docUpdates, this.fileUpdates, this.version, (error) => {
 					if (error != null) { throw error; }
 					return setTimeout(done, 200);
 				});
@@ -227,7 +234,7 @@ describe("Applying updates to a project's structure", function() {
 				url: 'filestore.example.com'
 			};
 			this.fileUpdates = [ this.fileUpdate ];
-			DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, [], this.fileUpdates, this.version, function(error) {
+			DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, [], this.fileUpdates, this.version, (error) => {
 				if (error != null) { throw error; }
 				return setTimeout(done, 200);
 			});
@@ -261,7 +268,7 @@ describe("Applying updates to a project's structure", function() {
 				docLines: 'a\nb'
 			};
 			this.docUpdates = [ this.docUpdate ];
-			DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, this.docUpdates, [], this.version, function(error) {
+			DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, this.docUpdates, [], this.version, (error) => {
 				if (error != null) { throw error; }
 				return setTimeout(done, 200);
 			});
@@ -308,7 +315,7 @@ describe("Applying updates to a project's structure", function() {
 			const userId = this.project_id;
 			DocUpdaterClient.sendProjectUpdate(projectId, userId, updates.slice(0, 250), [], this.version0, function(error) {
 				if (error != null) { throw error; }
-				return DocUpdaterClient.sendProjectUpdate(projectId, userId, updates.slice(250), [], this.version1, function(error) {
+				return DocUpdaterClient.sendProjectUpdate(projectId, userId, updates.slice(250), [], this.version1, (error) => {
 					if (error != null) { throw error; }
 					return setTimeout(done, 2000);
 				});
@@ -316,7 +323,7 @@ describe("Applying updates to a project's structure", function() {
 			return null;
 		});
 
-		after(() => MockProjectHistoryApi.flushProject.restore());
+		after(function() { return MockProjectHistoryApi.flushProject.restore(); });
 
 		return it("should flush project history", function() {
 			return MockProjectHistoryApi.flushProject.calledWith(this.project_id).should.equal(true);
@@ -346,7 +353,7 @@ describe("Applying updates to a project's structure", function() {
 			const userId = this.project_id;
 			DocUpdaterClient.sendProjectUpdate(projectId, userId, updates.slice(0, 10), [], this.version0, function(error) {
 				if (error != null) { throw error; }
-				return DocUpdaterClient.sendProjectUpdate(projectId, userId, updates.slice(10), [], this.version1, function(error) {
+				return DocUpdaterClient.sendProjectUpdate(projectId, userId, updates.slice(10), [], this.version1, (error) => {
 					if (error != null) { throw error; }
 					return setTimeout(done, 2000);
 				});
@@ -354,7 +361,7 @@ describe("Applying updates to a project's structure", function() {
 			return null;
 		});
 
-		after(() => MockProjectHistoryApi.flushProject.restore());
+		after(function() { return MockProjectHistoryApi.flushProject.restore(); });
 
 		return it("should not flush project history", function() {
 			return MockProjectHistoryApi.flushProject.calledWith(this.project_id).should.equal(false);

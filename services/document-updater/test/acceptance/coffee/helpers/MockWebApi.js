@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -41,7 +48,7 @@ module.exports = (MockWebApi = {
 
 	run() {
 		app.get("/project/:project_id/doc/:doc_id", (req, res, next) => {
-			return this.getDocument(req.params.project_id, req.params.doc_id, function(error, doc) {
+			return this.getDocument(req.params.project_id, req.params.doc_id, (error, doc) => {
 				if (error != null) {
 					return res.sendStatus(500);
 				} else if (doc != null) {
@@ -53,7 +60,7 @@ module.exports = (MockWebApi = {
 		});
 
 		app.post("/project/:project_id/doc/:doc_id", bodyParser.json({limit: MAX_REQUEST_SIZE}), (req, res, next) => {
-			return MockWebApi.setDocument(req.params.project_id, req.params.doc_id, req.body.lines, req.body.version, req.body.ranges, req.body.lastUpdatedAt, req.body.lastUpdatedBy, function(error) {
+			return MockWebApi.setDocument(req.params.project_id, req.params.doc_id, req.body.lines, req.body.version, req.body.ranges, req.body.lastUpdatedAt, req.body.lastUpdatedBy, (error) => {
 				if (error != null) {
 					return res.sendStatus(500);
 				} else {
@@ -62,9 +69,9 @@ module.exports = (MockWebApi = {
 			});
 		});
 
-		return app.listen(3000, function(error) {
+		return app.listen(3000, (error) => {
 			if (error != null) { throw error; }
-	}).on("error", function(error) {
+	}).on("error", (error) => {
 			console.error("error starting MockWebApi:", error.message);
 			return process.exit(1);
 		});

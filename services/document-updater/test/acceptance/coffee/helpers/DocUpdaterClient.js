@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -30,10 +36,10 @@ module.exports = (DocUpdaterClient = {
 
 	sendUpdate(project_id, doc_id, update, callback) {
 		if (callback == null) { callback = function(error) {}; }
-		return rclient.rpush(keys.pendingUpdates({doc_id}), JSON.stringify(update), function(error){
+		return rclient.rpush(keys.pendingUpdates({doc_id}), JSON.stringify(update), (error) => {
 			if (error != null) { return callback(error); }
 			const doc_key = `${project_id}:${doc_id}`;
-			return rclient.sadd("DocsWithPendingUpdates", doc_key, function(error) {
+			return rclient.sadd("DocsWithPendingUpdates", doc_key, (error) => {
 				if (error != null) { return callback(error); }
 				return rclient.rpush("pending-updates-list", doc_key, callback);
 			});
@@ -42,10 +48,10 @@ module.exports = (DocUpdaterClient = {
 
 	sendUpdates(project_id, doc_id, updates, callback) {
 		if (callback == null) { callback = function(error) {}; }
-		return DocUpdaterClient.preloadDoc(project_id, doc_id, function(error) {
+		return DocUpdaterClient.preloadDoc(project_id, doc_id, (error) => {
 			if (error != null) { return callback(error); }
 			const jobs = [];
-			for (let update of Array.from(updates)) {
+			for (const update of Array.from(updates)) {
 				((update => jobs.push(callback => DocUpdaterClient.sendUpdate(project_id, doc_id, update, callback))))(update);
 			}
 			return async.series(jobs, err => DocUpdaterClient.waitForPendingUpdates(project_id, doc_id, callback));
@@ -53,7 +59,7 @@ module.exports = (DocUpdaterClient = {
 	},
 
 	waitForPendingUpdates(project_id, doc_id, callback) {
-		return async.retry({times: 30, interval: 100}, cb => rclient.llen(keys.pendingUpdates({doc_id}), function(err, length) {
+		return async.retry({times: 30, interval: 100}, cb => rclient.llen(keys.pendingUpdates({doc_id}), (err, length) => {
             if (length > 0) {
                 return cb(new Error("updates still pending"));
             } else {
@@ -65,7 +71,7 @@ module.exports = (DocUpdaterClient = {
 
 	getDoc(project_id, doc_id, callback) {
 		if (callback == null) { callback = function(error, res, body) {}; }
-		return request.get(`http://localhost:3003/project/${project_id}/doc/${doc_id}`, function(error, res, body) {
+		return request.get(`http://localhost:3003/project/${project_id}/doc/${doc_id}`, (error, res, body) => {
 			if ((body != null) && (res.statusCode >= 200) && (res.statusCode < 300)) {
 				body = JSON.parse(body);
 			}
@@ -75,7 +81,7 @@ module.exports = (DocUpdaterClient = {
 
 	getDocAndRecentOps(project_id, doc_id, fromVersion, callback) {
 		if (callback == null) { callback = function(error, res, body) {}; }
-		return request.get(`http://localhost:3003/project/${project_id}/doc/${doc_id}?fromVersion=${fromVersion}`, function(error, res, body) {
+		return request.get(`http://localhost:3003/project/${project_id}/doc/${doc_id}?fromVersion=${fromVersion}`, (error, res, body) => {
 			if ((body != null) && (res.statusCode >= 200) && (res.statusCode < 300)) {
 				body = JSON.parse(body);
 			}
@@ -143,7 +149,7 @@ module.exports = (DocUpdaterClient = {
 
 	getProjectDocs(project_id, projectStateHash, callback) {
 		if (callback == null) { callback = function() {}; }
-		return request.get(`http://localhost:3003/project/${project_id}/doc?state=${projectStateHash}`, function(error, res, body) {
+		return request.get(`http://localhost:3003/project/${project_id}/doc?state=${projectStateHash}`, (error, res, body) => {
 			if ((body != null) && (res.statusCode >= 200) && (res.statusCode < 300)) {
 				body = JSON.parse(body);
 			}
@@ -161,9 +167,9 @@ module.exports = (DocUpdaterClient = {
 });
 
 function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
+  const range = [];
+  const ascending = left < right;
+  const end = !inclusive ? right : ascending ? right + 1 : right - 1;
   for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
     range.push(i);
   }

@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -47,14 +53,14 @@ describe("Applying updates to a doc", function() {
 			sinon.spy(MockWebApi, "getDocument");
 			this.startTime = Date.now();
 			MockWebApi.insertDoc(this.project_id, this.doc_id, {lines: this.lines, version: this.version});
-			DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, this.update, function(error) {
+			DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, this.update, (error) => {
 				if (error != null) { throw error; }
 				return setTimeout(done, 200);
 			});
 			return null;
 		});
 
-		after(() => MockWebApi.getDocument.restore());
+		after(function() { return MockWebApi.getDocument.restore(); });
 
 		it("should load the document from the web API", function() {
 			return MockWebApi.getDocument
@@ -107,7 +113,7 @@ describe("Applying updates to a doc", function() {
 				this.timeout = 10000;
 				this.second_update = Object.create(this.update);
 				this.second_update.v = this.version + 1;
-				DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, this.second_update, function(error) {
+				DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, this.second_update, (error) => {
 					if (error != null) { throw error; }
 					return setTimeout(done, 200);
 				});
@@ -133,7 +139,7 @@ describe("Applying updates to a doc", function() {
 			DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
 				if (error != null) { throw error; }
 				sinon.spy(MockWebApi, "getDocument");
-				return DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, this.update, function(error) {
+				return DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, this.update, (error) => {
 					if (error != null) { throw error; }
 					return setTimeout(done, 200);
 				});
@@ -141,9 +147,9 @@ describe("Applying updates to a doc", function() {
 			return null;
 		});
 
-		after(() => MockWebApi.getDocument.restore());
+		after(function() { return MockWebApi.getDocument.restore(); });
 
-		it("should not need to call the web api", () => MockWebApi.getDocument.called.should.equal(false));
+		it("should not need to call the web api", function() { return MockWebApi.getDocument.called.should.equal(false); });
 
 		it("should update the doc", function(done) {
 			DocUpdaterClient.getDoc(this.project_id, this.doc_id, (error, res, doc) => {
@@ -181,7 +187,7 @@ describe("Applying updates to a doc", function() {
 			DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
 				if (error != null) { throw error; }
 				sinon.spy(MockWebApi, "getDocument");
-				return DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, this.update, function(error) {
+				return DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, this.update, (error) => {
 					if (error != null) { throw error; }
 					return setTimeout(done, 200);
 				});
@@ -189,7 +195,7 @@ describe("Applying updates to a doc", function() {
 			return null;
 		});
 
-		after(() => MockWebApi.getDocument.restore());
+		after(function() { return MockWebApi.getDocument.restore(); });
 
 		it("should update the doc", function(done) {
 			DocUpdaterClient.getDoc(this.project_id, this.doc_id, (error, res, doc) => {
@@ -345,7 +351,7 @@ describe("Applying updates to a doc", function() {
 
 			DocUpdaterClient.subscribeToAppliedOps(this.messageCallback = sinon.stub());
 
-			DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, this.broken_update, function(error) {
+			DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, this.broken_update, (error) => {
 				if (error != null) { throw error; }
 				return setTimeout(done, 200);
 			});
@@ -404,9 +410,9 @@ describe("Applying updates to a doc", function() {
 			return null;
 		});
 
-		after(() => MockTrackChangesApi.flushDoc.restore());
+		after(function() { return MockTrackChangesApi.flushDoc.restore(); });
 
-		return it("should flush the doc twice", () => MockTrackChangesApi.flushDoc.calledTwice.should.equal(true));
+		return it("should flush the doc twice", function() { return MockTrackChangesApi.flushDoc.calledTwice.should.equal(true); });
 	});
 
 	describe("when there is no version in Mongo", function() {
@@ -421,7 +427,7 @@ describe("Applying updates to a doc", function() {
 				op: this.update.op,
 				v: 0
 			};
-			DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, update, function(error) {
+			DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, update, (error) => {
 				if (error != null) { throw error; }
 				return setTimeout(done, 200);
 			});

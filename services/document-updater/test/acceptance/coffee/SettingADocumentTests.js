@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -182,11 +189,11 @@ describe("Setting a document", function() {
 			return this.statusCode.should.equal(413);
 		});
 
-		it("should not send the updated doc lines to the web api", () => MockWebApi.setDocument.called.should.equal(false));
+		it("should not send the updated doc lines to the web api", function() { return MockWebApi.setDocument.called.should.equal(false); });
 
-		it("should not flush track changes", () => MockTrackChangesApi.flushDoc.called.should.equal(false));
+		it("should not flush track changes", function() { return MockTrackChangesApi.flushDoc.called.should.equal(false); });
 
-		return it("should not flush project history", () => MockProjectHistoryApi.flushProject.called.should.equal(false));
+		return it("should not flush project history", function() { return MockProjectHistoryApi.flushProject.called.should.equal(false); });
 	});
 
 	describe("when the updated doc is large but under the bodyParser and HTTPController size limit", function() {
