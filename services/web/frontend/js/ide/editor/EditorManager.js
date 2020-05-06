@@ -75,6 +75,15 @@ define([
         this.$scope.$on('flush-changes', () => {
           return Document.flushAll()
         })
+        window.addEventListener('blur', () => {
+          // The browser may put the tab into sleep as it looses focus.
+          // Flushing the documents should help with keeping the documents in
+          //  sync: we can use any new version of the doc that the server may
+          //  present us. There should be no need to insert local changes into
+          //  the doc history as the user comes back.
+          sl_console.log('[EditorManager] forcing flush onblur')
+          Document.flushAll()
+        })
 
         this.$scope.$watch('editor.wantTrackChanges', value => {
           if (value == null) {
