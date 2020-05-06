@@ -79,7 +79,7 @@ module.exports = MockProjectHistoryApi = {
         if (this.oldFiles[key] != null) {
           res.send(this.oldFiles[key])
         } else {
-          res.send(404)
+          res.sendStatus(404)
         }
       }
     )
@@ -99,7 +99,7 @@ module.exports = MockProjectHistoryApi = {
       if (this.projectVersions[projectId] != null) {
         res.json(this.projectVersions[projectId])
       } else {
-        res.send(404)
+        res.sendStatus(404)
       }
     })
 
@@ -109,7 +109,7 @@ module.exports = MockProjectHistoryApi = {
       if (labels != null) {
         res.json(labels)
       } else {
-        res.send(404)
+        res.sendStatus(404)
       }
     })
 
@@ -135,9 +135,9 @@ module.exports = MockProjectHistoryApi = {
             : undefined
         if (label != null) {
           this.deleteLabel(projectId, labelId)
-          res.send(204)
+          res.sendStatus(204)
         } else {
-          res.send(404)
+          res.sendStatus(404)
         }
       }
     )

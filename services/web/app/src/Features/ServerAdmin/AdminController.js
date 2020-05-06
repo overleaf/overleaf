@@ -126,7 +126,7 @@ module.exports = AdminController = {
     Settings.mongo.writeAll = true
     return DocumentUpdaterHandler.flushAllDocsToMongo(function() {
       logger.log('all docs have been saved to mongo')
-      return res.send()
+      return res.sendStatus(200)
     })
   },
 

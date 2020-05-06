@@ -82,7 +82,7 @@ describe('NotificationsController', function() {
 
   it('should send a delete request when a delete has been received to mark a notification', function(done) {
     return this.controller.markNotificationAsRead(this.req, {
-      send: () => {
+      sendStatus: () => {
         this.handler.markAsRead
           .calledWith(user_id, notification_id)
           .should.equal(true)

@@ -53,7 +53,7 @@ module.exports = ChatController = {
             'new-chat-message',
             message
           )
-          return res.send(204)
+          return res.sendStatus(204)
         })
       }
     )

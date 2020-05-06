@@ -35,6 +35,8 @@ module.exports = {
   markNotificationAsRead(req, res) {
     const user_id = AuthenticationController.getLoggedInUserId(req)
     const { notification_id } = req.params
-    NotificationsHandler.markAsRead(user_id, notification_id, () => res.send())
+    NotificationsHandler.markAsRead(user_id, notification_id, () =>
+      res.sendStatus(200)
+    )
   }
 }

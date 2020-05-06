@@ -55,10 +55,11 @@ describe('ChatController', function() {
         project_id: this.project_id
       }
     }
-    return (this.res = {
+    this.res = {
       json: sinon.stub(),
-      send: sinon.stub()
-    })
+      send: sinon.stub(),
+      sendStatus: sinon.stub()
+    }
   })
 
   describe('sendMessage', function() {
@@ -105,7 +106,7 @@ describe('ChatController', function() {
     })
 
     it('should return a 204 status code', function() {
-      return this.res.send.calledWith(204).should.equal(true)
+      return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 

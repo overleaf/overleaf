@@ -37,7 +37,7 @@ module.exports = UserController = {
     } else if (/^[a-f0-9]{24}$/.test(userId)) {
       query = { _id: ObjectId(userId) }
     } else {
-      return res.send(400)
+      return res.sendStatus(400)
     }
 
     UserGetter.getUser(
@@ -48,7 +48,7 @@ module.exports = UserController = {
           return next(error)
         }
         if (!user) {
-          return res.send(404)
+          return res.sendStatus(404)
         }
         UserController.sendFormattedPersonalInfo(user, res, next)
       }

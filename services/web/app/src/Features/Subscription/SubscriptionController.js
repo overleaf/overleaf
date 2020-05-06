@@ -467,9 +467,9 @@ module.exports = SubscriptionController = {
       }
       return SubscriptionHandler.extendTrial(subscription, 14, function(err) {
         if (err != null) {
-          return res.send(500)
+          return res.sendStatus(500)
         } else {
-          return res.send(200)
+          return res.sendStatus(200)
         }
       })
     })

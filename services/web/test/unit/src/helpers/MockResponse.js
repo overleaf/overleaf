@@ -52,7 +52,6 @@ class MockResponse {
   sendStatus(status) {
     if (arguments.length < 2) {
       if (typeof status !== 'number') {
-        const body = status
         status = 200
       }
     }
@@ -72,7 +71,7 @@ class MockResponse {
     if (arguments.length < 2) {
       if (typeof status !== 'number') {
         body = status
-        status = 200
+        status = this.statusCode || 200
       }
     }
     this.statusCode = status

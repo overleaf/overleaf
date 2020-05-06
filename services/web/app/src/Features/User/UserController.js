@@ -148,7 +148,7 @@ const UserController = {
             'Failed to unsubscribe user from newsletter'
           )
         }
-        res.send()
+        res.sendStatus(200)
       })
     })
   },
@@ -259,7 +259,7 @@ const UserController = {
                   { err, userId },
                   'error getting user for email update'
                 )
-                return res.send(500)
+                return res.sendStatus(500)
               }
               AuthenticationController.setInSessionUser(req, {
                 email: user.email,

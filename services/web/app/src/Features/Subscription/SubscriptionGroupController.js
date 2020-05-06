@@ -37,7 +37,7 @@ module.exports = {
           )
           return next(err)
         }
-        return res.send()
+        return res.sendStatus(200)
       }
     )
   },
@@ -61,7 +61,7 @@ module.exports = {
             )
             return res.sendStatus(500)
           }
-          return res.send()
+          return res.sendStatus(200)
         }
       )
     })

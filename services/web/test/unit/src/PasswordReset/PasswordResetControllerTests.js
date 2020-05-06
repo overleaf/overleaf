@@ -2,6 +2,7 @@ const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
 const { expect } = require('chai')
+const MockResponse = require('../helpers/MockResponse')
 
 const MODULE_PATH = path.join(
   __dirname,
@@ -26,7 +27,7 @@ describe('PasswordResetController', function() {
       session: {},
       query: {}
     }
-    this.res = {}
+    this.res = new MockResponse()
 
     this.settings = {}
     this.PasswordResetHandler = {
@@ -71,14 +72,12 @@ describe('PasswordResetController', function() {
         'primary'
       )
       this.RateLimiter.addCount.callsArgWith(1, null, false)
-      this.res.send = code => {
-        code.should.equal(429)
-        this.PasswordResetHandler.generateAndEmailResetToken
-          .calledWith(this.email)
-          .should.equal(false)
-        done()
-      }
       this.PasswordResetController.requestReset(this.req, this.res)
+      this.PasswordResetHandler.generateAndEmailResetToken
+        .calledWith(this.email)
+        .should.equal(false)
+      this.res.statusCode.should.equal(429)
+      done()
     })
 
     it('should tell the handler to process that email', function(done) {
@@ -88,14 +87,12 @@ describe('PasswordResetController', function() {
         null,
         'primary'
       )
-      this.res.send = code => {
-        code.should.equal(200)
-        this.PasswordResetHandler.generateAndEmailResetToken
-          .calledWith(this.email)
-          .should.equal(true)
-        done()
-      }
       this.PasswordResetController.requestReset(this.req, this.res)
+      this.PasswordResetHandler.generateAndEmailResetToken
+        .calledWith(this.email)
+        .should.equal(true)
+      this.res.statusCode.should.equal(200)
+      done()
     })
 
     it('should send a 500 if there is an error', function(done) {
@@ -104,11 +101,9 @@ describe('PasswordResetController', function() {
         1,
         'error'
       )
-      this.res.send = code => {
-        code.should.equal(500)
-        done()
-      }
       this.PasswordResetController.requestReset(this.req, this.res)
+      this.res.statusCode.should.equal(500)
+      done()
     })
 
     it("should send a 404 if the email doesn't exist", function(done) {
@@ -118,11 +113,9 @@ describe('PasswordResetController', function() {
         null,
         null
       )
-      this.res.send = code => {
-        code.should.equal(404)
-        done()
-      }
       this.PasswordResetController.requestReset(this.req, this.res)
+      this.res.statusCode.should.equal(404)
+      done()
     })
 
     it('should send a 404 if the email is registered as a secondard email', function(done) {
@@ -132,11 +125,9 @@ describe('PasswordResetController', function() {
         null,
         'secondary'
       )
-      this.res.send = code => {
-        code.should.equal(404)
-        done()
-      }
       this.PasswordResetController.requestReset(this.req, this.res)
+      this.res.statusCode.should.equal(404)
+      done()
     })
 
     it('should normalize the email address', function(done) {
@@ -148,14 +139,12 @@ describe('PasswordResetController', function() {
         null,
         'primary'
       )
-      this.res.send = code => {
-        code.should.equal(200)
-        this.PasswordResetHandler.generateAndEmailResetToken
-          .calledWith(this.email.toLowerCase().trim())
-          .should.equal(true)
-        done()
-      }
       this.PasswordResetController.requestReset(this.req, this.res)
+      this.PasswordResetHandler.generateAndEmailResetToken
+        .calledWith(this.email.toLowerCase().trim())
+        .should.equal(true)
+      this.res.statusCode.should.equal(200)
+      done()
     })
   })
 

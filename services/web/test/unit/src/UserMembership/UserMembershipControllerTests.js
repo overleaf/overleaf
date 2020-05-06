@@ -231,7 +231,7 @@ describe('UserMembershipController', function() {
 
     it('remove user', function(done) {
       return this.UserMembershipController.remove(this.req, {
-        send: () => {
+        sendStatus: () => {
           sinon.assert.calledWithMatch(
             this.UserMembershipHandler.removeUser,
             this.subscription,

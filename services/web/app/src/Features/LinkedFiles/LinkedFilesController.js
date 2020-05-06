@@ -106,7 +106,7 @@ module.exports = LinkedFilesController = {
         linkedFileData == null ||
         (linkedFileData != null ? linkedFileData.provider : undefined) == null
       ) {
-        return res.send(409)
+        return res.sendStatus(409)
       }
       const { provider } = linkedFileData
       const parent_folder_id = parentFolder._id

@@ -1043,7 +1043,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   privateApiRouter.get('/opps-small', function(req, res, next) {
     logger.err('test error occured')
-    res.send()
+    res.sendStatus(200)
   })
 
   webRouter.post('/error/client', function(req, res, next) {

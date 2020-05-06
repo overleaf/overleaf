@@ -267,7 +267,7 @@ describe('UserController', function() {
 
   describe('unsubscribe', function() {
     it('should send the user to unsubscribe', function(done) {
-      this.res.send = code => {
+      this.res.sendStatus = () => {
         this.NewsLetterManager.unsubscribe
           .calledWith(this.user)
           .should.equal(true)

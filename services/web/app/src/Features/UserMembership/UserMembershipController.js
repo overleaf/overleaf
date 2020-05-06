@@ -126,7 +126,7 @@ module.exports = {
         if (error != null) {
           return next(error)
         }
-        return res.send()
+        return res.sendStatus(200)
       }
     )
   },
