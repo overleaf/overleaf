@@ -8,7 +8,7 @@ build-base:
 
 
 build-community:
-	docker build -f Dockerfile -t $(SHARELATEX_TAG) .
+	docker build --build-arg SHARELATEX_BASE_TAG=$(SHARELATEX_BASE_TAG) -f Dockerfile -t $(SHARELATEX_TAG) .
 
 
 PHONY: build-base build-community

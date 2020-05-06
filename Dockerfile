@@ -2,7 +2,8 @@
 # Overleaf Community Edition (overleaf/overleaf)
 # ---------------------------------------------
 
-FROM sharelatex/sharelatex-base:latest
+ARG SHARELATEX_BASE_TAG=sharelatex/sharelatex-base:latest
+FROM $SHARELATEX_BASE_TAG
 
 ENV SHARELATEX_CONFIG /etc/sharelatex/settings.coffee
 
