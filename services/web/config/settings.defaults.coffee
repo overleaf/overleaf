@@ -220,7 +220,7 @@ module.exports = settings =
 	# --------
 	security:
 		sessionSecret: sessionSecret
-		bcryptRounds: if process.env['NODE_ENV'] == 'test' then 1 else 12 # number of rounds used to hash user passwords (raised to power 2)
+		bcryptRounds: (parseInt(process.env['BCRYPT_ROUNDS'], 10) || 12) # number of rounds used to hash user passwords (raised to power 2)
 
 	httpAuthUsers: httpAuthUsers
 

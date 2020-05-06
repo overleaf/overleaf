@@ -21,6 +21,7 @@ services:
       - .:/app
     working_dir: /app
     environment:
+      BCRYPT_ROUNDS: 1
       REDIS_HOST: redis
       MONGO_URL: "mongodb://mongo/sharelatex"
       SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true'
