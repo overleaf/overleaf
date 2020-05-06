@@ -27,7 +27,7 @@
   overflow-y: auto;
   // Specificity needed to override default `body > .content` values
   body > .content& {
-    min-height: calc(~'100vh -' (@header-height + @footer-height));
+    min-height: calc(~'100vh -' (@header-height - @footer-height));
     padding-top: 0;
   }
 }
@@ -62,7 +62,7 @@
 
 .project-list-row when (@is-overleaf) {
   height: 100%;
-  min-height: calc(~'100vh -' (@header-height + @footer-height));
+  min-height: calc(~'100vh -' (@header-height - @footer-height));
 }
 .project-list-container when (@is-overleaf) {
   height: 100%;
