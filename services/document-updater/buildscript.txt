@@ -4,7 +4,7 @@ document-updater
 --docker-repos=gcr.io/overleaf-ops
 --env-add=
 --env-pass-through=
---language=coffeescript
+--language=es
 --node-version=10.19.0
 --public-repo=True
 --script-version=2.2.0

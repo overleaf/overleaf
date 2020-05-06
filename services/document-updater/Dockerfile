@@ -16,7 +16,6 @@ RUN npm ci --quiet
 COPY . /app
 
 
-RUN npm run compile:all
 
 FROM base
 
