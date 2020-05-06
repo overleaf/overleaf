@@ -1,372 +1,467 @@
-sinon = require "sinon"
-chai = require("chai")
-chai.should()
-expect = chai.expect
-async = require "async"
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require("sinon");
+const chai = require("chai");
+chai.should();
+const {
+    expect
+} = chai;
+const async = require("async");
 
-{db, ObjectId} = require "../../../app/js/mongojs"
-MockWebApi = require "./helpers/MockWebApi"
-DocUpdaterClient = require "./helpers/DocUpdaterClient"
-DocUpdaterApp = require "./helpers/DocUpdaterApp"
+const {db, ObjectId} = require("../../../app/js/mongojs");
+const MockWebApi = require("./helpers/MockWebApi");
+const DocUpdaterClient = require("./helpers/DocUpdaterClient");
+const DocUpdaterApp = require("./helpers/DocUpdaterApp");
 
-describe "Ranges", ->
-	before (done) ->
-		DocUpdaterApp.ensureRunning done
+describe("Ranges", function() {
+	before(done => DocUpdaterApp.ensureRunning(done));
 
-	describe "tracking changes from ops", ->
-		before (done) ->
-			@project_id = DocUpdaterClient.randomId()
-			@user_id = DocUpdaterClient.randomId()
-			@id_seed = "587357bd35e64f6157"
-			@doc = {
-				id: DocUpdaterClient.randomId()
+	describe("tracking changes from ops", function() {
+		before(function(done) {
+			this.project_id = DocUpdaterClient.randomId();
+			this.user_id = DocUpdaterClient.randomId();
+			this.id_seed = "587357bd35e64f6157";
+			this.doc = {
+				id: DocUpdaterClient.randomId(),
 				lines: ["aaa"]
-			}
-			@updates = [{
-				doc: @doc.id
-				op: [{ i: "123", p: 1 }]
-				v: 0
-				meta: { user_id: @user_id }
+			};
+			this.updates = [{
+				doc: this.doc.id,
+				op: [{ i: "123", p: 1 }],
+				v: 0,
+				meta: { user_id: this.user_id }
 			}, {
-				doc: @doc.id
-				op: [{ i: "456", p: 5 }]
-				v: 1
-				meta: { user_id: @user_id, tc: @id_seed }
+				doc: this.doc.id,
+				op: [{ i: "456", p: 5 }],
+				v: 1,
+				meta: { user_id: this.user_id, tc: this.id_seed }
 			}, {
-				doc: @doc.id
-				op: [{ d: "12", p: 1 }]
-				v: 2
-				meta: { user_id: @user_id }
-			}]
-			MockWebApi.insertDoc @project_id, @doc.id, {
-				lines: @doc.lines
+				doc: this.doc.id,
+				op: [{ d: "12", p: 1 }],
+				v: 2,
+				meta: { user_id: this.user_id }
+			}];
+			MockWebApi.insertDoc(this.project_id, this.doc.id, {
+				lines: this.doc.lines,
 				version: 0
+			});
+			const jobs = [];
+			for (let update of Array.from(this.updates)) {
+				(update => {
+					return jobs.push(callback => DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, update, callback));
+				})(update);
 			}
-			jobs = []
-			for update in @updates
-				do (update) =>
-					jobs.push (callback) => DocUpdaterClient.sendUpdate @project_id, @doc.id, update, callback
 			
-			DocUpdaterApp.ensureRunning (error) =>
-				throw error if error?
-				DocUpdaterClient.preloadDoc @project_id, @doc.id, (error) =>
-					throw error if error?
-					async.series jobs, (error) ->
-						throw error if error?
-						done()
+			return DocUpdaterApp.ensureRunning(error => {
+				if (error != null) { throw error; }
+				return DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+					if (error != null) { throw error; }
+					return async.series(jobs, function(error) {
+						if (error != null) { throw error; }
+						return done();
+					});
+				});
+			});
+		});
 		
-		it "should update the ranges", (done) ->
-			DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
-				throw error if error?
-				ranges = data.ranges
-				change = ranges.changes[0]
-				change.op.should.deep.equal { i: "456", p: 3 }
-				change.id.should.equal @id_seed + "000001"
-				change.metadata.user_id.should.equal @user_id
-				done()
+		it("should update the ranges", function(done) {
+			return DocUpdaterClient.getDoc(this.project_id, this.doc.id, (error, res, data) => {
+				if (error != null) { throw error; }
+				const {
+                    ranges
+                } = data;
+				const change = ranges.changes[0];
+				change.op.should.deep.equal({ i: "456", p: 3 });
+				change.id.should.equal(this.id_seed + "000001");
+				change.metadata.user_id.should.equal(this.user_id);
+				return done();
+			});
+		});
 	
-		describe "Adding comments", ->
-			describe "standalone", ->
-				before (done) ->
-					@project_id = DocUpdaterClient.randomId()
-					@user_id = DocUpdaterClient.randomId()
-					@doc = {
-						id: DocUpdaterClient.randomId()
+		return describe("Adding comments", function() {
+			describe("standalone", function() {
+				before(function(done) {
+					this.project_id = DocUpdaterClient.randomId();
+					this.user_id = DocUpdaterClient.randomId();
+					this.doc = {
+						id: DocUpdaterClient.randomId(),
 						lines: ["foo bar baz"]
-					}
-					@updates = [{
-						doc: @doc.id
-						op: [{ c: "bar", p: 4, t: @tid = DocUpdaterClient.randomId() }]
+					};
+					this.updates = [{
+						doc: this.doc.id,
+						op: [{ c: "bar", p: 4, t: (this.tid = DocUpdaterClient.randomId()) }],
 						v: 0
-					}]
-					MockWebApi.insertDoc @project_id, @doc.id, {
-						lines: @doc.lines
+					}];
+					MockWebApi.insertDoc(this.project_id, this.doc.id, {
+						lines: this.doc.lines,
 						version: 0
+					});
+					const jobs = [];
+					for (let update of Array.from(this.updates)) {
+						(update => {
+							return jobs.push(callback => DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, update, callback));
+						})(update);
 					}
-					jobs = []
-					for update in @updates
-						do (update) =>
-							jobs.push (callback) => DocUpdaterClient.sendUpdate @project_id, @doc.id, update, callback
-					DocUpdaterClient.preloadDoc @project_id, @doc.id, (error) =>
-						throw error if error?
-						async.series jobs, (error) ->
-							throw error if error?
-							setTimeout done, 200
+					return DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+						if (error != null) { throw error; }
+						return async.series(jobs, function(error) {
+							if (error != null) { throw error; }
+							return setTimeout(done, 200);
+						});
+					});
+				});
 				
-				it "should update the ranges", (done) ->
-					DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
-						throw error if error?
-						ranges = data.ranges
-						comment = ranges.comments[0]
-						comment.op.should.deep.equal { c: "bar", p: 4, t: @tid }
-						comment.id.should.equal @tid
-						done()
+				return it("should update the ranges", function(done) {
+					return DocUpdaterClient.getDoc(this.project_id, this.doc.id, (error, res, data) => {
+						if (error != null) { throw error; }
+						const {
+                            ranges
+                        } = data;
+						const comment = ranges.comments[0];
+						comment.op.should.deep.equal({ c: "bar", p: 4, t: this.tid });
+						comment.id.should.equal(this.tid);
+						return done();
+					});
+				});
+			});
 
-			describe "with conflicting ops needing OT", ->
-				before (done) ->
-					@project_id = DocUpdaterClient.randomId()
-					@user_id = DocUpdaterClient.randomId()
-					@doc = {
-						id: DocUpdaterClient.randomId()
+			return describe("with conflicting ops needing OT", function() {
+				before(function(done) {
+					this.project_id = DocUpdaterClient.randomId();
+					this.user_id = DocUpdaterClient.randomId();
+					this.doc = {
+						id: DocUpdaterClient.randomId(),
 						lines: ["foo bar baz"]
-					}
-					@updates = [{
-						doc: @doc.id
-						op: [{ i: "ABC", p: 3 }]
-						v: 0
-						meta: { user_id: @user_id }
+					};
+					this.updates = [{
+						doc: this.doc.id,
+						op: [{ i: "ABC", p: 3 }],
+						v: 0,
+						meta: { user_id: this.user_id }
 					}, {
-						doc: @doc.id
-						op: [{ c: "bar", p: 4, t: @tid = DocUpdaterClient.randomId() }]
+						doc: this.doc.id,
+						op: [{ c: "bar", p: 4, t: (this.tid = DocUpdaterClient.randomId()) }],
 						v: 0
-					}]
-					MockWebApi.insertDoc @project_id, @doc.id, {
-						lines: @doc.lines
+					}];
+					MockWebApi.insertDoc(this.project_id, this.doc.id, {
+						lines: this.doc.lines,
 						version: 0
+					});
+					const jobs = [];
+					for (let update of Array.from(this.updates)) {
+						(update => {
+							return jobs.push(callback => DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, update, callback));
+						})(update);
 					}
-					jobs = []
-					for update in @updates
-						do (update) =>
-							jobs.push (callback) => DocUpdaterClient.sendUpdate @project_id, @doc.id, update, callback
-					DocUpdaterClient.preloadDoc @project_id, @doc.id, (error) =>
-						throw error if error?
-						async.series jobs, (error) ->
-							throw error if error?
-							setTimeout done, 200
+					return DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+						if (error != null) { throw error; }
+						return async.series(jobs, function(error) {
+							if (error != null) { throw error; }
+							return setTimeout(done, 200);
+						});
+					});
+				});
 				
-				it "should update the comments with the OT shifted comment", (done) ->
-					DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
-						throw error if error?
-						ranges = data.ranges
-						comment = ranges.comments[0]
-						comment.op.should.deep.equal { c: "bar", p: 7, t: @tid }
-						done()
+				return it("should update the comments with the OT shifted comment", function(done) {
+					return DocUpdaterClient.getDoc(this.project_id, this.doc.id, (error, res, data) => {
+						if (error != null) { throw error; }
+						const {
+                            ranges
+                        } = data;
+						const comment = ranges.comments[0];
+						comment.op.should.deep.equal({ c: "bar", p: 7, t: this.tid });
+						return done();
+					});
+				});
+			});
+		});
+	});
 
-	describe "Loading ranges from persistence layer", ->
-		before (done) ->
-			@project_id = DocUpdaterClient.randomId()
-			@user_id = DocUpdaterClient.randomId()
-			@id_seed = "587357bd35e64f6157"
-			@doc = {
-				id: DocUpdaterClient.randomId()
+	describe("Loading ranges from persistence layer", function() {
+		before(function(done) {
+			this.project_id = DocUpdaterClient.randomId();
+			this.user_id = DocUpdaterClient.randomId();
+			this.id_seed = "587357bd35e64f6157";
+			this.doc = {
+				id: DocUpdaterClient.randomId(),
 				lines: ["a123aa"]
-			}
-			@update = {
-				doc: @doc.id
-				op: [{ i: "456", p: 5 }]
-				v: 0
-				meta: { user_id: @user_id, tc: @id_seed }
-			}
-			MockWebApi.insertDoc @project_id, @doc.id, {
-				lines: @doc.lines
-				version: 0
+			};
+			this.update = {
+				doc: this.doc.id,
+				op: [{ i: "456", p: 5 }],
+				v: 0,
+				meta: { user_id: this.user_id, tc: this.id_seed }
+			};
+			MockWebApi.insertDoc(this.project_id, this.doc.id, {
+				lines: this.doc.lines,
+				version: 0,
 				ranges: {
 					changes: [{
-						op: { i: "123", p: 1 }
-						metadata:
-							user_id: @user_id
+						op: { i: "123", p: 1 },
+						metadata: {
+							user_id: this.user_id,
 							ts: new Date()
+						}
 					}]
 				}
-			}
-			DocUpdaterClient.preloadDoc @project_id, @doc.id, (error) =>
-				throw error if error?
-				DocUpdaterClient.sendUpdate @project_id, @doc.id, @update, (error) ->
-					throw error if error?
-					setTimeout done, 200
+			});
+			return DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+				if (error != null) { throw error; }
+				return DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, this.update, function(error) {
+					if (error != null) { throw error; }
+					return setTimeout(done, 200);
+				});
+			});
+		});
 		
-		it "should have preloaded the existing ranges", (done) ->
-			DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
-				throw error if error?
-				{changes} = data.ranges
-				changes[0].op.should.deep.equal { i: "123", p: 1 }
-				changes[1].op.should.deep.equal { i: "456", p: 5 }
-				done()
+		it("should have preloaded the existing ranges", function(done) {
+			return DocUpdaterClient.getDoc(this.project_id, this.doc.id, (error, res, data) => {
+				if (error != null) { throw error; }
+				const {changes} = data.ranges;
+				changes[0].op.should.deep.equal({ i: "123", p: 1 });
+				changes[1].op.should.deep.equal({ i: "456", p: 5 });
+				return done();
+			});
+		});
 		
-		it "should flush the ranges to the persistence layer again", (done) ->
-			DocUpdaterClient.flushDoc @project_id, @doc.id, (error) =>
-				throw error if error?
-				MockWebApi.getDocument @project_id, @doc.id, (error, doc) =>
-					{changes} = doc.ranges
-					changes[0].op.should.deep.equal { i: "123", p: 1 }
-					changes[1].op.should.deep.equal { i: "456", p: 5 }
-					done()
+		return it("should flush the ranges to the persistence layer again", function(done) {
+			return DocUpdaterClient.flushDoc(this.project_id, this.doc.id, error => {
+				if (error != null) { throw error; }
+				return MockWebApi.getDocument(this.project_id, this.doc.id, (error, doc) => {
+					const {changes} = doc.ranges;
+					changes[0].op.should.deep.equal({ i: "123", p: 1 });
+					changes[1].op.should.deep.equal({ i: "456", p: 5 });
+					return done();
+				});
+			});
+		});
+	});
 
-	describe "accepting a change", ->
-		before (done) ->
-			@project_id = DocUpdaterClient.randomId()
-			@user_id = DocUpdaterClient.randomId()
-			@id_seed = "587357bd35e64f6157"
-			@doc = {
-				id: DocUpdaterClient.randomId()
+	describe("accepting a change", function() {
+		before(function(done) {
+			this.project_id = DocUpdaterClient.randomId();
+			this.user_id = DocUpdaterClient.randomId();
+			this.id_seed = "587357bd35e64f6157";
+			this.doc = {
+				id: DocUpdaterClient.randomId(),
 				lines: ["aaa"]
-			}
-			@update = {
-				doc: @doc.id
-				op: [{ i: "456", p: 1 }]
-				v: 0
-				meta: { user_id: @user_id, tc: @id_seed }
-			}
-			MockWebApi.insertDoc @project_id, @doc.id, {
-				lines: @doc.lines
+			};
+			this.update = {
+				doc: this.doc.id,
+				op: [{ i: "456", p: 1 }],
+				v: 0,
+				meta: { user_id: this.user_id, tc: this.id_seed }
+			};
+			MockWebApi.insertDoc(this.project_id, this.doc.id, {
+				lines: this.doc.lines,
 				version: 0
-			}
-			DocUpdaterClient.preloadDoc @project_id, @doc.id, (error) =>
-				throw error if error?
-				DocUpdaterClient.sendUpdate @project_id, @doc.id, @update, (error) =>
-					throw error if error?
-					setTimeout () =>
-						DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
-							throw error if error?
-							ranges = data.ranges
-							change = ranges.changes[0]
-							change.op.should.deep.equal { i: "456", p: 1 }
-							change.id.should.equal @id_seed + "000001"
-							change.metadata.user_id.should.equal @user_id
-							done()
-					, 200
+			});
+			return DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+				if (error != null) { throw error; }
+				return DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, this.update, error => {
+					if (error != null) { throw error; }
+					return setTimeout(() => {
+						return DocUpdaterClient.getDoc(this.project_id, this.doc.id, (error, res, data) => {
+							if (error != null) { throw error; }
+							const {
+                                ranges
+                            } = data;
+							const change = ranges.changes[0];
+							change.op.should.deep.equal({ i: "456", p: 1 });
+							change.id.should.equal(this.id_seed + "000001");
+							change.metadata.user_id.should.equal(this.user_id);
+							return done();
+						});
+					}
+					, 200);
+				});
+			});
+		});
 		
-		it "should remove the change after accepting", (done) ->
-			DocUpdaterClient.acceptChange @project_id, @doc.id, @id_seed + "000001", (error) =>
-				throw error if error?
-				DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
-					throw error if error?
-					expect(data.ranges.changes).to.be.undefined
-					done()
+		return it("should remove the change after accepting", function(done) {
+			return DocUpdaterClient.acceptChange(this.project_id, this.doc.id, this.id_seed + "000001", error => {
+				if (error != null) { throw error; }
+				return DocUpdaterClient.getDoc(this.project_id, this.doc.id, (error, res, data) => {
+					if (error != null) { throw error; }
+					expect(data.ranges.changes).to.be.undefined;
+					return done();
+				});
+			});
+		});
+	});
 
-	describe "deleting a comment range", ->
-		before (done) ->
-			@project_id = DocUpdaterClient.randomId()
-			@user_id = DocUpdaterClient.randomId()
-			@doc = {
-				id: DocUpdaterClient.randomId()
+	describe("deleting a comment range", function() {
+		before(function(done) {
+			this.project_id = DocUpdaterClient.randomId();
+			this.user_id = DocUpdaterClient.randomId();
+			this.doc = {
+				id: DocUpdaterClient.randomId(),
 				lines: ["foo bar"]
-			}
-			@update = {
-				doc: @doc.id
-				op: [{ c: "bar", p: 4, t: @tid = DocUpdaterClient.randomId() }]
+			};
+			this.update = {
+				doc: this.doc.id,
+				op: [{ c: "bar", p: 4, t: (this.tid = DocUpdaterClient.randomId()) }],
 				v: 0
-			}
-			MockWebApi.insertDoc @project_id, @doc.id, {
-				lines: @doc.lines
+			};
+			MockWebApi.insertDoc(this.project_id, this.doc.id, {
+				lines: this.doc.lines,
 				version: 0
-			}
-			DocUpdaterClient.preloadDoc @project_id, @doc.id, (error) =>
-				throw error if error?
-				DocUpdaterClient.sendUpdate @project_id, @doc.id, @update, (error) =>
-					throw error if error?
-					setTimeout () =>
-						DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
-							throw error if error?
-							ranges = data.ranges
-							change = ranges.comments[0]
-							change.op.should.deep.equal { c: "bar", p: 4, t: @tid }
-							change.id.should.equal @tid
-							done()
-					, 200
+			});
+			return DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+				if (error != null) { throw error; }
+				return DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, this.update, error => {
+					if (error != null) { throw error; }
+					return setTimeout(() => {
+						return DocUpdaterClient.getDoc(this.project_id, this.doc.id, (error, res, data) => {
+							if (error != null) { throw error; }
+							const {
+                                ranges
+                            } = data;
+							const change = ranges.comments[0];
+							change.op.should.deep.equal({ c: "bar", p: 4, t: this.tid });
+							change.id.should.equal(this.tid);
+							return done();
+						});
+					}
+					, 200);
+				});
+			});
+		});
 		
-		it "should remove the comment range", (done) ->
-			DocUpdaterClient.removeComment @project_id, @doc.id, @tid, (error, res) =>
-				throw error if error?
-				expect(res.statusCode).to.equal 204
-				DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
-					throw error if error?
-					expect(data.ranges.comments).to.be.undefined
-					done()
+		return it("should remove the comment range", function(done) {
+			return DocUpdaterClient.removeComment(this.project_id, this.doc.id, this.tid, (error, res) => {
+				if (error != null) { throw error; }
+				expect(res.statusCode).to.equal(204);
+				return DocUpdaterClient.getDoc(this.project_id, this.doc.id, (error, res, data) => {
+					if (error != null) { throw error; }
+					expect(data.ranges.comments).to.be.undefined;
+					return done();
+				});
+			});
+		});
+	});
 					
-	describe "tripping range size limit", ->
-		before (done) ->
-			@project_id = DocUpdaterClient.randomId()
-			@user_id = DocUpdaterClient.randomId()
-			@id_seed = DocUpdaterClient.randomId()
-			@doc = {
-				id: DocUpdaterClient.randomId()
+	describe("tripping range size limit", function() {
+		before(function(done) {
+			this.project_id = DocUpdaterClient.randomId();
+			this.user_id = DocUpdaterClient.randomId();
+			this.id_seed = DocUpdaterClient.randomId();
+			this.doc = {
+				id: DocUpdaterClient.randomId(),
 				lines: ["aaa"]
-			}
-			@i = new Array(3 * 1024 * 1024).join("a")
-			@updates = [{
-				doc: @doc.id
-				op: [{ i: @i, p: 1 }]
-				v: 0
-				meta: { user_id: @user_id, tc: @id_seed }
-			}]
-			MockWebApi.insertDoc @project_id, @doc.id, {
-				lines: @doc.lines
+			};
+			this.i = new Array(3 * 1024 * 1024).join("a");
+			this.updates = [{
+				doc: this.doc.id,
+				op: [{ i: this.i, p: 1 }],
+				v: 0,
+				meta: { user_id: this.user_id, tc: this.id_seed }
+			}];
+			MockWebApi.insertDoc(this.project_id, this.doc.id, {
+				lines: this.doc.lines,
 				version: 0
+			});
+			const jobs = [];
+			for (let update of Array.from(this.updates)) {
+				(update => {
+					return jobs.push(callback => DocUpdaterClient.sendUpdate(this.project_id, this.doc.id, update, callback));
+				})(update);
 			}
-			jobs = []
-			for update in @updates
-				do (update) =>
-					jobs.push (callback) => DocUpdaterClient.sendUpdate @project_id, @doc.id, update, callback
-			DocUpdaterClient.preloadDoc @project_id, @doc.id, (error) =>
-				throw error if error?
-				async.series jobs, (error) ->
-					throw error if error?
-					setTimeout done, 200
+			return DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+				if (error != null) { throw error; }
+				return async.series(jobs, function(error) {
+					if (error != null) { throw error; }
+					return setTimeout(done, 200);
+				});
+			});
+		});
 		
-		it "should not update the ranges", (done) ->
-			DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
-				throw error if error?
-				ranges = data.ranges
-				expect(ranges.changes).to.be.undefined
-				done()
+		return it("should not update the ranges", function(done) {
+			return DocUpdaterClient.getDoc(this.project_id, this.doc.id, (error, res, data) => {
+				if (error != null) { throw error; }
+				const {
+                    ranges
+                } = data;
+				expect(ranges.changes).to.be.undefined;
+				return done();
+			});
+		});
+	});
 
-	describe "deleting text surrounding a comment", ->
-		before (done) ->
-			@project_id = DocUpdaterClient.randomId()
-			@user_id = DocUpdaterClient.randomId()
-			@doc_id = DocUpdaterClient.randomId()
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: ["foo bar baz"]
-				version: 0
+	return describe("deleting text surrounding a comment", function() {
+		before(function(done) {
+			this.project_id = DocUpdaterClient.randomId();
+			this.user_id = DocUpdaterClient.randomId();
+			this.doc_id = DocUpdaterClient.randomId();
+			MockWebApi.insertDoc(this.project_id, this.doc_id, {
+				lines: ["foo bar baz"],
+				version: 0,
 				ranges: {
 					comments: [{
-						op: { c: "a", p: 5, tid: @tid = DocUpdaterClient.randomId() }
-						metadata:
-							user_id: @user_id
+						op: { c: "a", p: 5, tid: (this.tid = DocUpdaterClient.randomId()) },
+						metadata: {
+							user_id: this.user_id,
 							ts: new Date()
+						}
 					}]
 				}
-			}
-			@updates = [{
-				doc: @doc_id
-				op: [{ d: "foo ", p: 0 }]
-				v: 0
-				meta: { user_id: @user_id }
+			});
+			this.updates = [{
+				doc: this.doc_id,
+				op: [{ d: "foo ", p: 0 }],
+				v: 0,
+				meta: { user_id: this.user_id }
 			}, {
-				doc: @doc_id
-				op: [{ d: "bar ", p: 0 }]
-				v: 1
-				meta: { user_id: @user_id }
-			}]
-			jobs = []
-			for update in @updates
-				do (update) =>
-					jobs.push (callback) => DocUpdaterClient.sendUpdate @project_id, @doc_id, update, callback
-			DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
-				throw error if error?
-				async.series jobs, (error) ->
-					throw error if error?
-					setTimeout () =>
-						DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, data) =>
-							throw error if error?
-							done()
-					, 200
+				doc: this.doc_id,
+				op: [{ d: "bar ", p: 0 }],
+				v: 1,
+				meta: { user_id: this.user_id }
+			}];
+			const jobs = [];
+			for (let update of Array.from(this.updates)) {
+				(update => {
+					return jobs.push(callback => DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, update, callback));
+				})(update);
+			}
+			return DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
+				if (error != null) { throw error; }
+				return async.series(jobs, function(error) {
+					if (error != null) { throw error; }
+					return setTimeout(() => {
+						return DocUpdaterClient.getDoc(this.project_id, this.doc_id, (error, res, data) => {
+							if (error != null) { throw error; }
+							return done();
+						});
+					}
+					, 200);
+				});
+			});
+		});
 		
-		it "should write a snapshot from before the destructive change", (done) ->
-			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, data) =>
-				return done(error) if error?
-				db.docSnapshots.find {
-					project_id: ObjectId(@project_id),
-					doc_id: ObjectId(@doc_id)
-				}, (error, docSnapshots) =>
-					return done(error) if error?
-					expect(docSnapshots.length).to.equal 1
-					expect(docSnapshots[0].version).to.equal 1
-					expect(docSnapshots[0].lines).to.deep.equal ["bar baz"]
-					expect(docSnapshots[0].ranges.comments[0].op).to.deep.equal {
+		return it("should write a snapshot from before the destructive change", function(done) {
+			return DocUpdaterClient.getDoc(this.project_id, this.doc_id, (error, res, data) => {
+				if (error != null) { return done(error); }
+				return db.docSnapshots.find({
+					project_id: ObjectId(this.project_id),
+					doc_id: ObjectId(this.doc_id)
+				}, (error, docSnapshots) => {
+					if (error != null) { return done(error); }
+					expect(docSnapshots.length).to.equal(1);
+					expect(docSnapshots[0].version).to.equal(1);
+					expect(docSnapshots[0].lines).to.deep.equal(["bar baz"]);
+					expect(docSnapshots[0].ranges.comments[0].op).to.deep.equal({
 						c: "a",
 						p: 1,
-						tid: @tid
-					}
-					done()
+						tid: this.tid
+					});
+					return done();
+				});
+			});
+		});
+	});
+});

@@ -1,109 +1,141 @@
-sinon = require "sinon"
-chai = require("chai")
-chai.should()
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require("sinon");
+const chai = require("chai");
+chai.should();
 
-MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
-MockProjectHistoryApi = require "./helpers/MockProjectHistoryApi"
-MockWebApi = require "./helpers/MockWebApi"
-DocUpdaterClient = require "./helpers/DocUpdaterClient"
-DocUpdaterApp = require "./helpers/DocUpdaterApp"
+const MockTrackChangesApi = require("./helpers/MockTrackChangesApi");
+const MockProjectHistoryApi = require("./helpers/MockProjectHistoryApi");
+const MockWebApi = require("./helpers/MockWebApi");
+const DocUpdaterClient = require("./helpers/DocUpdaterClient");
+const DocUpdaterApp = require("./helpers/DocUpdaterApp");
 
-describe "Deleting a document", ->
-	before (done) ->
-		@lines = ["one", "two", "three"]
-		@version = 42
-		@update =
-			doc: @doc_id
+describe("Deleting a document", function() {
+	before(function(done) {
+		this.lines = ["one", "two", "three"];
+		this.version = 42;
+		this.update = {
+			doc: this.doc_id,
 			op: [{
-				i: "one and a half\n"
+				i: "one and a half\n",
 				p: 4
-			}]
-			v: @version
-		@result = ["one", "one and a half", "two", "three"]
+			}],
+			v: this.version
+		};
+		this.result = ["one", "one and a half", "two", "three"];
 
-		sinon.spy MockTrackChangesApi, "flushDoc"
-		sinon.spy MockProjectHistoryApi, "flushProject"
-		DocUpdaterApp.ensureRunning(done)
+		sinon.spy(MockTrackChangesApi, "flushDoc");
+		sinon.spy(MockProjectHistoryApi, "flushProject");
+		return DocUpdaterApp.ensureRunning(done);
+	});
 
-	after ->
-		MockTrackChangesApi.flushDoc.restore()
-		MockProjectHistoryApi.flushProject.restore()
+	after(function() {
+		MockTrackChangesApi.flushDoc.restore();
+		return MockProjectHistoryApi.flushProject.restore();
+	});
 
-	describe "when the updated doc exists in the doc updater", ->
-		before (done) ->
-			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			sinon.spy MockWebApi, "setDocument"
-			sinon.spy MockWebApi, "getDocument"
+	describe("when the updated doc exists in the doc updater", function() {
+		before(function(done) {
+			[this.project_id, this.doc_id] = Array.from([DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]);
+			sinon.spy(MockWebApi, "setDocument");
+			sinon.spy(MockWebApi, "getDocument");
 
-			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
-			DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
-				throw error if error?
-				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) =>
-					throw error if error?
-					setTimeout () =>
-						DocUpdaterClient.deleteDoc @project_id, @doc_id, (error, res, body) =>
-							@statusCode = res.statusCode
-							setTimeout done, 200
-					, 200
+			MockWebApi.insertDoc(this.project_id, this.doc_id, {lines: this.lines, version: this.version});
+			return DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
+				if (error != null) { throw error; }
+				return DocUpdaterClient.sendUpdate(this.project_id, this.doc_id, this.update, error => {
+					if (error != null) { throw error; }
+					return setTimeout(() => {
+						return DocUpdaterClient.deleteDoc(this.project_id, this.doc_id, (error, res, body) => {
+							this.statusCode = res.statusCode;
+							return setTimeout(done, 200);
+						});
+					}
+					, 200);
+				});
+			});
+		});
 
-		after ->
-			MockWebApi.setDocument.restore()
-			MockWebApi.getDocument.restore()
+		after(function() {
+			MockWebApi.setDocument.restore();
+			return MockWebApi.getDocument.restore();
+		});
 
-		it "should return a 204 status code", ->
-			@statusCode.should.equal 204
+		it("should return a 204 status code", function() {
+			return this.statusCode.should.equal(204);
+		});
 
-		it "should send the updated document and version to the web api", ->
-			MockWebApi.setDocument
-				.calledWith(@project_id, @doc_id, @result, @version + 1)
-				.should.equal true
+		it("should send the updated document and version to the web api", function() {
+			return MockWebApi.setDocument
+				.calledWith(this.project_id, this.doc_id, this.result, this.version + 1)
+				.should.equal(true);
+		});
 
-		it "should need to reload the doc if read again", (done) ->
-			MockWebApi.getDocument.called.should.equal.false
-			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
+		it("should need to reload the doc if read again", function(done) {
+			MockWebApi.getDocument.called.should.equal.false;
+			return DocUpdaterClient.getDoc(this.project_id, this.doc_id, (error, res, doc) => {
 				MockWebApi.getDocument
-					.calledWith(@project_id, @doc_id)
-					.should.equal true
-				done()
+					.calledWith(this.project_id, this.doc_id)
+					.should.equal(true);
+				return done();
+			});
+		});
 
-		it "should flush track changes", ->
-			MockTrackChangesApi.flushDoc.calledWith(@doc_id).should.equal true
+		it("should flush track changes", function() {
+			return MockTrackChangesApi.flushDoc.calledWith(this.doc_id).should.equal(true);
+		});
 
-		it "should flush project history", ->
-			MockProjectHistoryApi.flushProject.calledWith(@project_id).should.equal true
+		return it("should flush project history", function() {
+			return MockProjectHistoryApi.flushProject.calledWith(this.project_id).should.equal(true);
+		});
+	});
 
-	describe "when the doc is not in the doc updater", ->
-		before (done) ->
-			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-			}
-			sinon.spy MockWebApi, "setDocument"
-			sinon.spy MockWebApi, "getDocument"
-			DocUpdaterClient.deleteDoc @project_id, @doc_id, (error, res, body) =>
-				@statusCode = res.statusCode
-				setTimeout done, 200
+	return describe("when the doc is not in the doc updater", function() {
+		before(function(done) {
+			[this.project_id, this.doc_id] = Array.from([DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]);
+			MockWebApi.insertDoc(this.project_id, this.doc_id, {
+				lines: this.lines
+			});
+			sinon.spy(MockWebApi, "setDocument");
+			sinon.spy(MockWebApi, "getDocument");
+			return DocUpdaterClient.deleteDoc(this.project_id, this.doc_id, (error, res, body) => {
+				this.statusCode = res.statusCode;
+				return setTimeout(done, 200);
+			});
+		});
 
-		after ->
-			MockWebApi.setDocument.restore()
-			MockWebApi.getDocument.restore()
+		after(function() {
+			MockWebApi.setDocument.restore();
+			return MockWebApi.getDocument.restore();
+		});
 
-		it "should return a 204 status code", ->
-			@statusCode.should.equal 204
+		it("should return a 204 status code", function() {
+			return this.statusCode.should.equal(204);
+		});
 
-		it "should not need to send the updated document to the web api", ->
-			MockWebApi.setDocument.called.should.equal false
+		it("should not need to send the updated document to the web api", () => MockWebApi.setDocument.called.should.equal(false));
 
-		it "should need to reload the doc if read again", (done) ->
-			MockWebApi.getDocument.called.should.equal.false
-			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
+		it("should need to reload the doc if read again", function(done) {
+			MockWebApi.getDocument.called.should.equal.false;
+			return DocUpdaterClient.getDoc(this.project_id, this.doc_id, (error, res, doc) => {
 				MockWebApi.getDocument
-					.calledWith(@project_id, @doc_id)
-					.should.equal true
-				done()
+					.calledWith(this.project_id, this.doc_id)
+					.should.equal(true);
+				return done();
+			});
+		});
 
-		it "should flush track changes", ->
-			MockTrackChangesApi.flushDoc.calledWith(@doc_id).should.equal true
+		it("should flush track changes", function() {
+			return MockTrackChangesApi.flushDoc.calledWith(this.doc_id).should.equal(true);
+		});
 
-		it "should flush project history", ->
-			MockProjectHistoryApi.flushProject.calledWith(@project_id).should.equal true
+		return it("should flush project history", function() {
+			return MockProjectHistoryApi.flushProject.calledWith(this.project_id).should.equal(true);
+		});
+	});
+});

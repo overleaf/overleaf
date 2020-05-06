@@ -1,90 +1,112 @@
-sinon = require "sinon"
-chai = require("chai")
-chai.should()
-expect = chai.expect
-async = require "async"
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require("sinon");
+const chai = require("chai");
+chai.should();
+const {
+    expect
+} = chai;
+const async = require("async");
 
-MockWebApi = require "./helpers/MockWebApi"
-DocUpdaterClient = require "./helpers/DocUpdaterClient"
-DocUpdaterApp = require "./helpers/DocUpdaterApp"
+const MockWebApi = require("./helpers/MockWebApi");
+const DocUpdaterClient = require("./helpers/DocUpdaterClient");
+const DocUpdaterApp = require("./helpers/DocUpdaterApp");
 
-describe "Flushing a doc to Mongo", ->
-	before (done) ->
-		@lines = ["one", "two", "three"]
-		@version = 42
-		@update =
-			doc: @doc_id
-			meta: { user_id: 'last-author-fake-id' }
+describe("Flushing a doc to Mongo", function() {
+	before(function(done) {
+		this.lines = ["one", "two", "three"];
+		this.version = 42;
+		this.update = {
+			doc: this.doc_id,
+			meta: { user_id: 'last-author-fake-id' },
 			op: [{
-				i: "one and a half\n"
+				i: "one and a half\n",
 				p: 4
-			}]
-			v: @version
-		@result = ["one", "one and a half", "two", "three"]
-		DocUpdaterApp.ensureRunning(done)
+			}],
+			v: this.version
+		};
+		this.result = ["one", "one and a half", "two", "three"];
+		return DocUpdaterApp.ensureRunning(done);
+	});
 
-	describe "when the updated doc exists in the doc updater", ->
-		before (done) ->
-			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			sinon.spy MockWebApi, "setDocument"
+	describe("when the updated doc exists in the doc updater", function() {
+		before(function(done) {
+			[this.project_id, this.doc_id] = Array.from([DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]);
+			sinon.spy(MockWebApi, "setDocument");
 
-			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
-			DocUpdaterClient.sendUpdates @project_id, @doc_id, [@update], (error) =>
-				throw error if error?
-				setTimeout () =>
-					DocUpdaterClient.flushDoc @project_id, @doc_id, done
-				, 200
+			MockWebApi.insertDoc(this.project_id, this.doc_id, {lines: this.lines, version: this.version});
+			return DocUpdaterClient.sendUpdates(this.project_id, this.doc_id, [this.update], error => {
+				if (error != null) { throw error; }
+				return setTimeout(() => {
+					return DocUpdaterClient.flushDoc(this.project_id, this.doc_id, done);
+				}
+				, 200);
+			});
+		});
 
-		after ->
-			MockWebApi.setDocument.restore()
+		after(() => MockWebApi.setDocument.restore());
 
-		it "should flush the updated doc lines and version to the web api", ->
-			MockWebApi.setDocument
-				.calledWith(@project_id, @doc_id, @result, @version + 1)
-				.should.equal true
+		it("should flush the updated doc lines and version to the web api", function() {
+			return MockWebApi.setDocument
+				.calledWith(this.project_id, this.doc_id, this.result, this.version + 1)
+				.should.equal(true);
+		});
 
-		it "should flush the last update author and time to the web api", ->
-			lastUpdatedAt = MockWebApi.setDocument.lastCall.args[5]
-			parseInt(lastUpdatedAt).should.be.closeTo((new Date()).getTime(), 30000)
+		return it("should flush the last update author and time to the web api", function() {
+			const lastUpdatedAt = MockWebApi.setDocument.lastCall.args[5];
+			parseInt(lastUpdatedAt).should.be.closeTo((new Date()).getTime(), 30000);
 
-			lastUpdatedBy = MockWebApi.setDocument.lastCall.args[6]
-			lastUpdatedBy.should.equal 'last-author-fake-id'
+			const lastUpdatedBy = MockWebApi.setDocument.lastCall.args[6];
+			return lastUpdatedBy.should.equal('last-author-fake-id');
+		});
+	});
 
-	describe "when the doc does not exist in the doc updater", ->
-		before (done) ->
-			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-			}
-			sinon.spy MockWebApi, "setDocument"
-			DocUpdaterClient.flushDoc @project_id, @doc_id, done
+	describe("when the doc does not exist in the doc updater", function() {
+		before(function(done) {
+			[this.project_id, this.doc_id] = Array.from([DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]);
+			MockWebApi.insertDoc(this.project_id, this.doc_id, {
+				lines: this.lines
+			});
+			sinon.spy(MockWebApi, "setDocument");
+			return DocUpdaterClient.flushDoc(this.project_id, this.doc_id, done);
+		});
 
-		after ->
-			MockWebApi.setDocument.restore()
+		after(() => MockWebApi.setDocument.restore());
 
-		it "should not flush the doc to the web api", ->
-			MockWebApi.setDocument.called.should.equal false
+		return it("should not flush the doc to the web api", () => MockWebApi.setDocument.called.should.equal(false));
+	});
 
-	describe "when the web api http request takes a long time on first request", ->
-		before (done) ->
-			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-				version: @version
-			}
-			t = 30000
-			sinon.stub MockWebApi, "setDocument", (project_id, doc_id, lines, version, ranges, lastUpdatedAt, lastUpdatedBy, callback = (error) ->) ->
-				setTimeout callback, t
-				t = 0
-			DocUpdaterClient.preloadDoc @project_id, @doc_id, done
+	return describe("when the web api http request takes a long time on first request", function() {
+		before(function(done) {
+			[this.project_id, this.doc_id] = Array.from([DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]);
+			MockWebApi.insertDoc(this.project_id, this.doc_id, {
+				lines: this.lines,
+				version: this.version
+			});
+			let t = 30000;
+			sinon.stub(MockWebApi, "setDocument", function(project_id, doc_id, lines, version, ranges, lastUpdatedAt, lastUpdatedBy, callback) {
+				if (callback == null) { callback = function(error) {}; }
+				setTimeout(callback, t);
+				return t = 0;
+			});
+			return DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, done);
+		});
 
-		after ->
-			MockWebApi.setDocument.restore()
+		after(() => MockWebApi.setDocument.restore());
 		
-		it "should still work", (done) ->
-			start = Date.now()
-			DocUpdaterClient.flushDoc @project_id, @doc_id, (error, res, doc) =>
-				res.statusCode.should.equal 204
-				delta = Date.now() - start
-				expect(delta).to.be.below 20000
-				done()
+		return it("should still work", function(done) {
+			const start = Date.now();
+			return DocUpdaterClient.flushDoc(this.project_id, this.doc_id, (error, res, doc) => {
+				res.statusCode.should.equal(204);
+				const delta = Date.now() - start;
+				expect(delta).to.be.below(20000);
+				return done();
+			});
+		});
+	});
+});

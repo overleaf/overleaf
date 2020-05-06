@@ -1,300 +1,363 @@
-sinon = require "sinon"
-chai = require("chai")
-chai.should()
-Settings = require('settings-sharelatex')
-rclient_project_history = require("redis-sharelatex").createClient(Settings.redis.project_history)
-ProjectHistoryKeys = Settings.redis.project_history.key_schema
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require("sinon");
+const chai = require("chai");
+chai.should();
+const Settings = require('settings-sharelatex');
+const rclient_project_history = require("redis-sharelatex").createClient(Settings.redis.project_history);
+const ProjectHistoryKeys = Settings.redis.project_history.key_schema;
 
-MockProjectHistoryApi = require "./helpers/MockProjectHistoryApi"
-MockWebApi = require "./helpers/MockWebApi"
-DocUpdaterClient = require "./helpers/DocUpdaterClient"
-DocUpdaterApp = require "./helpers/DocUpdaterApp"
+const MockProjectHistoryApi = require("./helpers/MockProjectHistoryApi");
+const MockWebApi = require("./helpers/MockWebApi");
+const DocUpdaterClient = require("./helpers/DocUpdaterClient");
+const DocUpdaterApp = require("./helpers/DocUpdaterApp");
 
-describe "Applying updates to a project's structure", ->
-	before ->
-		@user_id = 'user-id-123'
-		@version = 1234
+describe("Applying updates to a project's structure", function() {
+	before(function() {
+		this.user_id = 'user-id-123';
+		return this.version = 1234;
+	});
 
-	describe "renaming a file", ->
-		before (done) ->
-			@project_id = DocUpdaterClient.randomId()
-			@fileUpdate =
-				id: DocUpdaterClient.randomId()
-				pathname: '/file-path'
+	describe("renaming a file", function() {
+		before(function(done) {
+			this.project_id = DocUpdaterClient.randomId();
+			this.fileUpdate = {
+				id: DocUpdaterClient.randomId(),
+				pathname: '/file-path',
 				newPathname: '/new-file-path'
-			@fileUpdates = [ @fileUpdate ]
-			DocUpdaterApp.ensureRunning (error) =>
-				throw error if error?
-				DocUpdaterClient.sendProjectUpdate @project_id, @user_id, [], @fileUpdates, @version, (error) ->
-					throw error if error?
-					setTimeout done, 200
+			};
+			this.fileUpdates = [ this.fileUpdate ];
+			return DocUpdaterApp.ensureRunning(error => {
+				if (error != null) { throw error; }
+				return DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, [], this.fileUpdates, this.version, function(error) {
+					if (error != null) { throw error; }
+					return setTimeout(done, 200);
+				});
+			});
+		});
 
-		it "should push the applied file renames to the project history api", (done) ->
-			rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
-				throw error if error?
+		return it("should push the applied file renames to the project history api", function(done) {
+			rclient_project_history.lrange(ProjectHistoryKeys.projectHistoryOps({project_id: this.project_id}), 0, -1, (error, updates) => {
+				if (error != null) { throw error; }
 
-				update = JSON.parse(updates[0])
-				update.file.should.equal @fileUpdate.id
-				update.pathname.should.equal '/file-path'
-				update.new_pathname.should.equal '/new-file-path'
-				update.meta.user_id.should.equal @user_id
-				update.meta.ts.should.be.a('string')
-				update.version.should.equal "#{@version}.0"
+				const update = JSON.parse(updates[0]);
+				update.file.should.equal(this.fileUpdate.id);
+				update.pathname.should.equal('/file-path');
+				update.new_pathname.should.equal('/new-file-path');
+				update.meta.user_id.should.equal(this.user_id);
+				update.meta.ts.should.be.a('string');
+				update.version.should.equal(`${this.version}.0`);
 
-				done()
-			return null
+				return done();
+			});
+			return null;
+		});
+	});
 
-	describe "renaming a document", ->
-		before ->
-			@docUpdate =
-				id: DocUpdaterClient.randomId()
-				pathname: '/doc-path'
+	describe("renaming a document", function() {
+		before(function() {
+			this.docUpdate = {
+				id: DocUpdaterClient.randomId(),
+				pathname: '/doc-path',
 				newPathname: '/new-doc-path'
-			@docUpdates = [ @docUpdate ]
+			};
+			return this.docUpdates = [ this.docUpdate ];});
 
-		describe "when the document is not loaded", ->
-			before (done) ->
-				@project_id = DocUpdaterClient.randomId()
-				DocUpdaterClient.sendProjectUpdate @project_id, @user_id, @docUpdates, [], @version, (error) ->
-					throw error if error?
-					setTimeout done, 200
-				return null
+		describe("when the document is not loaded", function() {
+			before(function(done) {
+				this.project_id = DocUpdaterClient.randomId();
+				DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, this.docUpdates, [], this.version, function(error) {
+					if (error != null) { throw error; }
+					return setTimeout(done, 200);
+				});
+				return null;
+			});
 
-			it "should push the applied doc renames to the project history api", (done) ->
-				rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
-					throw error if error?
+			return it("should push the applied doc renames to the project history api", function(done) {
+				rclient_project_history.lrange(ProjectHistoryKeys.projectHistoryOps({project_id: this.project_id}), 0, -1, (error, updates) => {
+					if (error != null) { throw error; }
 
-					update = JSON.parse(updates[0])
-					update.doc.should.equal @docUpdate.id
-					update.pathname.should.equal '/doc-path'
-					update.new_pathname.should.equal '/new-doc-path'
-					update.meta.user_id.should.equal @user_id
-					update.meta.ts.should.be.a('string')
-					update.version.should.equal "#{@version}.0"
+					const update = JSON.parse(updates[0]);
+					update.doc.should.equal(this.docUpdate.id);
+					update.pathname.should.equal('/doc-path');
+					update.new_pathname.should.equal('/new-doc-path');
+					update.meta.user_id.should.equal(this.user_id);
+					update.meta.ts.should.be.a('string');
+					update.version.should.equal(`${this.version}.0`);
 
-					done()
-				return null
+					return done();
+				});
+				return null;
+			});
+		});
 
-		describe "when the document is loaded", ->
-			before (done) ->
-				@project_id = DocUpdaterClient.randomId()
-				MockWebApi.insertDoc @project_id, @docUpdate.id, {}
-				DocUpdaterClient.preloadDoc @project_id, @docUpdate.id, (error) =>
-					throw error if error?
-					sinon.spy MockWebApi, "getDocument"
-					DocUpdaterClient.sendProjectUpdate @project_id, @user_id, @docUpdates, [], @version, (error) ->
-						throw error if error?
-						setTimeout done, 200
-				return null
+		return describe("when the document is loaded", function() {
+			before(function(done) {
+				this.project_id = DocUpdaterClient.randomId();
+				MockWebApi.insertDoc(this.project_id, this.docUpdate.id, {});
+				DocUpdaterClient.preloadDoc(this.project_id, this.docUpdate.id, error => {
+					if (error != null) { throw error; }
+					sinon.spy(MockWebApi, "getDocument");
+					return DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, this.docUpdates, [], this.version, function(error) {
+						if (error != null) { throw error; }
+						return setTimeout(done, 200);
+					});
+				});
+				return null;
+			});
 
-			after ->
-				MockWebApi.getDocument.restore()
+			after(() => MockWebApi.getDocument.restore());
 
-			it "should update the doc", (done) ->
-				DocUpdaterClient.getDoc @project_id, @docUpdate.id, (error, res, doc) =>
-					doc.pathname.should.equal @docUpdate.newPathname
-					done()
-				return null
+			it("should update the doc", function(done) {
+				DocUpdaterClient.getDoc(this.project_id, this.docUpdate.id, (error, res, doc) => {
+					doc.pathname.should.equal(this.docUpdate.newPathname);
+					return done();
+				});
+				return null;
+			});
 
-			it "should push the applied doc renames to the project history api", (done) ->
-				rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
-					throw error if error?
+			return it("should push the applied doc renames to the project history api", function(done) {
+				rclient_project_history.lrange(ProjectHistoryKeys.projectHistoryOps({project_id: this.project_id}), 0, -1, (error, updates) => {
+					if (error != null) { throw error; }
 
-					update = JSON.parse(updates[0])
-					update.doc.should.equal @docUpdate.id
-					update.pathname.should.equal '/doc-path'
-					update.new_pathname.should.equal '/new-doc-path'
-					update.meta.user_id.should.equal @user_id
-					update.meta.ts.should.be.a('string')
-					update.version.should.equal "#{@version}.0"
+					const update = JSON.parse(updates[0]);
+					update.doc.should.equal(this.docUpdate.id);
+					update.pathname.should.equal('/doc-path');
+					update.new_pathname.should.equal('/new-doc-path');
+					update.meta.user_id.should.equal(this.user_id);
+					update.meta.ts.should.be.a('string');
+					update.version.should.equal(`${this.version}.0`);
 
-					done()
-				return null
+					return done();
+				});
+				return null;
+			});
+		});
+	});
 
-	describe "renaming multiple documents and files", ->
-		before ->
-			@docUpdate0 =
-				id: DocUpdaterClient.randomId()
-				pathname: '/doc-path0'
+	describe("renaming multiple documents and files", function() {
+		before(function() {
+			this.docUpdate0 = {
+				id: DocUpdaterClient.randomId(),
+				pathname: '/doc-path0',
 				newPathname: '/new-doc-path0'
-			@docUpdate1 =
-				id: DocUpdaterClient.randomId()
-				pathname: '/doc-path1'
+			};
+			this.docUpdate1 = {
+				id: DocUpdaterClient.randomId(),
+				pathname: '/doc-path1',
 				newPathname: '/new-doc-path1'
-			@docUpdates = [ @docUpdate0, @docUpdate1 ]
-			@fileUpdate0 =
-				id: DocUpdaterClient.randomId()
-				pathname: '/file-path0'
+			};
+			this.docUpdates = [ this.docUpdate0, this.docUpdate1 ];
+			this.fileUpdate0 = {
+				id: DocUpdaterClient.randomId(),
+				pathname: '/file-path0',
 				newPathname: '/new-file-path0'
-			@fileUpdate1 =
-				id: DocUpdaterClient.randomId()
-				pathname: '/file-path1'
+			};
+			this.fileUpdate1 = {
+				id: DocUpdaterClient.randomId(),
+				pathname: '/file-path1',
 				newPathname: '/new-file-path1'
-			@fileUpdates = [ @fileUpdate0, @fileUpdate1 ]
+			};
+			return this.fileUpdates = [ this.fileUpdate0, this.fileUpdate1 ];});
 
-		describe "when the documents are not loaded", ->
-			before (done) ->
-				@project_id = DocUpdaterClient.randomId()
-				DocUpdaterClient.sendProjectUpdate @project_id, @user_id, @docUpdates, @fileUpdates, @version, (error) ->
-					throw error if error?
-					setTimeout done, 200
-				return null
+		return describe("when the documents are not loaded", function() {
+			before(function(done) {
+				this.project_id = DocUpdaterClient.randomId();
+				DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, this.docUpdates, this.fileUpdates, this.version, function(error) {
+					if (error != null) { throw error; }
+					return setTimeout(done, 200);
+				});
+				return null;
+			});
 
-			it "should push the applied doc renames to the project history api", (done) ->
-				rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
-					throw error if error?
+			return it("should push the applied doc renames to the project history api", function(done) {
+				rclient_project_history.lrange(ProjectHistoryKeys.projectHistoryOps({project_id: this.project_id}), 0, -1, (error, updates) => {
+					if (error != null) { throw error; }
 
-					update = JSON.parse(updates[0])
-					update.doc.should.equal @docUpdate0.id
-					update.pathname.should.equal '/doc-path0'
-					update.new_pathname.should.equal '/new-doc-path0'
-					update.meta.user_id.should.equal @user_id
-					update.meta.ts.should.be.a('string')
-					update.version.should.equal "#{@version}.0"
+					let update = JSON.parse(updates[0]);
+					update.doc.should.equal(this.docUpdate0.id);
+					update.pathname.should.equal('/doc-path0');
+					update.new_pathname.should.equal('/new-doc-path0');
+					update.meta.user_id.should.equal(this.user_id);
+					update.meta.ts.should.be.a('string');
+					update.version.should.equal(`${this.version}.0`);
 
-					update = JSON.parse(updates[1])
-					update.doc.should.equal @docUpdate1.id
-					update.pathname.should.equal '/doc-path1'
-					update.new_pathname.should.equal '/new-doc-path1'
-					update.meta.user_id.should.equal @user_id
-					update.meta.ts.should.be.a('string')
-					update.version.should.equal "#{@version}.1"
+					update = JSON.parse(updates[1]);
+					update.doc.should.equal(this.docUpdate1.id);
+					update.pathname.should.equal('/doc-path1');
+					update.new_pathname.should.equal('/new-doc-path1');
+					update.meta.user_id.should.equal(this.user_id);
+					update.meta.ts.should.be.a('string');
+					update.version.should.equal(`${this.version}.1`);
 
-					update = JSON.parse(updates[2])
-					update.file.should.equal @fileUpdate0.id
-					update.pathname.should.equal '/file-path0'
-					update.new_pathname.should.equal '/new-file-path0'
-					update.meta.user_id.should.equal @user_id
-					update.meta.ts.should.be.a('string')
-					update.version.should.equal "#{@version}.2"
+					update = JSON.parse(updates[2]);
+					update.file.should.equal(this.fileUpdate0.id);
+					update.pathname.should.equal('/file-path0');
+					update.new_pathname.should.equal('/new-file-path0');
+					update.meta.user_id.should.equal(this.user_id);
+					update.meta.ts.should.be.a('string');
+					update.version.should.equal(`${this.version}.2`);
 
-					update = JSON.parse(updates[3])
-					update.file.should.equal @fileUpdate1.id
-					update.pathname.should.equal '/file-path1'
-					update.new_pathname.should.equal '/new-file-path1'
-					update.meta.user_id.should.equal @user_id
-					update.meta.ts.should.be.a('string')
-					update.version.should.equal "#{@version}.3"
+					update = JSON.parse(updates[3]);
+					update.file.should.equal(this.fileUpdate1.id);
+					update.pathname.should.equal('/file-path1');
+					update.new_pathname.should.equal('/new-file-path1');
+					update.meta.user_id.should.equal(this.user_id);
+					update.meta.ts.should.be.a('string');
+					update.version.should.equal(`${this.version}.3`);
 
-					done()
-				return null
+					return done();
+				});
+				return null;
+			});
+		});
+	});
 
 
-	describe "adding a file", ->
-		before (done) ->
-			@project_id = DocUpdaterClient.randomId()
-			@fileUpdate =
-				id: DocUpdaterClient.randomId()
-				pathname: '/file-path'
+	describe("adding a file", function() {
+		before(function(done) {
+			this.project_id = DocUpdaterClient.randomId();
+			this.fileUpdate = {
+				id: DocUpdaterClient.randomId(),
+				pathname: '/file-path',
 				url: 'filestore.example.com'
-			@fileUpdates = [ @fileUpdate ]
-			DocUpdaterClient.sendProjectUpdate @project_id, @user_id, [], @fileUpdates, @version, (error) ->
-				throw error if error?
-				setTimeout done, 200
-			return null
+			};
+			this.fileUpdates = [ this.fileUpdate ];
+			DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, [], this.fileUpdates, this.version, function(error) {
+				if (error != null) { throw error; }
+				return setTimeout(done, 200);
+			});
+			return null;
+		});
 
-		it "should push the file addition to the project history api", (done) ->
-			rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
-				throw error if error?
+		return it("should push the file addition to the project history api", function(done) {
+			rclient_project_history.lrange(ProjectHistoryKeys.projectHistoryOps({project_id: this.project_id}), 0, -1, (error, updates) => {
+				if (error != null) { throw error; }
 
-				update = JSON.parse(updates[0])
-				update.file.should.equal @fileUpdate.id
-				update.pathname.should.equal '/file-path'
-				update.url.should.equal 'filestore.example.com'
-				update.meta.user_id.should.equal @user_id
-				update.meta.ts.should.be.a('string')
-				update.version.should.equal "#{@version}.0"
+				const update = JSON.parse(updates[0]);
+				update.file.should.equal(this.fileUpdate.id);
+				update.pathname.should.equal('/file-path');
+				update.url.should.equal('filestore.example.com');
+				update.meta.user_id.should.equal(this.user_id);
+				update.meta.ts.should.be.a('string');
+				update.version.should.equal(`${this.version}.0`);
 
-				done()
-			return null
+				return done();
+			});
+			return null;
+		});
+	});
 
-	describe "adding a doc", ->
-		before (done) ->
-			@project_id = DocUpdaterClient.randomId()
-			@docUpdate =
-				id: DocUpdaterClient.randomId()
-				pathname: '/file-path'
+	describe("adding a doc", function() {
+		before(function(done) {
+			this.project_id = DocUpdaterClient.randomId();
+			this.docUpdate = {
+				id: DocUpdaterClient.randomId(),
+				pathname: '/file-path',
 				docLines: 'a\nb'
-			@docUpdates = [ @docUpdate ]
-			DocUpdaterClient.sendProjectUpdate @project_id, @user_id, @docUpdates, [], @version, (error) ->
-				throw error if error?
-				setTimeout done, 200
-			return null
+			};
+			this.docUpdates = [ this.docUpdate ];
+			DocUpdaterClient.sendProjectUpdate(this.project_id, this.user_id, this.docUpdates, [], this.version, function(error) {
+				if (error != null) { throw error; }
+				return setTimeout(done, 200);
+			});
+			return null;
+		});
 
-		it "should push the doc addition to the project history api", (done) ->
-			rclient_project_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
-				throw error if error?
+		return it("should push the doc addition to the project history api", function(done) {
+			rclient_project_history.lrange(ProjectHistoryKeys.projectHistoryOps({project_id: this.project_id}), 0, -1, (error, updates) => {
+				if (error != null) { throw error; }
 
-				update = JSON.parse(updates[0])
-				update.doc.should.equal @docUpdate.id
-				update.pathname.should.equal '/file-path'
-				update.docLines.should.equal 'a\nb'
-				update.meta.user_id.should.equal @user_id
-				update.meta.ts.should.be.a('string')
-				update.version.should.equal "#{@version}.0"
+				const update = JSON.parse(updates[0]);
+				update.doc.should.equal(this.docUpdate.id);
+				update.pathname.should.equal('/file-path');
+				update.docLines.should.equal('a\nb');
+				update.meta.user_id.should.equal(this.user_id);
+				update.meta.ts.should.be.a('string');
+				update.version.should.equal(`${this.version}.0`);
 
-				done()
-			return null
+				return done();
+			});
+			return null;
+		});
+	});
 
-	describe "with enough updates to flush to the history service", ->
-		before (done) ->
-			@project_id = DocUpdaterClient.randomId()
-			@user_id = DocUpdaterClient.randomId()
-			@version0 = 12345
-			@version1 = @version0 + 1
-			updates = []
-			for v in [0..599] # Should flush after 500 ops
-				updates.push
+	describe("with enough updates to flush to the history service", function() {
+		before(function(done) {
+			this.project_id = DocUpdaterClient.randomId();
+			this.user_id = DocUpdaterClient.randomId();
+			this.version0 = 12345;
+			this.version1 = this.version0 + 1;
+			const updates = [];
+			for (let v = 0; v <= 599; v++) { // Should flush after 500 ops
+				updates.push({
 					id: DocUpdaterClient.randomId(),
-					pathname: '/file-' + v
+					pathname: '/file-' + v,
 					docLines: 'a\nb'
+				});
+			}
 
-			sinon.spy MockProjectHistoryApi, "flushProject"
+			sinon.spy(MockProjectHistoryApi, "flushProject");
 
-			# Send updates in chunks to causes multiple flushes
-			projectId = @project_id
-			userId = @project_id
-			DocUpdaterClient.sendProjectUpdate projectId, userId, updates.slice(0, 250), [], @version0, (error) ->
-				throw error if error?
-				DocUpdaterClient.sendProjectUpdate projectId, userId, updates.slice(250), [], @version1, (error) ->
-					throw error if error?
-					setTimeout done, 2000
-			return null
+			// Send updates in chunks to causes multiple flushes
+			const projectId = this.project_id;
+			const userId = this.project_id;
+			DocUpdaterClient.sendProjectUpdate(projectId, userId, updates.slice(0, 250), [], this.version0, function(error) {
+				if (error != null) { throw error; }
+				return DocUpdaterClient.sendProjectUpdate(projectId, userId, updates.slice(250), [], this.version1, function(error) {
+					if (error != null) { throw error; }
+					return setTimeout(done, 2000);
+				});
+			});
+			return null;
+		});
 
-		after ->
-			MockProjectHistoryApi.flushProject.restore()
+		after(() => MockProjectHistoryApi.flushProject.restore());
 
-		it "should flush project history", ->
-			MockProjectHistoryApi.flushProject.calledWith(@project_id).should.equal true
+		return it("should flush project history", function() {
+			return MockProjectHistoryApi.flushProject.calledWith(this.project_id).should.equal(true);
+		});
+	});
 
-	describe "with too few updates to flush to the history service", ->
-		before (done) ->
-			@project_id = DocUpdaterClient.randomId()
-			@user_id = DocUpdaterClient.randomId()
-			@version0 = 12345
-			@version1 = @version0 + 1
+	return describe("with too few updates to flush to the history service", function() {
+		before(function(done) {
+			this.project_id = DocUpdaterClient.randomId();
+			this.user_id = DocUpdaterClient.randomId();
+			this.version0 = 12345;
+			this.version1 = this.version0 + 1;
 
-			updates = []
-			for v in [0..42] # Should flush after 500 ops
-				updates.push
+			const updates = [];
+			for (let v = 0; v <= 42; v++) { // Should flush after 500 ops
+				updates.push({
 					id: DocUpdaterClient.randomId(),
-					pathname: '/file-' + v
+					pathname: '/file-' + v,
 					docLines: 'a\nb'
+				});
+			}
 
-			sinon.spy MockProjectHistoryApi, "flushProject"
+			sinon.spy(MockProjectHistoryApi, "flushProject");
 
-			# Send updates in chunks
-			projectId = @project_id
-			userId = @project_id
-			DocUpdaterClient.sendProjectUpdate projectId, userId, updates.slice(0, 10), [], @version0, (error) ->
-				throw error if error?
-				DocUpdaterClient.sendProjectUpdate projectId, userId, updates.slice(10), [], @version1, (error) ->
-					throw error if error?
-					setTimeout done, 2000
-			return null
+			// Send updates in chunks
+			const projectId = this.project_id;
+			const userId = this.project_id;
+			DocUpdaterClient.sendProjectUpdate(projectId, userId, updates.slice(0, 10), [], this.version0, function(error) {
+				if (error != null) { throw error; }
+				return DocUpdaterClient.sendProjectUpdate(projectId, userId, updates.slice(10), [], this.version1, function(error) {
+					if (error != null) { throw error; }
+					return setTimeout(done, 2000);
+				});
+			});
+			return null;
+		});
 
-		after ->
-			MockProjectHistoryApi.flushProject.restore()
+		after(() => MockProjectHistoryApi.flushProject.restore());
 
-		it "should not flush project history", ->
-			MockProjectHistoryApi.flushProject.calledWith(@project_id).should.equal false
+		return it("should not flush project history", function() {
+			return MockProjectHistoryApi.flushProject.calledWith(this.project_id).should.equal(false);
+		});
+	});
+});
