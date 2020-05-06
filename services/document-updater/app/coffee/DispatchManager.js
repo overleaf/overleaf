@@ -1,55 +1,81 @@
-Settings = require('settings-sharelatex')
-logger = require('logger-sharelatex')
-Keys = require('./UpdateKeys')
-redis = require("redis-sharelatex")
-Errors = require("./Errors")
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS202: Simplify dynamic range loops
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let DispatchManager;
+const Settings = require('settings-sharelatex');
+const logger = require('logger-sharelatex');
+const Keys = require('./UpdateKeys');
+const redis = require("redis-sharelatex");
+const Errors = require("./Errors");
 
-UpdateManager = require('./UpdateManager')
-Metrics = require('./Metrics')
-RateLimitManager = require('./RateLimitManager')
+const UpdateManager = require('./UpdateManager');
+const Metrics = require('./Metrics');
+const RateLimitManager = require('./RateLimitManager');
 
-module.exports = DispatchManager =
-	createDispatcher: (RateLimiter) ->
-		client = redis.createClient(Settings.redis.documentupdater)
-		worker = {
-			client: client
-			_waitForUpdateThenDispatchWorker: (callback = (error) ->) ->
-				timer = new Metrics.Timer "worker.waiting"
-				worker.client.blpop "pending-updates-list", 0, (error, result) ->
-					logger.log("getting pending-updates-list", error, result)
-					timer.done()
-					return callback(error) if error?
-					return callback() if !result?
-					[list_name, doc_key] = result
-					[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
-					# Dispatch this in the background
-					backgroundTask = (cb) ->
-						UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, (error) ->
-							# log everything except OpRangeNotAvailable errors, these are normal
-							if error? 
-								# downgrade OpRangeNotAvailable and "Delete component" errors so they are not sent to sentry
-								logAsWarning = (error instanceof Errors.OpRangeNotAvailableError) || (error instanceof Errors.DeleteMismatchError)
-								if logAsWarning
-									logger.warn err: error, project_id: project_id, doc_id: doc_id, "error processing update"
-								else
-									logger.error err: error, project_id: project_id, doc_id: doc_id, "error processing update"
-							cb()
-					RateLimiter.run backgroundTask, callback
+module.exports = (DispatchManager = {
+	createDispatcher(RateLimiter) {
+		const client = redis.createClient(Settings.redis.documentupdater);
+		var worker = {
+			client,
+			_waitForUpdateThenDispatchWorker(callback) {
+				if (callback == null) { callback = function(error) {}; }
+				const timer = new Metrics.Timer("worker.waiting");
+				return worker.client.blpop("pending-updates-list", 0, function(error, result) {
+					logger.log("getting pending-updates-list", error, result);
+					timer.done();
+					if (error != null) { return callback(error); }
+					if ((result == null)) { return callback(); }
+					const [list_name, doc_key] = Array.from(result);
+					const [project_id, doc_id] = Array.from(Keys.splitProjectIdAndDocId(doc_key));
+					// Dispatch this in the background
+					const backgroundTask = cb => UpdateManager.processOutstandingUpdatesWithLock(project_id, doc_id, function(error) {
+                        // log everything except OpRangeNotAvailable errors, these are normal
+                        if (error != null) { 
+                            // downgrade OpRangeNotAvailable and "Delete component" errors so they are not sent to sentry
+                            const logAsWarning = (error instanceof Errors.OpRangeNotAvailableError) || (error instanceof Errors.DeleteMismatchError);
+                            if (logAsWarning) {
+                                logger.warn({err: error, project_id, doc_id}, "error processing update");
+                            } else {
+                                logger.error({err: error, project_id, doc_id}, "error processing update");
+                            }
+                        }
+                        return cb();
+                    });
+					return RateLimiter.run(backgroundTask, callback);
+				});
+			},
 						
-			run: () ->
-				return if Settings.shuttingDown
-				worker._waitForUpdateThenDispatchWorker (error) =>
-					if error?
-						logger.error err: error, "Error in worker process"
-						throw error
-					else
-						worker.run()
-		}
+			run() {
+				if (Settings.shuttingDown) { return; }
+				return worker._waitForUpdateThenDispatchWorker(error => {
+					if (error != null) {
+						logger.error({err: error}, "Error in worker process");
+						throw error;
+					} else {
+						return worker.run();
+					}
+				});
+			}
+		};
 		
-		return worker
+		return worker;
+	},
 		
-	createAndStartDispatchers: (number) ->
-		RateLimiter = new RateLimitManager(number)
-		for i in [1..number]
-			worker = DispatchManager.createDispatcher(RateLimiter)
-			worker.run()
+	createAndStartDispatchers(number) {
+		const RateLimiter = new RateLimitManager(number);
+		return (() => {
+			const result = [];
+			for (let i = 1, end = number, asc = 1 <= end; asc ? i <= end : i >= end; asc ? i++ : i--) {
+				const worker = DispatchManager.createDispatcher(RateLimiter);
+				result.push(worker.run());
+			}
+			return result;
+		})();
+	}
+});

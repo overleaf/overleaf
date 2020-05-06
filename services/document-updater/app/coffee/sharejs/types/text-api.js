@@ -1,32 +1,44 @@
-# Text document API for text
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+// Text document API for text
 
-text = require './text' if typeof WEB is 'undefined'
+let text;
+if (typeof WEB === 'undefined') { text = require('./text'); }
 
-text.api =
-  provides: {text:true}
+text.api = {
+  provides: {text:true},
 
-  # The number of characters in the string
-  getLength: -> @snapshot.length
+  // The number of characters in the string
+  getLength() { return this.snapshot.length; },
 
-  # Get the text contents of a document
-  getText: -> @snapshot
+  // Get the text contents of a document
+  getText() { return this.snapshot; },
 
-  insert: (pos, text, callback) ->
-    op = [{p:pos, i:text}]
+  insert(pos, text, callback) {
+    const op = [{p:pos, i:text}];
     
-    @submitOp op, callback
-    op
+    this.submitOp(op, callback);
+    return op;
+  },
   
-  del: (pos, length, callback) ->
-    op = [{p:pos, d:@snapshot[pos...(pos + length)]}]
+  del(pos, length, callback) {
+    const op = [{p:pos, d:this.snapshot.slice(pos, (pos + length))}];
 
-    @submitOp op, callback
-    op
+    this.submitOp(op, callback);
+    return op;
+  },
   
-  _register: ->
-    @on 'remoteop', (op) ->
-      for component in op
-        if component.i != undefined
-          @emit 'insert', component.p, component.i
-        else
-          @emit 'delete', component.p, component.d
+  _register() {
+    return this.on('remoteop', function(op) {
+      return Array.from(op).map((component) =>
+        component.i !== undefined ?
+          this.emit('insert', component.p, component.i)
+        :
+          this.emit('delete', component.p, component.d));
+    });
+  }
+};

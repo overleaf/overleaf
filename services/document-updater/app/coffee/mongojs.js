@@ -1,12 +1,21 @@
-Settings = require "settings-sharelatex"
-mongojs = require "mongojs"
-db = mongojs(Settings.mongo.url, ["docSnapshots"])
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const Settings = require("settings-sharelatex");
+const mongojs = require("mongojs");
+const db = mongojs(Settings.mongo.url, ["docSnapshots"]);
 
-module.exports =
-	db: db
-	ObjectId: mongojs.ObjectId
-	healthCheck: (callback) ->
-		db.runCommand {ping: 1}, (err, res) ->
-			return callback(err) if err?
-			return callback(new Error("failed mongo ping")) if !res.ok
-			callback()
+module.exports = {
+	db,
+	ObjectId: mongojs.ObjectId,
+	healthCheck(callback) {
+		return db.runCommand({ping: 1}, function(err, res) {
+			if (err != null) { return callback(err); }
+			if (!res.ok) { return callback(new Error("failed mongo ping")); }
+			return callback();
+		});
+	}
+};

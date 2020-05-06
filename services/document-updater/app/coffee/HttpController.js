@@ -1,231 +1,336 @@
-DocumentManager = require "./DocumentManager"
-HistoryManager = require "./HistoryManager"
-ProjectManager = require "./ProjectManager"
-Errors = require "./Errors"
-logger = require "logger-sharelatex"
-Metrics = require "./Metrics"
-ProjectFlusher = require("./ProjectFlusher")
-DeleteQueueManager = require("./DeleteQueueManager")
-async = require "async"
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS103: Rewrite code to no longer use __guard__
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let HttpController;
+const DocumentManager = require("./DocumentManager");
+const HistoryManager = require("./HistoryManager");
+const ProjectManager = require("./ProjectManager");
+const Errors = require("./Errors");
+const logger = require("logger-sharelatex");
+const Metrics = require("./Metrics");
+const ProjectFlusher = require("./ProjectFlusher");
+const DeleteQueueManager = require("./DeleteQueueManager");
+const async = require("async");
 
-TWO_MEGABYTES = 2 * 1024 * 1024
+const TWO_MEGABYTES = 2 * 1024 * 1024;
 
-module.exports = HttpController =
-	getDoc: (req, res, next = (error) ->) ->
-		doc_id = req.params.doc_id
-		project_id = req.params.project_id
-		logger.log project_id: project_id, doc_id: doc_id, "getting doc via http"
-		timer = new Metrics.Timer("http.getDoc")
+module.exports = (HttpController = {
+	getDoc(req, res, next) {
+		let fromVersion;
+		if (next == null) { next = function(error) {}; }
+		const {
+            doc_id
+        } = req.params;
+		const {
+            project_id
+        } = req.params;
+		logger.log({project_id, doc_id}, "getting doc via http");
+		const timer = new Metrics.Timer("http.getDoc");
 
-		if req.query?.fromVersion?
-			fromVersion = parseInt(req.query.fromVersion, 10)
-		else
-			fromVersion = -1
+		if ((req.query != null ? req.query.fromVersion : undefined) != null) {
+			fromVersion = parseInt(req.query.fromVersion, 10);
+		} else {
+			fromVersion = -1;
+		}
 
-		DocumentManager.getDocAndRecentOpsWithLock project_id, doc_id, fromVersion, (error, lines, version, ops, ranges, pathname) ->
-			timer.done()
-			return next(error) if error?
-			logger.log project_id: project_id, doc_id: doc_id, "got doc via http"
-			if !lines? or !version?
-				return next(new Errors.NotFoundError("document not found"))
-			res.json
-				id: doc_id
-				lines: lines
-				version: version
-				ops: ops
-				ranges: ranges
-				pathname: pathname
+		return DocumentManager.getDocAndRecentOpsWithLock(project_id, doc_id, fromVersion, function(error, lines, version, ops, ranges, pathname) {
+			timer.done();
+			if (error != null) { return next(error); }
+			logger.log({project_id, doc_id}, "got doc via http");
+			if ((lines == null) || (version == null)) {
+				return next(new Errors.NotFoundError("document not found"));
+			}
+			return res.json({
+				id: doc_id,
+				lines,
+				version,
+				ops,
+				ranges,
+				pathname
+			});
+		});
+	},
 
-	_getTotalSizeOfLines: (lines) ->
-		size = 0
-		for line in lines
-			size += (line.length + 1)
-		return size
+	_getTotalSizeOfLines(lines) {
+		let size = 0;
+		for (let line of Array.from(lines)) {
+			size += (line.length + 1);
+		}
+		return size;
+	},
 
-	getProjectDocsAndFlushIfOld: (req, res, next = (error) ->) ->
-		project_id = req.params.project_id
-		projectStateHash = req.query?.state
-		# exclude is string of existing docs "id:version,id:version,..."
-		excludeItems = req.query?.exclude?.split(',') or []
-		logger.log project_id: project_id, exclude: excludeItems, "getting docs via http"
-		timer = new Metrics.Timer("http.getAllDocs")
-		excludeVersions = {}
-		for item in excludeItems
-			[id,version] = item?.split(':')
-			excludeVersions[id] = version
-		logger.log {project_id: project_id, projectStateHash: projectStateHash, excludeVersions: excludeVersions}, "excluding versions"
-		ProjectManager.getProjectDocsAndFlushIfOld project_id, projectStateHash, excludeVersions, (error, result) ->
-			timer.done()
-			if error instanceof Errors.ProjectStateChangedError
-				res.sendStatus 409 # conflict
-			else if error?
-				return next(error)
-			else
-				logger.log project_id: project_id, result: ("#{doc._id}:#{doc.v}" for doc in result), "got docs via http"
-				res.send result
+	getProjectDocsAndFlushIfOld(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		const {
+            project_id
+        } = req.params;
+		const projectStateHash = req.query != null ? req.query.state : undefined;
+		// exclude is string of existing docs "id:version,id:version,..."
+		const excludeItems = __guard__(req.query != null ? req.query.exclude : undefined, x => x.split(',')) || [];
+		logger.log({project_id, exclude: excludeItems}, "getting docs via http");
+		const timer = new Metrics.Timer("http.getAllDocs");
+		const excludeVersions = {};
+		for (let item of Array.from(excludeItems)) {
+			const [id,version] = Array.from(item != null ? item.split(':') : undefined);
+			excludeVersions[id] = version;
+		}
+		logger.log({project_id, projectStateHash, excludeVersions}, "excluding versions");
+		return ProjectManager.getProjectDocsAndFlushIfOld(project_id, projectStateHash, excludeVersions, function(error, result) {
+			timer.done();
+			if (error instanceof Errors.ProjectStateChangedError) {
+				return res.sendStatus(409); // conflict
+			} else if (error != null) {
+				return next(error);
+			} else {
+				logger.log({project_id, result: ((Array.from(result).map((doc) => `${doc._id}:${doc.v}`)))}, "got docs via http");
+				return res.send(result);
+			}
+		});
+	},
 
-	clearProjectState: (req, res, next = (error) ->) ->
-		project_id = req.params.project_id
-		timer = new Metrics.Timer("http.clearProjectState")
-		logger.log project_id: project_id, "clearing project state via http"
-		ProjectManager.clearProjectState project_id, (error) ->
-			timer.done()
-			if error?
-				return next(error)
-			else
-				res.sendStatus 200
+	clearProjectState(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		const {
+            project_id
+        } = req.params;
+		const timer = new Metrics.Timer("http.clearProjectState");
+		logger.log({project_id}, "clearing project state via http");
+		return ProjectManager.clearProjectState(project_id, function(error) {
+			timer.done();
+			if (error != null) {
+				return next(error);
+			} else {
+				return res.sendStatus(200);
+			}
+		});
+	},
 
-	setDoc: (req, res, next = (error) ->) ->
-		doc_id = req.params.doc_id
-		project_id = req.params.project_id
-		{lines, source, user_id, undoing} = req.body
-		lineSize = HttpController._getTotalSizeOfLines(lines)
-		if lineSize > TWO_MEGABYTES
-			logger.log {project_id, doc_id, source, lineSize, user_id}, "document too large, returning 406 response"
-			return res.sendStatus 406
-		logger.log {project_id, doc_id, lines, source, user_id, undoing}, "setting doc via http"
-		timer = new Metrics.Timer("http.setDoc")
-		DocumentManager.setDocWithLock project_id, doc_id, lines, source, user_id, undoing, (error) ->
-			timer.done()
-			return next(error) if error?
-			logger.log project_id: project_id, doc_id: doc_id, "set doc via http"
-			res.sendStatus 204 # No Content
+	setDoc(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		const {
+            doc_id
+        } = req.params;
+		const {
+            project_id
+        } = req.params;
+		const {lines, source, user_id, undoing} = req.body;
+		const lineSize = HttpController._getTotalSizeOfLines(lines);
+		if (lineSize > TWO_MEGABYTES) {
+			logger.log({project_id, doc_id, source, lineSize, user_id}, "document too large, returning 406 response");
+			return res.sendStatus(406);
+		}
+		logger.log({project_id, doc_id, lines, source, user_id, undoing}, "setting doc via http");
+		const timer = new Metrics.Timer("http.setDoc");
+		return DocumentManager.setDocWithLock(project_id, doc_id, lines, source, user_id, undoing, function(error) {
+			timer.done();
+			if (error != null) { return next(error); }
+			logger.log({project_id, doc_id}, "set doc via http");
+			return res.sendStatus(204);
+		});
+	}, // No Content
 
 
-	flushDocIfLoaded: (req, res, next = (error) ->) ->
-		doc_id = req.params.doc_id
-		project_id = req.params.project_id
-		logger.log project_id: project_id, doc_id: doc_id, "flushing doc via http"
-		timer = new Metrics.Timer("http.flushDoc")
-		DocumentManager.flushDocIfLoadedWithLock project_id, doc_id, (error) ->
-			timer.done()
-			return next(error) if error?
-			logger.log project_id: project_id, doc_id: doc_id, "flushed doc via http"
-			res.sendStatus 204 # No Content
+	flushDocIfLoaded(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		const {
+            doc_id
+        } = req.params;
+		const {
+            project_id
+        } = req.params;
+		logger.log({project_id, doc_id}, "flushing doc via http");
+		const timer = new Metrics.Timer("http.flushDoc");
+		return DocumentManager.flushDocIfLoadedWithLock(project_id, doc_id, function(error) {
+			timer.done();
+			if (error != null) { return next(error); }
+			logger.log({project_id, doc_id}, "flushed doc via http");
+			return res.sendStatus(204);
+		});
+	}, // No Content
 
-	deleteDoc: (req, res, next = (error) ->) ->
-		doc_id = req.params.doc_id
-		project_id = req.params.project_id
-		ignoreFlushErrors = req.query.ignore_flush_errors == 'true'
-		timer = new Metrics.Timer("http.deleteDoc")
-		logger.log project_id: project_id, doc_id: doc_id, "deleting doc via http"
-		DocumentManager.flushAndDeleteDocWithLock project_id, doc_id, { ignoreFlushErrors: ignoreFlushErrors }, (error) ->
-			timer.done()
-			# There is no harm in flushing project history if the previous call
-			# failed and sometimes it is required
-			HistoryManager.flushProjectChangesAsync project_id
+	deleteDoc(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		const {
+            doc_id
+        } = req.params;
+		const {
+            project_id
+        } = req.params;
+		const ignoreFlushErrors = req.query.ignore_flush_errors === 'true';
+		const timer = new Metrics.Timer("http.deleteDoc");
+		logger.log({project_id, doc_id}, "deleting doc via http");
+		return DocumentManager.flushAndDeleteDocWithLock(project_id, doc_id, { ignoreFlushErrors }, function(error) {
+			timer.done();
+			// There is no harm in flushing project history if the previous call
+			// failed and sometimes it is required
+			HistoryManager.flushProjectChangesAsync(project_id);
 
-			return next(error) if error?
-			logger.log project_id: project_id, doc_id: doc_id, "deleted doc via http"
-			res.sendStatus 204 # No Content
+			if (error != null) { return next(error); }
+			logger.log({project_id, doc_id}, "deleted doc via http");
+			return res.sendStatus(204);
+		});
+	}, // No Content
 
-	flushProject: (req, res, next = (error) ->) ->
-		project_id = req.params.project_id
-		logger.log project_id: project_id, "flushing project via http"
-		timer = new Metrics.Timer("http.flushProject")
-		ProjectManager.flushProjectWithLocks project_id, (error) ->
-			timer.done()
-			return next(error) if error?
-			logger.log project_id: project_id, "flushed project via http"
-			res.sendStatus 204 # No Content
+	flushProject(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		const {
+            project_id
+        } = req.params;
+		logger.log({project_id}, "flushing project via http");
+		const timer = new Metrics.Timer("http.flushProject");
+		return ProjectManager.flushProjectWithLocks(project_id, function(error) {
+			timer.done();
+			if (error != null) { return next(error); }
+			logger.log({project_id}, "flushed project via http");
+			return res.sendStatus(204);
+		});
+	}, // No Content
 
-	deleteProject: (req, res, next = (error) ->) ->
-		project_id = req.params.project_id
-		logger.log project_id: project_id, "deleting project via http"
-		options = {}
-		options.background = true if req.query?.background # allow non-urgent flushes to be queued
-		options.skip_history_flush = true if req.query?.shutdown # don't flush history when realtime shuts down
-		if req.query?.background
-			ProjectManager.queueFlushAndDeleteProject project_id, (error) ->
-				return next(error) if error?
-				logger.log project_id: project_id, "queue delete of project via http"
-				res.sendStatus 204 # No Content
-		else
-			timer = new Metrics.Timer("http.deleteProject")
-			ProjectManager.flushAndDeleteProjectWithLocks project_id, options, (error) ->
-				timer.done()
-				return next(error) if error?
-				logger.log project_id: project_id, "deleted project via http"
-				res.sendStatus 204 # No Content
+	deleteProject(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		const {
+            project_id
+        } = req.params;
+		logger.log({project_id}, "deleting project via http");
+		const options = {};
+		if (req.query != null ? req.query.background : undefined) { options.background = true; } // allow non-urgent flushes to be queued
+		if (req.query != null ? req.query.shutdown : undefined) { options.skip_history_flush = true; } // don't flush history when realtime shuts down
+		if (req.query != null ? req.query.background : undefined) {
+			return ProjectManager.queueFlushAndDeleteProject(project_id, function(error) {
+				if (error != null) { return next(error); }
+				logger.log({project_id}, "queue delete of project via http");
+				return res.sendStatus(204);
+			}); // No Content
+		} else {
+			const timer = new Metrics.Timer("http.deleteProject");
+			return ProjectManager.flushAndDeleteProjectWithLocks(project_id, options, function(error) {
+				timer.done();
+				if (error != null) { return next(error); }
+				logger.log({project_id}, "deleted project via http");
+				return res.sendStatus(204);
+			});
+		}
+	}, // No Content
 
-	deleteMultipleProjects: (req, res, next = (error) ->) ->
-		project_ids = req.body?.project_ids || []
-		logger.log project_ids: project_ids, "deleting multiple projects via http"
-		async.eachSeries project_ids, (project_id, cb) ->
-			logger.log project_id: project_id, "queue delete of project via http"
-			ProjectManager.queueFlushAndDeleteProject project_id, cb
-		, (error) ->
-			return next(error) if error?
-			res.sendStatus 204 # No Content
+	deleteMultipleProjects(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		const project_ids = (req.body != null ? req.body.project_ids : undefined) || [];
+		logger.log({project_ids}, "deleting multiple projects via http");
+		return async.eachSeries(project_ids, function(project_id, cb) {
+			logger.log({project_id}, "queue delete of project via http");
+			return ProjectManager.queueFlushAndDeleteProject(project_id, cb);
+		}
+		, function(error) {
+			if (error != null) { return next(error); }
+			return res.sendStatus(204);
+		});
+	}, // No Content
 
-	acceptChanges: (req, res, next = (error) ->) ->
-		{project_id, doc_id} = req.params
-		change_ids = req.body?.change_ids
-		if !change_ids?
-			change_ids = [ req.params.change_id ]
-		logger.log {project_id, doc_id}, "accepting #{ change_ids.length } changes via http"
-		timer = new Metrics.Timer("http.acceptChanges")
-		DocumentManager.acceptChangesWithLock project_id, doc_id, change_ids, (error) ->
-			timer.done()
-			return next(error) if error?
-			logger.log {project_id, doc_id}, "accepted #{ change_ids.length } changes via http"
-			res.sendStatus 204 # No Content
+	acceptChanges(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		const {project_id, doc_id} = req.params;
+		let change_ids = req.body != null ? req.body.change_ids : undefined;
+		if ((change_ids == null)) {
+			change_ids = [ req.params.change_id ];
+		}
+		logger.log({project_id, doc_id}, `accepting ${ change_ids.length } changes via http`);
+		const timer = new Metrics.Timer("http.acceptChanges");
+		return DocumentManager.acceptChangesWithLock(project_id, doc_id, change_ids, function(error) {
+			timer.done();
+			if (error != null) { return next(error); }
+			logger.log({project_id, doc_id}, `accepted ${ change_ids.length } changes via http`);
+			return res.sendStatus(204);
+		});
+	}, // No Content
 
-	deleteComment: (req, res, next = (error) ->) ->
-		{project_id, doc_id, comment_id} = req.params
-		logger.log {project_id, doc_id, comment_id}, "deleting comment via http"
-		timer = new Metrics.Timer("http.deleteComment")
-		DocumentManager.deleteCommentWithLock project_id, doc_id, comment_id, (error) ->
-			timer.done()
-			return next(error) if error?
-			logger.log {project_id, doc_id, comment_id}, "deleted comment via http"
-			res.sendStatus 204 # No Content
+	deleteComment(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		const {project_id, doc_id, comment_id} = req.params;
+		logger.log({project_id, doc_id, comment_id}, "deleting comment via http");
+		const timer = new Metrics.Timer("http.deleteComment");
+		return DocumentManager.deleteCommentWithLock(project_id, doc_id, comment_id, function(error) {
+			timer.done();
+			if (error != null) { return next(error); }
+			logger.log({project_id, doc_id, comment_id}, "deleted comment via http");
+			return res.sendStatus(204);
+		});
+	}, // No Content
 
-	updateProject: (req, res, next = (error) ->) ->
-		timer = new Metrics.Timer("http.updateProject")
-		project_id = req.params.project_id
-		{projectHistoryId, userId, docUpdates, fileUpdates, version} = req.body
-		logger.log {project_id, docUpdates, fileUpdates, version}, "updating project via http"
+	updateProject(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		const timer = new Metrics.Timer("http.updateProject");
+		const {
+            project_id
+        } = req.params;
+		const {projectHistoryId, userId, docUpdates, fileUpdates, version} = req.body;
+		logger.log({project_id, docUpdates, fileUpdates, version}, "updating project via http");
 
-		ProjectManager.updateProjectWithLocks project_id, projectHistoryId, userId, docUpdates, fileUpdates, version, (error) ->
-			timer.done()
-			return next(error) if error?
-			logger.log project_id: project_id, "updated project via http"
-			res.sendStatus 204 # No Content
+		return ProjectManager.updateProjectWithLocks(project_id, projectHistoryId, userId, docUpdates, fileUpdates, version, function(error) {
+			timer.done();
+			if (error != null) { return next(error); }
+			logger.log({project_id}, "updated project via http");
+			return res.sendStatus(204);
+		});
+	}, // No Content
 
-	resyncProjectHistory: (req, res, next = (error) ->) ->
-		project_id = req.params.project_id
-		{projectHistoryId, docs, files} = req.body
+	resyncProjectHistory(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		const {
+            project_id
+        } = req.params;
+		const {projectHistoryId, docs, files} = req.body;
 
-		logger.log {project_id, docs, files}, "queuing project history resync via http"
-		HistoryManager.resyncProjectHistory project_id, projectHistoryId, docs, files, (error) ->
-			return next(error) if error?
-			logger.log {project_id}, "queued project history resync via http"
-			res.sendStatus 204
+		logger.log({project_id, docs, files}, "queuing project history resync via http");
+		return HistoryManager.resyncProjectHistory(project_id, projectHistoryId, docs, files, function(error) {
+			if (error != null) { return next(error); }
+			logger.log({project_id}, "queued project history resync via http");
+			return res.sendStatus(204);
+		});
+	},
 
-	flushAllProjects: (req, res, next = (error)-> )->
-		res.setTimeout(5 * 60 * 1000)
-		options =
-			limit : req.query.limit || 1000
-			concurrency : req.query.concurrency || 5
+	flushAllProjects(req, res, next ){
+		if (next == null) { next = function(error){}; }
+		res.setTimeout(5 * 60 * 1000);
+		const options = {
+			limit : req.query.limit || 1000,
+			concurrency : req.query.concurrency || 5,
 			dryRun : req.query.dryRun || false
-		ProjectFlusher.flushAllProjects options, (err, project_ids)->
-			if err?
-				logger.err err:err, "error bulk flushing projects"
-				res.sendStatus 500
-			else
-				res.send project_ids
+		};
+		return ProjectFlusher.flushAllProjects(options, function(err, project_ids){
+			if (err != null) {
+				logger.err({err}, "error bulk flushing projects");
+				return res.sendStatus(500);
+			} else {
+				return res.send(project_ids);
+			}
+		});
+	},
 
-	flushQueuedProjects: (req, res, next = (error) ->) ->
-		res.setTimeout(10 * 60 * 1000)
-		options =
-			limit : req.query.limit || 1000
-			timeout: 5 * 60 * 1000
-			min_delete_age: req.query.min_delete_age || 5 * 60 * 1000
-		DeleteQueueManager.flushAndDeleteOldProjects options, (err, flushed)->
-			if err?
-				logger.err err:err, "error flushing old projects"
-				res.sendStatus 500
-			else
-				logger.log {flushed: flushed}, "flush of queued projects completed"
-				res.send {flushed: flushed}
+	flushQueuedProjects(req, res, next) {
+		if (next == null) { next = function(error) {}; }
+		res.setTimeout(10 * 60 * 1000);
+		const options = {
+			limit : req.query.limit || 1000,
+			timeout: 5 * 60 * 1000,
+			min_delete_age: req.query.min_delete_age || (5 * 60 * 1000)
+		};
+		return DeleteQueueManager.flushAndDeleteOldProjects(options, function(err, flushed){
+			if (err != null) {
+				logger.err({err}, "error flushing old projects");
+				return res.sendStatus(500);
+			} else {
+				logger.log({flushed}, "flush of queued projects completed");
+				return res.send({flushed});
+			}
+	});
+	}
+});
+
+function __guard__(value, transform) {
+  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+}

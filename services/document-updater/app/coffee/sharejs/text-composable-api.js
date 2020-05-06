@@ -1,43 +1,64 @@
-# Text document API for text
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+// Text document API for text
 
-if WEB?
-  type = exports.types['text-composable']
-else
-  type = require './text-composable'
+let type;
+if (typeof WEB !== 'undefined' && WEB !== null) {
+  type = exports.types['text-composable'];
+} else {
+  type = require('./text-composable');
+}
 
-type.api =
-  provides: {'text':true}
+type.api = {
+  provides: {'text':true},
 
-  # The number of characters in the string
-  'getLength': -> @snapshot.length
+  // The number of characters in the string
+  'getLength'() { return this.snapshot.length; },
 
-  # Get the text contents of a document
-  'getText': -> @snapshot
+  // Get the text contents of a document
+  'getText'() { return this.snapshot; },
 
-  'insert': (pos, text, callback) ->
-    op = type.normalize [pos, 'i':text, (@snapshot.length - pos)]
+  'insert'(pos, text, callback) {
+    const op = type.normalize([pos, {'i':text}, (this.snapshot.length - pos)]);
     
-    @submitOp op, callback
-    op
+    this.submitOp(op, callback);
+    return op;
+  },
   
-  'del': (pos, length, callback) ->
-    op = type.normalize [pos, 'd':@snapshot[pos...(pos + length)], (@snapshot.length - pos - length)]
+  'del'(pos, length, callback) {
+    const op = type.normalize([pos, {'d':this.snapshot.slice(pos, (pos + length))}, (this.snapshot.length - pos - length)]);
 
-    @submitOp op, callback
-    op
+    this.submitOp(op, callback);
+    return op;
+  },
 
-  _register: ->
-    @on 'remoteop', (op) ->
-      pos = 0
-      for component in op
-        if typeof component is 'number'
-          pos += component
-        else if component.i != undefined
-          @emit 'insert', pos, component.i
-          pos += component.i.length
-        else
-          # delete
-          @emit 'delete', pos, component.d
-          # We don't increment pos, because the position
-          # specified is after the delete has happened.
+  _register() {
+    return this.on('remoteop', function(op) {
+      let pos = 0;
+      return (() => {
+        const result = [];
+        for (let component of Array.from(op)) {
+          if (typeof component === 'number') {
+            result.push(pos += component);
+          } else if (component.i !== undefined) {
+            this.emit('insert', pos, component.i);
+            result.push(pos += component.i.length);
+          } else {
+            // delete
+            result.push(this.emit('delete', pos, component.d));
+          }
+        }
+        return result;
+      })();
+    });
+  }
+};
+          // We don't increment pos, because the position
+          // specified is after the delete has happened.
 

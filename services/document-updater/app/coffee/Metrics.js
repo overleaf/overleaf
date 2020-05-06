@@ -1,1 +1,1 @@
-module.exports = require "metrics-sharelatex"
+module.exports = require("metrics-sharelatex");

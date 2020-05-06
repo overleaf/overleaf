@@ -1,261 +1,315 @@
-# An alternate composable implementation for text. This is much closer
-# to the implementation used by google wave.
-#
-# Ops are lists of components which iterate over the whole document.
-# Components are either:
-#   A number N: Skip N characters in the original document
-#   {i:'str'}:  Insert 'str' at the current position in the document
-#   {d:'str'}:  Delete 'str', which appears at the current position in the document
-#
-# Eg: [3, {i:'hi'}, 5, {d:'internet'}]
-#
-# Snapshots are strings.
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+// An alternate composable implementation for text. This is much closer
+// to the implementation used by google wave.
+//
+// Ops are lists of components which iterate over the whole document.
+// Components are either:
+//   A number N: Skip N characters in the original document
+//   {i:'str'}:  Insert 'str' at the current position in the document
+//   {d:'str'}:  Delete 'str', which appears at the current position in the document
+//
+// Eg: [3, {i:'hi'}, 5, {d:'internet'}]
+//
+// Snapshots are strings.
 
-p = -> #require('util').debug
-i = -> #require('util').inspect
+let makeAppend;
+const p = function() {}; //require('util').debug
+const i = function() {}; //require('util').inspect
 
-exports = if WEB? then {} else module.exports
+const exports = (typeof WEB !== 'undefined' && WEB !== null) ? {} : module.exports;
 
-exports.name = 'text-composable'
+exports.name = 'text-composable';
 
-exports.create = -> ''
+exports.create = () => '';
 
-# -------- Utility methods
+// -------- Utility methods
 
-checkOp = (op) ->
-  throw new Error('Op must be an array of components') unless Array.isArray(op)
-  last = null
-  for c in op
-    if typeof(c) == 'object'
-      throw new Error("Invalid op component: #{i c}") unless (c.i? && c.i.length > 0) or (c.d? && c.d.length > 0)
-    else
-      throw new Error('Op components must be objects or numbers') unless typeof(c) == 'number'
-      throw new Error('Skip components must be a positive number') unless c > 0
-      throw new Error('Adjacent skip components should be added') if typeof(last) == 'number'
+const checkOp = function(op) {
+  if (!Array.isArray(op)) { throw new Error('Op must be an array of components'); }
+  let last = null;
+  return (() => {
+    const result = [];
+    for (let c of Array.from(op)) {
+      if (typeof(c) === 'object') {
+        if (((c.i == null) || !(c.i.length > 0)) && ((c.d == null) || !(c.d.length > 0))) { throw new Error(`Invalid op component: ${i(c)}`); }
+      } else {
+        if (typeof(c) !== 'number') { throw new Error('Op components must be objects or numbers'); }
+        if (!(c > 0)) { throw new Error('Skip components must be a positive number'); }
+        if (typeof(last) === 'number') { throw new Error('Adjacent skip components should be added'); }
+      }
 
-    last = c
+      result.push(last = c);
+    }
+    return result;
+  })();
+};
 
-# Makes a function for appending components to a given op.
-# Exported for the randomOpGenerator.
-exports._makeAppend = makeAppend = (op) -> (component) ->
-  if component == 0 || component.i == '' || component.d == ''
-    return
-  else if op.length == 0
-    op.push component
-  else if typeof(component) == 'number' && typeof(op[op.length - 1]) == 'number'
-    op[op.length - 1] += component
-  else if component.i? && op[op.length - 1].i?
-    op[op.length - 1].i += component.i
-  else if component.d? && op[op.length - 1].d?
-    op[op.length - 1].d += component.d
-  else
-    op.push component
+// Makes a function for appending components to a given op.
+// Exported for the randomOpGenerator.
+exports._makeAppend = (makeAppend = op => (function(component) {
+  if ((component === 0) || (component.i === '') || (component.d === '')) {
+    return;
+  } else if (op.length === 0) {
+    return op.push(component);
+  } else if ((typeof(component) === 'number') && (typeof(op[op.length - 1]) === 'number')) {
+    return op[op.length - 1] += component;
+  } else if ((component.i != null) && (op[op.length - 1].i != null)) {
+    return op[op.length - 1].i += component.i;
+  } else if ((component.d != null) && (op[op.length - 1].d != null)) {
+    return op[op.length - 1].d += component.d;
+  } else {
+    return op.push(component);
+  }
+}));
   
-#  checkOp op
+//  checkOp op
 
-# Makes 2 functions for taking components from the start of an op, and for peeking
-# at the next op that could be taken.
-makeTake = (op) ->
-  # The index of the next component to take
-  idx = 0
-  # The offset into the component
-  offset = 0
+// Makes 2 functions for taking components from the start of an op, and for peeking
+// at the next op that could be taken.
+const makeTake = function(op) {
+  // The index of the next component to take
+  let idx = 0;
+  // The offset into the component
+  let offset = 0;
 
-  # Take up to length n from the front of op. If n is null, take the next
-  # op component. If indivisableField == 'd', delete components won't be separated.
-  # If indivisableField == 'i', insert components won't be separated.
-  take = (n, indivisableField) ->
-    return null if idx == op.length
-    #assert.notStrictEqual op.length, i, 'The op is too short to traverse the document'
+  // Take up to length n from the front of op. If n is null, take the next
+  // op component. If indivisableField == 'd', delete components won't be separated.
+  // If indivisableField == 'i', insert components won't be separated.
+  const take = function(n, indivisableField) {
+    let c;
+    if (idx === op.length) { return null; }
+    //assert.notStrictEqual op.length, i, 'The op is too short to traverse the document'
 
-    if typeof(op[idx]) == 'number'
-      if !n? or op[idx] - offset <= n
-        c = op[idx] - offset
-        ++idx; offset = 0
-        c
-      else
-        offset += n
-        n
-    else
-      # Take from the string
-      field = if op[idx].i then 'i' else 'd'
-      c = {}
-      if !n? or op[idx][field].length - offset <= n or field == indivisableField
-        c[field] = op[idx][field][offset..]
-        ++idx; offset = 0
-      else
-        c[field] = op[idx][field][offset...(offset + n)]
-        offset += n
-      c
+    if (typeof(op[idx]) === 'number') {
+      if ((n == null) || ((op[idx] - offset) <= n)) {
+        c = op[idx] - offset;
+        ++idx; offset = 0;
+        return c;
+      } else {
+        offset += n;
+        return n;
+      }
+    } else {
+      // Take from the string
+      const field = op[idx].i ? 'i' : 'd';
+      c = {};
+      if ((n == null) || ((op[idx][field].length - offset) <= n) || (field === indivisableField)) {
+        c[field] = op[idx][field].slice(offset);
+        ++idx; offset = 0;
+      } else {
+        c[field] = op[idx][field].slice(offset, (offset + n));
+        offset += n;
+      }
+      return c;
+    }
+  };
   
-  peekType = () ->
-    op[idx]
+  const peekType = () => op[idx];
   
-  [take, peekType]
+  return [take, peekType];
+};
 
-# Find and return the length of an op component
-componentLength = (component) ->
-  if typeof(component) == 'number'
-    component
-  else if component.i?
-    component.i.length
-  else
-    component.d.length
+// Find and return the length of an op component
+const componentLength = function(component) {
+  if (typeof(component) === 'number') {
+    return component;
+  } else if (component.i != null) {
+    return component.i.length;
+  } else {
+    return component.d.length;
+  }
+};
 
-# Normalize an op, removing all empty skips and empty inserts / deletes. Concatenate
-# adjacent inserts and deletes.
-exports.normalize = (op) ->
-  newOp = []
-  append = makeAppend newOp
-  append component for component in op
-  newOp
+// Normalize an op, removing all empty skips and empty inserts / deletes. Concatenate
+// adjacent inserts and deletes.
+exports.normalize = function(op) {
+  const newOp = [];
+  const append = makeAppend(newOp);
+  for (let component of Array.from(op)) { append(component); }
+  return newOp;
+};
 
-# Apply the op to the string. Returns the new string.
-exports.apply = (str, op) ->
-  p "Applying #{i op} to '#{str}'"
-  throw new Error('Snapshot should be a string') unless typeof(str) == 'string'
-  checkOp op
+// Apply the op to the string. Returns the new string.
+exports.apply = function(str, op) {
+  p(`Applying ${i(op)} to '${str}'`);
+  if (typeof(str) !== 'string') { throw new Error('Snapshot should be a string'); }
+  checkOp(op);
 
-  pos = 0
-  newDoc = []
+  const pos = 0;
+  const newDoc = [];
 
-  for component in op
-    if typeof(component) == 'number'
-      throw new Error('The op is too long for this document') if component > str.length
-      newDoc.push str[...component]
-      str = str[component..]
-    else if component.i?
-      newDoc.push component.i
-    else
-      throw new Error("The deleted text '#{component.d}' doesn't match the next characters in the document '#{str[...component.d.length]}'") unless component.d == str[...component.d.length]
-      str = str[component.d.length..]
+  for (let component of Array.from(op)) {
+    if (typeof(component) === 'number') {
+      if (component > str.length) { throw new Error('The op is too long for this document'); }
+      newDoc.push(str.slice(0, component));
+      str = str.slice(component);
+    } else if (component.i != null) {
+      newDoc.push(component.i);
+    } else {
+      if (component.d !== str.slice(0, component.d.length)) { throw new Error(`The deleted text '${component.d}' doesn't match the next characters in the document '${str.slice(0, component.d.length)}'`); }
+      str = str.slice(component.d.length);
+    }
+  }
   
-  throw new Error("The applied op doesn't traverse the entire document") unless '' == str
+  if ('' !== str) { throw new Error("The applied op doesn't traverse the entire document"); }
 
-  newDoc.join ''
+  return newDoc.join('');
+};
 
-# transform op1 by op2. Return transformed version of op1.
-# op1 and op2 are unchanged by transform.
-exports.transform = (op, otherOp, side) ->
-  throw new Error "side (#{side} must be 'left' or 'right'" unless side == 'left' or side == 'right'
+// transform op1 by op2. Return transformed version of op1.
+// op1 and op2 are unchanged by transform.
+exports.transform = function(op, otherOp, side) {
+  let component;
+  if ((side !== 'left') && (side !== 'right')) { throw new Error(`side (${side} must be 'left' or 'right'`); }
 
-  checkOp op
-  checkOp otherOp
-  newOp = []
+  checkOp(op);
+  checkOp(otherOp);
+  const newOp = [];
 
-  append = makeAppend newOp
-  [take, peek] = makeTake op
+  const append = makeAppend(newOp);
+  const [take, peek] = Array.from(makeTake(op));
 
-  for component in otherOp
-    if typeof(component) == 'number' # Skip
-      length = component
-      while length > 0
-        chunk = take(length, 'i')
-        throw new Error('The op traverses more elements than the document has') unless chunk != null
+  for (component of Array.from(otherOp)) {
+    var chunk, length;
+    if (typeof(component) === 'number') { // Skip
+      length = component;
+      while (length > 0) {
+        chunk = take(length, 'i');
+        if (chunk === null) { throw new Error('The op traverses more elements than the document has'); }
 
-        append chunk
-        length -= componentLength chunk unless typeof(chunk) == 'object' && chunk.i?
-    else if component.i? # Insert
-      if side == 'left'
-        # The left insert should go first.
-        o = peek()
-        append take() if o?.i
+        append(chunk);
+        if ((typeof(chunk) !== 'object') || (chunk.i == null)) { length -= componentLength(chunk); }
+      }
+    } else if (component.i != null) { // Insert
+      if (side === 'left') {
+        // The left insert should go first.
+        const o = peek();
+        if (o != null ? o.i : undefined) { append(take()); }
+      }
 
-      # Otherwise, skip the inserted text.
-      append(component.i.length)
-    else # Delete.
-      #assert.ok component.d
-      length = component.d.length
-      while length > 0
-        chunk = take(length, 'i')
-        throw new Error('The op traverses more elements than the document has') unless chunk != null
+      // Otherwise, skip the inserted text.
+      append(component.i.length);
+    } else { // Delete.
+      //assert.ok component.d
+      ({
+        length
+      } = component.d);
+      while (length > 0) {
+        chunk = take(length, 'i');
+        if (chunk === null) { throw new Error('The op traverses more elements than the document has'); }
 
-        if typeof(chunk) == 'number'
-          length -= chunk
-        else if chunk.i?
-          append(chunk)
-        else
-          #assert.ok chunk.d
-          # The delete is unnecessary now.
-          length -= chunk.d.length
+        if (typeof(chunk) === 'number') {
+          length -= chunk;
+        } else if (chunk.i != null) {
+          append(chunk);
+        } else {
+          //assert.ok chunk.d
+          // The delete is unnecessary now.
+          length -= chunk.d.length;
+        }
+      }
+    }
+  }
   
-  # Append extras from op1
-  while (component = take())
-    throw new Error "Remaining fragments in the op: #{i component}" unless component?.i?
-    append component
+  // Append extras from op1
+  while (component = take()) {
+    if ((component != null ? component.i : undefined) == null) { throw new Error(`Remaining fragments in the op: ${i(component)}`); }
+    append(component);
+  }
 
-  newOp
+  return newOp;
+};
 
 
-# Compose 2 ops into 1 op.
-exports.compose = (op1, op2) ->
-  p "COMPOSE #{i op1} + #{i op2}"
-  checkOp op1
-  checkOp op2
+// Compose 2 ops into 1 op.
+exports.compose = function(op1, op2) {
+  let component;
+  p(`COMPOSE ${i(op1)} + ${i(op2)}`);
+  checkOp(op1);
+  checkOp(op2);
 
-  result = []
+  const result = [];
 
-  append = makeAppend result
-  [take, _] = makeTake op1
+  const append = makeAppend(result);
+  const [take, _] = Array.from(makeTake(op1));
 
-  for component in op2
-    if typeof(component) == 'number' # Skip
-      length = component
-      while length > 0
-        chunk = take(length, 'd')
-        throw new Error('The op traverses more elements than the document has') unless chunk != null
+  for (component of Array.from(op2)) {
+    var chunk, length;
+    if (typeof(component) === 'number') { // Skip
+      length = component;
+      while (length > 0) {
+        chunk = take(length, 'd');
+        if (chunk === null) { throw new Error('The op traverses more elements than the document has'); }
 
-        append chunk
-        length -= componentLength chunk unless typeof(chunk) == 'object' && chunk.d?
+        append(chunk);
+        if ((typeof(chunk) !== 'object') || (chunk.d == null)) { length -= componentLength(chunk); }
+      }
 
-    else if component.i? # Insert
-      append {i:component.i}
+    } else if (component.i != null) { // Insert
+      append({i:component.i});
 
-    else # Delete
-      offset = 0
-      while offset < component.d.length
-        chunk = take(component.d.length - offset, 'd')
-        throw new Error('The op traverses more elements than the document has') unless chunk != null
+    } else { // Delete
+      let offset = 0;
+      while (offset < component.d.length) {
+        chunk = take(component.d.length - offset, 'd');
+        if (chunk === null) { throw new Error('The op traverses more elements than the document has'); }
 
-        # If its delete, append it. If its skip, drop it and decrease length. If its insert, check the strings match, drop it and decrease length.
-        if typeof(chunk) == 'number'
-          append {d:component.d[offset...(offset + chunk)]}
-          offset += chunk
-        else if chunk.i?
-          throw new Error("The deleted text doesn't match the inserted text") unless component.d[offset...(offset + chunk.i.length)] == chunk.i
-          offset += chunk.i.length
-          # The ops cancel each other out.
-        else
-          # Delete
-          append chunk
+        // If its delete, append it. If its skip, drop it and decrease length. If its insert, check the strings match, drop it and decrease length.
+        if (typeof(chunk) === 'number') {
+          append({d:component.d.slice(offset, (offset + chunk))});
+          offset += chunk;
+        } else if (chunk.i != null) {
+          if (component.d.slice(offset, (offset + chunk.i.length)) !== chunk.i) { throw new Error("The deleted text doesn't match the inserted text"); }
+          offset += chunk.i.length;
+          // The ops cancel each other out.
+        } else {
+          // Delete
+          append(chunk);
+        }
+      }
+    }
+  }
     
-  # Append extras from op1
-  while (component = take())
-    throw new Error "Trailing stuff in op1 #{i component}" unless component?.d?
-    append component
+  // Append extras from op1
+  while (component = take()) {
+    if ((component != null ? component.d : undefined) == null) { throw new Error(`Trailing stuff in op1 ${i(component)}`); }
+    append(component);
+  }
 
-  result
+  return result;
+};
   
 
-invertComponent = (c) ->
-  if typeof(c) == 'number'
-    c
-  else if c.i?
-    {d:c.i}
-  else
-    {i:c.d}
+const invertComponent = function(c) {
+  if (typeof(c) === 'number') {
+    return c;
+  } else if (c.i != null) {
+    return {d:c.i};
+  } else {
+    return {i:c.d};
+  }
+};
 
-# Invert an op
-exports.invert = (op) ->
-  result = []
-  append = makeAppend result
+// Invert an op
+exports.invert = function(op) {
+  const result = [];
+  const append = makeAppend(result);
 
-  append(invertComponent component) for component in op
+  for (let component of Array.from(op)) { append(invertComponent(component)); }
   
-  result
+  return result;
+};
 
-if window?
-  window.ot ||= {}
-  window.ot.types ||= {}
-  window.ot.types.text = exports
+if (typeof window !== 'undefined' && window !== null) {
+  if (!window.ot) { window.ot = {}; }
+  if (!window.ot.types) { window.ot.types = {}; }
+  window.ot.types.text = exports;
+}
 
