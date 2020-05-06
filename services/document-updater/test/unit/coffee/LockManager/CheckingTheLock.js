@@ -1,37 +1,62 @@
-require('coffee-script')
-sinon = require('sinon')
-assert = require('assert')
-path = require('path')
-modulePath = path.join __dirname, '../../../../app/js/LockManager.js'
-project_id = 1234
-doc_id     = 5678
-blockingKey = "Blocking:#{doc_id}"
-SandboxedModule = require('sandboxed-module')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS206: Consider reworking classes to avoid initClass
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require('coffee-script');
+const sinon = require('sinon');
+const assert = require('assert');
+const path = require('path');
+const modulePath = path.join(__dirname, '../../../../app/js/LockManager.js');
+const project_id = 1234;
+const doc_id     = 5678;
+const blockingKey = `Blocking:${doc_id}`;
+const SandboxedModule = require('sandboxed-module');
 
-describe 'LockManager - checking the lock', ()->
+describe('LockManager - checking the lock', function(){
 
-	existsStub = sinon.stub()
+	let Profiler;
+	const existsStub = sinon.stub();
 	
-	mocks =
-		"logger-sharelatex": log:->
-		"redis-sharelatex":
-			createClient : ()->
-				auth:->
-				exists: existsStub
-		"./Metrics": {inc: () ->}
-		"./Profiler": class Profiler
-			log: sinon.stub().returns { end: sinon.stub() }
-			end: sinon.stub()
-	LockManager = SandboxedModule.require(modulePath, requires: mocks)
+	const mocks = {
+		"logger-sharelatex": { log() {}
+	},
+		"redis-sharelatex": {
+			createClient(){
+				return {
+					auth() {},
+					exists: existsStub
+				};
+			}
+		},
+		"./Metrics": {inc() {}},
+		"./Profiler": (Profiler = (function() {
+			Profiler = class Profiler {
+				static initClass() {
+					this.prototype.log = sinon.stub().returns({ end: sinon.stub() });
+					this.prototype.end = sinon.stub();
+				}
+			};
+			Profiler.initClass();
+			return Profiler;
+		})())
+	};
+	const LockManager = SandboxedModule.require(modulePath, {requires: mocks});
 
-	it 'should return true if the key does not exists', (done)->
-		existsStub.yields(null, "0")
-		LockManager.checkLock doc_id, (err, free)->
-			free.should.equal true
-			done()
+	it('should return true if the key does not exists', function(done){
+		existsStub.yields(null, "0");
+		return LockManager.checkLock(doc_id, function(err, free){
+			free.should.equal(true);
+			return done();
+		});
+	});
 
-	it 'should return false if the key does exists', (done)->
-		existsStub.yields(null, "1")
-		LockManager.checkLock doc_id, (err, free)->
-			free.should.equal false
-			done()
+	return it('should return false if the key does exists', function(done){
+		existsStub.yields(null, "1");
+		return LockManager.checkLock(doc_id, function(err, free){
+			free.should.equal(false);
+			return done();
+		});
+	});
+});

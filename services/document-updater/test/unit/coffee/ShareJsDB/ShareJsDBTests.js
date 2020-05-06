@@ -1,93 +1,129 @@
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-expect = chai.expect
-modulePath = "../../../../app/js/ShareJsDB.js"
-SandboxedModule = require('sandboxed-module')
-Errors = require "../../../../app/js/Errors"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const {
+    expect
+} = chai;
+const modulePath = "../../../../app/js/ShareJsDB.js";
+const SandboxedModule = require('sandboxed-module');
+const Errors = require("../../../../app/js/Errors");
 
-describe "ShareJsDB", ->
-	beforeEach ->
-		@doc_id = "document-id"
-		@project_id = "project-id"
-		@doc_key = "#{@project_id}:#{@doc_id}"
-		@callback = sinon.stub()
-		@ShareJsDB = SandboxedModule.require modulePath, requires:
-			"./RedisManager": @RedisManager = {}
+describe("ShareJsDB", function() {
+	beforeEach(function() {
+		this.doc_id = "document-id";
+		this.project_id = "project-id";
+		this.doc_key = `${this.project_id}:${this.doc_id}`;
+		this.callback = sinon.stub();
+		this.ShareJsDB = SandboxedModule.require(modulePath, { requires: {
+			"./RedisManager": (this.RedisManager = {})
+		}
+	});
 
-		@version = 42
-		@lines = ["one", "two", "three"]
-		@db = new @ShareJsDB(@project_id, @doc_id, @lines, @version)
+		this.version = 42;
+		this.lines = ["one", "two", "three"];
+		return this.db = new this.ShareJsDB(this.project_id, this.doc_id, this.lines, this.version);
+	});
 
-	describe "getSnapshot", ->
-		describe "successfully", ->
-			beforeEach ->
-				@db.getSnapshot @doc_key, @callback
+	describe("getSnapshot", function() {
+		describe("successfully", function() {
+			beforeEach(function() {
+				return this.db.getSnapshot(this.doc_key, this.callback);
+			});
 
-			it "should return the doc lines", ->
-				@callback.args[0][1].snapshot.should.equal @lines.join("\n")
+			it("should return the doc lines", function() {
+				return this.callback.args[0][1].snapshot.should.equal(this.lines.join("\n"));
+			});
 
-			it "should return the doc version", ->
-				@callback.args[0][1].v.should.equal @version
+			it("should return the doc version", function() {
+				return this.callback.args[0][1].v.should.equal(this.version);
+			});
 
-			it "should return the type as text", ->
-				@callback.args[0][1].type.should.equal "text"
+			return it("should return the type as text", function() {
+				return this.callback.args[0][1].type.should.equal("text");
+			});
+		});
 
-		describe "when the key does not match", ->
-			beforeEach ->
-				@db.getSnapshot "bad:key", @callback
+		return describe("when the key does not match", function() {
+			beforeEach(function() {
+				return this.db.getSnapshot("bad:key", this.callback);
+			});
 
-			it "should return the callback with a NotFoundError", ->
-				@callback.calledWith(new Errors.NotFoundError("not found")).should.equal true
+			return it("should return the callback with a NotFoundError", function() {
+				return this.callback.calledWith(new Errors.NotFoundError("not found")).should.equal(true);
+			});
+		});
+	});
 
-	describe "getOps", ->
-		describe "with start == end", ->
-			beforeEach ->
-				@start = @end = 42
-				@db.getOps @doc_key, @start, @end, @callback
+	describe("getOps", function() {
+		describe("with start == end", function() {
+			beforeEach(function() {
+				this.start = (this.end = 42);
+				return this.db.getOps(this.doc_key, this.start, this.end, this.callback);
+			});
 
-			it "should return an empty array", ->
-				@callback.calledWith(null, []).should.equal true
+			return it("should return an empty array", function() {
+				return this.callback.calledWith(null, []).should.equal(true);
+			});
+		});
 		
-		describe "with a non empty range", ->
-			beforeEach ->
-				@start = 35
-				@end = 42
-				@RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, @ops)
-				@db.getOps @doc_key, @start, @end, @callback
+		describe("with a non empty range", function() {
+			beforeEach(function() {
+				this.start = 35;
+				this.end = 42;
+				this.RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, this.ops);
+				return this.db.getOps(this.doc_key, this.start, this.end, this.callback);
+			});
 
-			it "should get the range from redis", ->
-				@RedisManager.getPreviousDocOps
-					.calledWith(@doc_id, @start, @end-1)
-					.should.equal true
+			it("should get the range from redis", function() {
+				return this.RedisManager.getPreviousDocOps
+					.calledWith(this.doc_id, this.start, this.end-1)
+					.should.equal(true);
+			});
 
-			it "should return the ops", ->
-				@callback.calledWith(null, @ops).should.equal true
+			return it("should return the ops", function() {
+				return this.callback.calledWith(null, this.ops).should.equal(true);
+			});
+		});
 
-		describe "with no specified end", ->
-			beforeEach ->
-				@start = 35
-				@end = null
-				@RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, @ops)
-				@db.getOps @doc_key, @start, @end, @callback
+		return describe("with no specified end", function() {
+			beforeEach(function() {
+				this.start = 35;
+				this.end = null;
+				this.RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, this.ops);
+				return this.db.getOps(this.doc_key, this.start, this.end, this.callback);
+			});
 			
-			it "should get until the end of the list", ->
-				@RedisManager.getPreviousDocOps
-					.calledWith(@doc_id, @start, -1)
-					.should.equal true
+			return it("should get until the end of the list", function() {
+				return this.RedisManager.getPreviousDocOps
+					.calledWith(this.doc_id, this.start, -1)
+					.should.equal(true);
+			});
+		});
+	});
 
-	describe "writeOps", ->
-		describe "writing an op", ->
-			beforeEach ->
-				@opData =
-					op: {p: 20, t: "foo"}
-					meta: {source: "bar"}
-					v: @version
-				@db.writeOp @doc_key, @opData, @callback
+	return describe("writeOps", () => describe("writing an op", function() {
+        beforeEach(function() {
+            this.opData = {
+                op: {p: 20, t: "foo"},
+                meta: {source: "bar"},
+                v: this.version
+            };
+            return this.db.writeOp(this.doc_key, this.opData, this.callback);
+        });
 
-			it "should write into appliedOps", ->
-				expect(@db.appliedOps[@doc_key]).to.deep.equal [@opData]
+        it("should write into appliedOps", function() {
+            return expect(this.db.appliedOps[this.doc_key]).to.deep.equal([this.opData]);
+    });
 
-			it "should call the callback without an error", ->
-				@callback.called.should.equal true
-				(@callback.args[0][0]?).should.equal false
+        return it("should call the callback without an error", function() {
+            this.callback.called.should.equal(true);
+            return (this.callback.args[0][0] != null).should.equal(false);
+        });
+    }));
+});

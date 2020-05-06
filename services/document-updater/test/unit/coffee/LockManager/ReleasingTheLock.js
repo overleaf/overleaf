@@ -1,53 +1,82 @@
-require('coffee-script')
-sinon = require('sinon')
-assert = require('assert')
-path = require('path')
-modulePath = path.join __dirname, '../../../../app/js/LockManager.js'
-project_id = 1234
-doc_id     = 5678
-SandboxedModule = require('sandboxed-module')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS206: Consider reworking classes to avoid initClass
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require('coffee-script');
+const sinon = require('sinon');
+const assert = require('assert');
+const path = require('path');
+const modulePath = path.join(__dirname, '../../../../app/js/LockManager.js');
+const project_id = 1234;
+const doc_id     = 5678;
+const SandboxedModule = require('sandboxed-module');
 
-describe 'LockManager - releasing the lock', ()->
-	beforeEach ->
-		@client = {
-			auth: ->
+describe('LockManager - releasing the lock', function(){
+	beforeEach(function() {
+		let Profiler;
+		this.client = {
+			auth() {},
 			eval: sinon.stub()
-		}
-		mocks =
-			"logger-sharelatex":
-				log:->
-				error:->
-			"redis-sharelatex":
-				createClient : () => @client
+		};
+		const mocks = {
+			"logger-sharelatex": {
+				log() {},
+				error() {}
+			},
+			"redis-sharelatex": {
+				createClient : () => this.client
+			},
 			"settings-sharelatex": {
-				redis:
-					lock:
-						key_schema:
-							blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
-			}
-			"./Metrics": {inc: () ->}
-			"./Profiler": class Profiler
-				log: sinon.stub().returns { end: sinon.stub() }
-				end: sinon.stub()
-		@LockManager = SandboxedModule.require(modulePath, requires: mocks)
-		@lockValue = "lock-value-stub"
-		@callback = sinon.stub()
+				redis: {
+					lock: {
+						key_schema: {
+							blockingKey({doc_id}) { return `Blocking:${doc_id}`; }
+						}
+					}
+				}
+			},
+			"./Metrics": {inc() {}},
+			"./Profiler": (Profiler = (function() {
+				Profiler = class Profiler {
+					static initClass() {
+						this.prototype.log = sinon.stub().returns({ end: sinon.stub() });
+						this.prototype.end = sinon.stub();
+					}
+				};
+				Profiler.initClass();
+				return Profiler;
+			})())
+		};
+		this.LockManager = SandboxedModule.require(modulePath, {requires: mocks});
+		this.lockValue = "lock-value-stub";
+		return this.callback = sinon.stub();
+	});
 
-	describe "when the lock is current", ->
-		beforeEach ->
-			@client.eval = sinon.stub().yields(null, 1)
-			@LockManager.releaseLock doc_id, @lockValue, @callback
+	describe("when the lock is current", function() {
+		beforeEach(function() {
+			this.client.eval = sinon.stub().yields(null, 1);
+			return this.LockManager.releaseLock(doc_id, this.lockValue, this.callback);
+		});
 
-		it 'should clear the data from redis', ->
-			@client.eval.calledWith(@LockManager.unlockScript, 1, "Blocking:#{doc_id}", @lockValue).should.equal true
+		it('should clear the data from redis', function() {
+			return this.client.eval.calledWith(this.LockManager.unlockScript, 1, `Blocking:${doc_id}`, this.lockValue).should.equal(true);
+		});
 
-		it 'should call the callback', ->
-			@callback.called.should.equal true
+		return it('should call the callback', function() {
+			return this.callback.called.should.equal(true);
+		});
+	});
 
-	describe "when the lock has expired", ->
-		beforeEach ->
-			@client.eval = sinon.stub().yields(null, 0)
-			@LockManager.releaseLock doc_id, @lockValue, @callback
+	return describe("when the lock has expired", function() {
+		beforeEach(function() {
+			this.client.eval = sinon.stub().yields(null, 0);
+			return this.LockManager.releaseLock(doc_id, this.lockValue, this.callback);
+		});
 
-		it 'should return an error if the lock has expired', ->
-			@callback.calledWith(new Error("tried to release timed out lock")).should.equal true
+		return it('should return an error if the lock has expired', function() {
+			return this.callback.calledWith(new Error("tried to release timed out lock")).should.equal(true);
+		});
+	});
+});

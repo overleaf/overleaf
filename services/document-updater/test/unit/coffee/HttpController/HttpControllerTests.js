@@ -1,617 +1,809 @@
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-modulePath = "../../../../app/js/HttpController.js"
-SandboxedModule = require('sandboxed-module')
-Errors = require "../../../../app/js/Errors.js"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS206: Consider reworking classes to avoid initClass
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const modulePath = "../../../../app/js/HttpController.js";
+const SandboxedModule = require('sandboxed-module');
+const Errors = require("../../../../app/js/Errors.js");
 
-describe "HttpController", ->
-	beforeEach ->
-		@HttpController = SandboxedModule.require modulePath, requires:
-			"./DocumentManager": @DocumentManager = {}
-			"./HistoryManager": @HistoryManager =
-				flushProjectChangesAsync: sinon.stub()
-			"./ProjectManager": @ProjectManager = {}
-			"logger-sharelatex" : @logger = { log: sinon.stub() }
-			"./ProjectFlusher": {flushAllProjects:->}
-			"./DeleteQueueManager": @DeleteQueueManager = {}
-			"./Metrics": @Metrics = {}
+describe("HttpController", function() {
+	beforeEach(function() {
+		let Timer;
+		this.HttpController = SandboxedModule.require(modulePath, { requires: {
+			"./DocumentManager": (this.DocumentManager = {}),
+			"./HistoryManager": (this.HistoryManager =
+				{flushProjectChangesAsync: sinon.stub()}),
+			"./ProjectManager": (this.ProjectManager = {}),
+			"logger-sharelatex" : (this.logger = { log: sinon.stub() }),
+			"./ProjectFlusher": {flushAllProjects() {}},
+			"./DeleteQueueManager": (this.DeleteQueueManager = {}),
+			"./Metrics": (this.Metrics = {}),
 			"./Errors" : Errors
-		@Metrics.Timer = class Timer
-			done: sinon.stub()
-		@project_id = "project-id-123"
-		@doc_id = "doc-id-123"
-		@next = sinon.stub()
-		@res =
-			send: sinon.stub()
-			sendStatus: sinon.stub()
+		}
+	}
+		);
+		this.Metrics.Timer = (Timer = (function() {
+			Timer = class Timer {
+				static initClass() {
+					this.prototype.done = sinon.stub();
+				}
+			};
+			Timer.initClass();
+			return Timer;
+		})());
+		this.project_id = "project-id-123";
+		this.doc_id = "doc-id-123";
+		this.next = sinon.stub();
+		return this.res = {
+			send: sinon.stub(),
+			sendStatus: sinon.stub(),
 			json: sinon.stub()
+		};
+	});
 
-	describe "getDoc", ->
-		beforeEach ->
-			@lines = ["one", "two", "three"]
-			@ops = ["mock-op-1", "mock-op-2"]
-			@version = 42
-			@fromVersion = 42
-			@ranges = { changes: "mock", comments: "mock" }
-			@pathname = '/a/b/c'
-			@req =
-				params:
-					project_id: @project_id
-					doc_id: @doc_id
+	describe("getDoc", function() {
+		beforeEach(function() {
+			this.lines = ["one", "two", "three"];
+			this.ops = ["mock-op-1", "mock-op-2"];
+			this.version = 42;
+			this.fromVersion = 42;
+			this.ranges = { changes: "mock", comments: "mock" };
+			this.pathname = '/a/b/c';
+			return this.req = {
+				params: {
+					project_id: this.project_id,
+					doc_id: this.doc_id
+				}
+			};
+		});
 
-		describe "when the document exists and no recent ops are requested", ->
-			beforeEach ->
-				@DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, @lines, @version, [], @ranges, @pathname)
-				@HttpController.getDoc(@req, @res, @next)
+		describe("when the document exists and no recent ops are requested", function() {
+			beforeEach(function() {
+				this.DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, this.lines, this.version, [], this.ranges, this.pathname);
+				return this.HttpController.getDoc(this.req, this.res, this.next);
+			});
 
-			it "should get the doc", ->
-				@DocumentManager.getDocAndRecentOpsWithLock
-					.calledWith(@project_id, @doc_id, -1)
-					.should.equal true
+			it("should get the doc", function() {
+				return this.DocumentManager.getDocAndRecentOpsWithLock
+					.calledWith(this.project_id, this.doc_id, -1)
+					.should.equal(true);
+			});
 
-			it "should return the doc as JSON", ->
-				@res.json
+			it("should return the doc as JSON", function() {
+				return this.res.json
 					.calledWith({
-						id: @doc_id
-						lines: @lines
-						version: @version
-						ops: []
-						ranges: @ranges
-						pathname: @pathname
+						id: this.doc_id,
+						lines: this.lines,
+						version: this.version,
+						ops: [],
+						ranges: this.ranges,
+						pathname: this.pathname
 					})
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should log the request", ->
-				@logger.log
-					.calledWith(doc_id: @doc_id, project_id: @project_id, "getting doc via http")
-					.should.equal true
+			it("should log the request", function() {
+				return this.logger.log
+					.calledWith({doc_id: this.doc_id, project_id: this.project_id}, "getting doc via http")
+					.should.equal(true);
+			});
 
-			it "should time the request", ->
-				@Metrics.Timer::done.called.should.equal true
+			return it("should time the request", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
+		});
 
-		describe "when recent ops are requested", ->
-			beforeEach ->
-				@DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, @lines, @version, @ops, @ranges, @pathname)
-				@req.query = fromVersion: "#{@fromVersion}"
-				@HttpController.getDoc(@req, @res, @next)
+		describe("when recent ops are requested", function() {
+			beforeEach(function() {
+				this.DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, this.lines, this.version, this.ops, this.ranges, this.pathname);
+				this.req.query = {fromVersion: `${this.fromVersion}`};
+				return this.HttpController.getDoc(this.req, this.res, this.next);
+			});
 
-			it "should get the doc", ->
-				@DocumentManager.getDocAndRecentOpsWithLock
-					.calledWith(@project_id, @doc_id, @fromVersion)
-					.should.equal true
+			it("should get the doc", function() {
+				return this.DocumentManager.getDocAndRecentOpsWithLock
+					.calledWith(this.project_id, this.doc_id, this.fromVersion)
+					.should.equal(true);
+			});
 
-			it "should return the doc as JSON", ->
-				@res.json
+			it("should return the doc as JSON", function() {
+				return this.res.json
 					.calledWith({
-						id: @doc_id
-						lines: @lines
-						version: @version
-						ops: @ops
-						ranges: @ranges
-						pathname: @pathname
+						id: this.doc_id,
+						lines: this.lines,
+						version: this.version,
+						ops: this.ops,
+						ranges: this.ranges,
+						pathname: this.pathname
 					})
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should log the request", ->
-				@logger.log
-					.calledWith(doc_id: @doc_id, project_id: @project_id, "getting doc via http")
-					.should.equal true
+			it("should log the request", function() {
+				return this.logger.log
+					.calledWith({doc_id: this.doc_id, project_id: this.project_id}, "getting doc via http")
+					.should.equal(true);
+			});
 
-			it "should time the request", ->
-				@Metrics.Timer::done.called.should.equal true
+			return it("should time the request", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
+		});
 
-		describe "when the document does not exist", ->
-			beforeEach ->
-				@DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, null, null)
-				@HttpController.getDoc(@req, @res, @next)
+		describe("when the document does not exist", function() {
+			beforeEach(function() {
+				this.DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, null, null);
+				return this.HttpController.getDoc(this.req, this.res, this.next);
+			});
 
-			it "should call next with NotFoundError", ->
-				@next
+			return it("should call next with NotFoundError", function() {
+				return this.next
 					.calledWith(new Errors.NotFoundError("not found"))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
 
-		describe "when an errors occurs", ->
-			beforeEach ->
-				@DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, new Error("oops"), null, null)
-				@HttpController.getDoc(@req, @res, @next)
+		return describe("when an errors occurs", function() {
+			beforeEach(function() {
+				this.DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, new Error("oops"), null, null);
+				return this.HttpController.getDoc(this.req, this.res, this.next);
+			});
 
-			it "should call next with the error", ->
-				@next
+			return it("should call next with the error", function() {
+				return this.next
 					.calledWith(new Error("oops"))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
+	});
 
-	describe "setDoc", ->
-		beforeEach ->
-			@lines = ["one", "two", "three"]
-			@source = "dropbox"
-			@user_id = "user-id-123"
-			@req =
-				headers: {}
-				params:
-					project_id: @project_id
-					doc_id: @doc_id
-				body:
-					lines: @lines
-					source: @source
-					user_id: @user_id
-					undoing: @undoing = true
+	describe("setDoc", function() {
+		beforeEach(function() {
+			this.lines = ["one", "two", "three"];
+			this.source = "dropbox";
+			this.user_id = "user-id-123";
+			return this.req = {
+				headers: {},
+				params: {
+					project_id: this.project_id,
+					doc_id: this.doc_id
+				},
+				body: {
+					lines: this.lines,
+					source: this.source,
+					user_id: this.user_id,
+					undoing: (this.undoing = true)
+				}
+			};
+		});
 
-		describe "successfully", ->
-			beforeEach ->
-				@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(6)
-				@HttpController.setDoc(@req, @res, @next)
+		describe("successfully", function() {
+			beforeEach(function() {
+				this.DocumentManager.setDocWithLock = sinon.stub().callsArgWith(6);
+				return this.HttpController.setDoc(this.req, this.res, this.next);
+			});
 
-			it "should set the doc", ->
-				@DocumentManager.setDocWithLock
-					.calledWith(@project_id, @doc_id, @lines, @source, @user_id, @undoing)
-					.should.equal true
+			it("should set the doc", function() {
+				return this.DocumentManager.setDocWithLock
+					.calledWith(this.project_id, this.doc_id, this.lines, this.source, this.user_id, this.undoing)
+					.should.equal(true);
+			});
 
-			it "should return a successful No Content response", ->
-				@res.sendStatus
+			it("should return a successful No Content response", function() {
+				return this.res.sendStatus
 					.calledWith(204)
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should log the request", ->
-				@logger.log
-					.calledWith(doc_id: @doc_id, project_id: @project_id, lines: @lines, source: @source, user_id: @user_id, undoing: @undoing, "setting doc via http")
-					.should.equal true
+			it("should log the request", function() {
+				return this.logger.log
+					.calledWith({doc_id: this.doc_id, project_id: this.project_id, lines: this.lines, source: this.source, user_id: this.user_id, undoing: this.undoing}, "setting doc via http")
+					.should.equal(true);
+			});
 
-			it "should time the request", ->
-				@Metrics.Timer::done.called.should.equal true
+			return it("should time the request", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
+		});
 
-		describe "when an errors occurs", ->
-			beforeEach ->
-				@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(6, new Error("oops"))
-				@HttpController.setDoc(@req, @res, @next)
+		describe("when an errors occurs", function() {
+			beforeEach(function() {
+				this.DocumentManager.setDocWithLock = sinon.stub().callsArgWith(6, new Error("oops"));
+				return this.HttpController.setDoc(this.req, this.res, this.next);
+			});
 
-			it "should call next with the error", ->
-				@next
+			return it("should call next with the error", function() {
+				return this.next
 					.calledWith(new Error("oops"))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
 
-		describe "when the payload is too large", ->
-			beforeEach ->
-				lines = []
-				for _ in [0..200000]
-					lines.push "test test test"
-				@req.body.lines = lines
-				@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(6)
-				@HttpController.setDoc(@req, @res, @next)
+		return describe("when the payload is too large", function() {
+			beforeEach(function() {
+				const lines = [];
+				for (let _ = 0; _ <= 200000; _++) {
+					lines.push("test test test");
+				}
+				this.req.body.lines = lines;
+				this.DocumentManager.setDocWithLock = sinon.stub().callsArgWith(6);
+				return this.HttpController.setDoc(this.req, this.res, this.next);
+			});
 
-			it 'should send back a 406 response', ->
-				@res.sendStatus.calledWith(406).should.equal true
+			it('should send back a 406 response', function() {
+				return this.res.sendStatus.calledWith(406).should.equal(true);
+			});
 
-			it 'should not call setDocWithLock', ->
-				@DocumentManager.setDocWithLock.callCount.should.equal 0
+			return it('should not call setDocWithLock', function() {
+				return this.DocumentManager.setDocWithLock.callCount.should.equal(0);
+			});
+		});
+	});
 
-	describe "flushProject", ->
-		beforeEach ->
-			@req =
-				params:
-					project_id: @project_id
+	describe("flushProject", function() {
+		beforeEach(function() {
+			return this.req = {
+				params: {
+					project_id: this.project_id
+				}
+			};
+		});
 
-		describe "successfully", ->
-			beforeEach ->
-				@ProjectManager.flushProjectWithLocks = sinon.stub().callsArgWith(1)
-				@HttpController.flushProject(@req, @res, @next)
+		describe("successfully", function() {
+			beforeEach(function() {
+				this.ProjectManager.flushProjectWithLocks = sinon.stub().callsArgWith(1);
+				return this.HttpController.flushProject(this.req, this.res, this.next);
+			});
 
-			it "should flush the project", ->
-				@ProjectManager.flushProjectWithLocks
-					.calledWith(@project_id)
-					.should.equal true
+			it("should flush the project", function() {
+				return this.ProjectManager.flushProjectWithLocks
+					.calledWith(this.project_id)
+					.should.equal(true);
+			});
 
-			it "should return a successful No Content response", ->
-				@res.sendStatus
+			it("should return a successful No Content response", function() {
+				return this.res.sendStatus
 					.calledWith(204)
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should log the request", ->
-				@logger.log
-					.calledWith(project_id: @project_id, "flushing project via http")
-					.should.equal true
+			it("should log the request", function() {
+				return this.logger.log
+					.calledWith({project_id: this.project_id}, "flushing project via http")
+					.should.equal(true);
+			});
 
-			it "should time the request", ->
-				@Metrics.Timer::done.called.should.equal true
+			return it("should time the request", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
+		});
 
-		describe "when an errors occurs", ->
-			beforeEach ->
-				@ProjectManager.flushProjectWithLocks = sinon.stub().callsArgWith(1, new Error("oops"))
-				@HttpController.flushProject(@req, @res, @next)
+		return describe("when an errors occurs", function() {
+			beforeEach(function() {
+				this.ProjectManager.flushProjectWithLocks = sinon.stub().callsArgWith(1, new Error("oops"));
+				return this.HttpController.flushProject(this.req, this.res, this.next);
+			});
 
-			it "should call next with the error", ->
-				@next
+			return it("should call next with the error", function() {
+				return this.next
 					.calledWith(new Error("oops"))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
+	});
 
-	describe "flushDocIfLoaded", ->
-		beforeEach ->
-			@lines = ["one", "two", "three"]
-			@version = 42
-			@req =
-				params:
-					project_id: @project_id
-					doc_id: @doc_id
+	describe("flushDocIfLoaded", function() {
+		beforeEach(function() {
+			this.lines = ["one", "two", "three"];
+			this.version = 42;
+			return this.req = {
+				params: {
+					project_id: this.project_id,
+					doc_id: this.doc_id
+				}
+			};
+		});
 
-		describe "successfully", ->
-			beforeEach ->
-				@DocumentManager.flushDocIfLoadedWithLock = sinon.stub().callsArgWith(2)
-				@HttpController.flushDocIfLoaded(@req, @res, @next)
+		describe("successfully", function() {
+			beforeEach(function() {
+				this.DocumentManager.flushDocIfLoadedWithLock = sinon.stub().callsArgWith(2);
+				return this.HttpController.flushDocIfLoaded(this.req, this.res, this.next);
+			});
 
-			it "should flush the doc", ->
-				@DocumentManager.flushDocIfLoadedWithLock
-					.calledWith(@project_id, @doc_id)
-					.should.equal true
+			it("should flush the doc", function() {
+				return this.DocumentManager.flushDocIfLoadedWithLock
+					.calledWith(this.project_id, this.doc_id)
+					.should.equal(true);
+			});
 
-			it "should return a successful No Content response", ->
-				@res.sendStatus
+			it("should return a successful No Content response", function() {
+				return this.res.sendStatus
 					.calledWith(204)
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should log the request", ->
-				@logger.log
-					.calledWith(doc_id: @doc_id, project_id: @project_id, "flushing doc via http")
-					.should.equal true
+			it("should log the request", function() {
+				return this.logger.log
+					.calledWith({doc_id: this.doc_id, project_id: this.project_id}, "flushing doc via http")
+					.should.equal(true);
+			});
 
-			it "should time the request", ->
-				@Metrics.Timer::done.called.should.equal true
+			return it("should time the request", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
+		});
 
-		describe "when an errors occurs", ->
-			beforeEach ->
-				@DocumentManager.flushDocIfLoadedWithLock = sinon.stub().callsArgWith(2, new Error("oops"))
-				@HttpController.flushDocIfLoaded(@req, @res, @next)
+		return describe("when an errors occurs", function() {
+			beforeEach(function() {
+				this.DocumentManager.flushDocIfLoadedWithLock = sinon.stub().callsArgWith(2, new Error("oops"));
+				return this.HttpController.flushDocIfLoaded(this.req, this.res, this.next);
+			});
 
-			it "should call next with the error", ->
-				@next
+			return it("should call next with the error", function() {
+				return this.next
 					.calledWith(new Error("oops"))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
+	});
 
-	describe "deleteDoc", ->
-		beforeEach ->
-			@req =
-				params:
-					project_id: @project_id
-					doc_id: @doc_id
+	describe("deleteDoc", function() {
+		beforeEach(function() {
+			return this.req = {
+				params: {
+					project_id: this.project_id,
+					doc_id: this.doc_id
+				},
 				query: {}
+			};});
 
-		describe "successfully", ->
-			beforeEach ->
-				@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArgWith(3)
-				@HttpController.deleteDoc(@req, @res, @next)
+		describe("successfully", function() {
+			beforeEach(function() {
+				this.DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArgWith(3);
+				return this.HttpController.deleteDoc(this.req, this.res, this.next);
+			});
 
-			it "should flush and delete the doc", ->
-				@DocumentManager.flushAndDeleteDocWithLock
-					.calledWith(@project_id, @doc_id, { ignoreFlushErrors: false })
-					.should.equal true
+			it("should flush and delete the doc", function() {
+				return this.DocumentManager.flushAndDeleteDocWithLock
+					.calledWith(this.project_id, this.doc_id, { ignoreFlushErrors: false })
+					.should.equal(true);
+			});
 
-			it "should flush project history", ->
-				@HistoryManager.flushProjectChangesAsync
-					.calledWithExactly(@project_id)
-					.should.equal true
+			it("should flush project history", function() {
+				return this.HistoryManager.flushProjectChangesAsync
+					.calledWithExactly(this.project_id)
+					.should.equal(true);
+			});
 
-			it "should return a successful No Content response", ->
-				@res.sendStatus
+			it("should return a successful No Content response", function() {
+				return this.res.sendStatus
 					.calledWith(204)
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should log the request", ->
-				@logger.log
-					.calledWith(doc_id: @doc_id, project_id: @project_id, "deleting doc via http")
-					.should.equal true
+			it("should log the request", function() {
+				return this.logger.log
+					.calledWith({doc_id: this.doc_id, project_id: this.project_id}, "deleting doc via http")
+					.should.equal(true);
+			});
 
-			it "should time the request", ->
-				@Metrics.Timer::done.called.should.equal true
+			return it("should time the request", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
+		});
 
-		describe "ignoring errors", ->
-			beforeEach ->
-				@req.query.ignore_flush_errors = 'true'
-				@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().yields()
-				@HttpController.deleteDoc(@req, @res, @next)
+		describe("ignoring errors", function() {
+			beforeEach(function() {
+				this.req.query.ignore_flush_errors = 'true';
+				this.DocumentManager.flushAndDeleteDocWithLock = sinon.stub().yields();
+				return this.HttpController.deleteDoc(this.req, this.res, this.next);
+			});
 
-			it "should delete the doc", ->
-				@DocumentManager.flushAndDeleteDocWithLock
-					.calledWith(@project_id, @doc_id, { ignoreFlushErrors: true })
-					.should.equal true
+			it("should delete the doc", function() {
+				return this.DocumentManager.flushAndDeleteDocWithLock
+					.calledWith(this.project_id, this.doc_id, { ignoreFlushErrors: true })
+					.should.equal(true);
+			});
 
-			it "should return a successful No Content response", ->
-				@res.sendStatus.calledWith(204).should.equal true
+			return it("should return a successful No Content response", function() {
+				return this.res.sendStatus.calledWith(204).should.equal(true);
+			});
+		});
 
-		describe "when an errors occurs", ->
-			beforeEach ->
-				@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArgWith(3, new Error("oops"))
-				@HttpController.deleteDoc(@req, @res, @next)
+		return describe("when an errors occurs", function() {
+			beforeEach(function() {
+				this.DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArgWith(3, new Error("oops"));
+				return this.HttpController.deleteDoc(this.req, this.res, this.next);
+			});
 
-			it "should flush project history", ->
-				@HistoryManager.flushProjectChangesAsync
-					.calledWithExactly(@project_id)
-					.should.equal true
+			it("should flush project history", function() {
+				return this.HistoryManager.flushProjectChangesAsync
+					.calledWithExactly(this.project_id)
+					.should.equal(true);
+			});
 
-			it "should call next with the error", ->
-				@next
+			return it("should call next with the error", function() {
+				return this.next
 					.calledWith(new Error("oops"))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
+	});
 
-	describe "deleteProject", ->
-		beforeEach ->
-			@req =
-				params:
-					project_id: @project_id
+	describe("deleteProject", function() {
+		beforeEach(function() {
+			return this.req = {
+				params: {
+					project_id: this.project_id
+				}
+			};
+		});
 
-		describe "successfully", ->
-			beforeEach ->
-				@ProjectManager.flushAndDeleteProjectWithLocks = sinon.stub().callsArgWith(2)
-				@HttpController.deleteProject(@req, @res, @next)
+		describe("successfully", function() {
+			beforeEach(function() {
+				this.ProjectManager.flushAndDeleteProjectWithLocks = sinon.stub().callsArgWith(2);
+				return this.HttpController.deleteProject(this.req, this.res, this.next);
+			});
 
-			it "should delete the project", ->
-				@ProjectManager.flushAndDeleteProjectWithLocks
-					.calledWith(@project_id)
-					.should.equal true
+			it("should delete the project", function() {
+				return this.ProjectManager.flushAndDeleteProjectWithLocks
+					.calledWith(this.project_id)
+					.should.equal(true);
+			});
 
-			it "should return a successful No Content response", ->
-				@res.sendStatus
+			it("should return a successful No Content response", function() {
+				return this.res.sendStatus
 					.calledWith(204)
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should log the request", ->
-				@logger.log
-					.calledWith(project_id: @project_id, "deleting project via http")
-					.should.equal true
+			it("should log the request", function() {
+				return this.logger.log
+					.calledWith({project_id: this.project_id}, "deleting project via http")
+					.should.equal(true);
+			});
 
-			it "should time the request", ->
-				@Metrics.Timer::done.called.should.equal true
+			return it("should time the request", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
+		});
 
-		describe "with the background=true option from realtime", ->
-			beforeEach ->
-				@ProjectManager.queueFlushAndDeleteProject = sinon.stub().callsArgWith(1)
-				@req.query = {background:true, shutdown:true}
-				@HttpController.deleteProject(@req, @res, @next)
+		describe("with the background=true option from realtime", function() {
+			beforeEach(function() {
+				this.ProjectManager.queueFlushAndDeleteProject = sinon.stub().callsArgWith(1);
+				this.req.query = {background:true, shutdown:true};
+				return this.HttpController.deleteProject(this.req, this.res, this.next);
+			});
 
-			it "should queue the flush and delete", ->
-				@ProjectManager.queueFlushAndDeleteProject
-					.calledWith(@project_id)
-					.should.equal true
+			return it("should queue the flush and delete", function() {
+				return this.ProjectManager.queueFlushAndDeleteProject
+					.calledWith(this.project_id)
+					.should.equal(true);
+			});
+		});
 
-		describe "when an errors occurs", ->
-			beforeEach ->
-				@ProjectManager.flushAndDeleteProjectWithLocks = sinon.stub().callsArgWith(2, new Error("oops"))
-				@HttpController.deleteProject(@req, @res, @next)
+		return describe("when an errors occurs", function() {
+			beforeEach(function() {
+				this.ProjectManager.flushAndDeleteProjectWithLocks = sinon.stub().callsArgWith(2, new Error("oops"));
+				return this.HttpController.deleteProject(this.req, this.res, this.next);
+			});
 
-			it "should call next with the error", ->
-				@next
+			return it("should call next with the error", function() {
+				return this.next
 					.calledWith(new Error("oops"))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
+	});
 
-	describe "acceptChanges", ->
-		beforeEach ->
-			@req =
-				params:
-					project_id: @project_id
-					doc_id: @doc_id
-					change_id: @change_id = "mock-change-od-1"
+	describe("acceptChanges", function() {
+		beforeEach(function() {
+			return this.req = {
+				params: {
+					project_id: this.project_id,
+					doc_id: this.doc_id,
+					change_id: (this.change_id = "mock-change-od-1")
+				}
+			};
+		});
 
-		describe "successfully with a single change", ->
-			beforeEach ->
-				@DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3)
-				@HttpController.acceptChanges(@req, @res, @next)
+		describe("successfully with a single change", function() {
+			beforeEach(function() {
+				this.DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3);
+				return this.HttpController.acceptChanges(this.req, this.res, this.next);
+			});
 
-			it "should accept the change", ->
-				@DocumentManager.acceptChangesWithLock
-					.calledWith(@project_id, @doc_id, [ @change_id ])
-					.should.equal true
+			it("should accept the change", function() {
+				return this.DocumentManager.acceptChangesWithLock
+					.calledWith(this.project_id, this.doc_id, [ this.change_id ])
+					.should.equal(true);
+			});
 
-			it "should return a successful No Content response", ->
-				@res.sendStatus
+			it("should return a successful No Content response", function() {
+				return this.res.sendStatus
 					.calledWith(204)
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should log the request", ->
-				@logger.log
-					.calledWith({@project_id, @doc_id}, "accepting 1 changes via http")
-					.should.equal true
+			it("should log the request", function() {
+				return this.logger.log
+					.calledWith({project_id: this.project_id, doc_id: this.doc_id}, "accepting 1 changes via http")
+					.should.equal(true);
+			});
 
-			it "should time the request", ->
-				@Metrics.Timer::done.called.should.equal true
+			return it("should time the request", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
+		});
 
-		describe "succesfully with with multiple changes", ->
-			beforeEach ->
-				@change_ids = [ "mock-change-od-1", "mock-change-od-2", "mock-change-od-3", "mock-change-od-4" ]
-				@req.body =
-					change_ids: @change_ids
-				@DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3)
-				@HttpController.acceptChanges(@req, @res, @next)
+		describe("succesfully with with multiple changes", function() {
+			beforeEach(function() {
+				this.change_ids = [ "mock-change-od-1", "mock-change-od-2", "mock-change-od-3", "mock-change-od-4" ];
+				this.req.body =
+					{change_ids: this.change_ids};
+				this.DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3);
+				return this.HttpController.acceptChanges(this.req, this.res, this.next);
+			});
 
-			it "should accept the changes in the body payload", ->
-				@DocumentManager.acceptChangesWithLock
-					.calledWith(@project_id, @doc_id, @change_ids)
-					.should.equal true
+			it("should accept the changes in the body payload", function() {
+				return this.DocumentManager.acceptChangesWithLock
+					.calledWith(this.project_id, this.doc_id, this.change_ids)
+					.should.equal(true);
+			});
 
-			it "should log the request with the correct number of changes", ->
-				@logger.log
-					.calledWith({@project_id, @doc_id}, "accepting #{ @change_ids.length } changes via http")
-					.should.equal true
+			return it("should log the request with the correct number of changes", function() {
+				return this.logger.log
+					.calledWith({project_id: this.project_id, doc_id: this.doc_id}, `accepting ${ this.change_ids.length } changes via http`)
+					.should.equal(true);
+			});
+		});
 
-		describe "when an errors occurs", ->
-			beforeEach ->
-				@DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3, new Error("oops"))
-				@HttpController.acceptChanges(@req, @res, @next)
+		return describe("when an errors occurs", function() {
+			beforeEach(function() {
+				this.DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3, new Error("oops"));
+				return this.HttpController.acceptChanges(this.req, this.res, this.next);
+			});
 
-			it "should call next with the error", ->
-				@next
+			return it("should call next with the error", function() {
+				return this.next
 					.calledWith(new Error("oops"))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
+	});
 
-	describe "deleteComment", ->
-		beforeEach ->
-			@req =
-				params:
-					project_id: @project_id
-					doc_id: @doc_id
-					comment_id: @comment_id = "mock-comment-id"
+	describe("deleteComment", function() {
+		beforeEach(function() {
+			return this.req = {
+				params: {
+					project_id: this.project_id,
+					doc_id: this.doc_id,
+					comment_id: (this.comment_id = "mock-comment-id")
+				}
+			};
+		});
 
-		describe "successfully", ->
-			beforeEach ->
-				@DocumentManager.deleteCommentWithLock = sinon.stub().callsArgWith(3)
-				@HttpController.deleteComment(@req, @res, @next)
+		describe("successfully", function() {
+			beforeEach(function() {
+				this.DocumentManager.deleteCommentWithLock = sinon.stub().callsArgWith(3);
+				return this.HttpController.deleteComment(this.req, this.res, this.next);
+			});
 
-			it "should accept the change", ->
-				@DocumentManager.deleteCommentWithLock
-					.calledWith(@project_id, @doc_id, @comment_id)
-					.should.equal true
+			it("should accept the change", function() {
+				return this.DocumentManager.deleteCommentWithLock
+					.calledWith(this.project_id, this.doc_id, this.comment_id)
+					.should.equal(true);
+			});
 
-			it "should return a successful No Content response", ->
-				@res.sendStatus
+			it("should return a successful No Content response", function() {
+				return this.res.sendStatus
 					.calledWith(204)
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should log the request", ->
-				@logger.log
-					.calledWith({@project_id, @doc_id, @comment_id}, "deleting comment via http")
-					.should.equal true
+			it("should log the request", function() {
+				return this.logger.log
+					.calledWith({project_id: this.project_id, doc_id: this.doc_id, comment_id: this.comment_id}, "deleting comment via http")
+					.should.equal(true);
+			});
 
-			it "should time the request", ->
-				@Metrics.Timer::done.called.should.equal true
+			return it("should time the request", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
+		});
 
-		describe "when an errors occurs", ->
-			beforeEach ->
-				@DocumentManager.deleteCommentWithLock = sinon.stub().callsArgWith(3, new Error("oops"))
-				@HttpController.deleteComment(@req, @res, @next)
+		return describe("when an errors occurs", function() {
+			beforeEach(function() {
+				this.DocumentManager.deleteCommentWithLock = sinon.stub().callsArgWith(3, new Error("oops"));
+				return this.HttpController.deleteComment(this.req, this.res, this.next);
+			});
 
-			it "should call next with the error", ->
-				@next
+			return it("should call next with the error", function() {
+				return this.next
 					.calledWith(new Error("oops"))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
+	});
 
-	describe "getProjectDocsAndFlushIfOld", ->
-		beforeEach ->
-			@state = "01234567890abcdef"
-			@docs = [{_id: "1234", lines: "hello", v: 23}, {_id: "4567", lines: "world", v: 45}]
-			@req =
-				params:
-					project_id: @project_id
-				query:
-					state: @state
+	describe("getProjectDocsAndFlushIfOld", function() {
+		beforeEach(function() {
+			this.state = "01234567890abcdef";
+			this.docs = [{_id: "1234", lines: "hello", v: 23}, {_id: "4567", lines: "world", v: 45}];
+			return this.req = {
+				params: {
+					project_id: this.project_id
+				},
+				query: {
+					state: this.state
+				}
+			};
+		});
 
-		describe "successfully", ->
-			beforeEach ->
-				@ProjectManager.getProjectDocsAndFlushIfOld = sinon.stub().callsArgWith(3,null, @docs)
-				@HttpController.getProjectDocsAndFlushIfOld(@req, @res, @next)
+		describe("successfully", function() {
+			beforeEach(function() {
+				this.ProjectManager.getProjectDocsAndFlushIfOld = sinon.stub().callsArgWith(3,null, this.docs);
+				return this.HttpController.getProjectDocsAndFlushIfOld(this.req, this.res, this.next);
+			});
 
-			it "should get docs from the project manager", ->
-				@ProjectManager.getProjectDocsAndFlushIfOld
-					.calledWith(@project_id, @state, {})
-					.should.equal true
+			it("should get docs from the project manager", function() {
+				return this.ProjectManager.getProjectDocsAndFlushIfOld
+					.calledWith(this.project_id, this.state, {})
+					.should.equal(true);
+			});
 
-			it "should return a successful response", ->
-				@res.send
-					.calledWith(@docs)
-					.should.equal true
+			it("should return a successful response", function() {
+				return this.res.send
+					.calledWith(this.docs)
+					.should.equal(true);
+			});
 
-			it "should log the request", ->
-				@logger.log
-					.calledWith({project_id: @project_id, exclude: []}, "getting docs via http")
-					.should.equal true
+			it("should log the request", function() {
+				return this.logger.log
+					.calledWith({project_id: this.project_id, exclude: []}, "getting docs via http")
+					.should.equal(true);
+			});
 
-			it "should log the response", ->
-				@logger.log
-					.calledWith({project_id: @project_id, result: ["1234:23", "4567:45"]}, "got docs via http")
-					.should.equal true
+			it("should log the response", function() {
+				return this.logger.log
+					.calledWith({project_id: this.project_id, result: ["1234:23", "4567:45"]}, "got docs via http")
+					.should.equal(true);
+			});
 
-			it "should time the request", ->
-				@Metrics.Timer::done.called.should.equal true
+			return it("should time the request", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
+		});
 
-		describe "when there is a conflict", ->
-			beforeEach ->
-				@ProjectManager.getProjectDocsAndFlushIfOld = sinon.stub().callsArgWith(3, new Errors.ProjectStateChangedError("project state changed"))
-				@HttpController.getProjectDocsAndFlushIfOld(@req, @res, @next)
+		describe("when there is a conflict", function() {
+			beforeEach(function() {
+				this.ProjectManager.getProjectDocsAndFlushIfOld = sinon.stub().callsArgWith(3, new Errors.ProjectStateChangedError("project state changed"));
+				return this.HttpController.getProjectDocsAndFlushIfOld(this.req, this.res, this.next);
+			});
 
-			it "should return an HTTP 409 Conflict response", ->
-				@res.sendStatus
+			return it("should return an HTTP 409 Conflict response", function() {
+				return this.res.sendStatus
 					.calledWith(409)
-					.should.equal true
+					.should.equal(true);
+			});
+		});
 
-		describe "when an error occurs", ->
-			beforeEach ->
-				@ProjectManager.getProjectDocsAndFlushIfOld = sinon.stub().callsArgWith(3, new Error("oops"))
-				@HttpController.getProjectDocsAndFlushIfOld(@req, @res, @next)
+		return describe("when an error occurs", function() {
+			beforeEach(function() {
+				this.ProjectManager.getProjectDocsAndFlushIfOld = sinon.stub().callsArgWith(3, new Error("oops"));
+				return this.HttpController.getProjectDocsAndFlushIfOld(this.req, this.res, this.next);
+			});
 
-			it "should call next with the error", ->
-				@next
+			return it("should call next with the error", function() {
+				return this.next
 					.calledWith(new Error("oops"))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
+	});
 
-	describe "updateProject", ->
-		beforeEach ->
-			@projectHistoryId = "history-id-123"
-			@userId = "user-id-123"
-			@docUpdates = sinon.stub()
-			@fileUpdates = sinon.stub()
-			@version = 1234567
-			@req =
-				body: {@projectHistoryId, @userId, @docUpdates, @fileUpdates, @version}
-				params:
-					project_id: @project_id
+	describe("updateProject", function() {
+		beforeEach(function() {
+			this.projectHistoryId = "history-id-123";
+			this.userId = "user-id-123";
+			this.docUpdates = sinon.stub();
+			this.fileUpdates = sinon.stub();
+			this.version = 1234567;
+			return this.req = {
+				body: {projectHistoryId: this.projectHistoryId, userId: this.userId, docUpdates: this.docUpdates, fileUpdates: this.fileUpdates, version: this.version},
+				params: {
+					project_id: this.project_id
+				}
+			};
+		});
 
-		describe "successfully", ->
-			beforeEach ->
-				@ProjectManager.updateProjectWithLocks = sinon.stub().callsArgWith(6)
-				@HttpController.updateProject(@req, @res, @next)
+		describe("successfully", function() {
+			beforeEach(function() {
+				this.ProjectManager.updateProjectWithLocks = sinon.stub().callsArgWith(6);
+				return this.HttpController.updateProject(this.req, this.res, this.next);
+			});
 
-			it "should accept the change", ->
-				@ProjectManager.updateProjectWithLocks
-					.calledWith(@project_id, @projectHistoryId, @userId, @docUpdates, @fileUpdates, @version)
-					.should.equal true
+			it("should accept the change", function() {
+				return this.ProjectManager.updateProjectWithLocks
+					.calledWith(this.project_id, this.projectHistoryId, this.userId, this.docUpdates, this.fileUpdates, this.version)
+					.should.equal(true);
+			});
 
-			it "should return a successful No Content response", ->
-				@res.sendStatus
+			it("should return a successful No Content response", function() {
+				return this.res.sendStatus
 					.calledWith(204)
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should time the request", ->
-				@Metrics.Timer::done.called.should.equal true
+			return it("should time the request", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
+		});
 
-		describe "when an errors occurs", ->
-			beforeEach ->
-				@ProjectManager.updateProjectWithLocks = sinon.stub().callsArgWith(6, new Error("oops"))
-				@HttpController.updateProject(@req, @res, @next)
+		return describe("when an errors occurs", function() {
+			beforeEach(function() {
+				this.ProjectManager.updateProjectWithLocks = sinon.stub().callsArgWith(6, new Error("oops"));
+				return this.HttpController.updateProject(this.req, this.res, this.next);
+			});
 
-			it "should call next with the error", ->
-				@next
+			return it("should call next with the error", function() {
+				return this.next
 					.calledWith(new Error("oops"))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
+	});
 
-	describe "resyncProjectHistory", ->
-		beforeEach ->
-			@projectHistoryId = "history-id-123"
-			@docs = sinon.stub()
-			@files = sinon.stub()
-			@fileUpdates = sinon.stub()
-			@req =
+	return describe("resyncProjectHistory", function() {
+		beforeEach(function() {
+			this.projectHistoryId = "history-id-123";
+			this.docs = sinon.stub();
+			this.files = sinon.stub();
+			this.fileUpdates = sinon.stub();
+			return this.req = {
 				body:
-					{@projectHistoryId, @docs, @files}
-				params:
-					project_id: @project_id
+					{projectHistoryId: this.projectHistoryId, docs: this.docs, files: this.files},
+				params: {
+					project_id: this.project_id
+				}
+			};
+		});
 
-		describe "successfully", ->
-			beforeEach ->
-				@HistoryManager.resyncProjectHistory = sinon.stub().callsArgWith(4)
-				@HttpController.resyncProjectHistory(@req, @res, @next)
+		describe("successfully", function() {
+			beforeEach(function() {
+				this.HistoryManager.resyncProjectHistory = sinon.stub().callsArgWith(4);
+				return this.HttpController.resyncProjectHistory(this.req, this.res, this.next);
+			});
 
-			it "should accept the change", ->
-				@HistoryManager.resyncProjectHistory
-					.calledWith(@project_id, @projectHistoryId, @docs, @files)
-					.should.equal true
+			it("should accept the change", function() {
+				return this.HistoryManager.resyncProjectHistory
+					.calledWith(this.project_id, this.projectHistoryId, this.docs, this.files)
+					.should.equal(true);
+			});
 
-			it "should return a successful No Content response", ->
-				@res.sendStatus
+			return it("should return a successful No Content response", function() {
+				return this.res.sendStatus
 					.calledWith(204)
-					.should.equal true
+					.should.equal(true);
+			});
+		});
 
-		describe "when an errors occurs", ->
-			beforeEach ->
-				@HistoryManager.resyncProjectHistory = sinon.stub().callsArgWith(4, new Error("oops"))
-				@HttpController.resyncProjectHistory(@req, @res, @next)
+		return describe("when an errors occurs", function() {
+			beforeEach(function() {
+				this.HistoryManager.resyncProjectHistory = sinon.stub().callsArgWith(4, new Error("oops"));
+				return this.HttpController.resyncProjectHistory(this.req, this.res, this.next);
+			});
 
-			it "should call next with the error", ->
-				@next
+			return it("should call next with the error", function() {
+				return this.next
 					.calledWith(new Error("oops"))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
+	});
+});

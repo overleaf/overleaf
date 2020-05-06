@@ -1,110 +1,147 @@
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-modulePath = "../../../../app/js/DispatchManager.js"
-SandboxedModule = require('sandboxed-module')
-Errors = require "../../../../app/js/Errors.js"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const modulePath = "../../../../app/js/DispatchManager.js";
+const SandboxedModule = require('sandboxed-module');
+const Errors = require("../../../../app/js/Errors.js");
 
-describe "DispatchManager", ->
-	beforeEach ->
-		@timeout(3000)
-		@DispatchManager = SandboxedModule.require modulePath, requires:
-			"./UpdateManager" : @UpdateManager = {}
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
-			"settings-sharelatex": @settings =
-				redis:
+describe("DispatchManager", function() {
+	beforeEach(function() {
+		this.timeout(3000);
+		this.DispatchManager = SandboxedModule.require(modulePath, { requires: {
+			"./UpdateManager" : (this.UpdateManager = {}),
+			"logger-sharelatex": (this.logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }),
+			"settings-sharelatex": (this.settings = {
+				redis: {
 					documentupdater: {}
-			"redis-sharelatex": @redis = {}
-			"./RateLimitManager": {}
-			"./Errors": Errors
-			"./Metrics":
-				Timer: ->
-					done: ->
-		@callback = sinon.stub()
-		@RateLimiter = { run: (task,cb) -> task(cb) } # run task without rate limit
+				}
+			}),
+			"redis-sharelatex": (this.redis = {}),
+			"./RateLimitManager": {},
+			"./Errors": Errors,
+			"./Metrics": {
+				Timer() {
+					return {done() {}};
+				}
+			}
+		}
+	}
+		);
+		this.callback = sinon.stub();
+		return this.RateLimiter = { run(task,cb) { return task(cb); } };}); // run task without rate limit
 
-	describe "each worker", ->
-		beforeEach ->
-			@client =
-				auth: sinon.stub()
-			@redis.createClient = sinon.stub().returns @client
-			@worker = @DispatchManager.createDispatcher(@RateLimiter)
+	return describe("each worker", function() {
+		beforeEach(function() {
+			this.client =
+				{auth: sinon.stub()};
+			this.redis.createClient = sinon.stub().returns(this.client);
+			return this.worker = this.DispatchManager.createDispatcher(this.RateLimiter);
+		});
 			
-		it "should create a new redis client", ->
-			@redis.createClient.called.should.equal true
+		it("should create a new redis client", function() {
+			return this.redis.createClient.called.should.equal(true);
+		});
 			
-		describe "_waitForUpdateThenDispatchWorker", ->
-			beforeEach ->
-				@project_id = "project-id-123"
-				@doc_id = "doc-id-123"
-				@doc_key = "#{@project_id}:#{@doc_id}"
-				@client.blpop = sinon.stub().callsArgWith(2, null, ["pending-updates-list", @doc_key])
+		describe("_waitForUpdateThenDispatchWorker", function() {
+			beforeEach(function() {
+				this.project_id = "project-id-123";
+				this.doc_id = "doc-id-123";
+				this.doc_key = `${this.project_id}:${this.doc_id}`;
+				return this.client.blpop = sinon.stub().callsArgWith(2, null, ["pending-updates-list", this.doc_key]);
+			});
 
-			describe "in the normal case", ->
-				beforeEach ->
-					@UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArg(2)
-					@worker._waitForUpdateThenDispatchWorker @callback
+			describe("in the normal case", function() {
+				beforeEach(function() {
+					this.UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArg(2);
+					return this.worker._waitForUpdateThenDispatchWorker(this.callback);
+				});
 
-				it "should call redis with BLPOP", ->
-					@client.blpop
+				it("should call redis with BLPOP", function() {
+					return this.client.blpop
 						.calledWith("pending-updates-list", 0)
-						.should.equal true
+						.should.equal(true);
+				});
 						
-				it "should call processOutstandingUpdatesWithLock", ->
-					@UpdateManager.processOutstandingUpdatesWithLock
-						.calledWith(@project_id, @doc_id)
-						.should.equal true
+				it("should call processOutstandingUpdatesWithLock", function() {
+					return this.UpdateManager.processOutstandingUpdatesWithLock
+						.calledWith(this.project_id, this.doc_id)
+						.should.equal(true);
+				});
 
-				it "should not log any errors", ->
-					@logger.error.called.should.equal false
-					@logger.warn.called.should.equal false
+				it("should not log any errors", function() {
+					this.logger.error.called.should.equal(false);
+					return this.logger.warn.called.should.equal(false);
+				});
 
-				it "should call the callback", ->
-					@callback.called.should.equal true
+				return it("should call the callback", function() {
+					return this.callback.called.should.equal(true);
+				});
+			});
 
-			describe "with an error", ->
-				beforeEach ->
-					@UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArgWith(2, new Error("a generic error"))
-					@worker._waitForUpdateThenDispatchWorker @callback
+			describe("with an error", function() {
+				beforeEach(function() {
+					this.UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArgWith(2, new Error("a generic error"));
+					return this.worker._waitForUpdateThenDispatchWorker(this.callback);
+				});
 
-				it "should log an error", ->
-					@logger.error.called.should.equal true
+				it("should log an error", function() {
+					return this.logger.error.called.should.equal(true);
+				});
 
-				it "should call the callback", ->
-					@callback.called.should.equal true
+				return it("should call the callback", function() {
+					return this.callback.called.should.equal(true);
+				});
+			});
 
-			describe "with a 'Delete component' error", ->
-				beforeEach ->
-					@UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArgWith(2, new Errors.DeleteMismatchError())
-					@worker._waitForUpdateThenDispatchWorker @callback
+			return describe("with a 'Delete component' error", function() {
+				beforeEach(function() {
+					this.UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArgWith(2, new Errors.DeleteMismatchError());
+					return this.worker._waitForUpdateThenDispatchWorker(this.callback);
+				});
 
-				it "should log a warning", ->
-					@logger.warn.called.should.equal true
+				it("should log a warning", function() {
+					return this.logger.warn.called.should.equal(true);
+				});
 
-				it "should call the callback", ->
-					@callback.called.should.equal true
+				return it("should call the callback", function() {
+					return this.callback.called.should.equal(true);
+				});
+			});
+		});
 
-		describe "run", ->
-			it "should call _waitForUpdateThenDispatchWorker until shutting down", (done) ->
-				callCount = 0
-				@worker._waitForUpdateThenDispatchWorker = (callback = (error) ->) =>
-					callCount++
-					if callCount == 3
-						@settings.shuttingDown = true
-					setTimeout () ->
-						callback()
-					, 10
-				sinon.spy @worker, "_waitForUpdateThenDispatchWorker"
-				
-			
-				@worker.run()
+		return describe("run", () => it("should call _waitForUpdateThenDispatchWorker until shutting down", function(done) {
+            let callCount = 0;
+            this.worker._waitForUpdateThenDispatchWorker = callback => {
+                if (callback == null) { callback = function(error) {}; }
+                callCount++;
+                if (callCount === 3) {
+                    this.settings.shuttingDown = true;
+                }
+                return setTimeout(() => callback()
+                , 10);
+            };
+            sinon.spy(this.worker, "_waitForUpdateThenDispatchWorker");
+            
+        
+            this.worker.run();
 
-				checkStatus = () =>
-					if not @settings.shuttingDown # retry until shutdown
-						setTimeout checkStatus, 100
-						return
-					else
-						@worker._waitForUpdateThenDispatchWorker.callCount.should.equal 3
-						done()
+            var checkStatus = () => {
+                if (!this.settings.shuttingDown) { // retry until shutdown
+                    setTimeout(checkStatus, 100);
+                    return;
+                } else {
+                    this.worker._waitForUpdateThenDispatchWorker.callCount.should.equal(3);
+                    return done();
+                }
+            };
 
-				checkStatus()
+            return checkStatus();
+        }));
+	});
+});

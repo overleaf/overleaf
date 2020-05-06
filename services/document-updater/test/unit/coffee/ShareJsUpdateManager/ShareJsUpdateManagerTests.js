@@ -1,131 +1,181 @@
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-modulePath = "../../../../app/js/ShareJsUpdateManager.js"
-SandboxedModule = require('sandboxed-module')
-crypto = require('crypto')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const modulePath = "../../../../app/js/ShareJsUpdateManager.js";
+const SandboxedModule = require('sandboxed-module');
+const crypto = require('crypto');
 
-describe "ShareJsUpdateManager", ->
-	beforeEach ->
-		@project_id = "project-id-123"
-		@doc_id = "document-id-123"
-		@callback = sinon.stub()
-		@ShareJsUpdateManager = SandboxedModule.require modulePath,
-			requires:
+describe("ShareJsUpdateManager", function() {
+	beforeEach(function() {
+		let Model;
+		this.project_id = "project-id-123";
+		this.doc_id = "document-id-123";
+		this.callback = sinon.stub();
+		return this.ShareJsUpdateManager = SandboxedModule.require(modulePath, {
+			requires: {
 				"./sharejs/server/model":
-					class Model
-						constructor: (@db) ->
-				"./ShareJsDB" : @ShareJsDB = { mockDB: true }
-				"redis-sharelatex" : createClient: () => @rclient = auth:->
-				"logger-sharelatex": @logger = { log: sinon.stub() }
-				"./RealTimeRedisManager": @RealTimeRedisManager = {}
-				"./Metrics": @metrics = { inc: sinon.stub() }
-			globals:
-				clearTimeout: @clearTimeout = sinon.stub()
+					(Model = class Model {
+						constructor(db) {
+							this.db = db;
+						}
+					}),
+				"./ShareJsDB" : (this.ShareJsDB = { mockDB: true }),
+				"redis-sharelatex" : { createClient: () => { return this.rclient = {auth() {}}; }
+			},
+				"logger-sharelatex": (this.logger = { log: sinon.stub() }),
+				"./RealTimeRedisManager": (this.RealTimeRedisManager = {}),
+				"./Metrics": (this.metrics = { inc: sinon.stub() })
+			},
+			globals: {
+				clearTimeout: (this.clearTimeout = sinon.stub())
+			}
+		}
+		);
+	});
 
-	describe "applyUpdate", ->
-		beforeEach ->
-			@lines = ["one", "two"]
-			@version = 34
-			@updatedDocLines = ["onefoo", "two"]
-			content = @updatedDocLines.join("\n")
-			@hash = crypto.createHash('sha1').update("blob " + content.length + "\x00").update(content, 'utf8').digest('hex')
-			@update = {p: 4, t: "foo", v:@version, hash:@hash}
-			@model =
-				applyOp: sinon.stub().callsArg(2)
-				getSnapshot: sinon.stub()
-				db:
+	describe("applyUpdate", function() {
+		beforeEach(function() {
+			this.lines = ["one", "two"];
+			this.version = 34;
+			this.updatedDocLines = ["onefoo", "two"];
+			const content = this.updatedDocLines.join("\n");
+			this.hash = crypto.createHash('sha1').update("blob " + content.length + "\x00").update(content, 'utf8').digest('hex');
+			this.update = {p: 4, t: "foo", v:this.version, hash:this.hash};
+			this.model = {
+				applyOp: sinon.stub().callsArg(2),
+				getSnapshot: sinon.stub(),
+				db: {
 					appliedOps: {}
-			@ShareJsUpdateManager.getNewShareJsModel = sinon.stub().returns(@model)
-			@ShareJsUpdateManager._listenForOps = sinon.stub()
-			@ShareJsUpdateManager.removeDocFromCache = sinon.stub().callsArg(1)
+				}
+			};
+			this.ShareJsUpdateManager.getNewShareJsModel = sinon.stub().returns(this.model);
+			this.ShareJsUpdateManager._listenForOps = sinon.stub();
+			return this.ShareJsUpdateManager.removeDocFromCache = sinon.stub().callsArg(1);
+		});
 
-		describe "successfully", ->
-			beforeEach (done) ->
-				@model.getSnapshot.callsArgWith(1, null, {snapshot: @updatedDocLines.join("\n"), v: @version})
-				@model.db.appliedOps["#{@project_id}:#{@doc_id}"] = @appliedOps = ["mock-ops"]
-				@ShareJsUpdateManager.applyUpdate @project_id, @doc_id, @update, @lines, @version, (err, docLines, version, appliedOps) =>
-					@callback(err, docLines, version, appliedOps)
-					done()
+		describe("successfully", function() {
+			beforeEach(function(done) {
+				this.model.getSnapshot.callsArgWith(1, null, {snapshot: this.updatedDocLines.join("\n"), v: this.version});
+				this.model.db.appliedOps[`${this.project_id}:${this.doc_id}`] = (this.appliedOps = ["mock-ops"]);
+				return this.ShareJsUpdateManager.applyUpdate(this.project_id, this.doc_id, this.update, this.lines, this.version, (err, docLines, version, appliedOps) => {
+					this.callback(err, docLines, version, appliedOps);
+					return done();
+				});
+			});
 
-			it "should create a new ShareJs model", ->
-				@ShareJsUpdateManager.getNewShareJsModel
-					.calledWith(@project_id, @doc_id, @lines, @version)
-					.should.equal true
+			it("should create a new ShareJs model", function() {
+				return this.ShareJsUpdateManager.getNewShareJsModel
+					.calledWith(this.project_id, this.doc_id, this.lines, this.version)
+					.should.equal(true);
+			});
 
-			it "should listen for ops on the model", ->
-				@ShareJsUpdateManager._listenForOps
-					.calledWith(@model)
-					.should.equal true
+			it("should listen for ops on the model", function() {
+				return this.ShareJsUpdateManager._listenForOps
+					.calledWith(this.model)
+					.should.equal(true);
+			});
 
-			it "should send the update to ShareJs", ->
-				@model.applyOp
-					.calledWith("#{@project_id}:#{@doc_id}", @update)
-					.should.equal true
+			it("should send the update to ShareJs", function() {
+				return this.model.applyOp
+					.calledWith(`${this.project_id}:${this.doc_id}`, this.update)
+					.should.equal(true);
+			});
 
-			it "should get the updated doc lines", ->
-				@model.getSnapshot
-					.calledWith("#{@project_id}:#{@doc_id}")
-					.should.equal true
+			it("should get the updated doc lines", function() {
+				return this.model.getSnapshot
+					.calledWith(`${this.project_id}:${this.doc_id}`)
+					.should.equal(true);
+			});
 
-			it "should return the updated doc lines, version and ops", ->
-				@callback.calledWith(null, @updatedDocLines, @version, @appliedOps).should.equal true
+			return it("should return the updated doc lines, version and ops", function() {
+				return this.callback.calledWith(null, this.updatedDocLines, this.version, this.appliedOps).should.equal(true);
+			});
+		});
 
-		describe "when applyOp fails", ->
-			beforeEach (done) ->
-				@error = new Error("Something went wrong")
-				@model.applyOp = sinon.stub().callsArgWith(2, @error)
-				@ShareJsUpdateManager.applyUpdate @project_id, @doc_id, @update, @lines, @version, (err, docLines, version) =>
-					@callback(err, docLines, version)
-					done()
+		describe("when applyOp fails", function() {
+			beforeEach(function(done) {
+				this.error = new Error("Something went wrong");
+				this.model.applyOp = sinon.stub().callsArgWith(2, this.error);
+				return this.ShareJsUpdateManager.applyUpdate(this.project_id, this.doc_id, this.update, this.lines, this.version, (err, docLines, version) => {
+					this.callback(err, docLines, version);
+					return done();
+				});
+			});
 
-			it "should call the callback with the error", ->
-				@callback.calledWith(@error).should.equal true
+			return it("should call the callback with the error", function() {
+				return this.callback.calledWith(this.error).should.equal(true);
+			});
+		});
 
-		describe "when getSnapshot fails", ->
-			beforeEach (done) ->
-				@error = new Error("Something went wrong")
-				@model.getSnapshot.callsArgWith(1, @error)
-				@ShareJsUpdateManager.applyUpdate @project_id, @doc_id, @update, @lines, @version, (err, docLines, version) =>
-					@callback(err, docLines, version)
-					done()
+		describe("when getSnapshot fails", function() {
+			beforeEach(function(done) {
+				this.error = new Error("Something went wrong");
+				this.model.getSnapshot.callsArgWith(1, this.error);
+				return this.ShareJsUpdateManager.applyUpdate(this.project_id, this.doc_id, this.update, this.lines, this.version, (err, docLines, version) => {
+					this.callback(err, docLines, version);
+					return done();
+				});
+			});
 
-			it "should call the callback with the error", ->
-				@callback.calledWith(@error).should.equal true
+			return it("should call the callback with the error", function() {
+				return this.callback.calledWith(this.error).should.equal(true);
+			});
+		});
 
-		describe "with an invalid hash", ->
-			beforeEach (done) ->
-				@error = new Error("invalid hash")
-				@model.getSnapshot.callsArgWith(1, null, {snapshot: "unexpected content", v: @version})
-				@model.db.appliedOps["#{@project_id}:#{@doc_id}"] = @appliedOps = ["mock-ops"]
-				@ShareJsUpdateManager.applyUpdate @project_id, @doc_id, @update, @lines, @version, (err, docLines, version, appliedOps) =>
-					@callback(err, docLines, version, appliedOps)
-					done()
+		return describe("with an invalid hash", function() {
+			beforeEach(function(done) {
+				this.error = new Error("invalid hash");
+				this.model.getSnapshot.callsArgWith(1, null, {snapshot: "unexpected content", v: this.version});
+				this.model.db.appliedOps[`${this.project_id}:${this.doc_id}`] = (this.appliedOps = ["mock-ops"]);
+				return this.ShareJsUpdateManager.applyUpdate(this.project_id, this.doc_id, this.update, this.lines, this.version, (err, docLines, version, appliedOps) => {
+					this.callback(err, docLines, version, appliedOps);
+					return done();
+				});
+			});
 
-			it "should call the callback with the error", ->
-				@callback.calledWith(@error).should.equal true
+			return it("should call the callback with the error", function() {
+				return this.callback.calledWith(this.error).should.equal(true);
+			});
+		});
+	});
 
-	describe "_listenForOps", ->
-		beforeEach ->
-			@model = on: (event, callback) =>
-				@callback = callback
-			sinon.spy @model, "on"
-			@ShareJsUpdateManager._listenForOps(@model)
+	return describe("_listenForOps", function() {
+		beforeEach(function() {
+			this.model = { on: (event, callback) => {
+				return this.callback = callback;
+			}
+		};
+			sinon.spy(this.model, "on");
+			return this.ShareJsUpdateManager._listenForOps(this.model);
+		});
 
-		it "should listen to the model for updates", ->
-			@model.on.calledWith("applyOp")
-				.should.equal true
+		it("should listen to the model for updates", function() {
+			return this.model.on.calledWith("applyOp")
+				.should.equal(true);
+		});
 
-		describe "the callback", ->
-			beforeEach ->
-				@opData =
-					op: {t: "foo", p: 1}
-					meta: source: "bar"
-				@RealTimeRedisManager.sendData = sinon.stub()
-				@callback("#{@project_id}:#{@doc_id}", @opData)
+		return describe("the callback", function() {
+			beforeEach(function() {
+				this.opData = {
+					op: {t: "foo", p: 1},
+					meta: { source: "bar"
+				}
+				};
+				this.RealTimeRedisManager.sendData = sinon.stub();
+				return this.callback(`${this.project_id}:${this.doc_id}`, this.opData);
+			});
 
-			it "should publish the op to redis", ->
-				@RealTimeRedisManager.sendData
-					.calledWith({project_id: @project_id, doc_id: @doc_id, op: @opData})
-					.should.equal true
+			return it("should publish the op to redis", function() {
+				return this.RealTimeRedisManager.sendData
+					.calledWith({project_id: this.project_id, doc_id: this.doc_id, op: this.opData})
+					.should.equal(true);
+			});
+		});
+	});
+});
 

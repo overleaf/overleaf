@@ -1,56 +1,76 @@
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-expect = chai.expect
-modulePath = "../../../../app/js/DiffCodec.js"
-SandboxedModule = require('sandboxed-module')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const {
+    expect
+} = chai;
+const modulePath = "../../../../app/js/DiffCodec.js";
+const SandboxedModule = require('sandboxed-module');
 
-describe "DiffCodec", ->
-	beforeEach ->
-		@callback = sinon.stub()
-		@DiffCodec = SandboxedModule.require modulePath
+describe("DiffCodec", function() {
+	beforeEach(function() {
+		this.callback = sinon.stub();
+		return this.DiffCodec = SandboxedModule.require(modulePath);
+	});
 
-	describe "diffAsShareJsOps", ->
-		it "should insert new text correctly", (done) ->
-			@before = ["hello world"]
-			@after  = ["hello beautiful world"]
-			@DiffCodec.diffAsShareJsOp @before, @after, (error, ops) ->
-				expect(ops).to.deep.equal [
-					i: "beautiful "
+	return describe("diffAsShareJsOps", function() {
+		it("should insert new text correctly", function(done) {
+			this.before = ["hello world"];
+			this.after  = ["hello beautiful world"];
+			return this.DiffCodec.diffAsShareJsOp(this.before, this.after, function(error, ops) {
+				expect(ops).to.deep.equal([{
+					i: "beautiful ",
 					p: 6
-				]
-				done()
+				}
+				]);
+				return done();
+			});
+		});
 
-		it "should shift later inserts by previous inserts", (done) ->
-			@before = ["the boy played with the ball"]
-			@after  = ["the tall boy played with the red ball"]
-			@DiffCodec.diffAsShareJsOp @before, @after, (error, ops) ->
-				expect(ops).to.deep.equal [
-					{ i: "tall ", p: 4 }
+		it("should shift later inserts by previous inserts", function(done) {
+			this.before = ["the boy played with the ball"];
+			this.after  = ["the tall boy played with the red ball"];
+			return this.DiffCodec.diffAsShareJsOp(this.before, this.after, function(error, ops) {
+				expect(ops).to.deep.equal([
+					{ i: "tall ", p: 4 },
 					{ i: "red ", p: 29 }
-				]
-				done()
+				]);
+				return done();
+			});
+		});
 
-		it "should delete text correctly", (done) ->
-			@before  = ["hello beautiful world"]
-			@after = ["hello world"]
-			@DiffCodec.diffAsShareJsOp @before, @after, (error, ops) ->
-				expect(ops).to.deep.equal [
-					d: "beautiful "
+		it("should delete text correctly", function(done) {
+			this.before  = ["hello beautiful world"];
+			this.after = ["hello world"];
+			return this.DiffCodec.diffAsShareJsOp(this.before, this.after, function(error, ops) {
+				expect(ops).to.deep.equal([{
+					d: "beautiful ",
 					p: 6
-				]
-				done()
+				}
+				]);
+				return done();
+			});
+		});
 
 
-		it "should shift later deletes by the first deletes", (done) ->
-			@before = ["the tall boy played with the red ball"]
-			@after  = ["the boy played with the ball"]
-			@DiffCodec.diffAsShareJsOp @before, @after, (error, ops) ->
-				expect(ops).to.deep.equal [
-					{ d: "tall ", p: 4 }
+		return it("should shift later deletes by the first deletes", function(done) {
+			this.before = ["the tall boy played with the red ball"];
+			this.after  = ["the boy played with the ball"];
+			return this.DiffCodec.diffAsShareJsOp(this.before, this.after, function(error, ops) {
+				expect(ops).to.deep.equal([
+					{ d: "tall ", p: 4 },
 					{ d: "red ", p: 24 }
-				]
-				done()
+				]);
+				return done();
+			});
+		});
+	});
+});
 			
 			
 

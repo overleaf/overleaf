@@ -1,226 +1,304 @@
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-modulePath = "../../../../app/js/PersistenceManager.js"
-SandboxedModule = require('sandboxed-module')
-Errors = require "../../../../app/js/Errors"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS206: Consider reworking classes to avoid initClass
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const modulePath = "../../../../app/js/PersistenceManager.js";
+const SandboxedModule = require('sandboxed-module');
+const Errors = require("../../../../app/js/Errors");
 
-describe "PersistenceManager", ->
-	beforeEach ->
-		@request = sinon.stub()
-		@request.defaults = () => @request
-		@PersistenceManager = SandboxedModule.require modulePath, requires:
-			"requestretry": @request
-			"settings-sharelatex": @Settings = {}
-			"./Metrics": @Metrics =
-				Timer: class Timer
-					done: sinon.stub()
+describe("PersistenceManager", function() {
+	beforeEach(function() {
+		let Timer;
+		this.request = sinon.stub();
+		this.request.defaults = () => this.request;
+		this.PersistenceManager = SandboxedModule.require(modulePath, { requires: {
+			"requestretry": this.request,
+			"settings-sharelatex": (this.Settings = {}),
+			"./Metrics": (this.Metrics = {
+				Timer: (Timer = (function() {
+					Timer = class Timer {
+						static initClass() {
+							this.prototype.done = sinon.stub();
+						}
+					};
+					Timer.initClass();
+					return Timer;
+				})()),
 				inc: sinon.stub()
-			"logger-sharelatex": @logger = {log: sinon.stub(), err: sinon.stub()}
-		@project_id = "project-id-123"
-		@projectHistoryId = "history-id-123"
-		@doc_id = "doc-id-123"
-		@lines = ["one", "two", "three"]
-		@version = 42
-		@callback = sinon.stub()
-		@ranges = { comments: "mock", entries: "mock" }
-		@pathname = '/a/b/c.tex'
-		@lastUpdatedAt = Date.now()
-		@lastUpdatedBy = 'last-author-id'
-		@Settings.apis =
-			web:
-				url: @url = "www.example.com"
-				user: @user = "sharelatex"
-				pass: @pass = "password"
-
-	describe "getDoc", ->
-		beforeEach ->
-			@webResponse = {
-				lines: @lines,
-				version: @version,
-				ranges: @ranges
-				pathname: @pathname,
-				projectHistoryId: @projectHistoryId
+			}),
+			"logger-sharelatex": (this.logger = {log: sinon.stub(), err: sinon.stub()})
+		}
+	});
+		this.project_id = "project-id-123";
+		this.projectHistoryId = "history-id-123";
+		this.doc_id = "doc-id-123";
+		this.lines = ["one", "two", "three"];
+		this.version = 42;
+		this.callback = sinon.stub();
+		this.ranges = { comments: "mock", entries: "mock" };
+		this.pathname = '/a/b/c.tex';
+		this.lastUpdatedAt = Date.now();
+		this.lastUpdatedBy = 'last-author-id';
+		return this.Settings.apis = {
+			web: {
+				url: (this.url = "www.example.com"),
+				user: (this.user = "sharelatex"),
+				pass: (this.pass = "password")
 			}
+		};
+	});
 
-		describe "with a successful response from the web api", ->
-			beforeEach ->
-				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(@webResponse))
-				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
+	describe("getDoc", function() {
+		beforeEach(function() {
+			return this.webResponse = {
+				lines: this.lines,
+				version: this.version,
+				ranges: this.ranges,
+				pathname: this.pathname,
+				projectHistoryId: this.projectHistoryId
+			};});
 
-			it "should call the web api", ->
-				@request
+		describe("with a successful response from the web api", function() {
+			beforeEach(function() {
+				this.request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(this.webResponse));
+				return this.PersistenceManager.getDoc(this.project_id, this.doc_id, this.callback);
+			});
+
+			it("should call the web api", function() {
+				return this.request
 					.calledWith({
-						url: "#{@url}/project/#{@project_id}/doc/#{@doc_id}"
-						method: "GET"
-						headers:
+						url: `${this.url}/project/${this.project_id}/doc/${this.doc_id}`,
+						method: "GET",
+						headers: {
 							"accept": "application/json"
-						auth:
-							user: @user
-							pass: @pass
+						},
+						auth: {
+							user: this.user,
+							pass: this.pass,
 							sendImmediately: true
-						jar: false
+						},
+						jar: false,
 						timeout: 5000
 					})
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should call the callback with the doc lines, version and ranges", ->
-				@callback
-					.calledWith(null, @lines, @version, @ranges, @pathname, @projectHistoryId)
-					.should.equal true
+			it("should call the callback with the doc lines, version and ranges", function() {
+				return this.callback
+					.calledWith(null, this.lines, this.version, this.ranges, this.pathname, this.projectHistoryId)
+					.should.equal(true);
+			});
 
-			it "should time the execution", ->
-				@Metrics.Timer::done.called.should.equal true
+			it("should time the execution", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
 
-			it "should increment the metric", ->
-				@Metrics.inc.calledWith("getDoc", 1, {status: 200}).should.equal true
+			return it("should increment the metric", function() {
+				return this.Metrics.inc.calledWith("getDoc", 1, {status: 200}).should.equal(true);
+			});
+		});
 
-		describe "when request returns an error", ->
-			beforeEach ->
-				@error = new Error("oops")
-				@error.code = "EOOPS"
-				@request.callsArgWith(1, @error, null, null)
-				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
+		describe("when request returns an error", function() {
+			beforeEach(function() {
+				this.error = new Error("oops");
+				this.error.code = "EOOPS";
+				this.request.callsArgWith(1, this.error, null, null);
+				return this.PersistenceManager.getDoc(this.project_id, this.doc_id, this.callback);
+			});
 
-			it "should return the error", ->
-				@callback.calledWith(@error).should.equal true
+			it("should return the error", function() {
+				return this.callback.calledWith(this.error).should.equal(true);
+			});
 
-			it "should time the execution", ->
-				@Metrics.Timer::done.called.should.equal true
+			it("should time the execution", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
 
-			it "should increment the metric", ->
-				@Metrics.inc.calledWith("getDoc", 1, {status: "EOOPS"}).should.equal true
+			return it("should increment the metric", function() {
+				return this.Metrics.inc.calledWith("getDoc", 1, {status: "EOOPS"}).should.equal(true);
+			});
+		});
 
-		describe "when the request returns 404", ->
-			beforeEach ->
-				@request.callsArgWith(1, null, {statusCode: 404}, "")
-				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
+		describe("when the request returns 404", function() {
+			beforeEach(function() {
+				this.request.callsArgWith(1, null, {statusCode: 404}, "");
+				return this.PersistenceManager.getDoc(this.project_id, this.doc_id, this.callback);
+			});
 
-			it "should return a NotFoundError", ->
-				@callback.calledWith(new Errors.NotFoundError("not found")).should.equal true
+			it("should return a NotFoundError", function() {
+				return this.callback.calledWith(new Errors.NotFoundError("not found")).should.equal(true);
+			});
 
-			it "should time the execution", ->
-				@Metrics.Timer::done.called.should.equal true
+			it("should time the execution", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
 
-			it "should increment the metric", ->
-				@Metrics.inc.calledWith("getDoc", 1, {status: 404}).should.equal true
+			return it("should increment the metric", function() {
+				return this.Metrics.inc.calledWith("getDoc", 1, {status: 404}).should.equal(true);
+			});
+		});
 
-		describe "when the request returns an error status code", ->
-			beforeEach ->
-				@request.callsArgWith(1, null, {statusCode: 500}, "")
-				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
+		describe("when the request returns an error status code", function() {
+			beforeEach(function() {
+				this.request.callsArgWith(1, null, {statusCode: 500}, "");
+				return this.PersistenceManager.getDoc(this.project_id, this.doc_id, this.callback);
+			});
 
-			it "should return an error", ->
-				@callback.calledWith(new Error("web api error")).should.equal true
+			it("should return an error", function() {
+				return this.callback.calledWith(new Error("web api error")).should.equal(true);
+			});
 
-			it "should time the execution", ->
-				@Metrics.Timer::done.called.should.equal true
+			it("should time the execution", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
 
-			it "should increment the metric", ->
-				@Metrics.inc.calledWith("getDoc", 1, {status: 500}).should.equal true
+			return it("should increment the metric", function() {
+				return this.Metrics.inc.calledWith("getDoc", 1, {status: 500}).should.equal(true);
+			});
+		});
 
-		describe "when request returns an doc without lines", ->
-			beforeEach ->
-				delete @webResponse.lines
-				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(@webResponse))
-				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
+		describe("when request returns an doc without lines", function() {
+			beforeEach(function() {
+				delete this.webResponse.lines;
+				this.request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(this.webResponse));
+				return this.PersistenceManager.getDoc(this.project_id, this.doc_id, this.callback);
+			});
 
-			it "should return and error", ->
-				@callback.calledWith(new Error("web API response had no doc lines")).should.equal true
+			return it("should return and error", function() {
+				return this.callback.calledWith(new Error("web API response had no doc lines")).should.equal(true);
+			});
+		});
 
-		describe "when request returns an doc without a version", ->
-			beforeEach ->
-				delete @webResponse.version
-				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(@webResponse))
-				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
+		describe("when request returns an doc without a version", function() {
+			beforeEach(function() {
+				delete this.webResponse.version;
+				this.request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(this.webResponse));
+				return this.PersistenceManager.getDoc(this.project_id, this.doc_id, this.callback);
+			});
 
-			it "should return and error", ->
-				@callback.calledWith(new Error("web API response had no valid doc version")).should.equal true
+			return it("should return and error", function() {
+				return this.callback.calledWith(new Error("web API response had no valid doc version")).should.equal(true);
+			});
+		});
 
-		describe "when request returns an doc without a pathname", ->
-			beforeEach ->
-				delete @webResponse.pathname
-				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(@webResponse))
-				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
+		return describe("when request returns an doc without a pathname", function() {
+			beforeEach(function() {
+				delete this.webResponse.pathname;
+				this.request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(this.webResponse));
+				return this.PersistenceManager.getDoc(this.project_id, this.doc_id, this.callback);
+			});
 
-			it "should return and error", ->
-				@callback.calledWith(new Error("web API response had no valid doc pathname")).should.equal true
+			return it("should return and error", function() {
+				return this.callback.calledWith(new Error("web API response had no valid doc pathname")).should.equal(true);
+			});
+		});
+	});
 
-	describe "setDoc", ->
-		describe "with a successful response from the web api", ->
-			beforeEach ->
-				@request.callsArgWith(1, null, {statusCode: 200})
-				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback)
+	return describe("setDoc", function() {
+		describe("with a successful response from the web api", function() {
+			beforeEach(function() {
+				this.request.callsArgWith(1, null, {statusCode: 200});
+				return this.PersistenceManager.setDoc(this.project_id, this.doc_id, this.lines, this.version, this.ranges, this.lastUpdatedAt, this.lastUpdatedBy, this.callback);
+			});
 
-			it "should call the web api", ->
-				@request
+			it("should call the web api", function() {
+				return this.request
 					.calledWith({
-						url: "#{@url}/project/#{@project_id}/doc/#{@doc_id}"
-						json:
-							lines: @lines
-							version: @version
-							ranges: @ranges
-							lastUpdatedAt: @lastUpdatedAt
-							lastUpdatedBy: @lastUpdatedBy
-						method: "POST"
-						auth:
-							user: @user
-							pass: @pass
+						url: `${this.url}/project/${this.project_id}/doc/${this.doc_id}`,
+						json: {
+							lines: this.lines,
+							version: this.version,
+							ranges: this.ranges,
+							lastUpdatedAt: this.lastUpdatedAt,
+							lastUpdatedBy: this.lastUpdatedBy
+						},
+						method: "POST",
+						auth: {
+							user: this.user,
+							pass: this.pass,
 							sendImmediately: true
-						jar: false
+						},
+						jar: false,
 						timeout: 5000
 					})
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should call the callback without error", ->
-				@callback.calledWith(null).should.equal true
+			it("should call the callback without error", function() {
+				return this.callback.calledWith(null).should.equal(true);
+			});
 
-			it "should time the execution", ->
-				@Metrics.Timer::done.called.should.equal true
+			it("should time the execution", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
 
-			it "should increment the metric", ->
-				@Metrics.inc.calledWith("setDoc", 1, {status: 200}).should.equal true
+			return it("should increment the metric", function() {
+				return this.Metrics.inc.calledWith("setDoc", 1, {status: 200}).should.equal(true);
+			});
+		});
 
-		describe "when request returns an error", ->
-			beforeEach ->
-				@error = new Error("oops")
-				@error.code = "EOOPS"
-				@request.callsArgWith(1, @error, null, null)
-				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback)
+		describe("when request returns an error", function() {
+			beforeEach(function() {
+				this.error = new Error("oops");
+				this.error.code = "EOOPS";
+				this.request.callsArgWith(1, this.error, null, null);
+				return this.PersistenceManager.setDoc(this.project_id, this.doc_id, this.lines, this.version, this.ranges, this.lastUpdatedAt, this.lastUpdatedBy, this.callback);
+			});
 
-			it "should return the error", ->
-				@callback.calledWith(@error).should.equal true
+			it("should return the error", function() {
+				return this.callback.calledWith(this.error).should.equal(true);
+			});
 
-			it "should time the execution", ->
-				@Metrics.Timer::done.called.should.equal true
+			it("should time the execution", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
 
-			it "should increment the metric", ->
-				@Metrics.inc.calledWith("setDoc", 1, {status: "EOOPS"}).should.equal true
+			return it("should increment the metric", function() {
+				return this.Metrics.inc.calledWith("setDoc", 1, {status: "EOOPS"}).should.equal(true);
+			});
+		});
 
-		describe "when the request returns 404", ->
-			beforeEach ->
-				@request.callsArgWith(1, null, {statusCode: 404}, "")
-				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback)
+		describe("when the request returns 404", function() {
+			beforeEach(function() {
+				this.request.callsArgWith(1, null, {statusCode: 404}, "");
+				return this.PersistenceManager.setDoc(this.project_id, this.doc_id, this.lines, this.version, this.ranges, this.lastUpdatedAt, this.lastUpdatedBy, this.callback);
+			});
 
-			it "should return a NotFoundError", ->
-				@callback.calledWith(new Errors.NotFoundError("not found")).should.equal true
+			it("should return a NotFoundError", function() {
+				return this.callback.calledWith(new Errors.NotFoundError("not found")).should.equal(true);
+			});
 
-			it "should time the execution", ->
-				@Metrics.Timer::done.called.should.equal true
+			it("should time the execution", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
 
-			it "should increment the metric", ->
-				@Metrics.inc.calledWith("setDoc", 1, {status: 404}).should.equal true
+			return it("should increment the metric", function() {
+				return this.Metrics.inc.calledWith("setDoc", 1, {status: 404}).should.equal(true);
+			});
+		});
 
-		describe "when the request returns an error status code", ->
-			beforeEach ->
-				@request.callsArgWith(1, null, {statusCode: 500}, "")
-				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback)
+		return describe("when the request returns an error status code", function() {
+			beforeEach(function() {
+				this.request.callsArgWith(1, null, {statusCode: 500}, "");
+				return this.PersistenceManager.setDoc(this.project_id, this.doc_id, this.lines, this.version, this.ranges, this.lastUpdatedAt, this.lastUpdatedBy, this.callback);
+			});
 
-			it "should return an error", ->
-				@callback.calledWith(new Error("web api error")).should.equal true
+			it("should return an error", function() {
+				return this.callback.calledWith(new Error("web api error")).should.equal(true);
+			});
 
-			it "should time the execution", ->
-				@Metrics.Timer::done.called.should.equal true
+			it("should time the execution", function() {
+				return this.Metrics.Timer.prototype.done.called.should.equal(true);
+			});
 
-			it "should increment the metric", ->
-				@Metrics.inc.calledWith("setDoc", 1, {status: 500}).should.equal true
+			return it("should increment the metric", function() {
+				return this.Metrics.inc.calledWith("setDoc", 1, {status: 500}).should.equal(true);
+			});
+		});
+	});
+});

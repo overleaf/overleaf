@@ -1,316 +1,395 @@
-sinon = require('sinon')
-chai = require('chai')
-should = chai.should()
-expect = chai.expect
-modulePath = "../../../../app/js/RangesManager.js"
-SandboxedModule = require('sandboxed-module')
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const {
+    expect
+} = chai;
+const modulePath = "../../../../app/js/RangesManager.js";
+const SandboxedModule = require('sandboxed-module');
 
-describe "RangesManager", ->
-	beforeEach ->
-		@RangesManager = SandboxedModule.require modulePath,
-			requires:
-				"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
+describe("RangesManager", function() {
+	beforeEach(function() {
+		this.RangesManager = SandboxedModule.require(modulePath, {
+			requires: {
+				"logger-sharelatex": (this.logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() })
+			}
+		});
 
-		@doc_id = "doc-id-123"
-		@project_id = "project-id-123"
-		@user_id = "user-id-123"
-		@callback = sinon.stub()
+		this.doc_id = "doc-id-123";
+		this.project_id = "project-id-123";
+		this.user_id = "user-id-123";
+		return this.callback = sinon.stub();
+	});
 
-	describe "applyUpdate", ->
-		beforeEach ->
-			@updates = [{
-				meta:
-					user_id: @user_id
+	describe("applyUpdate", function() {
+		beforeEach(function() {
+			this.updates = [{
+				meta: {
+					user_id: this.user_id
+				},
 				op: [{
-					i: "two "
+					i: "two ",
 					p: 4
 				}]
-			}]
-			@entries = {
+			}];
+			this.entries = {
 				comments: [{
-					op:
-						c: "three "
+					op: {
+						c: "three ",
 						p: 4
-					metadata:
-						user_id: @user_id
-				}]
+					},
+					metadata: {
+						user_id: this.user_id
+					}
+				}],
 				changes: [{
-					op:
-						i: "five"
+					op: {
+						i: "five",
 						p: 15
-					metadata:
-						user_id: @user_id
+					},
+					metadata: {
+						user_id: this.user_id
+					}
 				}]
-			}
-			@newDocLines = ["one two three four five"] # old is "one three four five"
+			};
+			return this.newDocLines = ["one two three four five"];}); // old is "one three four five"
 		
-		describe "successfully", ->
-			beforeEach ->
-				@RangesManager.applyUpdate @project_id, @doc_id, @entries, @updates, @newDocLines, @callback
+		describe("successfully", function() {
+			beforeEach(function() {
+				return this.RangesManager.applyUpdate(this.project_id, this.doc_id, this.entries, this.updates, this.newDocLines, this.callback);
+			});
 			
-			it "should return the modified the comments and changes", ->
-				@callback.called.should.equal true
-				[error, entries, ranges_were_collapsed] = @callback.args[0]
-				expect(error).to.be.null
-				expect(ranges_were_collapsed).to.equal false
-				entries.comments[0].op.should.deep.equal {
-					c: "three "
+			return it("should return the modified the comments and changes", function() {
+				this.callback.called.should.equal(true);
+				const [error, entries, ranges_were_collapsed] = Array.from(this.callback.args[0]);
+				expect(error).to.be.null;
+				expect(ranges_were_collapsed).to.equal(false);
+				entries.comments[0].op.should.deep.equal({
+					c: "three ",
 					p: 8
-				}
-				entries.changes[0].op.should.deep.equal {
-					i: "five"
+				});
+				return entries.changes[0].op.should.deep.equal({
+					i: "five",
 					p: 19
-				}
+				});
+		});
+	});
 		
-		describe "with empty comments", ->
-			beforeEach ->
-				@entries.comments = []
-				@RangesManager.applyUpdate @project_id, @doc_id, @entries, @updates, @newDocLines, @callback
+		describe("with empty comments", function() {
+			beforeEach(function() {
+				this.entries.comments = [];
+				return this.RangesManager.applyUpdate(this.project_id, this.doc_id, this.entries, this.updates, this.newDocLines, this.callback);
+			});
 			
-			it "should return an object with no comments", ->
-				# Save space in redis and don't store just {}
-				@callback.called.should.equal true
-				[error, entries] = @callback.args[0]
-				expect(error).to.be.null
-				expect(entries.comments).to.be.undefined
+			return it("should return an object with no comments", function() {
+				// Save space in redis and don't store just {}
+				this.callback.called.should.equal(true);
+				const [error, entries] = Array.from(this.callback.args[0]);
+				expect(error).to.be.null;
+				return expect(entries.comments).to.be.undefined;
+			});
+		});
 		
-		describe "with empty changes", ->
-			beforeEach ->
-				@entries.changes = []
-				@RangesManager.applyUpdate @project_id, @doc_id, @entries, @updates, @newDocLines, @callback
+		describe("with empty changes", function() {
+			beforeEach(function() {
+				this.entries.changes = [];
+				return this.RangesManager.applyUpdate(this.project_id, this.doc_id, this.entries, this.updates, this.newDocLines, this.callback);
+			});
 			
-			it "should return an object with no changes", ->
-				# Save space in redis and don't store just {}
-				@callback.called.should.equal true
-				[error, entries] = @callback.args[0]
-				expect(error).to.be.null
-				expect(entries.changes).to.be.undefined
+			return it("should return an object with no changes", function() {
+				// Save space in redis and don't store just {}
+				this.callback.called.should.equal(true);
+				const [error, entries] = Array.from(this.callback.args[0]);
+				expect(error).to.be.null;
+				return expect(entries.changes).to.be.undefined;
+			});
+		});
 	
-		describe "with too many comments", ->
-			beforeEach ->
-				@RangesManager.MAX_COMMENTS = 2
-				@updates = [{
-					meta:
-						user_id: @user_id
+		describe("with too many comments", function() {
+			beforeEach(function() {
+				this.RangesManager.MAX_COMMENTS = 2;
+				this.updates = [{
+					meta: {
+						user_id: this.user_id
+					},
 					op: [{
-						c: "one"
-						p: 0
+						c: "one",
+						p: 0,
 						t: "thread-id-1"
 					}]
-				}]
-				@entries = {
+				}];
+				this.entries = {
 					comments: [{
-						op:
-							c: "three "
-							p: 4
+						op: {
+							c: "three ",
+							p: 4,
 							t: "thread-id-2"
-						metadata:
-							user_id: @user_id
+						},
+						metadata: {
+							user_id: this.user_id
+						}
 					}, {
-						op:
-							c: "four "
-							p: 10
+						op: {
+							c: "four ",
+							p: 10,
 							t: "thread-id-3"
-						metadata:
-							user_id: @user_id
-					}]
+						},
+						metadata: {
+							user_id: this.user_id
+						}
+					}],
 					changes: []
-				}
-				@RangesManager.applyUpdate @project_id, @doc_id, @entries, @updates, @newDocLines, @callback
+				};
+				return this.RangesManager.applyUpdate(this.project_id, this.doc_id, this.entries, this.updates, this.newDocLines, this.callback);
+			});
 			
-			it "should return an error", ->
-				@callback.called.should.equal true
-				[error, entries] = @callback.args[0]
-				expect(error).to.not.be.null
-				expect(error.message).to.equal("too many comments or tracked changes")
+			return it("should return an error", function() {
+				this.callback.called.should.equal(true);
+				const [error, entries] = Array.from(this.callback.args[0]);
+				expect(error).to.not.be.null;
+				return expect(error.message).to.equal("too many comments or tracked changes");
+			});
+		});
 		
-		describe "with too many changes", ->
-			beforeEach ->
-				@RangesManager.MAX_CHANGES = 2
-				@updates = [{
-					meta:
-						user_id: @user_id
+		describe("with too many changes", function() {
+			beforeEach(function() {
+				this.RangesManager.MAX_CHANGES = 2;
+				this.updates = [{
+					meta: {
+						user_id: this.user_id,
 						tc: "track-changes-id-yes"
+					},
 					op: [{
-						i: "one "
+						i: "one ",
 						p: 0
 					}]
-				}]
-				@entries = {
+				}];
+				this.entries = {
 					changes: [{
-						op:
-							i: "three"
+						op: {
+							i: "three",
 							p: 4
-						metadata:
-							user_id: @user_id
+						},
+						metadata: {
+							user_id: this.user_id
+						}
 					}, {
-						op:
-							i: "four"
+						op: {
+							i: "four",
 							p: 10
-						metadata:
-							user_id: @user_id
-					}]
+						},
+						metadata: {
+							user_id: this.user_id
+						}
+					}],
 					comments: []
-				}
-				@newDocLines = ["one two three four"]
-				@RangesManager.applyUpdate @project_id, @doc_id, @entries, @updates, @newDocLines, @callback
+				};
+				this.newDocLines = ["one two three four"];
+				return this.RangesManager.applyUpdate(this.project_id, this.doc_id, this.entries, this.updates, this.newDocLines, this.callback);
+			});
 			
-			it "should return an error", ->
-				# Save space in redis and don't store just {}
-				@callback.called.should.equal true
-				[error, entries] = @callback.args[0]
-				expect(error).to.not.be.null
-				expect(error.message).to.equal("too many comments or tracked changes")
+			return it("should return an error", function() {
+				// Save space in redis and don't store just {}
+				this.callback.called.should.equal(true);
+				const [error, entries] = Array.from(this.callback.args[0]);
+				expect(error).to.not.be.null;
+				return expect(error.message).to.equal("too many comments or tracked changes");
+			});
+		});
 		
-		describe "inconsistent changes", ->
-			beforeEach ->
-				@updates = [{
-					meta:
-						user_id: @user_id
+		describe("inconsistent changes", function() {
+			beforeEach(function() {
+				this.updates = [{
+					meta: {
+						user_id: this.user_id
+					},
 					op: [{
-						c: "doesn't match"
+						c: "doesn't match",
 						p: 0
 					}]
-				}]
-				@RangesManager.applyUpdate @project_id, @doc_id, @entries, @updates, @newDocLines, @callback
+				}];
+				return this.RangesManager.applyUpdate(this.project_id, this.doc_id, this.entries, this.updates, this.newDocLines, this.callback);
+			});
 			
-			it "should return an error", ->
-				# Save space in redis and don't store just {}
-				@callback.called.should.equal true
-				[error, entries] = @callback.args[0]
-				expect(error).to.not.be.null
-				expect(error.message).to.equal("Change ({\"op\":{\"i\":\"five\",\"p\":15},\"metadata\":{\"user_id\":\"user-id-123\"}}) doesn't match text (\"our \")")
+			return it("should return an error", function() {
+				// Save space in redis and don't store just {}
+				this.callback.called.should.equal(true);
+				const [error, entries] = Array.from(this.callback.args[0]);
+				expect(error).to.not.be.null;
+				return expect(error.message).to.equal("Change ({\"op\":{\"i\":\"five\",\"p\":15},\"metadata\":{\"user_id\":\"user-id-123\"}}) doesn't match text (\"our \")");
+			});
+		});
 
 
-		describe "with an update that collapses a range", ->
-			beforeEach ->
-				@updates = [{
-					meta:
-						user_id: @user_id
+		return describe("with an update that collapses a range", function() {
+			beforeEach(function() {
+				this.updates = [{
+					meta: {
+						user_id: this.user_id
+					},
 					op: [{
-						d: "one"
-						p: 0
+						d: "one",
+						p: 0,
 						t: "thread-id-1"
 					}]
-				}]
-				@entries = {
+				}];
+				this.entries = {
 					comments: [{
-						op:
-							c: "n"
-							p: 1
+						op: {
+							c: "n",
+							p: 1,
 							t: "thread-id-2"
-						metadata:
-							user_id: @user_id
-					}]
+						},
+						metadata: {
+							user_id: this.user_id
+						}
+					}],
 					changes: []
+				};
+				return this.RangesManager.applyUpdate(this.project_id, this.doc_id, this.entries, this.updates, this.newDocLines, this.callback);
+			});
+
+			return it("should return ranges_were_collapsed == true", function() {
+				this.callback.called.should.equal(true);
+				const [error, entries, ranges_were_collapsed] = Array.from(this.callback.args[0]);
+				return expect(ranges_were_collapsed).to.equal(true);
+			});
+		});
+	});
+
+	return describe("acceptChanges", function() {
+		beforeEach(function() {
+			this.RangesManager = SandboxedModule.require(modulePath, {
+				requires: {
+					"logger-sharelatex": (this.logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }),
+					"./RangesTracker":(this.RangesTracker = SandboxedModule.require("../../../../app/js/RangesTracker.js"))
 				}
-				@RangesManager.applyUpdate @project_id, @doc_id, @entries, @updates, @newDocLines, @callback
-
-			it "should return ranges_were_collapsed == true", ->
-				@callback.called.should.equal true
-				[error, entries, ranges_were_collapsed] = @callback.args[0]
-				expect(ranges_were_collapsed).to.equal true
-
-	describe "acceptChanges", ->
-		beforeEach ->
-			@RangesManager = SandboxedModule.require modulePath,
-				requires:
-					"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
-					"./RangesTracker":@RangesTracker = SandboxedModule.require "../../../../app/js/RangesTracker.js"
-
-			@ranges = {
-				comments: []
-				changes: [{
-					id: "a1"
-					op:
-						i: "lorem"
-						p: 0
-				}, {
-					id: "a2"
-					op:
-						i: "ipsum"
-						p: 10
-				}, {
-					id: "a3"
-					op:
-						i: "dolor"
-						p: 20
-				}, {
-					id: "a4"
-					op:
-						i: "sit"
-						p: 30
-				}, {
-					id: "a5"
-					op:
-						i: "amet"
-						p: 40
-				}]
 			}
-			@removeChangeIdsSpy = sinon.spy @RangesTracker.prototype, "removeChangeIds"
+			);
 
-		describe "successfully with a single change", ->
-			beforeEach (done) ->
-				@change_ids = [ @ranges.changes[1].id ]
-				@RangesManager.acceptChanges @change_ids, @ranges, (err, ranges) => 
-					@rangesResponse = ranges
-					done()
+			this.ranges = {
+				comments: [],
+				changes: [{
+					id: "a1",
+					op: {
+						i: "lorem",
+						p: 0
+					}
+				}, {
+					id: "a2",
+					op: {
+						i: "ipsum",
+						p: 10
+					}
+				}, {
+					id: "a3",
+					op: {
+						i: "dolor",
+						p: 20
+					}
+				}, {
+					id: "a4",
+					op: {
+						i: "sit",
+						p: 30
+					}
+				}, {
+					id: "a5",
+					op: {
+						i: "amet",
+						p: 40
+					}
+				}]
+			};
+			return this.removeChangeIdsSpy = sinon.spy(this.RangesTracker.prototype, "removeChangeIds");
+		});
 
-			it "should log the call with the correct number of changes", ->
-				@logger.log
+		describe("successfully with a single change", function() {
+			beforeEach(function(done) {
+				this.change_ids = [ this.ranges.changes[1].id ];
+				return this.RangesManager.acceptChanges(this.change_ids, this.ranges, (err, ranges) => { 
+					this.rangesResponse = ranges;
+					return done();
+				});
+			});
+
+			it("should log the call with the correct number of changes", function() {
+				return this.logger.log
 					.calledWith("accepting 1 changes in ranges")
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should delegate the change removal to the ranges tracker", ->
-				@removeChangeIdsSpy
-					.calledWith(@change_ids)
-					.should.equal true
+			it("should delegate the change removal to the ranges tracker", function() {
+				return this.removeChangeIdsSpy
+					.calledWith(this.change_ids)
+					.should.equal(true);
+			});
 
-			it "should remove the change", ->
-				expect(@rangesResponse.changes
-					.find((change) => change.id ==  @ranges.changes[1].id))
-					.to.be.undefined
+			it("should remove the change", function() {
+				return expect(this.rangesResponse.changes
+					.find(change => change.id ===  this.ranges.changes[1].id))
+					.to.be.undefined;
+			});
 
-			it "should return the original number of changes minus 1", ->
-				@rangesResponse.changes.length
-					.should.equal @ranges.changes.length - 1
+			it("should return the original number of changes minus 1", function() {
+				return this.rangesResponse.changes.length
+					.should.equal(this.ranges.changes.length - 1);
+			});
 					
-			it "should not touch other changes", ->
-				for i in [ 0, 2, 3, 4]
-					expect(@rangesResponse.changes
-						.find((change) => change.id ==  @ranges.changes[i].id))
-						.to.deep.equal @ranges.changes[i]
+			return it("should not touch other changes", function() {
+				return [ 0, 2, 3, 4].map((i) =>
+					expect(this.rangesResponse.changes
+						.find(change => change.id ===  this.ranges.changes[i].id))
+						.to.deep.equal(this.ranges.changes[i]));
+		});
+	});
 
-		describe "successfully with multiple changes", ->
-			beforeEach (done) ->
-				@change_ids = [ @ranges.changes[1].id, @ranges.changes[3].id, @ranges.changes[4].id ]
-				@RangesManager.acceptChanges @change_ids, @ranges, (err, ranges) => 
-					@rangesResponse = ranges
-					done()
+		return describe("successfully with multiple changes", function() {
+			beforeEach(function(done) {
+				this.change_ids = [ this.ranges.changes[1].id, this.ranges.changes[3].id, this.ranges.changes[4].id ];
+				return this.RangesManager.acceptChanges(this.change_ids, this.ranges, (err, ranges) => { 
+					this.rangesResponse = ranges;
+					return done();
+				});
+			});
 
-			it "should log the call with the correct number of changes", ->
-				@logger.log
-					.calledWith("accepting #{ @change_ids.length } changes in ranges")
-					.should.equal true
+			it("should log the call with the correct number of changes", function() {
+				return this.logger.log
+					.calledWith(`accepting ${ this.change_ids.length } changes in ranges`)
+					.should.equal(true);
+			});
 
-			it "should delegate the change removal to the ranges tracker", ->
-				@removeChangeIdsSpy
-					.calledWith(@change_ids)
-					.should.equal true
+			it("should delegate the change removal to the ranges tracker", function() {
+				return this.removeChangeIdsSpy
+					.calledWith(this.change_ids)
+					.should.equal(true);
+			});
 
-			it "should remove the changes", ->
-				for i in [ 1, 3, 4]
-					expect(@rangesResponse.changes
-						.find((change) => change.id ==  @ranges.changes[1].id))
-						.to.be.undefined
+			it("should remove the changes", function() {
+				return [ 1, 3, 4].map((i) =>
+					expect(this.rangesResponse.changes
+						.find(change => change.id ===  this.ranges.changes[1].id))
+						.to.be.undefined);
+			});
 			
-			it "should return the original number of changes minus the number of accepted changes", ->
-				@rangesResponse.changes.length
-					.should.equal @ranges.changes.length - 3
+			it("should return the original number of changes minus the number of accepted changes", function() {
+				return this.rangesResponse.changes.length
+					.should.equal(this.ranges.changes.length - 3);
+			});
 
-			it "should not touch other changes", ->
-				for i in [ 0, 2 ]
-					expect(@rangesResponse.changes
-						.find((change) => change.id ==  @ranges.changes[i].id))
-						.to.deep.equal @ranges.changes[i]
+			return it("should not touch other changes", function() {
+				return [ 0, 2 ].map((i) =>
+					expect(this.rangesResponse.changes
+						.find(change => change.id ===  this.ranges.changes[i].id))
+						.to.deep.equal(this.ranges.changes[i]));
+		});
+	});
+});
+});
 					
