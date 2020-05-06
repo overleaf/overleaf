@@ -8,7 +8,11 @@ define(['../../base'], function(App) {
 
     $scope.samlInitPath = ExposedSettings.samlInitPath
 
-    $scope.dismiss = notification =>
+    $scope.dismiss = notification => {
+      if (!notification._id) {
+        notification.hide = true
+        return
+      }
       $http({
         url: `/notifications/${notification._id}`,
         method: 'DELETE',
@@ -16,6 +20,7 @@ define(['../../base'], function(App) {
           'X-Csrf-Token': window.csrfToken
         }
       }).then(() => (notification.hide = true))
+    }
   })
 
   App.controller('DismissableNotificationsController', function(

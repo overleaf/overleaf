@@ -97,10 +97,6 @@ include ../../_mixins/saml
 					.notification-action
 						a.btn.btn-sm.btn-info(href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=/project&email={{notification.email}}")
 							| #{translate('link_account')}
-					.notification-close
-						button(ng-click="dismiss(notification)").close.pull-right
-							span(aria-hidden="true") &times;
-							span.sr-only #{translate("close")}
 
 				.alert.alert-info(
 					ng-switch-when="notification_institution_sso_linked"
