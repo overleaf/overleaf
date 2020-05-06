@@ -32,99 +32,139 @@
 // NOTE: The global scope here is shared with other sharejs files when built with closure.
 // Be careful what ends up in your namespace.
 
-let append, transformComponent;
-const text = {};
+let append, transformComponent
+const text = {}
 
-text.name = 'text';
+text.name = 'text'
 
-text.create = () => '';
+text.create = () => ''
 
-const strInject = (s1, pos, s2) => s1.slice(0, pos) + s2 + s1.slice(pos);
+const strInject = (s1, pos, s2) => s1.slice(0, pos) + s2 + s1.slice(pos)
 
-const checkValidComponent = function(c) {
-  if (typeof c.p !== 'number') { throw new Error('component missing position field'); }
+const checkValidComponent = function (c) {
+  if (typeof c.p !== 'number') {
+    throw new Error('component missing position field')
+  }
 
-  const i_type = typeof c.i;
-  const d_type = typeof c.d;
-  if (!((i_type === 'string') ^ (d_type === 'string'))) { throw new Error('component needs an i or d field'); }
+  const i_type = typeof c.i
+  const d_type = typeof c.d
+  if (!((i_type === 'string') ^ (d_type === 'string'))) {
+    throw new Error('component needs an i or d field')
+  }
 
-  if (!(c.p >= 0)) { throw new Error('position cannot be negative'); }
-};
+  if (!(c.p >= 0)) {
+    throw new Error('position cannot be negative')
+  }
+}
 
-const checkValidOp = function(op) {
-  for (const c of Array.from(op)) { checkValidComponent(c); }
-  return true;
-};
+const checkValidOp = function (op) {
+  for (const c of Array.from(op)) {
+    checkValidComponent(c)
+  }
+  return true
+}
 
-text.apply = function(snapshot, op) {
-  checkValidOp(op);
+text.apply = function (snapshot, op) {
+  checkValidOp(op)
   for (const component of Array.from(op)) {
     if (component.i != null) {
-      snapshot = strInject(snapshot, component.p, component.i);
+      snapshot = strInject(snapshot, component.p, component.i)
     } else {
-      const deleted = snapshot.slice(component.p, (component.p + component.d.length));
-      if (component.d !== deleted) { throw new Error(`Delete component '${component.d}' does not match deleted text '${deleted}'`); }
-      snapshot = snapshot.slice(0, component.p) + snapshot.slice((component.p + component.d.length));
+      const deleted = snapshot.slice(
+        component.p,
+        component.p + component.d.length
+      )
+      if (component.d !== deleted) {
+        throw new Error(
+          `Delete component '${component.d}' does not match deleted text '${deleted}'`
+        )
+      }
+      snapshot =
+        snapshot.slice(0, component.p) +
+        snapshot.slice(component.p + component.d.length)
     }
   }
-  
-  return snapshot;
-};
 
+  return snapshot
+}
 
 // Exported for use by the random op generator.
 //
 // For simplicity, this version of append does not compress adjacent inserts and deletes of
 // the same text. It would be nice to change that at some stage.
-text._append = (append = function(newOp, c) {
-  if ((c.i === '') || (c.d === '')) { return; }
+text._append = append = function (newOp, c) {
+  if (c.i === '' || c.d === '') {
+    return
+  }
   if (newOp.length === 0) {
-    return newOp.push(c);
+    return newOp.push(c)
   } else {
-    const last = newOp[newOp.length - 1];
+    const last = newOp[newOp.length - 1]
 
     // Compose the insert into the previous insert if possible
-    if ((last.i != null) && (c.i != null) && (last.p <= c.p && c.p <= (last.p + last.i.length))) {
-      return newOp[newOp.length - 1] = {i:strInject(last.i, c.p - last.p, c.i), p:last.p};
-    } else if ((last.d != null) && (c.d != null) && (c.p <= last.p && last.p <= (c.p + c.d.length))) {
-      return newOp[newOp.length - 1] = {d:strInject(c.d, last.p - c.p, last.d), p:c.p};
+    if (
+      last.i != null &&
+      c.i != null &&
+      last.p <= c.p &&
+      c.p <= last.p + last.i.length
+    ) {
+      return (newOp[newOp.length - 1] = {
+        i: strInject(last.i, c.p - last.p, c.i),
+        p: last.p
+      })
+    } else if (
+      last.d != null &&
+      c.d != null &&
+      c.p <= last.p &&
+      last.p <= c.p + c.d.length
+    ) {
+      return (newOp[newOp.length - 1] = {
+        d: strInject(c.d, last.p - c.p, last.d),
+        p: c.p
+      })
     } else {
-      return newOp.push(c);
+      return newOp.push(c)
     }
   }
-});
+}
 
-text.compose = function(op1, op2) {
-  checkValidOp(op1);
-  checkValidOp(op2);
+text.compose = function (op1, op2) {
+  checkValidOp(op1)
+  checkValidOp(op2)
 
-  const newOp = op1.slice();
-  for (const c of Array.from(op2)) { append(newOp, c); }
+  const newOp = op1.slice()
+  for (const c of Array.from(op2)) {
+    append(newOp, c)
+  }
 
-  return newOp;
-};
+  return newOp
+}
 
 // Attempt to compress the op components together 'as much as possible'.
 // This implementation preserves order and preserves create/delete pairs.
-text.compress = op => text.compose([], op);
+text.compress = (op) => text.compose([], op)
 
-text.normalize = function(op) {
-  const newOp = [];
-  
+text.normalize = function (op) {
+  const newOp = []
+
   // Normalize should allow ops which are a single (unwrapped) component:
   // {i:'asdf', p:23}.
   // There's no good way to test if something is an array:
   // http://perfectionkills.com/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/
   // so this is probably the least bad solution.
-  if ((op.i != null) || (op.p != null)) { op = [op]; }
+  if (op.i != null || op.p != null) {
+    op = [op]
+  }
 
   for (const c of Array.from(op)) {
-    if (c.p == null) { c.p = 0; }
-    append(newOp, c);
+    if (c.p == null) {
+      c.p = 0
+    }
+    append(newOp, c)
   }
-  
-  return newOp;
-};
+
+  return newOp
+}
 
 // This helper method transforms a position by an op component.
 //
@@ -132,121 +172,143 @@ text.normalize = function(op) {
 // is pushed after the insert (true) or before it (false).
 //
 // insertAfter is optional for deletes.
-const transformPosition = function(pos, c, insertAfter) {
+const transformPosition = function (pos, c, insertAfter) {
   if (c.i != null) {
-    if ((c.p < pos) || ((c.p === pos) && insertAfter)) {
-      return pos + c.i.length;
+    if (c.p < pos || (c.p === pos && insertAfter)) {
+      return pos + c.i.length
     } else {
-      return pos;
+      return pos
     }
   } else {
     // I think this could also be written as: Math.min(c.p, Math.min(c.p - otherC.p, otherC.d.length))
     // but I think its harder to read that way, and it compiles using ternary operators anyway
     // so its no slower written like this.
     if (pos <= c.p) {
-      return pos;
-    } else if (pos <= (c.p + c.d.length)) {
-      return c.p;
+      return pos
+    } else if (pos <= c.p + c.d.length) {
+      return c.p
     } else {
-      return pos - c.d.length;
+      return pos - c.d.length
     }
   }
-};
+}
 
 // Helper method to transform a cursor position as a result of an op.
 //
 // Like transformPosition above, if c is an insert, insertAfter specifies whether the cursor position
 // is pushed after an insert (true) or before it (false).
-text.transformCursor = function(position, op, side) {
-  const insertAfter = side === 'right';
-  for (const c of Array.from(op)) { position = transformPosition(position, c, insertAfter); }
-  return position;
-};
+text.transformCursor = function (position, op, side) {
+  const insertAfter = side === 'right'
+  for (const c of Array.from(op)) {
+    position = transformPosition(position, c, insertAfter)
+  }
+  return position
+}
 
 // Transform an op component by another op component. Asymmetric.
 // The result will be appended to destination.
 //
 // exported for use in JSON type
-text._tc = (transformComponent = function(dest, c, otherC, side) {
-  checkValidOp([c]);
-  checkValidOp([otherC]);
+text._tc = transformComponent = function (dest, c, otherC, side) {
+  checkValidOp([c])
+  checkValidOp([otherC])
 
   if (c.i != null) {
-    append(dest, {i:c.i, p:transformPosition(c.p, otherC, side === 'right')});
-
-  } else { // Delete
-    if (otherC.i != null) { // delete vs insert
-      let s = c.d;
+    append(dest, {
+      i: c.i,
+      p: transformPosition(c.p, otherC, side === 'right')
+    })
+  } else {
+    // Delete
+    if (otherC.i != null) {
+      // delete vs insert
+      let s = c.d
       if (c.p < otherC.p) {
-        append(dest, {d:s.slice(0, otherC.p - c.p), p:c.p});
-        s = s.slice((otherC.p - c.p));
+        append(dest, { d: s.slice(0, otherC.p - c.p), p: c.p })
+        s = s.slice(otherC.p - c.p)
       }
       if (s !== '') {
-        append(dest, {d:s, p:c.p + otherC.i.length});
+        append(dest, { d: s, p: c.p + otherC.i.length })
       }
-
-    } else { // Delete vs delete
-      if (c.p >= (otherC.p + otherC.d.length)) {
-        append(dest, {d:c.d, p:c.p - otherC.d.length});
-      } else if ((c.p + c.d.length) <= otherC.p) {
-        append(dest, c);
+    } else {
+      // Delete vs delete
+      if (c.p >= otherC.p + otherC.d.length) {
+        append(dest, { d: c.d, p: c.p - otherC.d.length })
+      } else if (c.p + c.d.length <= otherC.p) {
+        append(dest, c)
       } else {
         // They overlap somewhere.
-        const newC = {d:'', p:c.p};
+        const newC = { d: '', p: c.p }
         if (c.p < otherC.p) {
-          newC.d = c.d.slice(0, (otherC.p - c.p));
+          newC.d = c.d.slice(0, otherC.p - c.p)
         }
-        if ((c.p + c.d.length) > (otherC.p + otherC.d.length)) {
-          newC.d += c.d.slice(((otherC.p + otherC.d.length) - c.p));
+        if (c.p + c.d.length > otherC.p + otherC.d.length) {
+          newC.d += c.d.slice(otherC.p + otherC.d.length - c.p)
         }
 
         // This is entirely optional - just for a check that the deleted
         // text in the two ops matches
-        const intersectStart = Math.max(c.p, otherC.p);
-        const intersectEnd = Math.min(c.p + c.d.length, otherC.p + otherC.d.length);
-        const cIntersect = c.d.slice(intersectStart - c.p, intersectEnd - c.p);
-        const otherIntersect = otherC.d.slice(intersectStart - otherC.p, intersectEnd - otherC.p);
-        if (cIntersect !== otherIntersect) { throw new Error('Delete ops delete different text in the same region of the document'); }
+        const intersectStart = Math.max(c.p, otherC.p)
+        const intersectEnd = Math.min(
+          c.p + c.d.length,
+          otherC.p + otherC.d.length
+        )
+        const cIntersect = c.d.slice(intersectStart - c.p, intersectEnd - c.p)
+        const otherIntersect = otherC.d.slice(
+          intersectStart - otherC.p,
+          intersectEnd - otherC.p
+        )
+        if (cIntersect !== otherIntersect) {
+          throw new Error(
+            'Delete ops delete different text in the same region of the document'
+          )
+        }
 
         if (newC.d !== '') {
           // This could be rewritten similarly to insert v delete, above.
-          newC.p = transformPosition(newC.p, otherC);
-          append(dest, newC);
+          newC.p = transformPosition(newC.p, otherC)
+          append(dest, newC)
         }
       }
     }
   }
-  
-  return dest;
-});
 
-const invertComponent = function(c) {
+  return dest
+}
+
+const invertComponent = function (c) {
   if (c.i != null) {
-    return {d:c.i, p:c.p};
+    return { d: c.i, p: c.p }
   } else {
-    return {i:c.d, p:c.p};
+    return { i: c.d, p: c.p }
   }
-};
+}
 
 // No need to use append for invert, because the components won't be able to
 // cancel with one another.
-text.invert = op => Array.from(op.slice().reverse()).map((c) => invertComponent(c));
-
+text.invert = (op) =>
+  Array.from(op.slice().reverse()).map((c) => invertComponent(c))
 
 if (typeof WEB !== 'undefined' && WEB !== null) {
-  if (!exports.types) { exports.types = {}; }
+  if (!exports.types) {
+    exports.types = {}
+  }
 
   // This is kind of awful - come up with a better way to hook this helper code up.
-  bootstrapTransform(text, transformComponent, checkValidOp, append);
+  bootstrapTransform(text, transformComponent, checkValidOp, append)
 
   // [] is used to prevent closure from renaming types.text
-  exports.types.text = text;
+  exports.types.text = text
 } else {
-  module.exports = text;
+  module.exports = text
 
   // The text type really shouldn't need this - it should be possible to define
   // an efficient transform function by making a sort of transform map and passing each
   // op component through it.
-  require('./helpers').bootstrapTransform(text, transformComponent, checkValidOp, append);
+  require('./helpers').bootstrapTransform(
+    text,
+    transformComponent,
+    checkValidOp,
+    append
+  )
 }
-

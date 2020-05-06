@@ -9,8 +9,6 @@
    @const
    @type {boolean}
 */
-const WEB = true;
+const WEB = true
 
-
-const exports = window.sharejs;
-
+const exports = window.sharejs

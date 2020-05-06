@@ -25,30 +25,36 @@
 //
 //   ^--- async thing will only be running once at any time.
 
-module.exports = function(process) {
-  if (typeof process !== 'function') { throw new Error('process is not a function'); }
-  const queue = [];
-  
-  const enqueue = function(data, callback) {
-    queue.push([data, callback]);
-    return flush();
-  };
+module.exports = function (process) {
+  if (typeof process !== 'function') {
+    throw new Error('process is not a function')
+  }
+  const queue = []
 
-  enqueue.busy = false;
+  const enqueue = function (data, callback) {
+    queue.push([data, callback])
+    return flush()
+  }
 
-  var flush = function() {
-    if (enqueue.busy || (queue.length === 0)) { return; }
+  enqueue.busy = false
 
-    enqueue.busy = true;
-    const [data, callback] = Array.from(queue.shift());
-    return process(data, function(...result) { // TODO: Make this not use varargs - varargs are really slow.
-      enqueue.busy = false;
+  var flush = function () {
+    if (enqueue.busy || queue.length === 0) {
+      return
+    }
+
+    enqueue.busy = true
+    const [data, callback] = Array.from(queue.shift())
+    return process(data, function (...result) {
+      // TODO: Make this not use varargs - varargs are really slow.
+      enqueue.busy = false
       // This is called after busy = false so a user can check if enqueue.busy is set in the callback.
-      if (callback) { callback.apply(null, result); }
-      return flush();
-    });
-  };
+      if (callback) {
+        callback.apply(null, result)
+      }
+      return flush()
+    })
+  }
 
-  return enqueue;
-};
-
+  return enqueue
+}
