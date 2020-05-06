@@ -15,8 +15,7 @@ const entryPoints = {
   ide: './frontend/js/ide.js',
   style: './frontend/stylesheets/style.less',
   'ieee-style': './frontend/stylesheets/ieee-style.less',
-  'light-style': './frontend/stylesheets/light-style.less',
-  'sl-style': './frontend/stylesheets/sl-style.less'
+  'light-style': './frontend/stylesheets/light-style.less'
 }
 
 // Attempt to load frontend entry-points from modules, if they exist
