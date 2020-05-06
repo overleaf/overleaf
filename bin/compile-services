@@ -12,7 +12,7 @@ grep 'name:' config/services.js | \
 			web)
 				npm run webpack:production
 				;;
-			real-time|document-updater)
+			real-time)
 				npm run compile:all
 				;;	
 			*)
