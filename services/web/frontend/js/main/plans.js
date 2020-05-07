@@ -270,28 +270,9 @@ define(['../base'], function(App) {
         'group-inquiry-potential'
       )
     }
+
     if ($location.hash() === 'groups') {
       $scope.openGroupPlanModal()
-    }
-
-    $scope.openPayByInvoiceModal = function() {
-      const path = `${window.location.pathname}${window.location.search}`
-      history.replaceState(null, document.title, path + '#pay-by-invoice')
-      $modal
-        .open({
-          templateUrl: 'groupPlanModalInquiryTemplate'
-        })
-        .result.finally(() =>
-          history.replaceState(null, document.title, window.location.pathname)
-        )
-      eventTracking.send(
-        'subscription-funnel',
-        'plans-page',
-        'group-inquiry-potential'
-      )
-    }
-    if ($location.hash() === 'pay-by-invoice') {
-      $scope.openPayByInvoiceModal()
     }
 
     var eventLabel = (label, location) => label
@@ -417,13 +398,6 @@ define(['../base'], function(App) {
       let { plan_code, size, usage, currency } = $scope.selected
       plan_code = `group_${plan_code}_${size}_${usage}`
       window.location = `/user/subscription/new?planCode=${plan_code}&currency=${currency}&itm_campaign=groups`
-    }
-
-    $scope.payByInvoice = function() {
-      $modal.open({
-        templateUrl: 'groupPlanModalInquiryTemplate'
-      })
-      $scope.$close()
     }
   })
 })

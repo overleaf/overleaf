@@ -28,7 +28,6 @@ define([
   './main/register-users',
   './main/subscription/team-invite-controller',
   './main/subscription/upgrade-subscription',
-  './main/contact-us',
   './main/learn',
   './main/exposed-settings',
   './main/affiliations/components/affiliationForm',

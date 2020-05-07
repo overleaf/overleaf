@@ -45,8 +45,10 @@ script(type="text/ng-template", id="groupPlanModalPurchaseTemplate")
 	.modal-footer
 		.text-center
 			button.btn.btn-primary.btn-lg(ng-click="purchase()") Purchase Now
-			br
-			| or
-			br
-			a(href, ng-click="payByInvoice()") Pay by invoice or VAT invoice
+			hr.thin
+			a(
+				href
+				ng-controller="ContactGeneralModal"
+				ng-click="openModal()"
+			) Need more than 50 licenses? Please get in touch
 
