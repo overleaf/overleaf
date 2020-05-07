@@ -34,6 +34,7 @@ services:
             # different locations
             SHARELATEX_REDIS_HOST: redis
             REDIS_HOST: redis
+            SHARELATEX_REDIS_PASS: redis
 
             ENABLED_LINKED_FILE_TYPES: 'url,project_file'
 
@@ -119,6 +120,7 @@ services:
         restart: always
         image: redis
         container_name: redis
+        command: redis-server --requirepass redis
         expose:
             - 6379
         volumes:
