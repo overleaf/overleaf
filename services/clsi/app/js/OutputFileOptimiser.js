@@ -45,8 +45,7 @@ module.exports = OutputFileOptimiser = {
 
   checkIfPDFIsOptimised(file, callback) {
     const SIZE = 16 * 1024 // check the header of the pdf
-    const result = new Buffer(SIZE)
-    result.fill(0) // prevent leakage of uninitialised buffer
+    const result = Buffer.alloc(SIZE) // fills with zeroes by default
     return fs.open(file, 'r', function(err, fd) {
       if (err != null) {
         return callback(err)
