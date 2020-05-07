@@ -1,20 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const chai = require('chai')
-if (Object.prototype.should == null) {
-  chai.should()
-}
-const { expect } = chai
 const request = require('request')
 const Settings = require('settings-sharelatex')
 
@@ -23,9 +6,35 @@ const buildUrl = path =>
 
 const url = buildUrl(`project/smoketest-${process.pid}/compile`)
 
-describe('Running a compile', function() {
-  before(function(done) {
-    return request.post(
+module.exports = {
+  sendNewResult(res) {
+    this._run(error => this._sendResponse(res, error))
+  },
+  sendLastResult(res) {
+    this._sendResponse(res, this._lastError)
+  },
+  triggerRun(cb) {
+    this._run(error => {
+      this._lastError = error
+      cb(error)
+    })
+  },
+
+  _lastError: new Error('SmokeTestsPending'),
+  _sendResponse(res, error) {
+    let code, body
+    if (error) {
+      code = 500
+      body = error.message
+    } else {
+      code = 200
+      body = 'OK'
+    }
+    res.contentType('text/plain')
+    res.status(code).send(body)
+  },
+  _run(done) {
+    request.post(
       {
         url,
         json: {
@@ -50,7 +59,7 @@ describe('Running a compile', function() {
       \\pgfmathsetmacro{\\dy}{rand*0.1}% A random variance in the y coordinate,
                                      % gives a hight fill to the lipid
       \\pgfmathsetmacro{\\rot}{rand*0.1}% A random variance in the
-                                      % molecule orientation      
+                                      % molecule orientation
       \\shade[ball color=red] ({\\i+\\dx+\\rot},{0.5*\\j+\\dy+0.4*sin(\\i*\\nuPi*10)}) circle(0.45);
       \\shade[ball color=gray] (\\i+\\dx,{0.5*\\j+\\dy+0.4*sin(\\i*\\nuPi*10)-0.9}) circle(0.45);
       \\shade[ball color=gray] (\\i+\\dx-\\rot,{0.5*\\j+\\dy+0.4*sin(\\i*\\nuPi*10)-1.8}) circle(0.45);
@@ -72,29 +81,22 @@ describe('Running a compile', function() {
         }
       },
       (error, response, body) => {
-        this.error = error
-        this.response = response
-        this.body = body
-        return done()
+        if (error) return done(error)
+        if (!body || !body.compile || !body.compile.outputFiles) {
+          return done(new Error('response payload incomplete'))
+        }
+
+        let pdfFound = false
+        let logFound = false
+        for (const file of body.compile.outputFiles) {
+          if (file.type === 'pdf') pdfFound = true
+          if (file.type === 'log') logFound = true
+        }
+
+        if (!pdfFound) return done(new Error('no pdf returned'))
+        if (!logFound) return done(new Error('no log returned'))
+        done()
       }
     )
-  })
-
-  it('should return the pdf', function() {
-    for (const file of Array.from(this.body.compile.outputFiles)) {
-      if (file.type === 'pdf') {
-        return
-      }
-    }
-    throw new Error('no pdf returned')
-  })
-
-  return it('should return the log', function() {
-    for (const file of Array.from(this.body.compile.outputFiles)) {
-      if (file.type === 'log') {
-        return
-      }
-    }
-    throw new Error('no log returned')
-  })
-})
+  }
+}

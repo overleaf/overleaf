@@ -17,7 +17,7 @@ if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
 }
 
-const smokeTest = require('smoke-test-sharelatex')
+const smokeTest = require('./test/smoke/js/SmokeTests')
 const ContentTypeMapper = require('./app/js/ContentTypeMapper')
 const Errors = require('./app/js/Errors')
 
@@ -192,64 +192,39 @@ app.get('/oops', function(req, res, next) {
 
 app.get('/status', (req, res, next) => res.send('CLSI is alive\n'))
 
-const resCacher = {
-  contentType(setContentType) {
-    this.setContentType = setContentType
-  },
-  send(code, body) {
-    this.code = code
-    this.body = body
-  },
-
-  // default the server to be down
-  code: 500,
-  body: {},
-  setContentType: 'application/json'
-}
-
-let shutdownTime
+let PROCESS_IS_TOO_OLD = false
 if (Settings.processLifespanLimitMs) {
   Settings.processLifespanLimitMs +=
     Settings.processLifespanLimitMs * (Math.random() / 10)
-  shutdownTime = Date.now() + Settings.processLifespanLimitMs
-  logger.info('Lifespan limited to ', shutdownTime)
-}
+  logger.info(
+    'Lifespan limited to ',
+    Date.now() + Settings.processLifespanLimitMs
+  )
 
-const checkIfProcessIsTooOld = function(cont) {
-  if (shutdownTime && shutdownTime < Date.now()) {
+  setTimeout(() => {
     logger.log('shutting down, process is too old')
-    resCacher.send = function() {}
-    resCacher.code = 500
-    resCacher.body = { processToOld: true }
-  } else {
-    cont()
-  }
+    PROCESS_IS_TOO_OLD = true
+  }, Settings.processLifespanLimitMs)
 }
 
 if (Settings.smokeTest) {
-  const runSmokeTest = function() {
-    checkIfProcessIsTooOld(function() {
-      logger.log('running smoke tests')
-      smokeTest.run(
-        require.resolve(__dirname + '/test/smoke/js/SmokeTests.js')
-      )({}, resCacher)
-      return setTimeout(runSmokeTest, 30 * 1000)
+  function runSmokeTest() {
+    if (PROCESS_IS_TOO_OLD) return
+    logger.log('running smoke tests')
+    smokeTest.triggerRun(err => {
+      logger.error({ err }, 'smoke tests failed')
+      setTimeout(runSmokeTest, 30 * 1000)
     })
   }
   runSmokeTest()
 }
 
 app.get('/health_check', function(req, res) {
-  res.contentType(resCacher.setContentType)
-  return res.status(resCacher.code).send(resCacher.body)
+  if (PROCESS_IS_TOO_OLD) return res.status(500).json({ processToOld: true })
+  smokeTest.sendLastResult(res)
 })
 
-app.get('/smoke_test_force', (req, res) =>
-  smokeTest.run(require.resolve(__dirname + '/test/smoke/js/SmokeTests.js'))(
-    req,
-    res
-  )
-)
+app.get('/smoke_test_force', (req, res) => smokeTest.sendNewResult(res))
 
 app.use(function(error, req, res, next) {
   if (error instanceof Errors.NotFoundError) {
