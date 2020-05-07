@@ -46,7 +46,7 @@ module.exports = CommandRunner = {
     const proc = spawn(command[0], command.slice(1), { cwd: directory, env })
 
     let stdout = ''
-    proc.stdout.on('data', data => (stdout += data))
+    proc.stdout.setEncoding('utf8').on('data', data => (stdout += data))
 
     proc.on('error', function(err) {
       logger.err(

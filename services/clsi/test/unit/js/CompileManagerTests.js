@@ -294,6 +294,7 @@ describe('CompileManager', function() {
         this.proc = new EventEmitter()
         this.proc.stdout = new EventEmitter()
         this.proc.stderr = new EventEmitter()
+        this.proc.stderr.setEncoding = sinon.stub().returns(this.proc.stderr)
         this.child_process.spawn = sinon.stub().returns(this.proc)
         this.CompileManager.clearProject(
           this.project_id,
@@ -328,6 +329,7 @@ describe('CompileManager', function() {
         this.proc = new EventEmitter()
         this.proc.stdout = new EventEmitter()
         this.proc.stderr = new EventEmitter()
+        this.proc.stderr.setEncoding = sinon.stub().returns(this.proc.stderr)
         this.child_process.spawn = sinon.stub().returns(this.proc)
         this.CompileManager.clearProject(
           this.project_id,

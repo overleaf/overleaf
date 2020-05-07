@@ -87,7 +87,7 @@ module.exports = OutputFileFinder = {
 
     const proc = spawn('find', args)
     let stdout = ''
-    proc.stdout.on('data', chunk => (stdout += chunk.toString()))
+    proc.stdout.setEncoding('utf8').on('data', chunk => (stdout += chunk))
     proc.on('error', callback)
     return proc.on('close', function(code) {
       if (code !== 0) {
