@@ -7,7 +7,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -49,13 +48,13 @@ describe('Setting a document', function () {
     sinon.spy(MockTrackChangesApi, 'flushDoc')
     sinon.spy(MockProjectHistoryApi, 'flushProject')
     sinon.spy(MockWebApi, 'setDocument')
-    return DocUpdaterApp.ensureRunning(done)
+    DocUpdaterApp.ensureRunning(done)
   })
 
   after(function () {
     MockTrackChangesApi.flushDoc.restore()
     MockProjectHistoryApi.flushProject.restore()
-    return MockWebApi.setDocument.restore()
+    MockWebApi.setDocument.restore()
   })
 
   describe('when the updated doc exists in the doc updater', function () {
@@ -70,7 +69,7 @@ describe('Setting a document', function () {
         if (error != null) {
           throw error
         }
-        return DocUpdaterClient.sendUpdate(
+        DocUpdaterClient.sendUpdate(
           this.project_id,
           this.doc_id,
           this.update,
@@ -78,8 +77,8 @@ describe('Setting a document', function () {
             if (error != null) {
               throw error
             }
-            return setTimeout(() => {
-              return DocUpdaterClient.setDocLines(
+            setTimeout(() => {
+              DocUpdaterClient.setDocLines(
                 this.project_id,
                 this.doc_id,
                 this.newLines,
@@ -88,28 +87,27 @@ describe('Setting a document', function () {
                 false,
                 (error, res, body) => {
                   this.statusCode = res.statusCode
-                  return done()
+                  done()
                 }
               )
             }, 200)
           }
         )
       })
-      return null
     })
 
     after(function () {
       MockTrackChangesApi.flushDoc.reset()
       MockProjectHistoryApi.flushProject.reset()
-      return MockWebApi.setDocument.reset()
+      MockWebApi.setDocument.reset()
     })
 
     it('should return a 204 status code', function () {
-      return this.statusCode.should.equal(204)
+      this.statusCode.should.equal(204)
     })
 
     it('should send the updated doc lines and version to the web api', function () {
-      return MockWebApi.setDocument
+      MockWebApi.setDocument
         .calledWith(this.project_id, this.doc_id, this.newLines)
         .should.equal(true)
     })
@@ -120,10 +118,9 @@ describe('Setting a document', function () {
         this.doc_id,
         (error, res, doc) => {
           doc.lines.should.deep.equal(this.newLines)
-          return done()
+          done()
         }
       )
-      return null
     })
 
     it('should bump the version in the doc updater', function (done) {
@@ -132,21 +129,19 @@ describe('Setting a document', function () {
         this.doc_id,
         (error, res, doc) => {
           doc.version.should.equal(this.version + 2)
-          return done()
+          done()
         }
       )
-      return null
     })
 
-    return it('should leave the document in redis', function (done) {
+    it('should leave the document in redis', function (done) {
       rclient_du.get(Keys.docLines({ doc_id: this.doc_id }), (error, lines) => {
         if (error != null) {
           throw error
         }
         expect(JSON.parse(lines)).to.deep.equal(this.newLines)
-        return done()
+        done()
       })
-      return null
     })
   })
 
@@ -167,49 +162,45 @@ describe('Setting a document', function () {
         false,
         (error, res, body) => {
           this.statusCode = res.statusCode
-          return setTimeout(done, 200)
+          setTimeout(done, 200)
         }
       )
-      return null
     })
 
     after(function () {
       MockTrackChangesApi.flushDoc.reset()
       MockProjectHistoryApi.flushProject.reset()
-      return MockWebApi.setDocument.reset()
+      MockWebApi.setDocument.reset()
     })
 
     it('should return a 204 status code', function () {
-      return this.statusCode.should.equal(204)
+      this.statusCode.should.equal(204)
     })
 
     it('should send the updated doc lines to the web api', function () {
-      return MockWebApi.setDocument
+      MockWebApi.setDocument
         .calledWith(this.project_id, this.doc_id, this.newLines)
         .should.equal(true)
     })
 
     it('should flush track changes', function () {
-      return MockTrackChangesApi.flushDoc
-        .calledWith(this.doc_id)
-        .should.equal(true)
+      MockTrackChangesApi.flushDoc.calledWith(this.doc_id).should.equal(true)
     })
 
     it('should flush project history', function () {
-      return MockProjectHistoryApi.flushProject
+      MockProjectHistoryApi.flushProject
         .calledWith(this.project_id)
         .should.equal(true)
     })
 
-    return it('should remove the document from redis', function (done) {
+    it('should remove the document from redis', function (done) {
       rclient_du.get(Keys.docLines({ doc_id: this.doc_id }), (error, lines) => {
         if (error != null) {
           throw error
         }
         expect(lines).to.not.exist
-        return done()
+        done()
       })
-      return null
     })
   })
 
@@ -236,32 +227,31 @@ describe('Setting a document', function () {
         false,
         (error, res, body) => {
           this.statusCode = res.statusCode
-          return setTimeout(done, 200)
+          setTimeout(done, 200)
         }
       )
-      return null
     })
 
     after(function () {
       MockTrackChangesApi.flushDoc.reset()
       MockProjectHistoryApi.flushProject.reset()
-      return MockWebApi.setDocument.reset()
+      MockWebApi.setDocument.reset()
     })
 
     it('should return a 413 status code', function () {
-      return this.statusCode.should.equal(413)
+      this.statusCode.should.equal(413)
     })
 
     it('should not send the updated doc lines to the web api', function () {
-      return MockWebApi.setDocument.called.should.equal(false)
+      MockWebApi.setDocument.called.should.equal(false)
     })
 
     it('should not flush track changes', function () {
-      return MockTrackChangesApi.flushDoc.called.should.equal(false)
+      MockTrackChangesApi.flushDoc.called.should.equal(false)
     })
 
-    return it('should not flush project history', function () {
-      return MockProjectHistoryApi.flushProject.called.should.equal(false)
+    it('should not flush project history', function () {
+      MockProjectHistoryApi.flushProject.called.should.equal(false)
     })
   })
 
@@ -289,34 +279,33 @@ describe('Setting a document', function () {
         false,
         (error, res, body) => {
           this.statusCode = res.statusCode
-          return setTimeout(done, 200)
+          setTimeout(done, 200)
         }
       )
-      return null
     })
 
     after(function () {
       MockTrackChangesApi.flushDoc.reset()
       MockProjectHistoryApi.flushProject.reset()
-      return MockWebApi.setDocument.reset()
+      MockWebApi.setDocument.reset()
     })
 
     it('should return a 204 status code', function () {
-      return this.statusCode.should.equal(204)
+      this.statusCode.should.equal(204)
     })
 
-    return it('should send the updated doc lines to the web api', function () {
-      return MockWebApi.setDocument
+    it('should send the updated doc lines to the web api', function () {
+      MockWebApi.setDocument
         .calledWith(this.project_id, this.doc_id, this.newLines)
         .should.equal(true)
     })
   })
 
-  return describe('with track changes', function () {
+  describe('with track changes', function () {
     before(function () {
       this.lines = ['one', 'one and a half', 'two', 'three']
       this.id_seed = '587357bd35e64f6157'
-      return (this.update = {
+      this.update = {
         doc: this.doc_id,
         op: [
           {
@@ -329,7 +318,7 @@ describe('Setting a document', function () {
           user_id: this.user_id
         },
         v: this.version
-      })
+      }
     })
 
     describe('with the undo flag', function () {
@@ -344,7 +333,7 @@ describe('Setting a document', function () {
           if (error != null) {
             throw error
           }
-          return DocUpdaterClient.sendUpdate(
+          DocUpdaterClient.sendUpdate(
             this.project_id,
             this.doc_id,
             this.update,
@@ -353,7 +342,7 @@ describe('Setting a document', function () {
                 throw error
               }
               // Go back to old lines, with undo flag
-              return DocUpdaterClient.setDocLines(
+              DocUpdaterClient.setDocLines(
                 this.project_id,
                 this.doc_id,
                 this.lines,
@@ -362,22 +351,21 @@ describe('Setting a document', function () {
                 true,
                 (error, res, body) => {
                   this.statusCode = res.statusCode
-                  return setTimeout(done, 200)
+                  setTimeout(done, 200)
                 }
               )
             }
           )
         })
-        return null
       })
 
       after(function () {
         MockTrackChangesApi.flushDoc.reset()
         MockProjectHistoryApi.flushProject.reset()
-        return MockWebApi.setDocument.reset()
+        MockWebApi.setDocument.reset()
       })
 
-      return it('should undo the tracked changes', function (done) {
+      it('should undo the tracked changes', function (done) {
         DocUpdaterClient.getDoc(
           this.project_id,
           this.doc_id,
@@ -387,14 +375,13 @@ describe('Setting a document', function () {
             }
             const { ranges } = data
             expect(ranges.changes).to.be.undefined
-            return done()
+            done()
           }
         )
-        return null
       })
     })
 
-    return describe('without the undo flag', function () {
+    describe('without the undo flag', function () {
       before(function (done) {
         this.project_id = DocUpdaterClient.randomId()
         this.doc_id = DocUpdaterClient.randomId()
@@ -406,7 +393,7 @@ describe('Setting a document', function () {
           if (error != null) {
             throw error
           }
-          return DocUpdaterClient.sendUpdate(
+          DocUpdaterClient.sendUpdate(
             this.project_id,
             this.doc_id,
             this.update,
@@ -415,7 +402,7 @@ describe('Setting a document', function () {
                 throw error
               }
               // Go back to old lines, without undo flag
-              return DocUpdaterClient.setDocLines(
+              DocUpdaterClient.setDocLines(
                 this.project_id,
                 this.doc_id,
                 this.lines,
@@ -424,22 +411,21 @@ describe('Setting a document', function () {
                 false,
                 (error, res, body) => {
                   this.statusCode = res.statusCode
-                  return setTimeout(done, 200)
+                  setTimeout(done, 200)
                 }
               )
             }
           )
         })
-        return null
       })
 
       after(function () {
         MockTrackChangesApi.flushDoc.reset()
         MockProjectHistoryApi.flushProject.reset()
-        return MockWebApi.setDocument.reset()
+        MockWebApi.setDocument.reset()
       })
 
-      return it('should not undo the tracked changes', function (done) {
+      it('should not undo the tracked changes', function (done) {
         DocUpdaterClient.getDoc(
           this.project_id,
           this.doc_id,
@@ -449,10 +435,9 @@ describe('Setting a document', function () {
             }
             const { ranges } = data
             expect(ranges.changes.length).to.equal(1)
-            return done()
+            done()
           }
         )
-        return null
       })
     })
   })
