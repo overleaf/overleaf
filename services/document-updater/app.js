@@ -31,7 +31,7 @@ Metrics.event_loop.monitor(logger, 100)
 
 const app = express()
 app.use(Metrics.http.monitor(logger))
-app.use(bodyParser.json({ limit: Settings.max_doc_length + 64 * 1024 }))
+app.use(bodyParser.json({ limit: Settings.maxJsonRequestSize }))
 Metrics.injectMetricsRoute(app)
 
 DispatchManager.createAndStartDispatchers(Settings.dispatcherCount || 10)

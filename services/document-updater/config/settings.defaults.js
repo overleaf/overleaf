@@ -168,6 +168,8 @@ module.exports = {
   },
 
   max_doc_length: 2 * 1024 * 1024, // 2mb
+  maxJsonRequestSize:
+    parseInt(process.env.MAX_JSON_REQUEST_SIZE, 10) || 8 * 1024 * 1024,
 
   dispatcherCount: process.env.DISPATCHER_COUNT,
 

@@ -230,8 +230,7 @@ describe('Setting a document', function () {
       })
       this.newLines = []
       while (
-        JSON.stringify(this.newLines).length <
-        Settings.max_doc_length + 64 * 1024
+        JSON.stringify(this.newLines).length <= Settings.maxJsonRequestSize
       ) {
         this.newLines.push('(a long line of text)'.repeat(10000))
       }
