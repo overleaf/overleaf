@@ -3,13 +3,6 @@
     handle-callback-err,
     no-return-assign,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const chai = require('chai')
 chai.should()
@@ -66,7 +59,7 @@ describe('Setting a document', function () {
         version: this.version
       })
       DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, (error) => {
-        if (error != null) {
+        if (error) {
           throw error
         }
         DocUpdaterClient.sendUpdate(
@@ -74,7 +67,7 @@ describe('Setting a document', function () {
           this.doc_id,
           this.update,
           (error) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
             setTimeout(() => {
@@ -136,7 +129,7 @@ describe('Setting a document', function () {
 
     it('should leave the document in redis', function (done) {
       rclient_du.get(Keys.docLines({ doc_id: this.doc_id }), (error, lines) => {
-        if (error != null) {
+        if (error) {
           throw error
         }
         expect(JSON.parse(lines)).to.deep.equal(this.newLines)
@@ -195,7 +188,7 @@ describe('Setting a document', function () {
 
     it('should remove the document from redis', function (done) {
       rclient_du.get(Keys.docLines({ doc_id: this.doc_id }), (error, lines) => {
-        if (error != null) {
+        if (error) {
           throw error
         }
         expect(lines).to.not.exist
@@ -330,7 +323,7 @@ describe('Setting a document', function () {
           version: this.version
         })
         DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, (error) => {
-          if (error != null) {
+          if (error) {
             throw error
           }
           DocUpdaterClient.sendUpdate(
@@ -338,7 +331,7 @@ describe('Setting a document', function () {
             this.doc_id,
             this.update,
             (error) => {
-              if (error != null) {
+              if (error) {
                 throw error
               }
               // Go back to old lines, with undo flag
@@ -370,7 +363,7 @@ describe('Setting a document', function () {
           this.project_id,
           this.doc_id,
           (error, res, data) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
             const { ranges } = data
@@ -390,7 +383,7 @@ describe('Setting a document', function () {
           version: this.version
         })
         DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, (error) => {
-          if (error != null) {
+          if (error) {
             throw error
           }
           DocUpdaterClient.sendUpdate(
@@ -398,7 +391,7 @@ describe('Setting a document', function () {
             this.doc_id,
             this.update,
             (error) => {
-              if (error != null) {
+              if (error) {
                 throw error
               }
               // Go back to old lines, without undo flag
@@ -430,7 +423,7 @@ describe('Setting a document', function () {
           this.project_id,
           this.doc_id,
           (error, res, data) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
             const { ranges } = data
