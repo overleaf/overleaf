@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
@@ -211,7 +210,7 @@ const watchForEvent = (eventName) =>
   )
 
 const events = ['connect', 'ready', 'error', 'close', 'reconnecting', 'end']
-for (const eventName of Array.from(events)) {
+for (const eventName of events) {
   watchForEvent(eventName)
 }
 
