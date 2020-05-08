@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -43,7 +42,7 @@ Metrics.injectMetricsRoute(app)
 
 DispatchManager.createAndStartDispatchers(Settings.dispatcherCount || 10)
 
-app.param('project_id', function (req, res, next, projectId) {
+app.param('project_id', (req, res, next, projectId) => {
   if (projectId != null ? projectId.match(/^[0-9a-f]{24}$/) : undefined) {
     return next()
   } else {
@@ -51,7 +50,7 @@ app.param('project_id', function (req, res, next, projectId) {
   }
 })
 
-app.param('doc_id', function (req, res, next, docId) {
+app.param('doc_id', (req, res, next, docId) => {
   if (docId != null ? docId.match(/^[0-9a-f]{24}$/) : undefined) {
     return next()
   } else {
@@ -98,18 +97,18 @@ app.delete(
 app.get('/flush_all_projects', HttpController.flushAllProjects)
 app.get('/flush_queued_projects', HttpController.flushQueuedProjects)
 
-app.get('/total', function (req, res, next) {
+app.get('/total', (req, res, next) => {
   const timer = new Metrics.Timer('http.allDocList')
-  return RedisManager.getCountOfDocsInMemory(function (err, count) {
+  RedisManager.getCountOfDocsInMemory((err, count) => {
     if (err) {
       return next(err)
     }
     timer.done()
-    return res.send({ total: count })
+    res.send({ total: count })
   })
 })
 
-app.get('/status', function (req, res) {
+app.get('/status', (req, res) => {
   if (Settings.shuttingDown) {
     return res.sendStatus(503) // Service unavailable
   } else {
@@ -120,8 +119,8 @@ app.get('/status', function (req, res) {
 const pubsubClient = require('redis-sharelatex').createClient(
   Settings.redis.pubsub
 )
-app.get('/health_check/redis', (req, res, next) =>
-  pubsubClient.healthCheck(function (error) {
+app.get('/health_check/redis', (req, res, next) => {
+  pubsubClient.healthCheck((error) => {
     if (error != null) {
       logger.err({ err: error }, 'failed redis health check')
       return res.sendStatus(500)
@@ -129,13 +128,13 @@ app.get('/health_check/redis', (req, res, next) =>
       return res.sendStatus(200)
     }
   })
-)
+})
 
 const docUpdaterRedisClient = require('redis-sharelatex').createClient(
   Settings.redis.documentupdater
 )
-app.get('/health_check/redis_cluster', (req, res, next) =>
-  docUpdaterRedisClient.healthCheck(function (error) {
+app.get('/health_check/redis_cluster', (req, res, next) => {
+  docUpdaterRedisClient.healthCheck((error) => {
     if (error != null) {
       logger.err({ err: error }, 'failed redis cluster health check')
       return res.sendStatus(500)
@@ -143,34 +142,37 @@ app.get('/health_check/redis_cluster', (req, res, next) =>
       return res.sendStatus(200)
     }
   })
-)
+})
 
-app.get('/health_check', (req, res, next) =>
+app.get('/health_check', (req, res, next) => {
   async.series(
     [
-      (cb) =>
-        pubsubClient.healthCheck(function (error) {
+      (cb) => {
+        pubsubClient.healthCheck((error) => {
           if (error != null) {
             logger.err({ err: error }, 'failed redis health check')
           }
-          return cb(error)
-        }),
-      (cb) =>
-        docUpdaterRedisClient.healthCheck(function (error) {
+          cb(error)
+        })
+      },
+      (cb) => {
+        docUpdaterRedisClient.healthCheck((error) => {
           if (error != null) {
             logger.err({ err: error }, 'failed redis cluster health check')
           }
-          return cb(error)
-        }),
-      (cb) =>
-        mongojs.healthCheck(function (error) {
+          cb(error)
+        })
+      },
+      (cb) => {
+        mongojs.healthCheck((error) => {
           if (error != null) {
             logger.err({ err: error }, 'failed mongo health check')
           }
-          return cb(error)
+          cb(error)
         })
+      }
     ],
-    function (error) {
+    (error) => {
       if (error != null) {
         return res.sendStatus(500)
       } else {
@@ -178,9 +180,9 @@ app.get('/health_check', (req, res, next) =>
       }
     }
   )
-)
+})
 
-app.use(function (error, req, res, next) {
+app.use((error, req, res, next) => {
   if (error instanceof Errors.NotFoundError) {
     return res.sendStatus(404)
   } else if (error instanceof Errors.OpRangeNotAvailableError) {
@@ -193,21 +195,20 @@ app.use(function (error, req, res, next) {
   }
 })
 
-const shutdownCleanly = (signal) =>
-  function () {
-    logger.log({ signal }, 'received interrupt, cleaning up')
-    Settings.shuttingDown = true
-    return setTimeout(function () {
-      logger.log({ signal }, 'shutting down')
-      return process.exit()
-    }, 10000)
-  }
+const shutdownCleanly = (signal) => () => {
+  logger.log({ signal }, 'received interrupt, cleaning up')
+  Settings.shuttingDown = true
+  setTimeout(() => {
+    logger.log({ signal }, 'shutting down')
+    process.exit()
+  }, 10000)
+}
 
-const watchForEvent = (eventName) =>
-  docUpdaterRedisClient.on(
-    eventName,
-    (e) => console.log(`redis event: ${eventName} ${e}`) // eslint-disable-line no-console
-  )
+const watchForEvent = (eventName) => {
+  docUpdaterRedisClient.on(eventName, (e) => {
+    console.log(`redis event: ${eventName} ${e}`) // eslint-disable-line no-console
+  })
+}
 
 const events = ['connect', 'ready', 'error', 'close', 'reconnecting', 'end']
 for (const eventName of events) {
@@ -227,11 +228,11 @@ const port =
 const host = Settings.internal.documentupdater.host || 'localhost'
 if (!module.parent) {
   // Called directly
-  app.listen(port, host, function () {
+  app.listen(port, host, () => {
     logger.info(`Document-updater starting up, listening on ${host}:${port}`)
     if (Settings.continuousBackgroundFlush) {
       logger.info('Starting continuous background flush')
-      return DeleteQueueManager.startBackgroundFlush()
+      DeleteQueueManager.startBackgroundFlush()
     }
   })
 }
