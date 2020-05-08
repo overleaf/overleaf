@@ -7,7 +7,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -61,10 +60,8 @@ describe('Setting a document', function () {
 
   describe('when the updated doc exists in the doc updater', function () {
     before(function (done) {
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
-      ])
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
         version: this.version
@@ -155,10 +152,8 @@ describe('Setting a document', function () {
 
   describe('when the updated doc does not exist in the doc updater', function () {
     before(function (done) {
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
-      ])
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
         version: this.version
@@ -220,10 +215,8 @@ describe('Setting a document', function () {
 
   describe('when the updated doc is too large for the body parser', function () {
     before(function (done) {
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
-      ])
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
         version: this.version
@@ -274,10 +267,8 @@ describe('Setting a document', function () {
 
   describe('when the updated doc is large but under the bodyParser and HTTPController size limit', function () {
     before(function (done) {
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
-      ])
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
         version: this.version
@@ -343,10 +334,8 @@ describe('Setting a document', function () {
 
     describe('with the undo flag', function () {
       before(function (done) {
-        ;[this.project_id, this.doc_id] = Array.from([
-          DocUpdaterClient.randomId(),
-          DocUpdaterClient.randomId()
-        ])
+        this.project_id = DocUpdaterClient.randomId()
+        this.doc_id = DocUpdaterClient.randomId()
         MockWebApi.insertDoc(this.project_id, this.doc_id, {
           lines: this.lines,
           version: this.version
@@ -407,10 +396,8 @@ describe('Setting a document', function () {
 
     return describe('without the undo flag', function () {
       before(function (done) {
-        ;[this.project_id, this.doc_id] = Array.from([
-          DocUpdaterClient.randomId(),
-          DocUpdaterClient.randomId()
-        ])
+        this.project_id = DocUpdaterClient.randomId()
+        this.doc_id = DocUpdaterClient.randomId()
         MockWebApi.insertDoc(this.project_id, this.doc_id, {
           lines: this.lines,
           version: this.version
