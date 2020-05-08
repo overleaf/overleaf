@@ -1,7 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
-    no-return-assign,
 */
 const sinon = require('sinon')
 const chai = require('chai')
@@ -79,6 +77,9 @@ describe('Setting a document', function () {
                 this.user_id,
                 false,
                 (error, res, body) => {
+                  if (error) {
+                    return done(error)
+                  }
                   this.statusCode = res.statusCode
                   done()
                 }
@@ -110,6 +111,9 @@ describe('Setting a document', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) {
+            return done(error)
+          }
           doc.lines.should.deep.equal(this.newLines)
           done()
         }
@@ -121,6 +125,9 @@ describe('Setting a document', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) {
+            return done(error)
+          }
           doc.version.should.equal(this.version + 2)
           done()
         }
@@ -154,6 +161,9 @@ describe('Setting a document', function () {
         this.user_id,
         false,
         (error, res, body) => {
+          if (error) {
+            return done(error)
+          }
           this.statusCode = res.statusCode
           setTimeout(done, 200)
         }
@@ -219,6 +229,9 @@ describe('Setting a document', function () {
         this.user_id,
         false,
         (error, res, body) => {
+          if (error) {
+            return done(error)
+          }
           this.statusCode = res.statusCode
           setTimeout(done, 200)
         }
@@ -271,6 +284,9 @@ describe('Setting a document', function () {
         this.user_id,
         false,
         (error, res, body) => {
+          if (error) {
+            return done(error)
+          }
           this.statusCode = res.statusCode
           setTimeout(done, 200)
         }
@@ -343,6 +359,9 @@ describe('Setting a document', function () {
                 this.user_id,
                 true,
                 (error, res, body) => {
+                  if (error) {
+                    return done(error)
+                  }
                   this.statusCode = res.statusCode
                   setTimeout(done, 200)
                 }
@@ -403,6 +422,9 @@ describe('Setting a document', function () {
                 this.user_id,
                 false,
                 (error, res, body) => {
+                  if (error) {
+                    return done(error)
+                  }
                   this.statusCode = res.statusCode
                   setTimeout(done, 200)
                 }
