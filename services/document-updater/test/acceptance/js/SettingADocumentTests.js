@@ -1,12 +1,9 @@
-/* eslint-disable
-    camelcase,
-*/
 const sinon = require('sinon')
 const chai = require('chai')
 chai.should()
 const { expect } = require('chai')
 const Settings = require('settings-sharelatex')
-const rclient_du = require('redis-sharelatex').createClient(
+const docUpdaterRedis = require('redis-sharelatex').createClient(
   Settings.redis.documentupdater
 )
 const Keys = Settings.redis.documentupdater.key_schema
@@ -135,13 +132,16 @@ describe('Setting a document', function () {
     })
 
     it('should leave the document in redis', function (done) {
-      rclient_du.get(Keys.docLines({ doc_id: this.doc_id }), (error, lines) => {
-        if (error) {
-          throw error
+      docUpdaterRedis.get(
+        Keys.docLines({ doc_id: this.doc_id }),
+        (error, lines) => {
+          if (error) {
+            throw error
+          }
+          expect(JSON.parse(lines)).to.deep.equal(this.newLines)
+          done()
         }
-        expect(JSON.parse(lines)).to.deep.equal(this.newLines)
-        done()
-      })
+      )
     })
   })
 
@@ -197,13 +197,16 @@ describe('Setting a document', function () {
     })
 
     it('should remove the document from redis', function (done) {
-      rclient_du.get(Keys.docLines({ doc_id: this.doc_id }), (error, lines) => {
-        if (error) {
-          throw error
+      docUpdaterRedis.get(
+        Keys.docLines({ doc_id: this.doc_id }),
+        (error, lines) => {
+          if (error) {
+            throw error
+          }
+          expect(lines).to.not.exist
+          done()
         }
-        expect(lines).to.not.exist
-        done()
-      })
+      )
     })
   })
 
