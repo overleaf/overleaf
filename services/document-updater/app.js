@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const Metrics = require('metrics-sharelatex')
 Metrics.initialize('doc-updater')
 
@@ -13,7 +8,7 @@ logger.initialize('document-updater')
 
 logger.logger.addSerializers(require('./app/js/LoggerSerializers'))
 
-if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
+if (Settings.sentry != null && Settings.sentry.dsn != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
 }
 
@@ -42,7 +37,7 @@ Metrics.injectMetricsRoute(app)
 DispatchManager.createAndStartDispatchers(Settings.dispatcherCount || 10)
 
 app.param('project_id', (req, res, next, projectId) => {
-  if (projectId != null ? projectId.match(/^[0-9a-f]{24}$/) : undefined) {
+  if (projectId != null && projectId.match(/^[0-9a-f]{24}$/)) {
     return next()
   } else {
     return next(new Error('invalid project id'))
@@ -50,7 +45,7 @@ app.param('project_id', (req, res, next, projectId) => {
 })
 
 app.param('doc_id', (req, res, next, docId) => {
-  if (docId != null ? docId.match(/^[0-9a-f]{24}$/) : undefined) {
+  if (docId != null && docId.match(/^[0-9a-f]{24}$/)) {
     return next()
   } else {
     return next(new Error('invalid doc id'))
@@ -120,7 +115,7 @@ const pubsubClient = require('redis-sharelatex').createClient(
 )
 app.get('/health_check/redis', (req, res, next) => {
   pubsubClient.healthCheck((error) => {
-    if (error != null) {
+    if (error) {
       logger.err({ err: error }, 'failed redis health check')
       return res.sendStatus(500)
     } else {
@@ -134,7 +129,7 @@ const docUpdaterRedisClient = require('redis-sharelatex').createClient(
 )
 app.get('/health_check/redis_cluster', (req, res, next) => {
   docUpdaterRedisClient.healthCheck((error) => {
-    if (error != null) {
+    if (error) {
       logger.err({ err: error }, 'failed redis cluster health check')
       return res.sendStatus(500)
     } else {
@@ -148,7 +143,7 @@ app.get('/health_check', (req, res, next) => {
     [
       (cb) => {
         pubsubClient.healthCheck((error) => {
-          if (error != null) {
+          if (error) {
             logger.err({ err: error }, 'failed redis health check')
           }
           cb(error)
@@ -156,7 +151,7 @@ app.get('/health_check', (req, res, next) => {
       },
       (cb) => {
         docUpdaterRedisClient.healthCheck((error) => {
-          if (error != null) {
+          if (error) {
             logger.err({ err: error }, 'failed redis cluster health check')
           }
           cb(error)
@@ -164,7 +159,7 @@ app.get('/health_check', (req, res, next) => {
       },
       (cb) => {
         mongojs.healthCheck((error) => {
-          if (error != null) {
+          if (error) {
             logger.err({ err: error }, 'failed mongo health check')
           }
           cb(error)
@@ -172,7 +167,7 @@ app.get('/health_check', (req, res, next) => {
       }
     ],
     (error) => {
-      if (error != null) {
+      if (error) {
         return res.sendStatus(500)
       } else {
         return res.sendStatus(200)
