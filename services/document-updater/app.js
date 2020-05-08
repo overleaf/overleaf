@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -216,16 +215,13 @@ for (const eventName of events) {
 }
 
 const port =
-  __guard__(
-    Settings.internal != null ? Settings.internal.documentupdater : undefined,
-    (x) => x.port
-  ) ||
-  __guard__(
-    Settings.apis != null ? Settings.apis.documentupdater : undefined,
-    (x1) => x1.port
-  ) ||
+  Settings.internal.documentupdater.port ||
+  (Settings.api &&
+    Settings.api.documentupdater &&
+    Settings.api.documentupdater.port) ||
   3003
 const host = Settings.internal.documentupdater.host || 'localhost'
+
 if (!module.parent) {
   // Called directly
   app.listen(port, host, () => {
@@ -249,10 +245,4 @@ for (const signal of [
   'SIGABRT'
 ]) {
   process.on(signal, shutdownCleanly(signal))
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }
