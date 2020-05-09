@@ -28,8 +28,6 @@ aside.chat(
 					ng-class="{'self': message.user.id == user.id }"
 				)
 					div.date(ng-if="$index == 0 || (message.timestamp - chat.messages[$index - 1].timestamp) > 5 * 60 * 1000") {{ message.timestamp | formatDate:'h:mm a' }} {{ message.timestamp | relativeDate }}
-					span.avatar
-						img(ng-src="{{message.user.gravatar_url}}?d=mm&s=50")
 					div.message-wrapper
 						.name(ng-if="message.user.id != user.id")
 							span(ng-if="message.user.first_name") {{ message.user.first_name }}
@@ -53,5 +51,3 @@ aside.chat(
 			ng-model="newMessageContent",
 			ng-click="resetUnreadMessages()"
 		)
-
-
