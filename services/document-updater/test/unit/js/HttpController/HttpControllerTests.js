@@ -44,7 +44,9 @@ describe('HttpController', function () {
         params: {
           project_id: this.project_id,
           doc_id: this.doc_id
-        }
+        },
+        query: {},
+        body: {}
       }
     })
 
@@ -86,7 +88,7 @@ describe('HttpController', function () {
       it('should log the request', function () {
         this.logger.log
           .calledWith(
-            { doc_id: this.doc_id, project_id: this.project_id },
+            { docId: this.doc_id, projectId: this.project_id },
             'getting doc via http'
           )
           .should.equal(true)
@@ -136,7 +138,7 @@ describe('HttpController', function () {
       it('should log the request', function () {
         this.logger.log
           .calledWith(
-            { doc_id: this.doc_id, project_id: this.project_id },
+            { docId: this.doc_id, projectId: this.project_id },
             'getting doc via http'
           )
           .should.equal(true)
@@ -187,6 +189,7 @@ describe('HttpController', function () {
           project_id: this.project_id,
           doc_id: this.doc_id
         },
+        query: {},
         body: {
           lines: this.lines,
           source: this.source,
@@ -223,11 +226,11 @@ describe('HttpController', function () {
         this.logger.log
           .calledWith(
             {
-              doc_id: this.doc_id,
-              project_id: this.project_id,
+              docId: this.doc_id,
+              projectId: this.project_id,
               lines: this.lines,
               source: this.source,
-              user_id: this.user_id,
+              userId: this.user_id,
               undoing: this.undoing
             },
             'setting doc via http'
@@ -279,7 +282,9 @@ describe('HttpController', function () {
       this.req = {
         params: {
           project_id: this.project_id
-        }
+        },
+        query: {},
+        body: {}
       }
     })
 
@@ -302,7 +307,7 @@ describe('HttpController', function () {
       it('should log the request', function () {
         this.logger.log
           .calledWith(
-            { project_id: this.project_id },
+            { projectId: this.project_id },
             'flushing project via http'
           )
           .should.equal(true)
@@ -335,7 +340,9 @@ describe('HttpController', function () {
         params: {
           project_id: this.project_id,
           doc_id: this.doc_id
-        }
+        },
+        query: {},
+        body: {}
       }
     })
 
@@ -360,7 +367,7 @@ describe('HttpController', function () {
       it('should log the request', function () {
         this.logger.log
           .calledWith(
-            { doc_id: this.doc_id, project_id: this.project_id },
+            { docId: this.doc_id, projectId: this.project_id },
             'flushing doc via http'
           )
           .should.equal(true)
@@ -392,7 +399,8 @@ describe('HttpController', function () {
           project_id: this.project_id,
           doc_id: this.doc_id
         },
-        query: {}
+        query: {},
+        body: {}
       }
     })
 
@@ -425,7 +433,7 @@ describe('HttpController', function () {
       it('should log the request', function () {
         this.logger.log
           .calledWith(
-            { doc_id: this.doc_id, project_id: this.project_id },
+            { docId: this.doc_id, projectId: this.project_id },
             'deleting doc via http'
           )
           .should.equal(true)
@@ -479,7 +487,9 @@ describe('HttpController', function () {
       this.req = {
         params: {
           project_id: this.project_id
-        }
+        },
+        query: {},
+        body: {}
       }
     })
 
@@ -504,7 +514,7 @@ describe('HttpController', function () {
       it('should log the request', function () {
         this.logger.log
           .calledWith(
-            { project_id: this.project_id },
+            { projectId: this.project_id },
             'deleting project via http'
           )
           .should.equal(true)
@@ -552,7 +562,9 @@ describe('HttpController', function () {
           project_id: this.project_id,
           doc_id: this.doc_id,
           change_id: (this.change_id = 'mock-change-od-1')
-        }
+        },
+        query: {},
+        body: {}
       }
     })
 
@@ -577,7 +589,7 @@ describe('HttpController', function () {
       it('should log the request', function () {
         this.logger.log
           .calledWith(
-            { project_id: this.project_id, doc_id: this.doc_id },
+            { projectId: this.project_id, docId: this.doc_id },
             'accepting 1 changes via http'
           )
           .should.equal(true)
@@ -612,7 +624,7 @@ describe('HttpController', function () {
       it('should log the request with the correct number of changes', function () {
         this.logger.log
           .calledWith(
-            { project_id: this.project_id, doc_id: this.doc_id },
+            { projectId: this.project_id, docId: this.doc_id },
             `accepting ${this.change_ids.length} changes via http`
           )
           .should.equal(true)
@@ -640,7 +652,9 @@ describe('HttpController', function () {
           project_id: this.project_id,
           doc_id: this.doc_id,
           comment_id: (this.comment_id = 'mock-comment-id')
-        }
+        },
+        query: {},
+        body: {}
       }
     })
 
@@ -666,9 +680,9 @@ describe('HttpController', function () {
         this.logger.log
           .calledWith(
             {
-              project_id: this.project_id,
-              doc_id: this.doc_id,
-              comment_id: this.comment_id
+              projectId: this.project_id,
+              docId: this.doc_id,
+              commentId: this.comment_id
             },
             'deleting comment via http'
           )
@@ -707,7 +721,8 @@ describe('HttpController', function () {
         },
         query: {
           state: this.state
-        }
+        },
+        body: {}
       }
     })
 
@@ -736,7 +751,7 @@ describe('HttpController', function () {
       it('should log the request', function () {
         this.logger.log
           .calledWith(
-            { project_id: this.project_id, exclude: [] },
+            { projectId: this.project_id, exclude: [] },
             'getting docs via http'
           )
           .should.equal(true)
@@ -745,7 +760,7 @@ describe('HttpController', function () {
       it('should log the response', function () {
         this.logger.log
           .calledWith(
-            { project_id: this.project_id, result: ['1234:23', '4567:45'] },
+            { projectId: this.project_id, result: ['1234:23', '4567:45'] },
             'got docs via http'
           )
           .should.equal(true)
@@ -802,6 +817,7 @@ describe('HttpController', function () {
       this.fileUpdates = sinon.stub()
       this.version = 1234567
       this.req = {
+        query: {},
         body: {
           projectHistoryId: this.projectHistoryId,
           userId: this.userId,
@@ -866,6 +882,7 @@ describe('HttpController', function () {
       this.files = sinon.stub()
       this.fileUpdates = sinon.stub()
       this.req = {
+        query: {},
         body: {
           projectHistoryId: this.projectHistoryId,
           docs: this.docs,
