@@ -6,7 +6,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
@@ -69,7 +68,7 @@ module.exports = HttpController = {
 
   _getTotalSizeOfLines(lines) {
     let size = 0
-    for (const line of Array.from(lines)) {
+    for (const line of lines) {
       size += line.length + 1
     }
     return size
@@ -89,10 +88,8 @@ module.exports = HttpController = {
     logger.log({ project_id, exclude: excludeItems }, 'getting docs via http')
     const timer = new Metrics.Timer('http.getAllDocs')
     const excludeVersions = {}
-    for (const item of Array.from(excludeItems)) {
-      const [id, version] = Array.from(
-        item != null ? item.split(':') : undefined
-      )
+    for (const item of excludeItems) {
+      const [id, version] = item.split(':')
       excludeVersions[id] = version
     }
     logger.log(
@@ -113,7 +110,7 @@ module.exports = HttpController = {
           logger.log(
             {
               project_id,
-              result: Array.from(result).map((doc) => `${doc._id}:${doc.v}`)
+              result: result.map((doc) => `${doc._id}:${doc.v}`)
             },
             'got docs via http'
           )
