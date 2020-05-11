@@ -3,12 +3,11 @@ const HistoryManager = require('./HistoryManager')
 const ProjectManager = require('./ProjectManager')
 const Errors = require('./Errors')
 const logger = require('logger-sharelatex')
+const Settings = require('settings-sharelatex')
 const Metrics = require('./Metrics')
 const ProjectFlusher = require('./ProjectFlusher')
 const DeleteQueueManager = require('./DeleteQueueManager')
 const async = require('async')
-
-const TWO_MEGABYTES = 2 * 1024 * 1024
 
 module.exports = {
   getDoc,
@@ -134,7 +133,7 @@ function setDoc(req, res, next) {
   const projectId = req.params.project_id
   const { lines, source, user_id: userId, undoing } = req.body
   const lineSize = _getTotalSizeOfLines(lines)
-  if (lineSize > TWO_MEGABYTES) {
+  if (lineSize > Settings.max_doc_length) {
     logger.log(
       { projectId, docId, source, lineSize, userId },
       'document too large, returning 406 response'
