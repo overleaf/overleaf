@@ -210,57 +210,70 @@ describe('Setting a document', function () {
     })
   })
 
-  describe('when the updated doc is too large for the body parser', function () {
-    before(function (done) {
-      this.project_id = DocUpdaterClient.randomId()
-      this.doc_id = DocUpdaterClient.randomId()
-      MockWebApi.insertDoc(this.project_id, this.doc_id, {
-        lines: this.lines,
-        version: this.version
-      })
-      this.newLines = []
-      while (
-        JSON.stringify(this.newLines).length <= Settings.maxJsonRequestSize
-      ) {
-        this.newLines.push('(a long line of text)'.repeat(10000))
-      }
-      DocUpdaterClient.setDocLines(
-        this.project_id,
-        this.doc_id,
-        this.newLines,
-        this.source,
-        this.user_id,
-        false,
-        (error, res, body) => {
-          if (error) {
-            return done(error)
-          }
-          this.statusCode = res.statusCode
-          setTimeout(done, 200)
+  const DOC_TOO_LARGE_TEST_CASES = [
+    {
+      desc: 'when the updated doc is too large for the body parser',
+      size: Settings.maxJsonRequestSize,
+      expectedStatusCode: 413
+    },
+    {
+      desc: 'when the updated doc is larger than the HTTP controller limit',
+      size: Settings.max_doc_length,
+      expectedStatusCode: 406
+    }
+  ]
+
+  DOC_TOO_LARGE_TEST_CASES.forEach((testCase) => {
+    describe(testCase.desc, function () {
+      before(function (done) {
+        this.project_id = DocUpdaterClient.randomId()
+        this.doc_id = DocUpdaterClient.randomId()
+        MockWebApi.insertDoc(this.project_id, this.doc_id, {
+          lines: this.lines,
+          version: this.version
+        })
+        this.newLines = []
+        while (JSON.stringify(this.newLines).length <= testCase.size) {
+          this.newLines.push('(a long line of text)'.repeat(10000))
         }
-      )
-    })
+        DocUpdaterClient.setDocLines(
+          this.project_id,
+          this.doc_id,
+          this.newLines,
+          this.source,
+          this.user_id,
+          false,
+          (error, res, body) => {
+            if (error) {
+              return done(error)
+            }
+            this.statusCode = res.statusCode
+            setTimeout(done, 200)
+          }
+        )
+      })
 
-    after(function () {
-      MockTrackChangesApi.flushDoc.reset()
-      MockProjectHistoryApi.flushProject.reset()
-      MockWebApi.setDocument.reset()
-    })
+      after(function () {
+        MockTrackChangesApi.flushDoc.reset()
+        MockProjectHistoryApi.flushProject.reset()
+        MockWebApi.setDocument.reset()
+      })
 
-    it('should return a 413 status code', function () {
-      this.statusCode.should.equal(413)
-    })
+      it(`should return a ${testCase.expectedStatusCode} status code`, function () {
+        this.statusCode.should.equal(testCase.expectedStatusCode)
+      })
 
-    it('should not send the updated doc lines to the web api', function () {
-      MockWebApi.setDocument.called.should.equal(false)
-    })
+      it('should not send the updated doc lines to the web api', function () {
+        MockWebApi.setDocument.called.should.equal(false)
+      })
 
-    it('should not flush track changes', function () {
-      MockTrackChangesApi.flushDoc.called.should.equal(false)
-    })
+      it('should not flush track changes', function () {
+        MockTrackChangesApi.flushDoc.called.should.equal(false)
+      })
 
-    it('should not flush project history', function () {
-      MockProjectHistoryApi.flushProject.called.should.equal(false)
+      it('should not flush project history', function () {
+        MockProjectHistoryApi.flushProject.called.should.equal(false)
+      })
     })
   })
 
