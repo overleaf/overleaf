@@ -20,10 +20,32 @@ const async = require('async')
 const logger = require('logger-sharelatex')
 const oneDay = 24 * 60 * 60 * 1000
 const Settings = require('settings-sharelatex')
+const diskusage = require('diskusage')
 
 module.exports = ProjectPersistenceManager = {
   EXPIRY_TIMEOUT: Settings.project_cache_length_ms || oneDay * 2.5,
 
+  refreshExpiryTimeout(callback) {
+    if (callback == null) {
+      callback = function(error) {}
+    }
+    diskusage.check('/', function(err, stats) {
+      if (err) {
+        logger.err({ err: err }, 'error getting disk usage')
+        return callback(err)
+      }
+      const lowDisk = stats.available / stats.total < 0.1
+      const lowerExpiry = ProjectPersistenceManager.EXPIRY_TIMEOUT * 0.9
+      if (lowDisk && Settings.project_cache_length_ms / 2 < lowerExpiry) {
+        logger.warn(
+          { stats: stats },
+          'disk running low on space, modifying EXPIRY_TIMEOUT'
+        )
+        ProjectPersistenceManager.EXPIRY_TIMEOUT = lowerExpiry
+      }
+      callback()
+    })
+  },
   markProjectAsJustAccessed(project_id, callback) {
     if (callback == null) {
       callback = function(error) {}
