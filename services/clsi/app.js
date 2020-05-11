@@ -192,7 +192,7 @@ app.get('/oops', function(req, res, next) {
 
 app.get('/status', (req, res, next) => res.send('CLSI is alive\n'))
 
-let PROCESS_IS_TOO_OLD = false
+Settings.processTooOld = false
 if (Settings.processLifespanLimitMs) {
   Settings.processLifespanLimitMs +=
     Settings.processLifespanLimitMs * (Math.random() / 10)
@@ -203,16 +203,16 @@ if (Settings.processLifespanLimitMs) {
 
   setTimeout(() => {
     logger.log('shutting down, process is too old')
-    PROCESS_IS_TOO_OLD = true
+    Settings.processTooOld = true
   }, Settings.processLifespanLimitMs)
 }
 
 if (Settings.smokeTest) {
   function runSmokeTest() {
-    if (PROCESS_IS_TOO_OLD) return
+    if (Settings.processTooOld) return
     logger.log('running smoke tests')
     smokeTest.triggerRun(err => {
-      logger.error({ err }, 'smoke tests failed')
+      if (err) logger.error({ err }, 'smoke tests failed')
       setTimeout(runSmokeTest, 30 * 1000)
     })
   }
@@ -220,7 +220,9 @@ if (Settings.smokeTest) {
 }
 
 app.get('/health_check', function(req, res) {
-  if (PROCESS_IS_TOO_OLD) return res.status(500).json({ processToOld: true })
+  if (Settings.processTooOld) {
+    return res.status(500).json({ processTooOld: true })
+  }
   smokeTest.sendLastResult(res)
 })
 
