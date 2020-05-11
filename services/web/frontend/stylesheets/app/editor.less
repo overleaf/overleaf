@@ -620,6 +620,7 @@ CodeMirror
     }
     .search-result-hit {
       &:hover {
+        color: @brand-success;
         cursor: pointer;
       }
       border-bottom: 1px solid #ddd;
@@ -628,16 +629,6 @@ CodeMirror
         border-bottom: 1px solid transparent;
       }
       border-left: 4px solid transparent;
-      &.selected-search-result-hit {
-        background-color: @red;
-        color: white;
-        .hit-year.small {
-          color: white;
-        }
-        .hit-journal.small {
-          color: white;
-        }
-      }
       .hit-title {
         font-size: 1.3em;
         font-style: italic;
