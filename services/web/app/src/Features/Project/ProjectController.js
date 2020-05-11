@@ -411,7 +411,7 @@ const ProjectController = {
         },
         userAffiliations(cb) {
           if (!Features.hasFeature('affiliations')) {
-            return cb(null, null)
+            return cb(null, [])
           }
           getUserAffiliations(userId, (error, affiliations) => {
             if (error && error instanceof V1ConnectionError) {
