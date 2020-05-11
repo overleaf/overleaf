@@ -6,7 +6,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -81,9 +80,7 @@ module.exports = HttpController = {
     const projectStateHash = req.query != null ? req.query.state : undefined
     // exclude is string of existing docs "id:version,id:version,..."
     const excludeItems =
-      __guard__(req.query != null ? req.query.exclude : undefined, (x) =>
-        x.split(',')
-      ) || []
+      req.query.exclude != null ? req.query.exclude.split(',') : []
     logger.log({ project_id, exclude: excludeItems }, 'getting docs via http')
     const timer = new Metrics.Timer('http.getAllDocs')
     const excludeVersions = {}
@@ -461,10 +458,4 @@ module.exports = HttpController = {
       }
     })
   }
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }
