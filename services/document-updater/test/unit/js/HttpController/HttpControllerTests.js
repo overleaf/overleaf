@@ -2,13 +2,6 @@
     no-return-assign,
     no-unused-vars,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS206: Consider reworking classes to avoid initClass
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const chai = require('chai')
 const should = chai.should()
@@ -33,15 +26,9 @@ describe('HttpController', function () {
         './Errors': Errors
       }
     })
-    this.Metrics.Timer = Timer = (function () {
-      Timer = class Timer {
-        static initClass() {
-          this.prototype.done = sinon.stub()
-        }
-      }
-      Timer.initClass()
-      return Timer
-    })()
+    this.Metrics.Timer = class Timer {}
+    Timer.prototype.done = sinon.stub()
+
     this.project_id = 'project-id-123'
     this.doc_id = 'doc-id-123'
     this.next = sinon.stub()
