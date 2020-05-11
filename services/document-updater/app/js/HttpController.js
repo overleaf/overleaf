@@ -6,7 +6,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -41,7 +40,7 @@ module.exports = HttpController = {
       fromVersion = -1
     }
 
-    return DocumentManager.getDocAndRecentOpsWithLock(
+    DocumentManager.getDocAndRecentOpsWithLock(
       project_id,
       doc_id,
       fromVersion,
@@ -54,7 +53,7 @@ module.exports = HttpController = {
         if (lines == null || version == null) {
           return next(new Errors.NotFoundError('document not found'))
         }
-        return res.json({
+        res.json({
           id: doc_id,
           lines,
           version,
@@ -96,16 +95,16 @@ module.exports = HttpController = {
       { project_id, projectStateHash, excludeVersions },
       'excluding versions'
     )
-    return ProjectManager.getProjectDocsAndFlushIfOld(
+    ProjectManager.getProjectDocsAndFlushIfOld(
       project_id,
       projectStateHash,
       excludeVersions,
       function (error, result) {
         timer.done()
         if (error instanceof Errors.ProjectStateChangedError) {
-          return res.sendStatus(409) // conflict
+          res.sendStatus(409) // conflict
         } else if (error != null) {
-          return next(error)
+          next(error)
         } else {
           logger.log(
             {
@@ -114,7 +113,7 @@ module.exports = HttpController = {
             },
             'got docs via http'
           )
-          return res.send(result)
+          res.send(result)
         }
       }
     )
@@ -127,12 +126,12 @@ module.exports = HttpController = {
     const { project_id } = req.params
     const timer = new Metrics.Timer('http.clearProjectState')
     logger.log({ project_id }, 'clearing project state via http')
-    return ProjectManager.clearProjectState(project_id, function (error) {
+    ProjectManager.clearProjectState(project_id, function (error) {
       timer.done()
       if (error != null) {
-        return next(error)
+        next(error)
       } else {
-        return res.sendStatus(200)
+        res.sendStatus(200)
       }
     })
   },
@@ -157,7 +156,7 @@ module.exports = HttpController = {
       'setting doc via http'
     )
     const timer = new Metrics.Timer('http.setDoc')
-    return DocumentManager.setDocWithLock(
+    DocumentManager.setDocWithLock(
       project_id,
       doc_id,
       lines,
@@ -170,7 +169,7 @@ module.exports = HttpController = {
           return next(error)
         }
         logger.log({ project_id, doc_id }, 'set doc via http')
-        return res.sendStatus(204)
+        res.sendStatus(204)
       }
     )
   }, // No Content
@@ -183,18 +182,16 @@ module.exports = HttpController = {
     const { project_id } = req.params
     logger.log({ project_id, doc_id }, 'flushing doc via http')
     const timer = new Metrics.Timer('http.flushDoc')
-    return DocumentManager.flushDocIfLoadedWithLock(
-      project_id,
-      doc_id,
-      function (error) {
-        timer.done()
-        if (error != null) {
-          return next(error)
-        }
-        logger.log({ project_id, doc_id }, 'flushed doc via http')
-        return res.sendStatus(204)
+    DocumentManager.flushDocIfLoadedWithLock(project_id, doc_id, function (
+      error
+    ) {
+      timer.done()
+      if (error != null) {
+        return next(error)
       }
-    )
+      logger.log({ project_id, doc_id }, 'flushed doc via http')
+      res.sendStatus(204)
+    })
   }, // No Content
 
   deleteDoc(req, res, next) {
@@ -206,7 +203,7 @@ module.exports = HttpController = {
     const ignoreFlushErrors = req.query.ignore_flush_errors === 'true'
     const timer = new Metrics.Timer('http.deleteDoc')
     logger.log({ project_id, doc_id }, 'deleting doc via http')
-    return DocumentManager.flushAndDeleteDocWithLock(
+    DocumentManager.flushAndDeleteDocWithLock(
       project_id,
       doc_id,
       { ignoreFlushErrors },
@@ -220,7 +217,7 @@ module.exports = HttpController = {
           return next(error)
         }
         logger.log({ project_id, doc_id }, 'deleted doc via http')
-        return res.sendStatus(204)
+        res.sendStatus(204)
       }
     )
   }, // No Content
@@ -232,13 +229,13 @@ module.exports = HttpController = {
     const { project_id } = req.params
     logger.log({ project_id }, 'flushing project via http')
     const timer = new Metrics.Timer('http.flushProject')
-    return ProjectManager.flushProjectWithLocks(project_id, function (error) {
+    ProjectManager.flushProjectWithLocks(project_id, function (error) {
       timer.done()
       if (error != null) {
         return next(error)
       }
       logger.log({ project_id }, 'flushed project via http')
-      return res.sendStatus(204)
+      res.sendStatus(204)
     })
   }, // No Content
 
@@ -256,18 +253,16 @@ module.exports = HttpController = {
       options.skip_history_flush = true
     } // don't flush history when realtime shuts down
     if (req.query != null ? req.query.background : undefined) {
-      return ProjectManager.queueFlushAndDeleteProject(project_id, function (
-        error
-      ) {
+      ProjectManager.queueFlushAndDeleteProject(project_id, function (error) {
         if (error != null) {
           return next(error)
         }
         logger.log({ project_id }, 'queue delete of project via http')
-        return res.sendStatus(204)
+        res.sendStatus(204)
       }) // No Content
     } else {
       const timer = new Metrics.Timer('http.deleteProject')
-      return ProjectManager.flushAndDeleteProjectWithLocks(
+      ProjectManager.flushAndDeleteProjectWithLocks(
         project_id,
         options,
         function (error) {
@@ -276,7 +271,7 @@ module.exports = HttpController = {
             return next(error)
           }
           logger.log({ project_id }, 'deleted project via http')
-          return res.sendStatus(204)
+          res.sendStatus(204)
         }
       )
     }
@@ -289,17 +284,17 @@ module.exports = HttpController = {
     const project_ids =
       (req.body != null ? req.body.project_ids : undefined) || []
     logger.log({ project_ids }, 'deleting multiple projects via http')
-    return async.eachSeries(
+    async.eachSeries(
       project_ids,
       function (project_id, cb) {
         logger.log({ project_id }, 'queue delete of project via http')
-        return ProjectManager.queueFlushAndDeleteProject(project_id, cb)
+        ProjectManager.queueFlushAndDeleteProject(project_id, cb)
       },
       function (error) {
         if (error != null) {
           return next(error)
         }
-        return res.sendStatus(204)
+        res.sendStatus(204)
       }
     )
   }, // No Content
@@ -318,7 +313,7 @@ module.exports = HttpController = {
       `accepting ${change_ids.length} changes via http`
     )
     const timer = new Metrics.Timer('http.acceptChanges')
-    return DocumentManager.acceptChangesWithLock(
+    DocumentManager.acceptChangesWithLock(
       project_id,
       doc_id,
       change_ids,
@@ -331,7 +326,7 @@ module.exports = HttpController = {
           { project_id, doc_id },
           `accepted ${change_ids.length} changes via http`
         )
-        return res.sendStatus(204)
+        res.sendStatus(204)
       }
     )
   }, // No Content
@@ -343,7 +338,7 @@ module.exports = HttpController = {
     const { project_id, doc_id, comment_id } = req.params
     logger.log({ project_id, doc_id, comment_id }, 'deleting comment via http')
     const timer = new Metrics.Timer('http.deleteComment')
-    return DocumentManager.deleteCommentWithLock(
+    DocumentManager.deleteCommentWithLock(
       project_id,
       doc_id,
       comment_id,
@@ -356,7 +351,7 @@ module.exports = HttpController = {
           { project_id, doc_id, comment_id },
           'deleted comment via http'
         )
-        return res.sendStatus(204)
+        res.sendStatus(204)
       }
     )
   }, // No Content
@@ -379,7 +374,7 @@ module.exports = HttpController = {
       'updating project via http'
     )
 
-    return ProjectManager.updateProjectWithLocks(
+    ProjectManager.updateProjectWithLocks(
       project_id,
       projectHistoryId,
       userId,
@@ -392,7 +387,7 @@ module.exports = HttpController = {
           return next(error)
         }
         logger.log({ project_id }, 'updated project via http')
-        return res.sendStatus(204)
+        res.sendStatus(204)
       }
     )
   }, // No Content
@@ -408,7 +403,7 @@ module.exports = HttpController = {
       { project_id, docs, files },
       'queuing project history resync via http'
     )
-    return HistoryManager.resyncProjectHistory(
+    HistoryManager.resyncProjectHistory(
       project_id,
       projectHistoryId,
       docs,
@@ -418,7 +413,7 @@ module.exports = HttpController = {
           return next(error)
         }
         logger.log({ project_id }, 'queued project history resync via http')
-        return res.sendStatus(204)
+        res.sendStatus(204)
       }
     )
   },
@@ -433,15 +428,12 @@ module.exports = HttpController = {
       concurrency: req.query.concurrency || 5,
       dryRun: req.query.dryRun || false
     }
-    return ProjectFlusher.flushAllProjects(options, function (
-      err,
-      project_ids
-    ) {
+    ProjectFlusher.flushAllProjects(options, function (err, project_ids) {
       if (err != null) {
         logger.err({ err }, 'error bulk flushing projects')
-        return res.sendStatus(500)
+        res.sendStatus(500)
       } else {
-        return res.send(project_ids)
+        res.send(project_ids)
       }
     })
   },
@@ -456,16 +448,16 @@ module.exports = HttpController = {
       timeout: 5 * 60 * 1000,
       min_delete_age: req.query.min_delete_age || 5 * 60 * 1000
     }
-    return DeleteQueueManager.flushAndDeleteOldProjects(options, function (
+    DeleteQueueManager.flushAndDeleteOldProjects(options, function (
       err,
       flushed
     ) {
       if (err != null) {
         logger.err({ err }, 'error flushing old projects')
-        return res.sendStatus(500)
+        res.sendStatus(500)
       } else {
         logger.log({ flushed }, 'flush of queued projects completed')
-        return res.send({ flushed })
+        res.send({ flushed })
       }
     })
   }
