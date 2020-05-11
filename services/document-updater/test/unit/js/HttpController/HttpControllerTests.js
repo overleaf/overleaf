@@ -1,17 +1,10 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
 const modulePath = '../../../../app/js/HttpController.js'
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/js/Errors.js')
 
 describe('HttpController', function () {
   beforeEach(function () {
-    let Timer
     this.HttpController = SandboxedModule.require(modulePath, {
       requires: {
         './DocumentManager': (this.DocumentManager = {}),
@@ -27,7 +20,7 @@ describe('HttpController', function () {
       }
     })
     this.Metrics.Timer = class Timer {}
-    Timer.prototype.done = sinon.stub()
+    this.Metrics.Timer.prototype.done = sinon.stub()
 
     this.project_id = 'project-id-123'
     this.doc_id = 'doc-id-123'
