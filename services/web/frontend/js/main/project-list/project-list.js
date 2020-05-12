@@ -536,9 +536,7 @@ define(['../../base', './services/project-list'], function(App) {
             name: data.name,
             id: data.project_id,
             accessLevel: 'owner',
-            owner: {
-              _id: data.owner_ref
-            }
+            owner: data.owner
             // TODO: Check access level if correct after adding it in
             // to the rest of the app
           })

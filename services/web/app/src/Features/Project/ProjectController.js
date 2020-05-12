@@ -1,3 +1,7 @@
+/* eslint-disable
+   camelcase
+*/
+
 const Path = require('path')
 const fs = require('fs')
 const crypto = require('crypto')
@@ -250,6 +254,7 @@ const ProjectController = {
       return res.send({ redir: '/register' })
     }
     const currentUser = AuthenticationController.getSessionUser(req)
+    const { first_name, last_name, email } = currentUser
     ProjectDuplicator.duplicate(
       currentUser,
       projectId,
@@ -265,7 +270,8 @@ const ProjectController = {
         res.send({
           name: project.name,
           project_id: project._id,
-          owner_ref: project.owner_ref
+          owner_ref: project.owner_ref,
+          owner: { first_name, last_name, email, _id: currentUser._id }
         })
       }
     )
