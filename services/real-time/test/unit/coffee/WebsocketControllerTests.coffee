@@ -125,6 +125,28 @@ describe 'WebsocketController', ->
 			it "should not log an error", ->
 				@logger.error.called.should.equal false
 
+		describe "when the subscribe failed", ->
+			beforeEach ->
+				@client.id = "mock-client-id"
+				@project = {
+					name: "Test Project"
+					owner: {
+						_id: @owner_id = "mock-owner-id-123"
+					}
+				}
+				@privilegeLevel = "owner"
+				@ConnectedUsersManager.updateUserPosition = sinon.stub().callsArg(4)
+				@isRestrictedUser = true
+				@WebApiManager.joinProject = sinon.stub().callsArgWith(2, null, @project, @privilegeLevel, @isRestrictedUser)
+				@RoomManager.joinProject = sinon.stub().callsArgWith(2, new Error("subscribe failed"))
+				@WebsocketController.joinProject @client, @user, @project_id, @callback
+
+			it "should return an error", ->
+				@callback
+					.calledWith(new Error("subscribe failed"))
+					.should.equal true
+				@callback.args[0][0].message.should.equal "subscribe failed"
+
 	describe "leaveProject", ->
 		beforeEach ->
 			@DocumentUpdaterManager.flushProjectToMongoAndDelete = sinon.stub().callsArg(1)
