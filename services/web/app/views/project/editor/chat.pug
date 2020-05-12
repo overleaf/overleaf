@@ -35,7 +35,7 @@ aside.chat(
 						.message(
 							ng-style="getMessageStyle(message.user);"
 						)
-							.arrow(ng-style="getArrowStyle(message.user)")
+							.arrow(ng-if="message.user.id != user.id" ng-style="getArrowStyle(message.user)")
 							.message-content
 								p(
 									mathjax,
