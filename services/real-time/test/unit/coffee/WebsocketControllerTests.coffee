@@ -143,6 +143,19 @@ describe 'WebsocketController', ->
 			@WebsocketController.FLUSH_IF_EMPTY_DELAY = 0
 			tk.reset() # Allow setTimeout to work.
 
+		describe "when the client did not joined a project yet", ->
+			beforeEach (done) ->
+				@client.params = {}
+				@WebsocketController.leaveProject @io, @client, done
+
+			it "should bail out when calling leaveProject", () ->
+				@WebsocketLoadBalancer.emitToRoom.called.should.equal false
+				@RoomManager.leaveProjectAndDocs.called.should.equal false
+				@ConnectedUsersManager.markUserAsDisconnected.called.should.equal false
+
+			it "should not inc any metric", () ->
+				@metrics.inc.called.should.equal false
+
 		describe "when the project is empty", ->
 			beforeEach (done) ->
 				@clientsInRoom = []
@@ -201,8 +214,8 @@ describe 'WebsocketController', ->
 					.calledWith(@project_id)
 					.should.equal false
 
-			it "should increment the leave-project metric", ->
-				@metrics.inc.calledWith("editor.leave-project").should.equal true
+			it "should not increment the leave-project metric", ->
+				@metrics.inc.calledWith("editor.leave-project").should.equal false
 
 		describe "when client has not joined a project", ->
 			beforeEach (done) ->
@@ -225,8 +238,8 @@ describe 'WebsocketController', ->
 					.calledWith(@project_id)
 					.should.equal false
 
-			it "should increment the leave-project metric", ->
-				@metrics.inc.calledWith("editor.leave-project").should.equal true
+			it "should not increment the leave-project metric", ->
+				@metrics.inc.calledWith("editor.leave-project").should.equal false
 
 	describe "joinDoc", ->
 		beforeEach ->
