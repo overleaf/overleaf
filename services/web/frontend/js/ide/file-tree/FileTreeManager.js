@@ -170,7 +170,7 @@ define([
     getFullCount() {
       const entities = []
       this.forEachEntity(function(e) {
-        return entities.push(e)
+        if (!e.deleted) entities.push(e)
       })
       return entities.length
     }
