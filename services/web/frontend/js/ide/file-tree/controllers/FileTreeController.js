@@ -3,7 +3,6 @@
     handle-callback-err,
     max-len,
     no-return-assign,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -182,7 +181,7 @@ define(['../../../base'], function(App) {
       }
     })
     return $scope.$on('done', (e, opts = {}) => {
-      isBibFile = opts.name && /^.*\.bib$/.test(opts.name)
+      const isBibFile = opts.name && /^.*\.bib$/.test(opts.name)
       if (opts.shouldReindexReferences || isBibFile) {
         ide.$scope.$emit('references:should-reindex', {})
       }

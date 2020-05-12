@@ -1,5 +1,6 @@
+/* global PassField */
+
 /* eslint-disable
-    no-undef,
     max-len
 */
 define(['../base', 'libs/passfield'], function(App) {

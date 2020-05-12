@@ -1,7 +1,6 @@
 /* eslint-disable
     max-len,
     no-return-assign,
-    no-undef,
     no-useless-escape,
 */
 // TODO: This file was created by bulk-decaffeinate.

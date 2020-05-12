@@ -1,7 +1,8 @@
+/* global MathJax */
+
 /* eslint-disable
     camelcase,
     max-len,
-    no-undef,
     no-useless-escape,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -17,7 +18,7 @@
 
 // Configure dynamically loaded assets (via webpack) to be downloaded from CDN
 // See: https://webpack.js.org/guides/public-path/#on-the-fly
-__webpack_public_path__ = window.baseAssetPath
+__webpack_public_path__ = window.baseAssetPath // eslint-disable-line no-undef
 
 define([
   './libraries',

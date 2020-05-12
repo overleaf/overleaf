@@ -1,7 +1,6 @@
 /* eslint-disable
     max-len,
     no-return-assign,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -13,7 +12,12 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define(['../base'], App =>
-  App.controller('GroupPlanContactController', function($scope, $modal, $http) {
+  App.controller('GroupPlanContactController', function(
+    $scope,
+    $modal,
+    $http,
+    eventTracking
+  ) {
     $scope.form = {}
     $scope.sent = false
     $scope.sending = false

@@ -1,7 +1,6 @@
 /* eslint-disable
     max-len,
     no-return-assign,
-    no-undef,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -48,7 +47,7 @@ define(['../base'], function(App) {
       return Array.from(emails).map(email => {
         $scope.inputs.addMembers.inflightCount += 1
         return queuedHttp
-          .post(paths.addMember, {
+          .post(window.paths.addMember, {
             email,
             _csrf: window.csrfToken
           })
@@ -76,10 +75,12 @@ define(['../base'], function(App) {
       for (let user of Array.from($scope.selectedUsers)) {
         ;(function(user) {
           let url
-          if (paths.removeInvite && user.invite && user._id == null) {
-            url = `${paths.removeInvite}/${encodeURIComponent(user.email)}`
-          } else if (paths.removeMember && user._id != null) {
-            url = `${paths.removeMember}/${user._id}`
+          if (window.paths.removeInvite && user.invite && user._id == null) {
+            url = `${window.paths.removeInvite}/${encodeURIComponent(
+              user.email
+            )}`
+          } else if (window.paths.removeMember && user._id != null) {
+            url = `${window.paths.removeMember}/${user._id}`
           } else {
             return
           }

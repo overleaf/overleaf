@@ -2,7 +2,6 @@
     camelcase,
     max-len,
     no-return-assign,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -48,8 +47,10 @@ define(['crypto-js/md5'], function(CryptoJS) {
       return r + g + b < 3 * 128
     },
 
-    OWN_HUE: 200, // We will always appear as this color to ourselves
     ANONYMOUS_HUE: 100,
+    OWN_HUE: 200, // We will always appear as this color to ourselves
+    OWN_HUE_BLOCKED_SIZE: 20, // no other user should havea HUE in this range
+    TOTAL_HUES: 360, // actually 361, but 360 for legacy reasons
     getHueForUserId(user_id) {
       if (user_id == null || user_id === 'anonymous-user') {
         return this.ANONYMOUS_HUE
@@ -59,11 +60,18 @@ define(['crypto-js/md5'], function(CryptoJS) {
         return this.OWN_HUE
       }
 
-      hue = this.getHueForId(user_id)
-      // Avoid 20 degrees either side of the personal hue
-      if (hue > this.OWNER_HUE - 20) {
-        hue = hue + 40
+      let hue = this.getHueForId(user_id)
+
+      // if `hue` is within `OWN_HUE_BLOCKED_SIZE` degrees of the personal hue
+      // (`OWN_HUE`), shift `hue` to the end of available hues by adding
+      if (
+        hue > this.OWN_HUE - this.OWN_HUE_BLOCKED_SIZE &&
+        hue < this.OWN_HUE + this.OWN_HUE_BLOCKED_SIZE
+      ) {
+        hue = hue - this.OWN_HUE // `hue` now at 0 +/- `OWN_HUE_BLOCKED_SIZE`
+        hue = hue + this.TOTAL_HUES - this.OWN_HUE_BLOCKED_SIZE
       }
+
       return hue
     },
 
@@ -73,7 +81,9 @@ define(['crypto-js/md5'], function(CryptoJS) {
 
     getHueForId(id) {
       const hash = CryptoJS(id)
-      let hue = parseInt(hash.toString().slice(0, 8), 16) % 320
+      let hue =
+        parseInt(hash.toString().slice(0, 8), 16) %
+        (this.TOTAL_HUES - this.OWN_HUE_BLOCKED_SIZE * 2)
       return hue
     }
   })

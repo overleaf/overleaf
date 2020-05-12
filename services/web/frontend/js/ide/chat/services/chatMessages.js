@@ -1,7 +1,8 @@
+/* global Raven */
+
 /* eslint-disable
     max-len,
     no-return-assign,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.

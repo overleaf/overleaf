@@ -1,7 +1,6 @@
 /* eslint-disable
     max-len,
     no-return-assign,
-    no-undef,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -14,7 +13,7 @@ define(['../../base'], App =>
   App.controller('TeamInviteController', function($scope, $http) {
     $scope.inflight = false
 
-    if (hasIndividualRecurlySubscription) {
+    if (window.hasIndividualRecurlySubscription) {
       $scope.view = 'hasIndividualRecurlySubscription'
     } else {
       $scope.view = 'teamInvite'

@@ -3,7 +3,6 @@
     max-len,
     no-cond-assign,
     no-return-assign,
-    no-undef,
     no-unused-vars,
     no-useless-escape,
 */

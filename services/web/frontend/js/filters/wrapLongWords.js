@@ -1,7 +1,6 @@
 /* eslint-disable
     max-len,
     no-return-assign,
-    no-undef,
     no-unused-vars,
     no-useless-escape,
 */

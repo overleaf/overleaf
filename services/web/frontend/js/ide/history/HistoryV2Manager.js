@@ -2,7 +2,6 @@
     camelcase,
     max-len,
     no-return-assign,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -401,13 +400,13 @@ define([
           )
           filesWithOps = []
           if (currentUpdate != null) {
-            for (pathname of currentUpdate.pathnames) {
+            for (let pathname of currentUpdate.pathnames) {
               filesWithOps.push({
                 pathname: pathname,
                 operation: 'edited'
               })
             }
-            for (op of currentUpdate.project_ops) {
+            for (let op of currentUpdate.project_ops) {
               let fileWithOp
               if (op.add != null) {
                 fileWithOp = {

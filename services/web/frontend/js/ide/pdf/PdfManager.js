@@ -1,5 +1,4 @@
 /* eslint-disable
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.

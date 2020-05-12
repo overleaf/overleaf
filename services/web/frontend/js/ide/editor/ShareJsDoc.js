@@ -1,7 +1,6 @@
 /* eslint-disable
     camelcase,
     max-len,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -157,7 +156,7 @@ define(['../../utils/EventEmitter', 'libs/sharejs'], function(
 
       _processQueue() {
         if (this.queuedMessages.length > 0) {
-          nextAvailableVersion = this.queuedMessages[0].v
+          const nextAvailableVersion = this.queuedMessages[0].v
           if (nextAvailableVersion > this._doc.version) {
             // there are updates we still can't apply yet
           } else {

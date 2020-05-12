@@ -1,8 +1,9 @@
+/* global recurly */
+
 /* eslint-disable
     camelcase,
     max-len,
     no-return-assign,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -168,7 +169,8 @@ define(['../base'], function(App) {
 
   App.controller('RecurlySubscriptionController', function($scope) {
     const recurlyIsSetup = ensureRecurlyIsSetup()
-    $scope.showChangePlanButton = recurlyIsSetup && !subscription.groupPlan
+    $scope.showChangePlanButton =
+      recurlyIsSetup && !window.subscription.groupPlan
     $scope.recurlyLoadError = !recurlyIsSetup
 
     $scope.switchToDefaultView = () => {

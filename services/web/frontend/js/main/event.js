@@ -2,7 +2,6 @@
     camelcase,
     max-len,
     no-return-assign,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -20,17 +19,6 @@ define(['moment', '../base', '../modules/localStorage'], function(moment, App) {
   // long wait until the next one
   let heartbeatsSent = 0
   let nextHeartbeat = new Date()
-
-  const send = function(category, action, attributes) {
-    if (attributes == null) {
-      attributes = {}
-    }
-    ga('send', 'event', category, action)
-    const event_name = `${action}-${category}`
-    return typeof Intercom === 'function'
-      ? Intercom('trackEvent', event_name, attributes)
-      : undefined
-  }
 
   App.factory('eventTracking', function($http, localStorage) {
     const _getEventCache = function() {

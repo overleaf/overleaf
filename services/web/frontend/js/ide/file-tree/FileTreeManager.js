@@ -4,7 +4,6 @@
     max-len,
     no-dupe-class-members,
     no-return-assign,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.

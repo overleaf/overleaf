@@ -3,7 +3,6 @@
     max-len,
     new-cap,
     no-return-assign,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
