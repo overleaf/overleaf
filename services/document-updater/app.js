@@ -1,11 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const Metrics = require('metrics-sharelatex')
 Metrics.initialize('doc-updater')
 
@@ -16,7 +8,7 @@ logger.initialize('document-updater')
 
 logger.logger.addSerializers(require('./app/js/LoggerSerializers'))
 
-if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
+if (Settings.sentry != null && Settings.sentry.dsn != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
 }
 
@@ -39,21 +31,21 @@ Metrics.event_loop.monitor(logger, 100)
 
 const app = express()
 app.use(Metrics.http.monitor(logger))
-app.use(bodyParser.json({ limit: Settings.max_doc_length + 64 * 1024 }))
+app.use(bodyParser.json({ limit: Settings.maxJsonRequestSize }))
 Metrics.injectMetricsRoute(app)
 
 DispatchManager.createAndStartDispatchers(Settings.dispatcherCount || 10)
 
-app.param('project_id', function (req, res, next, projectId) {
-  if (projectId != null ? projectId.match(/^[0-9a-f]{24}$/) : undefined) {
+app.param('project_id', (req, res, next, projectId) => {
+  if (projectId != null && projectId.match(/^[0-9a-f]{24}$/)) {
     return next()
   } else {
     return next(new Error('invalid project id'))
   }
 })
 
-app.param('doc_id', function (req, res, next, docId) {
-  if (docId != null ? docId.match(/^[0-9a-f]{24}$/) : undefined) {
+app.param('doc_id', (req, res, next, docId) => {
+  if (docId != null && docId.match(/^[0-9a-f]{24}$/)) {
     return next()
   } else {
     return next(new Error('invalid doc id'))
@@ -99,18 +91,18 @@ app.delete(
 app.get('/flush_all_projects', HttpController.flushAllProjects)
 app.get('/flush_queued_projects', HttpController.flushQueuedProjects)
 
-app.get('/total', function (req, res, next) {
+app.get('/total', (req, res, next) => {
   const timer = new Metrics.Timer('http.allDocList')
-  return RedisManager.getCountOfDocsInMemory(function (err, count) {
+  RedisManager.getCountOfDocsInMemory((err, count) => {
     if (err) {
       return next(err)
     }
     timer.done()
-    return res.send({ total: count })
+    res.send({ total: count })
   })
 })
 
-app.get('/status', function (req, res) {
+app.get('/status', (req, res) => {
   if (Settings.shuttingDown) {
     return res.sendStatus(503) // Service unavailable
   } else {
@@ -121,67 +113,70 @@ app.get('/status', function (req, res) {
 const pubsubClient = require('redis-sharelatex').createClient(
   Settings.redis.pubsub
 )
-app.get('/health_check/redis', (req, res, next) =>
-  pubsubClient.healthCheck(function (error) {
-    if (error != null) {
+app.get('/health_check/redis', (req, res, next) => {
+  pubsubClient.healthCheck((error) => {
+    if (error) {
       logger.err({ err: error }, 'failed redis health check')
       return res.sendStatus(500)
     } else {
       return res.sendStatus(200)
     }
   })
-)
+})
 
 const docUpdaterRedisClient = require('redis-sharelatex').createClient(
   Settings.redis.documentupdater
 )
-app.get('/health_check/redis_cluster', (req, res, next) =>
-  docUpdaterRedisClient.healthCheck(function (error) {
-    if (error != null) {
+app.get('/health_check/redis_cluster', (req, res, next) => {
+  docUpdaterRedisClient.healthCheck((error) => {
+    if (error) {
       logger.err({ err: error }, 'failed redis cluster health check')
       return res.sendStatus(500)
     } else {
       return res.sendStatus(200)
     }
   })
-)
+})
 
-app.get('/health_check', (req, res, next) =>
+app.get('/health_check', (req, res, next) => {
   async.series(
     [
-      (cb) =>
-        pubsubClient.healthCheck(function (error) {
-          if (error != null) {
+      (cb) => {
+        pubsubClient.healthCheck((error) => {
+          if (error) {
             logger.err({ err: error }, 'failed redis health check')
           }
-          return cb(error)
-        }),
-      (cb) =>
-        docUpdaterRedisClient.healthCheck(function (error) {
-          if (error != null) {
+          cb(error)
+        })
+      },
+      (cb) => {
+        docUpdaterRedisClient.healthCheck((error) => {
+          if (error) {
             logger.err({ err: error }, 'failed redis cluster health check')
           }
-          return cb(error)
-        }),
-      (cb) =>
-        mongojs.healthCheck(function (error) {
-          if (error != null) {
+          cb(error)
+        })
+      },
+      (cb) => {
+        mongojs.healthCheck((error) => {
+          if (error) {
             logger.err({ err: error }, 'failed mongo health check')
           }
-          return cb(error)
+          cb(error)
         })
+      }
     ],
-    function (error) {
-      if (error != null) {
+    (error) => {
+      if (error) {
         return res.sendStatus(500)
       } else {
         return res.sendStatus(200)
       }
     }
   )
-)
+})
 
-app.use(function (error, req, res, next) {
+app.use((error, req, res, next) => {
   if (error instanceof Errors.NotFoundError) {
     return res.sendStatus(404)
   } else if (error instanceof Errors.OpRangeNotAvailableError) {
@@ -194,45 +189,41 @@ app.use(function (error, req, res, next) {
   }
 })
 
-const shutdownCleanly = (signal) =>
-  function () {
-    logger.log({ signal }, 'received interrupt, cleaning up')
-    Settings.shuttingDown = true
-    return setTimeout(function () {
-      logger.log({ signal }, 'shutting down')
-      return process.exit()
-    }, 10000)
-  }
+const shutdownCleanly = (signal) => () => {
+  logger.log({ signal }, 'received interrupt, cleaning up')
+  Settings.shuttingDown = true
+  setTimeout(() => {
+    logger.log({ signal }, 'shutting down')
+    process.exit()
+  }, 10000)
+}
 
-const watchForEvent = (eventName) =>
-  docUpdaterRedisClient.on(
-    eventName,
-    (e) => console.log(`redis event: ${eventName} ${e}`) // eslint-disable-line no-console
-  )
+const watchForEvent = (eventName) => {
+  docUpdaterRedisClient.on(eventName, (e) => {
+    console.log(`redis event: ${eventName} ${e}`) // eslint-disable-line no-console
+  })
+}
 
 const events = ['connect', 'ready', 'error', 'close', 'reconnecting', 'end']
-for (const eventName of Array.from(events)) {
+for (const eventName of events) {
   watchForEvent(eventName)
 }
 
 const port =
-  __guard__(
-    Settings.internal != null ? Settings.internal.documentupdater : undefined,
-    (x) => x.port
-  ) ||
-  __guard__(
-    Settings.apis != null ? Settings.apis.documentupdater : undefined,
-    (x1) => x1.port
-  ) ||
+  Settings.internal.documentupdater.port ||
+  (Settings.api &&
+    Settings.api.documentupdater &&
+    Settings.api.documentupdater.port) ||
   3003
 const host = Settings.internal.documentupdater.host || 'localhost'
+
 if (!module.parent) {
   // Called directly
-  app.listen(port, host, function () {
+  app.listen(port, host, () => {
     logger.info(`Document-updater starting up, listening on ${host}:${port}`)
     if (Settings.continuousBackgroundFlush) {
       logger.info('Starting continuous background flush')
-      return DeleteQueueManager.startBackgroundFlush()
+      DeleteQueueManager.startBackgroundFlush()
     }
   })
 }
@@ -249,10 +240,4 @@ for (const signal of [
   'SIGABRT'
 ]) {
   process.on(signal, shutdownCleanly(signal))
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }
