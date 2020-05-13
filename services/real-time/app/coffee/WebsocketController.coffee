@@ -40,6 +40,7 @@ module.exports = WebsocketController =
 			client.set("is_restricted_user", !!(isRestrictedUser))
 
 			RoomManager.joinProject client, project_id, (err) ->
+				return callback(err) if err
 				logger.log {user_id, project_id, client_id: client.id}, "user joined project"
 				callback null, project, privilegeLevel, WebsocketController.PROTOCOL_VERSION
 
