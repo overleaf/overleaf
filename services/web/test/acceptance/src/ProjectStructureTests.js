@@ -342,7 +342,7 @@ describe('ProjectStructureChanges', function() {
       expect(_.where(updates, { pathname: '/references.bib' }).length).to.equal(
         1
       )
-      expect(version).to.equal(3)
+      expect(version).to.equal(1)
     })
 
     it('should version the files created', function() {
@@ -355,7 +355,7 @@ describe('ProjectStructureChanges', function() {
       expect(update.userId).to.equal(owner._id)
       expect(update.pathname).to.equal('/universe.jpg')
       expect(update.url).to.be.a('string')
-      expect(version).to.equal(3)
+      expect(version).to.equal(1)
     })
   })
 

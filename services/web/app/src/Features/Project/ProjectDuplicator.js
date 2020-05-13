@@ -1,16 +1,21 @@
-const { callbackify, promisify } = require('util')
+const { callbackify } = require('util')
+const Path = require('path')
 const OError = require('@overleaf/o-error')
+const { promiseMapWithLimit } = require('../../util/promises')
+const { Doc } = require('../../models/Doc')
+const { File } = require('../../models/File')
+const DocstoreManager = require('../Docstore/DocstoreManager')
+const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
+const FileStoreHandler = require('../FileStore/FileStoreHandler')
 const ProjectCreationHandler = require('./ProjectCreationHandler')
+const ProjectDeleter = require('./ProjectDeleter')
+const ProjectEntityMongoUpdateHandler = require('./ProjectEntityMongoUpdateHandler')
 const ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
+const ProjectGetter = require('./ProjectGetter')
 const ProjectLocator = require('./ProjectLocator')
 const ProjectOptionsHandler = require('./ProjectOptionsHandler')
-const ProjectDeleter = require('./ProjectDeleter')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const DocstoreManager = require('../Docstore/DocstoreManager')
-const ProjectGetter = require('./ProjectGetter')
-const _ = require('underscore')
-const async = require('async')
-const logger = require('logger-sharelatex')
+const SafePath = require('./SafePath')
+const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 
 module.exports = {
   duplicate: callbackify(duplicate),
@@ -18,179 +23,6 @@ module.exports = {
     duplicate
   }
 }
-
-function _copyDocs(
-  ownerId,
-  newProject,
-  originalRootDoc,
-  originalFolder,
-  desFolder,
-  docContents,
-  callback
-) {
-  const setRootDoc = _.once(docId => {
-    ProjectEntityUpdateHandler.setRootDoc(newProject._id, docId, () => {})
-  })
-  const docs = originalFolder.docs || []
-  const jobs = docs.map(
-    doc =>
-      function(cb) {
-        if (doc == null || doc._id == null) {
-          return callback()
-        }
-        const content = docContents[doc._id.toString()]
-        ProjectEntityUpdateHandler.addDoc(
-          newProject._id,
-          desFolder._id,
-          doc.name,
-          content.lines,
-          ownerId,
-          function(err, newDoc) {
-            if (err != null) {
-              logger.warn({ err }, 'error copying doc')
-              return callback(err)
-            }
-            if (
-              originalRootDoc != null &&
-              newDoc.name === originalRootDoc.name
-            ) {
-              setRootDoc(newDoc._id)
-            }
-            cb()
-          }
-        )
-      }
-  )
-
-  async.series(jobs, callback)
-}
-
-function _copyFiles(
-  ownerId,
-  newProject,
-  originalProjectId,
-  originalFolder,
-  desFolder,
-  callback
-) {
-  const fileRefs = originalFolder.fileRefs || []
-  let firstError = null // track first error to exit gracefully from parallel copy
-  const jobs = fileRefs.map(
-    file =>
-      function(cb) {
-        if (firstError != null) {
-          return async.setImmediate(cb)
-        } // skip further copies if an error has occurred
-        ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject(
-          newProject._id,
-          newProject,
-          desFolder._id,
-          originalProjectId,
-          file,
-          ownerId,
-          function(err) {
-            if (err != null) {
-              if (!firstError) {
-                firstError = err
-              }
-            } // set the error flag if this copy failed
-            cb()
-          }
-        )
-      }
-  )
-  // If one of these jobs fails then we wait until all running jobs have
-  // finished, skipping those which have not started yet. We need to wait
-  // for all the copy jobs to finish to avoid them writing to the project
-  // entry in the background while we are deleting it.
-  async.parallelLimit(jobs, 5, function(err) {
-    if (firstError != null) {
-      return callback(firstError)
-    }
-    if (err != null) {
-      return callback(err)
-    } // shouldn't happen
-    callback()
-  })
-}
-
-function _copyFolderRecursively(
-  ownerId,
-  newProjectId,
-  originalProjectId,
-  originalRootDoc,
-  originalFolder,
-  desFolder,
-  docContents,
-  callback
-) {
-  ProjectGetter.getProject(
-    newProjectId,
-    { rootFolder: true, name: true },
-    function(err, newProject) {
-      if (err != null) {
-        logger.warn({ projectId: newProjectId }, 'could not get project')
-        return callback(err)
-      }
-
-      const folders = originalFolder.folders || []
-
-      const jobs = folders.map(
-        childFolder =>
-          function(cb) {
-            if (childFolder == null || childFolder._id == null) {
-              return cb()
-            }
-            ProjectEntityUpdateHandler.addFolder(
-              newProject._id,
-              desFolder != null ? desFolder._id : undefined,
-              childFolder.name,
-              function(err, newFolder) {
-                if (err != null) {
-                  return cb(err)
-                }
-                _copyFolderRecursively(
-                  ownerId,
-                  newProjectId,
-                  originalProjectId,
-                  originalRootDoc,
-                  childFolder,
-                  newFolder,
-                  docContents,
-                  cb
-                )
-              }
-            )
-          }
-      )
-
-      jobs.push(cb =>
-        _copyFiles(
-          ownerId,
-          newProject,
-          originalProjectId,
-          originalFolder,
-          desFolder,
-          cb
-        )
-      )
-      jobs.push(cb =>
-        _copyDocs(
-          ownerId,
-          newProject,
-          originalRootDoc,
-          originalFolder,
-          desFolder,
-          docContents,
-          cb
-        )
-      )
-
-      async.series(jobs, callback)
-    }
-  )
-}
-const _copyFolderRecursivelyAsync = promisify(_copyFolderRecursively)
 
 async function duplicate(owner, originalProjectId, newProjectName) {
   await DocumentUpdaterHandler.promises.flushProjectToMongo(originalProjectId)
@@ -202,19 +34,11 @@ async function duplicate(owner, originalProjectId, newProjectName) {
       rootDoc_id: true
     }
   )
-  const {
-    element: originalRootDoc
-  } = await ProjectLocator.promises.findRootDoc({
+  const { path: rootDocPath } = await ProjectLocator.promises.findRootDoc({
     project_id: originalProjectId
   })
-  const docContentsArray = await DocstoreManager.promises.getAllDocs(
-    originalProjectId
-  )
 
-  const docContents = {}
-  for (const docContent of docContentsArray) {
-    docContents[docContent._id] = docContent
-  }
+  const originalEntries = _getFolderEntries(originalProject.rootFolder[0])
 
   // Now create the new project, cleaning it up on failure if necessary
   const newProject = await ProjectCreationHandler.promises.createBlankProject(
@@ -227,15 +51,24 @@ async function duplicate(owner, originalProjectId, newProjectName) {
       newProject._id,
       originalProject.compiler
     )
-    await _copyFolderRecursivelyAsync(
-      owner._id,
+    const [docEntries, fileEntries] = await Promise.all([
+      _copyDocs(originalEntries.docEntries, originalProject, newProject),
+      _copyFiles(originalEntries.fileEntries, originalProject, newProject)
+    ])
+    const projectVersion = await ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure(
       newProject._id,
-      originalProjectId,
-      originalRootDoc,
-      originalProject.rootFolder[0],
-      newProject.rootFolder[0],
-      docContents
+      docEntries,
+      fileEntries
     )
+    if (rootDocPath) {
+      await _setRootDoc(newProject._id, rootDocPath.fileSystem)
+    }
+    await _notifyDocumentUpdater(newProject, owner._id, {
+      newFiles: fileEntries,
+      newDocs: docEntries,
+      newProject: { version: projectVersion }
+    })
+    await TpdsProjectFlusher.promises.flushProjectToTpds(newProject._id)
   } catch (err) {
     // Clean up broken clone on error.
     // Make sure we delete the new failed project, not the original one!
@@ -250,4 +83,115 @@ async function duplicate(owner, originalProjectId, newProjectName) {
     }).withCause(err)
   }
   return newProject
+}
+
+function _getFolderEntries(folder, folderPath = '/') {
+  const docEntries = []
+  const fileEntries = []
+  const docs = folder.docs || []
+  const files = folder.fileRefs || []
+  const subfolders = folder.folders || []
+
+  for (const doc of docs) {
+    if (doc == null || doc._id == null) {
+      continue
+    }
+    const path = Path.join(folderPath, doc.name)
+    docEntries.push({ doc, path })
+  }
+
+  for (const file of files) {
+    if (file == null || file._id == null) {
+      continue
+    }
+    const path = Path.join(folderPath, file.name)
+    fileEntries.push({ file, path })
+  }
+
+  for (const subfolder of subfolders) {
+    if (subfolder == null || subfolder._id == null) {
+      continue
+    }
+    const subfolderPath = Path.join(folderPath, subfolder.name)
+    const subfolderEntries = _getFolderEntries(subfolder, subfolderPath)
+    for (const docEntry of subfolderEntries.docEntries) {
+      docEntries.push(docEntry)
+    }
+    for (const fileEntry of subfolderEntries.fileEntries) {
+      fileEntries.push(fileEntry)
+    }
+  }
+  return { docEntries, fileEntries }
+}
+
+async function _copyDocs(sourceEntries, sourceProject, targetProject) {
+  const docLinesById = await _getDocLinesForProject(sourceProject._id)
+  const targetEntries = []
+  for (const sourceEntry of sourceEntries) {
+    const sourceDoc = sourceEntry.doc
+    const path = sourceEntry.path
+    const doc = new Doc({ name: sourceDoc.name })
+    const docLines = docLinesById.get(sourceDoc._id.toString())
+    await DocstoreManager.promises.updateDoc(
+      targetProject._id.toString(),
+      doc._id.toString(),
+      docLines,
+      0,
+      {}
+    )
+    targetEntries.push({ doc, path, docLines: docLines.join('\n') })
+  }
+  return targetEntries
+}
+
+async function _getDocLinesForProject(projectId) {
+  const docs = await DocstoreManager.promises.getAllDocs(projectId)
+  const docLinesById = new Map(docs.map(doc => [doc._id, doc.lines]))
+  return docLinesById
+}
+
+async function _copyFiles(sourceEntries, sourceProject, targetProject) {
+  const targetEntries = await promiseMapWithLimit(
+    5,
+    sourceEntries,
+    async sourceEntry => {
+      const sourceFile = sourceEntry.file
+      const path = sourceEntry.path
+      const file = new File({ name: SafePath.clean(sourceFile.name) })
+      if (sourceFile.linkedFileData != null) {
+        file.linkedFileData = sourceFile.linkedFileData
+      }
+      if (sourceFile.hash != null) {
+        file.hash = sourceFile.hash
+      }
+      const url = await FileStoreHandler.promises.copyFile(
+        sourceProject._id,
+        sourceFile._id,
+        targetProject._id,
+        file._id
+      )
+      return { file, path, url }
+    }
+  )
+  return targetEntries
+}
+
+async function _setRootDoc(projectId, path) {
+  const { element: rootDoc } = await ProjectLocator.promises.findElementByPath({
+    project_id: projectId,
+    path,
+    exactCaseMatch: true
+  })
+  await ProjectEntityUpdateHandler.promises.setRootDoc(projectId, rootDoc._id)
+}
+
+async function _notifyDocumentUpdater(project, userId, changes) {
+  const projectHistoryId =
+    project.overleaf && project.overleaf.history && project.overleaf.history.id
+  await DocumentUpdaterHandler.promises.updateProjectStructure(
+    project._id,
+    projectHistoryId,
+    userId,
+    changes
+  )
 }
