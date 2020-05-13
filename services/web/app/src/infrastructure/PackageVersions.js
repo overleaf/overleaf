@@ -6,7 +6,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const version = {
-  ace: '1.4.5', // Upgrade instructions: https://github.com/overleaf/write_latex/wiki/Upgrading-Ace
+  ace: '1.4.10', // Upgrade instructions: https://github.com/overleaf/write_latex/wiki/Upgrading-Ace
   fineuploader: '5.15.4'
 }
 
