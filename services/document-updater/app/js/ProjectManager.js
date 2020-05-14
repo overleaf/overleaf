@@ -19,35 +19,26 @@ module.exports = {
       if (error) {
         return callback(error)
       }
-      const jobs = []
       const errors = []
-      for (const docId of docIds) {
-        ;((docId) =>
-          jobs.push((callback) =>
-            DocumentManager.flushDocIfLoadedWithLock(
-              projectId,
-              docId,
-              function (error) {
-                if (error instanceof Errors.NotFoundError) {
-                  logger.warn(
-                    { err: error, projectId, docId },
-                    'found deleted doc when flushing'
-                  )
-                  callback()
-                } else if (error) {
-                  logger.error(
-                    { err: error, projectId, docId },
-                    'error flushing doc'
-                  )
-                  errors.push(error)
-                  callback()
-                } else {
-                  callback()
-                }
-              }
+      const jobs = docIds.map((docId) => (callback) => {
+        DocumentManager.flushDocIfLoadedWithLock(projectId, docId, function (
+          error
+        ) {
+          if (error instanceof Errors.NotFoundError) {
+            logger.warn(
+              { err: error, projectId, docId },
+              'found deleted doc when flushing'
             )
-          ))(docId)
-      }
+            callback()
+          } else if (error) {
+            logger.error({ err: error, projectId, docId }, 'error flushing doc')
+            errors.push(error)
+            callback()
+          } else {
+            callback()
+          }
+        })
+      })
 
       logger.log({ projectId, docIds }, 'flushing docs')
       async.series(jobs, function () {
@@ -73,28 +64,24 @@ module.exports = {
       if (error) {
         return callback(error)
       }
-      const jobs = []
       const errors = []
-      for (const docId of docIds) {
-        ;((docId) =>
-          jobs.push((callback) =>
-            DocumentManager.flushAndDeleteDocWithLock(
-              projectId,
-              docId,
-              {},
-              function (error) {
-                if (error) {
-                  logger.error(
-                    { err: error, projectId, docId },
-                    'error deleting doc'
-                  )
-                  errors.push(error)
-                }
-                callback()
-              }
-            )
-          ))(docId)
-      }
+      const jobs = docIds.map((docId) => (callback) => {
+        DocumentManager.flushAndDeleteDocWithLock(
+          projectId,
+          docId,
+          {},
+          function (error) {
+            if (error) {
+              logger.error(
+                { err: error, projectId, docId },
+                'error deleting doc'
+              )
+              errors.push(error)
+            }
+            callback()
+          }
+        )
+      })
 
       logger.log({ projectId, docIds }, 'deleting docs')
       async.series(jobs, () =>
@@ -188,29 +175,24 @@ module.exports = {
           )
           return callback(error)
         }
-        const jobs = []
-        for (const docId of docIds) {
-          ;((docId) =>
-            jobs.push((
-              cb // get the doc lines from redis
-            ) =>
-              DocumentManager.getDocAndFlushIfOldWithLock(
-                projectId,
-                docId,
-                function (err, lines, version) {
-                  if (err) {
-                    logger.error(
-                      { err, projectId, docId },
-                      'error getting project doc lines in getProjectDocsAndFlushIfOld'
-                    )
-                    return cb(err)
-                  }
-                  const doc = { _id: docId, lines, v: version } // create a doc object to return
-                  cb(null, doc)
-                }
-              )
-            ))(docId)
-        }
+        // get the doc lines from redis
+        const jobs = docIds.map((docId) => (cb) => {
+          DocumentManager.getDocAndFlushIfOldWithLock(
+            projectId,
+            docId,
+            function (err, lines, version) {
+              if (err) {
+                logger.error(
+                  { err, projectId, docId },
+                  'error getting project doc lines in getProjectDocsAndFlushIfOld'
+                )
+                return cb(err)
+              }
+              const doc = { _id: docId, lines, v: version } // create a doc object to return
+              cb(null, doc)
+            }
+          )
+        })
         async.series(jobs, function (error, docs) {
           if (error) {
             return callback(error)
