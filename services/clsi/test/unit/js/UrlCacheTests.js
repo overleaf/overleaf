@@ -160,7 +160,7 @@ describe('UrlCache', function() {
 
   describe('_ensureUrlIsInCache', function() {
     beforeEach(function() {
-      this.UrlFetcher.pipeUrlToFile = sinon.stub().callsArg(2)
+      this.UrlFetcher.pipeUrlToFileWithRetry = sinon.stub().callsArg(2)
       return (this.UrlCache._updateOrCreateUrlDetails = sinon
         .stub()
         .callsArg(3))
@@ -190,7 +190,7 @@ describe('UrlCache', function() {
       })
 
       it('should download the URL to the cache file', function() {
-        return this.UrlFetcher.pipeUrlToFile
+        return this.UrlFetcher.pipeUrlToFileWithRetry
           .calledWith(
             this.url,
             this.UrlCache._cacheFilePathForUrl(this.project_id, this.url)
@@ -232,7 +232,7 @@ describe('UrlCache', function() {
       })
 
       it('should not download the URL to the cache file', function() {
-        return this.UrlFetcher.pipeUrlToFile.called.should.equal(false)
+        return this.UrlFetcher.pipeUrlToFileWithRetry.called.should.equal(false)
       })
 
       return it('should return the callback with the cache file path', function() {

@@ -95,7 +95,7 @@ module.exports = UrlCache = {
         }
         if (needsDownloading) {
           logger.log({ url, lastModified }, 'downloading URL')
-          return UrlFetcher.pipeUrlToFile(
+          return UrlFetcher.pipeUrlToFileWithRetry(
             url,
             UrlCache._cacheFilePathForUrl(project_id, url),
             error => {
