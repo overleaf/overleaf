@@ -15,15 +15,13 @@ module.exports = {
       _callback(...args)
     }
 
-    RedisManager.getDocIdsInProject(projectId, function (error, docIds) {
+    RedisManager.getDocIdsInProject(projectId, (error, docIds) => {
       if (error) {
         return callback(error)
       }
       const errors = []
       const jobs = docIds.map((docId) => (callback) => {
-        DocumentManager.flushDocIfLoadedWithLock(projectId, docId, function (
-          error
-        ) {
+        DocumentManager.flushDocIfLoadedWithLock(projectId, docId, (error) => {
           if (error instanceof Errors.NotFoundError) {
             logger.warn(
               { err: error, projectId, docId },
@@ -41,7 +39,7 @@ module.exports = {
       })
 
       logger.log({ projectId, docIds }, 'flushing docs')
-      async.series(jobs, function () {
+      async.series(jobs, () => {
         if (errors.length > 0) {
           callback(new Error('Errors flushing docs. See log for details'))
         } else {
@@ -60,7 +58,7 @@ module.exports = {
       _callback(...args)
     }
 
-    RedisManager.getDocIdsInProject(projectId, function (error, docIds) {
+    RedisManager.getDocIdsInProject(projectId, (error, docIds) => {
       if (error) {
         return callback(error)
       }
@@ -70,7 +68,7 @@ module.exports = {
           projectId,
           docId,
           {},
-          function (error) {
+          (error) => {
             if (error) {
               logger.error(
                 { err: error, projectId, docId },
@@ -89,9 +87,7 @@ module.exports = {
         // history is completely flushed because the project may be
         // deleted in web after this call completes, and so further
         // attempts to flush would fail after that.
-        HistoryManager.flushProjectChanges(projectId, options, function (
-          error
-        ) {
+        HistoryManager.flushProjectChanges(projectId, options, (error) => {
           if (errors.length > 0) {
             callback(new Error('Errors deleting docs. See log for details'))
           } else if (error) {
@@ -105,7 +101,7 @@ module.exports = {
   },
 
   queueFlushAndDeleteProject(projectId, callback) {
-    RedisManager.queueFlushAndDeleteProject(projectId, function (error) {
+    RedisManager.queueFlushAndDeleteProject(projectId, (error) => {
       if (error) {
         logger.error(
           { projectId, error },
@@ -119,14 +115,14 @@ module.exports = {
   },
 
   getProjectDocsTimestamps(projectId, callback) {
-    RedisManager.getDocIdsInProject(projectId, function (error, docIds) {
+    RedisManager.getDocIdsInProject(projectId, (error, docIds) => {
       if (error) {
         return callback(error)
       }
       if (docIds.length === 0) {
         return callback(null, [])
       }
-      RedisManager.getDocTimestamps(docIds, function (error, timestamps) {
+      RedisManager.getDocTimestamps(docIds, (error, timestamps) => {
         if (error) {
           return callback(error)
         }
@@ -149,58 +145,59 @@ module.exports = {
       _callback(...args)
     }
 
-    RedisManager.checkOrSetProjectState(projectId, projectStateHash, function (
-      error,
-      projectStateChanged
-    ) {
-      if (error) {
-        logger.error(
-          { err: error, projectId },
-          'error getting/setting project state in getProjectDocsAndFlushIfOld'
-        )
-        return callback(error)
-      }
-      // we can't return docs if project structure has changed
-      if (projectStateChanged) {
-        return callback(
-          Errors.ProjectStateChangedError('project state changed')
-        )
-      }
-      // project structure hasn't changed, return doc content from redis
-      RedisManager.getDocIdsInProject(projectId, function (error, docIds) {
+    RedisManager.checkOrSetProjectState(
+      projectId,
+      projectStateHash,
+      (error, projectStateChanged) => {
         if (error) {
           logger.error(
             { err: error, projectId },
-            'error getting doc ids in getProjectDocs'
+            'error getting/setting project state in getProjectDocsAndFlushIfOld'
           )
           return callback(error)
         }
-        // get the doc lines from redis
-        const jobs = docIds.map((docId) => (cb) => {
-          DocumentManager.getDocAndFlushIfOldWithLock(
-            projectId,
-            docId,
-            function (err, lines, version) {
-              if (err) {
-                logger.error(
-                  { err, projectId, docId },
-                  'error getting project doc lines in getProjectDocsAndFlushIfOld'
-                )
-                return cb(err)
-              }
-              const doc = { _id: docId, lines, v: version } // create a doc object to return
-              cb(null, doc)
-            }
+        // we can't return docs if project structure has changed
+        if (projectStateChanged) {
+          return callback(
+            Errors.ProjectStateChangedError('project state changed')
           )
-        })
-        async.series(jobs, function (error, docs) {
+        }
+        // project structure hasn't changed, return doc content from redis
+        RedisManager.getDocIdsInProject(projectId, (error, docIds) => {
           if (error) {
+            logger.error(
+              { err: error, projectId },
+              'error getting doc ids in getProjectDocs'
+            )
             return callback(error)
           }
-          callback(null, docs)
+          // get the doc lines from redis
+          const jobs = docIds.map((docId) => (cb) => {
+            DocumentManager.getDocAndFlushIfOldWithLock(
+              projectId,
+              docId,
+              (err, lines, version) => {
+                if (err) {
+                  logger.error(
+                    { err, projectId, docId },
+                    'error getting project doc lines in getProjectDocsAndFlushIfOld'
+                  )
+                  return cb(err)
+                }
+                const doc = { _id: docId, lines, v: version } // create a doc object to return
+                cb(null, doc)
+              }
+            )
+          })
+          async.series(jobs, (error, docs) => {
+            if (error) {
+              return callback(error)
+            }
+            callback(null, docs)
+          })
         })
-      })
-    })
+      }
+    )
   },
 
   clearProjectState(projectId, callback) {
@@ -238,7 +235,7 @@ module.exports = {
           docId,
           userId,
           projectUpdate,
-          function (error, count) {
+          (error, count) => {
             projectOpsLength = count
             cb(error)
           }
@@ -250,7 +247,7 @@ module.exports = {
           userId,
           projectUpdate,
           projectHistoryId,
-          function (error, count) {
+          (error, count) => {
             projectOpsLength = count
             cb(error)
           }
@@ -269,7 +266,7 @@ module.exports = {
           fileId,
           userId,
           projectUpdate,
-          function (error, count) {
+          (error, count) => {
             projectOpsLength = count
             cb(error)
           }
@@ -282,7 +279,7 @@ module.exports = {
           fileId,
           userId,
           projectUpdate,
-          function (error, count) {
+          (error, count) => {
             projectOpsLength = count
             cb(error)
           }
@@ -290,11 +287,11 @@ module.exports = {
       }
     }
 
-    async.eachSeries(docUpdates, handleDocUpdate, function (error) {
+    async.eachSeries(docUpdates, handleDocUpdate, (error) => {
       if (error) {
         return callback(error)
       }
-      async.eachSeries(fileUpdates, handleFileUpdate, function (error) {
+      async.eachSeries(fileUpdates, handleFileUpdate, (error) => {
         if (error) {
           return callback(error)
         }
