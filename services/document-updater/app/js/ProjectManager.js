@@ -3,13 +3,6 @@
     handle-callback-err,
     no-unused-vars,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let ProjectManager
 const RedisManager = require('./RedisManager')
 const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
@@ -29,7 +22,7 @@ module.exports = ProjectManager = {
     }
 
     RedisManager.getDocIdsInProject(project_id, function (error, doc_ids) {
-      if (error != null) {
+      if (error) {
         return callback(error)
       }
       const jobs = []
@@ -41,13 +34,13 @@ module.exports = ProjectManager = {
               project_id,
               doc_id,
               function (error) {
-                if (error != null && error instanceof Errors.NotFoundError) {
+                if (error instanceof Errors.NotFoundError) {
                   logger.warn(
                     { err: error, project_id, doc_id },
                     'found deleted doc when flushing'
                   )
                   callback()
-                } else if (error != null) {
+                } else if (error) {
                   logger.error(
                     { err: error, project_id, doc_id },
                     'error flushing doc'
@@ -83,7 +76,7 @@ module.exports = ProjectManager = {
     }
 
     RedisManager.getDocIdsInProject(project_id, function (error, doc_ids) {
-      if (error != null) {
+      if (error) {
         return callback(error)
       }
       const jobs = []
@@ -96,7 +89,7 @@ module.exports = ProjectManager = {
               doc_id,
               {},
               function (error) {
-                if (error != null) {
+                if (error) {
                   logger.error(
                     { err: error, project_id, doc_id },
                     'error deleting doc'
@@ -120,7 +113,7 @@ module.exports = ProjectManager = {
         ) {
           if (errors.length > 0) {
             callback(new Error('Errors deleting docs. See log for details'))
-          } else if (error != null) {
+          } else if (error) {
             callback(error)
           } else {
             callback(null)
@@ -132,7 +125,7 @@ module.exports = ProjectManager = {
 
   queueFlushAndDeleteProject(project_id, callback) {
     RedisManager.queueFlushAndDeleteProject(project_id, function (error) {
-      if (error != null) {
+      if (error) {
         logger.error(
           { project_id, error },
           'error adding project to flush and delete queue'
@@ -146,14 +139,14 @@ module.exports = ProjectManager = {
 
   getProjectDocsTimestamps(project_id, callback) {
     RedisManager.getDocIdsInProject(project_id, function (error, doc_ids) {
-      if (error != null) {
+      if (error) {
         return callback(error)
       }
-      if (!(doc_ids != null ? doc_ids.length : undefined)) {
+      if (doc_ids.length === 0) {
         return callback(null, [])
       }
       RedisManager.getDocTimestamps(doc_ids, function (error, timestamps) {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
         callback(null, timestamps)
@@ -179,7 +172,7 @@ module.exports = ProjectManager = {
       error,
       projectStateChanged
     ) {
-      if (error != null) {
+      if (error) {
         logger.error(
           { err: error, project_id },
           'error getting/setting project state in getProjectDocsAndFlushIfOld'
@@ -194,7 +187,7 @@ module.exports = ProjectManager = {
       }
       // project structure hasn't changed, return doc content from redis
       RedisManager.getDocIdsInProject(project_id, function (error, doc_ids) {
-        if (error != null) {
+        if (error) {
           logger.error(
             { err: error, project_id },
             'error getting doc ids in getProjectDocs'
@@ -211,7 +204,7 @@ module.exports = ProjectManager = {
                 project_id,
                 doc_id,
                 function (err, lines, version) {
-                  if (err != null) {
+                  if (err) {
                     logger.error(
                       { err, project_id, doc_id },
                       'error getting project doc lines in getProjectDocsAndFlushIfOld'
@@ -225,7 +218,7 @@ module.exports = ProjectManager = {
             ))(doc_id)
         }
         async.series(jobs, function (error, docs) {
-          if (error != null) {
+          if (error) {
             return callback(error)
           }
           callback(null, docs)
@@ -322,11 +315,11 @@ module.exports = ProjectManager = {
     }
 
     async.eachSeries(docUpdates, handleDocUpdate, function (error) {
-      if (error != null) {
+      if (error) {
         return callback(error)
       }
       async.eachSeries(fileUpdates, handleFileUpdate, function (error) {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
         if (
