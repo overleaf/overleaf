@@ -22,9 +22,6 @@ const Errors = require('./Errors')
 
 module.exports = ProjectManager = {
   flushProjectWithLocks(project_id, _callback) {
-    if (_callback == null) {
-      _callback = function (error) {}
-    }
     const timer = new Metrics.Timer('projectManager.flushProjectWithLocks')
     const callback = function (...args) {
       timer.done()
@@ -77,9 +74,6 @@ module.exports = ProjectManager = {
   },
 
   flushAndDeleteProjectWithLocks(project_id, options, _callback) {
-    if (_callback == null) {
-      _callback = function (error) {}
-    }
     const timer = new Metrics.Timer(
       'projectManager.flushAndDeleteProjectWithLocks'
     )
@@ -137,9 +131,6 @@ module.exports = ProjectManager = {
   },
 
   queueFlushAndDeleteProject(project_id, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     RedisManager.queueFlushAndDeleteProject(project_id, function (error) {
       if (error != null) {
         logger.error(
@@ -154,9 +145,6 @@ module.exports = ProjectManager = {
   },
 
   getProjectDocsTimestamps(project_id, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     RedisManager.getDocIdsInProject(project_id, function (error, doc_ids) {
       if (error != null) {
         return callback(error)
@@ -179,12 +167,6 @@ module.exports = ProjectManager = {
     excludeVersions,
     _callback
   ) {
-    if (excludeVersions == null) {
-      excludeVersions = {}
-    }
-    if (_callback == null) {
-      _callback = function (error, docs) {}
-    }
     const timer = new Metrics.Timer(
       'projectManager.getProjectDocsAndFlushIfOld'
     )
@@ -253,9 +235,6 @@ module.exports = ProjectManager = {
   },
 
   clearProjectState(project_id, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     RedisManager.clearProjectState(project_id, callback)
   },
 
@@ -268,9 +247,6 @@ module.exports = ProjectManager = {
     version,
     _callback
   ) {
-    if (_callback == null) {
-      _callback = function (error) {}
-    }
     const timer = new Metrics.Timer('projectManager.updateProject')
     const callback = function (...args) {
       timer.done()
