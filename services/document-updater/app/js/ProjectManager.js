@@ -1,9 +1,7 @@
 /* eslint-disable
     camelcase,
     handle-callback-err,
-    no-unused-vars,
 */
-let ProjectManager
 const RedisManager = require('./RedisManager')
 const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
 const DocumentManager = require('./DocumentManager')
@@ -13,7 +11,7 @@ const logger = require('logger-sharelatex')
 const Metrics = require('./Metrics')
 const Errors = require('./Errors')
 
-module.exports = ProjectManager = {
+module.exports = {
   flushProjectWithLocks(project_id, _callback) {
     const timer = new Metrics.Timer('projectManager.flushProjectWithLocks')
     const callback = function (...args) {
