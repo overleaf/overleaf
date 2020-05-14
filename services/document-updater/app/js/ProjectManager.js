@@ -7,7 +7,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -30,7 +29,7 @@ module.exports = ProjectManager = {
     const timer = new Metrics.Timer('projectManager.flushProjectWithLocks')
     const callback = function (...args) {
       timer.done()
-      return _callback(...Array.from(args || []))
+      return _callback(...args)
     }
 
     return RedisManager.getDocIdsInProject(project_id, function (
@@ -42,7 +41,7 @@ module.exports = ProjectManager = {
       }
       const jobs = []
       const errors = []
-      for (const doc_id of Array.from(doc_ids || [])) {
+      for (const doc_id of doc_ids) {
         ;((doc_id) =>
           jobs.push((callback) =>
             DocumentManager.flushDocIfLoadedWithLock(
@@ -92,7 +91,7 @@ module.exports = ProjectManager = {
     )
     const callback = function (...args) {
       timer.done()
-      return _callback(...Array.from(args || []))
+      return _callback(...args)
     }
 
     return RedisManager.getDocIdsInProject(project_id, function (
@@ -104,7 +103,7 @@ module.exports = ProjectManager = {
       }
       const jobs = []
       const errors = []
-      for (const doc_id of Array.from(doc_ids || [])) {
+      for (const doc_id of doc_ids) {
         ;((doc_id) =>
           jobs.push((callback) =>
             DocumentManager.flushAndDeleteDocWithLock(
@@ -210,7 +209,7 @@ module.exports = ProjectManager = {
     )
     const callback = function (...args) {
       timer.done()
-      return _callback(...Array.from(args || []))
+      return _callback(...args)
     }
 
     return RedisManager.checkOrSetProjectState(
@@ -243,7 +242,7 @@ module.exports = ProjectManager = {
             return callback(error)
           }
           const jobs = []
-          for (const doc_id of Array.from(doc_ids || [])) {
+          for (const doc_id of doc_ids) {
             ;((doc_id) =>
               jobs.push((
                 cb // get the doc lines from redis
@@ -298,7 +297,7 @@ module.exports = ProjectManager = {
     const timer = new Metrics.Timer('projectManager.updateProject')
     const callback = function (...args) {
       timer.done()
-      return _callback(...Array.from(args || []))
+      return _callback(...args)
     }
 
     const project_version = version
@@ -389,5 +388,5 @@ module.exports = ProjectManager = {
         return callback()
       })
     })
-  }
+  },
 }
