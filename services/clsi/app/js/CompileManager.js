@@ -217,6 +217,11 @@ module.exports = CompileManager = {
                 error = new Error('compilation')
                 error.validate = 'fail'
               }
+              // make top-level output accesible to user, write in background for simplicity
+              if (output != null) {
+                fs.writeFile(Path.join(compileDir, "output.stdout"), output.stdout, () => { })
+                fs.writeFile(Path.join(compileDir, "output.stderr"), output.stderr, () => { })
+              }
               // compile was killed by user, was a validation, or a compile which failed validation
               if (
                 (error != null ? error.terminated : undefined) ||

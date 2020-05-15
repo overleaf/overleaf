@@ -201,6 +201,10 @@ module.exports = ResourceWriter = {
             // knitr cache
             should_delete = false
           }
+          if (path.match(/^output.(stdout|stderr)$/)) {
+            // latexmk output
+            should_delete = true
+          }
           if (path.match(/^output-.*/)) {
             // Tikz cached figures (default case)
             should_delete = false
