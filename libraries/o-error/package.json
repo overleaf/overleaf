@@ -1,9 +1,10 @@
 {
   "name": "@overleaf/o-error",
   "version": "3.0.0",
-  "description": "Make custom error types that pass `instanceof` checks, have stack traces, support custom messages and properties, and can wrap causes (like VError).",
+  "description": "Light-weight helpers for handling JavaScript Errors in node.js and the browser. Helps with long stack traces, Error subclasses, wrapping internal errors (causes), and attaching extra data to errors for logging.",
+  "keywords": ["browser", "node", "error", "long stack trace", "stack trace", "stack", "cause", "verror"],
   "main": "index.js",
-  "types": "index.d.ts",
+  "files": ["index.js", "index.d.ts"],
   "scripts": {
     "lint": "eslint .",
     "update-readme": "doc/update-readme.js",
