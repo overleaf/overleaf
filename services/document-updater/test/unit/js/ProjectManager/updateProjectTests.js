@@ -6,7 +6,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS206: Consider reworking classes to avoid initClass
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -50,10 +49,10 @@ describe('ProjectManager', function () {
     this.version = 1234567
     this.HistoryManager.shouldFlushHistoryOps = sinon.stub().returns(false)
     this.HistoryManager.flushProjectChangesAsync = sinon.stub()
-    return (this.callback = sinon.stub())
+    this.callback = sinon.stub()
   })
 
-  return describe('updateProjectWithLocks', function () {
+  describe('updateProjectWithLocks', function () {
     describe('rename operations', function () {
       beforeEach(function () {
         this.firstDocUpdate = {
@@ -74,14 +73,14 @@ describe('ProjectManager', function () {
         }
         this.fileUpdates = [this.firstFileUpdate]
         this.DocumentManager.renameDocWithLock = sinon.stub().yields()
-        return (this.ProjectHistoryRedisManager.queueRenameEntity = sinon
+        this.ProjectHistoryRedisManager.queueRenameEntity = sinon
           .stub()
-          .yields())
+          .yields()
       })
 
       describe('successfully', function () {
         beforeEach(function () {
-          return this.ProjectManager.updateProjectWithLocks(
+          this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
@@ -110,7 +109,7 @@ describe('ProjectManager', function () {
               this.projectHistoryId
             )
             .should.equal(true)
-          return this.DocumentManager.renameDocWithLock
+          this.DocumentManager.renameDocWithLock
             .calledWith(
               this.project_id,
               this.secondDocUpdate.id,
@@ -127,7 +126,7 @@ describe('ProjectManager', function () {
             this.firstFileUpdate,
             { version: `${this.version}.2` }
           )
-          return this.ProjectHistoryRedisManager.queueRenameEntity
+          this.ProjectHistoryRedisManager.queueRenameEntity
             .calledWith(
               this.project_id,
               this.projectHistoryId,
@@ -140,13 +139,13 @@ describe('ProjectManager', function () {
         })
 
         it('should not flush the history', function () {
-          return this.HistoryManager.flushProjectChangesAsync
+          this.HistoryManager.flushProjectChangesAsync
             .calledWith(this.project_id)
             .should.equal(false)
         })
 
-        return it('should call the callback', function () {
-          return this.callback.called.should.equal(true)
+        it('should call the callback', function () {
+          this.callback.called.should.equal(true)
         })
       })
 
@@ -156,7 +155,7 @@ describe('ProjectManager', function () {
           this.DocumentManager.renameDocWithLock = sinon
             .stub()
             .yields(this.error)
-          return this.ProjectManager.updateProjectWithLocks(
+          this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
@@ -167,8 +166,8 @@ describe('ProjectManager', function () {
           )
         })
 
-        return it('should call the callback with the error', function () {
-          return this.callback.calledWith(this.error).should.equal(true)
+        it('should call the callback with the error', function () {
+          this.callback.calledWith(this.error).should.equal(true)
         })
       })
 
@@ -178,7 +177,7 @@ describe('ProjectManager', function () {
           this.ProjectHistoryRedisManager.queueRenameEntity = sinon
             .stub()
             .yields(this.error)
-          return this.ProjectManager.updateProjectWithLocks(
+          this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
@@ -189,15 +188,15 @@ describe('ProjectManager', function () {
           )
         })
 
-        return it('should call the callback with the error', function () {
-          return this.callback.calledWith(this.error).should.equal(true)
+        it('should call the callback with the error', function () {
+          this.callback.calledWith(this.error).should.equal(true)
         })
       })
 
-      return describe('with enough ops to flush', function () {
+      describe('with enough ops to flush', function () {
         beforeEach(function () {
           this.HistoryManager.shouldFlushHistoryOps = sinon.stub().returns(true)
-          return this.ProjectManager.updateProjectWithLocks(
+          this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
@@ -208,15 +207,15 @@ describe('ProjectManager', function () {
           )
         })
 
-        return it('should flush the history', function () {
-          return this.HistoryManager.flushProjectChangesAsync
+        it('should flush the history', function () {
+          this.HistoryManager.flushProjectChangesAsync
             .calledWith(this.project_id)
             .should.equal(true)
         })
       })
     })
 
-    return describe('add operations', function () {
+    describe('add operations', function () {
       beforeEach(function () {
         this.firstDocUpdate = {
           id: 1,
@@ -236,14 +235,12 @@ describe('ProjectManager', function () {
           url: 'filestore.example.com/3'
         }
         this.fileUpdates = [this.firstFileUpdate, this.secondFileUpdate]
-        return (this.ProjectHistoryRedisManager.queueAddEntity = sinon
-          .stub()
-          .yields())
+        this.ProjectHistoryRedisManager.queueAddEntity = sinon.stub().yields()
       })
 
       describe('successfully', function () {
         beforeEach(function () {
-          return this.ProjectManager.updateProjectWithLocks(
+          this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
@@ -274,7 +271,7 @@ describe('ProjectManager', function () {
               firstDocUpdateWithVersion
             )
             .should.equal(true)
-          return this.ProjectHistoryRedisManager.queueAddEntity
+          this.ProjectHistoryRedisManager.queueAddEntity
             .getCall(1)
             .calledWith(
               this.project_id,
@@ -309,7 +306,7 @@ describe('ProjectManager', function () {
               firstFileUpdateWithVersion
             )
             .should.equal(true)
-          return this.ProjectHistoryRedisManager.queueAddEntity
+          this.ProjectHistoryRedisManager.queueAddEntity
             .getCall(3)
             .calledWith(
               this.project_id,
@@ -323,13 +320,13 @@ describe('ProjectManager', function () {
         })
 
         it('should not flush the history', function () {
-          return this.HistoryManager.flushProjectChangesAsync
+          this.HistoryManager.flushProjectChangesAsync
             .calledWith(this.project_id)
             .should.equal(false)
         })
 
-        return it('should call the callback', function () {
-          return this.callback.called.should.equal(true)
+        it('should call the callback', function () {
+          this.callback.called.should.equal(true)
         })
       })
 
@@ -339,7 +336,7 @@ describe('ProjectManager', function () {
           this.ProjectHistoryRedisManager.queueAddEntity = sinon
             .stub()
             .yields(this.error)
-          return this.ProjectManager.updateProjectWithLocks(
+          this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
@@ -350,8 +347,8 @@ describe('ProjectManager', function () {
           )
         })
 
-        return it('should call the callback with the error', function () {
-          return this.callback.calledWith(this.error).should.equal(true)
+        it('should call the callback with the error', function () {
+          this.callback.calledWith(this.error).should.equal(true)
         })
       })
 
@@ -361,7 +358,7 @@ describe('ProjectManager', function () {
           this.ProjectHistoryRedisManager.queueAddEntity = sinon
             .stub()
             .yields(this.error)
-          return this.ProjectManager.updateProjectWithLocks(
+          this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
@@ -372,15 +369,15 @@ describe('ProjectManager', function () {
           )
         })
 
-        return it('should call the callback with the error', function () {
-          return this.callback.calledWith(this.error).should.equal(true)
+        it('should call the callback with the error', function () {
+          this.callback.calledWith(this.error).should.equal(true)
         })
       })
 
-      return describe('with enough ops to flush', function () {
+      describe('with enough ops to flush', function () {
         beforeEach(function () {
           this.HistoryManager.shouldFlushHistoryOps = sinon.stub().returns(true)
-          return this.ProjectManager.updateProjectWithLocks(
+          this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
             this.user_id,
@@ -391,8 +388,8 @@ describe('ProjectManager', function () {
           )
         })
 
-        return it('should flush the history', function () {
-          return this.HistoryManager.flushProjectChangesAsync
+        it('should flush the history', function () {
+          this.HistoryManager.flushProjectChangesAsync
             .calledWith(this.project_id)
             .should.equal(true)
         })
