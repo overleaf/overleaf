@@ -1,5 +1,7 @@
 // This is the code from the README.
 
+const OError = require('..')
+
 const demoDatabase = {
   findUser(id, callback) {
     process.nextTick(() => {
@@ -35,8 +37,6 @@ sayHi1(43, (err, result) => {
     console.log(result)
   }
 })
-
-const OError = require('.')
 
 function sayHi2(userId, callback) {
   demoDatabase.findUser(userId, (err, user) => {
