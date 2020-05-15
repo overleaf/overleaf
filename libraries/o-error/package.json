@@ -2,13 +2,26 @@
   "name": "@overleaf/o-error",
   "version": "3.0.0",
   "description": "Light-weight helpers for handling JavaScript Errors in node.js and the browser. Helps with long stack traces, Error subclasses, wrapping internal errors (causes), and attaching extra data to errors for logging.",
-  "keywords": ["browser", "node", "error", "long stack trace", "stack trace", "stack", "cause", "verror"],
+  "keywords": [
+    "browser",
+    "node",
+    "error",
+    "long stack trace",
+    "stack trace",
+    "stack",
+    "cause",
+    "verror"
+  ],
   "main": "index.js",
-  "files": ["index.js", "index.d.ts"],
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
   "scripts": {
     "lint": "eslint .",
     "update-readme": "doc/update-readme.js",
     "test": "mocha",
+    "test:coverage": "nyc --reporter=lcov --reporter=text-summary npm run test",
     "typecheck": "tsc --allowJs --checkJs --noEmit --moduleResolution node --target ES6 *.js test/**/*.js",
     "declaration:build": "rm -f index.d.ts && tsc --allowJs --declaration --emitDeclarationOnly --moduleResolution node --target ES6 index.js",
     "declaration:check": "git diff --exit-code -- index.d.ts",
@@ -34,7 +47,9 @@
     "jsdoc-to-markdown": "^5.0.3",
     "markdown-toc": "^1.2.0",
     "mocha": "^7.1.1",
+    "nyc": "^15.0.1",
     "prettier": "^2.0.2",
     "typescript": "^3.8.3"
-  }
+  },
+  "dependencies": {}
 }

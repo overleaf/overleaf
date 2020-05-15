@@ -2,6 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/%40overleaf%2Fo-error.svg)](https://badge.fury.io/js/%40overleaf%2Fo-error)
 [![CircleCI](https://circleci.com/gh/overleaf/o-error.svg?style=svg)](https://circleci.com/gh/overleaf/o-error)
+[![Coverage Status](https://coveralls.io/repos/github/overleaf/o-error/badge.svg?branch=master)](https://coveralls.io/github/overleaf/o-error?branch=master)
 
 Light-weight helpers for handling JavaScript Errors in node.js and the browser.
 
