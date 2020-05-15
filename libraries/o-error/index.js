@@ -108,10 +108,8 @@ class OError extends Error {
 
     let stack = oError.stack
 
-    if (oError._oErrorTags) {
-      for (const tag of oError._oErrorTags) {
-        stack += `\n${tag.stack}`
-      }
+    if (Array.isArray(oError._oErrorTags) && oError._oErrorTags.length) {
+      stack += `\n${oError._oErrorTags.map((tag) => tag.stack).join('\n')}`
     }
 
     const causeStack = oError.cause && OError.getFullStack(oError.cause)
