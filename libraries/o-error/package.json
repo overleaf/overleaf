@@ -3,11 +3,15 @@
   "version": "2.1.0",
   "description": "Make custom error types that pass `instanceof` checks, have stack traces, support custom messages and properties, and can wrap causes (like VError).",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "lint": "eslint .",
     "update-readme": "doc/update-readme.js",
     "test": "mocha",
-    "typecheck": "tsc --allowJs --checkJs --noEmit --moduleResolution node --target ES6 *.js test/**/*.js"
+    "typecheck": "tsc --allowJs --checkJs --noEmit --moduleResolution node --target ES6 *.js test/**/*.js",
+    "declaration:build": "rm -f index.d.ts && tsc --allowJs --declaration --emitDeclarationOnly --moduleResolution node --target ES6 index.js",
+    "declaration:check": "git diff --exit-code -- index.d.ts",
+    "prepublishOnly": "npm run --silent declaration:build && npm run --silent declaration:check"
   },
   "author": "Overleaf (https://www.overleaf.com)",
   "license": "MIT",
