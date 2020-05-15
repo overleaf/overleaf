@@ -1,16 +1,23 @@
 {
   "name": "@overleaf/o-error",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Make custom error types that pass `instanceof` checks, have stack traces, support custom messages and properties, and can wrap causes (like VError).",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "lint": "eslint .",
-    "test": "mocha --require test/support"
+    "update-readme": "doc/update-readme.js",
+    "test": "mocha",
+    "typecheck": "tsc --allowJs --checkJs --noEmit --moduleResolution node --target ES6 *.js test/**/*.js",
+    "declaration:build": "rm -f index.d.ts && tsc --allowJs --declaration --emitDeclarationOnly --moduleResolution node --target ES6 index.js",
+    "declaration:check": "git diff --exit-code -- index.d.ts",
+    "prepublishOnly": "npm run --silent declaration:build && npm run --silent declaration:check"
   },
   "author": "Overleaf (https://www.overleaf.com)",
   "license": "MIT",
   "repository": "github:overleaf/o-error",
   "devDependencies": {
+    "@types/node": "^13.13.2",
     "chai": "^3.3.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
@@ -23,7 +30,10 @@
     "eslint-plugin-prettier": "^3.1.3",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "jsdoc-to-markdown": "^5.0.3",
+    "markdown-toc": "^1.2.0",
     "mocha": "^7.1.1",
-    "prettier": "^2.0.2"
+    "prettier": "^2.0.2",
+    "typescript": "^3.8.3"
   }
 }
