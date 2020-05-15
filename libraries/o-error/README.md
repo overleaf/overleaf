@@ -6,7 +6,7 @@
 Light-weight helpers for handling JavaScript Errors in node.js and the browser.
 
 - Get long stack traces across async functions and callbacks with `OError.tag`.
-- Easily make custom `Error` subclasses, optionally with HTTP status codes.
+- Easily make custom `Error` subclasses.
 - Wrap internal errors, preserving the original errors for logging as `causes`.
 - Play nice with error logging services by keeping data in attached `info` objects instead of the error message.
 
