@@ -1,6 +1,6 @@
 {
   "name": "@overleaf/o-error",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Make custom error types that pass `instanceof` checks, have stack traces, support custom messages and properties, and can wrap causes (like VError).",
   "main": "index.js",
   "types": "index.d.ts",
