@@ -2,13 +2,6 @@
     no-return-assign,
     no-unused-vars,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS206: Consider reworking classes to avoid initClass
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const chai = require('chai')
 const should = chai.should()
@@ -18,28 +11,36 @@ const _ = require('lodash')
 
 describe('ProjectManager', function () {
   beforeEach(function () {
-    let Timer
+    this.RedisManager = {}
+    this.ProjectHistoryRedisManager = {
+      queueRenameEntity: sinon.stub().yields(),
+      queueAddEntity: sinon.stub().yields()
+    }
+    this.DocumentManager = {
+      renameDocWithLock: sinon.stub().yields()
+    }
+    this.HistoryManager = {
+      flushProjectChangesAsync: sinon.stub(),
+      shouldFlushHistoryOps: sinon.stub().returns(false)
+    }
+    this.Metrics = {
+      Timer: class Timer {}
+    }
+    this.Metrics.Timer.prototype.done = sinon.stub()
+
+    this.logger = {
+      log: sinon.stub(),
+      error: sinon.stub()
+    }
+
     this.ProjectManager = SandboxedModule.require(modulePath, {
       requires: {
-        './RedisManager': (this.RedisManager = {}),
-        './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
-        './DocumentManager': (this.DocumentManager = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub()
-        }),
-        './HistoryManager': (this.HistoryManager = {}),
-        './Metrics': (this.Metrics = {
-          Timer: (Timer = (function () {
-            Timer = class Timer {
-              static initClass() {
-                this.prototype.done = sinon.stub()
-              }
-            }
-            Timer.initClass()
-            return Timer
-          })())
-        })
+        './RedisManager': this.RedisManager,
+        './ProjectHistoryRedisManager': this.ProjectHistoryRedisManager,
+        './DocumentManager': this.DocumentManager,
+        'logger-sharelatex': this.logger,
+        './HistoryManager': this.HistoryManager,
+        './Metrics': this.Metrics
       }
     })
 
@@ -47,8 +48,6 @@ describe('ProjectManager', function () {
     this.projectHistoryId = 'history-id-123'
     this.user_id = 'user-id-123'
     this.version = 1234567
-    this.HistoryManager.shouldFlushHistoryOps = sinon.stub().returns(false)
-    this.HistoryManager.flushProjectChangesAsync = sinon.stub()
     this.callback = sinon.stub()
   })
 
@@ -72,10 +71,6 @@ describe('ProjectManager', function () {
           newPathname: 'bar2'
         }
         this.fileUpdates = [this.firstFileUpdate]
-        this.DocumentManager.renameDocWithLock = sinon.stub().yields()
-        this.ProjectHistoryRedisManager.queueRenameEntity = sinon
-          .stub()
-          .yields()
       })
 
       describe('successfully', function () {
@@ -152,9 +147,7 @@ describe('ProjectManager', function () {
       describe('when renaming a doc fails', function () {
         beforeEach(function () {
           this.error = new Error('error')
-          this.DocumentManager.renameDocWithLock = sinon
-            .stub()
-            .yields(this.error)
+          this.DocumentManager.renameDocWithLock.yields(this.error)
           this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
@@ -174,9 +167,7 @@ describe('ProjectManager', function () {
       describe('when renaming a file fails', function () {
         beforeEach(function () {
           this.error = new Error('error')
-          this.ProjectHistoryRedisManager.queueRenameEntity = sinon
-            .stub()
-            .yields(this.error)
+          this.ProjectHistoryRedisManager.queueRenameEntity.yields(this.error)
           this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
@@ -195,7 +186,7 @@ describe('ProjectManager', function () {
 
       describe('with enough ops to flush', function () {
         beforeEach(function () {
-          this.HistoryManager.shouldFlushHistoryOps = sinon.stub().returns(true)
+          this.HistoryManager.shouldFlushHistoryOps.returns(true)
           this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
@@ -235,7 +226,6 @@ describe('ProjectManager', function () {
           url: 'filestore.example.com/3'
         }
         this.fileUpdates = [this.firstFileUpdate, this.secondFileUpdate]
-        this.ProjectHistoryRedisManager.queueAddEntity = sinon.stub().yields()
       })
 
       describe('successfully', function () {
@@ -333,9 +323,7 @@ describe('ProjectManager', function () {
       describe('when adding a doc fails', function () {
         beforeEach(function () {
           this.error = new Error('error')
-          this.ProjectHistoryRedisManager.queueAddEntity = sinon
-            .stub()
-            .yields(this.error)
+          this.ProjectHistoryRedisManager.queueAddEntity.yields(this.error)
           this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
@@ -355,9 +343,7 @@ describe('ProjectManager', function () {
       describe('when adding a file fails', function () {
         beforeEach(function () {
           this.error = new Error('error')
-          this.ProjectHistoryRedisManager.queueAddEntity = sinon
-            .stub()
-            .yields(this.error)
+          this.ProjectHistoryRedisManager.queueAddEntity.yields(this.error)
           this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
@@ -376,7 +362,7 @@ describe('ProjectManager', function () {
 
       describe('with enough ops to flush', function () {
         beforeEach(function () {
-          this.HistoryManager.shouldFlushHistoryOps = sinon.stub().returns(true)
+          this.HistoryManager.shouldFlushHistoryOps.returns(true)
           this.ProjectManager.updateProjectWithLocks(
             this.project_id,
             this.projectHistoryId,
