@@ -26,7 +26,8 @@ describe('ShareJsDB', function () {
     this.callback = sinon.stub()
     this.ShareJsDB = SandboxedModule.require(modulePath, {
       requires: {
-        './RedisManager': (this.RedisManager = {})
+        './RedisManager': (this.RedisManager = {}),
+        './Errors': Errors
       }
     })
 
@@ -68,7 +69,7 @@ describe('ShareJsDB', function () {
 
       return it('should return the callback with a NotFoundError', function () {
         return this.callback
-          .calledWith(new Errors.NotFoundError('not found'))
+          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)
       })
     })

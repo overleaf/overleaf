@@ -159,7 +159,7 @@ describe('HttpController', function () {
 
       it('should call next with NotFoundError', function () {
         this.next
-          .calledWith(new Errors.NotFoundError('not found'))
+          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)
       })
     })
@@ -173,7 +173,7 @@ describe('HttpController', function () {
       })
 
       it('should call next with the error', function () {
-        this.next.calledWith(new Error('oops')).should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
   })
@@ -252,7 +252,7 @@ describe('HttpController', function () {
       })
 
       it('should call next with the error', function () {
-        this.next.calledWith(new Error('oops')).should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
 
@@ -327,7 +327,7 @@ describe('HttpController', function () {
       })
 
       it('should call next with the error', function () {
-        this.next.calledWith(new Error('oops')).should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
   })
@@ -387,7 +387,7 @@ describe('HttpController', function () {
       })
 
       it('should call next with the error', function () {
-        this.next.calledWith(new Error('oops')).should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
   })
@@ -477,7 +477,7 @@ describe('HttpController', function () {
       })
 
       it('should call next with the error', function () {
-        this.next.calledWith(new Error('oops')).should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
   })
@@ -550,7 +550,7 @@ describe('HttpController', function () {
       })
 
       it('should call next with the error', function () {
-        this.next.calledWith(new Error('oops')).should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
   })
@@ -640,7 +640,7 @@ describe('HttpController', function () {
       })
 
       it('should call next with the error', function () {
-        this.next.calledWith(new Error('oops')).should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
   })
@@ -703,7 +703,7 @@ describe('HttpController', function () {
       })
 
       it('should call next with the error', function () {
-        this.next.calledWith(new Error('oops')).should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
   })
@@ -804,7 +804,7 @@ describe('HttpController', function () {
       })
 
       it('should call next with the error', function () {
-        this.next.calledWith(new Error('oops')).should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
   })
@@ -870,7 +870,7 @@ describe('HttpController', function () {
       })
 
       it('should call next with the error', function () {
-        this.next.calledWith(new Error('oops')).should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
   })
@@ -925,7 +925,7 @@ describe('HttpController', function () {
       })
 
       it('should call next with the error', function () {
-        this.next.calledWith(new Error('oops')).should.equal(true)
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
   })

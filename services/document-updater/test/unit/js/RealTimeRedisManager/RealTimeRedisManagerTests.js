@@ -118,7 +118,7 @@ describe('RealTimeRedisManager', function () {
 
       return it('should return an error to the callback', function () {
         return this.callback
-          .calledWith(new Error('JSON parse error'))
+          .calledWith(sinon.match.has('name', 'SyntaxError'))
           .should.equal(true)
       })
     })

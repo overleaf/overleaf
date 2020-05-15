@@ -88,9 +88,9 @@ describe('Setting a document', function () {
     })
 
     after(function () {
-      MockTrackChangesApi.flushDoc.reset()
-      MockProjectHistoryApi.flushProject.reset()
-      MockWebApi.setDocument.reset()
+      MockTrackChangesApi.flushDoc.resetHistory()
+      MockProjectHistoryApi.flushProject.resetHistory()
+      MockWebApi.setDocument.resetHistory()
     })
 
     it('should return a 204 status code', function () {
@@ -171,9 +171,9 @@ describe('Setting a document', function () {
     })
 
     after(function () {
-      MockTrackChangesApi.flushDoc.reset()
-      MockProjectHistoryApi.flushProject.reset()
-      MockWebApi.setDocument.reset()
+      MockTrackChangesApi.flushDoc.resetHistory()
+      MockProjectHistoryApi.flushProject.resetHistory()
+      MockWebApi.setDocument.resetHistory()
     })
 
     it('should return a 204 status code', function () {
@@ -254,9 +254,9 @@ describe('Setting a document', function () {
       })
 
       after(function () {
-        MockTrackChangesApi.flushDoc.reset()
-        MockProjectHistoryApi.flushProject.reset()
-        MockWebApi.setDocument.reset()
+        MockTrackChangesApi.flushDoc.resetHistory()
+        MockProjectHistoryApi.flushProject.resetHistory()
+        MockWebApi.setDocument.resetHistory()
       })
 
       it(`should return a ${testCase.expectedStatusCode} status code`, function () {
@@ -310,9 +310,9 @@ describe('Setting a document', function () {
     })
 
     after(function () {
-      MockTrackChangesApi.flushDoc.reset()
-      MockProjectHistoryApi.flushProject.reset()
-      MockWebApi.setDocument.reset()
+      MockTrackChangesApi.flushDoc.resetHistory()
+      MockProjectHistoryApi.flushProject.resetHistory()
+      MockWebApi.setDocument.resetHistory()
     })
 
     it('should return a 204 status code', function () {
@@ -388,9 +388,9 @@ describe('Setting a document', function () {
       })
 
       after(function () {
-        MockTrackChangesApi.flushDoc.reset()
-        MockProjectHistoryApi.flushProject.reset()
-        MockWebApi.setDocument.reset()
+        MockTrackChangesApi.flushDoc.resetHistory()
+        MockProjectHistoryApi.flushProject.resetHistory()
+        MockWebApi.setDocument.resetHistory()
       })
 
       it('should undo the tracked changes', function (done) {
@@ -451,9 +451,9 @@ describe('Setting a document', function () {
       })
 
       after(function () {
-        MockTrackChangesApi.flushDoc.reset()
-        MockProjectHistoryApi.flushProject.reset()
-        MockWebApi.setDocument.reset()
+        MockTrackChangesApi.flushDoc.resetHistory()
+        MockProjectHistoryApi.flushProject.resetHistory()
+        MockWebApi.setDocument.resetHistory()
       })
 
       it('should not undo the tracked changes', function (done) {

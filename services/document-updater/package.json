@@ -55,7 +55,7 @@
     "prettier": "^2.0.5",
     "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "~0.2.0",
-    "sinon": "~1.5.2",
+    "sinon": "^9.0.2",
     "timekeeper": "^2.0.0"
   }
 }

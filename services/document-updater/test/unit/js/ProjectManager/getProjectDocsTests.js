@@ -40,7 +40,8 @@ describe('ProjectManager - getProjectDocsAndFlushIfOld', function () {
             Timer.initClass()
             return Timer
           })())
-        })
+        }),
+        './Errors': Errors
       }
     })
     this.project_id = 'project-id-123'
@@ -146,9 +147,7 @@ describe('ProjectManager - getProjectDocsAndFlushIfOld', function () {
 
     it('should call the callback with an error', function () {
       return this.callback
-        .calledWith(
-          new Errors.ProjectStateChangedError('project state changed')
-        )
+        .calledWith(sinon.match.instanceOf(Errors.ProjectStateChangedError))
         .should.equal(true)
     })
 
@@ -194,7 +193,9 @@ describe('ProjectManager - getProjectDocsAndFlushIfOld', function () {
     })
 
     it('should call the callback with an error', function () {
-      return this.callback.calledWith(new Error('oops')).should.equal(true)
+      return this.callback
+        .calledWith(sinon.match.instanceOf(Error))
+        .should.equal(true)
     })
 
     return it('should time the execution', function () {
