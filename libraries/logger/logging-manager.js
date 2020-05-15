@@ -1,5 +1,5 @@
 const bunyan = require('bunyan')
-const request = require('request')
+const fs = require('fs')
 const yn = require('yn')
 const OError = require('@overleaf/o-error')
 const GCPLogging = require('@google-cloud/logging-bunyan')
@@ -42,18 +42,12 @@ const Logger = (module.exports = {
   },
 
   checkLogLevel() {
-    const options = {
-      headers: {
-        'Metadata-Flavor': 'Google'
-      },
-      uri: `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
-    }
-    request(options, (err, response, body) => {
-      if (err) {
+    fs.readFile('/logging/tracingEndTime', (error, end) => {
+      if (error || !end) {
         this.logger.level(this.defaultLevel)
         return
       }
-      if (parseInt(body) > Date.now()) {
+      if (parseInt(end) > Date.now()) {
         this.logger.level('trace')
       } else {
         this.logger.level(this.defaultLevel)
