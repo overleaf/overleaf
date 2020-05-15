@@ -1,10 +1,4 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
 const modulePath = '../../../../app/js/ProjectManager.js'
 const SandboxedModule = require('sandboxed-module')
 const _ = require('lodash')
