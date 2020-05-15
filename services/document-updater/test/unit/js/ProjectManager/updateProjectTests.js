@@ -49,22 +49,28 @@ describe('ProjectManager', function () {
     describe('rename operations', function () {
       beforeEach(function () {
         this.firstDocUpdate = {
+          type: 'rename-doc',
           id: 1,
           pathname: 'foo',
           newPathname: 'foo'
         }
         this.secondDocUpdate = {
+          type: 'rename-doc',
           id: 2,
           pathname: 'bar',
           newPathname: 'bar2'
         }
-        this.docUpdates = [this.firstDocUpdate, this.secondDocUpdate]
         this.firstFileUpdate = {
+          type: 'rename-file',
           id: 2,
           pathname: 'bar',
           newPathname: 'bar2'
         }
-        this.fileUpdates = [this.firstFileUpdate]
+        this.updates = [
+          this.firstDocUpdate,
+          this.secondDocUpdate,
+          this.firstFileUpdate
+        ]
       })
 
       describe('successfully', function () {
@@ -73,8 +79,7 @@ describe('ProjectManager', function () {
             this.project_id,
             this.projectHistoryId,
             this.user_id,
-            this.docUpdates,
-            this.fileUpdates,
+            this.updates,
             this.version,
             this.callback
           )
@@ -146,8 +151,7 @@ describe('ProjectManager', function () {
             this.project_id,
             this.projectHistoryId,
             this.user_id,
-            this.docUpdates,
-            this.fileUpdates,
+            this.updates,
             this.version,
             this.callback
           )
@@ -166,8 +170,7 @@ describe('ProjectManager', function () {
             this.project_id,
             this.projectHistoryId,
             this.user_id,
-            this.docUpdates,
-            this.fileUpdates,
+            this.updates,
             this.version,
             this.callback
           )
@@ -185,8 +188,7 @@ describe('ProjectManager', function () {
             this.project_id,
             this.projectHistoryId,
             this.user_id,
-            this.docUpdates,
-            this.fileUpdates,
+            this.updates,
             this.version,
             this.callback
           )
@@ -203,23 +205,31 @@ describe('ProjectManager', function () {
     describe('add operations', function () {
       beforeEach(function () {
         this.firstDocUpdate = {
+          type: 'add-doc',
           id: 1,
           docLines: 'a\nb'
         }
         this.secondDocUpdate = {
+          type: 'add-doc',
           id: 2,
           docLines: 'a\nb'
         }
-        this.docUpdates = [this.firstDocUpdate, this.secondDocUpdate]
         this.firstFileUpdate = {
+          type: 'add-file',
           id: 3,
           url: 'filestore.example.com/2'
         }
         this.secondFileUpdate = {
+          type: 'add-file',
           id: 4,
           url: 'filestore.example.com/3'
         }
-        this.fileUpdates = [this.firstFileUpdate, this.secondFileUpdate]
+        this.updates = [
+          this.firstDocUpdate,
+          this.secondDocUpdate,
+          this.firstFileUpdate,
+          this.secondFileUpdate
+        ]
       })
 
       describe('successfully', function () {
@@ -228,8 +238,7 @@ describe('ProjectManager', function () {
             this.project_id,
             this.projectHistoryId,
             this.user_id,
-            this.docUpdates,
-            this.fileUpdates,
+            this.updates,
             this.version,
             this.callback
           )
@@ -322,8 +331,7 @@ describe('ProjectManager', function () {
             this.project_id,
             this.projectHistoryId,
             this.user_id,
-            this.docUpdates,
-            this.fileUpdates,
+            this.updates,
             this.version,
             this.callback
           )
@@ -342,8 +350,7 @@ describe('ProjectManager', function () {
             this.project_id,
             this.projectHistoryId,
             this.user_id,
-            this.docUpdates,
-            this.fileUpdates,
+            this.updates,
             this.version,
             this.callback
           )
@@ -361,8 +368,7 @@ describe('ProjectManager', function () {
             this.project_id,
             this.projectHistoryId,
             this.user_id,
-            this.docUpdates,
-            this.fileUpdates,
+            this.updates,
             this.version,
             this.callback
           )
@@ -373,6 +379,24 @@ describe('ProjectManager', function () {
             .calledWith(this.project_id)
             .should.equal(true)
         })
+      })
+    })
+
+    describe('when given an unknown operation type', function () {
+      beforeEach(function () {
+        this.updates = [{ type: 'brew-coffee' }]
+        this.ProjectManager.updateProjectWithLocks(
+          this.project_id,
+          this.projectHistoryId,
+          this.user_id,
+          this.updates,
+          this.version,
+          this.callback
+        )
+      })
+
+      it('should call back with an error', function () {
+        this.callback.calledWith(sinon.match.instanceOf(Error)).should.be.true
       })
     })
   })

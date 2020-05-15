@@ -212,9 +212,8 @@ function updateProjectWithLocks(
   projectId,
   projectHistoryId,
   userId,
-  docUpdates,
-  fileUpdates,
-  version,
+  updates,
+  projectVersion,
   _callback
 ) {
   const timer = new Metrics.Timer('projectManager.updateProject')
@@ -223,92 +222,85 @@ function updateProjectWithLocks(
     _callback(...args)
   }
 
-  const projectVersion = version
   let projectSubversion = 0 // project versions can have multiple operations
-
   let projectOpsLength = 0
 
-  const handleDocUpdate = function (projectUpdate, cb) {
-    const docId = projectUpdate.id
-    projectUpdate.version = `${projectVersion}.${projectSubversion++}`
-    if (projectUpdate.docLines != null) {
-      ProjectHistoryRedisManager.queueAddEntity(
-        projectId,
-        projectHistoryId,
-        'doc',
-        docId,
-        userId,
-        projectUpdate,
-        (error, count) => {
-          projectOpsLength = count
-          cb(error)
-        }
-      )
-    } else {
-      DocumentManager.renameDocWithLock(
-        projectId,
-        docId,
-        userId,
-        projectUpdate,
-        projectHistoryId,
-        (error, count) => {
-          projectOpsLength = count
-          cb(error)
-        }
-      )
+  function handleUpdate(update, cb) {
+    update.version = `${projectVersion}.${projectSubversion++}`
+    switch (update.type) {
+      case 'add-doc':
+        ProjectHistoryRedisManager.queueAddEntity(
+          projectId,
+          projectHistoryId,
+          'doc',
+          update.id,
+          userId,
+          update,
+          (error, count) => {
+            projectOpsLength = count
+            cb(error)
+          }
+        )
+        break
+      case 'rename-doc':
+        DocumentManager.renameDocWithLock(
+          projectId,
+          update.id,
+          userId,
+          update,
+          projectHistoryId,
+          (error, count) => {
+            projectOpsLength = count
+            cb(error)
+          }
+        )
+        break
+      case 'add-file':
+        ProjectHistoryRedisManager.queueAddEntity(
+          projectId,
+          projectHistoryId,
+          'file',
+          update.id,
+          userId,
+          update,
+          (error, count) => {
+            projectOpsLength = count
+            cb(error)
+          }
+        )
+        break
+      case 'rename-file':
+        ProjectHistoryRedisManager.queueRenameEntity(
+          projectId,
+          projectHistoryId,
+          'file',
+          update.id,
+          userId,
+          update,
+          (error, count) => {
+            projectOpsLength = count
+            cb(error)
+          }
+        )
+        break
+      default:
+        cb(new Error(`Unknown update type: ${update.type}`))
     }
   }
 
-  const handleFileUpdate = function (projectUpdate, cb) {
-    const fileId = projectUpdate.id
-    projectUpdate.version = `${projectVersion}.${projectSubversion++}`
-    if (projectUpdate.url != null) {
-      ProjectHistoryRedisManager.queueAddEntity(
-        projectId,
-        projectHistoryId,
-        'file',
-        fileId,
-        userId,
-        projectUpdate,
-        (error, count) => {
-          projectOpsLength = count
-          cb(error)
-        }
-      )
-    } else {
-      ProjectHistoryRedisManager.queueRenameEntity(
-        projectId,
-        projectHistoryId,
-        'file',
-        fileId,
-        userId,
-        projectUpdate,
-        (error, count) => {
-          projectOpsLength = count
-          cb(error)
-        }
-      )
-    }
-  }
-
-  async.eachSeries(docUpdates, handleDocUpdate, (error) => {
+  async.eachSeries(updates, handleUpdate, (error) => {
     if (error) {
       return callback(error)
     }
-    async.eachSeries(fileUpdates, handleFileUpdate, (error) => {
-      if (error) {
-        return callback(error)
-      }
-      if (
-        HistoryManager.shouldFlushHistoryOps(
-          projectOpsLength,
-          docUpdates.length + fileUpdates.length,
-          HistoryManager.FLUSH_PROJECT_EVERY_N_OPS
-        )
-      ) {
-        HistoryManager.flushProjectChangesAsync(projectId)
-      }
-      callback()
-    })
+    if (
+      HistoryManager.shouldFlushHistoryOps(
+        projectOpsLength,
+        updates.length,
+        HistoryManager.FLUSH_PROJECT_EVERY_N_OPS
+      )
+    ) {
+      HistoryManager.flushProjectChangesAsync(projectId)
+    }
+    callback()
   })
 }

@@ -809,12 +809,34 @@ describe('HttpController', function () {
     })
   })
 
-  describe('updateProject', function () {
+  describe('updateProject (split doc and file updates)', function () {
     beforeEach(function () {
       this.projectHistoryId = 'history-id-123'
       this.userId = 'user-id-123'
-      this.docUpdates = sinon.stub()
-      this.fileUpdates = sinon.stub()
+      this.docUpdates = [
+        { id: 1, pathname: 'thesis.tex', newPathname: 'book.tex' },
+        { id: 2, pathname: 'article.tex', docLines: 'hello' }
+      ]
+      this.fileUpdates = [
+        { id: 3, pathname: 'apple.png', newPathname: 'banana.png' },
+        { id: 4, url: 'filestore.example.com/4' }
+      ]
+      this.expectedUpdates = [
+        {
+          type: 'rename-doc',
+          id: 1,
+          pathname: 'thesis.tex',
+          newPathname: 'book.tex'
+        },
+        { type: 'add-doc', id: 2, pathname: 'article.tex', docLines: 'hello' },
+        {
+          type: 'rename-file',
+          id: 3,
+          pathname: 'apple.png',
+          newPathname: 'banana.png'
+        },
+        { type: 'add-file', id: 4, url: 'filestore.example.com/4' }
+      ]
       this.version = 1234567
       this.req = {
         query: {},
@@ -833,9 +855,7 @@ describe('HttpController', function () {
 
     describe('successfully', function () {
       beforeEach(function () {
-        this.ProjectManager.updateProjectWithLocks = sinon
-          .stub()
-          .callsArgWith(6)
+        this.ProjectManager.updateProjectWithLocks = sinon.stub().yields()
         this.HttpController.updateProject(this.req, this.res, this.next)
       })
 
@@ -845,8 +865,7 @@ describe('HttpController', function () {
             this.project_id,
             this.projectHistoryId,
             this.userId,
-            this.docUpdates,
-            this.fileUpdates,
+            this.expectedUpdates,
             this.version
           )
           .should.equal(true)
@@ -865,7 +884,83 @@ describe('HttpController', function () {
       beforeEach(function () {
         this.ProjectManager.updateProjectWithLocks = sinon
           .stub()
-          .callsArgWith(6, new Error('oops'))
+          .yields(new Error('oops'))
+        this.HttpController.updateProject(this.req, this.res, this.next)
+      })
+
+      it('should call next with the error', function () {
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
+      })
+    })
+  })
+
+  describe('updateProject (single updates parameter)', function () {
+    beforeEach(function () {
+      this.projectHistoryId = 'history-id-123'
+      this.userId = 'user-id-123'
+      this.updates = [
+        {
+          type: 'rename-doc',
+          id: 1,
+          pathname: 'thesis.tex',
+          newPathname: 'book.tex'
+        },
+        { type: 'add-doc', id: 2, pathname: 'article.tex', docLines: 'hello' },
+        {
+          type: 'rename-file',
+          id: 3,
+          pathname: 'apple.png',
+          newPathname: 'banana.png'
+        },
+        { type: 'add-file', id: 4, url: 'filestore.example.com/4' }
+      ]
+      this.version = 1234567
+      this.req = {
+        query: {},
+        body: {
+          projectHistoryId: this.projectHistoryId,
+          userId: this.userId,
+          updates: this.updates,
+          version: this.version
+        },
+        params: {
+          project_id: this.project_id
+        }
+      }
+    })
+
+    describe('successfully', function () {
+      beforeEach(function () {
+        this.ProjectManager.updateProjectWithLocks = sinon.stub().yields()
+        this.HttpController.updateProject(this.req, this.res, this.next)
+      })
+
+      it('should accept the change', function () {
+        this.ProjectManager.updateProjectWithLocks
+          .calledWith(
+            this.project_id,
+            this.projectHistoryId,
+            this.userId,
+            this.updates,
+            this.version
+          )
+          .should.equal(true)
+      })
+
+      it('should return a successful No Content response', function () {
+        this.res.sendStatus.calledWith(204).should.equal(true)
+      })
+
+      it('should time the request', function () {
+        this.Metrics.Timer.prototype.done.called.should.equal(true)
+      })
+    })
+
+    describe('when an errors occurs', function () {
+      beforeEach(function () {
+        this.ProjectManager.updateProjectWithLocks = sinon
+          .stub()
+          .yields(new Error('oops'))
         this.HttpController.updateProject(this.req, this.res, this.next)
       })
 
