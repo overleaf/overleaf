@@ -24,7 +24,7 @@ module.exports = {
       UserMembershipMiddleware.requireGroupManagementAccess,
       RateLimiterMiddleware.rateLimit({
         endpointName: 'create-team-invite',
-        maxRequests: 100,
+        maxRequests: 200,
         timeInterval: 60
       }),
       TeamInvitesController.createInvite
