@@ -119,7 +119,7 @@ describe 'WebsocketController', ->
 
 			it "should return an error", ->
 				@callback
-					.calledWith(new Error("not authorized"))
+					.calledWith(sinon.match({message: "not authorized"}))
 					.should.equal true
 
 			it "should not log an error", ->
@@ -143,7 +143,7 @@ describe 'WebsocketController', ->
 
 			it "should return an error", ->
 				@callback
-					.calledWith(new Error("subscribe failed"))
+					.calledWith(sinon.match({message: "subscribe failed"}))
 					.should.equal true
 				@callback.args[0][0].message.should.equal "subscribe failed"
 
@@ -369,7 +369,7 @@ describe 'WebsocketController', ->
 				@WebsocketController.joinDoc @client, @doc_id, -1, @options, @callback
 
 			it "should call the callback with an error", ->
-				@callback.calledWith(@err).should.equal true
+				@callback.calledWith(sinon.match({message: "not authorized"})).should.equal true
 
 			it "should not call the DocumentUpdaterManager", ->
 				@DocumentUpdaterManager.getDocument.called.should.equal false

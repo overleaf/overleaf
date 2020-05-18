@@ -42,7 +42,7 @@
     "chai": "~1.9.1",
     "cookie-signature": "^1.0.5",
     "sandboxed-module": "~0.3.0",
-    "sinon": "^1.5.2",
+    "sinon": "^2.4.1",
     "mocha": "^4.0.1",
     "uid-safe": "^1.0.1",
     "timekeeper": "0.0.4"

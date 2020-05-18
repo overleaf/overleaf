@@ -60,7 +60,7 @@ describe 'WebApiManager', ->
 
 			it "should call the callback with an error", ->
 				@callback
-					.calledWith(new Error("non-success code from web: 500"))
+					.calledWith(sinon.match({message: "non-success status code from web: 500"}))
 					.should.equal true
 
 		describe "with no data from web", ->
@@ -70,7 +70,7 @@ describe 'WebApiManager', ->
 
 			it "should call the callback with an error", ->
 				@callback
-					.calledWith(new Error("no data returned from joinProject request"))
+					.calledWith(sinon.match({message: "no data returned from joinProject request"}))
 					.should.equal true
 
 		describe "when the project is over its rate limit", ->
@@ -80,5 +80,5 @@ describe 'WebApiManager', ->
 
 			it "should call the callback with a TooManyRequests error code", ->
 				@callback
-					.calledWith(new CodedError("rate-limit hit when joining project", "TooManyRequests"))
+					.calledWith(sinon.match({message: "rate-limit hit when joining project", code: "TooManyRequests"}))
 					.should.equal true
