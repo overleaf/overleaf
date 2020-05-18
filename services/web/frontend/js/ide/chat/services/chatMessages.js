@@ -145,7 +145,7 @@ define(['../../../base'], App =>
         return lastMessage.contents.push(message.content)
       } else {
         return chat.state.messages.push({
-          user: formatUser(message.user),
+          user: message.user,
           timestamp: message.timestamp,
           contents: [message.content]
         })
