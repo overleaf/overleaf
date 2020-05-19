@@ -9,7 +9,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(() => [
+export default [
   {
     regexToMatch: /Misplaced alignment tab character \&/,
     extraInfoURL:
@@ -277,4 +277,4 @@ You have used \\begin{} without a corresponding \\end{}.\
 You have used \\begin{} without a corresponding \\end{}.\
 `
   }
-])
+]

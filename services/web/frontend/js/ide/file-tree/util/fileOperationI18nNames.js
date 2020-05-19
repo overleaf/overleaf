@@ -1,11 +1,14 @@
-define([], function() {
-  if (window.fileActionI18n !== undefined) {
-    return window.fileActionI18n
-  }
-  return {
-    edited: 'edited',
-    renamed: 'renamed',
-    created: 'created',
-    deleted: 'deleted'
-  }
-})
+let fileActionI18n
+
+if (window.fileActionI18n !== undefined) {
+  fileActionI18n = window.fileActionI18n
+}
+
+fileActionI18n = {
+  edited: 'edited',
+  renamed: 'renamed',
+  created: 'created',
+  deleted: 'deleted'
+}
+
+export default fileActionI18n

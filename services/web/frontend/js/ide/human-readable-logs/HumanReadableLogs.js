@@ -10,10 +10,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['libs/latex-log-parser', './HumanReadableLogsRules'], (
-  LogParser,
-  ruleset
-) => ({
+import LogParser from 'libs/latex-log-parser'
+import ruleset from './HumanReadableLogsRules'
+
+export default {
   parse(rawLog, options) {
     let parsedLogEntries
     if (typeof rawLog === 'string') {
@@ -87,4 +87,4 @@ define(['libs/latex-log-parser', './HumanReadableLogsRules'], (
 
     return parsedLogEntries
   }
-}))
+}

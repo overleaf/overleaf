@@ -14,6 +14,22 @@
 // * @license MIT
 //
 // From: https://github.com/marklagendijk/angular-recursion
+/* eslint-disable
+    max-len,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+//
+// * An Angular service which helps with creating recursive directives.
+// * @author Mark Lagendijk
+// * @license MIT
+//
+// From: https://github.com/marklagendijk/angular-recursion
 angular.module('RecursionHelper', []).factory('RecursionHelper', [
   '$compile',
   function($compile) {

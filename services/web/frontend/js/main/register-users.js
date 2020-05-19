@@ -10,36 +10,40 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['../base'], App =>
-  App.controller('RegisterUsersController', function($scope, queuedHttp) {
-    $scope.users = []
+import App from '../base'
 
-    $scope.inputs = { emails: '' }
+export default App.controller('RegisterUsersController', function(
+  $scope,
+  queuedHttp
+) {
+  $scope.users = []
 
-    const parseEmails = function(emailsString) {
-      const regexBySpaceOrComma = /[\s,]+/
-      let emails = emailsString.split(regexBySpaceOrComma)
-      emails = _.map(emails, email => (email = email.trim()))
-      emails = _.filter(emails, email => email.indexOf('@') !== -1)
-      return emails
-    }
+  $scope.inputs = { emails: '' }
 
-    return ($scope.registerUsers = function() {
-      const emails = parseEmails($scope.inputs.emails)
-      $scope.error = false
-      return Array.from(emails).map(email =>
-        queuedHttp
-          .post('/admin/register', {
-            email,
-            _csrf: window.csrfToken
-          })
-          .then(function(response) {
-            const { data } = response
-            const user = data
-            $scope.users.push(user)
-            return ($scope.inputs.emails = '')
-          })
-          .catch(() => ($scope.error = true))
-      )
-    })
-  }))
+  const parseEmails = function(emailsString) {
+    const regexBySpaceOrComma = /[\s,]+/
+    let emails = emailsString.split(regexBySpaceOrComma)
+    emails = _.map(emails, email => (email = email.trim()))
+    emails = _.filter(emails, email => email.indexOf('@') !== -1)
+    return emails
+  }
+
+  return ($scope.registerUsers = function() {
+    const emails = parseEmails($scope.inputs.emails)
+    $scope.error = false
+    return Array.from(emails).map(email =>
+      queuedHttp
+        .post('/admin/register', {
+          email,
+          _csrf: window.csrfToken
+        })
+        .then(function(response) {
+          const { data } = response
+          const user = data
+          $scope.users.push(user)
+          return ($scope.inputs.emails = '')
+        })
+        .catch(() => ($scope.error = true))
+    )
+  })
+})

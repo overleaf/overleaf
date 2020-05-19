@@ -10,41 +10,43 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['../../../base', '../services/chatMessages'], App =>
-  App.controller('ChatController', function(
-    $scope,
-    chatMessages,
-    ide,
-    $location
-  ) {
-    $scope.chat = chatMessages.state
+import App from '../../../base'
+import '../services/chatMessages'
 
-    $scope.$watch(
-      'chat.messages',
-      function(messages) {
-        if (messages != null) {
-          return $scope.$emit('updateScrollPosition')
-        }
-      },
-      true
-    ) // Deep watch
+export default App.controller('ChatController', function(
+  $scope,
+  chatMessages,
+  ide,
+  $location
+) {
+  $scope.chat = chatMessages.state
 
-    $scope.$on('layout:chat:resize', () => $scope.$emit('updateScrollPosition'))
-
-    $scope.$watch('chat.newMessage', function(message) {
-      if (message != null) {
-        return ide.$scope.$broadcast('chat:newMessage', message)
+  $scope.$watch(
+    'chat.messages',
+    function(messages) {
+      if (messages != null) {
+        return $scope.$emit('updateScrollPosition')
       }
-    })
+    },
+    true
+  ) // Deep watch
 
-    $scope.resetUnreadMessages = () =>
-      ide.$scope.$broadcast('chat:resetUnreadMessages')
+  $scope.$on('layout:chat:resize', () => $scope.$emit('updateScrollPosition'))
 
-    $scope.sendMessage = function() {
-      const message = $scope.newMessageContent
-      $scope.newMessageContent = ''
-      return chatMessages.sendMessage(message)
+  $scope.$watch('chat.newMessage', function(message) {
+    if (message != null) {
+      return ide.$scope.$broadcast('chat:newMessage', message)
     }
+  })
 
-    return ($scope.loadMoreMessages = () => chatMessages.loadMoreMessages())
-  }))
+  $scope.resetUnreadMessages = () =>
+    ide.$scope.$broadcast('chat:resetUnreadMessages')
+
+  $scope.sendMessage = function() {
+    const message = $scope.newMessageContent
+    $scope.newMessageContent = ''
+    return chatMessages.sendMessage(message)
+  }
+
+  return ($scope.loadMoreMessages = () => chatMessages.loadMoreMessages())
+})

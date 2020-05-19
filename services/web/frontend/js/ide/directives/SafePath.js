@@ -16,10 +16,9 @@
 //   app/coffee/Features/Project/SafePath.coffee
 //   public/coffee/ide/directives/SafePath.coffee
 
-const load = function() {
-  let SafePath
-  const BADCHAR_RX = new RegExp(
-    `\
+let SafePath
+const BADCHAR_RX = new RegExp(
+  `\
 [\
 \\/\
 \\\\\
@@ -30,27 +29,27 @@ const load = function() {
 \\uD800-\\uDFFF\
 ]\
 `,
-    'g'
-  )
+  'g'
+)
 
-  const BADFILE_RX = new RegExp(
-    `\
+const BADFILE_RX = new RegExp(
+  `\
 (^\\.$)\
 |(^\\.\\.$)\
 |(^\\s+)\
 |(\\s+$)\
 `,
-    'g'
-  )
+  'g'
+)
 
-  // Put a block on filenames which match javascript property names, as they
-  // can cause exceptions where the code puts filenames into a hash. This is a
-  // temporary workaround until the code in other places is made safe against
-  // property names.
-  //
-  // The list of property names is taken from
-  //   ['prototype'].concat(Object.getOwnPropertyNames(Object.prototype))
-  const BLOCKEDFILE_RX = new RegExp(`\
+// Put a block on filenames which match javascript property names, as they
+// can cause exceptions where the code puts filenames into a hash. This is a
+// temporary workaround until the code in other places is made safe against
+// property names.
+//
+// The list of property names is taken from
+//   ['prototype'].concat(Object.getOwnPropertyNames(Object.prototype))
+const BLOCKEDFILE_RX = new RegExp(`\
 ^(\
 prototype\
 |constructor\
@@ -68,36 +67,29 @@ prototype\
 )$\
 `)
 
-  const MAX_PATH = 1024 // Maximum path length, in characters. This is fairly arbitrary.
+const MAX_PATH = 1024 // Maximum path length, in characters. This is fairly arbitrary.
 
-  return (SafePath = {
-    clean(filename) {
-      filename = filename.replace(BADCHAR_RX, '_')
-      // for BADFILE_RX replace any matches with an equal number of underscores
-      filename = filename.replace(BADFILE_RX, match =>
-        new Array(match.length + 1).join('_')
-      )
-      // replace blocked filenames 'prototype' with '@prototype'
-      filename = filename.replace(BLOCKEDFILE_RX, '@$1')
-      return filename
-    },
+export default (SafePath = {
+  clean(filename) {
+    filename = filename.replace(BADCHAR_RX, '_')
+    // for BADFILE_RX replace any matches with an equal number of underscores
+    filename = filename.replace(BADFILE_RX, match =>
+      new Array(match.length + 1).join('_')
+    )
+    // replace blocked filenames 'prototype' with '@prototype'
+    filename = filename.replace(BLOCKEDFILE_RX, '@$1')
+    return filename
+  },
 
-    isCleanFilename(filename) {
-      return (
-        SafePath.isAllowedLength(filename) &&
-        !filename.match(BADCHAR_RX) &&
-        !filename.match(BADFILE_RX)
-      )
-    },
+  isCleanFilename(filename) {
+    return (
+      SafePath.isAllowedLength(filename) &&
+      !filename.match(BADCHAR_RX) &&
+      !filename.match(BADFILE_RX)
+    )
+  },
 
-    isAllowedLength(pathname) {
-      return pathname.length > 0 && pathname.length <= MAX_PATH
-    }
-  })
-}
-
-if (typeof define !== 'undefined' && define !== null) {
-  define([], load)
-} else {
-  module.exports = load()
-}
+  isAllowedLength(pathname) {
+    return pathname.length > 0 && pathname.length <= MAX_PATH
+  }
+})

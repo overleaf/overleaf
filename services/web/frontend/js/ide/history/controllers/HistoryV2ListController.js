@@ -10,44 +10,46 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['../../../base', '../util/displayNameForUser'], (
-  App,
-  displayNameForUser
-) =>
-  App.controller('HistoryV2ListController', function($scope, $modal, ide) {
-    $scope.hoveringOverListSelectors = false
-    $scope.listConfig = { showOnlyLabelled: false }
+import App from '../../../base'
 
-    $scope.projectUsers = []
+export default App.controller('HistoryV2ListController', function(
+  $scope,
+  $modal,
+  ide
+) {
+  $scope.hoveringOverListSelectors = false
+  $scope.listConfig = { showOnlyLabelled: false }
 
-    $scope.$watch('project.members', function(newVal) {
-      if (newVal != null) {
-        return ($scope.projectUsers = newVal.concat($scope.project.owner))
-      }
-    })
+  $scope.projectUsers = []
 
-    $scope.loadMore = () => {
-      return ide.historyManager.fetchNextBatchOfUpdates()
+  $scope.$watch('project.members', function(newVal) {
+    if (newVal != null) {
+      return ($scope.projectUsers = newVal.concat($scope.project.owner))
     }
+  })
 
-    $scope.handleVersionSelect = version =>
-      $scope.$applyAsync(() =>
-        ide.historyManager.selectVersionForPointInTime(version)
-      )
+  $scope.loadMore = () => {
+    return ide.historyManager.fetchNextBatchOfUpdates()
+  }
 
-    $scope.handleRangeSelect = (selectedToV, selectedFromV) =>
-      $scope.$applyAsync(() =>
-        ide.historyManager.selectVersionsForCompare(selectedToV, selectedFromV)
-      )
+  $scope.handleVersionSelect = version =>
+    $scope.$applyAsync(() =>
+      ide.historyManager.selectVersionForPointInTime(version)
+    )
 
-    return ($scope.handleLabelDelete = labelDetails =>
-      $modal.open({
-        templateUrl: 'historyV2DeleteLabelModalTemplate',
-        controller: 'HistoryV2DeleteLabelModalController',
-        resolve: {
-          labelDetails() {
-            return labelDetails
-          }
+  $scope.handleRangeSelect = (selectedToV, selectedFromV) =>
+    $scope.$applyAsync(() =>
+      ide.historyManager.selectVersionsForCompare(selectedToV, selectedFromV)
+    )
+
+  return ($scope.handleLabelDelete = labelDetails =>
+    $modal.open({
+      templateUrl: 'historyV2DeleteLabelModalTemplate',
+      controller: 'HistoryV2DeleteLabelModalController',
+      resolve: {
+        labelDetails() {
+          return labelDetails
         }
-      }))
-  }))
+      }
+    }))
+})

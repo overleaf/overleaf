@@ -9,43 +9,44 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['../../../base'], App =>
-  App.directive('changeEntry', $timeout => ({
-    restrict: 'E',
-    templateUrl: 'changeEntryTemplate',
-    scope: {
-      entry: '=',
-      user: '=',
-      permissions: '=',
-      onAccept: '&',
-      onReject: '&',
-      onIndicatorClick: '&',
-      onBodyClick: '&'
-    },
-    link(scope, element, attrs) {
-      scope.contentLimit = 40
-      scope.isCollapsed = true
-      scope.needsCollapsing = false
+import App from '../../../base'
 
-      element.on('click', function(e) {
-        if (
-          $(e.target).is(
-            '.rp-entry, .rp-entry-description, .rp-entry-body, .rp-entry-action-icon i'
-          )
-        ) {
-          return scope.onBodyClick()
-        }
-      })
+export default App.directive('changeEntry', $timeout => ({
+  restrict: 'E',
+  templateUrl: 'changeEntryTemplate',
+  scope: {
+    entry: '=',
+    user: '=',
+    permissions: '=',
+    onAccept: '&',
+    onReject: '&',
+    onIndicatorClick: '&',
+    onBodyClick: '&'
+  },
+  link(scope, element, attrs) {
+    scope.contentLimit = 40
+    scope.isCollapsed = true
+    scope.needsCollapsing = false
 
-      scope.toggleCollapse = function() {
-        scope.isCollapsed = !scope.isCollapsed
-        return $timeout(() => scope.$emit('review-panel:layout'))
+    element.on('click', function(e) {
+      if (
+        $(e.target).is(
+          '.rp-entry, .rp-entry-description, .rp-entry-body, .rp-entry-action-icon i'
+        )
+      ) {
+        return scope.onBodyClick()
       }
+    })
 
-      return scope.$watch(
-        'entry.content.length',
-        contentLength =>
-          (scope.needsCollapsing = contentLength > scope.contentLimit)
-      )
+    scope.toggleCollapse = function() {
+      scope.isCollapsed = !scope.isCollapsed
+      return $timeout(() => scope.$emit('review-panel:layout'))
     }
-  })))
+
+    return scope.$watch(
+      'entry.content.length',
+      contentLength =>
+        (scope.needsCollapsing = contentLength > scope.contentLimit)
+    )
+  }
+}))

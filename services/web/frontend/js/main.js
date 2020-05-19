@@ -8,65 +8,62 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define([
-  './main/token-access',
-  './main/project-list/index',
-  './main/account-settings',
-  './main/clear-sessions',
-  './main/account-upgrade',
-  './main/plans',
-  './main/post-gateway',
-  './main/user-membership',
-  './main/scribtex-popup',
-  './main/event',
-  './main/bonus',
-  './main/system-messages',
-  './main/translations',
-  './main/subscription-dashboard',
-  './main/new-subscription',
-  './main/annual-upgrade',
-  './main/register-users',
-  './main/subscription/team-invite-controller',
-  './main/subscription/upgrade-subscription',
-  './main/learn',
-  './main/exposed-settings',
-  './main/affiliations/components/affiliationForm',
-  './main/affiliations/controllers/UserAffiliationsController',
-  './main/affiliations/factories/UserAffiliationsDataService',
-  './main/oauth/controllers/UserOauthController',
-  './main/keys',
-  './main/importing',
-  './analytics/AbTestingManager',
-  './directives/autoSubmitForm',
-  './directives/asyncForm',
-  './directives/complexPassword',
-  './directives/stopPropagation',
-  './directives/focus',
-  './directives/equals',
-  './directives/eventTracking',
-  './directives/fineUpload',
-  './directives/onEnter',
-  './directives/selectAll',
-  './directives/maxHeight',
-  './directives/creditCards',
-  './directives/bookmarkableTabset',
-  './services/queued-http',
-  './services/validateCaptcha',
-  './services/validateCaptchaV3',
-  './filters/formatDate',
-  './components/inputSuggestions',
-  '../../modules/modules-main.js'
-], function() {
-  angular.module('SharelatexApp').config(function($locationProvider) {
-    try {
-      return $locationProvider.html5Mode({
-        enabled: true,
-        requireBase: false,
-        rewriteLinks: false
-      })
-    } catch (e) {
-      return console.error("Error while trying to fix '#' links: ", e)
-    }
-  })
-  return angular.bootstrap(document.body, ['SharelatexApp'])
+import './main/token-access'
+import './main/project-list/index'
+import './main/account-settings'
+import './main/clear-sessions'
+import './main/account-upgrade'
+import './main/plans'
+import './main/post-gateway'
+import './main/user-membership'
+import './main/scribtex-popup'
+import './main/event'
+import './main/bonus'
+import './main/system-messages'
+import './main/translations'
+import './main/subscription-dashboard'
+import './main/new-subscription'
+import './main/annual-upgrade'
+import './main/register-users'
+import './main/subscription/team-invite-controller'
+import './main/subscription/upgrade-subscription'
+import './main/learn'
+import './main/exposed-settings'
+import './main/affiliations/components/affiliationForm'
+import './main/affiliations/controllers/UserAffiliationsController'
+import './main/affiliations/factories/UserAffiliationsDataService'
+import './main/oauth/controllers/UserOauthController'
+import './main/keys'
+import './main/importing'
+import './analytics/AbTestingManager'
+import './directives/autoSubmitForm'
+import './directives/asyncForm'
+import './directives/complexPassword'
+import './directives/stopPropagation'
+import './directives/focus'
+import './directives/equals'
+import './directives/eventTracking'
+import './directives/fineUpload'
+import './directives/onEnter'
+import './directives/selectAll'
+import './directives/maxHeight'
+import './directives/creditCards'
+import './directives/bookmarkableTabset'
+import './services/queued-http'
+import './services/validateCaptcha'
+import './services/validateCaptchaV3'
+import './filters/formatDate'
+import './components/inputSuggestions'
+import '../../modules/modules-main.js'
+angular.module('SharelatexApp').config(function($locationProvider) {
+  try {
+    return $locationProvider.html5Mode({
+      enabled: true,
+      requireBase: false,
+      rewriteLinks: false
+    })
+  } catch (e) {
+    return console.error("Error while trying to fix '#' links: ", e)
+  }
 })
+export default angular.bootstrap(document.body, ['SharelatexApp'])

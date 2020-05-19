@@ -10,9 +10,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['../../../base'], App =>
-  App.controller('HistoryV2FileTreeController', function($scope, ide) {
-    $scope.handleFileSelection = file => {
-      ide.historyManager.selectFile(file)
-    }
-  }))
+import App from '../../../base'
+
+export default App.controller('HistoryV2FileTreeController', function(
+  $scope,
+  ide
+) {
+  $scope.handleFileSelection = file => {
+    ide.historyManager.selectFile(file)
+  }
+})

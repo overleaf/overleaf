@@ -1,33 +1,34 @@
-define(['../../base'], App =>
-  App.controller('LeftHandMenuPromoController', function(
-    $scope,
-    UserAffiliationsDataService,
-    eventTracking
-  ) {
-    $scope.hasProjects = window.data.projects.length > 0
-    $scope.userHasNoSubscription = window.userHasNoSubscription
+import App from '../../base'
 
-    $scope.upgradeSubscription = function() {
-      eventTracking.send('subscription-funnel', 'project-page', 'upgrade')
-    }
+export default App.controller('LeftHandMenuPromoController', function(
+  $scope,
+  UserAffiliationsDataService,
+  eventTracking
+) {
+  $scope.hasProjects = window.data.projects.length > 0
+  $scope.userHasNoSubscription = window.userHasNoSubscription
 
-    $scope.share = function() {
-      eventTracking.send('subscription-funnel', 'project-page', 'sharing')
-    }
+  $scope.upgradeSubscription = function() {
+    eventTracking.send('subscription-funnel', 'project-page', 'upgrade')
+  }
 
-    const _userHasNoAffiliation = function() {
-      $scope.userEmails = []
-      $scope.userAffiliations = []
-      return UserAffiliationsDataService.getUserEmails().then(function(emails) {
-        $scope.userEmails = emails
-        $scope.userAffiliations = emails
-          .filter(email => email.affiliation)
-          .map(email => email.affiliation)
-        $scope.userOnPayingUniversity = $scope.userAffiliations.some(
-          affiliation => affiliation.licence && affiliation.licence !== 'free'
-        )
-      })
-    }
+  $scope.share = function() {
+    eventTracking.send('subscription-funnel', 'project-page', 'sharing')
+  }
 
-    _userHasNoAffiliation()
-  }))
+  const _userHasNoAffiliation = function() {
+    $scope.userEmails = []
+    $scope.userAffiliations = []
+    return UserAffiliationsDataService.getUserEmails().then(function(emails) {
+      $scope.userEmails = emails
+      $scope.userAffiliations = emails
+        .filter(email => email.affiliation)
+        .map(email => email.affiliation)
+      $scope.userOnPayingUniversity = $scope.userAffiliations.some(
+        affiliation => affiliation.licence && affiliation.licence !== 'free'
+      )
+    })
+  }
+
+  _userHasNoAffiliation()
+})

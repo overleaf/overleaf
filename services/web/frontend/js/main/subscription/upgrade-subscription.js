@@ -1,9 +1,10 @@
-define(['../../base'], App =>
-  App.controller('UpgradeSubscriptionController', function(
-    $scope,
-    eventTracking
-  ) {
-    $scope.upgradeSubscription = function() {
-      eventTracking.send('subscription-funnel', 'subscription-page', 'upgrade')
-    }
-  }))
+import App from '../../base'
+
+export default App.controller('UpgradeSubscriptionController', function(
+  $scope,
+  eventTracking
+) {
+  $scope.upgradeSubscription = function() {
+    eventTracking.send('subscription-funnel', 'subscription-page', 'upgrade')
+  }
+})

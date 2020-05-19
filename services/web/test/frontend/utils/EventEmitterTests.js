@@ -10,78 +10,79 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['../../../frontend/js/utils/EventEmitter'], EventEmitter =>
-  describe('EventEmitter', function() {
-    beforeEach(function() {
-      return (this.eventEmitter = new EventEmitter())
-    })
+import EventEmitter from '../../../frontend/js/utils/EventEmitter'
 
-    it('calls listeners', function() {
-      const cb1 = sinon.stub()
-      const cb2 = sinon.stub()
-      this.eventEmitter.on('foo', cb1)
-      this.eventEmitter.on('bar', cb2)
+export default describe('EventEmitter', function() {
+  beforeEach(function() {
+    return (this.eventEmitter = new EventEmitter())
+  })
 
-      this.eventEmitter.trigger('foo')
+  it('calls listeners', function() {
+    const cb1 = sinon.stub()
+    const cb2 = sinon.stub()
+    this.eventEmitter.on('foo', cb1)
+    this.eventEmitter.on('bar', cb2)
 
-      expect(cb1).to.have.been.called
-      return expect(cb2).to.not.have.been.called
-    })
+    this.eventEmitter.trigger('foo')
 
-    it('calls multiple listeners', function() {
-      const cb1 = sinon.stub()
-      const cb2 = sinon.stub()
-      this.eventEmitter.on('foo', cb1)
-      this.eventEmitter.on('foo', cb2)
+    expect(cb1).to.have.been.called
+    return expect(cb2).to.not.have.been.called
+  })
 
-      this.eventEmitter.trigger('foo')
+  it('calls multiple listeners', function() {
+    const cb1 = sinon.stub()
+    const cb2 = sinon.stub()
+    this.eventEmitter.on('foo', cb1)
+    this.eventEmitter.on('foo', cb2)
 
-      expect(cb1).to.have.been.called
-      return expect(cb2).to.have.been.called
-    })
+    this.eventEmitter.trigger('foo')
 
-    it('calls listeners with namespace', function() {
-      const cb1 = sinon.stub()
-      const cb2 = sinon.stub()
-      this.eventEmitter.on('foo', cb1)
-      this.eventEmitter.on('foo.bar', cb2)
+    expect(cb1).to.have.been.called
+    return expect(cb2).to.have.been.called
+  })
 
-      this.eventEmitter.trigger('foo')
+  it('calls listeners with namespace', function() {
+    const cb1 = sinon.stub()
+    const cb2 = sinon.stub()
+    this.eventEmitter.on('foo', cb1)
+    this.eventEmitter.on('foo.bar', cb2)
 
-      expect(cb1).to.have.been.called
-      return expect(cb2).to.have.been.called
-    })
+    this.eventEmitter.trigger('foo')
 
-    it('removes listeners', function() {
-      const cb = sinon.stub()
-      this.eventEmitter.on('foo', cb)
-      this.eventEmitter.off('foo')
+    expect(cb1).to.have.been.called
+    return expect(cb2).to.have.been.called
+  })
 
-      this.eventEmitter.trigger('foo')
+  it('removes listeners', function() {
+    const cb = sinon.stub()
+    this.eventEmitter.on('foo', cb)
+    this.eventEmitter.off('foo')
 
-      return expect(cb).to.not.have.been.called
-    })
+    this.eventEmitter.trigger('foo')
 
-    it('removes namespaced listeners', function() {
-      const cb = sinon.stub()
-      this.eventEmitter.on('foo.bar', cb)
-      this.eventEmitter.off('foo.bar')
+    return expect(cb).to.not.have.been.called
+  })
 
-      this.eventEmitter.trigger('foo')
+  it('removes namespaced listeners', function() {
+    const cb = sinon.stub()
+    this.eventEmitter.on('foo.bar', cb)
+    this.eventEmitter.off('foo.bar')
 
-      return expect(cb).to.not.have.been.called
-    })
+    this.eventEmitter.trigger('foo')
 
-    it('does not remove unnamespaced listeners if off called with namespace', function() {
-      const cb1 = sinon.stub()
-      const cb2 = sinon.stub()
-      this.eventEmitter.on('foo', cb1)
-      this.eventEmitter.on('foo.bar', cb2)
-      this.eventEmitter.off('foo.bar')
+    return expect(cb).to.not.have.been.called
+  })
 
-      this.eventEmitter.trigger('foo')
+  it('does not remove unnamespaced listeners if off called with namespace', function() {
+    const cb1 = sinon.stub()
+    const cb2 = sinon.stub()
+    this.eventEmitter.on('foo', cb1)
+    this.eventEmitter.on('foo.bar', cb2)
+    this.eventEmitter.off('foo.bar')
 
-      expect(cb1).to.have.been.called
-      return expect(cb2).to.not.have.been.called
-    })
-  }))
+    this.eventEmitter.trigger('foo')
+
+    expect(cb1).to.have.been.called
+    return expect(cb2).to.not.have.been.called
+  })
+})

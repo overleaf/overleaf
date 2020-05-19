@@ -10,53 +10,56 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['../base', 'algoliasearch'], (App, AlgoliaSearch) =>
-  App.factory('algoliaSearch', function() {
-    let kbIdx, wikiIdx
-    if (
-      (window.sharelatex != null ? window.sharelatex.algolia : undefined) !=
-        null &&
+import App from '../base'
+import AlgoliaSearch from 'algoliasearch'
+
+export default App.factory('algoliaSearch', function() {
+  let kbIdx, wikiIdx
+  if (
+    (window.sharelatex != null ? window.sharelatex.algolia : undefined) !=
+      null &&
+    __guard__(
+      window.sharelatex.algolia != null
+        ? window.sharelatex.algolia.indexes
+        : undefined,
+      x => x.wiki
+    ) != null
+  ) {
+    const client = AlgoliaSearch(
+      window.sharelatex.algolia != null
+        ? window.sharelatex.algolia.app_id
+        : undefined,
+      window.sharelatex.algolia != null
+        ? window.sharelatex.algolia.api_key
+        : undefined
+    )
+    wikiIdx = client.initIndex(
       __guard__(
         window.sharelatex.algolia != null
           ? window.sharelatex.algolia.indexes
           : undefined,
-        x => x.wiki
-      ) != null
-    ) {
-      const client = AlgoliaSearch(
+        x1 => x1.wiki
+      )
+    )
+    kbIdx = client.initIndex(
+      __guard__(
         window.sharelatex.algolia != null
-          ? window.sharelatex.algolia.app_id
+          ? window.sharelatex.algolia.indexes
           : undefined,
-        window.sharelatex.algolia != null
-          ? window.sharelatex.algolia.api_key
-          : undefined
+        x2 => x2.kb
       )
-      wikiIdx = client.initIndex(
-        __guard__(
-          window.sharelatex.algolia != null
-            ? window.sharelatex.algolia.indexes
-            : undefined,
-          x1 => x1.wiki
-        )
-      )
-      kbIdx = client.initIndex(
-        __guard__(
-          window.sharelatex.algolia != null
-            ? window.sharelatex.algolia.indexes
-            : undefined,
-          x2 => x2.kb
-        )
-      )
-    }
+    )
+  }
 
-    // searchKB is deprecated
-    const service = {
-      searchWiki: wikiIdx ? wikiIdx.search.bind(wikiIdx) : null,
-      searchKB: kbIdx ? kbIdx.search.bind(kbIdx) : null
-    }
+  // searchKB is deprecated
+  const service = {
+    searchWiki: wikiIdx ? wikiIdx.search.bind(wikiIdx) : null,
+    searchKB: kbIdx ? kbIdx.search.bind(kbIdx) : null
+  }
 
-    return service
-  }))
+  return service
+})
+
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null
     ? transform(value)

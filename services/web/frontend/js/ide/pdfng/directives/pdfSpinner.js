@@ -11,34 +11,35 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['../../../base'], App =>
-  App.factory('pdfSpinner', function() {
-    let pdfSpinner
-    return (pdfSpinner = class pdfSpinner {
-      constructor() {}
-      // handler for spinners
+import App from '../../../base'
 
-      add(element, options) {
-        const size = 64
-        const spinner = $(
-          `<div class="pdfng-spinner" style="position: absolute; top: 50%; left:50%; transform: translateX(-50%) translateY(-50%);"><i class="fa fa-spinner${
-            (options != null ? options.static : undefined) ? '' : ' fa-spin'
-          }" style="color: #999"></i></div>`
-        )
-        spinner.css({ 'font-size': size + 'px' })
-        return element.append(spinner)
-      }
+export default App.factory('pdfSpinner', function() {
+  let pdfSpinner
+  return (pdfSpinner = class pdfSpinner {
+    constructor() {}
+    // handler for spinners
 
-      start(element) {
-        return element.find('.fa-spinner').addClass('fa-spin')
-      }
+    add(element, options) {
+      const size = 64
+      const spinner = $(
+        `<div class="pdfng-spinner" style="position: absolute; top: 50%; left:50%; transform: translateX(-50%) translateY(-50%);"><i class="fa fa-spinner${
+          (options != null ? options.static : undefined) ? '' : ' fa-spin'
+        }" style="color: #999"></i></div>`
+      )
+      spinner.css({ 'font-size': size + 'px' })
+      return element.append(spinner)
+    }
 
-      stop(element) {
-        return element.find('.fa-spinner').removeClass('fa-spin')
-      }
+    start(element) {
+      return element.find('.fa-spinner').addClass('fa-spin')
+    }
 
-      remove(element) {
-        return element.find('.fa-spinner').remove()
-      }
-    })
-  }))
+    stop(element) {
+      return element.find('.fa-spinner').removeClass('fa-spin')
+    }
+
+    remove(element) {
+      return element.find('.fa-spinner').remove()
+    }
+  })
+})

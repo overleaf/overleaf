@@ -1,8 +1,6 @@
-define([
-  './controllers/ShareController',
-  './controllers/ShareProjectModalController',
-  './controllers/ShareProjectModalMemberRowController',
-  './controllers/OwnershipTransferConfirmModalController',
-  './services/projectMembers',
-  './services/projectInvites'
-], function() {})
+import './controllers/ShareController'
+import './controllers/ShareProjectModalController'
+import './controllers/ShareProjectModalMemberRowController'
+import './controllers/OwnershipTransferConfirmModalController'
+import './services/projectMembers'
+import './services/projectInvites'

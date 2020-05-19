@@ -1,4 +1,5 @@
 // Conditionally enable Sentry based on whether the DSN token is set
+// Conditionally enable Sentry based on whether the DSN token is set
 if (window.ExposedSettings.sentryDsn) {
   import(/* webpackChunkName: "sentry" */ '@sentry/browser').then(Sentry => {
     let eventCount = 0

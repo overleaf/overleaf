@@ -1,3 +1,2 @@
-define(['../base'], function(App) {
-  App.constant('ExposedSettings', window.ExposedSettings)
-})
+import App from '../base'
+App.constant('ExposedSettings', window.ExposedSettings)

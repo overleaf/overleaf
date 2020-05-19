@@ -9,51 +9,48 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['../../../EditorShareJsCodec'], function(EditorShareJsCodec) {
-  let CursorPositionAdapter
-  return (CursorPositionAdapter = class CursorPositionAdapter {
-    constructor(editor) {
-      this.editor = editor
-    }
+import EditorShareJsCodec from '../../../EditorShareJsCodec'
+let CursorPositionAdapter
 
-    getCursor() {
-      return this.editor.getCursorPosition()
-    }
+export default (CursorPositionAdapter = class CursorPositionAdapter {
+  constructor(editor) {
+    this.editor = editor
+  }
 
-    getEditorScrollPosition() {
-      return this.editor.getFirstVisibleRow()
-    }
+  getCursor() {
+    return this.editor.getCursorPosition()
+  }
 
-    setCursor(pos) {
-      pos = pos.cursorPosition || { row: 0, column: 0 }
-      return this.editor.moveCursorToPosition(pos)
-    }
+  getEditorScrollPosition() {
+    return this.editor.getFirstVisibleRow()
+  }
 
-    setEditorScrollPosition(pos) {
-      pos = pos.firstVisibleLine || 0
-      return this.editor.scrollToLine(pos)
-    }
+  setCursor(pos) {
+    pos = pos.cursorPosition || { row: 0, column: 0 }
+    return this.editor.moveCursorToPosition(pos)
+  }
 
-    clearSelection() {
-      return this.editor.selection.clearSelection()
-    }
+  setEditorScrollPosition(pos) {
+    pos = pos.firstVisibleLine || 0
+    return this.editor.scrollToLine(pos)
+  }
 
-    gotoLine(line, column) {
-      this.editor.gotoLine(line, column)
-      this.editor.scrollToLine(line, true, true) // centre and animate
-      return this.editor.focus()
-    }
+  clearSelection() {
+    return this.editor.selection.clearSelection()
+  }
 
-    gotoOffset(offset) {
-      const lines = this.editor
-        .getSession()
-        .getDocument()
-        .getAllLines()
-      const position = EditorShareJsCodec.shareJsOffsetToRowColumn(
-        offset,
-        lines
-      )
-      return this.gotoLine(position.row + 1, position.column)
-    }
-  })
+  gotoLine(line, column) {
+    this.editor.gotoLine(line, column)
+    this.editor.scrollToLine(line, true, true) // centre and animate
+    return this.editor.focus()
+  }
+
+  gotoOffset(offset) {
+    const lines = this.editor
+      .getSession()
+      .getDocument()
+      .getAllLines()
+    const position = EditorShareJsCodec.shareJsOffsetToRowColumn(offset, lines)
+    return this.gotoLine(position.row + 1, position.column)
+  }
 })

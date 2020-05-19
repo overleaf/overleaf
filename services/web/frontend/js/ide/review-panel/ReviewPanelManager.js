@@ -2,21 +2,19 @@
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
-define([
-  './controllers/ReviewPanelController',
-  './controllers/TrackChangesUpgradeModalController',
-  './controllers/BulkActionsModalController',
-  './directives/reviewPanelSorted',
-  './directives/reviewPanelToggle',
-  './directives/changeEntry',
-  './directives/aggregateChangeEntry',
-  './directives/commentEntry',
-  './directives/addCommentEntry',
-  './directives/bulkActionsEntry',
-  './directives/resolvedCommentEntry',
-  './directives/resolvedCommentsDropdown',
-  './directives/reviewPanelCollapseHeight',
-  './filters/notEmpty',
-  './filters/numKeys',
-  './filters/orderOverviewEntries'
-], function() {})
+import './controllers/ReviewPanelController'
+import './controllers/TrackChangesUpgradeModalController'
+import './controllers/BulkActionsModalController'
+import './directives/reviewPanelSorted'
+import './directives/reviewPanelToggle'
+import './directives/changeEntry'
+import './directives/aggregateChangeEntry'
+import './directives/commentEntry'
+import './directives/addCommentEntry'
+import './directives/bulkActionsEntry'
+import './directives/resolvedCommentEntry'
+import './directives/resolvedCommentsDropdown'
+import './directives/reviewPanelCollapseHeight'
+import './filters/notEmpty'
+import './filters/numKeys'
+import './filters/orderOverviewEntries'
