@@ -334,7 +334,7 @@ module.exports = CompileManager = {
       proc.on('error', callback)
 
       let stderr = ''
-      proc.stderr.on('data', chunk => (stderr += chunk.toString()))
+      proc.stderr.setEncoding('utf8').on('data', chunk => (stderr += chunk))
 
       return proc.on('close', function(code) {
         if (code === 0) {

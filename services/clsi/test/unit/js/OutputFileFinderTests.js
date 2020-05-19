@@ -70,6 +70,7 @@ describe('OutputFileFinder', function() {
     beforeEach(function() {
       this.proc = new EventEmitter()
       this.proc.stdout = new EventEmitter()
+      this.proc.stdout.setEncoding = sinon.stub().returns(this.proc.stdout)
       this.spawn.returns(this.proc)
       this.directory = '/base/dir'
       return this.OutputFileFinder._getAllFiles(this.directory, this.callback)
