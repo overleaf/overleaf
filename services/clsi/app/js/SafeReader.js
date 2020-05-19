@@ -43,7 +43,7 @@ module.exports = SafeReader = {
           }
           return callback(null, ...Array.from(result))
         })
-      const buff = new Buffer(size, 0) // fill with zeros
+      const buff = Buffer.alloc(size) // fills with zeroes by default
       return fs.read(fd, buff, 0, buff.length, 0, function(
         err,
         bytesRead,

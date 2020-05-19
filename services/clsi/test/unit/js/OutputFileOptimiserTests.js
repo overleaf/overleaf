@@ -124,7 +124,7 @@ describe('OutputFileOptimiser', function() {
       this.fs.read = sinon
         .stub()
         .withArgs(this.fd)
-        .yields(null, 100, new Buffer('hello /Linearized 1'))
+        .yields(null, 100, Buffer.from('hello /Linearized 1'))
       this.fs.close = sinon
         .stub()
         .withArgs(this.fd)
@@ -140,7 +140,7 @@ describe('OutputFileOptimiser', function() {
         this.fs.read = sinon
           .stub()
           .withArgs(this.fd)
-          .yields(null, 100, new Buffer('hello /Linearized 1'))
+          .yields(null, 100, Buffer.from('hello /Linearized 1'))
         return this.OutputFileOptimiser.checkIfPDFIsOptimised(
           this.src,
           this.callback
@@ -169,7 +169,7 @@ describe('OutputFileOptimiser', function() {
         this.fs.read = sinon
           .stub()
           .withArgs(this.fd)
-          .yields(null, 100, new Buffer('hello not linearized 1'))
+          .yields(null, 100, Buffer.from('hello not linearized 1'))
         return this.OutputFileOptimiser.checkIfPDFIsOptimised(
           this.src,
           this.callback
