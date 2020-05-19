@@ -1194,13 +1194,18 @@ const ProjectEntityUpdateHandler = {
           project.overleaf &&
           project.overleaf.history &&
           project.overleaf.history.id
-        TpdsUpdateSender.moveEntity({
-          project_id: projectId,
-          project_name: project.name,
-          startPath,
-          endPath,
-          rev
-        })
+        // do not wait
+        TpdsUpdateSender.promises
+          .moveEntity({
+            project_id: projectId,
+            project_name: project.name,
+            startPath,
+            endPath,
+            rev
+          })
+          .catch(err => {
+            logger.error({ err }, 'error sending tpds update')
+          })
         DocumentUpdaterHandler.updateProjectStructure(
           projectId,
           projectHistoryId,
@@ -1243,13 +1248,18 @@ const ProjectEntityUpdateHandler = {
           project.overleaf &&
           project.overleaf.history &&
           project.overleaf.history.id
-        TpdsUpdateSender.moveEntity({
-          project_id: projectId,
-          project_name: project.name,
-          startPath,
-          endPath,
-          rev
-        })
+        // do not wait
+        TpdsUpdateSender.promises
+          .moveEntity({
+            project_id: projectId,
+            project_name: project.name,
+            startPath,
+            endPath,
+            rev
+          })
+          .catch(err => {
+            logger.error({ err }, 'error sending tpds update')
+          })
         DocumentUpdaterHandler.updateProjectStructure(
           projectId,
           projectHistoryId,

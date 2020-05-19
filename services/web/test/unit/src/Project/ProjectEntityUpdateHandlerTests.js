@@ -133,7 +133,10 @@ describe('ProjectEntityUpdateHandler', function() {
       addFile: sinon.stub().yields(),
       addDoc: sinon.stub(),
       deleteEntity: sinon.stub().yields(),
-      moveEntity: sinon.stub()
+      moveEntity: sinon.stub(),
+      promises: {
+        moveEntity: sinon.stub().resolves()
+      }
     }
     this.FileStoreHandler = {
       copyFile: sinon.stub(),
@@ -1672,7 +1675,7 @@ describe('ProjectEntityUpdateHandler', function() {
     })
 
     it('notifies tpds', function() {
-      this.TpdsUpdateSender.moveEntity
+      this.TpdsUpdateSender.promises.moveEntity
         .calledWith({
           project_id: projectId,
           project_name: this.project_name,
@@ -1731,7 +1734,7 @@ describe('ProjectEntityUpdateHandler', function() {
       })
 
       it('notifies tpds', function() {
-        this.TpdsUpdateSender.moveEntity
+        this.TpdsUpdateSender.promises.moveEntity
           .calledWith({
             project_id: projectId,
             project_name: this.project_name,
