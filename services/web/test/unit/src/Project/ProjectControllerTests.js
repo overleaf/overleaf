@@ -102,11 +102,6 @@ describe('ProjectController', function() {
         .stub()
         .callsArgWith(2, null, { lastLoginIp: '192.170.18.2' })
     }
-    this.Modules = {
-      hooks: {
-        fire: sinon.stub()
-      }
-    }
     this.Features = {
       hasFeature: sinon.stub()
     }
@@ -171,7 +166,6 @@ describe('ProjectController', function() {
           .AuthenticationController,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
-        '../../infrastructure/Modules': this.Modules,
         './ProjectEntityHandler': this.ProjectEntityHandler,
         '../Errors/Errors': Errors,
         '../../infrastructure/Features': this.Features,
@@ -424,10 +418,7 @@ describe('ProjectController', function() {
         null,
         this.allProjects
       )
-      this.Modules.hooks.fire
-        .withArgs('findAllV1Projects', this.user._id)
-        .yields(undefined)
-    }) // Without integration module hook, cb returns undefined
+    })
 
     it('should render the project/list page', function(done) {
       this.res.render = (pageName, opts) => {
@@ -521,17 +512,6 @@ describe('ProjectController', function() {
           'Error accessing Overleaf V1. Some of your projects or features may be missing.'
       })
 
-      it('should show a warning when there is an error getting v1 projects', function(done) {
-        this.Modules.hooks.fire
-          .withArgs('findAllV1Projects', this.user._id)
-          .yields(new Errors.V1ConnectionError('error'))
-        this.res.render = (pageName, opts) => {
-          expect(opts.warnings).to.contain(this.connectionWarning)
-          done()
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-
       it('should show a warning when there is an error getting subscriptions from v1', function(done) {
         this.LimitationsManager.hasPaidSubscription.yields(
           new Errors.V1ConnectionError('error')
@@ -587,82 +567,6 @@ describe('ProjectController', function() {
         this.user._id = ObjectId('588f3ddae8ebc1bac07c9fff') // last two digits
         this.res.render = (pageName, opts) => {
           expect(opts.frontChatWidgetRoomId).to.equal(undefined)
-          done()
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-    })
-
-    describe('with overleaf-integration-web-module hook', function() {
-      beforeEach(function() {
-        this.Features.hasFeature = sinon
-          .stub()
-          .withArgs('overleaf-integration')
-          .returns(true)
-        this.V1Response = {
-          projects: [
-            {
-              id: '123mockV1Id',
-              title: 'mock title',
-              updated_at: 1509616411,
-              removed: false,
-              archived: false
-            },
-            {
-              id: '456mockV1Id',
-              title: 'mock title 2',
-              updated_at: 1509616411,
-              removed: true,
-              archived: false
-            }
-          ],
-          tags: [{ name: 'mock tag', project_ids: ['123mockV1Id'] }]
-        }
-        this.Modules.hooks.fire
-          .withArgs('findAllV1Projects', this.user._id)
-          .yields(null, [this.V1Response])
-      }) // Need to wrap response in array, as multiple hooks could fire
-
-      it('should include V1 projects', function(done) {
-        this.res.render = (pageName, opts) => {
-          opts.projects.length.should.equal(
-            this.projects.length +
-              this.collabertions.length +
-              this.readOnly.length +
-              this.tokenReadAndWrite.length +
-              this.tokenReadOnly.length +
-              this.V1Response.projects.length
-          )
-          opts.projects.forEach(p => {
-            // Check properties correctly mapped from V1
-            expect(p).to.have.property('id')
-            expect(p).to.have.property('name')
-            expect(p).to.have.property('lastUpdated')
-            expect(p).to.have.property('accessLevel')
-            expect(p).to.have.property('archived')
-          })
-          done()
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-
-      it('should include V1 tags', function(done) {
-        this.res.render = (pageName, opts) => {
-          opts.tags.length.should.equal(
-            this.tags.length + this.V1Response.tags.length
-          )
-          opts.tags.forEach(t => {
-            expect(t).to.have.property('name')
-            expect(t).to.have.property('project_ids')
-          })
-          done()
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-
-      it('should have isShowingV1Projects flag', function(done) {
-        this.res.render = (pageName, opts) => {
-          opts.isShowingV1Projects.should.equal(true)
           done()
         }
         this.ProjectController.projectListPage(this.req, this.res)
@@ -952,10 +856,7 @@ describe('ProjectController', function() {
         null,
         this.allProjects
       )
-      this.Modules.hooks.fire
-        .withArgs('findAllV1Projects', this.user._id)
-        .yields(undefined)
-    }) // Without integration module hook, cb returns undefined
+    })
 
     it('should render the project/list page', function(done) {
       this.res.render = (pageName, opts) => {

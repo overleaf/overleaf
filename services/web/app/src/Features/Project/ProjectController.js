@@ -29,7 +29,6 @@ const PackageVersions = require('../../infrastructure/PackageVersions')
 const Sources = require('../Authorization/Sources')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
-const Modules = require('../../infrastructure/Modules')
 const ProjectEntityHandler = require('./ProjectEntityHandler')
 const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const UserGetter = require('../User/UserGetter')
@@ -326,7 +325,6 @@ const ProjectController = {
         // _buildProjectList already converts archived/trashed to booleans so isArchivedOrTrashed should not be used here
         projects = ProjectController._buildProjectList(projects, userId)
           .filter(p => !(p.archived || p.trashed))
-          .filter(p => !p.isV1Project)
           .map(p => ({ _id: p.id, name: p.name, accessLevel: p.accessLevel }))
 
         res.json({ projects })
@@ -380,22 +378,6 @@ const ProjectController = {
             cb
           )
         },
-        v1Projects(cb) {
-          if (!Features.hasFeature('overleaf-integration')) {
-            return cb(null, null)
-          }
-
-          Modules.hooks.fire('findAllV1Projects', userId, (error, projects) => {
-            if (projects == null) {
-              projects = []
-            }
-            if (error != null && error instanceof V1ConnectionError) {
-              noV1Connection = true
-              return cb(null, null)
-            }
-            cb(error, projects[0])
-          })
-        }, // hooks.fire returns an array of results, only need first
         hasSubscription(cb) {
           LimitationsManager.hasPaidSubscription(
             currentUser,
@@ -433,20 +415,13 @@ const ProjectController = {
           logger.warn({ err }, 'error getting data for project list page')
           return next(err)
         }
-        if (noV1Connection) {
-          results.v1Projects = results.v1Projects || { projects: [], tags: [] }
-          results.v1Projects.noConnection = true
-        }
         const { notifications, user, userAffiliations } = results
         // Handle case of deleted user
         if (user == null) {
           UserController.logout(req, res, next)
           return
         }
-        const v1Tags =
-          (results.v1Projects != null ? results.v1Projects.tags : undefined) ||
-          []
-        const tags = results.tags.concat(v1Tags)
+        const tags = results.tags
         const notificationsInstitution = []
         for (const notification of notifications) {
           notification.html = req.i18n.translate(
@@ -545,12 +520,9 @@ const ProjectController = {
         )
         const projects = ProjectController._buildProjectList(
           results.projects,
-          userId,
-          results.v1Projects != null ? results.v1Projects.projects : undefined
+          userId
         )
-        const warnings = ProjectController._buildWarningsList(
-          results.v1Projects
-        )
+        const warnings = ProjectController._buildWarningsList(noV1Connection)
 
         // in v2 add notifications for matching university IPs
         if (Settings.overleaf != null && req.ip !== user.lastLoginIp) {
@@ -573,9 +545,6 @@ const ProjectController = {
             userAffiliations,
             hasSubscription: results.hasSubscription,
             institutionLinkingError,
-            isShowingV1Projects:
-              results.v1Projects != null &&
-              results.v1Projects.projects.length > 0,
             warnings,
             zipFileSizeLimit: Settings.maxUploadSize
           }
@@ -863,11 +832,8 @@ const ProjectController = {
     )
   },
 
-  _buildProjectList(allProjects, userId, v1Projects) {
+  _buildProjectList(allProjects, userId) {
     let project
-    if (v1Projects == null) {
-      v1Projects = []
-    }
     const {
       owned,
       readAndWrite,
@@ -906,9 +872,6 @@ const ProjectController = {
           userId
         )
       )
-    }
-    for (project of v1Projects) {
-      projects.push(ProjectController._buildV1ProjectViewModel(project))
     }
     // Token-access
     //   Only add these projects if they're not already present, this gives us cascading access
@@ -973,39 +936,6 @@ const ProjectController = {
     return model
   },
 
-  _buildV1ProjectViewModel(project) {
-    const archived = project.archived
-    // If a project is simultaneously trashed and archived, we will consider it archived but not trashed.
-    const trashed = project.removed && !archived
-
-    const projectViewModel = {
-      id: project.id,
-      name: project.title,
-      lastUpdated: new Date(project.updated_at * 1000), // Convert from epoch
-      archived: archived,
-      trashed: trashed,
-      isV1Project: true
-    }
-    if (
-      (project.owner != null && project.owner.user_is_owner) ||
-      (project.creator != null && project.creator.user_is_creator)
-    ) {
-      projectViewModel.accessLevel = 'owner'
-    } else {
-      projectViewModel.accessLevel = 'readOnly'
-    }
-    if (project.owner != null) {
-      projectViewModel.owner = {
-        first_name: project.owner.name
-      }
-    } else if (project.creator != null) {
-      projectViewModel.owner = {
-        first_name: project.creator.name
-      }
-    }
-    return projectViewModel
-  },
-
   _injectProjectUsers(projects, callback) {
     const users = {}
     for (const project of projects) {
@@ -1051,22 +981,12 @@ const ProjectController = {
     )
   },
 
-  _buildWarningsList(v1ProjectData) {
-    if (v1ProjectData == null) {
-      v1ProjectData = {}
-    }
-    const warnings = []
-    if (v1ProjectData.noConnection) {
-      warnings.push(
-        'Error accessing Overleaf V1. Some of your projects or features may be missing.'
-      )
-    }
-    if (v1ProjectData.hasHiddenV1Projects) {
-      warnings.push(
-        "Looks like you've got a lot of V1 projects! Some of them may be hidden on V2. To view them all, use the V1 dashboard."
-      )
-    }
-    return warnings
+  _buildWarningsList(noConnection) {
+    return noConnection
+      ? [
+          'Error accessing Overleaf V1. Some of your projects or features may be missing.'
+        ]
+      : []
   },
 
   _buildPortalTemplatesList(affiliations) {

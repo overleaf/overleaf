@@ -1,4 +1,4 @@
-td.project-list-table-name-cell(ng-if-start="!project.isV1Project")
+td.project-list-table-name-cell
 	.project-list-table-name-container
 		input.project-list-table-select-item(
 			select-individual,
@@ -61,7 +61,7 @@ td.project-list-table-lastupdated-cell
 		| {{getUserName(project.lastUpdatedBy)}}
 
 
-td.project-list-table-actions-cell(ng-if-end)
+td.project-list-table-actions-cell
 	div(
 		ng-if="!project.isTableActionInflight"
 	)

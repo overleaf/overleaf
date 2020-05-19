@@ -240,11 +240,6 @@ App.controller('ProjectPageController', function(
         visible = false
       }
 
-      // Hide projects from V1 if we only want to see shared projects
-      if ($scope.filter === 'shared' && project.isV1Project) {
-        visible = false
-      }
-
       // Hide projects we don't own if we only want to see owned projects
       if ($scope.filter === 'owned' && project.accessLevel !== 'owner') {
         visible = false
@@ -272,10 +267,6 @@ App.controller('ProjectPageController', function(
         if (project.trashed) {
           visible = false
         }
-      }
-
-      if ($scope.filter === 'v1' && !project.isV1Project) {
-        visible = false
       }
 
       if (visible) {
