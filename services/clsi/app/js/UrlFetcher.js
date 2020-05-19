@@ -12,16 +12,23 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let UrlFetcher
 const request = require('request').defaults({ jar: false })
 const fs = require('fs')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const URL = require('url')
+const async = require('async')
 
 const oneMinute = 60 * 1000
 
 module.exports = UrlFetcher = {
+  pipeUrlToFileWithRetry(url, filePath, callback) {
+    const doDownload = function(cb) {
+      UrlFetcher.pipeUrlToFile(url, filePath, cb)
+    }
+    async.retry(3, doDownload, callback)
+  },
+
   pipeUrlToFile(url, filePath, _callback) {
     if (_callback == null) {
       _callback = function(error) {}
