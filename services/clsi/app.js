@@ -359,10 +359,10 @@ if (!module.parent) {
 
 module.exports = app
 
-setInterval(
-  () => ProjectPersistenceManager.clearExpiredProjects(),
-  (tenMinutes = 10 * 60 * 1000)
-)
+setInterval(() => {
+  ProjectPersistenceManager.refreshExpiryTimeout()
+  ProjectPersistenceManager.clearExpiredProjects()
+}, (tenMinutes = 10 * 60 * 1000))
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

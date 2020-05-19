@@ -14,6 +14,7 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 require('chai').should()
+const assert = require('chai').assert
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/ProjectPersistenceManager'
@@ -26,13 +27,72 @@ describe('ProjectPersistenceManager', function() {
       requires: {
         './UrlCache': (this.UrlCache = {}),
         './CompileManager': (this.CompileManager = {}),
-        'logger-sharelatex': (this.logger = { log: sinon.stub() }),
+        diskusage: (this.diskusage = { check: sinon.stub() }),
+        'logger-sharelatex': (this.logger = {
+          log: sinon.stub(),
+          warn: sinon.stub(),
+          err: sinon.stub()
+        }),
+        'settings-sharelatex': (this.settings = {
+          project_cache_length_ms: 1000
+        }),
         './db': (this.db = {})
       }
     })
     this.callback = sinon.stub()
     this.project_id = 'project-id-123'
     return (this.user_id = '1234')
+  })
+
+  describe('refreshExpiryTimeout', function() {
+    it('should leave expiry alone if plenty of disk', function(done) {
+      this.diskusage.check.callsArgWith(1, null, {
+        available: 40,
+        total: 100
+      })
+
+      this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
+        this.ProjectPersistenceManager.EXPIRY_TIMEOUT.should.equal(
+          this.settings.project_cache_length_ms
+        )
+        done()
+      })
+    })
+
+    it('should drop EXPIRY_TIMEOUT 10% if low disk usage', function(done) {
+      this.diskusage.check.callsArgWith(1, null, {
+        available: 5,
+        total: 100
+      })
+
+      this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
+        this.ProjectPersistenceManager.EXPIRY_TIMEOUT.should.equal(900)
+        done()
+      })
+    })
+
+    it('should not drop EXPIRY_TIMEOUT to below 50% of project_cache_length_ms', function(done) {
+      this.diskusage.check.callsArgWith(1, null, {
+        available: 5,
+        total: 100
+      })
+      this.ProjectPersistenceManager.EXPIRY_TIMEOUT = 500
+      this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
+        this.ProjectPersistenceManager.EXPIRY_TIMEOUT.should.equal(500)
+        done()
+      })
+    })
+
+    it('should not modify EXPIRY_TIMEOUT if there is an error getting disk values', function(done) {
+      this.diskusage.check.callsArgWith(1, 'Error', {
+        available: 5,
+        total: 100
+      })
+      this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
+        this.ProjectPersistenceManager.EXPIRY_TIMEOUT.should.equal(1000)
+        done()
+      })
+    })
   })
 
   describe('clearExpiredProjects', function() {
