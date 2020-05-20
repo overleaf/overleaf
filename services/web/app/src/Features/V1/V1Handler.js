@@ -102,29 +102,6 @@ module.exports = V1Handler = {
         }
       }
     )
-  },
-
-  getDocExported(token, callback) {
-    // default to not exported
-    if (callback == null) {
-      callback = function(err, info) {}
-    }
-    if ((Settings.apis != null ? Settings.apis.v1 : undefined) == null) {
-      return callback(null, {
-        exported: false,
-        exporting: false
-      })
-    }
-
-    return V1Api.request(
-      { url: `/api/v1/sharelatex/docs/${token}/exported_to_v2` },
-      function(err, response, body) {
-        if (err != null) {
-          return callback(err)
-        }
-        return callback(null, body)
-      }
-    )
   }
 }
 

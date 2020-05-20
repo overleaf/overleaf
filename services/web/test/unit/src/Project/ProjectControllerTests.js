@@ -177,7 +177,6 @@ describe('ProjectController', function() {
           getUserAffiliations: this.getUserAffiliations
         },
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
-        '../V1/V1Handler': {},
         '../../models/Project': {}
       }
     })

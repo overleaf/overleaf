@@ -260,16 +260,6 @@ module.exports = MockV1Api = {
     )
 
     app.get(
-      '/api/v1/sharelatex/docs/:token/exported_to_v2',
-      (req, res, next) => {
-        if (this.doc_exported[req.params.token] != null) {
-          return res.json(this.doc_exported[req.params.token])
-        }
-        return res.json({ exporting: false, exported: false })
-      }
-    )
-
-    app.get(
       '/api/v1/sharelatex/docs/read_token/:token/exists',
       (req, res, next) => {
         return res.json({ exists: false })

@@ -37,7 +37,6 @@ const { V1ConnectionError } = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')
 const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandler')
 const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
-const V1Handler = require('../V1/V1Handler')
 const UserController = require('../User/UserController')
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
@@ -619,35 +618,7 @@ const ProjectController = {
               if (err != null) {
                 return cb(err)
               }
-              if (
-                (project.overleaf != null ? project.overleaf.id : undefined) ==
-                  null ||
-                (project.tokens != null
-                  ? project.tokens.readAndWrite
-                  : undefined) == null ||
-                Settings.projectImportingCheckMaxCreateDelta == null
-              ) {
-                return cb(null, project)
-              }
-              const createDelta =
-                (new Date().getTime() -
-                  new Date(project._id.getTimestamp()).getTime()) /
-                1000
-              if (
-                !(createDelta < Settings.projectImportingCheckMaxCreateDelta)
-              ) {
-                return cb(null, project)
-              }
-              V1Handler.getDocExported(
-                project.tokens.readAndWrite,
-                (err, docExported) => {
-                  if (err != null) {
-                    return next(err)
-                  }
-                  project.exporting = docExported.exporting
-                  cb(null, project)
-                }
-              )
+              cb(null, project)
             }
           )
         },
@@ -736,11 +707,6 @@ const ProjectController = {
               privilegeLevel === PrivilegeLevels.NONE
             ) {
               return res.sendStatus(401)
-            }
-
-            if (project.exporting) {
-              res.render('project/importing', { bodyClasses: ['editor'] })
-              return
             }
 
             if (
