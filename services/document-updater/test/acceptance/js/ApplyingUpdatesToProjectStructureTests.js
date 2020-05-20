@@ -1,11 +1,8 @@
-/* eslint-disable
-    camelcase,
-*/
 const sinon = require('sinon')
 const chai = require('chai')
 chai.should()
 const Settings = require('settings-sharelatex')
-const rclient_project_history = require('redis-sharelatex').createClient(
+const rclientProjectHistory = require('redis-sharelatex').createClient(
   Settings.redis.project_history
 )
 const ProjectHistoryKeys = Settings.redis.project_history.key_schema
@@ -51,7 +48,7 @@ describe("Applying updates to a project's structure", function () {
     })
 
     it('should push the applied file renames to the project history api', function (done) {
-      rclient_project_history.lrange(
+      rclientProjectHistory.lrange(
         ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
         0,
         -1,
@@ -103,7 +100,7 @@ describe("Applying updates to a project's structure", function () {
       })
 
       it('should push the applied doc renames to the project history api', function (done) {
-        rclient_project_history.lrange(
+        rclientProjectHistory.lrange(
           ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
           0,
           -1,
@@ -174,7 +171,7 @@ describe("Applying updates to a project's structure", function () {
       })
 
       it('should push the applied doc renames to the project history api', function (done) {
-        rclient_project_history.lrange(
+        rclientProjectHistory.lrange(
           ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
           0,
           -1,
@@ -243,7 +240,7 @@ describe("Applying updates to a project's structure", function () {
       })
 
       it('should push the applied doc renames to the project history api', function (done) {
-        rclient_project_history.lrange(
+        rclientProjectHistory.lrange(
           ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
           0,
           -1,
@@ -316,7 +313,7 @@ describe("Applying updates to a project's structure", function () {
     })
 
     it('should push the file addition to the project history api', function (done) {
-      rclient_project_history.lrange(
+      rclientProjectHistory.lrange(
         ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
         0,
         -1,
@@ -364,7 +361,7 @@ describe("Applying updates to a project's structure", function () {
     })
 
     it('should push the doc addition to the project history api', function (done) {
-      rclient_project_history.lrange(
+      rclientProjectHistory.lrange(
         ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
         0,
         -1,
