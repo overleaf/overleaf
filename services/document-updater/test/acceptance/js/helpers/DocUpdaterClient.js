@@ -8,7 +8,6 @@
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let DocUpdaterClient
@@ -35,26 +34,20 @@ module.exports = DocUpdaterClient = {
   },
 
   subscribeToAppliedOps(callback) {
-    if (callback == null) {
-      callback = function (message) {}
-    }
     return rclient_sub.on('message', callback)
   },
 
   sendUpdate(project_id, doc_id, update, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     return rclient.rpush(
       keys.pendingUpdates({ doc_id }),
       JSON.stringify(update),
       (error) => {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
         const doc_key = `${project_id}:${doc_id}`
         return rclient.sadd('DocsWithPendingUpdates', doc_key, (error) => {
-          if (error != null) {
+          if (error) {
             return callback(error)
           }
           return rclient.rpush('pending-updates-list', doc_key, callback)
@@ -64,11 +57,8 @@ module.exports = DocUpdaterClient = {
   },
 
   sendUpdates(project_id, doc_id, updates, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     return DocUpdaterClient.preloadDoc(project_id, doc_id, (error) => {
-      if (error != null) {
+      if (error) {
         return callback(error)
       }
       const jobs = []
@@ -100,9 +90,6 @@ module.exports = DocUpdaterClient = {
   },
 
   getDoc(project_id, doc_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
     return request.get(
       `http://localhost:3003/project/${project_id}/doc/${doc_id}`,
       (error, res, body) => {
@@ -115,9 +102,6 @@ module.exports = DocUpdaterClient = {
   },
 
   getDocAndRecentOps(project_id, doc_id, fromVersion, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
     return request.get(
       `http://localhost:3003/project/${project_id}/doc/${doc_id}?fromVersion=${fromVersion}`,
       (error, res, body) => {
@@ -130,16 +114,10 @@ module.exports = DocUpdaterClient = {
   },
 
   preloadDoc(project_id, doc_id, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     return DocUpdaterClient.getDoc(project_id, doc_id, callback)
   },
 
   flushDoc(project_id, doc_id, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     return request.post(
       `http://localhost:3003/project/${project_id}/doc/${doc_id}/flush`,
       (error, res, body) => callback(error, res, body)
@@ -147,9 +125,6 @@ module.exports = DocUpdaterClient = {
   },
 
   setDocLines(project_id, doc_id, lines, source, user_id, undoing, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     return request.post(
       {
         url: `http://localhost:3003/project/${project_id}/doc/${doc_id}`,
@@ -165,9 +140,6 @@ module.exports = DocUpdaterClient = {
   },
 
   deleteDoc(project_id, doc_id, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     return request.del(
       `http://localhost:3003/project/${project_id}/doc/${doc_id}`,
       (error, res, body) => callback(error, res, body)
@@ -175,9 +147,6 @@ module.exports = DocUpdaterClient = {
   },
 
   flushProject(project_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     return request.post(
       `http://localhost:3003/project/${project_id}/flush`,
       callback
@@ -185,16 +154,10 @@ module.exports = DocUpdaterClient = {
   },
 
   deleteProject(project_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     return request.del(`http://localhost:3003/project/${project_id}`, callback)
   },
 
   deleteProjectOnShutdown(project_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     return request.del(
       `http://localhost:3003/project/${project_id}?background=true&shutdown=true`,
       callback
@@ -202,9 +165,6 @@ module.exports = DocUpdaterClient = {
   },
 
   flushOldProjects(callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     return request.get(
       'http://localhost:3003/flush_queued_projects?min_delete_age=1',
       callback
@@ -212,9 +172,6 @@ module.exports = DocUpdaterClient = {
   },
 
   acceptChange(project_id, doc_id, change_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     return request.post(
       `http://localhost:3003/project/${project_id}/doc/${doc_id}/change/${change_id}/accept`,
       callback
@@ -222,9 +179,6 @@ module.exports = DocUpdaterClient = {
   },
 
   removeComment(project_id, doc_id, comment, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     return request.del(
       `http://localhost:3003/project/${project_id}/doc/${doc_id}/comment/${comment}`,
       callback
@@ -232,9 +186,6 @@ module.exports = DocUpdaterClient = {
   },
 
   getProjectDocs(project_id, projectStateHash, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     return request.get(
       `http://localhost:3003/project/${project_id}/doc?state=${projectStateHash}`,
       (error, res, body) => {
@@ -254,9 +205,6 @@ module.exports = DocUpdaterClient = {
     version,
     callback
   ) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     return request.post(
       {
         url: `http://localhost:3003/project/${project_id}`,
