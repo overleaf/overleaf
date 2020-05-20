@@ -1,7 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
-    no-return-assign,
 */
 const sinon = require('sinon')
 const chai = require('chai')
@@ -34,7 +32,7 @@ describe("Applying updates to a project's structure", function () {
       this.fileUpdates = [this.fileUpdate]
       DocUpdaterApp.ensureRunning((error) => {
         if (error) {
-          throw error
+          return done(error)
         }
         DocUpdaterClient.sendProjectUpdate(
           this.project_id,
@@ -44,7 +42,7 @@ describe("Applying updates to a project's structure", function () {
           this.version,
           (error) => {
             if (error) {
-              throw error
+              return done(error)
             }
             setTimeout(done, 200)
           }
@@ -59,7 +57,7 @@ describe("Applying updates to a project's structure", function () {
         -1,
         (error, updates) => {
           if (error) {
-            throw error
+            return done(error)
           }
 
           const update = JSON.parse(updates[0])
@@ -97,7 +95,7 @@ describe("Applying updates to a project's structure", function () {
           this.version,
           (error) => {
             if (error) {
-              throw error
+              return done(error)
             }
             setTimeout(done, 200)
           }
@@ -111,7 +109,7 @@ describe("Applying updates to a project's structure", function () {
           -1,
           (error, updates) => {
             if (error) {
-              throw error
+              return done(error)
             }
 
             const update = JSON.parse(updates[0])
@@ -137,7 +135,7 @@ describe("Applying updates to a project's structure", function () {
           this.docUpdate.id,
           (error) => {
             if (error) {
-              throw error
+              return done(error)
             }
             sinon.spy(MockWebApi, 'getDocument')
             DocUpdaterClient.sendProjectUpdate(
@@ -148,7 +146,7 @@ describe("Applying updates to a project's structure", function () {
               this.version,
               (error) => {
                 if (error) {
-                  throw error
+                  return done(error)
                 }
                 setTimeout(done, 200)
               }
@@ -166,6 +164,9 @@ describe("Applying updates to a project's structure", function () {
           this.project_id,
           this.docUpdate.id,
           (error, res, doc) => {
+            if (error) {
+              return done(error)
+            }
             doc.pathname.should.equal(this.docUpdate.newPathname)
             done()
           }
@@ -179,7 +180,7 @@ describe("Applying updates to a project's structure", function () {
           -1,
           (error, updates) => {
             if (error) {
-              throw error
+              return done(error)
             }
 
             const update = JSON.parse(updates[0])
@@ -234,7 +235,7 @@ describe("Applying updates to a project's structure", function () {
           this.version,
           (error) => {
             if (error) {
-              throw error
+              return done(error)
             }
             setTimeout(done, 200)
           }
@@ -248,7 +249,7 @@ describe("Applying updates to a project's structure", function () {
           -1,
           (error, updates) => {
             if (error) {
-              throw error
+              return done(error)
             }
 
             let update = JSON.parse(updates[0])
@@ -307,7 +308,7 @@ describe("Applying updates to a project's structure", function () {
         this.version,
         (error) => {
           if (error) {
-            throw error
+            return done(error)
           }
           setTimeout(done, 200)
         }
@@ -321,7 +322,7 @@ describe("Applying updates to a project's structure", function () {
         -1,
         (error, updates) => {
           if (error) {
-            throw error
+            return done(error)
           }
 
           const update = JSON.parse(updates[0])
@@ -355,7 +356,7 @@ describe("Applying updates to a project's structure", function () {
         this.version,
         (error) => {
           if (error) {
-            throw error
+            return done(error)
           }
           setTimeout(done, 200)
         }
@@ -369,7 +370,7 @@ describe("Applying updates to a project's structure", function () {
         -1,
         (error, updates) => {
           if (error) {
-            throw error
+            return done(error)
           }
 
           const update = JSON.parse(updates[0])
@@ -415,7 +416,7 @@ describe("Applying updates to a project's structure", function () {
         this.version0,
         function (error) {
           if (error) {
-            throw error
+            return done(error)
           }
           DocUpdaterClient.sendProjectUpdate(
             projectId,
@@ -425,7 +426,7 @@ describe("Applying updates to a project's structure", function () {
             this.version1,
             (error) => {
               if (error) {
-                throw error
+                return done(error)
               }
               setTimeout(done, 2000)
             }
@@ -475,7 +476,7 @@ describe("Applying updates to a project's structure", function () {
         this.version0,
         function (error) {
           if (error) {
-            throw error
+            return done(error)
           }
           DocUpdaterClient.sendProjectUpdate(
             projectId,
@@ -485,7 +486,7 @@ describe("Applying updates to a project's structure", function () {
             this.version1,
             (error) => {
               if (error) {
-                throw error
+                return done(error)
               }
               setTimeout(done, 2000)
             }
