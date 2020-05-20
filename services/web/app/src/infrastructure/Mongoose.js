@@ -51,4 +51,6 @@ mongoose.plugin(schema => {
   schema.options.usePushEach = true
 })
 
+mongoose.Promise = global.Promise;
+
 module.exports = mongoose
