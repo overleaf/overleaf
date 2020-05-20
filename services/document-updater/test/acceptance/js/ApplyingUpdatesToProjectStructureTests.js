@@ -8,7 +8,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
@@ -41,7 +40,7 @@ describe("Applying updates to a project's structure", function () {
       }
       this.fileUpdates = [this.fileUpdate]
       return DocUpdaterApp.ensureRunning((error) => {
-        if (error != null) {
+        if (error) {
           throw error
         }
         return DocUpdaterClient.sendProjectUpdate(
@@ -51,7 +50,7 @@ describe("Applying updates to a project's structure", function () {
           this.fileUpdates,
           this.version,
           (error) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
             return setTimeout(done, 200)
@@ -66,7 +65,7 @@ describe("Applying updates to a project's structure", function () {
         0,
         -1,
         (error, updates) => {
-          if (error != null) {
+          if (error) {
             throw error
           }
 
@@ -81,7 +80,6 @@ describe("Applying updates to a project's structure", function () {
           return done()
         }
       )
-      return null
     })
   })
 
@@ -105,13 +103,12 @@ describe("Applying updates to a project's structure", function () {
           [],
           this.version,
           (error) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
             return setTimeout(done, 200)
           }
         )
-        return null
       })
 
       return it('should push the applied doc renames to the project history api', function (done) {
@@ -120,7 +117,7 @@ describe("Applying updates to a project's structure", function () {
           0,
           -1,
           (error, updates) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
 
@@ -135,7 +132,6 @@ describe("Applying updates to a project's structure", function () {
             return done()
           }
         )
-        return null
       })
     })
 
@@ -147,7 +143,7 @@ describe("Applying updates to a project's structure", function () {
           this.project_id,
           this.docUpdate.id,
           (error) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
             sinon.spy(MockWebApi, 'getDocument')
@@ -158,7 +154,7 @@ describe("Applying updates to a project's structure", function () {
               [],
               this.version,
               (error) => {
-                if (error != null) {
+                if (error) {
                   throw error
                 }
                 return setTimeout(done, 200)
@@ -166,7 +162,6 @@ describe("Applying updates to a project's structure", function () {
             )
           }
         )
-        return null
       })
 
       after(function () {
@@ -182,7 +177,6 @@ describe("Applying updates to a project's structure", function () {
             return done()
           }
         )
-        return null
       })
 
       return it('should push the applied doc renames to the project history api', function (done) {
@@ -191,7 +185,7 @@ describe("Applying updates to a project's structure", function () {
           0,
           -1,
           (error, updates) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
 
@@ -206,7 +200,6 @@ describe("Applying updates to a project's structure", function () {
             return done()
           }
         )
-        return null
       })
     })
   })
@@ -247,13 +240,12 @@ describe("Applying updates to a project's structure", function () {
           this.fileUpdates,
           this.version,
           (error) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
             return setTimeout(done, 200)
           }
         )
-        return null
       })
 
       return it('should push the applied doc renames to the project history api', function (done) {
@@ -262,7 +254,7 @@ describe("Applying updates to a project's structure", function () {
           0,
           -1,
           (error, updates) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
 
@@ -301,7 +293,6 @@ describe("Applying updates to a project's structure", function () {
             return done()
           }
         )
-        return null
       })
     })
   })
@@ -322,13 +313,12 @@ describe("Applying updates to a project's structure", function () {
         this.fileUpdates,
         this.version,
         (error) => {
-          if (error != null) {
+          if (error) {
             throw error
           }
           return setTimeout(done, 200)
         }
       )
-      return null
     })
 
     return it('should push the file addition to the project history api', function (done) {
@@ -337,7 +327,7 @@ describe("Applying updates to a project's structure", function () {
         0,
         -1,
         (error, updates) => {
-          if (error != null) {
+          if (error) {
             throw error
           }
 
@@ -352,7 +342,6 @@ describe("Applying updates to a project's structure", function () {
           return done()
         }
       )
-      return null
     })
   })
 
@@ -372,13 +361,12 @@ describe("Applying updates to a project's structure", function () {
         [],
         this.version,
         (error) => {
-          if (error != null) {
+          if (error) {
             throw error
           }
           return setTimeout(done, 200)
         }
       )
-      return null
     })
 
     return it('should push the doc addition to the project history api', function (done) {
@@ -387,7 +375,7 @@ describe("Applying updates to a project's structure", function () {
         0,
         -1,
         (error, updates) => {
-          if (error != null) {
+          if (error) {
             throw error
           }
 
@@ -402,7 +390,6 @@ describe("Applying updates to a project's structure", function () {
           return done()
         }
       )
-      return null
     })
   })
 
@@ -434,7 +421,7 @@ describe("Applying updates to a project's structure", function () {
         [],
         this.version0,
         function (error) {
-          if (error != null) {
+          if (error) {
             throw error
           }
           return DocUpdaterClient.sendProjectUpdate(
@@ -444,7 +431,7 @@ describe("Applying updates to a project's structure", function () {
             [],
             this.version1,
             (error) => {
-              if (error != null) {
+              if (error) {
                 throw error
               }
               return setTimeout(done, 2000)
@@ -452,7 +439,6 @@ describe("Applying updates to a project's structure", function () {
           )
         }
       )
-      return null
     })
 
     after(function () {
@@ -495,7 +481,7 @@ describe("Applying updates to a project's structure", function () {
         [],
         this.version0,
         function (error) {
-          if (error != null) {
+          if (error) {
             throw error
           }
           return DocUpdaterClient.sendProjectUpdate(
@@ -505,7 +491,7 @@ describe("Applying updates to a project's structure", function () {
             [],
             this.version1,
             (error) => {
-              if (error != null) {
+              if (error) {
                 throw error
               }
               return setTimeout(done, 2000)
@@ -513,7 +499,6 @@ describe("Applying updates to a project's structure", function () {
           )
         }
       )
-      return null
     })
 
     after(function () {
