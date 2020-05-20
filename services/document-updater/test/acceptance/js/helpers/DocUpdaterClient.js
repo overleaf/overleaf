@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 let DocUpdaterClient
 const Settings = require('settings-sharelatex')
@@ -57,9 +56,12 @@ module.exports = DocUpdaterClient = {
       const jobs = updates.map((update) => (callback) => {
         DocUpdaterClient.sendUpdate(project_id, doc_id, update, callback)
       })
-      async.series(jobs, (err) =>
+      async.series(jobs, (err) => {
+        if (err) {
+          return callback(err)
+        }
         DocUpdaterClient.waitForPendingUpdates(project_id, doc_id, callback)
-      )
+      })
     })
   },
 
@@ -68,6 +70,9 @@ module.exports = DocUpdaterClient = {
       { times: 30, interval: 100 },
       (cb) =>
         rclient.llen(keys.pendingUpdates({ doc_id }), (err, length) => {
+          if (err) {
+            return cb(err)
+          }
           if (length > 0) {
             cb(new Error('updates still pending'))
           } else {
