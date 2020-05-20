@@ -7,6 +7,11 @@ FROM phusion/baseimage:0.11
 ENV baseDir .
 
 
+# Makes sure LuaTex cache is writable
+# -----------------------------------
+ENV TEXMFVAR=/var/lib/sharelatex/tmp/texmf-var
+
+
 # Install dependencies
 # --------------------
 RUN apt-get update \
