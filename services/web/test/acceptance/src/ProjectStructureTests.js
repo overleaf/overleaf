@@ -267,33 +267,24 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should version creating a doc', function() {
-      const {
-        docUpdates: updates,
-        version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
-      expect(updates.length).to.equal(2)
-      _.each(updates, update => {
+    it('should version creating a doc and a file', function() {
+      const { updates, version } = MockDocUpdaterApi.getProjectStructureUpdates(
+        exampleProjectId
+      )
+      expect(updates.length).to.equal(3)
+      for (const update of updates.slice(0, 2)) {
+        expect(update.type).to.equal('add-doc')
         expect(update.userId).to.equal(owner._id)
         expect(update.docLines).to.be.a('string')
-      })
+      }
       expect(_.where(updates, { pathname: '/main.tex' }).length).to.equal(1)
       expect(_.where(updates, { pathname: '/references.bib' }).length).to.equal(
         1
       )
-      expect(version).to.equal(3)
-    })
-
-    it('should version creating a file', function() {
-      const {
-        fileUpdates: updates,
-        version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
-      expect(updates.length).to.equal(1)
-      const update = updates[0]
-      expect(update.userId).to.equal(owner._id)
-      expect(update.pathname).to.equal('/universe.jpg')
-      expect(update.url).to.be.a('string')
+      expect(updates[2].type).to.equal('add-file')
+      expect(updates[2].userId).to.equal(owner._id)
+      expect(updates[2].pathname).to.equal('/universe.jpg')
+      expect(updates[2].url).to.be.a('string')
       expect(version).to.equal(3)
     })
   })
@@ -328,33 +319,24 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should version the docs created', function() {
-      const {
-        docUpdates: updates,
-        version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(dupProjectId)
-      expect(updates.length).to.equal(2)
-      _.each(updates, update => {
+    it('should version the docs and files created', function() {
+      const { updates, version } = MockDocUpdaterApi.getProjectStructureUpdates(
+        dupProjectId
+      )
+      expect(updates.length).to.equal(3)
+      for (const update of updates.slice(0, 2)) {
+        expect(update.type).to.equal('add-doc')
         expect(update.userId).to.equal(owner._id)
         expect(update.docLines).to.be.a('string')
-      })
+      }
       expect(_.where(updates, { pathname: '/main.tex' }).length).to.equal(1)
       expect(_.where(updates, { pathname: '/references.bib' }).length).to.equal(
         1
       )
-      expect(version).to.equal(1)
-    })
-
-    it('should version the files created', function() {
-      const {
-        fileUpdates: updates,
-        version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(dupProjectId)
-      expect(updates.length).to.equal(1)
-      const update = updates[0]
-      expect(update.userId).to.equal(owner._id)
-      expect(update.pathname).to.equal('/universe.jpg')
-      expect(update.url).to.be.a('string')
+      expect(updates[2].type).to.equal('add-file')
+      expect(updates[2].userId).to.equal(owner._id)
+      expect(updates[2].pathname).to.equal('/universe.jpg')
+      expect(updates[2].url).to.be.a('string')
       expect(version).to.equal(1)
     })
   })
@@ -382,11 +364,12 @@ describe('ProjectStructureChanges', function() {
 
     it('should version the doc added', function(done) {
       const {
-        docUpdates: updates,
+        updates,
         version: newVersion
       } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
       expect(updates.length).to.equal(1)
       const update = updates[0]
+      expect(update.type).to.equal('add-doc')
       expect(update.userId).to.equal(owner._id)
       expect(update.pathname).to.equal('/new.tex')
       expect(update.docLines).to.be.a('string')
@@ -414,29 +397,19 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should version the docs created', function() {
-      const {
-        docUpdates: updates,
-        version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
-      expect(updates.length).to.equal(1)
-      const update = updates[0]
-      expect(update.userId).to.equal(owner._id)
-      expect(update.pathname).to.equal('/main.tex')
-      expect(update.docLines).to.equal('Test')
-      expect(version).to.equal(1)
-    })
-
-    it('should version the files created', function() {
-      const {
-        fileUpdates: updates,
-        version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
-      expect(updates.length).to.equal(1)
-      const update = updates[0]
-      expect(update.userId).to.equal(owner._id)
-      expect(update.pathname).to.equal('/1pixel.png')
-      expect(update.url).to.be.a('string')
+    it('should version the docs and files created', function() {
+      const { updates, version } = MockDocUpdaterApi.getProjectStructureUpdates(
+        exampleProjectId
+      )
+      expect(updates.length).to.equal(2)
+      expect(updates[0].type).to.equal('add-doc')
+      expect(updates[0].userId).to.equal(owner._id)
+      expect(updates[0].pathname).to.equal('/main.tex')
+      expect(updates[0].docLines).to.equal('Test')
+      expect(updates[1].type).to.equal('add-file')
+      expect(updates[1].userId).to.equal(owner._id)
+      expect(updates[1].pathname).to.equal('/1pixel.png')
+      expect(updates[1].url).to.be.a('string')
       expect(version).to.equal(1)
     })
   })
@@ -597,22 +570,22 @@ describe('ProjectStructureChanges', function() {
   })
 
   describe('uploading a project with files in different encodings', function() {
-    let docUpdates
+    let updates
     beforeEach(function(done) {
       uploadExampleProject(owner, 'charsets/charsets.zip', (err, projectId) => {
         if (err) {
           return done(err)
         }
 
-        docUpdates = MockDocUpdaterApi.getProjectStructureUpdates(projectId)
-          .docUpdates
+        updates = MockDocUpdaterApi.getProjectStructureUpdates(projectId)
+          .updates
         done()
       })
     })
 
     it('should correctly parse windows-1252', function() {
       const update = _.find(
-        docUpdates,
+        updates,
         update => update.pathname === '/test-german-windows-1252.tex'
       )
       expect(update.docLines).to.contain(
@@ -622,7 +595,7 @@ describe('ProjectStructureChanges', function() {
 
     it('should correctly parse German utf8', function() {
       const update = _.find(
-        docUpdates,
+        updates,
         update => update.pathname === '/test-german-utf8x.tex'
       )
       expect(update.docLines).to.contain(
@@ -632,7 +605,7 @@ describe('ProjectStructureChanges', function() {
 
     it('should correctly parse little-endian utf16', function() {
       const update = _.find(
-        docUpdates,
+        updates,
         update => update.pathname === '/test-greek-utf16-le-bom.tex'
       )
       expect(update.docLines).to.contain(
@@ -642,7 +615,7 @@ describe('ProjectStructureChanges', function() {
 
     it('should correctly parse Greek utf8', function() {
       const update = _.find(
-        docUpdates,
+        updates,
         update => update.pathname === '/test-greek-utf8x.tex'
       )
       expect(update.docLines).to.contain(
@@ -675,12 +648,12 @@ describe('ProjectStructureChanges', function() {
     })
 
     it('should version a newly uploaded file', function(done) {
-      const {
-        fileUpdates: updates,
-        version
-      } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
+      const { updates, version } = MockDocUpdaterApi.getProjectStructureUpdates(
+        exampleProjectId
+      )
       expect(updates.length).to.equal(1)
       const update = updates[0]
+      expect(update.type).to.equal('add-file')
       expect(update.userId).to.equal(owner._id)
       expect(update.pathname).to.equal('/1pixel.png')
       expect(update.url).to.be.a('string')
@@ -701,17 +674,18 @@ describe('ProjectStructureChanges', function() {
         'image/png',
         () => {
           const {
-            fileUpdates: updates,
+            updates,
             version
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(2)
-          let update = updates[0]
-          expect(update.userId).to.equal(owner._id)
-          expect(update.pathname).to.equal('/1pixel.png')
-          update = updates[1]
-          expect(update.userId).to.equal(owner._id)
-          expect(update.pathname).to.equal('/1pixel.png')
-          expect(update.url).to.be.a('string')
+          expect(updates[0].type).to.equal('rename-file')
+          expect(updates[0].userId).to.equal(owner._id)
+          expect(updates[0].pathname).to.equal('/1pixel.png')
+          expect(updates[0].newPathname).to.equal('')
+          expect(updates[1].type).to.equal('add-file')
+          expect(updates[1].userId).to.equal(owner._id)
+          expect(updates[1].pathname).to.equal('/1pixel.png')
+          expect(updates[1].url).to.be.a('string')
 
           // two file uploads
           verifyVersionIncremented(
@@ -778,11 +752,12 @@ describe('ProjectStructureChanges', function() {
         exampleFolderId,
         () => {
           const {
-            docUpdates: updates,
+            updates,
             version
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(1)
           const update = updates[0]
+          expect(update.type).to.equal('rename-doc')
           expect(update.userId).to.equal(owner._id)
           expect(update.pathname).to.equal('/new.tex')
           expect(update.newPathname).to.equal('/foo/new.tex')
@@ -808,11 +783,12 @@ describe('ProjectStructureChanges', function() {
         exampleFolderId,
         () => {
           const {
-            fileUpdates: updates,
+            updates,
             version
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(1)
           const update = updates[0]
+          expect(update.type).to.equal('rename-file')
           expect(update.userId).to.equal(owner._id)
           expect(update.pathname).to.equal('/1pixel.png')
           expect(update.newPathname).to.equal('/foo/1pixel.png')
@@ -860,13 +836,14 @@ describe('ProjectStructureChanges', function() {
                 newFolderId,
                 () => {
                   const {
-                    docUpdates: updates,
+                    updates,
                     version
                   } = MockDocUpdaterApi.getProjectStructureUpdates(
                     exampleProjectId
                   )
                   expect(updates.length).to.equal(1)
                   let update = updates[0]
+                  expect(update.type).to.equal('rename-doc')
                   expect(update.userId).to.equal(owner._id)
                   expect(update.pathname).to.equal('/foo/new.tex')
                   expect(update.newPathname).to.equal('/bar/foo/new.tex')
@@ -946,11 +923,12 @@ describe('ProjectStructureChanges', function() {
         'wombat.tex',
         () => {
           const {
-            docUpdates: updates,
+            updates,
             version
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(1)
           const update = updates[0]
+          expect(update.type).to.equal('rename-doc')
           expect(update.userId).to.equal(owner._id)
           expect(update.pathname).to.equal('/foo/new.tex')
           expect(update.newPathname).to.equal('/foo/wombat.tex')
@@ -975,11 +953,12 @@ describe('ProjectStructureChanges', function() {
         'potato.png',
         () => {
           const {
-            fileUpdates: updates,
+            updates,
             version
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(1)
           const update = updates[0]
+          expect(update.type).to.equal('rename-file')
           expect(update.userId).to.equal(owner._id)
           expect(update.pathname).to.equal('/foo/1pixel.png')
           expect(update.newPathname).to.equal('/foo/potato.png')
@@ -1004,21 +983,18 @@ describe('ProjectStructureChanges', function() {
         'giraffe',
         () => {
           const {
-            docUpdates,
-            fileUpdates,
+            updates,
             version
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
-          expect(docUpdates.length).to.equal(1)
-          const docUpdate = docUpdates[0]
-          expect(docUpdate.userId).to.equal(owner._id)
-          expect(docUpdate.pathname).to.equal('/foo/new.tex')
-          expect(docUpdate.newPathname).to.equal('/giraffe/new.tex')
-
-          expect(fileUpdates.length).to.equal(1)
-          const fileUpdate = fileUpdates[0]
-          expect(fileUpdate.userId).to.equal(owner._id)
-          expect(fileUpdate.pathname).to.equal('/foo/1pixel.png')
-          expect(fileUpdate.newPathname).to.equal('/giraffe/1pixel.png')
+          expect(updates.length).to.equal(2)
+          expect(updates[0].type).to.equal('rename-doc')
+          expect(updates[0].userId).to.equal(owner._id)
+          expect(updates[0].pathname).to.equal('/foo/new.tex')
+          expect(updates[0].newPathname).to.equal('/giraffe/new.tex')
+          expect(updates[1].type).to.equal('rename-file')
+          expect(updates[1].userId).to.equal(owner._id)
+          expect(updates[1].pathname).to.equal('/foo/1pixel.png')
+          expect(updates[1].newPathname).to.equal('/giraffe/1pixel.png')
 
           verifyVersionIncremented(
             exampleProjectId,
@@ -1078,21 +1054,18 @@ describe('ProjectStructureChanges', function() {
     it('should version deleting a folder', function(done) {
       deleteItem(owner, exampleProjectId, 'folder', exampleFolderId, () => {
         const {
-          docUpdates,
-          fileUpdates,
+          updates,
           version
         } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
-        expect(docUpdates.length).to.equal(1)
-        const docUpdate = docUpdates[0]
-        expect(docUpdate.userId).to.equal(owner._id)
-        expect(docUpdate.pathname).to.equal('/foo/new.tex')
-        expect(docUpdate.newPathname).to.equal('')
-
-        expect(fileUpdates.length).to.equal(1)
-        const fileUpdate = fileUpdates[0]
-        expect(fileUpdate.userId).to.equal(owner._id)
-        expect(fileUpdate.pathname).to.equal('/foo/1pixel.png')
-        expect(fileUpdate.newPathname).to.equal('')
+        expect(updates.length).to.equal(2)
+        expect(updates[0].type).to.equal('rename-doc')
+        expect(updates[0].userId).to.equal(owner._id)
+        expect(updates[0].pathname).to.equal('/foo/new.tex')
+        expect(updates[0].newPathname).to.equal('')
+        expect(updates[1].type).to.equal('rename-file')
+        expect(updates[1].userId).to.equal(owner._id)
+        expect(updates[1].pathname).to.equal('/foo/1pixel.png')
+        expect(updates[1].newPathname).to.equal('')
 
         verifyVersionIncremented(exampleProjectId, oldVersion, version, 1, done)
       })
@@ -1250,11 +1223,12 @@ describe('ProjectStructureChanges', function() {
         }
 
         const {
-          docUpdates: updates,
+          updates,
           version
         } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
         expect(updates.length).to.equal(1)
         const update = updates[0]
+        expect(update.type).to.equal('add-doc')
         expect(update.userId).to.equal(owner._id)
         expect(update.pathname).to.equal('/test.tex')
         expect(update.docLines).to.equal('Test')
@@ -1293,11 +1267,12 @@ describe('ProjectStructureChanges', function() {
         }
 
         const {
-          fileUpdates: updates,
+          updates,
           version
         } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
         expect(updates.length).to.equal(1)
         const update = updates[0]
+        expect(update.type).to.equal('add-file')
         expect(update.userId).to.equal(owner._id)
         expect(update.pathname).to.equal('/1pixel.png')
         expect(update.url).to.be.a('string')
@@ -1352,18 +1327,18 @@ describe('ProjectStructureChanges', function() {
           }
 
           const {
-            fileUpdates: updates,
+            updates,
             version
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(2)
-          let update = updates[0]
-          expect(update.userId).to.equal(owner._id)
-          expect(update.pathname).to.equal('/1pixel.png')
-          // expect(update.url).to.be.a('string');
-          update = updates[1]
-          expect(update.userId).to.equal(owner._id)
-          expect(update.pathname).to.equal('/1pixel.png')
-          expect(update.url).to.be.a('string')
+          expect(updates[0].type).to.equal('rename-file')
+          expect(updates[0].userId).to.equal(owner._id)
+          expect(updates[0].pathname).to.equal('/1pixel.png')
+          expect(updates[0].newPathname).to.equal('')
+          expect(updates[1].type).to.equal('add-file')
+          expect(updates[1].userId).to.equal(owner._id)
+          expect(updates[1].pathname).to.equal('/1pixel.png')
+          expect(updates[1].url).to.be.a('string')
 
           verifyVersionIncremented(
             exampleProjectId,
@@ -1396,11 +1371,12 @@ describe('ProjectStructureChanges', function() {
             }
 
             const {
-              docUpdates: updates,
+              updates,
               version
             } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
             expect(updates.length).to.equal(1)
             const update = updates[0]
+            expect(update.type).to.equal('rename-doc')
             expect(update.userId).to.equal(owner._id)
             expect(update.pathname).to.equal('/new.tex')
             expect(update.newPathname).to.equal('')
@@ -1442,11 +1418,12 @@ describe('ProjectStructureChanges', function() {
           'test-greek-utf16-le-bom.tex',
           'text/x-tex',
           () => {
-            const {
-              docUpdates: updates
-            } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
+            const { updates } = MockDocUpdaterApi.getProjectStructureUpdates(
+              exampleProjectId
+            )
             expect(updates.length).to.equal(1)
             const update = updates[0]
+            expect(update.type).to.equal('add-doc')
             expect(update.pathname).to.equal('/test-greek-utf16-le-bom.tex')
             expect(update.docLines).to.contain(
               'Η γρήγορη καστανή αλεπού πήδηξε χαλαρά πάνω από το σκυλί.'
@@ -1465,11 +1442,12 @@ describe('ProjectStructureChanges', function() {
           'test-german-windows-1252.tex',
           'text/x-tex',
           () => {
-            const {
-              docUpdates: updates
-            } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
+            const { updates } = MockDocUpdaterApi.getProjectStructureUpdates(
+              exampleProjectId
+            )
             expect(updates.length).to.equal(1)
             const update = updates[0]
+            expect(update.type).to.equal('add-doc')
             expect(update.pathname).to.equal('/test-german-windows-1252.tex')
             expect(update.docLines).to.contain(
               'Der schnelle braune Fuchs sprang träge über den Hund.'

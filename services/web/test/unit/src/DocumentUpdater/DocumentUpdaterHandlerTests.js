@@ -882,8 +882,9 @@ describe('DocumentUpdaterHandler', function() {
             newProject: { version: this.version }
           }
 
-          const docUpdates = [
+          const updates = [
             {
+              type: 'rename-doc',
               id: this.docIdB.toString(),
               pathname: '/old_b',
               newPathname: '/new_b'
@@ -901,8 +902,7 @@ describe('DocumentUpdaterHandler', function() {
                   url: this.url,
                   method: 'POST',
                   json: {
-                    docUpdates,
-                    fileUpdates: [],
+                    updates,
                     userId: this.user_id,
                     version: this.version,
                     projectHistoryId: this.projectHistoryId
@@ -925,8 +925,9 @@ describe('DocumentUpdaterHandler', function() {
             newProject: { version: this.version }
           }
 
-          const docUpdates = [
+          const updates = [
             {
+              type: 'add-doc',
               id: this.docId.toString(),
               pathname: '/foo',
               docLines: 'a\nb',
@@ -946,8 +947,7 @@ describe('DocumentUpdaterHandler', function() {
                   url: this.url,
                   method: 'POST',
                   json: {
-                    docUpdates,
-                    fileUpdates: [],
+                    updates,
                     userId: this.user_id,
                     version: this.version,
                     projectHistoryId: this.projectHistoryId
@@ -974,8 +974,9 @@ describe('DocumentUpdaterHandler', function() {
             newProject: { version: this.version }
           }
 
-          const fileUpdates = [
+          const updates = [
             {
+              type: 'add-file',
               id: this.fileId.toString(),
               pathname: '/bar',
               url: 'filestore.example.com/file',
@@ -995,8 +996,7 @@ describe('DocumentUpdaterHandler', function() {
                   url: this.url,
                   method: 'POST',
                   json: {
-                    docUpdates: [],
-                    fileUpdates,
+                    updates,
                     userId: this.user_id,
                     version: this.version,
                     projectHistoryId: this.projectHistoryId
@@ -1019,8 +1019,9 @@ describe('DocumentUpdaterHandler', function() {
             newProject: { version: this.version }
           }
 
-          const docUpdates = [
+          const updates = [
             {
+              type: 'rename-doc',
               id: this.docId.toString(),
               pathname: '/foo',
               newPathname: ''
@@ -1038,14 +1039,74 @@ describe('DocumentUpdaterHandler', function() {
                   url: this.url,
                   method: 'POST',
                   json: {
-                    docUpdates,
-                    fileUpdates: [],
+                    updates,
                     userId: this.user_id,
                     version: this.version,
                     projectHistoryId: this.projectHistoryId
                   }
                 })
                 .should.equal(true)
+              done()
+            }
+          )
+        })
+      })
+
+      describe('when a file is converted to a doc', function() {
+        it('should send the delete first', function(done) {
+          this.docId = new ObjectId()
+          this.fileId = new ObjectId()
+          this.changes = {
+            oldFiles: [
+              {
+                path: '/foo.doc',
+                url: 'filestore.example.com/file',
+                file: { _id: this.fileId }
+              }
+            ],
+            newDocs: [
+              {
+                path: '/foo.doc',
+                docLines: 'hello there',
+                doc: { _id: this.docId }
+              }
+            ],
+            newProject: { version: this.version }
+          }
+
+          const updates = [
+            {
+              type: 'rename-file',
+              id: this.fileId.toString(),
+              pathname: '/foo.doc',
+              newPathname: ''
+            },
+            {
+              type: 'add-doc',
+              id: this.docId.toString(),
+              pathname: '/foo.doc',
+              docLines: 'hello there',
+              url: undefined,
+              hash: undefined
+            }
+          ]
+
+          this.handler.updateProjectStructure(
+            this.project_id,
+            this.projectHistoryId,
+            this.user_id,
+            this.changes,
+            () => {
+              this.request.should.have.been.calledWith({
+                url: this.url,
+                method: 'POST',
+                json: {
+                  updates,
+                  userId: this.user_id,
+                  version: this.version,
+                  projectHistoryId: this.projectHistoryId
+                }
+              })
               done()
             }
           )

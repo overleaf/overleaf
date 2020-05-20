@@ -880,10 +880,17 @@ describe('ProjectEntityUpdateHandler', function() {
         this.folder = { _id: folderId, docs: [], fileRefs: [this.existingFile] }
         this.newDoc = { _id: docId }
         this.docLines = ['line one', 'line two']
-        this.path = 'path/to/file'
-        this.ProjectLocator.findElement.yields(null, this.folder, {
-          fileSystem: this.path
-        })
+        this.folderPath = '/path/to/folder'
+        this.filePath = '/path/to/folder/foo.tex'
+        this.ProjectLocator.findElement
+          .withArgs({
+            project_id: projectId,
+            element_id: this.folder._id,
+            type: 'folder'
+          })
+          .yields(null, this.folder, {
+            fileSystem: this.folderPath
+          })
         this.DocstoreManager.updateDoc.yields()
         this.ProjectEntityMongoUpdateHandler.replaceFileWithDoc.yields(
           null,
@@ -924,7 +931,7 @@ describe('ProjectEntityUpdateHandler', function() {
         expect(this.TpdsUpdateSender.addDoc).to.have.been.calledWith({
           project_id: projectId,
           doc_id: this.newDoc._id,
-          path: this.path,
+          path: this.filePath,
           project_name: this.newProject.name,
           rev: this.existingFile.rev + 1
         })
@@ -934,13 +941,13 @@ describe('ProjectEntityUpdateHandler', function() {
         const oldFiles = [
           {
             file: this.existingFile,
-            path: `${this.path}/foo.tex`
+            path: this.filePath
           }
         ]
         const newDocs = [
           {
             doc: sinon.match(this.newDoc),
-            path: this.path,
+            path: this.filePath,
             docLines: this.docLines.join('\n')
           }
         ]

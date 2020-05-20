@@ -607,7 +607,7 @@ const ProjectEntityUpdateHandler = {
     }
     ProjectLocator.findElement(
       { project_id: projectId, element_id: folderId, type: 'folder' },
-      (error, folder, path) => {
+      (error, folder, folderPath) => {
         if (error != null) {
           return callback(error)
         }
@@ -620,6 +620,7 @@ const ProjectEntityUpdateHandler = {
         )
         if (existingFile) {
           const doc = new Doc({ name: docName })
+          const filePath = `${folderPath.fileSystem}/${existingFile.name}`
           DocstoreManager.updateDoc(
             projectId.toString(),
             doc._id.toString(),
@@ -642,7 +643,7 @@ const ProjectEntityUpdateHandler = {
                     {
                       project_id: projectId,
                       doc_id: doc._id,
-                      path: path.fileSystem,
+                      path: filePath,
                       project_name: project.name,
                       rev: existingFile.rev + 1
                     },
@@ -650,7 +651,6 @@ const ProjectEntityUpdateHandler = {
                       if (err) {
                         return callback(err)
                       }
-                      const docPath = path.fileSystem
                       const projectHistoryId =
                         project.overleaf &&
                         project.overleaf.history &&
@@ -658,14 +658,14 @@ const ProjectEntityUpdateHandler = {
                       const newDocs = [
                         {
                           doc,
-                          path: docPath,
+                          path: filePath,
                           docLines: docLines.join('\n')
                         }
                       ]
                       const oldFiles = [
                         {
                           file: existingFile,
-                          path: Path.join(path.fileSystem, existingFile.name)
+                          path: filePath
                         }
                       ]
                       DocumentUpdaterHandler.updateProjectStructure(
