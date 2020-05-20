@@ -57,7 +57,7 @@ script(type='text/ng-template', id='newFileModalTemplate')
 							p.text-center
 								| The following files already exist in this project:
 							ul.text-center.list-unstyled.row-spaced-small
-								li(ng-repeat="conflict in conflicts"): strong {{ conflict }}
+								li(ng-repeat="conflict in conflicts track by $index"): strong {{ conflict }}
 							p.text-center.row-spaced-small
 								| Do you want to overwrite them?
 							p.text-center
