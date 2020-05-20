@@ -2,13 +2,6 @@
     camelcase,
     handle-callback-err,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let DocUpdaterClient
 const Settings = require('settings-sharelatex')
 const rclient = require('redis-sharelatex').createClient(
@@ -26,10 +19,11 @@ rclient_sub.setMaxListeners(0)
 
 module.exports = DocUpdaterClient = {
   randomId() {
-    const chars = __range__(1, 24, true).map(
-      (i) => Math.random().toString(16)[2]
-    )
-    return chars.join('')
+    let str = ''
+    for (let i = 0; i < 24; i++) {
+      str += Math.floor(Math.random() * 16).toString(16)
+    }
+    return str
   },
 
   subscribeToAppliedOps(callback) {
@@ -60,13 +54,9 @@ module.exports = DocUpdaterClient = {
       if (error) {
         return callback(error)
       }
-      const jobs = []
-      for (const update of Array.from(updates)) {
-        ;((update) =>
-          jobs.push((callback) =>
-            DocUpdaterClient.sendUpdate(project_id, doc_id, update, callback)
-          ))(update)
-      }
+      const jobs = updates.map((update) => (callback) => {
+        DocUpdaterClient.sendUpdate(project_id, doc_id, update, callback)
+      })
       async.series(jobs, (err) =>
         DocUpdaterClient.waitForPendingUpdates(project_id, doc_id, callback)
       )
@@ -209,14 +199,4 @@ module.exports = DocUpdaterClient = {
       (error, res, body) => callback(error, res, body)
     )
   }
-}
-
-function __range__(left, right, inclusive) {
-  const range = []
-  const ascending = left < right
-  const end = !inclusive ? right : ascending ? right + 1 : right - 1
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i)
-  }
-  return range
 }
