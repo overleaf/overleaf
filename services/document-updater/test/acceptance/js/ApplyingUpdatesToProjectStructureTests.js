@@ -3,13 +3,6 @@
     handle-callback-err,
     no-return-assign,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const chai = require('chai')
 chai.should()
@@ -27,7 +20,7 @@ const DocUpdaterApp = require('./helpers/DocUpdaterApp')
 describe("Applying updates to a project's structure", function () {
   before(function () {
     this.user_id = 'user-id-123'
-    return (this.version = 1234)
+    this.version = 1234
   })
 
   describe('renaming a file', function () {
@@ -39,11 +32,11 @@ describe("Applying updates to a project's structure", function () {
         newPathname: '/new-file-path'
       }
       this.fileUpdates = [this.fileUpdate]
-      return DocUpdaterApp.ensureRunning((error) => {
+      DocUpdaterApp.ensureRunning((error) => {
         if (error) {
           throw error
         }
-        return DocUpdaterClient.sendProjectUpdate(
+        DocUpdaterClient.sendProjectUpdate(
           this.project_id,
           this.user_id,
           [],
@@ -53,13 +46,13 @@ describe("Applying updates to a project's structure", function () {
             if (error) {
               throw error
             }
-            return setTimeout(done, 200)
+            setTimeout(done, 200)
           }
         )
       })
     })
 
-    return it('should push the applied file renames to the project history api', function (done) {
+    it('should push the applied file renames to the project history api', function (done) {
       rclient_project_history.lrange(
         ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
         0,
@@ -77,7 +70,7 @@ describe("Applying updates to a project's structure", function () {
           update.meta.ts.should.be.a('string')
           update.version.should.equal(`${this.version}.0`)
 
-          return done()
+          done()
         }
       )
     })
@@ -90,7 +83,7 @@ describe("Applying updates to a project's structure", function () {
         pathname: '/doc-path',
         newPathname: '/new-doc-path'
       }
-      return (this.docUpdates = [this.docUpdate])
+      this.docUpdates = [this.docUpdate]
     })
 
     describe('when the document is not loaded', function () {
@@ -106,12 +99,12 @@ describe("Applying updates to a project's structure", function () {
             if (error) {
               throw error
             }
-            return setTimeout(done, 200)
+            setTimeout(done, 200)
           }
         )
       })
 
-      return it('should push the applied doc renames to the project history api', function (done) {
+      it('should push the applied doc renames to the project history api', function (done) {
         rclient_project_history.lrange(
           ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
           0,
@@ -129,13 +122,13 @@ describe("Applying updates to a project's structure", function () {
             update.meta.ts.should.be.a('string')
             update.version.should.equal(`${this.version}.0`)
 
-            return done()
+            done()
           }
         )
       })
     })
 
-    return describe('when the document is loaded', function () {
+    describe('when the document is loaded', function () {
       before(function (done) {
         this.project_id = DocUpdaterClient.randomId()
         MockWebApi.insertDoc(this.project_id, this.docUpdate.id, {})
@@ -147,7 +140,7 @@ describe("Applying updates to a project's structure", function () {
               throw error
             }
             sinon.spy(MockWebApi, 'getDocument')
-            return DocUpdaterClient.sendProjectUpdate(
+            DocUpdaterClient.sendProjectUpdate(
               this.project_id,
               this.user_id,
               this.docUpdates,
@@ -157,7 +150,7 @@ describe("Applying updates to a project's structure", function () {
                 if (error) {
                   throw error
                 }
-                return setTimeout(done, 200)
+                setTimeout(done, 200)
               }
             )
           }
@@ -165,7 +158,7 @@ describe("Applying updates to a project's structure", function () {
       })
 
       after(function () {
-        return MockWebApi.getDocument.restore()
+        MockWebApi.getDocument.restore()
       })
 
       it('should update the doc', function (done) {
@@ -174,12 +167,12 @@ describe("Applying updates to a project's structure", function () {
           this.docUpdate.id,
           (error, res, doc) => {
             doc.pathname.should.equal(this.docUpdate.newPathname)
-            return done()
+            done()
           }
         )
       })
 
-      return it('should push the applied doc renames to the project history api', function (done) {
+      it('should push the applied doc renames to the project history api', function (done) {
         rclient_project_history.lrange(
           ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
           0,
@@ -197,7 +190,7 @@ describe("Applying updates to a project's structure", function () {
             update.meta.ts.should.be.a('string')
             update.version.should.equal(`${this.version}.0`)
 
-            return done()
+            done()
           }
         )
       })
@@ -227,10 +220,10 @@ describe("Applying updates to a project's structure", function () {
         pathname: '/file-path1',
         newPathname: '/new-file-path1'
       }
-      return (this.fileUpdates = [this.fileUpdate0, this.fileUpdate1])
+      this.fileUpdates = [this.fileUpdate0, this.fileUpdate1]
     })
 
-    return describe('when the documents are not loaded', function () {
+    describe('when the documents are not loaded', function () {
       before(function (done) {
         this.project_id = DocUpdaterClient.randomId()
         DocUpdaterClient.sendProjectUpdate(
@@ -243,12 +236,12 @@ describe("Applying updates to a project's structure", function () {
             if (error) {
               throw error
             }
-            return setTimeout(done, 200)
+            setTimeout(done, 200)
           }
         )
       })
 
-      return it('should push the applied doc renames to the project history api', function (done) {
+      it('should push the applied doc renames to the project history api', function (done) {
         rclient_project_history.lrange(
           ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
           0,
@@ -290,7 +283,7 @@ describe("Applying updates to a project's structure", function () {
             update.meta.ts.should.be.a('string')
             update.version.should.equal(`${this.version}.3`)
 
-            return done()
+            done()
           }
         )
       })
@@ -316,12 +309,12 @@ describe("Applying updates to a project's structure", function () {
           if (error) {
             throw error
           }
-          return setTimeout(done, 200)
+          setTimeout(done, 200)
         }
       )
     })
 
-    return it('should push the file addition to the project history api', function (done) {
+    it('should push the file addition to the project history api', function (done) {
       rclient_project_history.lrange(
         ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
         0,
@@ -339,7 +332,7 @@ describe("Applying updates to a project's structure", function () {
           update.meta.ts.should.be.a('string')
           update.version.should.equal(`${this.version}.0`)
 
-          return done()
+          done()
         }
       )
     })
@@ -364,12 +357,12 @@ describe("Applying updates to a project's structure", function () {
           if (error) {
             throw error
           }
-          return setTimeout(done, 200)
+          setTimeout(done, 200)
         }
       )
     })
 
-    return it('should push the doc addition to the project history api', function (done) {
+    it('should push the doc addition to the project history api', function (done) {
       rclient_project_history.lrange(
         ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
         0,
@@ -387,7 +380,7 @@ describe("Applying updates to a project's structure", function () {
           update.meta.ts.should.be.a('string')
           update.version.should.equal(`${this.version}.0`)
 
-          return done()
+          done()
         }
       )
     })
@@ -424,7 +417,7 @@ describe("Applying updates to a project's structure", function () {
           if (error) {
             throw error
           }
-          return DocUpdaterClient.sendProjectUpdate(
+          DocUpdaterClient.sendProjectUpdate(
             projectId,
             userId,
             updates.slice(250),
@@ -434,7 +427,7 @@ describe("Applying updates to a project's structure", function () {
               if (error) {
                 throw error
               }
-              return setTimeout(done, 2000)
+              setTimeout(done, 2000)
             }
           )
         }
@@ -442,17 +435,17 @@ describe("Applying updates to a project's structure", function () {
     })
 
     after(function () {
-      return MockProjectHistoryApi.flushProject.restore()
+      MockProjectHistoryApi.flushProject.restore()
     })
 
-    return it('should flush project history', function () {
-      return MockProjectHistoryApi.flushProject
+    it('should flush project history', function () {
+      MockProjectHistoryApi.flushProject
         .calledWith(this.project_id)
         .should.equal(true)
     })
   })
 
-  return describe('with too few updates to flush to the history service', function () {
+  describe('with too few updates to flush to the history service', function () {
     before(function (done) {
       this.project_id = DocUpdaterClient.randomId()
       this.user_id = DocUpdaterClient.randomId()
@@ -484,7 +477,7 @@ describe("Applying updates to a project's structure", function () {
           if (error) {
             throw error
           }
-          return DocUpdaterClient.sendProjectUpdate(
+          DocUpdaterClient.sendProjectUpdate(
             projectId,
             userId,
             updates.slice(10),
@@ -494,7 +487,7 @@ describe("Applying updates to a project's structure", function () {
               if (error) {
                 throw error
               }
-              return setTimeout(done, 2000)
+              setTimeout(done, 2000)
             }
           )
         }
@@ -502,11 +495,11 @@ describe("Applying updates to a project's structure", function () {
     })
 
     after(function () {
-      return MockProjectHistoryApi.flushProject.restore()
+      MockProjectHistoryApi.flushProject.restore()
     })
 
-    return it('should not flush project history', function () {
-      return MockProjectHistoryApi.flushProject
+    it('should not flush project history', function () {
+      MockProjectHistoryApi.flushProject
         .calledWith(this.project_id)
         .should.equal(false)
     })
