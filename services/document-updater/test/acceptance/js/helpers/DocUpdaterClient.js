@@ -185,18 +185,11 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  sendProjectUpdate(
-    projectId,
-    userId,
-    docUpdates,
-    fileUpdates,
-    version,
-    callback
-  ) {
+  sendProjectUpdate(projectId, userId, updates, version, callback) {
     request.post(
       {
         url: `http://localhost:3003/project/${projectId}`,
-        json: { userId, docUpdates, fileUpdates, version }
+        json: { userId, updates, version }
       },
       (error, res, body) => callback(error, res, body)
     )

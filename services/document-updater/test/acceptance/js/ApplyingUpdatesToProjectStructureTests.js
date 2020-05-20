@@ -22,11 +22,12 @@ describe("Applying updates to a project's structure", function () {
     before(function (done) {
       this.project_id = DocUpdaterClient.randomId()
       this.fileUpdate = {
+        type: 'rename-file',
         id: DocUpdaterClient.randomId(),
         pathname: '/file-path',
         newPathname: '/new-file-path'
       }
-      this.fileUpdates = [this.fileUpdate]
+      this.updates = [this.fileUpdate]
       DocUpdaterApp.ensureRunning((error) => {
         if (error) {
           return done(error)
@@ -34,8 +35,7 @@ describe("Applying updates to a project's structure", function () {
         DocUpdaterClient.sendProjectUpdate(
           this.project_id,
           this.user_id,
-          [],
-          this.fileUpdates,
+          this.updates,
           this.version,
           (error) => {
             if (error) {
@@ -73,12 +73,13 @@ describe("Applying updates to a project's structure", function () {
 
   describe('renaming a document', function () {
     before(function () {
-      this.docUpdate = {
+      this.update = {
+        type: 'rename-doc',
         id: DocUpdaterClient.randomId(),
         pathname: '/doc-path',
         newPathname: '/new-doc-path'
       }
-      this.docUpdates = [this.docUpdate]
+      this.updates = [this.update]
     })
 
     describe('when the document is not loaded', function () {
@@ -87,8 +88,7 @@ describe("Applying updates to a project's structure", function () {
         DocUpdaterClient.sendProjectUpdate(
           this.project_id,
           this.user_id,
-          this.docUpdates,
-          [],
+          this.updates,
           this.version,
           (error) => {
             if (error) {
@@ -110,7 +110,7 @@ describe("Applying updates to a project's structure", function () {
             }
 
             const update = JSON.parse(updates[0])
-            update.doc.should.equal(this.docUpdate.id)
+            update.doc.should.equal(this.update.id)
             update.pathname.should.equal('/doc-path')
             update.new_pathname.should.equal('/new-doc-path')
             update.meta.user_id.should.equal(this.user_id)
@@ -126,10 +126,10 @@ describe("Applying updates to a project's structure", function () {
     describe('when the document is loaded', function () {
       before(function (done) {
         this.project_id = DocUpdaterClient.randomId()
-        MockWebApi.insertDoc(this.project_id, this.docUpdate.id, {})
+        MockWebApi.insertDoc(this.project_id, this.update.id, {})
         DocUpdaterClient.preloadDoc(
           this.project_id,
-          this.docUpdate.id,
+          this.update.id,
           (error) => {
             if (error) {
               return done(error)
@@ -138,8 +138,7 @@ describe("Applying updates to a project's structure", function () {
             DocUpdaterClient.sendProjectUpdate(
               this.project_id,
               this.user_id,
-              this.docUpdates,
-              [],
+              this.updates,
               this.version,
               (error) => {
                 if (error) {
@@ -159,12 +158,12 @@ describe("Applying updates to a project's structure", function () {
       it('should update the doc', function (done) {
         DocUpdaterClient.getDoc(
           this.project_id,
-          this.docUpdate.id,
+          this.update.id,
           (error, res, doc) => {
             if (error) {
               return done(error)
             }
-            doc.pathname.should.equal(this.docUpdate.newPathname)
+            doc.pathname.should.equal(this.update.newPathname)
             done()
           }
         )
@@ -181,7 +180,7 @@ describe("Applying updates to a project's structure", function () {
             }
 
             const update = JSON.parse(updates[0])
-            update.doc.should.equal(this.docUpdate.id)
+            update.doc.should.equal(this.update.id)
             update.pathname.should.equal('/doc-path')
             update.new_pathname.should.equal('/new-doc-path')
             update.meta.user_id.should.equal(this.user_id)
@@ -198,27 +197,35 @@ describe("Applying updates to a project's structure", function () {
   describe('renaming multiple documents and files', function () {
     before(function () {
       this.docUpdate0 = {
+        type: 'rename-doc',
         id: DocUpdaterClient.randomId(),
         pathname: '/doc-path0',
         newPathname: '/new-doc-path0'
       }
       this.docUpdate1 = {
+        type: 'rename-doc',
         id: DocUpdaterClient.randomId(),
         pathname: '/doc-path1',
         newPathname: '/new-doc-path1'
       }
-      this.docUpdates = [this.docUpdate0, this.docUpdate1]
       this.fileUpdate0 = {
+        type: 'rename-file',
         id: DocUpdaterClient.randomId(),
         pathname: '/file-path0',
         newPathname: '/new-file-path0'
       }
       this.fileUpdate1 = {
+        type: 'rename-file',
         id: DocUpdaterClient.randomId(),
         pathname: '/file-path1',
         newPathname: '/new-file-path1'
       }
-      this.fileUpdates = [this.fileUpdate0, this.fileUpdate1]
+      this.updates = [
+        this.docUpdate0,
+        this.docUpdate1,
+        this.fileUpdate0,
+        this.fileUpdate1
+      ]
     })
 
     describe('when the documents are not loaded', function () {
@@ -227,8 +234,7 @@ describe("Applying updates to a project's structure", function () {
         DocUpdaterClient.sendProjectUpdate(
           this.project_id,
           this.user_id,
-          this.docUpdates,
-          this.fileUpdates,
+          this.updates,
           this.version,
           (error) => {
             if (error) {
@@ -292,16 +298,16 @@ describe("Applying updates to a project's structure", function () {
     before(function (done) {
       this.project_id = DocUpdaterClient.randomId()
       this.fileUpdate = {
+        type: 'add-file',
         id: DocUpdaterClient.randomId(),
         pathname: '/file-path',
         url: 'filestore.example.com'
       }
-      this.fileUpdates = [this.fileUpdate]
+      this.updates = [this.fileUpdate]
       DocUpdaterClient.sendProjectUpdate(
         this.project_id,
         this.user_id,
-        [],
-        this.fileUpdates,
+        this.updates,
         this.version,
         (error) => {
           if (error) {
@@ -340,16 +346,16 @@ describe("Applying updates to a project's structure", function () {
     before(function (done) {
       this.project_id = DocUpdaterClient.randomId()
       this.docUpdate = {
+        type: 'add-doc',
         id: DocUpdaterClient.randomId(),
         pathname: '/file-path',
         docLines: 'a\nb'
       }
-      this.docUpdates = [this.docUpdate]
+      this.updates = [this.docUpdate]
       DocUpdaterClient.sendProjectUpdate(
         this.project_id,
         this.user_id,
-        this.docUpdates,
-        [],
+        this.updates,
         this.version,
         (error) => {
           if (error) {
@@ -394,6 +400,7 @@ describe("Applying updates to a project's structure", function () {
       for (let v = 0; v <= 599; v++) {
         // Should flush after 500 ops
         updates.push({
+          type: 'add-doc',
           id: DocUpdaterClient.randomId(),
           pathname: '/file-' + v,
           docLines: 'a\nb'
@@ -409,7 +416,6 @@ describe("Applying updates to a project's structure", function () {
         projectId,
         userId,
         updates.slice(0, 250),
-        [],
         this.version0,
         function (error) {
           if (error) {
@@ -419,7 +425,6 @@ describe("Applying updates to a project's structure", function () {
             projectId,
             userId,
             updates.slice(250),
-            [],
             this.version1,
             (error) => {
               if (error) {
@@ -454,6 +459,7 @@ describe("Applying updates to a project's structure", function () {
       for (let v = 0; v <= 42; v++) {
         // Should flush after 500 ops
         updates.push({
+          type: 'add-doc',
           id: DocUpdaterClient.randomId(),
           pathname: '/file-' + v,
           docLines: 'a\nb'
@@ -469,7 +475,6 @@ describe("Applying updates to a project's structure", function () {
         projectId,
         userId,
         updates.slice(0, 10),
-        [],
         this.version0,
         function (error) {
           if (error) {
@@ -479,7 +484,6 @@ describe("Applying updates to a project's structure", function () {
             projectId,
             userId,
             updates.slice(10),
-            [],
             this.version1,
             (error) => {
               if (error) {
