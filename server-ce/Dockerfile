@@ -93,6 +93,8 @@ ENV WEB_API_USER "sharelatex"
 
 ENV SHARELATEX_APP_NAME "Overleaf Community Edition"
 
+ENV OPTIMISE_PDF "true"
+
 
 EXPOSE 80
 

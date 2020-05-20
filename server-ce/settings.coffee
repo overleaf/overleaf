@@ -22,6 +22,9 @@ TMP_DIR = '/var/lib/sharelatex/tmp'
 
 settings =
 
+	clsi:
+		optimiseInDocker: process.env['OPTIMISE_PDF'] == 'true'
+
 	brandPrefix: ""
 
 	allowAnonymousReadAndWriteSharing:
