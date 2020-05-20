@@ -15,10 +15,6 @@ App.controller(
       return $location.path()
     }
 
-    $scope.buildFormImportPath = projectId => {
-      return `/overleaf/project/${projectId}/import`
-    }
-
     $scope.buildZipDownloadPath = projectId => {
       return `/overleaf/project/${projectId}/download/zip`
     }

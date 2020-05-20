@@ -64,11 +64,10 @@ async function _handleV1Project(token, userId) {
     }
     return {
       v1Import: {
-        status: 'canImport',
+        status: 'canDownloadZip',
         projectId: token,
         hasOwner: docInfo.has_owner,
         name: docInfo.name || 'Untitled',
-        hasAssignment: docInfo.has_assignment,
         brandInfo: docInfo.brand_info
       }
     }

@@ -14,7 +14,7 @@ block content
 		.editor.full-size
 			div
 				| &nbsp;
-				a(href="/project" style="font-size: 2rem; margin-left: 1rem; color: #ddd;")
+				a(href="/project", style="font-size: 2rem; margin-left: 1rem; color: #ddd;")
 					i.fa.fa-arrow-left
 
 			.loading-screen(
@@ -77,72 +77,18 @@ block content
 										href="/login?redir={{ currentPath() }}"
 									) Log In To Move Project
 
-							div(ng-if="v1ImportData.status == 'canImport'")
-								div(ng-if="v1ImportData.hasOwner")
-									p.text-center.row-spaced-small
-										| #[strong() {{ getProjectName() }}] has not yet been moved into
-										| the new version of Overleaf. You will need to move it in order
-										| to continue working on it. It should only take a few seconds.
+							div(ng-if="v1ImportData.status == 'canDownloadZip'")
+								p.text-center.row-spaced.small
+									| #[strong() {{ getProjectName() }}] has not yet been moved into
+									| the new version of Overleaf. This project was created
+									| anonymously and therefore cannot be automatically imported.
+									| Please download a zip file of the project and upload that to
+									| continue editing it. If you would like to delete this project
+									| after you have made a copy, please contact support.
 
-									form(
-										async-form="v2Import"
-										name="v2ImportForm"
-										action="{{ buildFormImportPath(v1ImportData.projectId) }}"
-										method="POST"
-										ng-cloak
-									)
-										input(name='_csrf', type='hidden', value=csrfToken)
-										form-messages(for="v2ImportForm")
-										input.row-spaced.btn.btn-primary.text-center.center-block(
-											type="submit"
-											ng-value="v2ImportForm.inflight || v2ImportForm.response.success ? 'Moving to v2…' : 'Move Project and Continue'"
-											ng-disabled="v2ImportForm.inflight || v2ImportForm.response.success"
-										)
-
-									.row-spaced-small.text-center
-										a(href="{{ buildZipDownloadPath(v1ImportData.projectId) }}")
-											| Download project zip file
-								div(ng-if="!v1ImportData.hasOwner")
-									p.text-center.row-spaced.small
-										| #[strong() {{ getProjectName() }}] has not yet been moved into
-										| the new version of Overleaf. This project was created
-										| anonymously and therefore cannot be automatically imported.
-										| Please download a zip file of the project and upload that to
-										| continue editing it. If you would like to delete this project
-										| after you have made a copy, please contact support.
-
-									.row-spaced.text-center
-										a.btn.btn-primary(href="{{ buildZipDownloadPath(v1ImportData.projectId) }}")
-											| Download project zip file
-
-							.row-spaced.text-center
-								div(ng-if="v1ImportData.hasAssignment")
-									p
-										| #[span.fa.fa-exclamation-triangle]
-										| This project is an assignment, and the assignment toolkit is
-										| no longer supported in Overleaf v2. When you move it to
-										| Overleaf v2, it will become a normal project.
-										| #[a(href="https://www.overleaf.com/learn/how-to/Overleaf_v2_FAQ#assignment-tools") Please see our FAQ]
-										| for more information or contact your instructor if you haven't
-										| already submitted it.
-								div(ng-if="!v1ImportData.hasAssignment")
-									div(ng-switch="v1ImportData.brandInfo")
-										div(ng-switch-when="'f1000'")
-											p
-												| #[span.fa.fa-exclamation-triangle]
-												| This project is an F1000Research article, and our integration
-												| with F1000Research has changed in Overleaf v2.
-												| #[a(href="https://www.overleaf.com/learn/how-to/Overleaf_v2_FAQ#f1000research") Find out more about moving to Overleaf v2]
-										div(ng-switch-when="'wellcome'")
-											p
-												| #[span.fa.fa-exclamation-triangle]
-												| This project is an Wellcome Open Research article, and our
-												| integration with Wellcome Open Research has changed in
-												| Overleaf v2.
-												| #[a(href="https://www.overleaf.com/learn/how-to/Overleaf_v2_FAQ#f1000research") Find out more about moving to Overleaf v2]
-										div(ng-switch-default)
-											a(href="https://www.overleaf.com/learn/how-to/Overleaf_v2_FAQ")
-												| Find out more about moving to Overleaf v2
+								.row-spaced.text-center
+									a.btn.btn-primary(href="{{ buildZipDownloadPath(v1ImportData.projectId) }}")
+										| Download project zip file
 
 
 block append foot-scripts
