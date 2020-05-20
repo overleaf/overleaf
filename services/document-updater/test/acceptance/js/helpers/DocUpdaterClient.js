@@ -1,6 +1,3 @@
-/* eslint-disable
-    camelcase,
-*/
 let DocUpdaterClient
 const Settings = require('settings-sharelatex')
 const rclient = require('redis-sharelatex').createClient(
@@ -10,11 +7,11 @@ const keys = Settings.redis.documentupdater.key_schema
 const request = require('request').defaults({ jar: false })
 const async = require('async')
 
-const rclient_sub = require('redis-sharelatex').createClient(
+const rclientSub = require('redis-sharelatex').createClient(
   Settings.redis.pubsub
 )
-rclient_sub.subscribe('applied-ops')
-rclient_sub.setMaxListeners(0)
+rclientSub.subscribe('applied-ops')
+rclientSub.setMaxListeners(0)
 
 module.exports = DocUpdaterClient = {
   randomId() {
@@ -26,50 +23,50 @@ module.exports = DocUpdaterClient = {
   },
 
   subscribeToAppliedOps(callback) {
-    rclient_sub.on('message', callback)
+    rclientSub.on('message', callback)
   },
 
-  sendUpdate(project_id, doc_id, update, callback) {
+  sendUpdate(projectId, docId, update, callback) {
     rclient.rpush(
-      keys.pendingUpdates({ doc_id }),
+      keys.pendingUpdates({ doc_id: docId }),
       JSON.stringify(update),
       (error) => {
         if (error) {
           return callback(error)
         }
-        const doc_key = `${project_id}:${doc_id}`
-        rclient.sadd('DocsWithPendingUpdates', doc_key, (error) => {
+        const docKey = `${projectId}:${docId}`
+        rclient.sadd('DocsWithPendingUpdates', docKey, (error) => {
           if (error) {
             return callback(error)
           }
-          rclient.rpush('pending-updates-list', doc_key, callback)
+          rclient.rpush('pending-updates-list', docKey, callback)
         })
       }
     )
   },
 
-  sendUpdates(project_id, doc_id, updates, callback) {
-    DocUpdaterClient.preloadDoc(project_id, doc_id, (error) => {
+  sendUpdates(projectId, docId, updates, callback) {
+    DocUpdaterClient.preloadDoc(projectId, docId, (error) => {
       if (error) {
         return callback(error)
       }
       const jobs = updates.map((update) => (callback) => {
-        DocUpdaterClient.sendUpdate(project_id, doc_id, update, callback)
+        DocUpdaterClient.sendUpdate(projectId, docId, update, callback)
       })
       async.series(jobs, (err) => {
         if (err) {
           return callback(err)
         }
-        DocUpdaterClient.waitForPendingUpdates(project_id, doc_id, callback)
+        DocUpdaterClient.waitForPendingUpdates(projectId, docId, callback)
       })
     })
   },
 
-  waitForPendingUpdates(project_id, doc_id, callback) {
+  waitForPendingUpdates(projectId, docId, callback) {
     async.retry(
       { times: 30, interval: 100 },
       (cb) =>
-        rclient.llen(keys.pendingUpdates({ doc_id }), (err, length) => {
+        rclient.llen(keys.pendingUpdates({ doc_id: docId }), (err, length) => {
           if (err) {
             return cb(err)
           }
@@ -83,9 +80,9 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  getDoc(project_id, doc_id, callback) {
+  getDoc(projectId, docId, callback) {
     request.get(
-      `http://localhost:3003/project/${project_id}/doc/${doc_id}`,
+      `http://localhost:3003/project/${projectId}/doc/${docId}`,
       (error, res, body) => {
         if (body != null && res.statusCode >= 200 && res.statusCode < 300) {
           body = JSON.parse(body)
@@ -95,9 +92,9 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  getDocAndRecentOps(project_id, doc_id, fromVersion, callback) {
+  getDocAndRecentOps(projectId, docId, fromVersion, callback) {
     request.get(
-      `http://localhost:3003/project/${project_id}/doc/${doc_id}?fromVersion=${fromVersion}`,
+      `http://localhost:3003/project/${projectId}/doc/${docId}?fromVersion=${fromVersion}`,
       (error, res, body) => {
         if (body != null && res.statusCode >= 200 && res.statusCode < 300) {
           body = JSON.parse(body)
@@ -107,25 +104,25 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  preloadDoc(project_id, doc_id, callback) {
-    DocUpdaterClient.getDoc(project_id, doc_id, callback)
+  preloadDoc(projectId, docId, callback) {
+    DocUpdaterClient.getDoc(projectId, docId, callback)
   },
 
-  flushDoc(project_id, doc_id, callback) {
+  flushDoc(projectId, docId, callback) {
     request.post(
-      `http://localhost:3003/project/${project_id}/doc/${doc_id}/flush`,
+      `http://localhost:3003/project/${projectId}/doc/${docId}/flush`,
       (error, res, body) => callback(error, res, body)
     )
   },
 
-  setDocLines(project_id, doc_id, lines, source, user_id, undoing, callback) {
+  setDocLines(projectId, docId, lines, source, userId, undoing, callback) {
     request.post(
       {
-        url: `http://localhost:3003/project/${project_id}/doc/${doc_id}`,
+        url: `http://localhost:3003/project/${projectId}/doc/${docId}`,
         json: {
           lines,
           source,
-          user_id,
+          user_id: userId,
           undoing
         }
       },
@@ -133,24 +130,24 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  deleteDoc(project_id, doc_id, callback) {
+  deleteDoc(projectId, docId, callback) {
     request.del(
-      `http://localhost:3003/project/${project_id}/doc/${doc_id}`,
+      `http://localhost:3003/project/${projectId}/doc/${docId}`,
       (error, res, body) => callback(error, res, body)
     )
   },
 
-  flushProject(project_id, callback) {
-    request.post(`http://localhost:3003/project/${project_id}/flush`, callback)
+  flushProject(projectId, callback) {
+    request.post(`http://localhost:3003/project/${projectId}/flush`, callback)
   },
 
-  deleteProject(project_id, callback) {
-    request.del(`http://localhost:3003/project/${project_id}`, callback)
+  deleteProject(projectId, callback) {
+    request.del(`http://localhost:3003/project/${projectId}`, callback)
   },
 
-  deleteProjectOnShutdown(project_id, callback) {
+  deleteProjectOnShutdown(projectId, callback) {
     request.del(
-      `http://localhost:3003/project/${project_id}?background=true&shutdown=true`,
+      `http://localhost:3003/project/${projectId}?background=true&shutdown=true`,
       callback
     )
   },
@@ -162,23 +159,23 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  acceptChange(project_id, doc_id, change_id, callback) {
+  acceptChange(projectId, docId, changeId, callback) {
     request.post(
-      `http://localhost:3003/project/${project_id}/doc/${doc_id}/change/${change_id}/accept`,
+      `http://localhost:3003/project/${projectId}/doc/${docId}/change/${changeId}/accept`,
       callback
     )
   },
 
-  removeComment(project_id, doc_id, comment, callback) {
+  removeComment(projectId, docId, comment, callback) {
     request.del(
-      `http://localhost:3003/project/${project_id}/doc/${doc_id}/comment/${comment}`,
+      `http://localhost:3003/project/${projectId}/doc/${docId}/comment/${comment}`,
       callback
     )
   },
 
-  getProjectDocs(project_id, projectStateHash, callback) {
+  getProjectDocs(projectId, projectStateHash, callback) {
     request.get(
-      `http://localhost:3003/project/${project_id}/doc?state=${projectStateHash}`,
+      `http://localhost:3003/project/${projectId}/doc?state=${projectStateHash}`,
       (error, res, body) => {
         if (body != null && res.statusCode >= 200 && res.statusCode < 300) {
           body = JSON.parse(body)
@@ -189,7 +186,7 @@ module.exports = DocUpdaterClient = {
   },
 
   sendProjectUpdate(
-    project_id,
+    projectId,
     userId,
     docUpdates,
     fileUpdates,
@@ -198,7 +195,7 @@ module.exports = DocUpdaterClient = {
   ) {
     request.post(
       {
-        url: `http://localhost:3003/project/${project_id}`,
+        url: `http://localhost:3003/project/${projectId}`,
         json: { userId, docUpdates, fileUpdates, version }
       },
       (error, res, body) => callback(error, res, body)
