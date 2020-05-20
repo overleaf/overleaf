@@ -41,7 +41,8 @@ describe('PersistenceManager', function () {
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
           err: sinon.stub()
-        })
+        }),
+        './Errors': Errors
       }
     })
     this.project_id = 'project-id-123'
@@ -171,7 +172,7 @@ describe('PersistenceManager', function () {
 
       it('should return a NotFoundError', function () {
         return this.callback
-          .calledWith(new Errors.NotFoundError('not found'))
+          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)
       })
 
@@ -198,7 +199,7 @@ describe('PersistenceManager', function () {
 
       it('should return an error', function () {
         return this.callback
-          .calledWith(new Error('web api error'))
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
 
@@ -231,7 +232,7 @@ describe('PersistenceManager', function () {
 
       return it('should return and error', function () {
         return this.callback
-          .calledWith(new Error('web API response had no doc lines'))
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
     })
@@ -254,7 +255,7 @@ describe('PersistenceManager', function () {
 
       return it('should return and error', function () {
         return this.callback
-          .calledWith(new Error('web API response had no valid doc version'))
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
     })
@@ -277,7 +278,7 @@ describe('PersistenceManager', function () {
 
       return it('should return and error', function () {
         return this.callback
-          .calledWith(new Error('web API response had no valid doc pathname'))
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
     })
@@ -386,7 +387,7 @@ describe('PersistenceManager', function () {
 
       it('should return a NotFoundError', function () {
         return this.callback
-          .calledWith(new Errors.NotFoundError('not found'))
+          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)
       })
 
@@ -418,7 +419,7 @@ describe('PersistenceManager', function () {
 
       it('should return an error', function () {
         return this.callback
-          .calledWith(new Error('web api error'))
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
 

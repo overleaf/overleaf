@@ -142,8 +142,9 @@ describe('LockManager - trying the lock', function () {
       })
 
       return it('should return the callback with an error', function () {
-        const e = new Error('tried to release timed out lock')
-        return this.callback.calledWith(e).should.equal(true)
+        return this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
   })

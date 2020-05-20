@@ -119,9 +119,13 @@ describe('LockManager - getting the lock', function () {
     })
 
     return it('should return the callback with an error', function () {
-      const e = new Error('Timeout')
-      e.doc_id = this.doc_id
-      return this.callback.calledWith(e).should.equal(true)
+      return this.callback
+        .calledWith(
+          sinon.match
+            .instanceOf(Error)
+            .and(sinon.match.has('doc_id', this.doc_id))
+        )
+        .should.equal(true)
     })
   })
 })

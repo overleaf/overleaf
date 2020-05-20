@@ -52,7 +52,8 @@ describe('DocumentManager', function () {
         './RealTimeRedisManager': (this.RealTimeRedisManager = {}),
         './DiffCodec': (this.DiffCodec = {}),
         './UpdateManager': (this.UpdateManager = {}),
-        './RangesManager': (this.RangesManager = {})
+        './RangesManager': (this.RangesManager = {}),
+        './Errors': Errors
       }
     })
     this.project_id = 'project-id-123'
@@ -765,10 +766,9 @@ describe('DocumentManager', function () {
       })
 
       return it('should call the callback with a not found error', function () {
-        const error = new Errors.NotFoundError(
-          `document not found: ${this.doc_id}`
-        )
-        return this.callback.calledWith(error).should.equal(true)
+        return this.callback
+          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
+          .should.equal(true)
       })
     })
   })
@@ -848,10 +848,9 @@ describe('DocumentManager', function () {
       })
 
       return it('should call the callback with a not found error', function () {
-        const error = new Errors.NotFoundError(
-          `document not found: ${this.doc_id}`
-        )
-        return this.callback.calledWith(error).should.equal(true)
+        return this.callback
+          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
+          .should.equal(true)
       })
     })
   })

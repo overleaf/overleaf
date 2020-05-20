@@ -140,14 +140,16 @@ describe('ProjectManager - flushAndDeleteProject', function () {
     it('should record the error', function () {
       return this.logger.error
         .calledWith(
-          { err: this.error, project_id: this.project_id, doc_id: 'doc-id-1' },
+          { err: this.error, projectId: this.project_id, docId: 'doc-id-1' },
           'error deleting doc'
         )
         .should.equal(true)
     })
 
     it('should call the callback with an error', function () {
-      return this.callback.calledWith(new Error()).should.equal(true)
+      return this.callback
+        .calledWith(sinon.match.instanceOf(Error))
+        .should.equal(true)
     })
 
     return it('should time the execution', function () {

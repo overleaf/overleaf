@@ -121,26 +121,26 @@ describe('Flushing a doc to Mongo', function () {
         version: this.version
       })
       let t = 30000
-      sinon.stub(
-        MockWebApi,
-        'setDocument',
-        (
-          project_id,
-          doc_id,
-          lines,
-          version,
-          ranges,
-          lastUpdatedAt,
-          lastUpdatedBy,
-          callback
-        ) => {
-          if (callback == null) {
-            callback = function (error) {}
+      sinon
+        .stub(MockWebApi, 'setDocument')
+        .callsFake(
+          (
+            project_id,
+            doc_id,
+            lines,
+            version,
+            ranges,
+            lastUpdatedAt,
+            lastUpdatedBy,
+            callback
+          ) => {
+            if (callback == null) {
+              callback = function (error) {}
+            }
+            setTimeout(callback, t)
+            return (t = 0)
           }
-          setTimeout(callback, t)
-          return (t = 0)
-        }
-      )
+        )
       return DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, done)
     })
 

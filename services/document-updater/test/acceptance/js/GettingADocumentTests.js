@@ -216,12 +216,14 @@ describe('Getting a document', function () {
         DocUpdaterClient.randomId(),
         DocUpdaterClient.randomId()
       ])
-      sinon.stub(MockWebApi, 'getDocument', (project_id, doc_id, callback) => {
-        if (callback == null) {
-          callback = function (error, doc) {}
-        }
-        return callback(new Error('oops'))
-      })
+      sinon
+        .stub(MockWebApi, 'getDocument')
+        .callsFake((project_id, doc_id, callback) => {
+          if (callback == null) {
+            callback = function (error, doc) {}
+          }
+          return callback(new Error('oops'))
+        })
       return DocUpdaterClient.getDoc(
         this.project_id,
         this.doc_id,
@@ -248,12 +250,14 @@ describe('Getting a document', function () {
         DocUpdaterClient.randomId(),
         DocUpdaterClient.randomId()
       ])
-      sinon.stub(MockWebApi, 'getDocument', (project_id, doc_id, callback) => {
-        if (callback == null) {
-          callback = function (error, doc) {}
-        }
-        return setTimeout(callback, 30000)
-      })
+      sinon
+        .stub(MockWebApi, 'getDocument')
+        .callsFake((project_id, doc_id, callback) => {
+          if (callback == null) {
+            callback = function (error, doc) {}
+          }
+          return setTimeout(callback, 30000)
+        })
       return done()
     })
 

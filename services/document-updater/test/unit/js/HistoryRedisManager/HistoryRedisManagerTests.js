@@ -95,7 +95,7 @@ describe('HistoryRedisManager', function () {
 
       return it('should call the callback with an error', function () {
         return this.callback
-          .calledWith(new Error('cannot push no ops'))
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
     })

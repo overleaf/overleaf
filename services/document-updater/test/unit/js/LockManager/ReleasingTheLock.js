@@ -92,7 +92,7 @@ describe('LockManager - releasing the lock', function () {
 
     return it('should return an error if the lock has expired', function () {
       return this.callback
-        .calledWith(new Error('tried to release timed out lock'))
+        .calledWith(sinon.match.instanceOf(Error))
         .should.equal(true)
     })
   })

@@ -398,7 +398,7 @@ describe('RedisManager', function () {
 
       return it('should return an error', function () {
         return this.callback
-          .calledWith(new Error('redis getDoc exceeded timeout'))
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
     })
@@ -426,7 +426,7 @@ describe('RedisManager', function () {
 
       return it('should return an error', function () {
         return this.callback
-          .calledWith(new Errors.NotFoundError('not found'))
+          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)
       })
     })
@@ -543,11 +543,7 @@ describe('RedisManager', function () {
 
       it('should return an error', function () {
         return this.callback
-          .calledWith(
-            new Errors.OpRangeNotAvailableError(
-              'doc ops range is not loaded in redis'
-            )
-          )
+          .calledWith(sinon.match.instanceOf(Errors.OpRangeNotAvailableError))
           .should.equal(true)
       })
 
@@ -588,7 +584,7 @@ describe('RedisManager', function () {
 
       return it('should return an error', function () {
         return this.callback
-          .calledWith(new Error('redis getPreviousDocOps exceeded timeout'))
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
     })
@@ -854,9 +850,7 @@ describe('RedisManager', function () {
 
       return it('should call the callback with an error', function () {
         return this.callback
-          .calledWith(
-            new Error(`Version mismatch. '${this.doc_id}' is corrupted.`)
-          )
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
     })
@@ -954,7 +948,7 @@ describe('RedisManager', function () {
 
       return it('should call the callback with an error', function () {
         return this.callback
-          .calledWith(new Error('null bytes found in doc lines'))
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
     })
@@ -985,7 +979,7 @@ describe('RedisManager', function () {
 
       return it('should call the callback with the error', function () {
         return this.callback
-          .calledWith(new Error('ranges are too large'))
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
     })
@@ -1157,7 +1151,7 @@ describe('RedisManager', function () {
 
       return it('should call the callback with an error', function () {
         return this.callback
-          .calledWith(new Error('null bytes found in doc lines'))
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
     })
@@ -1185,7 +1179,7 @@ describe('RedisManager', function () {
 
       return it('should call the callback with the error', function () {
         return this.callback
-          .calledWith(new Error('ranges are too large'))
+          .calledWith(sinon.match.instanceOf(Error))
           .should.equal(true)
       })
     })

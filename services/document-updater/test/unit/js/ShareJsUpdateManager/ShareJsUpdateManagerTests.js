@@ -194,7 +194,9 @@ describe('ShareJsUpdateManager', function () {
       })
 
       return it('should call the callback with the error', function () {
-        return this.callback.calledWith(this.error).should.equal(true)
+        return this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
       })
     })
   })
