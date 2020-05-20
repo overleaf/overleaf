@@ -7,7 +7,6 @@
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let DocUpdaterClient
@@ -34,11 +33,11 @@ module.exports = DocUpdaterClient = {
   },
 
   subscribeToAppliedOps(callback) {
-    return rclient_sub.on('message', callback)
+    rclient_sub.on('message', callback)
   },
 
   sendUpdate(project_id, doc_id, update, callback) {
-    return rclient.rpush(
+    rclient.rpush(
       keys.pendingUpdates({ doc_id }),
       JSON.stringify(update),
       (error) => {
@@ -46,18 +45,18 @@ module.exports = DocUpdaterClient = {
           return callback(error)
         }
         const doc_key = `${project_id}:${doc_id}`
-        return rclient.sadd('DocsWithPendingUpdates', doc_key, (error) => {
+        rclient.sadd('DocsWithPendingUpdates', doc_key, (error) => {
           if (error) {
             return callback(error)
           }
-          return rclient.rpush('pending-updates-list', doc_key, callback)
+          rclient.rpush('pending-updates-list', doc_key, callback)
         })
       }
     )
   },
 
   sendUpdates(project_id, doc_id, updates, callback) {
-    return DocUpdaterClient.preloadDoc(project_id, doc_id, (error) => {
+    DocUpdaterClient.preloadDoc(project_id, doc_id, (error) => {
       if (error) {
         return callback(error)
       }
@@ -68,21 +67,21 @@ module.exports = DocUpdaterClient = {
             DocUpdaterClient.sendUpdate(project_id, doc_id, update, callback)
           ))(update)
       }
-      return async.series(jobs, (err) =>
+      async.series(jobs, (err) =>
         DocUpdaterClient.waitForPendingUpdates(project_id, doc_id, callback)
       )
     })
   },
 
   waitForPendingUpdates(project_id, doc_id, callback) {
-    return async.retry(
+    async.retry(
       { times: 30, interval: 100 },
       (cb) =>
         rclient.llen(keys.pendingUpdates({ doc_id }), (err, length) => {
           if (length > 0) {
-            return cb(new Error('updates still pending'))
+            cb(new Error('updates still pending'))
           } else {
-            return cb()
+            cb()
           }
         }),
       callback
@@ -90,42 +89,42 @@ module.exports = DocUpdaterClient = {
   },
 
   getDoc(project_id, doc_id, callback) {
-    return request.get(
+    request.get(
       `http://localhost:3003/project/${project_id}/doc/${doc_id}`,
       (error, res, body) => {
         if (body != null && res.statusCode >= 200 && res.statusCode < 300) {
           body = JSON.parse(body)
         }
-        return callback(error, res, body)
+        callback(error, res, body)
       }
     )
   },
 
   getDocAndRecentOps(project_id, doc_id, fromVersion, callback) {
-    return request.get(
+    request.get(
       `http://localhost:3003/project/${project_id}/doc/${doc_id}?fromVersion=${fromVersion}`,
       (error, res, body) => {
         if (body != null && res.statusCode >= 200 && res.statusCode < 300) {
           body = JSON.parse(body)
         }
-        return callback(error, res, body)
+        callback(error, res, body)
       }
     )
   },
 
   preloadDoc(project_id, doc_id, callback) {
-    return DocUpdaterClient.getDoc(project_id, doc_id, callback)
+    DocUpdaterClient.getDoc(project_id, doc_id, callback)
   },
 
   flushDoc(project_id, doc_id, callback) {
-    return request.post(
+    request.post(
       `http://localhost:3003/project/${project_id}/doc/${doc_id}/flush`,
       (error, res, body) => callback(error, res, body)
     )
   },
 
   setDocLines(project_id, doc_id, lines, source, user_id, undoing, callback) {
-    return request.post(
+    request.post(
       {
         url: `http://localhost:3003/project/${project_id}/doc/${doc_id}`,
         json: {
@@ -140,59 +139,56 @@ module.exports = DocUpdaterClient = {
   },
 
   deleteDoc(project_id, doc_id, callback) {
-    return request.del(
+    request.del(
       `http://localhost:3003/project/${project_id}/doc/${doc_id}`,
       (error, res, body) => callback(error, res, body)
     )
   },
 
   flushProject(project_id, callback) {
-    return request.post(
-      `http://localhost:3003/project/${project_id}/flush`,
-      callback
-    )
+    request.post(`http://localhost:3003/project/${project_id}/flush`, callback)
   },
 
   deleteProject(project_id, callback) {
-    return request.del(`http://localhost:3003/project/${project_id}`, callback)
+    request.del(`http://localhost:3003/project/${project_id}`, callback)
   },
 
   deleteProjectOnShutdown(project_id, callback) {
-    return request.del(
+    request.del(
       `http://localhost:3003/project/${project_id}?background=true&shutdown=true`,
       callback
     )
   },
 
   flushOldProjects(callback) {
-    return request.get(
+    request.get(
       'http://localhost:3003/flush_queued_projects?min_delete_age=1',
       callback
     )
   },
 
   acceptChange(project_id, doc_id, change_id, callback) {
-    return request.post(
+    request.post(
       `http://localhost:3003/project/${project_id}/doc/${doc_id}/change/${change_id}/accept`,
       callback
     )
   },
 
   removeComment(project_id, doc_id, comment, callback) {
-    return request.del(
+    request.del(
       `http://localhost:3003/project/${project_id}/doc/${doc_id}/comment/${comment}`,
       callback
     )
   },
 
   getProjectDocs(project_id, projectStateHash, callback) {
-    return request.get(
+    request.get(
       `http://localhost:3003/project/${project_id}/doc?state=${projectStateHash}`,
       (error, res, body) => {
         if (body != null && res.statusCode >= 200 && res.statusCode < 300) {
           body = JSON.parse(body)
         }
-        return callback(error, res, body)
+        callback(error, res, body)
       }
     )
   },
@@ -205,7 +201,7 @@ module.exports = DocUpdaterClient = {
     version,
     callback
   ) {
-    return request.post(
+    request.post(
       {
         url: `http://localhost:3003/project/${project_id}`,
         json: { userId, docUpdates, fileUpdates, version }
