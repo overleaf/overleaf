@@ -1,4 +1,22 @@
-const { db } = require('../app/src/infrastructure/mongojs')
+// Run like this:
+// node ... --projectIds ./path/to/file/with/one/projectId/in/each/line
+
+const fs = require('fs')
+const { db, ObjectId } = require('../app/src/infrastructure/mongojs')
+
+const minimist = require('minimist')
+
+const argv = minimist(process.argv.slice(2))
+const commit = argv.commit !== undefined
+
+if (!argv.projectIds) {
+  console.error('--projectIds flag is missing')
+  process.exit(100)
+}
+
+if (!commit) {
+  console.log('DOING DRY RUN. TO SAVE CHANGES PASS --commit')
+}
 
 const languages = [
   'am',
@@ -22,8 +40,16 @@ const languages = [
   'fi'
 ]
 
+const projectIds = fs
+  .readFileSync(argv.projectIds, { encoding: 'utf-8' })
+  .split('\n')
+  .filter(Boolean)
+
 function main(callback) {
-  const query = { spellCheckLanguage: { $in: languages } }
+  const query = {
+    _id: { $in: projectIds.map(ObjectId) },
+    spellCheckLanguage: { $in: languages }
+  }
   db.projects.update(
     query,
     { $set: { spellCheckLanguage: '' } },
