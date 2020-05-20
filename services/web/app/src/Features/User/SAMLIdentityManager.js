@@ -1,7 +1,9 @@
 const EmailHandler = require('../Email/EmailHandler')
 const Errors = require('../Errors/Errors')
 const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
+const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const OError = require('@overleaf/o-error')
+const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 const logger = require('logger-sharelatex')
@@ -151,6 +153,24 @@ async function getUser(providerId, externalUserId) {
   return user
 }
 
+async function redundantSubscription(userId, providerId, providerName) {
+  const subscription = await SubscriptionLocator.promises.getUserIndividualSubscription(
+    userId
+  )
+
+  if (subscription) {
+    await NotificationsBuilder.promises
+      .redundantPersonalSubscription(
+        {
+          institutionId: providerId,
+          institutionName: providerName
+        },
+        { _id: userId }
+      )
+      .create()
+  }
+}
+
 async function linkAccounts(
   userId,
   externalUserId,
@@ -171,6 +191,11 @@ async function linkAccounts(
   // update v1 affiliations record
   if (hasEntitlement) {
     await InstitutionsAPI.promises.addEntitlement(userId, institutionEmail)
+    try {
+      await redundantSubscription(userId, providerId, providerName)
+    } catch (error) {
+      logger.err({ err: error }, 'error checking redundant subscription')
+    }
   } else {
     await InstitutionsAPI.promises.removeEntitlement(userId, institutionEmail)
   }
@@ -271,6 +296,7 @@ const SAMLIdentityManager = {
   entitlementAttributeMatches,
   getUser,
   linkAccounts,
+  redundantSubscription,
   unlinkAccounts,
   updateEntitlement,
   userHasEntitlement

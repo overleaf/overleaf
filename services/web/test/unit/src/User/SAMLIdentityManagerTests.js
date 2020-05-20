@@ -49,6 +49,18 @@ describe('SAMLIdentityManager', function() {
           sendEmail: sinon.stub().yields()
         }),
         '../Errors/Errors': this.Errors,
+        '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
+          promises: {
+            redundantPersonalSubscription: sinon
+              .stub()
+              .returns({ create: sinon.stub().resolves() })
+          }
+        }),
+        '../Subscription/SubscriptionLocator': (this.SubscriptionLocator = {
+          promises: {
+            getUserIndividualSubscription: sinon.stub().resolves()
+          }
+        }),
         '../../models/User': {
           User: (this.User = {
             findOneAndUpdate: sinon.stub(),
@@ -210,6 +222,49 @@ describe('SAMLIdentityManager', function() {
         ['foo', 'bar'],
         'bam'
       ).should.equal(false)
+    })
+  })
+
+  describe('redundantSubscription', function() {
+    const userId = '1bv'
+    const providerId = 123
+    const providerName = 'University Name'
+    describe('with a personal subscription', function() {
+      beforeEach(function() {
+        this.SubscriptionLocator.promises.getUserIndividualSubscription.resolves(
+          {
+            planCode: 'professional'
+          }
+        )
+      })
+      it('should create redundant personal subscription notification ', async function() {
+        try {
+          await this.SAMLIdentityManager.redundantSubscription(
+            userId,
+            providerId,
+            providerName
+          )
+        } catch (error) {
+          expect(error).to.not.exist
+        }
+        expect(this.NotificationsBuilder.promises.redundantPersonalSubscription)
+          .to.have.been.calledOnce
+      })
+    })
+    describe('without a personal subscription', function() {
+      it('should create redundant personal subscription notification ', async function() {
+        try {
+          await this.SAMLIdentityManager.redundantSubscription(
+            userId,
+            providerId,
+            providerName
+          )
+        } catch (error) {
+          expect(error).to.not.exist
+        }
+        expect(this.NotificationsBuilder.promises.redundantPersonalSubscription)
+          .to.not.have.been.called
+      })
     })
   })
 })
