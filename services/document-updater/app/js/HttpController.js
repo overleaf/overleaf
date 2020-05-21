@@ -325,28 +325,13 @@ function deleteComment(req, res, next) {
 function updateProject(req, res, next) {
   const timer = new Metrics.Timer('http.updateProject')
   const projectId = req.params.project_id
-  const {
-    projectHistoryId,
-    userId,
-    docUpdates,
-    fileUpdates,
-    updates,
-    version
-  } = req.body
-  logger.log(
-    { projectId, updates, docUpdates, fileUpdates, version },
-    'updating project via http'
-  )
-  const allUpdates = _mergeUpdates(
-    docUpdates || [],
-    fileUpdates || [],
-    updates || []
-  )
+  const { projectHistoryId, userId, updates = [], version } = req.body
+  logger.log({ projectId, updates, version }, 'updating project via http')
   ProjectManager.updateProjectWithLocks(
     projectId,
     projectHistoryId,
     userId,
-    allUpdates,
+    updates,
     version,
     (error) => {
       timer.done()
@@ -415,24 +400,4 @@ function flushQueuedProjects(req, res, next) {
       res.send({ flushed })
     }
   })
-}
-
-/**
- * Merge updates from the previous project update interface (docUpdates +
- * fileUpdates) and the new update interface (updates).
- */
-function _mergeUpdates(docUpdates, fileUpdates, updates) {
-  const mergedUpdates = []
-  for (const update of docUpdates) {
-    const type = update.docLines != null ? 'add-doc' : 'rename-doc'
-    mergedUpdates.push({ type, ...update })
-  }
-  for (const update of fileUpdates) {
-    const type = update.url != null ? 'add-file' : 'rename-file'
-    mergedUpdates.push({ type, ...update })
-  }
-  for (const update of updates) {
-    mergedUpdates.push(update)
-  }
-  return mergedUpdates
 }
