@@ -17,7 +17,7 @@ module.exports = WebsocketController =
 
 	joinProject: (client, user, project_id, callback = (error, project, privilegeLevel, protocolVersion) ->) ->
 		if client.disconnected
-			metrics.inc('disconnected_join_project')
+			metrics.inc('editor.join-project.disconnected', 1, {status: 'immediately'})
 			return callback()
 
 		user_id = user?._id
@@ -26,7 +26,7 @@ module.exports = WebsocketController =
 		WebApiManager.joinProject project_id, user, (error, project, privilegeLevel, isRestrictedUser) ->
 			return callback(error) if error?
 			if client.disconnected
-				metrics.inc('disconnected_join_project')
+				metrics.inc('editor.join-project.disconnected', 1, {status: 'after-web-api-call'})
 				return callback()
 
 			if !privilegeLevel or privilegeLevel == ""
@@ -85,7 +85,7 @@ module.exports = WebsocketController =
 
 	joinDoc: (client, doc_id, fromVersion = -1, options, callback = (error, doclines, version, ops, ranges) ->) ->
 		if client.disconnected
-				metrics.inc('disconnected_join_doc')
+				metrics.inc('editor.join-doc.disconnected', 1, {status: 'immediately'})
 				return callback()
 
 		metrics.inc "editor.join-doc"
@@ -101,14 +101,14 @@ module.exports = WebsocketController =
 				RoomManager.joinDoc client, doc_id, (error) ->
 					return callback(error) if error?
 					if client.disconnected
-						metrics.inc('disconnected_join_doc')
+						metrics.inc('editor.join-doc.disconnected', 1, {status: 'after-joining-room'})
 						# the client will not read the response anyways
 						return callback()
 
 					DocumentUpdaterManager.getDocument project_id, doc_id, fromVersion, (error, lines, version, ranges, ops) ->
 						return callback(error) if error?
 						if client.disconnected
-							metrics.inc('disconnected_join_doc')
+							metrics.inc('editor.join-doc.disconnected', 1, {status: 'after-doc-updater-call'})
 							# the client will not read the response anyways
 							return callback()
 
@@ -255,7 +255,7 @@ module.exports = WebsocketController =
 						setTimeout () ->
 							if client.disconnected
 								# skip the message broadcast, the client has moved on
-								return metrics.inc('disconnected_otUpdateError')
+								return metrics.inc('editor.doc-update.disconnected', 1, {status:'at-otUpdateError'})
 							client.emit "otUpdateError", message.error, message
 							client.disconnect()
 						, 100

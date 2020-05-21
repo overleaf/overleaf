@@ -160,8 +160,8 @@ describe 'WebsocketController', ->
 			it "should call the callback with no details", ->
 				expect(@callback.args[0]).to.deep.equal []
 
-			it "should increment the disconnected_join_project metric", ->
-				expect(@metrics.inc.calledWith("disconnected_join_project")).to.equal(true)
+			it "should increment the editor.join-project.disconnected metric with a status", ->
+				expect(@metrics.inc.calledWith('editor.join-project.disconnected', 1, {status: 'immediately'})).to.equal(true)
 
 		describe "when the client disconnects while WebApiManager.joinProject is running", ->
 			beforeEach ->
@@ -174,8 +174,8 @@ describe 'WebsocketController', ->
 			it "should call the callback with no details", ->
 				expect(@callback.args[0]).to.deep.equal []
 
-			it "should increment the disconnected_join_project metric", ->
-				expect(@metrics.inc.calledWith("disconnected_join_project")).to.equal(true)
+			it "should increment the editor.join-project.disconnected metric with a status", ->
+				expect(@metrics.inc.calledWith('editor.join-project.disconnected', 1, {status: 'after-web-api-call'})).to.equal(true)
 
 	describe "leaveProject", ->
 		beforeEach ->
@@ -422,8 +422,8 @@ describe 'WebsocketController', ->
 			it "should call the callback with no details", ->
 				expect(@callback.args[0]).to.deep.equal([])
 
-			it "should increment the disconnected_join_doc metric", ->
-				expect(@metrics.inc.calledWith("disconnected_join_doc")).to.equal(true)
+			it "should increment the editor.join-doc.disconnected metric with a status", ->
+				expect(@metrics.inc.calledWith('editor.join-doc.disconnected', 1, {status: 'immediately'})).to.equal(true)
 
 			it "should not get the document", ->
 				expect(@DocumentUpdaterManager.getDocument.called).to.equal(false)
@@ -439,8 +439,8 @@ describe 'WebsocketController', ->
 			it "should call the callback with no details", ->
 				expect(@callback.args[0]).to.deep.equal([])
 
-			it "should increment the disconnected_join_doc metric", ->
-				expect(@metrics.inc.calledWith("disconnected_join_doc")).to.equal(true)
+			it "should increment the editor.join-doc.disconnected metric with a status", ->
+				expect(@metrics.inc.calledWith('editor.join-doc.disconnected', 1, {status: 'after-joining-room'})).to.equal(true)
 
 			it "should not get the document", ->
 				expect(@DocumentUpdaterManager.getDocument.called).to.equal(false)
@@ -456,8 +456,8 @@ describe 'WebsocketController', ->
 			it "should call the callback with no details", ->
 				expect(@callback.args[0]).to.deep.equal []
 
-			it "should increment the disconnected_join_doc metric", ->
-				expect(@metrics.inc.calledWith("disconnected_join_doc")).to.equal(true)
+			it "should increment the editor.join-doc.disconnected metric with a status", ->
+				expect(@metrics.inc.calledWith('editor.join-doc.disconnected', 1, {status: 'after-doc-updater-call'})).to.equal(true)
 
 	describe "leaveDoc", ->
 		beforeEach ->
@@ -847,8 +847,8 @@ describe 'WebsocketController', ->
 				it "should not disconnect the client", ->
 					@client.disconnect.called.should.equal false
 
-				it "should increment the disconnected_otUpdateError metric", ->
-					expect(@metrics.inc.calledWith("disconnected_otUpdateError")).to.equal(true)
+				it "should increment the editor.doc-update.disconnected metric with a status", ->
+					expect(@metrics.inc.calledWith('editor.doc-update.disconnected', 1, {status:'at-otUpdateError'})).to.equal(true)
 
 	describe "_assertClientCanApplyUpdate", ->
 		beforeEach ->
