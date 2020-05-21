@@ -59,7 +59,6 @@ App.controller('DeleteAccountModalController', function(
     isValid: false,
     deleteText: '',
     password: '',
-    confirmV1Purge: false,
     confirmSharelatexDelete: false,
     inflight: false,
     error: null
@@ -77,7 +76,6 @@ App.controller('DeleteAccountModalController', function(
       $scope.state.deleteText.toLowerCase() ===
         userDefaultEmail.toLowerCase() &&
       $scope.state.password.length > 0 &&
-      $scope.state.confirmV1Purge &&
       $scope.state.confirmSharelatexDelete)
 
   $scope.delete = function() {
