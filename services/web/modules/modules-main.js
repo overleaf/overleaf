@@ -20,6 +20,6 @@ if (fs.existsSync(MODULES_PATH)) {
 
 module.exports = function() {
   return {
-    code: `define(['${entryPoints.join("', '")}'], function() {})`
+    code: entryPoints.map(entryPoint => `import '${entryPoint}'`).join('\n')
   }
 }
