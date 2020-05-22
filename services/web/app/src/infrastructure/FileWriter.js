@@ -16,7 +16,44 @@ const uuid = require('uuid')
 const _ = require('underscore')
 const Settings = require('settings-sharelatex')
 const request = require('request')
+const { Transform, pipeline } = require('stream')
+const { InvalidError } = require('../Features/Errors/Errors')
 const { promisifyAll } = require('../util/promises')
+
+class SizeLimitedStream extends Transform {
+  constructor(options) {
+    options.autoDestroy = true
+    super(options)
+
+    this.bytes = 0
+    this.sizeLimit = options.sizeLimit
+    this.drain = false
+    this.on('error', () => {
+      this.drain = true
+      this.resume()
+    })
+  }
+
+  _transform(chunk, encoding, done) {
+    if (this.drain) {
+      // mechanism to drain the source stream on error, to avoid leaks
+      // we consume the rest of the incoming stream and don't push it anywhere
+      return done()
+    }
+
+    this.bytes += chunk.length
+    if (this.sizeLimit && this.bytes > this.sizeLimit) {
+      return done(
+        new InvalidError({
+          message: 'stream size limit reached',
+          info: { size: this.bytes }
+        })
+      )
+    }
+    this.push(chunk)
+    done()
+  }
+}
 
 const FileWriter = {
   ensureDumpFolderExists(callback) {
@@ -58,52 +95,69 @@ const FileWriter = {
     })
   },
 
-  writeStreamToDisk(identifier, stream, callback) {
+  writeStreamToDisk(identifier, stream, options, callback) {
+    if (typeof options === 'function') {
+      callback = options
+      options = {}
+    }
     if (callback == null) {
       callback = function(error, fsPath) {}
     }
-    callback = _.once(callback)
+    options = options || {}
+
     const fsPath = `${Settings.path.dumpFolder}/${identifier}_${uuid.v4()}`
 
     stream.pause()
-    return FileWriter.ensureDumpFolderExists(function(error) {
+
+    FileWriter.ensureDumpFolderExists(function(error) {
+      const writeStream = fs.createWriteStream(fsPath)
+
       if (error != null) {
         return callback(error)
       }
       stream.resume()
 
-      const writeStream = fs.createWriteStream(fsPath)
-      stream.pipe(writeStream)
+      const passThrough = new SizeLimitedStream({
+        sizeLimit: options.maxSizeBytes
+      })
 
-      stream.on('error', function(err) {
-        logger.warn(
-          { err, identifier, fsPath },
-          '[writeStreamToDisk] something went wrong with incoming stream'
-        )
-        return callback(err)
-      })
-      writeStream.on('error', function(err) {
-        logger.warn(
-          { err, identifier, fsPath },
-          '[writeStreamToDisk] something went wrong with writing to disk'
-        )
-        return callback(err)
-      })
-      return writeStream.on('finish', function() {
+      // if writing fails, we want to consume the bytes from the source, to avoid leaks
+      for (const evt of ['error', 'close']) {
+        writeStream.on(evt, function() {
+          passThrough.unpipe(writeStream)
+          passThrough.resume()
+        })
+      }
+
+      pipeline(stream, passThrough, writeStream, function(err) {
+        if (err) {
+          logger.warn(
+            { err, identifier, fsPath },
+            '[writeStreamToDisk] something went wrong writing the stream to disk'
+          )
+          return callback(err)
+        }
+
         logger.log(
           { identifier, fsPath },
           '[writeStreamToDisk] write stream finished'
         )
-        return callback(null, fsPath)
+        callback(null, fsPath)
       })
     })
   },
 
-  writeUrlToDisk(identifier, url, callback) {
+  writeUrlToDisk(identifier, url, options, callback) {
+    if (typeof options === 'function') {
+      callback = options
+      options = {}
+    }
     if (callback == null) {
       callback = function(error, fsPath) {}
     }
+    options = options || {}
     callback = _.once(callback)
+
     const stream = request.get(url)
     stream.on('error', function(err) {
       logger.warn(
@@ -114,7 +168,7 @@ const FileWriter = {
     })
     stream.on('response', function(response) {
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return FileWriter.writeStreamToDisk(identifier, stream, callback)
+        FileWriter.writeStreamToDisk(identifier, stream, options, callback)
       } else {
         const err = new Error(`bad response from url: ${response.statusCode}`)
         logger.warn({ err, identifier, url }, `[writeUrlToDisk] ${err.message}`)
@@ -126,3 +180,4 @@ const FileWriter = {
 
 module.exports = FileWriter
 module.exports.promises = promisifyAll(FileWriter)
+module.exports.SizeLimitedStream = SizeLimitedStream
