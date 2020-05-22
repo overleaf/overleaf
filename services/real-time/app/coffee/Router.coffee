@@ -24,6 +24,10 @@ module.exports = Router =
 			if error.name == "CodedError"
 				logger.warn attrs, error.message, code: error.code
 				return callback {message: error.message, code: error.code}
+			if error.message == 'unexpected arguments'
+				logger.log attrs, 'unexpected arguments'
+				metrics.inc 'unexpected-arguments', 1, { status: method }
+				return callback { message: error.message }
 			if error.message in ["not authorized", "doc updater could not load requested ops", "no project_id found on client"]
 				logger.warn attrs, error.message
 				return callback {message: error.message}
@@ -31,6 +35,14 @@ module.exports = Router =
 				logger.error attrs, "server side error in #{method}"
 				# Don't return raw error to prevent leaking server side info
 				return callback {message: "Something went wrong in real-time service"}
+
+	_handleInvalidArguments: (client, method, args) ->
+		error = new Error("unexpected arguments")
+		callback = args[args.length - 1]
+		if typeof callback != 'function'
+			callback = (() ->)
+		attrs = {arguments: args}
+		Router._handleError(callback, error, client, method, attrs)
 
 	configure: (app, io, session) ->
 		app.set("io", io)
@@ -82,6 +94,9 @@ module.exports = Router =
 				user = {_id: "anonymous-user"}
 
 			client.on "joinProject", (data = {}, callback) ->
+				if typeof callback != 'function'
+					return Router._handleInvalidArguments(client, 'joinProject', arguments)
+
 				if data.anonymousAccessToken
 					user.anonymousAccessToken = data.anonymousAccessToken
 				WebsocketController.joinProject client, user, data.project_id, (err, args...) ->
@@ -114,11 +129,10 @@ module.exports = Router =
 					callback = options
 					options = fromVersion
 					fromVersion = -1
-				else if typeof fromVersion == "number" and typeof options == "object"
+				else if typeof fromVersion == "number" and typeof options == "object" and typeof callback == 'function'
 					# Called with 4 args, things are as expected
 				else
-					logger.error { arguments: arguments }, "unexpected arguments"
-					return callback?(new Error("unexpected arguments"))
+					return Router._handleInvalidArguments(client, 'joinDoc', arguments)
 
 				WebsocketController.joinDoc client, doc_id, fromVersion, options, (err, args...) ->
 					if err?
@@ -127,6 +141,9 @@ module.exports = Router =
 						callback(null, args...)
 
 			client.on "leaveDoc", (doc_id, callback) ->
+				if typeof callback != 'function'
+					return Router._handleInvalidArguments(client, 'leaveDoc', arguments)
+
 				WebsocketController.leaveDoc client, doc_id, (err, args...) ->
 					if err?
 						Router._handleError callback, err, client, "leaveDoc"
@@ -134,6 +151,9 @@ module.exports = Router =
 						callback(null, args...)
 
 			client.on "clientTracking.getConnectedUsers", (callback = (error, users) ->) ->
+				if typeof callback != 'function'
+					return Router._handleInvalidArguments(client, 'clientTracking.getConnectedUsers', arguments)
+
 				WebsocketController.getConnectedUsers client, (err, users) ->
 					if err?
 						Router._handleError callback, err, client, "clientTracking.getConnectedUsers"
@@ -141,6 +161,9 @@ module.exports = Router =
 						callback(null, users)
 
 			client.on "clientTracking.updatePosition", (cursorData, callback = (error) ->) ->
+				if typeof callback != 'function'
+					return Router._handleInvalidArguments(client, 'clientTracking.updatePosition', arguments)
+
 				WebsocketController.updateClientPosition client, cursorData, (err) ->
 					if err?
 						Router._handleError callback, err, client, "clientTracking.updatePosition"
@@ -148,6 +171,9 @@ module.exports = Router =
 						callback()
 
 			client.on "applyOtUpdate", (doc_id, update, callback = (error) ->) ->
+				if typeof callback != 'function'
+					return Router._handleInvalidArguments(client, 'applyOtUpdate', arguments)
+
 				WebsocketController.applyOtUpdate client, doc_id, update, (err) ->
 					if err?
 						Router._handleError callback, err, client, "applyOtUpdate", {doc_id, update}
