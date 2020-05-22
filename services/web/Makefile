@@ -48,6 +48,13 @@ test_unit_app:
 	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
 	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
+test_unit_app_parallel: export COMPOSE_PROJECT_NAME = \
+	unit_test_parallel_$(BUILD_DIR_NAME)
+test_unit_app_parallel:
+	$(DOCKER_COMPOSE) down -v -t 0
+	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:app:parallel
+	$(DOCKER_COMPOSE) down -v -t 0
+
 TEST_UNIT_MODULES = $(MODULE_DIRS:=/test_unit)
 $(TEST_UNIT_MODULES): %/test_unit: %/Makefile
 test_unit_modules: $(TEST_UNIT_MODULES)
@@ -102,9 +109,20 @@ ci:
 #
 # Lint & format
 #
+ORG_PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+RUN_LINT_FORMAT ?= \
+	docker run --rm \
+		--volume $(PWD):/src \
+		--workdir /src \
+		--env NODE_PATH=/app/node_modules \
+		--env PATH=$(ORG_PATH):/app/node_modules/.bin \
+		gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps
 
 format:
 	npm -q run format
+
+format_in_docker:
+	$(RUN_LINT_FORMAT) make format
 
 format_fix:
 	npm -q run format:fix
@@ -112,13 +130,25 @@ format_fix:
 lint:
 	npm -q run lint
 
+lint_in_docker:
+	$(RUN_LINT_FORMAT) make lint
+
 #
 # Build & publish
 #
 
-build:
+build_deps:
+	docker build --pull \
+		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
+		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
+		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):master-deps \
+		--target deps \
+		.
+
+build: build_deps
 	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
+		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
 		--build-arg SENTRY_RELEASE=${COMMIT_SHA} \
 		--build-arg BRANCH_NAME=$(BRANCH_NAME) \
 		.

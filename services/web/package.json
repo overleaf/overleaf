@@ -16,6 +16,7 @@
     "test:acceptance:app": "npm run test:acceptance:run_dir -- test/acceptance/src",
     "test:unit:run_dir": "mocha --recursive --reporter spec --timeout 25000 --exit --grep=$MOCHA_GREP --file test/unit/bootstrap.js",
     "test:unit:app": "npm run test:unit:run_dir -- test/unit/src",
+    "test:unit:app:parallel": "parallel --plain --keep-order --halt now,fail=1 npm run test:unit:run_dir -- {} ::: test/unit/src/*",
     "test:frontend": "karma start",
     "test:frontend:single": "karma start --single-run",
     "start": "node $NODE_APP_OPTIONS app.js",

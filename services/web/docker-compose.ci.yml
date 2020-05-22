@@ -48,7 +48,7 @@ services:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     volumes:
       - ./:/tmp/build/
-    command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
+    command: tar -cf /tmp/build/build.tar public/
     user: root
 
   redis:

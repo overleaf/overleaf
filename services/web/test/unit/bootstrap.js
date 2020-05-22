@@ -1,6 +1,9 @@
 const chai = require('chai')
 const sinon = require('sinon')
 
+// add chai.should()
+chai.should()
+
 // Load sinon-chai assertions so expect(stubFn).to.have.been.calledWith('abc')
 // has a nicer failure messages
 chai.use(require('sinon-chai'))

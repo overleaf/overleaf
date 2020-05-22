@@ -21,9 +21,15 @@ DOCKER_COMPOSE_TEST_UNIT := \
 	export COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) \
 	&& $(DOCKER_COMPOSE)
 
+ifeq (,$(wildcard test/unit))
+test_unit:
+
+else
 test_unit:
 	${DOCKER_COMPOSE_TEST_UNIT} run --rm test_unit npm -q run test:unit:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/unit/src
 	${DOCKER_COMPOSE_TEST_UNIT} down
+
+endif
 
 ifeq (,$(wildcard test/acceptance))
 test_acceptance:

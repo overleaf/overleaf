@@ -1,4 +1,4 @@
-version: "2"
+version: "2.3"
 
 volumes:
   data:
@@ -6,7 +6,9 @@ volumes:
 services:
 
   test_unit:
-    image: node:10.19.0
+    build:
+      context: .
+      target: base
     volumes:
       - .:/app
     working_dir: /app
