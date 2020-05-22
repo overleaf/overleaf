@@ -1,71 +1,43 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let InstitutionsFeatures
-const InstitutionsGetter = require('./InstitutionsGetter')
+const UserGetter = require('../User/UserGetter')
 const PlansLocator = require('../Subscription/PlansLocator')
 const Settings = require('settings-sharelatex')
-const logger = require('logger-sharelatex')
 
 module.exports = InstitutionsFeatures = {
   getInstitutionsFeatures(userId, callback) {
-    if (callback == null) {
-      callback = function(error, features) {}
-    }
-    return InstitutionsFeatures.getInstitutionsPlan(userId, function(
-      error,
-      plan
-    ) {
-      if (error != null) {
+    InstitutionsFeatures.getInstitutionsPlan(userId, function(error, planCode) {
+      if (error) {
         return callback(error)
       }
-      plan = PlansLocator.findLocalPlanInSettings(plan)
-      return callback(null, (plan != null ? plan.features : undefined) || {})
+      const plan = planCode && PlansLocator.findLocalPlanInSettings(planCode)
+      const features = plan && plan.features
+      callback(null, features || {})
     })
   },
 
   getInstitutionsPlan(userId, callback) {
-    if (callback == null) {
-      callback = function(error, plan) {}
-    }
-    return InstitutionsFeatures.hasLicence(userId, function(error, hasLicence) {
-      if (error != null) {
+    InstitutionsFeatures.hasLicence(userId, function(error, hasLicence) {
+      if (error) {
         return callback(error)
       }
       if (!hasLicence) {
         return callback(null, null)
       }
-      return callback(null, Settings.institutionPlanCode)
+      callback(null, Settings.institutionPlanCode)
     })
   },
 
   hasLicence(userId, callback) {
-    if (callback == null) {
-      callback = function(error, hasLicence) {}
-    }
-    return InstitutionsGetter.getConfirmedAffiliations(userId, function(
-      error,
-      affiliations
-    ) {
-      if (error != null) {
+    UserGetter.getUserFullEmails(userId, function(error, emailsData) {
+      if (error) {
         return callback(error)
       }
 
-      const hasLicence = affiliations.some(
-        affiliation => affiliation.licence && affiliation.licence !== 'free'
+      const hasLicence = emailsData.some(
+        emailData => emailData.emailHasInstitutionLicence
       )
 
-      return callback(null, hasLicence)
+      callback(null, hasLicence)
     })
   }
 }

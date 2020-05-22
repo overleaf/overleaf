@@ -22,7 +22,7 @@ const modulePath = require('path').join(
 
 describe('InstitutionsFeatures', function() {
   beforeEach(function() {
-    this.InstitutionsGetter = { getConfirmedAffiliations: sinon.stub() }
+    this.UserGetter = { getUserFullEmails: sinon.stub() }
     this.PlansLocator = { findLocalPlanInSettings: sinon.stub() }
     this.institutionPlanCode = 'institution_plan_code'
     this.InstitutionsFeatures = SandboxedModule.require(modulePath, {
@@ -30,7 +30,7 @@ describe('InstitutionsFeatures', function() {
         console: console
       },
       requires: {
-        './InstitutionsGetter': this.InstitutionsGetter,
+        '../User/UserGetter': this.UserGetter,
         '../Subscription/PlansLocator': this.PlansLocator,
         'settings-sharelatex': {
           institutionPlanCode: this.institutionPlanCode
@@ -47,7 +47,7 @@ describe('InstitutionsFeatures', function() {
 
   describe('hasLicence', function() {
     it('should handle error', function(done) {
-      this.InstitutionsGetter.getConfirmedAffiliations.yields(new Error('Nope'))
+      this.UserGetter.getUserFullEmails.yields(new Error('Nope'))
       return this.InstitutionsFeatures.hasLicence(
         this.userId,
         (error, hasLicence) => {
@@ -57,28 +57,9 @@ describe('InstitutionsFeatures', function() {
       )
     })
 
-    it('should return false if user has no confirmed affiliations', function(done) {
-      const affiliations = []
-      this.InstitutionsGetter.getConfirmedAffiliations.yields(
-        null,
-        affiliations
-      )
-      return this.InstitutionsFeatures.hasLicence(
-        this.userId,
-        (error, hasLicence) => {
-          expect(error).to.not.exist
-          expect(hasLicence).to.be.false
-          return done()
-        }
-      )
-    })
-
     it('should return false if user has no paid affiliations', function(done) {
-      const affiliations = [{ licence: 'free' }]
-      this.InstitutionsGetter.getConfirmedAffiliations.yields(
-        null,
-        affiliations
-      )
+      const emailData = [{ emailHasInstitutionLicence: false }]
+      this.UserGetter.getUserFullEmails.yields(null, emailData)
       return this.InstitutionsFeatures.hasLicence(
         this.userId,
         (error, hasLicence) => {
@@ -90,16 +71,11 @@ describe('InstitutionsFeatures', function() {
     })
 
     it('should return true if user has confirmed paid affiliation', function(done) {
-      const affiliations = [
-        { licence: 'pro_plus' },
-        { licence: 'free' },
-        { licence: 'pro' },
-        { licence: null }
+      const emailData = [
+        { emailHasInstitutionLicence: true },
+        { emailHasInstitutionLicence: false }
       ]
-      this.InstitutionsGetter.getConfirmedAffiliations.yields(
-        null,
-        affiliations
-      )
+      this.UserGetter.getUserFullEmails.yields(null, emailData)
       return this.InstitutionsFeatures.hasLicence(
         this.userId,
         (error, hasLicence) => {

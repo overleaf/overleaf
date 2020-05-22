@@ -5,6 +5,7 @@ const { db } = mongojs
 const { ObjectId } = mongojs
 const { promisifyAll } = require('../../util/promises')
 const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
+const InstitutionsHelper = require('../Institutions/InstitutionsHelper')
 const Errors = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')
 
@@ -37,7 +38,10 @@ const UserGetter = {
   },
 
   getUserFullEmails(userId, callback) {
-    this.getUser(userId, { email: 1, emails: 1 }, function(error, user) {
+    this.getUser(userId, { email: 1, emails: 1, samlIdentifiers: 1 }, function(
+      error,
+      user
+    ) {
       if (error) {
         return callback(error)
       }
@@ -46,7 +50,10 @@ const UserGetter = {
       }
 
       if (!Features.hasFeature('affiliations')) {
-        return callback(null, decorateFullEmails(user.email, user.emails, []))
+        return callback(
+          null,
+          decorateFullEmails(user.email, user.emails, [], [])
+        )
       }
 
       getUserAffiliations(userId, function(error, affiliationsData) {
@@ -55,7 +62,12 @@ const UserGetter = {
         }
         callback(
           null,
-          decorateFullEmails(user.email, user.emails || [], affiliationsData)
+          decorateFullEmails(
+            user.email,
+            user.emails || [],
+            affiliationsData,
+            user.samlIdentifiers || []
+          )
         )
       })
     })
@@ -147,7 +159,12 @@ const UserGetter = {
   }
 }
 
-var decorateFullEmails = (defaultEmail, emailsData, affiliationsData) =>
+var decorateFullEmails = (
+  defaultEmail,
+  emailsData,
+  affiliationsData,
+  samlIdentifiers
+) =>
   emailsData.map(function(emailData) {
     emailData.default = emailData.email === defaultEmail
 
@@ -166,6 +183,18 @@ var decorateFullEmails = (defaultEmail, emailsData, affiliationsData) =>
     } else {
       emailsData.affiliation = null
     }
+
+    if (emailData.samlProviderId) {
+      emailData.samlIdentifier = samlIdentifiers.find(
+        samlIdentifier => samlIdentifier.providerId === emailData.samlProviderId
+      )
+    } else {
+      emailsData.samlIdentifier = null
+    }
+
+    emailData.emailHasInstitutionLicence = InstitutionsHelper.emailHasLicence(
+      emailData
+    )
 
     return emailData
   })

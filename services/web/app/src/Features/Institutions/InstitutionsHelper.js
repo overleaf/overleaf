@@ -1,0 +1,24 @@
+function emailHasLicence(emailData) {
+  if (!emailData.confirmedAt) {
+    return false
+  }
+  if (!emailData.affiliation) {
+    return false
+  }
+  const affiliation = emailData.affiliation
+  const institution = affiliation.institution
+  if (!institution) {
+    return false
+  }
+  if (!institution.confirmed) {
+    return false
+  }
+  if (!affiliation.licence) {
+    return false
+  }
+  return affiliation.licence !== 'free'
+}
+
+module.exports = {
+  emailHasLicence
+}

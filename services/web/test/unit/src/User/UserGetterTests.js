@@ -17,7 +17,11 @@ describe('UserGetter', function() {
       _id: '12390i',
       email: 'email2@foo.bar',
       emails: [
-        { email: 'email1@foo.bar', reversedHostname: 'rab.oof' },
+        {
+          email: 'email1@foo.bar',
+          reversedHostname: 'rab.oof',
+          confirmedAt: new Date()
+        },
         { email: 'email2@foo.bar', reversedHostname: 'rab.oof' }
       ]
     }
@@ -85,7 +89,7 @@ describe('UserGetter', function() {
       this.UserGetter.getUser = sinon
         .stub()
         .callsArgWith(2, null, this.fakeUser)
-      const projection = { email: 1, emails: 1 }
+      const projection = { email: 1, emails: 1, samlIdentifiers: 1 }
       this.UserGetter.getUserFullEmails(
         this.fakeUser._id,
         (error, fullEmails) => {
@@ -111,11 +115,14 @@ describe('UserGetter', function() {
             {
               email: 'email1@foo.bar',
               reversedHostname: 'rab.oof',
+              confirmedAt: this.fakeUser.emails[0].confirmedAt,
+              emailHasInstitutionLicence: false,
               default: false
             },
             {
               email: 'email2@foo.bar',
               reversedHostname: 'rab.oof',
+              emailHasInstitutionLicence: false,
               default: true
             }
           ])
@@ -135,7 +142,11 @@ describe('UserGetter', function() {
           department: 'Maths',
           inferred: false,
           licence: 'pro_plus',
-          institution: { name: 'University Name', isUniversity: true }
+          institution: {
+            name: 'University Name',
+            isUniversity: true,
+            confirmed: true
+          }
         }
       ]
       this.getUserAffiliations.callsArgWith(1, null, affiliationsData)
@@ -147,7 +158,9 @@ describe('UserGetter', function() {
             {
               email: 'email1@foo.bar',
               reversedHostname: 'rab.oof',
+              confirmedAt: this.fakeUser.emails[0].confirmedAt,
               default: false,
+              emailHasInstitutionLicence: true,
               affiliation: {
                 institution: affiliationsData[0].institution,
                 inferred: affiliationsData[0].inferred,
@@ -159,6 +172,42 @@ describe('UserGetter', function() {
             {
               email: 'email2@foo.bar',
               reversedHostname: 'rab.oof',
+              emailHasInstitutionLicence: false,
+              default: true
+            }
+          ])
+          done()
+        }
+      )
+    })
+
+    it('should merge SAML identifier', function(done) {
+      const fakeSamlIdentifiers = [
+        { providerId: 'saml_id', exteranlUserId: 'whatever' }
+      ]
+      const fakeUserWithSaml = this.fakeUser
+      fakeUserWithSaml.emails[0].samlProviderId = 'saml_id'
+      fakeUserWithSaml.samlIdentifiers = fakeSamlIdentifiers
+      this.UserGetter.getUser = sinon.stub().yields(null, this.fakeUser)
+      this.getUserAffiliations.callsArgWith(1, null, [])
+      this.UserGetter.getUserFullEmails(
+        this.fakeUser._id,
+        (error, fullEmails) => {
+          expect(error).to.not.exist
+          assert.deepEqual(fullEmails, [
+            {
+              email: 'email1@foo.bar',
+              reversedHostname: 'rab.oof',
+              confirmedAt: this.fakeUser.emails[0].confirmedAt,
+              default: false,
+              emailHasInstitutionLicence: false,
+              samlProviderId: 'saml_id',
+              samlIdentifier: fakeSamlIdentifiers[0]
+            },
+            {
+              email: 'email2@foo.bar',
+              reversedHostname: 'rab.oof',
+              emailHasInstitutionLicence: false,
               default: true
             }
           ])
@@ -175,7 +224,7 @@ describe('UserGetter', function() {
       this.UserGetter.getUser = sinon
         .stub()
         .callsArgWith(2, null, this.fakeUser)
-      const projection = { email: 1, emails: 1 }
+      const projection = { email: 1, emails: 1, samlIdentifiers: 1 }
       this.UserGetter.getUserFullEmails(
         this.fakeUser._id,
         (error, fullEmails) => {
