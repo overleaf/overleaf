@@ -5,12 +5,18 @@ const globby = require('globby')
 // Generate list of view names from app/views
 
 const viewList = globby
-  .sync('**/*.pug', {
+  .sync('app/views/**/*.pug', {
     onlyFiles: true,
     concurrency: 1,
-    ignore: '**/_*.pug',
-    cwd: 'app/views'
+    ignore: '**/_*.pug'
   })
+  .concat(
+    globby.sync('modules/*/app/views/**/*.pug', {
+      onlyFiles: true,
+      concurrency: 1,
+      ignore: '**/_*.pug'
+    })
+  )
   .map(x => {
     return x.replace(/\.pug$/, '') // strip trailing .pug extension
   })
@@ -25,7 +31,7 @@ module.exports = {
     let failures = 0
     viewList.forEach(view => {
       try {
-        let filename = app.get('views') + '/' + view + '.pug'
+        let filename = view + '.pug'
         pug.compileFile(filename, { cache: true })
         logger.log({ view }, 'compiled')
         success++
