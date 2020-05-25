@@ -17,7 +17,7 @@ const _ = require('underscore')
 const Settings = require('settings-sharelatex')
 const request = require('request')
 const { Transform, pipeline } = require('stream')
-const { InvalidError } = require('../Features/Errors/Errors')
+const { FileTooLargeError } = require('../Features/Errors/Errors')
 const { promisifyAll } = require('../util/promises')
 
 class SizeLimitedStream extends Transform {
@@ -44,7 +44,7 @@ class SizeLimitedStream extends Transform {
     this.bytes += chunk.length
     if (this.sizeLimit && this.bytes > this.sizeLimit) {
       return done(
-        new InvalidError({
+        new FileTooLargeError({
           message: 'stream size limit reached',
           info: { size: this.bytes }
         })
@@ -130,6 +130,15 @@ const FileWriter = {
       }
 
       pipeline(stream, passThrough, writeStream, function(err) {
+        if (
+          passThrough.bytes >= options.maxSizeBytes &&
+          !(err instanceof FileTooLargeError)
+        ) {
+          err = new FileTooLargeError({
+            message: 'stream size limit reached',
+            info: { size: passThrough.bytes }
+          }).withCause(err || {})
+        }
         if (err) {
           logger.warn(
             { err, identifier, fsPath },
