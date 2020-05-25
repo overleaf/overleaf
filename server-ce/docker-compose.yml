@@ -39,7 +39,7 @@ services:
 
             # Enables Thumbnail generation using ImageMagick
             ENABLE_CONVERSIONS: 'true'
-            
+
             # Disables email confirmation requirement
             EMAIL_CONFIRMATION_DISABLED: 'true'
 
