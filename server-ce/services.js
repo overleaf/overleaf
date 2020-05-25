@@ -33,10 +33,6 @@ module.exports =
 	repo: "https://github.com/sharelatex/chat-sharelatex.git",
 	version: "master"
 }, {
-	name: "tags",
-	repo: "https://github.com/sharelatex/tags-sharelatex.git",
-	version: "master"
-}, {
 	name: "spelling",
 	repo: "https://github.com/sharelatex/spelling-sharelatex.git",
 	version: "master"
