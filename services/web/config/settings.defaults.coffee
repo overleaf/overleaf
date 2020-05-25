@@ -225,8 +225,8 @@ module.exports = settings =
 	httpAuthUsers: httpAuthUsers
 
 	twoFactorAuthentication:
-		enabled: process.env['TWO_FACTOR_AUTHENTICATION_ENABLED'] == 'true'
-		requiredForStaff: process.env['TWO_FACTOR_AUTHENTICATION_REQUIRED_FOR_STAFF'] == 'true'
+		enabled: false
+		requiredForStaff: false
 
 	# Default features
 	# ----------------
