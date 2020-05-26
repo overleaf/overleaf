@@ -104,7 +104,7 @@ async function enqueue(group, method, job) {
     return
   }
   try {
-    return request({
+    await request({
       uri: `${tpdsWorkerUrl}/enqueue/web_to_tpds_http_requests`,
       json: { group, job, method },
       method: 'post',
