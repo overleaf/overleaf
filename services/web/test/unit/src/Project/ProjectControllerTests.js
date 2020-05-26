@@ -1082,7 +1082,7 @@ describe('ProjectController', function() {
           this.ProjectController.loadEditor(this.req, this.res)
         })
       }
-      function checkWsFallback(isBeta) {
+      function checkWsFallback(isBeta, isV2) {
         describe('with ws=fallback', function() {
           beforeEach(function() {
             this.req.query = {}
@@ -1096,7 +1096,9 @@ describe('ProjectController', function() {
             this.ProjectController.loadEditor(this.req, this.res)
           })
           checkLoadEditorWsMetric(
-            `load-editor-ws${isBeta ? '-beta' : ''}-fallback`
+            `load-editor-ws${isBeta ? '-beta' : ''}${
+              isV2 ? '-v2' : ''
+            }-fallback`
           )
         })
       }
@@ -1143,6 +1145,157 @@ describe('ProjectController', function() {
           })
           checkLoadEditorWsMetric('load-editor-ws-beta')
           checkWsFallback(true)
+        })
+      })
+
+      describe('v2-rollout', function() {
+        beforeEach(function() {
+          this.settings.wsUrlBeta = '/beta.socket.io'
+          this.settings.wsUrlV2 = '/socket.io.v2'
+        })
+
+        function checkNonMatch() {
+          it('should set the normal custom wsUrl', function(done) {
+            this.res.render = (pageName, opts) => {
+              opts.wsUrl.should.equal('/other.socket.io')
+              done()
+            }
+            this.ProjectController.loadEditor(this.req, this.res)
+          })
+          checkLoadEditorWsMetric('load-editor-ws')
+          checkWsFallback(false)
+        }
+        function checkMatch() {
+          it('should set the v2 wsUrl', function(done) {
+            this.res.render = (pageName, opts) => {
+              opts.wsUrl.should.equal('/socket.io.v2')
+              done()
+            }
+            this.ProjectController.loadEditor(this.req, this.res)
+          })
+          checkLoadEditorWsMetric('load-editor-ws-v2')
+          checkWsFallback(false, true)
+        }
+        function checkForBetaUser() {
+          describe('for a beta user', function() {
+            beforeEach(function() {
+              this.user.betaProgram = true
+            })
+            it('should set the beta wsUrl', function(done) {
+              this.res.render = (pageName, opts) => {
+                opts.wsUrl.should.equal('/beta.socket.io')
+                done()
+              }
+              this.ProjectController.loadEditor(this.req, this.res)
+            })
+            checkLoadEditorWsMetric('load-editor-ws-beta')
+            checkWsFallback(true)
+          })
+        }
+
+        describe('when the roll out percentage is 0', function() {
+          beforeEach(function() {
+            this.settings.wsUrlV2Percentage = 0
+          })
+          describe('when the projectId does not match (0)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(0)
+            })
+            checkNonMatch()
+          })
+          describe('when the projectId does not match (42)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(42)
+            })
+            checkNonMatch()
+          })
+          checkForBetaUser()
+        })
+        describe('when the roll out percentage is 1', function() {
+          beforeEach(function() {
+            this.settings.wsUrlV2Percentage = 1
+          })
+          describe('when the projectId matches (0)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(0)
+            })
+            checkMatch()
+            checkForBetaUser()
+          })
+          describe('when the projectId does not match (1)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(1)
+            })
+            checkNonMatch()
+            checkForBetaUser()
+          })
+          describe('when the projectId does not match (42)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(42)
+            })
+            checkNonMatch()
+          })
+        })
+        describe('when the roll out percentage is 10', function() {
+          beforeEach(function() {
+            this.settings.wsUrlV2Percentage = 10
+          })
+          describe('when the projectId matches (0)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(0)
+            })
+            checkMatch()
+          })
+          describe('when the projectId matches (9)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(9)
+            })
+            checkMatch()
+            checkForBetaUser()
+          })
+          describe('when the projectId does not match (10)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(10)
+            })
+            checkNonMatch()
+          })
+          describe('when the projectId does not match (42)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(42)
+            })
+            checkNonMatch()
+            checkForBetaUser()
+          })
+        })
+        describe('when the roll out percentage is 100', function() {
+          beforeEach(function() {
+            this.settings.wsUrlV2Percentage = 100
+          })
+          describe('when the projectId matches (0)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(0)
+            })
+            checkMatch()
+            checkForBetaUser()
+          })
+          describe('when the projectId matches (10)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(10)
+            })
+            checkMatch()
+          })
+          describe('when the projectId matches (42)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(42)
+            })
+            checkMatch()
+          })
+          describe('when the projectId matches (99)', function() {
+            beforeEach(function() {
+              this.req.params.Project_id = ObjectId.createFromTime(99)
+            })
+            checkMatch()
+          })
         })
       })
     })

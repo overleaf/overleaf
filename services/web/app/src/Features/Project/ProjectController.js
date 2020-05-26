@@ -7,6 +7,7 @@ const fs = require('fs')
 const crypto = require('crypto')
 const async = require('async')
 const logger = require('logger-sharelatex')
+const { ObjectId } = require('../../infrastructure/mongojs')
 const ProjectDeleter = require('./ProjectDeleter')
 const ProjectDuplicator = require('./ProjectDuplicator')
 const ProjectCreationHandler = require('./ProjectCreationHandler')
@@ -722,6 +723,15 @@ const ProjectController = {
             if (user.betaProgram && Settings.wsUrlBeta !== undefined) {
               wsUrl = Settings.wsUrlBeta
               metricName += '-beta'
+            } else if (
+              Settings.wsUrlV2 &&
+              Settings.wsUrlV2Percentage > 0 &&
+              (ObjectId(projectId).getTimestamp() / 1000) %
+                100 <
+                Settings.wsUrlV2Percentage
+            ) {
+              wsUrl = Settings.wsUrlV2
+              metricName += '-v2'
             }
             if (req.query && req.query.ws === 'fallback') {
               // `?ws=fallback` will connect to the bare origin, and ignore
