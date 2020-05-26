@@ -29,7 +29,7 @@ module.exports = {
 
 async function insertFile(bucket, key, stream) {
   const convertedKey = KeyBuilder.getConvertedFolderKey(key)
-  if (!convertedKey.match(/^[0-9a-f]{24}\/[0-9a-f]{24}/i)) {
+  if (!convertedKey.match(/^[0-9a-f]{24}\/([0-9a-f]{24}|v\/[0-9]+\/[a-z]+)/i)) {
     throw new InvalidParametersError({
       message: 'key does not match validation regex',
       info: { bucket, key, convertedKey }
@@ -43,7 +43,7 @@ async function insertFile(bucket, key, stream) {
 
 async function deleteFile(bucket, key) {
   const convertedKey = KeyBuilder.getConvertedFolderKey(key)
-  if (!convertedKey.match(/^[0-9a-f]{24}\/[0-9a-f]{24}/i)) {
+  if (!convertedKey.match(/^[0-9a-f]{24}\/([0-9a-f]{24}|v\/[0-9]+\/[a-z]+)/i)) {
     throw new InvalidParametersError({
       message: 'key does not match validation regex',
       info: { bucket, key, convertedKey }
