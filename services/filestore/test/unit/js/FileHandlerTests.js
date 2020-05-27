@@ -111,6 +111,16 @@ describe('FileHandler', function() {
       })
     })
 
+    it('should accept templates-api key format', function(done) {
+      KeyBuilder.getConvertedFolderKey.returns(
+        '5ecba29f1a294e007d0bccb4/v/0/pdf'
+      )
+      FileHandler.insertFile(bucket, key, stream, err => {
+        expect(err).not.to.exist
+        done()
+      })
+    })
+
     it('should throw an error when the key is in the wrong format', function(done) {
       KeyBuilder.getConvertedFolderKey.returns('wombat')
       FileHandler.insertFile(bucket, key, stream, err => {
@@ -153,6 +163,16 @@ describe('FileHandler', function() {
         expect(err).not.to.exist
         expect(PersistorManager.promises.deleteDirectory).not.to.have.been
           .called
+        done()
+      })
+    })
+
+    it('should accept templates-api key format', function(done) {
+      KeyBuilder.getConvertedFolderKey.returns(
+        '5ecba29f1a294e007d0bccb4/v/0/pdf'
+      )
+      FileHandler.deleteFile(bucket, key, err => {
+        expect(err).not.to.exist
         done()
       })
     })
