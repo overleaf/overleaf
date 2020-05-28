@@ -117,10 +117,13 @@ export default App.controller('NewSubscriptionController', function(
 
   pricing.on('change', () => {
     $scope.planName = pricing.items.plan.name
-    $scope.price = pricing.price
+
     if (pricing.items.plan.trial) {
       $scope.trialLength = pricing.items.plan.trial.length
     }
+
+    $scope.price = $scope.trialLength ? pricing.price.next : pricing.price.now
+    $scope.taxes = pricing.price.taxes
     $scope.monthlyBilling = pricing.items.plan.period.length === 1
 
     $scope.availableCurrencies = {}
@@ -137,20 +140,25 @@ export default App.controller('NewSubscriptionController', function(
       pricing.items.coupon.discount &&
       pricing.items.coupon.discount.type === 'percent'
     ) {
-      const basePrice = parseInt(pricing.price.base.plan.unit)
-      $scope.normalPrice = basePrice
+      const basePrice = parseInt(pricing.price.base.plan.unit, 10)
+      $scope.coupon = {
+        singleUse: pricing.items.coupon.single_use,
+        normalPrice: basePrice
+      }
       if (
         pricing.items.coupon.applies_for_months > 0 &&
         pricing.items.coupon.discount.rate &&
         pricing.items.coupon.applies_for_months
       ) {
-        $scope.discountMonths = pricing.items.coupon.applies_for_months
-        $scope.discountRate = pricing.items.coupon.discount.rate * 100
+        $scope.coupon.discountMonths = pricing.items.coupon.applies_for_months
+        $scope.coupon.discountRate = pricing.items.coupon.discount.rate * 100
       }
 
       if (pricing.price.taxes[0] && pricing.price.taxes[0].rate) {
-        $scope.normalPrice += basePrice * pricing.price.taxes[0].rate
+        $scope.coupon.normalPrice += basePrice * pricing.price.taxes[0].rate
       }
+    } else {
+      $scope.coupon = null
     }
     $scope.$apply()
   })

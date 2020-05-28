@@ -13,7 +13,6 @@ block head-scripts
 
 block content
 	.content.content-alt
-
 		.container(ng-controller="NewSubscriptionController" ng-cloak)
 			.row.card-group
 				.col-md-5.col-md-push-4
@@ -47,13 +46,30 @@ block content
 								.col-md-12.text-center
 									div(ng-if="trialLength")
 										span !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
-										span(ng-if="discountMonths && discountRate") &nbsp; -  {{discountMonths}} #{translate("month")}s {{discountRate}}% Off
+										span(ng-if="coupon.discountMonths && coupon.discountRate") &nbsp; -  {{coupon.discountMonths}} #{translate("month")}s {{coupon.discountRate}}% Off
+									
 									div(ng-if="price")
-										strong {{availableCurrencies[currencyCode]['symbol']}}{{price.next.total}}
-										span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
-										span(ng-if="!monthlyBilling")  #{translate("every")} #{translate("year")}
-									div(ng-if="normalPrice")
-										span.small Normally {{availableCurrencies[currencyCode]['symbol']}}{{normalPrice}}
+										- var priceAngularExp = "<strong>{{ availableCurrencies[currencyCode]['symbol'] }}{{ price.total }}</strong>";
+										span(ng-if="!coupon.singleUse && monthlyBilling")
+											| !{translate("x_price_per_month", { price: priceAngularExp } )}
+										span(ng-if="!coupon.singleUse && !monthlyBilling")
+											| !{translate("x_price_per_year", { price: priceAngularExp } )}
+										span(ng-if="coupon.singleUse && monthlyBilling")
+											| !{translate("x_price_for_first_month", { price: priceAngularExp } )}
+										span(ng-if="coupon.singleUse && !monthlyBilling")
+											| !{translate("x_price_for_first_year", { price: priceAngularExp } )}
+
+									div(ng-if="coupon && coupon.normalPrice")
+										- var noDiscountPriceAngularExp = "{{ availableCurrencies[currencyCode]['symbol']}}{{coupon.normalPrice | number:2 }}";
+										span.small(ng-if="!coupon.singleUse && monthlyBilling")
+											| !{translate("normally_x_price_per_month", { price: noDiscountPriceAngularExp } )}
+										span.small(ng-if="!coupon.singleUse && !monthlyBilling")
+											| !{translate("normally_x_price_per_year", { price: noDiscountPriceAngularExp } )}
+										span.small(ng-if="coupon.singleUse && monthlyBilling")
+											| !{translate("then_x_price_per_month", { price: noDiscountPriceAngularExp } )}
+										span.small(ng-if="coupon.singleUse && !monthlyBilling")
+											| !{translate("then_x_price_per_year", { price: noDiscountPriceAngularExp } )}
+
 						.row(ng-hide="recurlyLoadError")
 							div()
 								.col-md-12()
@@ -191,7 +207,7 @@ block content
 													ng-model="data.company"
 												)
 
-											.form-group(ng-show="ui.addCompanyDetails && price.taxes.length")
+											.form-group(ng-show="ui.addCompanyDetails && taxes.length")
 												label(for="vat-number") #{translate("vat_number")}
 												input#vat-number.form-control(
 													type="text"
@@ -212,20 +228,24 @@ block content
 											p(ng-if="paymentMethod.value === 'paypal'") #{translate("paypal_upgrade")}
 
 											div.price-breakdown(
-												ng-show="price.taxes.length"
+												ng-show="taxes.length"
 											)
+												- var priceBreakdownAngularExp = "<strong>{{ availableCurrencies[currencyCode]['symbol'] }}{{ price.total }}</strong>";
+												- priceBreakdownAngularExp += " ({{availableCurrencies[currencyCode]['symbol']}}{{ price.subtotal }}";
+												- priceBreakdownAngularExp += " + " ;
+												- priceBreakdownAngularExp += "{{availableCurrencies[currencyCode]['symbol']}}{{ price.tax }} tax)";
 												hr.thin
 												span 
 													| Total:
 													|
-												strong 
-													| {{availableCurrencies[currencyCode]['symbol']}}{{price.next.total}}
-													|
-												span 
-													| ({{availableCurrencies[currencyCode]['symbol']}}{{price.next.subtotal}} + {{availableCurrencies[currencyCode]['symbol']}}{{price.next.tax}} tax)
-													|
-												span(ng-if="monthlyBilling") #{translate("every")} #{translate("month")}
-												span(ng-if="!monthlyBilling") #{translate("every")} #{translate("year")}
+													span(ng-if="!coupon.singleUse && monthlyBilling")
+														| !{translate("x_price_per_month", { price: priceBreakdownAngularExp } )}
+													span(ng-if="!coupon.singleUse && !monthlyBilling")
+														| !{translate("x_price_per_year", { price: priceBreakdownAngularExp } )}
+													span(ng-if="coupon.singleUse && monthlyBilling")
+														| !{translate("x_price_for_first_month", { price: priceBreakdownAngularExp } )}
+													span(ng-if="coupon.singleUse && !monthlyBilling")
+														| !{translate("x_price_for_first_year", { price: priceBreakdownAngularExp } )}
 												hr.thin
 
 											div.payment-submit
