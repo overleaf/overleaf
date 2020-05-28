@@ -26,13 +26,13 @@ const thirtySeconds = 30 * 1000
 module.exports = DocArchive = {
   archiveAllDocs(project_id, callback) {
     if (callback == null) {
-      callback = function(err, docs) {}
+      callback = function (err, docs) {}
     }
     return MongoManager.getProjectsDocs(
       project_id,
       { include_deleted: true },
       { lines: true, ranges: true, rev: true, inS3: true },
-      function(err, docs) {
+      function (err, docs) {
         if (err != null) {
           return callback(err)
         } else if (docs == null) {
@@ -40,8 +40,8 @@ module.exports = DocArchive = {
             new Errors.NotFoundError(`No docs for project ${project_id}`)
           )
         }
-        docs = _.filter(docs, doc => doc.inS3 !== true)
-        const jobs = _.map(docs, doc => cb =>
+        docs = _.filter(docs, (doc) => doc.inS3 !== true)
+        const jobs = _.map(docs, (doc) => (cb) =>
           DocArchive.archiveDoc(project_id, doc, cb)
         )
         return async.parallelLimit(jobs, 5, callback)
@@ -57,13 +57,13 @@ module.exports = DocArchive = {
     } catch (e) {
       return callback(e)
     }
-    return DocArchive._mongoDocToS3Doc(doc, function(error, json_doc) {
+    return DocArchive._mongoDocToS3Doc(doc, function (error, json_doc) {
       if (error != null) {
         return callback(error)
       }
       options.body = json_doc
       options.headers = { 'Content-Type': 'application/json' }
-      return request.put(options, function(err, res) {
+      return request.put(options, function (err, res) {
         if (err != null || res.statusCode !== 200) {
           logger.err(
             {
@@ -94,7 +94,7 @@ module.exports = DocArchive = {
           )
           return callback(new Error('Error in S3 md5 response'))
         }
-        return MongoManager.markDocAsArchived(doc._id, doc.rev, function(err) {
+        return MongoManager.markDocAsArchived(doc._id, doc.rev, function (err) {
           if (err != null) {
             return callback(err)
           }
@@ -106,9 +106,12 @@ module.exports = DocArchive = {
 
   unArchiveAllDocs(project_id, callback) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
-    return MongoManager.getArchivedProjectDocs(project_id, function(err, docs) {
+    return MongoManager.getArchivedProjectDocs(project_id, function (
+      err,
+      docs
+    ) {
       if (err != null) {
         logger.err({ err, project_id }, 'error unarchiving all docs')
         return callback(err)
@@ -119,8 +122,8 @@ module.exports = DocArchive = {
       }
       const jobs = _.map(
         docs,
-        doc =>
-          function(cb) {
+        (doc) =>
+          function (cb) {
             if (doc.inS3 == null) {
               return cb()
             } else {
@@ -141,7 +144,7 @@ module.exports = DocArchive = {
       return callback(e)
     }
     options.json = true
-    return request.get(options, function(err, res, doc) {
+    return request.get(options, function (err, res, doc) {
       if (err != null || res.statusCode !== 200) {
         logger.err(
           { err, res, project_id, doc_id },
@@ -149,7 +152,7 @@ module.exports = DocArchive = {
         )
         return callback(new Errors.NotFoundError('Error in S3 request'))
       }
-      return DocArchive._s3DocToMongoDoc(doc, function(error, mongo_doc) {
+      return DocArchive._s3DocToMongoDoc(doc, function (error, mongo_doc) {
         if (error != null) {
           return callback(error)
         }
@@ -157,7 +160,7 @@ module.exports = DocArchive = {
           project_id,
           doc_id.toString(),
           mongo_doc,
-          function(err) {
+          function (err) {
             if (err != null) {
               return callback(err)
             }
@@ -171,20 +174,20 @@ module.exports = DocArchive = {
 
   destroyAllDocs(project_id, callback) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     return MongoManager.getProjectsDocs(
       project_id,
       { include_deleted: true },
       { _id: 1 },
-      function(err, docs) {
+      function (err, docs) {
         if (err != null) {
           logger.err({ err, project_id }, "error getting project's docs")
           return callback(err)
         } else if (docs == null) {
           return callback()
         }
-        const jobs = _.map(docs, doc => cb =>
+        const jobs = _.map(docs, (doc) => (cb) =>
           DocArchive.destroyDoc(project_id, doc._id, cb)
         )
         return async.parallelLimit(jobs, 5, callback)
@@ -194,7 +197,7 @@ module.exports = DocArchive = {
 
   destroyDoc(project_id, doc_id, callback) {
     logger.log({ project_id, doc_id }, 'removing doc from mongo and s3')
-    return MongoManager.findDoc(project_id, doc_id, { inS3: 1 }, function(
+    return MongoManager.findDoc(project_id, doc_id, { inS3: 1 }, function (
       error,
       doc
     ) {
@@ -205,7 +208,7 @@ module.exports = DocArchive = {
         return callback(new Errors.NotFoundError('Doc not found in Mongo'))
       }
       if (doc.inS3 === true) {
-        return DocArchive._deleteDocFromS3(project_id, doc_id, function(err) {
+        return DocArchive._deleteDocFromS3(project_id, doc_id, function (err) {
           if (err != null) {
             return err
           }
@@ -225,7 +228,7 @@ module.exports = DocArchive = {
       return callback(e)
     }
     options.json = true
-    return request.del(options, function(err, res, body) {
+    return request.del(options, function (err, res, body) {
       if (err != null || res.statusCode !== 204) {
         logger.err(
           { err, res, project_id, doc_id },
@@ -239,7 +242,7 @@ module.exports = DocArchive = {
 
   _s3DocToMongoDoc(doc, callback) {
     if (callback == null) {
-      callback = function(error, mongo_doc) {}
+      callback = function (error, mongo_doc) {}
     }
     const mongo_doc = {}
     if (doc.schema_v === 1 && doc.lines != null) {
@@ -257,7 +260,7 @@ module.exports = DocArchive = {
 
   _mongoDocToS3Doc(doc, callback) {
     if (callback == null) {
-      callback = function(error, s3_doc) {}
+      callback = function (error, s3_doc) {}
     }
     if (doc.lines == null) {
       return callback(new Error('doc has no lines'))

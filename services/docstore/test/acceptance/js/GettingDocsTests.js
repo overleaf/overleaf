@@ -19,8 +19,8 @@ const DocstoreApp = require('./helpers/DocstoreApp')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
 
-describe('Getting a doc', function() {
-  beforeEach(function(done) {
+describe('Getting a doc', function () {
+  beforeEach(function (done) {
     this.project_id = ObjectId()
     this.doc_id = ObjectId()
     this.lines = ['original', 'lines']
@@ -44,7 +44,7 @@ describe('Getting a doc', function() {
         this.lines,
         this.version,
         this.ranges,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -54,8 +54,8 @@ describe('Getting a doc', function() {
     })
   })
 
-  describe('when the doc exists', function() {
-    return it('should get the doc lines and version', function(done) {
+  describe('when the doc exists', function () {
+    return it('should get the doc lines and version', function (done) {
       return DocstoreClient.getDoc(
         this.project_id,
         this.doc_id,
@@ -70,8 +70,8 @@ describe('Getting a doc', function() {
     })
   })
 
-  describe('when the doc does not exist', function() {
-    return it('should return a 404', function(done) {
+  describe('when the doc does not exist', function () {
+    return it('should return a 404', function (done) {
       const missing_doc_id = ObjectId()
       return DocstoreClient.getDoc(
         this.project_id,
@@ -85,8 +85,8 @@ describe('Getting a doc', function() {
     })
   })
 
-  return describe('when the doc is a deleted doc', function() {
-    beforeEach(function(done) {
+  return describe('when the doc is a deleted doc', function () {
+    beforeEach(function (done) {
       this.deleted_doc_id = ObjectId()
       return DocstoreClient.createDoc(
         this.project_id,
@@ -94,7 +94,7 @@ describe('Getting a doc', function() {
         this.lines,
         this.version,
         this.ranges,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -107,7 +107,7 @@ describe('Getting a doc', function() {
       )
     })
 
-    it('should return the doc', function(done) {
+    it('should return the doc', function (done) {
       return DocstoreClient.getDoc(
         this.project_id,
         this.deleted_doc_id,
@@ -122,7 +122,7 @@ describe('Getting a doc', function() {
       )
     })
 
-    return it('should return a 404 when the query string is not set', function(done) {
+    return it('should return a 404 when the query string is not set', function (done) {
       return DocstoreClient.getDoc(
         this.project_id,
         this.deleted_doc_id,

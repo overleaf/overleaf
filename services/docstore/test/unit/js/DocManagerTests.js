@@ -22,8 +22,8 @@ const modulePath = require('path').join(__dirname, '../../../app/js/DocManager')
 const { ObjectId } = require('mongojs')
 const Errors = require('../../../app/js/Errors')
 
-describe('DocManager', function() {
-  beforeEach(function() {
+describe('DocManager', function () {
+  beforeEach(function () {
     this.DocManager = SandboxedModule.require(modulePath, {
       requires: {
         './MongoManager': (this.MongoManager = {}),
@@ -48,12 +48,12 @@ describe('DocManager', function() {
     return (this.stubbedError = new Error('blew up'))
   })
 
-  describe('checkDocExists', function() {
-    beforeEach(function() {
+  describe('checkDocExists', function () {
+    beforeEach(function () {
       return (this.DocManager._getDoc = sinon.stub())
     })
 
-    it('should call get doc with a quick filter', function(done) {
+    it('should call get doc with a quick filter', function (done) {
       this.DocManager._getDoc.callsArgWith(3, null, { _id: this.doc_id })
       return this.DocManager.checkDocExists(
         this.project_id,
@@ -68,7 +68,7 @@ describe('DocManager', function() {
       )
     })
 
-    it('should return false when doc is not there', function(done) {
+    it('should return false when doc is not there', function (done) {
       this.DocManager._getDoc.callsArgWith(3, null)
       return this.DocManager.checkDocExists(
         this.project_id,
@@ -80,7 +80,7 @@ describe('DocManager', function() {
       )
     })
 
-    return it('should return error when get doc errors', function(done) {
+    return it('should return error when get doc errors', function (done) {
       this.DocManager._getDoc.callsArgWith(3, 'error')
       return this.DocManager.checkDocExists(
         this.project_id,
@@ -93,8 +93,8 @@ describe('DocManager', function() {
     })
   })
 
-  describe('getFullDoc', function() {
-    beforeEach(function() {
+  describe('getFullDoc', function () {
+    beforeEach(function () {
       this.DocManager._getDoc = sinon.stub()
       return (this.doc = {
         _id: this.doc_id,
@@ -102,7 +102,7 @@ describe('DocManager', function() {
       })
     })
 
-    it('should call get doc with a quick filter', function(done) {
+    it('should call get doc with a quick filter', function (done) {
       this.DocManager._getDoc.callsArgWith(3, null, this.doc)
       return this.DocManager.getFullDoc(
         this.project_id,
@@ -124,7 +124,7 @@ describe('DocManager', function() {
       )
     })
 
-    return it('should return error when get doc errors', function(done) {
+    return it('should return error when get doc errors', function (done) {
       this.DocManager._getDoc.callsArgWith(3, 'error')
       return this.DocManager.getFullDoc(
         this.project_id,
@@ -137,13 +137,13 @@ describe('DocManager', function() {
     })
   })
 
-  describe('getRawDoc', function() {
-    beforeEach(function() {
+  describe('getRawDoc', function () {
+    beforeEach(function () {
       this.DocManager._getDoc = sinon.stub()
       return (this.doc = { lines: ['2134'] })
     })
 
-    it('should call get doc with a quick filter', function(done) {
+    it('should call get doc with a quick filter', function (done) {
       this.DocManager._getDoc.callsArgWith(3, null, this.doc)
       return this.DocManager.getDocLines(
         this.project_id,
@@ -161,7 +161,7 @@ describe('DocManager', function() {
       )
     })
 
-    return it('should return error when get doc errors', function(done) {
+    return it('should return error when get doc errors', function (done) {
       this.DocManager._getDoc.callsArgWith(3, 'error')
       return this.DocManager.getDocLines(
         this.project_id,
@@ -174,8 +174,8 @@ describe('DocManager', function() {
     })
   })
 
-  describe('getDoc', function() {
-    beforeEach(function() {
+  describe('getDoc', function () {
+    beforeEach(function () {
       this.project = { name: 'mock-project' }
       this.doc = {
         _id: this.doc_id,
@@ -189,29 +189,29 @@ describe('DocManager', function() {
         .yields(null, this.version))
     })
 
-    describe('when using a filter', function() {
-      beforeEach(function() {
+    describe('when using a filter', function () {
+      beforeEach(function () {
         return this.MongoManager.findDoc.yields(null, this.doc)
       })
 
-      it('should error if inS3 is not set to true', function(done) {
+      it('should error if inS3 is not set to true', function (done) {
         return this.DocManager._getDoc(
           this.project_id,
           this.doc_id,
           { inS3: false },
-          err => {
+          (err) => {
             expect(err).to.exist
             return done()
           }
         )
       })
 
-      it('should always get inS3 even when no filter is passed', function(done) {
+      it('should always get inS3 even when no filter is passed', function (done) {
         return this.DocManager._getDoc(
           this.project_id,
           this.doc_id,
           undefined,
-          err => {
+          (err) => {
             this.MongoManager.findDoc.called.should.equal(false)
             expect(err).to.exist
             return done()
@@ -219,12 +219,12 @@ describe('DocManager', function() {
         )
       })
 
-      return it('should not error if inS3 is set to true', function(done) {
+      return it('should not error if inS3 is set to true', function (done) {
         return this.DocManager._getDoc(
           this.project_id,
           this.doc_id,
           { inS3: true },
-          err => {
+          (err) => {
             expect(err).to.not.exist
             return done()
           }
@@ -232,8 +232,8 @@ describe('DocManager', function() {
       })
     })
 
-    describe('when the doc is in the doc collection', function() {
-      beforeEach(function() {
+    describe('when the doc is in the doc collection', function () {
+      beforeEach(function () {
         this.MongoManager.findDoc.yields(null, this.doc)
         return this.DocManager._getDoc(
           this.project_id,
@@ -243,19 +243,19 @@ describe('DocManager', function() {
         )
       })
 
-      it('should get the doc from the doc collection', function() {
+      it('should get the doc from the doc collection', function () {
         return this.MongoManager.findDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
-      it('should get the doc version from the docOps collection', function() {
+      it('should get the doc version from the docOps collection', function () {
         return this.MongoManager.getDocVersion
           .calledWith(this.doc_id)
           .should.equal(true)
       })
 
-      return it('should return the callback with the doc with the version', function() {
+      return it('should return the callback with the doc with the version', function () {
         this.callback.called.should.equal(true)
         const doc = this.callback.args[0][1]
         doc.lines.should.equal(this.doc.lines)
@@ -263,8 +263,8 @@ describe('DocManager', function() {
       })
     })
 
-    describe('without the version filter', function() {
-      beforeEach(function() {
+    describe('without the version filter', function () {
+      beforeEach(function () {
         this.MongoManager.findDoc.yields(null, this.doc)
         return this.DocManager._getDoc(
           this.project_id,
@@ -274,13 +274,13 @@ describe('DocManager', function() {
         )
       })
 
-      return it('should not get the doc version from the docOps collection', function() {
+      return it('should not get the doc version from the docOps collection', function () {
         return this.MongoManager.getDocVersion.called.should.equal(false)
       })
     })
 
-    describe('when MongoManager.findDoc errors', function() {
-      beforeEach(function() {
+    describe('when MongoManager.findDoc errors', function () {
+      beforeEach(function () {
         this.MongoManager.findDoc.yields(this.stubbedError)
         return this.DocManager._getDoc(
           this.project_id,
@@ -290,13 +290,13 @@ describe('DocManager', function() {
         )
       })
 
-      return it('should return the error', function() {
+      return it('should return the error', function () {
         return this.callback.calledWith(this.stubbedError).should.equal(true)
       })
     })
 
-    describe('when the doc is archived', function() {
-      beforeEach(function() {
+    describe('when the doc is archived', function () {
+      beforeEach(function () {
         this.doc = {
           _id: this.doc_id,
           project_id: this.project_id,
@@ -321,23 +321,23 @@ describe('DocManager', function() {
         )
       })
 
-      it('should call the DocArchive to unarchive the doc', function() {
+      it('should call the DocArchive to unarchive the doc', function () {
         return this.DocArchiveManager.unarchiveDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
-      it('should look up the doc twice', function() {
+      it('should look up the doc twice', function () {
         return this.MongoManager.findDoc.calledTwice.should.equal(true)
       })
 
-      return it('should return the doc', function() {
+      return it('should return the doc', function () {
         return this.callback.calledWith(null, this.doc).should.equal(true)
       })
     })
 
-    return describe('when the doc does not exist in the docs collection', function() {
-      beforeEach(function() {
+    return describe('when the doc does not exist in the docs collection', function () {
+      beforeEach(function () {
         this.MongoManager.findDoc = sinon.stub().yields(null, null)
         return this.DocManager._getDoc(
           this.project_id,
@@ -347,7 +347,7 @@ describe('DocManager', function() {
         )
       })
 
-      return it('should return a NotFoundError', function() {
+      return it('should return a NotFoundError', function () {
         return this.callback
           .calledWith(
             sinon.match.has(
@@ -360,9 +360,9 @@ describe('DocManager', function() {
     })
   })
 
-  describe('getAllNonDeletedDocs', function() {
-    describe('when the project exists', function() {
-      beforeEach(function() {
+  describe('getAllNonDeletedDocs', function () {
+    describe('when the project exists', function () {
+      beforeEach(function () {
         this.docs = [
           {
             _id: this.doc_id,
@@ -384,19 +384,19 @@ describe('DocManager', function() {
         )
       })
 
-      it('should get the project from the database', function() {
+      it('should get the project from the database', function () {
         return this.MongoManager.getProjectsDocs
           .calledWith(this.project_id, { include_deleted: false }, this.filter)
           .should.equal(true)
       })
 
-      return it('should return the docs', function() {
+      return it('should return the docs', function () {
         return this.callback.calledWith(null, this.docs).should.equal(true)
       })
     })
 
-    return describe('when there are no docs for the project', function() {
-      beforeEach(function() {
+    return describe('when there are no docs for the project', function () {
+      beforeEach(function () {
         this.MongoManager.getProjectsDocs = sinon
           .stub()
           .callsArgWith(3, null, null)
@@ -410,7 +410,7 @@ describe('DocManager', function() {
         )
       })
 
-      return it('should return a NotFoundError', function() {
+      return it('should return a NotFoundError', function () {
         return this.callback
           .calledWith(
             sinon.match.has('message', `No docs for project ${this.project_id}`)
@@ -420,9 +420,9 @@ describe('DocManager', function() {
     })
   })
 
-  describe('deleteDoc', function() {
-    describe('when the doc exists', function() {
-      beforeEach(function() {
+  describe('deleteDoc', function () {
+    describe('when the doc exists', function () {
+      beforeEach(function () {
         this.lines = ['mock', 'doc', 'lines']
         this.rev = 77
         this.DocManager.checkDocExists = sinon
@@ -436,25 +436,25 @@ describe('DocManager', function() {
         )
       })
 
-      it('should get the doc', function() {
+      it('should get the doc', function () {
         return this.DocManager.checkDocExists
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
-      it('should mark doc as deleted', function() {
+      it('should mark doc as deleted', function () {
         return this.MongoManager.markDocAsDeleted
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
-      return it('should return the callback', function() {
+      return it('should return the callback', function () {
         return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('when the doc does not exist', function() {
-      beforeEach(function() {
+    return describe('when the doc does not exist', function () {
+      beforeEach(function () {
         this.DocManager.checkDocExists = sinon
           .stub()
           .callsArgWith(2, null, false)
@@ -465,7 +465,7 @@ describe('DocManager', function() {
         )
       })
 
-      return it('should return a NotFoundError', function() {
+      return it('should return a NotFoundError', function () {
         return this.callback
           .calledWith(
             sinon.match.has(
@@ -478,8 +478,8 @@ describe('DocManager', function() {
     })
   })
 
-  return describe('updateDoc', function() {
-    beforeEach(function() {
+  return describe('updateDoc', function () {
+    beforeEach(function () {
       this.oldDocLines = ['old', 'doc', 'lines']
       this.newDocLines = ['new', 'doc', 'lines']
       this.originalRanges = {
@@ -521,8 +521,8 @@ describe('DocManager', function() {
       return (this.DocManager._getDoc = sinon.stub())
     })
 
-    describe('when only the doc lines have changed', function() {
-      beforeEach(function() {
+    describe('when only the doc lines have changed', function () {
+      beforeEach(function () {
         this.DocManager._getDoc = sinon.stub().callsArgWith(3, null, this.doc)
         return this.DocManager.updateDoc(
           this.project_id,
@@ -534,7 +534,7 @@ describe('DocManager', function() {
         )
       })
 
-      it('should get the existing doc', function() {
+      it('should get the existing doc', function () {
         return this.DocManager._getDoc
           .calledWith(this.project_id, this.doc_id, {
             version: true,
@@ -547,25 +547,25 @@ describe('DocManager', function() {
           .should.equal(true)
       })
 
-      it('should upsert the document to the doc collection', function() {
+      it('should upsert the document to the doc collection', function () {
         return this.MongoManager.upsertIntoDocCollection
           .calledWith(this.project_id, this.doc_id, { lines: this.newDocLines })
           .should.equal(true)
       })
 
-      it('should not update the version', function() {
+      it('should not update the version', function () {
         return this.MongoManager.setDocVersion.called.should.equal(false)
       })
 
-      return it('should return the callback with the new rev', function() {
+      return it('should return the callback with the new rev', function () {
         return this.callback
           .calledWith(null, true, this.rev + 1)
           .should.equal(true)
       })
     })
 
-    describe('when the doc ranges have changed', function() {
-      beforeEach(function() {
+    describe('when the doc ranges have changed', function () {
+      beforeEach(function () {
         this.DocManager._getDoc = sinon.stub().callsArgWith(3, null, this.doc)
         this.RangeManager.shouldUpdateRanges.returns(true)
         return this.DocManager.updateDoc(
@@ -578,25 +578,25 @@ describe('DocManager', function() {
         )
       })
 
-      it('should upsert the ranges', function() {
+      it('should upsert the ranges', function () {
         return this.MongoManager.upsertIntoDocCollection
           .calledWith(this.project_id, this.doc_id, { ranges: this.newRanges })
           .should.equal(true)
       })
 
-      it('should not update the version', function() {
+      it('should not update the version', function () {
         return this.MongoManager.setDocVersion.called.should.equal(false)
       })
 
-      return it('should return the callback with the new rev', function() {
+      return it('should return the callback with the new rev', function () {
         return this.callback
           .calledWith(null, true, this.rev + 1)
           .should.equal(true)
       })
     })
 
-    describe('when only the version has changed', function() {
-      beforeEach(function() {
+    describe('when only the version has changed', function () {
+      beforeEach(function () {
         this.DocManager._getDoc = sinon.stub().callsArgWith(3, null, this.doc)
         return this.DocManager.updateDoc(
           this.project_id,
@@ -608,25 +608,25 @@ describe('DocManager', function() {
         )
       })
 
-      it('should not change the lines or ranges', function() {
+      it('should not change the lines or ranges', function () {
         return this.MongoManager.upsertIntoDocCollection.called.should.equal(
           false
         )
       })
 
-      it('should update the version', function() {
+      it('should update the version', function () {
         return this.MongoManager.setDocVersion
           .calledWith(this.doc_id, this.version + 1)
           .should.equal(true)
       })
 
-      return it('should return the callback with the old rev', function() {
+      return it('should return the callback with the old rev', function () {
         return this.callback.calledWith(null, true, this.rev).should.equal(true)
       })
     })
 
-    describe('when the doc has not changed at all', function() {
-      beforeEach(function() {
+    describe('when the doc has not changed at all', function () {
+      beforeEach(function () {
         this.DocManager._getDoc = sinon.stub().callsArgWith(3, null, this.doc)
         return this.DocManager.updateDoc(
           this.project_id,
@@ -638,25 +638,25 @@ describe('DocManager', function() {
         )
       })
 
-      it('should not update the ranges or lines', function() {
+      it('should not update the ranges or lines', function () {
         return this.MongoManager.upsertIntoDocCollection.called.should.equal(
           false
         )
       })
 
-      it('should not update the version', function() {
+      it('should not update the version', function () {
         return this.MongoManager.setDocVersion.called.should.equal(false)
       })
 
-      return it('should return the callback with the old rev and modified == false', function() {
+      return it('should return the callback with the old rev and modified == false', function () {
         return this.callback
           .calledWith(null, false, this.rev)
           .should.equal(true)
       })
     })
 
-    describe('when the version is null', function() {
-      beforeEach(function() {
+    describe('when the version is null', function () {
+      beforeEach(function () {
         return this.DocManager.updateDoc(
           this.project_id,
           this.doc_id,
@@ -667,7 +667,7 @@ describe('DocManager', function() {
         )
       })
 
-      return it('should return an error', function() {
+      return it('should return an error', function () {
         return this.callback
           .calledWith(
             sinon.match.has('message', 'no lines, version or ranges provided')
@@ -676,8 +676,8 @@ describe('DocManager', function() {
       })
     })
 
-    describe('when the lines are null', function() {
-      beforeEach(function() {
+    describe('when the lines are null', function () {
+      beforeEach(function () {
         return this.DocManager.updateDoc(
           this.project_id,
           this.doc_id,
@@ -688,7 +688,7 @@ describe('DocManager', function() {
         )
       })
 
-      return it('should return an error', function() {
+      return it('should return an error', function () {
         return this.callback
           .calledWith(
             sinon.match.has('message', 'no lines, version or ranges provided')
@@ -697,8 +697,8 @@ describe('DocManager', function() {
       })
     })
 
-    describe('when the ranges are null', function() {
-      beforeEach(function() {
+    describe('when the ranges are null', function () {
+      beforeEach(function () {
         return this.DocManager.updateDoc(
           this.project_id,
           this.doc_id,
@@ -709,7 +709,7 @@ describe('DocManager', function() {
         )
       })
 
-      return it('should return an error', function() {
+      return it('should return an error', function () {
         return this.callback
           .calledWith(
             sinon.match.has('message', 'no lines, version or ranges provided')
@@ -718,8 +718,8 @@ describe('DocManager', function() {
       })
     })
 
-    describe('when there is a generic error getting the doc', function() {
-      beforeEach(function() {
+    describe('when there is a generic error getting the doc', function () {
+      beforeEach(function () {
         this.error = new Error('doc could not be found')
         this.DocManager._getDoc = sinon
           .stub()
@@ -734,19 +734,19 @@ describe('DocManager', function() {
         )
       })
 
-      it('should not upsert the document to the doc collection', function() {
+      it('should not upsert the document to the doc collection', function () {
         return this.MongoManager.upsertIntoDocCollection.called.should.equal(
           false
         )
       })
 
-      return it('should return the callback with the error', function() {
+      return it('should return the callback with the error', function () {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    describe('when the doc lines have not changed', function() {
-      beforeEach(function() {
+    describe('when the doc lines have not changed', function () {
+      beforeEach(function () {
         this.DocManager._getDoc = sinon.stub().callsArgWith(3, null, this.doc)
         return this.DocManager.updateDoc(
           this.project_id,
@@ -758,21 +758,21 @@ describe('DocManager', function() {
         )
       })
 
-      it('should not update the doc', function() {
+      it('should not update the doc', function () {
         return this.MongoManager.upsertIntoDocCollection.called.should.equal(
           false
         )
       })
 
-      return it('should return the callback with the existing rev', function() {
+      return it('should return the callback with the existing rev', function () {
         return this.callback
           .calledWith(null, false, this.rev)
           .should.equal(true)
       })
     })
 
-    return describe('when the doc does not exist', function() {
-      beforeEach(function() {
+    return describe('when the doc does not exist', function () {
+      beforeEach(function () {
         this.DocManager._getDoc = sinon.stub().callsArgWith(3, null, null, null)
         return this.DocManager.updateDoc(
           this.project_id,
@@ -784,7 +784,7 @@ describe('DocManager', function() {
         )
       })
 
-      it('should upsert the document to the doc collection', function() {
+      it('should upsert the document to the doc collection', function () {
         return this.MongoManager.upsertIntoDocCollection
           .calledWith(this.project_id, this.doc_id, {
             lines: this.newDocLines,
@@ -793,13 +793,13 @@ describe('DocManager', function() {
           .should.equal(true)
       })
 
-      it('should set the version', function() {
+      it('should set the version', function () {
         return this.MongoManager.setDocVersion
           .calledWith(this.doc_id, this.version)
           .should.equal(true)
       })
 
-      return it('should return the callback with the new rev', function() {
+      return it('should return the callback with the new rev', function () {
         return this.callback.calledWith(null, true, 1).should.equal(true)
       })
     })

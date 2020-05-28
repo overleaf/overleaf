@@ -20,7 +20,7 @@ const DocArchiveManager = require('../../../../app/js/DocArchiveManager.js')
 module.exports = DocstoreClient = {
   createDoc(project_id, doc_id, lines, version, ranges, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return DocstoreClient.updateDoc(
       project_id,
@@ -34,7 +34,7 @@ module.exports = DocstoreClient = {
 
   getDoc(project_id, doc_id, qs, callback) {
     if (callback == null) {
-      callback = function(error, res, body) {}
+      callback = function (error, res, body) {}
     }
     return request.get(
       {
@@ -48,7 +48,7 @@ module.exports = DocstoreClient = {
 
   getAllDocs(project_id, callback) {
     if (callback == null) {
-      callback = function(error, res, body) {}
+      callback = function (error, res, body) {}
     }
     return request.get(
       {
@@ -61,7 +61,7 @@ module.exports = DocstoreClient = {
 
   getAllRanges(project_id, callback) {
     if (callback == null) {
-      callback = function(error, res, body) {}
+      callback = function (error, res, body) {}
     }
     return request.get(
       {
@@ -74,7 +74,7 @@ module.exports = DocstoreClient = {
 
   updateDoc(project_id, doc_id, lines, version, ranges, callback) {
     if (callback == null) {
-      callback = function(error, res, body) {}
+      callback = function (error, res, body) {}
     }
     return request.post(
       {
@@ -91,7 +91,7 @@ module.exports = DocstoreClient = {
 
   deleteDoc(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(error, res, body) {}
+      callback = function (error, res, body) {}
     }
     return request.del(
       {
@@ -103,7 +103,7 @@ module.exports = DocstoreClient = {
 
   archiveAllDoc(project_id, callback) {
     if (callback == null) {
-      callback = function(error, res, body) {}
+      callback = function (error, res, body) {}
     }
     return request.post(
       {
@@ -115,7 +115,7 @@ module.exports = DocstoreClient = {
 
   destroyAllDoc(project_id, callback) {
     if (callback == null) {
-      callback = function(error, res, body) {}
+      callback = function (error, res, body) {}
     }
     return request.post(
       {
@@ -127,7 +127,7 @@ module.exports = DocstoreClient = {
 
   getS3Doc(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(error, res, body) {}
+      callback = function (error, res, body) {}
     }
     const options = DocArchiveManager.buildS3Options(project_id + '/' + doc_id)
     options.json = true

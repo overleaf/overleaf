@@ -20,8 +20,8 @@ const DocstoreApp = require('./helpers/DocstoreApp')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
 
-describe('Getting all docs', function() {
-  beforeEach(function(done) {
+describe('Getting all docs', function () {
+  beforeEach(function (done) {
     this.project_id = ObjectId()
     this.docs = [
       {
@@ -50,9 +50,9 @@ describe('Getting all docs', function() {
       rev: 8
     }
     const version = 42
-    const jobs = Array.from(this.docs).map(doc =>
-      (doc => {
-        return callback => {
+    const jobs = Array.from(this.docs).map((doc) =>
+      ((doc) => {
+        return (callback) => {
           return DocstoreClient.createDoc(
             this.project_id,
             doc._id,
@@ -64,14 +64,14 @@ describe('Getting all docs', function() {
         }
       })(doc)
     )
-    jobs.push(cb => {
+    jobs.push((cb) => {
       return DocstoreClient.createDoc(
         this.project_id,
         this.deleted_doc._id,
         this.deleted_doc.lines,
         version,
         this.deleted_doc.ranges,
-        err => {
+        (err) => {
           return DocstoreClient.deleteDoc(
             this.project_id,
             this.deleted_doc._id,
@@ -80,11 +80,11 @@ describe('Getting all docs', function() {
         }
       )
     })
-    jobs.unshift(cb => DocstoreApp.ensureRunning(cb))
+    jobs.unshift((cb) => DocstoreApp.ensureRunning(cb))
     return async.series(jobs, done)
   })
 
-  it('getAllDocs should return all the (non-deleted) docs', function(done) {
+  it('getAllDocs should return all the (non-deleted) docs', function (done) {
     return DocstoreClient.getAllDocs(this.project_id, (error, res, docs) => {
       if (error != null) {
         throw error
@@ -98,7 +98,7 @@ describe('Getting all docs', function() {
     })
   })
 
-  return it('getAllRanges should return all the (non-deleted) doc ranges', function(done) {
+  return it('getAllRanges should return all the (non-deleted) doc ranges', function (done) {
     return DocstoreClient.getAllRanges(this.project_id, (error, res, docs) => {
       if (error != null) {
         throw error

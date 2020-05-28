@@ -22,14 +22,14 @@ const Settings = require('settings-sharelatex')
 module.exports = HttpController = {
   getDoc(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
     const { doc_id } = req.params
     const include_deleted =
       (req.query != null ? req.query.include_deleted : undefined) === 'true'
     logger.log({ project_id, doc_id }, 'getting doc')
-    return DocManager.getFullDoc(project_id, doc_id, function(error, doc) {
+    return DocManager.getFullDoc(project_id, doc_id, function (error, doc) {
       if (error != null) {
         return next(error)
       }
@@ -46,12 +46,12 @@ module.exports = HttpController = {
 
   getRawDoc(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
     const { doc_id } = req.params
     logger.log({ project_id, doc_id }, 'getting raw doc')
-    return DocManager.getDocLines(project_id, doc_id, function(error, doc) {
+    return DocManager.getDocLines(project_id, doc_id, function (error, doc) {
       if (error != null) {
         return next(error)
       }
@@ -66,14 +66,14 @@ module.exports = HttpController = {
 
   getAllDocs(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
     logger.log({ project_id }, 'getting all docs')
     return DocManager.getAllNonDeletedDocs(
       project_id,
       { lines: true, rev: true },
-      function(error, docs) {
+      function (error, docs) {
         if (docs == null) {
           docs = []
         }
@@ -87,14 +87,14 @@ module.exports = HttpController = {
 
   getAllRanges(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
     logger.log({ project_id }, 'getting all ranges')
     return DocManager.getAllNonDeletedDocs(
       project_id,
       { ranges: true },
-      function(error, docs) {
+      function (error, docs) {
         if (docs == null) {
           docs = []
         }
@@ -108,7 +108,7 @@ module.exports = HttpController = {
 
   updateDoc(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
     const { doc_id } = req.params
@@ -151,7 +151,7 @@ module.exports = HttpController = {
       lines,
       version,
       ranges,
-      function(error, modified, rev) {
+      function (error, modified, rev) {
         if (error != null) {
           return next(error)
         }
@@ -165,12 +165,12 @@ module.exports = HttpController = {
 
   deleteDoc(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
     const { doc_id } = req.params
     logger.log({ project_id, doc_id }, 'deleting doc')
-    return DocManager.deleteDoc(project_id, doc_id, function(error) {
+    return DocManager.deleteDoc(project_id, doc_id, function (error) {
       if (error != null) {
         return next(error)
       }
@@ -210,11 +210,11 @@ module.exports = HttpController = {
 
   archiveAllDocs(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
     logger.log({ project_id }, 'archiving all docs')
-    return DocArchive.archiveAllDocs(project_id, function(error) {
+    return DocArchive.archiveAllDocs(project_id, function (error) {
       if (error != null) {
         return next(error)
       }
@@ -224,11 +224,11 @@ module.exports = HttpController = {
 
   unArchiveAllDocs(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
     logger.log({ project_id }, 'unarchiving all docs')
-    return DocArchive.unArchiveAllDocs(project_id, function(error) {
+    return DocArchive.unArchiveAllDocs(project_id, function (error) {
       if (error != null) {
         return next(error)
       }
@@ -238,11 +238,11 @@ module.exports = HttpController = {
 
   destroyAllDocs(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
     logger.log({ project_id }, 'destroying all docs')
-    return DocArchive.destroyAllDocs(project_id, function(error) {
+    return DocArchive.destroyAllDocs(project_id, function (error) {
       if (error != null) {
         return next(error)
       }
@@ -251,7 +251,7 @@ module.exports = HttpController = {
   },
 
   healthCheck(req, res) {
-    return HealthChecker.check(function(err) {
+    return HealthChecker.check(function (err) {
       if (err != null) {
         logger.err({ err }, 'error performing health check')
         return res.send(500)

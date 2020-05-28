@@ -23,13 +23,13 @@ const request = require('request')
 const DocstoreApp = require('./helpers/DocstoreApp')
 const DocstoreClient = require('./helpers/DocstoreClient')
 
-describe('Archiving', function() {
-  before(function(done) {
+describe('Archiving', function () {
+  before(function (done) {
     return DocstoreApp.ensureRunning(done)
   })
 
-  describe('multiple docs in a project', function() {
-    before(function(done) {
+  describe('multiple docs in a project', function () {
+    before(function (done) {
       this.project_id = ObjectId()
       this.docs = [
         {
@@ -45,9 +45,9 @@ describe('Archiving', function() {
           version: 4
         }
       ]
-      const jobs = Array.from(this.docs).map(doc =>
-        (doc => {
-          return callback => {
+      const jobs = Array.from(this.docs).map((doc) =>
+        ((doc) => {
+          return (callback) => {
             return DocstoreClient.createDoc(
               this.project_id,
               doc._id,
@@ -60,7 +60,7 @@ describe('Archiving', function() {
         })(doc)
       )
 
-      return async.series(jobs, error => {
+      return async.series(jobs, (error) => {
         if (error != null) {
           throw error
         }
@@ -71,15 +71,15 @@ describe('Archiving', function() {
       })
     })
 
-    it('should archive all the docs', function(done) {
+    it('should archive all the docs', function (done) {
       this.res.statusCode.should.equal(204)
       return done()
     })
 
-    it('should set inS3 and unset lines and ranges in each doc', function(done) {
-      const jobs = Array.from(this.docs).map(doc =>
-        (doc => {
-          return callback => {
+    it('should set inS3 and unset lines and ranges in each doc', function (done) {
+      const jobs = Array.from(this.docs).map((doc) =>
+        ((doc) => {
+          return (callback) => {
             return db.docs.findOne({ _id: doc._id }, (error, doc) => {
               should.not.exist(doc.lines)
               should.not.exist(doc.ranges)
@@ -92,10 +92,10 @@ describe('Archiving', function() {
       return async.series(jobs, done)
     })
 
-    it('should set the docs in s3 correctly', function(done) {
-      const jobs = Array.from(this.docs).map(doc =>
-        (doc => {
-          return callback => {
+    it('should set the docs in s3 correctly', function (done) {
+      const jobs = Array.from(this.docs).map((doc) =>
+        ((doc) => {
+          return (callback) => {
             return DocstoreClient.getS3Doc(
               this.project_id,
               doc._id,
@@ -111,8 +111,8 @@ describe('Archiving', function() {
       return async.series(jobs, done)
     })
 
-    return describe('after unarchiving from a request for the project', function() {
-      before(function(done) {
+    return describe('after unarchiving from a request for the project', function () {
+      before(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
           (error, res, fetched_docs) => {
@@ -125,7 +125,7 @@ describe('Archiving', function() {
         )
       })
 
-      it('should return the docs', function(done) {
+      it('should return the docs', function (done) {
         for (let i = 0; i < this.fetched_docs.length; i++) {
           const doc = this.fetched_docs[i]
           doc.lines.should.deep.equal(this.docs[i].lines)
@@ -133,10 +133,10 @@ describe('Archiving', function() {
         return done()
       })
 
-      return it('should restore the docs to mongo', function(done) {
+      return it('should restore the docs to mongo', function (done) {
         const jobs = Array.from(this.docs).map((doc, i) =>
           ((doc, i) => {
-            return callback => {
+            return (callback) => {
               return db.docs.findOne({ _id: doc._id }, (error, doc) => {
                 doc.lines.should.deep.equal(this.docs[i].lines)
                 doc.ranges.should.deep.equal(this.docs[i].ranges)
@@ -151,8 +151,8 @@ describe('Archiving', function() {
     })
   })
 
-  describe('a deleted doc', function() {
-    before(function(done) {
+  describe('a deleted doc', function () {
+    before(function (done) {
       this.project_id = ObjectId()
       this.doc = {
         _id: ObjectId(),
@@ -166,14 +166,14 @@ describe('Archiving', function() {
         this.doc.lines,
         this.doc.version,
         this.doc.ranges,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
           return DocstoreClient.deleteDoc(
             this.project_id,
             this.doc._id,
-            error => {
+            (error) => {
               if (error != null) {
                 throw error
               }
@@ -193,12 +193,12 @@ describe('Archiving', function() {
       )
     })
 
-    it('should successully archive the docs', function(done) {
+    it('should successully archive the docs', function (done) {
       this.res.statusCode.should.equal(204)
       return done()
     })
 
-    it('should set inS3 and unset lines and ranges in each doc', function(done) {
+    it('should set inS3 and unset lines and ranges in each doc', function (done) {
       return db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
         if (error != null) {
           throw error
@@ -211,7 +211,7 @@ describe('Archiving', function() {
       })
     })
 
-    it('should set the doc in s3 correctly', function(done) {
+    it('should set the doc in s3 correctly', function (done) {
       return DocstoreClient.getS3Doc(
         this.project_id,
         this.doc._id,
@@ -226,8 +226,8 @@ describe('Archiving', function() {
       )
     })
 
-    return describe('after unarchiving from a request for the project', function() {
-      before(function(done) {
+    return describe('after unarchiving from a request for the project', function () {
+      before(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
           (error, res, fetched_docs) => {
@@ -240,12 +240,12 @@ describe('Archiving', function() {
         )
       })
 
-      it('should not included the deleted', function(done) {
+      it('should not included the deleted', function (done) {
         this.fetched_docs.length.should.equal(0)
         return done()
       })
 
-      return it('should restore the doc to mongo', function(done) {
+      return it('should restore the doc to mongo', function (done) {
         return db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
           if (error != null) {
             throw error
@@ -260,8 +260,8 @@ describe('Archiving', function() {
     })
   })
 
-  describe('a doc with large lines', function() {
-    before(function(done) {
+  describe('a doc with large lines', function () {
+    before(function (done) {
       this.project_id = ObjectId()
       this.timeout(1000 * 30)
       const quarterMegInBytes = 250000
@@ -280,7 +280,7 @@ describe('Archiving', function() {
         this.doc.lines,
         this.doc.version,
         this.doc.ranges,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -295,12 +295,12 @@ describe('Archiving', function() {
       )
     })
 
-    it('should successully archive the docs', function(done) {
+    it('should successully archive the docs', function (done) {
       this.res.statusCode.should.equal(204)
       return done()
     })
 
-    it('should set inS3 and unset lines and ranges in each doc', function(done) {
+    it('should set inS3 and unset lines and ranges in each doc', function (done) {
       return db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
         if (error != null) {
           throw error
@@ -312,7 +312,7 @@ describe('Archiving', function() {
       })
     })
 
-    it('should set the doc in s3 correctly', function(done) {
+    it('should set the doc in s3 correctly', function (done) {
       return DocstoreClient.getS3Doc(
         this.project_id,
         this.doc._id,
@@ -327,8 +327,8 @@ describe('Archiving', function() {
       )
     })
 
-    return describe('after unarchiving from a request for the project', function() {
-      before(function(done) {
+    return describe('after unarchiving from a request for the project', function () {
+      before(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
           (error, res, fetched_docs) => {
@@ -341,7 +341,7 @@ describe('Archiving', function() {
         )
       })
 
-      return it('should restore the doc to mongo', function(done) {
+      return it('should restore the doc to mongo', function (done) {
         return db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
           if (error != null) {
             throw error
@@ -355,8 +355,8 @@ describe('Archiving', function() {
     })
   })
 
-  describe('a doc with naughty strings', function() {
-    before(function(done) {
+  describe('a doc with naughty strings', function () {
+    before(function (done) {
       this.project_id = ObjectId()
       this.doc = {
         _id: ObjectId(),
@@ -754,7 +754,7 @@ describe('Archiving', function() {
         this.doc.lines,
         this.doc.version,
         this.doc.ranges,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -769,12 +769,12 @@ describe('Archiving', function() {
       )
     })
 
-    it('should successully archive the docs', function(done) {
+    it('should successully archive the docs', function (done) {
       this.res.statusCode.should.equal(204)
       return done()
     })
 
-    it('should set inS3 and unset lines and ranges in each doc', function(done) {
+    it('should set inS3 and unset lines and ranges in each doc', function (done) {
       return db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
         if (error != null) {
           throw error
@@ -786,7 +786,7 @@ describe('Archiving', function() {
       })
     })
 
-    it('should set the doc in s3 correctly', function(done) {
+    it('should set the doc in s3 correctly', function (done) {
       return DocstoreClient.getS3Doc(
         this.project_id,
         this.doc._id,
@@ -801,8 +801,8 @@ describe('Archiving', function() {
       )
     })
 
-    return describe('after unarchiving from a request for the project', function() {
-      before(function(done) {
+    return describe('after unarchiving from a request for the project', function () {
+      before(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
           (error, res, fetched_docs) => {
@@ -815,7 +815,7 @@ describe('Archiving', function() {
         )
       })
 
-      return it('should restore the doc to mongo', function(done) {
+      return it('should restore the doc to mongo', function (done) {
         return db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
           if (error != null) {
             throw error
@@ -829,8 +829,8 @@ describe('Archiving', function() {
     })
   })
 
-  describe('a doc with ranges', function() {
-    before(function(done) {
+  describe('a doc with ranges', function () {
+    before(function (done) {
       this.project_id = ObjectId()
       this.doc = {
         _id: ObjectId(),
@@ -873,7 +873,7 @@ describe('Archiving', function() {
         this.doc.lines,
         this.doc.version,
         this.doc.ranges,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -888,12 +888,12 @@ describe('Archiving', function() {
       )
     })
 
-    it('should successully archive the docs', function(done) {
+    it('should successully archive the docs', function (done) {
       this.res.statusCode.should.equal(204)
       return done()
     })
 
-    it('should set inS3 and unset lines and ranges in each doc', function(done) {
+    it('should set inS3 and unset lines and ranges in each doc', function (done) {
       return db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
         if (error != null) {
           throw error
@@ -905,7 +905,7 @@ describe('Archiving', function() {
       })
     })
 
-    it('should set the doc in s3 correctly', function(done) {
+    it('should set the doc in s3 correctly', function (done) {
       return DocstoreClient.getS3Doc(
         this.project_id,
         this.doc._id,
@@ -921,8 +921,8 @@ describe('Archiving', function() {
       )
     })
 
-    return describe('after unarchiving from a request for the project', function() {
-      before(function(done) {
+    return describe('after unarchiving from a request for the project', function () {
+      before(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
           (error, res, fetched_docs) => {
@@ -935,7 +935,7 @@ describe('Archiving', function() {
         )
       })
 
-      return it('should restore the doc to mongo', function(done) {
+      return it('should restore the doc to mongo', function (done) {
         return db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
           if (error != null) {
             throw error
@@ -949,8 +949,8 @@ describe('Archiving', function() {
     })
   })
 
-  describe('a doc that is archived twice', function() {
-    before(function(done) {
+  describe('a doc that is archived twice', function () {
+    before(function (done) {
       this.project_id = ObjectId()
       this.doc = {
         _id: ObjectId(),
@@ -964,7 +964,7 @@ describe('Archiving', function() {
         this.doc.lines,
         this.doc.version,
         this.doc.ranges,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -990,7 +990,7 @@ describe('Archiving', function() {
       )
     })
 
-    it('should set inS3 and unset lines and ranges in each doc', function(done) {
+    it('should set inS3 and unset lines and ranges in each doc', function (done) {
       return db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
         if (error != null) {
           throw error
@@ -1002,7 +1002,7 @@ describe('Archiving', function() {
       })
     })
 
-    it('should set the doc in s3 correctly', function(done) {
+    it('should set the doc in s3 correctly', function (done) {
       return DocstoreClient.getS3Doc(
         this.project_id,
         this.doc._id,
@@ -1017,8 +1017,8 @@ describe('Archiving', function() {
       )
     })
 
-    return describe('after unarchiving from a request for the project', function() {
-      before(function(done) {
+    return describe('after unarchiving from a request for the project', function () {
+      before(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
           (error, res, fetched_docs) => {
@@ -1031,7 +1031,7 @@ describe('Archiving', function() {
         )
       })
 
-      return it('should restore the doc to mongo', function(done) {
+      return it('should restore the doc to mongo', function (done) {
         return db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
           if (error != null) {
             throw error
@@ -1045,8 +1045,8 @@ describe('Archiving', function() {
     })
   })
 
-  return describe('a doc with the old schema (just an array of lines)', function() {
-    before(function(done) {
+  return describe('a doc with the old schema (just an array of lines)', function () {
+    before(function (done) {
       this.project_id = ObjectId()
       this.doc = {
         _id: ObjectId(),
@@ -1070,7 +1070,7 @@ describe('Archiving', function() {
             rev: this.doc.version,
             inS3: true
           },
-          error => {
+          (error) => {
             if (error != null) {
               throw error
             }
@@ -1089,7 +1089,7 @@ describe('Archiving', function() {
       })
     })
 
-    it('should restore the doc to mongo', function(done) {
+    it('should restore the doc to mongo', function (done) {
       return db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
         if (error != null) {
           throw error
@@ -1100,7 +1100,7 @@ describe('Archiving', function() {
       })
     })
 
-    return it('should return the doc', function(done) {
+    return it('should return the doc', function (done) {
       this.fetched_docs[0].lines.should.deep.equal(this.doc.lines)
       return done()
     })

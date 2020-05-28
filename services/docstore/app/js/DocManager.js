@@ -31,13 +31,16 @@ module.exports = DocManager = {
       filter = {}
     }
     if (callback == null) {
-      callback = function(error, doc) {}
+      callback = function (error, doc) {}
     }
     if (filter.inS3 !== true) {
       return callback('must include inS3 when getting doc')
     }
 
-    return MongoManager.findDoc(project_id, doc_id, filter, function(err, doc) {
+    return MongoManager.findDoc(project_id, doc_id, filter, function (
+      err,
+      doc
+    ) {
       if (err != null) {
         return callback(err)
       } else if (doc == null) {
@@ -47,7 +50,7 @@ module.exports = DocManager = {
           )
         )
       } else if (doc != null ? doc.inS3 : undefined) {
-        return DocArchive.unarchiveDoc(project_id, doc_id, function(err) {
+        return DocArchive.unarchiveDoc(project_id, doc_id, function (err) {
           if (err != null) {
             logger.err({ err, project_id, doc_id }, 'error unarchiving doc')
             return callback(err)
@@ -56,7 +59,7 @@ module.exports = DocManager = {
         })
       } else {
         if (filter.version) {
-          return MongoManager.getDocVersion(doc_id, function(error, version) {
+          return MongoManager.getDocVersion(doc_id, function (error, version) {
             if (error != null) {
               return callback(error)
             }
@@ -72,13 +75,13 @@ module.exports = DocManager = {
 
   checkDocExists(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(err, exists) {}
+      callback = function (err, exists) {}
     }
     return DocManager._getDoc(
       project_id,
       doc_id,
       { _id: 1, inS3: true },
-      function(err, doc) {
+      function (err, doc) {
         if (err != null) {
           return callback(err)
         }
@@ -89,7 +92,7 @@ module.exports = DocManager = {
 
   getFullDoc(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(err, doc) {}
+      callback = function (err, doc) {}
     }
     return DocManager._getDoc(
       project_id,
@@ -102,7 +105,7 @@ module.exports = DocManager = {
         ranges: true,
         inS3: true
       },
-      function(err, doc) {
+      function (err, doc) {
         if (err != null) {
           return callback(err)
         }
@@ -113,13 +116,13 @@ module.exports = DocManager = {
 
   getDocLines(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(err, doc) {}
+      callback = function (err, doc) {}
     }
     return DocManager._getDoc(
       project_id,
       doc_id,
       { lines: true, inS3: true },
-      function(err, doc) {
+      function (err, doc) {
         if (err != null) {
           return callback(err)
         }
@@ -130,9 +133,9 @@ module.exports = DocManager = {
 
   getAllNonDeletedDocs(project_id, filter, callback) {
     if (callback == null) {
-      callback = function(error, docs) {}
+      callback = function (error, docs) {}
     }
-    return DocArchive.unArchiveAllDocs(project_id, function(error) {
+    return DocArchive.unArchiveAllDocs(project_id, function (error) {
       if (error != null) {
         return callback(error)
       }
@@ -140,7 +143,7 @@ module.exports = DocManager = {
         project_id,
         { include_deleted: false },
         filter,
-        function(error, docs) {
+        function (error, docs) {
           if (typeof err !== 'undefined' && err !== null) {
             return callback(error)
           } else if (docs == null) {
@@ -157,7 +160,7 @@ module.exports = DocManager = {
 
   updateDoc(project_id, doc_id, lines, version, ranges, callback) {
     if (callback == null) {
-      callback = function(error, modified, rev) {}
+      callback = function (error, modified, rev) {}
     }
     if (lines == null || version == null || ranges == null) {
       return callback(new Error('no lines, version or ranges provided'))
@@ -174,7 +177,7 @@ module.exports = DocManager = {
         ranges: true,
         inS3: true
       },
-      function(err, doc) {
+      function (err, doc) {
         let updateLines, updateRanges, updateVersion
         if (err != null && !(err instanceof Errors.NotFoundError)) {
           logger.err(
@@ -200,7 +203,7 @@ module.exports = DocManager = {
         let modified = false
         let rev = (doc != null ? doc.rev : undefined) || 0
 
-        const updateLinesAndRangesIfNeeded = function(cb) {
+        const updateLinesAndRangesIfNeeded = function (cb) {
           if (updateLines || updateRanges) {
             const update = {}
             if (updateLines) {
@@ -228,7 +231,7 @@ module.exports = DocManager = {
           }
         }
 
-        const updateVersionIfNeeded = function(cb) {
+        const updateVersionIfNeeded = function (cb) {
           if (updateVersion) {
             logger.log(
               {
@@ -250,11 +253,11 @@ module.exports = DocManager = {
           }
         }
 
-        return updateLinesAndRangesIfNeeded(function(error) {
+        return updateLinesAndRangesIfNeeded(function (error) {
           if (error != null) {
             return callback(error)
           }
-          return updateVersionIfNeeded(function(error) {
+          return updateVersionIfNeeded(function (error) {
             if (error != null) {
               return callback(error)
             }
@@ -267,9 +270,9 @@ module.exports = DocManager = {
 
   deleteDoc(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return DocManager.checkDocExists(project_id, doc_id, function(
+    return DocManager.checkDocExists(project_id, doc_id, function (
       error,
       exists
     ) {

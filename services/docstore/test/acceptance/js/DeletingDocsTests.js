@@ -20,8 +20,8 @@ const DocstoreApp = require('./helpers/DocstoreApp')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
 
-describe('Deleting a doc', function() {
-  beforeEach(function(done) {
+describe('Deleting a doc', function () {
+  beforeEach(function (done) {
     this.project_id = ObjectId()
     this.doc_id = ObjectId()
     this.lines = ['original', 'lines']
@@ -34,7 +34,7 @@ describe('Deleting a doc', function() {
         this.lines,
         this.version,
         this.ranges,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -44,8 +44,8 @@ describe('Deleting a doc', function() {
     })
   })
 
-  describe('when the doc exists', function() {
-    beforeEach(function(done) {
+  describe('when the doc exists', function () {
+    beforeEach(function (done) {
       return DocstoreClient.deleteDoc(
         this.project_id,
         this.doc_id,
@@ -56,11 +56,11 @@ describe('Deleting a doc', function() {
       )
     })
 
-    afterEach(function(done) {
+    afterEach(function (done) {
       return db.docs.remove({ _id: this.doc_id }, done)
     })
 
-    return it('should insert a deleted doc into the docs collection', function(done) {
+    return it('should insert a deleted doc into the docs collection', function (done) {
       return db.docs.find({ _id: this.doc_id }, (error, docs) => {
         docs[0]._id.should.deep.equal(this.doc_id)
         docs[0].lines.should.deep.equal(this.lines)
@@ -70,8 +70,8 @@ describe('Deleting a doc', function() {
     })
   })
 
-  return describe('when the doc does not exist', function() {
-    return it('should return a 404', function(done) {
+  return describe('when the doc does not exist', function () {
+    return it('should return a 404', function (done) {
       const missing_doc_id = ObjectId()
       return DocstoreClient.deleteDoc(
         this.project_id,
@@ -85,12 +85,12 @@ describe('Deleting a doc', function() {
   })
 })
 
-describe("Destroying a project's documents", function() {
-  describe('when the doc exists', function() {
-    beforeEach(function(done) {
+describe("Destroying a project's documents", function () {
+  describe('when the doc exists', function () {
+    beforeEach(function (done) {
       return db.docOps.insert(
         { doc_id: ObjectId(this.doc_id), version: 1 },
-        function(err) {
+        function (err) {
           if (err != null) {
             return done(err)
           }
@@ -99,7 +99,7 @@ describe("Destroying a project's documents", function() {
       )
     })
 
-    it('should remove the doc from the docs collection', function(done) {
+    it('should remove the doc from the docs collection', function (done) {
       return db.docs.find({ _id: this.doc_id }, (err, docs) => {
         expect(err).not.to.exist
         expect(docs).to.deep.equal([])
@@ -107,7 +107,7 @@ describe("Destroying a project's documents", function() {
       })
     })
 
-    return it('should remove the docOps from the docOps collection', function(done) {
+    return it('should remove the docOps from the docOps collection', function (done) {
       return db.docOps.find({ doc_id: this.doc_id }, (err, docOps) => {
         expect(err).not.to.exist
         expect(docOps).to.deep.equal([])
@@ -116,9 +116,9 @@ describe("Destroying a project's documents", function() {
     })
   })
 
-  return describe('when the doc is archived', function() {
-    beforeEach(function(done) {
-      return DocstoreClient.archiveAllDoc(this.project_id, function(err) {
+  return describe('when the doc is archived', function () {
+    beforeEach(function (done) {
+      return DocstoreClient.archiveAllDoc(this.project_id, function (err) {
         if (err != null) {
           return done(err)
         }
@@ -126,7 +126,7 @@ describe("Destroying a project's documents", function() {
       })
     })
 
-    it('should remove the doc from the docs collection', function(done) {
+    it('should remove the doc from the docs collection', function (done) {
       return db.docs.find({ _id: this.doc_id }, (err, docs) => {
         expect(err).not.to.exist
         expect(docs).to.deep.equal([])
@@ -134,7 +134,7 @@ describe("Destroying a project's documents", function() {
       })
     })
 
-    it('should remove the docOps from the docOps collection', function(done) {
+    it('should remove the docOps from the docOps collection', function (done) {
       return db.docOps.find({ doc_id: this.doc_id }, (err, docOps) => {
         expect(err).not.to.exist
         expect(docOps).to.deep.equal([])
@@ -142,7 +142,7 @@ describe("Destroying a project's documents", function() {
       })
     })
 
-    return it('should remove the doc contents from s3', function(done) {
+    return it('should remove the doc contents from s3', function (done) {
       return DocstoreClient.getS3Doc(
         this.project_id,
         this.doc_id,

@@ -22,8 +22,8 @@ const { ObjectId } = require('mongojs')
 const { assert } = require('chai')
 const _ = require('underscore')
 
-describe('RangeManager', function() {
-  beforeEach(function() {
+describe('RangeManager', function () {
+  beforeEach(function () {
     return (this.RangeManager = SandboxedModule.require(modulePath, {
       requires: {
         './mongojs': {
@@ -33,8 +33,8 @@ describe('RangeManager', function() {
     }))
   })
 
-  describe('jsonRangesToMongo', function() {
-    it('should convert ObjectIds and dates to proper objects', function() {
+  describe('jsonRangesToMongo', function () {
+    it('should convert ObjectIds and dates to proper objects', function () {
       const change_id = ObjectId().toString()
       const comment_id = ObjectId().toString()
       const user_id = ObjectId().toString()
@@ -77,7 +77,7 @@ describe('RangeManager', function() {
       })
     })
 
-    it('should leave malformed ObjectIds as they are', function() {
+    it('should leave malformed ObjectIds as they are', function () {
       const change_id = 'foo'
       const comment_id = 'bar'
       const user_id = 'baz'
@@ -112,7 +112,7 @@ describe('RangeManager', function() {
       })
     })
 
-    return it('should be consistent when transformed through json -> mongo -> json', function() {
+    return it('should be consistent when transformed through json -> mongo -> json', function () {
       const change_id = ObjectId().toString()
       const comment_id = ObjectId().toString()
       const user_id = ObjectId().toString()
@@ -144,8 +144,8 @@ describe('RangeManager', function() {
     })
   })
 
-  return describe('shouldUpdateRanges', function() {
-    beforeEach(function() {
+  return describe('shouldUpdateRanges', function () {
+    beforeEach(function () {
       this.ranges = {
         changes: [
           {
@@ -169,16 +169,16 @@ describe('RangeManager', function() {
       ))
     })
 
-    describe('with a blank new range', function() {
-      return it('should throw an error', function() {
+    describe('with a blank new range', function () {
+      return it('should throw an error', function () {
         return expect(() => {
           return this.RangeManager.shouldUpdateRanges(this.ranges, null)
         }).to.throw(Error)
       })
     })
 
-    describe('with a blank old range', function() {
-      return it('should treat it like {}', function() {
+    describe('with a blank old range', function () {
+      return it('should treat it like {}', function () {
         this.RangeManager.shouldUpdateRanges(null, {}).should.equal(false)
         return this.RangeManager.shouldUpdateRanges(
           null,
@@ -187,8 +187,8 @@ describe('RangeManager', function() {
       })
     })
 
-    describe('with no changes', function() {
-      return it('should return false', function() {
+    describe('with no changes', function () {
+      return it('should return false', function () {
         return this.RangeManager.shouldUpdateRanges(
           this.ranges,
           this.ranges_copy
@@ -196,8 +196,8 @@ describe('RangeManager', function() {
       })
     })
 
-    return describe('with changes', function() {
-      it('should return true when the change id changes', function() {
+    return describe('with changes', function () {
+      it('should return true when the change id changes', function () {
         this.ranges_copy.changes[0].id = ObjectId()
         return this.RangeManager.shouldUpdateRanges(
           this.ranges,
@@ -205,7 +205,7 @@ describe('RangeManager', function() {
         ).should.equal(true)
       })
 
-      it('should return true when the change user id changes', function() {
+      it('should return true when the change user id changes', function () {
         this.ranges_copy.changes[0].metadata.user_id = ObjectId()
         return this.RangeManager.shouldUpdateRanges(
           this.ranges,
@@ -213,7 +213,7 @@ describe('RangeManager', function() {
         ).should.equal(true)
       })
 
-      it('should return true when the change ts changes', function() {
+      it('should return true when the change ts changes', function () {
         this.ranges_copy.changes[0].metadata.ts = new Date(Date.now() + 1000)
         return this.RangeManager.shouldUpdateRanges(
           this.ranges,
@@ -221,7 +221,7 @@ describe('RangeManager', function() {
         ).should.equal(true)
       })
 
-      it('should return true when the change op changes', function() {
+      it('should return true when the change op changes', function () {
         this.ranges_copy.changes[0].op.i = 'bar'
         return this.RangeManager.shouldUpdateRanges(
           this.ranges,
@@ -229,7 +229,7 @@ describe('RangeManager', function() {
         ).should.equal(true)
       })
 
-      it('should return true when the comment id changes', function() {
+      it('should return true when the comment id changes', function () {
         this.ranges_copy.comments[0].id = ObjectId()
         return this.RangeManager.shouldUpdateRanges(
           this.ranges,
@@ -237,7 +237,7 @@ describe('RangeManager', function() {
         ).should.equal(true)
       })
 
-      it('should return true when the comment offset changes', function() {
+      it('should return true when the comment offset changes', function () {
         this.ranges_copy.comments[0].op.p = 17
         return this.RangeManager.shouldUpdateRanges(
           this.ranges,
@@ -245,7 +245,7 @@ describe('RangeManager', function() {
         ).should.equal(true)
       })
 
-      return it('should return true when the comment content changes', function() {
+      return it('should return true when the comment content changes', function () {
         this.ranges_copy.comments[0].op.c = 'bar'
         return this.RangeManager.shouldUpdateRanges(
           this.ranges,

@@ -34,15 +34,15 @@ module.exports = {
     })
     logger.log({ lines, url, doc_id, project_id }, 'running health check')
     const jobs = [
-      function(cb) {
+      function (cb) {
         const opts = getOpts()
         opts.json = { lines, version: 42, ranges: {} }
         return request.post(opts, cb)
       },
-      function(cb) {
+      function (cb) {
         const opts = getOpts()
         opts.json = true
-        return request.get(opts, function(err, res, body) {
+        return request.get(opts, function (err, res, body) {
           if (err != null) {
             logger.err({ err }, 'docstore returned a error in health check get')
             return cb(err)
@@ -60,8 +60,8 @@ module.exports = {
           }
         })
       },
-      cb => db.docs.remove({ _id: doc_id, project_id }, cb),
-      cb => db.docOps.remove({ doc_id }, cb)
+      (cb) => db.docs.remove({ _id: doc_id, project_id }, cb),
+      (cb) => db.docOps.remove({ doc_id }, cb)
     ]
     return async.series(jobs, callback)
   }

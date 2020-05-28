@@ -5,7 +5,7 @@
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 let Errors
-var NotFoundError = function(message) {
+var NotFoundError = function (message) {
   const error = new Error(message)
   error.name = 'NotFoundError'
   error.__proto__ = NotFoundError.prototype

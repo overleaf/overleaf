@@ -36,7 +36,7 @@ module.exports = RangeManager = {
       return null
     }
 
-    const updateMetadata = function(metadata) {
+    const updateMetadata = function (metadata) {
       if ((metadata != null ? metadata.ts : undefined) != null) {
         metadata.ts = new Date(metadata.ts)
       }

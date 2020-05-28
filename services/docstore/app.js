@@ -24,7 +24,7 @@ app.use(Metrics.http.monitor(logger))
 
 Metrics.injectMetricsRoute(app)
 
-app.param('project_id', function(req, res, next, projectId) {
+app.param('project_id', function (req, res, next, projectId) {
   if (projectId != null ? projectId.match(/^[0-9a-f]{24}$/) : undefined) {
     return next()
   } else {
@@ -32,7 +32,7 @@ app.param('project_id', function(req, res, next, projectId) {
   }
 })
 
-app.param('doc_id', function(req, res, next, docId) {
+app.param('doc_id', function (req, res, next, docId) {
   if (docId != null ? docId.match(/^[0-9a-f]{24}$/) : undefined) {
     return next()
   } else {
@@ -62,7 +62,7 @@ app.get('/health_check', HttpController.healthCheck)
 
 app.get('/status', (req, res) => res.send('docstore is alive'))
 
-app.use(function(error, req, res, next) {
+app.use(function (error, req, res, next) {
   logger.error({ err: error, req }, 'request errored')
   if (error instanceof Errors.NotFoundError) {
     return res.send(404)
@@ -76,7 +76,7 @@ const { host } = Settings.internal.docstore
 
 if (!module.parent) {
   // Called directly
-  app.listen(port, host, function(error) {
+  app.listen(port, host, function (error) {
     if (error != null) {
       throw error
     }
