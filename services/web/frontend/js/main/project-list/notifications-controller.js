@@ -28,10 +28,10 @@ App.controller('DismissableNotificationsController', function(
   localStorage
 ) {
   $scope.shouldShowNotification =
-    localStorage('dismissed-covid-19-notification') !== true
+    localStorage('dismissed-covid-19-notification-extended') !== true
 
   $scope.dismiss = () => {
-    localStorage('dismissed-covid-19-notification', true)
+    localStorage('dismissed-covid-19-notification-extended', true)
     $scope.shouldShowNotification = false
   }
 })
