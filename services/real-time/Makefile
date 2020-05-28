@@ -54,5 +54,8 @@ publish:
 
 	docker push $(DOCKER_REPO)/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 
+lint:
+
+format:
 
 .PHONY: clean test test_unit test_acceptance test_clean build publish
