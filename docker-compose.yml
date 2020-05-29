@@ -116,7 +116,7 @@ services:
 
     redis:
         restart: always
-        image: redis:5.0.0
+        image: redis:5
         container_name: redis
         expose:
             - 6379
