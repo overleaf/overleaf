@@ -5,15 +5,22 @@
 .content-page {
   word-break: break-word;
 
-  a:not(.btn) {
+  /*
+    Links and Buttons
+  */
+  a {
     color: @link-color-alt;
     &:hover {
       color: @link-hover-color-alt;
     }
   }
+
+  .reset-btns; // reapply btn style to correct color property set on <a> above
+
   hr {
     border-color: @hr-border-alt;
   }
+
   .quote-by {
     min-width: 80px;
     overflow: hidden;
@@ -24,7 +31,7 @@
   }
 
   /*
-    section 
+    section
   */
   section {
     padding: @line-height-computed (@grid-gutter-width / 2);
@@ -35,12 +42,38 @@
       }
       &.green {
         background-color: @ol-green;
+
+        .no-card * {
+          .btn-primary,
+          .btn-success {
+            // only correct button colors when green on green
+            .btn-primary-on-primary-bg;
+          }
+        }
       }
       &.blue-gray-dark {
         background-color: @ol-blue-gray-5;
       }
       &.blue-gray-light {
         background-color: @ol-blue-gray-1;
+      }
+
+      &.green,
+      &.green-dark,
+      &.blue-gray-dark {
+        .no-card * {
+          color: @white;
+          a {
+            text-decoration: underline;
+          }
+          .btn {
+            text-decoration: none;
+          }
+
+          .form-control {
+            color: @input-color;
+          }
+        }
       }
     }
     .section-row {

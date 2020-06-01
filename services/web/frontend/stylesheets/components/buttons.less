@@ -65,6 +65,9 @@
 .btn-primary {
   .button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
 }
+.btn-primary-on-primary-bg {
+  .button-variant(@white; @ol-dark-green; @ol-dark-green);
+}
 // Success appears as green
 .btn-success {
   .button-variant(@btn-success-color; @btn-success-bg; @btn-success-border);
@@ -80,6 +83,31 @@
 // Danger and error appear as red
 .btn-danger {
   .button-variant(@btn-danger-color; @btn-danger-bg; @btn-danger-border);
+}
+
+.reset-btns {
+  // reset all buttons back to their original colors
+  .btn-danger {
+    .btn-danger;
+  }
+  .btn-default {
+    .btn-default;
+  }
+  .btn-default-outline {
+    .btn-default-outline;
+  }
+  .btn-info {
+    .btn-info;
+  }
+  .btn-primary {
+    .btn-primary;
+  }
+  .btn-success {
+    .btn-success;
+  }
+  .btn-warning {
+    .btn-warning;
+  }
 }
 
 // Link buttons
