@@ -1,10 +1,10 @@
 docstore
---node-version=10.19.0
---script-version=1.3.5
---dependencies=mongo
---language=es
---docker-repos=gcr.io/overleaf-ops
 --acceptance-creds=aws
---env-pass-through=
+--dependencies=mongo
+--docker-repos=gcr.io/overleaf-ops
 --env-add=
+--env-pass-through=
+--language=es
+--node-version=10.19.0
 --public-repo=True
+--script-version=2.2.0

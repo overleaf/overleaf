@@ -18,7 +18,7 @@ const metrics = require('metrics-sharelatex')
 module.exports = MongoManager = {
   findDoc(project_id, doc_id, filter, callback) {
     if (callback == null) {
-      callback = function(error, doc) {}
+      callback = function (error, doc) {}
     }
     return db.docs.find(
       {
@@ -26,7 +26,7 @@ module.exports = MongoManager = {
         project_id: ObjectId(project_id.toString())
       },
       filter,
-      function(error, docs) {
+      function (error, docs) {
         if (docs == null) {
           docs = []
         }
@@ -98,12 +98,12 @@ module.exports = MongoManager = {
       _id: doc_id,
       rev
     }
-    return db.docs.update(query, update, err => callback(err))
+    return db.docs.update(query, update, (err) => callback(err))
   },
 
   getDocVersion(doc_id, callback) {
     if (callback == null) {
-      callback = function(error, version) {}
+      callback = function (error, version) {}
     }
     return db.docOps.find(
       {
@@ -112,7 +112,7 @@ module.exports = MongoManager = {
       {
         version: 1
       },
-      function(error, docs) {
+      function (error, docs) {
         if (error != null) {
           return callback(error)
         }
@@ -127,7 +127,7 @@ module.exports = MongoManager = {
 
   setDocVersion(doc_id, version, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return db.docOps.update(
       {
@@ -148,7 +148,7 @@ module.exports = MongoManager = {
       {
         _id: ObjectId(doc_id)
       },
-      function(err) {
+      function (err) {
         if (err != null) {
           return callback(err)
         }
@@ -170,6 +170,6 @@ module.exports = MongoManager = {
   'markDocAsArchived',
   'getDocVersion',
   'setDocVersion'
-].map(method =>
+].map((method) =>
   metrics.timeAsyncMethod(MongoManager, method, 'mongo.MongoManager', logger)
 )
