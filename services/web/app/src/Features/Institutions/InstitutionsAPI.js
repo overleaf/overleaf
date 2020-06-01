@@ -1,16 +1,3 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const settings = require('settings-sharelatex')
@@ -21,10 +8,7 @@ const { V1ConnectionError } = require('../Errors/Errors')
 
 const InstitutionsAPI = {
   getInstitutionAffiliations(institutionId, callback) {
-    if (callback == null) {
-      callback = function(error, body) {}
-    }
-    return makeAffiliationRequest(
+    makeAffiliationRequest(
       {
         method: 'GET',
         path: `/api/v2/institutions/${institutionId.toString()}/affiliations`,
@@ -35,10 +19,7 @@ const InstitutionsAPI = {
   },
 
   getInstitutionLicences(institutionId, startDate, endDate, lag, callback) {
-    if (callback == null) {
-      callback = function(error, body) {}
-    }
-    return makeAffiliationRequest(
+    makeAffiliationRequest(
       {
         method: 'GET',
         path: `/api/v2/institutions/${institutionId.toString()}/institution_licences`,
@@ -50,10 +31,7 @@ const InstitutionsAPI = {
   },
 
   getInstitutionNewLicences(institutionId, startDate, endDate, lag, callback) {
-    if (callback == null) {
-      callback = function(error, body) {}
-    }
-    return makeAffiliationRequest(
+    makeAffiliationRequest(
       {
         method: 'GET',
         path: `/api/v2/institutions/${institutionId.toString()}/new_institution_licences`,
@@ -65,10 +43,7 @@ const InstitutionsAPI = {
   },
 
   getUserAffiliations(userId, callback) {
-    if (callback == null) {
-      callback = function(error, body) {}
-    }
-    return makeAffiliationRequest(
+    makeAffiliationRequest(
       {
         method: 'GET',
         path: `/api/v2/users/${userId.toString()}/affiliations`,
@@ -79,14 +54,14 @@ const InstitutionsAPI = {
   },
 
   addAffiliation(userId, email, affiliationOptions, callback) {
-    if (callback == null) {
+    if (!callback) {
       // affiliationOptions is optional
       callback = affiliationOptions
       affiliationOptions = {}
     }
 
     const { university, department, role, confirmedAt } = affiliationOptions
-    return makeAffiliationRequest(
+    makeAffiliationRequest(
       {
         method: 'POST',
         path: `/api/v2/users/${userId.toString()}/affiliations`,
@@ -97,9 +72,13 @@ const InstitutionsAPI = {
         if (error) {
           return callback(error, body)
         }
+        if (!university) {
+          return callback(null, body)
+        }
+
         // have notifications delete any ip matcher notifications for this university
-        return NotificationsBuilder.ipMatcherAffiliation(userId).read(
-          university != null ? university.id : undefined,
+        NotificationsBuilder.ipMatcherAffiliation(userId).read(
+          university.id,
           function(err) {
             if (err) {
               // log and ignore error
@@ -108,7 +87,7 @@ const InstitutionsAPI = {
                 'Something went wrong marking ip notifications read'
               )
             }
-            return callback(null, body)
+            callback(null, body)
           }
         )
       }
@@ -116,10 +95,7 @@ const InstitutionsAPI = {
   },
 
   removeAffiliation(userId, email, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return makeAffiliationRequest(
+    makeAffiliationRequest(
       {
         method: 'POST',
         path: `/api/v2/users/${userId.toString()}/affiliations/remove`,
@@ -132,10 +108,7 @@ const InstitutionsAPI = {
   },
 
   endorseAffiliation(userId, email, role, department, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return makeAffiliationRequest(
+    makeAffiliationRequest(
       {
         method: 'POST',
         path: `/api/v2/users/${userId.toString()}/affiliations/endorse`,
@@ -147,10 +120,7 @@ const InstitutionsAPI = {
   },
 
   deleteAffiliations(userId, callback) {
-    if (callback == null) {
-      callback = function(error) {}
-    }
-    return makeAffiliationRequest(
+    makeAffiliationRequest(
       {
         method: 'DELETE',
         path: `/api/v2/users/${userId.toString()}/affiliations`,
@@ -161,7 +131,7 @@ const InstitutionsAPI = {
   },
 
   addEntitlement(userId, email, callback) {
-    return makeAffiliationRequest(
+    makeAffiliationRequest(
       {
         method: 'POST',
         path: `/api/v2/users/${userId}/affiliations/add_entitlement`,
@@ -173,7 +143,7 @@ const InstitutionsAPI = {
   },
 
   removeEntitlement(userId, email, callback) {
-    return makeAffiliationRequest(
+    makeAffiliationRequest(
       {
         method: 'POST',
         path: `/api/v2/users/${userId}/affiliations/remove_entitlement`,
@@ -186,16 +156,13 @@ const InstitutionsAPI = {
 }
 
 var makeAffiliationRequest = function(requestOptions, callback) {
-  if (callback == null) {
-    callback = function(error) {}
-  }
   if (!settings.apis.v1.url) {
     return callback(null)
   } // service is not configured
   if (!requestOptions.extraSuccessStatusCodes) {
     requestOptions.extraSuccessStatusCodes = []
   }
-  return request(
+  request(
     {
       method: requestOptions.method,
       url: `${settings.apis.v1.url}${requestOptions.path}`,
@@ -205,7 +172,7 @@ var makeAffiliationRequest = function(requestOptions, callback) {
       timeout: 20 * 1000
     },
     function(error, response, body) {
-      if (error != null) {
+      if (error) {
         return callback(
           new V1ConnectionError('error getting affiliations from v1').withCause(
             error
@@ -225,13 +192,13 @@ var makeAffiliationRequest = function(requestOptions, callback) {
       }
       let isSuccess = response.statusCode >= 200 && response.statusCode < 300
       if (!isSuccess) {
-        isSuccess = Array.from(requestOptions.extraSuccessStatusCodes).includes(
+        isSuccess = requestOptions.extraSuccessStatusCodes.includes(
           response.statusCode
         )
       }
       if (!isSuccess) {
         let errorMessage
-        if (body != null ? body.errors : undefined) {
+        if (body && body.errors) {
           errorMessage = `${response.statusCode}: ${body.errors}`
         } else {
           errorMessage = `${requestOptions.defaultErrorMessage}: ${
@@ -246,7 +213,7 @@ var makeAffiliationRequest = function(requestOptions, callback) {
         return callback(new Error(errorMessage))
       }
 
-      return callback(null, body)
+      callback(null, body)
     }
   )
 }
