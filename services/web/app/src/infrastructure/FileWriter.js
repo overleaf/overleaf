@@ -26,7 +26,7 @@ class SizeLimitedStream extends Transform {
     super(options)
 
     this.bytes = 0
-    this.sizeLimit = options.sizeLimit
+    this.maxSizeBytes = options.maxSizeBytes
     this.drain = false
     this.on('error', () => {
       this.drain = true
@@ -42,7 +42,7 @@ class SizeLimitedStream extends Transform {
     }
 
     this.bytes += chunk.length
-    if (this.sizeLimit && this.bytes > this.sizeLimit) {
+    if (this.maxSizeBytes && this.bytes > this.maxSizeBytes) {
       return done(
         new FileTooLargeError({
           message: 'stream size limit reached',
@@ -118,7 +118,7 @@ const FileWriter = {
       stream.resume()
 
       const passThrough = new SizeLimitedStream({
-        sizeLimit: options.maxSizeBytes
+        maxSizeBytes: options.maxSizeBytes
       })
 
       // if writing fails, we want to consume the bytes from the source, to avoid leaks
@@ -131,6 +131,7 @@ const FileWriter = {
 
       pipeline(stream, passThrough, writeStream, function(err) {
         if (
+          options.maxSizeBytes &&
           passThrough.bytes >= options.maxSizeBytes &&
           !(err instanceof FileTooLargeError)
         ) {
