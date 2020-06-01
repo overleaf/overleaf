@@ -38,7 +38,16 @@ describe('LockManager - getting the lock', function() {
             return { auth() {} }
           }
         },
-        'settings-sharelatex': { redis: {} },
+        'settings-sharelatex': {
+          redis: {},
+          lockManager: {
+            lockTestInterval: 50,
+            maxTestInterval: 1000,
+            maxLockWaitTime: 10000,
+            redisLockExpiry: 30,
+            slowExecutionThreshold: 5000
+          }
+        },
         'metrics-sharelatex': {
           inc() {},
           gauge() {}

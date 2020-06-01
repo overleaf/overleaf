@@ -23,6 +23,7 @@ services:
       PROJECT_HISTORY_ENABLED: 'true'
       ENABLED_LINKED_FILE_TYPES: 'url,project_file,project_output_file,mendeley,zotero'
       LINKED_URL_PROXY: 'http://localhost:6543'
+      LOCK_MANAGER_MAX_LOCK_WAIT_TIME: 30000
       NODE_ENV: test
       SHARELATEX_CONFIG:
     command: npm run test:acceptance:app

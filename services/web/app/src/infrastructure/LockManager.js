@@ -6,6 +6,7 @@ const logger = require('logger-sharelatex')
 const os = require('os')
 const crypto = require('crypto')
 const async = require('async')
+const settings = require('settings-sharelatex')
 
 const HOST = os.hostname()
 const PID = process.pid
@@ -14,12 +15,22 @@ let COUNT = 0
 
 const LOCK_QUEUES = new Map() // queue lock requests for each name/id so they get the lock on a first-come first-served basis
 
+logger.log(
+  { lockManagerSettings: settings.lockManager },
+  'LockManager initialising'
+)
+
 const LockManager = {
-  LOCK_TEST_INTERVAL: 50, // 50ms between each test of the lock
-  MAX_TEST_INTERVAL: 1000, // back off to 1s between each test of the lock
-  MAX_LOCK_WAIT_TIME: 10000, // 10s maximum time to spend trying to get the lock
-  REDIS_LOCK_EXPIRY: 30, // seconds. Time until lock auto expires in redis
-  SLOW_EXECUTION_THRESHOLD: 5000, // 5s, if execution takes longer than this then log
+  // ms between each test of the lock
+  LOCK_TEST_INTERVAL: settings.lockManager.lockTestInterval || 50,
+  // back off to ms between each test of the lock
+  MAX_TEST_INTERVAL: settings.lockManager.maxTestInterval || 1000,
+  // ms maximum time to spend trying to get the lock
+  MAX_LOCK_WAIT_TIME: settings.lockManager.maxLockWaitTime || 10000,
+  // seconds. Time until lock auto expires in redis
+  REDIS_LOCK_EXPIRY: settings.lockManager.redisLockExpiry || 30,
+  // ms, if execution takes longer than this then log
+  SLOW_EXECUTION_THRESHOLD: settings.lockManager.slowExecutionThreshold || 5000,
 
   // Use a signed lock value as described in
   // http://redis.io/topics/distlock#correct-implementation-with-a-single-instance

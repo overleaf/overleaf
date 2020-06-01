@@ -27,6 +27,11 @@ else
 		user: undefined
 		pass: undefined
 
+intFromEnv = (name, defaultValue) ->
+	if defaultValue in [null, undefined] or typeof defaultValue != 'number'
+		throw new Error("Bad default integer value for setting: #{name}, #{defaultValue}")
+	parseInt(process.env[name], 10) || defaultValue
+
 module.exports = settings =
 
 	allowAnonymousReadAndWriteSharing:
@@ -190,6 +195,12 @@ module.exports = settings =
 	# that are sent out, generated links, etc.
 	siteUrl : siteUrl = process.env['PUBLIC_URL'] or 'http://localhost:3000'
 
+	lockManager:
+		lockTestInterval: intFromEnv('LOCK_MANAGER_LOCK_TEST_INTERVAL', 50)
+		maxTestInterval: intFromEnv('LOCK_MANAGER_MAX_TEST_INTERVAL', 1000)
+		maxLockWaitTime: intFromEnv('LOCK_MANAGER_MAX_LOCK_WAIT_TIME', 10000)
+		redisLockExpiry: intFromEnv('LOCK_MANAGER_REDIS_LOCK_EXPIRY', 30)
+		slowExecutionThreshold: intFromEnv('LOCK_MANAGER_SLOW_EXECUTION_THRESHOLD', 5000)
 
 	# Used to close the editor off to users
 	editorIsOpen: process.env['EDITOR_IS_OPEN'] or true
