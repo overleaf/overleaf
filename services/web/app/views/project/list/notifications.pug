@@ -36,7 +36,17 @@ include ../../_mixins/saml
 						button(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
-
+				.alert.alert-info(
+					ng-switch-when="wfh_2020_upgrade_offer"
+				)
+					.notification-body
+						span Good news! Your WFH2020 free upgrade is extended to June 30th 2020. We're also providing specially discounted annual plans to help you continue collaborating throughout 2020.
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(href="https://www.overleaf.com/events/wfh2020") See options
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
 				.alert.alert-info(
 					ng-switch-when="notification_ip_matched_affiliation"
 				)
