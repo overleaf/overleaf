@@ -28,6 +28,11 @@
     "format:fix": "prettier-eslint '**/*.{js,less}' --write",
     "migrations": "east"
   },
+  "browserslist": [
+    "last 1 year",
+    "ie 11",
+    "firefox esr"
+  ],
   "dependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.9.0",

@@ -56,8 +56,12 @@ module.exports = {
       {
         // Pass application JS files through babel-loader, compiling to ES5
         test: /\.js$/,
-        // Only compile application files (dependencies are in ES5 already)
-        exclude: /node_modules/,
+        // Only compile application files (npm and vendored dependencies are in
+        // ES5 already)
+        exclude: [
+          /node_modules/,
+          path.resolve(__dirname, 'frontend/js/vendor')
+        ],
         use: [
           {
             loader: 'babel-loader',
@@ -103,9 +107,7 @@ module.exports = {
             options: {
               // Uniquely identifies the postcss plugin (required by webpack)
               ident: 'postcss',
-              plugins: [
-                require('autoprefixer')({ env: 'last 2 versions, ie >= 10' })
-              ]
+              plugins: [require('autoprefixer')]
             }
           },
           // Compiles the Less syntax to CSS
