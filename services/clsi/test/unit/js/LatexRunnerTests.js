@@ -74,7 +74,7 @@ describe('LatexRunner', function() {
         )
       })
 
-      return it('should run the latex command', function() {
+      it('should run the latex command', function() {
         return this.CommandRunner.run
           .calledWith(
             this.project_id,
