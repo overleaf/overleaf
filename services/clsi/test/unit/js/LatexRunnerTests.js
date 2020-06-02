@@ -38,7 +38,7 @@ describe('LatexRunner', function() {
           })
         },
         './CommandRunner': (this.CommandRunner = {}),
-        'fs': (this.fs = {
+        fs: (this.fs = {
           writeFile: sinon.stub().callsArg(2)
         })
       }
@@ -55,7 +55,10 @@ describe('LatexRunner', function() {
 
   return describe('runLatex', function() {
     beforeEach(function() {
-      return (this.CommandRunner.run = sinon.stub().callsArg(6))
+      return (this.CommandRunner.run = sinon.stub().callsArgWith(6, null, {
+        stdout: 'this is stdout',
+        stderr: 'this is stderr'
+      }))
     })
 
     describe('normally', function() {
@@ -74,7 +77,7 @@ describe('LatexRunner', function() {
         )
       })
 
-      return it('should run the latex command', function() {
+      it('should run the latex command', function() {
         return this.CommandRunner.run
           .calledWith(
             this.project_id,
@@ -87,18 +90,12 @@ describe('LatexRunner', function() {
           .should.equal(true)
       })
 
-      it('should record the stdout and stderr', function () {
+      it('should record the stdout and stderr', function() {
         this.fs.writeFile
-          .calledWith(
-            this.directory + '/' + 'output.stdout',
-            "this is stdout"
-          )
+          .calledWith(this.directory + '/' + 'output.stdout', 'this is stdout')
           .should.equal(true)
         this.fs.writeFile
-          .calledWith(
-            this.directory + '/' + 'output.stderr',
-            "this is stderr"
-          )
+          .calledWith(this.directory + '/' + 'output.stderr', 'this is stderr')
           .should.equal(true)
       })
     })

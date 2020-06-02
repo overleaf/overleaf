@@ -262,19 +262,19 @@ describe('ResourceWriter', function() {
         .should.equal(true)
     })
 
-    it('should delete the stdout log file', function () {
+    it('should delete the stdout log file', function() {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, 'output.stdout'))
         .should.equal(true)
     })
 
-    it('should delete the stderr log file', function () {
+    it('should delete the stderr log file', function() {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, 'output.stderr'))
         .should.equal(true)
     })
 
-    it('should delete the extra files', function () {
+    it('should delete the extra files', function() {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, 'extra/file.tex'))
         .should.equal(true)

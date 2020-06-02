@@ -12,6 +12,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+let UrlFetcher
 const request = require('request').defaults({ jar: false })
 const fs = require('fs')
 const logger = require('logger-sharelatex')

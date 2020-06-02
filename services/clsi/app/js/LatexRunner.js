@@ -132,7 +132,8 @@ module.exports = LatexRunner = {
         LatexRunner.writeLogOutput(project_id, directory, output, () => {
           return callback(error, output, stats, timings)
         })
-      }))
+      }
+    ))
   },
 
   writeLogOutput(project_id, directory, output, callback) {
@@ -142,9 +143,9 @@ module.exports = LatexRunner = {
     // internal method for writing non-empty log files
     function _writeFile(file, content, cb) {
       if (content && content.length > 0) {
-        fs.writeFile(file, content, (err) => {
+        fs.writeFile(file, content, err => {
           if (err) {
-            logger.error({ project_id, file }, "error writing log file") // don't fail on error
+            logger.error({ project_id, file }, 'error writing log file') // don't fail on error
           }
           cb()
         })
@@ -153,8 +154,8 @@ module.exports = LatexRunner = {
       }
     }
     // write stdout and stderr, ignoring errors
-    _writeFile(Path.join(directory, "output.stdout"), output.stdout, () => {
-      _writeFile(Path.join(directory, "output.stderr"), output.stderr, () => {
+    _writeFile(Path.join(directory, 'output.stdout'), output.stdout, () => {
+      _writeFile(Path.join(directory, 'output.stderr'), output.stderr, () => {
         callback()
       })
     })
