@@ -412,7 +412,7 @@ module.exports = DockerRunner = {
           })
         }
       )
-    var inspectContainer = (isRetry) =>
+    var inspectContainer = isRetry =>
       container.inspect(function(error, stats) {
         if ((error != null ? error.statusCode : undefined) === 404) {
           return createAndStartContainer()
