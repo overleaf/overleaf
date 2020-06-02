@@ -9,7 +9,7 @@ module.exports = {
       username: 'clsi',
       dialect: 'sqlite',
       storage:
-        process.env.SQLITE_PATH || Path.resolve(__dirname + '/../db/db.sqlite'),
+        process.env.SQLITE_PATH || Path.resolve(__dirname, '../db/db.sqlite'),
       pool: {
         max: 1,
         min: 1
@@ -26,10 +26,10 @@ module.exports = {
     parseInt(process.env.PROCESS_LIFE_SPAN_LIMIT_MS) || 60 * 60 * 24 * 1000 * 2,
 
   path: {
-    compilesDir: Path.resolve(__dirname + '/../compiles'),
-    clsiCacheDir: Path.resolve(__dirname + '/../cache'),
-    synctexBaseDir(project_id) {
-      return Path.join(this.compilesDir, project_id)
+    compilesDir: Path.resolve(__dirname, '../compiles'),
+    clsiCacheDir: Path.resolve(__dirname, '../cache'),
+    synctexBaseDir(projectId) {
+      return Path.join(this.compilesDir, projectId)
     }
   },
 
@@ -63,7 +63,7 @@ module.exports = {
 }
 
 if (process.env.DOCKER_RUNNER) {
-  let seccomp_profile_path
+  let seccompProfilePath
   module.exports.clsi = {
     dockerRunner: process.env.DOCKER_RUNNER === 'true',
     docker: {
@@ -81,16 +81,14 @@ if (process.env.DOCKER_RUNNER) {
   }
 
   try {
-    seccomp_profile_path = Path.resolve(
-      __dirname + '/../seccomp/clsi-profile.json'
-    )
+    seccompProfilePath = Path.resolve(__dirname, '../seccomp/clsi-profile.json')
     module.exports.clsi.docker.seccomp_profile = JSON.stringify(
-      JSON.parse(require('fs').readFileSync(seccomp_profile_path))
+      JSON.parse(require('fs').readFileSync(seccompProfilePath))
     )
   } catch (error) {
     console.log(
       error,
-      `could not load seccom profile from ${seccomp_profile_path}`
+      `could not load seccom profile from ${seccompProfilePath}`
     )
   }
 

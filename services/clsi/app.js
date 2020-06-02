@@ -5,7 +5,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let tenMinutes
+const tenMinutes = 10 * 60 * 1000
 const Metrics = require('metrics-sharelatex')
 Metrics.initialize('clsi')
 
@@ -49,31 +49,29 @@ app.use(function(req, res, next) {
   return next()
 })
 
-app.param('project_id', function(req, res, next, project_id) {
-  if (project_id != null ? project_id.match(/^[a-zA-Z0-9_-]+$/) : undefined) {
+app.param('project_id', function(req, res, next, projectId) {
+  if (projectId != null ? projectId.match(/^[a-zA-Z0-9_-]+$/) : undefined) {
     return next()
   } else {
     return next(new Error('invalid project id'))
   }
 })
 
-app.param('user_id', function(req, res, next, user_id) {
-  if (user_id != null ? user_id.match(/^[0-9a-f]{24}$/) : undefined) {
+app.param('user_id', function(req, res, next, userId) {
+  if (userId != null ? userId.match(/^[0-9a-f]{24}$/) : undefined) {
     return next()
   } else {
     return next(new Error('invalid user id'))
   }
 })
 
-app.param('build_id', function(req, res, next, build_id) {
+app.param('build_id', function(req, res, next, buildId) {
   if (
-    build_id != null
-      ? build_id.match(OutputCacheManager.BUILD_REGEX)
-      : undefined
+    buildId != null ? buildId.match(OutputCacheManager.BUILD_REGEX) : undefined
   ) {
     return next()
   } else {
-    return next(new Error(`invalid build id ${build_id}`))
+    return next(new Error(`invalid build id ${buildId}`))
   }
 })
 
@@ -207,15 +205,15 @@ if (Settings.processLifespanLimitMs) {
   }, Settings.processLifespanLimitMs)
 }
 
+function runSmokeTest() {
+  if (Settings.processTooOld) return
+  logger.log('running smoke tests')
+  smokeTest.triggerRun(err => {
+    if (err) logger.error({ err }, 'smoke tests failed')
+    setTimeout(runSmokeTest, 30 * 1000)
+  })
+}
 if (Settings.smokeTest) {
-  function runSmokeTest() {
-    if (Settings.processTooOld) return
-    logger.log('running smoke tests')
-    smokeTest.triggerRun(err => {
-      if (err) logger.error({ err }, 'smoke tests failed')
-      setTimeout(runSmokeTest, 30 * 1000)
-    })
-  }
   runSmokeTest()
 }
 
@@ -308,29 +306,31 @@ const host =
     x1 => x1.host
   ) || 'localhost'
 
-const load_tcp_port = Settings.internal.load_balancer_agent.load_port
-const load_http_port = Settings.internal.load_balancer_agent.local_port
+const loadTcpPort = Settings.internal.load_balancer_agent.load_port
+const loadHttpPort = Settings.internal.load_balancer_agent.local_port
 
 if (!module.parent) {
   // Called directly
-  app.listen(port, host, error =>
-    logger.info(`CLSI starting up, listening on ${host}:${port}`)
-  )
-
-  loadTcpServer.listen(load_tcp_port, host, function(error) {
-    if (error != null) {
-      throw error
+  app.listen(port, host, error => {
+    if (error) {
+      logger.fatal({ error }, `Error starting CLSI on ${host}:${port}`)
+    } else {
+      logger.info(`CLSI starting up, listening on ${host}:${port}`)
     }
-    return logger.info(`Load tcp agent listening on load port ${load_tcp_port}`)
   })
 
-  loadHttpServer.listen(load_http_port, host, function(error) {
+  loadTcpServer.listen(loadTcpPort, host, function(error) {
     if (error != null) {
       throw error
     }
-    return logger.info(
-      `Load http agent listening on load port ${load_http_port}`
-    )
+    return logger.info(`Load tcp agent listening on load port ${loadTcpPort}`)
+  })
+
+  loadHttpServer.listen(loadHttpPort, host, function(error) {
+    if (error != null) {
+      throw error
+    }
+    return logger.info(`Load http agent listening on load port ${loadHttpPort}`)
   })
 }
 
@@ -339,7 +339,7 @@ module.exports = app
 setInterval(() => {
   ProjectPersistenceManager.refreshExpiryTimeout()
   ProjectPersistenceManager.clearExpiredProjects()
-}, (tenMinutes = 10 * 60 * 1000))
+}, tenMinutes)
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

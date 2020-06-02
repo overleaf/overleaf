@@ -48,7 +48,7 @@ describe('UrlFetcher', function() {
     })
 
     it('should call pipeUrlToFile multiple times on error', function(done) {
-      error = new Error("couldn't download file")
+      const error = new Error("couldn't download file")
       this.UrlFetcher.pipeUrlToFile.callsArgWith(2, error)
       this.UrlFetcher.pipeUrlToFileWithRetry(this.url, this.path, err => {
         expect(err).to.equal(error)
