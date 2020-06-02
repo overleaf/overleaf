@@ -19,6 +19,7 @@ const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const Metrics = require('./Metrics')
 const CommandRunner = require('./CommandRunner')
+const fs = require('fs')
 
 const ProcessTable = {} // table of currently running jobs (pids or docker container names)
 
@@ -127,9 +128,36 @@ module.exports = LatexRunner = {
               : undefined,
             x5 => x5[1]
           ) || 0
-        return callback(error, output, stats, timings)
+        // record output files
+        LatexRunner.writeLogOutput(project_id, directory, output, () => {
+          return callback(error, output, stats, timings)
+        })
+      }))
+  },
+
+  writeLogOutput(project_id, directory, output, callback) {
+    if (!output) {
+      return callback()
+    }
+    // internal method for writing non-empty log files
+    function _writeFile(file, content, cb) {
+      if (content && content.length > 0) {
+        fs.writeFile(file, content, (err) => {
+          if (err) {
+            logger.error({ project_id, file }, "error writing log file") // don't fail on error
+          }
+          cb()
+        })
+      } else {
+        cb()
       }
-    ))
+    }
+    // write stdout and stderr, ignoring errors
+    _writeFile(Path.join(directory, "output.stdout"), output.stdout, () => {
+      _writeFile(Path.join(directory, "output.stderr"), output.stderr, () => {
+        callback()
+      })
+    })
   },
 
   killLatex(project_id, callback) {

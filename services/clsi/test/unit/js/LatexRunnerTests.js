@@ -37,7 +37,10 @@ describe('LatexRunner', function() {
             done() {}
           })
         },
-        './CommandRunner': (this.CommandRunner = {})
+        './CommandRunner': (this.CommandRunner = {}),
+        'fs': (this.fs = {
+          writeFile: sinon.stub().callsArg(2)
+        })
       }
     })
 
@@ -80,6 +83,21 @@ describe('LatexRunner', function() {
             this.image,
             this.timeout,
             this.env
+          )
+          .should.equal(true)
+      })
+
+      it('should record the stdout and stderr', function () {
+        this.fs.writeFile
+          .calledWith(
+            this.directory + '/' + 'output.stdout',
+            "this is stdout"
+          )
+          .should.equal(true)
+        this.fs.writeFile
+          .calledWith(
+            this.directory + '/' + 'output.stderr',
+            "this is stderr"
           )
           .should.equal(true)
       })

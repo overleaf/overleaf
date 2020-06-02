@@ -231,7 +231,9 @@ module.exports = ResourceWriter = {
             path === 'output.pdf' ||
             path === 'output.dvi' ||
             path === 'output.log' ||
-            path === 'output.xdv'
+            path === 'output.xdv' ||
+            path === 'output.stdout' ||
+            path === 'output.stderr'
           ) {
             should_delete = true
           }
