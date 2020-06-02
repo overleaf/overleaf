@@ -55,7 +55,10 @@ describe('LatexRunner', function() {
 
   return describe('runLatex', function() {
     beforeEach(function() {
-      return (this.CommandRunner.run = sinon.stub().callsArg(6))
+      return (this.CommandRunner.run = sinon.stub().callsArgWith(6, null, {
+        stdout: 'this is stdout',
+        stderr: 'this is stderr'
+      }))
     })
 
     describe('normally', function() {
