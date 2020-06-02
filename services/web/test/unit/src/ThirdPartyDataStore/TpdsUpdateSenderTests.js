@@ -25,6 +25,9 @@ const filestoreUrl = 'filestore.sharelatex.com'
 
 describe('TpdsUpdateSender', function() {
   beforeEach(function() {
+    this.fakeUser = {
+      _id: '12390i'
+    }
     this.requestQueuer = function(queue, meth, opts, callback) {}
     const memberIds = [userId, collaberatorRef, readOnlyRef]
     this.CollaboratorsGetter = {
@@ -47,6 +50,14 @@ describe('TpdsUpdateSender', function() {
         }
       }
     }
+    const getUsers = sinon.stub().resolves(
+      memberIds.map(userId => {
+        return { _id: userId }
+      })
+    )
+    this.UserGetter = {
+      promises: { getUsers }
+    }
     this.updateSender = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -56,6 +67,7 @@ describe('TpdsUpdateSender', function() {
         'logger-sharelatex': { log() {} },
         'request-promise-native': this.request,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
+        '../User/UserGetter.js': this.UserGetter,
         'metrics-sharelatex': {
           inc() {}
         }
@@ -71,14 +83,14 @@ describe('TpdsUpdateSender', function() {
 
     it('should post the message to the tpdsworker', async function() {
       this.settings.apis.tpdsworker = { url: 'www.tpdsworker.env' }
-      const group = 'myproject'
-      const method = 'somemethod'
-      const job = 'do something'
-      await this.updateSender.promises.enqueue(group, method, job)
+      const group0 = 'myproject'
+      const method0 = 'somemethod0'
+      const job0 = 'do something'
+      await this.updateSender.promises.enqueue(group0, method0, job0)
       const args = this.request.firstCall.args[0]
-      args.json.group.should.equal(group)
-      args.json.job.should.equal(job)
-      args.json.method.should.equal(method)
+      args.json.group.should.equal(group0)
+      args.json.job.should.equal(job0)
+      args.json.method.should.equal(method0)
       args.uri.should.equal(
         'www.tpdsworker.env/enqueue/web_to_tpds_http_requests'
       )
@@ -101,19 +113,33 @@ describe('TpdsUpdateSender', function() {
         project_name: projectName
       })
 
-      const { group, job, method } = this.request.firstCall.args[0].json
-      group.should.equal(projectId)
-      method.should.equal('pipeStreamFrom')
-      job.method.should.equal('post')
-      job.streamOrigin.should.equal(
+      const {
+        group: group0,
+        job: job0,
+        method: method0
+      } = this.request.firstCall.args[0].json
+      group0.should.equal(userId)
+      method0.should.equal('pipeStreamFrom')
+      job0.method.should.equal('post')
+      job0.streamOrigin.should.equal(
         `${filestoreUrl}/project/${projectId}/file/${fileId}`
       )
       const expectedUrl = `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
         projectName
       )}${encodeURIComponent(path)}`
-      job.uri.should.equal(expectedUrl)
-      job.headers.sl_all_user_ids.should.equal(
-        JSON.stringify([userId, collaberatorRef, readOnlyRef])
+      job0.uri.should.equal(expectedUrl)
+      job0.headers.sl_all_user_ids.should.equal(JSON.stringify([userId]))
+
+      const { group: group1, job: job1 } = this.request.secondCall.args[0].json
+      group1.should.equal('collaberator_ref_1_here')
+      job1.headers.sl_all_user_ids.should.equal(
+        JSON.stringify(['collaberator_ref_1_here'])
+      )
+
+      const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
+      group2.should.equal('read_only_ref_1_id_here')
+      job2.headers.sl_all_user_ids.should.equal(
+        JSON.stringify(['read_only_ref_1_id_here'])
       )
     })
 
@@ -130,20 +156,34 @@ describe('TpdsUpdateSender', function() {
         project_name: projectName
       })
 
-      const { group, job, method } = this.request.firstCall.args[0].json
+      const {
+        group: group0,
+        job: job0,
+        method: method0
+      } = this.request.firstCall.args[0].json
 
-      group.should.equal(projectId)
-      method.should.equal('pipeStreamFrom')
-      job.method.should.equal('post')
+      group0.should.equal(userId)
+      method0.should.equal('pipeStreamFrom')
+      job0.method.should.equal('post')
       const expectedUrl = `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
         projectName
       )}${encodeURIComponent(path)}`
-      job.uri.should.equal(expectedUrl)
-      job.streamOrigin.should.equal(
+      job0.uri.should.equal(expectedUrl)
+      job0.streamOrigin.should.equal(
         `${this.docstoreUrl}/project/${projectId}/doc/${docId}/raw`
       )
-      job.headers.sl_all_user_ids.should.eql(
-        JSON.stringify([userId, collaberatorRef, readOnlyRef])
+      job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
+
+      const { group: group1, job: job1 } = this.request.secondCall.args[0].json
+      group1.should.equal('collaberator_ref_1_here')
+      job1.headers.sl_all_user_ids.should.equal(
+        JSON.stringify(['collaberator_ref_1_here'])
+      )
+
+      const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
+      group2.should.equal('read_only_ref_1_id_here')
+      job2.headers.sl_all_user_ids.should.equal(
+        JSON.stringify(['read_only_ref_1_id_here'])
       )
     })
 
@@ -156,18 +196,32 @@ describe('TpdsUpdateSender', function() {
         project_name: projectName
       })
 
-      const { group, job, method } = this.request.firstCall.args[0].json
+      const {
+        group: group0,
+        job: job0,
+        method: method0
+      } = this.request.firstCall.args[0].json
 
-      group.should.equal(projectId)
-      method.should.equal('standardHttpRequest')
-      job.method.should.equal('delete')
+      group0.should.equal(userId)
+      method0.should.equal('standardHttpRequest')
+      job0.method.should.equal('delete')
       const expectedUrl = `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
         projectName
       )}${encodeURIComponent(path)}`
-      job.headers.sl_all_user_ids.should.eql(
-        JSON.stringify([userId, collaberatorRef, readOnlyRef])
+      job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
+      job0.uri.should.equal(expectedUrl)
+
+      const { group: group1, job: job1 } = this.request.secondCall.args[0].json
+      group1.should.equal('collaberator_ref_1_here')
+      job1.headers.sl_all_user_ids.should.equal(
+        JSON.stringify(['collaberator_ref_1_here'])
       )
-      job.uri.should.equal(expectedUrl)
+
+      const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
+      group2.should.equal('read_only_ref_1_id_here')
+      job2.headers.sl_all_user_ids.should.equal(
+        JSON.stringify(['read_only_ref_1_id_here'])
+      )
     })
 
     it('moving entity', async function() {
@@ -181,16 +235,32 @@ describe('TpdsUpdateSender', function() {
         project_name: projectName
       })
 
-      const { group, job, method } = this.request.firstCall.args[0].json
+      const {
+        group: group0,
+        job: job0,
+        method: method0
+      } = this.request.firstCall.args[0].json
 
-      group.should.equal(projectId)
-      method.should.equal('standardHttpRequest')
-      job.method.should.equal('put')
-      job.uri.should.equal(`${thirdPartyDataStoreApiUrl}/user/${userId}/entity`)
-      job.json.startPath.should.equal(`/${projectName}/${startPath}`)
-      job.json.endPath.should.equal(`/${projectName}/${endPath}`)
-      job.headers.sl_all_user_ids.should.eql(
-        JSON.stringify([userId, collaberatorRef, readOnlyRef])
+      group0.should.equal(userId)
+      method0.should.equal('standardHttpRequest')
+      job0.method.should.equal('put')
+      job0.uri.should.equal(
+        `${thirdPartyDataStoreApiUrl}/user/${userId}/entity`
+      )
+      job0.json.startPath.should.equal(`/${projectName}/${startPath}`)
+      job0.json.endPath.should.equal(`/${projectName}/${endPath}`)
+      job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
+
+      const { group: group1, job: job1 } = this.request.secondCall.args[0].json
+      group1.should.equal('collaberator_ref_1_here')
+      job1.headers.sl_all_user_ids.should.equal(
+        JSON.stringify(['collaberator_ref_1_here'])
+      )
+
+      const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
+      group2.should.equal('read_only_ref_1_id_here')
+      job2.headers.sl_all_user_ids.should.equal(
+        JSON.stringify(['read_only_ref_1_id_here'])
       )
     })
 
@@ -204,30 +274,50 @@ describe('TpdsUpdateSender', function() {
         newProjectName
       })
 
-      const { group, job, method } = this.request.firstCall.args[0].json
+      const {
+        group: group0,
+        job: job0,
+        method: method0
+      } = this.request.firstCall.args[0].json
 
-      group.should.equal(projectId)
-      method.should.equal('standardHttpRequest')
-      job.method.should.equal('put')
-      job.uri.should.equal(`${thirdPartyDataStoreApiUrl}/user/${userId}/entity`)
-      job.json.startPath.should.equal(oldProjectName)
-      job.json.endPath.should.equal(newProjectName)
-      job.headers.sl_all_user_ids.should.eql(
-        JSON.stringify([userId, collaberatorRef, readOnlyRef])
+      group0.should.equal(userId)
+      method0.should.equal('standardHttpRequest')
+      job0.method.should.equal('put')
+      job0.uri.should.equal(
+        `${thirdPartyDataStoreApiUrl}/user/${userId}/entity`
+      )
+      job0.json.startPath.should.equal(oldProjectName)
+      job0.json.endPath.should.equal(newProjectName)
+      job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
+
+      const { group: group1, job: job1 } = this.request.secondCall.args[0].json
+      group1.should.equal('collaberator_ref_1_here')
+      job1.headers.sl_all_user_ids.should.equal(
+        JSON.stringify(['collaberator_ref_1_here'])
+      )
+
+      const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
+      group2.should.equal('read_only_ref_1_id_here')
+      job2.headers.sl_all_user_ids.should.equal(
+        JSON.stringify(['read_only_ref_1_id_here'])
       )
     })
 
     it('pollDropboxForUser', async function() {
       await this.updateSender.promises.pollDropboxForUser(userId)
 
-      const { group, job, method } = this.request.firstCall.args[0].json
+      const {
+        group: group0,
+        job: job0,
+        method: method0
+      } = this.request.firstCall.args[0].json
 
-      group.should.equal(`poll-dropbox:${userId}`)
-      method.should.equal('standardHttpRequest')
+      group0.should.equal(`poll-dropbox:${userId}`)
+      method0.should.equal('standardHttpRequest')
 
-      job.method.should.equal('post')
-      job.uri.should.equal(`${thirdPartyDataStoreApiUrl}/user/poll`)
-      job.json.user_ids[0].should.equal(userId)
+      job0.method.should.equal('post')
+      job0.uri.should.equal(`${thirdPartyDataStoreApiUrl}/user/poll`)
+      job0.json.user_ids[0].should.equal(userId)
     })
   })
 })

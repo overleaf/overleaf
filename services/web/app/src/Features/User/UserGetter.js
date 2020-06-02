@@ -11,24 +11,14 @@ const Features = require('../../infrastructure/Features')
 
 const UserGetter = {
   getUser(query, projection, callback) {
-    if (!query) {
-      return callback(new Error('no query provided'))
-    }
     if (arguments.length === 2) {
       callback = projection
       projection = {}
     }
-    if (typeof query === 'string') {
-      try {
-        query = { _id: ObjectId(query) }
-      } catch (e) {
-        return callback(null, null)
-      }
-    } else if (query instanceof ObjectId) {
-      query = { _id: query }
-    }
-
-    db.users.findOne(query, projection, callback)
+    normalizeQuery(query, (err, query) => {
+      if (err) return callback(err)
+      db.users.findOne(query, projection, callback)
+    })
   },
 
   getUserEmail(userId, callback) {
@@ -138,14 +128,14 @@ const UserGetter = {
     db.users.find(query, projection, callback)
   },
 
-  getUsers(userIds, projection, callback) {
-    try {
-      userIds = userIds.map(u => ObjectId(u.toString()))
-    } catch (error) {
-      return callback(error)
+  getUsers(query, projection, callback) {
+    if (!query) {
+      return callback(new Error('no query provided'))
     }
-
-    db.users.find({ _id: { $in: userIds } }, projection, callback)
+    normalizeQuery(query, (err, query) => {
+      if (err) return callback(err)
+      db.users.find(query, projection, callback)
+    })
   },
 
   // check for duplicate email address. This is also enforced at the DB level
@@ -156,6 +146,26 @@ const UserGetter = {
       }
       callback(error)
     })
+  }
+}
+
+function normalizeQuery(query, callback) {
+  if (!query) {
+    return callback(new Error('no query provided'))
+  }
+  try {
+    if (typeof query === 'string') {
+      callback(null, { _id: ObjectId(query) })
+    } else if (query instanceof ObjectId) {
+      callback(null, { _id: query })
+    } else if (Array.isArray(query)) {
+      const userIds = query.map(u => ObjectId(u.toString()))
+      callback(null, { _id: { $in: userIds } })
+    } else {
+      callback(null, query)
+    }
+  } catch (err) {
+    callback(err, null)
   }
 }
 

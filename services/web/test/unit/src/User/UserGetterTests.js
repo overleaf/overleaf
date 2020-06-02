@@ -77,8 +77,33 @@ describe('UserGetter', function() {
     })
 
     it('should not allow null query', function(done) {
-      this.UserGetter.getUser(null, {}, (error, user) => {
+      this.UserGetter.getUser(null, {}, error => {
         error.should.exist
+        error.message.should.equal('no query provided')
+        done()
+      })
+    })
+  })
+
+  describe('getUsers', function() {
+    it('should get users with array of userIds', function(done) {
+      const query = [new ObjectId()]
+      const projection = { email: 1 }
+      this.UserGetter.getUsers(query, projection, (error, users) => {
+        expect(error).to.not.exist
+        this.find.should.have.been.calledWithMatch(
+          { _id: { $in: query } },
+          projection
+        )
+        users.should.deep.equal([this.fakeUser])
+        done()
+      })
+    })
+
+    it('should not allow null query', function(done) {
+      this.UserGetter.getUser(null, {}, error => {
+        error.should.exist
+        error.message.should.equal('no query provided')
         done()
       })
     })
