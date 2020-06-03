@@ -11,6 +11,7 @@ const ASpellWorker = require('./ASpellWorker')
 const _ = require('underscore')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
+const OError = require('@overleaf/o-error')
 
 class ASpellWorkerPool {
   static initClass() {
@@ -75,7 +76,7 @@ class ASpellWorkerPool {
 
     if (worker == null) {
       // return error if too many workers
-      callback(new Error('no worker available'))
+      callback(new OError('no worker available'))
       return
     }
 

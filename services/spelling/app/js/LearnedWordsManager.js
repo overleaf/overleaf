@@ -3,6 +3,7 @@ const mongoCache = require('./MongoCache')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const { promisify } = require('util')
+const OError = require('@overleaf/o-error')
 
 const LearnedWordsManager = {
   learnWord(userToken, word, callback) {
@@ -58,7 +59,7 @@ const LearnedWordsManager = {
       preferences
     ) {
       if (error != null) {
-        return callback(error)
+        return callback(OError.tag(error))
       }
       let words =
         (preferences != null ? preferences.learnedWords : undefined) || []

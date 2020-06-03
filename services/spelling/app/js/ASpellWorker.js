@@ -49,9 +49,9 @@ class ASpellWorker {
         this.state = 'closed'
       }
       if (this.callback != null) {
-        const err = new OError({
-          message: 'aspell worker closed output streams with uncalled callback',
-          info: {
+        const err = new OError(
+          'aspell worker closed output streams with uncalled callback',
+          {
             process: this.pipe.pid,
             lang: this.language,
             stdout: output.slice(-1024),
@@ -60,7 +60,7 @@ class ASpellWorker {
             previousWorkerState,
             closeReason: this.closeReason
           }
-        })
+        )
         this.callback(err, [])
         this.callback = null
       }
@@ -70,7 +70,7 @@ class ASpellWorker {
       if (this.state !== 'killed') {
         this.state = 'error'
       }
-      const errInfo = {
+      OError.tag(err, 'aspell worker error', {
         process: this.pipe.pid,
         stdout: output.slice(-1024),
         stderr: error.slice(-1024),
@@ -78,22 +78,13 @@ class ASpellWorker {
         workerState: this.state,
         previousWorkerState,
         closeReason: this.closeReason
-      }
+      })
 
       if (this.callback != null) {
-        this.callback(
-          new OError({
-            message: 'aspell worker error',
-            info: errInfo
-          }).withCause(err),
-          []
-        )
+        this.callback(err, [])
         this.callback = null
       } else {
-        logger.warn(
-          Object.assign({ error: err }, errInfo),
-          'aspell worker error'
-        )
+        logger.warn(err)
       }
     })
     this.pipe.stdin.on('error', err => {
@@ -101,7 +92,8 @@ class ASpellWorker {
       if (this.state !== 'killed') {
         this.state = 'error'
       }
-      const errInfo = {
+
+      OError.tag(err, 'aspell worker error on stdin', {
         process: this.pipe.pid,
         stdout: output.slice(-1024),
         stderr: error.slice(-1024),
@@ -109,22 +101,13 @@ class ASpellWorker {
         workerState: this.state,
         previousWorkerState,
         closeReason: this.closeReason
-      }
+      })
 
       if (this.callback != null) {
-        this.callback(
-          new OError({
-            message: 'aspell worker error on stdin',
-            info: errInfo
-          }).withCause(err),
-          []
-        )
+        this.callback(err, [])
         this.callback = null
       } else {
-        logger.warn(
-          Object.assign({ error: err }, errInfo),
-          'aspell worker error on stdin'
-        )
+        logger.warn(err)
       }
     })
 
@@ -145,12 +128,14 @@ class ASpellWorker {
           this.callback = null // only allow one callback in use
         } else {
           logger.err(
-            {
-              process: this.pipe.pid,
-              lang: this.language,
-              workerState: this.state
-            },
-            'end of data marker received when callback already used'
+            new OError(
+              'end of data marker received when callback already used',
+              {
+                process: this.pipe.pid,
+                lang: this.language,
+                workerState: this.state
+              }
+            )
           )
         }
         this.state = 'ready'
@@ -180,13 +165,10 @@ class ASpellWorker {
     if (this.callback != null) {
       // only allow one callback in use
       return this.callback(
-        new OError({
-          message: 'Aspell callback already in use - SHOULD NOT HAPPEN',
-          info: {
-            process: this.pipe.pid,
-            lang: this.language,
-            workerState: this.state
-          }
+        new OError('Aspell callback already in use - SHOULD NOT HAPPEN', {
+          process: this.pipe.pid,
+          lang: this.language,
+          workerState: this.state
         })
       )
     }
