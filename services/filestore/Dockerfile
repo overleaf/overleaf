@@ -1,9 +1,8 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.3.6
 
-FROM node:12.16.1 as base
+FROM node:12.18.0 as base
 
 WORKDIR /app
 COPY install_deps.sh /app
@@ -14,7 +13,7 @@ FROM base as app
 #wildcard as some files may not be in all repos
 COPY package*.json npm-shrink*.json /app/
 
-RUN npm install --quiet
+RUN npm ci --quiet
 
 COPY . /app
 
