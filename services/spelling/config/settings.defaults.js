@@ -4,14 +4,14 @@ module.exports = {
   internal: {
     spelling: {
       port: 3005,
-      host: process.env['LISTEN_ADDRESS'] || 'localhost'
+      host: process.env.LISTEN_ADDRESS || 'localhost'
     }
   },
 
   mongo: {
     url:
-      process.env['MONGO_CONNECTION_STRING'] ||
-      `mongodb://${process.env['MONGO_HOST'] || 'localhost'}/sharelatex`
+      process.env.MONGO_CONNECTION_STRING ||
+      `mongodb://${process.env.MONGO_HOST || 'localhost'}/sharelatex`
   },
 
   cacheDir: Path.resolve('cache'),
