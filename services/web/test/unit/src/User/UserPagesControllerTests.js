@@ -328,7 +328,7 @@ describe('UserPagesController', function() {
       this.user.loginCount = 1
       this.res.redirect = url => {
         this.UserGetter.getUser.calledWith(this.user_id).should.equal(true)
-        url.should.equal(`/login?email=${encodeURIComponent(this.user.email)}`)
+        url.should.equal('/login')
         return done()
       }
       return this.UserPagesController.activateAccountPage(this.req, this.res)

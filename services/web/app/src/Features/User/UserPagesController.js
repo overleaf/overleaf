@@ -52,7 +52,7 @@ const UserPagesController = {
           // Already seen this user, so account must be activate
           // This lets users keep clicking the 'activate' link in their email
           // as a way to log in which, if I know our users, they will.
-          res.redirect(`/login?email=${encodeURIComponent(user.email)}`)
+          res.redirect(`/login`)
         } else {
           req.session.doLoginAfterPasswordReset = true
           res.render('user/activate', {
