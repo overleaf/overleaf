@@ -2,7 +2,7 @@ real-time
 --public-repo=True
 --language=coffeescript
 --env-add=
---node-version=10.19.0
+--node-version=10.21.0
 --acceptance-creds=None
 --dependencies=redis
 --docker-repos=gcr.io/overleaf-ops
