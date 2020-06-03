@@ -89,7 +89,7 @@ class ASpellRunner {
 
       // update the cache after processing all words, to avoid cache
       // changing while we use it
-      for (let k in addToCache) {
+      for (const k in addToCache) {
         const v = addToCache[k]
         cache.set(k, v)
       }
@@ -109,7 +109,7 @@ class ASpellRunner {
   getSuggestions(language, output) {
     const lines = output.split('\n')
     const suggestions = {}
-    for (let line of Array.from(lines)) {
+    for (const line of Array.from(lines)) {
       var parts, word
       if (line[0] === '&') {
         // Suggestions found
@@ -149,7 +149,7 @@ class ASpellRunner {
       callback = () => {}
     }
     const newWord = {}
-    for (let word of Array.from(words)) {
+    for (const word of Array.from(words)) {
       if (!newWord[word] && !cache.has(language + ':' + word)) {
         newWord[word] = true
       }
