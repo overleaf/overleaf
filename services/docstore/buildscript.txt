@@ -5,6 +5,6 @@ docstore
 --env-add=
 --env-pass-through=
 --language=es
---node-version=10.19.0
+--node-version=10.21.0
 --public-repo=True
 --script-version=2.2.0
