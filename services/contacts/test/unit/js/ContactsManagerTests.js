@@ -18,8 +18,8 @@ const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongojs')
 const tk = require('timekeeper')
 
-describe('ContactManager', function() {
-  beforeEach(function() {
+describe('ContactManager', function () {
+  beforeEach(function () {
     tk.freeze(Date.now())
     this.ContactManager = SandboxedModule.require(modulePath, {
       requires: {
@@ -36,17 +36,17 @@ describe('ContactManager', function() {
     return (this.callback = sinon.stub())
   })
 
-  afterEach(function() {
+  afterEach(function () {
     return tk.reset()
   })
 
-  describe('touchContact', function() {
-    beforeEach(function() {
+  describe('touchContact', function () {
+    beforeEach(function () {
       return (this.db.contacts.update = sinon.stub().callsArg(3))
     })
 
-    describe('with a valid user_id', function() {
-      beforeEach(function() {
+    describe('with a valid user_id', function () {
+      beforeEach(function () {
         return this.ContactManager.touchContact(
           this.user_id,
           (this.contact_id = 'mock_contact'),
@@ -54,12 +54,12 @@ describe('ContactManager', function() {
         )
       })
 
-      it('should increment the contact count and timestamp', function() {
+      it('should increment the contact count and timestamp', function () {
         return this.db.contacts.update
           .calledWith(
             {
               user_id: sinon.match(
-                o => o.toString() === this.user_id.toString()
+                (o) => o.toString() === this.user_id.toString()
               )
             },
             {
@@ -77,13 +77,13 @@ describe('ContactManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('with an invalid user id', function() {
-      beforeEach(function() {
+    return describe('with an invalid user id', function () {
+      beforeEach(function () {
         return this.ContactManager.touchContact(
           'not-valid-object-id',
           this.contact_id,
@@ -91,14 +91,14 @@ describe('ContactManager', function() {
         )
       })
 
-      return it('should call the callback with an error', function() {
+      return it('should call the callback with an error', function () {
         return this.callback.calledWith(sinon.match(Error)).should.equal(true)
       })
     })
   })
 
-  return describe('getContacts', function() {
-    beforeEach(function() {
+  return describe('getContacts', function () {
+    beforeEach(function () {
       this.user = {
         contacts: ['mock', 'contacts']
       }
@@ -107,35 +107,37 @@ describe('ContactManager', function() {
         .callsArgWith(1, null, this.user))
     })
 
-    describe('with a valid user_id', function() {
-      beforeEach(function() {
+    describe('with a valid user_id', function () {
+      beforeEach(function () {
         return this.ContactManager.getContacts(this.user_id, this.callback)
       })
 
-      it("should find the user's contacts", function() {
+      it("should find the user's contacts", function () {
         return this.db.contacts.findOne
           .calledWith({
-            user_id: sinon.match(o => o.toString() === this.user_id.toString())
+            user_id: sinon.match(
+              (o) => o.toString() === this.user_id.toString()
+            )
           })
           .should.equal(true)
       })
 
-      return it('should call the callback with the contacts', function() {
+      return it('should call the callback with the contacts', function () {
         return this.callback
           .calledWith(null, this.user.contacts)
           .should.equal(true)
       })
     })
 
-    return describe('with an invalid user id', function() {
-      beforeEach(function() {
+    return describe('with an invalid user id', function () {
+      beforeEach(function () {
         return this.ContactManager.getContacts(
           'not-valid-object-id',
           this.callback
         )
       })
 
-      return it('should call the callback with an error', function() {
+      return it('should call the callback with an error', function () {
         return this.callback.calledWith(sinon.match(Error)).should.equal(true)
       })
     })

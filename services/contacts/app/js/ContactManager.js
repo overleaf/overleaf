@@ -18,7 +18,7 @@ const metrics = require('metrics-sharelatex')
 module.exports = ContactManager = {
   touchContact(user_id, contact_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     try {
       user_id = ObjectId(user_id.toString())
@@ -45,7 +45,7 @@ module.exports = ContactManager = {
 
   getContacts(user_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     try {
       user_id = ObjectId(user_id.toString())
@@ -58,7 +58,7 @@ module.exports = ContactManager = {
       {
         user_id
       },
-      function(error, user) {
+      function (error, user) {
         if (error != null) {
           return callback(error)
         }
@@ -67,7 +67,7 @@ module.exports = ContactManager = {
     )
   }
 }
-;['touchContact', 'getContacts'].map(method =>
+;['touchContact', 'getContacts'].map((method) =>
   metrics.timeAsyncMethod(
     ContactManager,
     method,
