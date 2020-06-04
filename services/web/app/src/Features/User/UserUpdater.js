@@ -155,7 +155,7 @@ const UserUpdater = {
         if (res.n === 0) {
           return callback(new Error('Cannot remove email'))
         }
-        callback()
+        FeaturesUpdater.refreshFeatures(userId, callback)
       })
     })
   },

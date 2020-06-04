@@ -293,6 +293,18 @@ describe('UserUpdater', function() {
       )
     })
 
+    it('refresh features', function(done) {
+      this.UserUpdater.removeEmailAddress(
+        this.stubbedUser._id,
+        this.newEmail,
+        err => {
+          should.not.exist(err)
+          sinon.assert.calledWith(this.refreshFeatures, this.stubbedUser._id)
+          done()
+        }
+      )
+    })
+
     it('handle error', function(done) {
       this.UserUpdater.updateUser = sinon
         .stub()
