@@ -55,7 +55,7 @@ describe "applyOtUpdate", ->
 				update = JSON.parse(update)
 				update.op.should.deep.equal @update.op
 				update.meta.should.deep.equal {
-					source: @client.socket.sessionid
+					source: @client.publicId
 					user_id: @user_id
 				}
 				done()
@@ -208,7 +208,7 @@ describe "applyOtUpdate", ->
 				update = JSON.parse(update)
 				update.op.should.deep.equal @comment_update.op
 				update.meta.should.deep.equal {
-					source: @client.socket.sessionid
+					source: @client.publicId
 					user_id: @user_id
 				}
 				done()

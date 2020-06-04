@@ -69,7 +69,7 @@ module.exports = DocumentUpdaterController =
 		# send messages only to unique clients (due to duplicate entries in io.sockets.clients)
 		for client in clientList when not seen[client.id]
 			seen[client.id] = true
-			if client.id == update.meta.source
+			if client.publicId == update.meta.source
 				logger.log doc_id: doc_id, version: update.v, source: update.meta?.source, "distributing update to sender"
 				client.emit "otUpdateApplied", v: update.v, doc: update.doc
 			else if !update.dup # Duplicate ops should just be sent back to sending client for acknowledgement

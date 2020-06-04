@@ -37,6 +37,8 @@ module.exports = Client =
 			
 	connect: (cookie) ->
 		client = io.connect("http://localhost:3026", 'force new connection': true)
+		client.on 'connectionAccepted', (_, publicId) ->
+			client.publicId = publicId
 		return client
 		
 	getConnectedClients: (callback = (error, clients) ->) ->

@@ -45,7 +45,7 @@ module.exports = WebsocketController =
 				callback null, project, privilegeLevel, WebsocketController.PROTOCOL_VERSION
 
 			# No need to block for setting the user as connected in the cursor tracking
-			ConnectedUsersManager.updateUserPosition project_id, client.id, user, null, () ->
+			ConnectedUsersManager.updateUserPosition project_id, client.publicId, user, null, () ->
 
 	# We want to flush a project if there are no more (local) connected clients
 	# but we need to wait for the triggering client to disconnect. How long we wait
@@ -58,10 +58,10 @@ module.exports = WebsocketController =
 
 			metrics.inc "editor.leave-project"
 			logger.log {project_id, user_id, client_id: client.id}, "client leaving project"
-			WebsocketLoadBalancer.emitToRoom project_id, "clientTracking.clientDisconnected", client.id
+			WebsocketLoadBalancer.emitToRoom project_id, "clientTracking.clientDisconnected", client.publicId
 
 			# We can do this in the background
-			ConnectedUsersManager.markUserAsDisconnected project_id, client.id, (err) ->
+			ConnectedUsersManager.markUserAsDisconnected project_id, client.publicId, (err) ->
 				if err?
 					logger.error {err, project_id, user_id, client_id: client.id}, "error marking client as disconnected"
 
@@ -143,7 +143,7 @@ module.exports = WebsocketController =
 				if error?
 					logger.warn {err: error, client_id: client.id, project_id, user_id}, "silently ignoring unauthorized updateClientPosition. Client likely hasn't called joinProject yet."
 					return callback()
-				cursorData.id      = client.id
+				cursorData.id      = client.publicId
 				cursorData.user_id = user_id if user_id?
 				cursorData.email   = email   if email?
 				# Don't store anonymous users in redis to avoid influx
@@ -159,7 +159,7 @@ module.exports = WebsocketController =
 						last_name
 					else
 						""
-					ConnectedUsersManager.updateUserPosition(project_id, client.id, {
+					ConnectedUsersManager.updateUserPosition(project_id, client.publicId, {
 						first_name: first_name,
 						last_name:  last_name,
 						email:      email,
@@ -205,7 +205,7 @@ module.exports = WebsocketController =
 					, 100
 					return callback(error)
 				update.meta ||= {}
-				update.meta.source = client.id
+				update.meta.source = client.publicId
 				update.meta.user_id = user_id
 				metrics.inc "editor.doc-update", 0.3
 

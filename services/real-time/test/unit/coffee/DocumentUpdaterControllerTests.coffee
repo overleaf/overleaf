@@ -93,7 +93,7 @@ describe "DocumentUpdaterController", ->
 			@otherClients = [new MockClient(), new MockClient()]
 			@update =
 				op: [ t: "foo", p: 12 ]
-				meta: source: @sourceClient.id
+				meta: source: @sourceClient.publicId
 				v: @version = 42
 				doc: @doc_id
 			@io.sockets =

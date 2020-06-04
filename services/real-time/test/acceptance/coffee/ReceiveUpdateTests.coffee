@@ -65,7 +65,7 @@ describe "receiveUpdate", ->
 				doc_id: @doc_id
 				op:
 					meta:
-						source: @clientA.socket.sessionid
+						source: @clientA.publicId
 					v: @version
 					doc: @doc_id
 					op: [{i: "foo", p: 50}]				
