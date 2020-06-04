@@ -4,6 +4,7 @@ const User = require('./helpers/User')
 const request = require('./helpers/request')
 const settings = require('settings-sharelatex')
 
+require('./helpers/MockChatApi')
 require('./helpers/MockDocstoreApi')
 require('./helpers/MockDocUpdaterApi')
 
@@ -262,6 +263,38 @@ function expectNoAnonymousAdminAccess(user, projectId, callback) {
   )
 }
 
+function expectChatAccess(user, projectId, callback) {
+  user.request.get(
+    {
+      url: `/project/${projectId}/messages`,
+      json: true
+    },
+    (error, response) => {
+      if (error != null) {
+        return callback(error)
+      }
+      expect(response.statusCode).to.equal(200)
+      callback()
+    }
+  )
+}
+
+function expectNoChatAccess(user, projectId, callback) {
+  user.request.get(
+    {
+      url: `/project/${projectId}/messages`,
+      json: true
+    },
+    (error, response) => {
+      if (error != null) {
+        return callback(error)
+      }
+      expect(response.statusCode).to.equal(403)
+      callback()
+    }
+  )
+}
+
 describe('Authorization', function() {
   beforeEach(function(done) {
     this.timeout(90000)
@@ -316,6 +349,10 @@ describe('Authorization', function() {
       expectAdminAccess(this.owner, this.projectId, done)
     })
 
+    it('should allow the owner user chat messages access', function(done) {
+      expectChatAccess(this.owner, this.projectId, done)
+    })
+
     it('should not allow another user read access to the project', function(done) {
       expectNoReadAccess(
         this.other1,
@@ -342,6 +379,10 @@ describe('Authorization', function() {
       expectNoAdminAccess(this.other1, this.projectId, done)
     })
 
+    it('should not allow another user chat messages access', function(done) {
+      expectNoChatAccess(this.other1, this.projectId, done)
+    })
+
     it('should not allow anonymous user read access to it', function(done) {
       expectNoReadAccess(
         this.anon,
@@ -366,6 +407,10 @@ describe('Authorization', function() {
 
     it('should not allow anonymous user admin access to it', function(done) {
       expectNoAnonymousAdminAccess(this.anon, this.projectId, done)
+    })
+
+    it('should not allow anonymous user chat messages access', function(done) {
+      expectNoChatAccess(this.anon, this.projectId, done)
     })
 
     it('should allow site admin users read access to it', function(done) {
@@ -422,6 +467,10 @@ describe('Authorization', function() {
       expectReadAccess(this.ro_user, this.projectId, done)
     })
 
+    it('should allow the read-only user chat messages access', function(done) {
+      expectChatAccess(this.ro_user, this.projectId, done)
+    })
+
     it('should not allow the read-only user write access to its content', function(done) {
       expectNoContentWriteAccess(this.ro_user, this.projectId, done)
     })
@@ -454,6 +503,10 @@ describe('Authorization', function() {
     it('should not allow the read-write user admin access to it', function(done) {
       expectNoAdminAccess(this.rw_user, this.projectId, done)
     })
+
+    it('should allow the read-write user chat messages access', function(done) {
+      expectChatAccess(this.rw_user, this.projectId, done)
+    })
   })
 
   describe('public read-write project', function() {
@@ -475,6 +528,10 @@ describe('Authorization', function() {
       expectContentWriteAccess(this.other1, this.projectId, done)
     })
 
+    it('should allow a user chat messages access', function(done) {
+      expectChatAccess(this.other1, this.projectId, done)
+    })
+
     it('should not allow a user write access to its settings', function(done) {
       expectNoSettingsWriteAccess(
         this.other1,
@@ -494,6 +551,10 @@ describe('Authorization', function() {
 
     it('should allow an anonymous user write access to its content', function(done) {
       expectContentWriteAccess(this.anon, this.projectId, done)
+    })
+
+    it('should allow an anonymous user chat messages access', function(done) {
+      expectChatAccess(this.anon, this.projectId, done)
     })
 
     it('should not allow an anonymous user write access to its settings', function(done) {
@@ -542,6 +603,11 @@ describe('Authorization', function() {
       expectNoAdminAccess(this.other1, this.projectId, done)
     })
 
+    // NOTE: legacy readOnly access does not count as 'restricted' in the new model
+    it('should allow a user chat messages access', function(done) {
+      expectChatAccess(this.other1, this.projectId, done)
+    })
+
     it('should allow an anonymous user read access to it', function(done) {
       expectReadAccess(this.anon, this.projectId, done)
     })
@@ -561,6 +627,10 @@ describe('Authorization', function() {
 
     it('should not allow an anonymous user admin access to it', function(done) {
       expectNoAnonymousAdminAccess(this.anon, this.projectId, done)
+    })
+
+    it('should not allow an anonymous user chat messages access', function(done) {
+      expectNoChatAccess(this.anon, this.projectId, done)
     })
   })
 })

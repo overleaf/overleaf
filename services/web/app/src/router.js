@@ -801,11 +801,13 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get(
     '/project/:project_id/messages',
+    AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
     ChatController.getMessages
   )
   webRouter.post(
     '/project/:project_id/messages',
+    AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
     RateLimiterMiddleware.rateLimit({
       endpointName: 'send-chat-message',

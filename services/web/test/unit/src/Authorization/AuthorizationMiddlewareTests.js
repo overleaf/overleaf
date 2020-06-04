@@ -440,6 +440,55 @@ describe('AuthorizationMiddleware', function() {
     })
   })
 
+  describe('blockRestrictedUserFromProject', function() {
+    beforeEach(function() {
+      this.AuthorizationMiddleware._getUserAndProjectId = sinon
+        .stub()
+        .callsArgWith(1, null, this.userId, this.project_id)
+    })
+
+    it('should issue a 401 response for a restricted user', function(done) {
+      this.AuthorizationManager.isRestrictedUserForProject = sinon
+        .stub()
+        .callsArgWith(3, null, true)
+      this.req = {}
+      this.next = sinon.stub()
+      this.res.sendStatus = status => {
+        expect(status).to.equal(403)
+        expect(
+          this.AuthorizationManager.isRestrictedUserForProject.called
+        ).to.equal(true)
+        expect(this.next.called).to.equal(false)
+        done()
+      }
+      this.AuthorizationMiddleware.blockRestrictedUserFromProject(
+        this.req,
+        this.res,
+        this.next
+      )
+    })
+
+    it('should pass through for a regular user', function(done) {
+      this.AuthorizationManager.isRestrictedUserForProject = sinon
+        .stub()
+        .callsArgWith(3, null, false)
+      this.req = {}
+      this.res.sendStatus = sinon.stub()
+      this.next = status => {
+        expect(
+          this.AuthorizationManager.isRestrictedUserForProject.called
+        ).to.equal(true)
+        expect(this.res.sendStatus.called).to.equal(false)
+        done()
+      }
+      this.AuthorizationMiddleware.blockRestrictedUserFromProject(
+        this.req,
+        this.res,
+        this.next
+      )
+    })
+  })
+
   describe('ensureUserCanReadMultipleProjects', function() {
     beforeEach(function() {
       this.AuthorizationManager.canUserReadProject = sinon.stub()

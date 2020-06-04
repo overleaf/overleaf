@@ -43,6 +43,33 @@ module.exports = AuthorizationMiddleware = {
     })
   },
 
+  blockRestrictedUserFromProject(req, res, next) {
+    AuthorizationMiddleware._getUserAndProjectId(req, function(
+      error,
+      userId,
+      projectId
+    ) {
+      if (error) {
+        return next(error)
+      }
+      const token = TokenAccessHandler.getRequestToken(req, projectId)
+      AuthorizationManager.isRestrictedUserForProject(
+        userId,
+        projectId,
+        token,
+        (err, isRestrictedUser) => {
+          if (err) {
+            return next(err)
+          }
+          if (isRestrictedUser) {
+            return res.sendStatus(403)
+          }
+          next()
+        }
+      )
+    })
+  },
+
   ensureUserCanReadProject(req, res, next) {
     AuthorizationMiddleware._getUserAndProjectId(req, function(
       error,
