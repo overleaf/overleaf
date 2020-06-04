@@ -57,6 +57,7 @@ module.exports = {
   parallelSqlQueryLimit: process.env.FILESTORE_PARALLEL_SQL_QUERY_LIMIT || 1,
   filestoreDomainOveride: process.env.FILESTORE_DOMAIN_OVERRIDE,
   texliveImageNameOveride: process.env.TEX_LIVE_IMAGE_NAME_OVERRIDE,
+  texliveOpenoutAny: process.env.TEXLIVE_OPENOUT_ANY,
   sentry: {
     dsn: process.env.SENTRY_DSN
   }
