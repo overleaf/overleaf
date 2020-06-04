@@ -25,8 +25,8 @@ const user_id = '51dc93e6fb625a261300003b'
 const notification_id = 'fb625a26f09d'
 const notification_key = 'notification-key'
 
-describe('Notifications Tests', function() {
-  beforeEach(function() {
+describe('Notifications Tests', function () {
+  beforeEach(function () {
     const self = this
     this.findStub = sinon.stub()
     this.insertStub = sinon.stub()
@@ -71,8 +71,8 @@ describe('Notifications Tests', function() {
     return (this.stubbedNotificationArray = [this.stubbedNotification])
   })
 
-  describe('getUserNotifications', function() {
-    return it('should find all notifications and return i', function(done) {
+  describe('getUserNotifications', function () {
+    return it('should find all notifications and return i', function (done) {
       this.findStub.callsArgWith(1, null, this.stubbedNotificationArray)
       return this.notifications.getUserNotifications(
         user_id,
@@ -88,8 +88,8 @@ describe('Notifications Tests', function() {
     })
   })
 
-  describe('addNotification', function() {
-    beforeEach(function() {
+  describe('addNotification', function () {
+    beforeEach(function () {
       this.stubbedNotification = {
         user_id: ObjectId(user_id),
         key: 'notification-key',
@@ -110,11 +110,11 @@ describe('Notifications Tests', function() {
       return this.countStub.yields(null, 0)
     })
 
-    it('should insert the notification into the collection', function(done) {
+    it('should insert the notification into the collection', function (done) {
       return this.notifications.addNotification(
         user_id,
         this.stubbedNotification,
-        err => {
+        (err) => {
           expect(err).not.exists
           sinon.assert.calledWith(
             this.updateStub,
@@ -127,16 +127,16 @@ describe('Notifications Tests', function() {
       )
     })
 
-    describe('when there is an existing notification', function(done) {
-      beforeEach(function() {
+    describe('when there is an existing notification', function (done) {
+      beforeEach(function () {
         return this.countStub.yields(null, 1)
       })
 
-      it('should fail to insert', function(done) {
+      it('should fail to insert', function (done) {
         return this.notifications.addNotification(
           user_id,
           this.stubbedNotification,
-          err => {
+          (err) => {
             expect(err).not.exists
             sinon.assert.notCalled(this.updateStub)
             return done()
@@ -144,12 +144,12 @@ describe('Notifications Tests', function() {
         )
       })
 
-      return it('should update the key if forceCreate is true', function(done) {
+      return it('should update the key if forceCreate is true', function (done) {
         this.stubbedNotification.forceCreate = true
         return this.notifications.addNotification(
           user_id,
           this.stubbedNotification,
-          err => {
+          (err) => {
             expect(err).not.exists
             sinon.assert.calledWith(
               this.updateStub,
@@ -163,8 +163,8 @@ describe('Notifications Tests', function() {
       })
     })
 
-    describe('when the notification is set to expire', function() {
-      beforeEach(function() {
+    describe('when the notification is set to expire', function () {
+      beforeEach(function () {
         this.stubbedNotification = {
           user_id: ObjectId(user_id),
           key: 'notification-key',
@@ -185,11 +185,11 @@ describe('Notifications Tests', function() {
         })
       })
 
-      return it('should add an `expires` Date field to the document', function(done) {
+      return it('should add an `expires` Date field to the document', function (done) {
         return this.notifications.addNotification(
           user_id,
           this.stubbedNotification,
-          err => {
+          (err) => {
             expect(err).not.exists
             sinon.assert.calledWith(
               this.updateStub,
@@ -203,8 +203,8 @@ describe('Notifications Tests', function() {
       })
     })
 
-    return describe('when the notification has a nonsensical expires field', function() {
-      beforeEach(function() {
+    return describe('when the notification has a nonsensical expires field', function () {
+      beforeEach(function () {
         this.stubbedNotification = {
           user_id: ObjectId(user_id),
           key: 'notification-key',
@@ -221,11 +221,11 @@ describe('Notifications Tests', function() {
         })
       })
 
-      return it('should produce an error', function(done) {
+      return it('should produce an error', function (done) {
         return this.notifications.addNotification(
           user_id,
           this.stubbedNotification,
-          err => {
+          (err) => {
             ;(err instanceof Error).should.equal(true)
             sinon.assert.notCalled(this.updateStub)
             return done()
@@ -235,14 +235,14 @@ describe('Notifications Tests', function() {
     })
   })
 
-  describe('removeNotificationId', function() {
-    return it('should mark the notification id as read', function(done) {
+  describe('removeNotificationId', function () {
+    return it('should mark the notification id as read', function (done) {
       this.updateStub.callsArgWith(2, null)
 
       return this.notifications.removeNotificationId(
         user_id,
         notification_id,
-        err => {
+        (err) => {
           const searchOps = {
             user_id: ObjectId(user_id),
             _id: ObjectId(notification_id)
@@ -258,14 +258,14 @@ describe('Notifications Tests', function() {
     })
   })
 
-  describe('removeNotificationKey', function() {
-    return it('should mark the notification key as read', function(done) {
+  describe('removeNotificationKey', function () {
+    return it('should mark the notification key as read', function (done) {
       this.updateStub.callsArgWith(2, null)
 
       return this.notifications.removeNotificationKey(
         user_id,
         notification_key,
-        err => {
+        (err) => {
           const searchOps = {
             user_id: ObjectId(user_id),
             key: notification_key
@@ -281,13 +281,13 @@ describe('Notifications Tests', function() {
     })
   })
 
-  describe('removeNotificationByKeyOnly', function() {
-    return it('should mark the notification key as read', function(done) {
+  describe('removeNotificationByKeyOnly', function () {
+    return it('should mark the notification key as read', function (done) {
       this.updateStub.callsArgWith(2, null)
 
       return this.notifications.removeNotificationByKeyOnly(
         notification_key,
-        err => {
+        (err) => {
           const searchOps = { key: notification_key }
           const updateOperation = { $unset: { templateKey: true } }
           assert.deepEqual(this.updateStub.args[0][0], searchOps)
@@ -298,13 +298,13 @@ describe('Notifications Tests', function() {
     })
   })
 
-  return describe('deleteNotificationByKeyOnly', function() {
-    return it('should completely remove the notification', function(done) {
+  return describe('deleteNotificationByKeyOnly', function () {
+    return it('should completely remove the notification', function (done) {
       this.removeStub.callsArgWith(2, null)
 
       return this.notifications.deleteNotificationByKeyOnly(
         notification_key,
-        err => {
+        (err) => {
           const searchOps = { key: notification_key }
           const opts = { justOne: true }
           assert.deepEqual(this.removeStub.args[0][0], searchOps)
