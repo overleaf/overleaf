@@ -40,11 +40,11 @@ module.exports = {
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD || '',
       key_schema: {
-        historyLock({ doc_id }) {
-          return `HistoryLock:{${doc_id}}`
+        historyLock({ doc_id: docId }) {
+          return `HistoryLock:{${docId}}`
         },
-        historyIndexLock({ project_id }) {
-          return `HistoryIndexLock:{${project_id}}`
+        historyIndexLock({ project_id: projectId }) {
+          return `HistoryIndexLock:{${projectId}}`
         }
       }
     },
@@ -53,11 +53,11 @@ module.exports = {
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD || '',
       key_schema: {
-        uncompressedHistoryOps({ doc_id }) {
-          return `UncompressedHistoryOps:{${doc_id}}`
+        uncompressedHistoryOps({ doc_id: docId }) {
+          return `UncompressedHistoryOps:{${docId}}`
         },
-        docsWithHistoryOps({ project_id }) {
-          return `DocsWithHistoryOps:{${project_id}}`
+        docsWithHistoryOps({ project_id: projectId }) {
+          return `DocsWithHistoryOps:{${projectId}}`
         }
       }
     }

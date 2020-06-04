@@ -42,7 +42,7 @@ const Path = require('path')
 
 Metrics.memory.monitor(logger)
 
-const child_process = require('child_process')
+const childProcess = require('child_process')
 
 const HttpController = require('./app/js/HttpController')
 const express = require('express')
@@ -84,11 +84,14 @@ app.post('/pack', function (req, res, next) {
     return res.send('pack already running')
   } else {
     logger.log('running pack')
-    packWorker = child_process.fork(__dirname + '/app/js/PackWorker.js', [
-      req.query.limit || 1000,
-      req.query.delay || 1000,
-      req.query.timeout || 30 * 60 * 1000
-    ])
+    packWorker = childProcess.fork(
+      Path.join(__dirname, '/app/js/PackWorker.js'),
+      [
+        req.query.limit || 1000,
+        req.query.delay || 1000,
+        req.query.timeout || 30 * 60 * 1000
+      ]
+    )
     packWorker.on('exit', function (code, signal) {
       logger.log({ code, signal }, 'history auto pack exited')
       return (packWorker = null)
