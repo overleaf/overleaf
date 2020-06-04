@@ -16,8 +16,8 @@ const { expect } = chai
 const modulePath = '../../../../app/js/DocumentUpdaterManager.js'
 const SandboxedModule = require('sandboxed-module')
 
-describe('DocumentUpdaterManager', function() {
-  beforeEach(function() {
+describe('DocumentUpdaterManager', function () {
+  beforeEach(function () {
     this.DocumentUpdaterManager = SandboxedModule.require(modulePath, {
       requires: {
         request: (this.request = {}),
@@ -35,9 +35,9 @@ describe('DocumentUpdaterManager', function() {
     return (this.version = 42)
   })
 
-  describe('getDocument', function() {
-    describe('successfully', function() {
-      beforeEach(function() {
+  describe('getDocument', function () {
+    describe('successfully', function () {
+      beforeEach(function () {
         this.body = JSON.stringify({
           lines: this.lines,
           version: this.version,
@@ -53,20 +53,20 @@ describe('DocumentUpdaterManager', function() {
         )
       })
 
-      it('should get the document from the document updater', function() {
+      it('should get the document from the document updater', function () {
         const url = `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}`
         return this.request.get.calledWith(url).should.equal(true)
       })
 
-      return it('should call the callback with the content and version', function() {
+      return it('should call the callback with the content and version', function () {
         return this.callback
           .calledWith(null, this.lines.join('\n'), this.version)
           .should.equal(true)
       })
     })
 
-    describe('when the document updater API returns an error', function() {
-      beforeEach(function() {
+    describe('when the document updater API returns an error', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(
@@ -82,13 +82,13 @@ describe('DocumentUpdaterManager', function() {
         )
       })
 
-      return it('should return an error to the callback', function() {
+      return it('should return an error to the callback', function () {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the document updater returns a failure error code', function() {
-      beforeEach(function() {
+    return describe('when the document updater returns a failure error code', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
@@ -99,7 +99,7 @@ describe('DocumentUpdaterManager', function() {
         )
       })
 
-      return it('should return the callback with an error', function() {
+      return it('should return the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match.has(
@@ -112,14 +112,14 @@ describe('DocumentUpdaterManager', function() {
     })
   })
 
-  return describe('setDocument', function() {
-    beforeEach(function() {
+  return describe('setDocument', function () {
+    beforeEach(function () {
       this.content = 'mock content'
       return (this.user_id = 'user-id-123')
     })
 
-    describe('successfully', function() {
-      beforeEach(function() {
+    describe('successfully', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 200 })
@@ -132,7 +132,7 @@ describe('DocumentUpdaterManager', function() {
         )
       })
 
-      it('should set the document in the document updater', function() {
+      it('should set the document in the document updater', function () {
         const url = `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}`
         return this.request.post
           .calledWith({
@@ -147,13 +147,13 @@ describe('DocumentUpdaterManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
 
-    describe('when the document updater API returns an error', function() {
-      beforeEach(function() {
+    describe('when the document updater API returns an error', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(
@@ -171,13 +171,13 @@ describe('DocumentUpdaterManager', function() {
         )
       })
 
-      return it('should return an error to the callback', function() {
+      return it('should return an error to the callback', function () {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the document updater returns a failure error code', function() {
-      beforeEach(function() {
+    return describe('when the document updater returns a failure error code', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
@@ -190,7 +190,7 @@ describe('DocumentUpdaterManager', function() {
         )
       })
 
-      return it('should return the callback with an error', function() {
+      return it('should return the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match.has(

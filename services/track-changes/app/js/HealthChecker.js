@@ -24,10 +24,10 @@ module.exports = {
     const url = `http://localhost:${port}/project/${project_id}`
     logger.log({ project_id }, 'running health check')
     const jobs = [
-      cb =>
+      (cb) =>
         request.get(
           { url: `http://localhost:${port}/check_lock`, timeout: 3000 },
-          function(err, res, body) {
+          function (err, res, body) {
             if (err != null) {
               logger.err(
                 { err, project_id },
@@ -41,8 +41,8 @@ module.exports = {
             }
           }
         ),
-      cb =>
-        request.post({ url: `${url}/flush`, timeout: 10000 }, function(
+      (cb) =>
+        request.post({ url: `${url}/flush`, timeout: 10000 }, function (
           err,
           res,
           body
@@ -56,8 +56,8 @@ module.exports = {
             return cb()
           }
         }),
-      cb =>
-        request.get({ url: `${url}/updates`, timeout: 10000 }, function(
+      (cb) =>
+        request.get({ url: `${url}/updates`, timeout: 10000 }, function (
           err,
           res,
           body

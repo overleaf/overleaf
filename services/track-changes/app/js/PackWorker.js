@@ -52,8 +52,8 @@ if (!source.match(/^[0-9]+$/)) {
     }
     return result1
   })()
-  pending = _.filter(result, row =>
-    __guard__(row != null ? row.doc_id : undefined, x =>
+  pending = _.filter(result, (row) =>
+    __guard__(row != null ? row.doc_id : undefined, (x) =>
       x.match(/^[a-f0-9]{24}$/)
     )
   )
@@ -62,12 +62,12 @@ if (!source.match(/^[0-9]+$/)) {
 }
 
 let shutDownRequested = false
-const shutDownTimer = setTimeout(function() {
+const shutDownTimer = setTimeout(function () {
   logger.log('pack timed out, requesting shutdown')
   // start the shutdown on the next pack
   shutDownRequested = true
   // do a hard shutdown after a further 5 minutes
-  const hardTimeout = setTimeout(function() {
+  const hardTimeout = setTimeout(function () {
     logger.error('HARD TIMEOUT in pack archive worker')
     return process.exit()
   }, 5 * 60 * 1000)
@@ -79,8 +79,8 @@ logger.log(
 )
 
 // work around for https://github.com/mafintosh/mongojs/issues/224
-db.close = function(callback) {
-  return this._getServer(function(err, server) {
+db.close = function (callback) {
+  return this._getServer(function (err, server) {
     if (err != null) {
       return callback(err)
     }
@@ -90,20 +90,20 @@ db.close = function(callback) {
   })
 }
 
-const finish = function() {
+const finish = function () {
   if (shutDownTimer != null) {
     logger.log('cancelling timeout')
     clearTimeout(shutDownTimer)
   }
   logger.log('closing db')
-  return db.close(function() {
+  return db.close(function () {
     logger.log('closing LockManager Redis Connection')
-    return LockManager.close(function() {
+    return LockManager.close(function () {
       logger.log(
         { processedCount: COUNT, allCount: TOTAL },
         'ready to exit from pack archive worker'
       )
-      const hardTimeout = setTimeout(function() {
+      const hardTimeout = setTimeout(function () {
         logger.error('hard exit from pack archive worker')
         return process.exit(1)
       }, 5 * 1000)
@@ -112,12 +112,12 @@ const finish = function() {
   })
 }
 
-process.on('exit', code => logger.log({ code }, 'pack archive worker exited'))
+process.on('exit', (code) => logger.log({ code }, 'pack archive worker exited'))
 
-const processUpdates = pending =>
+const processUpdates = (pending) =>
   async.eachSeries(
     pending,
-    function(result, callback) {
+    function (result, callback) {
       let _id
       ;({ _id, project_id, doc_id } = result)
       COUNT++
@@ -129,7 +129,7 @@ const processUpdates = pending =>
         )
         return callback()
       }
-      const handler = function(err, result) {
+      const handler = function (err, result) {
         if (err != null && err.code === 'InternalError' && err.retryable) {
           logger.warn(
             { err, result },
@@ -154,7 +154,7 @@ const processUpdates = pending =>
         return PackManager.processOldPack(project_id, doc_id, _id, handler)
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err != null && err.message !== 'shutdown') {
         logger.error({ err }, 'error in pack archive worker processUpdates')
       }
@@ -163,7 +163,7 @@ const processUpdates = pending =>
   )
 // find the packs which can be archived
 
-const ObjectIdFromDate = function(date) {
+const ObjectIdFromDate = function (date) {
   const id = Math.floor(date.getTime() / 1000).toString(16) + '0000000000000000'
   return ObjectId(id)
 }
@@ -191,13 +191,13 @@ if (pending != null) {
     .sort({
       last_checked: 1
     })
-    .limit(LIMIT, function(err, results) {
+    .limit(LIMIT, function (err, results) {
       if (err != null) {
         logger.log({ err }, 'error checking for updates')
         finish()
         return
       }
-      pending = _.uniq(results, false, result => result.doc_id.toString())
+      pending = _.uniq(results, false, (result) => result.doc_id.toString())
       TOTAL = pending.length
       logger.log(`found ${TOTAL} documents to archive`)
       return processUpdates(pending)

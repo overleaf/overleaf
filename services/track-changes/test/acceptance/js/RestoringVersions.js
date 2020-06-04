@@ -23,8 +23,8 @@ const TrackChangesClient = require('./helpers/TrackChangesClient')
 const MockDocUpdaterApi = require('./helpers/MockDocUpdaterApi')
 const MockWebApi = require('./helpers/MockWebApi')
 
-describe('Restoring a version', function() {
-  before(function(done) {
+describe('Restoring a version', function () {
+  before(function (done) {
     sinon.spy(MockDocUpdaterApi, 'setDoc')
 
     this.now = Date.now()
@@ -78,7 +78,7 @@ describe('Restoring a version', function() {
         this.project_id,
         this.doc_id,
         this.updates,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -87,7 +87,7 @@ describe('Restoring a version', function() {
             this.doc_id,
             this.beforeVersion,
             this.user_id,
-            error => {
+            (error) => {
               if (error != null) {
                 throw error
               }
@@ -100,12 +100,12 @@ describe('Restoring a version', function() {
     return null
   })
 
-  after(function() {
+  after(function () {
     MockDocUpdaterApi.setDoc.restore()
     return null
   })
 
-  return it('should set the doc in the doc updater', function() {
+  return it('should set the doc in the doc updater', function () {
     MockDocUpdaterApi.setDoc
       .calledWith(
         this.project_id,

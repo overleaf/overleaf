@@ -16,8 +16,8 @@ const { expect } = chai
 const modulePath = '../../../../app/js/RestoreManager.js'
 const SandboxedModule = require('sandboxed-module')
 
-describe('RestoreManager', function() {
-  beforeEach(function() {
+describe('RestoreManager', function () {
+  beforeEach(function () {
     this.RestoreManager = SandboxedModule.require(modulePath, {
       requires: {
         'logger-sharelatex': (this.logger = {
@@ -35,8 +35,8 @@ describe('RestoreManager', function() {
     return (this.version = 42)
   })
 
-  return describe('restoreToBeforeVersion', function() {
-    beforeEach(function() {
+  return describe('restoreToBeforeVersion', function () {
+    beforeEach(function () {
       this.content = 'mock content'
       this.DocumentUpdaterManager.setDocument = sinon.stub().callsArg(4)
       this.DiffManager.getDocumentBeforeVersion = sinon
@@ -51,19 +51,19 @@ describe('RestoreManager', function() {
       )
     })
 
-    it('should get the content before the requested version', function() {
+    it('should get the content before the requested version', function () {
       return this.DiffManager.getDocumentBeforeVersion
         .calledWith(this.project_id, this.doc_id, this.version)
         .should.equal(true)
     })
 
-    it('should set the document in the document updater', function() {
+    it('should set the document in the document updater', function () {
       return this.DocumentUpdaterManager.setDocument
         .calledWith(this.project_id, this.doc_id, this.content, this.user_id)
         .should.equal(true)
     })
 
-    return it('should call the callback', function() {
+    return it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })

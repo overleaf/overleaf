@@ -19,11 +19,11 @@ const Settings = require('settings-sharelatex')
 module.exports = DocumentUpdaterManager = {
   getDocument(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(error, content, version) {}
+      callback = function (error, content, version) {}
     }
     const url = `${Settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}`
     logger.log({ project_id, doc_id }, 'getting doc from document updater')
-    return request.get(url, function(error, res, body) {
+    return request.get(url, function (error, res, body) {
       if (error != null) {
         return callback(error)
       }
@@ -54,7 +54,7 @@ module.exports = DocumentUpdaterManager = {
 
   setDocument(project_id, doc_id, content, user_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const url = `${Settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}`
     logger.log({ project_id, doc_id }, 'setting doc in document updater')
@@ -68,7 +68,7 @@ module.exports = DocumentUpdaterManager = {
           undoing: true
         }
       },
-      function(error, res, body) {
+      function (error, res, body) {
         if (error != null) {
           return callback(error)
         }

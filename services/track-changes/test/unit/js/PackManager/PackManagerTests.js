@@ -24,8 +24,8 @@ const _ = require('underscore')
 
 const tk = require('timekeeper')
 
-describe('PackManager', function() {
-  beforeEach(function() {
+describe('PackManager', function () {
+  beforeEach(function () {
     tk.freeze(new Date())
     this.PackManager = SandboxedModule.require(modulePath, {
       requires: {
@@ -46,12 +46,12 @@ describe('PackManager', function() {
     return (this.PackManager.MAX_COUNT = 512)
   })
 
-  afterEach(function() {
+  afterEach(function () {
     return tk.reset()
   })
 
-  describe('insertCompressedUpdates', function() {
-    beforeEach(function() {
+  describe('insertCompressedUpdates', function () {
+    beforeEach(function () {
       this.lastUpdate = {
         _id: '12345',
         pack: [
@@ -72,8 +72,8 @@ describe('PackManager', function() {
       })
     })
 
-    describe('with no last update', function() {
-      beforeEach(function() {
+    describe('with no last update', function () {
+      beforeEach(function () {
         this.PackManager.insertUpdatesIntoNewPack = sinon.stub().callsArg(4)
         return this.PackManager.insertCompressedUpdates(
           this.project_id,
@@ -85,21 +85,21 @@ describe('PackManager', function() {
         )
       })
 
-      describe('for a small update', function() {
-        it('should insert the update into a new pack', function() {
+      describe('for a small update', function () {
+        it('should insert the update into a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(this.project_id, this.doc_id, this.newUpdates, true)
             .should.equal(true)
         })
 
-        return it('should call the callback', function() {
+        return it('should call the callback', function () {
           return this.callback.called.should.equal(true)
         })
       })
 
-      return describe('for many small updates', function() {
-        beforeEach(function() {
-          this.newUpdates = __range__(0, 2048, true).map(i => ({
+      return describe('for many small updates', function () {
+        beforeEach(function () {
+          this.newUpdates = __range__(0, 2048, true).map((i) => ({
             op: `op-${i}`,
             meta: `meta-${i}`,
             v: i
@@ -114,7 +114,7 @@ describe('PackManager', function() {
           )
         })
 
-        it('should append the initial updates to the existing pack', function() {
+        it('should append the initial updates to the existing pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -125,7 +125,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should insert the first set remaining updates as a new pack', function() {
+        it('should insert the first set remaining updates as a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -136,7 +136,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should insert the second set of remaining updates as a new pack', function() {
+        it('should insert the second set of remaining updates as a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -147,7 +147,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should insert the third set of remaining updates as a new pack', function() {
+        it('should insert the third set of remaining updates as a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -158,7 +158,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should insert the final set of remaining updates as a new pack', function() {
+        it('should insert the final set of remaining updates as a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -169,14 +169,14 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        return it('should call the callback', function() {
+        return it('should call the callback', function () {
           return this.callback.called.should.equal(true)
         })
       })
     })
 
-    describe('with an existing pack as the last update', function() {
-      beforeEach(function() {
+    describe('with an existing pack as the last update', function () {
+      beforeEach(function () {
         this.PackManager.appendUpdatesToExistingPack = sinon.stub().callsArg(5)
         this.PackManager.insertUpdatesIntoNewPack = sinon.stub().callsArg(4)
         return this.PackManager.insertCompressedUpdates(
@@ -189,8 +189,8 @@ describe('PackManager', function() {
         )
       })
 
-      describe('for a small update', function() {
-        it('should append the update to the existing pack', function() {
+      describe('for a small update', function () {
+        it('should append the update to the existing pack', function () {
           return this.PackManager.appendUpdatesToExistingPack
             .calledWith(
               this.project_id,
@@ -201,19 +201,19 @@ describe('PackManager', function() {
             )
             .should.equal(true)
         })
-        it('should not insert any new packs', function() {
+        it('should not insert any new packs', function () {
           return this.PackManager.insertUpdatesIntoNewPack.called.should.equal(
             false
           )
         })
-        return it('should call the callback', function() {
+        return it('should call the callback', function () {
           return this.callback.called.should.equal(true)
         })
       })
 
-      describe('for many small updates', function() {
-        beforeEach(function() {
-          this.newUpdates = __range__(0, 2048, true).map(i => ({
+      describe('for many small updates', function () {
+        beforeEach(function () {
+          this.newUpdates = __range__(0, 2048, true).map((i) => ({
             op: `op-${i}`,
             meta: `meta-${i}`,
             v: i
@@ -228,7 +228,7 @@ describe('PackManager', function() {
           )
         })
 
-        it('should append the initial updates to the existing pack', function() {
+        it('should append the initial updates to the existing pack', function () {
           return this.PackManager.appendUpdatesToExistingPack
             .calledWith(
               this.project_id,
@@ -240,7 +240,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should insert the first set remaining updates as a new pack', function() {
+        it('should insert the first set remaining updates as a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -251,7 +251,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should insert the second set of remaining updates as a new pack', function() {
+        it('should insert the second set of remaining updates as a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -262,7 +262,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should insert the third set of remaining updates as a new pack', function() {
+        it('should insert the third set of remaining updates as a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -273,7 +273,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should insert the final set of remaining updates as a new pack', function() {
+        it('should insert the final set of remaining updates as a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -284,21 +284,21 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        return it('should call the callback', function() {
+        return it('should call the callback', function () {
           return this.callback.called.should.equal(true)
         })
       })
 
-      return describe('for many big updates', function() {
-        beforeEach(function() {
+      return describe('for many big updates', function () {
+        beforeEach(function () {
           const longString = __range__(
             0,
             0.75 * this.PackManager.MAX_SIZE,
             true
           )
-            .map(j => 'a')
+            .map((j) => 'a')
             .join('')
-          this.newUpdates = [0, 1, 2, 3, 4].map(i => ({
+          this.newUpdates = [0, 1, 2, 3, 4].map((i) => ({
             op: `op-${i}-${longString}`,
             meta: `meta-${i}`,
             v: i
@@ -313,7 +313,7 @@ describe('PackManager', function() {
           )
         })
 
-        it('should append the initial updates to the existing pack', function() {
+        it('should append the initial updates to the existing pack', function () {
           return this.PackManager.appendUpdatesToExistingPack
             .calledWith(
               this.project_id,
@@ -325,7 +325,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should insert the first set remaining updates as a new pack', function() {
+        it('should insert the first set remaining updates as a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -336,7 +336,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should insert the second set of remaining updates as a new pack', function() {
+        it('should insert the second set of remaining updates as a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -347,7 +347,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should insert the third set of remaining updates as a new pack', function() {
+        it('should insert the third set of remaining updates as a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -358,7 +358,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should insert the final set of remaining updates as a new pack', function() {
+        it('should insert the final set of remaining updates as a new pack', function () {
           return this.PackManager.insertUpdatesIntoNewPack
             .calledWith(
               this.project_id,
@@ -369,15 +369,15 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        return it('should call the callback', function() {
+        return it('should call the callback', function () {
           return this.callback.called.should.equal(true)
         })
       })
     })
 
-    describe('flushCompressedUpdates', function() {
-      return describe('when there is no previous update', function() {
-        beforeEach(function() {
+    describe('flushCompressedUpdates', function () {
+      return describe('when there is no previous update', function () {
+        beforeEach(function () {
           return this.PackManager.flushCompressedUpdates(
             this.project_id,
             this.doc_id,
@@ -388,8 +388,8 @@ describe('PackManager', function() {
           )
         })
 
-        return describe('for a small update  that will expire', function() {
-          it('should insert the update into mongo', function() {
+        return describe('for a small update  that will expire', function () {
+          it('should insert the update into mongo', function () {
             return this.db.docHistory.save
               .calledWithMatch({
                 pack: this.newUpdates,
@@ -402,7 +402,7 @@ describe('PackManager', function() {
               .should.equal(true)
           })
 
-          it('should set an expiry time in the future', function() {
+          it('should set an expiry time in the future', function () {
             return this.db.docHistory.save
               .calledWithMatch({
                 expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000)
@@ -410,15 +410,15 @@ describe('PackManager', function() {
               .should.equal(true)
           })
 
-          return it('should call the callback', function() {
+          return it('should call the callback', function () {
             return this.callback.called.should.equal(true)
           })
         })
       })
     })
 
-    describe('when there is a recent previous update in mongo that expires', function() {
-      beforeEach(function() {
+    describe('when there is a recent previous update in mongo that expires', function () {
+      beforeEach(function () {
         this.lastUpdate = {
           _id: '12345',
           pack: [
@@ -441,8 +441,8 @@ describe('PackManager', function() {
         )
       })
 
-      return describe('for a small update that will expire', function() {
-        it('should append the update in mongo', function() {
+      return describe('for a small update that will expire', function () {
+        it('should append the update in mongo', function () {
           return this.db.docHistory.findAndModify
             .calledWithMatch({
               query: { _id: this.lastUpdate._id },
@@ -454,7 +454,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should set an expiry time in the future', function() {
+        it('should set an expiry time in the future', function () {
           return this.db.docHistory.findAndModify
             .calledWithMatch({
               update: {
@@ -464,14 +464,14 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        return it('should call the callback', function() {
+        return it('should call the callback', function () {
           return this.callback.called.should.equal(true)
         })
       })
     })
 
-    describe('when there is a recent previous update in mongo that expires', function() {
-      beforeEach(function() {
+    describe('when there is a recent previous update in mongo that expires', function () {
+      beforeEach(function () {
         this.PackManager.updateIndex = sinon.stub().callsArg(2)
 
         this.lastUpdate = {
@@ -496,8 +496,8 @@ describe('PackManager', function() {
         )
       })
 
-      return describe('for a small update that will not expire', function() {
-        it('should insert the update into mongo', function() {
+      return describe('for a small update that will not expire', function () {
+        it('should insert the update into mongo', function () {
           return this.db.docHistory.save
             .calledWithMatch({
               pack: this.newUpdates,
@@ -510,20 +510,20 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should not set any expiry time', function() {
+        it('should not set any expiry time', function () {
           return this.db.docHistory.save
             .neverCalledWithMatch(sinon.match.has('expiresAt'))
             .should.equal(true)
         })
 
-        return it('should call the callback', function() {
+        return it('should call the callback', function () {
           return this.callback.called.should.equal(true)
         })
       })
     })
 
-    return describe('when there is an old previous update in mongo', function() {
-      beforeEach(function() {
+    return describe('when there is an old previous update in mongo', function () {
+      beforeEach(function () {
         this.lastUpdate = {
           _id: '12345',
           pack: [
@@ -546,8 +546,8 @@ describe('PackManager', function() {
         )
       })
 
-      return describe('for a small update that will expire', function() {
-        it('should insert the update into mongo', function() {
+      return describe('for a small update that will expire', function () {
+        it('should insert the update into mongo', function () {
           return this.db.docHistory.save
             .calledWithMatch({
               pack: this.newUpdates,
@@ -560,7 +560,7 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        it('should set an expiry time in the future', function() {
+        it('should set an expiry time in the future', function () {
           return this.db.docHistory.save
             .calledWithMatch({
               expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000)
@@ -568,28 +568,28 @@ describe('PackManager', function() {
             .should.equal(true)
         })
 
-        return it('should call the callback', function() {
+        return it('should call the callback', function () {
           return this.callback.called.should.equal(true)
         })
       })
     })
   })
 
-  describe('getOpsByVersionRange', function() {})
+  describe('getOpsByVersionRange', function () {})
 
-  describe('loadPacksByVersionRange', function() {})
+  describe('loadPacksByVersionRange', function () {})
 
-  describe('fetchPacksIfNeeded', function() {})
+  describe('fetchPacksIfNeeded', function () {})
 
-  describe('makeProjectIterator', function() {})
+  describe('makeProjectIterator', function () {})
 
-  describe('getPackById', function() {})
+  describe('getPackById', function () {})
 
-  describe('increaseTTL', function() {})
+  describe('increaseTTL', function () {})
 
-  describe('getIndex', function() {})
+  describe('getIndex', function () {})
 
-  describe('getPackFromIndex', function() {})
+  describe('getPackFromIndex', function () {})
   // getLastPackFromIndex:
   // getIndexWithKeys
   // initialiseIndex
@@ -604,9 +604,9 @@ describe('PackManager', function() {
   // 	updateIndexIfNeeded
   // 	findUnarchivedPacks
 
-  return describe('checkArchiveNotInProgress', function() {
-    describe('when an archive is in progress', function() {
-      beforeEach(function() {
+  return describe('checkArchiveNotInProgress', function () {
+    describe('when an archive is in progress', function () {
+      beforeEach(function () {
         this.db.docHistoryIndex = {
           findOne: sinon.stub().callsArgWith(2, null, { inS3: false })
         }
@@ -617,18 +617,18 @@ describe('PackManager', function() {
           this.callback
         )
       })
-      it('should call the callback', function() {
+      it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
-      return it('should return an error', function() {
+      return it('should return an error', function () {
         return this.callback
           .calledWith(sinon.match.has('message'))
           .should.equal(true)
       })
     })
 
-    describe('when an archive is completed', function() {
-      beforeEach(function() {
+    describe('when an archive is completed', function () {
+      beforeEach(function () {
         this.db.docHistoryIndex = {
           findOne: sinon.stub().callsArgWith(2, null, { inS3: true })
         }
@@ -639,18 +639,18 @@ describe('PackManager', function() {
           this.callback
         )
       })
-      it('should call the callback', function() {
+      it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
-      return it('should return an error', function() {
+      return it('should return an error', function () {
         return this.callback
           .calledWith(sinon.match.has('message'))
           .should.equal(true)
       })
     })
 
-    return describe('when the archive has not started or completed', function() {
-      beforeEach(function() {
+    return describe('when the archive has not started or completed', function () {
+      beforeEach(function () {
         this.db.docHistoryIndex = {
           findOne: sinon.stub().callsArgWith(2, null, {})
         }
@@ -661,10 +661,10 @@ describe('PackManager', function() {
           this.callback
         )
       })
-      it('should call the callback with no error', function() {
+      it('should call the callback with no error', function () {
         return this.callback.called.should.equal(true)
       })
-      return it('should return with no error', function() {
+      return it('should return with no error', function () {
         return (typeof this.callback.lastCall.args[0]).should.equal('undefined')
       })
     })

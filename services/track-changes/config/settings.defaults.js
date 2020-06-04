@@ -17,19 +17,19 @@ module.exports = {
   },
   apis: {
     documentupdater: {
-      url: `http://${process.env.DOCUMENT_UPDATER_HOST ||
+      url: `http://${
+        process.env.DOCUMENT_UPDATER_HOST ||
         process.env.DOCUPDATER_HOST ||
-        'localhost'}:3003`
+        'localhost'
+      }:3003`
     },
     docstore: {
       url: `http://${process.env.DOCSTORE_HOST || 'localhost'}:3016`
     },
     web: {
-      url: `http://${process.env.WEB_API_HOST ||
-        process.env.WEB_HOST ||
-        'localhost'}:${process.env.WEB_API_PORT ||
-        process.env.WEB_PORT ||
-        3000}`,
+      url: `http://${
+        process.env.WEB_API_HOST || process.env.WEB_HOST || 'localhost'
+      }:${process.env.WEB_API_PORT || process.env.WEB_PORT || 3000}`,
       user: process.env.WEB_API_USER || 'sharelatex',
       pass: process.env.WEB_API_PASSWORD || 'password'
     }

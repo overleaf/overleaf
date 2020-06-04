@@ -23,8 +23,8 @@ const TrackChangesApp = require('./helpers/TrackChangesApp')
 const TrackChangesClient = require('./helpers/TrackChangesClient')
 const MockWebApi = require('./helpers/MockWebApi')
 
-describe('Getting updates', function() {
-  before(function(done) {
+describe('Getting updates', function () {
+  before(function (done) {
     this.now = Date.now()
     this.to = this.now
     this.user_id = ObjectId().toString()
@@ -72,7 +72,7 @@ describe('Getting updates', function() {
         this.project_id,
         this.doc_id,
         this.updates,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -82,7 +82,6 @@ describe('Getting updates', function() {
     })
     return null
   })
-
   ;({
     after() {
       MockWebApi.getUserInfo.restore()
@@ -90,8 +89,8 @@ describe('Getting updates', function() {
     }
   })
 
-  describe('getting updates up to the limit', function() {
-    before(function(done) {
+  describe('getting updates up to the limit', function () {
+    before(function (done) {
       TrackChangesClient.getUpdates(
         this.project_id,
         { before: this.to + 1, min_count: 3 },
@@ -106,11 +105,11 @@ describe('Getting updates', function() {
       return null
     })
 
-    it('should fetch the user details from the web api', function() {
+    it('should fetch the user details from the web api', function () {
       return MockWebApi.getUserInfo.calledWith(this.user_id).should.equal(true)
     })
 
-    return it('should return at least the min_count number of summarized updates', function() {
+    return it('should return at least the min_count number of summarized updates', function () {
       const docs1 = {}
       docs1[this.doc_id] = { toV: 20, fromV: 19 }
       const docs2 = {}
@@ -146,8 +145,8 @@ describe('Getting updates', function() {
     })
   })
 
-  return describe('getting updates beyond the end of the database', function() {
-    before(function(done) {
+  return describe('getting updates beyond the end of the database', function () {
+    before(function (done) {
       TrackChangesClient.getUpdates(
         this.project_id,
         { before: this.to - 8 * this.hours + 1, min_count: 30 },
@@ -162,7 +161,7 @@ describe('Getting updates', function() {
       return null
     })
 
-    return it('should return as many updates as it can', function() {
+    return it('should return as many updates as it can', function () {
       const docs1 = {}
       docs1[this.doc_id] = { toV: 4, fromV: 3 }
       const docs2 = {}

@@ -16,9 +16,9 @@ if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
 }
 
 // log updates as truncated strings
-const truncateFn = updates =>
+const truncateFn = (updates) =>
   JSON.parse(
-    JSON.stringify(updates, function(key, value) {
+    JSON.stringify(updates, function (key, value) {
       let len
       if (typeof value === 'string' && (len = value.length) > 80) {
         return (
@@ -46,7 +46,7 @@ const child_process = require('child_process')
 
 const HttpController = require('./app/js/HttpController')
 const express = require('express')
-const bodyParser = require('body-parser');
+const bodyParser = require('body-parser')
 
 const app = express()
 
@@ -79,7 +79,7 @@ app.post('/check/dangling', HttpController.checkDanglingUpdates)
 
 let packWorker = null // use a single packing worker
 
-app.post('/pack', function(req, res, next) {
+app.post('/pack', function (req, res, next) {
   if (packWorker != null) {
     return res.send('pack already running')
   } else {
@@ -89,7 +89,7 @@ app.post('/pack', function(req, res, next) {
       req.query.delay || 1000,
       req.query.timeout || 30 * 60 * 1000
     ])
-    packWorker.on('exit', function(code, signal) {
+    packWorker.on('exit', function (code, signal) {
       logger.log({ code, signal }, 'history auto pack exited')
       return (packWorker = null)
     })
@@ -99,7 +99,7 @@ app.post('/pack', function(req, res, next) {
 
 app.get('/status', (req, res, next) => res.send('track-changes is alive'))
 
-app.get('/oops', function(req, res, next) {
+app.get('/oops', function (req, res, next) {
   throw new Error('dummy test error')
 })
 
@@ -107,7 +107,7 @@ app.get('/check_lock', HttpController.checkLock)
 
 app.get('/health_check', HttpController.healthCheck)
 
-app.use(function(error, req, res, next) {
+app.use(function (error, req, res, next) {
   logger.error({ err: error, req }, 'an internal error occured')
   return res.send(500)
 })
@@ -115,17 +115,17 @@ app.use(function(error, req, res, next) {
 const port =
   __guard__(
     Settings.internal != null ? Settings.internal.trackchanges : undefined,
-    x => x.port
+    (x) => x.port
   ) || 3015
 const host =
   __guard__(
     Settings.internal != null ? Settings.internal.trackchanges : undefined,
-    x1 => x1.host
+    (x1) => x1.host
   ) || 'localhost'
 
 if (!module.parent) {
   // Called directly
-  app.listen(port, host, function(error) {
+  app.listen(port, host, function (error) {
     if (error != null) {
       return logger.error(
         { err: error },

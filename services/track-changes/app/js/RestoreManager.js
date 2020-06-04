@@ -19,14 +19,14 @@ const logger = require('logger-sharelatex')
 module.exports = RestoreManager = {
   restoreToBeforeVersion(project_id, doc_id, version, user_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     logger.log({ project_id, doc_id, version, user_id }, 'restoring document')
     return DiffManager.getDocumentBeforeVersion(
       project_id,
       doc_id,
       version,
-      function(error, content) {
+      function (error, content) {
         if (error != null) {
           return callback(error)
         }
@@ -35,7 +35,7 @@ module.exports = RestoreManager = {
           doc_id,
           content,
           user_id,
-          function(error) {
+          function (error) {
             if (error != null) {
               return callback(error)
             }

@@ -16,8 +16,8 @@ const { expect } = chai
 const modulePath = '../../../../app/js/HttpController.js'
 const SandboxedModule = require('sandboxed-module')
 
-describe('HttpController', function() {
-  beforeEach(function() {
+describe('HttpController', function () {
+  beforeEach(function () {
     this.HttpController = SandboxedModule.require(modulePath, {
       singleOnly: true,
       requires: {
@@ -37,8 +37,8 @@ describe('HttpController', function() {
     return (this.now = Date.now())
   })
 
-  describe('flushDoc', function() {
-    beforeEach(function() {
+  describe('flushDoc', function () {
+    beforeEach(function () {
       this.req = {
         params: {
           doc_id: this.doc_id,
@@ -52,19 +52,19 @@ describe('HttpController', function() {
       return this.HttpController.flushDoc(this.req, this.res, this.next)
     })
 
-    it('should process the updates', function() {
+    it('should process the updates', function () {
       return this.UpdatesManager.processUncompressedUpdatesWithLock
         .calledWith(this.project_id, this.doc_id)
         .should.equal(true)
     })
 
-    return it('should return a success code', function() {
+    return it('should return a success code', function () {
       return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 
-  describe('flushProject', function() {
-    beforeEach(function() {
+  describe('flushProject', function () {
+    beforeEach(function () {
       this.req = {
         params: {
           project_id: this.project_id
@@ -77,19 +77,19 @@ describe('HttpController', function() {
       return this.HttpController.flushProject(this.req, this.res, this.next)
     })
 
-    it('should process the updates', function() {
+    it('should process the updates', function () {
       return this.UpdatesManager.processUncompressedUpdatesForProject
         .calledWith(this.project_id)
         .should.equal(true)
     })
 
-    return it('should return a success code', function() {
+    return it('should return a success code', function () {
       return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 
-  describe('getDiff', function() {
-    beforeEach(function() {
+  describe('getDiff', function () {
+    beforeEach(function () {
       this.from = 42
       this.to = 45
       this.req = {
@@ -108,7 +108,7 @@ describe('HttpController', function() {
       return this.HttpController.getDiff(this.req, this.res, this.next)
     })
 
-    it('should get the diff', function() {
+    it('should get the diff', function () {
       return this.DiffManager.getDiff
         .calledWith(
           this.project_id,
@@ -119,13 +119,13 @@ describe('HttpController', function() {
         .should.equal(true)
     })
 
-    return it('should return the diff', function() {
+    return it('should return the diff', function () {
       return this.res.json.calledWith({ diff: this.diff }).should.equal(true)
     })
   })
 
-  describe('getUpdates', function() {
-    beforeEach(function() {
+  describe('getUpdates', function () {
+    beforeEach(function () {
       this.before = Date.now()
       this.nextBeforeTimestamp = this.before - 100
       this.min_count = 10
@@ -146,7 +146,7 @@ describe('HttpController', function() {
       return this.HttpController.getUpdates(this.req, this.res, this.next)
     })
 
-    it('should get the updates', function() {
+    it('should get the updates', function () {
       return this.UpdatesManager.getSummarizedProjectUpdates
         .calledWith(this.project_id, {
           before: this.before,
@@ -155,7 +155,7 @@ describe('HttpController', function() {
         .should.equal(true)
     })
 
-    return it('should return the formatted updates', function() {
+    return it('should return the formatted updates', function () {
       return this.res.json
         .calledWith({
           updates: this.updates,
@@ -165,8 +165,8 @@ describe('HttpController', function() {
     })
   })
 
-  return describe('RestoreManager', function() {
-    beforeEach(function() {
+  return describe('RestoreManager', function () {
+    beforeEach(function () {
       this.version = '42'
       this.req = {
         params: {
@@ -184,7 +184,7 @@ describe('HttpController', function() {
       return this.HttpController.restore(this.req, this.res, this.next)
     })
 
-    it('should restore the document', function() {
+    it('should restore the document', function () {
       return this.RestoreManager.restoreToBeforeVersion
         .calledWith(
           this.project_id,
@@ -195,7 +195,7 @@ describe('HttpController', function() {
         .should.equal(true)
     })
 
-    return it('should return a success code', function() {
+    return it('should return a success code', function () {
       return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })

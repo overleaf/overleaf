@@ -38,7 +38,7 @@ module.exports = UpdatesManager = {
   ) {
     let i
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const { length } = rawUpdates
     if (length === 0) {
@@ -50,7 +50,7 @@ module.exports = UpdatesManager = {
       const op = rawUpdates[i]
       if (i > 0) {
         const thisVersion = op != null ? op.v : undefined
-        const prevVersion = __guard__(rawUpdates[i - 1], x => x.v)
+        const prevVersion = __guard__(rawUpdates[i - 1], (x) => x.v)
         if (!(prevVersion < thisVersion)) {
           logger.error(
             {
@@ -69,7 +69,7 @@ module.exports = UpdatesManager = {
 
     // FIXME: we no longer need the lastCompressedUpdate, so change functions not to need it
     // CORRECTION:  we do use it to log the time in case of error
-    return MongoManager.peekLastCompressedUpdate(doc_id, function(
+    return MongoManager.peekLastCompressedUpdate(doc_id, function (
       error,
       lastCompressedUpdate,
       lastVersion
@@ -105,7 +105,7 @@ module.exports = UpdatesManager = {
             lastCompressedUpdate != null
               ? lastCompressedUpdate.meta
               : undefined,
-            x1 => x1.end_ts
+            (x1) => x1.end_ts
           )
           const last_timestamp = ts != null ? new Date(ts) : 'unknown time'
           error = new Error(
@@ -179,7 +179,7 @@ module.exports = UpdatesManager = {
         lastCompressedUpdate,
         compressedUpdates,
         temporary,
-        function(error, result) {
+        function (error, result) {
           if (error != null) {
             return callback(error)
           }
@@ -206,9 +206,9 @@ module.exports = UpdatesManager = {
   // Check whether the updates are temporary (per-project property)
   _prepareProjectForUpdates(project_id, callback) {
     if (callback == null) {
-      callback = function(error, temporary) {}
+      callback = function (error, temporary) {}
     }
-    return UpdateTrimmer.shouldTrimUpdates(project_id, function(
+    return UpdateTrimmer.shouldTrimUpdates(project_id, function (
       error,
       temporary
     ) {
@@ -222,9 +222,9 @@ module.exports = UpdatesManager = {
   // Check for project id on document history (per-document property)
   _prepareDocForUpdates(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return MongoManager.backportProjectId(project_id, doc_id, function(error) {
+    return MongoManager.backportProjectId(project_id, doc_id, function (error) {
       if (error != null) {
         return callback(error)
       }
@@ -237,18 +237,18 @@ module.exports = UpdatesManager = {
   processUncompressedUpdates(project_id, doc_id, temporary, callback) {
     // get the updates as strings from redis (so we can delete them after they are applied)
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return RedisManager.getOldestDocUpdates(
       doc_id,
       UpdatesManager.REDIS_READ_BATCH_SIZE,
-      function(error, docUpdates) {
+      function (error, docUpdates) {
         if (error != null) {
           return callback(error)
         }
         const { length } = docUpdates
         // parse the redis strings into ShareJs updates
-        return RedisManager.expandDocUpdates(docUpdates, function(
+        return RedisManager.expandDocUpdates(docUpdates, function (
           error,
           rawUpdates
         ) {
@@ -268,7 +268,7 @@ module.exports = UpdatesManager = {
             doc_id,
             rawUpdates,
             temporary,
-            function(error) {
+            function (error) {
               if (error != null) {
                 return callback(error)
               }
@@ -281,7 +281,7 @@ module.exports = UpdatesManager = {
                 project_id,
                 doc_id,
                 docUpdates,
-                function(error) {
+                function (error) {
                   if (error != null) {
                     return callback(error)
                   }
@@ -320,9 +320,9 @@ module.exports = UpdatesManager = {
   // Process updates for a doc when we flush it individually
   processUncompressedUpdatesWithLock(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return UpdatesManager._prepareProjectForUpdates(project_id, function(
+    return UpdatesManager._prepareProjectForUpdates(project_id, function (
       error,
       temporary
     ) {
@@ -346,9 +346,9 @@ module.exports = UpdatesManager = {
     callback
   ) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return UpdatesManager._prepareDocForUpdates(project_id, doc_id, function(
+    return UpdatesManager._prepareDocForUpdates(project_id, doc_id, function (
       error
     ) {
       if (error != null) {
@@ -356,7 +356,7 @@ module.exports = UpdatesManager = {
       }
       return LockManager.runWithLock(
         keys.historyLock({ doc_id }),
-        releaseLock =>
+        (releaseLock) =>
           UpdatesManager.processUncompressedUpdates(
             project_id,
             doc_id,
@@ -371,23 +371,23 @@ module.exports = UpdatesManager = {
   // Process all updates for a project, only check project-level information once
   processUncompressedUpdatesForProject(project_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return RedisManager.getDocIdsWithHistoryOps(project_id, function(
+    return RedisManager.getDocIdsWithHistoryOps(project_id, function (
       error,
       doc_ids
     ) {
       if (error != null) {
         return callback(error)
       }
-      return UpdatesManager._prepareProjectForUpdates(project_id, function(
+      return UpdatesManager._prepareProjectForUpdates(project_id, function (
         error,
         temporary
       ) {
         const jobs = []
         for (const doc_id of Array.from(doc_ids)) {
-          ;(doc_id =>
-            jobs.push(cb =>
+          ;((doc_id) =>
+            jobs.push((cb) =>
               UpdatesManager._processUncompressedUpdatesForDocWithLock(
                 project_id,
                 doc_id,
@@ -404,9 +404,9 @@ module.exports = UpdatesManager = {
   // flush all outstanding changes
   flushAll(limit, callback) {
     if (callback == null) {
-      callback = function(error, result) {}
+      callback = function (error, result) {}
     }
-    return RedisManager.getProjectIdsWithHistoryOps(function(
+    return RedisManager.getProjectIdsWithHistoryOps(function (
       error,
       project_ids
     ) {
@@ -426,15 +426,15 @@ module.exports = UpdatesManager = {
       const selectedProjects =
         limit < 0 ? project_ids : project_ids.slice(0, limit)
       for (project_id of Array.from(selectedProjects)) {
-        ;(project_id =>
-          jobs.push(cb =>
+        ;((project_id) =>
+          jobs.push((cb) =>
             UpdatesManager.processUncompressedUpdatesForProject(
               project_id,
-              err => cb(null, { failed: err != null, project_id })
+              (err) => cb(null, { failed: err != null, project_id })
             )
           ))(project_id)
       }
-      return async.series(jobs, function(error, result) {
+      return async.series(jobs, function (error, result) {
         let x
         if (error != null) {
           return callback(error)
@@ -468,16 +468,16 @@ module.exports = UpdatesManager = {
 
   getDanglingUpdates(callback) {
     if (callback == null) {
-      callback = function(error, doc_ids) {}
+      callback = function (error, doc_ids) {}
     }
-    return RedisManager.getAllDocIdsWithHistoryOps(function(
+    return RedisManager.getAllDocIdsWithHistoryOps(function (
       error,
       all_doc_ids
     ) {
       if (error != null) {
         return callback(error)
       }
-      return RedisManager.getProjectIdsWithHistoryOps(function(
+      return RedisManager.getProjectIdsWithHistoryOps(function (
         error,
         all_project_ids
       ) {
@@ -485,14 +485,14 @@ module.exports = UpdatesManager = {
           return callback(error)
         }
         // function to get doc_ids for each project
-        const task = cb =>
+        const task = (cb) =>
           async.concatSeries(
             all_project_ids,
             RedisManager.getDocIdsWithHistoryOps,
             cb
           )
         // find the dangling doc ids
-        return task(function(error, project_doc_ids) {
+        return task(function (error, project_doc_ids) {
           const dangling_doc_ids = _.difference(all_doc_ids, project_doc_ids)
           logger.log(
             { all_doc_ids, all_project_ids, project_doc_ids, dangling_doc_ids },
@@ -509,12 +509,12 @@ module.exports = UpdatesManager = {
       options = {}
     }
     if (callback == null) {
-      callback = function(error, updates) {}
+      callback = function (error, updates) {}
     }
     return UpdatesManager.processUncompressedUpdatesWithLock(
       project_id,
       doc_id,
-      function(error) {
+      function (error) {
         if (error != null) {
           return callback(error)
         }
@@ -524,7 +524,7 @@ module.exports = UpdatesManager = {
           doc_id,
           options.from,
           options.to,
-          function(error, updates) {
+          function (error, updates) {
             if (error != null) {
               return callback(error)
             }
@@ -540,16 +540,16 @@ module.exports = UpdatesManager = {
       options = {}
     }
     if (callback == null) {
-      callback = function(error, updates) {}
+      callback = function (error, updates) {}
     }
-    return UpdatesManager.getDocUpdates(project_id, doc_id, options, function(
+    return UpdatesManager.getDocUpdates(project_id, doc_id, options, function (
       error,
       updates
     ) {
       if (error != null) {
         return callback(error)
       }
-      return UpdatesManager.fillUserInfo(updates, function(error, updates) {
+      return UpdatesManager.fillUserInfo(updates, function (error, updates) {
         if (error != null) {
           return callback(error)
         }
@@ -563,7 +563,7 @@ module.exports = UpdatesManager = {
       options = {}
     }
     if (callback == null) {
-      callback = function(error, updates) {}
+      callback = function (error, updates) {}
     }
     if (!options.min_count) {
       options.min_count = 25
@@ -573,11 +573,11 @@ module.exports = UpdatesManager = {
     let nextBeforeTimestamp = null
     return UpdatesManager.processUncompressedUpdatesForProject(
       project_id,
-      function(error) {
+      function (error) {
         if (error != null) {
           return callback(error)
         }
-        return PackManager.makeProjectIterator(project_id, before, function(
+        return PackManager.makeProjectIterator(project_id, before, function (
           err,
           iterator
         ) {
@@ -590,8 +590,8 @@ module.exports = UpdatesManager = {
               // console.log "checking iterator.done", iterator.done()
               summarizedUpdates.length < options.min_count && !iterator.done(),
 
-            cb =>
-              iterator.next(function(err, partialUpdates) {
+            (cb) =>
+              iterator.next(function (err, partialUpdates) {
                 if (err != null) {
                   return callback(err)
                 }
@@ -612,19 +612,19 @@ module.exports = UpdatesManager = {
             () =>
               // finally done all updates
               // console.log 'summarized Updates', summarizedUpdates
-              UpdatesManager.fillSummarizedUserInfo(summarizedUpdates, function(
-                err,
-                results
-              ) {
-                if (err != null) {
-                  return callback(err)
+              UpdatesManager.fillSummarizedUserInfo(
+                summarizedUpdates,
+                function (err, results) {
+                  if (err != null) {
+                    return callback(err)
+                  }
+                  return callback(
+                    null,
+                    results,
+                    !iterator.done() ? nextBeforeTimestamp : undefined
+                  )
                 }
-                return callback(
-                  null,
-                  results,
-                  !iterator.done() ? nextBeforeTimestamp : undefined
-                )
-              })
+              )
           )
         })
       }
@@ -633,14 +633,14 @@ module.exports = UpdatesManager = {
 
   fetchUserInfo(users, callback) {
     if (callback == null) {
-      callback = function(error, fetchedUserInfo) {}
+      callback = function (error, fetchedUserInfo) {}
     }
     const jobs = []
     const fetchedUserInfo = {}
     for (const user_id in users) {
-      ;(user_id =>
-        jobs.push(callback =>
-          WebApiManager.getUserInfo(user_id, function(error, userInfo) {
+      ;((user_id) =>
+        jobs.push((callback) =>
+          WebApiManager.getUserInfo(user_id, function (error, userInfo) {
             if (error != null) {
               return callback(error)
             }
@@ -650,7 +650,7 @@ module.exports = UpdatesManager = {
         ))(user_id)
     }
 
-    return async.series(jobs, function(err) {
+    return async.series(jobs, function (err) {
       if (err != null) {
         return callback(err)
       }
@@ -661,7 +661,7 @@ module.exports = UpdatesManager = {
   fillUserInfo(updates, callback) {
     let update, user_id
     if (callback == null) {
-      callback = function(error, updates) {}
+      callback = function (error, updates) {}
     }
     const users = {}
     for (update of Array.from(updates)) {
@@ -671,7 +671,7 @@ module.exports = UpdatesManager = {
       }
     }
 
-    return UpdatesManager.fetchUserInfo(users, function(
+    return UpdatesManager.fetchUserInfo(users, function (
       error,
       fetchedUserInfo
     ) {
@@ -692,7 +692,7 @@ module.exports = UpdatesManager = {
   fillSummarizedUserInfo(updates, callback) {
     let update, user_id, user_ids
     if (callback == null) {
-      callback = function(error, updates) {}
+      callback = function (error, updates) {}
     }
     const users = {}
     for (update of Array.from(updates)) {
@@ -704,7 +704,7 @@ module.exports = UpdatesManager = {
       }
     }
 
-    return UpdatesManager.fetchUserInfo(users, function(
+    return UpdatesManager.fetchUserInfo(users, function (
       error,
       fetchedUserInfo
     ) {

@@ -20,8 +20,8 @@ const { expect } = chai
 const modulePath = '../../../../app/js/UpdatesManager.js'
 const SandboxedModule = require('sandboxed-module')
 
-describe('UpdatesManager', function() {
-  beforeEach(function() {
+describe('UpdatesManager', function () {
+  beforeEach(function () {
     this.UpdatesManager = SandboxedModule.require(modulePath, {
       singleOnly: true,
       requires: {
@@ -53,9 +53,9 @@ describe('UpdatesManager', function() {
     return (this.temporary = 'temp-mock')
   })
 
-  describe('compressAndSaveRawUpdates', function() {
-    describe('when there are no raw ops', function() {
-      beforeEach(function() {
+  describe('compressAndSaveRawUpdates', function () {
+    describe('when there are no raw ops', function () {
+      beforeEach(function () {
         this.MongoManager.peekLastCompressedUpdate = sinon.stub()
         return this.UpdatesManager.compressAndSaveRawUpdates(
           this.project_id,
@@ -66,19 +66,19 @@ describe('UpdatesManager', function() {
         )
       })
 
-      it('should not need to access the database', function() {
+      it('should not need to access the database', function () {
         return this.MongoManager.peekLastCompressedUpdate.called.should.equal(
           false
         )
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
     })
 
-    describe('when there is no compressed history to begin with', function() {
-      beforeEach(function() {
+    describe('when there is no compressed history to begin with', function () {
+      beforeEach(function () {
         this.rawUpdates = [
           { v: 12, op: 'mock-op-12' },
           { v: 13, op: 'mock-op-13' }
@@ -101,13 +101,13 @@ describe('UpdatesManager', function() {
         )
       })
 
-      it('should look at the last compressed op', function() {
+      it('should look at the last compressed op', function () {
         return this.MongoManager.peekLastCompressedUpdate
           .calledWith(this.doc_id)
           .should.equal(true)
       })
 
-      it('should save the compressed ops as a pack', function() {
+      it('should save the compressed ops as a pack', function () {
         return this.PackManager.insertCompressedUpdates
           .calledWith(
             this.project_id,
@@ -119,13 +119,13 @@ describe('UpdatesManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
     })
 
-    describe('when the raw ops need appending to existing history', function() {
-      beforeEach(function() {
+    describe('when the raw ops need appending to existing history', function () {
+      beforeEach(function () {
         this.lastCompressedUpdate = { v: 11, op: 'compressed-op-11' }
         this.compressedUpdates = [
           { v: 12, op: 'compressed-op-11+12' },
@@ -146,8 +146,8 @@ describe('UpdatesManager', function() {
           .returns(this.compressedUpdates))
       })
 
-      describe('when the raw ops start where the existing history ends', function() {
-        beforeEach(function() {
+      describe('when the raw ops start where the existing history ends', function () {
+        beforeEach(function () {
           this.rawUpdates = [
             { v: 12, op: 'mock-op-12' },
             { v: 13, op: 'mock-op-13' }
@@ -161,19 +161,19 @@ describe('UpdatesManager', function() {
           )
         })
 
-        it('should look at the last compressed op', function() {
+        it('should look at the last compressed op', function () {
           return this.MongoManager.peekLastCompressedUpdate
             .calledWith(this.doc_id)
             .should.equal(true)
         })
 
-        it('should compress the raw ops', function() {
+        it('should compress the raw ops', function () {
           return this.UpdateCompressor.compressRawUpdates
             .calledWith(null, this.rawUpdates)
             .should.equal(true)
         })
 
-        it('should save the new compressed ops into a pack', function() {
+        it('should save the new compressed ops into a pack', function () {
           return this.PackManager.insertCompressedUpdates
             .calledWith(
               this.project_id,
@@ -185,13 +185,13 @@ describe('UpdatesManager', function() {
             .should.equal(true)
         })
 
-        return it('should call the callback', function() {
+        return it('should call the callback', function () {
           return this.callback.called.should.equal(true)
         })
       })
 
-      describe('when the raw ops start where the existing history ends and the history is in a pack', function() {
-        beforeEach(function() {
+      describe('when the raw ops start where the existing history ends and the history is in a pack', function () {
+        beforeEach(function () {
           this.lastCompressedUpdate = {
             pack: [{ v: 11, op: 'compressed-op-11' }],
             v: 11
@@ -217,19 +217,19 @@ describe('UpdatesManager', function() {
           )
         })
 
-        it('should look at the last compressed op', function() {
+        it('should look at the last compressed op', function () {
           return this.MongoManager.peekLastCompressedUpdate
             .calledWith(this.doc_id)
             .should.equal(true)
         })
 
-        it('should compress the raw ops', function() {
+        it('should compress the raw ops', function () {
           return this.UpdateCompressor.compressRawUpdates
             .calledWith(null, this.rawUpdates)
             .should.equal(true)
         })
 
-        it('should save the new compressed ops into a pack', function() {
+        it('should save the new compressed ops into a pack', function () {
           return this.PackManager.insertCompressedUpdates
             .calledWith(
               this.project_id,
@@ -241,13 +241,13 @@ describe('UpdatesManager', function() {
             .should.equal(true)
         })
 
-        return it('should call the callback', function() {
+        return it('should call the callback', function () {
           return this.callback.called.should.equal(true)
         })
       })
 
-      describe('when some raw ops are passed that have already been compressed', function() {
-        beforeEach(function() {
+      describe('when some raw ops are passed that have already been compressed', function () {
+        beforeEach(function () {
           this.rawUpdates = [
             { v: 10, op: 'mock-op-10' },
             { v: 11, op: 'mock-op-11' },
@@ -264,15 +264,15 @@ describe('UpdatesManager', function() {
           )
         })
 
-        return it('should only compress the more recent raw ops', function() {
+        return it('should only compress the more recent raw ops', function () {
           return this.UpdateCompressor.compressRawUpdates
             .calledWith(null, this.rawUpdates.slice(-2))
             .should.equal(true)
         })
       })
 
-      describe('when the raw ops do not follow from the last compressed op version', function() {
-        beforeEach(function() {
+      describe('when the raw ops do not follow from the last compressed op version', function () {
+        beforeEach(function () {
           this.rawUpdates = [{ v: 13, op: 'mock-op-13' }]
           return this.UpdatesManager.compressAndSaveRawUpdates(
             this.project_id,
@@ -283,7 +283,7 @@ describe('UpdatesManager', function() {
           )
         })
 
-        it('should call the callback with an error', function() {
+        it('should call the callback with an error', function () {
           return this.callback
             .calledWith(
               sinon.match.has(
@@ -294,15 +294,15 @@ describe('UpdatesManager', function() {
             .should.equal(true)
         })
 
-        return it('should not insert any update into mongo', function() {
+        return it('should not insert any update into mongo', function () {
           return this.PackManager.insertCompressedUpdates.called.should.equal(
             false
           )
         })
       })
 
-      return describe('when the raw ops are out of order', function() {
-        beforeEach(function() {
+      return describe('when the raw ops are out of order', function () {
+        beforeEach(function () {
           this.rawUpdates = [
             { v: 13, op: 'mock-op-13' },
             { v: 12, op: 'mock-op-12' }
@@ -316,13 +316,13 @@ describe('UpdatesManager', function() {
           )
         })
 
-        it('should call the callback with an error', function() {
+        it('should call the callback with an error', function () {
           return this.callback
             .calledWith(sinon.match.has('message'))
             .should.equal(true)
         })
 
-        return it('should not insert any update into mongo', function() {
+        return it('should not insert any update into mongo', function () {
           return this.PackManager.insertCompressedUpdates.called.should.equal(
             false
           )
@@ -330,8 +330,8 @@ describe('UpdatesManager', function() {
       })
     })
 
-    return describe('when the raw ops need appending to existing history which is in S3', function() {
-      beforeEach(function() {
+    return describe('when the raw ops need appending to existing history which is in S3', function () {
+      beforeEach(function () {
         this.lastCompressedUpdate = null
         this.lastVersion = 11
         this.compressedUpdates = [{ v: 13, op: 'compressed-op-12' }]
@@ -345,8 +345,8 @@ describe('UpdatesManager', function() {
           .returns(this.compressedUpdates))
       })
 
-      return describe('when the raw ops start where the existing history ends', function() {
-        beforeEach(function() {
+      return describe('when the raw ops start where the existing history ends', function () {
+        beforeEach(function () {
           this.rawUpdates = [
             { v: 12, op: 'mock-op-12' },
             { v: 13, op: 'mock-op-13' }
@@ -360,19 +360,19 @@ describe('UpdatesManager', function() {
           )
         })
 
-        it('should try to look at the last compressed op', function() {
+        it('should try to look at the last compressed op', function () {
           return this.MongoManager.peekLastCompressedUpdate
             .calledWith(this.doc_id)
             .should.equal(true)
         })
 
-        it('should compress the last compressed op and the raw ops', function() {
+        it('should compress the last compressed op and the raw ops', function () {
           return this.UpdateCompressor.compressRawUpdates
             .calledWith(this.lastCompressedUpdate, this.rawUpdates)
             .should.equal(true)
         })
 
-        it('should save the compressed ops', function() {
+        it('should save the compressed ops', function () {
           return this.PackManager.insertCompressedUpdates
             .calledWith(
               this.project_id,
@@ -384,15 +384,15 @@ describe('UpdatesManager', function() {
             .should.equal(true)
         })
 
-        return it('should call the callback', function() {
+        return it('should call the callback', function () {
           return this.callback.called.should.equal(true)
         })
       })
     })
   })
 
-  describe('processUncompressedUpdates', function() {
-    beforeEach(function() {
+  describe('processUncompressedUpdates', function () {
+    beforeEach(function () {
       this.UpdatesManager.compressAndSaveRawUpdates = sinon
         .stub()
         .callsArgWith(4)
@@ -403,8 +403,8 @@ describe('UpdatesManager', function() {
         .callsArgWith(1, null, (this.temporary = 'temp mock')))
     })
 
-    describe('when there is fewer than one batch to send', function() {
-      beforeEach(function() {
+    describe('when there is fewer than one batch to send', function () {
+      beforeEach(function () {
         this.updates = ['mock-update']
         this.RedisManager.getOldestDocUpdates = sinon
           .stub()
@@ -420,13 +420,13 @@ describe('UpdatesManager', function() {
         )
       })
 
-      it('should get the oldest updates', function() {
+      it('should get the oldest updates', function () {
         return this.RedisManager.getOldestDocUpdates
           .calledWith(this.doc_id, this.UpdatesManager.REDIS_READ_BATCH_SIZE)
           .should.equal(true)
       })
 
-      it('should compress and save the updates', function() {
+      it('should compress and save the updates', function () {
         return this.UpdatesManager.compressAndSaveRawUpdates
           .calledWith(
             this.project_id,
@@ -437,19 +437,19 @@ describe('UpdatesManager', function() {
           .should.equal(true)
       })
 
-      it('should delete the batch of uncompressed updates that was just processed', function() {
+      it('should delete the batch of uncompressed updates that was just processed', function () {
         return this.RedisManager.deleteAppliedDocUpdates
           .calledWith(this.project_id, this.doc_id, this.updates)
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('when there are multiple batches to send', function() {
-      beforeEach(function(done) {
+    return describe('when there are multiple batches to send', function () {
+      beforeEach(function (done) {
         this.UpdatesManager.REDIS_READ_BATCH_SIZE = 2
         this.updates = [
           'mock-update-0',
@@ -465,7 +465,7 @@ describe('UpdatesManager', function() {
           callback
         ) => {
           if (callback == null) {
-            callback = function(error, updates) {}
+            callback = function (error, updates) {}
           }
           const updates = this.redisArray.slice(0, batchSize)
           this.redisArray = this.redisArray.slice(batchSize)
@@ -487,11 +487,11 @@ describe('UpdatesManager', function() {
         )
       })
 
-      it('should get the oldest updates in three batches ', function() {
+      it('should get the oldest updates in three batches ', function () {
         return this.RedisManager.getOldestDocUpdates.callCount.should.equal(3)
       })
 
-      it('should compress and save the updates in batches', function() {
+      it('should compress and save the updates in batches', function () {
         this.UpdatesManager.compressAndSaveRawUpdates
           .calledWith(
             this.project_id,
@@ -518,20 +518,20 @@ describe('UpdatesManager', function() {
           .should.equal(true)
       })
 
-      it('should delete the batches of uncompressed updates', function() {
+      it('should delete the batches of uncompressed updates', function () {
         return this.RedisManager.deleteAppliedDocUpdates.callCount.should.equal(
           3
         )
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
     })
   })
 
-  describe('processCompressedUpdatesWithLock', function() {
-    beforeEach(function() {
+  describe('processCompressedUpdatesWithLock', function () {
+    beforeEach(function () {
       this.UpdateTrimmer.shouldTrimUpdates = sinon
         .stub()
         .callsArgWith(1, null, (this.temporary = 'temp mock'))
@@ -545,31 +545,31 @@ describe('UpdatesManager', function() {
       )
     })
 
-    it('should check if the updates are temporary', function() {
+    it('should check if the updates are temporary', function () {
       return this.UpdateTrimmer.shouldTrimUpdates
         .calledWith(this.project_id)
         .should.equal(true)
     })
 
-    it('should backport the project id', function() {
+    it('should backport the project id', function () {
       return this.MongoManager.backportProjectId
         .calledWith(this.project_id, this.doc_id)
         .should.equal(true)
     })
 
-    it('should run processUncompressedUpdates with the lock', function() {
+    it('should run processUncompressedUpdates with the lock', function () {
       return this.LockManager.runWithLock
         .calledWith(`HistoryLock:${this.doc_id}`)
         .should.equal(true)
     })
 
-    return it('should call the callback', function() {
+    return it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })
 
-  describe('getDocUpdates', function() {
-    beforeEach(function() {
+  describe('getDocUpdates', function () {
+    beforeEach(function () {
       this.updates = ['mock-updates']
       this.options = { to: 'mock-to', limit: 'mock-limit' }
       this.PackManager.getOpsByVersionRange = sinon
@@ -586,13 +586,13 @@ describe('UpdatesManager', function() {
       )
     })
 
-    it('should process outstanding updates', function() {
+    it('should process outstanding updates', function () {
       return this.UpdatesManager.processUncompressedUpdatesWithLock
         .calledWith(this.project_id, this.doc_id)
         .should.equal(true)
     })
 
-    it('should get the updates from the database', function() {
+    it('should get the updates from the database', function () {
       return this.PackManager.getOpsByVersionRange
         .calledWith(
           this.project_id,
@@ -603,13 +603,13 @@ describe('UpdatesManager', function() {
         .should.equal(true)
     })
 
-    return it('should return the updates', function() {
+    return it('should return the updates', function () {
       return this.callback.calledWith(null, this.updates).should.equal(true)
     })
   })
 
-  describe('getDocUpdatesWithUserInfo', function() {
-    beforeEach(function() {
+  describe('getDocUpdatesWithUserInfo', function () {
+    beforeEach(function () {
       this.updates = ['mock-updates']
       this.options = { to: 'mock-to', limit: 'mock-limit' }
       this.updatesWithUserInfo = ['updates-with-user-info']
@@ -627,27 +627,27 @@ describe('UpdatesManager', function() {
       )
     })
 
-    it('should get the updates', function() {
+    it('should get the updates', function () {
       return this.UpdatesManager.getDocUpdates
         .calledWith(this.project_id, this.doc_id, this.options)
         .should.equal(true)
     })
 
-    it('should file the updates with the user info', function() {
+    it('should file the updates with the user info', function () {
       return this.UpdatesManager.fillUserInfo
         .calledWith(this.updates)
         .should.equal(true)
     })
 
-    return it('should return the updates with the filled details', function() {
+    return it('should return the updates with the filled details', function () {
       return this.callback
         .calledWith(null, this.updatesWithUserInfo)
         .should.equal(true)
     })
   })
 
-  describe('processUncompressedUpdatesForProject', function() {
-    beforeEach(function(done) {
+  describe('processUncompressedUpdatesForProject', function () {
+    beforeEach(function (done) {
       this.doc_ids = ['mock-id-1', 'mock-id-2']
       this.UpdateTrimmer.shouldTrimUpdates = sinon
         .stub()
@@ -668,27 +668,27 @@ describe('UpdatesManager', function() {
       )
     })
 
-    it('should get all the docs with history ops', function() {
+    it('should get all the docs with history ops', function () {
       return this.RedisManager.getDocIdsWithHistoryOps
         .calledWith(this.project_id)
         .should.equal(true)
     })
 
-    it('should process the doc ops for the each doc_id', function() {
-      return Array.from(this.doc_ids).map(doc_id =>
+    it('should process the doc ops for the each doc_id', function () {
+      return Array.from(this.doc_ids).map((doc_id) =>
         this.UpdatesManager._processUncompressedUpdatesForDocWithLock
           .calledWith(this.project_id, doc_id, this.temporary)
           .should.equal(true)
       )
     })
 
-    return it('should call the callback', function() {
+    return it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })
 
-  describe('getSummarizedProjectUpdates', function() {
-    beforeEach(function() {
+  describe('getSummarizedProjectUpdates', function () {
+    beforeEach(function () {
       this.updates = [
         {
           doc_id: 123,
@@ -707,7 +707,7 @@ describe('UpdatesManager', function() {
       this.updatesWithUserInfo = ['updates-with-user-info']
       this.done_state = false
       this.iterator = {
-        next: cb => {
+        next: (cb) => {
           this.done_state = true
           return cb(null, this.updates)
         },
@@ -731,25 +731,25 @@ describe('UpdatesManager', function() {
       )
     })
 
-    it('should process any outstanding updates', function() {
+    it('should process any outstanding updates', function () {
       return this.UpdatesManager.processUncompressedUpdatesForProject
         .calledWith(this.project_id)
         .should.equal(true)
     })
 
-    it('should get the updates', function() {
+    it('should get the updates', function () {
       return this.PackManager.makeProjectIterator
         .calledWith(this.project_id, this.options.before)
         .should.equal(true)
     })
 
-    it('should fill the updates with the user info', function() {
+    it('should fill the updates with the user info', function () {
       return this.UpdatesManager.fillSummarizedUserInfo
         .calledWith(this.summarizedUpdates)
         .should.equal(true)
     })
 
-    return it('should return the updates with the filled details', function() {
+    return it('should return the updates with the filled details', function () {
       return this.callback
         .calledWith(null, this.updatesWithUserInfo)
         .should.equal(true)
@@ -861,9 +861,9 @@ describe('UpdatesManager', function() {
   // 		it "should call the callback with the updates", ->
   // 			@callback.calledWith(null, @updates, null).should.equal true
 
-  describe('fillUserInfo', function() {
-    describe('with valid users', function() {
-      beforeEach(function(done) {
+  describe('fillUserInfo', function () {
+    describe('with valid users', function () {
+      beforeEach(function (done) {
         const { ObjectId } = require('mongojs')
         this.user_id_1 = ObjectId().toString()
         this.user_id_2 = ObjectId().toString()
@@ -893,7 +893,7 @@ describe('UpdatesManager', function() {
 
         this.WebApiManager.getUserInfo = (user_id, callback) => {
           if (callback == null) {
-            callback = function(error, userInfo) {}
+            callback = function (error, userInfo) {}
           }
           return callback(null, this.user_info[user_id])
         }
@@ -908,7 +908,7 @@ describe('UpdatesManager', function() {
         )
       })
 
-      it('should only call getUserInfo once for each user_id', function() {
+      it('should only call getUserInfo once for each user_id', function () {
         this.WebApiManager.getUserInfo.calledTwice.should.equal(true)
         this.WebApiManager.getUserInfo
           .calledWith(this.user_id_1)
@@ -918,7 +918,7 @@ describe('UpdatesManager', function() {
           .should.equal(true)
       })
 
-      return it('should return the updates with the user info filled', function() {
+      return it('should return the updates with the user info filled', function () {
         return expect(this.results).to.deep.equal([
           {
             meta: {
@@ -948,8 +948,8 @@ describe('UpdatesManager', function() {
       })
     })
 
-    return describe('with invalid user ids', function() {
-      beforeEach(function(done) {
+    return describe('with invalid user ids', function () {
+      beforeEach(function (done) {
         this.updates = [
           {
             meta: {
@@ -966,7 +966,7 @@ describe('UpdatesManager', function() {
         ]
         this.WebApiManager.getUserInfo = (user_id, callback) => {
           if (callback == null) {
-            callback = function(error, userInfo) {}
+            callback = function (error, userInfo) {}
           }
           return callback(null, this.user_info[user_id])
         }
@@ -981,11 +981,11 @@ describe('UpdatesManager', function() {
         )
       })
 
-      it('should not call getUserInfo', function() {
+      it('should not call getUserInfo', function () {
         return this.WebApiManager.getUserInfo.called.should.equal(false)
       })
 
-      return it('should return the updates without the user info filled', function() {
+      return it('should return the updates without the user info filled', function () {
         return expect(this.results).to.deep.equal([
           {
             meta: {},
@@ -1000,14 +1000,14 @@ describe('UpdatesManager', function() {
     })
   })
 
-  return describe('_summarizeUpdates', function() {
-    beforeEach(function() {
+  return describe('_summarizeUpdates', function () {
+    beforeEach(function () {
       this.now = Date.now()
       this.user_1 = { id: 'mock-user-1' }
       return (this.user_2 = { id: 'mock-user-2' })
     })
 
-    it('should concat updates that are close in time', function() {
+    it('should concat updates that are close in time', function () {
       const result = this.UpdatesManager._summarizeUpdates([
         {
           doc_id: 'doc-id-1',
@@ -1046,7 +1046,7 @@ describe('UpdatesManager', function() {
       ])
     })
 
-    it('should leave updates that are far apart in time', function() {
+    it('should leave updates that are far apart in time', function () {
       const oneDay = 1000 * 60 * 60 * 24
       const result = this.UpdatesManager._summarizeUpdates([
         {
@@ -1098,7 +1098,7 @@ describe('UpdatesManager', function() {
       ])
     })
 
-    it('should concat onto existing summarized updates', function() {
+    it('should concat onto existing summarized updates', function () {
       const result = this.UpdatesManager._summarizeUpdates(
         [
           {
@@ -1157,7 +1157,7 @@ describe('UpdatesManager', function() {
       ])
     })
 
-    it('should include null user values', function() {
+    it('should include null user values', function () {
       const result = this.UpdatesManager._summarizeUpdates([
         {
           doc_id: 'doc-id-1',
@@ -1195,7 +1195,7 @@ describe('UpdatesManager', function() {
       ])
     })
 
-    it('should include null user values, when the null is earlier in the updates list', function() {
+    it('should include null user values, when the null is earlier in the updates list', function () {
       const result = this.UpdatesManager._summarizeUpdates([
         {
           doc_id: 'doc-id-1',
@@ -1233,7 +1233,7 @@ describe('UpdatesManager', function() {
       ])
     })
 
-    it('should roll several null user values into one', function() {
+    it('should roll several null user values into one', function () {
       const result = this.UpdatesManager._summarizeUpdates([
         {
           doc_id: 'doc-id-1',
@@ -1280,7 +1280,7 @@ describe('UpdatesManager', function() {
       ])
     })
 
-    return it('should split updates before a big delete', function() {
+    return it('should split updates before a big delete', function () {
       const result = this.UpdatesManager._summarizeUpdates([
         {
           doc_id: 'doc-id-1',

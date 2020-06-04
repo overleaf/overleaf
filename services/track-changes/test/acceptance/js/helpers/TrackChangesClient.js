@@ -33,9 +33,9 @@ const S3_BUCKET = Settings.trackchanges.stores.doc_history
 module.exports = TrackChangesClient = {
   flushAndGetCompressedUpdates(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(error, updates) {}
+      callback = function (error, updates) {}
     }
-    return TrackChangesClient.flushDoc(project_id, doc_id, error => {
+    return TrackChangesClient.flushDoc(project_id, doc_id, (error) => {
       if (error != null) {
         return callback(error)
       }
@@ -45,7 +45,7 @@ module.exports = TrackChangesClient = {
 
   flushDoc(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return request.post(
       {
@@ -60,7 +60,7 @@ module.exports = TrackChangesClient = {
 
   flushProject(project_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return request.post(
       {
@@ -75,7 +75,7 @@ module.exports = TrackChangesClient = {
 
   getCompressedUpdates(doc_id, callback) {
     if (callback == null) {
-      callback = function(error, updates) {}
+      callback = function (error, updates) {}
     }
     return db.docHistory
       .find({ doc_id: ObjectId(doc_id) })
@@ -85,7 +85,7 @@ module.exports = TrackChangesClient = {
 
   getProjectMetaData(project_id, callback) {
     if (callback == null) {
-      callback = function(error, updates) {}
+      callback = function (error, updates) {}
     }
     return db.projectHistoryMetaData.find(
       {
@@ -97,7 +97,7 @@ module.exports = TrackChangesClient = {
 
   setPreserveHistoryForProject(project_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return db.projectHistoryMetaData.update(
       {
@@ -115,18 +115,18 @@ module.exports = TrackChangesClient = {
 
   pushRawUpdates(project_id, doc_id, updates, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return rclient.sadd(
       Keys.docsWithHistoryOps({ project_id }),
       doc_id,
-      error => {
+      (error) => {
         if (error != null) {
           return callback(error)
         }
         return rclient.rpush(
           Keys.uncompressedHistoryOps({ doc_id }),
-          ...Array.from(Array.from(updates).map(u => JSON.stringify(u))),
+          ...Array.from(Array.from(updates).map((u) => JSON.stringify(u))),
           callback
         )
       }
@@ -135,7 +135,7 @@ module.exports = TrackChangesClient = {
 
   getDiff(project_id, doc_id, from, to, callback) {
     if (callback == null) {
-      callback = function(error, diff) {}
+      callback = function (error, diff) {}
     }
     return request.get(
       {
@@ -150,7 +150,7 @@ module.exports = TrackChangesClient = {
 
   getUpdates(project_id, options, callback) {
     if (callback == null) {
-      callback = function(error, body) {}
+      callback = function (error, body) {}
     }
     return request.get(
       {
@@ -165,7 +165,7 @@ module.exports = TrackChangesClient = {
 
   restoreDoc(project_id, doc_id, version, user_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return request.post(
       {
@@ -183,7 +183,7 @@ module.exports = TrackChangesClient = {
 
   pushDocHistory(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return request.post(
       {
@@ -198,7 +198,7 @@ module.exports = TrackChangesClient = {
 
   pullDocHistory(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return request.post(
       {
@@ -237,7 +237,7 @@ module.exports = TrackChangesClient = {
 
   getS3Doc(project_id, doc_id, pack_id, callback) {
     if (callback == null) {
-      callback = function(error, body) {}
+      callback = function (error, body) {}
     }
     const params = {
       Bucket: S3_BUCKET,
@@ -263,7 +263,7 @@ module.exports = TrackChangesClient = {
 
   removeS3Doc(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(error, res, body) {}
+      callback = function (error, res, body) {}
     }
     let params = {
       Bucket: S3_BUCKET,
@@ -278,7 +278,7 @@ module.exports = TrackChangesClient = {
       params = {
         Bucket: S3_BUCKET,
         Delete: {
-          Objects: data.Contents.map(s3object => ({ Key: s3object.Key }))
+          Objects: data.Contents.map((s3object) => ({ Key: s3object.Key }))
         }
       }
 

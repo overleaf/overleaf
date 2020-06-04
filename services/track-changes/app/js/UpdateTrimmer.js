@@ -20,9 +20,9 @@ const logger = require('logger-sharelatex')
 module.exports = UpdateTrimmer = {
   shouldTrimUpdates(project_id, callback) {
     if (callback == null) {
-      callback = function(error, shouldTrim) {}
+      callback = function (error, shouldTrim) {}
     }
-    return MongoManager.getProjectMetaData(project_id, function(
+    return MongoManager.getProjectMetaData(project_id, function (
       error,
       metadata
     ) {
@@ -32,7 +32,7 @@ module.exports = UpdateTrimmer = {
       if (metadata != null ? metadata.preserveHistory : undefined) {
         return callback(null, false)
       } else {
-        return WebApiManager.getProjectDetails(project_id, function(
+        return WebApiManager.getProjectDetails(project_id, function (
           error,
           details
         ) {
@@ -43,17 +43,19 @@ module.exports = UpdateTrimmer = {
           if (
             __guard__(
               details != null ? details.features : undefined,
-              x => x.versioning
+              (x) => x.versioning
             )
           ) {
             return MongoManager.setProjectMetaData(
               project_id,
               { preserveHistory: true },
-              function(error) {
+              function (error) {
                 if (error != null) {
                   return callback(error)
                 }
-                return MongoManager.upgradeHistory(project_id, function(error) {
+                return MongoManager.upgradeHistory(project_id, function (
+                  error
+                ) {
                   if (error != null) {
                     return callback(error)
                   }

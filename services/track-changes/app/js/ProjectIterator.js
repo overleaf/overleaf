@@ -62,7 +62,7 @@ module.exports = ProjectIterator = ProjectIterator = class ProjectIterator {
         nextPack.project_id,
         nextPack.doc_id,
         nextPack._id,
-        function(err, pack) {
+        function (err, pack) {
           if (err != null) {
             return callback(err)
           }

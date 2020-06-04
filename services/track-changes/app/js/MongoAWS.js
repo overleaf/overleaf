@@ -26,7 +26,7 @@ const Metrics = require('metrics-sharelatex')
 
 const DAYS = 24 * 3600 * 1000 // one day in milliseconds
 
-const createStream = function(streamConstructor, project_id, doc_id, pack_id) {
+const createStream = function (streamConstructor, project_id, doc_id, pack_id) {
   const AWS_CONFIG = {
     accessKeyId: settings.trackchanges.s3.key,
     secretAccessKey: settings.trackchanges.s3.secret,
@@ -43,11 +43,11 @@ const createStream = function(streamConstructor, project_id, doc_id, pack_id) {
 module.exports = MongoAWS = {
   archivePack(project_id, doc_id, pack_id, _callback) {
     if (_callback == null) {
-      _callback = function(error) {}
+      _callback = function (error) {}
     }
-    const callback = function(...args) {
+    const callback = function (...args) {
       _callback(...Array.from(args || []))
-      return (_callback = function() {})
+      return (_callback = function () {})
     }
 
     const query = {
@@ -69,7 +69,7 @@ module.exports = MongoAWS = {
 
     const upload = createStream(S3S.WriteStream, project_id, doc_id, pack_id)
 
-    return db.docHistory.findOne(query, function(err, result) {
+    return db.docHistory.findOne(query, function (err, result) {
       if (err != null) {
         return callback(err)
       }
@@ -85,7 +85,7 @@ module.exports = MongoAWS = {
         logger.error({ err: error, project_id, doc_id, pack_id }, error.message)
         return callback(error)
       }
-      return zlib.gzip(uncompressedData, function(err, buf) {
+      return zlib.gzip(uncompressedData, function (err, buf) {
         logger.log(
           {
             project_id,
@@ -99,8 +99,8 @@ module.exports = MongoAWS = {
         if (err != null) {
           return callback(err)
         }
-        upload.on('error', err => callback(err))
-        upload.on('finish', function() {
+        upload.on('error', (err) => callback(err))
+        upload.on('finish', function () {
           Metrics.inc('archive-pack')
           logger.log({ project_id, doc_id, pack_id }, 'upload to s3 completed')
           return callback(null)
@@ -113,11 +113,11 @@ module.exports = MongoAWS = {
 
   readArchivedPack(project_id, doc_id, pack_id, _callback) {
     if (_callback == null) {
-      _callback = function(error, result) {}
+      _callback = function (error, result) {}
     }
-    const callback = function(...args) {
+    const callback = function (...args) {
       _callback(...Array.from(args || []))
-      return (_callback = function() {})
+      return (_callback = function () {})
     }
 
     if (project_id == null) {
@@ -135,12 +135,12 @@ module.exports = MongoAWS = {
     const download = createStream(S3S.ReadStream, project_id, doc_id, pack_id)
 
     const inputStream = download
-      .on('open', obj => 1)
-      .on('error', err => callback(err))
+      .on('open', (obj) => 1)
+      .on('error', (err) => callback(err))
 
     const gunzip = zlib.createGunzip()
     gunzip.setEncoding('utf8')
-    gunzip.on('error', function(err) {
+    gunzip.on('error', function (err) {
       logger.log(
         { project_id, doc_id, pack_id, err },
         'error uncompressing gzip stream'
@@ -150,8 +150,8 @@ module.exports = MongoAWS = {
 
     const outputStream = inputStream.pipe(gunzip)
     const parts = []
-    outputStream.on('error', err => callback(err))
-    outputStream.on('end', function() {
+    outputStream.on('error', (err) => callback(err))
+    outputStream.on('end', function () {
       let object
       logger.log({ project_id, doc_id, pack_id }, 'download from s3 completed')
       try {
@@ -169,14 +169,14 @@ module.exports = MongoAWS = {
       }
       return callback(null, object)
     })
-    return outputStream.on('data', data => parts.push(data))
+    return outputStream.on('data', (data) => parts.push(data))
   },
 
   unArchivePack(project_id, doc_id, pack_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return MongoAWS.readArchivedPack(project_id, doc_id, pack_id, function(
+    return MongoAWS.readArchivedPack(project_id, doc_id, pack_id, function (
       err,
       object
     ) {

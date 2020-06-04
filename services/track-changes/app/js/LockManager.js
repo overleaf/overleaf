@@ -40,10 +40,10 @@ module.exports = LockManager = {
 
   tryLock(key, callback) {
     if (callback == null) {
-      callback = function(err, gotLock) {}
+      callback = function (err, gotLock) {}
     }
     const lockValue = LockManager.randomLock()
-    return rclient.set(key, lockValue, 'EX', this.LOCK_TTL, 'NX', function(
+    return rclient.set(key, lockValue, 'EX', this.LOCK_TTL, 'NX', function (
       err,
       gotLock
     ) {
@@ -61,17 +61,17 @@ module.exports = LockManager = {
   getLock(key, callback) {
     let attempt
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const startTime = Date.now()
-    return (attempt = function() {
+    return (attempt = function () {
       if (Date.now() - startTime > LockManager.MAX_LOCK_WAIT_TIME) {
         const e = new Error('Timeout')
         e.key = key
         return callback(e)
       }
 
-      return LockManager.tryLock(key, function(error, gotLock, lockValue) {
+      return LockManager.tryLock(key, function (error, gotLock, lockValue) {
         if (error != null) {
           return callback(error)
         }
@@ -86,9 +86,9 @@ module.exports = LockManager = {
 
   checkLock(key, callback) {
     if (callback == null) {
-      callback = function(err, isFree) {}
+      callback = function (err, isFree) {}
     }
-    return rclient.exists(key, function(err, exists) {
+    return rclient.exists(key, function (err, exists) {
       if (err != null) {
         return callback(err)
       }
@@ -102,7 +102,7 @@ module.exports = LockManager = {
   },
 
   releaseLock(key, lockValue, callback) {
-    return rclient.eval(LockManager.unlockScript, 1, key, lockValue, function(
+    return rclient.eval(LockManager.unlockScript, 1, key, lockValue, function (
       err,
       result
     ) {
@@ -123,14 +123,14 @@ module.exports = LockManager = {
 
   runWithLock(key, runner, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return LockManager.getLock(key, function(error, lockValue) {
+    return LockManager.getLock(key, function (error, lockValue) {
       if (error != null) {
         return callback(error)
       }
-      return runner(error1 =>
-        LockManager.releaseLock(key, lockValue, function(error2) {
+      return runner((error1) =>
+        LockManager.releaseLock(key, lockValue, function (error2) {
           error = error1 || error2
           if (error != null) {
             return callback(error)
@@ -142,7 +142,7 @@ module.exports = LockManager = {
   },
 
   healthCheck(callback) {
-    const action = releaseLock => releaseLock()
+    const action = (releaseLock) => releaseLock()
     return LockManager.runWithLock(
       `HistoryLock:HealthCheck:host=${HOST}:pid=${PID}:random=${RND}`,
       action,
