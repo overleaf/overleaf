@@ -16,9 +16,6 @@ const methodOverride = require('method-override')
 const bodyParser = require('body-parser')
 const errorHandler = require('errorhandler')
 const controller = require('./app/js/NotificationsController')
-const mongojs = require('mongojs')
-const db = mongojs(Settings.mongo.url, ['notifications'])
-const Path = require('path')
 
 metrics.memory.monitor(logger)
 
