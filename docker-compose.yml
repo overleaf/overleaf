@@ -1,4 +1,4 @@
-version: '2.2'
+version: '3.8'
 services:
     sharelatex:
         restart: always
@@ -7,10 +7,8 @@ services:
         image: sharelatex/sharelatex
         container_name: sharelatex
         depends_on:
-            mongo:
-                condition: service_healthy
-            redis:
-                condition: service_started
+            - mongo
+            - redis
         ports:
             - 80:80
         links:
