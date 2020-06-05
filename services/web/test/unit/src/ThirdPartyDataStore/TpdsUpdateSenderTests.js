@@ -141,6 +141,20 @@ describe('TpdsUpdateSender', function() {
       job2.headers.sl_all_user_ids.should.equal(
         JSON.stringify(['read_only_ref_1_id_here'])
       )
+
+      this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
+        {
+          _id: {
+            $in: [
+              'user_id_here',
+              'collaberator_ref_1_here',
+              'read_only_ref_1_id_here'
+            ]
+          },
+          'dropbox.access_token.uid': { $ne: null }
+        },
+        { _id: 1 }
+      )
     })
 
     it('post doc with stream origin of docstore', async function() {
@@ -185,6 +199,20 @@ describe('TpdsUpdateSender', function() {
       job2.headers.sl_all_user_ids.should.equal(
         JSON.stringify(['read_only_ref_1_id_here'])
       )
+
+      this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
+        {
+          _id: {
+            $in: [
+              'user_id_here',
+              'collaberator_ref_1_here',
+              'read_only_ref_1_id_here'
+            ]
+          },
+          'dropbox.access_token.uid': { $ne: null }
+        },
+        { _id: 1 }
+      )
     })
 
     it('deleting entity', async function() {
@@ -221,6 +249,20 @@ describe('TpdsUpdateSender', function() {
       group2.should.equal('read_only_ref_1_id_here')
       job2.headers.sl_all_user_ids.should.equal(
         JSON.stringify(['read_only_ref_1_id_here'])
+      )
+
+      this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
+        {
+          _id: {
+            $in: [
+              'user_id_here',
+              'collaberator_ref_1_here',
+              'read_only_ref_1_id_here'
+            ]
+          },
+          'dropbox.access_token.uid': { $ne: null }
+        },
+        { _id: 1 }
       )
     })
 
@@ -262,6 +304,20 @@ describe('TpdsUpdateSender', function() {
       job2.headers.sl_all_user_ids.should.equal(
         JSON.stringify(['read_only_ref_1_id_here'])
       )
+
+      this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
+        {
+          _id: {
+            $in: [
+              'user_id_here',
+              'collaberator_ref_1_here',
+              'read_only_ref_1_id_here'
+            ]
+          },
+          'dropbox.access_token.uid': { $ne: null }
+        },
+        { _id: 1 }
+      )
     })
 
     it('should be able to rename a project using the move entity func', async function() {
@@ -300,6 +356,20 @@ describe('TpdsUpdateSender', function() {
       group2.should.equal('read_only_ref_1_id_here')
       job2.headers.sl_all_user_ids.should.equal(
         JSON.stringify(['read_only_ref_1_id_here'])
+      )
+
+      this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
+        {
+          _id: {
+            $in: [
+              'user_id_here',
+              'collaberator_ref_1_here',
+              'read_only_ref_1_id_here'
+            ]
+          },
+          'dropbox.access_token.uid': { $ne: null }
+        },
+        { _id: 1 }
       )
     })
 

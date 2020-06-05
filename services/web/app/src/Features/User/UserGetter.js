@@ -129,9 +129,6 @@ const UserGetter = {
   },
 
   getUsers(query, projection, callback) {
-    if (!query) {
-      return callback(new Error('no query provided'))
-    }
     normalizeQuery(query, (err, query) => {
       if (err) return callback(err)
       db.users.find(query, projection, callback)
