@@ -179,6 +179,7 @@ block content
 		//- enable doc hash checking for all projects
 		//- used in public/js/libs/sharejs.js
 		window.useShareJsHash = true
+		window.wsRetryHandshake = #{settings.wsRetryHandshake}
 
 	- if (settings.overleaf != null)
 		script(type='text/javascript').

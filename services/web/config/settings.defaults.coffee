@@ -211,6 +211,7 @@ module.exports = settings =
 	wsUrlBeta: process.env['WEBSOCKET_URL_BETA']
 
 	wsUrlV2Percentage: parseInt(process.env['WEBSOCKET_URL_V2_PERCENTAGE'] || '0', 10)
+	wsRetryHandshake: parseInt(process.env['WEBSOCKET_RETRY_HANDSHAKE'] || '5', 10)
 
 	# cookie domain
 	# use full domain for cookies to only be accessible from that domain,
