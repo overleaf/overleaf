@@ -195,7 +195,6 @@ App.controller('PlansController', function(
   MultiCurrencyPricing,
   $http,
   $filter,
-  ipCookie,
   $location
 ) {
   let switchEvent

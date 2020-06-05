@@ -1,24 +1,33 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import App from '../base'
 
-export default App.controller('TranslationsPopupController', function(
+App.controller('TranslationsPopupController', function(
   $scope,
-  ipCookie
+  ipCookie,
+  localStorage
 ) {
-  $scope.hidei18nNotification = ipCookie('hidei18nNotification')
+  function getStoredDismissal() {
+    let localStore = localStorage('hide-i18n-notification')
 
-  return ($scope.dismiss = function() {
-    ipCookie('hidei18nNotification', true, { expires: 180 })
-    return ($scope.hidei18nNotification = ipCookie('hidei18nNotification'))
-  })
+    if (localStore === null) {
+      // Not stored in localStorage, check cookie
+      let cookieStore = ipCookie('hidei18nNotification')
+
+      // If stored in cookie, set on localStorage for forwards compat
+      if (cookieStore) {
+        localStorage('hide-i18n-notification', cookieStore)
+        ipCookie.remove('hidei18nNotification')
+      }
+
+      return cookieStore
+    }
+
+    return localStore
+  }
+
+  $scope.hidei18nNotification = getStoredDismissal()
+
+  $scope.dismiss = function() {
+    localStorage('hide-i18n-notification', true)
+    $scope.hidei18nNotification = true
+  }
 })
