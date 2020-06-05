@@ -133,8 +133,10 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@sentry/webpack-plugin": "^1.11.1",
     "5to6-codemod": "^1.8.0",
+    "@sentry/webpack-plugin": "^1.11.1",
+    "@testing-library/dom": "^7.7.3",
+    "@testing-library/react": "^10.0.4",
     "acorn": "^7.1.1",
     "acorn-walk": "^7.1.1",
     "angular-mocks": "~1.6.10",
@@ -148,7 +150,6 @@
     "cheerio": "^1.0.0-rc.3",
     "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.5.2",
-    "dom-testing-library": "^3.19.4",
     "es6-promise": "^4.2.8",
     "eslint": "^4.18.1",
     "eslint-config-prettier": "^3.1.0",
@@ -185,7 +186,6 @@
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "postcss-loader": "^3.0.0",
     "prettier-eslint-cli": "^4.7.1",
-    "react-testing-library": "^5.4.2",
     "remove-files-webpack-plugin": "^1.4.1",
     "requirejs": "^2.3.6",
     "samlp": "^3.4.1",
