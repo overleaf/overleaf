@@ -177,7 +177,8 @@ export default (ConnectionManager = (function() {
       // from the server, either "connectionAccepted" or
       // "connectionRejected".
 
-      this.ide.socket.on('connectionAccepted', message => {
+      this.ide.socket.on('connectionAccepted', (_, publicId) => {
+        this.ide.socket.publicId = publicId || this.ide.socket.socket.sessionid
         // state should be 'authenticating'...
         sl_console.log('[socket.io connectionAccepted] allowed to connect')
         this.connected = true

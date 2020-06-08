@@ -18,6 +18,7 @@
  */
 import EventEmitter from '../../utils/EventEmitter'
 import ShareJs from 'libs/sharejs'
+
 let ShareJsDoc
 const SINGLE_USER_FLUSH_DELAY = 1000 // ms
 
@@ -77,7 +78,7 @@ export default (ShareJsDoc = (function() {
           )
         },
         state: 'ok',
-        id: this.socket.socket.sessionid
+        id: this.socket.publicId
       }
 
       this._doc = new ShareJs.Doc(this.connection, this.doc_id, {
@@ -257,7 +258,7 @@ export default (ShareJsDoc = (function() {
     updateConnectionState(state) {
       sl_console.log(`[updateConnectionState] Setting state to ${state}`)
       this.connection.state = state
-      this.connection.id = this.socket.socket.sessionid
+      this.connection.id = this.socket.publicId
       this._doc.autoOpen = false
       this._doc._connectionStateChanged(state)
       return (this.lastAcked = null) // reset the last ack time when connection changes

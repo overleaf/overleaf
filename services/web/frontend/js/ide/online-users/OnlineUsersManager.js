@@ -17,6 +17,7 @@
 import ColorManager from '../colors/ColorManager'
 import 'crypto-js/md5'
 import './controllers/OnlineUsersController'
+
 let OnlineUsersManager
 
 export default (OnlineUsersManager = (function() {
@@ -42,7 +43,7 @@ export default (OnlineUsersManager = (function() {
           (error, connectedUsers) => {
             this.$scope.onlineUsers = {}
             for (let user of Array.from(connectedUsers || [])) {
-              if (user.client_id === this.ide.socket.socket.sessionid) {
+              if (user.client_id === this.ide.socket.publicId) {
                 // Don't store myself
                 continue
               }
@@ -66,7 +67,7 @@ export default (OnlineUsersManager = (function() {
       })
 
       this.ide.socket.on('clientTracking.clientUpdated', client => {
-        if (client.id !== this.ide.socket.socket.sessionid) {
+        if (client.id !== this.ide.socket.publicId) {
           // Check it's not me!
           return this.$scope.$apply(() => {
             this.$scope.onlineUsers[client.id] = client
