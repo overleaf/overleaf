@@ -142,6 +142,10 @@ module.exports = CompileManager = {
         )
       // set up environment variables for chktex
       const env = {}
+      if (Settings.texliveOpenoutAny && Settings.texliveOpenoutAny !== '') {
+        // override default texlive openout_any environment variable
+        env.openout_any = Settings.texliveOpenoutAny
+      }
       // only run chktex on LaTeX files (not knitr .Rtex files or any others)
       const isLaTeXFile =
         request.rootResourcePath != null
