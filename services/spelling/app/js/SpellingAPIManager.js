@@ -9,6 +9,7 @@
 const ASpell = require('./ASpell')
 const LearnedWordsManager = require('./LearnedWordsManager')
 const { callbackify } = require('util')
+const OError = require('@overleaf/o-error')
 
 // The max number of words checked in a single request
 const REQUEST_LIMIT = 10000
@@ -21,10 +22,10 @@ const SpellingAPIManager = {
       callback = () => {}
     }
     if (request.word == null) {
-      return callback(new Error('malformed JSON'))
+      return callback(new OError('malformed JSON'))
     }
     if (token == null) {
-      return callback(new Error('no token provided'))
+      return callback(new OError('no token provided'))
     }
 
     return LearnedWordsManager.learnWord(token, request.word, callback)
@@ -35,10 +36,10 @@ const SpellingAPIManager = {
       callback = () => {}
     }
     if (request.word == null) {
-      return callback(new Error('malformed JSON'))
+      return callback(new OError('malformed JSON'))
     }
     if (token == null) {
-      return callback(new Error('no token provided'))
+      return callback(new OError('no token provided'))
     }
 
     return LearnedWordsManager.unlearnWord(token, request.word, callback)
@@ -56,7 +57,7 @@ const SpellingAPIManager = {
 const promises = {
   async runRequest(token, request) {
     if (!request.words) {
-      throw new Error('malformed JSON')
+      throw new OError('malformed JSON')
     }
     const lang = request.language || 'en'
 

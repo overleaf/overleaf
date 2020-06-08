@@ -1,6 +1,7 @@
 const request = require('request')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
+const OError = require('@overleaf/o-error')
 
 module.exports = {
   healthCheck(req, res) {
@@ -28,7 +29,9 @@ module.exports = {
         logger.log('health check passed')
         res.sendStatus(200)
       } else {
-        logger.err({ body, numberOfSuggestions }, 'health check failed')
+        logger.err(
+          new OError('health check failed', { body, numberOfSuggestions })
+        )
         res.sendStatus(500)
       }
     })

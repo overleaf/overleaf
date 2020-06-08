@@ -1,6 +1,7 @@
 const SpellingAPIManager = require('./SpellingAPIManager')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
+const OError = require('@overleaf/o-error')
 
 function extractCheckRequestData(req) {
   const token = req.params ? req.params.user_id : undefined
@@ -22,13 +23,11 @@ module.exports = {
     logger.info({ token, wordCount }, 'running check')
     SpellingAPIManager.runRequest(token, req.body, function(error, result) {
       if (error != null) {
-        logger.err(
-          {
-            err: error,
+        logger.error(
+          OError.tag(error, 'error processing spelling request', {
             user_id: token,
             wordCount
-          },
-          'error processing spelling request'
+          })
         )
         return res.sendStatus(500)
       }
@@ -42,7 +41,7 @@ module.exports = {
     logger.info({ token, word }, 'learning word')
     SpellingAPIManager.learnWord(token, req.body, function(error) {
       if (error != null) {
-        return next(error)
+        return next(OError.tag(error))
       }
       res.sendStatus(204)
     })
@@ -54,7 +53,7 @@ module.exports = {
     logger.info({ token, word }, 'unlearning word')
     SpellingAPIManager.unlearnWord(token, req.body, function(error) {
       if (error != null) {
-        return next(error)
+        return next(OError.tag(error))
       }
       res.sendStatus(204)
     })
@@ -65,7 +64,7 @@ module.exports = {
     logger.log({ token, word }, 'deleting user dictionary')
     SpellingAPIManager.deleteDic(token, function(error) {
       if (error != null) {
-        return next(error)
+        return next(OError.tag(error))
       }
       res.sendStatus(204)
     })
@@ -81,7 +80,7 @@ module.exports = {
     )
     SpellingAPIManager.getDic(token, function(error, words) {
       if (error != null) {
-        return next(error)
+        return next(OError.tag(error))
       }
       res.send(words)
     })

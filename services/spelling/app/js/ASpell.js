@@ -14,6 +14,7 @@ const fs = require('fs')
 const settings = require('settings-sharelatex')
 const Path = require('path')
 const { promisify } = require('util')
+const OError = require('@overleaf/o-error')
 
 const OneMinute = 60 * 1000
 const opts = { max: 10000, maxAge: OneMinute * 60 * 10 }
@@ -27,8 +28,9 @@ try {
   const oldCache = fs.readFileSync(cacheFsPath)
   cache.load(JSON.parse(oldCache))
 } catch (error) {
-  const err = error
-  logger.log({ err, cacheFsPath }, 'could not load the cache file')
+  logger.log(
+    OError.tag(error, 'could not load the cache file', { cacheFsPath })
+  )
 }
 
 // write the cache every 30 minutes
@@ -36,12 +38,12 @@ const cacheDump = setInterval(function() {
   const dump = JSON.stringify(cache.dump())
   return fs.writeFile(cacheFsPathTmp, dump, function(err) {
     if (err != null) {
-      logger.log({ err }, 'error writing cache file')
+      logger.log(OError.tag(err, 'error writing cache file'))
       return fs.unlink(cacheFsPathTmp)
     } else {
       fs.rename(cacheFsPathTmp, cacheFsPath, err => {
         if (err) {
-          logger.error({ err }, 'error renaming cache file')
+          logger.error(OError.tag(err, 'error renaming cache file'))
         } else {
           logger.log({ len: dump.length, cacheFsPath }, 'wrote cache file')
         }
@@ -57,7 +59,7 @@ class ASpellRunner {
     }
     return this.runAspellOnWords(language, words, (error, output) => {
       if (error != null) {
-        return callback(error)
+        return callback(OError.tag(error))
       }
       // output = @removeAspellHeader(output)
       const suggestions = this.getSuggestions(language, output)
