@@ -68,7 +68,7 @@ module.exports = Router =
 				return
 
 			# send positive confirmation that the client has a valid connection
-			client.publicId = base64id.generateId()
+			client.publicId = 'P.' + base64id.generateId()
 			client.emit("connectionAccepted", null, client.publicId)
 
 			metrics.inc('socket-io.connection')
