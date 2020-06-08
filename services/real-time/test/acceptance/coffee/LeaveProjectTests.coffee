@@ -64,12 +64,12 @@ describe "leaveProject", ->
 			], done
 
 		it "should emit a disconnect message to the room", ->
-			@clientBDisconnectMessages.should.deep.equal [@clientA.socket.sessionid]
+			@clientBDisconnectMessages.should.deep.equal [@clientA.publicId]
 
 		it "should no longer list the client in connected users", (done) ->
 			@clientB.emit "clientTracking.getConnectedUsers", (error, users) =>
 				for user in users
-					if user.client_id == @clientA.socket.sessionid
+					if user.client_id == @clientA.publicId
 						throw "Expected clientA to not be listed in connected users"
 				return done()
 

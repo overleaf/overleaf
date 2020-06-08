@@ -9,6 +9,7 @@ module.exports = class MockClient
 		@emit = sinon.stub()
 		@disconnect = sinon.stub()
 		@id = idCounter++
+		@publicId = idCounter++
 	set : (key, value, callback) ->
 		@attributes[key] = value
 		callback() if callback?

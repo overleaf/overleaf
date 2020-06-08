@@ -21,6 +21,7 @@ describe 'WebsocketController', ->
 		@callback = sinon.stub()
 		@client =
 			id: @client_id = "mock-client-id-123"
+			publicId: "other-id-#{Math.random()}"
 			params: {}
 			set: sinon.stub()
 			get: (param, cb) -> cb null, @params[param]
@@ -106,7 +107,7 @@ describe 'WebsocketController', ->
 
 			it "should mark the user as connected in ConnectedUsersManager", ->
 				@ConnectedUsersManager.updateUserPosition
-					.calledWith(@project_id, @client.id, @user, null)
+					.calledWith(@project_id, @client.publicId, @user, null)
 					.should.equal true
 
 			it "should increment the join-project metric", ->
@@ -185,12 +186,12 @@ describe 'WebsocketController', ->
 
 			it "should end clientTracking.clientDisconnected to the project room", ->
 				@WebsocketLoadBalancer.emitToRoom
-					.calledWith(@project_id, "clientTracking.clientDisconnected", @client.id)
+					.calledWith(@project_id, "clientTracking.clientDisconnected", @client.publicId)
 					.should.equal true
 
 			it "should mark the user as disconnected", ->
 				@ConnectedUsersManager.markUserAsDisconnected
-					.calledWith(@project_id, @client.id)
+					.calledWith(@project_id, @client.publicId)
 					.should.equal true
 
 			it "should flush the project in the document updater", ->
@@ -223,12 +224,12 @@ describe 'WebsocketController', ->
 
 			it "should not end clientTracking.clientDisconnected to the project room", ->
 				@WebsocketLoadBalancer.emitToRoom
-					.calledWith(@project_id, "clientTracking.clientDisconnected", @client.id)
+					.calledWith(@project_id, "clientTracking.clientDisconnected", @client.publicId)
 					.should.equal false
 
 			it "should not mark the user as disconnected", ->
 				@ConnectedUsersManager.markUserAsDisconnected
-					.calledWith(@project_id, @client.id)
+					.calledWith(@project_id, @client.publicId)
 					.should.equal false
 
 			it "should not flush the project in the document updater", ->
@@ -247,12 +248,12 @@ describe 'WebsocketController', ->
 
 			it "should not end clientTracking.clientDisconnected to the project room", ->
 				@WebsocketLoadBalancer.emitToRoom
-					.calledWith(@project_id, "clientTracking.clientDisconnected", @client.id)
+					.calledWith(@project_id, "clientTracking.clientDisconnected", @client.publicId)
 					.should.equal false
 
 			it "should not mark the user as disconnected", ->
 				@ConnectedUsersManager.markUserAsDisconnected
-					.calledWith(@project_id, @client.id)
+					.calledWith(@project_id, @client.publicId)
 					.should.equal false
 
 			it "should not flush the project in the document updater", ->
@@ -488,7 +489,7 @@ describe 'WebsocketController', ->
 
 				@populatedCursorData =
 					doc_id: @doc_id,
-					id: @client.id
+					id: @client.publicId
 					name: "#{@first_name} #{@last_name}"
 					row: @row
 					column: @column
@@ -499,7 +500,7 @@ describe 'WebsocketController', ->
 				@WebsocketLoadBalancer.emitToRoom.calledWith(@project_id, "clientTracking.clientUpdated", @populatedCursorData).should.equal true
 
 			it "should send the  cursor data to the connected user manager", (done)->
-				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, {
+				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.publicId, {
 					_id: @user_id,
 					email: @email,
 					first_name: @first_name,
@@ -528,7 +529,7 @@ describe 'WebsocketController', ->
 
 				@populatedCursorData =
 					doc_id: @doc_id,
-					id: @client.id
+					id: @client.publicId
 					name: "#{@first_name}"
 					row: @row
 					column: @column
@@ -539,7 +540,7 @@ describe 'WebsocketController', ->
 				@WebsocketLoadBalancer.emitToRoom.calledWith(@project_id, "clientTracking.clientUpdated", @populatedCursorData).should.equal true
 
 			it "should send the  cursor data to the connected user manager", (done)->
-				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, {
+				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.publicId, {
 					_id: @user_id,
 					email: @email,
 					first_name: @first_name,
@@ -568,7 +569,7 @@ describe 'WebsocketController', ->
 
 				@populatedCursorData =
 					doc_id: @doc_id,
-					id: @client.id
+					id: @client.publicId
 					name: "#{@last_name}"
 					row: @row
 					column: @column
@@ -579,7 +580,7 @@ describe 'WebsocketController', ->
 				@WebsocketLoadBalancer.emitToRoom.calledWith(@project_id, "clientTracking.clientUpdated", @populatedCursorData).should.equal true
 
 			it "should send the  cursor data to the connected user manager", (done)->
-				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, {
+				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.publicId, {
 					_id: @user_id,
 					email: @email,
 					first_name: undefined,
@@ -609,7 +610,7 @@ describe 'WebsocketController', ->
 				@WebsocketLoadBalancer.emitToRoom
 					.calledWith(@project_id, "clientTracking.clientUpdated", {
 						doc_id: @doc_id,
-						id: @client.id,
+						id: @client.publicId,
 						user_id: @user_id,
 						name: "",
 						row: @row,
@@ -631,7 +632,7 @@ describe 'WebsocketController', ->
 				@WebsocketLoadBalancer.emitToRoom
 					.calledWith(@project_id, "clientTracking.clientUpdated", {
 						doc_id: @doc_id,
-						id: @client.id
+						id: @client.publicId
 						name: ""
 						row: @row
 						column: @column
@@ -655,7 +656,7 @@ describe 'WebsocketController', ->
 				@WebsocketController.applyOtUpdate @client, @doc_id, @update, @callback
 
 			it "should set the source of the update to the client id", ->
-				@update.meta.source.should.equal @client.id
+				@update.meta.source.should.equal @client.publicId
 
 			it "should set the user_id of the update to the user id", ->
 				@update.meta.user_id.should.equal @user_id

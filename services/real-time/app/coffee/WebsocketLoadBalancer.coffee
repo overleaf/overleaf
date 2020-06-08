@@ -72,7 +72,7 @@ module.exports = WebsocketLoadBalancer =
 				clientList = io.sockets.clients(message.room_id)
 				logger.log {channel:channel, message: message.message, room_id: message.room_id, message_id: message._id, socketIoClients: (client.id for client in clientList)}, "refreshing client list"
 				for client in clientList
-					ConnectedUsersManager.refreshClient(message.room_id, client.id)
+					ConnectedUsersManager.refreshClient(message.room_id, client.publicId)
 			else if message.room_id?
 				if message._id? && Settings.checkEventOrder
 					status = EventLogger.checkEventOrder("editor-events", message._id, message)
