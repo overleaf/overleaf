@@ -34,59 +34,7 @@ block content
 						.col-md-8.col-md-offset-2
 							p.text-centered #{translate("sl_benefits_plans")}
 
-					.row.top-switch
-						.col-md-6.col-md-offset-3
-							+plan_switch('card')
-						.col-md-2.text-right
-							+currency_dropdown
-
-					div(ng-show="showPlans")
-						.row
-							.col-md-10.col-md-offset-1
-								.row
-									.card-group.text-centered(ng-if="ui.view == 'monthly' || ui.view == 'annual'")
-										.col-md-4
-											.card.card-first
-												.card-header
-													h2 #{translate("personal")}
-												h5.tagline #{translate("tagline_personal")}
-												.circle #{translate("free")}
-												+features_free
-										.col-md-4
-											.card.card-highlighted
-												.best-value
-													strong #{translate('best_value')}
-												.card-header
-													h2 #{translate("collaborator")}
-												h5.tagline #{translate("tagline_collaborator")}
-												.circle
-													+price_collaborator
-												+features_collaborator
-										.col-md-4
-											.card.card-last
-												.card-header
-													h2 #{translate("professional")}
-												h5.tagline #{translate("tagline_professional")}
-												.circle
-													+price_professional
-												+features_professional
-
-									.card-group.text-centered(ng-if="ui.view == 'student'")
-										.col-md-4
-											.card.card-first
-												.card-header
-													h2 #{translate("personal")}
-												h5.tagline #{translate("tagline_personal")}
-												.circle #{translate("free")}
-												+features_free
-
-										.col-md-4
-											.card.card-highlighted
-												+card_student_annual
-
-										.col-md-4
-											.card.card-last
-												+card_student_monthly
+					+allCardsAndControls()
 
 					.row.row-spaced-large.text-centered
 						.col-xs-12
@@ -115,36 +63,39 @@ block content
 									ng-click="openGroupPlanModal()"
 								) #{translate('find_out_more')}
 
-					div
-						.row.row-spaced-large
-							.col-sm-12
-								.page-header.plans-header.plans-subheader.text-centered
-									h2 #{translate('compare_plan_features')}
-						.row
-							.col-md-6.col-md-offset-3
-								+plan_switch('table')
-							.col-md-3.text-right
-								+currency_dropdown
-						.row(event-tracking="features-table-viewed" event-tracking-ga="subscription-funnel" event-tracking-trigger="scroll" event-tracking-send-once="true" event-tracking-label=`exp-{{plansVariant}}`)
-							.col-sm-12(ng-if="ui.view != 'student'")
-								+table_premium
-							.col-sm-12(ng-if="ui.view == 'student'")
-								+table_student
+					.row.row-spaced-large
+						.col-sm-12
+							.page-header.plans-header.plans-subheader.text-centered
+								h2 #{translate('compare_plan_features')}
+					.row
+						.col-md-6.col-md-offset-3
+							+plan_switch('table')
+						.col-md-3.text-right
+							+currency_dropdown
+					.row(event-tracking="features-table-viewed" event-tracking-ga="subscription-funnel" event-tracking-trigger="scroll" event-tracking-send-once="true" event-tracking-label=`exp-{{plansVariant}}`)
+						.col-sm-12(ng-if="ui.view != 'student'")
+							+table_premium
+						.col-sm-12(ng-if="ui.view == 'student'")
+							+table_student
 
-						include _plans_quotes
+					include _plans_quotes
 
-						include _plans_faq
+					include _plans_faq
 
-						.row.row-spaced-large
-							.col-md-12
-								.plans-header.plans-subheader.text-centered
-									h2.header-with-btn #{translate('still_have_questions')}
-										button.btn.btn-default.btn-header.text-capitalize(
-											ng-controller="ContactGeneralModal"
-											ng-click="openModal()"
-										) #{translate('get_in_touch')}
-										!= moduleIncludes("contactModalGeneral", locals)
+					#bottom-cards.row.row-spaced(style="display: none;")
+						.col-sm-12
+							+allCardsAndControls(true)
 
-						.row.row-spaced
+					.row.row-spaced-large
+						.col-md-12
+							.plans-header.plans-subheader.text-centered
+								h2.header-with-btn #{translate('still_have_questions')}
+									button.btn.btn-default.btn-header.text-capitalize(
+										ng-controller="ContactGeneralModal"
+										ng-click="openModal()"
+									) #{translate('get_in_touch')}
+									!= moduleIncludes("contactModalGeneral", locals)
+
+					.row.row-spaced
 
 	include _modal_group_purchase

@@ -155,3 +155,57 @@ mixin plan_switch(location)
 				href="#"
 				ng-click="switchToStudent($event,'" + location + "')"
 			) #{translate("half_price_student")}
+
+mixin allCardsAndControls(controlsRowSpaced)
+	.row.top-switch(class=controlsRowSpaced ? "row-spaced" : "")
+		.col-md-6.col-md-offset-3
+			+plan_switch('card')
+		.col-md-2.text-right
+			+currency_dropdown
+
+	.row
+		.col-md-10.col-md-offset-1
+			.row
+				.card-group.text-centered(ng-if="ui.view == 'monthly' || ui.view == 'annual'")
+					.col-md-4
+						.card.card-first
+							.card-header
+								h2 #{translate("personal")}
+							h5.tagline #{translate("tagline_personal")}
+							.circle #{translate("free")}
+							+features_free
+					.col-md-4
+						.card.card-highlighted
+							.best-value
+								strong #{translate('best_value')}
+							.card-header
+								h2 #{translate("collaborator")}
+							h5.tagline #{translate("tagline_collaborator")}
+							.circle
+								+price_collaborator
+							+features_collaborator
+					.col-md-4
+						.card.card-last
+							.card-header
+								h2 #{translate("professional")}
+							h5.tagline #{translate("tagline_professional")}
+							.circle
+								+price_professional
+							+features_professional
+
+				.card-group.text-centered(ng-if="ui.view == 'student'")
+					.col-md-4
+						.card.card-first
+							.card-header
+								h2 #{translate("personal")}
+							h5.tagline #{translate("tagline_personal")}
+							.circle #{translate("free")}
+							+features_free
+
+					.col-md-4
+						.card.card-highlighted
+							+card_student_annual
+
+					.col-md-4
+						.card.card-last
+							+card_student_monthly

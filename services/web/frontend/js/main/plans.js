@@ -198,7 +198,6 @@ App.controller('PlansController', function(
   $location
 ) {
   let switchEvent
-  $scope.showPlans = true
 
   $scope.plans = MultiCurrencyPricing.plans
 
