@@ -26,6 +26,7 @@ module.exports = Router =
 				logger.warn attrs, error.message, code: error.code
 				return callback {message: error.message, code: error.code}
 			if error.message == 'unexpected arguments'
+				# the payload might be very large, put it on level info
 				logger.log attrs, 'unexpected arguments'
 				metrics.inc 'unexpected-arguments', 1, { status: method }
 				return callback { message: error.message }
