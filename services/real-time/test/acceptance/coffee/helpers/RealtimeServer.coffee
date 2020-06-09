@@ -1,5 +1,4 @@
 app = require('../../../../app')
-require("logger-sharelatex").logger.level("info")
 logger = require("logger-sharelatex")
 Settings = require("settings-sharelatex")
 
