@@ -16,11 +16,18 @@ module.exports = WebsocketController =
 	PROTOCOL_VERSION: 2
 
 	joinProject: (client, user, project_id, callback = (error, project, privilegeLevel, protocolVersion) ->) ->
+		if client.disconnected
+			metrics.inc('editor.join-project.disconnected', 1, {status: 'immediately'})
+			return callback()
+
 		user_id = user?._id
 		logger.log {user_id, project_id, client_id: client.id}, "user joining project"
 		metrics.inc "editor.join-project"
 		WebApiManager.joinProject project_id, user, (error, project, privilegeLevel, isRestrictedUser) ->
 			return callback(error) if error?
+			if client.disconnected
+				metrics.inc('editor.join-project.disconnected', 1, {status: 'after-web-api-call'})
+				return callback()
 
 			if !privilegeLevel or privilegeLevel == ""
 				err = new Error("not authorized")
@@ -77,6 +84,10 @@ module.exports = WebsocketController =
 			, WebsocketController.FLUSH_IF_EMPTY_DELAY
 
 	joinDoc: (client, doc_id, fromVersion = -1, options, callback = (error, doclines, version, ops, ranges) ->) ->
+		if client.disconnected
+				metrics.inc('editor.join-doc.disconnected', 1, {status: 'immediately'})
+				return callback()
+
 		metrics.inc "editor.join-doc"
 		Utils.getClientAttributes client, ["project_id", "user_id", "is_restricted_user"], (error, {project_id, user_id, is_restricted_user}) ->
 			return callback(error) if error?
@@ -89,8 +100,17 @@ module.exports = WebsocketController =
 				# doc to the client, so that no events are missed.
 				RoomManager.joinDoc client, doc_id, (error) ->
 					return callback(error) if error?
+					if client.disconnected
+						metrics.inc('editor.join-doc.disconnected', 1, {status: 'after-joining-room'})
+						# the client will not read the response anyways
+						return callback()
+
 					DocumentUpdaterManager.getDocument project_id, doc_id, fromVersion, (error, lines, version, ranges, ops) ->
 						return callback(error) if error?
+						if client.disconnected
+							metrics.inc('editor.join-doc.disconnected', 1, {status: 'after-doc-updater-call'})
+							# the client will not read the response anyways
+							return callback()
 
 						if is_restricted_user and ranges?.comments?
 							ranges.comments = []
@@ -122,6 +142,7 @@ module.exports = WebsocketController =
 						callback null, escapedLines, version, ops, ranges
 
 	leaveDoc: (client, doc_id, callback = (error) ->) ->
+		# client may have disconnected, but we have to cleanup internal state.
 		metrics.inc "editor.leave-doc"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			logger.log {user_id, project_id, doc_id, client_id: client.id}, "client leaving doc"
@@ -132,6 +153,10 @@ module.exports = WebsocketController =
 			## AuthorizationManager.removeAccessToDoc client, doc_id
 			callback()
 	updateClientPosition: (client, cursorData, callback = (error) ->) ->
+		if client.disconnected
+				# do not create a ghost entry in redis
+				return callback()
+
 		metrics.inc "editor.update-client-position", 0.1
 		Utils.getClientAttributes client, [
 			"project_id", "first_name", "last_name", "email", "user_id"
@@ -173,6 +198,10 @@ module.exports = WebsocketController =
 
 	CLIENT_REFRESH_DELAY: 1000
 	getConnectedUsers: (client, callback = (error, users) ->) ->
+		if client.disconnected
+				# they are not interested anymore, skip the redis lookups
+				return callback()
+
 		metrics.inc "editor.get-connected-users"
 		Utils.getClientAttributes client, ["project_id", "user_id", "is_restricted_user"], (error, clientAttributes) ->
 			return callback(error) if error?
@@ -192,6 +221,7 @@ module.exports = WebsocketController =
 				, WebsocketController.CLIENT_REFRESH_DELAY
 
 	applyOtUpdate: (client, doc_id, update, callback = (error) ->) ->
+		# client may have disconnected, but we can submit their update to doc-updater anyways.
 		Utils.getClientAttributes client, ["user_id", "project_id"], (error, {user_id, project_id}) ->
 			return callback(error) if error?
 			return callback(new Error("no project_id found on client")) if !project_id?
@@ -223,6 +253,9 @@ module.exports = WebsocketController =
 						# trigger an out-of-sync error
 						message = {project_id, doc_id, error: "update is too large"}
 						setTimeout () ->
+							if client.disconnected
+								# skip the message broadcast, the client has moved on
+								return metrics.inc('editor.doc-update.disconnected', 1, {status:'at-otUpdateError'})
 							client.emit "otUpdateError", message.error, message
 							client.disconnect()
 						, 100

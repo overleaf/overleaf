@@ -20,6 +20,7 @@ describe 'WebsocketController', ->
 		}
 		@callback = sinon.stub()
 		@client =
+			disconnected: false
 			id: @client_id = "mock-client-id-123"
 			publicId: "other-id-#{Math.random()}"
 			params: {}
@@ -147,6 +148,35 @@ describe 'WebsocketController', ->
 					.calledWith(sinon.match({message: "subscribe failed"}))
 					.should.equal true
 				@callback.args[0][0].message.should.equal "subscribe failed"
+
+		describe "when the client has disconnected", ->
+			beforeEach ->
+				@client.disconnected = true
+				@WebApiManager.joinProject = sinon.stub().callsArg(2)
+				@WebsocketController.joinProject @client, @user, @project_id, @callback
+
+			it "should not call WebApiManager.joinProject", ->
+				expect(@WebApiManager.joinProject.called).to.equal(false)
+
+			it "should call the callback with no details", ->
+				expect(@callback.args[0]).to.deep.equal []
+
+			it "should increment the editor.join-project.disconnected metric with a status", ->
+				expect(@metrics.inc.calledWith('editor.join-project.disconnected', 1, {status: 'immediately'})).to.equal(true)
+
+		describe "when the client disconnects while WebApiManager.joinProject is running", ->
+			beforeEach ->
+				@WebApiManager.joinProject = (project, user, cb) =>
+					@client.disconnected = true
+					cb(null, @project, @privilegeLevel, @isRestrictedUser)
+
+				@WebsocketController.joinProject @client, @user, @project_id, @callback
+
+			it "should call the callback with no details", ->
+				expect(@callback.args[0]).to.deep.equal []
+
+			it "should increment the editor.join-project.disconnected metric with a status", ->
+				expect(@metrics.inc.calledWith('editor.join-project.disconnected', 1, {status: 'after-web-api-call'})).to.equal(true)
 
 	describe "leaveProject", ->
 		beforeEach ->
@@ -385,6 +415,51 @@ describe 'WebsocketController', ->
 				ranges = @callback.args[0][4]
 				expect(ranges.comments).to.deep.equal []
 
+		describe "when the client has disconnected", ->
+			beforeEach ->
+				@client.disconnected = true
+				@WebsocketController.joinDoc @client, @doc_id, -1, @options, @callback
+
+			it "should call the callback with no details", ->
+				expect(@callback.args[0]).to.deep.equal([])
+
+			it "should increment the editor.join-doc.disconnected metric with a status", ->
+				expect(@metrics.inc.calledWith('editor.join-doc.disconnected', 1, {status: 'immediately'})).to.equal(true)
+
+			it "should not get the document", ->
+				expect(@DocumentUpdaterManager.getDocument.called).to.equal(false)
+
+		describe "when the client disconnects while RoomManager.joinDoc is running", ->
+			beforeEach ->
+				@RoomManager.joinDoc = (client, doc_id, cb) =>
+					@client.disconnected = true
+					cb()
+
+				@WebsocketController.joinDoc @client, @doc_id, -1, @options, @callback
+
+			it "should call the callback with no details", ->
+				expect(@callback.args[0]).to.deep.equal([])
+
+			it "should increment the editor.join-doc.disconnected metric with a status", ->
+				expect(@metrics.inc.calledWith('editor.join-doc.disconnected', 1, {status: 'after-joining-room'})).to.equal(true)
+
+			it "should not get the document", ->
+				expect(@DocumentUpdaterManager.getDocument.called).to.equal(false)
+
+		describe "when the client disconnects while DocumentUpdaterManager.getDocument is running", ->
+			beforeEach ->
+				@DocumentUpdaterManager.getDocument = (project_id, doc_id, fromVersion, callback) =>
+					@client.disconnected = true
+					callback(null, @doc_lines, @version, @ranges, @ops)
+
+				@WebsocketController.joinDoc @client, @doc_id, -1, @options, @callback
+
+			it "should call the callback with no details", ->
+				expect(@callback.args[0]).to.deep.equal []
+
+			it "should increment the editor.join-doc.disconnected metric with a status", ->
+				expect(@metrics.inc.calledWith('editor.join-doc.disconnected', 1, {status: 'after-doc-updater-call'})).to.equal(true)
+
 	describe "leaveDoc", ->
 		beforeEach ->
 			@doc_id = "doc-id-123"
@@ -463,6 +538,18 @@ describe 'WebsocketController', ->
 				@ConnectedUsersManager.getConnectedUsers
 					.called
 					.should.equal false
+
+		describe "when the client has disconnected", ->
+			beforeEach ->
+				@client.disconnected = true
+				@AuthorizationManager.assertClientCanViewProject = sinon.stub()
+				@WebsocketController.getConnectedUsers @client, @callback
+
+			it "should call the callback with no details", ->
+				expect(@callback.args[0]).to.deep.equal([])
+
+			it "should not check permissions", ->
+				expect(@AuthorizationManager.assertClientCanViewProject.called).to.equal(false)
 
 	describe "updateClientPosition", ->
 		beforeEach ->
@@ -643,6 +730,18 @@ describe 'WebsocketController', ->
 				@ConnectedUsersManager.updateUserPosition.called.should.equal false
 				done()
 
+		describe "when the client has disconnected", ->
+			beforeEach ->
+				@client.disconnected = true
+				@AuthorizationManager.assertClientCanViewProjectAndDoc = sinon.stub()
+				@WebsocketController.updateClientPosition @client, @update, @callback
+
+			it "should call the callback with no details", ->
+				expect(@callback.args[0]).to.deep.equal([])
+
+			it "should not check permissions", ->
+				expect(@AuthorizationManager.assertClientCanViewProjectAndDoc.called).to.equal(false)
+
 	describe "applyOtUpdate", ->
 		beforeEach ->
 			@update = {op: {p: 12, t: "foo"}}
@@ -716,7 +815,7 @@ describe 'WebsocketController', ->
 				@WebsocketController.applyOtUpdate @client, @doc_id, @update, @callback
 				setTimeout ->
 					done()
-				, 201
+				, 1
 
 			it "should call the callback with no error", ->
 				@callback.called.should.equal true
@@ -728,11 +827,29 @@ describe 'WebsocketController', ->
 					@user_id, @project_id, @doc_id, updateSize: 7372835
 				}, 'update is too large']
 
-			it "should send an otUpdateError the client", ->
-				@client.emit.calledWith('otUpdateError').should.equal true
+			describe "after 100ms", ->
+				beforeEach (done) ->
+					setTimeout done, 100
 
-			it "should disconnect the client", ->
-				@client.disconnect.called.should.equal true
+				it "should send an otUpdateError the client", ->
+					@client.emit.calledWith('otUpdateError').should.equal true
+
+				it "should disconnect the client", ->
+					@client.disconnect.called.should.equal true
+
+			describe "when the client disconnects during the next 100ms", ->
+				beforeEach (done) ->
+					@client.disconnected = true
+					setTimeout done, 100
+
+				it "should not send an otUpdateError the client", ->
+					@client.emit.calledWith('otUpdateError').should.equal false
+
+				it "should not disconnect the client", ->
+					@client.disconnect.called.should.equal false
+
+				it "should increment the editor.doc-update.disconnected metric with a status", ->
+					expect(@metrics.inc.calledWith('editor.doc-update.disconnected', 1, {status:'at-otUpdateError'})).to.equal(true)
 
 	describe "_assertClientCanApplyUpdate", ->
 		beforeEach ->

@@ -17,12 +17,14 @@ describe "leaveDoc", ->
 		@ops = ["mock", "doc", "ops"]
 		sinon.spy(logger, "error")
 		sinon.spy(logger, "warn")
+		sinon.spy(logger, "log")
 		@other_doc_id = FixturesManager.getRandomId()
 	
 	after ->
 		logger.error.restore() # remove the spy
 		logger.warn.restore()
-			
+		logger.log.restore()
+
 	describe "when joined to a doc", ->
 		beforeEach (done) ->
 			async.series [
@@ -80,5 +82,5 @@ describe "leaveDoc", ->
 					throw error if error?
 					done()
 
-			it "should trigger a warning only", ->
-				sinon.assert.calledWith(logger.warn, sinon.match.any, "ignoring request from client to leave room it is not in")
+			it "should trigger a low level message only", ->
+				sinon.assert.calledWith(logger.log, sinon.match.any, "ignoring request from client to leave room it is not in")
