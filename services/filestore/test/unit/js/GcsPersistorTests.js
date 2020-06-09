@@ -196,7 +196,7 @@ describe('GcsPersistorTests', function() {
       it('passes the byte range on to GCS', function() {
         expect(GcsFile.createReadStream).to.have.been.calledWith({
           start: 5,
-          end: 11 // we increment the end because Google's 'end' is exclusive
+          end: 10
         })
       })
     })
