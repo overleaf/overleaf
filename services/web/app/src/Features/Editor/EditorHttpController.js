@@ -29,6 +29,28 @@ module.exports = {
   _nameIsAcceptableLength
 }
 
+const unsupportedSpellcheckLanguages = [
+  'am',
+  'hy',
+  'bn',
+  'gu',
+  'he',
+  'hi',
+  'hu',
+  'is',
+  'kn',
+  'ml',
+  'mr',
+  'or',
+  'ss',
+  'ta',
+  'te',
+  'uk',
+  'uz',
+  'zu',
+  'fi'
+]
+
 async function joinProject(req, res, next) {
   const projectId = req.params.Project_id
   let userId = req.query.user_id
@@ -52,6 +74,14 @@ async function joinProject(req, res, next) {
   // Only show the 'renamed or deleted' message once
   if (project.deletedByExternalDataSource) {
     await ProjectDeleter.promises.unmarkAsDeletedByExternalSource(projectId)
+  }
+  // disable spellchecking for currently unsupported spell check languages
+  // preserve the value in the db so they can use it again once we add back
+  // support.
+  if (
+    unsupportedSpellcheckLanguages.indexOf(project.spellCheckLanguage) !== -1
+  ) {
+    project.spellCheckLanguage = ''
   }
   res.json({
     project,
