@@ -76,6 +76,7 @@ if (process.env.DOCKER_RUNNER) {
       socketPath: '/var/run/docker.sock',
       user: process.env.TEXLIVE_IMAGE_USER || 'tex'
     },
+    optimiseInDocker: true,
     expireProjectAfterIdleMs: 24 * 60 * 60 * 1000,
     checkProjectsIntervalMs: 10 * 60 * 1000
   }
