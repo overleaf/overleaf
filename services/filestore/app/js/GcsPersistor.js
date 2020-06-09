@@ -115,10 +115,6 @@ async function sendStream(bucketName, key, readStream, sourceMd5) {
 
 async function getFileStream(bucketName, key, _opts = {}) {
   const opts = Object.assign({}, _opts)
-  if (opts.end) {
-    // S3 (and http range headers) treat 'end' as inclusive, so increase this by 1
-    opts.end++
-  }
   const stream = storage
     .bucket(bucketName)
     .file(key)
