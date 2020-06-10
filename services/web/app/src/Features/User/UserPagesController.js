@@ -215,7 +215,7 @@ const UserPagesController = {
         const data = providers[provider]
         data.description = req.i18n.translate(
           data.descriptionKey,
-          data.descriptionOptions
+          Object.assign({}, data.descriptionOptions)
         )
         result[provider] = data
       }
