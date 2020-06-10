@@ -17,7 +17,7 @@ if Settings.sentry?.dsn?
 sessionRedisClient = redis.createClient(Settings.redis.websessions)
 
 RedisStore = require('connect-redis')(session)
-SessionSockets = require('session.socket.io')
+SessionSockets = require('./app/js/SessionSockets')
 CookieParser = require("cookie-parser")
 
 DrainManager = require("./app/js/DrainManager")
