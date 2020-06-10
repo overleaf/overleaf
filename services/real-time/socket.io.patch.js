@@ -47,3 +47,13 @@ function patchedFrameHandler(opcode, str) {
   }
   return outputBuffer;
 }
+
+const parser = require('socket.io/lib/parser')
+const decodePacket = parser.decodePacket
+parser.decodePacket = function (data) {
+  if (typeof data !== 'string') return {}
+  const firstColon = data.indexOf(':')
+  if (firstColon === -1) return {}
+  if (data.indexOf(':', firstColon + 1) === -1) return {}
+  return decodePacket(data)
+}
