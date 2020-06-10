@@ -54,6 +54,7 @@ module.exports = Router =
 		app.post "/project/:project_id/message/:message", httpAuth, bodyParser.json(limit: "5mb"), HttpApiController.sendMessage
 		
 		app.post "/drain", httpAuth, HttpApiController.startDrain
+		app.post "/client/:client_id/disconnect", httpAuth, HttpApiController.disconnectClient
 
 		session.on 'connection', (error, client, session) ->
 			client?.on "error", (err) ->
