@@ -285,7 +285,8 @@ App.controller('PlansController', function(
 App.controller('GroupPlansModalPurchaseController', function(
   $scope,
   $modal,
-  $location
+  $location,
+  $httpParamSerializer
 ) {
   $scope.options = {
     plan_codes: [
@@ -393,8 +394,17 @@ App.controller('GroupPlansModalPurchaseController', function(
   $scope.recalculatePrice()
 
   $scope.purchase = function() {
-    let { plan_code, size, usage, currency } = $scope.selected
-    plan_code = `group_${plan_code}_${size}_${usage}`
-    window.location = `/user/subscription/new?planCode=${plan_code}&currency=${currency}&itm_campaign=groups`
+    const { plan_code, size, usage, currency } = $scope.selected
+    const queryParams = {
+      planCode: `group_${plan_code}_${size}_${usage}`,
+      currency,
+      itm_campaign: 'groups'
+    }
+    if ($location.search().itm_content) {
+      queryParams.itm_content = $location.search().itm_content
+    }
+    window.location = `/user/subscription/new?${$httpParamSerializer(
+      queryParams
+    )}`
   }
 })
