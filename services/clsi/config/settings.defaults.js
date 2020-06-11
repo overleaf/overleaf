@@ -63,6 +63,17 @@ module.exports = {
   }
 }
 
+if (process.env.ALLOWED_COMPILE_GROUPS) {
+  try {
+    module.exports.allowedCompileGroups = process.env.ALLOWED_COMPILE_GROUPS.split(
+      ' '
+    )
+  } catch (error) {
+    console.error(error, 'could not apply allowed compile group setting')
+    process.exit(1)
+  }
+}
+
 if (process.env.DOCKER_RUNNER) {
   let seccompProfilePath
   module.exports.clsi = {
@@ -80,6 +91,21 @@ if (process.env.DOCKER_RUNNER) {
     optimiseInDocker: true,
     expireProjectAfterIdleMs: 24 * 60 * 60 * 1000,
     checkProjectsIntervalMs: 10 * 60 * 1000
+  }
+
+  try {
+    // Override individual docker settings using path-based keys, e.g.:
+    // compileGroupDockerConfigs = {
+    //    priority: { 'HostConfig.CpuShares': 100 }
+    //    beta: { 'dotted.path.here', 'value'}
+    // }
+    const compileGroupConfig = JSON.parse(
+      process.env.COMPILE_GROUP_DOCKER_CONFIGS || '{}'
+    )
+    module.exports.clsi.docker.compileGroupConfig = compileGroupConfig
+  } catch (error) {
+    console.error(error, 'could not apply compile group docker configs')
+    process.exit(1)
   }
 
   try {

@@ -20,7 +20,16 @@ const logger = require('logger-sharelatex')
 logger.info('using standard command runner')
 
 module.exports = CommandRunner = {
-  run(project_id, command, directory, image, timeout, environment, callback) {
+  run(
+    project_id,
+    command,
+    directory,
+    image,
+    timeout,
+    environment,
+    compileGroup,
+    callback
+  ) {
     let key, value
     if (callback == null) {
       callback = function(error) {}

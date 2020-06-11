@@ -87,6 +87,7 @@ describe('DockerRunner', function() {
     this.project_id = 'project-id-123'
     this.volumes = { '/local/compile/directory': '/compile' }
     this.Settings.clsi.docker.image = this.defaultImage = 'default-image'
+    this.compileGroup = 'compile-group'
     return (this.Settings.clsi.docker.env = { PATH: 'mock-path' })
   })
 
@@ -123,6 +124,7 @@ describe('DockerRunner', function() {
           this.image,
           this.timeout,
           this.env,
+          this.compileGroup,
           (err, output) => {
             this.callback(err, output)
             return done()
@@ -172,6 +174,7 @@ describe('DockerRunner', function() {
           this.image,
           this.timeout,
           this.env,
+          this.compileGroup,
           this.callback
         )
       })
@@ -220,6 +223,7 @@ describe('DockerRunner', function() {
           this.image,
           this.timeout,
           this.env,
+          this.compileGroup,
           this.callback
         )
       })
@@ -253,6 +257,7 @@ describe('DockerRunner', function() {
           null,
           this.timeout,
           this.env,
+          this.compileGroup,
           this.callback
         )
       })
@@ -282,6 +287,7 @@ describe('DockerRunner', function() {
           this.image,
           this.timeout,
           this.env,
+          this.compileGroup,
           this.callback
         )
       })
@@ -289,6 +295,64 @@ describe('DockerRunner', function() {
       return it('should use the override and keep the tag', function() {
         const image = this.DockerRunner._getContainerOptions.args[0][1]
         return image.should.equal('overrideimage.com/something/image:2016.2')
+      })
+    })
+  })
+
+  describe('run with _getOptions', function() {
+    beforeEach(function(done) {
+      // this.DockerRunner._getContainerOptions = sinon
+      //   .stub()
+      //   .returns((this.options = { mockoptions: 'foo' }))
+      this.DockerRunner._fingerprintContainer = sinon
+        .stub()
+        .returns((this.fingerprint = 'fingerprint'))
+
+      this.name = `project-${this.project_id}-${this.fingerprint}`
+
+      this.command = ['mock', 'command', '--outdir=$COMPILE_DIR']
+      this.command_with_dir = ['mock', 'command', '--outdir=/compile']
+      this.timeout = 42000
+      return done()
+    })
+
+    describe('when a compile group config is set', function() {
+      beforeEach(function() {
+        this.Settings.clsi.docker.compileGroupConfig = {
+          'compile-group': {
+            'HostConfig.newProperty': 'new-property'
+          },
+          'other-group': { otherProperty: 'other-property' }
+        }
+        this.DockerRunner._runAndWaitForContainer = sinon
+          .stub()
+          .callsArgWith(3, null, (this.output = 'mock-output'))
+        return this.DockerRunner.run(
+          this.project_id,
+          this.command,
+          this.directory,
+          this.image,
+          this.timeout,
+          this.env,
+          this.compileGroup,
+          this.callback
+        )
+      })
+
+      it('should set the docker options for the compile group', function() {
+        const options = this.DockerRunner._runAndWaitForContainer.lastCall
+          .args[0]
+        return expect(options.HostConfig).to.deep.include({
+          Binds: ['/local/compile/directory:/compile:rw'],
+          LogConfig: { Type: 'none', Config: {} },
+          CapDrop: 'ALL',
+          SecurityOpt: ['no-new-privileges'],
+          newProperty: 'new-property'
+        })
+      })
+
+      return it('should call the callback', function() {
+        return this.callback.calledWith(null, this.output).should.equal(true)
       })
     })
   })

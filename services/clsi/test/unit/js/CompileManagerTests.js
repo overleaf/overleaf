@@ -160,7 +160,8 @@ describe('CompileManager', function() {
         compiler: (this.compiler = 'pdflatex'),
         timeout: (this.timeout = 42000),
         imageName: (this.image = 'example.com/image'),
-        flags: (this.flags = ['-file-line-error'])
+        flags: (this.flags = ['-file-line-error']),
+        compileGroup: (this.compileGroup = 'compile-group')
       }
       this.env = {}
       this.Settings.compileDir = 'compiles'
@@ -199,7 +200,8 @@ describe('CompileManager', function() {
             timeout: this.timeout,
             image: this.image,
             flags: this.flags,
-            environment: this.env
+            environment: this.env,
+            compileGroup: this.compileGroup
           })
           .should.equal(true)
       })
@@ -253,7 +255,8 @@ describe('CompileManager', function() {
               CHKTEX_OPTIONS: '-nall -e9 -e10 -w15 -w16',
               CHKTEX_EXIT_ON_ERROR: 1,
               CHKTEX_ULIMIT_OPTIONS: '-t 5 -v 64000'
-            }
+            },
+            compileGroup: this.compileGroup
           })
           .should.equal(true)
       })
@@ -275,7 +278,8 @@ describe('CompileManager', function() {
             timeout: this.timeout,
             image: this.image,
             flags: this.flags,
-            environment: this.env
+            environment: this.env,
+            compileGroup: this.compileGroup
           })
           .should.equal(true)
       })
@@ -384,7 +388,7 @@ describe('CompileManager', function() {
         this.stdout = `NODE\t${this.page}\t${this.h}\t${this.v}\t${this.width}\t${this.height}\n`
         this.CommandRunner.run = sinon
           .stub()
-          .callsArgWith(6, null, { stdout: this.stdout })
+          .callsArgWith(7, null, { stdout: this.stdout })
         return this.CompileManager.syncFromCode(
           this.project_id,
           this.user_id,
@@ -443,7 +447,7 @@ describe('CompileManager', function() {
         this.stdout = `NODE\t${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}/${this.file_name}\t${this.line}\t${this.column}\n`
         this.CommandRunner.run = sinon
           .stub()
-          .callsArgWith(6, null, { stdout: this.stdout })
+          .callsArgWith(7, null, { stdout: this.stdout })
         return this.CompileManager.syncFromPdf(
           this.project_id,
           this.user_id,
@@ -485,7 +489,7 @@ describe('CompileManager', function() {
 
   return describe('wordcount', function() {
     beforeEach(function() {
-      this.CommandRunner.run = sinon.stub().callsArg(6)
+      this.CommandRunner.run = sinon.stub().callsArg(7)
       this.fs.readFile = sinon
         .stub()
         .callsArgWith(

@@ -45,7 +45,16 @@ module.exports = DockerRunner = {
   ERR_EXITED: new Error('exited'),
   ERR_TIMED_OUT: new Error('container timed out'),
 
-  run(project_id, command, directory, image, timeout, environment, callback) {
+  run(
+    project_id,
+    command,
+    directory,
+    image,
+    timeout,
+    environment,
+    compileGroup,
+    callback
+  ) {
     let name
     if (callback == null) {
       callback = function(error, output) {}
@@ -88,7 +97,8 @@ module.exports = DockerRunner = {
       image,
       volumes,
       timeout,
-      environment
+      environment,
+      compileGroup
     )
     const fingerprint = DockerRunner._fingerprintContainer(options)
     options.name = name = `project-${project_id}-${fingerprint}`
@@ -224,7 +234,14 @@ module.exports = DockerRunner = {
     )
   },
 
-  _getContainerOptions(command, image, volumes, timeout, environment) {
+  _getContainerOptions(
+    command,
+    image,
+    volumes,
+    timeout,
+    environment,
+    compileGroup
+  ) {
     let m, year
     let key, value, hostVol, dockerVol
     const timeoutInSeconds = timeout / 1000
@@ -309,6 +326,23 @@ module.exports = DockerRunner = {
 
     if (Settings.clsi.docker.runtime) {
       options.HostConfig.Runtime = Settings.clsi.docker.runtime
+    }
+
+    if (Settings.clsi.docker.Readonly) {
+      options.HostConfig.ReadonlyRootfs = true
+      options.HostConfig.Tmpfs = { '/tmp': 'rw,noexec,nosuid,size=65536k' }
+    }
+
+    // Allow per-compile group overriding of individual settings
+    if (
+      Settings.clsi.docker.compileGroupConfig &&
+      Settings.clsi.docker.compileGroupConfig[compileGroup]
+    ) {
+      const override = Settings.clsi.docker.compileGroupConfig[compileGroup]
+      let key
+      for (key in override) {
+        _.set(options, key, override[key])
+      }
     }
 
     return options
