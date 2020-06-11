@@ -15,10 +15,12 @@ const UserGetter = {
       callback = projection
       projection = {}
     }
-    normalizeQuery(query, (err, query) => {
-      if (err) return callback(err)
+    try {
+      query = normalizeQuery(query)
       db.users.findOne(query, projection, callback)
-    })
+    } catch (err) {
+      callback(err)
+    }
   },
 
   getUserEmail(userId, callback) {
@@ -129,10 +131,12 @@ const UserGetter = {
   },
 
   getUsers(query, projection, callback) {
-    normalizeQuery(query, (err, query) => {
-      if (err) return callback(err)
+    try {
+      query = normalizeQuery(query)
       db.users.find(query, projection, callback)
-    })
+    } catch (err) {
+      callback(err)
+    }
   },
 
   // check for duplicate email address. This is also enforced at the DB level
@@ -146,23 +150,19 @@ const UserGetter = {
   }
 }
 
-function normalizeQuery(query, callback) {
+function normalizeQuery(query) {
   if (!query) {
-    return callback(new Error('no query provided'))
+    throw new Error('no query provided')
   }
-  try {
-    if (typeof query === 'string') {
-      callback(null, { _id: ObjectId(query) })
-    } else if (query instanceof ObjectId) {
-      callback(null, { _id: query })
-    } else if (Array.isArray(query)) {
-      const userIds = query.map(u => ObjectId(u.toString()))
-      callback(null, { _id: { $in: userIds } })
-    } else {
-      callback(null, query)
-    }
-  } catch (err) {
-    callback(err, null)
+  if (typeof query === 'string') {
+    return { _id: ObjectId(query) }
+  } else if (query instanceof ObjectId) {
+    return { _id: query }
+  } else if (Array.isArray(query)) {
+    const userIds = query.map(u => ObjectId(u.toString()))
+    return { _id: { $in: userIds } }
+  } else {
+    return query
   }
 }
 

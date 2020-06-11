@@ -51,7 +51,7 @@ describe('TpdsUpdateSender', function() {
       }
     }
     const getUsers = sinon.stub().resolves(
-      memberIds.map(userId => {
+      memberIds.slice(1).map(userId => {
         return { _id: userId }
       })
     )
@@ -145,11 +145,7 @@ describe('TpdsUpdateSender', function() {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [
-              'user_id_here',
-              'collaberator_ref_1_here',
-              'read_only_ref_1_id_here'
-            ]
+            $in: ['collaberator_ref_1_here', 'read_only_ref_1_id_here']
           },
           'dropbox.access_token.uid': { $ne: null }
         },
@@ -203,11 +199,7 @@ describe('TpdsUpdateSender', function() {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [
-              'user_id_here',
-              'collaberator_ref_1_here',
-              'read_only_ref_1_id_here'
-            ]
+            $in: ['collaberator_ref_1_here', 'read_only_ref_1_id_here']
           },
           'dropbox.access_token.uid': { $ne: null }
         },
@@ -254,11 +246,7 @@ describe('TpdsUpdateSender', function() {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [
-              'user_id_here',
-              'collaberator_ref_1_here',
-              'read_only_ref_1_id_here'
-            ]
+            $in: ['collaberator_ref_1_here', 'read_only_ref_1_id_here']
           },
           'dropbox.access_token.uid': { $ne: null }
         },
@@ -308,11 +296,7 @@ describe('TpdsUpdateSender', function() {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [
-              'user_id_here',
-              'collaberator_ref_1_here',
-              'read_only_ref_1_id_here'
-            ]
+            $in: ['collaberator_ref_1_here', 'read_only_ref_1_id_here']
           },
           'dropbox.access_token.uid': { $ne: null }
         },
@@ -361,11 +345,7 @@ describe('TpdsUpdateSender', function() {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [
-              'user_id_here',
-              'collaberator_ref_1_here',
-              'read_only_ref_1_id_here'
-            ]
+            $in: ['collaberator_ref_1_here', 'read_only_ref_1_id_here']
           },
           'dropbox.access_token.uid': { $ne: null }
         },

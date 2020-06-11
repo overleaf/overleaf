@@ -103,7 +103,7 @@ async function enqueue(group, method, job) {
     return
   }
   try {
-    const response = request({
+    const response = await request({
       uri: `${tpdsWorkerUrl}/enqueue/web_to_tpds_http_requests`,
       json: { group, job, method },
       method: 'post',
@@ -123,16 +123,18 @@ async function getProjectUsersIds(projectId) {
     projectId
   )
   // filter list to only return users with dropbox linked
-  const users = await UserGetter.getUsers(
+  // skip the first user id, which is always returned
+  const dropboxUsers = await UserGetter.getUsers(
     {
-      _id: { $in: projectUserIds },
+      _id: { $in: projectUserIds.slice(1) },
       'dropbox.access_token.uid': { $ne: null }
     },
     {
       _id: 1
     }
   )
-  return users.map(user => user._id)
+  const dropboxUserIds = dropboxUsers.map(user => user._id)
+  return [projectUserIds[0], ...dropboxUserIds]
 }
 
 async function moveEntity(options) {
