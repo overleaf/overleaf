@@ -656,35 +656,37 @@ export default (HistoryManager = (function() {
 
     _loadLabels(labels, lastUpdateToV) {
       let sortedLabels = this._sortLabelsByVersionAndDate(labels)
-      let nLabels = sortedLabels.length
-      let hasPseudoCurrentStateLabel = false
-      let needsPseudoCurrentStateLabel = false
-      if (lastUpdateToV) {
-        hasPseudoCurrentStateLabel =
-          nLabels > 0 ? sortedLabels[0].isPseudoCurrentStateLabel : false
-        if (hasPseudoCurrentStateLabel) {
-          needsPseudoCurrentStateLabel =
-            nLabels > 1 ? sortedLabels[1].version !== lastUpdateToV : false
-        } else {
-          needsPseudoCurrentStateLabel =
-            nLabels > 0 ? sortedLabels[0].version !== lastUpdateToV : true
-        }
-        if (needsPseudoCurrentStateLabel && !hasPseudoCurrentStateLabel) {
-          let pseudoCurrentStateLabel = {
-            id: '1',
-            isPseudoCurrentStateLabel: true,
-            version: lastUpdateToV,
-            created_at: new Date().toISOString()
-          }
-          sortedLabels.unshift(pseudoCurrentStateLabel)
-        } else if (
-          !needsPseudoCurrentStateLabel &&
-          hasPseudoCurrentStateLabel
-        ) {
-          sortedLabels.shift()
-        }
+      let labelsWithoutPseudoLabel = this._deletePseudoCurrentStateLabelIfExistent(
+        sortedLabels
+      )
+      let labelsWithPseudoLabelIfNeeded = this._addPseudoCurrentStateLabelIfNeeded(
+        labelsWithoutPseudoLabel,
+        lastUpdateToV
+      )
+      return labelsWithPseudoLabelIfNeeded
+    }
+
+    _deletePseudoCurrentStateLabelIfExistent(labels) {
+      if (labels.length && labels[0].isPseudoCurrentStateLabel) {
+        labels.shift()
       }
-      return sortedLabels
+      return labels
+    }
+
+    _addPseudoCurrentStateLabelIfNeeded(labels, mostRecentVersion) {
+      if (
+        (labels.length && labels[0].version !== mostRecentVersion) ||
+        labels.length === 0
+      ) {
+        let pseudoCurrentStateLabel = {
+          id: '1',
+          isPseudoCurrentStateLabel: true,
+          version: mostRecentVersion,
+          created_at: new Date().toISOString()
+        }
+        labels.unshift(pseudoCurrentStateLabel)
+      }
+      return labels
     }
 
     _sortLabelsByVersionAndDate(labels) {

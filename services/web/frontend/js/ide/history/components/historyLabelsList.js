@@ -17,7 +17,7 @@ const historyLabelsListController = function($scope, $element, $attrs, _) {
   ctrl.isDragging = false
   ctrl.versionsWithLabels = []
   $scope.$watchCollection('$ctrl.labels', function(labels) {
-    if (labels != null && labels.length > 0) {
+    if (labels) {
       const groupedLabelsHash = _.groupBy(labels, 'version')
       ctrl.versionsWithLabels = _.map(groupedLabelsHash, (labels, version) => {
         return {

@@ -140,7 +140,7 @@ export default describe('HistoryV2Manager', function() {
       }
     ]
 
-    inject(($q, $http, $rootScope) => {
+    inject(($q, $http, $filter, $rootScope) => {
       this.$scope = $rootScope.$new()
       this.$scope.project = {
         features: {
@@ -152,7 +152,8 @@ export default describe('HistoryV2Manager', function() {
       }
       this.ide = {
         $q: $q,
-        $http: $http
+        $http: $http,
+        $filter: $filter
       }
       this.localStorage = sinon.stub().returns(null)
       this.historyManager = new HistoryV2Manager(
@@ -541,6 +542,96 @@ export default describe('HistoryV2Manager', function() {
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file.pathname).to.match(/.tex$/)
         })
+      })
+    })
+
+    describe('_loadLabels', function() {
+      it('should return labels list as is if there is a label for the last version', function() {
+        const labels = [
+          {
+            id: '1',
+            version: 1,
+            comment: 'foo',
+            created_at: new Date().toISOString()
+          },
+          {
+            id: '2',
+            version: 2,
+            comment: 'bar',
+            created_at: new Date().toISOString()
+          },
+          {
+            id: '3',
+            version: 3,
+            comment: 'baz',
+            created_at: new Date().toISOString()
+          }
+        ]
+        const lastUpdate = 3
+
+        const labelsResult = this.historyManager._loadLabels(labels, lastUpdate)
+
+        expect(labelsResult).to.have.members(labels)
+      })
+
+      it('should return a labels list with a pseudo current state label if there is no label for the last version', function() {
+        const labels = [
+          {
+            id: '1',
+            version: 1,
+            comment: 'foo',
+            created_at: new Date().toISOString()
+          },
+          {
+            id: '2',
+            version: 2,
+            comment: 'bar',
+            created_at: new Date().toISOString()
+          },
+          {
+            id: '3',
+            version: 3,
+            comment: 'baz',
+            created_at: new Date().toISOString()
+          }
+        ]
+        const lastUpdate = 5
+
+        const labelsResult = this.historyManager._loadLabels(labels, lastUpdate)
+
+        expect(labelsResult).to.include.members(labels)
+        expect(labelsResult[0].isPseudoCurrentStateLabel).to.equal(true)
+        expect(labelsResult[0].version).to.equal(5)
+      })
+
+      it('should keep pseudo label when deleting label', function() {
+        this.historyManager.$scope.history.labels = [
+          {
+            id: '1',
+            version: 1,
+            comment: 'foo',
+            created_at: new Date().toISOString()
+          }
+        ]
+        const lastUpdate = 5
+
+        this.historyManager.$scope.history.labels = this.historyManager._loadLabels(
+          this.historyManager.$scope.history.labels,
+          lastUpdate
+        )
+
+        expect(
+          this.historyManager.$scope.history.labels[0].isPseudoCurrentStateLabel
+        ).to.equal(true)
+
+        this.historyManager.$scope.history.labels = this.historyManager._loadLabels(
+          [],
+          lastUpdate
+        )
+        expect(
+          this.historyManager.$scope.history.labels[0].isPseudoCurrentStateLabel
+        ).to.equal(true)
+        expect(this.historyManager.$scope.history.labels[0].version).to.equal(5)
       })
     })
   })
