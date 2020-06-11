@@ -230,6 +230,9 @@ app.use(function(error, req, res, next) {
   if (error instanceof Errors.NotFoundError) {
     logger.warn({ err: error, url: req.url }, 'not found error')
     return res.sendStatus(404)
+  } else if (error.code === 'EPIPE') {
+    // inspect container returns EPIPE when shutting down
+    return res.sendStatus(503) // send 503 Unavailable response
   } else {
     logger.error({ err: error, url: req.url }, 'server error')
     return res.sendStatus((error != null ? error.statusCode : undefined) || 500)
