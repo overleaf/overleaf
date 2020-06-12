@@ -361,7 +361,49 @@ App.controller('PdfController', function(
       ide.clsiServerId = qs.clsiserverid = response.clsiServerId
     }
 
-    if (response.status === 'timedout') {
+    if (response.status === 'success') {
+      $scope.pdf.view = 'pdf'
+      $scope.shouldShowLogs = false
+
+      // define the base url. if the pdf file has a build number, pass it to the clsi in the url
+      if (fileByPath['output.pdf'] && fileByPath['output.pdf'].url) {
+        $scope.pdf.url = buildPdfDownloadUrl(
+          pdfDownloadDomain,
+          fileByPath['output.pdf'].url
+        )
+      } else if (fileByPath['output.pdf'] && fileByPath['output.pdf'].build) {
+        const { build } = fileByPath['output.pdf']
+        $scope.pdf.url = buildPdfDownloadUrl(
+          pdfDownloadDomain,
+          `/project/${$scope.project_id}/build/${build}/output/output.pdf`
+        )
+      } else {
+        $scope.pdf.url = buildPdfDownloadUrl(
+          pdfDownloadDomain,
+          `/project/${$scope.project_id}/output/output.pdf`
+        )
+      }
+      // check if we need to bust cache (build id is unique so don't need it in that case)
+      if (!(fileByPath['output.pdf'] && fileByPath['output.pdf'].build)) {
+        qs.cache_bust = `${Date.now()}`
+      }
+      // convert the qs hash into a query string and append it
+      $scope.pdf.url += createQueryString(qs)
+
+      // Save all downloads as files
+      qs.popupDownload = true
+
+      // Pass build id to download if we have it
+      let buildId = null
+      if (fileByPath['output.pdf'] && fileByPath['output.pdf'].build) {
+        buildId = fileByPath['output.pdf'].build
+      }
+      $scope.pdf.downloadUrl =
+        `/download/project/${$scope.project_id}${
+          buildId ? '/build/' + buildId : ''
+        }/output/output.pdf` + createQueryString(qs)
+      fetchLogs(fileByPath, { pdfDownloadDomain })
+    } else if (response.status === 'timedout') {
       $scope.pdf.view = 'errors'
       $scope.pdf.timedout = true
       fetchLogs(fileByPath, { pdfDownloadDomain })
@@ -430,48 +472,10 @@ App.controller('PdfController', function(
     } else if (response.status === 'compile-in-progress') {
       $scope.pdf.view = 'errors'
       $scope.pdf.compileInProgress = true
-    } else if (response.status === 'success') {
-      $scope.pdf.view = 'pdf'
-      $scope.shouldShowLogs = false
-
-      // define the base url. if the pdf file has a build number, pass it to the clsi in the url
-      if (fileByPath['output.pdf'] && fileByPath['output.pdf'].url) {
-        $scope.pdf.url = buildPdfDownloadUrl(
-          pdfDownloadDomain,
-          fileByPath['output.pdf'].url
-        )
-      } else if (fileByPath['output.pdf'] && fileByPath['output.pdf'].build) {
-        const { build } = fileByPath['output.pdf']
-        $scope.pdf.url = buildPdfDownloadUrl(
-          pdfDownloadDomain,
-          `/project/${$scope.project_id}/build/${build}/output/output.pdf`
-        )
-      } else {
-        $scope.pdf.url = buildPdfDownloadUrl(
-          pdfDownloadDomain,
-          `/project/${$scope.project_id}/output/output.pdf`
-        )
-      }
-      // check if we need to bust cache (build id is unique so don't need it in that case)
-      if (!(fileByPath['output.pdf'] && fileByPath['output.pdf'].build)) {
-        qs.cache_bust = `${Date.now()}`
-      }
-      // convert the qs hash into a query string and append it
-      $scope.pdf.url += createQueryString(qs)
-
-      // Save all downloads as files
-      qs.popupDownload = true
-
-      // Pass build id to download if we have it
-      let buildId = null
-      if (fileByPath['output.pdf'] && fileByPath['output.pdf'].build) {
-        buildId = fileByPath['output.pdf'].build
-      }
-      $scope.pdf.downloadUrl =
-        `/download/project/${$scope.project_id}${
-          buildId ? '/build/' + buildId : ''
-        }/output/output.pdf` + createQueryString(qs)
-      fetchLogs(fileByPath, { pdfDownloadDomain })
+    } else {
+      // fall back to displaying an error
+      $scope.pdf.view = 'errors'
+      $scope.pdf.error = true
     }
 
     const IGNORE_FILES = ['output.fls', 'output.fdb_latexmk']
