@@ -77,8 +77,10 @@ module.exports = CompileController = {
         validationProblems
       ) => {
         if (error) {
+          Metrics.inc('compile-error')
           return next(error)
         }
+        Metrics.inc('compile-status', 1, { status: status })
         res.json({
           status,
           outputFiles,
