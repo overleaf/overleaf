@@ -87,10 +87,11 @@ if (process.env.DOCKER_RUNNER) {
       JSON.parse(require('fs').readFileSync(seccompProfilePath))
     )
   } catch (error) {
-    console.log(
+    console.error(
       error,
-      `could not load seccom profile from ${seccompProfilePath}`
+      `could not load seccomp profile from ${seccompProfilePath}`
     )
+    process.exit(1)
   }
 
   module.exports.path.synctexBaseDir = () => '/compile'
