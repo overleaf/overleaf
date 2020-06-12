@@ -462,6 +462,9 @@ App.controller('PdfController', function(
     } else if (response.status === 'clsi-maintenance') {
       $scope.pdf.view = 'errors'
       $scope.pdf.clsiMaintenance = true
+    } else if (response.status === 'unavailable') {
+      $scope.pdf.view = 'errors'
+      $scope.pdf.clsiUnavailable = true
     } else if (response.status === 'too-recently-compiled') {
       $scope.pdf.view = 'errors'
       $scope.pdf.tooRecentlyCompiled = true

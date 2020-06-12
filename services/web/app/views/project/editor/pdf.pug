@@ -285,6 +285,10 @@ div.full-size.pdf(ng-controller="PdfController")
 				strong #{translate("server_error")} 
 				span #{translate("clsi_maintenance")}
 
+			.alert.alert-danger(ng-show="pdf.clsiUnavailable")
+				strong #{translate("server_error")} 
+				span #{translate("clsi_unavailable")}
+
 			.alert.alert-danger(ng-show="pdf.tooRecentlyCompiled")
 				strong #{translate("server_error")} 
 				span #{translate("too_recently_compiled")}

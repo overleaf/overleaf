@@ -45,6 +45,13 @@ const ClsiManager = {
             { ...options, syncType: 'full' },
             callback
           )
+        } else if (status === 'unavailable') {
+          return ClsiManager.sendRequestOnce(
+            projectId,
+            userId,
+            { ...options, syncType: 'full', forceNewClsiServer: true },
+            callback
+          )
         }
         callback(null, status, ...result)
       }
@@ -172,6 +179,22 @@ const ClsiManager = {
   _sendBuiltRequest(projectId, userId, req, options, callback) {
     if (options == null) {
       options = {}
+    }
+    if (options.forceNewClsiServer) {
+      // Clear clsi cookie, then try again
+      return ClsiCookieManager.clearServerId(projectId, err => {
+        if (err) {
+          return callback(err)
+        }
+        options.forceNewClsiServer = false // backend has now been reset
+        return ClsiManager._sendBuiltRequest(
+          projectId,
+          userId,
+          req,
+          options,
+          callback
+        )
+      })
     }
     ClsiFormatChecker.checkRecoursesForProblems(
       req.compile != null ? req.compile.resources : undefined,
@@ -434,6 +457,8 @@ const ClsiManager = {
         callback(null, { compile: { status: 'conflict' } })
       } else if (response.statusCode === 423) {
         callback(null, { compile: { status: 'compile-in-progress' } })
+      } else if (response.statusCode === 503) {
+        callback(null, { compile: { status: 'unavailable' } })
       } else {
         callback(
           new OError({
