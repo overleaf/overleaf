@@ -25,11 +25,11 @@ module.exports = HttpController = {
 
     logger.log({ user_id, contact_id }, 'adding contact')
 
-    return ContactManager.touchContact(user_id, contact_id, function(error) {
+    return ContactManager.touchContact(user_id, contact_id, function (error) {
       if (error != null) {
         return next(error)
       }
-      return ContactManager.touchContact(contact_id, user_id, function(error) {
+      return ContactManager.touchContact(contact_id, user_id, function (error) {
         if (error != null) {
           return next(error)
         }
@@ -52,7 +52,7 @@ module.exports = HttpController = {
 
     logger.log({ user_id }, 'getting contacts')
 
-    return ContactManager.getContacts(user_id, function(error, contact_dict) {
+    return ContactManager.getContacts(user_id, function (error, contact_dict) {
       if (error != null) {
         return next(error)
       }
@@ -70,7 +70,7 @@ module.exports = HttpController = {
 
       HttpController._sortContacts(contacts)
       contacts = contacts.slice(0, limit)
-      const contact_ids = contacts.map(contact => contact.user_id)
+      const contact_ids = contacts.map((contact) => contact.user_id)
 
       return res.status(200).send({
         contact_ids
@@ -79,7 +79,7 @@ module.exports = HttpController = {
   },
 
   _sortContacts(contacts) {
-    return contacts.sort(function(a, b) {
+    return contacts.sort(function (a, b) {
       // Sort by decreasing count, descreasing timestamp.
       // I.e. biggest count, and most recent at front.
       if (a.n > b.n) {

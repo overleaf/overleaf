@@ -34,7 +34,7 @@ app.post(
 
 app.get('/status', (req, res) => res.send('contacts is alive'))
 
-app.use(function(error, req, res, next) {
+app.use(function (error, req, res, next) {
   logger.error({ err: error }, 'request errored')
   if (error instanceof Errors.NotFoundError) {
     return res.send(404)
@@ -48,7 +48,7 @@ const { host } = Settings.internal.contacts
 
 if (!module.parent) {
   // Called directly
-  app.listen(port, host, function(error) {
+  app.listen(port, host, function (error) {
     if (error != null) {
       throw error
     }
