@@ -1,3 +1,4 @@
+const { ObjectId } = require('../../../../app/src/infrastructure/mongojs')
 const SandboxedModule = require('sandboxed-module')
 const chai = require('chai')
 const path = require('path')
@@ -11,9 +12,9 @@ const modulePath = path.join(
 )
 
 const projectId = 'project_id_here'
-const userId = 'user_id_here'
-const readOnlyRef = 'read_only_ref_1_id_here'
-const collaberatorRef = 'collaberator_ref_1_here'
+const userId = ObjectId()
+const readOnlyRef = ObjectId()
+const collaberatorRef = ObjectId()
 const projectName = 'project_name_here'
 
 const thirdPartyDataStoreApiUrl = 'http://third-party-json-store.herokuapp.com'
@@ -131,21 +132,19 @@ describe('TpdsUpdateSender', function() {
       job0.headers.sl_all_user_ids.should.equal(JSON.stringify([userId]))
 
       const { group: group1, job: job1 } = this.request.secondCall.args[0].json
-      group1.should.equal('collaberator_ref_1_here')
+      group1.should.equal(collaberatorRef)
       job1.headers.sl_all_user_ids.should.equal(
-        JSON.stringify(['collaberator_ref_1_here'])
+        JSON.stringify([collaberatorRef])
       )
 
       const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
-      group2.should.equal('read_only_ref_1_id_here')
-      job2.headers.sl_all_user_ids.should.equal(
-        JSON.stringify(['read_only_ref_1_id_here'])
-      )
+      group2.should.equal(readOnlyRef)
+      job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
 
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: ['collaberator_ref_1_here', 'read_only_ref_1_id_here']
+            $in: [collaberatorRef, readOnlyRef]
           },
           'dropbox.access_token.uid': { $ne: null }
         },
@@ -185,21 +184,19 @@ describe('TpdsUpdateSender', function() {
       job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
 
       const { group: group1, job: job1 } = this.request.secondCall.args[0].json
-      group1.should.equal('collaberator_ref_1_here')
+      group1.should.equal(collaberatorRef)
       job1.headers.sl_all_user_ids.should.equal(
-        JSON.stringify(['collaberator_ref_1_here'])
+        JSON.stringify([collaberatorRef])
       )
 
       const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
-      group2.should.equal('read_only_ref_1_id_here')
-      job2.headers.sl_all_user_ids.should.equal(
-        JSON.stringify(['read_only_ref_1_id_here'])
-      )
+      group2.should.equal(readOnlyRef)
+      job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
 
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: ['collaberator_ref_1_here', 'read_only_ref_1_id_here']
+            $in: [collaberatorRef, readOnlyRef]
           },
           'dropbox.access_token.uid': { $ne: null }
         },
@@ -232,21 +229,19 @@ describe('TpdsUpdateSender', function() {
       job0.uri.should.equal(expectedUrl)
 
       const { group: group1, job: job1 } = this.request.secondCall.args[0].json
-      group1.should.equal('collaberator_ref_1_here')
+      group1.should.equal(collaberatorRef)
       job1.headers.sl_all_user_ids.should.equal(
-        JSON.stringify(['collaberator_ref_1_here'])
+        JSON.stringify([collaberatorRef])
       )
 
       const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
-      group2.should.equal('read_only_ref_1_id_here')
-      job2.headers.sl_all_user_ids.should.equal(
-        JSON.stringify(['read_only_ref_1_id_here'])
-      )
+      group2.should.equal(readOnlyRef)
+      job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
 
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: ['collaberator_ref_1_here', 'read_only_ref_1_id_here']
+            $in: [collaberatorRef, readOnlyRef]
           },
           'dropbox.access_token.uid': { $ne: null }
         },
@@ -282,21 +277,19 @@ describe('TpdsUpdateSender', function() {
       job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
 
       const { group: group1, job: job1 } = this.request.secondCall.args[0].json
-      group1.should.equal('collaberator_ref_1_here')
+      group1.should.equal(collaberatorRef)
       job1.headers.sl_all_user_ids.should.equal(
-        JSON.stringify(['collaberator_ref_1_here'])
+        JSON.stringify([collaberatorRef])
       )
 
       const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
-      group2.should.equal('read_only_ref_1_id_here')
-      job2.headers.sl_all_user_ids.should.equal(
-        JSON.stringify(['read_only_ref_1_id_here'])
-      )
+      group2.should.equal(readOnlyRef)
+      job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
 
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: ['collaberator_ref_1_here', 'read_only_ref_1_id_here']
+            $in: [collaberatorRef, readOnlyRef]
           },
           'dropbox.access_token.uid': { $ne: null }
         },
@@ -331,21 +324,19 @@ describe('TpdsUpdateSender', function() {
       job0.headers.sl_all_user_ids.should.eql(JSON.stringify([userId]))
 
       const { group: group1, job: job1 } = this.request.secondCall.args[0].json
-      group1.should.equal('collaberator_ref_1_here')
+      group1.should.equal(collaberatorRef)
       job1.headers.sl_all_user_ids.should.equal(
-        JSON.stringify(['collaberator_ref_1_here'])
+        JSON.stringify([collaberatorRef])
       )
 
       const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
-      group2.should.equal('read_only_ref_1_id_here')
-      job2.headers.sl_all_user_ids.should.equal(
-        JSON.stringify(['read_only_ref_1_id_here'])
-      )
+      group2.should.equal(readOnlyRef)
+      job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
 
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: ['collaberator_ref_1_here', 'read_only_ref_1_id_here']
+            $in: [collaberatorRef, readOnlyRef]
           },
           'dropbox.access_token.uid': { $ne: null }
         },

@@ -1,3 +1,4 @@
+const { ObjectId } = require('../../infrastructure/mongojs')
 const _ = require('lodash')
 const { callbackify } = require('util')
 const logger = require('logger-sharelatex')
@@ -126,7 +127,7 @@ async function getProjectUsersIds(projectId) {
   // skip the first user id, which is always returned
   const dropboxUsers = await UserGetter.getUsers(
     {
-      _id: { $in: projectUserIds.slice(1) },
+      _id: { $in: projectUserIds.slice(1).map(id => ObjectId(id)) },
       'dropbox.access_token.uid': { $ne: null }
     },
     {
