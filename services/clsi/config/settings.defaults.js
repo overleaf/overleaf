@@ -102,7 +102,15 @@ if (process.env.DOCKER_RUNNER) {
     const compileGroupConfig = JSON.parse(
       process.env.COMPILE_GROUP_DOCKER_CONFIGS || '{}'
     )
-    module.exports.clsi.docker.compileGroupConfig = compileGroupConfig
+    // Automatically clean up wordcount and synctex containers
+    const defaultCompileGroupConfig = {
+      wordcount: { 'HostConfig.AutoRemove': true },
+      synctex: { 'HostConfig.AutoRemove': true }
+    }
+    module.exports.clsi.docker.compileGroupConfig = Object.assign(
+      defaultCompileGroupConfig,
+      compileGroupConfig
+    )
   } catch (error) {
     console.error(error, 'could not apply compile group docker configs')
     process.exit(1)
