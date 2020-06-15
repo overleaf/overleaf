@@ -1,5 +1,4 @@
-let Settings
-module.exports = Settings = {
+module.exports = {
   internal: {
     notifications: {
       port: 3042,

@@ -33,16 +33,17 @@ module.exports = {
       'adding notification'
     )
     metrics.inc('addNotification')
-    return Notifications.addNotification(req.params.user_id, req.body, function(
-      err,
-      notifications
-    ) {
-      if (err != null) {
-        return res.sendStatus(500)
-      } else {
-        return res.sendStatus(200)
+    return Notifications.addNotification(
+      req.params.user_id,
+      req.body,
+      function (err, notifications) {
+        if (err != null) {
+          return res.sendStatus(500)
+        } else {
+          return res.sendStatus(200)
+        }
       }
-    })
+    )
   },
 
   removeNotificationId(req, res) {

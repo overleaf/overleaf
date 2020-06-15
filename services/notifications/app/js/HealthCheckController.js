@@ -28,11 +28,11 @@ const db = mongojs(Settings.mongo != null ? Settings.mongo.url : undefined, [
 module.exports = {
   check(callback) {
     const user_id = ObjectId()
-    const cleanupNotifications = callback =>
+    const cleanupNotifications = (callback) =>
       db.notifications.remove({ user_id }, callback)
 
     let notification_key = `smoke-test-notification-${ObjectId()}`
-    const getOpts = endPath => ({
+    const getOpts = (endPath) => ({
       url: `http://localhost:${port}/user/${user_id}${endPath}`,
       timeout: 5000
     })
@@ -41,7 +41,7 @@ module.exports = {
       'Health Check: running'
     )
     const jobs = [
-      function(cb) {
+      function (cb) {
         const opts = getOpts('/')
         opts.json = {
           key: notification_key,
@@ -51,10 +51,10 @@ module.exports = {
         }
         return request.post(opts, cb)
       },
-      function(cb) {
+      function (cb) {
         const opts = getOpts('/')
         opts.json = true
-        return request.get(opts, function(err, res, body) {
+        return request.get(opts, function (err, res, body) {
           if (err != null) {
             logger.err({ err }, 'Health Check: error getting notification')
             return callback(err)
@@ -65,7 +65,7 @@ module.exports = {
           }
           const hasNotification = _.some(
             body,
-            notification =>
+            (notification) =>
               notification.key === notification_key &&
               notification.user_id === user_id.toString()
           )
@@ -81,7 +81,7 @@ module.exports = {
         })
       }
     ]
-    return async.series(jobs, function(err, body) {
+    return async.series(jobs, function (err, body) {
       if (err != null) {
         logger.err({ err }, 'Health Check: error running health check')
         return cleanupNotifications(() => callback(err))
@@ -93,7 +93,7 @@ module.exports = {
           { notification_id, notification_key },
           'Health Check: doing cleanup'
         )
-        return request.del(opts, function(err, res, body) {
+        return request.del(opts, function (err, res, body) {
           if (err != null) {
             logger.err(
               err,
@@ -104,7 +104,7 @@ module.exports = {
           }
           opts = getOpts('')
           opts.json = { key: notification_key }
-          return request.del(opts, function(err, res, body) {
+          return request.del(opts, function (err, res, body) {
             if (err != null) {
               logger.err(
                 err,

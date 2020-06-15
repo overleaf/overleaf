@@ -16,9 +16,6 @@ const methodOverride = require('method-override')
 const bodyParser = require('body-parser')
 const errorHandler = require('errorhandler')
 const controller = require('./app/js/NotificationsController')
-const mongojs = require('mongojs')
-const db = mongojs(Settings.mongo.url, ['notifications'])
-const Path = require('path')
 
 metrics.memory.monitor(logger)
 
@@ -43,7 +40,7 @@ app.delete('/key/:key', controller.removeNotificationByKeyOnly)
 app.get('/status', (req, res) => res.send('notifications sharelatex up'))
 
 app.get('/health_check', (req, res) =>
-  HealthCheckController.check(function(err) {
+  HealthCheckController.check(function (err) {
     if (err != null) {
       logger.err({ err }, 'error performing health check')
       return res.sendStatus(500)
@@ -58,12 +55,12 @@ app.get('*', (req, res) => res.sendStatus(404))
 const host =
   __guard__(
     Settings.internal != null ? Settings.internal.notifications : undefined,
-    x => x.host
+    (x) => x.host
   ) || 'localhost'
 const port =
   __guard__(
     Settings.internal != null ? Settings.internal.notifications : undefined,
-    x1 => x1.port
+    (x1) => x1.port
   ) || 3042
 app.listen(port, host, () =>
   logger.info(`notifications starting up, listening on ${host}:${port}`)

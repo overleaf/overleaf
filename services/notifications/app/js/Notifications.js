@@ -24,7 +24,7 @@ const metrics = require('metrics-sharelatex')
 module.exports = Notifications = {
   getUserNotifications(user_id, callback) {
     if (callback == null) {
-      callback = function(err, notifications) {}
+      callback = function (err, notifications) {}
     }
     const query = {
       user_id: ObjectId(user_id),
@@ -37,13 +37,13 @@ module.exports = Notifications = {
 
   _countExistingNotifications(user_id, notification, callback) {
     if (callback == null) {
-      callback = function(err, count) {}
+      callback = function (err, count) {}
     }
     const query = {
       user_id: ObjectId(user_id),
       key: notification.key
     }
-    return db.notifications.count(query, function(err, count) {
+    return db.notifications.count(query, function (err, count) {
       if (err != null) {
         return callback(err)
       }
@@ -52,7 +52,7 @@ module.exports = Notifications = {
   },
 
   addNotification(user_id, notification, callback) {
-    return this._countExistingNotifications(user_id, notification, function(
+    return this._countExistingNotifications(user_id, notification, function (
       err,
       count
     ) {
@@ -87,7 +87,7 @@ module.exports = Notifications = {
       }
       return db.notifications.update(
         { user_id: doc.user_id, key: notification.key },
-        { $set : { ...doc } },
+        { $set: doc },
         { upsert: true },
         callback
       )
@@ -124,6 +124,6 @@ module.exports = Notifications = {
     return db.notifications.remove(searchOps, { justOne: true }, callback)
   }
 }
-;['getUserNotifications', 'addNotification'].map(method =>
+;['getUserNotifications', 'addNotification'].map((method) =>
   metrics.timeAsyncMethod(Notifications, method, 'mongo.Notifications', logger)
 )
