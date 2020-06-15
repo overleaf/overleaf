@@ -10,7 +10,7 @@
  */
 const Sequelize = require('sequelize')
 const Settings = require('settings-sharelatex')
-const _ = require('underscore')
+const _ = require('lodash')
 const logger = require('logger-sharelatex')
 
 const options = _.extend({ logging: false }, Settings.mysql.clsi)

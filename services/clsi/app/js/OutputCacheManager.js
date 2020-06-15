@@ -19,7 +19,7 @@ const fs = require('fs')
 const fse = require('fs-extra')
 const Path = require('path')
 const logger = require('logger-sharelatex')
-const _ = require('underscore')
+const _ = require('lodash')
 const Settings = require('settings-sharelatex')
 const crypto = require('crypto')
 

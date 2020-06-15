@@ -19,7 +19,7 @@ const Path = require('path')
 const { spawn } = require('child_process')
 const logger = require('logger-sharelatex')
 const Metrics = require('./Metrics')
-const _ = require('underscore')
+const _ = require('lodash')
 
 module.exports = OutputFileOptimiser = {
   optimiseFile(src, dst, callback) {

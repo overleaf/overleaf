@@ -27,6 +27,7 @@
     "fs-extra": "^8.1.0",
     "heapdump": "^0.3.15",
     "lockfile": "^1.0.4",
+    "lodash": "^4.17.15",
     "logger-sharelatex": "^1.9.1",
     "lynx": "0.2.0",
     "metrics-sharelatex": "^2.6.0",
@@ -35,7 +36,6 @@
     "sequelize": "^5.21.5",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.1.0",
     "sqlite3": "^4.1.1",
-    "underscore": "^1.9.2",
     "v8-profiler-node8": "^6.1.1",
     "wrench": "~1.5.9"
   },
