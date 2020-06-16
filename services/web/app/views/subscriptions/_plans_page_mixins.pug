@@ -34,7 +34,7 @@ mixin btn_buy_student(location, plan)
 		) #{translate("start_free_trial")}
 
 //- Cards
-mixin card_student_annual
+mixin card_student_annual(location)
 	.best-value
 		strong #{translate('best_value')}
 	.card-header
@@ -43,26 +43,26 @@ mixin card_student_annual
 	.circle
 		span
 			+price_student_annual
-	+features_student('card', 'annual')
-mixin card_student_monthly
+	+features_student(location, 'annual')
+mixin card_student_monthly(location)
 	.card-header
 		h2 #{translate("student")}
 	h5.tagline #{translate('tagline_student_monthly')}
 	.circle
 		span
 			+price_student_monthly
-	+features_student('card', 'monthly')
+	+features_student(location, 'monthly')
 
-//- Features Lists
-mixin features_collaborator
+//- Features Lists, used within cards
+mixin features_collaborator(location)
 	ul.list-unstyled
 		li
 			strong #{translate("collabs_per_proj", {collabcount:10})}
 		+features_premium
 		li
 			br
-			+btn_buy_collaborator('card')
-mixin features_free
+			+btn_buy_collaborator(location)
+mixin features_free(location)
 	ul.list-unstyled
 		li #{translate("one_collaborator")}
 		li(class="hidden-xs hidden-sm") &nbsp;
@@ -73,7 +73,7 @@ mixin features_free
 		li(class="hidden-xs hidden-sm") &nbsp;
 		li
 			br
-			+btn_buy_free('card')
+			+btn_buy_free(location)
 mixin features_premium
 	li &nbsp;
 	li
@@ -82,14 +82,14 @@ mixin features_premium
 	li #{translate('full_doc_history')}
 	li #{translate('track_changes')}
 	li + #{translate('more').toLowerCase()}
-mixin features_professional
+mixin features_professional(location)
 	ul.list-unstyled
 		li
 			strong #{translate("unlimited_collabs")}
 			+features_premium
 		li
 			br
-			+btn_buy_professional('card')
+			+btn_buy_professional(location)
 mixin features_student(location, plan)
 	ul.list-unstyled
 		li
@@ -156,7 +156,8 @@ mixin plan_switch(location)
 				ng-click="switchToStudent($event,'" + location + "')"
 			) #{translate("half_price_student")}
 
-mixin allCardsAndControls(controlsRowSpaced)
+mixin allCardsAndControls(controlsRowSpaced, listLocation)
+	- var location = listLocation ? 'card_' + listLocation : 'card'
 	.row.top-switch(class=controlsRowSpaced ? "row-spaced" : "")
 		.col-md-6.col-md-offset-3
 			+plan_switch('card')
@@ -173,7 +174,7 @@ mixin allCardsAndControls(controlsRowSpaced)
 								h2 #{translate("personal")}
 							h5.tagline #{translate("tagline_personal")}
 							.circle #{translate("free")}
-							+features_free
+							+features_free(location)
 					.col-md-4
 						.card.card-highlighted
 							.best-value
@@ -183,7 +184,7 @@ mixin allCardsAndControls(controlsRowSpaced)
 							h5.tagline #{translate("tagline_collaborator")}
 							.circle
 								+price_collaborator
-							+features_collaborator
+							+features_collaborator(location)
 					.col-md-4
 						.card.card-last
 							.card-header
@@ -191,7 +192,7 @@ mixin allCardsAndControls(controlsRowSpaced)
 							h5.tagline #{translate("tagline_professional")}
 							.circle
 								+price_professional
-							+features_professional
+							+features_professional(location)
 
 				.card-group.text-centered(ng-if="ui.view == 'student'")
 					.col-md-4
@@ -200,12 +201,12 @@ mixin allCardsAndControls(controlsRowSpaced)
 								h2 #{translate("personal")}
 							h5.tagline #{translate("tagline_personal")}
 							.circle #{translate("free")}
-							+features_free
+							+features_free(location)
 
 					.col-md-4
 						.card.card-highlighted
-							+card_student_annual
+							+card_student_annual(location)
 
 					.col-md-4
 						.card.card-last
-							+card_student_monthly
+							+card_student_monthly(location)
