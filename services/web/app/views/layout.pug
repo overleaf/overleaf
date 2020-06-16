@@ -42,6 +42,7 @@ html(
 			if gaOptimize === true && typeof(gaOptimizeId) != "undefined"
 				script(type='text/javascript').
 					ga('require', '#{gaOptimizeId}')
+					ga('send', 'event', 'pageview',  document.title.substring(0, 499), window.location.href.substring(0, 499))
 				//- Anti-flicker snippet
 				style(type='text/css') .async-hide { opacity: 0 !important}
 				script(type='text/javascript').
