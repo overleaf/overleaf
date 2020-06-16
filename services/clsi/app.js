@@ -228,7 +228,7 @@ app.get('/smoke_test_force', (req, res) => smokeTest.sendNewResult(res))
 
 app.use(function(error, req, res, next) {
   if (error instanceof Errors.NotFoundError) {
-    logger.warn({ err: error, url: req.url }, 'not found error')
+    logger.log({ err: error, url: req.url }, 'not found error')
     return res.sendStatus(404)
   } else if (error.code === 'EPIPE') {
     // inspect container returns EPIPE when shutting down

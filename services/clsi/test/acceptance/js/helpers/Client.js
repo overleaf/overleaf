@@ -81,13 +81,14 @@ module.exports = Client = {
           file,
           line,
           column
-        }
+        },
+        json: true
       },
       (error, response, body) => {
         if (error != null) {
           return callback(error)
         }
-        return callback(null, JSON.parse(body))
+        return callback(null, body)
       }
     )
   },
@@ -103,13 +104,14 @@ module.exports = Client = {
           page,
           h,
           v
-        }
+        },
+        json: true
       },
       (error, response, body) => {
         if (error != null) {
           return callback(error)
         }
-        return callback(null, JSON.parse(body))
+        return callback(null, body)
       }
     )
   },
