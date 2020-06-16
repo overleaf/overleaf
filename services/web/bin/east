@@ -6,5 +6,5 @@ if [ -f /.dockerenv ]; then
   # I'm running inside docker
   npm run migrations -- "$@"
 else
-  ${SCRIPTPATH}/run web_v2 bin/east "$@"
+  ${SCRIPTPATH}/run web bin/east "$@"
 fi
