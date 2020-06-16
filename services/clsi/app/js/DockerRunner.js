@@ -25,7 +25,7 @@ const async = require('async')
 const LockManager = require('./DockerLockManager')
 const fs = require('fs')
 const Path = require('path')
-const _ = require('underscore')
+const _ = require('lodash')
 
 logger.info('using docker runner')
 

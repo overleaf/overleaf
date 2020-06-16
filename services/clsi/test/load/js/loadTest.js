@@ -13,7 +13,7 @@ const request = require('request')
 const Settings = require('settings-sharelatex')
 const async = require('async')
 const fs = require('fs')
-const _ = require('underscore')
+const _ = require('lodash')
 const concurentCompiles = 5
 const totalCompiles = 50
 

@@ -69,7 +69,8 @@ describe('DockerRunner', function() {
             return runner(callback)
           }
         }
-      }
+      },
+      globals: { Math } // used by lodash
     })
     this.Docker = Docker
     this.getContainer = Docker.prototype.getContainer

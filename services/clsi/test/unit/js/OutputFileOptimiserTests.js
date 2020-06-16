@@ -30,7 +30,8 @@ describe('OutputFileOptimiser', function() {
         child_process: { spawn: (this.spawn = sinon.stub()) },
         'logger-sharelatex': { log: sinon.stub(), warn: sinon.stub() },
         './Metrics': {}
-      }
+      },
+      globals: { Math } // used by lodash
     })
     this.directory = '/test/dir'
     return (this.callback = sinon.stub())
