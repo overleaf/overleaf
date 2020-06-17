@@ -22,9 +22,9 @@ module.exports = DiffManager = {
     // Get updates last, since then they must be ahead and it
     // might be possible to rewind to the same version as the doc.
     if (callback == null) {
-      callback = function(error, content, version, updates) {}
+      callback = function (error, content, version, updates) {}
     }
-    return DocumentUpdaterManager.getDocument(project_id, doc_id, function(
+    return DocumentUpdaterManager.getDocument(project_id, doc_id, function (
       error,
       content,
       version
@@ -40,7 +40,7 @@ module.exports = DiffManager = {
         project_id,
         doc_id,
         { from: fromVersion },
-        function(error, updates) {
+        function (error, updates) {
           if (error != null) {
             return callback(error)
           }
@@ -52,13 +52,13 @@ module.exports = DiffManager = {
 
   getDiff(project_id, doc_id, fromVersion, toVersion, callback) {
     if (callback == null) {
-      callback = function(error, diff) {}
+      callback = function (error, diff) {}
     }
     return DiffManager.getDocumentBeforeVersion(
       project_id,
       doc_id,
       fromVersion,
-      function(error, startingContent, updates) {
+      function (error, startingContent, updates) {
         let diff
         if (error != null) {
           if (error.message === 'broken-history') {
@@ -94,10 +94,10 @@ module.exports = DiffManager = {
     // versions.
     let retry
     if (_callback == null) {
-      _callback = function(error, document, rewoundUpdates) {}
+      _callback = function (error, document, rewoundUpdates) {}
     }
     let retries = 3
-    const callback = function(error, ...args) {
+    const callback = function (error, ...args) {
       if (error != null) {
         if (error.retry && retries > 0) {
           logger.warn(
@@ -113,7 +113,7 @@ module.exports = DiffManager = {
       }
     }
 
-    return (retry = function() {
+    return (retry = function () {
       retries--
       return DiffManager._tryGetDocumentBeforeVersion(
         project_id,
@@ -126,7 +126,7 @@ module.exports = DiffManager = {
 
   _tryGetDocumentBeforeVersion(project_id, doc_id, version, callback) {
     if (callback == null) {
-      callback = function(error, document, rewoundUpdates) {}
+      callback = function (error, document, rewoundUpdates) {}
     }
     logger.log(
       { project_id, doc_id, version },
@@ -136,7 +136,7 @@ module.exports = DiffManager = {
       project_id,
       doc_id,
       version,
-      function(error, content, version, updates) {
+      function (error, content, version, updates) {
         let startingContent
         if (error != null) {
           return callback(error)

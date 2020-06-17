@@ -17,14 +17,14 @@ const modulePath = '../../../../app/js/UpdateCompressor.js'
 const SandboxedModule = require('sandboxed-module')
 
 const bigstring = __range__(0, 2 * 1024 * 1024, true)
-  .map(i => 'a')
+  .map((i) => 'a')
   .join('')
 const mediumstring = __range__(0, 1024 * 1024, true)
-  .map(j => 'a')
+  .map((j) => 'a')
   .join('')
 
-describe('UpdateCompressor', function() {
-  beforeEach(function() {
+describe('UpdateCompressor', function () {
+  beforeEach(function () {
     this.UpdateCompressor = SandboxedModule.require(modulePath, {
       requires: {
         '../lib/diff_match_patch': require('../../../../app/lib/diff_match_patch')
@@ -36,8 +36,8 @@ describe('UpdateCompressor', function() {
     return (this.ts2 = Date.now() + 1000)
   })
 
-  describe('convertToSingleOpUpdates', function() {
-    it('should split grouped updates into individual updates', function() {
+  describe('convertToSingleOpUpdates', function () {
+    it('should split grouped updates into individual updates', function () {
       return expect(
         this.UpdateCompressor.convertToSingleOpUpdates([
           {
@@ -77,7 +77,7 @@ describe('UpdateCompressor', function() {
       ])
     })
 
-    it('should return no-op updates when the op list is empty', function() {
+    it('should return no-op updates when the op list is empty', function () {
       return expect(
         this.UpdateCompressor.convertToSingleOpUpdates([
           {
@@ -95,7 +95,7 @@ describe('UpdateCompressor', function() {
       ])
     })
 
-    return it('should ignore comment ops', function() {
+    return it('should ignore comment ops', function () {
       return expect(
         this.UpdateCompressor.convertToSingleOpUpdates([
           {
@@ -123,8 +123,8 @@ describe('UpdateCompressor', function() {
     })
   })
 
-  describe('concatUpdatesWithSameVersion', function() {
-    it('should concat updates with the same version', function() {
+  describe('concatUpdatesWithSameVersion', function () {
+    it('should concat updates with the same version', function () {
       return expect(
         this.UpdateCompressor.concatUpdatesWithSameVersion([
           {
@@ -173,7 +173,7 @@ describe('UpdateCompressor', function() {
       ])
     })
 
-    return it('should turn a noop into an empty op', function() {
+    return it('should turn a noop into an empty op', function () {
       return expect(
         this.UpdateCompressor.concatUpdatesWithSameVersion([
           {
@@ -196,9 +196,9 @@ describe('UpdateCompressor', function() {
     })
   })
 
-  describe('compress', function() {
-    describe('insert - insert', function() {
-      it('should append one insert to the other', function() {
+  describe('compress', function () {
+    describe('insert - insert', function () {
+      it('should append one insert to the other', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -225,7 +225,7 @@ describe('UpdateCompressor', function() {
         ])
       })
 
-      it('should insert one insert inside the other', function() {
+      it('should insert one insert inside the other', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -252,7 +252,7 @@ describe('UpdateCompressor', function() {
         ])
       })
 
-      it('should not append separated inserts', function() {
+      it('should not append separated inserts', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -288,7 +288,7 @@ describe('UpdateCompressor', function() {
         ])
       })
 
-      it('should not append inserts that are too big (second op)', function() {
+      it('should not append inserts that are too big (second op)', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -324,7 +324,7 @@ describe('UpdateCompressor', function() {
         ])
       })
 
-      it('should not append inserts that are too big (first op)', function() {
+      it('should not append inserts that are too big (first op)', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -360,7 +360,7 @@ describe('UpdateCompressor', function() {
         ])
       })
 
-      return it('should not append inserts that are too big (first and second op)', function() {
+      return it('should not append inserts that are too big (first and second op)', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -397,8 +397,8 @@ describe('UpdateCompressor', function() {
       })
     })
 
-    describe('delete - delete', function() {
-      it('should append one delete to the other', function() {
+    describe('delete - delete', function () {
+      it('should append one delete to the other', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -425,7 +425,7 @@ describe('UpdateCompressor', function() {
         ])
       })
 
-      it('should insert one delete inside the other', function() {
+      it('should insert one delete inside the other', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -452,7 +452,7 @@ describe('UpdateCompressor', function() {
         ])
       })
 
-      return it('should not append separated deletes', function() {
+      return it('should not append separated deletes', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -489,8 +489,8 @@ describe('UpdateCompressor', function() {
       })
     })
 
-    describe('insert - delete', function() {
-      it('should undo a previous insert', function() {
+    describe('insert - delete', function () {
+      it('should undo a previous insert', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -517,7 +517,7 @@ describe('UpdateCompressor', function() {
         ])
       })
 
-      it('should remove part of an insert from the middle', function() {
+      it('should remove part of an insert from the middle', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -544,7 +544,7 @@ describe('UpdateCompressor', function() {
         ])
       })
 
-      it('should cancel out two opposite updates', function() {
+      it('should cancel out two opposite updates', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -571,7 +571,7 @@ describe('UpdateCompressor', function() {
         ])
       })
 
-      it('should not combine separated updates', function() {
+      it('should not combine separated updates', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -607,7 +607,7 @@ describe('UpdateCompressor', function() {
         ])
       })
 
-      return it('should not combine updates with overlap beyond the end', function() {
+      return it('should not combine updates with overlap beyond the end', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -644,8 +644,8 @@ describe('UpdateCompressor', function() {
       })
     })
 
-    describe('delete - insert', function() {
-      it('should do a diff of the content', function() {
+    describe('delete - insert', function () {
+      it('should do a diff of the content', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -681,7 +681,7 @@ describe('UpdateCompressor', function() {
         ])
       })
 
-      return it('should return a no-op if the delete and insert are the same', function() {
+      return it('should return a no-op if the delete and insert are the same', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -709,8 +709,8 @@ describe('UpdateCompressor', function() {
       })
     })
 
-    describe('noop - insert', function() {
-      return it('should leave them untouched', function() {
+    describe('noop - insert', function () {
+      return it('should leave them untouched', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -747,8 +747,8 @@ describe('UpdateCompressor', function() {
       })
     })
 
-    return describe('noop - delete', function() {
-      return it('should leave them untouched', function() {
+    return describe('noop - delete', function () {
+      return it('should leave them untouched', function () {
         return expect(
           this.UpdateCompressor.compressUpdates([
             {
@@ -786,9 +786,9 @@ describe('UpdateCompressor', function() {
     })
   })
 
-  return describe('compressRawUpdates', function() {
-    return describe('merging in-place with an array op', function() {
-      return it('should not change the existing last updates', function() {
+  return describe('compressRawUpdates', function () {
+    return describe('merging in-place with an array op', function () {
+      return it('should not change the existing last updates', function () {
         return expect(
           this.UpdateCompressor.compressRawUpdates(
             {

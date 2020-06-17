@@ -26,7 +26,7 @@ const MAX_HTTP_REQUEST_LENGTH = 15000 // 15 seconds
 module.exports = WebApiManager = {
   sendRequest(url, callback) {
     if (callback == null) {
-      callback = function(error, body) {}
+      callback = function (error, body) {}
     }
     return request.get(
       {
@@ -39,7 +39,7 @@ module.exports = WebApiManager = {
           sendImmediately: true
         }
       },
-      function(error, res, body) {
+      function (error, res, body) {
         if (error != null) {
           return callback(error)
         }
@@ -61,11 +61,11 @@ module.exports = WebApiManager = {
 
   getUserInfo(user_id, callback) {
     if (callback == null) {
-      callback = function(error, userInfo) {}
+      callback = function (error, userInfo) {}
     }
     const url = `/user/${user_id}/personal_info`
     logger.log({ user_id }, 'getting user info from web')
-    return WebApiManager.sendRequest(url, function(error, body) {
+    return WebApiManager.sendRequest(url, function (error, body) {
       let user
       if (error != null) {
         logger.error({ err: error, user_id, url }, 'error accessing web')
@@ -93,11 +93,11 @@ module.exports = WebApiManager = {
 
   getProjectDetails(project_id, callback) {
     if (callback == null) {
-      callback = function(error, details) {}
+      callback = function (error, details) {}
     }
     const url = `/project/${project_id}/details`
     logger.log({ project_id }, 'getting project details from web')
-    return WebApiManager.sendRequest(url, function(error, body) {
+    return WebApiManager.sendRequest(url, function (error, body) {
       let project
       if (error != null) {
         logger.error({ err: error, project_id, url }, 'error accessing web')

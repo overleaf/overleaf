@@ -17,19 +17,19 @@ module.exports = {
   },
   apis: {
     documentupdater: {
-      url: `http://${process.env.DOCUMENT_UPDATER_HOST ||
+      url: `http://${
+        process.env.DOCUMENT_UPDATER_HOST ||
         process.env.DOCUPDATER_HOST ||
-        'localhost'}:3003`
+        'localhost'
+      }:3003`
     },
     docstore: {
       url: `http://${process.env.DOCSTORE_HOST || 'localhost'}:3016`
     },
     web: {
-      url: `http://${process.env.WEB_API_HOST ||
-        process.env.WEB_HOST ||
-        'localhost'}:${process.env.WEB_API_PORT ||
-        process.env.WEB_PORT ||
-        3000}`,
+      url: `http://${
+        process.env.WEB_API_HOST || process.env.WEB_HOST || 'localhost'
+      }:${process.env.WEB_API_PORT || process.env.WEB_PORT || 3000}`,
       user: process.env.WEB_API_USER || 'sharelatex',
       pass: process.env.WEB_API_PASSWORD || 'password'
     }
@@ -40,11 +40,11 @@ module.exports = {
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD || '',
       key_schema: {
-        historyLock({ doc_id }) {
-          return `HistoryLock:{${doc_id}}`
+        historyLock({ doc_id: docId }) {
+          return `HistoryLock:{${docId}}`
         },
-        historyIndexLock({ project_id }) {
-          return `HistoryIndexLock:{${project_id}}`
+        historyIndexLock({ project_id: projectId }) {
+          return `HistoryIndexLock:{${projectId}}`
         }
       }
     },
@@ -53,11 +53,11 @@ module.exports = {
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD || '',
       key_schema: {
-        uncompressedHistoryOps({ doc_id }) {
-          return `UncompressedHistoryOps:{${doc_id}}`
+        uncompressedHistoryOps({ doc_id: docId }) {
+          return `UncompressedHistoryOps:{${docId}}`
         },
-        docsWithHistoryOps({ project_id }) {
-          return `DocsWithHistoryOps:{${project_id}}`
+        docsWithHistoryOps({ project_id: projectId }) {
+          return `DocsWithHistoryOps:{${projectId}}`
         }
       }
     }

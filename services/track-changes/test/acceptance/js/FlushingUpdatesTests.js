@@ -24,13 +24,13 @@ const TrackChangesApp = require('./helpers/TrackChangesApp')
 const TrackChangesClient = require('./helpers/TrackChangesClient')
 const MockWebApi = require('./helpers/MockWebApi')
 
-describe('Flushing updates', function() {
-  before(function(done) {
+describe('Flushing updates', function () {
+  before(function (done) {
     return TrackChangesApp.ensureRunning(done)
   })
 
-  describe("flushing a doc's updates", function() {
-    before(function(done) {
+  describe("flushing a doc's updates", function () {
+    before(function (done) {
       this.project_id = ObjectId().toString()
       this.doc_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
@@ -46,14 +46,14 @@ describe('Flushing updates', function() {
             v: 3
           }
         ],
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
           return TrackChangesClient.flushDoc(
             this.project_id,
             this.doc_id,
-            error => {
+            (error) => {
               if (error != null) {
                 throw error
               }
@@ -65,7 +65,7 @@ describe('Flushing updates', function() {
       return null
     })
 
-    return it('should flush the op into mongo', function(done) {
+    return it('should flush the op into mongo', function (done) {
       TrackChangesClient.getCompressedUpdates(this.doc_id, (error, updates) => {
         expect(updates[0].pack[0].op).to.deep.equal([
           {
@@ -79,9 +79,9 @@ describe('Flushing updates', function() {
     })
   })
 
-  return describe("flushing a project's updates", function() {
-    describe('with versioning enabled', function() {
-      before(function(done) {
+  return describe("flushing a project's updates", function () {
+    describe('with versioning enabled', function () {
+      before(function (done) {
         this.project_id = ObjectId().toString()
         this.doc_id = ObjectId().toString()
         this.user_id = ObjectId().toString()
@@ -109,11 +109,11 @@ describe('Flushing updates', function() {
               v: 3
             }
           ],
-          error => {
+          (error) => {
             if (error != null) {
               throw error
             }
-            return TrackChangesClient.flushProject(this.project_id, error => {
+            return TrackChangesClient.flushProject(this.project_id, (error) => {
               if (error != null) {
                 throw error
               }
@@ -124,7 +124,7 @@ describe('Flushing updates', function() {
         return null
       })
 
-      it('should not mark the updates for deletion', function(done) {
+      it('should not mark the updates for deletion', function (done) {
         TrackChangesClient.getCompressedUpdates(
           this.doc_id,
           (error, updates) => {
@@ -135,7 +135,7 @@ describe('Flushing updates', function() {
         return null
       })
 
-      return it('should preserve history forever', function(done) {
+      return it('should preserve history forever', function (done) {
         TrackChangesClient.getProjectMetaData(
           this.project_id,
           (error, project) => {
@@ -147,8 +147,8 @@ describe('Flushing updates', function() {
       })
     })
 
-    describe('without versioning enabled', function() {
-      before(function(done) {
+    describe('without versioning enabled', function () {
+      before(function (done) {
         this.project_id = ObjectId().toString()
         this.doc_id = ObjectId().toString()
         this.user_id = ObjectId().toString()
@@ -176,11 +176,11 @@ describe('Flushing updates', function() {
               v: 3
             }
           ],
-          error => {
+          (error) => {
             if (error != null) {
               throw error
             }
-            return TrackChangesClient.flushProject(this.project_id, error => {
+            return TrackChangesClient.flushProject(this.project_id, (error) => {
               if (error != null) {
                 throw error
               }
@@ -191,7 +191,7 @@ describe('Flushing updates', function() {
         return null
       })
 
-      return it('should mark the updates for deletion', function(done) {
+      return it('should mark the updates for deletion', function (done) {
         TrackChangesClient.getCompressedUpdates(
           this.doc_id,
           (error, updates) => {
@@ -203,8 +203,8 @@ describe('Flushing updates', function() {
       })
     })
 
-    return describe('without versioning enabled but with preserveHistory set to true', function() {
-      before(function(done) {
+    return describe('without versioning enabled but with preserveHistory set to true', function () {
+      before(function (done) {
         this.project_id = ObjectId().toString()
         this.doc_id = ObjectId().toString()
         this.user_id = ObjectId().toString()
@@ -219,7 +219,7 @@ describe('Flushing updates', function() {
 
         TrackChangesClient.setPreserveHistoryForProject(
           this.project_id,
-          error => {
+          (error) => {
             if (error != null) {
               throw error
             }
@@ -241,13 +241,13 @@ describe('Flushing updates', function() {
                   v: 3
                 }
               ],
-              error => {
+              (error) => {
                 if (error != null) {
                   throw error
                 }
                 return TrackChangesClient.flushProject(
                   this.project_id,
-                  error => {
+                  (error) => {
                     if (error != null) {
                       throw error
                     }
@@ -261,7 +261,7 @@ describe('Flushing updates', function() {
         return null
       })
 
-      return it('should not mark the updates for deletion', function(done) {
+      return it('should not mark the updates for deletion', function (done) {
         TrackChangesClient.getCompressedUpdates(
           this.doc_id,
           (error, updates) => {

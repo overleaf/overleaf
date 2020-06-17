@@ -21,14 +21,14 @@ module.exports = MockWebApi = {
 
   getUserInfo(user_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return callback(null, this.users[user_id] || null)
   },
 
   getProjectDetails(project_id, callback) {
     if (callback == null) {
-      callback = function(error, project) {}
+      callback = function (error, project) {}
     }
     return callback(null, this.projects[project_id])
   },
@@ -61,12 +61,12 @@ module.exports = MockWebApi = {
     })
 
     return app
-      .listen(3000, error => {
+      .listen(3000, (error) => {
         if (error != null) {
           throw error
         }
       })
-      .on('error', error => {
+      .on('error', (error) => {
         console.error('error starting MockWebApiServer:', error.message)
         return process.exit(1)
       })

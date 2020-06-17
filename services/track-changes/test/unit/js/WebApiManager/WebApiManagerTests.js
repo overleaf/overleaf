@@ -16,8 +16,8 @@ const { expect } = chai
 const modulePath = '../../../../app/js/WebApiManager.js'
 const SandboxedModule = require('sandboxed-module')
 
-describe('WebApiManager', function() {
-  beforeEach(function() {
+describe('WebApiManager', function () {
+  beforeEach(function () {
     this.WebApiManager = SandboxedModule.require(modulePath, {
       requires: {
         requestretry: (this.request = {}),
@@ -49,9 +49,9 @@ describe('WebApiManager', function() {
     return (this.project = { features: 'mock-features' })
   })
 
-  describe('getUserInfo', function() {
-    describe('successfully', function() {
-      beforeEach(function() {
+  describe('getUserInfo', function () {
+    describe('successfully', function () {
+      beforeEach(function () {
         this.body = JSON.stringify(this.user_info)
         this.request.get = sinon
           .stub()
@@ -59,7 +59,7 @@ describe('WebApiManager', function() {
         return this.WebApiManager.getUserInfo(this.user_id, this.callback)
       })
 
-      it('should get the user from the web api', function() {
+      it('should get the user from the web api', function () {
         return this.request.get
           .calledWithMatch({
             url: `${this.settings.apis.web.url}/user/${this.user_id}/personal_info`,
@@ -72,7 +72,7 @@ describe('WebApiManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with only the email, id and names', function() {
+      return it('should call the callback with only the email, id and names', function () {
         return this.callback
           .calledWith(null, {
             id: this.user_id,
@@ -84,8 +84,8 @@ describe('WebApiManager', function() {
       })
     })
 
-    describe('when the web API returns an error', function() {
-      beforeEach(function() {
+    describe('when the web API returns an error', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(
@@ -97,20 +97,20 @@ describe('WebApiManager', function() {
         return this.WebApiManager.getUserInfo(this.user_id, this.callback)
       })
 
-      return it('should return an error to the callback', function() {
+      return it('should return an error to the callback', function () {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    describe('when the web returns a failure error code', function() {
-      beforeEach(function() {
+    describe('when the web returns a failure error code', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500, attempts: 42 }, '')
         return this.WebApiManager.getUserInfo(this.user_id, this.callback)
       })
 
-      return it('should return the callback with an error', function() {
+      return it('should return the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match.has(
@@ -122,23 +122,23 @@ describe('WebApiManager', function() {
       })
     })
 
-    return describe('when the user cannot be found', function() {
-      beforeEach(function() {
+    return describe('when the user cannot be found', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 404 }, 'nothing')
         return this.WebApiManager.getUserInfo(this.user_id, this.callback)
       })
 
-      return it('should return a null value', function() {
+      return it('should return a null value', function () {
         return this.callback.calledWith(null, null).should.equal(true)
       })
     })
   })
 
-  return describe('getProjectDetails', function() {
-    describe('successfully', function() {
-      beforeEach(function() {
+  return describe('getProjectDetails', function () {
+    describe('successfully', function () {
+      beforeEach(function () {
         this.body = JSON.stringify(this.project)
         this.request.get = sinon
           .stub()
@@ -149,7 +149,7 @@ describe('WebApiManager', function() {
         )
       })
 
-      it('should get the project from the web api', function() {
+      it('should get the project from the web api', function () {
         return this.request.get
           .calledWithMatch({
             url: `${this.settings.apis.web.url}/project/${this.project_id}/details`,
@@ -162,13 +162,13 @@ describe('WebApiManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the project', function() {
+      return it('should call the callback with the project', function () {
         return this.callback.calledWith(null, this.project).should.equal(true)
       })
     })
 
-    describe('when the web API returns an error', function() {
-      beforeEach(function() {
+    describe('when the web API returns an error', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(
@@ -183,13 +183,13 @@ describe('WebApiManager', function() {
         )
       })
 
-      return it('should return an error to the callback', function() {
+      return it('should return an error to the callback', function () {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when the web returns a failure error code', function() {
-      beforeEach(function() {
+    return describe('when the web returns a failure error code', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500, attempts: 42 }, '')
@@ -199,7 +199,7 @@ describe('WebApiManager', function() {
         )
       })
 
-      return it('should return the callback with an error', function() {
+      return it('should return the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match.has(

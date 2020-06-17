@@ -18,8 +18,8 @@ const { ObjectId } = require('mongojs')
 const MemoryStream = require('memorystream')
 const zlib = require('zlib')
 
-describe('MongoAWS', function() {
-  beforeEach(function() {
+describe('MongoAWS', function () {
+  beforeEach(function () {
     this.MongoAWS = SandboxedModule.require(modulePath, {
       singleOnly: true,
       requires: {
@@ -58,8 +58,8 @@ describe('MongoAWS', function() {
     return (this.callback = sinon.stub())
   })
 
-  describe('archivePack', function() {
-    beforeEach(function(done) {
+  describe('archivePack', function () {
+    beforeEach(function (done) {
       this.awssdk.config = { update: sinon.stub() }
       this.awssdk.S3 = sinon.stub()
       this.S3S.WriteStream = () => MemoryStream.createWriteStream()
@@ -79,13 +79,13 @@ describe('MongoAWS', function() {
       )
     })
 
-    return it('should call the callback', function() {
+    return it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })
 
-  return describe('unArchivePack', function() {
-    beforeEach(function(done) {
+  return describe('unArchivePack', function () {
+    beforeEach(function (done) {
       return zlib.gzip('{"pack":"123"}', (err, zbuf) => {
         this.awssdk.config = { update: sinon.stub() }
         this.awssdk.S3 = sinon.stub()
@@ -106,7 +106,7 @@ describe('MongoAWS', function() {
       })
     })
 
-    return it('should call db.docHistory.insert', function() {
+    return it('should call db.docHistory.insert', function () {
       return this.db.docHistory.insert.called.should.equal(true)
     })
   })

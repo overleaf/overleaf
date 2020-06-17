@@ -30,15 +30,15 @@ const TrackChangesClient = require('./helpers/TrackChangesClient')
 const MockDocStoreApi = require('./helpers/MockDocStoreApi')
 const MockWebApi = require('./helpers/MockWebApi')
 
-describe('Archiving updates', function() {
-  before(function(done) {
+describe('Archiving updates', function () {
+  before(function (done) {
     if (
       __guard__(
         __guard__(
           Settings != null ? Settings.trackchanges : undefined,
-          x1 => x1.s3
+          (x1) => x1.s3
         ),
-        x => x.key.length
+        (x) => x.key.length
       ) < 1
     ) {
       const message = new Error('s3 keys not setup, this test setup will fail')
@@ -48,7 +48,7 @@ describe('Archiving updates', function() {
     return TrackChangesClient.waitForS3(done)
   })
 
-  before(function(done) {
+  before(function (done) {
     this.now = Date.now()
     this.to = this.now
     this.user_id = ObjectId().toString()
@@ -104,14 +104,14 @@ describe('Archiving updates', function() {
         this.project_id,
         this.doc_id,
         this.updates,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
           return TrackChangesClient.flushDoc(
             this.project_id,
             this.doc_id,
-            error => {
+            (error) => {
               if (error != null) {
                 throw error
               }
@@ -124,7 +124,7 @@ describe('Archiving updates', function() {
     return null
   })
 
-  after(function(done) {
+  after(function (done) {
     MockWebApi.getUserInfo.restore()
     return db.docHistory.remove(
       { project_id: ObjectId(this.project_id) },
@@ -143,18 +143,22 @@ describe('Archiving updates', function() {
     )
   })
 
-  describe("archiving a doc's updates", function() {
-    before(function(done) {
-      TrackChangesClient.pushDocHistory(this.project_id, this.doc_id, error => {
-        if (error != null) {
-          throw error
+  describe("archiving a doc's updates", function () {
+    before(function (done) {
+      TrackChangesClient.pushDocHistory(
+        this.project_id,
+        this.doc_id,
+        (error) => {
+          if (error != null) {
+            throw error
+          }
+          return done()
         }
-        return done()
-      })
+      )
       return null
     })
 
-    it('should have one cached pack', function(done) {
+    it('should have one cached pack', function (done) {
       return db.docHistory.count(
         { doc_id: ObjectId(this.doc_id), expiresAt: { $exists: true } },
         (error, count) => {
@@ -167,7 +171,7 @@ describe('Archiving updates', function() {
       )
     })
 
-    it('should have one remaining pack after cache is expired', function(done) {
+    it('should have one remaining pack after cache is expired', function (done) {
       return db.docHistory.remove(
         {
           doc_id: ObjectId(this.doc_id),
@@ -191,7 +195,7 @@ describe('Archiving updates', function() {
       )
     })
 
-    it('should have a docHistoryIndex entry marked as inS3', function(done) {
+    it('should have a docHistoryIndex entry marked as inS3', function (done) {
       return db.docHistoryIndex.findOne(
         { _id: ObjectId(this.doc_id) },
         (error, index) => {
@@ -204,7 +208,7 @@ describe('Archiving updates', function() {
       )
     })
 
-    it('should have a docHistoryIndex entry with the last version', function(done) {
+    it('should have a docHistoryIndex entry with the last version', function (done) {
       return db.docHistoryIndex.findOne(
         { _id: ObjectId(this.doc_id) },
         (error, index) => {
@@ -217,7 +221,7 @@ describe('Archiving updates', function() {
       )
     })
 
-    return it('should store 1024 doc changes in S3 in one pack', function(done) {
+    return it('should store 1024 doc changes in S3 in one pack', function (done) {
       return db.docHistoryIndex.findOne(
         { _id: ObjectId(this.doc_id) },
         (error, index) => {
@@ -240,18 +244,22 @@ describe('Archiving updates', function() {
     })
   })
 
-  return describe("unarchiving a doc's updates", function() {
-    before(function(done) {
-      TrackChangesClient.pullDocHistory(this.project_id, this.doc_id, error => {
-        if (error != null) {
-          throw error
+  return describe("unarchiving a doc's updates", function () {
+    before(function (done) {
+      TrackChangesClient.pullDocHistory(
+        this.project_id,
+        this.doc_id,
+        (error) => {
+          if (error != null) {
+            throw error
+          }
+          return done()
         }
-        return done()
-      })
+      )
       return null
     })
 
-    return it('should restore both packs', function(done) {
+    return it('should restore both packs', function (done) {
       return db.docHistory.count(
         { doc_id: ObjectId(this.doc_id) },
         (error, count) => {

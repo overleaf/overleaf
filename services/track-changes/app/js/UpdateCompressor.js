@@ -42,7 +42,7 @@ module.exports = UpdateCompressor = {
     const splitUpdates = []
     for (const update of Array.from(updates)) {
       // Reject any non-insert or delete ops, i.e. comments
-      const ops = update.op.filter(o => o.i != null || o.d != null)
+      const ops = update.op.filter((o) => o.i != null || o.d != null)
       if (ops.length === 0) {
         splitUpdates.push({
           op: UpdateCompressor.NOOP,
@@ -97,7 +97,7 @@ module.exports = UpdateCompressor = {
     if (
       __guard__(
         lastPreviousUpdate != null ? lastPreviousUpdate.op : undefined,
-        x => x.length
+        (x) => x.length
       ) > 1
     ) {
       // if the last previous update was an array op, don't compress onto it.
@@ -183,7 +183,8 @@ module.exports = UpdateCompressor = {
     if (
       firstOp.i != null &&
       secondOp.i != null &&
-      firstOp.p <= secondOp.p && secondOp.p <= firstOp.p + firstOp.i.length &&
+      firstOp.p <= secondOp.p &&
+      secondOp.p <= firstOp.p + firstOp.i.length &&
       firstSize + secondSize < UpdateCompressor.MAX_UPDATE_SIZE
     ) {
       return [
@@ -204,7 +205,8 @@ module.exports = UpdateCompressor = {
     } else if (
       firstOp.d != null &&
       secondOp.d != null &&
-      secondOp.p <= firstOp.p && firstOp.p <= secondOp.p + secondOp.d.length &&
+      secondOp.p <= firstOp.p &&
+      firstOp.p <= secondOp.p + secondOp.d.length &&
       firstSize + secondSize < UpdateCompressor.MAX_UPDATE_SIZE
     ) {
       return [
@@ -225,7 +227,8 @@ module.exports = UpdateCompressor = {
     } else if (
       firstOp.i != null &&
       secondOp.d != null &&
-      firstOp.p <= secondOp.p && secondOp.p <= firstOp.p + firstOp.i.length
+      firstOp.p <= secondOp.p &&
+      secondOp.p <= firstOp.p + firstOp.i.length
     ) {
       offset = secondOp.p - firstOp.p
       const insertedText = firstOp.i.slice(offset, offset + secondOp.d.length)
@@ -276,7 +279,7 @@ module.exports = UpdateCompressor = {
           }
         ]
       } else {
-        return diff_ops.map(function(op) {
+        return diff_ops.map(function (op) {
           op.p += offset
           return {
             meta: {
@@ -299,7 +302,7 @@ module.exports = UpdateCompressor = {
   UNCHANGED: 0,
   diffAsShareJsOps(before, after, callback) {
     if (callback == null) {
-      callback = function(error, ops) {}
+      callback = function (error, ops) {}
     }
     const diffs = dmp.diff_main(before, after)
     dmp.diff_cleanupSemantic(diffs)

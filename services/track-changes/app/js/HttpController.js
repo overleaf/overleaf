@@ -24,7 +24,7 @@ const _ = require('underscore')
 module.exports = HttpController = {
   flushDoc(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { doc_id } = req.params
     const { project_id } = req.params
@@ -32,7 +32,7 @@ module.exports = HttpController = {
     return UpdatesManager.processUncompressedUpdatesWithLock(
       project_id,
       doc_id,
-      function(error) {
+      function (error) {
         if (error != null) {
           return next(error)
         }
@@ -43,13 +43,13 @@ module.exports = HttpController = {
 
   flushProject(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
     logger.log({ project_id }, 'compressing project history')
     return UpdatesManager.processUncompressedUpdatesForProject(
       project_id,
-      function(error) {
+      function (error) {
         if (error != null) {
           return next(error)
         }
@@ -61,11 +61,11 @@ module.exports = HttpController = {
   flushAll(req, res, next) {
     // limit on projects to flush or -1 for all (default)
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const limit = req.query.limit != null ? parseInt(req.query.limit, 10) : -1
     logger.log({ limit }, 'flushing all projects')
-    return UpdatesManager.flushAll(limit, function(error, result) {
+    return UpdatesManager.flushAll(limit, function (error, result) {
       if (error != null) {
         return next(error)
       }
@@ -92,10 +92,10 @@ module.exports = HttpController = {
 
   checkDanglingUpdates(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     logger.log('checking dangling updates')
-    return UpdatesManager.getDanglingUpdates(function(error, result) {
+    return UpdatesManager.getDanglingUpdates(function (error, result) {
       if (error != null) {
         return next(error)
       }
@@ -110,39 +110,40 @@ module.exports = HttpController = {
 
   checkDoc(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { doc_id } = req.params
     const { project_id } = req.params
     logger.log({ project_id, doc_id }, 'checking doc history')
-    return DiffManager.getDocumentBeforeVersion(project_id, doc_id, 1, function(
-      error,
-      document,
-      rewoundUpdates
-    ) {
-      if (error != null) {
-        return next(error)
-      }
-      const broken = []
-      for (const update of Array.from(rewoundUpdates)) {
-        for (const op of Array.from(update.op)) {
-          if (op.broken === true) {
-            broken.push(op)
+    return DiffManager.getDocumentBeforeVersion(
+      project_id,
+      doc_id,
+      1,
+      function (error, document, rewoundUpdates) {
+        if (error != null) {
+          return next(error)
+        }
+        const broken = []
+        for (const update of Array.from(rewoundUpdates)) {
+          for (const op of Array.from(update.op)) {
+            if (op.broken === true) {
+              broken.push(op)
+            }
           }
         }
+        if (broken.length > 0) {
+          return res.send(broken)
+        } else {
+          return res.sendStatus(204)
+        }
       }
-      if (broken.length > 0) {
-        return res.send(broken)
-      } else {
-        return res.sendStatus(204)
-      }
-    })
+    )
   },
 
   getDiff(req, res, next) {
     let from, to
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { doc_id } = req.params
     const { project_id } = req.params
@@ -159,7 +160,7 @@ module.exports = HttpController = {
     }
 
     logger.log({ project_id, doc_id, from, to }, 'getting diff')
-    return DiffManager.getDiff(project_id, doc_id, from, to, function(
+    return DiffManager.getDiff(project_id, doc_id, from, to, function (
       error,
       diff
     ) {
@@ -173,7 +174,7 @@ module.exports = HttpController = {
   getUpdates(req, res, next) {
     let before, min_count
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
 
@@ -187,7 +188,7 @@ module.exports = HttpController = {
     return UpdatesManager.getSummarizedProjectUpdates(
       project_id,
       { before, min_count },
-      function(error, updates, nextBeforeTimestamp) {
+      function (error, updates, nextBeforeTimestamp) {
         if (error != null) {
           return next(error)
         }
@@ -201,7 +202,7 @@ module.exports = HttpController = {
 
   restore(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     let { doc_id, project_id, version } = req.params
     const user_id = req.headers['x-user-id']
@@ -211,7 +212,7 @@ module.exports = HttpController = {
       doc_id,
       version,
       user_id,
-      function(error) {
+      function (error) {
         if (error != null) {
           return next(error)
         }
@@ -222,12 +223,12 @@ module.exports = HttpController = {
 
   pushDocHistory(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
     const { doc_id } = req.params
     logger.log({ project_id, doc_id }, 'pushing all finalised changes to s3')
-    return PackManager.pushOldPacks(project_id, doc_id, function(error) {
+    return PackManager.pushOldPacks(project_id, doc_id, function (error) {
       if (error != null) {
         return next(error)
       }
@@ -237,12 +238,12 @@ module.exports = HttpController = {
 
   pullDocHistory(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { project_id } = req.params
     const { doc_id } = req.params
     logger.log({ project_id, doc_id }, 'pulling all packs from s3')
-    return PackManager.pullOldPacks(project_id, doc_id, function(error) {
+    return PackManager.pullOldPacks(project_id, doc_id, function (error) {
       if (error != null) {
         return next(error)
       }
@@ -251,7 +252,7 @@ module.exports = HttpController = {
   },
 
   healthCheck(req, res) {
-    return HealthChecker.check(function(err) {
+    return HealthChecker.check(function (err) {
       if (err != null) {
         logger.err({ err }, 'error performing health check')
         return res.sendStatus(500)
@@ -262,7 +263,7 @@ module.exports = HttpController = {
   },
 
   checkLock(req, res) {
-    return HealthChecker.checkLock(function(err) {
+    return HealthChecker.checkLock(function (err) {
       if (err != null) {
         logger.err({ err }, 'error performing lock check')
         return res.sendStatus(500)

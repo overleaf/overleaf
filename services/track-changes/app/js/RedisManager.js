@@ -22,7 +22,7 @@ const async = require('async')
 module.exports = RedisManager = {
   getOldestDocUpdates(doc_id, batchSize, callback) {
     if (callback == null) {
-      callback = function(error, jsonUpdates) {}
+      callback = function (error, jsonUpdates) {}
     }
     const key = Keys.uncompressedHistoryOps({ doc_id })
     return rclient.lrange(key, 0, batchSize - 1, callback)
@@ -31,10 +31,10 @@ module.exports = RedisManager = {
   expandDocUpdates(jsonUpdates, callback) {
     let rawUpdates
     if (callback == null) {
-      callback = function(error, rawUpdates) {}
+      callback = function (error, rawUpdates) {}
     }
     try {
-      rawUpdates = Array.from(jsonUpdates || []).map(update =>
+      rawUpdates = Array.from(jsonUpdates || []).map((update) =>
         JSON.parse(update)
       )
     } catch (e) {
@@ -45,14 +45,14 @@ module.exports = RedisManager = {
 
   deleteAppliedDocUpdates(project_id, doc_id, docUpdates, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const multi = rclient.multi()
     // Delete all the updates which have been applied (exact match)
     for (const update of Array.from(docUpdates || [])) {
       multi.lrem(Keys.uncompressedHistoryOps({ doc_id }), 1, update)
     }
-    return multi.exec(function(error, results) {
+    return multi.exec(function (error, results) {
       if (error != null) {
         return callback(error)
       }
@@ -61,7 +61,7 @@ module.exports = RedisManager = {
       return rclient.srem(
         Keys.docsWithHistoryOps({ project_id }),
         doc_id,
-        function(error) {
+        function (error) {
           if (error != null) {
             return callback(error)
           }
@@ -73,7 +73,7 @@ module.exports = RedisManager = {
 
   getDocIdsWithHistoryOps(project_id, callback) {
     if (callback == null) {
-      callback = function(error, doc_ids) {}
+      callback = function (error, doc_ids) {}
     }
     return rclient.smembers(Keys.docsWithHistoryOps({ project_id }), callback)
   },
@@ -93,8 +93,8 @@ module.exports = RedisManager = {
     let cursor = 0 // redis iterator
     const keySet = {} // use hash to avoid duplicate results
     // scan over all keys looking for pattern
-    var doIteration = cb =>
-      node.scan(cursor, 'MATCH', pattern, 'COUNT', 1000, function(
+    var doIteration = (cb) =>
+      node.scan(cursor, 'MATCH', pattern, 'COUNT', 1000, function (
         error,
         reply
       ) {
@@ -132,11 +132,11 @@ module.exports = RedisManager = {
 
   getProjectIdsWithHistoryOps(callback) {
     if (callback == null) {
-      callback = function(error, project_ids) {}
+      callback = function (error, project_ids) {}
     }
     return RedisManager._getKeys(
       Keys.docsWithHistoryOps({ project_id: '*' }),
-      function(error, project_keys) {
+      function (error, project_keys) {
         if (error != null) {
           return callback(error)
         }
@@ -150,11 +150,11 @@ module.exports = RedisManager = {
     // return all the docids, to find dangling history entries after
     // everything is flushed.
     if (callback == null) {
-      callback = function(error, doc_ids) {}
+      callback = function (error, doc_ids) {}
     }
     return RedisManager._getKeys(
       Keys.uncompressedHistoryOps({ doc_id: '*' }),
-      function(error, doc_keys) {
+      function (error, doc_keys) {
         if (error != null) {
           return callback(error)
         }

@@ -23,7 +23,7 @@ module.exports = {
   callbacks: [],
   ensureRunning(callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     if (this.running) {
       return callback()
@@ -37,10 +37,10 @@ module.exports = {
           Settings.internal != null
             ? Settings.internal.trackchanges
             : undefined,
-          x => x.port
+          (x) => x.port
         ),
         'localhost',
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }

@@ -17,8 +17,8 @@ const { expect } = chai
 const modulePath = '../../../../app/js/DiffGenerator.js'
 const SandboxedModule = require('sandboxed-module')
 
-describe('DiffGenerator', function() {
-  beforeEach(function() {
+describe('DiffGenerator', function () {
+  beforeEach(function () {
     this.DiffGenerator = SandboxedModule.require(modulePath, {
       requires: {
         'logger-sharelatex': { warn: sinon.stub() }
@@ -34,9 +34,9 @@ describe('DiffGenerator', function() {
     })
   })
 
-  describe('rewindOp', function() {
-    describe('rewinding an insert', function() {
-      return it('should undo the insert', function() {
+  describe('rewindOp', function () {
+    describe('rewinding an insert', function () {
+      return it('should undo the insert', function () {
         const content = 'hello world'
         const rewoundContent = this.DiffGenerator.rewindOp(content, {
           p: 6,
@@ -46,8 +46,8 @@ describe('DiffGenerator', function() {
       })
     })
 
-    describe('rewinding a delete', function() {
-      return it('should undo the delete', function() {
+    describe('rewinding a delete', function () {
+      return it('should undo the delete', function () {
         const content = 'hello rld'
         const rewoundContent = this.DiffGenerator.rewindOp(content, {
           p: 6,
@@ -57,8 +57,8 @@ describe('DiffGenerator', function() {
       })
     })
 
-    describe('with an inconsistent update', function() {
-      return it('should throw an error', function() {
+    describe('with an inconsistent update', function () {
+      return it('should throw an error', function () {
         const content = 'hello world'
         return expect(() => {
           return this.DiffGenerator.rewindOp(content, { p: 6, i: 'foo' })
@@ -66,8 +66,8 @@ describe('DiffGenerator', function() {
       })
     })
 
-    return describe('with an update which is beyond the length of the content', function() {
-      return it('should undo the insert as if it were at the end of the content', function() {
+    return describe('with an update which is beyond the length of the content', function () {
+      return it('should undo the insert as if it were at the end of the content', function () {
         const content = 'foobar'
         const rewoundContent = this.DiffGenerator.rewindOp(content, {
           p: 4,
@@ -78,8 +78,8 @@ describe('DiffGenerator', function() {
     })
   })
 
-  describe('rewindUpdate', function() {
-    return it('should rewind ops in reverse', function() {
+  describe('rewindUpdate', function () {
+    return it('should rewind ops in reverse', function () {
       const content = 'aaabbbccc'
       const update = {
         op: [
@@ -92,8 +92,8 @@ describe('DiffGenerator', function() {
     })
   })
 
-  describe('rewindUpdates', function() {
-    return it('should rewind updates in reverse', function() {
+  describe('rewindUpdates', function () {
+    return it('should rewind updates in reverse', function () {
       const content = 'aaabbbccc'
       const updates = [
         { op: [{ p: 3, i: 'bbb' }] },
@@ -104,8 +104,8 @@ describe('DiffGenerator', function() {
     })
   })
 
-  describe('buildDiff', function() {
-    beforeEach(function() {
+  describe('buildDiff', function () {
+    beforeEach(function () {
       this.diff = [{ u: 'mock-diff' }]
       this.content = 'Hello world'
       this.updates = [
@@ -121,11 +121,11 @@ describe('DiffGenerator', function() {
       ))
     })
 
-    it('should return the diff', function() {
+    it('should return the diff', function () {
       return this.result.should.deep.equal(this.diff)
     })
 
-    it('should build the content into an initial diff', function() {
+    it('should build the content into an initial diff', function () {
       return this.DiffGenerator.applyUpdateToDiff
         .calledWith(
           [
@@ -138,24 +138,24 @@ describe('DiffGenerator', function() {
         .should.equal(true)
     })
 
-    it('should apply each update', function() {
-      return Array.from(this.updates).map(update =>
+    it('should apply each update', function () {
+      return Array.from(this.updates).map((update) =>
         this.DiffGenerator.applyUpdateToDiff
           .calledWith(sinon.match.any, update)
           .should.equal(true)
       )
     })
 
-    return it('should compress the diff', function() {
+    return it('should compress the diff', function () {
       return this.DiffGenerator.compressDiff
         .calledWith(this.diff)
         .should.equal(true)
     })
   })
 
-  describe('compressDiff', function() {
-    describe('with adjacent inserts with the same user_id', function() {
-      return it('should create one update with combined meta data and min/max timestamps', function() {
+  describe('compressDiff', function () {
+    describe('with adjacent inserts with the same user_id', function () {
+      return it('should create one update with combined meta data and min/max timestamps', function () {
         const diff = this.DiffGenerator.compressDiff([
           {
             i: 'foo',
@@ -175,8 +175,8 @@ describe('DiffGenerator', function() {
       })
     })
 
-    describe('with adjacent inserts with different user_ids', function() {
-      return it('should leave the inserts unchanged', function() {
+    describe('with adjacent inserts with different user_ids', function () {
+      return it('should leave the inserts unchanged', function () {
         const input = [
           {
             i: 'foo',
@@ -192,8 +192,8 @@ describe('DiffGenerator', function() {
       })
     })
 
-    describe('with adjacent deletes with the same user_id', function() {
-      return it('should create one update with combined meta data and min/max timestamps', function() {
+    describe('with adjacent deletes with the same user_id', function () {
+      return it('should create one update with combined meta data and min/max timestamps', function () {
         const diff = this.DiffGenerator.compressDiff([
           {
             d: 'foo',
@@ -213,8 +213,8 @@ describe('DiffGenerator', function() {
       })
     })
 
-    return describe('with adjacent deletes with different user_ids', function() {
-      return it('should leave the deletes unchanged', function() {
+    return describe('with adjacent deletes with different user_ids', function () {
+      return it('should leave the deletes unchanged', function () {
         const input = [
           {
             d: 'foo',
@@ -231,9 +231,9 @@ describe('DiffGenerator', function() {
     })
   })
 
-  return describe('applyUpdateToDiff', function() {
-    describe('an insert', function() {
-      it('should insert into the middle of (u)nchanged text', function() {
+  return describe('applyUpdateToDiff', function () {
+    describe('an insert', function () {
+      it('should insert into the middle of (u)nchanged text', function () {
         const diff = this.DiffGenerator.applyUpdateToDiff([{ u: 'foobar' }], {
           op: [{ p: 3, i: 'baz' }],
           meta: this.meta
@@ -245,7 +245,7 @@ describe('DiffGenerator', function() {
         ])
       })
 
-      it('should insert into the start of (u)changed text', function() {
+      it('should insert into the start of (u)changed text', function () {
         const diff = this.DiffGenerator.applyUpdateToDiff([{ u: 'foobar' }], {
           op: [{ p: 0, i: 'baz' }],
           meta: this.meta
@@ -256,7 +256,7 @@ describe('DiffGenerator', function() {
         ])
       })
 
-      it('should insert into the end of (u)changed text', function() {
+      it('should insert into the end of (u)changed text', function () {
         const diff = this.DiffGenerator.applyUpdateToDiff([{ u: 'foobar' }], {
           op: [{ p: 6, i: 'baz' }],
           meta: this.meta
@@ -267,7 +267,7 @@ describe('DiffGenerator', function() {
         ])
       })
 
-      it('should insert into the middle of (i)inserted text', function() {
+      it('should insert into the middle of (i)inserted text', function () {
         const diff = this.DiffGenerator.applyUpdateToDiff(
           [{ i: 'foobar', meta: this.meta }],
           { op: [{ p: 3, i: 'baz' }], meta: this.meta }
@@ -279,7 +279,7 @@ describe('DiffGenerator', function() {
         ])
       })
 
-      return it('should not count deletes in the running length total', function() {
+      return it('should not count deletes in the running length total', function () {
         const diff = this.DiffGenerator.applyUpdateToDiff(
           [{ d: 'deleted', meta: this.meta }, { u: 'foobar' }],
           { op: [{ p: 3, i: 'baz' }], meta: this.meta }
@@ -293,9 +293,9 @@ describe('DiffGenerator', function() {
       })
     })
 
-    return describe('a delete', function() {
-      describe('deleting unchanged text', function() {
-        it('should delete from the middle of (u)nchanged text', function() {
+    return describe('a delete', function () {
+      describe('deleting unchanged text', function () {
+        it('should delete from the middle of (u)nchanged text', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ u: 'foobazbar' }],
             { op: [{ p: 3, d: 'baz' }], meta: this.meta }
@@ -307,7 +307,7 @@ describe('DiffGenerator', function() {
           ])
         })
 
-        it('should delete from the start of (u)nchanged text', function() {
+        it('should delete from the start of (u)nchanged text', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ u: 'foobazbar' }],
             { op: [{ p: 0, d: 'foo' }], meta: this.meta }
@@ -318,7 +318,7 @@ describe('DiffGenerator', function() {
           ])
         })
 
-        it('should delete from the end of (u)nchanged text', function() {
+        it('should delete from the end of (u)nchanged text', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ u: 'foobazbar' }],
             { op: [{ p: 6, d: 'bar' }], meta: this.meta }
@@ -329,7 +329,7 @@ describe('DiffGenerator', function() {
           ])
         })
 
-        return it('should delete across multiple (u)changed text parts', function() {
+        return it('should delete across multiple (u)changed text parts', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ u: 'foo' }, { u: 'baz' }, { u: 'bar' }],
             { op: [{ p: 2, d: 'obazb' }], meta: this.meta }
@@ -344,8 +344,8 @@ describe('DiffGenerator', function() {
         })
       })
 
-      describe('deleting inserts', function() {
-        it('should delete from the middle of (i)nserted text', function() {
+      describe('deleting inserts', function () {
+        it('should delete from the middle of (i)nserted text', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ i: 'foobazbar', meta: this.meta }],
             { op: [{ p: 3, d: 'baz' }], meta: this.meta }
@@ -356,7 +356,7 @@ describe('DiffGenerator', function() {
           ])
         })
 
-        it('should delete from the start of (u)nchanged text', function() {
+        it('should delete from the start of (u)nchanged text', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ i: 'foobazbar', meta: this.meta }],
             { op: [{ p: 0, d: 'foo' }], meta: this.meta }
@@ -364,7 +364,7 @@ describe('DiffGenerator', function() {
           return expect(diff).to.deep.equal([{ i: 'bazbar', meta: this.meta }])
         })
 
-        it('should delete from the end of (u)nchanged text', function() {
+        it('should delete from the end of (u)nchanged text', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ i: 'foobazbar', meta: this.meta }],
             { op: [{ p: 6, d: 'bar' }], meta: this.meta }
@@ -372,7 +372,7 @@ describe('DiffGenerator', function() {
           return expect(diff).to.deep.equal([{ i: 'foobaz', meta: this.meta }])
         })
 
-        return it('should delete across multiple (u)changed and (i)nserted text parts', function() {
+        return it('should delete across multiple (u)changed and (i)nserted text parts', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ u: 'foo' }, { i: 'baz', meta: this.meta }, { u: 'bar' }],
             { op: [{ p: 2, d: 'obazb' }], meta: this.meta }
@@ -386,8 +386,8 @@ describe('DiffGenerator', function() {
         })
       })
 
-      describe('deleting over existing deletes', function() {
-        return it('should delete across multiple (u)changed and (d)deleted text parts', function() {
+      describe('deleting over existing deletes', function () {
+        return it('should delete across multiple (u)changed and (d)deleted text parts', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ u: 'foo' }, { d: 'baz', meta: this.meta }, { u: 'bar' }],
             { op: [{ p: 2, d: 'ob' }], meta: this.meta }
@@ -402,8 +402,8 @@ describe('DiffGenerator', function() {
         })
       })
 
-      describe("deleting when the text doesn't match", function() {
-        it('should throw an error when deleting from the middle of (u)nchanged text', function() {
+      describe("deleting when the text doesn't match", function () {
+        it('should throw an error when deleting from the middle of (u)nchanged text', function () {
           return expect(() =>
             this.DiffGenerator.applyUpdateToDiff([{ u: 'foobazbar' }], {
               op: [{ p: 3, d: 'xxx' }],
@@ -412,7 +412,7 @@ describe('DiffGenerator', function() {
           ).to.throw(this.DiffGenerator.ConsistencyError)
         })
 
-        it('should throw an error when deleting from the start of (u)nchanged text', function() {
+        it('should throw an error when deleting from the start of (u)nchanged text', function () {
           return expect(() =>
             this.DiffGenerator.applyUpdateToDiff([{ u: 'foobazbar' }], {
               op: [{ p: 0, d: 'xxx' }],
@@ -421,7 +421,7 @@ describe('DiffGenerator', function() {
           ).to.throw(this.DiffGenerator.ConsistencyError)
         })
 
-        return it('should throw an error when deleting from the end of (u)nchanged text', function() {
+        return it('should throw an error when deleting from the end of (u)nchanged text', function () {
           return expect(() =>
             this.DiffGenerator.applyUpdateToDiff([{ u: 'foobazbar' }], {
               op: [{ p: 6, d: 'xxx' }],
@@ -431,8 +431,8 @@ describe('DiffGenerator', function() {
         })
       })
 
-      describe('when the last update in the existing diff is a delete', function() {
-        return it('should insert the new update before the delete', function() {
+      describe('when the last update in the existing diff is a delete', function () {
+        return it('should insert the new update before the delete', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ u: 'foo' }, { d: 'bar', meta: this.meta }],
             { op: [{ p: 3, i: 'baz' }], meta: this.meta }
@@ -445,8 +445,8 @@ describe('DiffGenerator', function() {
         })
       })
 
-      return describe('when the only update in the existing diff is a delete', function() {
-        return it('should insert the new update after the delete', function() {
+      return describe('when the only update in the existing diff is a delete', function () {
+        return it('should insert the new update after the delete', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ d: 'bar', meta: this.meta }],
             { op: [{ p: 0, i: 'baz' }], meta: this.meta }

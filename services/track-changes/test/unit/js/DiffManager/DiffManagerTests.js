@@ -17,8 +17,8 @@ const { expect } = chai
 const modulePath = '../../../../app/js/DiffManager.js'
 const SandboxedModule = require('sandboxed-module')
 
-describe('DiffManager', function() {
-  beforeEach(function() {
+describe('DiffManager', function () {
+  beforeEach(function () {
     this.DiffManager = SandboxedModule.require(modulePath, {
       requires: {
         'logger-sharelatex': (this.logger = {
@@ -38,8 +38,8 @@ describe('DiffManager', function() {
     return (this.doc_id = 'mock-doc-id')
   })
 
-  describe('getLatestDocAndUpdates', function() {
-    beforeEach(function() {
+  describe('getLatestDocAndUpdates', function () {
+    beforeEach(function () {
       this.content = 'hello world'
       this.version = 42
       this.updates = ['mock-update-1', 'mock-update-2']
@@ -52,8 +52,8 @@ describe('DiffManager', function() {
         .callsArgWith(3, null, this.updates))
     })
 
-    describe('with a fromVersion', function() {
-      beforeEach(function() {
+    describe('with a fromVersion', function () {
+      beforeEach(function () {
         return this.DiffManager.getLatestDocAndUpdates(
           this.project_id,
           this.doc_id,
@@ -62,27 +62,27 @@ describe('DiffManager', function() {
         )
       })
 
-      it('should get the latest version of the doc', function() {
+      it('should get the latest version of the doc', function () {
         return this.DocumentUpdaterManager.getDocument
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
-      it('should get the latest updates', function() {
+      it('should get the latest updates', function () {
         return this.UpdatesManager.getDocUpdatesWithUserInfo
           .calledWith(this.project_id, this.doc_id, { from: this.from })
           .should.equal(true)
       })
 
-      return it('should call the callback with the content, version and updates', function() {
+      return it('should call the callback with the content, version and updates', function () {
         return this.callback
           .calledWith(null, this.content, this.version, this.updates)
           .should.equal(true)
       })
     })
 
-    return describe('with no fromVersion', function() {
-      beforeEach(function() {
+    return describe('with no fromVersion', function () {
+      beforeEach(function () {
         return this.DiffManager.getLatestDocAndUpdates(
           this.project_id,
           this.doc_id,
@@ -91,19 +91,19 @@ describe('DiffManager', function() {
         )
       })
 
-      it('should get the latest version of the doc', function() {
+      it('should get the latest version of the doc', function () {
         return this.DocumentUpdaterManager.getDocument
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
-      it('should not get the latest updates', function() {
+      it('should not get the latest updates', function () {
         return this.UpdatesManager.getDocUpdatesWithUserInfo.called.should.equal(
           false
         )
       })
 
-      return it('should call the callback with the content, version and blank updates', function() {
+      return it('should call the callback with the content, version and blank updates', function () {
         return this.callback
           .calledWith(null, this.content, this.version, [])
           .should.equal(true)
@@ -111,8 +111,8 @@ describe('DiffManager', function() {
     })
   })
 
-  describe('getDiff', function() {
-    beforeEach(function() {
+  describe('getDiff', function () {
+    beforeEach(function () {
       this.content = 'hello world'
       // Op versions are the version they were applied to, so doc is always one version
       // ahead.s
@@ -146,8 +146,8 @@ describe('DiffManager', function() {
       return (this.diff = [{ u: 'mock-diff' }])
     })
 
-    describe('with matching versions', function() {
-      beforeEach(function() {
+    describe('with matching versions', function () {
+      beforeEach(function () {
         this.DiffManager.getDocumentBeforeVersion = sinon
           .stub()
           .callsArgWith(3, null, this.rewound_content, this.updates)
@@ -161,13 +161,13 @@ describe('DiffManager', function() {
         )
       })
 
-      it('should get the latest doc and version with all recent updates', function() {
+      it('should get the latest doc and version with all recent updates', function () {
         return this.DiffManager.getDocumentBeforeVersion
           .calledWith(this.project_id, this.doc_id, this.fromVersion)
           .should.equal(true)
       })
 
-      it('should generate the diff', function() {
+      it('should generate the diff', function () {
         return this.DiffGenerator.buildDiff
           .calledWith(
             this.rewound_content,
@@ -176,21 +176,20 @@ describe('DiffManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the diff', function() {
+      return it('should call the callback with the diff', function () {
         return this.callback.calledWith(null, this.diff).should.equal(true)
       })
     })
 
-    describe('when the updates are inconsistent', function() {
-      beforeEach(function() {
+    describe('when the updates are inconsistent', function () {
+      beforeEach(function () {
         this.DiffManager.getLatestDocAndUpdates = sinon
           .stub()
           .callsArgWith(3, null, this.content, this.version, this.updates)
         this.DiffGenerator.buildDiff = sinon
           .stub()
           .throws((this.error = new Error('inconsistent!')))
-        this.DiffGenerator.rewindUpdates = sinon
-            .stub()
+        this.DiffGenerator.rewindUpdates = sinon.stub()
         this.DiffManager.getDiff(
           this.project_id,
           this.doc_id,
@@ -200,7 +199,7 @@ describe('DiffManager', function() {
         )
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         this.callback.calledWith(sinon.match(Error)).should.equal(true)
         const errorObj = this.callback.args[0][0]
         expect(errorObj.message).to.include('inconsistent!')
@@ -208,15 +207,15 @@ describe('DiffManager', function() {
     })
   })
 
-  describe('getDocumentBeforeVersion', function() {
-    beforeEach(function() {
+  describe('getDocumentBeforeVersion', function () {
+    beforeEach(function () {
       this.DiffManager._tryGetDocumentBeforeVersion = sinon.stub()
       this.document = 'mock-documents'
       return (this.rewound_updates = 'mock-rewound-updates')
     })
 
-    describe('succesfully', function() {
-      beforeEach(function() {
+    describe('succesfully', function () {
+      beforeEach(function () {
         this.DiffManager._tryGetDocumentBeforeVersion.yields(
           null,
           this.document,
@@ -230,21 +229,21 @@ describe('DiffManager', function() {
         )
       })
 
-      it('should call _tryGetDocumentBeforeVersion', function() {
+      it('should call _tryGetDocumentBeforeVersion', function () {
         return this.DiffManager._tryGetDocumentBeforeVersion
           .calledWith(this.project_id, this.doc_id, this.version)
           .should.equal(true)
       })
 
-      return it('should call the callback with the response', function() {
+      return it('should call the callback with the response', function () {
         return this.callback
           .calledWith(null, this.document, this.rewound_updates)
           .should.equal(true)
       })
     })
 
-    describe('with a retry needed', function() {
-      beforeEach(function() {
+    describe('with a retry needed', function () {
+      beforeEach(function () {
         let retried = false
         this.DiffManager._tryGetDocumentBeforeVersion = (
           project_id,
@@ -270,21 +269,21 @@ describe('DiffManager', function() {
         )
       })
 
-      it('should call _tryGetDocumentBeforeVersion twice', function() {
+      it('should call _tryGetDocumentBeforeVersion twice', function () {
         return this.DiffManager._tryGetDocumentBeforeVersion.calledTwice.should.equal(
           true
         )
       })
 
-      return it('should call the callback with the response', function() {
+      return it('should call the callback with the response', function () {
         return this.callback
           .calledWith(null, this.document, this.rewound_updates)
           .should.equal(true)
       })
     })
 
-    describe('with a non-retriable error', function() {
-      beforeEach(function() {
+    describe('with a non-retriable error', function () {
+      beforeEach(function () {
         this.error = new Error('oops')
         this.DiffManager._tryGetDocumentBeforeVersion.yields(this.error)
         return this.DiffManager.getDocumentBeforeVersion(
@@ -295,19 +294,19 @@ describe('DiffManager', function() {
         )
       })
 
-      it('should call _tryGetDocumentBeforeVersion once', function() {
+      it('should call _tryGetDocumentBeforeVersion once', function () {
         return this.DiffManager._tryGetDocumentBeforeVersion.calledOnce.should.equal(
           true
         )
       })
 
-      return it('should call the callback with the error', function() {
+      return it('should call the callback with the error', function () {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
 
-    return describe('when retry limit is matched', function() {
-      beforeEach(function() {
+    return describe('when retry limit is matched', function () {
+      beforeEach(function () {
         this.error = new Error('oops')
         this.error.retry = true
         this.DiffManager._tryGetDocumentBeforeVersion.yields(this.error)
@@ -319,20 +318,20 @@ describe('DiffManager', function() {
         )
       })
 
-      it('should call _tryGetDocumentBeforeVersion three times (max retries)', function() {
+      it('should call _tryGetDocumentBeforeVersion three times (max retries)', function () {
         return this.DiffManager._tryGetDocumentBeforeVersion.calledThrice.should.equal(
           true
         )
       })
 
-      return it('should call the callback with the error', function() {
+      return it('should call the callback with the error', function () {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
   })
 
-  return describe('_tryGetDocumentBeforeVersion', function() {
-    beforeEach(function() {
+  return describe('_tryGetDocumentBeforeVersion', function () {
+    beforeEach(function () {
       this.content = 'hello world'
       // Op versions are the version they were applied to, so doc is always one version
       // ahead.s
@@ -364,8 +363,8 @@ describe('DiffManager', function() {
       return (this.diff = [{ u: 'mock-diff' }])
     })
 
-    describe('with matching versions', function() {
-      beforeEach(function() {
+    describe('with matching versions', function () {
+      beforeEach(function () {
         this.DiffManager.getLatestDocAndUpdates = sinon
           .stub()
           .callsArgWith(3, null, this.content, this.version, this.updates)
@@ -386,25 +385,25 @@ describe('DiffManager', function() {
         )
       })
 
-      it('should get the latest doc and version with all recent updates', function() {
+      it('should get the latest doc and version with all recent updates', function () {
         return this.DiffManager.getLatestDocAndUpdates
           .calledWith(this.project_id, this.doc_id, this.fromVersion)
           .should.equal(true)
       })
 
-      it('should rewind the diff', function() {
+      it('should rewind the diff', function () {
         return sinon.assert.calledOnce(this.rewindUpdatesWithArgs)
       })
 
-      return it('should call the callback with the rewound document and updates', function() {
+      return it('should call the callback with the rewound document and updates', function () {
         return this.callback
           .calledWith(null, this.rewound_content, this.updates)
           .should.equal(true)
       })
     })
 
-    describe('with mismatching versions', function() {
-      beforeEach(function() {
+    describe('with mismatching versions', function () {
+      beforeEach(function () {
         this.version = 50
         this.updates = [
           { op: 'mock-1', v: 40 },
@@ -421,15 +420,15 @@ describe('DiffManager', function() {
         )
       })
 
-      return it('should call the callback with an error with retry = true set', function() {
+      return it('should call the callback with an error with retry = true set', function () {
         this.callback.calledOnce.should.equal(true)
         const error = this.callback.args[0][0]
         return expect(error.retry).to.equal(true)
       })
     })
 
-    return describe('when the updates are inconsistent', function() {
-      beforeEach(function() {
+    return describe('when the updates are inconsistent', function () {
+      beforeEach(function () {
         this.DiffManager.getLatestDocAndUpdates = sinon
           .stub()
           .callsArgWith(3, null, this.content, this.version, this.updates)
@@ -444,7 +443,7 @@ describe('DiffManager', function() {
         )
       })
 
-      return it('should call the callback with an error', function() {
+      return it('should call the callback with an error', function () {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })

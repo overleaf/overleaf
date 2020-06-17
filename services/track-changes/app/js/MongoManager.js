@@ -22,13 +22,13 @@ const logger = require('logger-sharelatex')
 module.exports = MongoManager = {
   getLastCompressedUpdate(doc_id, callback) {
     if (callback == null) {
-      callback = function(error, update) {}
+      callback = function (error, update) {}
     }
     return db.docHistory
       .find({ doc_id: ObjectId(doc_id.toString()) }, { pack: { $slice: -1 } }) // only return the last entry in a pack
       .sort({ v: -1 })
       .limit(1)
-      .toArray(function(error, compressedUpdates) {
+      .toArray(function (error, compressedUpdates) {
         if (error != null) {
           return callback(error)
         }
@@ -44,9 +44,9 @@ module.exports = MongoManager = {
     // to start, we pass it back as callback(null,null,version), just
     // giving the version so we can check consistency.
     if (callback == null) {
-      callback = function(error, update, version) {}
+      callback = function (error, update, version) {}
     }
-    return MongoManager.getLastCompressedUpdate(doc_id, function(
+    return MongoManager.getLastCompressedUpdate(doc_id, function (
       error,
       update
     ) {
@@ -76,7 +76,7 @@ module.exports = MongoManager = {
           return callback(null, update, update.v)
         }
       } else {
-        return PackManager.getLastPackFromIndex(doc_id, function(error, pack) {
+        return PackManager.getLastPackFromIndex(doc_id, function (error, pack) {
           if (error != null) {
             return callback(error)
           }
@@ -94,7 +94,7 @@ module.exports = MongoManager = {
 
   backportProjectId(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return db.docHistory.update(
       {
@@ -113,13 +113,13 @@ module.exports = MongoManager = {
 
   getProjectMetaData(project_id, callback) {
     if (callback == null) {
-      callback = function(error, metadata) {}
+      callback = function (error, metadata) {}
     }
     return db.projectHistoryMetaData.find(
       {
         project_id: ObjectId(project_id.toString())
       },
-      function(error, results) {
+      function (error, results) {
         if (error != null) {
           return callback(error)
         }
@@ -130,7 +130,7 @@ module.exports = MongoManager = {
 
   setProjectMetaData(project_id, metadata, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return db.projectHistoryMetaData.update(
       {
@@ -149,7 +149,7 @@ module.exports = MongoManager = {
   upgradeHistory(project_id, callback) {
     // preserve the project's existing history
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return db.docHistory.update(
       {
@@ -200,11 +200,10 @@ module.exports = MongoManager = {
     )
   }
 }
-
 ;[
   'getLastCompressedUpdate',
   'getProjectMetaData',
   'setProjectMetaData'
-].map(method =>
+].map((method) =>
   metrics.timeAsyncMethod(MongoManager, method, 'mongo.MongoManager', logger)
 )

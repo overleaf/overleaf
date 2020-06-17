@@ -24,13 +24,13 @@ const TrackChangesApp = require('./helpers/TrackChangesApp')
 const TrackChangesClient = require('./helpers/TrackChangesClient')
 const MockWebApi = require('./helpers/MockWebApi')
 
-describe('Appending doc ops to the history', function() {
-  before(function(done) {
+describe('Appending doc ops to the history', function () {
+  before(function (done) {
     return TrackChangesApp.ensureRunning(done)
   })
 
-  describe('when the history does not exist yet', function() {
-    before(function(done) {
+  describe('when the history does not exist yet', function () {
+    before(function (done) {
       this.project_id = ObjectId().toString()
       this.doc_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
@@ -55,7 +55,7 @@ describe('Appending doc ops to the history', function() {
             v: 5
           }
         ],
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -75,7 +75,7 @@ describe('Appending doc ops to the history', function() {
       return null
     })
 
-    it('should insert the compressed op into mongo', function() {
+    it('should insert the compressed op into mongo', function () {
       return expect(this.updates[0].pack[0].op).to.deep.equal([
         {
           p: 3,
@@ -84,21 +84,21 @@ describe('Appending doc ops to the history', function() {
       ])
     })
 
-    it('should insert the correct version number into mongo', function() {
+    it('should insert the correct version number into mongo', function () {
       return expect(this.updates[0].v).to.equal(5)
     })
 
-    it('should store the doc id', function() {
+    it('should store the doc id', function () {
       return expect(this.updates[0].doc_id.toString()).to.equal(this.doc_id)
     })
 
-    it('should store the project id', function() {
+    it('should store the project id', function () {
       return expect(this.updates[0].project_id.toString()).to.equal(
         this.project_id
       )
     })
 
-    return it('should clear the doc from the DocsWithHistoryOps set', function(done) {
+    return it('should clear the doc from the DocsWithHistoryOps set', function (done) {
       rclient.sismember(
         `DocsWithHistoryOps:${this.project_id}`,
         this.doc_id,
@@ -111,8 +111,8 @@ describe('Appending doc ops to the history', function() {
     })
   })
 
-  describe('when the history has already been started', function() {
-    beforeEach(function(done) {
+  describe('when the history has already been started', function () {
+    beforeEach(function (done) {
       this.project_id = ObjectId().toString()
       this.doc_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
@@ -137,7 +137,7 @@ describe('Appending doc ops to the history', function() {
             v: 5
           }
         ],
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -156,8 +156,8 @@ describe('Appending doc ops to the history', function() {
       return null
     })
 
-    describe('when the updates are recent and from the same user', function() {
-      beforeEach(function(done) {
+    describe('when the updates are recent and from the same user', function () {
+      beforeEach(function (done) {
         TrackChangesClient.pushRawUpdates(
           this.project_id,
           this.doc_id,
@@ -178,7 +178,7 @@ describe('Appending doc ops to the history', function() {
               v: 8
             }
           ],
-          error => {
+          (error) => {
             if (error != null) {
               throw error
             }
@@ -198,7 +198,7 @@ describe('Appending doc ops to the history', function() {
         return null
       })
 
-      it('should combine all the updates into one pack', function() {
+      it('should combine all the updates into one pack', function () {
         return expect(this.updates[0].pack[1].op).to.deep.equal([
           {
             p: 6,
@@ -207,13 +207,13 @@ describe('Appending doc ops to the history', function() {
         ])
       })
 
-      return it('should insert the correct version number into mongo', function() {
+      return it('should insert the correct version number into mongo', function () {
         return expect(this.updates[0].v_end).to.equal(8)
       })
     })
 
-    return describe('when the updates are far apart', function() {
-      beforeEach(function(done) {
+    return describe('when the updates are far apart', function () {
+      beforeEach(function (done) {
         const oneDay = 24 * 60 * 60 * 1000
         TrackChangesClient.pushRawUpdates(
           this.project_id,
@@ -235,7 +235,7 @@ describe('Appending doc ops to the history', function() {
               v: 8
             }
           ],
-          error => {
+          (error) => {
             if (error != null) {
               throw error
             }
@@ -255,7 +255,7 @@ describe('Appending doc ops to the history', function() {
         return null
       })
 
-      return it('should combine the updates into one pack', function() {
+      return it('should combine the updates into one pack', function () {
         expect(this.updates[0].pack[0].op).to.deep.equal([
           {
             p: 3,
@@ -272,8 +272,8 @@ describe('Appending doc ops to the history', function() {
     })
   })
 
-  describe('when the updates need processing in batches', function() {
-    before(function(done) {
+  describe('when the updates need processing in batches', function () {
+    before(function (done) {
       this.project_id = ObjectId().toString()
       this.doc_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
@@ -293,7 +293,7 @@ describe('Appending doc ops to the history', function() {
         this.project_id,
         this.doc_id,
         updates,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -313,17 +313,17 @@ describe('Appending doc ops to the history', function() {
       return null
     })
 
-    it('should concat the compressed op into mongo', function() {
+    it('should concat the compressed op into mongo', function () {
       return expect(this.updates[0].pack.length).to.deep.equal(3)
     }) // batch size is 100
 
-    return it('should insert the correct version number into mongo', function() {
+    return it('should insert the correct version number into mongo', function () {
       return expect(this.updates[0].v_end).to.equal(250)
     })
   })
 
-  describe('when there are multiple ops in each update', function() {
-    before(function(done) {
+  describe('when there are multiple ops in each update', function () {
+    before(function (done) {
       this.project_id = ObjectId().toString()
       this.doc_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
@@ -352,7 +352,7 @@ describe('Appending doc ops to the history', function() {
             v: 4
           }
         ],
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -372,7 +372,7 @@ describe('Appending doc ops to the history', function() {
       return null
     })
 
-    it('should insert the compressed ops into mongo', function() {
+    it('should insert the compressed ops into mongo', function () {
       expect(this.updates[0].pack[0].op).to.deep.equal([
         {
           p: 3,
@@ -387,14 +387,14 @@ describe('Appending doc ops to the history', function() {
       ])
     })
 
-    return it('should insert the correct version numbers into mongo', function() {
+    return it('should insert the correct version numbers into mongo', function () {
       expect(this.updates[0].pack[0].v).to.equal(3)
       return expect(this.updates[0].pack[1].v).to.equal(4)
     })
   })
 
-  describe('when there is a no-op update', function() {
-    before(function(done) {
+  describe('when there is a no-op update', function () {
+    before(function (done) {
       this.project_id = ObjectId().toString()
       this.doc_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
@@ -415,7 +415,7 @@ describe('Appending doc ops to the history', function() {
             v: 4
           }
         ],
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -435,11 +435,11 @@ describe('Appending doc ops to the history', function() {
       return null
     })
 
-    it('should insert the compressed no-op into mongo', function() {
+    it('should insert the compressed no-op into mongo', function () {
       return expect(this.updates[0].pack[0].op).to.deep.equal([])
     })
 
-    it('should insert the compressed next update into mongo', function() {
+    it('should insert the compressed next update into mongo', function () {
       return expect(this.updates[0].pack[1].op).to.deep.equal([
         {
           p: 3,
@@ -448,14 +448,14 @@ describe('Appending doc ops to the history', function() {
       ])
     })
 
-    return it('should insert the correct version numbers into mongo', function() {
+    return it('should insert the correct version numbers into mongo', function () {
       expect(this.updates[0].pack[0].v).to.equal(3)
       return expect(this.updates[0].pack[1].v).to.equal(4)
     })
   })
 
-  describe('when there is a comment update', function() {
-    before(function(done) {
+  describe('when there is a comment update', function () {
+    before(function (done) {
       this.project_id = ObjectId().toString()
       this.doc_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
@@ -473,7 +473,7 @@ describe('Appending doc ops to the history', function() {
             v: 3
           }
         ],
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -493,19 +493,19 @@ describe('Appending doc ops to the history', function() {
       return null
     })
 
-    it('should ignore the comment op', function() {
+    it('should ignore the comment op', function () {
       return expect(this.updates[0].pack[0].op).to.deep.equal([
         { d: 'bar', p: 6 }
       ])
     })
 
-    return it('should insert the correct version numbers into mongo', function() {
+    return it('should insert the correct version numbers into mongo', function () {
       return expect(this.updates[0].pack[0].v).to.equal(3)
     })
   })
 
-  describe('when the project has versioning enabled', function() {
-    before(function(done) {
+  describe('when the project has versioning enabled', function () {
+    before(function (done) {
       this.project_id = ObjectId().toString()
       this.doc_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
@@ -521,7 +521,7 @@ describe('Appending doc ops to the history', function() {
             v: 3
           }
         ],
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -541,13 +541,13 @@ describe('Appending doc ops to the history', function() {
       return null
     })
 
-    return it('should not add a expiresAt entry in the update in mongo', function() {
+    return it('should not add a expiresAt entry in the update in mongo', function () {
       return expect(this.updates[0].expiresAt).to.be.undefined
     })
   })
 
-  return describe('when the project does not have versioning enabled', function() {
-    before(function(done) {
+  return describe('when the project does not have versioning enabled', function () {
+    before(function (done) {
       this.project_id = ObjectId().toString()
       this.doc_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
@@ -563,7 +563,7 @@ describe('Appending doc ops to the history', function() {
             v: 3
           }
         ],
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -583,7 +583,7 @@ describe('Appending doc ops to the history', function() {
       return null
     })
 
-    return it('should add a expiresAt entry in the update in mongo', function() {
+    return it('should add a expiresAt entry in the update in mongo', function () {
       return expect(this.updates[0].expiresAt).to.exist
     })
   })

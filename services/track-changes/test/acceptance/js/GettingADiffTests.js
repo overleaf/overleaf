@@ -23,8 +23,8 @@ const TrackChangesClient = require('./helpers/TrackChangesClient')
 const MockDocUpdaterApi = require('./helpers/MockDocUpdaterApi')
 const MockWebApi = require('./helpers/MockWebApi')
 
-describe('Getting a diff', function() {
-  beforeEach(function(done) {
+describe('Getting a diff', function () {
+  beforeEach(function (done) {
     sinon.spy(MockDocUpdaterApi, 'getDoc')
 
     this.now = Date.now()
@@ -89,7 +89,7 @@ describe('Getting a diff', function() {
         this.project_id,
         this.doc_id,
         this.updates,
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }
@@ -112,17 +112,17 @@ describe('Getting a diff', function() {
     return null
   })
 
-  afterEach(function() {
+  afterEach(function () {
     MockDocUpdaterApi.getDoc.restore()
     MockWebApi.getUserInfo.restore()
     return null
   })
 
-  it('should return the diff', function() {
+  it('should return the diff', function () {
     return expect(this.diff).to.deep.equal(this.expected_diff)
   })
 
-  return it('should get the doc from the doc updater', function() {
+  return it('should get the doc from the doc updater', function () {
     MockDocUpdaterApi.getDoc
       .calledWith(this.project_id, this.doc_id)
       .should.equal(true)
