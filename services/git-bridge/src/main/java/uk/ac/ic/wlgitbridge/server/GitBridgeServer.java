@@ -129,6 +129,7 @@ public class GitBridgeServer {
 
         HandlerCollection handlers = new HandlerList();
         handlers.addHandler(new StatusHandler(bridge));
+        handlers.addHandler(new HealthCheckHandler(bridge));
         handlers.addHandler(initResourceHandler());
         handlers.addHandler(new PostbackHandler(bridge));
         handlers.addHandler(new DefaultHandler());
