@@ -431,30 +431,18 @@ module.exports = CompileManager = {
     const compileDir = getCompileDir(project_id, user_id)
     const synctex_path = `${base_dir}/output.pdf`
     const command = ['code', synctex_path, file_path, line, column]
-    return fse.ensureDir(compileDir, function(error) {
+    CompileManager._runSynctex(project_id, user_id, command, function(
+      error,
+      stdout
+    ) {
       if (error != null) {
-        logger.err(
-          { error, project_id, user_id, file_name },
-          'error ensuring dir for sync from code'
-        )
         return callback(error)
       }
-      return CompileManager._runSynctex(project_id, user_id, command, function(
-        error,
-        stdout
-      ) {
-        if (error != null) {
-          return callback(error)
-        }
-        logger.log(
-          { project_id, user_id, file_name, line, column, command, stdout },
-          'synctex code output'
-        )
-        return callback(
-          null,
-          CompileManager._parseSynctexFromCodeOutput(stdout)
-        )
-      })
+      logger.log(
+        { project_id, user_id, file_name, line, column, command, stdout },
+        'synctex code output'
+      )
+      return callback(null, CompileManager._parseSynctexFromCodeOutput(stdout))
     })
   },
 
@@ -467,53 +455,39 @@ module.exports = CompileManager = {
     const base_dir = Settings.path.synctexBaseDir(compileName)
     const synctex_path = `${base_dir}/output.pdf`
     const command = ['pdf', synctex_path, page, h, v]
-    return fse.ensureDir(compileDir, function(error) {
+    CompileManager._runSynctex(project_id, user_id, command, function(
+      error,
+      stdout
+    ) {
       if (error != null) {
-        logger.err(
-          { error, project_id, user_id, file_name },
-          'error ensuring dir for sync to code'
-        )
         return callback(error)
       }
-      return CompileManager._runSynctex(project_id, user_id, command, function(
-        error,
-        stdout
-      ) {
-        if (error != null) {
-          return callback(error)
-        }
-        logger.log(
-          { project_id, user_id, page, h, v, stdout },
-          'synctex pdf output'
-        )
-        return callback(
-          null,
-          CompileManager._parseSynctexFromPdfOutput(stdout, base_dir)
-        )
-      })
+      logger.log(
+        { project_id, user_id, page, h, v, stdout },
+        'synctex pdf output'
+      )
+      return callback(
+        null,
+        CompileManager._parseSynctexFromPdfOutput(stdout, base_dir)
+      )
     })
   },
 
-  _checkFileExists(path, callback) {
+  _checkFileExists(dir, filename, callback) {
     if (callback == null) {
       callback = function(error) {}
     }
-    const synctexDir = Path.dirname(path)
-    const synctexFile = Path.join(synctexDir, 'output.synctex.gz')
-    return fs.stat(synctexDir, function(error, stats) {
+    const file = Path.join(dir, filename)
+    return fs.stat(dir, function(error, stats) {
       if ((error != null ? error.code : undefined) === 'ENOENT') {
-        return callback(
-          new Errors.NotFoundError('called synctex with no output directory')
-        )
+        return callback(new Errors.NotFoundError('no output directory'))
       }
       if (error != null) {
         return callback(error)
       }
-      return fs.stat(synctexFile, function(error, stats) {
+      return fs.stat(file, function(error, stats) {
         if ((error != null ? error.code : undefined) === 'ENOENT') {
-          return callback(
-            new Errors.NotFoundError('called synctex with no output file')
-          )
+          return callback(new Errors.NotFoundError('no output file'))
         }
         if (error != null) {
           return callback(error)
@@ -538,25 +512,30 @@ module.exports = CompileManager = {
     const timeout = 60 * 1000 // increased to allow for large projects
     const compileName = getCompileName(project_id, user_id)
     const compileGroup = 'synctex'
-    return CommandRunner.run(
-      compileName,
-      command,
-      directory,
-      Settings.clsi != null ? Settings.clsi.docker.image : undefined,
-      timeout,
-      {},
-      compileGroup,
-      function(error, output) {
-        if (error != null) {
-          logger.err(
-            { err: error, command, project_id, user_id },
-            'error running synctex'
-          )
-          return callback(error)
-        }
-        return callback(null, output.stdout)
+    CompileManager._checkFileExists(directory, 'output.synctex.gz', error => {
+      if (error) {
+        return callback(error)
       }
-    )
+      return CommandRunner.run(
+        compileName,
+        command,
+        directory,
+        Settings.clsi != null ? Settings.clsi.docker.image : undefined,
+        timeout,
+        {},
+        compileGroup,
+        function(error, output) {
+          if (error != null) {
+            logger.err(
+              { err: error, command, project_id, user_id },
+              'error running synctex'
+            )
+            return callback(error)
+          }
+          return callback(null, output.stdout)
+        }
+      )
+    })
   },
 
   _parseSynctexFromCodeOutput(output) {
