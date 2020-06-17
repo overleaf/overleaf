@@ -128,6 +128,7 @@ public class GitBridgeServer {
         api.setContextPath("/api");
 
         HandlerCollection handlers = new HandlerList();
+        handlers.addHandler(new StatusHandler(bridge));
         handlers.addHandler(initResourceHandler());
         handlers.addHandler(new PostbackHandler(bridge));
         handlers.addHandler(new DefaultHandler());
