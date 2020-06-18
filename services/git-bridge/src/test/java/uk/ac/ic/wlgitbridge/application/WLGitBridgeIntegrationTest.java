@@ -910,12 +910,13 @@ public class WLGitBridgeIntegrationTest {
         });
         wlgb.run();
         HttpClient client = HttpClients.createDefault();
+        String urlBase = "http://127.0.0.1:" + gitBridgePort;
         // Status
-        HttpGet statusRequest = new HttpGet("http://127.0.0.1:"+gitBridgePort+"/api/status");
+        HttpGet statusRequest = new HttpGet(urlBase+"/api/status");
         HttpResponse statusResponse = client.execute(statusRequest);
         assertEquals(statusResponse.getStatusLine().getStatusCode(), 200);
         // Health Check
-        HttpGet healthCheckRequest = new HttpGet("http://127.0.0.1:"+gitBridgePort+"/api/health_check");
+        HttpGet healthCheckRequest = new HttpGet(urlBase+"/api/health_check");
         HttpResponse healthCheckResponse = client.execute(healthCheckRequest);
         assertEquals(healthCheckResponse.getStatusLine().getStatusCode(), 200);
     }
