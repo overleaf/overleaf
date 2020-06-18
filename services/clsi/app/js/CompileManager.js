@@ -199,7 +199,8 @@ module.exports = CompileManager = {
               timeout: request.timeout,
               image: request.imageName,
               flags: request.flags,
-              environment: env
+              environment: env,
+              compileGroup: request.compileGroup
             },
             function(error, output, stats, timings) {
               // request was for validation only
@@ -510,6 +511,7 @@ module.exports = CompileManager = {
     const directory = getCompileDir(project_id, user_id)
     const timeout = 60 * 1000 // increased to allow for large projects
     const compileName = getCompileName(project_id, user_id)
+    const compileGroup = 'synctex'
     CompileManager._checkFileExists(directory, 'output.synctex.gz', error => {
       if (error) {
         return callback(error)
@@ -521,6 +523,7 @@ module.exports = CompileManager = {
         Settings.clsi != null ? Settings.clsi.docker.image : undefined,
         timeout,
         {},
+        compileGroup,
         function(error, output) {
           if (error != null) {
             logger.err(
@@ -585,6 +588,7 @@ module.exports = CompileManager = {
     const compileDir = getCompileDir(project_id, user_id)
     const timeout = 60 * 1000
     const compileName = getCompileName(project_id, user_id)
+    const compileGroup = 'wordcount'
     return fse.ensureDir(compileDir, function(error) {
       if (error != null) {
         logger.err(
@@ -600,6 +604,7 @@ module.exports = CompileManager = {
         image,
         timeout,
         {},
+        compileGroup,
         function(error) {
           if (error != null) {
             return callback(error)

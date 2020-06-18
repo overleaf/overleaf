@@ -36,7 +36,8 @@ module.exports = LatexRunner = {
       timeout,
       image,
       environment,
-      flags
+      flags,
+      compileGroup
     } = options
     if (!compiler) {
       compiler = 'pdflatex'
@@ -46,7 +47,15 @@ module.exports = LatexRunner = {
     } // milliseconds
 
     logger.log(
-      { directory, compiler, timeout, mainFile, environment, flags },
+      {
+        directory,
+        compiler,
+        timeout,
+        mainFile,
+        environment,
+        flags,
+        compileGroup
+      },
       'starting compile'
     )
 
@@ -79,6 +88,7 @@ module.exports = LatexRunner = {
       image,
       timeout,
       environment,
+      compileGroup,
       function(error, output) {
         delete ProcessTable[id]
         if (error != null) {

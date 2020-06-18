@@ -74,7 +74,17 @@ module.exports = RequestParser = {
         default: [],
         type: 'object'
       })
-
+      if (settings.allowedCompileGroups) {
+        response.compileGroup = this._parseAttribute(
+          'compileGroup',
+          compile.options.compileGroup,
+          {
+            validValues: settings.allowedCompileGroups,
+            default: '',
+            type: 'string'
+          }
+        )
+      }
       // The syncType specifies whether the request contains all
       // resources (full) or only those resources to be updated
       // in-place (incremental).

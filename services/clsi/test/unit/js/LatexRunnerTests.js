@@ -48,6 +48,7 @@ describe('LatexRunner', function() {
     this.mainFile = 'main-file.tex'
     this.compiler = 'pdflatex'
     this.image = 'example.com/image'
+    this.compileGroup = 'compile-group'
     this.callback = sinon.stub()
     this.project_id = 'project-id-123'
     return (this.env = { foo: '123' })
@@ -55,7 +56,7 @@ describe('LatexRunner', function() {
 
   return describe('runLatex', function() {
     beforeEach(function() {
-      return (this.CommandRunner.run = sinon.stub().callsArgWith(6, null, {
+      return (this.CommandRunner.run = sinon.stub().callsArgWith(7, null, {
         stdout: 'this is stdout',
         stderr: 'this is stderr'
       }))
@@ -71,7 +72,8 @@ describe('LatexRunner', function() {
             compiler: this.compiler,
             timeout: (this.timeout = 42000),
             image: this.image,
-            environment: this.env
+            environment: this.env,
+            compileGroup: this.compileGroup
           },
           this.callback
         )
@@ -85,7 +87,8 @@ describe('LatexRunner', function() {
             this.directory,
             this.image,
             this.timeout,
-            this.env
+            this.env,
+            this.compileGroup
           )
           .should.equal(true)
       })
