@@ -261,7 +261,9 @@ module.exports = AuthorizationMiddleware = {
 
   redirectToRestricted(req, res, next) {
     // TODO: move this to throwing ForbiddenError
-    res.redirect(`/restricted?from=${encodeURIComponent(req.url)}`)
+    res.redirect(
+      `/restricted?from=${encodeURIComponent(res.locals.currentUrl)}`
+    )
   },
 
   restricted(req, res, next) {
