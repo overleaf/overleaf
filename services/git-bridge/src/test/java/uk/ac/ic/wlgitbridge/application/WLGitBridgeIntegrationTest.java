@@ -921,7 +921,7 @@ public class WLGitBridgeIntegrationTest {
         assertEquals(healthCheckResponse.getStatusLine().getStatusCode(), 200);
     }
 
-  private String makeConfigFile(
+    private String makeConfigFile(
             int port,
             int apiPort
     ) throws IOException {
