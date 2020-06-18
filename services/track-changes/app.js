@@ -112,7 +112,7 @@ app.get('/health_check', HttpController.healthCheck)
 
 app.use(function (error, req, res, next) {
   logger.error({ err: error, req }, 'an internal error occured')
-  return res.send(500)
+  return res.sendStatus(500)
 })
 
 const port =
