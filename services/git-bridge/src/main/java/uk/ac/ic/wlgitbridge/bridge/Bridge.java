@@ -263,6 +263,17 @@ public class Bridge {
         gcJob.start();
     }
 
+    public boolean healthCheck() {
+       try {
+         dbStore.getNumProjects();
+         Log.error("[HealthCheck] passed");
+         return true;
+       } catch (Exception e)  {
+         Log.error("[HealthCheck] FAILED!", e);
+         return false;
+       }
+    }
+
     /**
      * Performs a check of inconsistencies in the DB. This was used to upgrade
      * the schema.
