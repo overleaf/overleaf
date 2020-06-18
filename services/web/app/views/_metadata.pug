@@ -24,7 +24,7 @@
 	meta(itemprop="description", content=translate("site_description"))
 
 //- Image
--if (metadata && metadata.image)
+-if (metadata && metadata.image && metadata.image.fields)
 	//- from the CMS
 	meta(itemprop="image", content=metadata.image.fields.file.url)
 	meta(name="image", content=metadata.image.fields.file.url)
@@ -59,7 +59,7 @@ meta(name="twitter:card", content=metadata && metadata.twitterCardType ? metadat
 	meta(name="twitter:description", content=metadata.twitterDescription)
 - else
 	meta(name="twitter:description", content=translate("site_description"))
--if (metadata && metadata.twitterImage)
+-if (metadata && metadata.twitterImage && metadata.twitterImage.fields)
 	//- from the CMS
 	meta(name="twitter:image", content=metadata.twitterImage.fields.file.url)
 	meta(name="twitter:image:alt", content=metadata.twitterImage.fields.title)
@@ -80,7 +80,7 @@ meta(name="twitter:card", content=metadata && metadata.twitterCardType ? metadat
 -else
 	meta(property="og:description", content=translate("site_description"))
 
--if (metadata && metadata.openGraphImage)
+-if (metadata && metadata.openGraphImage && metadata.openGraphImage.fields)
 	//- from the CMS
 	meta(property="og:image", content=metadata.openGraphImage.fields.file.url)
 -else if (settings.overleaf)
