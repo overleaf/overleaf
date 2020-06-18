@@ -1,4 +1,4 @@
-const { ObjectId } = require('../../../../app/src/infrastructure/mongojs')
+const { db, ObjectId } = require('../../../../app/src/infrastructure/mongojs')
 const { expect } = require('chai')
 const SubscriptionUpdater = require('../../../../app/src/Features/Subscription/SubscriptionUpdater')
 const SubscriptionModel = require('../../../../app/src/models/Subscription')
@@ -14,6 +14,7 @@ class Subscription {
     this.manager_ids = options.managerIds || [this.admin_id]
     this.member_ids = options.memberIds || []
     this.invited_emails = options.invitedEmails || []
+    this.teamName = options.teamName
     this.teamInvites = options.teamInvites || []
     this.planCode = options.planCode
     this.recurlySubscription_id = options.recurlySubscription_id
@@ -36,6 +37,10 @@ class Subscription {
         callback()
       }
     )
+  }
+
+  get(callback) {
+    db.subscriptions.findOne({ _id: ObjectId(this._id) }, callback)
   }
 
   setManagerIds(managerIds, callback) {
