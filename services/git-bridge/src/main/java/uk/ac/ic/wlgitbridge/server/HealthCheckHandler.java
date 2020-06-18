@@ -32,8 +32,13 @@ public class HealthCheckHandler extends AbstractHandler {
       Log.info("GET <- /api/health_check");
       baseRequest.setHandled(true);
       response.setContentType("text/plain");
-      response.setStatus(200);
-      response.getWriter().println("ok");
+      if (bridge.healthCheck()) {
+        response.setStatus(200);
+        response.getWriter().println("ok");
+      } else {
+        response.setStatus(500);
+        response.getWriter().println("failed");
+      }
     }
   }
 
