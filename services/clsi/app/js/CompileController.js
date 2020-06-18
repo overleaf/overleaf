@@ -55,6 +55,10 @@ module.exports = CompileController = {
             } else if (error instanceof Errors.FilesOutOfSyncError) {
               code = 409 // Http 409 Conflict
               status = 'retry'
+            } else if (error && error.code === 'EPIPE') {
+              // docker returns EPIPE when shutting down
+              code = 503 // send 503 Unavailable response
+              status = 'unavailable'
             } else if (error != null ? error.terminated : undefined) {
               status = 'terminated'
             } else if (error != null ? error.validate : undefined) {
