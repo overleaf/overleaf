@@ -270,7 +270,7 @@ public class Bridge {
          if (!rootDirectory.exists()) {
            throw new Exception("bad filesystem state, root directory does not exist");
          }
-         Log.error("[HealthCheck] passed");
+         Log.info("[HealthCheck] passed");
          return true;
        } catch (Exception e)  {
          Log.error("[HealthCheck] FAILED!", e);
