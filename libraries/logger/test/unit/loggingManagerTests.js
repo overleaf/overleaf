@@ -259,6 +259,32 @@ describe('LoggingManager', function() {
       this.logger.error({ foo: 'bar' }, 'message')
       this.captureException.callCount.should.equal(10)
     })
+
+    describe('reportedToSentry', function() {
+      it('should mark the error as reported to sentry', function() {
+        const err = new Error()
+        this.logger.error({ err }, 'message')
+        expect(this.captureException.called).to.equal(true)
+        expect(err.reportedToSentry).to.equal(true)
+      })
+
+      it('should mark two errors as reported to sentry', function() {
+        const err1 = new Error()
+        const err2 = new Error()
+        this.logger.error({ err: err1, err2 }, 'message')
+        expect(this.captureException.called).to.equal(true)
+        expect(err1.reportedToSentry).to.equal(true)
+        expect(err2.reportedToSentry).to.equal(true)
+      })
+
+      it('should not mark arbitrary objects as reported to sentry', function() {
+        const err = new Error()
+        const ctx = { foo: 'bar' }
+        this.logger.error({ err, ctx }, 'message')
+        expect(this.captureException.called).to.equal(true)
+        expect(ctx.reportedToSentry).to.equal(undefined)
+      })
+    })
   })
 
   describe('checkLogLevel', function() {
