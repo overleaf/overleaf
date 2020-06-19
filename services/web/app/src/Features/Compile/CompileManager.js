@@ -22,7 +22,6 @@ const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
 const UserGetter = require('../User/UserGetter')
 const ClsiManager = require('./ClsiManager')
 const Metrics = require('metrics-sharelatex')
-const logger = require('logger-sharelatex')
 const rateLimiter = require('../../infrastructure/RateLimiter')
 
 module.exports = CompileManager = {
@@ -47,10 +46,6 @@ module.exports = CompileManager = {
           return callback(error)
         }
         if (recentlyCompiled) {
-          logger.warn(
-            { project_id, user_id },
-            'project was recently compiled so not continuing'
-          )
           return callback(null, 'too-recently-compiled', [])
         }
 
