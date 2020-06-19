@@ -489,7 +489,7 @@ describe('ClsiManager', function() {
       beforeEach(function(done) {
         this.ClsiManager._buildRequest(
           this.project_id,
-          { timeout: 100 },
+          { timeout: 100, compileGroup: 'standard' },
           (err, request) => {
             if (err != null) {
               return done(err)
@@ -539,7 +539,8 @@ describe('ClsiManager', function() {
               draft: false,
               check: undefined,
               syncType: undefined, // "full"
-              syncState: undefined
+              syncState: undefined,
+              compileGroup: 'standard'
             }, // "01234567890abcdef"
             rootResourcePath: 'main.tex',
             resources: [
@@ -583,7 +584,11 @@ describe('ClsiManager', function() {
           .callsArgWith(1, null, { 'mock-doc-id-1': 'main.tex' })
         this.ClsiManager._buildRequest(
           this.project_id,
-          { timeout: 100, incrementalCompilesEnabled: true },
+          {
+            timeout: 100,
+            incrementalCompilesEnabled: true,
+            compileGroup: 'priority'
+          },
           (err, request) => {
             if (err != null) {
               return done(err)
@@ -631,7 +636,8 @@ describe('ClsiManager', function() {
               draft: false,
               check: undefined,
               syncType: 'incremental',
-              syncState: '01234567890abcdef'
+              syncState: '01234567890abcdef',
+              compileGroup: 'priority'
             },
             rootResourcePath: 'main.tex',
             resources: [

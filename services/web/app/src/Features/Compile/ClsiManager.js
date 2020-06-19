@@ -827,7 +827,8 @@ const ClsiManager = {
           draft: !!options.draft,
           check: options.check,
           syncType: options.syncType,
-          syncState: options.syncState
+          syncState: options.syncState,
+          compileGroup: options.compileGroup
         },
         rootResourcePath,
         resources
