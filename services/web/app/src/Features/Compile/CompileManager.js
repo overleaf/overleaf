@@ -167,26 +167,28 @@ module.exports = CompileManager = {
       if (error != null) {
         return callback(error)
       }
-      return UserGetter.getUser(project.owner_ref, { features: 1 }, function(
-        err,
-        owner
-      ) {
-        if (error != null) {
-          return callback(error)
+      return UserGetter.getUser(
+        project.owner_ref,
+        { alphaProgram: 1, betaProgram: 1, features: 1 },
+        function(err, owner) {
+          if (error != null) {
+            return callback(error)
+          }
+          let ownerFeatures = (owner && owner.features) || {}
+          // put alpha users into their own compile group
+          if (owner && owner.alphaProgram) {
+            ownerFeatures.compileGroup = 'alpha'
+          }
+          return callback(null, {
+            timeout:
+              ownerFeatures.compileTimeout ||
+              Settings.defaultFeatures.compileTimeout,
+            compileGroup:
+              ownerFeatures.compileGroup ||
+              Settings.defaultFeatures.compileGroup
+          })
         }
-        return callback(null, {
-          timeout:
-            __guard__(
-              owner != null ? owner.features : undefined,
-              x => x.compileTimeout
-            ) || Settings.defaultFeatures.compileTimeout,
-          compileGroup:
-            __guard__(
-              owner != null ? owner.features : undefined,
-              x1 => x1.compileGroup
-            ) || Settings.defaultFeatures.compileGroup
-        })
-      })
+      )
     })
   },
 
@@ -270,10 +272,4 @@ module.exports = CompileManager = {
       return ClsiManager.wordCount(project_id, user_id, file, limits, callback)
     })
   }
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

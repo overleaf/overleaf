@@ -215,7 +215,11 @@ describe('CompileManager', function() {
 
     it("should look up the owner's features", function() {
       return this.UserGetter.getUser
-        .calledWith(this.project.owner_ref, { features: 1 })
+        .calledWith(this.project.owner_ref, {
+          alphaProgram: 1,
+          betaProgram: 1,
+          features: 1
+        })
         .should.equal(true)
     })
 

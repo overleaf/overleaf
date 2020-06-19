@@ -134,6 +134,7 @@ const UserSchema = new Schema({
     mendeley: Boolean, // coerce the refProviders values to Booleans
     zotero: Boolean
   },
+  alphaProgram: { type: Boolean, default: false }, // experimental features
   betaProgram: { type: Boolean, default: false },
   overleaf: {
     id: { type: Number },
