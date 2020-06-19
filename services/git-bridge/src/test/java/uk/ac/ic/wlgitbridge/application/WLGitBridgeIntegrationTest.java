@@ -912,13 +912,13 @@ public class WLGitBridgeIntegrationTest {
         HttpClient client = HttpClients.createDefault();
         String urlBase = "http://127.0.0.1:" + gitBridgePort;
         // Status
-        HttpGet statusRequest = new HttpGet(urlBase+"/api/status");
+        HttpGet statusRequest = new HttpGet(urlBase+"/status");
         HttpResponse statusResponse = client.execute(statusRequest);
-        assertEquals(statusResponse.getStatusLine().getStatusCode(), 200);
+        assertEquals(200, statusResponse.getStatusLine().getStatusCode());
         // Health Check
-        HttpGet healthCheckRequest = new HttpGet(urlBase+"/api/health_check");
+        HttpGet healthCheckRequest = new HttpGet(urlBase+"/health_check");
         HttpResponse healthCheckResponse = client.execute(healthCheckRequest);
-        assertEquals(healthCheckResponse.getStatusLine().getStatusCode(), 200);
+        assertEquals(200, healthCheckResponse.getStatusLine().getStatusCode());
     }
 
     private String makeConfigFile(
