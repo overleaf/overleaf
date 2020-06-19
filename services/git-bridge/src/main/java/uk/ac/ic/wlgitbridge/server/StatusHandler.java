@@ -29,7 +29,7 @@ public class StatusHandler extends AbstractHandler {
     HttpServletResponse response
   ) throws IOException {
     if ("GET".equals(baseRequest.getMethod()) && "/status".equals(target)) {
-      Log.info("GET <- /api/status");
+      Log.info("GET <- /status");
       baseRequest.setHandled(true);
       response.setContentType("text/plain");
       response.setStatus(200);

@@ -29,7 +29,7 @@ public class HealthCheckHandler extends AbstractHandler {
     HttpServletResponse response
   ) throws IOException {
     if ("GET".equals(baseRequest.getMethod()) && "/health_check".equals(target)) {
-      Log.info("GET <- /api/health_check");
+      Log.info("GET <- /health_check");
       baseRequest.setHandled(true);
       response.setContentType("text/plain");
       if (bridge.healthCheck()) {
