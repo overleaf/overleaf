@@ -39,9 +39,9 @@ module.exports = RoomManager =
             @leaveEntity client, entity, id
 
     emitOnCompletion: (promiseList, eventName) ->
-        result = Promise.all(promiseList)
-        result.then () -> RoomEvents.emit(eventName)
-        result.catch (err) -> RoomEvents.emit(eventName, err)
+        Promise.all(promiseList)
+          .then(() -> RoomEvents.emit(eventName))
+          .catch((err) -> RoomEvents.emit(eventName, err))
 
     eventSource: () ->
         return RoomEvents

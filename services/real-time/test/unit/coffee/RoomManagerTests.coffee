@@ -1,4 +1,5 @@
 chai = require('chai')
+expect = chai.expect
 should = chai.should()
 sinon = require("sinon")
 modulePath = "../../../app/js/RoomManager.js"
@@ -20,6 +21,29 @@ describe 'RoomManager', ->
 		sinon.spy(@RoomEvents, 'emit')
 		sinon.spy(@RoomEvents, 'once')
 	
+	describe "emitOnCompletion", ->
+		describe "when a subscribe errors", ->
+			afterEach () ->
+				process.removeListener("unhandledRejection", @onUnhandled)
+
+			beforeEach (done) ->
+				@onUnhandled = (error) =>
+					@unhandledError = error
+					done(new Error("unhandledRejection: #{error.message}"))
+				process.on("unhandledRejection", @onUnhandled)
+
+				reject = undefined
+				subscribePromise = new Promise((_, r) -> reject = r)
+				promises = [subscribePromise]
+				eventName = "project-subscribed-123"
+				@RoomEvents.once eventName, () ->
+					setTimeout(done, 100)
+				@RoomManager.emitOnCompletion(promises, eventName)
+				setTimeout(() -> reject(new Error("subscribe failed")))
+
+			it "should keep going", () ->
+				expect(@unhandledError).to.not.exist
+
 	describe "joinProject", ->
 	
 		describe "when the project room is empty", ->
