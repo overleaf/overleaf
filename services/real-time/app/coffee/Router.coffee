@@ -55,6 +55,8 @@ module.exports = Router =
 		app.post "/client/:client_id/disconnect", httpAuth, HttpApiController.disconnectClient
 
 		session.on 'connection', (error, client, session) ->
+			# init client context, we may access it in Router._handleError before
+			#  setting any values
 			client.ol_context = {}
 
 			client?.on "error", (err) ->
@@ -113,13 +115,9 @@ module.exports = Router =
 				metrics.inc('socket-io.disconnect')
 				metrics.gauge('socket-io.clients', io.sockets.clients()?.length - 1)
 
-				cleanup = () ->
-					delete client.ol_context
 				WebsocketController.leaveProject io, client, (err) ->
 					if err?
-						Router._handleError cleanup, err, client, "leaveProject"
-					else
-						cleanup()
+						Router._handleError (() ->), err, client, "leaveProject"
 
 			# Variadic. The possible arguments:
 			# doc_id, callback

@@ -33,6 +33,7 @@ module.exports = WebsocketController =
 				logger.warn {err, project_id, user_id, client_id: client.id}, "user is not authorized to join project"
 				return callback(err)
 
+			client.ol_context = {}
 			client.ol_context["privilege_level"] = privilegeLevel
 			client.ol_context["user_id"] = user_id
 			client.ol_context["project_id"] = project_id
