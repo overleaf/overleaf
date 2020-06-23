@@ -1,3 +1,8 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -14,7 +19,7 @@ module.exports = (RedisClientManager = {
         // create a dynamic list of redis clients, excluding any configurations which are not defined
         const clientList = (() => {
             const result = [];
-            for (let x of Array.from(configs)) {
+            for (const x of Array.from(configs)) {
                 if (x != null) {
                     const redisType = (x.cluster != null) ?
                         "cluster"

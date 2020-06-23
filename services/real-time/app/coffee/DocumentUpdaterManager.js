@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -26,7 +33,7 @@ module.exports = (DocumentUpdaterManager = {
 				logger.error({err, url, project_id, doc_id}, "error getting doc from doc updater");
 				return callback(err);
 			}
-			if (200 <= res.statusCode && res.statusCode < 300) {
+			if (res.statusCode >= 200 && res.statusCode < 300) {
 				logger.log({project_id, doc_id}, "got doc from document document updater");
 				try {
 					body = JSON.parse(body);
@@ -61,7 +68,7 @@ module.exports = (DocumentUpdaterManager = {
 			if (err != null) {
 				logger.error({err, project_id}, "error deleting project from document updater");
 				return callback(err);
-			} else if (200 <= res.statusCode && res.statusCode  < 300) {
+			} else if (res.statusCode >= 200 && res.statusCode  < 300) {
 				logger.log({project_id}, "deleted project from document updater");
 				return callback(null);
 			} else {

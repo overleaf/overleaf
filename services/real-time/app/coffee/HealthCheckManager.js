@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -36,6 +42,7 @@ module.exports = (HealthCheckManager = class HealthCheckManager {
         // keep a record of these objects to dispatch on
         CHANNEL_MANAGER[this.channel] = this;
     }
+
     processEvent(id) {
         // if this is our event record it
         if (id === this.id) {
@@ -46,6 +53,7 @@ module.exports = (HealthCheckManager = class HealthCheckManager {
             return this.timer = null; // only time the latency of the first event
         }
     }
+
     setStatus() {
         // if we saw the event anything other than a single time that is an error
         if (this.count !== 1) {
@@ -60,13 +68,15 @@ module.exports = (HealthCheckManager = class HealthCheckManager {
         // dispatch event to manager for channel
         return (CHANNEL_MANAGER[channel] != null ? CHANNEL_MANAGER[channel].processEvent(id) : undefined);
     }
+
     static status() {
         // return status of all channels for logging
         return CHANNEL_ERROR;
     }
+
     static isFailing() { 
         // check if any channel status is bad 
-        for (let channel in CHANNEL_ERROR) {
+        for (const channel in CHANNEL_ERROR) {
             const error = CHANNEL_ERROR[channel];
             if (error === true) { return true; }
         }

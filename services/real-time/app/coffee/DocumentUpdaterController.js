@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -123,7 +129,7 @@ module.exports = (DocumentUpdaterController = {
 	_processErrorFromDocumentUpdater(io, doc_id, error, message) {
 		return (() => {
 			const result = [];
-			for (let client of Array.from(io.sockets.clients(doc_id))) {
+			for (const client of Array.from(io.sockets.clients(doc_id))) {
 				logger.warn({err: error, doc_id, client_id: client.id}, "error from document updater, disconnecting client");
 				client.emit("otUpdateError", error, message);
 				result.push(client.disconnect());

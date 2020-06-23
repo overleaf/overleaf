@@ -1,3 +1,8 @@
+/* eslint-disable
+    camelcase,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -73,7 +78,7 @@ module.exports = (EventLogger = {
 	_cleanEventStream(now) {
 		return (() => {
 			const result = [];
-			for (let key in EVENT_LOG_TIMESTAMP) {
+			for (const key in EVENT_LOG_TIMESTAMP) {
 				const timestamp = EVENT_LOG_TIMESTAMP[key];
 				if ((now - timestamp) > EventLogger.MAX_STALE_TIME_IN_MS) {
 					delete EVENT_LOG_COUNTER[key];

@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -47,17 +54,17 @@ module.exports = (WebsocketController = {
 			}
 
 			client.ol_context = {};
-			client.ol_context["privilege_level"] = privilegeLevel;
-			client.ol_context["user_id"] = user_id;
-			client.ol_context["project_id"] = project_id;
-			client.ol_context["owner_id"] = __guard__(project != null ? project.owner : undefined, x => x._id);
-			client.ol_context["first_name"] = user != null ? user.first_name : undefined;
-			client.ol_context["last_name"] = user != null ? user.last_name : undefined;
-			client.ol_context["email"] = user != null ? user.email : undefined;
-			client.ol_context["connected_time"] = new Date();
-			client.ol_context["signup_date"] = user != null ? user.signUpDate : undefined;
-			client.ol_context["login_count"] = user != null ? user.loginCount : undefined;
-			client.ol_context["is_restricted_user"] = !!(isRestrictedUser);
+			client.ol_context.privilege_level = privilegeLevel;
+			client.ol_context.user_id = user_id;
+			client.ol_context.project_id = project_id;
+			client.ol_context.owner_id = __guard__(project != null ? project.owner : undefined, x => x._id);
+			client.ol_context.first_name = user != null ? user.first_name : undefined;
+			client.ol_context.last_name = user != null ? user.last_name : undefined;
+			client.ol_context.email = user != null ? user.email : undefined;
+			client.ol_context.connected_time = new Date();
+			client.ol_context.signup_date = user != null ? user.signUpDate : undefined;
+			client.ol_context.login_count = user != null ? user.loginCount : undefined;
+			client.ol_context.is_restricted_user = !!(isRestrictedUser);
 
 			RoomManager.joinProject(client, project_id, function(err) {
 				if (err) { return callback(err); }
@@ -73,7 +80,7 @@ module.exports = (WebsocketController = {
 	// We want to flush a project if there are no more (local) connected clients
 	// but we need to wait for the triggering client to disconnect. How long we wait
 	// is determined by FLUSH_IF_EMPTY_DELAY.
-	FLUSH_IF_EMPTY_DELAY: 500, //ms
+	FLUSH_IF_EMPTY_DELAY: 500, // ms
 	leaveProject(io, client, callback) {
 			if (callback == null) { callback = function(error) {}; }
 			const {project_id, user_id} = client.ol_context;
@@ -160,10 +167,10 @@ module.exports = (WebsocketController = {
 						}
 						if (options.encodeRanges) {
 							try {
-								for (let comment of Array.from((ranges != null ? ranges.comments : undefined) || [])) {
+								for (const comment of Array.from((ranges != null ? ranges.comments : undefined) || [])) {
 									if (comment.op.c != null) { comment.op.c = encodeForWebsockets(comment.op.c); }
 								}
-								for (let change of Array.from((ranges != null ? ranges.changes : undefined) || [])) {
+								for (const change of Array.from((ranges != null ? ranges.changes : undefined) || [])) {
 									if (change.op.i != null) { change.op.i = encodeForWebsockets(change.op.i); }
 									if (change.op.d != null) { change.op.d = encodeForWebsockets(change.op.d); }
 								}
@@ -192,7 +199,7 @@ module.exports = (WebsocketController = {
 			// we could remove permission when user leaves a doc, but because
 			// the connection is per-project, we continue to allow access
 			// after the initial joinDoc since we know they are already authorised.
-			//# AuthorizationManager.removeAccessToDoc client, doc_id
+			// # AuthorizationManager.removeAccessToDoc client, doc_id
 			return callback();
 		},
 	updateClientPosition(client, cursorData, callback) {
@@ -221,12 +228,7 @@ module.exports = (WebsocketController = {
 				} else {
 					cursorData.name = first_name && last_name ?
 						`${first_name} ${last_name}`
-					: first_name ?
-						first_name
-					: last_name ?
-						last_name
-					:
-						"";
+					: first_name || (last_name || "");
 					ConnectedUsersManager.updateUserPosition(project_id, client.publicId, {
 						first_name,
 						last_name,
@@ -340,7 +342,7 @@ module.exports = (WebsocketController = {
 	},
 
 	_isCommentUpdate(update) {
-		for (let op of Array.from(update.op)) {
+		for (const op of Array.from(update.op)) {
 			if ((op.c == null)) {
 				return false;
 			}

@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    standard/no-callback-literal,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -29,7 +36,7 @@ module.exports = (Router = {
 	_handleError(callback, error, client, method, attrs) {
 			if (callback == null) { callback = function(error) {}; }
 			if (attrs == null) { attrs = {}; }
-			for (let key of ["project_id", "doc_id", "user_id"]) {
+			for (const key of ["project_id", "doc_id", "user_id"]) {
 				attrs[key] = client.ol_context[key];
 			}
 			attrs.client_id = client.id;

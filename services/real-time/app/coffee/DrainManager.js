@@ -1,3 +1,8 @@
+/* eslint-disable
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -38,7 +43,7 @@ module.exports = (DrainManager = {
 	RECONNECTED_CLIENTS: {},
 	reconnectNClients(io, N) {
 		let drainedCount = 0;
-		for (let client of Array.from(io.sockets.clients())) {
+		for (const client of Array.from(io.sockets.clients())) {
 			if (!this.RECONNECTED_CLIENTS[client.id]) {
 				this.RECONNECTED_CLIENTS[client.id] = true;
 				logger.log({client_id: client.id}, "Asking client to reconnect gracefully");

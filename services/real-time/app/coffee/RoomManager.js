@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -51,7 +57,7 @@ module.exports = (RoomManager = {
         logger.log({client: client.id, roomsToLeave}, "client leaving project");
         return (() => {
             const result = [];
-            for (let id of Array.from(roomsToLeave)) {
+            for (const id of Array.from(roomsToLeave)) {
                 const entity = IdMap.get(id);
                 result.push(this.leaveEntity(client, entity, id));
             }
@@ -131,7 +137,7 @@ module.exports = (RoomManager = {
     _roomsClientIsIn(client) {
         const roomList = (() => {
             const result = [];
-            for (let fullRoomPath in (client.manager.roomClients != null ? client.manager.roomClients[client.id] : undefined)) {
+            for (const fullRoomPath in (client.manager.roomClients != null ? client.manager.roomClients[client.id] : undefined)) {
             // strip socket.io prefix from room to get original id
                 if (fullRoomPath !== '') {
                     const [prefix, room] = Array.from(fullRoomPath.split('/', 2));

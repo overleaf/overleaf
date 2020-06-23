@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -19,7 +25,7 @@ module.exports = (HttpController = {
 			const {project_id, user_id, first_name, last_name, email, connected_time} = ioClient.ol_context;
 			const client = {client_id, project_id, user_id, first_name, last_name, email, connected_time};
 			client.rooms = [];
-			for (let name in ioClient.manager.roomClients[client_id]) {
+			for (const name in ioClient.manager.roomClients[client_id]) {
 				const joined = ioClient.manager.roomClients[client_id][name];
 				if (joined && (name !== "")) {
 					client.rooms.push(name.replace(/^\//, "")); // Remove leading /

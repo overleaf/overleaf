@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -19,7 +25,7 @@ module.exports = (AuthorizationManager = {
 				
 	_assertClientHasPrivilegeLevel(client, allowedLevels, callback) {
 		if (callback == null) { callback = function(error) {}; }
-		if (Array.from(allowedLevels).includes(client.ol_context["privilege_level"])) {
+		if (Array.from(allowedLevels).includes(client.ol_context.privilege_level)) {
 			return callback(null);
 		} else {
 			return callback(new Error("not authorized"));

@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -13,7 +19,7 @@ module.exports = (HttpApiController = {
 	sendMessage(req, res, next) {
 		logger.log({message: req.params.message}, "sending message");
 		if (Array.isArray(req.body)) {
-			for (let payload of Array.from(req.body)) {
+			for (const payload of Array.from(req.body)) {
 				WebsocketLoadBalancer.emitToRoom(req.params.project_id, req.params.message, payload);
 			}
 		} else {

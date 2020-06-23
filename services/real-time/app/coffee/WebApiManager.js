@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -34,7 +41,7 @@ module.exports = (WebApiManager = {
 		}, function(error, response, data) {
 			let err;
 			if (error != null) { return callback(error); }
-			if (200 <= response.statusCode && response.statusCode < 300) {
+			if (response.statusCode >= 200 && response.statusCode < 300) {
 				if ((data == null) || ((data != null ? data.project : undefined) == null)) {
 					err = new Error('no data returned from joinProject request');
 					logger.error({err, project_id, user_id}, "error accessing web api");
