@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -79,7 +85,7 @@ describe("joinProject", function() {
 		return it("should have marked the user as connected", function(done) {
 			return this.client.emit("clientTracking.getConnectedUsers", (error, users) => {
 				let connected = false;
-				for (let user of Array.from(users)) {
+				for (const user of Array.from(users)) {
 					if ((user.client_id === this.client.publicId) && (user.user_id === this.user_id)) {
 						connected = true;
 						break;

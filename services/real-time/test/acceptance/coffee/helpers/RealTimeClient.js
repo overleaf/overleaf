@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -27,7 +34,7 @@ io.util.request = function() {
 		if (Client.cookie != null) {
 			return xhr.setRequestHeader("Cookie", Client.cookie);
 		}
-	}.bind(this);
+	};
 	return xhr;
 };
 
@@ -38,7 +45,7 @@ module.exports = (Client = {
 		if (callback == null) { callback = function(error) {}; }
 		const sessionId = uid(24);
 		session.cookie = {};
-		return rclient.set("sess:" + sessionId, JSON.stringify(session), function(error) {
+		return rclient.set("sess:" + sessionId, JSON.stringify(session), (error) => {
 			if (error != null) { return callback(error); }
 			const secret = Settings.security.sessionSecret;
 			const cookieKey = 's:' + signature.sign(sessionId, secret);

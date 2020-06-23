@@ -1,3 +1,8 @@
+/* eslint-disable
+    camelcase,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -15,17 +20,17 @@ const RealTimeClient = require("./helpers/RealTimeClient");
 const FixturesManager = require("./helpers/FixturesManager");
 
 describe('HttpControllerTests', function() {
-	describe('without a user', () => it('should return 404 for the client view', function(done) {
+	describe('without a user', function() { return it('should return 404 for the client view', function(done) {
         const client_id = 'not-existing';
         return request.get({
             url: `/clients/${client_id}`,
             json: true
-        }, function(error, response, data) {
+        }, (error, response, data) => {
             if (error) { return done(error); }
             expect(response.statusCode).to.equal(404);
             return done();
         });
-    }));
+    }); });
 
 	return describe('with a user and after joining a project', function() {
 		before(function(done) {

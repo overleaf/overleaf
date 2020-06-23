@@ -1,3 +1,9 @@
+/* eslint-disable
+    handle-callback-err,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -12,7 +18,7 @@ const {
 
 const RealTimeClient = require("./helpers/RealTimeClient");
 
-describe("Session", () => describe("with an established session", function() {
+describe("Session", function() { return describe("with an established session", function() {
     before(function(done) {
         this.user_id = "mock-user-id";
         RealTimeClient.setSession({
@@ -38,7 +44,7 @@ describe("Session", () => describe("with an established session", function() {
     return it("should appear in the list of connected clients", function(done) {
         return RealTimeClient.getConnectedClients((error, clients) => {
             let included = false;
-            for (let client of Array.from(clients)) {
+            for (const client of Array.from(clients)) {
                 if (client.client_id === this.client.socket.sessionid) {
                     included = true;
                     break;
@@ -48,4 +54,4 @@ describe("Session", () => describe("with an established session", function() {
             return done();
         });
     });
-}));
+}); });

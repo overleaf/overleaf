@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -32,7 +39,7 @@ module.exports = (MockWebServer = {
 		if (project_id === 'rate-limited') {
 			return res.status(429).send();
 		} else {
-			return MockWebServer.joinProject(project_id, user_id, function(error, project, privilegeLevel) {
+			return MockWebServer.joinProject(project_id, user_id, (error, project, privilegeLevel) => {
 				if (error != null) { return next(error); }
 				return res.json({
 					project,
@@ -50,10 +57,10 @@ module.exports = (MockWebServer = {
 		}
 		const app = express();
 		app.post("/project/:project_id/join", MockWebServer.joinProjectRequest);
-		return app.listen(3000, function(error) {
+		return app.listen(3000, (error) => {
 			MockWebServer.running = true;
 			return callback(error);
-	}).on("error", function(error) {
+	}).on("error", (error) => {
 			console.error("error starting MockWebServer:", error.message);
 			return process.exit(1);
 		});

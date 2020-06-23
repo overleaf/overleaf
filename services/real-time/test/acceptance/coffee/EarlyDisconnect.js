@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -19,7 +25,7 @@ const rclientRT = redis.createClient(settings.redis.realtime);
 const KeysRT = settings.redis.realtime.key_schema;
 
 describe("EarlyDisconnect", function() {
-	before(done => MockDocUpdaterServer.run(done));
+	before(function(done) { return MockDocUpdaterServer.run(done); });
 
 	describe("when the client disconnects before joinProject completes", function() {
 		before(function() {
@@ -51,7 +57,7 @@ describe("EarlyDisconnect", function() {
 				},
 
 				cb => {
-					this.clientA.emit("joinProject", {project_id: this.project_id}, (function() {}));
+					this.clientA.emit("joinProject", {project_id: this.project_id}, (() => {}));
 					// disconnect before joinProject completes
 					this.clientA.on("disconnect", () => cb());
 					return this.clientA.disconnect();
@@ -110,7 +116,7 @@ describe("EarlyDisconnect", function() {
 				},
 
 				cb => {
-					this.clientA.emit("joinDoc", this.doc_id, (function() {}));
+					this.clientA.emit("joinDoc", this.doc_id, (() => {}));
 					// disconnect before joinDoc completes
 					this.clientA.on("disconnect", () => cb());
 					return this.clientA.disconnect();
@@ -182,7 +188,7 @@ describe("EarlyDisconnect", function() {
 							row: 42,
 							column: 36,
 							doc_id: this.doc_id
-						}, (function() {}));
+						}, (() => {}));
 					// disconnect before updateClientPosition completes
 					this.clientA.on("disconnect", () => cb());
 					return this.clientA.disconnect();
@@ -198,7 +204,7 @@ describe("EarlyDisconnect", function() {
 		// we can not force the race condition, so we have to try many times
 		return Array.from(Array.from({length: 20}).map((_, i) => i+1)).map((attempt) =>
 			it(`should not show the client as connected (race ${attempt})`, function(done) {
-				rclientRT.smembers(KeysRT.clientsInProject({project_id: this.project_id}), function(err, results) {
+				rclientRT.smembers(KeysRT.clientsInProject({project_id: this.project_id}), (err, results) => {
 					if (err) { return done(err); }
 					expect(results).to.deep.equal([]);
 					return done();

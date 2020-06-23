@@ -1,3 +1,8 @@
+/* eslint-disable
+    camelcase,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -44,11 +49,11 @@ describe("DrainManagerTests", function() {
 	});
 
 	// trigger and check cleanup
-	it("should have disconnected all previous clients", done => RealTimeClient.getConnectedClients(function(error, data) {
+	it("should have disconnected all previous clients", function(done) { return RealTimeClient.getConnectedClients((error, data) => {
         if (error) { return done(error); }
         expect(data.length).to.equal(0);
         return done();
-    }));
+    }); });
 
 	return describe("with two clients in the project", function() {
 		beforeEach(function(done) {
@@ -87,9 +92,9 @@ describe("DrainManagerTests", function() {
 				], done);
 			});
 
-			afterEach(done => drain(0, done)); // reset drain
+			afterEach(function(done) { return drain(0, done); }); // reset drain
 
-			it("should not timeout", () => expect(true).to.equal(true));
+			it("should not timeout", function() { return expect(true).to.equal(true); });
 
 			return it("should not have disconnected", function() {
 				expect(this.clientA.socket.connected).to.equal(true);

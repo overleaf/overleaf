@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -73,7 +81,7 @@ describe("leaveDoc", function() {
 							
 		describe("then leaving the doc", function() {
 			beforeEach(function(done) {
-				return this.client.emit("leaveDoc", this.doc_id, function(error) {
+				return this.client.emit("leaveDoc", this.doc_id, (error) => {
 					if (error != null) { throw error; }
 					return done();
 				});
@@ -89,15 +97,15 @@ describe("leaveDoc", function() {
 
 		describe("when sending a leaveDoc request before the previous joinDoc request has completed", function() {
 			beforeEach(function(done) {
-				this.client.emit("leaveDoc", this.doc_id, function() {});
-				this.client.emit("joinDoc", this.doc_id, function() {});
-				return this.client.emit("leaveDoc", this.doc_id, function(error) {
+				this.client.emit("leaveDoc", this.doc_id, () => {});
+				this.client.emit("joinDoc", this.doc_id, () => {});
+				return this.client.emit("leaveDoc", this.doc_id, (error) => {
 					if (error != null) { throw error; }
 					return done();
 				});
 			});
 
-			it("should not trigger an error", () => sinon.assert.neverCalledWith(logger.error, sinon.match.any, "not subscribed - shouldn't happen"));
+			it("should not trigger an error", function() { return sinon.assert.neverCalledWith(logger.error, sinon.match.any, "not subscribed - shouldn't happen"); });
 
 			return it("should have left the doc room", function(done) {
 				return RealTimeClient.getConnectedClient(this.client.socket.sessionid, (error, client) => {
@@ -109,13 +117,13 @@ describe("leaveDoc", function() {
 
 		return describe("when sending a leaveDoc for a room the client has not joined ", function() {
 			beforeEach(function(done) {
-				return this.client.emit("leaveDoc", this.other_doc_id, function(error) {
+				return this.client.emit("leaveDoc", this.other_doc_id, (error) => {
 					if (error != null) { throw error; }
 					return done();
 				});
 			});
 
-			return it("should trigger a low level message only", () => sinon.assert.calledWith(logger.log, sinon.match.any, "ignoring request from client to leave room it is not in"));
+			return it("should trigger a low level message only", function() { return sinon.assert.calledWith(logger.log, sinon.match.any, "ignoring request from client to leave room it is not in"); });
 		});
 	});
 });

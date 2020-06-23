@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -28,7 +35,7 @@ module.exports = (MockDocUpdaterServer = {
 		const {project_id, doc_id} = req.params;
 		let {fromVersion} = req.query;
 		fromVersion = parseInt(fromVersion, 10);
-		return MockDocUpdaterServer.getDocument(project_id, doc_id, fromVersion, function(error, data) {
+		return MockDocUpdaterServer.getDocument(project_id, doc_id, fromVersion, (error, data) => {
 			if (error != null) { return next(error); }
 			return res.json(data);
 		});
@@ -36,7 +43,7 @@ module.exports = (MockDocUpdaterServer = {
 			
 	deleteProjectRequest(req, res, next) {
 		const {project_id} = req.params;
-		return MockDocUpdaterServer.deleteProject(project_id, function(error) {
+		return MockDocUpdaterServer.deleteProject(project_id, (error) => {
 			if (error != null) { return next(error); }
 			return res.sendStatus(204);
 		});
@@ -51,10 +58,10 @@ module.exports = (MockDocUpdaterServer = {
 		const app = express();
 		app.get("/project/:project_id/doc/:doc_id", MockDocUpdaterServer.getDocumentRequest);
 		app.delete("/project/:project_id", MockDocUpdaterServer.deleteProjectRequest);
-		return app.listen(3003, function(error) {
+		return app.listen(3003, (error) => {
 			MockDocUpdaterServer.running = true;
 			return callback(error);
-	}).on("error", function(error) {
+	}).on("error", (error) => {
 			console.error("error starting MockDocUpdaterServer:", error.message);
 			return process.exit(1);
 		});

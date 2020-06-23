@@ -1,3 +1,10 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -71,7 +78,7 @@ describe("clientTracking", function() {
 						row: (this.row = 42),
 						column: (this.column = 36),
 						doc_id: this.doc_id
-					}, function(error) {
+					}, (error) => {
 						if (error != null) { throw error; }
 						return setTimeout(cb, 300);
 					});
@@ -94,7 +101,7 @@ describe("clientTracking", function() {
 		
 		return it("should record the update in getConnectedUsers", function(done) {
 			return this.clientB.emit("clientTracking.getConnectedUsers", (error, users) => {
-				for (let user of Array.from(users)) {
+				for (const user of Array.from(users)) {
 					if (user.client_id === this.clientA.publicId) {
 						expect(user.cursorData).to.deep.equal({
 							row: this.row,
@@ -167,7 +174,7 @@ describe("clientTracking", function() {
 						row: (this.row = 42),
 						column: (this.column = 36),
 						doc_id: this.doc_id
-					}, function(error) {
+					}, (error) => {
 						if (error != null) { throw error; }
 						return setTimeout(cb, 300);
 					});

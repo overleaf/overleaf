@@ -1,3 +1,8 @@
+/* eslint-disable
+    camelcase,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -10,7 +15,7 @@ const RealTimeClient = require("./helpers/RealTimeClient");
 const FixturesManager = require("./helpers/FixturesManager");
 
 
-describe("Router", () => describe("joinProject", function() {
+describe("Router", function() { return describe("joinProject", function() {
     describe("when there is no callback provided", function() {
         after(function() {
             return process.removeListener('unhandledRejection', this.onUnhandled);
@@ -50,7 +55,7 @@ describe("Router", () => describe("joinProject", function() {
             ], done);
         });
 
-        return it("should keep on going", () => expect('still running').to.exist);
+        return it("should keep on going", function() { return expect('still running').to.exist; });
     });
 
     return describe("when there are too many arguments", function() {
@@ -98,4 +103,4 @@ describe("Router", () => describe("joinProject", function() {
             return expect(this.error.message).to.equal('unexpected arguments');
         });
     });
-}));
+}); });

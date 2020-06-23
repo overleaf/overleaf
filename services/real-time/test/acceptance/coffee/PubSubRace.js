@@ -1,3 +1,9 @@
+/* eslint-disable
+    camelcase,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -14,7 +20,7 @@ const redis = require("redis-sharelatex");
 const rclient = redis.createClient(settings.redis.pubsub);
 
 describe("PubSubRace", function() {
-	before(done => MockDocUpdaterServer.run(done));
+	before(function(done) { return MockDocUpdaterServer.run(done); });
 
 	describe("when the client leaves a doc before joinDoc completes", function() {
 		before(function(done) {
@@ -50,7 +56,7 @@ describe("PubSubRace", function() {
 				},
 
 				cb => {
-					this.clientA.emit("joinDoc", this.doc_id, function() {});
+					this.clientA.emit("joinDoc", this.doc_id, () => {});
 					// leave before joinDoc completes
 					return this.clientA.emit("leaveDoc", this.doc_id, cb);
 				},
@@ -106,15 +112,15 @@ describe("PubSubRace", function() {
 				},
 
 				cb => {
-					this.clientA.emit("joinDoc", this.doc_id, function() {});
-					this.clientA.emit("leaveDoc", this.doc_id, function() {});
-					this.clientA.emit("joinDoc", this.doc_id, function() {});
-					this.clientA.emit("leaveDoc", this.doc_id, function() {});
-					this.clientA.emit("joinDoc", this.doc_id, function() {});
-					this.clientA.emit("leaveDoc", this.doc_id, function() {});
-					this.clientA.emit("joinDoc", this.doc_id, function() {});
-					this.clientA.emit("leaveDoc", this.doc_id, function() {});
-					this.clientA.emit("joinDoc", this.doc_id, function() {});
+					this.clientA.emit("joinDoc", this.doc_id, () => {});
+					this.clientA.emit("leaveDoc", this.doc_id, () => {});
+					this.clientA.emit("joinDoc", this.doc_id, () => {});
+					this.clientA.emit("leaveDoc", this.doc_id, () => {});
+					this.clientA.emit("joinDoc", this.doc_id, () => {});
+					this.clientA.emit("leaveDoc", this.doc_id, () => {});
+					this.clientA.emit("joinDoc", this.doc_id, () => {});
+					this.clientA.emit("leaveDoc", this.doc_id, () => {});
+					this.clientA.emit("joinDoc", this.doc_id, () => {});
 					return this.clientA.emit("leaveDoc", this.doc_id, cb);
 				},
 
@@ -169,14 +175,14 @@ describe("PubSubRace", function() {
 				},
 
 				cb => {
-					this.clientA.emit("joinDoc", this.doc_id, function() {});
-					this.clientA.emit("leaveDoc", this.doc_id, function() {});
-					this.clientA.emit("joinDoc", this.doc_id, function() {});
-					this.clientA.emit("leaveDoc", this.doc_id, function() {});
-					this.clientA.emit("joinDoc", this.doc_id, function() {});
-					this.clientA.emit("leaveDoc", this.doc_id, function() {});
-					this.clientA.emit("joinDoc", this.doc_id, function() {});
-					this.clientA.emit("leaveDoc", this.doc_id, function() {});
+					this.clientA.emit("joinDoc", this.doc_id, () => {});
+					this.clientA.emit("leaveDoc", this.doc_id, () => {});
+					this.clientA.emit("joinDoc", this.doc_id, () => {});
+					this.clientA.emit("leaveDoc", this.doc_id, () => {});
+					this.clientA.emit("joinDoc", this.doc_id, () => {});
+					this.clientA.emit("leaveDoc", this.doc_id, () => {});
+					this.clientA.emit("joinDoc", this.doc_id, () => {});
+					this.clientA.emit("leaveDoc", this.doc_id, () => {});
 					return this.clientA.emit("joinDoc", this.doc_id, cb);
 				},
 
