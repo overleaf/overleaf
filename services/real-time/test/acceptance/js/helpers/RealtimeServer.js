@@ -12,40 +12,53 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const app = require('../../../../app');
-const logger = require("logger-sharelatex");
-const Settings = require("settings-sharelatex");
+const app = require('../../../../app')
+const logger = require('logger-sharelatex')
+const Settings = require('settings-sharelatex')
 
 module.exports = {
-	running: false,
-	initing: false,
-	callbacks: [],
-	ensureRunning(callback) {
-		if (callback == null) { callback = function(error) {}; }
-		if (this.running) {
-			return callback();
-		} else if (this.initing) {
-			return this.callbacks.push(callback);
-		} else {
-			this.initing = true;
-			this.callbacks.push(callback);
-			return app.listen(__guard__(Settings.internal != null ? Settings.internal.realtime : undefined, x => x.port), "localhost", error => { 
-				if (error != null) { throw error; }
-				this.running = true;
-				logger.log("clsi running in dev mode");
+  running: false,
+  initing: false,
+  callbacks: [],
+  ensureRunning(callback) {
+    if (callback == null) {
+      callback = function (error) {}
+    }
+    if (this.running) {
+      return callback()
+    } else if (this.initing) {
+      return this.callbacks.push(callback)
+    } else {
+      this.initing = true
+      this.callbacks.push(callback)
+      return app.listen(
+        __guard__(
+          Settings.internal != null ? Settings.internal.realtime : undefined,
+          (x) => x.port
+        ),
+        'localhost',
+        (error) => {
+          if (error != null) {
+            throw error
+          }
+          this.running = true
+          logger.log('clsi running in dev mode')
 
-				return (() => {
-					const result = [];
-					for (callback of Array.from(this.callbacks)) {
-						result.push(callback());
-					}
-					return result;
-				})();
-			});
-		}
-	}
-};
+          return (() => {
+            const result = []
+            for (callback of Array.from(this.callbacks)) {
+              result.push(callback())
+            }
+            return result
+          })()
+        }
+      )
+    }
+  }
+}
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return typeof value !== 'undefined' && value !== null
+    ? transform(value)
+    : undefined
 }
