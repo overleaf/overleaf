@@ -385,13 +385,10 @@ module.exports = settings =
 	# tenderUrl: ""
 	#
 	# Client-side error logging is provided by getsentry.com
-	# sentry:
-	#   src: ""
+	sentry:
+		environment: process.env['SENTRY_ENVIRONMENT']
+		release: process.env['SENTRY_RELEASE']
 	#   publicDSN: ""
-	#
-	# src should be either a remote url like
-	#    //cdn.ravenjs.com/1.1.22/jquery,native/raven.min.js
-	# or a local file in the js/libs directory.
 	# The publicDSN is the token for the client-side getSentry service.
 
 	# Production Settings

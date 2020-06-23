@@ -6,6 +6,8 @@ if (window.ExposedSettings.sentryDsn) {
 
     Sentry.init({
       dsn: window.ExposedSettings.sentryDsn,
+      release: window.ExposedSettings.sentryRelease,
+      environment: window.ExposedSettings.sentryEnvironment,
 
       // Ignore errors unless they come from our origins
       // Adapted from: https://docs.sentry.io/platforms/javascript/#decluttering-sentry

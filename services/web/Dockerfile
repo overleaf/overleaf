@@ -44,3 +44,6 @@ RUN mkdir -p /app/data/dumpFolder && \
 USER node
 
 CMD ["node", "--expose-gc", "app.js"]
+
+ARG SENTRY_RELEASE
+ENV SENTRY_RELEASE=$SENTRY_RELEASE
