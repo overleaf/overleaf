@@ -71,8 +71,7 @@ describe "DrainManagerTests", ->
 				], done
 
 			afterEach (done) ->
-				# reset drain
-				drain(0, done)
+				drain(0, done) # reset drain
 
 			it "should not timeout", ->
 				expect(true).to.equal(true)
