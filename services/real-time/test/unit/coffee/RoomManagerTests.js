@@ -1,3 +1,10 @@
+/* eslint-disable
+    no-return-assign,
+    no-unused-vars,
+    promise/param-names,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -31,7 +38,7 @@ describe('RoomManager', function() {
 		return sinon.spy(this.RoomEvents, 'once');
 	});
 	
-	describe("emitOnCompletion", () => describe("when a subscribe errors", function() {
+	describe("emitOnCompletion", function() { return describe("when a subscribe errors", function() {
         afterEach(function() {
             return process.removeListener("unhandledRejection", this.onUnhandled);
         });
@@ -43,7 +50,7 @@ describe('RoomManager', function() {
             };
             process.on("unhandledRejection", this.onUnhandled);
 
-            let reject = undefined;
+            let reject;
             const subscribePromise = new Promise((_, r) => reject = r);
             const promises = [subscribePromise];
             const eventName = "project-subscribed-123";
@@ -55,7 +62,7 @@ describe('RoomManager', function() {
         return it("should keep going", function() {
             return expect(this.unhandledError).to.not.exist;
         });
-    }));
+    }); });
 
 	describe("joinProject", function() {
 	
@@ -242,7 +249,7 @@ describe('RoomManager', function() {
 	});
 
 
-	return describe("leaveProjectAndDocs", () => describe("when the client is connected to the project and multiple docs", function() {
+	return describe("leaveProjectAndDocs", function() { return describe("when the client is connected to the project and multiple docs", function() {
 
         beforeEach(function() {
             this.RoomManager._roomsClientIsIn = sinon.stub().returns([this.project_id, this.doc_id, this.other_doc_id]);
@@ -355,5 +362,5 @@ describe('RoomManager', function() {
                 return this.RoomEvents.emit.called.should.equal(false);
             });
         });
-    }));
+    }); });
 });

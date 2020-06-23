@@ -1,3 +1,9 @@
+/* eslint-disable
+    handle-callback-err,
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -41,7 +47,7 @@ describe('SessionSockets', function() {
 			return this.socket = {handshake: {}};});
 
 		it('should return a lookup error', function(done) {
-			return this.checkSocket(this.socket, function(error) {
+			return this.checkSocket(this.socket, (error) => {
 				expect(error).to.exist;
 				expect(error.message).to.equal('could not look up session by key');
 				return done();
@@ -61,7 +67,7 @@ describe('SessionSockets', function() {
 			return this.socket = {handshake: {_signedCookies: {other: 1}}};});
 
 		it('should return a lookup error', function(done) {
-			return this.checkSocket(this.socket, function(error) {
+			return this.checkSocket(this.socket, (error) => {
 				expect(error).to.exist;
 				expect(error.message).to.equal('could not look up session by key');
 				return done();
@@ -88,7 +94,7 @@ describe('SessionSockets', function() {
 		});
 
 		return it('should return a redis error', function(done) {
-			return this.checkSocket(this.socket, function(error) {
+			return this.checkSocket(this.socket, (error) => {
 				expect(error).to.exist;
 				expect(error.message).to.equal('Redis: something went wrong');
 				return done();
@@ -108,7 +114,7 @@ describe('SessionSockets', function() {
 		});
 
 		return it('should return a lookup error', function(done) {
-			return this.checkSocket(this.socket, function(error) {
+			return this.checkSocket(this.socket, (error) => {
 				expect(error).to.exist;
 				expect(error.message).to.equal('could not look up session by key');
 				return done();
@@ -128,14 +134,14 @@ describe('SessionSockets', function() {
 		});
 
 		it('should not return an error', function(done) {
-			return this.checkSocket(this.socket, function(error) {
+			return this.checkSocket(this.socket, (error) => {
 				expect(error).to.not.exist;
 				return done();
 			});
 		});
 
 		return it('should return the session', function(done) {
-			return this.checkSocket(this.socket, function(error, s, session) {
+			return this.checkSocket(this.socket, (error, s, session) => {
 				expect(session).to.deep.equal({user: {_id: '123'}});
 				return done();
 			});
@@ -154,14 +160,14 @@ describe('SessionSockets', function() {
 		});
 
 		it('should not return an error', function(done) {
-			return this.checkSocket(this.socket, function(error) {
+			return this.checkSocket(this.socket, (error) => {
 				expect(error).to.not.exist;
 				return done();
 			});
 		});
 
 		return it('should return the other session', function(done) {
-			return this.checkSocket(this.socket, function(error, s, session) {
+			return this.checkSocket(this.socket, (error, s, session) => {
 				expect(session).to.deep.equal({user: {_id: 'abc'}});
 				return done();
 			});

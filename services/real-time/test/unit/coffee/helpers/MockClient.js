@@ -1,3 +1,8 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 let MockClient;
 const sinon = require('sinon');
 
@@ -12,5 +17,6 @@ module.exports = (MockClient = class MockClient {
 		this.id = idCounter++;
 		this.publicId = idCounter++;
 	}
+
 	disconnect() {}
 });

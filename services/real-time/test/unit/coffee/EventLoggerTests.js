@@ -1,3 +1,8 @@
+/* eslint-disable
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -28,7 +33,7 @@ describe('EventLogger', function() {
 		return this.message_2 = "message-2";
 	});
 
-	afterEach(() => tk.reset());
+	afterEach(function() { return tk.reset(); });
 
 	return describe('checkEventOrder', function() {
 
@@ -81,7 +86,7 @@ describe('EventLogger', function() {
 			});
 		});
 
-		return describe('after MAX_STALE_TIME_IN_MS', () => it('should flush old entries', function() {
+		return describe('after MAX_STALE_TIME_IN_MS', function() { return it('should flush old entries', function() {
             let status;
             this.EventLogger.MAX_EVENTS_BEFORE_CLEAN = 10;
             this.EventLogger.checkEventOrder(this.channel, this.id_1, this.message_1);
@@ -96,6 +101,6 @@ describe('EventLogger', function() {
             this.EventLogger.checkEventOrder(this.channel, 'other-1', this.message_2);
             status = this.EventLogger.checkEventOrder(this.channel, this.id_1, this.message_1);
             return expect(status).to.be.undefined;
-        }));
+        }); });
 	});
 });

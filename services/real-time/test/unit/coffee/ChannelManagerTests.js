@@ -1,3 +1,9 @@
+/* eslint-disable
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -86,7 +92,7 @@ describe('ChannelManager', function() {
 					.onSecondCall().resolves();
 				this.first = this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
 				// ignore error
-				this.first.catch((function(){}));
+				this.first.catch((() => {}));
 				expect(this.ChannelManager.getClientMapEntry(this.rclient).get("applied-ops:1234567890abcdef")).to.equal(this.first);
 
 				this.rclient.unsubscribe = sinon.stub().resolves();
@@ -173,7 +179,7 @@ describe('ChannelManager', function() {
 			beforeEach(function(done) {
 				this.rclient.subscribe = sinon.stub().resolves();
 				this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
-				let rejectSubscribe = undefined;
+				let rejectSubscribe;
 				this.rclient.unsubscribe = () => new Promise((resolve, reject) => rejectSubscribe = reject);
 				this.ChannelManager.unsubscribe(this.rclient, "applied-ops", "1234567890abcdef");
 

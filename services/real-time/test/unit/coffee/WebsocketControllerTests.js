@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    no-return-assign,
+    no-throw-literal,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -50,7 +58,7 @@ describe('WebsocketController', function() {
 		}
 	});});
 
-	afterEach(() => tk.reset());
+	afterEach(function() { return tk.reset(); });
 
 	describe("joinProject", function() {
 		describe("when authorised", function() {
@@ -81,37 +89,37 @@ describe('WebsocketController', function() {
 			});
 
 			it("should set the privilege level on the client", function() {
-				return this.client.ol_context["privilege_level"].should.equal(this.privilegeLevel);
+				return this.client.ol_context.privilege_level.should.equal(this.privilegeLevel);
 			});
 			it("should set the user's id on the client", function() {
-				return this.client.ol_context["user_id"].should.equal(this.user._id);
+				return this.client.ol_context.user_id.should.equal(this.user._id);
 			});
 			it("should set the user's email on the client", function() {
-				return this.client.ol_context["email"].should.equal(this.user.email);
+				return this.client.ol_context.email.should.equal(this.user.email);
 			});
 			it("should set the user's first_name on the client", function() {
-				return this.client.ol_context["first_name"].should.equal(this.user.first_name);
+				return this.client.ol_context.first_name.should.equal(this.user.first_name);
 			});
 			it("should set the user's last_name on the client", function() {
-				return this.client.ol_context["last_name"].should.equal(this.user.last_name);
+				return this.client.ol_context.last_name.should.equal(this.user.last_name);
 			});
 			it("should set the user's sign up date on the client", function() {
-				return this.client.ol_context["signup_date"].should.equal(this.user.signUpDate);
+				return this.client.ol_context.signup_date.should.equal(this.user.signUpDate);
 			});
 			it("should set the user's login_count on the client", function() {
-				return this.client.ol_context["login_count"].should.equal(this.user.loginCount);
+				return this.client.ol_context.login_count.should.equal(this.user.loginCount);
 			});
 			it("should set the connected time on the client", function() {
-				return this.client.ol_context["connected_time"].should.equal(new Date());
+				return this.client.ol_context.connected_time.should.equal(new Date());
 			});
 			it("should set the project_id on the client", function() {
-				return this.client.ol_context["project_id"].should.equal(this.project_id);
+				return this.client.ol_context.project_id.should.equal(this.project_id);
 			});
 			it("should set the project owner id on the client", function() {
-				return this.client.ol_context["owner_id"].should.equal(this.owner_id);
+				return this.client.ol_context.owner_id.should.equal(this.owner_id);
 			});
 			it("should set the is_restricted_user flag on the client", function() {
-				return this.client.ol_context["is_restricted_user"].should.equal(this.isRestrictedUser);
+				return this.client.ol_context.is_restricted_user.should.equal(this.isRestrictedUser);
 			});
 			it("should call the callback with the project, privilegeLevel and protocolVersion", function() {
 				return this.callback
@@ -1010,7 +1018,7 @@ describe('WebsocketController', function() {
 		});
 
 			describe("after 100ms", function() {
-				beforeEach(done => setTimeout(done, 100));
+				beforeEach(function(done) { return setTimeout(done, 100); });
 
 				it("should send an otUpdateError the client", function() {
 					return this.client.emit.calledWith('otUpdateError').should.equal(true);
@@ -1050,39 +1058,39 @@ describe('WebsocketController', function() {
 			return this.AuthorizationManager.assertClientCanViewProjectAndDoc = sinon.stub();
 		});
 
-		describe("with a read-write client", () => it("should return successfully", function(done) {
+		describe("with a read-write client", function() { return it("should return successfully", function(done) {
             this.AuthorizationManager.assertClientCanEditProjectAndDoc.yields(null);
-            return this.WebsocketController._assertClientCanApplyUpdate(this.client, this.doc_id, this.edit_update, function(error) {
+            return this.WebsocketController._assertClientCanApplyUpdate(this.client, this.doc_id, this.edit_update, (error) => {
                 expect(error).to.be.null;
                 return done();
             });
-        }));
+        }); });
 
-		describe("with a read-only client and an edit op", () => it("should return an error", function(done) {
+		describe("with a read-only client and an edit op", function() { return it("should return an error", function(done) {
             this.AuthorizationManager.assertClientCanEditProjectAndDoc.yields(new Error("not authorized"));
             this.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(null);
-            return this.WebsocketController._assertClientCanApplyUpdate(this.client, this.doc_id, this.edit_update, function(error) {
+            return this.WebsocketController._assertClientCanApplyUpdate(this.client, this.doc_id, this.edit_update, (error) => {
                 expect(error.message).to.equal("not authorized");
                 return done();
             });
-        }));
+        }); });
 
-		describe("with a read-only client and a comment op", () => it("should return successfully", function(done) {
+		describe("with a read-only client and a comment op", function() { return it("should return successfully", function(done) {
             this.AuthorizationManager.assertClientCanEditProjectAndDoc.yields(new Error("not authorized"));
             this.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(null);
-            return this.WebsocketController._assertClientCanApplyUpdate(this.client, this.doc_id, this.comment_update, function(error) {
+            return this.WebsocketController._assertClientCanApplyUpdate(this.client, this.doc_id, this.comment_update, (error) => {
                 expect(error).to.be.null;
                 return done();
             });
-        }));
+        }); });
 
-		return describe("with a totally unauthorized client", () => it("should return an error", function(done) {
+		return describe("with a totally unauthorized client", function() { return it("should return an error", function(done) {
             this.AuthorizationManager.assertClientCanEditProjectAndDoc.yields(new Error("not authorized"));
             this.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(new Error("not authorized"));
-            return this.WebsocketController._assertClientCanApplyUpdate(this.client, this.doc_id, this.comment_update, function(error) {
+            return this.WebsocketController._assertClientCanApplyUpdate(this.client, this.doc_id, this.comment_update, (error) => {
                 expect(error.message).to.equal("not authorized");
                 return done();
             });
-        }));
+        }); });
 	});
 });

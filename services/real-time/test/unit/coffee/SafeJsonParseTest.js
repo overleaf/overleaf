@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+    no-useless-escape,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -23,14 +31,14 @@ describe('SafeJsonParse', function() {
 
 	return describe("parse", function() {
 		it("should parse documents correctly", function(done) {
-			return this.SafeJsonParse.parse('{"foo": "bar"}', function(error, parsed) {
+			return this.SafeJsonParse.parse('{"foo": "bar"}', (error, parsed) => {
 				expect(parsed).to.deep.equal({foo: "bar"});
 				return done();
 			});
 		});
 		
 		it("should return an error on bad data", function(done) {
-			return this.SafeJsonParse.parse('blah', function(error, parsed) {
+			return this.SafeJsonParse.parse('blah', (error, parsed) => {
 				expect(error).to.exist;
 				return done();
 			});

@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    handle-callback-err,
+    no-return-assign,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -67,7 +75,7 @@ describe("ConnectedUsersManager", function() {
 		};
 		return this.cursorData = { row: 12, column: 9, doc_id: '53c3b8c85fee64000023dc6e' };});
 
-	afterEach(() => tk.reset());
+	afterEach(function() { return tk.reset(); });
 
 	describe("updateUserPosition", function() {
 		beforeEach(function() {
