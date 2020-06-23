@@ -1,14 +1,23 @@
-Settings = require 'settings-sharelatex'
-logger = require 'logger-sharelatex'
-RedisClientManager = require "./RedisClientManager"
-SafeJsonParse = require "./SafeJsonParse"
-EventLogger = require "./EventLogger"
-HealthCheckManager = require "./HealthCheckManager"
-RoomManager = require "./RoomManager"
-ChannelManager = require "./ChannelManager"
-ConnectedUsersManager = require "./ConnectedUsersManager"
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let WebsocketLoadBalancer;
+const Settings = require('settings-sharelatex');
+const logger = require('logger-sharelatex');
+const RedisClientManager = require("./RedisClientManager");
+const SafeJsonParse = require("./SafeJsonParse");
+const EventLogger = require("./EventLogger");
+const HealthCheckManager = require("./HealthCheckManager");
+const RoomManager = require("./RoomManager");
+const ChannelManager = require("./ChannelManager");
+const ConnectedUsersManager = require("./ConnectedUsersManager");
 
-RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
+const RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
 	'connectionAccepted',
 	'otUpdateApplied',
 	'otUpdateError',
@@ -17,88 +26,126 @@ RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
 	'reciveNewFile',
 	'reciveNewFolder',
 	'removeEntity'
-]
+];
 
-module.exports = WebsocketLoadBalancer =
-	rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub)
-	rclientSubList: RedisClientManager.createClientList(Settings.redis.pubsub)
+module.exports = (WebsocketLoadBalancer = {
+	rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub),
+	rclientSubList: RedisClientManager.createClientList(Settings.redis.pubsub),
 
-	emitToRoom: (room_id, message, payload...) ->
-		if !room_id?
-			logger.warn {message, payload}, "no room_id provided, ignoring emitToRoom"
-			return
-		data = JSON.stringify
-			room_id: room_id
-			message: message
-			payload: payload
-		logger.log {room_id, message, payload, length: data.length}, "emitting to room"
+	emitToRoom(room_id, message, ...payload) {
+		if ((room_id == null)) {
+			logger.warn({message, payload}, "no room_id provided, ignoring emitToRoom");
+			return;
+		}
+		const data = JSON.stringify({
+			room_id,
+			message,
+			payload
+		});
+		logger.log({room_id, message, payload, length: data.length}, "emitting to room");
 
-		for rclientPub in @rclientPubList
-			ChannelManager.publish rclientPub, "editor-events", room_id, data
+		return Array.from(this.rclientPubList).map((rclientPub) =>
+			ChannelManager.publish(rclientPub, "editor-events", room_id, data));
+	},
 
-	emitToAll: (message, payload...) ->
-		@emitToRoom "all", message, payload...
+	emitToAll(message, ...payload) {
+		return this.emitToRoom("all", message, ...Array.from(payload));
+	},
 
-	listenForEditorEvents: (io) ->
-		logger.log {rclients: @rclientPubList.length}, "publishing editor events"
-		logger.log {rclients: @rclientSubList.length}, "listening for editor events"
-		for rclientSub in @rclientSubList
-			rclientSub.subscribe "editor-events"
-			rclientSub.on "message", (channel, message) ->
-				EventLogger.debugEvent(channel, message) if Settings.debugEvents > 0
-				WebsocketLoadBalancer._processEditorEvent io, channel, message
-		@handleRoomUpdates(@rclientSubList)
+	listenForEditorEvents(io) {
+		logger.log({rclients: this.rclientPubList.length}, "publishing editor events");
+		logger.log({rclients: this.rclientSubList.length}, "listening for editor events");
+		for (let rclientSub of Array.from(this.rclientSubList)) {
+			rclientSub.subscribe("editor-events");
+			rclientSub.on("message", function(channel, message) {
+				if (Settings.debugEvents > 0) { EventLogger.debugEvent(channel, message); }
+				return WebsocketLoadBalancer._processEditorEvent(io, channel, message);
+			});
+		}
+		return this.handleRoomUpdates(this.rclientSubList);
+	},
 
-	handleRoomUpdates: (rclientSubList) ->
-		roomEvents = RoomManager.eventSource()
-		roomEvents.on 'project-active', (project_id) ->
-			subscribePromises = for rclient in rclientSubList
-				ChannelManager.subscribe rclient, "editor-events", project_id
-			RoomManager.emitOnCompletion(subscribePromises, "project-subscribed-#{project_id}")
-		roomEvents.on 'project-empty', (project_id) ->
-			for rclient in rclientSubList
-				ChannelManager.unsubscribe rclient, "editor-events", project_id
+	handleRoomUpdates(rclientSubList) {
+		const roomEvents = RoomManager.eventSource();
+		roomEvents.on('project-active', function(project_id) {
+			const subscribePromises = Array.from(rclientSubList).map((rclient) =>
+				ChannelManager.subscribe(rclient, "editor-events", project_id));
+			return RoomManager.emitOnCompletion(subscribePromises, `project-subscribed-${project_id}`);
+		});
+		return roomEvents.on('project-empty', project_id => Array.from(rclientSubList).map((rclient) =>
+            ChannelManager.unsubscribe(rclient, "editor-events", project_id)));
+	},
 
-	_processEditorEvent: (io, channel, message) ->
-		SafeJsonParse.parse message, (error, message) ->
-			if error?
-				logger.error {err: error, channel}, "error parsing JSON"
-				return
-			if message.room_id == "all"
-				io.sockets.emit(message.message, message.payload...)
-			else if message.message is 'clientTracking.refresh' && message.room_id?
+	_processEditorEvent(io, channel, message) {
+		return SafeJsonParse.parse(message, function(error, message) {
+			let clientList;
+			let client;
+			if (error != null) {
+				logger.error({err: error, channel}, "error parsing JSON");
+				return;
+			}
+			if (message.room_id === "all") {
+				return io.sockets.emit(message.message, ...Array.from(message.payload));
+			} else if ((message.message === 'clientTracking.refresh') && (message.room_id != null)) {
+				clientList = io.sockets.clients(message.room_id);
+				logger.log({channel, message: message.message, room_id: message.room_id, message_id: message._id, socketIoClients: ((() => {
+					const result = [];
+					for (client of Array.from(clientList)) { 						result.push(client.id);
+					}
+					return result;
+				})())}, "refreshing client list");
+				return (() => {
+					const result1 = [];
+					for (client of Array.from(clientList)) {
+						result1.push(ConnectedUsersManager.refreshClient(message.room_id, client.publicId));
+					}
+					return result1;
+				})();
+			} else if (message.room_id != null) {
+				if ((message._id != null) && Settings.checkEventOrder) {
+					const status = EventLogger.checkEventOrder("editor-events", message._id, message);
+					if (status === "duplicate") {
+						return; // skip duplicate events
+					}
+				}
+
+				const is_restricted_message = !Array.from(RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST).includes(message.message);
+
+				// send messages only to unique clients (due to duplicate entries in io.sockets.clients)
 				clientList = io.sockets.clients(message.room_id)
-				logger.log {channel:channel, message: message.message, room_id: message.room_id, message_id: message._id, socketIoClients: (client.id for client in clientList)}, "refreshing client list"
-				for client in clientList
-					ConnectedUsersManager.refreshClient(message.room_id, client.publicId)
-			else if message.room_id?
-				if message._id? && Settings.checkEventOrder
-					status = EventLogger.checkEventOrder("editor-events", message._id, message)
-					if status is "duplicate"
-						return # skip duplicate events
+				.filter(client => !(is_restricted_message && client.ol_context['is_restricted_user']));
 
-				is_restricted_message = message.message not in RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST
-
-				# send messages only to unique clients (due to duplicate entries in io.sockets.clients)
-				clientList = io.sockets.clients(message.room_id)
-				.filter((client) ->
-					!(is_restricted_message && client.ol_context['is_restricted_user'])
-				)
-
-				# avoid unnecessary work if no clients are connected
-				return if clientList.length is 0
-				logger.log {
-					channel: channel,
+				// avoid unnecessary work if no clients are connected
+				if (clientList.length === 0) { return; }
+				logger.log({
+					channel,
 					message: message.message,
 					room_id: message.room_id,
 					message_id: message._id,
-					socketIoClients: (client.id for client in clientList)
-				}, "distributing event to clients"
-				seen = {}
-				for client in clientList
-							if !seen[client.id]
-								seen[client.id] = true
-								client.emit(message.message, message.payload...)
-			else if message.health_check?
-				logger.debug {message}, "got health check message in editor events channel"
-				HealthCheckManager.check channel, message.key
+					socketIoClients: ((() => {
+						const result2 = [];
+						for (client of Array.from(clientList)) { 							result2.push(client.id);
+						}
+						return result2;
+					})())
+				}, "distributing event to clients");
+				const seen = {};
+				return (() => {
+					const result3 = [];
+					for (client of Array.from(clientList)) {
+						if (!seen[client.id]) {
+							seen[client.id] = true;
+							result3.push(client.emit(message.message, ...Array.from(message.payload)));
+						} else {
+							result3.push(undefined);
+						}
+					}
+					return result3;
+				})();
+			} else if (message.health_check != null) {
+				logger.debug({message}, "got health check message in editor events channel");
+				return HealthCheckManager.check(channel, message.key);
+			}
+		});
+	}
+});
