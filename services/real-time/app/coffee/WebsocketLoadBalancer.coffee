@@ -7,8 +7,6 @@ HealthCheckManager = require "./HealthCheckManager"
 RoomManager = require "./RoomManager"
 ChannelManager = require "./ChannelManager"
 ConnectedUsersManager = require "./ConnectedUsersManager"
-Utils = require './Utils'
-Async = require 'async'
 
 RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
 	'connectionAccepted',
@@ -78,8 +76,15 @@ module.exports = WebsocketLoadBalancer =
 					status = EventLogger.checkEventOrder("editor-events", message._id, message)
 					if status is "duplicate"
 						return # skip duplicate events
+
+				is_restricted_message = message.message not in RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST
+
 				# send messages only to unique clients (due to duplicate entries in io.sockets.clients)
 				clientList = io.sockets.clients(message.room_id)
+				.filter((client) ->
+					!(is_restricted_message && client.ol_context['is_restricted_user'])
+				)
+
 				# avoid unnecessary work if no clients are connected
 				return if clientList.length is 0
 				logger.log {
@@ -90,20 +95,10 @@ module.exports = WebsocketLoadBalancer =
 					socketIoClients: (client.id for client in clientList)
 				}, "distributing event to clients"
 				seen = {}
-				# Send the messages to clients async, don't wait for them all to finish
-				Async.eachLimit clientList
-					, 2
-					, (client, cb) ->
-						Utils.getClientAttributes client, ['is_restricted_user'], (err, {is_restricted_user}) ->
-							return cb(err) if err?
+				for client in clientList
 							if !seen[client.id]
 								seen[client.id] = true
-								if !(is_restricted_user && message.message not in RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST)
-									client.emit(message.message, message.payload...)
-							cb()
-					, (err) ->
-						if err?
-							logger.err {err, message}, "Error sending message to clients"
+								client.emit(message.message, message.payload...)
 			else if message.health_check?
 				logger.debug {message}, "got health check message in editor events channel"
 				HealthCheckManager.check channel, message.key

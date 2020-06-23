@@ -1,4 +1,3 @@
-Utils = require "./Utils"
 async = require "async"
 
 module.exports = HttpController =
@@ -8,11 +7,8 @@ module.exports = HttpController =
 	# and for checking internal state in acceptance tests. The acceptances tests
 	# should provide appropriate coverage.
 	_getConnectedClientView: (ioClient, callback = (error, client) ->) ->
-		client_id = ioClient.id
-		Utils.getClientAttributes ioClient, [
-			"project_id", "user_id", "first_name", "last_name", "email", "connected_time"
-		], (error, {project_id, user_id, first_name, last_name, email, connected_time}) ->
-			return callback(error) if error?
+			client_id = ioClient.id
+			{project_id, user_id, first_name, last_name, email, connected_time} = ioClient.ol_context
 			client = {client_id, project_id, user_id, first_name, last_name, email, connected_time}
 			client.rooms = []
 			for name, joined of ioClient.manager.roomClients[client_id]

@@ -23,9 +23,7 @@ describe 'WebsocketController', ->
 			disconnected: false
 			id: @client_id = "mock-client-id-123"
 			publicId: "other-id-#{Math.random()}"
-			params: {}
-			set: sinon.stub()
-			get: (param, cb) -> cb null, @params[param]
+			ol_context: {}
 			join: sinon.stub()
 			leave: sinon.stub()
 		@WebsocketController = SandboxedModule.require modulePath, requires:
@@ -69,38 +67,27 @@ describe 'WebsocketController', ->
 				@RoomManager.joinProject.calledWith(@client, @project_id).should.equal true
 
 			it "should set the privilege level on the client", ->
-				@client.set.calledWith("privilege_level", @privilegeLevel).should.equal true
-
+				@client.ol_context["privilege_level"].should.equal @privilegeLevel
 			it "should set the user's id on the client", ->
-				@client.set.calledWith("user_id", @user._id).should.equal true
-
+				@client.ol_context["user_id"].should.equal @user._id
 			it "should set the user's email on the client", ->
-				@client.set.calledWith("email", @user.email).should.equal true
-
+				@client.ol_context["email"].should.equal @user.email
 			it "should set the user's first_name on the client", ->
-				@client.set.calledWith("first_name", @user.first_name).should.equal true
-
+				@client.ol_context["first_name"].should.equal @user.first_name
 			it "should set the user's last_name on the client", ->
-				@client.set.calledWith("last_name", @user.last_name).should.equal true
-
+				@client.ol_context["last_name"].should.equal @user.last_name
 			it "should set the user's sign up date on the client", ->
-				@client.set.calledWith("signup_date", @user.signUpDate).should.equal true
-
+				@client.ol_context["signup_date"].should.equal @user.signUpDate
 			it "should set the user's login_count on the client", ->
-				@client.set.calledWith("login_count", @user.loginCount).should.equal true
-
+				@client.ol_context["login_count"].should.equal @user.loginCount
 			it "should set the connected time on the client", ->
-				@client.set.calledWith("connected_time", new Date()).should.equal true
-
+				@client.ol_context["connected_time"].should.equal new Date()
 			it "should set the project_id on the client", ->
-				@client.set.calledWith("project_id", @project_id).should.equal true
-
+				@client.ol_context["project_id"].should.equal @project_id
 			it "should set the project owner id on the client", ->
-				@client.set.calledWith("owner_id", @owner_id).should.equal true
-
+				@client.ol_context["owner_id"].should.equal @owner_id
 			it "should set the is_restricted_user flag on the client", ->
-				@client.set.calledWith("is_restricted_user", @isRestrictedUser).should.equal true
-
+				@client.ol_context["is_restricted_user"].should.equal @isRestrictedUser
 			it "should call the callback with the project, privilegeLevel and protocolVersion", ->
 				@callback
 					.calledWith(null, @project, @privilegeLevel, @WebsocketController.PROTOCOL_VERSION)
@@ -191,14 +178,14 @@ describe 'WebsocketController', ->
 						if room_id != @project_id
 							throw "expected room_id to be project_id"
 						return @clientsInRoom
-			@client.params.project_id = @project_id
-			@client.params.user_id = @user_id
+			@client.ol_context.project_id = @project_id
+			@client.ol_context.user_id = @user_id
 			@WebsocketController.FLUSH_IF_EMPTY_DELAY = 0
 			tk.reset() # Allow setTimeout to work.
 
 		describe "when the client did not joined a project yet", ->
 			beforeEach (done) ->
-				@client.params = {}
+				@client.ol_context = {}
 				@WebsocketController.leaveProject @io, @client, done
 
 			it "should bail out when calling leaveProject", () ->
@@ -248,8 +235,8 @@ describe 'WebsocketController', ->
 
 		describe "when client has not authenticated", ->
 			beforeEach (done) ->
-				@client.params.user_id = null
-				@client.params.project_id = null
+				@client.ol_context.user_id = null
+				@client.ol_context.project_id = null
 				@WebsocketController.leaveProject @io, @client, done
 
 			it "should not end clientTracking.clientDisconnected to the project room", ->
@@ -272,8 +259,8 @@ describe 'WebsocketController', ->
 
 		describe "when client has not joined a project", ->
 			beforeEach (done) ->
-				@client.params.user_id = @user_id
-				@client.params.project_id = null
+				@client.ol_context.user_id = @user_id
+				@client.ol_context.project_id = null
 				@WebsocketController.leaveProject @io, @client, done
 
 			it "should not end clientTracking.clientDisconnected to the project room", ->
@@ -303,8 +290,8 @@ describe 'WebsocketController', ->
 			@ranges = { "mock": "ranges" }
 			@options = {}
 
-			@client.params.project_id = @project_id
-			@client.params.is_restricted_user = false
+			@client.ol_context.project_id = @project_id
+			@client.ol_context.is_restricted_user = false
 			@AuthorizationManager.addAccessToDoc = sinon.stub()
 			@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
 			@DocumentUpdaterManager.getDocument = sinon.stub().callsArgWith(3, null, @doc_lines, @version, @ranges, @ops)
@@ -408,7 +395,7 @@ describe 'WebsocketController', ->
 		describe "with a restricted client", ->
 			beforeEach ->
 				@ranges.comments = [{op: {a: 1}}, {op: {a: 2}}]
-				@client.params.is_restricted_user = true
+				@client.ol_context.is_restricted_user = true
 				@WebsocketController.joinDoc @client, @doc_id, -1, @options, @callback
 
 			it "should overwrite ranges.comments with an empty list", ->
@@ -463,7 +450,7 @@ describe 'WebsocketController', ->
 	describe "leaveDoc", ->
 		beforeEach ->
 			@doc_id = "doc-id-123"
-			@client.params.project_id = @project_id
+			@client.ol_context.project_id = @project_id
 			@RoomManager.leaveDoc = sinon.stub()
 			@WebsocketController.leaveDoc @client, @doc_id, @callback
 
@@ -479,7 +466,7 @@ describe 'WebsocketController', ->
 
 	describe "getConnectedUsers", ->
 		beforeEach ->
-			@client.params.project_id = @project_id
+			@client.ol_context.project_id = @project_id
 			@users = ["mock", "users"]
 			@WebsocketLoadBalancer.emitToRoom = sinon.stub()
 			@ConnectedUsersManager.getConnectedUsers = sinon.stub().callsArgWith(1, null, @users)
@@ -527,7 +514,7 @@ describe 'WebsocketController', ->
 
 		describe "when restricted user", ->
 			beforeEach ->
-				@client.params.is_restricted_user = true
+				@client.ol_context.is_restricted_user = true
 				@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
 				@WebsocketController.getConnectedUsers @client, @callback
 
@@ -564,14 +551,13 @@ describe 'WebsocketController', ->
 
 		describe "with a logged in user", ->
 			beforeEach ->
-				@clientParams = {
+				@client.ol_context = {
 					project_id: @project_id
 					first_name: @first_name = "Douglas"
 					last_name: @last_name = "Adams"
 					email: @email = "joe@example.com"
 					user_id: @user_id = "user-id-123"
 				}
-				@client.get = (param, callback) => callback null, @clientParams[param]
 				@WebsocketController.updateClientPosition @client, @update
 
 				@populatedCursorData =
@@ -604,14 +590,13 @@ describe 'WebsocketController', ->
 
 		describe "with a logged in user who has no last_name set", ->
 			beforeEach ->
-				@clientParams = {
+				@client.ol_context = {
 					project_id: @project_id
 					first_name: @first_name = "Douglas"
 					last_name: undefined
 					email: @email = "joe@example.com"
 					user_id: @user_id = "user-id-123"
 				}
-				@client.get = (param, callback) => callback null, @clientParams[param]
 				@WebsocketController.updateClientPosition @client, @update
 
 				@populatedCursorData =
@@ -644,14 +629,13 @@ describe 'WebsocketController', ->
 
 		describe "with a logged in user who has no first_name set", ->
 			beforeEach ->
-				@clientParams = {
+				@client.ol_context = {
 					project_id: @project_id
 					first_name: undefined
 					last_name: @last_name = "Adams"
 					email: @email = "joe@example.com"
 					user_id: @user_id = "user-id-123"
 				}
-				@client.get = (param, callback) => callback null, @clientParams[param]
 				@WebsocketController.updateClientPosition @client, @update
 
 				@populatedCursorData =
@@ -683,14 +667,13 @@ describe 'WebsocketController', ->
 				@metrics.inc.calledWith("editor.update-client-position", 0.1).should.equal true
 		describe "with a logged in user who has no names set", ->
 			beforeEach ->
-				@clientParams = {
+				@client.ol_context = {
 					project_id: @project_id
 					first_name: undefined
 					last_name: undefined
 					email: @email = "joe@example.com"
 					user_id: @user_id = "user-id-123"
 				}
-				@client.get = (param, callback) => callback null, @clientParams[param]
 				@WebsocketController.updateClientPosition @client, @update
 
 			it "should send the update to the project name with no name", ->
@@ -709,10 +692,9 @@ describe 'WebsocketController', ->
 
 		describe "with an anonymous user", ->
 			beforeEach ->
-				@clientParams = {
+				@client.ol_context = {
 					project_id: @project_id
 				}
-				@client.get = (param, callback) => callback null, @clientParams[param]
 				@WebsocketController.updateClientPosition @client, @update
 
 			it "should send the update to the project room with no name", ->
@@ -745,8 +727,8 @@ describe 'WebsocketController', ->
 	describe "applyOtUpdate", ->
 		beforeEach ->
 			@update = {op: {p: 12, t: "foo"}}
-			@client.params.user_id = @user_id
-			@client.params.project_id = @project_id
+			@client.ol_context.user_id = @user_id
+			@client.ol_context.project_id = @project_id
 			@WebsocketController._assertClientCanApplyUpdate = sinon.stub().yields()
 			@DocumentUpdaterManager.queueChange = sinon.stub().callsArg(3)
 
@@ -807,8 +789,8 @@ describe 'WebsocketController', ->
 			beforeEach (done) ->
 				@client.disconnect = sinon.stub()
 				@client.emit = sinon.stub()
-				@client.params.user_id = @user_id
-				@client.params.project_id = @project_id
+				@client.ol_context.user_id = @user_id
+				@client.ol_context.project_id = @project_id
 				error = new Error("update is too large")
 				error.updateSize = 7372835
 				@DocumentUpdaterManager.queueChange = sinon.stub().callsArgWith(3, error)
