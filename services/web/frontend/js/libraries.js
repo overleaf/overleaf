@@ -10,3 +10,8 @@ import 'libs/angular-cookie'
 import 'libs/passfield'
 import 'libs/ng-tags-input-3.0.0'
 import 'libs/select/select'
+
+// Configure dynamically loaded assets (via webpack) to be downloaded from CDN
+// See: https://webpack.js.org/guides/public-path/#on-the-fly
+// eslint-disable-next-line no-undef, camelcase
+__webpack_public_path__ = window.baseAssetPath

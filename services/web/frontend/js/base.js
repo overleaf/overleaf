@@ -22,10 +22,6 @@ import './modules/recursionHelper'
 import './modules/errorCatcher'
 import './modules/localStorage'
 import './modules/sessionStorage'
-// Configure dynamically loaded assets (via webpack) to be downloaded from CDN
-// See: https://webpack.js.org/guides/public-path/#on-the-fly
-// eslint-disable-next-line no-undef
-__webpack_public_path__ = window.baseAssetPath
 
 const App = angular
   .module('SharelatexApp', [

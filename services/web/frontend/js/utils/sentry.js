@@ -32,11 +32,7 @@ if (window.ExposedSettings.sentryDsn) {
       }
     })
 
-    Sentry.configureScope(scope => {
-      if (window.user_id.length) {
-        scope.setUser(window.user_id)
-      }
-    })
+    Sentry.setUser({ id: window.user_id })
 
     // Previously Raven added itself as a global, so we mimic that old behaviour
     window.Raven = Sentry
