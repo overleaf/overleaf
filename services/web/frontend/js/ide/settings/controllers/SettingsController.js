@@ -1,3 +1,4 @@
+import _ from 'lodash'
 /* eslint-disable
     camelcase,
     max-len,
@@ -17,8 +18,7 @@ export default App.controller('SettingsController', function(
   $scope,
   ExposedSettings,
   settings,
-  ide,
-  _
+  ide
 ) {
   const validRootDocExtensions = ExposedSettings.validRootDocExtensions
   const validRootDocRegExp = new RegExp(

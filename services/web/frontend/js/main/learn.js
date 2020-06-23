@@ -1,3 +1,4 @@
+import _ from 'lodash'
 /* eslint-disable
     camelcase,
     handle-callback-err,
@@ -16,12 +17,7 @@
 import App from '../base'
 import '../directives/mathjax'
 import '../services/algolia-search'
-App.controller('SearchWikiController', function(
-  $scope,
-  algoliaSearch,
-  _,
-  $modal
-) {
+App.controller('SearchWikiController', function($scope, algoliaSearch, $modal) {
   $scope.hits = []
   $scope.hits_total = 0
   $scope.config_hits_per_page = 20

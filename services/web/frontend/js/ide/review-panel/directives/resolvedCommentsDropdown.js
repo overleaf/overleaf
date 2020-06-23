@@ -1,3 +1,4 @@
+import _ from 'lodash'
 /* eslint-disable
     max-len,
     no-return-assign,
@@ -13,7 +14,7 @@
  */
 import App from '../../../base'
 
-export default App.directive('resolvedCommentsDropdown', _ => ({
+export default App.directive('resolvedCommentsDropdown', () => ({
   restrict: 'E',
   templateUrl: 'resolvedCommentsDropdownTemplate',
   scope: {

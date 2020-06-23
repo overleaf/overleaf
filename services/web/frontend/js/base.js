@@ -22,7 +22,6 @@ import './modules/recursionHelper'
 import './modules/errorCatcher'
 import './modules/localStorage'
 import './modules/sessionStorage'
-import './utils/underscore'
 // Configure dynamically loaded assets (via webpack) to be downloaded from CDN
 // See: https://webpack.js.org/guides/public-path/#on-the-fly
 // eslint-disable-next-line no-undef
@@ -34,7 +33,6 @@ const App = angular
     'autocomplete',
     'RecursionHelper',
     'ng-context-menu',
-    'underscore',
     'ngSanitize',
     'ipCookie',
     'ErrorCatcher',

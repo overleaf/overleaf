@@ -1,5 +1,6 @@
+import _ from 'lodash'
 import App from '../base'
-App.directive('bookmarkableTabset', ($location, _) => ({
+App.directive('bookmarkableTabset', $location => ({
   restrict: 'A',
   require: 'tabset',
   link(scope, el, attrs, tabset) {

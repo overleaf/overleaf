@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
-const historyEntriesListController = function($scope, $element, $attrs, _) {
+const historyEntriesListController = function($scope, $element, $attrs) {
   const ctrl = this
   ctrl.$entryListViewportEl = null
   ctrl.isDragging = false

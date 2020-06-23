@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import CommandManager from './CommandManager'
 import EnvironmentManager from './EnvironmentManager'
 import PackageManager from './PackageManager'

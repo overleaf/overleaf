@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
-const historyLabelController = function($scope, $element, $attrs, $filter, _) {
+const historyLabelController = function($scope, $element, $attrs, $filter) {
   const ctrl = this
   ctrl.$onInit = () => {
     if (ctrl.showTooltip == null) {

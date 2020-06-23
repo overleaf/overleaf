@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import App from '../../../base'
 App.controller('ShareProjectModalController', function(
   $scope,

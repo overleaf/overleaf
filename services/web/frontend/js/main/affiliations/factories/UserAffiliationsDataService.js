@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import App from '../../../base'
 const countriesList = [
   { code: 'af', name: 'Afghanistan' },
@@ -405,7 +406,7 @@ for (let domain of commonDomains) {
   }
 }
 
-App.factory('UserAffiliationsDataService', function($http, $q, _) {
+App.factory('UserAffiliationsDataService', function($http, $q) {
   const getCountries = () => $q.resolve(countriesList)
 
   const getDefaultRoleHints = () => $q.resolve(defaultRoleHints)

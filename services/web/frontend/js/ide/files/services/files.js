@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import App from '../../../base'
 
 export default App.factory('files', function(ide) {

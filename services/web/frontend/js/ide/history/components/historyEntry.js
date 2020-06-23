@@ -1,3 +1,4 @@
+import _ from 'lodash'
 /* eslint-disable
     max-len,
 */
@@ -12,7 +13,7 @@
 import App from '../../../base'
 import ColorManager from '../../colors/ColorManager'
 import displayNameForUser from '../util/displayNameForUser'
-const historyEntryController = function($scope, $element, $attrs, _) {
+const historyEntryController = function($scope, $element, $attrs) {
   const ctrl = this
   // This method (and maybe the one below) will be removed soon. User details data will be
   // injected into the history API responses, so we won't need to fetch user data from other

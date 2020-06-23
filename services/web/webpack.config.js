@@ -181,16 +181,6 @@ module.exports = {
             options: 'angular'
           }
         ]
-      },
-      {
-        // Expose lodash global variable
-        test: require.resolve('lodash'),
-        use: [
-          {
-            loader: 'expose-loader',
-            options: '_'
-          }
-        ]
       }
     ]
   },

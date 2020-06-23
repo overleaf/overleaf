@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import App from '../../base'
 import './services/project-list'
 App.controller('ProjectPageController', function(

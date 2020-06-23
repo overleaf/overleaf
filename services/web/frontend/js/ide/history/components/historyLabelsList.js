@@ -1,3 +1,4 @@
+import _ from 'lodash'
 /* eslint-disable
     max-len,
 */
@@ -12,7 +13,7 @@
 import App from '../../../base'
 import ColorManager from '../../colors/ColorManager'
 import displayNameForUser from '../util/displayNameForUser'
-const historyLabelsListController = function($scope, $element, $attrs, _) {
+const historyLabelsListController = function($scope, $element, $attrs) {
   const ctrl = this
   ctrl.isDragging = false
   ctrl.versionsWithLabels = []
