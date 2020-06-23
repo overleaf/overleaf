@@ -7,11 +7,10 @@ if (window.ExposedSettings.sentryDsn) {
     Sentry.init({
       dsn: window.ExposedSettings.sentryDsn,
 
-      // Ignore errors unless they come from overleaf.com/sharelatex.com
+      // Ignore errors unless they come from our origins
       // Adapted from: https://docs.sentry.io/platforms/javascript/#decluttering-sentry
       whitelistUrls: [
-        /https:\/\/[a-z]+\.overleaf\.com/,
-        /https:\/\/[a-z]+\.sharelatex\.com/
+        new RegExp(window.ExposedSettings.sentryAllowedOriginRegex)
       ],
 
       ignoreErrors: [
