@@ -1,67 +1,90 @@
-RealTimeClient = require("./helpers/RealTimeClient")
-Settings = require("settings-sharelatex")
-{expect} = require('chai')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const RealTimeClient = require("./helpers/RealTimeClient");
+const Settings = require("settings-sharelatex");
+const {expect} = require('chai');
 
-describe 'SessionSockets', ->
-	before ->
-		@checkSocket = (fn) ->
-			client = RealTimeClient.connect()
-			client.on 'connectionAccepted', fn
-			client.on 'connectionRejected', fn
-			return null
+describe('SessionSockets', function() {
+	before(function() {
+		return this.checkSocket = function(fn) {
+			const client = RealTimeClient.connect();
+			client.on('connectionAccepted', fn);
+			client.on('connectionRejected', fn);
+			return null;
+		};
+	});
 
-	describe 'without cookies', ->
-		before ->
-			RealTimeClient.cookie = null
+	describe('without cookies', function() {
+		before(() => RealTimeClient.cookie = null);
 
-		it 'should return a lookup error', (done) ->
-			@checkSocket (error) ->
-				expect(error).to.exist
-				expect(error.message).to.equal('invalid session')
-				done()
+		return it('should return a lookup error', function(done) {
+			return this.checkSocket(function(error) {
+				expect(error).to.exist;
+				expect(error.message).to.equal('invalid session');
+				return done();
+			});
+		});
+	});
 
-	describe 'with a different cookie', ->
-		before ->
-			RealTimeClient.cookie = "some.key=someValue"
+	describe('with a different cookie', function() {
+		before(() => RealTimeClient.cookie = "some.key=someValue");
 
-		it 'should return a lookup error', (done) ->
-			@checkSocket (error) ->
-				expect(error).to.exist
-				expect(error.message).to.equal('invalid session')
-				done()
+		return it('should return a lookup error', function(done) {
+			return this.checkSocket(function(error) {
+				expect(error).to.exist;
+				expect(error.message).to.equal('invalid session');
+				return done();
+			});
+		});
+	});
 
-	describe 'with an invalid cookie', ->
-		before (done) ->
-			RealTimeClient.setSession {}, (error) ->
-				return done(error) if error
-				RealTimeClient.cookie = "#{Settings.cookieName}=#{
+	describe('with an invalid cookie', function() {
+		before(function(done) {
+			RealTimeClient.setSession({}, function(error) {
+				if (error) { return done(error); }
+				RealTimeClient.cookie = `${Settings.cookieName}=${
 					RealTimeClient.cookie.slice(17, 49)
-				}"
-				done()
-			return null
+				}`;
+				return done();
+			});
+			return null;
+		});
 
-		it 'should return a lookup error', (done) ->
-			@checkSocket (error) ->
-				expect(error).to.exist
-				expect(error.message).to.equal('invalid session')
-				done()
+		return it('should return a lookup error', function(done) {
+			return this.checkSocket(function(error) {
+				expect(error).to.exist;
+				expect(error.message).to.equal('invalid session');
+				return done();
+			});
+		});
+	});
 
-	describe 'with a valid cookie and no matching session', ->
-		before ->
-			RealTimeClient.cookie = "#{Settings.cookieName}=unknownId"
+	describe('with a valid cookie and no matching session', function() {
+		before(() => RealTimeClient.cookie = `${Settings.cookieName}=unknownId`);
 
-		it 'should return a lookup error', (done) ->
-			@checkSocket (error) ->
-				expect(error).to.exist
-				expect(error.message).to.equal('invalid session')
-				done()
+		return it('should return a lookup error', function(done) {
+			return this.checkSocket(function(error) {
+				expect(error).to.exist;
+				expect(error.message).to.equal('invalid session');
+				return done();
+			});
+		});
+	});
 
-	describe 'with a valid cookie and a matching session', ->
-		before (done) ->
-			RealTimeClient.setSession({}, done)
-			return null
+	return describe('with a valid cookie and a matching session', function() {
+		before(function(done) {
+			RealTimeClient.setSession({}, done);
+			return null;
+		});
 
-		it 'should not return an error', (done) ->
-			@checkSocket (error) ->
-				expect(error).to.not.exist
-				done()
+		return it('should not return an error', function(done) {
+			return this.checkSocket(function(error) {
+				expect(error).to.not.exist;
+				return done();
+			});
+		});
+	});
+});

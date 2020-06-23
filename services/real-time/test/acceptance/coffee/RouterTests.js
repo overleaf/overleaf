@@ -1,76 +1,101 @@
-async = require "async"
-{expect} = require("chai")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const async = require("async");
+const {expect} = require("chai");
 
-RealTimeClient = require "./helpers/RealTimeClient"
-FixturesManager = require "./helpers/FixturesManager"
+const RealTimeClient = require("./helpers/RealTimeClient");
+const FixturesManager = require("./helpers/FixturesManager");
 
 
-describe "Router", ->
-	describe "joinProject", ->
-		describe "when there is no callback provided", ->
-			after () ->
-				process.removeListener('unhandledRejection', @onUnhandled)
+describe("Router", () => describe("joinProject", function() {
+    describe("when there is no callback provided", function() {
+        after(function() {
+            return process.removeListener('unhandledRejection', this.onUnhandled);
+        });
 
-			before (done) ->
-				@onUnhandled = (error) ->
-					done(error)
-				process.on('unhandledRejection', @onUnhandled)
-				async.series [
-					(cb) =>
-						FixturesManager.setUpProject {
-							privilegeLevel: "owner"
-							project: {
-								name: "Test Project"
-							}
-						}, (e, {@project_id, @user_id}) =>
-							cb(e)
+        before(function(done) {
+            this.onUnhandled = error => done(error);
+            process.on('unhandledRejection', this.onUnhandled);
+            return async.series([
+                cb => {
+                    return FixturesManager.setUpProject({
+                        privilegeLevel: "owner",
+                        project: {
+                            name: "Test Project"
+                        }
+                    }, (e, {project_id, user_id}) => {
+                        this.project_id = project_id;
+                        this.user_id = user_id;
+                        return cb(e);
+                    });
+                },
 
-					(cb) =>
-						@client = RealTimeClient.connect()
-						@client.on "connectionAccepted", cb
+                cb => {
+                    this.client = RealTimeClient.connect();
+                    return this.client.on("connectionAccepted", cb);
+                },
 
-					(cb) =>
-						@client = RealTimeClient.connect()
-						@client.on "connectionAccepted", cb
+                cb => {
+                    this.client = RealTimeClient.connect();
+                    return this.client.on("connectionAccepted", cb);
+                },
 
-					(cb) =>
-						@client.emit "joinProject", project_id: @project_id
-						setTimeout(cb, 100)
-				], done
+                cb => {
+                    this.client.emit("joinProject", {project_id: this.project_id});
+                    return setTimeout(cb, 100);
+                }
+            ], done);
+        });
 
-			it "should keep on going", ->
-				expect('still running').to.exist
+        return it("should keep on going", () => expect('still running').to.exist);
+    });
 
-		describe "when there are too many arguments", ->
-			after () ->
-				process.removeListener('unhandledRejection', @onUnhandled)
+    return describe("when there are too many arguments", function() {
+        after(function() {
+            return process.removeListener('unhandledRejection', this.onUnhandled);
+        });
 
-			before (done) ->
-				@onUnhandled = (error) ->
-					done(error)
-				process.on('unhandledRejection', @onUnhandled)
-				async.series [
-					(cb) =>
-						FixturesManager.setUpProject {
-							privilegeLevel: "owner"
-							project: {
-								name: "Test Project"
-							}
-						}, (e, {@project_id, @user_id}) =>
-							cb(e)
+        before(function(done) {
+            this.onUnhandled = error => done(error);
+            process.on('unhandledRejection', this.onUnhandled);
+            return async.series([
+                cb => {
+                    return FixturesManager.setUpProject({
+                        privilegeLevel: "owner",
+                        project: {
+                            name: "Test Project"
+                        }
+                    }, (e, {project_id, user_id}) => {
+                        this.project_id = project_id;
+                        this.user_id = user_id;
+                        return cb(e);
+                    });
+                },
 
-					(cb) =>
-						@client = RealTimeClient.connect()
-						@client.on "connectionAccepted", cb
+                cb => {
+                    this.client = RealTimeClient.connect();
+                    return this.client.on("connectionAccepted", cb);
+                },
 
-					(cb) =>
-						@client = RealTimeClient.connect()
-						@client.on "connectionAccepted", cb
+                cb => {
+                    this.client = RealTimeClient.connect();
+                    return this.client.on("connectionAccepted", cb);
+                },
 
-					(cb) =>
-						@client.emit "joinProject", 1, 2, 3, 4, 5, (@error) =>
-							cb()
-				], done
+                cb => {
+                    return this.client.emit("joinProject", 1, 2, 3, 4, 5, error => {
+                        this.error = error;
+                        return cb();
+                    });
+                }
+            ], done);
+        });
 
-			it "should return an error message", ->
-				expect(@error.message).to.equal('unexpected arguments')
+        return it("should return an error message", function() {
+            return expect(this.error.message).to.equal('unexpected arguments');
+        });
+    });
+}));

@@ -1,86 +1,121 @@
-chai = require("chai")
-expect = chai.expect
-chai.should()
-sinon = require("sinon")
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const chai = require("chai");
+const {
+    expect
+} = chai;
+chai.should();
+const sinon = require("sinon");
 
-RealTimeClient = require "./helpers/RealTimeClient"
-MockDocUpdaterServer = require "./helpers/MockDocUpdaterServer"
-FixturesManager = require "./helpers/FixturesManager"
-logger = require("logger-sharelatex")
+const RealTimeClient = require("./helpers/RealTimeClient");
+const MockDocUpdaterServer = require("./helpers/MockDocUpdaterServer");
+const FixturesManager = require("./helpers/FixturesManager");
+const logger = require("logger-sharelatex");
 
-async = require "async"
+const async = require("async");
 
-describe "leaveDoc", ->
-	before ->
-		@lines = ["test", "doc", "lines"]
-		@version = 42
-		@ops = ["mock", "doc", "ops"]
-		sinon.spy(logger, "error")
-		sinon.spy(logger, "warn")
-		sinon.spy(logger, "log")
-		@other_doc_id = FixturesManager.getRandomId()
+describe("leaveDoc", function() {
+	before(function() {
+		this.lines = ["test", "doc", "lines"];
+		this.version = 42;
+		this.ops = ["mock", "doc", "ops"];
+		sinon.spy(logger, "error");
+		sinon.spy(logger, "warn");
+		sinon.spy(logger, "log");
+		return this.other_doc_id = FixturesManager.getRandomId();
+	});
 	
-	after ->
-		logger.error.restore() # remove the spy
-		logger.warn.restore()
-		logger.log.restore()
+	after(function() {
+		logger.error.restore(); // remove the spy
+		logger.warn.restore();
+		return logger.log.restore();
+	});
 
-	describe "when joined to a doc", ->
-		beforeEach (done) ->
-			async.series [
-				(cb) =>
-					FixturesManager.setUpProject {
+	return describe("when joined to a doc", function() {
+		beforeEach(function(done) {
+			return async.series([
+				cb => {
+					return FixturesManager.setUpProject({
 						privilegeLevel: "readAndWrite"
-					}, (e, {@project_id, @user_id}) =>
-						cb(e)
+					}, (e, {project_id, user_id}) => {
+						this.project_id = project_id;
+						this.user_id = user_id;
+						return cb(e);
+					});
+				},
 					
-				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
-						cb(e)
+				cb => {
+					return FixturesManager.setUpDoc(this.project_id, {lines: this.lines, version: this.version, ops: this.ops}, (e, {doc_id}) => {
+						this.doc_id = doc_id;
+						return cb(e);
+					});
+				},
 						
-				(cb) =>
-					@client = RealTimeClient.connect()
-					@client.on "connectionAccepted", cb
+				cb => {
+					this.client = RealTimeClient.connect();
+					return this.client.on("connectionAccepted", cb);
+				},
 						
-				(cb) =>
-					@client.emit "joinProject", project_id: @project_id, cb
+				cb => {
+					return this.client.emit("joinProject", {project_id: this.project_id}, cb);
+				},
 				
-				(cb) =>
-					@client.emit "joinDoc", @doc_id, (error, @returnedArgs...) => cb(error)
-			], done
+				cb => {
+					return this.client.emit("joinDoc", this.doc_id, (error, ...rest) => { [...this.returnedArgs] = Array.from(rest); return cb(error); });
+				}
+			], done);
+		});
 							
-		describe "then leaving the doc", ->
-			beforeEach (done) ->
-				@client.emit "leaveDoc", @doc_id, (error) ->
-					throw error if error?
-					done()
+		describe("then leaving the doc", function() {
+			beforeEach(function(done) {
+				return this.client.emit("leaveDoc", this.doc_id, function(error) {
+					if (error != null) { throw error; }
+					return done();
+				});
+			});
 			
-			it "should have left the doc room", (done) ->
-				RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
-					expect(@doc_id in client.rooms).to.equal false
-					done()
+			return it("should have left the doc room", function(done) {
+				return RealTimeClient.getConnectedClient(this.client.socket.sessionid, (error, client) => {
+					expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(false);
+					return done();
+				});
+			});
+		});
 
-		describe "when sending a leaveDoc request before the previous joinDoc request has completed", ->
-			beforeEach (done) ->
-				@client.emit "leaveDoc", @doc_id, () ->
-				@client.emit "joinDoc", @doc_id, () ->
-				@client.emit "leaveDoc", @doc_id, (error) ->
-					throw error if error?
-					done()
+		describe("when sending a leaveDoc request before the previous joinDoc request has completed", function() {
+			beforeEach(function(done) {
+				this.client.emit("leaveDoc", this.doc_id, function() {});
+				this.client.emit("joinDoc", this.doc_id, function() {});
+				return this.client.emit("leaveDoc", this.doc_id, function(error) {
+					if (error != null) { throw error; }
+					return done();
+				});
+			});
 
-			it "should not trigger an error", ->
-				sinon.assert.neverCalledWith(logger.error, sinon.match.any, "not subscribed - shouldn't happen")
+			it("should not trigger an error", () => sinon.assert.neverCalledWith(logger.error, sinon.match.any, "not subscribed - shouldn't happen"));
 
-			it "should have left the doc room", (done) ->
-				RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
-					expect(@doc_id in client.rooms).to.equal false
-					done()
+			return it("should have left the doc room", function(done) {
+				return RealTimeClient.getConnectedClient(this.client.socket.sessionid, (error, client) => {
+					expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(false);
+					return done();
+				});
+			});
+		});
 
-		describe "when sending a leaveDoc for a room the client has not joined ", ->
-			beforeEach (done) ->
-				@client.emit "leaveDoc", @other_doc_id, (error) ->
-					throw error if error?
-					done()
+		return describe("when sending a leaveDoc for a room the client has not joined ", function() {
+			beforeEach(function(done) {
+				return this.client.emit("leaveDoc", this.other_doc_id, function(error) {
+					if (error != null) { throw error; }
+					return done();
+				});
+			});
 
-			it "should trigger a low level message only", ->
-				sinon.assert.calledWith(logger.log, sinon.match.any, "ignoring request from client to leave room it is not in")
+			return it("should trigger a low level message only", () => sinon.assert.calledWith(logger.log, sinon.match.any, "ignoring request from client to leave room it is not in"));
+		});
+	});
+});

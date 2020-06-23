@@ -1,246 +1,351 @@
-chai = require("chai")
-expect = chai.expect
-chai.should()
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const chai = require("chai");
+const {
+    expect
+} = chai;
+chai.should();
 
-RealTimeClient = require "./helpers/RealTimeClient"
-MockDocUpdaterServer = require "./helpers/MockDocUpdaterServer"
-FixturesManager = require "./helpers/FixturesManager"
+const RealTimeClient = require("./helpers/RealTimeClient");
+const MockDocUpdaterServer = require("./helpers/MockDocUpdaterServer");
+const FixturesManager = require("./helpers/FixturesManager");
 
-async = require "async"
+const async = require("async");
 
-describe "joinDoc", ->
-	before ->
-		@lines = ["test", "doc", "lines"]
-		@version = 42
-		@ops = ["mock", "doc", "ops"]
-		@ranges = {"mock": "ranges"}
+describe("joinDoc", function() {
+	before(function() {
+		this.lines = ["test", "doc", "lines"];
+		this.version = 42;
+		this.ops = ["mock", "doc", "ops"];
+		return this.ranges = {"mock": "ranges"};});
 			
-	describe "when authorised readAndWrite", ->
-		before (done) ->
-			async.series [
-				(cb) =>
-					FixturesManager.setUpProject {
+	describe("when authorised readAndWrite", function() {
+		before(function(done) {
+			return async.series([
+				cb => {
+					return FixturesManager.setUpProject({
 						privilegeLevel: "readAndWrite"
-					}, (e, {@project_id, @user_id}) =>
-						cb(e)
+					}, (e, {project_id, user_id}) => {
+						this.project_id = project_id;
+						this.user_id = user_id;
+						return cb(e);
+					});
+				},
 					
-				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops, @ranges}, (e, {@doc_id}) =>
-						cb(e)
+				cb => {
+					return FixturesManager.setUpDoc(this.project_id, {lines: this.lines, version: this.version, ops: this.ops, ranges: this.ranges}, (e, {doc_id}) => {
+						this.doc_id = doc_id;
+						return cb(e);
+					});
+				},
 
-				(cb) =>
-					@client = RealTimeClient.connect()
-					@client.on "connectionAccepted", cb
+				cb => {
+					this.client = RealTimeClient.connect();
+					return this.client.on("connectionAccepted", cb);
+				},
 						
-				(cb) =>
-					@client.emit "joinProject", project_id: @project_id, cb
+				cb => {
+					return this.client.emit("joinProject", {project_id: this.project_id}, cb);
+				},
 				
-				(cb) =>
-					@client.emit "joinDoc", @doc_id, (error, @returnedArgs...) => cb(error)
-			], done
+				cb => {
+					return this.client.emit("joinDoc", this.doc_id, (error, ...rest) => { [...this.returnedArgs] = Array.from(rest); return cb(error); });
+				}
+			], done);
+		});
 
-		it "should get the doc from the doc updater", ->
-			MockDocUpdaterServer.getDocument
-				.calledWith(@project_id, @doc_id, -1)
-				.should.equal true
+		it("should get the doc from the doc updater", function() {
+			return MockDocUpdaterServer.getDocument
+				.calledWith(this.project_id, this.doc_id, -1)
+				.should.equal(true);
+		});
 		
-		it "should return the doc lines, version, ranges and ops", ->
-			@returnedArgs.should.deep.equal [@lines, @version, @ops, @ranges]
+		it("should return the doc lines, version, ranges and ops", function() {
+			return this.returnedArgs.should.deep.equal([this.lines, this.version, this.ops, this.ranges]);
+	});
 			
-		it "should have joined the doc room", (done) ->
-			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
-				expect(@doc_id in client.rooms).to.equal true
-				done()
+		return it("should have joined the doc room", function(done) {
+			return RealTimeClient.getConnectedClient(this.client.socket.sessionid, (error, client) => {
+				expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true);
+				return done();
+			});
+		});
+	});
 		
-	describe "when authorised readOnly", ->
-		before (done) ->
-			async.series [
-				(cb) =>
-					FixturesManager.setUpProject {
+	describe("when authorised readOnly", function() {
+		before(function(done) {
+			return async.series([
+				cb => {
+					return FixturesManager.setUpProject({
 						privilegeLevel: "readOnly"
-					}, (e, {@project_id, @user_id}) =>
-						cb(e)
+					}, (e, {project_id, user_id}) => {
+						this.project_id = project_id;
+						this.user_id = user_id;
+						return cb(e);
+					});
+				},
 					
-				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops, @ranges}, (e, {@doc_id}) =>
-						cb(e)
+				cb => {
+					return FixturesManager.setUpDoc(this.project_id, {lines: this.lines, version: this.version, ops: this.ops, ranges: this.ranges}, (e, {doc_id}) => {
+						this.doc_id = doc_id;
+						return cb(e);
+					});
+				},
 
-				(cb) =>
-					@client = RealTimeClient.connect()
-					@client.on "connectionAccepted", cb
+				cb => {
+					this.client = RealTimeClient.connect();
+					return this.client.on("connectionAccepted", cb);
+				},
 						
-				(cb) =>
-					@client.emit "joinProject", project_id: @project_id, cb
+				cb => {
+					return this.client.emit("joinProject", {project_id: this.project_id}, cb);
+				},
 				
-				(cb) =>
-					@client.emit "joinDoc", @doc_id, (error, @returnedArgs...) => cb(error)
-			], done
+				cb => {
+					return this.client.emit("joinDoc", this.doc_id, (error, ...rest) => { [...this.returnedArgs] = Array.from(rest); return cb(error); });
+				}
+			], done);
+		});
 
-		it "should get the doc from the doc updater", ->
-			MockDocUpdaterServer.getDocument
-				.calledWith(@project_id, @doc_id, -1)
-				.should.equal true
+		it("should get the doc from the doc updater", function() {
+			return MockDocUpdaterServer.getDocument
+				.calledWith(this.project_id, this.doc_id, -1)
+				.should.equal(true);
+		});
 		
-		it "should return the doc lines, version, ranges and ops", ->
-			@returnedArgs.should.deep.equal [@lines, @version, @ops, @ranges]
+		it("should return the doc lines, version, ranges and ops", function() {
+			return this.returnedArgs.should.deep.equal([this.lines, this.version, this.ops, this.ranges]);
+	});
 			
-		it "should have joined the doc room", (done) ->
-			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
-				expect(@doc_id in client.rooms).to.equal true
-				done()
+		return it("should have joined the doc room", function(done) {
+			return RealTimeClient.getConnectedClient(this.client.socket.sessionid, (error, client) => {
+				expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true);
+				return done();
+			});
+		});
+	});
 		
-	describe "when authorised as owner", ->
-		before (done) ->
-			async.series [
-				(cb) =>
-					FixturesManager.setUpProject {
+	describe("when authorised as owner", function() {
+		before(function(done) {
+			return async.series([
+				cb => {
+					return FixturesManager.setUpProject({
 						privilegeLevel: "owner"
-					}, (e, {@project_id, @user_id}) =>
-						cb(e)
+					}, (e, {project_id, user_id}) => {
+						this.project_id = project_id;
+						this.user_id = user_id;
+						return cb(e);
+					});
+				},
 					
-				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops, @ranges}, (e, {@doc_id}) =>
-						cb(e)
+				cb => {
+					return FixturesManager.setUpDoc(this.project_id, {lines: this.lines, version: this.version, ops: this.ops, ranges: this.ranges}, (e, {doc_id}) => {
+						this.doc_id = doc_id;
+						return cb(e);
+					});
+				},
 
-				(cb) =>
-					@client = RealTimeClient.connect()
-					@client.on "connectionAccepted", cb
+				cb => {
+					this.client = RealTimeClient.connect();
+					return this.client.on("connectionAccepted", cb);
+				},
 						
-				(cb) =>
-					@client.emit "joinProject", project_id: @project_id, cb
+				cb => {
+					return this.client.emit("joinProject", {project_id: this.project_id}, cb);
+				},
 				
-				(cb) =>
-					@client.emit "joinDoc", @doc_id, (error, @returnedArgs...) => cb(error)
-			], done
+				cb => {
+					return this.client.emit("joinDoc", this.doc_id, (error, ...rest) => { [...this.returnedArgs] = Array.from(rest); return cb(error); });
+				}
+			], done);
+		});
 
-		it "should get the doc from the doc updater", ->
-			MockDocUpdaterServer.getDocument
-				.calledWith(@project_id, @doc_id, -1)
-				.should.equal true
+		it("should get the doc from the doc updater", function() {
+			return MockDocUpdaterServer.getDocument
+				.calledWith(this.project_id, this.doc_id, -1)
+				.should.equal(true);
+		});
 		
-		it "should return the doc lines, version, ranges and ops", ->
-			@returnedArgs.should.deep.equal [@lines, @version, @ops, @ranges]
+		it("should return the doc lines, version, ranges and ops", function() {
+			return this.returnedArgs.should.deep.equal([this.lines, this.version, this.ops, this.ranges]);
+	});
 			
-		it "should have joined the doc room", (done) ->
-			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
-				expect(@doc_id in client.rooms).to.equal true
-				done()
+		return it("should have joined the doc room", function(done) {
+			return RealTimeClient.getConnectedClient(this.client.socket.sessionid, (error, client) => {
+				expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true);
+				return done();
+			});
+		});
+	});
 
-	# It is impossible to write an acceptance test to test joining an unauthorized
-	# project, since joinProject already catches that. If you can join a project,
-	# then you can join a doc in that project.
+	// It is impossible to write an acceptance test to test joining an unauthorized
+	// project, since joinProject already catches that. If you can join a project,
+	// then you can join a doc in that project.
 			
-	describe "with a fromVersion", ->
-		before (done) ->
-			@fromVersion = 36
-			async.series [
-				(cb) =>
-					FixturesManager.setUpProject {
+	describe("with a fromVersion", function() {
+		before(function(done) {
+			this.fromVersion = 36;
+			return async.series([
+				cb => {
+					return FixturesManager.setUpProject({
 						privilegeLevel: "readAndWrite"
-					}, (e, {@project_id, @user_id}) =>
-						cb(e)
+					}, (e, {project_id, user_id}) => {
+						this.project_id = project_id;
+						this.user_id = user_id;
+						return cb(e);
+					});
+				},
 					
-				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops, @ranges}, (e, {@doc_id}) =>
-						cb(e)
+				cb => {
+					return FixturesManager.setUpDoc(this.project_id, {lines: this.lines, version: this.version, ops: this.ops, ranges: this.ranges}, (e, {doc_id}) => {
+						this.doc_id = doc_id;
+						return cb(e);
+					});
+				},
 
-				(cb) =>
-					@client = RealTimeClient.connect()
-					@client.on "connectionAccepted", cb
+				cb => {
+					this.client = RealTimeClient.connect();
+					return this.client.on("connectionAccepted", cb);
+				},
 						
-				(cb) =>
-					@client.emit "joinProject", project_id: @project_id, cb
+				cb => {
+					return this.client.emit("joinProject", {project_id: this.project_id}, cb);
+				},
 				
-				(cb) =>
-					@client.emit "joinDoc", @doc_id, @fromVersion, (error, @returnedArgs...) => cb(error)
-			], done
+				cb => {
+					return this.client.emit("joinDoc", this.doc_id, this.fromVersion, (error, ...rest) => { [...this.returnedArgs] = Array.from(rest); return cb(error); });
+				}
+			], done);
+		});
 
-		it "should get the doc from the doc updater with the fromVersion", ->
-			MockDocUpdaterServer.getDocument
-				.calledWith(@project_id, @doc_id, @fromVersion)
-				.should.equal true
+		it("should get the doc from the doc updater with the fromVersion", function() {
+			return MockDocUpdaterServer.getDocument
+				.calledWith(this.project_id, this.doc_id, this.fromVersion)
+				.should.equal(true);
+		});
 		
-		it "should return the doc lines, version, ranges and ops", ->
-			@returnedArgs.should.deep.equal [@lines, @version, @ops, @ranges]
+		it("should return the doc lines, version, ranges and ops", function() {
+			return this.returnedArgs.should.deep.equal([this.lines, this.version, this.ops, this.ranges]);
+	});
 			
-		it "should have joined the doc room", (done) ->
-			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
-				expect(@doc_id in client.rooms).to.equal true
-				done()
+		return it("should have joined the doc room", function(done) {
+			return RealTimeClient.getConnectedClient(this.client.socket.sessionid, (error, client) => {
+				expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true);
+				return done();
+			});
+		});
+	});
 
-	describe "with options", ->
-		before (done) ->
-			@options = { encodeRanges: true }
-			async.series [
-				(cb) =>
-					FixturesManager.setUpProject {
+	describe("with options", function() {
+		before(function(done) {
+			this.options = { encodeRanges: true };
+			return async.series([
+				cb => {
+					return FixturesManager.setUpProject({
 						privilegeLevel: "readAndWrite"
-					}, (e, {@project_id, @user_id}) =>
-						cb(e)
+					}, (e, {project_id, user_id}) => {
+						this.project_id = project_id;
+						this.user_id = user_id;
+						return cb(e);
+					});
+				},
 
-				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops, @ranges}, (e, {@doc_id}) =>
-						cb(e)
+				cb => {
+					return FixturesManager.setUpDoc(this.project_id, {lines: this.lines, version: this.version, ops: this.ops, ranges: this.ranges}, (e, {doc_id}) => {
+						this.doc_id = doc_id;
+						return cb(e);
+					});
+				},
 
-				(cb) =>
-					@client = RealTimeClient.connect()
-					@client.on "connectionAccepted", cb
+				cb => {
+					this.client = RealTimeClient.connect();
+					return this.client.on("connectionAccepted", cb);
+				},
 
-				(cb) =>
-					@client.emit "joinProject", project_id: @project_id, cb
+				cb => {
+					return this.client.emit("joinProject", {project_id: this.project_id}, cb);
+				},
 
-				(cb) =>
-					@client.emit "joinDoc", @doc_id, @options, (error, @returnedArgs...) => cb(error)
-			], done
+				cb => {
+					return this.client.emit("joinDoc", this.doc_id, this.options, (error, ...rest) => { [...this.returnedArgs] = Array.from(rest); return cb(error); });
+				}
+			], done);
+		});
 
-		it "should get the doc from the doc updater with the default fromVersion", ->
-			MockDocUpdaterServer.getDocument
-				.calledWith(@project_id, @doc_id, -1)
-				.should.equal true
+		it("should get the doc from the doc updater with the default fromVersion", function() {
+			return MockDocUpdaterServer.getDocument
+				.calledWith(this.project_id, this.doc_id, -1)
+				.should.equal(true);
+		});
 
-		it "should return the doc lines, version, ranges and ops", ->
-			@returnedArgs.should.deep.equal [@lines, @version, @ops, @ranges]
+		it("should return the doc lines, version, ranges and ops", function() {
+			return this.returnedArgs.should.deep.equal([this.lines, this.version, this.ops, this.ranges]);
+	});
 
-		it "should have joined the doc room", (done) ->
-			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
-				expect(@doc_id in client.rooms).to.equal true
-				done()
+		return it("should have joined the doc room", function(done) {
+			return RealTimeClient.getConnectedClient(this.client.socket.sessionid, (error, client) => {
+				expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true);
+				return done();
+			});
+		});
+	});
 
-	describe "with fromVersion and options", ->
-		before (done) ->
-			@fromVersion = 36
-			@options = { encodeRanges: true }
-			async.series [
-				(cb) =>
-					FixturesManager.setUpProject {
+	return describe("with fromVersion and options", function() {
+		before(function(done) {
+			this.fromVersion = 36;
+			this.options = { encodeRanges: true };
+			return async.series([
+				cb => {
+					return FixturesManager.setUpProject({
 						privilegeLevel: "readAndWrite"
-					}, (e, {@project_id, @user_id}) =>
-						cb(e)
+					}, (e, {project_id, user_id}) => {
+						this.project_id = project_id;
+						this.user_id = user_id;
+						return cb(e);
+					});
+				},
 
-				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops, @ranges}, (e, {@doc_id}) =>
-						cb(e)
+				cb => {
+					return FixturesManager.setUpDoc(this.project_id, {lines: this.lines, version: this.version, ops: this.ops, ranges: this.ranges}, (e, {doc_id}) => {
+						this.doc_id = doc_id;
+						return cb(e);
+					});
+				},
 
-				(cb) =>
-					@client = RealTimeClient.connect()
-					@client.on "connectionAccepted", cb
+				cb => {
+					this.client = RealTimeClient.connect();
+					return this.client.on("connectionAccepted", cb);
+				},
 
-				(cb) =>
-					@client.emit "joinProject", project_id: @project_id, cb
+				cb => {
+					return this.client.emit("joinProject", {project_id: this.project_id}, cb);
+				},
 
-				(cb) =>
-					@client.emit "joinDoc", @doc_id, @fromVersion, @options, (error, @returnedArgs...) => cb(error)
-			], done
+				cb => {
+					return this.client.emit("joinDoc", this.doc_id, this.fromVersion, this.options, (error, ...rest) => { [...this.returnedArgs] = Array.from(rest); return cb(error); });
+				}
+			], done);
+		});
 
-		it "should get the doc from the doc updater with the fromVersion", ->
-			MockDocUpdaterServer.getDocument
-				.calledWith(@project_id, @doc_id, @fromVersion)
-				.should.equal true
+		it("should get the doc from the doc updater with the fromVersion", function() {
+			return MockDocUpdaterServer.getDocument
+				.calledWith(this.project_id, this.doc_id, this.fromVersion)
+				.should.equal(true);
+		});
 
-		it "should return the doc lines, version, ranges and ops", ->
-			@returnedArgs.should.deep.equal [@lines, @version, @ops, @ranges]
+		it("should return the doc lines, version, ranges and ops", function() {
+			return this.returnedArgs.should.deep.equal([this.lines, this.version, this.ops, this.ranges]);
+	});
 
-		it "should have joined the doc room", (done) ->
-			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
-				expect(@doc_id in client.rooms).to.equal true
-				done()
+		return it("should have joined the doc room", function(done) {
+			return RealTimeClient.getConnectedClient(this.client.socket.sessionid, (error, client) => {
+				expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true);
+				return done();
+			});
+		});
+	});
+});

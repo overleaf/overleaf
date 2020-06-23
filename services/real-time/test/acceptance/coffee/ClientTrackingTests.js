@@ -1,146 +1,191 @@
-chai = require("chai")
-expect = chai.expect
-chai.should()
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const chai = require("chai");
+const {
+    expect
+} = chai;
+chai.should();
 
-RealTimeClient = require "./helpers/RealTimeClient"
-MockWebServer = require "./helpers/MockWebServer"
-FixturesManager = require "./helpers/FixturesManager"
+const RealTimeClient = require("./helpers/RealTimeClient");
+const MockWebServer = require("./helpers/MockWebServer");
+const FixturesManager = require("./helpers/FixturesManager");
 
-async = require "async"
+const async = require("async");
 
-describe "clientTracking", ->
-	describe "when a client updates its cursor location", ->
-		before (done) ->
-			async.series [
-				(cb) =>
-					FixturesManager.setUpProject {
-						privilegeLevel: "owner"
+describe("clientTracking", function() {
+	describe("when a client updates its cursor location", function() {
+		before(function(done) {
+			return async.series([
+				cb => {
+					return FixturesManager.setUpProject({
+						privilegeLevel: "owner",
 						project: { name: "Test Project" }
-					}, (error, {@user_id, @project_id}) => cb()
+					}, (error, {user_id, project_id}) => { this.user_id = user_id; this.project_id = project_id; return cb(); });
+				},
 				
-				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
-						cb(e)
+				cb => {
+					return FixturesManager.setUpDoc(this.project_id, {lines: this.lines, version: this.version, ops: this.ops}, (e, {doc_id}) => {
+						this.doc_id = doc_id;
+						return cb(e);
+					});
+				},
 				
-				(cb) =>
-					@clientA = RealTimeClient.connect()
-					@clientA.on "connectionAccepted", cb
+				cb => {
+					this.clientA = RealTimeClient.connect();
+					return this.clientA.on("connectionAccepted", cb);
+				},
 					
-				(cb) =>
-					@clientB = RealTimeClient.connect()
-					@clientB.on "connectionAccepted", cb
+				cb => {
+					this.clientB = RealTimeClient.connect();
+					return this.clientB.on("connectionAccepted", cb);
+				},
 					
-				(cb) =>
-					@clientA.emit "joinProject", {
-						project_id: @project_id
-					}, cb
+				cb => {
+					return this.clientA.emit("joinProject", {
+						project_id: this.project_id
+					}, cb);
+				},
 				
-				(cb) =>
-					@clientA.emit "joinDoc", @doc_id, cb
+				cb => {
+					return this.clientA.emit("joinDoc", this.doc_id, cb);
+				},
 					
-				(cb) =>
-					@clientB.emit "joinProject", {
-						project_id: @project_id
-					}, cb
+				cb => {
+					return this.clientB.emit("joinProject", {
+						project_id: this.project_id
+					}, cb);
+				},
 					
-				(cb) =>
-					@updates = []
-					@clientB.on "clientTracking.clientUpdated", (data) =>
-						@updates.push data
+				cb => {
+					this.updates = [];
+					this.clientB.on("clientTracking.clientUpdated", data => {
+						return this.updates.push(data);
+					});
 
-					@clientA.emit "clientTracking.updatePosition", {
-						row: @row = 42
-						column: @column = 36
-						doc_id: @doc_id
-					}, (error) ->
-						throw error if error?
-						setTimeout cb, 300 # Give the message a chance to reach client B.
-			], done
+					return this.clientA.emit("clientTracking.updatePosition", {
+						row: (this.row = 42),
+						column: (this.column = 36),
+						doc_id: this.doc_id
+					}, function(error) {
+						if (error != null) { throw error; }
+						return setTimeout(cb, 300);
+					});
+				} // Give the message a chance to reach client B.
+			], done);
+		});
 			
-		it "should tell other clients about the update", ->
-			@updates.should.deep.equal [
+		it("should tell other clients about the update", function() {
+			return this.updates.should.deep.equal([
 				{
-					row: @row
-					column: @column
-					doc_id: @doc_id
-					id: @clientA.publicId
-					user_id: @user_id
+					row: this.row,
+					column: this.column,
+					doc_id: this.doc_id,
+					id: this.clientA.publicId,
+					user_id: this.user_id,
 					name: "Joe Bloggs"
 				}
-			]
+			]);
+	});
 		
-		it "should record the update in getConnectedUsers", (done) ->
-			@clientB.emit "clientTracking.getConnectedUsers", (error, users) =>
-				for user in users
-					if user.client_id == @clientA.publicId
+		return it("should record the update in getConnectedUsers", function(done) {
+			return this.clientB.emit("clientTracking.getConnectedUsers", (error, users) => {
+				for (let user of Array.from(users)) {
+					if (user.client_id === this.clientA.publicId) {
 						expect(user.cursorData).to.deep.equal({
-							row: @row
-							column: @column
-							doc_id: @doc_id 
-						})
-						return done()
-				throw new Error("user was never found")
+							row: this.row,
+							column: this.column,
+							doc_id: this.doc_id 
+						});
+						return done();
+					}
+				}
+				throw new Error("user was never found");
+			});
+		});
+	});
 				
-	describe "when an anonymous client updates its cursor location", ->
-		before (done) ->
-			async.series [
-				(cb) =>
-					FixturesManager.setUpProject {
-						privilegeLevel: "owner"
-						project: { name: "Test Project"	}
+	return describe("when an anonymous client updates its cursor location", function() {
+		before(function(done) {
+			return async.series([
+				cb => {
+					return FixturesManager.setUpProject({
+						privilegeLevel: "owner",
+						project: { name: "Test Project"	},
 						publicAccess: "readAndWrite"
-					}, (error, {@user_id, @project_id}) => cb()
+					}, (error, {user_id, project_id}) => { this.user_id = user_id; this.project_id = project_id; return cb(); });
+				},
 				
-				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
-						cb(e)
+				cb => {
+					return FixturesManager.setUpDoc(this.project_id, {lines: this.lines, version: this.version, ops: this.ops}, (e, {doc_id}) => {
+						this.doc_id = doc_id;
+						return cb(e);
+					});
+				},
 				
-				(cb) =>
-					@clientA = RealTimeClient.connect()
-					@clientA.on "connectionAccepted", cb
+				cb => {
+					this.clientA = RealTimeClient.connect();
+					return this.clientA.on("connectionAccepted", cb);
+				},
 
-				(cb) =>
-					@clientA.emit "joinProject", {
-						project_id: @project_id
-					}, cb
+				cb => {
+					return this.clientA.emit("joinProject", {
+						project_id: this.project_id
+					}, cb);
+				},
 			
-				(cb) =>
-					RealTimeClient.setSession({}, cb)
+				cb => {
+					return RealTimeClient.setSession({}, cb);
+				},
 					
-				(cb) =>
-					@anonymous = RealTimeClient.connect()
-					@anonymous.on "connectionAccepted", cb	
+				cb => {
+					this.anonymous = RealTimeClient.connect();
+					return this.anonymous.on("connectionAccepted", cb);
+				},	
 					
-				(cb) =>
-					@anonymous.emit "joinProject", {
-						project_id: @project_id
-					}, cb
+				cb => {
+					return this.anonymous.emit("joinProject", {
+						project_id: this.project_id
+					}, cb);
+				},
 				
-				(cb) =>
-					@anonymous.emit "joinDoc", @doc_id, cb
+				cb => {
+					return this.anonymous.emit("joinDoc", this.doc_id, cb);
+				},
 					
-				(cb) =>
-					@updates = []
-					@clientA.on "clientTracking.clientUpdated", (data) =>
-						@updates.push data
+				cb => {
+					this.updates = [];
+					this.clientA.on("clientTracking.clientUpdated", data => {
+						return this.updates.push(data);
+					});
 
-					@anonymous.emit "clientTracking.updatePosition", {
-						row: @row = 42
-						column: @column = 36
-						doc_id: @doc_id
-					}, (error) ->
-						throw error if error?
-						setTimeout cb, 300 # Give the message a chance to reach client B.
-			], done
+					return this.anonymous.emit("clientTracking.updatePosition", {
+						row: (this.row = 42),
+						column: (this.column = 36),
+						doc_id: this.doc_id
+					}, function(error) {
+						if (error != null) { throw error; }
+						return setTimeout(cb, 300);
+					});
+				} // Give the message a chance to reach client B.
+			], done);
+		});
 			
-		it "should tell other clients about the update", ->
-			@updates.should.deep.equal [
+		return it("should tell other clients about the update", function() {
+			return this.updates.should.deep.equal([
 				{
-					row: @row
-					column: @column
-					doc_id: @doc_id
-					id: @anonymous.publicId
-					user_id: "anonymous-user"
+					row: this.row,
+					column: this.column,
+					doc_id: this.doc_id,
+					id: this.anonymous.publicId,
+					user_id: "anonymous-user",
 					name: ""
 				}
-			]
+			]);
+	});
+});
+});

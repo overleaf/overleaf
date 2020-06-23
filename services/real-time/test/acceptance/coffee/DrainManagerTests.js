@@ -1,81 +1,100 @@
-RealTimeClient = require "./helpers/RealTimeClient"
-FixturesManager = require "./helpers/FixturesManager"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const RealTimeClient = require("./helpers/RealTimeClient");
+const FixturesManager = require("./helpers/FixturesManager");
 
-expect = require("chai").expect
+const {
+    expect
+} = require("chai");
 
-async = require "async"
-request = require "request"
+const async = require("async");
+const request = require("request");
 
-Settings = require "settings-sharelatex"
+const Settings = require("settings-sharelatex");
 
-drain = (rate, callback) ->
-	request.post {
-		url: "http://localhost:3026/drain?rate=#{rate}"
+const drain = function(rate, callback) {
+	request.post({
+		url: `http://localhost:3026/drain?rate=${rate}`,
 		auth: {
 			user: Settings.internal.realTime.user,
 			pass: Settings.internal.realTime.pass
 		}
-	}, (error, response, data) ->
-		callback error, data
-	return null
+	}, (error, response, data) => callback(error, data));
+	return null;
+};
 
-describe "DrainManagerTests", ->
-	before (done) ->
-		FixturesManager.setUpProject {
-			privilegeLevel: "owner"
+describe("DrainManagerTests", function() {
+	before(function(done) {
+		FixturesManager.setUpProject({
+			privilegeLevel: "owner",
 			project: {
 				name: "Test Project"
 			}
-		}, (e, {@project_id, @user_id}) => done()
-		return null
+		}, (e, {project_id, user_id}) => { this.project_id = project_id; this.user_id = user_id; return done(); });
+		return null;
+	});
 
-	before (done) ->
-		# cleanup to speedup reconnecting
-		@timeout(10000)
-		RealTimeClient.disconnectAllClients done
+	before(function(done) {
+		// cleanup to speedup reconnecting
+		this.timeout(10000);
+		return RealTimeClient.disconnectAllClients(done);
+	});
 
-	# trigger and check cleanup
-	it "should have disconnected all previous clients", (done) ->
-		RealTimeClient.getConnectedClients (error, data) ->
-			return done(error) if error
-			expect(data.length).to.equal(0)
-			done()
+	// trigger and check cleanup
+	it("should have disconnected all previous clients", done => RealTimeClient.getConnectedClients(function(error, data) {
+        if (error) { return done(error); }
+        expect(data.length).to.equal(0);
+        return done();
+    }));
 
-	describe "with two clients in the project", ->
-		beforeEach (done) ->
-			async.series [
-				(cb) =>
-					@clientA = RealTimeClient.connect()
-					@clientA.on "connectionAccepted", cb
+	return describe("with two clients in the project", function() {
+		beforeEach(function(done) {
+			return async.series([
+				cb => {
+					this.clientA = RealTimeClient.connect();
+					return this.clientA.on("connectionAccepted", cb);
+				},
 
-				(cb) =>
-					@clientB = RealTimeClient.connect()
-					@clientB.on "connectionAccepted", cb
+				cb => {
+					this.clientB = RealTimeClient.connect();
+					return this.clientB.on("connectionAccepted", cb);
+				},
 
-				(cb) =>
-					@clientA.emit "joinProject", project_id: @project_id, cb
+				cb => {
+					return this.clientA.emit("joinProject", {project_id: this.project_id}, cb);
+				},
 
-				(cb) =>
-					@clientB.emit "joinProject", project_id: @project_id, cb
-			], done
+				cb => {
+					return this.clientB.emit("joinProject", {project_id: this.project_id}, cb);
+				}
+			], done);
+		});
 
-		describe "starting to drain", () ->
-			beforeEach (done) ->
-				async.parallel [
-					(cb) =>
-						@clientA.on "reconnectGracefully", cb
-					(cb) =>
-						@clientB.on "reconnectGracefully", cb
+		return describe("starting to drain", function() {
+			beforeEach(function(done) {
+				return async.parallel([
+					cb => {
+						return this.clientA.on("reconnectGracefully", cb);
+					},
+					cb => {
+						return this.clientB.on("reconnectGracefully", cb);
+					},
 
-					(cb) -> drain(2, cb)
-				], done
+					cb => drain(2, cb)
+				], done);
+			});
 
-			afterEach (done) ->
-				drain(0, done) # reset drain
+			afterEach(done => drain(0, done)); // reset drain
 
-			it "should not timeout", ->
-				expect(true).to.equal(true)
+			it("should not timeout", () => expect(true).to.equal(true));
 
-			it "should not have disconnected", ->
-				expect(@clientA.socket.connected).to.equal true
-				expect(@clientB.socket.connected).to.equal true
+			return it("should not have disconnected", function() {
+				expect(this.clientA.socket.connected).to.equal(true);
+				return expect(this.clientB.socket.connected).to.equal(true);
+			});
+		});
+	});
+});
