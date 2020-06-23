@@ -1,288 +1,359 @@
-chai = require('chai')
-expect = chai.expect
-should = chai.should()
-sinon = require("sinon")
-modulePath = "../../../app/js/RoomManager.js"
-SandboxedModule = require('sandboxed-module')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const chai = require('chai');
+const {
+    expect
+} = chai;
+const should = chai.should();
+const sinon = require("sinon");
+const modulePath = "../../../app/js/RoomManager.js";
+const SandboxedModule = require('sandboxed-module');
 
-describe 'RoomManager', ->
-	beforeEach ->
-		@project_id = "project-id-123"
-		@doc_id = "doc-id-456"
-		@other_doc_id = "doc-id-789"
-		@client = {namespace: {name: ''}, id: "first-client"}
-		@RoomManager = SandboxedModule.require modulePath, requires:
-			"settings-sharelatex": @settings = {}
-			"logger-sharelatex": @logger = { log: sinon.stub(), warn: sinon.stub(), error: sinon.stub() }
-			"metrics-sharelatex": @metrics = { gauge: sinon.stub() }
-		@RoomManager._clientsInRoom = sinon.stub()
-		@RoomManager._clientAlreadyInRoom = sinon.stub()
-		@RoomEvents = @RoomManager.eventSource()
-		sinon.spy(@RoomEvents, 'emit')
-		sinon.spy(@RoomEvents, 'once')
+describe('RoomManager', function() {
+	beforeEach(function() {
+		this.project_id = "project-id-123";
+		this.doc_id = "doc-id-456";
+		this.other_doc_id = "doc-id-789";
+		this.client = {namespace: {name: ''}, id: "first-client"};
+		this.RoomManager = SandboxedModule.require(modulePath, { requires: {
+			"settings-sharelatex": (this.settings = {}),
+			"logger-sharelatex": (this.logger = { log: sinon.stub(), warn: sinon.stub(), error: sinon.stub() }),
+			"metrics-sharelatex": (this.metrics = { gauge: sinon.stub() })
+		}
+	});
+		this.RoomManager._clientsInRoom = sinon.stub();
+		this.RoomManager._clientAlreadyInRoom = sinon.stub();
+		this.RoomEvents = this.RoomManager.eventSource();
+		sinon.spy(this.RoomEvents, 'emit');
+		return sinon.spy(this.RoomEvents, 'once');
+	});
 	
-	describe "emitOnCompletion", ->
-		describe "when a subscribe errors", ->
-			afterEach () ->
-				process.removeListener("unhandledRejection", @onUnhandled)
+	describe("emitOnCompletion", () => describe("when a subscribe errors", function() {
+        afterEach(function() {
+            return process.removeListener("unhandledRejection", this.onUnhandled);
+        });
 
-			beforeEach (done) ->
-				@onUnhandled = (error) =>
-					@unhandledError = error
-					done(new Error("unhandledRejection: #{error.message}"))
-				process.on("unhandledRejection", @onUnhandled)
+        beforeEach(function(done) {
+            this.onUnhandled = error => {
+                this.unhandledError = error;
+                return done(new Error(`unhandledRejection: ${error.message}`));
+            };
+            process.on("unhandledRejection", this.onUnhandled);
 
-				reject = undefined
-				subscribePromise = new Promise((_, r) -> reject = r)
-				promises = [subscribePromise]
-				eventName = "project-subscribed-123"
-				@RoomEvents.once eventName, () ->
-					setTimeout(done, 100)
-				@RoomManager.emitOnCompletion(promises, eventName)
-				setTimeout(() -> reject(new Error("subscribe failed")))
+            let reject = undefined;
+            const subscribePromise = new Promise((_, r) => reject = r);
+            const promises = [subscribePromise];
+            const eventName = "project-subscribed-123";
+            this.RoomEvents.once(eventName, () => setTimeout(done, 100));
+            this.RoomManager.emitOnCompletion(promises, eventName);
+            return setTimeout(() => reject(new Error("subscribe failed")));
+        });
 
-			it "should keep going", () ->
-				expect(@unhandledError).to.not.exist
+        return it("should keep going", function() {
+            return expect(this.unhandledError).to.not.exist;
+        });
+    }));
 
-	describe "joinProject", ->
+	describe("joinProject", function() {
 	
-		describe "when the project room is empty", ->
+		describe("when the project room is empty", function() {
 
-			beforeEach (done) ->
-				@RoomManager._clientsInRoom
-					.withArgs(@client, @project_id)
-					.onFirstCall().returns(0)
-				@client.join = sinon.stub()
-				@callback = sinon.stub()
-				@RoomEvents.on 'project-active', (id) =>
-					setTimeout () =>
-						@RoomEvents.emit "project-subscribed-#{id}"
-					, 100
-				@RoomManager.joinProject @client, @project_id, (err) =>
-					@callback(err)
-					done()
+			beforeEach(function(done) {
+				this.RoomManager._clientsInRoom
+					.withArgs(this.client, this.project_id)
+					.onFirstCall().returns(0);
+				this.client.join = sinon.stub();
+				this.callback = sinon.stub();
+				this.RoomEvents.on('project-active', id => {
+					return setTimeout(() => {
+						return this.RoomEvents.emit(`project-subscribed-${id}`);
+					}
+					, 100);
+				});
+				return this.RoomManager.joinProject(this.client, this.project_id, err => {
+					this.callback(err);
+					return done();
+				});
+			});
 
-			it "should emit a 'project-active' event with the id", ->
-				@RoomEvents.emit.calledWithExactly('project-active', @project_id).should.equal true
+			it("should emit a 'project-active' event with the id", function() {
+				return this.RoomEvents.emit.calledWithExactly('project-active', this.project_id).should.equal(true);
+			});
 
-			it "should listen for the 'project-subscribed-id' event", ->
-				@RoomEvents.once.calledWith("project-subscribed-#{@project_id}").should.equal true
+			it("should listen for the 'project-subscribed-id' event", function() {
+				return this.RoomEvents.once.calledWith(`project-subscribed-${this.project_id}`).should.equal(true);
+			});
 
-			it "should join the room using the id", ->
-				@client.join.calledWithExactly(@project_id).should.equal true
+			return it("should join the room using the id", function() {
+				return this.client.join.calledWithExactly(this.project_id).should.equal(true);
+			});
+		});
 
-		describe "when there are other clients in the project room", ->
+		return describe("when there are other clients in the project room", function() {
 
-			beforeEach ->
-				@RoomManager._clientsInRoom
-					.withArgs(@client, @project_id)
+			beforeEach(function() {
+				this.RoomManager._clientsInRoom
+					.withArgs(this.client, this.project_id)
 					.onFirstCall().returns(123)
-					.onSecondCall().returns(124)
-				@client.join = sinon.stub()
-				@RoomManager.joinProject @client, @project_id
+					.onSecondCall().returns(124);
+				this.client.join = sinon.stub();
+				return this.RoomManager.joinProject(this.client, this.project_id);
+			});
 
-			it "should join the room using the id", ->
-				@client.join.called.should.equal true
+			it("should join the room using the id", function() {
+				return this.client.join.called.should.equal(true);
+			});
 
-			it "should not emit any events", ->
-				@RoomEvents.emit.called.should.equal false
+			return it("should not emit any events", function() {
+				return this.RoomEvents.emit.called.should.equal(false);
+			});
+		});
+	});
 
 
-	describe "joinDoc", ->
+	describe("joinDoc", function() {
 
-		describe "when the doc room is empty", ->
+		describe("when the doc room is empty", function() {
 
-			beforeEach (done) ->
-				@RoomManager._clientsInRoom
-					.withArgs(@client, @doc_id)
-					.onFirstCall().returns(0)
-				@client.join = sinon.stub()
-				@callback = sinon.stub()
-				@RoomEvents.on 'doc-active', (id) =>
-					setTimeout () =>
-						@RoomEvents.emit "doc-subscribed-#{id}"
-					, 100
-				@RoomManager.joinDoc @client, @doc_id, (err) =>
-					@callback(err)
-					done()
+			beforeEach(function(done) {
+				this.RoomManager._clientsInRoom
+					.withArgs(this.client, this.doc_id)
+					.onFirstCall().returns(0);
+				this.client.join = sinon.stub();
+				this.callback = sinon.stub();
+				this.RoomEvents.on('doc-active', id => {
+					return setTimeout(() => {
+						return this.RoomEvents.emit(`doc-subscribed-${id}`);
+					}
+					, 100);
+				});
+				return this.RoomManager.joinDoc(this.client, this.doc_id, err => {
+					this.callback(err);
+					return done();
+				});
+			});
 
-			it "should emit a 'doc-active' event with the id", ->
-				@RoomEvents.emit.calledWithExactly('doc-active', @doc_id).should.equal true
+			it("should emit a 'doc-active' event with the id", function() {
+				return this.RoomEvents.emit.calledWithExactly('doc-active', this.doc_id).should.equal(true);
+			});
 
-			it "should listen for the 'doc-subscribed-id' event", ->
-				@RoomEvents.once.calledWith("doc-subscribed-#{@doc_id}").should.equal true
+			it("should listen for the 'doc-subscribed-id' event", function() {
+				return this.RoomEvents.once.calledWith(`doc-subscribed-${this.doc_id}`).should.equal(true);
+			});
 
-			it "should join the room using the id", ->
-				@client.join.calledWithExactly(@doc_id).should.equal true
+			return it("should join the room using the id", function() {
+				return this.client.join.calledWithExactly(this.doc_id).should.equal(true);
+			});
+		});
 
-		describe "when there are other clients in the doc room", ->
+		return describe("when there are other clients in the doc room", function() {
 
-			beforeEach ->
-				@RoomManager._clientsInRoom
-					.withArgs(@client, @doc_id)
+			beforeEach(function() {
+				this.RoomManager._clientsInRoom
+					.withArgs(this.client, this.doc_id)
 					.onFirstCall().returns(123)
-					.onSecondCall().returns(124)
-				@client.join = sinon.stub()
-				@RoomManager.joinDoc @client, @doc_id
+					.onSecondCall().returns(124);
+				this.client.join = sinon.stub();
+				return this.RoomManager.joinDoc(this.client, this.doc_id);
+			});
 
-			it "should join the room using the id", ->
-				@client.join.called.should.equal true
+			it("should join the room using the id", function() {
+				return this.client.join.called.should.equal(true);
+			});
 
-			it "should not emit any events", ->
-				@RoomEvents.emit.called.should.equal false
-
-
-	describe "leaveDoc", ->
-
-		describe "when doc room will be empty after this client has left", ->
-
-			beforeEach ->
-				@RoomManager._clientAlreadyInRoom
-					.withArgs(@client, @doc_id)
-					.returns(true)
-				@RoomManager._clientsInRoom
-					.withArgs(@client, @doc_id)
-					.onCall(0).returns(0)
-				@client.leave = sinon.stub()
-				@RoomManager.leaveDoc @client, @doc_id
-
-			it "should leave the room using the id", ->
-				@client.leave.calledWithExactly(@doc_id).should.equal true
-
-			it "should emit a 'doc-empty' event with the id", ->
-				@RoomEvents.emit.calledWithExactly('doc-empty', @doc_id).should.equal true
+			return it("should not emit any events", function() {
+				return this.RoomEvents.emit.called.should.equal(false);
+			});
+		});
+	});
 
 
-		describe "when there are other clients in the doc room", ->
+	describe("leaveDoc", function() {
 
-			beforeEach ->
-				@RoomManager._clientAlreadyInRoom
-					.withArgs(@client, @doc_id)
-					.returns(true)
-				@RoomManager._clientsInRoom
-					.withArgs(@client, @doc_id)
-					.onCall(0).returns(123)
-				@client.leave = sinon.stub()
-				@RoomManager.leaveDoc @client, @doc_id
+		describe("when doc room will be empty after this client has left", function() {
 
-			it "should leave the room using the id", ->
-				@client.leave.calledWithExactly(@doc_id).should.equal true
+			beforeEach(function() {
+				this.RoomManager._clientAlreadyInRoom
+					.withArgs(this.client, this.doc_id)
+					.returns(true);
+				this.RoomManager._clientsInRoom
+					.withArgs(this.client, this.doc_id)
+					.onCall(0).returns(0);
+				this.client.leave = sinon.stub();
+				return this.RoomManager.leaveDoc(this.client, this.doc_id);
+			});
 
-			it "should not emit any events", ->
-				@RoomEvents.emit.called.should.equal false
+			it("should leave the room using the id", function() {
+				return this.client.leave.calledWithExactly(this.doc_id).should.equal(true);
+			});
 
-		describe "when the client is not in the doc room", ->
-
-			beforeEach ->
-				@RoomManager._clientAlreadyInRoom
-					.withArgs(@client, @doc_id)
-					.returns(false)
-				@RoomManager._clientsInRoom
-					.withArgs(@client, @doc_id)
-					.onCall(0).returns(0)
-				@client.leave = sinon.stub()
-				@RoomManager.leaveDoc @client, @doc_id
-
-			it "should not leave the room", ->
-				@client.leave.called.should.equal false
-
-			it "should not emit any events", ->
-				@RoomEvents.emit.called.should.equal false
+			return it("should emit a 'doc-empty' event with the id", function() {
+				return this.RoomEvents.emit.calledWithExactly('doc-empty', this.doc_id).should.equal(true);
+			});
+		});
 
 
-	describe "leaveProjectAndDocs", ->
+		describe("when there are other clients in the doc room", function() {
 
-		describe "when the client is connected to the project and multiple docs", ->
+			beforeEach(function() {
+				this.RoomManager._clientAlreadyInRoom
+					.withArgs(this.client, this.doc_id)
+					.returns(true);
+				this.RoomManager._clientsInRoom
+					.withArgs(this.client, this.doc_id)
+					.onCall(0).returns(123);
+				this.client.leave = sinon.stub();
+				return this.RoomManager.leaveDoc(this.client, this.doc_id);
+			});
 
-			beforeEach ->
-				@RoomManager._roomsClientIsIn = sinon.stub().returns [@project_id, @doc_id, @other_doc_id]
-				@client.join = sinon.stub()
-				@client.leave = sinon.stub()
+			it("should leave the room using the id", function() {
+				return this.client.leave.calledWithExactly(this.doc_id).should.equal(true);
+			});
 
-			describe "when this is the only client connected", ->
+			return it("should not emit any events", function() {
+				return this.RoomEvents.emit.called.should.equal(false);
+			});
+		});
 
-				beforeEach (done) ->
-					# first call is for the join,
-					# second for the leave
-					@RoomManager._clientsInRoom
-						.withArgs(@client, @doc_id)
-						.onCall(0).returns(0)
-						.onCall(1).returns(0)
-					@RoomManager._clientsInRoom
-						.withArgs(@client, @other_doc_id)
-						.onCall(0).returns(0)
-						.onCall(1).returns(0)
-					@RoomManager._clientsInRoom
-						.withArgs(@client, @project_id)
-						.onCall(0).returns(0)
-						.onCall(1).returns(0)
-					@RoomManager._clientAlreadyInRoom
-						.withArgs(@client, @doc_id)
-						.returns(true)
-						.withArgs(@client, @other_doc_id)
-						.returns(true)
-						.withArgs(@client, @project_id)
-						.returns(true)
-					@RoomEvents.on 'project-active', (id) =>
-						setTimeout () =>
-							@RoomEvents.emit "project-subscribed-#{id}"
-						, 100
-					@RoomEvents.on 'doc-active', (id) =>
-						setTimeout () =>
-							@RoomEvents.emit "doc-subscribed-#{id}"
-						, 100
-					# put the client in the rooms
-					@RoomManager.joinProject @client, @project_id, () =>
-						@RoomManager.joinDoc @client, @doc_id, () =>
-							@RoomManager.joinDoc @client, @other_doc_id, () =>
-								# now leave the project
-								@RoomManager.leaveProjectAndDocs @client
-								done()
+		return describe("when the client is not in the doc room", function() {
 
-				it "should leave all the docs", ->
-					@client.leave.calledWithExactly(@doc_id).should.equal true
-					@client.leave.calledWithExactly(@other_doc_id).should.equal true
+			beforeEach(function() {
+				this.RoomManager._clientAlreadyInRoom
+					.withArgs(this.client, this.doc_id)
+					.returns(false);
+				this.RoomManager._clientsInRoom
+					.withArgs(this.client, this.doc_id)
+					.onCall(0).returns(0);
+				this.client.leave = sinon.stub();
+				return this.RoomManager.leaveDoc(this.client, this.doc_id);
+			});
 
-				it "should leave the project", ->
-					@client.leave.calledWithExactly(@project_id).should.equal true
+			it("should not leave the room", function() {
+				return this.client.leave.called.should.equal(false);
+			});
 
-				it "should emit a 'doc-empty' event with the id for each doc", ->
-					@RoomEvents.emit.calledWithExactly('doc-empty', @doc_id).should.equal true
-					@RoomEvents.emit.calledWithExactly('doc-empty', @other_doc_id).should.equal true
+			return it("should not emit any events", function() {
+				return this.RoomEvents.emit.called.should.equal(false);
+			});
+		});
+	});
 
-				it "should emit a 'project-empty' event with the id for the project", ->
-					@RoomEvents.emit.calledWithExactly('project-empty', @project_id).should.equal true
 
-			describe "when other clients are still connected", ->
+	return describe("leaveProjectAndDocs", () => describe("when the client is connected to the project and multiple docs", function() {
 
-				beforeEach ->
-					@RoomManager._clientsInRoom
-						.withArgs(@client, @doc_id)
-						.onFirstCall().returns(123)
-						.onSecondCall().returns(122)
-					@RoomManager._clientsInRoom
-						.withArgs(@client, @other_doc_id)
-						.onFirstCall().returns(123)
-						.onSecondCall().returns(122)
-					@RoomManager._clientsInRoom
-						.withArgs(@client, @project_id)
-						.onFirstCall().returns(123)
-						.onSecondCall().returns(122)
-					@RoomManager._clientAlreadyInRoom
-						.withArgs(@client, @doc_id)
-						.returns(true)
-						.withArgs(@client, @other_doc_id)
-						.returns(true)
-						.withArgs(@client, @project_id)
-						.returns(true)
-					@RoomManager.leaveProjectAndDocs @client
+        beforeEach(function() {
+            this.RoomManager._roomsClientIsIn = sinon.stub().returns([this.project_id, this.doc_id, this.other_doc_id]);
+            this.client.join = sinon.stub();
+            return this.client.leave = sinon.stub();
+        });
 
-				it "should leave all the docs", ->
-					@client.leave.calledWithExactly(@doc_id).should.equal true
-					@client.leave.calledWithExactly(@other_doc_id).should.equal true
+        describe("when this is the only client connected", function() {
 
-				it "should leave the project", ->
-					@client.leave.calledWithExactly(@project_id).should.equal true
+            beforeEach(function(done) {
+                // first call is for the join,
+                // second for the leave
+                this.RoomManager._clientsInRoom
+                    .withArgs(this.client, this.doc_id)
+                    .onCall(0).returns(0)
+                    .onCall(1).returns(0);
+                this.RoomManager._clientsInRoom
+                    .withArgs(this.client, this.other_doc_id)
+                    .onCall(0).returns(0)
+                    .onCall(1).returns(0);
+                this.RoomManager._clientsInRoom
+                    .withArgs(this.client, this.project_id)
+                    .onCall(0).returns(0)
+                    .onCall(1).returns(0);
+                this.RoomManager._clientAlreadyInRoom
+                    .withArgs(this.client, this.doc_id)
+                    .returns(true)
+                    .withArgs(this.client, this.other_doc_id)
+                    .returns(true)
+                    .withArgs(this.client, this.project_id)
+                    .returns(true);
+                this.RoomEvents.on('project-active', id => {
+                    return setTimeout(() => {
+                        return this.RoomEvents.emit(`project-subscribed-${id}`);
+                    }
+                    , 100);
+                });
+                this.RoomEvents.on('doc-active', id => {
+                    return setTimeout(() => {
+                        return this.RoomEvents.emit(`doc-subscribed-${id}`);
+                    }
+                    , 100);
+                });
+                // put the client in the rooms
+                return this.RoomManager.joinProject(this.client, this.project_id, () => {
+                    return this.RoomManager.joinDoc(this.client, this.doc_id, () => {
+                        return this.RoomManager.joinDoc(this.client, this.other_doc_id, () => {
+                            // now leave the project
+                            this.RoomManager.leaveProjectAndDocs(this.client);
+                            return done();
+                        });
+                    });
+                });
+            });
 
-				it "should not emit any events", ->
-					@RoomEvents.emit.called.should.equal false
+            it("should leave all the docs", function() {
+                this.client.leave.calledWithExactly(this.doc_id).should.equal(true);
+                return this.client.leave.calledWithExactly(this.other_doc_id).should.equal(true);
+            });
+
+            it("should leave the project", function() {
+                return this.client.leave.calledWithExactly(this.project_id).should.equal(true);
+            });
+
+            it("should emit a 'doc-empty' event with the id for each doc", function() {
+                this.RoomEvents.emit.calledWithExactly('doc-empty', this.doc_id).should.equal(true);
+                return this.RoomEvents.emit.calledWithExactly('doc-empty', this.other_doc_id).should.equal(true);
+            });
+
+            return it("should emit a 'project-empty' event with the id for the project", function() {
+                return this.RoomEvents.emit.calledWithExactly('project-empty', this.project_id).should.equal(true);
+            });
+        });
+
+        return describe("when other clients are still connected", function() {
+
+            beforeEach(function() {
+                this.RoomManager._clientsInRoom
+                    .withArgs(this.client, this.doc_id)
+                    .onFirstCall().returns(123)
+                    .onSecondCall().returns(122);
+                this.RoomManager._clientsInRoom
+                    .withArgs(this.client, this.other_doc_id)
+                    .onFirstCall().returns(123)
+                    .onSecondCall().returns(122);
+                this.RoomManager._clientsInRoom
+                    .withArgs(this.client, this.project_id)
+                    .onFirstCall().returns(123)
+                    .onSecondCall().returns(122);
+                this.RoomManager._clientAlreadyInRoom
+                    .withArgs(this.client, this.doc_id)
+                    .returns(true)
+                    .withArgs(this.client, this.other_doc_id)
+                    .returns(true)
+                    .withArgs(this.client, this.project_id)
+                    .returns(true);
+                return this.RoomManager.leaveProjectAndDocs(this.client);
+            });
+
+            it("should leave all the docs", function() {
+                this.client.leave.calledWithExactly(this.doc_id).should.equal(true);
+                return this.client.leave.calledWithExactly(this.other_doc_id).should.equal(true);
+            });
+
+            it("should leave the project", function() {
+                return this.client.leave.calledWithExactly(this.project_id).should.equal(true);
+            });
+
+            return it("should not emit any events", function() {
+                return this.RoomEvents.emit.called.should.equal(false);
+            });
+        });
+    }));
+});

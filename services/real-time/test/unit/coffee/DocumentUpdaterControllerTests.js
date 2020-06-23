@@ -1,153 +1,203 @@
-SandboxedModule = require('sandboxed-module')
-sinon = require('sinon')
-require('chai').should()
-modulePath = require('path').join __dirname, '../../../app/js/DocumentUpdaterController'
-MockClient = require "./helpers/MockClient"
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const SandboxedModule = require('sandboxed-module');
+const sinon = require('sinon');
+require('chai').should();
+const modulePath = require('path').join(__dirname, '../../../app/js/DocumentUpdaterController');
+const MockClient = require("./helpers/MockClient");
 
-describe "DocumentUpdaterController", ->
-	beforeEach ->
-		@project_id = "project-id-123"
-		@doc_id = "doc-id-123"
-		@callback = sinon.stub()
-		@io = { "mock": "socket.io" }
-		@rclient = []
-		@RoomEvents = { on: sinon.stub() }
-		@EditorUpdatesController = SandboxedModule.require modulePath, requires:
-			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
-			"settings-sharelatex": @settings =
-				redis:
-					documentupdater:
-						key_schema:
-							pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
+describe("DocumentUpdaterController", function() {
+	beforeEach(function() {
+		this.project_id = "project-id-123";
+		this.doc_id = "doc-id-123";
+		this.callback = sinon.stub();
+		this.io = { "mock": "socket.io" };
+		this.rclient = [];
+		this.RoomEvents = { on: sinon.stub() };
+		return this.EditorUpdatesController = SandboxedModule.require(modulePath, { requires: {
+			"logger-sharelatex": (this.logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }),
+			"settings-sharelatex": (this.settings = {
+				redis: {
+					documentupdater: {
+						key_schema: {
+							pendingUpdates({doc_id}) { return `PendingUpdates:${doc_id}`; }
+						}
+					},
 					pubsub: null
-			"redis-sharelatex" : @redis =
-				createClient: (name) =>
-					@rclient.push(rclientStub = {name:name})
-					return rclientStub
-			"./SafeJsonParse": @SafeJsonParse =
-				parse: (data, cb) => cb null, JSON.parse(data)
-			"./EventLogger": @EventLogger = {checkEventOrder: sinon.stub()}
-			"./HealthCheckManager": {check: sinon.stub()}
-			"metrics-sharelatex": @metrics = {inc: sinon.stub()}
-			"./RoomManager" : @RoomManager = { eventSource: sinon.stub().returns @RoomEvents}
-			"./ChannelManager": @ChannelManager = {}
+				}
+			}),
+			"redis-sharelatex" : (this.redis = {
+				createClient: name => {
+					let rclientStub;
+					this.rclient.push(rclientStub = {name});
+					return rclientStub;
+				}
+			}),
+			"./SafeJsonParse": (this.SafeJsonParse =
+				{parse: (data, cb) => cb(null, JSON.parse(data))}),
+			"./EventLogger": (this.EventLogger = {checkEventOrder: sinon.stub()}),
+			"./HealthCheckManager": {check: sinon.stub()},
+			"metrics-sharelatex": (this.metrics = {inc: sinon.stub()}),
+			"./RoomManager" : (this.RoomManager = { eventSource: sinon.stub().returns(this.RoomEvents)}),
+			"./ChannelManager": (this.ChannelManager = {})
+		}
+	});});
 
-	describe "listenForUpdatesFromDocumentUpdater", ->
-		beforeEach ->
-			@rclient.length = 0  # clear any existing clients
-			@EditorUpdatesController.rclientList = [@redis.createClient("first"), @redis.createClient("second")]
-			@rclient[0].subscribe = sinon.stub()
-			@rclient[0].on = sinon.stub()
-			@rclient[1].subscribe = sinon.stub()
-			@rclient[1].on = sinon.stub()
-			@EditorUpdatesController.listenForUpdatesFromDocumentUpdater()
+	describe("listenForUpdatesFromDocumentUpdater", function() {
+		beforeEach(function() {
+			this.rclient.length = 0;  // clear any existing clients
+			this.EditorUpdatesController.rclientList = [this.redis.createClient("first"), this.redis.createClient("second")];
+			this.rclient[0].subscribe = sinon.stub();
+			this.rclient[0].on = sinon.stub();
+			this.rclient[1].subscribe = sinon.stub();
+			this.rclient[1].on = sinon.stub();
+			return this.EditorUpdatesController.listenForUpdatesFromDocumentUpdater();
+		});
 		
-		it "should subscribe to the doc-updater stream", ->
-			@rclient[0].subscribe.calledWith("applied-ops").should.equal true
+		it("should subscribe to the doc-updater stream", function() {
+			return this.rclient[0].subscribe.calledWith("applied-ops").should.equal(true);
+		});
 
-		it "should register a callback to handle updates", ->
-			@rclient[0].on.calledWith("message").should.equal true
+		it("should register a callback to handle updates", function() {
+			return this.rclient[0].on.calledWith("message").should.equal(true);
+		});
 
-		it "should subscribe to any additional doc-updater stream", ->
-			@rclient[1].subscribe.calledWith("applied-ops").should.equal true
-			@rclient[1].on.calledWith("message").should.equal true
+		return it("should subscribe to any additional doc-updater stream", function() {
+			this.rclient[1].subscribe.calledWith("applied-ops").should.equal(true);
+			return this.rclient[1].on.calledWith("message").should.equal(true);
+		});
+	});
 
-	describe "_processMessageFromDocumentUpdater", ->
-		describe "with bad JSON", ->
-			beforeEach ->
-				@SafeJsonParse.parse = sinon.stub().callsArgWith 1, new Error("oops")
-				@EditorUpdatesController._processMessageFromDocumentUpdater @io, "applied-ops", "blah"
+	describe("_processMessageFromDocumentUpdater", function() {
+		describe("with bad JSON", function() {
+			beforeEach(function() {
+				this.SafeJsonParse.parse = sinon.stub().callsArgWith(1, new Error("oops"));
+				return this.EditorUpdatesController._processMessageFromDocumentUpdater(this.io, "applied-ops", "blah");
+			});
 			
-			it "should log an error", ->
-				@logger.error.called.should.equal true
+			return it("should log an error", function() {
+				return this.logger.error.called.should.equal(true);
+			});
+		});
 
-		describe "with update", ->
-			beforeEach ->
-				@message =
-					doc_id: @doc_id
+		describe("with update", function() {
+			beforeEach(function() {
+				this.message = {
+					doc_id: this.doc_id,
 					op: {t: "foo", p: 12}
-				@EditorUpdatesController._applyUpdateFromDocumentUpdater = sinon.stub()
-				@EditorUpdatesController._processMessageFromDocumentUpdater @io, "applied-ops", JSON.stringify(@message)
+				};
+				this.EditorUpdatesController._applyUpdateFromDocumentUpdater = sinon.stub();
+				return this.EditorUpdatesController._processMessageFromDocumentUpdater(this.io, "applied-ops", JSON.stringify(this.message));
+			});
 
-			it "should apply the update", ->
-				@EditorUpdatesController._applyUpdateFromDocumentUpdater
-					.calledWith(@io, @doc_id, @message.op)
-					.should.equal true
+			return it("should apply the update", function() {
+				return this.EditorUpdatesController._applyUpdateFromDocumentUpdater
+					.calledWith(this.io, this.doc_id, this.message.op)
+					.should.equal(true);
+			});
+		});
 
-		describe "with error", ->
-			beforeEach ->
-				@message =
-					doc_id: @doc_id
+		return describe("with error", function() {
+			beforeEach(function() {
+				this.message = {
+					doc_id: this.doc_id,
 					error: "Something went wrong"
-				@EditorUpdatesController._processErrorFromDocumentUpdater = sinon.stub()
-				@EditorUpdatesController._processMessageFromDocumentUpdater @io, "applied-ops", JSON.stringify(@message)
+				};
+				this.EditorUpdatesController._processErrorFromDocumentUpdater = sinon.stub();
+				return this.EditorUpdatesController._processMessageFromDocumentUpdater(this.io, "applied-ops", JSON.stringify(this.message));
+			});
 
-			it "should process the error", ->
-				@EditorUpdatesController._processErrorFromDocumentUpdater
-					.calledWith(@io, @doc_id, @message.error)
-					.should.equal true
+			return it("should process the error", function() {
+				return this.EditorUpdatesController._processErrorFromDocumentUpdater
+					.calledWith(this.io, this.doc_id, this.message.error)
+					.should.equal(true);
+			});
+		});
+	});
 
-	describe "_applyUpdateFromDocumentUpdater", ->
-		beforeEach ->
-			@sourceClient = new MockClient()
-			@otherClients = [new MockClient(), new MockClient()]
-			@update =
-				op: [ t: "foo", p: 12 ]
-				meta: source: @sourceClient.publicId
-				v: @version = 42
-				doc: @doc_id
-			@io.sockets =
-				clients: sinon.stub().returns([@sourceClient, @otherClients..., @sourceClient]) # include a duplicate client
+	describe("_applyUpdateFromDocumentUpdater", function() {
+		beforeEach(function() {
+			this.sourceClient = new MockClient();
+			this.otherClients = [new MockClient(), new MockClient()];
+			this.update = {
+				op: [ {t: "foo", p: 12} ],
+				meta: { source: this.sourceClient.publicId
+			},
+				v: (this.version = 42),
+				doc: this.doc_id
+			};
+			return this.io.sockets =
+				{clients: sinon.stub().returns([this.sourceClient, ...Array.from(this.otherClients), this.sourceClient])};
+		}); // include a duplicate client
 		
-		describe "normally", ->
-			beforeEach ->
-				@EditorUpdatesController._applyUpdateFromDocumentUpdater @io, @doc_id, @update
+		describe("normally", function() {
+			beforeEach(function() {
+				return this.EditorUpdatesController._applyUpdateFromDocumentUpdater(this.io, this.doc_id, this.update);
+			});
 
-			it "should send a version bump to the source client", ->
-				@sourceClient.emit
-					.calledWith("otUpdateApplied", v: @version, doc: @doc_id)
-					.should.equal true
-				@sourceClient.emit.calledOnce.should.equal true
+			it("should send a version bump to the source client", function() {
+				this.sourceClient.emit
+					.calledWith("otUpdateApplied", {v: this.version, doc: this.doc_id})
+					.should.equal(true);
+				return this.sourceClient.emit.calledOnce.should.equal(true);
+			});
 
-			it "should get the clients connected to the document", ->
-				@io.sockets.clients
-					.calledWith(@doc_id)
-					.should.equal true
+			it("should get the clients connected to the document", function() {
+				return this.io.sockets.clients
+					.calledWith(this.doc_id)
+					.should.equal(true);
+			});
 
-			it "should send the full update to the other clients", ->
-				for client in @otherClients
+			return it("should send the full update to the other clients", function() {
+				return Array.from(this.otherClients).map((client) =>
 					client.emit
-						.calledWith("otUpdateApplied", @update)
-						.should.equal true
+						.calledWith("otUpdateApplied", this.update)
+						.should.equal(true));
+			});
+		});
 		
-		describe "with a duplicate op", ->
-			beforeEach ->
-				@update.dup = true
-				@EditorUpdatesController._applyUpdateFromDocumentUpdater @io, @doc_id, @update
+		return describe("with a duplicate op", function() {
+			beforeEach(function() {
+				this.update.dup = true;
+				return this.EditorUpdatesController._applyUpdateFromDocumentUpdater(this.io, this.doc_id, this.update);
+			});
 			
-			it "should send a version bump to the source client as usual", ->
-				@sourceClient.emit
-					.calledWith("otUpdateApplied", v: @version, doc: @doc_id)
-					.should.equal true
+			it("should send a version bump to the source client as usual", function() {
+				return this.sourceClient.emit
+					.calledWith("otUpdateApplied", {v: this.version, doc: this.doc_id})
+					.should.equal(true);
+			});
 
-			it "should not send anything to the other clients (they've already had the op)", ->
-				for client in @otherClients
+			return it("should not send anything to the other clients (they've already had the op)", function() {
+				return Array.from(this.otherClients).map((client) =>
 					client.emit
 						.calledWith("otUpdateApplied")
-						.should.equal false
+						.should.equal(false));
+			});
+		});
+	});
 
-	describe "_processErrorFromDocumentUpdater", ->
-		beforeEach ->
-			@clients = [new MockClient(), new MockClient()]
-			@io.sockets =
-				clients: sinon.stub().returns(@clients)
-			@EditorUpdatesController._processErrorFromDocumentUpdater @io, @doc_id, "Something went wrong"
+	return describe("_processErrorFromDocumentUpdater", function() {
+		beforeEach(function() {
+			this.clients = [new MockClient(), new MockClient()];
+			this.io.sockets =
+				{clients: sinon.stub().returns(this.clients)};
+			return this.EditorUpdatesController._processErrorFromDocumentUpdater(this.io, this.doc_id, "Something went wrong");
+		});
 
-		it "should log a warning", ->
-			@logger.warn.called.should.equal true
+		it("should log a warning", function() {
+			return this.logger.warn.called.should.equal(true);
+		});
 
-		it "should disconnect all clients in that document", ->
-			@io.sockets.clients.calledWith(@doc_id).should.equal true
-			for client in @clients
-				client.disconnect.called.should.equal true
+		return it("should disconnect all clients in that document", function() {
+			this.io.sockets.clients.calledWith(this.doc_id).should.equal(true);
+			return Array.from(this.clients).map((client) =>
+				client.disconnect.called.should.equal(true));
+		});
+	});
+});
 

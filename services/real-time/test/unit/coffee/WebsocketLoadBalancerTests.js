@@ -1,161 +1,204 @@
-SandboxedModule = require('sandboxed-module')
-sinon = require('sinon')
-require('chai').should()
-modulePath = require('path').join __dirname, '../../../app/js/WebsocketLoadBalancer'
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const SandboxedModule = require('sandboxed-module');
+const sinon = require('sinon');
+require('chai').should();
+const modulePath = require('path').join(__dirname, '../../../app/js/WebsocketLoadBalancer');
 
-describe "WebsocketLoadBalancer", ->
-	beforeEach ->
-		@rclient = {}
-		@RoomEvents = {on: sinon.stub()}
-		@WebsocketLoadBalancer = SandboxedModule.require modulePath, requires:
-			"./RedisClientManager":
+describe("WebsocketLoadBalancer", function() {
+	beforeEach(function() {
+		this.rclient = {};
+		this.RoomEvents = {on: sinon.stub()};
+		this.WebsocketLoadBalancer = SandboxedModule.require(modulePath, { requires: {
+			"./RedisClientManager": {
 				createClientList: () => []
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
-			"./SafeJsonParse": @SafeJsonParse =
-				parse: (data, cb) => cb null, JSON.parse(data)
-			"./EventLogger": {checkEventOrder: sinon.stub()}
-			"./HealthCheckManager": {check: sinon.stub()}
-			"./RoomManager" : @RoomManager = {eventSource: sinon.stub().returns @RoomEvents}
-			"./ChannelManager": @ChannelManager = {publish: sinon.stub()}
-			"./ConnectedUsersManager": @ConnectedUsersManager = {refreshClient: sinon.stub()}
-		@io = {}
-		@WebsocketLoadBalancer.rclientPubList = [{publish: sinon.stub()}]
-		@WebsocketLoadBalancer.rclientSubList = [{
-			subscribe: sinon.stub()
+			},
+			"logger-sharelatex": (this.logger = { log: sinon.stub(), error: sinon.stub() }),
+			"./SafeJsonParse": (this.SafeJsonParse =
+				{parse: (data, cb) => cb(null, JSON.parse(data))}),
+			"./EventLogger": {checkEventOrder: sinon.stub()},
+			"./HealthCheckManager": {check: sinon.stub()},
+			"./RoomManager" : (this.RoomManager = {eventSource: sinon.stub().returns(this.RoomEvents)}),
+			"./ChannelManager": (this.ChannelManager = {publish: sinon.stub()}),
+			"./ConnectedUsersManager": (this.ConnectedUsersManager = {refreshClient: sinon.stub()})
+		}
+	});
+		this.io = {};
+		this.WebsocketLoadBalancer.rclientPubList = [{publish: sinon.stub()}];
+		this.WebsocketLoadBalancer.rclientSubList = [{
+			subscribe: sinon.stub(),
 			on: sinon.stub()
-		}]
+		}];
 
-		@room_id = "room-id"
-		@message = "otUpdateApplied"
-		@payload = ["argument one", 42]
+		this.room_id = "room-id";
+		this.message = "otUpdateApplied";
+		return this.payload = ["argument one", 42];});
 
-	describe "emitToRoom", ->
-		beforeEach ->
-			@WebsocketLoadBalancer.emitToRoom(@room_id, @message, @payload...)
+	describe("emitToRoom", function() {
+		beforeEach(function() {
+			return this.WebsocketLoadBalancer.emitToRoom(this.room_id, this.message, ...Array.from(this.payload));
+		});
 
-		it "should publish the message to redis", ->
-			@ChannelManager.publish
-				.calledWith(@WebsocketLoadBalancer.rclientPubList[0], "editor-events", @room_id, JSON.stringify(
-					room_id: @room_id,
-					message: @message
-					payload: @payload
-				))
-				.should.equal true
+		return it("should publish the message to redis", function() {
+			return this.ChannelManager.publish
+				.calledWith(this.WebsocketLoadBalancer.rclientPubList[0], "editor-events", this.room_id, JSON.stringify({
+					room_id: this.room_id,
+					message: this.message,
+					payload: this.payload
+				}))
+				.should.equal(true);
+		});
+	});
 
-	describe "emitToAll", ->
-		beforeEach ->
-			@WebsocketLoadBalancer.emitToRoom = sinon.stub()
-			@WebsocketLoadBalancer.emitToAll @message, @payload...
+	describe("emitToAll", function() {
+		beforeEach(function() {
+			this.WebsocketLoadBalancer.emitToRoom = sinon.stub();
+			return this.WebsocketLoadBalancer.emitToAll(this.message, ...Array.from(this.payload));
+		});
 
-		it "should emit to the room 'all'", ->
-			@WebsocketLoadBalancer.emitToRoom
-				.calledWith("all", @message, @payload...)
-				.should.equal true
+		return it("should emit to the room 'all'", function() {
+			return this.WebsocketLoadBalancer.emitToRoom
+				.calledWith("all", this.message, ...Array.from(this.payload))
+				.should.equal(true);
+		});
+	});
 
-	describe "listenForEditorEvents", ->
-		beforeEach ->
-			@WebsocketLoadBalancer._processEditorEvent = sinon.stub()
-			@WebsocketLoadBalancer.listenForEditorEvents()
+	describe("listenForEditorEvents", function() {
+		beforeEach(function() {
+			this.WebsocketLoadBalancer._processEditorEvent = sinon.stub();
+			return this.WebsocketLoadBalancer.listenForEditorEvents();
+		});
 
-		it "should subscribe to the editor-events channel", ->
-			@WebsocketLoadBalancer.rclientSubList[0].subscribe
+		it("should subscribe to the editor-events channel", function() {
+			return this.WebsocketLoadBalancer.rclientSubList[0].subscribe
 				.calledWith("editor-events")
-				.should.equal true
+				.should.equal(true);
+		});
 
-		it "should process the events with _processEditorEvent", ->
-			@WebsocketLoadBalancer.rclientSubList[0].on
+		return it("should process the events with _processEditorEvent", function() {
+			return this.WebsocketLoadBalancer.rclientSubList[0].on
 				.calledWith("message", sinon.match.func)
-				.should.equal true
+				.should.equal(true);
+		});
+	});
 
-	describe "_processEditorEvent", ->
-		describe "with bad JSON", ->
-			beforeEach ->
-				@isRestrictedUser = false
-				@SafeJsonParse.parse = sinon.stub().callsArgWith 1, new Error("oops")
-				@WebsocketLoadBalancer._processEditorEvent(@io, "editor-events", "blah")
+	return describe("_processEditorEvent", function() {
+		describe("with bad JSON", function() {
+			beforeEach(function() {
+				this.isRestrictedUser = false;
+				this.SafeJsonParse.parse = sinon.stub().callsArgWith(1, new Error("oops"));
+				return this.WebsocketLoadBalancer._processEditorEvent(this.io, "editor-events", "blah");
+			});
 
-			it "should log an error", ->
-				@logger.error.called.should.equal true
+			return it("should log an error", function() {
+				return this.logger.error.called.should.equal(true);
+			});
+		});
 
-		describe "with a designated room", ->
-			beforeEach ->
-				@io.sockets =
+		describe("with a designated room", function() {
+			beforeEach(function() {
+				this.io.sockets = {
 					clients: sinon.stub().returns([
-						{id: 'client-id-1', emit: @emit1 = sinon.stub(), ol_context: {}}
-						{id: 'client-id-2', emit: @emit2 = sinon.stub(), ol_context: {}}
-						{id: 'client-id-1', emit: @emit3 = sinon.stub(), ol_context: {}} # duplicate client
+						{id: 'client-id-1', emit: (this.emit1 = sinon.stub()), ol_context: {}},
+						{id: 'client-id-2', emit: (this.emit2 = sinon.stub()), ol_context: {}},
+						{id: 'client-id-1', emit: (this.emit3 = sinon.stub()), ol_context: {}} // duplicate client
 					])
-				data = JSON.stringify
-					room_id: @room_id
-					message: @message
-					payload: @payload
-				@WebsocketLoadBalancer._processEditorEvent(@io, "editor-events", data)
+				};
+				const data = JSON.stringify({
+					room_id: this.room_id,
+					message: this.message,
+					payload: this.payload
+				});
+				return this.WebsocketLoadBalancer._processEditorEvent(this.io, "editor-events", data);
+			});
 
-			it "should send the message to all (unique) clients in the room", ->
-				@io.sockets.clients
-					.calledWith(@room_id)
-					.should.equal true
-				@emit1.calledWith(@message, @payload...).should.equal true
-				@emit2.calledWith(@message, @payload...).should.equal true
-				@emit3.called.should.equal false # duplicate client should be ignored
+			return it("should send the message to all (unique) clients in the room", function() {
+				this.io.sockets.clients
+					.calledWith(this.room_id)
+					.should.equal(true);
+				this.emit1.calledWith(this.message, ...Array.from(this.payload)).should.equal(true);
+				this.emit2.calledWith(this.message, ...Array.from(this.payload)).should.equal(true);
+				return this.emit3.called.should.equal(false);
+			});
+		}); // duplicate client should be ignored
 
-		describe "with a designated room, and restricted clients, not restricted message", ->
-			beforeEach ->
-				@io.sockets =
+		describe("with a designated room, and restricted clients, not restricted message", function() {
+			beforeEach(function() {
+				this.io.sockets = {
 					clients: sinon.stub().returns([
-						{id: 'client-id-1', emit: @emit1 = sinon.stub(), ol_context: {}}
-						{id: 'client-id-2', emit: @emit2 = sinon.stub(), ol_context: {}}
-						{id: 'client-id-1', emit: @emit3 = sinon.stub(), ol_context: {}} # duplicate client
-						{id: 'client-id-4', emit: @emit4 = sinon.stub(), ol_context: {is_restricted_user: true}}
+						{id: 'client-id-1', emit: (this.emit1 = sinon.stub()), ol_context: {}},
+						{id: 'client-id-2', emit: (this.emit2 = sinon.stub()), ol_context: {}},
+						{id: 'client-id-1', emit: (this.emit3 = sinon.stub()), ol_context: {}}, // duplicate client
+						{id: 'client-id-4', emit: (this.emit4 = sinon.stub()), ol_context: {is_restricted_user: true}}
 					])
-				data = JSON.stringify
-					room_id: @room_id
-					message: @message
-					payload: @payload
-				@WebsocketLoadBalancer._processEditorEvent(@io, "editor-events", data)
+				};
+				const data = JSON.stringify({
+					room_id: this.room_id,
+					message: this.message,
+					payload: this.payload
+				});
+				return this.WebsocketLoadBalancer._processEditorEvent(this.io, "editor-events", data);
+			});
 
-			it "should send the message to all (unique) clients in the room", ->
-				@io.sockets.clients
-					.calledWith(@room_id)
-					.should.equal true
-				@emit1.calledWith(@message, @payload...).should.equal true
-				@emit2.calledWith(@message, @payload...).should.equal true
-				@emit3.called.should.equal false # duplicate client should be ignored
-				@emit4.called.should.equal true  # restricted client, but should be called
+			return it("should send the message to all (unique) clients in the room", function() {
+				this.io.sockets.clients
+					.calledWith(this.room_id)
+					.should.equal(true);
+				this.emit1.calledWith(this.message, ...Array.from(this.payload)).should.equal(true);
+				this.emit2.calledWith(this.message, ...Array.from(this.payload)).should.equal(true);
+				this.emit3.called.should.equal(false); // duplicate client should be ignored
+				return this.emit4.called.should.equal(true);
+			});
+		});  // restricted client, but should be called
 
-		describe "with a designated room, and restricted clients, restricted message", ->
-			beforeEach ->
-				@io.sockets =
+		describe("with a designated room, and restricted clients, restricted message", function() {
+			beforeEach(function() {
+				this.io.sockets = {
 					clients: sinon.stub().returns([
-						{id: 'client-id-1', emit: @emit1 = sinon.stub(), ol_context: {}}
-						{id: 'client-id-2', emit: @emit2 = sinon.stub(), ol_context: {}}
-						{id: 'client-id-1', emit: @emit3 = sinon.stub(), ol_context: {}} # duplicate client
-						{id: 'client-id-4', emit: @emit4 = sinon.stub(), ol_context: {is_restricted_user: true}}
+						{id: 'client-id-1', emit: (this.emit1 = sinon.stub()), ol_context: {}},
+						{id: 'client-id-2', emit: (this.emit2 = sinon.stub()), ol_context: {}},
+						{id: 'client-id-1', emit: (this.emit3 = sinon.stub()), ol_context: {}}, // duplicate client
+						{id: 'client-id-4', emit: (this.emit4 = sinon.stub()), ol_context: {is_restricted_user: true}}
 					])
-				data = JSON.stringify
-					room_id: @room_id
-					message: @restrictedMessage = 'new-comment'
-					payload: @payload
-				@WebsocketLoadBalancer._processEditorEvent(@io, "editor-events", data)
+				};
+				const data = JSON.stringify({
+					room_id: this.room_id,
+					message: (this.restrictedMessage = 'new-comment'),
+					payload: this.payload
+				});
+				return this.WebsocketLoadBalancer._processEditorEvent(this.io, "editor-events", data);
+			});
 
-			it "should send the message to all (unique) clients in the room, who are not restricted", ->
-				@io.sockets.clients
-					.calledWith(@room_id)
-					.should.equal true
-				@emit1.calledWith(@restrictedMessage, @payload...).should.equal true
-				@emit2.calledWith(@restrictedMessage, @payload...).should.equal true
-				@emit3.called.should.equal false # duplicate client should be ignored
-				@emit4.called.should.equal false # restricted client, should not be called
+			return it("should send the message to all (unique) clients in the room, who are not restricted", function() {
+				this.io.sockets.clients
+					.calledWith(this.room_id)
+					.should.equal(true);
+				this.emit1.calledWith(this.restrictedMessage, ...Array.from(this.payload)).should.equal(true);
+				this.emit2.calledWith(this.restrictedMessage, ...Array.from(this.payload)).should.equal(true);
+				this.emit3.called.should.equal(false); // duplicate client should be ignored
+				return this.emit4.called.should.equal(false);
+			});
+		}); // restricted client, should not be called
 
-		describe "when emitting to all", ->
-			beforeEach ->
-				@io.sockets =
-					emit: @emit = sinon.stub()
-				data = JSON.stringify
-					room_id: "all"
-					message: @message
-					payload: @payload
-				@WebsocketLoadBalancer._processEditorEvent(@io, "editor-events", data)
+		return describe("when emitting to all", function() {
+			beforeEach(function() {
+				this.io.sockets =
+					{emit: (this.emit = sinon.stub())};
+				const data = JSON.stringify({
+					room_id: "all",
+					message: this.message,
+					payload: this.payload
+				});
+				return this.WebsocketLoadBalancer._processEditorEvent(this.io, "editor-events", data);
+			});
 
-			it "should send the message to all clients", ->
-				@emit.calledWith(@message, @payload...).should.equal true
+			return it("should send the message to all clients", function() {
+				return this.emit.calledWith(this.message, ...Array.from(this.payload)).should.equal(true);
+			});
+		});
+	});
+});

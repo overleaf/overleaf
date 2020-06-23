@@ -1,126 +1,170 @@
-{EventEmitter} = require('events')
-{expect} = require('chai')
-SandboxedModule = require('sandboxed-module')
-modulePath = '../../../app/js/SessionSockets'
-sinon = require('sinon')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const {EventEmitter} = require('events');
+const {expect} = require('chai');
+const SandboxedModule = require('sandboxed-module');
+const modulePath = '../../../app/js/SessionSockets';
+const sinon = require('sinon');
 
-describe 'SessionSockets', ->
-	before ->
-		@SessionSocketsModule = SandboxedModule.require modulePath
-		@io = new EventEmitter()
-		@id1 = Math.random().toString()
-		@id2 = Math.random().toString()
-		redisResponses =
-			error: [new Error('Redis: something went wrong'), null]
+describe('SessionSockets', function() {
+	before(function() {
+		this.SessionSocketsModule = SandboxedModule.require(modulePath);
+		this.io = new EventEmitter();
+		this.id1 = Math.random().toString();
+		this.id2 = Math.random().toString();
+		const redisResponses = {
+			error: [new Error('Redis: something went wrong'), null],
 			unknownId: [null, null]
-		redisResponses[@id1] = [null, {user: {_id: '123'}}]
-		redisResponses[@id2] = [null, {user: {_id: 'abc'}}]
+		};
+		redisResponses[this.id1] = [null, {user: {_id: '123'}}];
+		redisResponses[this.id2] = [null, {user: {_id: 'abc'}}];
 
-		@sessionStore =
-			get: sinon.stub().callsFake (id, fn) ->
-				fn.apply(null, redisResponses[id])
-		@cookieParser = (req, res, next) ->
-			req.signedCookies = req._signedCookies
-			next()
-		@SessionSockets = @SessionSocketsModule(@io, @sessionStore, @cookieParser, 'ol.sid')
-		@checkSocket = (socket, fn) =>
-			@SessionSockets.once('connection', fn)
-			@io.emit('connection', socket)
+		this.sessionStore = {
+			get: sinon.stub().callsFake((id, fn) => fn.apply(null, redisResponses[id]))
+		};
+		this.cookieParser = function(req, res, next) {
+			req.signedCookies = req._signedCookies;
+			return next();
+		};
+		this.SessionSockets = this.SessionSocketsModule(this.io, this.sessionStore, this.cookieParser, 'ol.sid');
+		return this.checkSocket = (socket, fn) => {
+			this.SessionSockets.once('connection', fn);
+			return this.io.emit('connection', socket);
+		};
+	});
 
-	describe 'without cookies', ->
-		before ->
-			@socket = {handshake: {}}
+	describe('without cookies', function() {
+		before(function() {
+			return this.socket = {handshake: {}};});
 
-		it 'should return a lookup error', (done) ->
-			@checkSocket @socket, (error) ->
-				expect(error).to.exist
-				expect(error.message).to.equal('could not look up session by key')
-				done()
+		it('should return a lookup error', function(done) {
+			return this.checkSocket(this.socket, function(error) {
+				expect(error).to.exist;
+				expect(error.message).to.equal('could not look up session by key');
+				return done();
+			});
+		});
 
-		it 'should not query redis', (done) ->
-			@checkSocket @socket, () =>
-				expect(@sessionStore.get.called).to.equal(false)
-				done()
+		return it('should not query redis', function(done) {
+			return this.checkSocket(this.socket, () => {
+				expect(this.sessionStore.get.called).to.equal(false);
+				return done();
+			});
+		});
+	});
 
-	describe 'with a different cookie', ->
-		before ->
-			@socket = {handshake: {_signedCookies: {other: 1}}}
+	describe('with a different cookie', function() {
+		before(function() {
+			return this.socket = {handshake: {_signedCookies: {other: 1}}};});
 
-		it 'should return a lookup error', (done) ->
-			@checkSocket @socket, (error) ->
-				expect(error).to.exist
-				expect(error.message).to.equal('could not look up session by key')
-				done()
+		it('should return a lookup error', function(done) {
+			return this.checkSocket(this.socket, function(error) {
+				expect(error).to.exist;
+				expect(error.message).to.equal('could not look up session by key');
+				return done();
+			});
+		});
 
-		it 'should not query redis', (done) ->
-			@checkSocket @socket, () =>
-				expect(@sessionStore.get.called).to.equal(false)
-				done()
+		return it('should not query redis', function(done) {
+			return this.checkSocket(this.socket, () => {
+				expect(this.sessionStore.get.called).to.equal(false);
+				return done();
+			});
+		});
+	});
 
-	describe 'with a valid cookie and a failing session lookup', ->
-		before ->
-			@socket = {handshake: {_signedCookies: {'ol.sid': 'error'}}}
+	describe('with a valid cookie and a failing session lookup', function() {
+		before(function() {
+			return this.socket = {handshake: {_signedCookies: {'ol.sid': 'error'}}};});
 
-		it 'should query redis', (done) ->
-			@checkSocket @socket, () =>
-				expect(@sessionStore.get.called).to.equal(true)
-				done()
+		it('should query redis', function(done) {
+			return this.checkSocket(this.socket, () => {
+				expect(this.sessionStore.get.called).to.equal(true);
+				return done();
+			});
+		});
 
-		it 'should return a redis error', (done) ->
-			@checkSocket @socket, (error) ->
-				expect(error).to.exist
-				expect(error.message).to.equal('Redis: something went wrong')
-				done()
+		return it('should return a redis error', function(done) {
+			return this.checkSocket(this.socket, function(error) {
+				expect(error).to.exist;
+				expect(error.message).to.equal('Redis: something went wrong');
+				return done();
+			});
+		});
+	});
 
-	describe 'with a valid cookie and no matching session', ->
-		before ->
-			@socket = {handshake: {_signedCookies: {'ol.sid': 'unknownId'}}}
+	describe('with a valid cookie and no matching session', function() {
+		before(function() {
+			return this.socket = {handshake: {_signedCookies: {'ol.sid': 'unknownId'}}};});
 
-		it 'should query redis', (done) ->
-			@checkSocket @socket, () =>
-				expect(@sessionStore.get.called).to.equal(true)
-				done()
+		it('should query redis', function(done) {
+			return this.checkSocket(this.socket, () => {
+				expect(this.sessionStore.get.called).to.equal(true);
+				return done();
+			});
+		});
 
-		it 'should return a lookup error', (done) ->
-			@checkSocket @socket, (error) ->
-				expect(error).to.exist
-				expect(error.message).to.equal('could not look up session by key')
-				done()
+		return it('should return a lookup error', function(done) {
+			return this.checkSocket(this.socket, function(error) {
+				expect(error).to.exist;
+				expect(error.message).to.equal('could not look up session by key');
+				return done();
+			});
+		});
+	});
 
-	describe 'with a valid cookie and a matching session', ->
-		before ->
-			@socket = {handshake: {_signedCookies: {'ol.sid': @id1}}}
+	describe('with a valid cookie and a matching session', function() {
+		before(function() {
+			return this.socket = {handshake: {_signedCookies: {'ol.sid': this.id1}}};});
 
-		it 'should query redis', (done) ->
-			@checkSocket @socket, () =>
-				expect(@sessionStore.get.called).to.equal(true)
-				done()
+		it('should query redis', function(done) {
+			return this.checkSocket(this.socket, () => {
+				expect(this.sessionStore.get.called).to.equal(true);
+				return done();
+			});
+		});
 
-		it 'should not return an error', (done) ->
-			@checkSocket @socket, (error) ->
-				expect(error).to.not.exist
-				done()
+		it('should not return an error', function(done) {
+			return this.checkSocket(this.socket, function(error) {
+				expect(error).to.not.exist;
+				return done();
+			});
+		});
 
-		it 'should return the session', (done) ->
-			@checkSocket @socket, (error, s, session) ->
-				expect(session).to.deep.equal({user: {_id: '123'}})
-				done()
+		return it('should return the session', function(done) {
+			return this.checkSocket(this.socket, function(error, s, session) {
+				expect(session).to.deep.equal({user: {_id: '123'}});
+				return done();
+			});
+		});
+	});
 
-	describe 'with a different valid cookie and matching session', ->
-		before ->
-			@socket = {handshake: {_signedCookies: {'ol.sid': @id2}}}
+	return describe('with a different valid cookie and matching session', function() {
+		before(function() {
+			return this.socket = {handshake: {_signedCookies: {'ol.sid': this.id2}}};});
 
-		it 'should query redis', (done) ->
-			@checkSocket @socket, () =>
-				expect(@sessionStore.get.called).to.equal(true)
-				done()
+		it('should query redis', function(done) {
+			return this.checkSocket(this.socket, () => {
+				expect(this.sessionStore.get.called).to.equal(true);
+				return done();
+			});
+		});
 
-		it 'should not return an error', (done) ->
-			@checkSocket @socket, (error) ->
-				expect(error).to.not.exist
-				done()
+		it('should not return an error', function(done) {
+			return this.checkSocket(this.socket, function(error) {
+				expect(error).to.not.exist;
+				return done();
+			});
+		});
 
-		it 'should return the other session', (done) ->
-			@checkSocket @socket, (error, s, session) ->
-				expect(session).to.deep.equal({user: {_id: 'abc'}})
-				done()
+		return it('should return the other session', function(done) {
+			return this.checkSocket(this.socket, function(error, s, session) {
+				expect(session).to.deep.equal({user: {_id: 'abc'}});
+				return done();
+			});
+		});
+	});
+});

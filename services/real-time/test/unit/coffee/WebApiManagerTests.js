@@ -1,84 +1,111 @@
-chai = require('chai')
-should = chai.should()
-sinon = require("sinon")
-modulePath = "../../../app/js/WebApiManager.js"
-SandboxedModule = require('sandboxed-module')
-{ CodedError } = require('../../../app/js/Errors')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const chai = require('chai');
+const should = chai.should();
+const sinon = require("sinon");
+const modulePath = "../../../app/js/WebApiManager.js";
+const SandboxedModule = require('sandboxed-module');
+const { CodedError } = require('../../../app/js/Errors');
 
-describe 'WebApiManager', ->
-	beforeEach ->
-		@project_id = "project-id-123"
-		@user_id = "user-id-123"
-		@user = {_id: @user_id}
-		@callback = sinon.stub()
-		@WebApiManager = SandboxedModule.require modulePath, requires:
-			"request": @request = {}
-			"settings-sharelatex": @settings =
-				apis:
-					web:
-						url: "http://web.example.com"
-						user: "username"
+describe('WebApiManager', function() {
+	beforeEach(function() {
+		this.project_id = "project-id-123";
+		this.user_id = "user-id-123";
+		this.user = {_id: this.user_id};
+		this.callback = sinon.stub();
+		return this.WebApiManager = SandboxedModule.require(modulePath, { requires: {
+			"request": (this.request = {}),
+			"settings-sharelatex": (this.settings = {
+				apis: {
+					web: {
+						url: "http://web.example.com",
+						user: "username",
 						pass: "password"
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+					}
+				}
+			}),
+			"logger-sharelatex": (this.logger = { log: sinon.stub(), error: sinon.stub() })
+		}
+	});});
 
-	describe "joinProject", ->
-		describe "successfully", ->
-			beforeEach ->
-				@response = {
-					project: { name: "Test project" }
+	return describe("joinProject", function() {
+		describe("successfully", function() {
+			beforeEach(function() {
+				this.response = {
+					project: { name: "Test project" },
 					privilegeLevel: "owner",
 					isRestrictedUser: true
-				}
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @response)
-				@WebApiManager.joinProject @project_id, @user, @callback
+				};
+				this.request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200}, this.response);
+				return this.WebApiManager.joinProject(this.project_id, this.user, this.callback);
+			});
 
-			it "should send a request to web to join the project", ->
-				@request.post
+			it("should send a request to web to join the project", function() {
+				return this.request.post
 					.calledWith({
-						url: "#{@settings.apis.web.url}/project/#{@project_id}/join"
-						qs:
-							user_id: @user_id
-						auth:
-							user: @settings.apis.web.user
-							pass: @settings.apis.web.pass
+						url: `${this.settings.apis.web.url}/project/${this.project_id}/join`,
+						qs: {
+							user_id: this.user_id
+						},
+						auth: {
+							user: this.settings.apis.web.user,
+							pass: this.settings.apis.web.pass,
 							sendImmediately: true
-						json: true
-						jar: false
+						},
+						json: true,
+						jar: false,
 						headers: {}
 					})
-					.should.equal true
+					.should.equal(true);
+			});
 
-			it "should return the project, privilegeLevel, and restricted flag", ->
-				@callback
-					.calledWith(null, @response.project, @response.privilegeLevel, @response.isRestrictedUser)
-					.should.equal true
+			return it("should return the project, privilegeLevel, and restricted flag", function() {
+				return this.callback
+					.calledWith(null, this.response.project, this.response.privilegeLevel, this.response.isRestrictedUser)
+					.should.equal(true);
+			});
+		});
 
-		describe "with an error from web", ->
-			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, null)
-				@WebApiManager.joinProject @project_id, @user_id, @callback
+		describe("with an error from web", function() {
+			beforeEach(function() {
+				this.request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, null);
+				return this.WebApiManager.joinProject(this.project_id, this.user_id, this.callback);
+			});
 
-			it "should call the callback with an error", ->
-				@callback
+			return it("should call the callback with an error", function() {
+				return this.callback
 					.calledWith(sinon.match({message: "non-success status code from web: 500"}))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
 
-		describe "with no data from web", ->
-			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200}, null)
-				@WebApiManager.joinProject @project_id, @user_id, @callback
+		describe("with no data from web", function() {
+			beforeEach(function() {
+				this.request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200}, null);
+				return this.WebApiManager.joinProject(this.project_id, this.user_id, this.callback);
+			});
 
-			it "should call the callback with an error", ->
-				@callback
+			return it("should call the callback with an error", function() {
+				return this.callback
 					.calledWith(sinon.match({message: "no data returned from joinProject request"}))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
 
-		describe "when the project is over its rate limit", ->
-			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 429}, null)
-				@WebApiManager.joinProject @project_id, @user_id, @callback
+		return describe("when the project is over its rate limit", function() {
+			beforeEach(function() {
+				this.request.post = sinon.stub().callsArgWith(1, null, {statusCode: 429}, null);
+				return this.WebApiManager.joinProject(this.project_id, this.user_id, this.callback);
+			});
 
-			it "should call the callback with a TooManyRequests error code", ->
-				@callback
+			return it("should call the callback with a TooManyRequests error code", function() {
+				return this.callback
 					.calledWith(sinon.match({message: "rate-limit hit when joining project", code: "TooManyRequests"}))
-					.should.equal true
+					.should.equal(true);
+			});
+		});
+	});
+});

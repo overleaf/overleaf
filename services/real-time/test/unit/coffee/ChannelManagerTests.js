@@ -1,220 +1,274 @@
-chai = require('chai')
-should = chai.should()
-expect = chai.expect
-sinon = require("sinon")
-modulePath = "../../../app/js/ChannelManager.js"
-SandboxedModule = require('sandboxed-module')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const chai = require('chai');
+const should = chai.should();
+const {
+    expect
+} = chai;
+const sinon = require("sinon");
+const modulePath = "../../../app/js/ChannelManager.js";
+const SandboxedModule = require('sandboxed-module');
 
-describe 'ChannelManager', ->
-	beforeEach ->
-		@rclient = {}
-		@other_rclient = {}
-		@ChannelManager = SandboxedModule.require modulePath, requires:
-			"settings-sharelatex": @settings = {}
-			"metrics-sharelatex": @metrics = {inc: sinon.stub(), summary: sinon.stub()}
-			"logger-sharelatex": @logger = { log: sinon.stub(), warn: sinon.stub(), error: sinon.stub() }
+describe('ChannelManager', function() {
+	beforeEach(function() {
+		this.rclient = {};
+		this.other_rclient = {};
+		return this.ChannelManager = SandboxedModule.require(modulePath, { requires: {
+			"settings-sharelatex": (this.settings = {}),
+			"metrics-sharelatex": (this.metrics = {inc: sinon.stub(), summary: sinon.stub()}),
+			"logger-sharelatex": (this.logger = { log: sinon.stub(), warn: sinon.stub(), error: sinon.stub() })
+		}
+	});});
 
-	describe "subscribe", ->
+	describe("subscribe", function() {
 
-		describe "when there is no existing subscription for this redis client", ->
-			beforeEach (done) ->
-				@rclient.subscribe = sinon.stub().resolves()
-				@ChannelManager.subscribe @rclient, "applied-ops", "1234567890abcdef"
-				setTimeout done
+		describe("when there is no existing subscription for this redis client", function() {
+			beforeEach(function(done) {
+				this.rclient.subscribe = sinon.stub().resolves();
+				this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				return setTimeout(done);
+			});
 
-			it "should subscribe to the redis channel", ->
-				@rclient.subscribe.calledWithExactly("applied-ops:1234567890abcdef").should.equal true
+			return it("should subscribe to the redis channel", function() {
+				return this.rclient.subscribe.calledWithExactly("applied-ops:1234567890abcdef").should.equal(true);
+			});
+		});
 
-		describe "when there is an existing subscription for this redis client", ->
-			beforeEach (done) ->
-				@rclient.subscribe = sinon.stub().resolves()
-				@ChannelManager.subscribe @rclient, "applied-ops", "1234567890abcdef"
-				@ChannelManager.subscribe @rclient, "applied-ops", "1234567890abcdef"
-				setTimeout done
+		describe("when there is an existing subscription for this redis client", function() {
+			beforeEach(function(done) {
+				this.rclient.subscribe = sinon.stub().resolves();
+				this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				return setTimeout(done);
+			});
 
-			it "should subscribe to the redis channel again", ->
-				@rclient.subscribe.callCount.should.equal 2
+			return it("should subscribe to the redis channel again", function() {
+				return this.rclient.subscribe.callCount.should.equal(2);
+			});
+		});
 
-		describe "when subscribe errors", ->
-			beforeEach (done) ->
-				@rclient.subscribe = sinon.stub()
+		describe("when subscribe errors", function() {
+			beforeEach(function(done) {
+				this.rclient.subscribe = sinon.stub()
 					.onFirstCall().rejects(new Error("some redis error"))
-					.onSecondCall().resolves()
-				p = @ChannelManager.subscribe @rclient, "applied-ops", "1234567890abcdef"
-				p.then () ->
-					done(new Error('should not subscribe but fail'))
-				.catch (err) =>
-					err.message.should.equal "some redis error"
-					@ChannelManager.getClientMapEntry(@rclient).has("applied-ops:1234567890abcdef").should.equal false
-					@ChannelManager.subscribe @rclient, "applied-ops", "1234567890abcdef"
-					# subscribe is wrapped in Promise, delay other assertions
-					setTimeout done
-				return null
+					.onSecondCall().resolves();
+				const p = this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				p.then(() => done(new Error('should not subscribe but fail'))).catch(err => {
+					err.message.should.equal("some redis error");
+					this.ChannelManager.getClientMapEntry(this.rclient).has("applied-ops:1234567890abcdef").should.equal(false);
+					this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
+					// subscribe is wrapped in Promise, delay other assertions
+					return setTimeout(done);
+				});
+				return null;
+			});
 
-			it "should have recorded the error", ->
-				expect(@metrics.inc.calledWithExactly("subscribe.failed.applied-ops")).to.equal(true)
+			it("should have recorded the error", function() {
+				return expect(this.metrics.inc.calledWithExactly("subscribe.failed.applied-ops")).to.equal(true);
+			});
 
-			it "should subscribe again", ->
-				@rclient.subscribe.callCount.should.equal 2
+			it("should subscribe again", function() {
+				return this.rclient.subscribe.callCount.should.equal(2);
+			});
 
-			it "should cleanup", ->
-				@ChannelManager.getClientMapEntry(@rclient).has("applied-ops:1234567890abcdef").should.equal false
+			return it("should cleanup", function() {
+				return this.ChannelManager.getClientMapEntry(this.rclient).has("applied-ops:1234567890abcdef").should.equal(false);
+			});
+		});
 
-		describe "when subscribe errors and the clientChannelMap entry was replaced", ->
-			beforeEach (done) ->
-				@rclient.subscribe = sinon.stub()
+		describe("when subscribe errors and the clientChannelMap entry was replaced", function() {
+			beforeEach(function(done) {
+				this.rclient.subscribe = sinon.stub()
 					.onFirstCall().rejects(new Error("some redis error"))
-					.onSecondCall().resolves()
-				@first = @ChannelManager.subscribe @rclient, "applied-ops", "1234567890abcdef"
-				# ignore error
-				@first.catch((()->))
-				expect(@ChannelManager.getClientMapEntry(@rclient).get("applied-ops:1234567890abcdef")).to.equal @first
+					.onSecondCall().resolves();
+				this.first = this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				// ignore error
+				this.first.catch((function(){}));
+				expect(this.ChannelManager.getClientMapEntry(this.rclient).get("applied-ops:1234567890abcdef")).to.equal(this.first);
 
-				@rclient.unsubscribe = sinon.stub().resolves()
-				@ChannelManager.unsubscribe @rclient, "applied-ops", "1234567890abcdef"
-				@second = @ChannelManager.subscribe @rclient, "applied-ops", "1234567890abcdef"
-				# should get replaced immediately
-				expect(@ChannelManager.getClientMapEntry(@rclient).get("applied-ops:1234567890abcdef")).to.equal @second
+				this.rclient.unsubscribe = sinon.stub().resolves();
+				this.ChannelManager.unsubscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				this.second = this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				// should get replaced immediately
+				expect(this.ChannelManager.getClientMapEntry(this.rclient).get("applied-ops:1234567890abcdef")).to.equal(this.second);
 
-				# let the first subscribe error -> unsubscribe -> subscribe
-				setTimeout done
+				// let the first subscribe error -> unsubscribe -> subscribe
+				return setTimeout(done);
+			});
 
-			it "should cleanup the second subscribePromise", ->
-				expect(@ChannelManager.getClientMapEntry(@rclient).has("applied-ops:1234567890abcdef")).to.equal false
+			return it("should cleanup the second subscribePromise", function() {
+				return expect(this.ChannelManager.getClientMapEntry(this.rclient).has("applied-ops:1234567890abcdef")).to.equal(false);
+			});
+		});
 
-		describe "when there is an existing subscription for another redis client but not this one", ->
-			beforeEach (done) ->
-				@other_rclient.subscribe = sinon.stub().resolves()
-				@ChannelManager.subscribe @other_rclient, "applied-ops", "1234567890abcdef"
-				@rclient.subscribe = sinon.stub().resolves()  # discard the original stub
-				@ChannelManager.subscribe @rclient, "applied-ops", "1234567890abcdef"
-				setTimeout done
+		return describe("when there is an existing subscription for another redis client but not this one", function() {
+			beforeEach(function(done) {
+				this.other_rclient.subscribe = sinon.stub().resolves();
+				this.ChannelManager.subscribe(this.other_rclient, "applied-ops", "1234567890abcdef");
+				this.rclient.subscribe = sinon.stub().resolves();  // discard the original stub
+				this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				return setTimeout(done);
+			});
 
-			it "should subscribe to the redis channel on this redis client", ->
-				@rclient.subscribe.calledWithExactly("applied-ops:1234567890abcdef").should.equal true
+			return it("should subscribe to the redis channel on this redis client", function() {
+				return this.rclient.subscribe.calledWithExactly("applied-ops:1234567890abcdef").should.equal(true);
+			});
+		});
+	});
 
-	describe "unsubscribe", ->
+	describe("unsubscribe", function() {
 
-		describe "when there is no existing subscription for this redis client", ->
-			beforeEach (done) ->
-				@rclient.unsubscribe = sinon.stub().resolves()
-				@ChannelManager.unsubscribe @rclient, "applied-ops", "1234567890abcdef"
-				setTimeout done
+		describe("when there is no existing subscription for this redis client", function() {
+			beforeEach(function(done) {
+				this.rclient.unsubscribe = sinon.stub().resolves();
+				this.ChannelManager.unsubscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				return setTimeout(done);
+			});
 
-			it "should unsubscribe from the redis channel", ->
-				@rclient.unsubscribe.called.should.equal true
+			return it("should unsubscribe from the redis channel", function() {
+				return this.rclient.unsubscribe.called.should.equal(true);
+			});
+		});
 
 
-		describe "when there is an existing subscription for this another redis client but not this one", ->
-			beforeEach (done) ->
-				@other_rclient.subscribe = sinon.stub().resolves()
-				@rclient.unsubscribe = sinon.stub().resolves()
-				@ChannelManager.subscribe @other_rclient, "applied-ops", "1234567890abcdef"
-				@ChannelManager.unsubscribe @rclient, "applied-ops", "1234567890abcdef"
-				setTimeout done
+		describe("when there is an existing subscription for this another redis client but not this one", function() {
+			beforeEach(function(done) {
+				this.other_rclient.subscribe = sinon.stub().resolves();
+				this.rclient.unsubscribe = sinon.stub().resolves();
+				this.ChannelManager.subscribe(this.other_rclient, "applied-ops", "1234567890abcdef");
+				this.ChannelManager.unsubscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				return setTimeout(done);
+			});
 
-			it "should still unsubscribe from the redis channel on this client", ->
-				@rclient.unsubscribe.called.should.equal true
+			return it("should still unsubscribe from the redis channel on this client", function() {
+				return this.rclient.unsubscribe.called.should.equal(true);
+			});
+		});
 
-		describe "when unsubscribe errors and completes", ->
-			beforeEach (done) ->
-				@rclient.subscribe = sinon.stub().resolves()
-				@ChannelManager.subscribe @rclient, "applied-ops", "1234567890abcdef"
-				@rclient.unsubscribe = sinon.stub().rejects(new Error("some redis error"))
-				@ChannelManager.unsubscribe @rclient, "applied-ops", "1234567890abcdef"
-				setTimeout done
-				return null
+		describe("when unsubscribe errors and completes", function() {
+			beforeEach(function(done) {
+				this.rclient.subscribe = sinon.stub().resolves();
+				this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				this.rclient.unsubscribe = sinon.stub().rejects(new Error("some redis error"));
+				this.ChannelManager.unsubscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				setTimeout(done);
+				return null;
+			});
 
-			it "should have cleaned up", ->
-				@ChannelManager.getClientMapEntry(@rclient).has("applied-ops:1234567890abcdef").should.equal false
+			it("should have cleaned up", function() {
+				return this.ChannelManager.getClientMapEntry(this.rclient).has("applied-ops:1234567890abcdef").should.equal(false);
+			});
 
-			it "should not error out when subscribing again", (done) ->
-				p = @ChannelManager.subscribe @rclient, "applied-ops", "1234567890abcdef"
-				p.then () ->
-					done()
-				.catch done
-				return null
+			return it("should not error out when subscribing again", function(done) {
+				const p = this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				p.then(() => done()).catch(done);
+				return null;
+			});
+		});
 
-		describe "when unsubscribe errors and another client subscribes at the same time", ->
-			beforeEach (done) ->
-				@rclient.subscribe = sinon.stub().resolves()
-				@ChannelManager.subscribe @rclient, "applied-ops", "1234567890abcdef"
-				rejectSubscribe = undefined
-				@rclient.unsubscribe = () ->
-					return new Promise (resolve, reject) ->
-						rejectSubscribe = reject
-				@ChannelManager.unsubscribe @rclient, "applied-ops", "1234567890abcdef"
+		describe("when unsubscribe errors and another client subscribes at the same time", function() {
+			beforeEach(function(done) {
+				this.rclient.subscribe = sinon.stub().resolves();
+				this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				let rejectSubscribe = undefined;
+				this.rclient.unsubscribe = () => new Promise((resolve, reject) => rejectSubscribe = reject);
+				this.ChannelManager.unsubscribe(this.rclient, "applied-ops", "1234567890abcdef");
 
-				setTimeout () =>
-					# delay, actualUnsubscribe should not see the new subscribe request
-					@ChannelManager.subscribe(@rclient, "applied-ops", "1234567890abcdef")
-					.then () ->
-						setTimeout done
-					.catch done
-					setTimeout ->
-						# delay, rejectSubscribe is not defined immediately
-						rejectSubscribe(new Error("redis error"))
-				return null
+				setTimeout(() => {
+					// delay, actualUnsubscribe should not see the new subscribe request
+					this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef")
+					.then(() => setTimeout(done)).catch(done);
+					return setTimeout(() => // delay, rejectSubscribe is not defined immediately
+                    rejectSubscribe(new Error("redis error")));
+				});
+				return null;
+			});
 
-			it "should have recorded the error", ->
-				expect(@metrics.inc.calledWithExactly("unsubscribe.failed.applied-ops")).to.equal(true)
+			it("should have recorded the error", function() {
+				return expect(this.metrics.inc.calledWithExactly("unsubscribe.failed.applied-ops")).to.equal(true);
+			});
 
-			it "should have subscribed", ->
-				@rclient.subscribe.called.should.equal true
+			it("should have subscribed", function() {
+				return this.rclient.subscribe.called.should.equal(true);
+			});
 
-			it "should have discarded the finished Promise", ->
-				@ChannelManager.getClientMapEntry(@rclient).has("applied-ops:1234567890abcdef").should.equal false
+			return it("should have discarded the finished Promise", function() {
+				return this.ChannelManager.getClientMapEntry(this.rclient).has("applied-ops:1234567890abcdef").should.equal(false);
+			});
+		});
 
-		describe "when there is an existing subscription for this redis client", ->
-			beforeEach (done) ->
-				@rclient.subscribe = sinon.stub().resolves()
-				@rclient.unsubscribe = sinon.stub().resolves()
-				@ChannelManager.subscribe @rclient, "applied-ops", "1234567890abcdef"
-				@ChannelManager.unsubscribe @rclient, "applied-ops", "1234567890abcdef"
-				setTimeout done
+		return describe("when there is an existing subscription for this redis client", function() {
+			beforeEach(function(done) {
+				this.rclient.subscribe = sinon.stub().resolves();
+				this.rclient.unsubscribe = sinon.stub().resolves();
+				this.ChannelManager.subscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				this.ChannelManager.unsubscribe(this.rclient, "applied-ops", "1234567890abcdef");
+				return setTimeout(done);
+			});
 
-			it "should unsubscribe from the redis channel", ->
-				@rclient.unsubscribe.calledWithExactly("applied-ops:1234567890abcdef").should.equal true
+			return it("should unsubscribe from the redis channel", function() {
+				return this.rclient.unsubscribe.calledWithExactly("applied-ops:1234567890abcdef").should.equal(true);
+			});
+		});
+	});
 
-	describe "publish", ->
+	return describe("publish", function() {
 
-		describe "when the channel is 'all'", ->
-			beforeEach ->
-				@rclient.publish = sinon.stub()
-				@ChannelManager.publish @rclient, "applied-ops", "all", "random-message"
+		describe("when the channel is 'all'", function() {
+			beforeEach(function() {
+				this.rclient.publish = sinon.stub();
+				return this.ChannelManager.publish(this.rclient, "applied-ops", "all", "random-message");
+			});
 
-			it "should publish on the base channel", ->
-				@rclient.publish.calledWithExactly("applied-ops", "random-message").should.equal true
+			return it("should publish on the base channel", function() {
+				return this.rclient.publish.calledWithExactly("applied-ops", "random-message").should.equal(true);
+			});
+		});
 
-		describe "when the channel has an specific id", ->
+		describe("when the channel has an specific id", function() {
 
-			describe "when the individual channel setting is false", ->
-				beforeEach ->
-					@rclient.publish = sinon.stub()
-					@settings.publishOnIndividualChannels = false
-					@ChannelManager.publish @rclient, "applied-ops", "1234567890abcdef", "random-message"
+			describe("when the individual channel setting is false", function() {
+				beforeEach(function() {
+					this.rclient.publish = sinon.stub();
+					this.settings.publishOnIndividualChannels = false;
+					return this.ChannelManager.publish(this.rclient, "applied-ops", "1234567890abcdef", "random-message");
+				});
 
-				it "should publish on the per-id channel", ->
-					@rclient.publish.calledWithExactly("applied-ops", "random-message").should.equal true
-					@rclient.publish.calledOnce.should.equal true
+				return it("should publish on the per-id channel", function() {
+					this.rclient.publish.calledWithExactly("applied-ops", "random-message").should.equal(true);
+					return this.rclient.publish.calledOnce.should.equal(true);
+				});
+			});
 
-			describe "when the individual channel setting is true", ->
-				beforeEach ->
-					@rclient.publish = sinon.stub()
-					@settings.publishOnIndividualChannels = true
-					@ChannelManager.publish @rclient, "applied-ops", "1234567890abcdef", "random-message"
+			return describe("when the individual channel setting is true", function() {
+				beforeEach(function() {
+					this.rclient.publish = sinon.stub();
+					this.settings.publishOnIndividualChannels = true;
+					return this.ChannelManager.publish(this.rclient, "applied-ops", "1234567890abcdef", "random-message");
+				});
 
-				it "should publish on the per-id channel", ->
-					@rclient.publish.calledWithExactly("applied-ops:1234567890abcdef", "random-message").should.equal true
-					@rclient.publish.calledOnce.should.equal true
+				return it("should publish on the per-id channel", function() {
+					this.rclient.publish.calledWithExactly("applied-ops:1234567890abcdef", "random-message").should.equal(true);
+					return this.rclient.publish.calledOnce.should.equal(true);
+				});
+			});
+		});
 
-		describe "metrics", ->
-			beforeEach ->
-				@rclient.publish = sinon.stub()
-				@ChannelManager.publish @rclient, "applied-ops", "all", "random-message"
+		return describe("metrics", function() {
+			beforeEach(function() {
+				this.rclient.publish = sinon.stub();
+				return this.ChannelManager.publish(this.rclient, "applied-ops", "all", "random-message");
+			});
 
-			it "should track the payload size", ->
-				@metrics.summary.calledWithExactly(
+			return it("should track the payload size", function() {
+				return this.metrics.summary.calledWithExactly(
 					"redis.publish.applied-ops",
 					"random-message".length
-				).should.equal true
+				).should.equal(true);
+			});
+		});
+	});
+});
