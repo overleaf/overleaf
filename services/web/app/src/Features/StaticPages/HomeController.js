@@ -14,9 +14,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let HomeController
-const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
-const _ = require('underscore')
 const Features = require('../../infrastructure/Features')
 
 const Path = require('path')
@@ -25,10 +22,7 @@ const fs = require('fs')
 const ErrorController = require('../Errors/ErrorController')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 
-const slHomepageExists = fs.existsSync(
-  Path.resolve(__dirname + '/../../../views/external/home/sl.pug')
-)
-const v2HomepageExists = fs.existsSync(
+const homepageExists = fs.existsSync(
   Path.resolve(__dirname + '/../../../views/external/home/v2.pug')
 )
 
@@ -46,17 +40,7 @@ module.exports = HomeController = {
   },
 
   home(req, res, next) {
-    if (
-      Features.hasFeature('homepage') &&
-      !Settings.overleaf &&
-      slHomepageExists
-    ) {
-      return res.render('external/home/sl')
-    } else if (
-      Features.hasFeature('homepage') &&
-      Settings.overleaf &&
-      v2HomepageExists
-    ) {
+    if (Features.hasFeature('homepage') && homepageExists) {
       return res.render('external/home/v2')
     } else {
       return res.redirect('/login')
