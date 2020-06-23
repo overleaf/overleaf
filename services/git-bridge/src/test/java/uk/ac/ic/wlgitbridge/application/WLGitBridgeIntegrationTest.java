@@ -3,6 +3,13 @@ package uk.ac.ic.wlgitbridge.application;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import static org.asynchttpclient.Dsl.*;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
 import org.asynchttpclient.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.After;
@@ -889,6 +896,29 @@ public class WLGitBridgeIntegrationTest {
         ), actual);
 
         wlgb.stop();
+    }
+
+    @Test
+    public void testStatusAndHealthCheckEndpoints() throws ClientProtocolException, IOException {
+        int gitBridgePort = 33887;
+        int mockServerPort = 3887;
+        server = new MockSnapshotServer(mockServerPort, getResource("/canCloneARepository").toFile());
+        server.start();
+        server.setState(states.get("canCloneARepository").get("state"));
+        wlgb = new GitBridgeApp(new String[] {
+          makeConfigFile(gitBridgePort, mockServerPort)
+        });
+        wlgb.run();
+        HttpClient client = HttpClients.createDefault();
+        String urlBase = "http://127.0.0.1:" + gitBridgePort;
+        // Status
+        HttpGet statusRequest = new HttpGet(urlBase+"/status");
+        HttpResponse statusResponse = client.execute(statusRequest);
+        assertEquals(200, statusResponse.getStatusLine().getStatusCode());
+        // Health Check
+        HttpGet healthCheckRequest = new HttpGet(urlBase+"/health_check");
+        HttpResponse healthCheckResponse = client.execute(healthCheckRequest);
+        assertEquals(200, healthCheckResponse.getStatusLine().getStatusCode());
     }
 
     private String makeConfigFile(

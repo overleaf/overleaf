@@ -119,8 +119,19 @@ public class GitBridgeServer {
     ) throws ServletException {
         HandlerCollection handlers = new HandlerList();
         handlers.addHandler(initApiHandler());
+        handlers.addHandler(initBaseHandler());
         handlers.addHandler(initGitHandler(config, repoStore, snapshotApi));
         jettyServer.setHandler(handlers);
+    }
+
+    private Handler initBaseHandler() {
+        ContextHandler base = new ContextHandler();
+        base.setContextPath("/");
+        HandlerCollection handlers = new HandlerList();
+        handlers.addHandler(new StatusHandler(bridge));
+        handlers.addHandler(new HealthCheckHandler(bridge));
+        base.setHandler(handlers);
+        return base;
     }
 
     private Handler initApiHandler() {

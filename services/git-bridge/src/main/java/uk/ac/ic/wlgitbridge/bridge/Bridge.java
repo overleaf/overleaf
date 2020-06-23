@@ -263,6 +263,21 @@ public class Bridge {
         gcJob.start();
     }
 
+    public boolean healthCheck() {
+       try {
+         dbStore.getNumProjects();
+         File rootDirectory = new File("/");
+         if (!rootDirectory.exists()) {
+           throw new Exception("bad filesystem state, root directory does not exist");
+         }
+         Log.info("[HealthCheck] passed");
+         return true;
+       } catch (Exception e)  {
+         Log.error("[HealthCheck] FAILED!", e);
+         return false;
+       }
+    }
+
     /**
      * Performs a check of inconsistencies in the DB. This was used to upgrade
      * the schema.
