@@ -19,9 +19,10 @@ if (process.versions.node.split('.')[0] >= 7) {
 }
 
 var io = require('socket.io')
+const logger = require('logger-sharelatex')
 
 if (io.version === '0.9.16' || io.version === '0.9.19') {
-  console.log('patching socket.io hybi-16 transport frame prototype')
+  logger.warn('patching socket.io hybi-16 transport frame prototype')
   var transports = require('socket.io/lib/transports/websocket/hybi-16.js')
   transports.prototype.frame = patchedFrameHandler
   // file hybi-07-12 has the same problem but no browsers are using that protocol now
@@ -33,7 +34,7 @@ function patchedFrameHandler(opcode, str) {
   var startOffset = 2
   var secondByte = dataLength
   if (dataLength === 65536) {
-    console.log('fixing invalid frame length in socket.io')
+    logger.log('fixing invalid frame length in socket.io')
   }
   if (dataLength > 65535) {
     // original code had > 65536
