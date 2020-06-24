@@ -1,6 +1,20 @@
 // EventEmitter has been removed from process in node >= 7
 // https://github.com/nodejs/node/commit/62b544290a075fe38e233887a06c408ba25a1c71
+/*
+  A socket.io dependency expects the EventEmitter to be available at
+    `process.EventEmitter`.
+  See this trace:
+  ---
+
+  /app/node_modules/policyfile/lib/server.js:254
+  Object.keys(process.EventEmitter.prototype).forEach(function proxy (key){
+                                   ^
+
+  TypeError: Cannot read property 'prototype' of undefined
+    at Object.<anonymous> (/app/node_modules/policyfile/lib/server.js:254:34)
+ */
 if (process.versions.node.split('.')[0] >= 7) {
+  // eslint-disable-next-line node/no-deprecated-api
   process.EventEmitter = require('events')
 }
 
@@ -14,7 +28,7 @@ if (io.version === '0.9.16' || io.version === '0.9.19') {
 }
 
 function patchedFrameHandler(opcode, str) {
-  var dataBuffer = new Buffer(str)
+  var dataBuffer = Buffer.from(str)
   var dataLength = dataBuffer.length
   var startOffset = 2
   var secondByte = dataLength
@@ -29,7 +43,7 @@ function patchedFrameHandler(opcode, str) {
     startOffset = 4
     secondByte = 126
   }
-  var outputBuffer = new Buffer(dataLength + startOffset)
+  var outputBuffer = Buffer.alloc(dataLength + startOffset)
   outputBuffer[0] = opcode
   outputBuffer[1] = secondByte
   dataBuffer.copy(outputBuffer, startOffset)
