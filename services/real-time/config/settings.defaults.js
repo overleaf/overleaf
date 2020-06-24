@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+
 const settings = {
   redis: {
     pubsub: {
