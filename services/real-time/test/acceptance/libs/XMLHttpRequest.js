@@ -11,7 +11,7 @@
  * @license MIT
  */
 
-var Url = require('url')
+const { URL } = require('url')
 var spawn = require('child_process').spawn
 var fs = require('fs')
 
@@ -24,7 +24,6 @@ exports.XMLHttpRequest = function () {
   var https = require('https')
 
   // Holds http.js objects
-  var client
   var request
   var response
 
@@ -147,8 +146,7 @@ exports.XMLHttpRequest = function () {
 
     // Check for valid request method
     if (!isAllowedHttpMethod(method)) {
-      throw 'SecurityError: Request method not allowed'
-      return
+      throw new Error('SecurityError: Request method not allowed')
     }
 
     settings = {
@@ -169,15 +167,17 @@ exports.XMLHttpRequest = function () {
    * @param string value Header value
    */
   this.setRequestHeader = function (header, value) {
-    if (this.readyState != this.OPENED) {
-      throw 'INVALID_STATE_ERR: setRequestHeader can only be called when state is OPEN'
+    if (this.readyState !== this.OPENED) {
+      throw new Error(
+        'INVALID_STATE_ERR: setRequestHeader can only be called when state is OPEN'
+      )
     }
     if (!isAllowedHttpHeader(header)) {
       console.warn('Refused to set unsafe header "' + header + '"')
       return
     }
     if (sendFlag) {
-      throw 'INVALID_STATE_ERR: send flag is true'
+      throw new Error('INVALID_STATE_ERR: send flag is true')
     }
     headers[header] = value
   }
@@ -242,25 +242,29 @@ exports.XMLHttpRequest = function () {
    * @param string data Optional data to send as request body.
    */
   this.send = function (data) {
-    if (this.readyState != this.OPENED) {
-      throw 'INVALID_STATE_ERR: connection must be opened before send() is called'
+    if (this.readyState !== this.OPENED) {
+      throw new Error(
+        'INVALID_STATE_ERR: connection must be opened before send() is called'
+      )
     }
 
     if (sendFlag) {
-      throw 'INVALID_STATE_ERR: send has already been called'
+      throw new Error('INVALID_STATE_ERR: send has already been called')
     }
 
+    var host
     var ssl = false
     var local = false
-    var url = Url.parse(settings.url)
+    var url = new URL(settings.url)
 
     // Determine the server
     switch (url.protocol) {
       case 'https:':
         ssl = true
-      // SSL & non-SSL both need host, no break here.
+        host = url.hostname
+        break
       case 'http:':
-        var host = url.hostname
+        host = url.hostname
         break
 
       case 'file:':
@@ -269,17 +273,17 @@ exports.XMLHttpRequest = function () {
 
       case undefined:
       case '':
-        var host = 'localhost'
+        host = 'localhost'
         break
 
       default:
-        throw 'Protocol not supported.'
+        throw new Error('Protocol not supported.')
     }
 
     // Load files off the local filesystem (file://)
     if (local) {
       if (settings.method !== 'GET') {
-        throw 'XMLHttpRequest: Only GET method is supported'
+        throw new Error('XMLHttpRequest: Only GET method is supported')
       }
 
       if (settings.async) {
@@ -322,7 +326,7 @@ exports.XMLHttpRequest = function () {
       if (typeof settings.password === 'undefined') {
         settings.password = ''
       }
-      var authBuf = new Buffer(settings.user + ':' + settings.password)
+      var authBuf = Buffer.from(settings.user + ':' + settings.password)
       headers.Authorization = 'Basic ' + authBuf.toString('base64')
     }
 
@@ -443,8 +447,8 @@ exports.XMLHttpRequest = function () {
         (data ? "req.write('" + data.replace(/'/g, "\\'") + "');" : '') +
         'req.end();'
       // Start the other Node Process, executing this string
-      syncProc = spawn(process.argv[0], ['-e', execString])
-      while ((self.responseText = fs.readFileSync(syncFile, 'utf8')) == '') {
+      const syncProc = spawn(process.argv[0], ['-e', execString])
+      while ((self.responseText = fs.readFileSync(syncFile, 'utf8')) === '') {
         // Wait while the file is empty
       }
       // Kill the child process once the file has data
