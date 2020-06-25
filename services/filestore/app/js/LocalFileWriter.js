@@ -31,7 +31,6 @@ async function writeStream(stream, key) {
     await deleteFile(fsPath)
 
     throw new WriteError('problem writing file locally', {
-      err,
       fsPath
     }).withCause(err)
   }

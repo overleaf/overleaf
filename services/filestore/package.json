@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@google-cloud/storage": "^4.7.0",
-    "@overleaf/o-error": "git://github.com/overleaf/o-error.git#14e515a195d6dbd3711c5a211a730752802d3b03",
+    "@overleaf/o-error": "^3.0.0",
     "aws-sdk": "^2.648.0",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
