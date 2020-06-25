@@ -28,7 +28,11 @@ public class StatusHandler extends AbstractHandler {
     HttpServletRequest request,
     HttpServletResponse response
   ) throws IOException {
-    if ("GET".equals(baseRequest.getMethod()) && "/status".equals(target)) {
+    if (
+      "GET".equals(baseRequest.getMethod())
+        && target != null
+        && target.matches("^\\/status\\/?$")
+    ) {
       Log.info("GET <- /status");
       baseRequest.setHandled(true);
       response.setContentType("text/plain");

@@ -28,7 +28,11 @@ public class HealthCheckHandler extends AbstractHandler {
     HttpServletRequest request,
     HttpServletResponse response
   ) throws IOException {
-    if ("GET".equals(baseRequest.getMethod()) && "/health_check".equals(target)) {
+    if (
+      "GET".equals(baseRequest.getMethod())
+        && target != null
+        && target.matches("^\\/health_check\\/?$")
+    ) {
       Log.info("GET <- /health_check");
       baseRequest.setHandled(true);
       response.setContentType("text/plain");

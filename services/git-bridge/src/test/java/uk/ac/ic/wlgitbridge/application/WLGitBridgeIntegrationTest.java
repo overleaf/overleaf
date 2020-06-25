@@ -921,6 +921,29 @@ public class WLGitBridgeIntegrationTest {
         assertEquals(200, healthCheckResponse.getStatusLine().getStatusCode());
     }
 
+    @Test
+    public void testStatusAndHealthCheckEndpointsWithTrailingSlash() throws ClientProtocolException, IOException {
+        int gitBridgePort = 33888;
+        int mockServerPort = 3888;
+        server = new MockSnapshotServer(mockServerPort, getResource("/canCloneARepository").toFile());
+        server.start();
+        server.setState(states.get("canCloneARepository").get("state"));
+        wlgb = new GitBridgeApp(new String[] {
+          makeConfigFile(gitBridgePort, mockServerPort)
+        });
+        wlgb.run();
+        HttpClient client = HttpClients.createDefault();
+        String urlBase = "http://127.0.0.1:" + gitBridgePort;
+        // Status
+        HttpGet statusRequest = new HttpGet(urlBase+"/status/");
+        HttpResponse statusResponse = client.execute(statusRequest);
+        assertEquals(200, statusResponse.getStatusLine().getStatusCode());
+        // Health Check
+        HttpGet healthCheckRequest = new HttpGet(urlBase+"/health_check/");
+        HttpResponse healthCheckResponse = client.execute(healthCheckRequest);
+        assertEquals(200, healthCheckResponse.getStatusLine().getStatusCode());
+    }
+
     private String makeConfigFile(
             int port,
             int apiPort
