@@ -1,0 +1,11 @@
+--- a/app/js/CompileManager.js
++++ b/app/js/CompileManager.js
+@@ -536,7 +536,7 @@ module.exports = CompileManager = {
+       compileName,
+       command,
+       directory,
+-      Settings.clsi != null ? Settings.clsi.docker.image : undefined,
++      Settings.clsi && Settings.clsi.docker ? Settings.clsi.docker.image : undefined,
+       timeout,
+       {},
+       function(error, output) {
