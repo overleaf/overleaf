@@ -26,7 +26,7 @@
   padding: 0 10px;
 }
 
-.history-toolbar when (@is-overleaf = false) or (@is-overleaf-light) {
+.history-toolbar when (@is-overleaf-light) {
   border-bottom: @toolbar-border-bottom;
 }
 
@@ -321,10 +321,6 @@
   }
 }
 
-.history-file-tree-inner when (@is-overleaf = false) {
-  font-size: 0.8rem;
-}
-
 .history-file-entity-wrapper {
   color: #fff;
   margin-left: (@line-height-computed / 2);
@@ -344,7 +340,7 @@
     outline: none;
     text-decoration: none;
   }
-  &:hover when (@is-overleaf = true) {
+  &:hover {
     .fake-full-width-bg(@file-tree-item-hover-bg);
   }
 }
@@ -405,15 +401,4 @@
 }
 .history-file-entity-name-removed {
   text-decoration: line-through;
-}
-
-.history-file-entity-link-selected when (@is-overleaf = false) {
-  color: @brand-primary;
-  &:hover,
-  &:focus {
-    color: @brand-primary;
-  }
-  .history-file-entity-icon {
-    color: @brand-primary;
-  }
 }

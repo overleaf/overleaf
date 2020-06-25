@@ -8,17 +8,13 @@
   align-items: center;
 }
 
-.error-container.full-height when (@is-overleaf = true) {
+.error-container.full-height {
   margin-top: -(@header-height + @content-margin-vertical) / 2;
 }
 
 .error-details {
-  flex: 0 1 50%;
+  flex: 1 1 50%;
   padding: @line-height-computed * 2;
-}
-
-.error-details when (@is-overleaf = true) {
-  flex-grow: 1;
 }
 
 .error-status {
@@ -33,24 +29,8 @@
   color: @gray;
   margin-bottom: @line-height-computed * 2;
 }
-.error-btn when (@is-overleaf = false) {
-  color: @navbar-default-link-color;
-  border: 2px solid @navbar-default-link-color;
-  border-radius: @border-radius-base;
-  font-weight: 700;
-  line-height: 1;
-  padding: @padding-base-vertical @padding-base-horizontal;
 
-  &:hover,
-  &:focus {
-    text-decoration: none;
-    color: #fff;
-    background-color: @navbar-default-link-hover-bg;
-    border: 2px solid @navbar-default-link-hover-color;
-  }
-}
-
-.error-btn when (@is-overleaf = true) {
+.error-btn {
   .btn;
   .btn-primary;
   display: block;

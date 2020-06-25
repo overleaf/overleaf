@@ -41,10 +41,6 @@
         margin-bottom: @line-height-computed / 2;
         text-align: right;
       }
-      .date when (@is-overleaf = false) {
-        border-bottom: 1px solid @gray-lightest;
-        text-align: center;
-      }
       .message-wrapper {
         .name {
           font-size: 12px;
@@ -136,13 +132,4 @@
 
 .break-word {
   word-break: break-all;
-}
-
-.editor-dark when (@is-overleaf = false) {
-  .chat {
-    .new-message {
-      background-color: lighten(@editor-dark-background-color, 10%);
-      border-color: @editor-dark-toolbar-border-color;
-    }
-  }
 }

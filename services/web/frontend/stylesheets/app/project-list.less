@@ -32,14 +32,10 @@
   }
 }
 
-.project-list-content when (@is-overleaf) {
+.project-list-content {
   margin: 0;
   height: 100%;
   overflow: hidden;
-}
-
-.project-list-content when (@is-overleaf = false) {
-  .container;
 }
 
 .project-list-empty {
@@ -56,31 +52,28 @@
   }
 }
 
-.sidebar-new-proj-btn when (@is-overleaf) {
+.sidebar-new-proj-btn {
   .btn-block;
 }
 
-.project-list-row when (@is-overleaf) {
+.project-list-row {
   height: 100%;
   min-height: calc(~'100vh -' (@header-height - @footer-height));
 }
-.project-list-container when (@is-overleaf) {
+.project-list-container {
   height: 100%;
 }
 .project-list-sidebar {
   background-color: @sidebar-bg;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
   padding-top: @content-margin-vertical;
   padding-bottom: @content-margin-vertical;
   color: @sidebar-color;
   .small {
     color: @sidebar-color;
   }
-}
-
-.project-list-sidebar when (@is-overleaf) {
-  overflow-x: hidden;
-  overflow-y: auto;
-  -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 
 .project-list-main {
@@ -313,9 +306,7 @@ ul.folders-menu {
         text-decoration: none;
       }
     }
-    > a when (@is-overleaf = false) {
-      font-size: 0.9rem;
-    }
+
     &.separator {
       padding: @folders-menu-item-v-padding @folders-menu-item-h-padding;
       cursor: auto;
@@ -480,12 +471,8 @@ ul.structured-list {
     a {
       color: @structured-list-link-color;
     }
-    .header when (@is-overleaf = true) {
+    .header {
       font-weight: 600;
-    }
-
-    .header when (@is-overleaf = false) {
-      text-transform: uppercase;
     }
 
     .select-item,
@@ -505,32 +492,14 @@ ul.structured-list {
   }
 }
 
-.project-list-card when (@is-overleaf) {
+.project-list-card {
   padding: 0 (@line-height-computed / 4);
 }
 
 ul.project-list {
   li {
-    .last-modified when (@is-overleaf = false) {
-      font-size: 0.8rem;
-    }
-    .owner when (@is-overleaf = false) {
-      font-size: 0.8rem;
-    }
-    .owner when (@is-overleaf = false) {
-      margin-right: 0;
-    }
     .projectName {
       margin-right: @line-height-computed / 4;
-      padding: 0;
-      vertical-align: inherit;
-      white-space: normal;
-      text-align: left;
-    }
-
-    .action-btn {
-      padding: 0 0.3em;
-      margin-left: 0.2em;
     }
   }
   i.tablesort {

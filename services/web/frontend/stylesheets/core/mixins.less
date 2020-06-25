@@ -518,7 +518,7 @@
     color: darken(@text-color, 10%);
   }
 
-  .alert-link-as-btn when (@is-overleaf = true) {
+  .alert-link-as-btn {
     display: inline-block;
     font-weight: bold;
     text-decoration: none;
@@ -605,7 +605,7 @@
   background-color: @background;
   border-color: @border;
 
-  .alert & when (@is-overleaf = true) {
+  .alert & {
     background-color: darken(@background, 16%);
   }
 
@@ -618,7 +618,7 @@
     color: @color;
     background-color: darken(@background, 8%);
     border-color: darken(@border, 12%);
-    .alert & when (@is-overleaf = true) {
+    .alert & {
       background-color: darken(@background, 24%);
     }
   }
@@ -650,7 +650,7 @@
   background-color: transparent;
   border-color: @color;
 
-  .alert & when (@is-overleaf = true) {
+  .alert & {
     background-color: transparent;
   }
 
@@ -663,7 +663,7 @@
     color: @color;
     background-color: transparent;
     border-color: darken(@color, 12%);
-    .alert & when (@is-overleaf = true) {
+    .alert & {
       background-color: transparent;
     }
   }

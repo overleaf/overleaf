@@ -29,7 +29,7 @@
   }
 }
 
-.editor-menu-icon when (@is-overleaf = true) {
+.editor-menu-icon {
   &.fa {
     width: 1em;
     background: @editor-header-logo-background;
@@ -350,30 +350,7 @@ CodeMirror
   height: 100%;
 }
 
-.ui-layout-resizer when (@is-overleaf = false) {
-  width: 6px;
-  background-color: @editor-resizer-bg-color;
-  border-left: 1px solid @editor-border-color;
-  border-right: 1px solid @editor-border-color;
-  .ui-layout-toggler {
-    color: #999;
-    font-family: FontAwesome;
-    font-style: normal;
-    font-weight: normal;
-    line-height: 1;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-size: 16px !important;
-    line-height: 50px;
-    background-color: @editor-toggler-bg-color;
-    &:hover {
-      background-color: @editor-toggler-hover-bg-color;
-      color: #333;
-    }
-  }
-}
-
-.ui-layout-resizer when (@is-overleaf = true) {
+.ui-layout-resizer {
   width: @ui-resizer-size !important;
   background-color: @editor-resizer-bg-color;
   &.ui-layout-resizer-closed {
@@ -401,28 +378,11 @@ CodeMirror
   }
 }
 
-.ui-layout-resizer-west.ui-layout-resizer-open,
-.ui-layout-resizer-east.ui-layout-resizer-closed {
-  .ui-layout-toggler when (@is-overleaf = false) {
-    &:before {
-      content: '\f104';
-    }
-  }
-}
-.ui-layout-resizer-east.ui-layout-resizer-open,
-.ui-layout-resizer-west.ui-layout-resizer-closed {
-  .ui-layout-toggler when (@is-overleaf = false) {
-    &:before {
-      content: '\f105';
-    }
-  }
-}
-
-.ui-layout-toggler when (@is-overleaf = true) {
+.ui-layout-toggler {
   display: none !important;
 }
 
-.custom-toggler when (@is-overleaf = true) {
+.custom-toggler {
   position: absolute;
   display: flex;
   align-items: center;
