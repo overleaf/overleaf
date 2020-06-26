@@ -70,4 +70,33 @@ Hello world
       expect(pdf).to.not.exist
     })
   })
+
+  describe('wordcount', function() {
+    beforeEach(function(done) {
+      Client.compile(this.project_id, this.request, done)
+    })
+    it('should error out with an invalid imageName', function() {
+      Client.wordcountWithImage(
+        this.project_id,
+        'main.tex',
+        'something/evil:1337',
+        (error, result) => {
+          expect(String(error)).to.include('statusCode=400')
+        }
+      )
+    })
+
+    it('should produce a texcout a valid imageName', function() {
+      Client.wordcountWithImage(
+        this.project_id,
+        'main.tex',
+        process.env.TEXLIVE_IMAGE,
+        (error, result) => {
+          expect(error).to.not.exist
+          expect(result).to.exist
+          expect(result.texcount).to.exist
+        }
+      )
+    })
+  })
 })
