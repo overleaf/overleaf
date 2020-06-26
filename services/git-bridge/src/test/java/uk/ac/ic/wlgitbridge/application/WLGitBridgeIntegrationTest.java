@@ -9,6 +9,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.HttpClients;
 import org.asynchttpclient.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -917,6 +918,52 @@ public class WLGitBridgeIntegrationTest {
         assertEquals(200, statusResponse.getStatusLine().getStatusCode());
         // Health Check
         HttpGet healthCheckRequest = new HttpGet(urlBase+"/health_check");
+        HttpResponse healthCheckResponse = client.execute(healthCheckRequest);
+        assertEquals(200, healthCheckResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testStatusAndHealthCheckEndpointsWithTrailingSlash() throws ClientProtocolException, IOException {
+        int gitBridgePort = 33888;
+        int mockServerPort = 3888;
+        server = new MockSnapshotServer(mockServerPort, getResource("/canCloneARepository").toFile());
+        server.start();
+        server.setState(states.get("canCloneARepository").get("state"));
+        wlgb = new GitBridgeApp(new String[] {
+          makeConfigFile(gitBridgePort, mockServerPort)
+        });
+        wlgb.run();
+        HttpClient client = HttpClients.createDefault();
+        String urlBase = "http://127.0.0.1:" + gitBridgePort;
+        // Status
+        HttpGet statusRequest = new HttpGet(urlBase+"/status/");
+        HttpResponse statusResponse = client.execute(statusRequest);
+        assertEquals(200, statusResponse.getStatusLine().getStatusCode());
+        // Health Check
+        HttpGet healthCheckRequest = new HttpGet(urlBase+"/health_check/");
+        HttpResponse healthCheckResponse = client.execute(healthCheckRequest);
+        assertEquals(200, healthCheckResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testStatusAndHealthCheckEndpointsWithHead() throws ClientProtocolException, IOException {
+        int gitBridgePort = 33889;
+        int mockServerPort = 3889;
+        server = new MockSnapshotServer(mockServerPort, getResource("/canCloneARepository").toFile());
+        server.start();
+        server.setState(states.get("canCloneARepository").get("state"));
+        wlgb = new GitBridgeApp(new String[] {
+          makeConfigFile(gitBridgePort, mockServerPort)
+        });
+        wlgb.run();
+        HttpClient client = HttpClients.createDefault();
+        String urlBase = "http://127.0.0.1:" + gitBridgePort;
+        // Status
+        HttpHead statusRequest = new HttpHead(urlBase+"/status");
+        HttpResponse statusResponse = client.execute(statusRequest);
+        assertEquals(200, statusResponse.getStatusLine().getStatusCode());
+        // Health Check
+        HttpHead healthCheckRequest = new HttpHead(urlBase+"/health_check");
         HttpResponse healthCheckResponse = client.execute(healthCheckRequest);
         assertEquals(200, healthCheckResponse.getStatusLine().getStatusCode());
     }
