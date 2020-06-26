@@ -32,7 +32,7 @@ public class HealthCheckHandler extends AbstractHandler {
     if (
       ("GET".equals(method) || "HEAD".equals(method))
         && target != null
-        && target.matches("^\\/health_check\\/?$")
+        && target.matches("^/health_check/?$")
     ) {
       Log.info(method + " <- /health_check");
       baseRequest.setHandled(true);
