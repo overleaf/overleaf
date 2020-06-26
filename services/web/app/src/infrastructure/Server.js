@@ -195,18 +195,24 @@ webRouter.use(function(req, res, next) {
 })
 
 // add security headers using Helmet
+const noCacheMiddleware = require('nocache')()
 webRouter.use(function(req, res, next) {
   const isLoggedIn = AuthenticationController.isUserLoggedIn(req)
   const isProjectPage = !!req.path.match('^/project/[a-f0-9]{24}$')
-
+  if (isLoggedIn || isProjectPage) {
+    noCacheMiddleware(req, res, next)
+  } else {
+    next()
+  }
+})
+webRouter.use(
   helmet({
     // note that more headers are added by default
     dnsPrefetchControl: false,
     referrerPolicy: { policy: 'origin-when-cross-origin' },
-    noCache: isLoggedIn || isProjectPage,
     hsts: false
-  })(req, res, next)
-})
+  })
+)
 
 logger.info('creating HTTP server'.yellow)
 const server = require('http').createServer(app)

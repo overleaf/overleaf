@@ -9,6 +9,7 @@ httpAuthUsers = {}
 httpAuthUsers[httpAuthUser] = httpAuthPass
 
 module.exports =
+	cacheStaticAssets: true
 	enableSubscriptions: true
 
 	httpAuthUsers: httpAuthUsers
