@@ -3,6 +3,7 @@ version: "2.3"
 services:
   dev:
     environment:
+      ALLOWED_IMAGE_NAMES_FLAT: "quay.io/sharelatex/texlive-full:2017.1"
       TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
       TEXLIVE_IMAGE_USER: "tex"
       SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
@@ -18,6 +19,7 @@ services:
       
   ci:
     environment:
+      ALLOWED_IMAGE_NAMES_FLAT: ${TEXLIVE_IMAGE}
       TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
       TEXLIVE_IMAGE_USER: "tex"
       SHARELATEX_CONFIG: /app/config/settings.defaults.coffee

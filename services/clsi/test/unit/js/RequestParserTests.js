@@ -114,6 +114,44 @@ describe('RequestParser', function() {
     })
   })
 
+  describe('when image restrictions are present', function() {
+    beforeEach(function() {
+      this.settings.allowedImageNamesFlat = ['repo/name:tag1', 'repo/name:tag2']
+    })
+
+    describe('with imageName set to something invalid', function() {
+      beforeEach(function() {
+        const request = this.validRequest
+        request.compile.options.imageName = 'something/different:latest'
+        this.RequestParser.parse(request, (error, data) => {
+          this.error = error
+          this.data = data
+        })
+      })
+
+      it('should throw an error for imageName', function() {
+        expect(String(this.error)).to.include(
+          'imageName attribute should be one of'
+        )
+      })
+    })
+
+    describe('with imageName set to something valid', function() {
+      beforeEach(function() {
+        const request = this.validRequest
+        request.compile.options.imageName = 'repo/name:tag1'
+        this.RequestParser.parse(request, (error, data) => {
+          this.error = error
+          this.data = data
+        })
+      })
+
+      it('should set the imageName', function() {
+        this.data.imageName.should.equal('repo/name:tag1')
+      })
+    })
+  })
+
   describe('with flags set', function() {
     beforeEach(function() {
       this.validRequest.compile.options.flags = ['-file-line-error']

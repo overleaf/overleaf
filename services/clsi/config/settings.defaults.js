@@ -73,6 +73,16 @@ if (process.env.ALLOWED_COMPILE_GROUPS) {
     process.exit(1)
   }
 }
+if (process.env.ALLOWED_IMAGE_NAMES_FLAT) {
+  try {
+    module.exports.allowedImageNamesFlat = process.env.ALLOWED_IMAGE_NAMES_FLAT.split(
+      ' '
+    )
+  } catch (error) {
+    console.error(error, 'could not apply allowed image names setting')
+    process.exit(1)
+  }
+}
 
 if (process.env.DOCKER_RUNNER) {
   let seccompProfilePath

@@ -61,7 +61,7 @@ module.exports = RequestParser = {
       response.imageName = this._parseAttribute(
         'imageName',
         compile.options.imageName,
-        { type: 'string' }
+        { type: 'string', validValues: settings.allowedImageNamesFlat }
       )
       response.draft = this._parseAttribute('draft', compile.options.draft, {
         default: false,
