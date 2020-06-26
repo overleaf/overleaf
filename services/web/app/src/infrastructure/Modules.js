@@ -22,6 +22,7 @@ const fs = require('fs')
 const Path = require('path')
 const pug = require('pug')
 const async = require('async')
+const Settings = require('settings-sharelatex')
 
 const MODULE_BASE_PATH = Path.resolve(__dirname + '/../../../modules')
 
@@ -91,7 +92,10 @@ module.exports = Modules = {
           )
           result.push(
             this.viewIncludes[view].push(
-              pug.compileFile(filePath, { doctype: 'html' })
+              pug.compileFile(filePath, {
+                doctype: 'html',
+                compileDebug: Settings.debugPugTemplates
+              })
             )
           )
         }

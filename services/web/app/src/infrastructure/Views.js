@@ -1,6 +1,7 @@
 const logger = require('logger-sharelatex')
 const pug = require('pug')
 const globby = require('globby')
+const Settings = require('settings-sharelatex')
 
 // Generate list of view names from app/views
 
@@ -32,7 +33,10 @@ module.exports = {
     viewList.forEach(view => {
       try {
         let filename = view + '.pug'
-        pug.compileFile(filename, { cache: true })
+        pug.compileFile(filename, {
+          cache: true,
+          compileDebug: Settings.debugPugTemplates
+        })
         logger.log({ view }, 'compiled')
         success++
       } catch (err) {
