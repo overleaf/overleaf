@@ -33,7 +33,7 @@ public class StatusHandler extends AbstractHandler {
     if (
       ("GET".equals(method) || "HEAD".equals(method))
         && target != null
-        && target.matches("^\\/status\\/?$")
+        && target.matches("^/status/?$")
     ) {
       Log.info(method + " <- /status");
       baseRequest.setHandled(true);
