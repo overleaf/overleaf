@@ -42,6 +42,7 @@ describe('WebsocketController', function () {
       leave: sinon.stub()
     }
     return (this.WebsocketController = SandboxedModule.require(modulePath, {
+      globals: { console },
       requires: {
         './WebApiManager': (this.WebApiManager = {}),
         './AuthorizationManager': (this.AuthorizationManager = {}),
@@ -393,9 +394,19 @@ describe('WebsocketController', function () {
     })
 
     describe('when the project is not empty', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.clientsInRoom = ['mock-remaining-client']
-        return this.WebsocketController.leaveProject(this.io, this.client)
+        this.io = {
+          sockets: {
+            clients: (room_id) => {
+              if (room_id !== this.project_id) {
+                throw 'expected room_id to be project_id'
+              }
+              return this.clientsInRoom
+            }
+          }
+        }
+        return this.WebsocketController.leaveProject(this.io, this.client, done)
       })
 
       return it('should not flush the project in the document updater', function () {
