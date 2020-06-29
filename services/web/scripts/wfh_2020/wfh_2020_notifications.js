@@ -1,6 +1,6 @@
-const NotificationsHandler = require('../app/src/Features/Notifications/NotificationsHandler')
+const NotificationsHandler = require('../../app/src/Features/Notifications/NotificationsHandler')
 
-const mongojs = require('../app/src/infrastructure/mongojs')
+const mongojs = require('../../app/src/infrastructure/mongojs')
 const { db } = mongojs
 const async = require('async')
 
