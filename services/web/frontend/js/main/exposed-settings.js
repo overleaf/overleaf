@@ -1,2 +1,7 @@
 import App from '../base'
-App.constant('ExposedSettings', window.ExposedSettings)
+
+const ExposedSettings = window.ExposedSettings
+
+App.constant('ExposedSettings', ExposedSettings)
+
+export default ExposedSettings

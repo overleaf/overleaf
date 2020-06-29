@@ -13,19 +13,13 @@ import _ from 'lodash'
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
+import isValidTeXFile from '../../../main/is-valid-tex-file'
 
 export default App.controller('SettingsController', function(
   $scope,
-  ExposedSettings,
   settings,
   ide
 ) {
-  const validRootDocExtensions = ExposedSettings.validRootDocExtensions
-  const validRootDocRegExp = new RegExp(
-    `\\.(${validRootDocExtensions.join('|')})$`,
-    'i'
-  )
-
   $scope.overallThemesList = window.overallThemes
   $scope.ui = { loadingStyleSheet: false }
 
@@ -83,7 +77,7 @@ export default App.controller('SettingsController', function(
       // To gracefully handle that case, make sure we also show the current main file (ignoring extension).
       filteredDocs = $scope.docs.filter(
         doc =>
-          validRootDocRegExp.test(doc.doc.name) ||
+          isValidTeXFile(doc.doc.name) ||
           $scope.project.rootDoc_id === doc.doc.id
       )
     }

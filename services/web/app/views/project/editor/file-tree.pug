@@ -88,6 +88,18 @@ aside.file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected'
 
 						span  {{ entity.name }}
 
+
+	if user.alphaProgram
+		.outline-container(
+			ng-controller="OutlineController"
+		)
+			outline-pane(
+				is-tex-file="isTexFile"
+				outline="outline"
+				jump-to-line="jumpToLine"
+			)
+
+
 script(type='text/ng-template', id='entityListItemTemplate')
 	li(
 		ng-class="{ 'selected': entity.selected, 'multi-selected': entity.multiSelected }",

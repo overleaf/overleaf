@@ -762,6 +762,7 @@ const ProjectController = {
                 featureSwitches: user.featureSwitches,
                 features: user.features,
                 refProviders: user.refProviders,
+                alphaProgram: user.alphaProgram,
                 betaProgram: user.betaProgram,
                 isAdmin: user.isAdmin
               },
