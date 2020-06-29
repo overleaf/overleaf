@@ -380,7 +380,8 @@ module.exports = WebsocketController = {
         // Don't store anonymous users in redis to avoid influx
         if (!user_id || user_id === 'anonymous-user') {
           cursorData.name = ''
-          callback()
+          // consistent async behaviour
+          setTimeout(callback)
         } else {
           cursorData.name =
             first_name && last_name
