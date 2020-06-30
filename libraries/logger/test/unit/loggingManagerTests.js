@@ -290,7 +290,9 @@ describe('LoggingManager', function() {
   describe('checkLogLevel', function() {
     it('should request log level override from the config map', function() {
       this.logger.checkLogLevel()
-      this.Fs.readFile.should.have.been.calledWithMatch('/logging/tracingEndTime')
+      this.Fs.readFile.should.have.been.calledWithMatch(
+        '/logging/tracingEndTime'
+      )
     })
 
     describe('when read errors', function() {
