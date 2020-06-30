@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const { db, ObjectId } = require('../../infrastructure/mongojs')
 const { callbackify } = require('util')
 const { Project } = require('../../models/Project')
@@ -18,6 +19,7 @@ const moment = require('moment')
 const { promiseMapWithLimit } = require('../../util/promises')
 
 const EXPIRE_PROJECTS_AFTER_DAYS = 90
+const PROJECT_EXPIRATION_BATCH_SIZE = 10000
 
 module.exports = {
   markAsDeletedByExternalSource: callbackify(markAsDeletedByExternalSource),
@@ -79,14 +81,22 @@ async function deleteUsersProjects(userId) {
 }
 
 async function expireDeletedProjectsAfterDuration() {
-  const deletedProjects = await DeletedProject.find({
-    'deleterData.deletedAt': {
-      $lt: new Date(moment().subtract(EXPIRE_PROJECTS_AFTER_DAYS, 'days'))
+  const deletedProjects = await DeletedProject.find(
+    {
+      'deleterData.deletedAt': {
+        $lt: new Date(moment().subtract(EXPIRE_PROJECTS_AFTER_DAYS, 'days'))
+      },
+      project: { $ne: null }
     },
-    project: { $ne: null }
-  })
-  for (const deletedProject of deletedProjects) {
-    await expireDeletedProject(deletedProject.deleterData.deletedProjectId)
+    { 'deleterData.deletedProjectId': 1 }
+  ).limit(PROJECT_EXPIRATION_BATCH_SIZE)
+  const projectIds = _.shuffle(
+    deletedProjects.map(
+      deletedProject => deletedProject.deleterData.deletedProjectId
+    )
+  )
+  for (const projectId of projectIds) {
+    await expireDeletedProject(projectId)
   }
 }
 
