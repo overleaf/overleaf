@@ -115,6 +115,22 @@ export default (ShareJsDoc = (function() {
         v: version,
         snapshot
       })
+      this._removeCarriageReturnCharFromShareJsDoc()
+    }
+
+    _removeCarriageReturnCharFromShareJsDoc() {
+      const doc = this._doc
+      if (doc.snapshot.indexOf('\r') === -1) {
+        return
+      }
+      window._ide.pushEvent('remove-carriage-return-char', {
+        doc_id: this.doc_id
+      })
+      let nextPos
+      while ((nextPos = doc.snapshot.indexOf('\r')) !== -1) {
+        sl_console.log('[ShareJsDoc] remove-carriage-return-char', nextPos)
+        doc.del(nextPos, 1)
+      }
     }
 
     submitOp(...args) {
