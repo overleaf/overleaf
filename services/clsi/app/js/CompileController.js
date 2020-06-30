@@ -220,8 +220,10 @@ module.exports = CompileController = {
     const { image } = req.query
     if (
       image &&
-      Settings.allowedImageNamesFlat &&
-      Settings.allowedImageNamesFlat.indexOf(image) === -1
+      Settings.clsi &&
+      Settings.clsi.docker &&
+      Settings.clsi.docker.allowedImages &&
+      !Settings.clsi.docker.allowedImages.includes(image)
     ) {
       return res.status(400).send('invalid image')
     }

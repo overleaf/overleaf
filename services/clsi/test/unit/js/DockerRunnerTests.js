@@ -273,7 +273,7 @@ describe('DockerRunner', function() {
       })
     })
 
-    return describe('with image override', function() {
+    describe('with image override', function() {
       beforeEach(function() {
         this.Settings.texliveImageNameOveride = 'overrideimage.com/something'
         this.DockerRunner._runAndWaitForContainer = sinon
@@ -294,6 +294,62 @@ describe('DockerRunner', function() {
       return it('should use the override and keep the tag', function() {
         const image = this.DockerRunner._getContainerOptions.args[0][1]
         return image.should.equal('overrideimage.com/something/image:2016.2')
+      })
+    })
+
+    describe('with image restriction', function() {
+      beforeEach(function() {
+        this.Settings.clsi.docker.allowedImages = [
+          'repo/image:tag1',
+          'repo/image:tag2'
+        ]
+        this.DockerRunner._runAndWaitForContainer = sinon
+          .stub()
+          .callsArgWith(3, null, (this.output = 'mock-output'))
+      })
+
+      describe('with a valid image', function() {
+        beforeEach(function() {
+          this.DockerRunner.run(
+            this.project_id,
+            this.command,
+            this.directory,
+            'repo/image:tag1',
+            this.timeout,
+            this.env,
+            this.compileGroup,
+            this.callback
+          )
+        })
+
+        it('should setup the container', function() {
+          this.DockerRunner._getContainerOptions.called.should.equal(true)
+        })
+      })
+
+      describe('with a invalid image', function() {
+        beforeEach(function() {
+          this.DockerRunner.run(
+            this.project_id,
+            this.command,
+            this.directory,
+            'something/different:evil',
+            this.timeout,
+            this.env,
+            this.compileGroup,
+            this.callback
+          )
+        })
+
+        it('should call the callback with an error', function() {
+          const err = new Error('image not allowed')
+          this.callback.called.should.equal(true)
+          this.callback.args[0][0].message.should.equal(err.message)
+        })
+
+        it('should not setup the container', function() {
+          this.DockerRunner._getContainerOptions.called.should.equal(false)
+        })
       })
     })
   })

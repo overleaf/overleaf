@@ -306,9 +306,10 @@ describe('CompileController', function() {
         .should.equal(true)
     })
 
-    describe('when allowedImageNamesFlat is set', function() {
+    describe('when allowedImages is set', function() {
       beforeEach(function() {
-        this.Settings.allowedImageNamesFlat = [
+        this.Settings.clsi = { docker: {} }
+        this.Settings.clsi.docker.allowedImages = [
           'repo/image:tag1',
           'repo/image:tag2'
         ]

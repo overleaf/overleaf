@@ -61,7 +61,13 @@ module.exports = RequestParser = {
       response.imageName = this._parseAttribute(
         'imageName',
         compile.options.imageName,
-        { type: 'string', validValues: settings.allowedImageNamesFlat }
+        {
+          type: 'string',
+          validValues:
+            settings.clsi &&
+            settings.clsi.docker &&
+            settings.clsi.docker.allowedImages
+        }
       )
       response.draft = this._parseAttribute('draft', compile.options.draft, {
         default: false,

@@ -116,7 +116,11 @@ describe('RequestParser', function() {
 
   describe('when image restrictions are present', function() {
     beforeEach(function() {
-      this.settings.allowedImageNamesFlat = ['repo/name:tag1', 'repo/name:tag2']
+      this.settings.clsi = { docker: {} }
+      this.settings.clsi.docker.allowedImages = [
+        'repo/name:tag1',
+        'repo/name:tag2'
+      ]
     })
 
     describe('with imageName set to something invalid', function() {

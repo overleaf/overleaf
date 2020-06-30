@@ -73,16 +73,6 @@ if (process.env.ALLOWED_COMPILE_GROUPS) {
     process.exit(1)
   }
 }
-if (process.env.ALLOWED_IMAGE_NAMES_FLAT) {
-  try {
-    module.exports.allowedImageNamesFlat = process.env.ALLOWED_IMAGE_NAMES_FLAT.split(
-      ' '
-    )
-  } catch (error) {
-    console.error(error, 'could not apply allowed image names setting')
-    process.exit(1)
-  }
-}
 
 if (process.env.DOCKER_RUNNER) {
   let seccompProfilePath
@@ -137,6 +127,17 @@ if (process.env.DOCKER_RUNNER) {
       `could not load seccomp profile from ${seccompProfilePath}`
     )
     process.exit(1)
+  }
+
+  if (process.env.ALLOWED_IMAGES) {
+    try {
+      module.exports.clsi.docker.allowedImages = process.env.ALLOWED_IMAGES.split(
+        ' '
+      )
+    } catch (error) {
+      console.error(error, 'could not apply allowed images setting')
+      process.exit(1)
+    }
   }
 
   module.exports.path.synctexBaseDir = () => '/compile'

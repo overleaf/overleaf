@@ -91,6 +91,13 @@ module.exports = DockerRunner = {
       image = `${Settings.texliveImageNameOveride}/${img[2]}`
     }
 
+    if (
+      Settings.clsi.docker.allowedImages &&
+      !Settings.clsi.docker.allowedImages.includes(image)
+    ) {
+      return callback(new Error('image not allowed'))
+    }
+
     const options = DockerRunner._getContainerOptions(
       command,
       image,
