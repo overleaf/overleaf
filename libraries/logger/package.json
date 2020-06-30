@@ -35,6 +35,7 @@
     "eslint-plugin-standard": "^3.0.1",
     "mocha": "^5.2.0",
     "prettier": "^1.18.2",
+    "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "2.0.3",
     "sinon": "7.2.3",
     "sinon-chai": "3.3.0"
