@@ -11,6 +11,9 @@ import 'libs/passfield'
 import 'libs/ng-tags-input-3.0.0'
 import 'libs/select/select'
 
+// Polyfill fetch for IE11
+import 'isomorphic-unfetch'
+
 // Configure dynamically loaded assets (via webpack) to be downloaded from CDN
 // See: https://webpack.js.org/guides/public-path/#on-the-fly
 // eslint-disable-next-line no-undef, camelcase
