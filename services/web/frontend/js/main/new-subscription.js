@@ -6,14 +6,12 @@ import _ from 'lodash'
 */
 /* global recurly */
 import App from '../base'
-import '../directives/creditCards'
 
 export default App.controller('NewSubscriptionController', function(
   $scope,
   MultiCurrencyPricing,
   $http,
-  eventTracking,
-  ccUtils
+  eventTracking
 ) {
   if (typeof recurly === 'undefined' || !recurly) {
     $scope.recurlyLoadError = true
