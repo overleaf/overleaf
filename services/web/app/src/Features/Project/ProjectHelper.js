@@ -1,176 +1,162 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+const { ObjectId } = require('../../infrastructure/mongojs')
+const _ = require('lodash')
+const { promisify } = require('util')
+const Settings = require('settings-sharelatex')
+
 const ENGINE_TO_COMPILER_MAP = {
   latex_dvipdf: 'latex',
   pdflatex: 'pdflatex',
   xelatex: 'xelatex',
   lualatex: 'lualatex'
 }
-const { ObjectId } = require('../../infrastructure/mongojs')
-const _ = require('lodash')
-const { promisify } = require('util')
 
-const ProjectHelper = {
-  compilerFromV1Engine(engine) {
-    return ENGINE_TO_COMPILER_MAP[engine]
-  },
-
-  isArchived(project, userId) {
-    userId = ObjectId(userId)
-
-    if (Array.isArray(project.archived)) {
-      return project.archived.find(id => id.equals(userId)) !== undefined
-    } else {
-      return !!project.archived
-    }
-  },
-
-  isTrashed(project, userId) {
-    userId = ObjectId(userId)
-
-    if (project.trashed) {
-      return project.trashed.find(id => id.equals(userId)) !== undefined
-    } else {
-      return false
-    }
-  },
-
-  isArchivedOrTrashed(project, userId) {
-    return (
-      ProjectHelper.isArchived(project, userId) ||
-      ProjectHelper.isTrashed(project, userId)
-    )
-  },
-
-  allCollaborators(project) {
-    return _.unionWith(
-      [project.owner_ref],
-      project.collaberator_refs,
-      project.readOnly_refs,
-      project.tokenAccessReadAndWrite_refs,
-      project.tokenAccessReadOnly_refs,
-      ProjectHelper._objectIdEquals
-    )
-  },
-
-  calculateArchivedArray(project, userId, action) {
-    let archived = project.archived
-    userId = ObjectId(userId)
-
-    if (archived === true) {
-      archived = ProjectHelper.allCollaborators(project)
-    } else if (!archived) {
-      archived = []
-    }
-
-    if (action === 'ARCHIVE') {
-      archived = _.unionWith(archived, [userId], ProjectHelper._objectIdEquals)
-    } else if (action === 'UNARCHIVE') {
-      archived = archived.filter(
-        id => !ProjectHelper._objectIdEquals(id, userId)
-      )
-    } else {
-      throw new Error('Unrecognised action')
-    }
-
-    return archived
-  },
-
-  ensureNameIsUnique(nameList, name, suffixes, maxLength, callback) {
-    // create a set of all project names
-    if (suffixes == null) {
-      suffixes = []
-    }
-    if (callback == null) {
-      callback = function(error, name) {}
-    }
-    const allNames = new Set(nameList)
-    const isUnique = x => !allNames.has(x)
-    // check if the supplied name is already unique
-    if (isUnique(name)) {
-      return callback(null, name)
-    }
-    // the name already exists, try adding the user-supplied suffixes to generate a unique name
-    for (let suffix of Array.from(suffixes)) {
-      const candidateName = ProjectHelper._addSuffixToProjectName(
-        name,
-        suffix,
-        maxLength
-      )
-      if (isUnique(candidateName)) {
-        return callback(null, candidateName)
-      }
-    }
-    // if there are no (more) suffixes, use a numeric one
-    const uniqueName = ProjectHelper._addNumericSuffixToProjectName(
-      name,
-      allNames,
-      maxLength
-    )
-    if (uniqueName != null) {
-      return callback(null, uniqueName)
-    } else {
-      return callback(
-        new Error(`Failed to generate a unique name for: ${name}`)
-      )
-    }
-  },
-
-  _objectIdEquals(firstVal, secondVal) {
-    // For use as a comparator for unionWith
-    return firstVal.toString() === secondVal.toString()
-  },
-
-  _addSuffixToProjectName(name, suffix, maxLength) {
-    // append the suffix and truncate the project title if needed
-    if (suffix == null) {
-      suffix = ''
-    }
-    const truncatedLength = maxLength - suffix.length
-    return name.substr(0, truncatedLength) + suffix
-  },
-
-  _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
-    const NUMERIC_SUFFIX_MATCH = / \((\d+)\)$/
-    const suffixedName = function(basename, number) {
-      const suffix = ` (${number})`
-      return basename.substr(0, maxLength - suffix.length) + suffix
-    }
-
-    const match = name.match(NUMERIC_SUFFIX_MATCH)
-    let basename = name
-    let n = 1
-    const last = allProjectNames.size + n
-
-    if (match != null) {
-      basename = name.replace(NUMERIC_SUFFIX_MATCH, '')
-      n = parseInt(match[1])
-    }
-
-    while (n <= last) {
-      const candidate = suffixedName(basename, n)
-      if (!allProjectNames.has(candidate)) {
-        return candidate
-      }
-      n += 1
-    }
-
-    return null
+module.exports = {
+  compilerFromV1Engine,
+  isArchived,
+  isTrashed,
+  isArchivedOrTrashed,
+  calculateArchivedArray,
+  ensureNameIsUnique,
+  getAllowedImagesForUser,
+  promises: {
+    ensureNameIsUnique: promisify(ensureNameIsUnique)
   }
 }
 
-ProjectHelper.promises = {
-  ensureNameIsUnique: promisify(ProjectHelper.ensureNameIsUnique)
+function compilerFromV1Engine(engine) {
+  return ENGINE_TO_COMPILER_MAP[engine]
 }
-module.exports = ProjectHelper
+
+function isArchived(project, userId) {
+  userId = ObjectId(userId)
+
+  if (Array.isArray(project.archived)) {
+    return project.archived.some(id => id.equals(userId))
+  } else {
+    return !!project.archived
+  }
+}
+
+function isTrashed(project, userId) {
+  userId = ObjectId(userId)
+
+  if (project.trashed) {
+    return project.trashed.some(id => id.equals(userId))
+  } else {
+    return false
+  }
+}
+
+function isArchivedOrTrashed(project, userId) {
+  return isArchived(project, userId) || isTrashed(project, userId)
+}
+
+function _allCollaborators(project) {
+  return _.unionWith(
+    [project.owner_ref],
+    project.collaberator_refs,
+    project.readOnly_refs,
+    project.tokenAccessReadAndWrite_refs,
+    project.tokenAccessReadOnly_refs,
+    _objectIdEquals
+  )
+}
+
+function calculateArchivedArray(project, userId, action) {
+  let archived = project.archived
+  userId = ObjectId(userId)
+
+  if (archived === true) {
+    archived = _allCollaborators(project)
+  } else if (!archived) {
+    archived = []
+  }
+
+  if (action === 'ARCHIVE') {
+    archived = _.unionWith(archived, [userId], _objectIdEquals)
+  } else if (action === 'UNARCHIVE') {
+    archived = archived.filter(id => !_objectIdEquals(id, userId))
+  } else {
+    throw new Error('Unrecognised action')
+  }
+
+  return archived
+}
+
+function ensureNameIsUnique(nameList, name, suffixes, maxLength, callback) {
+  // create a set of all project names
+  if (suffixes == null) {
+    suffixes = []
+  }
+  const allNames = new Set(nameList)
+  const isUnique = x => !allNames.has(x)
+  // check if the supplied name is already unique
+  if (isUnique(name)) {
+    return callback(null, name)
+  }
+  // the name already exists, try adding the user-supplied suffixes to generate a unique name
+  for (const suffix of suffixes) {
+    const candidateName = _addSuffixToProjectName(name, suffix, maxLength)
+    if (isUnique(candidateName)) {
+      return callback(null, candidateName)
+    }
+  }
+  // if there are no (more) suffixes, use a numeric one
+  const uniqueName = _addNumericSuffixToProjectName(name, allNames, maxLength)
+  if (uniqueName != null) {
+    callback(null, uniqueName)
+  } else {
+    callback(new Error(`Failed to generate a unique name for: ${name}`))
+  }
+}
+
+function _objectIdEquals(firstVal, secondVal) {
+  // For use as a comparator for unionWith
+  return firstVal.toString() === secondVal.toString()
+}
+
+function _addSuffixToProjectName(name, suffix, maxLength) {
+  // append the suffix and truncate the project title if needed
+  if (suffix == null) {
+    suffix = ''
+  }
+  const truncatedLength = maxLength - suffix.length
+  return name.substr(0, truncatedLength) + suffix
+}
+
+function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
+  const NUMERIC_SUFFIX_MATCH = / \((\d+)\)$/
+  const suffixedName = function(basename, number) {
+    const suffix = ` (${number})`
+    return basename.substr(0, maxLength - suffix.length) + suffix
+  }
+
+  const match = name.match(NUMERIC_SUFFIX_MATCH)
+  let basename = name
+  let n = 1
+  const last = allProjectNames.size + n
+
+  if (match != null) {
+    basename = name.replace(NUMERIC_SUFFIX_MATCH, '')
+    n = parseInt(match[1])
+  }
+
+  while (n <= last) {
+    const candidate = suffixedName(basename, n)
+    if (!allProjectNames.has(candidate)) {
+      return candidate
+    }
+    n += 1
+  }
+
+  return null
+}
+
+function getAllowedImagesForUser(sessionUser) {
+  const images = Settings.allowedImageNames || []
+  if (sessionUser && sessionUser.isAdmin) {
+    return images
+  } else {
+    return images.filter(image => !image.adminOnly)
+  }
+}

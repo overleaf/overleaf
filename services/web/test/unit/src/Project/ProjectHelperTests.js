@@ -1,22 +1,9 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const sinon = require('sinon')
 const chai = require('chai')
-const should = chai.should()
 const { expect } = chai
-const modulePath = '../../../../app/src/Features/Project/ProjectHelper.js'
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongojs')
+
+const MODULE_PATH = '../../../../app/src/Features/Project/ProjectHelper.js'
 
 describe('ProjectHelper', function() {
   beforeEach(function() {
@@ -30,7 +17,28 @@ describe('ProjectHelper', function() {
       features: {}
     }
 
-    return (this.ProjectHelper = SandboxedModule.require(modulePath))
+    this.adminUser = {
+      _id: 'admin-user-id',
+      isAdmin: true
+    }
+
+    this.Settings = {
+      allowedImageNames: [
+        { imageName: 'texlive-full:2018.1', imageDesc: 'TeX Live 2018' },
+        { imageName: 'texlive-full:2019.1', imageDesc: 'TeX Live 2019' },
+        {
+          imageName: 'texlive-full:2020.1',
+          imageDesc: 'TeX Live 2020',
+          adminOnly: true
+        }
+      ]
+    }
+
+    this.ProjectHelper = SandboxedModule.require(MODULE_PATH, {
+      requires: {
+        'settings-sharelatex': this.Settings
+      }
+    })
   })
 
   describe('isArchived', function() {
@@ -233,30 +241,57 @@ describe('ProjectHelper', function() {
 
   describe('compilerFromV1Engine', function() {
     it('returns the correct engine for latex_dvipdf', function() {
-      return expect(
-        this.ProjectHelper.compilerFromV1Engine('latex_dvipdf')
-      ).to.equal('latex')
+      expect(this.ProjectHelper.compilerFromV1Engine('latex_dvipdf')).to.equal(
+        'latex'
+      )
     })
 
     it('returns the correct engine for pdflatex', function() {
-      return expect(
-        this.ProjectHelper.compilerFromV1Engine('pdflatex')
-      ).to.equal('pdflatex')
+      expect(this.ProjectHelper.compilerFromV1Engine('pdflatex')).to.equal(
+        'pdflatex'
+      )
     })
 
     it('returns the correct engine for xelatex', function() {
-      return expect(
-        this.ProjectHelper.compilerFromV1Engine('xelatex')
-      ).to.equal('xelatex')
+      expect(this.ProjectHelper.compilerFromV1Engine('xelatex')).to.equal(
+        'xelatex'
+      )
     })
 
     it('returns the correct engine for lualatex', function() {
-      return expect(
-        this.ProjectHelper.compilerFromV1Engine('lualatex')
-      ).to.equal('lualatex')
+      expect(this.ProjectHelper.compilerFromV1Engine('lualatex')).to.equal(
+        'lualatex'
+      )
+    })
+  })
+
+  describe('getAllowedImagesForUser', function() {
+    it('filters out admin-only images when the user is anonymous', function() {
+      const images = this.ProjectHelper.getAllowedImagesForUser(null)
+      const imageNames = images.map(image => image.imageName)
+      expect(imageNames).to.deep.equal([
+        'texlive-full:2018.1',
+        'texlive-full:2019.1'
+      ])
+    })
+
+    it('filters out admin-only images when the user is not admin', function() {
+      const images = this.ProjectHelper.getAllowedImagesForUser(this.user)
+      const imageNames = images.map(image => image.imageName)
+      expect(imageNames).to.deep.equal([
+        'texlive-full:2018.1',
+        'texlive-full:2019.1'
+      ])
+    })
+
+    it('returns all images when the user is admin', function() {
+      const images = this.ProjectHelper.getAllowedImagesForUser(this.adminUser)
+      const imageNames = images.map(image => image.imageName)
+      expect(imageNames).to.deep.equal([
+        'texlive-full:2018.1',
+        'texlive-full:2019.1',
+        'texlive-full:2020.1'
+      ])
     })
   })
 })
-
-// describe "ensureNameIsUnique", ->
-// see tests for: ProjectDetailsHandler.generateUniqueName, which calls here.

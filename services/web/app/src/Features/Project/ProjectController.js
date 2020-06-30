@@ -1,7 +1,3 @@
-/* eslint-disable
-   camelcase
-*/
-
 const Path = require('path')
 const fs = require('fs')
 const crypto = require('crypto')
@@ -253,7 +249,7 @@ const ProjectController = {
       return res.send({ redir: '/register' })
     }
     const currentUser = AuthenticationController.getSessionUser(req)
-    const { first_name, last_name, email } = currentUser
+    const { first_name: firstName, last_name: lastName, email } = currentUser
     ProjectDuplicator.duplicate(
       currentUser,
       projectId,
@@ -270,7 +266,12 @@ const ProjectController = {
           name: project.name,
           project_id: project._id,
           owner_ref: project.owner_ref,
-          owner: { first_name, last_name, email, _id: currentUser._id }
+          owner: {
+            first_name: firstName,
+            last_name: lastName,
+            email,
+            _id: currentUser._id
+          }
         })
       }
     )
@@ -585,16 +586,18 @@ const ProjectController = {
   },
 
   loadEditor(req, res, next) {
-    let anonymous, userId
     const timer = new metrics.Timer('load-editor')
     if (!Settings.editorIsOpen) {
       return res.render('general/closed', { title: 'updating_site' })
     }
 
+    let anonymous, userId, sessionUser
     if (AuthenticationController.isUserLoggedIn(req)) {
+      sessionUser = AuthenticationController.getSessionUser(req)
       userId = AuthenticationController.getLoggedInUserId(req)
       anonymous = false
     } else {
+      sessionUser = null
       anonymous = true
       userId = null
     }
@@ -694,6 +697,9 @@ const ProjectController = {
           projectId
         )
         const { isTokenMember } = results
+        const allowedImageNames = ProjectHelper.getAllowedImagesForUser(
+          sessionUser
+        )
         AuthorizationManager.getPrivilegeLevelForProject(
           userId,
           projectId,
@@ -797,7 +803,7 @@ const ProjectController = {
                 project.overleaf.history &&
                 Boolean(project.overleaf.history.display),
               brandVariation,
-              allowedImageNames: Settings.allowedImageNames || [],
+              allowedImageNames,
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
               wsUrl,
               showSupport: Features.hasFeature('support')

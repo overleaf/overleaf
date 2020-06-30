@@ -75,7 +75,8 @@ describe('ProjectController', function() {
     this.ProjectHelper = {
       isArchived: sinon.stub(),
       isTrashed: sinon.stub(),
-      isArchivedOrTrashed: sinon.stub()
+      isArchivedOrTrashed: sinon.stub(),
+      getAllowedImagesForUser: sinon.stub().returns([])
     }
     this.AuthenticationController = {
       getLoggedInUser: sinon.stub().callsArgWith(1, null, this.user),
