@@ -40,7 +40,9 @@ describe('LoggingManager', function() {
     this.Raven = {
       Client: sinon.stub().returns(this.ravenClient)
     }
-    this.Request = sinon.stub()
+    this.Fs = {
+      readFile: sinon.stub()
+    }
     this.stackdriverStreamConfig = { stream: 'stackdriver' }
     this.stackdriverClient = {
       stream: sinon.stub().returns(this.stackdriverStreamConfig)
@@ -53,7 +55,7 @@ describe('LoggingManager', function() {
       requires: {
         bunyan: this.Bunyan,
         raven: this.Raven,
-        request: this.Request,
+        fs: this.Fs,
         '@google-cloud/logging-bunyan': this.GCPLogging
       }
     })
@@ -286,20 +288,16 @@ describe('LoggingManager', function() {
   })
 
   describe('checkLogLevel', function() {
-    it('should request log level override from google meta data service', function() {
+    it('should request log level override from the config map', function() {
       this.logger.checkLogLevel()
-      const options = {
-        headers: {
-          'Metadata-Flavor': 'Google'
-        },
-        uri: `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
-      }
-      this.Request.should.have.been.calledWithMatch(options)
+      this.Fs.readFile.should.have.been.calledWithMatch(
+        '/logging/tracingEndTime'
+      )
     })
 
-    describe('when request has error', function() {
+    describe('when read errors', function() {
       beforeEach(function() {
-        this.Request.yields('error')
+        this.Fs.readFile.yields(new Error('error'))
         this.logger.checkLogLevel()
       })
 
@@ -310,9 +308,9 @@ describe('LoggingManager', function() {
       })
     })
 
-    describe('when statusCode is not 200', function() {
+    describe('when the file is empty', function() {
       beforeEach(function() {
-        this.Request.yields(null, { statusCode: 404 })
+        this.Fs.readFile.yields(null, '')
         this.logger.checkLogLevel()
       })
 
@@ -325,7 +323,7 @@ describe('LoggingManager', function() {
 
     describe('when time value returned that is less than current time', function() {
       beforeEach(function() {
-        this.Request.yields(null, { statusCode: 200 }, '1')
+        this.Fs.readFile.yields(null, '1')
         this.logger.checkLogLevel()
       })
 
@@ -340,7 +338,7 @@ describe('LoggingManager', function() {
       describe('when level is already set', function() {
         beforeEach(function() {
           this.bunyanLogger.level.returns(10)
-          this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
+          this.Fs.readFile.yields(null, (this.start + 1000).toString())
           this.logger.checkLogLevel()
         })
 
@@ -354,7 +352,7 @@ describe('LoggingManager', function() {
       describe('when level is not already set', function() {
         beforeEach(function() {
           this.bunyanLogger.level.returns(20)
-          this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
+          this.Fs.readFile.yields(null, (this.start + 1000).toString())
           this.logger.checkLogLevel()
         })
 
