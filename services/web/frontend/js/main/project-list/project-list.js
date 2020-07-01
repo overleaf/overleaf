@@ -446,9 +446,7 @@ App.controller('ProjectPageController', function(
           name,
           _id: data.project_id,
           accessLevel: 'owner',
-          owner: {
-            _id: window.user_id
-          }
+          owner: data.owner
           // TODO: Check access level if correct after adding it in
           // to the rest of the app
         })

@@ -278,7 +278,13 @@ const ProjectController = {
   },
 
   newProject(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const currentUser = AuthenticationController.getSessionUser(req)
+    const {
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      _id: userId
+    } = currentUser
     const projectName =
       req.body.projectName != null ? req.body.projectName.trim() : undefined
     const { template } = req.body
@@ -297,7 +303,16 @@ const ProjectController = {
         if (err != null) {
           return next(err)
         }
-        res.send({ project_id: project._id })
+        res.send({
+          project_id: project._id,
+          owner_ref: project.owner_ref,
+          owner: {
+            first_name: firstName,
+            last_name: lastName,
+            email,
+            _id: userId
+          }
+        })
       }
     )
   },
