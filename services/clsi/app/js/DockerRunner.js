@@ -86,16 +86,16 @@ module.exports = DockerRunner = {
       ;({ image } = Settings.clsi.docker)
     }
 
-    if (Settings.texliveImageNameOveride != null) {
-      const img = image.split('/')
-      image = `${Settings.texliveImageNameOveride}/${img[2]}`
-    }
-
     if (
       Settings.clsi.docker.allowedImages &&
       !Settings.clsi.docker.allowedImages.includes(image)
     ) {
       return callback(new Error('image not allowed'))
+    }
+
+    if (Settings.texliveImageNameOveride != null) {
+      const img = image.split('/')
+      image = `${Settings.texliveImageNameOveride}/${img[2]}`
     }
 
     const options = DockerRunner._getContainerOptions(
