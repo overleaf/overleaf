@@ -42,7 +42,6 @@ describe('WebsocketController', function () {
       leave: sinon.stub()
     }
     return (this.WebsocketController = SandboxedModule.require(modulePath, {
-      globals: { console },
       requires: {
         './WebApiManager': (this.WebApiManager = {}),
         './AuthorizationManager': (this.AuthorizationManager = {}),
