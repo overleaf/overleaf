@@ -10,8 +10,8 @@
   "version": "2.1.1",
   "scripts": {
     "test": "mocha test/**/*.js",
-    "format": "prettier-eslint '**/*.js' --list-different",
-    "format:fix": "prettier-eslint '**/*.js' --write",
+    "format": "prettier-eslint $PWD'**/*.js' --list-different",
+    "format:fix": "prettier-eslint $PWD'**/*.js' --write",
     "lint": "eslint -f unix ."
   },
   "dependencies": {
