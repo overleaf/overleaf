@@ -37,6 +37,7 @@ describe('HttpController', function () {
     })
     this.res = {
       send: sinon.stub(),
+      sendStatus: sinon.stub(),
       json: sinon.stub(),
       setHeader: sinon.stub()
     }
@@ -111,7 +112,7 @@ describe('HttpController', function () {
 
       it('should return 404 if the query string delete is not set ', function () {
         this.HttpController.getDoc(this.req, this.res, this.next)
-        return this.res.send.calledWith(404).should.equal(true)
+        return this.res.sendStatus.calledWith(404).should.equal(true)
       })
 
       return it('should return the doc as JSON if include_deleted is set to true', function () {
@@ -374,7 +375,7 @@ describe('HttpController', function () {
       })
 
       return it('should return a 400 (bad request) response', function () {
-        return this.res.send.calledWith(400).should.equal(true)
+        return this.res.sendStatus.calledWith(400).should.equal(true)
       })
     })
 
@@ -390,7 +391,7 @@ describe('HttpController', function () {
       })
 
       return it('should return a 400 (bad request) response', function () {
-        return this.res.send.calledWith(400).should.equal(true)
+        return this.res.sendStatus.calledWith(400).should.equal(true)
       })
     })
 
@@ -406,7 +407,7 @@ describe('HttpController', function () {
       })
 
       return it('should return a 400 (bad request) response', function () {
-        return this.res.send.calledWith(400).should.equal(true)
+        return this.res.sendStatus.calledWith(400).should.equal(true)
       })
     })
 
@@ -447,7 +448,7 @@ describe('HttpController', function () {
     })
 
     return it('should return a 204 (No Content)', function () {
-      return this.res.send.calledWith(204).should.equal(true)
+      return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 
@@ -465,7 +466,7 @@ describe('HttpController', function () {
     })
 
     return it('should return a 204 (No Content)', function () {
-      return this.res.send.calledWith(204).should.equal(true)
+      return this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 
@@ -484,7 +485,7 @@ describe('HttpController', function () {
     })
 
     return it('should return 204', function () {
-      return sinon.assert.calledWith(this.res.send, 204)
+      return sinon.assert.calledWith(this.res.sendStatus, 204)
     })
   })
 })
