@@ -5,7 +5,7 @@ const OError = require('@overleaf/o-error')
 const GCPLogging = require('@google-cloud/logging-bunyan')
 
 // bunyan error serializer
-const errSerializer = function(err) {
+const errSerializer = function (err) {
   if (!err || !err.stack) {
     return err
   }
@@ -22,9 +22,9 @@ const errSerializer = function(err) {
 const Logger = (module.exports = {
   initialize(name) {
     this.isProduction =
-      (process.env['NODE_ENV'] || '').toLowerCase() === 'production'
+      (process.env.NODE_ENV || '').toLowerCase() === 'production'
     this.defaultLevel =
-      process.env['LOG_LEVEL'] || (this.isProduction ? 'warn' : 'debug')
+      process.env.LOG_LEVEL || (this.isProduction ? 'warn' : 'debug')
     this.loggerName = name
     this.logger = bunyan.createLogger({
       name,
@@ -154,7 +154,7 @@ const Logger = (module.exports = {
 
   error(attributes, message, ...args) {
     if (this.ringBuffer !== null && Array.isArray(this.ringBuffer.records)) {
-      attributes.logBuffer = this.ringBuffer.records.filter(function(record) {
+      attributes.logBuffer = this.ringBuffer.records.filter(function (record) {
         return record.level !== 50
       })
     }
@@ -192,14 +192,14 @@ const Logger = (module.exports = {
 
   fatal(attributes, message, callback) {
     if (callback == null) {
-      callback = function() {}
+      callback = function () {}
     }
     this.logger.fatal(attributes, message)
     if (this.raven != null) {
-      var cb = function(e) {
+      var cb = function (e) {
         // call the callback once after 'logged' or 'error' event
         callback()
-        return (cb = function() {})
+        return (cb = function () {})
       }
       this.captureException(attributes, message, 'fatal')
       this.raven.once('logged', cb)
@@ -210,7 +210,7 @@ const Logger = (module.exports = {
   },
 
   _setupRingBuffer() {
-    this.ringBufferSize = parseInt(process.env['LOG_RING_BUFFER_SIZE']) || 0
+    this.ringBufferSize = parseInt(process.env.LOG_RING_BUFFER_SIZE) || 0
     if (this.ringBufferSize > 0) {
       this.ringBuffer = new bunyan.RingBuffer({ limit: this.ringBufferSize })
       this.logger.addStream({
@@ -224,7 +224,7 @@ const Logger = (module.exports = {
   },
 
   _setupStackdriver() {
-    const stackdriverEnabled = yn(process.env['STACKDRIVER_LOGGING'])
+    const stackdriverEnabled = yn(process.env.STACKDRIVER_LOGGING)
     if (!stackdriverEnabled) {
       return
     }
