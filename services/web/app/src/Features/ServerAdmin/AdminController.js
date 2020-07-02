@@ -1,8 +1,7 @@
 /* eslint-disable
     camelcase,
     handle-callback-err,
-    max-len,
-    no-unused-vars,
+    max-len
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -15,18 +14,12 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let AdminController
+
 const metrics = require('metrics-sharelatex')
 const logger = require('logger-sharelatex')
 const _ = require('underscore')
-const { User } = require('../../models/User')
-const { Project } = require('../../models/Project')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const Settings = require('settings-sharelatex')
-const util = require('util')
-const RecurlyWrapper = require('../Subscription/RecurlyWrapper')
-const SubscriptionHandler = require('../Subscription/SubscriptionHandler')
-const projectEntityHandler = require('../Project/ProjectEntityHandler')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
@@ -58,11 +51,10 @@ var updateOpenConnetionsMetrics = function() {
 
 setTimeout(updateOpenConnetionsMetrics, oneMinInMs)
 
-module.exports = AdminController = {
+const AdminController = {
   index: (req, res, next) => {
     let agents, url
     let agent
-    const http = require('http')
     const openSockets = {}
     const object = require('http').globalAgent.sockets
     for (url in object) {
@@ -169,3 +161,5 @@ function __guard__(value, transform) {
     ? transform(value)
     : undefined
 }
+
+module.exports = AdminController
