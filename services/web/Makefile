@@ -48,9 +48,36 @@ test_unit_app:
 	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
 	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
-test_unit_app_parallel: export COMPOSE_PROJECT_NAME = \
+TEST_SUITES = $(sort $(filter-out \
+	$(wildcard test/unit/src/helpers/*), \
+	$(wildcard test/unit/src/*/*)))
+
+MOCHA_CMD_LINE = \
+	mocha \
+		--exit \
+		--file test/unit/bootstrap.js \
+		--grep=${MOCHA_GREP} \
+		--reporter spec \
+		--timeout 25000 \
+
+.PHONY: $(TEST_SUITES)
+$(TEST_SUITES):
+	$(MOCHA_CMD_LINE) $@
+
+J ?= 1
+test_unit_app_parallel_gnu_make: $(TEST_SUITES)
+test_unit_app_parallel_gnu_make_docker: export COMPOSE_PROJECT_NAME = \
+	unit_test_parallel_make_$(BUILD_DIR_NAME)
+test_unit_app_parallel_gnu_make_docker:
+	$(DOCKER_COMPOSE) down -v -t 0
+	$(DOCKER_COMPOSE) run --rm test_unit \
+		make test_unit_app_parallel_gnu_make --output-sync -j $(J)
+	$(DOCKER_COMPOSE) down -v -t 0
+
+test_unit_app_parallel: test_unit_app_parallel_gnu_parallel
+test_unit_app_parallel_gnu_parallel: export COMPOSE_PROJECT_NAME = \
 	unit_test_parallel_$(BUILD_DIR_NAME)
-test_unit_app_parallel:
+test_unit_app_parallel_gnu_parallel:
 	$(DOCKER_COMPOSE) down -v -t 0
 	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:app:parallel
 	$(DOCKER_COMPOSE) down -v -t 0
@@ -111,18 +138,58 @@ ci:
 #
 ORG_PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN_LINT_FORMAT ?= \
-	docker run --rm \
-		--volume $(PWD):/src \
-		--workdir /src \
-		--env NODE_PATH=/app/node_modules \
-		--env PATH=$(ORG_PATH):/app/node_modules/.bin \
-		gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps
+	docker run --rm ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 
-format:
-	npm -q run format
+NODE_MODULES_PATH := ${PATH}:${PWD}/node_modules/.bin:/app/node_modules/.bin
+WITH_NODE_MODULES_PATH = \
+	format_backend \
+	format_frontend \
+	format_misc \
+	format_test \
+	$(TEST_SUITES) \
+
+$(WITH_NODE_MODULES_PATH): export PATH=$(NODE_MODULES_PATH)
+
+format: format_backend
+format_backend:
+	prettier-eslint \
+		app.js \
+		'app/**/*.js' \
+		'modules/*/index.js' \
+		'modules/*/app/**/*.js' \
+	 	--list-different
+
+format: format_frontend
+format_frontend:
+	prettier-eslint \
+		'frontend/**/*.{js,less}' \
+		'modules/*/frontend/**/*.{js,less}' \
+		--list-different
+
+format: format_test
+format_test:
+	prettier-eslint \
+		'test/**/*.js' \
+		'modules/*/test/**/*.js' \
+		--list-different
+
+format: format_misc
+# migrations, scripts, webpack config, karma config
+format_misc:
+	prettier-eslint \
+		'**/*.{js,less}' \
+		--ignore app.js \
+		--ignore 'app/**/*.js' \
+		--ignore 'modules/*/app/**/*.js' \
+		--ignore 'modules/*/index.js' \
+		--ignore 'frontend/**/*.{js,less}' \
+		--ignore 'modules/*/frontend/**/*.{js,less}' \
+		--ignore 'test/**/*.js' \
+		--ignore 'modules/*/test/**/*.js' \
+		--list-different
 
 format_in_docker:
-	$(RUN_LINT_FORMAT) make format
+	$(RUN_LINT_FORMAT) make format -j --output-sync
 
 format_fix:
 	npm -q run format:fix
@@ -137,20 +204,47 @@ lint_in_docker:
 # Build & publish
 #
 
+IMAGE_CI ?= ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+IMAGE_REPO ?= gcr.io/overleaf-ops/$(PROJECT_NAME)
+IMAGE_REPO_BRANCH ?= $(IMAGE_REPO):$(BRANCH_NAME)
+IMAGE_REPO_MASTER ?= $(IMAGE_REPO):master
+IMAGE_REPO_FINAL ?= $(IMAGE_REPO_BRANCH)-$(BUILD_NUMBER)
+
+export SENTRY_RELEASE ?= ${COMMIT_SHA}
+
 build_deps:
 	docker build --pull \
-		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
-		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
-		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):master-deps \
+		--cache-from $(IMAGE_REPO_BRANCH)-deps \
+		--cache-from $(IMAGE_REPO_MASTER)-deps \
+		--tag $(IMAGE_REPO_BRANCH)-deps \
 		--target deps \
 		.
 
-build: build_deps
-	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
-		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
-		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
-		--build-arg SENTRY_RELEASE=${COMMIT_SHA} \
-		--build-arg BRANCH_NAME=$(BRANCH_NAME) \
+build_dev:
+	docker build \
+		--build-arg SENTRY_RELEASE \
+		--cache-from $(IMAGE_REPO_BRANCH)-deps \
+		--cache-from $(IMAGE_CI)-dev \
+		--tag $(IMAGE_CI) \
+		--tag $(IMAGE_CI)-dev \
+		--target dev \
+		.
+
+build_webpack:
+	docker build \
+		--build-arg SENTRY_RELEASE \
+		--cache-from $(IMAGE_CI)-dev \
+		--cache-from $(IMAGE_CI)-webpack \
+		--tag $(IMAGE_CI)-webpack \
+		--target webpack \
+		.
+
+build:
+	docker build \
+		--build-arg SENTRY_RELEASE \
+		--cache-from $(IMAGE_CI)-webpack \
+		--cache-from $(IMAGE_REPO_FINAL) \
+		--tag $(IMAGE_REPO_FINAL) \
 		.
 
 build_test_frontend:

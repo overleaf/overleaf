@@ -45,8 +45,7 @@ services:
     user: node
 
   tar:
-    build: .
-    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER-webpack
     volumes:
       - ./:/tmp/build/
     command: tar -cf /tmp/build/build.tar public/

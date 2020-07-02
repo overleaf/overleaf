@@ -8,5 +8,3 @@ echo "Waiting for translations and minify to finish"
 
 wait $TRANSLATIONS && echo "Translations install complete" || exit 1
 wait $WEBPACK && echo "Webpack complete" || exit 1
-
-rm .sentryclirc

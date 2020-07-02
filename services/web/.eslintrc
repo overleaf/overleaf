@@ -49,6 +49,7 @@
     "chai-friendly/no-unused-expressions": "error"
   },
   "overrides": [
+    // NOTE: changing paths may require updating them in the Makefile too.
     {
       // Test specific rules
       "files": ["**/test/*/src/**/*.js"],

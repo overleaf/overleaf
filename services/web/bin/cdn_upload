@@ -4,6 +4,10 @@ set -e
 # Upload to staging CDN if branch is either 'master' or 'staging-master'
 if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "staging-master" ]]; then
   tar --directory=/tmp/ -xf build.tar
+
+  # delete source maps
+  find /tmp/public -name '*.js.map' -delete
+
   gsutil -h "Cache-Control:public, max-age=31536000" -m cp -r /tmp/public $CDN_STAG
   # Only upload to production CDN if branch is
   if [[ "$BRANCH_NAME" == "master" ]]; then

@@ -138,7 +138,6 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@sentry/webpack-plugin": "^1.11.1",
     "@testing-library/dom": "^7.7.3",
     "@testing-library/react": "^10.0.4",
     "acorn": "^7.1.1",
@@ -191,7 +190,6 @@
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "postcss-loader": "^3.0.0",
     "prettier-eslint-cli": "^4.7.1",
-    "remove-files-webpack-plugin": "^1.4.1",
     "requirejs": "^2.3.6",
     "samlp": "^3.4.1",
     "sandboxed-module": "0.2.0",

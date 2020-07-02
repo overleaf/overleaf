@@ -1,3 +1,6 @@
+.git
+
+modules/*/Makefile
 **/node_modules
 copybara
 data
@@ -5,3 +8,8 @@ public/js
 public/minjs
 public/stylesheets
 public/manifest.json
+
+build.tar
+
+.sentryclirc
+.sentryclirc.enc

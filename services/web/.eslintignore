@@ -1,3 +1,4 @@
+# NOTE: changing paths may require updating them in the Makefile too.
 node_modules
 modules/**/scripts
 frontend/js/vendor
