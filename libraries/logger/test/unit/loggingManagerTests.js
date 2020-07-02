@@ -376,14 +376,14 @@ describe('LoggingManager', function() {
 
     describe('when ring buffer size is positive', function() {
       beforeEach(function() {
-        process.env['LOG_RING_BUFFER_SIZE'] = '20'
+        process.env.LOG_RING_BUFFER_SIZE = '20'
         this.logger = this.LoggingManager.initialize(this.loggerName)
         this.logger.ringBuffer.records = this.logBufferMock
         this.logger.error({}, 'error')
       })
 
       afterEach(function() {
-        process.env['LOG_RING_BUFFER_SIZE'] = undefined
+        process.env.LOG_RING_BUFFER_SIZE = undefined
       })
 
       it('should include buffered logs in error log and filter out error logs in buffer', function() {
@@ -396,13 +396,13 @@ describe('LoggingManager', function() {
 
     describe('when ring buffer size is zero', function() {
       beforeEach(function() {
-        process.env['LOG_RING_BUFFER_SIZE'] = '0'
+        process.env.LOG_RING_BUFFER_SIZE = '0'
         this.logger = this.LoggingManager.initialize(this.loggerName)
         this.logger.error({}, 'error')
       })
 
       afterEach(function() {
-        process.env['LOG_RING_BUFFER_SIZE'] = undefined
+        process.env.LOG_RING_BUFFER_SIZE = undefined
       })
 
       it('should not include buffered logs in error log', function() {
@@ -414,7 +414,7 @@ describe('LoggingManager', function() {
   describe('stackdriver logging', function() {
     describe('when STACKDRIVER_LOGGING is unset', function() {
       beforeEach(function() {
-        process.env['STACKDRIVER_LOGGING'] = undefined
+        process.env.STACKDRIVER_LOGGING = undefined
         this.LoggingManager.initialize(this.loggerName)
       })
 
@@ -427,7 +427,7 @@ describe('LoggingManager', function() {
 
     describe('when STACKDRIVER_LOGGING is true', function() {
       beforeEach(function() {
-        process.env['STACKDRIVER_LOGGING'] = 'true'
+        process.env.STACKDRIVER_LOGGING = 'true'
         this.LoggingManager.initialize(this.loggerName)
       })
 

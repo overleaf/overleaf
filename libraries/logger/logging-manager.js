@@ -22,9 +22,9 @@ const errSerializer = function(err) {
 const Logger = (module.exports = {
   initialize(name) {
     this.isProduction =
-      (process.env['NODE_ENV'] || '').toLowerCase() === 'production'
+      (process.env.NODE_ENV || '').toLowerCase() === 'production'
     this.defaultLevel =
-      process.env['LOG_LEVEL'] || (this.isProduction ? 'warn' : 'debug')
+      process.env.LOG_LEVEL || (this.isProduction ? 'warn' : 'debug')
     this.loggerName = name
     this.logger = bunyan.createLogger({
       name,
@@ -210,7 +210,7 @@ const Logger = (module.exports = {
   },
 
   _setupRingBuffer() {
-    this.ringBufferSize = parseInt(process.env['LOG_RING_BUFFER_SIZE']) || 0
+    this.ringBufferSize = parseInt(process.env.LOG_RING_BUFFER_SIZE) || 0
     if (this.ringBufferSize > 0) {
       this.ringBuffer = new bunyan.RingBuffer({ limit: this.ringBufferSize })
       this.logger.addStream({
@@ -224,7 +224,7 @@ const Logger = (module.exports = {
   },
 
   _setupStackdriver() {
-    const stackdriverEnabled = yn(process.env['STACKDRIVER_LOGGING'])
+    const stackdriverEnabled = yn(process.env.STACKDRIVER_LOGGING)
     if (!stackdriverEnabled) {
       return
     }
