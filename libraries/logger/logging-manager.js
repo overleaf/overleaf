@@ -5,7 +5,7 @@ const OError = require('@overleaf/o-error')
 const GCPLogging = require('@google-cloud/logging-bunyan')
 
 // bunyan error serializer
-const errSerializer = function(err) {
+const errSerializer = function (err) {
   if (!err || !err.stack) {
     return err
   }
@@ -154,7 +154,7 @@ const Logger = (module.exports = {
 
   error(attributes, message, ...args) {
     if (this.ringBuffer !== null && Array.isArray(this.ringBuffer.records)) {
-      attributes.logBuffer = this.ringBuffer.records.filter(function(record) {
+      attributes.logBuffer = this.ringBuffer.records.filter(function (record) {
         return record.level !== 50
       })
     }
@@ -192,14 +192,14 @@ const Logger = (module.exports = {
 
   fatal(attributes, message, callback) {
     if (callback == null) {
-      callback = function() {}
+      callback = function () {}
     }
     this.logger.fatal(attributes, message)
     if (this.raven != null) {
-      var cb = function(e) {
+      var cb = function (e) {
         // call the callback once after 'logged' or 'error' event
         callback()
-        return (cb = function() {})
+        return (cb = function () {})
       }
       this.captureException(attributes, message, 'fatal')
       this.raven.once('logged', cb)
