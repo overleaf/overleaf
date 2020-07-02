@@ -28,8 +28,7 @@ describe('S3PersistorTests', function () {
   const filesSize = 33
   const md5 = 'ffffffff00000000ffffffff00000000'
 
-  let Metrics,
-    Logger,
+  let Logger,
     Transform,
     S3,
     Fs,
@@ -71,10 +70,6 @@ describe('S3PersistorTests', function () {
 
     EmptyPromise = {
       promise: sinon.stub().resolves()
-    }
-
-    Metrics = {
-      count: sinon.stub()
     }
 
     ReadStream = {
@@ -155,7 +150,6 @@ describe('S3PersistorTests', function () {
         './Errors': Errors,
         fs: Fs,
         stream: Stream,
-        'metrics-sharelatex': Metrics,
         crypto
       },
       globals: { console, Buffer }
