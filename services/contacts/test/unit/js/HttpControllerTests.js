@@ -33,6 +33,7 @@ describe('HttpController', function () {
     this.res.status = sinon.stub().returns(this.res)
     this.res.end = sinon.stub()
     this.res.send = sinon.stub()
+    this.res.sendStatus = sinon.stub()
     return (this.next = sinon.stub())
   })
 
@@ -61,8 +62,7 @@ describe('HttpController', function () {
       })
 
       return it('should send back a 204 status', function () {
-        this.res.status.calledWith(204).should.equal(true)
-        return this.res.end.called.should.equal(true)
+        this.res.sendStatus.calledWith(204).should.equal(true)
       })
     })
 
