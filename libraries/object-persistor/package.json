@@ -1,0 +1,49 @@
+{
+  "name": "@overleaf/object-persistor",
+  "version": "1.0.0",
+  "description": "Module for storing objects in multiple backends, with fallback on 404 to assist migration between them",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run lint && npm run format && npm run test:unit",
+    "test:unit": "mocha",
+    "lint": "eslint src test *.js",
+    "format": "prettier-eslint $PWD'/**/*.js' --list-different",
+    "format:fix": "prettier-eslint $PWD'/**/*.js' --write"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com:overleaf/object-persistor"
+  },
+  "author": "Overleaf (https://www.overleaf.com/)",
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "@google-cloud/storage": "^5.1.0",
+    "@overleaf/o-error": "^2.1.0",
+    "aws-sdk": "^2.696.0",
+    "fast-crc32c": "^2.0.0",
+    "glob": "^7.1.6",
+    "logger-sharelatex": "^2.0.0",
+    "node-uuid": "^1.4.8",
+    "range-parser": "^1.2.1",
+    "tiny-async-pool": "^1.1.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-chai-expect": "^2.1.0",
+    "eslint-plugin-chai-friendly": "^0.6.0",
+    "eslint-plugin-mocha": "^7.0.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "mocha": "^8.0.1",
+    "mongodb": "^3.5.9",
+    "prettier-eslint": "^11.0.0",
+    "prettier-eslint-cli": "^5.0.0",
+    "sandboxed-module": "^2.0.4",
+    "sinon": "^9.0.2",
+    "sinon-chai": "^3.5.0"
+  }
+}
