@@ -39,7 +39,7 @@ const cacheDump = setInterval(function() {
   return fs.writeFile(cacheFsPathTmp, dump, function(err) {
     if (err != null) {
       logger.log(OError.tag(err, 'error writing cache file'))
-      return fs.unlink(cacheFsPathTmp)
+      fs.unlink(cacheFsPathTmp, () => {})
     } else {
       fs.rename(cacheFsPathTmp, cacheFsPath, err => {
         if (err) {
