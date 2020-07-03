@@ -40,8 +40,10 @@ describe('LoggingManager', function () {
     this.Raven = {
       Client: sinon.stub().returns(this.ravenClient)
     }
+    this.Request = sinon.stub()
     this.Fs = {
-      readFile: sinon.stub()
+      readFile: sinon.stub(),
+      access: sinon.stub()
     }
     this.stackdriverStreamConfig = { stream: 'stackdriver' }
     this.stackdriverClient = {
@@ -55,6 +57,7 @@ describe('LoggingManager', function () {
       requires: {
         bunyan: this.Bunyan,
         raven: this.Raven,
+        request: this.Request,
         fs: this.Fs,
         '@google-cloud/logging-bunyan': this.GCPLogging
       }
@@ -288,8 +291,16 @@ describe('LoggingManager', function () {
   })
 
   describe('checkLogLevel', function () {
+    beforeEach(function () {
+      this.Fs.access.yields(null)
+    })
+
+
     it('should request log level override from the config map', function () {
       this.logger.checkLogLevel()
+      this.Fs.access.should.have.been.calledWithMatch(
+        '/logging'
+      )
       this.Fs.readFile.should.have.been.calledWithMatch(
         '/logging/tracingEndTime'
       )
@@ -361,6 +372,100 @@ describe('LoggingManager', function () {
             'trace'
           )
         })
+      })
+
+      describe('when /logging does not exist', function () {
+        beforeEach(function () {
+          this.Fs.access.yields(new Error)
+        })
+
+        describe('checkLogLevel', function() {
+          it('should request log level override from google meta data service', function() {
+            this.logger.checkLogLevel()
+            const options = {
+              headers: {
+                'Metadata-Flavor': 'Google'
+              },
+              uri: `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
+            }
+            this.Request.should.have.been.calledWithMatch(options)
+          })
+      
+          describe('when request has error', function() {
+            beforeEach(function() {
+              this.Request.yields('error')
+              this.logger.checkLogLevel()
+            })
+      
+            it('should only set default level', function() {
+              this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
+                'debug'
+              )
+            })
+          })
+      
+          describe('when statusCode is not 200', function() {
+            beforeEach(function() {
+              this.Request.yields(null, { statusCode: 404 })
+              this.logger.checkLogLevel()
+            })
+      
+            it('should only set default level', function() {
+              this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
+                'debug'
+              )
+            })
+          })
+      
+          describe('when time value returned that is less than current time', function() {
+            beforeEach(function() {
+              this.Request.yields(null, { statusCode: 200 }, '1')
+              this.logger.checkLogLevel()
+            })
+      
+            it('should only set default level', function() {
+              this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
+                'debug'
+              )
+            })
+          })
+      
+          describe('when time value returned that is more than current time', function() {
+            describe('when level is already set', function() {
+              beforeEach(function() {
+                this.bunyanLogger.level.returns(10)
+                this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
+                this.logger.checkLogLevel()
+              })
+      
+              it('should set trace level', function() {
+                this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
+                  'trace'
+                )
+              })
+            })
+      
+            describe('when level is not already set', function() {
+              beforeEach(function() {
+                this.bunyanLogger.level.returns(20)
+                this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
+                this.logger.checkLogLevel()
+              })
+      
+              it('should set trace level', function() {
+                this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
+                  'trace'
+                )
+              })
+            })
+          })
+        })
+
+
+
+
+
+        
       })
     })
   })
