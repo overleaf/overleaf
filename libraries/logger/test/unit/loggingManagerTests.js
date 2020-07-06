@@ -29,6 +29,9 @@ describe('LoggingManager', function () {
       captureException: this.captureException,
       once: sinon.stub().yields()
     }
+    this.fetchResponse = {
+      text: sinon.stub().resolves('')
+    }
     this.Bunyan = {
       createLogger: sinon.stub().returns(this.bunyanLogger),
       RingBuffer: bunyan.RingBuffer,
@@ -40,7 +43,9 @@ describe('LoggingManager', function () {
     this.Raven = {
       Client: sinon.stub().returns(this.ravenClient)
     }
-    this.Request = sinon.stub()
+    this.Fetch = {
+      fetch: sinon.stub().resolves(this.fetchResponse)
+    }
     this.Fs = {
       readFile: sinon.stub(),
       access: sinon.stub()
@@ -57,7 +62,7 @@ describe('LoggingManager', function () {
       requires: {
         bunyan: this.Bunyan,
         raven: this.Raven,
-        request: this.Request,
+        'node-fetch': this.Fetch,
         fs: this.Fs,
         '@google-cloud/logging-bunyan': this.GCPLogging
       }
@@ -385,10 +390,10 @@ describe('LoggingManager', function () {
             const options = {
               headers: {
                 'Metadata-Flavor': 'Google'
-              },
-              uri: `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
+              } 
             }
-            this.Request.should.have.been.calledWithMatch(options)
+            const uri = `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
+            this.Fetch.fetch.should.have.been.calledWithMatch(uri,options)
           })
       
           describe('when request has error', function() {
@@ -448,7 +453,13 @@ describe('LoggingManager', function () {
             describe('when level is not already set', function() {
               beforeEach(function() {
                 this.bunyanLogger.level.returns(20)
-                this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
+                this.fetchResponse.text = sinon.stub().resolves(this.start + 1000)
+                this.Fetch.fetch = sinon.stub().resolves(this.fetchResponse)
+                //this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
+                //this.fetchResponse = sinon.stub().resolves
+                
+                
+                //{data: this.start + 1000, status: 200}
                 this.logger.checkLogLevel()
               })
       

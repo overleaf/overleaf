@@ -1,5 +1,5 @@
 const bunyan = require('bunyan')
-const request = require('request')
+const fetch = require('node-fetch')
 const fs = require('fs')
 const yn = require('yn')
 const OError = require('@overleaf/o-error')
@@ -60,19 +60,18 @@ const Logger = (module.exports = {
     const options = {
       headers: {
         'Metadata-Flavor': 'Google'
-      },
-      uri: `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
-    }
-    request(options, (err, response, body) => {
-      if (err) {
-        this.logger.level(this.defaultLevel)
-        return
       }
+    }
+    const uri = `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
+    fetch.fetch(uri,options).then(res => res.text()).then(body => {
       if (parseInt(body) > Date.now()) {
         this.logger.level('trace')
       } else {
         this.logger.level(this.defaultLevel)
       }
+    }).catch(err => {
+      this.logger.level(this.defaultLevel)
+      return
     })
   },
 

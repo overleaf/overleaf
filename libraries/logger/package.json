@@ -18,8 +18,8 @@
     "@google-cloud/logging-bunyan": "^3.0.0",
     "@overleaf/o-error": "^3.0.0",
     "bunyan": "^1.8.14",
+    "node-fetch": "^2.6.0",
     "raven": "^2.6.4",
-    "request": "^2.88.2",
     "yn": "^4.0.0"
   },
   "devDependencies": {
