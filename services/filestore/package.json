@@ -28,7 +28,7 @@
     "fast-crc32c": "^2.0.0",
     "glob": "^7.1.6",
     "lodash.once": "^4.1.1",
-    "logger-sharelatex": "^1.9.1",
+    "logger-sharelatex": "2.1.1",
     "metrics-sharelatex": "^2.6.2",
     "node-uuid": "~1.4.8",
     "range-parser": "^1.2.1",
