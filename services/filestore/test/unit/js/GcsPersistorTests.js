@@ -44,7 +44,6 @@ describe('GcsPersistorTests', function() {
           user_files: 'user_files'
         },
         gcs: {
-          deleteConcurrency: 1,
           directoryKeyRegex: /^[0-9a-fA-F]{24}\/[0-9a-fA-F]{24}/
         }
       }
