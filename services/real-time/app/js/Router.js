@@ -21,6 +21,8 @@ const httpAuth = basicAuth(function (user, pass) {
   return isValid
 })
 
+const HOSTNAME = require('os').hostname()
+
 let Router
 module.exports = Router = {
   _handleError(callback, error, client, method, attrs) {
@@ -155,6 +157,19 @@ module.exports = Router = {
         ;({ user } = session)
       } else {
         user = { _id: 'anonymous-user' }
+      }
+
+      if (settings.exposeHostname) {
+        client.on('debug.getHostname', function (callback) {
+          if (typeof callback !== 'function') {
+            return Router._handleInvalidArguments(
+              client,
+              'debug.getHostname',
+              arguments
+            )
+          }
+          callback(HOSTNAME)
+        })
       }
 
       client.on('joinProject', function (data, callback) {
