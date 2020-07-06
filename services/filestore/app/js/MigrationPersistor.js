@@ -169,27 +169,27 @@ module.exports = function(primary, fallback) {
 
       await primary.promises.sendStream(destBucket, destKey, stream, sourceMd5)
     } catch (err) {
-      const error = new WriteError({
-        message: 'unable to copy file to destination persistor',
-        info: {
+      const error = new WriteError(
+        'unable to copy file to destination persistor',
+        {
           sourceBucket,
           destBucket,
           sourceKey,
           destKey
         }
-      }).withCause(err)
+      ).withCause(err)
       metrics.inc('fallback.copy.failure')
 
       try {
         await primary.promises.deleteFile(destBucket, destKey)
       } catch (err) {
-        error.info.cleanupError = new WriteError({
-          message: 'unable to clean up destination copy artifact',
-          info: {
+        error.info.cleanupError = new WriteError(
+          'unable to clean up destination copy artifact',
+          {
             destBucket,
             destKey
           }
-        }).withCause(err)
+        ).withCause(err)
       }
 
       logger.warn({ error }, 'failed to copy file from fallback')

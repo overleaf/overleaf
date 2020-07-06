@@ -526,7 +526,6 @@ describe('GcsPersistorTests', function() {
     const directoryName = `${ObjectId()}/${ObjectId()}`
     describe('with valid parameters', function() {
       beforeEach(async function() {
-        console.log(key)
         return GcsPersistor.promises.deleteDirectory(bucket, directoryName)
       })
 

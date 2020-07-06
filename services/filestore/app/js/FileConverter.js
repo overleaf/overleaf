@@ -69,9 +69,8 @@ async function preview(sourcePath) {
 
 async function _convert(sourcePath, requestedFormat, command) {
   if (!APPROVED_FORMATS.includes(requestedFormat)) {
-    throw new ConversionError({
-      message: 'invalid format requested',
-      info: { format: requestedFormat }
+    throw new ConversionError('invalid format requested', {
+      format: requestedFormat
     })
   }
 
@@ -87,9 +86,11 @@ async function _convert(sourcePath, requestedFormat, command) {
       timeout: FOURTY_SECONDS
     })
   } catch (err) {
-    throw new ConversionError({
-      message: 'something went wrong converting file',
-      info: { stderr: err.stderr, sourcePath, requestedFormat, destPath }
+    throw new ConversionError('something went wrong converting file', {
+      stderr: err.stderr,
+      sourcePath,
+      requestedFormat,
+      destPath
     }).withCause(err)
   }
 

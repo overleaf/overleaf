@@ -81,14 +81,11 @@ async function verifyMd5(persistor, bucket, key, sourceMd5, destMd5 = null) {
       logger.warn(err, 'error deleting file for invalid upload')
     }
 
-    throw new WriteError({
-      message: 'source and destination hashes do not match',
-      info: {
-        sourceMd5,
-        destMd5,
-        bucket,
-        key
-      }
+    throw new WriteError('source and destination hashes do not match', {
+      sourceMd5,
+      destMd5,
+      bucket,
+      key
     })
   }
 }
@@ -165,15 +162,9 @@ function wrapError(error, message, params, ErrorType) {
     ) ||
     (error.response && error.response.statusCode === 404)
   ) {
-    return new NotFoundError({
-      message: 'no such file',
-      info: params
-    }).withCause(error)
+    return new NotFoundError('no such file', params).withCause(error)
   } else {
-    return new ErrorType({
-      message: message,
-      info: params
-    }).withCause(error)
+    return new ErrorType(message, params).withCause(error)
   }
 }
 

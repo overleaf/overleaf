@@ -322,10 +322,10 @@ function _getClientForBucket(bucket) {
     return _defaultClient
   }
 
-  throw new SettingsError({
-    message: 'no bucket-specific or default credentials provided',
-    info: { bucket }
-  })
+  throw new SettingsError(
+    'no bucket-specific or default credentials provided',
+    { bucket }
+  )
 }
 
 function _buildClientOptions(bucketCredentials) {
