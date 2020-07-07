@@ -63,8 +63,9 @@ App.controller('TagListController', function($scope, $modal) {
           project.tags.splice(index, 1)
         }
       }
-      // Remove tag
-      $scope.tags = $scope.tags.filter(t => t !== tag)
+
+      // Remove tag in place to update the state everywhere
+      $scope.tags.splice($scope.tags.indexOf(tag), 1)
     })
   }
 
