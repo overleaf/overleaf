@@ -1,14 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let ChannelManager
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const settings = require('settings-sharelatex')
@@ -19,7 +8,7 @@ const ClientMap = new Map() // for each redis client, store a Map of subscribed 
 // that we never subscribe to a channel multiple times. The socket.io side is
 // handled by RoomManager.
 
-module.exports = ChannelManager = {
+module.exports = {
   getClientMapEntry(rclient) {
     // return the per-client channel map if it exists, otherwise create and
     // return an empty map for the client.
@@ -36,22 +25,25 @@ module.exports = ChannelManager = {
       const p = rclient.subscribe(channel)
       p.finally(function () {
         if (clientChannelMap.get(channel) === subscribePromise) {
-          return clientChannelMap.delete(channel)
+          clientChannelMap.delete(channel)
         }
       })
         .then(function () {
           logger.log({ channel }, 'subscribed to channel')
-          return metrics.inc(`subscribe.${baseChannel}`)
+          metrics.inc(`subscribe.${baseChannel}`)
         })
         .catch(function (err) {
           logger.error({ channel, err }, 'failed to subscribe to channel')
-          return metrics.inc(`subscribe.failed.${baseChannel}`)
+          metrics.inc(`subscribe.failed.${baseChannel}`)
         })
       return p
     }
 
     const pendingActions = clientChannelMap.get(channel) || Promise.resolve()
-    var subscribePromise = pendingActions.then(actualSubscribe, actualSubscribe)
+    const subscribePromise = pendingActions.then(
+      actualSubscribe,
+      actualSubscribe
+    )
     clientChannelMap.set(channel, subscribePromise)
     logger.log({ channel }, 'planned to subscribe to channel')
     return subscribePromise
@@ -62,26 +54,25 @@ module.exports = ChannelManager = {
     const channel = `${baseChannel}:${id}`
     const actualUnsubscribe = function () {
       // unsubscribe is happening in the background, it should not reject
-      const p = rclient
+      return rclient
         .unsubscribe(channel)
         .finally(function () {
           if (clientChannelMap.get(channel) === unsubscribePromise) {
-            return clientChannelMap.delete(channel)
+            clientChannelMap.delete(channel)
           }
         })
         .then(function () {
           logger.log({ channel }, 'unsubscribed from channel')
-          return metrics.inc(`unsubscribe.${baseChannel}`)
+          metrics.inc(`unsubscribe.${baseChannel}`)
         })
         .catch(function (err) {
           logger.error({ channel, err }, 'unsubscribed from channel')
-          return metrics.inc(`unsubscribe.failed.${baseChannel}`)
+          metrics.inc(`unsubscribe.failed.${baseChannel}`)
         })
-      return p
     }
 
     const pendingActions = clientChannelMap.get(channel) || Promise.resolve()
-    var unsubscribePromise = pendingActions.then(
+    const unsubscribePromise = pendingActions.then(
       actualUnsubscribe,
       actualUnsubscribe
     )
@@ -100,6 +91,6 @@ module.exports = ChannelManager = {
     }
     // we publish on a different client to the subscribe, so we can't
     // check for the channel existing here
-    return rclient.publish(channel, data)
+    rclient.publish(channel, data)
   }
 }

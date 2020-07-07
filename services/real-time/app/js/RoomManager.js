@@ -1,19 +1,6 @@
 /* eslint-disable
     camelcase,
-    no-unused-vars,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let RoomManager
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const { EventEmitter } = require('events')
@@ -31,23 +18,17 @@ const RoomEvents = new EventEmitter() // emits {project,doc}-active and {project
 //
 // The pubsub side is handled by ChannelManager
 
-module.exports = RoomManager = {
+module.exports = {
   joinProject(client, project_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return this.joinEntity(client, 'project', project_id, callback)
+    this.joinEntity(client, 'project', project_id, callback)
   },
 
   joinDoc(client, doc_id, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return this.joinEntity(client, 'doc', doc_id, callback)
+    this.joinEntity(client, 'doc', doc_id, callback)
   },
 
   leaveDoc(client, doc_id) {
-    return this.leaveEntity(client, 'doc', doc_id)
+    this.leaveEntity(client, 'doc', doc_id)
   },
 
   leaveProjectAndDocs(client) {
@@ -58,18 +39,14 @@ module.exports = RoomManager = {
     // has not joined any rooms and do a final disconnection.
     const roomsToLeave = this._roomsClientIsIn(client)
     logger.log({ client: client.id, roomsToLeave }, 'client leaving project')
-    return (() => {
-      const result = []
-      for (const id of Array.from(roomsToLeave)) {
-        const entity = IdMap.get(id)
-        result.push(this.leaveEntity(client, entity, id))
-      }
-      return result
-    })()
+    for (const id of roomsToLeave) {
+      const entity = IdMap.get(id)
+      this.leaveEntity(client, entity, id)
+    }
   },
 
   emitOnCompletion(promiseList, eventName) {
-    return Promise.all(promiseList)
+    Promise.all(promiseList)
       .then(() => RoomEvents.emit(eventName))
       .catch((err) => RoomEvents.emit(eventName, err))
   },
@@ -92,19 +69,19 @@ module.exports = RoomManager = {
           { client: client.id, entity, id, beforeCount },
           'client joined new room and subscribed to channel'
         )
-        return callback(err)
+        callback(err)
       })
       RoomEvents.emit(`${entity}-active`, id)
       IdMap.set(id, entity)
       // keep track of the number of listeners
-      return metrics.gauge('room-listeners', RoomEvents.eventNames().length)
+      metrics.gauge('room-listeners', RoomEvents.eventNames().length)
     } else {
       logger.log(
         { client: client.id, entity, id, beforeCount },
         'client joined existing room'
       )
       client.join(id)
-      return callback()
+      callback()
     }
   },
 
@@ -128,7 +105,7 @@ module.exports = RoomManager = {
       'client left room'
     )
     // is the room now empty? if so, unsubscribe
-    if (entity == null) {
+    if (!entity) {
       logger.error({ entity: id }, 'unknown entity when leaving with id')
       return
     }
@@ -136,54 +113,48 @@ module.exports = RoomManager = {
       logger.log({ entity, id }, 'room is now empty')
       RoomEvents.emit(`${entity}-empty`, id)
       IdMap.delete(id)
-      return metrics.gauge('room-listeners', RoomEvents.eventNames().length)
+      metrics.gauge('room-listeners', RoomEvents.eventNames().length)
     }
   },
 
   // internal functions below, these access socket.io rooms data directly and
   // will need updating for socket.io v2
 
+  // The below code makes some assumptions that are always true for v0
+  // - we are using the base namespace '', so room names are '/<ENTITY>'
+  //   https://github.com/socketio/socket.io/blob/e4d61b1be65ac3313a85da111a46777aa8d4aae3/lib/manager.js#L62
+  //   https://github.com/socketio/socket.io/blob/e4d61b1be65ac3313a85da111a46777aa8d4aae3/lib/manager.js#L1018
+  // - client.namespace is a Namespace
+  //   https://github.com/socketio/socket.io/blob/e4d61b1be65ac3313a85da111a46777aa8d4aae3/lib/namespace.js#L204
+  //   https://github.com/socketio/socket.io/blob/e4d61b1be65ac3313a85da111a46777aa8d4aae3/lib/socket.js#L40
+  // - client.manager is a Manager
+  //   https://github.com/socketio/socket.io/blob/e4d61b1be65ac3313a85da111a46777aa8d4aae3/lib/namespace.js#L204
+  //   https://github.com/socketio/socket.io/blob/e4d61b1be65ac3313a85da111a46777aa8d4aae3/lib/socket.js#L41
+  // - a Manager has
+  //   - `.rooms={'NAMESPACE/ENTITY': []}` and
+  //   - `.roomClients={'CLIENT_ID': {'...': true}}`
+  //   https://github.com/socketio/socket.io/blob/e4d61b1be65ac3313a85da111a46777aa8d4aae3/lib/manager.js#L287-L288
+  //   https://github.com/socketio/socket.io/blob/e4d61b1be65ac3313a85da111a46777aa8d4aae3/lib/manager.js#L444-L455
+
   _clientsInRoom(client, room) {
-    const nsp = client.namespace.name
-    const name = nsp + '/' + room
-    return (
-      __guard__(
-        client.manager != null ? client.manager.rooms : undefined,
-        (x) => x[name]
-      ) || []
-    ).length
+    const clients = client.manager.rooms['/' + room] || []
+    return clients.length
   },
 
   _roomsClientIsIn(client) {
-    const roomList = (() => {
-      const result = []
-      for (const fullRoomPath in client.manager.roomClients != null
-        ? client.manager.roomClients[client.id]
-        : undefined) {
-        // strip socket.io prefix from room to get original id
-        if (fullRoomPath !== '') {
-          const [prefix, room] = Array.from(fullRoomPath.split('/', 2))
-          result.push(room)
-        }
-      }
-      return result
-    })()
-    return roomList
+    const rooms = client.manager.roomClients[client.id] || {}
+    return (
+      Object.keys(rooms)
+        // drop the namespace
+        .filter((room) => room !== '')
+        // room names are composed as '<NAMESPACE>/<ROOM>' and the default
+        //  namespace is empty (see comments above), just drop the '/'
+        .map((fullRoomPath) => fullRoomPath.slice(1))
+    )
   },
 
   _clientAlreadyInRoom(client, room) {
-    const nsp = client.namespace.name
-    const name = nsp + '/' + room
-    return __guard__(
-      client.manager.roomClients != null
-        ? client.manager.roomClients[client.id]
-        : undefined,
-      (x) => x[name]
-    )
+    const rooms = client.manager.roomClients[client.id] || {}
+    return !!rooms['/' + room]
   }
-}
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

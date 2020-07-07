@@ -1,31 +1,21 @@
-/* eslint-disable
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let DrainManager
 const logger = require('logger-sharelatex')
 
-module.exports = DrainManager = {
+module.exports = {
   startDrainTimeWindow(io, minsToDrain) {
     const drainPerMin = io.sockets.clients().length / minsToDrain
-    return DrainManager.startDrain(io, Math.max(drainPerMin / 60, 4))
-  }, // enforce minimum drain rate
+    // enforce minimum drain rate
+    this.startDrain(io, Math.max(drainPerMin / 60, 4))
+  },
 
   startDrain(io, rate) {
     // Clear out any old interval
-    let pollingInterval
     clearInterval(this.interval)
     logger.log({ rate }, 'starting drain')
     if (rate === 0) {
       return
-    } else if (rate < 1) {
+    }
+    let pollingInterval
+    if (rate < 1) {
       // allow lower drain rates
       // e.g. rate=0.1 will drain one client every 10 seconds
       pollingInterval = 1000 / rate
@@ -33,15 +23,15 @@ module.exports = DrainManager = {
     } else {
       pollingInterval = 1000
     }
-    return (this.interval = setInterval(() => {
-      return this.reconnectNClients(io, rate)
-    }, pollingInterval))
+    this.interval = setInterval(() => {
+      this.reconnectNClients(io, rate)
+    }, pollingInterval)
   },
 
   RECONNECTED_CLIENTS: {},
   reconnectNClients(io, N) {
     let drainedCount = 0
-    for (const client of Array.from(io.sockets.clients())) {
+    for (const client of io.sockets.clients()) {
       if (!this.RECONNECTED_CLIENTS[client.id]) {
         this.RECONNECTED_CLIENTS[client.id] = true
         logger.log(
@@ -57,7 +47,7 @@ module.exports = DrainManager = {
       }
     }
     if (drainedCount < N) {
-      return logger.log('All clients have been told to reconnectGracefully')
+      logger.log('All clients have been told to reconnectGracefully')
     }
   }
 }

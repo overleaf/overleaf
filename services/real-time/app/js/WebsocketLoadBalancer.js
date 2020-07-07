@@ -1,17 +1,6 @@
 /* eslint-disable
     camelcase,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let WebsocketLoadBalancer
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const RedisClientManager = require('./RedisClientManager')
@@ -33,12 +22,13 @@ const RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
   'removeEntity'
 ]
 
+let WebsocketLoadBalancer
 module.exports = WebsocketLoadBalancer = {
   rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub),
   rclientSubList: RedisClientManager.createClientList(Settings.redis.pubsub),
 
   emitToRoom(room_id, message, ...payload) {
-    if (room_id == null) {
+    if (!room_id) {
       logger.warn(
         { message, payload },
         'no room_id provided, ignoring emitToRoom'
@@ -55,99 +45,78 @@ module.exports = WebsocketLoadBalancer = {
       'emitting to room'
     )
 
-    return Array.from(this.rclientPubList).map((rclientPub) =>
+    this.rclientPubList.map((rclientPub) =>
       ChannelManager.publish(rclientPub, 'editor-events', room_id, data)
     )
   },
 
   emitToAll(message, ...payload) {
-    return this.emitToRoom('all', message, ...Array.from(payload))
+    this.emitToRoom('all', message, ...payload)
   },
 
   listenForEditorEvents(io) {
     logger.log(
-      { rclients: this.rclientPubList.length },
-      'publishing editor events'
-    )
-    logger.log(
       { rclients: this.rclientSubList.length },
       'listening for editor events'
     )
-    for (const rclientSub of Array.from(this.rclientSubList)) {
+    for (const rclientSub of this.rclientSubList) {
       rclientSub.subscribe('editor-events')
       rclientSub.on('message', function (channel, message) {
         if (Settings.debugEvents > 0) {
           EventLogger.debugEvent(channel, message)
         }
-        return WebsocketLoadBalancer._processEditorEvent(io, channel, message)
+        WebsocketLoadBalancer._processEditorEvent(io, channel, message)
       })
     }
-    return this.handleRoomUpdates(this.rclientSubList)
+    this.handleRoomUpdates(this.rclientSubList)
   },
 
   handleRoomUpdates(rclientSubList) {
     const roomEvents = RoomManager.eventSource()
     roomEvents.on('project-active', function (project_id) {
-      const subscribePromises = Array.from(rclientSubList).map((rclient) =>
+      const subscribePromises = rclientSubList.map((rclient) =>
         ChannelManager.subscribe(rclient, 'editor-events', project_id)
       )
-      return RoomManager.emitOnCompletion(
+      RoomManager.emitOnCompletion(
         subscribePromises,
         `project-subscribed-${project_id}`
       )
     })
-    return roomEvents.on('project-empty', (project_id) =>
-      Array.from(rclientSubList).map((rclient) =>
+    roomEvents.on('project-empty', (project_id) =>
+      rclientSubList.map((rclient) =>
         ChannelManager.unsubscribe(rclient, 'editor-events', project_id)
       )
     )
   },
 
   _processEditorEvent(io, channel, message) {
-    return SafeJsonParse.parse(message, function (error, message) {
-      let clientList
-      let client
-      if (error != null) {
+    SafeJsonParse.parse(message, function (error, message) {
+      if (error) {
         logger.error({ err: error, channel }, 'error parsing JSON')
         return
       }
       if (message.room_id === 'all') {
-        return io.sockets.emit(message.message, ...Array.from(message.payload))
+        io.sockets.emit(message.message, ...message.payload)
       } else if (
         message.message === 'clientTracking.refresh' &&
-        message.room_id != null
+        message.room_id
       ) {
-        clientList = io.sockets.clients(message.room_id)
+        const clientList = io.sockets.clients(message.room_id)
         logger.log(
           {
             channel,
             message: message.message,
             room_id: message.room_id,
             message_id: message._id,
-            socketIoClients: (() => {
-              const result = []
-              for (client of Array.from(clientList)) {
-                result.push(client.id)
-              }
-              return result
-            })()
+            socketIoClients: clientList.map((client) => client.id)
           },
           'refreshing client list'
         )
-        return (() => {
-          const result1 = []
-          for (client of Array.from(clientList)) {
-            result1.push(
-              ConnectedUsersManager.refreshClient(
-                message.room_id,
-                client.publicId
-              )
-            )
-          }
-          return result1
-        })()
-      } else if (message.room_id != null) {
-        if (message._id != null && Settings.checkEventOrder) {
+        for (const client of clientList) {
+          ConnectedUsersManager.refreshClient(message.room_id, client.publicId)
+        }
+      } else if (message.room_id) {
+        if (message._id && Settings.checkEventOrder) {
           const status = EventLogger.checkEventOrder(
             'editor-events',
             message._id,
@@ -158,12 +127,12 @@ module.exports = WebsocketLoadBalancer = {
           }
         }
 
-        const is_restricted_message = !Array.from(
-          RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST
-        ).includes(message.message)
+        const is_restricted_message = !RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST.includes(
+          message.message
+        )
 
         // send messages only to unique clients (due to duplicate entries in io.sockets.clients)
-        clientList = io.sockets
+        const clientList = io.sockets
           .clients(message.room_id)
           .filter(
             (client) =>
@@ -180,37 +149,23 @@ module.exports = WebsocketLoadBalancer = {
             message: message.message,
             room_id: message.room_id,
             message_id: message._id,
-            socketIoClients: (() => {
-              const result2 = []
-              for (client of Array.from(clientList)) {
-                result2.push(client.id)
-              }
-              return result2
-            })()
+            socketIoClients: clientList.map((client) => client.id)
           },
           'distributing event to clients'
         )
-        const seen = {}
-        return (() => {
-          const result3 = []
-          for (client of Array.from(clientList)) {
-            if (!seen[client.id]) {
-              seen[client.id] = true
-              result3.push(
-                client.emit(message.message, ...Array.from(message.payload))
-              )
-            } else {
-              result3.push(undefined)
-            }
+        const seen = new Map()
+        for (const client of clientList) {
+          if (!seen.has(client.id)) {
+            seen.set(client.id, true)
+            client.emit(message.message, ...message.payload)
           }
-          return result3
-        })()
-      } else if (message.health_check != null) {
+        }
+      } else if (message.health_check) {
         logger.debug(
           { message },
           'got health check message in editor events channel'
         )
-        return HealthCheckManager.check(channel, message.key)
+        HealthCheckManager.check(channel, message.key)
       }
     })
   }

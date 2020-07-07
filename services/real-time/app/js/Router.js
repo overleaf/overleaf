@@ -1,19 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
-    standard/no-callback-literal,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let Router
 const metrics = require('metrics-sharelatex')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
@@ -34,14 +21,10 @@ const httpAuth = basicAuth(function (user, pass) {
   return isValid
 })
 
+let Router
 module.exports = Router = {
   _handleError(callback, error, client, method, attrs) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
-    if (attrs == null) {
-      attrs = {}
-    }
+    attrs = attrs || {}
     for (const key of ['project_id', 'doc_id', 'user_id']) {
       attrs[key] = client.ol_context[key]
     }
@@ -49,15 +32,15 @@ module.exports = Router = {
     attrs.err = error
     if (error.name === 'CodedError') {
       logger.warn(attrs, error.message, { code: error.code })
-      return callback({ message: error.message, code: error.code })
-    }
-    if (error.message === 'unexpected arguments') {
+      const serializedError = { message: error.message, code: error.code }
+      callback(serializedError)
+    } else if (error.message === 'unexpected arguments') {
       // the payload might be very large, put it on level info
       logger.log(attrs, 'unexpected arguments')
       metrics.inc('unexpected-arguments', 1, { status: method })
-      return callback({ message: error.message })
-    }
-    if (
+      const serializedError = { message: error.message }
+      callback(serializedError)
+    } else if (
       [
         'not authorized',
         'doc updater could not load requested ops',
@@ -65,11 +48,15 @@ module.exports = Router = {
       ].includes(error.message)
     ) {
       logger.warn(attrs, error.message)
-      return callback({ message: error.message })
+      const serializedError = { message: error.message }
+      callback(serializedError)
     } else {
       logger.error(attrs, `server side error in ${method}`)
       // Don't return raw error to prevent leaking server side info
-      return callback({ message: 'Something went wrong in real-time service' })
+      const serializedError = {
+        message: 'Something went wrong in real-time service'
+      }
+      callback(serializedError)
     }
   },
 
@@ -80,7 +67,7 @@ module.exports = Router = {
       callback = function () {}
     }
     const attrs = { arguments: args }
-    return Router._handleError(callback, error, client, method, attrs)
+    Router._handleError(callback, error, client, method, attrs)
   },
 
   configure(app, io, session) {
@@ -102,18 +89,17 @@ module.exports = Router = {
       HttpApiController.disconnectClient
     )
 
-    return session.on('connection', function (error, client, session) {
+    session.on('connection', function (error, client, session) {
       // init client context, we may access it in Router._handleError before
       //  setting any values
-      let user
       client.ol_context = {}
 
-      if (client != null) {
+      if (client) {
         client.on('error', function (err) {
           logger.err({ clientErr: err }, 'socket.io client error')
           if (client.connected) {
             client.emit('reconnectGracefully')
-            return client.disconnect()
+            client.disconnect()
           }
         })
       }
@@ -125,13 +111,12 @@ module.exports = Router = {
       }
 
       if (
-        client != null &&
-        __guard__(error != null ? error.message : undefined, (x) =>
-          x.match(/could not look up session by key/)
-        )
+        client &&
+        error &&
+        error.message.match(/could not look up session by key/)
       ) {
         logger.warn(
-          { err: error, client: client != null, session: session != null },
+          { err: error, client: !!client, session: !!session },
           'invalid session'
         )
         // tell the client to reauthenticate if it has an invalid session key
@@ -140,15 +125,15 @@ module.exports = Router = {
         return
       }
 
-      if (error != null) {
+      if (error) {
         logger.err(
-          { err: error, client: client != null, session: session != null },
+          { err: error, client: !!client, session: !!session },
           'error when client connected'
         )
-        if (client != null) {
+        if (client) {
           client.emit('connectionRejected', { message: 'error' })
         }
-        if (client != null) {
+        if (client) {
           client.disconnect()
         }
         return
@@ -159,30 +144,21 @@ module.exports = Router = {
       client.emit('connectionAccepted', null, client.publicId)
 
       metrics.inc('socket-io.connection')
-      metrics.gauge(
-        'socket-io.clients',
-        __guard__(io.sockets.clients(), (x1) => x1.length)
-      )
+      metrics.gauge('socket-io.clients', io.sockets.clients().length)
 
       logger.log({ session, client_id: client.id }, 'client connected')
 
-      if (
-        __guard__(
-          session != null ? session.passport : undefined,
-          (x2) => x2.user
-        ) != null
-      ) {
+      let user
+      if (session && session.passport && session.passport.user) {
         ;({ user } = session.passport)
-      } else if ((session != null ? session.user : undefined) != null) {
+      } else if (session && session.user) {
         ;({ user } = session)
       } else {
         user = { _id: 'anonymous-user' }
       }
 
       client.on('joinProject', function (data, callback) {
-        if (data == null) {
-          data = {}
-        }
+        data = data || {}
         if (typeof callback !== 'function') {
           return Router._handleInvalidArguments(
             client,
@@ -194,18 +170,18 @@ module.exports = Router = {
         if (data.anonymousAccessToken) {
           user.anonymousAccessToken = data.anonymousAccessToken
         }
-        return WebsocketController.joinProject(
+        WebsocketController.joinProject(
           client,
           user,
           data.project_id,
           function (err, ...args) {
-            if (err != null) {
-              return Router._handleError(callback, err, client, 'joinProject', {
+            if (err) {
+              Router._handleError(callback, err, client, 'joinProject', {
                 project_id: data.project_id,
-                user_id: user != null ? user.id : undefined
+                user_id: user._id
               })
             } else {
-              return callback(null, ...Array.from(args))
+              callback(null, ...args)
             }
           }
         )
@@ -213,19 +189,11 @@ module.exports = Router = {
 
       client.on('disconnect', function () {
         metrics.inc('socket-io.disconnect')
-        metrics.gauge(
-          'socket-io.clients',
-          __guard__(io.sockets.clients(), (x3) => x3.length) - 1
-        )
+        metrics.gauge('socket-io.clients', io.sockets.clients().length)
 
-        return WebsocketController.leaveProject(io, client, function (err) {
-          if (err != null) {
-            return Router._handleError(
-              function () {},
-              err,
-              client,
-              'leaveProject'
-            )
+        WebsocketController.leaveProject(io, client, function (err) {
+          if (err) {
+            Router._handleError(function () {}, err, client, 'leaveProject')
           }
         })
       })
@@ -263,19 +231,19 @@ module.exports = Router = {
           return Router._handleInvalidArguments(client, 'joinDoc', arguments)
         }
 
-        return WebsocketController.joinDoc(
+        WebsocketController.joinDoc(
           client,
           doc_id,
           fromVersion,
           options,
           function (err, ...args) {
-            if (err != null) {
-              return Router._handleError(callback, err, client, 'joinDoc', {
+            if (err) {
+              Router._handleError(callback, err, client, 'joinDoc', {
                 doc_id,
                 fromVersion
               })
             } else {
-              return callback(null, ...Array.from(args))
+              callback(null, ...args)
             }
           }
         )
@@ -286,22 +254,16 @@ module.exports = Router = {
           return Router._handleInvalidArguments(client, 'leaveDoc', arguments)
         }
 
-        return WebsocketController.leaveDoc(client, doc_id, function (
-          err,
-          ...args
-        ) {
-          if (err != null) {
-            return Router._handleError(callback, err, client, 'leaveDoc')
+        WebsocketController.leaveDoc(client, doc_id, function (err, ...args) {
+          if (err) {
+            Router._handleError(callback, err, client, 'leaveDoc')
           } else {
-            return callback(null, ...Array.from(args))
+            callback(null, ...args)
           }
         })
       })
 
       client.on('clientTracking.getConnectedUsers', function (callback) {
-        if (callback == null) {
-          callback = function (error, users) {}
-        }
         if (typeof callback !== 'function') {
           return Router._handleInvalidArguments(
             client,
@@ -310,19 +272,16 @@ module.exports = Router = {
           )
         }
 
-        return WebsocketController.getConnectedUsers(client, function (
-          err,
-          users
-        ) {
-          if (err != null) {
-            return Router._handleError(
+        WebsocketController.getConnectedUsers(client, function (err, users) {
+          if (err) {
+            Router._handleError(
               callback,
               err,
               client,
               'clientTracking.getConnectedUsers'
             )
           } else {
-            return callback(null, users)
+            callback(null, users)
           }
         })
       })
@@ -331,8 +290,8 @@ module.exports = Router = {
         cursorData,
         callback
       ) {
-        if (callback == null) {
-          callback = function (error) {}
+        if (!callback) {
+          callback = function () {}
         }
         if (typeof callback !== 'function') {
           return Router._handleInvalidArguments(
@@ -342,28 +301,23 @@ module.exports = Router = {
           )
         }
 
-        return WebsocketController.updateClientPosition(
-          client,
-          cursorData,
-          function (err) {
-            if (err != null) {
-              return Router._handleError(
-                callback,
-                err,
-                client,
-                'clientTracking.updatePosition'
-              )
-            } else {
-              return callback()
-            }
+        WebsocketController.updateClientPosition(client, cursorData, function (
+          err
+        ) {
+          if (err) {
+            Router._handleError(
+              callback,
+              err,
+              client,
+              'clientTracking.updatePosition'
+            )
+          } else {
+            callback()
           }
-        )
+        })
       })
 
-      return client.on('applyOtUpdate', function (doc_id, update, callback) {
-        if (callback == null) {
-          callback = function (error) {}
-        }
+      client.on('applyOtUpdate', function (doc_id, update, callback) {
         if (typeof callback !== 'function') {
           return Router._handleInvalidArguments(
             client,
@@ -372,31 +326,19 @@ module.exports = Router = {
           )
         }
 
-        return WebsocketController.applyOtUpdate(
-          client,
-          doc_id,
-          update,
-          function (err) {
-            if (err != null) {
-              return Router._handleError(
-                callback,
-                err,
-                client,
-                'applyOtUpdate',
-                { doc_id, update }
-              )
-            } else {
-              return callback()
-            }
+        WebsocketController.applyOtUpdate(client, doc_id, update, function (
+          err
+        ) {
+          if (err) {
+            Router._handleError(callback, err, client, 'applyOtUpdate', {
+              doc_id,
+              update
+            })
+          } else {
+            callback()
           }
-        )
+        })
       })
     })
   }
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

@@ -1,15 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const async = require('async')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
@@ -29,9 +20,6 @@ module.exports = {
   // update. This way we don't care if the connected_user key has expired when
   // we receive a cursor update.
   updateUserPosition(project_id, client_id, user, cursorData, callback) {
-    if (callback == null) {
-      callback = function (err) {}
-    }
     logger.log({ project_id, client_id }, 'marking user as joined or connected')
 
     const multi = rclient.multi()
@@ -65,7 +53,7 @@ module.exports = {
       user.email || ''
     )
 
-    if (cursorData != null) {
+    if (cursorData) {
       multi.hset(
         Keys.connectedUser({ project_id, client_id }),
         'cursorData',
@@ -77,21 +65,18 @@ module.exports = {
       USER_TIMEOUT_IN_S
     )
 
-    return multi.exec(function (err) {
-      if (err != null) {
+    multi.exec(function (err) {
+      if (err) {
         logger.err(
           { err, project_id, client_id },
           'problem marking user as connected'
         )
       }
-      return callback(err)
+      callback(err)
     })
   },
 
-  refreshClient(project_id, client_id, callback) {
-    if (callback == null) {
-      callback = function (err) {}
-    }
+  refreshClient(project_id, client_id) {
     logger.log({ project_id, client_id }, 'refreshing connected client')
     const multi = rclient.multi()
     multi.hset(
@@ -103,14 +88,13 @@ module.exports = {
       Keys.connectedUser({ project_id, client_id }),
       USER_TIMEOUT_IN_S
     )
-    return multi.exec(function (err) {
-      if (err != null) {
+    multi.exec(function (err) {
+      if (err) {
         logger.err(
           { err, project_id, client_id },
           'problem refreshing connected client'
         )
       }
-      return callback(err)
     })
   },
 
@@ -120,74 +104,66 @@ module.exports = {
     multi.srem(Keys.clientsInProject({ project_id }), client_id)
     multi.expire(Keys.clientsInProject({ project_id }), FOUR_DAYS_IN_S)
     multi.del(Keys.connectedUser({ project_id, client_id }))
-    return multi.exec(callback)
+    multi.exec(callback)
   },
 
   _getConnectedUser(project_id, client_id, callback) {
-    return rclient.hgetall(
-      Keys.connectedUser({ project_id, client_id }),
-      function (err, result) {
-        if (
-          result == null ||
-          Object.keys(result).length === 0 ||
-          !result.user_id
-        ) {
-          result = {
-            connected: false,
-            client_id
-          }
-        } else {
-          result.connected = true
-          result.client_id = client_id
-          result.client_age =
-            (Date.now() - parseInt(result.last_updated_at, 10)) / 1000
-          if (result.cursorData != null) {
-            try {
-              result.cursorData = JSON.parse(result.cursorData)
-            } catch (e) {
-              logger.error(
-                {
-                  err: e,
-                  project_id,
-                  client_id,
-                  cursorData: result.cursorData
-                },
-                'error parsing cursorData JSON'
-              )
-              return callback(e)
-            }
+    rclient.hgetall(Keys.connectedUser({ project_id, client_id }), function (
+      err,
+      result
+    ) {
+      if (!(result && result.user_id)) {
+        result = {
+          connected: false,
+          client_id
+        }
+      } else {
+        result.connected = true
+        result.client_id = client_id
+        result.client_age =
+          (Date.now() - parseInt(result.last_updated_at, 10)) / 1000
+        if (result.cursorData) {
+          try {
+            result.cursorData = JSON.parse(result.cursorData)
+          } catch (e) {
+            logger.error(
+              {
+                err: e,
+                project_id,
+                client_id,
+                cursorData: result.cursorData
+              },
+              'error parsing cursorData JSON'
+            )
+            return callback(e)
           }
         }
-        return callback(err, result)
       }
-    )
+      callback(err, result)
+    })
   },
 
   getConnectedUsers(project_id, callback) {
     const self = this
-    return rclient.smembers(Keys.clientsInProject({ project_id }), function (
+    rclient.smembers(Keys.clientsInProject({ project_id }), function (
       err,
       results
     ) {
-      if (err != null) {
+      if (err) {
         return callback(err)
       }
       const jobs = results.map((client_id) => (cb) =>
         self._getConnectedUser(project_id, client_id, cb)
       )
-      return async.series(jobs, function (err, users) {
-        if (users == null) {
-          users = []
-        }
-        if (err != null) {
+      async.series(jobs, function (err, users) {
+        if (err) {
           return callback(err)
         }
         users = users.filter(
           (user) =>
-            (user != null ? user.connected : undefined) &&
-            (user != null ? user.client_age : undefined) < REFRESH_TIMEOUT_IN_S
+            user && user.connected && user.client_age < REFRESH_TIMEOUT_IN_S
         )
-        return callback(null, users)
+        callback(null, users)
       })
     })
   }

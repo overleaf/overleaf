@@ -1,18 +1,6 @@
 /* eslint-disable
     camelcase,
-    no-unused-vars,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let DocumentUpdaterController
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const RedisClientManager = require('./RedisClientManager')
@@ -23,28 +11,25 @@ const RoomManager = require('./RoomManager')
 const ChannelManager = require('./ChannelManager')
 const metrics = require('metrics-sharelatex')
 
-const MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 // 1Mb
-
+let DocumentUpdaterController
 module.exports = DocumentUpdaterController = {
   // DocumentUpdaterController is responsible for updates that come via Redis
   // Pub/Sub from the document updater.
   rclientList: RedisClientManager.createClientList(settings.redis.pubsub),
 
   listenForUpdatesFromDocumentUpdater(io) {
-    let i, rclient
     logger.log(
       { rclients: this.rclientList.length },
       'listening for applied-ops events'
     )
-    for (i = 0; i < this.rclientList.length; i++) {
-      rclient = this.rclientList[i]
+    for (const rclient of this.rclientList) {
       rclient.subscribe('applied-ops')
       rclient.on('message', function (channel, message) {
         metrics.inc('rclient', 0.001) // global event rate metric
         if (settings.debugEvents > 0) {
           EventLogger.debugEvent(channel, message)
         }
-        return DocumentUpdaterController._processMessageFromDocumentUpdater(
+        DocumentUpdaterController._processMessageFromDocumentUpdater(
           io,
           channel,
           message
@@ -53,42 +38,41 @@ module.exports = DocumentUpdaterController = {
     }
     // create metrics for each redis instance only when we have multiple redis clients
     if (this.rclientList.length > 1) {
-      for (i = 0; i < this.rclientList.length; i++) {
-        rclient = this.rclientList[i]
-        ;((
-          i // per client event rate metric
-        ) => rclient.on('message', () => metrics.inc(`rclient-${i}`, 0.001)))(i)
-      }
+      this.rclientList.forEach((rclient, i) => {
+        // per client event rate metric
+        const metricName = `rclient-${i}`
+        rclient.on('message', () => metrics.inc(metricName, 0.001))
+      })
     }
-    return this.handleRoomUpdates(this.rclientList)
+    this.handleRoomUpdates(this.rclientList)
   },
 
   handleRoomUpdates(rclientSubList) {
     const roomEvents = RoomManager.eventSource()
     roomEvents.on('doc-active', function (doc_id) {
-      const subscribePromises = Array.from(rclientSubList).map((rclient) =>
+      const subscribePromises = rclientSubList.map((rclient) =>
         ChannelManager.subscribe(rclient, 'applied-ops', doc_id)
       )
-      return RoomManager.emitOnCompletion(
+      RoomManager.emitOnCompletion(
         subscribePromises,
         `doc-subscribed-${doc_id}`
       )
     })
-    return roomEvents.on('doc-empty', (doc_id) =>
-      Array.from(rclientSubList).map((rclient) =>
+    roomEvents.on('doc-empty', (doc_id) =>
+      rclientSubList.map((rclient) =>
         ChannelManager.unsubscribe(rclient, 'applied-ops', doc_id)
       )
     )
   },
 
   _processMessageFromDocumentUpdater(io, channel, message) {
-    return SafeJsonParse.parse(message, function (error, message) {
-      if (error != null) {
+    SafeJsonParse.parse(message, function (error, message) {
+      if (error) {
         logger.error({ err: error, channel }, 'error parsing JSON')
         return
       }
-      if (message.op != null) {
-        if (message._id != null && settings.checkEventOrder) {
+      if (message.op) {
+        if (message._id && settings.checkEventOrder) {
           const status = EventLogger.checkEventOrder(
             'applied-ops',
             message._id,
@@ -98,24 +82,24 @@ module.exports = DocumentUpdaterController = {
             return // skip duplicate events
           }
         }
-        return DocumentUpdaterController._applyUpdateFromDocumentUpdater(
+        DocumentUpdaterController._applyUpdateFromDocumentUpdater(
           io,
           message.doc_id,
           message.op
         )
-      } else if (message.error != null) {
-        return DocumentUpdaterController._processErrorFromDocumentUpdater(
+      } else if (message.error) {
+        DocumentUpdaterController._processErrorFromDocumentUpdater(
           io,
           message.doc_id,
           message.error,
           message
         )
-      } else if (message.health_check != null) {
+      } else if (message.health_check) {
         logger.debug(
           { message },
           'got health check message in applied ops channel'
         )
-        return HealthCheckManager.check(channel, message.key)
+        HealthCheckManager.check(channel, message.key)
       }
     })
   },
@@ -132,20 +116,14 @@ module.exports = DocumentUpdaterController = {
       {
         doc_id,
         version: update.v,
-        source: update.meta != null ? update.meta.source : undefined,
-        socketIoClients: (() => {
-          const result = []
-          for (client of Array.from(clientList)) {
-            result.push(client.id)
-          }
-          return result
-        })()
+        source: update.meta && update.meta.source,
+        socketIoClients: clientList.map((client) => client.id)
       },
       'distributing updates to clients'
     )
     const seen = {}
     // send messages only to unique clients (due to duplicate entries in io.sockets.clients)
-    for (client of Array.from(clientList)) {
+    for (client of clientList) {
       if (!seen[client.id]) {
         seen[client.id] = true
         if (client.publicId === update.meta.source) {
@@ -153,7 +131,7 @@ module.exports = DocumentUpdaterController = {
             {
               doc_id,
               version: update.v,
-              source: update.meta != null ? update.meta.source : undefined
+              source: update.meta.source
             },
             'distributing update to sender'
           )
@@ -164,7 +142,7 @@ module.exports = DocumentUpdaterController = {
             {
               doc_id,
               version: update.v,
-              source: update.meta != null ? update.meta.source : undefined,
+              source: update.meta.source,
               client_id: client.id
             },
             'distributing update to collaborator'
@@ -175,16 +153,10 @@ module.exports = DocumentUpdaterController = {
     }
     if (Object.keys(seen).length < clientList.length) {
       metrics.inc('socket-io.duplicate-clients', 0.1)
-      return logger.log(
+      logger.log(
         {
           doc_id,
-          socketIoClients: (() => {
-            const result1 = []
-            for (client of Array.from(clientList)) {
-              result1.push(client.id)
-            }
-            return result1
-          })()
+          socketIoClients: clientList.map((client) => client.id)
         },
         'discarded duplicate clients'
       )
@@ -192,17 +164,13 @@ module.exports = DocumentUpdaterController = {
   },
 
   _processErrorFromDocumentUpdater(io, doc_id, error, message) {
-    return (() => {
-      const result = []
-      for (const client of Array.from(io.sockets.clients(doc_id))) {
-        logger.warn(
-          { err: error, doc_id, client_id: client.id },
-          'error from document updater, disconnecting client'
-        )
-        client.emit('otUpdateError', error, message)
-        result.push(client.disconnect())
-      }
-      return result
-    })()
+    for (const client of io.sockets.clients(doc_id)) {
+      logger.warn(
+        { err: error, doc_id, client_id: client.id },
+        'error from document updater, disconnecting client'
+      )
+      client.emit('otUpdateError', error, message)
+      client.disconnect()
+    }
   }
 }

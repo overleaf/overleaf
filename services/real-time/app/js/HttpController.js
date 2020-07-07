@@ -1,28 +1,15 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let HttpController
-const async = require('async')
 
+let HttpController
 module.exports = HttpController = {
   // The code in this controller is hard to unit test because of a lot of
   // dependencies on internal socket.io methods. It is not critical to the running
   // of ShareLaTeX, and is only used for getting stats about connected clients,
   // and for checking internal state in acceptance tests. The acceptances tests
   // should provide appropriate coverage.
-  _getConnectedClientView(ioClient, callback) {
-    if (callback == null) {
-      callback = function (error, client) {}
-    }
+  _getConnectedClientView(ioClient) {
     const client_id = ioClient.id
     const {
       project_id,
@@ -41,32 +28,23 @@ module.exports = HttpController = {
       email,
       connected_time
     }
-    client.rooms = []
-    for (const name in ioClient.manager.roomClients[client_id]) {
-      const joined = ioClient.manager.roomClients[client_id][name]
-      if (joined && name !== '') {
-        client.rooms.push(name.replace(/^\//, '')) // Remove leading /
-      }
-    }
-    return callback(null, client)
+    client.rooms = Object.keys(ioClient.manager.roomClients[client_id] || {})
+      // drop the namespace
+      .filter((room) => room !== '')
+      // room names are composed as '<NAMESPACE>/<ROOM>' and the default
+      //  namespace is empty (see comments in RoomManager), just drop the '/'
+      .map((fullRoomPath) => fullRoomPath.slice(1))
+    return client
   },
 
-  getConnectedClients(req, res, next) {
+  getConnectedClients(req, res) {
     const io = req.app.get('io')
     const ioClients = io.sockets.clients()
-    return async.map(
-      ioClients,
-      HttpController._getConnectedClientView,
-      function (error, clients) {
-        if (error != null) {
-          return next(error)
-        }
-        return res.json(clients)
-      }
-    )
+
+    res.json(ioClients.map(HttpController._getConnectedClientView))
   },
 
-  getConnectedClient(req, res, next) {
+  getConnectedClient(req, res) {
     const { client_id } = req.params
     const io = req.app.get('io')
     const ioClient = io.sockets.sockets[client_id]
@@ -74,14 +52,6 @@ module.exports = HttpController = {
       res.sendStatus(404)
       return
     }
-    return HttpController._getConnectedClientView(ioClient, function (
-      error,
-      client
-    ) {
-      if (error != null) {
-        return next(error)
-      }
-      return res.json(client)
-    })
+    res.json(HttpController._getConnectedClientView(ioClient))
   }
 }

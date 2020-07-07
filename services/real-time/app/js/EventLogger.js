@@ -1,15 +1,6 @@
 /* eslint-disable
     camelcase,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let EventLogger
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
@@ -31,15 +22,15 @@ module.exports = EventLogger = {
   debugEvent(channel, message) {
     if (settings.debugEvents > 0) {
       logger.log({ channel, message, counter: COUNTER++ }, 'logging event')
-      return settings.debugEvents--
+      settings.debugEvents--
     }
   },
 
-  checkEventOrder(channel, message_id, message) {
-    let result
+  checkEventOrder(channel, message_id) {
     if (typeof message_id !== 'string') {
       return
     }
+    let result
     if (!(result = message_id.match(/^(.*)-(\d+)$/))) {
       return
     }
@@ -51,7 +42,7 @@ module.exports = EventLogger = {
     }
     // store the last count in a hash for each host
     const previous = EventLogger._storeEventCount(key, count)
-    if (previous == null || count === previous + 1) {
+    if (!previous || count === previous + 1) {
       metrics.inc(`event.${channel}.valid`, 0.001) // downsample high rate docupdater events
       return // order is ok
     }
@@ -83,18 +74,11 @@ module.exports = EventLogger = {
   },
 
   _cleanEventStream(now) {
-    return (() => {
-      const result = []
-      for (const key in EVENT_LOG_TIMESTAMP) {
-        const timestamp = EVENT_LOG_TIMESTAMP[key]
-        if (now - timestamp > EventLogger.MAX_STALE_TIME_IN_MS) {
-          delete EVENT_LOG_COUNTER[key]
-          result.push(delete EVENT_LOG_TIMESTAMP[key])
-        } else {
-          result.push(undefined)
-        }
+    Object.entries(EVENT_LOG_TIMESTAMP).forEach(([key, timestamp]) => {
+      if (now - timestamp > EventLogger.MAX_STALE_TIME_IN_MS) {
+        delete EVENT_LOG_COUNTER[key]
+        delete EVENT_LOG_TIMESTAMP[key]
       }
-      return result
-    })()
+    })
   }
 }
