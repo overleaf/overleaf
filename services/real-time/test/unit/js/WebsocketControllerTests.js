@@ -77,7 +77,9 @@ describe('WebsocketController', function () {
           }
         }
         this.privilegeLevel = 'owner'
-        this.ConnectedUsersManager.updateUserPosition = sinon.stub().callsArg(4)
+        this.ConnectedUsersManager.updateUserPosition = sinon
+          .stub()
+          .callsArgAsync(4)
         this.isRestrictedUser = true
         this.WebApiManager.joinProject = sinon
           .stub()
@@ -212,7 +214,9 @@ describe('WebsocketController', function () {
           }
         }
         this.privilegeLevel = 'owner'
-        this.ConnectedUsersManager.updateUserPosition = sinon.stub().callsArg(4)
+        this.ConnectedUsersManager.updateUserPosition = sinon
+          .stub()
+          .callsArgAsync(4)
         this.isRestrictedUser = true
         this.WebApiManager.joinProject = sinon
           .stub()
@@ -393,9 +397,19 @@ describe('WebsocketController', function () {
     })
 
     describe('when the project is not empty', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.clientsInRoom = ['mock-remaining-client']
-        return this.WebsocketController.leaveProject(this.io, this.client)
+        this.io = {
+          sockets: {
+            clients: (room_id) => {
+              if (room_id !== this.project_id) {
+                throw 'expected room_id to be project_id'
+              }
+              return this.clientsInRoom
+            }
+          }
+        }
+        return this.WebsocketController.leaveProject(this.io, this.client, done)
       })
 
       return it('should not flush the project in the document updater', function () {
@@ -953,7 +967,7 @@ describe('WebsocketController', function () {
       this.WebsocketLoadBalancer.emitToRoom = sinon.stub()
       this.ConnectedUsersManager.updateUserPosition = sinon
         .stub()
-        .callsArgWith(4)
+        .callsArgAsync(4)
       this.AuthorizationManager.assertClientCanViewProjectAndDoc = sinon
         .stub()
         .callsArgWith(2, null)
@@ -965,7 +979,7 @@ describe('WebsocketController', function () {
     })
 
     describe('with a logged in user', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.client.ol_context = {
           project_id: this.project_id,
           first_name: (this.first_name = 'Douglas'),
@@ -973,9 +987,8 @@ describe('WebsocketController', function () {
           email: (this.email = 'joe@example.com'),
           user_id: (this.user_id = 'user-id-123')
         }
-        this.WebsocketController.updateClientPosition(this.client, this.update)
 
-        return (this.populatedCursorData = {
+        this.populatedCursorData = {
           doc_id: this.doc_id,
           id: this.client.publicId,
           name: `${this.first_name} ${this.last_name}`,
@@ -983,7 +996,12 @@ describe('WebsocketController', function () {
           column: this.column,
           email: this.email,
           user_id: this.user_id
-        })
+        }
+        this.WebsocketController.updateClientPosition(
+          this.client,
+          this.update,
+          done
+        )
       })
 
       it("should send the update to the project room with the user's name", function () {
@@ -1025,7 +1043,7 @@ describe('WebsocketController', function () {
     })
 
     describe('with a logged in user who has no last_name set', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.client.ol_context = {
           project_id: this.project_id,
           first_name: (this.first_name = 'Douglas'),
@@ -1033,9 +1051,8 @@ describe('WebsocketController', function () {
           email: (this.email = 'joe@example.com'),
           user_id: (this.user_id = 'user-id-123')
         }
-        this.WebsocketController.updateClientPosition(this.client, this.update)
 
-        return (this.populatedCursorData = {
+        this.populatedCursorData = {
           doc_id: this.doc_id,
           id: this.client.publicId,
           name: `${this.first_name}`,
@@ -1043,7 +1060,12 @@ describe('WebsocketController', function () {
           column: this.column,
           email: this.email,
           user_id: this.user_id
-        })
+        }
+        this.WebsocketController.updateClientPosition(
+          this.client,
+          this.update,
+          done
+        )
       })
 
       it("should send the update to the project room with the user's name", function () {
@@ -1085,7 +1107,7 @@ describe('WebsocketController', function () {
     })
 
     describe('with a logged in user who has no first_name set', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.client.ol_context = {
           project_id: this.project_id,
           first_name: undefined,
@@ -1093,9 +1115,8 @@ describe('WebsocketController', function () {
           email: (this.email = 'joe@example.com'),
           user_id: (this.user_id = 'user-id-123')
         }
-        this.WebsocketController.updateClientPosition(this.client, this.update)
 
-        return (this.populatedCursorData = {
+        this.populatedCursorData = {
           doc_id: this.doc_id,
           id: this.client.publicId,
           name: `${this.last_name}`,
@@ -1103,7 +1124,12 @@ describe('WebsocketController', function () {
           column: this.column,
           email: this.email,
           user_id: this.user_id
-        })
+        }
+        this.WebsocketController.updateClientPosition(
+          this.client,
+          this.update,
+          done
+        )
       })
 
       it("should send the update to the project room with the user's name", function () {
@@ -1144,7 +1170,7 @@ describe('WebsocketController', function () {
       })
     })
     describe('with a logged in user who has no names set', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.client.ol_context = {
           project_id: this.project_id,
           first_name: undefined,
@@ -1154,7 +1180,8 @@ describe('WebsocketController', function () {
         }
         return this.WebsocketController.updateClientPosition(
           this.client,
-          this.update
+          this.update,
+          done
         )
       })
 
@@ -1174,13 +1201,14 @@ describe('WebsocketController', function () {
     })
 
     describe('with an anonymous user', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.client.ol_context = {
           project_id: this.project_id
         }
         return this.WebsocketController.updateClientPosition(
           this.client,
-          this.update
+          this.update,
+          done
         )
       })
 
@@ -1203,13 +1231,16 @@ describe('WebsocketController', function () {
     })
 
     return describe('when the client has disconnected', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.client.disconnected = true
         this.AuthorizationManager.assertClientCanViewProjectAndDoc = sinon.stub()
         return this.WebsocketController.updateClientPosition(
           this.client,
           this.update,
-          this.callback
+          (...args) => {
+            this.callback(...args)
+            done(args[0])
+          }
         )
       })
 

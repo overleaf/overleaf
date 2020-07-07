@@ -113,7 +113,7 @@ describe('RoomManager', function () {
     })
 
     return describe('when there are other clients in the project room', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.RoomManager._clientsInRoom
           .withArgs(this.client, this.project_id)
           .onFirstCall()
@@ -121,7 +121,7 @@ describe('RoomManager', function () {
           .onSecondCall()
           .returns(124)
         this.client.join = sinon.stub()
-        return this.RoomManager.joinProject(this.client, this.project_id)
+        this.RoomManager.joinProject(this.client, this.project_id, done)
       })
 
       it('should join the room using the id', function () {
@@ -174,7 +174,7 @@ describe('RoomManager', function () {
     })
 
     return describe('when there are other clients in the doc room', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.RoomManager._clientsInRoom
           .withArgs(this.client, this.doc_id)
           .onFirstCall()
@@ -182,7 +182,7 @@ describe('RoomManager', function () {
           .onSecondCall()
           .returns(124)
         this.client.join = sinon.stub()
-        return this.RoomManager.joinDoc(this.client, this.doc_id)
+        this.RoomManager.joinDoc(this.client, this.doc_id, done)
       })
 
       it('should join the room using the id', function () {
