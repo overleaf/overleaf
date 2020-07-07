@@ -3,6 +3,7 @@ const chai = require('chai')
 const { expect } = chai
 const modulePath = '../../../app/js/LocalFileWriter.js'
 const SandboxedModule = require('sandboxed-module')
+const { Errors } = require('@overleaf/object-persistor')
 chai.use(require('sinon-chai'))
 
 describe('LocalFileWriter', function() {
@@ -22,6 +23,8 @@ describe('LocalFileWriter', function() {
       pipeline: sinon.stub().yields()
     }
 
+    const ObjectPersistor = { Errors }
+
     LocalFileWriter = SandboxedModule.require(modulePath, {
       requires: {
         fs,
@@ -30,7 +33,8 @@ describe('LocalFileWriter', function() {
         'metrics-sharelatex': {
           inc: sinon.stub(),
           Timer: sinon.stub().returns({ done: sinon.stub() })
-        }
+        },
+        '@overleaf/object-persistor': ObjectPersistor
       }
     })
   })

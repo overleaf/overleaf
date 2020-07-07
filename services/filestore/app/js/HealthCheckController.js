@@ -31,7 +31,7 @@ async function checkCanGetFiles() {
   try {
     await pipeline(sourceStream, buffer)
   } catch (err) {
-    throw new HealthCheckError('failed to get health-check file').withCause(err)
+    throw new HealthCheckError('failed to get health-check file', {}, err)
   }
 
   if (!buffer.size()) {

@@ -86,12 +86,11 @@ async function _convert(sourcePath, requestedFormat, command) {
       timeout: FOURTY_SECONDS
     })
   } catch (err) {
-    throw new ConversionError('something went wrong converting file', {
-      stderr: err.stderr,
-      sourcePath,
-      requestedFormat,
-      destPath
-    }).withCause(err)
+    throw new ConversionError(
+      'something went wrong converting file',
+      { stderr: err.stderr, sourcePath, requestedFormat, destPath },
+      err
+    )
   }
 
   timer.done()

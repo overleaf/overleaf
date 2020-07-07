@@ -30,9 +30,7 @@ async function writeStream(stream, key) {
   } catch (err) {
     await deleteFile(fsPath)
 
-    throw new WriteError('problem writing file locally', {
-      fsPath
-    }).withCause(err)
+    throw new WriteError('problem writing file locally', { fsPath }, err)
   }
 }
 
@@ -44,7 +42,7 @@ async function deleteFile(fsPath) {
     await promisify(fs.unlink)(fsPath)
   } catch (err) {
     if (err.code !== 'ENOENT') {
-      throw new WriteError('failed to delete file', { fsPath }).withCause(err)
+      throw new WriteError('failed to delete file', { fsPath }, err)
     }
   }
 }

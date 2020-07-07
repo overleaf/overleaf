@@ -590,7 +590,7 @@ describe('Filestore', function() {
 
             describe('when copyOnMiss is disabled', function() {
               beforeEach(function() {
-                Settings.filestore.fallback.copyOnMiss = false
+                app.persistor.settings.copyOnMiss = false
               })
 
               it('should fetch the file', async function() {
@@ -611,7 +611,7 @@ describe('Filestore', function() {
 
             describe('when copyOnMiss is enabled', function() {
               beforeEach(function() {
-                Settings.filestore.fallback.copyOnMiss = true
+                app.persistor.settings.copyOnMiss = true
               })
 
               it('should fetch the file', async function() {
@@ -656,7 +656,7 @@ describe('Filestore', function() {
 
               describe('when copyOnMiss is false', function() {
                 beforeEach(async function() {
-                  Settings.filestore.fallback.copyOnMiss = false
+                  app.persistor.settings.copyOnMiss = false
 
                   const response = await rp(opts)
                   expect(response.statusCode).to.equal(200)
@@ -702,7 +702,7 @@ describe('Filestore', function() {
 
               describe('when copyOnMiss is true', function() {
                 beforeEach(async function() {
-                  Settings.filestore.fallback.copyOnMiss = true
+                  app.persistor.settings.copyOnMiss = true
 
                   const response = await rp(opts)
                   expect(response.statusCode).to.equal(200)

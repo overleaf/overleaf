@@ -34,11 +34,11 @@ function streamToString(stream) {
 
 async function uploadStringToPersistor(persistor, bucket, key, content) {
   const fileStream = streamifier.createReadStream(content)
-  await persistor.promises.sendStream(bucket, key, fileStream)
+  await persistor.sendStream(bucket, key, fileStream)
 }
 
 async function getStringFromPersistor(persistor, bucket, key) {
-  const stream = await persistor.promises.getFileStream(bucket, key, {})
+  const stream = await persistor.getObjectStream(bucket, key, {})
   return streamToString(stream)
 }
 

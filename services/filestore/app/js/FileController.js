@@ -75,12 +75,11 @@ function getFile(req, res, next) {
           res.end()
         } else if (err) {
           next(
-            new Errors.ReadError('error transferring stream', {
-              bucket,
-              key,
-              format,
-              style
-            }).withCause(err)
+            new Errors.ReadError(
+              'error transferring stream',
+              { bucket, key, format, style },
+              err
+            )
           )
         }
       })
@@ -139,23 +138,17 @@ function copyFile(req, res, next) {
   })
   req.requestLogger.setMessage('copying file')
 
-  PersistorManager.copyFile(
-    bucket,
-    `${oldProjectId}/${oldFileId}`,
-    key,
-    function(err) {
+  PersistorManager.copyObject(bucket, `${oldProjectId}/${oldFileId}`, key)
+    .then(() => res.sendStatus(200))
+    .catch(err => {
       if (err) {
         if (err instanceof Errors.NotFoundError) {
           res.sendStatus(404)
         } else {
           next(err)
         }
-        return
       }
-
-      res.sendStatus(200)
-    }
-  )
+    })
 }
 
 function deleteFile(req, res, next) {

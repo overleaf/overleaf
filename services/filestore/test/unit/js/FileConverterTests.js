@@ -2,6 +2,7 @@ const sinon = require('sinon')
 const chai = require('chai')
 const { expect } = chai
 const SandboxedModule = require('sandboxed-module')
+const { Errors } = require('@overleaf/object-persistor')
 
 const modulePath = '../../../app/js/FileConverter.js'
 
@@ -22,6 +23,8 @@ describe('FileConverter', function() {
       promises: sinon.stub().resolves(destPath)
     }
 
+    const ObjectPersistor = { Errors }
+
     FileConverter = SandboxedModule.require(modulePath, {
       requires: {
         './SafeExec': SafeExec,
@@ -29,7 +32,8 @@ describe('FileConverter', function() {
           inc: sinon.stub(),
           Timer: sinon.stub().returns({ done: sinon.stub() })
         },
-        'settings-sharelatex': Settings
+        'settings-sharelatex': Settings,
+        '@overleaf/object-persistor': ObjectPersistor
       }
     })
   })

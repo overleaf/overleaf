@@ -32,8 +32,8 @@ describe('FileController', function() {
   beforeEach(function() {
     PersistorManager = {
       sendStream: sinon.stub().yields(),
-      copyFile: sinon.stub().yields(),
-      deleteFile: sinon.stub().yields()
+      copyObject: sinon.stub().resolves(),
+      deleteObject: sinon.stub().yields()
     }
 
     FileHandler = {
@@ -216,7 +216,9 @@ describe('FileController', function() {
     })
 
     it('should return a 404 is the file is not found', function(done) {
-      FileHandler.getFileSize.yields(new Errors.NotFoundError())
+      FileHandler.getFileSize.yields(
+        new Errors.NotFoundError({ message: 'not found', info: {} })
+      )
 
       res.sendStatus = code => {
         expect(code).to.equal(404)
@@ -262,7 +264,7 @@ describe('FileController', function() {
     it('should send bucket name and both keys to PersistorManager', function(done) {
       res.sendStatus = code => {
         code.should.equal(200)
-        expect(PersistorManager.copyFile).to.have.been.calledWith(
+        expect(PersistorManager.copyObject).to.have.been.calledWith(
           bucket,
           oldKey,
           key
@@ -273,7 +275,9 @@ describe('FileController', function() {
     })
 
     it('should send a 404 if the original file was not found', function(done) {
-      PersistorManager.copyFile.yields(new Errors.NotFoundError())
+      PersistorManager.copyObject.rejects(
+        new Errors.NotFoundError({ message: 'not found', info: {} })
+      )
       res.sendStatus = code => {
         code.should.equal(404)
         done()
@@ -281,10 +285,12 @@ describe('FileController', function() {
       FileController.copyFile(req, res, next)
     })
 
-    it('should send an error if there was an error', function() {
-      PersistorManager.copyFile.yields(error)
-      FileController.copyFile(req, res, next)
-      expect(next).to.have.been.calledWith(error)
+    it('should send an error if there was an error', function(done) {
+      PersistorManager.copyObject.rejects(error)
+      FileController.copyFile(req, res, err => {
+        expect(err).to.equal(error)
+        done()
+      })
     })
   })
 

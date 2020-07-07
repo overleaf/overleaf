@@ -2,6 +2,7 @@ const chai = require('chai')
 const should = chai.should()
 const { expect } = chai
 const modulePath = '../../../app/js/SafeExec'
+const { Errors } = require('@overleaf/object-persistor')
 const SandboxedModule = require('sandboxed-module')
 
 describe('SafeExec', function() {
@@ -11,10 +12,13 @@ describe('SafeExec', function() {
     settings = { enableConversions: true }
     options = { timeout: 10 * 1000, killSignal: 'SIGTERM' }
 
+    const ObjectPersistor = { Errors }
+
     safeExec = SandboxedModule.require(modulePath, {
       globals: { process },
       requires: {
-        'settings-sharelatex': settings
+        'settings-sharelatex': settings,
+        '@overleaf/object-persistor': ObjectPersistor
       }
     })
   })
