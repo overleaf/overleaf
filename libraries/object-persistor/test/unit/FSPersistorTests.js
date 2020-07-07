@@ -113,7 +113,9 @@ describe('FSPersistorTests', function () {
     describe('when the md5 hash does not match', function () {
       it('should return a write error', async function () {
         await expect(
-          FSPersistor.sendStream(location, files[0], remoteStream, '00000000')
+          FSPersistor.sendStream(location, files[0], remoteStream, {
+            sourceMd5: '00000000'
+          })
         )
           .to.eventually.be.rejected.and.be.an.instanceOf(Errors.WriteError)
           .and.have.property('message', 'md5 hash mismatch')
@@ -121,12 +123,9 @@ describe('FSPersistorTests', function () {
 
       it('deletes the copied file', async function () {
         try {
-          await FSPersistor.sendStream(
-            location,
-            files[0],
-            remoteStream,
-            '00000000'
-          )
+          await FSPersistor.sendStream(location, files[0], remoteStream, {
+            sourceMd5: '00000000'
+          })
         } catch (_) {}
         expect(fs.unlink).to.have.been.calledWith(
           `${location}/${filteredFilenames[0]}`

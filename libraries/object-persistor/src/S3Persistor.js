@@ -31,7 +31,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
     return this.sendStream(bucketName, key, fs.createReadStream(fsPath))
   }
 
-  async sendStream(bucketName, key, readStream, sourceMd5) {
+  async sendStream(bucketName, key, readStream, opts = {}) {
     try {
       // egress from us to S3
       const observeOptions = {
@@ -50,11 +50,18 @@ module.exports = class S3Persistor extends AbstractPersistor {
         Body: observer
       }
 
+      if (opts.contentType) {
+        uploadOptions.ContentType = opts.contentType
+      }
+      if (opts.contentEncoding) {
+        uploadOptions.ContentEncoding = opts.contentEncoding
+      }
+
       // if we have an md5 hash, pass this to S3 to verify the upload - otherwise
       // we rely on the S3 client's checksum calculation to validate the upload
       const clientOptions = {}
-      if (sourceMd5) {
-        uploadOptions.ContentMD5 = PersistorHelper.hexToBase64(sourceMd5)
+      if (opts.sourceMd5) {
+        uploadOptions.ContentMD5 = PersistorHelper.hexToBase64(opts.sourceMd5)
       } else {
         clientOptions.computeChecksums = true
       }

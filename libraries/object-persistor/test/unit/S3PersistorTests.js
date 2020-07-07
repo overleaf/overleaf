@@ -448,14 +448,11 @@ describe('S3PersistorTests', function () {
       })
     })
 
-    describe('when a hash is supploed', function () {
+    describe('when a hash is supplied', function () {
       beforeEach(async function () {
-        return S3Persistor.sendStream(
-          bucket,
-          key,
-          ReadStream,
-          'aaaaaaaabbbbbbbbaaaaaaaabbbbbbbb'
-        )
+        return S3Persistor.sendStream(bucket, key, ReadStream, {
+          sourceMd5: 'aaaaaaaabbbbbbbbaaaaaaaabbbbbbbb'
+        })
       })
 
       it('sends the hash in base64', function () {
@@ -464,6 +461,28 @@ describe('S3PersistorTests', function () {
           Key: key,
           Body: sinon.match.instanceOf(Transform),
           ContentMD5: 'qqqqqru7u7uqqqqqu7u7uw=='
+        })
+      })
+    })
+
+    describe('when metadata is supplied', function () {
+      const contentType = 'text/csv'
+      const contentEncoding = 'gzip'
+
+      beforeEach(async function () {
+        return S3Persistor.sendStream(bucket, key, ReadStream, {
+          contentType,
+          contentEncoding
+        })
+      })
+
+      it('sends the metadata to S3', function () {
+        expect(S3Client.upload).to.have.been.calledWith({
+          Bucket: bucket,
+          Key: key,
+          Body: sinon.match.instanceOf(Transform),
+          ContentType: contentType,
+          ContentEncoding: contentEncoding
         })
       })
     })

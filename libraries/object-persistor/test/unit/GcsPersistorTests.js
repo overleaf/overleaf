@@ -361,12 +361,9 @@ describe('GcsPersistorTests', function () {
 
     describe('when a hash is supplied', function () {
       beforeEach(async function () {
-        return GcsPersistor.sendStream(
-          bucket,
-          key,
-          ReadStream,
-          'aaaaaaaabbbbbbbbaaaaaaaabbbbbbbb'
-        )
+        return GcsPersistor.sendStream(bucket, key, ReadStream, {
+          sourceMd5: 'aaaaaaaabbbbbbbbaaaaaaaabbbbbbbb'
+        })
       })
 
       it('should not calculate the md5 hash of the file', function () {
@@ -385,6 +382,25 @@ describe('GcsPersistorTests', function () {
 
       it('does not fetch the md5 hash of the uploaded file', function () {
         expect(GcsFile.getMetadata).not.to.have.been.called
+      })
+    })
+
+    describe('when metadata is supplied', function () {
+      const contentType = 'text/csv'
+      const contentEncoding = 'gzip'
+
+      beforeEach(async function () {
+        return GcsPersistor.sendStream(bucket, key, ReadStream, {
+          contentType,
+          contentEncoding
+        })
+      })
+
+      it('should send the metadata to GCS', function () {
+        expect(GcsFile.createWriteStream).to.have.been.calledWith({
+          metadata: { contentType, contentEncoding },
+          resumable: false
+        })
       })
     })
 

@@ -195,11 +195,13 @@ describe('MigrationPersistorTests', function () {
       })
 
       it('should send a stream to the primary', function () {
-        expect(primaryPersistor.sendStream).to.have.been.calledWithExactly(
+        expect(
+          primaryPersistor.sendStream
+        ).to.have.been.calledWithExactly(
           bucket,
           key,
           sinon.match.instanceOf(Stream.PassThrough),
-          md5
+          { sourceMd5: md5 }
         )
       })
 
@@ -474,11 +476,13 @@ describe('MigrationPersistorTests', function () {
       })
 
       it('should send the file to the primary', function () {
-        expect(primaryPersistor.sendStream).to.have.been.calledWithExactly(
+        expect(
+          primaryPersistor.sendStream
+        ).to.have.been.calledWithExactly(
           bucket,
           destKey,
           sinon.match.instanceOf(Stream.PassThrough),
-          md5
+          { sourceMd5: md5 }
         )
       })
     })

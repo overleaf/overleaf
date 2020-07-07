@@ -37,7 +37,7 @@ const { Errors } = ObjectPersistor
 #### sendStream
 
 ```JavaScript
-async function sendStream(bucketName, key, readStream, sourceMd5 = null)
+async function sendStream(bucketName, key, readStream, opts = {})
 ```
 
 Uploads a stream to the backend.
@@ -45,7 +45,10 @@ Uploads a stream to the backend.
 - `bucketName`: The name of the bucket to upload to
 - `key`: The key for the uploaded object
 - `readStream`: The data stream to upload
-- `sourceMd5` (optional): The md5 hash of the source data, if known. The uploaded data will be compared against this and the operation will fail if it does not match. If omitted, the md5 is calculated as the data is uploaded instead, and verified against the backend.
+- `opts` (optional):
+    - `sourceMd5`: The md5 hash of the source data, if known. The uploaded data will be compared against this and the operation will fail if it does not match. If omitted, the md5 is calculated as the data is uploaded instead, and verified against the backend.
+    - `contentType`: The content type to write in the object metadata
+    - `contentEncoding`: The content encoding to write in the object metadata
 
 ##### Notes
 
