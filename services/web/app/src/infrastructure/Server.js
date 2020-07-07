@@ -72,6 +72,13 @@ if (Settings.behindProxy) {
     next()
   })
 }
+if (Settings.exposeHostname) {
+  const HOSTNAME = require('os').hostname()
+  app.use((req, res, next) => {
+    res.setHeader('X-Served-By', HOSTNAME)
+    next()
+  })
+}
 
 webRouter.use(
   express.static(Path.join(__dirname, '/../../../public'), {

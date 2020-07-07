@@ -418,6 +418,9 @@ module.exports = settings =
 	# address and http/https protocol information.
 	behindProxy: false
 
+	# Expose the hostname in the `X-Served-By` response header
+	exposeHostname: process.env['EXPOSE_HOSTNAME'] == 'true'
+
 	# Cookie max age (in milliseconds). Set to false for a browser session.
 	cookieSessionLength: 5 * 24 * 60 * 60 * 1000 # 5 days
 
