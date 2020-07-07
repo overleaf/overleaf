@@ -2,13 +2,9 @@ const _ = require('underscore')
 const settings = require('settings-sharelatex')
 const marked = require('marked')
 const StringHelper = require('../Helpers/StringHelper')
-const BaseWithHeaderEmailLayout = require(`./Layouts/${
-  settings.brandPrefix
-}BaseWithHeaderEmailLayout`)
+const BaseWithHeaderEmailLayout = require(`./Layouts/BaseWithHeaderEmailLayout`)
 const SpamSafe = require('./SpamSafe')
-const SingleCTAEmailBody = require(`./Bodies/${
-  settings.brandPrefix
-}SingleCTAEmailBody`)
+const SingleCTAEmailBody = require(`./Bodies/SingleCTAEmailBody`)
 const NoCTAEmailBody = require(`./Bodies/NoCTAEmailBody`)
 
 function CTAEmailTemplate(content) {
