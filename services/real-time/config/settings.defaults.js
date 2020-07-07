@@ -109,6 +109,9 @@ const settings = {
 
   cookieName: process.env.COOKIE_NAME || 'sharelatex.sid',
 
+  // Expose the hostname in the `debug.getHostname` rpc
+  exposeHostname: process.env.EXPOSE_HOSTNAME === 'true',
+
   max_doc_length: 2 * 1024 * 1024, // 2mb
 
   // combine
