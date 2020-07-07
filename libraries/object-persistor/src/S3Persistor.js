@@ -306,10 +306,10 @@ module.exports = class S3Persistor extends AbstractPersistor {
       return new S3(this._buildClientOptions(null, clientOptions))
     }
 
-    throw new SettingsError({
-      message: 'no bucket-specific or default credentials provided',
-      info: { bucket }
-    })
+    throw new SettingsError(
+      'no bucket-specific or default credentials provided',
+      { bucket }
+    )
   }
 
   _buildClientOptions(bucketCredentials, clientOptions) {

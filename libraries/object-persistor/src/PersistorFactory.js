@@ -22,7 +22,7 @@ function getPersistor(backend, settings) {
         Object.assign({}, settings.gcs, { Metrics: settings.Metrics })
       )
     default:
-      throw new SettingsError({ message: 'unknown backend', info: { backend } })
+      throw new SettingsError('unknown backend', { backend })
   }
 }
 
@@ -35,10 +35,7 @@ module.exports = function create(settings) {
     'Loading backend'
   )
   if (!settings.backend) {
-    throw new SettingsError({
-      message: 'no backend specified - config incomplete',
-      info: {}
-    })
+    throw new SettingsError('no backend specified - config incomplete')
   }
 
   let persistor = getPersistor(settings.backend, settings)

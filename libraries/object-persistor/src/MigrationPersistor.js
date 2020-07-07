@@ -179,15 +179,16 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
         sourceMd5
       )
     } catch (err) {
-      const error = new WriteError({
-        message: 'unable to copy file to destination persistor',
-        info: {
+      const error = new WriteError(
+        'unable to copy file to destination persistor',
+        {
           sourceBucket,
           destBucket,
           sourceKey,
           destKey
-        }
-      }).withCause(err)
+        },
+        err
+      )
       if (this.settings.Metrics) {
         this.settings.Metrics.inc('fallback.copy.failure')
       }
@@ -195,13 +196,14 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
       try {
         await this.primaryPersistor.deleteObject(destBucket, destKey)
       } catch (err) {
-        error.info.cleanupError = new WriteError({
-          message: 'unable to clean up destination copy artifact',
-          info: {
+        error.info.cleanupError = new WriteError(
+          'unable to clean up destination copy artifact',
+          {
             destBucket,
             destKey
-          }
-        }).withCause(err)
+          },
+          err
+        )
       }
       throw error
     }
