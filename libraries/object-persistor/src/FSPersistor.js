@@ -54,9 +54,11 @@ module.exports = class FSPersistor extends AbstractPersistor {
       const destMd5 = await this.getObjectMd5Hash(location, target)
       if (sourceMd5 !== destMd5) {
         await this._deleteFile(`${location}/${filterName(target)}`)
-        throw new WriteError({
-          message: 'md5 hash mismatch',
-          info: { sourceMd5, destMd5, location, target }
+        throw new WriteError('md5 hash mismatch', {
+          sourceMd5,
+          destMd5,
+          location,
+          target
         })
       }
     } finally {
@@ -108,10 +110,11 @@ module.exports = class FSPersistor extends AbstractPersistor {
     try {
       return await FSPersistor._getFileMd5HashForPath(fullPath)
     } catch (err) {
-      throw new ReadError({
-        message: 'unable to get md5 hash from file',
-        info: { location, filename }
-      }).withCause(err)
+      throw new ReadError(
+        'unable to get md5 hash from file',
+        { location, filename },
+        err
+      )
     }
   }
 
@@ -248,10 +251,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
     } catch (err) {
       await this._deleteFile(fsPath)
 
-      throw new WriteError({
-        message: 'problem writing file locally',
-        info: { err, fsPath }
-      }).withCause(err)
+      throw new WriteError('problem writing file locally', { err, fsPath }, err)
     }
   }
 
@@ -263,10 +263,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
       await fsUnlink(fsPath)
     } catch (err) {
       if (err.code !== 'ENOENT') {
-        throw new WriteError({
-          message: 'failed to delete file',
-          info: { fsPath }
-        }).withCause(err)
+        throw new WriteError('failed to delete file', { fsPath }, err)
       }
     }
   }

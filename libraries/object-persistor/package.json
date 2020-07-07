@@ -17,12 +17,12 @@
   "author": "Overleaf (https://www.overleaf.com/)",
   "license": "AGPL-3.0",
   "dependencies": {
-    "@google-cloud/storage": "^5.1.0",
-    "@overleaf/o-error": "^2.1.0",
-    "aws-sdk": "^2.696.0",
+    "@google-cloud/storage": "^5.1.1",
+    "@overleaf/o-error": "^3.0.0",
+    "aws-sdk": "^2.710.0",
     "fast-crc32c": "^2.0.0",
     "glob": "^7.1.6",
-    "logger-sharelatex": "^2.0.0",
+    "logger-sharelatex": "^2.1.1",
     "node-uuid": "^1.4.8",
     "range-parser": "^1.2.1",
     "tiny-async-pool": "^1.1.0"
