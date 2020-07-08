@@ -9,7 +9,7 @@
   "license": "AGPL-3.0-only",
   "version": "2.1.1",
   "scripts": {
-    "test": "mocha test/**/*.js",
+    "test": "mocha --grep=$MOCHA_GREP test/**/*.js",
     "format": "prettier-eslint $PWD'**/*.js' --list-different",
     "format:fix": "prettier-eslint $PWD'**/*.js' --write",
     "lint": "eslint -f unix ."
