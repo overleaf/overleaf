@@ -43,6 +43,7 @@ settings =
 			unlockBeforeDelete: process.env['GCS_UNLOCK_BEFORE_DELETE'] == "true"  # unlock an event-based hold before deleting. default false
 			deletedBucketSuffix: process.env['GCS_DELETED_BUCKET_SUFFIX']          # if present, copy file to another bucket on delete. default null
 			deleteConcurrency: parseInt(process.env['GCS_DELETE_CONCURRENCY']) || 50
+			signedUrlExpiryInMs: parseInt(process.env['LINK_EXPIRY_TIMEOUT'] || 60000)
 
 		s3:
 			if process.env['AWS_ACCESS_KEY_ID']? or process.env['S3_BUCKET_CREDENTIALS']?
@@ -51,6 +52,7 @@ settings =
 				endpoint: process.env['AWS_S3_ENDPOINT']
 				pathStyle: process.env['AWS_S3_PATH_STYLE']
 				partSize: process.env['AWS_S3_PARTSIZE'] or (100 * 1024 * 1024)
+				bucketCreds: JSON.parse process.env['S3_BUCKET_CREDENTIALS'] if process.env['S3_BUCKET_CREDENTIALS']?
 
 		# GCS should be configured by the service account on the kubernetes pod. See GOOGLE_APPLICATION_CREDENTIALS,
 		# which will be picked up automatically.
@@ -59,8 +61,6 @@ settings =
 			user_files: process.env['USER_FILES_BUCKET_NAME']
 			template_files: process.env['TEMPLATE_FILES_BUCKET_NAME']
 			public_files: process.env['PUBLIC_FILES_BUCKET_NAME']
-
-		s3BucketCreds: JSON.parse process.env['S3_BUCKET_CREDENTIALS'] if process.env['S3_BUCKET_CREDENTIALS']?
 
 		fallback:
 			if process.env['FALLBACK_BACKEND']?
@@ -71,7 +71,6 @@ settings =
 				copyOnMiss: process.env['COPY_ON_MISS'] == 'true'
 
 		allowRedirects: if process.env['ALLOW_REDIRECTS'] == 'true' then true else false
-		signedUrlExpiryInMs: parseInt(process.env['LINK_EXPIRY_TIMEOUT'] || 60000)
 
 	path:
 		uploadFolder: Path.resolve(__dirname + "/../uploads")

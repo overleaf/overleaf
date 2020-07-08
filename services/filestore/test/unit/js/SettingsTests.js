@@ -15,7 +15,7 @@ describe('Settings', function() {
       const settings = SandboxedModule.require('settings-sharelatex', {
         globals: { console, process }
       })
-      expect(settings.filestore.s3BucketCreds).to.deep.equal(s3Settings)
+      expect(settings.filestore.s3.bucketCreds).to.deep.equal(s3Settings)
     })
   })
 })
