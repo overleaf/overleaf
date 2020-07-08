@@ -1,4 +1,8 @@
 version: '2.2'
+volumes:
+    vol_mongo:
+    vol_redis:
+    vol_sharelatex:
 services:
     sharelatex:
         restart: always
@@ -17,7 +21,7 @@ services:
             - mongo
             - redis
         volumes:
-            - ~/sharelatex_data:/var/lib/sharelatex
+            - vol_sharelatex:/var/lib/sharelatex
             ########################################################################
             ####  Server Pro: Un-comment the following line to mount the docker ####
             ####             socket, required for Sibling Containers to work    ####
@@ -107,7 +111,7 @@ services:
         expose:
             - 27017
         volumes:
-            - ~/mongo_data:/data/db
+            - vol_mongo:/data/db
         healthcheck:
             test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
             interval: 10s
@@ -121,7 +125,7 @@ services:
         expose:
             - 6379
         volumes:
-            - ~/redis_data:/data
+            - vol_redis:/data
 
     # ldap:
     #    restart: always
