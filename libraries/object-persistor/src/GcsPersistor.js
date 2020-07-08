@@ -39,7 +39,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
     return this.sendStream(bucketName, key, fs.createReadStream(fsPath))
   }
 
-  async sendStream(bucketName, key, readStream, sourceMd5) {
+  async sendStream(bucketName, key, readStream, opts = {}) {
     try {
       // egress from us to gcs
       const observeOptions = {
@@ -47,6 +47,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
         Metrics: this.settings.Metrics
       }
 
+      let sourceMd5 = opts.sourceMd5
       if (!sourceMd5) {
         // if there is no supplied md5 hash, we calculate the hash as the data passes through
         observeOptions.hash = 'md5'
@@ -61,9 +62,16 @@ module.exports = class GcsPersistor extends AbstractPersistor {
 
       if (sourceMd5) {
         writeOptions.validation = 'md5'
-        writeOptions.metadata = {
-          md5Hash: PersistorHelper.hexToBase64(sourceMd5)
-        }
+        writeOptions.metadata = writeOptions.metadata || {}
+        writeOptions.metadata.md5Hash = PersistorHelper.hexToBase64(sourceMd5)
+      }
+      if (opts.contentType) {
+        writeOptions.metadata = writeOptions.metadata || {}
+        writeOptions.metadata.contentType = opts.contentType
+      }
+      if (opts.contentEncoding) {
+        writeOptions.metadata = writeOptions.metadata || {}
+        writeOptions.metadata.contentEncoding = opts.contentEncoding
       }
 
       const uploadStream = this.storage

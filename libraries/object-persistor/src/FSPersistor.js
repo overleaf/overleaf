@@ -43,8 +43,9 @@ module.exports = class FSPersistor extends AbstractPersistor {
     }
   }
 
-  async sendStream(location, target, sourceStream, sourceMd5) {
+  async sendStream(location, target, sourceStream, opts = {}) {
     const fsPath = await this._writeStream(sourceStream)
+    let sourceMd5 = opts.sourceMd5
     if (!sourceMd5) {
       sourceMd5 = await FSPersistor._getFileMd5HashForPath(fsPath)
     }

@@ -10,12 +10,12 @@ module.exports = class AbstractPersistor {
     })
   }
 
-  async sendStream(location, target, sourceStream, sourceMd5) {
+  async sendStream(location, target, sourceStream, opts = {}) {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'sendStream',
       location,
       target,
-      sourceMd5
+      opts
     })
   }
 
