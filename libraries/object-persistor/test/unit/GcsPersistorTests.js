@@ -250,7 +250,7 @@ describe('GcsPersistorTests', function () {
     })
   })
 
-  describe('getFile', function () {
+  describe('getRedirectUrl', function () {
     let signedUrl
 
     beforeEach(async function () {
