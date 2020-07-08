@@ -12,9 +12,6 @@ grep 'name:' config/services.js | \
 			web)
 				npm run webpack:production
 				;;
-			real-time)
-				npm run compile:all
-				;;	
 			*)
 				echo "$service doesn't require a compilation"
 				;;
