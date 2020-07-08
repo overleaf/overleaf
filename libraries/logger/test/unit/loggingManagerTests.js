@@ -30,7 +30,9 @@ describe('LoggingManager', function () {
       once: sinon.stub().yields()
     }
     this.fetchResponse = {
-      text: sinon.stub().resolves('')
+      text: sinon.stub().resolves(''),
+      status: 200,
+      ok: true
     }
     this.Bunyan = {
       createLogger: sinon.stub().returns(this.bunyanLogger),
@@ -439,11 +441,14 @@ describe('LoggingManager', function () {
             describe('when level is already set', function() {
               beforeEach(function() {
                 this.bunyanLogger.level.returns(10)
-                this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
+                //this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
+                console.log("In test ", this.start + 1000)
+                this.fetchResponse.text = sinon.stub().resolves(this.start + 1000)
+                this.Fetch.fetch = sinon.stub().resolves(this.fetchResponse)
                 this.logger.checkLogLevel()
               })
       
-              it('should set trace level', function() {
+              it.only('should set trace level', function() {
                 this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
                   'trace'
                 )
