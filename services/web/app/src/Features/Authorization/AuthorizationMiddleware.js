@@ -4,7 +4,7 @@ const async = require('async')
 const logger = require('logger-sharelatex')
 const { ObjectId } = require('mongojs')
 const Errors = require('../Errors/Errors')
-const HttpErrors = require('@overleaf/o-error/http')
+const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 
@@ -208,7 +208,7 @@ module.exports = AuthorizationMiddleware = {
             { userId, projectId },
             'denying user admin access to project'
           )
-          next(new HttpErrors.ForbiddenError({}))
+          HttpErrorHandler.forbidden(req, res)
         }
       )
     })

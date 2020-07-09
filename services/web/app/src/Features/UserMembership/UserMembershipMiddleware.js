@@ -6,6 +6,7 @@ const UserMembershipHandler = require('./UserMembershipHandler')
 const EntityConfigs = require('./UserMembershipEntityConfigs')
 const Errors = require('../Errors/Errors')
 const HttpErrors = require('@overleaf/o-error/http')
+const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const TemplatesManager = require('../Templates/TemplatesManager')
 
 // set of middleware arrays or functions that checks user access to an entity
@@ -284,6 +285,6 @@ function allowAccessIfAny(accessFunctions) {
         return next()
       }
     }
-    next(new HttpErrors.ForbiddenError({}))
+    HttpErrorHandler.forbidden(req, res)
   }
 }

@@ -1,7 +1,6 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
-const HttpErrors = require('@overleaf/o-error/http')
 const Errors = require('../../../../app/src/Features/Errors/Errors.js')
 
 const MODULE_PATH =
@@ -17,6 +16,9 @@ describe('AuthorizationMiddleware', function() {
       isUserLoggedIn: sinon.stub().returns(true)
     }
     this.AuthorizationManager = {}
+    this.HttpErrorHandler = {
+      forbidden: sinon.stub()
+    }
     this.TokenAccessHandler = {
       getRequestToken: sinon.stub().returns(this.token)
     }
@@ -37,7 +39,7 @@ describe('AuthorizationMiddleware', function() {
         mongojs: {
           ObjectId: this.ObjectId
         },
-        '@overleaf/o-error/http': HttpErrors,
+        '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Errors/Errors': Errors,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
@@ -277,14 +279,11 @@ describe('AuthorizationMiddleware', function() {
             .yields(null, false)
         })
 
-        it('should raise a 403', function(done) {
+        it('should invoke HTTP forbidden error handler', function(done) {
+          this.HttpErrorHandler.forbidden = sinon.spy(() => done())
           this.AuthorizationMiddleware.ensureUserCanAdminProject(
             this.req,
-            this.res,
-            err => {
-              expect(err).to.be.an.instanceof(HttpErrors.ForbiddenError)
-              done()
-            }
+            this.res
           )
         })
       })
@@ -317,14 +316,11 @@ describe('AuthorizationMiddleware', function() {
             .yields(null, false)
         })
 
-        it('should raise a 403', function(done) {
+        it('should invoke HTTP forbidden error handler', function(done) {
+          this.HttpErrorHandler.forbidden = sinon.spy(() => done())
           this.AuthorizationMiddleware.ensureUserCanAdminProject(
             this.req,
-            this.res,
-            err => {
-              expect(err).to.be.an.instanceof(HttpErrors.ForbiddenError)
-              done()
-            }
+            this.res
           )
         })
       })

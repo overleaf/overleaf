@@ -1,5 +1,6 @@
 const OError = require('@overleaf/o-error')
 const HttpErrors = require('@overleaf/o-error/http')
+const HttpErrorHandler = require('../../Features/Errors/HttpErrorHandler')
 const { ObjectId } = require('mongodb')
 const CollaboratorsHandler = require('./CollaboratorsHandler')
 const CollaboratorsGetter = require('./CollaboratorsGetter')
@@ -100,13 +101,11 @@ async function transferOwnership(req, res, next) {
         info: { public: { message: `user not found: ${toUserId}` } }
       })
     } else if (err instanceof Errors.UserNotCollaboratorError) {
-      throw new HttpErrors.ForbiddenError({
-        info: {
-          public: {
-            message: `user ${toUserId} should be a collaborator in project ${projectId} prior to ownership transfer`
-          }
-        }
-      })
+      HttpErrorHandler.forbidden(
+        req,
+        res,
+        `user ${toUserId} should be a collaborator in project ${projectId} prior to ownership transfer`
+      )
     } else {
       throw new HttpErrors.InternalServerError({}).withCause(err)
     }

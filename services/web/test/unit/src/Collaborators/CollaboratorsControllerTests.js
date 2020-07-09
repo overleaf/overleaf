@@ -33,6 +33,9 @@ describe('CollaboratorsController', function() {
     this.EditorRealTimeController = {
       emitToRoom: sinon.stub()
     }
+    this.HttpErrorHandler = {
+      forbidden: sinon.stub()
+    }
     this.TagsHandler = {
       promises: {
         removeProjectFromAllTags: sinon.stub().resolves()
@@ -62,6 +65,7 @@ describe('CollaboratorsController', function() {
         './CollaboratorsGetter': this.CollaboratorsGetter,
         './OwnershipTransferHandler': this.OwnershipTransferHandler,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
+        '../../Features/Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Tags/TagsHandler': this.TagsHandler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
@@ -275,6 +279,14 @@ describe('CollaboratorsController', function() {
           done()
         }
       )
+    })
+
+    it('invokes HTTP forbidden error handler if the user is not a collaborator', function(done) {
+      this.HttpErrorHandler.forbidden = sinon.spy(() => done())
+      this.OwnershipTransferHandler.promises.transferOwnership.rejects(
+        new Errors.UserNotCollaboratorError()
+      )
+      this.CollaboratorsController.transferOwnership(this.req, this.res)
     })
   })
 })
