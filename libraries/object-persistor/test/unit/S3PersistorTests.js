@@ -27,6 +27,7 @@ describe('S3PersistorTests', function () {
   ]
   const filesSize = 33
   const md5 = 'ffffffff00000000ffffffff00000000'
+  const redirectUrl = 'https://wombat.potato/giraffe'
 
   let Logger,
     Transform,
@@ -126,7 +127,8 @@ describe('S3PersistorTests', function () {
         .returns({ promise: sinon.stub().resolves({ ETag: `"${md5}"` }) }),
       copyObject: sinon.stub().returns(EmptyPromise),
       deleteObject: sinon.stub().returns(EmptyPromise),
-      deleteObjects: sinon.stub().returns(EmptyPromise)
+      deleteObjects: sinon.stub().returns(EmptyPromise),
+      getSignedUrlPromise: sinon.stub().resolves(redirectUrl)
     }
     S3 = sinon.stub().returns(S3Client)
 
@@ -351,6 +353,22 @@ describe('S3PersistorTests', function () {
       it('stores the bucket and key in the error', function () {
         expect(error.info).to.include({ bucketName: bucket, key: key })
       })
+    })
+  })
+
+  describe('getRedirectUrl', function () {
+    let signedUrl
+
+    beforeEach(async function () {
+      signedUrl = await S3Persistor.getRedirectUrl(bucket, key)
+    })
+
+    it('should request a signed URL', function () {
+      expect(S3Client.getSignedUrlPromise).to.have.been.called
+    })
+
+    it('should return the url', function () {
+      expect(signedUrl).to.equal(redirectUrl)
     })
   })
 

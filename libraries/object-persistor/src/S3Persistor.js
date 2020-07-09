@@ -114,9 +114,25 @@ module.exports = class S3Persistor extends AbstractPersistor {
     }
   }
 
-  async getRedirectUrl() {
-    // not implemented
-    return null
+  async getRedirectUrl(bucketName, key) {
+    const expiresSeconds = Math.round(this.settings.signedUrlExpiryInMs / 1000)
+    try {
+      const url = await this._getClientForBucket(
+        bucketName
+      ).getSignedUrlPromise('getObject', {
+        Bucket: bucketName,
+        Key: key,
+        Expires: expiresSeconds
+      })
+      return url
+    } catch (err) {
+      throw PersistorHelper.wrapError(
+        err,
+        'error generating signed url for S3 file',
+        { bucketName, key },
+        ReadError
+      )
+    }
   }
 
   async deleteDirectory(bucketName, key, continuationToken) {

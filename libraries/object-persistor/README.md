@@ -96,8 +96,6 @@ A `string` containing the signed link, or `null` if a link cannot be generated.
 
 In the case of `null`, you should fall back to `getObjectStream` as sometimes signed links cannot be generated.
 
-Signed links are currently only supported on the `gcs` backend.
-
 Do not use this method if you are using a secondary persistor, as this mechanism does not check to see if the object actually exists - so cannot provide a fallback.
 
 #### getObjectSize
