@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import classNames from 'classnames'
@@ -6,8 +6,6 @@ import OutlineRoot from './OutlineRoot'
 
 function OutlinePane({ isTexFile, outline, jumpToLine }) {
   const [expanded, setExpanded] = useState(true)
-
-  useEffect(() => setExpanded(isTexFile), [isTexFile])
 
   const expandCollapseIconClasses = classNames('fa', 'outline-caret-icon', {
     'fa-angle-down': expanded,
