@@ -41,14 +41,26 @@ services:
       - mongo
     command: npm run test:acceptance:app
 
-  test_frontend:
+  test_karma:
     build:
       context: .
       dockerfile: Dockerfile.frontend
     volumes:
       - .:/app
     working_dir: /app
-    command: npm run test:frontend:single
+    command: npm run test:karma:single
+
+  test_frontend:
+    build:
+      context: .
+      target: base
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      MOCHA_GREP: ${MOCHA_GREP}
+    command: npm run test:frontend
+    user: node
 
   redis:
     image: redis

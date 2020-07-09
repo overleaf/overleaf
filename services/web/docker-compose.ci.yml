@@ -32,7 +32,7 @@ services:
       - redis
       - mongo
 
-  test_frontend:
+  test_karma:
     build:
       context: .
       dockerfile: Dockerfile.frontend.ci
@@ -41,8 +41,14 @@ services:
         BRANCH_NAME: $BRANCH_NAME
         BUILD_NUMBER: $BUILD_NUMBER
     working_dir: /app
-    command: npm run test:frontend -- --single-run
+    command: npm run test:karma:single
     user: node
+
+  test_frontend:
+    build: .
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    user: node
+    command: npm run test:frontend
 
   tar:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER-webpack

@@ -2,10 +2,19 @@
   "presets": [
     "@babel/react",
     ["@babel/env", {
-      "modules": false,
       "useBuiltIns": "usage",
       "corejs": { "version": 3 }
     }]
   ],
-  "plugins": ["angularjs-annotate"]
+  "plugins": ["angularjs-annotate"],
+  // Disable core-js polyfilling in test environment, to prevent interference
+  // with mocking
+  "env": {
+    "test": {
+      "presets": [
+        "@babel/react",
+        "@babel/env"
+      ]
+    }
+  }
 }

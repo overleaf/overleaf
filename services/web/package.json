@@ -12,13 +12,14 @@
     "public": "./public"
   },
   "scripts": {
-    "test:acceptance:run_dir": "mocha --recursive --reporter spec --timeout 25000 --exit --grep=$MOCHA_GREP --require test/acceptance/bootstrap.js",
+    "test:acceptance:run_dir": "mocha --recursive --timeout 25000 --exit --grep=$MOCHA_GREP --require test/acceptance/bootstrap.js",
     "test:acceptance:app": "npm run test:acceptance:run_dir -- test/acceptance/src",
-    "test:unit:run_dir": "mocha --recursive --reporter spec --timeout 25000 --exit --grep=$MOCHA_GREP --file test/unit/bootstrap.js",
+    "test:unit:run_dir": "mocha --recursive --timeout 25000 --exit --grep=$MOCHA_GREP --file test/unit/bootstrap.js",
     "test:unit:app": "npm run test:unit:run_dir -- test/unit/src",
     "test:unit:app:parallel": "parallel --plain --keep-order --halt now,fail=1 npm run test:unit:run_dir -- {} ::: test/unit/src/*",
-    "test:frontend": "karma start",
-    "test:frontend:single": "karma start --single-run",
+    "test:frontend": "NODE_ENV=test mocha --recursive --exit --grep=$MOCHA_GREP --require test/frontend/bootstrap.js test/frontend modules/*/test/frontend",
+    "test:karma": "karma start",
+    "test:karma:single": "karma start --single-run",
     "start": "node $NODE_APP_OPTIONS app.js",
     "nodemon": "nodemon --config nodemon.json",
     "webpack": "webpack-dev-server --config webpack.config.dev.js",
@@ -138,6 +139,7 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
+    "@babel/register": "^7.10.1",
     "@testing-library/dom": "^7.7.3",
     "@testing-library/react": "^10.0.4",
     "acorn": "^7.1.1",
@@ -173,6 +175,8 @@
     "file-loader": "^5.0.2",
     "glob": "^7.1.6",
     "handlebars-loader": "^1.7.1",
+    "jsdom": "^16.2.2",
+    "jsdom-global": "^3.0.2",
     "karma": "^5.0.2",
     "karma-chai-sinon": "^0.1.5",
     "karma-chrome-launcher": "^3.1.0",

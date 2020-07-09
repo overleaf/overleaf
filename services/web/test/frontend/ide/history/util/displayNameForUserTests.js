@@ -9,6 +9,8 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import { expect } from 'chai'
+
 import displayNameForUser from '../../../../../frontend/js/ide/history/util/displayNameForUser'
 
 export default describe('displayNameForUser', function() {

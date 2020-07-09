@@ -10,6 +10,9 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import { expect } from 'chai'
+import sinon from 'sinon'
+
 import EventEmitter from '../../../frontend/js/utils/EventEmitter'
 
 export default describe('EventEmitter', function() {

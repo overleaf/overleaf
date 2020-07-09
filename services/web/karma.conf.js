@@ -14,12 +14,12 @@ module.exports = function(config) {
     browsers: ['ChromeCustom'],
     files: [
       // Import all tests (see comment in the file for why this is necessary)
-      'test/frontend/import_tests.js'
+      'test/karma/import_tests.js'
     ],
     middleware: ['fake-img'],
     preprocessors: {
       // Run files through webpack
-      'test/frontend/import_tests.js': ['webpack']
+      'test/karma/import_tests.js': ['webpack']
     },
     frameworks: ['mocha', 'chai-sinon'],
     // Configure webpack in the tests

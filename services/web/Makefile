@@ -33,7 +33,7 @@ clean_ci:
 # Tests
 #
 
-test: test_unit test_frontend test_acceptance
+test: test_unit test_karma test_acceptance test_frontend
 
 test_module: test_unit_module test_acceptance_module
 
@@ -90,17 +90,26 @@ test_unit_module:
 	$(MAKE) modules/$(MODULE_NAME)/test_unit
 
 #
-# Frontend unit tests
+# Karma frontend tests
 #
 
-test_frontend: build_test_frontend test_frontend_run
+test_karma: build_test_karma test_karma_run
 
-test_frontend_run:
-	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend
-	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+test_karma_run:
+	COMPOSE_PROJECT_NAME=karma_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	COMPOSE_PROJECT_NAME=karma_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_karma
+	COMPOSE_PROJECT_NAME=karma_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
-test_frontend_build_run: build_test_frontend test_frontend_run
+test_karma_build_run: build_test_karma test_karma_run
+
+#
+# Frontend tests
+#
+
+test_frontend:
+	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend
+	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 #
 # Acceptance tests
@@ -247,8 +256,8 @@ build:
 		--tag $(IMAGE_REPO_FINAL) \
 		.
 
-build_test_frontend:
-	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend
+build_test_karma:
+	COMPOSE_PROJECT_NAME=karma_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_karma
 
 publish:
 	docker push $(DOCKER_REPO)/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
@@ -269,7 +278,7 @@ $(MODULE_TARGETS):
 	$(MODULE_TARGETS) \
 	compile_modules compile_modules_full clean_ci \
 	test test_module test_unit test_unit_app \
-	test_unit_modules test_unit_module test_frontend test_frontend_run \
-	test_frontend_build_run test_acceptance test_acceptance_app \
+	test_unit_modules test_unit_module test_karma test_karma_run \
+	test_karma_build_run test_frontend test_acceptance test_acceptance_app \
 	test_acceptance_modules test_acceptance_module ci format format_fix lint \
-	build build_test_frontend publish tar
+	build build_test_karma publish tar
