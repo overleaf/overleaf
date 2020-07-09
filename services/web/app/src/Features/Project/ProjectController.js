@@ -766,6 +766,9 @@ const ProjectController = {
             }
             metrics.inc(metricName)
 
+            const enableOptimize =
+              !!Settings.experimentId && !user.features.zotero
+
             res.render('project/editor', {
               title: project.name,
               priority_title: true,
@@ -822,7 +825,8 @@ const ProjectController = {
               allowedImageNames,
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
               wsUrl,
-              showSupport: Features.hasFeature('support')
+              showSupport: Features.hasFeature('support'),
+              gaOptimize: enableOptimize
             })
             timer.done()
           }
