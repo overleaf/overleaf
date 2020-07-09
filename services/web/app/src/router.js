@@ -981,8 +981,16 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   // used by kubernetes health-check and acceptance tests
   webRouter.get('/dev/csrf', (req, res) => res.send(res.locals.csrfToken))
 
-  publicApiRouter.get('/health_check', HealthCheckController.check)
-  privateApiRouter.get('/health_check', HealthCheckController.checkApi)
+  publicApiRouter.get(
+    '/health_check',
+    HealthCheckController.checkActiveHandles,
+    HealthCheckController.check
+  )
+  privateApiRouter.get(
+    '/health_check',
+    HealthCheckController.checkActiveHandles,
+    HealthCheckController.checkApi
+  )
 
   publicApiRouter.get('/health_check/redis', HealthCheckController.checkRedis)
   privateApiRouter.get('/health_check/redis', HealthCheckController.checkRedis)

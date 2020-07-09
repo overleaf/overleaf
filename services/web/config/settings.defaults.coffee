@@ -231,6 +231,9 @@ module.exports = settings =
 	
 	maxUploadSize: 50 * 1024 * 1024 # 50 MB
 
+	# start failing the health check if active handles exceeds this limit
+	maxActiveHandles: if process.env['MAX_ACTIVE_HANDLES'] then parseInt(process.env['MAX_ACTIVE_HANDLES'], 10)
+
 	# Security
 	# --------
 	security:

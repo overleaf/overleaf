@@ -57,6 +57,26 @@ module.exports = HealthCheckController = {
     })
   },
 
+  checkActiveHandles(req, res, next) {
+    if (!(settings.maxActiveHandles > 0) || !process._getActiveHandles) {
+      return next()
+    }
+    const activeHandlesCount = (process._getActiveHandles() || []).length
+    if (activeHandlesCount > settings.maxActiveHandles) {
+      logger.err(
+        { activeHandlesCount, maxActiveHandles: settings.maxActiveHandles },
+        'exceeded max active handles, failing health check'
+      )
+      return res.sendStatus(500)
+    } else {
+      logger.debug(
+        { activeHandlesCount, maxActiveHandles: settings.maxActiveHandles },
+        'active handles are below maximum'
+      )
+      next()
+    }
+  },
+
   checkApi(req, res, next) {
     rclient.healthCheck(err => {
       if (err) {
