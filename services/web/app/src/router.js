@@ -543,6 +543,11 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   webRouter.get(
     '/project/:project_id/version/:version/zip',
+    RateLimiterMiddleware.rateLimit({
+      endpointName: 'download-project-revision',
+      maxRequests: 30,
+      timeInterval: 60 * 60
+    }),
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.downloadZipOfVersion
   )
