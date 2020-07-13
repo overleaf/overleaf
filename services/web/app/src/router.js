@@ -18,6 +18,7 @@ const UserInfoController = require('./Features/User/UserInfoController')
 const UserController = require('./Features/User/UserController')
 const UserEmailsController = require('./Features/User/UserEmailsController')
 const UserPagesController = require('./Features/User/UserPagesController')
+const UserOnboardingController = require('./Features/User/UserOnboardingController')
 const DocumentController = require('./Features/Documents/DocumentController')
 const CompileManager = require('./Features/Compile/CompileManager')
 const CompileController = require('./Features/Compile/CompileController')
@@ -238,6 +239,12 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/user/:user_id/personal_info',
     AuthenticationController.httpAuth,
     UserInfoController.getPersonalInfo
+  )
+
+  privateApiRouter.post(
+    '/user/onboarding_emails',
+    AuthenticationController.httpAuth,
+    UserOnboardingController.sendRecentSignupOnboardingEmails
   )
 
   webRouter.get(

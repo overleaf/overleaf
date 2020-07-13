@@ -563,6 +563,46 @@ manage ${projectName} sharing settings.
   }
 })
 
+templates.userOnboardingEmail = NoCTAEmailTemplate({
+  subject(opts) {
+    return `Getting more out of ${settings.appName}`
+  },
+  greeting(opts) {
+    return ''
+  },
+  title(opts) {
+    return `Getting more out of ${settings.appName}`
+  },
+  message(opts) {
+    return `\
+Thanks for signing up for ${
+      settings.appName
+    } recently. We hope you've been finding it useful!
+Here are some key features to help you get the most out of the service:
+
+<a href="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding">Learn LaTeX in 30 minutes</a>: In this tutorial we provide a quick and easy first introduction to LaTeX with no prior knowledge required. By the time you are finished, you will have written your first LaTeX document!
+
+<a href="https://www.overleaf.com/latex/templates?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding">Find a beautiful template</a>: If you're looking for a template or example to get started, we've a large selection available in our template gallery, including CVs, project reports, journal articles and more.
+
+<a href="https://www.overleaf.com/learn/how-to/Sharing_a_project?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding">Work with your collaborators</a>: One of the key features of Overleaf is the ability to share projects and collaborate on them with other users. Find out how to share your projecs with your colleagues in this quick how-to guide.
+
+If you have any questions, please let us know, and thanks again for using Overleaf.
+
+John
+
+Dr John Hammersley <br />
+Co-founder & CEO <br />
+<a href="http://www.overleaf.com">www.overleaf.com</a>
+<hr>
+    `
+  },
+  secondaryMessage() {
+    return `Don't want onboarding emails like this from us? Don't worry, this is the only one.
+ If you've previously subscribed to emails about product offers and company news and events,
+ you can unsubscribe <a href="${settings.siteUrl}/user/settings"> here </a>.`
+  }
+})
+
 function _formatUserNameAndEmail(user, placeholder) {
   if (user.first_name && user.last_name) {
     const fullName = `${user.first_name} ${user.last_name}`
