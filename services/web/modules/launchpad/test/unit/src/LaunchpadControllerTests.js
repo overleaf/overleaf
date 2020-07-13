@@ -62,6 +62,7 @@ describe('LaunchpadController', function() {
 
     this.res = {
       render: sinon.stub(),
+      redirect: sinon.stub(),
       send: sinon.stub(),
       sendStatus: sinon.stub()
     }
@@ -75,7 +76,7 @@ describe('LaunchpadController', function() {
         this.LaunchpadController,
         '_atLeastOneAdminExists'
       )
-      return (this.AuthenticationController._redirectToLoginPage = sinon.stub())
+      return (this.AuthenticationController.setRedirectInSession = sinon.stub())
     })
 
     afterEach(function() {
@@ -126,9 +127,10 @@ describe('LaunchpadController', function() {
         })
 
         it('should redirect to login page', function() {
-          return this.AuthenticationController._redirectToLoginPage.callCount.should.equal(
+          this.AuthenticationController.setRedirectInSession.callCount.should.equal(
             1
           )
+          this.res.redirect.calledWith('/login').should.equal(true)
         })
 
         it('should not render the launchpad page', function() {

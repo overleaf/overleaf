@@ -54,7 +54,8 @@ module.exports = LaunchpadController = {
             authMethod
           })
         } else {
-          return AuthenticationController._redirectToLoginPage(req, res)
+          AuthenticationController.setRedirectInSession(req)
+          return res.redirect('/login')
         }
       } else {
         return UserGetter.getUser(sessionUser._id, { isAdmin: 1 }, function(
