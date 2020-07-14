@@ -37,6 +37,8 @@ define(function() {
   MULTILINE_ERROR_REGEX = /^(.*)---line (\d+) of file (.*)\n([^]+?)\nI'm skipping whatever remains of this entry$/m;
   BAD_CROSS_REFERENCE_REGEX = /^(A bad cross reference---entry ".+?"\nrefers to entry.+?, which doesn't exist)$/m;
   MULTILINE_COMMAND_ERROR_REGEX = /^(.*)\n?---line (\d+) of file (.*)\n([^]+?)\nI'm skipping whatever remains of this command$/m;
+  // Errors hit in BST file have a slightly different format
+  BST_ERROR_REGEX = /^(.*?)\nwhile executing---line (\d+) of file (.*)/m;
   warningParsers = [
     [
       MULTILINE_WARNING_REGEX, function(match) {
@@ -101,8 +103,21 @@ define(function() {
           raw: fullMatch
         };
       }
+    ],[
+      BST_ERROR_REGEX, function(match) {
+        var fileName, firstMessage, fullMatch, lineNumber, secondMessage;
+        fullMatch = match[0], firstMessage = match[1], lineNumber = match[2], fileName = match[3];
+        return {
+          file: fileName,
+          level: "error",
+          message: firstMessage,
+          line: lineNumber,
+          raw: fullMatch
+        };
+      }
     ]
   ];
+
   (function() {
     this.parseBibtex = function() {
       var allErrors, allWarnings, ref, ref1, remainingText, result;
