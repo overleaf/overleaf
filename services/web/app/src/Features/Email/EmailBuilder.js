@@ -599,7 +599,7 @@ Co-founder & CEO <br />
   secondaryMessage() {
     return `Don't want onboarding emails like this from us? Don't worry, this is the only one.
  If you've previously subscribed to emails about product offers and company news and events,
- you can unsubscribe <a href="${settings.siteUrl}/user/settings"> here </a>.`
+ you can unsubscribe <a href="${settings.siteUrl}/user/settings">here</a>.`
   }
 })
 
