@@ -9,8 +9,7 @@ describe('SAMLIdentityManager', function() {
     this.Errors = {
       EmailExistsError: sinon.stub(),
       NotFoundError: sinon.stub(),
-      SAMLIdentityExistsError: sinon.stub(),
-      SAMLUserNotFoundError: sinon.stub()
+      SAMLIdentityExistsError: sinon.stub()
     }
     this.user = {
       _id: 'user-id-1',

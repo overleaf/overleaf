@@ -2,6 +2,7 @@ const { promisify } = require('util')
 const pLimit = require('p-limit')
 
 module.exports = {
+  promisify,
   promisifyAll,
   promisifyMultiResult,
   callbackifyMultiResult,

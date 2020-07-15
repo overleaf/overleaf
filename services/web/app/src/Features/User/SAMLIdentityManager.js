@@ -65,16 +65,6 @@ async function _addIdentifier(
   }
 }
 
-function _getUserQuery(providerId, externalUserId) {
-  externalUserId = externalUserId.toString()
-  providerId = providerId.toString()
-  const query = {
-    'samlIdentifiers.externalUserId': externalUserId,
-    'samlIdentifiers.providerId': providerId
-  }
-  return query
-}
-
 async function _addInstitutionEmail(userId, email, providerId) {
   const user = await UserGetter.promises.getUser(userId)
   const query = {
@@ -134,18 +124,16 @@ function _sendUnlinkedEmail(primaryEmail, providerName) {
 }
 
 async function getUser(providerId, externalUserId) {
-  if (providerId == null || externalUserId == null) {
+  if (!providerId || !externalUserId) {
     throw new Error(
       `invalid arguments: providerId: ${providerId}, externalUserId: ${externalUserId}`
     )
   }
-  providerId = providerId.toString()
-  externalUserId = externalUserId.toString()
-  const query = _getUserQuery(providerId, externalUserId)
-  let user = await User.findOne(query).exec()
-  if (!user) {
-    throw new Errors.SAMLUserNotFoundError()
-  }
+  const user = await User.findOne({
+    'samlIdentifiers.externalUserId': externalUserId.toString(),
+    'samlIdentifiers.providerId': providerId.toString()
+  }).exec()
+
   return user
 }
 

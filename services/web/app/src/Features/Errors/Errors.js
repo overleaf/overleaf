@@ -105,15 +105,6 @@ class SAMLSessionDataMissing extends BackwardCompatibleError {
   }
 }
 
-class SAMLUserNotFoundError extends BackwardCompatibleError {
-  constructor(arg) {
-    super(arg)
-    if (!this.message) {
-      this.message = 'user not found for SAML provider and external id'
-    }
-  }
-}
-
 class ThirdPartyIdentityExistsError extends BackwardCompatibleError {
   constructor(arg) {
     super(arg)
@@ -201,7 +192,6 @@ module.exports = {
   NotInV2Error,
   SAMLIdentityExistsError,
   SAMLSessionDataMissing,
-  SAMLUserNotFoundError,
   SLInV2Error,
   ThirdPartyIdentityExistsError,
   ThirdPartyUserNotFoundError,
