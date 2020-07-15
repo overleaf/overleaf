@@ -33,6 +33,7 @@ services:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
       LOCK_MANAGER_MAX_LOCK_WAIT_TIME: 30000
+      MONGO_SOCKET_TIMEOUT: 60000
       # SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
       SHARELATEX_CONFIG:
     command: npm run test:acceptance:app

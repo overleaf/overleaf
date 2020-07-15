@@ -19,6 +19,7 @@ mongoose.connect(
     poolSize: POOL_SIZE,
     config: { autoIndex: false },
     useMongoClient: true,
+    socketTimeoutMS: Settings.mongo.socketTimeoutMS,
     appname: 'web'
   }
 )
