@@ -15,6 +15,7 @@
  */
 let CommandRunner
 const { spawn } = require('child_process')
+const _ = require('underscore')
 const logger = require('logger-sharelatex')
 
 logger.info('using standard command runner')
@@ -33,6 +34,8 @@ module.exports = CommandRunner = {
     let key, value
     if (callback == null) {
       callback = function(error) {}
+    } else {
+      callback = _.once(callback)
     }
     command = Array.from(command).map(arg =>
       arg.toString().replace('$COMPILE_DIR', directory)
