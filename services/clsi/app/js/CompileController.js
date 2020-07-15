@@ -218,6 +218,15 @@ module.exports = CompileController = {
     const { project_id } = req.params
     const { user_id } = req.params
     const { image } = req.query
+    if (
+      image &&
+      Settings.clsi &&
+      Settings.clsi.docker &&
+      Settings.clsi.docker.allowedImages &&
+      !Settings.clsi.docker.allowedImages.includes(image)
+    ) {
+      return res.status(400).send('invalid image')
+    }
     logger.log({ image, file, project_id }, 'word count request')
 
     return CompileManager.wordcount(project_id, user_id, file, image, function(

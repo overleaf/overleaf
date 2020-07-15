@@ -129,6 +129,17 @@ if (process.env.DOCKER_RUNNER) {
     process.exit(1)
   }
 
+  if (process.env.ALLOWED_IMAGES) {
+    try {
+      module.exports.clsi.docker.allowedImages = process.env.ALLOWED_IMAGES.split(
+        ' '
+      )
+    } catch (error) {
+      console.error(error, 'could not apply allowed images setting')
+      process.exit(1)
+    }
+  }
+
   module.exports.path.synctexBaseDir = () => '/compile'
 
   module.exports.path.sandboxedCompilesHostDir = process.env.COMPILES_HOST_DIR

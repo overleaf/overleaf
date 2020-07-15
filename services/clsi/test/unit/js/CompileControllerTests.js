@@ -12,6 +12,7 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 require('chai').should()
+const { expect } = require('chai')
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/CompileController'
@@ -287,21 +288,60 @@ describe('CompileController', function() {
       this.CompileManager.wordcount = sinon
         .stub()
         .callsArgWith(4, null, (this.texcount = ['mock-texcount']))
-      return this.CompileController.wordcount(this.req, this.res, this.next)
     })
 
     it('should return the word count of a file', function() {
+      this.CompileController.wordcount(this.req, this.res, this.next)
       return this.CompileManager.wordcount
         .calledWith(this.project_id, undefined, this.file, this.image)
         .should.equal(true)
     })
 
-    return it('should return the texcount info', function() {
+    it('should return the texcount info', function() {
+      this.CompileController.wordcount(this.req, this.res, this.next)
       return this.res.json
         .calledWith({
           texcount: this.texcount
         })
         .should.equal(true)
+    })
+
+    describe('when allowedImages is set', function() {
+      beforeEach(function() {
+        this.Settings.clsi = { docker: {} }
+        this.Settings.clsi.docker.allowedImages = [
+          'repo/image:tag1',
+          'repo/image:tag2'
+        ]
+        this.res.send = sinon.stub()
+        this.res.status = sinon.stub().returns({ send: this.res.send })
+      })
+
+      describe('with an invalid image', function() {
+        beforeEach(function() {
+          this.req.query.image = 'something/evil:1337'
+          this.CompileController.wordcount(this.req, this.res, this.next)
+        })
+        it('should return a 400', function() {
+          expect(this.res.status.calledWith(400)).to.equal(true)
+        })
+        it('should not run the query', function() {
+          expect(this.CompileManager.wordcount.called).to.equal(false)
+        })
+      })
+
+      describe('with a valid image', function() {
+        beforeEach(function() {
+          this.req.query.image = 'repo/image:tag1'
+          this.CompileController.wordcount(this.req, this.res, this.next)
+        })
+        it('should not return a 400', function() {
+          expect(this.res.status.calledWith(400)).to.equal(false)
+        })
+        it('should run the query', function() {
+          expect(this.CompileManager.wordcount.called).to.equal(true)
+        })
+      })
     })
   })
 })

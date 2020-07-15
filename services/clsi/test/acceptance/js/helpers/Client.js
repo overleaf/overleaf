@@ -189,6 +189,11 @@ module.exports = Client = {
   },
 
   wordcount(project_id, file, callback) {
+    const image = undefined
+    Client.wordcountWithImage(project_id, file, image, callback)
+  },
+
+  wordcountWithImage(project_id, file, image, callback) {
     if (callback == null) {
       callback = function(error, pdfPositions) {}
     }
@@ -196,12 +201,16 @@ module.exports = Client = {
       {
         url: `${this.host}/project/${project_id}/wordcount`,
         qs: {
+          image,
           file
         }
       },
       (error, response, body) => {
         if (error != null) {
           return callback(error)
+        }
+        if (response.statusCode !== 200) {
+          return callback(new Error(`statusCode=${response.statusCode}`))
         }
         return callback(null, JSON.parse(body))
       }
