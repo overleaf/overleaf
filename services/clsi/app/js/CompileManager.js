@@ -520,7 +520,9 @@ module.exports = CompileManager = {
         compileName,
         command,
         directory,
-        Settings.clsi != null ? Settings.clsi.docker.image : undefined,
+        Settings.clsi && Settings.clsi.docker
+          ? Settings.clsi.docker.image
+          : undefined,
         timeout,
         {},
         compileGroup,
