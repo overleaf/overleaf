@@ -235,6 +235,7 @@ describe('Example Documents', function() {
                 ) === 'failure'
               ) {
                 console.log('DEBUG: error', error, 'body', JSON.stringify(body))
+                return done(new Error('Compile failed'))
               }
               const pdf = Client.getOutputFile(body, 'pdf')
               return downloadAndComparePdf(
@@ -263,6 +264,7 @@ describe('Example Documents', function() {
                 ) === 'failure'
               ) {
                 console.log('DEBUG: error', error, 'body', JSON.stringify(body))
+                return done(new Error('Compile failed'))
               }
               const pdf = Client.getOutputFile(body, 'pdf')
               return downloadAndComparePdf(
