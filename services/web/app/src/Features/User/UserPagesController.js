@@ -1,6 +1,5 @@
 const UserGetter = require('./UserGetter')
 const UserSessionsManager = require('./UserSessionsManager')
-const ErrorController = require('../Errors/ErrorController')
 const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
 const AuthenticationController = require('../Authentication/AuthenticationController')
@@ -25,44 +24,6 @@ const UserPagesController = {
       new_email: req.query.new_email || '',
       samlBeta: req.session.samlBeta
     })
-  },
-
-  activateAccountPage(req, res, next) {
-    // An 'activation' is actually just a password reset on an account that
-    // was set with a random password originally.
-    if (req.query.user_id == null || req.query.token == null) {
-      return ErrorController.notFound(req, res)
-    }
-
-    if (typeof req.query.user_id !== 'string') {
-      return ErrorController.forbidden(req, res)
-    }
-
-    UserGetter.getUser(
-      req.query.user_id,
-      { email: 1, loginCount: 1 },
-      (error, user) => {
-        if (error != null) {
-          return next(error)
-        }
-        if (!user) {
-          return ErrorController.notFound(req, res)
-        }
-        if (user.loginCount > 0) {
-          // Already seen this user, so account must be activate
-          // This lets users keep clicking the 'activate' link in their email
-          // as a way to log in which, if I know our users, they will.
-          res.redirect(`/login`)
-        } else {
-          req.session.doLoginAfterPasswordReset = true
-          res.render('user/activate', {
-            title: 'activate_account',
-            email: user.email,
-            token: req.query.token
-          })
-        }
-      }
-    )
   },
 
   loginPage(req, res) {
