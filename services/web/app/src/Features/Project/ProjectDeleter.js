@@ -260,7 +260,7 @@ async function deleteProject(projectId, options = {}) {
   logger.log({ project_id: projectId }, 'successfully deleted project')
 }
 
-async function undeleteProject(projectId) {
+async function undeleteProject(projectId, options = {}) {
   let deletedProject = await DeletedProject.findOne({
     'deleterData.deletedProjectId': projectId
   }).exec()
@@ -274,6 +274,10 @@ async function undeleteProject(projectId) {
   }
 
   let restored = new Project(deletedProject.project)
+
+  if (options.userId) {
+    restored.owner_ref = options.userId
+  }
 
   // if we're undeleting, we want the document to show up
   restored.name = await ProjectDetailsHandler.promises.generateUniqueName(
