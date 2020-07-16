@@ -13,6 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../base'
+import _ from 'lodash'
 import 'libs/jquery-layout'
 import 'libs/jquery.ui.touch-punch'
 
@@ -233,9 +234,16 @@ ng-click=\"handleClick()\">\
         }
 
         // Save state when exiting
-        $(window).unload(() =>
-          ide.localStorage(`layout.${name}`, element.layout().readState())
-        )
+        $(window).unload(() => {
+          // Save only the state properties for the current layout, ignoring sublayouts inside it.
+          // If we save sublayouts state (`children`), the layout library will use it when
+          // initializing. This raises errors when the sublayout elements aren't available (due to
+          // being loaded at init or just not existing for the current project/user).
+          const stateToSave = _.mapValues(element.layout().readState(), pane =>
+            _.omit(pane, 'children')
+          )
+          ide.localStorage(`layout.${name}`, stateToSave)
+        })
 
         if (attrs.openEast != null) {
           scope.$watch(attrs.openEast, function(value, oldValue) {

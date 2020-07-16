@@ -1,15 +1,28 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import classNames from 'classnames'
 import OutlineRoot from './OutlineRoot'
+import localStorage from '../../../modules/localStorage'
 
-function OutlinePane({ isTexFile, outline, jumpToLine }) {
-  const [expanded, setExpanded] = useState(true)
+function OutlinePane({ isTexFile, outline, projectId, jumpToLine, onToggle }) {
+  const storageKey = `file_outline.expanded.${projectId}`
+  const [expanded, setExpanded] = useState(() => {
+    const storedExpandedState = localStorage(storageKey) !== false
+    return storedExpandedState
+  })
+  const isOpen = isTexFile && expanded
+
+  useEffect(
+    () => {
+      onToggle(isOpen)
+    },
+    [isOpen]
+  )
 
   const expandCollapseIconClasses = classNames('fa', 'outline-caret-icon', {
-    'fa-angle-down': expanded,
-    'fa-angle-right': !expanded
+    'fa-angle-down': isOpen,
+    'fa-angle-right': !isOpen
   })
 
   const headerClasses = classNames('outline-pane', {
@@ -18,6 +31,7 @@ function OutlinePane({ isTexFile, outline, jumpToLine }) {
 
   function handleExpandCollapseClick() {
     if (isTexFile) {
+      localStorage(storageKey, !expanded)
       setExpanded(!expanded)
     }
   }
@@ -32,20 +46,20 @@ function OutlinePane({ isTexFile, outline, jumpToLine }) {
         >
           <i className={expandCollapseIconClasses} />
           <h4 className="outline-header-name">File outline</h4>
+          <OverlayTrigger placement="top" overlay={tooltip} delayHide={100}>
+            <a
+              href="/beta/participate"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="outline-header-beta-badge"
+            >
+              <span className="sr-only">
+                The File outline is a beta feature. Click here to manage your
+                beta program membership.
+              </span>
+            </a>
+          </OverlayTrigger>
         </button>
-        <OverlayTrigger placement="top" overlay={tooltip} delayHide={100}>
-          <a
-            href="/beta/participate"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="outline-header-beta-badge"
-          >
-            <span className="sr-only">
-              The File outline is a beta feature. Click here to manage your beta
-              program membership.
-            </span>
-          </a>
-        </OverlayTrigger>
       </header>
       {expanded && isTexFile ? (
         <div className="outline-body">
@@ -65,7 +79,9 @@ const tooltip = (
 OutlinePane.propTypes = {
   isTexFile: PropTypes.bool.isRequired,
   outline: PropTypes.array.isRequired,
-  jumpToLine: PropTypes.func.isRequired
+  projectId: PropTypes.string.isRequired,
+  jumpToLine: PropTypes.func.isRequired,
+  onToggle: PropTypes.func
 }
 
 export default OutlinePane

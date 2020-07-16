@@ -8,9 +8,16 @@
   }
 }
 
-.file-tree {
+.editor-sidebar {
   display: flex;
   flex-direction: column;
+}
+
+.file-tree {
+  display: flex !important; // To work around jQuery layout's inline styles
+  flex-direction: column;
+  flex-grow: 1;
+  max-height: 100%;
 
   .toolbar.toolbar-filetree {
     .toolbar-small-mixin;

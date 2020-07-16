@@ -132,6 +132,7 @@ export default (EditorManager = (function() {
       this.$scope.ui.view = 'editor'
 
       const done = () => {
+        this.$scope.$broadcast('doc:after-opened')
         if (options.gotoLine != null) {
           // allow Ace to display document before moving, delay until next tick
           // added delay to make this happen later that gotoStoredPosition in

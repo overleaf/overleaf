@@ -1,102 +1,113 @@
-aside.file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected': multiSelectedCount > 0 }", ng-show="ui.view != 'history' || !history.isV2").full-size
-	.toolbar.toolbar-filetree(ng-if="permissions.write")
-		a(
-			href,
-			ng-click="openNewDocModal()",
-			tooltip-html="'"+translate('new_file').replace(' ', '<br>')+"'",
-			tooltip-placement="bottom"
-		)
-			i.fa.fa-fw.fa-file
-		a(
-			href,
-			ng-click="openNewFolderModal()",
-			tooltip-html="'"+translate('new_folder').replace(' ', '<br>')+"'",
-			tooltip-placement="bottom"
-		)
-			i.fa.fa-fw.fa-folder
-		a(
-			href,
-			ng-click="openUploadFileModal()",
-			tooltip=translate('upload'),
-			tooltip-placement="bottom"
-		)
-			i.fa.fa-fw.fa-upload
-
-		.toolbar-right
-			a(
-				href,
-				ng-click="startRenamingSelected()",
-				tooltip=translate('rename'),
-				tooltip-placement="bottom",
-				ng-show="multiSelectedCount == 0"
-			)
-				i.fa.fa-fw.fa-pencil
-			a(
-				href,
-				ng-click="openDeleteModalForSelected()",
-				tooltip=translate('delete'),
-				tooltip-placement="bottom",
-				tooltip-append-to-body="true"
-			)
-				i.fa.fa-fw.fa-trash-o
-
-
-	.file-tree-inner(
-		ng-if="rootFolder",
-		ng-controller="FileTreeRootFolderController",
-		ng-class="{ 'no-toolbar': !permissions.write }"
+aside.editor-sidebar.full-size(
+	ng-controller="FileTreeController"
+	ng-class="{ 'multi-selected': multiSelectedCount > 0 }"
+	ng-show="ui.view != 'history' || !history.isV2"
+	vertical-resizable-panes=user.alphaProgram && "outline-resizer"
+	vertical-resizable-panes-toggled-externally-on=user.alphaProgram && "outline-toggled"
+)
+	.file-tree(
+		vertical-resizable-top=user.alphaProgram
 	)
-		ul.list-unstyled.file-tree-list(
-			droppable="permissions.write"
-			accept=".entity-name"
-			on-drop-callback="onDrop"
+		.toolbar.toolbar-filetree(ng-if="permissions.write")
+			a(
+				href,
+				ng-click="openNewDocModal()",
+				tooltip-html="'"+translate('new_file').replace(' ', '<br>')+"'",
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-fw.fa-file
+			a(
+				href,
+				ng-click="openNewFolderModal()",
+				tooltip-html="'"+translate('new_folder').replace(' ', '<br>')+"'",
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-fw.fa-folder
+			a(
+				href,
+				ng-click="openUploadFileModal()",
+				tooltip=translate('upload'),
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-fw.fa-upload
+
+			.toolbar-right
+				a(
+					href,
+					ng-click="startRenamingSelected()",
+					tooltip=translate('rename'),
+					tooltip-placement="bottom",
+					ng-show="multiSelectedCount == 0"
+				)
+					i.fa.fa-fw.fa-pencil
+				a(
+					href,
+					ng-click="openDeleteModalForSelected()",
+					tooltip=translate('delete'),
+					tooltip-placement="bottom",
+					tooltip-append-to-body="true"
+				)
+					i.fa.fa-fw.fa-trash-o
+
+
+		.file-tree-inner(
+			ng-if="rootFolder",
+			ng-controller="FileTreeRootFolderController",
+			ng-class="{ 'no-toolbar': !permissions.write }"
 		)
-			li(
-				ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf' || ui.view == 'file')"
-				ng-class="{ 'selected': ui.view == 'pdf' }"
-				ng-controller="PdfViewToggleController"
+			ul.list-unstyled.file-tree-list(
+				droppable="permissions.write"
+				accept=".entity-name"
+				on-drop-callback="onDrop"
 			)
-				.entity
-					.entity-name(
-						ng-click="togglePdfView()"
-					)
-						i.fa.fa-fw.toggle
-						i.fa.fa-fw.fa-file-pdf-o
-						|  PDF
+				li(
+					ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf' || ui.view == 'file')"
+					ng-class="{ 'selected': ui.view == 'pdf' }"
+					ng-controller="PdfViewToggleController"
+				)
+					.entity
+						.entity-name(
+							ng-click="togglePdfView()"
+						)
+							i.fa.fa-fw.toggle
+							i.fa.fa-fw.fa-file-pdf-o
+							|  PDF
 
-			file-entity(
-				entity="entity",
-				permissions="permissions",
-				ng-repeat="entity in rootFolder.children | orderBy:[orderByFoldersFirst, 'name']"
-			)
+				file-entity(
+					entity="entity",
+					permissions="permissions",
+					ng-repeat="entity in rootFolder.children | orderBy:[orderByFoldersFirst, 'name']"
+				)
 
-			li(ng-show="deletedDocs.length > 0 && ui.view == 'history'")
-				h3 #{translate("deleted_files")}
-			li(
-				ng-class="{ 'selected': entity.selected }",
-				ng-repeat="entity in deletedDocs | orderBy:'name'",
-				ng-controller="FileTreeEntityController",
-				ng-show="ui.view == 'history'"
-			)
-				.entity
-					.entity-name(
-						ng-click="select($event)"
-					)
-						//- Just a spacer to align with folders
-						i.fa.fa-fw.toggle
-						i.fa.fa-fw.fa-file
+				li(ng-show="deletedDocs.length > 0 && ui.view == 'history'")
+					h3 #{translate("deleted_files")}
+				li(
+					ng-class="{ 'selected': entity.selected }",
+					ng-repeat="entity in deletedDocs | orderBy:'name'",
+					ng-controller="FileTreeEntityController",
+					ng-show="ui.view == 'history'"
+				)
+					.entity
+						.entity-name(
+							ng-click="select($event)"
+						)
+							//- Just a spacer to align with folders
+							i.fa.fa-fw.toggle
+							i.fa.fa-fw.fa-file
 
-						span  {{ entity.name }}
-
+							span  {{ entity.name }}
 
 	if user.alphaProgram
 		.outline-container(
+			vertical-resizable-bottom
 			ng-controller="OutlineController"
 		)
 			outline-pane(
 				is-tex-file="isTexFile"
 				outline="outline"
+				project-id="project_id"
 				jump-to-line="jumpToLine"
+				on-toggle="onToggle"
 			)
 
 
