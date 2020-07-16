@@ -2,7 +2,6 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
-const HttpErrors = require('@overleaf/o-error/http')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
@@ -34,7 +33,8 @@ describe('CollaboratorsController', function() {
       emitToRoom: sinon.stub()
     }
     this.HttpErrorHandler = {
-      forbidden: sinon.stub()
+      forbidden: sinon.stub(),
+      notFound: sinon.stub()
     }
     this.TagsHandler = {
       promises: {
@@ -70,7 +70,6 @@ describe('CollaboratorsController', function() {
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         '../Errors/Errors': Errors,
-        '@overleaf/o-error/http': HttpErrors,
         'logger-sharelatex': this.logger
       }
     })
@@ -226,17 +225,16 @@ describe('CollaboratorsController', function() {
     })
 
     it('should return a 404 when the project or collaborator is not found', function(done) {
+      this.HttpErrorHandler.notFound = sinon.spy((req, res) => {
+        expect(req).to.equal(this.req)
+        expect(res).to.equal(this.res)
+        done()
+      })
+
       this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel.rejects(
         new Errors.NotFoundError()
       )
-      this.CollaboratorsController.setCollaboratorInfo(
-        this.req,
-        this.res,
-        err => {
-          expect(err).to.be.instanceof(HttpErrors.NotFoundError)
-          done()
-        }
-      )
+      this.CollaboratorsController.setCollaboratorInfo(this.req, this.res)
     })
   })
 
@@ -254,31 +252,29 @@ describe('CollaboratorsController', function() {
     })
 
     it('returns 404 if the project does not exist', function(done) {
+      this.HttpErrorHandler.notFound = sinon.spy((req, res, message) => {
+        expect(req).to.equal(this.req)
+        expect(res).to.equal(this.res)
+        expect(message).to.match(/project not found/)
+        done()
+      })
       this.OwnershipTransferHandler.promises.transferOwnership.rejects(
         new Errors.ProjectNotFoundError()
       )
-      this.CollaboratorsController.transferOwnership(
-        this.req,
-        this.res,
-        err => {
-          expect(err).to.be.instanceof(HttpErrors.NotFoundError)
-          done()
-        }
-      )
+      this.CollaboratorsController.transferOwnership(this.req, this.res)
     })
 
     it('returns 404 if the user does not exist', function(done) {
+      this.HttpErrorHandler.notFound = sinon.spy((req, res, message) => {
+        expect(req).to.equal(this.req)
+        expect(res).to.equal(this.res)
+        expect(message).to.match(/user not found/)
+        done()
+      })
       this.OwnershipTransferHandler.promises.transferOwnership.rejects(
         new Errors.UserNotFoundError()
       )
-      this.CollaboratorsController.transferOwnership(
-        this.req,
-        this.res,
-        err => {
-          expect(err).to.be.instanceof(HttpErrors.NotFoundError)
-          done()
-        }
-      )
+      this.CollaboratorsController.transferOwnership(this.req, this.res)
     })
 
     it('invokes HTTP forbidden error handler if the user is not a collaborator', function(done) {

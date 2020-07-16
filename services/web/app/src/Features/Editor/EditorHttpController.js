@@ -1,4 +1,3 @@
-const HttpErrors = require('@overleaf/o-error/http')
 const ProjectDeleter = require('../Project/ProjectDeleter')
 const EditorController = require('./EditorController')
 const ProjectGetter = require('../Project/ProjectGetter')
@@ -269,9 +268,7 @@ async function convertDocToFile(req, res, next) {
     res.json({ fileId: fileRef._id.toString() })
   } catch (err) {
     if (err instanceof Errors.NotFoundError) {
-      throw new HttpErrors.NotFoundError({
-        info: { public: { message: 'Document not found' } }
-      })
+      return HttpErrorHandler.notFound(req, res, 'Document not found')
     } else if (err instanceof Errors.DocHasRangesError) {
       return HttpErrorHandler.unprocessableEntity(
         req,

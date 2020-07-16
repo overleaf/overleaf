@@ -70,7 +70,7 @@ async function setCollaboratorInfo(req, res, next) {
     res.sendStatus(204)
   } catch (err) {
     if (err instanceof Errors.NotFoundError) {
-      throw new HttpErrors.NotFoundError({})
+      HttpErrorHandler.notFound(req, res)
     } else {
       throw new HttpErrors.InternalServerError({}).withCause(err)
     }
@@ -93,13 +93,9 @@ async function transferOwnership(req, res, next) {
     res.sendStatus(204)
   } catch (err) {
     if (err instanceof Errors.ProjectNotFoundError) {
-      throw new HttpErrors.NotFoundError({
-        info: { public: { message: `project not found: ${projectId}` } }
-      })
+      HttpErrorHandler.notFound(req, res, `project not found: ${projectId}`)
     } else if (err instanceof Errors.UserNotFoundError) {
-      throw new HttpErrors.NotFoundError({
-        info: { public: { message: `user not found: ${toUserId}` } }
-      })
+      HttpErrorHandler.notFound(req, res, `user not found: ${toUserId}`)
     } else if (err instanceof Errors.UserNotCollaboratorError) {
       HttpErrorHandler.forbidden(
         req,

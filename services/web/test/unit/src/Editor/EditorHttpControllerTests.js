@@ -123,6 +123,7 @@ describe('EditorHttpController', function() {
       }
     }
     this.HttpErrorHandler = {
+      notFound: sinon.stub(),
       unprocessableEntity: sinon.stub()
     }
     this.EditorHttpController = SandboxedModule.require(MODULE_PATH, {
@@ -556,6 +557,21 @@ describe('EditorHttpController', function() {
             done()
           }
         )
+        this.EditorHttpController.convertDocToFile(this.req, this.res)
+      })
+    })
+
+    describe("when the doc does't exist", function() {
+      it('should return a 404 - not found', function(done) {
+        this.ProjectEntityUpdateHandler.promises.convertDocToFile.rejects(
+          new Errors.NotFoundError({})
+        )
+        this.HttpErrorHandler.notFound = sinon.spy((req, res, message) => {
+          expect(req).to.exist
+          expect(res).to.exist
+          expect(message).to.equal('Document not found')
+          done()
+        })
         this.EditorHttpController.convertDocToFile(this.req, this.res)
       })
     })

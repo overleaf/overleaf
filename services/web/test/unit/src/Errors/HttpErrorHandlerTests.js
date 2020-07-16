@@ -95,6 +95,38 @@ describe('HttpErrorHandler', function() {
     })
   })
 
+  describe('notFound', function() {
+    it('returns 404', function() {
+      this.HttpErrorHandler.notFound(this.req, this.res)
+      expect(this.res.statusCode).to.equal(404)
+    })
+
+    it('should print a message when no content-type is included', function() {
+      this.HttpErrorHandler.notFound(this.req, this.res)
+      expect(this.res.body).to.equal('not found')
+    })
+
+    it("should render a template when content-type is 'html'", function() {
+      this.req.accepts = () => 'html'
+      this.HttpErrorHandler.notFound(this.req, this.res)
+      expect(this.res.renderedTemplate).to.equal('general/404')
+      expect(this.res.renderedVariables).to.deep.equal({
+        title: 'page_not_found'
+      })
+    })
+
+    it("should return a json object when content-type is 'json'", function() {
+      this.req.accepts = () => 'json'
+      this.HttpErrorHandler.notFound(this.req, this.res, 'an error', {
+        foo: 'bar'
+      })
+      expect(JSON.parse(this.res.body)).to.deep.equal({
+        message: 'an error',
+        foo: 'bar'
+      })
+    })
+  })
+
   describe('unprocessableEntity', function() {
     it('returns 422', function() {
       this.HttpErrorHandler.unprocessableEntity(this.req, this.res)

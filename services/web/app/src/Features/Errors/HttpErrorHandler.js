@@ -39,6 +39,18 @@ module.exports = {
     }
   },
 
+  notFound(req, res, message = 'not found', info = {}) {
+    res.status(404)
+    switch (req.accepts(['html', 'json'])) {
+      case 'html':
+        return res.render('general/404', { title: 'page_not_found' })
+      case 'json':
+        return renderJSONError(res, message, info)
+      default:
+        return res.send('not found')
+    }
+  },
+
   unprocessableEntity(req, res, message = 'unprocessable entity', info = {}) {
     res.status(422)
     switch (req.accepts(['html', 'json'])) {
