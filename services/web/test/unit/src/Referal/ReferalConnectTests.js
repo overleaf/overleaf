@@ -1,19 +1,5 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 require('chai').should()
-const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Referal/ReferalConnect.js'
@@ -21,7 +7,7 @@ const modulePath = require('path').join(
 
 describe('Referal connect middle wear', function() {
   beforeEach(function() {
-    return (this.connect = SandboxedModule.require(modulePath, {
+    this.connect = SandboxedModule.require(modulePath, {
       globals: {
         console: console
       },
@@ -31,7 +17,7 @@ describe('Referal connect middle wear', function() {
           err() {}
         }
       }
-    }))
+    })
   })
 
   it('should take a referal query string and put it on the session if it exists', function(done) {
@@ -39,9 +25,9 @@ describe('Referal connect middle wear', function() {
       query: { referal: '12345' },
       session: {}
     }
-    return this.connect.use(req, {}, () => {
+    this.connect.use(req, {}, () => {
       req.session.referal_id.should.equal(req.query.referal)
-      return done()
+      done()
     })
   })
 
@@ -50,9 +36,9 @@ describe('Referal connect middle wear', function() {
       query: {},
       session: { referal_id: 'same' }
     }
-    return this.connect.use(req, {}, () => {
+    this.connect.use(req, {}, () => {
       req.session.referal_id.should.equal('same')
-      return done()
+      done()
     })
   })
 
@@ -61,9 +47,9 @@ describe('Referal connect middle wear', function() {
       query: { fb_ref: '12345' },
       session: {}
     }
-    return this.connect.use(req, {}, () => {
+    this.connect.use(req, {}, () => {
       req.session.referal_id.should.equal(req.query.fb_ref)
-      return done()
+      done()
     })
   })
 
@@ -72,9 +58,9 @@ describe('Referal connect middle wear', function() {
       query: { rm: 'fb' },
       session: {}
     }
-    return this.connect.use(req, {}, () => {
+    this.connect.use(req, {}, () => {
       req.session.referal_medium.should.equal('facebook')
-      return done()
+      done()
     })
   })
 
@@ -83,9 +69,9 @@ describe('Referal connect middle wear', function() {
       query: { rm: 't' },
       session: {}
     }
-    return this.connect.use(req, {}, () => {
+    this.connect.use(req, {}, () => {
       req.session.referal_medium.should.equal('twitter')
-      return done()
+      done()
     })
   })
 
@@ -94,9 +80,9 @@ describe('Referal connect middle wear', function() {
       query: { rm: 'gp' },
       session: {}
     }
-    return this.connect.use(req, {}, () => {
+    this.connect.use(req, {}, () => {
       req.session.referal_medium.should.equal('google_plus')
-      return done()
+      done()
     })
   })
 
@@ -105,9 +91,9 @@ describe('Referal connect middle wear', function() {
       query: { rm: 'e' },
       session: {}
     }
-    return this.connect.use(req, {}, () => {
+    this.connect.use(req, {}, () => {
       req.session.referal_medium.should.equal('email')
-      return done()
+      done()
     })
   })
 
@@ -116,9 +102,9 @@ describe('Referal connect middle wear', function() {
       query: { rm: 'd' },
       session: {}
     }
-    return this.connect.use(req, {}, () => {
+    this.connect.use(req, {}, () => {
       req.session.referal_medium.should.equal('direct')
-      return done()
+      done()
     })
   })
 
@@ -127,9 +113,9 @@ describe('Referal connect middle wear', function() {
       query: { rs: 'b' },
       session: {}
     }
-    return this.connect.use(req, {}, () => {
+    this.connect.use(req, {}, () => {
       req.session.referal_source.should.equal('bonus')
-      return done()
+      done()
     })
   })
 
@@ -138,9 +124,9 @@ describe('Referal connect middle wear', function() {
       query: { rs: 'ps' },
       session: {}
     }
-    return this.connect.use(req, {}, () => {
+    this.connect.use(req, {}, () => {
       req.session.referal_source.should.equal('public_share')
-      return done()
+      done()
     })
   })
 
@@ -149,9 +135,9 @@ describe('Referal connect middle wear', function() {
       query: { rs: 'ci' },
       session: {}
     }
-    return this.connect.use(req, {}, () => {
+    this.connect.use(req, {}, () => {
       req.session.referal_source.should.equal('collaborator_invite')
-      return done()
+      done()
     })
   })
 })

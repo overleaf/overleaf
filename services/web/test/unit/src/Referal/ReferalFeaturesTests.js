@@ -1,17 +1,4 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 require('chai').should()
 const sinon = require('sinon')
 const modulePath = require('path').join(
@@ -40,7 +27,7 @@ describe('ReferalFeatures', function() {
     this.referal_id = 'referal-id-123'
     this.referal_medium = 'twitter'
     this.user_id = 'user-id-123'
-    return (this.new_user_id = 'new-user-id-123')
+    this.new_user_id = 'new-user-id-123'
   })
 
   describe('getBonusFeatures', function() {
@@ -58,18 +45,16 @@ describe('ReferalFeatures', function() {
         features: { collaborators: 1, dropbox: false, versioning: false }
       }
 
-      this.User.findOne = sinon.stub().callsArgWith(1, null, stubbedUser)
-      return this.ReferalFeatures.getBonusFeatures(this.user_id, this.callback)
+      this.User.findOne = sinon.stub().callsArgWith(2, null, stubbedUser)
+      this.ReferalFeatures.getBonusFeatures(this.user_id, this.callback)
     })
 
     it('should get the users number of refered user', function() {
-      return this.User.findOne
-        .calledWith({ _id: this.user_id })
-        .should.equal(true)
+      this.User.findOne.calledWith({ _id: this.user_id }).should.equal(true)
     })
 
     it('should call the callback with the features', function() {
-      return this.callback
+      this.callback
         .calledWith(null, this.Settings.bonus_features[3])
         .should.equal(true)
     })
@@ -87,18 +72,16 @@ describe('ReferalFeatures', function() {
       }
       this.User.findOne = sinon
         .stub()
-        .callsArgWith(1, null, { refered_user_count: this.refered_user_count })
-      return this.ReferalFeatures.getBonusFeatures(this.user_id, this.callback)
+        .callsArgWith(2, null, { refered_user_count: this.refered_user_count })
+      this.ReferalFeatures.getBonusFeatures(this.user_id, this.callback)
     })
 
     it('should get the users number of refered user', function() {
-      return this.User.findOne
-        .calledWith({ _id: this.user_id })
-        .should.equal(true)
+      this.User.findOne.calledWith({ _id: this.user_id }).should.equal(true)
     })
 
     it('should call the callback with no features', function() {
-      return this.callback.calledWith(null, {}).should.equal(true)
+      this.callback.calledWith(null, {}).should.equal(true)
     })
   })
 })

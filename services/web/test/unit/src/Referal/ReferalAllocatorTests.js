@@ -1,17 +1,4 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 require('chai').should()
 const sinon = require('sinon')
 const modulePath = require('path').join(
@@ -44,16 +31,16 @@ describe('ReferalAllocator', function() {
     this.new_user_id = 'new-user-id-123'
     this.FeaturesUpdater.refreshFeatures = sinon.stub().yields()
     this.User.update = sinon.stub().callsArgWith(3, null)
-    return (this.User.findOne = sinon
+    this.User.findOne = sinon
       .stub()
-      .callsArgWith(1, null, { _id: this.user_id }))
+      .callsArgWith(2, null, { _id: this.user_id })
   })
 
   describe('allocate', function() {
     describe('when the referal was a bonus referal', function() {
       beforeEach(function() {
         this.referal_source = 'bonus'
-        return this.ReferalAllocator.allocate(
+        this.ReferalAllocator.allocate(
           this.referal_id,
           this.new_user_id,
           this.referal_source,
@@ -63,7 +50,7 @@ describe('ReferalAllocator', function() {
       })
 
       it('should update the referring user with the refered users id', function() {
-        return this.User.update
+        this.User.update
           .calledWith(
             {
               referal_id: this.referal_id
@@ -81,19 +68,19 @@ describe('ReferalAllocator', function() {
       })
 
       it('find the referring users id', function() {
-        return this.User.findOne
+        this.User.findOne
           .calledWith({ referal_id: this.referal_id })
           .should.equal(true)
       })
 
       it("should refresh the user's subscription", function() {
-        return this.FeaturesUpdater.refreshFeatures
+        this.FeaturesUpdater.refreshFeatures
           .calledWith(this.user_id)
           .should.equal(true)
       })
 
       it('should call the callback', function() {
-        return this.callback.called.should.equal(true)
+        this.callback.called.should.equal(true)
       })
     })
 
@@ -101,8 +88,8 @@ describe('ReferalAllocator', function() {
       beforeEach(function() {
         this.referal_source = 'bonus'
         this.referal_id = 'wombat'
-        this.User.findOne = sinon.stub().callsArgWith(1, null, null)
-        return this.ReferalAllocator.allocate(
+        this.User.findOne = sinon.stub().callsArgWith(2, null, null)
+        this.ReferalAllocator.allocate(
           this.referal_id,
           this.new_user_id,
           this.referal_source,
@@ -112,28 +99,28 @@ describe('ReferalAllocator', function() {
       })
 
       it('should find the referring users id', function() {
-        return this.User.findOne
+        this.User.findOne
           .calledWith({ referal_id: this.referal_id })
           .should.equal(true)
       })
 
       it('should not update the referring user with the refered users id', function() {
-        return this.User.update.called.should.equal(false)
+        this.User.update.called.should.equal(false)
       })
 
       it('should not assign the user a bonus', function() {
-        return this.FeaturesUpdater.refreshFeatures.called.should.equal(false)
+        this.FeaturesUpdater.refreshFeatures.called.should.equal(false)
       })
 
       it('should call the callback', function() {
-        return this.callback.called.should.equal(true)
+        this.callback.called.should.equal(true)
       })
     })
 
     describe('when the referal is not a bonus referal', function() {
       beforeEach(function() {
         this.referal_source = 'public_share'
-        return this.ReferalAllocator.allocate(
+        this.ReferalAllocator.allocate(
           this.referal_id,
           this.new_user_id,
           this.referal_source,
@@ -143,21 +130,21 @@ describe('ReferalAllocator', function() {
       })
 
       it('should not update the referring user with the refered users id', function() {
-        return this.User.update.called.should.equal(false)
+        this.User.update.called.should.equal(false)
       })
 
       it('find the referring users id', function() {
-        return this.User.findOne
+        this.User.findOne
           .calledWith({ referal_id: this.referal_id })
           .should.equal(true)
       })
 
       it('should not assign the user a bonus', function() {
-        return this.FeaturesUpdater.refreshFeatures.called.should.equal(false)
+        this.FeaturesUpdater.refreshFeatures.called.should.equal(false)
       })
 
       it('should call the callback', function() {
-        return this.callback.called.should.equal(true)
+        this.callback.called.should.equal(true)
       })
     })
   })
