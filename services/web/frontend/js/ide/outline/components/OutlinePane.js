@@ -5,7 +5,14 @@ import classNames from 'classnames'
 import OutlineRoot from './OutlineRoot'
 import localStorage from '../../../modules/localStorage'
 
-function OutlinePane({ isTexFile, outline, projectId, jumpToLine, onToggle }) {
+function OutlinePane({
+  isTexFile,
+  outline,
+  projectId,
+  jumpToLine,
+  onToggle,
+  eventTracking
+}) {
   const storageKey = `file_outline.expanded.${projectId}`
   const [expanded, setExpanded] = useState(() => {
     const storedExpandedState = localStorage(storageKey) !== false
@@ -32,6 +39,7 @@ function OutlinePane({ isTexFile, outline, projectId, jumpToLine, onToggle }) {
   function handleExpandCollapseClick() {
     if (isTexFile) {
       localStorage(storageKey, !expanded)
+      eventTracking.sendMB(expanded ? 'outline-collapse' : 'outline-expand')
       setExpanded(!expanded)
     }
   }
@@ -81,7 +89,8 @@ OutlinePane.propTypes = {
   outline: PropTypes.array.isRequired,
   projectId: PropTypes.string.isRequired,
   jumpToLine: PropTypes.func.isRequired,
-  onToggle: PropTypes.func
+  onToggle: PropTypes.func,
+  eventTracking: PropTypes.object.isRequired
 }
 
 export default OutlinePane
