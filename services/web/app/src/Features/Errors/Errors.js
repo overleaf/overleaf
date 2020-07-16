@@ -175,6 +175,12 @@ class DocHasRangesError extends OError {
   }
 }
 
+class InvalidQueryError extends OError {
+  constructor(options) {
+    super({ message: 'invalid search query', ...options })
+  }
+}
+
 module.exports = {
   OError,
   BackwardCompatibleError,
@@ -203,5 +209,6 @@ module.exports = {
   ProjectNotFoundError,
   UserNotFoundError,
   UserNotCollaboratorError,
-  DocHasRangesError
+  DocHasRangesError,
+  InvalidQueryError
 }

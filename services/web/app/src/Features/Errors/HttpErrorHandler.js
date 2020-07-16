@@ -1,7 +1,7 @@
 const logger = require('logger-sharelatex')
 
 function renderJSONError(res, message, info) {
-  const fullInfo = { message, ...info }
+  const fullInfo = { ...info, message }
   if (info.message) {
     logger.warn(
       info,
@@ -12,6 +12,21 @@ function renderJSONError(res, message, info) {
 }
 
 module.exports = {
+  badRequest(req, res, message, info) {
+    res.status(400)
+    switch (req.accepts(['html', 'json'])) {
+      case 'html':
+        return res.render('general/400', {
+          title: 'Client Error',
+          message: message
+        })
+      case 'json':
+        return renderJSONError(res, message, info || {})
+      default:
+        return res.send('client error')
+    }
+  },
+
   forbidden(req, res, message = 'restricted', info = {}) {
     res.status(403)
     switch (req.accepts(['html', 'json'])) {
