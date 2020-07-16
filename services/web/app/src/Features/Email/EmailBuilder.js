@@ -1,6 +1,7 @@
 const _ = require('underscore')
 const settings = require('settings-sharelatex')
 const marked = require('marked')
+const EmailMessageHelper = require('./EmailMessageHelper')
 const StringHelper = require('../Helpers/StringHelper')
 const BaseWithHeaderEmailLayout = require(`./Layouts/BaseWithHeaderEmailLayout`)
 const SpamSafe = require('./SpamSafe')
@@ -58,8 +59,8 @@ function NoCTAEmailTemplate(content) {
   if (content.greeting == null) {
     content.greeting = () => 'Hi,'
   }
-  if (content.secondaryMessage == null) {
-    content.secondaryMessage = () => ''
+  if (!content.message) {
+    throw new Error('missing message')
   }
   return {
     subject(opts) {
@@ -69,10 +70,9 @@ function NoCTAEmailTemplate(content) {
     plainTextTemplate(opts) {
       return `\
 ${content.greeting(opts)}
-${content.message(opts).trim()}
-${(typeof content.secondaryMessage === 'function'
-        ? content.secondaryMessage(opts).trim()
-        : undefined) || ''}
+
+${content.message(opts, true).join('\r\n\r\n')}
+
 Regards,
 The ${settings.appName} Team - ${settings.siteUrl}\
 `
@@ -82,12 +82,7 @@ The ${settings.appName} Team - ${settings.siteUrl}\
         title:
           typeof content.title === 'function' ? content.title(opts) : undefined,
         greeting: content.greeting(opts),
-        message: marked(content.message(opts).trim()),
-        secondaryMessage: marked(content.secondaryMessage(opts).trim()),
-        gmailGoToAction:
-          typeof content.gmailGoToAction === 'function'
-            ? content.gmailGoToAction(opts)
-            : undefined,
+        message: content.message(opts),
         StringHelper
       })
     }
@@ -237,9 +232,10 @@ templates.passwordChanged = NoCTAEmailTemplate({
     return `Password Changed`
   },
   message(opts) {
-    return `We're contacting you to notify you that your password has been set or changed.
-
-If you have recently set your password for the first time, or if you just changed your password, you don't need to take any further action. If you didn't set or change your password, please contact us.`
+    return [
+      `We're contacting you to notify you that your password has been set or changed.`,
+      `If you have recently set your password for the first time, or if you just changed your password, you don't need to take any further action. If you didn't set or change your password, please contact us.`
+    ]
   }
 })
 
@@ -482,9 +478,10 @@ templates.emailThirdPartyIdentifierLinked = NoCTAEmailTemplate({
     return `Accounts Linked`
   },
   message(opts) {
-    let message = `We're contacting you to notify you that your ${opts.provider}
-    account is now linked to your ${settings.appName} account.`
-    return message
+    let message = `We're contacting you to notify you that your ${
+      opts.provider
+    } account is now linked to your ${settings.appName} account.`
+    return [message]
   }
 })
 
@@ -498,9 +495,10 @@ templates.emailThirdPartyIdentifierUnlinked = NoCTAEmailTemplate({
     return `Accounts No Longer Linked`
   },
   message(opts) {
-    let message = `We're contacting you to notify you that your ${opts.provider}
-    account is no longer linked with your ${settings.appName} account.`
-    return message
+    let message = `We're contacting you to notify you that your ${
+      opts.provider
+    } account is no longer linked with your ${settings.appName} account.`
+    return [message]
   }
 })
 
@@ -514,19 +512,22 @@ templates.ownershipTransferConfirmationPreviousOwner = NoCTAEmailTemplate({
     )
     return `${projectName} - Owner change`
   },
-  message(opts) {
+  message(opts, isPlainText) {
     const nameAndEmail = _.escape(
       _formatUserNameAndEmail(opts.newOwner, 'a collaborator')
     )
     const projectName = _.escape(
       SpamSafe.safeProjectName(opts.project.name, 'your project')
     )
-    return `\
-As per your request, we have made ${nameAndEmail} the owner of ${projectName}.
-
-If you haven't asked to change the owner of **${projectName}**, please get in touch
-with us via ${settings.adminEmail}.
-`
+    const projectNameDisplay = isPlainText
+      ? projectName
+      : `<b>${projectName}</b>`
+    return [
+      `As per your request, we have made ${nameAndEmail} the owner of ${projectNameDisplay}.`,
+      `If you haven't asked to change the owner of ${projectNameDisplay}, please get in touch with us via ${
+        settings.adminEmail
+      }.`
+    ]
   }
 })
 
@@ -573,33 +574,50 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
   title(opts) {
     return `Getting more out of ${settings.appName}`
   },
-  message(opts) {
-    return `\
-Thanks for signing up for ${
-      settings.appName
-    } recently. We hope you've been finding it useful!
-Here are some key features to help you get the most out of the service:
-
-<a href="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding">Learn LaTeX in 30 minutes</a>: In this tutorial we provide a quick and easy first introduction to LaTeX with no prior knowledge required. By the time you are finished, you will have written your first LaTeX document!
-
-<a href="https://www.overleaf.com/latex/templates?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding">Find a beautiful template</a>: If you're looking for a template or example to get started, we've a large selection available in our template gallery, including CVs, project reports, journal articles and more.
-
-<a href="https://www.overleaf.com/learn/how-to/Sharing_a_project?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding">Work with your collaborators</a>: One of the key features of Overleaf is the ability to share projects and collaborate on them with other users. Find out how to share your projecs with your colleagues in this quick how-to guide.
-
-If you have any questions, please let us know, and thanks again for using Overleaf.
-
-John
-
-Dr John Hammersley <br />
-Co-founder & CEO <br />
-<a href="http://www.overleaf.com">www.overleaf.com</a>
-<hr>
-    `
-  },
-  secondaryMessage() {
-    return `Don't want onboarding emails like this from us? Don't worry, this is the only one.
- If you've previously subscribed to emails about product offers and company news and events,
- you can unsubscribe <a href="${settings.siteUrl}/user/settings">here</a>.`
+  message(opts, isPlainText) {
+    const learnLatexLink = EmailMessageHelper.displayLink(
+      'Learn LaTeX in 30 minutes',
+      `${
+        settings.siteUrl
+      }/learn/latex/Learn_LaTeX_in_30_minutes?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding`,
+      isPlainText
+    )
+    const templatesLinks = EmailMessageHelper.displayLink(
+      'Find a beautiful template',
+      `${
+        settings.siteUrl
+      }/latex/templates?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding`,
+      isPlainText
+    )
+    const collaboratorsLink = EmailMessageHelper.displayLink(
+      'Work with your collaborators',
+      `${
+        settings.siteUrl
+      }/learn/how-to/Sharing_a_project?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding`,
+      isPlainText
+    )
+    const siteLink = EmailMessageHelper.displayLink(
+      'www.overleaf.com',
+      settings.siteUrl,
+      isPlainText
+    )
+    const userSettingsLink = EmailMessageHelper.displayLink(
+      'here',
+      `${settings.siteUrl}/user/settings`,
+      isPlainText
+    )
+    return [
+      `Thanks for signing up for ${
+        settings.appName
+      } recently. We hope you've been finding it useful! Here are some key features to help you get the most out of the service:`,
+      `${learnLatexLink}: In this tutorial we provide a quick and easy first introduction to LaTeX with no prior knowledge required. By the time you are finished, you will have written your first LaTeX document!`,
+      `${templatesLinks}: If you're looking for a template or example to get started, we've a large selection available in our template gallery, including CVs, project reports, journal articles and more.`,
+      `${collaboratorsLink}: One of the key features of Overleaf is the ability to share projects and collaborate on them with other users. Find out how to share your projecs with your colleagues in this quick how-to guide.`,
+      `If you have any questions, please let us know, and thanks again for using Overleaf.`,
+      `John`,
+      `Dr John Hammersley <br />Co-founder & CEO <br />${siteLink}<hr>`,
+      `Don't want onboarding emails like this from us? Don't worry, this is the only one. If you've previously subscribed to emails about product offers and company news and events, you can unsubscribe ${userSettingsLink}.`
+    ]
   }
 })
 

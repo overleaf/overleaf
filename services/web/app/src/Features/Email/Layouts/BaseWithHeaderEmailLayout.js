@@ -14,7 +14,7 @@ module.exports = _.template(`\
 
 .avoid-auto-linking a,
 .avoid-auto-linking a[href] {
-	color: #4F9C45 !important;
+	color: #138A07 !important;
 	text-decoration: none !important;
 	-moz-hyphens: none;
 	-ms-hyphens: none;
@@ -22,7 +22,7 @@ module.exports = _.template(`\
 	hyphens: none; }
 	.avoid-auto-linking a:visited,
 	.avoid-auto-linking a[href]:visited {
-		color: #4F9C45; }
+		color: #138A07; }
 	.avoid-auto-linking a:hover,
 	.avoid-auto-linking a[href]:hover {
 		color: #3d7935; }
@@ -366,7 +366,7 @@ module.exports = _.template(`\
 								<p style="Margin: 0; Margin-bottom: 10px; color: #5D6879; font-family: Helvetica, Arial, sans-serif; font-size: 16px; font-weight: normal; line-height: 1.3; margin: 0; margin-bottom: 10px; padding: 0; text-align: left;"><small style="color: #5D6879; font-size: 80%;">
 									${settings.appName} &bull; <a href="${
   settings.siteUrl
-}" style="Margin: 0; color: #4F9C45; font-family: Helvetica, Arial, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;">${
+}" style="Margin: 0; color: #0F7A06; font-family: Helvetica, Arial, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;">${
   settings.siteUrl
 }</a>
 								</small></p>
