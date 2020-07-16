@@ -42,8 +42,10 @@ html(
 			if gaOptimize === true && typeof(gaOptimizeId) != "undefined"
 				script(type='text/javascript').
 					ga('require', '#{gaOptimizeId}')
-					ga('send', 'event', 'pageview',  document.title.substring(0, 499), window.location.href.substring(0, 499))
-				if !experimentId
+				if !customOptimizeEvent
+					script(type='text/javascript').
+						ga('send', 'event', 'pageview',  document.title.substring(0, 499), window.location.href.substring(0, 499))
+				if !ExposedSettings.experimentId
 					//- Anti-flicker snippet
 					//- Only run for tests controlled by Optimize editor
 					style(type='text/css') .async-hide { opacity: 0 !important}

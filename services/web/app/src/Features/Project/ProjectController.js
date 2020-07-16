@@ -830,7 +830,8 @@ const ProjectController = {
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
               wsUrl,
               showSupport: Features.hasFeature('support'),
-              gaOptimize: enableOptimize
+              gaOptimize: enableOptimize,
+              customOptimizeEvent: true
             })
             timer.done()
           }
