@@ -1,19 +1,6 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
-const should = require('chai').should()
+require('chai').should()
 const sinon = require('sinon')
-const querystring = require('querystring')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionHandler'
 
@@ -109,9 +96,9 @@ describe('SubscriptionHandler', function() {
       }
     })
 
-    return (this.SubscriptionHandler.syncSubscriptionToUser = sinon
+    this.SubscriptionHandler.syncSubscriptionToUser = sinon
       .stub()
-      .callsArgWith(2))
+      .callsArgWith(2)
   })
 
   describe('createSubscription', function() {
@@ -122,14 +109,14 @@ describe('SubscriptionHandler', function() {
         number: '12345'
       }
       this.recurlyTokenIds = { billing: '45555666' }
-      return (this.SubscriptionHandler.validateNoSubscriptionInRecurly = sinon
+      this.SubscriptionHandler.validateNoSubscriptionInRecurly = sinon
         .stub()
-        .yields(null, true))
+        .yields(null, true)
     })
 
     describe('successfully', function() {
       beforeEach(function() {
-        return this.SubscriptionHandler.createSubscription(
+        this.SubscriptionHandler.createSubscription(
           this.user,
           this.subscriptionDetails,
           this.recurlyTokenIds,
@@ -138,7 +125,7 @@ describe('SubscriptionHandler', function() {
       })
 
       it('should create the subscription with the wrapper', function() {
-        return this.RecurlyWrapper.createSubscription
+        this.RecurlyWrapper.createSubscription
           .calledWith(this.user, this.subscriptionDetails, this.recurlyTokenIds)
           .should.equal(true)
       })
@@ -148,7 +135,7 @@ describe('SubscriptionHandler', function() {
         this.SubscriptionUpdater.syncSubscription.args[0][0].should.deep.equal(
           this.activeRecurlySubscription
         )
-        return this.SubscriptionUpdater.syncSubscription.args[0][1].should.deep.equal(
+        this.SubscriptionUpdater.syncSubscription.args[0][1].should.deep.equal(
           this.user._id
         )
       })
@@ -159,7 +146,7 @@ describe('SubscriptionHandler', function() {
         this.SubscriptionHandler.validateNoSubscriptionInRecurly = sinon
           .stub()
           .yields(null, false)
-        return this.SubscriptionHandler.createSubscription(
+        this.SubscriptionHandler.createSubscription(
           this.user,
           this.subscriptionDetails,
           this.recurlyTokenIds,
@@ -167,8 +154,8 @@ describe('SubscriptionHandler', function() {
         )
       })
 
-      it('should return an error', function() {
-        return this.callback.calledWith(
+      it('should  an error', function() {
+        this.callback.calledWith(
           new Error('user already has subscription in recurly')
         )
       })
@@ -186,7 +173,7 @@ describe('SubscriptionHandler', function() {
             true,
             this.subscription
           )
-          return this.SubscriptionHandler.updateSubscription(
+          this.SubscriptionHandler.updateSubscription(
             this.user,
             this.plan_code,
             null,
@@ -200,13 +187,13 @@ describe('SubscriptionHandler', function() {
             .should.equal(true)
           const updateOptions = this.RecurlyWrapper.updateSubscription
             .args[0][1]
-          return updateOptions.plan_code.should.equal(this.plan_code)
+          updateOptions.plan_code.should.equal(this.plan_code)
         })
 
         it('should update immediately', function() {
           const updateOptions = this.RecurlyWrapper.updateSubscription
             .args[0][1]
-          return updateOptions.timeframe.should.equal('now')
+          updateOptions.timeframe.should.equal('now')
         })
 
         it('should sync the new subscription to the user', function() {
@@ -216,7 +203,7 @@ describe('SubscriptionHandler', function() {
           this.SubscriptionUpdater.syncSubscription.args[0][0].should.deep.equal(
             this.activeRecurlySubscription
           )
-          return this.SubscriptionUpdater.syncSubscription.args[0][1].should.deep.equal(
+          this.SubscriptionUpdater.syncSubscription.args[0][1].should.deep.equal(
             this.user._id
           )
         })
@@ -230,7 +217,7 @@ describe('SubscriptionHandler', function() {
           null,
           false
         )
-        return this.SubscriptionHandler.updateSubscription(
+        this.SubscriptionHandler.updateSubscription(
           this.user,
           this.plan_code,
           null,
@@ -240,7 +227,7 @@ describe('SubscriptionHandler', function() {
 
       it('should redirect to the subscription dashboard', function() {
         this.RecurlyWrapper.updateSubscription.called.should.equal(false)
-        return this.SubscriptionHandler.syncSubscriptionToUser.called.should.equal(
+        this.SubscriptionHandler.syncSubscriptionToUser.called.should.equal(
           false
         )
       })
@@ -256,7 +243,7 @@ describe('SubscriptionHandler', function() {
           true,
           this.subscription
         )
-        return this.SubscriptionHandler.updateSubscription(
+        this.SubscriptionHandler.updateSubscription(
           this.user,
           this.plan_code,
           this.coupon_code,
@@ -265,7 +252,7 @@ describe('SubscriptionHandler', function() {
       })
 
       it('should get the users account', function() {
-        return this.RecurlyWrapper.getSubscription
+        this.RecurlyWrapper.getSubscription
           .calledWith(this.activeRecurlySubscription.uuid)
           .should.equal(true)
       })
@@ -277,7 +264,7 @@ describe('SubscriptionHandler', function() {
             this.coupon_code
           )
           .should.equal(true)
-        return done()
+        done()
       })
 
       it('should update the subscription', function() {
@@ -285,7 +272,7 @@ describe('SubscriptionHandler', function() {
           .calledWith(this.subscription.recurlySubscription_id)
           .should.equal(true)
         const updateOptions = this.RecurlyWrapper.updateSubscription.args[0][1]
-        return updateOptions.plan_code.should.equal(this.plan_code)
+        updateOptions.plan_code.should.equal(this.plan_code)
       })
     })
   })
@@ -299,11 +286,11 @@ describe('SubscriptionHandler', function() {
           false,
           this.subscription
         )
-        return this.SubscriptionHandler.cancelSubscription(this.user, done)
+        this.SubscriptionHandler.cancelSubscription(this.user, done)
       })
 
       it('should redirect to the subscription dashboard', function() {
-        return this.RecurlyWrapper.cancelSubscription.called.should.equal(false)
+        this.RecurlyWrapper.cancelSubscription.called.should.equal(false)
       })
     })
 
@@ -315,18 +302,18 @@ describe('SubscriptionHandler', function() {
           true,
           this.subscription
         )
-        return this.SubscriptionHandler.cancelSubscription(this.user, done)
+        this.SubscriptionHandler.cancelSubscription(this.user, done)
       })
 
       it('should cancel the subscription', function() {
         this.RecurlyWrapper.cancelSubscription.called.should.equal(true)
-        return this.RecurlyWrapper.cancelSubscription
+        this.RecurlyWrapper.cancelSubscription
           .calledWith(this.subscription.recurlySubscription_id)
           .should.equal(true)
       })
 
       it('should trigger the cancel subscription event', function() {
-        return this.Events.emit
+        this.Events.emit
           .calledWith('cancelSubscription', this.user._id)
           .should.equal(true)
       })
@@ -342,17 +329,15 @@ describe('SubscriptionHandler', function() {
           false,
           this.subscription
         )
-        return this.SubscriptionHandler.reactivateSubscription(this.user, done)
+        this.SubscriptionHandler.reactivateSubscription(this.user, done)
       })
 
       it('should redirect to the subscription dashboard', function() {
-        return this.RecurlyWrapper.reactivateSubscription.called.should.equal(
-          false
-        )
+        this.RecurlyWrapper.reactivateSubscription.called.should.equal(false)
       })
 
       it('should not send a notification email', function() {
-        return sinon.assert.notCalled(this.EmailHandler.sendEmail)
+        sinon.assert.notCalled(this.EmailHandler.sendEmail)
       })
     })
 
@@ -364,18 +349,18 @@ describe('SubscriptionHandler', function() {
           true,
           this.subscription
         )
-        return this.SubscriptionHandler.reactivateSubscription(this.user, done)
+        this.SubscriptionHandler.reactivateSubscription(this.user, done)
       })
 
       it('should reactivate the subscription', function() {
         this.RecurlyWrapper.reactivateSubscription.called.should.equal(true)
-        return this.RecurlyWrapper.reactivateSubscription
+        this.RecurlyWrapper.reactivateSubscription
           .calledWith(this.subscription.recurlySubscription_id)
           .should.equal(true)
       })
 
       it('should send a notification email', function() {
-        return sinon.assert.calledWith(
+        sinon.assert.calledWith(
           this.EmailHandler.sendEmail,
           'reactivatedSubscription'
         )
@@ -388,11 +373,11 @@ describe('SubscriptionHandler', function() {
       beforeEach(function(done) {
         this.user.id = this.activeRecurlySubscription.account.account_code
 
-        this.User.findById = (userId, callback) => {
+        this.User.findById = (userId, projection, callback) => {
           userId.should.equal(this.user.id)
-          return callback(null, this.user)
+          callback(null, this.user)
         }
-        return this.SubscriptionHandler.syncSubscription(
+        this.SubscriptionHandler.syncSubscription(
           this.activeRecurlySubscription,
           {},
           done
@@ -400,14 +385,14 @@ describe('SubscriptionHandler', function() {
       })
 
       it('should request the affected subscription from the API', function() {
-        return this.RecurlyWrapper.getSubscription
+        this.RecurlyWrapper.getSubscription
           .calledWith(this.activeRecurlySubscription.uuid)
           .should.equal(true)
       })
 
       it('should request the account details of the subscription', function() {
         const options = this.RecurlyWrapper.getSubscription.args[0][1]
-        return options.includeAccount.should.equal(true)
+        options.includeAccount.should.equal(true)
       })
 
       it('should sync the subscription to the user', function() {
@@ -415,7 +400,7 @@ describe('SubscriptionHandler', function() {
         this.SubscriptionUpdater.syncSubscription.args[0][0].should.deep.equal(
           this.activeRecurlySubscription
         )
-        return this.SubscriptionUpdater.syncSubscription.args[0][1].should.deep.equal(
+        this.SubscriptionUpdater.syncSubscription.args[0][1].should.deep.equal(
           this.user._id
         )
       })
@@ -483,51 +468,49 @@ describe('SubscriptionHandler', function() {
         .stub()
         .yields(null, this.subscriptions)
       this.SubscriptionUpdater.syncSubscription = sinon.stub().yields()
-      return (this.callback = sinon.stub())
+      this.callback = sinon.stub()
     })
 
     describe('with no subscription in recurly', function() {
       beforeEach(function() {
         this.subscriptions.push((this.subscription = { mock: 'subscription' }))
-        return this.SubscriptionHandler.validateNoSubscriptionInRecurly(
+        this.SubscriptionHandler.validateNoSubscriptionInRecurly(
           this.user_id,
           this.callback
         )
       })
 
       it('should call RecurlyWrapper.listAccountActiveSubscriptions with the user id', function() {
-        return this.RecurlyWrapper.listAccountActiveSubscriptions
+        this.RecurlyWrapper.listAccountActiveSubscriptions
           .calledWith(this.user_id)
           .should.equal(true)
       })
 
       it('should sync the subscription', function() {
-        return this.SubscriptionUpdater.syncSubscription
+        this.SubscriptionUpdater.syncSubscription
           .calledWith(this.subscription, this.user_id)
           .should.equal(true)
       })
 
       it('should call the callback with valid == false', function() {
-        return this.callback.calledWith(null, false).should.equal(true)
+        this.callback.calledWith(null, false).should.equal(true)
       })
     })
 
     describe('with a subscription in recurly', function() {
       beforeEach(function() {
-        return this.SubscriptionHandler.validateNoSubscriptionInRecurly(
+        this.SubscriptionHandler.validateNoSubscriptionInRecurly(
           this.user_id,
           this.callback
         )
       })
 
       it('should not sync the subscription', function() {
-        return this.SubscriptionUpdater.syncSubscription.called.should.equal(
-          false
-        )
+        this.SubscriptionUpdater.syncSubscription.called.should.equal(false)
       })
 
       it('should call the callback with valid == true', function() {
-        return this.callback.calledWith(null, true).should.equal(true)
+        this.callback.calledWith(null, true).should.equal(true)
       })
     })
   })
