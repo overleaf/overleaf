@@ -15,7 +15,7 @@ class OutlineManager {
     this.outline = []
 
     scope.$on('doc:after-opened', () => {
-      this.shareJsDoc = scope.editor.shareJsDoc
+      this.shareJsDoc = scope.editor.sharejs_doc
       this.isTexFile = isValidTeXFile(scope.editor.open_doc_name)
       this.updateOutline()
       this.broadcastChangeEvent()
