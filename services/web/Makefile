@@ -240,6 +240,10 @@ build_dev:
 		.
 
 build_webpack:
+	$(MAKE) build_webpack_once \
+	|| $(MAKE) build_webpack_once
+
+build_webpack_once:
 	docker build \
 		--build-arg SENTRY_RELEASE \
 		--cache-from $(IMAGE_CI)-dev \
