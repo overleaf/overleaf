@@ -646,16 +646,20 @@ const ProjectController = {
           if (userId == null) {
             cb(null, defaultSettingsForAnonymousUser(userId))
           } else {
-            User.findById(userId, (err, user) => {
-              // Handle case of deleted user
-              if (user == null) {
-                UserController.logout(req, res, next)
-                return
-              }
+            User.findById(
+              userId,
+              'email first_name last_name referal_id signUpDate featureSwitches features refProviders alphaProgram betaProgram isAdmin ace',
+              (err, user) => {
+                // Handle case of deleted user
+                if (user == null) {
+                  UserController.logout(req, res, next)
+                  return
+                }
 
-              logger.log({ projectId, userId }, 'got user')
-              cb(err, user)
-            })
+                logger.log({ projectId, userId }, 'got user')
+                cb(err, user)
+              }
+            )
           }
         },
         subscription(cb) {

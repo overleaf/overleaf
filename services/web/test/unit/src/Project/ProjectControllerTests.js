@@ -937,7 +937,7 @@ describe('ProjectController', function() {
         email: 'bob@bob.com'
       }
       this.ProjectGetter.getProject.callsArgWith(2, null, this.project)
-      this.UserModel.findById.callsArgWith(1, null, this.user)
+      this.UserModel.findById.callsArgWith(2, null, this.user)
       this.SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
       this.AuthorizationManager.getPrivilegeLevelForProject.callsArgWith(
         3,
