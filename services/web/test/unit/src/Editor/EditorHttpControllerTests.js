@@ -122,6 +122,9 @@ describe('EditorHttpController', function() {
         convertDocToFile: sinon.stub().resolves(this.file)
       }
     }
+    this.HttpErrorHandler = {
+      unprocessableEntity: sinon.stub()
+    }
     this.EditorHttpController = SandboxedModule.require(MODULE_PATH, {
       globals: {
         console: console
@@ -144,6 +147,7 @@ describe('EditorHttpController', function() {
         '../../infrastructure/FileWriter': this.FileWriter,
         '../Project/ProjectEntityUpdateHandler': this
           .ProjectEntityUpdateHandler,
+        '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Errors/Errors': Errors,
         '@overleaf/o-error/http': HttpErrors
       }
@@ -540,14 +544,19 @@ describe('EditorHttpController', function() {
     })
 
     describe('when the doc has ranges', function() {
-      it('should return a 422', function(done) {
+      it('should return a 422 - Unprocessable Entity', function(done) {
         this.ProjectEntityUpdateHandler.promises.convertDocToFile.rejects(
           new Errors.DocHasRangesError({})
         )
-        this.EditorHttpController.convertDocToFile(this.req, this.res, err => {
-          expect(err).to.be.instanceof(HttpErrors.UnprocessableEntityError)
-          done()
-        })
+        this.HttpErrorHandler.unprocessableEntity = sinon.spy(
+          (req, res, message) => {
+            expect(req).to.exist
+            expect(res).to.exist
+            expect(message).to.equal('Document has comments or tracked changes')
+            done()
+          }
+        )
+        this.EditorHttpController.convertDocToFile(this.req, this.res)
       })
     })
   })

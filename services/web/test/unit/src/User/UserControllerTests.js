@@ -70,6 +70,9 @@ describe('UserController', function() {
       revokeAllUserSessions: sinon.stub().callsArgWith(2, null)
     }
     this.SudoModeHandler = { clearSudoMode: sinon.stub() }
+    this.HttpErrorHandler = {
+      unprocessableEntity: sinon.stub()
+    }
     this.UserController = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -95,6 +98,7 @@ describe('UserController', function() {
         './UserHandler': this.UserHandler,
         './UserSessionsManager': this.UserSessionsManager,
         '../SudoMode/SudoModeHandler': this.SudoModeHandler,
+        '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         'settings-sharelatex': this.settings,
         'logger-sharelatex': {
           log() {},
@@ -233,17 +237,19 @@ describe('UserController', function() {
           .yields(new Errors.SubscriptionAdminDeletionError())
       })
 
-      it('should return a json error', function(done) {
-        this.UserController.tryDeleteUser(this.req, null, error => {
-          expect(error).to.be.instanceof(HttpErrors.UnprocessableEntityError)
-          expect(
-            OError.hasCauseInstanceOf(
-              error,
-              Errors.SubscriptionAdminDeletionError
-            )
-          ).to.be.true
-          done()
-        })
+      it('should return a HTTP Unprocessable Entity error', function(done) {
+        this.HttpErrorHandler.unprocessableEntity = sinon.spy(
+          (req, res, message, info) => {
+            expect(req).to.exist
+            expect(res).to.exist
+            expect(message).to.equal('error while deleting user account')
+            expect(info).to.deep.equal({
+              error: 'SubscriptionAdminDeletionError'
+            })
+            done()
+          }
+        )
+        this.UserController.tryDeleteUser(this.req, this.res)
       })
     })
 

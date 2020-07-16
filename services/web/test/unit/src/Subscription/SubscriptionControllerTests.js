@@ -121,6 +121,9 @@ describe('SubscriptionController', function() {
         './FeaturesUpdater': (this.FeaturesUpdater = {}),
         './GroupPlansData': (this.GroupPlansData = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
+        '../Errors/HttpErrorHandler': (this.HttpErrorHandler = {
+          unprocessableEntity: sinon.stub()
+        }),
         '../Errors/Errors': Errors,
         './Errors': SubscriptionErrors,
         '@overleaf/o-error/http': HttpErrors
@@ -240,18 +243,21 @@ describe('SubscriptionController', function() {
     })
 
     describe('with an invalid plan code', function() {
-      it('should return 422 error', function(done) {
+      it('should return 422 error - Unprocessable Entity', function(done) {
         this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
           1,
           null,
           false
         )
         this.PlansLocator.findLocalPlanInSettings.returns(null)
-        this.next = error => {
-          expect(error).to.exist
-          expect(error.statusCode).to.equal(422)
-          done()
-        }
+        this.HttpErrorHandler.unprocessableEntity = sinon.spy(
+          (req, res, message) => {
+            expect(req).to.exist
+            expect(res).to.exist
+            expect(message).to.deep.equal('Plan not found')
+            done()
+          }
+        )
         return this.SubscriptionController.paymentPage(
           this.req,
           this.res,
@@ -469,6 +475,39 @@ describe('SubscriptionController', function() {
         expect(OError.hasCauseInstanceOf(error, Errors.InvalidError)).to.be.true
       })
       return done()
+    })
+
+    it('should handle recurly errors', function(done) {
+      this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
+      this.SubscriptionHandler.createSubscription.yields(
+        new SubscriptionErrors.RecurlyTransactionError({})
+      )
+
+      this.HttpErrorHandler.unprocessableEntity = sinon.spy(
+        (req, res, info) => {
+          expect(req).to.exist
+          expect(res).to.exist
+          expect(info).to.deep.equal('Unknown transaction error')
+          done()
+        }
+      )
+
+      return this.SubscriptionController.createSubscription(this.req, this.res)
+    })
+
+    it('should handle invalid error', function(done) {
+      this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
+      this.SubscriptionHandler.createSubscription.yields(
+        new Errors.InvalidError({})
+      )
+
+      this.HttpErrorHandler.unprocessableEntity = sinon.spy((req, res) => {
+        expect(req).to.exist
+        expect(res).to.exist
+        done()
+      })
+
+      return this.SubscriptionController.createSubscription(this.req, this.res)
     })
   })
 

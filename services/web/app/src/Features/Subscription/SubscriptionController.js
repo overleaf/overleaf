@@ -30,7 +30,9 @@ const planFeatures = require('./planFeatures')
 const GroupPlansData = require('./GroupPlansData')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const Errors = require('../Errors/Errors')
+const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const SubscriptionErrors = require('./Errors')
+const OError = require('@overleaf/o-error')
 const HttpErrors = require('@overleaf/o-error/http')
 
 module.exports = SubscriptionController = {
@@ -82,11 +84,7 @@ module.exports = SubscriptionController = {
     const user = AuthenticationController.getSessionUser(req)
     const plan = PlansLocator.findLocalPlanInSettings(req.query.planCode)
     if (!plan) {
-      return next(
-        new HttpErrors.UnprocessableEntityError({
-          info: { public: { message: 'Plan not found' } }
-        })
-      )
+      return HttpErrorHandler.unprocessableEntity(req, res, 'Plan not found')
     }
     return LimitationsManager.userHasV1OrV2Subscription(user, function(
       err,
@@ -224,13 +222,16 @@ module.exports = SubscriptionController = {
             return res.sendStatus(201)
           }
 
-          if (err instanceof SubscriptionErrors.RecurlyTransactionError) {
-            return next(
-              new HttpErrors.UnprocessableEntityError({}).withCause(err)
-            )
-          } else if (err instanceof Errors.InvalidError) {
-            return next(
-              new HttpErrors.UnprocessableEntityError({}).withCause(err)
+          if (
+            err instanceof SubscriptionErrors.RecurlyTransactionError ||
+            err instanceof Errors.InvalidError
+          ) {
+            logger.warn(err)
+            return HttpErrorHandler.unprocessableEntity(
+              req,
+              res,
+              err.message,
+              OError.getFullInfo(err).public
             )
           }
 

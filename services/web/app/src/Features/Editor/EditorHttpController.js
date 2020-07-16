@@ -12,6 +12,7 @@ const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const Errors = require('../Errors/Errors')
+const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
 const { expressify } = require('../../util/promises')
 
@@ -272,11 +273,11 @@ async function convertDocToFile(req, res, next) {
         info: { public: { message: 'Document not found' } }
       })
     } else if (err instanceof Errors.DocHasRangesError) {
-      throw new HttpErrors.UnprocessableEntityError({
-        info: {
-          public: { message: 'Document has comments or tracked changes' }
-        }
-      })
+      return HttpErrorHandler.unprocessableEntity(
+        req,
+        res,
+        'Document has comments or tracked changes'
+      )
     } else {
       throw err
     }

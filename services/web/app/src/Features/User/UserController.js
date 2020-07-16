@@ -13,6 +13,7 @@ const UserSessionsManager = require('./UserSessionsManager')
 const UserUpdater = require('./UserUpdater')
 const SudoModeHandler = require('../SudoMode/SudoModeHandler')
 const Errors = require('../Errors/Errors')
+const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const OError = require('@overleaf/o-error')
 const HttpErrors = require('@overleaf/o-error/http')
 const EmailHandler = require('../Email/EmailHandler')
@@ -108,10 +109,12 @@ const UserController = {
                 errorData.info.public = {
                   error: 'SubscriptionAdminDeletionError'
                 }
-                return next(
-                  new HttpErrors.UnprocessableEntityError(errorData).withCause(
-                    err
-                  )
+                logger.warn(new OError(errorData).withCause(err))
+                return HttpErrorHandler.unprocessableEntity(
+                  req,
+                  res,
+                  errorData.message,
+                  errorData.info.public
                 )
               } else {
                 return next(new OError(errorData).withCause(err))
