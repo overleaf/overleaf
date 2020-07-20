@@ -171,6 +171,7 @@
     "eslint-plugin-node": "^6.0.0",
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-react": "^7.19.0",
+    "eslint-plugin-react-hooks": "^4.0.8",
     "eslint-plugin-standard": "^3.0.1",
     "expose-loader": "^0.7.5",
     "fetch-mock": "^9.10.2",

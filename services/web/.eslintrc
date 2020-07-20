@@ -6,6 +6,7 @@
     "prettier",
     "prettier/react",
     "prettier/standard",
+    "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended"
   ],
   "plugins": [
@@ -26,24 +27,6 @@
     }
   },
   "rules": {
-    // Fix conflict between prettier & standard by overriding to prefer
-    // double quotes
-    "jsx-quotes": ["error", "prefer-double"],
-
-    // Override weird behaviour of jsx-a11y label-has-for (says labels must be
-    // nested *and* have for/id attributes)
-    "jsx-a11y/label-has-for": [
-      "error",
-      {
-        "required": {
-          "some": [
-            "nesting",
-            "id"
-          ]
-        }
-      }
-    ],
-
     // Swap the no-unused-expressions rule with a more chai-friendly one
     "no-unused-expressions": 0,
     "chai-friendly/no-unused-expressions": "error"
@@ -107,6 +90,28 @@
         // Injected in layout.pug
         "user_id": true,
         "ExposedSettings": true
+      },
+      "rules": {
+        // Prevent usage of legacy string refs
+        "react/no-string-refs": "error",
+
+        // Fix conflict between prettier & standard by overriding to prefer
+        // double quotes
+        "jsx-quotes": ["error", "prefer-double"],
+
+        // Override weird behaviour of jsx-a11y label-has-for (says labels must be
+        // nested *and* have for/id attributes)
+        "jsx-a11y/label-has-for": [
+          "error",
+          {
+            "required": {
+              "some": [
+                "nesting",
+                "id"
+              ]
+            }
+          }
+        ]
       }
     }
   ]
