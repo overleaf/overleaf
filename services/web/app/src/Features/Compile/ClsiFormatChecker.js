@@ -66,7 +66,7 @@ module.exports = ClsiFormatChecker = {
     let sizedResources = resources.map(function(resource) {
       const result = { path: resource.path }
       if (resource.content != null) {
-        result.size = resource.content.replace(/\n/g).length
+        result.size = resource.content.replace(/\n/g, '').length
         result.kbSize = Math.ceil(result.size / 1000)
       } else {
         result.size = 0

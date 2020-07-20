@@ -198,9 +198,7 @@ describe('ClsiFormatChecker', function() {
       it('should error when there is more than 5mb of data', function(done) {
         this.resources.push({
           path: 'massive.tex',
-          content: require('crypto')
-            .randomBytes(1000 * 1000 * 5)
-            .toString('hex')
+          content: 'hello world\n'.repeat(833333) // over 5mb limit
         })
 
         while (this.resources.length < 20) {
@@ -213,10 +211,10 @@ describe('ClsiFormatChecker', function() {
         return this.ClsiFormatChecker._checkDocsAreUnderSizeLimit(
           this.resources,
           (err, sizeError) => {
-            sizeError.totalSize.should.equal(10000016)
+            sizeError.totalSize.should.equal(16 + 833333 * 11) // 16 is for earlier resources
             sizeError.resources.length.should.equal(10)
             sizeError.resources[0].path.should.equal('massive.tex')
-            sizeError.resources[0].size.should.equal(1000 * 1000 * 10)
+            sizeError.resources[0].size.should.equal(833333 * 11)
             return done()
           }
         )
