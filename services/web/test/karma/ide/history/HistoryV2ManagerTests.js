@@ -19,6 +19,7 @@ export default describe('HistoryV2Manager', function() {
       updates: [],
       viewMode: 'point_in_time',
       nextBeforeTimestamp: null,
+      loading: false,
       atEnd: false,
       userHasFullFeature: undefined,
       freeHistoryLimitHit: false,

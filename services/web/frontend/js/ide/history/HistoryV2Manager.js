@@ -130,6 +130,7 @@ export default (HistoryManager = (function() {
         updates: [],
         viewMode: this._getViewModeUserPref(),
         nextBeforeTimestamp: null,
+        loading: false,
         atEnd: false,
         userHasFullFeature: undefined,
         freeHistoryLimitHit: false,
@@ -618,9 +619,11 @@ export default (HistoryManager = (function() {
         requests.labels = this.ide.$http.get(labelsURL)
       }
 
+      this.$scope.history.loading = true
       return this.ide.$q
         .all(requests)
         .then(response => {
+          this.$scope.history.loading = false
           const updatesData = response.updates.data
           let lastUpdateToV = null
 
@@ -648,6 +651,7 @@ export default (HistoryManager = (function() {
           }
         })
         .catch(error => {
+          this.$scope.history.loading = false
           const { status, statusText } = error
           this.$scope.history.error = { status, statusText }
           this.$scope.history.atEnd = true
