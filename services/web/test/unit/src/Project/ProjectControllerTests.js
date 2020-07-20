@@ -178,7 +178,8 @@ describe('ProjectController', function() {
           getUserAffiliations: this.getUserAffiliations
         },
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
-        '../../models/Project': {}
+        '../../models/Project': {},
+        '../Analytics/AnalyticsManager': { recordEvent: () => {} }
       }
     })
 

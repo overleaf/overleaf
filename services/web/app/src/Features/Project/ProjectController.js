@@ -35,6 +35,7 @@ const Features = require('../../infrastructure/Features')
 const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandler')
 const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
 const UserController = require('../User/UserController')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false
@@ -772,6 +773,12 @@ const ProjectController = {
 
             const enableOptimize =
               !!Settings.experimentId && !user.features.zotero
+
+            if (userId) {
+              AnalyticsManager.recordEvent(userId, 'project-opened', {
+                projectId: project._id
+              })
+            }
 
             res.render('project/editor', {
               title: project.name,
