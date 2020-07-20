@@ -22,6 +22,7 @@ const errSerializer = function (err) {
 
 const Logger = (module.exports = {
   initialize(name) {
+    this.useMetadata = (process.env.USE_METADATA || '').toLowerCase() === 'true'
     this.isProduction =
       (process.env.NODE_ENV || '').toLowerCase() === 'production'
     this.defaultLevel =
@@ -42,52 +43,54 @@ const Logger = (module.exports = {
     return this
   },
 
-  checkLogLevelFile() {
-    fs.readFile('/logging/tracingEndTime', (error, end) => {
-      if (error || !end) {
-        this.logger.level(this.defaultLevel)
-        return
-      }
-      if (parseInt(end) > Date.now()) {
+  async checkLogLevelFile() {
+    try {
+      const end = await fs.promises.readFile('/logging/tracingEndTime')
+      if (!end) throw new Error("No end time found")
+      if (parseInt(end,10) > Date.now()) {
         this.logger.level('trace')
       } else {
         this.logger.level(this.defaultLevel)
       }
-    })
+    } catch (err) {
+      this.logger.level(this.defaultLevel)
+      return
+    }
   },
 
-  checkLogLevelMetadata() {
+async checkLogLevelMetadata() {
     const options = {
       headers: {
         'Metadata-Flavor': 'Google'
       }
     }
     const uri = `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
-    fetch.fetch(uri,options).then(res => res.text()).then(body => {
-      console.log("About to parse Int", body)
-      if (parseInt(body) > Date.now()) {
-        console.log("About to set logger level to trace")
-        console.log(this.logger)
-        this.logger.level('trace')
-      } else {
-        console.log("About to set logger level to default")
-        this.logger.level(this.defaultLevel)
-      }
-    }).catch(err => {
+    try {
+      const res = await fetch(uri,options)
+      if (!res.ok) throw new Error("Metadata not okay")
+        const body = await res.text()
+        console.log("About to parse Int", body)
+        if (parseInt(body) > Date.now()) {
+          console.log("About to set logger level to trace")
+          console.log(this.logger)
+          this.logger.level('trace')
+        } else {
+          console.log("About to set logger level to default")
+          this.logger.level(this.defaultLevel)
+        }
+    } catch (err) {
       console.log("ERROR: About to set logger level to default")
       this.logger.level(this.defaultLevel)
       return
-    })
+    }
   },
 
-  checkLogLevel() {
-    fs.access('/logging', (err) => {
-      if (err) {
-        this.checkLogLevelMetadata()
-      } else {
-        this.checkLogLevelFile()
-      }
-    })
+  async checkLogLevel() {
+    if (this.useMetadata) {
+      await this.checkLogLevelMetadata()
+    } else {
+      await this.checkLogLevelFile()
+    }
   },
 
   initializeErrorReporting(sentryDsn, options) {

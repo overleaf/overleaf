@@ -45,9 +45,7 @@ describe('LoggingManager', function () {
     this.Raven = {
       Client: sinon.stub().returns(this.ravenClient)
     }
-    this.Fetch = {
-      fetch: sinon.stub().resolves(this.fetchResponse)
-    }
+    this.Fetch = sinon.stub().resolves(this.fetchResponse)
     this.Fs = {
       readFile: sinon.stub(),
       access: sinon.stub()
@@ -381,9 +379,14 @@ describe('LoggingManager', function () {
         })
       })
 
-      describe('when /logging does not exist', function () {
+      describe('when not running in GKE', function () {
         beforeEach(function () {
-          this.Fs.access.yields(new Error)
+          process.env.USE_METADATA = 'TRUE'
+          this.logger = this.LoggingManager.initialize(this.loggerName)
+        })
+
+        afterEach(function() {
+          process.env.USE_METADATA = undefined
         })
 
         describe('checkLogLevel', function() {
@@ -439,13 +442,14 @@ describe('LoggingManager', function () {
       
           describe('when time value returned that is more than current time', function() {
             describe('when level is already set', function() {
-              beforeEach(function() {
+              beforeEach(async function() {
                 this.bunyanLogger.level.returns(10)
                 //this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
                 console.log("In test ", this.start + 1000)
                 this.fetchResponse.text = sinon.stub().resolves(this.start + 1000)
-                this.Fetch.fetch = sinon.stub().resolves(this.fetchResponse)
-                this.logger.checkLogLevel()
+                //this.Fetch = sinon.stub().resolves(this.fetchResponse)
+
+                await this.logger.checkLogLevel()
               })
       
               it.only('should set trace level', function() {
