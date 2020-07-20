@@ -27,6 +27,21 @@ module.exports = {
     }
   },
 
+  conflict(req, res, message, info) {
+    res.status(409)
+    switch (req.accepts(['html', 'json'])) {
+      case 'html':
+        return res.render('general/400', {
+          title: 'Client Error',
+          message: message
+        })
+      case 'json':
+        return renderJSONError(res, message, info || {})
+      default:
+        return res.send('conflict')
+    }
+  },
+
   forbidden(req, res, message = 'restricted', info = {}) {
     res.status(403)
     switch (req.accepts(['html', 'json'])) {

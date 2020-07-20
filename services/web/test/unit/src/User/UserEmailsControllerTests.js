@@ -6,11 +6,13 @@ const { assert } = chai
 const modulePath = '../../../../app/src/Features/User/UserEmailsController.js'
 const SandboxedModule = require('sandboxed-module')
 const MockRequest = require('../helpers/MockRequest')
+const MockResponse = require('../helpers/MockResponse')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 describe('UserEmailsController', function() {
   beforeEach(function() {
     this.req = new MockRequest()
+    this.res = new MockResponse()
     this.user = { _id: 'mock-user-id' }
 
     this.UserGetter = { getUserFullEmails: sinon.stub() }
@@ -38,6 +40,7 @@ describe('UserEmailsController', function() {
         .withArgs('example.com')
         .resolves({ sso_enabled: false })
     }
+    this.HttpErrorHandler = { conflict: sinon.stub() }
     this.UserEmailsController = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -51,6 +54,7 @@ describe('UserEmailsController', function() {
         '../Helpers/EmailHelper': this.EmailHelper,
         './UserEmailsConfirmationHandler': (this.UserEmailsConfirmationHandler = {}),
         '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
+        '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Errors/Errors': Errors,
         'logger-sharelatex': {
           log() {
@@ -141,6 +145,33 @@ describe('UserEmailsController', function() {
           done()
         }
       })
+    })
+    it('should call the HTTP conflict handler when the email already exists', function(done) {
+      this.UserUpdater.addEmailAddress.callsArgWith(
+        3,
+        new Errors.EmailExistsError()
+      )
+      this.HttpErrorHandler.conflict = sinon.spy((req, res, message) => {
+        req.should.exist
+        res.should.exist
+        message.should.equal('email_already_registered')
+        done()
+      })
+      this.UserEmailsController.add(this.req, this.res)
+    })
+
+    it("should call the HTTP conflict handler when there's a domain matching error", function(done) {
+      this.UserUpdater.addEmailAddress.callsArgWith(
+        3,
+        new Error('422: Email does not belong to university')
+      )
+      this.HttpErrorHandler.conflict = sinon.spy((req, res, message) => {
+        req.should.exist
+        res.should.exist
+        message.should.equal('email_does_not_belong_to_university')
+        done()
+      })
+      this.UserEmailsController.add(this.req, this.res)
     })
   })
 

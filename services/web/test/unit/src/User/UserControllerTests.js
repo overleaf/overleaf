@@ -71,6 +71,7 @@ describe('UserController', function() {
     }
     this.SudoModeHandler = { clearSudoMode: sinon.stub() }
     this.HttpErrorHandler = {
+      conflict: sinon.stub(),
       unprocessableEntity: sinon.stub()
     }
     this.UserController = SandboxedModule.require(modulePath, {
@@ -427,6 +428,21 @@ describe('UserController', function() {
           })
         }
         this.UserController.updateUserSettings(this.req, this.res, next)
+      })
+
+      it('should call the HTTP conflict error handler when the email already exists', function(done) {
+        this.HttpErrorHandler.conflict = sinon.spy((req, res, message) => {
+          expect(req).to.exist
+          expect(req).to.exist
+          message.should.equal('email_already_registered')
+          done()
+        })
+        this.req.body.email = this.newEmail.toUpperCase()
+        this.UserUpdater.changeEmailAddress.callsArgWith(
+          2,
+          new Errors.EmailExistsError()
+        )
+        this.UserController.updateUserSettings(this.req, this.res)
       })
     })
 

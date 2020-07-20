@@ -237,16 +237,14 @@ const UserController = {
           UserUpdater.changeEmailAddress(userId, newEmail, err => {
             if (err) {
               let errorData = {
-                message: 'problem updaing users email address',
+                message: 'problem updating users email address',
                 info: { userId, newEmail, public: {} }
               }
               if (err instanceof Errors.EmailExistsError) {
-                errorData.info.public.message = req.i18n.translate(
+                const translation = req.i18n.translate(
                   'email_already_registered'
                 )
-                return next(
-                  new HttpErrors.ConflictError(errorData).withCause(err)
-                )
+                return HttpErrorHandler.conflict(req, res, translation)
               } else {
                 errorData.info.public.message = req.i18n.translate(
                   'problem_changing_email_address'

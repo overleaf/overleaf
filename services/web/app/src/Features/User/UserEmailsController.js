@@ -6,6 +6,7 @@ const EmailHelper = require('../Helpers/EmailHelper')
 const UserEmailsConfirmationHandler = require('./UserEmailsConfirmationHandler')
 const { endorseAffiliation } = require('../Institutions/InstitutionsAPI')
 const Errors = require('../Errors/Errors')
+const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const HttpErrors = require('@overleaf/o-error/http')
 
 function add(req, res, next) {
@@ -158,31 +159,13 @@ module.exports = UserEmailsController = {
 
   _handleEmailError(error, req, res, next) {
     if (error instanceof Errors.UnconfirmedEmailError) {
-      return next(
-        new HttpErrors.ConflictError({
-          info: {
-            public: { message: 'email must be confirmed' }
-          }
-        }).withCause(error)
-      )
+      return HttpErrorHandler.conflict(req, res, 'email must be confirmed')
     } else if (error instanceof Errors.EmailExistsError) {
-      return next(
-        new HttpErrors.ConflictError({
-          info: {
-            public: { message: req.i18n.translate('email_already_registered') }
-          }
-        }).withCause(error)
-      )
+      const message = req.i18n.translate('email_already_registered')
+      return HttpErrorHandler.conflict(req, res, message)
     } else if (error.message === '422: Email does not belong to university') {
-      return next(
-        new HttpErrors.ConflictError({
-          info: {
-            public: {
-              message: req.i18n.translate('email_does_not_belong_to_university')
-            }
-          }
-        }).withCause(error)
-      )
+      const message = req.i18n.translate('email_does_not_belong_to_university')
+      return HttpErrorHandler.conflict(req, res, message)
     }
     next(new HttpErrors.InternalServerError().withCause(error))
   }
