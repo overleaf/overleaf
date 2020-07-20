@@ -23,8 +23,6 @@ const CookieParser = require('cookie-parser')
 const DrainManager = require('./app/js/DrainManager')
 const HealthCheckManager = require('./app/js/HealthCheckManager')
 
-// work around frame handler bug in socket.io v0.9.16
-require('./socket.io.patch.js')
 // Set up socket.io server
 const app = express()
 

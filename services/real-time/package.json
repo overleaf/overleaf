@@ -32,8 +32,8 @@
     "redis-sharelatex": "^1.0.12",
     "request": "^2.88.2",
     "settings-sharelatex": "^1.1.0",
-    "socket.io": "0.9.19",
-    "socket.io-client": "^0.9.16"
+    "socket.io": "https://github.com/overleaf/socket.io/archive/0.9.19-overleaf-2.tar.gz",
+    "socket.io-client": "https://github.com/overleaf/socket.io-client/archive/0.9.17-overleaf-1.tar.gz"
   },
   "devDependencies": {
     "bunyan": "~0.22.3",
