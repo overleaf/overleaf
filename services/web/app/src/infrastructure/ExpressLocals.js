@@ -354,7 +354,6 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.use(function(req, res, next) {
     res.locals.ExposedSettings = {
-      experimentId: Settings.experimentId,
       isOverleaf: Settings.overleaf != null,
       appName: Settings.appName,
       hasSamlBeta: req.session.samlBeta,
