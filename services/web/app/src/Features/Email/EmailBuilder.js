@@ -1,6 +1,7 @@
 const _ = require('underscore')
 const settings = require('settings-sharelatex')
 const marked = require('marked')
+const moment = require('moment')
 const EmailMessageHelper = require('./EmailMessageHelper')
 const StringHelper = require('../Helpers/StringHelper')
 const BaseWithHeaderEmailLayout = require(`./Layouts/BaseWithHeaderEmailLayout`)
@@ -468,40 +469,6 @@ If you have any questions, you can contact our support team by reply.\
   }
 })
 
-templates.emailThirdPartyIdentifierLinked = NoCTAEmailTemplate({
-  subject(opts) {
-    return `Your ${settings.appName} account is now linked with ${
-      opts.provider
-    }`
-  },
-  title(opts) {
-    return `Accounts Linked`
-  },
-  message(opts) {
-    let message = `We're contacting you to notify you that your ${
-      opts.provider
-    } account is now linked to your ${settings.appName} account.`
-    return [message]
-  }
-})
-
-templates.emailThirdPartyIdentifierUnlinked = NoCTAEmailTemplate({
-  subject(opts) {
-    return `Your ${settings.appName} account is no longer linked with ${
-      opts.provider
-    }`
-  },
-  title(opts) {
-    return `Accounts No Longer Linked`
-  },
-  message(opts) {
-    let message = `We're contacting you to notify you that your ${
-      opts.provider
-    } account is no longer linked with your ${settings.appName} account.`
-    return [message]
-  }
-})
-
 templates.ownershipTransferConfirmationPreviousOwner = NoCTAEmailTemplate({
   subject(opts) {
     return `Project ownership transfer - ${settings.appName}`
@@ -617,6 +584,36 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
       `John`,
       `Dr John Hammersley <br />Co-founder & CEO <br />${siteLink}<hr>`,
       `Don't want onboarding emails like this from us? Don't worry, this is the only one. If you've previously subscribed to emails about product offers and company news and events, you can unsubscribe ${userSettingsLink}.`
+    ]
+  }
+})
+
+templates.securityAlert = NoCTAEmailTemplate({
+  subject(opts) {
+    return `Overleaf security note: ${opts.action}`
+  },
+  title(opts) {
+    return opts.action.charAt(0).toUpperCase() + opts.action.slice(1)
+  },
+  message(opts, isPlainText) {
+    const dateFormatted = moment().format('dddd D MMMM YYYY')
+    const timeFormatted = moment().format('HH:mm')
+    const helpLink = EmailMessageHelper.displayLink(
+      'quick guide',
+      `${settings.siteUrl}/learn/how-to/Keeping_your_account_secure`,
+      isPlainText
+    )
+    return [
+      `We are writing to let you know that ${
+        opts.actionDescribed
+      } on ${dateFormatted} at ${timeFormatted} GMT.`,
+      `If this was you, you can ignore this email.`,
+      `If this was not you, we recommend getting in touch with our support team at ${
+        settings.adminEmail
+      } to report this as potentially suspicious activity on your account.`,
+      `We also encourage you to read our ${helpLink} to keeping your ${
+        settings.appName
+      } account safe.`
     ]
   }
 })

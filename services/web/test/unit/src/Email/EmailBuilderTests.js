@@ -13,7 +13,8 @@ describe('EmailBuilder', function() {
   beforeEach(function() {
     this.settings = {
       appName: 'testApp',
-      brandPrefix: ''
+      brandPrefix: '',
+      siteUrl: 'https://www.overleaf.com'
     }
     this.EmailBuilder = SandboxedModule.require(MODULE_PATH, {
       globals: {
@@ -97,6 +98,27 @@ describe('EmailBuilder', function() {
     it('should replace spammy project name', function() {
       this.email.html.indexOf('a new project').should.not.equal(-1)
       this.email.subject.indexOf('New Project').should.not.equal(-1)
+    })
+  })
+
+  describe('templates', function() {
+    describe('securityAlert', function() {
+      before(function() {
+        this.email = 'example@overleaf.com'
+        this.opts = {
+          to: this.email,
+          actionDescribed: `an Institutional SSO account at Overleaf University was linked to your account ${
+            this.email
+          }`,
+          action: 'institutional SSO account linked'
+        }
+        this.email = this.EmailBuilder.buildEmail('securityAlert', this.opts)
+      })
+
+      it('should build the email', function() {
+        expect(this.email.html != null).to.equal(true)
+        expect(this.email.text != null).to.equal(true)
+      })
     })
   })
 })

@@ -108,33 +108,29 @@ async function _sendLinkedEmail(userId, providerName) {
   const user = await UserGetter.promises.getUser(userId, { email: 1 })
   const emailOptions = {
     to: user.email,
-    provider: providerName
+    actionDescribed: `an Institutional SSO account at ${providerName} was linked to your account ${
+      user.email
+    }`,
+    action: 'institutional SSO account linked'
   }
-  EmailHandler.sendEmail(
-    'emailThirdPartyIdentifierLinked',
-    emailOptions,
-    error => {
-      if (error != null) {
-        logger.warn(error)
-      }
+  EmailHandler.sendEmail('securityAlert', emailOptions, error => {
+    if (error) {
+      logger.warn({ err: error })
     }
-  )
+  })
 }
 
 function _sendUnlinkedEmail(primaryEmail, providerName) {
   const emailOptions = {
     to: primaryEmail,
-    provider: providerName
+    actionDescribed: `an Institutional SSO account at ${providerName} is no longer linked to your account ${primaryEmail}`,
+    action: 'institutional SSO account no longer linked'
   }
-  EmailHandler.sendEmail(
-    'emailThirdPartyIdentifierUnlinked',
-    emailOptions,
-    error => {
-      if (error != null) {
-        logger.warn(error)
-      }
+  EmailHandler.sendEmail('securityAlert', emailOptions, error => {
+    if (error) {
+      logger.warn({ err: error })
     }
-  )
+  })
 }
 
 async function getUser(providerId, externalUserId) {

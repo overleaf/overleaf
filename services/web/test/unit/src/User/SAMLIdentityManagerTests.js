@@ -63,7 +63,9 @@ describe('SAMLIdentityManager', function() {
         }),
         '../../models/User': {
           User: (this.User = {
-            findOneAndUpdate: sinon.stub(),
+            findOneAndUpdate: sinon.stub().returns({
+              exec: sinon.stub().resolves()
+            }),
             findOne: sinon.stub().returns({
               exec: sinon.stub().resolves()
             }),
@@ -80,7 +82,12 @@ describe('SAMLIdentityManager', function() {
           }
         }),
         '../User/UserUpdater': (this.UserUpdater = {
-          addEmailAddress: sinon.stub()
+          addEmailAddress: sinon.stub(),
+          promises: {
+            addEmailAddress: sinon.stub().resolves(),
+            confirmEmail: sinon.stub().resolves(),
+            updateUser: sinon.stub().resolves()
+          }
         }),
         '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
         'logger-sharelatex': this.logger
@@ -164,10 +171,25 @@ describe('SAMLIdentityManager', function() {
         }
       })
     })
+
+    describe('after linking', function() {
+      it('should send an email notification', function() {
+        this.SAMLIdentityManager.linkAccounts(
+          this.user._id,
+          this.user.email,
+          '1',
+          'Overleaf University',
+          () => {
+            expect(this.User.update).to.have.been.called
+            expect(this.EmailHandler.sendEmail).to.have.been.called
+          }
+        )
+      })
+    })
   })
 
   describe('unlinkAccounts', function() {
-    it('should send an email notification email', function() {
+    it('should send an email notification', function() {
       this.SAMLIdentityManager.unlinkAccounts(
         this.user._id,
         this.user.email,
