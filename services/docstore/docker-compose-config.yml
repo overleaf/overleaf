@@ -1,0 +1,14 @@
+version: "2.3"
+
+services:
+  dev:
+    environment:
+    - AWS_BUCKET
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+
+  ci:
+    environment:
+    - AWS_BUCKET
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY

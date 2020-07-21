@@ -1,5 +1,5 @@
 docstore
---acceptance-creds=aws
+--acceptance-creds=None
 --dependencies=mongo
 --docker-repos=gcr.io/overleaf-ops
 --env-add=
