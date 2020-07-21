@@ -21,14 +21,14 @@ services:
     volumes:
       - .:/app
     working_dir: /app
-    extends:
-      file: docker-compose-config.yml
-      service: dev
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_BUCKET: ${AWS_BUCKET}
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ERROR
       NODE_ENV: test
