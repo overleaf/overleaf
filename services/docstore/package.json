@@ -48,7 +48,7 @@
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-standard": "^4.0.1",
     "mocha": "^7.1.1",
-    "prettier": "^2.0.0",
+    "prettier": "^2.0.1",
     "prettier-eslint-cli": "^5.0.0",
     "request": "~2.88.2",
     "sandboxed-module": "~2.0.3",
