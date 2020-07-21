@@ -3,7 +3,10 @@ overleaf/docstore
 
 A CRUD API for storing and updating text documents in projects
 
-
+## Tests
+```
+AWS_BUCKET=**** AWS_ACCESS_KEY_ID=**** AWS_SECRET_ACCESS_KEY=**** make test
+```
 License
 -------
 
