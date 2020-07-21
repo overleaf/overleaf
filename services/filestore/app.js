@@ -1,8 +1,8 @@
-const Metrics = require('metrics-sharelatex')
 const logger = require('logger-sharelatex')
+const Metrics = require('metrics-sharelatex')
 
-Metrics.initialize('filestore')
 logger.initialize('filestore')
+Metrics.initialize('filestore')
 
 const settings = require('settings-sharelatex')
 const express = require('express')
