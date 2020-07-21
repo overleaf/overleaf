@@ -265,6 +265,21 @@ describe('S3PersistorTests', function () {
       })
     })
 
+    describe('when given S3 options', function () {
+      const httpOptions = { timeout: 2000 }
+      const maxRetries = 2
+
+      beforeEach(async function () {
+        settings.httpOptions = httpOptions
+        settings.maxRetries = maxRetries
+        await S3Persistor.getObjectStream(bucket, key)
+      })
+
+      it('configures the S3 client appropriately', function () {
+        expect(S3).to.have.been.calledWithMatch({ httpOptions, maxRetries })
+      })
+    })
+
     describe("when the file doesn't exist", function () {
       let error, stream
 
