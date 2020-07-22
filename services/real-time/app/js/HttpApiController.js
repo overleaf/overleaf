@@ -23,7 +23,7 @@ module.exports = {
         req.body
       )
     }
-    res.send(204)
+    res.sendStatus(204)
   },
 
   startDrain(req, res) {
@@ -32,7 +32,7 @@ module.exports = {
     rate = parseFloat(rate) || 0
     logger.log({ rate }, 'setting client drain rate')
     DrainManager.startDrain(io, rate)
-    res.send(204)
+    res.sendStatus(204)
   },
 
   disconnectClient(req, res, next) {
