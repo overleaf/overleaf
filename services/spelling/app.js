@@ -26,7 +26,7 @@ const HealthCheckController = require('./app/js/HealthCheckController')
 app.use(bodyParser.json({ limit: '2mb' }))
 app.use(metrics.http.monitor(logger))
 
-app.del('/user/:user_id', SpellingAPIController.deleteDic)
+app.delete('/user/:user_id', SpellingAPIController.deleteDic)
 app.get('/user/:user_id', SpellingAPIController.getDic)
 app.post('/user/:user_id/check', SpellingAPIController.check)
 app.post('/user/:user_id/learn', SpellingAPIController.learn)
