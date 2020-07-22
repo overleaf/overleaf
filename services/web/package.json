@@ -126,6 +126,7 @@
     "requestretry": "^1.13.0",
     "rimraf": "2.2.6",
     "rolling-rate-limiter": "git+https://github.com/ShaneKilkelly/rolling-rate-limiter.git#master",
+    "sanitize-html": "^1.27.1",
     "sanitizer": "0.1.1",
     "settings-sharelatex": "^1.1.0",
     "temp": "^0.8.3",
