@@ -538,24 +538,31 @@ describe('SubscriptionController', function() {
   })
 
   describe('updateAccountEmailAddress via put', function() {
-    beforeEach(function(done) {
-      this.res = {
-        sendStatus() {
-          return done()
-        }
-      }
-      sinon.spy(this.res, 'sendStatus')
-      this.SubscriptionController.updateAccountEmailAddress(this.req, this.res)
-    })
-
     it('should send the user and subscriptionId to RecurlyWrapper', function() {
+      this.res.sendStatus = sinon.spy()
+      this.SubscriptionController.updateAccountEmailAddress(this.req, this.res)
       this.RecurlyWrapper.updateAccountEmailAddress
         .calledWith(this.user._id, this.user.email)
         .should.equal(true)
     })
 
-    it('shouldrespond with 200', function() {
+    it('should respond with 200', function() {
+      this.res.sendStatus = sinon.spy()
+      this.SubscriptionController.updateAccountEmailAddress(this.req, this.res)
       this.res.sendStatus.calledWith(200).should.equal(true)
+    })
+
+    it('should send the error to the next handler when updating recurly account email fails', function(done) {
+      this.RecurlyWrapper.updateAccountEmailAddress.yields(new Error())
+      this.next = sinon.spy(error => {
+        expect(error).instanceOf(Error)
+        done()
+      })
+      this.SubscriptionController.updateAccountEmailAddress(
+        this.req,
+        this.res,
+        this.next
+      )
     })
   })
 

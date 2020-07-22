@@ -236,6 +236,22 @@ describe('CollaboratorsController', function() {
       )
       this.CollaboratorsController.setCollaboratorInfo(this.req, this.res)
     })
+
+    it('should pass the error to the next handler when setting the privilege level fails', function(done) {
+      this.next = sinon.spy(err => {
+        expect(err).instanceOf(Error)
+        done()
+      })
+
+      this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel.rejects(
+        new Error()
+      )
+      this.CollaboratorsController.setCollaboratorInfo(
+        this.req,
+        this.res,
+        this.next
+      )
+    })
   })
 
   describe('transferOwnership', function() {

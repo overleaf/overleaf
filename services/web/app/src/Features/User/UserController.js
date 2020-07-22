@@ -15,7 +15,6 @@ const SudoModeHandler = require('../SudoMode/SudoModeHandler')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const OError = require('@overleaf/o-error')
-const HttpErrors = require('@overleaf/o-error/http')
 const EmailHandler = require('../Email/EmailHandler')
 const UrlHelper = require('../Helpers/UrlHelper')
 const { promisify } = require('util')
@@ -236,21 +235,20 @@ const UserController = {
           // update the user email
           UserUpdater.changeEmailAddress(userId, newEmail, err => {
             if (err) {
-              let errorData = {
-                message: 'problem updating users email address',
-                info: { userId, newEmail, public: {} }
-              }
               if (err instanceof Errors.EmailExistsError) {
                 const translation = req.i18n.translate(
                   'email_already_registered'
                 )
                 return HttpErrorHandler.conflict(req, res, translation)
               } else {
-                errorData.info.public.message = req.i18n.translate(
-                  'problem_changing_email_address'
-                )
-                return next(
-                  new HttpErrors.InternalServerError(errorData).withCause(err)
+                return HttpErrorHandler.legacyInternal(
+                  req,
+                  res,
+                  req.i18n.translate('problem_changing_email_address'),
+                  new OError({
+                    message: 'problem_changing_email_address',
+                    info: { userId, newEmail }
+                  }).withCause(err)
                 )
               }
             }

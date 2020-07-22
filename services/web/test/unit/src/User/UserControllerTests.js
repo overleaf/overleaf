@@ -72,7 +72,8 @@ describe('UserController', function() {
     this.SudoModeHandler = { clearSudoMode: sinon.stub() }
     this.HttpErrorHandler = {
       conflict: sinon.stub(),
-      unprocessableEntity: sinon.stub()
+      unprocessableEntity: sinon.stub(),
+      legacyInternal: sinon.stub()
     }
     this.UserController = SandboxedModule.require(modulePath, {
       globals: {
@@ -416,18 +417,16 @@ describe('UserController', function() {
       it('should pass on an error and not send a success status', function(done) {
         this.req.body.email = this.newEmail.toUpperCase()
         this.UserUpdater.changeEmailAddress.callsArgWith(2, new Error())
-        const next = err => {
-          expect(err).to.exist
-          process.nextTick(() => {
-            // logic in User.findById
-            expect(this.res.send.called).to.equal(false)
-            expect(this.res.sendStatus.called).to.equal(false)
-            // logic after error handling
-            expect(this.User.findById.callCount).to.equal(1)
+        this.HttpErrorHandler.legacyInternal = sinon.spy(
+          (req, res, message, error) => {
+            expect(req).to.exist
+            expect(req).to.exist
+            message.should.equal('problem_changing_email_address')
+            expect(error).to.be.instanceof(OError)
             done()
-          })
-        }
-        this.UserController.updateUserSettings(this.req, this.res, next)
+          }
+        )
+        this.UserController.updateUserSettings(this.req, this.res, this.next)
       })
 
       it('should call the HTTP conflict error handler when the email already exists', function(done) {

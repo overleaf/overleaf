@@ -1,5 +1,4 @@
 const OError = require('@overleaf/o-error')
-const HttpErrors = require('@overleaf/o-error/http')
 const HttpErrorHandler = require('../../Features/Errors/HttpErrorHandler')
 const { ObjectId } = require('mongodb')
 const CollaboratorsHandler = require('./CollaboratorsHandler')
@@ -72,7 +71,7 @@ async function setCollaboratorInfo(req, res, next) {
     if (err instanceof Errors.NotFoundError) {
       HttpErrorHandler.notFound(req, res)
     } else {
-      throw new HttpErrors.InternalServerError({}).withCause(err)
+      next(err)
     }
   }
 }
@@ -103,7 +102,7 @@ async function transferOwnership(req, res, next) {
         `user ${toUserId} should be a collaborator in project ${projectId} prior to ownership transfer`
       )
     } else {
-      throw new HttpErrors.InternalServerError({}).withCause(err)
+      next(err)
     }
   }
 }

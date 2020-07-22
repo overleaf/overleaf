@@ -79,5 +79,18 @@ module.exports = {
       default:
         return res.send('unprocessable entity')
     }
+  },
+
+  legacyInternal(req, res, message, error) {
+    logger.error(error)
+    res.status(500)
+    switch (req.accepts(['html', 'json'])) {
+      case 'html':
+        return res.render('general/500', { title: 'Server Error' })
+      case 'json':
+        return renderJSONError(res, message, {})
+      default:
+        return res.send('internal server error')
+    }
   }
 }

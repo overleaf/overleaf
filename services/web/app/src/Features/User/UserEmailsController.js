@@ -7,7 +7,6 @@ const UserEmailsConfirmationHandler = require('./UserEmailsConfirmationHandler')
 const { endorseAffiliation } = require('../Institutions/InstitutionsAPI')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
-const HttpErrors = require('@overleaf/o-error/http')
 
 function add(req, res, next) {
   const userId = AuthenticationController.getLoggedInUserId(req)
@@ -167,6 +166,6 @@ module.exports = UserEmailsController = {
       const message = req.i18n.translate('email_does_not_belong_to_university')
       return HttpErrorHandler.conflict(req, res, message)
     }
-    next(new HttpErrors.InternalServerError().withCause(error))
+    next(error)
   }
 }

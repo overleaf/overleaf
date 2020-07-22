@@ -33,7 +33,6 @@ const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const SubscriptionErrors = require('./Errors')
 const OError = require('@overleaf/o-error')
-const HttpErrors = require('@overleaf/o-error/http')
 
 module.exports = SubscriptionController = {
   plansPage(req, res, next) {
@@ -340,7 +339,7 @@ module.exports = SubscriptionController = {
       error
     ) {
       if (error) {
-        return next(new HttpErrors.InternalServerError({}).withCause(error))
+        return next(error)
       }
       res.sendStatus(200)
     })

@@ -2,7 +2,7 @@ const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
 const assertNotCalled = sinon.assert.notCalled
 const chai = require('chai')
-const { assert } = chai
+const { assert, expect } = chai
 const modulePath = '../../../../app/src/Features/User/UserEmailsController.js'
 const SandboxedModule = require('sandboxed-module')
 const MockRequest = require('../helpers/MockRequest')
@@ -146,6 +146,16 @@ describe('UserEmailsController', function() {
         }
       })
     })
+
+    it('should pass the error to the next handler when adding the email fails', function(done) {
+      this.UserUpdater.addEmailAddress.callsArgWith(3, new Error())
+      this.next = sinon.spy(error => {
+        expect(error).instanceOf(Error)
+        done()
+      })
+      this.UserEmailsController.add(this.req, this.res, this.next)
+    })
+
     it('should call the HTTP conflict handler when the email already exists', function(done) {
       this.UserUpdater.addEmailAddress.callsArgWith(
         3,
