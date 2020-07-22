@@ -18,22 +18,22 @@ metrics.memory.monitor(logger)
 
 const SpellingAPIController = require('./app/js/SpellingAPIController')
 const express = require('express')
-const server = express()
-metrics.injectMetricsRoute(server)
+const app = express()
+metrics.injectMetricsRoute(app)
 const bodyParser = require('body-parser')
 const HealthCheckController = require('./app/js/HealthCheckController')
 
-server.use(bodyParser.json({ limit: '2mb' }))
-server.use(metrics.http.monitor(logger))
+app.use(bodyParser.json({ limit: '2mb' }))
+app.use(metrics.http.monitor(logger))
 
-server.del('/user/:user_id', SpellingAPIController.deleteDic)
-server.get('/user/:user_id', SpellingAPIController.getDic)
-server.post('/user/:user_id/check', SpellingAPIController.check)
-server.post('/user/:user_id/learn', SpellingAPIController.learn)
-server.post('/user/:user_id/unlearn', SpellingAPIController.unlearn)
-server.get('/status', (req, res) => res.send({ status: 'spelling api is up' }))
+app.del('/user/:user_id', SpellingAPIController.deleteDic)
+app.get('/user/:user_id', SpellingAPIController.getDic)
+app.post('/user/:user_id/check', SpellingAPIController.check)
+app.post('/user/:user_id/learn', SpellingAPIController.learn)
+app.post('/user/:user_id/unlearn', SpellingAPIController.unlearn)
+app.get('/status', (req, res) => res.send({ status: 'spelling api is up' }))
 
-server.get('/health_check', HealthCheckController.healthCheck)
+app.get('/health_check', HealthCheckController.healthCheck)
 
 const settings =
   Settings.internal && Settings.internal.spelling
@@ -44,7 +44,7 @@ const port = settings && settings.port ? settings.port : 3005
 
 if (!module.parent) {
   // application entry point, called directly
-  server.listen(port, host, function(error) {
+  app.listen(port, host, function(error) {
     if (error != null) {
       throw error
     }
@@ -52,4 +52,4 @@ if (!module.parent) {
   })
 }
 
-module.exports = server
+module.exports = app
