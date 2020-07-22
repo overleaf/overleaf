@@ -20,7 +20,6 @@
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js"
   },
   "dependencies": {
-    "@google-cloud/storage": "^4.7.0",
     "@overleaf/o-error": "^3.0.0",
     "@overleaf/object-persistor": "git+https://github.com/overleaf/object-persistor.git",
     "aws-sdk": "^2.710.0",
@@ -40,6 +39,7 @@
     "tiny-async-pool": "^1.1.0"
   },
   "devDependencies": {
+    "@google-cloud/storage": "^5.1.2",
     "babel-eslint": "^10.1.0",
     "bunyan": "^1.8.14",
     "chai": "4.2.0",
