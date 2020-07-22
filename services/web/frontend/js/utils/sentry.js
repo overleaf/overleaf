@@ -17,7 +17,14 @@ if (window.ExposedSettings.sentryDsn) {
 
       ignoreErrors: [
         // Ignore very noisy error
-        'SecurityError: Permission denied to access property "pathname" on cross-origin object'
+        'SecurityError: Permission denied to access property "pathname" on cross-origin object',
+        // Ignore unhandled error that is "expected" - see https://github.com/overleaf/issues/issues/3321
+        /^Missing PDF/,
+        // Ignore "expected" error from aborted fetch - see https://github.com/overleaf/issues/issues/3321
+        /^AbortError/,
+        // Ignore spurious error from Ace internals - see https://github.com/overleaf/issues/issues/3321
+        'ResizeObserver loop limit exceeded',
+        'ResizeObserver loop completed with undelivered notifications.'
       ],
 
       beforeSend(event) {
