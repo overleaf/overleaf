@@ -2,13 +2,13 @@ aside.editor-sidebar.full-size(
 	ng-controller="FileTreeController"
 	ng-class="{ 'multi-selected': multiSelectedCount > 0 }"
 	ng-show="ui.view != 'history' || !history.isV2"
-	vertical-resizable-panes=user.alphaProgram && "outline-resizer"
-	vertical-resizable-panes-toggled-externally-on=user.alphaProgram && "outline-toggled"
-	vertical-resizable-panes-min-size=user.alphaProgram && "32"
-	vertical-resizable-panes-max-size=user.alphaProgram && "75%"
+	vertical-resizable-panes=user.betaProgram && "outline-resizer"
+	vertical-resizable-panes-toggled-externally-on=user.betaProgram && "outline-toggled"
+	vertical-resizable-panes-min-size=user.betaProgram && "32"
+	vertical-resizable-panes-max-size=user.betaProgram && "75%"
 )
 	.file-tree(
-		vertical-resizable-top=user.alphaProgram
+		vertical-resizable-top=user.betaProgram
 	)
 		.toolbar.toolbar-filetree(ng-if="permissions.write")
 			a(
@@ -99,7 +99,7 @@ aside.editor-sidebar.full-size(
 
 							span  {{ entity.name }}
 
-	if user.alphaProgram
+	if user.betaProgram
 		.outline-container(
 			vertical-resizable-bottom
 			ng-controller="OutlineController"
