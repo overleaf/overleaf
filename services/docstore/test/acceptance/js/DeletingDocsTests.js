@@ -11,12 +11,12 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const sinon = require('sinon')
 const chai = require('chai')
 chai.should()
 const { db, ObjectId } = require('../../../app/js/mongojs')
 const { expect } = chai
 const DocstoreApp = require('./helpers/DocstoreApp')
+const Errors = require('../../../app/js/Errors')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
 
@@ -143,17 +143,10 @@ describe("Destroying a project's documents", function () {
     })
 
     return it('should remove the doc contents from s3', function (done) {
-      return DocstoreClient.getS3Doc(
-        this.project_id,
-        this.doc_id,
-        (error, res, s3_doc) => {
-          if (error != null) {
-            throw error
-          }
-          expect(res.statusCode).to.equal(404)
-          return done()
-        }
-      )
+      return DocstoreClient.getS3Doc(this.project_id, this.doc_id, (error) => {
+        expect(error).to.be.instanceOf(Errors.NotFoundError)
+        done()
+      })
     })
   })
 })

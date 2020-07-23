@@ -15,6 +15,13 @@ const app = require('../../../../app')
 require('logger-sharelatex').logger.level('error')
 const settings = require('settings-sharelatex')
 
+// treat unhandled promise rejections as failures
+process.on('unhandledRejection', (e) => {
+  // eslint-disable-next-line no-console
+  console.log('** Unhandled Promise Rejection **\n', e)
+  throw e
+})
+
 module.exports = {
   running: false,
   initing: false,

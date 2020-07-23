@@ -13,9 +13,23 @@
  */
 let DocstoreClient
 const request = require('request').defaults({ jar: false })
-const { db, ObjectId } = require('../../../../app/js/mongojs')
 const settings = require('settings-sharelatex')
-const DocArchiveManager = require('../../../../app/js/DocArchiveManager.js')
+const Persistor = require('../../../../app/js/PersistorManager')
+
+async function streamToString(stream) {
+  const chunks = []
+  return new Promise((resolve, reject) => {
+    stream.on('data', (chunk) => chunks.push(chunk))
+    stream.on('error', reject)
+    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
+  })
+}
+
+async function getStringFromPersistor(persistor, bucket, key) {
+  const stream = await persistor.getObjectStream(bucket, key, {})
+  stream.resume()
+  return streamToString(stream)
+}
 
 module.exports = DocstoreClient = {
   createDoc(project_id, doc_id, lines, version, ranges, callback) {
@@ -55,7 +69,9 @@ module.exports = DocstoreClient = {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc`,
         json: true
       },
-      callback
+      (req, res, body) => {
+        callback(req, res, body)
+      }
     )
   },
 
@@ -126,11 +142,14 @@ module.exports = DocstoreClient = {
   },
 
   getS3Doc(project_id, doc_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    const options = DocArchiveManager.buildS3Options(project_id + '/' + doc_id)
-    options.json = true
-    return request.get(options, callback)
+    getStringFromPersistor(
+      Persistor,
+      settings.docstore.bucket,
+      `${project_id}/${doc_id}`
+    )
+      .then((data) => {
+        callback(null, JSON.parse(data))
+      })
+      .catch(callback)
   }
 }
