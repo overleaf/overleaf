@@ -16,18 +16,21 @@ services:
   test_acceptance:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
-    extends:
-      file: docker-compose-config.yml
-      service: ci
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
+      GCS_API_ENDPOINT: gcs:9090
+      GCS_API_SCHEME: http
+      GCS_PROJECT_ID: fake
+      STORAGE_EMULATOR_HOST: http://gcs:9090/storage/v1
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
     depends_on:
       mongo:
+        condition: service_healthy
+      gcs:
         condition: service_healthy
     user: node
     command: npm run test:acceptance:_run
@@ -42,3 +45,7 @@ services:
     user: root
   mongo:
     image: mongo:3.6
+  gcs:
+    build:
+      context: test/acceptance/deps
+      dockerfile: Dockerfile.fake-gcs
