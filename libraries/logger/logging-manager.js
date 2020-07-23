@@ -69,17 +69,12 @@ async checkLogLevelMetadata() {
       const res = await fetch(uri,options)
       if (!res.ok) throw new Error("Metadata not okay")
         const body = await res.text()
-        console.log("About to parse Int", body)
         if (parseInt(body) > Date.now()) {
-          console.log("About to set logger level to trace")
-          console.log(this.logger)
           this.logger.level('trace')
         } else {
-          console.log("About to set logger level to default")
           this.logger.level(this.defaultLevel)
         }
     } catch (err) {
-      console.log("ERROR: About to set logger level to default")
       this.logger.level(this.defaultLevel)
       return
     }

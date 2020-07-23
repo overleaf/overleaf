@@ -446,7 +446,6 @@ describe('LoggingManager', function () {
               beforeEach(async function() {
                 this.bunyanLogger.level.returns(10)
                 //this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
-                console.log("In test ", this.start + 1000)
                 this.fetchResponse.text = sinon.stub().resolves(this.start + 1000)
                 //this.Fetch = sinon.stub().resolves(this.fetchResponse)
 
