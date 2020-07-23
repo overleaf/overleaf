@@ -10,7 +10,7 @@ const layoutOptions = {
     paneSelector: '[vertical-resizable-bottom]',
     paneClass: 'vertical-resizable-bottom',
     resizerClass: 'vertical-resizable-resizer',
-    resizerCursor: 'row-resize',
+    resizerCursor: 'ns-resize',
     size: 'auto',
     resizable: true,
     closable: false,
@@ -24,7 +24,9 @@ const layoutOptions = {
 export default App.directive('verticalResizablePanes', localStorage => ({
   restrict: 'A',
   link(scope, element, attrs) {
-    let name = attrs.verticalResizablePanes
+    const name = attrs.verticalResizablePanes
+    const minSize = attrs.verticalResizablePanesMinSize
+    const maxSize = attrs.verticalResizablePanesMaxSize
     let storedSize = null
     let manualResizeIncoming = false
 
@@ -77,6 +79,14 @@ export default App.directive('verticalResizablePanes', localStorage => ({
         }
         layoutHandle.sizePane('south', newSize)
       })
+    }
+
+    if (maxSize) {
+      layoutOptions.south.maxSize = maxSize
+    }
+
+    if (minSize) {
+      layoutOptions.south.minSize = minSize
     }
 
     // The `drag` event fires only when the user manually resizes the panes; the `resize` event fires even when

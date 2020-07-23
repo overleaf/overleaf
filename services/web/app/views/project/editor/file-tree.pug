@@ -4,6 +4,8 @@ aside.editor-sidebar.full-size(
 	ng-show="ui.view != 'history' || !history.isV2"
 	vertical-resizable-panes=user.alphaProgram && "outline-resizer"
 	vertical-resizable-panes-toggled-externally-on=user.alphaProgram && "outline-toggled"
+	vertical-resizable-panes-min-size=user.alphaProgram && "32"
+	vertical-resizable-panes-max-size=user.alphaProgram && "75%"
 )
 	.file-tree(
 		vertical-resizable-top=user.alphaProgram
