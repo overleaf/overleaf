@@ -38,7 +38,8 @@ describe('DocManager', function () {
           log: sinon.stub(),
           warn() {},
           err() {}
-        })
+        }),
+        './Errors': Errors
       }
     })
     this.doc_id = ObjectId().toString()
