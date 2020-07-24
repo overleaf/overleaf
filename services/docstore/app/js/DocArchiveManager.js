@@ -84,6 +84,10 @@ async function unArchiveAllDocs(projectId) {
   if (!docs) {
     throw new Errors.NotFoundError(`No docs for project ${projectId}`)
   }
+  if (!docs.length) {
+    // AsyncPool will throw an error with an empty array
+    return
+  }
   await AsyncPool(PARALLEL_JOBS, docs, (doc) =>
     unarchiveDoc(projectId, doc._id)
   )
