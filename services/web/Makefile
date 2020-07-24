@@ -17,7 +17,7 @@ MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
 MODULE_NAME=$(shell basename $(MODULE))
 
 $(MODULE_MAKEFILES): Makefile.module
-	cp Makefile.module $@
+	cp Makefile.module $@ || diff Makefile.module $@
 
 #
 # Clean
