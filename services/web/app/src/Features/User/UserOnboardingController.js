@@ -7,6 +7,8 @@ const _ = require('underscore')
 
 module.exports = {
   sendRecentSignupOnboardingEmails(req, res, next) {
+    res.setTimeout(600 * 1000) // increase timeout to handle days with a lot of signups
+
     // find all the users with no onboardingEmailSentAt and
     // have signed up in the last 7 days
     db.users.find(

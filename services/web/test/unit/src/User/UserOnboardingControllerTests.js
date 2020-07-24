@@ -47,7 +47,9 @@ describe('UserOnboardingController', function() {
       }
     })
     this.req = {}
-    this.res = {}
+    this.res = {
+      setTimeout: sinon.stub()
+    }
   })
 
   it('sends onboarding emails', function(done) {
