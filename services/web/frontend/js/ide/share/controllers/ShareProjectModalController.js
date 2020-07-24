@@ -57,7 +57,16 @@ App.controller('ShareProjectModalController', function(
   )
 
   $scope.autocompleteContacts = []
-  $http.get('/user/contacts').then(function(response) {
+  if ($scope.isRestrictedTokenMember) {
+    // Restricted token members are users who join via a read-only link.
+    // They will not be able to invite any users, so skip the lookup of
+    //  their contacts. This request would result in a 403 for anonymous
+    //  users, which in turn would redirect them to the /login.
+  } else {
+    $http.get('/user/contacts').then(processContactsResponse)
+  }
+
+  function processContactsResponse(response) {
     const { data } = response
     $scope.autocompleteContacts = data.contacts || []
     for (let contact of $scope.autocompleteContacts) {
@@ -77,7 +86,7 @@ App.controller('ShareProjectModalController', function(
         contact.display = contact.name
       }
     }
-  })
+  }
 
   const getCurrentMemberEmails = () =>
     ($scope.project.members || []).map(u => u.email)

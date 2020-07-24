@@ -195,6 +195,11 @@ export default App.controller('SettingsController', function(
     if (typeof oldRootDoc_id === 'undefined') {
       return
     }
+    if ($scope.permissionsLevel === 'readOnly') {
+      // The user is unauthorized to persist rootDoc changes.
+      // Use the new value for this very editor session only.
+      return
+    }
     // otherwise only save changes, null values are allowed
     if (rootDoc_id !== oldRootDoc_id) {
       settings.saveProjectSettings({ rootDocId: rootDoc_id }).catch(() => {
