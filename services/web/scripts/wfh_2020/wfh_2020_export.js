@@ -7,8 +7,14 @@ db.subscriptions.aggregate(
   { $unwind: '$member_ids' },
   { $group: { _id: null, memberIds: { $addToSet: '$member_ids' } } },
   function(err, results) {
-    if (err || !results.length) {
-      throw err
+    if (err) {
+      console.error(err)
+      process.exit(1)
+    }
+
+    if (!results.length) {
+      console.error('No users found')
+      process.exit(1)
     }
 
     const userIds = results[0].memberIds
@@ -31,7 +37,8 @@ db.subscriptions.aggregate(
       },
       function(err) {
         if (err) {
-          throw err
+          console.error(err)
+          process.exit(1)
         }
 
         process.exit(0)
