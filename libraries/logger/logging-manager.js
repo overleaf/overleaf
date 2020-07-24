@@ -22,7 +22,7 @@ const errSerializer = function (err) {
 
 const Logger = (module.exports = {
   initialize(name) {
-    this.useMetadata = (process.env.USE_METADATA || '').toLowerCase() === 'true'
+    this.logLevelSource = (process.env.LOG_LEVEL_SOURCE || 'file').toLowerCase()
     this.isProduction =
       (process.env.NODE_ENV || '').toLowerCase() === 'production'
     this.defaultLevel =
@@ -77,14 +77,6 @@ async checkLogLevelMetadata() {
     } catch (err) {
       this.logger.level(this.defaultLevel)
       return
-    }
-  },
-
-  async checkLogLevel() {
-    if (this.useMetadata) {
-      await this.checkLogLevelMetadata()
-    } else {
-      await this.checkLogLevelFile()
     }
   },
 
@@ -274,10 +266,19 @@ async checkLogLevelMetadata() {
       if (this.checkInterval) {
         clearInterval(this.checkInterval)
       }
-      // check for log level override on startup
-      this.checkLogLevel()
-      // re-check log level every minute
-      this.checkInterval = setInterval(this.checkLogLevel.bind(this), 1000 * 60)
+      if (this.logLevelSource === 'file') {
+        // check for log level override on startup
+        this.checkLogLevelFile()
+        // re-check log level every minute
+        this.checkInterval = setInterval(this.checkLogLevelFile.bind(this), 1000 * 60)
+      } else if (this.logLevelSource === 'gce_metadata') {
+        // check for log level override on startup
+        this.checkLogLevelMetadata()
+        // re-check log level every minute
+        this.checkInterval = setInterval(this.checkLogLevelMetadata.bind(this), 1000 * 60)
+      } else if (this.logLevelSource !== 'none') {
+        console.log('Unrecognised log level source')
+      }
     }
   }
 })
