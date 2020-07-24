@@ -5,7 +5,6 @@ const path = require('path')
 const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 const { promises } = require('dns')
-//const fetchMock = require('fetch-mock')
 
 chai.use(sinonChai)
 chai.should()
@@ -50,7 +49,6 @@ describe('LoggingManager', function () {
     this.Fetch = sinon.stub().resolves(this.fetchResponse)
     this.Fs = {
       readFile: sinon.stub(),
-      access: sinon.stub(),
       promises: {
         readFile: sinon.stub()
       }
@@ -172,8 +170,6 @@ describe('LoggingManager', function () {
       })
 
     })
-
-
 
     describe('when LOG_LEVEL set in env', function () {
       beforeEach(function () {
@@ -416,111 +412,104 @@ describe('LoggingManager', function () {
     })
   })
 
-describe('checkLogLevelMetadata', function () {
-  beforeEach(function () {
-    this.logger = this.LoggingManager.initialize(this.loggerName)
-  })
-
-  describe('checkLogLevel', function() {
-    it('should request log level override from google meta data service', function() {
-      this.logger.checkLogLevelMetadata()
-      const options = {
-        headers: {
-          'Metadata-Flavor': 'Google'
-        } 
-      }
-      const uri = `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
-      this.Fetch.should.have.been.calledWithMatch(uri,options)
+  describe('checkLogLevelMetadata', function () {
+    beforeEach(function () {
+      this.logger = this.LoggingManager.initialize(this.loggerName)
     })
 
-    describe('when request has error', function() {
-      beforeEach(async function() {
-        this.Fetch = sinon.stub().throws()
-        //this.Request.yields('error')
-        await this.logger.checkLogLevelMetadata()
+    describe('checkLogLevel', function() {
+      it('should request log level override from google meta data service', function() {
+        this.logger.checkLogLevelMetadata()
+        const options = {
+          headers: {
+            'Metadata-Flavor': 'Google'
+          } 
+        }
+        const uri = `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
+        this.Fetch.should.have.been.calledWithMatch(uri,options)
       })
 
-      it('should only set default level', function() {
-        this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
-          'debug'
-        )
-      })
-    })
-
-    describe('when statusCode is not 200', function() {
-      beforeEach(async function() {
-        this.fetchResponse.status = 404
-        //this.Request.yields(null, { statusCode: 404 })
-        await this.logger.checkLogLevelMetadata()
-      })
-
-      it('should only set default level', function() {
-        this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
-          'debug'
-        )
-      })
-    })
-
-    describe('when time value returned that is less than current time', function() {
-      beforeEach(async function() {
-        //this.Request.yields(null, { statusCode: 200 }, '1')
-        this.fetchResponse.text = sinon.stub().resolves('1')
-        await this.logger.checkLogLevelMetadata()
-      })
-
-      it('should only set default level', function() {
-        this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
-          'debug'
-        )
-      })
-    })
-
-    describe('when time value returned that is more than current time', function() {
-      describe('when level is already set', function() {
+      describe('when request has error', function() {
         beforeEach(async function() {
-          this.bunyanLogger.level.returns(10)
-          //this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
-          this.fetchResponse.text = sinon.stub().resolves(this.start + 1000)
-          //this.Fetch = sinon.stub().resolves(this.fetchResponse)
-
+          this.Fetch = sinon.stub().throws()
+          //this.Request.yields('error')
           await this.logger.checkLogLevelMetadata()
         })
 
-        it('should set trace level', function() {
+        it('should only set default level', function() {
           this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
-            'trace'
+            'debug'
           )
         })
       })
 
-      describe('when level is not already set', function() {
+      describe('when statusCode is not 200', function() {
         beforeEach(async function() {
-          this.bunyanLogger.level.returns(20)
-          this.fetchResponse.text = sinon.stub().resolves(this.start + 1000)
-          this.Fetch.fetch = sinon.stub().resolves(this.fetchResponse)
-          //this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
-          //this.fetchResponse = sinon.stub().resolves
-          
-          
-          //{data: this.start + 1000, status: 200}
+          this.fetchResponse.status = 404
+          //this.Request.yields(null, { statusCode: 404 })
           await this.logger.checkLogLevelMetadata()
         })
 
-        it('should set trace level', function() {
+        it('should only set default level', function() {
           this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
-            'trace'
+            'debug'
           )
         })
       })
+
+      describe('when time value returned that is less than current time', function() {
+        beforeEach(async function() {
+          //this.Request.yields(null, { statusCode: 200 }, '1')
+          this.fetchResponse.text = sinon.stub().resolves('1')
+          await this.logger.checkLogLevelMetadata()
+        })
+
+        it('should only set default level', function() {
+          this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
+            'debug'
+          )
+        })
+      })
+
+      describe('when time value returned that is more than current time', function() {
+        describe('when level is already set', function() {
+          beforeEach(async function() {
+            this.bunyanLogger.level.returns(10)
+            //this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
+            this.fetchResponse.text = sinon.stub().resolves(this.start + 1000)
+            //this.Fetch = sinon.stub().resolves(this.fetchResponse)
+
+            await this.logger.checkLogLevelMetadata()
+          })
+
+          it('should set trace level', function() {
+            this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
+              'trace'
+            )
+          })
+        })
+
+        describe('when level is not already set', function() {
+          beforeEach(async function() {
+            this.bunyanLogger.level.returns(20)
+            this.fetchResponse.text = sinon.stub().resolves(this.start + 1000)
+            this.Fetch.fetch = sinon.stub().resolves(this.fetchResponse)
+            //this.Request.yields(null, { statusCode: 200 }, this.start + 1000)
+            //this.fetchResponse = sinon.stub().resolves
+            
+            
+            //{data: this.start + 1000, status: 200}
+            await this.logger.checkLogLevelMetadata()
+          })
+
+          it('should set trace level', function() {
+            this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
+              'trace'
+            )
+          })
+        })
+      })
     })
-  })
-
-
-
-
-
-        
-
   })
 
   describe('ringbuffer', function () {
