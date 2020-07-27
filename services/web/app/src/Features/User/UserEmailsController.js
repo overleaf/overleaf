@@ -1,40 +1,55 @@
-let UserEmailsController
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
+const EmailHandler = require('../Email/EmailHandler')
 const EmailHelper = require('../Helpers/EmailHelper')
 const UserEmailsConfirmationHandler = require('./UserEmailsConfirmationHandler')
 const { endorseAffiliation } = require('../Institutions/InstitutionsAPI')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
+const { expressify } = require('../../util/promises')
 
-function add(req, res, next) {
+async function add(req, res, next) {
   const userId = AuthenticationController.getLoggedInUserId(req)
   const email = EmailHelper.parseEmail(req.body.email)
   if (!email) {
     return res.sendStatus(422)
   }
+  const user = await UserGetter.promises.getUser(userId, { email: 1 })
 
   const affiliationOptions = {
     university: req.body.university,
     role: req.body.role,
     department: req.body.department
   }
-  UserUpdater.addEmailAddress(userId, email, affiliationOptions, function(
-    error
-  ) {
-    if (error) {
-      return UserEmailsController._handleEmailError(error, req, res, next)
-    }
-    UserEmailsConfirmationHandler.sendConfirmationEmail(userId, email, function(
-      error
-    ) {
-      if (error) {
-        return next(error)
-      }
-      res.sendStatus(204)
-    })
-  })
+
+  try {
+    await UserUpdater.promises.addEmailAddress(
+      userId,
+      email,
+      affiliationOptions
+    )
+  } catch (error) {
+    return UserEmailsController._handleEmailError(error, req, res, next)
+  }
+
+  const emailOptions = {
+    to: user.email,
+    actionDescribed: `a secondary email address has been added to your account ${
+      user.email
+    }`,
+    message: [
+      `<span style="display:inline-block;padding: 0 20px;width:100%;">Added: <br/><b>${email}</b></span>`
+    ],
+    action: 'secondary email address added'
+  }
+  await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
+  await UserEmailsConfirmationHandler.promises.sendConfirmationEmail(
+    userId,
+    email
+  )
+
+  res.sendStatus(204)
 }
 
 function resendConfirmation(req, res, next) {
@@ -61,7 +76,7 @@ function resendConfirmation(req, res, next) {
   })
 }
 
-module.exports = UserEmailsController = {
+const UserEmailsController = {
   list(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
     UserGetter.getUserFullEmails(userId, function(error, fullEmails) {
@@ -72,7 +87,7 @@ module.exports = UserEmailsController = {
     })
   },
 
-  add,
+  add: expressify(add),
 
   remove(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
@@ -169,3 +184,9 @@ module.exports = UserEmailsController = {
     next(error)
   }
 }
+
+UserEmailsController.promises = {
+  add
+}
+
+module.exports = UserEmailsController
