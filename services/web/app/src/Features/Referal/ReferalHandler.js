@@ -2,7 +2,8 @@ const { User } = require('../../models/User')
 
 module.exports = {
   getReferedUsers(userId, callback) {
-    User.findById(userId, { refered_users: 1 }, function(err, user) {
+    const projection = { refered_users: 1, refered_user_count: 1 }
+    User.findById(userId, projection, function(err, user) {
       if (err) {
         return callback(err)
       }

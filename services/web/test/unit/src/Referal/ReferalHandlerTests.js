@@ -87,23 +87,6 @@ describe('Referal handler', function() {
       )
     })
 
-    it('should return the count if it differs from the array length', function(done) {
-      const user = {
-        refered_users: ['1234', '312312', '3213129'],
-        refered_user_count: 5
-      }
-      this.User.findById.callsArgWith(2, null, user)
-
-      this.handler.getReferedUsers(
-        this.user_id,
-        (err, passedReferedUserIds, passedReferedUserCount) => {
-          should.not.exist(err)
-          passedReferedUserCount.should.equal(5)
-          done()
-        }
-      )
-    })
-
     it('should error if finding the user fails', function(done) {
       this.User.findById.callsArgWith(2, new Error('user not found'))
 

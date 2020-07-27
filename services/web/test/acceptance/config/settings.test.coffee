@@ -171,6 +171,17 @@ module.exports =
 		'google': {
 			name: 'google'
 		},
+
+	# for testing /user/bonus
+	social:
+		twitter:
+			handle: 'overleaf'
+
+		facebook:
+			appId:  '400474170024644'
+			picture: 'https://www.overleaf.com/img/ol-brand/logo-horizontal.png'
+			redirectUri: 'https://www.overleaf.com'
+
   # setting to true since many features are enabled/disabled after availability of this
   # property (check Features.js)
 	overleaf: true
