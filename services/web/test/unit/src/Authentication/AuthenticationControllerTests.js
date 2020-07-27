@@ -23,6 +23,12 @@ describe('AuthenticationController', function() {
         console: console
       },
       requires: {
+        '../Helpers/AsyncFormHelper': (this.AsyncFormHelper = {
+          redirect: sinon.stub()
+        }),
+        '../../infrastructure/RequestContentTypeDetection': {
+          acceptsJson: (this.acceptsJson = sinon.stub().returns(false))
+        },
         './AuthenticationManager': (this.AuthenticationManager = {}),
         '../User/UserUpdater': (this.UserUpdater = {
           updateUser: sinon.stub()
@@ -965,7 +971,7 @@ describe('AuthenticationController', function() {
       this.AuthenticationController._recordSuccessfulLogin = sinon.stub()
       this.AnalyticsManager.recordEvent = sinon.stub()
       this.AnalyticsManager.identifyUser = sinon.stub()
-      this.req.headers = { accept: 'application/json, whatever' }
+      this.acceptsJson.returns(true)
       this.res.json = sinon.stub()
       this.res.redirect = sinon.stub()
     })
@@ -1011,14 +1017,18 @@ describe('AuthenticationController', function() {
         this.res,
         this.next
       )
-      expect(this.res.json.callCount).to.equal(1)
-      expect(this.res.redirect.callCount).to.equal(0)
-      expect(this.res.json.calledWith({ redir: '/some/page' })).to.equal(true)
+      expect(
+        this.AsyncFormHelper.redirect.calledWith(
+          this.req,
+          this.res,
+          '/some/page'
+        )
+      ).to.equal(true)
     })
 
     describe('with a non-json request', function() {
       beforeEach(function() {
-        this.req.headers = {}
+        this.acceptsJson.returns(false)
         this.res.json = sinon.stub()
         this.res.redirect = sinon.stub()
       })
@@ -1030,9 +1040,13 @@ describe('AuthenticationController', function() {
           this.res,
           this.next
         )
-        expect(this.res.json.callCount).to.equal(0)
-        expect(this.res.redirect.callCount).to.equal(1)
-        expect(this.res.redirect.calledWith('/some/page')).to.equal(true)
+        expect(
+          this.AsyncFormHelper.redirect.calledWith(
+            this.req,
+            this.res,
+            '/some/page'
+          )
+        ).to.equal(true)
       })
     })
 
@@ -1072,7 +1086,7 @@ describe('AuthenticationController', function() {
           this.res,
           this.user
         )
-        expect(this.res.json.callCount).to.equal(1)
+        expect(this.AsyncFormHelper.redirect.called).to.equal(true)
       })
 
       it('stop if hook has redirected', function(done) {

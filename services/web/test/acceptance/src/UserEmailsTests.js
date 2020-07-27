@@ -18,6 +18,7 @@ const request = require('./helpers/request')
 const settings = require('settings-sharelatex')
 const { db, ObjectId } = require('../../../app/src/infrastructure/mongojs')
 const MockV1Api = require('./helpers/MockV1Api')
+const expectErrorResponse = require('./helpers/expectErrorResponse')
 
 describe('UserEmails', function() {
   beforeEach(function(done) {
@@ -811,6 +812,31 @@ describe('UserEmails', function() {
           }
         ],
         done
+      )
+    })
+  })
+
+  describe('when not logged in', function() {
+    beforeEach(function(done) {
+      this.anonymous = new User()
+      this.anonymous.getCsrfToken(done)
+    })
+    it('should return a plain 403 when setting the email', function(done) {
+      this.anonymous.request(
+        {
+          method: 'POST',
+          url: '/user/emails',
+          json: {
+            email: 'newly-added-email@example.com'
+          }
+        },
+        (error, response, body) => {
+          if (error) {
+            return done(error)
+          }
+          expectErrorResponse.requireLogin.json(response, body)
+          done()
+        }
       )
     })
   })

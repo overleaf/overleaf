@@ -34,9 +34,19 @@ describe('siteIsOpen', function() {
     })
 
     it('should return maintenance page', function(done) {
-      return request.get('/login', (error, response) => {
+      request.get('/login', (error, response, body) => {
         response.statusCode.should.equal(503)
-        return done()
+        body.should.match(/is currently down for maintenance/)
+        done()
+      })
+    })
+
+    it('should return a plain text message for a json request', function(done) {
+      request.get('/some/route', { json: true }, (error, response, body) => {
+        response.statusCode.should.equal(503)
+        body.message.should.match(/maintenance/)
+        body.message.should.match(/status.overleaf.com/)
+        done()
       })
     })
   })

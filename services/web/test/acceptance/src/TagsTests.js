@@ -4,6 +4,8 @@ const { expect } = require('chai')
 const _ = require('lodash')
 const request = require('./helpers/request')
 
+const expectErrorResponse = require('./helpers/expectErrorResponse')
+
 const _initUser = (user, callback) => {
   async.series([cb => user.login(cb), cb => user.getCsrfToken(cb)], callback)
 }
@@ -77,8 +79,7 @@ describe('Tags', function() {
         }
         _getTags(this.user, (err, response, body) => {
           expect(err).to.not.exist
-          expect(response.statusCode).to.equal(302)
-          expect(body).to.not.exist
+          expectErrorResponse.requireLogin.json(response, body)
           done()
         })
       })

@@ -17,6 +17,14 @@ const UrlHelper = require('../Helpers/UrlHelper')
 const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
 const SudoModeHandler = require('../SudoMode/SudoModeHandler')
 const _ = require('lodash')
+const {
+  acceptsJson
+} = require('../../infrastructure/RequestContentTypeDetection')
+
+function send401WithChallenge(res) {
+  res.setHeader('WWW-Authenticate', 'OverleafLogin')
+  res.sendStatus(401)
+}
 
 const AuthenticationController = (module.exports = {
   serializeUser(user, callback) {
@@ -213,6 +221,7 @@ const AuthenticationController = (module.exports = {
         next = function() {}
       }
       if (!AuthenticationController.isUserLoggedIn(req)) {
+        if (acceptsJson(req)) return send401WithChallenge(res)
         return AuthenticationController._redirectToLoginOrRegisterPage(req, res)
       } else {
         req.user = AuthenticationController.getSessionUser(req)
@@ -272,6 +281,7 @@ const AuthenticationController = (module.exports = {
           // need to destroy the existing session and generate a new one
           // otherwise they will already be logged in when they are redirected
           // to the login page
+          if (acceptsJson(req)) return send401WithChallenge(res)
           AuthenticationController._redirectToLoginOrRegisterPage(req, res)
         })
       } else {
@@ -303,6 +313,7 @@ const AuthenticationController = (module.exports = {
         { url: req.url },
         'user trying to access endpoint not in global whitelist'
       )
+      if (acceptsJson(req)) return send401WithChallenge(res)
       AuthenticationController.setRedirectInSession(req)
       res.redirect('/login')
     }

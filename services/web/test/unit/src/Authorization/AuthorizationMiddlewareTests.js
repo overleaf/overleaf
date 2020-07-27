@@ -159,8 +159,8 @@ describe('AuthorizationMiddleware', function() {
                 this.next
               )
               this.next.called.should.equal(false)
-              this.AuthorizationMiddleware.redirectToRestricted
-                .calledWith(this.req, this.res, this.next)
+              this.HttpErrorHandler.forbidden
+                .calledWith(this.req, this.res)
                 .should.equal(true)
             })
           })
@@ -200,8 +200,8 @@ describe('AuthorizationMiddleware', function() {
                 this.next
               )
               this.next.called.should.equal(false)
-              this.AuthorizationMiddleware.redirectToRestricted
-                .calledWith(this.req, this.res, this.next)
+              this.HttpErrorHandler.forbidden
+                .calledWith(this.req, this.res)
                 .should.equal(true)
             })
           })

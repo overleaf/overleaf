@@ -1,4 +1,5 @@
 const logger = require('logger-sharelatex')
+const Settings = require('settings-sharelatex')
 
 function renderJSONError(res, message, info) {
   const fullInfo = { ...info, message }
@@ -91,6 +92,22 @@ module.exports = {
         return renderJSONError(res, message, {})
       default:
         return res.send('internal server error')
+    }
+  },
+
+  maintenance(req, res) {
+    res.status(503)
+    let message = `${Settings.appName} is currently down for maintenance.`
+    if (Settings.statusPageUrl) {
+      message += ` Please check https://${Settings.statusPageUrl} for updates.`
+    }
+    switch (req.accepts(['html', 'json'])) {
+      case 'html':
+        return res.render('general/closed', { title: 'maintenance' })
+      case 'json':
+        return renderJSONError(res, message, {})
+      default:
+        return res.send(message)
     }
   }
 }

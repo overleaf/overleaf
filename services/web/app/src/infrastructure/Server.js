@@ -34,6 +34,7 @@ const Views = require('./Views')
 
 const ErrorController = require('../Features/Errors/ErrorController')
 const HttpErrorController = require('../Features/Errors/HttpErrorController')
+const HttpErrorHandler = require('../Features/Errors/HttpErrorHandler')
 const UserSessionsManager = require('../Features/User/UserSessionsManager')
 const AuthenticationController = require('../Features/Authentication/AuthenticationController')
 
@@ -185,8 +186,7 @@ webRouter.use(function(req, res, next) {
   ) {
     next()
   } else {
-    res.status(503)
-    res.render('general/closed', { title: 'maintenance' })
+    HttpErrorHandler.maintenance(req, res)
   }
 })
 
@@ -196,8 +196,7 @@ webRouter.use(function(req, res, next) {
   } else if (req.url.indexOf('/admin') === 0) {
     next()
   } else {
-    res.status(503)
-    res.render('general/closed', { title: 'maintenance' })
+    HttpErrorHandler.maintenance(req, res)
   }
 })
 
