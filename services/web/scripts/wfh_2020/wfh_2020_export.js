@@ -2,10 +2,12 @@ const mongojs = require('../../app/src/infrastructure/mongojs')
 const { db } = mongojs
 const async = require('async')
 
-db.subscriptions.aggregate(
-  { $match: { teamName: /(Work From Home|Work from Home)/ } },
-  { $unwind: '$member_ids' },
-  { $group: { _id: null, memberIds: { $addToSet: '$member_ids' } } },
+db.deletedSubscriptions.aggregate(
+  { $match: { 'subscription.teamName': /(Work From Home|Work from Home)/ } },
+  { $unwind: '$subscription.member_ids' },
+  {
+    $group: { _id: null, memberIds: { $addToSet: '$subscription.member_ids' } }
+  },
   function(err, results) {
     if (err) {
       console.error(err)
