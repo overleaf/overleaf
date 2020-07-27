@@ -772,7 +772,8 @@ const ProjectController = {
             metrics.inc(metricName)
 
             const enableOptimize =
-              !!Settings.experimentId && !user.features.zotero
+              !!Settings.experimentId &&
+              (user.features && !user.features.zotero)
 
             if (userId) {
               AnalyticsManager.recordEvent(userId, 'project-opened', {
