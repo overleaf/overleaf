@@ -9,6 +9,7 @@ const metrics = require('metrics-sharelatex')
 const AuthenticationManager = require('../Authentication/AuthenticationManager')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const Features = require('../../infrastructure/Features')
+const UserAuditLogHandler = require('./UserAuditLogHandler')
 const UserSessionsManager = require('./UserSessionsManager')
 const UserUpdater = require('./UserUpdater')
 const SudoModeHandler = require('../SudoMode/SudoModeHandler')
@@ -18,6 +19,7 @@ const OError = require('@overleaf/o-error')
 const EmailHandler = require('../Email/EmailHandler')
 const UrlHelper = require('../Helpers/UrlHelper')
 const { promisify } = require('util')
+const { expressify } = require('../../util/promises')
 
 async function _ensureAffiliation(userId, emailData) {
   if (emailData.samlProviderId) {
@@ -25,6 +27,25 @@ async function _ensureAffiliation(userId, emailData) {
   } else {
     await UserUpdater.promises.addAffiliationForNewUser(userId, emailData.email)
   }
+}
+
+async function clearSessions(req, res, next) {
+  metrics.inc('user.clear-sessions')
+  const user = AuthenticationController.getSessionUser(req)
+  const sessions = await UserSessionsManager.promises.getAllUserSessions(user, [
+    req.sessionID
+  ])
+  await UserAuditLogHandler.promises.addEntry(
+    user._id,
+    'clear-sessions',
+    user._id,
+    req.ip,
+    { sessions }
+  )
+  await UserSessionsManager.promises.revokeAllUserSessions(user, [
+    req.sessionID
+  ])
+  res.sendStatus(201)
 }
 
 async function ensureAffiliation(user) {
@@ -67,6 +88,8 @@ async function ensureAffiliationMiddleware(req, res, next) {
 }
 
 const UserController = {
+  clearSessions: expressify(clearSessions),
+
   tryDeleteUser(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
     const { password } = req.body
@@ -352,17 +375,6 @@ const UserController = {
         })
       }
     )
-  },
-
-  clearSessions(req, res, next) {
-    metrics.inc('user.clear-sessions')
-    const user = AuthenticationController.getSessionUser(req)
-    UserSessionsManager.revokeAllUserSessions(user, [req.sessionID], err => {
-      if (err != null) {
-        return next(err)
-      }
-      res.sendStatus(201)
-    })
   },
 
   changePassword(req, res, next) {

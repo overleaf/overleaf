@@ -67,7 +67,11 @@ describe('UserController', function() {
     this.UserSessionsManager = {
       trackSession: sinon.stub(),
       untrackSession: sinon.stub(),
-      revokeAllUserSessions: sinon.stub().callsArgWith(2, null)
+      revokeAllUserSessions: sinon.stub().callsArgWith(2, null),
+      promises: {
+        getAllUserSessions: sinon.stub().resolves(),
+        revokeAllUserSessions: sinon.stub().resolves()
+      }
     }
     this.SudoModeHandler = { clearSudoMode: sinon.stub() }
     this.HttpErrorHandler = {
@@ -97,6 +101,11 @@ describe('UserController', function() {
         '../Referal/ReferalAllocator': this.ReferalAllocator,
         '../Subscription/SubscriptionDomainHandler': this
           .SubscriptionDomainHandler,
+        './UserAuditLogHandler': (this.UserAuditLogHandler = {
+          promises: {
+            addEntry: sinon.stub().resolves()
+          }
+        }),
         './UserHandler': this.UserHandler,
         './UserSessionsManager': this.UserSessionsManager,
         '../SudoMode/SudoModeHandler': this.SudoModeHandler,
@@ -557,31 +566,57 @@ describe('UserController', function() {
 
   describe('clearSessions', function() {
     it('should call revokeAllUserSessions', function(done) {
+      this.res.sendStatus.callsFake(() => {
+        this.UserSessionsManager.promises.revokeAllUserSessions.callCount.should.equal(
+          1
+        )
+        done()
+      })
       this.UserController.clearSessions(this.req, this.res)
-      this.UserSessionsManager.revokeAllUserSessions.callCount.should.equal(1)
-      done()
     })
 
     it('send a 201 response', function(done) {
-      this.res.sendStatus = status => {
+      this.res.sendStatus.callsFake(status => {
         status.should.equal(201)
         done()
-      }
-      this.UserController.clearSessions(this.req, this.res)
+      })
+
+      this.UserController.clearSessions(this.req, this.res, () => {
+        done()
+      })
+    })
+
+    describe('when getAllUserSessions produces an error', function() {
+      it('should return an error', function(done) {
+        this.UserSessionsManager.promises.getAllUserSessions.rejects(
+          new Error('woops')
+        )
+        this.UserController.clearSessions(this.req, this.res, error => {
+          expect(error).to.be.instanceof(Error)
+          done()
+        })
+      })
+    })
+
+    describe('when audit log addEntry produces an error', function() {
+      it('should call next with an error', function(done) {
+        this.UserAuditLogHandler.promises.addEntry.rejects(new Error('woops'))
+        this.UserController.clearSessions(this.req, this.res, error => {
+          expect(error).to.be.instanceof(Error)
+          done()
+        })
+      })
     })
 
     describe('when revokeAllUserSessions produces an error', function() {
       it('should call next with an error', function(done) {
-        this.UserSessionsManager.revokeAllUserSessions.callsArgWith(
-          2,
+        this.UserSessionsManager.promises.revokeAllUserSessions.rejects(
           new Error('woops')
         )
-        const next = err => {
-          expect(err).to.not.equal(null)
-          expect(err).to.be.instanceof(Error)
+        this.UserController.clearSessions(this.req, this.res, error => {
+          expect(error).to.be.instanceof(Error)
           done()
-        }
-        this.UserController.clearSessions(this.req, this.res, next)
+        })
       })
     })
   })
