@@ -124,6 +124,14 @@ export default (EditorManager = (function() {
       return this.openDoc(doc, options)
     }
 
+    jumpToLine(options) {
+      return this.$scope.$broadcast(
+        'editor:gotoLine',
+        options.gotoLine,
+        options.gotoColumn
+      )
+    }
+
     openDoc(doc, options) {
       if (options == null) {
         options = {}
@@ -137,13 +145,7 @@ export default (EditorManager = (function() {
           // allow Ace to display document before moving, delay until next tick
           // added delay to make this happen later that gotoStoredPosition in
           // CursorPositionManager
-          return setTimeout(() => {
-            return this.$scope.$broadcast(
-              'editor:gotoLine',
-              options.gotoLine,
-              options.gotoColumn
-            )
-          }, 0)
+          return setTimeout(() => this.jumpToLine(options), 0)
         } else if (options.gotoOffset != null) {
           return setTimeout(() => {
             return this.$scope.$broadcast(

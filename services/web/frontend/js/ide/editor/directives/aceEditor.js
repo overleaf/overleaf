@@ -554,11 +554,26 @@ App.directive('aceEditor', function(
         return scope.$emit(`${scope.name}:change`)
       }
 
+      let currentFirstVisibleRow = null
+      const emitMiddleVisibleRowChanged = () => {
+        if (!window.user.alphaProgram) return
+        const firstVisibleRow = editor.getFirstVisibleRow()
+        if (firstVisibleRow === currentFirstVisibleRow) return
+
+        currentFirstVisibleRow = firstVisibleRow
+        const lastVisibleRow = editor.getLastVisibleRow()
+        scope.$emit(
+          `scroll:editor:update`,
+          Math.floor((firstVisibleRow + lastVisibleRow) / 2)
+        )
+      }
+
       const onScroll = function(scrollTop) {
         if (scope.eventsBridge == null) {
           return
         }
         const height = editor.renderer.layerConfig.maxHeight
+        emitMiddleVisibleRowChanged()
         return scope.eventsBridge.emit('aceScroll', scrollTop, height)
       }
 

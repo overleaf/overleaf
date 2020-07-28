@@ -13,6 +13,7 @@ App.controller('OutlineController', function($scope, ide, eventTracking) {
     $scope.$applyAsync(() => {
       $scope.isTexFile = outlineInfo.isTexFile
       $scope.outline = outlineInfo.outline
+      $scope.highlightedLine = outlineInfo.highlightedLine
     })
   }
 

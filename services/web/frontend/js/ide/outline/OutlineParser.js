@@ -113,9 +113,4 @@ function nestOutline(flatOutline) {
   return nestedOutlines
 }
 
-function parseOutline(content) {
-  const flatOutline = matchOutline(content)
-  return nestOutline(flatOutline)
-}
-
-export default parseOutline
+export { matchOutline, nestOutline }

@@ -11,7 +11,8 @@ function OutlinePane({
   projectId,
   jumpToLine,
   onToggle,
-  eventTracking
+  eventTracking,
+  highlightedLine
 }) {
   const storageKey = `file_outline.expanded.${projectId}`
   const [expanded, setExpanded] = useState(() => {
@@ -71,7 +72,11 @@ function OutlinePane({
       </header>
       {expanded && isTexFile ? (
         <div className="outline-body">
-          <OutlineRoot outline={outline} jumpToLine={jumpToLine} />
+          <OutlineRoot
+            outline={outline}
+            jumpToLine={jumpToLine}
+            highlightedLine={highlightedLine}
+          />
         </div>
       ) : null}
     </div>
@@ -90,7 +95,8 @@ OutlinePane.propTypes = {
   projectId: PropTypes.string.isRequired,
   jumpToLine: PropTypes.func.isRequired,
   onToggle: PropTypes.func,
-  eventTracking: PropTypes.object.isRequired
+  eventTracking: PropTypes.object.isRequired,
+  highlightedLine: PropTypes.number
 }
 
 export default OutlinePane

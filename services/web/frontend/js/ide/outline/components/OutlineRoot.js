@@ -2,11 +2,16 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import OutlineList from './OutlineList'
 
-function OutlineRoot({ outline, jumpToLine }) {
+function OutlineRoot({ outline, jumpToLine, highlightedLine }) {
   return (
     <div>
       {outline.length ? (
-        <OutlineList outline={outline} jumpToLine={jumpToLine} isRoot />
+        <OutlineList
+          outline={outline}
+          jumpToLine={jumpToLine}
+          isRoot
+          highlightedLine={highlightedLine}
+        />
       ) : (
         <div className="outline-body-no-elements">
           We can’t find any sections or subsections in this file.{' '}
@@ -26,7 +31,8 @@ function OutlineRoot({ outline, jumpToLine }) {
 
 OutlineRoot.propTypes = {
   outline: PropTypes.array.isRequired,
-  jumpToLine: PropTypes.func.isRequired
+  jumpToLine: PropTypes.func.isRequired,
+  highlightedLine: PropTypes.number
 }
 
 export default OutlineRoot

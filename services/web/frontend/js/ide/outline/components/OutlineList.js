@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import OutlineItem from './OutlineItem'
 
-function OutlineList({ outline, jumpToLine, isRoot }) {
+function OutlineList({ outline, jumpToLine, isRoot, highlightedLine }) {
   const listClasses = classNames('outline-item-list', {
     'outline-item-list-root': isRoot
   })
@@ -15,6 +15,7 @@ function OutlineList({ outline, jumpToLine, isRoot }) {
             key={`${outlineItem.level}-${idx}`}
             outlineItem={outlineItem}
             jumpToLine={jumpToLine}
+            highlightedLine={highlightedLine}
           />
         )
       })}
@@ -25,7 +26,8 @@ function OutlineList({ outline, jumpToLine, isRoot }) {
 OutlineList.propTypes = {
   outline: PropTypes.array.isRequired,
   jumpToLine: PropTypes.func.isRequired,
-  isRoot: PropTypes.bool
+  isRoot: PropTypes.bool,
+  highlightedLine: PropTypes.number
 }
 
 export default OutlineList
