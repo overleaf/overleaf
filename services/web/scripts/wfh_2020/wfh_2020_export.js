@@ -28,12 +28,16 @@ db.deletedSubscriptions.aggregate(
       10,
       function(userId, callback) {
         db.users.findOne(userId, function(err, user) {
-          const emails = user.emails.map(email => email.email)
-          console.log(
-            `${user._id},${user.first_name || ''},${user.last_name || ''},${
-              user.signUpDate
-            },${emails.join(',')}`
-          )
+          if (user) {
+            const emails = user.emails.map(email => email.email)
+            console.log(
+              `${user._id},${user.first_name || ''},${user.last_name || ''},${
+                user.signUpDate
+              },${emails.join(',')}`
+            )
+          } else {
+            console.error('A group user was not found')
+          }
           callback(err)
         })
       },
