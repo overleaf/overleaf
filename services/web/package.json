@@ -25,7 +25,7 @@
     "nodemon": "nodemon --config nodemon.json",
     "webpack": "webpack-dev-server --config webpack.config.dev.js",
     "webpack:production": "webpack --config webpack.config.prod.js",
-    "lint": "eslint -f unix .",
+    "lint": "eslint --max-warnings 0 -f unix .",
     "format": "prettier-eslint '**/*.{js,less}' --list-different",
     "format:fix": "prettier-eslint '**/*.{js,less}' --write",
     "migrations": "east"
