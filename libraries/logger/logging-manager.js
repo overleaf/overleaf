@@ -43,41 +43,33 @@ const Logger = (module.exports = {
     return this
   },
 
-  async checkLogLevelFile() {
+  async checkLogLevel() {
     try {
-      const end = await fs.promises.readFile('/logging/tracingEndTime')
-      if (!end) throw new Error("No end time found")
-      if (parseInt(end,10) > Date.now()) {
+      const end = await this.getTracingEndTime()
+      if (parseInt(end, 10) > Date.now()) {
         this.logger.level('trace')
       } else {
         this.logger.level(this.defaultLevel)
       }
     } catch (err) {
       this.logger.level(this.defaultLevel)
-      return
     }
   },
 
-async checkLogLevelMetadata() {
+  async getTracingEndTimeFile() {
+      return fs.promises.readFile('/logging/tracingEndTime')
+  },
+
+async getTracingEndTimeMetadata() {
     const options = {
       headers: {
         'Metadata-Flavor': 'Google'
       }
     }
     const uri = `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
-    try {
-      const res = await fetch(uri,options)
-      if (!res.ok) throw new Error("Metadata not okay")
-        const body = await res.text()
-        if (parseInt(body) > Date.now()) {
-          this.logger.level('trace')
-        } else {
-          this.logger.level(this.defaultLevel)
-        }
-    } catch (err) {
-      this.logger.level(this.defaultLevel)
-      return
-    }
+    const res = await fetch(uri,options)
+    if (!res.ok) throw new Error("Metadata not okay")
+    return res.text()
   },
 
   initializeErrorReporting(sentryDsn, options) {
@@ -267,18 +259,19 @@ async checkLogLevelMetadata() {
         clearInterval(this.checkInterval)
       }
       if (this.logLevelSource === 'file') {
-        // check for log level override on startup
-        this.checkLogLevelFile()
-        // re-check log level every minute
-        this.checkInterval = setInterval(this.checkLogLevelFile.bind(this), 1000 * 60)
+        this.getTracingEndTime = this.getTracingEndTimeFile
       } else if (this.logLevelSource === 'gce_metadata') {
-        // check for log level override on startup
-        this.checkLogLevelMetadata()
-        // re-check log level every minute
-        this.checkInterval = setInterval(this.checkLogLevelMetadata.bind(this), 1000 * 60)
-      } else if (this.logLevelSource !== 'none') {
+         this.getTracingEndTime = this.getTracingEndTimeMetadata
+      } else if (this.logLevelSource === 'none') {
+        return
+      } else {
         console.log('Unrecognised log level source')
+        return
       }
+      // check for log level override on startup
+      this.checkLogLevel()
+      // re-check log level every minute
+      this.checkInterval = setInterval(this.checkLogLevel.bind(this), 1000 * 60)
     }
   }
 })
