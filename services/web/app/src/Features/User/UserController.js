@@ -45,6 +45,23 @@ async function clearSessions(req, res, next) {
   await UserSessionsManager.promises.revokeAllUserSessions(user, [
     req.sessionID
   ])
+  const emailOptions = {
+    to: user.email,
+    actionDescribed: `active sessions were cleared on your account ${
+      user.email
+    }`,
+    action: 'active sessions cleared'
+  }
+
+  try {
+    await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
+  } catch (error) {
+    logger.error(
+      { userId: user._id },
+      'could not send security alert email when sessions cleared'
+    )
+  }
+
   res.sendStatus(201)
 }
 

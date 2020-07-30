@@ -111,19 +111,22 @@ describe('UserController', function() {
         '../SudoMode/SudoModeHandler': this.SudoModeHandler,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': {
+        'logger-sharelatex': (this.logger = {
           log() {},
           warn() {},
           err() {},
-          error() {}
-        },
+          error: sinon.stub()
+        }),
         'metrics-sharelatex': {
           inc() {}
         },
         '../Errors/Errors': Errors,
         '@overleaf/o-error': OError,
         '@overleaf/o-error/http': HttpErrors,
-        '../Email/EmailHandler': { sendEmail: sinon.stub() }
+        '../Email/EmailHandler': (this.EmailHandler = {
+          sendEmail: sinon.stub(),
+          promises: { sendEmail: sinon.stub().resolves() }
+        })
       }
     })
 
@@ -565,57 +568,80 @@ describe('UserController', function() {
   })
 
   describe('clearSessions', function() {
-    it('should call revokeAllUserSessions', function(done) {
-      this.res.sendStatus.callsFake(() => {
-        this.UserSessionsManager.promises.revokeAllUserSessions.callCount.should.equal(
-          1
-        )
-        done()
-      })
-      this.UserController.clearSessions(this.req, this.res)
-    })
-
-    it('send a 201 response', function(done) {
-      this.res.sendStatus.callsFake(status => {
-        status.should.equal(201)
-        done()
-      })
-
-      this.UserController.clearSessions(this.req, this.res, () => {
-        done()
-      })
-    })
-
-    describe('when getAllUserSessions produces an error', function() {
-      it('should return an error', function(done) {
-        this.UserSessionsManager.promises.getAllUserSessions.rejects(
-          new Error('woops')
-        )
-        this.UserController.clearSessions(this.req, this.res, error => {
-          expect(error).to.be.instanceof(Error)
+    describe('success', function() {
+      it('should call revokeAllUserSessions', function(done) {
+        this.res.sendStatus.callsFake(() => {
+          this.UserSessionsManager.promises.revokeAllUserSessions.callCount.should.equal(
+            1
+          )
           done()
         })
+        this.UserController.clearSessions(this.req, this.res)
       })
-    })
 
-    describe('when audit log addEntry produces an error', function() {
-      it('should call next with an error', function(done) {
-        this.UserAuditLogHandler.promises.addEntry.rejects(new Error('woops'))
-        this.UserController.clearSessions(this.req, this.res, error => {
-          expect(error).to.be.instanceof(Error)
+      it('send a 201 response', function(done) {
+        this.res.sendStatus.callsFake(status => {
+          status.should.equal(201)
           done()
         })
+
+        this.UserController.clearSessions(this.req, this.res)
+      })
+
+      it('sends a security alert email', function(done) {
+        this.res.sendStatus.callsFake(status => {
+          this.EmailHandler.promises.sendEmail.callCount.should.equal(1)
+          done()
+        })
+
+        this.UserController.clearSessions(this.req, this.res)
       })
     })
 
-    describe('when revokeAllUserSessions produces an error', function() {
-      it('should call next with an error', function(done) {
-        this.UserSessionsManager.promises.revokeAllUserSessions.rejects(
-          new Error('woops')
-        )
-        this.UserController.clearSessions(this.req, this.res, error => {
-          expect(error).to.be.instanceof(Error)
-          done()
+    describe('errors', function() {
+      describe('when getAllUserSessions produces an error', function() {
+        it('should return an error', function(done) {
+          this.UserSessionsManager.promises.getAllUserSessions.rejects(
+            new Error('woops')
+          )
+          this.UserController.clearSessions(this.req, this.res, error => {
+            expect(error).to.be.instanceof(Error)
+            done()
+          })
+        })
+      })
+
+      describe('when audit log addEntry produces an error', function() {
+        it('should call next with an error', function(done) {
+          this.UserAuditLogHandler.promises.addEntry.rejects(new Error('woops'))
+          this.UserController.clearSessions(this.req, this.res, error => {
+            expect(error).to.be.instanceof(Error)
+            done()
+          })
+        })
+      })
+
+      describe('when revokeAllUserSessions produces an error', function() {
+        it('should call next with an error', function(done) {
+          this.UserSessionsManager.promises.revokeAllUserSessions.rejects(
+            new Error('woops')
+          )
+          this.UserController.clearSessions(this.req, this.res, error => {
+            expect(error).to.be.instanceof(Error)
+            done()
+          })
+        })
+      })
+
+      describe('when EmailHandler produces an error', function() {
+        it('send a 201 response but log error', function(done) {
+          this.EmailHandler.promises.sendEmail.rejects(new Error('oops'))
+          this.res.sendStatus.callsFake(status => {
+            status.should.equal(201)
+            this.logger.error.callCount.should.equal(1)
+            done()
+          })
+          this.UserController.clearSessions(this.req, this.res)
         })
       })
     })
