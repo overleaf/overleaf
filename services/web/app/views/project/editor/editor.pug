@@ -37,7 +37,10 @@ div.full-size(
 				i.fa.fa-arrow-left
 				| &nbsp;&nbsp;#{translate("open_a_file_on_the_left")}
 
-		!= moduleIncludes('editor:main', locals)
+		if moduleIncludesAvailable('editor:main')
+			!= moduleIncludes('editor:main', locals)
+		else
+			.toolbar.toolbar-editor
 
 		.multi-selection-ongoing(
 			ng-show="multiSelectedCount > 0"
