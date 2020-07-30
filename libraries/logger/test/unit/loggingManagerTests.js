@@ -4,7 +4,6 @@ const chai = require('chai')
 const path = require('path')
 const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
-const { promises } = require('dns')
 
 chai.use(sinonChai)
 chai.should()

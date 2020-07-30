@@ -22,7 +22,7 @@ const errSerializer = function (err) {
 
 const Logger = (module.exports = {
   initialize(name) {
-    console.log("IN INIT")
+    console.log('IN INIT')
     this.logLevelSource = (process.env.LOG_LEVEL_SOURCE || 'file').toLowerCase()
     this.isProduction =
       (process.env.NODE_ENV || '').toLowerCase() === 'production'
@@ -60,18 +60,18 @@ const Logger = (module.exports = {
   },
 
   async getTracingEndTimeFile() {
-      return fs.promises.readFile('/logging/tracingEndTime')
+    return fs.promises.readFile('/logging/tracingEndTime')
   },
 
-async getTracingEndTimeMetadata() {
+  async getTracingEndTimeMetadata() {
     const options = {
       headers: {
         'Metadata-Flavor': 'Google'
       }
     }
     const uri = `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
-    const res = await fetch(uri,options)
-    if (!res.ok) throw new Error("Metadata not okay")
+    const res = await fetch(uri, options)
+    if (!res.ok) throw new Error('Metadata not okay')
     return res.text()
   },
 
@@ -256,7 +256,7 @@ async getTracingEndTimeMetadata() {
   },
 
   _setupLogLevelChecker() {
-    console.log("In _setupLogLevelChecker")
+    console.log('In _setupLogLevelChecker')
     console.log(this.logger)
     if (this.isProduction) {
       // clear interval if already set
@@ -266,7 +266,7 @@ async getTracingEndTimeMetadata() {
       if (this.logLevelSource === 'file') {
         this.getTracingEndTime = this.getTracingEndTimeFile
       } else if (this.logLevelSource === 'gce_metadata') {
-         this.getTracingEndTime = this.getTracingEndTimeMetadata
+        this.getTracingEndTime = this.getTracingEndTimeMetadata
       } else if (this.logLevelSource === 'none') {
         return
       } else {
