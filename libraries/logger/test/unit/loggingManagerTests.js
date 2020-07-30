@@ -81,14 +81,12 @@ describe('LoggingManager', function () {
 
   describe('initialize', function () {
     beforeEach(function () {
-      this.getTracingEndTimeFileStub = sinon.stub(this.LoggingManager, 'getTracingEndTimeFile')
-      this.getTracingEndTimeMetadataStub = sinon.stub(this.LoggingManager, 'getTracingEndTimeMetadata')
+      this.checkLogLevelStub = sinon.stub(this.LoggingManager, 'checkLogLevel').resolves('')
       this.Bunyan.createLogger.reset()
     })
 
     afterEach(function () {
-      this.getTracingEndTimeFileStub.restore()
-      this.getTracingEndTimeMetadataStub.restore()
+      this.checkLogLevelStub.restore()
     })
 
     describe('not in production', function () {
@@ -103,8 +101,7 @@ describe('LoggingManager', function () {
       })
 
       it('should not run getTracingEndTime', function () {
-        this.getTracingEndTimeFileStub.should.not.have.been.called
-        this.getTracingEndTimeMetadataStub.should.not.have.been.called
+        this.checkLogLevelStub.should.not.have.been.called
       })
     })
 
@@ -119,7 +116,7 @@ describe('LoggingManager', function () {
         beforeEach(function () {
           this.logger = this.LoggingManager.initialize(this.loggerName)
         })
-        it.only('should default to log level warn', function () {
+        it('should default to log level warn', function () {
 
           const level = this.Bunyan.createLogger.firstCall.args[0].streams[0].level
           console.log(level)
@@ -136,44 +133,19 @@ describe('LoggingManager', function () {
         })
 
         it('should run checkLogLevel', function () {
-          this.getTracingEndTimeFileStub.should.have.been.calledOnce
+          this.checkLogLevelStub.should.have.been.calledOnce
         })
 
         describe('after 1 minute', () =>
           it('should run checkLogLevel again', function () {
             this.clock.tick(61 * 1000)
-            this.getTracingEndTimeFileStub.should.have.been.calledTwice
+            this.checkLogLevelStub.should.have.been.calledTwice
           }))
 
         describe('after 2 minutes', () =>
           it('should run checkLogLevel again', function () {
             this.clock.tick(121 * 1000)
-            this.getTracingEndTimeFileStub.should.have.been.calledThrice
-          }))
-      })
-
-      describe('logLevelSource gce_metadata', function () {
-        beforeEach(function () {
-          process.env.LOG_LEVEL_SOURCE = 'gce_metadata'
-          this.logger = this.LoggingManager.initialize(this.loggerName)
-        })
-
-        afterEach(() => delete process.env.LOG_LEVEL_SOURCE)
-
-        it('should run checkLogLevel', function () {
-          this.getTracingEndTimeMetadataStub.should.have.been.calledOnce
-        })
-
-        describe('after 1 minute', () =>
-          it('should run checkLogLevel again', function () {
-            this.clock.tick(61 * 1000)
-            this.getTracingEndTimeMetadataStub.should.have.been.calledTwice
-          }))
-
-        describe('after 2 minutes', () =>
-          it('should run checkLogLevel again', function () {
-            this.clock.tick(121 * 1000)
-            this.getTracingEndTimeMetadataStub.should.have.been.calledThrice
+            this.checkLogLevelStub.should.have.been.calledThrice
           }))
       })
 
