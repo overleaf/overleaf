@@ -22,7 +22,6 @@ const errSerializer = function (err) {
 
 const Logger = (module.exports = {
   initialize(name) {
-    console.log('IN INIT')
     this.logLevelSource = (process.env.LOG_LEVEL_SOURCE || 'file').toLowerCase()
     this.isProduction =
       (process.env.NODE_ENV || '').toLowerCase() === 'production'
@@ -40,7 +39,6 @@ const Logger = (module.exports = {
     })
     this._setupRingBuffer()
     this._setupStackdriver()
-    console.log(this.logger)
     this._setupLogLevelChecker()
     return this
   },
@@ -256,8 +254,6 @@ const Logger = (module.exports = {
   },
 
   _setupLogLevelChecker() {
-    console.log('In _setupLogLevelChecker')
-    console.log(this.logger)
     if (this.isProduction) {
       // clear interval if already set
       if (this.checkInterval) {

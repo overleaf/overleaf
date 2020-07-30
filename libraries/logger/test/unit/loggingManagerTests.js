@@ -111,21 +111,13 @@ describe('LoggingManager', function () {
 
       afterEach(() => delete process.env.NODE_ENV)
 
-      describe('blah', function () {
-        beforeEach(function () {
-          this.logger = this.LoggingManager.initialize(this.loggerName)
-        })
-        it('should default to log level warn', function () {
-
-          const level = this.Bunyan.createLogger.firstCall.args[0].streams[0].level
-          console.log(level)
-          level.should.equal(
-            'warn'
-          )
-        })       
-      })
-
-
+      it('should default to log level warn', function () {
+        this.logger = this.LoggingManager.initialize(this.loggerName)
+        this.Bunyan.createLogger.firstCall.args[0].streams[0].level.should.equal(
+          'warn'
+        )
+      })       
+      
       describe('logLevelSource file', function () {
         beforeEach(function() {
           this.logger = this.LoggingManager.initialize(this.loggerName)
@@ -324,7 +316,7 @@ describe('LoggingManager', function () {
 
     describe('when read errors', function () {
       beforeEach(async function () {
-        this.Fs.promises.readFile.yields(new Error('error'))
+        this.Fs.promises.readFile.throws(new Error('error'))
         this.logger.getTracingEndTime = this.logger.getTracingEndTimeFile
         await this.logger.checkLogLevel()
       })
