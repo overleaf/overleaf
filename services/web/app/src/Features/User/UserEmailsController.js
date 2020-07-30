@@ -3,6 +3,7 @@ const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
 const EmailHandler = require('../Email/EmailHandler')
 const EmailHelper = require('../Helpers/EmailHelper')
+const UserAuditLogHandler = require('./UserAuditLogHandler')
 const UserEmailsConfirmationHandler = require('./UserEmailsConfirmationHandler')
 const { endorseAffiliation } = require('../Institutions/InstitutionsAPI')
 const Errors = require('../Errors/Errors')
@@ -22,6 +23,16 @@ async function add(req, res, next) {
     role: req.body.role,
     department: req.body.department
   }
+
+  await UserAuditLogHandler.promises.addEntry(
+    user._id,
+    'add-email',
+    user._id,
+    req.ip,
+    {
+      newSecondaryEmail: email
+    }
+  )
 
   try {
     await UserUpdater.promises.addEmailAddress(
@@ -183,10 +194,6 @@ const UserEmailsController = {
     }
     next(error)
   }
-}
-
-UserEmailsController.promises = {
-  add
 }
 
 module.exports = UserEmailsController

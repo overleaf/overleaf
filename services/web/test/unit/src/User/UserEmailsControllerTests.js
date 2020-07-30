@@ -66,6 +66,11 @@ describe('UserEmailsController', function() {
           }
         }),
         '../Helpers/EmailHelper': this.EmailHelper,
+        './UserAuditLogHandler': (this.UserAuditLogHandler = {
+          promises: {
+            addEntry: sinon.stub().resolves()
+          }
+        }),
         './UserEmailsConfirmationHandler': (this.UserEmailsConfirmationHandler = {
           promises: {
             sendConfirmationEmail: sinon.stub().resolves()
@@ -116,6 +121,21 @@ describe('UserEmailsController', function() {
         .yields()
     })
 
+    it('adds an entry to user audit log', function(done) {
+      this.res.sendStatus = sinon.stub()
+      this.res.sendStatus.callsFake(() => {
+        this.UserAuditLogHandler.promises.addEntry.should.have.been.calledWith(
+          this.user._id,
+          'add-email',
+          this.user._id,
+          this.req.ip,
+          { newSecondaryEmail: this.newEmail }
+        )
+        done()
+      })
+      this.UserEmailsController.add(this.req, this.res)
+    })
+
     it('adds new email', function(done) {
       this.UserEmailsController.add(
         this.req,
@@ -143,20 +163,21 @@ describe('UserEmailsController', function() {
       )
     })
 
-    it('sends a security alert email', async function() {
-      await this.UserEmailsController.promises.add(
-        this.req,
-        this.res,
-        this.next
-      )
-      const emailCall = this.EmailHandler.promises.sendEmail.getCall(0)
-      emailCall.args[0].should.to.equal('securityAlert')
-      emailCall.args[1].to.should.equal(this.user.email)
-      emailCall.args[1].actionDescribed.should.contain(
-        'a secondary email address'
-      )
-      emailCall.args[1].to.should.equal(this.user.email)
-      emailCall.args[1].message[0].should.contain(this.newEmail)
+    it('sends a security alert email', function(done) {
+      this.res.sendStatus = sinon.stub()
+      this.res.sendStatus.callsFake(() => {
+        const emailCall = this.EmailHandler.promises.sendEmail.getCall(0)
+        emailCall.args[0].should.to.equal('securityAlert')
+        emailCall.args[1].to.should.equal(this.user.email)
+        emailCall.args[1].actionDescribed.should.contain(
+          'a secondary email address'
+        )
+        emailCall.args[1].to.should.equal(this.user.email)
+        emailCall.args[1].message[0].should.contain(this.newEmail)
+        done()
+      })
+
+      this.UserEmailsController.add(this.req, this.res)
     })
 
     it('sends an email confirmation', function(done) {
@@ -224,6 +245,22 @@ describe('UserEmailsController', function() {
         done()
       })
       this.UserEmailsController.add(this.req, this.res, this.next)
+    })
+
+    describe('errors', function() {
+      describe('via UserAuditLogHandler', function() {
+        beforeEach(function() {
+          this.UserAuditLogHandler.promises.addEntry.throws('oops')
+        })
+        it('should not add email and should return error', function(done) {
+          this.UserEmailsController.add(this.req, this.res, error => {
+            expect(error).to.exist
+            this.UserUpdater.promises.addEmailAddress.should.not.have.been
+              .called
+            done()
+          })
+        })
+      })
     })
   })
 
