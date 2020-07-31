@@ -13,14 +13,18 @@ services:
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
-    command: npm run test:unit
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+    command: npm run --silent test:unit
     user: node
 
   test_acceptance:
-    image: node:10
+    image: node:10.21.0
     volumes:
       - .:/app
     working_dir: /app
+    extends:
+      file: docker-compose-config.yml
+      service: dev
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis
@@ -33,13 +37,14 @@ services:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ERROR
       NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
     user: node
     depends_on:
       mongo:
         condition: service_healthy
       gcs:
         condition: service_healthy
-    command: npm run test:acceptance
+    command: npm run --silent test:acceptance
 
   mongo:
     image: mongo:3.6

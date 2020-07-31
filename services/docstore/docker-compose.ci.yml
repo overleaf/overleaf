@@ -11,11 +11,15 @@ services:
     command: npm run test:unit:_run
     environment:
       NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
 
 
   test_acceptance:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    extends:
+      file: docker-compose-config.yml
+      service: ci
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis
@@ -27,6 +31,7 @@ services:
       STORAGE_EMULATOR_HOST: http://gcs:9090/storage/v1
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
     depends_on:
       mongo:
         condition: service_healthy
