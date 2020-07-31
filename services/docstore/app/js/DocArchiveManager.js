@@ -7,7 +7,7 @@ const crypto = require('crypto')
 const Streamifier = require('streamifier')
 const RangeManager = require('./RangeManager')
 const PersistorManager = require('./PersistorManager')
-const AsyncPool = require('tiny-async-pool')
+const asyncPool = require('tiny-async-pool')
 
 const PARALLEL_JOBS = 5
 
@@ -39,7 +39,7 @@ async function archiveAllDocs(projectId) {
     throw new Errors.NotFoundError(`No docs for project ${projectId}`)
   }
 
-  await AsyncPool(
+  await asyncPool(
     PARALLEL_JOBS,
     docs.filter((doc) => !doc.inS3),
     (doc) => archiveDoc(projectId, doc)
@@ -85,10 +85,10 @@ async function unArchiveAllDocs(projectId) {
     throw new Errors.NotFoundError(`No docs for project ${projectId}`)
   }
   if (!docs.length) {
-    // AsyncPool will throw an error with an empty array
+    // asyncPool will throw an error with an empty array
     return
   }
-  await AsyncPool(PARALLEL_JOBS, docs, (doc) =>
+  await asyncPool(PARALLEL_JOBS, docs, (doc) =>
     unarchiveDoc(projectId, doc._id)
   )
 }
@@ -141,8 +141,8 @@ async function destroyAllDocs(projectId) {
     { include_deleted: true },
     { _id: 1 }
   )
-  if (docs) {
-    await AsyncPool(PARALLEL_JOBS, docs, (doc) =>
+  if (docs && docs.length) {
+    await asyncPool(PARALLEL_JOBS, docs, (doc) =>
       destroyDoc(projectId, doc._id)
     )
   }
