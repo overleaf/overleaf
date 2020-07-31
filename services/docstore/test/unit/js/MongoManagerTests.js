@@ -29,6 +29,9 @@ describe('MongoManager', function () {
         },
         'metrics-sharelatex': { timeAsyncMethod: sinon.stub() },
         'logger-sharelatex': { log() {} }
+      },
+      globals: {
+        console
       }
     })
     this.project_id = ObjectId().toString()

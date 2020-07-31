@@ -123,17 +123,19 @@ describe('DocArchiveManager', function () {
     }
 
     MongoManager = {
-      markDocAsArchived: sinon.stub().yields(),
-      upsertIntoDocCollection: sinon.stub().yields(),
-      getProjectsDocs: sinon.stub().yields(null, mongoDocs),
-      getArchivedProjectDocs: sinon.stub().yields(null, archivedDocs),
-      findDoc: sinon.stub().yields(),
-      destroyDoc: sinon.stub().yields()
+      promises: {
+        markDocAsArchived: sinon.stub().resolves(),
+        upsertIntoDocCollection: sinon.stub().resolves(),
+        getProjectsDocs: sinon.stub().resolves(mongoDocs),
+        getArchivedProjectDocs: sinon.stub().resolves(archivedDocs),
+        findDoc: sinon.stub().resolves(),
+        destroyDoc: sinon.stub().resolves()
+      }
     }
     for (const mongoDoc of mongoDocs) {
-      MongoManager.findDoc
-        .withArgs(projectId, mongoDoc._id, sinon.match.any)
-        .yields(null, mongoDoc)
+      MongoManager.promises.findDoc
+        .withArgs(projectId, mongoDoc._id)
+        .resolves(mongoDoc)
     }
 
     DocArchiveManager = SandboxedModule.require(modulePath, {
@@ -223,7 +225,7 @@ describe('DocArchiveManager', function () {
 
     it('should mark the doc as archived', async function () {
       await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0])
-      expect(MongoManager.markDocAsArchived).to.have.been.calledWith(
+      expect(MongoManager.promises.markDocAsArchived).to.have.been.calledWith(
         mongoDocs[0]._id,
         mongoDocs[0].rev
       )
@@ -270,7 +272,7 @@ describe('DocArchiveManager', function () {
     it('should update the doc lines in mongo', async function () {
       await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
       expect(
-        MongoManager.upsertIntoDocCollection
+        MongoManager.promises.upsertIntoDocCollection
       ).to.have.been.calledWith(projectId, docId, { lines: mongoDocs[0].lines })
     })
 
@@ -297,11 +299,9 @@ describe('DocArchiveManager', function () {
 
         it('should return the docs lines', async function () {
           await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
-          expect(MongoManager.upsertIntoDocCollection).to.have.been.calledWith(
-            projectId,
-            docId,
-            mongoDoc
-          )
+          expect(
+            MongoManager.promises.upsertIntoDocCollection
+          ).to.have.been.calledWith(projectId, docId, mongoDoc)
         })
       })
 
@@ -322,11 +322,9 @@ describe('DocArchiveManager', function () {
 
         it('should return the doc lines and ranges', async function () {
           await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
-          expect(MongoManager.upsertIntoDocCollection).to.have.been.calledWith(
-            projectId,
-            docId,
-            mongoDoc
-          )
+          expect(
+            MongoManager.promises.upsertIntoDocCollection
+          ).to.have.been.calledWith(projectId, docId, mongoDoc)
         })
       })
 
@@ -345,11 +343,9 @@ describe('DocArchiveManager', function () {
 
         it('should return only the doc lines', async function () {
           await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
-          expect(MongoManager.upsertIntoDocCollection).to.have.been.calledWith(
-            projectId,
-            docId,
-            mongoDoc
-          )
+          expect(
+            MongoManager.promises.upsertIntoDocCollection
+          ).to.have.been.calledWith(projectId, docId, mongoDoc)
         })
       })
 
@@ -435,27 +431,27 @@ describe('DocArchiveManager', function () {
     it('should archive all project docs which are not in s3', async function () {
       await DocArchiveManager.promises.archiveAllDocs(projectId)
       // not inS3
-      expect(MongoManager.markDocAsArchived).to.have.been.calledWith(
+      expect(MongoManager.promises.markDocAsArchived).to.have.been.calledWith(
         mongoDocs[0]._id
       )
-      expect(MongoManager.markDocAsArchived).to.have.been.calledWith(
+      expect(MongoManager.promises.markDocAsArchived).to.have.been.calledWith(
         mongoDocs[1]._id
       )
-      expect(MongoManager.markDocAsArchived).to.have.been.calledWith(
+      expect(MongoManager.promises.markDocAsArchived).to.have.been.calledWith(
         mongoDocs[4]._id
       )
 
       // inS3
-      expect(MongoManager.markDocAsArchived).not.to.have.been.calledWith(
-        mongoDocs[2]._id
-      )
-      expect(MongoManager.markDocAsArchived).not.to.have.been.calledWith(
-        mongoDocs[3]._id
-      )
+      expect(
+        MongoManager.promises.markDocAsArchived
+      ).not.to.have.been.calledWith(mongoDocs[2]._id)
+      expect(
+        MongoManager.promises.markDocAsArchived
+      ).not.to.have.been.calledWith(mongoDocs[3]._id)
     })
 
     it('should return error if the project has no docs', async function () {
-      MongoManager.getProjectsDocs.yields(null, null)
+      MongoManager.promises.getProjectsDocs.resolves(null)
 
       await expect(
         DocArchiveManager.promises.archiveAllDocs(projectId)
@@ -481,7 +477,7 @@ describe('DocArchiveManager', function () {
     })
 
     it('should return error if the project has no docs', async function () {
-      MongoManager.getArchivedProjectDocs.yields(null, null)
+      MongoManager.promises.getArchivedProjectDocs.resolves(null)
 
       await expect(
         DocArchiveManager.promises.unArchiveAllDocs(projectId)
@@ -519,7 +515,9 @@ describe('DocArchiveManager', function () {
       await DocArchiveManager.promises.destroyAllDocs(projectId)
 
       for (const mongoDoc of mongoDocs) {
-        expect(MongoManager.destroyDoc).to.have.been.calledWith(mongoDoc._id)
+        expect(MongoManager.promises.destroyDoc).to.have.been.calledWith(
+          mongoDoc._id
+        )
       }
     })
   })

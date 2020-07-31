@@ -1,5 +1,5 @@
-const { promisify, callbackify } = require('util')
-const MongoManager = require('./MongoManager')
+const { callbackify } = require('util')
+const MongoManager = require('./MongoManager').promises
 const Errors = require('./Errors')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
@@ -29,7 +29,7 @@ module.exports = {
 }
 
 async function archiveAllDocs(projectId) {
-  const docs = await promisify(MongoManager.getProjectsDocs)(
+  const docs = await MongoManager.getProjectsDocs(
     projectId,
     { include_deleted: true },
     { lines: true, ranges: true, rev: true, inS3: true }
@@ -76,11 +76,11 @@ async function archiveDoc(projectId, doc) {
   await PersistorManager.sendStream(settings.docstore.bucket, key, stream, {
     sourceMd5: md5
   })
-  await promisify(MongoManager.markDocAsArchived)(doc._id, doc.rev)
+  await MongoManager.markDocAsArchived(doc._id, doc.rev)
 }
 
 async function unArchiveAllDocs(projectId) {
-  const docs = await promisify(MongoManager.getArchivedProjectDocs)(projectId)
+  const docs = await MongoManager.getArchivedProjectDocs(projectId)
   if (!docs) {
     throw new Errors.NotFoundError(`No docs for project ${projectId}`)
   }
@@ -131,16 +131,12 @@ async function unarchiveDoc(projectId, docId) {
   } else {
     throw new Error("I don't understand the doc format in s3")
   }
-  await promisify(MongoManager.upsertIntoDocCollection)(
-    projectId,
-    docId,
-    mongoDoc
-  )
+  await MongoManager.upsertIntoDocCollection(projectId, docId, mongoDoc)
   await PersistorManager.deleteObject(settings.docstore.bucket, key)
 }
 
 async function destroyAllDocs(projectId) {
-  const docs = await promisify(MongoManager.getProjectsDocs)(
+  const docs = await MongoManager.getProjectsDocs(
     projectId,
     { include_deleted: true },
     { _id: 1 }
@@ -157,7 +153,7 @@ async function destroyDoc(projectId, docId) {
     { project_id: projectId, doc_id: docId },
     'removing doc from mongo and persistor'
   )
-  const doc = await promisify(MongoManager.findDoc)(projectId, docId, {
+  const doc = await MongoManager.findDoc(projectId, docId, {
     inS3: 1
   })
   if (!doc) {
@@ -170,7 +166,7 @@ async function destroyDoc(projectId, docId) {
       `${projectId}/${docId}`
     )
   }
-  await promisify(MongoManager.destroyDoc)(docId)
+  await MongoManager.destroyDoc(docId)
 }
 
 async function _streamToString(stream) {
