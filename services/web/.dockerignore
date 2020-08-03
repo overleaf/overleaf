@@ -1,5 +1,7 @@
 .git
 
+.npmrc
+
 modules/*/Makefile
 **/node_modules
 copybara
