@@ -14,7 +14,7 @@ services:
     working_dir: /app
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
-    command: npm run test:unit:app
+    command: npm run --silent test:unit:app
     user: node
 
   test_acceptance:
@@ -36,11 +36,10 @@ services:
       MONGO_SOCKET_TIMEOUT: 60000
       # SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
       SHARELATEX_CONFIG:
-    command: npm run test:acceptance:app
     depends_on:
       - redis
       - mongo
-    command: npm run test:acceptance:app
+    command: npm run --silent test:acceptance:app
 
   test_karma:
     build:
@@ -49,7 +48,7 @@ services:
     volumes:
       - .:/app
     working_dir: /app
-    command: npm run test:karma:single
+    command: npm run --silent test:karma:single
 
   test_frontend:
     build:
@@ -60,7 +59,7 @@ services:
     working_dir: /app
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
-    command: npm run test:frontend
+    command: npm run --silent test:frontend
     user: node
 
   redis:

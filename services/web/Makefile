@@ -201,10 +201,10 @@ format_in_docker:
 	$(RUN_LINT_FORMAT) make format -j --output-sync
 
 format_fix:
-	npm -q run format:fix
+	npm run --silent format:fix
 
 lint:
-	npm -q run lint
+	npm run --silent lint
 
 lint_in_docker:
 	$(RUN_LINT_FORMAT) make lint
