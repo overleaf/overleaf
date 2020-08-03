@@ -26,6 +26,7 @@ const HistoryManager = require('./HistoryManager')
 const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
 const RestoreManager = require('./RestoreManager')
+const { pipeline } = require('stream')
 
 module.exports = HistoryController = {
   selectHistoryApi(req, res, next) {
@@ -289,13 +290,18 @@ module.exports = HistoryController = {
         v1_id,
         version,
         `${project.name} (Version ${version})`,
+        req,
         res,
         next
       )
     })
   },
 
-  _pipeHistoryZipToResponse(v1_project_id, version, name, res, next) {
+  _pipeHistoryZipToResponse(v1_project_id, version, name, req, res, next) {
+    if (req.aborted) {
+      // client has disconnected -- skip project history api call and download
+      return
+    }
     // increase timeout to 6 minutes
     res.setTimeout(6 * 60 * 1000)
     const url = `${
@@ -315,6 +321,10 @@ module.exports = HistoryController = {
         logger.warn({ err, v1_project_id, version }, 'history API error')
         return next(err)
       }
+      if (req.aborted) {
+        // client has disconnected -- skip delayed s3 download
+        return
+      }
       let retryAttempt = 0
       let retryDelay = 2000
       // retry for about 6 minutes starting with short delay
@@ -322,6 +332,11 @@ module.exports = HistoryController = {
         40,
         callback =>
           setTimeout(function() {
+            if (req.aborted) {
+              // client has disconnected -- skip s3 download
+              return callback() // stop async.retry loop
+            }
+
             // increase delay by 1 second up to 10
             if (retryDelay < 10000) {
               retryDelay += 1000
@@ -331,8 +346,16 @@ module.exports = HistoryController = {
               url: body.zipUrl,
               sendImmediately: true
             })
+            const abortS3Request = () => getReq.abort()
+            req.on('aborted', abortS3Request)
+            res.on('timeout', abortS3Request)
+            function cleanupAbortTrigger() {
+              req.off('aborted', abortS3Request)
+              res.off('timeout', abortS3Request)
+            }
             getReq.on('response', function(response) {
               if (response.statusCode !== 200) {
+                cleanupAbortTrigger()
                 return callback(new Error('invalid response'))
               }
               // pipe also proxies the headers, but we want to customize these ones
@@ -343,14 +366,22 @@ module.exports = HistoryController = {
                 filename: `${name}.zip`
               })
               res.contentType('application/zip')
-              getReq.pipe(res)
-              return callback()
+              pipeline(response, res, err => {
+                if (err) {
+                  logger.warn(
+                    { err, v1_project_id, version, retryAttempt },
+                    'history s3 proxying error'
+                  )
+                }
+              })
+              callback()
             })
             return getReq.on('error', function(err) {
               logger.warn(
                 { err, v1_project_id, version, retryAttempt },
                 'history s3 download error'
               )
+              cleanupAbortTrigger()
               return callback(err)
             })
           }, retryDelay),
