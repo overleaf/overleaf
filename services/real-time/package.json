@@ -14,7 +14,7 @@
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "nodemon": "nodemon --config nodemon.json",
-    "lint": "node_modules/.bin/eslint .",
+    "lint": "node_modules/.bin/eslint --max-warnings 0 .",
     "format": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --list-different",
     "format:fix": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --write"
   },
