@@ -1,10 +1,10 @@
 {
-  "name": "metrics-sharelatex",
+  "name": "@overleaf/metrics",
   "version": "3.0.0",
   "description": "A drop-in metrics and monitoring module for node.js apps",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sharelatex/metrics-sharelatex.git"
+    "url": "https://github.com/overleaf/metrics-module.git"
   },
   "dependencies": {
     "@google-cloud/debug-agent": "^3.0.0",
