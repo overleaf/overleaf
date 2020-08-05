@@ -989,7 +989,7 @@ public class WLGitBridgeIntegrationTest {
         String urlBase = "http://127.0.0.1:" + gitBridgePort;
         HttpPost gitLfsRequest = new HttpPost(urlBase+"/5f2419407929eb0026641967.git/info/lfs/objects/batch");
         HttpResponse gitLfsResponse = client.execute(gitLfsRequest);
-        assertEquals(406, gitLfsResponse.getStatusLine().getStatusCode());
+        assertEquals(422, gitLfsResponse.getStatusLine().getStatusCode());
         HttpEntity entity = gitLfsResponse.getEntity();
         String responseString = EntityUtils.toString(entity, "UTF-8");
         assertTrue(responseString.contains("Git LFS is not supported on Overleaf"));
