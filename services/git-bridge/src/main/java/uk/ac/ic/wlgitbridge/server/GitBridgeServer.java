@@ -130,6 +130,7 @@ public class GitBridgeServer {
         HandlerCollection handlers = new HandlerList();
         handlers.addHandler(new StatusHandler(bridge));
         handlers.addHandler(new HealthCheckHandler(bridge));
+        handlers.addHandler(new GitLfsHandler(bridge));
         base.setHandler(handlers);
         return base;
     }

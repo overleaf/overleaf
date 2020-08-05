@@ -5,12 +5,18 @@ import org.apache.commons.io.IOUtils;
 import static org.asynchttpclient.Dsl.*;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.HttpEntity;
+import org.apache.http.util.EntityUtils;
+import org.apache.http.ParseException;
+
 import org.asynchttpclient.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.After;
@@ -966,6 +972,27 @@ public class WLGitBridgeIntegrationTest {
         HttpHead healthCheckRequest = new HttpHead(urlBase+"/health_check");
         HttpResponse healthCheckResponse = client.execute(healthCheckRequest);
         assertEquals(200, healthCheckResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void gitLfsBatchEndpoint() throws ClientProtocolException, IOException, ParseException {
+        int gitBridgePort = 33890;
+        int mockServerPort = 3890;
+        server = new MockSnapshotServer(mockServerPort, getResource("/canCloneARepository").toFile());
+        server.start();
+        server.setState(states.get("canCloneARepository").get("state"));
+        wlgb = new GitBridgeApp(new String[] {
+          makeConfigFile(gitBridgePort, mockServerPort)
+        });
+        wlgb.run();
+        HttpClient client = HttpClients.createDefault();
+        String urlBase = "http://127.0.0.1:" + gitBridgePort;
+        HttpPost gitLfsRequest = new HttpPost(urlBase+"/5f2419407929eb0026641967.git/info/lfs/objects/batch");
+        HttpResponse gitLfsResponse = client.execute(gitLfsRequest);
+        assertEquals(406, gitLfsResponse.getStatusLine().getStatusCode());
+        HttpEntity entity = gitLfsResponse.getEntity();
+        String responseString = EntityUtils.toString(entity, "UTF-8");
+        assertTrue(responseString.contains("Git LFS is not supported on Overleaf"));
     }
 
     private String makeConfigFile(
