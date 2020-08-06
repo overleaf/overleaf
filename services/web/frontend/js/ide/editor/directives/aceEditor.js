@@ -556,7 +556,6 @@ App.directive('aceEditor', function(
 
       let currentFirstVisibleRow = null
       const emitMiddleVisibleRowChanged = () => {
-        if (!window.user.alphaProgram) return
         const firstVisibleRow = editor.getFirstVisibleRow()
         if (firstVisibleRow === currentFirstVisibleRow) return
 

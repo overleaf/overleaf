@@ -39,7 +39,6 @@ class OutlineManager {
     })
 
     scope.$on('cursor:editor:update', (event, cursorPosition) => {
-      if (!window.user.alphaProgram) return
       if (this.ignoreNextCursorUpdate) {
         this.ignoreNextCursorUpdate = false
         return
@@ -49,7 +48,6 @@ class OutlineManager {
     })
 
     scope.$on('scroll:editor:update', (event, middleVisibleRow) => {
-      if (!window.user.alphaProgram) return
       if (this.ignoreNextScroll) {
         this.ignoreNextScroll = false
         return
