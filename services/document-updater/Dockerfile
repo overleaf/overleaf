@@ -15,8 +15,6 @@ RUN npm ci --quiet
 
 COPY . /app
 
-
-
 FROM base
 
 COPY --from=app /app /app

@@ -47,3 +47,6 @@ forever/
 **/appendonly.aof
 **/dump.rdb
 **/nodes.conf
+
+# managed by dev-environment$ bin/update_build_scripts
+.npmrc
