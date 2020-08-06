@@ -56,7 +56,6 @@ class OutlineManager {
       }
 
       this.updateHighlightedLine(middleVisibleRow + 1)
-      this.broadcastChangeEvent()
     })
 
     scope.$watch('editor.showRichText', () => {
@@ -84,7 +83,9 @@ class OutlineManager {
       if (editorLine < outline.line) break // editorLine is above
       closestOutlineLine = outline.line
     }
+    if (closestOutlineLine === this.highlightedLine) return
     this.highlightedLine = closestOutlineLine
+    this.broadcastChangeEvent()
   }
 
   jumpToLine(line) {
