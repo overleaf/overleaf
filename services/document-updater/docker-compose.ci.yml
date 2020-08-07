@@ -11,6 +11,7 @@ services:
     command: npm run test:unit:_run
     environment:
       NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
 
 
   test_acceptance:
@@ -23,6 +24,7 @@ services:
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
     depends_on:
       mongo:
         condition: service_healthy
