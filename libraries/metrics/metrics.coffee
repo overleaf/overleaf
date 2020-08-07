@@ -1,7 +1,4 @@
-if process.env["USE_PROM_METRICS"] != "true" 
-	return module.exports = require("./statsd/metrics")
-else
- 	console.log("using prometheus")
+console.log("using prometheus")
 
 prom = require('./prom_wrapper')
 
@@ -29,7 +26,7 @@ module.exports = Metrics =
 			traceAgent = require('@google-cloud/trace-agent')
 
 			traceOpts =
-				ignoreUrls: [/^\/status/, /^\/health_check/] 
+				ignoreUrls: [/^\/status/, /^\/health_check/]
 			traceAgent.start(traceOpts)
 
 		console.log("ENABLE_DEBUG_AGENT set to #{process.env['ENABLE_DEBUG_AGENT']}")
@@ -61,7 +58,7 @@ module.exports = Metrics =
 		destructors.push func
 
 	injectMetricsRoute: (app) ->
-		app.get('/metrics', (req, res) -> 
+		app.get('/metrics', (req, res) ->
 			res.set('Content-Type', prom.registry.contentType)
 			res.end(prom.registry.metrics())
 		)
@@ -125,7 +122,7 @@ module.exports = Metrics =
 		prom.metric('gauge', key).set({app: appname, host: hostname, status: opts?.status}, this.sanitizeValue(value))
 		if process.env['DEBUG_METRICS']
 			console.log("doing gauge", key, opts)
-			
+
 	globalGauge: (key, value, sampleRate = 1, opts)->
 		key = Metrics.buildPromKey(key)
 		prom.metric('gauge', key).set({app: appname, status: opts?.status},this.sanitizeValue(value))
