@@ -13,7 +13,7 @@
     "nodemon": "nodemon --config nodemon.json",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
-    "lint": "node_modules/.bin/eslint .",
+    "lint": "node_modules/.bin/eslint --max-warnings 0 .",
     "format": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --list-different",
     "format:fix": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --write"
   },
@@ -46,6 +46,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "mocha": "^7.1.0",
     "nodemon": "^2.0.2",
+    "prettier": "^2.0.0",
     "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "^2.0.3",
     "sinon": "^9.0.0",

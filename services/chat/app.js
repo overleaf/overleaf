@@ -15,14 +15,14 @@ if (!module.parent) {
   const port =
     __guard__(
       settings.internal != null ? settings.internal.chat : undefined,
-      x => x.port
+      (x) => x.port
     ) || 3010
   const host =
     __guard__(
       settings.internal != null ? settings.internal.chat : undefined,
-      x1 => x1.host
+      (x1) => x1.host
     ) || 'localhost'
-  Server.server.listen(port, host, function(error) {
+  Server.server.listen(port, host, function (error) {
     if (error != null) {
       throw error
     }

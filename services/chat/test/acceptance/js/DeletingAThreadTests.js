@@ -16,15 +16,15 @@ const crypto = require('crypto')
 const ChatClient = require('./helpers/ChatClient')
 const ChatApp = require('./helpers/ChatApp')
 
-describe('Deleting a thread', function() {
-  before(function(done) {
+describe('Deleting a thread', function () {
+  before(function (done) {
     this.project_id = ObjectId().toString()
     this.user_id = ObjectId().toString()
     return ChatApp.ensureRunning(done)
   })
 
-  return describe('with a thread that is deleted', function() {
-    before(function(done) {
+  return describe('with a thread that is deleted', function () {
+    before(function (done) {
       this.thread_id = ObjectId().toString()
       this.content = 'deleted thread message'
       return ChatClient.sendMessage(
@@ -48,7 +48,7 @@ describe('Deleting a thread', function() {
       )
     })
 
-    return it('should then not list the thread for the project', function(done) {
+    return it('should then not list the thread for the project', function (done) {
       return ChatClient.getThreads(
         this.project_id,
         (error, response, threads) => {

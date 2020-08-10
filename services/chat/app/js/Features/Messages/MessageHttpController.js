@@ -53,12 +53,15 @@ module.exports = MessageHttpController = {
   getAllThreads(req, res, next) {
     const { project_id } = req.params
     logger.log({ project_id }, 'getting all threads')
-    return ThreadManager.findAllThreadRooms(project_id, function(error, rooms) {
+    return ThreadManager.findAllThreadRooms(project_id, function (
+      error,
+      rooms
+    ) {
       if (error != null) {
         return next(error)
       }
-      const room_ids = rooms.map(r => r._id)
-      return MessageManager.findAllMessagesInRooms(room_ids, function(
+      const room_ids = rooms.map((r) => r._id)
+      return MessageManager.findAllMessagesInRooms(room_ids, function (
         error,
         messages
       ) {
@@ -75,20 +78,23 @@ module.exports = MessageHttpController = {
     const { project_id, thread_id } = req.params
     const { user_id } = req.body
     logger.log({ user_id, project_id, thread_id }, 'marking thread as resolved')
-    return ThreadManager.resolveThread(project_id, thread_id, user_id, function(
-      error
-    ) {
-      if (error != null) {
-        return next(error)
+    return ThreadManager.resolveThread(
+      project_id,
+      thread_id,
+      user_id,
+      function (error) {
+        if (error != null) {
+          return next(error)
+        }
+        return res.sendStatus(204)
       }
-      return res.sendStatus(204)
-    })
+    )
   }, // No content
 
   reopenThread(req, res, next) {
     const { project_id, thread_id } = req.params
     logger.log({ project_id, thread_id }, 'reopening thread')
-    return ThreadManager.reopenThread(project_id, thread_id, function(error) {
+    return ThreadManager.reopenThread(project_id, thread_id, function (error) {
       if (error != null) {
         return next(error)
       }
@@ -99,14 +105,14 @@ module.exports = MessageHttpController = {
   deleteThread(req, res, next) {
     const { project_id, thread_id } = req.params
     logger.log({ project_id, thread_id }, 'deleting thread')
-    return ThreadManager.deleteThread(project_id, thread_id, function(
+    return ThreadManager.deleteThread(project_id, thread_id, function (
       error,
       room_id
     ) {
       if (error != null) {
         return next(error)
       }
-      return MessageManager.deleteAllMessagesInRoom(room_id, function(error) {
+      return MessageManager.deleteAllMessagesInRoom(room_id, function (error) {
         if (error != null) {
           return next(error)
         }
@@ -122,7 +128,7 @@ module.exports = MessageHttpController = {
       { project_id, thread_id, message_id, content },
       'editing message'
     )
-    return ThreadManager.findOrCreateThread(project_id, thread_id, function(
+    return ThreadManager.findOrCreateThread(project_id, thread_id, function (
       error,
       room
     ) {
@@ -134,7 +140,7 @@ module.exports = MessageHttpController = {
         message_id,
         content,
         Date.now(),
-        function(error) {
+        function (error) {
           if (error != null) {
             return next(error)
           }
@@ -147,14 +153,14 @@ module.exports = MessageHttpController = {
   deleteMessage(req, res, next) {
     const { project_id, thread_id, message_id } = req.params
     logger.log({ project_id, thread_id, message_id }, 'deleting message')
-    return ThreadManager.findOrCreateThread(project_id, thread_id, function(
+    return ThreadManager.findOrCreateThread(project_id, thread_id, function (
       error,
       room
     ) {
       if (error != null) {
         return next(error)
       }
-      return MessageManager.deleteMessage(room._id, message_id, function(
+      return MessageManager.deleteMessage(room._id, message_id, function (
         error,
         message
       ) {
@@ -187,7 +193,7 @@ module.exports = MessageHttpController = {
     return ThreadManager.findOrCreateThread(
       project_id,
       client_thread_id,
-      function(error, thread) {
+      function (error, thread) {
         if (error != null) {
           return next(error)
         }
@@ -196,7 +202,7 @@ module.exports = MessageHttpController = {
           user_id,
           content,
           Date.now(),
-          function(error, message) {
+          function (error, message) {
             if (error != null) {
               return next(error)
             }
@@ -229,7 +235,7 @@ module.exports = MessageHttpController = {
     return ThreadManager.findOrCreateThread(
       project_id,
       client_thread_id,
-      function(error, thread) {
+      function (error, thread) {
         if (error != null) {
           return next(error)
         }
@@ -242,7 +248,7 @@ module.exports = MessageHttpController = {
           thread_object_id,
           limit,
           before,
-          function(error, messages) {
+          function (error, messages) {
             if (error != null) {
               return next(error)
             }

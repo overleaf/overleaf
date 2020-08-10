@@ -31,7 +31,7 @@ module.exports = MessageFormatter = {
   },
 
   formatMessagesForClientSide(messages) {
-    return Array.from(messages).map(message =>
+    return Array.from(messages).map((message) =>
       this.formatMessageForClientSide(message)
     )
   },
@@ -44,7 +44,7 @@ module.exports = MessageFormatter = {
     }
 
     const threads = {}
-    const getThread = function(room) {
+    const getThread = function (room) {
       const thread_id = room.thread_id.toString()
       if (threads[thread_id] != null) {
         return threads[thread_id]

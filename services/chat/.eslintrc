@@ -1,7 +1,6 @@
 // this file was auto-generated, do not edit it directly.
 // instead run bin/update_build_scripts from
 // https://github.com/sharelatex/sharelatex-dev-environment
-// Version: 1.4.0
 {
   "extends": [
     "standard",
@@ -9,7 +8,7 @@
     "prettier/standard"
   ],
   "parserOptions": {
-    "ecmaVersion": 2017
+    "ecmaVersion": 2018
   },
   "plugins": [
     "mocha",

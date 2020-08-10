@@ -18,8 +18,8 @@ const crypto = require('crypto')
 const ChatClient = require('./helpers/ChatClient')
 const ChatApp = require('./helpers/ChatApp')
 
-describe('Getting messages', function() {
-  before(function(done) {
+describe('Getting messages', function () {
+  before(function (done) {
     this.user_id1 = ObjectId().toString()
     this.user_id2 = ObjectId().toString()
     this.content1 = 'foo bar'
@@ -27,19 +27,19 @@ describe('Getting messages', function() {
     return ChatApp.ensureRunning(done)
   })
 
-  describe('globally', function() {
-    before(function(done) {
+  describe('globally', function () {
+    before(function (done) {
       this.project_id = ObjectId().toString()
       return async.series(
         [
-          cb =>
+          (cb) =>
             ChatClient.sendGlobalMessage(
               this.project_id,
               this.user_id1,
               this.content1,
               cb
             ),
-          cb =>
+          (cb) =>
             ChatClient.sendGlobalMessage(
               this.project_id,
               this.user_id2,
@@ -51,7 +51,7 @@ describe('Getting messages', function() {
       )
     })
 
-    return it('should contain the messages and populated users when getting the messages', function(done) {
+    return it('should contain the messages and populated users when getting the messages', function (done) {
       return ChatClient.getGlobalMessages(
         this.project_id,
         (error, response, messages) => {
@@ -67,14 +67,14 @@ describe('Getting messages', function() {
     })
   })
 
-  return describe('from all the threads', function() {
-    before(function(done) {
+  return describe('from all the threads', function () {
+    before(function (done) {
       this.project_id = ObjectId().toString()
       this.thread_id1 = ObjectId().toString()
       this.thread_id2 = ObjectId().toString()
       return async.series(
         [
-          cb =>
+          (cb) =>
             ChatClient.sendMessage(
               this.project_id,
               this.thread_id1,
@@ -82,7 +82,7 @@ describe('Getting messages', function() {
               'one',
               cb
             ),
-          cb =>
+          (cb) =>
             ChatClient.sendMessage(
               this.project_id,
               this.thread_id2,
@@ -90,7 +90,7 @@ describe('Getting messages', function() {
               'two',
               cb
             ),
-          cb =>
+          (cb) =>
             ChatClient.sendMessage(
               this.project_id,
               this.thread_id1,
@@ -98,7 +98,7 @@ describe('Getting messages', function() {
               'three',
               cb
             ),
-          cb =>
+          (cb) =>
             ChatClient.sendMessage(
               this.project_id,
               this.thread_id2,
@@ -111,7 +111,7 @@ describe('Getting messages', function() {
       )
     })
 
-    return it('should contain a dictionary of threads with messages with populated users', function(done) {
+    return it('should contain a dictionary of threads with messages with populated users', function (done) {
       return ChatClient.getThreads(
         this.project_id,
         (error, response, threads) => {
