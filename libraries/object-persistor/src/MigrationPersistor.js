@@ -63,7 +63,7 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
     return this._runOnBoth('deleteDirectory', ...args)
   }
 
-  async getObjectStream(bucket, key, opts) {
+  async getObjectStream(bucket, key, opts = {}) {
     const shouldCopy = this.settings.copyOnMiss && !opts.start && !opts.end
 
     try {
