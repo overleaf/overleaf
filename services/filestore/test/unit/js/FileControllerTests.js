@@ -5,7 +5,7 @@ const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../app/js/Errors')
 const modulePath = '../../../app/js/FileController.js'
 
-describe('FileController', function() {
+describe('FileController', function () {
   let PersistorManager,
     FileHandler,
     LocalFileWriter,
@@ -29,7 +29,7 @@ describe('FileController', function() {
   const key = `${projectId}/${fileId}`
   const error = new Error('incorrect utensil')
 
-  beforeEach(function() {
+  beforeEach(function () {
     PersistorManager = {
       sendStream: sinon.stub().yields(),
       copyObject: sinon.stub().resolves(),
@@ -91,76 +91,76 @@ describe('FileController', function() {
     next = sinon.stub()
   })
 
-  describe('getFile', function() {
-    it('should try and get a redirect url first', function() {
+  describe('getFile', function () {
+    it('should try and get a redirect url first', function () {
       FileController.getFile(req, res, next)
       expect(FileHandler.getRedirectUrl).to.have.been.calledWith(bucket, key)
     })
 
-    it('should pipe the stream', function() {
+    it('should pipe the stream', function () {
       FileController.getFile(req, res, next)
       expect(stream.pipeline).to.have.been.calledWith(fileStream, res)
     })
 
-    it('should send a 200 if the cacheWarm param is true', function(done) {
+    it('should send a 200 if the cacheWarm param is true', function (done) {
       req.query.cacheWarm = true
-      res.sendStatus = statusCode => {
+      res.sendStatus = (statusCode) => {
         statusCode.should.equal(200)
         done()
       }
       FileController.getFile(req, res, next)
     })
 
-    it('should send an error if there is a problem', function() {
+    it('should send an error if there is a problem', function () {
       FileHandler.getFile.yields(error)
       FileController.getFile(req, res, next)
       expect(next).to.have.been.calledWith(error)
     })
 
-    describe('with a redirect url', function() {
+    describe('with a redirect url', function () {
       const redirectUrl = 'https://wombat.potato/giraffe'
 
-      beforeEach(function() {
+      beforeEach(function () {
         FileHandler.getRedirectUrl.yields(null, redirectUrl)
         res.redirect = sinon.stub()
       })
 
-      it('should redirect', function() {
+      it('should redirect', function () {
         FileController.getFile(req, res, next)
         expect(res.redirect).to.have.been.calledWith(redirectUrl)
       })
 
-      it('should not get a file stream', function() {
+      it('should not get a file stream', function () {
         FileController.getFile(req, res, next)
         expect(FileHandler.getFile).not.to.have.been.called
       })
 
-      describe('when there is an error getting the redirect url', function() {
-        beforeEach(function() {
+      describe('when there is an error getting the redirect url', function () {
+        beforeEach(function () {
           FileHandler.getRedirectUrl.yields(new Error('wombat herding error'))
         })
 
-        it('should not redirect', function() {
+        it('should not redirect', function () {
           FileController.getFile(req, res, next)
           expect(res.redirect).not.to.have.been.called
         })
 
-        it('should not return an error', function() {
+        it('should not return an error', function () {
           FileController.getFile(req, res, next)
           expect(next).not.to.have.been.called
         })
 
-        it('should proxy the file', function() {
+        it('should proxy the file', function () {
           FileController.getFile(req, res, next)
           expect(FileHandler.getFile).to.have.been.calledWith(bucket, key)
         })
       })
     })
 
-    describe('with a range header', function() {
+    describe('with a range header', function () {
       let expectedOptions
 
-      beforeEach(function() {
+      beforeEach(function () {
         expectedOptions = {
           bucket,
           key,
@@ -169,7 +169,7 @@ describe('FileController', function() {
         }
       })
 
-      it('should pass range options to FileHandler', function() {
+      it('should pass range options to FileHandler', function () {
         req.headers.range = 'bytes=0-8'
         expectedOptions.start = 0
         expectedOptions.end = 8
@@ -182,7 +182,7 @@ describe('FileController', function() {
         )
       })
 
-      it('should ignore an invalid range header', function() {
+      it('should ignore an invalid range header', function () {
         req.headers.range = 'potato'
         FileController.getFile(req, res, next)
         expect(FileHandler.getFile).to.have.been.calledWith(
@@ -192,7 +192,7 @@ describe('FileController', function() {
         )
       })
 
-      it("should ignore any type other than 'bytes'", function() {
+      it("should ignore any type other than 'bytes'", function () {
         req.headers.range = 'wombats=0-8'
         FileController.getFile(req, res, next)
         expect(FileHandler.getFile).to.have.been.calledWith(
@@ -204,8 +204,8 @@ describe('FileController', function() {
     })
   })
 
-  describe('getFileHead', function() {
-    it('should return the file size in a Content-Length header', function(done) {
+  describe('getFileHead', function () {
+    it('should return the file size in a Content-Length header', function (done) {
       res.end = () => {
         expect(res.status).to.have.been.calledWith(200)
         expect(res.set).to.have.been.calledWith('Content-Length', fileSize)
@@ -215,12 +215,12 @@ describe('FileController', function() {
       FileController.getFileHead(req, res, next)
     })
 
-    it('should return a 404 is the file is not found', function(done) {
+    it('should return a 404 is the file is not found', function (done) {
       FileHandler.getFileSize.yields(
         new Errors.NotFoundError({ message: 'not found', info: {} })
       )
 
-      res.sendStatus = code => {
+      res.sendStatus = (code) => {
         expect(code).to.equal(404)
         done()
       }
@@ -228,7 +228,7 @@ describe('FileController', function() {
       FileController.getFileHead(req, res, next)
     })
 
-    it('should send an error on internal errors', function() {
+    it('should send an error on internal errors', function () {
       FileHandler.getFileSize.yields(error)
 
       FileController.getFileHead(req, res, next)
@@ -236,9 +236,9 @@ describe('FileController', function() {
     })
   })
 
-  describe('insertFile', function() {
-    it('should send bucket name key and res to PersistorManager', function(done) {
-      res.sendStatus = code => {
+  describe('insertFile', function () {
+    it('should send bucket name key and res to PersistorManager', function (done) {
+      res.sendStatus = (code) => {
         expect(FileHandler.insertFile).to.have.been.calledWith(bucket, key, req)
         expect(code).to.equal(200)
         done()
@@ -247,12 +247,12 @@ describe('FileController', function() {
     })
   })
 
-  describe('copyFile', function() {
+  describe('copyFile', function () {
     const oldFileId = 'oldFileId'
     const oldProjectId = 'oldProjectid'
     const oldKey = `${oldProjectId}/${oldFileId}`
 
-    beforeEach(function() {
+    beforeEach(function () {
       req.body = {
         source: {
           project_id: oldProjectId,
@@ -261,8 +261,8 @@ describe('FileController', function() {
       }
     })
 
-    it('should send bucket name and both keys to PersistorManager', function(done) {
-      res.sendStatus = code => {
+    it('should send bucket name and both keys to PersistorManager', function (done) {
+      res.sendStatus = (code) => {
         code.should.equal(200)
         expect(PersistorManager.copyObject).to.have.been.calledWith(
           bucket,
@@ -274,29 +274,29 @@ describe('FileController', function() {
       FileController.copyFile(req, res, next)
     })
 
-    it('should send a 404 if the original file was not found', function(done) {
+    it('should send a 404 if the original file was not found', function (done) {
       PersistorManager.copyObject.rejects(
         new Errors.NotFoundError({ message: 'not found', info: {} })
       )
-      res.sendStatus = code => {
+      res.sendStatus = (code) => {
         code.should.equal(404)
         done()
       }
       FileController.copyFile(req, res, next)
     })
 
-    it('should send an error if there was an error', function(done) {
+    it('should send an error if there was an error', function (done) {
       PersistorManager.copyObject.rejects(error)
-      FileController.copyFile(req, res, err => {
+      FileController.copyFile(req, res, (err) => {
         expect(err).to.equal(error)
         done()
       })
     })
   })
 
-  describe('delete file', function() {
-    it('should tell the file handler', function(done) {
-      res.sendStatus = code => {
+  describe('delete file', function () {
+    it('should tell the file handler', function (done) {
+      res.sendStatus = (code) => {
         code.should.equal(204)
         expect(FileHandler.deleteFile).to.have.been.calledWith(bucket, key)
         done()
@@ -304,16 +304,16 @@ describe('FileController', function() {
       FileController.deleteFile(req, res, next)
     })
 
-    it('should send a 500 if there was an error', function() {
+    it('should send a 500 if there was an error', function () {
       FileHandler.deleteFile.yields(error)
       FileController.deleteFile(req, res, next)
       expect(next).to.have.been.calledWith(error)
     })
   })
 
-  describe('delete project', function() {
-    it('should tell the file handler', function(done) {
-      res.sendStatus = code => {
+  describe('delete project', function () {
+    it('should tell the file handler', function (done) {
+      res.sendStatus = (code) => {
         code.should.equal(204)
         expect(FileHandler.deleteProject).to.have.been.calledWith(bucket, key)
         done()
@@ -321,24 +321,24 @@ describe('FileController', function() {
       FileController.deleteProject(req, res, next)
     })
 
-    it('should send a 500 if there was an error', function() {
+    it('should send a 500 if there was an error', function () {
       FileHandler.deleteProject.yields(error)
       FileController.deleteProject(req, res, next)
       expect(next).to.have.been.calledWith(error)
     })
   })
 
-  describe('directorySize', function() {
-    it('should return total directory size bytes', function(done) {
+  describe('directorySize', function () {
+    it('should return total directory size bytes', function (done) {
       FileController.directorySize(req, {
-        json: result => {
+        json: (result) => {
           expect(result['total bytes']).to.equal(fileSize)
           done()
         }
       })
     })
 
-    it('should send a 500 if there was an error', function() {
+    it('should send a 500 if there was an error', function () {
       FileHandler.getDirectorySize.yields(error)
       FileController.directorySize(req, res, next)
       expect(next).to.have.been.calledWith(error)

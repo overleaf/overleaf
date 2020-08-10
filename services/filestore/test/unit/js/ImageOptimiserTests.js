@@ -5,11 +5,11 @@ const modulePath = '../../../app/js/ImageOptimiser.js'
 const { FailedCommandError } = require('../../../app/js/Errors')
 const SandboxedModule = require('sandboxed-module')
 
-describe('ImageOptimiser', function() {
+describe('ImageOptimiser', function () {
   let ImageOptimiser, SafeExec, logger
   const sourcePath = '/wombat/potato.eps'
 
-  beforeEach(function() {
+  beforeEach(function () {
     SafeExec = {
       promises: sinon.stub().resolves()
     }
@@ -27,9 +27,9 @@ describe('ImageOptimiser', function() {
     })
   })
 
-  describe('compressPng', function() {
-    it('should convert the file', function(done) {
-      ImageOptimiser.compressPng(sourcePath, err => {
+  describe('compressPng', function () {
+    it('should convert the file', function (done) {
+      ImageOptimiser.compressPng(sourcePath, (err) => {
         expect(err).not.to.exist
         expect(SafeExec.promises).to.have.been.calledWith([
           'optipng',
@@ -39,32 +39,32 @@ describe('ImageOptimiser', function() {
       })
     })
 
-    it('should return the error', function(done) {
+    it('should return the error', function (done) {
       SafeExec.promises.rejects('wombat herding failure')
-      ImageOptimiser.compressPng(sourcePath, err => {
+      ImageOptimiser.compressPng(sourcePath, (err) => {
         expect(err.toString()).to.equal('wombat herding failure')
         done()
       })
     })
   })
 
-  describe('when optimiser is sigkilled', function() {
+  describe('when optimiser is sigkilled', function () {
     const expectedError = new FailedCommandError('', 'SIGKILL', '', '')
     let error
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       SafeExec.promises.rejects(expectedError)
-      ImageOptimiser.compressPng(sourcePath, err => {
+      ImageOptimiser.compressPng(sourcePath, (err) => {
         error = err
         done()
       })
     })
 
-    it('should not produce an error', function() {
+    it('should not produce an error', function () {
       expect(error).not.to.exist
     })
 
-    it('should log a warning', function() {
+    it('should log a warning', function () {
       expect(logger.warn).to.have.been.calledOnce
     })
   })

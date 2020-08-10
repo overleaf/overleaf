@@ -29,7 +29,7 @@ if (!process.env.AWS_ACCESS_KEY_ID) {
   throw new Error('please provide credentials for the AWS S3 test server')
 }
 
-process.on('unhandledRejection', e => {
+process.on('unhandledRejection', (e) => {
   // eslint-disable-next-line no-console
   console.log('** Unhandled Promise Rejection **\n', e)
   throw e
@@ -39,7 +39,7 @@ process.on('unhandledRejection', e => {
 // fs will always be available - add others if they are configured
 const BackendSettings = require('./TestConfig')
 
-describe('Filestore', function() {
+describe('Filestore', function () {
   this.timeout(1000 * 10)
   const filestoreUrl = `http://localhost:${Settings.internal.filestore.port}`
 
@@ -51,7 +51,7 @@ describe('Filestore', function() {
 
       const badSockets = []
       for (const socket of stdout.split('\n')) {
-        const fields = socket.split(' ').filter(part => part !== '')
+        const fields = socket.split(' ').filter((part) => part !== '')
         if (
           fields.length > 2 &&
           parseInt(fields[1]) &&
@@ -79,11 +79,11 @@ describe('Filestore', function() {
   }
 
   // redefine the test suite for every available backend
-  Object.keys(BackendSettings).forEach(backend => {
-    describe(backend, function() {
+  Object.keys(BackendSettings).forEach((backend) => {
+    describe(backend, function () {
       let app, previousEgress, previousIngress, metricPrefix, projectId
 
-      before(async function() {
+      before(async function () {
         // create the app with the relevant filestore settings
         Settings.filestore = BackendSettings[backend]
         app = new FilestoreApp()
@@ -91,7 +91,7 @@ describe('Filestore', function() {
       })
 
       if (BackendSettings[backend].gcs) {
-        before(async function() {
+        before(async function () {
           const storage = new Storage(Settings.filestore.gcs.endpoint)
           await storage.createBucket(process.env.GCS_USER_FILES_BUCKET_NAME)
           await storage.createBucket(process.env.GCS_PUBLIC_FILES_BUCKET_NAME)
@@ -108,12 +108,12 @@ describe('Filestore', function() {
         })
       }
 
-      after(async function() {
+      after(async function () {
         await msleep(3000)
         await app.stop()
       })
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         // retrieve previous metrics from the app
         if (['s3', 'gcs'].includes(Settings.filestore.backend)) {
           metricPrefix = Settings.filestore.backend
@@ -125,26 +125,26 @@ describe('Filestore', function() {
         projectId = ObjectId().toString()
       })
 
-      it('should send a 200 for the status endpoint', async function() {
+      it('should send a 200 for the status endpoint', async function () {
         const response = await rp(`${filestoreUrl}/status`)
         expect(response.statusCode).to.equal(200)
         expect(response.body).to.contain('filestore')
         expect(response.body).to.contain('up')
       })
 
-      it('should send a 200 for the health-check endpoint', async function() {
+      it('should send a 200 for the health-check endpoint', async function () {
         const response = await rp(`${filestoreUrl}/health_check`)
         expect(response.statusCode).to.equal(200)
         expect(response.body).to.equal('OK')
       })
 
-      describe('with a file on the server', function() {
+      describe('with a file on the server', function () {
         let fileId, fileUrl, constantFileContent
 
         const localFileReadPath =
           '/tmp/filestore_acceptance_tests_file_read.txt'
 
-        beforeEach(async function() {
+        beforeEach(async function () {
           fileId = ObjectId().toString()
           fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
           constantFileContent = [
@@ -174,14 +174,14 @@ describe('Filestore', function() {
           }
         })
 
-        it('should return 404 for a non-existant id', async function() {
+        it('should return 404 for a non-existant id', async function () {
           const options = { uri: fileUrl + '___this_is_clearly_wrong___' }
           await expect(
             rp.get(options)
           ).to.eventually.be.rejected.and.have.property('statusCode', 404)
         })
 
-        it('should return the file size on a HEAD request', async function() {
+        it('should return the file size on a HEAD request', async function () {
           const expectedLength = Buffer.byteLength(constantFileContent)
           const res = await rp.head(fileUrl)
           expect(res.statusCode).to.equal(200)
@@ -190,17 +190,17 @@ describe('Filestore', function() {
           )
         })
 
-        it('should be able get the file back', async function() {
+        it('should be able get the file back', async function () {
           const res = await rp.get(fileUrl)
           expect(res.body).to.equal(constantFileContent)
         })
 
-        it('should not leak a socket', async function() {
+        it('should not leak a socket', async function () {
           await rp.get(fileUrl)
           await expectNoSockets()
         })
 
-        it('should be able to get back the first 9 bytes of the file', async function() {
+        it('should be able to get back the first 9 bytes of the file', async function () {
           const options = {
             uri: fileUrl,
             headers: {
@@ -211,7 +211,7 @@ describe('Filestore', function() {
           expect(res.body).to.equal('hello wor')
         })
 
-        it('should be able to get back bytes 4 through 10 of the file', async function() {
+        it('should be able to get back bytes 4 through 10 of the file', async function () {
           const options = {
             uri: fileUrl,
             headers: {
@@ -222,7 +222,7 @@ describe('Filestore', function() {
           expect(res.body).to.equal('o world')
         })
 
-        it('should be able to delete the file', async function() {
+        it('should be able to delete the file', async function () {
           const response = await rp.del(fileUrl)
           expect(response.statusCode).to.equal(204)
           await expect(
@@ -230,7 +230,7 @@ describe('Filestore', function() {
           ).to.eventually.be.rejected.and.have.property('statusCode', 404)
         })
 
-        it('should be able to copy files', async function() {
+        it('should be able to copy files', async function () {
           const newProjectID = ObjectId().toString()
           const newFileId = ObjectId().toString()
           const newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${newFileId}`
@@ -252,7 +252,7 @@ describe('Filestore', function() {
           expect(response.body).to.equal(constantFileContent)
         })
 
-        it('should be able to overwrite the file', async function() {
+        it('should be able to overwrite the file', async function () {
           const newContent = `here is some different content, ${Math.random()}`
           const writeStream = request.post(fileUrl)
           const readStream = streamifier.createReadStream(newContent)
@@ -265,7 +265,7 @@ describe('Filestore', function() {
         })
 
         if (['S3Persistor', 'GcsPersistor'].includes(backend)) {
-          it('should record an egress metric for the upload', async function() {
+          it('should record an egress metric for the upload', async function () {
             const metric = await TestHelper.getMetric(
               filestoreUrl,
               `${metricPrefix}_egress`
@@ -273,7 +273,7 @@ describe('Filestore', function() {
             expect(metric - previousEgress).to.equal(constantFileContent.length)
           })
 
-          it('should record an ingress metric when downloading the file', async function() {
+          it('should record an ingress metric when downloading the file', async function () {
             await rp.get(fileUrl)
             const metric = await TestHelper.getMetric(
               filestoreUrl,
@@ -284,7 +284,7 @@ describe('Filestore', function() {
             )
           })
 
-          it('should record an ingress metric for a partial download', async function() {
+          it('should record an ingress metric for a partial download', async function () {
             const options = {
               uri: fileUrl,
               headers: {
@@ -301,7 +301,7 @@ describe('Filestore', function() {
         }
       })
 
-      describe('with multiple files', function() {
+      describe('with multiple files', function () {
         let fileIds, fileUrls, projectUrl
         const localFileReadPaths = [
           '/tmp/filestore_acceptance_tests_file_read_1.txt',
@@ -320,14 +320,14 @@ describe('Filestore', function() {
           ].join('\n')
         ]
 
-        before(async function() {
+        before(async function () {
           return Promise.all([
             fsWriteFile(localFileReadPaths[0], constantFileContents[0]),
             fsWriteFile(localFileReadPaths[1], constantFileContents[1])
           ])
         })
 
-        beforeEach(async function() {
+        beforeEach(async function () {
           projectUrl = `${filestoreUrl}/project/${projectId}`
           fileIds = [ObjectId().toString(), ObjectId().toString()]
           fileUrls = [
@@ -354,7 +354,7 @@ describe('Filestore', function() {
           ])
         })
 
-        it('should get the directory size', async function() {
+        it('should get the directory size', async function () {
           const response = await rp.get(
             `${filestoreUrl}/project/${projectId}/size`
           )
@@ -363,7 +363,7 @@ describe('Filestore', function() {
           )
         })
 
-        it('should store the files', async function() {
+        it('should store the files', async function () {
           for (const index in fileUrls) {
             await expect(rp.get(fileUrls[index])).to.eventually.have.property(
               'body',
@@ -372,7 +372,7 @@ describe('Filestore', function() {
           }
         })
 
-        it('should be able to delete the project', async function() {
+        it('should be able to delete the project', async function () {
           await expect(rp.delete(projectUrl)).to.eventually.have.property(
             'statusCode',
             204
@@ -385,17 +385,17 @@ describe('Filestore', function() {
           }
         })
 
-        it('should not delete a partial project id', async function() {
+        it('should not delete a partial project id', async function () {
           await expect(
             rp.delete(`${filestoreUrl}/project/5`)
           ).to.eventually.be.rejected.and.have.property('statusCode', 400)
         })
       })
 
-      describe('with a large file', function() {
+      describe('with a large file', function () {
         let fileId, fileUrl, largeFileContent, error
 
-        beforeEach(async function() {
+        beforeEach(async function () {
           fileId = ObjectId().toString()
           fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
 
@@ -414,26 +414,26 @@ describe('Filestore', function() {
           }
         })
 
-        it('should be able to get the file back', async function() {
+        it('should be able to get the file back', async function () {
           const response = await rp.get(fileUrl)
           expect(response.body).to.equal(largeFileContent)
         })
 
-        it('should not throw an error', function() {
+        it('should not throw an error', function () {
           expect(error).not.to.exist
         })
 
-        it('should not leak a socket', async function() {
+        it('should not leak a socket', async function () {
           await rp.get(fileUrl)
           await expectNoSockets()
         })
 
-        it('should not leak a socket if the connection is aborted', async function() {
+        it('should not leak a socket if the connection is aborted', async function () {
           this.timeout(20000)
           for (let i = 0; i < 5; i++) {
             // test is not 100% reliable, so repeat
             // create a new connection and have it time out before reading any data
-            await new Promise(resolve => {
+            await new Promise((resolve) => {
               const streamThatHangs = new Stream.PassThrough()
               const stream = request({ url: fileUrl, timeout: 1000 })
               stream.pipe(streamThatHangs)
@@ -449,10 +449,10 @@ describe('Filestore', function() {
       })
 
       if (backend === 'S3Persistor' || backend === 'FallbackGcsToS3Persistor') {
-        describe('with a file in a specific bucket', function() {
+        describe('with a file in a specific bucket', function () {
           let constantFileContent, fileId, fileUrl, bucketName
 
-          beforeEach(async function() {
+          beforeEach(async function () {
             constantFileContent = `This is a file in a different S3 bucket ${Math.random()}`
             fileId = ObjectId().toString()
             bucketName = ObjectId().toString()
@@ -483,7 +483,7 @@ describe('Filestore', function() {
               .promise()
           })
 
-          it('should get the file from the specified bucket', async function() {
+          it('should get the file from the specified bucket', async function () {
             const response = await rp.get(fileUrl)
             expect(response.body).to.equal(constantFileContent)
           })
@@ -491,10 +491,10 @@ describe('Filestore', function() {
       }
 
       if (backend === 'GcsPersistor') {
-        describe('when deleting a file in GCS', function() {
+        describe('when deleting a file in GCS', function () {
           let fileId, fileUrl, content, error, date
 
-          beforeEach(async function() {
+          beforeEach(async function () {
             date = new Date()
             tk.freeze(date)
             fileId = ObjectId()
@@ -515,15 +515,15 @@ describe('Filestore', function() {
             }
           })
 
-          afterEach(function() {
+          afterEach(function () {
             tk.reset()
           })
 
-          it('should not throw an error', function() {
+          it('should not throw an error', function () {
             expect(error).not.to.exist
           })
 
-          it('should copy the file to the deleted-files bucket', async function() {
+          it('should copy the file to the deleted-files bucket', async function () {
             await TestHelper.expectPersistorToHaveFile(
               app.persistor,
               `${Settings.filestore.stores.user_files}-deleted`,
@@ -532,7 +532,7 @@ describe('Filestore', function() {
             )
           })
 
-          it('should remove the file from the original bucket', async function() {
+          it('should remove the file from the original bucket', async function () {
             await TestHelper.expectPersistorNotToHaveFile(
               app.persistor,
               Settings.filestore.stores.user_files,
@@ -543,7 +543,7 @@ describe('Filestore', function() {
       }
 
       if (BackendSettings[backend].fallback) {
-        describe('with a fallback', function() {
+        describe('with a fallback', function () {
           let constantFileContent,
             fileId,
             fileKey,
@@ -551,7 +551,7 @@ describe('Filestore', function() {
             bucket,
             fallbackBucket
 
-          beforeEach(function() {
+          beforeEach(function () {
             constantFileContent = `This is yet more file content ${Math.random()}`
             fileId = ObjectId().toString()
             fileKey = `${projectId}/${fileId}`
@@ -561,8 +561,8 @@ describe('Filestore', function() {
             fallbackBucket = Settings.filestore.fallback.buckets[bucket]
           })
 
-          describe('with a file in the fallback bucket', function() {
-            beforeEach(async function() {
+          describe('with a file in the fallback bucket', function () {
+            beforeEach(async function () {
               await TestHelper.uploadStringToPersistor(
                 app.persistor.fallbackPersistor,
                 fallbackBucket,
@@ -571,7 +571,7 @@ describe('Filestore', function() {
               )
             })
 
-            it('should not find file in the primary', async function() {
+            it('should not find file in the primary', async function () {
               await TestHelper.expectPersistorNotToHaveFile(
                 app.persistor.primaryPersistor,
                 bucket,
@@ -579,7 +579,7 @@ describe('Filestore', function() {
               )
             })
 
-            it('should find the file in the fallback', async function() {
+            it('should find the file in the fallback', async function () {
               await TestHelper.expectPersistorToHaveFile(
                 app.persistor.fallbackPersistor,
                 fallbackBucket,
@@ -588,17 +588,17 @@ describe('Filestore', function() {
               )
             })
 
-            describe('when copyOnMiss is disabled', function() {
-              beforeEach(function() {
+            describe('when copyOnMiss is disabled', function () {
+              beforeEach(function () {
                 app.persistor.settings.copyOnMiss = false
               })
 
-              it('should fetch the file', async function() {
+              it('should fetch the file', async function () {
                 const res = await rp.get(fileUrl)
                 expect(res.body).to.equal(constantFileContent)
               })
 
-              it('should not copy the file to the primary', async function() {
+              it('should not copy the file to the primary', async function () {
                 await rp.get(fileUrl)
 
                 await TestHelper.expectPersistorNotToHaveFile(
@@ -609,17 +609,17 @@ describe('Filestore', function() {
               })
             })
 
-            describe('when copyOnMiss is enabled', function() {
-              beforeEach(function() {
+            describe('when copyOnMiss is enabled', function () {
+              beforeEach(function () {
                 app.persistor.settings.copyOnMiss = true
               })
 
-              it('should fetch the file', async function() {
+              it('should fetch the file', async function () {
                 const res = await rp.get(fileUrl)
                 expect(res.body).to.equal(constantFileContent)
               })
 
-              it('copies the file to the primary', async function() {
+              it('copies the file to the primary', async function () {
                 await rp.get(fileUrl)
                 // wait for the file to copy in the background
                 await msleep(1000)
@@ -633,10 +633,10 @@ describe('Filestore', function() {
               })
             })
 
-            describe('when copying a file', function() {
+            describe('when copying a file', function () {
               let newFileId, newFileUrl, newFileKey, opts
 
-              beforeEach(function() {
+              beforeEach(function () {
                 const newProjectID = ObjectId().toString()
                 newFileId = ObjectId().toString()
                 newFileUrl = `${filestoreUrl}/project/${newProjectID}/file/${newFileId}`
@@ -654,15 +654,15 @@ describe('Filestore', function() {
                 }
               })
 
-              describe('when copyOnMiss is false', function() {
-                beforeEach(async function() {
+              describe('when copyOnMiss is false', function () {
+                beforeEach(async function () {
                   app.persistor.settings.copyOnMiss = false
 
                   const response = await rp(opts)
                   expect(response.statusCode).to.equal(200)
                 })
 
-                it('should leave the old file in the old bucket', async function() {
+                it('should leave the old file in the old bucket', async function () {
                   await TestHelper.expectPersistorToHaveFile(
                     app.persistor.fallbackPersistor,
                     fallbackBucket,
@@ -671,7 +671,7 @@ describe('Filestore', function() {
                   )
                 })
 
-                it('should not create a new file in the old bucket', async function() {
+                it('should not create a new file in the old bucket', async function () {
                   await TestHelper.expectPersistorNotToHaveFile(
                     app.persistor.fallbackPersistor,
                     fallbackBucket,
@@ -679,7 +679,7 @@ describe('Filestore', function() {
                   )
                 })
 
-                it('should create a new file in the new bucket', async function() {
+                it('should create a new file in the new bucket', async function () {
                   await TestHelper.expectPersistorToHaveFile(
                     app.persistor.primaryPersistor,
                     bucket,
@@ -688,7 +688,7 @@ describe('Filestore', function() {
                   )
                 })
 
-                it('should not copy the old file to the primary with the old key', async function() {
+                it('should not copy the old file to the primary with the old key', async function () {
                   // wait for the file to copy in the background
                   await msleep(1000)
 
@@ -700,15 +700,15 @@ describe('Filestore', function() {
                 })
               })
 
-              describe('when copyOnMiss is true', function() {
-                beforeEach(async function() {
+              describe('when copyOnMiss is true', function () {
+                beforeEach(async function () {
                   app.persistor.settings.copyOnMiss = true
 
                   const response = await rp(opts)
                   expect(response.statusCode).to.equal(200)
                 })
 
-                it('should leave the old file in the old bucket', async function() {
+                it('should leave the old file in the old bucket', async function () {
                   await TestHelper.expectPersistorToHaveFile(
                     app.persistor.fallbackPersistor,
                     fallbackBucket,
@@ -717,7 +717,7 @@ describe('Filestore', function() {
                   )
                 })
 
-                it('should not create a new file in the old bucket', async function() {
+                it('should not create a new file in the old bucket', async function () {
                   await TestHelper.expectPersistorNotToHaveFile(
                     app.persistor.fallbackPersistor,
                     fallbackBucket,
@@ -725,7 +725,7 @@ describe('Filestore', function() {
                   )
                 })
 
-                it('should create a new file in the new bucket', async function() {
+                it('should create a new file in the new bucket', async function () {
                   await TestHelper.expectPersistorToHaveFile(
                     app.persistor.primaryPersistor,
                     bucket,
@@ -734,7 +734,7 @@ describe('Filestore', function() {
                   )
                 })
 
-                it('should copy the old file to the primary with the old key', async function() {
+                it('should copy the old file to the primary with the old key', async function () {
                   // wait for the file to copy in the background
                   await msleep(1000)
 
@@ -749,8 +749,8 @@ describe('Filestore', function() {
             })
           })
 
-          describe('when sending a file', function() {
-            beforeEach(async function() {
+          describe('when sending a file', function () {
+            beforeEach(async function () {
               const writeStream = request.post(fileUrl)
               const readStream = streamifier.createReadStream(
                 constantFileContent
@@ -760,7 +760,7 @@ describe('Filestore', function() {
               await pipeline(readStream, writeStream, resultStream)
             })
 
-            it('should store the file on the primary', async function() {
+            it('should store the file on the primary', async function () {
               await TestHelper.expectPersistorToHaveFile(
                 app.persistor.primaryPersistor,
                 bucket,
@@ -769,7 +769,7 @@ describe('Filestore', function() {
               )
             })
 
-            it('should not store the file on the fallback', async function() {
+            it('should not store the file on the fallback', async function () {
               await TestHelper.expectPersistorNotToHaveFile(
                 app.persistor.fallbackPersistor,
                 fallbackBucket,
@@ -778,9 +778,9 @@ describe('Filestore', function() {
             })
           })
 
-          describe('when deleting a file', function() {
-            describe('when the file exists on the primary', function() {
-              beforeEach(async function() {
+          describe('when deleting a file', function () {
+            describe('when the file exists on the primary', function () {
+              beforeEach(async function () {
                 await TestHelper.uploadStringToPersistor(
                   app.persistor.primaryPersistor,
                   bucket,
@@ -789,7 +789,7 @@ describe('Filestore', function() {
                 )
               })
 
-              it('should delete the file', async function() {
+              it('should delete the file', async function () {
                 const response = await rp.del(fileUrl)
                 expect(response.statusCode).to.equal(204)
                 await expect(
@@ -798,8 +798,8 @@ describe('Filestore', function() {
               })
             })
 
-            describe('when the file exists on the fallback', function() {
-              beforeEach(async function() {
+            describe('when the file exists on the fallback', function () {
+              beforeEach(async function () {
                 await TestHelper.uploadStringToPersistor(
                   app.persistor.fallbackPersistor,
                   fallbackBucket,
@@ -808,7 +808,7 @@ describe('Filestore', function() {
                 )
               })
 
-              it('should delete the file', async function() {
+              it('should delete the file', async function () {
                 const response = await rp.del(fileUrl)
                 expect(response.statusCode).to.equal(204)
                 await expect(
@@ -817,8 +817,8 @@ describe('Filestore', function() {
               })
             })
 
-            describe('when the file exists on both the primary and the fallback', function() {
-              beforeEach(async function() {
+            describe('when the file exists on both the primary and the fallback', function () {
+              beforeEach(async function () {
                 await TestHelper.uploadStringToPersistor(
                   app.persistor.primaryPersistor,
                   bucket,
@@ -833,7 +833,7 @@ describe('Filestore', function() {
                 )
               })
 
-              it('should delete the files', async function() {
+              it('should delete the files', async function () {
                 const response = await rp.del(fileUrl)
                 expect(response.statusCode).to.equal(204)
                 await expect(
@@ -842,8 +842,8 @@ describe('Filestore', function() {
               })
             })
 
-            describe('when the file does not exist', function() {
-              it('should return return 204', async function() {
+            describe('when the file does not exist', function () {
+              it('should return return 204', async function () {
                 // S3 doesn't give us a 404 when the object doesn't exist, so to stay
                 // consistent we merrily return 204 ourselves here as well
                 const response = await rp.del(fileUrl)
@@ -854,14 +854,14 @@ describe('Filestore', function() {
         })
       }
 
-      describe('with a pdf file', function() {
+      describe('with a pdf file', function () {
         let fileId, fileUrl, localFileSize
         const localFileReadPath = Path.resolve(
           __dirname,
           '../../fixtures/test.pdf'
         )
 
-        beforeEach(async function() {
+        beforeEach(async function () {
           fileId = ObjectId().toString()
           fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
           const stat = await fsStat(localFileReadPath)
@@ -872,13 +872,13 @@ describe('Filestore', function() {
           await pipeline(readStream, writeStream, endStream)
         })
 
-        it('should be able get the file back', async function() {
+        it('should be able get the file back', async function () {
           const response = await rp.get(fileUrl)
           expect(response.body.substring(0, 8)).to.equal('%PDF-1.5')
         })
 
         if (['S3Persistor', 'GcsPersistor'].includes(backend)) {
-          it('should record an egress metric for the upload', async function() {
+          it('should record an egress metric for the upload', async function () {
             const metric = await TestHelper.getMetric(
               filestoreUrl,
               `${metricPrefix}_egress`
@@ -887,20 +887,20 @@ describe('Filestore', function() {
           })
         }
 
-        describe('getting the preview image', function() {
+        describe('getting the preview image', function () {
           this.timeout(1000 * 20)
           let previewFileUrl
 
-          beforeEach(function() {
+          beforeEach(function () {
             previewFileUrl = `${fileUrl}?style=preview`
           })
 
-          it('should not time out', async function() {
+          it('should not time out', async function () {
             const response = await rp.get(previewFileUrl)
             expect(response.statusCode).to.equal(200)
           })
 
-          it('should respond with image data', async function() {
+          it('should respond with image data', async function () {
             // note: this test relies of the imagemagick conversion working
             const response = await rp.get(previewFileUrl)
             expect(response.body.length).to.be.greaterThan(400)
@@ -908,20 +908,20 @@ describe('Filestore', function() {
           })
         })
 
-        describe('warming the cache', function() {
+        describe('warming the cache', function () {
           this.timeout(1000 * 20)
           let previewFileUrl
 
-          beforeEach(function() {
+          beforeEach(function () {
             previewFileUrl = `${fileUrl}?style=preview&cacheWarm=true`
           })
 
-          it('should not time out', async function() {
+          it('should not time out', async function () {
             const response = await rp.get(previewFileUrl)
             expect(response.statusCode).to.equal(200)
           })
 
-          it("should respond with only an 'OK'", async function() {
+          it("should respond with only an 'OK'", async function () {
             // note: this test relies of the imagemagick conversion working
             const response = await rp.get(previewFileUrl)
             expect(response.body).to.equal('OK')

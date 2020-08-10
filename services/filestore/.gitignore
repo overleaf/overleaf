@@ -49,3 +49,6 @@ template_files/*
 
 /log.json
 hash_folder
+
+# managed by dev-environment$ bin/update_build_scripts
+.npmrc

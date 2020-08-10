@@ -9,7 +9,7 @@ const { Errors } = require('@overleaf/object-persistor')
 chai.use(require('sinon-chai'))
 chai.use(require('chai-as-promised'))
 
-describe('FileHandler', function() {
+describe('FileHandler', function () {
   let PersistorManager,
     LocalFileWriter,
     FileConverter,
@@ -31,7 +31,7 @@ describe('FileHandler', function() {
     on: sinon.stub()
   }
 
-  beforeEach(function() {
+  beforeEach(function () {
     PersistorManager = {
       getObjectStream: sinon.stub().resolves(sourceStream),
       getRedirectUrl: sinon.stub().resolves(redirectUrl),
@@ -89,11 +89,11 @@ describe('FileHandler', function() {
     })
   })
 
-  describe('insertFile', function() {
+  describe('insertFile', function () {
     const stream = 'stream'
 
-    it('should send file to the filestore', function(done) {
-      FileHandler.insertFile(bucket, key, stream, err => {
+    it('should send file to the filestore', function (done) {
+      FileHandler.insertFile(bucket, key, stream, (err) => {
         expect(err).not.to.exist
         expect(PersistorManager.sendStream).to.have.been.calledWith(
           bucket,
@@ -104,39 +104,39 @@ describe('FileHandler', function() {
       })
     })
 
-    it('should not make a delete request for the convertedKey folder', function(done) {
-      FileHandler.insertFile(bucket, key, stream, err => {
+    it('should not make a delete request for the convertedKey folder', function (done) {
+      FileHandler.insertFile(bucket, key, stream, (err) => {
         expect(err).not.to.exist
         expect(PersistorManager.deleteDirectory).not.to.have.been.called
         done()
       })
     })
 
-    it('should accept templates-api key format', function(done) {
+    it('should accept templates-api key format', function (done) {
       KeyBuilder.getConvertedFolderKey.returns(
         '5ecba29f1a294e007d0bccb4/v/0/pdf'
       )
-      FileHandler.insertFile(bucket, key, stream, err => {
+      FileHandler.insertFile(bucket, key, stream, (err) => {
         expect(err).not.to.exist
         done()
       })
     })
 
-    it('should throw an error when the key is in the wrong format', function(done) {
+    it('should throw an error when the key is in the wrong format', function (done) {
       KeyBuilder.getConvertedFolderKey.returns('wombat')
-      FileHandler.insertFile(bucket, key, stream, err => {
+      FileHandler.insertFile(bucket, key, stream, (err) => {
         expect(err).to.exist
         done()
       })
     })
 
-    describe('when conversions are enabled', function() {
-      beforeEach(function() {
+    describe('when conversions are enabled', function () {
+      beforeEach(function () {
         Settings.enableConversions = true
       })
 
-      it('should delete the convertedKey folder', function(done) {
-        FileHandler.insertFile(bucket, key, stream, err => {
+      it('should delete the convertedKey folder', function (done) {
+        FileHandler.insertFile(bucket, key, stream, (err) => {
           expect(err).not.to.exist
           expect(PersistorManager.deleteDirectory).to.have.been.calledWith(
             bucket,
@@ -148,9 +148,9 @@ describe('FileHandler', function() {
     })
   })
 
-  describe('deleteFile', function() {
-    it('should tell the filestore manager to delete the file', function(done) {
-      FileHandler.deleteFile(bucket, key, err => {
+  describe('deleteFile', function () {
+    it('should tell the filestore manager to delete the file', function (done) {
+      FileHandler.deleteFile(bucket, key, (err) => {
         expect(err).not.to.exist
         expect(PersistorManager.deleteObject).to.have.been.calledWith(
           bucket,
@@ -160,39 +160,39 @@ describe('FileHandler', function() {
       })
     })
 
-    it('should not tell the filestore manager to delete the cached folder', function(done) {
-      FileHandler.deleteFile(bucket, key, err => {
+    it('should not tell the filestore manager to delete the cached folder', function (done) {
+      FileHandler.deleteFile(bucket, key, (err) => {
         expect(err).not.to.exist
         expect(PersistorManager.deleteDirectory).not.to.have.been.called
         done()
       })
     })
 
-    it('should accept templates-api key format', function(done) {
+    it('should accept templates-api key format', function (done) {
       KeyBuilder.getConvertedFolderKey.returns(
         '5ecba29f1a294e007d0bccb4/v/0/pdf'
       )
-      FileHandler.deleteFile(bucket, key, err => {
+      FileHandler.deleteFile(bucket, key, (err) => {
         expect(err).not.to.exist
         done()
       })
     })
 
-    it('should throw an error when the key is in the wrong format', function(done) {
+    it('should throw an error when the key is in the wrong format', function (done) {
       KeyBuilder.getConvertedFolderKey.returns('wombat')
-      FileHandler.deleteFile(bucket, key, err => {
+      FileHandler.deleteFile(bucket, key, (err) => {
         expect(err).to.exist
         done()
       })
     })
 
-    describe('when conversions are enabled', function() {
-      beforeEach(function() {
+    describe('when conversions are enabled', function () {
+      beforeEach(function () {
         Settings.enableConversions = true
       })
 
-      it('should delete the convertedKey folder', function(done) {
-        FileHandler.deleteFile(bucket, key, err => {
+      it('should delete the convertedKey folder', function (done) {
+        FileHandler.deleteFile(bucket, key, (err) => {
           expect(err).not.to.exist
           expect(PersistorManager.deleteDirectory).to.have.been.calledWith(
             bucket,
@@ -204,9 +204,9 @@ describe('FileHandler', function() {
     })
   })
 
-  describe('deleteProject', function() {
-    it('should tell the filestore manager to delete the folder', function(done) {
-      FileHandler.deleteProject(bucket, projectKey, err => {
+  describe('deleteProject', function () {
+    it('should tell the filestore manager to delete the folder', function (done) {
+      FileHandler.deleteProject(bucket, projectKey, (err) => {
         expect(err).not.to.exist
         expect(PersistorManager.deleteDirectory).to.have.been.calledWith(
           bucket,
@@ -216,16 +216,16 @@ describe('FileHandler', function() {
       })
     })
 
-    it('should throw an error when the key is in the wrong format', function(done) {
-      FileHandler.deleteProject(bucket, 'wombat', err => {
+    it('should throw an error when the key is in the wrong format', function (done) {
+      FileHandler.deleteProject(bucket, 'wombat', (err) => {
         expect(err).to.exist
         done()
       })
     })
   })
 
-  describe('getFile', function() {
-    it('should return the source stream no format or style are defined', function(done) {
+  describe('getFile', function () {
+    it('should return the source stream no format or style are defined', function (done) {
       FileHandler.getFile(bucket, key, null, (err, stream) => {
         expect(err).not.to.exist
         expect(stream).to.equal(sourceStream)
@@ -233,9 +233,9 @@ describe('FileHandler', function() {
       })
     })
 
-    it('should pass options through to PersistorManager', function(done) {
+    it('should pass options through to PersistorManager', function (done) {
       const options = { start: 0, end: 8 }
-      FileHandler.getFile(bucket, key, options, err => {
+      FileHandler.getFile(bucket, key, options, (err) => {
         expect(err).not.to.exist
         expect(PersistorManager.getObjectStream).to.have.been.calledWith(
           bucket,
@@ -246,26 +246,26 @@ describe('FileHandler', function() {
       })
     })
 
-    describe('when a format is defined', function() {
+    describe('when a format is defined', function () {
       let result
 
-      describe('when the file is not cached', function() {
-        beforeEach(function(done) {
+      describe('when the file is not cached', function () {
+        beforeEach(function (done) {
           FileHandler.getFile(bucket, key, { format: 'png' }, (err, stream) => {
             result = { err, stream }
             done()
           })
         })
 
-        it('should convert the file', function() {
+        it('should convert the file', function () {
           expect(FileConverter.promises.convert).to.have.been.called
         })
 
-        it('should compress the converted file', function() {
+        it('should compress the converted file', function () {
           expect(ImageOptimiser.promises.compressPng).to.have.been.called
         })
 
-        it('should return the the converted stream', function() {
+        it('should return the the converted stream', function () {
           expect(result.err).not.to.exist
           expect(result.stream).to.equal(readStream)
           expect(PersistorManager.getObjectStream).to.have.been.calledWith(
@@ -275,8 +275,8 @@ describe('FileHandler', function() {
         })
       })
 
-      describe('when the file is cached', function() {
-        beforeEach(function(done) {
+      describe('when the file is cached', function () {
+        beforeEach(function (done) {
           PersistorManager.checkIfObjectExists = sinon.stub().resolves(true)
           FileHandler.getFile(bucket, key, { format: 'png' }, (err, stream) => {
             result = { err, stream }
@@ -284,15 +284,15 @@ describe('FileHandler', function() {
           })
         })
 
-        it('should not convert the file', function() {
+        it('should not convert the file', function () {
           expect(FileConverter.promises.convert).not.to.have.been.called
         })
 
-        it('should not compress the converted file again', function() {
+        it('should not compress the converted file again', function () {
           expect(ImageOptimiser.promises.compressPng).not.to.have.been.called
         })
 
-        it('should return the cached stream', function() {
+        it('should return the cached stream', function () {
           expect(result.err).not.to.exist
           expect(result.stream).to.equal(sourceStream)
           expect(PersistorManager.getObjectStream).to.have.been.calledWith(
@@ -303,9 +303,9 @@ describe('FileHandler', function() {
       })
     })
 
-    describe('when a style is defined', function() {
-      it('generates a thumbnail when requested', function(done) {
-        FileHandler.getFile(bucket, key, { style: 'thumbnail' }, err => {
+    describe('when a style is defined', function () {
+      it('generates a thumbnail when requested', function (done) {
+        FileHandler.getFile(bucket, key, { style: 'thumbnail' }, (err) => {
           expect(err).not.to.exist
           expect(FileConverter.promises.thumbnail).to.have.been.called
           expect(FileConverter.promises.preview).not.to.have.been.called
@@ -313,8 +313,8 @@ describe('FileHandler', function() {
         })
       })
 
-      it('generates a preview when requested', function(done) {
-        FileHandler.getFile(bucket, key, { style: 'preview' }, err => {
+      it('generates a preview when requested', function (done) {
+        FileHandler.getFile(bucket, key, { style: 'preview' }, (err) => {
           expect(err).not.to.exist
           expect(FileConverter.promises.thumbnail).not.to.have.been.called
           expect(FileConverter.promises.preview).to.have.been.called
@@ -324,8 +324,8 @@ describe('FileHandler', function() {
     })
   })
 
-  describe('getRedirectUrl', function() {
-    beforeEach(function() {
+  describe('getRedirectUrl', function () {
+    beforeEach(function () {
       Settings.filestore = {
         allowRedirects: true,
         stores: {
@@ -334,7 +334,7 @@ describe('FileHandler', function() {
       }
     })
 
-    it('should return a redirect url', function(done) {
+    it('should return a redirect url', function (done) {
       FileHandler.getRedirectUrl(bucket, key, (err, url) => {
         expect(err).not.to.exist
         expect(url).to.equal(redirectUrl)
@@ -342,7 +342,7 @@ describe('FileHandler', function() {
       })
     })
 
-    it('should call the persistor to get a redirect url', function(done) {
+    it('should call the persistor to get a redirect url', function (done) {
       FileHandler.getRedirectUrl(bucket, key, () => {
         expect(PersistorManager.getRedirectUrl).to.have.been.calledWith(
           bucket,
@@ -352,7 +352,7 @@ describe('FileHandler', function() {
       })
     })
 
-    it('should return null if options are supplied', function(done) {
+    it('should return null if options are supplied', function (done) {
       FileHandler.getRedirectUrl(
         bucket,
         key,
@@ -365,7 +365,7 @@ describe('FileHandler', function() {
       )
     })
 
-    it('should return null if the bucket is not one of the defined ones', function(done) {
+    it('should return null if the bucket is not one of the defined ones', function (done) {
       FileHandler.getRedirectUrl('a_different_bucket', key, (err, url) => {
         expect(err).not.to.exist
         expect(url).to.be.null
@@ -373,7 +373,7 @@ describe('FileHandler', function() {
       })
     })
 
-    it('should return null if redirects are not enabled', function(done) {
+    it('should return null if redirects are not enabled', function (done) {
       Settings.filestore.allowRedirects = false
       FileHandler.getRedirectUrl(bucket, key, (err, url) => {
         expect(err).not.to.exist
@@ -383,9 +383,9 @@ describe('FileHandler', function() {
     })
   })
 
-  describe('getDirectorySize', function() {
-    it('should call the filestore manager to get directory size', function(done) {
-      FileHandler.getDirectorySize(bucket, key, err => {
+  describe('getDirectorySize', function () {
+    it('should call the filestore manager to get directory size', function (done) {
+      FileHandler.getDirectorySize(bucket, key, (err) => {
         expect(err).not.to.exist
         expect(PersistorManager.directorySize).to.have.been.calledWith(
           bucket,

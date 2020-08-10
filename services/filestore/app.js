@@ -28,7 +28,7 @@ if (Metrics.event_loop) {
   Metrics.event_loop.monitor(logger)
 }
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   Metrics.inc('http-request')
   next()
 })
@@ -127,7 +127,7 @@ app.get(
   fileController.getFile
 )
 
-app.get('/status', function(req, res) {
+app.get('/status', function (req, res) {
   res.send('filestore sharelatex up')
 })
 
@@ -140,7 +140,7 @@ const host = '0.0.0.0'
 
 if (!module.parent) {
   // Called directly
-  app.listen(port, host, error => {
+  app.listen(port, host, (error) => {
     if (error) {
       logger.error('Error starting Filestore', error)
       throw error
@@ -153,7 +153,7 @@ process
   .on('unhandledRejection', (reason, p) => {
     logger.err(reason, 'Unhandled Rejection at Promise', p)
   })
-  .on('uncaughtException', err => {
+  .on('uncaughtException', (err) => {
     logger.err(err, 'Uncaught Exception thrown')
     process.exit(1)
   })
