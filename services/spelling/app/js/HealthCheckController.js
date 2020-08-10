@@ -13,7 +13,7 @@ module.exports = {
       },
       timeout: 1000 * 20
     }
-    return request.post(opts, function(err, response, body) {
+    return request.post(opts, function (err, response, body) {
       if (err != null) {
         return res.sendStatus(500)
       }

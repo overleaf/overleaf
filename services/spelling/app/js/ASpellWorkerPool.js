@@ -56,7 +56,9 @@ class ASpellWorkerPool {
   }
 
   cleanup() {
-    const active = this.PROCESS_POOL.filter(worker => worker.state !== 'killed')
+    const active = this.PROCESS_POOL.filter(
+      (worker) => worker.state !== 'killed'
+    )
     this.PROCESS_POOL = active
     return metrics.gauge('aspellWorkerPool-size', this.PROCESS_POOL.length)
   }
@@ -66,7 +68,7 @@ class ASpellWorkerPool {
     let worker
     const availableWorker = _.find(
       this.PROCESS_POOL,
-      cached => cached.language === language && cached.isReady()
+      (cached) => cached.language === language && cached.isReady()
     )
     if (availableWorker == null) {
       worker = this.create(language)
@@ -103,7 +105,7 @@ class ASpellWorkerPool {
         return worker.shutdown(`reached limit of ${this.MAX_REQUESTS} requests`)
       } else {
         // queue a shutdown if worker is idle
-        return (worker.idleTimer = setTimeout(function() {
+        return (worker.idleTimer = setTimeout(function () {
           worker.shutdown('idle worker')
           return (worker.idleTimer = null)
         }, this.MAX_IDLE_TIME))

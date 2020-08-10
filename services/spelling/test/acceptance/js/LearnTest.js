@@ -3,7 +3,7 @@ const request = require('./helpers/request')
 
 const USER_ID = 101
 
-const checkWord = words =>
+const checkWord = (words) =>
   request.post({
     url: `/user/${USER_ID}/check`,
     body: JSON.stringify({
@@ -11,7 +11,7 @@ const checkWord = words =>
     })
   })
 
-const learnWord = word =>
+const learnWord = (word) =>
   request.post({
     url: `/user/${USER_ID}/learn`,
     body: JSON.stringify({
@@ -19,7 +19,7 @@ const learnWord = word =>
     })
   })
 
-const unlearnWord = word =>
+const unlearnWord = (word) =>
   request.post({
     url: `/user/${USER_ID}/unlearn`,
     body: JSON.stringify({
@@ -37,17 +37,17 @@ const deleteDict = () =>
     url: `/user/${USER_ID}`
   })
 
-describe('learning words', function() {
-  afterEach(async function() {
+describe('learning words', function () {
+  afterEach(async function () {
     await deleteDict()
   })
 
-  it('should return status 204 when posting a word successfully', async function() {
+  it('should return status 204 when posting a word successfully', async function () {
     const response = await learnWord('abcd')
     expect(response.statusCode).to.equal(204)
   })
 
-  it('should not learn the same word twice', async function() {
+  it('should not learn the same word twice', async function () {
     await learnWord('foobar')
     const learnResponse = await learnWord('foobar')
     expect(learnResponse.statusCode).to.equal(204)
@@ -59,7 +59,7 @@ describe('learning words', function() {
     expect(responseBody.length).to.equals(1)
   })
 
-  it('should return no misspellings after a word is learnt', async function() {
+  it('should return no misspellings after a word is learnt', async function () {
     const response = await checkWord(['abv'])
     const responseBody = JSON.parse(response.body)
     expect(responseBody.misspellings.length).to.equals(1)
@@ -71,7 +71,7 @@ describe('learning words', function() {
     expect(responseBody2.misspellings.length).to.equals(0)
   })
 
-  it('should return misspellings again after a personal dictionary is deleted', async function() {
+  it('should return misspellings again after a personal dictionary is deleted', async function () {
     await learnWord('bvc')
     await deleteDict()
 
@@ -81,13 +81,13 @@ describe('learning words', function() {
   })
 })
 
-describe('unlearning words', function() {
-  it('should return status 204 when posting a word successfully', async function() {
+describe('unlearning words', function () {
+  it('should return status 204 when posting a word successfully', async function () {
     const response = await unlearnWord('anything')
     expect(response.statusCode).to.equal(204)
   })
 
-  it('should return misspellings after a word is unlearnt', async function() {
+  it('should return misspellings after a word is unlearnt', async function () {
     await learnWord('abv')
 
     const response = await checkWord(['abv'])

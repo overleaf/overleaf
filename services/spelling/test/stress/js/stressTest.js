@@ -24,9 +24,9 @@ const wordlist = fs
   .readFileSync(WORDS)
   .toString()
   .split('\n')
-  .filter(w => w.match(/^[a-z]+$/))
+  .filter((w) => w.match(/^[a-z]+$/))
 
-const generateCorrectWords = function(n) {
+const generateCorrectWords = function (n) {
   const words = []
   const N = Math.random() > 0.5 ? wordlist.length : 10
   for (
@@ -40,7 +40,7 @@ const generateCorrectWords = function(n) {
   return words
 }
 
-const generateIncorrectWords = function(n) {
+const generateIncorrectWords = function (n) {
   const words = []
   const N = wordlist.length
   for (
@@ -54,7 +54,7 @@ const generateIncorrectWords = function(n) {
   return words
 }
 
-const make_request = function(correctWords, incorrectWords, callback) {
+const make_request = function (correctWords, incorrectWords, callback) {
   let i, j, w
   let i1
   let j1
@@ -73,7 +73,7 @@ const make_request = function(correctWords, incorrectWords, callback) {
     bad[i + correctSet.length] = true
   }
   const k = full.length
-  full.forEach(function(e, i) {
+  full.forEach(function (e, i) {
     let ref
     j = Math.floor(k * Math.random())
     ;[full[i], full[j]] = Array.from([full[j], full[i]])
@@ -89,7 +89,7 @@ const make_request = function(correctWords, incorrectWords, callback) {
   return request.post(
     'http://localhost:3005/user/1/check',
     { json: true, body: { words: full } },
-    function(err, req, body) {
+    function (err, req, body) {
       let m
       const { misspellings } = body
       console.log(JSON.stringify({ full, misspellings }))
