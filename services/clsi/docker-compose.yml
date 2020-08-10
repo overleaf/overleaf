@@ -15,7 +15,8 @@ services:
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
-    command: npm run test:unit
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+    command: npm run --silent test:unit
 
   test_acceptance:
     build:
@@ -35,5 +36,6 @@ services:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ERROR
       NODE_ENV: test
-    command: npm run test:acceptance
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+    command: npm run --silent test:acceptance
 

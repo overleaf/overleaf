@@ -5,7 +5,7 @@
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 let Errors
-var NotFoundError = function(message) {
+var NotFoundError = function (message) {
   const error = new Error(message)
   error.name = 'NotFoundError'
   error.__proto__ = NotFoundError.prototype
@@ -13,7 +13,7 @@ var NotFoundError = function(message) {
 }
 NotFoundError.prototype.__proto__ = Error.prototype
 
-var FilesOutOfSyncError = function(message) {
+var FilesOutOfSyncError = function (message) {
   const error = new Error(message)
   error.name = 'FilesOutOfSyncError'
   error.__proto__ = FilesOutOfSyncError.prototype
@@ -21,7 +21,7 @@ var FilesOutOfSyncError = function(message) {
 }
 FilesOutOfSyncError.prototype.__proto__ = Error.prototype
 
-var AlreadyCompilingError = function(message) {
+var AlreadyCompilingError = function (message) {
   const error = new Error(message)
   error.name = 'AlreadyCompilingError'
   error.__proto__ = AlreadyCompilingError.prototype

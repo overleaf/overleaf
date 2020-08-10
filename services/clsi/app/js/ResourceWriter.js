@@ -30,7 +30,7 @@ const parallelFileDownloads = settings.parallelFileDownloads || 1
 module.exports = ResourceWriter = {
   syncResourcesToDisk(request, basePath, callback) {
     if (callback == null) {
-      callback = function(error, resourceList) {}
+      callback = function (error, resourceList) {}
     }
     if (request.syncType === 'incremental') {
       logger.log(
@@ -40,14 +40,14 @@ module.exports = ResourceWriter = {
       return ResourceStateManager.checkProjectStateMatches(
         request.syncState,
         basePath,
-        function(error, resourceList) {
+        function (error, resourceList) {
           if (error != null) {
             return callback(error)
           }
           return ResourceWriter._removeExtraneousFiles(
             resourceList,
             basePath,
-            function(error, outputFiles, allFiles) {
+            function (error, outputFiles, allFiles) {
               if (error != null) {
                 return callback(error)
               }
@@ -55,7 +55,7 @@ module.exports = ResourceWriter = {
                 resourceList,
                 allFiles,
                 basePath,
-                function(error) {
+                function (error) {
                   if (error != null) {
                     return callback(error)
                   }
@@ -63,7 +63,7 @@ module.exports = ResourceWriter = {
                     request.project_id,
                     request.resources,
                     basePath,
-                    function(error) {
+                    function (error) {
                       if (error != null) {
                         return callback(error)
                       }
@@ -85,7 +85,7 @@ module.exports = ResourceWriter = {
         request.project_id,
         request.resources,
         basePath,
-        function(error) {
+        function (error) {
           if (error != null) {
             return callback(error)
           }
@@ -93,7 +93,7 @@ module.exports = ResourceWriter = {
             request.syncState,
             request.resources,
             basePath,
-            function(error) {
+            function (error) {
               if (error != null) {
                 return callback(error)
               }
@@ -107,15 +107,15 @@ module.exports = ResourceWriter = {
 
   saveIncrementalResourcesToDisk(project_id, resources, basePath, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return this._createDirectory(basePath, error => {
+    return this._createDirectory(basePath, (error) => {
       if (error != null) {
         return callback(error)
       }
-      const jobs = Array.from(resources).map(resource =>
-        (resource => {
-          return callback =>
+      const jobs = Array.from(resources).map((resource) =>
+        ((resource) => {
+          return (callback) =>
             this._writeResourceToDisk(project_id, resource, basePath, callback)
         })(resource)
       )
@@ -125,19 +125,19 @@ module.exports = ResourceWriter = {
 
   saveAllResourcesToDisk(project_id, resources, basePath, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return this._createDirectory(basePath, error => {
+    return this._createDirectory(basePath, (error) => {
       if (error != null) {
         return callback(error)
       }
-      return this._removeExtraneousFiles(resources, basePath, error => {
+      return this._removeExtraneousFiles(resources, basePath, (error) => {
         if (error != null) {
           return callback(error)
         }
-        const jobs = Array.from(resources).map(resource =>
-          (resource => {
-            return callback =>
+        const jobs = Array.from(resources).map((resource) =>
+          ((resource) => {
+            return (callback) =>
               this._writeResourceToDisk(
                 project_id,
                 resource,
@@ -153,9 +153,9 @@ module.exports = ResourceWriter = {
 
   _createDirectory(basePath, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return fs.mkdir(basePath, function(err) {
+    return fs.mkdir(basePath, function (err) {
       if (err != null) {
         if (err.code === 'EEXIST') {
           return callback()
@@ -171,15 +171,15 @@ module.exports = ResourceWriter = {
 
   _removeExtraneousFiles(resources, basePath, _callback) {
     if (_callback == null) {
-      _callback = function(error, outputFiles, allFiles) {}
+      _callback = function (error, outputFiles, allFiles) {}
     }
     const timer = new Metrics.Timer('unlink-output-files')
-    const callback = function(error, ...result) {
+    const callback = function (error, ...result) {
       timer.done()
       return _callback(error, ...Array.from(result))
     }
 
-    return OutputFileFinder.findOutputFiles(resources, basePath, function(
+    return OutputFileFinder.findOutputFiles(resources, basePath, function (
       error,
       outputFiles,
       allFiles
@@ -190,7 +190,7 @@ module.exports = ResourceWriter = {
 
       const jobs = []
       for (const file of Array.from(outputFiles || [])) {
-        ;(function(file) {
+        ;(function (file) {
           const { path } = file
           let should_delete = true
           if (
@@ -242,7 +242,7 @@ module.exports = ResourceWriter = {
             should_delete = true
           }
           if (should_delete) {
-            return jobs.push(callback =>
+            return jobs.push((callback) =>
               ResourceWriter._deleteFileIfNotDirectory(
                 Path.join(basePath, path),
                 callback
@@ -252,7 +252,7 @@ module.exports = ResourceWriter = {
         })(file)
       }
 
-      return async.series(jobs, function(error) {
+      return async.series(jobs, function (error) {
         if (error != null) {
           return callback(error)
         }
@@ -263,9 +263,9 @@ module.exports = ResourceWriter = {
 
   _deleteFileIfNotDirectory(path, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return fs.stat(path, function(error, stat) {
+    return fs.stat(path, function (error, stat) {
       if (error != null && error.code === 'ENOENT') {
         return callback()
       } else if (error != null) {
@@ -275,7 +275,7 @@ module.exports = ResourceWriter = {
         )
         return callback(error)
       } else if (stat.isFile()) {
-        return fs.unlink(path, function(error) {
+        return fs.unlink(path, function (error) {
           if (error != null) {
             logger.err(
               { err: error, path },
@@ -294,16 +294,18 @@ module.exports = ResourceWriter = {
 
   _writeResourceToDisk(project_id, resource, basePath, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return ResourceWriter.checkPath(basePath, resource.path, function(
+    return ResourceWriter.checkPath(basePath, resource.path, function (
       error,
       path
     ) {
       if (error != null) {
         return callback(error)
       }
-      return fs.mkdir(Path.dirname(path), { recursive: true }, function(error) {
+      return fs.mkdir(Path.dirname(path), { recursive: true }, function (
+        error
+      ) {
         if (error != null) {
           return callback(error)
         }
@@ -314,7 +316,7 @@ module.exports = ResourceWriter = {
             resource.url,
             path,
             resource.modified,
-            function(err) {
+            function (err) {
               if (err != null) {
                 logger.err(
                   {

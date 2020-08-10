@@ -1,20 +1,20 @@
 const request = require('request')
 const Settings = require('settings-sharelatex')
 
-const buildUrl = path =>
+const buildUrl = (path) =>
   `http://${Settings.internal.clsi.host}:${Settings.internal.clsi.port}/${path}`
 
 const url = buildUrl(`project/smoketest-${process.pid}/compile`)
 
 module.exports = {
   sendNewResult(res) {
-    this._run(error => this._sendResponse(res, error))
+    this._run((error) => this._sendResponse(res, error))
   },
   sendLastResult(res) {
     this._sendResponse(res, this._lastError)
   },
   triggerRun(cb) {
-    this._run(error => {
+    this._run((error) => {
       this._lastError = error
       cb(error)
     })

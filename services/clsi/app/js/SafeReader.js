@@ -22,9 +22,9 @@ module.exports = SafeReader = {
 
   readFile(file, size, encoding, callback) {
     if (callback == null) {
-      callback = function(error, result) {}
+      callback = function (error, result) {}
     }
-    return fs.open(file, 'r', function(err, fd) {
+    return fs.open(file, 'r', function (err, fd) {
       if (err != null && err.code === 'ENOENT') {
         return callback()
       }
@@ -34,7 +34,7 @@ module.exports = SafeReader = {
 
       // safely return always closing the file
       const callbackWithClose = (err, ...result) =>
-        fs.close(fd, function(err1) {
+        fs.close(fd, function (err1) {
           if (err != null) {
             return callback(err)
           }
@@ -44,7 +44,7 @@ module.exports = SafeReader = {
           return callback(null, ...Array.from(result))
         })
       const buff = Buffer.alloc(size) // fills with zeroes by default
-      return fs.read(fd, buff, 0, buff.length, 0, function(
+      return fs.read(fd, buff, 0, buff.length, 0, function (
         err,
         bytesRead,
         buffer

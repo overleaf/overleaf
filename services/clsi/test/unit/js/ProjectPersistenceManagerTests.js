@@ -21,8 +21,8 @@ const modulePath = require('path').join(
 )
 const tk = require('timekeeper')
 
-describe('ProjectPersistenceManager', function() {
-  beforeEach(function() {
+describe('ProjectPersistenceManager', function () {
+  beforeEach(function () {
     this.ProjectPersistenceManager = SandboxedModule.require(modulePath, {
       requires: {
         './UrlCache': (this.UrlCache = {}),
@@ -44,8 +44,8 @@ describe('ProjectPersistenceManager', function() {
     return (this.user_id = '1234')
   })
 
-  describe('refreshExpiryTimeout', function() {
-    it('should leave expiry alone if plenty of disk', function(done) {
+  describe('refreshExpiryTimeout', function () {
+    it('should leave expiry alone if plenty of disk', function (done) {
       this.diskusage.check.callsArgWith(1, null, {
         available: 40,
         total: 100
@@ -59,7 +59,7 @@ describe('ProjectPersistenceManager', function() {
       })
     })
 
-    it('should drop EXPIRY_TIMEOUT 10% if low disk usage', function(done) {
+    it('should drop EXPIRY_TIMEOUT 10% if low disk usage', function (done) {
       this.diskusage.check.callsArgWith(1, null, {
         available: 5,
         total: 100
@@ -71,7 +71,7 @@ describe('ProjectPersistenceManager', function() {
       })
     })
 
-    it('should not drop EXPIRY_TIMEOUT to below 50% of project_cache_length_ms', function(done) {
+    it('should not drop EXPIRY_TIMEOUT to below 50% of project_cache_length_ms', function (done) {
       this.diskusage.check.callsArgWith(1, null, {
         available: 5,
         total: 100
@@ -83,7 +83,7 @@ describe('ProjectPersistenceManager', function() {
       })
     })
 
-    it('should not modify EXPIRY_TIMEOUT if there is an error getting disk values', function(done) {
+    it('should not modify EXPIRY_TIMEOUT if there is an error getting disk values', function (done) {
       this.diskusage.check.callsArgWith(1, 'Error', {
         available: 5,
         total: 100
@@ -95,8 +95,8 @@ describe('ProjectPersistenceManager', function() {
     })
   })
 
-  describe('clearExpiredProjects', function() {
-    beforeEach(function() {
+  describe('clearExpiredProjects', function () {
+    beforeEach(function () {
       this.project_ids = ['project-id-1', 'project-id-2']
       this.ProjectPersistenceManager._findExpiredProjectIds = sinon
         .stub()
@@ -108,21 +108,21 @@ describe('ProjectPersistenceManager', function() {
       return this.ProjectPersistenceManager.clearExpiredProjects(this.callback)
     })
 
-    it('should clear each expired project', function() {
-      return Array.from(this.project_ids).map(project_id =>
+    it('should clear each expired project', function () {
+      return Array.from(this.project_ids).map((project_id) =>
         this.ProjectPersistenceManager.clearProjectFromCache
           .calledWith(project_id)
           .should.equal(true)
       )
     })
 
-    return it('should call the callback', function() {
+    return it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })
 
-  return describe('clearProject', function() {
-    beforeEach(function() {
+  return describe('clearProject', function () {
+    beforeEach(function () {
       this.ProjectPersistenceManager._clearProjectFromDatabase = sinon
         .stub()
         .callsArg(1)
@@ -135,25 +135,25 @@ describe('ProjectPersistenceManager', function() {
       )
     })
 
-    it('should clear the project from the database', function() {
+    it('should clear the project from the database', function () {
       return this.ProjectPersistenceManager._clearProjectFromDatabase
         .calledWith(this.project_id)
         .should.equal(true)
     })
 
-    it('should clear all the cached Urls for the project', function() {
+    it('should clear all the cached Urls for the project', function () {
       return this.UrlCache.clearProject
         .calledWith(this.project_id)
         .should.equal(true)
     })
 
-    it('should clear the project compile folder', function() {
+    it('should clear the project compile folder', function () {
       return this.CompileManager.clearProject
         .calledWith(this.project_id, this.user_id)
         .should.equal(true)
     })
 
-    return it('should call the callback', function() {
+    return it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })

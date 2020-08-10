@@ -16,8 +16,8 @@ const modulePath = require('path').join(
   '../../../app/js/TikzManager'
 )
 
-describe('TikzManager', function() {
-  beforeEach(function() {
+describe('TikzManager', function () {
+  beforeEach(function () {
     return (this.TikzManager = SandboxedModule.require(modulePath, {
       requires: {
         './ResourceWriter': (this.ResourceWriter = {}),
@@ -28,15 +28,15 @@ describe('TikzManager', function() {
     }))
   })
 
-  describe('checkMainFile', function() {
-    beforeEach(function() {
+  describe('checkMainFile', function () {
+    beforeEach(function () {
       this.compileDir = 'compile-dir'
       this.mainFile = 'main.tex'
       return (this.callback = sinon.stub())
     })
 
-    describe('if there is already an output.tex file in the resources', function() {
-      beforeEach(function() {
+    describe('if there is already an output.tex file in the resources', function () {
+      beforeEach(function () {
         this.resources = [{ path: 'main.tex' }, { path: 'output.tex' }]
         return this.TikzManager.checkMainFile(
           this.compileDir,
@@ -46,13 +46,13 @@ describe('TikzManager', function() {
         )
       })
 
-      return it('should call the callback with false ', function() {
+      return it('should call the callback with false ', function () {
         return this.callback.calledWithExactly(null, false).should.equal(true)
       })
     })
 
-    return describe('if there is no output.tex file in the resources', function() {
-      beforeEach(function() {
+    return describe('if there is no output.tex file in the resources', function () {
+      beforeEach(function () {
         this.resources = [{ path: 'main.tex' }]
         return (this.ResourceWriter.checkPath = sinon
           .stub()
@@ -60,8 +60,8 @@ describe('TikzManager', function() {
           .callsArgWith(2, null, `${this.compileDir}/${this.mainFile}`))
       })
 
-      describe('and the main file contains tikzexternalize', function() {
-        beforeEach(function() {
+      describe('and the main file contains tikzexternalize', function () {
+        beforeEach(function () {
           this.SafeReader.readFile = sinon
             .stub()
             .withArgs(`${this.compileDir}/${this.mainFile}`)
@@ -74,19 +74,19 @@ describe('TikzManager', function() {
           )
         })
 
-        it('should look at the file on disk', function() {
+        it('should look at the file on disk', function () {
           return this.SafeReader.readFile
             .calledWith(`${this.compileDir}/${this.mainFile}`)
             .should.equal(true)
         })
 
-        return it('should call the callback with true ', function() {
+        return it('should call the callback with true ', function () {
           return this.callback.calledWithExactly(null, true).should.equal(true)
         })
       })
 
-      describe('and the main file does not contain tikzexternalize', function() {
-        beforeEach(function() {
+      describe('and the main file does not contain tikzexternalize', function () {
+        beforeEach(function () {
           this.SafeReader.readFile = sinon
             .stub()
             .withArgs(`${this.compileDir}/${this.mainFile}`)
@@ -99,19 +99,19 @@ describe('TikzManager', function() {
           )
         })
 
-        it('should look at the file on disk', function() {
+        it('should look at the file on disk', function () {
           return this.SafeReader.readFile
             .calledWith(`${this.compileDir}/${this.mainFile}`)
             .should.equal(true)
         })
 
-        return it('should call the callback with false', function() {
+        return it('should call the callback with false', function () {
           return this.callback.calledWithExactly(null, false).should.equal(true)
         })
       })
 
-      return describe('and the main file contains \\usepackage{pstool}', function() {
-        beforeEach(function() {
+      return describe('and the main file contains \\usepackage{pstool}', function () {
+        beforeEach(function () {
           this.SafeReader.readFile = sinon
             .stub()
             .withArgs(`${this.compileDir}/${this.mainFile}`)
@@ -124,21 +124,21 @@ describe('TikzManager', function() {
           )
         })
 
-        it('should look at the file on disk', function() {
+        it('should look at the file on disk', function () {
           return this.SafeReader.readFile
             .calledWith(`${this.compileDir}/${this.mainFile}`)
             .should.equal(true)
         })
 
-        return it('should call the callback with true ', function() {
+        return it('should call the callback with true ', function () {
           return this.callback.calledWithExactly(null, true).should.equal(true)
         })
       })
     })
   })
 
-  return describe('injectOutputFile', function() {
-    beforeEach(function() {
+  return describe('injectOutputFile', function () {
+    beforeEach(function () {
       this.rootDir = '/mock'
       this.filename = 'filename.tex'
       this.callback = sinon.stub()
@@ -162,25 +162,25 @@ Hello world
       )
     })
 
-    it('sould check the path', function() {
+    it('sould check the path', function () {
       return this.ResourceWriter.checkPath
         .calledWith(this.rootDir, this.filename)
         .should.equal(true)
     })
 
-    it('should read the file', function() {
+    it('should read the file', function () {
       return this.fs.readFile
         .calledWith(`${this.rootDir}/${this.filename}`, 'utf8')
         .should.equal(true)
     })
 
-    it('should write out the same file as output.tex', function() {
+    it('should write out the same file as output.tex', function () {
       return this.fs.writeFile
         .calledWith(`${this.rootDir}/output.tex`, this.content, { flag: 'wx' })
         .should.equal(true)
     })
 
-    return it('should call the callback', function() {
+    return it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })

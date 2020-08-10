@@ -13,8 +13,8 @@ const request = require('request')
 require('chai').should()
 const ClsiApp = require('./helpers/ClsiApp')
 
-describe('Broken LaTeX file', function() {
-  before(function(done) {
+describe('Broken LaTeX file', function () {
+  before(function (done) {
     this.broken_request = {
       resources: [
         {
@@ -44,8 +44,8 @@ Hello world
     return ClsiApp.ensureRunning(done)
   })
 
-  describe('on first run', function() {
-    before(function(done) {
+  describe('on first run', function () {
+    before(function (done) {
       this.project_id = Client.randomId()
       return Client.compile(
         this.project_id,
@@ -59,13 +59,13 @@ Hello world
       )
     })
 
-    return it('should return a failure status', function() {
+    return it('should return a failure status', function () {
       return this.body.compile.status.should.equal('failure')
     })
   })
 
-  return describe('on second run', function() {
-    before(function(done) {
+  return describe('on second run', function () {
+    before(function (done) {
       this.project_id = Client.randomId()
       return Client.compile(this.project_id, this.correct_request, () => {
         return Client.compile(
@@ -81,7 +81,7 @@ Hello world
       })
     })
 
-    return it('should return a failure status', function() {
+    return it('should return a failure status', function () {
       return this.body.compile.status.should.equal('failure')
     })
   })

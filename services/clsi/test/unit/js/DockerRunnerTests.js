@@ -23,8 +23,8 @@ const modulePath = require('path').join(
 )
 const Path = require('path')
 
-describe('DockerRunner', function() {
-  beforeEach(function() {
+describe('DockerRunner', function () {
+  beforeEach(function () {
     let container, Docker, Timer
     this.container = container = {}
     this.DockerRunner = SandboxedModule.require(modulePath, {
@@ -39,7 +39,7 @@ describe('DockerRunner', function() {
           info: sinon.stub(),
           warn: sinon.stub()
         }),
-        dockerode: (Docker = (function() {
+        dockerode: (Docker = (function () {
           Docker = class Docker {
             static initClass() {
               this.prototype.getContainer = sinon.stub().returns(container)
@@ -90,12 +90,12 @@ describe('DockerRunner', function() {
     return (this.Settings.clsi.docker.env = { PATH: 'mock-path' })
   })
 
-  afterEach(function() {
+  afterEach(function () {
     this.DockerRunner.stopContainerMonitor()
   })
 
-  describe('run', function() {
-    beforeEach(function(done) {
+  describe('run', function () {
+    beforeEach(function (done) {
       this.DockerRunner._getContainerOptions = sinon
         .stub()
         .returns((this.options = { mockoptions: 'foo' }))
@@ -111,8 +111,8 @@ describe('DockerRunner', function() {
       return done()
     })
 
-    describe('successfully', function() {
-      beforeEach(function(done) {
+    describe('successfully', function () {
+      beforeEach(function (done) {
         this.DockerRunner._runAndWaitForContainer = sinon
           .stub()
           .callsArgWith(3, null, (this.output = 'mock-output'))
@@ -131,7 +131,7 @@ describe('DockerRunner', function() {
         )
       })
 
-      it('should generate the options for the container', function() {
+      it('should generate the options for the container', function () {
         return this.DockerRunner._getContainerOptions
           .calledWith(
             this.command_with_dir,
@@ -142,25 +142,25 @@ describe('DockerRunner', function() {
           .should.equal(true)
       })
 
-      it('should generate the fingerprint from the returned options', function() {
+      it('should generate the fingerprint from the returned options', function () {
         return this.DockerRunner._fingerprintContainer
           .calledWith(this.options)
           .should.equal(true)
       })
 
-      it('should do the run', function() {
+      it('should do the run', function () {
         return this.DockerRunner._runAndWaitForContainer
           .calledWith(this.options, this.volumes, this.timeout)
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback.calledWith(null, this.output).should.equal(true)
       })
     })
 
-    describe('when path.sandboxedCompilesHostDir is set', function() {
-      beforeEach(function() {
+    describe('when path.sandboxedCompilesHostDir is set', function () {
+      beforeEach(function () {
         this.Settings.path.sandboxedCompilesHostDir = '/some/host/dir/compiles'
         this.directory = '/var/lib/sharelatex/data/compiles/xyz'
         this.DockerRunner._runAndWaitForContainer = sinon
@@ -178,7 +178,7 @@ describe('DockerRunner', function() {
         )
       })
 
-      it('should re-write the bind directory', function() {
+      it('should re-write the bind directory', function () {
         const volumes = this.DockerRunner._runAndWaitForContainer.lastCall
           .args[1]
         return expect(volumes).to.deep.equal({
@@ -186,13 +186,13 @@ describe('DockerRunner', function() {
         })
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback.calledWith(null, this.output).should.equal(true)
       })
     })
 
-    describe('when the run throws an error', function() {
-      beforeEach(function() {
+    describe('when the run throws an error', function () {
+      beforeEach(function () {
         let firstTime = true
         this.output = 'mock-output'
         this.DockerRunner._runAndWaitForContainer = (
@@ -202,7 +202,7 @@ describe('DockerRunner', function() {
           callback
         ) => {
           if (callback == null) {
-            callback = function(error, output) {}
+            callback = function (error, output) {}
           }
           if (firstTime) {
             firstTime = false
@@ -227,25 +227,25 @@ describe('DockerRunner', function() {
         )
       })
 
-      it('should do the run twice', function() {
+      it('should do the run twice', function () {
         return this.DockerRunner._runAndWaitForContainer.calledTwice.should.equal(
           true
         )
       })
 
-      it('should destroy the container in between', function() {
+      it('should destroy the container in between', function () {
         return this.DockerRunner.destroyContainer
           .calledWith(this.name, null)
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback.calledWith(null, this.output).should.equal(true)
       })
     })
 
-    describe('with no image', function() {
-      beforeEach(function() {
+    describe('with no image', function () {
+      beforeEach(function () {
         this.DockerRunner._runAndWaitForContainer = sinon
           .stub()
           .callsArgWith(3, null, (this.output = 'mock-output'))
@@ -261,7 +261,7 @@ describe('DockerRunner', function() {
         )
       })
 
-      return it('should use the default image', function() {
+      return it('should use the default image', function () {
         return this.DockerRunner._getContainerOptions
           .calledWith(
             this.command_with_dir,
@@ -273,8 +273,8 @@ describe('DockerRunner', function() {
       })
     })
 
-    describe('with image override', function() {
-      beforeEach(function() {
+    describe('with image override', function () {
+      beforeEach(function () {
         this.Settings.texliveImageNameOveride = 'overrideimage.com/something'
         this.DockerRunner._runAndWaitForContainer = sinon
           .stub()
@@ -291,14 +291,14 @@ describe('DockerRunner', function() {
         )
       })
 
-      return it('should use the override and keep the tag', function() {
+      return it('should use the override and keep the tag', function () {
         const image = this.DockerRunner._getContainerOptions.args[0][1]
         return image.should.equal('overrideimage.com/something/image:2016.2')
       })
     })
 
-    describe('with image restriction', function() {
-      beforeEach(function() {
+    describe('with image restriction', function () {
+      beforeEach(function () {
         this.Settings.clsi.docker.allowedImages = [
           'repo/image:tag1',
           'repo/image:tag2'
@@ -308,8 +308,8 @@ describe('DockerRunner', function() {
           .callsArgWith(3, null, (this.output = 'mock-output'))
       })
 
-      describe('with a valid image', function() {
-        beforeEach(function() {
+      describe('with a valid image', function () {
+        beforeEach(function () {
           this.DockerRunner.run(
             this.project_id,
             this.command,
@@ -322,13 +322,13 @@ describe('DockerRunner', function() {
           )
         })
 
-        it('should setup the container', function() {
+        it('should setup the container', function () {
           this.DockerRunner._getContainerOptions.called.should.equal(true)
         })
       })
 
-      describe('with a invalid image', function() {
-        beforeEach(function() {
+      describe('with a invalid image', function () {
+        beforeEach(function () {
           this.DockerRunner.run(
             this.project_id,
             this.command,
@@ -341,21 +341,21 @@ describe('DockerRunner', function() {
           )
         })
 
-        it('should call the callback with an error', function() {
+        it('should call the callback with an error', function () {
           const err = new Error('image not allowed')
           this.callback.called.should.equal(true)
           this.callback.args[0][0].message.should.equal(err.message)
         })
 
-        it('should not setup the container', function() {
+        it('should not setup the container', function () {
           this.DockerRunner._getContainerOptions.called.should.equal(false)
         })
       })
     })
   })
 
-  describe('run with _getOptions', function() {
-    beforeEach(function(done) {
+  describe('run with _getOptions', function () {
+    beforeEach(function (done) {
       // this.DockerRunner._getContainerOptions = sinon
       //   .stub()
       //   .returns((this.options = { mockoptions: 'foo' }))
@@ -371,8 +371,8 @@ describe('DockerRunner', function() {
       return done()
     })
 
-    describe('when a compile group config is set', function() {
-      beforeEach(function() {
+    describe('when a compile group config is set', function () {
+      beforeEach(function () {
         this.Settings.clsi.docker.compileGroupConfig = {
           'compile-group': {
             'HostConfig.newProperty': 'new-property'
@@ -394,7 +394,7 @@ describe('DockerRunner', function() {
         )
       })
 
-      it('should set the docker options for the compile group', function() {
+      it('should set the docker options for the compile group', function () {
         const options = this.DockerRunner._runAndWaitForContainer.lastCall
           .args[0]
         return expect(options.HostConfig).to.deep.include({
@@ -406,14 +406,14 @@ describe('DockerRunner', function() {
         })
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback.calledWith(null, this.output).should.equal(true)
       })
     })
   })
 
-  describe('_runAndWaitForContainer', function() {
-    beforeEach(function() {
+  describe('_runAndWaitForContainer', function () {
+    beforeEach(function () {
       this.options = { mockoptions: 'foo', name: (this.name = 'mock-name') }
       this.DockerRunner.startContainer = (
         options,
@@ -436,25 +436,25 @@ describe('DockerRunner', function() {
       )
     })
 
-    it('should create/start the container', function() {
+    it('should create/start the container', function () {
       return this.DockerRunner.startContainer
         .calledWith(this.options, this.volumes)
         .should.equal(true)
     })
 
-    it('should wait for the container to finish', function() {
+    it('should wait for the container to finish', function () {
       return this.DockerRunner.waitForContainer
         .calledWith(this.name, this.timeout)
         .should.equal(true)
     })
 
-    return it('should call the callback with the output', function() {
+    return it('should call the callback with the output', function () {
       return this.callback.calledWith(null, this.output).should.equal(true)
     })
   })
 
-  describe('startContainer', function() {
-    beforeEach(function() {
+  describe('startContainer', function () {
+    beforeEach(function () {
       this.attachStreamHandler = sinon.stub()
       this.attachStreamHandler.cock = true
       this.options = { mockoptions: 'foo', name: 'mock-name' }
@@ -470,8 +470,8 @@ describe('DockerRunner', function() {
       return sinon.spy(this.DockerRunner, 'attachToContainer')
     })
 
-    describe('when the container exists', function() {
-      beforeEach(function() {
+    describe('when the container exists', function () {
+      beforeEach(function () {
         this.container.inspect = sinon.stub().callsArgWith(0)
         this.container.start = sinon.stub().yields()
 
@@ -483,24 +483,24 @@ describe('DockerRunner', function() {
         )
       })
 
-      it('should start the container with the given name', function() {
+      it('should start the container with the given name', function () {
         this.getContainer.calledWith(this.options.name).should.equal(true)
         return this.container.start.called.should.equal(true)
       })
 
-      it('should not try to create the container', function() {
+      it('should not try to create the container', function () {
         return this.createContainer.called.should.equal(false)
       })
 
-      it('should attach to the container', function() {
+      it('should attach to the container', function () {
         return this.DockerRunner.attachToContainer.called.should.equal(true)
       })
 
-      it('should call the callback', function() {
+      it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
 
-      return it('should attach before the container starts', function() {
+      return it('should attach before the container starts', function () {
         return sinon.assert.callOrder(
           this.DockerRunner.attachToContainer,
           this.container.start
@@ -508,8 +508,8 @@ describe('DockerRunner', function() {
       })
     })
 
-    describe('when the container does not exist', function() {
-      beforeEach(function() {
+    describe('when the container does not exist', function () {
+      beforeEach(function () {
         const exists = false
         this.container.start = sinon.stub().yields()
         this.container.inspect = sinon
@@ -523,20 +523,20 @@ describe('DockerRunner', function() {
         )
       })
 
-      it('should create the container', function() {
+      it('should create the container', function () {
         return this.createContainer.calledWith(this.options).should.equal(true)
       })
 
-      it('should call the callback and stream handler', function() {
+      it('should call the callback and stream handler', function () {
         this.attachStreamHandler.called.should.equal(true)
         return this.callback.called.should.equal(true)
       })
 
-      it('should attach to the container', function() {
+      it('should attach to the container', function () {
         return this.DockerRunner.attachToContainer.called.should.equal(true)
       })
 
-      return it('should attach before the container starts', function() {
+      return it('should attach before the container starts', function () {
         return sinon.assert.callOrder(
           this.DockerRunner.attachToContainer,
           this.container.start
@@ -544,8 +544,8 @@ describe('DockerRunner', function() {
       })
     })
 
-    describe('when the container is already running', function() {
-      beforeEach(function() {
+    describe('when the container is already running', function () {
+      beforeEach(function () {
         const error = new Error(
           `HTTP code is 304 which indicates error: server error - start: Cannot start container ${this.name}: The container MOCKID is already running.`
         )
@@ -560,18 +560,18 @@ describe('DockerRunner', function() {
         )
       })
 
-      it('should not try to create the container', function() {
+      it('should not try to create the container', function () {
         return this.createContainer.called.should.equal(false)
       })
 
-      return it('should call the callback  and stream handler without an error', function() {
+      return it('should call the callback  and stream handler without an error', function () {
         this.attachStreamHandler.called.should.equal(true)
         return this.callback.called.should.equal(true)
       })
     })
 
-    describe('when a volume does not exist', function() {
-      beforeEach(function() {
+    describe('when a volume does not exist', function () {
+      beforeEach(function () {
         this.fs.stat = sinon.stub().yields(new Error('no such path'))
         return this.DockerRunner.startContainer(
           this.options,
@@ -581,17 +581,17 @@ describe('DockerRunner', function() {
         )
       })
 
-      it('should not try to create the container', function() {
+      it('should not try to create the container', function () {
         return this.createContainer.called.should.equal(false)
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         this.callback.calledWith(sinon.match(Error)).should.equal(true)
       })
     })
 
-    describe('when a volume exists but is not a directory', function() {
-      beforeEach(function() {
+    describe('when a volume exists but is not a directory', function () {
+      beforeEach(function () {
         this.fs.stat = sinon.stub().yields(null, {
           isDirectory() {
             return false
@@ -605,17 +605,17 @@ describe('DockerRunner', function() {
         )
       })
 
-      it('should not try to create the container', function() {
+      it('should not try to create the container', function () {
         return this.createContainer.called.should.equal(false)
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         this.callback.calledWith(sinon.match(Error)).should.equal(true)
       })
     })
 
-    describe('when a volume does not exist, but sibling-containers are used', function() {
-      beforeEach(function() {
+    describe('when a volume does not exist, but sibling-containers are used', function () {
+      beforeEach(function () {
         this.fs.stat = sinon.stub().yields(new Error('no such path'))
         this.Settings.path.sandboxedCompilesHostDir = '/some/path'
         this.container.start = sinon.stub().yields()
@@ -626,30 +626,30 @@ describe('DockerRunner', function() {
         )
       })
 
-      afterEach(function() {
+      afterEach(function () {
         return delete this.Settings.path.sandboxedCompilesHostDir
       })
 
-      it('should start the container with the given name', function() {
+      it('should start the container with the given name', function () {
         this.getContainer.calledWith(this.options.name).should.equal(true)
         return this.container.start.called.should.equal(true)
       })
 
-      it('should not try to create the container', function() {
+      it('should not try to create the container', function () {
         return this.createContainer.called.should.equal(false)
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         this.callback.called.should.equal(true)
         return this.callback.calledWith(new Error()).should.equal(false)
       })
     })
 
-    return describe('when the container tries to be created, but already has been (race condition)', function() {})
+    return describe('when the container tries to be created, but already has been (race condition)', function () {})
   })
 
-  describe('waitForContainer', function() {
-    beforeEach(function() {
+  describe('waitForContainer', function () {
+    beforeEach(function () {
       this.containerId = 'container-id'
       this.timeout = 5000
       this.container.wait = sinon
@@ -658,8 +658,8 @@ describe('DockerRunner', function() {
       return (this.container.kill = sinon.stub().yields())
     })
 
-    describe('when the container returns in time', function() {
-      beforeEach(function() {
+    describe('when the container returns in time', function () {
+      beforeEach(function () {
         return this.DockerRunner.waitForContainer(
           this.containerId,
           this.timeout,
@@ -667,23 +667,23 @@ describe('DockerRunner', function() {
         )
       })
 
-      it('should wait for the container', function() {
+      it('should wait for the container', function () {
         this.getContainer.calledWith(this.containerId).should.equal(true)
         return this.container.wait.called.should.equal(true)
       })
 
-      return it('should call the callback with the exit', function() {
+      return it('should call the callback with the exit', function () {
         return this.callback
           .calledWith(null, this.statusCode)
           .should.equal(true)
       })
     })
 
-    return describe('when the container does not return before the timeout', function() {
-      beforeEach(function(done) {
-        this.container.wait = function(callback) {
+    return describe('when the container does not return before the timeout', function () {
+      beforeEach(function (done) {
+        this.container.wait = function (callback) {
           if (callback == null) {
-            callback = function(error, exitCode) {}
+            callback = function (error, exitCode) {}
           }
           return setTimeout(() => callback(null, { StatusCode: 42 }), 100)
         }
@@ -698,12 +698,12 @@ describe('DockerRunner', function() {
         )
       })
 
-      it('should call kill on the container', function() {
+      it('should call kill on the container', function () {
         this.getContainer.calledWith(this.containerId).should.equal(true)
         return this.container.kill.called.should.equal(true)
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         this.callback.calledWith(sinon.match(Error)).should.equal(true)
 
         const errorObj = this.callback.args[0][0]
@@ -713,8 +713,8 @@ describe('DockerRunner', function() {
     })
   })
 
-  describe('destroyOldContainers', function() {
-    beforeEach(function(done) {
+  describe('destroyOldContainers', function () {
+    beforeEach(function (done) {
       const oneHourInSeconds = 60 * 60
       const oneHourInMilliseconds = oneHourInSeconds * 1000
       const nowInSeconds = Date.now() / 1000
@@ -738,42 +738,42 @@ describe('DockerRunner', function() {
       this.DockerRunner.MAX_CONTAINER_AGE = oneHourInMilliseconds
       this.listContainers.callsArgWith(1, null, this.containers)
       this.DockerRunner.destroyContainer = sinon.stub().callsArg(3)
-      return this.DockerRunner.destroyOldContainers(error => {
+      return this.DockerRunner.destroyOldContainers((error) => {
         this.callback(error)
         return done()
       })
     })
 
-    it('should list all containers', function() {
+    it('should list all containers', function () {
       return this.listContainers.calledWith({ all: true }).should.equal(true)
     })
 
-    it('should destroy old containers', function() {
+    it('should destroy old containers', function () {
       this.DockerRunner.destroyContainer.callCount.should.equal(1)
       return this.DockerRunner.destroyContainer
         .calledWith('project-old-container-name', 'old-container-id')
         .should.equal(true)
     })
 
-    it('should not destroy new containers', function() {
+    it('should not destroy new containers', function () {
       return this.DockerRunner.destroyContainer
         .calledWith('project-new-container-name', 'new-container-id')
         .should.equal(false)
     })
 
-    it('should not destroy non-project containers', function() {
+    it('should not destroy non-project containers', function () {
       return this.DockerRunner.destroyContainer
         .calledWith('totally-not-a-project-container', 'some-random-id')
         .should.equal(false)
     })
 
-    return it('should callback the callback', function() {
+    return it('should callback the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })
 
-  describe('_destroyContainer', function() {
-    beforeEach(function() {
+  describe('_destroyContainer', function () {
+    beforeEach(function () {
       this.containerId = 'some_id'
       this.fakeContainer = { remove: sinon.stub().callsArgWith(1, null) }
       return (this.Docker.prototype.getContainer = sinon
@@ -781,11 +781,11 @@ describe('DockerRunner', function() {
         .returns(this.fakeContainer))
     })
 
-    it('should get the container', function(done) {
+    it('should get the container', function (done) {
       return this.DockerRunner._destroyContainer(
         this.containerId,
         false,
-        err => {
+        (err) => {
           this.Docker.prototype.getContainer.callCount.should.equal(1)
           this.Docker.prototype.getContainer
             .calledWith(this.containerId)
@@ -795,11 +795,11 @@ describe('DockerRunner', function() {
       )
     })
 
-    it('should try to force-destroy the container when shouldForce=true', function(done) {
+    it('should try to force-destroy the container when shouldForce=true', function (done) {
       return this.DockerRunner._destroyContainer(
         this.containerId,
         true,
-        err => {
+        (err) => {
           this.fakeContainer.remove.callCount.should.equal(1)
           this.fakeContainer.remove
             .calledWith({ force: true })
@@ -809,11 +809,11 @@ describe('DockerRunner', function() {
       )
     })
 
-    it('should not try to force-destroy the container when shouldForce=false', function(done) {
+    it('should not try to force-destroy the container when shouldForce=false', function (done) {
       return this.DockerRunner._destroyContainer(
         this.containerId,
         false,
-        err => {
+        (err) => {
           this.fakeContainer.remove.callCount.should.equal(1)
           this.fakeContainer.remove
             .calledWith({ force: false })
@@ -823,19 +823,19 @@ describe('DockerRunner', function() {
       )
     })
 
-    it('should not produce an error', function(done) {
+    it('should not produce an error', function (done) {
       return this.DockerRunner._destroyContainer(
         this.containerId,
         false,
-        err => {
+        (err) => {
           expect(err).to.equal(null)
           return done()
         }
       )
     })
 
-    describe('when the container is already gone', function() {
-      beforeEach(function() {
+    describe('when the container is already gone', function () {
+      beforeEach(function () {
         this.fakeError = new Error('woops')
         this.fakeError.statusCode = 404
         this.fakeContainer = {
@@ -846,11 +846,11 @@ describe('DockerRunner', function() {
           .returns(this.fakeContainer))
       })
 
-      return it('should not produce an error', function(done) {
+      return it('should not produce an error', function (done) {
         return this.DockerRunner._destroyContainer(
           this.containerId,
           false,
-          err => {
+          (err) => {
             expect(err).to.equal(null)
             return done()
           }
@@ -858,8 +858,8 @@ describe('DockerRunner', function() {
       })
     })
 
-    return describe('when container.destroy produces an error', function(done) {
-      beforeEach(function() {
+    return describe('when container.destroy produces an error', function (done) {
+      beforeEach(function () {
         this.fakeError = new Error('woops')
         this.fakeError.statusCode = 500
         this.fakeContainer = {
@@ -870,11 +870,11 @@ describe('DockerRunner', function() {
           .returns(this.fakeContainer))
       })
 
-      return it('should produce an error', function(done) {
+      return it('should produce an error', function (done) {
         return this.DockerRunner._destroyContainer(
           this.containerId,
           false,
-          err => {
+          (err) => {
             expect(err).to.not.equal(null)
             expect(err).to.equal(this.fakeError)
             return done()
@@ -884,8 +884,8 @@ describe('DockerRunner', function() {
     })
   })
 
-  return describe('kill', function() {
-    beforeEach(function() {
+  return describe('kill', function () {
+    beforeEach(function () {
       this.containerId = 'some_id'
       this.fakeContainer = { kill: sinon.stub().callsArgWith(0, null) }
       return (this.Docker.prototype.getContainer = sinon
@@ -893,8 +893,8 @@ describe('DockerRunner', function() {
         .returns(this.fakeContainer))
     })
 
-    it('should get the container', function(done) {
-      return this.DockerRunner.kill(this.containerId, err => {
+    it('should get the container', function (done) {
+      return this.DockerRunner.kill(this.containerId, (err) => {
         this.Docker.prototype.getContainer.callCount.should.equal(1)
         this.Docker.prototype.getContainer
           .calledWith(this.containerId)
@@ -903,22 +903,22 @@ describe('DockerRunner', function() {
       })
     })
 
-    it('should try to force-destroy the container', function(done) {
-      return this.DockerRunner.kill(this.containerId, err => {
+    it('should try to force-destroy the container', function (done) {
+      return this.DockerRunner.kill(this.containerId, (err) => {
         this.fakeContainer.kill.callCount.should.equal(1)
         return done()
       })
     })
 
-    it('should not produce an error', function(done) {
-      return this.DockerRunner.kill(this.containerId, err => {
+    it('should not produce an error', function (done) {
+      return this.DockerRunner.kill(this.containerId, (err) => {
         expect(err).to.equal(undefined)
         return done()
       })
     })
 
-    describe('when the container is not actually running', function() {
-      beforeEach(function() {
+    describe('when the container is not actually running', function () {
+      beforeEach(function () {
         this.fakeError = new Error('woops')
         this.fakeError.statusCode = 500
         this.fakeError.message =
@@ -931,16 +931,16 @@ describe('DockerRunner', function() {
           .returns(this.fakeContainer))
       })
 
-      return it('should not produce an error', function(done) {
-        return this.DockerRunner.kill(this.containerId, err => {
+      return it('should not produce an error', function (done) {
+        return this.DockerRunner.kill(this.containerId, (err) => {
           expect(err).to.equal(undefined)
           return done()
         })
       })
     })
 
-    return describe('when container.kill produces a legitimate error', function(done) {
-      beforeEach(function() {
+    return describe('when container.kill produces a legitimate error', function (done) {
+      beforeEach(function () {
         this.fakeError = new Error('woops')
         this.fakeError.statusCode = 500
         this.fakeError.message = 'Totally legitimate reason to throw an error'
@@ -952,8 +952,8 @@ describe('DockerRunner', function() {
           .returns(this.fakeContainer))
       })
 
-      return it('should produce an error', function(done) {
-        return this.DockerRunner.kill(this.containerId, err => {
+      return it('should produce an error', function (done) {
+        return this.DockerRunner.kill(this.containerId, (err) => {
           expect(err).to.not.equal(undefined)
           expect(err).to.equal(this.fakeError)
           return done()

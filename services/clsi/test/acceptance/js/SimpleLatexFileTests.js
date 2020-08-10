@@ -13,8 +13,8 @@ const request = require('request')
 require('chai').should()
 const ClsiApp = require('./helpers/ClsiApp')
 
-describe('Simple LaTeX file', function() {
-  before(function(done) {
+describe('Simple LaTeX file', function () {
+  before(function (done) {
     this.project_id = Client.randomId()
     this.request = {
       resources: [
@@ -43,17 +43,17 @@ Hello world
     })
   })
 
-  it('should return the PDF', function() {
+  it('should return the PDF', function () {
     const pdf = Client.getOutputFile(this.body, 'pdf')
     return pdf.type.should.equal('pdf')
   })
 
-  it('should return the log', function() {
+  it('should return the log', function () {
     const log = Client.getOutputFile(this.body, 'log')
     return log.type.should.equal('log')
   })
 
-  it('should provide the pdf for download', function(done) {
+  it('should provide the pdf for download', function (done) {
     const pdf = Client.getOutputFile(this.body, 'pdf')
     return request.get(pdf.url, (error, res, body) => {
       res.statusCode.should.equal(200)
@@ -61,7 +61,7 @@ Hello world
     })
   })
 
-  return it('should provide the log for download', function(done) {
+  return it('should provide the log for download', function (done) {
     const log = Client.getOutputFile(this.body, 'pdf')
     return request.get(log.url, (error, res, body) => {
       res.statusCode.should.equal(200)

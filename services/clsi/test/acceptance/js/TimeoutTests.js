@@ -13,8 +13,8 @@ const request = require('request')
 require('chai').should()
 const ClsiApp = require('./helpers/ClsiApp')
 
-describe('Timed out compile', function() {
-  before(function(done) {
+describe('Timed out compile', function () {
+  before(function (done) {
     this.request = {
       options: {
         timeout: 10
@@ -47,16 +47,16 @@ describe('Timed out compile', function() {
     })
   })
 
-  it('should return a timeout error', function() {
+  it('should return a timeout error', function () {
     return this.body.compile.error.should.equal('container timed out')
   })
 
-  it('should return a timedout status', function() {
+  it('should return a timedout status', function () {
     return this.body.compile.status.should.equal('timedout')
   })
 
-  return it('should return the log output file name', function() {
-    const outputFilePaths = this.body.compile.outputFiles.map(x => x.path)
+  return it('should return the log output file name', function () {
+    const outputFilePaths = this.body.compile.outputFiles.map((x) => x.path)
     return outputFilePaths.should.include('output.log')
   })
 })

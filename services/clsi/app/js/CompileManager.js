@@ -35,7 +35,7 @@ const async = require('async')
 const Errors = require('./Errors')
 const CommandRunner = require('./CommandRunner')
 
-const getCompileName = function(project_id, user_id) {
+const getCompileName = function (project_id, user_id) {
   if (user_id != null) {
     return `${project_id}-${user_id}`
   } else {
@@ -49,19 +49,19 @@ const getCompileDir = (project_id, user_id) =>
 module.exports = CompileManager = {
   doCompileWithLock(request, callback) {
     if (callback == null) {
-      callback = function(error, outputFiles) {}
+      callback = function (error, outputFiles) {}
     }
     const compileDir = getCompileDir(request.project_id, request.user_id)
     const lockFile = Path.join(compileDir, '.project-lock')
     // use a .project-lock file in the compile directory to prevent
     // simultaneous compiles
-    return fse.ensureDir(compileDir, function(error) {
+    return fse.ensureDir(compileDir, function (error) {
       if (error != null) {
         return callback(error)
       }
       return LockManager.runWithLock(
         lockFile,
-        releaseLock => CompileManager.doCompile(request, releaseLock),
+        (releaseLock) => CompileManager.doCompile(request, releaseLock),
         callback
       )
     })
@@ -69,7 +69,7 @@ module.exports = CompileManager = {
 
   doCompile(request, callback) {
     if (callback == null) {
-      callback = function(error, outputFiles) {}
+      callback = function (error, outputFiles) {}
     }
     const compileDir = getCompileDir(request.project_id, request.user_id)
     let timer = new Metrics.Timer('write-to-disk')
@@ -77,7 +77,7 @@ module.exports = CompileManager = {
       { project_id: request.project_id, user_id: request.user_id },
       'syncing resources to disk'
     )
-    return ResourceWriter.syncResourcesToDisk(request, compileDir, function(
+    return ResourceWriter.syncResourcesToDisk(request, compileDir, function (
       error,
       resourceList
     ) {
@@ -109,7 +109,7 @@ module.exports = CompileManager = {
       )
       timer.done()
 
-      const injectDraftModeIfRequired = function(callback) {
+      const injectDraftModeIfRequired = function (callback) {
         if (request.draft) {
           return DraftModeManager.injectDraftMode(
             Path.join(compileDir, request.rootResourcePath),
@@ -120,12 +120,12 @@ module.exports = CompileManager = {
         }
       }
 
-      const createTikzFileIfRequired = callback =>
+      const createTikzFileIfRequired = (callback) =>
         TikzManager.checkMainFile(
           compileDir,
           request.rootResourcePath,
           resourceList,
-          function(error, needsMainFile) {
+          function (error, needsMainFile) {
             if (error != null) {
               return callback(error)
             }
@@ -165,7 +165,7 @@ module.exports = CompileManager = {
       // apply a series of file modifications/creations for draft mode and tikz
       return async.series(
         [injectDraftModeIfRequired, createTikzFileIfRequired],
-        function(error) {
+        function (error) {
           if (error != null) {
             return callback(error)
           }
@@ -177,9 +177,9 @@ module.exports = CompileManager = {
                 request.imageName != null
                   ? request.imageName.match(/:(.*)/)
                   : undefined,
-                x1 => x1[1]
+                (x1) => x1[1]
               ),
-              x => x.replace(/\./g, '-')
+              (x) => x.replace(/\./g, '-')
             ) || 'default'
           if (!request.project_id.match(/^[0-9a-f]{24}$/)) {
             tag = 'other'
@@ -202,13 +202,11 @@ module.exports = CompileManager = {
               environment: env,
               compileGroup: request.compileGroup
             },
-            function(error, output, stats, timings) {
+            function (error, output, stats, timings) {
               // request was for validation only
               let metric_key, metric_value
               if (request.check === 'validate') {
-                const result = (error != null
-                ? error.code
-                : undefined)
+                const result = (error != null ? error.code : undefined)
                   ? 'fail'
                   : 'pass'
                 error = new Error('validation')
@@ -231,7 +229,7 @@ module.exports = CompileManager = {
                 OutputFileFinder.findOutputFiles(
                   resourceList,
                   compileDir,
-                  function(err, outputFiles) {
+                  function (err, outputFiles) {
                     if (err != null) {
                       return callback(err)
                     }
@@ -289,7 +287,7 @@ module.exports = CompileManager = {
               return OutputFileFinder.findOutputFiles(
                 resourceList,
                 compileDir,
-                function(error, outputFiles) {
+                function (error, outputFiles) {
                   if (error != null) {
                     return callback(error)
                   }
@@ -309,7 +307,7 @@ module.exports = CompileManager = {
 
   stopCompile(project_id, user_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const compileName = getCompileName(project_id, user_id)
     return LatexRunner.killLatex(compileName, callback)
@@ -317,16 +315,16 @@ module.exports = CompileManager = {
 
   clearProject(project_id, user_id, _callback) {
     if (_callback == null) {
-      _callback = function(error) {}
+      _callback = function (error) {}
     }
-    const callback = function(error) {
+    const callback = function (error) {
       _callback(error)
-      return (_callback = function() {})
+      return (_callback = function () {})
     }
 
     const compileDir = getCompileDir(project_id, user_id)
 
-    return CompileManager._checkDirectory(compileDir, function(err, exists) {
+    return CompileManager._checkDirectory(compileDir, function (err, exists) {
       if (err != null) {
         return callback(err)
       }
@@ -339,9 +337,9 @@ module.exports = CompileManager = {
       proc.on('error', callback)
 
       let stderr = ''
-      proc.stderr.setEncoding('utf8').on('data', chunk => (stderr += chunk))
+      proc.stderr.setEncoding('utf8').on('data', (chunk) => (stderr += chunk))
 
-      return proc.on('close', function(code) {
+      return proc.on('close', function (code) {
         if (code === 0) {
           return callback(null)
         } else {
@@ -353,26 +351,26 @@ module.exports = CompileManager = {
 
   _findAllDirs(callback) {
     if (callback == null) {
-      callback = function(error, allDirs) {}
+      callback = function (error, allDirs) {}
     }
     const root = Settings.path.compilesDir
-    return fs.readdir(root, function(err, files) {
+    return fs.readdir(root, function (err, files) {
       if (err != null) {
         return callback(err)
       }
-      const allDirs = Array.from(files).map(file => Path.join(root, file))
+      const allDirs = Array.from(files).map((file) => Path.join(root, file))
       return callback(null, allDirs)
     })
   },
 
   clearExpiredProjects(max_cache_age_ms, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const now = Date.now()
     // action for each directory
     const expireIfNeeded = (checkDir, cb) =>
-      fs.stat(checkDir, function(err, stats) {
+      fs.stat(checkDir, function (err, stats) {
         if (err != null) {
           return cb()
         } // ignore errors checking directory
@@ -385,7 +383,7 @@ module.exports = CompileManager = {
         }
       })
     // iterate over all project directories
-    return CompileManager._findAllDirs(function(error, allDirs) {
+    return CompileManager._findAllDirs(function (error, allDirs) {
       if (error != null) {
         return callback()
       }
@@ -395,9 +393,9 @@ module.exports = CompileManager = {
 
   _checkDirectory(compileDir, callback) {
     if (callback == null) {
-      callback = function(error, exists) {}
+      callback = function (error, exists) {}
     }
-    return fs.lstat(compileDir, function(err, stats) {
+    return fs.lstat(compileDir, function (err, stats) {
       if ((err != null ? err.code : undefined) === 'ENOENT') {
         return callback(null, false) //  directory does not exist
       } else if (err != null) {
@@ -423,7 +421,7 @@ module.exports = CompileManager = {
     // might not match the file path on the host. The .synctex.gz file however, will be accessed
     // wherever it is on the host.
     if (callback == null) {
-      callback = function(error, pdfPositions) {}
+      callback = function (error, pdfPositions) {}
     }
     const compileName = getCompileName(project_id, user_id)
     const base_dir = Settings.path.synctexBaseDir(compileName)
@@ -431,7 +429,7 @@ module.exports = CompileManager = {
     const compileDir = getCompileDir(project_id, user_id)
     const synctex_path = `${base_dir}/output.pdf`
     const command = ['code', synctex_path, file_path, line, column]
-    CompileManager._runSynctex(project_id, user_id, command, function(
+    CompileManager._runSynctex(project_id, user_id, command, function (
       error,
       stdout
     ) {
@@ -448,14 +446,14 @@ module.exports = CompileManager = {
 
   syncFromPdf(project_id, user_id, page, h, v, callback) {
     if (callback == null) {
-      callback = function(error, filePositions) {}
+      callback = function (error, filePositions) {}
     }
     const compileName = getCompileName(project_id, user_id)
     const compileDir = getCompileDir(project_id, user_id)
     const base_dir = Settings.path.synctexBaseDir(compileName)
     const synctex_path = `${base_dir}/output.pdf`
     const command = ['pdf', synctex_path, page, h, v]
-    CompileManager._runSynctex(project_id, user_id, command, function(
+    CompileManager._runSynctex(project_id, user_id, command, function (
       error,
       stdout
     ) {
@@ -475,17 +473,17 @@ module.exports = CompileManager = {
 
   _checkFileExists(dir, filename, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const file = Path.join(dir, filename)
-    return fs.stat(dir, function(error, stats) {
+    return fs.stat(dir, function (error, stats) {
       if ((error != null ? error.code : undefined) === 'ENOENT') {
         return callback(new Errors.NotFoundError('no output directory'))
       }
       if (error != null) {
         return callback(error)
       }
-      return fs.stat(file, function(error, stats) {
+      return fs.stat(file, function (error, stats) {
         if ((error != null ? error.code : undefined) === 'ENOENT') {
           return callback(new Errors.NotFoundError('no output file'))
         }
@@ -502,7 +500,7 @@ module.exports = CompileManager = {
 
   _runSynctex(project_id, user_id, command, callback) {
     if (callback == null) {
-      callback = function(error, stdout) {}
+      callback = function (error, stdout) {}
     }
     const seconds = 1000
 
@@ -512,7 +510,7 @@ module.exports = CompileManager = {
     const timeout = 60 * 1000 // increased to allow for large projects
     const compileName = getCompileName(project_id, user_id)
     const compileGroup = 'synctex'
-    CompileManager._checkFileExists(directory, 'output.synctex.gz', error => {
+    CompileManager._checkFileExists(directory, 'output.synctex.gz', (error) => {
       if (error) {
         return callback(error)
       }
@@ -526,7 +524,7 @@ module.exports = CompileManager = {
         timeout,
         {},
         compileGroup,
-        function(error, output) {
+        function (error, output) {
           if (error != null) {
             logger.err(
               { err: error, command, project_id, user_id },
@@ -576,7 +574,7 @@ module.exports = CompileManager = {
 
   wordcount(project_id, user_id, file_name, image, callback) {
     if (callback == null) {
-      callback = function(error, pdfPositions) {}
+      callback = function (error, pdfPositions) {}
     }
     logger.log({ project_id, user_id, file_name, image }, 'running wordcount')
     const file_path = `$COMPILE_DIR/${file_name}`
@@ -591,7 +589,7 @@ module.exports = CompileManager = {
     const timeout = 60 * 1000
     const compileName = getCompileName(project_id, user_id)
     const compileGroup = 'wordcount'
-    return fse.ensureDir(compileDir, function(error) {
+    return fse.ensureDir(compileDir, function (error) {
       if (error != null) {
         logger.err(
           { error, project_id, user_id, file_name },
@@ -607,14 +605,14 @@ module.exports = CompileManager = {
         timeout,
         {},
         compileGroup,
-        function(error) {
+        function (error) {
           if (error != null) {
             return callback(error)
           }
           return fs.readFile(
             compileDir + '/' + file_name + '.wc',
             'utf-8',
-            function(err, stdout) {
+            function (err, stdout) {
               if (err != null) {
                 // call it node_err so sentry doesn't use random path error as unique id so it can't be ignored
                 logger.err(

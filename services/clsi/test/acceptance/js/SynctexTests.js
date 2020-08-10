@@ -16,8 +16,8 @@ const { expect } = require('chai')
 const ClsiApp = require('./helpers/ClsiApp')
 const crypto = require('crypto')
 
-describe('Syncing', function() {
-  before(function(done) {
+describe('Syncing', function () {
+  before(function (done) {
     const content = `\
 \\documentclass{article}
 \\begin{document}
@@ -47,8 +47,8 @@ Hello world
     })
   })
 
-  describe('from code to pdf', function() {
-    return it('should return the correct location', function(done) {
+  describe('from code to pdf', function () {
+    return it('should return the correct location', function (done) {
       return Client.syncFromCode(
         this.project_id,
         'main.tex',
@@ -69,8 +69,8 @@ Hello world
     })
   })
 
-  describe('from pdf to code', function() {
-    return it('should return the correct location', function(done) {
+  describe('from pdf to code', function () {
+    return it('should return the correct location', function (done) {
       return Client.syncFromPdf(
         this.project_id,
         1,
@@ -89,12 +89,12 @@ Hello world
     })
   })
 
-  describe('when the project directory is not available', function() {
-    before(function() {
+  describe('when the project directory is not available', function () {
+    before(function () {
       this.other_project_id = Client.randomId()
     })
-    describe('from code to pdf', function() {
-      it('should return a 404 response', function(done) {
+    describe('from code to pdf', function () {
+      it('should return a 404 response', function (done) {
         return Client.syncFromCode(
           this.other_project_id,
           'main.tex',
@@ -110,8 +110,8 @@ Hello world
         )
       })
     })
-    describe('from pdf to code', function() {
-      it('should return a 404 response', function(done) {
+    describe('from pdf to code', function () {
+      it('should return a 404 response', function (done) {
         return Client.syncFromPdf(
           this.other_project_id,
           1,
@@ -129,8 +129,8 @@ Hello world
     })
   })
 
-  describe('when the synctex file is not available', function() {
-    before(function(done) {
+  describe('when the synctex file is not available', function () {
+    before(function (done) {
       this.broken_project_id = Client.randomId()
       const content = 'this is not valid tex' // not a valid tex file
       this.request = {
@@ -153,8 +153,8 @@ Hello world
       )
     })
 
-    describe('from code to pdf', function() {
-      it('should return a 404 response', function(done) {
+    describe('from code to pdf', function () {
+      it('should return a 404 response', function (done) {
         return Client.syncFromCode(
           this.broken_project_id,
           'main.tex',
@@ -170,8 +170,8 @@ Hello world
         )
       })
     })
-    describe('from pdf to code', function() {
-      it('should return a 404 response', function(done) {
+    describe('from pdf to code', function () {
+      it('should return a 404 response', function (done) {
         return Client.syncFromPdf(
           this.broken_project_id,
           1,

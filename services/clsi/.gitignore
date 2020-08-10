@@ -11,3 +11,6 @@ db.sqlite-wal
 db.sqlite-shm
 config/*
 npm-debug.log
+
+# managed by dev-environment$ bin/update_build_scripts
+.npmrc

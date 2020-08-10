@@ -33,11 +33,11 @@ module.exports = CommandRunner = {
   ) {
     let key, value
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     } else {
       callback = _.once(callback)
     }
-    command = Array.from(command).map(arg =>
+    command = Array.from(command).map((arg) =>
       arg.toString().replace('$COMPILE_DIR', directory)
     )
     logger.log({ project_id, command, directory }, 'running command')
@@ -58,9 +58,9 @@ module.exports = CommandRunner = {
     const proc = spawn(command[0], command.slice(1), { cwd: directory, env })
 
     let stdout = ''
-    proc.stdout.setEncoding('utf8').on('data', data => (stdout += data))
+    proc.stdout.setEncoding('utf8').on('data', (data) => (stdout += data))
 
-    proc.on('error', function(err) {
+    proc.on('error', function (err) {
       logger.err(
         { err, project_id, command, directory },
         'error running command'
@@ -68,7 +68,7 @@ module.exports = CommandRunner = {
       return callback(err)
     })
 
-    proc.on('close', function(code, signal) {
+    proc.on('close', function (code, signal) {
       let err
       logger.info({ code, signal, project_id }, 'command exited')
       if (signal === 'SIGTERM') {
@@ -91,7 +91,7 @@ module.exports = CommandRunner = {
 
   kill(pid, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     try {
       process.kill(-pid) // kill all processes in group

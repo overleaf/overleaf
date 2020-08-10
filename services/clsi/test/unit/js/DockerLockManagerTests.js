@@ -17,8 +17,8 @@ const modulePath = require('path').join(
   '../../../app/js/DockerLockManager'
 )
 
-describe('LockManager', function() {
-  beforeEach(function() {
+describe('LockManager', function () {
+  beforeEach(function () {
     return (this.LockManager = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': (this.Settings = { clsi: { docker: {} } }),
@@ -30,13 +30,13 @@ describe('LockManager', function() {
     }))
   })
 
-  return describe('runWithLock', function() {
-    describe('with a single lock', function() {
-      beforeEach(function(done) {
+  return describe('runWithLock', function () {
+    describe('with a single lock', function () {
+      beforeEach(function (done) {
         this.callback = sinon.stub()
         return this.LockManager.runWithLock(
           'lock-one',
-          releaseLock =>
+          (releaseLock) =>
             setTimeout(() => releaseLock(null, 'hello', 'world'), 100),
 
           (err, ...args) => {
@@ -46,20 +46,20 @@ describe('LockManager', function() {
         )
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback
           .calledWith(null, 'hello', 'world')
           .should.equal(true)
       })
     })
 
-    describe('with two locks', function() {
-      beforeEach(function(done) {
+    describe('with two locks', function () {
+      beforeEach(function (done) {
         this.callback1 = sinon.stub()
         this.callback2 = sinon.stub()
         this.LockManager.runWithLock(
           'lock-one',
-          releaseLock =>
+          (releaseLock) =>
             setTimeout(() => releaseLock(null, 'hello', 'world', 'one'), 100),
 
           (err, ...args) => {
@@ -68,7 +68,7 @@ describe('LockManager', function() {
         )
         return this.LockManager.runWithLock(
           'lock-two',
-          releaseLock =>
+          (releaseLock) =>
             setTimeout(() => releaseLock(null, 'hello', 'world', 'two'), 200),
 
           (err, ...args) => {
@@ -78,29 +78,29 @@ describe('LockManager', function() {
         )
       })
 
-      it('should call the first callback', function() {
+      it('should call the first callback', function () {
         return this.callback1
           .calledWith(null, 'hello', 'world', 'one')
           .should.equal(true)
       })
 
-      return it('should call the second callback', function() {
+      return it('should call the second callback', function () {
         return this.callback2
           .calledWith(null, 'hello', 'world', 'two')
           .should.equal(true)
       })
     })
 
-    return describe('with lock contention', function() {
-      describe('where the first lock is released quickly', function() {
-        beforeEach(function(done) {
+    return describe('with lock contention', function () {
+      describe('where the first lock is released quickly', function () {
+        beforeEach(function (done) {
           this.LockManager.MAX_LOCK_WAIT_TIME = 1000
           this.LockManager.LOCK_TEST_INTERVAL = 100
           this.callback1 = sinon.stub()
           this.callback2 = sinon.stub()
           this.LockManager.runWithLock(
             'lock',
-            releaseLock =>
+            (releaseLock) =>
               setTimeout(() => releaseLock(null, 'hello', 'world', 'one'), 100),
 
             (err, ...args) => {
@@ -109,7 +109,7 @@ describe('LockManager', function() {
           )
           return this.LockManager.runWithLock(
             'lock',
-            releaseLock =>
+            (releaseLock) =>
               setTimeout(() => releaseLock(null, 'hello', 'world', 'two'), 200),
 
             (err, ...args) => {
@@ -119,21 +119,21 @@ describe('LockManager', function() {
           )
         })
 
-        it('should call the first callback', function() {
+        it('should call the first callback', function () {
           return this.callback1
             .calledWith(null, 'hello', 'world', 'one')
             .should.equal(true)
         })
 
-        return it('should call the second callback', function() {
+        return it('should call the second callback', function () {
           return this.callback2
             .calledWith(null, 'hello', 'world', 'two')
             .should.equal(true)
         })
       })
 
-      describe('where the first lock is held longer than the waiting time', function() {
-        beforeEach(function(done) {
+      describe('where the first lock is held longer than the waiting time', function () {
+        beforeEach(function (done) {
           let doneTwo
           this.LockManager.MAX_LOCK_HOLD_TIME = 10000
           this.LockManager.MAX_LOCK_WAIT_TIME = 1000
@@ -141,7 +141,7 @@ describe('LockManager', function() {
           this.callback1 = sinon.stub()
           this.callback2 = sinon.stub()
           let doneOne = (doneTwo = false)
-          const finish = function(key) {
+          const finish = function (key) {
             if (key === 1) {
               doneOne = true
             }
@@ -154,7 +154,7 @@ describe('LockManager', function() {
           }
           this.LockManager.runWithLock(
             'lock',
-            releaseLock =>
+            (releaseLock) =>
               setTimeout(
                 () => releaseLock(null, 'hello', 'world', 'one'),
                 1100
@@ -167,7 +167,7 @@ describe('LockManager', function() {
           )
           return this.LockManager.runWithLock(
             'lock',
-            releaseLock =>
+            (releaseLock) =>
               setTimeout(() => releaseLock(null, 'hello', 'world', 'two'), 100),
 
             (err, ...args) => {
@@ -177,20 +177,20 @@ describe('LockManager', function() {
           )
         })
 
-        it('should call the first callback', function() {
+        it('should call the first callback', function () {
           return this.callback1
             .calledWith(null, 'hello', 'world', 'one')
             .should.equal(true)
         })
 
-        return it('should call the second callback with an error', function() {
+        return it('should call the second callback with an error', function () {
           const error = sinon.match.instanceOf(Error)
           return this.callback2.calledWith(error).should.equal(true)
         })
       })
 
-      return describe('where the first lock is held longer than the max holding time', function() {
-        beforeEach(function(done) {
+      return describe('where the first lock is held longer than the max holding time', function () {
+        beforeEach(function (done) {
           let doneTwo
           this.LockManager.MAX_LOCK_HOLD_TIME = 1000
           this.LockManager.MAX_LOCK_WAIT_TIME = 2000
@@ -198,7 +198,7 @@ describe('LockManager', function() {
           this.callback1 = sinon.stub()
           this.callback2 = sinon.stub()
           let doneOne = (doneTwo = false)
-          const finish = function(key) {
+          const finish = function (key) {
             if (key === 1) {
               doneOne = true
             }
@@ -211,7 +211,7 @@ describe('LockManager', function() {
           }
           this.LockManager.runWithLock(
             'lock',
-            releaseLock =>
+            (releaseLock) =>
               setTimeout(
                 () => releaseLock(null, 'hello', 'world', 'one'),
                 1500
@@ -224,7 +224,7 @@ describe('LockManager', function() {
           )
           return this.LockManager.runWithLock(
             'lock',
-            releaseLock =>
+            (releaseLock) =>
               setTimeout(() => releaseLock(null, 'hello', 'world', 'two'), 100),
 
             (err, ...args) => {
@@ -234,13 +234,13 @@ describe('LockManager', function() {
           )
         })
 
-        it('should call the first callback', function() {
+        it('should call the first callback', function () {
           return this.callback1
             .calledWith(null, 'hello', 'world', 'one')
             .should.equal(true)
         })
 
-        return it('should call the second callback', function() {
+        return it('should call the second callback', function () {
           return this.callback2
             .calledWith(null, 'hello', 'world', 'two')
             .should.equal(true)

@@ -26,10 +26,10 @@ module.exports = OutputFileOptimiser = {
     // check output file (src) and see if we can optimise it, storing
     // the result in the build directory (dst)
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     if (src.match(/\/output\.pdf$/)) {
-      return OutputFileOptimiser.checkIfPDFIsOptimised(src, function(
+      return OutputFileOptimiser.checkIfPDFIsOptimised(src, function (
         err,
         isOptimised
       ) {
@@ -46,12 +46,12 @@ module.exports = OutputFileOptimiser = {
   checkIfPDFIsOptimised(file, callback) {
     const SIZE = 16 * 1024 // check the header of the pdf
     const result = Buffer.alloc(SIZE) // fills with zeroes by default
-    return fs.open(file, 'r', function(err, fd) {
+    return fs.open(file, 'r', function (err, fd) {
       if (err != null) {
         return callback(err)
       }
       return fs.read(fd, result, 0, SIZE, 0, (errRead, bytesRead, buffer) =>
-        fs.close(fd, function(errClose) {
+        fs.close(fd, function (errClose) {
           if (errRead != null) {
             return callback(errRead)
           }
@@ -68,7 +68,7 @@ module.exports = OutputFileOptimiser = {
 
   optimisePDF(src, dst, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const tmpOutput = dst + '.opt'
     const args = ['--linearize', src, tmpOutput]
@@ -77,19 +77,19 @@ module.exports = OutputFileOptimiser = {
     const timer = new Metrics.Timer('qpdf')
     const proc = spawn('qpdf', args)
     let stdout = ''
-    proc.stdout.setEncoding('utf8').on('data', chunk => (stdout += chunk))
+    proc.stdout.setEncoding('utf8').on('data', (chunk) => (stdout += chunk))
     callback = _.once(callback) // avoid double call back for error and close event
-    proc.on('error', function(err) {
+    proc.on('error', function (err) {
       logger.warn({ err, args }, 'qpdf failed')
       return callback(null)
     }) // ignore the error
-    return proc.on('close', function(code) {
+    return proc.on('close', function (code) {
       timer.done()
       if (code !== 0) {
         logger.warn({ code, args }, 'qpdf returned error')
         return callback(null) // ignore the error
       }
-      return fs.rename(tmpOutput, dst, function(err) {
+      return fs.rename(tmpOutput, dst, function (err) {
         if (err != null) {
           logger.warn(
             { tmpOutput, dst },

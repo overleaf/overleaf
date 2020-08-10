@@ -41,13 +41,13 @@ module.exports = ResourceStateManager = {
 
   saveProjectState(state, resources, basePath, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const stateFile = Path.join(basePath, this.SYNC_STATE_FILE)
     if (state == null) {
       // remove the file if no state passed in
       logger.log({ state, basePath }, 'clearing sync state')
-      return fs.unlink(stateFile, function(err) {
+      return fs.unlink(stateFile, function (err) {
         if (err != null && err.code !== 'ENOENT') {
           return callback(err)
         } else {
@@ -56,7 +56,9 @@ module.exports = ResourceStateManager = {
       })
     } else {
       logger.log({ state, basePath }, 'writing sync state')
-      const resourceList = Array.from(resources).map(resource => resource.path)
+      const resourceList = Array.from(resources).map(
+        (resource) => resource.path
+      )
       return fs.writeFile(
         stateFile,
         [...Array.from(resourceList), `stateHash:${state}`].join('\n'),
@@ -67,11 +69,11 @@ module.exports = ResourceStateManager = {
 
   checkProjectStateMatches(state, basePath, callback) {
     if (callback == null) {
-      callback = function(error, resources) {}
+      callback = function (error, resources) {}
     }
     const stateFile = Path.join(basePath, this.SYNC_STATE_FILE)
     const size = this.SYNC_STATE_MAX_SIZE
-    return SafeReader.readFile(stateFile, size, 'utf8', function(
+    return SafeReader.readFile(stateFile, size, 'utf8', function (
       err,
       result,
       bytesRead
@@ -86,7 +88,7 @@ module.exports = ResourceStateManager = {
         )
       }
       const array =
-        __guard__(result != null ? result.toString() : undefined, x =>
+        __guard__(result != null ? result.toString() : undefined, (x) =>
           x.split('\n')
         ) || []
       const adjustedLength = Math.max(array.length, 1)
@@ -102,7 +104,7 @@ module.exports = ResourceStateManager = {
           new Errors.FilesOutOfSyncError('invalid state for incremental update')
         )
       } else {
-        const resources = Array.from(resourceList).map(path => ({ path }))
+        const resources = Array.from(resourceList).map((path) => ({ path }))
         return callback(null, resources)
       }
     })
@@ -112,11 +114,11 @@ module.exports = ResourceStateManager = {
     // check the paths are all relative to current directory
     let file
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     for (file of Array.from(resources || [])) {
       for (const dir of Array.from(
-        __guard__(file != null ? file.path : undefined, x => x.split('/'))
+        __guard__(file != null ? file.path : undefined, (x) => x.split('/'))
       )) {
         if (dir === '..') {
           return callback(new Error('relative path in resource file list'))
@@ -129,8 +131,8 @@ module.exports = ResourceStateManager = {
       seenFile[file] = true
     }
     const missingFiles = Array.from(resources)
-      .filter(resource => !seenFile[resource.path])
-      .map(resource => resource.path)
+      .filter((resource) => !seenFile[resource.path])
+      .map((resource) => resource.path)
     if ((missingFiles != null ? missingFiles.length : undefined) > 0) {
       logger.err(
         { missingFiles, basePath, allFiles, resources },

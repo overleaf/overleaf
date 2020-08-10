@@ -21,8 +21,8 @@ const path = require('path')
 const { expect } = require('chai')
 const { EventEmitter } = require('events')
 
-describe('OutputFileFinder', function() {
-  beforeEach(function() {
+describe('OutputFileFinder', function () {
+  beforeEach(function () {
     this.OutputFileFinder = SandboxedModule.require(modulePath, {
       requires: {
         fs: (this.fs = {}),
@@ -34,8 +34,8 @@ describe('OutputFileFinder', function() {
     return (this.callback = sinon.stub())
   })
 
-  describe('findOutputFiles', function() {
-    beforeEach(function() {
+  describe('findOutputFiles', function () {
+    beforeEach(function () {
       this.resource_path = 'resource/path.tex'
       this.output_paths = ['output.pdf', 'extra/file.tex']
       this.all_paths = this.output_paths.concat([this.resource_path])
@@ -52,7 +52,7 @@ describe('OutputFileFinder', function() {
       )
     })
 
-    return it('should only return the output files, not directories or resource paths', function() {
+    return it('should only return the output files, not directories or resource paths', function () {
       return expect(this.outputFiles).to.deep.equal([
         {
           path: 'output.pdf',
@@ -66,8 +66,8 @@ describe('OutputFileFinder', function() {
     })
   })
 
-  return describe('_getAllFiles', function() {
-    beforeEach(function() {
+  return describe('_getAllFiles', function () {
+    beforeEach(function () {
       this.proc = new EventEmitter()
       this.proc.stdout = new EventEmitter()
       this.proc.stdout.setEncoding = sinon.stub().returns(this.proc.stdout)
@@ -76,8 +76,8 @@ describe('OutputFileFinder', function() {
       return this.OutputFileFinder._getAllFiles(this.directory, this.callback)
     })
 
-    describe('successfully', function() {
-      beforeEach(function() {
+    describe('successfully', function () {
+      beforeEach(function () {
         this.proc.stdout.emit(
           'data',
           ['/base/dir/main.tex', '/base/dir/chapters/chapter1.tex'].join('\n') +
@@ -86,19 +86,19 @@ describe('OutputFileFinder', function() {
         return this.proc.emit('close', 0)
       })
 
-      return it('should call the callback with the relative file paths', function() {
+      return it('should call the callback with the relative file paths', function () {
         return this.callback
           .calledWith(null, ['main.tex', 'chapters/chapter1.tex'])
           .should.equal(true)
       })
     })
 
-    return describe("when the directory doesn't exist", function() {
-      beforeEach(function() {
+    return describe("when the directory doesn't exist", function () {
+      beforeEach(function () {
         return this.proc.emit('close', 1)
       })
 
-      return it('should call the callback with a blank array', function() {
+      return it('should call the callback with a blank array', function () {
         return this.callback.calledWith(null, []).should.equal(true)
       })
     })

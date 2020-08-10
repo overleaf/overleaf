@@ -21,12 +21,12 @@ const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const url = require('url')
 
-module.exports = ForbidSymlinks = function(staticFn, root, options) {
+module.exports = ForbidSymlinks = function (staticFn, root, options) {
   const expressStatic = staticFn(root, options)
   const basePath = Path.resolve(root)
-  return function(req, res, next) {
+  return function (req, res, next) {
     let file, project_id, result
-    const path = __guard__(url.parse(req.url), x => x.pathname)
+    const path = __guard__(url.parse(req.url), (x) => x.pathname)
     // check that the path is of the form /project_id_or_name/path/to/file.log
     if ((result = path.match(/^\/?([a-zA-Z0-9_-]+)\/(.*)/))) {
       project_id = result[1]
@@ -52,7 +52,7 @@ module.exports = ForbidSymlinks = function(staticFn, root, options) {
       return res.sendStatus(404)
     }
     // check that the requested path is not a symlink
-    return fs.realpath(requestedFsPath, function(err, realFsPath) {
+    return fs.realpath(requestedFsPath, function (err, realFsPath) {
       if (err != null) {
         if (err.code === 'ENOENT') {
           return res.sendStatus(404)

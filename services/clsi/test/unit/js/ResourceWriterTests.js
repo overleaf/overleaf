@@ -20,8 +20,8 @@ const modulePath = require('path').join(
 )
 const path = require('path')
 
-describe('ResourceWriter', function() {
-  beforeEach(function() {
+describe('ResourceWriter', function () {
+  beforeEach(function () {
     let Timer
     this.ResourceWriter = SandboxedModule.require(modulePath, {
       singleOnly: true,
@@ -37,7 +37,7 @@ describe('ResourceWriter', function() {
         'logger-sharelatex': { log: sinon.stub(), err: sinon.stub() },
         './Metrics': (this.Metrics = {
           inc: sinon.stub(),
-          Timer: (Timer = (function() {
+          Timer: (Timer = (function () {
             Timer = class Timer {
               static initClass() {
                 this.prototype.done = sinon.stub()
@@ -54,8 +54,8 @@ describe('ResourceWriter', function() {
     return (this.callback = sinon.stub())
   })
 
-  describe('syncResourcesToDisk on a full request', function() {
-    beforeEach(function() {
+  describe('syncResourcesToDisk on a full request', function () {
+    beforeEach(function () {
       this.resources = ['resource-1-mock', 'resource-2-mock', 'resource-3-mock']
       this.ResourceWriter._writeResourceToDisk = sinon.stub().callsArg(3)
       this.ResourceWriter._removeExtraneousFiles = sinon.stub().callsArg(2)
@@ -71,33 +71,33 @@ describe('ResourceWriter', function() {
       )
     })
 
-    it('should remove old files', function() {
+    it('should remove old files', function () {
       return this.ResourceWriter._removeExtraneousFiles
         .calledWith(this.resources, this.basePath)
         .should.equal(true)
     })
 
-    it('should write each resource to disk', function() {
-      return Array.from(this.resources).map(resource =>
+    it('should write each resource to disk', function () {
+      return Array.from(this.resources).map((resource) =>
         this.ResourceWriter._writeResourceToDisk
           .calledWith(this.project_id, resource, this.basePath)
           .should.equal(true)
       )
     })
 
-    it('should store the sync state and resource list', function() {
+    it('should store the sync state and resource list', function () {
       return this.ResourceStateManager.saveProjectState
         .calledWith(this.syncState, this.resources, this.basePath)
         .should.equal(true)
     })
 
-    return it('should call the callback', function() {
+    return it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })
 
-  describe('syncResourcesToDisk on an incremental update', function() {
-    beforeEach(function() {
+  describe('syncResourcesToDisk on an incremental update', function () {
+    beforeEach(function () {
       this.resources = ['resource-1-mock']
       this.ResourceWriter._writeResourceToDisk = sinon.stub().callsArg(3)
       this.ResourceWriter._removeExtraneousFiles = sinon
@@ -120,39 +120,39 @@ describe('ResourceWriter', function() {
       )
     })
 
-    it('should check the sync state matches', function() {
+    it('should check the sync state matches', function () {
       return this.ResourceStateManager.checkProjectStateMatches
         .calledWith(this.syncState, this.basePath)
         .should.equal(true)
     })
 
-    it('should remove old files', function() {
+    it('should remove old files', function () {
       return this.ResourceWriter._removeExtraneousFiles
         .calledWith(this.resources, this.basePath)
         .should.equal(true)
     })
 
-    it('should check each resource exists', function() {
+    it('should check each resource exists', function () {
       return this.ResourceStateManager.checkResourceFiles
         .calledWith(this.resources, this.allFiles, this.basePath)
         .should.equal(true)
     })
 
-    it('should write each resource to disk', function() {
-      return Array.from(this.resources).map(resource =>
+    it('should write each resource to disk', function () {
+      return Array.from(this.resources).map((resource) =>
         this.ResourceWriter._writeResourceToDisk
           .calledWith(this.project_id, resource, this.basePath)
           .should.equal(true)
       )
     })
 
-    return it('should call the callback', function() {
+    return it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })
 
-  describe('syncResourcesToDisk on an incremental update when the state does not match', function() {
-    beforeEach(function() {
+  describe('syncResourcesToDisk on an incremental update when the state does not match', function () {
+    beforeEach(function () {
       this.resources = ['resource-1-mock']
       this.ResourceStateManager.checkProjectStateMatches = sinon
         .stub()
@@ -169,19 +169,19 @@ describe('ResourceWriter', function() {
       )
     })
 
-    it('should check whether the sync state matches', function() {
+    it('should check whether the sync state matches', function () {
       return this.ResourceStateManager.checkProjectStateMatches
         .calledWith(this.syncState, this.basePath)
         .should.equal(true)
     })
 
-    return it('should call the callback with an error', function() {
+    return it('should call the callback with an error', function () {
       return this.callback.calledWith(this.error).should.equal(true)
     })
   })
 
-  describe('_removeExtraneousFiles', function() {
-    beforeEach(function() {
+  describe('_removeExtraneousFiles', function () {
+    beforeEach(function () {
       this.output_files = [
         {
           path: 'output.pdf',
@@ -250,49 +250,49 @@ describe('ResourceWriter', function() {
       )
     })
 
-    it('should find the existing output files', function() {
+    it('should find the existing output files', function () {
       return this.OutputFileFinder.findOutputFiles
         .calledWith(this.resources, this.basePath)
         .should.equal(true)
     })
 
-    it('should delete the output files', function() {
+    it('should delete the output files', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, 'output.pdf'))
         .should.equal(true)
     })
 
-    it('should delete the stdout log file', function() {
+    it('should delete the stdout log file', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, 'output.stdout'))
         .should.equal(true)
     })
 
-    it('should delete the stderr log file', function() {
+    it('should delete the stderr log file', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, 'output.stderr'))
         .should.equal(true)
     })
 
-    it('should delete the extra files', function() {
+    it('should delete the extra files', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, 'extra/file.tex'))
         .should.equal(true)
     })
 
-    it('should not delete the extra aux files', function() {
+    it('should not delete the extra aux files', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, 'extra.aux'))
         .should.equal(false)
     })
 
-    it('should not delete the knitr cache file', function() {
+    it('should not delete the knitr cache file', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, 'cache/_chunk1'))
         .should.equal(false)
     })
 
-    it('should not delete the epstopdf converted files', function() {
+    it('should not delete the epstopdf converted files', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(
           path.join(this.basePath, 'figures/image-eps-converted-to.pdf')
@@ -300,25 +300,25 @@ describe('ResourceWriter', function() {
         .should.equal(false)
     })
 
-    it('should not delete the tikz md5 files', function() {
+    it('should not delete the tikz md5 files', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, 'foo/main-figure0.md5'))
         .should.equal(false)
     })
 
-    it('should not delete the tikz dpth files', function() {
+    it('should not delete the tikz dpth files', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, 'foo/main-figure0.dpth'))
         .should.equal(false)
     })
 
-    it('should not delete the tikz pdf files', function() {
+    it('should not delete the tikz pdf files', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, 'foo/main-figure0.pdf'))
         .should.equal(false)
     })
 
-    it('should not delete the minted pygstyle files', function() {
+    it('should not delete the minted pygstyle files', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(
           path.join(this.basePath, '_minted-main/default-pyg-prefix.pygstyle')
@@ -326,13 +326,13 @@ describe('ResourceWriter', function() {
         .should.equal(false)
     })
 
-    it('should not delete the minted default pygstyle files', function() {
+    it('should not delete the minted default pygstyle files', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(this.basePath, '_minted-main/default.pygstyle'))
         .should.equal(false)
     })
 
-    it('should not delete the minted default pygtex files', function() {
+    it('should not delete the minted default pygtex files', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(
           path.join(
@@ -343,7 +343,7 @@ describe('ResourceWriter', function() {
         .should.equal(false)
     })
 
-    it('should not delete the markdown md.tex files', function() {
+    it('should not delete the markdown md.tex files', function () {
       return this.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(
           path.join(
@@ -354,18 +354,18 @@ describe('ResourceWriter', function() {
         .should.equal(false)
     })
 
-    it('should call the callback', function() {
+    it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
 
-    return it('should time the request', function() {
+    return it('should time the request', function () {
       return this.Metrics.Timer.prototype.done.called.should.equal(true)
     })
   })
 
-  describe('_writeResourceToDisk', function() {
-    describe('with a url based resource', function() {
-      beforeEach(function() {
+  describe('_writeResourceToDisk', function () {
+    describe('with a url based resource', function () {
+      beforeEach(function () {
         this.fs.mkdir = sinon.stub().callsArg(2)
         this.resource = {
           path: 'main.tex',
@@ -383,7 +383,7 @@ describe('ResourceWriter', function() {
         )
       })
 
-      it('should ensure the directory exists', function() {
+      it('should ensure the directory exists', function () {
         this.fs.mkdir
           .calledWith(
             path.dirname(path.join(this.basePath, this.resource.path))
@@ -391,7 +391,7 @@ describe('ResourceWriter', function() {
           .should.equal(true)
       })
 
-      it('should write the URL from the cache', function() {
+      it('should write the URL from the cache', function () {
         return this.UrlCache.downloadUrlToFile
           .calledWith(
             this.project_id,
@@ -402,17 +402,17 @@ describe('ResourceWriter', function() {
           .should.equal(true)
       })
 
-      it('should call the callback', function() {
+      it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
 
-      return it('should not return an error if the resource writer errored', function() {
+      return it('should not return an error if the resource writer errored', function () {
         return should.not.exist(this.callback.args[0][0])
       })
     })
 
-    describe('with a content based resource', function() {
-      beforeEach(function() {
+    describe('with a content based resource', function () {
+      beforeEach(function () {
         this.resource = {
           path: 'main.tex',
           content: 'Hello world'
@@ -427,7 +427,7 @@ describe('ResourceWriter', function() {
         )
       })
 
-      it('should ensure the directory exists', function() {
+      it('should ensure the directory exists', function () {
         return this.fs.mkdir
           .calledWith(
             path.dirname(path.join(this.basePath, this.resource.path))
@@ -435,7 +435,7 @@ describe('ResourceWriter', function() {
           .should.equal(true)
       })
 
-      it('should write the contents to disk', function() {
+      it('should write the contents to disk', function () {
         return this.fs.writeFile
           .calledWith(
             path.join(this.basePath, this.resource.path),
@@ -444,13 +444,13 @@ describe('ResourceWriter', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('with a file path that breaks out of the root folder', function() {
-      beforeEach(function() {
+    return describe('with a file path that breaks out of the root folder', function () {
+      beforeEach(function () {
         this.resource = {
           path: '../../main.tex',
           content: 'Hello world'
@@ -464,11 +464,11 @@ describe('ResourceWriter', function() {
         )
       })
 
-      it('should not write to disk', function() {
+      it('should not write to disk', function () {
         return this.fs.writeFile.called.should.equal(false)
       })
 
-      it('should return an error', function() {
+      it('should return an error', function () {
         this.callback.calledWith(sinon.match(Error)).should.equal(true)
 
         const message = this.callback.args[0][0].message
@@ -477,23 +477,23 @@ describe('ResourceWriter', function() {
     })
   })
 
-  return describe('checkPath', function() {
-    describe('with a valid path', function() {
-      beforeEach(function() {
+  return describe('checkPath', function () {
+    describe('with a valid path', function () {
+      beforeEach(function () {
         return this.ResourceWriter.checkPath('foo', 'bar', this.callback)
       })
 
-      return it('should return the joined path', function() {
+      return it('should return the joined path', function () {
         return this.callback.calledWith(null, 'foo/bar').should.equal(true)
       })
     })
 
-    describe('with an invalid path', function() {
-      beforeEach(function() {
+    describe('with an invalid path', function () {
+      beforeEach(function () {
         this.ResourceWriter.checkPath('foo', 'baz/../../bar', this.callback)
       })
 
-      it('should return an error', function() {
+      it('should return an error', function () {
         this.callback.calledWith(sinon.match(Error)).should.equal(true)
 
         const message = this.callback.args[0][0].message
@@ -501,8 +501,8 @@ describe('ResourceWriter', function() {
       })
     })
 
-    describe('with another invalid path matching on a prefix', function() {
-      beforeEach(function() {
+    describe('with another invalid path matching on a prefix', function () {
+      beforeEach(function () {
         return this.ResourceWriter.checkPath(
           'foo',
           '../foobar/baz',
@@ -510,7 +510,7 @@ describe('ResourceWriter', function() {
         )
       })
 
-      it('should return an error', function() {
+      it('should return an error', function () {
         this.callback.calledWith(sinon.match(Error)).should.equal(true)
 
         const message = this.callback.args[0][0].message

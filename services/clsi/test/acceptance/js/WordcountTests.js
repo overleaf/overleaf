@@ -17,8 +17,8 @@ const path = require('path')
 const fs = require('fs')
 const ClsiApp = require('./helpers/ClsiApp')
 
-describe('Syncing', function() {
-  before(function(done) {
+describe('Syncing', function () {
+  before(function (done) {
     this.request = {
       resources: [
         {
@@ -45,8 +45,8 @@ describe('Syncing', function() {
     })
   })
 
-  return describe('wordcount file', function() {
-    return it('should return wordcount info', function(done) {
+  return describe('wordcount file', function () {
+    return it('should return wordcount info', function (done) {
       return Client.wordcount(this.project_id, 'main.tex', (error, result) => {
         if (error != null) {
           throw error
