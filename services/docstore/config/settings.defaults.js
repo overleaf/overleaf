@@ -21,7 +21,7 @@ const Settings = {
     healthCheck: {
       project_id: process.env.HEALTH_CHECK_PROJECT_ID
     },
-    bucket: process.env.BUCKET_NAME || 'bucket',
+    bucket: process.env.BUCKET_NAME || process.env.AWS_BUCKET || 'bucket',
     gcs: {
       unlockBeforeDelete: process.env.GCS_UNLOCK_BEFORE_DELETE === 'true',
       deletedBucketSuffix: process.env.GCS_DELETED_BUCKET_SUFFIX,
