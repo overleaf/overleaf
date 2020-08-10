@@ -39,11 +39,12 @@ async function archiveAllDocs(projectId) {
     throw new Errors.NotFoundError(`No docs for project ${projectId}`)
   }
 
-  await asyncPool(
-    PARALLEL_JOBS,
-    docs.filter((doc) => !doc.inS3),
-    (doc) => archiveDoc(projectId, doc)
-  )
+  const docsToArchive = docs.filter((doc) => !doc.inS3)
+  if (docsToArchive.length) {
+    await asyncPool(PARALLEL_JOBS, docsToArchive, (doc) =>
+      archiveDoc(projectId, doc)
+    )
+  }
 }
 
 async function archiveDoc(projectId, doc) {
