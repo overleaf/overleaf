@@ -11,11 +11,9 @@ FROM base as app
 #wildcard as some files may not be in all repos
 COPY package*.json npm-shrink*.json /app/
 
-RUN npm install --quiet
+RUN npm ci --quiet
 
 COPY . /app
-
-
 
 FROM base
 
