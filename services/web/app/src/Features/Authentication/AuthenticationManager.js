@@ -220,7 +220,8 @@ const AuthenticationManager = {
 
 AuthenticationManager.promises = {
   authenticate: util.promisify(AuthenticationManager.authenticate),
-  hashPassword: util.promisify(AuthenticationManager.hashPassword)
+  hashPassword: util.promisify(AuthenticationManager.hashPassword),
+  setUserPassword: util.promisify(AuthenticationManager.setUserPassword)
 }
 
 module.exports = AuthenticationManager

@@ -13,6 +13,7 @@ describe('UserController', function() {
 
     this.user = {
       _id: this.user_id,
+      email: 'email@overleaf.com',
       save: sinon.stub().callsArgWith(0),
       ace: {}
     }
@@ -31,6 +32,7 @@ describe('UserController', function() {
       i18n: {
         translate: text => text
       },
+      ip: '0:0:0:0',
       query: {}
     }
 
@@ -50,8 +52,11 @@ describe('UserController', function() {
     }
     this.AuthenticationManager = {
       authenticate: sinon.stub(),
-      setUserPassword: sinon.stub(),
-      validatePassword: sinon.stub()
+      validatePassword: sinon.stub(),
+      promises: {
+        authenticate: sinon.stub(),
+        setUserPassword: sinon.stub()
+      }
     }
     this.ReferalAllocator = { allocate: sinon.stub() }
     this.SubscriptionDomainHandler = { autoAllocate: sinon.stub() }
@@ -75,6 +80,7 @@ describe('UserController', function() {
     }
     this.SudoModeHandler = { clearSudoMode: sinon.stub() }
     this.HttpErrorHandler = {
+      badRequest: sinon.stub(),
       conflict: sinon.stub(),
       unprocessableEntity: sinon.stub(),
       legacyInternal: sinon.stub()
@@ -648,59 +654,163 @@ describe('UserController', function() {
   })
 
   describe('changePassword', function() {
-    it('should check the old password is the current one at the moment', function() {
-      this.AuthenticationManager.authenticate.yields()
-      this.req.body = { currentPassword: 'oldpasshere' }
-      this.UserController.changePassword(this.req, this.res, this.callback)
-      this.AuthenticationManager.authenticate.should.have.been.calledWith(
-        { _id: this.user._id },
-        'oldpasshere'
-      )
-      this.AuthenticationManager.setUserPassword.callCount.should.equal(0)
-    })
-
-    it('it should not set the new password if they do not match', function() {
-      this.AuthenticationManager.authenticate.yields(null, {})
-      this.req.body = {
-        newPassword1: '1',
-        newPassword2: '2'
-      }
-      this.UserController.changePassword(this.req, this.res, this.callback)
-      this.res.status.should.have.been.calledWith(400)
-      this.AuthenticationManager.setUserPassword.callCount.should.equal(0)
-    })
-
-    it('should set the new password if they do match', function() {
-      this.AuthenticationManager.authenticate.yields(null, this.user)
-      this.AuthenticationManager.setUserPassword.yields()
-      this.req.body = {
-        newPassword1: 'newpass',
-        newPassword2: 'newpass'
-      }
-      this.UserController.changePassword(this.req, this.res, this.callback)
-      this.AuthenticationManager.setUserPassword.should.have.been.calledWith(
-        this.user._id,
-        'newpass'
-      )
-    })
-
-    it('it should not set the new password if it is invalid', function() {
-      this.AuthenticationManager.validatePassword = sinon
-        .stub()
-        .returns({ message: 'validation-error' })
-      this.AuthenticationManager.authenticate.yields(null, {})
-      this.req.body = {
-        newPassword1: 'newpass',
-        newPassword2: 'newpass'
-      }
-      this.UserController.changePassword(this.req, this.res, this.callback)
-      this.AuthenticationManager.setUserPassword.callCount.should.equal(0)
-      this.res.status.should.have.been.calledWith(400)
-      this.res.json.should.have.been.calledWith({
-        message: {
-          type: 'error',
-          text: 'validation-error'
+    describe('success', function() {
+      beforeEach(function() {
+        this.AuthenticationManager.promises.authenticate.resolves(this.user)
+        this.AuthenticationManager.promises.setUserPassword.resolves()
+        this.req.body = {
+          newPassword1: 'newpass',
+          newPassword2: 'newpass'
         }
+      })
+      it('should set the new password if they do match', function(done) {
+        this.res.json.callsFake(() => {
+          this.AuthenticationManager.promises.setUserPassword.should.have.been.calledWith(
+            this.user._id,
+            'newpass'
+          )
+          done()
+        })
+        this.UserController.changePassword(this.req, this.res)
+      })
+
+      it('should log the update', function(done) {
+        this.res.json.callsFake(() => {
+          this.UserAuditLogHandler.promises.addEntry.should.have.been.calledWith(
+            this.user._id,
+            'update-password',
+            this.user._id,
+            this.req.ip
+          )
+          this.AuthenticationManager.promises.setUserPassword.callCount.should.equal(
+            1
+          )
+          done()
+        })
+        this.UserController.changePassword(this.req, this.res)
+      })
+
+      it('should send security alert email', function(done) {
+        this.res.json.callsFake(() => {
+          const expectedArg = {
+            to: this.user.email,
+            actionDescribed: `your password has been changed on your account ${
+              this.user.email
+            }`,
+            action: 'password changed'
+          }
+          const emailCall = this.EmailHandler.sendEmail.lastCall
+          expect(emailCall.args[0]).to.equal('securityAlert')
+          expect(emailCall.args[1]).to.deep.equal(expectedArg)
+          done()
+        })
+        this.UserController.changePassword(this.req, this.res)
+      })
+    })
+
+    describe('errors', function() {
+      it('should check the old password is the current one at the moment', function(done) {
+        this.AuthenticationManager.promises.authenticate.resolves()
+        this.req.body = { currentPassword: 'oldpasshere' }
+        this.HttpErrorHandler.badRequest.callsFake(() => {
+          expect(this.HttpErrorHandler.badRequest).to.have.been.calledWith(
+            this.req,
+            this.res,
+            'Your old password is wrong'
+          )
+          this.AuthenticationManager.promises.authenticate.should.have.been.calledWith(
+            { _id: this.user._id },
+            'oldpasshere'
+          )
+          this.AuthenticationManager.promises.setUserPassword.callCount.should.equal(
+            0
+          )
+          done()
+        })
+        this.UserController.changePassword(this.req, this.res)
+      })
+
+      it('it should not set the new password if they do not match', function(done) {
+        this.AuthenticationManager.promises.authenticate.resolves({})
+        this.req.body = {
+          newPassword1: '1',
+          newPassword2: '2'
+        }
+        this.HttpErrorHandler.badRequest.callsFake(() => {
+          expect(this.HttpErrorHandler.badRequest).to.have.been.calledWith(
+            this.req,
+            this.res,
+            'password_change_passwords_do_not_match'
+          )
+          this.AuthenticationManager.promises.setUserPassword.callCount.should.equal(
+            0
+          )
+          done()
+        })
+        this.UserController.changePassword(this.req, this.res)
+      })
+
+      it('it should not set the new password if it is invalid', function(done) {
+        this.AuthenticationManager.validatePassword = sinon
+          .stub()
+          .returns({ message: 'validation-error' })
+        this.AuthenticationManager.promises.authenticate.resolves({})
+        this.req.body = {
+          newPassword1: 'newpass',
+          newPassword2: 'newpass'
+        }
+        this.HttpErrorHandler.badRequest.callsFake(() => {
+          expect(this.HttpErrorHandler.badRequest).to.have.been.calledWith(
+            this.req,
+            this.res,
+            'validation-error'
+          )
+          this.AuthenticationManager.promises.setUserPassword.callCount.should.equal(
+            0
+          )
+          done()
+        })
+        this.UserController.changePassword(this.req, this.res)
+      })
+
+      describe('UserAuditLogHandler error', function() {
+        it('should return error and not update password', function(done) {
+          this.UserAuditLogHandler.promises.addEntry.rejects(new Error('oops'))
+          this.AuthenticationManager.promises.authenticate.resolves(this.user)
+          this.AuthenticationManager.promises.setUserPassword.resolves()
+          this.req.body = {
+            newPassword1: 'newpass',
+            newPassword2: 'newpass'
+          }
+
+          this.UserController.changePassword(this.req, this.res, error => {
+            expect(error).to.be.instanceof(Error)
+            this.AuthenticationManager.promises.setUserPassword.callCount.should.equal(
+              0
+            )
+            done()
+          })
+        })
+      })
+
+      describe('EmailHandler error', function() {
+        beforeEach(function() {
+          this.AuthenticationManager.promises.authenticate.resolves(this.user)
+          this.AuthenticationManager.promises.setUserPassword.resolves()
+          this.req.body = {
+            newPassword1: 'newpass',
+            newPassword2: 'newpass'
+          }
+          this.EmailHandler.sendEmail.yields(new Error('oops'))
+        })
+        it('should not return error but should log it', function(done) {
+          this.res.json.callsFake(result => {
+            expect(result.message.type).to.equal('success')
+            this.logger.error.callCount.should.equal(1)
+            done()
+          })
+          this.UserController.changePassword(this.req, this.res)
+        })
       })
     })
   })

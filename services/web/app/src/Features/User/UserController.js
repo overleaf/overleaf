@@ -29,6 +29,71 @@ async function _ensureAffiliation(userId, emailData) {
   }
 }
 
+async function changePassword(req, res, next) {
+  metrics.inc('user.password-change')
+  const userId = AuthenticationController.getLoggedInUserId(req)
+
+  const user = await AuthenticationManager.promises.authenticate(
+    { _id: userId },
+    req.body.currentPassword
+  )
+  if (!user) {
+    return HttpErrorHandler.badRequest(req, res, 'Your old password is wrong')
+  }
+
+  if (req.body.newPassword1 !== req.body.newPassword2) {
+    return HttpErrorHandler.badRequest(
+      req,
+      res,
+      req.i18n.translate('password_change_passwords_do_not_match')
+    )
+  }
+  const validationError = AuthenticationManager.validatePassword(
+    req.body.newPassword1
+  )
+  if (validationError != null) {
+    return HttpErrorHandler.badRequest(req, res, validationError.message)
+  }
+
+  await UserAuditLogHandler.promises.addEntry(
+    user._id,
+    'update-password',
+    user._id,
+    req.ip
+  )
+
+  await AuthenticationManager.promises.setUserPassword(
+    user._id,
+    req.body.newPassword1
+  )
+
+  const emailOptions = {
+    to: user.email,
+    actionDescribed: `your password has been changed on your account ${
+      user.email
+    }`,
+    action: 'password changed'
+  }
+  EmailHandler.sendEmail('securityAlert', emailOptions, error => {
+    if (error) {
+      // log error when sending security alert email but do not pass back
+      logger.error({ err: error })
+    }
+  })
+
+  await UserSessionsManager.promises.revokeAllUserSessions(user, [
+    req.sessionID
+  ])
+
+  return res.json({
+    message: {
+      type: 'success',
+      email: user.email,
+      text: req.i18n.translate('password_change_successful')
+    }
+  })
+}
+
 async function clearSessions(req, res, next) {
   metrics.inc('user.clear-sessions')
   const user = AuthenticationController.getSessionUser(req)
@@ -394,84 +459,7 @@ const UserController = {
     )
   },
 
-  changePassword(req, res, next) {
-    metrics.inc('user.password-change')
-    const internalError = {
-      message: { type: 'error', text: req.i18n.translate('internal_error') }
-    }
-    const userId = AuthenticationController.getLoggedInUserId(req)
-    AuthenticationManager.authenticate(
-      { _id: userId },
-      req.body.currentPassword,
-      (err, user) => {
-        if (err) {
-          return res.status(500).json(internalError)
-        }
-        if (!user) {
-          return res.status(400).json({
-            message: {
-              type: 'error',
-              text: 'Your old password is wrong'
-            }
-          })
-        }
-        if (req.body.newPassword1 !== req.body.newPassword2) {
-          return res.status(400).json({
-            message: {
-              type: 'error',
-              text: req.i18n.translate('password_change_passwords_do_not_match')
-            }
-          })
-        }
-        const validationError = AuthenticationManager.validatePassword(
-          req.body.newPassword1
-        )
-        if (validationError != null) {
-          return res.status(400).json({
-            message: {
-              type: 'error',
-              text: validationError.message
-            }
-          })
-        }
-        AuthenticationManager.setUserPassword(
-          user._id,
-          req.body.newPassword1,
-          err => {
-            if (err) {
-              return res.status(500).json(internalError)
-            }
-            // log errors but do not wait for response
-            EmailHandler.sendEmail(
-              'passwordChanged',
-              { to: user.email },
-              err => {
-                if (err) {
-                  logger.warn(err)
-                }
-              }
-            )
-            UserSessionsManager.revokeAllUserSessions(
-              user,
-              [req.sessionID],
-              err => {
-                if (err != null) {
-                  return res.status(500).json(internalError)
-                }
-                res.json({
-                  message: {
-                    type: 'success',
-                    email: user.email,
-                    text: req.i18n.translate('password_change_successful')
-                  }
-                })
-              }
-            )
-          }
-        )
-      }
-    )
-  }
+  changePassword: expressify(changePassword)
 }
 
 UserController.promises = {
