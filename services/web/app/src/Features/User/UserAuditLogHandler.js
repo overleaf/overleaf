@@ -8,10 +8,11 @@ const MAX_AUDIT_LOG_ENTRIES = 200
  *
  * The entry should include at least the following fields:
  *
+ * - userId: the user on behalf of whom the operation was performed
  * - operation: a string identifying the type of operation
  * - initiatorId: who performed the operation
+ * - ipAddress: the IP address of the initiator
  * - info: an object detailing what happened
- * - userId: the user on behalf of whom the operation was performed
  */
 async function addEntry(userId, operation, initiatorId, ipAddress, info = {}) {
   const timestamp = new Date()
