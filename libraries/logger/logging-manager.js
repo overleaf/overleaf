@@ -52,7 +52,6 @@ const Logger = (module.exports = {
         this.logger.level(this.defaultLevel)
       }
     } catch (err) {
-      console.log(err)
       this.logger.level(this.defaultLevel)
     }
   },
