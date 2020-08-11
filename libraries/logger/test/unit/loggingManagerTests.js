@@ -453,7 +453,7 @@ describe('LoggingManager', function () {
         describe('when level is already set', function() {
           beforeEach(async function() {
             this.bunyanLogger.level.returns(10)
-            this.fetchResponse.text = sinon.stub().resolves(this.start + 1000)
+            this.fetchResponse.text = sinon.stub().resolves((this.start + 1000).toString())
             this.logger.getTracingEndTime = this.logger.getTracingEndTimeMetadata
 
             await this.logger.checkLogLevel()
@@ -469,7 +469,7 @@ describe('LoggingManager', function () {
         describe('when level is not already set', function() {
           beforeEach(async function() {
             this.bunyanLogger.level.returns(20)
-            this.fetchResponse.text = sinon.stub().resolves(this.start + 1000)
+            this.fetchResponse.text = sinon.stub().resolves((this.start + 1000).toString())
             this.Fetch.fetch = sinon.stub().resolves(this.fetchResponse)            
             this.logger.getTracingEndTime = this.logger.getTracingEndTimeMetadata
 
