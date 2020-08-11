@@ -80,7 +80,9 @@ describe('LoggingManager', function () {
 
   describe('initialize', function () {
     beforeEach(function () {
-      this.checkLogLevelStub = sinon.stub(this.LoggingManager, 'checkLogLevel').resolves('')
+      this.checkLogLevelStub = sinon
+        .stub(this.LoggingManager, 'checkLogLevel')
+        .resolves('')
       this.Bunyan.createLogger.reset()
     })
 
@@ -116,10 +118,9 @@ describe('LoggingManager', function () {
         this.Bunyan.createLogger.firstCall.args[0].streams[0].level.should.equal(
           'warn'
         )
-      })       
-      
-      describe('logLevelSource file', function () {
+      })
 
+      describe('logLevelSource file', function () {
         it('should run checkLogLevel', function () {
           this.checkLogLevelStub.should.have.been.calledOnce
         })
@@ -136,7 +137,6 @@ describe('LoggingManager', function () {
             this.checkLogLevelStub.should.have.been.calledThrice
           }))
       })
-
     })
 
     describe('when LOG_LEVEL set in env', function () {
@@ -302,7 +302,6 @@ describe('LoggingManager', function () {
   })
 
   describe('checkLogLevelFile', function () {
-
     it('should request log level override from the config map', async function () {
       this.logger.getTracingEndTime = this.logger.getTracingEndTimeFile
       await this.logger.checkLogLevel()
@@ -391,89 +390,93 @@ describe('LoggingManager', function () {
       this.logger = this.LoggingManager.initialize(this.loggerName)
     })
 
-    describe('checkLogLevel', function() {
-      it('should request log level override from google meta data service', async function() {
+    describe('checkLogLevel', function () {
+      it('should request log level override from google meta data service', async function () {
         this.logger.getTracingEndTime = this.logger.getTracingEndTimeMetadata
         await this.logger.checkLogLevel()
         const options = {
           headers: {
             'Metadata-Flavor': 'Google'
-          } 
+          }
         }
         const uri = `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
-        this.Fetch.should.have.been.calledWithMatch(uri,options)
+        this.Fetch.should.have.been.calledWithMatch(uri, options)
       })
 
-      describe('when request has error', function() {
-        beforeEach(async function() {
+      describe('when request has error', function () {
+        beforeEach(async function () {
           this.Fetch = sinon.stub().throws()
           this.logger.getTracingEndTime = this.logger.getTracingEndTimeMetadata
           await this.logger.checkLogLevel()
         })
 
-        it('should only set default level', function() {
+        it('should only set default level', function () {
           this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
             'debug'
           )
         })
       })
 
-      describe('when statusCode is not 200', function() {
-        beforeEach(async function() {
+      describe('when statusCode is not 200', function () {
+        beforeEach(async function () {
           this.fetchResponse.status = 404
           this.logger.getTracingEndTime = this.logger.getTracingEndTimeMetadata
           await this.logger.checkLogLevel()
         })
 
-        it('should only set default level', function() {
+        it('should only set default level', function () {
           this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
             'debug'
           )
         })
       })
 
-      describe('when time value returned that is less than current time', function() {
-        beforeEach(async function() {
+      describe('when time value returned that is less than current time', function () {
+        beforeEach(async function () {
           this.logger.getTracingEndTime = this.logger.getTracingEndTimeMetadata
           this.fetchResponse.text = sinon.stub().resolves('1')
           await this.logger.checkLogLevel()
         })
 
-        it('should only set default level', function() {
+        it('should only set default level', function () {
           this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
             'debug'
           )
         })
       })
 
-      describe('when time value returned that is more than current time', function() {
-        describe('when level is already set', function() {
-          beforeEach(async function() {
+      describe('when time value returned that is more than current time', function () {
+        describe('when level is already set', function () {
+          beforeEach(async function () {
             this.bunyanLogger.level.returns(10)
-            this.fetchResponse.text = sinon.stub().resolves((this.start + 1000).toString())
+            this.fetchResponse.text = sinon
+              .stub()
+              .resolves((this.start + 1000).toString())
             this.logger.getTracingEndTime = this.logger.getTracingEndTimeMetadata
 
             await this.logger.checkLogLevel()
           })
 
-          it('should set trace level', function() {
+          it('should set trace level', function () {
             this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
               'trace'
             )
           })
         })
 
-        describe('when level is not already set', function() {
-          beforeEach(async function() {
+        describe('when level is not already set', function () {
+          beforeEach(async function () {
             this.bunyanLogger.level.returns(20)
-            this.fetchResponse.text = sinon.stub().resolves((this.start + 1000).toString())
-            this.Fetch.fetch = sinon.stub().resolves(this.fetchResponse)            
+            this.fetchResponse.text = sinon
+              .stub()
+              .resolves((this.start + 1000).toString())
+            this.Fetch.fetch = sinon.stub().resolves(this.fetchResponse)
             this.logger.getTracingEndTime = this.logger.getTracingEndTimeMetadata
 
             await this.logger.checkLogLevel()
           })
 
-          it('should set trace level', function() {
+          it('should set trace level', function () {
             this.bunyanLogger.level.should.have.been.calledOnce.and.calledWith(
               'trace'
             )
