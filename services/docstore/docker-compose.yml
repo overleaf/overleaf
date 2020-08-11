@@ -13,7 +13,8 @@ services:
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
-    command: npm run test:unit
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+    command: npm run --silent test:unit
     user: node
 
   test_acceptance:
@@ -29,15 +30,26 @@ services:
       REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
+      GCS_API_ENDPOINT: gcs:9090
+      GCS_API_SCHEME: http
+      GCS_PROJECT_ID: fake
+      STORAGE_EMULATOR_HOST: http://gcs:9090/storage/v1
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ERROR
       NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
     user: node
     depends_on:
       mongo:
         condition: service_healthy
-    command: npm run test:acceptance
+      gcs:
+        condition: service_healthy
+    command: npm run --silent test:acceptance
 
   mongo:
     image: mongo:3.6
 
+  gcs:
+    build:
+      context: test/acceptance/deps
+      dockerfile: Dockerfile.fake-gcs

@@ -14,6 +14,7 @@ let MongoManager
 const { db, ObjectId } = require('./mongojs')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
+const { promisify } = require('util')
 
 module.exports = MongoManager = {
   findDoc(project_id, doc_id, filter, callback) {
@@ -162,14 +163,11 @@ module.exports = MongoManager = {
     )
   }
 }
-;[
-  'findDoc',
-  'getProjectsDocs',
-  'getArchivedProjectDocs',
-  'upsertIntoDocCollection',
-  'markDocAsArchived',
-  'getDocVersion',
-  'setDocVersion'
-].map((method) =>
+
+const methods = Object.getOwnPropertyNames(MongoManager)
+
+module.exports.promises = {}
+for (const method of methods) {
   metrics.timeAsyncMethod(MongoManager, method, 'mongo.MongoManager', logger)
-)
+  module.exports.promises[method] = promisify(module.exports[method])
+}

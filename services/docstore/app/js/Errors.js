@@ -1,16 +1,10 @@
-/* eslint-disable
-    no-proto,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-let Errors
-var NotFoundError = function (message) {
-  const error = new Error(message)
-  error.name = 'NotFoundError'
-  error.__proto__ = NotFoundError.prototype
-  return error
-}
-NotFoundError.prototype.__proto__ = Error.prototype
+// import Errors from object-persistor to pass instanceof checks
+const OError = require('@overleaf/o-error')
+const { Errors } = require('@overleaf/object-persistor')
 
-module.exports = Errors = { NotFoundError }
+class Md5MismatchError extends OError {}
+
+module.exports = {
+  Md5MismatchError,
+  ...Errors
+}
