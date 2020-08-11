@@ -316,7 +316,7 @@ describe('LoggingManager', function () {
 
     describe('when read errors', function () {
       beforeEach(async function () {
-        this.Fs.promises.readFile.throws(new Error('error'))
+        this.Fs.promises.readFile.throws(new Error('test read error'))
         this.logger.getTracingEndTime = this.logger.getTracingEndTimeFile
         await this.logger.checkLogLevel()
       })
@@ -330,7 +330,7 @@ describe('LoggingManager', function () {
 
     describe('when the file is empty', function () {
       beforeEach(async function () {
-        this.Fs.promises.readFile.yields(null, '')
+        this.Fs.promises.readFile.returns('')
         this.logger.getTracingEndTime = this.logger.getTracingEndTimeFile
         await this.logger.checkLogLevel()
       })
@@ -344,7 +344,7 @@ describe('LoggingManager', function () {
 
     describe('when time value returned that is less than current time', function () {
       beforeEach(async function () {
-        this.Fs.promises.readFile.yields(null, '1')
+        this.Fs.promises.readFile.returns('1')
         this.logger.getTracingEndTime = this.logger.getTracingEndTimeFile
         await this.logger.checkLogLevel()
       })
@@ -453,7 +453,7 @@ describe('LoggingManager', function () {
         describe('when level is already set', function() {
           beforeEach(async function() {
             this.bunyanLogger.level.returns(10)
-            this.fetchResponse.text = sinon.stub().resolves(this.start + 1000)
+            this.fetchResponse.text = sinon.stub().resolves((this.start + 1000).toString())
             this.logger.getTracingEndTime = this.logger.getTracingEndTimeMetadata
 
             await this.logger.checkLogLevel()
@@ -469,7 +469,7 @@ describe('LoggingManager', function () {
         describe('when level is not already set', function() {
           beforeEach(async function() {
             this.bunyanLogger.level.returns(20)
-            this.fetchResponse.text = sinon.stub().resolves(this.start + 1000)
+            this.fetchResponse.text = sinon.stub().resolves((this.start + 1000).toString())
             this.Fetch.fetch = sinon.stub().resolves(this.fetchResponse)            
             this.logger.getTracingEndTime = this.logger.getTracingEndTimeMetadata
 
