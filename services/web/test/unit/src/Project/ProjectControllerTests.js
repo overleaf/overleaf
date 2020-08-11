@@ -2,7 +2,6 @@ const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const HttpErrors = require('@overleaf/o-error/http')
 const { ObjectId } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
@@ -144,7 +143,6 @@ describe('ProjectController', function() {
           err() {}
         },
         'metrics-sharelatex': this.Metrics,
-        '@overleaf/o-error/http': HttpErrors,
         './ProjectDeleter': this.ProjectDeleter,
         './ProjectDuplicator': this.ProjectDuplicator,
         './ProjectCreationHandler': this.ProjectCreationHandler,

@@ -3,7 +3,6 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
-const HttpErrors = require('@overleaf/o-error/http')
 
 const MODULE_PATH = '../../../../app/src/Features/Editor/EditorHttpController'
 
@@ -149,8 +148,7 @@ describe('EditorHttpController', function() {
         '../Project/ProjectEntityUpdateHandler': this
           .ProjectEntityUpdateHandler,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
-        '../Errors/Errors': Errors,
-        '@overleaf/o-error/http': HttpErrors
+        '../Errors/Errors': Errors
       }
     })
   })

@@ -1,34 +1,85 @@
 const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
 
-function renderJSONError(res, message, info) {
-  const fullInfo = { ...info, message }
+function renderJSONError(res, message, info = {}) {
   if (info.message) {
     logger.warn(
       info,
       `http error info shouldn't contain a 'message' field, will be overridden`
     )
   }
-  res.json(fullInfo)
+  if (message != null) {
+    res.json({ ...info, message })
+  } else {
+    res.json(info)
+  }
 }
 
-module.exports = {
-  badRequest(req, res, message, info) {
-    res.status(400)
-    switch (req.accepts(['html', 'json'])) {
-      case 'html':
-        return res.render('general/400', {
-          title: 'Client Error',
-          message: message
-        })
-      case 'json':
-        return renderJSONError(res, message, info || {})
-      default:
-        return res.send('client error')
+function handleGeneric500Error(req, res, statusCode, message) {
+  res.status(statusCode)
+  switch (req.accepts(['html', 'json'])) {
+    case 'html':
+      return res.render('general/500', { title: 'Server Error' })
+    case 'json':
+      return renderJSONError(res, message)
+    default:
+      return res.send('internal server error')
+  }
+}
+
+function handleGeneric400Error(req, res, statusCode, message, info = {}) {
+  res.status(statusCode)
+  switch (req.accepts(['html', 'json'])) {
+    case 'html':
+      return res.render('general/400', {
+        title: 'Client Error',
+        message: message
+      })
+    case 'json':
+      return renderJSONError(res, message, info)
+    default:
+      return res.send('client error')
+  }
+}
+
+let HttpErrorHandler
+module.exports = HttpErrorHandler = {
+  handleErrorByStatusCode(req, res, error, statusCode) {
+    const is400Error = statusCode >= 400 && statusCode < 500
+    const is500Error = statusCode >= 500 && statusCode < 600
+
+    if (is400Error) {
+      logger.warn(error)
+    } else if (is500Error) {
+      logger.error(error)
+    }
+
+    if (statusCode === 403) {
+      HttpErrorHandler.forbidden(req, res)
+    } else if (statusCode === 404) {
+      HttpErrorHandler.notFound(req, res)
+    } else if (statusCode === 409) {
+      HttpErrorHandler.conflict(req, res, '')
+    } else if (statusCode === 422) {
+      HttpErrorHandler.unprocessableEntity(req, res)
+    } else if (is400Error) {
+      handleGeneric400Error(req, res, statusCode)
+    } else if (is500Error) {
+      handleGeneric500Error(req, res, statusCode)
+    } else {
+      logger.error(
+        { err: error, statusCode },
+        `unable to handle error with status code ${statusCode}`
+      )
+      res.sendStatus(500)
     }
   },
 
-  conflict(req, res, message, info) {
+  badRequest(req, res, message, info = {}) {
+    handleGeneric400Error(req, res, 400, message, info)
+  },
+
+  conflict(req, res, message, info = {}) {
     res.status(409)
     switch (req.accepts(['html', 'json'])) {
       case 'html':
@@ -37,7 +88,7 @@ module.exports = {
           message: message
         })
       case 'json':
-        return renderJSONError(res, message, info || {})
+        return renderJSONError(res, message, info)
       default:
         return res.send('conflict')
     }
@@ -84,15 +135,7 @@ module.exports = {
 
   legacyInternal(req, res, message, error) {
     logger.error(error)
-    res.status(500)
-    switch (req.accepts(['html', 'json'])) {
-      case 'html':
-        return res.render('general/500', { title: 'Server Error' })
-      case 'json':
-        return renderJSONError(res, message, {})
-      default:
-        return res.send('internal server error')
-    }
+    handleGeneric500Error(req, res, 500, message)
   },
 
   maintenance(req, res) {

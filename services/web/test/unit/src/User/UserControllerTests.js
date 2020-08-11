@@ -5,7 +5,6 @@ const modulePath = '../../../../app/src/Features/User/UserController.js'
 const SandboxedModule = require('sandboxed-module')
 const OError = require('@overleaf/o-error')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
-const HttpErrors = require('@overleaf/o-error/http')
 
 describe('UserController', function() {
   beforeEach(function() {
@@ -128,7 +127,6 @@ describe('UserController', function() {
         },
         '../Errors/Errors': Errors,
         '@overleaf/o-error': OError,
-        '@overleaf/o-error/http': HttpErrors,
         '../Email/EmailHandler': (this.EmailHandler = {
           sendEmail: sinon.stub(),
           promises: { sendEmail: sinon.stub().resolves() }

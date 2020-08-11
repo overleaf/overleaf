@@ -21,8 +21,6 @@ const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionController'
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const SubscriptionErrors = require('../../../../app/src/Features/Subscription/Errors')
-const OError = require('@overleaf/o-error')
-const HttpErrors = require('@overleaf/o-error/http')
 
 const mockSubscriptions = {
   'subscription-123-active': {
@@ -125,8 +123,7 @@ describe('SubscriptionController', function() {
           unprocessableEntity: sinon.stub()
         }),
         '../Errors/Errors': Errors,
-        './Errors': SubscriptionErrors,
-        '@overleaf/o-error/http': HttpErrors
+        './Errors': SubscriptionErrors
       }
     })
 
@@ -450,31 +447,32 @@ describe('SubscriptionController', function() {
       this.SubscriptionHandler.createSubscription.yields(
         new SubscriptionErrors.RecurlyTransactionError({})
       )
-      this.SubscriptionController.createSubscription(this.req, null, error => {
-        expect(error).to.exist
-        expect(error).to.be.instanceof(HttpErrors.UnprocessableEntityError)
-        expect(
-          OError.hasCauseInstanceOf(
-            error,
-            SubscriptionErrors.RecurlyTransactionError
-          )
-        ).to.be.true
-      })
-      return done()
+      this.HttpErrorHandler.unprocessableEntity = sinon.spy(
+        (req, res, message) => {
+          expect(req).to.exist
+          expect(res).to.exist
+          expect(message).to.deep.equal('Unknown transaction error')
+          done()
+        }
+      )
+      this.SubscriptionController.createSubscription(this.req, this.res)
     })
 
     it('should handle validation errors', function(done) {
       this.next = sinon.stub()
       this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
       this.SubscriptionHandler.createSubscription.yields(
-        new Errors.InvalidError({})
+        new Errors.InvalidError('invalid error test')
       )
-      this.SubscriptionController.createSubscription(this.req, null, error => {
-        expect(error).to.exist
-        expect(error).to.be.instanceof(HttpErrors.UnprocessableEntityError)
-        expect(OError.hasCauseInstanceOf(error, Errors.InvalidError)).to.be.true
-      })
-      return done()
+      this.HttpErrorHandler.unprocessableEntity = sinon.spy(
+        (req, res, message) => {
+          expect(req).to.exist
+          expect(res).to.exist
+          expect(message).to.deep.equal('invalid error test')
+          done()
+        }
+      )
+      this.SubscriptionController.createSubscription(this.req, this.res)
     })
 
     it('should handle recurly errors', function(done) {

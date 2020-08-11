@@ -1,26 +1,28 @@
-const HttpErrors = require('@overleaf/o-error/http')
 const bodyParser = require('body-parser')
+const HttpErrorHandler = require('../Features/Errors/HttpErrorHandler')
 
-const convertToHTTPError = error => {
-  if (!error.statusCode || error.statusCode < 400 || error.statusCode >= 600) {
-    // cannot be converted to a HttpError
-    return error
+function isBodyParserError(nextArg) {
+  if (nextArg instanceof Error) {
+    return (
+      nextArg.statusCode &&
+      nextArg.statusCode >= 400 &&
+      nextArg.statusCode < 600
+    )
   }
-
-  return new HttpErrors.HttpError({
-    message: error.message,
-    statusCode: error.statusCode
-  }).withCause(error)
+  return false
 }
 
-// Wraps a parser and attempt to wrap its error (if any) into a HTTPError so the
-// response code is forwarded to the client
 const wrapBodyParser = method => opts => {
   const middleware = bodyParser[method](opts)
   return (req, res, next) => {
     middleware(req, res, nextArg => {
-      if (nextArg instanceof Error) {
-        return next(convertToHTTPError(nextArg))
+      if (isBodyParserError(nextArg)) {
+        return HttpErrorHandler.handleErrorByStatusCode(
+          req,
+          res,
+          nextArg,
+          nextArg.statusCode
+        )
       }
       next(nextArg)
     })

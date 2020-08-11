@@ -23,6 +23,125 @@ describe('HttpErrorHandler', function() {
     })
   })
 
+  describe('handleErrorByStatusCode', function() {
+    it('returns the http status code of 400 errors', function() {
+      const err = new Error()
+      this.HttpErrorHandler.handleErrorByStatusCode(
+        this.req,
+        this.res,
+        err,
+        400
+      )
+      expect(this.res.statusCode).to.equal(400)
+    })
+
+    it('returns the http status code of 500 errors', function() {
+      const err = new Error()
+      this.HttpErrorHandler.handleErrorByStatusCode(
+        this.req,
+        this.res,
+        err,
+        500
+      )
+      expect(this.res.statusCode).to.equal(500)
+    })
+
+    it('returns the http status code of any 5xx error', function() {
+      const err = new Error()
+      this.HttpErrorHandler.handleErrorByStatusCode(
+        this.req,
+        this.res,
+        err,
+        588
+      )
+      expect(this.res.statusCode).to.equal(588)
+    })
+
+    it('returns the http status code of any 4xx error', function() {
+      const err = new Error()
+      this.HttpErrorHandler.handleErrorByStatusCode(
+        this.req,
+        this.res,
+        err,
+        488
+      )
+      expect(this.res.statusCode).to.equal(488)
+    })
+
+    it('returns 500 for http status codes smaller than 400', function() {
+      const err = new Error()
+      this.HttpErrorHandler.handleErrorByStatusCode(
+        this.req,
+        this.res,
+        err,
+        302
+      )
+      expect(this.res.statusCode).to.equal(500)
+    })
+
+    it('returns 500 for http status codes larger than 600', function() {
+      const err = new Error()
+      this.HttpErrorHandler.handleErrorByStatusCode(
+        this.req,
+        this.res,
+        err,
+        302
+      )
+      expect(this.res.statusCode).to.equal(500)
+    })
+
+    it('returns 500 when the error has no http status code', function() {
+      const err = new Error()
+      this.HttpErrorHandler.handleErrorByStatusCode(this.req, this.res, err)
+      expect(this.res.statusCode).to.equal(500)
+    })
+
+    it('uses the conflict() error handler', function() {
+      const err = new Error()
+      this.HttpErrorHandler.handleErrorByStatusCode(
+        this.req,
+        this.res,
+        err,
+        409
+      )
+      expect(this.res.body).to.equal('conflict')
+    })
+
+    it('uses the forbidden() error handler', function() {
+      const err = new Error()
+      this.HttpErrorHandler.handleErrorByStatusCode(
+        this.req,
+        this.res,
+        err,
+        403
+      )
+      expect(this.res.body).to.equal('restricted')
+    })
+
+    it('uses the notFound() error handler', function() {
+      const err = new Error()
+      this.HttpErrorHandler.handleErrorByStatusCode(
+        this.req,
+        this.res,
+        err,
+        404
+      )
+      expect(this.res.body).to.equal('not found')
+    })
+
+    it('uses the unprocessableEntity() error handler', function() {
+      const err = new Error()
+      err.httpStatusCode = 422
+      this.HttpErrorHandler.handleErrorByStatusCode(
+        this.req,
+        this.res,
+        err,
+        422
+      )
+      expect(this.res.body).to.equal('unprocessable entity')
+    })
+  })
+
   describe('badRequest', function() {
     it('returns 400', function() {
       this.HttpErrorHandler.badRequest(this.req, this.res)
