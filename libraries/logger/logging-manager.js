@@ -270,9 +270,7 @@ const Logger = (module.exports = {
         return
       }
       // check for log level override on startup
-      this.checkLogLevel().catch((error) => {
-        console.log(error)
-      })
+      this.checkLogLevel()
       // re-check log level every minute
       this.checkInterval = setInterval(this.checkLogLevel.bind(this), 1000 * 60)
     }
