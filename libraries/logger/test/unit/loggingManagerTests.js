@@ -107,21 +107,18 @@ describe('LoggingManager', function () {
     describe('in production', function () {
       beforeEach(function () {
         process.env.NODE_ENV = 'production'
+        this.logger = this.LoggingManager.initialize(this.loggerName)
       })
 
       afterEach(() => delete process.env.NODE_ENV)
 
       it('should default to log level warn', function () {
-        this.logger = this.LoggingManager.initialize(this.loggerName)
         this.Bunyan.createLogger.firstCall.args[0].streams[0].level.should.equal(
           'warn'
         )
       })       
       
       describe('logLevelSource file', function () {
-        beforeEach(function() {
-          this.logger = this.LoggingManager.initialize(this.loggerName)
-        })
 
         it('should run checkLogLevel', function () {
           this.checkLogLevelStub.should.have.been.calledOnce
