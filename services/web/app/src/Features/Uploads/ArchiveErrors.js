@@ -1,6 +1,6 @@
-const OError = require('@overleaf/o-error')
+const Errors = require('../Errors/Errors')
 
-class InvalidZipFileError extends OError {
+class InvalidZipFileError extends Errors.BackwardCompatibleError {
   constructor(options) {
     super({
       message: 'invalid_zip_file',

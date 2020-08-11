@@ -213,7 +213,7 @@ const UserController = {
                 errorData.info.public = {
                   error: 'SubscriptionAdminDeletionError'
                 }
-                logger.warn(new OError(errorData).withCause(err))
+                logger.warn(OError.tag(err, errorData.message, errorData.info))
                 return HttpErrorHandler.unprocessableEntity(
                   req,
                   res,
@@ -221,7 +221,7 @@ const UserController = {
                   errorData.info.public
                 )
               } else {
-                return next(new OError(errorData).withCause(err))
+                return next(OError.tag(err, errorData.message, errorData.info))
               }
             }
             const sessionId = req.sessionID
@@ -350,10 +350,10 @@ const UserController = {
                   req,
                   res,
                   req.i18n.translate('problem_changing_email_address'),
-                  new OError({
-                    message: 'problem_changing_email_address',
-                    info: { userId, newEmail }
-                  }).withCause(err)
+                  OError.tag(err, 'problem_changing_email_address', {
+                    userId,
+                    newEmail
+                  })
                 )
               }
             }

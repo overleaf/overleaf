@@ -154,5 +154,27 @@ describe('NewsletterManager', function() {
         `/lists/list_id/members/${this.emailHash}`
       )
     })
+
+    it('does not reject on non-fatal error ', async function() {
+      const nonFatalError = new Error('merge fields were invalid')
+      this.mailchimp.patch.rejects(nonFatalError)
+      await expect(
+        this.NewsletterManager.changeEmail(
+          this.user,
+          'overleaf.squirrel@example.com'
+        )
+      ).to.be.fulfilled
+    })
+
+    it('rejects on any other error', async function() {
+      const fatalError = new Error('fatal error')
+      this.mailchimp.patch.rejects(fatalError)
+      await expect(
+        this.NewsletterManager.changeEmail(
+          this.user,
+          'overleaf.squirrel@example.com'
+        )
+      ).to.be.rejected
+    })
   })
 })

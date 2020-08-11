@@ -56,7 +56,7 @@ class FolderStructureBuilder {
 
   recordEntityPath(path) {
     if (this.entityPaths.has(path)) {
-      throw new OError({ message: 'entity already exists', info: { path } })
+      throw new OError('entity already exists', { path })
     }
     this.entityPaths.add(path)
   }

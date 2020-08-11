@@ -73,14 +73,11 @@ async function duplicate(owner, originalProjectId, newProjectName) {
     // Clean up broken clone on error.
     // Make sure we delete the new failed project, not the original one!
     await ProjectDeleter.promises.deleteProject(newProject._id)
-    throw new OError({
-      message: 'error cloning project, broken clone deleted',
-      info: {
-        originalProjectId,
-        newProjectName,
-        newProjectId: newProject._id
-      }
-    }).withCause(err)
+    throw OError.tag(err, 'error cloning project, broken clone deleted', {
+      originalProjectId,
+      newProjectName,
+      newProjectId: newProject._id
+    })
   }
   return newProject
 }

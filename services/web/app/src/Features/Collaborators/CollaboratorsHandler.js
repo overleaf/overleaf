@@ -70,10 +70,10 @@ async function removeUserFromProject(projectId, userId) {
       )
     }
   } catch (err) {
-    throw new OError({
-      message: 'problem removing user from project collaborators',
-      info: { projectId, userId }
-    }).withCause(err)
+    throw OError.tag(err, 'problem removing user from project collaborators', {
+      projectId,
+      userId
+    })
   }
 }
 
@@ -225,9 +225,7 @@ async function setCollaboratorPrivilegeLevel(
       break
     }
     default: {
-      throw new OError({
-        message: `unknown privilege level: ${privilegeLevel}`
-      })
+      throw new OError(`unknown privilege level: ${privilegeLevel}`)
     }
   }
   const mongoResponse = await Project.updateOne(query, update).exec()
@@ -255,10 +253,10 @@ async function userIsTokenMember(userId, projectId) {
     )
     return project != null
   } catch (err) {
-    throw new OError({
-      message: 'problem while checking if user is token member',
-      info: { userId, projectId }
-    }).withCause(err)
+    throw OError.tag(err, 'problem while checking if user is token member', {
+      userId,
+      projectId
+    })
   }
 }
 

@@ -39,9 +39,7 @@ async function initializeProject() {
     }
     return { overleaf_id: overleafId }
   } catch (err) {
-    throw new OError({
-      message: 'failed to initialize project history'
-    }).withCause(err)
+    throw OError.tag(err, 'failed to initialize project history')
   }
 }
 
@@ -51,10 +49,9 @@ async function flushProject(projectId) {
       url: `${settings.apis.project_history.url}/project/${projectId}/flush`
     })
   } catch (err) {
-    throw new OError({
-      message: 'failed to flush project to project history',
-      info: { projectId }
-    }).withCause(err)
+    throw OError.tag(err, 'failed to flush project to project history', {
+      projectId
+    })
   }
 }
 
@@ -64,10 +61,7 @@ async function resyncProject(projectId) {
       url: `${settings.apis.project_history.url}/project/${projectId}/resync`
     })
   } catch (err) {
-    throw new OError({
-      message: 'failed to resync project history',
-      info: { projectId }
-    })
+    throw new OError('failed to resync project history', { projectId })
   }
 }
 
@@ -77,10 +71,7 @@ async function deleteProject(projectId) {
       `${settings.apis.project_history.url}/project/${projectId}`
     )
   } catch (err) {
-    throw new OError({
-      message: 'failed to clear project history',
-      info: { projectId }
-    })
+    throw new OError('failed to clear project history', { projectId })
   }
 }
 

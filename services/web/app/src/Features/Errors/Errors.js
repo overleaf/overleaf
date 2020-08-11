@@ -6,15 +6,27 @@ const settings = require('settings-sharelatex')
 // of object)
 class BackwardCompatibleError extends OError {
   constructor(messageOrOptions) {
-    let options
     if (typeof messageOrOptions === 'string') {
-      options = { message: messageOrOptions }
-    } else if (!messageOrOptions) {
-      options = {}
+      super(messageOrOptions)
+    } else if (messageOrOptions) {
+      const { message, info } = messageOrOptions
+      super(message, info)
     } else {
-      options = messageOrOptions
+      super()
     }
-    super(options)
+  }
+}
+
+// Error class that facilitates the migration to OError v3 by providing
+// a signature in which the 2nd argument can be an object containing
+// the `info` object.
+class OErrorV2CompatibleError extends OError {
+  constructor(message, options) {
+    if (options) {
+      super(message, options.info)
+    } else {
+      super(message)
+    }
   }
 }
 
@@ -42,12 +54,9 @@ class V1ConnectionError extends BackwardCompatibleError {}
 
 class UnconfirmedEmailError extends BackwardCompatibleError {}
 
-class EmailExistsError extends OError {
+class EmailExistsError extends OErrorV2CompatibleError {
   constructor(options) {
-    super({
-      message: 'Email already exists',
-      ...options
-    })
+    super('Email already exists', options)
   }
 }
 
@@ -124,51 +133,39 @@ class ThirdPartyUserNotFoundError extends BackwardCompatibleError {
   }
 }
 
-class SubscriptionAdminDeletionError extends OError {
+class SubscriptionAdminDeletionError extends OErrorV2CompatibleError {
   constructor(options) {
-    super({
-      message: 'subscription admins cannot be deleted',
-      ...options
-    })
+    super('subscription admins cannot be deleted', options)
   }
 }
 
-class ProjectNotFoundError extends OError {
+class ProjectNotFoundError extends OErrorV2CompatibleError {
   constructor(options) {
-    super({
-      message: 'project not found',
-      ...options
-    })
+    super('project not found', options)
   }
 }
 
-class UserNotFoundError extends OError {
+class UserNotFoundError extends OErrorV2CompatibleError {
   constructor(options) {
-    super({
-      message: 'user not found',
-      ...options
-    })
+    super('user not found', options)
   }
 }
 
-class UserNotCollaboratorError extends OError {
+class UserNotCollaboratorError extends OErrorV2CompatibleError {
   constructor(options) {
-    super({
-      message: 'user not a collaborator',
-      ...options
-    })
+    super('user not a collaborator', options)
   }
 }
 
-class DocHasRangesError extends OError {
+class DocHasRangesError extends OErrorV2CompatibleError {
   constructor(options) {
-    super({ message: 'document has ranges', ...options })
+    super('document has ranges', options)
   }
 }
 
-class InvalidQueryError extends OError {
+class InvalidQueryError extends OErrorV2CompatibleError {
   constructor(options) {
-    super({ message: 'invalid search query', ...options })
+    super('invalid search query', options)
   }
 }
 

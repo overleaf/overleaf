@@ -1,7 +1,7 @@
-const OError = require('@overleaf/o-error')
+const Errors = require('../Errors/Errors')
 
-class InvalidEmailError extends OError {}
-class InvalidPasswordError extends OError {}
+class InvalidEmailError extends Errors.BackwardCompatibleError {}
+class InvalidPasswordError extends Errors.BackwardCompatibleError {}
 
 module.exports = {
   InvalidEmailError,

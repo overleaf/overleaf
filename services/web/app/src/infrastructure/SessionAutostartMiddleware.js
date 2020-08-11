@@ -1,5 +1,5 @@
 const Settings = require('settings-sharelatex')
-const Errors = require('../Features/Errors/Errors')
+const OError = require('@overleaf/o-error')
 
 // SessionAutostartMiddleware provides a mechanism to force certain routes not
 // to get an automatic session where they don't have one already. This allows us
@@ -75,12 +75,9 @@ class SessionAutostartMiddleware {
   static genericPostGatewayMiddleware(req, res, next) {
     if (req.method !== 'POST') {
       return next(
-        new Errors.OError({
-          message: 'post gateway invoked for non-POST request',
-          info: {
-            path: req.path,
-            method: req.method
-          }
+        new OError('post gateway invoked for non-POST request', {
+          path: req.path,
+          method: req.method
         })
       )
     }

@@ -694,17 +694,13 @@ async function createNewFolderStructure(projectId, docEntries, fileEntries) {
       }
     ).exec()
     if (project == null) {
-      throw new OError({
-        message: 'project not found or folder structure already exists',
-        info: { projectId }
+      throw new OError('project not found or folder structure already exists', {
+        projectId
       })
     }
     return project.version
   } catch (err) {
-    throw new OError({
-      message: 'failed to create folder structure',
-      info: { projectId }
-    }).withCause(err)
+    throw OError.tag(err, 'failed to create folder structure', { projectId })
   }
 }
 

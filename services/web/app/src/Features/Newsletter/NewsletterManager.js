@@ -14,6 +14,12 @@ module.exports = {
   promises: provider
 }
 
+class NonFatalEmailUpdateError extends OError {
+  constructor(message, oldEmail, newEmail) {
+    super(message, { oldEmail, newEmail })
+  }
+}
+
 function getProvider() {
   if (mailchimpIsConfigured()) {
     logger.info('Using newsletter provider: mailchimp')
@@ -49,10 +55,9 @@ function makeMailchimpProvider() {
       })
       logger.info({ user }, 'finished subscribing user to newsletter')
     } catch (err) {
-      throw new OError({
-        message: 'error subscribing user to newsletter',
-        info: { userId: user._id }
-      }).withCause(err)
+      throw OError.tag(err, 'error subscribing user to newsletter', {
+        userId: user._id
+      })
     }
   }
 
@@ -85,10 +90,9 @@ function makeMailchimpProvider() {
         return
       }
 
-      throw new OError({
-        message: 'error unsubscribing user from newsletter',
-        info: { userId: user._id }
-      }).withCause(err)
+      throw OError.tag(err, 'error unsubscribing user from newsletter', {
+        userId: user._id
+      })
     }
   }
 
@@ -109,15 +113,14 @@ function makeMailchimpProvider() {
         await unsubscribe(user, { delete: true })
       } catch (unsubscribeError) {
         // something went wrong removing the user's address
-        throw new OError({
-          message:
-            'error unsubscribing old email in response to email change failure',
-          info: { oldEmail, newEmail, updateError }
-        }).withCause(unsubscribeError)
+        throw OError.tag(
+          unsubscribeError,
+          'error unsubscribing old email in response to email change failure',
+          { oldEmail, newEmail, updateError }
+        )
       }
 
-      // throw the error, unless it was an expected one that we can ignore
-      if (!updateError.info || !updateError.info.nonFatal) {
+      if (!(updateError instanceof NonFatalEmailUpdateError)) {
         throw updateError
       }
     }
@@ -155,19 +158,19 @@ function makeMailchimpProvider() {
 
           logger.info({ oldEmail, newEmail }, message)
 
-          // throw a non-fatal error
-          throw new OError({
-            message: message,
-            info: { oldEmail, newEmail, nonFatal: true }
-          }).withCause(err)
+          throw new NonFatalEmailUpdateError(
+            message,
+            oldEmail,
+            newEmail
+          ).withCause(err)
         }
       })
 
       // if we didn't find an expected error, generate something to throw
-      throw new OError({
-        message: 'error changing email in newsletter',
-        info: { oldEmail, newEmail }
-      }).withCause(err)
+      throw OError.tag(err, 'error changing email in newsletter', {
+        oldEmail,
+        newEmail
+      })
     }
   }
 

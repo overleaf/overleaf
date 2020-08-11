@@ -43,10 +43,7 @@ async function getAllMembers(req, res, next) {
   try {
     members = await CollaboratorsGetter.promises.getAllInvitedMembers(projectId)
   } catch (err) {
-    throw new OError({
-      message: 'error getting members for project',
-      info: { projectId }
-    }).withCause(err)
+    throw OError.tag(err, 'error getting members for project', { projectId })
   }
   res.json({ members })
 }

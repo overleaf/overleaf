@@ -1,6 +1,6 @@
-const OError = require('@overleaf/o-error')
+const Errors = require('../Errors/Errors')
 
-class RecurlyTransactionError extends OError {
+class RecurlyTransactionError extends Errors.BackwardCompatibleError {
   constructor(options) {
     super({
       message: 'Unknown transaction error',

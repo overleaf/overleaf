@@ -32,10 +32,7 @@ async function addEntry(userId, operation, initiatorId, ipAddress, info = {}) {
     }
   ).exec()
   if (result.nModified === 0) {
-    throw new OError({
-      message: 'user not found',
-      info: { userId }
-    })
+    throw new OError('user not found', { userId })
   }
 }
 

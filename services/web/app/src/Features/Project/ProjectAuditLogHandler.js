@@ -35,9 +35,6 @@ async function addEntry(projectId, operation, initiatorId, info = {}) {
     }
   ).exec()
   if (result.nModified === 0) {
-    throw new OError({
-      message: 'project not found',
-      info: { projectId }
-    })
+    throw new OError('project not found', { projectId })
   }
 }

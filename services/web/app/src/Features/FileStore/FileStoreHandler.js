@@ -7,6 +7,7 @@ const Async = require('async')
 const FileHashManager = require('./FileHashManager')
 const { File } = require('../../models/File')
 const Errors = require('../Errors/Errors')
+const OError = require('@overleaf/o-error')
 const { promisifyAll } = require('../../util/promises')
 
 const ONE_MIN_IN_MS = 60 * 1000
@@ -193,10 +194,11 @@ const FileStoreHandler = {
       err => {
         if (err) {
           return callback(
-            new Errors.OError({
-              message: 'something went wrong deleting a project in filestore',
-              info: { projectId }
-            }).withCause(err)
+            OError.tag(
+              err,
+              'something went wrong deleting a project in filestore',
+              { projectId }
+            )
           )
         }
         callback()

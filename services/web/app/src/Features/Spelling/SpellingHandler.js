@@ -10,20 +10,16 @@ module.exports = {
     request.get({ url: url, timeout: TIMEOUT }, (error, response) => {
       if (error) {
         return callback(
-          new OError({
-            message: 'error getting user dictionary',
-            info: { error, userId }
-          }).withCause(error)
+          OError.tag(error, 'error getting user dictionary', { error, userId })
         )
       }
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
         return callback(
-          new OError({
-            message:
-              'Non-success code from spelling API when getting user dictionary',
-            info: { userId, statusCode: response.statusCode }
-          })
+          new OError(
+            'Non-success code from spelling API when getting user dictionary',
+            { userId, statusCode: response.statusCode }
+          )
         )
       }
 
@@ -44,20 +40,19 @@ module.exports = {
       (error, response) => {
         if (error) {
           return callback(
-            new OError({
-              message: 'error deleting word from user dictionary',
-              info: { error, userId, word }
-            }).withCause(error)
+            OError.tag(error, 'error deleting word from user dictionary', {
+              userId,
+              word
+            })
           )
         }
 
         if (response.statusCode < 200 || response.statusCode >= 300) {
           return callback(
-            new OError({
-              message:
-                'Non-success code from spelling API when removing word from user dictionary',
-              info: { userId, word, statusCode: response.statusCode }
-            })
+            new OError(
+              'Non-success code from spelling API when removing word from user dictionary',
+              { userId, word, statusCode: response.statusCode }
+            )
           )
         }
 
@@ -71,20 +66,16 @@ module.exports = {
     request.delete({ url: url, timeout: TIMEOUT }, (error, response) => {
       if (error) {
         return callback(
-          new OError({
-            message: 'error deleting user dictionary',
-            info: { userId }
-          }).withCause(error)
+          OError.tag(error, 'error deleting user dictionary', { userId })
         )
       }
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
         return callback(
-          new OError({
-            message:
-              'Non-success code from spelling API when removing user dictionary',
-            info: { userId, statusCode: response.statusCode }
-          })
+          new OError(
+            'Non-success code from spelling API when removing user dictionary',
+            { userId, statusCode: response.statusCode }
+          )
         )
       }
 

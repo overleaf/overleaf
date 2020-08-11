@@ -60,7 +60,7 @@ async function _addIdentifier(
     if (err.code === 11000) {
       throw new Errors.SAMLIdentityExistsError()
     } else {
-      throw new OError(err)
+      throw OError.tag(err)
     }
   }
 }
