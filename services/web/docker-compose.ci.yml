@@ -10,6 +10,8 @@ services:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     user: node
     command: npm run test:unit:app
+    environment:
+      NODE_OPTIONS: "--unhandled-rejections=strict"
 
   test_acceptance:
     build: .
@@ -25,6 +27,7 @@ services:
       LINKED_URL_PROXY: 'http://localhost:6543'
       LOCK_MANAGER_MAX_LOCK_WAIT_TIME: 30000
       NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
       SHARELATEX_CONFIG:
     command: npm run test:acceptance:app
     user: root
@@ -43,12 +46,16 @@ services:
     working_dir: /app
     command: npm run test:karma:single
     user: node
+    environment:
+      NODE_OPTIONS: "--unhandled-rejections=strict"
 
   test_frontend:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     user: node
     command: npm run test:frontend
+    environment:
+      NODE_OPTIONS: "--unhandled-rejections=strict"
 
   tar:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER-webpack
