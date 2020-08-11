@@ -29,12 +29,6 @@ describe('ContactManager', function() {
               url: 'contacts.sharelatex.com'
             }
           }
-        }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          warn: sinon.stub(),
-          error: sinon.stub(),
-          err() {}
         })
       }
     })
@@ -108,23 +102,6 @@ describe('ContactManager', function() {
           )
           .should.equal(true)
       })
-
-      it('should log the error', function() {
-        this.logger.warn.should.have.been.calledWith(
-          {
-            err: sinon.match
-              .instanceOf(Error)
-              .and(
-                sinon.match.has(
-                  'message',
-                  'contacts api responded with non-success code: 500'
-                )
-              ),
-            user_id: this.user_id
-          },
-          'error getting contacts for user'
-        )
-      })
     })
   })
 
@@ -183,26 +160,6 @@ describe('ContactManager', function() {
                   'contacts api responded with non-success code: 500'
                 )
               )
-          )
-          .should.equal(true)
-      })
-
-      it('should log the error', function() {
-        return this.logger.warn
-          .calledWith(
-            {
-              err: sinon.match
-                .instanceOf(Error)
-                .and(
-                  sinon.match.has(
-                    'message',
-                    'contacts api responded with non-success code: 500'
-                  )
-                ),
-              user_id: this.user_id,
-              contact_id: this.contact_id
-            },
-            'error adding contact for user'
           )
           .should.equal(true)
       })

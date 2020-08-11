@@ -13,6 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ReferencesHandler
+const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const request = require('request')
 const settings = require('settings-sharelatex')
@@ -104,7 +105,9 @@ module.exports = ReferencesHandler = {
       { rootFolder: true, owner_ref: 1 },
       function(err, project) {
         if (err) {
-          logger.warn({ err, projectId }, 'error finding project')
+          OError.tag(err, 'error finding project', {
+            projectId
+          })
           return callback(err)
         }
         logger.log({ projectId }, 'indexing all bib files in project')
@@ -130,7 +133,9 @@ module.exports = ReferencesHandler = {
       { rootFolder: true, owner_ref: 1 },
       function(err, project) {
         if (err) {
-          logger.warn({ err, projectId }, 'error finding project')
+          OError.tag(err, 'error finding project', {
+            projectId
+          })
           return callback(err)
         }
         return ReferencesHandler._doIndexOperation(
@@ -150,10 +155,9 @@ module.exports = ReferencesHandler = {
     }
     return ReferencesHandler._isFullIndex(project, function(err, isFullIndex) {
       if (err) {
-        logger.warn(
-          { err, projectId },
-          'error checking whether to do full index'
-        )
+        OError.tag(err, 'error checking whether to do full index', {
+          projectId
+        })
         return callback(err)
       }
       logger.log(
@@ -167,10 +171,10 @@ module.exports = ReferencesHandler = {
         function(err) {
           // continue
           if (err) {
-            logger.warn(
-              { err, projectId, docIds },
-              'error flushing docs to mongo'
-            )
+            OError.tag(err, 'error flushing docs to mongo', {
+              projectId,
+              docIds
+            })
             return callback(err)
           }
           const bibDocUrls = docIds.map(docId =>
@@ -190,10 +194,9 @@ module.exports = ReferencesHandler = {
             },
             function(err, res, data) {
               if (err) {
-                logger.warn(
-                  { err, projectId },
-                  'error communicating with references api'
-                )
+                OError.tag(err, 'error communicating with references api', {
+                  projectId
+                })
                 return callback(err)
               }
               if (res.statusCode >= 200 && res.statusCode < 300) {

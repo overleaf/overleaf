@@ -13,6 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const logger = require('logger-sharelatex')
+const OError = require('@overleaf/o-error')
 const async = require('async')
 const metrics = require('metrics-sharelatex')
 const Settings = require('settings-sharelatex')
@@ -260,10 +261,7 @@ const ProjectCreationHandler = {
       owner_id,
       function(error, doc) {
         if (error != null) {
-          logger.warn(
-            { err: error },
-            'error adding root doc when creating project'
-          )
+          OError.tag(error, 'error adding root doc when creating project')
           return callback(error)
         }
         return ProjectEntityUpdateHandler.setRootDoc(

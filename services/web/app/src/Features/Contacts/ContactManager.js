@@ -13,9 +13,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ContactManager
+const OError = require('@overleaf/o-error')
 const request = require('request')
 const settings = require('settings-sharelatex')
-const logger = require('logger-sharelatex')
 
 module.exports = ContactManager = {
   getContactIds(user_id, options, callback) {
@@ -43,12 +43,9 @@ module.exports = ContactManager = {
             (data != null ? data.contact_ids : undefined) || []
           )
         } else {
-          error = new Error(
-            `contacts api responded with non-success code: ${res.statusCode}`
-          )
-          logger.warn(
-            { err: error, user_id },
-            'error getting contacts for user'
+          error = new OError(
+            `contacts api responded with non-success code: ${res.statusCode}`,
+            { user_id }
           )
           return callback(error)
         }
@@ -79,12 +76,12 @@ module.exports = ContactManager = {
             (data != null ? data.contact_ids : undefined) || []
           )
         } else {
-          error = new Error(
-            `contacts api responded with non-success code: ${res.statusCode}`
-          )
-          logger.warn(
-            { err: error, user_id, contact_id },
-            'error adding contact for user'
+          error = new OError(
+            `contacts api responded with non-success code: ${res.statusCode}`,
+            {
+              user_id,
+              contact_id
+            }
           )
           return callback(error)
         }

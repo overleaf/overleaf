@@ -496,7 +496,7 @@ describe('FileStoreHandler', function() {
     })
 
     it('should return the err', function(done) {
-      const error = 'errrror'
+      const error = new Error('error')
       this.request.callsArgWith(1, error)
       this.handler.copyFile(
         this.projectId,

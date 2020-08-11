@@ -17,6 +17,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let RecurlyWrapper
+const OError = require('@overleaf/o-error')
 const querystring = require('querystring')
 const crypto = require('crypto')
 const request = require('request')
@@ -46,9 +47,12 @@ module.exports = RecurlyWrapper = {
         },
         function(error, response, responseBody) {
           if (error) {
-            logger.warn(
-              { error, user_id: user._id },
-              'error response from recurly while checking account'
+            OError.tag(
+              error,
+              'error response from recurly while checking account',
+              {
+                user_id: user._id
+              }
             )
             return next(error)
           }
@@ -67,7 +71,9 @@ module.exports = RecurlyWrapper = {
             account
           ) {
             if (err) {
-              logger.warn({ err, user_id: user._id }, 'error parsing account')
+              OError.tag(err, 'error parsing account', {
+                user_id: user._id
+              })
               return next(err)
             }
             cache.userExists = true
@@ -107,9 +113,12 @@ module.exports = RecurlyWrapper = {
         },
         (error, response, responseBody) => {
           if (error) {
-            logger.warn(
-              { error, user_id: user._id },
-              'error response from recurly while creating account'
+            OError.tag(
+              error,
+              'error response from recurly while creating account',
+              {
+                user_id: user._id
+              }
             )
             return next(error)
           }
@@ -118,7 +127,9 @@ module.exports = RecurlyWrapper = {
             account
           ) {
             if (err) {
-              logger.warn({ err, user_id: user._id }, 'error creating account')
+              OError.tag(err, 'error creating account', {
+                user_id: user._id
+              })
               return next(err)
             }
             cache.account = account
@@ -149,9 +160,12 @@ module.exports = RecurlyWrapper = {
         },
         (error, response, responseBody) => {
           if (error) {
-            logger.warn(
-              { error, user_id: user._id },
-              'error response from recurly while creating billing info'
+            OError.tag(
+              error,
+              'error response from recurly while creating billing info',
+              {
+                user_id: user._id
+              }
             )
             return next(error)
           }
@@ -160,10 +174,10 @@ module.exports = RecurlyWrapper = {
             billingInfo
           ) {
             if (err) {
-              logger.warn(
-                { err, user_id: user._id, accountCode },
-                'error creating billing info'
-              )
+              OError.tag(err, 'error creating billing info', {
+                user_id: user._id,
+                accountCode
+              })
               return next(err)
             }
             cache.billingInfo = billingInfo
@@ -212,9 +226,12 @@ module.exports = RecurlyWrapper = {
         },
         (error, response, responseBody) => {
           if (error) {
-            logger.warn(
-              { error, user_id: user._id },
-              'error response from recurly while setting address'
+            OError.tag(
+              error,
+              'error response from recurly while setting address',
+              {
+                user_id: user._id
+              }
             )
             return next(error)
           }
@@ -223,10 +240,9 @@ module.exports = RecurlyWrapper = {
             billingInfo
           ) {
             if (err) {
-              logger.warn(
-                { err, user_id: user._id },
-                'error updating billing info'
-              )
+              OError.tag(err, 'error updating billing info', {
+                user_id: user._id
+              })
               return next(err)
             }
             cache.billingInfo = billingInfo
@@ -263,9 +279,12 @@ module.exports = RecurlyWrapper = {
         },
         (error, response, responseBody) => {
           if (error) {
-            logger.warn(
-              { error, user_id: user._id },
-              'error response from recurly while creating subscription'
+            OError.tag(
+              error,
+              'error response from recurly while creating subscription',
+              {
+                user_id: user._id
+              }
             )
             return next(error)
           }
@@ -274,10 +293,9 @@ module.exports = RecurlyWrapper = {
             subscription
           ) {
             if (err) {
-              logger.warn(
-                { err, user_id: user._id },
-                'error creating subscription'
-              )
+              OError.tag(err, 'error creating subscription', {
+                user_id: user._id
+              })
               return next(err)
             }
             cache.subscription = subscription
@@ -312,18 +330,16 @@ module.exports = RecurlyWrapper = {
       ],
       function(err, result) {
         if (err) {
-          logger.warn(
-            { err, user_id: user._id },
-            'error in paypal subscription creation process'
-          )
+          OError.tag(err, 'error in paypal subscription creation process', {
+            user_id: user._id
+          })
           return callback(err)
         }
         if (!result.subscription) {
           err = new Error('no subscription object in result')
-          logger.warn(
-            { err, user_id: user._id },
-            'error in paypal subscription creation process'
-          )
+          OError.tag(err, 'error in paypal subscription creation process', {
+            user_id: user._id
+          })
           return callback(err)
         }
         logger.log(

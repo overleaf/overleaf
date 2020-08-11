@@ -11,6 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const { Project } = require('../../models/Project')
+const OError = require('@overleaf/o-error')
 const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 const ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
 const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
@@ -81,7 +82,9 @@ const TemplatesManager = {
           attributes,
           function(err, project) {
             if (err != null) {
-              logger.warn({ err, zipReq }, 'problem building project from zip')
+              OError.tag(err, 'problem building project from zip', {
+                zipReq
+              })
               return callback(err)
             }
             return async.series(

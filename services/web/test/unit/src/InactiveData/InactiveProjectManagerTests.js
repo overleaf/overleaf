@@ -79,12 +79,13 @@ describe('InactiveProjectManager', function() {
       )
     })
 
-    it('should not mark project as active if error with unarchinging', function(done) {
-      this.DocstoreManager.unarchiveProject.callsArgWith(1, 'error')
+    it('should not mark project as active if error with unarchiving', function(done) {
+      const error = new Error('error')
+      this.DocstoreManager.unarchiveProject.callsArgWith(1, error)
       return this.InactiveProjectManager.reactivateProjectIfRequired(
         this.project_id,
         err => {
-          err.should.equal('error')
+          err.should.equal(error)
           this.DocstoreManager.unarchiveProject
             .calledWith(this.project_id)
             .should.equal(true)

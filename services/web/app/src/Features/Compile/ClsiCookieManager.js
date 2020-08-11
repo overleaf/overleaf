@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let rclient_secondary
+const OError = require('@overleaf/o-error')
 const Settings = require('settings-sharelatex')
 const request = require('request')
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
@@ -59,10 +60,9 @@ module.exports = function(backendGroup) {
       const url = `${Settings.apis.clsi.url}/project/${project_id}/status`
       return request.get(url, (err, res, body) => {
         if (err != null) {
-          logger.warn(
-            { err, project_id },
-            'error getting initial server id for project'
-          )
+          OError.tag(err, 'error getting initial server id for project', {
+            project_id
+          })
           return callback(err)
         }
         return this.setServerId(project_id, res, function(err, serverId) {
@@ -139,7 +139,9 @@ module.exports = function(backendGroup) {
       }
       return this._getServerId(project_id, (err, serverId) => {
         if (err != null) {
-          logger.warn({ err, project_id }, 'error getting server id')
+          OError.tag(err, 'error getting server id', {
+            project_id
+          })
           return callback(err)
         }
         const serverCookie = request.cookie(

@@ -14,6 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const mongojs = require('../../infrastructure/mongojs')
+const OError = require('@overleaf/o-error')
 const metrics = require('metrics-sharelatex')
 const { db } = mongojs
 const { ObjectId } = mongojs
@@ -119,7 +120,10 @@ const ProjectGetter = {
 
     return db.projects.find(query, projection, function(err, project) {
       if (err != null) {
-        logger.warn({ err, query, projection }, 'error getting project')
+        OError.tag(err, 'error getting project', {
+          query,
+          projection
+        })
         return callback(err)
       }
       return callback(null, project != null ? project[0] : undefined)

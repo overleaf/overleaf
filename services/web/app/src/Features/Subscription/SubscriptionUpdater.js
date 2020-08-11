@@ -1,11 +1,11 @@
 const { db } = require('../../infrastructure/mongojs')
+const OError = require('@overleaf/o-error')
 const async = require('async')
 const { promisifyAll } = require('../../util/promises')
 const { Subscription } = require('../../models/Subscription')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const UserGetter = require('../User/UserGetter')
 const PlansLocator = require('./PlansLocator')
-const logger = require('logger-sharelatex')
 const { ObjectId } = require('mongoose').Types
 const FeaturesUpdater = require('./FeaturesUpdater')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
@@ -107,10 +107,10 @@ const SubscriptionUpdater = {
     const removeOperation = { $pull: { member_ids: userId } }
     Subscription.updateMany(filter, removeOperation, function(err) {
       if (err != null) {
-        logger.warn(
-          { err, filter, removeOperation },
-          'error removing user from groups'
-        )
+        OError.tag(err, 'error removing user from groups', {
+          filter,
+          removeOperation
+        })
         return callback(err)
       }
       UserGetter.getUser(userId, function(error, user) {

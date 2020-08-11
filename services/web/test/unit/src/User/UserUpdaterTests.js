@@ -98,9 +98,8 @@ describe('UserUpdater', function() {
       this.UserUpdater.addAffiliationForNewUser(
         this.stubbedUser._id,
         this.newEmail,
-        (error, updated) => {
+        error => {
           should.not.exist(error)
-          expect(updated).to.deep.equal({ n: 1, nModified: 1, ok: 1 })
           sinon.assert.calledOnce(this.UserUpdater.updateUser)
           sinon.assert.calledWithMatch(
             this.UserUpdater.updateUser,
@@ -212,22 +211,6 @@ describe('UserUpdater', function() {
           args[0].should.equal(this.stubbedUser._id)
           args[1].should.equal(this.newEmail)
           args[2].should.equal(affiliationOptions)
-          done()
-        }
-      )
-    })
-
-    it('handle error', function(done) {
-      this.UserUpdater.updateUser = sinon
-        .stub()
-        .callsArgWith(2, new Error('nope'))
-
-      this.UserUpdater.addEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        err => {
-          this.logger.warn.called.should.equal(true)
-          should.exist(err)
           done()
         }
       )

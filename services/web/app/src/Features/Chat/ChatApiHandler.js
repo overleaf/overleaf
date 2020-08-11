@@ -12,9 +12,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ChatApiHandler
+const OError = require('@overleaf/o-error')
 const request = require('request')
 const settings = require('settings-sharelatex')
-const logger = require('logger-sharelatex')
 
 module.exports = ChatApiHandler = {
   _apiRequest(opts, callback) {
@@ -28,11 +28,11 @@ module.exports = ChatApiHandler = {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return callback(null, data)
       } else {
-        error = new Error(
-          `chat api returned non-success code: ${response.statusCode}`
+        error = new OError(
+          `chat api returned non-success code: ${response.statusCode}`,
+          opts
         )
         error.statusCode = response.statusCode
-        logger.warn({ err: error, opts }, 'error sending request to chat api')
         return callback(error)
       }
     })

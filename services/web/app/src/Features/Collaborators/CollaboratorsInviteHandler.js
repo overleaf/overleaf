@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const { ProjectInvite } = require('../../models/ProjectInvite')
+const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const CollaboratorsEmailHandler = require('./CollaboratorsEmailHandler')
 const CollaboratorsHandler = require('./CollaboratorsHandler')
@@ -32,7 +33,9 @@ const CollaboratorsInviteHandler = {
     logger.log({ projectId }, 'fetching invites for project')
     return ProjectInvite.find({ projectId }, function(err, invites) {
       if (err != null) {
-        logger.warn({ err, projectId }, 'error getting invites from mongo')
+        OError.tag(err, 'error getting invites from mongo', {
+          projectId
+        })
         return callback(err)
       }
       logger.log(
@@ -50,7 +53,9 @@ const CollaboratorsInviteHandler = {
     logger.log({ projectId }, 'counting invites for project')
     return ProjectInvite.count({ projectId }, function(err, count) {
       if (err != null) {
-        logger.warn({ err, projectId }, 'error getting invites from mongo')
+        OError.tag(err, 'error getting invites from mongo', {
+          projectId
+        })
         return callback(err)
       }
       return callback(null, count)
@@ -67,7 +72,10 @@ const CollaboratorsInviteHandler = {
       existingUser
     ) {
       if (err != null) {
-        logger.warn({ projectId, email }, 'error checking if user exists')
+        OError.tag(err, 'error checking if user exists', {
+          projectId,
+          email
+        })
         return callback(err)
       }
       if (existingUser == null) {
@@ -79,7 +87,10 @@ const CollaboratorsInviteHandler = {
         project
       ) {
         if (err != null) {
-          logger.warn({ projectId, email }, 'error getting project')
+          OError.tag(err, 'error getting project', {
+            projectId,
+            email
+          })
           return callback(err)
         }
         if (project == null) {
@@ -153,10 +164,11 @@ const CollaboratorsInviteHandler = {
     )
     return Crypto.randomBytes(24, function(err, buffer) {
       if (err != null) {
-        logger.warn(
-          { err, projectId, sendingUserId: sendingUser._id, email },
-          'error generating random token'
-        )
+        OError.tag(err, 'error generating random token', {
+          projectId,
+          sendingUserId: sendingUser._id,
+          email
+        })
         return callback(err)
       }
       const token = buffer.toString('hex')
@@ -169,10 +181,11 @@ const CollaboratorsInviteHandler = {
       })
       return invite.save(function(err, invite) {
         if (err != null) {
-          logger.warn(
-            { err, projectId, sendingUserId: sendingUser._id, email },
-            'error saving token'
-          )
+          OError.tag(err, 'error saving token', {
+            projectId,
+            sendingUserId: sendingUser._id,
+            email
+          })
           return callback(err)
         }
         // Send email and notification in background
@@ -201,7 +214,10 @@ const CollaboratorsInviteHandler = {
     logger.log({ projectId, inviteId }, 'removing invite')
     return ProjectInvite.remove({ projectId, _id: inviteId }, function(err) {
       if (err != null) {
-        logger.warn({ err, projectId, inviteId }, 'error removing invite')
+        OError.tag(err, 'error removing invite', {
+          projectId,
+          inviteId
+        })
         return callback(err)
       }
       CollaboratorsInviteHandler._tryCancelInviteNotification(
@@ -222,7 +238,10 @@ const CollaboratorsInviteHandler = {
       invite
     ) {
       if (err != null) {
-        logger.warn({ err, projectId, inviteId }, 'error finding invite')
+        OError.tag(err, 'error finding invite', {
+          projectId,
+          inviteId
+        })
         return callback(err)
       }
       if (invite == null) {
@@ -238,10 +257,10 @@ const CollaboratorsInviteHandler = {
         invite,
         function(err) {
           if (err != null) {
-            logger.warn(
-              { projectId, inviteId },
-              'error resending invite messages'
-            )
+            OError.tag(err, 'error resending invite messages', {
+              projectId,
+              inviteId
+            })
             return callback(err)
           }
           return callback(null)
@@ -260,7 +279,9 @@ const CollaboratorsInviteHandler = {
       invite
     ) {
       if (err != null) {
-        logger.warn({ err, projectId }, 'error fetching invite')
+        OError.tag(err, 'error fetching invite', {
+          projectId
+        })
         return callback(err)
       }
       if (invite == null) {
@@ -281,7 +302,10 @@ const CollaboratorsInviteHandler = {
       tokenString,
       function(err, invite) {
         if (err != null) {
-          logger.warn({ err, projectId, tokenString }, 'error finding invite')
+          OError.tag(err, 'error finding invite', {
+            projectId,
+            tokenString
+          })
           return callback(err)
         }
         if (!invite) {
@@ -300,20 +324,21 @@ const CollaboratorsInviteHandler = {
           invite.privileges,
           function(err) {
             if (err != null) {
-              logger.warn(
-                { err, projectId, inviteId, userId: user._id },
-                'error adding user to project'
-              )
+              OError.tag(err, 'error adding user to project', {
+                projectId,
+                inviteId,
+                userId: user._id
+              })
               return callback(err)
             }
             // Remove invite
             logger.log({ projectId, inviteId }, 'removing invite')
             return ProjectInvite.remove({ _id: inviteId }, function(err) {
               if (err != null) {
-                logger.warn(
-                  { err, projectId, inviteId },
-                  'error removing invite'
-                )
+                OError.tag(err, 'error removing invite', {
+                  projectId,
+                  inviteId
+                })
                 return callback(err)
               }
               CollaboratorsInviteHandler._tryCancelInviteNotification(

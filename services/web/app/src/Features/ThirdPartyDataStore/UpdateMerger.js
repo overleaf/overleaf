@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let UpdateMerger
+const OError = require('@overleaf/o-error')
 const _ = require('underscore')
 const async = require('async')
 const fs = require('fs')
@@ -196,9 +197,12 @@ module.exports = UpdateMerger = {
         docLines
       ) {
         if (err != null) {
-          logger.warn(
-            { project_id },
-            'error reading file into text array for process doc update'
+          OError.tag(
+            err,
+            'error reading file into text array for process doc update',
+            {
+              project_id
+            }
           )
           return callback(err)
         }
@@ -236,7 +240,9 @@ module.exports = UpdateMerger = {
           content = ''
         }
         if (error != null) {
-          logger.warn({ path }, 'error reading file into text array')
+          OError.tag(error, 'error reading file into text array', {
+            path
+          })
           return callback(error)
         }
         const lines = content.split(/\r\n|\n|\r/)

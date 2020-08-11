@@ -1,4 +1,4 @@
-const logger = require('logger-sharelatex')
+const OError = require('@overleaf/o-error')
 const { User } = require('../../models/User')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 
@@ -34,10 +34,10 @@ module.exports = {
           {},
           function(err) {
             if (err != null) {
-              logger.warn(
-                { err, referalId, newUserId },
-                'something went wrong allocating referal'
-              )
+              OError.tag(err, 'something went wrong allocating referal', {
+                referalId,
+                newUserId
+              })
               return callback(err)
             }
             FeaturesUpdater.refreshFeatures(user._id, callback)

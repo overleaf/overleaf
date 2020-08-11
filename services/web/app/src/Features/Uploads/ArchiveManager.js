@@ -13,6 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const logger = require('logger-sharelatex')
+const OError = require('@overleaf/o-error')
 const metrics = require('metrics-sharelatex')
 const fs = require('fs')
 const Path = require('path')
@@ -165,10 +166,10 @@ const ArchiveManager = {
               destFile,
               function(err) {
                 if (err != null) {
-                  logger.warn(
-                    { err, source, destFile },
-                    'error unzipping file entry'
-                  )
+                  OError.tag(err, 'error unzipping file entry', {
+                    source,
+                    destFile
+                  })
                   zipfile.close() // bail out, stop reading file entries
                   return callback(err)
                 } else {
@@ -205,7 +206,7 @@ const ArchiveManager = {
 
     return ArchiveManager._isZipTooLarge(source, function(err, isTooLarge) {
       if (err != null) {
-        logger.warn({ err }, 'error checking size of zip file')
+        OError.tag(err, 'error checking size of zip file')
         return callback(err)
       }
 
@@ -221,7 +222,10 @@ const ArchiveManager = {
       ) {
         timer.done()
         if (err != null) {
-          logger.warn({ err, source, destination }, 'unzip failed')
+          OError.tag(err, 'unzip failed', {
+            source,
+            destination
+          })
           return callback(err)
         } else {
           return callback()

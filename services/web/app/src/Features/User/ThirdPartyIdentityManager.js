@@ -1,4 +1,5 @@
 const APP_ROOT = '../../../../app/src'
+const OError = require('@overleaf/o-error')
 const EmailHandler = require(`${APP_ROOT}/Features/Email/EmailHandler`)
 const Errors = require('../Errors/Errors')
 const _ = require('lodash')
@@ -98,7 +99,7 @@ function link(
       }
       EmailHandler.sendEmail('securityAlert', emailOptions, error => {
         if (error != null) {
-          logger.warn(error)
+          logger.warn(OError.tag(error))
         }
         return callback(null, res)
       })

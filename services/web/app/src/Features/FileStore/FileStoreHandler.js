@@ -47,10 +47,10 @@ const FileStoreHandler = {
           ),
         function(err, result) {
           if (err) {
-            logger.warn(
-              { err, projectId, fileArgs },
-              'Error uploading file, retries failed'
-            )
+            OError.tag(err, 'Error uploading file, retries failed', {
+              projectId,
+              fileArgs
+            })
             return callback(err)
           }
           callback(err, result.url, result.fileRef)
@@ -96,14 +96,11 @@ const FileStoreHandler = {
         })
         writeStream.on('response', function(response) {
           if (![200, 201].includes(response.statusCode)) {
-            err = new Error(
+            err = new OError(
               `non-ok response from filestore for upload: ${
                 response.statusCode
-              }`
-            )
-            logger.warn(
-              { err, statusCode: response.statusCode },
-              'error uploading to filestore'
+              }`,
+              { statusCode: response.statusCode }
             )
             return callbackOnce(err)
           }
@@ -145,10 +142,10 @@ const FileStoreHandler = {
     const url = this._buildUrl(projectId, fileId)
     request.head(url, (err, res) => {
       if (err) {
-        logger.warn(
-          { err, projectId, fileId },
-          'failed to get file size from filestore'
-        )
+        OError.tag(err, 'failed to get file size from filestore', {
+          projectId,
+          fileId
+        })
         return callback(err)
       }
       if (res.statusCode === 404) {
@@ -224,21 +221,27 @@ const FileStoreHandler = {
     }
     return request(opts, function(err, response) {
       if (err) {
-        logger.warn(
-          { err, oldProjectId, oldFileId, newProjectId, newFileId },
-          'something went wrong telling filestore api to copy file'
+        OError.tag(
+          err,
+          'something went wrong telling filestore api to copy file',
+          {
+            oldProjectId,
+            oldFileId,
+            newProjectId,
+            newFileId
+          }
         )
         return callback(err)
       } else if (response.statusCode >= 200 && response.statusCode < 300) {
         // successful response
         return callback(null, opts.uri)
       } else {
-        err = new Error(
-          `non-ok response from filestore for copyFile: ${response.statusCode}`
-        )
-        logger.warn(
-          { uri: opts.uri, statusCode: response.statusCode },
-          'error uploading to filestore'
+        err = new OError(
+          `non-ok response from filestore for copyFile: ${response.statusCode}`,
+          {
+            uri: opts.uri,
+            statusCode: response.statusCode
+          }
         )
         return callback(err)
       }

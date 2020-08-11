@@ -1,4 +1,5 @@
 const async = require('async')
+const OError = require('@overleaf/o-error')
 const PlansLocator = require('./PlansLocator')
 const _ = require('underscore')
 const SubscriptionLocator = require('./SubscriptionLocator')
@@ -47,9 +48,12 @@ const FeaturesUpdater = {
     }
     async.series(jobs, function(err, results) {
       if (err) {
-        logger.warn(
-          { err, userId },
-          'error getting subscription or group for refreshFeatures'
+        OError.tag(
+          err,
+          'error getting subscription or group for refreshFeatures',
+          {
+            userId
+          }
         )
         return callback(err)
       }
@@ -287,7 +291,9 @@ const FeaturesUpdater = {
       user
     ) {
       if (err != null) {
-        logger.warn({ v1UserId }, '[AccountSync] error getting user')
+        OError.tag(err, '[AccountSync] error getting user', {
+          v1UserId
+        })
         return callback(err)
       }
       if ((user != null ? user._id : undefined) == null) {

@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let SudoModeMiddleware
+const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const SudoModeHandler = require('./SudoModeHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
@@ -33,10 +34,9 @@ module.exports = SudoModeMiddleware = {
     )
     return SudoModeHandler.isSudoModeActive(userId, function(err, isActive) {
       if (err != null) {
-        logger.warn(
-          { err, userId },
-          '[SudoMode] error checking if sudo mode is active'
-        )
+        OError.tag(err, '[SudoMode] error checking if sudo mode is active', {
+          userId
+        })
         return next(err)
       }
       if (isActive) {

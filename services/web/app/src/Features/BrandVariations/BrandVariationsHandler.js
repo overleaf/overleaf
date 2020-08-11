@@ -13,6 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let BrandVariationsHandler
+const OError = require('@overleaf/o-error')
 const url = require('url')
 const settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
@@ -33,10 +34,9 @@ module.exports = BrandVariationsHandler = {
       },
       function(error, response, brandVariationDetails) {
         if (error != null) {
-          logger.warn(
-            { brandVariationId, error },
-            'error getting brand variation details'
-          )
+          OError.tag(error, 'error getting brand variation details', {
+            brandVariationId
+          })
           return callback(error)
         }
         _formatBrandVariationDetails(brandVariationDetails)

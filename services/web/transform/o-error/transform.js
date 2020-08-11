@@ -1,92 +1,83 @@
 function functionArgsFilter(j, path) {
-  return ['err', 'error'].includes(path.get('params').value[0].name)
+  if (path.get('params') && path.get('params').value[0]) {
+    return ['err', 'error'].includes(path.get('params').value[0].name)
+  } else {
+    return false
+  }
+}
+
+function isReturningFunctionCallWithError(path, errorVarName) {
+  return (
+    path.value.argument &&
+    path.value.argument.arguments &&
+    path.value.argument.arguments[0] &&
+    path.value.argument.arguments[0].name === errorVarName
+  )
+}
+
+function expressionIsLoggingError(path) {
+  return ['warn', 'error', 'err'].includes(
+    path.get('callee').get('property').value.name
+  )
+}
+
+function createTagErrorExpression(j, path, errorVarName) {
+  let message = 'error'
+  if (path.value.arguments.length >= 2) {
+    message = path.value.arguments[1].value || message
+  }
+
+  let info
+  try {
+    info = j.objectExpression(
+      // add properties from original logger info object to the
+      // OError info object, filtering out the err object itself,
+      // which is typically one of the args when doing intermediate
+      // error logging
+      // TODO: this can fail when the property name does not match
+      //       the variable name. e.g. { err: error } so need to check
+      //       both in the filter
+      path
+        .get('arguments')
+        .value[0].properties.filter(
+          property => property.key.name !== errorVarName
+        )
+    )
+  } catch (error) {
+    // if info retrieval fails it remains empty
+  }
+  const args = [j.identifier(errorVarName), j.literal(message)]
+  if (info) {
+    args.push(info)
+  }
+  return j.callExpression(
+    j.memberExpression(j.identifier('OError'), j.identifier('tag')),
+    args
+  )
 }
 
 function functionBodyProcessor(j, path) {
   // the error variable should be the first parameter to the function
   const errorVarName = path.get('params').value[0].name
   j(path)
-    // look for if statements
-    .find(j.IfStatement)
-    .filter(path => {
-      let hasReturnError = false
+    .find(j.IfStatement) // look for if statements
+    .filter(path =>
       j(path)
         // find returns inside the if statement where the error from
         // the args is explicitly returned
         .find(j.ReturnStatement)
-        .forEach(
-          path =>
-            (hasReturnError =
-              path.value.argument.arguments[0].name === errorVarName)
-        )
-      return hasReturnError
-    })
+        .some(path => isReturningFunctionCallWithError(path, errorVarName))
+    )
     .forEach(path => {
       j(path)
-        // within the selected if blocks find calls to logger
         .find(j.CallExpression, {
           callee: {
             object: { name: 'logger' }
           }
         })
-        // handle logger.warn, logger.error and logger.err
-        .filter(path =>
-          ['warn', 'error', 'err'].includes(
-            path.get('callee').get('property').value.name
-          )
-        )
-        // replace the logger call with the constructed OError wrapper
+        .filter(path => expressionIsLoggingError(path))
         .replaceWith(path => {
-          // extract the error message which is the second arg for logger
-          const message =
-            path.value.arguments.length >= 2
-              ? path.value.arguments[1].value
-              : 'Error'
-          // create: err = new OError(...)
-          return j.assignmentExpression(
-            '=',
-            // assign over the existing error var
-            j.identifier(errorVarName),
-            j.callExpression(
-              j.memberExpression(
-                // create: new OError
-                j.newExpression(j.identifier('OError'), [
-                  // create: { ... } args for new OError()
-                  j.objectExpression([
-                    // set message property with original error message
-                    j.property(
-                      'init',
-                      j.identifier('message'),
-                      j.literal(message)
-                    ),
-                    j.property(
-                      'init',
-                      // set info property with object { info: {} }
-                      j.identifier('info'),
-                      j.objectExpression(
-                        // add properties from original logger info object to the
-                        // OError info object, filtering out the err object itself,
-                        // which is typically one of the args when doing intermediate
-                        // error logging
-                        // TODO: this can fail when the property name does not match
-                        //       the variable name. e.g. { err: error } so need to check
-                        //       both in the filter
-                        path
-                          .get('arguments')
-                          .value[0].properties.filter(
-                            property => property.key.name !== errorVarName
-                          )
-                      )
-                    )
-                  ])
-                ]),
-                // add: .withCause( ) to OError
-                j.identifier('withCause')
-              ),
-              // add original error var as argument: .withCause(err)
-              [j.identifier(errorVarName)]
-            )
-          )
+          return createTagErrorExpression(j, path, errorVarName)
         })
     })
 }

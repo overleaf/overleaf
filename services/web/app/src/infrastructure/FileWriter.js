@@ -11,6 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const fs = require('fs')
+const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const uuid = require('uuid')
 const _ = require('underscore')
@@ -141,9 +142,13 @@ const FileWriter = {
           }).withCause(err || {})
         }
         if (err) {
-          logger.warn(
-            { err, identifier, fsPath },
-            '[writeStreamToDisk] something went wrong writing the stream to disk'
+          OError.tag(
+            err,
+            '[writeStreamToDisk] something went wrong writing the stream to disk',
+            {
+              identifier,
+              fsPath
+            }
           )
           return callback(err)
         }

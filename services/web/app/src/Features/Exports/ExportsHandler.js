@@ -15,6 +15,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ExportsHandler, self
+const OError = require('@overleaf/o-error')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectHistoryHandler = require('../Project/ProjectHistoryHandler')
 const ProjectLocator = require('../Project/ProjectLocator')
@@ -104,17 +105,19 @@ module.exports = ExportsHandler = self = {
 
     return async.auto(jobs, function(err, results) {
       if (err != null) {
-        logger.warn(
-          { err, project_id, user_id, brand_variation_id },
-          'error building project export'
-        )
+        OError.tag(err, 'error building project export', {
+          project_id,
+          user_id,
+          brand_variation_id
+        })
         return callback(err)
       }
 
       const { project, rootDoc, user, historyVersion } = results
       if (!rootDoc || rootDoc[1] == null) {
-        err = new Error('cannot export project without root doc')
-        logger.warn({ err, project_id })
+        err = new OError('cannot export project without root doc', {
+          project_id
+        })
         return callback(err)
       }
 
@@ -175,10 +178,9 @@ module.exports = ExportsHandler = self = {
       },
       function(err, res, body) {
         if (err != null) {
-          logger.warn(
-            { err, export: export_data },
-            'error making request to v1 export'
-          )
+          OError.tag(err, 'error making request to v1 export', {
+            export: export_data
+          })
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
           return callback(null, body)
@@ -207,24 +209,18 @@ module.exports = ExportsHandler = self = {
       },
       function(err, res, body) {
         if (err != null) {
-          logger.warn(
-            { err, project_id },
-            'error making request to project history'
-          )
+          OError.tag(err, 'error making request to project history', {
+            project_id
+          })
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
           return callback(null, body.version)
         } else {
-          err = new Error(
+          err = new OError(
             `project history version returned a failure status code: ${
               res.statusCode
-            }`
-          )
-          logger.warn(
-            { err, project_id },
-            `project history version returned failure status code: ${
-              res.statusCode
-            }`
+            }`,
+            { project_id }
           )
           return callback(err)
         }
@@ -243,20 +239,16 @@ module.exports = ExportsHandler = self = {
       },
       function(err, res, body) {
         if (err != null) {
-          logger.warn(
-            { err, export: export_id },
-            'error making request to v1 export'
-          )
+          OError.tag(err, 'error making request to v1 export', {
+            export: export_id
+          })
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
           return callback(null, body)
         } else {
-          err = new Error(
-            `v1 export returned a failure status code: ${res.statusCode}`
-          )
-          logger.warn(
-            { err, export: export_id },
-            `v1 export returned failure status code: ${res.statusCode}`
+          err = new OError(
+            `v1 export returned a failure status code: ${res.statusCode}`,
+            { export: export_id }
           )
           return callback(err)
         }
@@ -277,22 +269,16 @@ module.exports = ExportsHandler = self = {
       },
       function(err, res, body) {
         if (err != null) {
-          logger.warn(
-            { err, export: export_id },
-            'error making request to v1 export'
-          )
+          OError.tag(err, 'error making request to v1 export', {
+            export: export_id
+          })
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
           return callback(null, body)
         } else {
-          err = new Error(
-            `v1 export returned a failure status code: ${res.statusCode}`
-          )
-          logger.warn(
-            { err, export: export_id },
-            `v1 export zip fetch returned failure status code: ${
-              res.statusCode
-            }`
+          err = new OError(
+            `v1 export returned a failure status code: ${res.statusCode}`,
+            { export: export_id }
           )
           return callback(err)
         }

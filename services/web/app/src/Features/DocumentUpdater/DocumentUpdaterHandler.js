@@ -1,4 +1,5 @@
 const request = require('request').defaults()
+const OError = require('@overleaf/o-error')
 const settings = require('settings-sharelatex')
 const _ = require('underscore')
 const async = require('async')
@@ -137,10 +138,10 @@ function getProjectDocsIfMatch(projectId, projectStateHash, callback) {
   request.post(url, function(error, res, body) {
     timer.done()
     if (error) {
-      logger.warn(
-        { err: error, url, projectId },
-        'error getting project docs from doc updater'
-      )
+      OError.tag(error, 'error getting project docs from doc updater', {
+        url,
+        projectId
+      })
       return callback(error)
     }
     if (res.statusCode === 409) {
@@ -156,18 +157,17 @@ function getProjectDocsIfMatch(projectId, projectStateHash, callback) {
       try {
         docs = JSON.parse(body)
       } catch (error1) {
-        error = error1
-        return callback(error)
+        return callback(OError.tag(error1))
       }
       callback(null, docs)
     } else {
-      logger.warn(
-        { projectId, url },
-        `doc updater returned a non-success status code: ${res.statusCode}`
-      )
       callback(
-        new Error(
-          `doc updater returned a non-success status code: ${res.statusCode}`
+        new OError(
+          `doc updater returned a non-success status code: ${res.statusCode}`,
+          {
+            projectId,
+            url
+          }
         )
       )
     }

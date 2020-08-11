@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const OError = require('@overleaf/o-error')
 const async = require('async')
 const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
@@ -128,10 +129,10 @@ const ProjectEntityUpdateHandler = {
             ranges,
             (err, modified, rev) => {
               if (err != null) {
-                logger.warn(
-                  { err, docId, projectId },
-                  'error sending doc to docstore'
-                )
+                OError.tag(err, 'error sending doc to docstore', {
+                  docId,
+                  projectId
+                })
                 return callback(err)
               }
               logger.log(
@@ -215,16 +216,12 @@ const ProjectEntityUpdateHandler = {
       doc,
       (err, result, project) => {
         if (err != null) {
-          logger.warn(
-            {
-              err,
-              projectId,
-              folderId,
-              doc_name: doc != null ? doc.name : undefined,
-              doc_id: doc != null ? doc._id : undefined
-            },
-            'error adding file with project'
-          )
+          OError.tag(err, 'error adding file with project', {
+            projectId,
+            folderId,
+            doc_name: doc != null ? doc.name : undefined,
+            doc_id: doc != null ? doc._id : undefined
+          })
           return callback(err)
         }
         TpdsUpdateSender.addDoc(
@@ -360,10 +357,12 @@ const ProjectEntityUpdateHandler = {
       fsPath,
       (err, fileStoreUrl, fileRef) => {
         if (err != null) {
-          logger.warn(
-            { err, projectId, folderId, file_name: fileName, fileRef },
-            'error uploading image to s3'
-          )
+          OError.tag(err, 'error uploading image to s3', {
+            projectId,
+            folderId,
+            file_name: fileName,
+            fileRef
+          })
           return callback(err)
         }
         callback(null, fileStoreUrl, fileRef)
@@ -378,10 +377,12 @@ const ProjectEntityUpdateHandler = {
       fileRef,
       (err, result, project) => {
         if (err != null) {
-          logger.warn(
-            { err, projectId, folderId, file_name: fileRef.name, fileRef },
-            'error adding file with project'
-          )
+          OError.tag(err, 'error adding file with project', {
+            projectId,
+            folderId,
+            file_name: fileRef.name,
+            fileRef
+          })
           return callback(err)
         }
         TpdsUpdateSender.addFile(
