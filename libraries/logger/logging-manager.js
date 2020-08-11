@@ -1,4 +1,5 @@
 const bunyan = require('bunyan')
+const fetch = require('node-fetch')
 const fs = require('fs')
 const yn = require('yn')
 const OError = require('@overleaf/o-error')
@@ -21,6 +22,7 @@ const errSerializer = function (err) {
 
 const Logger = (module.exports = {
   initialize(name) {
+    this.logLevelSource = (process.env.LOG_LEVEL_SOURCE || 'file').toLowerCase()
     this.isProduction =
       (process.env.NODE_ENV || '').toLowerCase() === 'production'
     this.defaultLevel =
@@ -41,18 +43,33 @@ const Logger = (module.exports = {
     return this
   },
 
-  checkLogLevel() {
-    fs.readFile('/logging/tracingEndTime', (error, end) => {
-      if (error || !end) {
-        this.logger.level(this.defaultLevel)
-        return
-      }
-      if (parseInt(end) > Date.now()) {
+  async checkLogLevel() {
+    try {
+      const end = await this.getTracingEndTime()
+      if (parseInt(end, 10) > Date.now()) {
         this.logger.level('trace')
       } else {
         this.logger.level(this.defaultLevel)
       }
-    })
+    } catch (err) {
+      this.logger.level(this.defaultLevel)
+    }
+  },
+
+  async getTracingEndTimeFile() {
+    return fs.promises.readFile('/logging/tracingEndTime')
+  },
+
+  async getTracingEndTimeMetadata() {
+    const options = {
+      headers: {
+        'Metadata-Flavor': 'Google'
+      }
+    }
+    const uri = `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
+    const res = await fetch(uri, options)
+    if (!res.ok) throw new Error('Metadata not okay')
+    return res.text()
   },
 
   initializeErrorReporting(sentryDsn, options) {
@@ -240,6 +257,16 @@ const Logger = (module.exports = {
       // clear interval if already set
       if (this.checkInterval) {
         clearInterval(this.checkInterval)
+      }
+      if (this.logLevelSource === 'file') {
+        this.getTracingEndTime = this.getTracingEndTimeFile
+      } else if (this.logLevelSource === 'gce_metadata') {
+        this.getTracingEndTime = this.getTracingEndTimeMetadata
+      } else if (this.logLevelSource === 'none') {
+        return
+      } else {
+        console.log('Unrecognised log level source')
+        return
       }
       // check for log level override on startup
       this.checkLogLevel()
