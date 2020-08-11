@@ -99,7 +99,7 @@ describe('LoggingManager', function () {
         )
       })
 
-      it('should not run getTracingEndTime', function () {
+      it('should not run checkLogLevel', function () {
         this.checkLogLevelStub.should.not.have.been.called
       })
     })
