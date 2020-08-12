@@ -181,7 +181,11 @@ if (Settings.shutdownDrainTimeWindow) {
   if (Settings.errors && Settings.errors.catchUncaughtErrors) {
     process.removeAllListeners('uncaughtException')
     process.on('uncaughtException', function (error) {
-      if (['EPIPE', 'ECONNRESET'].includes(error.code)) {
+      if (
+        ['ETIMEDOUT', 'EHOSTUNREACH', 'EPIPE', 'ECONNRESET'].includes(
+          error.code
+        )
+      ) {
         Metrics.inc('disconnected_write', 1, { status: error.code })
         return logger.warn(
           { err: error },
