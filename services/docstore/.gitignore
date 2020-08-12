@@ -1,2 +1,5 @@
 node_modules
 forever
+
+# managed by dev-environment$ bin/update_build_scripts
+.npmrc

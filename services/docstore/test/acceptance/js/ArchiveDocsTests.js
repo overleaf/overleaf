@@ -51,14 +51,14 @@ describe('Archiving', function () {
           _id: ObjectId(),
           lines: ['one', 'two', 'three'],
           ranges: {},
-          version: 2
+          version: 2,
         },
         {
           _id: ObjectId(),
           lines: ['aaa', 'bbb', 'ccc'],
           ranges: {},
-          version: 4
-        }
+          version: 4,
+        },
       ]
       const jobs = Array.from(this.docs).map((doc) =>
         ((doc) => {
@@ -173,7 +173,7 @@ describe('Archiving', function () {
         _id: ObjectId(),
         lines: ['one', 'two', 'three'],
         ranges: {},
-        version: 2
+        version: 2,
       }
       return DocstoreClient.createDoc(
         this.project_id,
@@ -287,7 +287,7 @@ describe('Archiving', function () {
         _id: ObjectId(),
         lines: [big_line, big_line, big_line, big_line],
         ranges: {},
-        version: 2
+        version: 2,
       }
       return DocstoreClient.createDoc(
         this.project_id,
@@ -758,10 +758,10 @@ describe('Archiving', function () {
           'Roses are \u001b[0;31mred\u001b[0m, violets are \u001b[0;34mblue. Hope you enjoy terminal hue',
           'But now...\u001b[20Cfor my greatest trick...\u001b[8m',
           'The quic\b\b\b\b\b\bk brown fo\u0007\u0007\u0007\u0007\u0007\u0007\u0007\u0007\u0007\u0007\u0007x... [Beeeep]',
-          'Powerلُلُصّبُلُلصّبُررً ॣ ॣh ॣ ॣ冗'
+          'Powerلُلُصّبُلُلصّبُررً ॣ ॣh ॣ ॣ冗',
         ],
         ranges: {},
-        version: 2
+        version: 2,
       }
       return DocstoreClient.createDoc(
         this.project_id,
@@ -857,17 +857,17 @@ describe('Archiving', function () {
               op: { i: 'foo', p: 24 },
               metadata: {
                 user_id: ObjectId(),
-                ts: new Date('2017-01-27T16:10:44.194Z')
-              }
+                ts: new Date('2017-01-27T16:10:44.194Z'),
+              },
             },
             {
               id: ObjectId(),
               op: { d: 'bar', p: 50 },
               metadata: {
                 user_id: ObjectId(),
-                ts: new Date('2017-01-27T18:10:44.194Z')
-              }
-            }
+                ts: new Date('2017-01-27T18:10:44.194Z'),
+              },
+            },
           ],
           comments: [
             {
@@ -875,12 +875,12 @@ describe('Archiving', function () {
               op: { c: 'comment', p: 284, t: ObjectId() },
               metadata: {
                 user_id: ObjectId(),
-                ts: new Date('2017-01-26T14:22:04.869Z')
-              }
-            }
-          ]
+                ts: new Date('2017-01-26T14:22:04.869Z'),
+              },
+            },
+          ],
         },
-        version: 2
+        version: 2,
       }
       return DocstoreClient.createDoc(
         this.project_id,
@@ -971,7 +971,7 @@ describe('Archiving', function () {
         _id: ObjectId(),
         lines: ['abc', 'def', 'ghi'],
         ranges: {},
-        version: 2
+        version: 2,
       }
       return DocstoreClient.createDoc(
         this.project_id,
@@ -1067,7 +1067,7 @@ describe('Archiving', function () {
         _id: ObjectId(),
         lines: ['abc', 'def', 'ghi'],
         ranges: {},
-        version: 2
+        version: 2,
       }
       uploadContent(
         `${this.project_id}/${this.doc._id}`,
@@ -1079,7 +1079,7 @@ describe('Archiving', function () {
               project_id: this.project_id,
               _id: this.doc._id,
               rev: this.doc.version,
-              inS3: true
+              inS3: true,
             },
             (error) => {
               if (error != null) {

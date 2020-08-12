@@ -29,17 +29,17 @@ describe('HttpController', function () {
         './DocArchiveManager': (this.DocArchiveManager = {}),
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
-          error: sinon.stub()
+          error: sinon.stub(),
         }),
-        './HealthChecker': {}
+        './HealthChecker': {},
       },
-      globals: { process }
+      globals: { process },
     })
     this.res = {
       send: sinon.stub(),
       sendStatus: sinon.stub(),
       json: sinon.stub(),
-      setHeader: sinon.stub()
+      setHeader: sinon.stub(),
     }
     this.res.status = sinon.stub().returns(this.res)
     this.req = { query: {} }
@@ -50,14 +50,14 @@ describe('HttpController', function () {
       _id: this.doc_id,
       lines: ['mock', 'lines', ' here', '', '', ' spaces '],
       version: 42,
-      rev: 5
+      rev: 5,
     }
     return (this.deletedDoc = {
       deleted: true,
       _id: this.doc_id,
       lines: ['mock', 'lines', ' here', '', '', ' spaces '],
       version: 42,
-      rev: 5
+      rev: 5,
     })
   })
 
@@ -66,7 +66,7 @@ describe('HttpController', function () {
       beforeEach(function () {
         this.req.params = {
           project_id: this.project_id,
-          doc_id: this.doc_id
+          doc_id: this.doc_id,
         }
         this.DocManager.getFullDoc = sinon
           .stub()
@@ -86,7 +86,7 @@ describe('HttpController', function () {
             _id: this.doc_id,
             lines: this.doc.lines,
             rev: this.doc.rev,
-            version: this.doc.version
+            version: this.doc.version,
           })
           .should.equal(true)
       })
@@ -96,7 +96,7 @@ describe('HttpController', function () {
       beforeEach(function () {
         this.req.params = {
           project_id: this.project_id,
-          doc_id: this.doc_id
+          doc_id: this.doc_id,
         }
         return (this.DocManager.getFullDoc = sinon
           .stub()
@@ -124,7 +124,7 @@ describe('HttpController', function () {
             lines: this.doc.lines,
             rev: this.doc.rev,
             deleted: true,
-            version: this.doc.version
+            version: this.doc.version,
           })
           .should.equal(true)
       })
@@ -135,7 +135,7 @@ describe('HttpController', function () {
     beforeEach(function () {
       this.req.params = {
         project_id: this.project_id,
-        doc_id: this.doc_id
+        doc_id: this.doc_id,
       }
       this.DocManager.getDocLines = sinon.stub().callsArgWith(2, null, this.doc)
       return this.HttpController.getRawDoc(this.req, this.res, this.next)
@@ -169,13 +169,13 @@ describe('HttpController', function () {
           {
             _id: ObjectId(),
             lines: ['mock', 'lines', 'one'],
-            rev: 2
+            rev: 2,
           },
           {
             _id: ObjectId(),
             lines: ['mock', 'lines', 'two'],
-            rev: 4
-          }
+            rev: 4,
+          },
         ]
         this.DocManager.getAllNonDeletedDocs = sinon
           .stub()
@@ -195,13 +195,13 @@ describe('HttpController', function () {
             {
               _id: this.docs[0]._id.toString(),
               lines: this.docs[0].lines,
-              rev: this.docs[0].rev
+              rev: this.docs[0].rev,
             },
             {
               _id: this.docs[1]._id.toString(),
               lines: this.docs[1].lines,
-              rev: this.docs[1].rev
-            }
+              rev: this.docs[1].rev,
+            },
           ])
           .should.equal(true)
       })
@@ -214,14 +214,14 @@ describe('HttpController', function () {
           {
             _id: ObjectId(),
             lines: ['mock', 'lines', 'one'],
-            rev: 2
+            rev: 2,
           },
           null,
           {
             _id: ObjectId(),
             lines: ['mock', 'lines', 'two'],
-            rev: 4
-          }
+            rev: 4,
+          },
         ]
         this.DocManager.getAllNonDeletedDocs = sinon
           .stub()
@@ -235,13 +235,13 @@ describe('HttpController', function () {
             {
               _id: this.docs[0]._id.toString(),
               lines: this.docs[0].lines,
-              rev: this.docs[0].rev
+              rev: this.docs[0].rev,
             },
             {
               _id: this.docs[2]._id.toString(),
               lines: this.docs[2].lines,
-              rev: this.docs[2].rev
-            }
+              rev: this.docs[2].rev,
+            },
           ])
           .should.equal(true)
       })
@@ -251,7 +251,7 @@ describe('HttpController', function () {
           .calledWith(
             {
               err: sinon.match.has('message', 'null doc'),
-              project_id: this.project_id
+              project_id: this.project_id,
             },
             'encountered null doc'
           )
@@ -267,12 +267,12 @@ describe('HttpController', function () {
         this.docs = [
           {
             _id: ObjectId(),
-            ranges: { mock_ranges: 'one' }
+            ranges: { mock_ranges: 'one' },
           },
           {
             _id: ObjectId(),
-            ranges: { mock_ranges: 'two' }
-          }
+            ranges: { mock_ranges: 'two' },
+          },
         ]
         this.DocManager.getAllNonDeletedDocs = sinon
           .stub()
@@ -291,12 +291,12 @@ describe('HttpController', function () {
           .calledWith([
             {
               _id: this.docs[0]._id.toString(),
-              ranges: this.docs[0].ranges
+              ranges: this.docs[0].ranges,
             },
             {
               _id: this.docs[1]._id.toString(),
-              ranges: this.docs[1].ranges
-            }
+              ranges: this.docs[1].ranges,
+            },
           ])
           .should.equal(true)
       })
@@ -307,7 +307,7 @@ describe('HttpController', function () {
     beforeEach(function () {
       return (this.req.params = {
         project_id: this.project_id,
-        doc_id: this.doc_id
+        doc_id: this.doc_id,
       })
     })
 
@@ -316,7 +316,7 @@ describe('HttpController', function () {
         this.req.body = {
           lines: (this.lines = ['hello', 'world']),
           version: (this.version = 42),
-          ranges: (this.ranges = { changes: 'mock' })
+          ranges: (this.ranges = { changes: 'mock' }),
         }
         this.DocManager.updateDoc = sinon
           .stub()
@@ -348,7 +348,7 @@ describe('HttpController', function () {
         this.req.body = {
           lines: (this.lines = ['hello', 'world']),
           version: (this.version = 42),
-          ranges: {}
+          ranges: {},
         }
         this.DocManager.updateDoc = sinon
           .stub()
@@ -416,7 +416,7 @@ describe('HttpController', function () {
         this.req.body = {
           lines: (this.lines = Array(2049).fill('a'.repeat(1024))),
           version: (this.version = 42),
-          ranges: (this.ranges = { changes: 'mock' })
+          ranges: (this.ranges = { changes: 'mock' }),
         }
         return this.HttpController.updateDoc(this.req, this.res, this.next)
       })
@@ -435,7 +435,7 @@ describe('HttpController', function () {
     beforeEach(function () {
       this.req.params = {
         project_id: this.project_id,
-        doc_id: this.doc_id
+        doc_id: this.doc_id,
       }
       this.DocManager.deleteDoc = sinon.stub().callsArg(2)
       return this.HttpController.deleteDoc(this.req, this.res, this.next)

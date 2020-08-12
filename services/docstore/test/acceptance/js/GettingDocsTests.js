@@ -32,10 +32,10 @@ describe('Getting a doc', function () {
           op: { i: 'foo', p: 3 },
           meta: {
             user_id: ObjectId().toString(),
-            ts: new Date().toString()
-          }
-        }
-      ]
+            ts: new Date().toString(),
+          },
+        },
+      ],
     }
     return DocstoreApp.ensureRunning(() => {
       return DocstoreClient.createDoc(

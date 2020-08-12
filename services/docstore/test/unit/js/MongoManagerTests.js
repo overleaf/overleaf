@@ -25,14 +25,14 @@ describe('MongoManager', function () {
       requires: {
         './mongojs': {
           db: (this.db = { docs: {}, docOps: {} }),
-          ObjectId
+          ObjectId,
         },
         'metrics-sharelatex': { timeAsyncMethod: sinon.stub() },
-        'logger-sharelatex': { log() {} }
+        'logger-sharelatex': { log() {} },
       },
       globals: {
-        console
-      }
+        console,
+      },
     })
     this.project_id = ObjectId().toString()
     this.doc_id = ObjectId().toString()
@@ -58,7 +58,7 @@ describe('MongoManager', function () {
         .calledWith(
           {
             _id: ObjectId(this.doc_id),
-            project_id: ObjectId(this.project_id)
+            project_id: ObjectId(this.project_id),
           },
           this.filter
         )
@@ -97,7 +97,7 @@ describe('MongoManager', function () {
           .calledWith(
             {
               project_id: ObjectId(this.project_id),
-              deleted: { $ne: true }
+              deleted: { $ne: true },
             },
             this.filter
           )
@@ -125,7 +125,7 @@ describe('MongoManager', function () {
         return this.db.docs.find
           .calledWith(
             {
-              project_id: ObjectId(this.project_id)
+              project_id: ObjectId(this.project_id),
             },
             this.filter
           )
@@ -189,7 +189,7 @@ describe('MongoManager', function () {
           const args = this.db.docs.update.args[0]
           assert.deepEqual(args[0], {
             _id: ObjectId(this.doc_id),
-            project_id: ObjectId(this.project_id)
+            project_id: ObjectId(this.project_id),
           })
           assert.equal(args[1].$set.deleted, true)
           return done()
@@ -218,13 +218,13 @@ describe('MongoManager', function () {
 
     it('should destroy the doc', function () {
       return sinon.assert.calledWith(this.db.docs.remove, {
-        _id: ObjectId('123456789012')
+        _id: ObjectId('123456789012'),
       })
     })
 
     return it('should destroy the docOps', function () {
       return sinon.assert.calledWith(this.db.docOps.remove, {
-        doc_id: ObjectId('123456789012')
+        doc_id: ObjectId('123456789012'),
       })
     })
   })
@@ -275,15 +275,15 @@ describe('MongoManager', function () {
       return this.db.docOps.update
         .calledWith(
           {
-            doc_id: ObjectId(this.doc_id)
+            doc_id: ObjectId(this.doc_id),
           },
           {
             $set: {
-              version: this.version
-            }
+              version: this.version,
+            },
           },
           {
-            upsert: true
+            upsert: true,
           }
         )
         .should.equal(true)

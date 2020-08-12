@@ -31,10 +31,10 @@ describe('Applying updates to a doc', function () {
           op: { i: 'foo', p: 3 },
           meta: {
             user_id: ObjectId().toString(),
-            ts: new Date().toString()
-          }
-        }
-      ]
+            ts: new Date().toString(),
+          },
+        },
+      ],
     }
     this.newRanges = {
       changes: [
@@ -43,10 +43,10 @@ describe('Applying updates to a doc', function () {
           op: { i: 'bar', p: 6 },
           meta: {
             user_id: ObjectId().toString(),
-            ts: new Date().toString()
-          }
-        }
-      ]
+            ts: new Date().toString(),
+          },
+        },
+      ],
     }
     this.version = 42
     return DocstoreApp.ensureRunning(() => {
