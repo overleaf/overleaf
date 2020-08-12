@@ -22,7 +22,7 @@
     "coffee-script": "^1.12.7",
     "errorhandler": "^1.5.1",
     "express": "4.17.1",
-    "logger-sharelatex": "^1.9.1",
+    "logger-sharelatex": "^2.2.0",
     "method-override": "^3.0.0",
     "metrics-sharelatex": "^2.6.2",
     "mongojs": "^3.1.0",
