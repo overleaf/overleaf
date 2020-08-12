@@ -774,6 +774,69 @@ describe('UserEmails', function() {
         done
       )
     })
+
+    describe('audit log', function() {
+      const originalEmail = 'original@overleaf.com'
+      let otherEmail, response, userHelper, user, userId
+      beforeEach(async function() {
+        otherEmail = 'other@overleaf.com'
+        userHelper = new UserHelper()
+        userHelper = await UserHelper.createUser({
+          email: originalEmail
+        })
+        userHelper = await UserHelper.loginUser({
+          email: originalEmail,
+          password: userHelper.getDefaultPassword()
+        })
+        userId = userHelper.user._id
+        response = await userHelper.request.post({
+          form: {
+            email: otherEmail
+          },
+          simple: false,
+          uri: '/user/emails'
+        })
+        expect(response.statusCode).to.equal(204)
+        const token = await new Promise(resolve => {
+          db.tokens.findOne(
+            {
+              'data.user_id': userId.toString(),
+              'data.email': otherEmail
+            },
+            (error, tokenData) => {
+              expect(error).to.not.exist
+              resolve(tokenData.token)
+            }
+          )
+        })
+        response = await userHelper.request.post(`/user/emails/confirm`, {
+          form: {
+            token
+          },
+          simple: false
+        })
+        expect(response.statusCode).to.equal(200)
+        response = await userHelper.request.post('/user/emails/default', {
+          form: {
+            email: otherEmail
+          },
+          simple: false
+        })
+        expect(response.statusCode).to.equal(200)
+        userHelper = await UserHelper.getUser(userId)
+        user = userHelper.user
+      })
+      it('should be updated', function() {
+        const entry = user.auditLog[user.auditLog.length - 1]
+        expect(typeof entry.initiatorId).to.equal('object')
+        expect(entry.initiatorId).to.deep.equal(user._id)
+        expect(entry.ipAddress).to.equal('127.0.0.1')
+        expect(entry.info).to.deep.equal({
+          newPrimaryEmail: otherEmail,
+          oldPrimaryEmail: originalEmail
+        })
+      })
+    })
   })
 
   describe('when not logged in', function() {

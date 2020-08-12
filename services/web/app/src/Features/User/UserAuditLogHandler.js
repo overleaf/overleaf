@@ -15,6 +15,19 @@ const MAX_AUDIT_LOG_ENTRIES = 200
  * - info: an object detailing what happened
  */
 async function addEntry(userId, operation, initiatorId, ipAddress, info = {}) {
+  if (!operation || !ipAddress)
+    throw new OError('missing required audit log data', {
+      operation,
+      initiatorId,
+      ipAddress
+    })
+
+  if (!initiatorId && operation !== 'reset-password')
+    throw new OError('missing initiatorId for audit log', {
+      operation,
+      ipAddress
+    })
+
   const timestamp = new Date()
   const entry = {
     operation,

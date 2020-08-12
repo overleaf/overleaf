@@ -303,6 +303,7 @@ describe('UserController', function() {
 
   describe('updateUserSettings', function() {
     beforeEach(function() {
+      this.auditLog = { initiatorId: this.user_id, ipAddress: this.req.ip }
       this.newEmail = 'hello@world.com'
       this.req.externalAuthenticationSystemUsed = sinon.stub().returns(false)
     })
@@ -381,11 +382,11 @@ describe('UserController', function() {
 
     it('should call the user updater with the new email and user _id', function(done) {
       this.req.body.email = this.newEmail.toUpperCase()
-      this.UserUpdater.changeEmailAddress.callsArgWith(2)
+      this.UserUpdater.changeEmailAddress.callsArgWith(3)
       this.res.sendStatus = code => {
         code.should.equal(200)
         this.UserUpdater.changeEmailAddress
-          .calledWith(this.user_id, this.newEmail)
+          .calledWith(this.user_id, this.newEmail, this.auditLog)
           .should.equal(true)
         done()
       }
@@ -394,7 +395,7 @@ describe('UserController', function() {
 
     it('should update the email on the session', function(done) {
       this.req.body.email = this.newEmail.toUpperCase()
-      this.UserUpdater.changeEmailAddress.callsArgWith(2)
+      this.UserUpdater.changeEmailAddress.callsArgWith(3)
       let callcount = 0
       this.User.findById = (id, cb) => {
         if (++callcount === 2) {
@@ -418,7 +419,7 @@ describe('UserController', function() {
 
     it('should call populateTeamInvites', function(done) {
       this.req.body.email = this.newEmail.toUpperCase()
-      this.UserUpdater.changeEmailAddress.callsArgWith(2)
+      this.UserUpdater.changeEmailAddress.callsArgWith(3)
       this.res.sendStatus = code => {
         code.should.equal(200)
         this.UserHandler.populateTeamInvites
@@ -432,7 +433,7 @@ describe('UserController', function() {
     describe('when changeEmailAddress yields an error', function() {
       it('should pass on an error and not send a success status', function(done) {
         this.req.body.email = this.newEmail.toUpperCase()
-        this.UserUpdater.changeEmailAddress.callsArgWith(2, new OError())
+        this.UserUpdater.changeEmailAddress.callsArgWith(3, new OError())
         this.HttpErrorHandler.legacyInternal = sinon.spy(
           (req, res, message, error) => {
             expect(req).to.exist
@@ -454,7 +455,7 @@ describe('UserController', function() {
         })
         this.req.body.email = this.newEmail.toUpperCase()
         this.UserUpdater.changeEmailAddress.callsArgWith(
-          2,
+          3,
           new Errors.EmailExistsError()
         )
         this.UserController.updateUserSettings(this.req, this.res)

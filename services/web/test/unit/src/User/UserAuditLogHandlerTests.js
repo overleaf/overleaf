@@ -40,10 +40,12 @@ describe('UserAuditLogHandler', function() {
 
   describe('addEntry', function() {
     describe('success', function() {
-      beforeEach(async function() {
+      beforeEach(function() {
         this.dbUpdate = this.UserMock.expects('updateOne')
           .chain('exec')
           .resolves({ nModified: 1 })
+      })
+      it('writes a log', async function() {
         await this.UserAuditLogHandler.promises.addEntry(
           this.userId,
           this.action.operation,
@@ -51,30 +53,80 @@ describe('UserAuditLogHandler', function() {
           this.action.ip,
           this.action.info
         )
+        this.UserMock.verify()
       })
 
-      it('writes a log', async function() {
+      it('updates the log for password reset operation witout a initiatorId', async function() {
+        await expect(
+          this.UserAuditLogHandler.promises.addEntry(
+            this.userId,
+            'reset-password',
+            undefined,
+            this.action.ip,
+            this.action.info
+          )
+        )
         this.UserMock.verify()
       })
     })
 
-    describe('when the user does not exist', function() {
-      beforeEach(function() {
-        this.UserMock.expects('updateOne')
-          .chain('exec')
-          .resolves({ nModified: 0 })
+    describe('errors', function() {
+      describe('when the user does not exist', function() {
+        beforeEach(function() {
+          this.UserMock.expects('updateOne')
+            .chain('exec')
+            .resolves({ nModified: 0 })
+        })
+
+        it('throws an error', async function() {
+          await expect(
+            this.UserAuditLogHandler.promises.addEntry(
+              this.userId,
+              this.action.operation,
+              this.action.initiatorId,
+              this.action.ip,
+              this.action.info
+            )
+          ).to.be.rejected
+        })
       })
 
-      it('throws an error', async function() {
-        await expect(
-          this.UserAuditLogHandler.promises.addEntry(
-            this.userId,
-            this.action.operation,
-            this.action.initiatorId,
-            this.action.ip,
-            this.action.info
-          )
-        ).to.be.rejected
+      describe('missing parameters', function() {
+        it('throws an error when no operation', async function() {
+          await expect(
+            this.UserAuditLogHandler.promises.addEntry(
+              this.userId,
+              undefined,
+              this.action.initiatorId,
+              this.action.ip,
+              this.action.info
+            )
+          ).to.be.rejected
+        })
+
+        it('throws an error when no IP', async function() {
+          await expect(
+            this.UserAuditLogHandler.promises.addEntry(
+              this.userId,
+              this.action.operation,
+              this.action.initiatorId,
+              undefined,
+              this.action.info
+            )
+          ).to.be.rejected
+        })
+
+        it('throws an error when no initiatorId and not a password reset operation', async function() {
+          await expect(
+            this.UserAuditLogHandler.promises.addEntry(
+              this.userId,
+              this.action.operation,
+              undefined,
+              this.action.ip,
+              this.action.info
+            )
+          ).to.be.rejected
+        })
       })
     })
   })

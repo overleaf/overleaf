@@ -121,7 +121,11 @@ const UserEmailsController = {
     if (!email) {
       return res.sendStatus(422)
     }
-    UserUpdater.setDefaultEmailAddress(userId, email, false, err => {
+    const auditLog = {
+      initiatorId: userId,
+      ipAddress: req.ip
+    }
+    UserUpdater.setDefaultEmailAddress(userId, email, false, auditLog, err => {
       if (err) {
         return UserEmailsController._handleEmailError(err, req, res, next)
       }

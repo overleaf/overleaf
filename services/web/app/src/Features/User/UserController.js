@@ -338,7 +338,11 @@ const UserController = {
           res.sendStatus(400)
         } else {
           // update the user email
-          UserUpdater.changeEmailAddress(userId, newEmail, err => {
+          const auditLog = {
+            initiatorId: userId,
+            ipAddress: req.ip
+          }
+          UserUpdater.changeEmailAddress(userId, newEmail, auditLog, err => {
             if (err) {
               if (err instanceof Errors.EmailExistsError) {
                 const translation = req.i18n.translate(
