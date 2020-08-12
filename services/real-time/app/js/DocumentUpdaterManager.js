@@ -12,7 +12,7 @@ const rclient = require('redis-sharelatex').createClient(
 )
 const Keys = settings.redis.documentupdater.key_schema
 
-module.exports = {
+const DocumentUpdaterManager = {
   getDocument(project_id, doc_id, fromVersion, callback) {
     const timer = new metrics.Timer('get-document')
     const url = `${settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}?fromVersion=${fromVersion}`
@@ -61,6 +61,11 @@ module.exports = {
         callback(err)
       }
     })
+  },
+
+  checkDocument(project_id, doc_id, callback) {
+    // in this call fromVersion = -1 means get document without docOps
+    DocumentUpdaterManager.getDocument(project_id, doc_id, -1, callback)
   },
 
   flushProjectToMongoAndDelete(project_id, callback) {
@@ -141,3 +146,5 @@ module.exports = {
     })
   }
 }
+
+module.exports = DocumentUpdaterManager

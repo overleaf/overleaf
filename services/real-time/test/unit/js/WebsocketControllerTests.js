@@ -38,6 +38,7 @@ describe('WebsocketController', function () {
       id: (this.client_id = 'mock-client-id-123'),
       publicId: `other-id-${Math.random()}`,
       ol_context: {},
+      joinLeaveEpoch: 0,
       join: sinon.stub(),
       leave: sinon.stub()
     }
@@ -503,10 +504,13 @@ describe('WebsocketController', function () {
 
       this.client.ol_context.project_id = this.project_id
       this.client.ol_context.is_restricted_user = false
-      this.AuthorizationManager.addAccessToDoc = sinon.stub()
+      this.AuthorizationManager.addAccessToDoc = sinon.stub().yields()
       this.AuthorizationManager.assertClientCanViewProject = sinon
         .stub()
         .callsArgWith(1, null)
+      this.AuthorizationManager.assertClientCanViewProjectAndDoc = sinon
+        .stub()
+        .callsArgWith(2, null)
       this.DocumentUpdaterManager.getDocument = sinon
         .stub()
         .callsArgWith(
@@ -529,6 +533,10 @@ describe('WebsocketController', function () {
           this.options,
           this.callback
         )
+      })
+
+      it('should inc the joinLeaveEpoch', function () {
+        expect(this.client.joinLeaveEpoch).to.equal(1)
       })
 
       it('should check that the client is authorized to view the project', function () {
@@ -739,6 +747,136 @@ describe('WebsocketController', function () {
       })
     })
 
+    describe('when the client disconnects while auth checks are running', function () {
+      beforeEach(function (done) {
+        this.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(
+          new Error()
+        )
+        this.DocumentUpdaterManager.checkDocument = (
+          project_id,
+          doc_id,
+          cb
+        ) => {
+          this.client.disconnected = true
+          cb()
+        }
+
+        this.WebsocketController.joinDoc(
+          this.client,
+          this.doc_id,
+          -1,
+          this.options,
+          (...args) => {
+            this.callback(...args)
+            done()
+          }
+        )
+      })
+
+      it('should call the callback with no details', function () {
+        expect(this.callback.called).to.equal(true)
+        expect(this.callback.args[0]).to.deep.equal([])
+      })
+
+      it('should increment the editor.join-doc.disconnected metric with a status', function () {
+        expect(
+          this.metrics.inc.calledWith('editor.join-doc.disconnected', 1, {
+            status: 'after-client-auth-check'
+          })
+        ).to.equal(true)
+      })
+
+      it('should not get the document', function () {
+        expect(this.DocumentUpdaterManager.getDocument.called).to.equal(false)
+      })
+    })
+
+    describe('when the client starts a parallel joinDoc request', function () {
+      beforeEach(function (done) {
+        this.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(
+          new Error()
+        )
+        this.DocumentUpdaterManager.checkDocument = (
+          project_id,
+          doc_id,
+          cb
+        ) => {
+          this.DocumentUpdaterManager.checkDocument = sinon.stub().yields()
+          this.WebsocketController.joinDoc(
+            this.client,
+            this.doc_id,
+            -1,
+            {},
+            () => {}
+          )
+          cb()
+        }
+
+        this.WebsocketController.joinDoc(
+          this.client,
+          this.doc_id,
+          -1,
+          this.options,
+          (...args) => {
+            this.callback(...args)
+            // make sure the other joinDoc request completed
+            setTimeout(done, 5)
+          }
+        )
+      })
+
+      it('should call the callback with an error', function () {
+        expect(this.callback.called).to.equal(true)
+        expect(this.callback.args[0][0].message).to.equal(
+          'joinLeaveEpoch mismatch'
+        )
+      })
+
+      it('should get the document once (the parallel request wins)', function () {
+        expect(this.DocumentUpdaterManager.getDocument.callCount).to.equal(1)
+      })
+    })
+
+    describe('when the client starts a parallel leaveDoc request', function () {
+      beforeEach(function (done) {
+        this.RoomManager.leaveDoc = sinon.stub()
+
+        this.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(
+          new Error()
+        )
+        this.DocumentUpdaterManager.checkDocument = (
+          project_id,
+          doc_id,
+          cb
+        ) => {
+          this.WebsocketController.leaveDoc(this.client, this.doc_id, () => {})
+          cb()
+        }
+
+        this.WebsocketController.joinDoc(
+          this.client,
+          this.doc_id,
+          -1,
+          this.options,
+          (...args) => {
+            this.callback(...args)
+            done()
+          }
+        )
+      })
+
+      it('should call the callback with an error', function () {
+        expect(this.callback.called).to.equal(true)
+        expect(this.callback.args[0][0].message).to.equal(
+          'joinLeaveEpoch mismatch'
+        )
+      })
+
+      it('should not get the document', function () {
+        expect(this.DocumentUpdaterManager.getDocument.called).to.equal(false)
+      })
+    })
+
     describe('when the client disconnects while RoomManager.joinDoc is running', function () {
       beforeEach(function () {
         this.RoomManager.joinDoc = (client, doc_id, cb) => {
@@ -825,6 +963,10 @@ describe('WebsocketController', function () {
         this.doc_id,
         this.callback
       )
+    })
+
+    it('should inc the joinLeaveEpoch', function () {
+      expect(this.client.joinLeaveEpoch).to.equal(1)
     })
 
     it('should remove the client from the doc_id room', function () {

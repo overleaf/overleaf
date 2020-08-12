@@ -158,6 +158,7 @@ module.exports = WebsocketController = {
       return callback()
     }
 
+    const joinLeaveEpoch = ++client.joinLeaveEpoch
     metrics.inc('editor.join-doc')
     const { project_id, user_id, is_restricted_user } = client.ol_context
     if (!project_id) {
@@ -168,9 +169,22 @@ module.exports = WebsocketController = {
       'client joining doc'
     )
 
-    AuthorizationManager.assertClientCanViewProject(client, function (error) {
+    WebsocketController._assertClientAuthorization(client, doc_id, function (
+      error
+    ) {
       if (error) {
         return callback(error)
+      }
+      if (client.disconnected) {
+        metrics.inc('editor.join-doc.disconnected', 1, {
+          status: 'after-client-auth-check'
+        })
+        // the client will not read the response anyways
+        return callback()
+      }
+      if (joinLeaveEpoch !== client.joinLeaveEpoch) {
+        // another joinDoc or leaveDoc rpc overtook us
+        return callback(new Error('joinLeaveEpoch mismatch'))
       }
       // ensure the per-doc applied-ops channel is subscribed before sending the
       // doc to the client, so that no events are missed.
@@ -279,8 +293,42 @@ module.exports = WebsocketController = {
     })
   },
 
+  _assertClientAuthorization(client, doc_id, callback) {
+    // Check for project-level access first
+    AuthorizationManager.assertClientCanViewProject(client, function (error) {
+      if (error) {
+        return callback(error)
+      }
+      // Check for doc-level access next
+      AuthorizationManager.assertClientCanViewProjectAndDoc(
+        client,
+        doc_id,
+        function (error) {
+          if (error) {
+            // No cached access, check docupdater
+            const { project_id } = client.ol_context
+            DocumentUpdaterManager.checkDocument(project_id, doc_id, function (
+              error
+            ) {
+              if (error) {
+                return callback(error)
+              } else {
+                // Success
+                AuthorizationManager.addAccessToDoc(client, doc_id, callback)
+              }
+            })
+          } else {
+            // Access already cached
+            callback()
+          }
+        }
+      )
+    })
+  },
+
   leaveDoc(client, doc_id, callback) {
     // client may have disconnected, but we have to cleanup internal state.
+    client.joinLeaveEpoch++
     metrics.inc('editor.leave-doc')
     const { project_id, user_id } = client.ol_context
     logger.log(

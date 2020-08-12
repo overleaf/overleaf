@@ -16,6 +16,7 @@ module.exports = MockClient = class MockClient {
     this.disconnect = sinon.stub()
     this.id = idCounter++
     this.publicId = idCounter++
+    this.joinLeaveEpoch = 0
   }
 
   disconnect() {}
