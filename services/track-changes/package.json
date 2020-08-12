@@ -27,7 +27,7 @@
     "express": "4.17.1",
     "heap": "^0.2.6",
     "line-reader": "^0.4.0",
-    "logger-sharelatex": "^1.9.0",
+    "logger-sharelatex": "^2.2.0",
     "metrics-sharelatex": "^2.6.2",
     "mongo-uri": "^0.1.2",
     "mongojs": "3.1.0",
