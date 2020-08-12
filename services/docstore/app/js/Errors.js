@@ -6,5 +6,5 @@ class Md5MismatchError extends OError {}
 
 module.exports = {
   Md5MismatchError,
-  ...Errors,
+  ...Errors
 }

@@ -24,8 +24,8 @@ module.exports = {
     unArchiveAllDocs,
     unarchiveDoc,
     destroyAllDocs,
-    destroyDoc,
-  },
+    destroyDoc
+  }
 }
 
 async function archiveAllDocs(projectId) {
@@ -61,7 +61,7 @@ async function archiveDoc(projectId, doc) {
   const json = JSON.stringify({
     lines: doc.lines,
     ranges: doc.ranges,
-    schema_v: 1,
+    schema_v: 1
   })
 
   // this should never happen, but protects against memory-corruption errors that
@@ -75,7 +75,7 @@ async function archiveDoc(projectId, doc) {
   const md5 = crypto.createHash('md5').update(json).digest('hex')
   const stream = Streamifier.createReadStream(json)
   await PersistorManager.sendStream(settings.docstore.bucket, key, stream, {
-    sourceMd5: md5,
+    sourceMd5: md5
   })
   await MongoManager.markDocAsArchived(doc._id, doc.rev)
 }
@@ -115,7 +115,7 @@ async function unarchiveDoc(projectId, docId) {
     throw new Errors.Md5MismatchError('md5 mismatch when downloading doc', {
       key,
       sourceMd5,
-      md5,
+      md5
     })
   }
 
@@ -155,7 +155,7 @@ async function destroyDoc(projectId, docId) {
     'removing doc from mongo and persistor'
   )
   const doc = await MongoManager.findDoc(projectId, docId, {
-    inS3: 1,
+    inS3: 1
   })
   if (!doc) {
     throw new Errors.NotFoundError('Doc not found in Mongo')

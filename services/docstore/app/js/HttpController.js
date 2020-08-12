@@ -157,7 +157,7 @@ module.exports = HttpController = {
         }
         return res.json({
           modified,
-          rev,
+          rev
         })
       }
     )
@@ -259,5 +259,5 @@ module.exports = HttpController = {
         return res.sendStatus(200)
       }
     })
-  },
+  }
 }

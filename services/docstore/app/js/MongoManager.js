@@ -24,7 +24,7 @@ module.exports = MongoManager = {
     return db.docs.find(
       {
         _id: ObjectId(doc_id.toString()),
-        project_id: ObjectId(project_id.toString()),
+        project_id: ObjectId(project_id.toString())
       },
       filter,
       function (error, docs) {
@@ -50,7 +50,7 @@ module.exports = MongoManager = {
   getArchivedProjectDocs(project_id, callback) {
     const query = {
       project_id: ObjectId(project_id.toString()),
-      inS3: true,
+      inS3: true
     }
     return db.docs.find(query, {}, callback)
   },
@@ -59,11 +59,11 @@ module.exports = MongoManager = {
     const update = {
       $set: updates,
       $inc: {
-        rev: 1,
+        rev: 1
       },
       $unset: {
-        inS3: true,
-      },
+        inS3: true
+      }
     }
     update.$set.project_id = ObjectId(project_id)
     return db.docs.update(
@@ -78,10 +78,10 @@ module.exports = MongoManager = {
     return db.docs.update(
       {
         _id: ObjectId(doc_id),
-        project_id: ObjectId(project_id),
+        project_id: ObjectId(project_id)
       },
       {
-        $set: { deleted: true },
+        $set: { deleted: true }
       },
       callback
     )
@@ -90,14 +90,14 @@ module.exports = MongoManager = {
   markDocAsArchived(doc_id, rev, callback) {
     const update = {
       $set: {},
-      $unset: {},
+      $unset: {}
     }
     update.$set.inS3 = true
     update.$unset.lines = true
     update.$unset.ranges = true
     const query = {
       _id: doc_id,
-      rev,
+      rev
     }
     return db.docs.update(query, update, (err) => callback(err))
   },
@@ -108,10 +108,10 @@ module.exports = MongoManager = {
     }
     return db.docOps.find(
       {
-        doc_id: ObjectId(doc_id),
+        doc_id: ObjectId(doc_id)
       },
       {
-        version: 1,
+        version: 1
       },
       function (error, docs) {
         if (error != null) {
@@ -132,13 +132,13 @@ module.exports = MongoManager = {
     }
     return db.docOps.update(
       {
-        doc_id: ObjectId(doc_id),
+        doc_id: ObjectId(doc_id)
       },
       {
-        $set: { version },
+        $set: { version }
       },
       {
-        upsert: true,
+        upsert: true
       },
       callback
     )
@@ -147,7 +147,7 @@ module.exports = MongoManager = {
   destroyDoc(doc_id, callback) {
     return db.docs.remove(
       {
-        _id: ObjectId(doc_id),
+        _id: ObjectId(doc_id)
       },
       function (err) {
         if (err != null) {
@@ -155,13 +155,13 @@ module.exports = MongoManager = {
         }
         return db.docOps.remove(
           {
-            doc_id: ObjectId(doc_id),
+            doc_id: ObjectId(doc_id)
           },
           callback
         )
       }
     )
-  },
+  }
 }
 
 const methods = Object.getOwnPropertyNames(MongoManager)

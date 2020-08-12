@@ -32,24 +32,24 @@ describe('DocArchiveManager', function () {
     md5Sum = 'decafbad'
 
     RangeManager = {
-      jsonRangesToMongo: sinon.stub().returns({ mongo: 'ranges' }),
+      jsonRangesToMongo: sinon.stub().returns({ mongo: 'ranges' })
     }
     Settings = {
       docstore: {
-        bucket: 'wombat',
-      },
+        bucket: 'wombat'
+      }
     }
     Logger = {
       log: sinon.stub(),
-      err: sinon.stub(),
+      err: sinon.stub()
     }
     HashDigest = sinon.stub().returns(md5Sum)
     HashUpdate = sinon.stub().returns({ digest: HashDigest })
     Crypto = {
-      createHash: sinon.stub().returns({ update: HashUpdate }),
+      createHash: sinon.stub().returns({ update: HashUpdate })
     }
     Streamifier = {
-      createReadStream: sinon.stub().returns({ stream: 'readStream' }),
+      createReadStream: sinon.stub().returns({ stream: 'readStream' })
     }
 
     projectId = ObjectId()
@@ -57,69 +57,69 @@ describe('DocArchiveManager', function () {
       {
         _id: ObjectId(),
         inS3: true,
-        rev: 2,
+        rev: 2
       },
       {
         _id: ObjectId(),
         inS3: true,
-        rev: 4,
+        rev: 4
       },
       {
         _id: ObjectId(),
         inS3: true,
-        rev: 6,
-      },
+        rev: 6
+      }
     ]
     mongoDocs = [
       {
         _id: ObjectId(),
         lines: ['one', 'two', 'three'],
-        rev: 2,
+        rev: 2
       },
       {
         _id: ObjectId(),
         lines: ['aaa', 'bbb', 'ccc'],
-        rev: 4,
+        rev: 4
       },
       {
         _id: ObjectId(),
         inS3: true,
-        rev: 6,
+        rev: 6
       },
       {
         _id: ObjectId(),
         inS3: true,
-        rev: 6,
+        rev: 6
       },
       {
         _id: ObjectId(),
         lines: ['111', '222', '333'],
-        rev: 6,
-      },
+        rev: 6
+      }
     ]
 
     docJson = JSON.stringify({
       lines: mongoDocs[0].lines,
       ranges: mongoDocs[0].ranges,
-      schema_v: 1,
+      schema_v: 1
     })
 
     stream = {
       on: sinon.stub(),
-      resume: sinon.stub(),
+      resume: sinon.stub()
     }
     stream.on.withArgs('data').yields(Buffer.from(docJson, 'utf8'))
     stream.on.withArgs('end').yields()
 
     readStream = {
-      stream: 'readStream',
+      stream: 'readStream'
     }
 
     PersistorManager = {
       getObjectStream: sinon.stub().resolves(stream),
       sendStream: sinon.stub().resolves(),
       getObjectMd5Hash: sinon.stub().resolves(md5Sum),
-      deleteObject: sinon.stub().resolves(),
+      deleteObject: sinon.stub().resolves()
     }
 
     MongoManager = {
@@ -129,8 +129,8 @@ describe('DocArchiveManager', function () {
         getProjectsDocs: sinon.stub().resolves(mongoDocs),
         getArchivedProjectDocs: sinon.stub().resolves(archivedDocs),
         findDoc: sinon.stub().resolves(),
-        destroyDoc: sinon.stub().resolves(),
-      },
+        destroyDoc: sinon.stub().resolves()
+      }
     }
     for (const mongoDoc of mongoDocs) {
       MongoManager.promises.findDoc
@@ -147,12 +147,12 @@ describe('DocArchiveManager', function () {
         './MongoManager': MongoManager,
         './RangeManager': RangeManager,
         './PersistorManager': PersistorManager,
-        './Errors': Errors,
+        './Errors': Errors
       },
       globals: {
         console,
-        JSON,
-      },
+        JSON
+      }
     })
   })
 
@@ -183,7 +183,7 @@ describe('DocArchiveManager', function () {
       const json = JSON.stringify({
         lines: mongoDocs[0].lines,
         ranges: mongoDocs[0].ranges,
-        schema_v: 1,
+        schema_v: 1
       })
 
       await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0])
@@ -290,7 +290,7 @@ describe('DocArchiveManager', function () {
       describe('when the doc has the old schema', function () {
         beforeEach(function () {
           mongoDoc = {
-            lines: ['doc', 'lines'],
+            lines: ['doc', 'lines']
           }
           s3Doc = ['doc', 'lines']
           docJson = JSON.stringify(s3Doc)
@@ -310,11 +310,11 @@ describe('DocArchiveManager', function () {
           s3Doc = {
             lines: ['doc', 'lines'],
             ranges: { json: 'ranges' },
-            schema_v: 1,
+            schema_v: 1
           }
           mongoDoc = {
             lines: ['doc', 'lines'],
-            ranges: { mongo: 'ranges' },
+            ranges: { mongo: 'ranges' }
           }
           docJson = JSON.stringify(s3Doc)
           stream.on.withArgs('data').yields(Buffer.from(docJson, 'utf8'))
@@ -332,10 +332,10 @@ describe('DocArchiveManager', function () {
         beforeEach(function () {
           s3Doc = {
             lines: ['doc', 'lines'],
-            schema_v: 1,
+            schema_v: 1
           }
           mongoDoc = {
-            lines: ['doc', 'lines'],
+            lines: ['doc', 'lines']
           }
           docJson = JSON.stringify(s3Doc)
           stream.on.withArgs('data').yields(Buffer.from(docJson, 'utf8'))
@@ -353,7 +353,7 @@ describe('DocArchiveManager', function () {
         beforeEach(function () {
           s3Doc = {
             lines: ['doc', 'lines'],
-            schema_v: 2,
+            schema_v: 2
           }
           docJson = JSON.stringify(s3Doc)
           stream.on.withArgs('data').yields(Buffer.from(docJson, 'utf8'))

@@ -65,5 +65,5 @@ module.exports = RangeManager = {
     } catch (error) {
       return data
     }
-  },
+  }
 }

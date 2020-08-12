@@ -103,7 +103,7 @@ module.exports = DocManager = {
         deleted: true,
         version: true,
         ranges: true,
-        inS3: true,
+        inS3: true
       },
       function (err, doc) {
         if (err != null) {
@@ -175,7 +175,7 @@ module.exports = DocManager = {
         lines: true,
         version: true,
         ranges: true,
-        inS3: true,
+        inS3: true
       },
       function (err, doc) {
         let updateLines, updateRanges, updateVersion
@@ -238,7 +238,7 @@ module.exports = DocManager = {
                 project_id,
                 doc_id,
                 oldVersion: doc != null ? doc.version : undefined,
-                newVersion: version,
+                newVersion: version
               },
               'updating doc version'
             )
@@ -288,5 +288,5 @@ module.exports = DocManager = {
       }
       return MongoManager.markDocAsDeleted(project_id, doc_id, callback)
     })
-  },
+  }
 }

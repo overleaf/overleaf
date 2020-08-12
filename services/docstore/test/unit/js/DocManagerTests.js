@@ -32,15 +32,15 @@ describe('DocManager', function () {
           jsonRangesToMongo(r) {
             return r
           },
-          shouldUpdateRanges: sinon.stub().returns(false),
+          shouldUpdateRanges: sinon.stub().returns(false)
         }),
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
           warn() {},
-          err() {},
+          err() {}
         }),
-        './Errors': Errors,
-      },
+        './Errors': Errors
+      }
     })
     this.doc_id = ObjectId().toString()
     this.project_id = ObjectId().toString()
@@ -99,7 +99,7 @@ describe('DocManager', function () {
       this.DocManager._getDoc = sinon.stub()
       return (this.doc = {
         _id: this.doc_id,
-        lines: ['2134'],
+        lines: ['2134']
       })
     })
 
@@ -117,7 +117,7 @@ describe('DocManager', function () {
               deleted: true,
               version: true,
               ranges: true,
-              inS3: true,
+              inS3: true
             })
             .should.equal(true)
           return done()
@@ -154,7 +154,7 @@ describe('DocManager', function () {
           this.DocManager._getDoc
             .calledWith(this.project_id, this.doc_id, {
               lines: true,
-              inS3: true,
+              inS3: true
             })
             .should.equal(true)
           return done()
@@ -181,7 +181,7 @@ describe('DocManager', function () {
       this.doc = {
         _id: this.doc_id,
         project_id: this.project_id,
-        lines: ['mock-lines'],
+        lines: ['mock-lines']
       }
       this.version = 42
       this.MongoManager.findDoc = sinon.stub()
@@ -302,7 +302,7 @@ describe('DocManager', function () {
           _id: this.doc_id,
           project_id: this.project_id,
           lines: ['mock-lines'],
-          inS3: true,
+          inS3: true
         }
         this.MongoManager.findDoc.yields(null, this.doc)
         this.DocArchiveManager.unarchiveDoc = (
@@ -368,8 +368,8 @@ describe('DocManager', function () {
           {
             _id: this.doc_id,
             project_id: this.project_id,
-            lines: ['mock-lines'],
-          },
+            lines: ['mock-lines']
+          }
         ]
         this.MongoManager.getProjectsDocs = sinon
           .stub()
@@ -490,10 +490,10 @@ describe('DocManager', function () {
             op: { i: 'foo', p: 3 },
             meta: {
               user_id: ObjectId().toString(),
-              ts: new Date().toString(),
-            },
-          },
-        ],
+              ts: new Date().toString()
+            }
+          }
+        ]
       }
       this.newRanges = {
         changes: [
@@ -502,10 +502,10 @@ describe('DocManager', function () {
             op: { i: 'bar', p: 6 },
             meta: {
               user_id: ObjectId().toString(),
-              ts: new Date().toString(),
-            },
-          },
-        ],
+              ts: new Date().toString()
+            }
+          }
+        ]
       }
       this.version = 42
       this.doc = {
@@ -514,7 +514,7 @@ describe('DocManager', function () {
         lines: this.oldDocLines,
         rev: (this.rev = 5),
         version: this.version,
-        ranges: this.originalRanges,
+        ranges: this.originalRanges
       }
 
       this.MongoManager.upsertIntoDocCollection = sinon.stub().callsArg(3)
@@ -543,7 +543,7 @@ describe('DocManager', function () {
             lines: true,
             version: true,
             ranges: true,
-            inS3: true,
+            inS3: true
           })
           .should.equal(true)
       })
@@ -789,7 +789,7 @@ describe('DocManager', function () {
         return this.MongoManager.upsertIntoDocCollection
           .calledWith(this.project_id, this.doc_id, {
             lines: this.newDocLines,
-            ranges: this.originalRanges,
+            ranges: this.originalRanges
           })
           .should.equal(true)
       })

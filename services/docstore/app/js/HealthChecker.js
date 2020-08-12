@@ -26,11 +26,11 @@ module.exports = {
     const url = `http://localhost:${port}/project/${project_id}/doc/${doc_id}`
     const lines = [
       'smoke test - delete me',
-      `${crypto.randomBytes(32).toString('hex')}`,
+      `${crypto.randomBytes(32).toString('hex')}`
     ]
     const getOpts = () => ({
       url,
-      timeout: 3000,
+      timeout: 3000
     })
     logger.log({ lines, url, doc_id, project_id }, 'running health check')
     const jobs = [
@@ -61,8 +61,8 @@ module.exports = {
         })
       },
       (cb) => db.docs.remove({ _id: doc_id, project_id }, cb),
-      (cb) => db.docOps.remove({ doc_id }, cb),
+      (cb) => db.docOps.remove({ doc_id }, cb)
     ]
     return async.series(jobs, callback)
-  },
+  }
 }

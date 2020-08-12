@@ -54,7 +54,7 @@ module.exports = DocstoreClient = {
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`,
         json: true,
-        qs,
+        qs
       },
       callback
     )
@@ -67,7 +67,7 @@ module.exports = DocstoreClient = {
     return request.get(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc`,
-        json: true,
+        json: true
       },
       (req, res, body) => {
         callback(req, res, body)
@@ -82,7 +82,7 @@ module.exports = DocstoreClient = {
     return request.get(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/ranges`,
-        json: true,
+        json: true
       },
       callback
     )
@@ -98,8 +98,8 @@ module.exports = DocstoreClient = {
         json: {
           lines,
           version,
-          ranges,
-        },
+          ranges
+        }
       },
       callback
     )
@@ -111,7 +111,7 @@ module.exports = DocstoreClient = {
     }
     return request.del(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`
       },
       callback
     )
@@ -123,7 +123,7 @@ module.exports = DocstoreClient = {
     }
     return request.post(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/archive`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/archive`
       },
       callback
     )
@@ -135,7 +135,7 @@ module.exports = DocstoreClient = {
     }
     return request.post(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/destroy`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/destroy`
       },
       callback
     )
@@ -151,5 +151,5 @@ module.exports = DocstoreClient = {
         callback(null, JSON.parse(data))
       })
       .catch(callback)
-  },
+  }
 }
