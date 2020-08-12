@@ -68,8 +68,10 @@ async function joinProject(req, res, next) {
   }
   // Hide access tokens if this is not the project owner
   TokenAccessHandler.protectTokens(project, privilegeLevel)
+  // Hide sensitive data if the user is restricted
   if (isRestrictedUser) {
     project.owner = { _id: project.owner._id }
+    project.members = []
   }
   // Only show the 'renamed or deleted' message once
   if (project.deletedByExternalDataSource) {

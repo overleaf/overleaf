@@ -127,10 +127,11 @@ script(type="text/ng-template", id="historyEntryTpl")
 				history-draggable-boundary-on-drag-stop="$ctrl.onDraggingStop(isValidDrop, boundary)"
 			)
 
-			history-label(
+			history-label(				
 				ng-repeat="label in $ctrl.entry.labels | orderBy : '-created_at'"
+				ng-init="user = $ctrl.buildUserView(label)"
 				label-text="label.comment"
-				label-owner-name="$ctrl.displayNameById(label.user_id)"
+				label-owner-name="$ctrl.displayNameById(label.user_id) || 'Anonymous'"
 				label-creation-date-time="label.created_at"
 				is-owned-by-current-user="label.user_id === $ctrl.currentUser.id"
 				on-label-delete="$ctrl.onLabelDelete({ label: label })"
@@ -223,13 +224,13 @@ script(type="text/ng-template", id="historyLabelsListTpl")
 				.history-entry-label-metadata
 					.history-entry-label-metadata-user(
 						ng-if="!label.isPseudoCurrentStateLabel"
-						ng-init="user = $ctrl.getUserById(label.user_id)"
+						ng-init="user = $ctrl.buildUserView(label)"
 					)
 						| Saved by 
 						span.name(
 							ng-if="user && user._id !== $ctrl.currentUser.id"
 							ng-style="$ctrl.getUserCSSStyle(user, versionWithLabel);"
-						) {{ ::$ctrl.displayName(user) }} 
+						) {{ ::user.displayName }}
 						span.name(
 							ng-if="user && user._id == $ctrl.currentUser.id"
 							ng-style="$ctrl.getUserCSSStyle(user, versionWithLabel);"

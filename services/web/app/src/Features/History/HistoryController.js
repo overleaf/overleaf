@@ -21,6 +21,7 @@ const logger = require('logger-sharelatex')
 const request = require('request')
 const settings = require('settings-sharelatex')
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const UserGetter = require('../User/UserGetter')
 const Errors = require('../Errors/Errors')
 const HistoryManager = require('./HistoryManager')
 const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
@@ -201,7 +202,12 @@ module.exports = HistoryController = {
         if (error != null) {
           return next(error)
         }
-        return res.json(labels)
+        HistoryController._enrichLabels(labels, (err, labels) => {
+          if (err) {
+            return next(err)
+          }
+          return res.json(labels)
+        })
       }
     )
   },
@@ -222,9 +228,84 @@ module.exports = HistoryController = {
         if (error != null) {
           return next(error)
         }
-        return res.json(label)
+        HistoryController._enrichLabel(label, (err, label) => {
+          if (err) {
+            return next(err)
+          }
+          return res.json(label)
+        })
       }
     )
+  },
+
+  _enrichLabel(label, callback) {
+    if (!label.user_id) {
+      return callback(null, label)
+    }
+    UserGetter.getUser(
+      label.user_id,
+      { first_name: 1, last_name: 1, email: 1 },
+      (err, user) => {
+        if (err) {
+          return callback(err)
+        }
+        const newLabel = Object.assign({}, label)
+        newLabel.user_display_name = HistoryController._displayNameForUser(user)
+        callback(null, newLabel)
+      }
+    )
+  },
+
+  _enrichLabels(labels, callback) {
+    if (!labels || !labels.length) {
+      return callback(null, [])
+    }
+    const uniqueUsers = new Set(labels.map(label => label.user_id))
+
+    // For backwards compatibility expect missing user_id fields
+    uniqueUsers.delete(undefined)
+
+    if (!uniqueUsers.size) {
+      return callback(null, labels)
+    }
+
+    UserGetter.getUsers(
+      Array.from(uniqueUsers),
+      { first_name: 1, last_name: 1, email: 1 },
+      function(err, rawUsers) {
+        if (err) {
+          return callback(err)
+        }
+        const users = new Map(rawUsers.map(user => [String(user._id), user]))
+
+        labels.forEach(label => {
+          const user = users.get(label.user_id)
+          if (!user) return
+          label.user_display_name = HistoryController._displayNameForUser(user)
+        })
+        callback(null, labels)
+      }
+    )
+  },
+
+  _displayNameForUser(user) {
+    if (user == null) {
+      return 'Anonymous'
+    }
+    if (user.name != null) {
+      return user.name
+    }
+    let name = [user.first_name, user.last_name]
+      .filter(n => n != null)
+      .join(' ')
+      .trim()
+    if (name === '') {
+      name = user.email.split('@')[0]
+    }
+    if (name == null || name === '') {
+      return '?'
+    }
+    return name
   },
 
   deleteLabel(req, res, next) {

@@ -129,16 +129,13 @@ const historyLabelsListController = function($scope, $element, $attrs) {
       })
     }
   }
-  // This method (and maybe the one below) will be removed soon. User details data will be
-  // injected into the history API responses, so we won't need to fetch user data from other
-  // local data structures.
-  ctrl.getUserById = id =>
-    _.find(ctrl.users, function(user) {
-      const curUserId =
-        (user != null ? user._id : undefined) ||
-        (user != null ? user.id : undefined)
-      return curUserId === id
-    })
+  ctrl.buildUserView = label => {
+    const user = {
+      _id: label.user_id,
+      displayName: label.user_display_name
+    }
+    return user
+  }
   ctrl.displayName = displayNameForUser
   ctrl.getUserCSSStyle = function(user, versionWithLabel) {
     const curUserId =

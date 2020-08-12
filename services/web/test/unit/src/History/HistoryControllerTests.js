@@ -43,6 +43,7 @@ describe('HistoryController', function() {
         './HistoryManager': (this.HistoryManager = {}),
         '../Project/ProjectDetailsHandler': (this.ProjectDetailsHandler = {}),
         '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
+        '../User/UserGetter': (this.UserGetter = {}),
         './RestoreManager': (this.RestoreManager = {})
       }
     })

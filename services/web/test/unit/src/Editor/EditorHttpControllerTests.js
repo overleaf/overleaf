@@ -23,11 +23,13 @@ describe('EditorHttpController', function() {
         _id: 'owner',
         email: 'owner@example.com',
         other_property: true
-      }
+      },
+      members: [{ one: 1 }, { two: 2 }]
     }
     this.reducedProjectView = {
       _id: this.projectView._id,
-      owner: { _id: this.projectView.owner._id }
+      owner: { _id: this.projectView.owner._id },
+      members: []
     }
     this.doc = { _id: new ObjectId(), name: 'excellent-original-idea.tex' }
     this.file = { _id: new ObjectId() }
