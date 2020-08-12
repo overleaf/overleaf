@@ -27,7 +27,7 @@
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
-    "logger-sharelatex": "^1.7.0",
+    "logger-sharelatex": "^2.2.0",
     "metrics-sharelatex": "^2.6.2",
     "redis-sharelatex": "^1.0.13",
     "request": "^2.88.2",
