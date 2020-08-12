@@ -30,14 +30,16 @@ block content
 							)
 								li.container-fluid
 									.row
-										.col-md-5
+										.col-md-4
 											input.select-all(
 												select-all,
 												type="checkbox"
 											)
 											span.header #{translate("email")}
-										.col-md-5
+										.col-md-4
 											span.header #{translate("name")}
+										.col-md-2
+											span.header #{translate("last_login")}
 										.col-md-2
 											span.header #{translate("accepted_invite")}
 								li.container-fluid(
@@ -45,15 +47,17 @@ block content
 									ng-controller="UserMembershipListItemController"
 								)
 									.row
-										.col-md-5
+										.col-md-4
 											input.select-item(
 												select-individual,
 												type="checkbox",
 												ng-model="user.selected"
 											)
 											span.email {{ user.email }}
-										.col-md-5
+										.col-md-4
 											span.name {{ user.first_name }} {{ user.last_name }}
+										.col-md-2
+											span.lastLogin {{ user.last_logged_in_at | formatDate:'Do MMM YYYY' }}
 										.col-md-2
 											span.registered
 												i.fa.fa-check.text-success(ng-show="!user.invite" aria-hidden="true")
@@ -102,7 +106,7 @@ block content
 							.row
 								.col-xs-2.col-xs-offset-10(ng-if="paths.exportMembers", ng-cloak)
 									a(href=paths.exportMembers) #{translate('export_csv')}
-									
+
 
 	script(type="text/javascript").
 		window.users = !{StringHelper.stringifyJsonForScript(users)};

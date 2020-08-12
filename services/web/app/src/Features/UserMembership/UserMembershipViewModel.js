@@ -33,7 +33,12 @@ module.exports = UserMembershipViewModel = {
     }
 
     const userId = userOrIdOrEmail
-    const projection = { email: 1, first_name: 1, last_name: 1 }
+    const projection = {
+      email: 1,
+      first_name: 1,
+      last_name: 1,
+      lastLoggedIn: 1
+    }
     return UserGetter.getUser(userId, projection, function(error, user) {
       if (error != null || user == null) {
         return callback(null, buildUserViewModelWithId(userId.toString()))
@@ -52,6 +57,7 @@ var buildUserViewModel = function(user, isInvite) {
     email: user.email || null,
     first_name: user.first_name || null,
     last_name: user.last_name || null,
+    last_logged_in_at: user.lastLoggedIn || null,
     invite: isInvite
   }
 }

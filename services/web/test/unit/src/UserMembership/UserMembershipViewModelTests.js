@@ -38,7 +38,8 @@ describe('UserMembershipViewModel', function() {
     this.user = {
       _id: 'mock-user-id',
       email: 'mock-email@baz.com',
-      first_name: 'Name'
+      first_name: 'Name',
+      lastLoggedIn: '2020-05-20T10:41:11.407Z'
     }
   })
 
@@ -48,6 +49,7 @@ describe('UserMembershipViewModel', function() {
       return expect(viewModel).to.deep.equal({
         email: this.email,
         invite: true,
+        last_logged_in_at: null,
         first_name: null,
         last_name: null,
         _id: null
@@ -58,6 +60,7 @@ describe('UserMembershipViewModel', function() {
       const viewModel = this.UserMembershipViewModel.build(this.user)
       expect(viewModel._id).to.equal(this.user._id)
       expect(viewModel.email).to.equal(this.user.email)
+      expect(viewModel.last_logged_in_at).to.equal(this.user.lastLoggedIn)
       return expect(viewModel.invite).to.equal(false)
     })
   })
