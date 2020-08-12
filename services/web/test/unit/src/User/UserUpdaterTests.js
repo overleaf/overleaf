@@ -59,6 +59,11 @@ describe('UserUpdater', function() {
           addAffiliation: this.addAffiliation,
           removeAffiliation: this.removeAffiliation
         },
+        '../Email/EmailHandler': (this.EmailHandler = {
+          promises: {
+            sendEmail: sinon.stub()
+          }
+        }),
         '../../infrastructure/Features': (this.Features = {
           hasFeature: sinon.stub().returns(false)
         }),
@@ -151,7 +156,13 @@ describe('UserUpdater', function() {
             .calledWith(this.stubbedUser._id, this.newEmail)
             .should.equal(true)
           this.UserUpdater.setDefaultEmailAddress
-            .calledWith(this.stubbedUser._id, this.newEmail, true)
+            .calledWith(
+              this.stubbedUser._id,
+              this.newEmail,
+              true,
+              this.auditLog,
+              true
+            )
             .should.equal(true)
           this.UserUpdater.removeEmailAddress
             .calledWith(this.stubbedUser._id, this.stubbedUser.email)
@@ -558,6 +569,34 @@ describe('UserUpdater', function() {
             this.NewsletterManager.promises.changeEmail.callCount.should.equal(
               0
             )
+          }
+        )
+      })
+    })
+
+    describe('security alert', function() {
+      it('should be sent to old and new email when sendSecurityAlert=true', function(done) {
+        // this.UserGetter.promises.getUser.resolves(this.stubbedUser)
+        this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
+
+        this.UserUpdater.setDefaultEmailAddress(
+          this.stubbedUser._id,
+          this.newEmail,
+          false,
+          this.auditLog,
+          true,
+          error => {
+            expect(error).to.not.exist
+            this.EmailHandler.promises.sendEmail.callCount.should.equal(2)
+            const toOldEmailAlert = this.EmailHandler.promises.sendEmail
+              .firstCall
+            expect(toOldEmailAlert.args[0]).to.equal('securityAlert')
+            const toNewEmailAlert = this.EmailHandler.promises.sendEmail
+              .lastCall
+            expect(toOldEmailAlert.args[1].to).to.equal(this.stubbedUser.email)
+            expect(toNewEmailAlert.args[0]).to.equal('securityAlert')
+            expect(toNewEmailAlert.args[1].to).to.equal(this.newEmail)
+            done()
           }
         )
       })

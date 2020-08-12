@@ -13,6 +13,7 @@ const {
 } = require('../Institutions/InstitutionsAPI')
 const Features = require('../../infrastructure/Features')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
+const EmailHandler = require('../Email/EmailHandler')
 const EmailHelper = require('../Helpers/EmailHelper')
 const Errors = require('../Errors/Errors')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
@@ -23,7 +24,8 @@ async function setDefaultEmailAddress(
   userId,
   email,
   allowUnconfirmed,
-  auditLog
+  auditLog,
+  sendSecurityAlert
 ) {
   email = EmailHelper.parseEmail(email)
   if (email == null) {
@@ -65,6 +67,25 @@ async function setDefaultEmailAddress(
   // this should not happen
   if (res.n === 0) {
     throw new Error('email update error')
+  }
+
+  if (sendSecurityAlert) {
+    // send email to both old and new primary email
+    const emailOptions = {
+      actionDescribed: `the primary email address on your account was changed to ${email}`,
+      action: 'change of primary email address'
+    }
+    const toOld = Object.assign({}, emailOptions, { to: oldEmail })
+    const toNew = Object.assign({}, emailOptions, { to: email })
+    try {
+      await EmailHandler.promises.sendEmail('securityAlert', toOld)
+      await EmailHandler.promises.sendEmail('securityAlert', toNew)
+    } catch (error) {
+      logger.error(
+        { err: error, userId },
+        'could not send security alert email when primary email changed'
+      )
+    }
   }
 
   try {
@@ -155,6 +176,7 @@ const UserUpdater = {
             newEmail,
             true,
             auditLog,
+            true,
             cb
           ),
         cb => UserUpdater.removeEmailAddress(userId, oldEmail, cb)
