@@ -44,9 +44,7 @@ describe('SubscriptionGroupController', function() {
     this.GroupHandler = { removeUserFromGroup: sinon.stub().callsArgWith(2) }
 
     this.SubscriptionLocator = {
-      findManagedSubscription: sinon
-        .stub()
-        .callsArgWith(1, null, this.subscription)
+      getSubscription: sinon.stub().callsArgWith(1, null, this.subscription)
     }
 
     this.AuthenticationController = {
@@ -89,6 +87,31 @@ describe('SubscriptionGroupController', function() {
         }
       }
       return this.Controller.removeUserFromGroup(this.req, res)
+    })
+  })
+
+  describe('removeSelfFromGroup', function() {
+    it('gets subscription and remove user', function(done) {
+      const userIdToRemove = '31231'
+      this.req.query = { subscriptionId: this.subscriptionId }
+      const memberUserIdToremove = 123456789
+      this.req.session.user._id = memberUserIdToremove
+
+      const res = {
+        sendStatus: () => {
+          sinon.assert.calledWith(
+            this.SubscriptionLocator.getSubscription,
+            this.subscriptionId
+          )
+          sinon.assert.calledWith(
+            this.GroupHandler.removeUserFromGroup,
+            this.subscriptionId,
+            memberUserIdToremove
+          )
+          return done()
+        }
+      }
+      return this.Controller.removeSelfFromGroup(this.req, res)
     })
   })
 })

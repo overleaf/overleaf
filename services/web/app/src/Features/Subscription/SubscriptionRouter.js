@@ -47,11 +47,6 @@ module.exports = {
       SubscriptionController.canceledSubscription
     )
 
-    webRouter.get(
-      '/subscription/group',
-      AuthenticationController.requireLogin(),
-      SubscriptionGroupController.redirectToSubscriptionGroupAdminPage
-    )
     webRouter.delete(
       '/subscription/group/user',
       AuthenticationController.requireLogin(),

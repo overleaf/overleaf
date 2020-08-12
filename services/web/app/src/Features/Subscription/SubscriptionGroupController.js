@@ -43,9 +43,12 @@ module.exports = {
   },
 
   removeSelfFromGroup(req, res, next) {
-    const adminUserId = req.query.admin_user_id
+    const subscriptionId = req.query.subscriptionId
     const userToRemove_id = AuthenticationController.getLoggedInUserId(req)
-    return getManagedSubscription(adminUserId, function(error, subscription) {
+    return SubscriptionLocator.getSubscription(subscriptionId, function(
+      error,
+      subscription
+    ) {
       if (error != null) {
         return next(error)
       }
@@ -56,7 +59,7 @@ module.exports = {
         function(err) {
           if (err != null) {
             logger.err(
-              { err, userToRemove_id, adminUserId },
+              { err, userToRemove_id, subscriptionId },
               'error removing self from group'
             )
             return res.sendStatus(500)
@@ -65,35 +68,5 @@ module.exports = {
         }
       )
     })
-  },
-
-  // legacy route
-  redirectToSubscriptionGroupAdminPage(req, res, next) {
-    const user_id = AuthenticationController.getLoggedInUserId(req)
-    return getManagedSubscription(user_id, function(error, subscription) {
-      if (error != null) {
-        return next(error)
-      }
-      if (!(subscription != null ? subscription.groupPlan : undefined)) {
-        return res.redirect('/user/subscription')
-      }
-      return res.redirect(`/manage/groups/${subscription._id}/members`)
-    })
   }
 }
-
-var getManagedSubscription = (managerId, callback) =>
-  SubscriptionLocator.findManagedSubscription(managerId, function(
-    err,
-    subscription
-  ) {
-    if (err) {
-      return callback(err)
-    } else if (!subscription) {
-      return callback(
-        new Error(`No subscription found managed by user ${managerId}`)
-      )
-    }
-
-    return callback(null, subscription)
-  })

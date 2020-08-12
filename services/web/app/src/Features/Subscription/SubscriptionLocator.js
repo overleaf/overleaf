@@ -42,10 +42,6 @@ const SubscriptionLocator = {
     )
   },
 
-  findManagedSubscription(managerId, callback) {
-    return Subscription.findOne({ manager_ids: managerId }, callback)
-  },
-
   getManagedGroupSubscriptions(user_or_id, callback) {
     if (callback == null) {
       callback = function(error, managedSubscriptions) {}
@@ -120,9 +116,6 @@ SubscriptionLocator.promises = {
   getUsersSubscription: promisify(SubscriptionLocator.getUsersSubscription),
   getUserIndividualSubscription: promisify(
     SubscriptionLocator.getUserIndividualSubscription
-  ),
-  findManagedSubscription: promisify(
-    SubscriptionLocator.findManagedSubscription
   ),
   getManagedGroupSubscriptions: promisify(
     SubscriptionLocator.getManagedGroupSubscriptions

@@ -148,7 +148,10 @@ App.controller('LeaveGroupModalController', function(
     return $http({
       url: '/subscription/group/user',
       method: 'DELETE',
-      params: { admin_user_id: $scope.admin_id, _csrf: window.csrfToken }
+      params: {
+        subscriptionId: $scope.subscriptionId,
+        _csrf: window.csrfToken
+      }
     })
       .then(() => location.reload())
       .catch(() => console.log('something went wrong changing plan'))
@@ -158,8 +161,8 @@ App.controller('LeaveGroupModalController', function(
 })
 
 App.controller('GroupMembershipController', function($scope, $modal) {
-  $scope.removeSelfFromGroup = function(admin_id) {
-    $scope.admin_id = admin_id
+  $scope.removeSelfFromGroup = function(subscriptionId) {
+    $scope.subscriptionId = subscriptionId
     return $modal.open({
       templateUrl: 'LeaveGroupModalTemplate',
       controller: 'LeaveGroupModalController',

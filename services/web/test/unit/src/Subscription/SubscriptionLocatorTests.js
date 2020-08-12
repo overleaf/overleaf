@@ -88,21 +88,5 @@ describe('Subscription Locator Tests', function() {
         }
       )
     })
-
-    describe('finding managed subscription', function() {
-      it('should query the database', function(done) {
-        this.Subscription.findOne.callsArgWith(1, null, this.subscription)
-        return this.SubscriptionLocator.findManagedSubscription(
-          this.user._id,
-          (err, subscription) => {
-            this.Subscription.findOne
-              .calledWith({ manager_ids: this.user._id })
-              .should.equal(true)
-            subscription.should.equal(this.subscription)
-            return done()
-          }
-        )
-      })
-    })
   })
 })
