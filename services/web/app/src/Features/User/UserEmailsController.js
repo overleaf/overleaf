@@ -121,7 +121,7 @@ const UserEmailsController = {
     if (!email) {
       return res.sendStatus(422)
     }
-    UserUpdater.setDefaultEmailAddress(userId, email, err => {
+    UserUpdater.setDefaultEmailAddress(userId, email, false, err => {
       if (err) {
         return UserEmailsController._handleEmailError(err, req, res, next)
       }

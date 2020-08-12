@@ -5,7 +5,7 @@ const metrics = require('metrics-sharelatex')
 const { db } = mongojs
 const async = require('async')
 const { ObjectId } = mongojs
-const { promisify } = require('util')
+const { callbackify, promisify } = require('util')
 const UserGetter = require('./UserGetter')
 const {
   addAffiliation,
@@ -17,6 +17,54 @@ const EmailHelper = require('../Helpers/EmailHelper')
 const Errors = require('../Errors/Errors')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
 const RecurlyWrapper = require('../Subscription/RecurlyWrapper')
+
+async function setDefaultEmailAddress(userId, email, allowUnconfirmed) {
+  email = EmailHelper.parseEmail(email)
+  if (email == null) {
+    throw new Error('invalid email')
+  }
+
+  const user = await UserGetter.promises.getUser(userId, {
+    email: 1,
+    emails: 1
+  })
+  if (!user) {
+    throw new Error('invalid userId')
+  }
+
+  const oldEmail = user.email
+  const userEmail = user.emails.find(e => e.email === email)
+  if (!userEmail) {
+    throw new Error('Default email does not belong to user')
+  }
+  if (!userEmail.confirmedAt && !allowUnconfirmed) {
+    throw new Errors.UnconfirmedEmailError()
+  }
+
+  const query = { _id: userId, 'emails.email': email }
+  const update = { $set: { email } }
+  const res = await UserUpdater.promises.updateUser(query, update)
+
+  // this should not happen
+  if (res.n === 0) {
+    throw new Error('email update error')
+  }
+
+  try {
+    await NewsletterManager.promises.changeEmail(user, email)
+  } catch (error) {
+    logger.warn(
+      { err: error, oldEmail, newEmail: email },
+      'Failed to change email in newsletter subscription'
+    )
+  }
+
+  try {
+    await RecurlyWrapper.promises.updateAccountEmailAddress(user._id, email)
+  } catch (error) {
+    // errors are ignored
+  }
+}
 
 const UserUpdater = {
   addAffiliationForNewUser(userId, email, callback) {
@@ -166,55 +214,7 @@ const UserUpdater = {
 
   // set the default email address by setting the `email` attribute. The email
   // must be one of the user's multiple emails (`emails` attribute)
-  setDefaultEmailAddress(userId, email, allowUnconfirmed, callback) {
-    if (typeof allowUnconfirmed === 'function') {
-      callback = allowUnconfirmed
-      allowUnconfirmed = false
-    }
-    email = EmailHelper.parseEmail(email)
-    if (email == null) {
-      return callback(new Error('invalid email'))
-    }
-    UserGetter.getUser(userId, { email: 1, emails: 1 }, (err, user) => {
-      if (err) {
-        return callback(err)
-      }
-      if (!user) {
-        return callback(new Error('invalid userId'))
-      }
-      const oldEmail = user.email
-      const userEmail = user.emails.find(e => e.email === email)
-      if (!userEmail) {
-        return callback(new Error('Default email does not belong to user'))
-      }
-      if (!userEmail.confirmedAt && !allowUnconfirmed) {
-        return callback(new Errors.UnconfirmedEmailError())
-      }
-      const query = { _id: userId, 'emails.email': email }
-      const update = { $set: { email } }
-      UserUpdater.updateUser(query, update, (err, res) => {
-        if (err) {
-          return callback(err)
-        }
-        // this should not happen
-        if (res.n === 0) {
-          return callback(new Error('email update error'))
-        }
-        NewsletterManager.changeEmail(user, email, err => {
-          if (err != null) {
-            logger.warn(
-              { err, oldEmail, newEmail: email },
-              'Failed to change email in newsletter subscription'
-            )
-          }
-        })
-        RecurlyWrapper.updateAccountEmailAddress(user._id, email, _error => {
-          // errors are ignored
-        })
-        callback()
-      })
-    })
-  },
+  setDefaultEmailAddress: callbackify(setDefaultEmailAddress),
 
   confirmEmail(userId, email, confirmedAt, callback) {
     if (arguments.length === 3) {
@@ -285,6 +285,7 @@ const promises = {
   addAffiliationForNewUser: promisify(UserUpdater.addAffiliationForNewUser),
   addEmailAddress: promisify(UserUpdater.addEmailAddress),
   confirmEmail: promisify(UserUpdater.confirmEmail),
+  setDefaultEmailAddress,
   updateUser: promisify(UserUpdater.updateUser)
 }
 
