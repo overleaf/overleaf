@@ -49,7 +49,7 @@ services:
     command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
     user: root
   mongo:
-    image: mongo:3.6
+    image: mongo:4.0
   gcs:
     build:
       context: test/acceptance/deps
