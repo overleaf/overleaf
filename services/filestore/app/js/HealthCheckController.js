@@ -62,7 +62,7 @@ module.exports = {
   check(req, res, next) {
     Promise.all([checkCanGetFiles(), checkFileConvert()])
       .then(() => res.sendStatus(200))
-      .catch(err => {
+      .catch((err) => {
         next(err)
       })
   }

@@ -6,7 +6,7 @@ const { Errors } = require('@overleaf/object-persistor')
 
 const modulePath = '../../../app/js/FileConverter.js'
 
-describe('FileConverter', function() {
+describe('FileConverter', function () {
   let SafeExec, FileConverter
   const sourcePath = '/data/wombat.eps'
   const destPath = '/tmp/dest.png'
@@ -18,7 +18,7 @@ describe('FileConverter', function() {
     }
   }
 
-  beforeEach(function() {
+  beforeEach(function () {
     SafeExec = {
       promises: sinon.stub().resolves(destPath)
     }
@@ -38,20 +38,20 @@ describe('FileConverter', function() {
     })
   })
 
-  describe('convert', function() {
-    it('should convert the source to the requested format', async function() {
+  describe('convert', function () {
+    it('should convert the source to the requested format', async function () {
       await FileConverter.promises.convert(sourcePath, format)
       const args = SafeExec.promises.args[0][0]
       expect(args).to.include(`${sourcePath}[0]`)
       expect(args).to.include(`${sourcePath}.${format}`)
     })
 
-    it('should return the dest path', async function() {
+    it('should return the dest path', async function () {
       const destPath = await FileConverter.promises.convert(sourcePath, format)
       destPath.should.equal(`${sourcePath}.${format}`)
     })
 
-    it('should wrap the error from convert', async function() {
+    it('should wrap the error from convert', async function () {
       SafeExec.promises.rejects(errorMessage)
       try {
         await FileConverter.promises.convert(sourcePath, format)
@@ -62,7 +62,7 @@ describe('FileConverter', function() {
       }
     })
 
-    it('should not accept an non approved format', async function() {
+    it('should not accept an non approved format', async function () {
       try {
         await FileConverter.promises.convert(sourcePath, 'potato')
         expect('error should have been thrown').not.to.exist
@@ -71,12 +71,12 @@ describe('FileConverter', function() {
       }
     })
 
-    it('should prefix the command with Settings.commands.convertCommandPrefix', async function() {
+    it('should prefix the command with Settings.commands.convertCommandPrefix', async function () {
       Settings.commands.convertCommandPrefix = ['nice']
       await FileConverter.promises.convert(sourcePath, format)
     })
 
-    it('should convert the file when called as a callback', function(done) {
+    it('should convert the file when called as a callback', function (done) {
       FileConverter.convert(sourcePath, format, (err, destPath) => {
         expect(err).not.to.exist
         destPath.should.equal(`${sourcePath}.${format}`)
@@ -89,16 +89,16 @@ describe('FileConverter', function() {
     })
   })
 
-  describe('thumbnail', function() {
-    it('should call converter resize with args', async function() {
+  describe('thumbnail', function () {
+    it('should call converter resize with args', async function () {
       await FileConverter.promises.thumbnail(sourcePath)
       const args = SafeExec.promises.args[0][0]
       expect(args).to.include(`${sourcePath}[0]`)
     })
   })
 
-  describe('preview', function() {
-    it('should call converter resize with args', async function() {
+  describe('preview', function () {
+    it('should call converter resize with args', async function () {
       await FileConverter.promises.preview(sourcePath)
       const args = SafeExec.promises.args[0][0]
       expect(args).to.include(`${sourcePath}[0]`)

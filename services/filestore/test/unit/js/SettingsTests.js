@@ -2,9 +2,9 @@ const chai = require('chai')
 const { expect } = chai
 const SandboxedModule = require('sandboxed-module')
 
-describe('Settings', function() {
-  describe('s3', function() {
-    it('should use JSONified env var if present', function() {
+describe('Settings', function () {
+  describe('s3', function () {
+    it('should use JSONified env var if present', function () {
       const s3Settings = {
         bucket1: {
           auth_key: 'bucket1_key',

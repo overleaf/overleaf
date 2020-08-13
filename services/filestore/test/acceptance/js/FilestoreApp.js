@@ -33,7 +33,7 @@ class FilestoreApp {
       this.server = this.app.listen(
         Settings.internal.filestore.port,
         'localhost',
-        err => {
+        (err) => {
           if (err) {
             return reject(err)
           }
@@ -110,7 +110,7 @@ class FilestoreApp {
     // unload the app, as we may be doing this on multiple runs with
     // different settings, which affect startup in some cases
     const files = await fsReaddir(Path.resolve(__dirname, '../../../app/js'))
-    files.forEach(file => {
+    files.forEach((file) => {
       disrequire(Path.resolve(__dirname, '../../../app/js', file))
     })
     disrequire(Path.resolve(__dirname, '../../../app'))

@@ -28,7 +28,7 @@ function safeExec(command, options, callback) {
 
   let killTimer
 
-  const cleanup = lodashOnce(function(err) {
+  const cleanup = lodashOnce(function (err) {
     if (killTimer) {
       clearTimeout(killTimer)
     }
@@ -36,7 +36,7 @@ function safeExec(command, options, callback) {
   })
 
   if (options.timeout) {
-    killTimer = setTimeout(function() {
+    killTimer = setTimeout(function () {
       try {
         // use negative process id to kill process group
         process.kill(-child.pid, options.killSignal || 'SIGTERM')
@@ -52,7 +52,7 @@ function safeExec(command, options, callback) {
     }, options.timeout)
   }
 
-  child.on('close', function(code, signal) {
+  child.on('close', function (code, signal) {
     if (code || signal) {
       return cleanup(
         new FailedCommandError(command, code || signal, stdout, stderr)
@@ -62,13 +62,13 @@ function safeExec(command, options, callback) {
     cleanup()
   })
 
-  child.on('error', err => {
+  child.on('error', (err) => {
     cleanup(err)
   })
-  child.stdout.on('data', chunk => {
+  child.stdout.on('data', (chunk) => {
     stdout += chunk
   })
-  child.stderr.on('data', chunk => {
+  child.stderr.on('data', (chunk) => {
     stderr += chunk
   })
 }
