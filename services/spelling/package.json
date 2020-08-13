@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "bunyan": "^1.8.12",
-    "chai": "",
+    "chai": "4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-config-standard": "^14.1.0",
@@ -55,7 +55,7 @@
     "mocha": "^7.1.1",
     "prettier": "^2.0.0",
     "prettier-eslint-cli": "^5.0.0",
-    "sandboxed-module": "",
+    "sandboxed-module": "2.0.4",
     "sinon": "^9.0.1"
   }
 }
