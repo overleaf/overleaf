@@ -39,7 +39,7 @@ module.exports.monitor = logger => (function(req, res, next) {
                     requestUrl: reqUrl,
                     requestSize,
                     status: res.statusCode,
-                    responseSize: (res._headers != null ? res._headers["content-length"] : undefined),
+                    responseSize: res.getHeader("content-length"),
                     userAgent: req.headers["user-agent"],
                     remoteIp,
                     referer: referrer,
@@ -61,7 +61,7 @@ module.exports.monitor = logger => (function(req, res, next) {
                     "content-length": req.headers["content-length"]
                 },
                 res: {
-                    "content-length": (res._headers != null ? res._headers["content-length"] : undefined),
+                    "content-length": res.getHeader("content-length"),
                     statusCode: res.statusCode
                 },
                 "response-time": responseTimeMs
