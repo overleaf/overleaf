@@ -65,7 +65,7 @@ class ASpellWorker {
         this.callback = null
       }
     })
-    this.pipe.on('error', err => {
+    this.pipe.on('error', (err) => {
       const previousWorkerState = this.state
       if (this.state !== 'killed') {
         this.state = 'error'
@@ -87,7 +87,7 @@ class ASpellWorker {
         logger.warn(err)
       }
     })
-    this.pipe.stdin.on('error', err => {
+    this.pipe.stdin.on('error', (err) => {
       const previousWorkerState = this.state
       if (this.state !== 'killed') {
         this.state = 'error'
@@ -114,7 +114,7 @@ class ASpellWorker {
     this.pipe.stdout.setEncoding('utf8') // ensure utf8 output is handled correctly
     var output = ''
     const endMarkerRegex = new RegExp('^[a-z][a-z]', 'gm')
-    this.pipe.stdout.on('data', data => {
+    this.pipe.stdout.on('data', (data) => {
       // We receive the language code from Aspell as the end of data marker in
       // the data.  The input is a utf8 encoded string.
       const oldPos = output.length
@@ -144,7 +144,7 @@ class ASpellWorker {
     })
 
     var error = ''
-    this.pipe.stderr.on('data', chunk => {
+    this.pipe.stderr.on('data', (chunk) => {
       return (error = error + chunk)
     })
 

@@ -18,7 +18,7 @@
     "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests && npm run compile:smoke_tests",
     "nodemon": "nodemon --config nodemon.json",
     "compile:smoke_tests": "[ ! -e test/smoke/coffee ] &&  echo 'No smoke tests to compile' || coffee -o test/smoke/js -c test/smoke/coffee",
-    "lint": "node_modules/.bin/eslint .",
+    "lint": "node_modules/.bin/eslint --max-warnings 0 .",
     "format": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --list-different",
     "format:fix": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --write"
   },
@@ -29,7 +29,7 @@
     "body-parser": "^1.19.0",
     "coffee-script": "^1.12.7",
     "express": "^4.17.1",
-    "logger-sharelatex": "^2.0.0",
+    "logger-sharelatex": "^2.2.0",
     "lru-cache": "^5.1.1",
     "metrics-sharelatex": "^2.6.2",
     "mongojs": "3.1.0",
@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "bunyan": "^1.8.12",
-    "chai": "",
+    "chai": "4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-config-standard": "^14.1.0",
@@ -53,8 +53,9 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "mocha": "^7.1.1",
+    "prettier": "^2.0.0",
     "prettier-eslint-cli": "^5.0.0",
-    "sandboxed-module": "",
+    "sandboxed-module": "2.0.4",
     "sinon": "^9.0.1"
   }
 }

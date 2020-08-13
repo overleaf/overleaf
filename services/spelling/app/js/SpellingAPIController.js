@@ -21,7 +21,7 @@ module.exports = {
     metrics.inc('spelling-check', 0.1)
     const { token, wordCount } = extractCheckRequestData(req)
     logger.info({ token, wordCount }, 'running check')
-    SpellingAPIManager.runRequest(token, req.body, function(error, result) {
+    SpellingAPIManager.runRequest(token, req.body, function (error, result) {
       if (error != null) {
         logger.error(
           OError.tag(error, 'error processing spelling request', {
@@ -39,7 +39,7 @@ module.exports = {
     metrics.inc('spelling-learn', 0.1)
     const { token, word } = extractLearnRequestData(req)
     logger.info({ token, word }, 'learning word')
-    SpellingAPIManager.learnWord(token, req.body, function(error) {
+    SpellingAPIManager.learnWord(token, req.body, function (error) {
       if (error != null) {
         return next(OError.tag(error))
       }
@@ -51,7 +51,7 @@ module.exports = {
     metrics.inc('spelling-unlearn', 0.1)
     const { token, word } = extractLearnRequestData(req)
     logger.info({ token, word }, 'unlearning word')
-    SpellingAPIManager.unlearnWord(token, req.body, function(error) {
+    SpellingAPIManager.unlearnWord(token, req.body, function (error) {
       if (error != null) {
         return next(OError.tag(error))
       }
@@ -62,7 +62,7 @@ module.exports = {
   deleteDic(req, res, next) {
     const { token, word } = extractLearnRequestData(req)
     logger.log({ token, word }, 'deleting user dictionary')
-    SpellingAPIManager.deleteDic(token, function(error) {
+    SpellingAPIManager.deleteDic(token, function (error) {
       if (error != null) {
         return next(OError.tag(error))
       }
@@ -78,7 +78,7 @@ module.exports = {
       },
       'getting user dictionary'
     )
-    SpellingAPIManager.getDic(token, function(error, words) {
+    SpellingAPIManager.getDic(token, function (error, words) {
       if (error != null) {
         return next(OError.tag(error))
       }

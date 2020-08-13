@@ -44,7 +44,7 @@ const port = settings && settings.port ? settings.port : 3005
 
 if (!module.parent) {
   // application entry point, called directly
-  app.listen(port, host, function(error) {
+  app.listen(port, host, function (error) {
     if (error != null) {
       throw error
     }

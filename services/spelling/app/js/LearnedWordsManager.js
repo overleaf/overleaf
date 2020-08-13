@@ -54,7 +54,7 @@ const LearnedWordsManager = {
     metrics.inc('mongoCache', 0.1, { status: 'miss' })
     logger.info({ userToken }, 'mongoCache miss')
 
-    db.spellingPreferences.findOne({ token: userToken }, function(
+    db.spellingPreferences.findOne({ token: userToken }, function (
       error,
       preferences
     ) {
@@ -94,7 +94,7 @@ const promises = {
 LearnedWordsManager.promises = promises
 
 module.exports = LearnedWordsManager
-;['learnWord', 'unlearnWord', 'getLearnedWords'].map(method =>
+;['learnWord', 'unlearnWord', 'getLearnedWords'].map((method) =>
   metrics.timeAsyncMethod(
     LearnedWordsManager,
     method,

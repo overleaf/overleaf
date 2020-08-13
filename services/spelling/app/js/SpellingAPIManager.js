@@ -70,7 +70,7 @@ const promises = {
       const learnedWords = await LearnedWordsManager.promises.getLearnedWords(
         token
       )
-      const notLearntMisspellings = misspellings.filter(m => {
+      const notLearntMisspellings = misspellings.filter((m) => {
         const word = wordSlice[m.index]
         return (
           learnedWords.indexOf(word) === -1 &&
