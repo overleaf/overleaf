@@ -17,13 +17,13 @@ const { expect } = require('chai')
 const ChatClient = require('./helpers/ChatClient')
 const ChatApp = require('./helpers/ChatApp')
 
-describe('Sending a message', function() {
-  before(function(done) {
+describe('Sending a message', function () {
+  before(function (done) {
     return ChatApp.ensureRunning(done)
   })
 
-  describe('globally', function() {
-    before(function(done) {
+  describe('globally', function () {
+    before(function (done) {
       this.project_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
       this.content = 'global message'
@@ -42,7 +42,7 @@ describe('Sending a message', function() {
       )
     })
 
-    return it('should then list the message in the project messages', function(done) {
+    return it('should then list the message in the project messages', function (done) {
       return ChatClient.getGlobalMessages(
         this.project_id,
         (error, response, messages) => {
@@ -56,8 +56,8 @@ describe('Sending a message', function() {
     })
   })
 
-  describe('to a thread', function() {
-    before(function(done) {
+  describe('to a thread', function () {
+    before(function (done) {
       this.project_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
       this.thread_id = ObjectId().toString()
@@ -78,7 +78,7 @@ describe('Sending a message', function() {
       )
     })
 
-    it('should then list the message in the threads', function(done) {
+    it('should then list the message in the threads', function (done) {
       return ChatClient.getThreads(
         this.project_id,
         (error, response, threads) => {
@@ -93,7 +93,7 @@ describe('Sending a message', function() {
       )
     })
 
-    return it('should not appear in the global messages', function(done) {
+    return it('should not appear in the global messages', function (done) {
       return ChatClient.getGlobalMessages(
         this.project_id,
         (error, response, messages) => {
@@ -106,15 +106,15 @@ describe('Sending a message', function() {
     })
   })
 
-  return describe('failure cases', function() {
-    before(function() {
+  return describe('failure cases', function () {
+    before(function () {
       this.project_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
       return (this.thread_id = ObjectId().toString())
     })
 
-    describe('with a malformed user_id', function() {
-      return it('should return a graceful error', function(done) {
+    describe('with a malformed user_id', function () {
+      return it('should return a graceful error', function (done) {
         return ChatClient.sendMessage(
           this.project_id,
           this.thread_id,
@@ -129,8 +129,8 @@ describe('Sending a message', function() {
       })
     })
 
-    describe('with a malformed project_id', function() {
-      return it('should return a graceful error', function(done) {
+    describe('with a malformed project_id', function () {
+      return it('should return a graceful error', function (done) {
         return ChatClient.sendMessage(
           'malformed-project',
           this.thread_id,
@@ -145,8 +145,8 @@ describe('Sending a message', function() {
       })
     })
 
-    describe('with a malformed thread_id', function() {
-      return it('should return a graceful error', function(done) {
+    describe('with a malformed thread_id', function () {
+      return it('should return a graceful error', function (done) {
         return ChatClient.sendMessage(
           this.project_id,
           'malformed-thread-id',
@@ -161,8 +161,8 @@ describe('Sending a message', function() {
       })
     })
 
-    describe('with no content', function() {
-      return it('should return a graceful error', function(done) {
+    describe('with no content', function () {
+      return it('should return a graceful error', function (done) {
         return ChatClient.sendMessage(
           this.project_id,
           this.thread_id,
@@ -177,8 +177,8 @@ describe('Sending a message', function() {
       })
     })
 
-    return describe('with very long content', function() {
-      return it('should return a graceful error', function(done) {
+    return describe('with very long content', function () {
+      return it('should return a graceful error', function (done) {
         const content = new Buffer(10240).toString('hex')
         return ChatClient.sendMessage(
           this.project_id,

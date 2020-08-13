@@ -14,16 +14,16 @@ const { expect } = require('chai')
 const ChatClient = require('./helpers/ChatClient')
 const ChatApp = require('./helpers/ChatApp')
 
-describe('Deleting a message', function() {
-  before(function(done) {
+describe('Deleting a message', function () {
+  before(function (done) {
     this.project_id = ObjectId().toString()
     this.user_id = ObjectId().toString()
     this.thread_id = ObjectId().toString()
     return ChatApp.ensureRunning(done)
   })
 
-  return describe('in a thread', function() {
-    before(function(done) {
+  return describe('in a thread', function () {
+    before(function (done) {
       return ChatClient.sendMessage(
         this.project_id,
         this.thread_id,
@@ -58,7 +58,7 @@ describe('Deleting a message', function() {
       )
     })
 
-    return it('should then remove the message from the threads', function(done) {
+    return it('should then remove the message from the threads', function (done) {
       return ChatClient.getThreads(
         this.project_id,
         (error, response, threads) => {

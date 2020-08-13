@@ -1,10 +1,8 @@
 chat
---acceptance-creds=None
 --dependencies=mongo
 --docker-repos=gcr.io/overleaf-ops
 --env-add=
 --env-pass-through=
---language=es
 --node-version=10.21.0
 --public-repo=False
---script-version=1.4.0
+--script-version=3.3.2

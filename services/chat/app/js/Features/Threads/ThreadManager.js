@@ -24,7 +24,7 @@ module.exports = ThreadManager = {
   findOrCreateThread(project_id, thread_id, callback) {
     let query, update
     if (callback == null) {
-      callback = function(error, thread) {}
+      callback = function (error, thread) {}
     }
     project_id = ObjectId(project_id.toString())
     if (thread_id !== ThreadManager.GLOBAL_THREAD) {
@@ -50,13 +50,13 @@ module.exports = ThreadManager = {
       }
     }
 
-    return db.rooms.update(query, { $set: update }, { upsert: true }, function(
+    return db.rooms.update(query, { $set: update }, { upsert: true }, function (
       error
     ) {
       if (error != null) {
         return callback(error)
       }
-      return db.rooms.find(query, function(error, rooms) {
+      return db.rooms.find(query, function (error, rooms) {
         if (rooms == null) {
           rooms = []
         }
@@ -70,7 +70,7 @@ module.exports = ThreadManager = {
 
   findAllThreadRooms(project_id, callback) {
     if (callback == null) {
-      callback = function(error, rooms) {}
+      callback = function (error, rooms) {}
     }
     return db.rooms.find(
       {
@@ -87,7 +87,7 @@ module.exports = ThreadManager = {
 
   resolveThread(project_id, thread_id, user_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return db.rooms.update(
       {
@@ -108,7 +108,7 @@ module.exports = ThreadManager = {
 
   reopenThread(project_id, thread_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return db.rooms.update(
       {
@@ -126,9 +126,9 @@ module.exports = ThreadManager = {
 
   deleteThread(project_id, thread_id, callback) {
     if (callback == null) {
-      callback = function(error, room_id) {}
+      callback = function (error, room_id) {}
     }
-    return this.findOrCreateThread(project_id, thread_id, function(
+    return this.findOrCreateThread(project_id, thread_id, function (
       error,
       room
     ) {
@@ -139,7 +139,7 @@ module.exports = ThreadManager = {
         {
           _id: room._id
         },
-        function(error) {
+        function (error) {
           if (error != null) {
             return callback(error)
           }
@@ -155,6 +155,6 @@ module.exports = ThreadManager = {
   'resolveThread',
   'reopenThread',
   'deleteThread'
-].map(method =>
+].map((method) =>
   metrics.timeAsyncMethod(ThreadManager, method, 'mongo.ThreadManager', logger)
 )

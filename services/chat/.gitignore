@@ -7,3 +7,6 @@ node_modules/
 plato/
 
 **/*.map
+
+# managed by dev-environment$ bin/update_build_scripts
+.npmrc

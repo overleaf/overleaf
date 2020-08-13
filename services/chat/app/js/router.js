@@ -16,7 +16,7 @@ const { ObjectId } = require('./mongojs')
 
 module.exports = Router = {
   route(app) {
-    app.param('project_id', function(req, res, next, project_id) {
+    app.param('project_id', function (req, res, next, project_id) {
       if (ObjectId.isValid(project_id)) {
         return next()
       } else {
@@ -24,7 +24,7 @@ module.exports = Router = {
       }
     })
 
-    app.param('thread_id', function(req, res, next, thread_id) {
+    app.param('thread_id', function (req, res, next, thread_id) {
       if (ObjectId.isValid(thread_id)) {
         return next()
       } else {
