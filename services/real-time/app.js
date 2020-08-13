@@ -98,7 +98,16 @@ function healthCheck(req, res) {
     }
   })
 }
-app.get('/health_check', healthCheck)
+app.get(
+  '/health_check',
+  (req, res, next) => {
+    if (Settings.shutDownComplete) {
+      return res.sendStatus(503)
+    }
+    next()
+  },
+  healthCheck
+)
 
 app.get('/health_check/redis', healthCheck)
 
@@ -167,6 +176,8 @@ function drainAndShutdown(signal) {
               client.disconnect()
             })
           }
+          // Mark the node as unhealthy.
+          Settings.shutDownComplete = true
         }, Settings.gracefulReconnectTimeoutMs)
       })
       shutdownCleanly(signal)
