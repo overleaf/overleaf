@@ -194,6 +194,24 @@
           display: none;
         }
       }
+
+      .entity-limit-hit {
+        color: @file-tree-item-color;
+        line-height: 2.05;
+        margin-left: (@line-height-computed / 2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .entity-limit-hit-message {
+        font-style: italic;
+      }
+
+      i.fa.entity-limit-hit-tooltip-trigger {
+        margin-left: (@line-height-computed / 4);
+        cursor: pointer;
+      }
     }
   }
 

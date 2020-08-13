@@ -16,7 +16,8 @@ export default App.directive('fileEntity', RecursionHelper => ({
   restrict: 'E',
   scope: {
     entity: '=',
-    permissions: '='
+    permissions: '=',
+    depth: '=?'
   },
   templateUrl: 'entityListItemTemplate',
   compile(element) {

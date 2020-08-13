@@ -323,7 +323,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 								) #{translate("upload_file")}
 
 			ul.list-unstyled(
-				ng-if="entity.type == 'folder'"
+				ng-if="entity.type == 'folder' && (depth == null || depth < MAX_DEPTH)"
 				ng-show="expanded"
 				droppable="permissions.write"
 				accept=".entity-name"
@@ -333,8 +333,25 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					entity="child",
 					permissions="permissions",
 					ng-repeat="child in entity.children | orderBy:[orderByFoldersFirst, 'name']"
+					depth="(depth || 0) + 1"
 				)
 
+			.entity-limit-hit(
+				ng-if="depth === MAX_DEPTH"
+				ng-show="expanded"
+			)
+				i.fa.fa-fw
+				span.entity-limit-hit-message 
+					| Some files might be missing
+					|
+					i.fa.fa-question-circle.entity-limit-hit-tooltip-trigger(
+						tooltip="Your project has hit Overleaf's maximum file depth limit. Files within this folder won't be visible."
+						tooltip-append-to-body="true"
+						aria-hidden="true"
+					)
+					span.sr-only 
+						| Your project has hit Overleaf's maximum file depth limit. Files within this folder won't be visible. 
+					
 script(type='text/ng-template', id='newFolderModalTemplate')
 	.modal-header
 		h3 #{translate("new_folder")}

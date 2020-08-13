@@ -20,6 +20,8 @@ App.controller('FileTreeEntityController', function(
   $modal,
   $element
 ) {
+  $scope.MAX_DEPTH = 8
+
   $scope.select = function(e) {
     if (e.ctrlKey || e.metaKey) {
       e.stopPropagation()
