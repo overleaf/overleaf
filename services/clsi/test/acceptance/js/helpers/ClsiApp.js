@@ -23,7 +23,7 @@ module.exports = {
   callbacks: [],
   ensureRunning(callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     if (this.running) {
       return callback()
@@ -35,10 +35,10 @@ module.exports = {
       return app.listen(
         __guard__(
           Settings.internal != null ? Settings.internal.clsi : undefined,
-          x => x.port
+          (x) => x.port
         ),
         'localhost',
-        error => {
+        (error) => {
           if (error != null) {
             throw error
           }

@@ -62,6 +62,6 @@ module.exports = {
     return sequelize
       .sync()
       .then(() => logger.log('db sync complete'))
-      .catch(err => console.log(err, 'error syncing'))
+      .catch((err) => console.log(err, 'error syncing'))
   }
 }

@@ -26,7 +26,7 @@ module.exports = TikzManager = {
   checkMainFile(compileDir, mainFile, resources, callback) {
     // if there's already an output.tex file, we don't want to touch it
     if (callback == null) {
-      callback = function(error, needsMainFile) {}
+      callback = function (error, needsMainFile) {}
     }
     for (const resource of Array.from(resources)) {
       if (resource.path === 'output.tex') {
@@ -35,14 +35,17 @@ module.exports = TikzManager = {
       }
     }
     // if there's no output.tex, see if we are using tikz/pgf or pstool in the main file
-    return ResourceWriter.checkPath(compileDir, mainFile, function(
+    return ResourceWriter.checkPath(compileDir, mainFile, function (
       error,
       path
     ) {
       if (error != null) {
         return callback(error)
       }
-      return SafeReader.readFile(path, 65536, 'utf8', function(error, content) {
+      return SafeReader.readFile(path, 65536, 'utf8', function (
+        error,
+        content
+      ) {
         if (error != null) {
           return callback(error)
         }
@@ -64,16 +67,16 @@ module.exports = TikzManager = {
 
   injectOutputFile(compileDir, mainFile, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return ResourceWriter.checkPath(compileDir, mainFile, function(
+    return ResourceWriter.checkPath(compileDir, mainFile, function (
       error,
       path
     ) {
       if (error != null) {
         return callback(error)
       }
-      return fs.readFile(path, 'utf8', function(error, content) {
+      return fs.readFile(path, 'utf8', function (error, content) {
         if (error != null) {
           return callback(error)
         }

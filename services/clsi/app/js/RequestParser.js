@@ -27,7 +27,7 @@ module.exports = RequestParser = {
   parse(body, callback) {
     let resource
     if (callback == null) {
-      callback = function(error, data) {}
+      callback = function (error, data) {}
     }
     const response = {}
 

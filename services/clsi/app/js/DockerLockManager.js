@@ -23,7 +23,7 @@ module.exports = LockManager = {
   tryLock(key, callback) {
     let lockValue
     if (callback == null) {
-      callback = function(err, gotLock) {}
+      callback = function (err, gotLock) {}
     }
     const existingLock = LockState[key]
     if (existingLock != null) {
@@ -46,11 +46,11 @@ module.exports = LockManager = {
   getLock(key, callback) {
     let attempt
     if (callback == null) {
-      callback = function(error, lockValue) {}
+      callback = function (error, lockValue) {}
     }
     const startTime = Date.now()
     return (attempt = () =>
-      LockManager.tryLock(key, function(error, gotLock, lockValue) {
+      LockManager.tryLock(key, function (error, gotLock, lockValue) {
         if (error != null) {
           return callback(error)
         }
@@ -68,7 +68,7 @@ module.exports = LockManager = {
 
   releaseLock(key, lockValue, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const existingLock = LockState[key]
     if (existingLock === lockValue) {
@@ -93,14 +93,14 @@ module.exports = LockManager = {
 
   runWithLock(key, runner, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return LockManager.getLock(key, function(error, lockValue) {
+    return LockManager.getLock(key, function (error, lockValue) {
       if (error != null) {
         return callback(error)
       }
       return runner((error1, ...args) =>
-        LockManager.releaseLock(key, lockValue, function(error2) {
+        LockManager.releaseLock(key, lockValue, function (error2) {
           error = error1 || error2
           if (error != null) {
             return callback(error)

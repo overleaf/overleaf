@@ -27,9 +27,9 @@ module.exports = ProjectPersistenceManager = {
 
   refreshExpiryTimeout(callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    diskusage.check('/', function(err, stats) {
+    diskusage.check('/', function (err, stats) {
       if (err) {
         logger.err({ err: err }, 'error getting disk usage')
         return callback(err)
@@ -48,9 +48,9 @@ module.exports = ProjectPersistenceManager = {
   },
   markProjectAsJustAccessed(project_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    const job = cb =>
+    const job = (cb) =>
       db.Project.findOrCreate({ where: { project_id } })
         .spread((project, created) =>
           project
@@ -64,9 +64,9 @@ module.exports = ProjectPersistenceManager = {
 
   clearExpiredProjects(callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return ProjectPersistenceManager._findExpiredProjectIds(function(
+    return ProjectPersistenceManager._findExpiredProjectIds(function (
       error,
       project_ids
     ) {
@@ -74,9 +74,9 @@ module.exports = ProjectPersistenceManager = {
         return callback(error)
       }
       logger.log({ project_ids }, 'clearing expired projects')
-      const jobs = Array.from(project_ids || []).map(project_id =>
-        (project_id => callback =>
-          ProjectPersistenceManager.clearProjectFromCache(project_id, function(
+      const jobs = Array.from(project_ids || []).map((project_id) =>
+        ((project_id) => (callback) =>
+          ProjectPersistenceManager.clearProjectFromCache(project_id, function (
             err
           ) {
             if (err != null) {
@@ -85,13 +85,13 @@ module.exports = ProjectPersistenceManager = {
             return callback()
           }))(project_id)
       )
-      return async.series(jobs, function(error) {
+      return async.series(jobs, function (error) {
         if (error != null) {
           return callback(error)
         }
         return CompileManager.clearExpiredProjects(
           ProjectPersistenceManager.EXPIRY_TIMEOUT,
-          error => callback()
+          (error) => callback()
         )
       })
     })
@@ -99,16 +99,16 @@ module.exports = ProjectPersistenceManager = {
 
   clearProject(project_id, user_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     logger.log({ project_id, user_id }, 'clearing project for user')
-    return CompileManager.clearProject(project_id, user_id, function(error) {
+    return CompileManager.clearProject(project_id, user_id, function (error) {
       if (error != null) {
         return callback(error)
       }
       return ProjectPersistenceManager.clearProjectFromCache(
         project_id,
-        function(error) {
+        function (error) {
           if (error != null) {
             return callback(error)
           }
@@ -120,17 +120,17 @@ module.exports = ProjectPersistenceManager = {
 
   clearProjectFromCache(project_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     logger.log({ project_id }, 'clearing project from cache')
-    return UrlCache.clearProject(project_id, function(error) {
+    return UrlCache.clearProject(project_id, function (error) {
       if (error != null) {
         logger.err({ error, project_id }, 'error clearing project from cache')
         return callback(error)
       }
       return ProjectPersistenceManager._clearProjectFromDatabase(
         project_id,
-        function(error) {
+        function (error) {
           if (error != null) {
             logger.err(
               { error, project_id },
@@ -145,10 +145,10 @@ module.exports = ProjectPersistenceManager = {
 
   _clearProjectFromDatabase(project_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     logger.log({ project_id }, 'clearing project from database')
-    const job = cb =>
+    const job = (cb) =>
       db.Project.destroy({ where: { project_id } })
         .then(() => cb())
         .error(cb)
@@ -157,19 +157,19 @@ module.exports = ProjectPersistenceManager = {
 
   _findExpiredProjectIds(callback) {
     if (callback == null) {
-      callback = function(error, project_ids) {}
+      callback = function (error, project_ids) {}
     }
-    const job = function(cb) {
+    const job = function (cb) {
       const keepProjectsFrom = new Date(
         Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT
       )
       const q = {}
       q[db.op.lt] = keepProjectsFrom
       return db.Project.findAll({ where: { lastAccessed: q } })
-        .then(projects =>
+        .then((projects) =>
           cb(
             null,
-            projects.map(project => project.project_id)
+            projects.map((project) => project.project_id)
           )
         )
         .error(cb)

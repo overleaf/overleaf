@@ -25,20 +25,20 @@ module.exports = LockManager = {
 
   runWithLock(path, runner, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const lockOpts = {
       wait: this.MAX_LOCK_WAIT_TIME,
       pollPeriod: this.LOCK_TEST_INTERVAL,
       stale: this.LOCK_STALE
     }
-    return Lockfile.lock(path, lockOpts, function(error) {
+    return Lockfile.lock(path, lockOpts, function (error) {
       if ((error != null ? error.code : undefined) === 'EEXIST') {
         return callback(new Errors.AlreadyCompilingError('compile in progress'))
       } else if (error != null) {
         return fs.lstat(path, (statLockErr, statLock) =>
           fs.lstat(Path.dirname(path), (statDirErr, statDir) =>
-            fs.readdir(Path.dirname(path), function(readdirErr, readdirDir) {
+            fs.readdir(Path.dirname(path), function (readdirErr, readdirDir) {
               logger.err(
                 {
                   error,
@@ -58,7 +58,7 @@ module.exports = LockManager = {
         )
       } else {
         return runner((error1, ...args) =>
-          Lockfile.unlock(path, function(error2) {
+          Lockfile.unlock(path, function (error2) {
             error = error1 || error2
             if (error != null) {
               return callback(error)

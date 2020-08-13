@@ -23,14 +23,12 @@ module.exports = Client = {
   host: Settings.apis.clsi.url,
 
   randomId() {
-    return Math.random()
-      .toString(16)
-      .slice(2)
+    return Math.random().toString(16).slice(2)
   },
 
   compile(project_id, data, callback) {
     if (callback == null) {
-      callback = function(error, res, body) {}
+      callback = function (error, res, body) {}
     }
     return request.post(
       {
@@ -45,7 +43,7 @@ module.exports = Client = {
 
   clearCache(project_id, callback) {
     if (callback == null) {
-      callback = function(error, res, body) {}
+      callback = function (error, res, body) {}
     }
     return request.del(`${this.host}/project/${project_id}`, callback)
   },
@@ -64,7 +62,7 @@ module.exports = Client = {
     const app = express()
     app.use(express.static(directory))
     console.log('starting test server on', port, host)
-    return app.listen(port, host).on('error', error => {
+    return app.listen(port, host).on('error', (error) => {
       console.error('error starting server:', error.message)
       return process.exit(1)
     })
@@ -72,7 +70,7 @@ module.exports = Client = {
 
   syncFromCode(project_id, file, line, column, callback) {
     if (callback == null) {
-      callback = function(error, pdfPositions) {}
+      callback = function (error, pdfPositions) {}
     }
     return request.get(
       {
@@ -95,7 +93,7 @@ module.exports = Client = {
 
   syncFromPdf(project_id, page, h, v, callback) {
     if (callback == null) {
-      callback = function(error, pdfPositions) {}
+      callback = function (error, pdfPositions) {}
     }
     return request.get(
       {
@@ -118,7 +116,7 @@ module.exports = Client = {
 
   compileDirectory(project_id, baseDirectory, directory, serverPort, callback) {
     if (callback == null) {
-      callback = function(error, res, body) {}
+      callback = function (error, res, body) {}
     }
     const resources = []
     let entities = fs.readdirSync(`${baseDirectory}/${directory}`)
@@ -130,7 +128,7 @@ module.exports = Client = {
         entities = entities.concat(
           fs
             .readdirSync(`${baseDirectory}/${directory}/${entity}`)
-            .map(subEntity => {
+            .map((subEntity) => {
               if (subEntity === 'main.tex') {
                 rootResourcePath = `${entity}/${subEntity}`
               }
@@ -195,7 +193,7 @@ module.exports = Client = {
 
   wordcountWithImage(project_id, file, image, callback) {
     if (callback == null) {
-      callback = function(error, pdfPositions) {}
+      callback = function (error, pdfPositions) {}
     }
     return request.get(
       {

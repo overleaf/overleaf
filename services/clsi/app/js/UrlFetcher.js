@@ -24,7 +24,7 @@ const oneMinute = 60 * 1000
 
 module.exports = UrlFetcher = {
   pipeUrlToFileWithRetry(url, filePath, callback) {
-    const doDownload = function(cb) {
+    const doDownload = function (cb) {
       UrlFetcher.pipeUrlToFile(url, filePath, cb)
     }
     async.retry(3, doDownload, callback)
@@ -32,14 +32,14 @@ module.exports = UrlFetcher = {
 
   pipeUrlToFile(url, filePath, _callback) {
     if (_callback == null) {
-      _callback = function(error) {}
+      _callback = function (error) {}
     }
-    const callbackOnce = function(error) {
+    const callbackOnce = function (error) {
       if (timeoutHandler != null) {
         clearTimeout(timeoutHandler)
       }
       _callback(error)
-      return (_callback = function() {})
+      return (_callback = function () {})
     }
 
     if (settings.filestoreDomainOveride != null) {
@@ -47,7 +47,7 @@ module.exports = UrlFetcher = {
       url = `${settings.filestoreDomainOveride}${p}`
     }
     var timeoutHandler = setTimeout(
-      function() {
+      function () {
         timeoutHandler = null
         logger.error({ url, filePath }, 'Timed out downloading file to cache')
         return callbackOnce(
@@ -63,7 +63,7 @@ module.exports = UrlFetcher = {
     urlStream.pause() // stop data flowing until we are ready
 
     // attach handlers before setting up pipes
-    urlStream.on('error', function(error) {
+    urlStream.on('error', function (error) {
       logger.error({ err: error, url, filePath }, 'error downloading url')
       return callbackOnce(
         error || new Error(`Something went wrong downloading the URL ${url}`)
@@ -74,17 +74,17 @@ module.exports = UrlFetcher = {
       logger.log({ url, filePath }, 'finished downloading file into cache')
     )
 
-    return urlStream.on('response', function(res) {
+    return urlStream.on('response', function (res) {
       if (res.statusCode >= 200 && res.statusCode < 300) {
         const fileStream = fs.createWriteStream(filePath)
 
         // attach handlers before setting up pipes
-        fileStream.on('error', function(error) {
+        fileStream.on('error', function (error) {
           logger.error(
             { err: error, url, filePath },
             'error writing file into cache'
           )
-          return fs.unlink(filePath, function(err) {
+          return fs.unlink(filePath, function (err) {
             if (err != null) {
               logger.err({ err, filePath }, 'error deleting file from cache')
             }
@@ -92,7 +92,7 @@ module.exports = UrlFetcher = {
           })
         })
 
-        fileStream.on('finish', function() {
+        fileStream.on('finish', function () {
           logger.log({ url, filePath }, 'finished writing file into cache')
           return callbackOnce()
         })

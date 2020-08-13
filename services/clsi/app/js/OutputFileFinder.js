@@ -24,14 +24,14 @@ const logger = require('logger-sharelatex')
 module.exports = OutputFileFinder = {
   findOutputFiles(resources, directory, callback) {
     if (callback == null) {
-      callback = function(error, outputFiles, allFiles) {}
+      callback = function (error, outputFiles, allFiles) {}
     }
     const incomingResources = {}
     for (const resource of Array.from(resources)) {
       incomingResources[resource.path] = true
     }
 
-    return OutputFileFinder._getAllFiles(directory, function(error, allFiles) {
+    return OutputFileFinder._getAllFiles(directory, function (error, allFiles) {
       if (allFiles == null) {
         allFiles = []
       }
@@ -44,7 +44,7 @@ module.exports = OutputFileFinder = {
         if (!incomingResources[file]) {
           outputFiles.push({
             path: file,
-            type: __guard__(file.match(/\.([^\.]+)$/), x => x[1])
+            type: __guard__(file.match(/\.([^\.]+)$/), (x) => x[1])
           })
         }
       }
@@ -54,11 +54,11 @@ module.exports = OutputFileFinder = {
 
   _getAllFiles(directory, _callback) {
     if (_callback == null) {
-      _callback = function(error, fileList) {}
+      _callback = function (error, fileList) {}
     }
-    const callback = function(error, fileList) {
+    const callback = function (error, fileList) {
       _callback(error, fileList)
-      return (_callback = function() {})
+      return (_callback = function () {})
     }
 
     // don't include clsi-specific files/directories in the output list
@@ -87,9 +87,9 @@ module.exports = OutputFileFinder = {
 
     const proc = spawn('find', args)
     let stdout = ''
-    proc.stdout.setEncoding('utf8').on('data', chunk => (stdout += chunk))
+    proc.stdout.setEncoding('utf8').on('data', (chunk) => (stdout += chunk))
     proc.on('error', callback)
-    return proc.on('close', function(code) {
+    return proc.on('close', function (code) {
       if (code !== 0) {
         logger.warn(
           { directory, code },
@@ -98,7 +98,7 @@ module.exports = OutputFileFinder = {
         return callback(null, [])
       }
       let fileList = stdout.trim().split('\n')
-      fileList = fileList.map(function(file) {
+      fileList = fileList.map(function (file) {
         // Strip leading directory
         let path
         return (path = Path.relative(directory, file))

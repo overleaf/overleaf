@@ -18,61 +18,61 @@ const modulePath = require('path').join(
   '../../../app/js/ContentTypeMapper'
 )
 
-describe('ContentTypeMapper', function() {
-  beforeEach(function() {
+describe('ContentTypeMapper', function () {
+  beforeEach(function () {
     return (this.ContentTypeMapper = SandboxedModule.require(modulePath))
   })
 
-  return describe('map', function() {
-    it('should map .txt to text/plain', function() {
+  return describe('map', function () {
+    it('should map .txt to text/plain', function () {
       const content_type = this.ContentTypeMapper.map('example.txt')
       return content_type.should.equal('text/plain')
     })
 
-    it('should map .csv to text/csv', function() {
+    it('should map .csv to text/csv', function () {
       const content_type = this.ContentTypeMapper.map('example.csv')
       return content_type.should.equal('text/csv')
     })
 
-    it('should map .pdf to application/pdf', function() {
+    it('should map .pdf to application/pdf', function () {
       const content_type = this.ContentTypeMapper.map('example.pdf')
       return content_type.should.equal('application/pdf')
     })
 
-    it('should fall back to octet-stream', function() {
+    it('should fall back to octet-stream', function () {
       const content_type = this.ContentTypeMapper.map('example.unknown')
       return content_type.should.equal('application/octet-stream')
     })
 
-    describe('coercing web files to plain text', function() {
-      it('should map .js to plain text', function() {
+    describe('coercing web files to plain text', function () {
+      it('should map .js to plain text', function () {
         const content_type = this.ContentTypeMapper.map('example.js')
         return content_type.should.equal('text/plain')
       })
 
-      it('should map .html to plain text', function() {
+      it('should map .html to plain text', function () {
         const content_type = this.ContentTypeMapper.map('example.html')
         return content_type.should.equal('text/plain')
       })
 
-      return it('should map .css to plain text', function() {
+      return it('should map .css to plain text', function () {
         const content_type = this.ContentTypeMapper.map('example.css')
         return content_type.should.equal('text/plain')
       })
     })
 
-    return describe('image files', function() {
-      it('should map .png to image/png', function() {
+    return describe('image files', function () {
+      it('should map .png to image/png', function () {
         const content_type = this.ContentTypeMapper.map('example.png')
         return content_type.should.equal('image/png')
       })
 
-      it('should map .jpeg to image/jpeg', function() {
+      it('should map .jpeg to image/jpeg', function () {
         const content_type = this.ContentTypeMapper.map('example.jpeg')
         return content_type.should.equal('image/jpeg')
       })
 
-      return it('should map .svg to text/plain to protect against XSS (SVG can execute JS)', function() {
+      return it('should map .svg to text/plain to protect against XSS (SVG can execute JS)', function () {
         const content_type = this.ContentTypeMapper.map('example.svg')
         return content_type.should.equal('text/plain')
       })

@@ -1,11 +1,9 @@
 clsi
---acceptance-creds=None
 --data-dirs=cache,compiles,db
 --dependencies=
 --docker-repos=gcr.io/overleaf-ops
 --env-add=
 --env-pass-through=TEXLIVE_IMAGE
---language=es
 --node-version=10.21.0
 --public-repo=True
---script-version=2.1.0
+--script-version=3.3.2

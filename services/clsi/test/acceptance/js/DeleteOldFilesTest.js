@@ -13,8 +13,8 @@ const request = require('request')
 require('chai').should()
 const ClsiApp = require('./helpers/ClsiApp')
 
-describe('Deleting Old Files', function() {
-  before(function(done) {
+describe('Deleting Old Files', function () {
+  before(function (done) {
     this.request = {
       resources: [
         {
@@ -31,8 +31,8 @@ Hello world
     return ClsiApp.ensureRunning(done)
   })
 
-  return describe('on first run', function() {
-    before(function(done) {
+  return describe('on first run', function () {
+    before(function (done) {
       this.project_id = Client.randomId()
       return Client.compile(
         this.project_id,
@@ -46,12 +46,12 @@ Hello world
       )
     })
 
-    it('should return a success status', function() {
+    it('should return a success status', function () {
       return this.body.compile.status.should.equal('success')
     })
 
-    return describe('after file has been deleted', function() {
-      before(function(done) {
+    return describe('after file has been deleted', function () {
+      before(function (done) {
         this.request.resources = []
         return Client.compile(
           this.project_id,
@@ -65,7 +65,7 @@ Hello world
         )
       })
 
-      return it('should return a failure status', function() {
+      return it('should return a failure status', function () {
         return this.body.compile.status.should.equal('failure')
       })
     })

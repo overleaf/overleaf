@@ -24,10 +24,10 @@ const Errors = require('./Errors')
 module.exports = CompileController = {
   compile(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const timer = new Metrics.Timer('compile-request')
-    return RequestParser.parse(req.body, function(error, request) {
+    return RequestParser.parse(req.body, function (error, request) {
       if (error != null) {
         return next(error)
       }
@@ -37,11 +37,11 @@ module.exports = CompileController = {
       }
       return ProjectPersistenceManager.markProjectAsJustAccessed(
         request.project_id,
-        function(error) {
+        function (error) {
           if (error != null) {
             return next(error)
           }
-          return CompileManager.doCompileWithLock(request, function(
+          return CompileManager.doCompileWithLock(request, function (
             error,
             outputFiles
           ) {
@@ -116,7 +116,7 @@ module.exports = CompileController = {
               compile: {
                 status,
                 error: (error != null ? error.message : undefined) || error,
-                outputFiles: outputFiles.map(file => ({
+                outputFiles: outputFiles.map((file) => ({
                   url:
                     `${Settings.apis.clsi.url}/project/${request.project_id}` +
                     (request.user_id != null
@@ -138,7 +138,7 @@ module.exports = CompileController = {
 
   stopCompile(req, res, next) {
     const { project_id, user_id } = req.params
-    return CompileManager.stopCompile(project_id, user_id, function(error) {
+    return CompileManager.stopCompile(project_id, user_id, function (error) {
       if (error != null) {
         return next(error)
       }
@@ -148,12 +148,12 @@ module.exports = CompileController = {
 
   clearCache(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     return ProjectPersistenceManager.clearProject(
       req.params.project_id,
       req.params.user_id,
-      function(error) {
+      function (error) {
         if (error != null) {
           return next(error)
         }
@@ -164,7 +164,7 @@ module.exports = CompileController = {
 
   syncFromCode(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const { file } = req.query
     const line = parseInt(req.query.line, 10)
@@ -177,7 +177,7 @@ module.exports = CompileController = {
       file,
       line,
       column,
-      function(error, pdfPositions) {
+      function (error, pdfPositions) {
         if (error != null) {
           return next(error)
         }
@@ -190,29 +190,33 @@ module.exports = CompileController = {
 
   syncFromPdf(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const page = parseInt(req.query.page, 10)
     const h = parseFloat(req.query.h)
     const v = parseFloat(req.query.v)
     const { project_id } = req.params
     const { user_id } = req.params
-    return CompileManager.syncFromPdf(project_id, user_id, page, h, v, function(
-      error,
-      codePositions
-    ) {
-      if (error != null) {
-        return next(error)
+    return CompileManager.syncFromPdf(
+      project_id,
+      user_id,
+      page,
+      h,
+      v,
+      function (error, codePositions) {
+        if (error != null) {
+          return next(error)
+        }
+        return res.json({
+          code: codePositions
+        })
       }
-      return res.json({
-        code: codePositions
-      })
-    })
+    )
   },
 
   wordcount(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const file = req.query.file || 'main.tex'
     const { project_id } = req.params
@@ -229,7 +233,7 @@ module.exports = CompileController = {
     }
     logger.log({ image, file, project_id }, 'word count request')
 
-    return CompileManager.wordcount(project_id, user_id, file, image, function(
+    return CompileManager.wordcount(project_id, user_id, file, image, function (
       error,
       result
     ) {
@@ -244,7 +248,7 @@ module.exports = CompileController = {
 
   status(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     return res.send('OK')
   }

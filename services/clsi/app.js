@@ -42,14 +42,14 @@ app.use(Metrics.http.monitor(logger))
 // minutes (including file download time), so bump up the
 // timeout a bit.
 const TIMEOUT = 10 * 60 * 1000
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   req.setTimeout(TIMEOUT)
   res.setTimeout(TIMEOUT)
   res.removeHeader('X-Powered-By')
   return next()
 })
 
-app.param('project_id', function(req, res, next, projectId) {
+app.param('project_id', function (req, res, next, projectId) {
   if (projectId != null ? projectId.match(/^[a-zA-Z0-9_-]+$/) : undefined) {
     return next()
   } else {
@@ -57,7 +57,7 @@ app.param('project_id', function(req, res, next, projectId) {
   }
 })
 
-app.param('user_id', function(req, res, next, userId) {
+app.param('user_id', function (req, res, next, userId) {
   if (userId != null ? userId.match(/^[0-9a-f]{24}$/) : undefined) {
     return next()
   } else {
@@ -65,7 +65,7 @@ app.param('user_id', function(req, res, next, userId) {
   }
 })
 
-app.param('build_id', function(req, res, next, buildId) {
+app.param('build_id', function (req, res, next, buildId) {
   if (
     buildId != null ? buildId.match(OutputCacheManager.BUILD_REGEX) : undefined
   ) {
@@ -134,19 +134,18 @@ const staticServer = ForbidSymlinks(express.static, Settings.path.compilesDir, {
   }
 })
 
-app.get('/project/:project_id/user/:user_id/build/:build_id/output/*', function(
-  req,
-  res,
-  next
-) {
-  // for specific build get the path from the OutputCacheManager (e.g. .clsi/buildId)
-  req.url =
-    `/${req.params.project_id}-${req.params.user_id}/` +
-    OutputCacheManager.path(req.params.build_id, `/${req.params[0]}`)
-  return staticServer(req, res, next)
-})
+app.get(
+  '/project/:project_id/user/:user_id/build/:build_id/output/*',
+  function (req, res, next) {
+    // for specific build get the path from the OutputCacheManager (e.g. .clsi/buildId)
+    req.url =
+      `/${req.params.project_id}-${req.params.user_id}/` +
+      OutputCacheManager.path(req.params.build_id, `/${req.params[0]}`)
+    return staticServer(req, res, next)
+  }
+)
 
-app.get('/project/:project_id/build/:build_id/output/*', function(
+app.get('/project/:project_id/build/:build_id/output/*', function (
   req,
   res,
   next
@@ -158,7 +157,7 @@ app.get('/project/:project_id/build/:build_id/output/*', function(
   return staticServer(req, res, next)
 })
 
-app.get('/project/:project_id/user/:user_id/output/*', function(
+app.get('/project/:project_id/user/:user_id/output/*', function (
   req,
   res,
   next
@@ -168,7 +167,7 @@ app.get('/project/:project_id/user/:user_id/output/*', function(
   return staticServer(req, res, next)
 })
 
-app.get('/project/:project_id/output/*', function(req, res, next) {
+app.get('/project/:project_id/output/*', function (req, res, next) {
   if (
     (req.query != null ? req.query.build : undefined) != null &&
     req.query.build.match(OutputCacheManager.BUILD_REGEX)
@@ -183,7 +182,7 @@ app.get('/project/:project_id/output/*', function(req, res, next) {
   return staticServer(req, res, next)
 })
 
-app.get('/oops', function(req, res, next) {
+app.get('/oops', function (req, res, next) {
   logger.error({ err: 'hello' }, 'test error')
   return res.send('error\n')
 })
@@ -208,7 +207,7 @@ if (Settings.processLifespanLimitMs) {
 function runSmokeTest() {
   if (Settings.processTooOld) return
   logger.log('running smoke tests')
-  smokeTest.triggerRun(err => {
+  smokeTest.triggerRun((err) => {
     if (err) logger.error({ err }, 'smoke tests failed')
     setTimeout(runSmokeTest, 30 * 1000)
   })
@@ -217,7 +216,7 @@ if (Settings.smokeTest) {
   runSmokeTest()
 }
 
-app.get('/health_check', function(req, res) {
+app.get('/health_check', function (req, res) {
   if (Settings.processTooOld) {
     return res.status(500).json({ processTooOld: true })
   }
@@ -226,7 +225,7 @@ app.get('/health_check', function(req, res) {
 
 app.get('/smoke_test_force', (req, res) => smokeTest.sendNewResult(res))
 
-app.use(function(error, req, res, next) {
+app.use(function (error, req, res, next) {
   if (error instanceof Errors.NotFoundError) {
     logger.log({ err: error, url: req.url }, 'not found error')
     return res.sendStatus(404)
@@ -244,8 +243,8 @@ const os = require('os')
 
 let STATE = 'up'
 
-const loadTcpServer = net.createServer(function(socket) {
-  socket.on('error', function(err) {
+const loadTcpServer = net.createServer(function (socket) {
+  socket.on('error', function (err) {
     if (err.code === 'ECONNRESET') {
       // this always comes up, we don't know why
       return
@@ -280,19 +279,19 @@ const loadTcpServer = net.createServer(function(socket) {
 
 const loadHttpServer = express()
 
-loadHttpServer.post('/state/up', function(req, res, next) {
+loadHttpServer.post('/state/up', function (req, res, next) {
   STATE = 'up'
   logger.info('getting message to set server to down')
   return res.sendStatus(204)
 })
 
-loadHttpServer.post('/state/down', function(req, res, next) {
+loadHttpServer.post('/state/down', function (req, res, next) {
   STATE = 'down'
   logger.info('getting message to set server to down')
   return res.sendStatus(204)
 })
 
-loadHttpServer.post('/state/maint', function(req, res, next) {
+loadHttpServer.post('/state/maint', function (req, res, next) {
   STATE = 'maint'
   logger.info('getting message to set server to maint')
   return res.sendStatus(204)
@@ -301,12 +300,12 @@ loadHttpServer.post('/state/maint', function(req, res, next) {
 const port =
   __guard__(
     Settings.internal != null ? Settings.internal.clsi : undefined,
-    x => x.port
+    (x) => x.port
   ) || 3013
 const host =
   __guard__(
     Settings.internal != null ? Settings.internal.clsi : undefined,
-    x1 => x1.host
+    (x1) => x1.host
   ) || 'localhost'
 
 const loadTcpPort = Settings.internal.load_balancer_agent.load_port
@@ -314,7 +313,7 @@ const loadHttpPort = Settings.internal.load_balancer_agent.local_port
 
 if (!module.parent) {
   // Called directly
-  app.listen(port, host, error => {
+  app.listen(port, host, (error) => {
     if (error) {
       logger.fatal({ error }, `Error starting CLSI on ${host}:${port}`)
     } else {
@@ -322,14 +321,14 @@ if (!module.parent) {
     }
   })
 
-  loadTcpServer.listen(loadTcpPort, host, function(error) {
+  loadTcpServer.listen(loadTcpPort, host, function (error) {
     if (error != null) {
       throw error
     }
     return logger.info(`Load tcp agent listening on load port ${loadTcpPort}`)
   })
 
-  loadHttpServer.listen(loadHttpPort, host, function(error) {
+  loadHttpServer.listen(loadHttpPort, host, function (error) {
     if (error != null) {
       throw error
     }

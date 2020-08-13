@@ -18,9 +18,9 @@ const logger = require('logger-sharelatex')
 module.exports = DraftModeManager = {
   injectDraftMode(filename, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return fs.readFile(filename, 'utf8', function(error, content) {
+    return fs.readFile(filename, 'utf8', function (error, content) {
       if (error != null) {
         return callback(error)
       }

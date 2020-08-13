@@ -16,8 +16,8 @@ const modulePath = require('path').join(
   '../../../app/js/DraftModeManager'
 )
 
-describe('DraftModeManager', function() {
-  beforeEach(function() {
+describe('DraftModeManager', function () {
+  beforeEach(function () {
     return (this.DraftModeManager = SandboxedModule.require(modulePath, {
       requires: {
         fs: (this.fs = {}),
@@ -26,8 +26,8 @@ describe('DraftModeManager', function() {
     }))
   })
 
-  describe('_injectDraftOption', function() {
-    it('should add draft option into documentclass with existing options', function() {
+  describe('_injectDraftOption', function () {
+    it('should add draft option into documentclass with existing options', function () {
       return this.DraftModeManager._injectDraftOption(`\
 \\documentclass[a4paper,foo=bar]{article}\
 `).should.equal(`\
@@ -35,7 +35,7 @@ describe('DraftModeManager', function() {
 `)
     })
 
-    return it('should add draft option into documentclass with no options', function() {
+    return it('should add draft option into documentclass with no options', function () {
       return this.DraftModeManager._injectDraftOption(`\
 \\documentclass{article}\
 `).should.equal(`\
@@ -44,8 +44,8 @@ describe('DraftModeManager', function() {
     })
   })
 
-  return describe('injectDraftMode', function() {
-    beforeEach(function() {
+  return describe('injectDraftMode', function () {
+    beforeEach(function () {
       this.filename = '/mock/filename.tex'
       this.callback = sinon.stub()
       const content = `\
@@ -59,13 +59,13 @@ Hello world
       return this.DraftModeManager.injectDraftMode(this.filename, this.callback)
     })
 
-    it('should read the file', function() {
+    it('should read the file', function () {
       return this.fs.readFile
         .calledWith(this.filename, 'utf8')
         .should.equal(true)
     })
 
-    it('should write the modified file', function() {
+    it('should write the modified file', function () {
       return this.fs.writeFile
         .calledWith(
           this.filename,
@@ -79,7 +79,7 @@ Hello world
         .should.equal(true)
     })
 
-    return it('should call the callback', function() {
+    return it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })

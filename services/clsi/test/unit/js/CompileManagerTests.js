@@ -24,8 +24,8 @@ const tk = require('timekeeper')
 const { EventEmitter } = require('events')
 const Path = require('path')
 
-describe('CompileManager', function() {
-  beforeEach(function() {
+describe('CompileManager', function () {
+  beforeEach(function () {
     this.CompileManager = SandboxedModule.require(modulePath, {
       requires: {
         './LatexRunner': (this.LatexRunner = {}),
@@ -60,8 +60,8 @@ describe('CompileManager', function() {
     this.project_id = 'project-id-123'
     return (this.user_id = '1234')
   })
-  describe('doCompileWithLock', function() {
-    beforeEach(function() {
+  describe('doCompileWithLock', function () {
+    beforeEach(function () {
       this.request = {
         resources: (this.resources = 'mock-resources'),
         project_id: this.project_id,
@@ -77,33 +77,33 @@ describe('CompileManager', function() {
         runner((err, ...result) => callback(err, ...Array.from(result))))
     })
 
-    describe('when the project is not locked', function() {
-      beforeEach(function() {
+    describe('when the project is not locked', function () {
+      beforeEach(function () {
         return this.CompileManager.doCompileWithLock(
           this.request,
           this.callback
         )
       })
 
-      it('should ensure that the compile directory exists', function() {
+      it('should ensure that the compile directory exists', function () {
         return this.fse.ensureDir.calledWith(this.compileDir).should.equal(true)
       })
 
-      it('should call doCompile with the request', function() {
+      it('should call doCompile with the request', function () {
         return this.CompileManager.doCompile
           .calledWith(this.request)
           .should.equal(true)
       })
 
-      return it('should call the callback with the output files', function() {
+      return it('should call the callback with the output files', function () {
         return this.callback
           .calledWithExactly(null, this.output_files)
           .should.equal(true)
       })
     })
 
-    return describe('when the project is locked', function() {
-      beforeEach(function() {
+    return describe('when the project is locked', function () {
+      beforeEach(function () {
         this.error = new Error('locked')
         this.LockManager.runWithLock = (lockFile, runner, callback) => {
           return callback(this.error)
@@ -114,22 +114,22 @@ describe('CompileManager', function() {
         )
       })
 
-      it('should ensure that the compile directory exists', function() {
+      it('should ensure that the compile directory exists', function () {
         return this.fse.ensureDir.calledWith(this.compileDir).should.equal(true)
       })
 
-      it('should not call doCompile with the request', function() {
+      it('should not call doCompile with the request', function () {
         return this.CompileManager.doCompile.called.should.equal(false)
       })
 
-      return it('should call the callback with the error', function() {
+      return it('should call the callback with the error', function () {
         return this.callback.calledWithExactly(this.error).should.equal(true)
       })
     })
   })
 
-  describe('doCompile', function() {
-    beforeEach(function() {
+  describe('doCompile', function () {
+    beforeEach(function () {
       this.output_files = [
         {
           path: 'output.log',
@@ -180,18 +180,18 @@ describe('CompileManager', function() {
       return (this.TikzManager.checkMainFile = sinon.stub().callsArg(3, false))
     })
 
-    describe('normally', function() {
-      beforeEach(function() {
+    describe('normally', function () {
+      beforeEach(function () {
         return this.CompileManager.doCompile(this.request, this.callback)
       })
 
-      it('should write the resources to disk', function() {
+      it('should write the resources to disk', function () {
         return this.ResourceWriter.syncResourcesToDisk
           .calledWith(this.request, this.compileDir)
           .should.equal(true)
       })
 
-      it('should run LaTeX', function() {
+      it('should run LaTeX', function () {
         return this.LatexRunner.runLatex
           .calledWith(`${this.project_id}-${this.user_id}`, {
             directory: this.compileDir,
@@ -206,43 +206,43 @@ describe('CompileManager', function() {
           .should.equal(true)
       })
 
-      it('should find the output files', function() {
+      it('should find the output files', function () {
         return this.OutputFileFinder.findOutputFiles
           .calledWith(this.resources, this.compileDir)
           .should.equal(true)
       })
 
-      it('should return the output files', function() {
+      it('should return the output files', function () {
         return this.callback
           .calledWith(null, this.build_files)
           .should.equal(true)
       })
 
-      return it('should not inject draft mode by default', function() {
+      return it('should not inject draft mode by default', function () {
         return this.DraftModeManager.injectDraftMode.called.should.equal(false)
       })
     })
 
-    describe('with draft mode', function() {
-      beforeEach(function() {
+    describe('with draft mode', function () {
+      beforeEach(function () {
         this.request.draft = true
         return this.CompileManager.doCompile(this.request, this.callback)
       })
 
-      return it('should inject the draft mode header', function() {
+      return it('should inject the draft mode header', function () {
         return this.DraftModeManager.injectDraftMode
           .calledWith(this.compileDir + '/' + this.rootResourcePath)
           .should.equal(true)
       })
     })
 
-    describe('with a check option', function() {
-      beforeEach(function() {
+    describe('with a check option', function () {
+      beforeEach(function () {
         this.request.check = 'error'
         return this.CompileManager.doCompile(this.request, this.callback)
       })
 
-      return it('should run chktex', function() {
+      return it('should run chktex', function () {
         return this.LatexRunner.runLatex
           .calledWith(`${this.project_id}-${this.user_id}`, {
             directory: this.compileDir,
@@ -262,14 +262,14 @@ describe('CompileManager', function() {
       })
     })
 
-    return describe('with a knitr file and check options', function() {
-      beforeEach(function() {
+    return describe('with a knitr file and check options', function () {
+      beforeEach(function () {
         this.request.rootResourcePath = 'main.Rtex'
         this.request.check = 'error'
         return this.CompileManager.doCompile(this.request, this.callback)
       })
 
-      return it('should not run chktex', function() {
+      return it('should not run chktex', function () {
         return this.LatexRunner.runLatex
           .calledWith(`${this.project_id}-${this.user_id}`, {
             directory: this.compileDir,
@@ -286,9 +286,9 @@ describe('CompileManager', function() {
     })
   })
 
-  describe('clearProject', function() {
-    describe('succesfully', function() {
-      beforeEach(function() {
+  describe('clearProject', function () {
+    describe('succesfully', function () {
+      beforeEach(function () {
         this.Settings.compileDir = 'compiles'
         this.fs.lstat = sinon.stub().callsArgWith(1, null, {
           isDirectory() {
@@ -308,7 +308,7 @@ describe('CompileManager', function() {
         return this.proc.emit('close', 0)
       })
 
-      it('should remove the project directory', function() {
+      it('should remove the project directory', function () {
         return this.child_process.spawn
           .calledWith('rm', [
             '-r',
@@ -317,13 +317,13 @@ describe('CompileManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback', function() {
+      return it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
     })
 
-    return describe('with a non-success status code', function() {
-      beforeEach(function() {
+    return describe('with a non-success status code', function () {
+      beforeEach(function () {
         this.Settings.compileDir = 'compiles'
         this.fs.lstat = sinon.stub().callsArgWith(1, null, {
           isDirectory() {
@@ -344,7 +344,7 @@ describe('CompileManager', function() {
         return this.proc.emit('close', 1)
       })
 
-      it('should remove the project directory', function() {
+      it('should remove the project directory', function () {
         return this.child_process.spawn
           .calledWith('rm', [
             '-r',
@@ -353,7 +353,7 @@ describe('CompileManager', function() {
           .should.equal(true)
       })
 
-      it('should call the callback with an error from the stderr', function() {
+      it('should call the callback with an error from the stderr', function () {
         this.callback.calledWithExactly(sinon.match(Error)).should.equal(true)
 
         this.callback.args[0][0].message.should.equal(
@@ -363,8 +363,8 @@ describe('CompileManager', function() {
     })
   })
 
-  describe('syncing', function() {
-    beforeEach(function() {
+  describe('syncing', function () {
+    beforeEach(function () {
       this.page = 1
       this.h = 42.23
       this.v = 87.56
@@ -374,12 +374,12 @@ describe('CompileManager', function() {
       this.column = 3
       this.file_name = 'main.tex'
       this.child_process.execFile = sinon.stub()
-      return (this.Settings.path.synctexBaseDir = project_id =>
+      return (this.Settings.path.synctexBaseDir = (project_id) =>
         `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`)
     })
 
-    describe('syncFromCode', function() {
-      beforeEach(function() {
+    describe('syncFromCode', function () {
+      beforeEach(function () {
         this.fs.stat = sinon.stub().callsArgWith(1, null, {
           isFile() {
             return true
@@ -399,7 +399,7 @@ describe('CompileManager', function() {
         )
       })
 
-      it('should execute the synctex binary', function() {
+      it('should execute the synctex binary', function () {
         const bin_path = Path.resolve(__dirname + '/../../../bin/synctex')
         const synctex_path = `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}/output.pdf`
         const file_path = `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}/${this.file_name}`
@@ -422,7 +422,7 @@ describe('CompileManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the parsed output', function() {
+      return it('should call the callback with the parsed output', function () {
         return this.callback
           .calledWith(null, [
             {
@@ -437,8 +437,8 @@ describe('CompileManager', function() {
       })
     })
 
-    return describe('syncFromPdf', function() {
-      beforeEach(function() {
+    return describe('syncFromPdf', function () {
+      beforeEach(function () {
         this.fs.stat = sinon.stub().callsArgWith(1, null, {
           isFile() {
             return true
@@ -458,7 +458,7 @@ describe('CompileManager', function() {
         )
       })
 
-      it('should execute the synctex binary', function() {
+      it('should execute the synctex binary', function () {
         const bin_path = Path.resolve(__dirname + '/../../../bin/synctex')
         const synctex_path = `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}/output.pdf`
         return this.CommandRunner.run
@@ -473,7 +473,7 @@ describe('CompileManager', function() {
           .should.equal(true)
       })
 
-      return it('should call the callback with the parsed output', function() {
+      return it('should call the callback with the parsed output', function () {
         return this.callback
           .calledWith(null, [
             {
@@ -487,8 +487,8 @@ describe('CompileManager', function() {
     })
   })
 
-  return describe('wordcount', function() {
-    beforeEach(function() {
+  return describe('wordcount', function () {
+    beforeEach(function () {
       this.CommandRunner.run = sinon.stub().callsArg(7)
       this.fs.readFile = sinon
         .stub()
@@ -514,7 +514,7 @@ describe('CompileManager', function() {
       )
     })
 
-    it('should run the texcount command', function() {
+    it('should run the texcount command', function () {
       this.directory = `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`
       this.file_path = `$COMPILE_DIR/${this.file_name}`
       this.command = [
@@ -537,7 +537,7 @@ describe('CompileManager', function() {
         .should.equal(true)
     })
 
-    return it('should call the callback with the parsed output', function() {
+    return it('should call the callback with the parsed output', function () {
       return this.callback
         .calledWith(null, {
           encode: 'ascii',

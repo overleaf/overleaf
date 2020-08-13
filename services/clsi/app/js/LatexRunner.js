@@ -27,7 +27,7 @@ module.exports = LatexRunner = {
   runLatex(project_id, options, callback) {
     let command
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     let {
       directory,
@@ -89,20 +89,20 @@ module.exports = LatexRunner = {
       timeout,
       environment,
       compileGroup,
-      function(error, output) {
+      function (error, output) {
         delete ProcessTable[id]
         if (error != null) {
           return callback(error)
         }
         const runs =
           __guard__(
-            __guard__(output != null ? output.stderr : undefined, x1 =>
+            __guard__(output != null ? output.stderr : undefined, (x1) =>
               x1.match(/^Run number \d+ of .*latex/gm)
             ),
-            x => x.length
+            (x) => x.length
           ) || 0
         const failed =
-          __guard__(output != null ? output.stdout : undefined, x2 =>
+          __guard__(output != null ? output.stdout : undefined, (x2) =>
             x2.match(/^Latexmk: Errors/m)
           ) != null
             ? 1
@@ -122,21 +122,21 @@ module.exports = LatexRunner = {
             stderr != null
               ? stderr.match(/Percent of CPU this job got: (\d+)/m)
               : undefined,
-            x3 => x3[1]
+            (x3) => x3[1]
           ) || 0
         timings['cpu-time'] =
           __guard__(
             stderr != null
               ? stderr.match(/User time.*: (\d+.\d+)/m)
               : undefined,
-            x4 => x4[1]
+            (x4) => x4[1]
           ) || 0
         timings['sys-time'] =
           __guard__(
             stderr != null
               ? stderr.match(/System time.*: (\d+.\d+)/m)
               : undefined,
-            x5 => x5[1]
+            (x5) => x5[1]
           ) || 0
         // record output files
         LatexRunner.writeLogOutput(project_id, directory, output, () => {
@@ -153,7 +153,7 @@ module.exports = LatexRunner = {
     // internal method for writing non-empty log files
     function _writeFile(file, content, cb) {
       if (content && content.length > 0) {
-        fs.writeFile(file, content, err => {
+        fs.writeFile(file, content, (err) => {
           if (err) {
             logger.error({ project_id, file }, 'error writing log file') // don't fail on error
           }
@@ -173,7 +173,7 @@ module.exports = LatexRunner = {
 
   killLatex(project_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const id = `${project_id}`
     logger.log({ id }, 'killing running compile')
@@ -202,7 +202,7 @@ module.exports = LatexRunner = {
     return (
       __guard__(
         Settings != null ? Settings.clsi : undefined,
-        x => x.latexmkCommandPrefix
+        (x) => x.latexmkCommandPrefix
       ) || []
     ).concat(args)
   },

@@ -18,8 +18,8 @@ const modulePath = require('path').join(
 )
 const Path = require('path')
 
-describe('LatexRunner', function() {
-  beforeEach(function() {
+describe('LatexRunner', function () {
+  beforeEach(function () {
     let Timer
     this.LatexRunner = SandboxedModule.require(modulePath, {
       requires: {
@@ -54,16 +54,16 @@ describe('LatexRunner', function() {
     return (this.env = { foo: '123' })
   })
 
-  return describe('runLatex', function() {
-    beforeEach(function() {
+  return describe('runLatex', function () {
+    beforeEach(function () {
       return (this.CommandRunner.run = sinon.stub().callsArgWith(7, null, {
         stdout: 'this is stdout',
         stderr: 'this is stderr'
       }))
     })
 
-    describe('normally', function() {
-      beforeEach(function() {
+    describe('normally', function () {
+      beforeEach(function () {
         return this.LatexRunner.runLatex(
           this.project_id,
           {
@@ -79,7 +79,7 @@ describe('LatexRunner', function() {
         )
       })
 
-      it('should run the latex command', function() {
+      it('should run the latex command', function () {
         return this.CommandRunner.run
           .calledWith(
             this.project_id,
@@ -93,7 +93,7 @@ describe('LatexRunner', function() {
           .should.equal(true)
       })
 
-      it('should record the stdout and stderr', function() {
+      it('should record the stdout and stderr', function () {
         this.fs.writeFile
           .calledWith(this.directory + '/' + 'output.stdout', 'this is stdout')
           .should.equal(true)
@@ -103,8 +103,8 @@ describe('LatexRunner', function() {
       })
     })
 
-    describe('with an .Rtex main file', function() {
-      beforeEach(function() {
+    describe('with an .Rtex main file', function () {
+      beforeEach(function () {
         return this.LatexRunner.runLatex(
           this.project_id,
           {
@@ -118,15 +118,15 @@ describe('LatexRunner', function() {
         )
       })
 
-      return it('should run the latex command on the equivalent .tex file', function() {
+      return it('should run the latex command on the equivalent .tex file', function () {
         const command = this.CommandRunner.run.args[0][1]
         const mainFile = command.slice(-1)[0]
         return mainFile.should.equal('$COMPILE_DIR/main-file.tex')
       })
     })
 
-    return describe('with a flags option', function() {
-      beforeEach(function() {
+    return describe('with a flags option', function () {
+      beforeEach(function () {
         return this.LatexRunner.runLatex(
           this.project_id,
           {
@@ -141,10 +141,10 @@ describe('LatexRunner', function() {
         )
       })
 
-      return it('should include the flags in the command', function() {
+      return it('should include the flags in the command', function () {
         const command = this.CommandRunner.run.args[0][1]
         const flags = command.filter(
-          arg => arg === '-file-line-error' || arg === '-halt-on-error'
+          (arg) => arg === '-file-line-error' || arg === '-halt-on-error'
         )
         flags.length.should.equal(2)
         flags[0].should.equal('-file-line-error')

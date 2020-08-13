@@ -35,17 +35,15 @@ const Server = {
   getFile() {},
 
   randomId() {
-    return Math.random()
-      .toString(16)
-      .slice(2)
+    return Math.random().toString(16).slice(2)
   }
 }
 
 Server.run()
 
-describe('Url Caching', function() {
-  describe('Downloading an image for the first time', function() {
-    before(function(done) {
+describe('Url Caching', function () {
+  describe('Downloading an image for the first time', function () {
+    before(function (done) {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
       this.request = {
@@ -82,17 +80,17 @@ describe('Url Caching', function() {
       })
     })
 
-    afterEach(function() {
+    afterEach(function () {
       return Server.getFile.restore()
     })
 
-    return it('should download the image', function() {
+    return it('should download the image', function () {
       return Server.getFile.calledWith(`/${this.file}`).should.equal(true)
     })
   })
 
-  describe('When an image is in the cache and the last modified date is unchanged', function() {
-    before(function(done) {
+  describe('When an image is in the cache and the last modified date is unchanged', function () {
+    before(function (done) {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
       this.request = {
@@ -137,17 +135,17 @@ describe('Url Caching', function() {
       )
     })
 
-    after(function() {
+    after(function () {
       return Server.getFile.restore()
     })
 
-    return it('should not download the image again', function() {
+    return it('should not download the image again', function () {
       return Server.getFile.called.should.equal(false)
     })
   })
 
-  describe('When an image is in the cache and the last modified date is advanced', function() {
-    before(function(done) {
+  describe('When an image is in the cache and the last modified date is advanced', function () {
+    before(function (done) {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
       this.request = {
@@ -193,17 +191,17 @@ describe('Url Caching', function() {
       )
     })
 
-    afterEach(function() {
+    afterEach(function () {
       return Server.getFile.restore()
     })
 
-    return it('should download the image again', function() {
+    return it('should download the image again', function () {
       return Server.getFile.called.should.equal(true)
     })
   })
 
-  describe('When an image is in the cache and the last modified date is further in the past', function() {
-    before(function(done) {
+  describe('When an image is in the cache and the last modified date is further in the past', function () {
+    before(function (done) {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
       this.request = {
@@ -249,17 +247,17 @@ describe('Url Caching', function() {
       )
     })
 
-    afterEach(function() {
+    afterEach(function () {
       return Server.getFile.restore()
     })
 
-    return it('should not download the image again', function() {
+    return it('should not download the image again', function () {
       return Server.getFile.called.should.equal(false)
     })
   })
 
-  describe('When an image is in the cache and the last modified date is not specified', function() {
-    before(function(done) {
+  describe('When an image is in the cache and the last modified date is not specified', function () {
+    before(function (done) {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
       this.request = {
@@ -305,17 +303,17 @@ describe('Url Caching', function() {
       )
     })
 
-    afterEach(function() {
+    afterEach(function () {
       return Server.getFile.restore()
     })
 
-    return it('should download the image again', function() {
+    return it('should download the image again', function () {
       return Server.getFile.called.should.equal(true)
     })
   })
 
-  return describe('After clearing the cache', function() {
-    before(function(done) {
+  return describe('After clearing the cache', function () {
+    before(function (done) {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
       this.request = {
@@ -338,7 +336,7 @@ describe('Url Caching', function() {
         ]
       }
 
-      return Client.compile(this.project_id, this.request, error => {
+      return Client.compile(this.project_id, this.request, (error) => {
         if (error != null) {
           throw error
         }
@@ -361,11 +359,11 @@ describe('Url Caching', function() {
       })
     })
 
-    afterEach(function() {
+    afterEach(function () {
       return Server.getFile.restore()
     })
 
-    return it('should download the image again', function() {
+    return it('should download the image again', function () {
       return Server.getFile.called.should.equal(true)
     })
   })
