@@ -28,7 +28,7 @@
     "heapdump": "^0.3.15",
     "lockfile": "^1.0.4",
     "lodash": "^4.17.15",
-    "logger-sharelatex": "^1.9.1",
+    "logger-sharelatex": "^2.2.0",
     "lynx": "0.2.0",
     "metrics-sharelatex": "^2.6.0",
     "mysql": "^2.18.1",
