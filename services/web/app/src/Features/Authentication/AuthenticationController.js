@@ -26,7 +26,7 @@ function send401WithChallenge(res) {
   res.sendStatus(401)
 }
 
-const AuthenticationController = (module.exports = {
+const AuthenticationController = {
   serializeUser(user, callback) {
     if (!user._id || !user.email) {
       const err = new Error('serializeUser called with non-user object')
@@ -431,7 +431,7 @@ const AuthenticationController = (module.exports = {
       delete req.session.postLoginRedirect
     }
   }
-})
+}
 
 function _afterLoginSessionSetup(req, user, callback) {
   if (callback == null) {
@@ -495,3 +495,5 @@ function _loginAsyncHandlers(req, user) {
   // capture the request ip for use when creating the session
   return (user._login_req_ip = req.ip)
 }
+
+module.exports = AuthenticationController

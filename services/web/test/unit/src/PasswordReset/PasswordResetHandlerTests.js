@@ -39,13 +39,20 @@ describe('PasswordResetHandler', function() {
     }
     this.EmailHandler = { sendEmail: sinon.stub() }
     this.AuthenticationManager = {
-      setUserPassword: sinon.stub(),
       setUserPasswordInV1: sinon.stub(),
-      setUserPasswordInV2: sinon.stub()
+      setUserPasswordInV2: sinon.stub(),
+      promises: {
+        setUserPassword: sinon.stub().resolves()
+      }
     }
     this.PasswordResetHandler = SandboxedModule.require(modulePath, {
       globals: { console: console },
       requires: {
+        '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
+          promises: {
+            addEntry: sinon.stub().resolves()
+          }
+        }),
         '../User/UserGetter': this.UserGetter,
         '../Security/OneTimeTokenHandler': this.OneTimeTokenHandler,
         '../Email/EmailHandler': this.EmailHandler,
@@ -59,7 +66,7 @@ describe('PasswordResetHandler', function() {
     })
     this.token = '12312321i'
     this.user_id = 'user_id_here'
-    this.user = { email: (this.email = 'bob@bob.com'), _id: 'user-id' }
+    this.user = { email: (this.email = 'bob@bob.com'), _id: this.user_id }
     this.password = 'my great secret password'
     this.callback = sinon.stub()
     // this should not have any effect now
@@ -186,18 +193,28 @@ describe('PasswordResetHandler', function() {
   })
 
   describe('setNewUserPassword', function() {
+    beforeEach(function() {
+      this.auditLog = { ip: '0:0:0:0' }
+    })
     describe('when no data is found', function() {
       beforeEach(function() {
         this.OneTimeTokenHandler.getValueFromTokenAndExpire.yields(null, null)
+      })
+
+      it('should return found == false and reset == false', function() {
         this.PasswordResetHandler.setNewUserPassword(
           this.token,
           this.password,
-          this.callback
+          this.auditLog,
+          (error, result) => {
+            expect(error).to.not.exist
+            expect(result).to.deep.equal({
+              found: false,
+              reset: false,
+              userId: null
+            })
+          }
         )
-      })
-
-      it('should return exists == false', function() {
-        this.callback.calledWith(null, false).should.equal(true)
       })
     })
 
@@ -209,9 +226,9 @@ describe('PasswordResetHandler', function() {
             user_id: this.user._id,
             email: this.email
           })
-        this.AuthenticationManager.setUserPassword
+        this.AuthenticationManager.promises.setUserPassword
           .withArgs(this.user._id, this.password)
-          .yields(null, true, this.user._id)
+          .resolves(true)
       })
 
       describe('when no user is found with this email', function() {
@@ -221,15 +238,16 @@ describe('PasswordResetHandler', function() {
             .yields(null, null)
         })
 
-        it('should return found == false', function(done) {
+        it('should return found == false and reset == false', function(done) {
           this.PasswordResetHandler.setNewUserPassword(
             this.token,
             this.password,
-            (err, found) => {
-              if (err != null) {
-                return done(err)
-              }
+            this.auditLog,
+            (err, result) => {
+              const { found, reset, userId } = result
+              expect(err).to.not.exist
               expect(found).to.be.false
+              expect(reset).to.be.false
               done()
             }
           )
@@ -243,15 +261,16 @@ describe('PasswordResetHandler', function() {
             .yields(null, { _id: 'not-the-same', email: this.email })
         })
 
-        it('should return found == false', function(done) {
+        it('should return found == false and reset == false', function(done) {
           this.PasswordResetHandler.setNewUserPassword(
             this.token,
             this.password,
-            (err, found) => {
-              if (err != null) {
-                return done(err)
-              }
+            this.auditLog,
+            (err, result) => {
+              const { found, reset, userId } = result
+              expect(err).to.not.exist
               expect(found).to.be.false
+              expect(reset).to.be.false
               done()
             }
           )
@@ -259,26 +278,100 @@ describe('PasswordResetHandler', function() {
       })
 
       describe('when the email and user match', function() {
-        beforeEach(function() {
-          this.PasswordResetHandler.getUserForPasswordResetToken = sinon
-            .stub()
-            .withArgs(this.token)
-            .yields(null, this.user)
+        describe('success', function() {
+          beforeEach(function() {
+            this.UserGetter.getUserByMainEmail.yields(null, this.user)
+          })
+
+          it('should update the user audit log', function(done) {
+            this.PasswordResetHandler.setNewUserPassword(
+              this.token,
+              this.password,
+              this.auditLog,
+              (error, result) => {
+                const { reset, userId } = result
+                expect(error).to.not.exist
+                const logCall = this.UserAuditLogHandler.promises.addEntry
+                  .lastCall
+                expect(logCall.args[0]).to.equal(this.user_id)
+                expect(logCall.args[1]).to.equal('reset-password')
+                expect(logCall.args[2]).to.equal(undefined)
+                expect(logCall.args[3]).to.equal(this.auditLog.ip)
+                expect(logCall.args[4]).to.equal(undefined)
+                done()
+              }
+            )
+          })
+
+          it('should return reset == true and the user id', function(done) {
+            this.PasswordResetHandler.setNewUserPassword(
+              this.token,
+              this.password,
+              this.auditLog,
+              (err, result) => {
+                const { reset, userId } = result
+                expect(err).to.not.exist
+                expect(reset).to.be.true
+                expect(userId).to.equal(this.user._id)
+                done()
+              }
+            )
+          })
+
+          describe('when logged in', function() {
+            beforeEach(function() {
+              this.auditLog.initiatorId = this.user_id
+            })
+            it('should update the user audit log with initiatorId', function(done) {
+              this.PasswordResetHandler.setNewUserPassword(
+                this.token,
+                this.password,
+                this.auditLog,
+                (error, result) => {
+                  const { reset, userId } = result
+                  expect(error).to.not.exist
+                  const logCall = this.UserAuditLogHandler.promises.addEntry
+                    .lastCall
+                  expect(logCall.args[0]).to.equal(this.user_id)
+                  expect(logCall.args[1]).to.equal('reset-password')
+                  expect(logCall.args[2]).to.equal(this.user_id)
+                  expect(logCall.args[3]).to.equal(this.auditLog.ip)
+                  expect(logCall.args[4]).to.equal(undefined)
+                  done()
+                }
+              )
+            })
+          })
         })
 
-        it('should return found == true and the user id', function(done) {
-          this.PasswordResetHandler.setNewUserPassword(
-            this.token,
-            this.password,
-            (err, found, userId) => {
-              if (err != null) {
-                return done(err)
-              }
-              expect(found).to.be.true
-              expect(userId).to.equal(this.user._id)
-              done()
-            }
-          )
+        describe('errors', function() {
+          describe('via UserAuditLogHandler', function() {
+            beforeEach(function() {
+              this.PasswordResetHandler.promises.getUserForPasswordResetToken = sinon
+                .stub()
+                .withArgs(this.token)
+                .resolves(this.user)
+              this.UserAuditLogHandler.promises.addEntry.rejects(
+                new Error('oops')
+              )
+            })
+            it('should return the error and not update the password', function(done) {
+              this.PasswordResetHandler.setNewUserPassword(
+                this.token,
+                this.password,
+                this.auditLog,
+                (error, result) => {
+                  expect(error).to.exist
+                  expect(
+                    this.UserAuditLogHandler.promises.addEntry.callCount
+                  ).to.equal(1)
+                  expect(this.AuthenticationManager.promises.setUserPassword).to
+                    .not.have.been.called
+                  done()
+                }
+              )
+            })
+          })
         })
       })
     })
@@ -292,27 +385,27 @@ describe('PasswordResetHandler', function() {
             v1_user_id: this.user.overleaf.id,
             email: this.email
           })
-        this.AuthenticationManager.setUserPassword
+        this.AuthenticationManager.promises.setUserPassword
           .withArgs(this.user._id, this.password)
-          .yields(null, true)
+          .resolves(true)
       })
 
-      describe('when no user is found with this email', function() {
+      describe('when no user is reset with this email', function() {
         beforeEach(function() {
           this.UserGetter.getUserByMainEmail
             .withArgs(this.email)
             .yields(null, null)
         })
 
-        it('should return found == false', function(done) {
+        it('should return reset == false', function(done) {
           this.PasswordResetHandler.setNewUserPassword(
             this.token,
             this.password,
-            (err, found) => {
-              if (err != null) {
-                return done(err)
-              }
-              expect(found).to.be.false
+            this.auditLog,
+            (err, result) => {
+              const { reset, userId } = result
+              expect(err).to.not.exist
+              expect(reset).to.be.false
               done()
             }
           )
@@ -328,15 +421,15 @@ describe('PasswordResetHandler', function() {
           })
         })
 
-        it('should return found == false', function(done) {
+        it('should return reset == false', function(done) {
           this.PasswordResetHandler.setNewUserPassword(
             this.token,
             this.password,
-            (err, found) => {
-              if (err != null) {
-                return done(err)
-              }
-              expect(found).to.be.false
+            this.auditLog,
+            (err, result) => {
+              const { reset, userId } = result
+              expect(err).to.not.exist
+              expect(reset).to.be.false
               done()
             }
           )
@@ -350,15 +443,15 @@ describe('PasswordResetHandler', function() {
             .yields(null, this.user)
         })
 
-        it('should return found == true and the user id', function(done) {
+        it('should return reset == true and the user id', function(done) {
           this.PasswordResetHandler.setNewUserPassword(
             this.token,
             this.password,
-            (err, found, userId) => {
-              if (err != null) {
-                return done(err)
-              }
-              expect(found).to.be.true
+            this.auditLog,
+            (err, result) => {
+              const { reset, userId } = result
+              expect(err).to.not.exist
+              expect(reset).to.be.true
               expect(userId).to.equal(this.user._id)
               done()
             }

@@ -32,15 +32,25 @@ describe('PasswordResetController', function() {
     this.settings = {}
     this.PasswordResetHandler = {
       generateAndEmailResetToken: sinon.stub(),
-      setNewUserPassword: sinon.stub().yields(null, true, this.user_id)
+      promises: {
+        setNewUserPassword: sinon
+          .stub()
+          .resolves({ found: true, reset: true, userID: this.user_id })
+      }
     }
     this.RateLimiter = { addCount: sinon.stub() }
     this.UserSessionsManager = {
-      revokeAllUserSessions: sinon.stub().callsArgWith(2, null)
+      promises: {
+        revokeAllUserSessions: sinon.stub().resolves()
+      }
     }
-    this.AuthenticationManager = { validatePassword: sinon.stub() }
+    this.AuthenticationManager = {
+      validatePassword: sinon.stub()
+    }
     this.UserUpdater = {
-      removeReconfirmFlag: sinon.stub().callsArgWith(1, null)
+      promises: {
+        removeReconfirmFlag: sinon.stub().resolves()
+      }
     }
     this.PasswordResetController = SandboxedModule.require(MODULE_PATH, {
       globals: {
@@ -52,12 +62,20 @@ describe('PasswordResetController', function() {
         'logger-sharelatex': {
           log() {},
           warn() {},
+          err: sinon.stub(),
           error() {}
         },
         '../../infrastructure/RateLimiter': this.RateLimiter,
-        '../Authentication/AuthenticationController': (this.AuthenticationController = {}),
+        '../Authentication/AuthenticationController': (this.AuthenticationController = {
+          getLoggedInUserId: sinon.stub(),
+          finishLogin: sinon.stub()
+        }),
         '../Authentication/AuthenticationManager': this.AuthenticationManager,
-        '../User/UserGetter': (this.UserGetter = {}),
+        '../User/UserGetter': (this.UserGetter = {
+          promises: {
+            getUser: sinon.stub()
+          }
+        }),
         '../User/UserSessionsManager': this.UserSessionsManager,
         '../User/UserUpdater': this.UserUpdater
       }
@@ -156,7 +174,7 @@ describe('PasswordResetController', function() {
     it('should tell the user handler to reset the password', function(done) {
       this.res.sendStatus = code => {
         code.should.equal(200)
-        this.PasswordResetHandler.setNewUserPassword
+        this.PasswordResetHandler.promises.setNewUserPassword
           .calledWith(this.token, this.password)
           .should.equal(true)
         done()
@@ -168,7 +186,7 @@ describe('PasswordResetController', function() {
       this.password = this.req.body.password = ' oh! clever! spaces around!   '
       this.res.sendStatus = code => {
         code.should.equal(200)
-        this.PasswordResetHandler.setNewUserPassword.should.have.been.calledWith(
+        this.PasswordResetHandler.promises.setNewUserPassword.should.have.been.calledWith(
           this.token,
           this.password
         )
@@ -177,14 +195,27 @@ describe('PasswordResetController', function() {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    it("should send 404 if the token didn't work", function(done) {
-      this.PasswordResetHandler.setNewUserPassword.yields(
-        null,
-        false,
-        this.user_id
-      )
-      this.res.status = code => {
+    it('should send 404 if the token was not found', function(done) {
+      this.PasswordResetHandler.promises.setNewUserPassword.resolves({
+        found: false,
+        reset: false,
+        userId: this.user_id
+      })
+      this.res.sendStatus = code => {
         code.should.equal(404)
+        done()
+      }
+      this.PasswordResetController.setNewUserPassword(this.req, this.res)
+    })
+
+    it('should return 500 if not reset', function(done) {
+      this.PasswordResetHandler.promises.setNewUserPassword.resolves({
+        found: true,
+        reset: false,
+        userId: this.user_id
+      })
+      this.res.sendStatus = code => {
+        code.should.equal(500)
         done()
       }
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
@@ -194,7 +225,9 @@ describe('PasswordResetController', function() {
       this.req.body.password = ''
       this.res.sendStatus = code => {
         code.should.equal(400)
-        this.PasswordResetHandler.setNewUserPassword.called.should.equal(false)
+        this.PasswordResetHandler.promises.setNewUserPassword.called.should.equal(
+          false
+        )
         done()
       }
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
@@ -204,7 +237,9 @@ describe('PasswordResetController', function() {
       this.req.body.passwordResetToken = ''
       this.res.sendStatus = code => {
         code.should.equal(400)
-        this.PasswordResetHandler.setNewUserPassword.called.should.equal(false)
+        this.PasswordResetHandler.promises.setNewUserPassword.called.should.equal(
+          false
+        )
         done()
       }
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
@@ -217,7 +252,9 @@ describe('PasswordResetController', function() {
         .returns({ message: 'password contains invalid characters' })
       this.res.sendStatus = code => {
         code.should.equal(400)
-        this.PasswordResetHandler.setNewUserPassword.called.should.equal(false)
+        this.PasswordResetHandler.promises.setNewUserPassword.called.should.equal(
+          false
+        )
         done()
       }
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
@@ -234,7 +271,9 @@ describe('PasswordResetController', function() {
 
     it('should clear sessions', function(done) {
       this.res.sendStatus = code => {
-        this.UserSessionsManager.revokeAllUserSessions.callCount.should.equal(1)
+        this.UserSessionsManager.promises.revokeAllUserSessions.callCount.should.equal(
+          1
+        )
         done()
       }
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
@@ -242,38 +281,60 @@ describe('PasswordResetController', function() {
 
     it('should call removeReconfirmFlag', function(done) {
       this.res.sendStatus = code => {
-        this.UserUpdater.removeReconfirmFlag.callCount.should.equal(1)
+        this.UserUpdater.promises.removeReconfirmFlag.callCount.should.equal(1)
         done()
       }
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
+    describe('catch errors', function() {
+      it('should return 404 for NotFoundError', function(done) {
+        const anError = new Error('oops')
+        anError.name = 'NotFoundError'
+        this.PasswordResetHandler.promises.setNewUserPassword.rejects(anError)
+        this.res.sendStatus = code => {
+          code.should.equal(404)
+          done()
+        }
+        this.PasswordResetController.setNewUserPassword(this.req, this.res)
+      })
+      it('should return 400 for InvalidPasswordError', function(done) {
+        const anError = new Error('oops')
+        anError.name = 'InvalidPasswordError'
+        this.PasswordResetHandler.promises.setNewUserPassword.rejects(anError)
+        this.res.sendStatus = code => {
+          code.should.equal(400)
+          done()
+        }
+        this.PasswordResetController.setNewUserPassword(this.req, this.res)
+      })
+      it('should return 500 for other errors', function(done) {
+        const anError = new Error('oops')
+        this.PasswordResetHandler.promises.setNewUserPassword.rejects(anError)
+        this.res.sendStatus = code => {
+          code.should.equal(500)
+          done()
+        }
+        this.PasswordResetController.setNewUserPassword(this.req, this.res)
+      })
+    })
+
     describe('when doLoginAfterPasswordReset is set', function() {
       beforeEach(function() {
-        this.UserGetter.getUser = sinon
-          .stub()
-          .callsArgWith(1, null, { email: 'joe@example.com' })
+        this.user = {
+          _id: this.userId,
+          email: 'joe@example.com'
+        }
+        this.UserGetter.promises.getUser.resolves(this.user)
         this.req.session.doLoginAfterPasswordReset = 'true'
-        this.res.json = sinon.stub()
-        this.AuthenticationController.finishLogin = sinon.stub().yields()
-        this.AuthenticationController._getRedirectFromSession = sinon
-          .stub()
-          .returns('/some/path')
       })
 
       it('should login user', function(done) {
-        this.PasswordResetController.setNewUserPassword(
-          this.req,
-          this.res,
-          err => {
-            expect(err).to.not.exist
-            this.AuthenticationController.finishLogin.callCount.should.equal(1)
-            this.AuthenticationController.finishLogin
-              .calledWith({ email: 'joe@example.com' }, this.req)
-              .should.equal(true)
-            done()
-          }
-        )
+        this.AuthenticationController.finishLogin.callsFake((...args) => {
+          expect(args[0]).to.equal(this.user)
+          done()
+        })
+        this.PasswordResetController.setNewUserPassword(this.req, this.res)
       })
     })
   })

@@ -332,7 +332,8 @@ const promises = {
   addEmailAddress: promisify(UserUpdater.addEmailAddress),
   confirmEmail: promisify(UserUpdater.confirmEmail),
   setDefaultEmailAddress,
-  updateUser: promisify(UserUpdater.updateUser)
+  updateUser: promisify(UserUpdater.updateUser),
+  removeReconfirmFlag: promisify(UserUpdater.removeReconfirmFlag)
 }
 
 UserUpdater.promises = promises
