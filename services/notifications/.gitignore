@@ -50,3 +50,6 @@ Gemfile.lock
 app/views/external
 
 /modules/
+
+# managed by dev-environment$ bin/update_build_scripts
+.npmrc

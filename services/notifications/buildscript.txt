@@ -1,10 +1,8 @@
 notifications
---acceptance-creds=None
 --dependencies=mongo
 --docker-repos=gcr.io/overleaf-ops
 --env-add=
 --env-pass-through=
---language=es
 --node-version=10.21.0
 --public-repo=True
---script-version=2.0.0
+--script-version=3.3.2

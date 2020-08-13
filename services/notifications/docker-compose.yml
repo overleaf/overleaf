@@ -13,7 +13,8 @@ services:
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
-    command: npm run test:unit
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+    command: npm run --silent test:unit
     user: node
 
   test_acceptance:
@@ -29,12 +30,13 @@ services:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ERROR
       NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
     user: node
     depends_on:
       mongo:
         condition: service_healthy
-    command: npm run test:acceptance
+    command: npm run --silent test:acceptance
 
   mongo:
-    image: mongo:3.6
+    image: mongo:4.0
 
