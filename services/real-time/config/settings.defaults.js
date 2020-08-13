@@ -123,6 +123,16 @@ const settings = {
 
   shutdownDrainTimeWindow: process.env.SHUTDOWN_DRAIN_TIME_WINDOW || 9,
 
+  // The shutdown procedure asks clients to reconnect gracefully.
+  // 3rd-party/buggy clients may not act upon receiving the message and keep
+  //  stale connections alive. We forcefully disconnect them after X ms:
+  gracefulReconnectTimeoutMs:
+    parseInt(process.env.GRACEFUL_RECONNECT_TIMEOUT_MS, 10) ||
+    // The frontend allows actively editing users to keep the connection open
+    //  for up-to ConnectionManager.MAX_RECONNECT_GRACEFULLY_INTERVAL=45s
+    // Permit an extra delay to account for slow/flaky connections.
+    (45 + 30) * 1000,
+
   continualPubsubTraffic: process.env.CONTINUAL_PUBSUB_TRAFFIC || false,
 
   checkEventOrder: process.env.CHECK_EVENT_ORDER || false,

@@ -1,13 +1,13 @@
 const logger = require('logger-sharelatex')
 
 module.exports = {
-  startDrainTimeWindow(io, minsToDrain) {
+  startDrainTimeWindow(io, minsToDrain, callback) {
     const drainPerMin = io.sockets.clients().length / minsToDrain
     // enforce minimum drain rate
-    this.startDrain(io, Math.max(drainPerMin / 60, 4))
+    this.startDrain(io, Math.max(drainPerMin / 60, 4), callback)
   },
 
-  startDrain(io, rate) {
+  startDrain(io, rate, callback) {
     // Clear out any old interval
     clearInterval(this.interval)
     logger.log({ rate }, 'starting drain')
@@ -24,7 +24,11 @@ module.exports = {
       pollingInterval = 1000
     }
     this.interval = setInterval(() => {
-      this.reconnectNClients(io, rate)
+      const requestedAllClientsToReconnect = this.reconnectNClients(io, rate)
+      if (requestedAllClientsToReconnect && callback) {
+        callback()
+        callback = undefined
+      }
     }, pollingInterval)
   },
 
@@ -48,6 +52,8 @@ module.exports = {
     }
     if (drainedCount < N) {
       logger.log('All clients have been told to reconnectGracefully')
+      return true
     }
+    return false
   }
 }

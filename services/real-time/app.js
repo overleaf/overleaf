@@ -155,7 +155,20 @@ function drainAndShutdown(signal) {
         { signal },
         `received interrupt, starting drain over ${shutdownDrainTimeWindow} mins`
       )
-      DrainManager.startDrainTimeWindow(io, shutdownDrainTimeWindow)
+      DrainManager.startDrainTimeWindow(io, shutdownDrainTimeWindow, () => {
+        setTimeout(() => {
+          const staleClients = io.sockets.clients()
+          if (staleClients.length !== 0) {
+            logger.warn(
+              { staleClients: staleClients.map((client) => client.id) },
+              'forcefully disconnecting stale clients'
+            )
+            staleClients.forEach((client) => {
+              client.disconnect()
+            })
+          }
+        }, Settings.gracefulReconnectTimeoutMs)
+      })
       shutdownCleanly(signal)
     }, statusCheckInterval)
   }
