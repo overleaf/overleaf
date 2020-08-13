@@ -73,13 +73,13 @@ module.exports = (MemoryMonitor = {
 	monitor(logger) {
 		const interval = setInterval(() => MemoryMonitor.Check(logger)
 		, oneMinute);
-		const Metrics = require("./metrics");
+		const Metrics = require("./index");
 		return Metrics.registerDestructor(() => clearInterval(interval));
 	},
 
 	Check(logger) {
 		let mem;
-		const Metrics = require("./metrics");
+		const Metrics = require("./index");
 		const memBeforeGc = (mem = inMegaBytes(process.memoryUsage()));
 		Metrics.gauge("memory.rss", mem.rss);
 		Metrics.gauge("memory.heaptotal", mem.heapTotal);

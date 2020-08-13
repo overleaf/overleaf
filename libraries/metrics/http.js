@@ -11,7 +11,7 @@ const yn = require("yn");
 const STACKDRIVER_LOGGING = yn(process.env['STACKDRIVER_LOGGING']);
 
 module.exports.monitor = logger => (function(req, res, next) {
-    const Metrics = require("./metrics");
+    const Metrics = require("./index");
     const startTime = process.hrtime();
     const {
         end

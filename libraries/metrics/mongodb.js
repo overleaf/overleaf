@@ -21,7 +21,7 @@ module.exports = {
 			mongodbCore = require(v2_path);
 		} catch (error1) {}
 
-		const Metrics = require("./metrics");
+		const Metrics = require("./index");
 
 		const monitorMethod = function(base, method, type) {
 			let _method;

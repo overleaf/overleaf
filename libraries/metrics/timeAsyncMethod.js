@@ -9,7 +9,7 @@
 
 module.exports = function(obj, methodName, prefix, logger) {
 	let modifedMethodName;
-	const metrics = require('./metrics');
+	const metrics = require('./index');
 
 	if (typeof obj[methodName] !== 'function') {
 		throw new Error(`[Metrics] expected object property '${methodName}' to be a function`);
