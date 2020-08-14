@@ -11,6 +11,7 @@ services:
     command: npm run test:unit:_run
     environment:
       NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
 
 
   test_acceptance:
@@ -27,6 +28,7 @@ services:
       AWS_SECRET_ACCESS_KEY: fake
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
       AWS_BUCKET: bucket
     depends_on:
       mongo:
@@ -50,10 +52,10 @@ services:
     image: redis
 
   mongo:
-    image: mongo:3.6
+    image: mongo:4.0
   s3:
-    image: adobe/s3mock
+    build:
+      context: test/acceptance/deps
+      dockerfile: Dockerfile.s3mock
     environment:
       - initialBuckets=fake_user_files,fake_template_files,fake_public_files,bucket
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9090"]

@@ -8,7 +8,6 @@
   "execMap": {
     "js": "npm run start"
   },
-
   "watch": [
     "app/js/",
     "app.js",
