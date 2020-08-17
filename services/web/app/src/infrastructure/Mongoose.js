@@ -13,7 +13,7 @@ if (
   )
 }
 
-mongoose.connect(
+const connectionPromise = mongoose.connect(
   Settings.mongo.url,
   {
     poolSize: POOL_SIZE,
@@ -53,5 +53,12 @@ mongoose.plugin(schema => {
 })
 
 mongoose.Promise = global.Promise
+
+async function getNativeDb() {
+  const connection = await connectionPromise
+  return connection.db
+}
+
+mongoose.getNativeDb = getNativeDb
 
 module.exports = mongoose
