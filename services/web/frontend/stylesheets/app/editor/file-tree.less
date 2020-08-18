@@ -142,8 +142,28 @@
       i.toggle {
         width: 24px;
         padding: 6px;
-        font-size: 0.7rem;
+        font-size: 16px;
         color: @file-tree-item-toggle-color;
+      }
+
+      .file-tree-dropdown-toggle {
+        display: flex;
+        align-items: center;
+        color: #fff;
+        white-space: pre;
+        line-height: 6px;
+        font-size: 20px;
+        height: 100%;
+        padding: 0 12px 0 18px;
+
+        &:hover,
+        &:focus {
+          text-decoration: none;
+        }
+        &::before {
+          content: '\00B7\A\00B7\A\00B7';
+          margin-top: -4px;
+        }
       }
 
       &.multi-selected {
@@ -172,9 +192,6 @@
       .dropdown {
         position: absolute;
         right: 0;
-        > a {
-          padding: 0 12px;
-        }
       }
 
       .rename-input {
@@ -234,7 +251,8 @@
           .fake-full-width-bg(@file-tree-item-selected-bg);
 
           .entity-menu-toggle {
-            display: inline;
+            display: inline-block;
+            height: 100%;
           }
         }
       }

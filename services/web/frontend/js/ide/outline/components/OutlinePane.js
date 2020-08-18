@@ -55,19 +55,19 @@ function OutlinePane({
         >
           <i className={expandCollapseIconClasses} />
           <h4 className="outline-header-name">File outline</h4>
-          <OverlayTrigger placement="top" overlay={tooltip} delayHide={100}>
-            <a
-              href="/beta/participate"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="outline-header-beta-badge"
-            >
-              <span className="sr-only">
-                The File outline is a beta feature. Click here to manage your
-                beta program membership.
-              </span>
-            </a>
-          </OverlayTrigger>
+          {expanded ? (
+            <OverlayTrigger placement="top" overlay={tooltip} delayHide={100}>
+              <a
+                href="https://forms.gle/8N1iSS9rkgmpFDHY6"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="outline-header-info-badge"
+                onClick={ev => ev.stopPropagation()}
+              >
+                <span className="sr-only">{infoContent}</span>
+              </a>
+            </OverlayTrigger>
+          ) : null}
         </button>
       </header>
       {expanded && isTexFile ? (
@@ -83,11 +83,13 @@ function OutlinePane({
   )
 }
 
-const tooltip = (
-  <Tooltip id="outline-beta-badge-tooltip">
-    The <strong>File outline</strong> is a beta feature.
-  </Tooltip>
+const infoContent = (
+  <>
+    The <strong>File outline</strong> is a new feature. Click the icon to give
+    feedback.
+  </>
 )
+const tooltip = <Tooltip id="outline-info-tooltip">{infoContent}</Tooltip>
 
 OutlinePane.propTypes = {
   isTexFile: PropTypes.bool.isRequired,

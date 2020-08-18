@@ -62,19 +62,21 @@
   text-overflow: ellipsis;
 }
 
-.outline-header-beta-badge {
+.outline-header-info-badge {
   display: inline-block;
-  border-radius: @border-radius-base;
-  background-color: @orange;
   width: @outline-h-rhythm * 0.75;
   height: @outline-v-rhythm * 0.75;
   line-height: @outline-v-rhythm * 0.75;
   text-align: center;
   cursor: pointer;
+  background-color: @info-badge-bg;
+  font-family: @font-family-serif;
   color: #fff;
+  font-style: italic;
+  border-radius: @outline-h-rhythm * 0.375;
 
   &::before {
-    content: 'β';
+    content: 'i';
   }
 
   &:hover,
@@ -174,6 +176,7 @@
   border-radius: @border-radius-base;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
   &:hover,
   &:focus {
     outline: 0;

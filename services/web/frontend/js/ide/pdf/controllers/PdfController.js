@@ -973,6 +973,8 @@ App.factory('synctex', function(ide, $http, $q) {
 
 App.controller('PdfSynctexController', function($scope, synctex, ide) {
   this.cursorPosition = null
+  $scope.syncToPdfInFlight = false
+  $scope.syncToCodeInFlight = false
   ide.$scope.$on('cursor:editor:update', (event, cursorPosition) => {
     this.cursorPosition = cursorPosition
   })
@@ -981,14 +983,19 @@ App.controller('PdfSynctexController', function($scope, synctex, ide) {
     if (this.cursorPosition == null) {
       return
     }
-    synctex.syncToPdf(this.cursorPosition).then(highlights => {
-      $scope.pdf.highlights = highlights
-    })
+    $scope.syncToPdfInFlight = true
+    synctex
+      .syncToPdf(this.cursorPosition)
+      .then(highlights => {
+        $scope.pdf.highlights = highlights
+      })
+      .finally(() => ($scope.syncToPdfInFlight = false))
   }
 
   ide.$scope.$on('cursor:editor:syncToPdf', $scope.syncToPdf)
 
   $scope.syncToCode = function() {
+    $scope.syncToCodeInFlight = true
     synctex
       .syncToCode($scope.pdf.position, {
         includeVisualOffset: true,
@@ -998,6 +1005,7 @@ App.controller('PdfSynctexController', function($scope, synctex, ide) {
         const { doc, line } = data
         ide.editorManager.openDoc(doc, { gotoLine: line })
       })
+      .finally(() => ($scope.syncToCodeInFlight = false))
   }
 })
 

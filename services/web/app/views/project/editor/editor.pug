@@ -100,15 +100,19 @@ div.full-size(
 			tooltip-placement="right"
 			tooltip-append-to-body="true"
 			ng-click="syncToPdf()"
+			ng-disabled="syncToPdfInFlight"
 		)
-			i.synctex-control-icon
+			i.synctex-control-icon(ng-show="!syncToPdfInFlight")
+			i.synctex-spin-icon.fa.fa-refresh.fa-spin(ng-show="syncToPdfInFlight")
 		a.btn.btn-default.btn-xs.synctex-control.synctex-control-goto-code(
 			tooltip-html="'"+translate('go_to_pdf_location_in_code', {}, true)+"'"
 			tooltip-placement="right"
 			tooltip-append-to-body="true"
 			ng-click="syncToCode()"
+			ng-disabled="syncToCodeInFlight"
 		)
-			i.synctex-control-icon
+			i.synctex-control-icon(ng-show="!syncToCodeInFlight")
+			i.synctex-spin-icon.fa.fa-refresh.fa-spin(ng-show="syncToCodeInFlight")
 
 div.full-size(
 	ng-if="ui.pdfLayout == 'flat'"

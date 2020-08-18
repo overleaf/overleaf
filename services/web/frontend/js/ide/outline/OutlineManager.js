@@ -18,9 +18,17 @@ class OutlineManager {
     this.ignoreNextScroll = false
     this.ignoreNextCursorUpdate = false
 
-    scope.$on('doc:after-opened', () => {
+    scope.$on('doc:after-opened', (ev, { isNewDoc }) => {
+      if (isNewDoc) {
+        // if a new doc is opened a cursor updates will be triggered before the
+        // content is loaded. We have to ignore it or the outline highlight
+        // will be incorrect. This doesn't happen when `doc:after-opened` is
+        // fired without a new doc opened.
+        this.ignoreNextCursorUpdate = true
+      }
+      // always ignore the next scroll update so the cursor update takes
+      // precedence
       this.ignoreNextScroll = true
-      this.ignoreNextCursorUpdate = true
       this.shareJsDoc = scope.editor.sharejs_doc
       this.isTexFile = isValidTeXFile(scope.editor.open_doc_name)
       this.updateOutline()

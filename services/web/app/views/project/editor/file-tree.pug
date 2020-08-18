@@ -2,13 +2,13 @@ aside.editor-sidebar.full-size(
 	ng-controller="FileTreeController"
 	ng-class="{ 'multi-selected': multiSelectedCount > 0 }"
 	ng-show="ui.view != 'history' || !history.isV2"
-	vertical-resizable-panes=user.betaProgram && "outline-resizer"
-	vertical-resizable-panes-toggled-externally-on=user.betaProgram && "outline-toggled"
-	vertical-resizable-panes-min-size=user.betaProgram && "32"
-	vertical-resizable-panes-max-size=user.betaProgram && "75%"
+	vertical-resizable-panes="outline-resizer"
+	vertical-resizable-panes-toggled-externally-on="outline-toggled"
+	vertical-resizable-panes-min-size="32"
+	vertical-resizable-panes-max-size="75%"
 )
 	.file-tree(
-		vertical-resizable-top=user.betaProgram
+		vertical-resizable-top
 	)
 		.toolbar.toolbar-filetree(ng-if="permissions.write")
 			a(
@@ -99,20 +99,19 @@ aside.editor-sidebar.full-size(
 
 							span  {{ entity.name }}
 
-	if user.betaProgram
-		.outline-container(
-			vertical-resizable-bottom
-			ng-controller="OutlineController"
+	.outline-container(
+		vertical-resizable-bottom
+		ng-controller="OutlineController"
+	)
+		outline-pane(
+			is-tex-file="isTexFile"
+			outline="outline"
+			project-id="project_id"
+			jump-to-line="jumpToLine"
+			on-toggle="onToggle"
+			event-tracking="eventTracking"
+			highlighted-line="highlightedLine"
 		)
-			outline-pane(
-				is-tex-file="isTexFile"
-				outline="outline"
-				project-id="project_id"
-				jump-to-line="jumpToLine"
-				on-toggle="onToggle"
-				event-tracking="eventTracking"
-				highlighted-line="highlightedLine"
-			)
 
 
 script(type='text/ng-template', id='entityListItemTemplate')
@@ -156,8 +155,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					dropdown,
 					ng-if="permissions.write"
 				)
-					a.dropdown-toggle(href, dropdown-toggle, stop-propagation="click")
-						i.fa.fa-chevron-down
+					a.dropdown-toggle.file-tree-dropdown-toggle(href, dropdown-toggle, stop-propagation="click")
 
 					ul.dropdown-menu.dropdown-menu-right
 						li
@@ -214,7 +212,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 				)
 					i.fa.fa-fw.toggle(
 						ng-if="entity.type == 'folder'"
-						ng-class="{'fa-chevron-right': !expanded, 'fa-chevron-down': expanded}"
+						ng-class="{'fa-angle-right': !expanded, 'fa-angle-down': expanded}"
 						ng-click="toggleExpanded()"
 					)
 
@@ -245,8 +243,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 						dropdown,
 						ng-if="permissions.write"
 					)
-						a.dropdown-toggle(href, dropdown-toggle, stop-propagation="click")
-							i.fa.fa-chevron-down
+						a.dropdown-toggle.file-tree-dropdown-toggle(href, dropdown-toggle, stop-propagation="click")
 
 						ul.dropdown-menu.dropdown-menu-right
 							li

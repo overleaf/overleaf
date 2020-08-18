@@ -21,7 +21,7 @@ function OutlineRoot({ outline, jumpToLine, highlightedLine }) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Know more about the file outline
+            Find out more about the file outline
           </a>
         </div>
       )}

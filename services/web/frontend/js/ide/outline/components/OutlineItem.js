@@ -3,6 +3,14 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import OutlineList from './OutlineList'
 
+function getChildrenLines(children) {
+  return (children || [])
+    .map(child => {
+      return getChildrenLines(child.children).concat(child.line)
+    })
+    .flat()
+}
+
 function OutlineItem({ outlineItem, jumpToLine, highlightedLine }) {
   const [expanded, setExpanded] = useState(true)
   const titleElementRef = createRef()
@@ -17,8 +25,13 @@ function OutlineItem({ outlineItem, jumpToLine, highlightedLine }) {
     'fa-angle-right': !expanded
   })
 
+  const hasHighlightedChild =
+    !expanded &&
+    getChildrenLines(outlineItem.children).includes(highlightedLine)
+
   const itemLinkClasses = classNames('outline-item-link', {
-    'outline-item-link-highlight': highlightedLine === outlineItem.line
+    'outline-item-link-highlight':
+      highlightedLine === outlineItem.line || hasHighlightedChild
   })
 
   function handleExpandCollapseClick() {

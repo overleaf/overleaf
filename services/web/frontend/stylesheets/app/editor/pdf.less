@@ -233,6 +233,11 @@
   background-color: fade(@btn-default-bg, 80%);
   transition: background 0.15s ease;
 
+  &[disabled] {
+    opacity: 1;
+    background-color: fade(@btn-default-bg, 60%);
+  }
+
   > .synctex-control-icon {
     display: inline-block;
     font: normal normal normal 14px/1 FontAwesome;
@@ -240,6 +245,10 @@
     text-rendering: auto;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  > .synctex-spin-icon {
+    margin-top: 2px;
   }
 }
 

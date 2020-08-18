@@ -139,8 +139,8 @@ export default (EditorManager = (function() {
       sl_console.log(`[openDoc] Opening ${doc.id}`)
       this.$scope.ui.view = 'editor'
 
-      const done = () => {
-        this.$scope.$broadcast('doc:after-opened')
+      const done = isNewDoc => {
+        this.$scope.$broadcast('doc:after-opened', { isNewDoc })
         if (options.gotoLine != null) {
           // allow Ace to display document before moving, delay until next tick
           // added delay to make this happen later that gotoStoredPosition in
@@ -163,7 +163,7 @@ export default (EditorManager = (function() {
         // automatically update the file tree whenever the file is opened
         this.ide.fileTreeManager.selectEntity(doc)
         this.$scope.$apply(() => {
-          return done()
+          return done(false)
         })
         return
       }
@@ -192,7 +192,7 @@ export default (EditorManager = (function() {
         return this.$scope.$apply(() => {
           this.$scope.editor.opening = false
           this.$scope.editor.sharejs_doc = sharejs_doc
-          return done()
+          return done(true)
         })
       })
     }

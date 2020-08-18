@@ -325,8 +325,7 @@ ul.folders-menu {
   }
   > li.folders-menu-item-with-tooltip {
     > a {
-      padding-right: 1.5 * @folders-menu-item-h-padding +
-        @folders-menu-tooltip-size;
+      padding-right: 1.5 * @folders-menu-item-h-padding + @info-badge-size;
     }
   }
   > li > a.small {
@@ -414,15 +413,15 @@ ul.folders-menu {
   position: absolute;
   top: 50%;
   right: @folders-menu-item-h-padding;
-  width: @folders-menu-tooltip-size;
-  height: @folders-menu-tooltip-size;
-  margin-top: -(floor(@folders-menu-tooltip-size / 2));
-  line-height: @folders-menu-tooltip-size;
-  background-color: @folders-menu-tooltip-bg;
+  width: @info-badge-size;
+  height: @info-badge-size;
+  margin-top: -(floor(@info-badge-size / 2));
+  line-height: @info-badge-size;
+  background-color: @info-badge-bg;
   font-family: @font-family-serif;
   color: #fff;
   font-style: italic;
-  border-radius: ceil(@folders-menu-tooltip-size / 2);
+  border-radius: ceil(@info-badge-size / 2);
   text-align: center;
   font-weight: 700;
   @media (min-width: @screen-sm-min) {
