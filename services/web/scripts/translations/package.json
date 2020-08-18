@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@brainly/onesky-utils": "^1.4.0",
+    "sanitize-html": "^1.27.1"
+  }
+}
