@@ -1,3 +1,4 @@
+const { promisify } = require('util')
 const { ReadPreference } = require('mongodb')
 const { getNativeDb } = require('../../app/src/infrastructure/Mongoose')
 
@@ -21,6 +22,12 @@ async function performUpdate(collection, nextBatch, update) {
 }
 
 async function batchedUpdate(collectionName, query, update) {
+  // Apparently the mongo driver returns the connection too early.
+  // Some secondary connections are not ready as it returns, leading to
+  //  failing cursor actions with a readPreference set to 'secondary'.
+  // TODO(das7pad): revisit/remove this delay after the mongo-driver update.
+  await Promise.all([getNativeDb(), promisify(setTimeout)(10 * 1000)])
+
   const db = await getNativeDb()
   const collection = db.collection(collectionName)
 
