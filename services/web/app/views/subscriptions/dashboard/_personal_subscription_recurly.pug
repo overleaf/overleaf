@@ -56,7 +56,7 @@ div(ng-controller="RecurlySubscriptionController")
 
 	.div(ng-controller="RecurlyCancellationController", ng-show="showCancellation").text-center
 		p
-			strong #{translate("sure_you_want_to_cancel")}
+			strong #{translate("wed_love_you_to_stay")}
 
 		div(ng-show="showExtendFreeTrial")
 			p !{translate("have_more_days_to_try", {days:14})}
@@ -69,7 +69,7 @@ div(ng-controller="RecurlySubscriptionController")
 			div(ng-controller="ChangePlanFormController")
 				p !{translate("interested_in_cheaper_plan",{price:'{{studentPrice}}'})}
 				p
-					button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-info #{translate("yes_please")}
+					button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-success #{translate("yes_move_me_to_student_plan")}
 				p
 					a(href, ng-click="cancelSubscription()", ng-disabled='inflight')  #{translate("no_thanks_cancel_now")}
 
