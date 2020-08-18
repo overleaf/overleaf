@@ -1,4 +1,6 @@
 {
+  "wed_love_you_to_stay": "We'd love you to stay",
+  "yes_move_me_to_student_plan": "Yes, move me to the student plan",
   "last_login": "Last Login",
   "invalid_insitituional_email": "Your institution's SSO service returned your email address as __email__, which is at an unexpected domain that we do not recognise as belonging to it. You may be able to change your primary email address via your user profile at your institution to one at your institution's domain. Please contact your IT department if you have any questions.",
   "thank_you_for_being_part_of_our_beta_program": "Thank you for being part of our Beta Program, where you can have early access to new features and help us understand your needs better",
@@ -679,7 +681,7 @@
   "activating": "Activating",
   "ill_take_it": "I'll take it!",
   "cancel_your_subscription": "Stop Your Subscription",
-  "no_thanks_cancel_now": "No thanks - I still want to Cancel Now",
+  "no_thanks_cancel_now": "No thanks, I still want to cancel",
   "cancel_my_account": "Cancel my subscription",
   "sure_you_want_to_cancel": "Are you sure you want to cancel?",
   "i_want_to_stay": "I want to stay",
