@@ -18,7 +18,6 @@ const UrlHelper = require('../Helpers/UrlHelper')
 const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
 const SudoModeHandler = require('../SudoMode/SudoModeHandler')
 const _ = require('lodash')
-const OError = require('@overleaf/o-error')
 const {
   acceptsJson
 } = require('../../infrastructure/RequestContentTypeDetection')
