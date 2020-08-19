@@ -102,7 +102,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
     const stream = this.storage
       .bucket(bucketName)
       .file(key)
-      .createReadStream(opts)
+      .createReadStream({ decompress: false, ...opts })
 
     // ingress to us from gcs
     const observer = new PersistorHelper.ObserverStream({

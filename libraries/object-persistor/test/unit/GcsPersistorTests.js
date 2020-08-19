@@ -160,6 +160,12 @@ describe('GcsPersistorTests', function () {
         expect(GcsFile.createReadStream).to.have.been.called
       })
 
+      it('disables automatic decompression', function () {
+        expect(GcsFile.createReadStream).to.have.been.calledWith({
+          decompress: false
+        })
+      })
+
       it('pipes the stream through the meter', function () {
         expect(ReadStream.pipe).to.have.been.calledWith(
           sinon.match.instanceOf(Transform)
@@ -183,6 +189,7 @@ describe('GcsPersistorTests', function () {
 
       it('passes the byte range on to GCS', function () {
         expect(GcsFile.createReadStream).to.have.been.calledWith({
+          decompress: false,
           start: 5,
           end: 10
         })
