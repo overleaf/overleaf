@@ -499,6 +499,7 @@ module.exports = settings =
 	appName: process.env['APP_NAME'] or "ShareLaTeX (Community Edition)"
 
 	adminEmail: process.env['ADMIN_EMAIL'] or "placeholder@example.com"
+	adminDomains: JSON.parse(process.env['ADMIN_DOMAINS'] or 'null')
 
 	salesEmail: process.env['SALES_EMAIL'] or "placeholder@example.com"
 

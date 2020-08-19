@@ -13,6 +13,7 @@ module.exports =
 	enableSubscriptions: true
 
 	httpAuthUsers: httpAuthUsers
+	adminDomains: ['example.com']
 
 	apis:
 		web:

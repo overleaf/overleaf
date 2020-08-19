@@ -17,6 +17,7 @@ const UrlHelper = require('../Helpers/UrlHelper')
 const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
 const SudoModeHandler = require('../SudoMode/SudoModeHandler')
 const _ = require('lodash')
+const OError = require('@overleaf/o-error')
 const {
   acceptsJson
 } = require('../../infrastructure/RequestContentTypeDetection')
@@ -317,6 +318,37 @@ const AuthenticationController = {
       AuthenticationController.setRedirectInSession(req)
       res.redirect('/login')
     }
+  },
+
+  validateAdmin(req, res, next) {
+    const adminDomains = Settings.adminDomains
+    if (
+      !adminDomains ||
+      !(Array.isArray(adminDomains) && adminDomains.length)
+    ) {
+      return next()
+    }
+    const user = AuthenticationController.getSessionUser(req)
+    if (!(user && user.isAdmin)) {
+      return next()
+    }
+    const email = user.email
+    if (email == null) {
+      return next(
+        new OError('[ValidateAdmin] Admin user without email address', {
+          userId: user._id
+        })
+      )
+    }
+    if (!adminDomains.find(domain => email.endsWith(`@${domain}`))) {
+      return next(
+        new OError('[ValidateAdmin] Admin user with invalid email domain', {
+          email: email,
+          userId: user._id
+        })
+      )
+    }
+    return next()
   },
 
   httpAuth: basicAuth(function(user, pass) {

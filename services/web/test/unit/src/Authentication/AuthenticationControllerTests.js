@@ -52,10 +52,10 @@ describe('AuthenticationController', function() {
           error: sinon.stub(),
           err: sinon.stub()
         }),
-        'settings-sharelatex': {
+        'settings-sharelatex': (this.Settings = {
           siteUrl: 'http://www.foo.bar',
           httpAuthUsers: this.httpAuthUsers
-        },
+        }),
         passport: (this.passport = {
           authenticate: sinon.stub().returns(sinon.stub())
         }),
@@ -107,6 +107,80 @@ describe('AuthenticationController', function() {
 
   afterEach(function() {
     tk.reset()
+  })
+
+  describe('validateAdmin', function() {
+    beforeEach(function() {
+      this.Settings.adminDomains = ['good.example.com']
+      this.goodAdmin = {
+        email: 'alice@good.example.com',
+        isAdmin: true
+      }
+      this.badAdmin = {
+        email: 'beatrice@bad.example.com',
+        isAdmin: true
+      }
+      this.normalUser = {
+        email: 'claire@whatever.example.com',
+        isAdmin: false
+      }
+    })
+
+    it('should skip when adminDomains are not configured', function(done) {
+      this.Settings.adminDomains = []
+      this.AuthenticationController.getSessionUser = sinon
+        .stub()
+        .returns(this.normalUser)
+      this.AuthenticationController.validateAdmin(this.req, this.res, err => {
+        this.AuthenticationController.getSessionUser.called.should.equal(false)
+        expect(err).to.not.exist
+        done()
+      })
+    })
+
+    it('should skip non-admin user', function(done) {
+      this.AuthenticationController.getSessionUser = sinon
+        .stub()
+        .returns(this.normalUser)
+      this.AuthenticationController.validateAdmin(this.req, this.res, err => {
+        this.AuthenticationController.getSessionUser.called.should.equal(true)
+        expect(err).to.not.exist
+        done()
+      })
+    })
+
+    it('should permit an admin with the right doman', function(done) {
+      this.AuthenticationController.getSessionUser = sinon
+        .stub()
+        .returns(this.goodAdmin)
+      this.AuthenticationController.validateAdmin(this.req, this.res, err => {
+        this.AuthenticationController.getSessionUser.called.should.equal(true)
+        expect(err).to.not.exist
+        done()
+      })
+    })
+
+    it('should block an admin with a missing email', function(done) {
+      this.AuthenticationController.getSessionUser = sinon
+        .stub()
+        .returns({ isAdmin: true })
+      this.AuthenticationController.validateAdmin(this.req, this.res, err => {
+        this.AuthenticationController.getSessionUser.called.should.equal(true)
+        expect(err).to.exist
+        done()
+      })
+    })
+
+    it('should block an admin with a bad domain', function(done) {
+      this.AuthenticationController.getSessionUser = sinon
+        .stub()
+        .returns(this.badAdmin)
+      this.AuthenticationController.validateAdmin(this.req, this.res, err => {
+        this.AuthenticationController.getSessionUser.called.should.equal(true)
+        expect(err).to.exist
+        done()
+      })
+    })
   })
 
   describe('isUserLoggedIn', function() {
