@@ -1,8 +1,12 @@
 const { promisify } = require('util')
-const { ReadPreference } = require('mongodb')
+const { ReadPreference, ObjectId } = require('mongodb')
 const { getNativeDb } = require('../../app/src/infrastructure/Mongoose')
 
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 1000
+let BATCH_LAST_ID
+if (process.env.BATCH_LAST_ID) {
+  BATCH_LAST_ID = ObjectId(process.env.BATCH_LAST_ID)
+}
 
 async function getNextBatch(collection, query, maxId) {
   if (maxId) {
@@ -33,7 +37,7 @@ async function batchedUpdate(collectionName, query, update) {
 
   let nextBatch
   let updated = 0
-  let maxId
+  let maxId = BATCH_LAST_ID
   while ((nextBatch = await getNextBatch(collection, query, maxId)).length) {
     maxId = nextBatch[nextBatch.length - 1]
     updated += nextBatch.length
