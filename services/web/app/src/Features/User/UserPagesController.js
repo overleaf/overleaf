@@ -1,4 +1,5 @@
 const UserGetter = require('./UserGetter')
+const OError = require('@overleaf/o-error')
 const UserSessionsManager = require('./UserSessionsManager')
 const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
@@ -142,7 +143,9 @@ const UserPagesController = {
       [req.sessionID],
       (err, sessions) => {
         if (err != null) {
-          logger.warn({ userId: user._id }, 'error getting all user sessions')
+          OError.tag(err, 'error getting all user sessions', {
+            userId: user._id
+          })
           return next(err)
         }
         res.render('user/sessions', {

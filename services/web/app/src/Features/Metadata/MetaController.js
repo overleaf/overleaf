@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let MetaController
+const OError = require('@overleaf/o-error')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const MetaHandler = require('./MetaHandler')
 const logger = require('logger-sharelatex')
@@ -25,9 +26,12 @@ module.exports = MetaController = {
       projectMeta
     ) {
       if (err != null) {
-        logger.warn(
-          { project_id, err },
-          '[MetaController] error getting all labels from project'
+        OError.tag(
+          err,
+          '[MetaController] error getting all labels from project',
+          {
+            project_id
+          }
         )
         return next(err)
       }
@@ -44,10 +48,10 @@ module.exports = MetaController = {
       docMeta
     ) {
       if (err != null) {
-        logger.warn(
-          { project_id, doc_id, err },
-          '[MetaController] error getting labels from doc'
-        )
+        OError.tag(err, '[MetaController] error getting labels from doc', {
+          project_id,
+          doc_id
+        })
         return next(err)
       }
       EditorRealTimeController.emitToRoom(project_id, 'broadcastDocMeta', {

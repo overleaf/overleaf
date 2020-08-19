@@ -1,4 +1,5 @@
 const AuthenticationManager = require('./AuthenticationManager')
+const OError = require('@overleaf/o-error')
 const LoginRateLimiter = require('../Security/LoginRateLimiter')
 const UserUpdater = require('../User/UserUpdater')
 const Metrics = require('metrics-sharelatex')
@@ -471,7 +472,9 @@ function _afterLoginSessionSetup(req, user, callback) {
   }
   req.login(user, function(err) {
     if (err) {
-      logger.warn({ user_id: user._id, err }, 'error from req.login')
+      OError.tag(err, 'error from req.login', {
+        user_id: user._id
+      })
       return callback(err)
     }
     // Regenerate the session to get a new sessionID (cookie value) to
@@ -479,10 +482,9 @@ function _afterLoginSessionSetup(req, user, callback) {
     const oldSession = req.session
     req.session.destroy(function(err) {
       if (err) {
-        logger.warn(
-          { user_id: user._id, err },
-          'error when trying to destroy old session'
-        )
+        OError.tag(err, 'error when trying to destroy old session', {
+          user_id: user._id
+        })
         return callback(err)
       }
       req.sessionStore.generate(req)
@@ -496,10 +498,9 @@ function _afterLoginSessionSetup(req, user, callback) {
       }
       req.session.save(function(err) {
         if (err) {
-          logger.warn(
-            { user_id: user._id },
-            'error saving regenerated session after login'
-          )
+          OError.tag(err, 'error saving regenerated session after login', {
+            user_id: user._id
+          })
           return callback(err)
         }
         UserSessionsManager.trackSession(user, req.sessionID, function() {})

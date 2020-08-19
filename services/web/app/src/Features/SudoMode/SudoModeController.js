@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let SudoModeController
+const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const SudoModeHandler = require('./SudoModeHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
@@ -31,10 +32,9 @@ module.exports = SudoModeController = {
     logger.log({ userId }, '[SudoMode] rendering sudo mode password page')
     return SudoModeHandler.isSudoModeActive(userId, function(err, isActive) {
       if (err != null) {
-        logger.warn(
-          { err, userId },
-          '[SudoMode] error checking if sudo mode is active'
-        )
+        OError.tag(err, '[SudoMode] error checking if sudo mode is active', {
+          userId
+        })
         return next(err)
       }
       if (isActive) {
@@ -68,12 +68,13 @@ module.exports = SudoModeController = {
       userRecord
     ) {
       if (err != null) {
-        logger.warn({ err, userId }, '[SudoMode] error getting user')
+        OError.tag(err, '[SudoMode] error getting user', {
+          userId
+        })
         return next(err)
       }
       if (userRecord == null) {
-        err = new Error('user not found')
-        logger.warn({ err, userId }, '[SudoMode] user not found')
+        err = new OError('[SudoMode] user not found', { userId })
         return next(err)
       }
       return SudoModeHandler.authenticate(userRecord.email, password, function(
@@ -81,7 +82,9 @@ module.exports = SudoModeController = {
         user
       ) {
         if (err != null) {
-          logger.warn({ err, userId }, '[SudoMode] error authenticating user')
+          OError.tag(err, '[SudoMode] error authenticating user', {
+            userId
+          })
           return next(err)
         }
         if (user != null) {
@@ -91,10 +94,9 @@ module.exports = SudoModeController = {
           )
           return SudoModeHandler.activateSudoMode(userId, function(err) {
             if (err != null) {
-              logger.warn(
-                { err, userId },
-                '[SudoMode] error activating sudo mode'
-              )
+              OError.tag(err, '[SudoMode] error activating sudo mode', {
+                userId
+              })
               return next(err)
             }
             return res.json({

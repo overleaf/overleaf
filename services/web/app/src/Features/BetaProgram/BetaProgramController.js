@@ -1,4 +1,5 @@
 const BetaProgramHandler = require('./BetaProgramHandler')
+const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
@@ -38,7 +39,9 @@ const BetaProgramController = {
     logger.log({ user_id: userId }, 'showing beta participation page for user')
     UserGetter.getUser(userId, function(err, user) {
       if (err) {
-        logger.warn({ err, userId }, 'error fetching user')
+        OError.tag(err, 'error fetching user', {
+          userId
+        })
         return next(err)
       }
       res.render('beta_program/opt_in', {

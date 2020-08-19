@@ -15,6 +15,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let HistoryController
+const OError = require('@overleaf/o-error')
 const _ = require('lodash')
 const async = require('async')
 const logger = require('logger-sharelatex')
@@ -339,12 +340,6 @@ module.exports = HistoryController = {
         error = new Error(
           `history api responded with non-success code: ${response.statusCode}`
         )
-        logger.warn(
-          { err: error },
-          `project-history api responded with non-success code: ${
-            response.statusCode
-          }`
-        )
         return callback(error)
       }
     })
@@ -399,7 +394,10 @@ module.exports = HistoryController = {
     }
     return request(options, function(err, response, body) {
       if (err) {
-        logger.warn({ err, v1_project_id, version }, 'history API error')
+        OError.tag(err, 'history API error', {
+          v1_project_id,
+          version
+        })
         return next(err)
       }
       if (req.aborted) {
@@ -468,10 +466,11 @@ module.exports = HistoryController = {
           }, retryDelay),
         function(err) {
           if (err) {
-            logger.warn(
-              { err, v1_project_id, version, retryAttempt },
-              'history s3 download failed'
-            )
+            OError.tag(err, 'history s3 download failed', {
+              v1_project_id,
+              version,
+              retryAttempt
+            })
             return next(err)
           }
         }

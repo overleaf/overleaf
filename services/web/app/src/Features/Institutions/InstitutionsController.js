@@ -1,4 +1,4 @@
-const logger = require('logger-sharelatex')
+const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
 const { addAffiliation } = require('../Institutions/InstitutionsAPI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
@@ -28,7 +28,7 @@ var affiliateUsers = function(hostname, callback) {
     users
   ) {
     if (error) {
-      logger.warn({ error }, 'problem fetching users by hostname')
+      OError.tag(error, 'problem fetching users by hostname')
       return callback(error)
     }
 
@@ -59,8 +59,8 @@ var affiliateUserByReversedHostname = function(
         { confirmedAt: email.confirmedAt },
         error => {
           if (error) {
-            logger.warn(
-              { error },
+            OError.tag(
+              error,
               'problem adding affiliation while confirming hostname'
             )
             return innerCallback(error)

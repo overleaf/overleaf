@@ -13,6 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const ProjectGetter = require('../Project/ProjectGetter')
+const OError = require('@overleaf/o-error')
 const ProjectLocator = require('../Project/ProjectLocator')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
@@ -42,10 +43,10 @@ module.exports = {
           { project, element_id: doc_id, type: 'doc' },
           function(error, doc, path) {
             if (error != null) {
-              logger.warn(
-                { err: error, doc_id, project_id },
-                'error finding element for getDocument'
-              )
+              OError.tag(error, 'error finding element for getDocument', {
+                doc_id,
+                project_id
+              })
               return next(error)
             }
             return ProjectEntityHandler.getDoc(project_id, doc_id, function(
@@ -56,9 +57,13 @@ module.exports = {
               ranges
             ) {
               if (error != null) {
-                logger.warn(
-                  { err: error, doc_id, project_id },
-                  'error finding doc contents for getDocument'
+                OError.tag(
+                  error,
+                  'error finding doc contents for getDocument',
+                  {
+                    doc_id,
+                    project_id
+                  }
                 )
                 return next(error)
               }
@@ -106,10 +111,10 @@ module.exports = {
       lastUpdatedBy,
       function(error) {
         if (error != null) {
-          logger.warn(
-            { err: error, doc_id, project_id },
-            'error finding element for getDocument'
-          )
+          OError.tag(error, 'error finding element for getDocument', {
+            doc_id,
+            project_id
+          })
           return next(error)
         }
         logger.log(

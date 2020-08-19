@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SubscriptionGroupHandler = require('./SubscriptionGroupHandler')
+const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const AuthenticationController = require('../Authentication/AuthenticationController')
@@ -31,10 +32,10 @@ module.exports = {
       userToRemove_id,
       function(err) {
         if (err != null) {
-          logger.warn(
-            { err, subscriptionId: subscription._id, userToRemove_id },
-            'error removing user from group'
-          )
+          OError.tag(err, 'error removing user from group', {
+            subscriptionId: subscription._id,
+            userToRemove_id
+          })
           return next(err)
         }
         return res.sendStatus(200)

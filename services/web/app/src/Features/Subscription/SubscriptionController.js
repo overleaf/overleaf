@@ -268,10 +268,9 @@ module.exports = SubscriptionController = {
     logger.log({ user_id: user._id }, 'canceling subscription')
     return SubscriptionHandler.cancelSubscription(user, function(err) {
       if (err != null) {
-        logger.warn(
-          { err, user_id: user._id },
-          'something went wrong canceling subscription'
-        )
+        OError.tag(err, 'something went wrong canceling subscription', {
+          user_id: user._id
+        })
         return next(err)
       }
       // Note: this redirect isn't used in the main flow as the redirection is
@@ -292,10 +291,9 @@ module.exports = SubscriptionController = {
     logger.log({ user_id }, 'canceling v1 subscription')
     return V1SubscriptionManager.cancelV1Subscription(user_id, function(err) {
       if (err != null) {
-        logger.warn(
-          { err, user_id },
-          'something went wrong canceling v1 subscription'
-        )
+        OError.tag(err, 'something went wrong canceling v1 subscription', {
+          user_id
+        })
         return next(err)
       }
       return res.redirect('/user/subscription')
@@ -322,10 +320,9 @@ module.exports = SubscriptionController = {
       null,
       function(err) {
         if (err != null) {
-          logger.warn(
-            { err, user_id: user._id },
-            'something went wrong updating subscription'
-          )
+          OError.tag(err, 'something went wrong updating subscription', {
+            user_id: user._id
+          })
           return next(err)
         }
         return res.redirect('/user/subscription')
@@ -350,10 +347,9 @@ module.exports = SubscriptionController = {
     logger.log({ user_id: user._id }, 'reactivating subscription')
     return SubscriptionHandler.reactivateSubscription(user, function(err) {
       if (err != null) {
-        logger.warn(
-          { err, user_id: user._id },
-          'something went wrong reactivating subscription'
-        )
+        OError.tag(err, 'something went wrong reactivating subscription', {
+          user_id: user._id
+        })
         return next(err)
       }
       return res.redirect('/user/subscription')
@@ -447,7 +443,9 @@ module.exports = SubscriptionController = {
       coupon_code,
       function(err) {
         if (err != null) {
-          logger.warn({ err, user_id: user._id }, 'error updating subscription')
+          OError.tag(err, 'error updating subscription', {
+            user_id: user._id
+          })
           return next(err)
         }
         return res.sendStatus(200)

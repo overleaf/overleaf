@@ -188,9 +188,12 @@ const UserController = {
       password,
       (err, user) => {
         if (err != null) {
-          logger.warn(
-            { userId },
-            'error authenticating during attempt to delete account'
+          OError.tag(
+            err,
+            'error authenticating during attempt to delete account',
+            {
+              userId
+            }
           )
           return next(err)
         }
@@ -230,7 +233,7 @@ const UserController = {
             }
             req.session.destroy(err => {
               if (err != null) {
-                logger.warn({ err }, 'error destorying session')
+                OError.tag(err, 'error destroying session')
                 return next(err)
               }
               UserSessionsManager.untrackSession(user, sessionId)
@@ -398,7 +401,7 @@ const UserController = {
     } // passport logout
     req.session.destroy(err => {
       if (err) {
-        logger.warn({ err }, 'error destorying session')
+        OError.tag(err, 'error destroying session')
         return cb(err)
       }
       if (user != null) {

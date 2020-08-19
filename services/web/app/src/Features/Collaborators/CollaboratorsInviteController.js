@@ -13,6 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let CollaboratorsInviteController
+const OError = require('@overleaf/o-error')
 const ProjectGetter = require('../Project/ProjectGetter')
 const LimitationsManager = require('../Subscription/LimitationsManager')
 const UserGetter = require('../User/UserGetter')
@@ -37,7 +38,9 @@ module.exports = CollaboratorsInviteController = {
       invites
     ) {
       if (err != null) {
-        logger.warn({ projectId }, 'error getting invites for project')
+        OError.tag(err, 'error getting invites for project', {
+          projectId
+        })
         return next(err)
       }
       return res.json({ invites })
@@ -144,9 +147,14 @@ module.exports = CollaboratorsInviteController = {
               email,
               function(err, shouldAllowInvite) {
                 if (err != null) {
-                  logger.warn(
-                    { err, email, projectId, sendingUserId },
-                    'error checking if we can invite this email address'
+                  OError.tag(
+                    err,
+                    'error checking if we can invite this email address',
+                    {
+                      email,
+                      projectId,
+                      sendingUserId
+                    }
                   )
                   return next(err)
                 }
@@ -167,10 +175,11 @@ module.exports = CollaboratorsInviteController = {
                   privileges,
                   function(err, invite) {
                     if (err != null) {
-                      logger.warn(
-                        { projectId, email, sendingUserId },
-                        'error creating project invite'
-                      )
+                      OError.tag(err, 'error creating project invite', {
+                        projectId,
+                        email,
+                        sendingUserId
+                      })
                       return next(err)
                     }
                     logger.log(
@@ -202,7 +211,10 @@ module.exports = CollaboratorsInviteController = {
       inviteId,
       function(err) {
         if (err != null) {
-          logger.warn({ projectId, inviteId }, 'error revoking invite')
+          OError.tag(err, 'error revoking invite', {
+            projectId,
+            inviteId
+          })
           return next(err)
         }
         EditorRealTimeController.emitToRoom(
@@ -235,7 +247,10 @@ module.exports = CollaboratorsInviteController = {
           inviteId,
           function(err) {
             if (err != null) {
-              logger.warn({ projectId, inviteId }, 'error resending invite')
+              OError.tag(err, 'error resending invite', {
+                projectId,
+                inviteId
+              })
               return next(err)
             }
             return res.sendStatus(201)
@@ -262,10 +277,9 @@ module.exports = CollaboratorsInviteController = {
       projectId,
       function(err, isMember) {
         if (err != null) {
-          logger.warn(
-            { err, projectId },
-            'error checking if user is member of project'
-          )
+          OError.tag(err, 'error checking if user is member of project', {
+            projectId
+          })
           return next(err)
         }
         if (isMember) {
@@ -281,7 +295,10 @@ module.exports = CollaboratorsInviteController = {
           token,
           function(err, invite) {
             if (err != null) {
-              logger.warn({ projectId, token }, 'error getting invite by token')
+              OError.tag(err, 'error getting invite by token', {
+                projectId,
+                token
+              })
               return next(err)
             }
             // check if invite is gone, or otherwise non-existent
@@ -295,7 +312,9 @@ module.exports = CollaboratorsInviteController = {
               { email: 1, first_name: 1, last_name: 1 },
               function(err, owner) {
                 if (err != null) {
-                  logger.warn({ err, projectId }, 'error getting project owner')
+                  OError.tag(err, 'error getting project owner', {
+                    projectId
+                  })
                   return next(err)
                 }
                 if (owner == null) {
@@ -308,7 +327,9 @@ module.exports = CollaboratorsInviteController = {
                   project
                 ) {
                   if (err != null) {
-                    logger.warn({ err, projectId }, 'error getting project')
+                    OError.tag(err, 'error getting project', {
+                      projectId
+                    })
                     return next(err)
                   }
                   if (project == null) {
@@ -345,7 +366,10 @@ module.exports = CollaboratorsInviteController = {
       currentUser,
       function(err) {
         if (err != null) {
-          logger.warn({ projectId, token }, 'error accepting invite by token')
+          OError.tag(err, 'error accepting invite by token', {
+            projectId,
+            token
+          })
           return next(err)
         }
         EditorRealTimeController.emitToRoom(

@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let LaunchpadController
+const OError = require('@overleaf/o-error')
 const Settings = require('settings-sharelatex')
 const Path = require('path')
 const Url = require('url')
@@ -105,7 +106,9 @@ module.exports = LaunchpadController = {
     const emailOptions = { to: email }
     return EmailHandler.sendEmail('testEmail', emailOptions, function(err) {
       if (err != null) {
-        logger.warn({ email }, 'error sending test email')
+        OError.tag(err, 'error sending test email', {
+          email
+        })
         return next(err)
       }
       logger.log({ email }, 'sent test email')
@@ -158,10 +161,10 @@ module.exports = LaunchpadController = {
           user
         ) {
           if (err != null) {
-            logger.warn(
-              { err, email, authMethod },
-              'error with registerNewUser'
-            )
+            OError.tag(err, 'error with registerNewUser', {
+              email,
+              authMethod
+            })
             return next(err)
           }
 
@@ -173,10 +176,9 @@ module.exports = LaunchpadController = {
             },
             function(err) {
               if (err != null) {
-                logger.warn(
-                  { user_id: user._id, err },
-                  'error setting user to admin'
-                )
+                OError.tag(err, 'error setting user to admin', {
+                  user_id: user._id
+                })
                 return next(err)
               }
 
@@ -233,10 +235,9 @@ module.exports = LaunchpadController = {
           },
           function(err) {
             if (err != null) {
-              logger.err(
-                { user_id: user._id, err },
-                'error setting user to admin'
-              )
+              OError.tag(err, 'error setting user to admin', {
+                user_id: user._id
+              })
               return next(err)
             }
 

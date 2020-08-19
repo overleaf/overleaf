@@ -1,4 +1,5 @@
 const Path = require('path')
+const OError = require('@overleaf/o-error')
 const fs = require('fs')
 const crypto = require('crypto')
 const async = require('async')
@@ -257,10 +258,10 @@ const ProjectController = {
       projectName,
       (err, project) => {
         if (err != null) {
-          logger.warn(
-            { err, projectId, userId: currentUser._id },
-            'error cloning project'
-          )
+          OError.tag(err, 'error cloning project', {
+            projectId,
+            userId: currentUser._id
+          })
           return next(err)
         }
         res.send({
@@ -430,7 +431,7 @@ const ProjectController = {
       },
       (err, results) => {
         if (err != null) {
-          logger.warn({ err }, 'error getting data for project list page')
+          OError.tag(err, 'error getting data for project list page')
           return next(err)
         }
         const { notifications, user, userAffiliations } = results
@@ -705,7 +706,7 @@ const ProjectController = {
       },
       (err, results) => {
         if (err != null) {
-          logger.warn({ err }, 'error getting details for project page')
+          OError.tag(err, 'error getting details for project page')
           return next(err)
         }
         const { project } = results

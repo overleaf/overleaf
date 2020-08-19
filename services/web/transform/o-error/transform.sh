@@ -3,7 +3,6 @@ npx jscodeshift \
   -t transform/o-error/transform.js \
   --ignore-pattern=frontend/js/libraries.js \
   --ignore-pattern=frontend/js/vendor \
-  --ignore-pattern=**/*Controller*js \
   $1
 # replace blank lines in staged changed with token
 git diff --ignore-all-space --ignore-blank-lines | sed 's/^\+$/\+REMOVE_ME_IM_A_BLANK_LINE/g' | git apply --reject --cached --ignore-space-change
