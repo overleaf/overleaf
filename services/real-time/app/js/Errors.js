@@ -21,6 +21,12 @@ class MissingSessionError extends OError {
   }
 }
 
+class NotAuthorizedError extends OError {
+  constructor() {
+    super('not authorized')
+  }
+}
+
 class NullBytesInOpError extends OError {
   constructor(jsonChange) {
     super('null bytes found in op', { jsonChange })
@@ -37,6 +43,7 @@ module.exports = {
   CodedError,
   DataTooLargeToParseError,
   MissingSessionError,
+  NotAuthorizedError,
   NullBytesInOpError,
   UpdateTooLargeError
 }
