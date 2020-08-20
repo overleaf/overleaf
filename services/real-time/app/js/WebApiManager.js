@@ -4,7 +4,7 @@
 const request = require('request')
 const settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
-const { CodedError } = require('./Errors')
+const { CodedError, WebApiRequestFailedError } = require('./Errors')
 
 module.exports = {
   joinProject(project_id, user, callback) {
@@ -57,11 +57,7 @@ module.exports = {
             )
           )
         } else {
-          err = new Error(
-            `non-success status code from web: ${response.statusCode}`
-          )
-          logger.error({ err, project_id, user_id }, 'error accessing web api')
-          callback(err)
+          callback(new WebApiRequestFailedError(response.statusCode))
         }
       }
     )

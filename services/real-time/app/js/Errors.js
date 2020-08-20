@@ -39,11 +39,18 @@ class UpdateTooLargeError extends OError {
   }
 }
 
+class WebApiRequestFailedError extends OError {
+  constructor(statusCode) {
+    super('non-success status code from web', { statusCode })
+  }
+}
+
 module.exports = {
   CodedError,
   DataTooLargeToParseError,
   MissingSessionError,
   NotAuthorizedError,
   NullBytesInOpError,
-  UpdateTooLargeError
+  UpdateTooLargeError,
+  WebApiRequestFailedError
 }
