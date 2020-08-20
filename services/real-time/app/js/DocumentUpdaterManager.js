@@ -7,6 +7,7 @@ const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const metrics = require('metrics-sharelatex')
 const {
+  ClientRequestedMissingOpsError,
   DocumentUpdaterRequestFailedError,
   NullBytesInOpError,
   UpdateTooLargeError
@@ -47,13 +48,7 @@ const DocumentUpdaterManager = {
         body = body || {}
         callback(null, body.lines, body.version, body.ranges, body.ops)
       } else if ([404, 422].includes(res.statusCode)) {
-        err = new Error('doc updater could not load requested ops')
-        err.statusCode = res.statusCode
-        logger.warn(
-          { err, project_id, doc_id, url, fromVersion },
-          'doc updater could not load requested ops'
-        )
-        callback(err)
+        callback(new ClientRequestedMissingOpsError(res.statusCode))
       } else {
         callback(
           new DocumentUpdaterRequestFailedError('getDocument', res.statusCode)

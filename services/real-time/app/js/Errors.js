@@ -1,5 +1,13 @@
 const OError = require('@overleaf/o-error')
 
+class ClientRequestedMissingOpsError extends OError {
+  constructor(statusCode) {
+    super('doc updater could not load requested ops', {
+      statusCode
+    })
+  }
+}
+
 class CodedError extends OError {
   constructor(message, code) {
     super(message, { code })
@@ -63,6 +71,7 @@ class WebApiRequestFailedError extends OError {
 module.exports = {
   CodedError,
   CorruptedJoinProjectResponseError,
+  ClientRequestedMissingOpsError,
   DataTooLargeToParseError,
   DocumentUpdaterRequestFailedError,
   MissingSessionError,

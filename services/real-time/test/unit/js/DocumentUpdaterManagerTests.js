@@ -136,14 +136,16 @@ describe('DocumentUpdaterManager', function () {
 
         return it('should return the callback with an error', function () {
           this.callback.called.should.equal(true)
-          const err = this.callback.getCall(0).args[0]
-          err.should.have.property('statusCode', statusCode)
-          err.should.have.property(
-            'message',
-            'doc updater could not load requested ops'
-          )
+          this.callback
+            .calledWith(
+              sinon.match({
+                message: 'doc updater could not load requested ops',
+                info: { statusCode }
+              })
+            )
+            .should.equal(true)
           this.logger.error.called.should.equal(false)
-          return this.logger.warn.called.should.equal(true)
+          this.logger.warn.called.should.equal(false)
         })
       })
     )
