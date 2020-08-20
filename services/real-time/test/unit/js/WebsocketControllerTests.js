@@ -1464,8 +1464,8 @@ describe('WebsocketController', function () {
         return this.client.disconnect.called.should.equal(true)
       })
 
-      it('should log an error', function () {
-        return this.logger.error.called.should.equal(true)
+      it('should not log an error', function () {
+        return this.logger.error.called.should.equal(false)
       })
 
       return it('should call the callback with the error', function () {

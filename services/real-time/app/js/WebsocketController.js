@@ -1,6 +1,7 @@
 /* eslint-disable
     camelcase,
 */
+const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const WebApiManager = require('./WebApiManager')
@@ -91,7 +92,14 @@ module.exports = WebsocketController = {
         client.publicId,
         user,
         null,
-        function () {}
+        function (err) {
+          if (err) {
+            logger.warn(
+              { err, project_id, user_id, client_id: client.id },
+              'background cursor update failed'
+            )
+          }
+        }
       )
     })
   },
@@ -229,17 +237,7 @@ module.exports = WebsocketController = {
               try {
                 line = encodeForWebsockets(line)
               } catch (err) {
-                logger.err(
-                  {
-                    err,
-                    project_id,
-                    doc_id,
-                    fromVersion,
-                    line,
-                    client_id: client.id
-                  },
-                  'error encoding line uri component'
-                )
+                OError.tag(err, 'error encoding line uri component', { line })
                 return callback(err)
               }
               escapedLines.push(line)
@@ -260,17 +258,9 @@ module.exports = WebsocketController = {
                   }
                 }
               } catch (err) {
-                logger.err(
-                  {
-                    err,
-                    project_id,
-                    doc_id,
-                    fromVersion,
-                    ranges,
-                    client_id: client.id
-                  },
-                  'error encoding range uri component'
-                )
+                OError.tag(err, 'error encoding range uri component', {
+                  ranges
+                })
                 return callback(err)
               }
             }
@@ -538,16 +528,9 @@ module.exports = WebsocketController = {
             }
 
             if (error) {
-              logger.error(
-                {
-                  err: error,
-                  project_id,
-                  doc_id,
-                  client_id: client.id,
-                  version: update.v
-                },
-                'document was not available for update'
-              )
+              OError.tag(error, 'document was not available for update', {
+                version: update.v
+              })
               client.disconnect()
             }
             callback(error)

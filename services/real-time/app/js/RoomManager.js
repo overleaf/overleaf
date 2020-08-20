@@ -4,6 +4,7 @@
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const { EventEmitter } = require('events')
+const OError = require('@overleaf/o-error')
 
 const IdMap = new Map() // keep track of whether ids are from projects or docs
 const RoomEvents = new EventEmitter() // emits {project,doc}-active and {project,doc}-empty events
@@ -65,6 +66,10 @@ module.exports = {
       logger.log({ entity, id }, 'room is now active')
       RoomEvents.once(`${entity}-subscribed-${id}`, function (err) {
         // only allow the client to join when all the relevant channels have subscribed
+        if (err) {
+          OError.tag(err, 'error joining', { entity, id })
+          return callback(err)
+        }
         logger.log(
           { client: client.id, entity, id, beforeCount },
           'client joined new room and subscribed to channel'
