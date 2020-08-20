@@ -13,12 +13,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let MessageManager
-const mongojs = require('../../mongojs')
-const { db } = mongojs
-const { ObjectId } = mongojs
-const async = require('async')
+const { ObjectId, getCollection } = require('../../mongodb')
 const metrics = require('metrics-sharelatex')
 const logger = require('logger-sharelatex')
+
+const messagesCollectionPromise = getCollection('messages')
 
 module.exports = MessageManager = {
   createMessage(room_id, user_id, content, timestamp, callback) {
@@ -32,7 +31,15 @@ module.exports = MessageManager = {
       timestamp
     }
     newMessageOpts = this._ensureIdsAreObjectIds(newMessageOpts)
-    return db.messages.save(newMessageOpts, callback)
+    messagesCollectionPromise.then((messages) =>
+      messages.insertOne(newMessageOpts, function (error, confirmation) {
+        if (error) {
+          return callback(error)
+        }
+        newMessageOpts._id = confirmation.insertedId
+        callback(null, newMessageOpts)
+      })
+    )
   },
 
   getMessages(room_id, limit, before, callback) {
@@ -44,19 +51,25 @@ module.exports = MessageManager = {
       query.timestamp = { $lt: before }
     }
     query = this._ensureIdsAreObjectIds(query)
-    const cursor = db.messages.find(query).sort({ timestamp: -1 }).limit(limit)
-    return cursor.toArray(callback)
+    messagesCollectionPromise.then((messages) =>
+      messages
+        .find(query)
+        .sort({ timestamp: -1 })
+        .limit(limit)
+        .toArray(callback)
+    )
   },
 
   findAllMessagesInRooms(room_ids, callback) {
     if (callback == null) {
       callback = function (error, messages) {}
     }
-    return db.messages.find(
-      {
-        room_id: { $in: room_ids }
-      },
-      callback
+    messagesCollectionPromise.then((messages) =>
+      messages
+        .find({
+          room_id: { $in: room_ids }
+        })
+        .toArray(callback)
     )
   },
 
@@ -64,11 +77,13 @@ module.exports = MessageManager = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return db.messages.remove(
-      {
-        room_id
-      },
-      callback
+    messagesCollectionPromise.then((messages) =>
+      messages.deleteMany(
+        {
+          room_id
+        },
+        callback
+      )
     )
   },
 
@@ -80,20 +95,17 @@ module.exports = MessageManager = {
       _id: message_id,
       room_id
     })
-    return db.messages.update(
-      query,
-      {
-        $set: {
-          content,
-          edited_at: timestamp
-        }
-      },
-      function (error) {
-        if (error != null) {
-          return callback(error)
-        }
-        return callback()
-      }
+    messagesCollectionPromise.then((messages) =>
+      messages.updateOne(
+        query,
+        {
+          $set: {
+            content,
+            edited_at: timestamp
+          }
+        },
+        callback
+      )
     )
   },
 
@@ -105,12 +117,9 @@ module.exports = MessageManager = {
       _id: message_id,
       room_id
     })
-    return db.messages.remove(query, function (error) {
-      if (error != null) {
-        return callback(error)
-      }
-      return callback()
-    })
+    messagesCollectionPromise.then((messages) =>
+      messages.deleteOne(query, callback)
+    )
   },
 
   _ensureIdsAreObjectIds(query) {

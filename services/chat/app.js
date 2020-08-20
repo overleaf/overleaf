@@ -8,6 +8,7 @@
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 
+const mongodb = require('./app/js/mongodb')
 const Server = require('./app/js/server')
 
 if (!module.parent) {
@@ -22,12 +23,20 @@ if (!module.parent) {
       settings.internal != null ? settings.internal.chat : undefined,
       (x1) => x1.host
     ) || 'localhost'
-  Server.server.listen(port, host, function (error) {
-    if (error != null) {
-      throw error
-    }
-    return logger.info(`Chat starting up, listening on ${host}:${port}`)
-  })
+  mongodb.clientConnecting
+    .then(() => {
+      Server.server.listen(port, host, function (err) {
+        if (err) {
+          logger.fatal({ err }, `Cannot bind to ${host}:${port}. Exiting.`)
+          process.exit(1)
+        }
+        return logger.info(`Chat starting up, listening on ${host}:${port}`)
+      })
+    })
+    .catch((err) => {
+      logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
+      process.exit(1)
+    })
 }
 
 module.exports = Server.server

@@ -24,7 +24,7 @@
     "express": "4.17.1",
     "logger-sharelatex": "^2.2.0",
     "metrics-sharelatex": "^2.5.0",
-    "mongojs": "3.1.0",
+    "mongodb": "^3.6.0",
     "request": "^2.88.2",
     "settings-sharelatex": "^1.1.0"
   },

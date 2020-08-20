@@ -12,7 +12,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const app = require('../../../../app')
-require('logger-sharelatex').logger.level('error')
 
 module.exports = {
   running: false,

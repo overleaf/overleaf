@@ -12,7 +12,7 @@
  */
 let Router
 const MessageHttpController = require('./Features/Messages/MessageHttpController')
-const { ObjectId } = require('./mongojs')
+const { ObjectId } = require('./mongodb')
 
 module.exports = Router = {
   route(app) {

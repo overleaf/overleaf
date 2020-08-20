@@ -11,7 +11,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { ObjectId } = require('../../../app/js/mongojs')
+const { ObjectId } = require('../../../app/js/mongodb')
 const { expect } = require('chai')
 
 const ChatClient = require('./helpers/ChatClient')
