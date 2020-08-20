@@ -1,7 +1,8 @@
 const { EventEmitter } = require('events')
+const { MissingSessionError } = require('./Errors')
 
 module.exports = function (io, sessionStore, cookieParser, cookieName) {
-  const missingSessionError = new Error('could not look up session by key')
+  const missingSessionError = new MissingSessionError()
 
   const sessionSockets = new EventEmitter()
   function next(error, socket, session) {

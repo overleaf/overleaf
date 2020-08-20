@@ -15,6 +15,12 @@ class DataTooLargeToParseError extends OError {
   }
 }
 
+class MissingSessionError extends OError {
+  constructor() {
+    super('could not look up session by key')
+  }
+}
+
 class NullBytesInOpError extends OError {
   constructor(jsonChange) {
     super('null bytes found in op', { jsonChange })
@@ -30,6 +36,7 @@ class UpdateTooLargeError extends OError {
 module.exports = {
   CodedError,
   DataTooLargeToParseError,
+  MissingSessionError,
   NullBytesInOpError,
   UpdateTooLargeError
 }
