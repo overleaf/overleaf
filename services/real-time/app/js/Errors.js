@@ -38,6 +38,12 @@ class DocumentUpdaterRequestFailedError extends OError {
   }
 }
 
+class JoinLeaveEpochMismatchError extends OError {
+  constructor() {
+    super('joinLeaveEpoch mismatch')
+  }
+}
+
 class MissingSessionError extends OError {
   constructor() {
     super('could not look up session by key')
@@ -80,6 +86,7 @@ module.exports = {
   ClientRequestedMissingOpsError,
   DataTooLargeToParseError,
   DocumentUpdaterRequestFailedError,
+  JoinLeaveEpochMismatchError,
   MissingSessionError,
   NotAuthorizedError,
   NotJoinedError,

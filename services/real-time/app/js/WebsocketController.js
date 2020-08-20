@@ -9,7 +9,11 @@ const DocumentUpdaterManager = require('./DocumentUpdaterManager')
 const ConnectedUsersManager = require('./ConnectedUsersManager')
 const WebsocketLoadBalancer = require('./WebsocketLoadBalancer')
 const RoomManager = require('./RoomManager')
-const { NotAuthorizedError, NotJoinedError } = require('./Errors')
+const {
+  JoinLeaveEpochMismatchError,
+  NotAuthorizedError,
+  NotJoinedError
+} = require('./Errors')
 
 let WebsocketController
 module.exports = WebsocketController = {
@@ -180,7 +184,7 @@ module.exports = WebsocketController = {
       }
       if (joinLeaveEpoch !== client.joinLeaveEpoch) {
         // another joinDoc or leaveDoc rpc overtook us
-        return callback(new Error('joinLeaveEpoch mismatch'))
+        return callback(new JoinLeaveEpochMismatchError())
       }
       // ensure the per-doc applied-ops channel is subscribed before sending the
       // doc to the client, so that no events are missed.
