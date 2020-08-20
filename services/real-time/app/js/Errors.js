@@ -68,6 +68,12 @@ class NullBytesInOpError extends OError {
   }
 }
 
+class UnexpectedArgumentsError extends OError {
+  constructor() {
+    super('unexpected arguments')
+  }
+}
+
 class UpdateTooLargeError extends OError {
   constructor(updateSize) {
     super('update is too large', { updateSize })
@@ -91,6 +97,7 @@ module.exports = {
   NotAuthorizedError,
   NotJoinedError,
   NullBytesInOpError,
+  UnexpectedArgumentsError,
   UpdateTooLargeError,
   WebApiRequestFailedError
 }

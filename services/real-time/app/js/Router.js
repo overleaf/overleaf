@@ -9,6 +9,7 @@ const HttpController = require('./HttpController')
 const HttpApiController = require('./HttpApiController')
 const bodyParser = require('body-parser')
 const base64id = require('base64id')
+const { UnexpectedArgumentsError } = require('./Errors')
 
 const basicAuth = require('basic-auth-connect')
 const httpAuth = basicAuth(function (user, pass) {
@@ -64,7 +65,7 @@ module.exports = Router = {
   },
 
   _handleInvalidArguments(client, method, args) {
-    const error = new Error('unexpected arguments')
+    const error = new UnexpectedArgumentsError()
     let callback = args[args.length - 1]
     if (typeof callback !== 'function') {
       callback = function () {}
