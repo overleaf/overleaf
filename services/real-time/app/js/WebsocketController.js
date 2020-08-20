@@ -509,7 +509,7 @@ module.exports = WebsocketController = {
           function (error) {
             if ((error && error.message) === 'update is too large') {
               metrics.inc('update_too_large')
-              const { updateSize } = error
+              const { updateSize } = error.info
               logger.warn(
                 { user_id, project_id, doc_id, updateSize },
                 'update is too large'

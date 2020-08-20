@@ -6,6 +6,7 @@ const _ = require('underscore')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const metrics = require('metrics-sharelatex')
+const { UpdateTooLargeError } = require('./Errors')
 
 const rclient = require('redis-sharelatex').createClient(
   settings.redis.documentupdater
@@ -125,9 +126,7 @@ const DocumentUpdaterManager = {
 
     const updateSize = jsonChange.length
     if (updateSize > settings.maxUpdateSize) {
-      const error = new Error('update is too large')
-      error.updateSize = updateSize
-      return callback(error)
+      return callback(new UpdateTooLargeError(updateSize))
     }
 
     // record metric for each update added to queue

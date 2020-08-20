@@ -346,7 +346,7 @@ describe('DocumentUpdaterManager', function () {
       })
 
       it('should add the size to the error', function () {
-        return this.callback.args[0][0].updateSize.should.equal(7782422)
+        return this.callback.args[0][0].info.updateSize.should.equal(7782422)
       })
 
       return it('should not push the change onto the pending-updates-list queue', function () {

@@ -19,6 +19,7 @@ const { expect } = chai
 const modulePath = '../../../app/js/WebsocketController.js'
 const SandboxedModule = require('sandboxed-module')
 const tk = require('timekeeper')
+const { UpdateTooLargeError } = require('../../../app/js/Errors')
 
 describe('WebsocketController', function () {
   beforeEach(function () {
@@ -1507,8 +1508,7 @@ describe('WebsocketController', function () {
         this.client.emit = sinon.stub()
         this.client.ol_context.user_id = this.user_id
         this.client.ol_context.project_id = this.project_id
-        const error = new Error('update is too large')
-        error.updateSize = 7372835
+        const error = new UpdateTooLargeError(7372835)
         this.DocumentUpdaterManager.queueChange = sinon
           .stub()
           .callsArgWith(3, error)

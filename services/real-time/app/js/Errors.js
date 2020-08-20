@@ -15,4 +15,10 @@ class DataTooLargeToParseError extends OError {
   }
 }
 
-module.exports = { CodedError, DataTooLargeToParseError }
+class UpdateTooLargeError extends OError {
+  constructor(updateSize) {
+    super('update is too large', { updateSize })
+  }
+}
+
+module.exports = { CodedError, DataTooLargeToParseError, UpdateTooLargeError }
