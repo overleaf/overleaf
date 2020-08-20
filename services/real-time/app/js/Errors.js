@@ -50,6 +50,12 @@ class NotAuthorizedError extends OError {
   }
 }
 
+class NotJoinedError extends OError {
+  constructor() {
+    super('no project_id found on client')
+  }
+}
+
 class NullBytesInOpError extends OError {
   constructor(jsonChange) {
     super('null bytes found in op', { jsonChange })
@@ -76,6 +82,7 @@ module.exports = {
   DocumentUpdaterRequestFailedError,
   MissingSessionError,
   NotAuthorizedError,
+  NotJoinedError,
   NullBytesInOpError,
   UpdateTooLargeError,
   WebApiRequestFailedError

@@ -9,7 +9,7 @@ const DocumentUpdaterManager = require('./DocumentUpdaterManager')
 const ConnectedUsersManager = require('./ConnectedUsersManager')
 const WebsocketLoadBalancer = require('./WebsocketLoadBalancer')
 const RoomManager = require('./RoomManager')
-const { NotAuthorizedError } = require('./Errors')
+const { NotAuthorizedError, NotJoinedError } = require('./Errors')
 
 let WebsocketController
 module.exports = WebsocketController = {
@@ -158,7 +158,7 @@ module.exports = WebsocketController = {
     metrics.inc('editor.join-doc')
     const { project_id, user_id, is_restricted_user } = client.ol_context
     if (!project_id) {
-      return callback(new Error('no project_id found on client'))
+      return callback(new NotJoinedError())
     }
     logger.log(
       { user_id, project_id, doc_id, fromVersion, client_id: client.id },
@@ -424,7 +424,7 @@ module.exports = WebsocketController = {
       return callback(null, [])
     }
     if (!project_id) {
-      return callback(new Error('no project_id found on client'))
+      return callback(new NotJoinedError())
     }
     logger.log(
       { user_id, project_id, client_id: client.id },
@@ -459,7 +459,7 @@ module.exports = WebsocketController = {
     // client may have disconnected, but we can submit their update to doc-updater anyways.
     const { user_id, project_id } = client.ol_context
     if (!project_id) {
-      return callback(new Error('no project_id found on client'))
+      return callback(new NotJoinedError())
     }
 
     WebsocketController._assertClientCanApplyUpdate(
