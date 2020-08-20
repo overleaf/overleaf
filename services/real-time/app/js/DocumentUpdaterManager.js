@@ -6,7 +6,11 @@ const _ = require('underscore')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const metrics = require('metrics-sharelatex')
-const { NullBytesInOpError, UpdateTooLargeError } = require('./Errors')
+const {
+  DocumentUpdaterRequestFailedError,
+  NullBytesInOpError,
+  UpdateTooLargeError
+} = require('./Errors')
 
 const rclient = require('redis-sharelatex').createClient(
   settings.redis.documentupdater
@@ -51,15 +55,9 @@ const DocumentUpdaterManager = {
         )
         callback(err)
       } else {
-        err = new Error(
-          `doc updater returned a non-success status code: ${res.statusCode}`
+        callback(
+          new DocumentUpdaterRequestFailedError('getDocument', res.statusCode)
         )
-        err.statusCode = res.statusCode
-        logger.error(
-          { err, project_id, doc_id, url },
-          `doc updater returned a non-success status code: ${res.statusCode}`
-        )
-        callback(err)
       }
     })
   },
@@ -89,15 +87,12 @@ const DocumentUpdaterManager = {
         logger.log({ project_id }, 'deleted project from document updater')
         callback(null)
       } else {
-        err = new Error(
-          `document updater returned a failure status code: ${res.statusCode}`
+        callback(
+          new DocumentUpdaterRequestFailedError(
+            'flushProjectToMongoAndDelete',
+            res.statusCode
+          )
         )
-        err.statusCode = res.statusCode
-        logger.error(
-          { err, project_id },
-          `document updater returned failure status code: ${res.statusCode}`
-        )
-        callback(err)
       }
     })
   },

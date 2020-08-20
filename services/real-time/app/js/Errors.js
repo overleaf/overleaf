@@ -21,6 +21,15 @@ class DataTooLargeToParseError extends OError {
   }
 }
 
+class DocumentUpdaterRequestFailedError extends OError {
+  constructor(action, statusCode) {
+    super('doc updater returned a non-success status code', {
+      action,
+      statusCode
+    })
+  }
+}
+
 class MissingSessionError extends OError {
   constructor() {
     super('could not look up session by key')
@@ -55,6 +64,7 @@ module.exports = {
   CodedError,
   CorruptedJoinProjectResponseError,
   DataTooLargeToParseError,
+  DocumentUpdaterRequestFailedError,
   MissingSessionError,
   NotAuthorizedError,
   NullBytesInOpError,
