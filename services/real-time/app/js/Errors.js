@@ -1,8 +1,8 @@
-class CodedError extends Error {
+const OError = require('@overleaf/o-error')
+
+class CodedError extends OError {
   constructor(message, code) {
-    super(message)
-    this.name = this.constructor.name
-    this.code = code
+    super(message, { code })
   }
 }
 

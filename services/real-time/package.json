@@ -19,6 +19,7 @@
     "format:fix": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --write"
   },
   "dependencies": {
+    "@overleaf/o-error": "^3.0.0",
     "async": "^0.9.0",
     "base64id": "0.1.0",
     "basic-auth-connect": "^1.0.0",

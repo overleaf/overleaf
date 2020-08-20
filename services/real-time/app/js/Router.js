@@ -33,8 +33,8 @@ module.exports = Router = {
     attrs.client_id = client.id
     attrs.err = error
     if (error.name === 'CodedError') {
-      logger.warn(attrs, error.message, { code: error.code })
-      const serializedError = { message: error.message, code: error.code }
+      logger.warn(attrs, error.message)
+      const serializedError = { message: error.message, code: error.info.code }
       callback(serializedError)
     } else if (error.message === 'unexpected arguments') {
       // the payload might be very large, put it on level info

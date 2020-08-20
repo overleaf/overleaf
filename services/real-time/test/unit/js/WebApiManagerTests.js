@@ -152,7 +152,9 @@ describe('WebApiManager', function () {
           .calledWith(
             sinon.match({
               message: 'rate-limit hit when joining project',
-              code: 'TooManyRequests'
+              info: {
+                code: 'TooManyRequests'
+              }
             })
           )
           .should.equal(true)
