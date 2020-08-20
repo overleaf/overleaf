@@ -6,7 +6,7 @@ const _ = require('underscore')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const metrics = require('metrics-sharelatex')
-const { UpdateTooLargeError } = require('./Errors')
+const { NullBytesInOpError, UpdateTooLargeError } = require('./Errors')
 
 const rclient = require('redis-sharelatex').createClient(
   settings.redis.documentupdater
@@ -116,12 +116,7 @@ const DocumentUpdaterManager = {
     const jsonChange = JSON.stringify(change)
     if (jsonChange.indexOf('\u0000') !== -1) {
       // memory corruption check
-      const error = new Error('null bytes found in op')
-      logger.error(
-        { err: error, project_id, doc_id, jsonChange },
-        error.message
-      )
-      return callback(error)
+      return callback(new NullBytesInOpError(jsonChange))
     }
 
     const updateSize = jsonChange.length

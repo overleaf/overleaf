@@ -15,10 +15,21 @@ class DataTooLargeToParseError extends OError {
   }
 }
 
+class NullBytesInOpError extends OError {
+  constructor(jsonChange) {
+    super('null bytes found in op', { jsonChange })
+  }
+}
+
 class UpdateTooLargeError extends OError {
   constructor(updateSize) {
     super('update is too large', { updateSize })
   }
 }
 
-module.exports = { CodedError, DataTooLargeToParseError, UpdateTooLargeError }
+module.exports = {
+  CodedError,
+  DataTooLargeToParseError,
+  NullBytesInOpError,
+  UpdateTooLargeError
+}
