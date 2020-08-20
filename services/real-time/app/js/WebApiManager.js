@@ -4,7 +4,11 @@
 const request = require('request')
 const settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
-const { CodedError, WebApiRequestFailedError } = require('./Errors')
+const {
+  CodedError,
+  CorruptedJoinProjectResponseError,
+  WebApiRequestFailedError
+} = require('./Errors')
 
 module.exports = {
   joinProject(project_id, user, callback) {
@@ -32,15 +36,9 @@ module.exports = {
         if (error) {
           return callback(error)
         }
-        let err
         if (response.statusCode >= 200 && response.statusCode < 300) {
           if (!(data && data.project)) {
-            err = new Error('no data returned from joinProject request')
-            logger.error(
-              { err, project_id, user_id },
-              'error accessing web api'
-            )
-            return callback(err)
+            return callback(new CorruptedJoinProjectResponseError())
           }
           callback(
             null,

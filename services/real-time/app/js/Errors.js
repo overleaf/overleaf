@@ -6,6 +6,12 @@ class CodedError extends OError {
   }
 }
 
+class CorruptedJoinProjectResponseError extends OError {
+  constructor() {
+    super('no data returned from joinProject request')
+  }
+}
+
 class DataTooLargeToParseError extends OError {
   constructor(data) {
     super('data too large to parse', {
@@ -47,6 +53,7 @@ class WebApiRequestFailedError extends OError {
 
 module.exports = {
   CodedError,
+  CorruptedJoinProjectResponseError,
   DataTooLargeToParseError,
   MissingSessionError,
   NotAuthorizedError,
