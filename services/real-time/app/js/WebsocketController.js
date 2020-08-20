@@ -9,6 +9,7 @@ const DocumentUpdaterManager = require('./DocumentUpdaterManager')
 const ConnectedUsersManager = require('./ConnectedUsersManager')
 const WebsocketLoadBalancer = require('./WebsocketLoadBalancer')
 const RoomManager = require('./RoomManager')
+const { NotAuthorizedError } = require('./Errors')
 
 let WebsocketController
 module.exports = WebsocketController = {
@@ -48,12 +49,7 @@ module.exports = WebsocketController = {
       }
 
       if (!privilegeLevel) {
-        const err = new Error('not authorized')
-        logger.warn(
-          { err, project_id, user_id, client_id: client.id },
-          'user is not authorized to join project'
-        )
-        return callback(err)
+        return callback(new NotAuthorizedError())
       }
 
       client.ol_context = {}
