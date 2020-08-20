@@ -274,7 +274,9 @@ module.exports = Router = {
 
         WebsocketController.leaveDoc(client, doc_id, function (err, ...args) {
           if (err) {
-            Router._handleError(callback, err, client, 'leaveDoc')
+            Router._handleError(callback, err, client, 'leaveDoc', {
+              doc_id
+            })
           } else {
             callback(null, ...args)
           }
