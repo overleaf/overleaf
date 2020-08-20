@@ -50,7 +50,7 @@ describe('SafeJsonParse', function () {
       const data = `{\"foo\": \"${big_blob}\"}`
       this.Settings.maxUpdateSize = 2 * 1024
       return this.SafeJsonParse.parse(data, (error, parsed) => {
-        this.logger.error.called.should.equal(true)
+        this.logger.error.called.should.equal(false)
         expect(error).to.exist
         return done()
       })

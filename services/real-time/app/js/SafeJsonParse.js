@@ -1,14 +1,10 @@
 const Settings = require('settings-sharelatex')
-const logger = require('logger-sharelatex')
+const { DataTooLargeToParseError } = require('./Errors')
 
 module.exports = {
   parse(data, callback) {
     if (data.length > Settings.maxUpdateSize) {
-      logger.error(
-        { head: data.slice(0, 1024), length: data.length },
-        'data too large to parse'
-      )
-      return callback(new Error('data too large to parse'))
+      return callback(new DataTooLargeToParseError(data))
     }
     let parsed
     try {
