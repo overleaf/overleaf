@@ -68,7 +68,7 @@ module.exports = {
 
     multi.exec(function (err) {
       if (err) {
-        OError.tag(err, 'problem marking user as connected')
+        err = new OError('problem marking user as connected').withCause(err)
       }
       callback(err)
     })
@@ -104,7 +104,7 @@ module.exports = {
     multi.del(Keys.connectedUser({ project_id, client_id }))
     multi.exec(function (err) {
       if (err) {
-        OError.tag(err, 'problem marking user as disconnected')
+        err = new OError('problem marking user as disconnected').withCause(err)
       }
       callback(err)
     })
@@ -116,9 +116,9 @@ module.exports = {
       result
     ) {
       if (err) {
-        OError.tag(err, 'problem fetching connected user details', {
+        err = new OError('problem fetching connected user details', {
           other_client_id: client_id
-        })
+        }).withCause(err)
         return callback(err)
       }
       if (!(result && result.user_id)) {
@@ -154,7 +154,7 @@ module.exports = {
       results
     ) {
       if (err) {
-        OError.tag(err, 'problem getting clients in project')
+        err = new OError('problem getting clients in project').withCause(err)
         return callback(err)
       }
       const jobs = results.map((client_id) => (cb) =>

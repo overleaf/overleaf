@@ -136,12 +136,12 @@ const DocumentUpdaterManager = {
       error
     ) {
       if (error) {
-        OError.tag(error, 'error pushing update into redis')
+        error = new OError('error pushing update into redis').withCause(error)
         return callback(error)
       }
       rclient.rpush('pending-updates-list', doc_key, function (error) {
         if (error) {
-          OError.tag(error, 'error pushing doc_id into redis')
+          error = new OError('error pushing doc_id into redis').withCause(error)
         }
         callback(error)
       })

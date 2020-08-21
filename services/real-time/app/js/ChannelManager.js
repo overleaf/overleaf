@@ -23,12 +23,13 @@ module.exports = {
     const channel = `${baseChannel}:${id}`
     const actualSubscribe = function () {
       // subscribe is happening in the foreground and it should reject
-      const p = rclient.subscribe(channel)
-      p.finally(function () {
-        if (clientChannelMap.get(channel) === subscribePromise) {
-          clientChannelMap.delete(channel)
-        }
-      })
+      return rclient
+        .subscribe(channel)
+        .finally(function () {
+          if (clientChannelMap.get(channel) === subscribePromise) {
+            clientChannelMap.delete(channel)
+          }
+        })
         .then(function () {
           logger.log({ channel }, 'subscribed to channel')
           metrics.inc(`subscribe.${baseChannel}`)
@@ -37,9 +38,10 @@ module.exports = {
           logger.error({ channel, err }, 'failed to subscribe to channel')
           metrics.inc(`subscribe.failed.${baseChannel}`)
           // add context for the stack-trace at the call-site
-          OError.tag(err, 'failed to subscribe to channel', { channel })
+          throw new OError('failed to subscribe to channel', {
+            channel
+          }).withCause(err)
         })
-      return p
     }
 
     const pendingActions = clientChannelMap.get(channel) || Promise.resolve()
