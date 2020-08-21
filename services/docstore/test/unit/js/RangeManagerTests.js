@@ -18,7 +18,7 @@ const modulePath = require('path').join(
   __dirname,
   '../../../app/js/RangeManager'
 )
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const { assert } = require('chai')
 const _ = require('underscore')
 
@@ -26,7 +26,7 @@ describe('RangeManager', function () {
   beforeEach(function () {
     return (this.RangeManager = SandboxedModule.require(modulePath, {
       requires: {
-        './mongojs': {
+        './mongodb': {
           ObjectId
         }
       }

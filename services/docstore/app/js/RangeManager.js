@@ -13,7 +13,7 @@
  */
 let RangeManager
 const _ = require('underscore')
-const { ObjectId } = require('./mongojs')
+const { ObjectId } = require('./mongodb')
 
 module.exports = RangeManager = {
   shouldUpdateRanges(doc_ranges, incoming_ranges) {
