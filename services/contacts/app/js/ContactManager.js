@@ -11,7 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ContactManager
-const { db, ObjectId } = require('./mongojs')
+const { db, ObjectId } = require('./mongodb')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 
@@ -31,7 +31,7 @@ module.exports = ContactManager = {
     update.$inc[`contacts.${contact_id}.n`] = 1
     update.$set[`contacts.${contact_id}.ts`] = new Date()
 
-    return db.contacts.update(
+    db.contacts.updateOne(
       {
         user_id
       },
