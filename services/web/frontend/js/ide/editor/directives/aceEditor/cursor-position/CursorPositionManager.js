@@ -30,13 +30,17 @@ export default (CursorPositionManager = class CursorPositionManager {
 
     this.$scope.$on('changeEditor', this.storePositionAndLine)
 
-    this.$scope.$on(`${this.$scope.name}:gotoLine`, (e, line, column) => {
-      if (line != null) {
-        return setTimeout(() => {
-          return this.adapter.gotoLine(line, column)
-        }, 10)
+    this.$scope.$on(
+      `${this.$scope.name}:gotoLine`,
+      (e, line, column, syncToPdf) => {
+        if (line != null) {
+          return setTimeout(() => {
+            this.adapter.gotoLine(line, column)
+            if (syncToPdf) this.onSyncToPdf()
+          }, 10)
+        }
       }
-    }) // Hack: Must happen after @gotoStoredPosition
+    ) // Hack: Must happen after @gotoStoredPosition
 
     this.$scope.$on(`${this.$scope.name}:gotoOffset`, (e, offset) => {
       if (offset != null) {

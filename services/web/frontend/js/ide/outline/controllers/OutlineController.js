@@ -17,8 +17,8 @@ App.controller('OutlineController', function($scope, ide, eventTracking) {
     })
   }
 
-  $scope.jumpToLine = lineNo => {
-    ide.outlineManager.jumpToLine(lineNo)
+  $scope.jumpToLine = (lineNo, syncToPdf) => {
+    ide.outlineManager.jumpToLine(lineNo, syncToPdf)
     eventTracking.sendMB('outline-jump-to-line')
   }
 

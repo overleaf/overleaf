@@ -128,7 +128,8 @@ export default (EditorManager = (function() {
       return this.$scope.$broadcast(
         'editor:gotoLine',
         options.gotoLine,
-        options.gotoColumn
+        options.gotoColumn,
+        options.syncToPdf
       )
     }
 

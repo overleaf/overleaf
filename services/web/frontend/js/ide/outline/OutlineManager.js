@@ -94,9 +94,9 @@ class OutlineManager {
     this.broadcastChangeEvent()
   }
 
-  jumpToLine(line) {
+  jumpToLine(line, syncToPdf) {
     this.ignoreNextScroll = true
-    this.ide.editorManager.jumpToLine({ gotoLine: line })
+    this.ide.editorManager.jumpToLine({ gotoLine: line, syncToPdf })
   }
 
   broadcastChangeEvent() {
