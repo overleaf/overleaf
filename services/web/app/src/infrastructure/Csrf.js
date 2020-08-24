@@ -12,9 +12,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let Csrf
+
 const csurf = require('csurf')
 const csrf = csurf()
+const { promisify } = require('util')
 
 // Wrapper for `csurf` middleware that provides a list of routes that can be excluded from csrf checks.
 //
@@ -27,9 +28,9 @@ const csrf = csurf()
 //   myRouter.csrf.disableDefaultCsrfProtection "/path" "METHOD"
 //
 // To validate the csrf token in a request to ensure that it's valid, you can use `validateRequest`, which takes a
-// request object and calls a callback with either true or false.
+// request object and calls a callback with an error if invalid.
 
-module.exports = Csrf = class Csrf {
+class Csrf {
   constructor() {
     this.middleware = this.middleware.bind(this)
     this.excluded_routes = {}
@@ -71,7 +72,7 @@ module.exports = Csrf = class Csrf {
     if (cb == null) {
       cb = function(valid) {}
     }
-    return csrf(req, null, err => cb(err == null))
+    return csrf(req, null, err => cb(err))
   }
 
   static validateToken(token, session, cb) {
@@ -94,3 +95,9 @@ module.exports = Csrf = class Csrf {
     return Csrf.validateRequest(req, cb)
   }
 }
+
+Csrf.promises = {
+  validateRequest: promisify(Csrf.validateRequest)
+}
+
+module.exports = Csrf

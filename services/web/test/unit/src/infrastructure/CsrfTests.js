@@ -126,15 +126,15 @@ describe('Csrf', function() {
 
   describe('validateRequest', function() {
     describe('when the request is invalid', function() {
-      it('calls the callback with `false`', function() {
+      it('calls the callback with error', function() {
         this.cb = sinon.stub()
         this.Csrf.validateRequest(this.req, this.cb)
-        return expect(this.cb.calledWith(false)).to.equal(true)
+        return expect(this.cb.calledWith(this.err)).to.equal(true)
       })
     })
 
     describe('when the request is valid', function() {
-      it('calls the callback with `true`', function() {
+      it('calls the callback without an error', function() {
         this.Csrf = SandboxedModule.require(modulePath, {
           globals: {
             console: console
@@ -147,7 +147,7 @@ describe('Csrf', function() {
         })
         this.cb = sinon.stub()
         this.Csrf.validateRequest(this.req, this.cb)
-        return expect(this.cb.calledWith(true)).to.equal(true)
+        return expect(this.cb.calledWith()).to.equal(true)
       })
     })
   })
@@ -157,7 +157,7 @@ describe('Csrf', function() {
       it('calls the callback with `false`', function() {
         this.cb = sinon.stub()
         this.Csrf.validateToken('token', {}, this.cb)
-        return expect(this.cb.calledWith(false)).to.equal(true)
+        expect(this.cb.calledWith(this.err)).to.equal(true)
       })
     })
 
@@ -175,7 +175,7 @@ describe('Csrf', function() {
         })
         this.cb = sinon.stub()
         this.Csrf.validateToken('goodtoken', {}, this.cb)
-        return expect(this.cb.calledWith(true)).to.equal(true)
+        return expect(this.cb.calledWith()).to.equal(true)
       })
     })
 
