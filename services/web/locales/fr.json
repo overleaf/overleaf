@@ -1,6 +1,5 @@
 {
   "last_login": "Dernière connexion",
-  "invalid_insitituional_email": "Le service d’authentification de votre établissement a indiqué que votre adresse courriel était __email__, mais le domaine de cette adresse n’appartient pas à ceux que nous reconnaissons pour cet établissement. Il est peut-être possible de modifier votre adresse courriel principale depuis le profil utilisateur de votre établissement pour qu’elle soit dans un domaine reconnu. Veuillez contacter votre département informatique si vous avez des questions.",
   "thank_you_for_being_part_of_our_beta_program": "Merci de votre participation au programme de bêta, qui vous permet d’accéder en avant-première aux nouvelles fonctionnalités et de nous aider à mieux comprendre vos besoins",
   "you_will_be_able_to_contact_us_any_time_to_share_your_feedback": "Vous pourrez nous contacter à tout moment pour donner votre avis",
   "we_may_also_contact_you_from_time_to_time_by_email_with_a_survey": "Nous serons également amenés à vous inviter par courriel à participer à des sondages ou à d’autres initiatives de recherche utilisateur",

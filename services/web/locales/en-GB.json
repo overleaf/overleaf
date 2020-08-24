@@ -1,8 +1,8 @@
 {
+  "invalid_institutional_email": "Your institution's SSO service returned your email address as __email__, which is at an unexpected domain that we do not recognise as belonging to it. You may be able to change your primary email address via your user profile at your institution to one at your institution's domain. Please contact your IT department if you have any questions.",
   "wed_love_you_to_stay": "We'd love you to stay",
   "yes_move_me_to_student_plan": "Yes, move me to the student plan",
   "last_login": "Last Login",
-  "invalid_insitituional_email": "Your institution's SSO service returned your email address as __email__, which is at an unexpected domain that we do not recognise as belonging to it. You may be able to change your primary email address via your user profile at your institution to one at your institution's domain. Please contact your IT department if you have any questions.",
   "thank_you_for_being_part_of_our_beta_program": "Thank you for being part of our Beta Program, where you can have early access to new features and help us understand your needs better",
   "you_will_be_able_to_contact_us_any_time_to_share_your_feedback": "You will be able to contact us any time to share your feedback",
   "we_may_also_contact_you_from_time_to_time_by_email_with_a_survey": "We may also contact you from time to time by email with a survey, or to see if you would like to participate in other user research initiatives",
