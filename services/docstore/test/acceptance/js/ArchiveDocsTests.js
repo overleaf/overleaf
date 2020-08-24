@@ -17,7 +17,7 @@ const Settings = require('settings-sharelatex')
 const chai = require('chai')
 const { expect } = chai
 const should = chai.should()
-const { db, ObjectId } = require('../../../app/js/mongojs')
+const { getCollection, ObjectId } = require('../../../app/js/mongodb')
 const async = require('async')
 const DocstoreApp = require('./helpers/DocstoreApp')
 const DocstoreClient = require('./helpers/DocstoreClient')
@@ -31,6 +31,14 @@ function uploadContent(path, json, callback) {
     .then(() => callback())
     .catch(callback)
 }
+
+let db
+before(async function () {
+  db = {
+    docs: await getCollection('docs'),
+    docOps: await getCollection('docOps')
+  }
+})
 
 describe('Archiving', function () {
   before(function (done) {
