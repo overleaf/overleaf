@@ -150,19 +150,18 @@
         display: flex;
         align-items: center;
         color: #fff;
-        white-space: pre;
-        line-height: 6px;
+        line-height: 1.6;
         font-size: 20px;
-        height: 100%;
-        padding: 0 12px 0 18px;
+        padding: 0 4px 0 18px;
 
         &:hover,
         &:focus {
           text-decoration: none;
         }
         &::before {
-          content: '\00B7\A\00B7\A\00B7';
-          margin-top: -4px;
+          content: '\00B7\00B7\00B7';
+          transform: rotate(90deg);
+          letter-spacing: 0.5px;
         }
       }
 
@@ -252,7 +251,6 @@
 
           .entity-menu-toggle {
             display: inline-block;
-            height: 100%;
           }
         }
       }
