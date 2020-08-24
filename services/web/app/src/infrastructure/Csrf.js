@@ -76,11 +76,8 @@ class Csrf {
   }
 
   static validateToken(token, session, cb) {
-    if (cb == null) {
-      cb = function(valid) {}
-    }
     if (token == null) {
-      return cb(false)
+      return cb(new Error('missing token'))
     }
     // run a dummy csrf check to see if it returns an error
     // use this to simulate a csrf check regardless of req method, headers &c.

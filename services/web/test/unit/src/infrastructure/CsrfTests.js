@@ -180,7 +180,7 @@ describe('Csrf', function() {
     })
 
     describe('when there is no token', function() {
-      it('calls the callback with `false`', function() {
+      it('calls the callback with an error', function() {
         this.Csrf = SandboxedModule.require(modulePath, {
           globals: {
             console: console
@@ -192,8 +192,9 @@ describe('Csrf', function() {
           }
         })
         this.cb = sinon.stub()
-        this.Csrf.validateToken(null, {}, this.cb)
-        return expect(this.cb.calledWith(false)).to.equal(true)
+        this.Csrf.validateToken(null, {}, error => {
+          expect(error).to.exist
+        })
       })
     })
   })
