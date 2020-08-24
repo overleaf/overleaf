@@ -45,6 +45,12 @@ module.exports = {
               'tpds update failed to be processed, too many requests'
             )
             return res.sendStatus(429)
+          } else if (err.name === 'ProjectIsArchivedOrTrashedError') {
+            logger.info(
+              { err, user_id, filePath, projectName },
+              'tpds project is archived'
+            )
+            return res.sendStatus(409)
           } else if (err.message === 'project_has_too_many_files') {
             logger.warn(
               { err, user_id, filePath },

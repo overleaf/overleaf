@@ -35,7 +35,9 @@ describe('TpdsUpdateHandler', function() {
     this.project_id = 'dsjajilknaksdn'
     this.project = { _id: this.project_id, name: 'projectNameHere' }
     this.projectLocator = {
-      findUsersProjectByName: sinon.stub().callsArgWith(2, null, this.project)
+      findUsersProjectByName: sinon
+        .stub()
+        .callsArgWith(2, null, { project: this.project })
     }
     this.projectCreationHandler = {
       createBlankProject: sinon.stub().callsArgWith(2, null, this.project)
@@ -96,7 +98,9 @@ describe('TpdsUpdateHandler', function() {
     })
 
     it('should create a new project if one does not already exit', function(done) {
-      this.projectLocator.findUsersProjectByName = sinon.stub().callsArgWith(2)
+      this.projectLocator.findUsersProjectByName = sinon
+        .stub()
+        .callsArgWith(2, null, { project: null })
       const path = '/'
       return this.handler.newUpdate(
         this.user_id,
@@ -113,8 +117,59 @@ describe('TpdsUpdateHandler', function() {
       )
     })
 
+    it('should not create a new project if one with the same name is archived', function(done) {
+      this.projectLocator.findUsersProjectByName = sinon
+        .stub()
+        .callsArgWith(2, null, {
+          project: this.project,
+          isArchivedOrTrashed: true
+        })
+      const path = '/'
+      return this.handler.newUpdate(
+        this.user_id,
+        this.project.name,
+        path,
+        {},
+        this.source,
+        err => {
+          expect(err).to.exist
+          expect(err.name).to.equal('ProjectIsArchivedOrTrashedError')
+          this.projectCreationHandler.createBlankProject
+            .calledWith(this.user_id, this.project.name)
+            .should.equal(false)
+          return done()
+        }
+      )
+    })
+
+    it('should not create a new project if one is found', function(done) {
+      this.projectLocator.findUsersProjectByName = sinon
+        .stub()
+        .callsArgWith(2, null, {
+          project: this.project,
+          isArchivedOrTrashed: false
+        })
+      const path = '/'
+      return this.handler.newUpdate(
+        this.user_id,
+        this.project.name,
+        path,
+        {},
+        this.source,
+        err => {
+          expect(err).to.not.exist
+          this.projectCreationHandler.createBlankProject
+            .calledWith(this.user_id, this.project.name)
+            .should.equal(false)
+          return done()
+        }
+      )
+    })
+
     it('should set the root doc automatically if a new project is created', function(done) {
-      this.projectLocator.findUsersProjectByName = sinon.stub().callsArgWith(2)
+      this.projectLocator.findUsersProjectByName = sinon
+        .stub()
+        .callsArgWith(2, null, { project: null })
       this.handler._rootDocTimeoutLength = 0
       const path = '/'
       return this.handler.newUpdate(
@@ -138,7 +193,9 @@ describe('TpdsUpdateHandler', function() {
       this.FileTypeManager.shouldIgnore = sinon
         .stub()
         .callsArgWith(1, null, true)
-      this.projectLocator.findUsersProjectByName = sinon.stub().callsArgWith(2)
+      this.projectLocator.findUsersProjectByName = sinon
+        .stub()
+        .callsArgWith(2, null, { project: null })
       const path = '/.gitignore'
       this.updateMerger.mergeUpdate = sinon.stub()
       return this.handler.newUpdate(
@@ -158,7 +215,9 @@ describe('TpdsUpdateHandler', function() {
       this.CooldownManager.isProjectOnCooldown = sinon
         .stub()
         .callsArgWith(1, null, false)
-      this.projectLocator.findUsersProjectByName = sinon.stub().callsArgWith(2)
+      this.projectLocator.findUsersProjectByName = sinon
+        .stub()
+        .callsArgWith(2, null, { project: null })
       const path = '/path/here'
       const update = {}
       this.updateMerger.mergeUpdate = sinon.stub()
@@ -188,7 +247,9 @@ describe('TpdsUpdateHandler', function() {
       this.CooldownManager.isProjectOnCooldown = sinon
         .stub()
         .callsArgWith(1, null, true)
-      this.projectLocator.findUsersProjectByName = sinon.stub().callsArgWith(2)
+      this.projectLocator.findUsersProjectByName = sinon
+        .stub()
+        .callsArgWith(2, null, { project: null })
       this.FileTypeManager.shouldIgnore = sinon
         .stub()
         .callsArgWith(1, null, false)

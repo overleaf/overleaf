@@ -281,13 +281,37 @@ const ProjectLocator = {
         const { owned, readAndWrite } = allProjects
         const projects = owned.concat(readAndWrite)
         projectName = projectName.toLowerCase()
-        const project = _.find(
-          projects,
-          project =>
-            project.name.toLowerCase() === projectName &&
-            !ProjectHelper.isArchivedOrTrashed(project, userId)
-        )
-        callback(null, project)
+        const _findNonArchivedProject = () =>
+          _.find(
+            projects,
+            project =>
+              project.name.toLowerCase() === projectName &&
+              !ProjectHelper.isArchivedOrTrashed(project, userId)
+          )
+        const _findArchivedProject = () =>
+          _.find(
+            projects,
+            project =>
+              project.name.toLowerCase() === projectName &&
+              ProjectHelper.isArchivedOrTrashed(project, userId)
+          )
+        const nonArchivedProject = _findNonArchivedProject()
+        if (nonArchivedProject) {
+          return callback(null, {
+            project: nonArchivedProject,
+            isArchivedOrTrashed: false
+          })
+        } else {
+          const archivedProject = _findArchivedProject()
+          if (archivedProject) {
+            return callback(null, {
+              project: archivedProject,
+              isArchivedOrTrashed: true
+            })
+          } else {
+            return callback(null, { project: null })
+          }
+        }
       }
     )
   }

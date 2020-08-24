@@ -45,6 +45,7 @@ describe('TpdsController', function() {
         'logger-sharelatex': {
           log() {},
           warn() {},
+          info() {},
           err() {}
         },
         'metrics-sharelatex': {
@@ -107,6 +108,28 @@ describe('TpdsController', function() {
       }
       this.TpdsController.mergeUpdate(req, res)
       res.sendStatus.calledWith(500).should.equal(true)
+    })
+
+    it('should return a 409 error when the project is archived', function() {
+      const path = '/projectName/here.txt'
+      const req = {
+        pause() {},
+        params: { 0: path, user_id: this.user_id },
+        session: {
+          destroy() {}
+        },
+        headers: {
+          'x-sl-update-source': (this.source = 'dropbox')
+        }
+      }
+      this.TpdsUpdateHandler.newUpdate = sinon
+        .stub()
+        .callsArgWith(5, new Errors.ProjectIsArchivedOrTrashedError())
+      const res = {
+        sendStatus: sinon.stub()
+      }
+      this.TpdsController.mergeUpdate(req, res)
+      res.sendStatus.calledWith(409).should.equal(true)
     })
 
     it('should return a 400 error when the project is too big', function() {

@@ -30,7 +30,14 @@ module.exports = {
       return projectLocator.findUsersProjectByName(
         user_id,
         projectName,
-        (err, project) => {
+        (err, result) => {
+          if (err) {
+            return callback(err)
+          }
+          if (!result) {
+            return callback(new Error('no data from project locator'))
+          }
+          const { project, isArchivedOrTrashed } = result
           if (project == null) {
             return projectCreationHandler.createBlankProject(
               user_id,
@@ -47,6 +54,9 @@ module.exports = {
               }
             )
           } else {
+            if (isArchivedOrTrashed) {
+              return cb(new Errors.ProjectIsArchivedOrTrashedError())
+            }
             return cb(err, project)
           }
         }
@@ -89,12 +99,26 @@ module.exports = {
     logger.log({ user_id, filePath: path }, 'handling delete update from tpds')
     return projectLocator.findUsersProjectByName(user_id, projectName, function(
       err,
-      project
+      result
     ) {
+      if (err) {
+        return callback(err)
+      }
+      if (!result) {
+        return callback(new Error('no data from project locator'))
+      }
+      const { project, isArchivedOrTrashed } = result
       if (project == null) {
         logger.log(
           { user_id, filePath: path, projectName },
           'project not found from tpds update, ignoring folder or project'
+        )
+        return callback()
+      }
+      if (isArchivedOrTrashed) {
+        logger.log(
+          { user_id, filePath: path, projectName },
+          'project is archived or trashed, ignoring folder or project'
         )
         return callback()
       }

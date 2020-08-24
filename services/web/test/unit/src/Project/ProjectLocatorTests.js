@@ -579,7 +579,8 @@ describe('ProjectLocator', function() {
           { name: 'wellll' },
           stubbedProject,
           { name: 'Noooo' }
-        ]
+        ],
+        readAndWrite: []
       }
       this.ProjectGetter.findAllUsersProjects = sinon
         .stub()
@@ -587,17 +588,19 @@ describe('ProjectLocator', function() {
       this.locator.findUsersProjectByName(
         userId,
         stubbedProject.name.toLowerCase(),
-        (err, project) => {
+        (err, result) => {
           if (err != null) {
             return done(err)
           }
+          expect(result).to.exist
+          const { project } = result
           project.should.equal(stubbedProject)
           done()
         }
       )
     })
 
-    it('should return the project which is not archived', function(done) {
+    it('should return the project which is not archived first', function(done) {
       const userId = '123jojoidns'
       const stubbedProject = { name: 'findThis', _id: 12331321 }
       const projects = {
@@ -608,7 +611,8 @@ describe('ProjectLocator', function() {
           stubbedProject,
           { name: 'findThis', archived: true, trashed: false },
           { name: 'Noooo', trashed: true }
-        ]
+        ],
+        readAndWrite: []
       }
 
       this.ProjectHelper.isArchivedOrTrashed
@@ -636,11 +640,63 @@ describe('ProjectLocator', function() {
       this.locator.findUsersProjectByName(
         userId,
         stubbedProject.name.toLowerCase(),
-        (err, project) => {
+        (err, result) => {
           if (err != null) {
             return done(err)
           }
+          expect(result).to.exist
+          const { project, isArchivedOrTrashed } = result
           project._id.should.equal(stubbedProject._id)
+          expect(isArchivedOrTrashed).to.equal(false)
+          done()
+        }
+      )
+    })
+
+    it('should return archived project, and a flag indicating it is archived', function(done) {
+      const userId = '123jojoidns'
+      const stubbedProject = { name: 'findThis', _id: 12331321 }
+      const projects = {
+        owned: [
+          { name: 'notThis' },
+          { name: 'wellll' },
+          { name: 'findThis', archived: true, trashed: true, _id: 1234 },
+          { name: 'findThis', archived: true, trashed: false },
+          { name: 'Noooo', trashed: true }
+        ],
+        readAndWrite: []
+      }
+
+      this.ProjectHelper.isArchivedOrTrashed
+        .withArgs(projects.owned[0], userId)
+        .returns(false)
+      this.ProjectHelper.isArchivedOrTrashed
+        .withArgs(projects.owned[1], userId)
+        .returns(false)
+      this.ProjectHelper.isArchivedOrTrashed
+        .withArgs(projects.owned[2], userId)
+        .returns(true)
+      this.ProjectHelper.isArchivedOrTrashed
+        .withArgs(projects.owned[3], userId)
+        .returns(true)
+      this.ProjectHelper.isArchivedOrTrashed
+        .withArgs(projects.owned[4], userId)
+        .returns(true)
+
+      this.ProjectGetter.findAllUsersProjects = sinon
+        .stub()
+        .callsArgWith(2, null, projects)
+      this.locator.findUsersProjectByName(
+        userId,
+        stubbedProject.name.toLowerCase(),
+        (err, result) => {
+          if (err != null) {
+            return done(err)
+          }
+          expect(result).to.exist
+          const { project, isArchivedOrTrashed } = result
+          project._id.should.equal(1234)
+          expect(isArchivedOrTrashed).to.equal(true)
           done()
         }
       )
@@ -659,10 +715,12 @@ describe('ProjectLocator', function() {
       this.locator.findUsersProjectByName(
         userId,
         stubbedProject.name.toLowerCase(),
-        (err, project) => {
+        (err, result) => {
           if (err != null) {
             return done(err)
           }
+          expect(result).to.exist
+          const { project } = result
           project.should.equal(stubbedProject)
           done()
         }

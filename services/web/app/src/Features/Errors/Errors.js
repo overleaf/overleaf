@@ -169,6 +169,8 @@ class InvalidQueryError extends OErrorV2CompatibleError {
   }
 }
 
+class ProjectIsArchivedOrTrashedError extends BackwardCompatibleError {}
+
 module.exports = {
   OError,
   BackwardCompatibleError,
@@ -197,5 +199,6 @@ module.exports = {
   UserNotFoundError,
   UserNotCollaboratorError,
   DocHasRangesError,
-  InvalidQueryError
+  InvalidQueryError,
+  ProjectIsArchivedOrTrashedError
 }

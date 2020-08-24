@@ -37,6 +37,42 @@ describe('TpdsUpdateTests', function() {
     })
   })
 
+  describe('adding a file', function() {
+    beforeEach(function(done) {
+      return request(
+        {
+          method: 'POST',
+          url: `/project/${this.project_id}/contents/test.tex`,
+          auth: {
+            username: 'sharelatex',
+            password: 'password',
+            sendImmediately: true
+          },
+          body: 'test one two'
+        },
+        (error, response, body) => {
+          if (error != null) {
+            throw error
+          }
+          expect(response.statusCode).to.equal(200)
+          return done()
+        }
+      )
+    })
+
+    it('should have added the file', function(done) {
+      return ProjectGetter.getProject(this.project_id, (error, project) => {
+        if (error != null) {
+          throw error
+        }
+        const projectFolder = project.rootFolder[0]
+        const file = projectFolder.docs.find(e => e.name === 'test.tex')
+        expect(file).to.exist
+        return done()
+      })
+    })
+  })
+
   describe('deleting a file', function() {
     beforeEach(function(done) {
       return request(
@@ -70,6 +106,99 @@ describe('TpdsUpdateTests', function() {
             throw new Error('expected main.tex to have been deleted')
           }
         }
+        return done()
+      })
+    })
+  })
+
+  describe('update a new file', function() {
+    beforeEach(function(done) {
+      return request(
+        {
+          method: 'POST',
+          url: `/user/${this.owner._id}/update/test-project/other.tex`,
+          auth: {
+            username: 'sharelatex',
+            password: 'password',
+            sendImmediately: true
+          },
+          body: 'test one two'
+        },
+        (error, response, body) => {
+          if (error != null) {
+            throw error
+          }
+          expect(response.statusCode).to.equal(200)
+          return done()
+        }
+      )
+    })
+
+    it('should have added the file', function(done) {
+      return ProjectGetter.getProject(this.project_id, (error, project) => {
+        if (error != null) {
+          throw error
+        }
+        const projectFolder = project.rootFolder[0]
+        const file = projectFolder.docs.find(e => e.name === 'other.tex')
+        expect(file).to.exist
+        return done()
+      })
+    })
+  })
+
+  describe('update when the project is archived', function() {
+    beforeEach(function(done) {
+      this.owner.request(
+        {
+          url: `/Project/${this.project_id}/archive`,
+          method: 'post'
+        },
+        (err, response, body) => {
+          expect(err).to.not.exist
+          return request(
+            {
+              method: 'POST',
+              url: `/user/${this.owner._id}/update/test-project/test.tex`,
+              auth: {
+                username: 'sharelatex',
+                password: 'password',
+                sendImmediately: true
+              },
+              body: 'test one two'
+            },
+            (error, response, body) => {
+              if (error != null) {
+                throw error
+              }
+              expect(response.statusCode).to.equal(409)
+              return done()
+            }
+          )
+        }
+      )
+    })
+
+    it('should not have created a new project', function(done) {
+      ProjectGetter.findAllUsersProjects(
+        this.owner._id,
+        'name',
+        (err, projects) => {
+          expect(err).to.not.exist
+          expect(projects.owned.length).to.equal(1)
+          done()
+        }
+      )
+    })
+
+    it('should not have added the file', function(done) {
+      return ProjectGetter.getProject(this.project_id, (error, project) => {
+        if (error != null) {
+          throw error
+        }
+        const projectFolder = project.rootFolder[0]
+        const file = projectFolder.docs.find(e => e.name === 'test.tex')
+        expect(file).to.not.exist
         return done()
       })
     })
