@@ -615,7 +615,7 @@ App.controller('PdfController', function(
     function processBiber(log) {
       const { errors, warnings } = BibLogParser.parse(log, {})
       const all = [].concat(errors, warnings)
-      accumulateResults({ type: 'BibTeX', all, errors, warnings })
+      accumulateResults({ type: 'BibTeX:', all, errors, warnings })
     }
 
     // output the results

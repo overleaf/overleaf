@@ -23,10 +23,19 @@ define(function() {
     iterationCount = 0;
     while (match = re.exec(text)) {
       iterationCount += 1;
-      if (iterationCount >= 10000) {
-        return result;
-      }
       newEntry = process(match);
+
+      // Too many log entries can cause browser crashes
+      // Construct a too many files error from the last match
+      const maxErrors = 100
+      if (iterationCount >= maxErrors) {
+        const level = newEntry.level + "s"
+        newEntry.message = `Over ${maxErrors} ${level} returned. Download raw logs to see full list`;
+        newEntry.line = undefined;
+        result.unshift(newEntry)
+        return [result, ""];
+      }
+
       result.push(newEntry);
       text = (match.input.slice(0, match.index)) + (match.input.slice(match.index + match[0].length + 1, match.input.length));
     }
