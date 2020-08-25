@@ -1,6 +1,8 @@
 /* eslint-disable
     camelcase,
 */
+const { NotAuthorizedError } = require('./Errors')
+
 let AuthorizationManager
 module.exports = AuthorizationManager = {
   assertClientCanViewProject(client, callback) {
@@ -23,7 +25,7 @@ module.exports = AuthorizationManager = {
     if (allowedLevels.includes(client.ol_context.privilege_level)) {
       callback(null)
     } else {
-      callback(new Error('not authorized'))
+      callback(new NotAuthorizedError())
     }
   },
 
@@ -49,7 +51,7 @@ module.exports = AuthorizationManager = {
     if (client.ol_context[`doc:${doc_id}`] === 'allowed') {
       callback(null)
     } else {
-      callback(new Error('not authorized'))
+      callback(new NotAuthorizedError())
     }
   },
 

@@ -6,6 +6,12 @@ const _ = require('underscore')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const metrics = require('metrics-sharelatex')
+const {
+  ClientRequestedMissingOpsError,
+  DocumentUpdaterRequestFailedError,
+  NullBytesInOpError,
+  UpdateTooLargeError
+} = require('./Errors')
 
 const rclient = require('redis-sharelatex').createClient(
   settings.redis.documentupdater
@@ -42,23 +48,11 @@ const DocumentUpdaterManager = {
         body = body || {}
         callback(null, body.lines, body.version, body.ranges, body.ops)
       } else if ([404, 422].includes(res.statusCode)) {
-        err = new Error('doc updater could not load requested ops')
-        err.statusCode = res.statusCode
-        logger.warn(
-          { err, project_id, doc_id, url, fromVersion },
-          'doc updater could not load requested ops'
-        )
-        callback(err)
+        callback(new ClientRequestedMissingOpsError(res.statusCode))
       } else {
-        err = new Error(
-          `doc updater returned a non-success status code: ${res.statusCode}`
+        callback(
+          new DocumentUpdaterRequestFailedError('getDocument', res.statusCode)
         )
-        err.statusCode = res.statusCode
-        logger.error(
-          { err, project_id, doc_id, url },
-          `doc updater returned a non-success status code: ${res.statusCode}`
-        )
-        callback(err)
       }
     })
   },
@@ -88,15 +82,12 @@ const DocumentUpdaterManager = {
         logger.log({ project_id }, 'deleted project from document updater')
         callback(null)
       } else {
-        err = new Error(
-          `document updater returned a failure status code: ${res.statusCode}`
+        callback(
+          new DocumentUpdaterRequestFailedError(
+            'flushProjectToMongoAndDelete',
+            res.statusCode
+          )
         )
-        err.statusCode = res.statusCode
-        logger.error(
-          { err, project_id },
-          `document updater returned failure status code: ${res.statusCode}`
-        )
-        callback(err)
       }
     })
   },
@@ -115,19 +106,12 @@ const DocumentUpdaterManager = {
     const jsonChange = JSON.stringify(change)
     if (jsonChange.indexOf('\u0000') !== -1) {
       // memory corruption check
-      const error = new Error('null bytes found in op')
-      logger.error(
-        { err: error, project_id, doc_id, jsonChange },
-        error.message
-      )
-      return callback(error)
+      return callback(new NullBytesInOpError(jsonChange))
     }
 
     const updateSize = jsonChange.length
     if (updateSize > settings.maxUpdateSize) {
-      const error = new Error('update is too large')
-      error.updateSize = updateSize
-      return callback(error)
+      return callback(new UpdateTooLargeError(updateSize))
     }
 
     // record metric for each update added to queue

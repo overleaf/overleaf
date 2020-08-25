@@ -9,6 +9,11 @@ const DocumentUpdaterManager = require('./DocumentUpdaterManager')
 const ConnectedUsersManager = require('./ConnectedUsersManager')
 const WebsocketLoadBalancer = require('./WebsocketLoadBalancer')
 const RoomManager = require('./RoomManager')
+const {
+  JoinLeaveEpochMismatchError,
+  NotAuthorizedError,
+  NotJoinedError
+} = require('./Errors')
 
 let WebsocketController
 module.exports = WebsocketController = {
@@ -48,12 +53,7 @@ module.exports = WebsocketController = {
       }
 
       if (!privilegeLevel) {
-        const err = new Error('not authorized')
-        logger.warn(
-          { err, project_id, user_id, client_id: client.id },
-          'user is not authorized to join project'
-        )
-        return callback(err)
+        return callback(new NotAuthorizedError())
       }
 
       client.ol_context = {}
@@ -162,7 +162,7 @@ module.exports = WebsocketController = {
     metrics.inc('editor.join-doc')
     const { project_id, user_id, is_restricted_user } = client.ol_context
     if (!project_id) {
-      return callback(new Error('no project_id found on client'))
+      return callback(new NotJoinedError())
     }
     logger.log(
       { user_id, project_id, doc_id, fromVersion, client_id: client.id },
@@ -184,7 +184,7 @@ module.exports = WebsocketController = {
       }
       if (joinLeaveEpoch !== client.joinLeaveEpoch) {
         // another joinDoc or leaveDoc rpc overtook us
-        return callback(new Error('joinLeaveEpoch mismatch'))
+        return callback(new JoinLeaveEpochMismatchError())
       }
       // ensure the per-doc applied-ops channel is subscribed before sending the
       // doc to the client, so that no events are missed.
@@ -428,7 +428,7 @@ module.exports = WebsocketController = {
       return callback(null, [])
     }
     if (!project_id) {
-      return callback(new Error('no project_id found on client'))
+      return callback(new NotJoinedError())
     }
     logger.log(
       { user_id, project_id, client_id: client.id },
@@ -463,7 +463,7 @@ module.exports = WebsocketController = {
     // client may have disconnected, but we can submit their update to doc-updater anyways.
     const { user_id, project_id } = client.ol_context
     if (!project_id) {
-      return callback(new Error('no project_id found on client'))
+      return callback(new NotJoinedError())
     }
 
     WebsocketController._assertClientCanApplyUpdate(
@@ -509,7 +509,7 @@ module.exports = WebsocketController = {
           function (error) {
             if ((error && error.message) === 'update is too large') {
               metrics.inc('update_too_large')
-              const { updateSize } = error
+              const { updateSize } = error.info
               logger.warn(
                 { user_id, project_id, doc_id, updateSize },
                 'update is too large'

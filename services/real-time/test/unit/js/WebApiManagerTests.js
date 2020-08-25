@@ -106,7 +106,10 @@ describe('WebApiManager', function () {
       return it('should call the callback with an error', function () {
         return this.callback
           .calledWith(
-            sinon.match({ message: 'non-success status code from web: 500' })
+            sinon.match({
+              message: 'non-success status code from web',
+              info: { statusCode: 500 }
+            })
           )
           .should.equal(true)
       })
@@ -152,7 +155,9 @@ describe('WebApiManager', function () {
           .calledWith(
             sinon.match({
               message: 'rate-limit hit when joining project',
-              code: 'TooManyRequests'
+              info: {
+                code: 'TooManyRequests'
+              }
             })
           )
           .should.equal(true)

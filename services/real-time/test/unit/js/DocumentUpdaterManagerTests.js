@@ -136,14 +136,16 @@ describe('DocumentUpdaterManager', function () {
 
         return it('should return the callback with an error', function () {
           this.callback.called.should.equal(true)
-          const err = this.callback.getCall(0).args[0]
-          err.should.have.property('statusCode', statusCode)
-          err.should.have.property(
-            'message',
-            'doc updater could not load requested ops'
-          )
+          this.callback
+            .calledWith(
+              sinon.match({
+                message: 'doc updater could not load requested ops',
+                info: { statusCode }
+              })
+            )
+            .should.equal(true)
           this.logger.error.called.should.equal(false)
-          return this.logger.warn.called.should.equal(true)
+          this.logger.warn.called.should.equal(false)
         })
       })
     )
@@ -163,13 +165,18 @@ describe('DocumentUpdaterManager', function () {
 
       return it('should return the callback with an error', function () {
         this.callback.called.should.equal(true)
-        const err = this.callback.getCall(0).args[0]
-        err.should.have.property('statusCode', 500)
-        err.should.have.property(
-          'message',
-          'doc updater returned a non-success status code: 500'
-        )
-        return this.logger.error.called.should.equal(true)
+        this.callback
+          .calledWith(
+            sinon.match({
+              message: 'doc updater returned a non-success status code',
+              info: {
+                action: 'getDocument',
+                statusCode: 500
+              }
+            })
+          )
+          .should.equal(true)
+        this.logger.error.called.should.equal(false)
       })
     })
   })
@@ -234,12 +241,17 @@ describe('DocumentUpdaterManager', function () {
 
       return it('should return the callback with an error', function () {
         this.callback.called.should.equal(true)
-        const err = this.callback.getCall(0).args[0]
-        err.should.have.property('statusCode', 500)
-        return err.should.have.property(
-          'message',
-          'document updater returned a failure status code: 500'
-        )
+        this.callback
+          .calledWith(
+            sinon.match({
+              message: 'doc updater returned a non-success status code',
+              info: {
+                action: 'flushProjectToMongoAndDelete',
+                statusCode: 500
+              }
+            })
+          )
+          .should.equal(true)
       })
     })
   })
@@ -346,7 +358,7 @@ describe('DocumentUpdaterManager', function () {
       })
 
       it('should add the size to the error', function () {
-        return this.callback.args[0][0].updateSize.should.equal(7782422)
+        return this.callback.args[0][0].info.updateSize.should.equal(7782422)
       })
 
       return it('should not push the change onto the pending-updates-list queue', function () {

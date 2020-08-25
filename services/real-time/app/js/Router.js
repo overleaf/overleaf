@@ -9,6 +9,7 @@ const HttpController = require('./HttpController')
 const HttpApiController = require('./HttpApiController')
 const bodyParser = require('body-parser')
 const base64id = require('base64id')
+const { UnexpectedArgumentsError } = require('./Errors')
 
 const basicAuth = require('basic-auth-connect')
 const httpAuth = basicAuth(function (user, pass) {
@@ -33,8 +34,8 @@ module.exports = Router = {
     attrs.client_id = client.id
     attrs.err = error
     if (error.name === 'CodedError') {
-      logger.warn(attrs, error.message, { code: error.code })
-      const serializedError = { message: error.message, code: error.code }
+      logger.warn(attrs, error.message)
+      const serializedError = { message: error.message, code: error.info.code }
       callback(serializedError)
     } else if (error.message === 'unexpected arguments') {
       // the payload might be very large, put it on level info
@@ -64,7 +65,7 @@ module.exports = Router = {
   },
 
   _handleInvalidArguments(client, method, args) {
-    const error = new Error('unexpected arguments')
+    const error = new UnexpectedArgumentsError()
     let callback = args[args.length - 1]
     if (typeof callback !== 'function') {
       callback = function () {}
