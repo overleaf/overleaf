@@ -167,9 +167,9 @@ templates.canceledSubscription = CTAEmailTemplate({
   },
   message() {
     return `\
-I'm sorry to see you cancelled your ${
+We are sorry to see you cancelled your ${
       settings.appName
-    } premium account. Would you mind giving us some feedback on what the site is lacking at the moment via this quick survey?\
+    } premium subscription. Would you mind giving us some feedback on what the site is lacking at the moment via this quick survey?\
 `
   },
   secondaryMessage() {
@@ -179,7 +179,7 @@ I'm sorry to see you cancelled your ${
     return 'Leave Feedback'
   },
   ctaURL(opts) {
-    return 'https://docs.google.com/forms/d/e/1FAIpQLScqU6Je1r4Afz6ul6oY0RAfN7RabdWv_oL1u7Rj1YBmXS4fiQ/viewform?usp=sf_link'
+    return 'https://docs.google.com/forms/d/e/1FAIpQLSfa7z_s-cucRRXm70N4jEcSbFsZeb0yuKThHGQL8ySEaQzF0Q/viewform?usp=sf_link'
   }
 })
 
