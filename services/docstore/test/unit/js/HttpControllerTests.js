@@ -19,7 +19,7 @@ const modulePath = require('path').join(
   __dirname,
   '../../../app/js/HttpController'
 )
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 
 describe('HttpController', function () {
   beforeEach(function () {

@@ -13,12 +13,20 @@
  */
 const chai = require('chai')
 chai.should()
-const { db, ObjectId } = require('../../../app/js/mongojs')
+const { getCollection, ObjectId } = require('../../../app/js/mongodb')
 const { expect } = chai
 const DocstoreApp = require('./helpers/DocstoreApp')
 const Errors = require('../../../app/js/Errors')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
+
+let db
+before(async function () {
+  db = {
+    docs: await getCollection('docs'),
+    docOps: await getCollection('docOps')
+  }
+})
 
 describe('Deleting a doc', function () {
   beforeEach(function (done) {
@@ -61,7 +69,7 @@ describe('Deleting a doc', function () {
     })
 
     return it('should insert a deleted doc into the docs collection', function (done) {
-      return db.docs.find({ _id: this.doc_id }, (error, docs) => {
+      return db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
         docs[0]._id.should.deep.equal(this.doc_id)
         docs[0].lines.should.deep.equal(this.lines)
         docs[0].deleted.should.equal(true)
@@ -100,7 +108,7 @@ describe("Destroying a project's documents", function () {
     })
 
     it('should remove the doc from the docs collection', function (done) {
-      return db.docs.find({ _id: this.doc_id }, (err, docs) => {
+      return db.docs.find({ _id: this.doc_id }).toArray((err, docs) => {
         expect(err).not.to.exist
         expect(docs).to.deep.equal([])
         return done()
@@ -108,7 +116,7 @@ describe("Destroying a project's documents", function () {
     })
 
     return it('should remove the docOps from the docOps collection', function (done) {
-      return db.docOps.find({ doc_id: this.doc_id }, (err, docOps) => {
+      return db.docOps.find({ doc_id: this.doc_id }).toArray((err, docOps) => {
         expect(err).not.to.exist
         expect(docOps).to.deep.equal([])
         return done()
@@ -118,7 +126,7 @@ describe("Destroying a project's documents", function () {
 
   return describe('when the doc is archived', function () {
     beforeEach(function (done) {
-      return DocstoreClient.archiveAllDoc(this.project_id, function (err) {
+      return DocstoreClient.archiveAllDoc(this.project_id, (err) => {
         if (err != null) {
           return done(err)
         }
@@ -127,7 +135,7 @@ describe("Destroying a project's documents", function () {
     })
 
     it('should remove the doc from the docs collection', function (done) {
-      return db.docs.find({ _id: this.doc_id }, (err, docs) => {
+      return db.docs.find({ _id: this.doc_id }).toArray((err, docs) => {
         expect(err).not.to.exist
         expect(docs).to.deep.equal([])
         return done()
@@ -135,7 +143,7 @@ describe("Destroying a project's documents", function () {
     })
 
     it('should remove the docOps from the docOps collection', function (done) {
-      return db.docOps.find({ doc_id: this.doc_id }, (err, docOps) => {
+      return db.docOps.find({ doc_id: this.doc_id }).toArray((err, docOps) => {
         expect(err).not.to.exist
         expect(docOps).to.deep.equal([])
         return done()

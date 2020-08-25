@@ -3,7 +3,7 @@ const chai = require('chai')
 const { expect } = chai
 const modulePath = '../../../app/js/DocArchiveManager.js'
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const Errors = require('../../../app/js/Errors')
 
 chai.use(require('chai-as-promised'))

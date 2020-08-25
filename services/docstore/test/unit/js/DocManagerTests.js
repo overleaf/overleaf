@@ -19,7 +19,7 @@ const { assert } = require('chai')
 chai.should()
 const { expect } = chai
 const modulePath = require('path').join(__dirname, '../../../app/js/DocManager')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const Errors = require('../../../app/js/Errors')
 
 describe('DocManager', function () {

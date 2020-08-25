@@ -10,6 +10,7 @@ const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const express = require('express')
 const bodyParser = require('body-parser')
+const mongodb = require('./app/js/mongodb')
 const Errors = require('./app/js/Errors')
 const HttpController = require('./app/js/HttpController')
 
@@ -76,12 +77,21 @@ const { host } = Settings.internal.docstore
 
 if (!module.parent) {
   // Called directly
-  app.listen(port, host, function (error) {
-    if (error != null) {
-      throw error
-    }
-    return logger.info(`Docstore starting up, listening on ${host}:${port}`)
-  })
+  mongodb
+    .waitForDb()
+    .then(() => {
+      app.listen(port, host, function (err) {
+        if (err) {
+          logger.fatal({ err }, `Cannot bind to ${host}:${port}. Exiting.`)
+          process.exit(1)
+        }
+        return logger.info(`Docstore starting up, listening on ${host}:${port}`)
+      })
+    })
+    .catch((err) => {
+      logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
+      process.exit(1)
+    })
 }
 
 module.exports = app

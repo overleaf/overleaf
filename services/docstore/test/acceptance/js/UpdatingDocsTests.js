@@ -13,7 +13,7 @@
 const sinon = require('sinon')
 const chai = require('chai')
 chai.should()
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const DocstoreApp = require('./helpers/DocstoreApp')
 
 const DocstoreClient = require('./helpers/DocstoreClient')

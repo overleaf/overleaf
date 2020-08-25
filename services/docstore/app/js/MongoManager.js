@@ -11,28 +11,28 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let MongoManager
-const { db, ObjectId } = require('./mongojs')
+const { getCollection, ObjectId } = require('./mongodb')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const { promisify } = require('util')
+
+const docsCollectionPromise = getCollection('docs')
+const docOpsCollectionPromise = getCollection('docOps')
 
 module.exports = MongoManager = {
   findDoc(project_id, doc_id, filter, callback) {
     if (callback == null) {
       callback = function (error, doc) {}
     }
-    return db.docs.find(
-      {
-        _id: ObjectId(doc_id.toString()),
-        project_id: ObjectId(project_id.toString())
-      },
-      filter,
-      function (error, docs) {
-        if (docs == null) {
-          docs = []
-        }
-        return callback(error, docs[0])
-      }
+    docsCollectionPromise.then((docs) =>
+      docs.findOne(
+        {
+          _id: ObjectId(doc_id.toString()),
+          project_id: ObjectId(project_id.toString())
+        },
+        filter,
+        callback
+      )
     )
   },
 
@@ -44,7 +44,9 @@ module.exports = MongoManager = {
     if (!options.include_deleted) {
       query.deleted = { $ne: true }
     }
-    return db.docs.find(query, filter, callback)
+    docsCollectionPromise.then((docs) =>
+      docs.find(query, filter).toArray(callback)
+    )
   },
 
   getArchivedProjectDocs(project_id, callback) {
@@ -52,7 +54,7 @@ module.exports = MongoManager = {
       project_id: ObjectId(project_id.toString()),
       inS3: true
     }
-    return db.docs.find(query, {}, callback)
+    docsCollectionPromise.then((docs) => docs.find(query).toArray(callback))
   },
 
   upsertIntoDocCollection(project_id, doc_id, updates, callback) {
@@ -66,24 +68,28 @@ module.exports = MongoManager = {
       }
     }
     update.$set.project_id = ObjectId(project_id)
-    return db.docs.update(
-      { _id: ObjectId(doc_id) },
-      update,
-      { upsert: true },
-      callback
+    docsCollectionPromise.then((docs) =>
+      docs.updateOne(
+        { _id: ObjectId(doc_id) },
+        update,
+        { upsert: true },
+        callback
+      )
     )
   },
 
   markDocAsDeleted(project_id, doc_id, callback) {
-    return db.docs.update(
-      {
-        _id: ObjectId(doc_id),
-        project_id: ObjectId(project_id)
-      },
-      {
-        $set: { deleted: true }
-      },
-      callback
+    docsCollectionPromise.then((docs) =>
+      docs.updateOne(
+        {
+          _id: ObjectId(doc_id),
+          project_id: ObjectId(project_id)
+        },
+        {
+          $set: { deleted: true }
+        },
+        callback
+      )
     )
   },
 
@@ -99,30 +105,30 @@ module.exports = MongoManager = {
       _id: doc_id,
       rev
     }
-    return db.docs.update(query, update, (err) => callback(err))
+    docsCollectionPromise.then((docs) =>
+      docs.updateOne(query, update, callback)
+    )
   },
 
   getDocVersion(doc_id, callback) {
     if (callback == null) {
       callback = function (error, version) {}
     }
-    return db.docOps.find(
-      {
-        doc_id: ObjectId(doc_id)
-      },
-      {
-        version: 1
-      },
-      function (error, docs) {
-        if (error != null) {
-          return callback(error)
+    docOpsCollectionPromise.then((docOps) =>
+      docOps.findOne(
+        {
+          doc_id: ObjectId(doc_id)
+        },
+        {
+          version: 1
+        },
+        function (error, doc) {
+          if (error != null) {
+            return callback(error)
+          }
+          callback(null, (doc && doc.version) || 0)
         }
-        if (docs.length < 1 || docs[0].version == null) {
-          return callback(null, 0)
-        } else {
-          return callback(null, docs[0].version)
-        }
-      }
+      )
     )
   },
 
@@ -130,36 +136,42 @@ module.exports = MongoManager = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return db.docOps.update(
-      {
-        doc_id: ObjectId(doc_id)
-      },
-      {
-        $set: { version }
-      },
-      {
-        upsert: true
-      },
-      callback
+    docOpsCollectionPromise.then((docOps) =>
+      docOps.updateOne(
+        {
+          doc_id: ObjectId(doc_id)
+        },
+        {
+          $set: { version }
+        },
+        {
+          upsert: true
+        },
+        callback
+      )
     )
   },
 
   destroyDoc(doc_id, callback) {
-    return db.docs.remove(
-      {
-        _id: ObjectId(doc_id)
-      },
-      function (err) {
-        if (err != null) {
-          return callback(err)
+    docsCollectionPromise.then((docs) =>
+      docs.deleteOne(
+        {
+          _id: ObjectId(doc_id)
+        },
+        function (err) {
+          if (err != null) {
+            return callback(err)
+          }
+          docOpsCollectionPromise.then((docOps) =>
+            docOps.deleteOne(
+              {
+                doc_id: ObjectId(doc_id)
+              },
+              callback
+            )
+          )
         }
-        return db.docOps.remove(
-          {
-            doc_id: ObjectId(doc_id)
-          },
-          callback
-        )
-      }
+      )
     )
   }
 }
