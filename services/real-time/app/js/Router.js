@@ -28,7 +28,7 @@ let Router
 module.exports = Router = {
   _handleError(callback, error, client, method, attrs) {
     attrs = attrs || {}
-    for (const key of ['project_id', 'doc_id', 'user_id']) {
+    for (const key of ['project_id', 'user_id']) {
       attrs[key] = client.ol_context[key]
     }
     attrs.client_id = client.id
@@ -275,7 +275,9 @@ module.exports = Router = {
 
         WebsocketController.leaveDoc(client, doc_id, function (err, ...args) {
           if (err) {
-            Router._handleError(callback, err, client, 'leaveDoc')
+            Router._handleError(callback, err, client, 'leaveDoc', {
+              doc_id
+            })
           } else {
             callback(null, ...args)
           }
