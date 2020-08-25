@@ -17,14 +17,14 @@ const DispatchManager = require('./app/js/DispatchManager')
 const DeleteQueueManager = require('./app/js/DeleteQueueManager')
 const Errors = require('./app/js/Errors')
 const HttpController = require('./app/js/HttpController')
-const mongojs = require('./app/js/mongojs')
+const mongodb = require('./app/js/mongodb')
 const async = require('async')
 
 const Path = require('path')
 const bodyParser = require('body-parser')
 
 Metrics.mongodb.monitor(
-  Path.resolve(__dirname, '/node_modules/mongojs/node_modules/mongodb'),
+  Path.resolve(__dirname, '/node_modules/mongodb'),
   logger
 )
 Metrics.event_loop.monitor(logger, 100)
@@ -158,7 +158,7 @@ app.get('/health_check', (req, res, next) => {
         })
       },
       (cb) => {
-        mongojs.healthCheck((error) => {
+        mongodb.healthCheck((error) => {
           if (error) {
             logger.err({ err: error }, 'failed mongo health check')
           }
@@ -219,13 +219,27 @@ const host = Settings.internal.documentupdater.host || 'localhost'
 
 if (!module.parent) {
   // Called directly
-  app.listen(port, host, () => {
-    logger.info(`Document-updater starting up, listening on ${host}:${port}`)
-    if (Settings.continuousBackgroundFlush) {
-      logger.info('Starting continuous background flush')
-      DeleteQueueManager.startBackgroundFlush()
-    }
-  })
+  mongodb
+    .waitForDb()
+    .then(() => {
+      app.listen(port, host, function (err) {
+        if (err) {
+          logger.fatal({ err }, `Cannot bind to ${host}:${port}. Exiting.`)
+          process.exit(1)
+        }
+        logger.info(
+          `Document-updater starting up, listening on ${host}:${port}`
+        )
+        if (Settings.continuousBackgroundFlush) {
+          logger.info('Starting continuous background flush')
+          DeleteQueueManager.startBackgroundFlush()
+        }
+      })
+    })
+    .catch((err) => {
+      logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
+      process.exit(1)
+    })
 }
 
 module.exports = app
