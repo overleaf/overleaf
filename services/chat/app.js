@@ -23,7 +23,8 @@ if (!module.parent) {
       settings.internal != null ? settings.internal.chat : undefined,
       (x1) => x1.host
     ) || 'localhost'
-  mongodb.clientConnecting
+  mongodb
+    .waitForDb()
     .then(() => {
       Server.server.listen(port, host, function (err) {
         if (err) {
