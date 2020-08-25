@@ -2,6 +2,7 @@
     camelcase,
 */
 const request = require('request')
+const OError = require('@overleaf/o-error')
 const settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const {
@@ -34,6 +35,7 @@ module.exports = {
       },
       function (error, response, data) {
         if (error) {
+          OError.tag(error, 'join project request failed')
           return callback(error)
         }
         if (response.statusCode >= 200 && response.statusCode < 300) {

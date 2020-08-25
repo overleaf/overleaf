@@ -1,3 +1,4 @@
+const OError = require('@overleaf/o-error')
 const { EventEmitter } = require('events')
 const { MissingSessionError } = require('./Errors')
 
@@ -18,6 +19,9 @@ module.exports = function (io, sessionStore, cookieParser, cookieName) {
       }
       sessionStore.get(sessionId, function (error, session) {
         if (error) {
+          OError.tag(error, 'error getting session from sessionStore', {
+            sessionId
+          })
           return next(error, socket)
         }
         if (!session) {

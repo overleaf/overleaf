@@ -5,6 +5,7 @@ const async = require('async')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const redis = require('redis-sharelatex')
+const OError = require('@overleaf/o-error')
 const rclient = redis.createClient(Settings.redis.realtime)
 const Keys = Settings.redis.realtime.key_schema
 
@@ -67,10 +68,7 @@ module.exports = {
 
     multi.exec(function (err) {
       if (err) {
-        logger.err(
-          { err, project_id, client_id },
-          'problem marking user as connected'
-        )
+        err = new OError('problem marking user as connected').withCause(err)
       }
       callback(err)
     })
@@ -104,7 +102,12 @@ module.exports = {
     multi.srem(Keys.clientsInProject({ project_id }), client_id)
     multi.expire(Keys.clientsInProject({ project_id }), FOUR_DAYS_IN_S)
     multi.del(Keys.connectedUser({ project_id, client_id }))
-    multi.exec(callback)
+    multi.exec(function (err) {
+      if (err) {
+        err = new OError('problem marking user as disconnected').withCause(err)
+      }
+      callback(err)
+    })
   },
 
   _getConnectedUser(project_id, client_id, callback) {
@@ -112,6 +115,12 @@ module.exports = {
       err,
       result
     ) {
+      if (err) {
+        err = new OError('problem fetching connected user details', {
+          other_client_id: client_id
+        }).withCause(err)
+        return callback(err)
+      }
       if (!(result && result.user_id)) {
         result = {
           connected: false,
@@ -126,15 +135,10 @@ module.exports = {
           try {
             result.cursorData = JSON.parse(result.cursorData)
           } catch (e) {
-            logger.error(
-              {
-                err: e,
-                project_id,
-                client_id,
-                cursorData: result.cursorData
-              },
-              'error parsing cursorData JSON'
-            )
+            OError.tag(e, 'error parsing cursorData JSON', {
+              other_client_id: client_id,
+              cursorData: result.cursorData
+            })
             return callback(e)
           }
         }
@@ -150,6 +154,7 @@ module.exports = {
       results
     ) {
       if (err) {
+        err = new OError('problem getting clients in project').withCause(err)
         return callback(err)
       }
       const jobs = results.map((client_id) => (cb) =>
@@ -157,6 +162,7 @@ module.exports = {
       )
       async.series(jobs, function (err, users) {
         if (err) {
+          OError.tag(err, 'problem getting connected users')
           return callback(err)
         }
         users = users.filter(

@@ -1,6 +1,7 @@
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
 const settings = require('settings-sharelatex')
+const OError = require('@overleaf/o-error')
 
 const ClientMap = new Map() // for each redis client, store a Map of subscribed channels (channelname -> subscribe promise)
 
@@ -22,12 +23,13 @@ module.exports = {
     const channel = `${baseChannel}:${id}`
     const actualSubscribe = function () {
       // subscribe is happening in the foreground and it should reject
-      const p = rclient.subscribe(channel)
-      p.finally(function () {
-        if (clientChannelMap.get(channel) === subscribePromise) {
-          clientChannelMap.delete(channel)
-        }
-      })
+      return rclient
+        .subscribe(channel)
+        .finally(function () {
+          if (clientChannelMap.get(channel) === subscribePromise) {
+            clientChannelMap.delete(channel)
+          }
+        })
         .then(function () {
           logger.log({ channel }, 'subscribed to channel')
           metrics.inc(`subscribe.${baseChannel}`)
@@ -35,8 +37,11 @@ module.exports = {
         .catch(function (err) {
           logger.error({ channel, err }, 'failed to subscribe to channel')
           metrics.inc(`subscribe.failed.${baseChannel}`)
+          // add context for the stack-trace at the call-site
+          throw new OError('failed to subscribe to channel', {
+            channel
+          }).withCause(err)
         })
-      return p
     }
 
     const pendingActions = clientChannelMap.get(channel) || Promise.resolve()

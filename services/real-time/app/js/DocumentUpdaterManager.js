@@ -3,6 +3,7 @@
 */
 const request = require('request')
 const _ = require('underscore')
+const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const metrics = require('metrics-sharelatex')
@@ -29,10 +30,7 @@ const DocumentUpdaterManager = {
     request.get(url, function (err, res, body) {
       timer.done()
       if (err) {
-        logger.error(
-          { err, url, project_id, doc_id },
-          'error getting doc from doc updater'
-        )
+        OError.tag(err, 'error getting doc from doc updater')
         return callback(err)
       }
       if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -43,6 +41,7 @@ const DocumentUpdaterManager = {
         try {
           body = JSON.parse(body)
         } catch (error) {
+          OError.tag(error, 'error parsing doc updater response')
           return callback(error)
         }
         body = body || {}
@@ -73,10 +72,7 @@ const DocumentUpdaterManager = {
     request.del(url, function (err, res) {
       timer.done()
       if (err) {
-        logger.error(
-          { err, project_id },
-          'error deleting project from document updater'
-        )
+        OError.tag(err, 'error deleting project from document updater')
         callback(err)
       } else if (res.statusCode >= 200 && res.statusCode < 300) {
         logger.log({ project_id }, 'deleted project from document updater')
@@ -124,9 +120,15 @@ const DocumentUpdaterManager = {
       error
     ) {
       if (error) {
+        error = new OError('error pushing update into redis').withCause(error)
         return callback(error)
       }
-      rclient.rpush('pending-updates-list', doc_key, callback)
+      rclient.rpush('pending-updates-list', doc_key, function (error) {
+        if (error) {
+          error = new OError('error pushing doc_id into redis').withCause(error)
+        }
+        callback(error)
+      })
     })
   }
 }

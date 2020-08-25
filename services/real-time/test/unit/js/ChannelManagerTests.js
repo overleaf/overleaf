@@ -91,7 +91,8 @@ describe('ChannelManager', function () {
         )
         p.then(() => done(new Error('should not subscribe but fail'))).catch(
           (err) => {
-            err.message.should.equal('some redis error')
+            err.message.should.equal('failed to subscribe to channel')
+            err.cause.message.should.equal('some redis error')
             this.ChannelManager.getClientMapEntry(this.rclient)
               .has('applied-ops:1234567890abcdef')
               .should.equal(false)
