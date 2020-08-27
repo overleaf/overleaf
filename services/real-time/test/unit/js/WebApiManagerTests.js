@@ -130,8 +130,8 @@ describe('WebApiManager', function () {
         this.callback
           .calledWith(
             sinon.match({
-              message: 'non-success status code from web',
-              info: { statusCode: 404 }
+              message: 'project not found',
+              info: { code: 'ProjectNotFound' }
             })
           )
           .should.equal(true)

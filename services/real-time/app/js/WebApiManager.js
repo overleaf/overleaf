@@ -59,6 +59,8 @@ module.exports = {
           )
         } else if (response.statusCode === 403) {
           callback(new NotAuthorizedError())
+        } else if (response.statusCode === 404) {
+          callback(new CodedError('project not found', 'ProjectNotFound'))
         } else {
           callback(new WebApiRequestFailedError(response.statusCode))
         }
