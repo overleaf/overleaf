@@ -12,11 +12,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ThreadManager
-const { ObjectId, getCollection } = require('../../mongodb')
+const { db, ObjectId } = require('../../mongodb')
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
-
-const roomsCollectionPromise = getCollection('rooms')
 
 module.exports = ThreadManager = {
   GLOBAL_THREAD: 'GLOBAL',
@@ -50,58 +48,52 @@ module.exports = ThreadManager = {
       }
     }
 
-    roomsCollectionPromise.then((rooms) =>
-      rooms.updateOne(query, { $set: update }, { upsert: true }, function (
-        error
-      ) {
-        if (error != null) {
-          return callback(error)
-        }
-        rooms.findOne(query, callback)
-      })
-    )
+    db.rooms.updateOne(query, { $set: update }, { upsert: true }, function (
+      error
+    ) {
+      if (error != null) {
+        return callback(error)
+      }
+      db.rooms.findOne(query, callback)
+    })
   },
 
   findAllThreadRooms(project_id, callback) {
     if (callback == null) {
       callback = function (error, rooms) {}
     }
-    roomsCollectionPromise.then((rooms) =>
-      rooms
-        .find(
-          {
-            project_id: ObjectId(project_id.toString()),
-            thread_id: { $exists: true }
-          },
-          {
-            thread_id: 1,
-            resolved: 1
-          }
-        )
-        .toArray(callback)
-    )
+    db.rooms
+      .find(
+        {
+          project_id: ObjectId(project_id.toString()),
+          thread_id: { $exists: true }
+        },
+        {
+          thread_id: 1,
+          resolved: 1
+        }
+      )
+      .toArray(callback)
   },
 
   resolveThread(project_id, thread_id, user_id, callback) {
     if (callback == null) {
       callback = function (error) {}
     }
-    roomsCollectionPromise.then((rooms) =>
-      rooms.updateOne(
-        {
-          project_id: ObjectId(project_id.toString()),
-          thread_id: ObjectId(thread_id.toString())
-        },
-        {
-          $set: {
-            resolved: {
-              user_id,
-              ts: new Date()
-            }
+    db.rooms.updateOne(
+      {
+        project_id: ObjectId(project_id.toString()),
+        thread_id: ObjectId(thread_id.toString())
+      },
+      {
+        $set: {
+          resolved: {
+            user_id,
+            ts: new Date()
           }
-        },
-        callback
-      )
+        }
+      },
+      callback
     )
   },
 
@@ -109,19 +101,17 @@ module.exports = ThreadManager = {
     if (callback == null) {
       callback = function (error) {}
     }
-    roomsCollectionPromise.then((rooms) =>
-      rooms.updateOne(
-        {
-          project_id: ObjectId(project_id.toString()),
-          thread_id: ObjectId(thread_id.toString())
-        },
-        {
-          $unset: {
-            resolved: true
-          }
-        },
-        callback
-      )
+    db.rooms.updateOne(
+      {
+        project_id: ObjectId(project_id.toString()),
+        thread_id: ObjectId(thread_id.toString())
+      },
+      {
+        $unset: {
+          resolved: true
+        }
+      },
+      callback
     )
   },
 
@@ -136,18 +126,16 @@ module.exports = ThreadManager = {
       if (error != null) {
         return callback(error)
       }
-      roomsCollectionPromise.then((rooms) =>
-        rooms.deleteOne(
-          {
-            _id: room._id
-          },
-          function (error) {
-            if (error != null) {
-              return callback(error)
-            }
-            return callback(null, room._id)
+      db.rooms.deleteOne(
+        {
+          _id: room._id
+        },
+        function (error) {
+          if (error != null) {
+            return callback(error)
           }
-        )
+          return callback(null, room._id)
+        }
       )
     })
   }

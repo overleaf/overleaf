@@ -11,7 +11,14 @@ async function waitForDb() {
   await clientPromise
 }
 
+const db = {}
+waitForDb().then(async function () {
+  db.messages = await getCollection('messages')
+  db.rooms = await getCollection('rooms')
+})
+
 module.exports = {
+  db,
   ObjectId,
   getCollection,
   waitForDb
