@@ -107,8 +107,7 @@ describe('WebApiManager', function () {
         this.callback
           .calledWith(
             sinon.match({
-              message: 'non-success status code from web',
-              info: { statusCode: 403 }
+              message: 'not authorized'
             })
           )
           .should.equal(true)

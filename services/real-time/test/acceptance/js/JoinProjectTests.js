@@ -221,9 +221,7 @@ describe('joinProject', function () {
     })
 
     it('should return an error', function () {
-      this.error.message.should.equal(
-        'Something went wrong in real-time service'
-      )
+      this.error.message.should.equal('not authorized')
     })
 
     it('should not have joined the project room', function (done) {
