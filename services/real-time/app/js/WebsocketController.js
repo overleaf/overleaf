@@ -462,10 +462,6 @@ module.exports = WebsocketController = {
       update,
       function (error) {
         if (error) {
-          logger.warn(
-            { err: error, doc_id, client_id: client.id, version: update.v },
-            'client is not authorized to make update'
-          )
           setTimeout(
             () =>
               // Disconnect, but give the client the chance to receive the error
