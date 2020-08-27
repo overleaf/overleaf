@@ -38,6 +38,9 @@ module.exports = MockWebServer = {
   joinProjectRequest(req, res, next) {
     const { project_id } = req.params
     const { user_id } = req.query
+    if (project_id === 'not-found') {
+      return res.status(404).send()
+    }
     if (project_id === 'forbidden') {
       return res.status(403).send()
     }

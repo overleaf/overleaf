@@ -237,6 +237,67 @@ describe('joinProject', function () {
     })
   })
 
+  describe('when deleted and web replies with a 404', function () {
+    before(function (done) {
+      return async.series(
+        [
+          (cb) => {
+            return FixturesManager.setUpProject(
+              {
+                project_id: 'not-found',
+                privilegeLevel: 'owner',
+                project: {
+                  name: 'Test Project'
+                }
+              },
+              (e, { project_id, user_id }) => {
+                this.project_id = project_id
+                this.user_id = user_id
+                cb(e)
+              }
+            )
+          },
+
+          (cb) => {
+            this.client = RealTimeClient.connect()
+            this.client.on('connectionAccepted', cb)
+          },
+
+          (cb) => {
+            this.client.emit(
+              'joinProject',
+              { project_id: this.project_id },
+              (error, project, privilegeLevel, protocolVersion) => {
+                this.error = error
+                this.project = project
+                this.privilegeLevel = privilegeLevel
+                this.protocolVersion = protocolVersion
+                cb()
+              }
+            )
+          }
+        ],
+        done
+      )
+    })
+
+    it('should return an error', function () {
+      this.error.message.should.equal('Something went wrong in real-time service')
+    })
+
+    it('should not have joined the project room', function (done) {
+      RealTimeClient.getConnectedClient(
+        this.client.socket.sessionid,
+        (error, client) => {
+          expect(Array.from(client.rooms).includes(this.project_id)).to.equal(
+            false
+          )
+          done()
+        }
+      )
+    })
+  })
+
   return describe('when over rate limit', function () {
     before(function (done) {
       return async.series(
