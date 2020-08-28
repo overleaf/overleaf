@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const app = require('../../../../app')
+const { waitForDb } = require('../../../../app/js/mongodb')
 require('logger-sharelatex').logger.level('error')
 const settings = require('settings-sharelatex')
 
@@ -27,9 +28,10 @@ module.exports = {
       return callback()
     } else if (this.initing) {
       return this.callbacks.push(callback)
-    } else {
-      this.initing = true
-      this.callbacks.push(callback)
+    }
+    this.initing = true
+    this.callbacks.push(callback)
+    waitForDb().then(() => {
       return app.listen(
         settings.internal.docstore.port,
         'localhost',
@@ -47,6 +49,6 @@ module.exports = {
           })()
         }
       )
-    }
+    })
   }
 }
