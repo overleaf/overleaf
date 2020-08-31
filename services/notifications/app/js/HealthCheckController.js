@@ -11,19 +11,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { ObjectId } = require('mongojs')
+const { db, ObjectId } = require('./mongodb')
 const request = require('request')
 const async = require('async')
 const _ = require('underscore')
 const settings = require('settings-sharelatex')
 const { port } = settings.internal.notifications
 const logger = require('logger-sharelatex')
-
-const mongojs = require('mongojs')
-const Settings = require('settings-sharelatex')
-const db = mongojs(Settings.mongo != null ? Settings.mongo.url : undefined, [
-  'notifications'
-])
 
 module.exports = {
   check(callback) {
