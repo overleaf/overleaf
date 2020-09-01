@@ -58,7 +58,7 @@ function OutlinePane({
           {expanded ? (
             <OverlayTrigger placement="top" overlay={tooltip} delayHide={100}>
               <a
-                href="https://forms.gle/8N1iSS9rkgmpFDHY6"
+                href="/learn/how-to/Using_the_File_Outline_in_Overleaf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="outline-header-info-badge"
@@ -85,8 +85,8 @@ function OutlinePane({
 
 const infoContent = (
   <>
-    The <strong>File outline</strong> is a new feature. Click the icon to give
-    feedback.
+    The <strong>File outline</strong> is a new feature. Click the icon to learn
+    more.
   </>
 )
 const tooltip = <Tooltip id="outline-info-tooltip">{infoContent}</Tooltip>
