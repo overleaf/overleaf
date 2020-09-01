@@ -109,7 +109,8 @@ class SAMLSessionDataMissing extends BackwardCompatibleError {
         settings.appName
       }. Please contact your IT department if you have any questions.`
     } else if (!institutionEmail) {
-      this.message = 'Unable to confirm your institution email.'
+      this.message =
+        'Unable to confirm your institutional email address. The institutional identity provider did not provide an email address in the expected attribute. Please contact us if this keeps happening.'
     }
   }
 }
