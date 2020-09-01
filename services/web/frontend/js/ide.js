@@ -180,7 +180,7 @@ App.controller('IdeController', function(
   ide.$scope = $scope
 
   ide.referencesSearchManager = new ReferencesManager(ide, $scope)
-  ide.connectionManager = new ConnectionManager(ide, $scope, eventTracking)
+  ide.connectionManager = new ConnectionManager(ide, $scope)
   ide.fileTreeManager = new FileTreeManager(ide, $scope)
   ide.editorManager = new EditorManager(ide, $scope, localStorage)
   ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
