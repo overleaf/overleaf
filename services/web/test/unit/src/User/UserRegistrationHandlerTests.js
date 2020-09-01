@@ -29,7 +29,7 @@ describe('UserRegistrationHandler', function() {
     this.User = { update: sinon.stub().callsArgWith(2) }
     this.UserGetter = { getUserByAnyEmail: sinon.stub() }
     this.UserCreator = {
-      createNewUser: sinon.stub().callsArgWith(1, null, this.user)
+      createNewUser: sinon.stub().callsArgWith(2, null, this.user)
     }
     this.AuthenticationManager = {
       validateEmail: sinon.stub().returns(null),

@@ -1,16 +1,21 @@
 const logger = require('logger-sharelatex')
 const util = require('util')
-const { User } = require('../../models/User')
+const { AffiliationError } = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')
-const UserUpdater = require('./UserUpdater')
+const { User } = require('../../models/User')
+const UserDeleter = require('./UserDeleter')
 const UserGetter = require('./UserGetter')
+const UserUpdater = require('./UserUpdater')
 
-async function _addAffiliation(user) {
+async function _addAffiliation(user, affiliationOptions) {
   try {
-    await UserUpdater.promises.addAffiliationForNewUser(user._id, user.email)
+    await UserUpdater.promises.addAffiliationForNewUser(
+      user._id,
+      user.email,
+      affiliationOptions
+    )
   } catch (error) {
-    // do not pass error back during registration
-    // errors are logged in UserUpdater and InstitutionsAPI
+    throw new AffiliationError('add affiliation failed').withCause(error)
   }
 
   try {
@@ -24,7 +29,7 @@ async function _addAffiliation(user) {
   return user
 }
 
-async function createNewUser(attributes) {
+async function createNewUser(attributes, options = {}) {
   let user = new User()
 
   if (attributes.first_name == null || attributes.first_name === '') {
@@ -65,7 +70,16 @@ async function createNewUser(attributes) {
   user = await user.save()
 
   if (Features.hasFeature('affiliations')) {
-    user = await _addAffiliation(user)
+    try {
+      user = await _addAffiliation(user, options.affiliationOptions || {})
+    } catch (error) {
+      if (options.requireAffiliation) {
+        await UserDeleter.promises.deleteMongoUser(user._id)
+        throw error
+      } else {
+        logger.error(error)
+      }
+    }
   }
 
   return user

@@ -35,6 +35,7 @@ const UserRegistrationHandler = {
           first_name: userDetails.first_name,
           last_name: userDetails.last_name
         },
+        {},
         callback
       )
     } else {

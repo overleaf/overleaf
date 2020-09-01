@@ -15,12 +15,14 @@ const Errors = require('../Errors/Errors')
 
 module.exports = {
   deleteUser: callbackify(deleteUser),
+  deleteMongoUser: callbackify(deleteMongoUser),
   expireDeletedUser: callbackify(expireDeletedUser),
   ensureCanDeleteUser: callbackify(ensureCanDeleteUser),
   expireDeletedUsersAfterDuration: callbackify(expireDeletedUsersAfterDuration),
 
   promises: {
     deleteUser: deleteUser,
+    deleteMongoUser: deleteMongoUser,
     expireDeletedUser: expireDeletedUser,
     ensureCanDeleteUser: ensureCanDeleteUser,
     expireDeletedUsersAfterDuration: expireDeletedUsersAfterDuration
@@ -41,11 +43,22 @@ async function deleteUser(userId, options = {}) {
     await _cleanupUser(user)
     await _createDeletedUser(user, options)
     await ProjectDeleter.promises.deleteUsersProjects(user._id)
-    await User.deleteOne({ _id: userId }).exec()
+    await deleteMongoUser(user._id)
   } catch (error) {
     logger.warn({ error, userId }, 'something went wrong deleting the user')
     throw error
   }
+}
+
+/**
+ * delete a user document only
+ */
+async function deleteMongoUser(userId) {
+  if (!userId) {
+    throw new Error('no user_id')
+  }
+
+  await User.deleteOne({ _id: userId }).exec()
 }
 
 async function expireDeletedUser(userId) {

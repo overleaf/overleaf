@@ -105,8 +105,13 @@ async function setDefaultEmailAddress(
 }
 
 const UserUpdater = {
-  addAffiliationForNewUser(userId, email, callback) {
-    addAffiliation(userId, email, error => {
+  addAffiliationForNewUser(userId, email, affiliationOptions, callback) {
+    if (callback == null) {
+      // affiliationOptions is optional
+      callback = affiliationOptions
+      affiliationOptions = {}
+    }
+    addAffiliation(userId, email, affiliationOptions, error => {
       if (error) {
         return callback(error)
       }
