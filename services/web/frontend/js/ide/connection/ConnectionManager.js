@@ -433,6 +433,18 @@ Something went wrong connecting to your project. Please refresh if this continue
         data,
         (err, project, permissionsLevel, protocolVersion) => {
           if (err != null || project == null) {
+            err = err || {}
+            if (err.code === 'ProjectNotFound') {
+              // A stale browser tab tried to join a deleted project.
+              // Reloading the page will render a 404.
+              this.ide
+                .showGenericMessageModal(
+                  'Project has been deleted',
+                  'This project has been deleted by the owner.'
+                )
+                .result.then(() => location.reload(true))
+              return
+            }
             if (err.code === 'TooManyRequests') {
               sl_console.log(
                 `[joinProject ${connectionId}] retrying: ${err.message}`
