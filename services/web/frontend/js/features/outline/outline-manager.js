@@ -1,9 +1,5 @@
-import './controllers/OutlineController'
-import './components/OutlinePane'
-import './components/OutlineRoot'
-import './components/OutlineList'
-import './components/OutlineItem'
-import { matchOutline, nestOutline } from './OutlineParser'
+import './controllers/outline-controller'
+import { matchOutline, nestOutline } from './outline-parser'
 import isValidTeXFile from '../../main/is-valid-tex-file'
 
 class OutlineManager {

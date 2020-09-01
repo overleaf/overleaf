@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import classNames from 'classnames'
-import OutlineRoot from './OutlineRoot'
+import OutlineRoot from './outline-root'
 import localStorage from '../../../modules/localStorage'
 
 function OutlinePane({

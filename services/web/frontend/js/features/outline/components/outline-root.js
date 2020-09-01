@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import OutlineList from './OutlineList'
+import OutlineList from './outline-list'
 
 function OutlineRoot({ outline, jumpToLine, highlightedLine }) {
   return (

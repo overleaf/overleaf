@@ -1,5 +1,5 @@
 import App from '../../../base'
-import OutlinePane from '../components/OutlinePane'
+import OutlinePane from '../components/outline-pane'
 import { react2angular } from 'react2angular'
 
 App.controller('OutlineController', function($scope, ide, eventTracking) {

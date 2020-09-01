@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
-import OutlineItem from './OutlineItem'
+import OutlineItem from './outline-item'
 
 function OutlineList({ outline, jumpToLine, isRoot, highlightedLine }) {
   const listClasses = classNames('outline-item-list', {
