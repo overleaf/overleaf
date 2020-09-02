@@ -18,8 +18,8 @@
  * to customise the loader's options. However the rest of the file is identical
  * to the one provided by PDF.js.
  */
-var pdfjs = require('pdfjs-dist/es5/build/pdf.js')
-var PdfjsWorker = require('pdfjs-dist/es5/build/pdf.worker.js')
+var pdfjs = require('pdfjs-dist/build/pdf.js')
+var PdfjsWorker = require('pdfjs-dist/build/pdf.worker.js')
 
 if (typeof window !== 'undefined' && 'Worker' in window) {
   pdfjs.GlobalWorkerOptions.workerPort = new PdfjsWorker()
