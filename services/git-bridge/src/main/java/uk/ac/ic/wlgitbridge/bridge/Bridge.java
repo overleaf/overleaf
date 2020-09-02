@@ -473,7 +473,7 @@ public class Bridge {
             );
             throw e;
         } catch (IOException e) {
-            Log.warn("[{}] IOException on put", projectName);
+            Log.warn("[{}] IOException on put: {}", projectName, e);
             throw e;
         }
 
