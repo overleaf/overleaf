@@ -8,7 +8,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS103: Rewrite code to no longer use __guard__
  * DS205: Consider reworking code to avoid use of IIFEs
  * DS207: Consider shorter variations of null checks
@@ -120,13 +119,11 @@ module.exports = DockerRunner = {
           { err: error, project_id },
           'error running container so destroying and retrying'
         )
-        return DockerRunner.destroyContainer(name, null, true, function (
-          error
-        ) {
+        DockerRunner.destroyContainer(name, null, true, function (error) {
           if (error != null) {
             return callback(error)
           }
-          return DockerRunner._runAndWaitForContainer(
+          DockerRunner._runAndWaitForContainer(
             options,
             volumes,
             timeout,
@@ -134,12 +131,13 @@ module.exports = DockerRunner = {
           )
         })
       } else {
-        return callback(error, output)
+        callback(error, output)
       }
     })
 
+    // pass back the container name to allow it to be killed
     return name
-  }, // pass back the container name to allow it to be killed
+  },
 
   kill(container_id, callback) {
     if (callback == null) {
@@ -147,7 +145,7 @@ module.exports = DockerRunner = {
     }
     logger.log({ container_id }, 'sending kill signal to container')
     const container = dockerode.getContainer(container_id)
-    return container.kill(function (error) {
+    container.kill(function (error) {
       if (
         error != null &&
         __guardMethod__(
@@ -164,9 +162,9 @@ module.exports = DockerRunner = {
       }
       if (error != null) {
         logger.error({ err: error, container_id }, 'error killing container')
-        return callback(error)
+        callback(error)
       } else {
-        return callback()
+        callback()
       }
     })
   },
@@ -178,7 +176,7 @@ module.exports = DockerRunner = {
     const callback = function (...args) {
       _callback(...args)
       // Only call the callback once
-      return (_callback = function () {})
+      _callback = function () {}
     }
 
     const { name } = options
@@ -189,7 +187,7 @@ module.exports = DockerRunner = {
 
     const callbackIfFinished = function () {
       if (streamEnded && containerReturned) {
-        return callback(null, output)
+        callback(null, output)
       }
     }
 
@@ -199,10 +197,10 @@ module.exports = DockerRunner = {
       }
       output = _output
       streamEnded = true
-      return callbackIfFinished()
+      callbackIfFinished()
     }
 
-    return DockerRunner.startContainer(
+    DockerRunner.startContainer(
       options,
       volumes,
       attachStreamHandler,
@@ -211,7 +209,7 @@ module.exports = DockerRunner = {
           return callback(error)
         }
 
-        return DockerRunner.waitForContainer(name, timeout, function (
+        DockerRunner.waitForContainer(name, timeout, function (
           error,
           exitCode
         ) {
@@ -237,7 +235,7 @@ module.exports = DockerRunner = {
             (x) => (x.SecurityOpt = null)
           ) // small log line
           logger.log({ err, exitCode, options }, 'docker container has exited')
-          return callbackIfFinished()
+          callbackIfFinished()
         })
       }
     )
@@ -364,7 +362,7 @@ module.exports = DockerRunner = {
   },
 
   startContainer(options, volumes, attachStreamHandler, callback) {
-    return LockManager.runWithLock(
+    LockManager.runWithLock(
       options.name,
       (releaseLock) =>
         // Check that volumes exist before starting the container.
@@ -375,7 +373,7 @@ module.exports = DockerRunner = {
           if (err != null) {
             return releaseLock(err)
           }
-          return DockerRunner._startContainer(
+          DockerRunner._startContainer(
             options,
             volumes,
             attachStreamHandler,
@@ -405,13 +403,13 @@ module.exports = DockerRunner = {
         if (!(stats != null ? stats.isDirectory() : undefined)) {
           return cb(DockerRunner.ERR_NOT_DIRECTORY)
         }
-        return cb()
+        cb()
       })
     const jobs = []
     for (const vol in volumes) {
       ;((vol) => jobs.push((cb) => checkVolume(vol, cb)))(vol)
     }
-    return async.series(jobs, callback)
+    async.series(jobs, callback)
   },
 
   _startContainer(options, volumes, attachStreamHandler, callback) {
@@ -429,7 +427,7 @@ module.exports = DockerRunner = {
         if (error != null) {
           return callback(error)
         }
-        return startExistingContainer()
+        startExistingContainer()
       })
     var startExistingContainer = () =>
       DockerRunner.attachToContainer(
@@ -439,37 +437,37 @@ module.exports = DockerRunner = {
           if (error != null) {
             return callback(error)
           }
-          return container.start(function (error) {
+          container.start(function (error) {
             if (
               error != null &&
               (error != null ? error.statusCode : undefined) !== 304
             ) {
               // already running
-              return callback(error)
+              callback(error)
             } else {
-              return callback()
+              callback()
             }
           })
         }
       )
-    return container.inspect(function (error, stats) {
+    container.inspect(function (error, stats) {
       if ((error != null ? error.statusCode : undefined) === 404) {
-        return createAndStartContainer()
+        createAndStartContainer()
       } else if (error != null) {
         logger.err(
           { container_name: name, error },
           'unable to inspect container to start'
         )
-        return callback(error)
+        callback(error)
       } else {
-        return startExistingContainer()
+        startExistingContainer()
       }
     })
   },
 
   attachToContainer(containerId, attachStreamHandler, attachStartCallback) {
     const container = dockerode.getContainer(containerId)
-    return container.attach({ stdout: 1, stderr: 1, stream: 1 }, function (
+    container.attach({ stdout: 1, stderr: 1, stream: 1 }, function (
       error,
       stream
     ) {
@@ -495,7 +493,7 @@ module.exports = DockerRunner = {
               return
             }
             if (this.data.length < MAX_OUTPUT) {
-              return (this.data += data)
+              this.data += data
             } else {
               logger.error(
                 {
@@ -506,7 +504,7 @@ module.exports = DockerRunner = {
                 `${name} exceeds max size`
               )
               this.data += `(...truncated at ${MAX_OUTPUT} chars...)`
-              return (this.overflowed = true)
+              this.overflowed = true
             }
           }
           // kill container if too much output
@@ -526,7 +524,7 @@ module.exports = DockerRunner = {
         )
       )
 
-      return stream.on('end', () =>
+      stream.on('end', () =>
         attachStreamHandler(null, { stdout: stdout.data, stderr: stderr.data })
       )
     })
@@ -539,7 +537,7 @@ module.exports = DockerRunner = {
     const callback = function (...args) {
       _callback(...args)
       // Only call the callback once
-      return (_callback = function () {})
+      _callback = function () {}
     }
 
     const container = dockerode.getContainer(containerId)
@@ -551,11 +549,11 @@ module.exports = DockerRunner = {
         { container_id: containerId },
         'timeout reached, killing container'
       )
-      return container.kill(function () {})
+      container.kill(function () {})
     }, timeout)
 
     logger.log({ container_id: containerId }, 'waiting for docker container')
-    return container.wait(function (error, res) {
+    container.wait(function (error, res) {
       if (error != null) {
         clearTimeout(timeoutId)
         logger.error(
@@ -568,14 +566,14 @@ module.exports = DockerRunner = {
         logger.log({ containerId }, 'docker container timed out')
         error = DockerRunner.ERR_TIMED_OUT
         error.timedout = true
-        return callback(error)
+        callback(error)
       } else {
         clearTimeout(timeoutId)
         logger.log(
           { container_id: containerId, exitCode: res.StatusCode },
           'docker container returned'
         )
-        return callback(null, res.StatusCode)
+        callback(null, res.StatusCode)
       }
     })
   },
@@ -590,7 +588,7 @@ module.exports = DockerRunner = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return LockManager.runWithLock(
+    LockManager.runWithLock(
       containerName,
       (releaseLock) =>
         DockerRunner._destroyContainer(
@@ -608,7 +606,7 @@ module.exports = DockerRunner = {
     }
     logger.log({ container_id: containerId }, 'destroying docker container')
     const container = dockerode.getContainer(containerId)
-    return container.remove({ force: shouldForce === true }, function (error) {
+    container.remove({ force: shouldForce === true }, function (error) {
       if (
         error != null &&
         (error != null ? error.statusCode : undefined) === 404
@@ -627,7 +625,7 @@ module.exports = DockerRunner = {
       } else {
         logger.log({ container_id: containerId }, 'destroyed container')
       }
-      return callback(error)
+      callback(error)
     })
   },
 
@@ -652,17 +650,14 @@ module.exports = DockerRunner = {
       { containerName: name, created, now, age, maxAge, ttl },
       'checking whether to destroy container'
     )
-    return callback(null, name, container.Id, ttl)
+    callback(null, name, container.Id, ttl)
   },
 
   destroyOldContainers(callback) {
     if (callback == null) {
       callback = function (error) {}
     }
-    return dockerode.listContainers({ all: true }, function (
-      error,
-      containers
-    ) {
+    dockerode.listContainers({ all: true }, function (error, containers) {
       if (error != null) {
         return callback(error)
       }
@@ -679,7 +674,7 @@ module.exports = DockerRunner = {
               // strip the / prefix
               // the LockManager uses the plain container name
               name = name.slice(1)
-              return jobs.push((cb) =>
+              jobs.push((cb) =>
                 DockerRunner.destroyContainer(name, id, false, () => cb())
               )
             }
@@ -687,7 +682,7 @@ module.exports = DockerRunner = {
       }
       // Ignore errors because some containers get stuck but
       // will be destroyed next time
-      return async.series(jobs, callback)
+      async.series(jobs, callback)
     })
   },
 
