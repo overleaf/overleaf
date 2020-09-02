@@ -8,6 +8,7 @@ const logger = require('logger-sharelatex')
 const {
   CodedError,
   CorruptedJoinProjectResponseError,
+  NotAuthorizedError,
   WebApiRequestFailedError
 } = require('./Errors')
 
@@ -55,6 +56,10 @@ module.exports = {
               'TooManyRequests'
             )
           )
+        } else if (response.statusCode === 403) {
+          callback(new NotAuthorizedError())
+        } else if (response.statusCode === 404) {
+          callback(new CodedError('project not found', 'ProjectNotFound'))
         } else {
           callback(new WebApiRequestFailedError(response.statusCode))
         }

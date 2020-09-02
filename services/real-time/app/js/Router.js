@@ -33,6 +33,7 @@ module.exports = Router = {
     }
     attrs.client_id = client.id
     attrs.err = error
+    attrs.method = method
     if (error.name === 'CodedError') {
       logger.warn(attrs, error.message)
       const serializedError = { message: error.message, code: error.info.code }

@@ -91,6 +91,53 @@ describe('WebApiManager', function () {
       })
     })
 
+    describe('when web replies with a 403', function () {
+      beforeEach(function () {
+        this.request.post = sinon
+          .stub()
+          .callsArgWith(1, null, { statusCode: 403 }, null)
+        this.WebApiManager.joinProject(
+          this.project_id,
+          this.user_id,
+          this.callback
+        )
+      })
+
+      it('should call the callback with an error', function () {
+        this.callback
+          .calledWith(
+            sinon.match({
+              message: 'not authorized'
+            })
+          )
+          .should.equal(true)
+      })
+    })
+
+    describe('when web replies with a 404', function () {
+      beforeEach(function () {
+        this.request.post = sinon
+          .stub()
+          .callsArgWith(1, null, { statusCode: 404 }, null)
+        this.WebApiManager.joinProject(
+          this.project_id,
+          this.user_id,
+          this.callback
+        )
+      })
+
+      it('should call the callback with an error', function () {
+        this.callback
+          .calledWith(
+            sinon.match({
+              message: 'project not found',
+              info: { code: 'ProjectNotFound' }
+            })
+          )
+          .should.equal(true)
+      })
+    })
+
     describe('with an error from web', function () {
       beforeEach(function () {
         this.request.post = sinon
