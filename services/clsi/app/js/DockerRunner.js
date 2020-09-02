@@ -8,7 +8,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS103: Rewrite code to no longer use __guard__
  * DS205: Consider reworking code to avoid use of IIFEs
@@ -77,7 +76,7 @@ module.exports = DockerRunner = {
     const volumes = {}
     volumes[directory] = '/compile'
 
-    command = Array.from(command).map((arg) =>
+    command = command.map((arg) =>
       __guardMethod__(arg.toString(), 'replace', (o) =>
         o.replace('$COMPILE_DIR', '/compile')
       )
@@ -177,7 +176,7 @@ module.exports = DockerRunner = {
       _callback = function (error, output) {}
     }
     const callback = function (...args) {
-      _callback(...Array.from(args || []))
+      _callback(...args)
       // Only call the callback once
       return (_callback = function () {})
     }
@@ -538,7 +537,7 @@ module.exports = DockerRunner = {
       _callback = function (error, exitCode) {}
     }
     const callback = function (...args) {
-      _callback(...Array.from(args || []))
+      _callback(...args)
       // Only call the callback once
       return (_callback = function () {})
     }
@@ -668,7 +667,7 @@ module.exports = DockerRunner = {
         return callback(error)
       }
       const jobs = []
-      for (const container of Array.from(containers || [])) {
+      for (const container of containers) {
         ;((container) =>
           DockerRunner.examineOldContainer(container, function (
             err,
