@@ -8,7 +8,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS103: Rewrite code to no longer use __guard__
  * DS205: Consider reworking code to avoid use of IIFEs
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -28,10 +27,9 @@ const _ = require('lodash')
 logger.info('using docker runner')
 
 const usingSiblingContainers = () =>
-  __guard__(
-    Settings != null ? Settings.path : undefined,
-    (x) => x.sandboxedCompilesHostDir
-  ) != null
+  Settings != null &&
+  Settings.path != null &&
+  Settings.path.sandboxedCompilesHostDir != null
 
 let containerMonitorTimeout
 let containerMonitorInterval
@@ -76,9 +74,7 @@ module.exports = DockerRunner = {
     volumes[directory] = '/compile'
 
     command = command.map((arg) =>
-      __guardMethod__(arg.toString(), 'replace', (o) =>
-        o.replace('$COMPILE_DIR', '/compile')
-      )
+      arg.toString().replace('$COMPILE_DIR', '/compile')
     )
     if (image == null) {
       ;({ image } = Settings.clsi.docker)
@@ -148,11 +144,8 @@ module.exports = DockerRunner = {
     container.kill(function (error) {
       if (
         error != null &&
-        __guardMethod__(
-          error != null ? error.message : undefined,
-          'match',
-          (o) => o.match(/Cannot kill container .* is not running/)
-        )
+        error.message != null &&
+        error.message.match(/Cannot kill container .* is not running/)
       ) {
         logger.warn(
           { err: error, container_id },
@@ -230,10 +223,9 @@ module.exports = DockerRunner = {
             return callback(err)
           }
           containerReturned = true
-          __guard__(
-            options != null ? options.HostConfig : undefined,
-            (x) => (x.SecurityOpt = null)
-          ) // small log line
+          if (options != null && options.HostConfig != null) {
+            options.HostConfig.SecurityOpt = null
+          }
           logger.log({ err, exitCode, options }, 'docker container has exited')
           callbackIfFinished()
         })
@@ -718,20 +710,3 @@ module.exports = DockerRunner = {
 }
 
 DockerRunner.startContainerMonitor()
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
-function __guardMethod__(obj, methodName, transform) {
-  if (
-    typeof obj !== 'undefined' &&
-    obj !== null &&
-    typeof obj[methodName] === 'function'
-  ) {
-    return transform(obj, methodName)
-  } else {
-    return undefined
-  }
-}
