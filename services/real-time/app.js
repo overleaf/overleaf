@@ -23,11 +23,26 @@ const CookieParser = require('cookie-parser')
 const DrainManager = require('./app/js/DrainManager')
 const HealthCheckManager = require('./app/js/HealthCheckManager')
 
+// NOTE: debug is invoked for every blob that is put on the wire
+const socketIoLogger = {
+  error(...message) {
+    logger.info({ fromSocketIo: true, originalLevel: 'error' }, ...message)
+  },
+  warn(...message) {
+    logger.info({ fromSocketIo: true, originalLevel: 'warn' }, ...message)
+  },
+  info() {},
+  debug() {},
+  log() {}
+}
+
 // Set up socket.io server
 const app = express()
 
 const server = require('http').createServer(app)
-const io = require('socket.io').listen(server)
+const io = require('socket.io').listen(server, {
+  logger: socketIoLogger
+})
 
 // Bind to sessions
 const sessionStore = new RedisStore({ client: sessionRedisClient })
@@ -61,7 +76,6 @@ io.configure(function () {
     'xhr-polling',
     'jsonp-polling'
   ])
-  io.set('log level', 1)
 })
 
 app.get('/', (req, res) => res.send('real-time-sharelatex is alive'))
