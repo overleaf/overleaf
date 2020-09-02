@@ -8,7 +8,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS205: Consider reworking code to avoid use of IIFEs
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -278,23 +277,11 @@ module.exports = DockerRunner = {
       NetworkDisabled: true,
       Memory: 1024 * 1024 * 1024 * 1024, // 1 Gb
       User: Settings.clsi.docker.user,
-      Env: (() => {
-        const result = []
-        for (key in env) {
-          value = env[key]
-          result.push(`${key}=${value}`)
-        }
-        return result
-      })(), // convert the environment hash to an array
+      Env: Object.entries(env).map(([key, value]) => `${key}=${value}`),
       HostConfig: {
-        Binds: (() => {
-          const result1 = []
-          for (hostVol in volumes) {
-            dockerVol = volumes[hostVol]
-            result1.push(`${hostVol}:${dockerVol}`)
-          }
-          return result1
-        })(),
+        Binds: Object.entries(volumes).map(
+          ([hostVol, dockerVol]) => `${hostVol}:${dockerVol}`
+        ),
         LogConfig: { Type: 'none', Config: {} },
         Ulimits: [
           {
@@ -399,7 +386,7 @@ module.exports = DockerRunner = {
       })
     const jobs = []
     for (const vol in volumes) {
-      ;((vol) => jobs.push((cb) => checkVolume(vol, cb)))(vol)
+      jobs.push((cb) => checkVolume(vol, cb))
     }
     async.series(jobs, callback)
   },
@@ -655,22 +642,21 @@ module.exports = DockerRunner = {
       }
       const jobs = []
       for (const container of containers) {
-        ;((container) =>
-          DockerRunner.examineOldContainer(container, function (
-            err,
-            name,
-            id,
-            ttl
-          ) {
-            if (name.slice(0, 9) === '/project-' && ttl <= 0) {
-              // strip the / prefix
-              // the LockManager uses the plain container name
-              name = name.slice(1)
-              jobs.push((cb) =>
-                DockerRunner.destroyContainer(name, id, false, () => cb())
-              )
-            }
-          }))(container)
+        DockerRunner.examineOldContainer(container, function (
+          err,
+          name,
+          id,
+          ttl
+        ) {
+          if (name.slice(0, 9) === '/project-' && ttl <= 0) {
+            // strip the / prefix
+            // the LockManager uses the plain container name
+            name = name.slice(1)
+            jobs.push((cb) =>
+              DockerRunner.destroyContainer(name, id, false, () => cb())
+            )
+          }
+        })
       }
       // Ignore errors because some containers get stuck but
       // will be destroyed next time
