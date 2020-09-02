@@ -1493,8 +1493,8 @@ describe('WebsocketController', function () {
       // it "should disconnect the client", ->
       // 	@client.disconnect.called.should.equal true
 
-      it('should log a warning', function () {
-        return this.logger.warn.called.should.equal(true)
+      it('should not log a warning', function () {
+        return this.logger.warn.called.should.equal(false)
       })
 
       return it('should call the callback with the error', function () {

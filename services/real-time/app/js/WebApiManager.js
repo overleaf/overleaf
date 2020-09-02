@@ -49,7 +49,6 @@ module.exports = {
             data.isRestrictedUser
           )
         } else if (response.statusCode === 429) {
-          logger.log(project_id, user_id, 'rate-limit hit when joining project')
           callback(
             new CodedError(
               'rate-limit hit when joining project',
