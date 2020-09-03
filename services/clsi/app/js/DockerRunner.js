@@ -1,5 +1,4 @@
 /* eslint-disable
-    camelcase,
     handle-callback-err,
     no-return-assign,
     no-unused-vars,
@@ -33,7 +32,7 @@ module.exports = DockerRunner = {
   ERR_TIMED_OUT: new Error('container timed out'),
 
   run(
-    project_id,
+    projectId,
     command,
     directory,
     image,
@@ -90,18 +89,18 @@ module.exports = DockerRunner = {
       compileGroup
     )
     const fingerprint = DockerRunner._fingerprintContainer(options)
-    options.name = name = `project-${project_id}-${fingerprint}`
+    options.name = name = `project-${projectId}-${fingerprint}`
 
     // logOptions = _.clone(options)
     // logOptions?.HostConfig?.SecurityOpt = "secomp used, removed in logging"
-    logger.log({ project_id }, 'running docker container')
+    logger.log({ projectId }, 'running docker container')
     DockerRunner._runAndWaitForContainer(options, volumes, timeout, function (
       error,
       output
     ) {
       if (error && error.statusCode === 500) {
         logger.log(
-          { err: error, project_id },
+          { err: error, projectId },
           'error running container so destroying and retrying'
         )
         DockerRunner.destroyContainer(name, null, true, function (error) {
@@ -124,9 +123,9 @@ module.exports = DockerRunner = {
     return name
   },
 
-  kill(container_id, callback) {
-    logger.log({ container_id }, 'sending kill signal to container')
-    const container = dockerode.getContainer(container_id)
+  kill(containerId, callback) {
+    logger.log({ containerId }, 'sending kill signal to container')
+    const container = dockerode.getContainer(containerId)
     container.kill(function (error) {
       if (
         error != null &&
@@ -134,13 +133,13 @@ module.exports = DockerRunner = {
         error.message.match(/Cannot kill container .* is not running/)
       ) {
         logger.warn(
-          { err: error, container_id },
+          { err: error, containerId },
           'container not running, continuing'
         )
         error = null
       }
       if (error != null) {
-        logger.error({ err: error, container_id }, 'error killing container')
+        logger.error({ err: error, containerId }, 'error killing container')
         callback(error)
       } else {
         callback()
@@ -424,7 +423,7 @@ module.exports = DockerRunner = {
     ) {
       if (error != null) {
         logger.error(
-          { err: error, container_id: containerId },
+          { err: error, containerId },
           'error attaching to container'
         )
         return attachStartCallback(error)
@@ -432,7 +431,7 @@ module.exports = DockerRunner = {
         attachStartCallback()
       }
 
-      logger.log({ container_id: containerId }, 'attached to container')
+      logger.log({ containerId }, 'attached to container')
 
       const MAX_OUTPUT = 1024 * 1024 // limit output to 1MB
       const createStringOutputStream = function (name) {
@@ -448,7 +447,7 @@ module.exports = DockerRunner = {
             } else {
               logger.error(
                 {
-                  container_id: containerId,
+                  containerId,
                   length: this.data.length,
                   maxLen: MAX_OUTPUT
                 },
@@ -470,7 +469,7 @@ module.exports = DockerRunner = {
 
       stream.on('error', (err) =>
         logger.error(
-          { err, container_id: containerId },
+          { err, containerId },
           'error reading from container stream'
         )
       )
@@ -493,21 +492,15 @@ module.exports = DockerRunner = {
     let timedOut = false
     const timeoutId = setTimeout(function () {
       timedOut = true
-      logger.log(
-        { container_id: containerId },
-        'timeout reached, killing container'
-      )
+      logger.log({ containerId }, 'timeout reached, killing container')
       container.kill(function () {})
     }, timeout)
 
-    logger.log({ container_id: containerId }, 'waiting for docker container')
+    logger.log({ containerId }, 'waiting for docker container')
     container.wait(function (error, res) {
       if (error != null) {
         clearTimeout(timeoutId)
-        logger.error(
-          { err: error, container_id: containerId },
-          'error waiting for container'
-        )
+        logger.error({ err: error, containerId }, 'error waiting for container')
         return callback(error)
       }
       if (timedOut) {
@@ -518,7 +511,7 @@ module.exports = DockerRunner = {
       } else {
         clearTimeout(timeoutId)
         logger.log(
-          { container_id: containerId, exitCode: res.StatusCode },
+          { containerId, exitCode: res.StatusCode },
           'docker container returned'
         )
         callback(null, res.StatusCode)
@@ -546,23 +539,20 @@ module.exports = DockerRunner = {
   },
 
   _destroyContainer(containerId, shouldForce, callback) {
-    logger.log({ container_id: containerId }, 'destroying docker container')
+    logger.log({ containerId }, 'destroying docker container')
     const container = dockerode.getContainer(containerId)
     container.remove({ force: shouldForce === true }, function (error) {
       if (error != null && error.statusCode === 404) {
         logger.warn(
-          { err: error, container_id: containerId },
+          { err: error, containerId },
           'container not found, continuing'
         )
         error = null
       }
       if (error != null) {
-        logger.error(
-          { err: error, container_id: containerId },
-          'error destroying container'
-        )
+        logger.error({ err: error, containerId }, 'error destroying container')
       } else {
-        logger.log({ container_id: containerId }, 'destroyed container')
+        logger.log({ containerId }, 'destroyed container')
       }
       callback(error)
     })
