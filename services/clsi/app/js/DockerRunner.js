@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -574,7 +573,7 @@ module.exports = DockerRunner = {
       { containerName: name, created, now, age, maxAge, ttl },
       'checking whether to destroy container'
     )
-    callback(null, name, container.Id, ttl)
+    return { name, id: container.Id, ttl }
   },
 
   destroyOldContainers(callback) {
@@ -584,21 +583,15 @@ module.exports = DockerRunner = {
       }
       const jobs = []
       for (const container of containers) {
-        DockerRunner.examineOldContainer(container, function (
-          err,
-          name,
-          id,
-          ttl
-        ) {
-          if (name.slice(0, 9) === '/project-' && ttl <= 0) {
-            // strip the / prefix
-            // the LockManager uses the plain container name
-            name = name.slice(1)
-            jobs.push((cb) =>
-              DockerRunner.destroyContainer(name, id, false, () => cb())
-            )
-          }
-        })
+        const { name, id, ttl } = DockerRunner.examineOldContainer(container)
+        if (name.slice(0, 9) === '/project-' && ttl <= 0) {
+          // strip the / prefix
+          // the LockManager uses the plain container name
+          const plainName = name.slice(1)
+          jobs.push((cb) =>
+            DockerRunner.destroyContainer(plainName, id, false, () => cb())
+          )
+        }
       }
       // Ignore errors because some containers get stuck but
       // will be destroyed next time
