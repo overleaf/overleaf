@@ -1,4 +1,8 @@
 {
+  "file_outline": "File outline",
+  "the_file_outline_is_a_new_feature_click_the_icon_to_learn_more": "The File outline is a new feature. Click the icon to learn more",
+  "we_cant_find_any_sections_or_subsections_in_this_file": "We can’t find any sections or subsections in this file",
+  "find_out_more_about_the_file_outline": "Find out more about the file outline",
   "invalid_institutional_email": "Your institution's SSO service returned your email address as __email__, which is at an unexpected domain that we do not recognise as belonging to it. You may be able to change your primary email address via your user profile at your institution to one at your institution's domain. Please contact your IT department if you have any questions.",
   "wed_love_you_to_stay": "We'd love you to stay",
   "yes_move_me_to_student_plan": "Yes, move me to the student plan",
