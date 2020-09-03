@@ -277,6 +277,7 @@ const DockerRunner = {
     if (Settings.clsi.docker.Readonly) {
       options.HostConfig.ReadonlyRootfs = true
       options.HostConfig.Tmpfs = { '/tmp': 'rw,noexec,nosuid,size=65536k' }
+      options.Volumes['/home/tex'] = {}
     }
 
     // Allow per-compile group overriding of individual settings
@@ -519,7 +520,7 @@ const DockerRunner = {
   _destroyContainer(containerId, shouldForce, callback) {
     logger.log({ containerId }, 'destroying docker container')
     const container = dockerode.getContainer(containerId)
-    container.remove({ force: shouldForce === true }, (error) => {
+    container.remove({ force: shouldForce === true, v: true }, (error) => {
       if (error != null && error.statusCode === 404) {
         logger.warn(
           { err: error, containerId },

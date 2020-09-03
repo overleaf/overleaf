@@ -802,7 +802,7 @@ describe('DockerRunner', function () {
         (err) => {
           this.fakeContainer.remove.callCount.should.equal(1)
           this.fakeContainer.remove
-            .calledWith({ force: true })
+            .calledWithMatch({ force: true })
             .should.equal(true)
           return done()
         }
@@ -816,7 +816,7 @@ describe('DockerRunner', function () {
         (err) => {
           this.fakeContainer.remove.callCount.should.equal(1)
           this.fakeContainer.remove
-            .calledWith({ force: false })
+            .calledWithMatch({ force: false })
             .should.equal(true)
           return done()
         }
