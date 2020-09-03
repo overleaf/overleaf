@@ -1,4 +1,3 @@
-let DockerRunner
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const Docker = require('dockerode')
@@ -21,7 +20,7 @@ const usingSiblingContainers = () =>
 let containerMonitorTimeout
 let containerMonitorInterval
 
-module.exports = DockerRunner = {
+const DockerRunner = {
   run(
     projectId,
     command,
@@ -32,7 +31,6 @@ module.exports = DockerRunner = {
     compileGroup,
     callback
   ) {
-    let name
     if (usingSiblingContainers()) {
       const _newPath = Settings.path.sandboxedCompilesHostDir
       logger.log(
@@ -49,14 +47,13 @@ module.exports = DockerRunner = {
       )
     }
 
-    const volumes = {}
-    volumes[directory] = '/compile'
+    const volumes = { [directory]: '/compile' }
 
     command = command.map((arg) =>
       arg.toString().replace('$COMPILE_DIR', '/compile')
     )
     if (image == null) {
-      ;({ image } = Settings.clsi.docker)
+      image = Settings.clsi.docker.image
     }
 
     if (
@@ -80,7 +77,8 @@ module.exports = DockerRunner = {
       compileGroup
     )
     const fingerprint = DockerRunner._fingerprintContainer(options)
-    options.name = name = `project-${projectId}-${fingerprint}`
+    const name = `project-${projectId}-${fingerprint}`
+    options.name = name
 
     // logOptions = _.clone(options)
     // logOptions?.HostConfig?.SecurityOpt = "secomp used, removed in logging"
@@ -179,19 +177,18 @@ module.exports = DockerRunner = {
           error,
           exitCode
         ) {
-          let err
           if (error != null) {
             return callback(error)
           }
           if (exitCode === 137) {
             // exit status from kill -9
-            err = new Error('terminated')
+            const err = new Error('terminated')
             err.terminated = true
             return callback(err)
           }
           if (exitCode === 1) {
             // exit status from chktex
-            err = new Error('exited')
+            const err = new Error('exited')
             err.code = exitCode
             return callback(err)
           }
@@ -199,7 +196,7 @@ module.exports = DockerRunner = {
           if (options != null && options.HostConfig != null) {
             options.HostConfig.SecurityOpt = null
           }
-          logger.log({ err, exitCode, options }, 'docker container has exited')
+          logger.log({ exitCode, options }, 'docker container has exited')
           callbackIfFinished()
         })
       }
@@ -214,13 +211,11 @@ module.exports = DockerRunner = {
     environment,
     compileGroup
   ) {
-    let m, year
-    let key, value, hostVol, dockerVol
     const timeoutInSeconds = timeout / 1000
 
     const dockerVolumes = {}
-    for (hostVol in volumes) {
-      dockerVol = volumes[hostVol]
+    for (const hostVol in volumes) {
+      const dockerVol = volumes[hostVol]
       dockerVolumes[dockerVol] = {}
 
       if (volumes[hostVol].slice(-3).indexOf(':r') === -1) {
@@ -231,17 +226,14 @@ module.exports = DockerRunner = {
     // merge settings and environment parameter
     const env = {}
     for (const src of [Settings.clsi.docker.env, environment || {}]) {
-      for (key in src) {
-        value = src[key]
+      for (const key in src) {
+        const value = src[key]
         env[key] = value
       }
     }
     // set the path based on the image year
-    if ((m = image.match(/:([0-9]+)\.[0-9]+/))) {
-      year = m[1]
-    } else {
-      year = '2014'
-    }
+    const match = image.match(/:([0-9]+)\.[0-9]+/)
+    const year = match ? match[1] : '2014'
     env.PATH = `/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/${year}/bin/x86_64-linux/`
     const options = {
       Cmd: command,
@@ -296,8 +288,7 @@ module.exports = DockerRunner = {
       Settings.clsi.docker.compileGroupConfig[compileGroup]
     ) {
       const override = Settings.clsi.docker.compileGroupConfig[compileGroup]
-      let key
-      for (key in override) {
+      for (const key in override) {
         _.set(options, key, override[key])
       }
     }
@@ -627,3 +618,5 @@ module.exports = DockerRunner = {
 }
 
 DockerRunner.startContainerMonitor()
+
+module.exports = DockerRunner
