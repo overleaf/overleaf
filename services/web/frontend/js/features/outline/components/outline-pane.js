@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import classNames from 'classnames'
+import { useTranslation, Trans } from 'react-i18next'
+
 import OutlineRoot from './outline-root'
 import localStorage from '../../../modules/localStorage'
 
@@ -14,6 +16,8 @@ function OutlinePane({
   eventTracking,
   highlightedLine
 }) {
+  const { t } = useTranslation()
+
   const storageKey = `file_outline.expanded.${projectId}`
   const [expanded, setExpanded] = useState(() => {
     const storedExpandedState = localStorage(storageKey) !== false
@@ -45,6 +49,17 @@ function OutlinePane({
     }
   }
 
+  const infoContent = (
+    <>
+      <Trans
+        i18nKey="the_file_outline_is_a_new_feature_click_the_icon_to_learn_more"
+        components={[<strong />]}
+      />
+      .
+    </>
+  )
+  const tooltip = <Tooltip id="outline-info-tooltip">{infoContent}</Tooltip>
+
   return (
     <div className={headerClasses}>
       <header className="outline-header">
@@ -54,7 +69,7 @@ function OutlinePane({
           onClick={handleExpandCollapseClick}
         >
           <i className={expandCollapseIconClasses} />
-          <h4 className="outline-header-name">File outline</h4>
+          <h4 className="outline-header-name">{t('file_outline')}</h4>
           {expanded ? (
             <OverlayTrigger placement="top" overlay={tooltip} delayHide={100}>
               <a
@@ -82,14 +97,6 @@ function OutlinePane({
     </div>
   )
 }
-
-const infoContent = (
-  <>
-    The <strong>File outline</strong> is a new feature. Click the icon to learn
-    more.
-  </>
-)
-const tooltip = <Tooltip id="outline-info-tooltip">{infoContent}</Tooltip>
 
 OutlinePane.propTypes = {
   isTexFile: PropTypes.bool.isRequired,

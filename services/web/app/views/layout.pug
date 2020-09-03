@@ -75,6 +75,11 @@ html(
 			};
 			window.ab = {};
 			window.user_id = '#{getLoggedInUserId()}';
+			//- Internationalisation settings
+			window.i18n = {
+				currentLangCode: '#{currentLngCode}'
+			}
+			//- Expose some settings globally to the frontend
 			window.ExposedSettings = JSON.parse('!{StringHelper.stringifyJsonForScript(ExposedSettings)}');
 
 		- if (typeof(settings.algolia) != "undefined")

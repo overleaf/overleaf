@@ -122,6 +122,7 @@
     "react": "^16.13.1",
     "react-bootstrap": "^0.33.1",
     "react-dom": "^16.13.1",
+    "react-i18next": "^11.7.1",
     "react2angular": "^4.0.6",
     "redis-sharelatex": "^1.0.13",
     "request": "^2.88.2",

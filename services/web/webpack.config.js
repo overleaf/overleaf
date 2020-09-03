@@ -140,6 +140,16 @@ module.exports = {
           runtimePath: 'handlebars/runtime'
         }
       },
+      {
+        // Load translations files with custom loader, to extract and apply
+        // fallbacks
+        test: /locales\/(\w{2}(-\w{2})?)\.json$/,
+        use: [
+          {
+            loader: path.resolve('frontend/translations-loader.js')
+          }
+        ]
+      },
       // Allow for injection of modules dependencies by reading contents of
       // modules directory and adding necessary dependencies
       {

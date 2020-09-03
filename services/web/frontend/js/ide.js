@@ -18,6 +18,7 @@
  */
 import App from './base'
 import FileTreeManager from './ide/file-tree/FileTreeManager'
+import LoadingManager from './ide/LoadingManager'
 import ConnectionManager from './ide/connection/ConnectionManager'
 import EditorManager from './ide/editor/EditorManager'
 import OnlineUsersManager from './ide/online-users/OnlineUsersManager'
@@ -180,6 +181,7 @@ App.controller('IdeController', function(
   ide.$scope = $scope
 
   ide.referencesSearchManager = new ReferencesManager(ide, $scope)
+  ide.loadingManager = new LoadingManager($scope)
   ide.connectionManager = new ConnectionManager(ide, $scope)
   ide.fileTreeManager = new FileTreeManager(ide, $scope)
   ide.editorManager = new EditorManager(ide, $scope, localStorage)

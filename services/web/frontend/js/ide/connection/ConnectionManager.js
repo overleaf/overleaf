@@ -188,7 +188,7 @@ export default (ConnectionManager = (function() {
 
         this.$scope.$apply(() => {
           if (this.$scope.state.loading) {
-            return (this.$scope.state.load_progress = 70)
+            this.$scope.state.load_progress = 70
           }
         })
 
@@ -439,8 +439,7 @@ Something went wrong connecting to your project. Please refresh if this continue
             this.$scope.protocolVersion = protocolVersion
             this.$scope.project = project
             this.$scope.permissionsLevel = permissionsLevel
-            this.$scope.state.load_progress = 100
-            this.$scope.state.loading = false
+            this.ide.loadingManager.socketLoaded()
             this.$scope.$broadcast('project:joined')
           })
         }

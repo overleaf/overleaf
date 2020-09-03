@@ -1,8 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { useTranslation } from 'react-i18next'
+
 import OutlineList from './outline-list'
 
 function OutlineRoot({ outline, jumpToLine, highlightedLine }) {
+  const { t } = useTranslation()
+
   return (
     <div>
       {outline.length ? (
@@ -14,14 +18,14 @@ function OutlineRoot({ outline, jumpToLine, highlightedLine }) {
         />
       ) : (
         <div className="outline-body-no-elements">
-          We can’t find any sections or subsections in this file.{' '}
+          {t('we_cant_find_any_sections_or_subsections_in_this_file')}.{' '}
           <a
             href="/learn/how-to/Using_the_File_Outline_feature"
             className="outline-body-link"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Find out more about the file outline
+            {t('find_out_more_about_the_file_outline')}
           </a>
         </div>
       )}
