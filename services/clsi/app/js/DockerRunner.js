@@ -4,13 +4,6 @@
     no-return-assign,
     no-unused-vars,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let DockerRunner, oneHour
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
@@ -286,10 +279,7 @@ module.exports = DockerRunner = {
       }
     }
 
-    if (
-      (Settings.path != null ? Settings.path.synctexBinHostPath : undefined) !=
-      null
-    ) {
+    if (Settings.path != null && Settings.path.synctexBinHostPath != null) {
       options.HostConfig.Binds.push(
         `${Settings.path.synctexBinHostPath}:/opt/synctex:ro`
       )
@@ -367,7 +357,7 @@ module.exports = DockerRunner = {
         if (err != null) {
           return cb(err)
         }
-        if (!(stats != null ? stats.isDirectory() : undefined)) {
+        if (!stats.isDirectory()) {
           return cb(DockerRunner.ERR_NOT_DIRECTORY)
         }
         cb()
@@ -402,20 +392,17 @@ module.exports = DockerRunner = {
             return callback(error)
           }
           container.start(function (error) {
-            if (
-              error != null &&
-              (error != null ? error.statusCode : undefined) !== 304
-            ) {
-              // already running
+            if (error != null && error.statusCode !== 304) {
               callback(error)
             } else {
+              // already running
               callback()
             }
           })
         }
       )
     container.inspect(function (error, stats) {
-      if ((error != null ? error.statusCode : undefined) === 404) {
+      if (error != null && error.statusCode === 404) {
         createAndStartContainer()
       } else if (error != null) {
         logger.err(
@@ -562,10 +549,7 @@ module.exports = DockerRunner = {
     logger.log({ container_id: containerId }, 'destroying docker container')
     const container = dockerode.getContainer(containerId)
     container.remove({ force: shouldForce === true }, function (error) {
-      if (
-        error != null &&
-        (error != null ? error.statusCode : undefined) === 404
-      ) {
+      if (error != null && error.statusCode === 404) {
         logger.warn(
           { err: error, container_id: containerId },
           'container not found, continuing'
@@ -590,9 +574,7 @@ module.exports = DockerRunner = {
     Settings.clsi.docker.maxContainerAge || (oneHour = 60 * 60 * 1000),
 
   examineOldContainer(container, callback) {
-    const name =
-      container.Name ||
-      (container.Names != null ? container.Names[0] : undefined)
+    const name = container.Name || (container.Names && container.Names[0])
     const created = container.Created * 1000 // creation time is returned in seconds
     const now = Date.now()
     const age = now - created
