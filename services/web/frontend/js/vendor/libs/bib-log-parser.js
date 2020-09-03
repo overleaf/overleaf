@@ -27,12 +27,17 @@ define(function() {
 
       // Too many log entries can cause browser crashes
       // Construct a too many files error from the last match
-      const maxErrors = 100
+      var maxErrors = 100;
       if (iterationCount >= maxErrors) {
-        const level = newEntry.level + "s"
-        newEntry.message = `Over ${maxErrors} ${level} returned. Download raw logs to see full list`;
+        var level = newEntry.level + "s";
+        newEntry.message = [
+          "Over",
+          maxErrors,
+          level,
+          "returned. Download raw logs to see full list"
+        ].join(" ");
         newEntry.line = undefined;
-        result.unshift(newEntry)
+        result.unshift(newEntry);
         return [result, ""];
       }
 
