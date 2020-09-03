@@ -611,8 +611,8 @@ const DockerRunner = {
       containerMonitorTimeout = undefined
     }
     if (containerMonitorInterval) {
-      clearInterval(containerMonitorTimeout)
-      containerMonitorTimeout = undefined
+      clearInterval(containerMonitorInterval)
+      containerMonitorInterval = undefined
     }
   }
 }
