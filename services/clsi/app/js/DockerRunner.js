@@ -22,11 +22,6 @@ let containerMonitorTimeout
 let containerMonitorInterval
 
 module.exports = DockerRunner = {
-  ERR_NOT_DIRECTORY: new Error('not a directory'),
-  ERR_TERMINATED: new Error('terminated'),
-  ERR_EXITED: new Error('exited'),
-  ERR_TIMED_OUT: new Error('container timed out'),
-
   run(
     projectId,
     command,
@@ -190,13 +185,13 @@ module.exports = DockerRunner = {
           }
           if (exitCode === 137) {
             // exit status from kill -9
-            err = DockerRunner.ERR_TERMINATED
+            err = new Error('terminated')
             err.terminated = true
             return callback(err)
           }
           if (exitCode === 1) {
             // exit status from chktex
-            err = DockerRunner.ERR_EXITED
+            err = new Error('exited')
             err.code = exitCode
             return callback(err)
           }
@@ -353,7 +348,7 @@ module.exports = DockerRunner = {
           return cb(err)
         }
         if (!stats.isDirectory()) {
-          return cb(DockerRunner.ERR_NOT_DIRECTORY)
+          return cb(new Error('not a directory'))
         }
         cb()
       })
@@ -501,7 +496,7 @@ module.exports = DockerRunner = {
       }
       if (timedOut) {
         logger.log({ containerId }, 'docker container timed out')
-        error = DockerRunner.ERR_TIMED_OUT
+        error = new Error('container timed out')
         error.timedout = true
         callback(error)
       } else {
