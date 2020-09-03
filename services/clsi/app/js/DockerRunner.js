@@ -1,8 +1,4 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-let DockerRunner, oneHour
+let DockerRunner
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const Docker = require('dockerode')
@@ -14,6 +10,7 @@ const fs = require('fs')
 const Path = require('path')
 const _ = require('lodash')
 
+const ONE_HOUR_IN_MS = 60 * 60 * 1000
 logger.info('using docker runner')
 
 const usingSiblingContainers = () =>
@@ -559,8 +556,7 @@ module.exports = DockerRunner = {
 
   // handle expiry of docker containers
 
-  MAX_CONTAINER_AGE:
-    Settings.clsi.docker.maxContainerAge || (oneHour = 60 * 60 * 1000),
+  MAX_CONTAINER_AGE: Settings.clsi.docker.maxContainerAge || ONE_HOUR_IN_MS,
 
   examineOldContainer(container, callback) {
     const name = container.Name || (container.Names && container.Names[0])
@@ -618,7 +614,7 @@ module.exports = DockerRunner = {
               logger.error({ err }, 'failed to destroy old containers')
             }
           }),
-        (oneHour = 60 * 60 * 1000)
+        ONE_HOUR_IN_MS
       )
     }, randomDelay)
   },
