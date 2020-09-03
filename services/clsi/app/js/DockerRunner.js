@@ -50,9 +50,6 @@ module.exports = DockerRunner = {
     callback
   ) {
     let name
-    if (callback == null) {
-      callback = function (error, output) {}
-    }
     if (usingSiblingContainers()) {
       const _newPath = Settings.path.sandboxedCompilesHostDir
       logger.log(
@@ -135,9 +132,6 @@ module.exports = DockerRunner = {
   },
 
   kill(container_id, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     logger.log({ container_id }, 'sending kill signal to container')
     const container = dockerode.getContainer(container_id)
     container.kill(function (error) {
@@ -162,9 +156,6 @@ module.exports = DockerRunner = {
   },
 
   _runAndWaitForContainer(options, volumes, timeout, _callback) {
-    if (_callback == null) {
-      _callback = function (error, output) {}
-    }
     const callback = function (...args) {
       _callback(...args)
       // Only call the callback once
@@ -366,9 +357,6 @@ module.exports = DockerRunner = {
 
   // Check that volumes exist and are directories
   _checkVolumes(options, volumes, callback) {
-    if (callback == null) {
-      callback = function (error, containerName) {}
-    }
     if (usingSiblingContainers()) {
       // Server Pro, with sibling-containers active, skip checks
       return callback(null)
@@ -392,9 +380,6 @@ module.exports = DockerRunner = {
   },
 
   _startContainer(options, volumes, attachStreamHandler, callback) {
-    if (callback == null) {
-      callback = function (error, output) {}
-    }
     callback = _.once(callback)
     const { name } = options
 
@@ -510,9 +495,6 @@ module.exports = DockerRunner = {
   },
 
   waitForContainer(containerId, timeout, _callback) {
-    if (_callback == null) {
-      _callback = function (error, exitCode) {}
-    }
     const callback = function (...args) {
       _callback(...args)
       // Only call the callback once
@@ -564,9 +546,6 @@ module.exports = DockerRunner = {
     // async exception, but if you delete by id it just does a normal
     // error callback. We fall back to deleting by name if no id is
     // supplied.
-    if (callback == null) {
-      callback = function (error) {}
-    }
     LockManager.runWithLock(
       containerName,
       (releaseLock) =>
@@ -580,9 +559,6 @@ module.exports = DockerRunner = {
   },
 
   _destroyContainer(containerId, shouldForce, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     logger.log({ container_id: containerId }, 'destroying docker container')
     const container = dockerode.getContainer(containerId)
     container.remove({ force: shouldForce === true }, function (error) {
@@ -614,9 +590,6 @@ module.exports = DockerRunner = {
     Settings.clsi.docker.maxContainerAge || (oneHour = 60 * 60 * 1000),
 
   examineOldContainer(container, callback) {
-    if (callback == null) {
-      callback = function (error, name, id, ttl) {}
-    }
     const name =
       container.Name ||
       (container.Names != null ? container.Names[0] : undefined)
@@ -633,9 +606,6 @@ module.exports = DockerRunner = {
   },
 
   destroyOldContainers(callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     dockerode.listContainers({ all: true }, function (error, containers) {
       if (error != null) {
         return callback(error)
@@ -677,7 +647,12 @@ module.exports = DockerRunner = {
     const randomDelay = Math.floor(Math.random() * 5 * 60 * 1000)
     containerMonitorTimeout = setTimeout(() => {
       containerMonitorInterval = setInterval(
-        () => DockerRunner.destroyOldContainers(),
+        () =>
+          DockerRunner.destroyOldContainers((err) => {
+            if (err) {
+              logger.error({ err }, 'failed to destroy old containers')
+            }
+          }),
         (oneHour = 60 * 60 * 1000)
       )
     }, randomDelay)
