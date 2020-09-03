@@ -137,12 +137,7 @@ const DockerRunner = {
   },
 
   _runAndWaitForContainer(options, volumes, timeout, _callback) {
-    const callback = function (...args) {
-      _callback(...args)
-      // Only call the callback once
-      _callback = function () {}
-    }
-
+    const callback = _.once(_callback)
     const { name } = options
 
     let streamEnded = false
@@ -463,11 +458,7 @@ const DockerRunner = {
   },
 
   waitForContainer(containerId, timeout, _callback) {
-    const callback = function (...args) {
-      _callback(...args)
-      // Only call the callback once
-      _callback = function () {}
-    }
+    const callback = _.once(_callback)
 
     const container = dockerode.getContainer(containerId)
 
