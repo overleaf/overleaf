@@ -1,4 +1,4 @@
-const db = require('./DB')
+const { db } = require('./mongodb')
 const mongoCache = require('./MongoCache')
 const logger = require('logger-sharelatex')
 const metrics = require('metrics-sharelatex')
@@ -11,7 +11,7 @@ const LearnedWordsManager = {
       callback = () => {}
     }
     mongoCache.del(userToken)
-    return db.spellingPreferences.update(
+    return db.spellingPreferences.updateOne(
       {
         token: userToken
       },
@@ -30,7 +30,7 @@ const LearnedWordsManager = {
       callback = () => {}
     }
     mongoCache.del(userToken)
-    return db.spellingPreferences.update(
+    return db.spellingPreferences.updateOne(
       {
         token: userToken
       },
@@ -78,7 +78,7 @@ const LearnedWordsManager = {
     if (callback == null) {
       callback = () => {}
     }
-    db.spellingPreferences.remove({ token: userToken }, callback)
+    db.spellingPreferences.deleteOne({ token: userToken }, callback)
   }
 }
 
