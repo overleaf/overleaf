@@ -8,6 +8,7 @@
 let Metrics;
 console.log("using prometheus");
 
+const ExpressCompression = require('compression');
 const prom = require('./prom_wrapper');
 
 const {
@@ -75,7 +76,9 @@ module.exports = (Metrics = {
 	},
 
 	injectMetricsRoute(app) {
-		return app.get('/metrics', function(req, res) {
+		return app.get('/metrics', ExpressCompression({
+			level: parseInt(process.env.METRICS_COMPRESSION_LEVEL || '1', 10)
+		}), function (req, res) {
 			res.set('Content-Type', prom.registry.contentType);
 			return res.end(prom.registry.metrics());
 		});
