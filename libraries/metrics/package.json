@@ -1,6 +1,6 @@
 {
   "name": "@overleaf/metrics",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "A drop-in metrics and monitoring module for node.js apps",
   "repository": {
     "type": "git",
