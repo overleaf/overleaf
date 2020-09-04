@@ -19,13 +19,13 @@ module.exports = (OpenSocketsMonitor = {
 	monitor(logger) {
 		const interval = setInterval(() => OpenSocketsMonitor.gaugeOpenSockets()
 		, 5 * seconds);
-		const Metrics = require("./metrics");
+		const Metrics = require("./index");
 		return Metrics.registerDestructor(() => clearInterval(interval));
 	},
 
 	gaugeOpenSockets() {
 		let agents, hostname, url;
-		const Metrics = require("./metrics");
+		const Metrics = require("./index");
 		const object = require('http').globalAgent.sockets;
 		for (url in object) {
 			agents = object[url];

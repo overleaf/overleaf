@@ -9,7 +9,7 @@ module.exports = (EventLoopMonitor = {
 	monitor(logger, interval, log_threshold) {
 		if (interval == null) { interval = 1000; }
 		if (log_threshold == null) { log_threshold = 100; }
-		const Metrics = require("./metrics");
+		const Metrics = require("./index");
 		// check for logger on startup to avoid exceptions later if undefined
 		if ((logger == null)) { throw new Error("logger is undefined"); }
 		// monitor delay in setInterval to detect event loop blocking

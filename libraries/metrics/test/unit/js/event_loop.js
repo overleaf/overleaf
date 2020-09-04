@@ -24,7 +24,7 @@ describe('event_loop', function() {
 			warn: sinon.stub()
 		};
 		return this.event_loop = SandboxedModule.require(modulePath, { requires: {
-			'./metrics': this.metrics
+			'./index': this.metrics
 		}
 	}
 		);

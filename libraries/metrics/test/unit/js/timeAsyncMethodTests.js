@@ -25,7 +25,7 @@ describe('timeAsyncMethod', function() {
 			inc: sinon.stub()
 		};
 		this.timeAsyncMethod = SandboxedModule.require(modulePath, { requires: {
-			'./metrics': this.metrics
+			'./index': this.metrics
 		}
 	}
 		);
