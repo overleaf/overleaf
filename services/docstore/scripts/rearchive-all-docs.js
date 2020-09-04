@@ -61,18 +61,30 @@ async function rearchiveAllDocs() {
   // start from an objectId and run in ascending order, so we can resume later
   const query = {}
   const startId = params._[0]
+  const endId = params.e
   if (startId) {
-    const validator = new RegExp('^[0-9a-fA-F]{24}$')
-    if (!validator.test(startId)) {
-      console.error('Invalid object id')
-      return
+    if (!new RegExp('^[0-9a-fA-F]{24}$').test(startId)) {
+      throw new Error('Invalid start object id')
     }
     query._id = {
-      $gt: ObjectId(startId)
+      $gte: ObjectId(startId)
     }
     console.log(`Starting from object ID ${startId}`)
   } else {
     console.log('No object id specified. Starting from the beginning.')
+  }
+
+  if (endId) {
+    if (!new RegExp('^[0-9a-fA-F]{24}$').test(endId)) {
+      throw new Error('Invalid end object id')
+    }
+    query._id = {
+      ...(query._id || {}),
+      ...{
+        $lte: ObjectId(endId)
+      }
+    }
+    console.log(`Stopping at object ID ${endId}`)
   }
 
   const results = (await getCollection('projects'))
