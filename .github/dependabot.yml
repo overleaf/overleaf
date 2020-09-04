@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # Docker images use the branch name and do not support slashes in tags
+      # https://github.com/overleaf/google-ops/issues/822
+      # https://docs.github.com/en/github/administering-a-repository/configuration-options-for-dependency-updates#pull-request-branch-nameseparator
+      separator: "-"
+
+    # Block informal upgrades -- security upgrades use a separate queue.
+    # https://docs.github.com/en/github/administering-a-repository/configuration-options-for-dependency-updates#open-pull-requests-limit
+    open-pull-requests-limit: 0
