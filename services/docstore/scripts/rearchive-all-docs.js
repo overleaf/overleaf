@@ -78,12 +78,8 @@ async function rearchiveAllDocs() {
     if (!new RegExp('^[0-9a-fA-F]{24}$').test(endId)) {
       throw new Error('Invalid end object id')
     }
-    query._id = {
-      ...(query._id || {}),
-      ...{
-        $lte: ObjectId(endId)
-      }
-    }
+    query._id = query._id || {}
+    query._id.$lte = ObjectId(endId)
     console.log(`Stopping at object ID ${endId}`)
   }
 
