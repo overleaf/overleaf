@@ -10,7 +10,7 @@ const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const { Institution } = require('../../models/Institution')
 const { Subscription } = require('../../models/Subscription')
 
-const ASYNC_LIMIT = 10
+const ASYNC_LIMIT = parseInt(process.env.ASYNC_LIMIT, 10) || 5
 module.exports = {
   upgradeInstitutionUsers(institutionId, callback) {
     async.waterfall(
