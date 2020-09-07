@@ -11,16 +11,20 @@ async function healthCheck() {
   }
 }
 
+let setupDbPromise
 async function waitForDb() {
-  await clientPromise
+  if (!setupDbPromise) {
+    setupDbPromise = setupDb()
+  }
+  await setupDbPromise
 }
 
 const db = {}
-waitForDb().then(async function () {
+async function setupDb() {
   const internalDb = (await clientPromise).db()
 
   db.docSnapshots = internalDb.collection('docSnapshots')
-})
+}
 
 module.exports = {
   db,
