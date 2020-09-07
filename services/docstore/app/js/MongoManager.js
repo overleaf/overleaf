@@ -26,7 +26,9 @@ module.exports = MongoManager = {
         _id: ObjectId(doc_id.toString()),
         project_id: ObjectId(project_id.toString())
       },
-      filter,
+      {
+        projection: filter
+      },
       callback
     )
   },
@@ -39,7 +41,11 @@ module.exports = MongoManager = {
     if (!options.include_deleted) {
       query.deleted = { $ne: true }
     }
-    db.docs.find(query, filter).toArray(callback)
+    db.docs
+      .find(query, {
+        projection: filter
+      })
+      .toArray(callback)
   },
 
   getArchivedProjectDocs(project_id, callback) {
@@ -106,7 +112,9 @@ module.exports = MongoManager = {
         doc_id: ObjectId(doc_id)
       },
       {
-        version: 1
+        projection: {
+          version: 1
+        }
       },
       function (error, doc) {
         if (error != null) {

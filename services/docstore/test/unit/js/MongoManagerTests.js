@@ -60,7 +60,9 @@ describe('MongoManager', function () {
             _id: ObjectId(this.doc_id),
             project_id: ObjectId(this.project_id)
           },
-          this.filter
+          {
+            projection: this.filter
+          }
         )
         .should.equal(true)
     })
@@ -101,7 +103,9 @@ describe('MongoManager', function () {
               project_id: ObjectId(this.project_id),
               deleted: { $ne: true }
             },
-            this.filter
+            {
+              projection: this.filter
+            }
           )
           .should.equal(true)
       })
@@ -129,7 +133,9 @@ describe('MongoManager', function () {
             {
               project_id: ObjectId(this.project_id)
             },
-            this.filter
+            {
+              projection: this.filter
+            }
           )
           .should.equal(true)
       })
@@ -241,7 +247,12 @@ describe('MongoManager', function () {
 
       it('should look for the doc in the database', function () {
         return this.db.docOps.findOne
-          .calledWith({ doc_id: ObjectId(this.doc_id) }, { version: 1 })
+          .calledWith(
+            { doc_id: ObjectId(this.doc_id) },
+            {
+              projection: { version: 1 }
+            }
+          )
           .should.equal(true)
       })
 
