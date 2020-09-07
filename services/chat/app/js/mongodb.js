@@ -3,17 +3,21 @@ const { MongoClient, ObjectId } = require('mongodb')
 
 const clientPromise = MongoClient.connect(Settings.mongo.url)
 
+let setupDbPromise
 async function waitForDb() {
-  await clientPromise
+  if (!setupDbPromise) {
+    setupDbPromise = setupDb()
+  }
+  await setupDbPromise
 }
 
 const db = {}
-waitForDb().then(async function () {
+async function setupDb() {
   const internalDb = (await clientPromise).db()
 
   db.messages = internalDb.collection('messages')
   db.rooms = internalDb.collection('rooms')
-})
+}
 
 module.exports = {
   db,
