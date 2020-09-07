@@ -197,7 +197,7 @@
     "less-loader": "^6.0.0",
     "less-plugin-autoprefix": "^2.0.0",
     "mini-css-extract-plugin": "^0.8.0",
-    "mkdirp": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.1.tgz",
+    "mkdirp": "0.5.1",
     "mock-fs": "^4.11.0",
     "nodemon": "^1.14.3",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
