@@ -18,9 +18,16 @@ async function setupDb() {
   db.docs = internalDb.collection('docs')
   db.docOps = internalDb.collection('docOps')
 }
+async function addCollection(name) {
+  await waitForDb()
+  const internalDb = (await clientPromise).db()
+
+  db[name] = internalDb.collection(name)
+}
 
 module.exports = {
   db,
   ObjectId,
+  addCollection,
   waitForDb
 }
