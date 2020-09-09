@@ -14,7 +14,7 @@
  */
 let MessageManager
 const { ObjectId, getCollection } = require('../../mongodb')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
 
 const messagesCollectionPromise = getCollection('messages')
