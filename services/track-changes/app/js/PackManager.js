@@ -275,10 +275,7 @@ module.exports = PackManager = {
       'appending updates to existing pack'
     )
     Metrics.inc(`append-pack-${temporary ? 'temporary' : 'permanent'}`)
-    return db.docHistory.findAndModify(
-      { query, update, new: true, fields: { meta: 1, v_end: 1 } },
-      callback
-    )
+    return db.docHistory.updateOne(query, update, callback)
   },
 
   // Retrieve all changes for a document
@@ -303,7 +300,8 @@ module.exports = PackManager = {
         // console.log "query:", query
         return db.docHistory
           .find(query)
-          .sort({ v: -1 }, function (err, result) {
+          .sort({ v: -1 })
+          .toArray(function (err, result) {
             if (err != null) {
               return callback(err)
             }
@@ -382,20 +380,9 @@ module.exports = PackManager = {
 
   fetchPacksIfNeeded(project_id, doc_id, pack_ids, callback) {
     let id
-    return db.docHistory.find(
-      {
-        _id: {
-          $in: (() => {
-            const result = []
-            for (id of Array.from(pack_ids)) {
-              result.push(ObjectId(id))
-            }
-            return result
-          })()
-        }
-      },
-      { _id: 1 },
-      function (err, loadedPacks) {
+    return db.docHistory
+      .find({ _id: { $in: pack_ids.map(ObjectId) } }, { _id: 1 })
+      .toArray(function (err, loadedPacks) {
         if (err != null) {
           return callback(err)
         }
@@ -430,8 +417,7 @@ module.exports = PackManager = {
             return callback()
           }
         )
-      }
-    )
+      })
   },
 
   // Retrieve all changes across a project
@@ -440,7 +426,8 @@ module.exports = PackManager = {
     // get all the docHistory Entries
     return db.docHistory
       .find({ project_id: ObjectId(project_id) }, { pack: false })
-      .sort({ 'meta.end_ts': -1 }, function (err, packs) {
+      .sort({ 'meta.end_ts': -1 })
+      .toArray(function (err, packs) {
         let pack
         if (err != null) {
           return callback(err)
@@ -451,9 +438,9 @@ module.exports = PackManager = {
           allPacks.push(pack)
           seenIds[pack._id] = true
         }
-        return db.docHistoryIndex.find(
-          { project_id: ObjectId(project_id) },
-          function (err, indexes) {
+        return db.docHistoryIndex
+          .find({ project_id: ObjectId(project_id) })
+          .toArray(function (err, indexes) {
             if (err != null) {
               return callback(err)
             }
@@ -472,8 +459,7 @@ module.exports = PackManager = {
               null,
               new ProjectIterator(allPacks, before, PackManager.getPackById)
             )
-          }
-        )
+          })
       })
   },
 
@@ -499,11 +485,9 @@ module.exports = PackManager = {
   increaseTTL(pack, callback) {
     if (pack.expiresAt < new Date(Date.now() + 6 * DAYS)) {
       // update cache expiry since we are using this pack
-      return db.docHistory.findAndModify(
-        {
-          query: { _id: pack._id },
-          update: { $set: { expiresAt: new Date(Date.now() + 7 * DAYS) } }
-        },
+      return db.docHistory.updateOne(
+        { _id: pack._id },
+        { $set: { expiresAt: new Date(Date.now() + 7 * DAYS) } },
         (err) => callback(err, pack)
       )
     } else {
@@ -619,7 +603,8 @@ module.exports = PackManager = {
     }
     return db.docHistory
       .find(query, { pack: false })
-      .sort({ v: 1 }, function (err, packs) {
+      .sort({ v: 1 })
+      .toArray(function (err, packs) {
         if (err != null) {
           return callback(err)
         }
@@ -644,7 +629,8 @@ module.exports = PackManager = {
     }
     return db.docHistory
       .find(query, { pack: false })
-      .sort({ v: 1 }, function (err, packs) {
+      .sort({ v: 1 })
+      .toArray(function (err, packs) {
         if (err != null) {
           return callback(err)
         }
@@ -729,15 +715,15 @@ module.exports = PackManager = {
   },
 
   _insertPacksIntoIndex(project_id, doc_id, newPacks, callback) {
-    return db.docHistoryIndex.findAndModify(
+    return db.docHistoryIndex.updateOne(
+      { _id: ObjectId(doc_id.toString()) },
       {
-        query: { _id: ObjectId(doc_id.toString()) },
-        update: {
-          $setOnInsert: { project_id: ObjectId(project_id.toString()) },
-          $push: {
-            packs: { $each: newPacks, $sort: { v: 1 } }
-          }
-        },
+        $setOnInsert: { project_id: ObjectId(project_id.toString()) },
+        $push: {
+          packs: { $each: newPacks, $sort: { v: 1 } }
+        }
+      },
+      {
         upsert: true
       },
       callback
@@ -995,11 +981,9 @@ module.exports = PackManager = {
 
   _markPackAsFinalised(project_id, doc_id, pack_id, callback) {
     logger.log({ project_id, doc_id, pack_id }, 'marking pack as finalised')
-    return db.docHistory.findAndModify(
-      {
-        query: { _id: pack_id },
-        update: { $set: { finalised: true } }
-      },
+    return db.docHistory.updateOne(
+      { _id: pack_id },
+      { $set: { finalised: true } },
       callback
     )
   },
@@ -1020,11 +1004,9 @@ module.exports = PackManager = {
 
   markPackAsChecked(project_id, doc_id, pack_id, callback) {
     logger.log({ project_id, doc_id, pack_id }, 'marking pack as checked')
-    return db.docHistory.findAndModify(
-      {
-        query: { _id: pack_id },
-        update: { $currentDate: { last_checked: true } }
-      },
+    return db.docHistory.updateOne(
+      { _id: pack_id },
+      { $currentDate: { last_checked: true } },
       callback
     )
   },
@@ -1117,15 +1099,12 @@ module.exports = PackManager = {
       { project_id, doc_id, pack_id },
       'clearing as archive in progress'
     )
-    return db.docHistoryIndex.findAndModify(
+    return db.docHistoryIndex.updateOne(
       {
-        query: {
-          _id: ObjectId(doc_id.toString()),
-          packs: { $elemMatch: { _id: pack_id, inS3: false } }
-        },
-        fields: { 'packs.$': 1 },
-        update: { $unset: { 'packs.$.inS3': true } }
+        _id: ObjectId(doc_id.toString()),
+        packs: { $elemMatch: { _id: pack_id, inS3: false } }
       },
+      { $unset: { 'packs.$.inS3': true } },
       callback
     )
   },
@@ -1155,12 +1134,13 @@ module.exports = PackManager = {
   },
 
   setTTLOnArchivedPack(project_id, doc_id, pack_id, callback) {
-    return db.docHistory.findAndModify(
-      {
-        query: { _id: pack_id },
-        update: { $set: { expiresAt: new Date(Date.now() + 1 * DAYS) } }
-      },
+    return db.docHistory.updateOne(
+      { _id: pack_id },
+      { $set: { expiresAt: new Date(Date.now() + 1 * DAYS) } },
       function (err) {
+        if (err) {
+          return callback(err)
+        }
         logger.log({ project_id, doc_id, pack_id }, 'set expiry on pack')
         return callback()
       }

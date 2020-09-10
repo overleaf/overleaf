@@ -190,7 +190,7 @@ describe('MongoManager', function () {
     beforeEach(function () {
       this.metadata = { mock: 'metadata' }
       this.db.projectHistoryMetaData = {
-        find: sinon.stub().callsArgWith(1, null, [this.metadata])
+        findOne: sinon.stub().callsArgWith(1, null, this.metadata)
       }
       return this.MongoManager.getProjectMetaData(
         this.project_id,
@@ -199,7 +199,7 @@ describe('MongoManager', function () {
     })
 
     it('should look up the meta data in the db', function () {
-      return this.db.projectHistoryMetaData.find
+      return this.db.projectHistoryMetaData.findOne
         .calledWith({ project_id: ObjectId(this.project_id) })
         .should.equal(true)
     })
