@@ -17,6 +17,7 @@ const sinon = require('sinon')
 const chai = require('chai')
 const should = chai.should()
 const { expect } = chai
+const { ObjectId } = require('mongodb')
 const modulePath = '../../../../app/js/UpdatesManager.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -864,7 +865,6 @@ describe('UpdatesManager', function () {
   describe('fillUserInfo', function () {
     describe('with valid users', function () {
       beforeEach(function (done) {
-        const { ObjectId } = require('mongojs')
         this.user_id_1 = ObjectId().toString()
         this.user_id_2 = ObjectId().toString()
         this.updates = [

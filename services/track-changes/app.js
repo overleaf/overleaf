@@ -44,6 +44,7 @@ Metrics.memory.monitor(logger)
 
 const childProcess = require('child_process')
 
+const mongodb = require('./app/js/mongodb')
 const HttpController = require('./app/js/HttpController')
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -128,18 +129,26 @@ const host =
 
 if (!module.parent) {
   // Called directly
-  app.listen(port, host, function (error) {
-    if (error != null) {
-      return logger.error(
-        { err: error },
-        'could not start track-changes server'
-      )
-    } else {
-      return logger.info(
-        `trackchanges starting up, listening on ${host}:${port}`
-      )
-    }
-  })
+  mongodb
+    .waitForDb()
+    .then(() => {
+      app.listen(port, host, function (error) {
+        if (error != null) {
+          return logger.error(
+            { err: error },
+            'could not start track-changes server'
+          )
+        } else {
+          return logger.info(
+            `trackchanges starting up, listening on ${host}:${port}`
+          )
+        }
+      })
+    })
+    .catch((err) => {
+      logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
+      process.exit(1)
+    })
 }
 
 module.exports = app

@@ -18,7 +18,7 @@ const async = require('async')
 const _ = require('underscore')
 const Bson = require('bson')
 const BSON = new Bson()
-const { db, ObjectId } = require('./mongojs')
+const { db, ObjectId } = require('./mongodb')
 const logger = require('logger-sharelatex')
 const LockManager = require('./LockManager')
 const MongoAWS = require('./MongoAWS')
@@ -220,7 +220,7 @@ module.exports = PackManager = {
       { project_id, doc_id, newUpdates },
       'inserting updates into new pack'
     )
-    return db.docHistory.save(newPack, function (err, result) {
+    return db.docHistory.insertOne(newPack, function (err) {
       if (err != null) {
         return callback(err)
       }
@@ -381,7 +381,10 @@ module.exports = PackManager = {
   fetchPacksIfNeeded(project_id, doc_id, pack_ids, callback) {
     let id
     return db.docHistory
-      .find({ _id: { $in: pack_ids.map(ObjectId) } }, { _id: 1 })
+      .find(
+        { _id: { $in: pack_ids.map(ObjectId) } },
+        { projection: { _id: 1 } }
+      )
       .toArray(function (err, loadedPacks) {
         if (err != null) {
           return callback(err)
@@ -425,7 +428,10 @@ module.exports = PackManager = {
   makeProjectIterator(project_id, before, callback) {
     // get all the docHistory Entries
     return db.docHistory
-      .find({ project_id: ObjectId(project_id) }, { pack: false })
+      .find(
+        { project_id: ObjectId(project_id) },
+        { projection: { pack: false } }
+      )
       .sort({ 'meta.end_ts': -1 })
       .toArray(function (err, packs) {
         let pack
@@ -507,7 +513,7 @@ module.exports = PackManager = {
   getPackFromIndex(doc_id, pack_id, callback) {
     return db.docHistoryIndex.findOne(
       { _id: ObjectId(doc_id.toString()), 'packs._id': pack_id },
-      { 'packs.$': 1 },
+      { projection: { 'packs.$': 1 } },
       callback
     )
   },
@@ -515,7 +521,7 @@ module.exports = PackManager = {
   getLastPackFromIndex(doc_id, callback) {
     return db.docHistoryIndex.findOne(
       { _id: ObjectId(doc_id.toString()) },
-      { packs: { $slice: -1 } },
+      { projection: { packs: { $slice: -1 } } },
       function (err, indexPack) {
         if (err != null) {
           return callback(err)
@@ -602,7 +608,7 @@ module.exports = PackManager = {
       expiresAt: { $exists: false }
     }
     return db.docHistory
-      .find(query, { pack: false })
+      .find(query, { projection: { pack: false } })
       .sort({ v: 1 })
       .toArray(function (err, packs) {
         if (err != null) {
@@ -628,7 +634,7 @@ module.exports = PackManager = {
       expiresAt: { $exists: false }
     }
     return db.docHistory
-      .find(query, { pack: false })
+      .find(query, { projection: { pack: false } })
       .sort({ v: 1 })
       .toArray(function (err, packs) {
         if (err != null) {
@@ -1069,20 +1075,18 @@ module.exports = PackManager = {
       { project_id, doc_id },
       'marking pack as archive in progress status'
     )
-    return db.docHistoryIndex.findAndModify(
+    return db.docHistoryIndex.findOneAndUpdate(
       {
-        query: {
-          _id: ObjectId(doc_id.toString()),
-          packs: { $elemMatch: { _id: pack_id, inS3: { $exists: false } } }
-        },
-        fields: { 'packs.$': 1 },
-        update: { $set: { 'packs.$.inS3': false } }
+        _id: ObjectId(doc_id.toString()),
+        packs: { $elemMatch: { _id: pack_id, inS3: { $exists: false } } }
       },
+      { $set: { 'packs.$.inS3': false } },
+      { projection: { 'packs.$': 1 } },
       function (err, result) {
         if (err != null) {
           return callback(err)
         }
-        if (result == null) {
+        if (!result.value) {
           return callback(new Error('archive is already in progress'))
         }
         logger.log(
@@ -1111,20 +1115,18 @@ module.exports = PackManager = {
 
   markPackAsArchived(project_id, doc_id, pack_id, callback) {
     logger.log({ project_id, doc_id, pack_id }, 'marking pack as archived')
-    return db.docHistoryIndex.findAndModify(
+    return db.docHistoryIndex.findOneAndUpdate(
       {
-        query: {
-          _id: ObjectId(doc_id.toString()),
-          packs: { $elemMatch: { _id: pack_id, inS3: false } }
-        },
-        fields: { 'packs.$': 1 },
-        update: { $set: { 'packs.$.inS3': true } }
+        _id: ObjectId(doc_id.toString()),
+        packs: { $elemMatch: { _id: pack_id, inS3: false } }
       },
+      { $set: { 'packs.$.inS3': true } },
+      { projection: { 'packs.$': 1 } },
       function (err, result) {
         if (err != null) {
           return callback(err)
         }
-        if (result == null) {
+        if (!result.value) {
           return callback(new Error('archive is not marked as progress'))
         }
         logger.log({ project_id, doc_id, pack_id }, 'marked as archived')

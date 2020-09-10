@@ -18,7 +18,7 @@ const settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const AWS = require('aws-sdk')
 const S3S = require('s3-streams')
-const { db, ObjectId } = require('./mongojs')
+const { db, ObjectId } = require('./mongodb')
 const JSONStream = require('JSONStream')
 const ReadlineStream = require('byline')
 const zlib = require('zlib')
@@ -187,7 +187,11 @@ module.exports = MongoAWS = {
       // allow the object to expire, we can always retrieve it again
       object.expiresAt = new Date(Date.now() + 7 * DAYS)
       logger.log({ project_id, doc_id, pack_id }, 'inserting object from s3')
-      return db.docHistory.insert(object, callback)
+      return db.docHistory.insertOne(object, (err, confirmation) => {
+        if (err) return callback(err)
+        object._id = confirmation.insertedId
+        callback(null, object)
+      })
     })
   }
 }

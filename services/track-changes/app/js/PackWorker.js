@@ -18,7 +18,7 @@ let project_id, doc_id
 const Settings = require('settings-sharelatex')
 const async = require('async')
 const _ = require('underscore')
-const { db, ObjectId } = require('./mongojs')
+const { db, ObjectId } = require('./mongodb')
 const fs = require('fs')
 const Metrics = require('metrics-sharelatex')
 Metrics.initialize('track-changes')
@@ -174,7 +174,7 @@ if (pending != null) {
         _id: { $lt: ObjectIdFromDate(oneWeekAgo) },
         last_checked: { $lt: oneWeekAgo }
       },
-      { _id: 1, doc_id: 1, project_id: 1 }
+      { projection: { _id: 1, doc_id: 1, project_id: 1 } }
     )
     .sort({
       last_checked: 1

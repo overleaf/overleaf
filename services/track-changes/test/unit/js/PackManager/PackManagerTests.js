@@ -17,7 +17,7 @@ const should = chai.should()
 const { expect } = chai
 const modulePath = '../../../../app/js/PackManager.js'
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const _ = require('underscore')
 
 const tk = require('timekeeper')
@@ -28,7 +28,7 @@ describe('PackManager', function () {
     this.PackManager = SandboxedModule.require(modulePath, {
       requires: {
         bson: require('bson'),
-        './mongojs': { db: (this.db = {}), ObjectId },
+        './mongodb': { db: (this.db = {}), ObjectId },
         './LockManager': {},
         './MongoAWS': {},
         'logger-sharelatex': { log: sinon.stub(), error: sinon.stub() },
@@ -65,7 +65,7 @@ describe('PackManager', function () {
         { op: 'op-4', meta: 'meta-4', v: 4 }
       ]
       return (this.db.docHistory = {
-        save: sinon.stub().callsArg(1),
+        insertOne: sinon.stub().yields(),
         insert: sinon.stub().callsArg(1),
         updateOne: sinon.stub().yields(),
         findAndModify: sinon.stub().callsArg(1)
@@ -390,7 +390,7 @@ describe('PackManager', function () {
 
         return describe('for a small update  that will expire', function () {
           it('should insert the update into mongo', function () {
-            return this.db.docHistory.save
+            return this.db.docHistory.insertOne
               .calledWithMatch({
                 pack: this.newUpdates,
                 project_id: ObjectId(this.project_id),
@@ -403,7 +403,7 @@ describe('PackManager', function () {
           })
 
           it('should set an expiry time in the future', function () {
-            return this.db.docHistory.save
+            return this.db.docHistory.insertOne
               .calledWithMatch({
                 expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000)
               })
@@ -496,7 +496,7 @@ describe('PackManager', function () {
 
       return describe('for a small update that will not expire', function () {
         it('should insert the update into mongo', function () {
-          return this.db.docHistory.save
+          return this.db.docHistory.insertOne
             .calledWithMatch({
               pack: this.newUpdates,
               project_id: ObjectId(this.project_id),
@@ -509,7 +509,7 @@ describe('PackManager', function () {
         })
 
         it('should not set any expiry time', function () {
-          return this.db.docHistory.save
+          return this.db.docHistory.insertOne
             .neverCalledWithMatch(sinon.match.has('expiresAt'))
             .should.equal(true)
         })
@@ -546,7 +546,7 @@ describe('PackManager', function () {
 
       return describe('for a small update that will expire', function () {
         it('should insert the update into mongo', function () {
-          return this.db.docHistory.save
+          return this.db.docHistory.insertOne
             .calledWithMatch({
               pack: this.newUpdates,
               project_id: ObjectId(this.project_id),
@@ -559,7 +559,7 @@ describe('PackManager', function () {
         })
 
         it('should set an expiry time in the future', function () {
-          return this.db.docHistory.save
+          return this.db.docHistory.insertOne
             .calledWithMatch({
               expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000)
             })
