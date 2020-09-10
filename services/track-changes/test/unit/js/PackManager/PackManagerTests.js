@@ -68,6 +68,7 @@ describe('PackManager', function () {
       return (this.db.docHistory = {
         save: sinon.stub().callsArg(1),
         insert: sinon.stub().callsArg(1),
+        updateOne: sinon.stub().yields(),
         findAndModify: sinon.stub().callsArg(1)
       })
     })
@@ -443,23 +444,21 @@ describe('PackManager', function () {
 
       return describe('for a small update that will expire', function () {
         it('should append the update in mongo', function () {
-          return this.db.docHistory.findAndModify
-            .calledWithMatch({
-              query: { _id: this.lastUpdate._id },
-              update: {
+          return this.db.docHistory.updateOne
+            .calledWithMatch(
+              { _id: this.lastUpdate._id },
+              {
                 $push: { pack: { $each: this.newUpdates } },
                 $set: { v_end: this.newUpdates[this.newUpdates.length - 1].v }
               }
-            })
+            )
             .should.equal(true)
         })
 
         it('should set an expiry time in the future', function () {
-          return this.db.docHistory.findAndModify
-            .calledWithMatch({
-              update: {
-                $set: { expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000) }
-              }
+          return this.db.docHistory.updateOne
+            .calledWithMatch(sinon.match.any, {
+              $set: { expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000) }
             })
             .should.equal(true)
         })
