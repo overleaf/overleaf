@@ -301,7 +301,8 @@ module.exports = PackManager = {
         // console.log "query:", query
         return db.docHistory
           .find(query)
-          .sort({ v: -1 }, function (err, result) {
+          .sort({ v: -1 })
+          .toArray(function (err, result) {
             if (err != null) {
               return callback(err)
             }
@@ -380,20 +381,9 @@ module.exports = PackManager = {
 
   fetchPacksIfNeeded(project_id, doc_id, pack_ids, callback) {
     let id
-    return db.docHistory.find(
-      {
-        _id: {
-          $in: (() => {
-            const result = []
-            for (id of Array.from(pack_ids)) {
-              result.push(ObjectId(id))
-            }
-            return result
-          })()
-        }
-      },
-      { _id: 1 },
-      function (err, loadedPacks) {
+    return db.docHistory
+      .find({ _id: { $in: pack_ids.map(ObjectId) } }, { _id: 1 })
+      .toArray(function (err, loadedPacks) {
         if (err != null) {
           return callback(err)
         }
@@ -428,8 +418,7 @@ module.exports = PackManager = {
             return callback()
           }
         )
-      }
-    )
+      })
   },
 
   // Retrieve all changes across a project
@@ -438,7 +427,8 @@ module.exports = PackManager = {
     // get all the docHistory Entries
     return db.docHistory
       .find({ project_id: ObjectId(project_id) }, { pack: false })
-      .sort({ 'meta.end_ts': -1 }, function (err, packs) {
+      .sort({ 'meta.end_ts': -1 })
+      .toArray(function (err, packs) {
         let pack
         if (err != null) {
           return callback(err)
@@ -449,9 +439,9 @@ module.exports = PackManager = {
           allPacks.push(pack)
           seenIds[pack._id] = true
         }
-        return db.docHistoryIndex.find(
-          { project_id: ObjectId(project_id) },
-          function (err, indexes) {
+        return db.docHistoryIndex
+          .find({ project_id: ObjectId(project_id) })
+          .toArray(function (err, indexes) {
             if (err != null) {
               return callback(err)
             }
@@ -470,8 +460,7 @@ module.exports = PackManager = {
               null,
               new ProjectIterator(allPacks, before, PackManager.getPackById)
             )
-          }
-        )
+          })
       })
   },
 
@@ -617,7 +606,8 @@ module.exports = PackManager = {
     }
     return db.docHistory
       .find(query, { pack: false })
-      .sort({ v: 1 }, function (err, packs) {
+      .sort({ v: 1 })
+      .toArray(function (err, packs) {
         if (err != null) {
           return callback(err)
         }
@@ -642,7 +632,8 @@ module.exports = PackManager = {
     }
     return db.docHistory
       .find(query, { pack: false })
-      .sort({ v: 1 }, function (err, packs) {
+      .sort({ v: 1 })
+      .toArray(function (err, packs) {
         if (err != null) {
           return callback(err)
         }

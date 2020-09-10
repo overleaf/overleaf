@@ -115,16 +115,11 @@ module.exports = MongoManager = {
     if (callback == null) {
       callback = function (error, metadata) {}
     }
-    return db.projectHistoryMetaData.find(
+    return db.projectHistoryMetaData.findOne(
       {
         project_id: ObjectId(project_id.toString())
       },
-      function (error, results) {
-        if (error != null) {
-          return callback(error)
-        }
-        return callback(null, results[0])
-      }
+      callback
     )
   },
 

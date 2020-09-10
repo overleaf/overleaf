@@ -191,7 +191,8 @@ if (pending != null) {
     .sort({
       last_checked: 1
     })
-    .limit(LIMIT, function (err, results) {
+    .limit(LIMIT)
+    .toArray(function (err, results) {
       if (err != null) {
         logger.log({ err }, 'error checking for updates')
         finish()
