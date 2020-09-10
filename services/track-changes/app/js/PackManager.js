@@ -16,7 +16,9 @@
 let PackManager
 const async = require('async')
 const _ = require('underscore')
-const { db, ObjectId, BSON } = require('./mongojs')
+const Bson = require('bson')
+const BSON = new Bson()
+const { db, ObjectId } = require('./mongojs')
 const logger = require('logger-sharelatex')
 const LockManager = require('./LockManager')
 const MongoAWS = require('./MongoAWS')

@@ -18,7 +18,7 @@ let project_id, doc_id
 const Settings = require('settings-sharelatex')
 const async = require('async')
 const _ = require('underscore')
-const { db, ObjectId, BSON } = require('./mongojs')
+const { db, ObjectId } = require('./mongojs')
 const fs = require('fs')
 const Metrics = require('metrics-sharelatex')
 Metrics.initialize('track-changes')

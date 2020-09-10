@@ -18,8 +18,6 @@ const { expect } = chai
 const modulePath = '../../../../app/js/PackManager.js'
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongojs')
-const bson = require('bson')
-const BSON = new bson.BSONPure()
 const _ = require('underscore')
 
 const tk = require('timekeeper')
@@ -29,7 +27,8 @@ describe('PackManager', function () {
     tk.freeze(new Date())
     this.PackManager = SandboxedModule.require(modulePath, {
       requires: {
-        './mongojs': { db: (this.db = {}), ObjectId, BSON },
+        bson: require('bson'),
+        './mongojs': { db: (this.db = {}), ObjectId },
         './LockManager': {},
         './MongoAWS': {},
         'logger-sharelatex': { log: sinon.stub(), error: sinon.stub() },
