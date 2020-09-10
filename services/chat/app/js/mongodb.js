@@ -2,18 +2,25 @@ const Settings = require('settings-sharelatex')
 const { MongoClient, ObjectId } = require('mongodb')
 
 const clientPromise = MongoClient.connect(Settings.mongo.url)
-const dbPromise = clientPromise.then((client) => client.db())
 
-async function getCollection(name) {
-  return (await dbPromise).collection(name)
+let setupDbPromise
+async function waitForDb() {
+  if (!setupDbPromise) {
+    setupDbPromise = setupDb()
+  }
+  await setupDbPromise
 }
 
-async function waitForDb() {
-  await clientPromise
+const db = {}
+async function setupDb() {
+  const internalDb = (await clientPromise).db()
+
+  db.messages = internalDb.collection('messages')
+  db.rooms = internalDb.collection('rooms')
 }
 
 module.exports = {
+  db,
   ObjectId,
-  getCollection,
   waitForDb
 }

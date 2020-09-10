@@ -11,6 +11,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+const { waitForDb } = require('../../../../app/js/mongodb')
 const app = require('../../../../app')
 
 module.exports = {
@@ -25,9 +26,10 @@ module.exports = {
       return callback()
     } else if (this.initing) {
       return this.callbacks.push(callback)
-    } else {
-      this.initing = true
-      this.callbacks.push(callback)
+    }
+    this.initing = true
+    this.callbacks.push(callback)
+    waitForDb().then(() => {
       return app.listen(3010, 'localhost', (error) => {
         if (error != null) {
           throw error
@@ -41,6 +43,6 @@ module.exports = {
           return result
         })()
       })
-    }
+    })
   }
 }
