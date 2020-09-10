@@ -13,9 +13,7 @@ const sinon = require('sinon')
 const chai = require('chai')
 chai.should()
 const { expect } = chai
-const mongojs = require('../../../app/js/mongojs')
-const { db } = mongojs
-const { ObjectId } = mongojs
+const { ObjectId } = require('../../../app/js/mongodb')
 const Settings = require('settings-sharelatex')
 
 const TrackChangesApp = require('./helpers/TrackChangesApp')

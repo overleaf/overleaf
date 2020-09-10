@@ -18,9 +18,7 @@ const sinon = require('sinon')
 const chai = require('chai')
 chai.should()
 const { expect } = chai
-const mongojs = require('../../../app/js/mongojs')
-const { db } = mongojs
-const { ObjectId } = mongojs
+const { db, ObjectId } = require('../../../app/js/mongodb')
 const Settings = require('settings-sharelatex')
 const request = require('request')
 const rclient = require('redis').createClient(Settings.redis.history) // Only works locally for now
@@ -126,7 +124,7 @@ describe('Archiving updates', function () {
 
   after(function (done) {
     MockWebApi.getUserInfo.restore()
-    return db.docHistory.remove(
+    return db.docHistory.deleteMany(
       { project_id: ObjectId(this.project_id) },
       () => {
         return db.docHistoryIndex.remove(
@@ -172,7 +170,7 @@ describe('Archiving updates', function () {
     })
 
     it('should have one remaining pack after cache is expired', function (done) {
-      return db.docHistory.remove(
+      return db.docHistory.deleteMany(
         {
           doc_id: ObjectId(this.doc_id),
           expiresAt: { $exists: true }
