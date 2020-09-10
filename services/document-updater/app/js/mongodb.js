@@ -1,7 +1,10 @@
 const Settings = require('settings-sharelatex')
 const { MongoClient, ObjectId } = require('mongodb')
 
-const clientPromise = MongoClient.connect(Settings.mongo.url)
+const clientPromise = MongoClient.connect(
+  Settings.mongo.url,
+  Settings.mongo.options
+)
 
 async function healthCheck() {
   const internalDb = (await clientPromise).db()
