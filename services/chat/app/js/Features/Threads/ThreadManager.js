@@ -14,7 +14,7 @@
 let ThreadManager
 const { ObjectId, getCollection } = require('../../mongodb')
 const logger = require('logger-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 
 const roomsCollectionPromise = getCollection('rooms')
 
