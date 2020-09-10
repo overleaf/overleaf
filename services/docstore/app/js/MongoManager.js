@@ -13,7 +13,7 @@
 let MongoManager
 const { getCollection, ObjectId } = require('./mongodb')
 const logger = require('logger-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const { promisify } = require('util')
 
 const docsCollectionPromise = getCollection('docs')

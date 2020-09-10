@@ -23,6 +23,9 @@ const { ObjectId } = require('mongodb')
 
 describe('HttpController', function () {
   beforeEach(function () {
+    const settings = {
+      max_doc_length: 2 * 1024 * 1024
+    }
     this.HttpController = SandboxedModule.require(modulePath, {
       requires: {
         './DocManager': (this.DocManager = {}),
@@ -31,6 +34,7 @@ describe('HttpController', function () {
           log: sinon.stub(),
           error: sinon.stub()
         }),
+        'settings-sharelatex': settings,
         './HealthChecker': {}
       },
       globals: { process }
