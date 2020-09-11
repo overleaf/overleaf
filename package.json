@@ -11,7 +11,7 @@
     "grunt-shell": "^1.1.1",
     "load-grunt-config": "^0.19.2",
     "lodash": "^3.0.0",
-    "mongodb": "^2.2.34",
+    "mongodb": "^3.6.2",
     "mongojs": "2.4.0",
     "redis": "^2.6.2",
     "rimraf": "~2.2.6",
