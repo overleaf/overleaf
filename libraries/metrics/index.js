@@ -1,5 +1,3 @@
-console.log('using prometheus')
-
 const ExpressCompression = require('compression')
 const prom = require('./prom_wrapper')
 
