@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let Metrics
 console.log('using prometheus')
 
@@ -21,10 +16,7 @@ require('./uv_threadpool_size')
 module.exports = Metrics = {
   register: prom.registry,
 
-  initialize(_name, opts) {
-    if (opts == null) {
-      opts = {}
-    }
+  initialize(_name, opts = {}) {
     appname = _name
     collectDefaultMetrics({ timeout: 5000, prefix: Metrics.buildPromKey() })
     if (opts.ttlInMinutes) {
@@ -87,10 +79,7 @@ module.exports = Metrics = {
     )
   },
 
-  buildPromKey(key) {
-    if (key == null) {
-      key = ''
-    }
+  buildPromKey(key = '') {
     return key.replace(/[^a-zA-Z0-9]/g, '_')
   },
 
@@ -98,20 +87,11 @@ module.exports = Metrics = {
     return parseFloat(value)
   },
 
-  set(key, value, sampleRate) {
-    if (sampleRate == null) {
-      sampleRate = 1
-    }
+  set(key, value, sampleRate = 1) {
     console.log('counts are not currently supported')
   },
 
-  inc(key, sampleRate, opts) {
-    if (sampleRate == null) {
-      sampleRate = 1
-    }
-    if (opts == null) {
-      opts = {}
-    }
+  inc(key, sampleRate = 1, opts = {}) {
     key = Metrics.buildPromKey(key)
     opts.app = appname
     opts.host = hostname
@@ -121,13 +101,7 @@ module.exports = Metrics = {
     }
   },
 
-  count(key, count, sampleRate, opts) {
-    if (sampleRate == null) {
-      sampleRate = 1
-    }
-    if (opts == null) {
-      opts = {}
-    }
+  count(key, count, sampleRate = 1, opts = {}) {
     key = Metrics.buildPromKey(key)
     opts.app = appname
     opts.host = hostname
@@ -137,10 +111,7 @@ module.exports = Metrics = {
     }
   },
 
-  summary(key, value, opts) {
-    if (opts == null) {
-      opts = {}
-    }
+  summary(key, value, opts = {}) {
     key = Metrics.buildPromKey(key)
     opts.app = appname
     opts.host = hostname
@@ -150,10 +121,7 @@ module.exports = Metrics = {
     }
   },
 
-  timing(key, timeSpan, sampleRate, opts) {
-    if (opts == null) {
-      opts = {}
-    }
+  timing(key, timeSpan, sampleRate, opts = {}) {
     key = Metrics.buildPromKey('timer_' + key)
     opts.app = appname
     opts.host = hostname
@@ -164,10 +132,7 @@ module.exports = Metrics = {
   },
 
   Timer: class {
-    constructor(key, sampleRate, opts) {
-      if (sampleRate == null) {
-        sampleRate = 1
-      }
+    constructor(key, sampleRate = 1, opts = {}) {
       this.start = new Date()
       key = Metrics.buildPromKey(key)
       this.key = key
@@ -182,16 +147,13 @@ module.exports = Metrics = {
     }
   },
 
-  gauge(key, value, sampleRate, opts) {
-    if (sampleRate == null) {
-      sampleRate = 1
-    }
+  gauge(key, value, sampleRate = 1, opts = {}) {
     key = Metrics.buildPromKey(key)
     prom.metric('gauge', key).set(
       {
         app: appname,
         host: hostname,
-        status: opts != null ? opts.status : undefined
+        status: opts.status
       },
       this.sanitizeValue(value)
     )
@@ -200,17 +162,11 @@ module.exports = Metrics = {
     }
   },
 
-  globalGauge(key, value, sampleRate, opts) {
-    if (sampleRate == null) {
-      sampleRate = 1
-    }
+  globalGauge(key, value, sampleRate = 1, opts = {}) {
     key = Metrics.buildPromKey(key)
     prom
       .metric('gauge', key)
-      .set(
-        { app: appname, status: opts != null ? opts.status : undefined },
-        this.sanitizeValue(value)
-      )
+      .set({ app: appname, status: opts.status }, this.sanitizeValue(value))
   },
 
   mongodb: require('./mongodb'),
