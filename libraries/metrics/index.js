@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -32,9 +31,7 @@ module.exports = Metrics = {
       prom.ttlInMinutes = opts.ttlInMinutes
     }
 
-    console.log(
-      `ENABLE_TRACE_AGENT set to ${process.env.ENABLE_TRACE_AGENT}`
-    )
+    console.log(`ENABLE_TRACE_AGENT set to ${process.env.ENABLE_TRACE_AGENT}`)
     if (process.env.ENABLE_TRACE_AGENT === 'true') {
       console.log('starting google trace agent')
       const traceAgent = require('@google-cloud/trace-agent')
@@ -43,9 +40,7 @@ module.exports = Metrics = {
       traceAgent.start(traceOpts)
     }
 
-    console.log(
-      `ENABLE_DEBUG_AGENT set to ${process.env.ENABLE_DEBUG_AGENT}`
-    )
+    console.log(`ENABLE_DEBUG_AGENT set to ${process.env.ENABLE_DEBUG_AGENT}`)
     if (process.env.ENABLE_DEBUG_AGENT === 'true') {
       console.log('starting google debug agent')
       const debugAgent = require('@google-cloud/debug-agent')
@@ -72,22 +67,22 @@ module.exports = Metrics = {
       })
     }
 
-    return Metrics.inc('process_startup')
+    Metrics.inc('process_startup')
   },
 
   registerDestructor(func) {
-    return destructors.push(func)
+    destructors.push(func)
   },
 
   injectMetricsRoute(app) {
-    return app.get(
+    app.get(
       '/metrics',
       ExpressCompression({
         level: parseInt(process.env.METRICS_COMPRESSION_LEVEL || '1', 10)
       }),
       function(req, res) {
         res.set('Content-Type', prom.registry.contentType)
-        return res.end(prom.registry.metrics())
+        res.end(prom.registry.metrics())
       }
     )
   },
@@ -107,7 +102,7 @@ module.exports = Metrics = {
     if (sampleRate == null) {
       sampleRate = 1
     }
-    return console.log('counts are not currently supported')
+    console.log('counts are not currently supported')
   },
 
   inc(key, sampleRate, opts) {
@@ -122,7 +117,7 @@ module.exports = Metrics = {
     opts.host = hostname
     prom.metric('counter', key).inc(opts)
     if (process.env.DEBUG_METRICS) {
-      return console.log('doing inc', key, opts)
+      console.log('doing inc', key, opts)
     }
   },
 
@@ -138,7 +133,7 @@ module.exports = Metrics = {
     opts.host = hostname
     prom.metric('counter', key).inc(opts, count)
     if (process.env.DEBUG_METRICS) {
-      return console.log('doing count/inc', key, opts)
+      console.log('doing count/inc', key, opts)
     }
   },
 
@@ -151,7 +146,7 @@ module.exports = Metrics = {
     opts.host = hostname
     prom.metric('summary', key).observe(opts, value)
     if (process.env.DEBUG_METRICS) {
-      return console.log('doing summary', key, value, opts)
+      console.log('doing summary', key, value, opts)
     }
   },
 
@@ -164,7 +159,7 @@ module.exports = Metrics = {
     opts.host = hostname
     prom.metric('summary', key).observe(opts, timeSpan)
     if (process.env.DEBUG_METRICS) {
-      return console.log('doing timing', key, opts)
+      console.log('doing timing', key, opts)
     }
   },
 
@@ -201,7 +196,7 @@ module.exports = Metrics = {
       this.sanitizeValue(value)
     )
     if (process.env.DEBUG_METRICS) {
-      return console.log('doing gauge', key, opts)
+      console.log('doing gauge', key, opts)
     }
   },
 
@@ -210,7 +205,7 @@ module.exports = Metrics = {
       sampleRate = 1
     }
     key = Metrics.buildPromKey(key)
-    return prom
+    prom
       .metric('gauge', key)
       .set(
         { app: appname, status: opts != null ? opts.status : undefined },
