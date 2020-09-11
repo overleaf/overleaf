@@ -10,12 +10,25 @@ const destructors = []
 
 require('./uv_threadpool_size')
 
-function initialize(_name, opts = {}) {
-  appname = _name
-  collectDefaultMetrics({ timeout: 5000, prefix: buildPromKey() })
+/**
+ * Configure the metrics module
+ */
+function configure(opts = {}) {
+  if (opts.appName) {
+    appname = opts.appName
+  }
   if (opts.ttlInMinutes) {
     prom.ttlInMinutes = opts.ttlInMinutes
   }
+}
+
+/**
+ * Configure the metrics module and start the default metrics collectors and
+ * profiling agents.
+ */
+function initialize(_name, opts = {}) {
+  configure({ ...opts, appName: _name })
+  collectDefaultMetrics({ timeout: 5000, prefix: buildPromKey() })
 
   console.log(`ENABLE_TRACE_AGENT set to ${process.env.ENABLE_TRACE_AGENT}`)
   if (process.env.ENABLE_TRACE_AGENT === 'true') {
@@ -71,7 +84,7 @@ function injectMetricsRoute(app) {
   )
 }
 
-function buildPromKey(key = '') {
+function buildPromKey(key) {
   return key.replace(/[^a-zA-Z0-9]/g, '_')
 }
 
@@ -113,7 +126,7 @@ function summary(key, value, opts = {}) {
   }
 }
 
-function timing(key, timeSpan, sampleRate, opts = {}) {
+function timing(key, timeSpan, sampleRate = 1, opts = {}) {
   key = buildPromKey('timer_' + key)
   opts.app = appname
   opts.host = hostname
@@ -168,6 +181,7 @@ function close() {
 }
 
 module.exports = {
+  configure,
   initialize,
   registerDestructor,
   injectMetricsRoute,
