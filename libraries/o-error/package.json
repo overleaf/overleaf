@@ -22,7 +22,7 @@
     "update-readme": "doc/update-readme.js",
     "test": "mocha",
     "test:coverage": "nyc --reporter=lcov --reporter=text-summary npm run test",
-    "typecheck": "tsc --allowJs --checkJs --noEmit --moduleResolution node --target ES6 *.js test/**/*.js",
+    "typecheck": "tsc --allowJs --checkJs --noEmit --moduleResolution node --strict --target ES6 *.js test/**/*.js",
     "declaration:build": "rm -f index.d.ts && tsc --allowJs --declaration --emitDeclarationOnly --moduleResolution node --target ES6 index.js",
     "declaration:check": "git diff --exit-code -- index.d.ts",
     "prepublishOnly": "npm run --silent declaration:build && npm run --silent declaration:check"
@@ -31,6 +31,7 @@
   "license": "MIT",
   "repository": "github:overleaf/o-error",
   "devDependencies": {
+    "@types/chai": "^4.2.12",
     "@types/node": "^13.13.2",
     "chai": "^3.3.0",
     "eslint": "^6.8.0",

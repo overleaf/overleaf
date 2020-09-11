@@ -13,15 +13,14 @@ class OError extends Error {
     this.name = this.constructor.name
     if (info) this.info = info
     if (cause) this.cause = cause
-
-    /** @private @type {Array<TaggedError>} */
+    /** @private @type {Array<TaggedError> | undefined} */
     this._oErrorTags // eslint-disable-line
   }
 
   /**
    * Set the extra info object for this error.
    *
-   * @param {Object | null | undefined} info extra data to attach to the error
+   * @param {Object} info extra data to attach to the error
    * @return {this}
    */
   withInfo(info) {
@@ -44,6 +43,28 @@ class OError extends Error {
    * Tag debugging information onto any error (whether an OError or not) and
    * return it.
    *
+   * @example <caption>An error in a callback</caption>
+   * function findUser(name, callback) {
+   *   fs.readFile('/etc/passwd', (err, data) => {
+   *     if (err) return callback(OError.tag(err, 'failed to read passwd'))
+   *     // ...
+   *   })
+   * }
+   *
+   * @example <caption>A possible error in a callback</caption>
+   * function cleanup(callback) {
+   *   fs.unlink('/tmp/scratch', (err) => callback(err && OError.tag(err)))
+   * }
+   *
+   * @example <caption>An error with async/await</caption>
+   * async function cleanup() {
+   *   try {
+   *     await fs.promises.unlink('/tmp/scratch')
+   *   } catch (err) {
+   *     throw OError.tag(err, 'failed to remove scratch file')
+   *   }
+   * }
+   *
    * @param {Error} error the error to tag
    * @param {string} [message] message with which to tag `error`
    * @param {Object} [info] extra data with wich to tag `error`
@@ -60,7 +81,7 @@ class OError extends Error {
       tag = /** @type TaggedError */ ({ name: 'TaggedError', message, info })
       Error.captureStackTrace(tag, OError.tag)
     } else {
-      tag = new TaggedError(message, info)
+      tag = new TaggedError(message || '', info)
     }
 
     oError._oErrorTags.push(tag)
@@ -106,7 +127,7 @@ class OError extends Error {
 
     const oError = /** @type{OError} */ (error)
 
-    let stack = oError.stack
+    let stack = oError.stack || '(no stack)'
 
     if (Array.isArray(oError._oErrorTags) && oError._oErrorTags.length) {
       stack += `\n${oError._oErrorTags.map((tag) => tag.stack).join('\n')}`
@@ -129,6 +150,11 @@ class OError extends Error {
  */
 class TaggedError extends OError {}
 
+/**
+ * @private
+ * @param {string} string
+ * @return {string}
+ */
 function indent(string) {
   return string.replace(/^/gm, '    ')
 }

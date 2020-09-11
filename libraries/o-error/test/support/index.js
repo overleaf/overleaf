@@ -2,6 +2,10 @@ const { expect } = require('chai')
 
 const OError = require('../..')
 
+/**
+ * @param {Error} e
+ * @param {any} expected
+ */
 exports.expectError = function OErrorExpectError(e, expected) {
   expect(
     e.name,
@@ -23,24 +27,28 @@ exports.expectError = function OErrorExpectError(e, expected) {
     'error should be recognised by util.types.isNativeError'
   ).to.be.true
 
-  expect(e.stack, 'error should have a stack trace').to.be.truthy
-
   expect(
     e.toString(),
     'toString should return the default error message formatting'
   ).to.equal(expected.message)
 
+  expect(e.stack, 'error should have a stack trace').to.not.be.empty
+
   expect(
-    e.stack.split('\n')[0],
+    /** @type {string} */ (e.stack).split('\n')[0],
     'stack should start with the default error message formatting'
   ).to.match(new RegExp(`^${expected.name}:`))
 
   expect(
-    e.stack.split('\n')[1],
+    /** @type {string} */ (e.stack).split('\n')[1],
     'first stack frame should be the function where the error was thrown'
   ).to.match(expected.firstFrameRx)
 }
 
+/**
+ * @param {Error} error
+ * @param {String[]} expected
+ */
 exports.expectFullStackWithoutStackFramesToEqual = function (error, expected) {
   const fullStack = OError.getFullStack(error)
   const fullStackWithoutFrames = fullStack

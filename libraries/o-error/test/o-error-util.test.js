@@ -149,9 +149,44 @@ describe('OError.tag', function () {
       expect.fail('should have yielded an error')
     })
   })
+
+  it('is not included in the stack trace if using capture', function () {
+    if (!Error.captureStackTrace) return this.skip()
+    const err = new Error('test error')
+    OError.tag(err, 'test message')
+    const stack = OError.getFullStack(err)
+    expect(stack).to.match(/TaggedError: test message\n\s+at/)
+    expect(stack).to.not.match(/TaggedError: test message\n\s+at [\w.]*tag/)
+  })
+
+  describe('without Error.captureStackTrace', function () {
+    /* eslint-disable mocha/no-hooks-for-single-case */
+    before(function () {
+      this.originalCaptureStackTrace = Error.captureStackTrace
+      Error.captureStackTrace = null
+    })
+    after(function () {
+      Error.captureStackTrace = this.originalCaptureStackTrace
+    })
+
+    it('still captures a stack trace, albeit including itself', function () {
+      const err = new Error('test error')
+      OError.tag(err, 'test message')
+      expectFullStackWithoutStackFramesToEqual(err, [
+        'Error: test error',
+        'TaggedError: test message',
+      ])
+      const stack = OError.getFullStack(err)
+      expect(stack).to.match(/TaggedError: test message\n\s+at [\w.]*tag/)
+    })
+  })
 })
 
 describe('OError.getFullInfo', function () {
+  it('works when given null', function () {
+    expect(OError.getFullInfo(null)).to.deep.equal({})
+  })
+
   it('works on a normal error', function () {
     const err = new Error('foo')
     expect(OError.getFullInfo(err)).to.deep.equal({})
@@ -193,6 +228,10 @@ describe('OError.getFullInfo', function () {
 })
 
 describe('OError.getFullStack', function () {
+  it('works when given null', function () {
+    expect(OError.getFullStack(null)).to.equal('')
+  })
+
   it('works on a normal error', function () {
     const err = new Error('foo')
     const fullStack = OError.getFullStack(err)
