@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -228,6 +227,8 @@ module.exports = Metrics = {
   timeAsyncMethod: require('./timeAsyncMethod'),
 
   close() {
-    return Array.from(destructors).map(func => func())
+    for (const func of destructors) {
+      func()
+    }
   }
 }
