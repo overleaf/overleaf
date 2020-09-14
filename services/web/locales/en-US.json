@@ -1,4 +1,6 @@
 {
+  "expand": "Expand",
+  "collapse": "Collapse",
   "file_outline": "File outline",
   "the_file_outline_is_a_new_feature_click_the_icon_to_learn_more": "The <0>File outline</0> is a new feature. Click the icon to learn more",
   "we_cant_find_any_sections_or_subsections_in_this_file": "We can’t find any sections or subsections in this file",
