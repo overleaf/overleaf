@@ -26,9 +26,9 @@
     "logger-sharelatex": "^2.2.0",
     "metrics-sharelatex": "^2.7.0",
     "mongodb": "^3.6.0",
+    "p-map": "^4.0.0",
     "settings-sharelatex": "^1.1.0",
     "streamifier": "^0.1.1",
-    "tiny-async-pool": "^1.1.0",
     "underscore": "~1.10.2"
   },
   "devDependencies": {
