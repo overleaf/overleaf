@@ -110,31 +110,6 @@ function buildEmail(templateName, opts) {
 
 const templates = {}
 
-templates.accountMergeToOverleafAddress = CTAEmailTemplate({
-  subject() {
-    return `Confirm Account Merge - ${settings.appName}`
-  },
-  title() {
-    return 'Confirm Account Merge'
-  },
-  message() {
-    return `\
-To merge your ShareLaTeX and Overleaf accounts, click the button below.
-If you think you have received this message in error,
-please contact us at https://www.overleaf.com/contact\
-`
-  },
-  ctaText() {
-    return 'Confirm Account Merge'
-  },
-  ctaURL(opts) {
-    return opts.tokenLinkUrl
-  }
-})
-
-templates.accountMergeToSharelatexAddress =
-  templates.accountMergeToOverleafAddress
-
 templates.registered = CTAEmailTemplate({
   subject() {
     return `Activate your ${settings.appName} Account`
@@ -306,25 +281,6 @@ templates.verifyEmailToJoinTeam = CTAEmailTemplate({
   }
 })
 
-templates.dropboxUnlinkedDuplicate = CTAEmailTemplate({
-  subject() {
-    return `Your Dropbox Account has been Unlinked - ${settings.appName}`
-  },
-  message(opts) {
-    return `\
-Our automated systems have detected that your Dropbox account was linked to more than one Overleaf accounts. This should not have been allowed and might be causing issues with the Dropbox sync feature.
-
-We have now unlinked all your Dropbox and Overleaf Accounts. To ensure your project will keep syncing you can link your Dropbox account to the Overleaf account of your choice now.\
-`
-  },
-  ctaText() {
-    return 'Link Dropbox Account'
-  },
-  ctaURL(opts) {
-    return `${settings.siteUrl}/user/settings`
-  }
-})
-
 templates.testEmail = CTAEmailTemplate({
   subject() {
     return `A Test Email from ${settings.appName}`
@@ -343,114 +299,6 @@ templates.testEmail = CTAEmailTemplate({
   },
   ctaURL() {
     return settings.siteUrl
-  }
-})
-
-templates.projectsTransferredFromSharelatex = CTAEmailTemplate({
-  subject() {
-    return 'ShareLaTeX projects transferred to your Overleaf account'
-  },
-  title() {
-    return 'ShareLaTeX projects transferred to your Overleaf account'
-  },
-  message(opts) {
-    return `\
-We are writing with important information about your Overleaf and ShareLaTeX accounts.
-
-As part of our ongoing work to [integrate Overleaf and ShareLaTeX](https://www.overleaf.com/blog/518-exciting-news-sharelatex-is-joining-overleaf),
-we found a ShareLaTeX account with the email address ${
-      opts.to
-    } that matches your Overleaf account.
-
-We have now transferred the projects from this ShareLaTeX account into your Overleaf account, so you may notice some new
-projects on your Overleaf projects page.
-
-When you next log in, you may be prompted to reconfirm your email address in order to regain access to your account.
-If you have any questions, please contact our support team by reply.\
-`
-  },
-  ctaText() {
-    return `Log in to ${settings.appName}`
-  },
-  ctaURL() {
-    return settings.siteUrl + '/login'
-  }
-})
-
-templates.emailAddressPoachedEmail = CTAEmailTemplate({
-  subject() {
-    return `One of your email addresses has been moved to another ${
-      settings.appName
-    } account`
-  },
-  title() {
-    return `One of your email addresses has been moved to another ${
-      settings.appName
-    } account`
-  },
-  message(opts) {
-    let message = `\
-We are writing with important information about your Overleaf account.
-
-You added the email address ${opts.poached} to your ${
-      opts.to
-    } Overleaf account as a secondary (or affiliation)
-email address, but we have had to remove it.
-
-This is because your ${
-      opts.poached
-    } email address was also in use as the primary email address for an older Overleaf
-account from before our [integration with ShareLaTeX to create Overleaf v2](https://www.overleaf.com/blog/518-exciting-news-sharelatex-is-joining-overleaf).
-
-### What do I need to do?
-
-You now have two Overleaf accounts, one under ${opts.poached} and one under ${
-      opts.to
-    }.
-
-You may wish to log in to Overleaf as ${
-      opts.poached
-    } to check whether you have projects there that you would like to
-keep. If you are not sure of the password, you can send yourself a password reset email to ${
-      opts.poached
-    }, via
-https://www.overleaf.com/user/password/reset
-
-Once you have downloaded your projects, you may wish to delete your
-${
-      opts.poached
-    } Overleaf account, which you can do from your account settings. You will then be able to add
-${opts.poached} as a secondary email address on your ${opts.to} account again.
-
-\
-`
-    if (opts.proFeatures) {
-      message += `\
-Because your ${
-        opts.poached
-      } email address was an institutional affiliation through which you had Pro features. Your Pro
-features have been transferred to your ${
-        opts.poached
-      } account. If you would like to transfer them back to your
-${opts.to} account, you will need to delete the ${
-        opts.poached
-      } account and re-add it as a secondary email address,
-as described above.
-
-\
-`
-    }
-
-    message += `\
-If you have any questions, you can contact our support team by reply.\
-`
-    return message
-  },
-  ctaText() {
-    return `Log in to ${settings.appName}`
-  },
-  ctaURL() {
-    return settings.siteUrl + '/login'
   }
 })
 
