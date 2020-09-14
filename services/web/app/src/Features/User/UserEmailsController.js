@@ -3,12 +3,25 @@ const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
 const EmailHandler = require('../Email/EmailHandler')
 const EmailHelper = require('../Helpers/EmailHelper')
-const UserAuditLogHandler = require('./UserAuditLogHandler')
 const UserEmailsConfirmationHandler = require('./UserEmailsConfirmationHandler')
 const { endorseAffiliation } = require('../Institutions/InstitutionsAPI')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const { expressify } = require('../../util/promises')
+
+async function _sendSecurityAlertEmail(user, email) {
+  const emailOptions = {
+    to: user.email,
+    actionDescribed: `a secondary email address has been added to your account ${
+      user.email
+    }`,
+    message: [
+      `<span style="display:inline-block;padding: 0 20px;width:100%;">Added: <br/><b>${email}</b></span>`
+    ],
+    action: 'secondary email address added'
+  }
+  await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
+}
 
 async function add(req, res, next) {
   const userId = AuthenticationController.getLoggedInUserId(req)
@@ -24,37 +37,22 @@ async function add(req, res, next) {
     department: req.body.department
   }
 
-  await UserAuditLogHandler.promises.addEntry(
-    user._id,
-    'add-email',
-    user._id,
-    req.ip,
-    {
-      newSecondaryEmail: email
-    }
-  )
-
   try {
     await UserUpdater.promises.addEmailAddress(
       userId,
       email,
-      affiliationOptions
+      affiliationOptions,
+      {
+        initiatorId: user._id,
+        ipAddress: req.ip
+      }
     )
   } catch (error) {
     return UserEmailsController._handleEmailError(error, req, res, next)
   }
 
-  const emailOptions = {
-    to: user.email,
-    actionDescribed: `a secondary email address has been added to your account ${
-      user.email
-    }`,
-    message: [
-      `<span style="display:inline-block;padding: 0 20px;width:100%;">Added: <br/><b>${email}</b></span>`
-    ],
-    action: 'secondary email address added'
-  }
-  await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
+  await _sendSecurityAlertEmail(user, email)
+
   await UserEmailsConfirmationHandler.promises.sendConfirmationEmail(
     userId,
     email

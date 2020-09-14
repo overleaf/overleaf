@@ -21,8 +21,8 @@ describe('UserUpdater', function() {
     this.UserGetter = {
       getUserEmail: sinon.stub(),
       getUserByAnyEmail: sinon.stub(),
-      ensureUniqueEmailAddress: sinon.stub(),
       promises: {
+        ensureUniqueEmailAddress: sinon.stub(),
         getUser: sinon.stub()
       }
     }
@@ -55,10 +55,13 @@ describe('UserUpdater', function() {
           timeAsyncMethod: sinon.stub()
         },
         './UserGetter': this.UserGetter,
-        '../Institutions/InstitutionsAPI': {
+        '../Institutions/InstitutionsAPI': (this.InstitutionsAPI = {
           addAffiliation: this.addAffiliation,
-          removeAffiliation: this.removeAffiliation
-        },
+          removeAffiliation: this.removeAffiliation,
+          promises: {
+            addAffiliation: sinon.stub()
+          }
+        }),
         '../Email/EmailHandler': (this.EmailHandler = {
           promises: {
             sendEmail: sinon.stub()
@@ -140,7 +143,7 @@ describe('UserUpdater', function() {
         ipAddress: '0:0:0:0'
       }
       this.UserGetter.getUserEmail.callsArgWith(1, null, this.stubbedUser.email)
-      this.UserUpdater.addEmailAddress = sinon.stub().callsArgWith(2)
+      this.UserUpdater.addEmailAddress = sinon.stub().callsArgWith(4)
       this.UserUpdater.setDefaultEmailAddress = sinon.stub().yields()
       this.UserUpdater.removeEmailAddress = sinon.stub().callsArgWith(2)
     })
@@ -153,7 +156,7 @@ describe('UserUpdater', function() {
         err => {
           should.not.exist(err)
           this.UserUpdater.addEmailAddress
-            .calledWith(this.stubbedUser._id, this.newEmail)
+            .calledWith(this.stubbedUser._id, this.newEmail, {}, this.auditLog)
             .should.equal(true)
           this.UserUpdater.setDefaultEmailAddress
             .calledWith(
@@ -200,23 +203,29 @@ describe('UserUpdater', function() {
 
   describe('addEmailAddress', function() {
     beforeEach(function() {
-      this.UserGetter.ensureUniqueEmailAddress = sinon.stub().callsArgWith(1)
-      this.UserUpdater.updateUser = sinon.stub().callsArgWith(2, null)
+      this.UserGetter.promises.ensureUniqueEmailAddress = sinon
+        .stub()
+        .resolves()
+      this.UserUpdater.promises.updateUser = sinon.stub().resolves()
     })
 
     it('add email', function(done) {
       this.UserUpdater.addEmailAddress(
         this.stubbedUser._id,
         this.newEmail,
+        {},
+        { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
         err => {
-          this.UserGetter.ensureUniqueEmailAddress.called.should.equal(true)
-          should.not.exist(err)
+          this.UserGetter.promises.ensureUniqueEmailAddress.called.should.equal(
+            true
+          )
+          expect(err).to.not.exist
           const reversedHostname = this.newEmail
             .split('@')[1]
             .split('')
             .reverse()
             .join('')
-          this.UserUpdater.updateUser
+          this.UserUpdater.promises.updateUser
             .calledWith(this.stubbedUser._id, {
               $push: {
                 emails: {
@@ -242,10 +251,13 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         affiliationOptions,
+        { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
         err => {
           should.not.exist(err)
-          this.addAffiliation.calledOnce.should.equal(true)
-          const { args } = this.addAffiliation.lastCall
+          this.InstitutionsAPI.promises.addAffiliation.calledOnce.should.equal(
+            true
+          )
+          const { args } = this.InstitutionsAPI.promises.addAffiliation.lastCall
           args[0].should.equal(this.stubbedUser._id)
           args[1].should.equal(this.newEmail)
           args[2].should.equal(affiliationOptions)
@@ -255,22 +267,79 @@ describe('UserUpdater', function() {
     })
 
     it('handle affiliation error', function(done) {
-      this.addAffiliation.callsArgWith(3, new Error('nope'))
+      this.InstitutionsAPI.promises.addAffiliation.rejects(new Error('nope'))
       this.UserUpdater.addEmailAddress(
         this.stubbedUser._id,
         this.newEmail,
+        {},
+        { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
         err => {
           should.exist(err)
-          this.UserUpdater.updateUser.called.should.equal(false)
+          this.UserUpdater.promises.updateUser.called.should.equal(false)
           done()
         }
       )
     })
 
     it('validates email', function(done) {
-      this.UserUpdater.addEmailAddress(this.stubbedUser._id, 'bar', err => {
-        should.exist(err)
-        done()
+      this.UserUpdater.addEmailAddress(
+        this.stubbedUser._id,
+        'bar',
+        {},
+        { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
+        err => {
+          should.exist(err)
+          done()
+        }
+      )
+    })
+
+    it('updates the audit log', function(done) {
+      this.ip = '127:0:0:0'
+      this.UserUpdater.addEmailAddress(
+        this.stubbedUser._id,
+        this.newEmail,
+        {},
+        { initiatorId: this.stubbedUser._id, ipAddress: this.ip },
+        error => {
+          expect(error).to.not.exist
+          this.InstitutionsAPI.promises.addAffiliation.calledOnce.should.equal(
+            true
+          )
+          const { args } = this.UserAuditLogHandler.promises.addEntry.lastCall
+          expect(args[0]).to.equal(this.stubbedUser._id)
+          expect(args[1]).to.equal('add-email')
+          expect(args[2]).to.equal(this.stubbedUser._id)
+          expect(args[3]).to.equal(this.ip)
+          expect(args[4]).to.deep.equal({
+            newSecondaryEmail: this.newEmail
+          })
+          done()
+        }
+      )
+    })
+
+    describe('errors', function() {
+      describe('via UserAuditLogHandler', function() {
+        const anError = new Error('oops')
+        beforeEach(function() {
+          this.UserAuditLogHandler.promises.addEntry.throws(anError)
+        })
+        it('should not add email and should return error', function(done) {
+          this.UserUpdater.addEmailAddress(
+            this.stubbedUser._id,
+            this.newEmail,
+            {},
+            { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
+            error => {
+              expect(error).to.exist
+              expect(error).to.equal(anError)
+              expect(this.UserUpdater.promises.updateUser).to.not.have.been
+                .called
+              done()
+            }
+          )
+        })
       })
     })
   })

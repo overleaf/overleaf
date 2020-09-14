@@ -186,7 +186,13 @@ class User {
 
   addEmail(email, callback) {
     this.emails.push({ email, createdAt: new Date() })
-    UserUpdater.addEmailAddress(this.id, email, callback)
+    UserUpdater.addEmailAddress(
+      this.id,
+      email,
+      {},
+      { initiatorId: this._id, ipAddress: '127:0:0:0' },
+      callback
+    )
   }
 
   confirmEmail(email, callback) {

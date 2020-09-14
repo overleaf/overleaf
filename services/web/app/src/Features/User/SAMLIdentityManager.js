@@ -4,17 +4,42 @@ const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const OError = require('@overleaf/o-error')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
+const UserAuditLogHandler = require('../User/UserAuditLogHandler')
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 const logger = require('logger-sharelatex')
 const { User } = require('../../models/User')
+
+async function _addAuditLogEntry(
+  link,
+  userId,
+  auditLog,
+  institutionEmail,
+  providerId,
+  providerName
+) {
+  const operation = link ? 'link-institution-sso' : 'unlink-institution-sso'
+  await UserAuditLogHandler.promises.addEntry(
+    userId,
+    operation,
+    auditLog.initiatorId,
+    auditLog.ipAddress,
+    {
+      institutionEmail,
+      providerId,
+      providerName
+    }
+  )
+}
 
 async function _addIdentifier(
   userId,
   externalUserId,
   providerId,
   hasEntitlement,
-  institutionEmail
+  institutionEmail,
+  providerName,
+  auditLog
 ) {
   // first check if institutionEmail linked to another account
   // before adding the identifier for the email
@@ -33,7 +58,18 @@ async function _addIdentifier(
       throw new Errors.EmailExistsError()
     }
   }
+
   providerId = providerId.toString()
+
+  await _addAuditLogEntry(
+    true,
+    userId,
+    auditLog,
+    institutionEmail,
+    providerId,
+    providerName
+  )
+
   hasEntitlement = !!hasEntitlement
   const query = {
     _id: userId,
@@ -65,7 +101,7 @@ async function _addIdentifier(
   }
 }
 
-async function _addInstitutionEmail(userId, email, providerId) {
+async function _addInstitutionEmail(userId, email, providerId, auditLog) {
   const user = await UserGetter.promises.getUser(userId)
   const query = {
     _id: userId,
@@ -83,12 +119,10 @@ async function _addInstitutionEmail(userId, email, providerId) {
   if (emailAlreadyAssociated && emailAlreadyAssociated.confirmedAt) {
     await UserUpdater.promises.updateUser(query, update)
   } else if (emailAlreadyAssociated) {
-    // add and confirm email
     await UserUpdater.promises.confirmEmail(user._id, email)
     await UserUpdater.promises.updateUser(query, update)
   } else {
-    // add and confirm email
-    await UserUpdater.promises.addEmailAddress(user._id, email)
+    await UserUpdater.promises.addEmailAddress(user._id, email, {}, auditLog)
     await UserUpdater.promises.confirmEmail(user._id, email)
     await UserUpdater.promises.updateUser(query, update)
   }
@@ -161,16 +195,19 @@ async function linkAccounts(
   institutionEmail,
   providerId,
   providerName,
-  hasEntitlement
+  hasEntitlement,
+  auditLog
 ) {
   await _addIdentifier(
     userId,
     externalUserId,
     providerId,
     hasEntitlement,
-    institutionEmail
+    institutionEmail,
+    providerName,
+    auditLog
   )
-  await _addInstitutionEmail(userId, institutionEmail, providerId)
+  await _addInstitutionEmail(userId, institutionEmail, providerId, auditLog)
   await _sendLinkedEmail(userId, providerName)
   // update v1 affiliations record
   if (hasEntitlement) {
@@ -190,12 +227,23 @@ async function unlinkAccounts(
   institutionEmail,
   primaryEmail,
   providerId,
-  providerName
+  providerName,
+  auditLog
 ) {
   providerId = providerId.toString()
   const query = {
     _id: userId
   }
+
+  await _addAuditLogEntry(
+    false,
+    userId,
+    auditLog,
+    institutionEmail,
+    providerId,
+    providerName
+  )
+
   const update = {
     $pull: {
       samlIdentifiers: {

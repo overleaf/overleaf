@@ -9,7 +9,8 @@ const { callbackify, promisify } = require('util')
 const UserGetter = require('./UserGetter')
 const {
   addAffiliation,
-  removeAffiliation
+  removeAffiliation,
+  promises: InstitutionsAPIPromises
 } = require('../Institutions/InstitutionsAPI')
 const Features = require('../../infrastructure/Features')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
@@ -19,6 +20,51 @@ const Errors = require('../Errors/Errors')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
 const RecurlyWrapper = require('../Subscription/RecurlyWrapper')
 const UserAuditLogHandler = require('./UserAuditLogHandler')
+
+async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
+  newEmail = EmailHelper.parseEmail(newEmail)
+  if (!newEmail) {
+    throw new Error('invalid email')
+  }
+
+  await UserGetter.promises.ensureUniqueEmailAddress(newEmail)
+
+  await UserAuditLogHandler.promises.addEntry(
+    userId,
+    'add-email',
+    auditLog.initiatorId,
+    auditLog.ipAddress,
+    {
+      newSecondaryEmail: newEmail
+    }
+  )
+
+  try {
+    await InstitutionsAPIPromises.addAffiliation(
+      userId,
+      newEmail,
+      affiliationOptions
+    )
+  } catch (error) {
+    throw OError.tag(error, 'problem adding affiliation while adding email')
+  }
+
+  try {
+    const reversedHostname = newEmail
+      .split('@')[1]
+      .split('')
+      .reverse()
+      .join('')
+    const update = {
+      $push: {
+        emails: { email: newEmail, createdAt: new Date(), reversedHostname }
+      }
+    }
+    await UserUpdater.promises.updateUser(userId, update)
+  } catch (error) {
+    throw OError.tag(error, 'problem updating users emails')
+  }
+}
 
 async function setDefaultEmailAddress(
   userId,
@@ -174,7 +220,7 @@ const UserUpdater = {
             oldEmail = email
             cb(error)
           }),
-        cb => UserUpdater.addEmailAddress(userId, newEmail, cb),
+        cb => UserUpdater.addEmailAddress(userId, newEmail, {}, auditLog, cb),
         cb =>
           UserUpdater.setDefaultEmailAddress(
             userId,
@@ -192,48 +238,7 @@ const UserUpdater = {
 
   // Add a new email address for the user. Email cannot be already used by this
   // or any other user
-  addEmailAddress(userId, newEmail, affiliationOptions, callback) {
-    if (callback == null) {
-      // affiliationOptions is optional
-      callback = affiliationOptions
-      affiliationOptions = {}
-    }
-    newEmail = EmailHelper.parseEmail(newEmail)
-    if (newEmail == null) {
-      return callback(new Error('invalid email'))
-    }
-
-    UserGetter.ensureUniqueEmailAddress(newEmail, error => {
-      if (error != null) {
-        return callback(error)
-      }
-
-      addAffiliation(userId, newEmail, affiliationOptions, error => {
-        if (error != null) {
-          OError.tag(error, 'problem adding affiliation while adding email')
-          return callback(error)
-        }
-
-        const reversedHostname = newEmail
-          .split('@')[1]
-          .split('')
-          .reverse()
-          .join('')
-        const update = {
-          $push: {
-            emails: { email: newEmail, createdAt: new Date(), reversedHostname }
-          }
-        }
-        UserUpdater.updateUser(userId, update, error => {
-          if (error != null) {
-            OError.tag(error, 'problem updating users emails')
-            return callback(error)
-          }
-          callback()
-        })
-      })
-    })
-  },
+  addEmailAddress: callbackify(addEmailAddress),
 
   // remove one of the user's email addresses. The email cannot be the user's
   // default email address
@@ -334,7 +339,7 @@ const UserUpdater = {
 
 const promises = {
   addAffiliationForNewUser: promisify(UserUpdater.addAffiliationForNewUser),
-  addEmailAddress: promisify(UserUpdater.addEmailAddress),
+  addEmailAddress,
   confirmEmail: promisify(UserUpdater.confirmEmail),
   setDefaultEmailAddress,
   updateUser: promisify(UserUpdater.updateUser),

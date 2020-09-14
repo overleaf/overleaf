@@ -66,11 +66,6 @@ describe('UserEmailsController', function() {
           }
         }),
         '../Helpers/EmailHelper': this.EmailHelper,
-        './UserAuditLogHandler': (this.UserAuditLogHandler = {
-          promises: {
-            addEntry: sinon.stub().resolves()
-          }
-        }),
         './UserEmailsConfirmationHandler': (this.UserEmailsConfirmationHandler = {
           promises: {
             sendConfirmationEmail: sinon.stub().resolves()
@@ -121,16 +116,14 @@ describe('UserEmailsController', function() {
         .yields()
     })
 
-    it('adds an entry to user audit log', function(done) {
+    it('passed audit log to addEmailAddress', function(done) {
       this.res.sendStatus = sinon.stub()
       this.res.sendStatus.callsFake(() => {
-        this.UserAuditLogHandler.promises.addEntry.should.have.been.calledWith(
-          this.user._id,
-          'add-email',
-          this.user._id,
-          this.req.ip,
-          { newSecondaryEmail: this.newEmail }
-        )
+        const addCall = this.UserUpdater.promises.addEmailAddress.lastCall
+        expect(addCall.args[3]).to.deep.equal({
+          initiatorId: this.user._id,
+          ipAddress: this.req.ip
+        })
         done()
       })
       this.UserEmailsController.add(this.req, this.res)
@@ -245,22 +238,6 @@ describe('UserEmailsController', function() {
         done()
       })
       this.UserEmailsController.add(this.req, this.res, this.next)
-    })
-
-    describe('errors', function() {
-      describe('via UserAuditLogHandler', function() {
-        beforeEach(function() {
-          this.UserAuditLogHandler.promises.addEntry.throws('oops')
-        })
-        it('should not add email and should return error', function(done) {
-          this.UserEmailsController.add(this.req, this.res, error => {
-            expect(error).to.exist
-            this.UserUpdater.promises.addEmailAddress.should.not.have.been
-              .called
-            done()
-          })
-        })
-      })
     })
   })
 
