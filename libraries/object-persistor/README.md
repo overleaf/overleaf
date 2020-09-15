@@ -185,10 +185,10 @@ An integer containing the size, in bytes
 
 When using a secondary persistor, this returns the value from the secondary persistor if no objects are found on the primary.
 
-#### checkIfFileExists
+#### checkIfObjectExists
 
 ```JavaScript
-async function checkIfFileExists(bucketName, key)
+async function checkIfObjectExists(bucketName, key)
 ```
 
 Returns whether an object exists
@@ -204,10 +204,10 @@ A boolean representing whether the object exists
 
 When using a secondary persistor, returns true if the object exists on either the primary or secondary.
 
-#### copyFile
+#### copyObject
 
 ```JavaScript
-async function copyFile(bucketName, sourceKey, destKey)
+async function copyObject(bucketName, sourceKey, destKey)
 ```
 
 Copies a object to another key, within a bucket.
