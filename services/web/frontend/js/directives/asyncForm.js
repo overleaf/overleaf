@@ -1,17 +1,3 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import App from '../base'
 import 'libs/passfield'
 App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
@@ -30,26 +16,23 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
     scope[attrs.name].inflight = false
 
     const validateCaptchaIfEnabled = function(callback) {
-      if (callback == null) {
-        callback = function(response) {}
-      }
       if (attrs.captchaActionName) {
         validateCaptchaV3(attrs.captchaActionName)
       }
       if (attrs.captcha != null) {
-        return validateCaptcha(callback)
+        validateCaptcha(callback)
       } else {
-        return callback()
+        callback()
       }
     }
 
     const submitRequest = function(grecaptchaResponse) {
       const formData = {}
-      for (var data of Array.from(element.serializeArray())) {
+      for (let data of Array.from(element.serializeArray())) {
         formData[data.name] = data.value
       }
 
-      if (grecaptchaResponse != null) {
+      if (grecaptchaResponse) {
         formData['g-recaptcha-response'] = grecaptchaResponse
       }
 
@@ -75,10 +58,10 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
             return
           }
 
-          if (data.redir != null) {
+          if (data.redir) {
             ga('send', 'event', formName, 'success')
             return (window.location = data.redir)
-          } else if (data.message != null) {
+          } else if (data.message) {
             response.message = data.message
 
             if (data.message.type === 'error') {
@@ -96,8 +79,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
           }
         })
         .catch(function(httpResponse) {
-          let config, headers, status
-          ;({ data, status, headers, config } = httpResponse)
+          const { data, status } = httpResponse
           scope[attrs.name].inflight = false
           response.success = false
           response.error = true
@@ -110,40 +92,45 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
             return
           }
 
-          if (status === 400 && data.accountLinkingError) {
-            // Bad Request for account linking
-            response.message = {
-              text: data.accountLinkingError,
-              type: 'error'
-            }
-          } else if (status === 400) {
+          let responseMessage
+          if (data.message && data.message.text) {
+            responseMessage = data.message.text
+          } else {
+            responseMessage = data.message
+          }
+
+          if (status === 400) {
             // Bad Request
             response.message = {
-              text: 'Invalid Request. Please correct the data and try again.',
+              text:
+                responseMessage ||
+                'Invalid Request. Please correct the data and try again.',
               type: 'error'
             }
           } else if (status === 403) {
             // Forbidden
             response.message = {
               text:
+                responseMessage ||
                 'Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies.',
               type: 'error'
             }
           } else if (status === 429) {
             response.message = {
-              text: 'Too many attempts. Please wait for a while and try again.',
+              text:
+                responseMessage ||
+                'Too many attempts. Please wait for a while and try again.',
               type: 'error'
             }
           } else {
             response.message = {
               text:
-                (data.message != null ? data.message.text : undefined) ||
-                data.message ||
+                responseMessage ||
                 'Something went wrong talking to the server :(. Please try again.',
               type: 'error'
             }
           }
-          return ga('send', 'event', formName, 'failure', data.message)
+          ga('send', 'event', formName, 'failure', data.message)
         })
     }
 
@@ -160,11 +147,11 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
 
     element.on('submit', function(e) {
       e.preventDefault()
-      return submit()
+      submit()
     })
 
     if (attrs.autoSubmit) {
-      return submit()
+      submit()
     }
   }
 }))

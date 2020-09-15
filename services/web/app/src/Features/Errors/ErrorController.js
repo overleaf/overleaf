@@ -3,6 +3,7 @@ const Errors = require('./Errors')
 const logger = require('logger-sharelatex')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const SamlLogHandler = require('../SamlLog/SamlLogHandler')
+const HttpErrorHandler = require('./HttpErrorHandler')
 
 module.exports = ErrorController = {
   notFound(req, res) {
@@ -71,8 +72,7 @@ module.exports = ErrorController = {
         { err: error, url: req.url },
         'missing SAML session data error'
       )
-      res.status(400)
-      res.send({ accountLinkingError: error.message })
+      HttpErrorHandler.badRequest(req, res, error.message)
     } else {
       logger.error(
         { err: error, url: req.url, method: req.method, user },
