@@ -23,7 +23,7 @@ module.exports = {
       endpointName: 'file-upload',
       params: ['Project_id'],
       maxRequests: 200,
-      timeInterval: 60 * 30
+      timeInterval: 60 * 15
     })
     if (Settings.allowAnonymousReadAndWriteSharing) {
       webRouter.post(
