@@ -1,191 +1,208 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+const ExpressCompression = require('compression')
+const prom = require('./prom_wrapper')
+
+const { collectDefaultMetrics } = prom
+
+let appname = 'unknown'
+const hostname = require('os').hostname()
+
+const destructors = []
+
+require('./uv_threadpool_size')
+
+/**
+ * Configure the metrics module
  */
-let Metrics;
-console.log("using prometheus");
+function configure(opts = {}) {
+  if (opts.appName) {
+    appname = opts.appName
+  }
+  if (opts.ttlInMinutes) {
+    prom.ttlInMinutes = opts.ttlInMinutes
+  }
+}
 
-const ExpressCompression = require('compression');
-const prom = require('./prom_wrapper');
+/**
+ * Configure the metrics module and start the default metrics collectors and
+ * profiling agents.
+ */
+function initialize(_name, opts = {}) {
+  configure({ ...opts, appName: _name })
+  collectDefaultMetrics({ timeout: 5000, prefix: buildPromKey() })
 
-const {
-    collectDefaultMetrics
-} = prom;
+  console.log(`ENABLE_TRACE_AGENT set to ${process.env.ENABLE_TRACE_AGENT}`)
+  if (process.env.ENABLE_TRACE_AGENT === 'true') {
+    console.log('starting google trace agent')
+    const traceAgent = require('@google-cloud/trace-agent')
 
-let appname = "unknown";
-const hostname = require('os').hostname();
+    const traceOpts = { ignoreUrls: [/^\/status/, /^\/health_check/] }
+    traceAgent.start(traceOpts)
+  }
 
-const destructors = [];
+  console.log(`ENABLE_DEBUG_AGENT set to ${process.env.ENABLE_DEBUG_AGENT}`)
+  if (process.env.ENABLE_DEBUG_AGENT === 'true') {
+    console.log('starting google debug agent')
+    const debugAgent = require('@google-cloud/debug-agent')
+    debugAgent.start({
+      allowExpressions: true,
+      serviceContext: {
+        service: appname,
+        version: process.env.BUILD_VERSION
+      }
+    })
+  }
 
-require("./uv_threadpool_size");
+  console.log(`ENABLE_PROFILE_AGENT set to ${process.env.ENABLE_PROFILE_AGENT}`)
+  if (process.env.ENABLE_PROFILE_AGENT === 'true') {
+    console.log('starting google profile agent')
+    const profiler = require('@google-cloud/profiler')
+    profiler.start({
+      serviceContext: {
+        service: appname,
+        version: process.env.BUILD_VERSION
+      }
+    })
+  }
 
-module.exports = (Metrics = {
-	register: prom.registry,
+  inc('process_startup')
+}
 
-	initialize(_name, opts) {
-		if (opts == null) { opts = {}; }
-		appname = _name;
-		collectDefaultMetrics({ timeout: 5000, prefix: Metrics.buildPromKey()});
-		if (opts.ttlInMinutes) {
-			prom.ttlInMinutes = opts.ttlInMinutes;
-		}
+function registerDestructor(func) {
+  destructors.push(func)
+}
 
-		console.log(`ENABLE_TRACE_AGENT set to ${process.env['ENABLE_TRACE_AGENT']}`);
-		if (process.env['ENABLE_TRACE_AGENT'] === "true") {
-			console.log("starting google trace agent");
-			const traceAgent = require('@google-cloud/trace-agent');
+function injectMetricsRoute(app) {
+  app.get(
+    '/metrics',
+    ExpressCompression({
+      level: parseInt(process.env.METRICS_COMPRESSION_LEVEL || '1', 10)
+    }),
+    function(req, res) {
+      res.set('Content-Type', prom.registry.contentType)
+      res.end(prom.registry.metrics())
+    }
+  )
+}
 
-			const traceOpts =
-				{ignoreUrls: [/^\/status/, /^\/health_check/]};
-			traceAgent.start(traceOpts);
-		}
+function buildPromKey(key) {
+  return key.replace(/[^a-zA-Z0-9]/g, '_')
+}
 
-		console.log(`ENABLE_DEBUG_AGENT set to ${process.env['ENABLE_DEBUG_AGENT']}`);
-		if (process.env['ENABLE_DEBUG_AGENT'] === "true") {
-			console.log("starting google debug agent");
-			const debugAgent = require('@google-cloud/debug-agent');
-			debugAgent.start({
-				allowExpressions: true,
-				serviceContext: {
-					service: appname,
-					version: process.env['BUILD_VERSION']
-				}
-			});
-		}
+function sanitizeValue(value) {
+  return parseFloat(value)
+}
 
-		console.log(`ENABLE_PROFILE_AGENT set to ${process.env['ENABLE_PROFILE_AGENT']}`);
-		if (process.env['ENABLE_PROFILE_AGENT'] === "true") {
-			console.log("starting google profile agent");
-			const profiler = require('@google-cloud/profiler');
-			profiler.start({
-				serviceContext: {
-					service: appname,
-					version: process.env['BUILD_VERSION']
-				}
-			});
-		}
+function set(key, value, sampleRate = 1) {
+  console.log('counts are not currently supported')
+}
 
-		return Metrics.inc("process_startup");
-	},
+function inc(key, sampleRate = 1, opts = {}) {
+  key = buildPromKey(key)
+  opts.app = appname
+  opts.host = hostname
+  prom.metric('counter', key).inc(opts)
+  if (process.env.DEBUG_METRICS) {
+    console.log('doing inc', key, opts)
+  }
+}
 
-	registerDestructor(func) {
-		return destructors.push(func);
-	},
+function count(key, count, sampleRate = 1, opts = {}) {
+  key = buildPromKey(key)
+  opts.app = appname
+  opts.host = hostname
+  prom.metric('counter', key).inc(opts, count)
+  if (process.env.DEBUG_METRICS) {
+    console.log('doing count/inc', key, opts)
+  }
+}
 
-	injectMetricsRoute(app) {
-		return app.get('/metrics', ExpressCompression({
-			level: parseInt(process.env.METRICS_COMPRESSION_LEVEL || '1', 10)
-		}), function (req, res) {
-			res.set('Content-Type', prom.registry.contentType);
-			return res.end(prom.registry.metrics());
-		});
-	},
+function summary(key, value, opts = {}) {
+  key = buildPromKey(key)
+  opts.app = appname
+  opts.host = hostname
+  prom.metric('summary', key).observe(opts, value)
+  if (process.env.DEBUG_METRICS) {
+    console.log('doing summary', key, value, opts)
+  }
+}
 
-	buildPromKey(key){
-		if (key == null) { key = ""; }
-		return key.replace(/[^a-zA-Z0-9]/g, "_");
-	},
+function timing(key, timeSpan, sampleRate = 1, opts = {}) {
+  key = buildPromKey('timer_' + key)
+  opts.app = appname
+  opts.host = hostname
+  prom.metric('summary', key).observe(opts, timeSpan)
+  if (process.env.DEBUG_METRICS) {
+    console.log('doing timing', key, opts)
+  }
+}
 
-	sanitizeValue(value) {
-		return parseFloat(value);
-	},
+class Timer {
+  constructor(key, sampleRate = 1, opts = {}) {
+    this.start = new Date()
+    key = buildPromKey(key)
+    this.key = key
+    this.sampleRate = sampleRate
+    this.opts = opts
+  }
 
-	set(key, value, sampleRate){
-		if (sampleRate == null) { sampleRate = 1; }
-		return console.log("counts are not currently supported");
-	},
+  done() {
+    const timeSpan = new Date() - this.start
+    timing(this.key, timeSpan, this.sampleRate, this.opts)
+    return timeSpan
+  }
+}
 
-	inc(key, sampleRate, opts){
-		if (sampleRate == null) { sampleRate = 1; }
-		if (opts == null) { opts = {}; }
-		key = Metrics.buildPromKey(key);
-		opts.app = appname;
-		opts.host = hostname;
-		prom.metric('counter', key).inc(opts);
-		if (process.env['DEBUG_METRICS']) {
-			return console.log("doing inc", key, opts);
-		}
-	},
+function gauge(key, value, sampleRate = 1, opts = {}) {
+  key = buildPromKey(key)
+  prom.metric('gauge', key).set(
+    {
+      app: appname,
+      host: hostname,
+      status: opts.status
+    },
+    this.sanitizeValue(value)
+  )
+  if (process.env.DEBUG_METRICS) {
+    console.log('doing gauge', key, opts)
+  }
+}
 
-	count(key, count, sampleRate, opts){
-		if (sampleRate == null) { sampleRate = 1; }
-		if (opts == null) { opts = {}; }
-		key = Metrics.buildPromKey(key);
-		opts.app = appname;
-		opts.host = hostname;
-		prom.metric('counter', key).inc(opts, count);
-		if (process.env['DEBUG_METRICS']) {
-			return console.log("doing count/inc", key, opts);
-		}
-	},
+function globalGauge(key, value, sampleRate = 1, opts = {}) {
+  key = buildPromKey(key)
+  prom
+    .metric('gauge', key)
+    .set({ app: appname, status: opts.status }, this.sanitizeValue(value))
+}
 
-	summary(key, value, opts){
-		if (opts == null) { opts = {}; }
-		key = Metrics.buildPromKey(key);
-		opts.app = appname;
-		opts.host = hostname;
-		prom.metric('summary', key).observe(opts, value);
-		if (process.env['DEBUG_METRICS']) {
-			return console.log("doing summary", key, value, opts);
-		}
-	},
+function close() {
+  for (const func of destructors) {
+    func()
+  }
+}
 
-	timing(key, timeSpan, sampleRate, opts){
-		if (opts == null) { opts = {}; }
-		key = Metrics.buildPromKey("timer_" + key);
-		opts.app = appname;
-		opts.host = hostname;
-		prom.metric('summary', key).observe(opts, timeSpan);
-		if (process.env['DEBUG_METRICS']) {
-			return console.log("doing timing", key, opts);
-		}
-	},
+module.exports = {
+  configure,
+  initialize,
+  registerDestructor,
+  injectMetricsRoute,
+  buildPromKey,
+  sanitizeValue,
+  set,
+  inc,
+  count,
+  summary,
+  timing,
+  Timer,
+  gauge,
+  globalGauge,
+  close,
 
-	Timer : class {
-		constructor(key, sampleRate, opts){
-			if (sampleRate == null) { sampleRate = 1; }
-			this.start = new Date();
-			key = Metrics.buildPromKey(key);
-			this.key = key;
-			this.sampleRate = sampleRate;
-			this.opts = opts;
-		}
+  register: prom.registry,
 
-		done() {
-			const timeSpan = new Date - this.start;
-			Metrics.timing(this.key, timeSpan, this.sampleRate, this.opts);
-			return timeSpan;
-		}
-	},
-
-	gauge(key, value, sampleRate, opts){
-		if (sampleRate == null) { sampleRate = 1; }
-		key = Metrics.buildPromKey(key);
-		prom.metric('gauge', key).set({app: appname, host: hostname, status: (opts != null ? opts.status : undefined)}, this.sanitizeValue(value));
-		if (process.env['DEBUG_METRICS']) {
-			return console.log("doing gauge", key, opts);
-		}
-	},
-
-	globalGauge(key, value, sampleRate, opts){
-		if (sampleRate == null) { sampleRate = 1; }
-		key = Metrics.buildPromKey(key);
-		return prom.metric('gauge', key).set({app: appname, status: (opts != null ? opts.status : undefined)},this.sanitizeValue(value));
-	},
-
-	mongodb: require("./mongodb"),
-	http: require("./http"),
-	open_sockets: require("./open_sockets"),
-	event_loop: require("./event_loop"),
-	memory: require("./memory"),
-
-	timeAsyncMethod: require('./timeAsyncMethod'),
-
-	close() {
-		return Array.from(destructors).map((func) =>
-			func());
-	}
-});
+  mongodb: require('./mongodb'),
+  http: require('./http'),
+  open_sockets: require('./open_sockets'),
+  event_loop: require('./event_loop'),
+  memory: require('./memory'),
+  timeAsyncMethod: require('./timeAsyncMethod')
+}

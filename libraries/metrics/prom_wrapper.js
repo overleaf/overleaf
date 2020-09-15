@@ -5,144 +5,162 @@
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const prom = require('prom-client');
-const registry = require('prom-client').register;
-const metrics = new Map();
-
+const prom = require('prom-client')
+const registry = require('prom-client').register
+const metrics = new Map()
 
 const optsKey = function(opts) {
-	let keys = Object.keys(opts);
-	if (keys.length === 0) { return ''; }
+  let keys = Object.keys(opts)
+  if (keys.length === 0) {
+    return ''
+  }
 
-	keys = keys.sort();
+  keys = keys.sort()
 
-	let hash = '';
-	for (let key of Array.from(keys)) {
-		if (hash.length) { hash += ","; }
-		hash += `${key}:${opts[key]}`;
-	}
+  let hash = ''
+  for (const key of Array.from(keys)) {
+    if (hash.length) {
+      hash += ','
+    }
+    hash += `${key}:${opts[key]}`
+  }
 
-	return hash;
-};
+  return hash
+}
 
 const extendOpts = function(opts, labelNames) {
-	for (let label of Array.from(labelNames)) {
-		if (!opts[label]) { opts[label] = ''; }
-	}
-	return opts;
-};
+  for (const label of Array.from(labelNames)) {
+    if (!opts[label]) {
+      opts[label] = ''
+    }
+  }
+  return opts
+}
 
 const optsAsArgs = function(opts, labelNames) {
-	const args = [];
-	for (let label of Array.from(labelNames)) {
-		args.push(opts[label] || '');
-	}
-	return args;
-};
-
+  const args = []
+  for (const label of Array.from(labelNames)) {
+    args.push(opts[label] || '')
+  }
+  return args
+}
 
 const PromWrapper = {
-	ttlInMinutes: 0,
-	registry,
+  ttlInMinutes: 0,
+  registry,
 
-	metric(type, name) {
-		return metrics.get(name) || new MetricWrapper(type, name);
-	},
+  metric(type, name) {
+    return metrics.get(name) || new MetricWrapper(type, name)
+  },
 
-	collectDefaultMetrics: prom.collectDefaultMetrics
-};
-
+  collectDefaultMetrics: prom.collectDefaultMetrics
+}
 
 class MetricWrapper {
-	constructor(type, name) {
-		metrics.set(name, this);
-		this.name = name;
-		this.instances = new Map();
-		this.lastAccess = new Date();
-		this.metric = (() => { switch (type) {
-			case "counter":
-				return new prom.Counter({
-					name,
-					help: name,
-					labelNames: ['app','host','status','method', 'path']
-				});
-			case "summary":
-				return new prom.Summary({
-					name,
-					help: name,
-					maxAgeSeconds: 60,
-					ageBuckets: 10,
-					labelNames: ['app', 'host', 'path', 'status_code', 'method', 'collection', 'query']
-				});
-			case "gauge":
-				return new prom.Gauge({
-					name,
-					help: name,
-					labelNames: ['app','host', 'status']
-				});
-		} })();
-	}
+  constructor(type, name) {
+    metrics.set(name, this)
+    this.name = name
+    this.instances = new Map()
+    this.lastAccess = new Date()
+    this.metric = (() => {
+      switch (type) {
+        case 'counter':
+          return new prom.Counter({
+            name,
+            help: name,
+            labelNames: ['app', 'host', 'status', 'method', 'path']
+          })
+        case 'summary':
+          return new prom.Summary({
+            name,
+            help: name,
+            maxAgeSeconds: 60,
+            ageBuckets: 10,
+            labelNames: [
+              'app',
+              'host',
+              'path',
+              'status_code',
+              'method',
+              'collection',
+              'query'
+            ]
+          })
+        case 'gauge':
+          return new prom.Gauge({
+            name,
+            help: name,
+            labelNames: ['app', 'host', 'status']
+          })
+      }
+    })()
+  }
 
-	inc(opts, value) {
-		return this._execMethod('inc', opts, value);
-	}
+  inc(opts, value) {
+    return this._execMethod('inc', opts, value)
+  }
 
-	observe(opts, value) {
-		return this._execMethod('observe', opts, value);
-	}
+  observe(opts, value) {
+    return this._execMethod('observe', opts, value)
+  }
 
-	set(opts, value) {
-		return this._execMethod('set', opts, value);
-	}
+  set(opts, value) {
+    return this._execMethod('set', opts, value)
+  }
 
-	sweep() {
-		const thresh = new Date(Date.now() - (1000 * 60 * PromWrapper.ttlInMinutes));
-		this.instances.forEach((instance, key) => {
-			if (thresh > instance.time) {
-				if (process.env['DEBUG_METRICS']) {
-					console.log("Sweeping stale metric instance", this.name, {opts: instance.opts}, key);
-				}
-				return this.metric.remove(...Array.from(optsAsArgs(instance.opts, this.metric.labelNames) || []));
-			}
-		});
+  sweep() {
+    const thresh = new Date(Date.now() - 1000 * 60 * PromWrapper.ttlInMinutes)
+    this.instances.forEach((instance, key) => {
+      if (thresh > instance.time) {
+        if (process.env.DEBUG_METRICS) {
+          console.log(
+            'Sweeping stale metric instance',
+            this.name,
+            { opts: instance.opts },
+            key
+          )
+        }
+        return this.metric.remove(
+          ...Array.from(optsAsArgs(instance.opts, this.metric.labelNames) || [])
+        )
+      }
+    })
 
-		if (thresh > this.lastAccess) {
-			if (process.env['DEBUG_METRICS']) {
-				console.log("Sweeping stale metric", this.name, thresh, this.lastAccess);
-			}
-			metrics.delete(this.name);
-			return registry.removeSingleMetric(this.name);
-		}
-	}
+    if (thresh > this.lastAccess) {
+      if (process.env.DEBUG_METRICS) {
+        console.log('Sweeping stale metric', this.name, thresh, this.lastAccess)
+      }
+      metrics.delete(this.name)
+      return registry.removeSingleMetric(this.name)
+    }
+  }
 
-	_execMethod(method, opts, value) {
-		opts = extendOpts(opts, this.metric.labelNames);
-		const key = optsKey(opts);
-		if (key !== '') { this.instances.set(key, { time: new Date(), opts }); }
-		this.lastAccess = new Date();
-		return this.metric[method](opts, value);
-	}
+  _execMethod(method, opts, value) {
+    opts = extendOpts(opts, this.metric.labelNames)
+    const key = optsKey(opts)
+    if (key !== '') {
+      this.instances.set(key, { time: new Date(), opts })
+    }
+    this.lastAccess = new Date()
+    return this.metric[method](opts, value)
+  }
 }
-
 
 if (!PromWrapper.sweepRegistered) {
-	if (process.env['DEBUG_METRICS']) {
-		console.log("Registering sweep method");
-	}
-	PromWrapper.sweepRegistered = true;
-	setInterval(
-		function() {
-			if (PromWrapper.ttlInMinutes) {
-				if (process.env['DEBUG_METRICS']) {
-					console.log("Sweeping metrics");
-				}
-				return metrics.forEach((metric, key) => {
-					return metric.sweep();
-				});
-			}
-		},
-	60000);
+  if (process.env.DEBUG_METRICS) {
+    console.log('Registering sweep method')
+  }
+  PromWrapper.sweepRegistered = true
+  setInterval(function() {
+    if (PromWrapper.ttlInMinutes) {
+      if (process.env.DEBUG_METRICS) {
+        console.log('Sweeping metrics')
+      }
+      return metrics.forEach((metric, key) => {
+        return metric.sweep()
+      })
+    }
+  }, 60000)
 }
 
-
-module.exports = PromWrapper;
+module.exports = PromWrapper

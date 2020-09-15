@@ -1,6 +1,6 @@
 {
   "name": "@overleaf/metrics",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "A drop-in metrics and monitoring module for node.js apps",
   "repository": {
     "type": "git",
@@ -18,11 +18,25 @@
   "devDependencies": {
     "bunyan": "^1.0.0",
     "chai": "^4.2.0",
+    "eslint": "^7.8.1",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-chai-expect": "^2.2.0",
+    "eslint-plugin-chai-friendly": "^0.6.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "mocha": "^8.0.1",
+    "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.0.2"
   },
   "scripts": {
-    "test": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/unit"
+    "lint": "eslint --max-warnings 0 .",
+    "test": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/unit",
+    "format": "prettier-eslint $PWD'/**/*.js' --list-different",
+    "format:fix": "prettier-eslint $PWD'/**/*.js' --write"
   }
 }
