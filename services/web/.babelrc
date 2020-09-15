@@ -7,13 +7,17 @@
     }]
   ],
   "plugins": ["angularjs-annotate"],
-  // Disable core-js polyfilling in test environment, to prevent interference
-  // with mocking
+  // Target our current Node version in test environment, to transform and
+  // polyfill only what's necessary
   "env": {
     "test": {
       "presets": [
         "@babel/react",
-        "@babel/env"
+        ["@babel/env", {
+            "targets": {"node": "10.21"},
+            "useBuiltIns": "usage",
+            "corejs": { "version": 3 }
+          }]
       ]
     }
   }

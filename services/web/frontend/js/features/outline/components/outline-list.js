@@ -8,7 +8,7 @@ function OutlineList({ outline, jumpToLine, isRoot, highlightedLine }) {
     'outline-item-list-root': isRoot
   })
   return (
-    <ul className={listClasses}>
+    <ul className={listClasses} role={isRoot ? 'tree' : 'group'}>
       {outline.map((outlineItem, idx) => {
         return (
           <OutlineItem
