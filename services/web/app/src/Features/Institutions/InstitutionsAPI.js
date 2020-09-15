@@ -60,12 +60,18 @@ const InstitutionsAPI = {
       affiliationOptions = {}
     }
 
-    const { university, department, role, confirmedAt } = affiliationOptions
+    const {
+      university,
+      department,
+      role,
+      confirmedAt,
+      entitlement
+    } = affiliationOptions
     makeAffiliationRequest(
       {
         method: 'POST',
         path: `/api/v2/users/${userId.toString()}/affiliations`,
-        body: { email, university, department, role, confirmedAt },
+        body: { email, university, department, role, confirmedAt, entitlement },
         defaultErrorMessage: "Couldn't create affiliation"
       },
       function(error, body) {

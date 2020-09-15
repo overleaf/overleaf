@@ -190,7 +190,8 @@ describe('InstitutionsAPI', function() {
         university: { id: 1 },
         role: 'Prof',
         department: 'Math',
-        confirmedAt: new Date()
+        confirmedAt: new Date(),
+        entitlement: true
       }
       return this.InstitutionsAPI.addAffiliation(
         this.stubbedUser._id,
@@ -207,12 +208,13 @@ describe('InstitutionsAPI', function() {
           requestOptions.method.should.equal('POST')
 
           const { body } = requestOptions
-          Object.keys(body).length.should.equal(5)
+          Object.keys(body).length.should.equal(6)
           body.email.should.equal(this.newEmail)
           body.university.should.equal(affiliationOptions.university)
           body.department.should.equal(affiliationOptions.department)
           body.role.should.equal(affiliationOptions.role)
           body.confirmedAt.should.equal(affiliationOptions.confirmedAt)
+          body.entitlement.should.equal(affiliationOptions.entitlement)
           this.markAsReadIpMatcher.calledOnce.should.equal(true)
           return done()
         }

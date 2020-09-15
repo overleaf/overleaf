@@ -38,18 +38,48 @@ describe('InstitutionsController', function() {
         { email: 'another@mit.edu', reversedHostname: this.host }
       ]
     }
+    this.stubbedUser1DecoratedEmails = [
+      {
+        email: 'stubb1@mit.edu',
+        reversedHostname: this.host,
+        samlIdentifier: { hasEntitlement: false }
+      },
+      { email: 'test@test.com', reversedHostname: 'test.com' },
+      {
+        email: 'another@mit.edu',
+        reversedHostname: this.host,
+        samlIdentifier: { hasEntitlement: true }
+      }
+    ]
     this.stubbedUser2 = {
       _id: '3131232',
       name: 'test',
       email: 'hello2@world.com',
       emails: [{ email: 'subb2@mit.edu', reversedHostname: this.host }]
     }
+    this.stubbedUser2DecoratedEmails = [
+      {
+        email: 'subb2@mit.edu',
+        reversedHostname: this.host
+      }
+    ]
 
-    this.getUsersByHostname = sinon
-      .stub()
-      .callsArgWith(2, null, [this.stubbedUser1, this.stubbedUser2])
+    this.getUsersByHostname = sinon.stub().callsArgWith(
+      2,
+      null,
+      [this.stubbedUser1, this.stubbedUser2].map(user => {
+        return { _id: user._id }
+      })
+    )
     this.addAffiliation = sinon.stub().callsArgWith(3, null)
     this.refreshFeatures = sinon.stub().yields(null)
+    this.getUserFullEmails = sinon.stub()
+    this.getUserFullEmails
+      .withArgs(this.stubbedUser1._id)
+      .yields(null, this.stubbedUser1DecoratedEmails)
+    this.getUserFullEmails
+      .withArgs(this.stubbedUser2._id)
+      .yields(null, this.stubbedUser2DecoratedEmails)
     this.InstitutionsController = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -57,7 +87,8 @@ describe('InstitutionsController', function() {
       requires: {
         'logger-sharelatex': this.logger,
         '../User/UserGetter': {
-          getUsersByHostname: this.getUsersByHostname
+          getUsersByHostname: this.getUsersByHostname,
+          getUserFullEmails: this.getUserFullEmails
         },
         '../Institutions/InstitutionsAPI': {
           addAffiliation: this.addAffiliation
@@ -84,13 +115,25 @@ describe('InstitutionsController', function() {
         this.getUsersByHostname.calledOnce.should.equal(true)
         this.addAffiliation.calledThrice.should.equal(true)
         this.addAffiliation
-          .calledWith(this.stubbedUser1._id, this.stubbedUser1.emails[0].email)
+          .calledWithMatch(
+            this.stubbedUser1._id,
+            this.stubbedUser1.emails[0].email,
+            { entitlement: false }
+          )
           .should.equal(true)
         this.addAffiliation
-          .calledWith(this.stubbedUser1._id, this.stubbedUser1.emails[2].email)
+          .calledWithMatch(
+            this.stubbedUser1._id,
+            this.stubbedUser1.emails[2].email,
+            { entitlement: true }
+          )
           .should.equal(true)
         this.addAffiliation
-          .calledWith(this.stubbedUser2._id, this.stubbedUser2.emails[0].email)
+          .calledWithMatch(
+            this.stubbedUser2._id,
+            this.stubbedUser2.emails[0].email,
+            { entitlement: undefined }
+          )
           .should.equal(true)
         this.refreshFeatures
           .calledWith(this.stubbedUser1._id)
@@ -100,6 +143,7 @@ describe('InstitutionsController', function() {
           .should.equal(true)
         return done()
       }
+      this.next.callsFake(done)
       return this.InstitutionsController.confirmDomain(
         this.req,
         this.res,

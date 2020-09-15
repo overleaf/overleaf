@@ -23,10 +23,7 @@ var affiliateUsers = function(hostname, callback) {
     .split('')
     .reverse()
     .join('')
-  UserGetter.getUsersByHostname(hostname, { _id: 1, emails: 1 }, function(
-    error,
-    users
-  ) {
+  UserGetter.getUsersByHostname(hostname, { _id: 1 }, function(error, users) {
     if (error) {
       OError.tag(error, 'problem fetching users by hostname')
       return callback(error)
@@ -35,8 +32,13 @@ var affiliateUsers = function(hostname, callback) {
     async.mapLimit(
       users,
       ASYNC_AFFILIATIONS_LIMIT,
-      (user, innerCallback) =>
-        affiliateUserByReversedHostname(user, reversedHostname, innerCallback),
+      (user, innerCallback) => {
+        UserGetter.getUserFullEmails(user._id, (error, emails) => {
+          if (error) return innerCallback(error)
+          user.emails = emails
+          affiliateUserByReversedHostname(user, reversedHostname, innerCallback)
+        })
+      },
       callback
     )
   })
@@ -52,11 +54,15 @@ var affiliateUserByReversedHostname = function(
   )
   async.mapSeries(
     matchingEmails,
-    (email, innerCallback) =>
+    (email, innerCallback) => {
       addAffiliation(
         user._id,
         email.email,
-        { confirmedAt: email.confirmedAt },
+        {
+          confirmedAt: email.confirmedAt,
+          entitlement:
+            email.samlIdentifier && email.samlIdentifier.hasEntitlement
+        },
         error => {
           if (error) {
             OError.tag(
@@ -67,7 +73,8 @@ var affiliateUserByReversedHostname = function(
           }
           FeaturesUpdater.refreshFeatures(user._id, innerCallback)
         }
-      ),
+      )
+    },
     callback
   )
 }
