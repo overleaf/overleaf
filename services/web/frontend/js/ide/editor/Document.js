@@ -31,6 +31,17 @@ export default (Document = (function() {
       if (!this.openDocs) {
         this.openDocs = {}
       }
+      // Try to clean up existing docs before reopening them. If the doc has no
+      // buffered ops then it will be deleted by _cleanup() and a new instance
+      // of the document created below. This prevents us trying to follow the
+      // joinDoc:existing code path on an existing doc that doesn't have any
+      // local changes and getting an error if its version is too old.
+      if (this.openDocs[doc_id]) {
+        sl_console.log(
+          `[getDocument] Cleaning up existing document instance for ${doc_id}`
+        )
+        this.openDocs[doc_id]._cleanUp()
+      }
       if (this.openDocs[doc_id] == null) {
         sl_console.log(
           `[getDocument] Creating new document instance for ${doc_id}`
@@ -247,6 +258,7 @@ export default (Document = (function() {
       if (callback == null) {
         callback = function(error) {}
       }
+      this.flush() // force an immediate flush when leaving document
       this.wantToBeJoined = false
       this._cancelJoin()
       if (this.doc != null && this.doc.hasBufferedOps()) {
@@ -560,7 +572,15 @@ export default (Document = (function() {
     }
 
     _cleanUp() {
-      if (Document.openDocs[this.doc_id] === this) {
+      // if we arrive here from _onError the pending and inflight ops will have been cleared
+      if (this.hasBufferedOps()) {
+        sl_console.log(
+          `[_cleanUp] Document (${
+            this.doc_id
+          }) has buffered ops, refusing to remove from openDocs`
+        )
+        return // return immediately, do not unbind from events
+      } else if (Document.openDocs[this.doc_id] === this) {
         sl_console.log(
           `[_cleanUp] Removing self (${this.doc_id}) from in openDocs`
         )

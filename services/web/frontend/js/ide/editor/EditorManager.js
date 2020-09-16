@@ -226,6 +226,10 @@ export default (EditorManager = (function() {
       const editorOpenDocEpoch = ++this.editorOpenDocEpoch
       return new_sharejs_doc.join(error => {
         if (error != null) {
+          sl_console.log(
+            `[_openNewDocument] error joining doc ${doc.id}`,
+            error
+          )
           return callback(error)
         }
         if (this.editorOpenDocEpoch !== editorOpenDocEpoch) {
