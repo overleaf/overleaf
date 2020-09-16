@@ -77,7 +77,7 @@
     "fuse.js": "^3.0.0",
     "handlebars": "^4.7.6",
     "helmet": "^3.22.0",
-    "http-proxy": "^1.18.0",
+    "http-proxy": "^1.18.1",
     "i18next": "^19.6.3",
     "i18next-fs-backend": "^1.0.7",
     "i18next-http-middleware": "^3.0.2",
