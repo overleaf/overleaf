@@ -36,7 +36,8 @@ async function addEntity(options) {
       headers: {
         sl_entity_rev: options.rev,
         sl_project_id: options.project_id,
-        sl_all_user_ids: JSON.stringify([userId])
+        sl_all_user_ids: JSON.stringify([userId]),
+        sl_project_owner_user_id: projectUserIds[0]
       },
       uri: buildTpdsUrl(userId, options.project_name, options.path),
       title: 'addFile',
@@ -86,7 +87,8 @@ async function deleteEntity(options) {
       method: 'delete',
       headers: {
         sl_project_id: options.project_id,
-        sl_all_user_ids: JSON.stringify([userId])
+        sl_all_user_ids: JSON.stringify([userId]),
+        sl_project_owner_user_id: projectUserIds[0]
       },
       uri: buildTpdsUrl(userId, options.project_name, options.path),
       title: 'deleteEntity',
@@ -156,7 +158,8 @@ async function moveEntity(options) {
       headers: {
         sl_project_id: options.project_id,
         sl_entity_rev: options.rev,
-        sl_all_user_ids: JSON.stringify([userId])
+        sl_all_user_ids: JSON.stringify([userId]),
+        sl_project_owner_user_id: projectUserIds[0]
       },
       json: {
         user_id: userId,

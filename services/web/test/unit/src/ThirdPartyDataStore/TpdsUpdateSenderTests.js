@@ -130,16 +130,19 @@ describe('TpdsUpdateSender', function() {
       )}${encodeURIComponent(path)}`
       job0.uri.should.equal(expectedUrl)
       job0.headers.sl_all_user_ids.should.equal(JSON.stringify([userId]))
+      job0.headers.sl_project_owner_user_id.should.equal(userId)
 
       const { group: group1, job: job1 } = this.request.secondCall.args[0].json
       group1.should.equal(collaberatorRef)
       job1.headers.sl_all_user_ids.should.equal(
         JSON.stringify([collaberatorRef])
       )
+      job1.headers.sl_project_owner_user_id.should.equal(userId)
 
       const { group: group2, job: job2 } = this.request.thirdCall.args[0].json
       group2.should.equal(readOnlyRef)
       job2.headers.sl_all_user_ids.should.equal(JSON.stringify([readOnlyRef]))
+      job2.headers.sl_project_owner_user_id.should.equal(userId)
 
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
