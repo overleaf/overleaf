@@ -1,4 +1,5 @@
 {
+  "compile_timeout": "Compile timeout (seconds)",
   "collabs_per_proj_single": "__collabcount__ collaborator per project",
   "premium_features": "Premium features",
   "special_price_student": "Special Price Student Plans",
