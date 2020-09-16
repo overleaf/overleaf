@@ -85,7 +85,7 @@
     "jquery": "^2.2.4",
     "json2csv": "^4.3.3",
     "jsonwebtoken": "^8.5.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "logger-sharelatex": "^2.2.0",
     "mailchimp-api-v3": "^1.12.0",
     "marked": "^0.3.5",
