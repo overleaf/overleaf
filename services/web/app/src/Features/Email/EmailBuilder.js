@@ -6,9 +6,83 @@ const EmailMessageHelper = require('./EmailMessageHelper')
 const StringHelper = require('../Helpers/StringHelper')
 const BaseWithHeaderEmailLayout = require(`./Layouts/BaseWithHeaderEmailLayout`)
 const SpamSafe = require('./SpamSafe')
+const ctaEmailBody = require('./Bodies/cta-email')
 const SingleCTAEmailBody = require(`./Bodies/SingleCTAEmailBody`)
 const NoCTAEmailBody = require(`./Bodies/NoCTAEmailBody`)
 
+function _emailBodyPlainText(content, opts, ctaEmail) {
+  let emailBody = `${content.greeting(opts, true)}`
+  emailBody += `\r\n\r\n`
+  emailBody += `${content.message(opts, true).join('\r\n\r\n')}`
+
+  if (ctaEmail) {
+    emailBody += `\r\n\r\n`
+    emailBody += `${content.ctaText(opts, true)}: ${content.ctaURL(opts, true)}`
+  }
+
+  if (
+    content.secondaryMessage(opts, true) &&
+    content.secondaryMessage(opts, true).length > 0
+  ) {
+    emailBody += `\r\n\r\n`
+    emailBody += `${content.secondaryMessage(opts, true).join('\r\n\r\n')}`
+  }
+
+  emailBody += `\r\n\r\n`
+  emailBody += `Regards,\r\nThe ${settings.appName} Team - ${settings.siteUrl}`
+
+  return emailBody
+}
+
+function ctaTemplate(content) {
+  if (
+    !content.ctaURL ||
+    !content.ctaText ||
+    !content.message ||
+    !content.subject
+  ) {
+    throw new Error('missing required CTA email content')
+  }
+  if (!content.title) {
+    content.title = () => {}
+  }
+  if (!content.greeting) {
+    content.greeting = () => 'Hi,'
+  }
+  if (!content.secondaryMessage) {
+    content.secondaryMessage = () => []
+  }
+  if (!content.gmailGoToAction) {
+    content.gmailGoToAction = () => {}
+  }
+  return {
+    subject(opts) {
+      return content.subject(opts)
+    },
+    layout: BaseWithHeaderEmailLayout,
+    plainTextTemplate(opts) {
+      return _emailBodyPlainText(content, opts, true)
+    },
+    compiledTemplate(opts) {
+      return ctaEmailBody({
+        title: content.title(opts),
+        greeting: content.greeting(opts),
+        message: content.message(opts),
+        secondaryMessage: content.secondaryMessage(opts),
+        ctaText: content.ctaText(opts),
+        ctaURL: content.ctaURL(opts),
+        gmailGoToAction: content.gmailGoToAction(opts),
+        StringHelper
+      })
+    }
+  }
+}
+
+//
+// DEPRECATED
+//
+// Use ctaTemplate instead of CTAEmailTemplate
+//
 function CTAEmailTemplate(content) {
   if (content.greeting == null) {
     content.greeting = () => 'Hi,'
@@ -175,7 +249,7 @@ Your subscription was reactivated successfully.\
   }
 })
 
-templates.passwordResetRequested = CTAEmailTemplate({
+templates.passwordResetRequested = ctaTemplate({
   subject() {
     return `Password Reset - ${settings.appName}`
   },
@@ -183,14 +257,13 @@ templates.passwordResetRequested = CTAEmailTemplate({
     return 'Password Reset'
   },
   message() {
-    return `We got a request to reset your ${settings.appName} password.`
+    return [`We got a request to reset your ${settings.appName} password.`]
   },
   secondaryMessage() {
-    return `\
-If you ignore this message, your password won't be changed.
-
-If you didn't request a password reset, let us know.\
-`
+    return [
+      "If you ignore this message, your password won't be changed.",
+      "If you didn't request a password reset, let us know."
+    ]
   },
   ctaText() {
     return 'Reset password'
@@ -331,7 +404,7 @@ templates.ownershipTransferConfirmationPreviousOwner = NoCTAEmailTemplate({
   }
 })
 
-templates.ownershipTransferConfirmationNewOwner = CTAEmailTemplate({
+templates.ownershipTransferConfirmationNewOwner = ctaTemplate({
   subject(opts) {
     return `Project ownership transfer - ${settings.appName}`
   },
@@ -341,17 +414,19 @@ templates.ownershipTransferConfirmationNewOwner = CTAEmailTemplate({
     )
     return `${projectName} - Owner change`
   },
-  message(opts) {
+  message(opts, isPlainText) {
     const nameAndEmail = _.escape(
       _formatUserNameAndEmail(opts.previousOwner, 'A collaborator')
     )
     const projectName = _.escape(
       SpamSafe.safeProjectName(opts.project.name, 'a project')
     )
-    return `\
-${nameAndEmail} has made you the owner of **${projectName}**. You can now
-manage ${projectName} sharing settings.
-`
+    const projectNameEmphasized = isPlainText
+      ? projectName
+      : `<b>${projectName}</b>`
+    return [
+      `${nameAndEmail} has made you the owner of ${projectNameEmphasized}. You can now manage ${projectName} sharing settings.`
+    ]
   },
   ctaText(opts) {
     return 'View project'
@@ -479,6 +554,7 @@ function _formatUserNameAndEmail(user, placeholder) {
 
 module.exports = {
   templates,
+  ctaTemplate,
   CTAEmailTemplate,
   NoCTAEmailTemplate,
   buildEmail

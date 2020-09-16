@@ -1,4 +1,5 @@
 const SandboxedModule = require('sandboxed-module')
+const cheerio = require('cheerio')
 const path = require('path')
 const { expect } = require('chai')
 const _ = require('underscore')
@@ -101,58 +102,188 @@ describe('EmailBuilder', function() {
     })
   })
 
+  describe('ctaTemplate', function() {
+    describe('missing required content', function() {
+      const content = {
+        title: () => {},
+        greeting: () => {},
+        message: () => {},
+        secondaryMessage: () => {},
+        ctaText: () => {},
+        ctaURL: () => {},
+        gmailGoToAction: () => {}
+      }
+      it('should throw an error when missing title', function() {
+        let { title, ...missing } = content
+        expect(() => {
+          this.EmailBuilder.ctaTemplate(missing)
+        }).to.throw(Error)
+      })
+      it('should throw an error when missing message', function() {
+        let { message, ...missing } = content
+        expect(() => {
+          this.EmailBuilder.ctaTemplate(missing)
+        }).to.throw(Error)
+      })
+      it('should throw an error when missing ctaText', function() {
+        let { ctaText, ...missing } = content
+        expect(() => {
+          this.EmailBuilder.ctaTemplate(missing)
+        }).to.throw(Error)
+      })
+      it('should throw an error when missing ctaURL', function() {
+        let { ctaURL, ...missing } = content
+        expect(() => {
+          this.EmailBuilder.ctaTemplate(missing)
+        }).to.throw(Error)
+      })
+    })
+  })
+
   describe('templates', function() {
-    describe('securityAlert', function() {
-      before(function() {
-        this.message = 'more details about the action'
-        this.messageHTML = `<br /><span style="text-align:center" class="a-class"><b><i>${
-          this.message
-        }</i></b></span>`
-        this.messageNotAllowedHTML = `<div></div>${this.messageHTML}`
-
-        this.actionDescribed = 'an action described'
-        this.actionDescribedHTML = `<br /><span style="text-align:center" class="a-class"><b><i>${
-          this.actionDescribed
-        }</i></b>`
-        this.actionDescribedNotAllowedHTML = `<div></div>${
-          this.actionDescribedHTML
-        }`
-
-        this.opts = {
-          to: this.email,
-          actionDescribed: this.actionDescribedNotAllowedHTML,
-          action: 'an action',
-          message: [this.messageNotAllowedHTML]
-        }
-        this.email = this.EmailBuilder.buildEmail('securityAlert', this.opts)
-      })
-
-      it('should build the email', function() {
-        expect(this.email.html != null).to.equal(true)
-        expect(this.email.text != null).to.equal(true)
-      })
-
-      describe('HTML email', function() {
-        it('should clean HTML in opts.actionDescribed', function() {
-          expect(this.email.html).to.not.contain(
-            this.actionDescribedNotAllowedHTML
+    describe('CTA', function() {
+      describe('ownershipTransferConfirmationNewOwner', function() {
+        before(function() {
+          this.emailAddress = 'example@overleaf.com'
+          this.opts = {
+            to: this.emailAddress,
+            previousOwner: {},
+            project: {
+              _id: 'abc123',
+              name: 'example project'
+            }
+          }
+          this.email = this.EmailBuilder.buildEmail(
+            'ownershipTransferConfirmationNewOwner',
+            this.opts
           )
-          expect(this.email.html).to.contain(this.actionDescribedHTML)
+          this.expectedUrl = `${
+            this.settings.siteUrl
+          }/project/${this.opts.project._id.toString()}`
         })
-        it('should clean HTML in opts.message', function() {
-          expect(this.email.html).to.not.contain(this.messageNotAllowedHTML)
-          expect(this.email.html).to.contain(this.messageHTML)
+
+        it('should build the email', function() {
+          expect(this.email.html).to.exist
+          expect(this.email.text).to.exist
+        })
+
+        describe('HTML email', function() {
+          it('should include a CTA button and a fallback CTA link', function() {
+            const dom = cheerio.load(this.email.html)
+            const buttonLink = dom('td a')
+            expect(buttonLink).to.exist
+            expect(buttonLink.attr('href')).to.equal(this.expectedUrl)
+            const fallback = dom('.avoid-auto-linking').last()
+            expect(fallback).to.exist
+            const fallbackLink = fallback.html().replace(/&amp;/g, '&')
+            expect(fallbackLink).to.contain(this.expectedUrl)
+          })
+        })
+
+        describe('plain text email', function() {
+          it('should contain the CTA link', function() {
+            expect(this.email.text).to.contain(this.expectedUrl)
+          })
         })
       })
 
-      describe('plain text email', function() {
-        it('should remove all HTML in opts.actionDescribed', function() {
-          expect(this.email.text).to.not.contain(this.actionDescribedHTML)
-          expect(this.email.text).to.contain(this.actionDescribed)
+      describe('passwordResetRequested', function() {
+        before(function() {
+          this.emailAddress = 'example@overleaf.com'
+          this.opts = {
+            to: this.emailAddress,
+            setNewPasswordUrl: `${
+              this.settings.siteUrl
+            }/user/password/set?passwordResetToken=aToken&email=${encodeURIComponent(
+              this.emailAddress
+            )}`
+          }
+          this.email = this.EmailBuilder.buildEmail(
+            'passwordResetRequested',
+            this.opts
+          )
         })
-        it('should remove all HTML in opts.message', function() {
-          expect(this.email.text).to.not.contain(this.messageHTML)
-          expect(this.email.text).to.contain(this.message)
+
+        it('should build the email', function() {
+          expect(this.email.html).to.exist
+          expect(this.email.text).to.exist
+        })
+
+        describe('HTML email', function() {
+          it('should include a CTA button and a fallback CTA link', function() {
+            const dom = cheerio.load(this.email.html)
+            const buttonLink = dom('td a')
+            expect(buttonLink).to.exist
+            expect(buttonLink.attr('href')).to.equal(
+              this.opts.setNewPasswordUrl
+            )
+            const fallback = dom('.avoid-auto-linking').last()
+            expect(fallback).to.exist
+            const fallbackLink = fallback.html().replace(/&amp;/g, '&')
+            expect(fallbackLink).to.contain(this.opts.setNewPasswordUrl)
+          })
+        })
+
+        describe('plain text email', function() {
+          it('should contain the CTA link', function() {
+            expect(this.email.text).to.contain(this.opts.setNewPasswordUrl)
+          })
+        })
+      })
+    })
+    describe('no CTA', function() {
+      describe('securityAlert', function() {
+        before(function() {
+          this.message = 'more details about the action'
+          this.messageHTML = `<br /><span style="text-align:center" class="a-class"><b><i>${
+            this.message
+          }</i></b></span>`
+          this.messageNotAllowedHTML = `<div></div>${this.messageHTML}`
+
+          this.actionDescribed = 'an action described'
+          this.actionDescribedHTML = `<br /><span style="text-align:center" class="a-class"><b><i>${
+            this.actionDescribed
+          }</i></b>`
+          this.actionDescribedNotAllowedHTML = `<div></div>${
+            this.actionDescribedHTML
+          }`
+
+          this.opts = {
+            to: this.email,
+            actionDescribed: this.actionDescribedNotAllowedHTML,
+            action: 'an action',
+            message: [this.messageNotAllowedHTML]
+          }
+          this.email = this.EmailBuilder.buildEmail('securityAlert', this.opts)
+        })
+
+        it('should build the email', function() {
+          expect(this.email.html != null).to.equal(true)
+          expect(this.email.text != null).to.equal(true)
+        })
+
+        describe('HTML email', function() {
+          it('should clean HTML in opts.actionDescribed', function() {
+            expect(this.email.html).to.not.contain(
+              this.actionDescribedNotAllowedHTML
+            )
+            expect(this.email.html).to.contain(this.actionDescribedHTML)
+          })
+          it('should clean HTML in opts.message', function() {
+            expect(this.email.html).to.not.contain(this.messageNotAllowedHTML)
+            expect(this.email.html).to.contain(this.messageHTML)
+          })
+        })
+
+        describe('plain text email', function() {
+          it('should remove all HTML in opts.actionDescribed', function() {
+            expect(this.email.text).to.not.contain(this.actionDescribedHTML)
+            expect(this.email.text).to.contain(this.actionDescribed)
+          })
+          it('should remove all HTML in opts.message', function() {
+            expect(this.email.text).to.not.contain(this.messageHTML)
+            expect(this.email.text).to.contain(this.message)
+          })
         })
       })
     })
