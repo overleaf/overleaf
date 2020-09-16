@@ -6,6 +6,7 @@ import { useTranslation, Trans } from 'react-i18next'
 
 import OutlineRoot from './outline-root'
 import localStorage from '../../../modules/localStorage'
+import withErrorBoundary from '../../../infrastructure/error-boundary'
 
 function OutlinePane({
   isTexFile,
@@ -108,4 +109,4 @@ OutlinePane.propTypes = {
   highlightedLine: PropTypes.number
 }
 
-export default OutlinePane
+export default withErrorBoundary(OutlinePane)
