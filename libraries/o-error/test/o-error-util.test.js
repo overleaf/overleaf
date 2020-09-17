@@ -180,6 +180,82 @@ describe('OError.tag', function () {
       expect(stack).to.match(/TaggedError: test message\n\s+at [\w.]*tag/)
     })
   })
+
+  describe('with limit on the number of tags', function () {
+    before(function () {
+      this.originalMaxTags = OError.maxTags
+      OError.maxTags = 3
+    })
+    after(function () {
+      OError.maxTags = this.originalMaxTags
+    })
+
+    it('should not tag more than that', function () {
+      const err = new Error('test error')
+      OError.tag(err, 'test message 1')
+      OError.tag(err, 'test message 2')
+      OError.tag(err, 'test message 3')
+      OError.tag(err, 'test message 4')
+      OError.tag(err, 'test message 5')
+      expectFullStackWithoutStackFramesToEqual(err, [
+        'Error: test error',
+        'TaggedError: test message 1',
+        'TaggedError: ... dropped tags',
+        'TaggedError: test message 4',
+        'TaggedError: test message 5',
+      ])
+    })
+
+    it('should handle deep recursion', async function () {
+      async function recursiveAdd(n) {
+        try {
+          if (n === 0) throw new Error('deep error')
+          const result = await recursiveAdd(n - 1)
+          return result + 1
+        } catch (err) {
+          throw OError.tag(err, `at level ${n}`)
+        }
+      }
+      try {
+        await recursiveAdd(10)
+      } catch (err) {
+        expectFullStackWithoutStackFramesToEqual(err, [
+          'Error: deep error',
+          'TaggedError: at level 0',
+          'TaggedError: ... dropped tags',
+          'TaggedError: at level 9',
+          'TaggedError: at level 10',
+        ])
+      }
+    })
+
+    it('should handle a singleton error', function (done) {
+      const err = new Error('singleton error')
+      function endpoint(callback) {
+        helper((err) => callback(err && OError.tag(err, 'in endpoint')))
+      }
+      function helper(callback) {
+        libraryFunction((err) => callback(err && OError.tag(err, 'in helper')))
+      }
+      function libraryFunction(callback) {
+        callback(err)
+      }
+
+      endpoint(() => {
+        endpoint((err) => {
+          expect(err).to.exist
+          expectFullStackWithoutStackFramesToEqual(err, [
+            'Error: singleton error',
+            'TaggedError: in helper',
+            'TaggedError: ... dropped tags',
+            'TaggedError: in helper',
+            'TaggedError: in endpoint',
+          ])
+          done()
+        })
+      })
+    })
+  })
 })
 
 describe('OError.getFullInfo', function () {

@@ -21,6 +21,7 @@ Light-weight helpers for handling JavaScript Errors in node.js and the browser.
   * [Adding More Info](#adding-more-info)
   * [`async`/`await`](#asyncawait)
   * [Better Async Stack Traces in Node 12+](#better-async-stack-traces-in-node-12)
+  * [Caveat: Shared Error Instances](#caveat-shared-error-instances)
 - [Create Custom Error Classes](#create-custom-error-classes)
   * [Attaching Extra Info](#attaching-extra-info)
   * [Wrapping an Internal Error](#wrapping-an-internal-error)
@@ -28,6 +29,7 @@ Light-weight helpers for handling JavaScript Errors in node.js and the browser.
   * [new OError(message, [info], [cause])](#new-oerrormessage-info-cause)
   * [oError.withInfo(info) ⇒ this](#oerrorwithinfoinfo--this)
   * [oError.withCause(cause) ⇒ this](#oerrorwithcausecause--this)
+  * [OError.maxTags : Number](#oerrormaxtags--number)
   * [OError.tag(error, [message], [info]) ⇒ Error](#oerrortagerror-message-info--error)
   * [OError.getFullInfo(error) ⇒ Object](#oerrorgetfullinfoerror--object)
   * [OError.getFullStack(error) ⇒ string](#oerrorgetfullstackerror--string)
@@ -222,6 +224,12 @@ TaggedError: failed to say hi
 
 The above output is from node 10. Node 12 has improved stack traces for async code that uses native promises. However, until your whole stack, including all libraries, is using async/await and native promises, you're still likely to get unhelpful stack traces. So, the tagging approach still adds value, even in node 12. (And the `info` from tagging can add value even to a good stack trace, because it can contain clues about the input the caused the error.)
 
+### Caveat: Shared Error Instances
+
+Some libraries, such as `ioredis`, may return the same `Error` instance to multiple callbacks. In this case, the tags may be misleading, because they will be a mixture of the different 'stacks' that lead to the error. You can either accept this or choose to instead wrap the errors from these libraries with new `OError` instances using `withCause`.
+
+In the worst case, a library that always returns a single instance of an error could cause a resource leak. To prevent this, `OError` will only add up to `OError.maxTags` (default 100) tags to a single Error instance.
+
 ## Create Custom Error Classes
 
 Broadly speaking, there are two kinds of errors: those we try to recover from, and those for which we give up (i.e. a 5xx response in a web application). For the latter kind, we usually just want to log a message and stack trace useful for debugging, which `OError.tag` helps with.
@@ -343,6 +351,7 @@ caused by:
         * [.withInfo(info)](#OError+withInfo) ⇒ <code>this</code>
         * [.withCause(cause)](#OError+withCause) ⇒ <code>this</code>
     * _static_
+        * [.maxTags](#OError.maxTags) : <code>Number</code>
         * [.tag(error, [message], [info])](#OError.tag) ⇒ <code>Error</code>
         * [.getFullInfo(error)](#OError.getFullInfo) ⇒ <code>Object</code>
         * [.getFullStack(error)](#OError.getFullStack) ⇒ <code>string</code>
@@ -379,6 +388,17 @@ Wrap the given error, which caused this error.
 | --- | --- | --- |
 | cause | <code>Error</code> | the internal error that caused this error |
 
+<a name="OError.maxTags"></a>
+
+### OError.maxTags : <code>Number</code>
+Maximum number of tags to apply to any one error instance. This is to avoid
+a resource leak in the (hopefully unlikely) case that a singleton error
+instance is returned to many callbacks. If tags have been dropped, the full
+stack trace will include a placeholder tag `... dropped tags`.
+
+Defaults to 100. Must be at least 1.
+
+**Kind**: static property of [<code>OError</code>](#OError)  
 <a name="OError.tag"></a>
 
 ### OError.tag(error, [message], [info]) ⇒ <code>Error</code>

@@ -5,6 +5,32 @@ export = OError;
  */
 declare class OError extends Error {
     /**
+     * @param {string} message as for built-in Error
+     * @param {Object} [info] extra data to attach to the error
+     * @param {Error} [cause] the internal error that caused this error
+     */
+    constructor(message: string, info?: any, cause?: Error);
+    info: any;
+    cause: Error;
+    /** @private @type {Array<TaggedError> | undefined} */
+    private _oErrorTags;
+    /**
+     * Set the extra info object for this error.
+     *
+     * @param {Object} info extra data to attach to the error
+     * @return {this}
+     */
+    withInfo(info: any): OError;
+    /**
+     * Wrap the given error, which caused this error.
+     *
+     * @param {Error} cause the internal error that caused this error
+     * @return {this}
+     */
+    withCause(cause: Error): OError;
+}
+declare namespace OError {
+    /**
      * Tag debugging information onto any error (whether an OError or not) and
      * return it.
      *
@@ -35,7 +61,7 @@ declare class OError extends Error {
      * @param {Object} [info] extra data with wich to tag `error`
      * @return {Error} the modified `error` argument
      */
-    static tag(error: Error, message?: string, info?: any): Error;
+    export function tag(error: Error, message?: string, info?: any): Error;
     /**
      * The merged info from any `tag`s on the given error.
      *
@@ -44,7 +70,7 @@ declare class OError extends Error {
      * @param {Error | null | undefined} error any errror (may or may not be an `OError`)
      * @return {Object}
      */
-    static getFullInfo(error: Error): any;
+    export function getFullInfo(error: Error): any;
     /**
      * Return the `stack` property from `error`, including the `stack`s for any
      * tagged errors added with `OError.tag` and for any `cause`s.
@@ -52,29 +78,6 @@ declare class OError extends Error {
      * @param {Error | null | undefined} error any error (may or may not be an `OError`)
      * @return {string}
      */
-    static getFullStack(error: Error): string;
-    /**
-     * @param {string} message as for built-in Error
-     * @param {Object} [info] extra data to attach to the error
-     * @param {Error} [cause] the internal error that caused this error
-     */
-    constructor(message: string, info?: any, cause?: Error);
-    info: any;
-    cause: Error;
-    /** @private @type {Array<TaggedError> | undefined} */
-    private _oErrorTags;
-    /**
-     * Set the extra info object for this error.
-     *
-     * @param {Object} info extra data to attach to the error
-     * @return {this}
-     */
-    withInfo(info: any): OError;
-    /**
-     * Wrap the given error, which caused this error.
-     *
-     * @param {Error} cause the internal error that caused this error
-     * @return {this}
-     */
-    withCause(cause: Error): OError;
+    export function getFullStack(error: Error): string;
+    export const maxTags: Number;
 }

@@ -84,6 +84,14 @@ class OError extends Error {
       tag = new TaggedError(message || '', info)
     }
 
+    if (oError._oErrorTags.length >= OError.maxTags) {
+      // Preserve the first tag and add an indicator that we dropped some tags.
+      if (oError._oErrorTags[1] === DROPPED_TAGS_ERROR) {
+        oError._oErrorTags.splice(2, 1)
+      } else {
+        oError._oErrorTags[1] = DROPPED_TAGS_ERROR
+      }
+    }
     oError._oErrorTags.push(tag)
 
     return error
@@ -143,12 +151,30 @@ class OError extends Error {
 }
 
 /**
+ * Maximum number of tags to apply to any one error instance. This is to avoid
+ * a resource leak in the (hopefully unlikely) case that a singleton error
+ * instance is returned to many callbacks. If tags have been dropped, the full
+ * stack trace will include a placeholder tag `... dropped tags`.
+ *
+ * Defaults to 100. Must be at least 1.
+ *
+ * @type {Number}
+ */
+OError.maxTags = 100
+
+/**
  * Used to record a stack trace every time we tag info onto an Error.
  *
  * @private
  * @extends OError
  */
 class TaggedError extends OError {}
+
+const DROPPED_TAGS_ERROR = /** @type{TaggedError} */ ({
+  name: 'TaggedError',
+  message: '... dropped tags',
+  stack: 'TaggedError: ... dropped tags',
+})
 
 /**
  * @private
