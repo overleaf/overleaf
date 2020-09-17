@@ -3,6 +3,6 @@ track-changes
 --docker-repos=gcr.io/overleaf-ops
 --env-add=AWS_BUCKET=bucket
 --env-pass-through=
---node-version=10.21.0
+--node-version=10.22.1
 --public-repo=True
---script-version=3.3.2
+--script-version=3.3.4
