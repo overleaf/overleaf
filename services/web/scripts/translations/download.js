@@ -27,16 +27,12 @@ async function run() {
         lang.translation[key] = sanitize(value)
       }
 
+      const outputLngCode = code === 'en-GB' ? 'en' : code
       await fs.writeFile(
-        `../../locales/${code}.json`,
+        `${__dirname}/../../locales/${outputLngCode}.json`,
         JSON.stringify(lang.translation, null, 2)
       )
     }
-
-    // Copy files, so we have appropriate dialects
-    await fs.copyFile('../../locales/en-GB.json', '../../locales/en-US.json')
-    await fs.copyFile('../../locales/en-GB.json', '../../locales/en.json')
-    await fs.copyFile('../../locales/zh-CN.json', '../../locales/cn.json')
   } catch (error) {
     console.error(error)
     process.exit(1)

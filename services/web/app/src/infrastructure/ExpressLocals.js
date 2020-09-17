@@ -209,16 +209,6 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function(req, res, next) {
-    const subdomain = _.find(
-      Settings.i18n.subdomainLang,
-      subdomain => subdomain.lngCode === req.showUserOtherLng && !subdomain.hide
-    )
-    res.locals.recomendSubdomain = subdomain
-    res.locals.currentLngCode = req.lng
-    next()
-  })
-
-  webRouter.use(function(req, res, next) {
     res.locals.getUserEmail = function() {
       const user = AuthenticationController.getSessionUser(req)
       const email = (user != null ? user.email : undefined) || ''

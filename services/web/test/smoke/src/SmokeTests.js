@@ -26,9 +26,7 @@ const cookeFilePath = `/tmp/smoke-test-cookie-${ownPort}-to-${port}.txt`
 const buildUrl = path =>
   ` -b ${cookeFilePath} --resolve 'smoke${
     Settings.cookieDomain
-  }:${port}:127.0.0.1' http://smoke${
-    Settings.cookieDomain
-  }:${port}/${path}?setLng=en`
+  }:${port}:127.0.0.1' http://smoke${Settings.cookieDomain}:${port}/${path}`
 const logger = require('logger-sharelatex')
 const LoginRateLimiter = require('../../../app/src/Features/Security/LoginRateLimiter.js')
 const RateLimiter = require('../../../app/src/infrastructure/RateLimiter.js')
