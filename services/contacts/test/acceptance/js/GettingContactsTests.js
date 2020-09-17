@@ -15,7 +15,7 @@ const sinon = require('sinon')
 const chai = require('chai')
 chai.should()
 const { expect } = chai
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const request = require('request')
 const async = require('async')
 const ContactsApp = require('./ContactsApp')

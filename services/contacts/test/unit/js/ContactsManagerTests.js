@@ -15,7 +15,7 @@ const should = chai.should()
 const { expect } = chai
 const modulePath = '../../../app/js/ContactManager.js'
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const tk = require('timekeeper')
 
 describe('ContactManager', function () {
@@ -23,7 +23,7 @@ describe('ContactManager', function () {
     tk.freeze(Date.now())
     this.ContactManager = SandboxedModule.require(modulePath, {
       requires: {
-        './mongojs': {
+        './mongodb': {
           db: (this.db = { contacts: {} }),
           ObjectId
         },
@@ -42,7 +42,7 @@ describe('ContactManager', function () {
 
   describe('touchContact', function () {
     beforeEach(function () {
-      return (this.db.contacts.update = sinon.stub().callsArg(3))
+      this.db.contacts.updateOne = sinon.stub().callsArg(3)
     })
 
     describe('with a valid user_id', function () {
@@ -55,7 +55,7 @@ describe('ContactManager', function () {
       })
 
       it('should increment the contact count and timestamp', function () {
-        return this.db.contacts.update
+        this.db.contacts.updateOne
           .calledWith(
             {
               user_id: sinon.match(
