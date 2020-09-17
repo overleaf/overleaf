@@ -1,4 +1,4 @@
-FROM fsouza/fake-gcs-server:latest
+FROM fsouza/fake-gcs-server:1.20
 RUN apk add --update --no-cache curl
 COPY healthcheck.sh /healthcheck.sh
 HEALTHCHECK --interval=1s --timeout=1s --retries=30 CMD /healthcheck.sh http://localhost:9090
