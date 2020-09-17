@@ -7,7 +7,7 @@ const crypto = require('crypto')
 const Streamifier = require('streamifier')
 const RangeManager = require('./RangeManager')
 const PersistorManager = require('./PersistorManager')
-const asyncPool = require('tiny-async-pool')
+const pMap = require('p-map')
 
 const PARALLEL_JOBS = 5
 
@@ -40,11 +40,9 @@ async function archiveAllDocs(projectId) {
   }
 
   const docsToArchive = docs.filter((doc) => !doc.inS3)
-  if (docsToArchive.length) {
-    await asyncPool(PARALLEL_JOBS, docsToArchive, (doc) =>
-      archiveDoc(projectId, doc)
-    )
-  }
+  await pMap(docsToArchive, (doc) => archiveDoc(projectId, doc), {
+    concurrency: PARALLEL_JOBS
+  })
 }
 
 async function archiveDoc(projectId, doc) {
@@ -85,13 +83,9 @@ async function unArchiveAllDocs(projectId) {
   if (!docs) {
     throw new Errors.NotFoundError(`No docs for project ${projectId}`)
   }
-  if (!docs.length) {
-    // asyncPool will throw an error with an empty array
-    return
-  }
-  await asyncPool(PARALLEL_JOBS, docs, (doc) =>
-    unarchiveDoc(projectId, doc._id)
-  )
+  await pMap(docs, (doc) => unarchiveDoc(projectId, doc._id), {
+    concurrency: PARALLEL_JOBS
+  })
 }
 
 async function unarchiveDoc(projectId, docId) {
@@ -143,9 +137,9 @@ async function destroyAllDocs(projectId) {
     { _id: 1 }
   )
   if (docs && docs.length) {
-    await asyncPool(PARALLEL_JOBS, docs, (doc) =>
-      destroyDoc(projectId, doc._id)
-    )
+    await pMap(docs, (doc) => destroyDoc(projectId, doc._id), {
+      concurrency: PARALLEL_JOBS
+    })
   }
 }
 
