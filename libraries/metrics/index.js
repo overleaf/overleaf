@@ -28,7 +28,7 @@ function configure(opts = {}) {
  */
 function initialize(_name, opts = {}) {
   configure({ ...opts, appName: _name })
-  collectDefaultMetrics({ timeout: 5000, prefix: buildPromKey() })
+  collectDefaultMetrics({ timeout: 5000, prefix: '' })
 
   console.log(`ENABLE_TRACE_AGENT set to ${process.env.ENABLE_TRACE_AGENT}`)
   if (process.env.ENABLE_TRACE_AGENT === 'true') {

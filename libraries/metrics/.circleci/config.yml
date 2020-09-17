@@ -1,0 +1,11 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@3.0.0
+
+workflows:
+  test:
+    jobs:
+      - node/test:
+          version: "10.22"
+          override-ci-command: npm install
