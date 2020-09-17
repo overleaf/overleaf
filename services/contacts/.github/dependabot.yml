@@ -15,3 +15,9 @@ updates:
     # Block informal upgrades -- security upgrades use a separate queue.
     # https://docs.github.com/en/github/administering-a-repository/configuration-options-for-dependency-updates#open-pull-requests-limit
     open-pull-requests-limit: 0
+
+    # currently assign team-magma to all dependabot PRs - this may change in
+    # future if we reorganise teams
+    labels:
+      - "dependencies"
+      - "Team-Magma"
