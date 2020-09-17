@@ -14,7 +14,12 @@ const Settings = {
     }
   },
 
-  mongo: {},
+  mongo: {
+    options: {
+      useUnifiedTopology:
+        (process.env.MONGO_USE_UNIFIED_TOPOLOGY || 'true') === 'true'
+    }
+  },
 
   docstore: {
     backend: process.env.BACKEND || 's3',

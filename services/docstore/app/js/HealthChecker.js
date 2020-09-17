@@ -10,7 +10,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { getCollection, ObjectId } = require('./mongodb')
+const { db, ObjectId } = require('./mongodb')
 const request = require('request')
 const async = require('async')
 const _ = require('underscore')
@@ -18,9 +18,6 @@ const crypto = require('crypto')
 const settings = require('settings-sharelatex')
 const { port } = settings.internal.docstore
 const logger = require('logger-sharelatex')
-
-const docsCollectionPromise = getCollection('docs')
-const docOpsCollectionPromise = getCollection('docOps')
 
 module.exports = {
   check(callback) {
@@ -63,14 +60,8 @@ module.exports = {
           }
         })
       },
-      (cb) =>
-        docsCollectionPromise.then((docs) =>
-          docs.deleteOne({ _id: doc_id, project_id }, cb)
-        ),
-      (cb) =>
-        docOpsCollectionPromise.then((docOps) =>
-          docOps.deleteOne({ doc_id }, cb)
-        )
+      (cb) => db.docs.deleteOne({ _id: doc_id, project_id }, cb),
+      (cb) => db.docOps.deleteOne({ doc_id }, cb)
     ]
     return async.series(jobs, callback)
   }

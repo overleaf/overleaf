@@ -21,13 +21,9 @@ const { assert } = require('chai')
 
 describe('MongoManager', function () {
   beforeEach(function () {
-    this.db = {}
     this.MongoManager = SandboxedModule.require(modulePath, {
       requires: {
         './mongodb': {
-          getCollection: sinon.stub().callsFake((name) => {
-            return Promise.resolve((this.db[name] = {}))
-          }),
           db: (this.db = { docs: {}, docOps: {} }),
           ObjectId
         },
@@ -40,12 +36,12 @@ describe('MongoManager', function () {
     })
     this.project_id = ObjectId().toString()
     this.doc_id = ObjectId().toString()
+    this.callback = sinon.stub()
     return (this.stubbedErr = new Error('hello world'))
   })
 
   describe('findDoc', function () {
-    beforeEach(function (done) {
-      this.callback = sinon.stub().callsFake(() => done())
+    beforeEach(function () {
       this.doc = { name: 'mock-doc' }
       this.db.docs.findOne = sinon.stub().callsArgWith(2, null, this.doc)
       this.filter = { lines: true }
@@ -64,7 +60,9 @@ describe('MongoManager', function () {
             _id: ObjectId(this.doc_id),
             project_id: ObjectId(this.project_id)
           },
-          this.filter
+          {
+            projection: this.filter
+          }
         )
         .should.equal(true)
     })
@@ -89,8 +87,7 @@ describe('MongoManager', function () {
     })
 
     describe('with included_deleted = false', function () {
-      beforeEach(function (done) {
-        this.callback = sinon.stub().callsFake(() => done())
+      beforeEach(function () {
         return this.MongoManager.getProjectsDocs(
           this.project_id,
           { include_deleted: false },
@@ -106,7 +103,9 @@ describe('MongoManager', function () {
               project_id: ObjectId(this.project_id),
               deleted: { $ne: true }
             },
-            this.filter
+            {
+              projection: this.filter
+            }
           )
           .should.equal(true)
       })
@@ -119,8 +118,7 @@ describe('MongoManager', function () {
     })
 
     return describe('with included_deleted = true', function () {
-      beforeEach(function (done) {
-        this.callback = sinon.stub().callsFake(() => done())
+      beforeEach(function () {
         return this.MongoManager.getProjectsDocs(
           this.project_id,
           { include_deleted: true },
@@ -135,7 +133,9 @@ describe('MongoManager', function () {
             {
               project_id: ObjectId(this.project_id)
             },
-            this.filter
+            {
+              projection: this.filter
+            }
           )
           .should.equal(true)
       })
@@ -239,8 +239,7 @@ describe('MongoManager', function () {
 
   describe('getDocVersion', function () {
     describe('when the doc exists', function () {
-      beforeEach(function (done) {
-        this.callback = sinon.stub().callsFake(() => done())
+      beforeEach(function () {
         this.doc = { version: (this.version = 42) }
         this.db.docOps.findOne = sinon.stub().callsArgWith(2, null, this.doc)
         return this.MongoManager.getDocVersion(this.doc_id, this.callback)
@@ -248,7 +247,12 @@ describe('MongoManager', function () {
 
       it('should look for the doc in the database', function () {
         return this.db.docOps.findOne
-          .calledWith({ doc_id: ObjectId(this.doc_id) }, { version: 1 })
+          .calledWith(
+            { doc_id: ObjectId(this.doc_id) },
+            {
+              projection: { version: 1 }
+            }
+          )
           .should.equal(true)
       })
 
@@ -258,8 +262,7 @@ describe('MongoManager', function () {
     })
 
     return describe("when the doc doesn't exist", function () {
-      beforeEach(function (done) {
-        this.callback = sinon.stub().callsFake(() => done())
+      beforeEach(function () {
         this.db.docOps.findOne = sinon.stub().callsArgWith(2, null, null)
         return this.MongoManager.getDocVersion(this.doc_id, this.callback)
       })
@@ -271,8 +274,7 @@ describe('MongoManager', function () {
   })
 
   return describe('setDocVersion', function () {
-    beforeEach(function (done) {
-      this.callback = sinon.stub().callsFake(() => done())
+    beforeEach(function () {
       this.version = 42
       this.db.docOps.updateOne = sinon.stub().callsArg(3)
       return this.MongoManager.setDocVersion(

@@ -13,20 +13,12 @@
  */
 const chai = require('chai')
 chai.should()
-const { getCollection, ObjectId } = require('../../../app/js/mongodb')
+const { db, ObjectId } = require('../../../app/js/mongodb')
 const { expect } = chai
 const DocstoreApp = require('./helpers/DocstoreApp')
 const Errors = require('../../../app/js/Errors')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
-
-let db
-before(async function () {
-  db = {
-    docs: await getCollection('docs'),
-    docOps: await getCollection('docOps')
-  }
-})
 
 describe('Deleting a doc', function () {
   beforeEach(function (done) {
