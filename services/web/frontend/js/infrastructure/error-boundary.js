@@ -10,11 +10,15 @@ function errorHandler(error, componentStack) {
   }
 }
 
+function DefaultFallbackComponent() {
+  return <></>
+}
+
 function withErrorBoundary(WrappedComponent, FallbackComponent) {
   function ErrorBoundaryWrapper(props) {
     return (
       <ErrorBoundary
-        fallbackRender={FallbackComponent || null}
+        FallbackComponent={FallbackComponent || DefaultFallbackComponent}
         onError={errorHandler}
       >
         <WrappedComponent {...props} />
