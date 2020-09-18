@@ -75,9 +75,7 @@ describe('UserEmailsController', function() {
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Errors/Errors': Errors,
         'logger-sharelatex': {
-          log() {
-            console.log(arguments)
-          },
+          log() {},
           err() {}
         }
       }

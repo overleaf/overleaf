@@ -246,7 +246,6 @@ describe('UserEmailsConfirmationHandler', function() {
       })
 
       it('should call the callback with a NotFoundError', function() {
-        console.log(this.callback.lastCall.args)
         return this.callback
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)

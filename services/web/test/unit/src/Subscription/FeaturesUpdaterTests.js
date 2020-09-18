@@ -32,9 +32,7 @@ describe('FeaturesUpdater', function() {
         './PlansLocator': (this.PlansLocator = {}),
         'logger-sharelatex': {
           log() {},
-          warn(obj, text) {
-            console.log(text)
-          }
+          warn() {}
         },
         'settings-sharelatex': (this.Settings = {}),
         '../Referal/ReferalFeatures': (this.ReferalFeatures = {}),

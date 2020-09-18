@@ -49,9 +49,7 @@ describe('PublishersGetter', function() {
           }
         }),
         'logger-sharelatex': {
-          log() {
-            return console.log(arguments)
-          },
+          log() {},
           err() {}
         }
       }

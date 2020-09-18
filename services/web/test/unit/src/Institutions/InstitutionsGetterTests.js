@@ -30,9 +30,7 @@ describe('InstitutionsGetter', function() {
         '../UserMembership/UserMembershipsHandler': (this.UserMembershipsHandler = {}),
         '../UserMembership/UserMembershipEntityConfigs': (this.UserMembershipEntityConfigs = {}),
         'logger-sharelatex': {
-          log() {
-            return console.log(arguments)
-          },
+          log() {},
           err() {}
         }
       }

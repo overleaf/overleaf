@@ -99,7 +99,6 @@ describe('RestoringFiles', function() {
         )
         expect(restored_doc._id.toString()).to.equal(this.restored_doc_id)
         expect(this.doc._id).to.not.equal(this.restored_doc_id)
-        // console.log @doc_id, @restored_doc_id, MockDocstoreApi.docs[@project_id]
         expect(
           MockDocstoreApi.docs[this.project_id][this.restored_doc_id].lines
         ).to.deep.equal(
