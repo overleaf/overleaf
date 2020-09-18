@@ -15,3 +15,8 @@ updates:
     # Block informal upgrades -- security upgrades use a separate queue.
     # https://docs.github.com/en/github/administering-a-repository/configuration-options-for-dependency-updates#open-pull-requests-limit
     open-pull-requests-limit: 0
+
+    labels:
+      - "dependencies"
+      - "Team-Magma"
+      - "Team-Aqua"
