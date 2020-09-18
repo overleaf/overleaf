@@ -13,7 +13,7 @@ describe('LearnedWordsManager', function () {
     this.callback = sinon.stub()
     this.db = {
       spellingPreferences: {
-        update: sinon.stub().yields()
+        updateOne: sinon.stub().yields()
       }
     }
     this.cache = {
@@ -26,7 +26,7 @@ describe('LearnedWordsManager', function () {
         console: console
       },
       requires: {
-        './DB': this.db,
+        './mongodb': { db: this.db },
         './MongoCache': this.cache,
         'logger-sharelatex': {
           log() {},
@@ -49,7 +49,7 @@ describe('LearnedWordsManager', function () {
 
     it('should insert the word in the word list in the database', function () {
       expect(
-        this.db.spellingPreferences.update.calledWith(
+        this.db.spellingPreferences.updateOne.calledWith(
           {
             token: this.token
           },
@@ -76,7 +76,7 @@ describe('LearnedWordsManager', function () {
 
     it('should remove the word from the word list in the database', function () {
       expect(
-        this.db.spellingPreferences.update.calledWith(
+        this.db.spellingPreferences.updateOne.calledWith(
           {
             token: this.token
           },
@@ -150,12 +150,12 @@ describe('LearnedWordsManager', function () {
 
   describe('deleteUsersLearnedWords', function () {
     beforeEach(function () {
-      this.db.spellingPreferences.remove = sinon.stub().callsArgWith(1)
+      this.db.spellingPreferences.deleteOne = sinon.stub().callsArgWith(1)
     })
 
     it('should get the word list for the given user', function (done) {
       this.LearnedWordsManager.deleteUsersLearnedWords(this.token, () => {
-        this.db.spellingPreferences.remove
+        this.db.spellingPreferences.deleteOne
           .calledWith({ token: this.token })
           .should.equal(true)
         done()
