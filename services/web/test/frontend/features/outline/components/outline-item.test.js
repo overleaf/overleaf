@@ -6,12 +6,10 @@ import { screen, render, fireEvent } from '@testing-library/react'
 import OutlineItem from '../../../../../frontend/js/features/outline/components/outline-item'
 
 describe('<OutlineItem />', function() {
-  before(function() {
-    this.jumpToLine = sinon.stub()
-  })
+  const jumpToLine = sinon.stub()
 
   afterEach(function() {
-    this.jumpToLine.reset()
+    jumpToLine.reset()
   })
 
   it('renders basic item', function() {
@@ -19,9 +17,7 @@ describe('<OutlineItem />', function() {
       title: 'Test Title',
       line: 1
     }
-    render(
-      <OutlineItem outlineItem={outlineItem} jumpToLine={this.jumpToLine} />
-    )
+    render(<OutlineItem outlineItem={outlineItem} jumpToLine={jumpToLine} />)
 
     screen.getByRole('treeitem', { current: false })
     screen.getByRole('button', { name: outlineItem.title })
@@ -34,9 +30,7 @@ describe('<OutlineItem />', function() {
       line: 1,
       children: [{ title: 'Child', line: 2 }]
     }
-    render(
-      <OutlineItem outlineItem={outlineItem} jumpToLine={this.jumpToLine} />
-    )
+    render(<OutlineItem outlineItem={outlineItem} jumpToLine={jumpToLine} />)
 
     const collapseButton = screen.getByRole('button', { name: 'Collapse' })
 
@@ -59,7 +53,7 @@ describe('<OutlineItem />', function() {
     render(
       <OutlineItem
         outlineItem={outlineItem}
-        jumpToLine={this.jumpToLine}
+        jumpToLine={jumpToLine}
         highlightedLine={1}
       />
     )
@@ -76,7 +70,7 @@ describe('<OutlineItem />', function() {
     render(
       <OutlineItem
         outlineItem={outlineItem}
-        jumpToLine={this.jumpToLine}
+        jumpToLine={jumpToLine}
         highlightedLine={2}
       />
     )
@@ -94,19 +88,17 @@ describe('<OutlineItem />', function() {
       title: 'Parent',
       line: 1
     }
-    render(
-      <OutlineItem outlineItem={outlineItem} jumpToLine={this.jumpToLine} />
-    )
+    render(<OutlineItem outlineItem={outlineItem} jumpToLine={jumpToLine} />)
 
     const titleButton = screen.getByRole('button', { name: outlineItem.title })
 
     fireEvent.click(titleButton)
-    sinon.assert.calledOnce(this.jumpToLine)
-    sinon.assert.calledWith(this.jumpToLine, 1, false)
+    expect(jumpToLine).to.be.calledOnce
+    expect(jumpToLine).to.be.calledWith(1, false)
 
-    this.jumpToLine.reset()
+    jumpToLine.reset()
     fireEvent.doubleClick(titleButton)
-    sinon.assert.calledOnce(this.jumpToLine)
-    sinon.assert.calledWith(this.jumpToLine, 1, true)
+    expect(jumpToLine).to.be.calledOnce
+    expect(jumpToLine).to.be.calledWith(1, true)
   })
 })

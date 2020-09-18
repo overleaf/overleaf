@@ -4,5 +4,7 @@
   "we_cant_find_any_sections_or_subsections_in_this_file",
   "find_out_more_about_the_file_outline",
   "expand",
-  "collapse"
+  "collapse",
+  "show_outline",
+  "hide_outline"
 ]
