@@ -12,13 +12,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let Notifications
-const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
-const mongojs = require('mongojs')
-const db = mongojs(Settings.mongo != null ? Settings.mongo.url : undefined, [
-  'notifications'
-])
-const { ObjectId } = require('mongojs')
+const { db, ObjectId } = require('./mongodb')
 const metrics = require('metrics-sharelatex')
 
 module.exports = Notifications = {
@@ -30,9 +25,7 @@ module.exports = Notifications = {
       user_id: ObjectId(user_id),
       templateKey: { $exists: true }
     }
-    return db.notifications.find(query, (err, notifications) =>
-      callback(err, notifications)
-    )
+    db.notifications.find(query).toArray(callback)
   },
 
   _countExistingNotifications(user_id, notification, callback) {
@@ -85,7 +78,7 @@ module.exports = Notifications = {
           return callback(err)
         }
       }
-      return db.notifications.update(
+      db.notifications.updateOne(
         { user_id: doc.user_id, key: notification.key },
         { $set: doc },
         { upsert: true },
@@ -100,7 +93,7 @@ module.exports = Notifications = {
       _id: ObjectId(notification_id)
     }
     const updateOperation = { $unset: { templateKey: true, messageOpts: true } }
-    return db.notifications.update(searchOps, updateOperation, callback)
+    db.notifications.updateOne(searchOps, updateOperation, callback)
   },
 
   removeNotificationKey(user_id, notification_key, callback) {
@@ -109,19 +102,19 @@ module.exports = Notifications = {
       key: notification_key
     }
     const updateOperation = { $unset: { templateKey: true } }
-    return db.notifications.update(searchOps, updateOperation, callback)
+    db.notifications.updateOne(searchOps, updateOperation, callback)
   },
 
   removeNotificationByKeyOnly(notification_key, callback) {
     const searchOps = { key: notification_key }
     const updateOperation = { $unset: { templateKey: true } }
-    return db.notifications.update(searchOps, updateOperation, callback)
+    db.notifications.updateOne(searchOps, updateOperation, callback)
   },
 
   // hard delete of doc, rather than removing the templateKey
   deleteNotificationByKeyOnly(notification_key, callback) {
     const searchOps = { key: notification_key }
-    return db.notifications.remove(searchOps, { justOne: true }, callback)
+    db.notifications.deleteOne(searchOps, callback)
   }
 }
 ;['getUserNotifications', 'addNotification'].map((method) =>

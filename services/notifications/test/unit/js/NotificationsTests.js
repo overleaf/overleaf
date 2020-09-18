@@ -19,7 +19,7 @@ const should = chai.should()
 const modulePath = '../../../app/js/Notifications.js'
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 
 const user_id = '51dc93e6fb625a261300003b'
 const notification_id = 'fb625a26f09d'
@@ -27,25 +27,19 @@ const notification_key = 'notification-key'
 
 describe('Notifications Tests', function () {
   beforeEach(function () {
-    const self = this
-    this.findStub = sinon.stub()
-    this.insertStub = sinon.stub()
+    this.findToArrayStub = sinon.stub()
+    this.findStub = sinon.stub().returns({ toArray: this.findToArrayStub })
     this.countStub = sinon.stub()
-    this.updateStub = sinon.stub()
-    this.removeStub = sinon.stub()
-    this.mongojs = () => {
-      return {
-        notifications: {
-          update: self.mongojsUpdate,
-          find: this.findStub,
-          insert: this.insertStub,
-          count: this.countStub,
-          update: this.updateStub,
-          remove: this.removeStub
-        }
+    this.updateOneStub = sinon.stub()
+    this.deleteOneStub = sinon.stub()
+    this.db = {
+      notifications: {
+        find: this.findStub,
+        count: this.countStub,
+        updateOne: this.updateOneStub,
+        deleteOne: this.deleteOneStub
       }
     }
-    this.mongojs.ObjectId = ObjectId
 
     this.notifications = SandboxedModule.require(modulePath, {
       requires: {
@@ -54,7 +48,7 @@ describe('Notifications Tests', function () {
           error() {}
         },
         'settings-sharelatex': {},
-        mongojs: this.mongojs,
+        './mongodb': { db: this.db, ObjectId },
         'metrics-sharelatex': { timeAsyncMethod: sinon.stub() }
       },
       globals: {
@@ -73,7 +67,7 @@ describe('Notifications Tests', function () {
 
   describe('getUserNotifications', function () {
     return it('should find all notifications and return i', function (done) {
-      this.findStub.callsArgWith(1, null, this.stubbedNotificationArray)
+      this.findToArrayStub.callsArgWith(0, null, this.stubbedNotificationArray)
       return this.notifications.getUserNotifications(
         user_id,
         (err, notifications) => {
@@ -106,7 +100,7 @@ describe('Notifications Tests', function () {
         user_id: this.stubbedNotification.user_id,
         key: 'notification-key'
       }
-      this.updateStub.yields()
+      this.updateOneStub.yields()
       return this.countStub.yields(null, 0)
     })
 
@@ -117,7 +111,7 @@ describe('Notifications Tests', function () {
         (err) => {
           expect(err).not.exists
           sinon.assert.calledWith(
-            this.updateStub,
+            this.updateOneStub,
             this.expectedQuery,
             { $set: this.expectedDocument },
             { upsert: true }
@@ -138,7 +132,7 @@ describe('Notifications Tests', function () {
           this.stubbedNotification,
           (err) => {
             expect(err).not.exists
-            sinon.assert.notCalled(this.updateStub)
+            sinon.assert.notCalled(this.updateOneStub)
             return done()
           }
         )
@@ -152,7 +146,7 @@ describe('Notifications Tests', function () {
           (err) => {
             expect(err).not.exists
             sinon.assert.calledWith(
-              this.updateStub,
+              this.updateOneStub,
               this.expectedQuery,
               { $set: this.expectedDocument },
               { upsert: true }
@@ -192,7 +186,7 @@ describe('Notifications Tests', function () {
           (err) => {
             expect(err).not.exists
             sinon.assert.calledWith(
-              this.updateStub,
+              this.updateOneStub,
               this.expectedQuery,
               { $set: this.expectedDocument },
               { upsert: true }
@@ -227,7 +221,7 @@ describe('Notifications Tests', function () {
           this.stubbedNotification,
           (err) => {
             ;(err instanceof Error).should.equal(true)
-            sinon.assert.notCalled(this.updateStub)
+            sinon.assert.notCalled(this.updateOneStub)
             return done()
           }
         )
@@ -237,7 +231,7 @@ describe('Notifications Tests', function () {
 
   describe('removeNotificationId', function () {
     return it('should mark the notification id as read', function (done) {
-      this.updateStub.callsArgWith(2, null)
+      this.updateOneStub.callsArgWith(2, null)
 
       return this.notifications.removeNotificationId(
         user_id,
@@ -250,8 +244,8 @@ describe('Notifications Tests', function () {
           const updateOperation = {
             $unset: { templateKey: true, messageOpts: true }
           }
-          assert.deepEqual(this.updateStub.args[0][0], searchOps)
-          assert.deepEqual(this.updateStub.args[0][1], updateOperation)
+          assert.deepEqual(this.updateOneStub.args[0][0], searchOps)
+          assert.deepEqual(this.updateOneStub.args[0][1], updateOperation)
           return done()
         }
       )
@@ -260,7 +254,7 @@ describe('Notifications Tests', function () {
 
   describe('removeNotificationKey', function () {
     return it('should mark the notification key as read', function (done) {
-      this.updateStub.callsArgWith(2, null)
+      this.updateOneStub.callsArgWith(2, null)
 
       return this.notifications.removeNotificationKey(
         user_id,
@@ -273,8 +267,8 @@ describe('Notifications Tests', function () {
           const updateOperation = {
             $unset: { templateKey: true }
           }
-          assert.deepEqual(this.updateStub.args[0][0], searchOps)
-          assert.deepEqual(this.updateStub.args[0][1], updateOperation)
+          assert.deepEqual(this.updateOneStub.args[0][0], searchOps)
+          assert.deepEqual(this.updateOneStub.args[0][1], updateOperation)
           return done()
         }
       )
@@ -283,15 +277,15 @@ describe('Notifications Tests', function () {
 
   describe('removeNotificationByKeyOnly', function () {
     return it('should mark the notification key as read', function (done) {
-      this.updateStub.callsArgWith(2, null)
+      this.updateOneStub.callsArgWith(2, null)
 
       return this.notifications.removeNotificationByKeyOnly(
         notification_key,
         (err) => {
           const searchOps = { key: notification_key }
           const updateOperation = { $unset: { templateKey: true } }
-          assert.deepEqual(this.updateStub.args[0][0], searchOps)
-          assert.deepEqual(this.updateStub.args[0][1], updateOperation)
+          assert.deepEqual(this.updateOneStub.args[0][0], searchOps)
+          assert.deepEqual(this.updateOneStub.args[0][1], updateOperation)
           return done()
         }
       )
@@ -300,15 +294,13 @@ describe('Notifications Tests', function () {
 
   return describe('deleteNotificationByKeyOnly', function () {
     return it('should completely remove the notification', function (done) {
-      this.removeStub.callsArgWith(2, null)
+      this.deleteOneStub.callsArgWith(1, null)
 
       return this.notifications.deleteNotificationByKeyOnly(
         notification_key,
         (err) => {
           const searchOps = { key: notification_key }
-          const opts = { justOne: true }
-          assert.deepEqual(this.removeStub.args[0][0], searchOps)
-          assert.deepEqual(this.removeStub.args[0][1], opts)
+          assert.deepEqual(this.deleteOneStub.args[0][0], searchOps)
           return done()
         }
       )

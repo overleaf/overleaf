@@ -15,6 +15,7 @@ const app = express()
 const methodOverride = require('method-override')
 const bodyParser = require('body-parser')
 const errorHandler = require('errorhandler')
+const mongodb = require('./app/js/mongodb')
 const controller = require('./app/js/NotificationsController')
 
 metrics.memory.monitor(logger)
@@ -62,9 +63,18 @@ const port =
     Settings.internal != null ? Settings.internal.notifications : undefined,
     (x1) => x1.port
   ) || 3042
-app.listen(port, host, () =>
-  logger.info(`notifications starting up, listening on ${host}:${port}`)
-)
+
+mongodb
+  .waitForDb()
+  .then(() => {
+    app.listen(port, host, () =>
+      logger.info(`notifications starting up, listening on ${host}:${port}`)
+    )
+  })
+  .catch((err) => {
+    logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
+    process.exit(1)
+  })
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null
