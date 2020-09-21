@@ -210,19 +210,19 @@ Click here to set your password and log in:\
   }
 })
 
-templates.canceledSubscription = CTAEmailTemplate({
+templates.canceledSubscription = ctaTemplate({
   subject() {
     return `${settings.appName} thoughts`
   },
   message() {
-    return `\
-We are sorry to see you cancelled your ${
-      settings.appName
-    } premium subscription. Would you mind giving us some feedback on what the site is lacking at the moment via this quick survey?\
-`
+    return [
+      `We are sorry to see you cancelled your ${
+        settings.appName
+      } premium subscription. Would you mind giving us some feedback on what the site is lacking at the moment via this quick survey?`
+    ]
   },
   secondaryMessage() {
-    return 'Thank you in advance!'
+    return ['Thank you in advance!']
   },
   ctaText() {
     return 'Leave Feedback'
@@ -232,14 +232,12 @@ We are sorry to see you cancelled your ${
   }
 })
 
-templates.reactivatedSubscription = CTAEmailTemplate({
+templates.reactivatedSubscription = ctaTemplate({
   subject() {
     return `Subscription Reactivated - ${settings.appName}`
   },
   message(opts) {
-    return `\
-Your subscription was reactivated successfully.\
-`
+    return ['Your subscription was reactivated successfully.']
   },
   ctaText() {
     return 'View Subscription Dashboard'
