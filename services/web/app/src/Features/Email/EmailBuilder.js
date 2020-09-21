@@ -330,7 +330,7 @@ templates.projectInvite = CTAEmailTemplate({
   }
 })
 
-templates.verifyEmailToJoinTeam = CTAEmailTemplate({
+templates.verifyEmailToJoinTeam = ctaTemplate({
   subject(opts) {
     return `${_.escape(
       _formatUserNameAndEmail(opts.inviter, 'A collaborator')
@@ -342,9 +342,11 @@ templates.verifyEmailToJoinTeam = CTAEmailTemplate({
     )} has invited you to join a team on ${settings.appName}`
   },
   message(opts) {
-    return `Please click the button below to join the team and enjoy the benefits of an upgraded ${
-      settings.appName
-    } account.`
+    return [
+      `Please click the button below to join the team and enjoy the benefits of an upgraded ${
+        settings.appName
+      } account.`
+    ]
   },
   ctaText(opts) {
     return 'Join now'

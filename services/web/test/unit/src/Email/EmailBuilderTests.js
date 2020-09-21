@@ -230,6 +230,51 @@ describe('EmailBuilder', function() {
           })
         })
       })
+
+      describe('verifyEmailToJoinTeam', function() {
+        before(function() {
+          this.emailAddress = 'example@overleaf.com'
+          this.opts = {
+            to: this.emailAddress,
+            acceptInviteUrl: `${
+              this.settings.siteUrl
+            }/subscription/invites/aToken123/`,
+            inviter: {
+              email: 'deanna@overleaf.com',
+              first_name: 'Deanna',
+              last_name: 'Troi'
+            }
+          }
+          this.email = this.EmailBuilder.buildEmail(
+            'verifyEmailToJoinTeam',
+            this.opts
+          )
+        })
+
+        it('should build the email', function() {
+          expect(this.email.html).to.exist
+          expect(this.email.text).to.exist
+        })
+
+        describe('HTML email', function() {
+          it('should include a CTA button and a fallback CTA link', function() {
+            const dom = cheerio.load(this.email.html)
+            const buttonLink = dom('a:contains("Join now")')
+            expect(buttonLink.length).to.equal(1)
+            expect(buttonLink.attr('href')).to.equal(this.opts.acceptInviteUrl)
+            const fallback = dom('.avoid-auto-linking').last()
+            expect(fallback.length).to.equal(1)
+            const fallbackLink = fallback.html()
+            expect(fallbackLink).to.contain(this.opts.acceptInviteUrl)
+          })
+        })
+
+        describe('plain text email', function() {
+          it('should contain the CTA link', function() {
+            expect(this.email.text).to.contain(this.opts.acceptInviteUrl)
+          })
+        })
+      })
     })
     describe('no CTA', function() {
       describe('securityAlert', function() {
