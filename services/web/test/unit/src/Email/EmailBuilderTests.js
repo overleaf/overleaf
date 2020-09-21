@@ -391,6 +391,44 @@ describe('EmailBuilder', function() {
           })
         })
       })
+
+      describe('testEmail', function() {
+        before(function() {
+          this.emailAddress = 'example@overleaf.com'
+          this.opts = {
+            to: this.emailAddress
+          }
+          this.email = this.EmailBuilder.buildEmail('testEmail', this.opts)
+        })
+
+        it('should build the email', function() {
+          expect(this.email.html).to.exist
+          expect(this.email.text).to.exist
+        })
+
+        describe('HTML email', function() {
+          it('should include a CTA button and a fallback CTA link', function() {
+            const dom = cheerio.load(this.email.html)
+            const buttonLink = dom(
+              `a:contains("Open ${this.settings.appName}")`
+            )
+            expect(buttonLink.length).to.equal(1)
+            expect(buttonLink.attr('href')).to.equal(this.settings.siteUrl)
+            const fallback = dom('.avoid-auto-linking').last()
+            expect(fallback.length).to.equal(1)
+            const fallbackLink = fallback.html()
+            expect(fallbackLink).to.contain(this.settings.siteUrl)
+          })
+        })
+
+        describe('plain text email', function() {
+          it('should contain the CTA link', function() {
+            expect(this.email.text).to.contain(
+              `Open ${this.settings.appName}: ${this.settings.siteUrl}`
+            )
+          })
+        })
+      })
     })
     describe('no CTA', function() {
       describe('securityAlert', function() {

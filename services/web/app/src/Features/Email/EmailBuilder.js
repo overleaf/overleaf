@@ -354,7 +354,7 @@ templates.verifyEmailToJoinTeam = ctaTemplate({
   }
 })
 
-templates.testEmail = CTAEmailTemplate({
+templates.testEmail = ctaTemplate({
   subject() {
     return `A Test Email from ${settings.appName}`
   },
@@ -365,7 +365,7 @@ templates.testEmail = CTAEmailTemplate({
     return 'Hi,'
   },
   message() {
-    return `This is a test Email from ${settings.appName}`
+    return [`This is a test Email from ${settings.appName}`]
   },
   ctaText() {
     return `Open ${settings.appName}`
