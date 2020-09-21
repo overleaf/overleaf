@@ -273,7 +273,7 @@ templates.passwordResetRequested = ctaTemplate({
   }
 })
 
-templates.confirmEmail = CTAEmailTemplate({
+templates.confirmEmail = ctaTemplate({
   subject() {
     return `Confirm Email - ${settings.appName}`
   },
@@ -281,7 +281,7 @@ templates.confirmEmail = CTAEmailTemplate({
     return 'Confirm Email'
   },
   message() {
-    return `Please confirm your email on ${settings.appName}.`
+    return [`Please confirm your email on ${settings.appName}.`]
   },
   ctaText() {
     return 'Confirm Email'
