@@ -4,6 +4,7 @@ import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import OutlineList from './outline-list'
+import Icon from '../../../shared/components/icon'
 
 function getChildrenLines(children) {
   return (children || [])
@@ -22,11 +23,6 @@ function OutlineItem({ outlineItem, jumpToLine, highlightedLine }) {
 
   const mainItemClasses = classNames('outline-item', {
     'outline-item-no-children': !outlineItem.children
-  })
-
-  const expandCollapseIconClasses = classNames('fa', 'outline-caret-icon', {
-    'fa-angle-down': expanded,
-    'fa-angle-right': !expanded
   })
 
   const hasHighlightedChild =
@@ -85,7 +81,10 @@ function OutlineItem({ outlineItem, jumpToLine, highlightedLine }) {
             onClick={handleExpandCollapseClick}
             aria-label={expanded ? t('collapse') : t('expand')}
           >
-            <i className={expandCollapseIconClasses} />
+            <Icon
+              type={expanded ? 'angle-down' : 'angle-right'}
+              classes={{ icon: 'outline-caret-icon' }}
+            />
           </button>
         ) : null}
         <button
