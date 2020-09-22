@@ -220,9 +220,13 @@ if (Settings.shutdownDrainTimeWindow) {
     process.removeAllListeners('uncaughtException')
     process.on('uncaughtException', function (error) {
       if (
-        ['ETIMEDOUT', 'EHOSTUNREACH', 'EPIPE', 'ECONNRESET'].includes(
-          error.code
-        )
+        [
+          'ETIMEDOUT',
+          'EHOSTUNREACH',
+          'EPIPE',
+          'ECONNRESET',
+          'ERR_STREAM_WRITE_AFTER_END'
+        ].includes(error.code)
       ) {
         Metrics.inc('disconnected_write', 1, { status: error.code })
         return logger.warn(
