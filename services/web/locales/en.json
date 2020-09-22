@@ -1,6 +1,6 @@
 {
   "also_provides_free_plan": "__appName__ also provides a free plan -- simply __registerLinkOpen__register here__registerLinkClose__ to get started.",
-  "compile_timeout": "Compile timeout (seconds)",
+  "compile_timeout": "Compile timeout (minutes)",
   "collabs_per_proj_single": "__collabcount__ collaborator per project",
   "premium_features": "Premium features",
   "special_price_student": "Special Price Student Plans",
