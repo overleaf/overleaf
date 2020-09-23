@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const User = require('./helpers/User').promises
 const { Project } = require('../../../app/src/models/Project')
-const { ObjectId } = require('../../../app/src/infrastructure/mongojs')
+const { ObjectId } = require('mongodb')
 
 describe('Project CRUD', function() {
   beforeEach(async function() {

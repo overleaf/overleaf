@@ -1,4 +1,4 @@
-const { ObjectId } = require('../../../../app/src/infrastructure/mongojs')
+const { ObjectId } = require('mongodb')
 const PublisherModel = require('../../../../app/src/models/Publisher').Publisher
 
 let count = parseInt(Math.random() * 999999)

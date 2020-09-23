@@ -20,7 +20,6 @@ const { expect } = chai
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Project/ProjectEntityHandler'
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongoose').Types
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 describe('ProjectEntityHandler', function() {

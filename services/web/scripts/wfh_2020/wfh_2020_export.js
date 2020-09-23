@@ -1,5 +1,4 @@
-const mongojs = require('../../app/src/infrastructure/mongojs')
-const { db } = mongojs
+const { db } = require('../../app/src/infrastructure/mongojs')
 const async = require('async')
 
 db.deletedSubscriptions.aggregate(

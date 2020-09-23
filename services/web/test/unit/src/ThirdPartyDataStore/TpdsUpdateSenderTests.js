@@ -1,4 +1,4 @@
-const { ObjectId } = require('../../../../app/src/infrastructure/mongojs')
+const { ObjectId } = require('mongodb')
 const SandboxedModule = require('sandboxed-module')
 const chai = require('chai')
 const path = require('path')

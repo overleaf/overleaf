@@ -1,5 +1,5 @@
 const { Joi: CelebrateJoi, celebrate, errors } = require('celebrate')
-const { ObjectId } = require('./mongojs')
+const { ObjectId } = require('mongodb')
 
 const objectIdValidator = {
   name: 'objectId',

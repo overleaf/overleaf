@@ -36,7 +36,7 @@ describe('AuthorizationMiddleware', function() {
       requires: {
         './AuthorizationManager': this.AuthorizationManager,
         'logger-sharelatex': { log() {} },
-        mongojs: {
+        mongodb: {
           ObjectId: this.ObjectId
         },
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,

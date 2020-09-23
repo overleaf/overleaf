@@ -16,8 +16,7 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
 const assertNotCalled = sinon.assert.notCalled
-const mongojs = require('mongojs')
-const { ObjectId } = mongojs
+const { ObjectId } = require('mongodb')
 const modulePath =
   '../../../../app/src/Features/UserMembership/UserMembershipViewModel'
 const SandboxedModule = require('sandboxed-module')
@@ -30,7 +29,7 @@ describe('UserMembershipViewModel', function() {
         console: console
       },
       requires: {
-        mongojs: mongojs,
+        mongodb: require('mongodb'),
         '../User/UserGetter': this.UserGetter
       }
     })

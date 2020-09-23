@@ -16,7 +16,6 @@ const _ = require('lodash')
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
-const { ObjectId } = require('mongojs')
 
 module.exports = MockV1HistoryApi = {
   fakeZipCall: 0,

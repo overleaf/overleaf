@@ -4,7 +4,7 @@ const crypto = require('crypto')
 const async = require('async')
 
 const settings = require('settings-sharelatex')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 
 const { Subscription } = require('../../models/Subscription')
 

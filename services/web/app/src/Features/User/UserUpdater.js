@@ -1,10 +1,8 @@
 const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
-const mongojs = require('../../infrastructure/mongojs')
+const { db, ObjectId } = require('../../infrastructure/mongojs')
 const metrics = require('metrics-sharelatex')
-const { db } = mongojs
 const async = require('async')
-const { ObjectId } = mongojs
 const { callbackify, promisify } = require('util')
 const UserGetter = require('./UserGetter')
 const {

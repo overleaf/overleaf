@@ -1,7 +1,7 @@
 const SandboxedModule = require('sandboxed-module')
 const modulePath =
   '../../../../app/src/Features/User/UserOnboardingController.js'
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const sinon = require('sinon')
 
 describe('UserOnboardingController', function() {

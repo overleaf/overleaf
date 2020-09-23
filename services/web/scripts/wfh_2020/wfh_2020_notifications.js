@@ -1,7 +1,6 @@
 const NotificationsHandler = require('../../app/src/Features/Notifications/NotificationsHandler')
 
-const mongojs = require('../../app/src/infrastructure/mongojs')
-const { db } = mongojs
+const { db } = require('../../app/src/infrastructure/mongojs')
 const async = require('async')
 
 const templateKey = 'wfh_2020_upgrade_offer'

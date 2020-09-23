@@ -15,7 +15,6 @@ const assert = require('assert')
 require('chai').should()
 const { expect } = require('chai')
 const sinon = require('sinon')
-const { ObjectId } = require('mongojs')
 const modulePath = require('path').join(
   __dirname,
   '../../../app/src/LaunchpadController.js'

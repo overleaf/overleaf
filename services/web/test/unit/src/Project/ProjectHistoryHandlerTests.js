@@ -19,7 +19,6 @@ const { expect } = chai
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Project/ProjectHistoryHandler'
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongoose').Types
 
 describe('ProjectHistoryHandler', function() {
   const project_id = '4eecb1c1bffa66588e0000a1'

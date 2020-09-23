@@ -6,7 +6,7 @@ const PrivilegeLevels = require('./PrivilegeLevels')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const PublicAccessLevels = require('./PublicAccessLevels')
 const Errors = require('../Errors/Errors')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const { promisifyAll } = require('../../util/promises')
 
 const AuthorizationManager = {

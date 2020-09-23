@@ -1,7 +1,7 @@
 const chai = require('chai')
 const { expect } = chai
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 
 const MODULE_PATH = '../../../../app/src/Features/Project/ProjectHelper.js'
 

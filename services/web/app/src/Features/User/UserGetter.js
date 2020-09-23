@@ -1,8 +1,6 @@
-const mongojs = require('../../infrastructure/mongojs')
+const { db, ObjectId } = require('../../infrastructure/mongojs')
 const metrics = require('metrics-sharelatex')
 const logger = require('logger-sharelatex')
-const { db } = mongojs
-const { ObjectId } = mongojs
 const { promisifyAll } = require('../../util/promises')
 const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
 const InstitutionsHelper = require('../Institutions/InstitutionsHelper')

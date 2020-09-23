@@ -17,7 +17,6 @@ const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionLocator'
 const { assert } = require('chai')
-const { ObjectId } = require('mongoose').Types
 
 describe('Subscription Locator Tests', function() {
   beforeEach(function() {

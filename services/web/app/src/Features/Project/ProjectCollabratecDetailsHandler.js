@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ProjectCollabratecDetailsHandler
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const { Project } = require('../../models/Project')
 
 module.exports = ProjectCollabratecDetailsHandler = {

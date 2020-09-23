@@ -1,4 +1,4 @@
-const { db } = require('../../infrastructure/mongojs')
+const { db, ObjectId } = require('../../infrastructure/mongojs')
 const OError = require('@overleaf/o-error')
 const async = require('async')
 const { promisifyAll } = require('../../util/promises')
@@ -6,7 +6,6 @@ const { Subscription } = require('../../models/Subscription')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const UserGetter = require('../User/UserGetter')
 const PlansLocator = require('./PlansLocator')
-const { ObjectId } = require('mongoose').Types
 const FeaturesUpdater = require('./FeaturesUpdater')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
 

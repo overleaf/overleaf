@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')

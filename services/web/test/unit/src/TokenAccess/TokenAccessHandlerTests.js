@@ -21,7 +21,7 @@ const modulePath = path.join(
   '../../../../app/src/Features/TokenAccess/TokenAccessHandler'
 )
 const { expect } = require('chai')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 
 describe('TokenAccessHandler', function() {
   beforeEach(function() {

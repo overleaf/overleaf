@@ -1,7 +1,7 @@
 const sinon = require('sinon')
 const chai = require('chai')
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const AuthenticationErrors = require('../../../../app/src/Features/Authentication/AuthenticationErrors')
 
 chai.should()

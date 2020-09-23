@@ -1,5 +1,4 @@
-const mongojs = require('../../app/src/infrastructure/mongojs')
-const { db, ObjectId } = mongojs
+const { db, ObjectId } = require('../../app/src/infrastructure/mongojs')
 const Async = require('async')
 
 const projectIds = [

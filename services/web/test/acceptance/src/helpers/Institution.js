@@ -1,4 +1,4 @@
-const { ObjectId } = require('../../../../app/src/infrastructure/mongojs')
+const { ObjectId } = require('mongodb')
 const InstitutionModel = require('../../../../app/src/models/Institution')
   .Institution
 

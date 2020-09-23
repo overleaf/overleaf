@@ -11,7 +11,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const Path = require('path')
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')

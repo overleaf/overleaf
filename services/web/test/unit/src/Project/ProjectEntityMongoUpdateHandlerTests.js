@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const tk = require('timekeeper')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
-const { ObjectId } = require('mongoose').Types
+const { ObjectId } = require('mongodb')
 const SandboxedModule = require('sandboxed-module')
 const { Project } = require('../helpers/models/Project')
 

@@ -13,7 +13,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { ObjectId } = require('mongoose').Types
+const { ObjectId } = require('mongodb')
 const async = require('async')
 const { promisifyAll } = require('../../util/promises')
 const Errors = require('../Errors/Errors')

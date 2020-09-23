@@ -1,7 +1,7 @@
 let UserController
 const UserGetter = require('./UserGetter')
 const AuthenticationController = require('../Authentication/AuthenticationController')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 
 module.exports = UserController = {
   getLoggedInUsersPersonalInfo(req, res, next) {

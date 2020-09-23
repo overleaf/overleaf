@@ -3,7 +3,7 @@ const _ = require('lodash')
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 
 module.exports = MockProjectHistoryApi = {
   docs: {},

@@ -3,7 +3,7 @@ const { expect } = require('chai')
 require('chai').should()
 const sinon = require('sinon')
 const { Tag } = require('../helpers/models/Tag')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Tags/TagsHandler.js'

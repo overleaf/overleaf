@@ -22,7 +22,7 @@ const modulePath =
   '../../../../app/src/Features/Collaborators/CollaboratorsInviteHandler.js'
 const SandboxedModule = require('sandboxed-module')
 const events = require('events')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const Crypto = require('crypto')
 
 describe('CollaboratorsInviteHandler', function() {

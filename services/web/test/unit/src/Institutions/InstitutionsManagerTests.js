@@ -83,7 +83,7 @@ describe('InstitutionsManager', function() {
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
         '../../models/Institution': this.InstitutionModel,
         '../../models/Subscription': SubscriptionModel,
-        '../../infrastructure/mongojs': this.Mongo,
+        mongodb: this.Mongo,
         '../User/SAMLIdentityManager': this.SAMLIdentityManager
       }
     }))

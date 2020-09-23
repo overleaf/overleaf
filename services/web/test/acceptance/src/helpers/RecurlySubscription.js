@@ -1,4 +1,4 @@
-const { ObjectId } = require('../../../../app/src/infrastructure/mongojs')
+const { ObjectId } = require('mongodb')
 const Subscription = require('./Subscription')
 const MockRecurlyApi = require('./MockRecurlyApi')
 const RecurlyWrapper = require('../../../../app/src/Features/Subscription/RecurlyWrapper')

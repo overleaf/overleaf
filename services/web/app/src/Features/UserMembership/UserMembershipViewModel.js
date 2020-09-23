@@ -11,7 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let UserMembershipViewModel
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const UserGetter = require('../User/UserGetter')
 
 module.exports = UserMembershipViewModel = {

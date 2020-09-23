@@ -1,6 +1,6 @@
 const async = require('async')
 const _ = require('underscore')
-const { ObjectId } = require('../../infrastructure/mongojs')
+const { ObjectId } = require('mongodb')
 const { getInstitutionAffiliations } = require('./InstitutionsAPI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const UserGetter = require('../User/UserGetter')

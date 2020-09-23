@@ -7,7 +7,7 @@ const tk = require('timekeeper')
 const moment = require('moment')
 const { Project } = require('../helpers/models/Project')
 const { DeletedProject } = require('../helpers/models/DeletedProject')
-const { ObjectId } = require('mongoose').Types
+const { ObjectId } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 describe('ProjectDeleter', function() {

@@ -4,7 +4,7 @@ const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Subscription/TeamInvitesHandler'
 
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 describe('TeamInvitesHandler', function() {

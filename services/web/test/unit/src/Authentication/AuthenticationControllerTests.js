@@ -7,7 +7,7 @@ const SandboxedModule = require('sandboxed-module')
 const tk = require('timekeeper')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 
 describe('AuthenticationController', function() {
   beforeEach(function() {

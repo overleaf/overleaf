@@ -16,7 +16,7 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Subscription/FeaturesUpdater'
 const { assert } = require('chai')
-const { ObjectId } = require('mongoose').Types
+const { ObjectId } = require('mongodb')
 
 describe('FeaturesUpdater', function() {
   beforeEach(function() {

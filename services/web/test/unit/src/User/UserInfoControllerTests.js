@@ -20,7 +20,7 @@ const SandboxedModule = require('sandboxed-module')
 const events = require('events')
 const MockResponse = require('../helpers/MockResponse')
 const MockRequest = require('../helpers/MockRequest')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 
 describe('UserInfoController', function() {
   beforeEach(function() {

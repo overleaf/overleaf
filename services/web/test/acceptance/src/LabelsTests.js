@@ -13,7 +13,7 @@
  */
 const _ = require('underscore')
 const { expect } = require('chai')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const request = require('./helpers/request')
 
 const MockProjectHistoryApi = require('./helpers/MockProjectHistoryApi')

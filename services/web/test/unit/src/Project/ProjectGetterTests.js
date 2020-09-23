@@ -17,7 +17,7 @@ const should = chai.should()
 const { expect } = chai
 const modulePath = '../../../../app/src/Features/Project/ProjectGetter.js'
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const { assert } = require('chai')
 
 describe('ProjectGetter', function() {

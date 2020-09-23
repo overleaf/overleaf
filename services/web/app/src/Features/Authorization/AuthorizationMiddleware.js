@@ -2,7 +2,7 @@ let AuthorizationMiddleware
 const AuthorizationManager = require('./AuthorizationManager')
 const async = require('async')
 const logger = require('logger-sharelatex')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')

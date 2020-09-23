@@ -1,4 +1,4 @@
-const { ObjectId } = require('../../infrastructure/mongojs')
+const { ObjectId } = require('mongodb')
 const _ = require('lodash')
 const { promisify } = require('util')
 const Settings = require('settings-sharelatex')

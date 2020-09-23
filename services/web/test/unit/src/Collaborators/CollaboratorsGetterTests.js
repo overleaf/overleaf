@@ -2,7 +2,7 @@ const Path = require('path')
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const { Project } = require('../helpers/models/Project')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 

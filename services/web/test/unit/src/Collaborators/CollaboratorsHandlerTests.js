@@ -5,7 +5,7 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const { Project } = require('../helpers/models/Project')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 
 const MODULE_PATH = path.join(
   __dirname,

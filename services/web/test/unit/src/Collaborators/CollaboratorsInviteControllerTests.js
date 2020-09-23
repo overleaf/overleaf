@@ -21,7 +21,7 @@ const SandboxedModule = require('sandboxed-module')
 const events = require('events')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 
 describe('CollaboratorsInviteController', function() {
   beforeEach(function() {
