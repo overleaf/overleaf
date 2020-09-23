@@ -93,15 +93,33 @@ async function unarchiveDoc(projectId, docId) {
     { project_id: projectId, doc_id: docId },
     'getting doc from persistor'
   )
+  const originalDoc = await MongoManager.findDoc(projectId, docId, { inS3: 1 })
+  if (!originalDoc.inS3) {
+    // return if it's not actually in S3 as there's nothing to do
+    return
+  }
   const key = `${projectId}/${docId}`
-  const sourceMd5 = await PersistorManager.getObjectMd5Hash(
-    settings.docstore.bucket,
-    key
-  )
-  const stream = await PersistorManager.getObjectStream(
-    settings.docstore.bucket,
-    key
-  )
+  let stream, sourceMd5
+  try {
+    sourceMd5 = await PersistorManager.getObjectMd5Hash(
+      settings.docstore.bucket,
+      key
+    )
+    stream = await PersistorManager.getObjectStream(
+      settings.docstore.bucket,
+      key
+    )
+  } catch (err) {
+    // if we get a 404, we could be in a race and something else has unarchived the doc already
+    if (err instanceof Errors.NotFoundError) {
+      const doc = await MongoManager.findDoc(projectId, docId, { inS3: 1 })
+      if (!doc.inS3) {
+        // the doc has been archived while we were looking for it, so no error
+        return
+      }
+    }
+    throw err
+  }
   stream.resume()
   const json = await _streamToString(stream)
   const md5 = crypto.createHash('md5').update(json).digest('hex')
