@@ -110,6 +110,7 @@ describe('SubscriptionUpdater', function() {
           warn() {}
         },
         'settings-sharelatex': this.Settings,
+        '../../infrastructure/mongojs': { db: {}, ObjectId },
         './FeaturesUpdater': this.FeaturesUpdater,
         '../../models/DeletedSubscription': {
           DeletedSubscription: this.DeletedSubscription
