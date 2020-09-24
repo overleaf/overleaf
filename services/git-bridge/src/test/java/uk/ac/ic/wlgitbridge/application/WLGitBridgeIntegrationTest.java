@@ -147,6 +147,10 @@ public class WLGitBridgeIntegrationTest {
         put("cannotCloneAHasDotGitProject", new HashMap<String, SnapshotAPIState>() {{
             put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAHasDotGitProject/state/state.json")).build());
         }});
+        put("canPullIgnoredForceAddedFile", new HashMap<String, SnapshotAPIState>() {{
+          put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullIgnoredForceAddedFile/base/state.json")).build());
+          put("withUpdatedMainFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullIgnoredForceAddedFile/withUpdatedMainFile/state.json")).build());
+        }});
     }};
 
     @Rule
@@ -993,6 +997,34 @@ public class WLGitBridgeIntegrationTest {
         HttpEntity entity = gitLfsResponse.getEntity();
         String responseString = EntityUtils.toString(entity, "UTF-8");
         assertTrue(responseString.contains("Git LFS is not supported on Overleaf"));
+    }
+
+    @Test
+    public void canPullIgnoredForceAddedFile() throws IOException, InterruptedException {
+      int gitBridgePort = 33891;
+      int mockServerPort = 3891;
+      server = new MockSnapshotServer(mockServerPort, getResource("/canPullIgnoredForceAddedFile").toFile());
+      server.start();
+      server.setState(states.get("canPullIgnoredForceAddedFile").get("base"));
+      wlgb = new GitBridgeApp(new String[] {
+        makeConfigFile(gitBridgePort, mockServerPort)
+      });
+      wlgb.run();
+      File testProjDir = gitClone("testproj", gitBridgePort, dir);
+      File one = new File(testProjDir, "sub/one.txt");
+      one.createNewFile();
+      FileWriter fw = new FileWriter(one.getPath());
+      fw.write("1");
+      fw.close();
+      assertEquals(0, runtime.exec(
+        "git add -A -f", null, testProjDir
+      ).waitFor());
+      gitCommit(testProjDir, "push");
+      gitPush(testProjDir);
+      server.setState(states.get("canPullIgnoredForceAddedFile").get("withUpdatedMainFile"));
+      gitPull(testProjDir);
+      File f = new File(testProjDir.getPath() + "/sub/one.txt");
+      assertTrue(f.exists());
     }
 
     private String makeConfigFile(
