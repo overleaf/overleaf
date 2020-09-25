@@ -5,7 +5,7 @@ import {
   nestOutline
 } from '../../../../frontend/js/features/outline/outline-parser'
 
-describe.only('OutlineParser', function() {
+describe('OutlineParser', function() {
   describe('matchOutline', function() {
     it('matches all levels', function() {
       const content = `

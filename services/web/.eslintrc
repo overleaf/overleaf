@@ -35,7 +35,7 @@
     // NOTE: changing paths may require updating them in the Makefile too.
     {
       // Test specific rules
-      "files": ["**/test/*/src/**/*.js"],
+      "files": ["**/test/*/src/**/*.js", "**/test/**/*.test.js"],
       "globals": {
         "expect": true
       },
