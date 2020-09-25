@@ -1,6 +1,6 @@
 {
   "name": "@overleaf/o-error",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Light-weight helpers for handling JavaScript Errors in node.js and the browser. Helps with long stack traces, Error subclasses, wrapping internal errors (causes), and attaching extra data to errors for logging.",
   "keywords": [
     "browser",
