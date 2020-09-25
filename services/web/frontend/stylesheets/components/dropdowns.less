@@ -20,6 +20,19 @@
   position: relative;
 }
 
+.open button.dropdown-toggle.dropdown-toggle-no-background,
+button.dropdown-toggle.dropdown-toggle-no-background {
+  background-color: transparent;
+  box-shadow: none;
+  border: 0;
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
 // Prevent the focus on the dropdown toggle when closing dropdowns
 .dropdown-toggle:focus {
   outline: 0;
