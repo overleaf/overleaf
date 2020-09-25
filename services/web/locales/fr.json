@@ -1,4 +1,5 @@
 {
+  "recompile_from_scratch": "Recompiler entièrement",
   "tagline_free": "Parfait pour se lancer",
   "also_provides_free_plan": "__appName__ propose aussi une offre gratuite : il suffit de __registerLinkOpen__vous inscrire ici__registerLinkClose__ pour commencer.",
   "compile_timeout": "Limite de temps de compilation (en minutes)",
