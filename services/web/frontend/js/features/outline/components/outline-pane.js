@@ -104,7 +104,7 @@ OutlinePane.propTypes = {
   outline: PropTypes.array.isRequired,
   projectId: PropTypes.string.isRequired,
   jumpToLine: PropTypes.func.isRequired,
-  onToggle: PropTypes.func,
+  onToggle: PropTypes.func.isRequired,
   eventTracking: PropTypes.object.isRequired,
   highlightedLine: PropTypes.number
 }

@@ -28,7 +28,8 @@
     "lint": "eslint --max-warnings 0 -f unix .",
     "format": "prettier-eslint '**/*.{js,less}' --list-different",
     "format:fix": "prettier-eslint '**/*.{js,less}' --write",
-    "migrations": "east"
+    "migrations": "east",
+    "storybook": "start-storybook -p 6006"
   },
   "browserslist": [
     "last 1 year",
@@ -148,6 +149,9 @@
   },
   "devDependencies": {
     "@babel/register": "^7.10.1",
+    "@storybook/addon-a11y": "^6.0.21",
+    "@storybook/addon-essentials": "^6.0.21",
+    "@storybook/react": "^6.0.21",
     "@testing-library/dom": "^7.7.3",
     "@testing-library/react": "^10.0.4",
     "acorn": "^7.1.1",
