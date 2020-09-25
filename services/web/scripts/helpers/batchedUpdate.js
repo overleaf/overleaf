@@ -8,24 +8,27 @@ if (process.env.BATCH_LAST_ID) {
   BATCH_LAST_ID = ObjectId(process.env.BATCH_LAST_ID)
 }
 
-async function getNextBatch(collection, query, maxId) {
+async function getNextBatch(collection, query, maxId, projection) {
   if (maxId) {
     query['_id'] = { $gt: maxId }
   }
   const entries = await collection
-    .find(query, { _id: 1 })
+    .find(query, projection)
     .sort({ _id: 1 })
     .limit(BATCH_SIZE)
     .setReadPreference(ReadPreference.SECONDARY)
     .toArray()
-  return entries.map(entry => entry._id)
+  return entries
 }
 
 async function performUpdate(collection, nextBatch, update) {
-  return collection.updateMany({ _id: { $in: nextBatch } }, update)
+  return collection.updateMany(
+    { _id: { $in: nextBatch.map(entry => entry._id) } },
+    update
+  )
 }
 
-async function batchedUpdate(collectionName, query, update) {
+async function batchedUpdate(collectionName, query, update, projection) {
   // Apparently the mongo driver returns the connection too early.
   // Some secondary connections are not ready as it returns, leading to
   //  failing cursor actions with a readPreference set to 'secondary'.
@@ -35,14 +38,23 @@ async function batchedUpdate(collectionName, query, update) {
   const db = await getNativeDb()
   const collection = db.collection(collectionName)
 
+  projection = projection || { _id: 1 }
   let nextBatch
   let updated = 0
   let maxId = BATCH_LAST_ID
-  while ((nextBatch = await getNextBatch(collection, query, maxId)).length) {
-    maxId = nextBatch[nextBatch.length - 1]
+  while (
+    (nextBatch = await getNextBatch(collection, query, maxId, projection))
+      .length
+  ) {
+    maxId = nextBatch[nextBatch.length - 1]._id
     updated += nextBatch.length
     console.log(JSON.stringify(nextBatch))
-    await performUpdate(collection, nextBatch, update)
+
+    if (typeof update === 'function') {
+      await update(collection, nextBatch)
+    } else {
+      await performUpdate(collection, nextBatch, update)
+    }
   }
   return updated
 }
