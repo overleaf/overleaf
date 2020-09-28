@@ -1,5 +1,5 @@
 {
-  "compile_timeout": "Tidsgrænse for kompiléring (sekunder)",
+  "compile_timeout": "Tidsgrænse for kompiléring (minutter)",
   "collabs_per_proj_single": "__collabcount__ samarbejdspartnere per projekt",
   "premium_features": "Premium funktioner",
   "special_price_student": "Studenterabonnementer Til Specialpris",
