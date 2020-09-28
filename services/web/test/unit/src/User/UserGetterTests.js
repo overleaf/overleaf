@@ -26,7 +26,8 @@ describe('UserGetter', function() {
       ]
     }
     this.findOne = sinon.stub().callsArgWith(2, null, this.fakeUser)
-    this.find = sinon.stub().callsArgWith(2, null, [this.fakeUser])
+    this.findToArrayStub = sinon.stub().yields(null, [this.fakeUser])
+    this.find = sinon.stub().returns({ toArray: this.findToArrayStub })
     this.Mongo = {
       db: {
         users: {

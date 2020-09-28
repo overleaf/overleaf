@@ -22,7 +22,13 @@ describe('UserOnboardingController', function() {
     ]
 
     this.mongojs = {
-      db: { users: { find: sinon.stub().callsArgWith(2, null, this.users) } },
+      db: {
+        users: {
+          find: sinon
+            .stub()
+            .returns({ toArray: sinon.stub().yields(null, this.users) })
+        }
+      },
       ObjectId: ObjectId
     }
 

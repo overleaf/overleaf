@@ -103,7 +103,7 @@ const UserGetter = {
         $elemMatch: { email: { $in: emails }, confirmedAt: { $exists: true } }
       }
     }
-    db.users.find(query, projection, callback)
+    db.users.find(query, projection).toArray(callback)
   },
 
   getUsersByV1Ids(v1Ids, projection, callback) {
@@ -112,7 +112,7 @@ const UserGetter = {
       projection = {}
     }
     const query = { 'overleaf.id': { $in: v1Ids } }
-    db.users.find(query, projection, callback)
+    db.users.find(query, projection).toArray(callback)
   },
 
   getUsersByHostname(hostname, projection, callback) {
@@ -125,13 +125,13 @@ const UserGetter = {
       emails: { $exists: true },
       'emails.reversedHostname': reversedHostname
     }
-    db.users.find(query, projection, callback)
+    db.users.find(query, projection).toArray(callback)
   },
 
   getUsers(query, projection, callback) {
     try {
       query = normalizeQuery(query)
-      db.users.find(query, projection, callback)
+      db.users.find(query, projection).toArray(callback)
     } catch (err) {
       callback(err)
     }

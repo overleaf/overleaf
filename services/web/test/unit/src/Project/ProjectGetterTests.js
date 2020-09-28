@@ -163,9 +163,9 @@ describe('ProjectGetter', function() {
   describe('getProject', function() {
     beforeEach(function() {
       this.project = { _id: (this.project_id = '56d46b0a1d3422b87c5ebcb1') }
-      return (this.db.projects.find = sinon
+      return (this.db.projects.findOne = sinon
         .stub()
-        .callsArgWith(2, null, [this.project]))
+        .callsArgWith(2, null, this.project))
     })
 
     describe('without projection', function() {
@@ -174,9 +174,11 @@ describe('ProjectGetter', function() {
           return this.ProjectGetter.getProject(this.project_id, this.callback)
         })
 
-        it('should call find with the project id', function() {
-          expect(this.db.projects.find.callCount).to.equal(1)
-          return expect(this.db.projects.find.lastCall.args[0]).to.deep.equal({
+        it('should call findOne with the project id', function() {
+          expect(this.db.projects.findOne.callCount).to.equal(1)
+          return expect(
+            this.db.projects.findOne.lastCall.args[0]
+          ).to.deep.equal({
             _id: ObjectId(this.project_id)
           })
         })
@@ -188,7 +190,7 @@ describe('ProjectGetter', function() {
         })
 
         it('should callback with error', function() {
-          expect(this.db.projects.find.callCount).to.equal(0)
+          expect(this.db.projects.findOne.callCount).to.equal(0)
           return expect(this.callback.lastCall.args[0]).to.be.instanceOf(Error)
         })
       })
@@ -208,14 +210,14 @@ describe('ProjectGetter', function() {
           )
         })
 
-        it('should call find with the project id', function() {
-          expect(this.db.projects.find.callCount).to.equal(1)
-          expect(this.db.projects.find.lastCall.args[0]).to.deep.equal({
+        it('should call findOne with the project id', function() {
+          expect(this.db.projects.findOne.callCount).to.equal(1)
+          expect(this.db.projects.findOne.lastCall.args[0]).to.deep.equal({
             _id: ObjectId(this.project_id)
           })
-          return expect(this.db.projects.find.lastCall.args[1]).to.deep.equal(
-            this.projection
-          )
+          return expect(
+            this.db.projects.findOne.lastCall.args[1]
+          ).to.deep.equal(this.projection)
         })
       })
 
@@ -225,7 +227,7 @@ describe('ProjectGetter', function() {
         })
 
         it('should callback with error', function() {
-          expect(this.db.projects.find.callCount).to.equal(0)
+          expect(this.db.projects.findOne.callCount).to.equal(0)
           return expect(this.callback.lastCall.args[0]).to.be.instanceOf(Error)
         })
       })
@@ -235,9 +237,9 @@ describe('ProjectGetter', function() {
   describe('getProjectWithoutLock', function() {
     beforeEach(function() {
       this.project = { _id: (this.project_id = '56d46b0a1d3422b87c5ebcb1') }
-      return (this.db.projects.find = sinon
+      return (this.db.projects.findOne = sinon
         .stub()
-        .callsArgWith(2, null, [this.project]))
+        .callsArgWith(2, null, this.project))
     })
 
     describe('without projection', function() {
@@ -249,9 +251,11 @@ describe('ProjectGetter', function() {
           )
         })
 
-        it('should call find with the project id', function() {
-          expect(this.db.projects.find.callCount).to.equal(1)
-          return expect(this.db.projects.find.lastCall.args[0]).to.deep.equal({
+        it('should call findOne with the project id', function() {
+          expect(this.db.projects.findOne.callCount).to.equal(1)
+          return expect(
+            this.db.projects.findOne.lastCall.args[0]
+          ).to.deep.equal({
             _id: ObjectId(this.project_id)
           })
         })
@@ -263,7 +267,7 @@ describe('ProjectGetter', function() {
         })
 
         it('should callback with error', function() {
-          expect(this.db.projects.find.callCount).to.equal(0)
+          expect(this.db.projects.findOne.callCount).to.equal(0)
           return expect(this.callback.lastCall.args[0]).to.be.instanceOf(Error)
         })
       })
@@ -283,14 +287,14 @@ describe('ProjectGetter', function() {
           )
         })
 
-        it('should call find with the project id', function() {
-          expect(this.db.projects.find.callCount).to.equal(1)
-          expect(this.db.projects.find.lastCall.args[0]).to.deep.equal({
+        it('should call findOne with the project id', function() {
+          expect(this.db.projects.findOne.callCount).to.equal(1)
+          expect(this.db.projects.findOne.lastCall.args[0]).to.deep.equal({
             _id: ObjectId(this.project_id)
           })
-          return expect(this.db.projects.find.lastCall.args[1]).to.deep.equal(
-            this.projection
-          )
+          return expect(
+            this.db.projects.findOne.lastCall.args[1]
+          ).to.deep.equal(this.projection)
         })
       })
 
@@ -300,7 +304,7 @@ describe('ProjectGetter', function() {
         })
 
         it('should callback with error', function() {
-          expect(this.db.projects.find.callCount).to.equal(0)
+          expect(this.db.projects.findOne.callCount).to.equal(0)
           return expect(this.callback.lastCall.args[0]).to.be.instanceOf(Error)
         })
       })

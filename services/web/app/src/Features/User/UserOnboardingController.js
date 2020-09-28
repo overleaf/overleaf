@@ -11,15 +11,17 @@ module.exports = {
 
     // find all the users with no onboardingEmailSentAt and
     // have signed up in the last 7 days
-    db.users.find(
-      {
-        onboardingEmailSentAt: null,
-        _id: {
-          $gt: ObjectId.createFromTime(Date.now() / 1000 - 7 * 24 * 60 * 60)
-        }
-      },
-      { email: 1 },
-      function(error, users) {
+    db.users
+      .find(
+        {
+          onboardingEmailSentAt: null,
+          _id: {
+            $gt: ObjectId.createFromTime(Date.now() / 1000 - 7 * 24 * 60 * 60)
+          }
+        },
+        { email: 1 }
+      )
+      .toArray(function(error, users) {
         if (error) {
           return next(error)
         }
@@ -34,8 +36,7 @@ module.exports = {
           logger.log('DONE SENDING ONBOARDING EMAILS')
           res.send(ids)
         })
-      }
-    )
+      })
   }
 }
 
