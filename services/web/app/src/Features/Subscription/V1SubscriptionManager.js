@@ -153,10 +153,11 @@ module.exports = V1SubscriptionManager = {
       if (v1Id == null) {
         return callback(null, null, null)
       }
+      const url = options.url(v1Id)
       return request(
         {
           baseUrl: settings.apis.v1.url,
-          url: options.url(v1Id),
+          url,
           method: options.method,
           auth: {
             user: settings.apis.v1.user,
@@ -169,7 +170,10 @@ module.exports = V1SubscriptionManager = {
         function(error, response, body) {
           if (error != null) {
             return callback(
-              new V1ConnectionError('no v1 connection').withCause(error)
+              new V1ConnectionError({
+                message: 'no v1 connection',
+                info: { url }
+              }).withCause(error)
             )
           }
           if (response && response.statusCode >= 500) {
