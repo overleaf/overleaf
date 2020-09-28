@@ -5,7 +5,7 @@ const AuthenticationManager = require('../Authentication/AuthenticationManager')
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 const UserSessionsManager = require('../User/UserSessionsManager')
-const logger = require('logger-sharelatex')
+const OError = require('@overleaf/o-error')
 const { expressify } = require('../../util/promises')
 
 async function setNewUserPassword(req, res, next) {
@@ -73,7 +73,9 @@ module.exports = {
     }
     RateLimiter.addCount(opts, (err, canContinue) => {
       if (err != null) {
-        res.status(500).send({ message: err.message })
+        return next(
+          new OError('rate-limit password reset failed').withCause(err)
+        )
       }
       if (!canContinue) {
         return res.status(429).send({
@@ -82,11 +84,10 @@ module.exports = {
       }
       PasswordResetHandler.generateAndEmailResetToken(email, (err, status) => {
         if (err != null) {
-          logger.warn(
-            { err },
-            'failed to generate and email password reset token'
-          )
-          res.status(500).send({ message: err.message })
+          OError.tag(err, 'failed to generate and email password reset token', {
+            email
+          })
+          next(err)
         } else if (status === 'primary') {
           res.status(200).send({
             message: { text: req.i18n.translate('password_reset_email_sent') }

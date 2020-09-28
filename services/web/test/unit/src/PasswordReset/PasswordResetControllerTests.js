@@ -117,11 +117,12 @@ describe('PasswordResetController', function() {
       this.RateLimiter.addCount.callsArgWith(1, null, true)
       this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
         1,
-        'error'
+        new Error('error')
       )
-      this.PasswordResetController.requestReset(this.req, this.res)
-      this.res.statusCode.should.equal(500)
-      done()
+      this.PasswordResetController.requestReset(this.req, this.res, error => {
+        expect(error).to.exist
+        done()
+      })
     })
 
     it("should send a 404 if the email doesn't exist", function(done) {
