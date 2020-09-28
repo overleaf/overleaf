@@ -1,4 +1,8 @@
 {
+  "your_project_has_errors": "Your project has errors",
+  "view_warnings": "View warnings",
+  "view_logs": "View logs",
+  "view_pdf\r\n": "View PDF",
   "recompile_from_scratch": "Recompile from scratch",
   "tagline_free": "Perfect for getting started",
   "also_provides_free_plan": "__appName__ also provides a free plan -- simply __registerLinkOpen__register here__registerLinkClose__ to get started.",
