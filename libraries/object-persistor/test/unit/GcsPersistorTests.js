@@ -260,16 +260,35 @@ describe('GcsPersistorTests', function () {
   describe('getRedirectUrl', function () {
     let signedUrl
 
-    beforeEach(async function () {
-      signedUrl = await GcsPersistor.getRedirectUrl(bucket, key)
+    describe('with signed URLs', function () {
+      beforeEach(async function () {
+        signedUrl = await GcsPersistor.getRedirectUrl(bucket, key)
+      })
+
+      it('should request a signed URL', function () {
+        expect(GcsFile.getSignedUrl).to.have.been.called
+      })
+
+      it('should return the url', function () {
+        expect(signedUrl).to.equal(redirectUrl)
+      })
     })
 
-    it('should request a signed URL', function () {
-      expect(GcsFile.getSignedUrl).to.have.been.called
-    })
+    describe('with unsigned URLs', function () {
+      beforeEach(async function () {
+        GcsPersistor.settings.unsignedUrls = true
+        GcsPersistor.settings.endpoint = {
+          apiScheme: 'http',
+          apiEndpoint: 'custom.endpoint'
+        }
+        signedUrl = await GcsPersistor.getRedirectUrl(bucket, key)
+      })
 
-    it('should return the url', function () {
-      expect(signedUrl).to.equal(redirectUrl)
+      it('should return a plain URL', function () {
+        expect(signedUrl).to.equal(
+          `http://custom.endpoint/download/storage/v1/b/${bucket}/o/${key}?alt=media`
+        )
+      })
     })
   })
 

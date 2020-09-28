@@ -293,6 +293,7 @@ GCS authentication is configured automatically via the local service account, or
 - `gcs.unlockBeforeDelete`: unlock an event-based hold before deleting. default false (see notes)
 - `gcs.deletedBucketSuffix`: if present, copy the object to a bucket with this suffix before deletion (see notes)
 - `gcs.deleteConcurrency`: when recursively deleting a directory, the maximum number of delete requests that will be used at once (default 50)
+- `gcs.unsignedUrls`: For testing - do not sign GCS download URLs
 - `gcs.endpoint.apiEndpoint`: For testing - specify a different GCS endpoint to use
 - `gcs.endpoint.apiScheme`: For testing - specify a scheme to use for the GCS endpoint (`http` or `https`)
 - `gcs.endpoint.projectId`: For testing - the GCS project ID to supply to the overridden backend

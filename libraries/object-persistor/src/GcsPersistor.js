@@ -125,6 +125,14 @@ module.exports = class GcsPersistor extends AbstractPersistor {
   }
 
   async getRedirectUrl(bucketName, key) {
+    if (this.settings.unsignedUrls) {
+      // Construct a direct URL to the object download endpoint
+      // (see https://cloud.google.com/storage/docs/request-endpoints#json-api)
+      const apiScheme = this.settings.endpoint.apiScheme || 'https://'
+      const apiEndpoint =
+        this.settings.endpoint.apiEndpoint || 'storage.googleapis.com'
+      return `${apiScheme}://${apiEndpoint}/download/storage/v1/b/${bucketName}/o/${key}?alt=media`
+    }
     try {
       const [url] = await this.storage
         .bucket(bucketName)
