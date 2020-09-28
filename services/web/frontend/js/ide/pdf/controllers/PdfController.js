@@ -1,6 +1,8 @@
 import App from '../../../base'
 import HumanReadableLogs from '../../human-readable-logs/HumanReadableLogs'
 import BibLogParser from 'libs/bib-log-parser'
+import PreviewPane from '../../../features/preview/components/preview-pane'
+import { react2angular } from 'react2angular'
 import 'ace/ace'
 const AUTO_COMPILE_MAX_WAIT = 5000
 // We add a 1 second debounce to sending user changes to server if they aren't
@@ -807,10 +809,12 @@ App.controller('PdfController', function(
   }
 
   $scope.toggleLogs = function() {
-    $scope.shouldShowLogs = !$scope.shouldShowLogs
-    if ($scope.shouldShowLogs) {
-      eventTracking.sendMBOnce('ide-open-logs-once')
-    }
+    $scope.$applyAsync(() => {
+      $scope.shouldShowLogs = !$scope.shouldShowLogs
+      if ($scope.shouldShowLogs) {
+        eventTracking.sendMBOnce('ide-open-logs-once')
+      }
+    })
   }
 
   $scope.showPdf = function() {
@@ -837,6 +841,27 @@ App.controller('PdfController', function(
     synctex.syncToCode(position).then(function(data) {
       const { doc, line } = data
       ide.editorManager.openDoc(doc, { gotoLine: line })
+    })
+  }
+
+  $scope.setAutoCompile = function(isOn) {
+    $scope.$applyAsync(function() {
+      $scope.autocompile_enabled = isOn
+    })
+  }
+  $scope.setDraftMode = function(isOn) {
+    $scope.$applyAsync(function() {
+      $scope.draft = isOn
+    })
+  }
+  $scope.setSyntaxCheck = function(isOn) {
+    $scope.$applyAsync(function() {
+      $scope.stop_on_validation_error = isOn
+    })
+  }
+  $scope.runSyntaxCheckNow = function() {
+    $scope.$applyAsync(function() {
+      $scope.recompile({ check: true })
     })
   }
 })
@@ -1043,3 +1068,6 @@ App.controller('ClearCacheModalController', function($scope, $modalInstance) {
 
   $scope.cancel = () => $modalInstance.dismiss('cancel')
 })
+
+// Wrap React component as Angular component. Only needed for "top-level" component
+App.component('previewPane', react2angular(PreviewPane))

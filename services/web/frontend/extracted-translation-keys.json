@@ -6,5 +6,16 @@
   "expand",
   "collapse",
   "show_outline",
-  "hide_outline"
+  "hide_outline",
+  "compiling",
+  "recompile",
+  "auto_compile",
+  "on",
+  "off",
+  "compile_mode",
+  "normal",
+  "fast",
+  "stop_on_validation_error",
+  "ignore_validation_errors",
+  "run_syntax_check_now"
 ]

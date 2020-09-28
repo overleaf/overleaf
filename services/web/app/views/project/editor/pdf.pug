@@ -1,224 +1,242 @@
 div.full-size.pdf(ng-controller="PdfController")
-	.toolbar.toolbar-pdf(ng-class="{ 'changes-to-autocompile': changesToAutoCompile && !autoCompileLintingError }")
-		.btn-group.btn-recompile-group#recompile(
-			dropdown,
-			tooltip-html="'"+translate('recompile_pdf')+" <span class=\"keyboard-shortcut\">({{modifierKey}} + Enter)</span>'"
-			tooltip-class="keyboard-tooltip"
-			tooltip-popup-delay="500"
-			tooltip-append-to-body="true"
-			tooltip-placement="bottom"
+	if showNewLogsUI
+		preview-pane(
+			compiler-state=`{
+				isAutoCompileOn: autocompile_enabled,
+				isCompiling: pdf.compiling,
+				isDraftModeOn: draft,
+				isSyntaxCheckOn: stop_on_validation_error
+			}`
+			log-entries="pdf.logEntries ? pdf.logEntries.all : []"
+			on-recompile="recompile"
+			on-run-syntax-check-now="runSyntaxCheckNow"
+			on-set-auto-compile="setAutoCompile"
+			on-set-draft-mode="setDraftMode"
+			on-set-syntax-check="setSyntaxCheck"
+			on-toggle-logs="toggleLogs"
+			should-show-logs="shouldShowLogs"
 		)
-			a.btn.btn-recompile(
-				href,
-				ng-disabled="pdf.compiling",
-				ng-click="recompile()"
-			)
-				i.fa.fa-refresh(
-					ng-class="{'fa-spin': pdf.compiling }"
-				)
-				| &nbsp;&nbsp;
-				span(ng-show="!pdf.compiling") #{translate("recompile")}
-				span(ng-show="pdf.compiling") #{translate("compiling")}…
-			a.btn.btn-recompile.dropdown-toggle(
-				href,
-				ng-disabled="pdf.compiling",
-				dropdown-toggle
-			)
-				span.caret
-			ul.dropdown-menu.dropdown-menu-left
-				li.dropdown-header #{translate("auto_compile")}
-				li
-					a(href, ng-click="autocompile_enabled = true")
-						i.fa.fa-fw(ng-class="{'fa-check': autocompile_enabled}")
-						| &nbsp;#{translate('on')}
-				li
-					a(href, ng-click="autocompile_enabled = false")
-						i.fa.fa-fw(ng-class="{'fa-check': !autocompile_enabled}")
-						| &nbsp;#{translate('off')}
-				li.dropdown-header #{translate("compile_mode")}
-				li
-					a(href, ng-click="draft = false")
-						i.fa.fa-fw(ng-class="{'fa-check': !draft}")
-						| &nbsp;#{translate("normal")}
-				li
-					a(href, ng-click="draft = true")
-						i.fa.fa-fw(ng-class="{'fa-check': draft}")
-						| &nbsp;#{translate("fast")}&nbsp;
-						span.subdued [draft]
-				li.dropdown-header #{translate("compile_time_checks")}
-				li
-					a(href, ng-click="stop_on_validation_error = true")
-						i.fa.fa-fw(ng-class="{'fa-check': stop_on_validation_error}")
-						| &nbsp;#{translate("stop_on_validation_error")}
-				li
-					a(href, ng-click="stop_on_validation_error = false")
-						i.fa.fa-fw(ng-class="{'fa-check': !stop_on_validation_error}")
-						| &nbsp;#{translate("ignore_validation_errors")}
-				li
-					a(href, ng-click="recompile({check:true})")
-						i.fa.fa-fw()
-						| &nbsp;#{translate("run_syntax_check_now")}
-		a(
-			href
-			ng-click="stop()"
-			ng-show="pdf.compiling",
-			tooltip=translate('stop_compile')
-			tooltip-placement="bottom"
-		)
-			i.fa.fa-fw.fa-stop()
-		a.log-btn(
-			href
-			ng-click="toggleLogs()"
-			ng-class="{ 'active': shouldShowLogs == true }"
-			tooltip=translate('logs_and_output_files')
-			tooltip-placement="bottom"
-		)
-			i.fa.fa-fw.fa-file-text-o
-			span.label(
-				ng-show="pdf.logEntries.warnings.length + pdf.logEntries.errors.length > 0"
-				ng-class="{\
-					'label-warning': pdf.logEntries.errors.length == 0,\
-					'label-danger': pdf.logEntries.errors.length > 0\
-				}"
-			) {{ pdf.logEntries.errors.length + pdf.logEntries.warnings.length }}
-			
-		a(
-			ng-href="{{pdf.downloadUrl || pdf.url}}"
-			target="_blank"
-			ng-if="pdf.url"
-			tooltip=translate('download_pdf')
-			tooltip-placement="bottom"
-		)
-			i.fa.fa-fw.fa-download
-			
-		.toolbar-right
-			span.auto-compile-status.small(
-				ng-show="changesToAutoCompile && !compiling && !autoCompileLintingError"
-			) #{translate('uncompiled_changes')}
-			span.auto-compile-status.auto-compile-error.small(
-				ng-show="autoCompileLintingError"
-				tooltip-placement="bottom"
-				tooltip=translate("code_check_failed_explanation")
+	else
+		.toolbar.toolbar-pdf(ng-class="{ 'changes-to-autocompile': changesToAutoCompile && !autoCompileLintingError }")
+			.btn-group.btn-recompile-group#recompile(
+				dropdown,
+				tooltip-html="'"+translate('recompile_pdf')+" <span class=\"keyboard-shortcut\">({{modifierKey}} + Enter)</span>'"
+				tooltip-class="keyboard-tooltip"
+				tooltip-popup-delay="500"
 				tooltip-append-to-body="true"
-			)
-				i.fa.fa-fw.fa-exclamation-triangle
-				|
-				| #{translate("code_check_failed")}
-			a(
-				href,
-				ng-click="switchToFlatLayout('pdf')"
-				ng-show="ui.pdfLayout == 'sideBySide'"
-				tooltip=translate('full_screen')
 				tooltip-placement="bottom"
-				tooltip-append-to-body="true"
 			)
-				i.fa.fa-expand
-			a(
-				href,
-				ng-click="switchToSideBySideLayout('editor')"
-				ng-show="ui.pdfLayout == 'flat'"
-				tooltip=translate('split_screen')
-				tooltip-placement="bottom"
-				tooltip-append-to-body="true"
-			)
-				i.fa.fa-compress
-	// end of toolbar
-
-	// logs view
-	.pdf-logs(ng-show="shouldShowLogs")
-		.alert.alert-success(ng-show="pdf.logEntries.all.length == 0 && !pdf.failure")
-			| #{translate("no_errors_good_job")}
-
-		.alert.alert-danger(ng-show="pdf.failure")
-			strong #{translate("compile_error")}. 
-			span #{translate("generic_failed_compile_message")}.
-
-		.alert.alert-danger(ng-show="pdf.failedCheck")
-			strong #{translate("failed_compile_check")}.
-			p
-			p.text-center(ng-show="!check")
-				a.text-info(
+				a.btn.btn-recompile(
 					href,
 					ng-disabled="pdf.compiling",
-					ng-click="recompile({try:true})"
-				) #{translate("failed_compile_check_try")}
-				| &#32;#{translate("failed_compile_option_or")}&#32;
-				a.text-info(
-					href,
-					ng-disabled="pdf.compiling",
-					ng-click="recompile({force:true})"
-				) #{translate("failed_compile_check_ignore")}
-				| .
-
-		div(ng-repeat="entry in pdf.logEntries.all", ng-controller="PdfLogEntryController")
-			.alert(
-				ng-class="{\
-					'alert-danger':  entry.level == 'error',\
-					'alert-warning': entry.level == 'warning',\
-					'alert-info':    entry.level == 'typesetting'\
-				}"
-				ng-click="openInEditor(entry)"
-			)
-				span.line-no
-					i.fa.fa-link(aria-hidden="true")
-					| &nbsp;
-					span(ng-show="entry.file") {{ entry.file }}
-					span(ng-show="entry.line") , line {{ entry.line }}
-				p.entry-message(ng-show="entry.message")
-					| {{ entry.type }} {{ entry.message }}
-				.card.card-hint(
-					ng-if="entry.humanReadableHint"
-					stop-propagation="click"
+					ng-click="recompile()"
 				)
-					figure.card-hint-icon-container
-						i.fa.fa-lightbulb-o(aria-hidden="true")
-					p.card-hint-text(
-						ng-show="entry.humanReadableHint",
-						ng-bind-html="wikiEnabled ? entry.humanReadableHint : stripHTMLFromString(entry.humanReadableHint)")
-					.card-hint-footer.clearfix
-						.card-hint-ext-link(ng-if="wikiEnabled && entry.extraInfoURL")
-							a(
-								ng-href="{{ entry.extraInfoURL }}",
-								ng-click="trackLogHintsLearnMore()"
-								target="_blank"
-							)
-								i.fa.fa-external-link
-								|&nbsp;#{translate("log_hint_extra_info")}
-
-				p.entry-content(ng-show="entry.content") {{ entry.content.trim() }}
-
-		div
-			.files-dropdown-container
-				a.btn.btn-default.btn-sm(
-					href,
-					tooltip=translate('clear_cached_files'),
-					tooltip-placement="top",
-					tooltip-append-to-body="true",
-					ng-click="openClearCacheModal()"
-				)
-					i.fa.fa-trash-o
-				| &nbsp;
-				div.files-dropdown(
-					ng-class="shouldDropUp ? 'dropup' : 'dropdown'"
-					dropdown
-				)
-					a.btn.btn-default.btn-sm(
-						href
-						dropdown-toggle
+					i.fa.fa-refresh(
+						ng-class="{'fa-spin': pdf.compiling }"
 					)
-						| !{translate("other_logs_and_files")}
-						span.caret
-					ul.dropdown-menu.dropdown-menu-right
-						li(ng-repeat="file in pdf.outputFiles")
-							a(
-								href="{{file.url}}"
-								target="_blank"
-							) {{ file.name }}
-			a.btn.btn-info.btn-sm(href, ng-click="toggleRawLog()")
-				span(ng-show="!pdf.showRawLog") #{translate("view_raw_logs")}
-				span(ng-show="pdf.showRawLog") #{translate("hide_raw_logs")}
+					span.btn-recompile-label(ng-show="!pdf.compiling") #{translate("recompile")}
+					span.btn-recompile-label(ng-show="pdf.compiling") #{translate("compiling")}…
+					
+				a.btn.btn-recompile.dropdown-toggle(
+					href,
+					ng-disabled="pdf.compiling",
+					dropdown-toggle
+				)
+					span.caret
+				ul.dropdown-menu.dropdown-menu-left
+					li.dropdown-header #{translate("auto_compile")}
+					li
+						a(href, ng-click="autocompile_enabled = true")
+							i.fa.fa-fw(ng-class="{'fa-check': autocompile_enabled}")
+							| &nbsp;#{translate('on')}
+					li
+						a(href, ng-click="autocompile_enabled = false")
+							i.fa.fa-fw(ng-class="{'fa-check': !autocompile_enabled}")
+							| &nbsp;#{translate('off')}
+					li.dropdown-header #{translate("compile_mode")}
+					li
+						a(href, ng-click="draft = false")
+							i.fa.fa-fw(ng-class="{'fa-check': !draft}")
+							| &nbsp;#{translate("normal")}
+					li
+						a(href, ng-click="draft = true")
+							i.fa.fa-fw(ng-class="{'fa-check': draft}")
+							| &nbsp;#{translate("fast")}&nbsp;
+							span.subdued [draft]
+					li.dropdown-header #{translate("compile_time_checks")}
+					li
+						a(href, ng-click="stop_on_validation_error = true")
+							i.fa.fa-fw(ng-class="{'fa-check': stop_on_validation_error}")
+							| &nbsp;#{translate("stop_on_validation_error")}
+					li
+						a(href, ng-click="stop_on_validation_error = false")
+							i.fa.fa-fw(ng-class="{'fa-check': !stop_on_validation_error}")
+							| &nbsp;#{translate("ignore_validation_errors")}
+					li
+						a(href, ng-click="recompile({check:true})")
+							i.fa.fa-fw()
+							| &nbsp;#{translate("run_syntax_check_now")}
+			a(
+				href
+				ng-click="stop()"
+				ng-show="pdf.compiling",
+				tooltip=translate('stop_compile')
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-fw.fa-stop()
+			a.log-btn(
+				href
+				ng-click="toggleLogs()"
+				ng-class="{ 'active': shouldShowLogs == true }"
+				tooltip=translate('logs_and_output_files')
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-fw.fa-file-text-o
+				span.label(
+					ng-show="pdf.logEntries.warnings.length + pdf.logEntries.errors.length > 0"
+					ng-class="{\
+						'label-warning': pdf.logEntries.errors.length == 0,\
+						'label-danger': pdf.logEntries.errors.length > 0\
+					}"
+				) {{ pdf.logEntries.errors.length + pdf.logEntries.warnings.length }}
+				
+			a(
+				ng-href="{{pdf.downloadUrl || pdf.url}}"
+				target="_blank"
+				ng-if="pdf.url"
+				tooltip=translate('download_pdf')
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-fw.fa-download
+				
+			.toolbar-right
+				span.auto-compile-status.small(
+					ng-show="changesToAutoCompile && !compiling && !autoCompileLintingError"
+				) #{translate('uncompiled_changes')}
+				span.auto-compile-status.auto-compile-error.small(
+					ng-show="autoCompileLintingError"
+					tooltip-placement="bottom"
+					tooltip=translate("code_check_failed_explanation")
+					tooltip-append-to-body="true"
+				)
+					i.fa.fa-fw.fa-exclamation-triangle
+					|
+					| #{translate("code_check_failed")}
+				a(
+					href,
+					ng-click="switchToFlatLayout('pdf')"
+					ng-show="ui.pdfLayout == 'sideBySide'"
+					tooltip=translate('full_screen')
+					tooltip-placement="bottom"
+					tooltip-append-to-body="true"
+				)
+					i.fa.fa-expand
+				a(
+					href,
+					ng-click="switchToSideBySideLayout('editor')"
+					ng-show="ui.pdfLayout == 'flat'"
+					tooltip=translate('split_screen')
+					tooltip-placement="bottom"
+					tooltip-append-to-body="true"
+				)
+					i.fa.fa-compress
+		// end of toolbar
 
-		pre(ng-bind="pdf.rawLog", ng-show="pdf.showRawLog")
+		// logs view
+		.pdf-logs(ng-show="shouldShowLogs")
+			.alert.alert-success(ng-show="pdf.logEntries.all.length == 0 && !pdf.failure")
+				| #{translate("no_errors_good_job")}
+
+			.alert.alert-danger(ng-show="pdf.failure")
+				strong #{translate("compile_error")}. 
+				span #{translate("generic_failed_compile_message")}.
+
+			.alert.alert-danger(ng-show="pdf.failedCheck")
+				strong #{translate("failed_compile_check")}.
+				p
+				p.text-center(ng-show="!check")
+					a.text-info(
+						href,
+						ng-disabled="pdf.compiling",
+						ng-click="recompile({try:true})"
+					) #{translate("failed_compile_check_try")}
+					| &#32;#{translate("failed_compile_option_or")}&#32;
+					a.text-info(
+						href,
+						ng-disabled="pdf.compiling",
+						ng-click="recompile({force:true})"
+					) #{translate("failed_compile_check_ignore")}
+					| .
+
+			div(ng-repeat="entry in pdf.logEntries.all", ng-controller="PdfLogEntryController")
+				.alert(
+					ng-class="{\
+						'alert-danger':  entry.level == 'error',\
+						'alert-warning': entry.level == 'warning',\
+						'alert-info':    entry.level == 'typesetting'\
+					}"
+					ng-click="openInEditor(entry)"
+				)
+					span.line-no
+						i.fa.fa-link(aria-hidden="true")
+						| &nbsp;
+						span(ng-show="entry.file") {{ entry.file }}
+						span(ng-show="entry.line") , line {{ entry.line }}
+					p.entry-message(ng-show="entry.message")
+						| {{ entry.type }} {{ entry.message }}
+					.card.card-hint(
+						ng-if="entry.humanReadableHint"
+						stop-propagation="click"
+					)
+						figure.card-hint-icon-container
+							i.fa.fa-lightbulb-o(aria-hidden="true")
+						p.card-hint-text(
+							ng-show="entry.humanReadableHint",
+							ng-bind-html="wikiEnabled ? entry.humanReadableHint : stripHTMLFromString(entry.humanReadableHint)")
+						.card-hint-footer.clearfix
+							.card-hint-ext-link(ng-if="wikiEnabled && entry.extraInfoURL")
+								a(
+									ng-href="{{ entry.extraInfoURL }}",
+									ng-click="trackLogHintsLearnMore()"
+									target="_blank"
+								)
+									i.fa.fa-external-link
+									|&nbsp;#{translate("log_hint_extra_info")}
+
+					p.entry-content(ng-show="entry.content") {{ entry.content.trim() }}
+
+			div
+				.files-dropdown-container
+					a.btn.btn-default.btn-sm(
+						href,
+						tooltip=translate('clear_cached_files'),
+						tooltip-placement="top",
+						tooltip-append-to-body="true",
+						ng-click="openClearCacheModal()"
+					)
+						i.fa.fa-trash-o
+					| &nbsp;
+					div.files-dropdown(
+						ng-class="shouldDropUp ? 'dropup' : 'dropdown'"
+						dropdown
+					)
+						a.btn.btn-default.btn-sm(
+							href
+							dropdown-toggle
+						)
+							| !{translate("other_logs_and_files")}
+							span.caret
+						ul.dropdown-menu.dropdown-menu-right
+							li(ng-repeat="file in pdf.outputFiles")
+								a(
+									href="{{file.url}}"
+									target="_blank"
+								) {{ file.name }}
+				a.btn.btn-info.btn-sm(href, ng-click="toggleRawLog()")
+					span(ng-show="!pdf.showRawLog") #{translate("view_raw_logs")}
+					span(ng-show="pdf.showRawLog") #{translate("hide_raw_logs")}
+
+			pre(ng-bind="pdf.rawLog", ng-show="pdf.showRawLog")
 	
 	
 	// non-log views (pdf and errors)

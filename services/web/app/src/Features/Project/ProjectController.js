@@ -841,7 +841,8 @@ const ProjectController = {
               showSupport: Features.hasFeature('support'),
               gaOptimize: enableOptimize,
               customOptimizeEvent: true,
-              experimentId: Settings.experimentId
+              experimentId: Settings.experimentId,
+              showNewLogsUI: req.query && req.query.new_logs_ui === 'true'
             })
             timer.done()
           }

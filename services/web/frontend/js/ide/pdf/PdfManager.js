@@ -11,6 +11,7 @@
 import './controllers/PdfController'
 import './controllers/PdfViewToggleController'
 import '../pdfng/directives/pdfJs'
+
 let PdfManager
 
 export default (PdfManager = class PdfManager {
