@@ -1,6 +1,7 @@
 const { promises: fs } = require('fs')
 const oneSky = require('@brainly/onesky-utils')
 const sanitizeHtml = require('sanitize-html')
+const { withAuth } = require('./config')
 
 async function run() {
   try {
@@ -10,12 +11,11 @@ async function run() {
     // translations being marked as GB) and very out-of-date.
     // However by requesting the "multilingual file" for this file, we get all
     // of the translations
-    const content = await oneSky.getMultilingualFile({
-      apiKey: process.env.ONE_SKY_PUBLIC_KEY,
-      secret: process.env.ONE_SKY_PRIVATE_KEY,
-      projectId: '25049',
-      fileName: 'en-US.json'
-    })
+    const content = await oneSky.getMultilingualFile(
+      withAuth({
+        fileName: 'en-US.json'
+      })
+    )
     const json = JSON.parse(content)
 
     for (const [code, lang] of Object.entries(json)) {

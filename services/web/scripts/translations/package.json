@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@brainly/onesky-utils": "^1.4.0",
+    "@brainly/onesky-utils": "https://github.com/overleaf/nodejs-onesky-utils/archive/jpa-upstream-pr-43.tar.gz",
     "sanitize-html": "^1.27.1"
   }
 }
