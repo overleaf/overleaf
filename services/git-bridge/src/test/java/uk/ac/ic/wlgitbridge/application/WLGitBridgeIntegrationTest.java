@@ -1027,6 +1027,24 @@ public class WLGitBridgeIntegrationTest {
       assertTrue(f.exists());
     }
 
+    @Test
+    public void canPullIgnoredFileFromOverleaf() throws IOException, InterruptedException {
+      int gitBridgePort = 33892;
+      int mockServerPort = 3892;
+      server = new MockSnapshotServer(mockServerPort, getResource("/canPullIgnoredForceAddedFile").toFile());
+      server.start();
+      server.setState(states.get("canPullIgnoredForceAddedFile").get("base"));
+      wlgb = new GitBridgeApp(new String[] {
+        makeConfigFile(gitBridgePort, mockServerPort)
+      });
+      wlgb.run();
+      File testProjDir = gitClone("testproj", gitBridgePort, dir);
+      server.setState(states.get("canPullIgnoredForceAddedFile").get("withUpdatedMainFile"));
+      gitPull(testProjDir);
+      File f = new File(testProjDir.getPath() + "/sub/one.txt");
+      assertTrue(f.exists());
+    }
+
     private String makeConfigFile(
             int port,
             int apiPort
