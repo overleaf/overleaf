@@ -184,23 +184,24 @@ function buildEmail(templateName, opts) {
 
 const templates = {}
 
-templates.registered = CTAEmailTemplate({
+templates.registered = ctaTemplate({
   subject() {
     return `Activate your ${settings.appName} Account`
   },
   message(opts) {
-    return `\
-Congratulations, you've just had an account created for you on ${
-      settings.appName
-    } with the email address '${_.escape(opts.to)}'.
-
-Click here to set your password and log in:\
-`
+    return [
+      `Congratulations, you've just had an account created for you on ${
+        settings.appName
+      } with the email address '${_.escape(opts.to)}'.`,
+      'Click here to set your password and log in:'
+    ]
   },
   secondaryMessage() {
-    return `If you have any questions or problems, please contact ${
-      settings.adminEmail
-    }`
+    return [
+      `If you have any questions or problems, please contact ${
+        settings.adminEmail
+      }`
+    ]
   },
   ctaText() {
     return 'Set password'
