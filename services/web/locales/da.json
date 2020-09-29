@@ -1,4 +1,11 @@
 {
+  "view_pdf": "Se PDF",
+  "your_project_has_errors": "Der er fejl i dit projekt",
+  "view_warnings": "Se advarsler",
+  "view_logs": "Se log",
+  "recompile_from_scratch": "Genkompilér fra bunden",
+  "tagline_free": "Perfekt at starte med",
+  "also_provides_free_plan": "__appName__ har også et gratis abonnement – du skal bare __registerLinkOpen__registrere dig__registerLinkClose__, for at komme igang.",
   "compile_timeout": "Tidsgrænse for kompiléring (minutter)",
   "collabs_per_proj_single": "__collabcount__ samarbejdspartnere per projekt",
   "premium_features": "Premium funktioner",
