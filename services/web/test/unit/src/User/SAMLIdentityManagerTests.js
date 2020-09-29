@@ -5,6 +5,8 @@ const SandboxedModule = require('sandboxed-module')
 const modulePath = '../../../../app/src/Features/User/SAMLIdentityManager.js'
 
 describe('SAMLIdentityManager', function() {
+  const linkedEmail = 'another@example.com'
+
   beforeEach(function() {
     this.Errors = {
       EmailExistsError: sinon.stub(),
@@ -274,7 +276,13 @@ describe('SAMLIdentityManager', function() {
           },
           () => {
             expect(this.User.update).to.have.been.called
-            expect(this.EmailHandler.sendEmail).to.have.been.called
+            expect(this.EmailHandler.sendEmail).to.have.been.calledOnce
+            const emailArgs = this.EmailHandler.sendEmail.lastCall.args
+            expect(emailArgs[0]).to.equal('securityAlert')
+            expect(emailArgs[1].to).to.equal(this.user.email)
+            expect(emailArgs[1].actionDescribed).to.contain('was linked')
+            expect(emailArgs[1].message[0]).to.contain('Linked')
+            expect(emailArgs[1].message[0]).to.contain(this.user.email)
           }
         )
       })
@@ -282,7 +290,6 @@ describe('SAMLIdentityManager', function() {
   })
 
   describe('unlinkAccounts', function() {
-    const linkedEmail = 'another@example.com'
     it('should update the audit log', async function() {
       await this.SAMLIdentityManager.unlinkAccounts(
         this.user._id,
@@ -344,6 +351,9 @@ describe('SAMLIdentityManager', function() {
       const emailArgs = this.EmailHandler.sendEmail.lastCall.args
       expect(emailArgs[0]).to.equal('securityAlert')
       expect(emailArgs[1].to).to.equal(this.user.email)
+      expect(emailArgs[1].actionDescribed).to.contain('was unlinked')
+      expect(emailArgs[1].message[0]).to.contain('No longer linked')
+      expect(emailArgs[1].message[0]).to.contain(linkedEmail)
     })
 
     describe('errors', function() {

@@ -128,14 +128,17 @@ async function _addInstitutionEmail(userId, email, providerId, auditLog) {
   }
 }
 
-async function _sendLinkedEmail(userId, providerName) {
+async function _sendLinkedEmail(userId, providerName, institutionEmail) {
   const user = await UserGetter.promises.getUser(userId, { email: 1 })
   const emailOptions = {
     to: user.email,
     actionDescribed: `an Institutional SSO account at ${providerName} was linked to your account ${
       user.email
     }`,
-    action: 'institutional SSO account linked'
+    action: 'institutional SSO account linked',
+    message: [
+      `<span style="display:inline-block;padding: 0 20px;width:100%;">Linked: <br/><b>${institutionEmail}</b></span>`
+    ]
   }
   EmailHandler.sendEmail('securityAlert', emailOptions, error => {
     if (error) {
@@ -144,11 +147,14 @@ async function _sendLinkedEmail(userId, providerName) {
   })
 }
 
-function _sendUnlinkedEmail(primaryEmail, providerName) {
+function _sendUnlinkedEmail(primaryEmail, providerName, institutionEmail) {
   const emailOptions = {
     to: primaryEmail,
-    actionDescribed: `an Institutional SSO account at ${providerName} is no longer linked to your account ${primaryEmail}`,
-    action: 'institutional SSO account no longer linked'
+    actionDescribed: `an Institutional SSO account at ${providerName} was unlinked from your account ${primaryEmail}`,
+    action: 'institutional SSO account no longer linked',
+    message: [
+      `<span style="display:inline-block;padding: 0 20px;width:100%;">No longer linked: <br/><b>${institutionEmail}</b></span>`
+    ]
   }
   EmailHandler.sendEmail('securityAlert', emailOptions, error => {
     if (error) {
@@ -208,7 +214,7 @@ async function linkAccounts(
     auditLog
   )
   await _addInstitutionEmail(userId, institutionEmail, providerId, auditLog)
-  await _sendLinkedEmail(userId, providerName)
+  await _sendLinkedEmail(userId, providerName, institutionEmail)
   // update v1 affiliations record
   if (hasEntitlement) {
     await InstitutionsAPI.promises.addEntitlement(userId, institutionEmail)
@@ -256,7 +262,7 @@ async function unlinkAccounts(
   // update v1 affiliations record
   await InstitutionsAPI.promises.removeEntitlement(userId, institutionEmail)
   // send email
-  _sendUnlinkedEmail(primaryEmail, providerName)
+  _sendUnlinkedEmail(primaryEmail, providerName, institutionEmail)
 }
 
 async function updateEntitlement(
