@@ -15,10 +15,11 @@
  */
 let LIMIT, pending
 let project_id, doc_id
+const { callbackify } = require('util')
 const Settings = require('settings-sharelatex')
 const async = require('async')
 const _ = require('underscore')
-const { db, ObjectId, waitForDb } = require('./mongodb')
+const { db, ObjectId, waitForDb, closeDb } = require('./mongodb')
 const fs = require('fs')
 const Metrics = require('metrics-sharelatex')
 Metrics.initialize('track-changes')
@@ -84,7 +85,7 @@ const finish = function () {
     clearTimeout(shutDownTimer)
   }
   logger.log('closing db')
-  return db.close(function () {
+  callbackify(closeDb)(function () {
     logger.log('closing LockManager Redis Connection')
     return LockManager.close(function () {
       logger.log(

@@ -23,8 +23,20 @@ async function setupDb() {
   db.projectHistoryMetaData = internalDb.collection('projectHistoryMetaData')
 }
 
+async function closeDb() {
+  let client
+  try {
+    client = await clientPromise
+  } catch (e) {
+    // there is nothing to close
+    return
+  }
+  return client.close()
+}
+
 module.exports = {
   db,
   ObjectId,
+  closeDb,
   waitForDb
 }
