@@ -21,5 +21,9 @@
   "loading",
   "no_messages",
   "send_first_message",
-  "your_message"
+  "your_message",
+  "your_project_has_errors",
+  "view_warnings",
+  "view_logs",
+  "view_pdf"
 ]

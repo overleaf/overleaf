@@ -5,16 +5,16 @@ div.full-size.pdf(ng-controller="PdfController")
 				isAutoCompileOn: autocompile_enabled,
 				isCompiling: pdf.compiling,
 				isDraftModeOn: draft,
-				isSyntaxCheckOn: stop_on_validation_error
+				isSyntaxCheckOn: stop_on_validation_error,
+				logEntries: pdf.logEntries ? pdf.logEntries : {}
 			}`
-			log-entries="pdf.logEntries ? pdf.logEntries.all : []"
 			on-recompile="recompile"
 			on-run-syntax-check-now="runSyntaxCheckNow"
 			on-set-auto-compile="setAutoCompile"
 			on-set-draft-mode="setDraftMode"
 			on-set-syntax-check="setSyntaxCheck"
 			on-toggle-logs="toggleLogs"
-			should-show-logs="shouldShowLogs"
+			show-logs="shouldShowLogs"
 		)
 	else
 		.toolbar.toolbar-pdf(ng-class="{ 'changes-to-autocompile': changesToAutoCompile && !autoCompileLintingError }")

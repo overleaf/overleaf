@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
+import Icon from '../../../shared/components/icon'
 
 function PreviewLogEntry({ file, line, message, content, raw, level }) {
   const logEntryClasses = classNames('alert', {
@@ -11,7 +12,7 @@ function PreviewLogEntry({ file, line, message, content, raw, level }) {
   return (
     <div className={logEntryClasses}>
       <span className="line-no">
-        <i className="fa fa-link" aria-hidden="true" />
+        <Icon type="link" />
         {file ? <span>{file}</span> : null}
         {line ? <span>, {line}</span> : null}
       </span>

@@ -25,7 +25,7 @@ export default (PdfManager = class PdfManager {
       failure: false, // PDF failed to compile
       compiling: false,
       uncompiled: true,
-      logEntries: [],
+      logEntries: {},
       logEntryAnnotations: {},
       rawLog: '',
       view: null, // 'pdf' 'logs'

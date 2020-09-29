@@ -33,6 +33,28 @@
   border-bottom: 0;
 }
 
+.toolbar-pdf-left,
+.toolbar-pdf-right {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  flex: 1 1 100%;
+}
+
+.toolbar-pdf-right {
+  flex: 1 0 0px;
+}
+
+.btn-toggle-logs {
+  &:focus,
+  &:active:focus {
+    outline: none;
+  }
+}
+.btn-toggle-logs-label {
+  padding-left: @line-height-computed / 4;
+}
+
 .pdf {
   background-color: @pdf-bg;
 }

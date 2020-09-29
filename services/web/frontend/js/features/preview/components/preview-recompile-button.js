@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
 import { Dropdown, MenuItem } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
+import Icon from '../../../shared/components/icon'
 
 function PreviewRecompileButton({
   compilerState: {
@@ -18,20 +18,6 @@ function PreviewRecompileButton({
   onSetSyntaxCheck
 }) {
   const { t } = useTranslation()
-
-  const iconClasses = {
-    recompile: classNames('fa', 'fa-refresh', {
-      'fa-spin': isCompiling
-    }),
-    autoCompileOn: classNames('fa', 'fa-fw', { 'fa-check': isAutoCompileOn }),
-    autoCompileOff: classNames('fa', 'fa-fw', { 'fa-check': !isAutoCompileOn }),
-    compileModeNormal: classNames('fa', 'fa-fw', {
-      'fa-check': !isDraftModeOn
-    }),
-    compileModeDraft: classNames('fa', 'fa-fw', { 'fa-check': isDraftModeOn }),
-    syntaxCheckOn: classNames('fa', 'fa-fw', { 'fa-check': isSyntaxCheckOn }),
-    syntaxCheckOff: classNames('fa', 'fa-fw', { 'fa-check': !isSyntaxCheckOn })
-  }
 
   function handleSelectAutoCompileOn() {
     onSetAutoCompile(true)
@@ -60,7 +46,7 @@ function PreviewRecompileButton({
   return (
     <Dropdown id="pdf-recompile-dropdown" className="btn-recompile-group">
       <button className="btn btn-recompile" onClick={onRecompile}>
-        <i className={iconClasses.recompile} aria-hidden="true" />
+        <Icon type="refresh" spin={isCompiling} />
         {isCompiling ? (
           <span className="btn-recompile-label">
             {t('compiling')}
@@ -74,33 +60,33 @@ function PreviewRecompileButton({
       <Dropdown.Menu>
         <MenuItem header>{t('auto_compile')}</MenuItem>
         <MenuItem onSelect={handleSelectAutoCompileOn}>
-          <i className={iconClasses.autoCompileOn} aria-hidden="true" />
+          <Icon type={isAutoCompileOn ? 'check' : ''} modifier="fw" />
           {t('on')}
         </MenuItem>
         <MenuItem onSelect={handleSelectAutoCompileOff}>
-          <i className={iconClasses.autoCompileOff} aria-hidden="true" />
+          <Icon type={!isAutoCompileOn ? 'check' : ''} modifier="fw" />
           {t('off')}
         </MenuItem>
         <MenuItem header>{t('compile_mode')}</MenuItem>
         <MenuItem onSelect={handleSelectDraftModeOff}>
-          <i className={iconClasses.compileModeNormal} aria-hidden="true" />
+          <Icon type={!isDraftModeOn ? 'check' : ''} modifier="fw" />
           {t('normal')}
         </MenuItem>
         <MenuItem onSelect={handleSelectDraftModeOn}>
-          <i className={iconClasses.compileModeDraft} aria-hidden="true" />
+          <Icon type={isDraftModeOn ? 'check' : ''} modifier="fw" />
           {t('fast')} <span className="subdued">[draft]</span>
         </MenuItem>
         <MenuItem header>Syntax Checks</MenuItem>
         <MenuItem onSelect={handleSelectSyntaxCheckOn}>
-          <i className={iconClasses.syntaxCheckOn} aria-hidden="true" />
+          <Icon type={isSyntaxCheckOn ? 'check' : ''} modifier="fw" />
           {t('stop_on_validation_error')}
         </MenuItem>
         <MenuItem onSelect={handleSelectSyntaxCheckOff}>
-          <i className={iconClasses.syntaxCheckOff} aria-hidden="true" />
+          <Icon type={!isSyntaxCheckOn ? 'check' : ''} modifier="fw" />
           {t('ignore_validation_errors')}
         </MenuItem>
         <MenuItem onSelect={onRunSyntaxCheckNow}>
-          <i className="fa fa-fw" aria-hidden="true" />
+          <Icon type="" modifier="fw" />
           {t('run_syntax_check_now')}
         </MenuItem>
       </Dropdown.Menu>
@@ -113,7 +99,8 @@ PreviewRecompileButton.propTypes = {
     isAutoCompileOn: PropTypes.bool.isRequired,
     isCompiling: PropTypes.bool.isRequired,
     isDraftModeOn: PropTypes.bool.isRequired,
-    isSyntaxCheckOn: PropTypes.bool.isRequired
+    isSyntaxCheckOn: PropTypes.bool.isRequired,
+    logEntries: PropTypes.object.isRequired
   }),
   onRecompile: PropTypes.func.isRequired,
   onRunSyntaxCheckNow: PropTypes.func.isRequired,

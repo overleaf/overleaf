@@ -271,7 +271,7 @@ App.controller('PdfController', function(
     }
     // if the previous run was a check, clear the error logs
     if ($scope.check) {
-      $scope.pdf.logEntries = []
+      $scope.pdf.logEntries = {}
     }
     // keep track of whether this is a compile or check
     $scope.check = !!options.check
@@ -622,7 +622,7 @@ App.controller('PdfController', function(
 
     // output the results
     function handleError() {
-      $scope.pdf.logEntries = []
+      $scope.pdf.logEntries = {}
       $scope.pdf.rawLog = ''
     }
 
