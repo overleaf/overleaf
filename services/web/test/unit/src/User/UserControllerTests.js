@@ -596,6 +596,16 @@ describe('UserController', function() {
       it('sends a security alert email', function(done) {
         this.res.sendStatus.callsFake(status => {
           this.EmailHandler.promises.sendEmail.callCount.should.equal(1)
+          const expectedArg = {
+            to: this.user.email,
+            actionDescribed: `active sessions were cleared on your account ${
+              this.user.email
+            }`,
+            action: 'active sessions cleared'
+          }
+          const emailCall = this.EmailHandler.promises.sendEmail.lastCall
+          expect(emailCall.args[0]).to.equal('securityAlert')
+          expect(emailCall.args[1]).to.deep.equal(expectedArg)
           done()
         })
 
@@ -639,11 +649,20 @@ describe('UserController', function() {
       })
 
       describe('when EmailHandler produces an error', function() {
+        const anError = new Error('oops')
         it('send a 201 response but log error', function(done) {
-          this.EmailHandler.promises.sendEmail.rejects(new Error('oops'))
+          this.EmailHandler.promises.sendEmail.rejects(anError)
           this.res.sendStatus.callsFake(status => {
             status.should.equal(201)
             this.logger.error.callCount.should.equal(1)
+            const loggerCall = this.logger.error.getCall(0)
+            expect(loggerCall.args[0]).to.deep.equal({
+              error: anError,
+              userId: this.user_id
+            })
+            expect(loggerCall.args[1]).to.contain(
+              'could not send security alert email when sessions cleared'
+            )
             done()
           })
           this.UserController.clearSessions(this.req, this.res)
@@ -793,6 +812,7 @@ describe('UserController', function() {
       })
 
       describe('EmailHandler error', function() {
+        const anError = new Error('oops')
         beforeEach(function() {
           this.AuthenticationManager.promises.authenticate.resolves(this.user)
           this.AuthenticationManager.promises.setUserPassword.resolves()
@@ -800,12 +820,19 @@ describe('UserController', function() {
             newPassword1: 'newpass',
             newPassword2: 'newpass'
           }
-          this.EmailHandler.sendEmail.yields(new Error('oops'))
+          this.EmailHandler.sendEmail.yields(anError)
         })
         it('should not return error but should log it', function(done) {
           this.res.json.callsFake(result => {
             expect(result.message.type).to.equal('success')
             this.logger.error.callCount.should.equal(1)
+            expect(this.logger.error).to.have.been.calledWithExactly(
+              {
+                error: anError,
+                userId: this.user_id
+              },
+              'could not send security alert email when password changed'
+            )
             done()
           })
           this.UserController.changePassword(this.req, this.res)

@@ -21,6 +21,44 @@ const UrlHelper = require('../Helpers/UrlHelper')
 const { promisify } = require('util')
 const { expressify } = require('../../util/promises')
 
+async function _sendSecurityAlertClearedSessions(user) {
+  const emailOptions = {
+    to: user.email,
+    actionDescribed: `active sessions were cleared on your account ${
+      user.email
+    }`,
+    action: 'active sessions cleared'
+  }
+  try {
+    await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
+  } catch (error) {
+    // log error when sending security alert email but do not pass back
+    logger.error(
+      { error, userId: user._id },
+      'could not send security alert email when sessions cleared'
+    )
+  }
+}
+
+function _sendSecurityAlertPasswordChanged(user) {
+  const emailOptions = {
+    to: user.email,
+    actionDescribed: `your password has been changed on your account ${
+      user.email
+    }`,
+    action: 'password changed'
+  }
+  EmailHandler.sendEmail('securityAlert', emailOptions, error => {
+    if (error) {
+      // log error when sending security alert email but do not pass back
+      logger.error(
+        { error, userId: user._id },
+        'could not send security alert email when password changed'
+      )
+    }
+  })
+}
+
 async function _ensureAffiliation(userId, emailData) {
   if (emailData.samlProviderId) {
     await UserUpdater.promises.confirmEmail(userId, emailData.email)
@@ -67,19 +105,8 @@ async function changePassword(req, res, next) {
     req.body.newPassword1
   )
 
-  const emailOptions = {
-    to: user.email,
-    actionDescribed: `your password has been changed on your account ${
-      user.email
-    }`,
-    action: 'password changed'
-  }
-  EmailHandler.sendEmail('securityAlert', emailOptions, error => {
-    if (error) {
-      // log error when sending security alert email but do not pass back
-      logger.error({ err: error })
-    }
-  })
+  // no need to wait, errors are logged and not passed back
+  _sendSecurityAlertPasswordChanged(user)
 
   await UserSessionsManager.promises.revokeAllUserSessions(user, [
     req.sessionID
@@ -96,7 +123,8 @@ async function changePassword(req, res, next) {
 
 async function clearSessions(req, res, next) {
   metrics.inc('user.clear-sessions')
-  const user = AuthenticationController.getSessionUser(req)
+  const userId = AuthenticationController.getLoggedInUserId(req)
+  const user = await UserGetter.promises.getUser(userId, { email: 1 })
   const sessions = await UserSessionsManager.promises.getAllUserSessions(user, [
     req.sessionID
   ])
@@ -110,22 +138,8 @@ async function clearSessions(req, res, next) {
   await UserSessionsManager.promises.revokeAllUserSessions(user, [
     req.sessionID
   ])
-  const emailOptions = {
-    to: user.email,
-    actionDescribed: `active sessions were cleared on your account ${
-      user.email
-    }`,
-    action: 'active sessions cleared'
-  }
 
-  try {
-    await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
-  } catch (error) {
-    logger.error(
-      { userId: user._id },
-      'could not send security alert email when sessions cleared'
-    )
-  }
+  await _sendSecurityAlertClearedSessions(user)
 
   res.sendStatus(201)
 }

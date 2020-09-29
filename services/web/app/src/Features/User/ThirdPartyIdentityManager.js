@@ -1,5 +1,4 @@
 const APP_ROOT = '../../../../app/src'
-const OError = require('@overleaf/o-error')
 const EmailHandler = require(`${APP_ROOT}/Features/Email/EmailHandler`)
 const Errors = require('../Errors/Errors')
 const _ = require('lodash')
@@ -62,6 +61,7 @@ function link(
   callback,
   retry
 ) {
+  const accountLinked = true
   if (!oauthProviders[providerId]) {
     return callback(new Error('Not a valid provider'))
   }
@@ -88,21 +88,8 @@ function link(
     } else if (err != null) {
       callback(err)
     } else if (res) {
-      const providerName = oauthProviders[providerId].name
-      const indefiniteArticle = _getIndefiniteArticle(providerName)
-      const emailOptions = {
-        to: res.email,
-        action: `${providerName} account linked`,
-        actionDescribed: `${indefiniteArticle} ${providerName} account was linked to your account ${
-          res.email
-        }`
-      }
-      EmailHandler.sendEmail('securityAlert', emailOptions, error => {
-        if (error != null) {
-          logger.warn(OError.tag(error))
-        }
-        return callback(null, res)
-      })
+      _sendSecurityAlert(accountLinked, providerId, res, userId)
+      callback(null, res)
     } else if (retry) {
       // if already retried then throw error
       callback(new Error('update failed'))
@@ -126,6 +113,7 @@ function link(
 }
 
 function unlink(userId, providerId, callback) {
+  const accountLinked = false
   if (!oauthProviders[providerId]) {
     return callback(new Error('Not a valid provider'))
   }
@@ -146,21 +134,9 @@ function unlink(userId, providerId, callback) {
     } else if (!res) {
       callback(new Error('update failed'))
     } else {
-      const providerName = oauthProviders[providerId].name
-      const indefiniteArticle = _getIndefiniteArticle(providerName)
-      const emailOptions = {
-        to: res.email,
-        action: `${providerName} account no longer linked`,
-        actionDescribed: `${indefiniteArticle} ${providerName} account is no longer linked to your account ${
-          res.email
-        }`
-      }
-      EmailHandler.sendEmail('securityAlert', emailOptions, error => {
-        if (error != null) {
-          logger.warn(error)
-        }
-        return callback(null, res)
-      })
+      // no need to wait, errors are logged and not passed back
+      _sendSecurityAlert(accountLinked, providerId, res, userId)
+      callback(null, res)
     }
   })
 }
@@ -173,6 +149,28 @@ function _getUserQuery(providerId, externalUserId) {
     'thirdPartyIdentifiers.providerId': providerId
   }
   return query
+}
+
+function _sendSecurityAlert(accountLinked, providerId, user, userId) {
+  const operation = accountLinked ? 'linked' : 'no longer linked'
+  const tense = accountLinked ? 'was' : 'is'
+  const providerName = oauthProviders[providerId].name
+  const indefiniteArticle = _getIndefiniteArticle(providerName)
+  const emailOptions = {
+    to: user.email,
+    action: `${providerName} account ${operation}`,
+    actionDescribed: `${indefiniteArticle} ${providerName} account ${tense} ${operation} to your account ${
+      user.email
+    }`
+  }
+  EmailHandler.sendEmail('securityAlert', emailOptions, error => {
+    if (error) {
+      logger.error(
+        { error, userId },
+        `could not send security alert email when ${providerName} ${operation}`
+      )
+    }
+  })
 }
 
 function _thirdPartyIdentifierUpdate(

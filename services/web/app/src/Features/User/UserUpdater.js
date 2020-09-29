@@ -19,6 +19,26 @@ const NewsletterManager = require('../Newsletter/NewsletterManager')
 const RecurlyWrapper = require('../Subscription/RecurlyWrapper')
 const UserAuditLogHandler = require('./UserAuditLogHandler')
 
+async function _sendSecurityAlertPrimaryEmailChanged(userId, oldEmail, email) {
+  // send email to both old and new primary email
+  const emailOptions = {
+    actionDescribed: `the primary email address on your account was changed to ${email}`,
+    action: 'change of primary email address'
+  }
+  const toOld = Object.assign({}, emailOptions, { to: oldEmail })
+  const toNew = Object.assign({}, emailOptions, { to: email })
+
+  try {
+    await EmailHandler.promises.sendEmail('securityAlert', toOld)
+    await EmailHandler.promises.sendEmail('securityAlert', toNew)
+  } catch (error) {
+    logger.error(
+      { error, userId },
+      'could not send security alert email when primary email changed'
+    )
+  }
+}
+
 async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
   newEmail = EmailHelper.parseEmail(newEmail)
   if (!newEmail) {
@@ -114,22 +134,8 @@ async function setDefaultEmailAddress(
   }
 
   if (sendSecurityAlert) {
-    // send email to both old and new primary email
-    const emailOptions = {
-      actionDescribed: `the primary email address on your account was changed to ${email}`,
-      action: 'change of primary email address'
-    }
-    const toOld = Object.assign({}, emailOptions, { to: oldEmail })
-    const toNew = Object.assign({}, emailOptions, { to: email })
-    try {
-      await EmailHandler.promises.sendEmail('securityAlert', toOld)
-      await EmailHandler.promises.sendEmail('securityAlert', toNew)
-    } catch (error) {
-      logger.error(
-        { err: error, userId },
-        'could not send security alert email when primary email changed'
-      )
-    }
+    // no need to wait, errors are logged and not passed back
+    _sendSecurityAlertPrimaryEmailChanged(userId, oldEmail, email)
   }
 
   try {

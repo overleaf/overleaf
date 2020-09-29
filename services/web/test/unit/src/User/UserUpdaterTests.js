@@ -669,6 +669,38 @@ describe('UserUpdater', function() {
           }
         )
       })
+      describe('errors', function() {
+        const anError = new Error('oops')
+        describe('EmailHandler', function() {
+          beforeEach(function() {
+            this.EmailHandler.promises.sendEmail.rejects(anError)
+            this.UserUpdater.promises.updateUser = sinon
+              .stub()
+              .resolves({ n: 1 })
+          })
+          it('should log but not pass back the error', function(done) {
+            this.UserUpdater.setDefaultEmailAddress(
+              this.stubbedUser._id,
+              this.newEmail,
+              false,
+              this.auditLog,
+              true,
+              error => {
+                expect(error).to.not.exist
+                const loggerCall = this.logger.error.firstCall
+                expect(loggerCall.args[0]).to.deep.equal({
+                  error: anError,
+                  userId: this.stubbedUser._id
+                })
+                expect(loggerCall.args[1]).to.contain(
+                  'could not send security alert email when primary email changed'
+                )
+                done()
+              }
+            )
+          })
+        })
+      })
     })
   })
 

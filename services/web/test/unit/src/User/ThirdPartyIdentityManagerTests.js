@@ -26,6 +26,9 @@ describe('ThirdPartyIdentityManager', function() {
           ThirdPartyIdentityExistsError: sinon.stub(),
           ThirdPartyUserNotFoundError: sinon.stub()
         }),
+        'logger-sharelatex': (this.logger = {
+          error: sinon.stub()
+        }),
         '../../../../app/src/models/User': {
           User: (this.User = {
             findOneAndUpdate: sinon.stub().yields(undefined, this.user),
@@ -59,6 +62,34 @@ describe('ThirdPartyIdentityManager', function() {
         'a Google account was linked'
       )
     })
+    describe('errors', function() {
+      const anError = new Error('oops')
+      describe('EmailHandler', function() {
+        beforeEach(function() {
+          this.EmailHandler.sendEmail.yields(anError)
+        })
+        it('should log but not return the error', function(done) {
+          this.ThirdPartyIdentityManager.link(
+            this.userId,
+            'google',
+            this.externalUserId,
+            this.externalData,
+            error => {
+              expect(error).to.not.exist
+              const loggerCall = this.logger.error.getCall(0)
+              expect(loggerCall.args[0]).to.deep.equal({
+                error: anError,
+                userId: this.userId
+              })
+              expect(loggerCall.args[1]).to.contain(
+                'could not send security alert email when Google linked'
+              )
+              done()
+            }
+          )
+        })
+      })
+    })
   })
   describe('unlink', function() {
     it('should send email alert', async function() {
@@ -68,6 +99,32 @@ describe('ThirdPartyIdentityManager', function() {
       expect(emailCall.args[1].actionDescribed).to.contain(
         'an Orcid account is no longer linked'
       )
+    })
+    describe('errors', function() {
+      const anError = new Error('oops')
+      describe('EmailHandler', function() {
+        beforeEach(function() {
+          this.EmailHandler.sendEmail.yields(anError)
+        })
+        it('should log but not return the error', function(done) {
+          this.ThirdPartyIdentityManager.unlink(
+            this.userId,
+            'google',
+            error => {
+              expect(error).to.not.exist
+              const loggerCall = this.logger.error.getCall(0)
+              expect(loggerCall.args[0]).to.deep.equal({
+                error: anError,
+                userId: this.userId
+              })
+              expect(loggerCall.args[1]).to.contain(
+                'could not send security alert email when Google no longer linked'
+              )
+              done()
+            }
+          )
+        })
+      })
     })
   })
 })
