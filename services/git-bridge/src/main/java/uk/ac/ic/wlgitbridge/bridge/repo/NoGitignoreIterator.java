@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.bridge.repo;
 
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.WorkingTreeIterator;
 import org.eclipse.jgit.treewalk.WorkingTreeOptions;
@@ -64,6 +65,8 @@ public class NoGitignoreIterator extends FileTreeIterator {
         super(p, root, fs, fileModeStrategy);
     }
 
+    // Note: the `list` is a list of top-level entities in this directory,
+    //       not a full list of files in the tree.
     @Override
     protected void init(Entry[] list) {
         super.init(list);
@@ -74,4 +77,11 @@ public class NoGitignoreIterator extends FileTreeIterator {
         }
     }
 
+    // When entering a sub-directory, create a new instance of this class,
+    // so we can also ignore gitignore specifications in sub-directories
+    @Override
+    protected AbstractTreeIterator enterSubtree() {
+      String fullPath = getDirectory().getAbsolutePath() + "/" + current().getName();
+      return new NoGitignoreIterator(this, new File(fullPath), fs, fileModeStrategy);
+    }
 }
