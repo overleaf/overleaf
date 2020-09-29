@@ -1,0 +1,20 @@
+--- a/ContactRouter.js
++++ b/ContactRouter.js
+@@ -5,6 +5,8 @@
+  * DS102: Remove unnecessary code created because of implicit returns
+  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+  */
++const Settings = require('settings-sharelatex')
++
+ const AuthenticationController = require('../Authentication/AuthenticationController')
+ const ContactController = require('./ContactController')
+ 
+@@ -12,7 +14,7 @@
+   apply(webRouter, apiRouter) {
+     return webRouter.get(
+       '/user/contacts',
+-      AuthenticationController.requireLogin(),
++      Settings.allowAnonymousReadAndWriteSharing ? (req, res, next) => { next() } : AuthenticationController.requireLogin(),
+       ContactController.getContacts
+     )
+   }

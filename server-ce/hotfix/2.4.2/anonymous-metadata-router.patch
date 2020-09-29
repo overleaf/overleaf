@@ -1,0 +1,23 @@
+--- a/router.js
++++ b/router.js
+@@ -607,16 +607,17 @@
+     ProjectDownloadsController.downloadMultipleProjects
+   )
+ 
++  console.log(`allowAnonymousReadAndWriteSharing: ${Settings.allowAnonymousReadAndWriteSharing}`)
+   webRouter.get(
+     '/project/:project_id/metadata',
+     AuthorizationMiddleware.ensureUserCanReadProject,
+-    AuthenticationController.requireLogin(),
++    Settings.allowAnonymousReadAndWriteSharing ? (req, res, next) => { next() } : AuthenticationController.requireLogin(),
+     MetaController.getMetadata
+-  )
++  ) 
+   webRouter.post(
+     '/project/:project_id/doc/:doc_id/metadata',
+     AuthorizationMiddleware.ensureUserCanReadProject,
+-    AuthenticationController.requireLogin(),
++    Settings.allowAnonymousReadAndWriteSharing ? (req, res, next) => { next() } : AuthenticationController.requireLogin(),
+     MetaController.broadcastMetadataForDoc
+   )
+   privateApiRouter.post(
