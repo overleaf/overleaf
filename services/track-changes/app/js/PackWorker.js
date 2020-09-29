@@ -18,7 +18,7 @@ let project_id, doc_id
 const Settings = require('settings-sharelatex')
 const async = require('async')
 const _ = require('underscore')
-const { db, ObjectId } = require('./mongodb')
+const { db, ObjectId, waitForDb } = require('./mongodb')
 const fs = require('fs')
 const Metrics = require('metrics-sharelatex')
 Metrics.initialize('track-changes')
@@ -160,10 +160,21 @@ const ObjectIdFromDate = function (date) {
 // find packs to be marked as finalised:true, those which have a newer pack present
 // then only consider finalised:true packs for archiving
 
-if (pending != null) {
-  logger.log(`got ${pending.length} entries from ${source}`)
-  processUpdates(pending)
-} else {
+waitForDb()
+  .then(() => {
+    if (pending != null) {
+      logger.log(`got ${pending.length} entries from ${source}`)
+      processUpdates(pending)
+    } else {
+      processFromOneWeekAgo()
+    }
+  })
+  .catch((err) => {
+    logger.fatal({ err }, 'cannot connect to mongo, exiting')
+    process.exit(1)
+  })
+
+function processFromOneWeekAgo() {
   const oneWeekAgo = new Date(Date.now() - 7 * DAYS)
   db.docHistory
     .find(
