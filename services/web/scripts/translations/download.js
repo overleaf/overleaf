@@ -30,7 +30,7 @@ async function run() {
       const outputLngCode = code === 'en-GB' ? 'en' : code
       await fs.writeFile(
         `${__dirname}/../../locales/${outputLngCode}.json`,
-        JSON.stringify(lang.translation, null, 2)
+        JSON.stringify(lang.translation, null, 2) + '\n'
       )
     }
   } catch (error) {
