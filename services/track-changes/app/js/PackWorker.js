@@ -18,7 +18,7 @@ let project_id, doc_id
 const Settings = require('settings-sharelatex')
 const async = require('async')
 const _ = require('underscore')
-const { db, ObjectId, BSON } = require('./mongojs')
+const { db, ObjectId } = require('./mongodb')
 const fs = require('fs')
 const Metrics = require('metrics-sharelatex')
 Metrics.initialize('track-changes')
@@ -77,18 +77,6 @@ const shutDownTimer = setTimeout(function () {
 logger.log(
   `checking for updates, limit=${LIMIT}, delay=${DOCUMENT_PACK_DELAY}, timeout=${TIMEOUT}`
 )
-
-// work around for https://github.com/mafintosh/mongojs/issues/224
-db.close = function (callback) {
-  return this._getServer(function (err, server) {
-    if (err != null) {
-      return callback(err)
-    }
-    server = server.destroy != null ? server : server.topology
-    server.destroy(true, true)
-    return callback()
-  })
-}
 
 const finish = function () {
   if (shutDownTimer != null) {
@@ -186,12 +174,13 @@ if (pending != null) {
         _id: { $lt: ObjectIdFromDate(oneWeekAgo) },
         last_checked: { $lt: oneWeekAgo }
       },
-      { _id: 1, doc_id: 1, project_id: 1 }
+      { projection: { _id: 1, doc_id: 1, project_id: 1 } }
     )
     .sort({
       last_checked: 1
     })
-    .limit(LIMIT, function (err, results) {
+    .limit(LIMIT)
+    .toArray(function (err, results) {
       if (err != null) {
         logger.log({ err }, 'error checking for updates')
         finish()

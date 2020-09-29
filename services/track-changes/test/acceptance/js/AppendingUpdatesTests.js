@@ -14,8 +14,7 @@ const sinon = require('sinon')
 const chai = require('chai')
 chai.should()
 const { expect } = chai
-const mongojs = require('../../../app/js/mongojs')
-const { ObjectId } = mongojs
+const { ObjectId } = require('../../../app/js/mongodb')
 const Settings = require('settings-sharelatex')
 const request = require('request')
 const rclient = require('redis').createClient(Settings.redis.history) // Only works locally for now

@@ -13,8 +13,6 @@ const sinon = require('sinon')
 const chai = require('chai')
 chai.should()
 const { expect } = chai
-const mongojs = require('../../../app/js/mongojs')
-const { ObjectId } = mongojs
 const Settings = require('settings-sharelatex')
 const LockManager = require('../../../app/js/LockManager')
 const rclient = require('redis').createClient(Settings.redis.history) // Only works locally for now

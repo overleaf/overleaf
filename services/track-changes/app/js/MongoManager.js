@@ -12,7 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let MongoManager
-const { db, ObjectId } = require('./mongojs')
+const { db, ObjectId } = require('./mongodb')
 const PackManager = require('./PackManager')
 const async = require('async')
 const _ = require('underscore')
@@ -25,7 +25,11 @@ module.exports = MongoManager = {
       callback = function (error, update) {}
     }
     return db.docHistory
-      .find({ doc_id: ObjectId(doc_id.toString()) }, { pack: { $slice: -1 } }) // only return the last entry in a pack
+      .find(
+        { doc_id: ObjectId(doc_id.toString()) },
+        // only return the last entry in a pack
+        { projection: { pack: { $slice: -1 } } }
+      )
       .sort({ v: -1 })
       .limit(1)
       .toArray(function (error, compressedUpdates) {
@@ -96,16 +100,13 @@ module.exports = MongoManager = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return db.docHistory.update(
+    return db.docHistory.updateMany(
       {
         doc_id: ObjectId(doc_id.toString()),
         project_id: { $exists: false }
       },
       {
         $set: { project_id: ObjectId(project_id.toString()) }
-      },
-      {
-        multi: true
       },
       callback
     )
@@ -115,16 +116,11 @@ module.exports = MongoManager = {
     if (callback == null) {
       callback = function (error, metadata) {}
     }
-    return db.projectHistoryMetaData.find(
+    return db.projectHistoryMetaData.findOne(
       {
         project_id: ObjectId(project_id.toString())
       },
-      function (error, results) {
-        if (error != null) {
-          return callback(error)
-        }
-        return callback(null, results[0])
-      }
+      callback
     )
   },
 
@@ -132,7 +128,7 @@ module.exports = MongoManager = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return db.projectHistoryMetaData.update(
+    return db.projectHistoryMetaData.updateOne(
       {
         project_id: ObjectId(project_id)
       },
@@ -151,7 +147,7 @@ module.exports = MongoManager = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return db.docHistory.update(
+    return db.docHistory.updateMany(
       {
         project_id: ObjectId(project_id),
         temporary: true,
@@ -160,9 +156,6 @@ module.exports = MongoManager = {
       {
         $set: { temporary: false },
         $unset: { expiresAt: '' }
-      },
-      {
-        multi: true
       },
       callback
     )

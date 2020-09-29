@@ -19,7 +19,7 @@ const request = require('request')
 const Settings = require('settings-sharelatex')
 const rclient = require('redis-sharelatex').createClient(Settings.redis.history) // Only works locally for now
 const Keys = Settings.redis.history.key_schema
-const { db, ObjectId } = require('../../../../app/js/mongojs')
+const { db, ObjectId } = require('../../../../app/js/mongodb')
 
 const aws = require('aws-sdk')
 const s3 = new aws.S3({
@@ -87,11 +87,11 @@ module.exports = TrackChangesClient = {
     if (callback == null) {
       callback = function (error, updates) {}
     }
-    return db.projectHistoryMetaData.find(
+    return db.projectHistoryMetaData.findOne(
       {
         project_id: ObjectId(project_id)
       },
-      (error, projects) => callback(error, projects[0])
+      callback
     )
   },
 
@@ -99,7 +99,7 @@ module.exports = TrackChangesClient = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return db.projectHistoryMetaData.update(
+    return db.projectHistoryMetaData.updateOne(
       {
         project_id: ObjectId(project_id)
       },

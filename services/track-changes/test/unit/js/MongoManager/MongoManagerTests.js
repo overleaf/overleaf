@@ -16,7 +16,7 @@ const { expect } = chai
 const modulePath = '../../../../app/js/MongoManager.js'
 const packModulePath = '../../../../app/js/PackManager.js'
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const tk = require('timekeeper')
 
 describe('MongoManager', function () {
@@ -24,7 +24,7 @@ describe('MongoManager', function () {
     tk.freeze(new Date())
     this.MongoManager = SandboxedModule.require(modulePath, {
       requires: {
-        './mongojs': { db: (this.db = {}), ObjectId },
+        './mongodb': { db: (this.db = {}), ObjectId },
         './PackManager': (this.PackManager = {}),
         'metrics-sharelatex': { timeAsyncMethod() {} },
         'logger-sharelatex': { log() {} }
@@ -156,7 +156,7 @@ describe('MongoManager', function () {
 
   describe('backportProjectId', function () {
     beforeEach(function () {
-      this.db.docHistory = { update: sinon.stub().callsArg(3) }
+      this.db.docHistory = { updateMany: sinon.stub().yields() }
       return this.MongoManager.backportProjectId(
         this.project_id,
         this.doc_id,
@@ -165,7 +165,7 @@ describe('MongoManager', function () {
     })
 
     it("should insert the project_id into all entries for the doc_id which don't have it set", function () {
-      return this.db.docHistory.update
+      return this.db.docHistory.updateMany
         .calledWith(
           {
             doc_id: ObjectId(this.doc_id),
@@ -173,9 +173,6 @@ describe('MongoManager', function () {
           },
           {
             $set: { project_id: ObjectId(this.project_id) }
-          },
-          {
-            multi: true
           }
         )
         .should.equal(true)
@@ -190,7 +187,7 @@ describe('MongoManager', function () {
     beforeEach(function () {
       this.metadata = { mock: 'metadata' }
       this.db.projectHistoryMetaData = {
-        find: sinon.stub().callsArgWith(1, null, [this.metadata])
+        findOne: sinon.stub().callsArgWith(1, null, this.metadata)
       }
       return this.MongoManager.getProjectMetaData(
         this.project_id,
@@ -199,7 +196,7 @@ describe('MongoManager', function () {
     })
 
     it('should look up the meta data in the db', function () {
-      return this.db.projectHistoryMetaData.find
+      return this.db.projectHistoryMetaData.findOne
         .calledWith({ project_id: ObjectId(this.project_id) })
         .should.equal(true)
     })
@@ -213,7 +210,7 @@ describe('MongoManager', function () {
     beforeEach(function () {
       this.metadata = { mock: 'metadata' }
       this.db.projectHistoryMetaData = {
-        update: sinon.stub().callsArgWith(3, null, [this.metadata])
+        updateOne: sinon.stub().yields()
       }
       return this.MongoManager.setProjectMetaData(
         this.project_id,
@@ -223,7 +220,7 @@ describe('MongoManager', function () {
     })
 
     it('should upsert the metadata into the DB', function () {
-      return this.db.projectHistoryMetaData.update
+      return this.db.projectHistoryMetaData.updateOne
         .calledWith(
           {
             project_id: ObjectId(this.project_id)

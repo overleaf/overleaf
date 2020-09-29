@@ -14,7 +14,7 @@ chai.should()
 const sinon = require('sinon')
 const modulePath = '../../../../app/js/MongoAWS.js'
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongojs')
+const { ObjectId } = require('mongodb')
 const MemoryStream = require('memorystream')
 const zlib = require('zlib')
 
@@ -44,7 +44,7 @@ describe('MongoAWS', function () {
         'aws-sdk': (this.awssdk = {}),
         fs: (this.fs = {}),
         's3-streams': (this.S3S = {}),
-        './mongojs': { db: (this.db = {}), ObjectId },
+        './mongodb': { db: (this.db = {}), ObjectId },
         JSONStream: (this.JSONStream = {}),
         'readline-stream': (this.readline = sinon.stub()),
         'metrics-sharelatex': { inc() {} }
@@ -92,7 +92,9 @@ describe('MongoAWS', function () {
         this.S3S.ReadStream = () =>
           MemoryStream.createReadStream(zbuf, { readable: true })
         this.db.docHistory = {}
-        this.db.docHistory.insert = sinon.stub().callsArgWith(1, null, 'pack')
+        this.db.docHistory.insertOne = sinon
+          .stub()
+          .yields(null, { insertedId: ObjectId() })
 
         return this.MongoAWS.unArchivePack(
           this.project_id,
@@ -107,7 +109,7 @@ describe('MongoAWS', function () {
     })
 
     return it('should call db.docHistory.insert', function () {
-      return this.db.docHistory.insert.called.should.equal(true)
+      return this.db.docHistory.insertOne.called.should.equal(true)
     })
   })
 })
