@@ -33,7 +33,8 @@ async function batchedUpdate(collectionName, query, update, projection) {
   // Some secondary connections are not ready as it returns, leading to
   //  failing cursor actions with a readPreference set to 'secondary'.
   // TODO(das7pad): revisit/remove this delay after the mongo-driver update.
-  await Promise.all([getNativeDb(), promisify(setTimeout)(10 * 1000)])
+  const CONNECT_DELAY = parseInt(process.env.CONNECT_DELAY, 10) || 10000
+  await Promise.all([getNativeDb(), promisify(setTimeout)(CONNECT_DELAY)])
 
   const db = await getNativeDb()
   const collection = db.collection(collectionName)
