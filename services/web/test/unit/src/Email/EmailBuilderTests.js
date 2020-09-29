@@ -468,6 +468,59 @@ describe('EmailBuilder', function() {
           })
         })
       })
+
+      describe('projectInvite', function() {
+        before(function() {
+          this.emailAddress = 'example@overleaf.com'
+          this.owner = {
+            email: 'owner@example.com',
+            name: 'Bailey'
+          }
+          this.projectName = 'Top Secret'
+          this.opts = {
+            inviteUrl:
+              `${
+                this.settings.siteUrl
+              }/project/projectId123/invite/token/aToken123?` +
+              [
+                `project_name=${encodeURIComponent(this.projectName)}`,
+                `user_first_name=${encodeURIComponent(this.owner.name)}`
+              ].join('&'),
+            owner: {
+              email: this.owner.email
+            },
+            project: {
+              name: this.projectName
+            },
+            to: this.emailAddress
+          }
+          this.email = this.EmailBuilder.buildEmail('projectInvite', this.opts)
+        })
+
+        it('should build the email', function() {
+          expect(this.email.html).to.exist
+          expect(this.email.text).to.exist
+        })
+
+        describe('HTML email', function() {
+          it('should include a CTA button and a fallback CTA link', function() {
+            const dom = cheerio.load(this.email.html)
+            const buttonLink = dom('a:contains("View project")')
+            expect(buttonLink.length).to.equal(1)
+            expect(buttonLink.attr('href')).to.equal(this.opts.inviteUrl)
+            const fallback = dom('.avoid-auto-linking').last()
+            expect(fallback.length).to.equal(1)
+            const fallbackLink = fallback.html().replace(/&amp;/g, '&')
+            expect(fallbackLink).to.contain(this.opts.inviteUrl)
+          })
+        })
+
+        describe('plain text email', function() {
+          it('should contain the CTA link', function() {
+            expect(this.email.text).to.contain(this.opts.inviteUrl)
+          })
+        })
+      })
     })
     describe('no CTA', function() {
       describe('securityAlert', function() {

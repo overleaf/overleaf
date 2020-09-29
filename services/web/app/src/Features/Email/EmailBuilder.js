@@ -290,7 +290,7 @@ templates.confirmEmail = ctaTemplate({
   }
 })
 
-templates.projectInvite = CTAEmailTemplate({
+templates.projectInvite = ctaTemplate({
   subject(opts) {
     return `${_.escape(
       SpamSafe.safeProjectName(opts.project.name, 'New Project')
@@ -306,11 +306,13 @@ templates.projectInvite = CTAEmailTemplate({
     )}`
   },
   message(opts) {
-    return `${_.escape(
-      SpamSafe.safeEmail(opts.owner.email, 'a collaborator')
-    )} wants to share ${_.escape(
-      SpamSafe.safeProjectName(opts.project.name, 'a new project')
-    )} with you.`
+    return [
+      `${_.escape(
+        SpamSafe.safeEmail(opts.owner.email, 'a collaborator')
+      )} wants to share ${_.escape(
+        SpamSafe.safeProjectName(opts.project.name, 'a new project')
+      )} with you.`
+    ]
   },
   ctaText() {
     return 'View project'
