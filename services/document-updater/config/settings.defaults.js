@@ -174,6 +174,10 @@ module.exports = {
   dispatcherCount: process.env.DISPATCHER_COUNT,
 
   mongo: {
+    options: {
+      useUnifiedTopology:
+        (process.env.MONGO_USE_UNIFIED_TOPOLOGY || 'true') === 'true'
+    },
     url:
       process.env.MONGO_CONNECTION_STRING ||
       `mongodb://${process.env.MONGO_HOST || '127.0.0.1'}/sharelatex`

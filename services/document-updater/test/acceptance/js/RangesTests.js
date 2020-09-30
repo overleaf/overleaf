@@ -17,7 +17,7 @@ chai.should()
 const { expect } = chai
 const async = require('async')
 
-const { db, ObjectId } = require('../../../app/js/mongojs')
+const { db, ObjectId } = require('../../../app/js/mongodb')
 const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
 const DocUpdaterApp = require('./helpers/DocUpdaterApp')
@@ -668,12 +668,12 @@ describe('Ranges', function () {
           if (error != null) {
             return done(error)
           }
-          return db.docSnapshots.find(
-            {
+          db.docSnapshots
+            .find({
               project_id: ObjectId(this.project_id),
               doc_id: ObjectId(this.doc_id)
-            },
-            (error, docSnapshots) => {
+            })
+            .toArray((error, docSnapshots) => {
               if (error != null) {
                 return done(error)
               }
@@ -686,8 +686,7 @@ describe('Ranges', function () {
                 tid: this.tid
               })
               return done()
-            }
-          )
+            })
         }
       )
     })

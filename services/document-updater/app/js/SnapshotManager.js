@@ -12,7 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let SnapshotManager
-const { db, ObjectId } = require('./mongojs')
+const { db, ObjectId } = require('./mongodb')
 
 module.exports = SnapshotManager = {
   recordSnapshot(
@@ -30,7 +30,7 @@ module.exports = SnapshotManager = {
     } catch (error) {
       return callback(error)
     }
-    return db.docSnapshots.insert(
+    db.docSnapshots.insertOne(
       {
         project_id,
         doc_id,

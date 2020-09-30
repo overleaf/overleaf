@@ -25,7 +25,7 @@
     "lodash": "^4.17.13",
     "logger-sharelatex": "^2.2.0",
     "metrics-sharelatex": "^2.6.2",
-    "mongojs": "^3.1.0",
+    "mongodb": "^3.6.0",
     "redis-sharelatex": "^1.0.13",
     "request": "^2.88.2",
     "requestretry": "^4.1.0",
