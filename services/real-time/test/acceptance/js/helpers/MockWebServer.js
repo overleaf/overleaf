@@ -31,7 +31,8 @@ module.exports = MockWebServer = {
     return callback(
       null,
       MockWebServer.projects[project_id],
-      MockWebServer.privileges[project_id][user_id]
+      MockWebServer.privileges[project_id][user_id] ||
+        MockWebServer.privileges[project_id]['anonymous-user']
     )
   },
 
