@@ -109,6 +109,22 @@ module.exports = FixturesManager = {
     })
   },
 
+  setUpEditorSession(options, callback) {
+    FixturesManager.setUpProject(options, (err, detailsProject) => {
+      if (err) return callback(err)
+
+      FixturesManager.setUpDoc(
+        detailsProject.project_id,
+        options,
+        (err, detailsDoc) => {
+          if (err) return callback(err)
+
+          callback(null, Object.assign({}, detailsProject, detailsDoc))
+        }
+      )
+    })
+  },
+
   getRandomId() {
     return require('crypto')
       .createHash('sha1')
