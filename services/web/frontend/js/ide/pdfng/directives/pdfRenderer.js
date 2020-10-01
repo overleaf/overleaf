@@ -18,7 +18,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
-import { getDocument, renderTextLayer } from './pdfJsLoader'
+import PDFJS from './pdfJsLoader'
 
 export default App.factory('PDFRenderer', function(
   $timeout,
@@ -55,7 +55,7 @@ export default App.factory('PDFRenderer', function(
         } else {
           disableFontFace = false
         }
-        this.pdfjs = getDocument({
+        this.pdfjs = PDFJS.getDocument({
           url: this.url,
           cMapUrl: window.pdfCMapsPath,
           cMapPacked: true,
@@ -448,7 +448,7 @@ export default App.factory('PDFRenderer', function(
         const textLayer = new pdfTextLayer({
           textLayerDiv: element.text[0],
           viewport,
-          renderer: renderTextLayer
+          renderer: PDFJS.renderTextLayer
         })
 
         const annotationsLayer = new pdfAnnotations({
