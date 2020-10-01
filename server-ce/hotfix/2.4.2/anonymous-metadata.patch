@@ -1,0 +1,43 @@
+--- /var/www/sharelatex/web/app/src/router.js	2020-09-14 20:21:39.741433000 +0000
++++ /var/www/sharelatex/web/app/src/router.js	2020-09-14 20:13:08.000000000 +0000
+@@ -607,16 +607,17 @@
+     ProjectDownloadsController.downloadMultipleProjects
+   )
+ 
++  console.log(`allowAnonymousReadAndWriteSharing: ${Settings.allowAnonymousReadAndWriteSharing}`)
+   webRouter.get(
+     '/project/:project_id/metadata',
+     AuthorizationMiddleware.ensureUserCanReadProject,
+-    AuthenticationController.requireLogin(),
++    Settings.allowAnonymousReadAndWriteSharing ? (req, res, next) => { next() } : AuthenticationController.requireLogin(),
+     MetaController.getMetadata
+-  )
++  ) 
+   webRouter.post(
+     '/project/:project_id/doc/:doc_id/metadata',
+     AuthorizationMiddleware.ensureUserCanReadProject,
+-    AuthenticationController.requireLogin(),
++    Settings.allowAnonymousReadAndWriteSharing ? (req, res, next) => { next() } : AuthenticationController.requireLogin(),
+     MetaController.broadcastMetadataForDoc
+   )
+   privateApiRouter.post(
+--- /var/www/sharelatex/web/app/src/Features/Contacts/ContactRouter.js	2020-09-14 20:21:52.243779000 +0000
++++ /var/www/sharelatex/web/app/src/Features/Contacts/ContactRouter.js	2020-09-14 20:13:08.000000000 +0000
+@@ -5,6 +5,8 @@
+  * DS102: Remove unnecessary code created because of implicit returns
+  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+  */
++const Settings = require('settings-sharelatex')
++
+ const AuthenticationController = require('../Authentication/AuthenticationController')
+ const ContactController = require('./ContactController')
+ 
+@@ -12,7 +14,7 @@
+   apply(webRouter, apiRouter) {
+     return webRouter.get(
+       '/user/contacts',
+-      AuthenticationController.requireLogin(),
++      Settings.allowAnonymousReadAndWriteSharing ? (req, res, next) => { next() } : AuthenticationController.requireLogin(),
+       ContactController.getContacts
+     )
+   }
