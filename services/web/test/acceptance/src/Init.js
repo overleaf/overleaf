@@ -1,8 +1,11 @@
 const App = require('../../../app.js')
 const { exec } = require('child_process')
+const { waitForDb } = require('../../../app/src/infrastructure/mongodb')
 const { db } = require('../../../app/src/infrastructure/mongojs')
 
 require('logger-sharelatex').logger.level('error')
+
+before(waitForDb)
 
 before(function(done) {
   exec('bin/east migrate', (error, stdout, stderr) => {

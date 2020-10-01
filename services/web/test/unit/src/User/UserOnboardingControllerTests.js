@@ -21,7 +21,7 @@ describe('UserOnboardingController', function() {
       }
     ]
 
-    this.mongojs = {
+    this.mongodb = {
       db: {
         users: {
           find: sinon
@@ -46,7 +46,7 @@ describe('UserOnboardingController', function() {
 
     this.UserOnboardingController = SandboxedModule.require(modulePath, {
       requires: {
-        '../../infrastructure/mongojs': this.mongojs,
+        '../../infrastructure/mongodb': this.mongodb,
         './UserUpdater': this.UserUpdater,
         '../Email/EmailHandler': this.EmailHandler,
         'logger-sharelatex': this.logger
@@ -61,7 +61,7 @@ describe('UserOnboardingController', function() {
   it('sends onboarding emails', function(done) {
     this.res.send = ids => {
       ids.length.should.equal(3)
-      this.mongojs.db.users.find.calledOnce.should.equal(true)
+      this.mongodb.db.users.find.calledOnce.should.equal(true)
       this.EmailHandler.sendEmail.calledThrice.should.equal(true)
       this.UserUpdater.updateUser.calledThrice.should.equal(true)
       for (var i = 0; i < 3; i++) {

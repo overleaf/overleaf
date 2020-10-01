@@ -1,4 +1,4 @@
-const { db, ObjectId } = require('../../infrastructure/mongojs')
+const { db, ObjectId } = require('../../infrastructure/mongodb')
 const UserUpdater = require('./UserUpdater')
 const EmailHandler = require('../Email/EmailHandler')
 const logger = require('logger-sharelatex')

@@ -106,7 +106,7 @@ describe('ProjectDeleter', function() {
 
     this.db = {
       projects: {
-        insert: sinon.stub().yields()
+        insertOne: sinon.stub().resolves()
       }
     }
 
@@ -143,7 +143,7 @@ describe('ProjectDeleter', function() {
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../Docstore/DocstoreManager': this.DocstoreManager,
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
-        '../../infrastructure/mongojs': { db: this.db, ObjectId },
+        '../../infrastructure/mongodb': { db: this.db, ObjectId },
         '../History/HistoryManager': this.HistoryManager,
         'logger-sharelatex': this.logger,
         '../Errors/Errors': Errors
@@ -662,7 +662,7 @@ describe('ProjectDeleter', function() {
     it('should insert the project into the collection', async function() {
       await this.ProjectDeleter.promises.undeleteProject(this.project._id)
       sinon.assert.calledWith(
-        this.db.projects.insert,
+        this.db.projects.insertOne,
         sinon.match({
           _id: this.project._id,
           name: this.project.name
@@ -674,7 +674,7 @@ describe('ProjectDeleter', function() {
       this.project.archived = true
       await this.ProjectDeleter.promises.undeleteProject(this.project._id)
       sinon.assert.calledWith(
-        this.db.projects.insert,
+        this.db.projects.insertOne,
         sinon.match({ archived: undefined })
       )
     })

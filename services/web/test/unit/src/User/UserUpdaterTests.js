@@ -12,7 +12,7 @@ const { expect } = require('chai')
 describe('UserUpdater', function() {
   beforeEach(function() {
     tk.freeze(Date.now())
-    this.mongojs = {
+    this.mongodb = {
       db: {},
       ObjectId(id) {
         return id
@@ -50,7 +50,7 @@ describe('UserUpdater', function() {
       },
       requires: {
         'logger-sharelatex': this.logger,
-        '../../infrastructure/mongojs': this.mongojs,
+        '../../infrastructure/mongodb': this.mongodb,
         'metrics-sharelatex': {
           timeAsyncMethod: sinon.stub()
         },

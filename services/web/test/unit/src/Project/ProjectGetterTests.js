@@ -32,7 +32,7 @@ describe('ProjectGetter', function() {
         console: console
       },
       requires: {
-        '../../infrastructure/mongojs': {
+        '../../infrastructure/mongodb': {
           db: (this.db = {
             projects: {},
             users: {}

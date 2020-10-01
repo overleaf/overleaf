@@ -48,7 +48,7 @@ describe('UserGetter', function() {
         'logger-sharelatex': {
           log() {}
         },
-        '../../infrastructure/mongojs': this.Mongo,
+        '../../infrastructure/mongodb': this.Mongo,
         'metrics-sharelatex': {
           timeAsyncMethod: sinon.stub()
         },

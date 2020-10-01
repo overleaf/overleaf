@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const { db, ObjectId } = require('../../infrastructure/mongojs')
+const { db, ObjectId } = require('../../infrastructure/mongodb')
 const { callbackify } = require('util')
 const { Project } = require('../../models/Project')
 const { DeletedProject } = require('../../models/DeletedProject')
@@ -290,16 +290,7 @@ async function undeleteProject(projectId, options = {}) {
   // create a new document with an _id already specified. We need to
   // insert it directly into the collection
 
-  // db.projects.insert doesn't work with promisify
-  await new Promise((resolve, reject) => {
-    db.projects.insert(restored, err => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve()
-      }
-    })
-  })
+  await db.projects.insertOne(restored)
   await DeletedProject.deleteOne({ _id: deletedProject._id }).exec()
 }
 

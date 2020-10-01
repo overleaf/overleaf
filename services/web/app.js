@@ -24,6 +24,7 @@ if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
 
 metrics.memory.monitor(logger)
 const Server = require('./app/src/infrastructure/Server')
+const mongodb = require('./app/src/infrastructure/mongodb')
 
 if (Settings.catchErrors) {
   process.removeAllListeners('uncaughtException')
@@ -40,12 +41,20 @@ if (!module.parent) {
   if (!process.env['WEB_API_USER'] || !process.env['WEB_API_PASSWORD']) {
     throw new Error('No API user and password provided')
   }
-  Server.server.listen(port, host, function() {
-    logger.info(`web starting up, listening on ${host}:${port}`)
-    logger.info(`${require('http').globalAgent.maxSockets} sockets enabled`)
-    // wait until the process is ready before monitoring the event loop
-    metrics.event_loop.monitor(logger)
-  })
+  mongodb
+    .waitForDb()
+    .then(() => {
+      Server.server.listen(port, host, function() {
+        logger.info(`web starting up, listening on ${host}:${port}`)
+        logger.info(`${require('http').globalAgent.maxSockets} sockets enabled`)
+        // wait until the process is ready before monitoring the event loop
+        metrics.event_loop.monitor(logger)
+      })
+    })
+    .catch(err => {
+      logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
+      process.exit(1)
+    })
 }
 
 // handle SIGTERM for graceful shutdown in kubernetes

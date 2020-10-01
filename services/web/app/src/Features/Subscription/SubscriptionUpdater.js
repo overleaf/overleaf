@@ -1,4 +1,4 @@
-const { db, ObjectId } = require('../../infrastructure/mongojs')
+const { db, ObjectId } = require('../../infrastructure/mongodb')
 const OError = require('@overleaf/o-error')
 const async = require('async')
 const { promisifyAll } = require('../../util/promises')
@@ -190,7 +190,7 @@ const SubscriptionUpdater = {
         [
           cb =>
             // 1. upsert subscription
-            db.subscriptions.update(
+            db.subscriptions.updateOne(
               { _id: subscription._id },
               subscription,
               { upsert: true },

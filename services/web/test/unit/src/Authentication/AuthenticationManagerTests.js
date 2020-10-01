@@ -20,7 +20,7 @@ describe('AuthenticationManager', function() {
         '../../models/User': {
           User: (this.User = {})
         },
-        '../../infrastructure/mongojs': {
+        '../../infrastructure/mongodb': {
           db: (this.db = { users: {} }),
           ObjectId
         },
@@ -99,9 +99,9 @@ describe('AuthenticationManager', function() {
           _id: '5c8791477192a80b5e76ca7e',
           email: (this.email = 'USER@sharelatex.com')
         }
-        this.db.users.update = sinon
+        this.db.users.updateOne = sinon
           .stub()
-          .callsArgWith(2, null, { nModified: 1 })
+          .callsArgWith(2, null, { modifiedCount: 1 })
       })
 
       it('should not produce an error', function(done) {
@@ -124,7 +124,7 @@ describe('AuthenticationManager', function() {
             expect(err).to.not.exist
             const {
               hashedPassword
-            } = this.db.users.update.lastCall.args[1].$set
+            } = this.db.users.updateOne.lastCall.args[1].$set
             expect(hashedPassword).to.exist
             expect(hashedPassword.length).to.equal(60)
             expect(hashedPassword).to.match(/^\$2a\$12\$[a-zA-Z0-9/.]{53}$/)
@@ -530,7 +530,7 @@ describe('AuthenticationManager', function() {
       this.salt = 'saltaasdfasdfasdf'
       this.bcrypt.genSalt = sinon.stub().callsArgWith(2, null, this.salt)
       this.bcrypt.hash = sinon.stub().callsArgWith(2, null, this.hashedPassword)
-      this.db.users.update = sinon.stub().callsArg(2)
+      this.db.users.updateOne = sinon.stub().callsArg(2)
     })
 
     describe('too long', function() {
@@ -613,7 +613,7 @@ describe('AuthenticationManager', function() {
       })
 
       it("should update the user's password in the database", function() {
-        const { args } = this.db.users.update.lastCall
+        const { args } = this.db.users.updateOne.lastCall
         expect(args[0]).to.deep.equal({
           _id: ObjectId(this.user_id.toString())
         })

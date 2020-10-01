@@ -1,6 +1,6 @@
 const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
-const { db, ObjectId } = require('../../infrastructure/mongojs')
+const { db, ObjectId } = require('../../infrastructure/mongodb')
 const metrics = require('metrics-sharelatex')
 const async = require('async')
 const { callbackify, promisify } = require('util')
@@ -200,7 +200,7 @@ const UserUpdater = {
       query._id = ObjectId(query._id)
     }
 
-    db.users.update(query, update, callback)
+    db.users.updateOne(query, update, callback)
   },
 
   //

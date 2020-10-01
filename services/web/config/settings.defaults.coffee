@@ -41,6 +41,11 @@ module.exports = settings =
 	# Databases
 	# ---------
 	mongo:
+		options: {
+			useUnifiedTopology: (process.env['MONGO_USE_UNIFIED_TOPOLOGY'] || 'true') == 'true',
+			poolSize: parseInt(process.env['MONGO_POOL_SIZE'], 10) || 10,
+			socketTimeoutMS: parseInt(process.env['MONGO_SOCKET_TIMEOUT'], 10) || 30000,
+		},
 		url : process.env['MONGO_CONNECTION_STRING'] || process.env['MONGO_URL'] || "mongodb://#{process.env['MONGO_HOST'] or '127.0.0.1'}/sharelatex"
 		poolSize: parseInt(process.env['MONGO_POOL_SIZE'], 10) || 10
 		socketTimeoutMS: parseInt(process.env['MONGO_SOCKET_TIMEOUT'], 10) || 30000
@@ -205,7 +210,7 @@ module.exports = settings =
 
 	# Used to close the editor off to users
 	editorIsOpen: process.env['EDITOR_IS_OPEN'] or true
-	
+
 	# Optional separate location for websocket connections, if unset defaults to siteUrl.
 	wsUrl: process.env['WEBSOCKET_URL']
 	wsUrlV2: process.env['WEBSOCKET_URL_V2']
@@ -229,7 +234,7 @@ module.exports = settings =
 	robotsNoindex: (process.env['ROBOTS_NOINDEX'] == "true") or false
 
 	maxEntitiesPerProject: 2000
-	
+
 	maxUploadSize: 50 * 1024 * 1024 # 50 MB
 
 	# start failing the health check if active handles exceeds this limit
@@ -612,7 +617,7 @@ module.exports = settings =
 
 	# currentImage: "texlive-full:2017.1"
 	# imageRoot: "<DOCKER REPOSITORY ROOT>" # without any trailing slash
-	
+
 	compileBodySizeLimitMb: process.env['COMPILE_BODY_SIZE_LIMIT_MB'] or 5
 
 	validRootDocExtensions: ['tex', 'Rtex', 'ltx']
@@ -645,7 +650,7 @@ module.exports = settings =
 					'col': [ 'width' ]
 					'figure': [ 'class', 'id', 'style']
 					'figcaption': [ 'class', 'id', 'style']
-					'i': [ 'aria-hidden', 'aria-label', 'class', 'id' ] 
+					'i': [ 'aria-hidden', 'aria-label', 'class', 'id' ]
 					'iframe': [ 'allowfullscreen', 'frameborder', 'height', 'src', 'style', 'width' ]
 					'img': [ 'alt', 'class', 'src', 'style' ]
 					'source': [ 'src', 'type' ]

@@ -14,7 +14,7 @@
 const Settings = require('settings-sharelatex')
 const crypto = require('crypto')
 const logger = require('logger-sharelatex')
-const { db } = require('../../infrastructure/mongojs')
+const { db } = require('../../infrastructure/mongodb')
 const Errors = require('../Errors/Errors')
 
 const ONE_HOUR_IN_S = 60 * 60
@@ -36,7 +36,7 @@ module.exports = {
     const createdAt = new Date()
     const expiresAt = new Date(createdAt.getTime() + expiresIn * 1000)
     const token = crypto.randomBytes(32).toString('hex')
-    return db.tokens.insert(
+    return db.tokens.insertOne(
       {
         use,
         token,
@@ -58,24 +58,23 @@ module.exports = {
       callback = function(error, data) {}
     }
     const now = new Date()
-    return db.tokens.findAndModify(
+    return db.tokens.findOneAndUpdate(
       {
-        query: {
-          use,
-          token,
-          expiresAt: { $gt: now },
-          usedAt: { $exists: false }
-        },
-        update: {
-          $set: {
-            usedAt: now
-          }
+        use,
+        token,
+        expiresAt: { $gt: now },
+        usedAt: { $exists: false }
+      },
+      {
+        $set: {
+          usedAt: now
         }
       },
-      function(error, token) {
+      function(error, result) {
         if (error != null) {
           return callback(error)
         }
+        const token = result.value
         if (token == null) {
           return callback(new Errors.NotFoundError('no token found'))
         }

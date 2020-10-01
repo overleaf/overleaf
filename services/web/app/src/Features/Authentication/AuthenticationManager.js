@@ -1,6 +1,6 @@
 const Settings = require('settings-sharelatex')
 const { User } = require('../../models/User')
-const { db, ObjectId } = require('../../infrastructure/mongojs')
+const { db, ObjectId } = require('../../infrastructure/mongodb')
 const bcrypt = require('bcrypt')
 const EmailHelper = require('../Helpers/EmailHelper')
 const V1Handler = require('../V1/V1Handler')
@@ -15,7 +15,7 @@ const BCRYPT_MINOR_VERSION = Settings.security.bcryptMinorVersion || 'a'
 
 const _checkWriteResult = function(result, callback) {
   // for MongoDB
-  if (result && result.nModified === 1) {
+  if (result && result.modifiedCount === 1) {
     callback(null, true)
   } else {
     callback(null, false)
@@ -26,7 +26,7 @@ const AuthenticationManager = {
   authenticate(query, password, callback) {
     // Using Mongoose for legacy reasons here. The returned User instance
     // gets serialized into the session and there may be subtle differences
-    // between the user returned by Mongoose vs mongojs (such as default values)
+    // between the user returned by Mongoose vs mongodb (such as default values)
     User.findOne(query, (error, user) => {
       if (error) {
         return callback(error)
@@ -152,7 +152,7 @@ const AuthenticationManager = {
       if (error) {
         return callback(error)
       }
-      db.users.update(
+      db.users.updateOne(
         {
           _id: ObjectId(userId.toString())
         },
