@@ -43,6 +43,9 @@ module.exports = MockDocUpdaterServer = {
         if (error != null) {
           return next(error)
         }
+        if (!data) {
+          return res.sendStatus(404)
+        }
         return res.json(data)
       }
     )
