@@ -1,5 +1,5 @@
 import App from '../../../base'
-import PDFJS from './pdfJsLoader'
+import { Util } from './pdfJsLoader'
 const EXTERNAL_LINK_TARGET = '_blank'
 const REL_NOOPENER = 'noreferrer noopener'
 
@@ -34,7 +34,7 @@ App.factory('pdfAnnotations', function() {
 
     buildLinkElementFromRect(rect) {
       rect = this.viewport.convertToViewportRectangle(rect)
-      rect = PDFJS.Util.normalizeRect(rect)
+      rect = Util.normalizeRect(rect)
       const element = document.createElement('a')
       element.style.left = Math.floor(rect[0]) + 'px'
       element.style.top = Math.floor(rect[1]) + 'px'
