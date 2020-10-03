@@ -143,18 +143,22 @@ PromWrapper.setupSweeping = function() {
   if (sweepingInterval) {
     clearInterval(sweepingInterval)
   }
+  if (!PromWrapper.ttlInMinutes) {
+    if (process.env.DEBUG_METRICS) {
+      console.log('Not registering sweep method -- empty ttl')
+    }
+    return
+  }
   if (process.env.DEBUG_METRICS) {
     console.log('Registering sweep method')
   }
   sweepingInterval = setInterval(function() {
-    if (PromWrapper.ttlInMinutes) {
-      if (process.env.DEBUG_METRICS) {
-        console.log('Sweeping metrics')
-      }
-      return metrics.forEach((metric, key) => {
-        return metric.sweep()
-      })
+    if (process.env.DEBUG_METRICS) {
+      console.log('Sweeping metrics')
     }
+    return metrics.forEach((metric, key) => {
+      return metric.sweep()
+    })
   }, 60000)
 
   const Metrics = require('./index')
