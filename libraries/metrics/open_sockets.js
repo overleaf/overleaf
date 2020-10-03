@@ -6,7 +6,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let OpenSocketsMonitor
-const { URL } = require('url')
 const seconds = 1000
 
 // In Node 0.10 the default is 5, which means only 5 open connections at one.
@@ -14,6 +13,27 @@ const seconds = 1000
 // regardless of Node version.
 require('http').globalAgent.maxSockets = Infinity
 require('https').globalAgent.maxSockets = Infinity
+
+const SOCKETS_HTTP = require('http').globalAgent.sockets
+const SOCKETS_HTTPS = require('https').globalAgent.sockets
+
+// keep track of set gauges and reset them in the next collection cycle
+const SEEN_HOSTS_HTTP = new Set()
+const SEEN_HOSTS_HTTPS = new Set()
+
+function collectOpenConnections(sockets, seenHosts, prefix) {
+  const Metrics = require('./index')
+  Object.keys(sockets).forEach(host => seenHosts.add(host))
+  seenHosts.forEach(host => {
+    // host: 'HOST:PORT:'
+    const hostname = host.split(':')[0]
+    const openConnections = (sockets[host] || []).length
+    if (!openConnections) {
+      seenHosts.delete(host)
+    }
+    Metrics.gauge(`open_connections.${prefix}.${hostname}`, openConnections)
+  })
+}
 
 module.exports = OpenSocketsMonitor = {
   monitor(logger) {
@@ -26,29 +46,7 @@ module.exports = OpenSocketsMonitor = {
   },
 
   gaugeOpenSockets() {
-    let agents, hostname, url
-    const Metrics = require('./index')
-    const object = require('http').globalAgent.sockets
-    for (url in object) {
-      agents = object[url]
-      url = new URL(`http://${url}`)
-      hostname =
-        url.hostname != null ? url.hostname.replace(/\./g, '_') : undefined
-      Metrics.gauge(`open_connections.http.${hostname}`, agents.length)
-    }
-    return (() => {
-      const result = []
-      const object1 = require('https').globalAgent.sockets
-      for (url in object1) {
-        agents = object1[url]
-        url = new URL(`https://${url}`)
-        hostname =
-          url.hostname != null ? url.hostname.replace(/\./g, '_') : undefined
-        result.push(
-          Metrics.gauge(`open_connections.https.${hostname}`, agents.length)
-        )
-      }
-      return result
-    })()
+    collectOpenConnections(SOCKETS_HTTP, SEEN_HOSTS_HTTP, 'http')
+    collectOpenConnections(SOCKETS_HTTPS, SEEN_HOSTS_HTTPS, 'https')
   }
 }
