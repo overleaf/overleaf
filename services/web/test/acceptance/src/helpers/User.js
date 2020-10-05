@@ -110,6 +110,7 @@ class User {
       if (error != null) {
         return callback(error)
       }
+      this.setExtraAttributes(user)
       AuthenticationManager.setUserPasswordInV2(
         user._id,
         this.password,
@@ -117,17 +118,12 @@ class User {
           if (error != null) {
             return callback(error)
           }
-          UserUpdater.updateUser(
-            user._id,
-            { $set: { emails: this.emails } },
-            error => {
-              if (error != null) {
-                return callback(error)
-              }
-              this.setExtraAttributes(user)
-              callback(null, this.password)
+          this.mongoUpdate({ $set: { emails: this.emails } }, error => {
+            if (error != null) {
+              return callback(error)
             }
-          )
+            callback(null, this.password)
+          })
         }
       )
     })

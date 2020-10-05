@@ -5,6 +5,7 @@ const UserCreator = require('../../../../app/src/Features/User/UserCreator')
 const UserGetter = require('../../../../app/src/Features/User/UserGetter')
 const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')
 const request = require('request-promise-native')
+const { ObjectId } = require('mongodb')
 
 let globalUserNum = 1
 
@@ -200,11 +201,15 @@ class UserHelper {
    * All args passed to UserUpdater.getUser.
    * @returns {UserHelper}
    */
-  static async updateUser(...args) {
-    const user = await UserUpdater.promises.updateUser(...args)
+  static async updateUser(userId, update) {
+    // TODO(das7pad): revert back to args pass-through after mongo upgrades
+    const user = await UserUpdater.promises.updateUser(
+      { _id: ObjectId(userId) },
+      update
+    )
 
     if (!user) {
-      throw new Error(`no user found for args: ${JSON.stringify([...args])}`)
+      throw new Error(`no user found for args: ${JSON.stringify([userId])}`)
     }
 
     return new UserHelper(user)
