@@ -1,0 +1,12 @@
+
+--- /var/www/sharelatex/web/app/views/layout/footer.pug
++++ /var/www/sharelatex/web/app/app/views/layout/footer.pug
+@@ -32,7 +32,7 @@ footer.site-footer
+ 						if item.url
+ 							a(href=item.url, class=item.class) !{translate(item.text)}
+ 						else
+-							| !{translate(item.text)}
++							| !{item.text}
+ 
+ 			ul.col-md-3.text-right
+ 
