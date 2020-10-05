@@ -1,4 +1,5 @@
 const readline = require('readline')
+const { waitForDb } = require('../app/src/infrastructure/mongodb')
 const ProjectEntityHandler = require('../app/src/Features/Project/ProjectEntityHandler')
 const ProjectGetter = require('../app/src/Features/Project/ProjectGetter')
 const Errors = require('../app/src/Features/Errors/Errors')
@@ -37,7 +38,8 @@ async function countFiles() {
   }
 }
 
-countFiles()
+waitForDb()
+  .then(countFiles)
   .then(() => {
     process.exit(0)
   })

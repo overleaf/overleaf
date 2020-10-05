@@ -1,3 +1,4 @@
+const { waitForDb } = require('../app/src/infrastructure/mongodb')
 const { User } = require('../app/src/models/User')
 const UserController = require('../app/src/Features/User/UserController')
 require('logger-sharelatex').logger.level('error')
@@ -41,7 +42,8 @@ async function run() {
   }
 }
 
-run()
+waitForDb()
+  .then(run)
   .then(() => {
     process.exit()
   })
