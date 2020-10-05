@@ -98,6 +98,7 @@ describe('SubscriptionUpdater', function() {
         console: console
       },
       requires: {
+        mongodb: { ObjectId },
         '../../models/Subscription': {
           Subscription: this.SubscriptionModel
         },

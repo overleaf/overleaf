@@ -186,6 +186,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         console: console
       },
       requires: {
+        mongodb: { ObjectId },
         'logger-sharelatex': this.logger,
         'settings-sharelatex': this.Settings,
         '../Cooldown/CooldownManager': this.CooldownManager,

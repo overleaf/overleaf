@@ -29,7 +29,7 @@ describe('UserMembershipViewModel', function() {
         console: console
       },
       requires: {
-        mongodb: require('mongodb'),
+        mongodb: { ObjectId },
         '../User/UserGetter': this.UserGetter
       }
     })

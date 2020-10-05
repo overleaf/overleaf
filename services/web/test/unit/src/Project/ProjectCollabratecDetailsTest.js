@@ -38,6 +38,7 @@ describe('ProjectCollabratecDetailsHandler', function() {
           console: console
         },
         requires: {
+          mongodb: { ObjectId },
           '../../models/Project': { Project: this.ProjectModel }
         }
       }

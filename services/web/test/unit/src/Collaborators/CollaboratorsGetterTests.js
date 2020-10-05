@@ -51,6 +51,7 @@ describe('CollaboratorsGetter', function() {
         console: console
       },
       requires: {
+        mongodb: { ObjectId },
         '../User/UserGetter': this.UserGetter,
         '../../models/Project': { Project },
         '../Project/ProjectGetter': this.ProjectGetter,

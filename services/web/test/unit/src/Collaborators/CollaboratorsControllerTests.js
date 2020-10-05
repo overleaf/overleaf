@@ -61,6 +61,7 @@ describe('CollaboratorsController', function() {
         console: console
       },
       requires: {
+        mongodb: { ObjectId },
         './CollaboratorsHandler': this.CollaboratorsHandler,
         './CollaboratorsGetter': this.CollaboratorsGetter,
         './OwnershipTransferHandler': this.OwnershipTransferHandler,

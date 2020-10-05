@@ -87,6 +87,7 @@ describe('TeamInvitesHandler', function() {
         console: console
       },
       requires: {
+        mongodb: { ObjectId },
         'logger-sharelatex': { log() {} },
         crypto: this.crypto,
         'settings-sharelatex': { siteUrl: 'http://example.com' },

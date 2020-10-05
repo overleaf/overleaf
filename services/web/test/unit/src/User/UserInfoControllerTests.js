@@ -39,6 +39,7 @@ describe('UserInfoController', function() {
         console: console
       },
       requires: {
+        mongodb: { ObjectId },
         './UserGetter': this.UserGetter,
         './UserUpdater': this.UserUpdater,
         './UserDeleter': this.UserDeleter,

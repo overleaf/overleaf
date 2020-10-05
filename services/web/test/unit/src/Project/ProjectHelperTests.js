@@ -36,6 +36,7 @@ describe('ProjectHelper', function() {
 
     this.ProjectHelper = SandboxedModule.require(MODULE_PATH, {
       requires: {
+        mongodb: { ObjectId },
         'settings-sharelatex': this.Settings
       }
     })

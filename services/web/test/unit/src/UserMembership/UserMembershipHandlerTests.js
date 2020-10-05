@@ -72,6 +72,7 @@ describe('UserMembershipHandler', function() {
         console: console
       },
       requires: {
+        mongodb: { ObjectId },
         './UserMembershipViewModel': this.UserMembershipViewModel,
         '../User/UserGetter': this.UserGetter,
         '../Errors/Errors': Errors,
