@@ -19,7 +19,7 @@ module.exports = {
             $gt: ObjectId.createFromTime(Date.now() / 1000 - 7 * 24 * 60 * 60)
           }
         },
-        { email: 1 }
+        { projection: { email: 1 } }
       )
       .toArray(function(error, users) {
         if (error) {

@@ -217,7 +217,7 @@ describe('ProjectGetter', function() {
           })
           return expect(
             this.db.projects.findOne.lastCall.args[1]
-          ).to.deep.equal(this.projection)
+          ).to.deep.equal({ projection: this.projection })
         })
       })
 
@@ -294,7 +294,7 @@ describe('ProjectGetter', function() {
           })
           return expect(
             this.db.projects.findOne.lastCall.args[1]
-          ).to.deep.equal(this.projection)
+          ).to.deep.equal({ projection: this.projection })
         })
       })
 

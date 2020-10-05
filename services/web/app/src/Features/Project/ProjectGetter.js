@@ -116,7 +116,7 @@ const ProjectGetter = {
       return callback(err)
     }
 
-    return db.projects.findOne(query, projection, function(err, project) {
+    return db.projects.findOne(query, { projection }, function(err, project) {
       if (err != null) {
         OError.tag(err, 'error getting project', {
           query,
