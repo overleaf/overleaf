@@ -1,4 +1,8 @@
 [
+  "n_warnings",
+  "n_warnings_plural",
+  "n_errors",
+  "n_errors_plural",
   "file_outline",
   "the_file_outline_is_a_new_feature_click_the_icon_to_learn_more",
   "we_cant_find_any_sections_or_subsections_in_this_file",
