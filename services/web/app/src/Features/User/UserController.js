@@ -12,7 +12,6 @@ const Features = require('../../infrastructure/Features')
 const UserAuditLogHandler = require('./UserAuditLogHandler')
 const UserSessionsManager = require('./UserSessionsManager')
 const UserUpdater = require('./UserUpdater')
-const SudoModeHandler = require('../SudoMode/SudoModeHandler')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const OError = require('@overleaf/o-error')
@@ -420,7 +419,6 @@ const UserController = {
       }
       if (user != null) {
         UserSessionsManager.untrackSession(user, sessionId)
-        SudoModeHandler.clearSudoMode(user._id)
       }
       cb()
     })

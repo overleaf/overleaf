@@ -67,9 +67,6 @@ describe('AuthenticationController', function() {
         '../../infrastructure/Modules': (this.Modules = {
           hooks: { fire: sinon.stub().yields(null, []) }
         }),
-        '../SudoMode/SudoModeHandler': (this.SudoModeHandler = {
-          activateSudoMode: sinon.stub().callsArgWith(1, null)
-        }),
         '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
           ipMatcherAffiliation: sinon.stub()
         }),

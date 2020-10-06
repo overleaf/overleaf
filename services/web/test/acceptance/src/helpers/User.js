@@ -573,23 +573,6 @@ class User {
     })
   }
 
-  activateSudoMode(callback) {
-    this.getCsrfToken(error => {
-      if (error != null) {
-        return callback(error)
-      }
-      this.request.post(
-        {
-          uri: '/confirm-password',
-          json: {
-            password: this.password
-          }
-        },
-        callback
-      )
-    })
-  }
-
   updateSettings(newSettings, callback) {
     this.getCsrfToken(error => {
       if (error != null) {

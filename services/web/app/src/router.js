@@ -40,8 +40,6 @@ const ContactRouter = require('./Features/Contacts/ContactRouter')
 const ReferencesController = require('./Features/References/ReferencesController')
 const AuthorizationMiddleware = require('./Features/Authorization/AuthorizationMiddleware')
 const BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
-const SudoModeController = require('./Features/SudoMode/SudoModeController')
-const SudoModeMiddleware = require('./Features/SudoMode/SudoModeMiddleware')
 const AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 const MetaController = require('./Features/Metadata/MetaController')
 const TokenAccessController = require('./Features/TokenAccess/TokenAccessController')
@@ -113,7 +111,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get(
     '/user/settings',
     AuthenticationController.requireLogin(),
-    SudoModeMiddleware.protectPage,
     UserPagesController.settingsPage
   )
   webRouter.post(
@@ -199,7 +196,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get(
     '/user/sessions',
     AuthenticationController.requireLogin(),
-    SudoModeMiddleware.protectPage,
     UserPagesController.sessionsPage
   )
   webRouter.post(
@@ -859,21 +855,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/beta/opt-out',
     AuthenticationController.requireLogin(),
     BetaProgramController.optOut
-  )
-  webRouter.get(
-    '/confirm-password',
-    AuthenticationController.requireLogin(),
-    SudoModeController.sudoModePrompt
-  )
-  webRouter.post(
-    '/confirm-password',
-    AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimit({
-      endpointName: 'confirm-password',
-      maxRequests: 10,
-      timeInterval: 60
-    }),
-    SudoModeController.submitPassword
   )
 
   // New "api" endpoints. Started as a way for v1 to call over to v2 (for

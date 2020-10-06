@@ -325,13 +325,7 @@ describe('Sessions', function() {
       this.user3 = new User()
       this.user3.email = this.user1.email
       this.user3.password = this.user1.password
-      async.series(
-        [
-          this.user2.login.bind(this.user2),
-          this.user2.activateSudoMode.bind(this.user2)
-        ],
-        done
-      )
+      async.series([this.user2.login.bind(this.user2)], done)
     })
 
     it('should allow the user to erase the other two sessions', function(done) {
@@ -382,26 +376,6 @@ describe('Sessions', function() {
               expect(sessions[0].slice(0, 5)).to.equal('sess:')
               expect(sessions[1].slice(0, 5)).to.equal('sess:')
               next()
-            })
-          },
-
-          // enter sudo-mode
-          next => {
-            this.user2.getCsrfToken(err => {
-              expect(err).to.be.oneOf([null, undefined])
-              this.user2.request.post(
-                {
-                  uri: '/confirm-password',
-                  json: {
-                    password: this.user2.password
-                  }
-                },
-                (err, response, body) => {
-                  expect(err).to.be.oneOf([null, undefined])
-                  expect(response.statusCode).to.equal(200)
-                  next()
-                }
-              )
             })
           },
 

@@ -16,7 +16,6 @@ const passport = require('passport')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const UrlHelper = require('../Helpers/UrlHelper')
 const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
-const SudoModeHandler = require('../SudoMode/SudoModeHandler')
 const _ = require('lodash')
 const {
   acceptsJson
@@ -103,16 +102,8 @@ const AuthenticationController = {
         if (err) {
           return next(err)
         }
-        SudoModeHandler.activateSudoMode(user._id, function(err) {
-          if (err) {
-            logger.err(
-              { err, user_id: user._id },
-              'Error activating Sudo Mode on login, continuing'
-            )
-          }
-          AuthenticationController._clearRedirectFromSession(req)
-          AsyncFormHelper.redirect(req, res, redir)
-        })
+        AuthenticationController._clearRedirectFromSession(req)
+        AsyncFormHelper.redirect(req, res, redir)
       })
     })
   },

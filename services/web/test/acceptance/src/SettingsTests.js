@@ -34,8 +34,7 @@ describe('SettingsPage', function() {
         cb => {
           MockV1Api.setUser(this.v1Id, this.v1User)
           return cb()
-        },
-        this.user.activateSudoMode.bind(this.user)
+        }
       ],
       done
     )

@@ -17,8 +17,7 @@ describe('Deleting a user', function() {
     async.series(
       [
         this.user.ensureUserExists.bind(this.user),
-        this.user.login.bind(this.user),
-        this.user.activateSudoMode.bind(this.user)
+        this.user.login.bind(this.user)
       ],
       done
     )
