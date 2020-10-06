@@ -39,6 +39,7 @@ describe('ThirdPartyIdentityManager', function() {
           this.provider,
           this.externalUserId,
           this.externalData,
+          { initiatorId: this.user.id, ipAddress: '0:0:0:0' },
           done
         )
       })
@@ -99,6 +100,7 @@ describe('ThirdPartyIdentityManager', function() {
           this.provider,
           this.externalUserId,
           this.externalData,
+          { initiatorId: this.user.id, ipAddress: '0:0:0:0' },
           (err, res) => {
             expect(res.thirdPartyIdentifiers.length).to.equal(1)
             return done()
@@ -114,6 +116,7 @@ describe('ThirdPartyIdentityManager', function() {
           this.provider,
           this.externalUserId,
           this.externalData,
+          { initiatorId: this.user.id, ipAddress: '0:0:0:0' },
           done
         )
       })
@@ -124,6 +127,7 @@ describe('ThirdPartyIdentityManager', function() {
           this.provider,
           this.externalUserId,
           this.externalData,
+          { initiatorId: this.user.id, ipAddress: '0:0:0:0' },
           (err, res) => {
             expect(res).to.exist
             done()
@@ -137,6 +141,7 @@ describe('ThirdPartyIdentityManager', function() {
           this.provider,
           this.externalUserId,
           this.externalData,
+          { initiatorId: this.user.id, ipAddress: '0:0:0:0' },
           (err, user) => {
             expect(user.thirdPartyIdentifiers.length).to.equal(1)
             return done()
@@ -151,6 +156,7 @@ describe('ThirdPartyIdentityManager', function() {
           this.provider,
           this.externalUserId,
           this.externalData,
+          { initiatorId: this.user.id, ipAddress: '0:0:0:0' },
           (err, user) => {
             expect(user.thirdPartyIdentifiers.length).to.equal(1)
             return done()
@@ -187,6 +193,7 @@ describe('ThirdPartyIdentityManager', function() {
         return ThirdPartyIdentityManager.unlink(
           this.user.id,
           this.provider,
+          { initiatorId: this.user.id, ipAddress: '0:0:0:0' },
           (err, res) => {
             expect(err).to.be.null
             expect(res.thirdPartyIdentifiers.length).to.equal(0)
@@ -203,6 +210,7 @@ describe('ThirdPartyIdentityManager', function() {
           this.provider,
           this.externalUserId,
           this.externalData,
+          { initiatorId: this.user.id, ipAddress: '0:0:0:0' },
           done
         )
       })
@@ -211,6 +219,7 @@ describe('ThirdPartyIdentityManager', function() {
         return ThirdPartyIdentityManager.unlink(
           this.user.id,
           this.provider,
+          { initiatorId: this.user.id, ipAddress: '0:0:0:0' },
           (err, user) => {
             expect(user.thirdPartyIdentifiers.length).to.equal(0)
             return done()

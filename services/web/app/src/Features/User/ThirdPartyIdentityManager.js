@@ -1,4 +1,5 @@
 const APP_ROOT = '../../../../app/src'
+const UserAuditLogHandler = require(`${APP_ROOT}/Features/User/UserAuditLogHandler`)
 const EmailHandler = require(`${APP_ROOT}/Features/Email/EmailHandler`)
 const Errors = require('../Errors/Errors')
 const _ = require('lodash')
@@ -58,6 +59,7 @@ function link(
   providerId,
   externalUserId,
   externalData,
+  auditLog,
   callback,
   retry
 ) {
@@ -65,80 +67,115 @@ function link(
   if (!oauthProviders[providerId]) {
     return callback(new Error('Not a valid provider'))
   }
-  const query = {
-    _id: userId,
-    'thirdPartyIdentifiers.providerId': {
-      $ne: providerId
-    }
-  }
-  const update = {
-    $push: {
-      thirdPartyIdentifiers: {
-        externalUserId,
-        externalData,
-        providerId
+
+  UserAuditLogHandler.addEntry(
+    userId,
+    'link-sso',
+    auditLog.initiatorId,
+    auditLog.ipAddress,
+    {
+      providerId
+    },
+    error => {
+      if (error) {
+        return callback(error)
       }
-    }
-  }
-  // add new tpi only if an entry for the provider does not exist
-  // projection includes thirdPartyIdentifiers for tests
-  User.findOneAndUpdate(query, update, { new: 1 }, (err, res) => {
-    if (err && err.code === 11000) {
-      callback(new Errors.ThirdPartyIdentityExistsError())
-    } else if (err != null) {
-      callback(err)
-    } else if (res) {
-      _sendSecurityAlert(accountLinked, providerId, res, userId)
-      callback(null, res)
-    } else if (retry) {
-      // if already retried then throw error
-      callback(new Error('update failed'))
-    } else {
-      // attempt to clear existing entry then retry
-      ThirdPartyIdentityManager.unlink(userId, providerId, function(err) {
-        if (err != null) {
-          return callback(err)
+      const query = {
+        _id: userId,
+        'thirdPartyIdentifiers.providerId': {
+          $ne: providerId
         }
-        ThirdPartyIdentityManager.link(
-          userId,
-          providerId,
-          externalUserId,
-          externalData,
-          callback,
-          true
-        )
+      }
+      const update = {
+        $push: {
+          thirdPartyIdentifiers: {
+            externalUserId,
+            externalData,
+            providerId
+          }
+        }
+      }
+      // add new tpi only if an entry for the provider does not exist
+      // projection includes thirdPartyIdentifiers for tests
+      User.findOneAndUpdate(query, update, { new: 1 }, (err, res) => {
+        if (err && err.code === 11000) {
+          callback(new Errors.ThirdPartyIdentityExistsError())
+        } else if (err != null) {
+          callback(err)
+        } else if (res) {
+          _sendSecurityAlert(accountLinked, providerId, res, userId)
+          callback(null, res)
+        } else if (retry) {
+          // if already retried then throw error
+          callback(new Error('update failed'))
+        } else {
+          // attempt to clear existing entry then retry
+          ThirdPartyIdentityManager.unlink(
+            userId,
+            providerId,
+            auditLog,
+            function(err) {
+              if (err != null) {
+                return callback(err)
+              }
+              ThirdPartyIdentityManager.link(
+                userId,
+                providerId,
+                externalUserId,
+                externalData,
+                auditLog,
+                callback,
+                true
+              )
+            }
+          )
+        }
       })
     }
-  })
+  )
 }
 
-function unlink(userId, providerId, callback) {
+function unlink(userId, providerId, auditLog, callback) {
   const accountLinked = false
   if (!oauthProviders[providerId]) {
     return callback(new Error('Not a valid provider'))
   }
-  const query = {
-    _id: userId
-  }
-  const update = {
-    $pull: {
-      thirdPartyIdentifiers: {
-        providerId
+  UserAuditLogHandler.addEntry(
+    userId,
+    'unlink-sso',
+    auditLog.initiatorId,
+    auditLog.ipAddress,
+    {
+      providerId
+    },
+    error => {
+      if (error) {
+        return callback(error)
       }
+      const query = {
+        _id: userId
+      }
+      const update = {
+        $pull: {
+          thirdPartyIdentifiers: {
+            providerId
+          }
+        }
+      }
+      // projection includes thirdPartyIdentifiers for tests
+      User.findOneAndUpdate(query, update, { new: 1 }, (err, res) => {
+        if (err != null) {
+          callback(err)
+        } else if (!res) {
+          callback(new Error('update failed'))
+        } else {
+          // no need to wait, errors are logged and not passed back
+          _sendSecurityAlert(accountLinked, providerId, res, userId)
+          callback(null, res)
+        }
+      })
     }
-  }
-  // projection includes thirdPartyIdentifiers for tests
-  User.findOneAndUpdate(query, update, { new: 1 }, (err, res) => {
-    if (err != null) {
-      callback(err)
-    } else if (!res) {
-      callback(new Error('update failed'))
-    } else {
-      // no need to wait, errors are logged and not passed back
-      _sendSecurityAlert(accountLinked, providerId, res, userId)
-      callback(null, res)
-    }
-  })
+  )
 }
 
 function _getUserQuery(providerId, externalUserId) {

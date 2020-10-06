@@ -1,7 +1,14 @@
 const OError = require('@overleaf/o-error')
 const { User } = require('../../models/User')
+const { callbackify } = require('util')
 
 const MAX_AUDIT_LOG_ENTRIES = 200
+
+function _canHaveNoInitiatorId(operation, info) {
+  if (operation === 'reset-password') return true
+  if (operation === 'unlink-sso' && info.providerId === 'collabratec')
+    return true
+}
 
 /**
  * Add an audit log entry
@@ -22,11 +29,12 @@ async function addEntry(userId, operation, initiatorId, ipAddress, info = {}) {
       ipAddress
     })
 
-  if (!initiatorId && operation !== 'reset-password')
+  if (!initiatorId && !_canHaveNoInitiatorId(operation, info)) {
     throw new OError('missing initiatorId for audit log', {
       operation,
       ipAddress
     })
+  }
 
   const timestamp = new Date()
   const entry = {
@@ -50,6 +58,7 @@ async function addEntry(userId, operation, initiatorId, ipAddress, info = {}) {
 }
 
 const UserAuditLogHandler = {
+  addEntry: callbackify(addEntry),
   promises: {
     addEntry
   }
