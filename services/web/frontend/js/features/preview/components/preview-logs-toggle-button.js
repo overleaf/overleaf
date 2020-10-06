@@ -36,34 +36,27 @@ function PreviewLogsToggleButton({
 }
 
 function CompilationResultIndicator({ nErrors, nWarnings }) {
-  if (nErrors) {
-    return <ErrorsCompilationResultIndicator nErrors={nErrors} />
-  } else if (nWarnings) {
-    return <WarningsCompilationResultIndicator nWarnings={nWarnings} />
+  if (nErrors || nWarnings) {
+    return (
+      <LogsCompilationResultIndicator
+        logType={nErrors ? 'errors' : 'warnings'}
+        nLogs={nErrors || nWarnings}
+      />
+    )
   } else {
     return <ViewLogsButton />
   }
 }
 
-function ErrorsCompilationResultIndicator({ nErrors }) {
+function LogsCompilationResultIndicator({ logType, nLogs }) {
   const { t } = useTranslation()
+  const label =
+    logType === 'errors' ? t('your_project_has_errors') : t('view_warnings')
   return (
     <>
       <Icon type="file-text-o" />
-      <span className="btn-toggle-logs-label">
-        {`${t('your_project_has_errors')} (${nErrors > 9 ? '9+' : nErrors})`}
-      </span>
-    </>
-  )
-}
-
-function WarningsCompilationResultIndicator({ nWarnings }) {
-  const { t } = useTranslation()
-  return (
-    <>
-      <Icon type="file-text-o" />
-      <span className="btn-toggle-logs-label">
-        {`${t('view_warnings')} (${nWarnings > 9 ? '9+' : nWarnings})`}
+      <span className="btn-toggle-logs-label" aria-label={label}>
+        {`${label} (${nLogs > 9 ? '9+' : nLogs})`}
       </span>
     </>
   )
@@ -99,12 +92,9 @@ PreviewLogsToggleButton.propTypes = {
   showLogs: PropTypes.bool.isRequired
 }
 
-ErrorsCompilationResultIndicator.propTypes = {
-  nErrors: PropTypes.number.isRequired
-}
-
-WarningsCompilationResultIndicator.propTypes = {
-  nWarnings: PropTypes.number.isRequired
+LogsCompilationResultIndicator.propTypes = {
+  logType: PropTypes.string.isRequired,
+  nLogs: PropTypes.number.isRequired
 }
 
 export default PreviewLogsToggleButton
