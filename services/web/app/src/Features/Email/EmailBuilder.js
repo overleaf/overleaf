@@ -431,7 +431,7 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
       isPlainText
     )
     const onboardingSurveyLink = EmailMessageHelper.displayLink(
-      'onboarding survey',
+      'Join our user feedback programme',
       'https://forms.gle/DB7pdk2B1VFQqVVB9',
       isPlainText
     )
@@ -442,7 +442,8 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
       `${learnLatexLink}: In this tutorial we provide a quick and easy first introduction to LaTeX with no prior knowledge required. By the time you are finished, you will have written your first LaTeX document!`,
       `${templatesLinks}: If you're looking for a template or example to get started, we've a large selection available in our template gallery, including CVs, project reports, journal articles and more.`,
       `${collaboratorsLink}: One of the key features of Overleaf is the ability to share projects and collaborate on them with other users. Find out how to share your projecs with your colleagues in this quick how-to guide.`,
-      `If you want to share your feedback as a new Overleaf user, please fill in our ${onboardingSurveyLink}.`,
+      `${onboardingSurveyLink} to help us make Overleaf even better!`,
+      'Thanks again for using Overleaf :)',
       `John`,
       `Dr John Hammersley <br />Co-founder & CEO <br />${siteLink}<hr>`,
       `Don't want onboarding emails like this from us? Don't worry, this is the only one. If you've previously subscribed to emails about product offers and company news and events, you can unsubscribe ${userSettingsLink}.`
