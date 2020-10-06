@@ -1,13 +1,11 @@
 const _ = require('underscore')
 const settings = require('settings-sharelatex')
-const marked = require('marked')
 const moment = require('moment')
 const EmailMessageHelper = require('./EmailMessageHelper')
 const StringHelper = require('../Helpers/StringHelper')
 const BaseWithHeaderEmailLayout = require(`./Layouts/BaseWithHeaderEmailLayout`)
 const SpamSafe = require('./SpamSafe')
 const ctaEmailBody = require('./Bodies/cta-email')
-const SingleCTAEmailBody = require(`./Bodies/SingleCTAEmailBody`)
 const NoCTAEmailBody = require(`./Bodies/NoCTAEmailBody`)
 
 function _emailBodyPlainText(content, opts, ctaEmail) {
@@ -72,58 +70,6 @@ function ctaTemplate(content) {
         ctaText: content.ctaText(opts),
         ctaURL: content.ctaURL(opts),
         gmailGoToAction: content.gmailGoToAction(opts),
-        StringHelper
-      })
-    }
-  }
-}
-
-//
-// DEPRECATED
-//
-// Use ctaTemplate instead of CTAEmailTemplate
-//
-function CTAEmailTemplate(content) {
-  if (content.greeting == null) {
-    content.greeting = () => 'Hi,'
-  }
-  if (content.secondaryMessage == null) {
-    content.secondaryMessage = () => ''
-  }
-  return {
-    subject(opts) {
-      return content.subject(opts)
-    },
-    layout: BaseWithHeaderEmailLayout,
-    plainTextTemplate(opts) {
-      return `\
-${content.greeting(opts)}
-
-${content.message(opts).trim()}
-
-${content.ctaText(opts)}: ${content.ctaURL(opts)}
-
-${(typeof content.secondaryMessage === 'function'
-        ? content.secondaryMessage(opts).trim()
-        : undefined) || ''}
-
-Regards,
-The ${settings.appName} Team - ${settings.siteUrl}\
-`
-    },
-    compiledTemplate(opts) {
-      return SingleCTAEmailBody({
-        title:
-          typeof content.title === 'function' ? content.title(opts) : undefined,
-        greeting: content.greeting(opts),
-        message: marked(content.message(opts).trim()),
-        secondaryMessage: marked(content.secondaryMessage(opts).trim()),
-        ctaText: content.ctaText(opts),
-        ctaURL: content.ctaURL(opts),
-        gmailGoToAction:
-          typeof content.gmailGoToAction === 'function'
-            ? content.gmailGoToAction(opts)
-            : undefined,
         StringHelper
       })
     }
@@ -558,7 +504,6 @@ function _formatUserNameAndEmail(user, placeholder) {
 module.exports = {
   templates,
   ctaTemplate,
-  CTAEmailTemplate,
   NoCTAEmailTemplate,
   buildEmail
 }
