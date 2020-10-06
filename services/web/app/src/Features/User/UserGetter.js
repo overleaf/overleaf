@@ -1,4 +1,5 @@
 const { db, ObjectId } = require('../../infrastructure/mongodb')
+const { ObjectId: MongooseObjectId } = require('mongoose').mongo
 const metrics = require('metrics-sharelatex')
 const logger = require('logger-sharelatex')
 const { promisifyAll } = require('../../util/promises')
@@ -154,6 +155,8 @@ function normalizeQuery(query) {
   }
   if (typeof query === 'string') {
     return { _id: ObjectId(query) }
+  } else if (query instanceof MongooseObjectId) {
+    return { _id: ObjectId(query.toString()) }
   } else if (query instanceof ObjectId) {
     return { _id: query }
   } else if (Array.isArray(query)) {

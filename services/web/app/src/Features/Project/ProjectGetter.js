@@ -14,6 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const { db, ObjectId } = require('../../infrastructure/mongodb')
+const { ObjectId: MongooseObjectId } = require('mongoose').mongo
 const OError = require('@overleaf/o-error')
 const metrics = require('metrics-sharelatex')
 const async = require('async')
@@ -106,6 +107,8 @@ const ProjectGetter = {
       query = { _id: ObjectId(project_id) }
     } else if (project_id instanceof ObjectId) {
       query = { _id: project_id }
+    } else if (project_id instanceof MongooseObjectId) {
+      query = { _id: ObjectId(project_id.toString()) }
     } else if (
       (project_id != null ? project_id.toString().length : undefined) === 24
     ) {

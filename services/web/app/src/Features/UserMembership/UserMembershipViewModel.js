@@ -12,6 +12,7 @@
  */
 let UserMembershipViewModel
 const { ObjectId } = require('mongodb')
+const { ObjectId: MongooseObjectId } = require('mongoose').mongo
 const UserGetter = require('../User/UserGetter')
 
 module.exports = UserMembershipViewModel = {
@@ -27,7 +28,12 @@ module.exports = UserMembershipViewModel = {
     if (callback == null) {
       callback = function(error, viewModel) {}
     }
-    if (!(userOrIdOrEmail instanceof ObjectId)) {
+    if (
+      !(
+        userOrIdOrEmail instanceof ObjectId ||
+        userOrIdOrEmail instanceof MongooseObjectId
+      )
+    ) {
       // userOrIdOrEmail is a user or an email and can be parsed by #build
       return callback(null, UserMembershipViewModel.build(userOrIdOrEmail))
     }
