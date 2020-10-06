@@ -1,7 +1,7 @@
 const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
-const { db, ObjectId } = require('../../infrastructure/mongodb')
-const { ObjectId: MongooseObjectId } = require('mongoose').mongo
+const { db } = require('../../infrastructure/mongodb')
+const { normalizeQuery } = require('../Helpers/Mongo')
 const metrics = require('metrics-sharelatex')
 const async = require('async')
 const { callbackify, promisify } = require('util')
@@ -193,14 +193,11 @@ const UserUpdater = {
     if (callback == null) {
       callback = () => {}
     }
-    if (typeof query === 'string') {
-      query = { _id: ObjectId(query) }
-    } else if (query instanceof ObjectId) {
-      query = { _id: query }
-    } else if (query instanceof MongooseObjectId) {
-      query = { _id: ObjectId(query.toString()) }
-    } else if (typeof query._id === 'string') {
-      query._id = ObjectId(query._id)
+
+    try {
+      query = normalizeQuery(query)
+    } catch (err) {
+      return callback(err)
     }
 
     db.users.updateOne(query, update, callback)

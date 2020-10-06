@@ -13,8 +13,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { db, ObjectId } = require('../../infrastructure/mongodb')
-const { ObjectId: MongooseObjectId } = require('mongoose').mongo
+const { db } = require('../../infrastructure/mongodb')
+const { normalizeQuery } = require('../Helpers/Mongo')
 const OError = require('@overleaf/o-error')
 const metrics = require('metrics-sharelatex')
 const async = require('async')
@@ -91,7 +91,6 @@ const ProjectGetter = {
   },
 
   getProjectWithoutLock(project_id, projection, callback) {
-    let query
     if (typeof projection === 'function' && callback == null) {
       callback = projection
       projection = {}
@@ -103,19 +102,10 @@ const ProjectGetter = {
       return callback(new Error('projection is not an object'))
     }
 
-    if (typeof project_id === 'string') {
-      query = { _id: ObjectId(project_id) }
-    } else if (project_id instanceof ObjectId) {
-      query = { _id: project_id }
-    } else if (project_id instanceof MongooseObjectId) {
-      query = { _id: ObjectId(project_id.toString()) }
-    } else if (
-      (project_id != null ? project_id.toString().length : undefined) === 24
-    ) {
-      // sometimes mongoose ids are hard to identify, this will catch them
-      query = { _id: ObjectId(project_id.toString()) }
-    } else {
-      const err = new Error('malformed get request')
+    let query
+    try {
+      query = normalizeQuery(project_id)
+    } catch (err) {
       return callback(err)
     }
 

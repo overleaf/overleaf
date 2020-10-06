@@ -1,5 +1,4 @@
-const { db, ObjectId } = require('../../infrastructure/mongodb')
-const { ObjectId: MongooseObjectId } = require('mongoose').mongo
+const { db } = require('../../infrastructure/mongodb')
 const metrics = require('metrics-sharelatex')
 const logger = require('logger-sharelatex')
 const { promisifyAll } = require('../../util/promises')
@@ -7,6 +6,7 @@ const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
 const InstitutionsHelper = require('../Institutions/InstitutionsHelper')
 const Errors = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')
+const { normalizeQuery, normalizeMultiQuery } = require('../Helpers/Mongo')
 
 const UserGetter = {
   getUser(query, projection, callback) {
@@ -131,7 +131,7 @@ const UserGetter = {
 
   getUsers(query, projection, callback) {
     try {
-      query = normalizeQuery(query)
+      query = normalizeMultiQuery(query)
       db.users.find(query, { projection }).toArray(callback)
     } catch (err) {
       callback(err)
@@ -146,24 +146,6 @@ const UserGetter = {
       }
       callback(error)
     })
-  }
-}
-
-function normalizeQuery(query) {
-  if (!query) {
-    throw new Error('no query provided')
-  }
-  if (typeof query === 'string') {
-    return { _id: ObjectId(query) }
-  } else if (query instanceof MongooseObjectId) {
-    return { _id: ObjectId(query.toString()) }
-  } else if (query instanceof ObjectId) {
-    return { _id: query }
-  } else if (Array.isArray(query)) {
-    const userIds = query.map(u => ObjectId(u.toString()))
-    return { _id: { $in: userIds } }
-  } else {
-    return query
   }
 }
 

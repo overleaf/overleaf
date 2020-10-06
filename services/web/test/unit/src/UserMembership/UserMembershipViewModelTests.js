@@ -20,6 +20,10 @@ const { ObjectId } = require('mongodb')
 const modulePath =
   '../../../../app/src/Features/UserMembership/UserMembershipViewModel'
 const SandboxedModule = require('sandboxed-module')
+const {
+  isObjectIdInstance,
+  normalizeQuery
+} = require('../../../../app/src/Features/Helpers/Mongo')
 
 describe('UserMembershipViewModel', function() {
   beforeEach(function() {
@@ -30,6 +34,7 @@ describe('UserMembershipViewModel', function() {
       },
       requires: {
         mongodb: { ObjectId },
+        '../Helpers/Mongo': { isObjectIdInstance, normalizeQuery },
         '../User/UserGetter': this.UserGetter
       }
     })

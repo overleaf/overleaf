@@ -10,6 +10,10 @@ const modulePath = path.join(
 )
 const { expect } = require('chai')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
+const {
+  normalizeQuery,
+  normalizeMultiQuery
+} = require('../../../../app/src/Features/Helpers/Mongo')
 
 describe('UserGetter', function() {
   beforeEach(function() {
@@ -45,6 +49,7 @@ describe('UserGetter', function() {
         console: console
       },
       requires: {
+        '../Helpers/Mongo': { normalizeQuery, normalizeMultiQuery },
         'logger-sharelatex': {
           log() {}
         },
@@ -66,7 +71,7 @@ describe('UserGetter', function() {
 
   describe('getUser', function() {
     it('should get user', function(done) {
-      const query = { _id: 'foo' }
+      const query = { _id: '000000000000000000000000' }
       const projection = { email: 1 }
       this.UserGetter.getUser(query, projection, (error, user) => {
         expect(error).to.not.exist
