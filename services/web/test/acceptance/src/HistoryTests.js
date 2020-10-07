@@ -13,7 +13,7 @@
  */
 const { expect } = require('chai')
 
-const { db, ObjectId } = require('../../../app/src/infrastructure/mongojs')
+const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 const MockV1HistoryApi = require('./helpers/MockV1HistoryApi')
 const User = require('./helpers/User')
 
@@ -33,7 +33,7 @@ describe('History', function() {
             return done(error)
           }
           this.v1_history_id = 42
-          return db.projects.update(
+          return db.projects.updateOne(
             {
               _id: ObjectId(this.project_id)
             },
@@ -83,7 +83,7 @@ describe('History', function() {
             return done(error)
           }
           this.v1_history_id = 42
-          db.projects.update(
+          db.projects.updateOne(
             { _id: ObjectId(this.project_id) },
             {
               $set: {
@@ -193,7 +193,7 @@ describe('History', function() {
         if (error != null) {
           return done(error)
         }
-        return db.projects.update(
+        return db.projects.updateOne(
           {
             _id: ObjectId(this.project_id)
           },

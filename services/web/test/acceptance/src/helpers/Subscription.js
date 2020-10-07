@@ -1,4 +1,4 @@
-const { db, ObjectId } = require('../../../../app/src/infrastructure/mongojs')
+const { db, ObjectId } = require('../../../../app/src/infrastructure/mongodb')
 const { expect } = require('chai')
 const SubscriptionUpdater = require('../../../../app/src/Features/Subscription/SubscriptionUpdater')
 const SubscriptionModel = require('../../../../app/src/models/Subscription')

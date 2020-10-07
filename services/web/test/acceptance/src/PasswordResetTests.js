@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const RateLimiter = require('../../../app/src/infrastructure/RateLimiter')
 const UserHelper = require('./helpers/UserHelper')
-const { db } = require('../../../app/src/infrastructure/mongojs')
+const { db } = require('../../../app/src/infrastructure/mongodb')
 
 describe('PasswordReset', function() {
   let email, response, user, userHelper, token
@@ -25,15 +25,9 @@ describe('PasswordReset', function() {
       }
     })
 
-    token = await new Promise(resolve => {
-      db.tokens.findOne(
-        { 'data.user_id': user._id.toString() },
-        (error, tokenData) => {
-          expect(error).to.not.exist
-          resolve(tokenData.token)
-        }
-      )
-    })
+    token = (await db.tokens.findOne({
+      'data.user_id': user._id.toString()
+    })).token
   })
   describe('with a valid token', function() {
     describe('when logged in', function() {

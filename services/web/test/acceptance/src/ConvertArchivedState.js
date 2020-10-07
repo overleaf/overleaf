@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const { exec } = require('child_process')
-const { ObjectId } = require('../../../app/src/infrastructure/mongojs')
+const { ObjectId } = require('mongodb')
 
 const User = require('./helpers/User').promises
 

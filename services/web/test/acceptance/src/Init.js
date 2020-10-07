@@ -1,7 +1,6 @@
 const App = require('../../../app.js')
 const { exec } = require('child_process')
-const { waitForDb } = require('../../../app/src/infrastructure/mongodb')
-const { db } = require('../../../app/src/infrastructure/mongojs')
+const { waitForDb, db } = require('../../../app/src/infrastructure/mongodb')
 
 require('logger-sharelatex').logger.level('error')
 
@@ -18,28 +17,8 @@ before(function(done) {
   })
 })
 
-afterEach(function(done) {
-  db.getCollectionNames((error, names) => {
-    if (error) {
-      throw error
-    }
-    Promise.all(
-      names.map(name => {
-        return new Promise((resolve, reject) => {
-          db[name].remove({}, err => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve()
-            }
-          })
-        })
-      })
-    ).then(
-      () => done(),
-      err => {
-        throw err
-      }
-    )
-  })
+afterEach(async function() {
+  return Promise.all(
+    Object.values(db).map(collection => collection.deleteMany({}))
+  )
 })

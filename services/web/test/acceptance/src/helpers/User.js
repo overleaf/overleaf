@@ -1,6 +1,6 @@
 const request = require('./request')
 const settings = require('settings-sharelatex')
-const { db, ObjectId } = require('../../../../app/src/infrastructure/mongojs')
+const { db, ObjectId } = require('../../../../app/src/infrastructure/mongodb')
 const UserModel = require('../../../../app/src/models/User').User
 const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')
 const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
@@ -43,7 +43,7 @@ class User {
   }
 
   mongoUpdate(updateOp, callback) {
-    db.users.update({ _id: ObjectId(this._id) }, updateOp, callback)
+    db.users.updateOne({ _id: ObjectId(this._id) }, updateOp, callback)
   }
 
   register(callback) {
@@ -202,17 +202,13 @@ class User {
   }
 
   ensureAdmin(callback) {
-    db.users.update(
-      { _id: ObjectId(this.id) },
-      { $set: { isAdmin: true } },
-      callback
-    )
+    this.mongoUpdate({ $set: { isAdmin: true } }, callback)
   }
 
   ensureStaffAccess(flag, callback) {
     const update = { $set: {} }
     update.$set[`staffAccess.${flag}`] = true
-    db.users.update({ _id: ObjectId(this.id) }, update, callback)
+    this.mongoUpdate(update, callback)
   }
 
   upgradeFeatures(callback) {
@@ -227,11 +223,7 @@ class User {
       trackChanges: true,
       trackChangesVisible: true
     }
-    db.users.update(
-      { _id: ObjectId(this.id) },
-      { $set: { features } },
-      callback
-    )
+    this.mongoUpdate({ $set: { features } }, callback)
   }
 
   downgradeFeatures(callback) {
@@ -246,26 +238,18 @@ class User {
       trackChanges: false,
       trackChangesVisible: false
     }
-    db.users.update(
-      { _id: ObjectId(this.id) },
-      { $set: { features } },
-      callback
-    )
+    this.mongoUpdate({ $set: { features } }, callback)
   }
 
   defaultFeatures(callback) {
     const features = settings.defaultFeatures
-    db.users.update(
-      { _id: ObjectId(this.id) },
-      { $set: { features } },
-      callback
-    )
+    this.mongoUpdate({ $set: { features } }, callback)
   }
 
   getFeatures(callback) {
     db.users.findOne(
       { _id: ObjectId(this.id) },
-      { features: 1 },
+      { projection: { features: 1 } },
       (error, user) => callback(error, user && user.features)
     )
   }
@@ -279,16 +263,12 @@ class User {
         return callback()
       }
       const userId = user._id
-      db.projects.remove(
-        { owner_ref: ObjectId(userId) },
-        { multi: true },
-        err => {
-          if (err != null) {
-            callback(err)
-          }
-          db.users.remove({ _id: ObjectId(userId) }, callback)
+      db.projects.deleteMany({ owner_ref: ObjectId(userId) }, err => {
+        if (err != null) {
+          callback(err)
         }
-      )
+        db.users.deleteOne({ _id: ObjectId(userId) }, callback)
+      })
     })
   }
 
@@ -323,7 +303,7 @@ class User {
   }
 
   saveProject(project, callback) {
-    db.projects.update({ _id: project._id }, project, callback)
+    db.projects.updateOne({ _id: project._id }, { $set: project }, callback)
   }
 
   createProject(name, options, callback) {
@@ -375,9 +355,7 @@ class User {
   }
 
   deleteProjects(callback) {
-    db.projects.remove({ owner_ref: ObjectId(this.id) }, { multi: true }, err =>
-      callback(err)
-    )
+    db.projects.deleteMany({ owner_ref: ObjectId(this.id) }, callback)
   }
 
   openProject(projectId, callback) {
@@ -430,9 +408,7 @@ class User {
     } else if (privileges === 'readOnly') {
       updateOp = { $addToSet: { readOnly_refs: user._id } }
     }
-    db.projects.update({ _id: db.ObjectId(projectId) }, updateOp, err =>
-      callback(err)
-    )
+    db.projects.updateOne({ _id: ObjectId(projectId) }, updateOp, callback)
   }
 
   makePublic(projectId, level, callback) {
@@ -520,17 +496,7 @@ class User {
             newPassword2: this.password
           }
         },
-        (error, response, body) => {
-          if (error != null) {
-            return callback(error)
-          }
-          db.users.findOne({ email: this.email }, (error, user) => {
-            if (error != null) {
-              return callback(error)
-            }
-            callback()
-          })
-        }
+        callback
       )
     })
   }

@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const async = require('async')
 const User = require('./helpers/User')
 const request = require('./helpers/request')
-const { db, ObjectId } = require('../../../app/src/infrastructure/mongojs')
+const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 const _ = require('underscore')
 
 describe('UserOnboardingTests', function() {
@@ -46,11 +46,11 @@ describe('UserOnboardingTests', function() {
 
         // user 3 should still not have had an email sent
         const user3 = this.user3
-        db.users.find(
-          {
+        db.users
+          .find({
             onboardingEmailSentAt: null
-          },
-          (error, users) => {
+          })
+          .toArray((error, users) => {
             if (error != null) {
               throw error
             }
@@ -58,8 +58,7 @@ describe('UserOnboardingTests', function() {
             expect(ids.length).to.equal(1)
             expect(ids).to.include(user3._id.toString())
             done()
-          }
-        )
+          })
       }
     )
   })

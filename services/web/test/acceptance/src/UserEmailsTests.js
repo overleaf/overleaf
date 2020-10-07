@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const async = require('async')
 const User = require('./helpers/User')
 const UserHelper = require('./helpers/UserHelper')
-const { db, ObjectId } = require('../../../app/src/infrastructure/mongojs')
+const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 const MockV1Api = require('./helpers/MockV1Api')
 const expectErrorResponse = require('./helpers/expectErrorResponse')
 
@@ -47,13 +47,13 @@ describe('UserEmails', function() {
             )
           },
           cb => {
-            db.tokens.find(
-              {
+            db.tokens
+              .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
                 usedAt: { $exists: false }
-              },
-              (error, tokens) => {
+              })
+              .toArray((error, tokens) => {
                 expect(error).to.not.exist
                 // There should only be one confirmation token at the moment
                 expect(tokens.length).to.equal(1)
@@ -63,8 +63,7 @@ describe('UserEmails', function() {
                 expect(tokens[0].data.user_id).to.equal(this.user._id)
                 ;({ token } = tokens[0])
                 cb()
-              }
-            )
+              })
           },
           cb => {
             this.user.request(
@@ -95,19 +94,18 @@ describe('UserEmails', function() {
             )
           },
           cb => {
-            db.tokens.find(
-              {
+            db.tokens
+              .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
                 usedAt: { $exists: false }
-              },
-              (error, tokens) => {
+              })
+              .toArray((error, tokens) => {
                 expect(error).to.not.exist
                 // Token should be deleted after use
                 expect(tokens.length).to.equal(0)
                 cb()
-              }
-            )
+              })
           }
         ],
         done
@@ -134,13 +132,13 @@ describe('UserEmails', function() {
             )
           },
           cb => {
-            db.tokens.find(
-              {
+            db.tokens
+              .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
                 usedAt: { $exists: false }
-              },
-              (error, tokens) => {
+              })
+              .toArray((error, tokens) => {
                 expect(error).to.not.exist
                 // There should only be one confirmation token at the moment
                 expect(tokens.length).to.equal(1)
@@ -148,8 +146,7 @@ describe('UserEmails', function() {
                 expect(tokens[0].data.user_id).to.equal(this.user._id)
                 token1 = tokens[0].token
                 cb()
-              }
-            )
+              })
           },
           cb => {
             // Delete the email from the first user
@@ -191,13 +188,13 @@ describe('UserEmails', function() {
             )
           },
           cb => {
-            db.tokens.find(
-              {
+            db.tokens
+              .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user2._id,
                 usedAt: { $exists: false }
-              },
-              (error, tokens) => {
+              })
+              .toArray((error, tokens) => {
                 expect(error).to.not.exist
                 // The first token has been used, so this should be token2 now
                 expect(tokens.length).to.equal(1)
@@ -205,8 +202,7 @@ describe('UserEmails', function() {
                 expect(tokens[0].data.user_id).to.equal(this.user2._id)
                 token2 = tokens[0].token
                 cb()
-              }
-            )
+              })
           },
           cb => {
             // Second user should be able to confirm the email
@@ -265,13 +261,13 @@ describe('UserEmails', function() {
             )
           },
           cb => {
-            db.tokens.find(
-              {
+            db.tokens
+              .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
                 usedAt: { $exists: false }
-              },
-              (error, tokens) => {
+              })
+              .toArray((error, tokens) => {
                 expect(error).to.not.exist
                 // There should only be one confirmation token at the moment
                 expect(tokens.length).to.equal(1)
@@ -279,8 +275,7 @@ describe('UserEmails', function() {
                 expect(tokens[0].data.user_id).to.equal(this.user._id)
                 ;({ token } = tokens[0])
                 cb()
-              }
-            )
+              })
           },
           cb => {
             db.tokens.update(
@@ -338,13 +333,13 @@ describe('UserEmails', function() {
             )
           },
           cb => {
-            db.tokens.find(
-              {
+            db.tokens
+              .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
                 usedAt: { $exists: false }
-              },
-              (error, tokens) => {
+              })
+              .toArray((error, tokens) => {
                 expect(error).to.not.exist
                 // There should only be one confirmation token at the moment
                 expect(tokens.length).to.equal(1)
@@ -353,8 +348,7 @@ describe('UserEmails', function() {
                 )
                 expect(tokens[0].data.user_id).to.equal(this.user._id)
                 cb()
-              }
-            )
+              })
           },
           cb => {
             this.user.request(
@@ -373,13 +367,13 @@ describe('UserEmails', function() {
             )
           },
           cb => {
-            db.tokens.find(
-              {
+            db.tokens
+              .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
                 usedAt: { $exists: false }
-              },
-              (error, tokens) => {
+              })
+              .toArray((error, tokens) => {
                 expect(error).to.not.exist
                 // There should be two tokens now
                 expect(tokens.length).to.equal(2)
@@ -392,8 +386,7 @@ describe('UserEmails', function() {
                 )
                 expect(tokens[1].data.user_id).to.equal(this.user._id)
                 cb()
-              }
-            )
+              })
           }
         ],
         done
@@ -432,21 +425,20 @@ describe('UserEmails', function() {
             )
           },
           cb => {
-            db.tokens.find(
-              {
+            db.tokens
+              .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
                 usedAt: { $exists: false }
-              },
-              (error, tokens) => {
+              })
+              .toArray((error, tokens) => {
                 expect(error).to.not.exist
                 // There should still only be one confirmation token
                 expect(tokens.length).to.equal(1)
                 expect(tokens[0].data.email).to.equal(this.user.email)
                 expect(tokens[0].data.user_id).to.equal(this.user._id)
                 cb()
-              }
-            )
+              })
           }
         ],
         done
@@ -473,18 +465,17 @@ describe('UserEmails', function() {
             )
           },
           cb => {
-            db.tokens.find(
-              {
+            db.tokens
+              .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
                 usedAt: { $exists: false }
-              },
-              (error, tokens) => {
+              })
+              .toArray((error, tokens) => {
                 expect(error).to.not.exist
                 expect(tokens.length).to.equal(0)
                 cb()
-              }
-            )
+              })
           }
         ],
         done
@@ -514,7 +505,7 @@ describe('UserEmails', function() {
           },
           cb => {
             // Mark the email as confirmed
-            db.users.update(
+            db.users.updateOne(
               {
                 'emails.email': 'new-confirmed-default@example.com'
               },
@@ -565,7 +556,7 @@ describe('UserEmails', function() {
       async.series(
         [
           cb => {
-            db.users.update(
+            db.users.updateOne(
               {
                 _id: ObjectId(this.user._id)
               },
@@ -629,7 +620,7 @@ describe('UserEmails', function() {
       async.series(
         [
           cb => {
-            db.users.update(
+            db.users.updateOne(
               {
                 _id: ObjectId(this.user._id)
               },
@@ -659,7 +650,7 @@ describe('UserEmails', function() {
           },
           cb => {
             // Mark the email as confirmed
-            db.users.update(
+            db.users.updateOne(
               {
                 'emails.email': 'new-confirmed-default-in-v1@example.com'
               },
@@ -701,7 +692,7 @@ describe('UserEmails', function() {
       async.series(
         [
           cb => {
-            db.users.update(
+            db.users.updateOne(
               {
                 _id: ObjectId(this.user._id)
               },
@@ -731,7 +722,7 @@ describe('UserEmails', function() {
           },
           cb => {
             // Mark the email as confirmed
-            db.users.update(
+            db.users.updateOne(
               {
                 'emails.email': 'exists-in-v1@example.com'
               },
@@ -797,18 +788,10 @@ describe('UserEmails', function() {
           uri: '/user/emails'
         })
         expect(response.statusCode).to.equal(204)
-        const token = await new Promise(resolve => {
-          db.tokens.findOne(
-            {
-              'data.user_id': userId.toString(),
-              'data.email': otherEmail
-            },
-            (error, tokenData) => {
-              expect(error).to.not.exist
-              resolve(tokenData.token)
-            }
-          )
-        })
+        const token = (await db.tokens.findOne({
+          'data.user_id': userId.toString(),
+          'data.email': otherEmail
+        })).token
         response = await userHelper.request.post(`/user/emails/confirm`, {
           form: {
             token
