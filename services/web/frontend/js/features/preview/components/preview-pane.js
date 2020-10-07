@@ -43,10 +43,14 @@ function PreviewPane({
         onToggleLogs={onToggleLogs}
       />
       <span aria-live="polite" className="sr-only">
-        {nErrors ? t('n_errors', { count: nErrors }) : ''}
+        {nErrors && !compilerState.isCompiling
+          ? t('n_errors', { count: nErrors })
+          : ''}
       </span>
       <span aria-live="polite" className="sr-only">
-        {nWarnings ? t('n_warnings', { count: nWarnings }) : ''}
+        {nWarnings && !compilerState.isCompiling
+          ? t('n_warnings', { count: nWarnings })
+          : ''}
       </span>
       {showLogs ? (
         <PreviewLogsPane logEntries={compilerState.logEntries.all} />
