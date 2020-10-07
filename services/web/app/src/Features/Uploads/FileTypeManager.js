@@ -30,7 +30,8 @@ const FileTypeManager = {
     '.clo',
     '.ldf',
     '.rmd',
-    '.lua'
+    '.lua',
+    '.gv'
   ],
 
   IGNORE_EXTENSIONS: [
