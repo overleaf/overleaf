@@ -1,6 +1,5 @@
-const { promisify } = require('util')
 const { ReadPreference, ObjectId } = require('mongodb')
-const { getNativeDb } = require('../../app/src/infrastructure/Mongoose')
+const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
 
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 1000
 let BATCH_LAST_ID
@@ -13,7 +12,8 @@ async function getNextBatch(collection, query, maxId, projection) {
     query['_id'] = { $gt: maxId }
   }
   const entries = await collection
-    .find(query, projection)
+    .find(query)
+    .project(projection)
     .sort({ _id: 1 })
     .limit(BATCH_SIZE)
     .setReadPreference(ReadPreference.SECONDARY)
@@ -29,15 +29,8 @@ async function performUpdate(collection, nextBatch, update) {
 }
 
 async function batchedUpdate(collectionName, query, update, projection) {
-  // Apparently the mongo driver returns the connection too early.
-  // Some secondary connections are not ready as it returns, leading to
-  //  failing cursor actions with a readPreference set to 'secondary'.
-  // TODO(das7pad): revisit/remove this delay after the mongo-driver update.
-  const CONNECT_DELAY = parseInt(process.env.CONNECT_DELAY, 10) || 10000
-  await Promise.all([getNativeDb(), promisify(setTimeout)(CONNECT_DELAY)])
-
-  const db = await getNativeDb()
-  const collection = db.collection(collectionName)
+  await waitForDb()
+  const collection = db[collectionName]
 
   projection = projection || { _id: 1 }
   let nextBatch

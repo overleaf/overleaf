@@ -1,4 +1,4 @@
-const { db } = require('../app/src/infrastructure/mongojs')
+const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
 const minimist = require('minimist')
 const _ = require('lodash')
 const async = require('async')
@@ -85,10 +85,12 @@ const checkAndUpdateUsers = (users, callback) =>
 
 const loopForUsers = (skip, callback) => {
   db.users
-    .find({}, { features: 1, lastLoggedIn: 1 })
+    .find({})
+    .project({ features: 1, lastLoggedIn: 1 })
     .sort('_id')
     .skip(skip)
-    .limit(FETCH_LIMIT, (error, users) => {
+    .limit(FETCH_LIMIT)
+    .toArray((error, users) => {
       if (error) {
         return callback(error)
       }
@@ -141,5 +143,7 @@ const setup = () => {
   }
 }
 
-setup()
-run()
+waitForDb().then(() => {
+  setup()
+  run()
+})

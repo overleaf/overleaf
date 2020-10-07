@@ -4,7 +4,11 @@ const fs = require('fs')
 const minimist = require('minimist')
 const readline = require('readline')
 
-const { db, ObjectId } = require('../../app/src/infrastructure/mongojs')
+const {
+  db,
+  ObjectId,
+  waitForDb
+} = require('../../app/src/infrastructure/mongodb')
 const DocstoreManager = require('../../app/src/Features/Docstore/DocstoreManager')
   .promises
 
@@ -64,6 +68,8 @@ rl.on('close', async () => {
 
   console.log(`Loaded Data for ${docCount} docs in ${projectCount} Projects`)
 
+  await waitForDb()
+
   for (const projectId of Object.keys(orphanedDocs)) {
     await deleteOrphanedDocs(projectId, orphanedDocs[projectId])
   }
@@ -107,33 +113,15 @@ async function projectIdExists(projectId) {
 }
 
 async function findProject(projectId) {
-  return new Promise((resolve, reject) => {
-    db.projects.findOne(
-      { _id: ObjectId(projectId) },
-      { _id: 1 },
-      (err, project) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(project)
-        }
-      }
-    )
-  })
+  return db.projects.findOne(
+    { _id: ObjectId(projectId) },
+    { projection: { _id: 1 } }
+  )
 }
 
 async function findDeletedProject(projectId) {
-  return new Promise((resolve, reject) => {
-    db.deletedProjects.findOne(
-      { 'project._id': ObjectId(projectId) },
-      { _id: 1 },
-      (err, project) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(project)
-        }
-      }
-    )
-  })
+  return db.deletedProjects.findOne(
+    { 'project._id': ObjectId(projectId) },
+    { projection: { _id: 1 } }
+  )
 }
