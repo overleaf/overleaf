@@ -105,7 +105,7 @@ div.full-size(
 			i.synctex-control-icon(ng-show="!syncToPdfInFlight")
 			i.synctex-spin-icon.fa.fa-refresh.fa-spin(ng-show="syncToPdfInFlight")
 		a.btn.btn-default.btn-xs.synctex-control.synctex-control-goto-code(
-			tooltip-html="'"+translate('go_to_pdf_location_in_code', {}, true)+"'"
+			tooltip=translate('go_to_pdf_location_in_code')
 			tooltip-placement="right"
 			tooltip-append-to-body="true"
 			ng-click="syncToCode()"

@@ -101,7 +101,6 @@
     "mongoose": "^4.13.19",
     "multer": "git+https://github.com/overleaf/multer.git",
     "nocache": "^2.1.0",
-    "node-html-encoder": "0.0.2",
     "nodemailer": "2.1.0",
     "nodemailer-mandrill-transport": "^1.2.0",
     "nodemailer-ses-transport": "^1.5.1",
