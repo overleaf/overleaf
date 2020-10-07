@@ -20,7 +20,7 @@ describe('<PreviewLogsToggleButton />', function() {
           onToggle={onToggleLogs}
         />
       )
-      screen.getByRole('button', { name: 'View logs' })
+      screen.getByText('View logs')
     })
     it('should render a view PDF button when viewing logs', function() {
       const showLogs = true
@@ -31,7 +31,7 @@ describe('<PreviewLogsToggleButton />', function() {
           onToggle={onToggleLogs}
         />
       )
-      screen.getByRole('button', { name: 'View PDF' })
+      screen.getByText('View PDF')
     })
   })
   describe('compile status indicator', function() {
@@ -50,7 +50,7 @@ describe('<PreviewLogsToggleButton />', function() {
           onToggle={onToggleLogs}
         />
       )
-      screen.getByRole('button', { name: 'View logs' })
+      screen.getByText('View logs')
     })
 
     it('should render an error status message when there are errors', function() {
@@ -66,9 +66,7 @@ describe('<PreviewLogsToggleButton />', function() {
           onToggle={onToggleLogs}
         />
       )
-      screen.getByRole('button', {
-        name: `Your project has errors (${logsState.nErrors})`
-      })
+      screen.getByText(`Your project has errors (${logsState.nErrors})`)
     })
 
     it('should render an error status message when there are both errors and warnings', function() {
@@ -84,9 +82,7 @@ describe('<PreviewLogsToggleButton />', function() {
           onToggle={onToggleLogs}
         />
       )
-      screen.getByRole('button', {
-        name: `Your project has errors (${logsState.nErrors})`
-      })
+      screen.getByText(`Your project has errors (${logsState.nErrors})`)
     })
 
     it('should render a warning status message when there are warnings but no errors', function() {
@@ -102,9 +98,7 @@ describe('<PreviewLogsToggleButton />', function() {
           onToggle={onToggleLogs}
         />
       )
-      screen.getByRole('button', {
-        name: `View warnings (${logsState.nWarnings})`
-      })
+      screen.getByText(`View warnings (${logsState.nWarnings})`)
     })
 
     it('should render 9+ errors when there are more than nine errors', function() {
@@ -120,7 +114,7 @@ describe('<PreviewLogsToggleButton />', function() {
           onToggle={onToggleLogs}
         />
       )
-      screen.getByRole('button', { name: `Your project has errors (9+)` })
+      screen.getByText('Your project has errors (9+)')
     })
   })
 })
