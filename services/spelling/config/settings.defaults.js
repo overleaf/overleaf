@@ -24,7 +24,16 @@ module.exports = {
 
   ignoredMisspellings: process.env.IGNORED_MISSPELLINGS
     ? process.env.IGNORED_MISSPELLINGS.split(',')
-    : ['ShareLaTeX', 'sharelatex', 'LaTeX', 'http', 'https', 'www'],
+    : [
+        'Overleaf',
+        'overleaf',
+        'ShareLaTeX',
+        'sharelatex',
+        'LaTeX',
+        'http',
+        'https',
+        'www'
+      ],
 
   sentry: {
     dsn: process.env.SENTRY_DSN
