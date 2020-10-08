@@ -1,4 +1,6 @@
 {
+  "tex_live_version": "TeX Live Version",
+  "git": "Git",
   "pdf_compile_in_progress_error": "Kompiliervorgang läuft bereits in einem anderen Fenster",
   "pdf_compile_try_again": "Bitte warte auf deinen anderen Kompiliervorgang, bevor du es erneut versuchst.",
   "invalid_email": "Eine E-Mail-Adresse ist ungültig",
