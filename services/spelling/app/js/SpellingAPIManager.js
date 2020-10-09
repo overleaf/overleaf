@@ -10,12 +10,13 @@ const ASpell = require('./ASpell')
 const LearnedWordsManager = require('./LearnedWordsManager')
 const { callbackify } = require('util')
 const OError = require('@overleaf/o-error')
+const Settings = require('settings-sharelatex')
 
 // The max number of words checked in a single request
 const REQUEST_LIMIT = 10000
 
 const SpellingAPIManager = {
-  whitelist: ['ShareLaTeX', 'sharelatex', 'LaTeX', 'http', 'https', 'www'],
+  whitelist: Settings.ignoredMisspellings,
 
   learnWord(token, request, callback) {
     if (callback == null) {
