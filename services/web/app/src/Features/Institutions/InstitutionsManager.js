@@ -9,6 +9,7 @@ const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const { Institution } = require('../../models/Institution')
 const { Subscription } = require('../../models/Subscription')
+const OError = require('@overleaf/o-error')
 
 const ASYNC_LIMIT = parseInt(process.env.ASYNC_LIMIT, 10) || 5
 module.exports = {
@@ -39,7 +40,10 @@ module.exports = {
       UserGetter.getUsersByAnyConfirmedEmail(
         affiliations.map(affiliation => affiliation.email),
         { features: 1, samlIdentifiers: 1 },
-        (error, users) => callback(error, checkFeatures(institutionId, users))
+        (error, users) => {
+          if (error) return callback(OError.tag(error))
+          callback(error, checkFeatures(institutionId, users))
+        }
       )
     })
   },
