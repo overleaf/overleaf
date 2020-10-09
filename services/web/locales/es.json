@@ -22,7 +22,7 @@
   "unlink_to_zotero": "Desvincular Zotero",
   "zotero_reference_loading": "Cargando referencias de Zotero",
   "zotero_reference_loading_success": "Se han cargado las referencias de Zotero",
-  "zotero_reference_loading_error": "Error, no se han podido cargar las referencias de Mendeley",
+  "zotero_reference_loading_error": "Error, no se han podido cargar las referencias de Zotero",
   "reference_import_button": "Importar referencias en",
   "unlink_reference": "Desvincular proveedor de referencias",
   "unlink_warning_reference": "Aviso: al desvincular tu cuenta de este proveedor no podrás importar referencias en tus proyectos.",
