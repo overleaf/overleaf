@@ -62,7 +62,7 @@ describe('TemplatesManager', function() {
       getProjectDescription: sinon.stub(),
       fixProjectName: sinon.stub().returns(this.templateName)
     }
-    this.Project = { update: sinon.stub().callsArgWith(3, null) }
+    this.Project = { updateOne: sinon.stub().callsArgWith(3, null) }
     this.FileWriter = { ensureDumpFolderExists: sinon.stub().callsArg(0) }
     this.TemplatesManager = SandboxedModule.require(modulePath, {
       globals: {
@@ -174,7 +174,7 @@ describe('TemplatesManager', function() {
       })
 
       it('should update project', function() {
-        return this.Project.update.should.have.been.calledWithMatch(
+        return this.Project.updateOne.should.have.been.calledWithMatch(
           { _id: this.project_id },
           {
             fromV1TemplateId: this.templateId,

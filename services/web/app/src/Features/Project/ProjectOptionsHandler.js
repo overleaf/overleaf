@@ -15,7 +15,7 @@ const ProjectOptionsHandler = {
     }
     const conditions = { _id: projectId }
     const update = { compiler }
-    Project.update(conditions, update, {}, callback)
+    Project.updateOne(conditions, update, {}, callback)
   },
 
   setImageName(projectId, imageName, callback) {
@@ -31,7 +31,7 @@ const ProjectOptionsHandler = {
     }
     const conditions = { _id: projectId }
     const update = { imageName: settings.imageRoot + '/' + imageName }
-    Project.update(conditions, update, {}, callback)
+    Project.updateOne(conditions, update, {}, callback)
   },
 
   setSpellCheckLanguage(projectId, languageCode, callback) {
@@ -46,7 +46,7 @@ const ProjectOptionsHandler = {
     }
     const conditions = { _id: projectId }
     const update = { spellCheckLanguage: languageCode }
-    Project.update(conditions, update, {}, callback)
+    Project.updateOne(conditions, update, {}, callback)
   },
 
   setBrandVariationId(projectId, brandVariationId, callback) {
@@ -55,13 +55,13 @@ const ProjectOptionsHandler = {
     }
     const conditions = { _id: projectId }
     const update = { brandVariationId }
-    Project.update(conditions, update, {}, callback)
+    Project.updateOne(conditions, update, {}, callback)
   },
 
   unsetBrandVariationId(projectId, callback) {
     const conditions = { _id: projectId }
     const update = { $unset: { brandVariationId: 1 } }
-    Project.update(conditions, update, {}, callback)
+    Project.updateOne(conditions, update, {}, callback)
   }
 }
 

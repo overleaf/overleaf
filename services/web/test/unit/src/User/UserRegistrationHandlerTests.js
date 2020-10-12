@@ -26,7 +26,7 @@ const EmailHelper = require('../../../../app/src/Features/Helpers/EmailHelper')
 describe('UserRegistrationHandler', function() {
   beforeEach(function() {
     this.user = { _id: (this.user_id = '31j2lk21kjl') }
-    this.User = { update: sinon.stub().callsArgWith(2) }
+    this.User = { updateOne: sinon.stub().callsArgWith(2) }
     this.UserGetter = { getUserByAnyEmail: sinon.stub() }
     this.UserCreator = {
       createNewUser: sinon.stub().callsArgWith(2, null, this.user)
@@ -129,7 +129,7 @@ describe('UserRegistrationHandler', function() {
 
       it('should set holding account to false', function(done) {
         return this.handler.registerNewUser(this.passingRequest, err => {
-          const update = this.User.update.args[0]
+          const update = this.User.updateOne.args[0]
           assert.deepEqual(update[0], { _id: this.user._id })
           assert.deepEqual(update[1], { $set: { holdingAccount: false } })
           return done()

@@ -114,7 +114,7 @@ var addUserToEntity = function(entity, attribute, user, callback) {
   }
   const fieldUpdate = {}
   fieldUpdate[attribute] = user._id
-  return entity.update({ $addToSet: fieldUpdate }, callback)
+  return entity.updateOne({ $addToSet: fieldUpdate }, callback)
 }
 
 var removeUserFromEntity = function(entity, attribute, userId, callback) {
@@ -123,7 +123,7 @@ var removeUserFromEntity = function(entity, attribute, userId, callback) {
   }
   const fieldUpdate = {}
   fieldUpdate[attribute] = userId
-  return entity.update({ $pull: fieldUpdate }, callback)
+  return entity.updateOne({ $pull: fieldUpdate }, callback)
 }
 
 var buildEntityQuery = function(entityId, entityConfig, loggedInUser) {

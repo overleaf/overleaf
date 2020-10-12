@@ -68,7 +68,8 @@ describe('SubscriptionGroupHandler', function() {
     this.EmailHandler = { sendEmail: sinon.stub() }
 
     this.Subscription = {
-      update: sinon.stub().yields(),
+      updateOne: sinon.stub().yields(),
+      updateMany: sinon.stub().yields(),
       findOne: sinon.stub().yields()
     }
 
@@ -143,38 +144,36 @@ describe('SubscriptionGroupHandler', function() {
     })
 
     it('replaces the admin_id', function() {
-      return this.Subscription.update
+      return this.Subscription.updateOne
         .calledWith({ admin_id: this.oldId }, { admin_id: this.newId })
         .should.equal(true)
     })
 
     it('replaces the manager_ids', function() {
-      this.Subscription.update
+      this.Subscription.updateMany
         .calledWith(
           { manager_ids: 'ba5eba11' },
-          { $addToSet: { manager_ids: '5ca1ab1e' } },
-          { multi: true }
+          { $addToSet: { manager_ids: '5ca1ab1e' } }
         )
         .should.equal(true)
 
-      return this.Subscription.update
+      return this.Subscription.updateMany
         .calledWith(
           { manager_ids: 'ba5eba11' },
-          { $pull: { manager_ids: 'ba5eba11' } },
-          { multi: true }
+          { $pull: { manager_ids: 'ba5eba11' } }
         )
         .should.equal(true)
     })
 
     it('replaces the member ids', function() {
-      this.Subscription.update
+      this.Subscription.updateMany
         .calledWith(
           { member_ids: this.oldId },
           { $addToSet: { member_ids: this.newId } }
         )
         .should.equal(true)
 
-      return this.Subscription.update
+      return this.Subscription.updateMany
         .calledWith(
           { member_ids: this.oldId },
           { $pull: { member_ids: this.oldId } }

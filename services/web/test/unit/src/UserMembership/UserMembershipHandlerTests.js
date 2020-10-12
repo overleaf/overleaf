@@ -43,13 +43,13 @@ describe('UserMembershipHandler', function() {
       _id: 'mock-institution-id',
       v1Id: 123,
       managerIds: [ObjectId(), ObjectId(), ObjectId()],
-      update: sinon.stub().yields(null)
+      updateOne: sinon.stub().yields(null)
     }
     this.publisher = {
       _id: 'mock-publisher-id',
       slug: 'slug',
       managerIds: [ObjectId(), ObjectId()],
-      update: sinon.stub().yields(null)
+      updateOne: sinon.stub().yields(null)
     }
 
     this.UserMembershipViewModel = {
@@ -228,7 +228,7 @@ describe('UserMembershipHandler', function() {
           EntityConfigs.institution,
           this.email,
           (error, user) => {
-            assertCalledWith(this.institution.update, {
+            assertCalledWith(this.institution.updateOne, {
               $addToSet: { managerIds: this.newUser._id }
             })
             return done()
@@ -258,8 +258,8 @@ describe('UserMembershipHandler', function() {
           EntityConfigs.institution,
           this.newUser._id,
           (error, user) => {
-            const { lastCall } = this.institution.update
-            assertCalledWith(this.institution.update, {
+            const { lastCall } = this.institution.updateOne
+            assertCalledWith(this.institution.updateOne, {
               $pull: { managerIds: this.newUser._id }
             })
             return done()

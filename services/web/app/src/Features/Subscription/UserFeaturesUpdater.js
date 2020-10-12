@@ -8,7 +8,7 @@ module.exports = {
       const value = features[key]
       update[`features.${key}`] = value
     }
-    User.update(conditions, update, (err, result) =>
+    User.updateOne(conditions, update, (err, result) =>
       callback(err, features, (result ? result.nModified : 0) === 1)
     )
   },
@@ -16,7 +16,7 @@ module.exports = {
   overrideFeatures(userId, features, callback) {
     const conditions = { _id: userId }
     const update = { features }
-    User.update(conditions, update, (err, result) =>
+    User.updateOne(conditions, update, (err, result) =>
       callback(err, (result ? result.nModified : 0) === 1)
     )
   }

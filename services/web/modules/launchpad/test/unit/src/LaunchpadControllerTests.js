@@ -337,7 +337,7 @@ describe('LaunchpadController', function() {
         this.UserRegistrationHandler.registerNewUser = sinon
           .stub()
           .callsArgWith(1, null, this.user)
-        this.User.update = sinon.stub().callsArgWith(2, null)
+        this.User.updateOne = sinon.stub().callsArgWith(2, null)
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.json = sinon.stub()
         this.next = sinon.stub()
@@ -365,8 +365,8 @@ describe('LaunchpadController', function() {
       })
 
       it('should have updated the user to make them an admin', function() {
-        this.User.update.callCount.should.equal(1)
-        return this.User.update
+        this.User.updateOne.callCount.should.equal(1)
+        return this.User.updateOne
           .calledWithMatch(
             { _id: this.user._id },
             {
@@ -401,7 +401,7 @@ describe('LaunchpadController', function() {
           email: this.email
         }
         this.UserRegistrationHandler.registerNewUser = sinon.stub()
-        this.User.update = sinon.stub()
+        this.User.updateOne = sinon.stub()
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.sendStatus = sinon.stub()
         this.next = sinon.stub()
@@ -440,7 +440,7 @@ describe('LaunchpadController', function() {
           email: this.email
         }
         this.UserRegistrationHandler.registerNewUser = sinon.stub()
-        this.User.update = sinon.stub()
+        this.User.updateOne = sinon.stub()
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.sendStatus = sinon.stub()
         this.next = sinon.stub()
@@ -479,7 +479,7 @@ describe('LaunchpadController', function() {
           email: this.email
         }
         this.UserRegistrationHandler.registerNewUser = sinon.stub()
-        this.User.update = sinon.stub()
+        this.User.updateOne = sinon.stub()
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.sendStatus = sinon.stub()
         this.next = sinon.stub()
@@ -514,7 +514,7 @@ describe('LaunchpadController', function() {
           email: this.email
         }
         this.UserRegistrationHandler.registerNewUser = sinon.stub()
-        this.User.update = sinon.stub()
+        this.User.updateOne = sinon.stub()
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.sendStatus = sinon.stub()
         this.next = sinon.stub()
@@ -555,7 +555,7 @@ describe('LaunchpadController', function() {
         this.UserRegistrationHandler.registerNewUser = sinon
           .stub()
           .callsArgWith(1, new Error('woops'))
-        this.User.update = sinon.stub()
+        this.User.updateOne = sinon.stub()
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.json = sinon.stub()
         this.next = sinon.stub()
@@ -583,7 +583,7 @@ describe('LaunchpadController', function() {
       })
 
       it('should not call update', function() {
-        return this.User.update.callCount.should.equal(0)
+        return this.User.updateOne.callCount.should.equal(0)
       })
     })
 
@@ -601,7 +601,7 @@ describe('LaunchpadController', function() {
         this.UserRegistrationHandler.registerNewUser = sinon
           .stub()
           .callsArgWith(1, null, this.user)
-        this.User.update = sinon.stub().callsArgWith(2, new Error('woops'))
+        this.User.updateOne = sinon.stub().callsArgWith(2, new Error('woops'))
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.json = sinon.stub()
         this.next = sinon.stub()
@@ -645,7 +645,7 @@ describe('LaunchpadController', function() {
         this.UserRegistrationHandler.registerNewUser = sinon
           .stub()
           .callsArgWith(1, null, this.user)
-        this.User.update = sinon.stub().callsArgWith(2, null)
+        this.User.updateOne = sinon.stub().callsArgWith(2, null)
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.UserGetter.getUser = sinon
           .stub()
@@ -676,7 +676,7 @@ describe('LaunchpadController', function() {
       })
 
       it('should have updated the user to make them an admin', function() {
-        return this.User.update
+        return this.User.updateOne
           .calledWith(
             { _id: this.user._id },
             {
@@ -725,7 +725,7 @@ describe('LaunchpadController', function() {
         this.UserRegistrationHandler.registerNewUser = sinon
           .stub()
           .callsArgWith(1, null, this.user)
-        this.User.update = sinon.stub().callsArgWith(2, null)
+        this.User.updateOne = sinon.stub().callsArgWith(2, null)
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.json = sinon.stub()
         this.next = sinon.stub()
@@ -758,8 +758,8 @@ describe('LaunchpadController', function() {
       })
 
       it('should have updated the user to make them an admin', function() {
-        this.User.update.callCount.should.equal(1)
-        return this.User.update
+        this.User.updateOne.callCount.should.equal(1)
+        return this.User.updateOne
           .calledWith(
             { _id: this.user._id },
             {
@@ -790,7 +790,7 @@ describe('LaunchpadController', function() {
           email: this.email
         }
         this.UserRegistrationHandler.registerNewUser = sinon.stub()
-        this.User.update = sinon.stub()
+        this.User.updateOne = sinon.stub()
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.sendStatus = sinon.stub()
         this.next = sinon.stub()
@@ -825,7 +825,7 @@ describe('LaunchpadController', function() {
           email: this.email
         }
         this.UserRegistrationHandler.registerNewUser = sinon.stub()
-        this.User.update = sinon.stub()
+        this.User.updateOne = sinon.stub()
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.sendStatus = sinon.stub()
         this.next = sinon.stub()
@@ -862,7 +862,7 @@ describe('LaunchpadController', function() {
           email: this.email
         }
         this.UserRegistrationHandler.registerNewUser = sinon.stub()
-        this.User.update = sinon.stub()
+        this.User.updateOne = sinon.stub()
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.sendStatus = sinon.stub()
         this.next = sinon.stub()
@@ -895,7 +895,7 @@ describe('LaunchpadController', function() {
           email: this.email
         }
         this.UserRegistrationHandler.registerNewUser = sinon.stub()
-        this.User.update = sinon.stub()
+        this.User.updateOne = sinon.stub()
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.sendStatus = sinon.stub()
         this.next = sinon.stub()
@@ -934,7 +934,7 @@ describe('LaunchpadController', function() {
         this.UserRegistrationHandler.registerNewUser = sinon
           .stub()
           .callsArgWith(1, new Error('woops'))
-        this.User.update = sinon.stub()
+        this.User.updateOne = sinon.stub()
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.json = sinon.stub()
         this.next = sinon.stub()
@@ -967,7 +967,7 @@ describe('LaunchpadController', function() {
       })
 
       it('should not call update', function() {
-        return this.User.update.callCount.should.equal(0)
+        return this.User.updateOne.callCount.should.equal(0)
       })
     })
 
@@ -983,7 +983,7 @@ describe('LaunchpadController', function() {
         this.UserRegistrationHandler.registerNewUser = sinon
           .stub()
           .callsArgWith(1, null, this.user)
-        this.User.update = sinon.stub().callsArgWith(2, new Error('woops'))
+        this.User.updateOne = sinon.stub().callsArgWith(2, new Error('woops'))
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.res.json = sinon.stub()
         this.next = sinon.stub()

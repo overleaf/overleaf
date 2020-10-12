@@ -22,7 +22,7 @@ function renameTag(userId, tagId, name, callback) {
   if (!callback) {
     callback = function() {}
   }
-  Tag.update(
+  Tag.updateOne(
     {
       _id: tagId,
       user_id: userId
@@ -40,7 +40,7 @@ function deleteTag(userId, tagId, callback) {
   if (!callback) {
     callback = function() {}
   }
-  Tag.remove(
+  Tag.deleteOne(
     {
       _id: tagId,
       user_id: userId
@@ -56,7 +56,7 @@ function updateTagUserIds(oldUserId, newUserId, callback) {
   }
   const searchOps = { user_id: oldUserId }
   const updateOperation = { $set: { user_id: newUserId } }
-  Tag.update(searchOps, updateOperation, { multi: true }, callback)
+  Tag.updateMany(searchOps, updateOperation, callback)
 }
 
 function removeProjectFromTag(userId, tagId, projectId, callback) {
@@ -68,7 +68,7 @@ function removeProjectFromTag(userId, tagId, projectId, callback) {
     user_id: userId
   }
   const deleteOperation = { $pull: { project_ids: projectId } }
-  Tag.update(searchOps, deleteOperation, callback)
+  Tag.updateOne(searchOps, deleteOperation, callback)
 }
 
 function addProjectToTag(userId, tagId, projectId, callback) {
@@ -92,13 +92,13 @@ function addProjectToTagName(userId, name, projectId, callback) {
     user_id: userId
   }
   const insertOperation = { $addToSet: { project_ids: projectId } }
-  Tag.update(searchOps, insertOperation, { upsert: true }, callback)
+  Tag.updateOne(searchOps, insertOperation, { upsert: true }, callback)
 }
 
 function removeProjectFromAllTags(userId, projectId, callback) {
   const searchOps = { user_id: userId }
   const deleteOperation = { $pull: { project_ids: projectId } }
-  Tag.update(searchOps, deleteOperation, { multi: true }, callback)
+  Tag.updateMany(searchOps, deleteOperation, callback)
 }
 
 const TagsHandler = {

@@ -53,12 +53,12 @@ describe('SystemMessageManager', function() {
 
   describe('clearMessages', function() {
     beforeEach(function() {
-      this.SystemMessage.remove = sinon.stub().callsArg(1)
+      this.SystemMessage.deleteMany = sinon.stub().callsArg(1)
       return this.SystemMessageManager.clearMessages(this.callback)
     })
 
     it('should remove the messages from the database', function() {
-      return this.SystemMessage.remove.calledWith({}).should.equal(true)
+      return this.SystemMessage.deleteMany.calledWith({}).should.equal(true)
     })
 
     it('should return the callback', function() {
