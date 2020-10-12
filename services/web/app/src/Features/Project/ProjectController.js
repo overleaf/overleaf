@@ -842,7 +842,8 @@ const ProjectController = {
               gaOptimize: enableOptimize,
               customOptimizeEvent: true,
               experimentId: Settings.experimentId,
-              showNewLogsUI: req.query && req.query.new_logs_ui === 'true'
+              showNewLogsUI: req.query && req.query.new_logs_ui === 'true',
+              showNewChatUI: req.query && req.query.new_chat_ui === 'true'
             })
             timer.done()
           }

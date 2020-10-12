@@ -73,6 +73,7 @@ export default App.factory('chatMessages', function($http, ide) {
       url += `&before=${chat.state.nextBeforeTimestamp}`
     }
     chat.state.loading = true
+    ide.$scope.$broadcast('chat:more-messages-loading', chat)
     return $http.get(url).then(function(response) {
       const messages = response.data != null ? response.data : []
       chat.state.loading = false
@@ -94,15 +95,16 @@ export default App.factory('chatMessages', function($http, ide) {
             )
           )
         }
-        return (chat.state.errored = true)
+        chat.state.errored = true
       } else {
         messages.reverse()
         prependMessages(messages)
-        return (chat.state.nextBeforeTimestamp =
+        chat.state.nextBeforeTimestamp =
           chat.state.messages[0] != null
             ? chat.state.messages[0].timestamp
-            : undefined)
+            : undefined
       }
+      ide.$scope.$broadcast('chat:more-messages-loaded', chat)
     })
   }
 
@@ -143,14 +145,15 @@ export default App.factory('chatMessages', function($http, ide) {
       message.timestamp - lastMessage.timestamp < TIMESTAMP_GROUP_SIZE
     if (shouldGroup) {
       lastMessage.timestamp = message.timestamp
-      return lastMessage.contents.push(message.content)
+      lastMessage.contents.push(message.content)
     } else {
-      return chat.state.messages.push({
+      chat.state.messages.push({
         user: message.user,
         timestamp: message.timestamp,
         contents: [message.content]
       })
     }
+    ide.$scope.$broadcast('chat:more-messages-loaded', chat)
   }
 
   return chat

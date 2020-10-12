@@ -17,5 +17,9 @@
   "fast",
   "stop_on_validation_error",
   "ignore_validation_errors",
-  "run_syntax_check_now"
+  "run_syntax_check_now",
+  "loading",
+  "no_messages",
+  "send_first_message",
+  "your_message"
 ]
