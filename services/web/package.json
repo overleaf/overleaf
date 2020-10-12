@@ -97,7 +97,6 @@
     "mocha": "^6.2.2",
     "moment": "^2.24.0",
     "mongodb": "^3.6.0",
-    "mongojs": "2.4.0",
     "mongoose": "^4.13.19",
     "multer": "git+https://github.com/overleaf/multer.git",
     "nocache": "^2.1.0",
