@@ -97,13 +97,18 @@ const UserGetter = {
       callback = projection
       projection = {}
     }
-    // $exists: true MUST be set to use the partial index
+
     const query = {
+      'emails.email': { $in: emails }, // use the index on emails.email
       emails: {
         $exists: true,
-        $elemMatch: { email: { $in: emails }, confirmedAt: { $exists: true } }
+        $elemMatch: {
+          email: { $in: emails },
+          confirmedAt: { $exists: true }
+        }
       }
     }
+
     db.users.find(query, { projection }).toArray(callback)
   },
 

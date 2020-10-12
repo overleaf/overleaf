@@ -380,6 +380,30 @@ describe('UserGetter', function() {
     })
   })
 
+  describe('getUsersByAnyConfirmedEmail', function() {
+    it('should find users by confirmed email', function(done) {
+      const emails = ['confirmed@example.com']
+
+      this.UserGetter.getUsersByAnyConfirmedEmail(emails, (error, users) => {
+        expect(error).to.not.exist
+        expect(this.find).to.be.calledOnceWith(
+          {
+            'emails.email': { $in: emails }, // use the index on emails.email
+            emails: {
+              $exists: true,
+              $elemMatch: {
+                email: { $in: emails },
+                confirmedAt: { $exists: true }
+              }
+            }
+          },
+          { projection: {} }
+        )
+        done()
+      })
+    })
+  })
+
   describe('getUsersByV1Id', function() {
     it('should find users by list of v1 ids', function(done) {
       const v1Ids = [501]
