@@ -37,7 +37,7 @@ const SubscriptionUpdater = {
     } else {
       update.$set.manager_ids = [ObjectId(adminId)]
     }
-    Subscription.updateOne(query, update, callback)
+    Subscription.update(query, update, callback)
   },
 
   syncSubscription(recurlySubscription, adminUserId, requesterData, callback) {
@@ -99,7 +99,7 @@ const SubscriptionUpdater = {
     const searchOps = { _id: subscriptionId }
     const insertOperation = { $addToSet: { member_ids: { $each: memberIds } } }
 
-    Subscription.updateOne(searchOps, insertOperation, callback)
+    Subscription.findAndModify(searchOps, insertOperation, callback)
   },
 
   removeUserFromGroups(filter, userId, callback) {
@@ -168,7 +168,7 @@ const SubscriptionUpdater = {
           ),
         cb =>
           // 2. remove subscription
-          Subscription.deleteOne({ _id: subscription._id }, cb),
+          Subscription.remove({ _id: subscription._id }, cb),
         cb =>
           // 3. refresh users features
           SubscriptionUpdater._refreshUsersFeatures(subscription, cb)

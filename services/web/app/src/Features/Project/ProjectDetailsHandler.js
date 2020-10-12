@@ -90,7 +90,7 @@ async function setProjectDescription(projectId, description) {
     'setting project description'
   )
   try {
-    await Project.updateOne(conditions, update).exec()
+    await Project.update(conditions, update).exec()
   } catch (err) {
     logger.warn({ err }, 'something went wrong setting project description')
     throw err
@@ -111,7 +111,7 @@ async function renameProject(projectId, newName) {
     return
   }
   const oldProjectName = project.name
-  await Project.updateOne({ _id: projectId }, { name: newName }).exec()
+  await Project.update({ _id: projectId }, { name: newName }).exec()
   await TpdsUpdateSender.promises.moveEntity({
     project_id: projectId,
     project_name: oldProjectName,
@@ -197,7 +197,7 @@ async function setPublicAccessLevel(projectId, newAccessLevel) {
       newAccessLevel
     )
   ) {
-    await Project.updateOne(
+    await Project.update(
       { _id: projectId },
       { publicAccesLevel: newAccessLevel }
     ).exec()
@@ -216,7 +216,7 @@ async function ensureTokensArePresent(projectId) {
     return project.tokens
   }
   await _generateTokens(project)
-  await Project.updateOne(
+  await Project.update(
     { _id: projectId },
     { $set: { tokens: project.tokens } }
   ).exec()
@@ -224,7 +224,7 @@ async function ensureTokensArePresent(projectId) {
 }
 
 async function clearTokens(projectId) {
-  await Project.updateOne(
+  await Project.update(
     { _id: projectId },
     { $unset: { tokens: 1 }, $set: { publicAccesLevel: 'private' } }
   ).exec()

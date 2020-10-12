@@ -18,9 +18,7 @@ const connectionPromise = mongoose.connect(
   {
     poolSize: POOL_SIZE,
     config: { autoIndex: false },
-    useUnifiedTopology: Settings.mongo.options.useUnifiedTopology,
-    useNewUrlParser: true,
-    useFindAndModify: false,
+    useMongoClient: true,
     socketTimeoutMS: Settings.mongo.socketTimeoutMS,
     appname: 'web'
   }
@@ -46,7 +44,7 @@ mongoose.connection.on('disconnected', () =>
 
 if (process.env.MONGOOSE_DEBUG) {
   mongoose.set('debug', (collectionName, method, query, doc) =>
-    logger.debug({ collectionName, method, query, doc }, 'mongoose debug')
+    logger.debug('mongoose debug', { collectionName, method, query, doc })
   )
 }
 
@@ -57,8 +55,8 @@ mongoose.plugin(schema => {
 mongoose.Promise = global.Promise
 
 async function getNativeDb() {
-  const mongooseInstance = await connectionPromise
-  return mongooseInstance.connection.db
+  const connection = await connectionPromise
+  return connection.db
 }
 
 mongoose.getNativeDb = getNativeDb

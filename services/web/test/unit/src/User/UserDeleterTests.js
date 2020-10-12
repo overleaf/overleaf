@@ -147,7 +147,7 @@ describe('UserDeleter', function() {
 
       describe('when no options are passed', function() {
         beforeEach(function() {
-          this.DeletedUserMock.expects('updateOne')
+          this.DeletedUserMock.expects('update')
             .withArgs(
               { 'deleterData.deletedUserId': this.userId },
               this.deletedUser,
@@ -274,7 +274,7 @@ describe('UserDeleter', function() {
           this.deletedUser.deleterData.deleterIpAddress = this.ipAddress
           this.deletedUser.deleterData.deleterId = this.deleterId
 
-          this.DeletedUserMock.expects('updateOne')
+          this.DeletedUserMock.expects('update')
             .withArgs(
               { 'deleterData.deletedUserId': this.userId },
               this.deletedUser,

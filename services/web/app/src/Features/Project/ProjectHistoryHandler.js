@@ -31,7 +31,7 @@ const ProjectHistoryHandler = {
       return callback(new Error('invalid history id'))
     }
     // use $exists:false to prevent overwriting any existing history id, atomically
-    return Project.updateOne(
+    return Project.update(
       { _id: project_id, 'overleaf.history.id': { $exists: false } },
       { 'overleaf.history.id': history_id },
       function(err, result) {
@@ -72,7 +72,7 @@ const ProjectHistoryHandler = {
     if (callback == null) {
       callback = function(err, result) {}
     }
-    return Project.updateOne(
+    return Project.update(
       { _id: project_id, 'overleaf.history.id': { $exists: true } },
       {
         'overleaf.history.display': true,
@@ -95,7 +95,7 @@ const ProjectHistoryHandler = {
     if (callback == null) {
       callback = function(err, result) {}
     }
-    return Project.updateOne(
+    return Project.update(
       { _id: project_id, 'overleaf.history.upgradedAt': { $exists: true } },
       {
         'overleaf.history.display': false,

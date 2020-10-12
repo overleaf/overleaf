@@ -43,7 +43,7 @@ describe('ProjectDetailsHandler', function() {
       exec: sinon.stub().resolves()
     }
     this.ProjectModel = {
-      updateOne: sinon.stub().returns(this.ProjectModelUpdateQuery)
+      update: sinon.stub().returns(this.ProjectModelUpdateQuery)
     }
     this.UserGetter = {
       promises: {
@@ -156,7 +156,7 @@ describe('ProjectDetailsHandler', function() {
         this.project._id,
         this.description
       )
-      expect(this.ProjectModel.updateOne).to.have.been.calledWith(
+      expect(this.ProjectModel.update).to.have.been.calledWith(
         { _id: this.project._id },
         { description: this.description }
       )
@@ -170,7 +170,7 @@ describe('ProjectDetailsHandler', function() {
 
     it('should update the project with the new name', async function() {
       await this.handler.promises.renameProject(this.project._id, this.newName)
-      expect(this.ProjectModel.updateOne).to.have.been.calledWith(
+      expect(this.ProjectModel.update).to.have.been.calledWith(
         { _id: this.project._id },
         { name: this.newName }
       )
@@ -191,7 +191,7 @@ describe('ProjectDetailsHandler', function() {
       await expect(this.handler.promises.renameProject(this.project._id)).to.be
         .rejected
       expect(this.TpdsUpdateSender.promises.moveEntity).not.to.have.been.called
-      expect(this.ProjectModel.updateOne).not.to.have.been.called
+      expect(this.ProjectModel.update).not.to.have.been.called
     })
   })
 
@@ -401,7 +401,7 @@ describe('ProjectDetailsHandler', function() {
         this.project._id,
         this.accessLevel
       )
-      expect(this.ProjectModel.updateOne).to.have.been.calledWith(
+      expect(this.ProjectModel.update).to.have.been.calledWith(
         { _id: this.project._id },
         { publicAccesLevel: this.accessLevel }
       )
@@ -459,7 +459,7 @@ describe('ProjectDetailsHandler', function() {
 
       it('should not update the project with new tokens', async function() {
         await this.handler.promises.ensureTokensArePresent(this.project._id)
-        expect(this.ProjectModel.updateOne).not.to.have.been.called
+        expect(this.ProjectModel.update).not.to.have.been.called
       })
 
       it('should produce the tokens without error', async function() {
@@ -503,8 +503,8 @@ describe('ProjectDetailsHandler', function() {
           .to.have.been.calledOnce
         expect(this.ProjectTokenGenerator.readAndWriteToken).to.have.been
           .calledOnce
-        expect(this.ProjectModel.updateOne).to.have.been.calledOnce
-        expect(this.ProjectModel.updateOne).to.have.been.calledWith(
+        expect(this.ProjectModel.update).to.have.been.calledOnce
+        expect(this.ProjectModel.update).to.have.been.calledWith(
           { _id: this.project._id },
           {
             $set: {
@@ -534,7 +534,7 @@ describe('ProjectDetailsHandler', function() {
   describe('clearTokens', function() {
     it('clears the tokens from the project', async function() {
       await this.handler.promises.clearTokens(this.project._id)
-      expect(this.ProjectModel.updateOne).to.have.been.calledWith(
+      expect(this.ProjectModel.update).to.have.been.calledWith(
         { _id: this.project._id },
         { $unset: { tokens: 1 }, $set: { publicAccesLevel: 'private' } }
       )

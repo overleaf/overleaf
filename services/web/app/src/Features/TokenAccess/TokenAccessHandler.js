@@ -164,7 +164,7 @@ const TokenAccessHandler = {
   addReadOnlyUserToProject(userId, projectId, callback) {
     userId = ObjectId(userId.toString())
     projectId = ObjectId(projectId.toString())
-    Project.updateOne(
+    Project.update(
       {
         _id: projectId
       },
@@ -178,7 +178,7 @@ const TokenAccessHandler = {
   addReadAndWriteUserToProject(userId, projectId, callback) {
     userId = ObjectId(userId.toString())
     projectId = ObjectId(projectId.toString())
-    Project.updateOne(
+    Project.update(
       {
         _id: projectId
       },

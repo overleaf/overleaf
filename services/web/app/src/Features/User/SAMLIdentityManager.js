@@ -258,7 +258,7 @@ async function unlinkAccounts(
     }
   }
   // update v2 user
-  await User.updateOne(query, update).exec()
+  await User.update(query, update).exec()
   // update v1 affiliations record
   await InstitutionsAPI.promises.removeEntitlement(userId, institutionEmail)
   // send email
@@ -283,7 +283,7 @@ async function updateEntitlement(
     }
   }
   // update v2 user
-  await User.updateOne(query, update).exec()
+  await User.update(query, update).exec()
   // update v1 affiliations record
   if (hasEntitlement) {
     await InstitutionsAPI.promises.addEntitlement(userId, institutionEmail)

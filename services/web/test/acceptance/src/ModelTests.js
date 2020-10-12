@@ -18,7 +18,7 @@ describe('mongoose', function() {
     it('does not allow the creation of multiple users with the same email', async function() {
       await expect(User.create({ email: email })).to.be.fulfilled
       await expect(User.create({ email: email })).to.be.rejected
-      await expect(User.countDocuments({ email: email })).to.eventually.equal(1)
+      await expect(User.count({ email: email })).to.eventually.equal(1)
     })
   })
 
