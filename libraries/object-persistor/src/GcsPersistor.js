@@ -220,9 +220,15 @@ module.exports = class GcsPersistor extends AbstractPersistor {
         .bucket(bucketName)
         .getFiles({ directory: key })
 
-      await asyncPool(this.settings.deleteConcurrency, files, async (file) => {
-        await this.deleteObject(bucketName, file.name)
-      })
+      if (Array.isArray(files) && files.length > 0) {
+        await asyncPool(
+          this.settings.deleteConcurrency,
+          files,
+          async (file) => {
+            await this.deleteObject(bucketName, file.name)
+          }
+        )
+      }
     } catch (err) {
       const error = PersistorHelper.wrapError(
         err,
