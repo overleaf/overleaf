@@ -47,7 +47,7 @@ block content
 									div(ng-if="trialLength")
 										span !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
 										span(ng-if="coupon.discountMonths && coupon.discountRate") &nbsp; -  {{coupon.discountMonths}} #{translate("month")}s {{coupon.discountRate}}% Off
-									
+
 									div(ng-if="price")
 										- var priceAngularExp = "<strong>{{ availableCurrencies[currencyCode]['symbol'] }}{{ price.total }}</strong>";
 										span(ng-if="!coupon.singleUse && monthlyBilling")
@@ -235,7 +235,7 @@ block content
 												- priceBreakdownAngularExp += " + " ;
 												- priceBreakdownAngularExp += "{{availableCurrencies[currencyCode]['symbol']}}{{ price.tax }} tax)";
 												hr.thin
-												span 
+												span
 													| Total:
 													|
 													span(ng-if="!coupon.singleUse && monthlyBilling")
@@ -283,7 +283,7 @@ block content
 						a.btn-primary.btn.plansPageStudentLink(
 							href,
 							ng-click="switchToStudent()"
-						) #{translate("half_price_student")}
+						) #{translate("special_price_student")}
 
 					.card.card-first
 						.paymentPageFeatures
@@ -295,7 +295,10 @@ block content
 									- var collaboratorCount = 'Unlimited'
 								else
 									- var collaboratorCount = plan.features.collaborators
-								| #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
+								if plan.features.collaborators == 1
+									| #{translate("collabs_per_proj_single", {collabcount:collaboratorCount})}
+								else
+									| #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
 							p #{translate("work_on_single_version")}. #{translate("view_collab_edits")} in real time.
 
 							h3 #{translate("full_doc_history")}

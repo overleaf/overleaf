@@ -288,20 +288,6 @@
       border-bottom: 0;
       padding: 18px;
     }
-    /* highlighted column */
-    td:nth-child(3) {
-      position: relative;
-      /* keep here position here, otherwise messes up border on safari when there is a bg color */
-      &:before {
-        /* needed for safafi */
-        border-top: 1px solid @border-color-base;
-        content: '';
-        left: 0;
-        position: absolute;
-        top: -1px;
-        width: 100%;
-      }
-    }
     td:first-child {
       border: 0;
     }
@@ -316,13 +302,6 @@
     color: @gray-med;
   }
 
-  /* highlighted column */
-  td:nth-child(3),
-  th:nth-child(3) {
-    background-color: white;
-    border-left: @border-width-base solid @border-color-base;
-    border-right: @border-width-base solid @border-color-base;
-  }
   .outer {
     left: -@border-width-base;
     right: -@border-width-base;
@@ -357,19 +336,21 @@
     }
   }
 
-  /* highlight rows on hover */
-  tr:hover {
-    td {
-      background-color: @table-hover-bg;
+  @media (min-width: @screen-sm-min) {
+    /* highlight rows on hover */
+    tr:hover {
+      td {
+        background-color: @table-hover-bg;
+      }
     }
-  }
-  tr:first-child:hover {
-    background-color: transparent;
-  }
-  tr:last-child:hover {
-    background-color: transparent;
-    td {
+    tr:first-child:hover {
       background-color: transparent;
+    }
+    tr:last-child:hover {
+      background-color: transparent;
+      td {
+        background-color: transparent;
+      }
     }
   }
 
@@ -409,6 +390,97 @@
     }
     .btn {
       font-size: @font-size-small;
+    }
+  }
+
+  @media screen and (max-width: @screen-xs-max) {
+    tbody,
+    thead {
+      display: block;
+    }
+    tr {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-around;
+    }
+    th {
+      font-size: 12px;
+    }
+    /* hide the first column header */
+    tr:first-child {
+      th:first-child {
+        display: none;
+      }
+    }
+    /* make the first column into a row */
+    td:first-child {
+      text-align: center;
+      background: @gray-lightest;
+      width: 100%;
+    }
+  }
+}
+
+.plans-table-main {
+  td:nth-child(4),
+  th:nth-child(4) {
+    background-color: white;
+    border-left: @border-width-base solid @border-color-base;
+    border-right: @border-width-base solid @border-color-base;
+  }
+  tr:last-child {
+    /* highlighted column */
+    td:nth-child(4) {
+      position: relative;
+      /* keep here position here, otherwise messes up border on safari when there is a bg color */
+      &:before {
+        /* needed for safafi */
+        border-top: 1px solid @border-color-base;
+        content: '';
+        left: 0;
+        position: absolute;
+        top: -1px;
+        width: 100%;
+      }
+    }
+  }
+  @media screen and (max-width: @screen-xs-max) {
+    td,
+    th {
+      display: block;
+      width: 25%;
+    }
+  }
+}
+
+.plans-table-student {
+  td:nth-child(3),
+  th:nth-child(3) {
+    background-color: white;
+    border-left: @border-width-base solid @border-color-base;
+    border-right: @border-width-base solid @border-color-base;
+  }
+  tr:last-child {
+    /* highlighted column */
+    td:nth-child(3) {
+      position: relative;
+      /* keep here position here, otherwise messes up border on safari when there is a bg color */
+      &:before {
+        /* needed for safafi */
+        border-top: 1px solid @border-color-base;
+        content: '';
+        left: 0;
+        position: absolute;
+        top: -1px;
+        width: 100%;
+      }
+    }
+  }
+  @media screen and (max-width: @screen-xs-max) {
+    td,
+    th {
+      display: block;
+      width: 33.3%;
     }
   }
 }

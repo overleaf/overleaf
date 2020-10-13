@@ -6,6 +6,7 @@ module.exports = [
     value: 'str',
     plans: {
       free: '1',
+      personal: '1',
       coll: '10',
       prof: 'unlimited'
     },
@@ -17,6 +18,7 @@ module.exports = [
     info: 'unlimited_private_info',
     plans: {
       free: true,
+      personal: true,
       coll: true,
       prof: true
     },
@@ -28,6 +30,7 @@ module.exports = [
     info: 'realtime_collab_info',
     plans: {
       free: true,
+      personal: true,
       coll: true,
       prof: true
     },
@@ -39,6 +42,7 @@ module.exports = [
     info: 'hundreds_templates_info',
     plans: {
       free: true,
+      personal: true,
       coll: true,
       prof: true
     },
@@ -50,10 +54,22 @@ module.exports = [
     info: 'latex_editor_info',
     plans: {
       free: true,
+      personal: true,
       coll: true,
       prof: true
     },
     student: true
+  },
+  {
+    feature: 'compile_timeout',
+    value: 'str',
+    plans: {
+      free: '1 min',
+      personal: '4 mins',
+      coll: '4 mins',
+      prof: '4 mins'
+    },
+    student: '4 mins'
   },
   {
     feature: 'realtime_track_changes',
@@ -61,28 +77,7 @@ module.exports = [
     info: 'realtime_track_changes_info',
     plans: {
       free: false,
-      coll: true,
-      prof: true
-    },
-    student: true
-  },
-  {
-    feature: 'reference_search',
-    value: 'bool',
-    info: 'reference_search_info',
-    plans: {
-      free: false,
-      coll: true,
-      prof: true
-    },
-    student: true
-  },
-  {
-    feature: 'reference_sync',
-    info: 'reference_sync_info',
-    value: 'bool',
-    plans: {
-      free: false,
+      personal: false,
       coll: true,
       prof: true
     },
@@ -94,6 +89,31 @@ module.exports = [
     info: 'full_doc_history_info',
     plans: {
       free: false,
+      personal: true,
+      coll: true,
+      prof: true
+    },
+    student: true
+  },
+  {
+    feature: 'reference_search',
+    value: 'bool',
+    info: 'reference_search_info',
+    plans: {
+      free: false,
+      personal: true,
+      coll: true,
+      prof: true
+    },
+    student: true
+  },
+  {
+    feature: 'reference_sync',
+    info: 'reference_sync_info',
+    value: 'bool',
+    plans: {
+      free: false,
+      personal: true,
       coll: true,
       prof: true
     },
@@ -105,6 +125,7 @@ module.exports = [
     info: 'dropbox_integration_info',
     plans: {
       free: false,
+      personal: true,
       coll: true,
       prof: true
     },
@@ -116,6 +137,7 @@ module.exports = [
     info: 'github_integration_info',
     plans: {
       free: false,
+      personal: true,
       coll: true,
       prof: true
     },
@@ -126,6 +148,7 @@ module.exports = [
     value: 'bool',
     plans: {
       free: false,
+      personal: true,
       coll: true,
       prof: true
     },

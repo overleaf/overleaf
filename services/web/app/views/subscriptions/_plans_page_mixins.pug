@@ -6,6 +6,13 @@ mixin btn_buy_collaborator(location)
 	)
 		span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 		span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
+mixin btn_buy_personal(location)
+	a.btn.btn-primary(
+		ng-href="/user/subscription/new?planCode={{ getPersonalPlanCode() }}&currency={{currencyCode}}&itm_campaign=plans&itm_content=" + location,
+		ng-click="signUpNowClicked('personal','" + location + "')"
+	)
+		span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
+		span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
 mixin btn_buy_free(location)
 	a.btn.btn-primary(
 		href="/register"
@@ -74,6 +81,19 @@ mixin features_free(location)
 		li
 			br
 			+btn_buy_free(location)
+mixin features_personal(location)
+	ul.list-unstyled
+		li #{translate("one_collaborator")}
+		li &nbsp;
+		li
+			strong #{translate('premium_features')}
+		li #{translate('sync_dropbox_github')}
+		li #{translate('full_doc_history')}
+		li + #{translate('more').toLowerCase()}
+		li(class="hidden-xs hidden-sm") &nbsp;
+		li
+			br
+			+btn_buy_personal(location)
 mixin features_premium
 	li &nbsp;
 	li
@@ -100,6 +120,13 @@ mixin features_student(location, plan)
 				+btn_buy_student(location, plan)
 
 //- Prices
+mixin price_personal
+	span(ng-if="ui.view == 'monthly'")
+		| {{plans[currencyCode]['personal']['monthly']}}
+		span.small /mo
+	span(ng-if="ui.view == 'annual'")
+		| {{plans[currencyCode]['personal']['annual']}}
+		span.small /yr
 mixin price_collaborator
 	span(ng-if="ui.view == 'monthly'")
 		| {{plans[currencyCode]['collaborator']['monthly']}}
@@ -154,7 +181,7 @@ mixin plan_switch(location)
 			a.btn.btn-default-outline(
 				href="#"
 				ng-click="switchToStudent($event,'" + location + "')"
-			) #{translate("half_price_student")}
+			) #{translate("special_price_student")}
 
 mixin allCardsAndControls(controlsRowSpaced, listLocation)
 	- var location = listLocation ? 'card_' + listLocation : 'card'
@@ -173,8 +200,9 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 							.card-header
 								h2 #{translate("personal")}
 							h5.tagline #{translate("tagline_personal")}
-							.circle #{translate("free")}
-							+features_free(location)
+							.circle
+								+price_personal
+							+features_personal(location)
 					.col-md-4
 						.card.card-highlighted
 							.best-value
@@ -198,8 +226,8 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 					.col-md-4
 						.card.card-first
 							.card-header
-								h2 #{translate("personal")}
-							h5.tagline #{translate("tagline_personal")}
+								h2 #{translate("free")}
+							h5.tagline #{translate("tagline_free")}
 							.circle #{translate("free")}
 							+features_free(location)
 

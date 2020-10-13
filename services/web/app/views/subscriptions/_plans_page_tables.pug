@@ -1,9 +1,10 @@
 
 //- Features Tables
 mixin table_premium
-	table.card.plans-table
+	table.card.plans-table.plans-table-main
 		tr
 			th
+			th #{translate("free")}
 			th #{translate("personal")}
 			th #{translate("collaborator")}
 				.outer.outer-top
@@ -15,6 +16,8 @@ mixin table_premium
 		tr
 			td #{translate("price")}
 			td #{translate("free")}
+			td
+				+price_personal
 			td
 				+price_collaborator
 			td
@@ -43,6 +46,8 @@ mixin table_premium
 			td
 				+btn_buy_free('table')
 			td
+				+btn_buy_personal('table')
+			td
 				+btn_buy_collaborator('table')
 				.outer.outer-btm
 					.outer-content &nbsp;
@@ -60,10 +65,10 @@ mixin table_cell_student(feature)
 		span.sr-only Feature not included
 
 mixin table_student
-	table.card.plans-table
+	table.card.plans-table.plans-table-student
 		tr
 			th
-			th #{translate("personal")}
+			th #{translate("free")}
 			th #{translate("student")} (#{translate("annual")})
 				.outer.outer-top
 					.outer-content

@@ -16,6 +16,10 @@ App.factory('MultiCurrencyPricing', function() {
           monthly: '$8',
           annual: '$80'
         },
+        personal: {
+          monthly: '$10',
+          annual: '$120'
+        },
         collaborator: {
           monthly: '$15',
           annual: '$180'
@@ -31,6 +35,10 @@ App.factory('MultiCurrencyPricing', function() {
         student: {
           monthly: '€7',
           annual: '€70'
+        },
+        personal: {
+          monthly: '€9',
+          annual: '€108'
         },
         collaborator: {
           monthly: '€14',
@@ -48,6 +56,10 @@ App.factory('MultiCurrencyPricing', function() {
           monthly: '£6',
           annual: '£60'
         },
+        personal: {
+          monthly: '£8',
+          annual: '£96'
+        },
         collaborator: {
           monthly: '£12',
           annual: '£144'
@@ -64,6 +76,10 @@ App.factory('MultiCurrencyPricing', function() {
           monthly: '60 kr',
           annual: '600 kr'
         },
+        personal: {
+          monthly: '73 kr',
+          annual: '876 kr'
+        },
         collaborator: {
           monthly: '110 kr',
           annual: '1320 kr'
@@ -78,6 +94,10 @@ App.factory('MultiCurrencyPricing', function() {
         student: {
           monthly: '$9',
           annual: '$90'
+        },
+        personal: {
+          monthly: '$11',
+          annual: '$132'
         },
         collaborator: {
           monthly: '$17',
@@ -95,6 +115,10 @@ App.factory('MultiCurrencyPricing', function() {
           monthly: '60 kr',
           annual: '600 kr'
         },
+        personal: {
+          monthly: '73 kr',
+          annual: '876 kr'
+        },
         collaborator: {
           monthly: '110 kr',
           annual: '1320 kr'
@@ -110,6 +134,10 @@ App.factory('MultiCurrencyPricing', function() {
         student: {
           monthly: '50 kr',
           annual: '500 kr'
+        },
+        personal: {
+          monthly: '60 kr',
+          annual: '720 kr'
         },
         collaborator: {
           monthly: '90 kr',
@@ -127,6 +155,10 @@ App.factory('MultiCurrencyPricing', function() {
           monthly: '$10',
           annual: '$100'
         },
+        personal: {
+          monthly: '$12',
+          annual: '$144'
+        },
         collaborator: {
           monthly: '$18',
           annual: '$216'
@@ -142,6 +174,10 @@ App.factory('MultiCurrencyPricing', function() {
         student: {
           monthly: '$10',
           annual: '$100'
+        },
+        personal: {
+          monthly: '$12',
+          annual: '$144'
         },
         collaborator: {
           monthly: '$18',
@@ -159,6 +195,10 @@ App.factory('MultiCurrencyPricing', function() {
           monthly: 'Fr 8',
           annual: 'Fr 80'
         },
+        personal: {
+          monthly: 'Fr 10',
+          annual: 'Fr 120'
+        },
         collaborator: {
           monthly: 'Fr 15',
           annual: 'Fr 180'
@@ -174,6 +214,10 @@ App.factory('MultiCurrencyPricing', function() {
         student: {
           monthly: '$12',
           annual: '$120'
+        },
+        personal: {
+          monthly: '$13',
+          annual: '$156'
         },
         collaborator: {
           monthly: '$20',
@@ -221,6 +265,15 @@ App.controller('PlansController', function(
       return 'collaborator-annual'
     } else {
       return `collaborator${$scope.planQueryString}`
+    }
+  }
+
+  $scope.getPersonalPlanCode = function() {
+    const { view } = $scope.ui
+    if (view === 'annual') {
+      return 'paid-personal-annual'
+    } else {
+      return `paid-personal${$scope.planQueryString}`
     }
   }
 
