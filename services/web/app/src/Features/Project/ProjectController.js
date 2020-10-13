@@ -727,7 +727,7 @@ const ProjectController = {
           projectId,
           anonRequestToken,
           (error, privilegeLevel) => {
-            let allowedFreeTrial
+            let allowedFreeTrial = true
             if (error != null) {
               return next(error)
             }
@@ -738,12 +738,8 @@ const ProjectController = {
               return res.sendStatus(401)
             }
 
-            if (
-              subscription != null &&
-              subscription.freeTrial != null &&
-              subscription.freeTrial.expiresAt != null
-            ) {
-              allowedFreeTrial = !!subscription.freeTrial.allowed || true
+            if (subscription != null) {
+              allowedFreeTrial = false
             }
 
             let wsUrl = Settings.wsUrl
@@ -794,9 +790,7 @@ const ProjectController = {
                 last_name: user.last_name,
                 referal_id: user.referal_id,
                 signUpDate: user.signUpDate,
-                subscription: {
-                  freeTrial: { allowed: allowedFreeTrial }
-                },
+                allowedFreeTrial: allowedFreeTrial,
                 featureSwitches: user.featureSwitches,
                 features: user.features,
                 refProviders: user.refProviders,

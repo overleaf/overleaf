@@ -203,13 +203,19 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 									li
 										i.fa.fa-check &nbsp;
 										|#{translate("compile_larger_projects")}
-
-						p.text-center.row-spaced-thin(ng-controller="FreeTrialModalController")
+						p.text-center.row-spaced-thin(ng-show="user.allowedFreeTrial" ng-controller="FreeTrialModalController")
 							a.btn.btn-success(
 								href
 								ng-class="buttonClass"
 								ng-click="startFreeTrial('projectMembers')"
 							) #{translate("start_free_trial")}
+
+						p.text-center.row-spaced-thin(ng-show="!user.allowedFreeTrial" ng-controller="UpgradeModalController")
+							a.btn.btn-success(
+							  href
+							  ng-class="buttonClass"
+							  ng-click="upgradePlan('projectMembers')"
+						  ) #{translate("upgrade")}
 
 						p.small(ng-show="startedFreeTrial")
 							| #{translate("refresh_page_after_starting_free_trial")}

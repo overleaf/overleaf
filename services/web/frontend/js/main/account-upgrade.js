@@ -37,3 +37,23 @@ export default App.controller('FreeTrialModalController', function(
     go()
   }
 })
+
+App.controller('UpgradeModalController', function($scope, eventTracking) {
+  $scope.buttonClass = 'btn-primary'
+
+  $scope.upgradePlan = function(source) {
+    const w = window.open()
+    const go = function() {
+      let url
+      if (typeof ga === 'function') {
+        ga('send', 'event', 'subscription-funnel', 'upgraded-plan', source)
+      }
+      url = '/user/subscription'
+      $scope.startedFreeTrial = true
+
+      w.location = url
+    }
+
+    go()
+  }
+})
