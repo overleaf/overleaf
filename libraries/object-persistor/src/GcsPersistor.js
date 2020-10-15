@@ -200,17 +200,21 @@ module.exports = class GcsPersistor extends AbstractPersistor {
       if (this.settings.unlockBeforeDelete) {
         await file.setMetadata({ eventBasedHold: false })
       }
-      await file.delete()
+      try {
+        await file.delete()
+      } catch (err) {
+        // ignore 404s: it's fine if the file doesn't exist.
+        if (err.code !== 404) {
+          throw err
+        }
+      }
     } catch (err) {
-      const error = PersistorHelper.wrapError(
+      throw PersistorHelper.wrapError(
         err,
         'error deleting GCS object',
         { bucketName, key },
         WriteError
       )
-      if (!(error instanceof NotFoundError)) {
-        throw error
-      }
     }
   }
 
