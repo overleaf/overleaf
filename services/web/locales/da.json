@@ -1,4 +1,8 @@
 {
+  "n_warnings": "__count__ advarsel",
+  "n_warnings_plural": "__count__ advarsler",
+  "n_errors": "__count__ fejl",
+  "n_errors_plural": "__count__ fejl",
   "view_pdf": "Se PDF",
   "your_project_has_errors": "Der er fejl i dit projekt",
   "view_warnings": "Se advarsler",

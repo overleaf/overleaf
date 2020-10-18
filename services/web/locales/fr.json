@@ -1,4 +1,8 @@
 {
+  "n_warnings": "__count__ avertissement",
+  "n_warnings_plural": "__count__ avertissements",
+  "n_errors": "__count__ erreur",
+  "n_errors_plural": "__count__ erreurs",
   "view_pdf": "Voir le PDF",
   "your_project_has_errors": "Il y a des erreurs dans votre projet",
   "view_warnings": "Voir les avertissements",
