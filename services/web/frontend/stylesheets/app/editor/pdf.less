@@ -460,3 +460,10 @@
     display: block;
   }
 }
+
+#download-dropdown-list {
+  max-height: calc(
+    ~'100vh - ' @toolbar-small-height ~' - ' @toolbar-height ~' - ' @margin-md
+  );
+  overflow-y: auto;
+}

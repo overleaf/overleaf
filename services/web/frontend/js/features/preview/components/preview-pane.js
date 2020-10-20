@@ -13,6 +13,8 @@ function PreviewPane({
   onSetDraftMode,
   onSetSyntaxCheck,
   onToggleLogs,
+  outputFiles,
+  pdfDownloadUrl,
   showLogs
 }) {
   const { t } = useTranslation()
@@ -43,6 +45,8 @@ function PreviewPane({
         onSetDraftMode={onSetDraftMode}
         onSetSyntaxCheck={onSetSyntaxCheck}
         onToggleLogs={onToggleLogs}
+        outputFiles={outputFiles}
+        pdfDownloadUrl={pdfDownloadUrl}
       />
       <span aria-live="polite" className="sr-only">
         {nErrors && !compilerState.isCompiling
@@ -76,6 +80,8 @@ PreviewPane.propTypes = {
   onSetDraftMode: PropTypes.func.isRequired,
   onSetSyntaxCheck: PropTypes.func.isRequired,
   onToggleLogs: PropTypes.func.isRequired,
+  outputFiles: PropTypes.array,
+  pdfDownloadUrl: PropTypes.string,
   showLogs: PropTypes.bool.isRequired
 }
 

@@ -1,4 +1,6 @@
 {
+  "other_output_files": "Other output files",
+  "toggle_output_files_list": "Toggle output files list",
   "n_warnings": "__count__ warning",
   "n_warnings_plural": "__count__ warnings",
   "n_errors": "__count__ error",
@@ -1106,6 +1108,7 @@
   "remove_collaborator": "Remove collaborator",
   "add_to_folders": "Add to folders",
   "download_zip_file": "Download .zip File",
+  "download_file": "Download <0>__type__</0> file",
   "price": "Price",
   "close": "Close",
   "keybindings": "Keybindings",

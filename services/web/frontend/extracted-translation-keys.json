@@ -1,4 +1,6 @@
 [
+  "download_pdf",
+  "download_file",
   "n_warnings",
   "n_warnings_plural",
   "n_errors",
@@ -16,6 +18,7 @@
   "auto_compile",
   "on",
   "off",
+  "other_output_files",
   "compile_mode",
   "normal",
   "fast",
@@ -25,6 +28,7 @@
   "loading",
   "no_messages",
   "send_first_message",
+  "toggle_output_files_list",
   "your_message",
   "your_project_has_errors",
   "view_warnings",

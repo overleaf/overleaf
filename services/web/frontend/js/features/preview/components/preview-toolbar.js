@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import PreviewDownloadButton from './preview-download-button'
 import PreviewRecompileButton from './preview-recompile-button'
 import PreviewLogsToggleButton from './preview-logs-toggle-button'
 
@@ -13,6 +14,8 @@ function PreviewToolbar({
   onSetDraftMode,
   onSetSyntaxCheck,
   onToggleLogs,
+  outputFiles,
+  pdfDownloadUrl,
   showLogs
 }) {
   return (
@@ -26,6 +29,11 @@ function PreviewToolbar({
           onSetDraftMode={onSetDraftMode}
           onSetSyntaxCheck={onSetSyntaxCheck}
           onClearCache={onClearCache}
+        />
+        <PreviewDownloadButton
+          isCompiling={compilerState.isCompiling}
+          outputFiles={outputFiles}
+          pdfDownloadUrl={pdfDownloadUrl}
         />
       </div>
       <div className="toolbar-pdf-right">
@@ -59,7 +67,9 @@ PreviewToolbar.propTypes = {
   onSetAutoCompile: PropTypes.func.isRequired,
   onSetDraftMode: PropTypes.func.isRequired,
   onSetSyntaxCheck: PropTypes.func.isRequired,
-  onToggleLogs: PropTypes.func.isRequired
+  onToggleLogs: PropTypes.func.isRequired,
+  pdfDownloadUrl: PropTypes.string,
+  outputFiles: PropTypes.array
 }
 
 export default PreviewToolbar

@@ -508,7 +508,9 @@ App.controller('PdfController', function(
           url:
             `/project/${$scope.project_id}/output/${file.path}` +
             createQueryString(qs),
-          main: !!isOutputFile
+          main: !!isOutputFile,
+          fileName: file.path,
+          type: file.type
         })
       }
     }
