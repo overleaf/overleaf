@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 
 function PreviewPane({
   compilerState,
+  onClearCache,
   onRecompile,
   onRunSyntaxCheckNow,
   onSetAutoCompile,
@@ -35,6 +36,7 @@ function PreviewPane({
         compilerState={compilerState}
         logsState={{ nErrors, nWarnings, nLogEntries }}
         showLogs={showLogs}
+        onClearCache={onClearCache}
         onRecompile={onRecompile}
         onRunSyntaxCheckNow={onRunSyntaxCheckNow}
         onSetAutoCompile={onSetAutoCompile}
@@ -67,6 +69,7 @@ PreviewPane.propTypes = {
     isSyntaxCheckOn: PropTypes.bool.isRequired,
     logEntries: PropTypes.object.isRequired
   }),
+  onClearCache: PropTypes.func.isRequired,
   onRecompile: PropTypes.func.isRequired,
   onRunSyntaxCheckNow: PropTypes.func.isRequired,
   onSetAutoCompile: PropTypes.func.isRequired,

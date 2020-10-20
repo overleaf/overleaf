@@ -7,10 +7,12 @@ import Icon from '../../../shared/components/icon'
 function PreviewRecompileButton({
   compilerState: {
     isAutoCompileOn,
+    isClearingCache,
     isCompiling,
     isDraftModeOn,
     isSyntaxCheckOn
   },
+  onClearCache,
   onRecompile,
   onRunSyntaxCheckNow,
   onSetAutoCompile,
@@ -18,6 +20,16 @@ function PreviewRecompileButton({
   onSetSyntaxCheck
 }) {
   const { t } = useTranslation()
+
+  function handleRecompileFromScratch() {
+    onClearCache()
+      .then(() => {
+        onRecompile()
+      })
+      .catch(error => {
+        console.error(error)
+      })
+  }
 
   function handleSelectAutoCompileOn() {
     onSetAutoCompile(true)
@@ -47,7 +59,7 @@ function PreviewRecompileButton({
     <Dropdown id="pdf-recompile-dropdown" className="btn-recompile-group">
       <button className="btn btn-recompile" onClick={onRecompile}>
         <Icon type="refresh" spin={isCompiling} />
-        {isCompiling ? (
+        {isCompiling || isClearingCache ? (
           <span className="btn-recompile-label">
             {t('compiling')}
             &hellip;
@@ -56,7 +68,10 @@ function PreviewRecompileButton({
           <span className="btn-recompile-label">{t('recompile')}</span>
         )}
       </button>
-      <Dropdown.Toggle className="btn btn-recompile" />
+      <Dropdown.Toggle
+        aria-label={t('toggle_compile_options_menu')}
+        className="btn btn-recompile"
+      />
       <Dropdown.Menu>
         <MenuItem header>{t('auto_compile')}</MenuItem>
         <MenuItem onSelect={handleSelectAutoCompileOn}>
@@ -89,6 +104,14 @@ function PreviewRecompileButton({
           <Icon type="" modifier="fw" />
           {t('run_syntax_check_now')}
         </MenuItem>
+        <MenuItem divider />
+        <MenuItem
+          onSelect={handleRecompileFromScratch}
+          disabled={isCompiling || isClearingCache}
+          aria-disabled={!!(isCompiling || isClearingCache)}
+        >
+          {t('recompile_from_scratch')}
+        </MenuItem>
       </Dropdown.Menu>
     </Dropdown>
   )
@@ -97,11 +120,13 @@ function PreviewRecompileButton({
 PreviewRecompileButton.propTypes = {
   compilerState: PropTypes.shape({
     isAutoCompileOn: PropTypes.bool.isRequired,
+    isClearingCache: PropTypes.bool.isRequired,
     isCompiling: PropTypes.bool.isRequired,
     isDraftModeOn: PropTypes.bool.isRequired,
     isSyntaxCheckOn: PropTypes.bool.isRequired,
     logEntries: PropTypes.object.isRequired
   }),
+  onClearCache: PropTypes.func.isRequired,
   onRecompile: PropTypes.func.isRequired,
   onRunSyntaxCheckNow: PropTypes.func.isRequired,
   onSetAutoCompile: PropTypes.func.isRequired,

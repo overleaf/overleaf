@@ -3,6 +3,7 @@
   "n_warnings_plural": "__count__ warnings",
   "n_errors": "__count__ error",
   "n_errors_plural": "__count__ errors",
+  "toggle_compile_options_menu": "Toggle compile options menu",
   "view_pdf": "View PDF",
   "your_project_has_errors": "Your project has errors",
   "view_warnings": "View warnings",

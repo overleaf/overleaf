@@ -6,6 +6,7 @@ import PreviewLogsToggleButton from './preview-logs-toggle-button'
 function PreviewToolbar({
   compilerState,
   logsState,
+  onClearCache,
   onRecompile,
   onRunSyntaxCheckNow,
   onSetAutoCompile,
@@ -24,6 +25,7 @@ function PreviewToolbar({
           onSetAutoCompile={onSetAutoCompile}
           onSetDraftMode={onSetDraftMode}
           onSetSyntaxCheck={onSetSyntaxCheck}
+          onClearCache={onClearCache}
         />
       </div>
       <div className="toolbar-pdf-right">
@@ -51,6 +53,7 @@ PreviewToolbar.propTypes = {
     nLogEntries: PropTypes.number.isRequired
   }),
   showLogs: PropTypes.bool.isRequired,
+  onClearCache: PropTypes.func.isRequired,
   onRecompile: PropTypes.func.isRequired,
   onRunSyntaxCheckNow: PropTypes.func.isRequired,
   onSetAutoCompile: PropTypes.func.isRequired,

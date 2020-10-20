@@ -29,5 +29,8 @@
   "your_project_has_errors",
   "view_warnings",
   "view_logs",
-  "view_pdf"
+  "view_pdf",
+  "recompile_from_scratch",
+  "run_syntax_check_now",
+  "toggle_compile_options_menu"
 ]
