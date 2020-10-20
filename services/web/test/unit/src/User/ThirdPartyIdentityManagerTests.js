@@ -117,13 +117,12 @@ describe('ThirdPartyIdentityManager', function() {
             this.auditLog,
             error => {
               expect(error).to.not.exist
-              const loggerCall = this.logger.error.getCall(0)
-              expect(loggerCall.args[0]).to.deep.equal({
-                error: anError,
-                userId: this.userId
-              })
-              expect(loggerCall.args[1]).to.contain(
-                'could not send security alert email when Google linked'
+              expect(this.logger.error.lastCall).to.be.calledWithExactly(
+                {
+                  err: anError,
+                  userId: this.userId
+                },
+                'could not send security alert email when Google account linked'
               )
               done()
             }
@@ -142,7 +141,7 @@ describe('ThirdPartyIdentityManager', function() {
       const emailCall = this.EmailHandler.sendEmail.getCall(0)
       expect(emailCall.args[0]).to.equal('securityAlert')
       expect(emailCall.args[1].actionDescribed).to.contain(
-        'an Orcid account is no longer linked'
+        'an Orcid account was unlinked from'
       )
     })
     it('should update user audit log', async function() {
@@ -189,13 +188,12 @@ describe('ThirdPartyIdentityManager', function() {
             this.auditLog,
             error => {
               expect(error).to.not.exist
-              const loggerCall = this.logger.error.getCall(0)
-              expect(loggerCall.args[0]).to.deep.equal({
-                error: anError,
-                userId: this.userId
-              })
-              expect(loggerCall.args[1]).to.contain(
-                'could not send security alert email when Google no longer linked'
+              expect(this.logger.error.lastCall).to.be.calledWithExactly(
+                {
+                  err: anError,
+                  userId: this.userId
+                },
+                'could not send security alert email when Google account no longer linked'
               )
               done()
             }

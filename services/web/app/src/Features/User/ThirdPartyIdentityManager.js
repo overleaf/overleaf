@@ -1,6 +1,7 @@
 const APP_ROOT = '../../../../app/src'
 const UserAuditLogHandler = require(`${APP_ROOT}/Features/User/UserAuditLogHandler`)
 const EmailHandler = require(`${APP_ROOT}/Features/Email/EmailHandler`)
+const EmailOptionsHelper = require(`${APP_ROOT}/Features/Email/EmailOptionsHelper`)
 const Errors = require('../Errors/Errors')
 const _ = require('lodash')
 const logger = require('logger-sharelatex')
@@ -9,12 +10,6 @@ const { User } = require(`${APP_ROOT}/models/User`)
 const { promisifyAll } = require(`${APP_ROOT}/util/promises`)
 
 const oauthProviders = settings.oauthProviders || {}
-
-function _getIndefiniteArticle(providerName) {
-  const vowels = ['a', 'e', 'i', 'o', 'u']
-  if (vowels.includes(providerName.charAt(0).toLowerCase())) return 'an'
-  return 'a'
-}
 
 function getUser(providerId, externalUserId, callback) {
   if (providerId == null || externalUserId == null) {
@@ -189,22 +184,17 @@ function _getUserQuery(providerId, externalUserId) {
 }
 
 function _sendSecurityAlert(accountLinked, providerId, user, userId) {
-  const operation = accountLinked ? 'linked' : 'no longer linked'
-  const tense = accountLinked ? 'was' : 'is'
   const providerName = oauthProviders[providerId].name
-  const indefiniteArticle = _getIndefiniteArticle(providerName)
-  const emailOptions = {
-    to: user.email,
-    action: `${providerName} account ${operation}`,
-    actionDescribed: `${indefiniteArticle} ${providerName} account ${tense} ${operation} to your account ${
-      user.email
-    }`
-  }
+  const emailOptions = EmailOptionsHelper.linkOrUnlink(
+    accountLinked,
+    providerName,
+    user.email
+  )
   EmailHandler.sendEmail('securityAlert', emailOptions, error => {
     if (error) {
       logger.error(
-        { error, userId },
-        `could not send security alert email when ${providerName} ${operation}`
+        { err: error, userId },
+        `could not send security alert email when ${emailOptions.action}`
       )
     }
   })
