@@ -768,10 +768,6 @@ const ProjectController = {
             }
             metrics.inc(metricName)
 
-            const enableOptimize =
-              !!Settings.experimentId &&
-              (user.features && !user.features.zotero)
-
             if (userId) {
               AnalyticsManager.recordEvent(userId, 'project-opened', {
                 projectId: project._id
@@ -833,9 +829,6 @@ const ProjectController = {
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
               wsUrl,
               showSupport: Features.hasFeature('support'),
-              gaOptimize: enableOptimize,
-              customOptimizeEvent: true,
-              experimentId: Settings.experimentId,
               showNewLogsUI: req.query && req.query.new_logs_ui === 'true',
               showNewChatUI: req.query && req.query.new_chat_ui === 'true'
             })
