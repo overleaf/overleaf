@@ -15,18 +15,6 @@ export default [
     score: 7.849662248028187
   },
   {
-    caption: '\\begin{}[]',
-    snippet: '\\begin{$1}[$2]',
-    meta: 'env',
-    score: 7.849662248028187
-  },
-  {
-    caption: '\\begin{}{}',
-    snippet: '\\begin{$1}{$2}',
-    meta: 'env',
-    score: 7.849662248028187
-  },
-  {
     caption: '\\end{}',
     snippet: '\\end{$1}',
     meta: 'env',
@@ -243,22 +231,10 @@ export default [
     score: 0.42937815279867964
   },
   {
-    caption: '\\left[]',
-    snippet: '\\left[$1]',
-    meta: 'cmd',
-    score: 0.42937815279867964
-  },
-  {
     caption: '\\sum',
     snippet: '\\sum',
     meta: 'cmd',
     score: 0.42607994509619934
-  },
-  {
-    caption: '\\noindent',
-    snippet: '\\noindent',
-    meta: 'cmd',
-    score: 0.42355747798114207
   },
   {
     caption: '\\chapter{}',
@@ -309,22 +285,10 @@ export default [
     score: 0.354445763583904
   },
   {
-    caption: '\\setlength',
-    snippet: '\\setlength',
-    meta: 'cmd',
-    score: 0.354445763583904
-  },
-  {
     caption: '\\mathcal{}',
     snippet: '\\mathcal{$1}',
     meta: 'cmd',
     score: 0.35084018920966636
-  },
-  {
-    caption: '\\newline',
-    snippet: '\\newline',
-    meta: 'cmd',
-    score: 0.3311721696201715
   },
   {
     caption: '\\newpage',
@@ -335,12 +299,6 @@ export default [
   {
     caption: '\\renewcommand{}{}',
     snippet: '\\renewcommand{$1}{$2}',
-    meta: 'cmd',
-    score: 0.3267437011085663
-  },
-  {
-    caption: '\\renewcommand',
-    snippet: '\\renewcommand',
     meta: 'cmd',
     score: 0.3267437011085663
   },
@@ -373,18 +331,6 @@ export default [
     snippet: '\\times',
     meta: 'cmd',
     score: 0.2957960629411553
-  },
-  {
-    caption: '\\citep{}',
-    snippet: '\\citep{$1}',
-    meta: 'cmd',
-    score: 0.2941882834697057
-  },
-  {
-    caption: '\\color[]{}',
-    snippet: '\\color[$1]{$2}',
-    meta: 'cmd',
-    score: 0.2864294797053033
   },
   {
     caption: '\\color{}',
@@ -435,12 +381,6 @@ export default [
     score: 0.25264309033778715
   },
   {
-    caption: '\\hat',
-    snippet: '\\hat',
-    meta: 'cmd',
-    score: 0.25264309033778715
-  },
-  {
     caption: '\\bibliographystyle{}',
     snippet: '\\bibliographystyle{$1}',
     meta: 'cmd',
@@ -453,20 +393,8 @@ export default [
     score: 0.2447632045426295
   },
   {
-    caption: '\\small{}',
-    snippet: '\\small{$1}',
-    meta: 'cmd',
-    score: 0.2447632045426295
-  },
-  {
     caption: '\\LaTeX',
     snippet: '\\LaTeX',
-    meta: 'cmd',
-    score: 0.2334089308452787
-  },
-  {
-    caption: '\\LaTeX{}',
-    snippet: '\\LaTeX{$1}',
     meta: 'cmd',
     score: 0.2334089308452787
   },
@@ -483,20 +411,8 @@ export default [
     score: 0.2253056071787701
   },
   {
-    caption: '\\newtheorem{}[]{}',
-    snippet: '\\newtheorem{$1}[$2]{$3}',
-    meta: 'cmd',
-    score: 0.215689795055434
-  },
-  {
     caption: '\\newtheorem{}{}',
     snippet: '\\newtheorem{$1}{$2}',
-    meta: 'cmd',
-    score: 0.215689795055434
-  },
-  {
-    caption: '\\newtheorem{}{}[]',
-    snippet: '\\newtheorem{$1}{$2}[$3]',
     meta: 'cmd',
     score: 0.215689795055434
   },
@@ -531,20 +447,8 @@ export default [
     score: 0.2038592081252624
   },
   {
-    caption: '\\footnotesize{}',
-    snippet: '\\footnotesize{$1}',
-    meta: 'cmd',
-    score: 0.2038592081252624
-  },
-  {
     caption: '\\large',
     snippet: '\\large',
-    meta: 'cmd',
-    score: 0.20377416734108866
-  },
-  {
-    caption: '\\large{}',
-    snippet: '\\large{$1}',
     meta: 'cmd',
     score: 0.20377416734108866
   },
@@ -567,18 +471,6 @@ export default [
     score: 0.1987771081149759
   },
   {
-    caption: '\\Large{}',
-    snippet: '\\Large{$1}',
-    meta: 'cmd',
-    score: 0.1987771081149759
-  },
-  {
-    caption: '\\cvitem{}{}',
-    snippet: '\\cvitem{$1}{$2}',
-    meta: 'cmd',
-    score: 0.19605476980016281
-  },
-  {
     caption: '\\rho',
     snippet: '\\rho',
     meta: 'cmd',
@@ -599,12 +491,6 @@ export default [
   {
     caption: '\\boldsymbol{}',
     snippet: '\\boldsymbol{$1}',
-    meta: 'cmd',
-    score: 0.18137737738638837
-  },
-  {
-    caption: '\\boldsymbol',
-    snippet: '\\boldsymbol',
     meta: 'cmd',
     score: 0.18137737738638837
   },
@@ -651,28 +537,10 @@ export default [
     score: 0.1525055392611109
   },
   {
-    caption: '\\address[]{}',
-    snippet: '\\address[$1]{$2}',
-    meta: 'cmd',
-    score: 0.1525055392611109
-  },
-  {
-    caption: '\\address{}{}{}',
-    snippet: '\\address{$1}{$2}{$3}',
-    meta: 'cmd',
-    score: 0.1525055392611109
-  },
-  {
     caption: '\\quad',
     snippet: '\\quad',
     meta: 'cmd',
     score: 0.15242755832392743
-  },
-  {
-    caption: '\\email{}',
-    snippet: '\\email{$1}',
-    meta: 'cmd',
-    score: 0.1522294670109857
   },
   {
     caption: '\\paragraph{}',
@@ -743,12 +611,6 @@ export default [
   {
     caption: '\\varsigma',
     snippet: '\\varsigma',
-    meta: 'cmd',
-    score: 0.0010424880711234978
-  },
-  {
-    caption: '\\varsigma{}',
-    snippet: '\\varsigma{$1}',
     meta: 'cmd',
     score: 0.0010424880711234978
   },
