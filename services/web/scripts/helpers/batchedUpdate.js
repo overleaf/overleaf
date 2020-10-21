@@ -8,6 +8,7 @@ if (process.env.BATCH_LAST_ID) {
 }
 
 async function getNextBatch(collection, query, maxId, projection) {
+  maxId = maxId || BATCH_LAST_ID
   if (maxId) {
     query['_id'] = { $gt: maxId }
   }
@@ -35,7 +36,7 @@ async function batchedUpdate(collectionName, query, update, projection) {
   projection = projection || { _id: 1 }
   let nextBatch
   let updated = 0
-  let maxId = BATCH_LAST_ID
+  let maxId
   while (
     (nextBatch = await getNextBatch(collection, query, maxId, projection))
       .length
@@ -66,6 +67,7 @@ function batchedUpdateWithResultHandling(collection, query, update) {
 }
 
 module.exports = {
+  getNextBatch,
   batchedUpdate,
   batchedUpdateWithResultHandling
 }
