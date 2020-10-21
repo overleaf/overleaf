@@ -141,8 +141,9 @@ const UserSchema = new Schema({
   refered_users: [{ type: ObjectId, ref: 'User' }],
   refered_user_count: { type: Number, default: 0 },
   refProviders: {
-    mendeley: Boolean, // coerce the refProviders values to Booleans
-    zotero: Boolean
+    // The actual values are managed by third-party-references.
+    mendeley: Schema.Types.Mixed,
+    zotero: Schema.Types.Mixed
   },
   alphaProgram: { type: Boolean, default: false }, // experimental features
   betaProgram: { type: Boolean, default: false },

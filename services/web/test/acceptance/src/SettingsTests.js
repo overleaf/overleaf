@@ -59,4 +59,24 @@ describe('SettingsPage', function() {
       })
     })
   })
+
+  describe('with third-party-references configured', function() {
+    beforeEach(function injectThirdPartyReferencesEntryIntoDb(done) {
+      this.user.mongoUpdate(
+        { $set: { refProviders: { zotero: { encrypted: '2020.9:SNIP' } } } },
+        done
+      )
+    })
+
+    it('should be able to update settings', function(done) {
+      const newName = 'third-party-references'
+      this.user.updateSettings({ first_name: newName }, error => {
+        should.not.exist(error)
+        this.user.get((error, user) => {
+          user.first_name.should.equal(newName)
+          done()
+        })
+      })
+    })
+  })
 })
