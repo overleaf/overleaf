@@ -19,6 +19,13 @@ async function run() {
     const json = JSON.parse(content)
 
     for (const [code, lang] of Object.entries(json)) {
+      if (code === 'en-GB') {
+        // OneSky does not have read-after-write consistency.
+        // Skip the dump of English locales, which may not include locales
+        //  that were just uploaded.
+        continue
+      }
+
       for (let [key, value] of Object.entries(lang.translation)) {
         // Handle multi-line strings as arrays by joining on newline
         if (Array.isArray(value)) {
@@ -27,9 +34,8 @@ async function run() {
         lang.translation[key] = sanitize(value)
       }
 
-      const outputLngCode = code === 'en-GB' ? 'en' : code
       await fs.writeFile(
-        `${__dirname}/../../locales/${outputLngCode}.json`,
+        `${__dirname}/../../locales/${code}.json`,
         JSON.stringify(lang.translation, null, 2) + '\n'
       )
     }
