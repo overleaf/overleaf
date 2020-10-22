@@ -28,11 +28,11 @@ async function main() {
     (nextBatch = await getNextBatch(collection, query, maxId, projection))
       .length
   ) {
+    processBatch(nextBatch)
+
     maxId = nextBatch[nextBatch.length - 1]._id
     processed += nextBatch.length
     console.error(maxId, processed)
-
-    processBatch(nextBatch)
   }
   console.error('done')
 }
