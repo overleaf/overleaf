@@ -208,7 +208,7 @@ describe('UserRegistrationHandler', function() {
       it('should set the password', function(done) {
         return this.handler.registerNewUser(this.passingRequest, err => {
           this.AuthenticationManager.setUserPassword
-            .calledWith(this.user._id, this.passingRequest.password)
+            .calledWith(this.user, this.passingRequest.password)
             .should.equal(true)
           return done()
         })

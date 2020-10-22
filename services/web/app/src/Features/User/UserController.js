@@ -85,23 +85,24 @@ async function changePassword(req, res, next) {
       req.i18n.translate('password_change_passwords_do_not_match')
     )
   }
-  const validationError = AuthenticationManager.validatePassword(
-    req.body.newPassword1
-  )
-  if (validationError != null) {
-    return HttpErrorHandler.badRequest(req, res, validationError.message)
-  }
 
+  try {
+    await AuthenticationManager.promises.setUserPassword(
+      user,
+      req.body.newPassword1
+    )
+  } catch (error) {
+    if (error.name === 'InvalidPasswordError') {
+      return HttpErrorHandler.badRequest(req, res, error.message)
+    } else {
+      throw error
+    }
+  }
   await UserAuditLogHandler.promises.addEntry(
     user._id,
     'update-password',
     user._id,
     req.ip
-  )
-
-  await AuthenticationManager.promises.setUserPassword(
-    user._id,
-    req.body.newPassword1
   )
 
   // no need to wait, errors are logged and not passed back

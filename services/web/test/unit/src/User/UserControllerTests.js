@@ -664,7 +664,7 @@ describe('UserController', function() {
       it('should set the new password if they do match', function(done) {
         this.res.json.callsFake(() => {
           this.AuthenticationManager.promises.setUserPassword.should.have.been.calledWith(
-            this.user._id,
+            this.user,
             'newpass'
           )
           done()
@@ -749,9 +749,12 @@ describe('UserController', function() {
       })
 
       it('it should not set the new password if it is invalid', function(done) {
-        this.AuthenticationManager.validatePassword = sinon
-          .stub()
-          .returns({ message: 'validation-error' })
+        // this.AuthenticationManager.validatePassword = sinon
+        //   .stub()
+        //   .returns({ message: 'validation-error' })
+        const err = new Error('bad')
+        err.name = 'InvalidPasswordError'
+        this.AuthenticationManager.promises.setUserPassword.rejects(err)
         this.AuthenticationManager.promises.authenticate.resolves({})
         this.req.body = {
           newPassword1: 'newpass',
@@ -761,10 +764,10 @@ describe('UserController', function() {
           expect(this.HttpErrorHandler.badRequest).to.have.been.calledWith(
             this.req,
             this.res,
-            'validation-error'
+            err.message
           )
           this.AuthenticationManager.promises.setUserPassword.callCount.should.equal(
-            0
+            1
           )
           done()
         })
@@ -784,7 +787,7 @@ describe('UserController', function() {
           this.UserController.changePassword(this.req, this.res, error => {
             expect(error).to.be.instanceof(Error)
             this.AuthenticationManager.promises.setUserPassword.callCount.should.equal(
-              0
+              1
             )
             done()
           })

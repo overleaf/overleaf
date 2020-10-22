@@ -26,7 +26,6 @@ describe('AuthenticationManager', function() {
         },
         bcrypt: (this.bcrypt = {}),
         'settings-sharelatex': this.settings,
-        '../V1/V1Handler': (this.V1Handler = {}),
         '../User/UserGetter': (this.UserGetter = {}),
         './AuthenticationErrors': AuthenticationErrors
       }
@@ -100,13 +99,15 @@ describe('AuthenticationManager', function() {
           email: (this.email = 'USER@sharelatex.com')
         }
         this.db.users.updateOne = sinon
+        this.User.findOne = sinon.stub().callsArgWith(2, null, this.user)
+        this.db.users.updateOne = sinon
           .stub()
           .callsArgWith(2, null, { modifiedCount: 1 })
       })
 
       it('should not produce an error', function(done) {
         this.AuthenticationManager.setUserPasswordInV2(
-          this.user._id,
+          this.user,
           'testpassword',
           (err, updated) => {
             expect(err).to.not.exist
@@ -118,7 +119,7 @@ describe('AuthenticationManager', function() {
 
       it('should set the hashed password', function(done) {
         this.AuthenticationManager.setUserPasswordInV2(
-          this.user._id,
+          this.user,
           'testpassword',
           err => {
             expect(err).to.not.exist
@@ -224,7 +225,7 @@ describe('AuthenticationManager', function() {
 
         it('should set the users password (with a higher number of rounds)', function() {
           this.AuthenticationManager.setUserPassword
-            .calledWith('user-id', this.unencryptedPassword)
+            .calledWith(this.user, this.unencryptedPassword)
             .should.equal(true)
         })
 
@@ -258,7 +259,7 @@ describe('AuthenticationManager', function() {
 
         it('should not set the users password (with a higher number of rounds)', function() {
           this.AuthenticationManager.setUserPassword
-            .calledWith('user-id', this.unencryptedPassword)
+            .calledWith(this.user, this.unencryptedPassword)
             .should.equal(false)
         })
 
@@ -525,11 +526,16 @@ describe('AuthenticationManager', function() {
   describe('setUserPassword', function() {
     beforeEach(function() {
       this.user_id = ObjectId()
+      this.user = {
+        _id: this.user_id,
+        email: 'user@example.com'
+      }
       this.password = 'banana'
       this.hashedPassword = 'asdkjfa;osiuvandf'
       this.salt = 'saltaasdfasdfasdf'
       this.bcrypt.genSalt = sinon.stub().callsArgWith(2, null, this.salt)
       this.bcrypt.hash = sinon.stub().callsArgWith(2, null, this.hashedPassword)
+      this.User.findOne = sinon.stub().callsArgWith(2, null, this.user)
       this.db.users.updateOne = sinon.stub().callsArg(2)
     })
 
@@ -545,7 +551,7 @@ describe('AuthenticationManager', function() {
 
       it('should return and error', function(done) {
         this.AuthenticationManager.setUserPassword(
-          this.user_id,
+          this.user,
           this.password,
           err => {
             expect(err).to.exist
@@ -556,11 +562,47 @@ describe('AuthenticationManager', function() {
 
       it('should not start the bcrypt process', function(done) {
         this.AuthenticationManager.setUserPassword(
-          this.user_id,
+          this.user,
           this.password,
           () => {
             this.bcrypt.genSalt.called.should.equal(false)
             this.bcrypt.hash.called.should.equal(false)
+            done()
+          }
+        )
+      })
+    })
+
+    describe('contains full email', function() {
+      beforeEach(function() {
+        this.password = `some${this.user.email}password`
+      })
+
+      it('should reject the password', function(done) {
+        this.AuthenticationManager.setUserPassword(
+          this.user,
+          this.password,
+          err => {
+            expect(err).to.exist
+            expect(err.name).to.equal('InvalidPasswordError')
+            done()
+          }
+        )
+      })
+    })
+
+    describe('contains first part of email', function() {
+      beforeEach(function() {
+        this.password = `some${this.user.email.split('@')[0]}password`
+      })
+
+      it('should reject the password', function(done) {
+        this.AuthenticationManager.setUserPassword(
+          this.user,
+          this.password,
+          err => {
+            expect(err).to.exist
+            expect(err.name).to.equal('InvalidPasswordError')
             done()
           }
         )
@@ -580,7 +622,7 @@ describe('AuthenticationManager', function() {
 
       it('should return and error', function(done) {
         this.AuthenticationManager.setUserPassword(
-          this.user_id,
+          this.user,
           this.password,
           err => {
             expect(err).to.exist
@@ -591,7 +633,7 @@ describe('AuthenticationManager', function() {
 
       it('should not start the bcrypt process', function(done) {
         this.AuthenticationManager.setUserPassword(
-          this.user_id,
+          this.user,
           this.password,
           () => {
             this.bcrypt.genSalt.called.should.equal(false)
@@ -606,7 +648,7 @@ describe('AuthenticationManager', function() {
       beforeEach(function() {
         this.UserGetter.getUser = sinon.stub().yields(null, { overleaf: null })
         this.AuthenticationManager.setUserPassword(
-          this.user_id,
+          this.user,
           this.password,
           this.callback
         )

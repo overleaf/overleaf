@@ -44,9 +44,6 @@ describe('PasswordResetController', function() {
         revokeAllUserSessions: sinon.stub().resolves()
       }
     }
-    this.AuthenticationManager = {
-      validatePassword: sinon.stub()
-    }
     this.UserUpdater = {
       promises: {
         removeReconfirmFlag: sinon.stub().resolves()
@@ -70,7 +67,6 @@ describe('PasswordResetController', function() {
           getLoggedInUserId: sinon.stub(),
           finishLogin: sinon.stub()
         }),
-        '../Authentication/AuthenticationManager': this.AuthenticationManager,
         '../User/UserGetter': (this.UserGetter = {
           promises: {
             getUser: sinon.stub()
@@ -248,13 +244,13 @@ describe('PasswordResetController', function() {
 
     it('should return 400 (Bad Request) if the password is invalid', function(done) {
       this.req.body.password = 'correct horse battery staple'
-      this.AuthenticationManager.validatePassword = sinon
-        .stub()
-        .returns({ message: 'password contains invalid characters' })
+      const err = new Error('bad')
+      err.name = 'InvalidPasswordError'
+      this.PasswordResetHandler.promises.setNewUserPassword.rejects(err)
       this.res.sendStatus = code => {
         code.should.equal(400)
         this.PasswordResetHandler.promises.setNewUserPassword.called.should.equal(
-          false
+          true
         )
         done()
       }

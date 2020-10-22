@@ -16,7 +16,8 @@ const UserRegistrationHandler = {
   _registrationRequestIsValid(body, callback) {
     const invalidEmail = AuthenticationManager.validateEmail(body.email || '')
     const invalidPassword = AuthenticationManager.validatePassword(
-      body.password || ''
+      body.password || '',
+      body.email
     )
     if (invalidEmail != null || invalidPassword != null) {
       return false
@@ -71,7 +72,7 @@ const UserRegistrationHandler = {
               ),
             cb =>
               AuthenticationManager.setUserPassword(
-                user._id,
+                user,
                 userDetails.password,
                 cb
               ),

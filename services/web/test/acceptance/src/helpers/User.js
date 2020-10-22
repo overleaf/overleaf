@@ -20,7 +20,7 @@ class User {
       }
     ]
     this.email = this.emails[0].email
-    this.password = `acceptance-test-${count}-password`
+    this.password = `a-terrible-secret-${count}`
     count++
     this.jar = request.jar()
     this.request = request.defaults({
@@ -111,21 +111,17 @@ class User {
         return callback(error)
       }
       this.setExtraAttributes(user)
-      AuthenticationManager.setUserPasswordInV2(
-        user._id,
-        this.password,
-        error => {
+      AuthenticationManager.setUserPasswordInV2(user, this.password, error => {
+        if (error != null) {
+          return callback(error)
+        }
+        this.mongoUpdate({ $set: { emails: this.emails } }, error => {
           if (error != null) {
             return callback(error)
           }
-          this.mongoUpdate({ $set: { emails: this.emails } }, error => {
-            if (error != null) {
-              return callback(error)
-            }
-            callback(null, this.password)
-          })
-        }
-      )
+          callback(null, this.password)
+        })
+      })
     })
   }
 

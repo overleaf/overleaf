@@ -54,7 +54,7 @@ function getUserForPasswordResetToken(token, callback) {
       }
       UserGetter.getUserByMainEmail(
         data.email,
-        { _id: 1, 'overleaf.id': 1 },
+        { _id: 1, 'overleaf.id': 1, email: 1 },
         (err, user) => {
           if (err != null) {
             callback(err)
@@ -93,16 +93,16 @@ async function setNewUserPassword(token, password, auditLog) {
     }
   }
 
+  const reset = await AuthenticationManager.promises.setUserPassword(
+    user,
+    password
+  )
+
   await UserAuditLogHandler.promises.addEntry(
     user._id,
     'reset-password',
     auditLog.initiatorId,
     auditLog.ip
-  )
-
-  const reset = await AuthenticationManager.promises.setUserPassword(
-    user._id,
-    password
   )
 
   return { found: true, reset, userId: user._id }
