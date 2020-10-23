@@ -217,7 +217,7 @@ settings =
 		collaborators: -1
 		dropbox: true
 		versioning: true
-		compileTimeout: parseIntOrFail(process.env["COMPILE_TIMEOUT"] or 180, 10)
+		compileTimeout: parseIntOrFail(process.env["COMPILE_TIMEOUT"] or 180)
 		compileGroup: "standard"
 		trackChanges: true
 		templates: true
@@ -383,7 +383,7 @@ if process.env["SHARELATEX_LDAP_URL"]
 			timeout: (
 				if _ldap_timeout = process.env["SHARELATEX_LDAP_TIMEOUT"]
 					try
-						parseIntOrFail(_ldap_timeout, 10)
+						parseIntOrFail(_ldap_timeout)
 					catch e
 						console.error "Cannot parse SHARELATEX_LDAP_TIMEOUT"
 				else
@@ -392,7 +392,7 @@ if process.env["SHARELATEX_LDAP_URL"]
 			connectTimeout: (
 				if _ldap_connect_timeout = process.env["SHARELATEX_LDAP_CONNECT_TIMEOUT"]
 					try
-						parseIntOrFail(_ldap_connect_timeout, 10)
+						parseIntOrFail(_ldap_connect_timeout)
 					catch e
 						console.error "Cannot parse SHARELATEX_LDAP_CONNECT_TIMEOUT"
 				else
@@ -450,7 +450,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			acceptedClockSkewMs: (
 				if _saml_skew = process.env["SHARELATEX_SAML_ACCEPTED_CLOCK_SKEW_MS"]
 					try
-						parseIntOrFail(_saml_skew, 10)
+						parseIntOrFail(_saml_skew)
 					catch e
 						console.error "Cannot parse SHARELATEX_SAML_ACCEPTED_CLOCK_SKEW_MS"
 				else
@@ -459,7 +459,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			requestIdExpirationPeriodMs: (
 				if _saml_exiration = process.env["SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"]
 					try
-						parseIntOrFail(_saml_expiration, 10)
+						parseIntOrFail(_saml_expiration)
 					catch e
 						console.error "Cannot parse SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"
 				else
