@@ -13,9 +13,13 @@ parse = (option)->
 			opt = JSON.parse(option)
 			return opt
 		catch err
-			console.error "problem parsing #{option}, invalid JSON"
-			return undefined
+			throw new Error("problem parsing #{option}, invalid JSON")
 
+parseIntOrFail = (value)->
+	parsedValue = parseInt(value, 10)
+	if isNaN(parsedValue)
+		throw new Error("'#{value}' is an invalid integer")
+	return parsedValue
 
 DATA_DIR = '/var/lib/sharelatex/data'
 TMP_DIR = '/var/lib/sharelatex/tmp'
@@ -213,7 +217,7 @@ settings =
 		collaborators: -1
 		dropbox: true
 		versioning: true
-		compileTimeout: parseInt(process.env["COMPILE_TIMEOUT"] or 180, 10)
+		compileTimeout: parseIntOrFail(process.env["COMPILE_TIMEOUT"] or 180, 10)
 		compileGroup: "standard"
 		trackChanges: true
 		templates: true
@@ -379,7 +383,7 @@ if process.env["SHARELATEX_LDAP_URL"]
 			timeout: (
 				if _ldap_timeout = process.env["SHARELATEX_LDAP_TIMEOUT"]
 					try
-						parseInt(_ldap_timeout)
+						parseIntOrFail(_ldap_timeout, 10)
 					catch e
 						console.error "Cannot parse SHARELATEX_LDAP_TIMEOUT"
 				else
@@ -388,7 +392,7 @@ if process.env["SHARELATEX_LDAP_URL"]
 			connectTimeout: (
 				if _ldap_connect_timeout = process.env["SHARELATEX_LDAP_CONNECT_TIMEOUT"]
 					try
-						parseInt(_ldap_connect_timeout)
+						parseIntOrFail(_ldap_connect_timeout, 10)
 					catch e
 						console.error "Cannot parse SHARELATEX_LDAP_CONNECT_TIMEOUT"
 				else
@@ -446,7 +450,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			acceptedClockSkewMs: (
 				if _saml_skew = process.env["SHARELATEX_SAML_ACCEPTED_CLOCK_SKEW_MS"]
 					try
-						parseInt(_saml_skew)
+						parseIntOrFail(_saml_skew, 10)
 					catch e
 						console.error "Cannot parse SHARELATEX_SAML_ACCEPTED_CLOCK_SKEW_MS"
 				else
@@ -455,7 +459,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			requestIdExpirationPeriodMs: (
 				if _saml_exiration = process.env["SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"]
 					try
-						parseInt(_saml_expiration)
+						parseIntOrFail(_saml_expiration, 10)
 					catch e
 						console.error "Cannot parse SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"
 				else
