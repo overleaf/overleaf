@@ -379,7 +379,7 @@ if process.env["SHARELATEX_LDAP_URL"]
 			timeout: (
 				if _ldap_timeout = process.env["SHARELATEX_LDAP_TIMEOUT"]
 					try
-						parseInt(_ldap_timeout)
+						parseInt(_ldap_timeout, 10)
 					catch e
 						console.error "Cannot parse SHARELATEX_LDAP_TIMEOUT"
 				else
@@ -388,7 +388,7 @@ if process.env["SHARELATEX_LDAP_URL"]
 			connectTimeout: (
 				if _ldap_connect_timeout = process.env["SHARELATEX_LDAP_CONNECT_TIMEOUT"]
 					try
-						parseInt(_ldap_connect_timeout)
+						parseInt(_ldap_connect_timeout, 10)
 					catch e
 						console.error "Cannot parse SHARELATEX_LDAP_CONNECT_TIMEOUT"
 				else
@@ -446,7 +446,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			acceptedClockSkewMs: (
 				if _saml_skew = process.env["SHARELATEX_SAML_ACCEPTED_CLOCK_SKEW_MS"]
 					try
-						parseInt(_saml_skew)
+						parseInt(_saml_skew, 10)
 					catch e
 						console.error "Cannot parse SHARELATEX_SAML_ACCEPTED_CLOCK_SKEW_MS"
 				else
@@ -455,7 +455,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			requestIdExpirationPeriodMs: (
 				if _saml_exiration = process.env["SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"]
 					try
-						parseInt(_saml_expiration)
+						parseInt(_saml_expiration, 10)
 					catch e
 						console.error "Cannot parse SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"
 				else
