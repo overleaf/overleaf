@@ -213,7 +213,7 @@ settings =
 		collaborators: -1
 		dropbox: true
 		versioning: true
-		compileTimeout: 180
+		compileTimeout: parseInt(process.env["COMPILE_TIMEOUT"] or 180, 10)
 		compileGroup: "standard"
 		trackChanges: true
 		templates: true
