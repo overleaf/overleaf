@@ -98,7 +98,6 @@ $ curl -X POST -d @data.json localhost:3013/project/<id>/compile
 You can specify any project-id in the URL, and the files and LaTeX environment will be persisted between requests.
 URLs will be downloaded and cached until provided with a more recent modified date.
 
-
 #### Example Response
 
 ```javascript
