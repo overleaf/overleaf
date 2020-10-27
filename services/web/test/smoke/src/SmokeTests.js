@@ -21,7 +21,7 @@ if (Object.prototype.should == null) {
 const { expect } = chai
 const Settings = require('settings-sharelatex')
 let ownPort = Settings.internal.web.port || Settings.port || 3000
-const port = Settings.web.web_router_port || ownPort // send requests to web router if this is the api process
+const port = (Settings.web && Settings.web.web_router_port) || ownPort // send requests to web router if this is the api process
 const cookeFilePath = `/tmp/smoke-test-cookie-${ownPort}-to-${port}.txt`
 const buildUrl = path =>
   ` -b ${cookeFilePath} --resolve 'smoke${
