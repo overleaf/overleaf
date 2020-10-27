@@ -29,6 +29,15 @@ function _emailBodyPlainText(content, opts, ctaEmail) {
   emailBody += `\r\n\r\n`
   emailBody += `Regards,\r\nThe ${settings.appName} Team - ${settings.siteUrl}`
 
+  if (
+    settings.email &&
+    settings.email.template &&
+    settings.email.template.customFooter
+  ) {
+    emailBody += `\r\n\r\n`
+    emailBody += settings.email.template.customFooter
+  }
+
   return emailBody
 }
 
@@ -114,13 +123,6 @@ function buildEmail(templateName, opts) {
   const template = templates[templateName]
   opts.siteUrl = settings.siteUrl
   opts.body = template.compiledTemplate(opts)
-  if (
-    settings.email &&
-    settings.email.template &&
-    settings.email.template.customFooter
-  ) {
-    opts.body += settings.email.template.customFooter
-  }
   return {
     subject: template.subject(opts),
     html: template.layout(opts),
