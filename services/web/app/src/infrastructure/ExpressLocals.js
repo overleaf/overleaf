@@ -12,6 +12,7 @@ const Features = require('./Features')
 const AuthenticationController = require('../Features/Authentication/AuthenticationController')
 const PackageVersions = require('./PackageVersions')
 const Modules = require('./Modules')
+const SafeHTMLSubstitute = require('../Features/Helpers/SafeHTMLSubstitution')
 
 let webpackManifest
 if (!IS_DEV_ENV) {
@@ -176,10 +177,15 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function(req, res, next) {
-    res.locals.translate = function(key, vars) {
+    res.locals.translate = function(key, vars, components) {
       vars = vars || {}
       vars.appName = Settings.appName
-      return req.i18n.translate(key, vars)
+      const locale = req.i18n.translate(key, vars)
+      if (components) {
+        return SafeHTMLSubstitute.render(locale, components)
+      } else {
+        return locale
+      }
     }
     // Don't include the query string parameters, otherwise Google
     // treats ?nocdn=true as the canonical version
