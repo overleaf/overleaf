@@ -179,6 +179,7 @@ module.exports = settings =
 			url: process.env['LINKED_URL_PROXY']
 		thirdpartyreferences:
 			url: "http://#{process.env['THIRD_PARTY_REFERENCES_HOST'] or 'localhost'}:3046"
+			timeout: parseInt(process.env['THIRD_PARTY_REFERENCES_TIMEOUT'] || '30000', 10)
 		v1:
 			url: v1Api.url
 			user: v1Api.user
