@@ -225,21 +225,14 @@ logger.info('creating HTTP server'.yellow)
 const server = require('http').createServer(app)
 
 // provide settings for separate web and api processes
-// if enableApiRouter and enableWebRouter are not defined they default
-// to true.
-const notDefined = x => x == null
-const enableApiRouter =
-  Settings.web != null ? Settings.web.enableApiRouter : undefined
-if (enableApiRouter || notDefined(enableApiRouter)) {
+if (Settings.enabledServices.includes('api')) {
   logger.info('providing api router')
   app.use(privateApiRouter)
   app.use(Validation.errorMiddleware)
   app.use(ErrorController.handleApiError)
 }
 
-const enableWebRouter =
-  Settings.web != null ? Settings.web.enableWebRouter : undefined
-if (enableWebRouter || notDefined(enableWebRouter)) {
+if (Settings.enabledServices.includes('web')) {
   logger.info('providing web router')
 
   if (app.get('env') === 'production') {

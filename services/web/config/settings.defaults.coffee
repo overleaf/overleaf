@@ -634,6 +634,8 @@ module.exports = settings =
 	# 	{imageName: 'texlive-full:2014.2', imageDesc: 'Legacy SL TeXLive 2014.2'}
 	# ]
 
+	enabledServices: (process.env['ENABLED_SERVICES'] || 'web,api').split(',').map((s) => s.trim())
+
 	# module options
 	# ----------
 	modules:
