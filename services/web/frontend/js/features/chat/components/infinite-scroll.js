@@ -1,15 +1,8 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useLayoutEffect } from 'react'
 import PropTypes from 'prop-types'
+import _ from 'lodash'
 
 const SCROLL_END_OFFSET = 30
-
-function usePrevious(value) {
-  const ref = useRef()
-  useEffect(() => {
-    ref.current = value
-  })
-  return ref.current
-}
 
 function InfiniteScroll({
   atEnd,
@@ -21,50 +14,28 @@ function InfiniteScroll({
 }) {
   const root = useRef(null)
 
-  const prevItemCount = usePrevious(itemCount)
-
   // we keep the value in a Ref instead of state so it can be safely used in effects
-  const scrollBottomRef = React.useRef(0)
+  const scrollBottomRef = useRef(0)
   function setScrollBottom(value) {
     scrollBottomRef.current = value
   }
 
-  // position updates are not immediately applied. The DOM frequently can't calculate
-  // element bounds after react updates, so it needs some throttling
-  function scheduleScrollPositionUpdate(throttle) {
-    const timeoutHandler = setTimeout(
-      () =>
-        (root.current.scrollTop =
-          root.current.scrollHeight -
-          root.current.clientHeight -
-          scrollBottomRef.current),
-      throttle
-    )
-    return () => clearTimeout(timeoutHandler)
+  function updateScrollPosition() {
+    root.current.scrollTop =
+      root.current.scrollHeight -
+      root.current.clientHeight -
+      scrollBottomRef.current
   }
 
   // Repositions the scroll after new items are loaded
-  useEffect(
-    () => {
-      // the first render requires a longer throttling due to slower DOM updates
-      const scrollThrottle = prevItemCount === 0 ? 150 : 0
-      return scheduleScrollPositionUpdate(scrollThrottle)
-    },
-    [itemCount, prevItemCount]
-  )
+  useLayoutEffect(updateScrollPosition, [itemCount])
 
   // Repositions the scroll after a window resize
   useEffect(() => {
-    let clearScrollPositionUpdate
-    const handleResize = () => {
-      clearScrollPositionUpdate = scheduleScrollPositionUpdate(400)
-    }
+    const handleResize = _.debounce(updateScrollPosition, 400)
     window.addEventListener('resize', handleResize)
     return () => {
       window.removeEventListener('resize', handleResize)
-      if (clearScrollPositionUpdate) {
-        clearScrollPositionUpdate()
-      }
     }
   }, [])
 
