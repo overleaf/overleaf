@@ -606,13 +606,21 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get(
     '/project/:project_id/metadata',
     AuthorizationMiddleware.ensureUserCanReadProject,
-    AuthenticationController.requireLogin(),
+    Settings.allowAnonymousReadAndWriteSharing
+      ? (req, res, next) => {
+          next()
+        }
+      : AuthenticationController.requireLogin(),
     MetaController.getMetadata
   )
   webRouter.post(
     '/project/:project_id/doc/:doc_id/metadata',
     AuthorizationMiddleware.ensureUserCanReadProject,
-    AuthenticationController.requireLogin(),
+    Settings.allowAnonymousReadAndWriteSharing
+      ? (req, res, next) => {
+          next()
+        }
+      : AuthenticationController.requireLogin(),
     MetaController.broadcastMetadataForDoc
   )
   privateApiRouter.post(
