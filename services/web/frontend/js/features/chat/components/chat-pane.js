@@ -58,7 +58,7 @@ function LoadingSpinner() {
   return (
     <div className="loading">
       <Icon type="fw" modifier="refresh" spin />
-      {`  ${t('loading')}...`}
+      {`  ${t('loading')}…`}
     </div>
   )
 }

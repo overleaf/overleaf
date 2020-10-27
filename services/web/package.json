@@ -17,7 +17,7 @@
     "test:unit:run_dir": "mocha --recursive --timeout 25000 --exit --grep=$MOCHA_GREP --file test/unit/bootstrap.js",
     "test:unit:app": "npm run test:unit:run_dir -- test/unit/src",
     "test:unit:app:parallel": "parallel --plain --keep-order --halt now,fail=1 npm run test:unit:run_dir -- {} ::: test/unit/src/*",
-    "test:frontend": "NODE_ENV=test mocha --recursive --exit --grep=$MOCHA_GREP --require test/frontend/bootstrap.js test/frontend modules/*/test/frontend",
+    "test:frontend": "NODE_ENV=test TZ=GMT mocha --recursive --exit --grep=$MOCHA_GREP --require test/frontend/bootstrap.js test/frontend modules/*/test/frontend",
     "test:frontend:coverage": "c8 --all --include 'frontend/js' --include 'modules/*/frontend/js' --exclude 'frontend/js/vendor' --reporter=lcov --reporter=text-summary npm run test:frontend",
     "test:karma": "karma start",
     "test:karma:single": "karma start --single-run",

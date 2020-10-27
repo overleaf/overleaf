@@ -16,7 +16,7 @@ function MessageInput({ resetUnreadMessages, sendMessage }) {
   return (
     <div className="new-message">
       <textarea
-        placeholder={`${t('your_message')}...`}
+        placeholder={`${t('your_message')}…`}
         onKeyDown={handleKeyDown}
         onClick={resetUnreadMessages}
       />

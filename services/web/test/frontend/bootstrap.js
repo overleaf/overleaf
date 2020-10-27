@@ -11,3 +11,15 @@ chai.use(require('sinon-chai'))
 
 window.i18n = { currentLangCode: 'en' }
 require('../../frontend/js/i18n')
+
+const moment = require('moment')
+moment.updateLocale('en', {
+  calendar: {
+    lastDay: '[Yesterday]',
+    sameDay: '[Today]',
+    nextDay: '[Tomorrow]',
+    lastWeek: 'ddd, Do MMM YY',
+    nextWeek: 'ddd, Do MMM YY',
+    sameElse: 'ddd, Do MMM YY'
+  }
+})
