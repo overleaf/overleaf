@@ -196,9 +196,9 @@ div.full-size.pdf(ng-controller="PdfController")
 							i.fa.fa-lightbulb-o(aria-hidden="true")
 						p.card-hint-text(
 							ng-show="entry.humanReadableHint",
-							ng-bind-html="wikiEnabled ? entry.humanReadableHint : stripHTMLFromString(entry.humanReadableHint)")
+							ng-bind-html="entry.humanReadableHint")
 						.card-hint-footer.clearfix
-							.card-hint-ext-link(ng-if="wikiEnabled && entry.extraInfoURL")
+							.card-hint-ext-link(ng-if="entry.extraInfoURL")
 								a(
 									ng-href="{{ entry.extraInfoURL }}",
 									ng-click="trackLogHintsLearnMore()"

@@ -29,7 +29,6 @@ App.controller('PdfController', function(
   $scope.pdf.view = $scope.pdf.url ? 'pdf' : 'uncompiled'
   $scope.pdf.clearingCache = false
   $scope.shouldShowLogs = false
-  $scope.wikiEnabled = window.wikiEnabled
 
   // view logic to check whether the files dropdown should "drop up" or "drop down"
   $scope.shouldDropUp = false
@@ -80,12 +79,6 @@ App.controller('PdfController', function(
     } else {
       return ''
     }
-  }
-
-  $scope.stripHTMLFromString = function(htmlStr) {
-    const tmp = document.createElement('DIV')
-    tmp.innerHTML = htmlStr
-    return tmp.textContent || tmp.innerText || ''
   }
 
   $scope.$on('project:joined', () => {
