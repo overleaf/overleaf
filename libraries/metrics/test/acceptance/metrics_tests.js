@@ -80,7 +80,7 @@ describe('Metrics module', function() {
       Metrics.globalGauge('tire_pressure', 99.99)
       const { value, labels } = await getMetricValue('tire_pressure')
       expect(value).to.equal(99.99)
-      expect(labels.host).to.equal('')
+      expect(labels.host).to.equal('global')
       expect(labels.app).to.equal(APP_NAME)
     })
   })
@@ -102,9 +102,9 @@ async function getSummarySum(key) {
 }
 
 async function getMetricValue(key) {
-  const metric = getMetric(key)
-  const item = await metric.get()
-  return item.values[0]
+  const metrics = await Metrics.register.getMetricsAsJSON()
+  const metric = metrics.find(m => m.name === key)
+  return metric.values[0]
 }
 
 async function expectMetricValue(key, expectedValue) {

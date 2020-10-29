@@ -1,11 +1,11 @@
+const os = require('os')
 const ExpressCompression = require('compression')
-const prom = require('./prom_wrapper')
+const promClient = require('prom-client')
+const promWrapper = require('./prom_wrapper')
 
-const { collectDefaultMetrics } = prom
+const DEFAULT_APP_NAME = 'unknown'
 
-let appname = 'unknown'
-const hostname = require('os').hostname()
-
+const { collectDefaultMetrics } = promWrapper
 const destructors = []
 
 require('./uv_threadpool_size')
@@ -14,11 +14,11 @@ require('./uv_threadpool_size')
  * Configure the metrics module
  */
 function configure(opts = {}) {
-  if (opts.appName) {
-    appname = opts.appName
-  }
+  const appName = opts.appName || DEFAULT_APP_NAME
+  const hostname = os.hostname()
+  promClient.register.setDefaultLabels({ app: appName, host: hostname })
   if (opts.ttlInMinutes) {
-    prom.ttlInMinutes = opts.ttlInMinutes
+    promWrapper.ttlInMinutes = opts.ttlInMinutes
   }
 }
 
@@ -26,8 +26,9 @@ function configure(opts = {}) {
  * Configure the metrics module and start the default metrics collectors and
  * profiling agents.
  */
-function initialize(_name, opts = {}) {
-  configure({ ...opts, appName: _name })
+function initialize(appName, opts = {}) {
+  appName = appName || DEFAULT_APP_NAME
+  configure({ ...opts, appName })
   collectDefaultMetrics({ timeout: 5000, prefix: '' })
 
   console.log(`ENABLE_TRACE_AGENT set to ${process.env.ENABLE_TRACE_AGENT}`)
@@ -46,7 +47,7 @@ function initialize(_name, opts = {}) {
     debugAgent.start({
       allowExpressions: true,
       serviceContext: {
-        service: appname,
+        service: appName,
         version: process.env.BUILD_VERSION
       }
     })
@@ -58,7 +59,7 @@ function initialize(_name, opts = {}) {
     const profiler = require('@google-cloud/profiler')
     profiler.start({
       serviceContext: {
-        service: appname,
+        service: appName,
         version: process.env.BUILD_VERSION
       }
     })
@@ -78,8 +79,8 @@ function injectMetricsRoute(app) {
       level: parseInt(process.env.METRICS_COMPRESSION_LEVEL || '1', 10)
     }),
     function(req, res) {
-      res.set('Content-Type', prom.registry.contentType)
-      res.end(prom.registry.metrics())
+      res.set('Content-Type', promWrapper.registry.contentType)
+      res.end(promWrapper.registry.metrics())
     }
   )
 }
@@ -98,9 +99,7 @@ function set(key, value, sampleRate = 1) {
 
 function inc(key, sampleRate = 1, opts = {}) {
   key = buildPromKey(key)
-  opts.app = appname
-  opts.host = hostname
-  prom.metric('counter', key).inc(opts)
+  promWrapper.metric('counter', key).inc(opts)
   if (process.env.DEBUG_METRICS) {
     console.log('doing inc', key, opts)
   }
@@ -108,9 +107,7 @@ function inc(key, sampleRate = 1, opts = {}) {
 
 function count(key, count, sampleRate = 1, opts = {}) {
   key = buildPromKey(key)
-  opts.app = appname
-  opts.host = hostname
-  prom.metric('counter', key).inc(opts, count)
+  promWrapper.metric('counter', key).inc(opts, count)
   if (process.env.DEBUG_METRICS) {
     console.log('doing count/inc', key, opts)
   }
@@ -118,9 +115,7 @@ function count(key, count, sampleRate = 1, opts = {}) {
 
 function summary(key, value, opts = {}) {
   key = buildPromKey(key)
-  opts.app = appname
-  opts.host = hostname
-  prom.metric('summary', key).observe(opts, value)
+  promWrapper.metric('summary', key).observe(opts, value)
   if (process.env.DEBUG_METRICS) {
     console.log('doing summary', key, value, opts)
   }
@@ -128,9 +123,7 @@ function summary(key, value, opts = {}) {
 
 function timing(key, timeSpan, sampleRate = 1, opts = {}) {
   key = buildPromKey('timer_' + key)
-  opts.app = appname
-  opts.host = hostname
-  prom.metric('summary', key).observe(opts, timeSpan)
+  promWrapper.metric('summary', key).observe(opts, timeSpan)
   if (process.env.DEBUG_METRICS) {
     console.log('doing timing', key, opts)
   }
@@ -154,14 +147,9 @@ class Timer {
 
 function gauge(key, value, sampleRate = 1, opts = {}) {
   key = buildPromKey(key)
-  prom.metric('gauge', key).set(
-    {
-      app: appname,
-      host: hostname,
-      status: opts.status
-    },
-    this.sanitizeValue(value)
-  )
+  promWrapper
+    .metric('gauge', key)
+    .set({ status: opts.status }, sanitizeValue(value))
   if (process.env.DEBUG_METRICS) {
     console.log('doing gauge', key, opts)
   }
@@ -169,9 +157,9 @@ function gauge(key, value, sampleRate = 1, opts = {}) {
 
 function globalGauge(key, value, sampleRate = 1, opts = {}) {
   key = buildPromKey(key)
-  prom
+  promWrapper
     .metric('gauge', key)
-    .set({ app: appname, status: opts.status }, this.sanitizeValue(value))
+    .set({ host: 'global', status: opts.status }, sanitizeValue(value))
 }
 
 function close() {
@@ -196,8 +184,9 @@ module.exports = {
   gauge,
   globalGauge,
   close,
+  prom: promClient,
 
-  register: prom.registry,
+  register: promWrapper.registry,
 
   mongodb: require('./mongodb'),
   http: require('./http'),
