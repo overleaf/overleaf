@@ -230,7 +230,7 @@
   "ru": "Rosyjski",
   "uk": "Ukraiński",
   "ro": "Rumuński",
-  "click_here_to_view_sl_in_lng": "Kliknij tutaj, żeby używać __appName__ w __lngName__m",
+  "click_here_to_view_sl_in_lng": "Kliknij tutaj, żeby używać __appName__ w <0>__lngName__</0>m",
   "language": "Język",
   "upload": "Wyślij plik",
   "menu": "Menu",
