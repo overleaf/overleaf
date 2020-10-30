@@ -9,6 +9,7 @@ import App from '../../../base'
 
 export default App.controller('UserAffiliationsController', function(
   $scope,
+  $rootScope,
   UserAffiliationsDataService,
   $q,
   $window
@@ -195,6 +196,7 @@ export default App.controller('UserAffiliationsController', function(
       }
       userEmail.default = true
       window.usersEmail = userEmail.email
+      $rootScope.usersEmail = userEmail.email
     })
 
   $scope.removeUserEmail = function(userEmail) {
