@@ -68,7 +68,7 @@ class MetricWrapper {
           return new prom.Counter({
             name,
             help: name,
-            labelNames: ['app', 'host', 'status', 'method', 'path']
+            labelNames: ['status', 'method', 'path']
           })
         case 'summary':
           return new prom.Summary({
@@ -76,21 +76,13 @@ class MetricWrapper {
             help: name,
             maxAgeSeconds: 60,
             ageBuckets: 10,
-            labelNames: [
-              'app',
-              'host',
-              'path',
-              'status_code',
-              'method',
-              'collection',
-              'query'
-            ]
+            labelNames: ['path', 'status_code', 'method', 'collection', 'query']
           })
         case 'gauge':
           return new prom.Gauge({
             name,
             help: name,
-            labelNames: ['app', 'host', 'status']
+            labelNames: ['host', 'status']
           })
       }
     })()
