@@ -275,7 +275,7 @@ script(type="text/ng-template", id="ownershipTransferConfirmTemplate")
 			span(aria-hidden="true") &times;
 		h3 #{translate("change_project_owner")}
 	.modal-body
-		p !{translate('project_ownership_transfer_confirmation_1', { user: '<strong>{{ member.email }}</strong>', project: '<strong>{{ project.name }}</strong>' })}
+		p !{translate('project_ownership_transfer_confirmation_1', { user: '{{ member.email }}', project: '{{ project.name }}' }, ['strong', 'strong'])}
 		p #{translate('project_ownership_transfer_confirmation_2')}
 	.modal-footer
 		.modal-footer-left

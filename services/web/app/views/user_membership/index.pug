@@ -9,7 +9,7 @@ block content
 					.card(ng-controller="UserMembershipController")
 						.page-header
 							.pull-right(ng-cloak)
-								small(ng-show="groupSize && selectedUsers.length == 0") !{translate("you_have_added_x_of_group_size_y", {addedUsersSize:"<strong>{{ users.length }}</strong>", groupSize:"<strong>{{ groupSize }}</strong>"})}
+								small(ng-show="groupSize && selectedUsers.length == 0") !{translate("you_have_added_x_of_group_size_y", {addedUsersSize:'{{ users.length }}', groupSize: '{{ groupSize }}'}, ['strong', 'strong'])}
 								a.btn.btn-danger(
 									href,
 									ng-show="selectedUsers.length > 0"

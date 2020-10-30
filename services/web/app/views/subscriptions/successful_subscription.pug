@@ -11,7 +11,7 @@ block content
 
 						.alert.alert-success
 							- if (personalSubscription.recurly.trial_ends_at)
-								p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount:"<strong>"+personalSubscription.recurly.price+"</strong>", collectionDate:"<strong>"+personalSubscription.recurly.nextPaymentDueAt+"</strong>"})}
+								p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount: personalSubscription.recurly.price, collectionDate: personalSubscription.recurly.nextPaymentDueAt}, ['strong', 'strong'])}
 								include ./_price_exceptions
 							p #{translate("to_modify_your_subscription_go_to")} 
 								a(href="/user/subscription")  #{translate("manage_subscription")}.

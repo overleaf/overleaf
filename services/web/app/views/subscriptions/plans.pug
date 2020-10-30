@@ -38,7 +38,7 @@ block content
 
 					.row.row-spaced-large.text-centered
 						.col-xs-12
-							p.text-centered !{translate('also_provides_free_plan', { appName:'{{settings.appName}}', registerLinkOpen: '<a href="/register">', registerLinkClose: '</a>' })}
+							p.text-centered !{translate('also_provides_free_plan', { appName:'{{settings.appName}}' }, [{ name: 'a', attrs: { href: '/register' }}])}
 							i.fa.fa-cc-mastercard.fa-2x(aria-hidden="true") &nbsp;
 							span.sr-only Mastercard accepted
 							i.fa.fa-cc-visa.fa-2x(aria-hidden="true") &nbsp;
