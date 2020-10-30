@@ -4,7 +4,7 @@ const settings = require('settings-sharelatex')
 const _ = require('underscore')
 const async = require('async')
 const logger = require('logger-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const { promisify } = require('util')
 
 module.exports = {

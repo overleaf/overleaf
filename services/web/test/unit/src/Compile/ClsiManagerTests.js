@@ -70,7 +70,7 @@ describe('ClsiManager', function() {
         'logger-sharelatex': this.logger,
         request: this.request,
         './ClsiFormatChecker': this.ClsiFormatChecker,
-        'metrics-sharelatex': this.Metrics
+        '@overleaf/metrics': this.Metrics
       }
     })
     this.project_id = 'project-id'

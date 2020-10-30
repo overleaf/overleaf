@@ -21,7 +21,7 @@ const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
 const UserGetter = require('../User/UserGetter')
 const ClsiManager = require('./ClsiManager')
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const rateLimiter = require('../../infrastructure/RateLimiter')
 
 module.exports = CompileManager = {

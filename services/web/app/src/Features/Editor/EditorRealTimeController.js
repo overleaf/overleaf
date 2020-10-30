@@ -13,7 +13,7 @@
  */
 let EditorRealTimeController
 const Settings = require('settings-sharelatex')
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('pubsub')
 const os = require('os')

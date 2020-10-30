@@ -1,4 +1,4 @@
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
 
 function computeValidationToken(req) {

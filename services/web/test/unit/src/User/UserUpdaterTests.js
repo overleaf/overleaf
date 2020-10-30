@@ -53,7 +53,7 @@ describe('UserUpdater', function() {
         '../Helpers/Mongo': { normalizeQuery },
         'logger-sharelatex': this.logger,
         '../../infrastructure/mongodb': this.mongodb,
-        'metrics-sharelatex': {
+        '@overleaf/metrics': {
           timeAsyncMethod: sinon.stub()
         },
         './UserGetter': this.UserGetter,

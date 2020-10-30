@@ -14,7 +14,7 @@
  */
 const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const fs = require('fs')
 const Path = require('path')
 const fse = require('fs-extra')

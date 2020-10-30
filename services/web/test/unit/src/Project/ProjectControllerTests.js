@@ -143,7 +143,7 @@ describe('ProjectController', function() {
           log() {},
           err() {}
         },
-        'metrics-sharelatex': this.Metrics,
+        '@overleaf/metrics': this.Metrics,
         './ProjectDeleter': this.ProjectDeleter,
         './ProjectDuplicator': this.ProjectDuplicator,
         './ProjectCreationHandler': this.ProjectCreationHandler,

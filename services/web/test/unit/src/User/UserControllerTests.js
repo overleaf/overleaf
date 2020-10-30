@@ -120,7 +120,7 @@ describe('UserController', function() {
           err() {},
           error: sinon.stub()
         }),
-        'metrics-sharelatex': {
+        '@overleaf/metrics': {
           inc() {}
         },
         '../Errors/Errors': Errors,

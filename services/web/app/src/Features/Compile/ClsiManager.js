@@ -19,7 +19,7 @@ const ClsiStateManager = require('./ClsiStateManager')
 const _ = require('underscore')
 const ClsiFormatChecker = require('./ClsiFormatChecker')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const Errors = require('../Errors/Errors')
 
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']

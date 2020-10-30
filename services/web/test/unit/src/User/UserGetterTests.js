@@ -54,7 +54,7 @@ describe('UserGetter', function() {
           log() {}
         },
         '../../infrastructure/mongodb': this.Mongo,
-        'metrics-sharelatex': {
+        '@overleaf/metrics': {
           timeAsyncMethod: sinon.stub()
         },
         'settings-sharelatex': settings,

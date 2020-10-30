@@ -68,7 +68,7 @@ describe('EditorController', function() {
         './EditorRealTimeController': (this.EditorRealTimeController = {
           emitToRoom: sinon.stub()
         }),
-        'metrics-sharelatex': (this.Metrics = { inc: sinon.stub() }),
+        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
           err: sinon.stub()

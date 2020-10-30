@@ -72,7 +72,7 @@ describe('CompileController', function() {
           log: sinon.stub(),
           error: sinon.stub()
         }),
-        'metrics-sharelatex': (this.Metrics = { inc: sinon.stub() }),
+        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
         './CompileManager': this.CompileManager,
         '../User/UserGetter': this.UserGetter,
         './ClsiManager': this.ClsiManager,

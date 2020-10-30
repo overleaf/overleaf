@@ -22,7 +22,7 @@ describe('BetaProgramHandler', function() {
         console: console
       },
       requires: {
-        'metrics-sharelatex': (this.logger = {
+        '@overleaf/metrics': (this.logger = {
           inc: sinon.stub()
         }),
         '../User/UserUpdater': (this.UserUpdater = {

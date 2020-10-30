@@ -15,7 +15,7 @@
  */
 const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const sanitize = require('sanitizer')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
 const ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')

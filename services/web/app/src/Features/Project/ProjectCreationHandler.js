@@ -15,7 +15,7 @@
 const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
 const async = require('async')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const Settings = require('settings-sharelatex')
 const { ObjectId } = require('mongodb')
 const { Project } = require('../../models/Project')

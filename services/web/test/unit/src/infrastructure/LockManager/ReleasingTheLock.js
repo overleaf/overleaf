@@ -26,7 +26,7 @@ describe('LockManager - releasing the lock', function() {
     'logger-sharelatex': {
       log() {}
     },
-    'metrics-sharelatex': {},
+    '@overleaf/metrics': {},
     './RedisWrapper': {
       client() {
         return {

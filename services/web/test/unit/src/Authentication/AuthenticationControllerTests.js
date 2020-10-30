@@ -33,7 +33,7 @@ describe('AuthenticationController', function() {
         '../User/UserUpdater': (this.UserUpdater = {
           updateUser: sinon.stub()
         }),
-        'metrics-sharelatex': (this.Metrics = { inc: sinon.stub() }),
+        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
         '../Security/LoginRateLimiter': (this.LoginRateLimiter = {
           processLoginRequest: sinon.stub(),
           recordSuccessfulLogin: sinon.stub()

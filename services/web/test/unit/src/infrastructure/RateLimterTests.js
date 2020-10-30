@@ -50,7 +50,7 @@ describe('RateLimiter', function() {
         log: sinon.stub(),
         err: sinon.stub()
       }),
-      'metrics-sharelatex': (this.Metrics = { inc: sinon.stub() }),
+      '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
       './RedisWrapper': this.RedisWrapper
     }
 

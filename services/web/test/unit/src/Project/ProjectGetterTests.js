@@ -40,7 +40,7 @@ describe('ProjectGetter', function() {
           }),
           ObjectId
         },
-        'metrics-sharelatex': {
+        '@overleaf/metrics': {
           timeAsyncMethod: sinon.stub()
         },
         '../../models/Project': {

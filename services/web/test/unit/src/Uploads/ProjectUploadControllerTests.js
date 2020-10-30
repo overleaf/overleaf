@@ -55,7 +55,7 @@ describe('ProjectUploadController', function() {
           error: sinon.stub(),
           err() {}
         }),
-        'metrics-sharelatex': this.metrics,
+        '@overleaf/metrics': this.metrics,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         './ArchiveErrors': ArchiveErrors,

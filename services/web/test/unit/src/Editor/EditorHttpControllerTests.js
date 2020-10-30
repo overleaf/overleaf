@@ -138,7 +138,7 @@ describe('EditorHttpController', function() {
         '../Project/ProjectEditorHandler': this.ProjectEditorHandler,
         'logger-sharelatex': this.logger,
         './EditorController': this.EditorController,
-        'metrics-sharelatex': this.Metrics,
+        '@overleaf/metrics': this.Metrics,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
         '../Collaborators/CollaboratorsInviteHandler': this

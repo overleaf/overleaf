@@ -15,7 +15,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
 const _ = require('underscore')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')

@@ -1,5 +1,5 @@
 const { callbackify, promisify } = require('util')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const RedisWrapper = require('./RedisWrapper')
 const rclient = RedisWrapper.client('lock')
 const logger = require('logger-sharelatex')

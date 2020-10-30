@@ -16,7 +16,7 @@
 const { db } = require('../../infrastructure/mongodb')
 const { normalizeQuery } = require('../Helpers/Mongo')
 const OError = require('@overleaf/o-error')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const async = require('async')
 const { promisifyAll } = require('../../util/promises')
 const { Project } = require('../../models/Project')

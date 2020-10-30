@@ -1,5 +1,5 @@
 const settings = require('settings-sharelatex')
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const RedisWrapper = require('./RedisWrapper')
 const rclient = RedisWrapper.client('ratelimiter')
 const RollingRateLimiter = require('rolling-rate-limiter')

@@ -48,7 +48,7 @@ describe('LockManager - getting the lock', function() {
             slowExecutionThreshold: 5000
           }
         },
-        'metrics-sharelatex': {
+        '@overleaf/metrics': {
           inc() {},
           gauge() {}
         }

@@ -1,5 +1,5 @@
 const { callbackify } = require('util')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const UserUpdater = require('../User/UserUpdater')
 
 async function optIn(userId) {

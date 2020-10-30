@@ -15,7 +15,7 @@
  */
 let CompileController
 const OError = require('@overleaf/o-error')
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const ProjectGetter = require('../Project/ProjectGetter')
 const CompileManager = require('./CompileManager')
 const ClsiManager = require('./ClsiManager')

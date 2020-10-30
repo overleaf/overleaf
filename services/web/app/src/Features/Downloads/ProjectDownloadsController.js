@@ -13,7 +13,7 @@
  */
 let ProjectDownloadsController
 const logger = require('logger-sharelatex')
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectZipStreamManager = require('./ProjectZipStreamManager')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
