@@ -820,6 +820,81 @@ describe('UserEmails', function() {
         })
       })
     })
+
+    describe('session cleanup', function() {
+      beforeEach(function setupSecondSession(done) {
+        this.userSession2 = new User()
+        this.userSession2.email = this.user.email
+        this.userSession2.emails = this.user.emails
+        this.userSession2.password = this.user.password
+        // login before adding the new email address
+        // User.login() performs a mongo update and resets the .emails field.
+        this.userSession2.login(done)
+      })
+
+      beforeEach(function checkSecondSessionLiveness(done) {
+        this.userSession2.request(
+          { method: 'GET', url: '/project', followRedirect: false },
+          (error, response) => {
+            expect(error).to.not.exist
+            expect(response.statusCode).to.equal(200)
+            done()
+          }
+        )
+      })
+
+      beforeEach(function addSecondaryEmail(done) {
+        this.user.request(
+          {
+            method: 'POST',
+            url: '/user/emails',
+            json: { email: 'new-confirmed-default@example.com' }
+          },
+          (error, response) => {
+            expect(error).to.not.exist
+            expect(response.statusCode).to.equal(204)
+            done()
+          }
+        )
+      })
+
+      beforeEach(function confirmSecondaryEmail(done) {
+        db.users.updateOne(
+          { 'emails.email': 'new-confirmed-default@example.com' },
+          { $set: { 'emails.$.confirmedAt': new Date() } },
+          done
+        )
+      })
+
+      beforeEach(function setDefault(done) {
+        this.user.request(
+          {
+            method: 'POST',
+            url: '/user/emails/default',
+            json: { email: 'new-confirmed-default@example.com' }
+          },
+          (error, response) => {
+            expect(error).to.not.exist
+            expect(response.statusCode).to.equal(200)
+            done()
+          }
+        )
+      })
+
+      it('should logout the other sessions', function(done) {
+        this.userSession2.request(
+          { method: 'GET', url: '/project', followRedirect: false },
+          (error, response) => {
+            expect(error).to.not.exist
+            expect(response.statusCode).to.equal(302)
+            expect(response.headers)
+              .to.have.property('location')
+              .to.match(new RegExp('^/login'))
+            done()
+          }
+        )
+      })
+    })
   })
 
   describe('when not logged in', function() {

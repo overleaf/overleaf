@@ -1,6 +1,8 @@
+const logger = require('logger-sharelatex')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
+const UserSessionsManager = require('./UserSessionsManager')
 const EmailHandler = require('../Email/EmailHandler')
 const EmailHelper = require('../Helpers/EmailHelper')
 const UserEmailsConfirmationHandler = require('./UserEmailsConfirmationHandler')
@@ -134,6 +136,18 @@ const UserEmailsController = {
           return UserEmailsController._handleEmailError(err, req, res, next)
         }
         AuthenticationController.setInSessionUser(req, { email: email })
+        const user = AuthenticationController.getSessionUser(req)
+        UserSessionsManager.revokeAllUserSessions(
+          user,
+          [req.sessionID],
+          err => {
+            if (err)
+              logger.warn(
+                { err },
+                'failed revoking secondary sessions after changing default email'
+              )
+          }
+        )
         res.sendStatus(200)
       }
     )
