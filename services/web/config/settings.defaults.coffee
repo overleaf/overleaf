@@ -42,13 +42,14 @@ module.exports = settings =
 	# ---------
 	mongo:
 		options: {
-			appname: 'web'
 			useUnifiedTopology: (process.env['MONGO_USE_UNIFIED_TOPOLOGY'] || 'true') == 'true',
 			poolSize: parseInt(process.env['MONGO_POOL_SIZE'], 10) || 10,
 			serverSelectionTimeoutMS: parseInt(process.env['MONGO_SERVER_SELECTION_TIMEOUT'], 10) || 60000,
 			socketTimeoutMS: parseInt(process.env['MONGO_SOCKET_TIMEOUT'], 10) || 30000,
 		},
 		url : process.env['MONGO_CONNECTION_STRING'] || process.env['MONGO_URL'] || "mongodb://#{process.env['MONGO_HOST'] or '127.0.0.1'}/sharelatex"
+		poolSize: parseInt(process.env['MONGO_POOL_SIZE'], 10) || 10
+		socketTimeoutMS: parseInt(process.env['MONGO_SOCKET_TIMEOUT'], 10) || 30000
 
 	redis:
 		web:

@@ -209,7 +209,7 @@ var removeInviteFromTeam = function(subscriptionId, email, callback) {
 
   async.series(
     [
-      cb => Subscription.updateOne(searchConditions, removeInvite, cb),
+      cb => Subscription.update(searchConditions, removeInvite, cb),
       cb => removeLegacyInvite(subscriptionId, email, cb)
     ],
     callback
@@ -217,7 +217,7 @@ var removeInviteFromTeam = function(subscriptionId, email, callback) {
 }
 
 var removeLegacyInvite = (subscriptionId, email, callback) =>
-  Subscription.updateOne(
+  Subscription.update(
     {
       _id: new ObjectId(subscriptionId.toString())
     },

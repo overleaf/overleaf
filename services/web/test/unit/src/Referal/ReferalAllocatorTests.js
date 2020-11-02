@@ -30,7 +30,7 @@ describe('ReferalAllocator', function() {
     this.user_id = 'user-id-123'
     this.new_user_id = 'new-user-id-123'
     this.FeaturesUpdater.refreshFeatures = sinon.stub().yields()
-    this.User.updateOne = sinon.stub().callsArgWith(3, null)
+    this.User.update = sinon.stub().callsArgWith(3, null)
     this.User.findOne = sinon
       .stub()
       .callsArgWith(2, null, { _id: this.user_id })
@@ -50,7 +50,7 @@ describe('ReferalAllocator', function() {
       })
 
       it('should update the referring user with the refered users id', function() {
-        this.User.updateOne
+        this.User.update
           .calledWith(
             {
               referal_id: this.referal_id
@@ -105,7 +105,7 @@ describe('ReferalAllocator', function() {
       })
 
       it('should not update the referring user with the refered users id', function() {
-        this.User.updateOne.called.should.equal(false)
+        this.User.update.called.should.equal(false)
       })
 
       it('should not assign the user a bonus', function() {
@@ -130,7 +130,7 @@ describe('ReferalAllocator', function() {
       })
 
       it('should not update the referring user with the refered users id', function() {
-        this.User.updateOne.called.should.equal(false)
+        this.User.update.called.should.equal(false)
       })
 
       it('find the referring users id', function() {

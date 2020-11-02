@@ -31,7 +31,7 @@ module.exports = SystemMessageManager = {
     if (callback == null) {
       callback = function(error) {}
     }
-    return SystemMessage.deleteMany({}, callback)
+    return SystemMessage.remove({}, callback)
   },
 
   createMessage(content, callback) {

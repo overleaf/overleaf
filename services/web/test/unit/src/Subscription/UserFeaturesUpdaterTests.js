@@ -21,7 +21,7 @@ const { assert } = require('chai')
 
 describe('UserFeaturesUpdater', function() {
   beforeEach(function() {
-    this.User = { updateOne: sinon.stub().callsArgWith(2) }
+    this.User = { update: sinon.stub().callsArgWith(2) }
     return (this.UserFeaturesUpdater = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -49,7 +49,7 @@ describe('UserFeaturesUpdater', function() {
             'features.versioning': true,
             'features.collaborators': 10
           }
-          this.User.updateOne
+          this.User.update
             .calledWith({ _id: user_id }, update)
             .should.equal(true)
           features.should.deep.equal(this.features)

@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 
+const POOL_SIZE = Settings.mongo.poolSize
+
 if (
   typeof global.beforeEach === 'function' &&
   process.argv.join(' ').match(/unit/)
@@ -13,21 +15,23 @@ if (
 
 const connectionPromise = mongoose.connect(
   Settings.mongo.url,
-  Object.assign(
-    {
-      // mongoose specific config
-      config: { autoIndex: false },
-      // mongoose defaults to false, native driver defaults to true
-      useNewUrlParser: true,
-      // use the equivalent `findOneAndUpdate` methods of the native driver
-      useFindAndModify: false
-    },
-    Settings.mongo.options
-  )
+  {
+    poolSize: POOL_SIZE,
+    config: { autoIndex: false },
+    useMongoClient: true,
+    socketTimeoutMS: Settings.mongo.socketTimeoutMS,
+    appname: 'web'
+  }
 )
 
 mongoose.connection.on('connected', () =>
-  logger.log('mongoose default connection open')
+  logger.log(
+    {
+      url: Settings.mongo.url,
+      poolSize: POOL_SIZE
+    },
+    'mongoose default connection open'
+  )
 )
 
 mongoose.connection.on('error', err =>
@@ -40,7 +44,7 @@ mongoose.connection.on('disconnected', () =>
 
 if (process.env.MONGOOSE_DEBUG) {
   mongoose.set('debug', (collectionName, method, query, doc) =>
-    logger.debug({ collectionName, method, query, doc }, 'mongoose debug')
+    logger.debug('mongoose debug', { collectionName, method, query, doc })
   )
 }
 
@@ -51,8 +55,8 @@ mongoose.plugin(schema => {
 mongoose.Promise = global.Promise
 
 async function getNativeDb() {
-  const mongooseInstance = await connectionPromise
-  return mongooseInstance.connection.db
+  const connection = await connectionPromise
+  return connection.db
 }
 
 mongoose.getNativeDb = getNativeDb

@@ -182,7 +182,7 @@ const ProjectEntityUpdateHandler = {
           return callback(err)
         }
         if (ProjectEntityUpdateHandler.isPathValidForRootDoc(docPath)) {
-          Project.updateOne(
+          Project.update(
             { _id: projectId },
             { rootDoc_id: newRootDocID },
             {},
@@ -201,7 +201,7 @@ const ProjectEntityUpdateHandler = {
 
   unsetRootDoc(projectId, callback) {
     logger.log({ projectId }, 'removing root doc')
-    Project.updateOne(
+    Project.update(
       { _id: projectId },
       { $unset: { rootDoc_id: true } },
       {},

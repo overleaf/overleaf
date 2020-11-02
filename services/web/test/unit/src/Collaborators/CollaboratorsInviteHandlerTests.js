@@ -34,8 +34,8 @@ describe('CollaboratorsInviteHandler', function() {
           this.prototype.save = sinon.stub()
           this.findOne = sinon.stub()
           this.find = sinon.stub()
-          this.deleteOne = sinon.stub()
-          this.countDocuments = sinon.stub()
+          this.remove = sinon.stub()
+          this.count = sinon.stub()
         }
         constructor(options) {
           if (options == null) {
@@ -105,7 +105,7 @@ describe('CollaboratorsInviteHandler', function() {
 
   describe('getInviteCount', function() {
     beforeEach(function() {
-      this.ProjectInvite.countDocuments.callsArgWith(1, null, 2)
+      this.ProjectInvite.count.callsArgWith(1, null, 2)
       return (this.call = callback => {
         return this.CollaboratorsInviteHandler.getInviteCount(
           this.projectId,
@@ -129,12 +129,9 @@ describe('CollaboratorsInviteHandler', function() {
       })
     })
 
-    describe('when model.countDocuments produces an error', function() {
+    describe('when model.count produces an error', function() {
       beforeEach(function() {
-        return this.ProjectInvite.countDocuments.callsArgWith(
-          1,
-          new Error('woops')
-        )
+        return this.ProjectInvite.count.callsArgWith(1, new Error('woops'))
       })
 
       it('should produce an error', function(done) {
@@ -394,7 +391,7 @@ describe('CollaboratorsInviteHandler', function() {
 
   describe('revokeInvite', function() {
     beforeEach(function() {
-      this.ProjectInvite.deleteOne.callsArgWith(1, null)
+      this.ProjectInvite.remove.callsArgWith(1, null)
       this.CollaboratorsInviteHandler._tryCancelInviteNotification = sinon
         .stub()
         .callsArgWith(1, null)
@@ -418,10 +415,10 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      it('should call ProjectInvite.deleteOne', function(done) {
+      it('should call ProjectInvite.remove', function(done) {
         return this.call(err => {
-          this.ProjectInvite.deleteOne.callCount.should.equal(1)
-          this.ProjectInvite.deleteOne
+          this.ProjectInvite.remove.callCount.should.equal(1)
+          this.ProjectInvite.remove
             .calledWith({ projectId: this.projectId, _id: this.inviteId })
             .should.equal(true)
           return done()
@@ -443,7 +440,7 @@ describe('CollaboratorsInviteHandler', function() {
 
     describe('when remove produces an error', function() {
       beforeEach(function() {
-        return this.ProjectInvite.deleteOne.callsArgWith(1, new Error('woops'))
+        return this.ProjectInvite.remove.callsArgWith(1, new Error('woops'))
       })
 
       it('should produce an error', function(done) {
@@ -644,7 +641,7 @@ describe('CollaboratorsInviteHandler', function() {
       this.CollaboratorsInviteHandler._tryCancelInviteNotification = sinon
         .stub()
         .callsArgWith(1, null)
-      this.ProjectInvite.deleteOne.callsArgWith(1, null)
+      this.ProjectInvite.remove.callsArgWith(1, null)
       return (this.call = callback => {
         return this.CollaboratorsInviteHandler.acceptInvite(
           this.projectId,
@@ -695,10 +692,10 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      it('should have called ProjectInvite.deleteOne', function(done) {
+      it('should have called ProjectInvite.remove', function(done) {
         return this.call(err => {
-          this.ProjectInvite.deleteOne.callCount.should.equal(1)
-          this.ProjectInvite.deleteOne
+          this.ProjectInvite.remove.callCount.should.equal(1)
+          this.ProjectInvite.remove
             .calledWith({ _id: this.inviteId })
             .should.equal(true)
           return done()
@@ -766,9 +763,9 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      it('should not have called ProjectInvite.deleteOne', function(done) {
+      it('should not have called ProjectInvite.remove', function(done) {
         return this.call(err => {
-          this.ProjectInvite.deleteOne.callCount.should.equal(0)
+          this.ProjectInvite.remove.callCount.should.equal(0)
           return done()
         })
       })
@@ -803,9 +800,9 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      it('should not have called ProjectInvite.deleteOne', function(done) {
+      it('should not have called ProjectInvite.remove', function(done) {
         return this.call(err => {
-          this.ProjectInvite.deleteOne.callCount.should.equal(0)
+          this.ProjectInvite.remove.callCount.should.equal(0)
           return done()
         })
       })
@@ -851,17 +848,17 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      it('should not have called ProjectInvite.deleteOne', function(done) {
+      it('should not have called ProjectInvite.remove', function(done) {
         return this.call(err => {
-          this.ProjectInvite.deleteOne.callCount.should.equal(0)
+          this.ProjectInvite.remove.callCount.should.equal(0)
           return done()
         })
       })
     })
 
-    describe('when ProjectInvite.deleteOne produces an error', function() {
+    describe('when ProjectInvite.remove produces an error', function() {
       beforeEach(function() {
-        return this.ProjectInvite.deleteOne.callsArgWith(1, new Error('woops'))
+        return this.ProjectInvite.remove.callsArgWith(1, new Error('woops'))
       })
 
       it('should produce an error', function(done) {
@@ -896,9 +893,9 @@ describe('CollaboratorsInviteHandler', function() {
         })
       })
 
-      it('should have called ProjectInvite.deleteOne', function(done) {
+      it('should have called ProjectInvite.remove', function(done) {
         return this.call(err => {
-          this.ProjectInvite.deleteOne.callCount.should.equal(1)
+          this.ProjectInvite.remove.callCount.should.equal(1)
           return done()
         })
       })

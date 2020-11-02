@@ -131,20 +131,16 @@ class User {
       const value = features[key]
       update[`features.${key}`] = value
     }
-    UserModel.updateOne({ _id: this.id }, update, callback)
+    UserModel.update({ _id: this.id }, update, callback)
   }
 
   setFeaturesOverride(featuresOverride, callback) {
     const update = { $push: { featuresOverrides: featuresOverride } }
-    UserModel.updateOne({ _id: this.id }, update, callback)
+    UserModel.update({ _id: this.id }, update, callback)
   }
 
   setOverleafId(overleafId, callback) {
-    UserModel.updateOne(
-      { _id: this.id },
-      { 'overleaf.id': overleafId },
-      callback
-    )
+    UserModel.update({ _id: this.id }, { 'overleaf.id': overleafId }, callback)
   }
 
   logout(callback) {
@@ -622,7 +618,7 @@ class User {
   }
 
   setV1Id(v1Id, callback) {
-    UserModel.updateOne(
+    UserModel.update(
       {
         _id: this._id
       },
