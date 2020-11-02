@@ -96,6 +96,9 @@ describe('<PreviewRecompileButton />', function() {
   })
 
   function renderPreviewRecompileButton(compilerState = {}) {
+    if (!compilerState.logEntries) {
+      compilerState.logEntries = {}
+    }
     render(
       <PreviewRecompileButton
         compilerState={{
