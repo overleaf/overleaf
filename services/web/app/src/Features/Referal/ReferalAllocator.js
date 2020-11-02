@@ -21,7 +21,7 @@ module.exports = {
       }
 
       if (referalSource === 'bonus') {
-        User.update(
+        User.updateOne(
           query,
           {
             $push: {

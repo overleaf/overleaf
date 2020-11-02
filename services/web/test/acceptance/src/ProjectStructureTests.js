@@ -1107,7 +1107,7 @@ describe('ProjectStructureChanges', function() {
 
     describe('when rootDoc_id matches doc being deleted', function() {
       beforeEach(function(done) {
-        Project.update(
+        Project.updateOne(
           { _id: this.exampleProjectId },
           { $set: { rootDoc_id: this.exampleDocId } },
           done
@@ -1139,7 +1139,7 @@ describe('ProjectStructureChanges', function() {
     describe('when rootDoc_id does not match doc being deleted', function() {
       beforeEach(function(done) {
         this.exampleRootDocId = new ObjectId()
-        Project.update(
+        Project.updateOne(
           { _id: this.exampleProjectId },
           { $set: { rootDoc_id: this.exampleRootDocId } },
           done

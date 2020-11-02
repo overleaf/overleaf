@@ -101,7 +101,7 @@ async function ensureCanDeleteUser(user) {
 }
 
 async function _createDeletedUser(user, options) {
-  await DeletedUser.update(
+  await DeletedUser.updateOne(
     { 'deleterData.deletedUserId': user._id },
     {
       user: user,

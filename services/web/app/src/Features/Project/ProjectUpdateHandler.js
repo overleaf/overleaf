@@ -32,13 +32,13 @@ module.exports = {
       lastUpdated: lastUpdatedAt || new Date().getTime(),
       lastUpdatedBy
     }
-    return Project.update(conditions, update, {}, callback)
+    return Project.updateOne(conditions, update, {}, callback)
   },
 
   markAsOpened(project_id, callback) {
     const conditions = { _id: project_id }
     const update = { lastOpened: Date.now() }
-    return Project.update(conditions, update, {}, function(err) {
+    return Project.updateOne(conditions, update, {}, function(err) {
       if (callback != null) {
         return callback()
       }
@@ -48,7 +48,7 @@ module.exports = {
   markAsInactive(project_id, callback) {
     const conditions = { _id: project_id }
     const update = { active: false }
-    return Project.update(conditions, update, {}, function(err) {
+    return Project.updateOne(conditions, update, {}, function(err) {
       if (callback != null) {
         return callback()
       }
@@ -58,7 +58,7 @@ module.exports = {
   markAsActive(project_id, callback) {
     const conditions = { _id: project_id }
     const update = { active: true }
-    return Project.update(conditions, update, {}, function(err) {
+    return Project.updateOne(conditions, update, {}, function(err) {
       if (callback != null) {
         return callback()
       }

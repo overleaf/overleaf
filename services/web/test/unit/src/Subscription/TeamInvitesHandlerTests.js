@@ -54,7 +54,7 @@ describe('TeamInvitesHandler', function() {
 
     this.Subscription = {
       findOne: sinon.stub().yields(),
-      update: sinon.stub().yields()
+      updateOne: sinon.stub().yields()
     }
 
     this.EmailHandler = {
@@ -201,7 +201,7 @@ describe('TeamInvitesHandler', function() {
         this.subscription,
         'John.Snow@example.com',
         (err, invite) => {
-          this.Subscription.update
+          this.Subscription.updateOne
             .calledWith(
               { _id: new ObjectId('55153a8014829a865bbf700d') },
               { $pull: { invited_emails: 'john.snow@example.com' } }
@@ -293,7 +293,7 @@ describe('TeamInvitesHandler', function() {
 
     it('removes the invite from the subscription', function(done) {
       this.TeamInvitesHandler.acceptInvite('dddddddd', this.user.id, () => {
-        this.Subscription.update
+        this.Subscription.updateOne
           .calledWith(
             { _id: new ObjectId('55153a8014829a865bbf700d') },
             { $pull: { teamInvites: { email: 'john.snow@example.com' } } }
@@ -311,14 +311,14 @@ describe('TeamInvitesHandler', function() {
         this.subscription,
         'jorah@example.com',
         () => {
-          this.Subscription.update
+          this.Subscription.updateOne
             .calledWith(
               { _id: new ObjectId('55153a8014829a865bbf700d') },
               { $pull: { teamInvites: { email: 'jorah@example.com' } } }
             )
             .should.eq(true)
 
-          this.Subscription.update
+          this.Subscription.updateOne
             .calledWith(
               { _id: new ObjectId('55153a8014829a865bbf700d') },
               { $pull: { invited_emails: 'jorah@example.com' } }
