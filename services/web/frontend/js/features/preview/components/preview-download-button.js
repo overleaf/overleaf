@@ -42,13 +42,20 @@ function PreviewDownloadButton({ isCompiling, outputFiles, pdfDownloadUrl }) {
       />
       <Dropdown.Menu id="download-dropdown-list">
         <FileList list={topFiles} listType="main" />
-
-        {otherFiles.length > 0 && (
+        {otherFiles.length > 0 && topFiles.length > 0 ? (
           <>
             <MenuItem divider />
             <MenuItem header>{t('other_output_files')}</MenuItem>
+          </>
+        ) : (
+          <></>
+        )}
+        {otherFiles.length > 0 ? (
+          <>
             <FileList list={otherFiles} listType="other" />
           </>
+        ) : (
+          <></>
         )}
       </Dropdown.Menu>
     </Dropdown>

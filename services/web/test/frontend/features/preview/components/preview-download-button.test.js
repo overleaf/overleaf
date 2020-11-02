@@ -167,4 +167,57 @@ describe('<PreviewDownloadButton />', function() {
     )
     screen.getAllByRole('menuitem', { name: 'Download alt.pdf file' })
   })
+  describe('list divider and header', function() {
+    it('should display when there are top files and other files', function() {
+      const outputFiles = [
+        makeFile('output.bbl'),
+        makeFile('output.ind'),
+        makeFile('output.gls'),
+        makeFile('output.log')
+      ]
+
+      render(
+        <PreviewDownloadButton
+          isCompiling={false}
+          outputFiles={outputFiles}
+          pdfDownloadUrl={pdfDownloadUrl}
+        />
+      )
+
+      screen.getByText('Other output files')
+      screen.getByRole('separator')
+    })
+    it('should not display when there are top files and no other files', function() {
+      const outputFiles = [
+        makeFile('output.bbl'),
+        makeFile('output.ind'),
+        makeFile('output.gls')
+      ]
+
+      render(
+        <PreviewDownloadButton
+          isCompiling={false}
+          outputFiles={outputFiles}
+          pdfDownloadUrl={pdfDownloadUrl}
+        />
+      )
+
+      expect(screen.queryByText('Other output files')).to.not.exist
+      expect(screen.queryByRole('separator')).to.not.exist
+    })
+    it('should not display when there are other files and no top files', function() {
+      const outputFiles = [makeFile('output.log')]
+
+      render(
+        <PreviewDownloadButton
+          isCompiling={false}
+          outputFiles={outputFiles}
+          pdfDownloadUrl={pdfDownloadUrl}
+        />
+      )
+
+      expect(screen.queryByText('Other output files')).to.not.exist
+      expect(screen.queryByRole('separator')).to.not.exist
+    })
+  })
 })
