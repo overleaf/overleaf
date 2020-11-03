@@ -53,7 +53,7 @@ describe('Project CRUD', function() {
 
     describe('with an array archived state', function() {
       it('should mark the project as not archived for the user', async function() {
-        await Project.update(
+        await Project.updateOne(
           { _id: this.projectId },
           { $set: { archived: [ObjectId(this.user._id)] } }
         ).exec()
@@ -72,7 +72,7 @@ describe('Project CRUD', function() {
 
     describe('with a legacy boolean state', function() {
       it('should mark the project as not archived for the user', async function() {
-        await Project.update(
+        await Project.updateOne(
           { _id: this.projectId },
           { $set: { archived: true } }
         ).exec()
@@ -92,7 +92,7 @@ describe('Project CRUD', function() {
 
   describe('when untrashing a project', function() {
     it('should mark the project as untrashed for the user', async function() {
-      await Project.update(
+      await Project.updateOne(
         { _id: this.projectId },
         { trashed: [ObjectId(this.user._id)] }
       ).exec()
@@ -107,7 +107,7 @@ describe('Project CRUD', function() {
     })
 
     it('does nothing if the user has already untrashed the project', async function() {
-      await Project.update(
+      await Project.updateOne(
         { _id: this.projectId },
         { trashed: [ObjectId(this.user._id)] }
       ).exec()

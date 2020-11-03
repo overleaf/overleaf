@@ -103,7 +103,7 @@ describe('Subscriptions', function() {
         MockRecurlyApi.mockSubscriptions = []
         MockRecurlyApi.coupons = {}
         MockRecurlyApi.redemptions = {}
-        Subscription.remove(
+        Subscription.deleteOne(
           {
             admin_id: this.user._id
           },
@@ -207,7 +207,7 @@ describe('Subscriptions', function() {
       })
 
       after(function(done) {
-        Subscription.remove(
+        Subscription.deleteOne(
           {
             admin_id: this.user._id
           },
@@ -277,7 +277,7 @@ describe('Subscriptions', function() {
       })
 
       after(function(done) {
-        Subscription.remove(
+        Subscription.deleteOne(
           {
             admin_id: this.owner1._id
           },
@@ -285,7 +285,7 @@ describe('Subscriptions', function() {
             if (error != null) {
               return done(error)
             }
-            return Subscription.remove(
+            return Subscription.deleteOne(
               {
                 admin_id: this.owner2._id
               },
@@ -349,7 +349,7 @@ describe('Subscriptions', function() {
       })
 
       after(function(done) {
-        Subscription.remove(
+        Subscription.deleteOne(
           {
             admin_id: this.owner1._id
           },
@@ -406,7 +406,7 @@ describe('Subscriptions', function() {
       })
 
       after(function(done) {
-        Institution.remove(
+        Institution.deleteOne(
           {
             v1Id: this.v1Id
           },

@@ -40,9 +40,6 @@ describe('SubscriptionUpdater', function() {
 
     this.updateStub = sinon.stub().callsArgWith(2, null)
     this.updateManyStub = sinon.stub().callsArgWith(2, null)
-    this.findAndModifyStub = sinon
-      .stub()
-      .callsArgWith(2, null, this.subscription)
     this.findOneAndUpdateStub = sinon
       .stub()
       .callsArgWith(2, null, this.subscription)
@@ -56,10 +53,9 @@ describe('SubscriptionUpdater', function() {
         return subscription
       }
     }
-    this.SubscriptionModel.remove = sinon.stub().yields()
-    this.SubscriptionModel.update = this.updateStub
+    this.SubscriptionModel.deleteOne = sinon.stub().yields()
+    this.SubscriptionModel.updateOne = this.updateStub
     this.SubscriptionModel.updateMany = this.updateManyStub
-    this.SubscriptionModel.findAndModify = this.findAndModifyStub
     this.SubscriptionModel.findOneAndUpdate = this.findOneAndUpdateStub
 
     this.SubscriptionLocator = {
@@ -138,8 +134,8 @@ describe('SubscriptionUpdater', function() {
             $set: { admin_id: ObjectId(this.otherUserId) },
             $addToSet: { manager_ids: ObjectId(this.otherUserId) }
           }
-          this.SubscriptionModel.update.should.have.been.calledOnce
-          this.SubscriptionModel.update.should.have.been.calledWith(
+          this.SubscriptionModel.updateOne.should.have.been.calledOnce
+          this.SubscriptionModel.updateOne.should.have.been.calledWith(
             query,
             update
           )
@@ -166,8 +162,8 @@ describe('SubscriptionUpdater', function() {
               manager_ids: [ObjectId(this.otherUserId)]
             }
           }
-          this.SubscriptionModel.update.should.have.been.calledOnce
-          this.SubscriptionModel.update.should.have.been.calledWith(
+          this.SubscriptionModel.updateOne.should.have.been.calledOnce
+          this.SubscriptionModel.updateOne.should.have.been.calledWith(
             query,
             update
           )
@@ -402,7 +398,7 @@ describe('SubscriptionUpdater', function() {
           const insertOperation = {
             $addToSet: { member_ids: { $each: [this.otherUserId] } }
           }
-          this.findAndModifyStub
+          this.updateStub
             .calledWith(searchOps, insertOperation)
             .should.equal(true)
           done()
@@ -489,7 +485,7 @@ describe('SubscriptionUpdater', function() {
     })
 
     it('should remove the subscription', function() {
-      this.SubscriptionModel.remove
+      this.SubscriptionModel.deleteOne
         .calledWith({ _id: this.subscription._id })
         .should.equal(true)
     })

@@ -168,7 +168,7 @@ module.exports = LaunchpadController = {
             return next(err)
           }
 
-          return User.update(
+          return User.updateOne(
             { _id: user._id },
             {
               $set: { isAdmin: true },
@@ -225,7 +225,7 @@ module.exports = LaunchpadController = {
         }
 
         logger.log({ user_id: user._id }, 'making user an admin')
-        User.update(
+        User.updateOne(
           { _id: user._id },
           {
             $set: {

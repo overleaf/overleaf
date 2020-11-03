@@ -83,7 +83,7 @@ async function _transferOwnership(projectId, previousOwnerId, newOwnerId) {
     projectId,
     newOwnerId
   )
-  await Project.update(
+  await Project.updateOne(
     { _id: projectId },
     { $set: { owner_ref: newOwnerId } }
   ).exec()

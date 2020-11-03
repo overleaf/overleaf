@@ -112,7 +112,7 @@ const TemplatesManager = {
                   fromV1TemplateId: templateId,
                   fromV1TemplateVersionId: templateVersionId
                 }
-                return Project.update(
+                return Project.updateOne(
                   { _id: project._id },
                   update,
                   {},

@@ -24,7 +24,7 @@ describe('OwnershipTransferHandler', function() {
       }
     }
     this.ProjectModel = {
-      update: sinon.stub().returns({
+      updateOne: sinon.stub().returns({
         exec: sinon.stub().resolves()
       })
     }
@@ -129,7 +129,7 @@ describe('OwnershipTransferHandler', function() {
         this.project._id,
         this.collaborator._id
       )
-      expect(this.ProjectModel.update).to.have.been.calledWith(
+      expect(this.ProjectModel.updateOne).to.have.been.calledWith(
         { _id: this.project._id },
         sinon.match({ $set: { owner_ref: this.collaborator._id } })
       )
@@ -140,7 +140,7 @@ describe('OwnershipTransferHandler', function() {
         this.project._id,
         this.user._id
       )
-      expect(this.ProjectModel.update).not.to.have.been.called
+      expect(this.ProjectModel.updateOne).not.to.have.been.called
     })
 
     it("should remove the user from the project's collaborators", async function() {

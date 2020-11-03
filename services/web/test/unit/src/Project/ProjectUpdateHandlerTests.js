@@ -27,7 +27,7 @@ describe('ProjectUpdateHandler', function() {
   beforeEach(function() {
     let Project
     this.ProjectModel = Project = class Project {}
-    this.ProjectModel.update = sinon.stub().callsArg(3)
+    this.ProjectModel.updateOne = sinon.stub().callsArg(3)
     return (this.handler = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -53,7 +53,7 @@ describe('ProjectUpdateHandler', function() {
         this.lastUpdatedBy,
         err => {
           sinon.assert.calledWith(
-            this.ProjectModel.update,
+            this.ProjectModel.updateOne,
             {
               _id: this.project_id,
               lastUpdated: { $lt: this.lastUpdatedAt }
@@ -71,7 +71,7 @@ describe('ProjectUpdateHandler', function() {
     it('should set smart fallbacks', function(done) {
       return this.handler.markAsUpdated(this.project_id, null, null, err => {
         sinon.assert.calledWithMatch(
-          this.ProjectModel.update,
+          this.ProjectModel.updateOne,
           {
             _id: this.project_id,
             lastUpdated: { $lt: this.fakeTime }
@@ -90,7 +90,7 @@ describe('ProjectUpdateHandler', function() {
     it('should send an update to mongo', function(done) {
       const project_id = 'project_id'
       return this.handler.markAsOpened(project_id, err => {
-        const args = this.ProjectModel.update.args[0]
+        const args = this.ProjectModel.updateOne.args[0]
         args[0]._id.should.equal(project_id)
         const date = args[1].lastOpened + ''
         const now = Date.now() + ''
@@ -104,7 +104,7 @@ describe('ProjectUpdateHandler', function() {
     it('should send an update to mongo', function(done) {
       const project_id = 'project_id'
       return this.handler.markAsInactive(project_id, err => {
-        const args = this.ProjectModel.update.args[0]
+        const args = this.ProjectModel.updateOne.args[0]
         args[0]._id.should.equal(project_id)
         args[1].active.should.equal(false)
         return done()
@@ -116,7 +116,7 @@ describe('ProjectUpdateHandler', function() {
     it('should send an update to mongo', function(done) {
       const project_id = 'project_id'
       return this.handler.markAsActive(project_id, err => {
-        const args = this.ProjectModel.update.args[0]
+        const args = this.ProjectModel.updateOne.args[0]
         args[0]._id.should.equal(project_id)
         args[1].active.should.equal(true)
         return done()

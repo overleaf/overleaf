@@ -78,7 +78,7 @@ describe('SAMLIdentityManager', function() {
             findOne: sinon.stub().returns({
               exec: sinon.stub().resolves()
             }),
-            update: sinon.stub().returns({
+            updateOne: sinon.stub().returns({
               exec: sinon.stub().resolves()
             })
           })
@@ -226,7 +226,7 @@ describe('SAMLIdentityManager', function() {
           expect(error).to.exist
           expect(error).to.equal(anError)
           expect(this.EmailHandler.sendEmail).to.not.have.been.called
-          expect(this.User.update).to.not.have.been.called
+          expect(this.User.updateOne).to.not.have.been.called
         }
       })
     })
@@ -275,7 +275,7 @@ describe('SAMLIdentityManager', function() {
             ipAddress: '0:0:0:0'
           },
           () => {
-            expect(this.User.update).to.have.been.called
+            expect(this.User.updateOne).to.have.been.called
             expect(this.EmailHandler.sendEmail).to.have.been.calledOnce
             const emailArgs = this.EmailHandler.sendEmail.lastCall.args
             expect(emailArgs[0]).to.equal('securityAlert')
@@ -332,7 +332,7 @@ describe('SAMLIdentityManager', function() {
           }
         }
       }
-      expect(this.User.update).to.have.been.calledOnce.and.calledWithMatch(
+      expect(this.User.updateOne).to.have.been.calledOnce.and.calledWithMatch(
         query,
         update
       )
@@ -346,7 +346,7 @@ describe('SAMLIdentityManager', function() {
         'Overleaf University',
         this.auditLog
       )
-      expect(this.User.update).to.have.been.called
+      expect(this.User.updateOne).to.have.been.called
       expect(this.EmailHandler.sendEmail).to.have.been.calledOnce
       const emailArgs = this.EmailHandler.sendEmail.lastCall.args
       expect(emailArgs[0]).to.equal('securityAlert')
@@ -376,7 +376,7 @@ describe('SAMLIdentityManager', function() {
           expect(error).to.exist
           expect(error).to.equal(anError)
           expect(this.EmailHandler.sendEmail).to.not.have.been.called
-          expect(this.User.update).to.not.have.been.called
+          expect(this.User.updateOne).to.not.have.been.called
         }
       })
     })
