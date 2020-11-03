@@ -51,7 +51,7 @@ const CollaboratorsInviteHandler = {
       callback = function(err, count) {}
     }
     logger.log({ projectId }, 'counting invites for project')
-    return ProjectInvite.countDocuments({ projectId }, function(err, count) {
+    return ProjectInvite.count({ projectId }, function(err, count) {
       if (err != null) {
         OError.tag(err, 'error getting invites from mongo', {
           projectId

@@ -35,7 +35,7 @@ describe('CollaboratorsInviteHandler', function() {
           this.findOne = sinon.stub()
           this.find = sinon.stub()
           this.deleteOne = sinon.stub()
-          this.countDocuments = sinon.stub()
+          this.count = sinon.stub()
         }
         constructor(options) {
           if (options == null) {
@@ -105,7 +105,7 @@ describe('CollaboratorsInviteHandler', function() {
 
   describe('getInviteCount', function() {
     beforeEach(function() {
-      this.ProjectInvite.countDocuments.callsArgWith(1, null, 2)
+      this.ProjectInvite.count.callsArgWith(1, null, 2)
       return (this.call = callback => {
         return this.CollaboratorsInviteHandler.getInviteCount(
           this.projectId,
@@ -129,12 +129,9 @@ describe('CollaboratorsInviteHandler', function() {
       })
     })
 
-    describe('when model.countDocuments produces an error', function() {
+    describe('when model.count produces an error', function() {
       beforeEach(function() {
-        return this.ProjectInvite.countDocuments.callsArgWith(
-          1,
-          new Error('woops')
-        )
+        return this.ProjectInvite.count.callsArgWith(1, new Error('woops'))
       })
 
       it('should produce an error', function(done) {
