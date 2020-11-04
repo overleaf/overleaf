@@ -167,7 +167,7 @@ describe('EmailBuilder', function() {
             const buttonLink = dom('a:contains("Leave Feedback")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(this.expectedUrl)
-            const fallback = dom('.avoid-auto-linking').last()
+            const fallback = dom('.force-overleaf-style').last()
             expect(fallback.length).to.equal(1)
             const fallbackLink = fallback.html()
             expect(fallbackLink).to.contain(this.expectedUrl)
@@ -206,7 +206,7 @@ describe('EmailBuilder', function() {
             const buttonLink = dom('a:contains("Confirm Email")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(this.opts.confirmEmailUrl)
-            const fallback = dom('.avoid-auto-linking').last()
+            const fallback = dom('.force-overleaf-style').last()
             expect(fallback.length).to.equal(1)
             const fallbackLink = fallback.html()
             expect(fallbackLink).to.contain(this.opts.confirmEmailUrl)
@@ -251,7 +251,7 @@ describe('EmailBuilder', function() {
             const buttonLink = dom('td a')
             expect(buttonLink).to.exist
             expect(buttonLink.attr('href')).to.equal(this.expectedUrl)
-            const fallback = dom('.avoid-auto-linking').last()
+            const fallback = dom('.force-overleaf-style').last()
             expect(fallback).to.exist
             const fallbackLink = fallback.html().replace(/&amp;/g, '&')
             expect(fallbackLink).to.contain(this.expectedUrl)
@@ -295,7 +295,7 @@ describe('EmailBuilder', function() {
             expect(buttonLink.attr('href')).to.equal(
               this.opts.setNewPasswordUrl
             )
-            const fallback = dom('.avoid-auto-linking').last()
+            const fallback = dom('.force-overleaf-style').last()
             expect(fallback).to.exist
             const fallbackLink = fallback.html().replace(/&amp;/g, '&')
             expect(fallbackLink).to.contain(this.opts.setNewPasswordUrl)
@@ -340,7 +340,7 @@ describe('EmailBuilder', function() {
             const buttonLink = dom('a:contains("Join now")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(this.opts.acceptInviteUrl)
-            const fallback = dom('.avoid-auto-linking').last()
+            const fallback = dom('.force-overleaf-style').last()
             expect(fallback.length).to.equal(1)
             const fallbackLink = fallback.html()
             expect(fallbackLink).to.contain(this.opts.acceptInviteUrl)
@@ -378,7 +378,7 @@ describe('EmailBuilder', function() {
             const buttonLink = dom('a:contains("View Subscription Dashboard")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(this.expectedUrl)
-            const fallback = dom('.avoid-auto-linking').last()
+            const fallback = dom('.force-overleaf-style').last()
             expect(fallback.length).to.equal(1)
             const fallbackLink = fallback.html()
             expect(fallbackLink).to.contain(this.expectedUrl)
@@ -414,7 +414,7 @@ describe('EmailBuilder', function() {
             )
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(this.settings.siteUrl)
-            const fallback = dom('.avoid-auto-linking').last()
+            const fallback = dom('.force-overleaf-style').last()
             expect(fallback.length).to.equal(1)
             const fallbackLink = fallback.html()
             expect(fallbackLink).to.contain(this.settings.siteUrl)
@@ -455,7 +455,7 @@ describe('EmailBuilder', function() {
             expect(buttonLink.attr('href')).to.equal(
               this.opts.setNewPasswordUrl
             )
-            const fallback = dom('.avoid-auto-linking').last()
+            const fallback = dom('.force-overleaf-style').last()
             expect(fallback.length).to.equal(1)
             const fallbackLink = fallback.html().replace(/&amp;/, '&')
             expect(fallbackLink).to.contain(this.opts.setNewPasswordUrl)
@@ -508,7 +508,7 @@ describe('EmailBuilder', function() {
             const buttonLink = dom('a:contains("View project")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(this.opts.inviteUrl)
-            const fallback = dom('.avoid-auto-linking').last()
+            const fallback = dom('.force-overleaf-style').last()
             expect(fallback.length).to.equal(1)
             const fallbackLink = fallback.html().replace(/&amp;/g, '&')
             expect(fallbackLink).to.contain(this.opts.inviteUrl)

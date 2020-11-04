@@ -12,22 +12,22 @@ module.exports = _.template(`\
 		<style>.button td {
 	border-radius: 9999px; }
 
-.avoid-auto-linking a,
-.avoid-auto-linking a[href] {
+.force-overleaf-style a,
+.force-overleaf-style a[href] {
 	color: #138A07 !important;
 	text-decoration: none !important;
 	-moz-hyphens: none;
 	-ms-hyphens: none;
 	-webkit-hyphens: none;
 	hyphens: none; }
-	.avoid-auto-linking a:visited,
-	.avoid-auto-linking a[href]:visited {
+	.force-overleaf-style a:visited,
+	.force-overleaf-style a[href]:visited {
 		color: #138A07; }
-	.avoid-auto-linking a:hover,
-	.avoid-auto-linking a[href]:hover {
+	.force-overleaf-style a:hover,
+	.force-overleaf-style a[href]:hover {
 		color: #3d7935; }
-	.avoid-auto-linking a:active,
-	.avoid-auto-linking a[href]:active {
+	.force-overleaf-style a:active,
+	.force-overleaf-style a[href]:active {
 		color: #3d7935; }
 </style>
 		<style>@media only screen {
