@@ -24,7 +24,7 @@ const Settings = require('settings-sharelatex')
 const EmailHelper = require('../Helpers/EmailHelper')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
-const AnalyticsManger = require('../Analytics/AnalyticsManager')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const rateLimiter = require('../../infrastructure/RateLimiter')
 const request = require('request')
@@ -377,7 +377,7 @@ module.exports = CollaboratorsInviteController = {
           'project:membership:changed',
           { invites: true, members: true }
         )
-        AnalyticsManger.recordEvent(currentUser._id, 'project-invite-accept', {
+        AnalyticsManager.recordEvent(currentUser._id, 'project-invite-accept', {
           projectId,
           userId: currentUser._id
         })

@@ -28,7 +28,7 @@ const fs = require('fs')
 const Path = require('path')
 const { promisify } = require('util')
 const _ = require('underscore')
-const AnalyticsManger = require('../Analytics/AnalyticsManager')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
 
 const ProjectCreationHandler = {
   createBlankProject(owner_id, projectName, attributes, callback) {
@@ -56,7 +56,7 @@ const ProjectCreationHandler = {
             if (error != null) {
               return callback(error)
             }
-            AnalyticsManger.recordEvent(owner_id, 'project-imported', {
+            AnalyticsManager.recordEvent(owner_id, 'project-imported', {
               projectId: project._id,
               attributes
             })
@@ -79,7 +79,7 @@ const ProjectCreationHandler = {
               if (error != null) {
                 return callback(error)
               }
-              AnalyticsManger.recordEvent(owner_id, 'project-created', {
+              AnalyticsManager.recordEvent(owner_id, 'project-created', {
                 projectId: project._id,
                 attributes
               })

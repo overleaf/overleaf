@@ -1,128 +1,72 @@
-const settings = require('settings-sharelatex')
-const FaultTolerantRequest = require('../../infrastructure/FaultTolerantRequest')
-const Errors = require('../Errors/Errors')
+const Settings = require('settings-sharelatex')
+const Metrics = require('../../infrastructure/Metrics')
+const Queues = require('../../infrastructure/Queues')
 
-// check that the request should be made: ignore smoke test user and ensure the
-// analytics service is configured
-const checkAnalyticsRequest = function(userId) {
-  if (
-    settings.smokeTest &&
-    settings.smokeTest.userId &&
-    settings.smokeTest.userId.toString() === userId.toString()
-  ) {
-    // ignore smoke test user
-    return { error: null, skip: true }
+function identifyUser(userId, oldUserId) {
+  if (isAnalyticsDisabled() || isSmokeTestUser(userId)) {
+    return
   }
-
-  if (!settings.apis.analytics) {
-    return {
-      error: new Errors.ServiceNotConfiguredError(
-        'Analytics service not configured'
-      ),
-      skip: true
-    }
-  }
-
-  return { error: null, skip: false }
+  Metrics.analyticsQueue.inc({ status: 'adding', event_type: 'identify' })
+  Queues.analytics.events
+    .add('identify', { userId, oldUserId })
+    .then(() => {
+      Metrics.analyticsQueue.inc({ status: 'added', event_type: 'identify' })
+    })
+    .catch(() => {
+      Metrics.analyticsQueue.inc({ status: 'error', event_type: 'identify' })
+    })
 }
 
-// prepare the request: set `fromv2` param and full URL
-const prepareAnalyticsRequest = function(options) {
-  if (settings.overleaf != null) {
-    options.qs = Object.assign({}, options.qs, { fromV2: 1 })
+function recordEvent(userId, event, segmentation) {
+  if (isAnalyticsDisabled() || isSmokeTestUser(userId)) {
+    return
   }
-
-  const urlPath = options.url
-  options.url = `${settings.apis.analytics.url}${urlPath}`
-
-  options.timeout = options.timeout || 30000
-
-  return options
+  Metrics.analyticsQueue.inc({ status: 'adding', event_type: 'event' })
+  Queues.analytics.events
+    .add('event', { userId, event, segmentation })
+    .then(() => {
+      Metrics.analyticsQueue.inc({ status: 'added', event_type: 'event' })
+    })
+    .catch(() => {
+      Metrics.analyticsQueue.inc({ status: 'error', event_type: 'event' })
+    })
 }
 
-// make the request to analytics after checking and preparing it.
-// request happens asynchronously in the background and will be retried on error
-const makeAnalyticsBackgroundRequest = function(userId, options, callback) {
-  let { error, skip } = checkAnalyticsRequest(userId)
-  if (error || skip) {
-    return callback(error)
+function updateEditingSession(userId, projectId, countryCode) {
+  if (isAnalyticsDisabled() || isSmokeTestUser(userId)) {
+    return
   }
-  prepareAnalyticsRequest(options)
+  Metrics.analyticsQueue.inc({
+    status: 'adding',
+    event_type: 'editing-session'
+  })
+  Queues.analytics.editingSessions
+    .add({ userId, projectId, countryCode })
+    .then(() => {
+      Metrics.analyticsQueue.inc({
+        status: 'added',
+        event_type: 'editing-session'
+      })
+    })
+    .catch(() => {
+      Metrics.analyticsQueue.inc({
+        status: 'error',
+        event_type: 'editing-session'
+      })
+    })
+}
 
-  // With the tweaked parameter values (BACKOFF_BASE=3000, BACKOFF_MULTIPLIER=3):
-  // - the 6th attempt (maxAttempts=6) will run after 5.5 to 11.5 minutes
-  // - the 9th attempt (maxAttempts=9) will run after 86 to 250 minutes
-  options.maxAttempts = options.maxAttempts || 9
-  options.backoffBase = options.backoffBase || 3000
-  options.backoffMultiplier = options.backoffMultiplier || 3
+function isSmokeTestUser(userId) {
+  const smokeTestUserId = Settings.smokeTest && Settings.smokeTest.userId
+  return smokeTestUserId != null && userId.toString() === smokeTestUserId
+}
 
-  FaultTolerantRequest.backgroundRequest(options, callback)
+function isAnalyticsDisabled() {
+  return !(Settings.analytics && Settings.analytics.enabled)
 }
 
 module.exports = {
-  identifyUser(userId, oldUserId, callback) {
-    if (!callback) {
-      // callback is optional
-      callback = () => {}
-    }
-
-    const opts = {
-      body: {
-        old_user_id: oldUserId
-      },
-      json: true,
-      method: 'POST',
-      url: `/user/${userId}/identify`
-    }
-    makeAnalyticsBackgroundRequest(userId, opts, callback)
-  },
-
-  recordEvent(userId, event, segmentation, callback) {
-    if (segmentation == null) {
-      // segmentation is optional
-      segmentation = {}
-    }
-    if (!callback) {
-      // callback is optional
-      callback = () => {}
-    }
-
-    const opts = {
-      body: {
-        event,
-        segmentation
-      },
-      json: true,
-      method: 'POST',
-      url: `/user/${userId}/event`
-    }
-
-    makeAnalyticsBackgroundRequest(userId, opts, callback)
-  },
-
-  updateEditingSession(userId, projectId, countryCode, callback) {
-    if (!callback) {
-      // callback is optional
-      callback = () => {}
-    }
-
-    const query = {
-      userId,
-      projectId
-    }
-
-    if (countryCode) {
-      query.countryCode = countryCode
-    }
-
-    const opts = {
-      method: 'PUT',
-      url: '/editingSession',
-      qs: query,
-      maxAttempts: 6 // dont retry for too long as session ping timestamp are
-      // recorded when the request is received on the analytics
-    }
-
-    makeAnalyticsBackgroundRequest(userId, opts, callback)
-  }
+  identifyUser,
+  recordEvent,
+  updateEditingSession
 }

@@ -93,6 +93,11 @@ module.exports = settings =
 			password: process.env["REDIS_PASSWORD"] or ""
 			maxRetriesPerRequest: parseInt(process.env["REDIS_MAX_RETRIES_PER_REQUEST"] || '20')
 
+		queues:
+			host: process.env['QUEUES_REDIS_HOST'] || process.env['REDIS_HOST'] || 'localhost'
+			port: process.env['QUEUES_REDIS_PORT'] || process.env['REDIS_PORT'] || '6379'
+			password: process.env['QUEUES_REDIS_PASSWORD'] || process.env['REDIS_PASSWORD'] || ''
+
 	# Service locations
 	# -----------------
 
@@ -615,6 +620,9 @@ module.exports = settings =
 		autoCompile:
 			everyone: process.env['RATE_LIMIT_AUTO_COMPILE_EVERYONE'] or 100
 			standard: process.env['RATE_LIMIT_AUTO_COMPILE_STANDARD'] or 25
+
+	analytics:
+		enabled: process.env['ANALYTICS_ENABLED'] == 'true'
 
 	# currentImage: "texlive-full:2017.1"
 	# imageRoot: "<DOCKER REPOSITORY ROOT>" # without any trailing slash

@@ -11,8 +11,8 @@ describe('AnalyticsController', function() {
     this.AuthenticationController = { getLoggedInUserId: sinon.stub() }
 
     this.AnalyticsManager = {
-      updateEditingSession: sinon.stub().callsArgWith(3),
-      recordEvent: sinon.stub().callsArgWith(3)
+      updateEditingSession: sinon.stub(),
+      recordEvent: sinon.stub()
     }
 
     this.InstitutionsAPI = {
