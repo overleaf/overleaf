@@ -13,12 +13,28 @@ const UserGetter = require('../User/UserGetter')
 
 const FeaturesUpdater = {
   refreshFeatures(userId, callback = () => {}) {
-    FeaturesUpdater._computeFeatures(userId, (error, features) => {
-      if (error) {
-        return callback(error)
+    UserGetter.getUser(userId, { _id: 1, features: 1 }, (err, user) => {
+      if (err) {
+        return callback(err)
       }
-      logger.log({ userId, features }, 'updating user features')
-      UserFeaturesUpdater.updateFeatures(userId, features, callback)
+      const oldFeatures = _.clone(user.features)
+      FeaturesUpdater._computeFeatures(userId, (error, features) => {
+        if (error) {
+          return callback(error)
+        }
+        logger.log({ userId, features }, 'updating user features')
+        UserFeaturesUpdater.updateFeatures(userId, features, err => {
+          if (err) {
+            return callback(err)
+          }
+          if (oldFeatures.dropbox === true && features.dropbox === false) {
+            logger.log({ userId }, '[FeaturesUpdater] must unlink dropbox')
+            const Modules = require('../../infrastructure/Modules')
+            Modules.hooks.fire('removeDropbox', userId, () => {})
+          }
+          return callback()
+        })
+      })
     })
   },
 
