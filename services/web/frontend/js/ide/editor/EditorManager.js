@@ -246,7 +246,7 @@ export default (EditorManager = (function() {
     }
 
     _bindToDocumentEvents(doc, sharejs_doc) {
-      sharejs_doc.on('error', (error, meta) => {
+      sharejs_doc.on('error', (error, meta, editorContent) => {
         let message
         if ((error != null ? error.message : undefined) != null) {
           ;({ message } = error)
@@ -271,7 +271,9 @@ export default (EditorManager = (function() {
           this.ide.showOutOfSyncModal(
             'Out of sync',
             "Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a href='/learn/Kb/Editor_out_of_sync_problems'>Please see this help guide for more information</a>",
-            sharejs_doc.doc._doc.snapshot
+            typeof editorContent === 'string'
+              ? editorContent
+              : sharejs_doc.doc._doc.snapshot
           )
         }
         const removeHandler = this.$scope.$on('project:joined', () => {

@@ -1,4 +1,3 @@
-import _ from 'lodash'
 /* eslint-disable
     camelcase,
     handle-callback-err,
@@ -84,8 +83,8 @@ export default (Document = (function() {
       this.connected = this.ide.socket.socket.connected
       this.joined = false
       this.wantToBeJoined = false
-      this._checkAceConsistency = _.bind(this._checkConsistency, this, this.ace)
-      this._checkCMConsistency = _.bind(this._checkConsistency, this, this.cm)
+      this._checkAceConsistency = () => this._checkConsistency(this.ace)
+      this._checkCMConsistency = () => this._checkConsistency(this.cm)
       this._bindToEditorEvents()
       this._bindToSocketEvents()
     }
@@ -140,21 +139,21 @@ export default (Document = (function() {
     }
 
     _checkConsistency(editor) {
-      return () => {
-        // We've been seeing a lot of errors when I think there shouldn't be
-        // any, which may be related to this check happening before the change is
-        // applied. If we use a timeout, hopefully we can reduce this.
-        return setTimeout(() => {
-          const editorValue = editor != null ? editor.getValue() : undefined
-          const sharejsValue =
-            this.doc != null ? this.doc.getSnapshot() : undefined
-          if (editorValue !== sharejsValue) {
-            return this._onError(
-              new Error('Editor text does not match server text')
-            )
-          }
-        }, 0)
-      }
+      // We've been seeing a lot of errors when I think there shouldn't be
+      // any, which may be related to this check happening before the change is
+      // applied. If we use a timeout, hopefully we can reduce this.
+      return setTimeout(() => {
+        const editorValue = editor != null ? editor.getValue() : undefined
+        const sharejsValue =
+          this.doc != null ? this.doc.getSnapshot() : undefined
+        if (editorValue !== sharejsValue) {
+          return this._onError(
+            new Error('Editor text does not match server text'),
+            {},
+            editorValue
+          )
+        }
+      }, 0)
     }
 
     getSnapshot() {
@@ -653,7 +652,7 @@ export default (Document = (function() {
       })
     }
 
-    _onError(error, meta) {
+    _onError(error, meta, editorContent) {
       if (meta == null) {
         meta = {}
       }
@@ -682,7 +681,7 @@ export default (Document = (function() {
       if (this.doc != null) {
         this.doc.clearInflightAndPendingOps()
       }
-      this.trigger('error', error, meta)
+      this.trigger('error', error, meta, editorContent)
       // The clean up should run after the error is triggered because the error triggers a
       // disconnect. If we run the clean up first, we remove our event handlers and miss
       // the disconnect event, which means we try to leaveDoc when the connection comes back.
