@@ -43,13 +43,19 @@ async function batchedUpdate(collectionName, query, update, projection) {
   ) {
     maxId = nextBatch[nextBatch.length - 1]._id
     updated += nextBatch.length
-    console.log(JSON.stringify(nextBatch))
+    console.log(
+      `Running update on batch with ids ${JSON.stringify(
+        nextBatch.map(entry => entry._id)
+      )}`
+    )
 
     if (typeof update === 'function') {
       await update(collection, nextBatch)
     } else {
       await performUpdate(collection, nextBatch, update)
     }
+
+    console.error(`Completed batch ending ${maxId}`)
   }
   return updated
 }

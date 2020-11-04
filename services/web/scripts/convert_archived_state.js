@@ -5,26 +5,34 @@ const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 const { batchedUpdate } = require('./helpers/batchedUpdate')
 const { promiseMapWithLimit } = require('../app/src/util/promises')
 
+// $ node scripts/convert_archived_state.js FIRST,SECOND
+const STAGE = process.argv.pop()
+
 async function main() {
-  await batchedUpdate(
-    'projects',
-    { archived: false },
-    {
-      $set: { archived: [] },
-      $unset: { trashed: '' } // lest any v1 trashed bits be left behind
-    }
-  )
+  if (STAGE.includes('FIRST')) {
+    await batchedUpdate(
+      'projects',
+      { archived: false },
+      {
+        $set: { archived: [] }
+      }
+    )
 
-  console.log('Done, moving to archived projects')
+    console.error('Done, with first part')
+  }
 
-  await batchedUpdate('projects', { archived: true }, performUpdate, {
-    _id: 1,
-    owner_ref: 1,
-    collaberator_refs: 1,
-    readOnly_refs: 1,
-    tokenAccessReadAndWrite_refs: 1,
-    tokenAccessReadOnly_refs: 1
-  })
+  if (STAGE.includes('SECOND')) {
+    await batchedUpdate('projects', { archived: true }, performUpdate, {
+      _id: 1,
+      owner_ref: 1,
+      collaberator_refs: 1,
+      readOnly_refs: 1,
+      tokenAccessReadAndWrite_refs: 1,
+      tokenAccessReadOnly_refs: 1
+    })
+
+    console.error('Done, with second part')
+  }
 }
 
 main()
@@ -48,8 +56,7 @@ async function setArchived(collection, project) {
   return collection.updateOne(
     { _id: project._id },
     {
-      $set: { archived: archived },
-      $unset: { trashed: '' } // lest any v1 trashed bits be left behind
+      $set: { archived: archived }
     }
   )
 }
