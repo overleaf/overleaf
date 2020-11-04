@@ -14,6 +14,7 @@ const FileTypeManager = {
     '.bibtex',
     '.txt',
     '.tikz',
+    '.mtx',
     '.rtex',
     '.md',
     '.asy',

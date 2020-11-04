@@ -26,6 +26,7 @@ export default App.controller('BinaryFileController', function(
     'bibtex',
     'txt',
     'tikz',
+    'mtx',
     'rtex',
     'md',
     'asy',
