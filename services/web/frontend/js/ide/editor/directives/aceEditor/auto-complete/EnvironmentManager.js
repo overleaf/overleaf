@@ -146,20 +146,22 @@ const parseCustomEnvironments = function(text) {
 
 const parseBeginCommands = function(text) {
   let match
-  const re = /^\\begin{(\w+)}.*\n([\t ]*).*$/gm
+  const re = /^([\t ]*)\\begin{(\w+)}.*\n([\t ]*)/gm
   const result = []
   let iterations = 0
   while ((match = re.exec(text))) {
+    const whitespaceAlignment = match[3].replace(match[1] || '', '')
     if (
-      !Array.from(Environments.all).includes(match[1]) &&
-      match[1] !== 'document'
+      !Array.from(Environments.all).includes(match[2]) &&
+      match[2] !== 'document'
     ) {
-      result.push({ name: match[1], whitespace: match[2] })
+      result.push({ name: match[2], whitespace: whitespaceAlignment })
       iterations += 1
       if (iterations >= 1000) {
         return result
       }
     }
+    re.lastIndex = match.index + 1
   }
   return result
 }
