@@ -1,4 +1,6 @@
 {
+  "log_entry_description": "Log entry with level: \"__level__\"",
+  "navigate_log_source": "Navigate to log position in source code: __location__",
   "other_output_files": "Other output files",
   "toggle_output_files_list": "Toggle output files list",
   "n_warnings": "__count__ warning",

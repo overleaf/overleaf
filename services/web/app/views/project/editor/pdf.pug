@@ -19,6 +19,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			output-files="pdf.outputFiles"
 			pdf-download-url="pdf.downloadUrl"
 			show-logs="shouldShowLogs"
+			on-log-entry-link-click="openInEditor"
 		)
 	else
 		.toolbar.toolbar-pdf(ng-class="{ 'changes-to-autocompile': changesToAutoCompile && !autoCompileLintingError }")
@@ -172,7 +173,7 @@ div.full-size.pdf(ng-controller="PdfController")
 					) #{translate("failed_compile_check_ignore")}
 					| .
 
-			div(ng-repeat="entry in pdf.logEntries.all", ng-controller="PdfLogEntryController")
+			div(ng-repeat="entry in pdf.logEntries.all")
 				.alert(
 					ng-class="{\
 						'alert-danger':  entry.level == 'error',\

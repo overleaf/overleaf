@@ -1,0 +1,131 @@
+.logs-pane {
+  .full-size;
+  top: @pdf-top-offset;
+  padding: @padding-sm;
+  overflow-y: auto;
+  background-color: @logs-pane-bg;
+}
+
+.log-entry {
+  margin-bottom: @margin-sm;
+}
+
+.log-entry-header {
+  padding: 3px @padding-sm;
+  display: flex;
+  align-items: flex-start;
+  color: #fff;
+  border-radius: @border-radius-base @border-radius-base 0 0;
+  &:last-child {
+    border-radius: @border-radius-base;
+  }
+}
+
+.log-entry-header-error {
+  background-color: @ol-red;
+}
+
+.log-entry-header-warning {
+  background-color: @orange;
+}
+
+.log-entry-header-typesetting {
+  background-color: @ol-blue;
+}
+
+.log-entry-header-title,
+.log-entry-header-link {
+  font-family: @font-family-sans-serif;
+  font-size: @font-size-base;
+  line-height: @line-height-base;
+  font-weight: 700;
+  flex-grow: 1;
+  margin: 0;
+  color: #fff;
+}
+
+.log-entry-header-link {
+  border-width: 0;
+  flex-grow: 0;
+  text-align: right;
+  white-space: nowrap;
+  padding-left: @padding-sm;
+  &:hover,
+  &:focus {
+    outline: 0;
+    color: #fff;
+  }
+  &:focus {
+    text-decoration: none;
+  }
+}
+
+.log-entry-content {
+  background-color: #fff;
+  padding: @padding-sm;
+  &:last-child {
+    border-radius: 0 0 @border-radius-base @border-radius-base;
+  }
+}
+
+.log-entry-content-raw-expandable-container {
+  position: relative;
+  background-color: @ol-blue-gray-1;
+  border-radius: @border-radius-base;
+}
+
+.log-entry-content-raw-button-container-collapsed {
+  padding-bottom: 0;
+}
+
+.log-entry-content-raw {
+  font-size: @font-size-small;
+  color: @ol-blue-gray-4;
+  padding: @padding-sm @padding-sm @padding-xl @padding-sm;
+  margin: 0;
+}
+
+.log-entry-content-raw-collapsed {
+  padding-bottom: 0;
+}
+
+.log-entry-content-button-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  padding-bottom: @padding-sm;
+  text-align: center;
+  border-radius: 0 0 @border-radius-base @border-radius-base;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: linear-gradient(0, @ol-blue-gray-1, transparent);
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+  }
+}
+
+.log-entry-content-button-container-collapsed::before {
+  opacity: 1;
+}
+
+.log-entry-btn-expand-collapse {
+  position: relative;
+  z-index: 1;
+  &:focus,
+  &:focus:active {
+    outline: 0;
+  }
+}
+
+.log-entry-human-readable-hint,
+.log-entry-human-readable-hint-link {
+  font-size: @font-size-small;
+  margin-top: @margin-sm;
+}

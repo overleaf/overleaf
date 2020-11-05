@@ -878,6 +878,25 @@ App.controller('PdfController', function(
       $scope.recompile({ check: true })
     })
   }
+
+  $scope.openInEditor = function(entry) {
+    let column, line
+    eventTracking.sendMBOnce('logs-jump-to-location-once')
+    const entity = ide.fileTreeManager.findEntityByPath(entry.file)
+    if (entity == null || entity.type !== 'doc') {
+      return
+    }
+    if (entry.line != null) {
+      line = entry.line
+    }
+    if (entry.column != null) {
+      column = entry.column
+    }
+    ide.editorManager.openDoc(entity, {
+      gotoLine: line,
+      gotoColumn: column
+    })
+  }
 })
 
 App.factory('synctex', function(ide, $http, $q) {
@@ -1045,27 +1064,6 @@ App.controller('PdfSynctexController', function($scope, synctex, ide) {
         ide.editorManager.openDoc(doc, { gotoLine: line })
       })
       .finally(() => ($scope.syncToCodeInFlight = false))
-  }
-})
-
-App.controller('PdfLogEntryController', function($scope, ide, eventTracking) {
-  $scope.openInEditor = function(entry) {
-    let column, line
-    eventTracking.sendMBOnce('logs-jump-to-location-once')
-    const entity = ide.fileTreeManager.findEntityByPath(entry.file)
-    if (entity == null || entity.type !== 'doc') {
-      return
-    }
-    if (entry.line != null) {
-      line = entry.line
-    }
-    if (entry.column != null) {
-      column = entry.column
-    }
-    ide.editorManager.openDoc(entity, {
-      gotoLine: line,
-      gotoColumn: column
-    })
   }
 })
 
