@@ -5,6 +5,7 @@ const _ = require('lodash')
 const Url = require('url')
 const Path = require('path')
 const moment = require('moment')
+const pug = require('pug-runtime')
 
 const IS_DEV_ENV = ['development', 'test'].includes(process.env.NODE_ENV)
 
@@ -22,6 +23,8 @@ if (!IS_DEV_ENV) {
   // dev reload
   webpackManifest = require(`../../../public/manifest.json`)
 }
+
+const I18N_HTML_INJECTIONS = new Set()
 
 module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(function(req, res, next) {
@@ -179,6 +182,23 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(function(req, res, next) {
     res.locals.translate = function(key, vars, components) {
       vars = vars || {}
+
+      if (Settings.i18n.checkForHTMLInVars) {
+        Object.entries(vars).forEach(([field, value]) => {
+          if (pug.escape(value) !== value) {
+            const violationsKey = key + field
+            // do not flood the logs, log one sample per pod + key + field
+            if (!I18N_HTML_INJECTIONS.has(violationsKey)) {
+              logger.warn(
+                { key, field, value },
+                'html content in translations context vars'
+              )
+              I18N_HTML_INJECTIONS.add(violationsKey)
+            }
+          }
+        })
+      }
+
       vars.appName = Settings.appName
       const locale = req.i18n.translate(key, vars)
       if (components) {

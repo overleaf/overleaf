@@ -293,6 +293,8 @@ module.exports = settings =
 	# ------
 	#
 	i18n:
+		checkForHTMLInVars: process.env['I18N_CHECK_FOR_HTML_IN_VARS'] == 'true'
+		escapeHTMLInVars: process.env['I18N_ESCAPE_HTML_IN_VARS'] == 'true'
 		subdomainLang:
 			www: {lngCode:"en", url: siteUrl}
 		defaultLng: "en"
