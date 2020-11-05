@@ -60,7 +60,11 @@ async function duplicate(owner, originalProjectId, newProjectName) {
       docEntries,
       fileEntries
     )
-    if (rootDocPath) {
+    // Silently ignore the rootDoc in case it's not valid per the new limits.
+    if (
+      rootDocPath &&
+      ProjectEntityUpdateHandler.isPathValidForRootDoc(rootDocPath.fileSystem)
+    ) {
       await _setRootDoc(newProject._id, rootDocPath.fileSystem)
     }
     await _notifyDocumentUpdater(newProject, owner._id, {
