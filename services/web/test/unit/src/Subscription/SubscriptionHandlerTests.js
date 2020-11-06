@@ -63,8 +63,6 @@ describe('SubscriptionHandler', function() {
       attemptInvoiceCollection: sinon.stub().yields()
     }
 
-    this.DropboxHandler = { unlinkAccount: sinon.stub().callsArgWith(1) }
-
     this.SubscriptionUpdater = {
       syncSubscription: sinon.stub().yields(),
       startFreeTrial: sinon.stub().callsArgWith(1)
