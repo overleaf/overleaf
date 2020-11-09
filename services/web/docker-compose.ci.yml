@@ -20,6 +20,7 @@ services:
     environment:
       BCRYPT_ROUNDS: 1
       REDIS_HOST: redis
+      QUEUES_REDIS_HOST: redis
       MONGO_URL: "mongodb://mongo/sharelatex"
       SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true'
       PROJECT_HISTORY_ENABLED: 'true'

@@ -94,9 +94,9 @@ module.exports = settings =
 			maxRetriesPerRequest: parseInt(process.env["REDIS_MAX_RETRIES_PER_REQUEST"] || '20')
 
 		queues:
-			host: process.env['QUEUES_REDIS_HOST'] || process.env['REDIS_HOST'] || 'localhost'
-			port: process.env['QUEUES_REDIS_PORT'] || process.env['REDIS_PORT'] || '6379'
-			password: process.env['QUEUES_REDIS_PASSWORD'] || process.env['REDIS_PASSWORD'] || ''
+			host: process.env['QUEUES_REDIS_HOST'] || 'localhost'
+			port: process.env['QUEUES_REDIS_PORT'] || '6379'
+			password: process.env['QUEUES_REDIS_PASSWORD'] || ''
 
 	# Service locations
 	# -----------------
