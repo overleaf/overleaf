@@ -1,9 +1,14 @@
 {
   "name": "redis-sharelatex",
   "version": "1.0.13",
-  "description": "Redis wrapper for node which will either use cluster, sentinal, or single instance redis",
+  "description": "Redis wrapper for node which will either use cluster or single instance redis",
   "main": "index.js",
-  "author": "ShareLaTeX",
+  "files": [
+    "index.js",
+    "Errors.js"
+  ],
+  "author": "Overleaf (https://www.overleaf.com)",
+  "repository": "github:overleaf/redis-wrapper",
   "license": "ISC",
   "scripts": {
     "lint": "eslint --max-warnings 0 .",
