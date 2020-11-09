@@ -15,6 +15,7 @@ function ChatPane({
   sendMessage,
   userId
 }) {
+  const { t } = useTranslation()
   useEffect(() => {
     loadMoreMessages()
   }, [])
@@ -36,6 +37,7 @@ function ChatPane({
         itemCount={messageContentCount}
       >
         <div>
+          <h2 className="sr-only">{t('chat')}</h2>
           {loading && <LoadingSpinner />}
           {shouldDisplayPlaceholder && <Placeholder />}
           <MessageList

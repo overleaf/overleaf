@@ -21,7 +21,7 @@ describe('<MessageInput />', function() {
       />
     )
 
-    screen.getByPlaceholderText('Your Message…')
+    screen.getByLabelText('Your Message')
   })
 
   it('sends a message after typing and hitting enter', function() {
@@ -32,7 +32,7 @@ describe('<MessageInput />', function() {
       />
     )
 
-    const input = screen.getByPlaceholderText('Your Message…')
+    const input = screen.getByRole('textbox')
 
     fireEvent.change(input, { target: { value: 'hello world' } })
     fireEvent.keyDown(input, { key: 'Enter' })
