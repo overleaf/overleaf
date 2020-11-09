@@ -3,7 +3,7 @@ SandboxedModule = require('sandboxed-module')
 assert = require('assert')
 path = require('path')
 sinon = require('sinon')
-modulePath = path.join __dirname, "./../../../index.coffee"
+modulePath = path.join __dirname, "./../../../index.js"
 expect = require("chai").expect
 
 describe "index", ->
