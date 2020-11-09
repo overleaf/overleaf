@@ -72,7 +72,7 @@ describe('index', function () {
     return it('should call createClient for the ioredis driver in single-instance mode if a non array is passed', function () {
       const client = this.redis.createClient(this.standardOpts)
       return this.ioredisConstructor
-        .calledWith(this.standardOpts)
+        .calledWith(sinon.match(this.standardOpts))
         .should.equal(true)
     })
   })
