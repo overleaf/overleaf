@@ -11,13 +11,8 @@ describe "index", ->
 	beforeEach ->
 
 		@settings = {}
-		@normalRedisClient = 
-			get: ->
-			on: ->
 		@ioredisConstructor = ioredisConstructor = sinon.stub()
 
-		@normalRedis = 
-			createClient: sinon.stub().returns(@normalRedisClient)
 		@ioredis = class IoRedis
 			constructor: ioredisConstructor
 			on: sinon.stub()
@@ -25,7 +20,6 @@ describe "index", ->
 			constructor: (@config, @options) ->
 			on: sinon.stub()
 		@redis = SandboxedModule.require modulePath, requires:
-			"redis":@normalRedis
 			"ioredis": @ioredis
 		@auth_pass = "1234 pass"
 
@@ -38,7 +32,6 @@ describe "index", ->
 
 		it "should use the ioredis driver in single-instance mode if a non array is passed", ->
 			client = @redis.createClient @standardOpts
-			@normalRedis.createClient.called.should.equal false
 			assert.equal(client.constructor, @ioredis)
 
 		it "should call createClient for the ioredis driver in single-instance mode if a non array is passed", ->
