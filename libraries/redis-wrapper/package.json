@@ -1,5 +1,5 @@
 {
-  "name": "redis-sharelatex",
+  "name": "@overleaf/redis-wrapper",
   "version": "1.0.13",
   "description": "Redis wrapper for node which will either use cluster or single instance redis",
   "main": "index.js",
