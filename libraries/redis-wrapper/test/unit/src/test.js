@@ -126,7 +126,8 @@ describe('index', function () {
       this.results = []
       this.multiOrig = { exec: sinon.stub().yields(null, this.results) }
       this.client = { multi: sinon.stub().returns(this.multiOrig) }
-      this.redis._monkeyPatchIoredisExec(this.client)
+      this.ioredisConstructor.returns(this.client)
+      this.redis.createClient(this.client)
       return (this.multi = this.client.multi())
     })
 
