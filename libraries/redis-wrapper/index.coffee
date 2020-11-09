@@ -14,13 +14,7 @@ module.exports = RedisSharelatex =
 		if !opts.retry_max_delay?
 			opts.retry_max_delay = 5000 # ms
 		
-		if opts.endpoints?
-			standardOpts = _.clone(opts)
-			delete standardOpts.endpoints
-			delete standardOpts.masterName
-			client = require("redis-sentinel").createClient opts.endpoints, opts.masterName, standardOpts
-			client.healthCheck = RedisSharelatex.singleInstanceHealthCheckBuilder(client)
-		else if opts.cluster?
+		if opts.cluster?
 			Redis = require("ioredis")
 			standardOpts = _.clone(opts)
 			delete standardOpts.cluster
