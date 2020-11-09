@@ -95,10 +95,24 @@ describe('<PreviewRecompileButton />', function() {
     })
   })
 
-  function renderPreviewRecompileButton(compilerState = {}) {
+  it('should show the button text when prop showText=true', function() {
+    const showText = true
+    renderPreviewRecompileButton({}, showText)
+    expect(screen.getByText('Recompile').getAttribute('style')).to.be.null
+  })
+  it('should not show the button text when prop showText=false', function() {
+    const showText = false
+    renderPreviewRecompileButton({}, showText)
+    expect(screen.getByText('Recompile').getAttribute('style')).to.equal(
+      'position: absolute; right: -100vw;'
+    )
+  })
+
+  function renderPreviewRecompileButton(compilerState = {}, showText) {
     if (!compilerState.logEntries) {
       compilerState.logEntries = {}
     }
+    if (showText === undefined) showText = true
     render(
       <PreviewRecompileButton
         compilerState={{
@@ -115,6 +129,7 @@ describe('<PreviewRecompileButton />', function() {
         onSetDraftMode={() => {}}
         onSetSyntaxCheck={() => {}}
         onClearCache={onClearCache}
+        showText={showText}
       />
     )
   }

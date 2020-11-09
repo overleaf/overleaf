@@ -19,17 +19,36 @@ describe('<PreviewDownloadButton />', function() {
     }
   }
 
-  it('should disable the button and dropdown toggle when compiling', function() {
-    const isCompiling = true
-    const outputFiles = undefined
+  function renderPreviewDownloadButton(
+    isCompiling,
+    outputFiles,
+    pdfDownloadUrl,
+    showText
+  ) {
+    if (isCompiling === undefined) isCompiling = false
+    if (showText === undefined) showText = true
     render(
       <PreviewDownloadButton
         isCompiling={isCompiling}
-        outputFiles={outputFiles}
-        pdfDownloadUrl={undefined}
+        outputFiles={outputFiles || []}
+        pdfDownloadUrl={pdfDownloadUrl}
+        showText={showText}
       />
     )
-    expect(screen.getByText('Download PDF').getAttribute('disabled')).to.exist
+  }
+
+  it('should disable the button and dropdown toggle when compiling', function() {
+    const isCompiling = true
+    const outputFiles = undefined
+
+    renderPreviewDownloadButton(isCompiling, outputFiles)
+
+    expect(
+      screen
+        .getByText('Download PDF')
+        .closest('a')
+        .getAttribute('disabled')
+    ).to.exist
     const buttons = screen.getAllByRole('button')
     expect(buttons.length).to.equal(1) // the dropdown toggle
     expect(buttons[0].getAttribute('disabled')).to.exist
@@ -40,41 +59,35 @@ describe('<PreviewDownloadButton />', function() {
   it('should disable the PDF button when there is no PDF', function() {
     const isCompiling = false
     const outputFiles = []
-    render(
-      <PreviewDownloadButton
-        isCompiling={isCompiling}
-        outputFiles={outputFiles}
-        pdfDownloadUrl={undefined}
-      />
-    )
-    expect(screen.getByText('Download PDF').getAttribute('disabled')).to.exist
+    renderPreviewDownloadButton(isCompiling, outputFiles)
+    expect(
+      screen
+        .getByText('Download PDF')
+        .closest('a')
+        .getAttribute('disabled')
+    ).to.exist
   })
   it('should enable the PDF button when there is a main PDF', function() {
     const isCompiling = false
     const outputFiles = []
-    render(
-      <PreviewDownloadButton
-        isCompiling={isCompiling}
-        outputFiles={outputFiles}
-        pdfDownloadUrl={pdfDownloadUrl}
-      />
-    )
-    expect(screen.getByText('Download PDF').getAttribute('href')).to.equal(
-      pdfDownloadUrl
-    )
-    expect(screen.getByText('Download PDF').getAttribute('disabled')).to.not
-      .exist
+    renderPreviewDownloadButton(isCompiling, outputFiles, pdfDownloadUrl)
+    expect(
+      screen
+        .getByText('Download PDF')
+        .closest('a')
+        .getAttribute('href')
+    ).to.equal(pdfDownloadUrl)
+    expect(
+      screen
+        .getByText('Download PDF')
+        .closest('a')
+        .getAttribute('disabled')
+    ).to.not.exist
   })
   it('should enable the dropdown when not compiling', function() {
     const isCompiling = false
     const outputFiles = []
-    render(
-      <PreviewDownloadButton
-        isCompiling={isCompiling}
-        outputFiles={outputFiles}
-        pdfDownloadUrl={pdfDownloadUrl}
-      />
-    )
+    renderPreviewDownloadButton(isCompiling, outputFiles, pdfDownloadUrl)
     const buttons = screen.getAllByRole('button')
     expect(buttons[0]).to.exist
     expect(buttons[0].getAttribute('disabled')).to.not.exist
@@ -93,13 +106,7 @@ describe('<PreviewDownloadButton />', function() {
       makeFile('output.blg')
     ]
 
-    render(
-      <PreviewDownloadButton
-        isCompiling={isCompiling}
-        outputFiles={outputFiles}
-        pdfDownloadUrl={pdfDownloadUrl}
-      />
-    )
+    renderPreviewDownloadButton(isCompiling, outputFiles, pdfDownloadUrl)
 
     const menuItems = screen.getAllByRole('menuitem')
     expect(menuItems.length).to.equal(outputFiles.length - 1) // main PDF is listed separately
@@ -138,13 +145,9 @@ describe('<PreviewDownloadButton />', function() {
     const pdfFile = makeFile('output.pdf', true)
     const bblFile = makeFile('output.bbl')
     const outputFiles = [Object.assign({}, { ...bblFile }), bblFile, pdfFile]
-    render(
-      <PreviewDownloadButton
-        isCompiling={isCompiling}
-        outputFiles={outputFiles}
-        pdfDownloadUrl={pdfDownloadUrl}
-      />
-    )
+
+    renderPreviewDownloadButton(isCompiling, outputFiles, pdfDownloadUrl)
+
     const bblMenuItems = screen.getAllByText((content, element) => {
       return (
         content !== '' && element.textContent === 'Download output.bbl file'
@@ -157,15 +160,22 @@ describe('<PreviewDownloadButton />', function() {
     const pdfFile = makeFile('output.pdf', true)
     const pdfAltFile = makeFile('alt.pdf')
     const outputFiles = [pdfFile, pdfAltFile]
-
-    render(
-      <PreviewDownloadButton
-        isCompiling={isCompiling}
-        outputFiles={outputFiles}
-        pdfDownloadUrl={pdfDownloadUrl}
-      />
-    )
+    renderPreviewDownloadButton(isCompiling, outputFiles, pdfDownloadUrl)
     screen.getAllByRole('menuitem', { name: 'Download alt.pdf file' })
+  })
+  it('should show the button text when prop showText=true', function() {
+    const isCompiling = false
+    const showText = true
+    renderPreviewDownloadButton(isCompiling, [], pdfDownloadUrl, showText)
+    expect(screen.getByText('Download PDF').getAttribute('style')).to.be.null
+  })
+  it('should not show the button text when prop showText=false', function() {
+    const isCompiling = false
+    const showText = false
+    renderPreviewDownloadButton(isCompiling, [], pdfDownloadUrl, showText)
+    expect(screen.getByText('Download PDF').getAttribute('style')).to.equal(
+      'position: absolute; right: -100vw;'
+    )
   })
   describe('list divider and header', function() {
     it('should display when there are top files and other files', function() {
@@ -176,13 +186,7 @@ describe('<PreviewDownloadButton />', function() {
         makeFile('output.log')
       ]
 
-      render(
-        <PreviewDownloadButton
-          isCompiling={false}
-          outputFiles={outputFiles}
-          pdfDownloadUrl={pdfDownloadUrl}
-        />
-      )
+      renderPreviewDownloadButton(false, outputFiles, pdfDownloadUrl, true)
 
       screen.getByText('Other output files')
       screen.getByRole('separator')
@@ -194,13 +198,7 @@ describe('<PreviewDownloadButton />', function() {
         makeFile('output.gls')
       ]
 
-      render(
-        <PreviewDownloadButton
-          isCompiling={false}
-          outputFiles={outputFiles}
-          pdfDownloadUrl={pdfDownloadUrl}
-        />
-      )
+      renderPreviewDownloadButton(false, outputFiles, pdfDownloadUrl, true)
 
       expect(screen.queryByText('Other output files')).to.not.exist
       expect(screen.queryByRole('separator')).to.not.exist
@@ -208,13 +206,7 @@ describe('<PreviewDownloadButton />', function() {
     it('should not display when there are other files and no top files', function() {
       const outputFiles = [makeFile('output.log')]
 
-      render(
-        <PreviewDownloadButton
-          isCompiling={false}
-          outputFiles={outputFiles}
-          pdfDownloadUrl={pdfDownloadUrl}
-        />
-      )
+      renderPreviewDownloadButton(false, outputFiles, pdfDownloadUrl, true)
 
       expect(screen.queryByText('Other output files')).to.not.exist
       expect(screen.queryByRole('separator')).to.not.exist

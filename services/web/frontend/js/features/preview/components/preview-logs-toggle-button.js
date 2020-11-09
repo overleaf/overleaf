@@ -1,4 +1,5 @@
 import React from 'react'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
@@ -7,77 +8,122 @@ import Icon from '../../../shared/components/icon'
 function PreviewLogsToggleButton({
   onToggle,
   showLogs,
-  logsState: { nErrors, nWarnings }
+  logsState: { nErrors, nWarnings },
+  showText
 }) {
-  const toggleButtonClasses = classNames('btn', 'btn-xs', 'btn-toggle-logs', {
-    'btn-danger': !showLogs && nErrors,
-    'btn-warning': !showLogs && !nErrors && nWarnings,
-    'btn-default': showLogs || (!nErrors && !nWarnings)
-  })
+  const { t } = useTranslation()
+  const toggleButtonClasses = classNames(
+    'btn',
+    'btn-xs',
+    'btn-toggle-logs',
+    'toolbar-item',
+    {
+      'btn-danger': !showLogs && nErrors,
+      'btn-warning': !showLogs && !nErrors && nWarnings,
+      'btn-default': showLogs || (!nErrors && !nWarnings)
+    }
+  )
+
+  let textStyle = {}
+  if (!showText) {
+    textStyle = {
+      position: 'absolute',
+      right: '-100vw'
+    }
+  }
 
   function handleOnClick(e) {
     e.currentTarget.blur()
     onToggle()
   }
 
-  return (
+  const buttonElement = (
     <button
+      id="logs-toggle"
       type="button"
       className={toggleButtonClasses}
       onClick={handleOnClick}
     >
       {showLogs ? (
-        <ViewPdfButton />
+        <ViewPdfButton textStyle={textStyle} />
       ) : (
-        <CompilationResultIndicator nErrors={nErrors} nWarnings={nWarnings} />
+        <CompilationResultIndicator
+          textStyle={textStyle}
+          nErrors={nErrors}
+          nWarnings={nWarnings}
+        />
       )}
     </button>
   )
+
+  return showText ? (
+    buttonElement
+  ) : (
+    <OverlayTrigger
+      placement="bottom"
+      overlay={
+        <Tooltip id="tooltip-logs-toggle">
+          {showLogs ? t('view_pdf') : t('view_logs')}
+        </Tooltip>
+      }
+    >
+      {buttonElement}
+    </OverlayTrigger>
+  )
 }
 
-function CompilationResultIndicator({ nErrors, nWarnings }) {
+function CompilationResultIndicator({ textStyle, nErrors, nWarnings }) {
   if (nErrors || nWarnings) {
     return (
       <LogsCompilationResultIndicator
         logType={nErrors ? 'errors' : 'warnings'}
         nLogs={nErrors || nWarnings}
+        textStyle={textStyle}
       />
     )
   } else {
-    return <ViewLogsButton />
+    return <ViewLogsButton textStyle={textStyle} />
   }
 }
 
-function LogsCompilationResultIndicator({ logType, nLogs }) {
+function LogsCompilationResultIndicator({ textStyle, logType, nLogs }) {
   const { t } = useTranslation()
   const label =
     logType === 'errors' ? t('your_project_has_errors') : t('view_warnings')
   return (
     <>
       <Icon type="file-text-o" />
-      <span className="btn-toggle-logs-label" aria-label={label}>
+      <span
+        className="btn-toggle-logs-label toolbar-text"
+        aria-label={label}
+        style={textStyle}
+      >
         {`${label} (${nLogs > 9 ? '9+' : nLogs})`}
       </span>
     </>
   )
 }
 
-function ViewLogsButton() {
+function ViewLogsButton({ textStyle }) {
   const { t } = useTranslation()
   return (
     <>
       <Icon type="file-text-o" />
-      <span className="btn-toggle-logs-label">{t('view_logs')}</span>
+      <span className="toolbar-text" style={textStyle}>
+        {t('view_logs')}
+      </span>
     </>
   )
 }
 
-function ViewPdfButton() {
+function ViewPdfButton({ textStyle }) {
   const { t } = useTranslation()
   return (
     <>
       <Icon type="file-pdf-o" />
-      <span className="btn-toggle-logs-label">{t('view_pdf')}</span>
+      <span className="toolbar-text" style={textStyle}>
+        {t('view_pdf')}
+      </span>
     </>
   )
 }
@@ -89,12 +135,22 @@ PreviewLogsToggleButton.propTypes = {
     nWarnings: PropTypes.number.isRequired,
     nLogEntries: PropTypes.number.isRequired
   }),
-  showLogs: PropTypes.bool.isRequired
+  showLogs: PropTypes.bool.isRequired,
+  showText: PropTypes.bool.isRequired
 }
 
 LogsCompilationResultIndicator.propTypes = {
   logType: PropTypes.string.isRequired,
-  nLogs: PropTypes.number.isRequired
+  nLogs: PropTypes.number.isRequired,
+  textStyle: PropTypes.object.isRequired
+}
+
+ViewLogsButton.propTypes = {
+  textStyle: PropTypes.object.isRequired
+}
+
+ViewPdfButton.propTypes = {
+  textStyle: PropTypes.object.isRequired
 }
 
 export default PreviewLogsToggleButton

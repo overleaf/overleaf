@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Dropdown, MenuItem } from 'react-bootstrap'
+import { Dropdown, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
 
@@ -17,7 +17,8 @@ function PreviewRecompileButton({
   onRunSyntaxCheckNow,
   onSetAutoCompile,
   onSetDraftMode,
-  onSetSyntaxCheck
+  onSetSyntaxCheck,
+  showText
 }) {
   const { t } = useTranslation()
 
@@ -55,18 +56,43 @@ function PreviewRecompileButton({
     onSetSyntaxCheck(false)
   }
 
-  return (
-    <Dropdown id="pdf-recompile-dropdown" className="btn-recompile-group">
+  let compilingProps = {}
+  let recompileProps = {}
+  function _hideText(keepAria) {
+    return {
+      'aria-hidden': !keepAria,
+      style: {
+        position: 'absolute',
+        right: '-100vw'
+      }
+    }
+  }
+
+  if (!showText) {
+    compilingProps = _hideText(isCompiling || isClearingCache)
+    recompileProps = _hideText(!isCompiling || !isClearingCache)
+  } else if (isCompiling || isClearingCache) {
+    recompileProps = _hideText()
+  } else {
+    compilingProps = _hideText()
+  }
+
+  const buttonElement = (
+    <Dropdown
+      id="pdf-recompile-dropdown"
+      className="btn-recompile-group toolbar-item"
+    >
       <button className="btn btn-recompile" onClick={onRecompile}>
         <Icon type="refresh" spin={isCompiling} />
-        {isCompiling || isClearingCache ? (
-          <span className="btn-recompile-label">
-            {t('compiling')}
-            &hellip;
-          </span>
-        ) : (
-          <span className="btn-recompile-label">{t('recompile')}</span>
-        )}
+
+        <span id="text-compiling" className="toolbar-text" {...compilingProps}>
+          {t('compiling')}
+          &hellip;
+        </span>
+
+        <span id="text-recompile" className="toolbar-text" {...recompileProps}>
+          {t('recompile')}
+        </span>
       </button>
       <Dropdown.Toggle
         aria-label={t('toggle_compile_options_menu')}
@@ -115,6 +141,21 @@ function PreviewRecompileButton({
       </Dropdown.Menu>
     </Dropdown>
   )
+
+  return showText ? (
+    buttonElement
+  ) : (
+    <OverlayTrigger
+      placement="bottom"
+      overlay={
+        <Tooltip id="tooltip-download-pdf">
+          {isCompiling || isClearingCache ? t('compiling') : t('recompile')}
+        </Tooltip>
+      }
+    >
+      {buttonElement}
+    </OverlayTrigger>
+  )
 }
 
 PreviewRecompileButton.propTypes = {
@@ -131,7 +172,8 @@ PreviewRecompileButton.propTypes = {
   onRunSyntaxCheckNow: PropTypes.func.isRequired,
   onSetAutoCompile: PropTypes.func.isRequired,
   onSetDraftMode: PropTypes.func.isRequired,
-  onSetSyntaxCheck: PropTypes.func.isRequired
+  onSetSyntaxCheck: PropTypes.func.isRequired,
+  showText: PropTypes.bool.isRequired
 }
 
 export default PreviewRecompileButton
