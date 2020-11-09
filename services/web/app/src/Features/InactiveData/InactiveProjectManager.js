@@ -19,6 +19,7 @@ const DocstoreManager = require('../Docstore/DocstoreManager')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectUpdateHandler = require('../Project/ProjectUpdateHandler')
 const { Project } = require('../../models/Project')
+const { ObjectId } = require('mongodb')
 
 const MILISECONDS_IN_DAY = 86400000
 module.exports = InactiveProjectManager = {
@@ -62,12 +63,14 @@ module.exports = InactiveProjectManager = {
       daysOld = 360
     }
     const oldProjectDate = new Date() - MILISECONDS_IN_DAY * daysOld
-    return Project.find()
-      .where('lastOpened')
-      .lt(oldProjectDate)
+    // use $not $gt to catch non-opened projects where lastOpened is null
+    Project.find({ lastOpened: { $not: { $gt: oldProjectDate } } })
+      .where('_id')
+      .lt(ObjectId.createFromTime(oldProjectDate / 1000))
       .where('active')
       .equals(true)
       .select('_id')
+      .sort({ _id: 1 })
       .limit(limit)
       .exec(function(err, projects) {
         if (err != null) {
@@ -75,22 +78,24 @@ module.exports = InactiveProjectManager = {
         }
         const jobs = _.map(projects, project => cb =>
           InactiveProjectManager.deactivateProject(project._id, function(err) {
-            logger.err(
-              { project_id: project._id, err: err },
-              'unable to deactivate project'
-            )
+            if (err) {
+              logger.err(
+                { project_id: project._id, err: err },
+                'unable to deactivate project'
+              )
+            }
             cb()
           })
         )
         logger.log(
-          { numberOfProjects: projects != null ? projects.length : undefined },
+          { numberOfProjects: projects && projects.length },
           'deactivating projects'
         )
-        return async.series(jobs, function(err) {
+        async.series(jobs, function(err) {
           if (err != null) {
             logger.warn({ err }, 'error deactivating projects')
           }
-          return callback(err, projects)
+          callback(err, projects)
         })
       })
   },
