@@ -6,6 +6,9 @@
   "author": "ShareLaTeX",
   "license": "ISC",
   "scripts": {
+    "lint": "eslint --max-warnings 0 .",
+    "format": "prettier-eslint $PWD'/**/*.js' --list-different",
+    "format:fix": "prettier-eslint $PWD'/**/*.js' --write",
     "test": "mocha --require coffee-script/register test/unit/src/*.coffee"
   },
   "dependencies": {
@@ -15,7 +18,20 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-chai-expect": "^2.1.0",
+    "eslint-plugin-chai-friendly": "^0.5.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-mocha": "^6.3.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.3",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "mocha": "^8.2.1",
+    "prettier": "^2.0.2",
+    "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.2.1"
   }
