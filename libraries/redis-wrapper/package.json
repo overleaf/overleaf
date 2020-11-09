@@ -6,7 +6,7 @@
   "author": "ShareLaTeX",
   "license": "ISC",
   "scripts": {
-    "test": "mocha --require coffee-script/register test.coffee"
+    "test": "mocha --require coffee-script/register test/unit/src/*.coffee"
   },
   "dependencies": {
     "coffee-script": "1.8.0",

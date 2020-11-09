@@ -1,7 +1,7 @@
 # execute this script with a redis container running to test the health check
 # starting and stopping redis with this script running is a good test
 
-redis = require "./index.coffee"
+redis = require "../../index.coffee"
 
 rclient = redis.createClient({host:"localhost",port:"6379"})
 setInterval () ->
