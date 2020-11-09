@@ -112,12 +112,19 @@ App.controller('EmailNotificationController', function(
 
   $scope.resendConfirmationEmail = function(userEmail) {
     userEmail.confirmationInflight = true
-    return UserAffiliationsDataService.resendConfirmationEmail(
-      userEmail.email
-    ).then(function() {
-      userEmail.hide = true
-      userEmail.confirmationInflight = false
-      $scope.$emit('project-list:notifications-received')
-    })
+    userEmail.error = false
+    UserAffiliationsDataService.resendConfirmationEmail(userEmail.email)
+      .then(() => {
+        userEmail.hide = true
+        $scope.$emit('project-list:notifications-received')
+      })
+      .catch(error => {
+        userEmail.error = true
+        console.error(error)
+        $scope.$emit('project-list:notifications-received')
+      })
+      .finally(() => {
+        userEmail.confirmationInflight = false
+      })
   }
 })

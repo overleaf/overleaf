@@ -174,19 +174,22 @@ include ../../_mixins/saml
 			ng-repeat="userEmail in userEmails",
 			ng-if="showConfirmEmail(userEmail) && projects.length > 0"
 		)
-			.alert.alert-warning(ng-if="!userEmail.confirmationInflight")
+			.alert.alert-warning
 				.notification-body
-					| #{translate("please_confirm_email", {emailAddress: "{{ userEmail.email }}"})}
-					|
-					a(
-						href
-						ng-click="resendConfirmationEmail(userEmail)"
-					) (#{translate('resend_confirmation_email')})
-			.alert.alert-warning(ng-if="userEmail.confirmationInflight")
-				.notification-body
-					i.fa.fa-spinner.fa-spin(aria-hidden="true")
-					|
-					| #{translate('resending_confirmation_email')}&hellip;
+					div(ng-if="!userEmail.confirmationInflight")
+						| #{translate("please_confirm_email", {emailAddress: "{{ userEmail.email }}"})}
+						|
+						a(
+							href
+							ng-click="resendConfirmationEmail(userEmail)"
+						) (#{translate('resend_confirmation_email')})
+					div(ng-if="userEmail.confirmationInflight")
+						i.fa.fa-spinner.fa-spin(aria-hidden="true")
+						|
+						| #{translate('resending_confirmation_email')}&hellip;
+					div(ng-if="!userEmail.confirmationInflight && userEmail.error" aria-live="polite")
+						| #{translate('generic_something_went_wrong')}
+
 	- var hasPaidAffiliation = userAffiliations.some(affiliation => affiliation.licence && affiliation.licence !== 'free')
 	if settings.enableSubscriptions && !hasSubscription && !hasPaidAffiliation
 		ul.list-unstyled(
