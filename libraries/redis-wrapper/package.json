@@ -9,7 +9,7 @@
     "lint": "eslint --max-warnings 0 .",
     "format": "prettier-eslint $PWD'/**/*.js' --list-different",
     "format:fix": "prettier-eslint $PWD'/**/*.js' --write",
-    "test": "mocha --require coffee-script/register test/unit/src/*.coffee"
+    "test": "mocha --recursive test/unit/src/"
   },
   "dependencies": {
     "coffee-script": "1.8.0",
