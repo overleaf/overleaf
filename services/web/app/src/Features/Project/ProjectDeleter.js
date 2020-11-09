@@ -240,6 +240,18 @@ async function deleteProject(projectId, options = {}) {
       projectId
     )
 
+    try {
+      // OPTIMIZATION: flush docs out of mongo
+      await DocstoreManager.promises.archiveProject(projectId)
+    } catch (err) {
+      // It is OK to fail here, the docs will get hard-deleted eventually after
+      //  the grace-period for soft-deleted projects has passed.
+      logger.warn(
+        { projectId, err },
+        'failed archiving doc via docstore as part of project soft-deletion'
+      )
+    }
+
     const memberIds = await CollaboratorsGetter.promises.getMemberIds(projectId)
 
     // fire these jobs in the background

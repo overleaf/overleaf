@@ -112,6 +112,7 @@ describe('ProjectDeleter', function() {
 
     this.DocstoreManager = {
       promises: {
+        archiveProject: sinon.stub().resolves(),
         destroyProject: sinon.stub().resolves()
       }
     }
@@ -318,6 +319,32 @@ describe('ProjectDeleter', function() {
       this.DocumentUpdaterHandler.promises.flushProjectToMongoAndDelete
         .calledWith(this.project._id)
         .should.equal(true)
+    })
+
+    it('should flush docs out of mongo', async function() {
+      this.ProjectMock.expects('deleteOne')
+        .chain('exec')
+        .resolves()
+      this.DeletedProjectMock.expects('updateOne').resolves()
+      await this.ProjectDeleter.promises.deleteProject(this.project._id, {
+        deleterUser: this.user,
+        ipAddress: this.ip
+      })
+      expect(
+        this.DocstoreManager.promises.archiveProject
+      ).to.have.been.calledWith(this.project._id)
+    })
+
+    it('should flush docs out of mongo and ignore errors', async function() {
+      this.ProjectMock.expects('deleteOne')
+        .chain('exec')
+        .resolves()
+      this.DeletedProjectMock.expects('updateOne').resolves()
+      this.DocstoreManager.promises.archiveProject.rejects(new Error('foo'))
+      await this.ProjectDeleter.promises.deleteProject(this.project._id, {
+        deleterUser: this.user,
+        ipAddress: this.ip
+      })
     })
 
     it('should removeProjectFromAllTags', async function() {
