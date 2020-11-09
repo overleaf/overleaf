@@ -5,18 +5,18 @@
   "main": "index.js",
   "author": "ShareLaTeX",
   "license": "ISC",
+  "scripts": {
+    "test": "mocha --require coffee-script/register test.coffee"
+  },
   "dependencies": {
     "coffee-script": "1.8.0",
     "ioredis": "~4.17.3",
     "underscore": "1.7.0"
   },
   "devDependencies": {
-    "chai": "1.9.1",
-    "grunt": "0.4.5",
-    "grunt-contrib-coffee": "0.11.1",
-    "grunt-mocha-test": "0.12.0",
-    "mocha": "1.21.4",
-    "sandboxed-module": "1.0.1",
-    "sinon": "1.10.3"
+    "chai": "^4.2.0",
+    "mocha": "^8.2.1",
+    "sandboxed-module": "^2.0.4",
+    "sinon": "^9.2.1"
   }
 }
