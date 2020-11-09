@@ -8,7 +8,7 @@
 					.alert.alert-success(ng-show="updateAccountEmailAddress.response.success")
 						| #{translate('recurly_email_updated')}
 				div(ng-hide="updateAccountEmailAddress.response.success")
-					p !{translate("recurly_email_update_needed", { recurlyEmail: personalSubscription.recurly.account.email, userEmail: user.email }, ['em', 'em'])}
+					p(ng-non-bindable) !{translate("recurly_email_update_needed", { recurlyEmail: personalSubscription.recurly.account.email, userEmail: user.email }, ['em', 'em'])}
 					.actions
 						button.btn-primary.btn(
 							type='submit',
