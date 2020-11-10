@@ -11,7 +11,7 @@
  */
 let LockManager
 const Settings = require('settings-sharelatex')
-const redis = require('redis-sharelatex')
+const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(Settings.redis.lock)
 const os = require('os')
 const crypto = require('crypto')

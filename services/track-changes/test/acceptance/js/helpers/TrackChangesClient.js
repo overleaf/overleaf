@@ -17,7 +17,9 @@ const async = require('async')
 const zlib = require('zlib')
 const request = require('request')
 const Settings = require('settings-sharelatex')
-const rclient = require('redis-sharelatex').createClient(Settings.redis.history) // Only works locally for now
+const rclient = require('@overleaf/redis-wrapper').createClient(
+  Settings.redis.history
+) // Only works locally for now
 const Keys = Settings.redis.history.key_schema
 const { db, ObjectId } = require('../../../../app/js/mongodb')
 

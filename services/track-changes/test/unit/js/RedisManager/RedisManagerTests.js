@@ -22,7 +22,7 @@ describe('RedisManager', function () {
   beforeEach(function () {
     this.RedisManager = SandboxedModule.require(modulePath, {
       requires: {
-        'redis-sharelatex': {
+        '@overleaf/redis-wrapper': {
           createClient: () => {
             return (this.rclient = {
               auth: sinon.stub(),
