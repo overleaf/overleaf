@@ -14,7 +14,7 @@
 let LockManager
 const metrics = require('./Metrics')
 const Settings = require('settings-sharelatex')
-const redis = require('redis-sharelatex')
+const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(Settings.redis.lock)
 const keys = Settings.redis.lock.key_schema
 const logger = require('logger-sharelatex')

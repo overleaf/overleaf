@@ -27,7 +27,7 @@ describe('HistoryRedisManager', function () {
     this.rclient.multi = () => this.rclient
     this.HistoryRedisManager = SandboxedModule.require(modulePath, {
       requires: {
-        'redis-sharelatex': { createClient: () => this.rclient },
+        '@overleaf/redis-wrapper': { createClient: () => this.rclient },
         'settings-sharelatex': {
           redis: {
             history: (this.settings = {

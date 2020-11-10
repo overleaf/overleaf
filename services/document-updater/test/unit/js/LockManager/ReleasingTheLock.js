@@ -31,7 +31,7 @@ describe('LockManager - releasing the lock', function () {
         log() {},
         error() {}
       },
-      'redis-sharelatex': {
+      '@overleaf/redis-wrapper': {
         createClient: () => this.client
       },
       'settings-sharelatex': {

@@ -44,7 +44,7 @@ describe('ProjectHistoryRedisManager', function () {
               }
             }
           }),
-          'redis-sharelatex': {
+          '@overleaf/redis-wrapper': {
             createClient: () => this.rclient
           },
           'logger-sharelatex': {

@@ -26,7 +26,7 @@ describe('LockManager - checking the lock', function () {
 
   const mocks = {
     'logger-sharelatex': { log() {} },
-    'redis-sharelatex': {
+    '@overleaf/redis-wrapper': {
       createClient() {
         return {
           auth() {},

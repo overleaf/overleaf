@@ -18,6 +18,8 @@
     "format:fix": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --write"
   },
   "dependencies": {
+    "@overleaf/o-error": "^3.1.0",
+    "@overleaf/redis-wrapper": "^2.0.0",
     "async": "^2.5.0",
     "body-parser": "^1.19.0",
     "bunyan": "~0.22.1",
@@ -26,7 +28,6 @@
     "logger-sharelatex": "^1.9.1",
     "metrics-sharelatex": "^2.6.2",
     "mongodb": "^3.6.0",
-    "redis-sharelatex": "^1.0.13",
     "request": "^2.88.2",
     "requestretry": "^4.1.0",
     "settings-sharelatex": "^1.1.0"

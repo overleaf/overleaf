@@ -1,13 +1,13 @@
 let DocUpdaterClient
 const Settings = require('settings-sharelatex')
-const rclient = require('redis-sharelatex').createClient(
+const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
 const keys = Settings.redis.documentupdater.key_schema
 const request = require('request').defaults({ jar: false })
 const async = require('async')
 
-const rclientSub = require('redis-sharelatex').createClient(
+const rclientSub = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.pubsub
 )
 rclientSub.subscribe('applied-ops')

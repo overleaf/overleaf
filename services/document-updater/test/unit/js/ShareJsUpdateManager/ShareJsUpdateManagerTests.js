@@ -30,7 +30,7 @@ describe('ShareJsUpdateManager', function () {
           }
         }),
         './ShareJsDB': (this.ShareJsDB = { mockDB: true }),
-        'redis-sharelatex': {
+        '@overleaf/redis-wrapper': {
           createClient: () => {
             return (this.rclient = { auth() {} })
           }

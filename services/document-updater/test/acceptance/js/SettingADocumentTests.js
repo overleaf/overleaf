@@ -3,7 +3,7 @@ const chai = require('chai')
 chai.should()
 const { expect } = require('chai')
 const Settings = require('settings-sharelatex')
-const docUpdaterRedis = require('redis-sharelatex').createClient(
+const docUpdaterRedis = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
 const Keys = Settings.redis.documentupdater.key_schema

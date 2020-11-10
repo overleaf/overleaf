@@ -35,7 +35,7 @@ describe('DispatchManager', function () {
             documentupdater: {}
           }
         }),
-        'redis-sharelatex': (this.redis = {}),
+        '@overleaf/redis-wrapper': (this.redis = {}),
         './RateLimitManager': {},
         './Errors': Errors,
         './Metrics': (this.Metrics = {
