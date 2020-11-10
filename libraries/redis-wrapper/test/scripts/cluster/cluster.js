@@ -7,6 +7,7 @@
 */
 
 const redis = require('../../../')
+const logger = require('logger-sharelatex')
 
 const rclient = redis.createClient({
   cluster: Array.from({ length: 9 }).map((value, index) => {
@@ -17,9 +18,9 @@ const rclient = redis.createClient({
 setInterval(() => {
   rclient.healthCheck((err) => {
     if (err) {
-      console.log('HEALTH CHECK FAILED', err)
+      logger.error({ err }, 'HEALTH CHECK FAILED')
     } else {
-      console.log('HEALTH CHECK OK')
+      logger.log('HEALTH CHECK OK')
     }
   })
 }, 1000)
