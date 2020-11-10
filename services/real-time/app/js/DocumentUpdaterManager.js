@@ -14,7 +14,7 @@ const {
   UpdateTooLargeError
 } = require('./Errors')
 
-const rclient = require('redis-sharelatex').createClient(
+const rclient = require('@overleaf/redis-wrapper').createClient(
   settings.redis.documentupdater
 )
 const Keys = settings.redis.documentupdater.key_schema

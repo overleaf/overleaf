@@ -47,7 +47,7 @@ describe('DocumentUpdaterManager', function () {
           warn: sinon.stub()
         }),
         request: (this.request = {}),
-        'redis-sharelatex': { createClient: () => this.rclient },
+        '@overleaf/redis-wrapper': { createClient: () => this.rclient },
         'metrics-sharelatex': (this.Metrics = {
           summary: sinon.stub(),
           Timer: (Timer = class Timer {
