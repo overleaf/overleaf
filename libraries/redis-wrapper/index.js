@@ -1,14 +1,16 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__, or convert again using --optional-chaining
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const _ = require('underscore')
-const os = require('os')
 const crypto = require('crypto')
+const os = require('os')
+const { promisify } = require('util')
+
+const Redis = require('ioredis')
+
+const {
+  RedisHealthCheckTimedOut,
+  RedisHealthCheckWriteError,
+  RedisHealthCheckVerifyError,
+} = require('./Errors')
+
+const HEARTBEAT_TIMEOUT = 2000
 
 // generate unique values for health check
 const HOST = os.hostname()
@@ -17,130 +19,147 @@ const RND = crypto.randomBytes(4).toString('hex')
 let COUNT = 0
 
 function createClient(opts) {
-  let client, standardOpts
-  if (opts == null) {
-    opts = { port: 6379, host: 'localhost' }
-  }
-  if (opts.retry_max_delay == null) {
-    opts.retry_max_delay = 5000 // ms
+  const standardOpts = Object.assign({}, opts)
+  delete standardOpts.key_schema
+
+  if (standardOpts.retry_max_delay == null) {
+    standardOpts.retry_max_delay = 5000 // ms
   }
 
-  if (opts.cluster != null) {
-    const Redis = require('ioredis')
-    standardOpts = _.clone(opts)
+  let client
+  if (opts.cluster) {
     delete standardOpts.cluster
-    delete standardOpts.key_schema
     client = new Redis.Cluster(opts.cluster, standardOpts)
-    client.healthCheck = clusterHealthCheckBuilder(client)
-    _monkeyPatchIoredisExec(client)
   } else {
-    standardOpts = _.clone(opts)
-    const ioredis = require('ioredis')
-    client = new ioredis(standardOpts)
-    _monkeyPatchIoredisExec(client)
-    client.healthCheck = singleInstanceHealthCheckBuilder(client)
+    client = new Redis(standardOpts)
+  }
+  monkeyPatchIoRedisExec(client)
+  client.healthCheck = (callback) => {
+    if (callback) {
+      // callback based invocation
+      healthCheck(client).then(callback).catch(callback)
+    } else {
+      // Promise based invocation
+      return healthCheck(client)
+    }
   }
   return client
 }
 
-const HEARTBEAT_TIMEOUT = 2000
-function singleInstanceHealthCheckBuilder(client) {
-  const healthCheck = (callback) => _checkClient(client, callback)
-  return healthCheck
-}
-
-function clusterHealthCheckBuilder(client) {
-  return singleInstanceHealthCheckBuilder(client)
-}
-
-function _checkClient(client, callback) {
-  callback = _.once(callback)
+async function healthCheck(client) {
   // check the redis connection by storing and retrieving a unique key/value pair
   const uniqueToken = `host=${HOST}:pid=${PID}:random=${RND}:time=${Date.now()}:count=${COUNT++}`
-  const timer = setTimeout(function () {
-    const error = new Error(
-      `redis client health check timed out ${__guard__(
-        client != null ? client.options : undefined,
-        (x) => x.host
-      )}`
-    )
-    console.error(
-      {
-        err: error,
-        key: client.options != null ? client.options.key : undefined, // only present for cluster
-        clientOptions: client.options,
-        uniqueToken,
-      },
-      'client timed out'
-    )
-    return callback(error)
-  }, HEARTBEAT_TIMEOUT)
+
+  // o-error context
+  const context = {
+    uniqueToken,
+    stage: 'add context for a timeout',
+  }
+
+  await runWithTimeout({
+    runner: runCheck(client, uniqueToken, context),
+    timeout: HEARTBEAT_TIMEOUT,
+    context,
+  })
+}
+
+async function runCheck(client, uniqueToken, context) {
   const healthCheckKey = `_redis-wrapper:healthCheckKey:{${uniqueToken}}`
   const healthCheckValue = `_redis-wrapper:healthCheckValue:{${uniqueToken}}`
+
   // set the unique key/value pair
-  let multi = client.multi()
-  multi.set(healthCheckKey, healthCheckValue, 'EX', 60)
-  return multi.exec(function (err, reply) {
-    if (err != null) {
-      clearTimeout(timer)
-      return callback(err)
-    }
-    // check that we can retrieve the unique key/value pair
-    multi = client.multi()
-    multi.get(healthCheckKey)
-    multi.del(healthCheckKey)
-    return multi.exec(function (err, reply) {
-      clearTimeout(timer)
-      if (err != null) {
-        return callback(err)
-      }
-      if (
-        (reply != null ? reply[0] : undefined) !== healthCheckValue ||
-        (reply != null ? reply[1] : undefined) !== 1
-      ) {
-        return callback(new Error('bad response from redis health check'))
-      }
-      return callback()
+  context.stage = 'write'
+  const writeAck = await client
+    .set(healthCheckKey, healthCheckValue, 'EX', 60)
+    .catch((err) => {
+      throw new RedisHealthCheckWriteError('write errored', context, err)
     })
-  })
+  if (writeAck !== 'OK') {
+    context.writeAck = writeAck
+    throw new RedisHealthCheckWriteError('write failed', context)
+  }
+
+  // check that we can retrieve the unique key/value pair
+  context.stage = 'verify'
+  const [roundTrippedHealthCheckValue, deleteAck] = await client
+    .multi()
+    .get(healthCheckKey)
+    .del(healthCheckKey)
+    .exec()
+    .catch((err) => {
+      throw new RedisHealthCheckVerifyError(
+        'read/delete errored',
+        context,
+        err
+      )
+    })
+  if (roundTrippedHealthCheckValue !== healthCheckValue) {
+    context.roundTrippedHealthCheckValue = roundTrippedHealthCheckValue
+    throw new RedisHealthCheckVerifyError('read failed', context)
+  }
+  if (deleteAck !== 1) {
+    context.deleteAck = deleteAck
+    throw new RedisHealthCheckVerifyError('delete failed', context)
+  }
 }
 
-function _monkeyPatchIoredisExec(client) {
+function unwrapMultiResult(result, callback) {
+  // ioredis exec returns a results like:
+  // [ [null, 42], [null, "foo"] ]
+  // where the first entries in each 2-tuple are
+  // presumably errors for each individual command,
+  // and the second entry is the result. We need to transform
+  // this into the same result as the old redis driver:
+  // [ 42, "foo" ]
+  //
+  // Basically reverse:
+  // https://github.com/luin/ioredis/blob/v4.17.3/lib/utils/index.ts#L75-L92
+  const filteredResult = []
+  for (const [err, value] of result || []) {
+    if (err) {
+      return callback(err)
+    } else {
+      filteredResult.push(value)
+    }
+  }
+  callback(null, filteredResult)
+}
+const unwrapMultiResultPromisified = promisify(unwrapMultiResult)
+
+function monkeyPatchIoRedisExec(client) {
   const _multi = client.multi
-  return (client.multi = function (...args) {
-    const multi = _multi.call(client, ...Array.from(args))
+  client.multi = function () {
+    const multi = _multi.apply(client, arguments)
     const _exec = multi.exec
-    multi.exec = function (callback) {
-      if (callback == null) {
-        callback = function () {}
+    multi.exec = (callback) => {
+      if (callback) {
+        // callback based invocation
+        _exec.call(multi, (error, result) => {
+          // The command can fail all-together due to syntax errors
+          if (error) return callback(error)
+          unwrapMultiResult(result, callback)
+        })
+      } else {
+        // Promise based invocation
+        return _exec.call(multi).then(unwrapMultiResultPromisified)
       }
-      return _exec.call(multi, function (error, result) {
-        // ioredis exec returns an results like:
-        // [ [null, 42], [null, "foo"] ]
-        // where the first entries in each 2-tuple are
-        // presumably errors for each individual command,
-        // and the second entry is the result. We need to transform
-        // this into the same result as the old redis driver:
-        // [ 42, "foo" ]
-        const filtered_result = []
-        for (const entry of Array.from(result || [])) {
-          if (entry[0] != null) {
-            return callback(entry[0])
-          } else {
-            filtered_result.push(entry[1])
-          }
-        }
-        return callback(error, filtered_result)
-      })
     }
     return multi
-  })
+  }
 }
 
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
+async function runWithTimeout({ runner, timeout, context }) {
+  let healthCheckDeadline
+  await Promise.race([
+    new Promise((resolve, reject) => {
+      healthCheckDeadline = setTimeout(() => {
+        // attach the timeout when hitting the timeout only
+        context.timeout = timeout
+        reject(new RedisHealthCheckTimedOut('timeout', context))
+      }, timeout)
+    }),
+    runner.finally(() => clearTimeout(healthCheckDeadline)),
+  ])
 }
 
 module.exports = {

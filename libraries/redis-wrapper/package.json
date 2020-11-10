@@ -11,12 +11,14 @@
     "format:fix": "prettier-eslint $PWD'/**/*.js' --write",
     "test": "mocha --recursive test/unit/src/"
   },
+  "peerDependencies": {
+    "@overleaf/o-error": "^3.1.0"
+  },
   "dependencies": {
-    "coffee-script": "1.8.0",
-    "ioredis": "~4.17.3",
-    "underscore": "1.7.0"
+    "ioredis": "~4.17.3"
   },
   "devDependencies": {
+    "@overleaf/o-error": "^3.1.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
