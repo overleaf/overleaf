@@ -260,7 +260,7 @@ module.exports = {
         to: 'js/libs/sigma-master'
       },
       {
-        from: 'node_modules/ace-builds/src-noconflict',
+        from: 'node_modules/ace-builds/src-min-noconflict',
         to: `js/ace-${PackageVersions.version.ace}/`
       },
       // Copy CMap files from pdfjs-dist package to build output. These are used
