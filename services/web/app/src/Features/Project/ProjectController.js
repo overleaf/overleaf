@@ -23,7 +23,6 @@ const ProjectUpdateHandler = require('./ProjectUpdateHandler')
 const ProjectGetter = require('./ProjectGetter')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const AuthenticationController = require('../Authentication/AuthenticationController')
-const PackageVersions = require('../../infrastructure/PackageVersions')
 const Sources = require('../Authorization/Sources')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
@@ -1043,11 +1042,7 @@ var defaultSettingsForAnonymousUser = userId => ({
 var THEME_LIST = []
 function generateThemeList() {
   const files = fs.readdirSync(
-    Path.join(
-      __dirname,
-      '/../../../../frontend/js/vendor/',
-      PackageVersions.lib('ace')
-    )
+    Path.join(__dirname, '/../../../../node_modules/ace-builds/src-noconflict')
   )
   const result = []
   for (let file of files) {

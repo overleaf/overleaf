@@ -201,10 +201,7 @@ module.exports = {
       // Shortcut to vendored dependencies in frontend/js/vendor/libs
       libs: path.join(__dirname, 'frontend/js/vendor/libs'),
       // Enables ace/ace shortcut
-      ace: path.join(
-        __dirname,
-        `frontend/js/vendor/${PackageVersions.lib('ace')}`
-      ),
+      ace: 'ace-builds/src-noconflict',
       // fineupload vendored dependency (which we're aliasing to fineuploadER
       // for some reason)
       fineuploader: path.join(
@@ -263,7 +260,7 @@ module.exports = {
         to: 'js/libs/sigma-master'
       },
       {
-        from: `frontend/js/vendor/ace-${PackageVersions.version.ace}/`,
+        from: 'node_modules/ace-builds/src-noconflict',
         to: `js/ace-${PackageVersions.version.ace}/`
       },
       // Copy CMap files from pdfjs-dist package to build output. These are used
