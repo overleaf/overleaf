@@ -78,6 +78,10 @@ describe('index', function () {
       })
     })
 
+    it('should work without opts', function () {
+      this.redis.createClient()
+    })
+
     it('should use the ioredis driver in single-instance mode if a non array is passed', function () {
       const client = this.redis.createClient(this.standardOpts)
       return assert.equal(client.constructor, this.ioredis)

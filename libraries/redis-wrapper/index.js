@@ -33,7 +33,7 @@ function createClient(opts) {
   }
 
   let client
-  if (opts.cluster) {
+  if (standardOpts.cluster) {
     delete standardOpts.cluster
     client = new Redis.Cluster(opts.cluster, standardOpts)
   } else {
