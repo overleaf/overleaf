@@ -55,6 +55,20 @@ describe('index', function () {
     return (this.auth_pass = '1234 pass')
   })
 
+  describe('redis-sentinel', function () {
+    it('should throw an error when creating a client', function () {
+      const redisSentinelOptions = {
+        endpoints: ['127.0.0.1:1234', '127.0.0.1:2345', '127.0.0.1:3456'],
+      }
+      const createNewClient = () => {
+        this.redis.createClient(redisSentinelOptions)
+      }
+      expect(createNewClient).to.throw(
+        '@overleaf/redis-wrapper: redis-sentinel is no longer supported'
+      )
+    })
+  })
+
   describe('single node redis', function () {
     beforeEach(function () {
       return (this.standardOpts = {

@@ -26,6 +26,12 @@ function createClient(opts) {
     standardOpts.retry_max_delay = 5000 // ms
   }
 
+  if (standardOpts.endpoints) {
+    throw new Error(
+      '@overleaf/redis-wrapper: redis-sentinel is no longer supported'
+    )
+  }
+
   let client
   if (opts.cluster) {
     delete standardOpts.cluster
