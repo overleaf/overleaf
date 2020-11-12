@@ -74,6 +74,7 @@ function PreviewDownloadButton({
       <Dropdown.Toggle
         className="btn btn-xs btn-info dropdown-toggle"
         aria-label={t('toggle_output_files_list')}
+        bsStyle="info"
       />
       <Dropdown.Menu id="download-dropdown-list">
         <FileList list={topFiles} listType="main" />

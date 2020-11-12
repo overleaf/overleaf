@@ -97,6 +97,7 @@ function PreviewRecompileButton({
       <Dropdown.Toggle
         aria-label={t('toggle_compile_options_menu')}
         className="btn btn-recompile"
+        bsStyle="success"
       />
       <Dropdown.Menu>
         <MenuItem header>{t('auto_compile')}</MenuItem>
