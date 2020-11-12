@@ -56,7 +56,7 @@ const FixturesManager = require('./helpers/FixturesManager')
 
 const settings = require('settings-sharelatex')
 const Keys = settings.redis.documentupdater.key_schema
-const redis = require('redis-sharelatex')
+const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.pubsub)
 
 function getPendingUpdates(doc_id, cb) {

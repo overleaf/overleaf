@@ -18,7 +18,7 @@ const async = require('async')
 
 const request = require('request')
 const Settings = require('settings-sharelatex')
-const redis = require('redis-sharelatex')
+const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(Settings.redis.websessions)
 
 const uid = require('uid-safe').sync

@@ -46,7 +46,7 @@ describe('DocumentUpdaterController', function () {
             pubsub: null
           }
         }),
-        'redis-sharelatex': (this.redis = {
+        '@overleaf/redis-wrapper': (this.redis = {
           createClient: (name) => {
             let rclientStub
             this.rclient.push((rclientStub = { name }))

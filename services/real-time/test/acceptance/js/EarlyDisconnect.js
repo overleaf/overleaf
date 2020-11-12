@@ -19,7 +19,7 @@ const MockWebServer = require('./helpers/MockWebServer')
 const FixturesManager = require('./helpers/FixturesManager')
 
 const settings = require('settings-sharelatex')
-const redis = require('redis-sharelatex')
+const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.pubsub)
 const rclientRT = redis.createClient(settings.redis.realtime)
 const KeysRT = settings.redis.realtime.key_schema

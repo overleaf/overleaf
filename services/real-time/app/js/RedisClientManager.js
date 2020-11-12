@@ -1,4 +1,4 @@
-const redis = require('redis-sharelatex')
+const redis = require('@overleaf/redis-wrapper')
 const logger = require('logger-sharelatex')
 
 module.exports = {

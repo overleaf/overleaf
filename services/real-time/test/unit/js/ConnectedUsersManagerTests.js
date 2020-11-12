@@ -59,7 +59,7 @@ describe('ConnectedUsersManager', function () {
       requires: {
         'settings-sharelatex': this.settings,
         'logger-sharelatex': { log() {} },
-        'redis-sharelatex': {
+        '@overleaf/redis-wrapper': {
           createClient: () => {
             return this.rClient
           }
