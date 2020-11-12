@@ -1477,7 +1477,7 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
     var editorDoc = editor.getSession().getDocument();
     editorDoc.setNewLineMode('unix');
 
-    var check = function check() {
+    function check() {
       return window.setTimeout(function () {
         var editorText = editorDoc.getValue();
         var otText = doc.getText();
@@ -1493,22 +1493,15 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
       , 0);
     };
 
-    if (keepEditorContents) {
-      doc.del(0, doc.getText().length);
-      doc.insert(0, editorDoc.getValue());
-    } else {
-      editorDoc.setValue(doc.getText());
-    }
+    onDelete(0, editorDoc.getValue());
+    onInsert(0, doc.getText());
 
     check();
 
-    // When we apply ops from sharejs, ace emits edit events. We need to ignore those
-    // to prevent an infinite typing loop.
-    var suppress = false;
-
     // Listen for edits in ace
-    var editorListener = function editorListener(change) {
-      if (suppress) {
+    function editorListener(change) {
+      if (change.origin === 'remote') {
+        // this change has been injected via sharejs
         return;
       }
 
@@ -1527,7 +1520,7 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
     editorDoc.on('change', editorListener);
 
     // Horribly inefficient.
-    var offsetToPos = function offsetToPos(offset) {
+    function offsetToPos(offset) {
       // Again, very inefficient.
       var lines = editorDoc.getAllLines();
 
@@ -1545,12 +1538,13 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
       return { row: row, column: offset };
     };
 
-    // We want to insert a remote:true into the delta if the op comes from the
-    // underlying sharejs doc (which means it is from a remote op), so we have to do
-    // the work of editorDoc.insert and editorDoc.remove manually. These methods are
-    // copied from ace.js doc#insert and #remove, and then inject the remote:true
-    // flag into the delta.
-    var onInsert = function onInsert(pos, text) {
+    // We want to insert the flag `origin: 'remote'` into the delta if the op
+    //  is the initial document write or comes from the underlying sharejs doc
+    //  (which means it is from a remote op), so we have to do the work of
+    //  editorDoc.insert and editorDoc.remove manually.
+    // These methods are copied from ace.js doc#insert and #remove, and then
+    //  inject the `origin: 'remote'` flag into the delta.
+    function onInsert(pos, text) {
       if (editorDoc.getLength() <= 1) {
         editorDoc.$detectNewLine(text);
       }
@@ -1563,31 +1557,27 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
         column: (lines.length === 1 ? start.column : 0) + lines[lines.length - 1].length
       };
 
-      suppress = true;
       editorDoc.applyDelta({
         start: start,
         end: end,
         action: 'insert',
         lines: lines,
-        remote: true
+        origin: 'remote'
       });
-      suppress = false;
       return check();
     };
 
-    var onDelete = function onDelete(pos, text) {
+    function onDelete(pos, text) {
       var range = Range.fromPoints(offsetToPos(pos), offsetToPos(pos + text.length));
       var start = editorDoc.clippedPos(range.start.row, range.start.column);
       var end = editorDoc.clippedPos(range.end.row, range.end.column);
-      suppress = true;
       editorDoc.applyDelta({
         start: start,
         end: end,
         action: 'remove',
         lines: editorDoc.getLinesForRange({ start: start, end: end }),
-        remote: true
+        origin: 'remote'
       });
-      suppress = false;
       return check();
     };
 
@@ -1632,6 +1622,11 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
   // Attach a CodeMirror editor to the document. The editor's contents are replaced
   // with the document's contents unless keepEditorContents is true. (In which case
   // the document's contents are nuked and replaced with the editor's).
+  // NOTE: When upgrading CM, make sure to check for new special cases of
+  //        origin prefixes as documented for `doc.setSelection`. We are using
+  //        a custom `origin: 'remote'` which may conflict.
+  //       Perma link of the docs at the time of writing this note:
+  // https://web.archive.org/web/20201029163528/https://codemirror.net/doc/manual.html#selection_origin
   window.sharejs.extendDoc('attach_cm', function (editor, keepEditorContents) {
     if (!this.provides.text) {
       throw new Error('Only text documents can be attached to CodeMirror2');
@@ -1640,7 +1635,7 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
     var sharedoc = this;
     var editorDoc = editor.getDoc();
 
-    var check = function check() {
+    function check() {
       return window.setTimeout(function () {
         var editorText = editor.getValue();
         var otText = sharedoc.getText();
@@ -1658,22 +1653,15 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
       , 0);
     };
 
-    if (keepEditorContents) {
-      this.del(0, sharedoc.getText().length);
-      this.insert(0, editor.getValue());
-    } else {
-      editor.setValue(sharedoc.getText());
-    }
+    onDelete(0, editor.getValue());
+    onInsert(0, sharedoc.getText());
 
     check();
 
-    // When we apply ops from sharejs, CodeMirror emits edit events.
-    // We need to ignore those to prevent an infinite typing loop.
-    var suppress = false;
-
     // Listen for edits in CodeMirror.
-    var editorListener = function editorListener(ed, change) {
-      if (suppress) {
+    function editorListener(ed, change) {
+      if (change.origin === 'remote') {
+        // this change has been injected via sharejs
         return;
       }
       var fromUndo = (change.origin === 'undo')
@@ -1683,26 +1671,23 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
 
     editorDoc.on('change', editorListener);
 
-    var onInsert = function onInsert(pos, text) {
-      suppress = true;
+    function onInsert(pos, text) {
       // All the primitives we need are already in CM's API.
-      editor.replaceRange(text, editor.posFromIndex(pos));
+      // call signature: editor.replaceRange(text, from, to, origin)
+      editor.replaceRange(text, editor.posFromIndex(pos), undefined, 'remote');
       // Clear CM's undo/redo history on remote edit. This prevents issues where
       // a user can accidentally remove another user's edits
       editor.clearHistory();
-      suppress = false;
       return check();
     };
 
-    var onDelete = function onDelete(pos, text) {
-      suppress = true;
+    function onDelete(pos, text) {
       var from = editor.posFromIndex(pos);
       var to = editor.posFromIndex(pos + text.length);
-      editor.replaceRange('', from, to);
+      editor.replaceRange('', from, to, 'remote');
       // Clear CM's undo/redo history on remote edit. This prevents issues where
       // a user can accidentally remove another user's edits
       editor.clearHistory()
-      suppress = false;
       return check();
     };
 

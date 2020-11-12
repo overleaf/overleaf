@@ -34,7 +34,7 @@ export default (MetadataManager = class MetadataManager {
     this.debouncer = {} // DocId => Timeout
 
     const onChange = change => {
-      if (change.remote) {
+      if (change.origin === 'remote') {
         return
       }
       if (!['remove', 'insert'].includes(change.action)) {

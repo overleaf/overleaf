@@ -14,7 +14,7 @@ class UndoManager {
   }
 
   onChange(change) {
-    if (!change.remote) return
+    if (change.origin !== 'remote') return
 
     // HACK: remote changes in Ace are added by the ShareJS/Ace adapter
     // asynchronously via a timeout (see attach_ace function). This makes it
