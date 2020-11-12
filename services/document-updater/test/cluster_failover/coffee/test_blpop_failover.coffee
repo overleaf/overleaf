@@ -1,4 +1,4 @@
-redis = require "redis-sharelatex"
+redis = require "@overleaf/redis-wrapper"
 rclient1 = redis.createClient(cluster: [{
 	port: "7000"
 	host: "localhost"
@@ -36,6 +36,6 @@ do sendPings = () ->
 		setTimeout sendPings, PING_DELAY
 
 do listenInBackground = (cb = () ->) ->
-	listenForPing (error, value) -> 
+	listenForPing (error, value) ->
 		console.error "[RECEIVING ERROR]", error.message if error
 		setTimeout listenInBackground

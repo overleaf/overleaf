@@ -104,7 +104,7 @@ describe('RedisManager', function () {
             }
           }
         }),
-        'redis-sharelatex': {
+        '@overleaf/redis-wrapper': {
           createClient: () => this.rclient
         },
         './Metrics': (this.metrics = {

@@ -27,7 +27,7 @@ describe('RealTimeRedisManager', function () {
     this.pubsubClient = { publish: sinon.stub() }
     this.RealTimeRedisManager = SandboxedModule.require(modulePath, {
       requires: {
-        'redis-sharelatex': {
+        '@overleaf/redis-wrapper': {
           createClient: (config) =>
             config.name === 'pubsub' ? this.pubsubClient : this.rclient
         },

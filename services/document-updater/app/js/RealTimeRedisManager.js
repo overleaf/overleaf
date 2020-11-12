@@ -13,10 +13,10 @@
  */
 let RealTimeRedisManager
 const Settings = require('settings-sharelatex')
-const rclient = require('redis-sharelatex').createClient(
+const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
-const pubsubClient = require('redis-sharelatex').createClient(
+const pubsubClient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.pubsub
 )
 const Keys = Settings.redis.documentupdater.key_schema

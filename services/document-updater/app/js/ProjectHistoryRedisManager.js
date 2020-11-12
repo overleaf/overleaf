@@ -19,7 +19,7 @@ const projectHistoryKeys = __guard__(
   Settings.redis != null ? Settings.redis.project_history : undefined,
   (x) => x.key_schema
 )
-const rclient = require('redis-sharelatex').createClient(
+const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.project_history
 )
 const logger = require('logger-sharelatex')

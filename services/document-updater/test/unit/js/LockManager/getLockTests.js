@@ -26,7 +26,7 @@ describe('LockManager - getting the lock', function () {
     this.LockManager = SandboxedModule.require(modulePath, {
       requires: {
         'logger-sharelatex': { log() {} },
-        'redis-sharelatex': {
+        '@overleaf/redis-wrapper': {
           createClient: () => {
             return { auth() {} }
           }

@@ -17,13 +17,13 @@ chai.should()
 const { expect } = chai
 const async = require('async')
 const Settings = require('settings-sharelatex')
-const rclient_history = require('redis-sharelatex').createClient(
+const rclient_history = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.history
 ) // note: this is track changes, not project-history
-const rclient_project_history = require('redis-sharelatex').createClient(
+const rclient_project_history = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.project_history
 )
-const rclient_du = require('redis-sharelatex').createClient(
+const rclient_du = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
 const Keys = Settings.redis.documentupdater.key_schema

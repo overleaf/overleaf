@@ -1,4 +1,4 @@
-redis = require "redis-sharelatex"
+redis = require "@overleaf/redis-wrapper"
 rclient1 = redis.createClient(cluster: [{
 	port: "7000"
 	host: "localhost"

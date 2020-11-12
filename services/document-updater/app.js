@@ -110,7 +110,7 @@ app.get('/status', (req, res) => {
   }
 })
 
-const pubsubClient = require('redis-sharelatex').createClient(
+const pubsubClient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.pubsub
 )
 app.get('/health_check/redis', (req, res, next) => {
@@ -124,7 +124,7 @@ app.get('/health_check/redis', (req, res, next) => {
   })
 })
 
-const docUpdaterRedisClient = require('redis-sharelatex').createClient(
+const docUpdaterRedisClient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
 app.get('/health_check/redis_cluster', (req, res, next) => {
