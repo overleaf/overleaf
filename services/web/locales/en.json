@@ -1313,5 +1313,6 @@
   "unlink_github": "Unlink your GitHub account",
   "link_to_github": "Link to your GitHub account",
   "github_integration": "GitHub Integration",
-  "github_is_premium": "GitHub sync is a premium feature"
+  "github_is_premium": "GitHub sync is a premium feature",
+  "remote_service_error": "The remote service produced an error"
 }
