@@ -14,7 +14,7 @@
  */
 let RedisManager
 const Settings = require('settings-sharelatex')
-const redis = require('redis-sharelatex')
+const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(Settings.redis.history)
 const Keys = Settings.redis.history.key_schema
 const async = require('async')
