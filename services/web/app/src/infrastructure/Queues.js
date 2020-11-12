@@ -1,6 +1,15 @@
 const Queue = require('bull')
 const Settings = require('settings-sharelatex')
 
+const analyticsQueues = {}
+
+function initialize() {
+  if (Settings.analytics.enabled) {
+    analyticsQueues.events = createQueue('analytics-events')
+    analyticsQueues.editingSessions = createQueue('analytics-editing-sessions')
+  }
+}
+
 function createQueue(queueName, defaultJobOptions) {
   return new Queue(queueName, {
     redis: Settings.redis.queues,
@@ -15,9 +24,4 @@ function createQueue(queueName, defaultJobOptions) {
   })
 }
 
-module.exports = {
-  analytics: {
-    events: createQueue('analytics-events'),
-    editingSessions: createQueue('analytics-editing-sessions')
-  }
-}
+module.exports = { initialize, analytics: analyticsQueues }
