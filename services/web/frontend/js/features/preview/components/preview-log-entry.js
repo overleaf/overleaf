@@ -14,11 +14,14 @@ function PreviewLogEntry({
   humanReadableHintComponent,
   extraInfoURL,
   level,
-  onLogEntryLinkClick
+  showLineAndNoLink = true,
+  showCloseButton = false,
+  onLogEntryLocationClick,
+  onClose
 }) {
   const { t } = useTranslation()
   function handleLogEntryLinkClick() {
-    onLogEntryLinkClick({ file, line, column })
+    onLogEntryLocationClick({ file, line, column })
   }
   const logEntryDescription = t('log_entry_description', {
     level: level
@@ -30,7 +33,10 @@ function PreviewLogEntry({
         file={file}
         line={line}
         message={message}
-        onLogEntryLinkClick={handleLogEntryLinkClick}
+        showLineAndNoLink={showLineAndNoLink}
+        onLogEntryLocationClick={handleLogEntryLinkClick}
+        showCloseButton={showCloseButton}
+        onClose={onClose}
       />
       {content ? (
         <PreviewLogEntryContent
@@ -48,7 +54,10 @@ function PreviewLogEntryHeader({
   file,
   line,
   message,
-  onLogEntryLinkClick
+  showLineAndNoLink = true,
+  showCloseButton = false,
+  onLogEntryLocationClick,
+  onClose
 }) {
   const { t } = useTranslation()
   const logEntryHeaderClasses = classNames('log-entry-header', {
@@ -56,23 +65,34 @@ function PreviewLogEntryHeader({
     'log-entry-header-warning': level === 'warning',
     'log-entry-header-typesetting': level === 'typesetting'
   })
-  const headerLinkBtnTitle = t('navigate_log_source', {
+  const headerLogLocationTitle = t('navigate_log_source', {
     location: file + (line ? `, ${line}` : '')
   })
+
   return (
     <header className={logEntryHeaderClasses}>
       <h3 className="log-entry-header-title">{message}</h3>
-      {file ? (
+      {showLineAndNoLink && file ? (
         <button
           className="btn-inline-link log-entry-header-link"
           type="button"
-          title={headerLinkBtnTitle}
-          onClick={onLogEntryLinkClick}
+          title={headerLogLocationTitle}
+          onClick={onLogEntryLocationClick}
         >
           <Icon type="chain" />
           &nbsp;
           <span>{file}</span>
           {line ? <span>, {line}</span> : null}
+        </button>
+      ) : null}
+      {showCloseButton && file ? (
+        <button
+          className="btn-inline-link log-entry-header-link"
+          type="button"
+          aria-label={t('dismiss_error_popup')}
+          onClick={onClose}
+        >
+          <span aria-hidden="true">&times;</span>
         </button>
       ) : null}
     </header>
@@ -148,7 +168,10 @@ PreviewLogEntryHeader.propTypes = {
   file: PropTypes.string,
   line: PropTypes.any,
   message: PropTypes.string,
-  onLogEntryLinkClick: PropTypes.func.isRequired
+  showLineAndNoLink: PropTypes.bool,
+  showCloseButton: PropTypes.bool,
+  onLogEntryLocationClick: PropTypes.func,
+  onClose: PropTypes.func
 }
 
 PreviewLogEntryContent.propTypes = {
@@ -172,7 +195,10 @@ PreviewLogEntry.propTypes = {
   humanReadableHintComponent: PropTypes.node,
   extraInfoURL: PropTypes.string,
   level: PropTypes.oneOf(['error', 'warning', 'typesetting']).isRequired,
-  onLogEntryLinkClick: PropTypes.func.isRequired
+  showLineAndNoLink: PropTypes.bool,
+  showCloseButton: PropTypes.bool,
+  onLogEntryLocationClick: PropTypes.func,
+  onClose: PropTypes.func
 }
 
 export default PreviewLogEntry

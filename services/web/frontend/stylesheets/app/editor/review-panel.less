@@ -64,38 +64,6 @@
   }
 }
 
-.triangle(@_, @width, @height, @color) {
-  position: absolute;
-  border-color: transparent;
-  border-style: solid;
-  width: 0;
-  height: 0;
-}
-.triangle(top, @width, @height, @color) {
-  border-width: 0 @width / 2 @height @width / 2;
-  border-bottom-color: @color;
-  border-left-color: transparent;
-  border-right-color: transparent;
-}
-.triangle(bottom, @width, @height, @color) {
-  border-width: @height @width / 2 0 @width / 2;
-  border-top-color: @color;
-  border-left-color: transparent;
-  border-right-color: transparent;
-}
-.triangle(right, @width, @height, @color) {
-  border-width: @height / 2 0 @height / 2 @width;
-  border-left-color: @color;
-  border-top-color: transparent;
-  border-bottom-color: transparent;
-}
-.triangle(left, @width, @height, @color) {
-  border-width: @height / 2 @width @height / 2 0;
-  border-right-color: @color;
-  border-top-color: transparent;
-  border-bottom-color: transparent;
-}
-
 #review-panel {
   display: block;
   .rp-size-expanded & {

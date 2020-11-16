@@ -31,7 +31,8 @@ export default (PdfManager = class PdfManager {
       view: null, // 'pdf' 'logs'
       showRawLog: false,
       highlights: [],
-      position: null
+      position: null,
+      lastCompileTimestamp: null
     }
   }
 })

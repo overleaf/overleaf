@@ -7,6 +7,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				isCompiling: pdf.compiling,
 				isDraftModeOn: draft,
 				isSyntaxCheckOn: stop_on_validation_error,
+				lastCompileTimestamp: pdf.lastCompileTimestamp,
 				logEntries: pdf.logEntries ? pdf.logEntries : {}
 			}`
 			on-clear-cache="clearCache"
@@ -19,7 +20,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			output-files="pdf.outputFiles"
 			pdf-download-url="pdf.downloadUrl"
 			show-logs="shouldShowLogs"
-			on-log-entry-link-click="openInEditor"
+			on-log-entry-location-click="openInEditor"
 		)
 	else
 		.toolbar.toolbar-pdf(ng-class="{ 'changes-to-autocompile': changesToAutoCompile && !autoCompileLintingError }")

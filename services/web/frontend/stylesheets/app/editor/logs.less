@@ -118,14 +118,41 @@
 .log-entry-btn-expand-collapse {
   position: relative;
   z-index: 1;
-  &:focus,
-  &:focus:active {
-    outline: 0;
-  }
+  .no-outline-ring-on-click;
 }
 
 .log-entry-human-readable-hint,
 .log-entry-human-readable-hint-link {
   font-size: @font-size-small;
   margin-top: @margin-sm;
+}
+
+.first-error-popup {
+  position: absolute;
+  z-index: 1;
+  top: @toolbar-small-height + 2px;
+  right: @padding-xs;
+  border-radius: @border-radius-base;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  animation: fade-in 0.15s linear 0s 1 none;
+  background-color: #fff;
+  &::before {
+    content: '';
+    .triangle(top, @padding-sm, @padding-xs, @ol-red);
+    top: -@padding-xs;
+    right: @padding-md;
+  }
+}
+
+.first-error-popup-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 @padding-sm @padding-sm @padding-sm;
+  margin-top: -@margin-sm;
+}
+
+.first-error-btn {
+  .no-outline-ring-on-click;
 }

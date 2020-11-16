@@ -1,4 +1,8 @@
 {
+  "first_error_popup_label": "Your project has errors. This is the first one.",
+  "dismiss_error_popup": "Dismiss first error alert",
+  "go_to_error_location": "Go to error location",
+  "view_all_errors": "View all errors",
   "log_entry_description": "Log entry with level: \"__level__\"",
   "navigate_log_source": "Navigate to log position in source code: __location__",
   "other_output_files": "Other output files",

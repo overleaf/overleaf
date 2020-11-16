@@ -361,6 +361,7 @@ App.controller('PdfController', function(
     if (response.status === 'success') {
       $scope.pdf.view = 'pdf'
       $scope.shouldShowLogs = false
+      $scope.pdf.lastCompileTimestamp = Date.now()
 
       // define the base url. if the pdf file has a build number, pass it to the clsi in the url
       if (fileByPath['output.pdf'] && fileByPath['output.pdf'].url) {
@@ -516,6 +517,8 @@ App.controller('PdfController', function(
 
   function fetchLogs(fileByPath, options) {
     let blgFile, chktexFile, logFile
+    $scope.pdf.logEntries = {}
+
     if (options != null ? options.validation : undefined) {
       chktexFile = fileByPath['output.chktex']
     } else {
