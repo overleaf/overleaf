@@ -7,13 +7,16 @@ import PreviewLogEntry from '../../../../../frontend/js/features/preview/compone
 
 describe('<PreviewLogEntry />', function() {
   const level = 'error'
-  const noOp = () => {}
 
   describe('log entry description', function() {
-    for (const level of ['error', 'warning', 'typesetting']) {
+    for (const level of ['error', 'warning', 'typesetting', 'raw']) {
       it(`describes the log entry with ${level} information`, function() {
-        render(<PreviewLogEntry level={level} onLogEntryLocationClick={noOp} />)
-        screen.getByLabelText(`Log entry with level: "${level}"`)
+        render(<PreviewLogEntry level={level} />)
+        const expectedLabel =
+          level === 'raw'
+            ? 'Raw logs from the LaTeX compiler'
+            : `Log entry with level: ${level}`
+        screen.getByLabelText(expectedLabel)
       })
     }
   })
@@ -29,34 +32,21 @@ describe('<PreviewLogEntry />', function() {
     })
 
     it('renders both file and line', function() {
-      render(
-        <PreviewLogEntry
-          file={file}
-          line={line}
-          level={level}
-          onLogEntryLocationClick={noOp}
-        />
-      )
+      render(<PreviewLogEntry file={file} line={line} level={level} />)
       screen.getByRole('button', {
         name: `Navigate to log position in source code: ${file}, ${line}`
       })
     })
 
     it('renders only file when line information is not available', function() {
-      render(
-        <PreviewLogEntry
-          file={file}
-          level={level}
-          onLogEntryLocationClick={noOp}
-        />
-      )
+      render(<PreviewLogEntry file={file} level={level} />)
       screen.getByRole('button', {
         name: `Navigate to log position in source code: ${file}`
       })
     })
 
     it('does not render when file information is not available', function() {
-      render(<PreviewLogEntry level={level} onLogEntryLocationClick={noOp} />)
+      render(<PreviewLogEntry level={level} />)
       expect(
         screen.queryByRole('button', {
           name: `Navigate to log position in source code: `
@@ -92,13 +82,7 @@ describe('<PreviewLogEntry />', function() {
     const logContent = 'foo bar latex error stuff baz'
 
     it('renders collapsed contents by default', function() {
-      render(
-        <PreviewLogEntry
-          content={logContent}
-          level={level}
-          onLogEntryLocationClick={noOp}
-        />
-      )
+      render(<PreviewLogEntry content={logContent} level={level} />)
       screen.getByText(logContent)
       screen.getByRole('button', {
         name: 'Expand'
@@ -106,13 +90,7 @@ describe('<PreviewLogEntry />', function() {
     })
 
     it('supports expanding contents', function() {
-      render(
-        <PreviewLogEntry
-          content={logContent}
-          level={level}
-          onLogEntryLocationClick={noOp}
-        />
-      )
+      render(<PreviewLogEntry content={logContent} level={level} />)
       screen.getByText(logContent)
       const expandCollapseBtn = screen.getByRole('button', {
         name: 'Expand'
@@ -124,9 +102,7 @@ describe('<PreviewLogEntry />', function() {
     })
 
     it('should not render at all when there are no log contents', function() {
-      const { container } = render(
-        <PreviewLogEntry level={level} onLogEntryLocationClick={noOp} />
-      )
+      const { container } = render(<PreviewLogEntry level={level} />)
       expect(container.querySelector('.log-entry-content')).to.not.exist
     })
   })
@@ -144,7 +120,6 @@ describe('<PreviewLogEntry />', function() {
           humanReadableHintComponent={logHint}
           extraInfoURL={infoURL}
           level={level}
-          onLogEntryLocationClick={noOp}
         />
       )
       screen.getByText(logHintText)
@@ -157,7 +132,6 @@ describe('<PreviewLogEntry />', function() {
           humanReadableHintComponent={logHint}
           extraInfoURL={infoURL}
           level={level}
-          onLogEntryLocationClick={noOp}
         />
       )
       screen.getByRole('link', { name: 'Learn more' })
@@ -169,7 +143,6 @@ describe('<PreviewLogEntry />', function() {
           content={logContent}
           humanReadableHintComponent={logHint}
           level={level}
-          onLogEntryLocationClick={noOp}
         />
       )
       expect(screen.queryByRole('link', { name: 'Learn more' })).to.not.exist

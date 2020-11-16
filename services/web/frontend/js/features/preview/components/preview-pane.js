@@ -100,6 +100,7 @@ function PreviewPane({
       {showLogs ? (
         <PreviewLogsPane
           logEntries={compilerState.logEntries.all}
+          rawLog={compilerState.rawLog}
           onLogEntryLocationClick={onLogEntryLocationClick}
         />
       ) : null}
@@ -114,7 +115,8 @@ PreviewPane.propTypes = {
     isDraftModeOn: PropTypes.bool.isRequired,
     isSyntaxCheckOn: PropTypes.bool.isRequired,
     lastCompileTimestamp: PropTypes.number,
-    logEntries: PropTypes.object.isRequired
+    logEntries: PropTypes.object.isRequired,
+    rawLog: PropTypes.string
   }),
   onClearCache: PropTypes.func.isRequired,
   onLogEntryLocationClick: PropTypes.func.isRequired,

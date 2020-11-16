@@ -27,6 +27,8 @@
   "off",
   "on",
   "other_output_files",
+  "raw_logs_description",
+  "raw_logs",
   "recompile_from_scratch",
   "recompile",
   "run_syntax_check_now",

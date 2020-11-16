@@ -8,7 +8,8 @@ div.full-size.pdf(ng-controller="PdfController")
 				isDraftModeOn: draft,
 				isSyntaxCheckOn: stop_on_validation_error,
 				lastCompileTimestamp: pdf.lastCompileTimestamp,
-				logEntries: pdf.logEntries ? pdf.logEntries : {}
+				logEntries: pdf.logEntries ? pdf.logEntries : {},
+				rawLog: pdf.rawLog ? pdf.rawLog : ''
 			}`
 			on-clear-cache="clearCache"
 			on-recompile="recompile"

@@ -23,9 +23,12 @@ function PreviewLogEntry({
   function handleLogEntryLinkClick() {
     onLogEntryLocationClick({ file, line, column })
   }
-  const logEntryDescription = t('log_entry_description', {
-    level: level
-  })
+  const logEntryDescription =
+    level === 'raw'
+      ? t('raw_logs_description')
+      : t('log_entry_description', {
+          level: level
+        })
   return (
     <div className="log-entry" aria-label={logEntryDescription}>
       <PreviewLogEntryHeader
@@ -63,7 +66,8 @@ function PreviewLogEntryHeader({
   const logEntryHeaderClasses = classNames('log-entry-header', {
     'log-entry-header-error': level === 'error',
     'log-entry-header-warning': level === 'warning',
-    'log-entry-header-typesetting': level === 'typesetting'
+    'log-entry-header-typesetting': level === 'typesetting',
+    'log-entry-header-raw': level === 'raw'
   })
   const headerLogLocationTitle = t('navigate_log_source', {
     location: file + (line ? `, ${line}` : '')
@@ -194,7 +198,7 @@ PreviewLogEntry.propTypes = {
   content: PropTypes.string,
   humanReadableHintComponent: PropTypes.node,
   extraInfoURL: PropTypes.string,
-  level: PropTypes.oneOf(['error', 'warning', 'typesetting']).isRequired,
+  level: PropTypes.oneOf(['error', 'warning', 'typesetting', 'raw']).isRequired,
   showLineAndNoLink: PropTypes.bool,
   showCloseButton: PropTypes.bool,
   onLogEntryLocationClick: PropTypes.func,
