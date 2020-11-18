@@ -74,7 +74,7 @@ script(type="text/ng-template", id="historyV2DeleteLabelModalTemplate")
 		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
 		p.help-block(ng-if="labelDetails")
 			| #{translate("history_are_you_sure_delete_label")}
-			strong "{{ labelDetails.comment }}"
+			strong  "{{ labelDetails.comment }}"
 			| ?
 	.modal-footer
 		button.btn.btn-default(
