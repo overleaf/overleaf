@@ -87,6 +87,8 @@ App.factory('ide', function($http, queuedHttp, $modal, $q, $filter, $timeout) {
     $modal.open({
       templateUrl: 'outOfSyncModalTemplate',
       controller: 'OutOfSyncModalController',
+      backdrop: false, // not dismissable by clicking background
+      keyboard: false, // prevent dismiss via keyboard
       resolve: {
         title() {
           return title
@@ -136,7 +138,7 @@ App.controller('GenericMessageModalController', function(
 
 App.controller('OutOfSyncModalController', function(
   $scope,
-  $modalInstance,
+  $window,
   title,
   message,
   editorContent
@@ -145,7 +147,11 @@ App.controller('OutOfSyncModalController', function(
   $scope.message = message
   $scope.editorContent = editorContent
 
-  return ($scope.done = () => $modalInstance.close())
+  $scope.done = () => {
+    // Reload the page to avoid staying in an inconsistent state.
+    // https://github.com/overleaf/issues/issues/3694
+    $window.location.reload()
+  }
 })
 
 function __guard__(value, transform) {
