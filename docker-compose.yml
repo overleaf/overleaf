@@ -102,7 +102,7 @@ services:
 
     mongo:
         restart: always
-        image: mongo
+        image: mongo:4.0
         container_name: mongo
         expose:
             - 27017
