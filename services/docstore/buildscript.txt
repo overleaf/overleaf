@@ -5,4 +5,4 @@ docstore
 --env-pass-through=
 --node-version=10.22.1
 --public-repo=True
---script-version=3.3.5
+--script-version=3.4.0

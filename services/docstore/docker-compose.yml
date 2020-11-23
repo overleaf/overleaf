@@ -28,6 +28,7 @@ services:
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis
+      QUEUES_REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       GCS_API_ENDPOINT: gcs:9090
@@ -48,8 +49,15 @@ services:
 
   mongo:
     image: mongo:4.0
+    healthcheck:
+      test: "mongo --quiet localhost/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 1)'"
+      interval: 1s
+      retries: 20
 
   gcs:
-    build:
-      context: test/acceptance/deps
-      dockerfile: Dockerfile.fake-gcs
+    image: fsouza/fake-gcs-server
+    command: ["--port=9090", "--scheme=http"]
+    healthcheck:
+      test: wget --quiet --output-document=/dev/null http://localhost:9090/storage/v1/b
+      interval: 1s
+      retries: 20
