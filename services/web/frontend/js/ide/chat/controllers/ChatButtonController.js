@@ -25,19 +25,26 @@ export default App.controller('ChatButtonController', function($scope, ide) {
 
   $scope.$on('chat:resetUnreadMessages', e => $scope.resetUnreadMessages())
 
-  $scope.$on('chat:newMessage', function(e, message) {
+  function handleNewMessage(message) {
     if (message != null) {
       if (
         __guard__(message != null ? message.user : undefined, x => x.id) !==
         ide.$scope.user.id
       ) {
         if (!$scope.ui.chatOpen) {
-          $scope.unreadMessages += 1
+          $scope.$applyAsync(() => {
+            $scope.unreadMessages += 1
+          })
         }
-        return flashTitle()
+        flashTitle()
       }
     }
-  })
+  }
+
+  $scope.$on('chat:newMessage', (e, message) => handleNewMessage(message))
+  window.addEventListener('Chat.MessageReceived', ({ detail: { message } }) =>
+    handleNewMessage(message)
+  )
 
   let focussed = true
   let newMessageNotificationTimeout = null

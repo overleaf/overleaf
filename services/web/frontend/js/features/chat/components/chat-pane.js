@@ -5,19 +5,24 @@ import MessageInput from './message-input'
 import InfiniteScroll from './infinite-scroll'
 import Icon from '../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
+import { useChatStore } from '../store/chat-store-effect'
+import withErrorBoundary from '../../../infrastructure/error-boundary'
 
-function ChatPane({
-  atEnd,
-  loading,
-  loadMoreMessages,
-  messages,
-  resetUnreadMessages,
-  sendMessage,
-  userId
-}) {
+function ChatPane({ resetUnreadMessages }) {
   const { t } = useTranslation()
+
+  const {
+    atEnd,
+    loading,
+    loadMoreMessages,
+    messages,
+    sendMessage,
+    userId
+  } = useChatStore()
+
   useEffect(() => {
     loadMoreMessages()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const shouldDisplayPlaceholder = !loading && messages.length === 0
@@ -80,13 +85,7 @@ function Placeholder() {
 }
 
 ChatPane.propTypes = {
-  atEnd: PropTypes.bool,
-  loading: PropTypes.bool,
-  loadMoreMessages: PropTypes.func.isRequired,
-  messages: PropTypes.array.isRequired,
-  resetUnreadMessages: PropTypes.func.isRequired,
-  sendMessage: PropTypes.func.isRequired,
-  userId: PropTypes.string.isRequired
+  resetUnreadMessages: PropTypes.func.isRequired
 }
 
-export default ChatPane
+export default withErrorBoundary(ChatPane)

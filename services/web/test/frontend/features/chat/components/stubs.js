@@ -1,4 +1,5 @@
 import sinon from 'sinon'
+import { resetChatStore } from '../../../../../frontend/js/features/chat/store/chat-store-effect'
 
 export function stubUIConfig() {
   window.uiConfig = {
@@ -26,10 +27,15 @@ export function tearDownMathJaxStubs() {
   delete window.MathJax
 }
 
-export function stubGlobalUser(user) {
+export function stubChatStore({ user }) {
+  window._ide = { socket: { on: sinon.stub(), off: sinon.stub() } }
+  window.dispatchEvent = sinon.stub()
   window.user = user
+  resetChatStore()
 }
 
-export function tearDownGlobalUserStub() {
+export function tearDownChatStore() {
+  delete window._ide
+  delete window.dispatchEvent
   delete window.user
 }

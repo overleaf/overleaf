@@ -5,10 +5,10 @@ import { screen, render, fireEvent } from '@testing-library/react'
 
 import MessageList from '../../../../../frontend/js/features/chat/components/message-list'
 import {
-  stubGlobalUser,
+  stubChatStore,
   stubMathJax,
   stubUIConfig,
-  tearDownGlobalUserStub,
+  tearDownChatStore,
   tearDownMathJaxStubs,
   tearDownUIConfigStubs
 } from './stubs'
@@ -25,24 +25,24 @@ describe('<MessageList />', function() {
       {
         contents: ['a message'],
         user: currentUser,
-        timestamp: new Date()
+        timestamp: new Date().getTime()
       },
       {
         contents: ['another message'],
         user: currentUser,
-        timestamp: new Date()
+        timestamp: new Date().getTime()
       }
     ]
   }
 
   before(function() {
-    stubGlobalUser(currentUser) // required by ColorManager
+    stubChatStore({ user: currentUser }) // required by ColorManager
     stubUIConfig()
     stubMathJax()
   })
 
   after(function() {
-    tearDownGlobalUserStub()
+    tearDownChatStore()
     tearDownUIConfigStubs()
     tearDownMathJaxStubs()
   })
@@ -62,8 +62,8 @@ describe('<MessageList />', function() {
 
   it('renders a single timestamp for all messages within 5 minutes', function() {
     const msgs = createMessages()
-    msgs[0].timestamp = new Date(2019, 6, 3, 4, 23)
-    msgs[1].timestamp = new Date(2019, 6, 3, 4, 27)
+    msgs[0].timestamp = new Date(2019, 6, 3, 4, 23).getTime()
+    msgs[1].timestamp = new Date(2019, 6, 3, 4, 27).getTime()
 
     render(
       <MessageList
@@ -79,8 +79,8 @@ describe('<MessageList />', function() {
 
   it('renders a timestamp for each messages separated for more than 5 minutes', function() {
     const msgs = createMessages()
-    msgs[0].timestamp = new Date(2019, 6, 3, 4, 23)
-    msgs[1].timestamp = new Date(2019, 6, 3, 4, 31)
+    msgs[0].timestamp = new Date(2019, 6, 3, 4, 23).getTime()
+    msgs[1].timestamp = new Date(2019, 6, 3, 4, 31).getTime()
 
     render(
       <MessageList

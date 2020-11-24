@@ -1,13 +1,11 @@
 import { expect } from 'chai'
 import React from 'react'
-import { screen, render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 
 import Message from '../../../../../frontend/js/features/chat/components/message'
 import {
-  stubGlobalUser,
   stubMathJax,
   stubUIConfig,
-  tearDownGlobalUserStub,
   tearDownMathJaxStubs,
   tearDownUIConfigStubs
 } from './stubs'
@@ -19,14 +17,14 @@ describe('<Message />', function() {
     email: 'fake@example.com'
   }
 
-  before(function() {
-    stubGlobalUser(currentUser) // required by ColorManager
+  beforeEach(function() {
+    window.user = currentUser
     stubUIConfig()
     stubMathJax()
   })
 
-  after(function() {
-    tearDownGlobalUserStub()
+  afterEach(function() {
+    delete window.user
     tearDownUIConfigStubs()
     tearDownMathJaxStubs()
   })
