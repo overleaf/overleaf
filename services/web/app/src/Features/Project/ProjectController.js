@@ -773,6 +773,9 @@ const ProjectController = {
               })
             }
 
+            const wantsOldChatUI =
+              req.query && req.query.new_chat_ui === 'false'
+
             res.render('project/editor', {
               title: project.name,
               priority_title: true,
@@ -829,7 +832,7 @@ const ProjectController = {
               wsUrl,
               showSupport: Features.hasFeature('support'),
               showNewLogsUI: req.query && req.query.new_logs_ui === 'true',
-              showNewChatUI: req.query && req.query.new_chat_ui === 'true'
+              showNewChatUI: user.betaProgram && !wantsOldChatUI
             })
             timer.done()
           }
