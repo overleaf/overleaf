@@ -49,7 +49,7 @@ describe('Notifications Tests', function () {
         },
         'settings-sharelatex': {},
         './mongodb': { db: this.db, ObjectId },
-        'metrics-sharelatex': { timeAsyncMethod: sinon.stub() }
+        '@overleaf/metrics': { timeAsyncMethod: sinon.stub() }
       },
       globals: {
         console

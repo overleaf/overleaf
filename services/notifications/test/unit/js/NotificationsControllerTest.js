@@ -29,7 +29,7 @@ describe('Notifications Controller', function () {
       requires: {
         'logger-sharelatex': { log() {} },
         './Notifications': this.notifications,
-        'metrics-sharelatex': {
+        '@overleaf/metrics': {
           inc: sinon.stub()
         }
       }
