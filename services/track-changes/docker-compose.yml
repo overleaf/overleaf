@@ -25,6 +25,7 @@ services:
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis
+      QUEUES_REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       AWS_S3_ENDPOINT: http://s3:9090
@@ -48,13 +49,23 @@ services:
 
   redis:
     image: redis
+    healthcheck:
+      test: ping=$$(redis-cli ping) && [ "$$ping" = 'PONG' ]
+      interval: 1s
+      retries: 20
 
   mongo:
     image: mongo:4.0
+    healthcheck:
+      test: "mongo --quiet localhost/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 1)'"
+      interval: 1s
+      retries: 20
 
   s3:
-    build:
-      context: test/acceptance/deps
-      dockerfile: Dockerfile.s3mock
+    image: adobe/s3mock
     environment:
       - initialBuckets=fake_user_files,fake_template_files,fake_public_files,bucket
+    healthcheck:
+      test: wget --quiet --output-document=/dev/null http://localhost:9090
+      interval: 1s
+      retries: 20
