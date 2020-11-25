@@ -28,7 +28,7 @@ describe('ContactManager', function () {
           ObjectId
         },
         'logger-sharelatex': { log: sinon.stub() },
-        'metrics-sharelatex': { timeAsyncMethod: sinon.stub() }
+        '@overleaf/metrics': { timeAsyncMethod: sinon.stub() }
       }
     })
     this.user_id = ObjectId().toString()

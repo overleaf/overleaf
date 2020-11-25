@@ -4,7 +4,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 Metrics.initialize('contacts')
 
 const Settings = require('settings-sharelatex')
