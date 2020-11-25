@@ -5,4 +5,4 @@ chat
 --env-pass-through=
 --node-version=10.22.1
 --public-repo=False
---script-version=3.3.4
+--script-version=3.4.0
