@@ -1,4 +1,4 @@
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 Metrics.initialize('doc-updater')
 
 const express = require('express')
