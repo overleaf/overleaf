@@ -1,6 +1,6 @@
 const PersistorManager = require('./PersistorManager')
 const FileHandler = require('./FileHandler')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const parseRange = require('range-parser')
 const Errors = require('./Errors')
 const { pipeline } = require('stream')

@@ -28,7 +28,7 @@ describe('FileConverter', function () {
     FileConverter = SandboxedModule.require(modulePath, {
       requires: {
         './SafeExec': SafeExec,
-        'metrics-sharelatex': {
+        '@overleaf/metrics': {
           inc: sinon.stub(),
           Timer: sinon.stub().returns({ done: sinon.stub() })
         },

@@ -1,7 +1,7 @@
 const settings = require('settings-sharelatex')
 
 const persistorSettings = settings.filestore
-persistorSettings.Metrics = require('metrics-sharelatex')
+persistorSettings.Metrics = require('@overleaf/metrics')
 persistorSettings.paths = settings.path
 
 const ObjectPersistor = require('@overleaf/object-persistor')

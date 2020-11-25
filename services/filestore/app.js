@@ -1,4 +1,4 @@
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 Metrics.initialize(process.env.METRICS_APP_NAME || 'filestore')
 
 const logger = require('logger-sharelatex')
