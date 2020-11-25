@@ -25,7 +25,7 @@ describe('EventLogger', function () {
           error: sinon.stub(),
           warn: sinon.stub()
         }),
-        'metrics-sharelatex': (this.metrics = { inc: sinon.stub() })
+        '@overleaf/metrics': (this.metrics = { inc: sinon.stub() })
       }
     })
     this.channel = 'applied-ops'

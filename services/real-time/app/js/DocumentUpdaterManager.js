@@ -6,7 +6,7 @@ const _ = require('underscore')
 const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const {
   ClientRequestedMissingOpsError,
   DocumentUpdaterRequestFailedError,

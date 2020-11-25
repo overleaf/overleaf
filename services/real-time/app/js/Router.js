@@ -1,7 +1,7 @@
 /* eslint-disable
     camelcase,
 */
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
 const settings = require('settings-sharelatex')
 const WebsocketController = require('./WebsocketController')

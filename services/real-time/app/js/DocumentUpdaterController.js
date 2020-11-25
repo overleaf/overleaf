@@ -9,7 +9,7 @@ const EventLogger = require('./EventLogger')
 const HealthCheckManager = require('./HealthCheckManager')
 const RoomManager = require('./RoomManager')
 const ChannelManager = require('./ChannelManager')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 
 let DocumentUpdaterController
 module.exports = DocumentUpdaterController = {

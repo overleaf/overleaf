@@ -3,7 +3,7 @@
 */
 const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const WebApiManager = require('./WebApiManager')
 const AuthorizationManager = require('./AuthorizationManager')
 const DocumentUpdaterManager = require('./DocumentUpdaterManager')

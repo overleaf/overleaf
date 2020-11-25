@@ -19,6 +19,7 @@
     "format:fix": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --write"
   },
   "dependencies": {
+    "@overleaf/metrics": "^3.4.1",
     "@overleaf/o-error": "^3.1.0",
     "@overleaf/redis-wrapper": "^2.0.0",
     "async": "^0.9.0",
@@ -30,7 +31,6 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "logger-sharelatex": "^2.2.0",
-    "metrics-sharelatex": "^2.6.2",
     "request": "^2.88.2",
     "settings-sharelatex": "^1.1.0",
     "socket.io": "https://github.com/overleaf/socket.io/archive/0.9.19-overleaf-4.tar.gz",
