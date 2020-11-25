@@ -10,7 +10,7 @@
 const ASpellWorker = require('./ASpellWorker')
 const _ = require('underscore')
 const logger = require('logger-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const OError = require('@overleaf/o-error')
 
 class ASpellWorkerPool {

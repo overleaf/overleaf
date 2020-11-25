@@ -20,7 +20,7 @@ describe('ASpellWorker', function () {
             info() {},
             err() {}
           },
-          'metrics-sharelatex': {
+          '@overleaf/metrics': {
             gauge() {},
             inc() {}
           },
