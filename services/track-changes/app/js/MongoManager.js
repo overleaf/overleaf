@@ -16,7 +16,7 @@ const { db, ObjectId } = require('./mongodb')
 const PackManager = require('./PackManager')
 const async = require('async')
 const _ = require('underscore')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
 
 module.exports = MongoManager = {

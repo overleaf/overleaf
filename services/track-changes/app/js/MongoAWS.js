@@ -22,7 +22,7 @@ const { db, ObjectId } = require('./mongodb')
 const JSONStream = require('JSONStream')
 const ReadlineStream = require('byline')
 const zlib = require('zlib')
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 
 const DAYS = 24 * 3600 * 1000 // one day in milliseconds
 

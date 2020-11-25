@@ -26,7 +26,7 @@ describe('MongoManager', function () {
       requires: {
         './mongodb': { db: (this.db = {}), ObjectId },
         './PackManager': (this.PackManager = {}),
-        'metrics-sharelatex': { timeAsyncMethod() {} },
+        '@overleaf/metrics': { timeAsyncMethod() {} },
         'logger-sharelatex': { log() {} }
       }
     })
