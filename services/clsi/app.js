@@ -6,7 +6,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const tenMinutes = 10 * 60 * 1000
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 Metrics.initialize('clsi')
 
 const CompileController = require('./app/js/CompileController')
