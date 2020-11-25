@@ -14,7 +14,7 @@
 let Notifications
 const logger = require('logger-sharelatex')
 const { db, ObjectId } = require('./mongodb')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 
 module.exports = Notifications = {
   getUserNotifications(user_id, callback) {
