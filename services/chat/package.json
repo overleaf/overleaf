@@ -18,12 +18,12 @@
     "format:fix": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --write"
   },
   "dependencies": {
+    "@overleaf/metrics": "^3.4.1",
     "async": "3.2.0",
     "body-parser": "^1.19.0",
     "errorhandler": "^1.5.1",
     "express": "4.17.1",
     "logger-sharelatex": "^2.2.0",
-    "@overleaf/metrics": "^3.1.0",
     "mongodb": "^3.6.0",
     "request": "^2.88.2",
     "settings-sharelatex": "^1.1.0"
