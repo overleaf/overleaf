@@ -27,7 +27,7 @@ Connect to postgres by running `heroku psql -a electric-leaf-4093`
 
 Run the following v2_user_universities export comand.
 ```
-\copy (select uu.user_id, uu.email, uu.cached_entitlement, ud.university_id from v2_user_universities uu LEFT JOIN university_domains ud ON uu.university_domain_id = ud.id) to 'cached-entitlements.csv' with csv;
+\copy (select uu.user_id, uu.email, uu.cached_entitlement, ud.university_id from v2_user_universities uu LEFT JOIN university_domains ud ON uu.university_domain_id = ud.id WHERE uu.removed_at IS NULL) to 'cached-entitlements.csv' with csv;
 ```
 
 **Note: this file contains PII and caution must be exercised to insure that it
