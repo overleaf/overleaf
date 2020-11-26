@@ -1,4 +1,4 @@
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const Settings = require('settings-sharelatex')
 const { callbackify } = require('util')
 

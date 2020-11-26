@@ -59,7 +59,7 @@ describe('FileController', function () {
         './Errors': Errors,
         stream: stream,
         'settings-sharelatex': settings,
-        'metrics-sharelatex': {
+        '@overleaf/metrics': {
           inc() {}
         }
       },

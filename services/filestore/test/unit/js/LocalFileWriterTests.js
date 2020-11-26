@@ -30,7 +30,7 @@ describe('LocalFileWriter', function () {
         fs,
         stream,
         'settings-sharelatex': settings,
-        'metrics-sharelatex': {
+        '@overleaf/metrics': {
           inc: sinon.stub(),
           Timer: sinon.stub().returns({ done: sinon.stub() })
         },

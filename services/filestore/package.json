@@ -20,6 +20,7 @@
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js"
   },
   "dependencies": {
+    "@overleaf/metrics": "^3.4.1",
     "@overleaf/o-error": "^3.0.0",
     "@overleaf/object-persistor": "git+https://github.com/overleaf/object-persistor.git",
     "body-parser": "^1.19.0",
@@ -28,7 +29,6 @@
     "glob": "^7.1.6",
     "lodash.once": "^4.1.1",
     "logger-sharelatex": "^2.2.0",
-    "metrics-sharelatex": "^2.7.0",
     "node-uuid": "~1.4.8",
     "range-parser": "^1.2.1",
     "request": "^2.88.2",

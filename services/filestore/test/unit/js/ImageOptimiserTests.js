@@ -20,7 +20,7 @@ describe('ImageOptimiser', function () {
       requires: {
         './SafeExec': SafeExec,
         'logger-sharelatex': logger,
-        'metrics-sharelatex': {
+        '@overleaf/metrics': {
           Timer: sinon.stub().returns({ done: sinon.stub() })
         }
       }
