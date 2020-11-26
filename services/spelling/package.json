@@ -24,6 +24,7 @@
   },
   "version": "0.1.4",
   "dependencies": {
+    "@overleaf/metrics": "^3.4.1",
     "@overleaf/o-error": "^3.0.0",
     "async": "^2.6.3",
     "body-parser": "^1.19.0",
@@ -31,7 +32,6 @@
     "express": "^4.17.1",
     "logger-sharelatex": "^2.2.0",
     "lru-cache": "^5.1.1",
-    "metrics-sharelatex": "^2.6.2",
     "mongodb": "^3.6.0",
     "node-statsd": "0.1.1",
     "request": "^2.88.2",

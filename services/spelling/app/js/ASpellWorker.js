@@ -9,7 +9,7 @@
  */
 const childProcess = require('child_process')
 const logger = require('logger-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const _ = require('underscore')
 const OError = require('@overleaf/o-error')
 

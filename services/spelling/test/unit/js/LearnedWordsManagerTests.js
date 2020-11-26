@@ -33,7 +33,7 @@ describe('LearnedWordsManager', function () {
           err() {},
           info() {}
         },
-        'metrics-sharelatex': {
+        '@overleaf/metrics': {
           timeAsyncMethod: sinon.stub(),
           inc: sinon.stub()
         }
