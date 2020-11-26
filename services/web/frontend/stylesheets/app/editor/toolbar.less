@@ -24,10 +24,14 @@
   }
 
   > a:not(.btn),
+  > button,
   .toolbar-left > a:not(.btn),
-  .toolbar-right > a:not(.btn) {
+  .toolbar-left > button,
+  .toolbar-right > a:not(.btn),
+  .toolbar-right > button {
     display: inline-block;
     color: @toolbar-icon-btn-color;
+    background-color: transparent;
     padding: 4px 2px;
     line-height: 1;
     height: 24px;
@@ -40,6 +44,7 @@
     &:hover {
       text-shadow: @toolbar-icon-btn-hover-shadow;
       color: @toolbar-icon-btn-hover-color;
+      background-color: transparent;
       text-decoration: none;
     }
     &.active,

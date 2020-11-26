@@ -29,13 +29,11 @@ export function tearDownMathJaxStubs() {
 
 export function stubChatStore({ user }) {
   window._ide = { socket: { on: sinon.stub(), off: sinon.stub() } }
-  window.dispatchEvent = sinon.stub()
   window.user = user
   resetChatStore()
 }
 
 export function tearDownChatStore() {
   delete window._ide
-  delete window.dispatchEvent
   delete window.user
 }

@@ -43,4 +43,16 @@ describe('<Icon />', function() {
     )
     expect(element).to.exist
   })
+
+  it('renders children', function() {
+    const { container } = render(
+      <Icon type="angle-down">
+        <Icon type="angle-up" />
+      </Icon>
+    )
+    const element = container.querySelector(
+      'i.fa.fa-angle-down > i.fa.fa-angle-up'
+    )
+    expect(element).to.exist
+  })
 })

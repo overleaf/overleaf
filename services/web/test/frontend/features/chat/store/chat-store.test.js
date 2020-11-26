@@ -30,8 +30,6 @@ describe('ChatStore', function() {
     window._ide = { socket }
     mockSocketMessage = message => socket.on.getCall(0).args[1](message)
 
-    window.dispatchEvent = sinon.stub()
-
     store = new ChatStore()
   })
 

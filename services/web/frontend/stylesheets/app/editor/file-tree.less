@@ -27,11 +27,15 @@
     flex-shrink: 0;
   }
 
+  > file-tree-root,
   .file-tree-inner {
+    position: relative;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     overflow-y: auto;
+    width: inherit;
+    height: inherit;
 
     &.no-toolbar {
       top: 0;
@@ -63,6 +67,7 @@
     }
   }
 
+  li.dnd-droppable-hover .entity-name,
   li .entity-name.droppable-hover {
     font-weight: bold;
     background-color: @file-tree-item-hover-bg;
@@ -86,16 +91,39 @@
     position: relative;
     overflow-y: auto;
 
-    ul {
+    .entity > ul,
+    ul[role='tree'] {
       margin-left: (@line-height-computed / 2);
     }
 
     li {
       line-height: @file-tree-line-height;
       position: relative;
+      &:focus {
+        outline: none;
+      }
 
       .entity {
         user-select: none;
+        &:focus {
+          outline: none;
+        }
+      }
+
+      .entity > .entity-name > button {
+        background-color: transparent;
+        border: 0;
+        padding: 0;
+        &:focus {
+          outline: none;
+        }
+        &.item-name-button {
+          width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-align: left;
+          padding-right: 32px;
+        }
       }
 
       .entity-name {
@@ -104,6 +132,12 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        &.entity-name-react {
+          text-overflow: clip;
+        }
+        &:focus {
+          outline: none;
+        }
         &:hover {
           background-color: @file-tree-item-hover-bg;
         }
@@ -116,6 +150,17 @@
         }
         input {
           line-height: 1.6;
+        }
+        .dropdown-toggle > i {
+          color: white;
+          font-size: 18px;
+        }
+      }
+
+      .entity.dnd-draggable-dragging {
+        .entity-name:hover {
+          background-color: transparent;
+          .fake-full-width-bg(transparent);
         }
       }
 
@@ -137,6 +182,10 @@
       i.fa-folder {
         color: @file-tree-item-folder-color;
         font-size: 14px;
+      }
+
+      i.spaced {
+        margin-left: 18px;
       }
 
       i.toggle {
@@ -169,6 +218,7 @@
         > .entity {
           > .entity-name {
             > div > i.fa,
+            > button > i.fa,
             > i.fa,
             .entity-menu-toggle i.fa {
               color: #fff;
@@ -237,6 +287,7 @@
         > .entity-name {
           color: @file-tree-item-selected-color;
           > div > i.fa,
+          > button > i.fa,
           > i.fa,
           .entity-menu-toggle i.fa {
             color: @file-tree-item-selected-color;
@@ -255,13 +306,39 @@
         }
       }
     }
+    ul.file-tree-list li.selected.dnd-droppable-hover {
+      > .entity {
+        > .entity-name {
+          background-color: @file-tree-item-hover-bg;
+          .fake-full-width-bg(@file-tree-item-hover-bg);
+        }
+      }
+    }
   }
 
+  .dnd-draggable-preview-layer {
+    position: absolute;
+    pointer-events: none;
+    z-index: 100;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    &.dnd-droppable-hover {
+      border: 3px solid @file-tree-item-selected-bg;
+    }
+  }
+
+  .dnd-draggable-preview-item,
   .ui-draggable-dragging {
     background-color: fade(@file-tree-item-selected-bg, 60%);
     color: @file-tree-item-selected-color;
     width: 75%;
     padding-left: @line-height-computed;
+  }
+
+  .dnd-draggable-preview-item {
+    line-height: @file-tree-line-height;
   }
 }
 
@@ -299,6 +376,17 @@
       background-color: white;
     }
   }
+}
+
+.file-tree-error {
+  text-align: center;
+  color: @file-tree-error-color;
+  padding: 20px;
+}
+
+.file-tree-modal-alert {
+  margin-top: 10px;
+  margin-bottom: 0px;
 }
 
 .modal-new-file--body {

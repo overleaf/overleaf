@@ -12,6 +12,7 @@
   "log_entry_description": "Log entry with level: __level__",
   "navigate_log_source": "Navigate to log position in source code: __location__",
   "other_output_files": "Download other output files",
+  "refresh": "Refresh",
   "toggle_output_files_list": "Toggle output files list",
   "n_warnings": "__count__ warning",
   "n_warnings_plural": "__count__ warnings",
@@ -1324,5 +1325,7 @@
   "link_to_github": "Link to your GitHub account",
   "github_integration": "GitHub Integration",
   "github_is_premium": "GitHub sync is a premium feature",
-  "remote_service_error": "The remote service produced an error"
+  "remote_service_error": "The remote service produced an error",
+  "linked_file": "Imported file",
+  "n_items": "__count__ items"
 }

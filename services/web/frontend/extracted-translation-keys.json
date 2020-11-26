@@ -74,5 +74,22 @@
   "view_warnings",
   "we_cant_find_any_sections_or_subsections_in_this_file",
   "your_message",
-  "your_project_has_errors"
+  "your_project_has_errors",
+  "recompile_from_scratch",
+  "run_syntax_check_now",
+  "toggle_compile_options_menu",
+  "sure_you_want_to_delete",
+  "delete",
+  "deleting",
+  "cancel",
+  "new_file",
+  "new_folder",
+  "create",
+  "creating",
+  "upload",
+  "rename",
+  "n_items",
+  "please_refresh",
+  "generic_something_went_wrong",
+  "refresh"
 ]
