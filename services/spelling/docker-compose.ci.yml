@@ -20,6 +20,7 @@ services:
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis
+      QUEUES_REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
@@ -41,3 +42,7 @@ services:
     user: root
   mongo:
     image: mongo:4.0
+    healthcheck:
+      test: "mongo --quiet localhost/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 1)'"
+      interval: 1s
+      retries: 20
