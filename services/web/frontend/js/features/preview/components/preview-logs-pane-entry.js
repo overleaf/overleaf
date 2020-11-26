@@ -5,46 +5,38 @@ import { useTranslation } from 'react-i18next'
 import useExpandCollapse from '../../../shared/hooks/use-expand-collapse'
 import Icon from '../../../shared/components/icon'
 
-function PreviewLogEntry({
-  file,
-  line,
-  message,
-  content,
-  column,
-  humanReadableHintComponent,
+function PreviewLogsPaneEntry({
+  headerTitle,
+  rawContent,
+  formattedContent,
   extraInfoURL,
   level,
-  showLineAndNoLink = true,
+  sourceLocation,
+  showSourceLocationLink = true,
   showCloseButton = false,
-  onLogEntryLocationClick,
+  entryAriaLabel = null,
+  onSourceLocationClick,
   onClose
 }) {
-  const { t } = useTranslation()
   function handleLogEntryLinkClick() {
-    onLogEntryLocationClick({ file, line, column })
+    onSourceLocationClick(sourceLocation)
   }
-  const logEntryDescription =
-    level === 'raw'
-      ? t('raw_logs_description')
-      : t('log_entry_description', {
-          level: level
-        })
+
   return (
-    <div className="log-entry" aria-label={logEntryDescription}>
+    <div className="log-entry" aria-label={entryAriaLabel}>
       <PreviewLogEntryHeader
         level={level}
-        file={file}
-        line={line}
-        message={message}
-        showLineAndNoLink={showLineAndNoLink}
-        onLogEntryLocationClick={handleLogEntryLinkClick}
+        sourceLocation={sourceLocation}
+        headerTitle={headerTitle}
+        showSourceLocationLink={showSourceLocationLink}
+        onSourceLocationClick={handleLogEntryLinkClick}
         showCloseButton={showCloseButton}
         onClose={onClose}
       />
-      {content ? (
+      {rawContent || formattedContent ? (
         <PreviewLogEntryContent
-          content={content}
-          humanReadableHintComponent={humanReadableHintComponent}
+          rawContent={rawContent}
+          formattedContent={formattedContent}
           extraInfoURL={extraInfoURL}
         />
       ) : null}
@@ -53,16 +45,17 @@ function PreviewLogEntry({
 }
 
 function PreviewLogEntryHeader({
+  sourceLocation,
   level,
-  file,
-  line,
-  message,
-  showLineAndNoLink = true,
+  headerTitle,
+  showSourceLocationLink = true,
   showCloseButton = false,
-  onLogEntryLocationClick,
+  onSourceLocationClick,
   onClose
 }) {
   const { t } = useTranslation()
+  const file = sourceLocation ? sourceLocation.file : null
+  const line = sourceLocation ? sourceLocation.line : null
   const logEntryHeaderClasses = classNames('log-entry-header', {
     'log-entry-header-error': level === 'error',
     'log-entry-header-warning': level === 'warning',
@@ -75,13 +68,13 @@ function PreviewLogEntryHeader({
 
   return (
     <header className={logEntryHeaderClasses}>
-      <h3 className="log-entry-header-title">{message}</h3>
-      {showLineAndNoLink && file ? (
+      <h3 className="log-entry-header-title">{headerTitle}</h3>
+      {showSourceLocationLink && file ? (
         <button
           className="btn-inline-link log-entry-header-link"
           type="button"
           title={headerLogLocationTitle}
-          onClick={onLogEntryLocationClick}
+          onClick={onSourceLocationClick}
         >
           <Icon type="chain" />
           &nbsp;
@@ -89,7 +82,7 @@ function PreviewLogEntryHeader({
           {line ? <span>, {line}</span> : null}
         </button>
       ) : null}
-      {showCloseButton && file ? (
+      {showCloseButton ? (
         <button
           className="btn-inline-link log-entry-header-link"
           type="button"
@@ -104,8 +97,8 @@ function PreviewLogEntryHeader({
 }
 
 function PreviewLogEntryContent({
-  content,
-  humanReadableHintComponent,
+  rawContent,
+  formattedContent,
   extraInfoURL
 }) {
   const { isExpanded, expandableProps, toggleProps } = useExpandCollapse({
@@ -127,38 +120,34 @@ function PreviewLogEntryContent({
 
   return (
     <div className="log-entry-content">
-      <div {...expandableProps}>
-        <pre className={logContentClasses}>{content.trim()}</pre>
-        <div className={buttonContainerClasses}>
-          <button
-            type="button"
-            className="btn btn-xs btn-default log-entry-btn-expand-collapse"
-            {...toggleProps}
-          >
-            {isExpanded ? (
-              <>
-                <Icon type="angle-up" /> {t('collapse')}
-              </>
-            ) : (
-              <>
-                <Icon type="angle-down" /> {t('expand')}
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-      {humanReadableHintComponent ? (
-        <div className="log-entry-human-readable-hint">
-          {humanReadableHintComponent}
+      {rawContent ? (
+        <div {...expandableProps}>
+          <pre className={logContentClasses}>{rawContent.trim()}</pre>
+          <div className={buttonContainerClasses}>
+            <button
+              type="button"
+              className="btn btn-xs btn-default log-entry-btn-expand-collapse"
+              {...toggleProps}
+            >
+              {isExpanded ? (
+                <>
+                  <Icon type="angle-up" /> {t('collapse')}
+                </>
+              ) : (
+                <>
+                  <Icon type="angle-down" /> {t('expand')}
+                </>
+              )}
+            </button>
+          </div>
         </div>
       ) : null}
+      {formattedContent ? (
+        <div className="log-entry-formatted-content">{formattedContent}</div>
+      ) : null}
       {extraInfoURL ? (
-        <div className="log-entry-human-readable-hint-link">
-          <a
-            href={extraInfoURL}
-            target="_blank"
-            className="log-entry-human-readable-hint-link"
-          >
+        <div className="log-entry-content-link">
+          <a href={extraInfoURL} target="_blank">
             {t('log_hint_extra_info')}
           </a>
         </div>
@@ -168,41 +157,40 @@ function PreviewLogEntryContent({
 }
 
 PreviewLogEntryHeader.propTypes = {
+  sourceLocation: PropTypes.shape({
+    file: PropTypes.string,
+    // `line should be either a number or null (i.e. not required), but currently sometimes we get
+    // an empty string (from BibTeX errors), which is why we're using `any` here. We should revert
+    // to PropTypes.number (not required) once we fix that.
+    line: PropTypes.any,
+    column: PropTypes.any
+  }),
   level: PropTypes.string.isRequired,
-  file: PropTypes.string,
-  line: PropTypes.any,
-  message: PropTypes.string,
-  showLineAndNoLink: PropTypes.bool,
+  headerTitle: PropTypes.string,
+  showSourceLocationLink: PropTypes.bool,
   showCloseButton: PropTypes.bool,
-  onLogEntryLocationClick: PropTypes.func,
+  onSourceLocationClick: PropTypes.func,
   onClose: PropTypes.func
 }
 
 PreviewLogEntryContent.propTypes = {
-  content: PropTypes.string.isRequired,
-  humanReadableHintComponent: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.element
-  ]),
+  rawContent: PropTypes.string,
+  formattedContent: PropTypes.node,
   extraInfoURL: PropTypes.string
 }
 
-PreviewLogEntry.propTypes = {
-  file: PropTypes.string,
-  // `line should be either a number or null (i.e. not required), but currently sometimes we get
-  // an empty string (from BibTeX errors), which is why we're using `any` here. We should revert
-  // to PropTypes.number (not required) once we fix that.
-  line: PropTypes.any,
-  column: PropTypes.any,
-  message: PropTypes.string,
-  content: PropTypes.string,
-  humanReadableHintComponent: PropTypes.node,
+PreviewLogsPaneEntry.propTypes = {
+  sourceLocation: PreviewLogEntryHeader.propTypes.sourceLocation,
+  headerTitle: PropTypes.string,
+  rawContent: PropTypes.string,
+  formattedContent: PropTypes.node,
   extraInfoURL: PropTypes.string,
   level: PropTypes.oneOf(['error', 'warning', 'typesetting', 'raw']).isRequired,
-  showLineAndNoLink: PropTypes.bool,
+  showSourceLocationLink: PropTypes.bool,
   showCloseButton: PropTypes.bool,
-  onLogEntryLocationClick: PropTypes.func,
+  entryAriaLabel: PropTypes.string,
+  onSourceLocationClick: PropTypes.func,
   onClose: PropTypes.func
 }
 
-export default PreviewLogEntry
+export default PreviewLogsPaneEntry

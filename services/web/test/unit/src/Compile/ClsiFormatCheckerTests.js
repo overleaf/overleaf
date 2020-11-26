@@ -57,7 +57,7 @@ describe('ClsiFormatChecker', function() {
       ])
     })
 
-    it('should call _checkForDuplicatePaths and _checkForConflictingPaths', function(done) {
+    it('should call _checkDocsAreUnderSizeLimit and _checkForConflictingPaths', function(done) {
       this.ClsiFormatChecker._checkForConflictingPaths = sinon
         .stub()
         .callsArgWith(1, null)

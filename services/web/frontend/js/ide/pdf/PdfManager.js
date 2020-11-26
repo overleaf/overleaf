@@ -28,6 +28,7 @@ export default (PdfManager = class PdfManager {
       logEntries: {},
       logEntryAnnotations: {},
       rawLog: '',
+      validation: {},
       view: null, // 'pdf' 'logs'
       showRawLog: false,
       highlights: [],

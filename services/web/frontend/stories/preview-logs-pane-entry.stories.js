@@ -1,69 +1,77 @@
 import React from 'react'
-import PreviewLogEntry from '../js/features/preview/components/preview-log-entry.js'
+import PreviewLogsPaneEntry from '../js/features/preview/components/preview-logs-pane-entry.js'
 
-export const ErrorWithCompilerOutput = args => <PreviewLogEntry {...args} />
+export const ErrorWithCompilerOutput = args => (
+  <PreviewLogsPaneEntry {...args} />
+)
 ErrorWithCompilerOutput.args = {
   level: 'error'
 }
 
 export const ErrorWithCompilerOutputAndHumanReadableHint = args => (
-  <PreviewLogEntry {...args} />
+  <PreviewLogsPaneEntry {...args} />
 )
 ErrorWithCompilerOutputAndHumanReadableHint.args = {
   level: 'error',
-  humanReadableHintComponent: <SampleHumanReadableHintComponent />,
+  formattedContent: <SampleHumanReadableHintComponent />,
   extraInfoURL:
     'https://www.overleaf.com/learn/latex/Errors/Extra_alignment_tab_has_been_changed_to_%5Ccr'
 }
 
-export const ErrorWithoutCompilerOutput = args => <PreviewLogEntry {...args} />
+export const ErrorWithoutCompilerOutput = args => (
+  <PreviewLogsPaneEntry {...args} />
+)
 ErrorWithoutCompilerOutput.args = {
   level: 'error',
-  content: null
+  rawContent: null
 }
 
-export const WarningWithCompilerOutput = args => <PreviewLogEntry {...args} />
+export const WarningWithCompilerOutput = args => (
+  <PreviewLogsPaneEntry {...args} />
+)
 WarningWithCompilerOutput.args = {
   level: 'warning'
 }
 
 export const WarningWithCompilerOutputAndHumanReadableHint = args => (
-  <PreviewLogEntry {...args} />
+  <PreviewLogsPaneEntry {...args} />
 )
 WarningWithCompilerOutputAndHumanReadableHint.args = {
   level: 'warning',
-  humanReadableHintComponent: <SampleHumanReadableHintComponent />,
+  formattedContent: <SampleHumanReadableHintComponent />,
   extraInfoURL:
     'https://www.overleaf.com/learn/latex/Errors/Extra_alignment_tab_has_been_changed_to_%5Ccr'
 }
 
 export const WarningWithoutCompilerOutput = args => (
-  <PreviewLogEntry {...args} />
+  <PreviewLogsPaneEntry {...args} />
 )
 WarningWithoutCompilerOutput.args = {
   level: 'warning',
-  content: null
+  rawContent: null
 }
 
-export const InfoWithCompilerOutput = args => <PreviewLogEntry {...args} />
+export const InfoWithCompilerOutput = args => <PreviewLogsPaneEntry {...args} />
 InfoWithCompilerOutput.args = {
   level: 'typesetting'
 }
 
 export const InfoWithCompilerOutputAndHumanReadableHint = args => (
-  <PreviewLogEntry {...args} />
+  <PreviewLogsPaneEntry {...args} />
 )
 InfoWithCompilerOutputAndHumanReadableHint.args = {
   level: 'typesetting',
-  humanReadableHintComponent: <SampleHumanReadableHintComponent />,
+  formattedContent: <SampleHumanReadableHintComponent />,
   extraInfoURL:
     'https://www.overleaf.com/learn/latex/Errors/Extra_alignment_tab_has_been_changed_to_%5Ccr'
 }
 
-export const InfoWithoutCompilerOutput = args => <PreviewLogEntry {...args} />
+export const InfoWithoutCompilerOutput = args => (
+  <PreviewLogsPaneEntry {...args} />
+)
 InfoWithoutCompilerOutput.args = {
   level: 'typesetting',
-  content: null
+  rawContent: null
 }
 
 function SampleHumanReadableHintComponent() {
@@ -84,14 +92,16 @@ function SampleHumanReadableHintComponent() {
 }
 
 export default {
-  title: 'PreviewLogEntry',
-  component: PreviewLogEntry,
+  title: 'PreviewLogsPaneEntry',
+  component: PreviewLogsPaneEntry,
   args: {
-    file: 'foo/bar.tex',
-    line: 10,
-    column: 20,
-    message: 'Lorem ipsum',
-    content: `
+    sourceLocation: {
+      file: 'foo/bar.tex',
+      line: 10,
+      column: 20
+    },
+    headerTitle: 'Lorem ipsum',
+    rawContent: `
 The LaTeX compiler output
   * With a lot of details
 

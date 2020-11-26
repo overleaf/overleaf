@@ -197,11 +197,70 @@ describe('<PreviewPane />', function() {
     })
   })
 
+  describe('accessible description of the compile result', function() {
+    it('renders an accessible description with the errors and warnings count', function() {
+      const errors = [sampleError1, sampleError2]
+      const warnings = [sampleWarning]
+      const propsWithErrorsAndWarnings = getProps(false, {
+        errors,
+        warnings
+      })
+      render(<PreviewPane {...propsWithErrorsAndWarnings} />)
+
+      screen.getByText(`${errors.length} error${errors.length > 1 ? 's' : ''}`)
+      screen.getByText(
+        `${warnings.length} warning${warnings.length > 1 ? 's' : ''}`
+      )
+    })
+    it('renders an accessible description for failed compiles with CLSI errors', function() {
+      const sampleCLSIError = {
+        clsiMaintenance: true
+      }
+
+      const propsWithCLSIError = getProps(
+        false,
+        {},
+        Date.now(),
+        false,
+        true,
+        {},
+        sampleCLSIError
+      )
+      render(<PreviewPane {...propsWithCLSIError} />)
+
+      screen.getByText('Your project did not compile because of an error')
+    })
+
+    it('renders an accessible description for failed compiles with validation issues', function() {
+      const sampleValidationIssue = {
+        clsiMaintenance: true
+      }
+
+      const propsWithValidationIssue = getProps(
+        false,
+        {},
+        Date.now(),
+        false,
+        true,
+        sampleValidationIssue,
+        {}
+      )
+      render(<PreviewPane {...propsWithValidationIssue} />)
+
+      screen.getByText(
+        'Your project did not compile because of a validation issue'
+      )
+    })
+  })
+
   function getProps(
     isCompiling = false,
     logEntries = {},
     lastCompileTimestamp = Date.now(),
-    isShowingLogs = false
+    isShowingLogs = false,
+    compileFailed = false,
+    validationIssues = {},
+    errors = {}
   ) {
     return {
       compilerState: {
@@ -210,8 +269,11 @@ describe('<PreviewPane />', function() {
         isClearingCache: false,
         isDraftModeOn: false,
         isSyntaxCheckOn: false,
-        lastCompileTimestamp: lastCompileTimestamp,
-        logEntries: logEntries
+        lastCompileTimestamp,
+        logEntries,
+        compileFailed,
+        validationIssues,
+        errors
       },
       onClearCache: () => {},
       onLogEntryLocationClick: () => {},

@@ -125,10 +125,13 @@
   .no-outline-ring-on-click;
 }
 
-.log-entry-human-readable-hint,
-.log-entry-human-readable-hint-link {
+.log-entry-formatted-content,
+.log-entry-content-link {
   font-size: @font-size-small;
-  margin-top: @margin-sm;
+  margin-top: @margin-xs;
+  &:first-of-type {
+    margin-top: 0;
+  }
 }
 
 .first-error-popup {

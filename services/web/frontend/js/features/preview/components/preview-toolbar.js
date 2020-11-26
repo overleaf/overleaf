@@ -213,6 +213,7 @@ function PreviewToolbar({
         <PreviewLogsToggleButton
           logsState={logsState}
           showLogs={showLogs}
+          compileFailed={compilerState.compileFailed}
           onToggle={onToggleLogs}
           showText={showToggleText}
         />
@@ -227,6 +228,7 @@ PreviewToolbar.propTypes = {
     isCompiling: PropTypes.bool.isRequired,
     isDraftModeOn: PropTypes.bool.isRequired,
     isSyntaxCheckOn: PropTypes.bool.isRequired,
+    compileFailed: PropTypes.bool,
     logEntries: PropTypes.object.isRequired
   }),
   logsState: PropTypes.shape({

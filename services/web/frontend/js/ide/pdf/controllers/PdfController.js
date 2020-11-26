@@ -338,6 +338,9 @@ App.controller('PdfController', function(
     $scope.pdf.failedCheck = false
     $scope.pdf.compileInProgress = false
     $scope.pdf.autoCompileDisabled = false
+    if (window.showNewLogsUI) {
+      $scope.clsiErrors = {}
+    }
 
     // make a cache to look up files by name
     const fileByPath = {}
@@ -362,6 +365,7 @@ App.controller('PdfController', function(
       $scope.pdf.view = 'pdf'
       $scope.shouldShowLogs = false
       $scope.pdf.lastCompileTimestamp = Date.now()
+      $scope.pdf.validation = {}
 
       // define the base url. if the pdf file has a build number, pass it to the clsi in the url
       if (fileByPath['output.pdf'] && fileByPath['output.pdf'].url) {
@@ -477,6 +481,33 @@ App.controller('PdfController', function(
       // fall back to displaying an error
       $scope.pdf.view = 'errors'
       $scope.pdf.error = true
+    }
+
+    if (window.showNewLogsUI) {
+      $scope.pdf.compileFailed = false
+      // `$scope.clsiErrors` stores the error states nested within `$scope.pdf`
+      // for use with React's <PreviewPane errors={$scope.clsiErrors}/>
+      $scope.clsiErrors = Object.assign(
+        {},
+        $scope.pdf.error ? { error: true } : null,
+        $scope.pdf.renderingError ? { renderingError: true } : null,
+        $scope.pdf.clsiMaintenance ? { clsiMaintenance: true } : null,
+        $scope.pdf.clsiUnavailable ? { clsiUnavailable: true } : null,
+        $scope.pdf.tooRecentlyCompiled ? { tooRecentlyCompiled: true } : null,
+        $scope.pdf.compileTerminated ? { compileTerminated: true } : null,
+        $scope.pdf.rateLimited ? { rateLimited: true } : null,
+        $scope.pdf.compileInProgress ? { compileInProgress: true } : null,
+        $scope.pdf.timedout ? { timedout: true } : null,
+        $scope.pdf.autoCompileDisabled ? { autoCompileDisabled: true } : null
+      )
+
+      if (
+        $scope.pdf.view === 'errors' ||
+        $scope.pdf.view === 'validation-problems'
+      ) {
+        $scope.shouldShowLogs = true
+        $scope.pdf.compileFailed = true
+      }
     }
 
     const IGNORE_FILES = ['output.fls', 'output.fdb_latexmk']
@@ -765,6 +796,11 @@ App.controller('PdfController', function(
         $scope.pdf.renderingError = false
         $scope.pdf.error = true
         $scope.pdf.view = 'errors'
+        if (window.showNewLogsUI) {
+          $scope.clsiErrors = { error: true }
+          $scope.shouldShowLogs = true
+          $scope.pdf.compileFailed = true
+        }
       })
       .finally(() => {
         $scope.lastFinishedCompileAt = Date.now()
