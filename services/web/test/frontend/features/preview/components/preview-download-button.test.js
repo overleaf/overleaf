@@ -116,11 +116,8 @@ describe('<PreviewDownloadButton />', function() {
     })
     menuItems.forEach((item, index) => {
       // check displayed text
-      const itemTextParts = item.textContent.split(' ')
-      expect(itemTextParts[0]).to.equal('Download')
-      const fileType = itemTextParts[1].split('.').pop()
+      const fileType = item.textContent.split('.').pop()
       expect(fileTypes).to.include(fileType)
-      expect(itemTextParts[2]).to.equal('file')
     })
 
     // check grouped correctly
@@ -149,9 +146,7 @@ describe('<PreviewDownloadButton />', function() {
     renderPreviewDownloadButton(isCompiling, outputFiles, pdfDownloadUrl)
 
     const bblMenuItems = screen.getAllByText((content, element) => {
-      return (
-        content !== '' && element.textContent === 'Download output.bbl file'
-      )
+      return content !== '' && element.textContent === 'output.bbl'
     })
     expect(bblMenuItems.length).to.equal(2)
   })
@@ -161,7 +156,7 @@ describe('<PreviewDownloadButton />', function() {
     const pdfAltFile = makeFile('alt.pdf')
     const outputFiles = [pdfFile, pdfAltFile]
     renderPreviewDownloadButton(isCompiling, outputFiles, pdfDownloadUrl)
-    screen.getAllByRole('menuitem', { name: 'Download alt.pdf file' })
+    screen.getAllByRole('menuitem', { name: 'alt.pdf' })
   })
   it('should show the button text when prop showText=true', function() {
     const isCompiling = false
@@ -188,7 +183,7 @@ describe('<PreviewDownloadButton />', function() {
 
       renderPreviewDownloadButton(false, outputFiles, pdfDownloadUrl, true)
 
-      screen.getByText('Other output files')
+      screen.getByText('Download other output files')
       screen.getByRole('separator')
     })
     it('should not display when there are top files and no other files', function() {

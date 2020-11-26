@@ -11,7 +11,7 @@
   "view_all_errors": "View all errors",
   "log_entry_description": "Log entry with level: __level__",
   "navigate_log_source": "Navigate to log position in source code: __location__",
-  "other_output_files": "Other output files",
+  "other_output_files": "Download other output files",
   "toggle_output_files_list": "Toggle output files list",
   "n_warnings": "__count__ warning",
   "n_warnings_plural": "__count__ warnings",
