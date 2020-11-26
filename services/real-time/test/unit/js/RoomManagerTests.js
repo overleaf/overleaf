@@ -31,7 +31,7 @@ describe('RoomManager', function () {
           warn: sinon.stub(),
           error: sinon.stub()
         }),
-        'metrics-sharelatex': (this.metrics = { gauge: sinon.stub() })
+        '@overleaf/metrics': (this.metrics = { gauge: sinon.stub() })
       }
     })
     this.RoomManager._clientsInRoom = sinon.stub()
