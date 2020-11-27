@@ -27,6 +27,7 @@ describe('NewsletterManager', function() {
 
     this.NewsletterManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
+        'logger-sharelatex': { info: sinon.stub() },
         'mailchimp-api-v3': this.Mailchimp,
         'settings-sharelatex': this.Settings
       },

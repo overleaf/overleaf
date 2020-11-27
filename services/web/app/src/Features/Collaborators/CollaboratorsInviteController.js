@@ -23,11 +23,9 @@ const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
 const EmailHelper = require('../Helpers/EmailHelper')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
-const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const rateLimiter = require('../../infrastructure/RateLimiter')
-const request = require('request')
 
 module.exports = CollaboratorsInviteController = {
   getAllInvites(req, res, next) {

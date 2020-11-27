@@ -74,7 +74,6 @@ describe('ProjectEntityHandler', function() {
         '../../models/Project': {
           Project: this.ProjectModel
         },
-        '../Errors/Errors': Errors,
         './ProjectLocator': this.ProjectLocator,
         './ProjectGetter': (this.ProjectGetter = {}),
         '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender

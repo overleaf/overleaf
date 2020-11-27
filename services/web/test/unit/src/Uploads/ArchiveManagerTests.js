@@ -50,6 +50,7 @@ describe('ArchiveManager', function() {
         console: console
       },
       requires: {
+        'settings-sharelatex': {},
         yauzl: (this.yauzl = {
           open: sinon.stub().callsArgWith(2, null, this.zipfile)
         }),

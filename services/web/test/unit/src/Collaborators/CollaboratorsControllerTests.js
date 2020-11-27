@@ -70,7 +70,6 @@ describe('CollaboratorsController', function() {
         '../Tags/TagsHandler': this.TagsHandler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
-        '../Errors/Errors': Errors,
         'logger-sharelatex': this.logger
       }
     })

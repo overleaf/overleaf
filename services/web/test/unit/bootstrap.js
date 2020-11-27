@@ -20,3 +20,35 @@ require('sinon-mongoose')
 afterEach(function() {
   sinon.restore()
 })
+
+const SandboxedModule = require('sandboxed-module')
+const PromisesUtils = require('../../app/src/util/promises')
+const Errors = require('../../app/src/Features/Errors/Errors')
+const GLOBAL_REQUIRE_CACHE_FOR_SANDBOXED_MODULES = {
+  // cache p-limit for all expressify/promisifyAll users
+  '../../util/promises': PromisesUtils,
+  '../../../../app/src/util/promises': PromisesUtils,
+
+  // Errors are widely used and instance checks need the exact same prototypes
+  '../Errors/Errors': Errors,
+  '../../../../app/src/Features/Errors/Errors': Errors,
+  '../../../../../app/src/Features/Errors/Errors': Errors
+}
+const LIBRARIES = [
+  '@overleaf/o-error',
+  'async',
+  'lodash',
+  'moment',
+  'underscore',
+  'xml2js',
+  'json2csv',
+  'sanitize-html',
+  'marked'
+]
+LIBRARIES.forEach(lib => {
+  GLOBAL_REQUIRE_CACHE_FOR_SANDBOXED_MODULES[lib] = require(lib)
+})
+
+SandboxedModule.configure({
+  requires: GLOBAL_REQUIRE_CACHE_FOR_SANDBOXED_MODULES
+})

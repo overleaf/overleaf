@@ -40,7 +40,6 @@ describe('AuthorizationMiddleware', function() {
           ObjectId: this.ObjectId
         },
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
-        '../Errors/Errors': Errors,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler

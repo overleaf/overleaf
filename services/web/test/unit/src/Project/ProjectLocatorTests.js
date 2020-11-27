@@ -58,7 +58,6 @@ describe('ProjectLocator', function() {
       requires: {
         '../../models/Project': { Project },
         '../../models/User': { User: this.User },
-        '../Errors/Errors': Errors,
         './ProjectGetter': this.ProjectGetter,
         './ProjectHelper': this.ProjectHelper,
         'logger-sharelatex': {

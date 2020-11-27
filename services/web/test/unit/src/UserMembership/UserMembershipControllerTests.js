@@ -78,7 +78,6 @@ describe('UserMembershipController', function() {
           '../Authentication/AuthenticationController': this
             .AuthenticationController,
           './UserMembershipHandler': this.UserMembershipHandler,
-          '../Errors/Errors': Errors,
           'logger-sharelatex': {
             log() {},
             err() {}

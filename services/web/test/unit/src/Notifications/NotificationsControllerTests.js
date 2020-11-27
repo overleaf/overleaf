@@ -51,11 +51,6 @@ describe('NotificationsController', function() {
       },
       requires: {
         './NotificationsHandler': this.handler,
-        underscore: (this.underscore = {
-          map(arr) {
-            return arr
-          }
-        }),
         'logger-sharelatex': {
           log() {},
           err() {}
@@ -73,7 +68,7 @@ describe('NotificationsController', function() {
       .callsArgWith(1, null, allNotifications)
     return this.controller.getAllUnreadNotifications(this.req, {
       send: body => {
-        body.should.equal(allNotifications)
+        body.should.deep.equal(allNotifications)
         this.handler.getUserNotifications.calledWith(user_id).should.equal(true)
         return done()
       }

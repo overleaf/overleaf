@@ -3,10 +3,10 @@ const settings = require('settings-sharelatex')
 const moment = require('moment')
 const EmailMessageHelper = require('./EmailMessageHelper')
 const StringHelper = require('../Helpers/StringHelper')
-const BaseWithHeaderEmailLayout = require(`./Layouts/BaseWithHeaderEmailLayout`)
+const BaseWithHeaderEmailLayout = require('./Layouts/BaseWithHeaderEmailLayout')
 const SpamSafe = require('./SpamSafe')
 const ctaEmailBody = require('./Bodies/cta-email')
-const NoCTAEmailBody = require(`./Bodies/NoCTAEmailBody`)
+const NoCTAEmailBody = require('./Bodies/NoCTAEmailBody')
 
 function _emailBodyPlainText(content, opts, ctaEmail) {
   let emailBody = `${content.greeting(opts, true)}`

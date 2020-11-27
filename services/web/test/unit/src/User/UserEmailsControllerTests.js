@@ -79,7 +79,6 @@ describe('UserEmailsController', function() {
         }),
         '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
-        '../Errors/Errors': Errors,
         'logger-sharelatex': (this.logger = {
           log() {},
           warn: sinon.stub(),

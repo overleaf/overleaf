@@ -62,7 +62,6 @@ describe('CollaboratorsInviteController', function() {
         '../Editor/EditorRealTimeController': (this.EditorRealTimeController = {
           emitToRoom: sinon.stub()
         }),
-        '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {}),
         '../Analytics/AnalyticsManager': this.AnalyticsManger,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,

@@ -63,8 +63,7 @@ describe('UserGetter', function() {
         },
         '../../infrastructure/Features': {
           hasFeature: sinon.stub().returns(true)
-        },
-        '../Errors/Errors': Errors
+        }
       }
     })
   })

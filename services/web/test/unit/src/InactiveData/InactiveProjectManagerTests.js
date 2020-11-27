@@ -21,6 +21,7 @@ const modulePath = path.join(
   '../../../../app/src/Features/InactiveData/InactiveProjectManager'
 )
 const { expect } = require('chai')
+const { ObjectId } = require('mongodb')
 
 describe('InactiveProjectManager', function() {
   beforeEach(function() {
@@ -40,6 +41,7 @@ describe('InactiveProjectManager', function() {
         console: console
       },
       requires: {
+        mongodb: { ObjectId },
         'settings-sharelatex': this.settings,
         'logger-sharelatex': {
           log() {},

@@ -41,7 +41,14 @@ test_module: test_unit_module test_acceptance_module
 # Unit tests
 #
 
-test_unit: test_unit_app test_unit_modules
+test_unit: test_unit_all
+test_unit_all:
+	COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:all
+	COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+
+test_unit_all_silent:
+	COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:all:silent
+	COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 test_unit_app:
 	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0

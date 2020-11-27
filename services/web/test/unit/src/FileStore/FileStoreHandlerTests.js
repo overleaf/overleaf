@@ -76,7 +76,6 @@ describe('FileStoreHandler', function() {
         '../../models/File': {
           File: this.FileModel
         },
-        '../Errors/Errors': Errors,
         fs: this.fs
       }
     })

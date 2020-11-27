@@ -97,8 +97,7 @@ describe('TeamInvitesHandler', function() {
         './SubscriptionLocator': this.SubscriptionLocator,
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './LimitationsManager': this.LimitationsManager,
-        '../Email/EmailHandler': this.EmailHandler,
-        '../Errors/Errors': Errors
+        '../Email/EmailHandler': this.EmailHandler
       }
     })
   })

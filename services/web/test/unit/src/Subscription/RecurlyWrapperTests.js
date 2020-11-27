@@ -158,9 +158,7 @@ describe('RecurlyWrapper', function() {
             log: sinon.stub()
           },
           request: sinon.stub(),
-          xml2js: require('xml2js'),
-          './Errors': SubscriptionErrors,
-          '../Errors/Errors': Errors
+          './Errors': SubscriptionErrors
         }
       }
     ))

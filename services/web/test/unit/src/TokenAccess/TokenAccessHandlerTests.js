@@ -41,8 +41,8 @@ describe('TokenAccessHandler', function() {
       requires: {
         mongodb: { ObjectId },
         '../../models/Project': { Project: (this.Project = {}) },
+        'logger-sharelatex': { err: sinon.stub() },
         'settings-sharelatex': (this.settings = {}),
-        '../Collaborators/CollaboratorsGetter': (this.CollaboratorsGetter = {}),
         '../User/UserGetter': (this.UserGetter = {}),
         '../V1/V1Api': (this.V1Api = {
           request: sinon.stub()

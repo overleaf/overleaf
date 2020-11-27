@@ -69,6 +69,7 @@ describe('TemplatesManager', function() {
         console: console
       },
       requires: {
+        'request-promise-native': sinon.stub(),
         '../Uploads/ProjectUploadManager': this.ProjectUploadManager,
         '../Project/ProjectOptionsHandler': this.ProjectOptionsHandler,
         '../Project/ProjectRootDocManager': this.ProjectRootDocManager,
@@ -77,7 +78,6 @@ describe('TemplatesManager', function() {
           getLoggedInUserId: sinon.stub()
         }),
         '../../infrastructure/FileWriter': this.FileWriter,
-        './TemplatesPublisher': this.TemplatesPublisher,
         'logger-sharelatex': {
           log() {},
           err() {}

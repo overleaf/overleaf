@@ -3,6 +3,7 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
+const ProjectHelper = require('../../../../app/src/Features/Project/ProjectHelper')
 
 const MODULE_PATH = '../../../../app/src/Features/Project/ProjectDetailsHandler'
 
@@ -69,6 +70,7 @@ describe('ProjectDetailsHandler', function() {
         console: console
       },
       requires: {
+        './ProjectHelper': ProjectHelper,
         './ProjectGetter': this.ProjectGetter,
         '../../models/Project': {
           Project: this.ProjectModel
@@ -81,7 +83,6 @@ describe('ProjectDetailsHandler', function() {
           err() {}
         },
         './ProjectTokenGenerator': this.ProjectTokenGenerator,
-        '../Errors/Errors': Errors,
         'settings-sharelatex': this.settings
       }
     })
@@ -227,6 +228,7 @@ describe('ProjectDetailsHandler', function() {
   })
 
   describe('generateUniqueName', function() {
+    // actually testing `ProjectHelper.promises.ensureNameIsUnique()`
     beforeEach(function() {
       this.longName = 'x'.repeat(this.handler.MAX_PROJECT_NAME_LENGTH - 5)
       const usersProjects = {

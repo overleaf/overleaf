@@ -167,7 +167,6 @@ describe('ProjectController', function() {
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         './ProjectEntityHandler': this.ProjectEntityHandler,
-        '../Errors/Errors': Errors,
         '../../infrastructure/Features': this.Features,
         '../Notifications/NotificationsBuilder': this.NotificationBuilder,
         '../User/UserGetter': this.UserGetter,

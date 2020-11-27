@@ -146,8 +146,7 @@ describe('ProjectDeleter', function() {
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
         '../../infrastructure/mongodb': { db: this.db, ObjectId },
         '../History/HistoryManager': this.HistoryManager,
-        'logger-sharelatex': this.logger,
-        '../Errors/Errors': Errors
+        'logger-sharelatex': this.logger
       },
       globals: {
         console: console

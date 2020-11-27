@@ -149,8 +149,7 @@ describe('EditorHttpController', function() {
         '../../infrastructure/FileWriter': this.FileWriter,
         '../Project/ProjectEntityUpdateHandler': this
           .ProjectEntityUpdateHandler,
-        '../Errors/HttpErrorHandler': this.HttpErrorHandler,
-        '../Errors/Errors': Errors
+        '../Errors/HttpErrorHandler': this.HttpErrorHandler
       }
     })
   })

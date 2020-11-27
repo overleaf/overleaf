@@ -196,9 +196,7 @@ describe('ProjectEntityMongoUpdateHandler', function() {
         './ProjectEntityHandler': this.ProjectEntityHandler,
         './ProjectLocator': this.ProjectLocator,
         './ProjectGetter': this.ProjectGetter,
-        './FolderStructureBuilder': this.FolderStructureBuilder,
-        // We need to provide Errors here to make instance check work
-        '../Errors/Errors': Errors
+        './FolderStructureBuilder': this.FolderStructureBuilder
       }
     })
   })

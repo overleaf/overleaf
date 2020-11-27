@@ -77,8 +77,7 @@ describe('OwnershipTransferHandler', function() {
           log() {},
           warn() {},
           err() {}
-        },
-        '../Errors/Errors': Errors
+        }
       }
     })
   })

@@ -2,19 +2,21 @@ const SandboxedModule = require('sandboxed-module')
 const cheerio = require('cheerio')
 const path = require('path')
 const { expect } = require('chai')
-const _ = require('underscore')
-_.templateSettings = { interpolate: /\{\{(.+?)\}\}/g }
 
 const MODULE_PATH = path.join(
   __dirname,
   '../../../../app/src/Features/Email/EmailBuilder'
 )
 
+const EmailMessageHelper = require('../../../../app/src/Features/Email/EmailMessageHelper')
+const ctaEmailBody = require('../../../../app/src/Features/Email/Bodies/cta-email')
+const NoCTAEmailBody = require('../../../../app/src/Features/Email/Bodies/NoCTAEmailBody')
+const BaseWithHeaderEmailLayout = require('../../../../app/src/Features/Email/Layouts/BaseWithHeaderEmailLayout')
+
 describe('EmailBuilder', function() {
-  beforeEach(function() {
+  before(function() {
     this.settings = {
       appName: 'testApp',
-      brandPrefix: '',
       siteUrl: 'https://www.overleaf.com'
     }
     this.EmailBuilder = SandboxedModule.require(MODULE_PATH, {
@@ -22,6 +24,10 @@ describe('EmailBuilder', function() {
         console: console
       },
       requires: {
+        './EmailMessageHelper': EmailMessageHelper,
+        './Bodies/cta-email': ctaEmailBody,
+        './Bodies/NoCTAEmailBody': NoCTAEmailBody,
+        './Layouts/BaseWithHeaderEmailLayout': BaseWithHeaderEmailLayout,
         'settings-sharelatex': this.settings,
         'logger-sharelatex': {
           log() {}

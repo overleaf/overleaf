@@ -47,8 +47,7 @@ describe('InstitutionsAPI', function() {
         },
         '../../../../../app/src/Features/V1/V1Api': {
           request: sinon.stub()
-        },
-        '../Errors/Errors': Errors
+        }
       }
     })
 

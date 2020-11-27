@@ -2,17 +2,13 @@ const sinon = require('sinon')
 const chai = require('chai')
 const { expect } = chai
 const SandboxedModule = require('sandboxed-module')
+const Errors = require('../../../../app/src/Features/Errors/Errors')
 const modulePath = '../../../../app/src/Features/User/SAMLIdentityManager.js'
 
 describe('SAMLIdentityManager', function() {
   const linkedEmail = 'another@example.com'
 
   beforeEach(function() {
-    this.Errors = {
-      EmailExistsError: sinon.stub(),
-      NotFoundError: sinon.stub(),
-      SAMLIdentityExistsError: sinon.stub()
-    }
     this.userId = 'user-id-1'
     this.user = {
       _id: this.userId,
@@ -166,7 +162,7 @@ describe('SAMLIdentityManager', function() {
           } catch (e) {
             error = e
           } finally {
-            expect(error).to.be.instanceof(this.Errors.EmailExistsError)
+            expect(error).to.be.instanceof(Errors.EmailExistsError)
             expect(this.User.findOneAndUpdate).to.not.have.been.called
           }
         })
@@ -197,7 +193,7 @@ describe('SAMLIdentityManager', function() {
           } catch (e) {
             error = e
           } finally {
-            expect(error).to.be.instanceof(this.Errors.SAMLIdentityExistsError)
+            expect(error).to.be.instanceof(Errors.SAMLIdentityExistsError)
             expect(this.User.findOneAndUpdate).to.not.have.been.called
           }
         })

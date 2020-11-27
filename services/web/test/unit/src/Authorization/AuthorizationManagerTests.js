@@ -35,7 +35,6 @@ describe('AuthorizationManager', function() {
         '../../models/User': {
           User: (this.User = {})
         },
-        '../Errors/Errors': Errors,
         '../TokenAccess/TokenAccessHandler': (this.TokenAccessHandler = {
           validateTokenForAnonymousAccess: sinon
             .stub()

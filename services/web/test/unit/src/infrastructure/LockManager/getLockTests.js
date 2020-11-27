@@ -120,6 +120,7 @@ describe('LockManager - getting the lock', function() {
   describe('when the lock times out', function() {
     beforeEach(function(done) {
       const time = Date.now()
+      this.LockManager.LOCK_TEST_INTERVAL = 1
       this.LockManager.MAX_LOCK_WAIT_TIME = 5
       this.LockManager._tryLock = sinon.stub().yields(null, false)
       return this.LockManager._getLock(this.key, this.namespace, (...args) => {
@@ -152,10 +153,10 @@ describe('LockManager - getting the lock', function() {
         }
       }
       // Start ten lock requests in order at 1ms 2ms 3ms...
-      // with them randomly holding the lock for 0-100ms.
+      // with them randomly holding the lock for 0-10ms.
       // Use predefined values for the random delay to make the test
       // deterministic.
-      const randomDelays = [52, 45, 41, 84, 60, 81, 31, 46, 9, 43]
+      const randomDelays = [5, 4, 1, 8, 6, 8, 3, 4, 2, 4]
       let startTime = 0
       return Array.from(randomDelays).map((randomDelay, i) =>
         ((randomDelay, i) => {

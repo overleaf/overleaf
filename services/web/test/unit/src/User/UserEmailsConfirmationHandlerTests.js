@@ -35,7 +35,6 @@ describe('UserEmailsConfirmationHandler', function() {
         }),
         'logger-sharelatex': (this.logger = { log: sinon.stub() }),
         '../Security/OneTimeTokenHandler': (this.OneTimeTokenHandler = {}),
-        '../Errors/Errors': Errors,
         './UserUpdater': (this.UserUpdater = {}),
         './UserGetter': (this.UserGetter = {
           getUser: sinon.stub().yields(null, this.mockUser)

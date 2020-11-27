@@ -17,7 +17,6 @@ const should = chai.should()
 const { expect } = chai
 const modulePath = '../../../../app/src/Features/User/UserSessionsManager.js'
 const SandboxedModule = require('sandboxed-module')
-const Async = require('async')
 
 describe('UserSessionsManager', function() {
   beforeEach(function() {
@@ -69,8 +68,7 @@ describe('UserSessionsManager', function() {
       requires: {
         'logger-sharelatex': this.logger,
         'settings-sharelatex': this.settings,
-        './UserSessionsRedis': this.UserSessionsRedis,
-        async: Async
+        './UserSessionsRedis': this.UserSessionsRedis
       }
     }))
   })

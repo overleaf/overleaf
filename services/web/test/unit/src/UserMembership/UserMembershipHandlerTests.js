@@ -75,7 +75,6 @@ describe('UserMembershipHandler', function() {
         mongodb: { ObjectId },
         './UserMembershipViewModel': this.UserMembershipViewModel,
         '../User/UserGetter': this.UserGetter,
-        '../Errors/Errors': Errors,
         '../../models/Institution': {
           Institution: this.Institution
         },

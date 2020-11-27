@@ -198,7 +198,7 @@ describe('ClsiFormatChecker', function() {
       it('should error when there is more than 5mb of data', function(done) {
         this.resources.push({
           path: 'massive.tex',
-          content: 'hello world\n'.repeat(833333) // over 5mb limit
+          content: 'hello world'.repeat(833333) // over 5mb limit
         })
 
         while (this.resources.length < 20) {
@@ -223,9 +223,7 @@ describe('ClsiFormatChecker', function() {
       it('should return nothing when project is correct size', function(done) {
         this.resources.push({
           path: 'massive.tex',
-          content: require('crypto')
-            .randomBytes(1000 * 1000 * 1)
-            .toString('hex')
+          content: 'x'.repeat(2 * 1000 * 1000)
         })
 
         while (this.resources.length < 20) {

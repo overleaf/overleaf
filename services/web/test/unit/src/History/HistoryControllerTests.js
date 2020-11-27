@@ -39,7 +39,6 @@ describe('HistoryController', function() {
         }),
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
-        '../Errors/Errors': Errors,
         './HistoryManager': (this.HistoryManager = {}),
         '../Project/ProjectDetailsHandler': (this.ProjectDetailsHandler = {}),
         '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),

@@ -77,7 +77,6 @@ describe('CollaboratorsHandler', function() {
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../Project/ProjectGetter': this.ProjectGetter,
         '../Project/ProjectHelper': this.ProjectHelper,
-        '../Errors/Errors': Errors,
         './CollaboratorsGetter': this.CollaboratorsGetter
       }
     })
@@ -445,7 +444,7 @@ describe('CollaboratorsHandler', function() {
           this.fromUserId,
           this.toUserId
         )
-        await sleep(100) // let the background tasks run
+        await sleep(10) // let the background tasks run
         for (const project of this.projects) {
           expect(
             this.TpdsProjectFlusher.promises.flushProjectToTpds
@@ -463,7 +462,7 @@ describe('CollaboratorsHandler', function() {
           this.fromUserId,
           this.toUserId
         )
-        await sleep(100) // let the background tasks run
+        await sleep(10) // let the background tasks run
         expect(this.logger.err).to.have.been.called
       })
     })

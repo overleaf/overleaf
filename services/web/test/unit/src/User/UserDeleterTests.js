@@ -102,8 +102,7 @@ describe('UserDeleter', function() {
           log: sinon.stub(),
           warn: sinon.stub(),
           err: sinon.stub()
-        }),
-        '../Errors/Errors': Errors
+        })
       },
       globals: {
         console: console

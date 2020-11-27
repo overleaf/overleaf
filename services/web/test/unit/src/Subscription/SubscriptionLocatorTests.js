@@ -35,6 +35,7 @@ describe('Subscription Locator Tests', function() {
         console: console
       },
       requires: {
+        './GroupPlansData': {},
         '../../models/Subscription': {
           Subscription: this.Subscription
         },

@@ -57,8 +57,6 @@ describe('UserController', function() {
         setUserPassword: sinon.stub()
       }
     }
-    this.ReferalAllocator = { allocate: sinon.stub() }
-    this.SubscriptionDomainHandler = { autoAllocate: sinon.stub() }
     this.UserUpdater = {
       changeEmailAddress: sinon.stub(),
       promises: {
@@ -83,11 +81,21 @@ describe('UserController', function() {
       unprocessableEntity: sinon.stub(),
       legacyInternal: sinon.stub()
     }
+
+    this.UrlHelper = {
+      getSafeRedirectPath: sinon.stub()
+    }
+    this.UrlHelper.getSafeRedirectPath
+      .withArgs('https://evil.com')
+      .returns(undefined)
+    this.UrlHelper.getSafeRedirectPath.returnsArg(0)
+
     this.UserController = SandboxedModule.require(modulePath, {
       globals: {
         console: console
       },
       requires: {
+        '../Helpers/UrlHelper': this.UrlHelper,
         './UserGetter': this.UserGetter,
         './UserDeleter': this.UserDeleter,
         './UserUpdater': this.UserUpdater,
@@ -102,9 +110,6 @@ describe('UserController', function() {
         '../../infrastructure/Features': (this.Features = {
           hasFeature: sinon.stub()
         }),
-        '../Referal/ReferalAllocator': this.ReferalAllocator,
-        '../Subscription/SubscriptionDomainHandler': this
-          .SubscriptionDomainHandler,
         './UserAuditLogHandler': (this.UserAuditLogHandler = {
           promises: {
             addEntry: sinon.stub().resolves()
@@ -123,7 +128,6 @@ describe('UserController', function() {
         '@overleaf/metrics': {
           inc() {}
         },
-        '../Errors/Errors': Errors,
         '@overleaf/o-error': OError,
         '../Email/EmailHandler': (this.EmailHandler = {
           sendEmail: sinon.stub(),
@@ -512,6 +516,16 @@ describe('UserController', function() {
       this.req.session.destroy = sinon.stub().callsArgWith(0)
       this.res.redirect = url => {
         url.should.equal(this.req.body.redirect)
+        done()
+      }
+      this.UserController.logout(this.req, this.res)
+    })
+
+    it('should redirect after logout, but not to evil.com', function(done) {
+      this.req.body.redirect = 'https://evil.com'
+      this.req.session.destroy = sinon.stub().callsArgWith(0)
+      this.res.redirect = url => {
+        url.should.equal('/login')
         done()
       }
       this.UserController.logout(this.req, this.res)

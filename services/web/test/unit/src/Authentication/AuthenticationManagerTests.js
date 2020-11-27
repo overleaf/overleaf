@@ -11,7 +11,7 @@ const modulePath =
 
 describe('AuthenticationManager', function() {
   beforeEach(function() {
-    this.settings = { security: { bcryptRounds: 12 } }
+    this.settings = { security: { bcryptRounds: 4 } }
     this.AuthenticationManager = SandboxedModule.require(modulePath, {
       globals: {
         console: console
@@ -42,7 +42,7 @@ describe('AuthenticationManager', function() {
       this.bcrypt.hash = bcrypt.hash
       // Hash of 'testpassword'
       this.testPassword =
-        '$2a$12$zhtThy3R5tLtw5sCwr5XD.zhPENGn4ecjeMcP87oYSYrIICFqBpei'
+        '$2a$04$DcU/3UeJf1PfsWlQL./5H.rGTQL1Z1iyz6r7bN9Do8cy6pVWxpKpK'
     })
 
     describe('authenticate', function() {
@@ -128,7 +128,7 @@ describe('AuthenticationManager', function() {
             } = this.db.users.updateOne.lastCall.args[1].$set
             expect(hashedPassword).to.exist
             expect(hashedPassword.length).to.equal(60)
-            expect(hashedPassword).to.match(/^\$2a\$12\$[a-zA-Z0-9/.]{53}$/)
+            expect(hashedPassword).to.match(/^\$2a\$04\$[a-zA-Z0-9/.]{53}$/)
             done()
           }
         )
@@ -151,7 +151,7 @@ describe('AuthenticationManager', function() {
         beforeEach(function(done) {
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
           this.bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
-          this.bcrypt.getRounds = sinon.stub().returns(12)
+          this.bcrypt.getRounds = sinon.stub().returns(4)
           this.AuthenticationManager.authenticate(
             { email: this.email },
             this.unencryptedPassword,
@@ -195,7 +195,7 @@ describe('AuthenticationManager', function() {
         beforeEach(function(done) {
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
           this.bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
-          this.bcrypt.getRounds = sinon.stub().returns(7)
+          this.bcrypt.getRounds = sinon.stub().returns(1)
           this.AuthenticationManager.setUserPassword = sinon
             .stub()
             .callsArgWith(2, null)
@@ -239,7 +239,7 @@ describe('AuthenticationManager', function() {
           this.settings.security.disableBcryptRoundsUpgrades = true
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
           this.bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
-          this.bcrypt.getRounds = sinon.stub().returns(7)
+          this.bcrypt.getRounds = sinon.stub().returns(1)
           this.AuthenticationManager.setUserPassword = sinon
             .stub()
             .callsArgWith(2, null)
@@ -670,7 +670,7 @@ describe('AuthenticationManager', function() {
       })
 
       it('should hash the password', function() {
-        this.bcrypt.genSalt.calledWith(12).should.equal(true)
+        this.bcrypt.genSalt.calledWith(4).should.equal(true)
         this.bcrypt.hash.calledWith(this.password, this.salt).should.equal(true)
       })
 

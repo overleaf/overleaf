@@ -18,6 +18,10 @@ describe('HttpErrorHandler', function() {
     this.HttpErrorHandler = SandboxedModule.require(modulePath, {
       globals: { console },
       requires: {
+        'settings-sharelatex': {
+          appName: 'Overleaf',
+          statusPageUrl: 'https://status.overlaf.com'
+        },
         'logger-sharelatex': this.logger
       }
     })

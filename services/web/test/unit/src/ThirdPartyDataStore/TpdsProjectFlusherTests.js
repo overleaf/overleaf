@@ -50,6 +50,7 @@ describe('TpdsProjectFlusher', function() {
 
     this.TpdsProjectFlusher = SandboxedModule.require(MODULE_PATH, {
       requires: {
+        'logger-sharelatex': { debug() {} },
         '../DocumentUpdater/DocumentUpdaterHandler': this
           .DocumentUpdaterHandler,
         '../Project/ProjectGetter': this.ProjectGetter,

@@ -39,8 +39,7 @@ describe('DocstoreManager', function() {
           warn: sinon.stub(),
           error: sinon.stub(),
           err() {}
-        }),
-        '../Errors/Errors': Errors
+        })
       }
     })
 
