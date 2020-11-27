@@ -47,7 +47,7 @@ describe('MongoAWS', function () {
         './mongodb': { db: (this.db = {}), ObjectId },
         JSONStream: (this.JSONStream = {}),
         'readline-stream': (this.readline = sinon.stub()),
-        'metrics-sharelatex': { inc() {} }
+        '@overleaf/metrics': { inc() {} }
       }
     })
 
