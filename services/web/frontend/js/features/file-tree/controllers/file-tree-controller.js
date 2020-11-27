@@ -43,10 +43,12 @@ App.controller('ReactFileTreeController', function(
   $scope.onSelect = selectedEntities => {
     if (selectedEntities.length === 1) {
       const selectedEntity = selectedEntities[0]
+      const type =
+        selectedEntity.type === 'fileRef' ? 'file' : selectedEntity.type
       $scope.$emit('entity:selected', {
         id: selectedEntity.entity._id,
         name: selectedEntity.entity.name,
-        type: selectedEntity.type
+        type
       })
 
       // in the react implementation there is no such concept as "1
