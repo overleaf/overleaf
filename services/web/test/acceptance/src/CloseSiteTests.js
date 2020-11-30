@@ -49,5 +49,19 @@ describe('siteIsOpen', function() {
         done()
       })
     })
+
+    it('should return a 200 on / for load balancer health checks', function(done) {
+      request.get('/', (error, response, body) => {
+        response.statusCode.should.equal(200)
+        done()
+      })
+    })
+
+    it('should return a 200 on /status for readiness checks', function(done) {
+      request.get('/status', (error, response, body) => {
+        response.statusCode.should.equal(200)
+        done()
+      })
+    })
   })
 })
