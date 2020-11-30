@@ -31,7 +31,8 @@ const UserSchema = new Schema({
       },
       confirmedAt: { type: Date },
       samlProviderId: { type: String },
-      affiliationUnchecked: { type: Boolean }
+      affiliationUnchecked: { type: Boolean },
+      reconfirmedAt: { type: Date }
     }
   ],
   first_name: { type: String, default: '' },

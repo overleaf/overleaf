@@ -72,9 +72,12 @@ describe('UserUpdater', function() {
         '../../infrastructure/Features': (this.Features = {
           hasFeature: sinon.stub().returns(false)
         }),
-        '../Subscription/FeaturesUpdater': {
-          refreshFeatures: this.refreshFeatures
-        },
+        '../Subscription/FeaturesUpdater': (this.FeaturesUpdater = {
+          refreshFeatures: this.refreshFeatures,
+          promises: {
+            refreshFeatures: sinon.stub().resolves()
+          }
+        }),
         'settings-sharelatex': (this.settings = {}),
         request: (this.request = {}),
         '../Newsletter/NewsletterManager': this.NewsletterManager,
@@ -87,10 +90,16 @@ describe('UserUpdater', function() {
       }
     })
 
+    this.stubbedUserEmail = 'hello@world.com'
     this.stubbedUser = {
       _id: '3131231',
       name: 'bob',
-      email: 'hello@world.com'
+      email: this.stubbedUserEmail,
+      emails: [
+        {
+          email: this.stubbedUserEmail
+        }
+      ]
     }
     this.newEmail = 'bob@bob.com'
     this.callback = sinon.stub()
@@ -708,19 +717,28 @@ describe('UserUpdater', function() {
 
   describe('confirmEmail', function() {
     beforeEach(function() {
-      this.UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, { n: 1 })
+      this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
+      this.UserGetter.promises.getUser.resolves(this.stubbedUser)
     })
 
     it('should update the email record', function(done) {
       this.UserUpdater.confirmEmail(
         this.stubbedUser._id,
-        this.newEmail,
+        this.stubbedUserEmail,
         err => {
           should.not.exist(err)
-          this.UserUpdater.updateUser
+          this.UserUpdater.promises.updateUser
             .calledWith(
-              { _id: this.stubbedUser._id, 'emails.email': this.newEmail },
-              { $set: { 'emails.$.confirmedAt': new Date() } }
+              {
+                _id: this.stubbedUser._id,
+                'emails.email': this.stubbedUserEmail
+              },
+              {
+                $set: {
+                  'emails.$.confirmedAt': new Date(),
+                  'emails.$.reconfirmedAt': new Date()
+                }
+              }
             )
             .should.equal(true)
           done()
@@ -734,9 +752,11 @@ describe('UserUpdater', function() {
         this.newEmail,
         err => {
           should.not.exist(err)
-          this.addAffiliation.calledOnce.should.equal(true)
+          this.InstitutionsAPI.promises.addAffiliation.calledOnce.should.equal(
+            true
+          )
           sinon.assert.calledWith(
-            this.addAffiliation,
+            this.InstitutionsAPI.promises.addAffiliation,
             this.stubbedUser._id,
             this.newEmail,
             { confirmedAt: new Date() }
@@ -747,9 +767,9 @@ describe('UserUpdater', function() {
     })
 
     it('handle error', function(done) {
-      this.UserUpdater.updateUser = sinon
+      this.UserUpdater.promises.updateUser = sinon
         .stub()
-        .callsArgWith(2, new Error('nope'))
+        .throws(new Error('nope'))
 
       this.UserUpdater.confirmEmail(
         this.stubbedUser._id,
@@ -762,7 +782,7 @@ describe('UserUpdater', function() {
     })
 
     it('handle missed update', function(done) {
-      this.UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, { n: 0 })
+      this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 0 })
 
       this.UserUpdater.confirmEmail(
         this.stubbedUser._id,
@@ -782,13 +802,13 @@ describe('UserUpdater', function() {
     })
 
     it('handle affiliation error', function(done) {
-      this.addAffiliation.callsArgWith(3, new Error('nope'))
+      this.InstitutionsAPI.promises.addAffiliation.throws(Error('nope'))
       this.UserUpdater.confirmEmail(
         this.stubbedUser._id,
         this.newEmail,
         err => {
           should.exist(err)
-          this.UserUpdater.updateUser.called.should.equal(false)
+          this.UserUpdater.promises.updateUser.called.should.equal(false)
           done()
         }
       )
@@ -800,7 +820,10 @@ describe('UserUpdater', function() {
         this.newEmail,
         err => {
           should.not.exist(err)
-          sinon.assert.calledWith(this.refreshFeatures, this.stubbedUser._id)
+          sinon.assert.calledWith(
+            this.FeaturesUpdater.promises.refreshFeatures,
+            this.stubbedUser._id
+          )
           done()
         }
       )

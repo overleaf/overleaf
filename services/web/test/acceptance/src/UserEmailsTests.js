@@ -6,6 +6,34 @@ const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 const MockV1Api = require('./helpers/MockV1Api')
 const expectErrorResponse = require('./helpers/expectErrorResponse')
 
+async function confirmEmail(userHelper, email) {
+  let response
+  // UserHelper.createUser does not create a confirmation token
+  response = await userHelper.request.post({
+    form: {
+      email
+    },
+    simple: false,
+    uri: '/user/emails/resend_confirmation'
+  })
+  expect(response.statusCode).to.equal(200)
+  const tokenData = await db.tokens
+    .find({
+      use: 'email_confirmation',
+      'data.user_id': userHelper.user._id.toString(),
+      usedAt: { $exists: false }
+    })
+    .next()
+  response = await userHelper.request.post({
+    form: {
+      token: tokenData.token
+    },
+    simple: false,
+    uri: '/user/emails/confirm'
+  })
+  expect(response.statusCode).to.equal(200)
+}
+
 describe('UserEmails', function() {
   beforeEach(function(done) {
     this.timeout(20000)
@@ -41,7 +69,9 @@ describe('UserEmails', function() {
                 expect(error).to.not.exist
                 expect(response.statusCode).to.equal(200)
                 expect(body[0].confirmedAt).to.not.exist
+                expect(body[0].reconfirmedAt).to.not.exist
                 expect(body[1].confirmedAt).to.not.exist
+                expect(body[1].reconfirmedAt).to.not.exist
                 cb()
               }
             )
@@ -88,7 +118,10 @@ describe('UserEmails', function() {
                 expect(error).to.not.exist
                 expect(response.statusCode).to.equal(200)
                 expect(body[0].confirmedAt).to.not.exist
+                expect(body[0].reconfirmedAt).to.not.exist
                 expect(body[1].confirmedAt).to.exist
+                expect(body[1].reconfirmedAt).to.exist
+                expect(body[1].reconfirmedAt).to.deep.equal(body[1].confirmedAt)
                 cb()
               }
             )
@@ -236,6 +269,37 @@ describe('UserEmails', function() {
         ],
         done
       )
+    })
+  })
+
+  describe('reconfirm an email', function() {
+    let email, userHelper, confirmedAtDate
+    beforeEach(async function() {
+      userHelper = new UserHelper()
+      email = userHelper.getDefaultEmail()
+      userHelper = await UserHelper.createUser({ email })
+      userHelper = await UserHelper.loginUser({
+        email,
+        password: userHelper.getDefaultPassword()
+      })
+      // original confirmation
+      await confirmEmail(userHelper, email)
+      const user = (await UserHelper.getUser({ email })).user
+      confirmedAtDate = user.emails[0].confirmedAt
+      expect(user.emails[0].confirmedAt).to.exist
+      expect(user.emails[0].reconfirmedAt).to.exist
+    })
+    it('should set reconfirmedAt and not reset confirmedAt', async function() {
+      await confirmEmail(userHelper, email)
+      const user = (await UserHelper.getUser({ email })).user
+      expect(user.emails[0].confirmedAt).to.exist
+      expect(user.emails[0].reconfirmedAt).to.exist
+      expect(user.emails[0].confirmedAt).to.deep.equal(confirmedAtDate)
+      expect(user.emails[0].reconfirmedAt).to.not.deep.equal(
+        user.emails[0].confirmedAt
+      )
+      expect(user.emails[0].reconfirmedAt > user.emails[0].confirmedAt).to.be
+        .true
     })
   })
 
