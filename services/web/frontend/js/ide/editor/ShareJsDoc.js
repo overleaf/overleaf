@@ -18,6 +18,7 @@
  */
 import EventEmitter from '../../utils/EventEmitter'
 import ShareJs from 'libs/sharejs'
+import EditorWatchdogManager from '../connection/EditorWatchdogManager'
 
 let ShareJsDoc
 const SINGLE_USER_FLUSH_DELAY = 1000 // ms
@@ -30,7 +31,13 @@ export default (ShareJsDoc = (function() {
 
       this.prototype.FATAL_OP_TIMEOUT = 30000
     }
-    constructor(doc_id, docLines, version, socket) {
+    constructor(
+      doc_id,
+      docLines,
+      version,
+      socket,
+      globalEditorWatchdogManager
+    ) {
       super()
       // Dencode any binary bits of data
       // See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
@@ -88,8 +95,12 @@ export default (ShareJsDoc = (function() {
       this._doc.on('change', (...args) => {
         return this.trigger('change', ...Array.from(args))
       })
+      this.EditorWatchdogManager = new EditorWatchdogManager({
+        parent: globalEditorWatchdogManager
+      })
       this._doc.on('acknowledge', () => {
         this.lastAcked = new Date() // note time of last ack from server for an op we sent
+        this.EditorWatchdogManager.onAck() // keep track of last ack globally
         return this.trigger('acknowledge')
       })
       this._doc.on('remoteop', (...args) => {
@@ -312,19 +323,49 @@ export default (ShareJsDoc = (function() {
       return size
     }
 
+    _attachEditorWatchdogManager(editorName, editor) {
+      // end-to-end check for edits -> acks, for this very ShareJsdoc
+      // This will catch a broken connection and missing UX-blocker for the
+      //  user, allowing them to keep editing.
+      this._detachEditorWatchdogManager = this.EditorWatchdogManager.attachToEditor(
+        editorName,
+        editor
+      )
+    }
+
+    _attachToEditor(editorName, editor, attachToShareJs) {
+      this._attachEditorWatchdogManager(editorName, editor)
+
+      attachToShareJs()
+    }
+
+    _maybeDetachEditorWatchdogManager() {
+      // a failed attach attempt may lead to a missing cleanup handler
+      if (this._detachEditorWatchdogManager) {
+        this._detachEditorWatchdogManager()
+        delete this._detachEditorWatchdogManager
+      }
+    }
+
     attachToAce(ace) {
-      return this._doc.attach_ace(ace, false, window.maxDocLength)
+      this._attachToEditor('Ace', ace, () => {
+        this._doc.attach_ace(ace, false, window.maxDocLength)
+      })
     }
     detachFromAce() {
+      this._maybeDetachEditorWatchdogManager()
       return typeof this._doc.detach_ace === 'function'
         ? this._doc.detach_ace()
         : undefined
     }
 
     attachToCM(cm) {
-      return this._doc.attach_cm(cm, false)
+      this._attachToEditor('CM', cm, () => {
+        this._doc.attach_cm(cm, false)
+      })
     }
     detachFromCM() {
+      this._maybeDetachEditorWatchdogManager()
       return typeof this._doc.detach_cm === 'function'
         ? this._doc.detach_cm()
         : undefined

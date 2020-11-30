@@ -13,15 +13,31 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../base'
+import EditorWatchdogManager from '../connection/EditorWatchdogManager'
 // We create and provide this as service so that we can access the global ide
 // from within other parts of the angular app.
-App.factory('ide', function($http, queuedHttp, $modal, $q, $filter, $timeout) {
+App.factory('ide', function(
+  $http,
+  queuedHttp,
+  $modal,
+  $q,
+  $filter,
+  $timeout,
+  eventTracking
+) {
   const ide = {}
   ide.$http = $http
   ide.queuedHttp = queuedHttp
   ide.$q = $q
   ide.$filter = $filter
   ide.$timeout = $timeout
+  ide.globalEditorWatchdogManager = new EditorWatchdogManager({
+    onTimeoutHandler: meta => {
+      eventTracking.sendMB('losing-edits', meta)
+      // clone the meta object, reportError adds additional fields into it
+      ide.reportError('losing-edits', Object.assign({}, meta))
+    }
+  })
 
   this.recentEvents = []
   ide.pushEvent = (type, meta) => {

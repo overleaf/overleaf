@@ -507,7 +507,8 @@ export default (Document = (function() {
               this.doc_id,
               docLines,
               version,
-              this.ide.socket
+              this.ide.socket,
+              this.ide.globalEditorWatchdogManager
             )
             this._decodeRanges(ranges)
             this.ranges = new RangesTracker(

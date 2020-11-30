@@ -50,6 +50,7 @@ if (ace.config._moduleUrl == null) {
 }
 
 App.directive('aceEditor', function(
+  ide,
   $timeout,
   $compile,
   $rootScope,
@@ -115,6 +116,11 @@ App.directive('aceEditor', function(
 
       const editor = ace.edit(element.find('.ace-editor-body')[0])
       editor.$blockScrolling = Infinity
+
+      // end-to-end check for edits -> acks, globally on any doc
+      // This may catch a missing attached ShareJsDoc that in turn bails out
+      //  on missing acks.
+      ide.globalEditorWatchdogManager.attachToEditor('Ace', editor)
 
       // auto-insertion of braces, brackets, dollars
       editor.setOption('behavioursEnabled', scope.autoPairDelimiters || false)
