@@ -1000,7 +1000,6 @@
 @file-tree-line-height: 2.05;
 @file-tree-item-color: #fff;
 @file-tree-item-focus-color: @file-tree-item-color;
-@file-tree-item-focus-selected-color: @file-tree-item-color;
 @file-tree-item-selected-color: @file-tree-item-color;
 @file-tree-item-toggle-color: @ol-blue-gray-2;
 @file-tree-item-icon-color: @ol-blue-gray-2;
@@ -1019,7 +1018,7 @@
 @outline-item-h-padding: @outline-h-rhythm * 0.25;
 @outline-line-guide-color: @ol-blue-gray-3;
 @outline-expand-collapse-color: @ol-blue-gray-2;
-@outline-no-items-color: @ol-blue-gray-2;
+@outline-no-items-color: @file-tree-item-color;
 @outline-header-hover-bg: @ol-blue-gray-6;
 @outline-highlight-bg: tint(@file-tree-bg, 15%);
 @vertical-resizable-resizer-bg: @ol-blue-gray-5;
@@ -1097,11 +1096,12 @@
 @history-entry-selected-label-bg-color: #fff;
 @history-entry-selected-label-color: @ol-blue;
 @history-entry-selected-pseudo-label-color: @ol-green;
-@history-entry-day-bg: @ol-blue-gray-2;
+@history-entry-day-bg: @ol-blue-gray-1;
+@history-entry-day-color: @ol-blue-gray-3;
 @history-entry-selected-bg: @ol-green;
 @history-entry-handle-bg: darken(@ol-green, 10%);
 @history-entry-handle-height: 8px;
-@history-base-color: @ol-blue-gray-2;
+@history-base-color: @ol-blue-gray-3;
 @history-highlight-color: @ol-type-color;
 @history-toolbar-bg-color: @editor-toolbar-bg;
 @history-toolbar-color: #fff;

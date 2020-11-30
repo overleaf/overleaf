@@ -78,7 +78,7 @@
 .history-entry-day {
   display: block;
   background-color: @history-entry-day-bg;
-  color: #fff;
+  color: @history-entry-day-color;
   padding: 5px 10px;
   line-height: 1;
   position: sticky;
@@ -331,6 +331,7 @@
   color: @file-tree-item-color;
   line-height: @file-tree-line-height;
   &:hover {
+    .fake-full-width-bg(@file-tree-item-hover-bg);
     background-color: @file-tree-item-hover-bg;
     color: @file-tree-item-color;
     text-decoration: none;
@@ -340,20 +341,18 @@
     outline: none;
     text-decoration: none;
   }
-  &:hover {
-    .fake-full-width-bg(@file-tree-item-hover-bg);
-  }
 }
 .history-file-entity-link-selected {
   background-color: @file-tree-item-selected-bg;
   font-weight: bold;
   color: #fff;
   .fake-full-width-bg(@file-tree-item-selected-bg);
-  &:hover {
-    background-color: @file-tree-item-hover-bg;
-  }
+  &:hover,
   &:focus {
-    color: @file-tree-item-focus-selected-color;
+    background-color: @file-tree-item-selected-bg;
+    .fake-full-width-bg(@file-tree-item-selected-bg);
+    color: #fff;
+    pointer-events: none;
   }
 }
 .history-file-entity-name-container {
