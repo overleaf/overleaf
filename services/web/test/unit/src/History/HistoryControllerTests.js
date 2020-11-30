@@ -59,7 +59,7 @@ describe('HistoryController', function() {
 
   describe('selectHistoryApi', function() {
     beforeEach(function() {
-      this.req = { url: '/mock/url', method: 'POST' }
+      this.req = { url: '/mock/url', method: 'POST', params: {} }
       this.res = 'mock-res'
       return (this.next = sinon.stub())
     })
