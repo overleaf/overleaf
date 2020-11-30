@@ -49,7 +49,6 @@ describe('<OutlinePane />', function() {
     )
 
     screen.getByRole('tree')
-    screen.getByRole('link', { textMatch: 'The File outline is a new feature' })
   })
 
   it('renders disabled outline', function() {
