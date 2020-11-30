@@ -469,7 +469,6 @@ App.directive('aceEditor', function(
           'Menlo',
           'Ubuntu Mono',
           'Consolas',
-          'source-code-pro',
           'monospace'
         ]
 
@@ -483,7 +482,7 @@ App.directive('aceEditor', function(
             case 'lucida':
               return editor.setOption(
                 'fontFamily',
-                '"Lucida Console", monospace'
+                '"Lucida Console", "Source Code Pro", monospace'
               )
             default:
               return editor.setOption('fontFamily', null)
