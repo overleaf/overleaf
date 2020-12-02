@@ -33,7 +33,7 @@ describe('<PreviewPane />', function() {
       })
       render(<PreviewPane {...propsAfterCompileWithErrors} />)
       screen.getByRole('alertdialog', {
-        name: 'Your project has errors. This is the first one.'
+        name: 'This project has errors. This is the first one.'
       })
       screen.getByText(sampleError1.message)
     })
@@ -46,7 +46,7 @@ describe('<PreviewPane />', function() {
       render(<PreviewPane {...propsAfterCompileWithWarningsOnly} />)
       expect(
         screen.queryByRole('alertdialog', {
-          name: 'Your project has errors. This is the first one.'
+          name: 'This project has errors. This is the first one.'
         })
       ).to.not.exist
     })
@@ -59,7 +59,7 @@ describe('<PreviewPane />', function() {
       render(<PreviewPane {...propsWhileCompiling} />)
       expect(
         screen.queryByRole('alertdialog', {
-          name: 'Your project has errors. This is the first one.'
+          name: 'This project has errors. This is the first one.'
         })
       ).to.not.exist
     })
@@ -77,7 +77,7 @@ describe('<PreviewPane />', function() {
       render(<PreviewPane {...propsWithErrorsViewingLogs} />)
       expect(
         screen.queryByRole('alertdialog', {
-          name: 'Your project has errors. This is the first one.'
+          name: 'This project has errors. This is the first one.'
         })
       ).to.not.exist
     })
@@ -108,7 +108,7 @@ describe('<PreviewPane />', function() {
       rerender(<PreviewPane {...propsWithErrorsAfterViewingLogs} />)
       expect(
         screen.queryByRole('alertdialog', {
-          name: 'Your project has errors. This is the first one.'
+          name: 'This project has errors. This is the first one.'
         })
       ).to.not.exist
     })
@@ -139,7 +139,7 @@ describe('<PreviewPane />', function() {
       )
       rerender(<PreviewPane {...propsWithErrorsAfterSecondCompile} />)
       screen.getByRole('alertdialog', {
-        name: 'Your project has errors. This is the first one.'
+        name: 'This project has errors. This is the first one.'
       })
       screen.getByText(sampleError2.message)
     })
@@ -157,7 +157,7 @@ describe('<PreviewPane />', function() {
       fireEvent.click(dismissPopUpButton)
       expect(
         screen.queryByRole('alertdialog', {
-          name: 'Your project has errors. This is the first one.'
+          name: 'This project has errors. This is the first one.'
         })
       ).to.not.exist
     })
@@ -191,7 +191,7 @@ describe('<PreviewPane />', function() {
       rerender(<PreviewPane {...propsWithErrorsForSecondCompile} />)
       expect(
         screen.queryByRole('alertdialog', {
-          name: 'Your project has errors. This is the first one.'
+          name: 'This project has errors. This is the first one.'
         })
       ).to.not.exist
     })
@@ -228,7 +228,7 @@ describe('<PreviewPane />', function() {
       )
       render(<PreviewPane {...propsWithCLSIError} />)
 
-      screen.getByText('Your project did not compile because of an error')
+      screen.getByText('This project did not compile because of an error')
     })
 
     it('renders an accessible description for failed compiles with validation issues', function() {
@@ -248,7 +248,7 @@ describe('<PreviewPane />', function() {
       render(<PreviewPane {...propsWithValidationIssue} />)
 
       screen.getByText(
-        'Your project did not compile because of a validation issue'
+        'This project did not compile because of a validation issue'
       )
     })
   })
@@ -262,6 +262,17 @@ describe('<PreviewPane />', function() {
     validationIssues = {},
     errors = {}
   ) {
+    const logEntriesWithDefaults = {
+      errors: [],
+      warnings: [],
+      typesetting: [],
+      ...logEntries
+    }
+    logEntriesWithDefaults.all = [
+      ...logEntriesWithDefaults.errors,
+      ...logEntriesWithDefaults.warnings,
+      ...logEntriesWithDefaults.typesetting
+    ]
     return {
       compilerState: {
         isAutoCompileOn: false,
@@ -270,7 +281,7 @@ describe('<PreviewPane />', function() {
         isDraftModeOn: false,
         isSyntaxCheckOn: false,
         lastCompileTimestamp,
-        logEntries,
+        logEntries: logEntriesWithDefaults,
         compileFailed,
         validationIssues,
         errors
@@ -278,12 +289,17 @@ describe('<PreviewPane />', function() {
       onClearCache: () => {},
       onLogEntryLocationClick: () => {},
       onRecompile: () => {},
+      onRecompileFromScratch: () => {},
       onRunSyntaxCheckNow: () => {},
       onSetAutoCompile: () => {},
       onSetDraftMode: () => {},
       onSetSyntaxCheck: () => {},
       onToggleLogs: () => {},
-      showLogs: isShowingLogs
+      onSetSplitLayout: () => {},
+      onSetFullLayout: () => {},
+      onStopCompilation: () => {},
+      showLogs: isShowingLogs,
+      splitLayout: true
     }
   }
 })

@@ -9,19 +9,30 @@ function useExpandCollapse({
 } = {}) {
   const ref = useRef()
   const [isExpanded, setIsExpanded] = useState(initiallyExpanded)
-  const [size, setSize] = useState()
+  const [sizing, setSizing] = useState({
+    size: null,
+    needsExpandCollapse: null
+  })
 
   useLayoutEffect(
     () => {
       const expandCollapseEl = ref.current
-      if (isExpanded) {
+      if (expandCollapseEl) {
         const expandedSize =
           dimension === 'height'
             ? expandCollapseEl.scrollHeight
             : expandCollapseEl.scrollWidth
-        setSize(expandedSize)
-      } else {
-        setSize(collapsedSize)
+
+        const needsExpandCollapse = expandedSize > collapsedSize
+
+        if (isExpanded) {
+          setSizing({ size: expandedSize, needsExpandCollapse })
+        } else {
+          setSizing({
+            size: needsExpandCollapse ? collapsedSize : expandedSize,
+            needsExpandCollapse
+          })
+        }
       }
     },
     [isExpanded]
@@ -39,10 +50,11 @@ function useExpandCollapse({
 
   return {
     isExpanded,
+    needsExpandCollapse: sizing.needsExpandCollapse,
     expandableProps: {
       ref,
       style: {
-        [dimension === 'height' ? 'height' : 'width']: `${size}px`
+        [dimension === 'height' ? 'height' : 'width']: `${sizing.size}px`
       },
       className: expandableClasses
     },

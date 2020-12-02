@@ -522,7 +522,7 @@
     display: inline-block;
     font-weight: bold;
     text-decoration: none;
-    .button-variant(#fff, shade(@background, 20%), transparent);
+    .btn-alert-variant(@background);
     .button-size(
       @padding-xs-vertical; @padding-small-horizontal; @font-size-small;
         @line-height-small; @btn-border-radius-small
@@ -536,6 +536,11 @@
   .small {
     color: @text-color;
   }
+}
+
+.btn-alert-variant(@alert-bg) {
+  .button-variant(#fff, shade(@alert-bg, 15%), transparent);
+  border-radius: @btn-border-radius-base;
 }
 
 // Tables

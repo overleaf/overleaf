@@ -49,65 +49,71 @@ entering extended mode
   const errors = [sampleError1, sampleError2]
   const warnings = [sampleWarning]
   const typesetting = [sampleTypesettingIssue]
-  const logEntries = [...errors, ...warnings, ...typesetting]
+  const logEntries = {
+    all: [...errors, ...warnings, ...typesetting],
+    errors,
+    warnings,
+    typesetting
+  }
 
   const onLogEntryLocationClick = sinon.stub()
+  const noOp = () =>
+    describe('with logs', function() {
+      beforeEach(function() {
+        render(
+          <PreviewLogsPane
+            logEntries={logEntries}
+            rawLog={sampleRawLog}
+            onLogEntryLocationClick={onLogEntryLocationClick}
+            onClearCache={noOp}
+          />
+        )
+      })
+      it('renders all log entries with appropriate labels', function() {
+        const errorEntries = screen.getAllByLabelText(
+          `Log entry with level: error`
+        )
+        const warningEntries = screen.getAllByLabelText(
+          `Log entry with level: warning`
+        )
+        const typesettingEntries = screen.getAllByLabelText(
+          `Log entry with level: typesetting`
+        )
+        expect(errorEntries).to.have.lengthOf(errors.length)
+        expect(warningEntries).to.have.lengthOf(warnings.length)
+        expect(typesettingEntries).to.have.lengthOf(typesetting.length)
+      })
 
-  describe('with logs', function() {
-    beforeEach(function() {
-      render(
-        <PreviewLogsPane
-          logEntries={logEntries}
-          rawLog={sampleRawLog}
-          onLogEntryLocationClick={onLogEntryLocationClick}
-        />
-      )
-    })
-    it('renders all log entries with appropriate labels', function() {
-      const errorEntries = screen.getAllByLabelText(
-        `Log entry with level: error`
-      )
-      const warningEntries = screen.getAllByLabelText(
-        `Log entry with level: warning`
-      )
-      const typesettingEntries = screen.getAllByLabelText(
-        `Log entry with level: typesetting`
-      )
-      expect(errorEntries).to.have.lengthOf(errors.length)
-      expect(warningEntries).to.have.lengthOf(warnings.length)
-      expect(typesettingEntries).to.have.lengthOf(typesetting.length)
-    })
+      it('renders the raw log', function() {
+        screen.getByLabelText('Raw logs from the LaTeX compiler')
+      })
 
-    it('renders the raw log', function() {
-      screen.getByLabelText('Raw logs from the LaTeX compiler')
-    })
-
-    it('renders a link to location button for every error and warning log entry', function() {
-      logEntries.forEach((entry, index) => {
-        const linkToSourceButton = screen.getByRole('button', {
-          name: `Navigate to log position in source code: ${entry.file}, ${
-            entry.line
-          }`
-        })
-        fireEvent.click(linkToSourceButton)
-        expect(onLogEntryLocationClick).to.have.callCount(index + 1)
-        const call = onLogEntryLocationClick.getCall(index)
-        expect(
-          call.calledWith({
-            file: entry.file,
-            line: entry.line,
-            column: entry.column
+      it('renders a link to location button for every error and warning log entry', function() {
+        logEntries.all.forEach((entry, index) => {
+          const linkToSourceButton = screen.getByRole('button', {
+            name: `Navigate to log position in source code: ${entry.file}, ${
+              entry.line
+            }`
           })
-        ).to.be.true
+          fireEvent.click(linkToSourceButton)
+          expect(onLogEntryLocationClick).to.have.callCount(index + 1)
+          const call = onLogEntryLocationClick.getCall(index)
+          expect(
+            call.calledWith({
+              file: entry.file,
+              line: entry.line,
+              column: entry.column
+            })
+          ).to.be.true
+        })
+      })
+      it(' does not render a link to location button for the raw log entry', function() {
+        const rawLogEntry = screen.getByLabelText(
+          'Raw logs from the LaTeX compiler'
+        )
+        expect(rawLogEntry.querySelector('.log-entry-header-link')).to.not.exist
       })
     })
-    it(' does not render a link to location button for the raw log entry', function() {
-      const rawLogEntry = screen.getByLabelText(
-        'Raw logs from the LaTeX compiler'
-      )
-      expect(rawLogEntry.querySelector('.log-entry-header-link')).to.not.exist
-    })
-  })
 
   describe('with validation issues', function() {
     const sampleValidationIssues = {
@@ -125,10 +131,11 @@ entering extended mode
         <PreviewLogsPane
           validationIssues={sampleValidationIssues}
           onLogEntryLocationClick={onLogEntryLocationClick}
+          onClearCache={noOp}
         />
       )
       const validationEntries = screen.getAllByLabelText(
-        'A validation issue which prevented your project from compiling'
+        'A validation issue which prevented this project from compiling'
       )
       expect(validationEntries).to.have.lengthOf(
         Object.keys(sampleValidationIssues).length
@@ -140,10 +147,11 @@ entering extended mode
         <PreviewLogsPane
           validationIssues={{ unknownIssue: true }}
           onLogEntryLocationClick={onLogEntryLocationClick}
+          onClearCache={noOp}
         />
       )
       const validationEntries = screen.queryAllByLabelText(
-        'A validation issue prevented your project from compiling'
+        'A validation issue prevented this project from compiling'
       )
       expect(validationEntries).to.have.lengthOf(0)
     })
@@ -161,10 +169,11 @@ entering extended mode
         <PreviewLogsPane
           errors={sampleErrors}
           onLogEntryLocationClick={onLogEntryLocationClick}
+          onClearCache={noOp}
         />
       )
       const errorEntries = screen.getAllByLabelText(
-        'An error which prevented your project from compiling'
+        'An error which prevented this project from compiling'
       )
       expect(errorEntries).to.have.lengthOf(Object.keys(sampleErrors).length)
     })
@@ -174,10 +183,11 @@ entering extended mode
         <PreviewLogsPane
           errors={{ unknownIssue: true }}
           onLogEntryLocationClick={onLogEntryLocationClick}
+          onClearCache={noOp}
         />
       )
       const errorEntries = screen.queryAllByLabelText(
-        'There was an error compiling your project'
+        'There was an error compiling this project'
       )
       expect(errorEntries).to.have.lengthOf(0)
     })

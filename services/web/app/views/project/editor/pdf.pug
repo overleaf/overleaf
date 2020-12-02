@@ -16,6 +16,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			}`
 			on-clear-cache="clearCache"
 			on-recompile="recompile"
+			on-recompile-from-scratch="recompileFromScratch"
 			on-run-syntax-check-now="runSyntaxCheckNow"
 			on-set-auto-compile="setAutoCompile"
 			on-set-draft-mode="setDraftMode"
@@ -23,6 +24,10 @@ div.full-size.pdf(ng-controller="PdfController")
 			on-toggle-logs="toggleLogs"
 			output-files="pdf.outputFiles"
 			pdf-download-url="pdf.downloadUrl"
+			split-layout="ui.pdfLayout === 'sideBySide'"
+			on-set-split-layout="setPdfSplitLayout"
+			on-set-full-layout="setPdfFullLayout"
+			on-stop-compilation="stop"
 			show-logs="shouldShowLogs"
 			on-log-entry-location-click="openInEditor"
 		)
@@ -234,7 +239,7 @@ div.full-size.pdf(ng-controller="PdfController")
 							href
 							dropdown-toggle
 						)
-							| !{translate("other_logs_and_files")}
+							| #{translate("other_logs_and_files")}
 							span.caret
 						ul.dropdown-menu.dropdown-menu-right
 							li(ng-repeat="file in pdf.outputFiles")

@@ -1,40 +1,79 @@
 .logs-pane {
   .full-size;
   top: @pdf-top-offset;
-  padding: @padding-sm;
   overflow-y: auto;
   background-color: @logs-pane-bg;
 }
 
+.logs-pane-content {
+  display: flex;
+  flex-direction: column;
+  padding: @padding-sm;
+  min-height: 100%;
+}
+
+.logs-pane-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: @padding-sm 0;
+  flex-grow: 1;
+  align-items: flex-end;
+}
+
+.logs-pane-actions-clear-cache {
+  .no-outline-ring-on-click;
+  margin-right: @margin-sm;
+}
+
 .log-entry {
   margin-bottom: @margin-sm;
+  border-radius: @border-radius-base;
+  overflow: hidden;
+}
+
+.log-entry-first-error-popup {
+  border-radius: 0;
+  overflow: auto;
 }
 
 .log-entry-header {
   padding: 3px @padding-sm;
   display: flex;
   align-items: flex-start;
-  color: #fff;
   border-radius: @border-radius-base @border-radius-base 0 0;
-  &:last-child {
-    border-radius: @border-radius-base;
-  }
+  color: #fff;
 }
 
 .log-entry-header-error {
   background-color: @ol-red;
 }
 
+.log-entry-header-link-error {
+  .btn-alert-variant(@ol-red);
+}
+
 .log-entry-header-warning {
   background-color: @orange;
+}
+
+.log-entry-header-link-warning {
+  .btn-alert-variant(@orange);
 }
 
 .log-entry-header-typesetting {
   background-color: @ol-blue;
 }
 
+.log-entry-header-link-typesetting {
+  .btn-alert-variant(@ol-blue);
+}
+
 .log-entry-header-raw {
   background-color: @ol-blue-gray-4;
+}
+
+.log-entry-header-link-raw {
+  .btn-alert-variant(@ol-blue-gray-4);
 }
 
 .log-entry-header-title,
@@ -49,11 +88,14 @@
 }
 
 .log-entry-header-link {
+  display: flex;
+  align-items: center;
+  border-radius: 9999px;
   border-width: 0;
   flex-grow: 0;
   text-align: right;
-  white-space: nowrap;
-  padding-left: @padding-sm;
+  margin-left: @margin-sm;
+  max-width: 33%;
   &:hover,
   &:focus {
     outline: 0;
@@ -64,59 +106,44 @@
   }
 }
 
+.log-entry-header-link-location {
+  white-space: nowrap;
+  direction: rtl;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 0 @padding-xs;
+}
+
 .log-entry-content {
   background-color: #fff;
   padding: @padding-sm;
-  &:last-child {
-    border-radius: 0 0 @border-radius-base @border-radius-base;
-  }
 }
 
-.log-entry-content-raw-expandable-container {
-  position: relative;
+.log-entry-content-raw-container {
   background-color: @ol-blue-gray-1;
   border-radius: @border-radius-base;
-}
-
-.log-entry-content-raw-button-container-collapsed {
-  padding-bottom: 0;
+  overflow: hidden;
 }
 
 .log-entry-content-raw {
-  font-size: @font-size-small;
+  font-size: @font-size-extra-small;
   color: @ol-blue-gray-4;
-  padding: @padding-sm @padding-sm @padding-xl @padding-sm;
+  padding: @padding-sm;
   margin: 0;
 }
 
-.log-entry-content-raw-collapsed {
-  padding-bottom: 0;
-}
-
 .log-entry-content-button-container {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  position: relative;
   height: 40px;
+  margin-top: 0;
+  transition: margin 0.15s ease-in-out, opacity 0.15s ease-in-out;
   padding-bottom: @padding-sm;
   text-align: center;
+  background-image: linear-gradient(0, @ol-blue-gray-1, transparent);
   border-radius: 0 0 @border-radius-base @border-radius-base;
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background-image: linear-gradient(0, @ol-blue-gray-1, transparent);
-    opacity: 0;
-    transition: opacity 0.15s ease-in-out;
-  }
 }
-
-.log-entry-content-button-container-collapsed::before {
-  opacity: 1;
+.log-entry-content-button-container-collapsed {
+  margin-top: -40px;
 }
 
 .log-entry-btn-expand-collapse {
@@ -139,7 +166,6 @@
   z-index: 1;
   top: @toolbar-small-height + 2px;
   right: @padding-xs;
-  border-radius: @border-radius-base;
   width: 90%;
   max-width: 450px;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
@@ -149,7 +175,7 @@
     content: '';
     .triangle(top, @padding-sm, @padding-xs, @ol-red);
     top: -@padding-xs;
-    right: @padding-md;
+    right: @padding-xl;
   }
 }
 
@@ -157,9 +183,20 @@
   display: flex;
   justify-content: space-between;
   padding: 0 @padding-sm @padding-sm @padding-sm;
-  margin-top: -@margin-sm;
+  border-radius: 0 0 @border-radius-base @border-radius-base;
 }
 
 .first-error-btn {
   .no-outline-ring-on-click;
+}
+
+.log-location-tooltip {
+  word-break: break-all;
+  &.tooltip.in {
+    opacity: 1;
+  }
+  & > .tooltip-inner {
+    max-width: 450px;
+    text-align: left;
+  }
 }

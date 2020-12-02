@@ -17,7 +17,6 @@ function useResizeObserver(observedElement, observedData, callback) {
     () => {
       if ('ResizeObserver' in window) {
         const observedCurrent = observedElement && observedElement.current
-
         if (observedCurrent) {
           observe(observedElement.current)
         }
@@ -27,7 +26,9 @@ function useResizeObserver(observedElement, observedData, callback) {
         }
 
         return () => {
-          unobserve(observedCurrent)
+          if (observedCurrent) {
+            unobserve(observedCurrent)
+          }
         }
       }
     },

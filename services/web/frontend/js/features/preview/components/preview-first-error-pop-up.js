@@ -31,6 +31,7 @@ function PreviewFirstErrorPopUp({
         level={logEntry.level}
         showLineAndNoLink={false}
         showCloseButton
+        customClass="log-entry-first-error-popup"
         onClose={onClose}
       />
       <div className="first-error-popup-actions">

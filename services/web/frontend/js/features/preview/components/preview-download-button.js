@@ -1,10 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Dropdown, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
+import PreviewDownloadFileList from './preview-download-file-list'
 import Icon from '../../../shared/components/icon'
-
-export const topFileTypes = ['bbl', 'gls', 'ind']
 
 function PreviewDownloadButton({
   isCompiling,
@@ -12,24 +11,7 @@ function PreviewDownloadButton({
   pdfDownloadUrl,
   showText
 }) {
-  let topFiles = []
-  let otherFiles = []
   const { t } = useTranslation()
-
-  if (outputFiles) {
-    topFiles = outputFiles.filter(file => {
-      if (topFileTypes.includes(file.type)) {
-        return file
-      }
-    })
-
-    otherFiles = outputFiles.filter(file => {
-      if (!topFileTypes.includes(file.type)) {
-        if (file.type === 'pdf' && file.main === true) return
-        return file
-      }
-    })
-  }
 
   let textStyle = {}
   if (!showText) {
@@ -77,35 +59,10 @@ function PreviewDownloadButton({
         bsStyle="info"
       />
       <Dropdown.Menu id="download-dropdown-list">
-        <MenuItem header>{t('other_output_files')}</MenuItem>
-        <FileList list={topFiles} listType="main" />
-        {otherFiles.length > 0 && topFiles.length > 0 ? (
-          <>
-            <MenuItem divider />
-          </>
-        ) : (
-          <></>
-        )}
-        {otherFiles.length > 0 ? (
-          <>
-            <FileList list={otherFiles} listType="other" />
-          </>
-        ) : (
-          <></>
-        )}
+        <PreviewDownloadFileList fileList={outputFiles} />
       </Dropdown.Menu>
     </Dropdown>
   )
-}
-
-function FileList({ listType, list }) {
-  return list.map((file, index) => {
-    return (
-      <MenuItem download href={file.url} key={`${listType}-${index}`}>
-        <b>{file.fileName}</b>
-      </MenuItem>
-    )
-  })
 }
 
 PreviewDownloadButton.propTypes = {
@@ -113,11 +70,6 @@ PreviewDownloadButton.propTypes = {
   outputFiles: PropTypes.array,
   pdfDownloadUrl: PropTypes.string,
   showText: PropTypes.bool.isRequired
-}
-
-FileList.propTypes = {
-  list: PropTypes.array.isRequired,
-  listType: PropTypes.string.isRequired
 }
 
 export default PreviewDownloadButton

@@ -14,6 +14,15 @@ const sampleContent = (
   </div>
 )
 
+const originalScrollHeight = Object.getOwnPropertyDescriptor(
+  HTMLElement.prototype,
+  'offsetHeight'
+)
+const originalScrollWidth = Object.getOwnPropertyDescriptor(
+  HTMLElement.prototype,
+  'offsetWidth'
+)
+
 function ExpandCollapseTestUI({ expandCollapseArgs }) {
   const { expandableProps } = useExpandCollapse(expandCollapseArgs)
   return (
@@ -27,6 +36,33 @@ ExpandCollapseTestUI.propTypes = {
 }
 
 describe('useExpandCollapse', function() {
+  // JSDom doesn't compute layout/sizing, so we need to simulate sizing for the elements
+  // Here we are simulating that the content is bigger than the `collapsedSize`, so
+  // the expand-collapse widget is used
+  beforeEach(function() {
+    Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
+      configurable: true,
+      value: 500
+    })
+    Object.defineProperty(HTMLElement.prototype, 'scrollWidth', {
+      configurable: true,
+      value: 500
+    })
+  })
+
+  afterEach(function() {
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'scrollHeight',
+      originalScrollHeight
+    )
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'scrollWidth',
+      originalScrollWidth
+    )
+  })
+
   describe('custom CSS classes', function() {
     it('supports a custom CSS class', function() {
       const testArgs = {

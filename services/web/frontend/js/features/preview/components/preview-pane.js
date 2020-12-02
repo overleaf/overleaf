@@ -9,15 +9,20 @@ function PreviewPane({
   compilerState,
   onClearCache,
   onRecompile,
+  onRecompileFromScratch,
   onRunSyntaxCheckNow,
   onSetAutoCompile,
   onSetDraftMode,
   onSetSyntaxCheck,
   onToggleLogs,
+  onSetFullLayout,
+  onSetSplitLayout,
+  onStopCompilation,
   outputFiles,
   pdfDownloadUrl,
   onLogEntryLocationClick,
-  showLogs
+  showLogs,
+  splitLayout
 }) {
   const { t } = useTranslation()
 
@@ -81,15 +86,19 @@ function PreviewPane({
         compilerState={compilerState}
         logsState={{ nErrors, nWarnings, nLogEntries }}
         showLogs={showLogs}
-        onClearCache={onClearCache}
         onRecompile={onRecompile}
+        onRecompileFromScratch={onRecompileFromScratch}
         onRunSyntaxCheckNow={onRunSyntaxCheckNow}
         onSetAutoCompile={onSetAutoCompile}
         onSetDraftMode={onSetDraftMode}
         onSetSyntaxCheck={onSetSyntaxCheck}
         onToggleLogs={onToggleLogs}
+        onSetSplitLayout={onSetSplitLayout}
+        onSetFullLayout={onSetFullLayout}
+        onStopCompilation={onStopCompilation}
         outputFiles={outputFiles}
         pdfDownloadUrl={pdfDownloadUrl}
+        splitLayout={splitLayout}
       />
       <span aria-live="polite" className="sr-only">
         {hasCLSIErrors ? t('compile_error_description') : ''}
@@ -117,11 +126,15 @@ function PreviewPane({
       ) : null}
       {showLogs ? (
         <PreviewLogsPane
-          logEntries={compilerState.logEntries.all}
+          logEntries={compilerState.logEntries}
           rawLog={compilerState.rawLog}
           validationIssues={compilerState.validationIssues}
           errors={compilerState.errors}
+          outputFiles={outputFiles}
           onLogEntryLocationClick={onLogEntryLocationClick}
+          isClearingCache={compilerState.isClearingCache}
+          isCompiling={compilerState.isCompiling}
+          onClearCache={onClearCache}
         />
       ) : null}
     </>
@@ -134,6 +147,7 @@ PreviewPane.propTypes = {
     isCompiling: PropTypes.bool.isRequired,
     isDraftModeOn: PropTypes.bool.isRequired,
     isSyntaxCheckOn: PropTypes.bool.isRequired,
+    isClearingCache: PropTypes.bool.isRequired,
     lastCompileTimestamp: PropTypes.number,
     logEntries: PropTypes.object,
     validationIssues: PropTypes.object,
@@ -144,14 +158,19 @@ PreviewPane.propTypes = {
   onClearCache: PropTypes.func.isRequired,
   onLogEntryLocationClick: PropTypes.func.isRequired,
   onRecompile: PropTypes.func.isRequired,
+  onRecompileFromScratch: PropTypes.func.isRequired,
   onRunSyntaxCheckNow: PropTypes.func.isRequired,
   onSetAutoCompile: PropTypes.func.isRequired,
   onSetDraftMode: PropTypes.func.isRequired,
   onSetSyntaxCheck: PropTypes.func.isRequired,
+  onSetSplitLayout: PropTypes.func.isRequired,
+  onSetFullLayout: PropTypes.func.isRequired,
+  onStopCompilation: PropTypes.func.isRequired,
   onToggleLogs: PropTypes.func.isRequired,
   outputFiles: PropTypes.array,
   pdfDownloadUrl: PropTypes.string,
-  showLogs: PropTypes.bool.isRequired
+  showLogs: PropTypes.bool.isRequired,
+  splitLayout: PropTypes.bool.isRequired
 }
 
 export default PreviewPane

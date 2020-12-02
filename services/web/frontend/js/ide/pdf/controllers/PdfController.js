@@ -33,6 +33,14 @@ App.controller('PdfController', function(
   // view logic to check whether the files dropdown should "drop up" or "drop down"
   $scope.shouldDropUp = false
 
+  // Exposed methods for React layout handling
+  $scope.setPdfSplitLayout = function() {
+    $scope.$applyAsync(() => $scope.switchToSideBySideLayout('editor'))
+  }
+  $scope.setPdfFullLayout = function() {
+    $scope.$applyAsync(() => $scope.switchToFlatLayout('pdf'))
+  }
+
   const logsContainerEl = document.querySelector('.pdf-logs')
   const filesDropdownEl =
     logsContainerEl && logsContainerEl.querySelector('.files-dropdown')
@@ -587,17 +595,20 @@ App.controller('PdfController', function(
     const logEntries = {
       all: [],
       errors: [],
-      warnings: []
+      warnings: [],
+      typesetting: []
     }
 
     function accumulateResults(newEntries) {
-      for (let key of ['all', 'errors', 'warnings']) {
-        if (newEntries.type != null) {
-          for (let entry of newEntries[key]) {
-            entry.type = newEntries.type
+      for (let key of ['all', 'errors', 'warnings', 'typesetting']) {
+        if (newEntries[key]) {
+          if (newEntries.type != null) {
+            for (let entry of newEntries[key]) {
+              entry.type = newEntries.type
+            }
           }
+          logEntries[key] = logEntries[key].concat(newEntries[key])
         }
-        logEntries[key] = logEntries[key].concat(newEntries[key])
       }
     }
 
@@ -608,7 +619,7 @@ App.controller('PdfController', function(
         ignoreDuplicates: true
       })
       const all = [].concat(errors, warnings, typesetting)
-      accumulateResults({ all, errors, warnings })
+      accumulateResults({ all, errors, warnings, typesetting })
     }
 
     function processChkTex(log) {
@@ -859,6 +870,19 @@ App.controller('PdfController', function(
         return deferred.reject(error)
       })
     return deferred.promise
+  }
+
+  $scope.recompileFromScratch = function() {
+    $scope.pdf.compiling = true
+    return $scope
+      .clearCache()
+      .then(() => {
+        $scope.pdf.compiling = false
+        $scope.recompile()
+      })
+      .catch(error => {
+        console.error(error)
+      })
   }
 
   $scope.toggleLogs = function() {

@@ -1,9 +1,12 @@
 import React, { useRef, useState } from 'react'
 import PropTypes from 'prop-types'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { useTranslation } from 'react-i18next'
 import PreviewDownloadButton from './preview-download-button'
 import PreviewRecompileButton from './preview-recompile-button'
 import PreviewLogsToggleButton from './preview-logs-toggle-button'
 import useResizeObserver from '../../../shared/hooks/use-resize-observer'
+import Icon from '../../../shared/components/icon'
 
 function _getElementWidth(element) {
   if (!element) return 0
@@ -13,16 +16,20 @@ function _getElementWidth(element) {
 function PreviewToolbar({
   compilerState,
   logsState,
-  onClearCache,
+  onRecompileFromScratch,
   onRecompile,
   onRunSyntaxCheckNow,
   onSetAutoCompile,
   onSetDraftMode,
   onSetSyntaxCheck,
   onToggleLogs,
+  onSetSplitLayout,
+  onSetFullLayout,
+  onStopCompilation,
   outputFiles,
   pdfDownloadUrl,
-  showLogs
+  showLogs,
+  splitLayout
 }) {
   const showTextRef = useRef(true)
   const showToggleTextRef = useRef(true)
@@ -33,6 +40,7 @@ function PreviewToolbar({
   const [showToggleText, setShowToggleText] = useState(
     showToggleTextRef.current
   )
+  const { t } = useTranslation()
 
   function checkCanShowText(observedElement) {
     // toolbar items can be in 3 states:
@@ -182,6 +190,20 @@ function PreviewToolbar({
     return itemWidth
   }
 
+  const pdfExpandLabel = splitLayout ? t('full_screen') : t('split_screen')
+  const pdfExpandIconType = splitLayout ? 'expand' : 'compress'
+  const pdfExpandTooltip = (
+    <Tooltip id="expand-pdf-btn">{pdfExpandLabel}</Tooltip>
+  )
+
+  function handlePdfExpandBtnClick() {
+    if (splitLayout) {
+      onSetFullLayout()
+    } else {
+      onSetSplitLayout()
+    }
+  }
+
   useResizeObserver(toolbarRef, logsState, checkCanShowText)
 
   return (
@@ -195,11 +217,12 @@ function PreviewToolbar({
         <PreviewRecompileButton
           compilerState={compilerState}
           onRecompile={onRecompile}
+          onRecompileFromScratch={onRecompileFromScratch}
           onRunSyntaxCheckNow={onRunSyntaxCheckNow}
           onSetAutoCompile={onSetAutoCompile}
           onSetDraftMode={onSetDraftMode}
           onSetSyntaxCheck={onSetSyntaxCheck}
-          onClearCache={onClearCache}
+          onStopCompilation={onStopCompilation}
           showText={showText}
         />
         <PreviewDownloadButton
@@ -217,6 +240,15 @@ function PreviewToolbar({
           onToggle={onToggleLogs}
           showText={showToggleText}
         />
+        <OverlayTrigger placement="left" overlay={pdfExpandTooltip}>
+          <button
+            onClick={handlePdfExpandBtnClick}
+            className="toolbar-pdf-expand-btn toolbar-item"
+            aria-label={pdfExpandLabel}
+          >
+            <Icon type={pdfExpandIconType} />
+          </button>
+        </OverlayTrigger>
       </div>
     </div>
   )
@@ -237,13 +269,17 @@ PreviewToolbar.propTypes = {
     nLogEntries: PropTypes.number.isRequired
   }),
   showLogs: PropTypes.bool.isRequired,
-  onClearCache: PropTypes.func.isRequired,
+  splitLayout: PropTypes.bool.isRequired,
   onRecompile: PropTypes.func.isRequired,
+  onRecompileFromScratch: PropTypes.func.isRequired,
   onRunSyntaxCheckNow: PropTypes.func.isRequired,
   onSetAutoCompile: PropTypes.func.isRequired,
   onSetDraftMode: PropTypes.func.isRequired,
   onSetSyntaxCheck: PropTypes.func.isRequired,
   onToggleLogs: PropTypes.func.isRequired,
+  onSetSplitLayout: PropTypes.func.isRequired,
+  onSetFullLayout: PropTypes.func.isRequired,
+  onStopCompilation: PropTypes.func.isRequired,
   pdfDownloadUrl: PropTypes.string,
   outputFiles: PropTypes.array
 }

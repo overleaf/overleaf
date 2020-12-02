@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useState, useRef } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import useExpandCollapse from '../../../shared/hooks/use-expand-collapse'
+import useResizeObserver from '../../../shared/hooks/use-resize-observer'
 import Icon from '../../../shared/components/icon'
 
 function PreviewLogsPaneEntry({
@@ -15,15 +17,19 @@ function PreviewLogsPaneEntry({
   showSourceLocationLink = true,
   showCloseButton = false,
   entryAriaLabel = null,
+  customClass,
   onSourceLocationClick,
   onClose
 }) {
-  function handleLogEntryLinkClick() {
+  const logEntryClasses = classNames('log-entry', customClass)
+
+  function handleLogEntryLinkClick(e) {
+    e.preventDefault()
     onSourceLocationClick(sourceLocation)
   }
 
   return (
-    <div className="log-entry" aria-label={entryAriaLabel}>
+    <div className={logEntryClasses} aria-label={entryAriaLabel}>
       <PreviewLogEntryHeader
         level={level}
         sourceLocation={sourceLocation}
@@ -54,6 +60,15 @@ function PreviewLogEntryHeader({
   onClose
 }) {
   const { t } = useTranslation()
+  const logLocationSpanRef = useRef()
+  const [showLocationTooltip, setShowLocationTooltip] = useState(false)
+
+  useResizeObserver(
+    logLocationSpanRef,
+    showLocationTooltip,
+    setTooltipForLogLocationLinkIfNeeded
+  )
+
   const file = sourceLocation ? sourceLocation.file : null
   const line = sourceLocation ? sourceLocation.line : null
   const logEntryHeaderClasses = classNames('log-entry-header', {
@@ -62,26 +77,69 @@ function PreviewLogEntryHeader({
     'log-entry-header-typesetting': level === 'typesetting',
     'log-entry-header-raw': level === 'raw'
   })
+  const logEntryLocationBtnClasses = classNames('log-entry-header-link', {
+    'log-entry-header-link-error': level === 'error',
+    'log-entry-header-link-warning': level === 'warning',
+    'log-entry-header-link-typesetting': level === 'typesetting',
+    'log-entry-header-link-raw': level === 'raw'
+  })
   const headerLogLocationTitle = t('navigate_log_source', {
     location: file + (line ? `, ${line}` : '')
   })
 
+  function setTooltipForLogLocationLinkIfNeeded(observedElement) {
+    const spanEl = observedElement.target
+    const shouldShowTooltip = spanEl.scrollWidth > spanEl.clientWidth
+    setShowLocationTooltip(shouldShowTooltip)
+  }
+
+  const locationLinkText =
+    showSourceLocationLink && file ? `${file}${line ? `, ${line}` : ''}` : null
+
+  // Because we want an ellipsis on the left-hand side (e.g. "...longfilename.tex"), the
+  // `log-entry-header-link-location` class has text laid out from right-to-left using the CSS
+  // rule `direction: rtl;`.
+  // This works most of the times, except when the first character of the filename is considered
+  // a punctuation mark, like `/` (e.g. `/foo/bar/baz.sty`). In this case, because of
+  // right-to-left writing rules, the punctuation mark is moved to the right-side of the string,
+  // resulting in `...bar/baz.sty/` instead of `...bar/baz.sty`.
+  // To avoid this edge-case, we wrap the `logLocationLinkText` in two directional formatting
+  // characters:
+  //   * \u202A LEFT-TO-RIGHT EMBEDDING Treat the following text as embedded left-to-right.
+  //   * \u202C POP DIRECTIONAL FORMATTING End the scope of the last LRE, RLE, RLO, or LRO.
+  // This essentially tells the browser that, althought the text is laid out from right-to-left,
+  // the wrapped portion of text should follow left-to-right writing rules.
+  const locationLink = locationLinkText ? (
+    <button
+      className={logEntryLocationBtnClasses}
+      type="button"
+      aria-label={headerLogLocationTitle}
+      onClick={onSourceLocationClick}
+    >
+      <Icon type="chain" />
+      &nbsp;
+      <span ref={logLocationSpanRef} className="log-entry-header-link-location">
+        {`\u202A${locationLinkText}\u202C`}
+      </span>
+    </button>
+  ) : null
+
+  const locationTooltip = showLocationTooltip ? (
+    <Tooltip id={locationLinkText} className="log-location-tooltip">
+      {locationLinkText}
+    </Tooltip>
+  ) : null
+
   return (
     <header className={logEntryHeaderClasses}>
       <h3 className="log-entry-header-title">{headerTitle}</h3>
-      {showSourceLocationLink && file ? (
-        <button
-          className="btn-inline-link log-entry-header-link"
-          type="button"
-          title={headerLogLocationTitle}
-          onClick={onSourceLocationClick}
-        >
-          <Icon type="chain" />
-          &nbsp;
-          <span>{file}</span>
-          {line ? <span>, {line}</span> : null}
-        </button>
-      ) : null}
+      {showLocationTooltip ? (
+        <OverlayTrigger placement="left" overlay={locationTooltip}>
+          {locationLink}
+        </OverlayTrigger>
+      ) : (
+        locationLink
+      )}
       {showCloseButton ? (
         <button
           className="btn-inline-link log-entry-header-link"
@@ -101,45 +159,50 @@ function PreviewLogEntryContent({
   formattedContent,
   extraInfoURL
 }) {
-  const { isExpanded, expandableProps, toggleProps } = useExpandCollapse({
-    collapsedSize: 150,
-    classes: {
-      container: 'log-entry-content-raw-expandable-container'
-    }
+  const {
+    isExpanded,
+    needsExpandCollapse,
+    expandableProps,
+    toggleProps
+  } = useExpandCollapse({
+    collapsedSize: 150
   })
-  const logContentClasses = classNames('log-entry-content-raw', {
-    'log-entry-content-raw-collapsed': !isExpanded
-  })
+
   const buttonContainerClasses = classNames(
     'log-entry-content-button-container',
     {
       'log-entry-content-button-container-collapsed': !isExpanded
     }
   )
+
   const { t } = useTranslation()
 
   return (
     <div className="log-entry-content">
       {rawContent ? (
-        <div {...expandableProps}>
-          <pre className={logContentClasses}>{rawContent.trim()}</pre>
-          <div className={buttonContainerClasses}>
-            <button
-              type="button"
-              className="btn btn-xs btn-default log-entry-btn-expand-collapse"
-              {...toggleProps}
-            >
-              {isExpanded ? (
-                <>
-                  <Icon type="angle-up" /> {t('collapse')}
-                </>
-              ) : (
-                <>
-                  <Icon type="angle-down" /> {t('expand')}
-                </>
-              )}
-            </button>
+        <div className="log-entry-content-raw-container">
+          <div {...expandableProps}>
+            <pre className="log-entry-content-raw">{rawContent.trim()}</pre>
           </div>
+          {needsExpandCollapse ? (
+            <div className={buttonContainerClasses}>
+              <button
+                type="button"
+                className="btn btn-xs btn-default log-entry-btn-expand-collapse"
+                {...toggleProps}
+              >
+                {isExpanded ? (
+                  <>
+                    <Icon type="angle-up" /> {t('collapse')}
+                  </>
+                ) : (
+                  <>
+                    <Icon type="angle-down" /> {t('expand')}
+                  </>
+                )}
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : null}
       {formattedContent ? (
@@ -186,6 +249,7 @@ PreviewLogsPaneEntry.propTypes = {
   formattedContent: PropTypes.node,
   extraInfoURL: PropTypes.string,
   level: PropTypes.oneOf(['error', 'warning', 'typesetting', 'raw']).isRequired,
+  customClass: PropTypes.string,
   showSourceLocationLink: PropTypes.bool,
   showCloseButton: PropTypes.bool,
   entryAriaLabel: PropTypes.string,

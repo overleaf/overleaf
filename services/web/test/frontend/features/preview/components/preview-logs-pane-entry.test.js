@@ -76,6 +76,42 @@ describe('<PreviewLogsPaneEntry />', function() {
   describe('logs pane entry raw contents', function() {
     const rawContent = 'foo bar latex error stuff baz'
 
+    // JSDom doesn't compute layout/sizing, so we need to simulate sizing for the elements
+    // Here we are simulating that the content is bigger than the `collapsedSize`, so
+    // the expand-collapse widget is used
+    const originalScrollHeight = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'offsetHeight'
+    )
+    const originalScrollWidth = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'offsetWidth'
+    )
+
+    beforeEach(function() {
+      Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
+        configurable: true,
+        value: 500
+      })
+      Object.defineProperty(HTMLElement.prototype, 'scrollWidth', {
+        configurable: true,
+        value: 500
+      })
+    })
+
+    afterEach(function() {
+      Object.defineProperty(
+        HTMLElement.prototype,
+        'scrollHeight',
+        originalScrollHeight
+      )
+      Object.defineProperty(
+        HTMLElement.prototype,
+        'scrollWidth',
+        originalScrollWidth
+      )
+    })
+
     it('renders collapsed contents by default', function() {
       render(<PreviewLogsPaneEntry rawContent={rawContent} level={level} />)
       screen.getByText(rawContent)

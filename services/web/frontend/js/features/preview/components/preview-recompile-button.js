@@ -7,30 +7,20 @@ import Icon from '../../../shared/components/icon'
 function PreviewRecompileButton({
   compilerState: {
     isAutoCompileOn,
-    isClearingCache,
     isCompiling,
     isDraftModeOn,
     isSyntaxCheckOn
   },
-  onClearCache,
   onRecompile,
+  onRecompileFromScratch,
   onRunSyntaxCheckNow,
+  onStopCompilation,
   onSetAutoCompile,
   onSetDraftMode,
   onSetSyntaxCheck,
   showText
 }) {
   const { t } = useTranslation()
-
-  function handleRecompileFromScratch() {
-    onClearCache()
-      .then(() => {
-        onRecompile()
-      })
-      .catch(error => {
-        console.error(error)
-      })
-  }
 
   function handleSelectAutoCompileOn() {
     onSetAutoCompile(true)
@@ -69,9 +59,9 @@ function PreviewRecompileButton({
   }
 
   if (!showText) {
-    compilingProps = _hideText(isCompiling || isClearingCache)
-    recompileProps = _hideText(!isCompiling || !isClearingCache)
-  } else if (isCompiling || isClearingCache) {
+    compilingProps = _hideText(isCompiling)
+    recompileProps = _hideText(!isCompiling)
+  } else if (isCompiling) {
     recompileProps = _hideText()
   } else {
     compilingProps = _hideText()
@@ -131,11 +121,20 @@ function PreviewRecompileButton({
           <Icon type="" modifier="fw" />
           {t('run_syntax_check_now')}
         </MenuItem>
+        <MenuItem className={!isCompiling ? 'hidden' : ''} divider />
+        <MenuItem
+          onSelect={onStopCompilation}
+          className={!isCompiling ? 'hidden' : ''}
+          disabled={!isCompiling}
+          aria-disabled={!isCompiling}
+        >
+          {t('stop_compile')}
+        </MenuItem>
         <MenuItem divider />
         <MenuItem
-          onSelect={handleRecompileFromScratch}
-          disabled={isCompiling || isClearingCache}
-          aria-disabled={!!(isCompiling || isClearingCache)}
+          onSelect={onRecompileFromScratch}
+          disabled={isCompiling}
+          aria-disabled={!!isCompiling}
         >
           {t('recompile_from_scratch')}
         </MenuItem>
@@ -150,7 +149,7 @@ function PreviewRecompileButton({
       placement="bottom"
       overlay={
         <Tooltip id="tooltip-download-pdf">
-          {isCompiling || isClearingCache ? t('compiling') : t('recompile')}
+          {isCompiling ? t('compiling') : t('recompile')}
         </Tooltip>
       }
     >
@@ -162,18 +161,18 @@ function PreviewRecompileButton({
 PreviewRecompileButton.propTypes = {
   compilerState: PropTypes.shape({
     isAutoCompileOn: PropTypes.bool.isRequired,
-    isClearingCache: PropTypes.bool.isRequired,
     isCompiling: PropTypes.bool.isRequired,
     isDraftModeOn: PropTypes.bool.isRequired,
     isSyntaxCheckOn: PropTypes.bool.isRequired,
     logEntries: PropTypes.object.isRequired
   }),
-  onClearCache: PropTypes.func.isRequired,
   onRecompile: PropTypes.func.isRequired,
+  onRecompileFromScratch: PropTypes.func.isRequired,
   onRunSyntaxCheckNow: PropTypes.func.isRequired,
   onSetAutoCompile: PropTypes.func.isRequired,
   onSetDraftMode: PropTypes.func.isRequired,
   onSetSyntaxCheck: PropTypes.func.isRequired,
+  onStopCompilation: PropTypes.func.isRequired,
   showText: PropTypes.bool.isRequired
 }
 
