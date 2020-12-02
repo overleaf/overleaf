@@ -442,7 +442,7 @@ async function cleanup() {
 <a name="OError.getFullInfo"></a>
 
 ### OError.getFullInfo(error) ⇒ <code>Object</code>
-The merged info from any `tag`s on the given error.
+The merged info from any `tag`s and causes on the given error.
 
 If an info property is repeated, the last one wins.
 
@@ -450,7 +450,7 @@ If an info property is repeated, the last one wins.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> \| <code>null</code> \| <code>undefined</code> | any errror (may or may not be an `OError`) |
+| error | <code>Error</code> \| <code>null</code> \| <code>undefined</code> | any error (may or may not be an `OError`) |
 
 <a name="OError.getFullStack"></a>
 

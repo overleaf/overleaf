@@ -63,11 +63,11 @@ declare namespace OError {
      */
     export function tag(error: Error, message?: string, info?: any): Error;
     /**
-     * The merged info from any `tag`s on the given error.
+     * The merged info from any `tag`s and causes on the given error.
      *
      * If an info property is repeated, the last one wins.
      *
-     * @param {Error | null | undefined} error any errror (may or may not be an `OError`)
+     * @param {Error | null | undefined} error any error (may or may not be an `OError`)
      * @return {Object}
      */
     export function getFullInfo(error: Error): any;

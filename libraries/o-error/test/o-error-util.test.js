@@ -282,12 +282,38 @@ describe('OError.getFullInfo', function () {
     })
   })
 
-  it('does not merge info from a cause', function () {
+  it('merges info from a cause', function () {
     const err1 = new Error('foo')
     const err2 = new Error('bar')
     err1.cause = err2
     err2.info = { userId: 123 }
-    expect(OError.getFullInfo(err1)).to.deep.equal({})
+    expect(OError.getFullInfo(err1)).to.deep.equal({ userId: 123 })
+  })
+
+  it('merges info from a nested cause', function () {
+    const err1 = new Error('foo')
+    const err2 = new Error('bar')
+    const err3 = new Error('baz')
+    err1.cause = err2
+    err2.info = { userId: 123 }
+    err2.cause = err3
+    err3.info = { foo: 42 }
+    expect(OError.getFullInfo(err1)).to.deep.equal({
+      userId: 123,
+      foo: 42,
+    })
+  })
+
+  it('merges info from cause with duplicate keys', function () {
+    const err1 = new Error('foo')
+    const err2 = new Error('bar')
+    err1.info = { userId: 42, foo: 1337 }
+    err1.cause = err2
+    err2.info = { userId: 1 }
+    expect(OError.getFullInfo(err1)).to.deep.equal({
+      userId: 42,
+      foo: 1337,
+    })
   })
 
   it('merges info from tags with duplicate keys', function () {
@@ -371,8 +397,8 @@ describe('OError.getFullStack', function () {
         '    TaggedError: failed to foo',
       ])
 
-      // The info from the wrapped cause should not leak out.
-      expect(OError.getFullInfo(error)).to.eql({ bat: 1 })
+      // The info from the wrapped cause should be picked up for logging.
+      expect(OError.getFullInfo(error)).to.eql({ bat: 1, foo: 1 })
 
       // But it should still be recorded.
       expect(OError.getFullInfo(error.cause)).to.eql({ foo: 1 })
