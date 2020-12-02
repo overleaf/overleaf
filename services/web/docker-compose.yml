@@ -39,6 +39,11 @@ services:
       MONGO_SOCKET_TIMEOUT: 60000
       # SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
       SHARELATEX_CONFIG:
+      COOKIE_DOMAIN: .overleaf.test
+      PUBLIC_URL: 'http://www.overleaf.test:3000'
+      HTTP_TEST_HOST: www.overleaf.test
+    extra_hosts:
+      - 'www.overleaf.test:127.0.0.1'
     depends_on:
       - redis
       - mongo

@@ -998,6 +998,16 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     HealthCheckController.checkActiveHandles,
     HealthCheckController.checkApi
   )
+  publicApiRouter.get(
+    '/health_check/full',
+    HealthCheckController.checkActiveHandles,
+    HealthCheckController.check
+  )
+  privateApiRouter.get(
+    '/health_check/full',
+    HealthCheckController.checkActiveHandles,
+    HealthCheckController.check
+  )
 
   publicApiRouter.get('/health_check/redis', HealthCheckController.checkRedis)
   privateApiRouter.get('/health_check/redis', HealthCheckController.checkRedis)
