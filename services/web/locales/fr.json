@@ -34,7 +34,6 @@
   "expand": "Déplier",
   "collapse": "Replier",
   "file_outline": "Structure du fichier",
-  "the_file_outline_is_a_new_feature_click_the_icon_to_learn_more": "L’affichage de la <0>structure du fichier</0> est une nouvelle fonctionnalité. Cliquez sur l’icône pour en apprendre plus",
   "we_cant_find_any_sections_or_subsections_in_this_file": "Nous n’avons trouvé aucune section ou sous-section dans ce fichier",
   "find_out_more_about_the_file_outline": "En savoir plus sur la structure du fichier",
   "invalid_institutional_email": "Le service d’authentification central de votre établissement a indiqué que votre adresse courriel était __email__, mais le domaine de cette adresse n’appartient pas à ceux que nous reconnaissons pour cet établissement. Il est peut-être possible de modifier votre adresse courriel principale depuis le profil utilisateur de votre établissement pour qu’elle soit dans un domaine reconnu. Veuillez contacter votre département informatique si vous avez des questions.",
