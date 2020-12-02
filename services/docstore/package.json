@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@overleaf/metrics": "^3.4.1",
-    "@overleaf/object-persistor": "git+https://github.com/overleaf/object-persistor.git",
+    "@overleaf/object-persistor": "https://github.com/overleaf/object-persistor/archive/4ca62157a2beb747e9a56da3ce1569124b90378a.tar.gz",
     "async": "^2.6.3",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
