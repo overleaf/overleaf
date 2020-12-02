@@ -778,6 +778,9 @@ const ProjectController = {
             const wantsOldChatUI =
               req.query && req.query.new_chat_ui === 'false'
 
+            const wantsOldLogsUI =
+              req.query && req.query.new_logs_ui === 'false'
+
             res.render('project/editor', {
               title: project.name,
               priority_title: true,
@@ -833,7 +836,7 @@ const ProjectController = {
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
               wsUrl,
               showSupport: Features.hasFeature('support'),
-              showNewLogsUI: req.query && req.query.new_logs_ui === 'true',
+              showNewLogsUI: user.alphaProgram && !wantsOldLogsUI,
               showNewChatUI: user.betaProgram && !wantsOldChatUI,
               showReactFileTree: user.alphaProgram && !wantsOldFileTreeUI
             })
