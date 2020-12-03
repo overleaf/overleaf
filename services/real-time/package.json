@@ -3,6 +3,8 @@
   "version": "0.1.4",
   "description": "The socket.io layer of ShareLaTeX for real-time editor interactions",
   "author": "ShareLaTeX <team@sharelatex.com>",
+  "license": "AGPL-3.0-only",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/sharelatex/real-time-sharelatex.git"
