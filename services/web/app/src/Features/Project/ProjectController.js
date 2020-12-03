@@ -1045,7 +1045,9 @@ var defaultSettingsForAnonymousUser = userId => ({
   },
   featureSwitches: {
     github: false
-  }
+  },
+  alphaProgram: false,
+  betaProgram: false
 })
 
 var THEME_LIST = []
