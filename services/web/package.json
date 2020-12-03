@@ -49,7 +49,7 @@
     "@pollyjs/adapter-node-http": "^4.2.1",
     "@pollyjs/core": "^4.2.1",
     "@pollyjs/persister-fs": "^4.2.1",
-    "@sentry/browser": "^5.12.0",
+    "@sentry/browser": "^5.27.6",
     "ace-builds": "https://github.com/overleaf/ace-builds/archive/v1.4.12-69aace50e6796d42116f8f96e19d2468d8a88af9.tar.gz",
     "algoliasearch": "^3.35.1",
     "angular": "~1.8.0",

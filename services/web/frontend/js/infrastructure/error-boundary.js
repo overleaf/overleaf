@@ -3,10 +3,13 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 function errorHandler(error, componentStack) {
   if (window.Raven) {
-    Raven.captureException(error, {
-      extra: { componentStack },
-      tags: { mechanism: 'react-error-boundary' }
+    Raven.captureException(error, scope => {
+      scope.setExtra('componentStack', componentStack)
+      scope.setTag('handler', 'react-error-boundary')
+      return scope
     })
+  } else {
+    console.error(error)
   }
 }
 

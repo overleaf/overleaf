@@ -42,7 +42,10 @@ app.config([
               ? Raven.captureException
               : undefined) != null
           ) {
-            Raven.captureException(exception)
+            Raven.captureException(exception, scope => {
+              scope.setTag('handler', 'angular-exception-handler')
+              return scope
+            })
           }
           return $delegate(exception, cause)
         }
