@@ -9,17 +9,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-/* eslint-disable
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import { captureException } from '../infrastructure/error-reporter'
+
 const app = angular.module('ErrorCatcher', [])
 const UNHANDLED_REJECTION_ERR_MSG = 'Possibly unhandled rejection: canceled'
 
@@ -37,16 +28,12 @@ app.config([
           ) {
             return
           }
-          if (
-            (typeof Raven !== 'undefined' && Raven !== null
-              ? Raven.captureException
-              : undefined) != null
-          ) {
-            Raven.captureException(exception, scope => {
-              scope.setTag('handler', 'angular-exception-handler')
-              return scope
-            })
-          }
+
+          captureException(exception, scope => {
+            scope.setTag('handler', 'angular-exception-handler')
+            return scope
+          })
+
           return $delegate(exception, cause)
         }
     ])

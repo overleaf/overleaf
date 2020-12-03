@@ -19,6 +19,7 @@ import _ from 'lodash'
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
+import { captureMessage } from '../../../infrastructure/error-reporter'
 import pdfTextLayer from './pdfTextLayer'
 import pdfAnnotations from './pdfAnnotations'
 import pdfHighlights from './pdfHighlights'
@@ -66,16 +67,14 @@ App.controller('pdfViewerController', function(
           return $scope.$emit('loaded')
         },
         errorCallback(error) {
-          if (window.Raven) {
-            // MissingPDFException is "expected" as the pdf file can be on a
-            // CLSI server that has been cycled out.
-            // Currently, there is NO error handling to handle this situation,
-            // but we plan to add this in the future
-            // (https://github.com/overleaf/issues/issues/2985) and this error
-            // is causing noise in Sentry so ignore it
-            if (!error.name === 'MissingPDFException') {
-              window.Raven.captureMessage(`pdfng error ${error}`)
-            }
+          // MissingPDFException is "expected" as the pdf file can be on a
+          // CLSI server that has been cycled out.
+          // Currently, there is NO error handling to handle this situation,
+          // but we plan to add this in the future
+          // (https://github.com/overleaf/issues/issues/2985) and this error
+          // is causing noise in Sentry so ignore it
+          if (!error || error.name !== 'MissingPDFException') {
+            captureMessage(`pdfng error ${error}`)
           }
           return $scope.$emit('pdf:error', error)
         },

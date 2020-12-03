@@ -1,5 +1,3 @@
-/* global Raven */
-
 /* eslint-disable
     max-len,
     no-return-assign,
@@ -16,6 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
+import { captureException } from '../../../infrastructure/error-reporter'
 
 export default App.factory('chatMessages', function($http, ide) {
   const MESSAGES_URL = `/project/${ide.project_id}/messages`
@@ -81,20 +80,17 @@ export default App.factory('chatMessages', function($http, ide) {
         chat.state.atEnd = true
       }
       if (messages.reverse == null) {
-        if (typeof Raven !== 'undefined' && Raven !== null) {
-          Raven.captureException(
-            new Error(`messages has no reverse property ${typeof messages}`)
-          )
-        }
+        captureException(
+          new Error(`messages has no reverse property ${typeof messages}`)
+        )
       }
       if (typeof messages.reverse !== 'function') {
-        if (typeof Raven !== 'undefined' && Raven !== null) {
-          Raven.captureException(
-            new Error(
-              `messages.reverse not a function ${typeof messages.reverse} ${typeof messages}`
-            )
+        captureException(
+          new Error(
+            `messages.reverse not a function ${typeof messages.reverse} ${typeof messages}`
           )
-        }
+        )
+
         chat.state.errored = true
       } else {
         messages.reverse()

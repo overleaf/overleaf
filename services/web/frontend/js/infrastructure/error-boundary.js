@@ -1,16 +1,13 @@
 import React from 'react'
+import { captureException } from './error-reporter'
 import { ErrorBoundary } from 'react-error-boundary'
 
 function errorHandler(error, componentStack) {
-  if (window.Raven) {
-    Raven.captureException(error, scope => {
-      scope.setExtra('componentStack', componentStack)
-      scope.setTag('handler', 'react-error-boundary')
-      return scope
-    })
-  } else {
-    console.error(error)
-  }
+  captureException(error, scope => {
+    scope.setExtra('componentStack', componentStack)
+    scope.setTag('handler', 'react-error-boundary')
+    return scope
+  })
 }
 
 function DefaultFallbackComponent() {

@@ -17,7 +17,7 @@
  */
 
 import './libraries'
-import './utils/sentry'
+import './infrastructure/error-reporter'
 import './modules/recursionHelper'
 import './modules/errorCatcher'
 import './modules/localStorage'

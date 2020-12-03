@@ -27,3 +27,6 @@ moment.updateLocale('en', {
 // node-fetch doesn't accept relative URL's: https://github.com/node-fetch/node-fetch/blob/master/docs/v2-LIMITS.md#known-differences
 const fetch = require('node-fetch')
 global.fetch = (url, ...options) => fetch('http://localhost' + url, ...options)
+
+// Mock global settings
+window.ExposedSettings = {}
