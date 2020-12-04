@@ -43,7 +43,7 @@ public class UrlResourceCache implements ResourceCache {
             Map<String, byte[]> fetchedUrls,
             Optional<Long> maxFileSize
     ) throws IOException, SizeLimitExceededException {
-        String path = dbStore.getPathForURLInProject(projectName, url);
+        String path = dbStore.getPathForURLInProject(projectName, getCacheKeyFromUrl(url));
         byte[] contents;
         if (path == null) {
             path = newPath;
@@ -118,8 +118,25 @@ public class UrlResourceCache implements ResourceCache {
             throw new SizeLimitExceededException(
                     Optional.of(path), contents.length, maxFileSize.get());
         }
-        dbStore.addURLIndexForProject(projectName, url, path);
+        dbStore.addURLIndexForProject(projectName, getCacheKeyFromUrl(url), path);
         return contents;
     }
 
+    /**
+     * Construct a suitable cache key from the given file URL.
+     *
+     * The file URL returned by the web service may contain a token parameter
+     * used for authentication. This token changes for every request, so we
+     * need to strip it from the query string before using the URL as a cache
+     * key.
+     */
+    private String getCacheKeyFromUrl(String url) {
+        // We're not doing proper URL parsing here, but it should be enough to
+        // remove the token without touching the important parts of the URL.
+        //
+        // The URL looks like:
+        //
+        // https://history.overleaf.com/api/projects/:project_id/blobs/:hash?token=:token&_path=:path
+        return url.replaceAll("token=[^&]*", "token=REMOVED");
+    }
 }

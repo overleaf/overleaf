@@ -3,7 +3,7 @@ package uk.ac.ic.wlgitbridge.bridge.resource;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import org.junit.Test;
-import uk.ac.ic.wlgitbridge.bridge.db.noop.NoopDbStore;
+import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.util.CastUtil;
 import uk.ac.ic.wlgitbridge.git.exception.SizeLimitExceededException;
 import uk.ac.ic.wlgitbridge.io.http.ning.NingHttpClientFacade;
@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 public class UrlResourceCacheTest {
 
@@ -28,8 +29,9 @@ public class UrlResourceCacheTest {
 
     private final NingHttpClientFacade http = mock(NingHttpClientFacade.class);
 
-    private final UrlResourceCache cache
-            = new UrlResourceCache(new NoopDbStore(), http);
+    private final DBStore dbStore = mock(DBStore.class);
+
+    private final UrlResourceCache cache = new UrlResourceCache(dbStore, http);
 
     private static HttpHeaders withContentLength(long cl) {
         return new DefaultHttpHeaders().add("Content-Length", String.valueOf(cl));
@@ -55,6 +57,10 @@ public class UrlResourceCacheTest {
         throws IOException, SizeLimitExceededException {
         cache.get(
                 PROJ, URL, NEW_PATH, new HashMap<>(), new HashMap<>(), max);
+    }
+
+    private void getUrl(String url) throws IOException, SizeLimitExceededException {
+        cache.get(PROJ, url, NEW_PATH, new HashMap<>(), new HashMap<>(), Optional.empty());
     }
 
     private void getWithMaxLength(long max)
@@ -102,6 +108,16 @@ public class UrlResourceCacheTest {
     public void getThrowsIfActualContentTooBig() throws Exception {
         respondWithContentLength(0, 10);
         getWithMaxLength(5);
+    }
+
+    @Test
+    public void tokenIsRemovedFromCacheKey() throws Exception {
+        String url = "http://history.overleaf.com/projects/1234/blobs/abdef?token=secretencryptedstuff&_path=test.tex";
+        String cacheKey = "http://history.overleaf.com/projects/1234/blobs/abdef?token=REMOVED&_path=test.tex";
+        respondWithContentLength(123);
+        getUrl(url);
+        verify(dbStore).getPathForURLInProject(PROJ, cacheKey);
+        verify(dbStore).addURLIndexForProject(PROJ, cacheKey, NEW_PATH);
     }
 
 }
