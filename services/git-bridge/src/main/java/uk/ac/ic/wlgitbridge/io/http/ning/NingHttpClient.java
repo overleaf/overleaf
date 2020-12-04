@@ -52,11 +52,16 @@ public class NingHttpClient implements NingHttpClientFacade {
                 @Override
                 public byte[] onCompleted(
                         Response response
-                ) throws IOException {
+                ) throws Exception {
+                    int statusCode = response.getStatusCode();
+                    if (statusCode >= 400) {
+                        throw new Exception("got status " + statusCode +
+                                            " fetching " + url);
+                    }
                     byte[] ret = bytes.toByteArray();
                     bytes.close();
                     log.info(
-                            response.getStatusCode()
+                            statusCode
                                     + " "
                                     + response.getStatusText()
                                     + " ("
