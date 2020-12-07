@@ -3,13 +3,11 @@
     handle-callback-err,
     new-cap,
     no-throw-literal,
-    no-unused-vars,
 */
-let DiffCodec
 const { diff_match_patch } = require('../lib/diff_match_patch')
 const dmp = new diff_match_patch()
 
-module.exports = DiffCodec = {
+module.exports = {
   ADDED: 1,
   REMOVED: -1,
   UNCHANGED: 0,
