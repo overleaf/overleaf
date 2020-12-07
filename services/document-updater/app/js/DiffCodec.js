@@ -9,7 +9,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -32,7 +31,7 @@ module.exports = DiffCodec = {
 
     const ops = []
     let position = 0
-    for (const diff of Array.from(diffs)) {
+    for (const diff of diffs) {
       const type = diff[0]
       const content = diff[1]
       if (type === this.ADDED) {
