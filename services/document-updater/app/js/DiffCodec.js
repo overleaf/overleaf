@@ -1,4 +1,4 @@
-const { diff_match_patch: DMP } = require('../lib/diff_match_patch')
+const DMP = require('diff-match-patch')
 const dmp = new DMP()
 
 module.exports = {
