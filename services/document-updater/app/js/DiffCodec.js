@@ -2,7 +2,6 @@
     camelcase,
     handle-callback-err,
     new-cap,
-    no-throw-literal,
 */
 const { diff_match_patch } = require('../lib/diff_match_patch')
 const dmp = new diff_match_patch()
@@ -35,7 +34,7 @@ module.exports = {
       } else if (type === this.UNCHANGED) {
         position += content.length
       } else {
-        throw 'Unknown type'
+        throw new Error('Unknown type')
       }
     }
     callback(null, ops)
