@@ -1,10 +1,5 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    new-cap,
-*/
-const { diff_match_patch } = require('../lib/diff_match_patch')
-const dmp = new diff_match_patch()
+const { diff_match_patch: DMP } = require('../lib/diff_match_patch')
+const dmp = new DMP()
 
 module.exports = {
   ADDED: 1,
