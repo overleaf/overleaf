@@ -5,13 +5,6 @@
     no-throw-literal,
     no-unused-vars,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let DiffCodec
 const { diff_match_patch } = require('../lib/diff_match_patch')
 const dmp = new diff_match_patch()
@@ -22,9 +15,6 @@ module.exports = DiffCodec = {
   UNCHANGED: 0,
 
   diffAsShareJsOp(before, after, callback) {
-    if (callback == null) {
-      callback = function (error, ops) {}
-    }
     const diffs = dmp.diff_main(before.join('\n'), after.join('\n'))
     dmp.diff_cleanupSemantic(diffs)
 
