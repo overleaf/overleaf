@@ -18,6 +18,11 @@ async function clearLoginRateLimit() {
   await clearRateLimit('login', Settings.smokeTest.user)
 }
 
+async function clearOverleafLoginRateLimit() {
+  if (!Settings.overleaf) return
+  await clearRateLimit('overleaf-login', Settings.smokeTest.rateLimitSubject)
+}
+
 async function clearOpenProjectRateLimit() {
   await clearRateLimit(
     'open-project',
@@ -27,7 +32,11 @@ async function clearOpenProjectRateLimit() {
 
 async function run({ processWithTimeout, timeout }) {
   await processWithTimeout({
-    work: Promise.all([clearLoginRateLimit(), clearOpenProjectRateLimit()]),
+    work: Promise.all([
+      clearLoginRateLimit(),
+      clearOverleafLoginRateLimit(),
+      clearOpenProjectRateLimit()
+    ]),
     timeout,
     message: 'cleanupRateLimits timed out'
   })
