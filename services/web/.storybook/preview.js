@@ -63,3 +63,5 @@ const withTheme = (Story, context) => {
   )
 }
 export const decorators = [withTheme]
+
+window.ExposedSettings = {}
