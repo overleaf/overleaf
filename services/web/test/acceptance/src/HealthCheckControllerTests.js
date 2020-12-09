@@ -19,11 +19,20 @@ describe('HealthCheckController', function() {
     })
 
     async function performSmokeTestRequest() {
+      const start = Date.now()
       const { response, body } = await user.doRequest('GET', {
         url: '/health_check/full',
         json: true
       })
+      const end = Date.now()
+
       expect(body).to.exist
+      expect(body.stats).to.exist
+      expect(Date.parse(body.stats.start)).to.be.within(start, start + 1000)
+      expect(Date.parse(body.stats.end)).to.be.within(end - 1000, end)
+
+      expect(body.stats.duration).to.be.within(0, 10000)
+      expect(body.stats.steps).to.be.instanceof(Array)
       return { response, body }
     }
 
@@ -36,13 +45,30 @@ describe('HealthCheckController', function() {
       })
     })
 
+    describe('when the request is aborted', function() {
+      it('should not crash', async function() {
+        try {
+          await user.doRequest('GET', {
+            timeout: 1,
+            url: '/health_check/full',
+            json: true
+          })
+        } catch (err) {
+          expect(err.code).to.equal('ESOCKETTIMEDOUT')
+          return
+        }
+        expect.fail('expected request to fail with timeout error')
+      })
+    })
+
     describe('when the project does not exist', function() {
       beforeEach(function() {
         Settings.smokeTest.projectId = '404'
       })
       it('should respond with a 500 ', async function() {
-        const { response } = await performSmokeTestRequest()
+        const { response, body } = await performSmokeTestRequest()
 
+        expect(body.error).to.equal('run.101_loadEditor failed')
         expect(response.statusCode).to.equal(500)
       })
     })
@@ -52,8 +78,9 @@ describe('HealthCheckController', function() {
         Settings.smokeTest.password = 'foo-bar'
       })
       it('should respond with a 500 with mismatching password', async function() {
-        const { response } = await performSmokeTestRequest()
+        const { response, body } = await performSmokeTestRequest()
 
+        expect(body.error).to.equal('run.002_login failed')
         expect(response.statusCode).to.equal(500)
       })
     })
