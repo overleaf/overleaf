@@ -29,13 +29,17 @@ describe('FileTree Rename Entity Flow', function() {
   beforeEach(function() {
     const rootFolder = [
       {
+        _id: 'root-folder-id',
         docs: [{ _id: '456def', name: 'a.tex' }],
         folders: [
           {
             _id: '987jkl',
             name: 'folder',
             docs: [],
-            fileRefs: [{ _id: '789ghi', name: 'c.tex' }],
+            fileRefs: [
+              { _id: '789ghi', name: 'c.tex' },
+              { _id: '981gkp', name: 'e.tex' }
+            ],
             folders: []
           }
         ],
@@ -108,6 +112,42 @@ describe('FileTree Rename Entity Flow', function() {
     fireEvent.keyDown(input, { key: 'Enter' })
 
     screen.getByRole('treeitem', { name: 'b.tex' })
+  })
+
+  it('shows error modal on invalid filename', async function() {
+    const input = initItemRename('a.tex')
+    fireEvent.change(input, { target: { value: '///' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    await screen.findByRole('alert', {
+      name: 'File name is empty or contains invalid characters',
+      hidden: true
+    })
+  })
+
+  it('shows error modal on duplicate filename', async function() {
+    const input = initItemRename('a.tex')
+    fireEvent.change(input, { target: { value: 'folder' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    await screen.findByRole('alert', {
+      name: 'A file or folder with this name already exists',
+      hidden: true
+    })
+  })
+
+  it('shows error modal on duplicate filename in subfolder', async function() {
+    const expandButton = screen.getByRole('button', { name: 'Expand' })
+    fireEvent.click(expandButton)
+
+    const input = initItemRename('c.tex')
+    fireEvent.change(input, { target: { value: 'e.tex' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    await screen.findByRole('alert', {
+      name: 'A file or folder with this name already exists',
+      hidden: true
+    })
   })
 
   describe('via socket event', function() {

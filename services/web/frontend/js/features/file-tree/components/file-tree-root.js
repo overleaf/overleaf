@@ -8,6 +8,7 @@ import FileTreeFolderList from './file-tree-folder-list'
 import FileTreeToolbar from './file-tree-toolbar'
 import FileTreeModalDelete from './modals/file-tree-modal-delete'
 import FileTreeModalCreateFolder from './modals/file-tree-modal-create-folder'
+import FileTreeModalError from './modals/file-tree-modal-error'
 import FileTreeContextMenu from './file-tree-context-menu'
 import FileTreeError from './file-tree-error'
 
@@ -50,6 +51,7 @@ function FileTreeRoot({
       </div>
       <FileTreeModalDelete />
       <FileTreeModalCreateFolder />
+      <FileTreeModalError />
     </FileTreeContext>
   )
 }

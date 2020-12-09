@@ -201,19 +201,62 @@ describe('FileTree Create Folder Flow', function() {
     expect(screen.queryByRole('treeitem', { name: newFolderName })).to.not.exist
   })
 
+  it('prevents adding duplicate or invalid names', async function() {
+    const rootFolder = [
+      {
+        _id: 'root-folder-id',
+        docs: [{ _id: '456def', name: 'existingFile' }],
+        folders: [],
+        fileRefs: []
+      }
+    ]
+    render(
+      <FileTreeRoot
+        rootFolder={rootFolder}
+        projectId="123abc"
+        hasWritePermissions
+        rootDocId="456def"
+        onSelect={onSelect}
+        onInit={onInit}
+      />
+    )
+
+    var newFolderName = 'existingFile'
+
+    fireCreateFolder(newFolderName)
+
+    expect(fetchMock.called()).to.be.false
+
+    await screen.findByRole('alert', {
+      name: 'A file or folder with this name already exists',
+      hidden: true
+    })
+
+    newFolderName = 'in/valid '
+    setFolderName(newFolderName)
+    await screen.findByRole('alert', {
+      name: 'File name is empty or contains invalid characters',
+      hidden: true
+    })
+  })
+
   function fireCreateFolder(name) {
     const createFolderButton = screen.getByRole('button', {
       name: 'New Folder'
     })
     fireEvent.click(createFolderButton)
 
+    setFolderName(name)
+
+    const modalCreateButton = getModalCreateButton()
+    fireEvent.click(modalCreateButton)
+  }
+
+  function setFolderName(name) {
     const input = screen.getByRole('textbox', {
       hidden: true // FIXME: modal should not be hidden but it has the aria-hidden label due to a react-bootstrap bug
     })
     fireEvent.change(input, { target: { value: name } })
-
-    const modalCreateButton = getModalCreateButton()
-    fireEvent.click(modalCreateButton)
   }
 
   function fakeId() {

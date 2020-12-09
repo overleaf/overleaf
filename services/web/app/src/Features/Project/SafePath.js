@@ -13,9 +13,10 @@
  */
 // This file is shared between the frontend and server code of web, so that
 // filename validation is the same in both implementations.
-// Both copies must be kept in sync:
-//   app/coffee/Features/Project/SafePath.coffee
-//   public/coffee/ide/directives/SafePath.coffee
+// The logic in all copies must be kept in sync:
+//   app/src/Features/Project/SafePath.js
+//   frontend/js/ide/directives/SafePath.js
+//   frontend/js/features/file-tree/util/safe-path.js
 
 const load = function() {
   let SafePath

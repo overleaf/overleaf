@@ -10,10 +10,14 @@ import {
   syncCreateEntity
 } from '../util/sync-mutation'
 import { findInTreeOrThrow } from '../util/find-in-tree'
+import { isNameUniqueInFolder } from '../util/is-name-unique-in-folder'
+import { isCleanFilename } from '../util/safe-path'
 
 import { FileTreeMainContext } from './file-tree-main'
 import { useFileTreeMutable } from './file-tree-mutable'
 import { useFileTreeSelectable } from './file-tree-selectable'
+
+import { InvalidFilenameError, DuplicateFilenameError } from '../errors'
 
 const FileTreeActionableContext = createContext()
 
@@ -120,15 +124,33 @@ export function useFileTreeActionable() {
   // update the entity with the new name immediately in the tree, but revert to
   // the old name if the sync fails
   function finishRenaming(newName) {
-    dispatch({ type: ACTION_TYPES.CLEAR })
     const selectedEntityId = Array.from(selectedEntityIds)[0]
     const found = findInTreeOrThrow(fileTreeData, selectedEntityId)
     const oldName = found.entity.name
+    if (newName === oldName) {
+      return dispatch({ type: ACTION_TYPES.CLEAR })
+    }
+    let error
+    // check valid name
+    if (!isCleanFilename(newName)) {
+      error = new InvalidFilenameError()
+      return dispatch({ type: ACTION_TYPES.ERROR, error })
+    }
+
+    // check for duplicates
+    if (!isNameUniqueInFolder(fileTreeData, found.parentFolderId, newName)) {
+      error = new DuplicateFilenameError()
+      return dispatch({ type: ACTION_TYPES.ERROR, error })
+    }
+
+    dispatch({ type: ACTION_TYPES.CLEAR })
     dispatchRename(selectedEntityId, newName)
     return syncRename(projectId, found.type, found.entity._id, newName).catch(
       error => {
-        dispatch({ type: ACTION_TYPES.ERROR, error })
         dispatchRename(selectedEntityId, oldName)
+        // The state from this error action isn't used anywhere right now
+        // but we need to handle the error for linting
+        dispatch({ type: ACTION_TYPES.ERROR, error })
       }
     )
   }
@@ -189,7 +211,12 @@ export function useFileTreeActionable() {
     const parentFolderId =
       found.type === 'folder' ? found.entity._id : found.parentFolderId
 
-    return syncCreateEntity(projectId, parentFolderId, entity)
+    // check for duplicates and throw
+    if (isNameUniqueInFolder(fileTreeData, parentFolderId, entity.name)) {
+      return syncCreateEntity(projectId, parentFolderId, entity)
+    } else {
+      return Promise.reject(new DuplicateFilenameError())
+    }
   }
 
   function finishCreatingFolder(name) {

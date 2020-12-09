@@ -10,10 +10,11 @@ function FileTreeItemName({ name, isSelected }) {
     isRenaming,
     startRenaming,
     finishRenaming,
+    error,
     cancel
   } = useFileTreeActionable()
 
-  const isRenamingEntity = isRenaming && isSelected
+  const isRenamingEntity = isRenaming && isSelected && !error
 
   if (isRenamingEntity) {
     return (

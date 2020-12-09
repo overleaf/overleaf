@@ -23,6 +23,7 @@ describe('<FileTreeRoot/>', function() {
   it('renders', function() {
     const rootFolder = [
       {
+        _id: 'root-folder-id',
         docs: [{ _id: '456def', name: 'main.tex' }],
         folders: [],
         fileRefs: []
@@ -47,6 +48,7 @@ describe('<FileTreeRoot/>', function() {
   it('fire onSelect', function() {
     const rootFolder = [
       {
+        _id: 'root-folder-id',
         docs: [
           { _id: '456def', name: 'main.tex' },
           { _id: '789ghi', name: 'other.tex' }
@@ -93,6 +95,7 @@ describe('<FileTreeRoot/>', function() {
   it('listen to editor.openDoc', function() {
     const rootFolder = [
       {
+        _id: 'root-folder-id',
         docs: [
           { _id: '456def', name: 'main.tex' },
           { _id: '789ghi', name: 'other.tex' }

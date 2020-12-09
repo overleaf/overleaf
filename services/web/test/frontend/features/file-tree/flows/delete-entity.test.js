@@ -28,6 +28,7 @@ describe('FileTree Delete Entity Flow', function() {
     beforeEach(function() {
       const rootFolder = [
         {
+          _id: 'root-folder-id',
           docs: [{ _id: '456def', name: 'main.tex' }],
           folders: [],
           fileRefs: []
@@ -118,6 +119,7 @@ describe('FileTree Delete Entity Flow', function() {
     beforeEach(function() {
       const rootFolder = [
         {
+          _id: 'root-folder-id',
           docs: [{ _id: '456def', name: 'main.tex' }],
           folders: [],
           fileRefs: [{ _id: '789ghi', name: 'my.bib' }]

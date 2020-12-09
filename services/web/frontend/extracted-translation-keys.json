@@ -19,6 +19,8 @@
   "expand",
   "fast",
   "file_outline",
+  "file_already_exists",
+  "files_cannot_include_invalid_characters",
   "find_out_more_about_the_file_outline",
   "first_error_popup_label",
   "following_paths_conflict",
@@ -95,5 +97,9 @@
   "n_items",
   "please_refresh",
   "generic_something_went_wrong",
-  "refresh"
+  "refresh",
+  "duplicate_file",
+  "error",
+  "invalid_file_name",
+  "ok"
 ]
