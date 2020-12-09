@@ -3,6 +3,7 @@
   "validation_issue_description": "This project did not compile because of a validation issue",
   "compile_error_entry_description": "An error which prevented this project from compiling",
   "validation_issue_entry_description": "A validation issue which prevented this project from compiling",
+  "github_file_name_error": "Your project contains file(s) with an invalid filename. Please check your repository and try again.",
   "raw_logs_description": "Raw logs from the LaTeX compiler",
   "raw_logs": "Raw logs",
   "first_error_popup_label": "This project has errors. This is the first one.",

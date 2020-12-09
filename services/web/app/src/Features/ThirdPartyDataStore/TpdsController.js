@@ -15,6 +15,7 @@ let parseParams
 
 const tpdsUpdateHandler = require('./TpdsUpdateHandler')
 const UpdateMerger = require('./UpdateMerger')
+const Errors = require('../Errors/Errors')
 const logger = require('logger-sharelatex')
 const Path = require('path')
 const metrics = require('@overleaf/metrics')
@@ -114,7 +115,11 @@ module.exports = {
       source,
       function(error) {
         if (error != null) {
-          return next(error)
+          if (error.constructor === Errors.InvalidNameError) {
+            return res.sendStatus(422)
+          } else {
+            return next(error)
+          }
         }
         return res.sendStatus(200)
       }
