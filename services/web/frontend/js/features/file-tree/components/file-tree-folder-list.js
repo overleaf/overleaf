@@ -12,9 +12,7 @@ function FileTreeFolderList({
   classes = {},
   dropRef = null
 }) {
-  const docsAndFiles = [...docs, ...files].sort(
-    (one, two) => one.name.toLowerCase() > two.name.toLowerCase()
-  )
+  const docsAndFiles = [...docs, ...files]
 
   return (
     <ul
@@ -22,7 +20,7 @@ function FileTreeFolderList({
       role="tree"
       ref={dropRef}
     >
-      {folders.map(folder => {
+      {folders.sort(compareFunction).map(folder => {
         return (
           <FileTreeFolder
             key={folder._id}
@@ -34,7 +32,7 @@ function FileTreeFolderList({
           />
         )
       })}
-      {docsAndFiles.map(doc => {
+      {docsAndFiles.sort(compareFunction).map(doc => {
         return (
           <FileTreeDoc
             key={doc._id}
@@ -56,6 +54,21 @@ FileTreeFolderList.propTypes = {
     root: PropTypes.string
   }),
   dropRef: PropTypes.func
+}
+
+// the collator used to sort files docs and folders in the tree. Use english as
+// base language for consistency. Options used:
+// numeric: true so 10 comes after 2
+// sensitivity: 'variant' so case and accent are not equal
+// caseFirst: 'upper' so upper-case letters come first
+const collator = new Intl.Collator('en', {
+  numeric: true,
+  sensitivity: 'variant',
+  caseFirst: 'upper'
+})
+
+function compareFunction(one, two) {
+  return collator.compare(one.name, two.name)
 }
 
 export default FileTreeFolderList
