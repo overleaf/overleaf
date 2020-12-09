@@ -54,7 +54,7 @@ describe('HealthCheckController', function() {
             json: true
           })
         } catch (err) {
-          expect(err.code).to.equal('ESOCKETTIMEDOUT')
+          expect(err.code).to.be.oneOf(['ETIMEDOUT', 'ESOCKETTIMEDOUT'])
           return
         }
         expect.fail('expected request to fail with timeout error')
