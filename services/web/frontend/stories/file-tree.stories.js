@@ -119,6 +119,7 @@ export default {
     rootDocId: '5e74f1a7ce17ae0041dfd056'
   },
   argTypes: {
+    onInit: { action: 'onInit' },
     onSelect: { action: 'onSelect' }
   },
   decorators: [
