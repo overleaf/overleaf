@@ -37,7 +37,7 @@ describe('FileTree Delete Entity Flow', function() {
       render(
         <FileTreeRoot
           rootFolder={rootFolder}
-          projectId={'123abc'}
+          projectId="123abc"
           hasWritePermissions
           onSelect={onSelect}
           onInit={onInit}
@@ -128,7 +128,7 @@ describe('FileTree Delete Entity Flow', function() {
       render(
         <FileTreeRoot
           rootFolder={rootFolder}
-          projectId={'123abc'}
+          projectId="123abc"
           hasWritePermissions
           onSelect={onSelect}
           onInit={onInit}

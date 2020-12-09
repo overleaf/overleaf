@@ -32,7 +32,7 @@ function FileTreeContextMenu() {
     <Dropdown
       onClick={handleClick}
       open
-      id={'dropdown-file-tree-context-menu'}
+      id="dropdown-file-tree-context-menu"
       onToggle={handleToggle}
     >
       <FakeDropDownToggle bsRole="toggle" />

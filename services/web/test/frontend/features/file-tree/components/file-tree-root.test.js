@@ -32,7 +32,7 @@ describe('<FileTreeRoot/>', function() {
     render(
       <FileTreeRoot
         rootFolder={rootFolder}
-        projectId={'123abc'}
+        projectId="123abc"
         hasWritePermissions={false}
         rootDocId="456def"
         onSelect={onSelect}
