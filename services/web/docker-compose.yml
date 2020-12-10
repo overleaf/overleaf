@@ -42,6 +42,7 @@ services:
       COOKIE_DOMAIN: .overleaf.test
       PUBLIC_URL: 'http://www.overleaf.test:3000'
       HTTP_TEST_HOST: www.overleaf.test
+      OT_JWT_AUTH_KEY: "very secret key"
     extra_hosts:
       - 'www.overleaf.test:127.0.0.1'
     depends_on:

@@ -258,6 +258,10 @@ module.exports = settings =
 		enabled: process.env['TWO_FACTOR_AUTHENTICATION_ENABLED'] == 'true'
 		requiredForStaff: process.env['TWO_FACTOR_AUTHENTICATION_REQUIRED_FOR_STAFF'] == 'true'
 
+	jwt:
+		key: process.env['OT_JWT_AUTH_KEY']
+		algorithm: process.env['OT_JWT_AUTH_ALG'] || 'HS256'
+
 	# Default features
 	# ----------------
 	#
