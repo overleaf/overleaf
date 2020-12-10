@@ -99,7 +99,7 @@
     "marked": "^0.3.5",
     "method-override": "^2.3.3",
     "minimist": "1.2.5",
-    "mmmagic": "^0.5.2",
+    "mmmagic": "^0.5.3",
     "moment": "^2.24.0",
     "mongodb": "^3.6.0",
     "mongoose": "^5.10.7",
