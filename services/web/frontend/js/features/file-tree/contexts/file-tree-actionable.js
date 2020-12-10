@@ -206,10 +206,10 @@ export function useFileTreeActionable() {
   }
 
   function finishCreatingEntity(entity) {
-    const selectedEntityId = Array.from(selectedEntityIds)[0]
-    const found = findInTreeOrThrow(fileTreeData, selectedEntityId)
-    const parentFolderId =
-      found.type === 'folder' ? found.entity._id : found.parentFolderId
+    const parentFolderId = getSelectedParentFolderId(
+      fileTreeData,
+      selectedEntityIds
+    )
 
     // check for duplicates and throw
     if (isNameUniqueInFolder(fileTreeData, parentFolderId, entity.name)) {
@@ -233,10 +233,10 @@ export function useFileTreeActionable() {
   // bypass React file tree entirely; requesting the Angular new doc or file
   // modal instead
   function startCreatingDocOrFile() {
-    const selectedEntityId = Array.from(selectedEntityIds)[0]
-    const found = findInTreeOrThrow(fileTreeData, selectedEntityId)
-    const parentFolderId =
-      found.type === 'folder' ? found.entity._id : found.parentFolderId
+    const parentFolderId = getSelectedParentFolderId(
+      fileTreeData,
+      selectedEntityIds
+    )
     window.dispatchEvent(
       new CustomEvent('FileTreeReactBridge.openNewDocModal', {
         detail: {
@@ -305,7 +305,7 @@ export function useFileTreeActionable() {
   return {
     canDelete: selectedEntityIds.size > 0,
     canRename: selectedEntityIds.size === 1,
-    canCreate: selectedEntityIds.size === 1,
+    canCreate: selectedEntityIds.size < 2,
     isDeleting,
     isRenaming,
     isCreatingFolder,
@@ -325,4 +325,16 @@ export function useFileTreeActionable() {
     finishCreatingLinkedFile,
     cancel
   }
+}
+
+function getSelectedParentFolderId(fileTreeData, selectedEntityIds) {
+  // we expect only one entity to be selected in that case, so we pick the first
+  const selectedEntityId = Array.from(selectedEntityIds)[0]
+  if (!selectedEntityId) {
+    // in some cases no entities are selected. Return the root folder id then.
+    return fileTreeData._id
+  }
+
+  const found = findInTreeOrThrow(fileTreeData, selectedEntityId)
+  return found.type === 'folder' ? found.entity._id : found.parentFolderId
 }

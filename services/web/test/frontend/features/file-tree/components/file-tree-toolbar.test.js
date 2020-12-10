@@ -9,9 +9,9 @@ describe('<FileTreeToolbar/>', function() {
   it('without selected files', function() {
     renderWithContext(<FileTreeToolbar />)
 
-    expect(screen.queryByRole('button', { name: 'New File' })).to.not.exist
-    expect(screen.queryByRole('button', { name: 'New Folder' })).to.not.exist
-    expect(screen.queryByRole('button', { name: 'Upload' })).to.not.exist
+    screen.getByRole('button', { name: 'New File' })
+    screen.getByRole('button', { name: 'New Folder' })
+    screen.getByRole('button', { name: 'Upload' })
     expect(screen.queryByRole('button', { name: 'Rename' })).to.not.exist
     expect(screen.queryByRole('button', { name: 'Delete' })).to.not.exist
   })
@@ -29,6 +29,9 @@ describe('<FileTreeToolbar/>', function() {
       contextProps: { initialSelectedEntityId: '123abc' }
     })
 
+    screen.getByRole('button', { name: 'New File' })
+    screen.getByRole('button', { name: 'New Folder' })
+    screen.getByRole('button', { name: 'Upload' })
     screen.getByRole('button', { name: 'Rename' })
     screen.getByRole('button', { name: 'Delete' })
   })

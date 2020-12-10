@@ -26,7 +26,7 @@ describe('FileTree Create Folder Flow', function() {
     delete window._ide
   })
 
-  it('add to root', async function() {
+  it('add to root when no files are selected', async function() {
     const rootFolder = [
       {
         _id: 'root-folder-id',
@@ -40,7 +40,6 @@ describe('FileTree Create Folder Flow', function() {
         rootFolder={rootFolder}
         projectId="123abc"
         hasWritePermissions
-        rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
       />
