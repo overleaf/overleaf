@@ -201,10 +201,16 @@ aside#left-menu.full-size(
 
 	h4 #{translate("help")}
 	ul.list-unstyled.nav
-		li(ng-controller="HotkeysController")
+		li(ng-controller="HotkeysModalController")
 			a(ng-click="openHotkeysModal()")
 				i.fa.fa-keyboard-o.fa-fw
 				| &nbsp;&nbsp; #{translate("show_hotkeys")}
+
+			hotkeys-modal(
+				handle-hide="handleHide"
+				show="show"
+				track-changes-visible="trackChangesVisible"
+			)
 		if showSupport
 			li
 				a(href='/learn', target="_blank")
