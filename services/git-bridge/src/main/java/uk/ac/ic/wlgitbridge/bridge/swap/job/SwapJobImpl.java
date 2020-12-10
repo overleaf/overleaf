@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -105,6 +106,8 @@ public class SwapJobImpl implements SwapJob {
     }
 
     private void doSwap_() {
+        ArrayList<String> exceptionProjectNames = new ArrayList<String>();
+
         Log.info("Running swap number {}", swaps.get() + 1);
         long totalSize = repoStore.totalSize();
         Log.info("Size is {}/{} (high)", totalSize, highWatermarkBytes);
@@ -114,14 +117,40 @@ public class SwapJobImpl implements SwapJob {
             return;
         }
         int numProjects = dbStore.getNumProjects();
+        // while we have too many projects on disk
         while (
                 (totalSize = repoStore.totalSize()) > lowWatermarkBytes &&
                 (numProjects = dbStore.getNumUnswappedProjects()) > minProjects
         ) {
+            // check if we've had too many exceptions so far
+            if (exceptionProjectNames.size() >= 20) {
+                StringBuilder sb = new StringBuilder();
+                for (String s: exceptionProjectNames) {
+                    sb.append(s);
+                    sb.append(' ');
+                }
+                Log.error(
+                    "Too many exceptions while running swap, giving up on this run: {}",
+                    sb.toString()
+                );
+                break;
+            }
+            // get the oldest project and try to swap it
+            String projectName = dbStore.getOldestUnswappedProject();
             try {
-                evict(dbStore.getOldestUnswappedProject());
-            } catch (IOException e) {
-                Log.warn("Exception while swapping, giving up", e);
+                evict(projectName);
+            } catch (Exception e) {
+                Log.warn("[{}] Exception while swapping, mark project and move on", projectName, e);
+                // NOTE: this is something of a hack. If a project fails to swap we get stuck in a
+                // loop where `dbStore.getOldestUnswappedProject()` gives the same failing project over and over again,
+                // which fills up the disk with errors. By touching the access time we can mark the project as a
+                // non-candidate for swapping. Ideally we should be checking the logs for these log events and fixing
+                // whatever is wrong with the project
+                dbStore.setLastAccessedTime(
+                    projectName,
+                    Timestamp.valueOf(LocalDateTime.now())
+                );
+                exceptionProjectNames.add(projectName);
             }
         }
         if (totalSize > lowWatermarkBytes) {
@@ -161,6 +190,11 @@ public class SwapJobImpl implements SwapJob {
         Preconditions.checkNotNull(projName, "projName was null");
         Log.info("Evicting project: {}", projName);
         try (LockGuard __ = lock.lockGuard(projName)) {
+            try {
+                repoStore.gcProject(projName);
+            } catch (Exception e) {
+                Log.error("[{}] Exception while running gc on project: {}", projName, e);
+            }
             long[] sizePtr = new long[1];
             try (InputStream blob = repoStore.bzip2Project(projName, sizePtr)) {
                 swapStore.upload(projName, blob, sizePtr[0]);

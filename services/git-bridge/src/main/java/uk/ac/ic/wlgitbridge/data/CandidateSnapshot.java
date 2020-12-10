@@ -77,7 +77,7 @@ public class CandidateSnapshot implements AutoCloseable {
         );
         for (ServletFile file : files) {
             if (file.isChanged()) {
-                file.writeToDisk(attsDirectory);
+                file.writeToDiskWithName(attsDirectory, file.getUniqueIdentifier());
             }
         }
     }
@@ -115,10 +115,9 @@ public class CandidateSnapshot implements AutoCloseable {
         JsonObject jsonFile = new JsonObject();
         jsonFile.addProperty("name", file.getPath());
         if (file.isChanged()) {
-            jsonFile.addProperty(
-                    "url",
-                    projectURL + "/" + file.getPath() + "?key=" + postbackKey
-            );
+            String identifier = file.getUniqueIdentifier();
+            String url = projectURL + "/" + identifier + "?key=" + postbackKey;
+            jsonFile.addProperty("url", url);
         }
         return jsonFile;
     }

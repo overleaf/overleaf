@@ -140,6 +140,13 @@ public class FSGitRepoStore implements RepoStore {
     }
 
     @Override
+    public void gcProject(String projectName) throws IOException {
+        Project.checkValidProjectName(projectName);
+        ProjectRepo repo = getExistingRepo(projectName);
+        repo.runGC();
+    }
+
+    @Override
     public void remove(String projectName) throws IOException {
         Project.checkValidProjectName(projectName);
         FileUtils.deleteDirectory(new File(rootDirectory, projectName));

@@ -33,6 +33,17 @@ To be run from the base directory:
 **Clean**:
 `mvn clean`
 
+To be run from the dev-environment:
+
+**Build jar**:
+`bin/run git-bridge make package`
+
+**Run tests**:
+`bin/run git-bridge make test`
+
+**Clean**:
+`bin/run git-bridge make clean`
+
 ### Installation
 
 Install dependencies:
@@ -108,23 +119,20 @@ You have to restart the server for configuration changes to take effect.
 
 ## Creating OAuth app
 
-In dev-env, run `bin/run rails_v1 rake db:seed`, or, if using this solo, run the following in the v1
-database:
+In dev-env, run the following command in mongo to create the oauth application
+for git-bridge.
 
-```sql
-INSERT INTO public.oauth_applications (
-  "name", uid, secret, redirect_uri, scopes, skip_authorization,
-  created_at, updated_at, partner, confidential
-) VALUES (
-  'gitbridge',
-  '264c723c925c13590880751f861f13084934030c13b4452901e73bdfab226edc',
-  'e6b2e9eee7ae2bb653823250bb69594a91db0547fe3790a7135acb497108e62d',
-  'http://www.overleaf.test:5000/no-callback-required',
-  'git_bridge',
-  true,
-  now(),
-  now(),
-  null,
-  true
-);
+```
+db.oauthApplications.insert({
+  "clientSecret" : "e6b2e9eee7ae2bb653823250bb69594a91db0547fe3790a7135acb497108e62d",
+  "grants" : [
+    "password"
+  ],
+  "id" : "264c723c925c13590880751f861f13084934030c13b4452901e73bdfab226edc",
+  "name" : "Overleaf Git Bridge",
+  "redirectUris" : [],
+  "scopes" : [
+    "git_bridge"
+  ]
+})
 ```

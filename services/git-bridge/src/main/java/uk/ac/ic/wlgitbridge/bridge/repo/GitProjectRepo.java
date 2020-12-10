@@ -240,6 +240,7 @@ public class GitProjectRepo implements ProjectRepo {
     ) throws IOException, GitAPIException {
         Preconditions.checkState(repository.isPresent());
         Repository repo = getJGitRepository();
+        resetHard();
         String name = getProjectName();
         Log.info("[{}] Writing commit", name);
         contents.write();

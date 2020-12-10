@@ -20,7 +20,11 @@ public abstract class RawFile {
     public abstract long size();
 
     public final void writeToDisk(File directory) throws IOException {
-        File file = new File(directory, getPath());
+        writeToDiskWithName(directory, getPath());
+    }
+
+    public final void writeToDiskWithName(File directory, String name) throws IOException {
+        File file = new File(directory, name);
         file.getParentFile().mkdirs();
         file.createNewFile();
         OutputStream out = new FileOutputStream(file);

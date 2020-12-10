@@ -47,6 +47,14 @@ public class MockSnapshotServer {
         port = ((NetworkConnector) server.getConnectors()[0]).getLocalPort();
     }
 
+    public void stop() {
+        try {
+            server.stop();
+        } catch (Exception e) {
+            Log.warn("Exception when trying to stop server", e);
+        }
+    }
+
     public void setState(SnapshotAPIState state) {
         responseBuilder.setState(state);
     }

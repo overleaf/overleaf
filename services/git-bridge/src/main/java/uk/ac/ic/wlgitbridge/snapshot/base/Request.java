@@ -11,6 +11,7 @@ import uk.ac.ic.wlgitbridge.util.Log;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.*;
 
 /**
@@ -73,9 +74,32 @@ public abstract class Request<T extends Result> {
             if (cause instanceof HttpResponseException) {
                 HttpResponseException httpCause = (HttpResponseException) cause;
                 int sc = httpCause.getStatusCode();
-                if (sc == HttpServletResponse.SC_UNAUTHORIZED || sc == HttpServletResponse.SC_FORBIDDEN) {
+                if (sc == HttpServletResponse.SC_UNAUTHORIZED || sc == HttpServletResponse.SC_FORBIDDEN) {  // 401, 403
                     throw new ForbiddenException();
-                } else if (sc == HttpServletResponse.SC_NOT_FOUND) {
+                } else if (sc == HttpServletResponse.SC_CONFLICT) {  // 409
+                    try {
+                        JsonObject json = Instance.gson.fromJson(httpCause.getContent(), JsonObject.class);
+                        String code = json.get("code").getAsString();
+                        if ("projectHasDotGit".equals(code)) {
+                            throw new MissingRepositoryException(Arrays.asList(
+                                    "This project contains a '.git' entity at the top level, indicating that it is",
+                                    "already a git repository. The Overleaf git-bridge cannot work with this project",
+                                    "due to a known problem with handling these '.git' folders.",
+                                    "",
+                                    "We recommend removing the .git folder before trying again.",
+                                    "",
+                                    "If this is unexpected, please contact us at support@overleaf.com, or",
+                                    "see https://www.overleaf.com/help/342 for more information."
+                            ));
+                        } else {
+                            throw new MissingRepositoryException(Arrays.asList("Conflict: 409"));
+                        }
+                    } catch (IllegalStateException
+                            | ClassCastException
+                            | NullPointerException _e) { // json parse errors
+                        throw new MissingRepositoryException(Arrays.asList("Conflict: 409"));
+                    }
+                } else if (sc == HttpServletResponse.SC_NOT_FOUND) {  // 404
                     try {
                         JsonObject json = Instance.gson.fromJson(httpCause.getContent(), JsonObject.class);
                         String message = json.get("message").getAsString();
