@@ -11,8 +11,11 @@ describe('OutlineParser', function() {
       const content = `
       \\book{Book}
       \\part{Part}
+      \\addpart{Part 2}
       \\chapter{Chapter}
+      \\addchap{Chapter 2}
       \\section{Section 1}
+      \\addsect{Section 1b}
       \\subsection{Subsection}
       \\subsubsection{Subsubsection}
       \\section{Section 2}
@@ -24,14 +27,17 @@ describe('OutlineParser', function() {
       expect(outline).to.deep.equal([
         { line: 2, title: 'Book', level: 10 },
         { line: 3, title: 'Part', level: 20 },
-        { line: 4, title: 'Chapter', level: 30 },
-        { line: 5, title: 'Section 1', level: 40 },
-        { line: 6, title: 'Subsection', level: 50 },
-        { line: 7, title: 'Subsubsection', level: 60 },
-        { line: 8, title: 'Section 2', level: 40 },
-        { line: 9, title: 'Subsubsection without subsection', level: 60 },
-        { line: 10, title: 'a paragraph', level: 70 },
-        { line: 11, title: 'a subparagraph', level: 80 }
+        { line: 4, title: 'Part 2', level: 20 },
+        { line: 5, title: 'Chapter', level: 30 },
+        { line: 6, title: 'Chapter 2', level: 30 },
+        { line: 7, title: 'Section 1', level: 40 },
+        { line: 8, title: 'Section 1b', level: 40 },
+        { line: 9, title: 'Subsection', level: 50 },
+        { line: 10, title: 'Subsubsection', level: 60 },
+        { line: 11, title: 'Section 2', level: 40 },
+        { line: 12, title: 'Subsubsection without subsection', level: 60 },
+        { line: 13, title: 'a paragraph', level: 70 },
+        { line: 14, title: 'a subparagraph', level: 80 }
       ])
     })
 

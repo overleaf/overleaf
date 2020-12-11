@@ -1,8 +1,11 @@
 const COMMAND_LEVELS = {
   book: 10,
   part: 20,
+  addpart: 20,
   chapter: 30,
+  addchap: 30,
   section: 40,
+  addsect: 40,
   subsection: 50,
   subsubsection: 60,
   paragraph: 70,
