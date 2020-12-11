@@ -6,11 +6,11 @@ run: package
 
 
 build:
-	mvn package -DskipTests
+	mvn --no-transfer-progress package -DskipTests
 
 
 test:
-	mvn test
+	mvn --no-transfer-progress test
 
 
 clean:
@@ -18,7 +18,7 @@ clean:
 
 
 package: clean
-	mvn package -DskipTests
+	mvn --no-transfer-progress package -DskipTests
 
 
 .PHONY: run package build clean test
