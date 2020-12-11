@@ -85,26 +85,9 @@ App.run(($rootScope, $templateCache) => {
   )
 })
 
-const sl_debugging =
-  __guard__(window.location != null ? window.location.search : undefined, x =>
-    x.match(/debug=true/)
-  ) != null
-var sl_console_last_log = null
+const sl_debugging = window.location.search.match(/debug=true/)
 window.sl_debugging = sl_debugging // make a global flag for debugging code
-window.sl_console = {
-  log(...args) {
-    if (sl_debugging) {
-      sl_console_last_log = null
-      return console.log(...Array.from(args || []))
-    }
-  },
-  logOnce(...args) {
-    if (sl_debugging && args[0] !== sl_console_last_log) {
-      sl_console_last_log = args[0]
-      return console.log(...Array.from(args || []))
-    }
-  }
-}
+window.sl_console = sl_debugging ? console : { log() {} }
 
 export default App
 

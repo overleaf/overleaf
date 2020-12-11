@@ -328,7 +328,7 @@ export default (Document = (function() {
       if (inflightOp == null && pendingOp == null) {
         // there's nothing going on, this is ok.
         saved = true
-        sl_console.logOnce('[pollSavedStatus] no inflight or pending ops')
+        sl_console.log('[pollSavedStatus] no inflight or pending ops')
       } else if (inflightOp != null && inflightOp === this.oldInflightOp) {
         // The same inflight op has been sitting unacked since we
         // last checked, this is bad.
