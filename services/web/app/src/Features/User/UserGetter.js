@@ -1,12 +1,42 @@
+const { callbackify } = require('util')
 const { db } = require('../../infrastructure/mongodb')
 const metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
 const { promisifyAll } = require('../../util/promises')
-const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
+const {
+  promises: InstitutionsAPIPromises
+} = require('../Institutions/InstitutionsAPI')
 const InstitutionsHelper = require('../Institutions/InstitutionsHelper')
 const Errors = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')
 const { normalizeQuery, normalizeMultiQuery } = require('../Helpers/Mongo')
+
+async function getUserFullEmails(userId) {
+  const user = await UserGetter.promises.getUser(userId, {
+    email: 1,
+    emails: 1,
+    samlIdentifiers: 1
+  })
+
+  if (!user) {
+    throw new Error('User not Found')
+  }
+
+  if (!Features.hasFeature('affiliations')) {
+    return decorateFullEmails(user.email, user.emails, [], [])
+  }
+
+  const affiliationsData = await InstitutionsAPIPromises.getUserAffiliations(
+    userId
+  )
+
+  return decorateFullEmails(
+    user.email,
+    user.emails || [],
+    affiliationsData,
+    user.samlIdentifiers || []
+  )
+}
 
 const UserGetter = {
   getUser(query, projection, callback) {
@@ -28,41 +58,7 @@ const UserGetter = {
     )
   },
 
-  getUserFullEmails(userId, callback) {
-    this.getUser(userId, { email: 1, emails: 1, samlIdentifiers: 1 }, function(
-      error,
-      user
-    ) {
-      if (error) {
-        return callback(error)
-      }
-      if (!user) {
-        return callback(new Error('User not Found'))
-      }
-
-      if (!Features.hasFeature('affiliations')) {
-        return callback(
-          null,
-          decorateFullEmails(user.email, user.emails, [], [])
-        )
-      }
-
-      getUserAffiliations(userId, function(error, affiliationsData) {
-        if (error) {
-          return callback(error)
-        }
-        callback(
-          null,
-          decorateFullEmails(
-            user.email,
-            user.emails || [],
-            affiliationsData,
-            user.samlIdentifiers || []
-          )
-        )
-      })
-    })
-  },
+  getUserFullEmails: callbackify(getUserFullEmails),
 
   getUserByMainEmail(email, projection, callback) {
     email = email.trim()
@@ -204,5 +200,9 @@ var decorateFullEmails = (
   metrics.timeAsyncMethod(UserGetter, method, 'mongo.UserGetter', logger)
 )
 
-UserGetter.promises = promisifyAll(UserGetter)
+UserGetter.promises = promisifyAll(UserGetter, {
+  without: ['getUserFullEmails']
+})
+UserGetter.promises.getUserFullEmails = getUserFullEmails
+
 module.exports = UserGetter

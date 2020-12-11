@@ -42,7 +42,7 @@ describe('UserGetter', function() {
       ObjectId
     }
     const settings = { apis: { v1: { url: 'v1.url', user: '', pass: '' } } }
-    this.getUserAffiliations = sinon.stub().callsArgWith(1, null, [])
+    this.getUserAffiliations = sinon.stub().resolves([])
 
     this.UserGetter = SandboxedModule.require(modulePath, {
       globals: {
@@ -59,7 +59,9 @@ describe('UserGetter', function() {
         },
         'settings-sharelatex': settings,
         '../Institutions/InstitutionsAPI': {
-          getUserAffiliations: this.getUserAffiliations
+          promises: {
+            getUserAffiliations: this.getUserAffiliations
+          }
         },
         '../../infrastructure/Features': {
           hasFeature: sinon.stub().returns(true)
@@ -116,16 +118,14 @@ describe('UserGetter', function() {
 
   describe('getUserFullEmails', function() {
     it('should get user', function(done) {
-      this.UserGetter.getUser = sinon
-        .stub()
-        .callsArgWith(2, null, this.fakeUser)
+      this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
       const projection = { email: 1, emails: 1, samlIdentifiers: 1 }
       this.UserGetter.getUserFullEmails(
         this.fakeUser._id,
         (error, fullEmails) => {
           expect(error).to.not.exist
-          this.UserGetter.getUser.called.should.equal(true)
-          this.UserGetter.getUser
+          this.UserGetter.promises.getUser.called.should.equal(true)
+          this.UserGetter.promises.getUser
             .calledWith(this.fakeUser._id, projection)
             .should.equal(true)
           done()
@@ -134,9 +134,7 @@ describe('UserGetter', function() {
     })
 
     it('should fetch emails data', function(done) {
-      this.UserGetter.getUser = sinon
-        .stub()
-        .callsArgWith(2, null, this.fakeUser)
+      this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
       this.UserGetter.getUserFullEmails(
         this.fakeUser._id,
         (error, fullEmails) => {
@@ -162,9 +160,7 @@ describe('UserGetter', function() {
     })
 
     it('should merge affiliation data', function(done) {
-      this.UserGetter.getUser = sinon
-        .stub()
-        .callsArgWith(2, null, this.fakeUser)
+      this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
       const affiliationsData = [
         {
           email: 'email1@foo.bar',
@@ -179,7 +175,7 @@ describe('UserGetter', function() {
           }
         }
       ]
-      this.getUserAffiliations.callsArgWith(1, null, affiliationsData)
+      this.getUserAffiliations.resolves(affiliationsData)
       this.UserGetter.getUserFullEmails(
         this.fakeUser._id,
         (error, fullEmails) => {
@@ -218,8 +214,8 @@ describe('UserGetter', function() {
       const fakeUserWithSaml = this.fakeUser
       fakeUserWithSaml.emails[0].samlProviderId = 'saml_id'
       fakeUserWithSaml.samlIdentifiers = fakeSamlIdentifiers
-      this.UserGetter.getUser = sinon.stub().yields(null, this.fakeUser)
-      this.getUserAffiliations.callsArgWith(1, null, [])
+      this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
+      this.getUserAffiliations.resolves([])
       this.UserGetter.getUserFullEmails(
         this.fakeUser._id,
         (error, fullEmails) => {
@@ -251,16 +247,14 @@ describe('UserGetter', function() {
         _id: '12390i',
         email: 'email2@foo.bar'
       }
-      this.UserGetter.getUser = sinon
-        .stub()
-        .callsArgWith(2, null, this.fakeUser)
+      this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
       const projection = { email: 1, emails: 1, samlIdentifiers: 1 }
       this.UserGetter.getUserFullEmails(
         this.fakeUser._id,
         (error, fullEmails) => {
           expect(error).to.not.exist
-          this.UserGetter.getUser.called.should.equal(true)
-          this.UserGetter.getUser
+          this.UserGetter.promises.getUser.called.should.equal(true)
+          this.UserGetter.promises.getUser
             .calledWith(this.fakeUser._id, projection)
             .should.equal(true)
           assert.deepEqual(fullEmails, [])
