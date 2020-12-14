@@ -20,7 +20,7 @@ block content
 			p.loading-screen-error(ng-if="state.error").ng-cloak
 				span(ng-bind-html="state.error")
 
-		.global-alerts(ng-cloak)
+		.global-alerts(ng-cloak ng-hide="editor.error_state")
 			.alert.alert-danger.small(ng-if="connection.forced_disconnect")
 				strong #{translate("disconnected")}
 				|  #{translate("please_refresh")}

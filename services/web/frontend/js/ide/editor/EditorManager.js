@@ -319,6 +319,9 @@ export default (EditorManager = (function() {
 
           this.ide.socket.disconnect()
           this.ide.reportError(error, meta)
+
+          // Tell the user about the error state.
+          this.$scope.editor.error_state = true
           this.ide.showOutOfSyncModal(
             'Out of sync',
             "Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a href='/learn/Kb/Editor_out_of_sync_problems'>Please see this help guide for more information</a>",
