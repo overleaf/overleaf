@@ -231,9 +231,10 @@ export default (Document = (function() {
       )
     }
 
-    leaveAndCleanUp() {
+    leaveAndCleanUp(cb) {
       return this.leave(error => {
-        return this._cleanUp()
+        this._cleanUp()
+        if (cb) cb(error)
       })
     }
 

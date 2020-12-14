@@ -206,28 +206,61 @@ export default (EditorManager = (function() {
     }
 
     _openNewDocument(doc, callback) {
+      // Leave the current document
+      //  - when we are opening a different new one, to avoid race conditions
+      //     between leaving and joining the same document
+      //  - when the current one has pending ops that need flushing, to avoid
+      //     race conditions from cleanup
+      const current_sharejs_doc = this.$scope.editor.sharejs_doc
+      const currentDocId = current_sharejs_doc && current_sharejs_doc.doc_id
+      const hasBufferedOps =
+        current_sharejs_doc && current_sharejs_doc.hasBufferedOps()
+      const changingDoc = current_sharejs_doc && currentDocId !== doc.id
+      if (changingDoc || hasBufferedOps) {
+        sl_console.log('[_openNewDocument] Leaving existing open doc...')
+
+        // Do not trigger any UI changes from remote operations
+        this._unbindFromDocumentEvents(current_sharejs_doc)
+
+        // Teardown the Document -> ShareJsDoc -> sharejs doc
+        // By the time this completes, the Document instance is no longer
+        //  registered in Document.openDocs and _doOpenNewDocument can start
+        //  from scratch -- read: no corrupted internal state.
+        const editorOpenDocEpoch = ++this.editorOpenDocEpoch
+        current_sharejs_doc.leaveAndCleanUp(error => {
+          if (error) {
+            sl_console.log(
+              `[_openNewDocument] error leaving doc ${currentDocId}`,
+              error
+            )
+            return callback(error)
+          }
+          if (this.editorOpenDocEpoch !== editorOpenDocEpoch) {
+            sl_console.log(
+              `[openNewDocument] editorOpenDocEpoch mismatch ${
+                this.editorOpenDocEpoch
+              } vs ${editorOpenDocEpoch}`
+            )
+            return callback(new Error('another document was loaded'))
+          }
+          this._doOpenNewDocument(doc, callback)
+        })
+      } else {
+        this._doOpenNewDocument(doc, callback)
+      }
+    }
+
+    _doOpenNewDocument(doc, callback) {
       if (callback == null) {
         callback = function(error, sharejs_doc) {}
       }
-      sl_console.log('[_openNewDocument] Opening...')
-      const current_sharejs_doc = this.$scope.editor.sharejs_doc
+      sl_console.log('[_doOpenNewDocument] Opening...')
       const new_sharejs_doc = Document.getDocument(this.ide, doc.id)
-      // Leave the current document only when we are opening a different new
-      // one, to avoid race conditions between leaving and joining the same
-      // document.
-      if (
-        current_sharejs_doc != null &&
-        current_sharejs_doc !== new_sharejs_doc
-      ) {
-        sl_console.log('[_openNewDocument] Leaving existing open doc...')
-        current_sharejs_doc.leaveAndCleanUp()
-        this._unbindFromDocumentEvents(current_sharejs_doc)
-      }
       const editorOpenDocEpoch = ++this.editorOpenDocEpoch
       return new_sharejs_doc.join(error => {
         if (error != null) {
           sl_console.log(
-            `[_openNewDocument] error joining doc ${doc.id}`,
+            `[_doOpenNewDocument] error joining doc ${doc.id}`,
             error
           )
           return callback(error)
