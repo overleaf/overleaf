@@ -199,7 +199,16 @@ export default (Document = (function() {
     _bindToSocketEvents() {
       this._onUpdateAppliedHandler = update => this._onUpdateApplied(update)
       this.ide.socket.on('otUpdateApplied', this._onUpdateAppliedHandler)
-      this._onErrorHandler = (error, update) => this._onError(error, update)
+      this._onErrorHandler = (error, message) => {
+        // 'otUpdateError' are emitted per doc socket.io room, hence we can be
+        //  sure that message.doc_id exists.
+        if (message.doc_id !== this.doc_id) {
+          // This error is for another doc. Do not action it. We could open
+          //  a modal that has the wrong context on it.
+          return
+        }
+        this._onError(error, message)
+      }
       this.ide.socket.on('otUpdateError', this._onErrorHandler)
       this._onDisconnectHandler = error => this._onDisconnect(error)
       return this.ide.socket.on('disconnect', this._onDisconnectHandler)
