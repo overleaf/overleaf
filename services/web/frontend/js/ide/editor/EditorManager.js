@@ -273,6 +273,7 @@ export default (EditorManager = (function() {
               this.editorOpenDocEpoch
             } vs ${editorOpenDocEpoch}`
           )
+          new_sharejs_doc.leaveAndCleanUp()
           return callback(new Error('another document was loaded'))
         }
         this._bindToDocumentEvents(doc, new_sharejs_doc)
