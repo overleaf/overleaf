@@ -270,6 +270,7 @@ export default (ShareJsDoc = (function() {
     }
 
     clearInflightAndPendingOps() {
+      this._clearFatalTimeoutTimer()
       this._doc.inflightOp = null
       this._doc.inflightCallbacks = []
       this._doc.pendingOp = null

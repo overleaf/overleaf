@@ -302,15 +302,30 @@ export default (EditorManager = (function() {
             'Sorry, this file has too many comments or tracked changes. Please try accepting or rejecting some existing changes, or resolving and deleting some comments.'
           )
         } else {
+          // Do not allow this doc to open another error modal.
+          sharejs_doc.off('error')
+
+          // Preserve the sharejs contents before the teardown.
+          editorContent =
+            typeof editorContent === 'string'
+              ? editorContent
+              : sharejs_doc.doc._doc.snapshot
+
+          // Tear down the ShareJsDoc.
+          if (sharejs_doc.doc) sharejs_doc.doc.clearInflightAndPendingOps()
+
+          // Do not re-join after re-connecting.
+          sharejs_doc.leaveAndCleanUp()
+
           this.ide.socket.disconnect()
           this.ide.reportError(error, meta)
           this.ide.showOutOfSyncModal(
             'Out of sync',
             "Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a href='/learn/Kb/Editor_out_of_sync_problems'>Please see this help guide for more information</a>",
-            typeof editorContent === 'string'
-              ? editorContent
-              : sharejs_doc.doc._doc.snapshot
+            editorContent
           )
+          // Do not forceReopen the document.
+          return
         }
         const removeHandler = this.$scope.$on('project:joined', () => {
           this.openDoc(doc, { forceReopen: true })
