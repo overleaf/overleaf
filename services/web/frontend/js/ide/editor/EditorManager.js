@@ -221,6 +221,8 @@ export default (EditorManager = (function() {
 
         // Do not trigger any UI changes from remote operations
         this._unbindFromDocumentEvents(current_sharejs_doc)
+        // Keep listening for out-of-sync and similar errors.
+        this._attachErrorHandlerToDocument(doc, current_sharejs_doc)
 
         // Teardown the Document -> ShareJsDoc -> sharejs doc
         // By the time this completes, the Document instance is no longer
@@ -278,7 +280,7 @@ export default (EditorManager = (function() {
       })
     }
 
-    _bindToDocumentEvents(doc, sharejs_doc) {
+    _attachErrorHandlerToDocument(doc, sharejs_doc) {
       sharejs_doc.on('error', (error, meta, editorContent) => {
         let message
         if ((error != null ? error.message : undefined) != null) {
@@ -314,6 +316,10 @@ export default (EditorManager = (function() {
           removeHandler()
         })
       })
+    }
+
+    _bindToDocumentEvents(doc, sharejs_doc) {
+      this._attachErrorHandlerToDocument(doc, sharejs_doc)
 
       return sharejs_doc.on('externalUpdate', update => {
         if (this._ignoreExternalUpdates) {
