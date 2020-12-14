@@ -13,6 +13,8 @@ describe('ChatStore', function() {
     id: '123abc'
   }
 
+  const testProjectId = 'project-123'
+
   const testMessage = {
     content: 'hello',
     timestamp: new Date().getTime(),
@@ -22,15 +24,13 @@ describe('ChatStore', function() {
   beforeEach(function() {
     fetchMock.reset()
 
-    window.user = user
-    window.project_id = 'project-123'
     window.csrfToken = 'csrf_tok'
 
-    socket = { on: sinon.stub() }
+    socket = { on: sinon.stub(), off: sinon.stub() }
     window._ide = { socket }
     mockSocketMessage = message => socket.on.getCall(0).args[1](message)
 
-    store = new ChatStore()
+    store = new ChatStore(user, testProjectId)
   })
 
   afterEach(function() {
@@ -213,6 +213,20 @@ describe('ChatStore', function() {
       store.on('updated', subscriber)
       await store.sendMessage('')
       await store.sendMessage(null)
+      expect(subscriber).not.to.be.called
+    })
+  })
+
+  describe('destroy', function() {
+    beforeEach(function() {
+      fetchMock.post(/messages/, 204)
+    })
+
+    it('removes event listeners', async function() {
+      const subscriber = sinon.stub()
+      store.on('updated', subscriber)
+      store.destroy()
+      await store.sendMessage('a message')
       expect(subscriber).not.to.be.called
     })
   })

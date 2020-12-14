@@ -1,5 +1,4 @@
 import sinon from 'sinon'
-import { resetChatStore } from '../../../../../frontend/js/features/chat/store/chat-store-effect'
 
 export function stubUIConfig() {
   window.uiConfig = {
@@ -30,7 +29,6 @@ export function tearDownMathJaxStubs() {
 export function stubChatStore({ user }) {
   window._ide = { socket: { on: sinon.stub(), off: sinon.stub() } }
   window.user = user
-  resetChatStore()
 }
 
 export function tearDownChatStore() {

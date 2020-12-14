@@ -1,15 +1,19 @@
 import { expect } from 'chai'
 import React from 'react'
 import sinon from 'sinon'
-import { screen, render, fireEvent } from '@testing-library/react'
+import { screen, fireEvent } from '@testing-library/react'
 
 import OutlinePane from '../../../../../frontend/js/features/outline/components/outline-pane'
+import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
 describe('<OutlinePane />', function() {
   const jumpToLine = () => {}
-  const projectId = '123abc'
   const onToggle = sinon.stub()
   const eventTracking = { sendMB: sinon.stub() }
+
+  function render(children) {
+    renderWithEditorContext(children, { projectId: '123abc' })
+  }
 
   before(function() {
     global.localStorage = {
@@ -41,7 +45,6 @@ describe('<OutlinePane />', function() {
       <OutlinePane
         isTexFile
         outline={outline}
-        projectId={projectId}
         jumpToLine={jumpToLine}
         onToggle={onToggle}
         eventTracking={eventTracking}
@@ -57,7 +60,6 @@ describe('<OutlinePane />', function() {
       <OutlinePane
         isTexFile={false}
         outline={outline}
-        projectId={projectId}
         jumpToLine={jumpToLine}
         onToggle={onToggle}
         eventTracking={eventTracking}
@@ -80,7 +82,6 @@ describe('<OutlinePane />', function() {
       <OutlinePane
         isTexFile
         outline={outline}
-        projectId={projectId}
         jumpToLine={jumpToLine}
         onToggle={onToggle}
         eventTracking={eventTracking}

@@ -133,6 +133,7 @@
     "react-i18next": "^11.7.1",
     "react-linkify": "^1.0.0-alpha",
     "react2angular": "^4.0.6",
+    "react2angular-shared-context": "^1.1.0",
     "request": "^2.88.2",
     "request-promise-native": "^1.0.8",
     "requestretry": "^1.13.0",

@@ -1,6 +1,9 @@
 import React from 'react'
 
 import OutlinePane from '../js/features/outline/components/outline-pane'
+import { ContextRoot } from '../js/shared/context/root-context'
+
+window.project_id = '1234'
 
 export const Basic = args => <OutlinePane {...args} />
 Basic.args = {
@@ -47,11 +50,17 @@ export default {
     jumpToLine: { action: 'jumpToLine' }
   },
   args: {
-    projectId: '1234',
     eventTracking: { sendMB: () => {} },
     isTexFile: true,
     outline: [],
     jumpToLine: () => {},
     onToggle: () => {}
-  }
+  },
+  decorators: [
+    Story => (
+      <ContextRoot>
+        <Story />
+      </ContextRoot>
+    )
+  ]
 }

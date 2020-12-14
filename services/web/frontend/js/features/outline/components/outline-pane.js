@@ -7,17 +7,19 @@ import OutlineRoot from './outline-root'
 import Icon from '../../../shared/components/icon'
 import localStorage from '../../../infrastructure/local-storage'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
+import { useEditorContext } from '../../../shared/context/editor-context'
 
 function OutlinePane({
   isTexFile,
   outline,
-  projectId,
   jumpToLine,
   onToggle,
   eventTracking,
   highlightedLine
 }) {
   const { t } = useTranslation()
+
+  const { projectId } = useEditorContext()
 
   const storageKey = `file_outline.expanded.${projectId}`
   const [expanded, setExpanded] = useState(() => {
@@ -77,7 +79,6 @@ function OutlinePane({
 OutlinePane.propTypes = {
   isTexFile: PropTypes.bool.isRequired,
   outline: PropTypes.array.isRequired,
-  projectId: PropTypes.string.isRequired,
   jumpToLine: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
   eventTracking: PropTypes.object.isRequired,

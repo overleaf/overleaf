@@ -7,6 +7,8 @@ block vars
 
 block content
 	.editor(ng-controller="IdeController").full-size
+		//- required by react2angular-shared-context, must be rendered as a top level component
+		shared-context-react()
 		.loading-screen(ng-if="state.loading")
 			.loading-screen-brand-container
 				.loading-screen-brand(

@@ -5,19 +5,21 @@ import { getJSON, postJSON } from '../../../infrastructure/fetch-json'
 export const MESSAGE_LIMIT = 50
 
 export class ChatStore {
-  constructor() {
+  constructor(user, projectId) {
     this.messages = []
     this.loading = false
     this.atEnd = false
 
+    this._user = user
+    this._projectId = projectId
     this._nextBeforeTimestamp = null
     this._justSent = false
 
     this._emitter = new EventEmitter()
 
-    window._ide.socket.on('new-chat-message', message => {
+    this._onNewChatMessage = message => {
       const messageIsFromSelf =
-        message && message.user && message.user.id === window.user.id
+        message && message.user && message.user.id === this._user.id
       if (!messageIsFromSelf || !this._justSent) {
         this.messages = appendMessage(this.messages, message)
         this._emitter.emit('updated')
@@ -27,7 +29,14 @@ export class ChatStore {
         )
       }
       this._justSent = false
-    })
+    }
+
+    window._ide.socket.on('new-chat-message', this._onNewChatMessage)
+  }
+
+  destroy() {
+    window._ide.socket.off('new-chat-message', this._onNewChatMessage)
+    this._emitter.off() // removes all listeners
   }
 
   on(event, fn) {
@@ -76,11 +85,11 @@ export class ChatStore {
     }
     this._justSent = true
     this.messages = appendMessage(this.messages, {
-      user: window.user,
+      user: this._user,
       content: message,
       timestamp: Date.now()
     })
-    const url = `/project/${window.project_id}/messages`
+    const url = `/project/${this._projectId}/messages`
     this._emitter.emit('updated')
     return postJSON(url, { body })
   }

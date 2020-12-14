@@ -1,37 +1,38 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ChatStore } from './chat-store'
-
-let chatStore
-
-export function resetChatStore() {
-  chatStore = undefined
-}
+import { useApplicationContext } from '../../../shared/context/application-context'
+import { useEditorContext } from '../../../shared/context/editor-context'
 
 export function useChatStore() {
-  if (!chatStore) {
-    chatStore = new ChatStore()
+  const { user } = useApplicationContext()
+  const { projectId } = useEditorContext()
+
+  const chatStoreRef = useRef(new ChatStore(user, projectId))
+
+  const [atEnd, setAtEnd] = useState(chatStoreRef.current.atEnd)
+  const [loading, setLoading] = useState(chatStoreRef.current.loading)
+  const [messages, setMessages] = useState(chatStoreRef.current.messages)
+
+  useEffect(
+    () => {
+      const chatStore = chatStoreRef.current
+      function handleStoreUpdated() {
+        setAtEnd(chatStore.atEnd)
+        setLoading(chatStore.loading)
+        setMessages(chatStore.messages)
+      }
+      chatStore.on('updated', handleStoreUpdated)
+      return () => chatStore.destroy()
+    },
+    [chatStoreRef]
+  )
+
+  return {
+    userId: user.id,
+    atEnd,
+    loading,
+    messages,
+    loadMoreMessages: () => chatStoreRef.current.loadMoreMessages(),
+    sendMessage: message => chatStoreRef.current.sendMessage(message)
   }
-
-  function getStateFromStore() {
-    return {
-      userId: window.user.id,
-      atEnd: chatStore.atEnd,
-      loading: chatStore.loading,
-      messages: chatStore.messages,
-      loadMoreMessages: () => chatStore.loadMoreMessages(),
-      sendMessage: message => chatStore.sendMessage(message)
-    }
-  }
-
-  const [storeState, setStoreState] = useState(getStateFromStore())
-
-  useEffect(() => {
-    function handleStoreUpdated() {
-      setStoreState(getStateFromStore())
-    }
-    chatStore.on('updated', handleStoreUpdated)
-    return () => chatStore.off('updated', handleStoreUpdated)
-  }, [])
-
-  return storeState
 }
