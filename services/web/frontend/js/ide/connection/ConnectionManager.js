@@ -72,6 +72,7 @@ export default (ConnectionManager = (function() {
       this.connected = false
       this.userIsInactive = false
       this.gracefullyReconnecting = false
+      this.shuttingDown = false
 
       this.joinProjectRetryInterval = this.JOIN_PROJECT_RETRY_INTERVAL
 
@@ -99,7 +100,11 @@ export default (ConnectionManager = (function() {
       })
 
       document.querySelector('body').addEventListener('click', e => {
-        if (!this.connected && e.target.id !== 'try-reconnect-now-button') {
+        if (
+          !this.shuttingDown &&
+          !this.connected &&
+          e.target.id !== 'try-reconnect-now-button'
+        ) {
           // user is editing, try to reconnect
           return this.tryReconnectWithRateLimit()
         }
@@ -235,7 +240,8 @@ export default (ConnectionManager = (function() {
         if (!this.$scope.connection.state.match(/^waiting/)) {
           if (
             !this.$scope.connection.forced_disconnect &&
-            !this.userIsInactive
+            !this.userIsInactive &&
+            !this.shuttingDown
           ) {
             this.startAutoReconnectCountdown()
           } else {
@@ -451,8 +457,12 @@ Something went wrong connecting to your project. Please refresh if this continue
       return this.tryReconnect()
     }
 
-    disconnect() {
-      if (this.ide.socket.socket && !this.ide.socket.socket.connected) {
+    disconnect(options) {
+      if (options && options.permanent) {
+        sl_console.log('[disconnect] shutting down ConnectionManager')
+        this.updateConnectionManagerState('inactive')
+        this.shuttingDown = true // prevent reconnection attempts
+      } else if (this.ide.socket.socket && !this.ide.socket.socket.connected) {
         sl_console.log(
           '[socket.io] skipping disconnect because socket.io has not connected'
         )
@@ -548,7 +558,11 @@ Something went wrong connecting to your project. Please refresh if this continue
 
     tryReconnect() {
       sl_console.log('[ConnectionManager] tryReconnect')
-      if (this.connected || this.$scope.connection.reconnecting) {
+      if (
+        this.connected ||
+        this.shuttingDown ||
+        this.$scope.connection.reconnecting
+      ) {
         return
       }
       this.updateConnectionManagerState('reconnecting')
