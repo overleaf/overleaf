@@ -69,9 +69,7 @@ async function checkCert(ukamfDB, providerId) {
     // check expiration on configured certificate
     const certificate = Certificate.fromPEM(
       Buffer.from(
-        `-----BEGIN CERTIFICATE-----\n${
-          body.sso_cert
-        }\n-----END CERTIFICATE-----`,
+        `-----BEGIN CERTIFICATE-----\n${body.sso_cert}\n-----END CERTIFICATE-----`,
         'utf8'
       )
     )

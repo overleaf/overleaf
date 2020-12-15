@@ -102,14 +102,11 @@ export default App.controller('LaunchpadController', function(
         $scope.statusChecks.websocket.error = 'socket.io not loaded'
         return
       }
-      const socket = io.connect(
-        null,
-        {
-          reconnect: false,
-          'connect timeout': 30 * 1000,
-          'force new connection': true
-        }
-      )
+      const socket = io.connect(null, {
+        reconnect: false,
+        'connect timeout': 30 * 1000,
+        'force new connection': true
+      })
 
       socket.on('connectionAccepted', function() {
         $scope.statusChecks.websocket.status = 'ok'

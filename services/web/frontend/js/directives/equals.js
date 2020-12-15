@@ -1,5 +1,5 @@
 /* eslint-disable
-*/
+ */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -14,7 +14,7 @@ export default App.directive('equals', () => ({
   link(scope, elem, attrs, ctrl) {
     const firstField = `#${attrs.equals}`
     return elem.add(firstField).on('keyup', () =>
-      scope.$apply(function() {
+      scope.$apply(function () {
         const equal = elem.val() === $(firstField).val()
         return ctrl.$setValidity('areEqual', equal)
       })

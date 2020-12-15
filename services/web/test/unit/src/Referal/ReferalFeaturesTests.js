@@ -34,7 +34,7 @@ describe('ReferalFeatures', function() {
     beforeEach(function() {
       this.refered_user_count = 3
       this.Settings.bonus_features = {
-        '3': {
+        3: {
           collaborators: 3,
           dropbox: false,
           versioning: false
@@ -64,7 +64,7 @@ describe('ReferalFeatures', function() {
     beforeEach(function() {
       this.refered_user_count = 0
       this.Settings.bonus_features = {
-        '1': {
+        1: {
           collaborators: 3,
           dropbox: false,
           versioning: false

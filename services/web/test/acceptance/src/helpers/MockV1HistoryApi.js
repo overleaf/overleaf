@@ -34,9 +34,7 @@ module.exports = MockV1HistoryApi = {
         res.header('content-disposition', 'attachment; name=project.zip')
         res.header('content-type', 'application/octet-stream')
         return res.send(
-          `Mock zip for ${req.params.project_id} at version ${
-            req.params.version
-          }`
+          `Mock zip for ${req.params.project_id} at version ${req.params.version}`
         )
       }
     )
@@ -51,9 +49,7 @@ module.exports = MockV1HistoryApi = {
         res.header('content-type', 'application/octet-stream')
         if (req.params.version === '42') {
           return res.send(
-            `Mock zip for ${req.params.project_id} at version ${
-              req.params.version
-            }`
+            `Mock zip for ${req.params.project_id} at version ${req.params.version}`
           )
         }
         function writeChunk() {
@@ -86,9 +82,7 @@ module.exports = MockV1HistoryApi = {
         MockV1HistoryApi.requestedZipPacks++
         MockV1HistoryApi.events.emit('v1-history-pack-zip')
         return res.json({
-          zipUrl: `http://localhost:3100/fake-zip-download/${
-            req.params.project_id
-          }/version/${req.params.version}`
+          zipUrl: `http://localhost:3100/fake-zip-download/${req.params.project_id}/version/${req.params.version}`
         })
       }
     )

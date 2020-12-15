@@ -39,11 +39,7 @@ export default App.controller('NewSubscriptionController', function(
       'subscription-form-switch-to-student',
       window.plan_code
     )
-    window.location = `/user/subscription/new?planCode=${planCode}&currency=${
-      $scope.currencyCode
-    }&cc=${$scope.data.coupon}&itm_campaign=${window.ITMCampaign}&itm_content=${
-      window.ITMContent
-    }`
+    window.location = `/user/subscription/new?planCode=${planCode}&currency=${$scope.currencyCode}&cc=${$scope.data.coupon}&itm_campaign=${window.ITMCampaign}&itm_content=${window.ITMContent}`
   }
 
   eventTracking.sendMB('subscription-form', { plan: window.plan_code })

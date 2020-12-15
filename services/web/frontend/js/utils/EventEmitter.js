@@ -22,7 +22,7 @@
 // Remove a listener for the foo event with the bar namespace: .off 'foo.bar'
 let EventEmitter
 
-export default (EventEmitter = class EventEmitter {
+export default EventEmitter = class EventEmitter {
   on(event, callback) {
     let namespace
     if (!this.events) {
@@ -76,4 +76,4 @@ export default (EventEmitter = class EventEmitter {
   emit(...args) {
     return this.trigger(...Array.from(args || []))
   }
-})
+}

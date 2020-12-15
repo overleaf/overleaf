@@ -15,7 +15,7 @@ import SocketIoShim from './SocketIoShim'
 let ConnectionManager
 const ONEHOUR = 1000 * 60 * 60
 
-export default (ConnectionManager = (function() {
+export default ConnectionManager = (function() {
   ConnectionManager = class ConnectionManager {
     static initClass() {
       this.prototype.disconnectAfterMs = ONEHOUR * 24
@@ -130,15 +130,12 @@ export default (ConnectionManager = (function() {
           pathname: this.wsUrl || '/socket.io'
         }
       }
-      this.ide.socket = SocketIoShim.connect(
-        parsedURL.origin,
-        {
-          resource: parsedURL.pathname.slice(1),
-          reconnect: false,
-          'connect timeout': 30 * 1000,
-          'force new connection': true
-        }
-      )
+      this.ide.socket = SocketIoShim.connect(parsedURL.origin, {
+        resource: parsedURL.pathname.slice(1),
+        reconnect: false,
+        'connect timeout': 30 * 1000,
+        'force new connection': true
+      })
 
       // handle network-level websocket errors (e.g. failed dns lookups)
 
@@ -281,9 +278,7 @@ The editor will refresh in automatically in 10 seconds.\
         this.$scope.connection.jobId += 1
         let jobId = this.$scope.connection.jobId
         sl_console.log(
-          `[updateConnectionManagerState ${jobId}] from ${
-            this.$scope.connection.state
-          } to ${state}`
+          `[updateConnectionManagerState ${jobId}] from ${this.$scope.connection.state} to ${state}`
         )
         this.$scope.connection.state = state
 
@@ -631,6 +626,7 @@ Something went wrong connecting to your project. Please refresh if this continue
         }) // 5 minutes
       }
     }
+
     reconnectGracefully(force) {
       if (this.reconnectGracefullyStarted == null) {
         this.reconnectGracefullyStarted = new Date()
@@ -674,4 +670,4 @@ Something went wrong connecting to your project. Please refresh if this continue
   }
   ConnectionManager.initClass()
   return ConnectionManager
-})())
+})()

@@ -16,7 +16,7 @@
 import CryptoJS from 'crypto-js/md5'
 let ColorManager
 
-export default (ColorManager = {
+export default ColorManager = {
   getColorScheme(hue, element) {
     if (this.isDarkTheme(element)) {
       return {
@@ -87,4 +87,4 @@ export default (ColorManager = {
       (this.TOTAL_HUES - this.OWN_HUE_BLOCKED_SIZE * 2)
     return hue
   }
-})
+}

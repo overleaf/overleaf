@@ -22,6 +22,7 @@ class Parser {
     // Ignore single letter commands since auto complete is moot then.
     this.prototype.commandRegex = /\\([a-zA-Z]{2,})/
   }
+
   constructor(doc, prefix) {
     this.doc = doc
     this.prefix = prefix
@@ -138,7 +139,7 @@ class Parser {
 }
 Parser.initClass()
 
-export default (CommandManager = class CommandManager {
+export default CommandManager = class CommandManager {
   constructor(metadataManager) {
     this.metadataManager = metadataManager
   }
@@ -231,7 +232,7 @@ export default (CommandManager = class CommandManager {
       }
     })
   }
-})
+}
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

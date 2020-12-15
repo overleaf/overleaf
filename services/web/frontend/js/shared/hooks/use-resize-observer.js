@@ -13,27 +13,25 @@ function useResizeObserver(observedElement, observedData, callback) {
     resizeObserver.current.unobserve(observedCurrent)
   }
 
-  useLayoutEffect(
-    () => {
-      if ('ResizeObserver' in window) {
-        const observedCurrent = observedElement && observedElement.current
+  useLayoutEffect(() => {
+    if ('ResizeObserver' in window) {
+      const observedCurrent = observedElement && observedElement.current
+      if (observedCurrent) {
+        observe(observedElement.current)
+      }
+
+      if (resizeObserver.current && observedCurrent) {
+        resizeObserver.current.observe(observedCurrent)
+      }
+
+      return () => {
         if (observedCurrent) {
-          observe(observedElement.current)
-        }
-
-        if (resizeObserver.current && observedCurrent) {
-          resizeObserver.current.observe(observedCurrent)
-        }
-
-        return () => {
-          if (observedCurrent) {
-            unobserve(observedCurrent)
-          }
+          unobserve(observedCurrent)
         }
       }
-    },
-    [observedElement, observedData]
-  )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [observedElement, observedData])
 }
 
 export default useResizeObserver

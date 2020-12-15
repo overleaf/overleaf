@@ -33,10 +33,10 @@ i18n.use(initReactI18next).init({
 // The webpackChunkName here will name this chunk (and thus the requested
 // script) according to the file name. See https://webpack.js.org/api/module-methods/#magic-comments
 // for details
-const localesPromise = import(/* webpackChunkName: "[request]" */ `../../locales/${LANG}.json`).then(
-  lang => {
-    i18n.addResourceBundle(LANG, 'translation', lang)
-  }
-)
+const localesPromise = import(
+  /* webpackChunkName: "[request]" */ `../../locales/${LANG}.json`
+).then(lang => {
+  i18n.addResourceBundle(LANG, 'translation', lang)
+})
 
 export default localesPromise

@@ -66,9 +66,7 @@ describe('DocstoreManager', function() {
       it('should delete the doc in the docstore api', function() {
         return this.request.del
           .calledWith({
-            url: `${this.settings.apis.docstore.url}/project/${
-              this.project_id
-            }/doc/${this.doc_id}`,
+            url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
             timeout: 30 * 1000
           })
           .should.equal(true)
@@ -168,9 +166,7 @@ describe('DocstoreManager', function() {
       it('should update the doc in the docstore api', function() {
         return this.request.post
           .calledWith({
-            url: `${this.settings.apis.docstore.url}/project/${
-              this.project_id
-            }/doc/${this.doc_id}`,
+            url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
             timeout: 30 * 1000,
             json: {
               lines: this.lines,
@@ -245,9 +241,7 @@ describe('DocstoreManager', function() {
       it('should get the doc from the docstore api', function() {
         return this.request.get
           .calledWith({
-            url: `${this.settings.apis.docstore.url}/project/${
-              this.project_id
-            }/doc/${this.doc_id}`,
+            url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
             timeout: 30 * 1000,
             json: true
           })
@@ -305,9 +299,7 @@ describe('DocstoreManager', function() {
       it('should get the doc from the docstore api (including deleted)', function() {
         return this.request.get
           .calledWith({
-            url: `${this.settings.apis.docstore.url}/project/${
-              this.project_id
-            }/doc/${this.doc_id}?include_deleted=true`,
+            url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}?include_deleted=true`,
             timeout: 30 * 1000,
             json: true
           })
@@ -362,9 +354,7 @@ describe('DocstoreManager', function() {
       it('should get all the project docs in the docstore api', function() {
         return this.request.get
           .calledWith({
-            url: `${this.settings.apis.docstore.url}/project/${
-              this.project_id
-            }/doc`,
+            url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc`,
             timeout: 30 * 1000,
             json: true
           })
@@ -418,9 +408,7 @@ describe('DocstoreManager', function() {
       it('should get all the project doc ranges in the docstore api', function() {
         return this.request.get
           .calledWith({
-            url: `${this.settings.apis.docstore.url}/project/${
-              this.project_id
-            }/ranges`,
+            url: `${this.settings.apis.docstore.url}/project/${this.project_id}/ranges`,
             timeout: 30 * 1000,
             json: true
           })

@@ -193,9 +193,7 @@ describe('EmailBuilder', function() {
           this.userId = 'abc123'
           this.opts = {
             to: this.emailAddress,
-            confirmEmailUrl: `${
-              this.settings.siteUrl
-            }/user/emails/confirm?token=aToken123`,
+            confirmEmailUrl: `${this.settings.siteUrl}/user/emails/confirm?token=aToken123`,
             sendingUser_id: this.userId
           }
           this.email = this.EmailBuilder.buildEmail('confirmEmail', this.opts)
@@ -320,9 +318,7 @@ describe('EmailBuilder', function() {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
             to: this.emailAddress,
-            acceptInviteUrl: `${
-              this.settings.siteUrl
-            }/subscription/invites/aToken123/`,
+            acceptInviteUrl: `${this.settings.siteUrl}/subscription/invites/aToken123/`,
             inviter: {
               email: 'deanna@overleaf.com',
               first_name: 'Deanna',
@@ -441,9 +437,7 @@ describe('EmailBuilder', function() {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
             to: this.emailAddress,
-            setNewPasswordUrl: `${
-              this.settings.siteUrl
-            }/user/activate?token=aToken123&user_id=aUserId123`
+            setNewPasswordUrl: `${this.settings.siteUrl}/user/activate?token=aToken123&user_id=aUserId123`
           }
           this.email = this.EmailBuilder.buildEmail('registered', this.opts)
         })
@@ -485,9 +479,7 @@ describe('EmailBuilder', function() {
           this.projectName = 'Top Secret'
           this.opts = {
             inviteUrl:
-              `${
-                this.settings.siteUrl
-              }/project/projectId123/invite/token/aToken123?` +
+              `${this.settings.siteUrl}/project/projectId123/invite/token/aToken123?` +
               [
                 `project_name=${encodeURIComponent(this.projectName)}`,
                 `user_first_name=${encodeURIComponent(this.owner.name)}`
@@ -532,18 +524,12 @@ describe('EmailBuilder', function() {
       describe('securityAlert', function() {
         before(function() {
           this.message = 'more details about the action'
-          this.messageHTML = `<br /><span style="text-align:center" class="a-class"><b><i>${
-            this.message
-          }</i></b></span>`
+          this.messageHTML = `<br /><span style="text-align:center" class="a-class"><b><i>${this.message}</i></b></span>`
           this.messageNotAllowedHTML = `<div></div>${this.messageHTML}`
 
           this.actionDescribed = 'an action described'
-          this.actionDescribedHTML = `<br /><span style="text-align:center" class="a-class"><b><i>${
-            this.actionDescribed
-          }</i></b>`
-          this.actionDescribedNotAllowedHTML = `<div></div>${
-            this.actionDescribedHTML
-          }`
+          this.actionDescribedHTML = `<br /><span style="text-align:center" class="a-class"><b><i>${this.actionDescribed}</i></b>`
+          this.actionDescribedNotAllowedHTML = `<div></div>${this.actionDescribedHTML}`
 
           this.opts = {
             to: this.email,

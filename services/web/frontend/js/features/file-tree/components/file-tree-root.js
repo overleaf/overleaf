@@ -28,12 +28,10 @@ function FileTreeRoot({
 }) {
   const isReady = projectId && rootFolder
 
-  useEffect(
-    () => {
-      if (isReady) onInit()
-    },
-    [isReady]
-  )
+  useEffect(() => {
+    if (isReady) onInit()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReady])
   if (!isReady) return null
 
   return (

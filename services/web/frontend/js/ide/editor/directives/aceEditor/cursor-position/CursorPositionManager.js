@@ -12,7 +12,7 @@
  */
 let CursorPositionManager
 
-export default (CursorPositionManager = class CursorPositionManager {
+export default CursorPositionManager = class CursorPositionManager {
   constructor($scope, adapter, localStorage) {
     this.storePositionAndLine = this.storePositionAndLine.bind(this)
     this.jumpToPositionInNewDoc = this.jumpToPositionInNewDoc.bind(this)
@@ -110,4 +110,4 @@ export default (CursorPositionManager = class CursorPositionManager {
     this.adapter.setCursor(pos)
     return this.adapter.setEditorScrollPosition(pos)
   }
-})
+}

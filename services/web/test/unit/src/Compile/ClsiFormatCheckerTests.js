@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -49,9 +49,7 @@ describe('ClsiFormatChecker', function() {
         },
         {
           path: 'stuff/image/image.png',
-          url: `http:somewhere.com/project/${
-            this.project_id
-          }/file/1234124321312`,
+          url: `http:somewhere.com/project/${this.project_id}/file/1234124321312`,
           modified: 'more stuff'
         }
       ])

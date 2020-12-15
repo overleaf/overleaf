@@ -1,5 +1,5 @@
 /* eslint-disable
-*/
+ */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -12,7 +12,7 @@ import App from '../../../base'
 export default App.filter(
   'orderOverviewEntries',
   () =>
-    function(items) {
+    function (items) {
       const array = []
       for (let key in items) {
         const value = items[key]

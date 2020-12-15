@@ -97,9 +97,7 @@ const FileStoreHandler = {
         writeStream.on('response', function(response) {
           if (![200, 201].includes(response.statusCode)) {
             err = new OError(
-              `non-ok response from filestore for upload: ${
-                response.statusCode
-              }`,
+              `non-ok response from filestore for upload: ${response.statusCode}`,
               { statusCode: response.statusCode }
             )
             return callbackOnce(err)

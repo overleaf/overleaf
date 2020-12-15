@@ -4,6 +4,7 @@ class SocketShimBase {
   static connect(url, options) {
     return new SocketShimBase()
   }
+
   constructor(socket) {
     this._socket = socket
   }
@@ -25,6 +26,7 @@ class SocketShimNoop extends SocketShimBase {
   static connect() {
     return new SocketShimNoop()
   }
+
   constructor(socket) {
     super(socket)
     this.socket = {
@@ -42,6 +44,7 @@ class SocketShimNoop extends SocketShimBase {
       disconnect(reason) {}
     }
   }
+
   connect() {}
   disconnect(reason) {}
   emit() {}
@@ -51,13 +54,9 @@ class SocketShimNoop extends SocketShimBase {
 
 class SocketShimV0 extends SocketShimBase {
   static connect(url, options) {
-    return new SocketShimV0(
-      io.connect(
-        url,
-        options
-      )
-    )
+    return new SocketShimV0(io.connect(url, options))
   }
+
   constructor(socket) {
     super(socket)
     this.socket = this._socket.socket
@@ -73,6 +72,7 @@ class SocketShimV2 extends SocketShimBase {
     options.timeout = options['connect timeout']
     return new SocketShimV2(url, options)
   }
+
   static get EVENT_MAP() {
     // Use the v2 event names transparently to the frontend.
     const connectionFailureEvents = [
@@ -85,6 +85,7 @@ class SocketShimV2 extends SocketShimBase {
       ['error', connectionFailureEvents]
     ])
   }
+
   _on(event, handler) {
     // Keep track of our event listeners.
     // We move them to a new socket in ._replaceSocketWithNewInstance()
@@ -95,6 +96,7 @@ class SocketShimV2 extends SocketShimBase {
     }
     this._socket.on(event, handler)
   }
+
   on(event, handler) {
     if (SocketShimV2.EVENT_MAP.has(event)) {
       for (const v2Event of SocketShimV2.EVENT_MAP.get(event)) {
@@ -104,6 +106,7 @@ class SocketShimV2 extends SocketShimBase {
       this._on(event, handler)
     }
   }
+
   _removeListener(event, handler) {
     // Keep track of our event listeners.
     // We move them to a new socket in ._replaceSocketWithNewInstance()
@@ -116,6 +119,7 @@ class SocketShimV2 extends SocketShimBase {
     }
     this._socket.removeListener(event, handler)
   }
+
   removeListener(event, handler) {
     if (SocketShimV2.EVENT_MAP.has(event)) {
       for (const v2Event of SocketShimV2.EVENT_MAP.get(event)) {

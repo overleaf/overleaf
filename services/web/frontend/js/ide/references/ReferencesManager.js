@@ -16,7 +16,7 @@ import _ from 'lodash'
 import CryptoJSSHA1 from 'crypto-js/sha1'
 let ReferencesManager
 
-export default (ReferencesManager = class ReferencesManager {
+export default ReferencesManager = class ReferencesManager {
   constructor(ide, $scope) {
     this.ide = ide
     this.$scope = $scope
@@ -109,7 +109,7 @@ export default (ReferencesManager = class ReferencesManager {
         return this._storeReferencesKeys(response.data.keys)
       })
   }
-})
+}
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

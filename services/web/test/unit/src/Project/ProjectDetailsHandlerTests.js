@@ -129,10 +129,9 @@ describe('ProjectDetailsHandler', function() {
     it('should make a call to mongo just for the description', async function() {
       this.ProjectGetter.promises.getProject.resolves()
       await this.handler.promises.getProjectDescription(this.project._id)
-      expect(this.ProjectGetter.promises.getProject).to.have.been.calledWith(
-        this.project._id,
-        { description: true }
-      )
+      expect(
+        this.ProjectGetter.promises.getProject
+      ).to.have.been.calledWith(this.project._id, { description: true })
     })
 
     it('should return what the mongo call returns', async function() {
@@ -269,8 +268,14 @@ describe('ProjectDetailsHandler', function() {
           { _id: 139, name: 'numeric (39)' },
           { _id: 140, name: 'numeric (40)' }
         ],
-        readAndWrite: [{ _id: 4, name: 'name2' }, { _id: 5, name: 'name22' }],
-        readOnly: [{ _id: 6, name: 'name3' }, { _id: 7, name: 'name33' }],
+        readAndWrite: [
+          { _id: 4, name: 'name2' },
+          { _id: 5, name: 'name22' }
+        ],
+        readOnly: [
+          { _id: 6, name: 'name3' },
+          { _id: 7, name: 'name33' }
+        ],
         tokenReadAndWrite: [
           { _id: 8, name: 'name4' },
           { _id: 9, name: 'name44' }

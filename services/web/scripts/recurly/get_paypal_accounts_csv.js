@@ -55,12 +55,8 @@ const printAccountCSV = (account, callback) => {
         first_name: account.first_name,
         last_name: account.last_name,
         hosted_login_token: account.hosted_login_token,
-        billing_info_url: `https://sharelatex.recurly.com/account/billing_info/edit?ht=${
-          account.hosted_login_token
-        }`,
-        account_management_url: `https://sharelatex.recurly.com/account/${
-          account.hosted_login_token
-        }`,
+        billing_info_url: `https://sharelatex.recurly.com/account/billing_info/edit?ht=${account.hosted_login_token}`,
+        account_management_url: `https://sharelatex.recurly.com/account/${account.hosted_login_token}`,
         current_period_ends_at: `${endAt.getFullYear()}-${endAt.getMonth() +
           1}-${endAt.getDate()}`,
         current_period_ends_at_segment: parseInt(

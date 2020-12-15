@@ -28,12 +28,10 @@ function OutlinePane({
   })
   const isOpen = isTexFile && expanded
 
-  useEffect(
-    () => {
-      onToggle(isOpen)
-    },
-    [isOpen]
-  )
+  useEffect(() => {
+    onToggle(isOpen)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
 
   const headerClasses = classNames('outline-pane', {
     'outline-pane-disabled': !isTexFile

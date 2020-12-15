@@ -19,7 +19,7 @@
 // instead edit it at https://github.com/sharelatex/ranges-tracker, where it has a suite of tests
 let RangesTracker
 
-export default (RangesTracker = class RangesTracker {
+export default RangesTracker = class RangesTracker {
   // The purpose of this class is to track a set of inserts and deletes to a document, like
   // track changes in Word. We store these as a set of ShareJs style ranges:
   //   {i: "foo", p: 42} # Insert 'foo' at offset 42
@@ -832,4 +832,4 @@ export default (RangesTracker = class RangesTracker {
     }
     return clone
   }
-})
+}

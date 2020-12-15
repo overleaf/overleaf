@@ -160,9 +160,7 @@ describe('TeamInvitesHandler', function() {
               sinon.match({
                 to: 'john.snow@example.com',
                 inviter: this.manager,
-                acceptInviteUrl: `http://example.com/subscription/invites/${
-                  this.newToken
-                }/`
+                acceptInviteUrl: `http://example.com/subscription/invites/${this.newToken}/`
               })
             )
             .should.equal(true)

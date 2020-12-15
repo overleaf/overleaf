@@ -189,8 +189,8 @@ App.controller('ShareProjectModalController', function(
                     data.users != null
                       ? data.users
                       : data.user != null
-                        ? [data.user]
-                        : []
+                      ? [data.user]
+                      : []
                   $scope.project.members.push(...users)
                 }
               }

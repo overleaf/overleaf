@@ -852,10 +852,12 @@ describe('UserEmails', function() {
           uri: '/user/emails'
         })
         expect(response.statusCode).to.equal(204)
-        const token = (await db.tokens.findOne({
-          'data.user_id': userId.toString(),
-          'data.email': otherEmail
-        })).token
+        const token = (
+          await db.tokens.findOne({
+            'data.user_id': userId.toString(),
+            'data.email': otherEmail
+          })
+        ).token
         response = await userHelper.request.post(`/user/emails/confirm`, {
           form: {
             token

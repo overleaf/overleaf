@@ -14,29 +14,27 @@ function useExpandCollapse({
     needsExpandCollapse: null
   })
 
-  useLayoutEffect(
-    () => {
-      const expandCollapseEl = ref.current
-      if (expandCollapseEl) {
-        const expandedSize =
-          dimension === 'height'
-            ? expandCollapseEl.scrollHeight
-            : expandCollapseEl.scrollWidth
+  useLayoutEffect(() => {
+    const expandCollapseEl = ref.current
+    if (expandCollapseEl) {
+      const expandedSize =
+        dimension === 'height'
+          ? expandCollapseEl.scrollHeight
+          : expandCollapseEl.scrollWidth
 
-        const needsExpandCollapse = expandedSize > collapsedSize
+      const needsExpandCollapse = expandedSize > collapsedSize
 
-        if (isExpanded) {
-          setSizing({ size: expandedSize, needsExpandCollapse })
-        } else {
-          setSizing({
-            size: needsExpandCollapse ? collapsedSize : expandedSize,
-            needsExpandCollapse
-          })
-        }
+      if (isExpanded) {
+        setSizing({ size: expandedSize, needsExpandCollapse })
+      } else {
+        setSizing({
+          size: needsExpandCollapse ? collapsedSize : expandedSize,
+          needsExpandCollapse
+        })
       }
-    },
-    [isExpanded]
-  )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExpanded])
 
   const expandableClasses = classNames(
     'expand-collapse-container',

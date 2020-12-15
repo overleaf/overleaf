@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -87,9 +87,7 @@ const ProjectTokenGenerator = {
             if (response.statusCode !== 200) {
               return cb(
                 new Error(
-                  `non-200 response from v1 read-token-exists api: ${
-                    response.statusCode
-                  }`
+                  `non-200 response from v1 read-token-exists api: ${response.statusCode}`
                 )
               )
             }

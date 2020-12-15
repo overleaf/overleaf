@@ -59,9 +59,7 @@ describe('ContactManager', function() {
       it('should get the contacts from the contacts api', function() {
         return this.request.get
           .calledWith({
-            url: `${this.settings.apis.contacts.url}/user/${
-              this.user_id
-            }/contacts`,
+            url: `${this.settings.apis.contacts.url}/user/${this.user_id}/contacts`,
             qs: { limit: 42 },
             json: true,
             jar: false
@@ -121,9 +119,7 @@ describe('ContactManager', function() {
       it('should add the contacts for the user in the contacts api', function() {
         return this.request.post
           .calledWith({
-            url: `${this.settings.apis.contacts.url}/user/${
-              this.user_id
-            }/contacts`,
+            url: `${this.settings.apis.contacts.url}/user/${this.user_id}/contacts`,
             json: {
               contact_id: this.contact_id
             },

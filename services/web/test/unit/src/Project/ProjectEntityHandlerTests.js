@@ -40,6 +40,7 @@ describe('ProjectEntityHandler', function() {
         static initClass() {
           this.prototype.rootFolder = [this.rootFolder]
         }
+
         constructor(options) {
           this._id = project_id
           this.name = 'project_name_here'

@@ -1,6 +1,6 @@
 import _ from 'lodash'
 /* eslint-disable
-*/
+ */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -9,12 +9,12 @@ import _ from 'lodash'
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
-const historyFileTreeController = function($scope, $element, $attrs) {
+const historyFileTreeController = function ($scope, $element, $attrs) {
   const ctrl = this
   ctrl.handleEntityClick = file => ctrl.onSelectedFileChange({ file })
   ctrl._fileTree = []
 
-  $scope.$watch('$ctrl.files', function(files) {
+  $scope.$watch('$ctrl.files', function (files) {
     if (files != null && files.length > 0) {
       ctrl._fileTree = _.reduce(files, _reducePathsToTree, [])
     }

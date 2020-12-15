@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -689,9 +689,7 @@ describe('TokenAccessHandler', function() {
         it('should return response body', function() {
           expect(
             this.V1Api.request.calledWith({
-              url: `/api/v1/sharelatex/users/${this.v1UserId}/docs/${
-                this.token
-              }/info`
+              url: `/api/v1/sharelatex/users/${this.v1UserId}/docs/${this.token}/info`
             })
           ).to.equal(true)
           return expect(this.callback.calledWith(null, 'mock-data')).to.equal(

@@ -1,5 +1,5 @@
 /* eslint-disable
-*/
+ */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -12,7 +12,7 @@ import App from '../base'
 export default App.directive('rightClick', () => ({
   restrict: 'A',
   link(scope, element, attrs) {
-    return element.bind('contextmenu', function(e) {
+    return element.bind('contextmenu', function (e) {
       e.preventDefault()
       e.stopPropagation()
       return scope.$eval(attrs.rightClick)

@@ -13,7 +13,7 @@
  */
 let SafariScrollPatcher
 
-export default (SafariScrollPatcher = class SafariScrollPatcher {
+export default SafariScrollPatcher = class SafariScrollPatcher {
   constructor($scope) {
     this.isOverAce = false // Flag to control if the pointer is over Ace.
     this.pdfDiv = null
@@ -101,4 +101,4 @@ export default (SafariScrollPatcher = class SafariScrollPatcher {
       return this.setListeners()
     })
   }
-})
+}

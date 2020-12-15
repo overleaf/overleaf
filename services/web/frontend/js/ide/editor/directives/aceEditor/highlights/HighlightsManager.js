@@ -20,7 +20,7 @@ import ColorManager from '../../../../colors/ColorManager'
 let HighlightsManager
 const { Range } = ace.require('ace/range')
 
-export default (HighlightsManager = class HighlightsManager {
+export default HighlightsManager = class HighlightsManager {
   constructor($scope, editor, element) {
     this.$scope = $scope
     this.editor = editor
@@ -387,7 +387,7 @@ export default (HighlightsManager = class HighlightsManager {
       )
     )
   }
-})
+}
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

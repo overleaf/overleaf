@@ -11,7 +11,7 @@
  */
 let MetadataManager
 
-export default (MetadataManager = class MetadataManager {
+export default MetadataManager = class MetadataManager {
   constructor(ide, $scope, metadata) {
     this.ide = ide
     this.$scope = $scope
@@ -26,4 +26,4 @@ export default (MetadataManager = class MetadataManager {
   loadProjectMetaFromServer() {
     return this.metadata.loadProjectMetaFromServer()
   }
-})
+}

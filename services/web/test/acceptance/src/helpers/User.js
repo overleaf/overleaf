@@ -585,9 +585,7 @@ class User {
       } else {
         callback(
           new Error(
-            `unexpected status code from /user/personal_info: ${
-              response.statusCode
-            }`
+            `unexpected status code from /user/personal_info: ${response.statusCode}`
           )
         )
       }

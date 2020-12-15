@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     new-cap,
     no-return-assign,
@@ -479,15 +479,13 @@ export default App.factory('PDFRenderer', function(
                   ? self.errorCallback(error)
                   : undefined
             )
-            return page
-              .getAnnotations()
-              .then(
-                annotations => annotationsLayer.setAnnotations(annotations),
-                error =>
-                  typeof self.errorCallback === 'function'
-                    ? self.errorCallback(error)
-                    : undefined
-              )
+            return page.getAnnotations().then(
+              annotations => annotationsLayer.setAnnotations(annotations),
+              error =>
+                typeof self.errorCallback === 'function'
+                  ? self.errorCallback(error)
+                  : undefined
+            )
           })
           .catch(function(error) {
             // page render failed

@@ -48,20 +48,17 @@ function OutlineItem({ outlineItem, jumpToLine, highlightedLine }) {
     jumpToLine(outlineItem.line, true)
   }
 
-  useEffect(
-    () => {
-      const wasHighlighted = isHighlightedRef.current
-      isHighlightedRef.current = isHighlighted
+  useEffect(() => {
+    const wasHighlighted = isHighlightedRef.current
+    isHighlightedRef.current = isHighlighted
 
-      if (!wasHighlighted && isHighlighted) {
-        scrollIntoViewIfNeeded(titleElementRef.current, {
-          scrollMode: 'if-needed',
-          block: 'center'
-        })
-      }
-    },
-    [isHighlighted, titleElementRef, isHighlightedRef]
-  )
+    if (!wasHighlighted && isHighlighted) {
+      scrollIntoViewIfNeeded(titleElementRef.current, {
+        scrollMode: 'if-needed',
+        block: 'center'
+      })
+    }
+  }, [isHighlighted, titleElementRef, isHighlightedRef])
 
   // don't set the aria-expanded attribute when there are no children
   const ariaExpandedValue = outlineItem.children ? expanded : undefined

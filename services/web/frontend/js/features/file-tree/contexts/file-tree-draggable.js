@@ -61,12 +61,9 @@ export function useDraggable(draggedEntityId) {
 
   // remove the automatic preview as we're using a custom preview via
   // FileTreeDraggablePreviewLayer
-  useEffect(
-    () => {
-      preview(getEmptyImage())
-    },
-    [preview]
-  )
+  useEffect(() => {
+    preview(getEmptyImage())
+  }, [preview])
 
   return {
     dragRef,

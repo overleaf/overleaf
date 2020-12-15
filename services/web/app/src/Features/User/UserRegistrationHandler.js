@@ -129,9 +129,7 @@ const UserRegistrationHandler = {
               return callback(err)
             }
 
-            const setNewPasswordUrl = `${
-              settings.siteUrl
-            }/user/activate?token=${token}&user_id=${user._id}`
+            const setNewPasswordUrl = `${settings.siteUrl}/user/activate?token=${token}&user_id=${user._id}`
 
             EmailHandler.sendEmail(
               'registered',

@@ -67,15 +67,13 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
         return $timeout(() => (scope.flashControls = false), 1000)
       })
 
-    scope.$on(
-      'pdfDoubleClick',
-      (event, e) =>
-        typeof scope.dblClickCallback === 'function'
-          ? scope.dblClickCallback({
-              page: e.page - 1,
-              offset: { top: e.y, left: e.x }
-            })
-          : undefined
+    scope.$on('pdfDoubleClick', (event, e) =>
+      typeof scope.dblClickCallback === 'function'
+        ? scope.dblClickCallback({
+            page: e.page - 1,
+            offset: { top: e.y, left: e.x }
+          })
+        : undefined
     )
 
     scope.$on('flash-controls', () => flashControls())

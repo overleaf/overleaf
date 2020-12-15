@@ -373,9 +373,7 @@ describe('ProjectLocator', function() {
     })
 
     it('should take a file path and return the element for a nested document', function(done) {
-      const path = `${subFolder.name}/${secondSubFolder.name}/${
-        subSubFile.name
-      }`
+      const path = `${subFolder.name}/${secondSubFolder.name}/${subSubFile.name}`
       this.locator.findElementByPath(
         { project, path },
         (err, element, type) => {

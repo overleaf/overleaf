@@ -25,7 +25,7 @@ class Highlight {
   }
 }
 
-export default (HighlightedWordManager = class HighlightedWordManager {
+export default HighlightedWordManager = class HighlightedWordManager {
   constructor(editor) {
     this.editor = editor
     this.reset()
@@ -134,4 +134,4 @@ export default (HighlightedWordManager = class HighlightedWordManager {
       (rangeStartIsWithinHighlight || rangeEndIsWithinHighlight)
     )
   }
-})
+}

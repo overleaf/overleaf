@@ -23,9 +23,7 @@ const { expressify } = require('../../util/promises')
 async function _sendSecurityAlertClearedSessions(user) {
   const emailOptions = {
     to: user.email,
-    actionDescribed: `active sessions were cleared on your account ${
-      user.email
-    }`,
+    actionDescribed: `active sessions were cleared on your account ${user.email}`,
     action: 'active sessions cleared'
   }
   try {
@@ -42,9 +40,7 @@ async function _sendSecurityAlertClearedSessions(user) {
 function _sendSecurityAlertPasswordChanged(user) {
   const emailOptions = {
     to: user.email,
-    actionDescribed: `your password has been changed on your account ${
-      user.email
-    }`,
+    actionDescribed: `your password has been changed on your account ${user.email}`,
     action: 'password changed'
   }
   EmailHandler.sendEmail('securityAlert', emailOptions, error => {

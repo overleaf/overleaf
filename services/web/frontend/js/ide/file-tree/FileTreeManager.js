@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-dupe-class-members,
     no-return-assign,
@@ -28,7 +28,7 @@ import './controllers/FileTreeRootFolderController'
 import '../../features/file-tree/controllers/file-tree-controller'
 let FileTreeManager
 
-export default (FileTreeManager = class FileTreeManager {
+export default FileTreeManager = class FileTreeManager {
   constructor(ide, $scope) {
     this.ide = ide
     this.$scope = $scope
@@ -787,7 +787,7 @@ export default (FileTreeManager = class FileTreeManager {
     this._deleteEntityFromScope(entity, { moveToDeleted: false })
     return parent_folder.children.push(entity)
   }
-})
+}
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -270,9 +270,7 @@ App.controller('UploadFileModalController', function(
     var decreseTimeout = () =>
       $timeout(function() {
         if ($scope.secondsToRedirect === 0) {
-          return ($window.location.href = `/login?redir=/project/${
-            ide.project_id
-          }`)
+          return ($window.location.href = `/login?redir=/project/${ide.project_id}`)
         } else {
           decreseTimeout()
           return ($scope.secondsToRedirect = $scope.secondsToRedirect - 1)

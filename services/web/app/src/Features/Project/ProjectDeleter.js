@@ -226,8 +226,8 @@ async function deleteProject(projectId, options = {}) {
       deletedProjectLastUpdatedAt: project.lastUpdated
     }
 
-    Object.keys(deleterData).forEach(
-      key => (deleterData[key] === undefined ? delete deleterData[key] : '')
+    Object.keys(deleterData).forEach(key =>
+      deleterData[key] === undefined ? delete deleterData[key] : ''
     )
 
     await DeletedProject.updateOne(

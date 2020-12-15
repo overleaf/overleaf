@@ -24,7 +24,6 @@ describe('FileStoreHandler', function() {
       my: 'writeStream',
       on(type, cb) {
         if (type === 'response') {
-          // eslint-disable-next-line standard/no-callback-literal
           cb({ statusCode: 200 })
         }
       }
@@ -213,7 +212,6 @@ describe('FileStoreHandler', function() {
       beforeEach(function() {
         this.writeStream.on = function(type, cb) {
           if (type === 'response') {
-            // eslint-disable-next-line standard/no-callback-literal
             cb({ statusCode: 500 })
           }
         }

@@ -12,7 +12,7 @@
  */
 let PermissionsManager
 
-export default (PermissionsManager = class PermissionsManager {
+export default PermissionsManager = class PermissionsManager {
   constructor(ide, $scope) {
     this.ide = ide
     this.$scope = $scope
@@ -46,4 +46,4 @@ export default (PermissionsManager = class PermissionsManager {
       }
     })
   }
-})
+}

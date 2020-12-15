@@ -106,9 +106,7 @@ export default App.controller('UserAffiliationsController', function(
     _resetMakingRequestType()
     $scope.ui.isMakingRequest = true
     $scope.ui.isProcessing = true
-    $window.location.href = `${
-      $scope.samlInitPath
-    }?university_id=${institutionId}&auto=/user/settings&email=${email}`
+    $window.location.href = `${$scope.samlInitPath}?university_id=${institutionId}&auto=/user/settings&email=${email}`
   }
 
   $scope.selectUniversityManually = function() {

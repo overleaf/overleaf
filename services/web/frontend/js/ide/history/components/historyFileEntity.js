@@ -20,9 +20,7 @@ const historyFileEntityController = function($scope, $element, $attrs) {
       ctrl.fileEntity.oldPathname,
       ctrl.fileEntity.pathname
     )
-    return `${
-      fileOperationI18nNames.renamed
-    } <strong>${simplifiedOldPathname}</strong> &rarr; <strong>${simplifiedPathname}</strong>`
+    return `${fileOperationI18nNames.renamed} <strong>${simplifiedOldPathname}</strong> &rarr; <strong>${simplifiedPathname}</strong>`
   }
   ctrl.getFileOperationName = () => {
     if (ctrl.fileEntity.operation === 'edited') {

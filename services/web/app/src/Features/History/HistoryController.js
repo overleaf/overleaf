@@ -179,9 +179,7 @@ module.exports = HistoryController = {
     HistoryController._makeRequest(
       {
         method: 'POST',
-        url: `${
-          settings.apis.project_history.url
-        }/project/${projectId}/user/${userId}/labels`,
+        url: `${settings.apis.project_history.url}/project/${projectId}/user/${userId}/labels`,
         json: { comment, version }
       },
       function(err, label) {
@@ -274,9 +272,7 @@ module.exports = HistoryController = {
     HistoryController._makeRequest(
       {
         method: 'DELETE',
-        url: `${
-          settings.apis.project_history.url
-        }/project/${projectId}/user/${userId}/labels/${labelId}`
+        url: `${settings.apis.project_history.url}/project/${projectId}/user/${userId}/labels/${labelId}`
       },
       function(err) {
         if (err) {
@@ -338,9 +334,7 @@ module.exports = HistoryController = {
     }
     // increase timeout to 6 minutes
     res.setTimeout(6 * 60 * 1000)
-    const url = `${
-      settings.apis.v1_history.url
-    }/projects/${v1ProjectId}/version/${version}/zip`
+    const url = `${settings.apis.v1_history.url}/projects/${v1ProjectId}/version/${version}/zip`
     const options = {
       auth: {
         user: settings.apis.v1_history.user,

@@ -14,9 +14,7 @@ const { expressify } = require('../../util/promises')
 async function _sendSecurityAlertEmail(user, email) {
   const emailOptions = {
     to: user.email,
-    actionDescribed: `a secondary email address has been added to your account ${
-      user.email
-    }`,
+    actionDescribed: `a secondary email address has been added to your account ${user.email}`,
     message: [
       `<span style="display:inline-block;padding: 0 20px;width:100%;">Added: <br/><b>${email}</b></span>`
     ],

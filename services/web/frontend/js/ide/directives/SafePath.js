@@ -70,7 +70,7 @@ prototype\
 
 const MAX_PATH = 1024 // Maximum path length, in characters. This is fairly arbitrary.
 
-export default (SafePath = {
+export default SafePath = {
   clean(filename) {
     filename = filename.replace(BADCHAR_RX, '_')
     // for BADFILE_RX replace any matches with an equal number of underscores
@@ -93,4 +93,4 @@ export default (SafePath = {
   isAllowedLength(pathname) {
     return pathname.length > 0 && pathname.length <= MAX_PATH
   }
-})
+}

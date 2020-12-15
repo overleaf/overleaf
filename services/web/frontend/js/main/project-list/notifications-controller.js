@@ -44,9 +44,7 @@ App.controller('ProjectInviteNotificationController', function($scope, $http) {
   $scope.accept = function() {
     $scope.notification.inflight = true
     return $http({
-      url: `/project/${
-        $scope.notification.messageOpts.projectId
-      }/invite/token/${$scope.notification.messageOpts.token}/accept`,
+      url: `/project/${$scope.notification.messageOpts.projectId}/invite/token/${$scope.notification.messageOpts.token}/accept`,
       method: 'POST',
       headers: {
         'X-Csrf-Token': window.csrfToken,

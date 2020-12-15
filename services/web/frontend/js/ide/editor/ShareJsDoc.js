@@ -23,7 +23,7 @@ import EditorWatchdogManager from '../connection/EditorWatchdogManager'
 let ShareJsDoc
 const SINGLE_USER_FLUSH_DELAY = 1000 // ms
 
-export default (ShareJsDoc = (function() {
+export default ShareJsDoc = (function() {
   ShareJsDoc = class ShareJsDoc extends EventEmitter {
     static initClass() {
       this.prototype.INFLIGHT_OP_TIMEOUT = 5000 // Retry sending ops after 5 seconds without an ack
@@ -31,6 +31,7 @@ export default (ShareJsDoc = (function() {
 
       this.prototype.FATAL_OP_TIMEOUT = 30000
     }
+
     constructor(
       doc_id,
       docLines,
@@ -262,9 +263,11 @@ export default (ShareJsDoc = (function() {
     getSnapshot() {
       return this._doc.snapshot
     }
+
     getVersion() {
       return this._doc.version
     }
+
     getType() {
       return this.type
     }
@@ -299,9 +302,11 @@ export default (ShareJsDoc = (function() {
     getInflightOp() {
       return this._doc.inflightOp
     }
+
     getPendingOp() {
       return this._doc.pendingOp
     }
+
     getRecentAck() {
       // check if we have received an ack recently (within a factor of two of the single user flush delay)
       return (
@@ -309,6 +314,7 @@ export default (ShareJsDoc = (function() {
         new Date() - this.lastAcked < 2 * SINGLE_USER_FLUSH_DELAY
       )
     }
+
     getOpSize(op) {
       // compute size of an op from its components
       // (total number of characters inserted and deleted)
@@ -353,6 +359,7 @@ export default (ShareJsDoc = (function() {
         this._doc.attach_ace(ace, false, window.maxDocLength)
       })
     }
+
     detachFromAce() {
       this._maybeDetachEditorWatchdogManager()
       return typeof this._doc.detach_ace === 'function'
@@ -365,12 +372,14 @@ export default (ShareJsDoc = (function() {
         this._doc.attach_cm(cm, false)
       })
     }
+
     detachFromCM() {
       this._maybeDetachEditorWatchdogManager()
       return typeof this._doc.detach_cm === 'function'
         ? this._doc.detach_cm()
         : undefined
     } // If we're waiting for the project to join, try again in 0.5 seconds
+
     _startInflightOpTimeout(update) {
       this._startFatalTimeoutTimer(update)
       var retryOp = () => {
@@ -415,6 +424,7 @@ export default (ShareJsDoc = (function() {
         return clearTimeout(timer)
       }) // 30 seconds
     }
+
     _startFatalTimeoutTimer(update) {
       // If an op doesn't get acked within FATAL_OP_TIMEOUT, something has
       // gone unrecoverably wrong (the op will have been retried multiple times)
@@ -461,7 +471,7 @@ export default (ShareJsDoc = (function() {
   }
   ShareJsDoc.initClass()
   return ShareJsDoc
-})())
+})()
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

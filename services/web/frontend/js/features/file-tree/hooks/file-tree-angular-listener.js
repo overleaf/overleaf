@@ -10,41 +10,35 @@ export function useFileTreeAngularListener() {
     finishCreatingLinkedFile
   } = useFileTreeActionable()
 
-  useEffect(
-    () => {
-      function handleDispatchCreateDoc(ev) {
-        const { ...doc } = ev.detail
-        finishCreatingDoc(doc)
-      }
-      window.addEventListener(
+  useEffect(() => {
+    function handleDispatchCreateDoc(ev) {
+      const { ...doc } = ev.detail
+      finishCreatingDoc(doc)
+    }
+    window.addEventListener(
+      'FileTreeReactBridge.createDoc',
+      handleDispatchCreateDoc
+    )
+    return () =>
+      window.removeEventListener(
         'FileTreeReactBridge.createDoc',
         handleDispatchCreateDoc
       )
-      return () =>
-        window.removeEventListener(
-          'FileTreeReactBridge.createDoc',
-          handleDispatchCreateDoc
-        )
-    },
-    [finishCreatingDoc]
-  )
+  }, [finishCreatingDoc])
 
-  useEffect(
-    () => {
-      function handleDispatchCreateLinkedFile(ev) {
-        const { ...file } = ev.detail
-        finishCreatingLinkedFile(file)
-      }
-      window.addEventListener(
+  useEffect(() => {
+    function handleDispatchCreateLinkedFile(ev) {
+      const { ...file } = ev.detail
+      finishCreatingLinkedFile(file)
+    }
+    window.addEventListener(
+      'FileTreeReactBridge.createLinkedFile',
+      handleDispatchCreateLinkedFile
+    )
+    return () =>
+      window.removeEventListener(
         'FileTreeReactBridge.createLinkedFile',
         handleDispatchCreateLinkedFile
       )
-      return () =>
-        window.removeEventListener(
-          'FileTreeReactBridge.createLinkedFile',
-          handleDispatchCreateLinkedFile
-        )
-    },
-    [finishCreatingLinkedFile]
-  )
+  }, [finishCreatingLinkedFile])
 }

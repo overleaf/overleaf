@@ -12,7 +12,7 @@
 import './controllers/BinaryFileController'
 let BinaryFilesManager
 
-export default (BinaryFilesManager = class BinaryFilesManager {
+export default BinaryFilesManager = class BinaryFilesManager {
   constructor(ide, $scope) {
     this.ide = ide
     this.$scope = $scope
@@ -37,4 +37,4 @@ export default (BinaryFilesManager = class BinaryFilesManager {
       this
     )
   }
-})
+}

@@ -41,9 +41,7 @@ const TemplatesManager = {
     _callback
   ) {
     const callback = _.once(_callback)
-    const zipUrl = `${
-      settings.apis.v1.url
-    }/api/v1/sharelatex/templates/${templateVersionId}`
+    const zipUrl = `${settings.apis.v1.url}/api/v1/sharelatex/templates/${templateVersionId}`
     const zipReq = request(zipUrl, {
       auth: {
         user: settings.apis.v1.user,

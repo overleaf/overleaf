@@ -66,7 +66,10 @@ const App = angular
             processEscapes: true,
             // Dollar delimiters are added by the mathjax directive
             inlineMath: [['\\(', '\\)']],
-            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            displayMath: [
+              ['$$', '$$'],
+              ['\\[', '\\]']
+            ]
           }
         })
     )

@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -21,11 +21,12 @@ import ShareJsDoc from './ShareJsDoc'
 import RangesTracker from '../review-panel/RangesTracker'
 let Document
 
-export default (Document = (function() {
+export default Document = (function() {
   Document = class Document extends EventEmitter {
     static initClass() {
       this.prototype.MAX_PENDING_OP_SIZE = 64
     }
+
     static getDocument(ide, doc_id) {
       if (!this.openDocs) {
         this.openDocs = {}
@@ -585,9 +586,7 @@ export default (Document = (function() {
       // if we arrive here from _onError the pending and inflight ops will have been cleared
       if (this.hasBufferedOps()) {
         sl_console.log(
-          `[_cleanUp] Document (${
-            this.doc_id
-          }) has buffered ops, refusing to remove from openDocs`
+          `[_cleanUp] Document (${this.doc_id}) has buffered ops, refusing to remove from openDocs`
         )
         return // return immediately, do not unbind from events
       } else if (Document.openDocs[this.doc_id] === this) {
@@ -758,7 +757,7 @@ export default (Document = (function() {
   }
   Document.initClass()
   return Document
-})())
+})()
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

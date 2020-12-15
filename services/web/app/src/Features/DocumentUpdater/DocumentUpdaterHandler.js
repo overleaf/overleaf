@@ -132,9 +132,7 @@ function getProjectDocsIfMatch(projectId, projectStateHash, callback) {
   // docs from redis via the docupdater. Otherwise we will need to
   // fall back to getting them from mongo.
   const timer = new metrics.Timer('get-project-docs')
-  const url = `${
-    settings.apis.documentupdater.url
-  }/project/${projectId}/get_and_flush_if_old?state=${projectStateHash}`
+  const url = `${settings.apis.documentupdater.url}/project/${projectId}/get_and_flush_if_old?state=${projectStateHash}`
   request.post(url, function(error, res, body) {
     timer.done()
     if (error) {

@@ -55,7 +55,9 @@ App.controller('ReactFileTreeController', function(
       // multi-selected entity" so here we pass a count of 0
       $scope.$emit('entities:multiSelected', { count: 0 })
     } else if (selectedEntities.length > 1) {
-      $scope.$emit('entities:multiSelected', { count: selectedEntities.length })
+      $scope.$emit('entities:multiSelected', {
+        count: selectedEntities.length
+      })
     }
   }
 })

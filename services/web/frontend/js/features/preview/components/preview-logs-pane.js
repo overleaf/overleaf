@@ -31,15 +31,15 @@ function PreviewLogsPane({
     <PreviewError key={index} name={name} />
   ))
 
-  const validationIssuesUI = Object.keys(validationIssues).map(
-    (name, index) => (
-      <PreviewValidationIssue
-        key={index}
-        name={name}
-        details={validationIssues[name]}
-      />
-    )
-  )
+  const validationIssuesUI = Object.keys(
+    validationIssues
+  ).map((name, index) => (
+    <PreviewValidationIssue
+      key={index}
+      name={name}
+      details={validationIssues[name]}
+    />
+  ))
 
   const logEntriesUI = [
     ...compilerErrors,

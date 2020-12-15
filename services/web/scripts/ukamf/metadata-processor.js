@@ -36,9 +36,7 @@ async function main() {
 
   const certificate = Certificate.fromPEM(
     Buffer.from(
-      `-----BEGIN CERTIFICATE-----\n${
-        samlConfig.cert
-      }\n-----END CERTIFICATE-----`,
+      `-----BEGIN CERTIFICATE-----\n${samlConfig.cert}\n-----END CERTIFICATE-----`,
       'utf8'
     )
   )

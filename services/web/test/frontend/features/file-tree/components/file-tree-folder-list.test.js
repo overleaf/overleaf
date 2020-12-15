@@ -35,7 +35,10 @@ describe('<FileTreeFolderList/>', function() {
 
   describe('selection and multi-selection', function() {
     it('without write permissions', function() {
-      const docs = [{ _id: '1', name: '1.tex' }, { _id: '2', name: '2.tex' }]
+      const docs = [
+        { _id: '1', name: '1.tex' },
+        { _id: '2', name: '2.tex' }
+      ]
       renderWithContext(
         <FileTreeFolderList folders={[]} docs={docs} files={[]} />,
         { contextProps: { hasWritePermissions: false } }

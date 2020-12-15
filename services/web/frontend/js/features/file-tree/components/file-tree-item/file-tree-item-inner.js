@@ -20,16 +20,13 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
 
   const itemRef = createRef()
 
-  useEffect(
-    () => {
-      if (isSelected && itemRef.current) {
-        scrollIntoViewIfNeeded(itemRef.current, {
-          scrollMode: 'if-needed'
-        })
-      }
-    },
-    [isSelected, itemRef]
-  )
+  useEffect(() => {
+    if (isSelected && itemRef.current) {
+      scrollIntoViewIfNeeded(itemRef.current, {
+        scrollMode: 'if-needed'
+      })
+    }
+  }, [isSelected, itemRef])
 
   function handleContextMenu(ev) {
     ev.preventDefault()

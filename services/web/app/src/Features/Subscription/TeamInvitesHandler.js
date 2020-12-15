@@ -190,9 +190,7 @@ var createInvite = function(subscription, email, inviter, callback) {
       const opts = {
         to: email,
         inviter,
-        acceptInviteUrl: `${settings.siteUrl}/subscription/invites/${
-          invite.token
-        }/`,
+        acceptInviteUrl: `${settings.siteUrl}/subscription/invites/${invite.token}/`,
         appName: settings.appName
       }
       EmailHandler.sendEmail('verifyEmailToJoinTeam', opts, error => {
@@ -273,9 +271,7 @@ var checkIfInviteIsPossible = function(subscription, email, callback) {
 var getInviterName = function(inviter) {
   let inviterName
   if (inviter.first_name && inviter.last_name) {
-    inviterName = `${inviter.first_name} ${inviter.last_name} (${
-      inviter.email
-    })`
+    inviterName = `${inviter.first_name} ${inviter.last_name} (${inviter.email})`
   } else {
     inviterName = inviter.email
   }

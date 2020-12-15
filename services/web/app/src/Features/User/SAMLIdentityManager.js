@@ -132,9 +132,7 @@ async function _sendLinkedEmail(userId, providerName, institutionEmail) {
   const user = await UserGetter.promises.getUser(userId, { email: 1 })
   const emailOptions = {
     to: user.email,
-    actionDescribed: `an Institutional SSO account at ${providerName} was linked to your account ${
-      user.email
-    }`,
+    actionDescribed: `an Institutional SSO account at ${providerName} was linked to your account ${user.email}`,
     action: 'institutional SSO account linked',
     message: [
       `<span style="display:inline-block;padding: 0 20px;width:100%;">Linked: <br/><b>${institutionEmail}</b></span>`

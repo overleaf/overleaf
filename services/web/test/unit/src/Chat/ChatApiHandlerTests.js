@@ -67,9 +67,7 @@ describe('ChatApiHandler', function() {
       it('should post the data to the chat api', function() {
         return this.request
           .calledWith({
-            url: `${this.settings.apis.chat.internal_url}/project/${
-              this.project_id
-            }/messages`,
+            url: `${this.settings.apis.chat.internal_url}/project/${this.project_id}/messages`,
             method: 'POST',
             json: {
               content: this.content,
@@ -125,9 +123,7 @@ describe('ChatApiHandler', function() {
         return this.request
           .calledWith({
             method: 'GET',
-            url: `${this.settings.apis.chat.internal_url}/project/${
-              this.project_id
-            }/messages`,
+            url: `${this.settings.apis.chat.internal_url}/project/${this.project_id}/messages`,
             qs: {
               limit: this.limit,
               before: this.before

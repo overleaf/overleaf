@@ -13,19 +13,16 @@ export function useChatStore() {
   const [loading, setLoading] = useState(chatStoreRef.current.loading)
   const [messages, setMessages] = useState(chatStoreRef.current.messages)
 
-  useEffect(
-    () => {
-      const chatStore = chatStoreRef.current
-      function handleStoreUpdated() {
-        setAtEnd(chatStore.atEnd)
-        setLoading(chatStore.loading)
-        setMessages(chatStore.messages)
-      }
-      chatStore.on('updated', handleStoreUpdated)
-      return () => chatStore.destroy()
-    },
-    [chatStoreRef]
-  )
+  useEffect(() => {
+    const chatStore = chatStoreRef.current
+    function handleStoreUpdated() {
+      setAtEnd(chatStore.atEnd)
+      setLoading(chatStore.loading)
+      setMessages(chatStore.messages)
+    }
+    chatStore.on('updated', handleStoreUpdated)
+    return () => chatStore.destroy()
+  }, [chatStoreRef])
 
   return {
     userId: user.id,

@@ -106,8 +106,8 @@ async function injectUserDetails(data) {
   const entries = Array.isArray(data.diff)
     ? data.diff
     : Array.isArray(data.updates)
-      ? data.updates
-      : []
+    ? data.updates
+    : []
   for (const entry of entries) {
     for (const user of (entry.meta && entry.meta.users) || []) {
       if (typeof user === 'string') {

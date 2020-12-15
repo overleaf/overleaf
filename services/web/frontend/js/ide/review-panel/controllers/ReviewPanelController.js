@@ -612,9 +612,7 @@ export default App.controller('ReviewPanelController', function(
 
   var _doAcceptChanges = function(change_ids) {
     $http.post(
-      `/project/${$scope.project_id}/doc/${
-        $scope.editor.open_doc_id
-      }/changes/accept`,
+      `/project/${$scope.project_id}/doc/${$scope.editor.open_doc_id}/changes/accept`,
       { change_ids, _csrf: window.csrfToken }
     )
     return $scope.$broadcast('changes:accept', change_ids)
@@ -854,9 +852,7 @@ export default App.controller('ReviewPanelController', function(
 
   $scope.saveEdit = function(thread_id, comment) {
     $http.post(
-      `/project/${$scope.project_id}/thread/${thread_id}/messages/${
-        comment.id
-      }/edit`,
+      `/project/${$scope.project_id}/thread/${thread_id}/messages/${comment.id}/edit`,
       {
         content: comment.content,
         _csrf: window.csrfToken
@@ -869,9 +865,7 @@ export default App.controller('ReviewPanelController', function(
     _onCommentDeleted(thread_id, comment.id)
     $http({
       method: 'DELETE',
-      url: `/project/${$scope.project_id}/thread/${thread_id}/messages/${
-        comment.id
-      }`,
+      url: `/project/${$scope.project_id}/thread/${thread_id}/messages/${comment.id}`,
       headers: {
         'X-CSRF-Token': window.csrfToken
       }

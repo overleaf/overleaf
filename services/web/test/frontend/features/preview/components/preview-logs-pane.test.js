@@ -91,9 +91,7 @@ entering extended mode
       it('renders a link to location button for every error and warning log entry', function() {
         logEntries.all.forEach((entry, index) => {
           const linkToSourceButton = screen.getByRole('button', {
-            name: `Navigate to log position in source code: ${entry.file}, ${
-              entry.line
-            }`
+            name: `Navigate to log position in source code: ${entry.file}, ${entry.line}`
           })
           fireEvent.click(linkToSourceButton)
           expect(onLogEntryLocationClick).to.have.callCount(index + 1)

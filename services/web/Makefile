@@ -161,6 +161,7 @@ WITH_NODE_MODULES_PATH = \
 	format_backend \
 	format_frontend \
 	format_misc \
+	format_styles \
 	format_test \
 	$(TEST_SUITES) \
 
@@ -168,53 +169,53 @@ $(WITH_NODE_MODULES_PATH): export PATH=$(NODE_MODULES_PATH)
 
 format: format_backend
 format_backend:
-	prettier-eslint \
+	eslint \
 		app.js \
 		'app/**/*.js' \
 		'modules/*/index.js' \
 		'modules/*/app/**/*.js' \
-	 	--list-different
+		--max-warnings=0
 
 format: format_frontend
 format_frontend:
-	prettier-eslint \
-		'frontend/**/*.{js,less}' \
-		'modules/*/frontend/**/*.{js,less}' \
+	eslint \
+		'frontend/**/*.js' \
+		'modules/*/frontend/**/*.js' \
+		--max-warnings=0
+
+format: format_styles
+format_styles:
+	prettier \
+		'frontend/**/*.less' \
+		'modules/*/frontend/**/*.less' \
 		--list-different
 
 format: format_test
 format_test:
-	prettier-eslint \
+	eslint \
 		'test/**/*.js' \
 		'modules/*/test/**/*.js' \
-		--list-different
+		--max-warnings=0
 
 format: format_misc
 # migrations, scripts, webpack config, karma config
 format_misc:
-	prettier-eslint \
-		'**/*.{js,less}' \
+	eslint . \
 		--ignore app.js \
 		--ignore 'app/**/*.js' \
 		--ignore 'modules/*/app/**/*.js' \
 		--ignore 'modules/*/index.js' \
-		--ignore 'frontend/**/*.{js,less}' \
-		--ignore 'modules/*/frontend/**/*.{js,less}' \
+		--ignore 'frontend/**/*.js' \
+		--ignore 'modules/*/frontend/**/*.js' \
 		--ignore 'test/**/*.js' \
 		--ignore 'modules/*/test/**/*.js' \
-		--list-different
+		--max-warnings=0
 
 format_in_docker:
 	$(RUN_LINT_FORMAT) make format -j --output-sync
 
 format_fix:
 	npm run --silent format:fix
-
-lint:
-	npm run --silent lint
-
-lint_in_docker:
-	$(RUN_LINT_FORMAT) make lint
 
 #
 # Build & publish
@@ -291,5 +292,5 @@ $(MODULE_TARGETS):
 	test test_module test_unit test_unit_app \
 	test_unit_modules test_unit_module test_karma test_karma_run \
 	test_karma_build_run test_frontend test_acceptance test_acceptance_app \
-	test_acceptance_modules test_acceptance_module ci format format_fix lint \
+	test_acceptance_modules test_acceptance_module ci format format_fix \
 	build build_test_karma publish tar

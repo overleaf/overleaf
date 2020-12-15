@@ -1,6 +1,6 @@
 import _ from 'lodash'
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     new-cap,
     no-return-assign,
