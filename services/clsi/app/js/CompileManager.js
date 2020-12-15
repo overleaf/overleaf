@@ -46,6 +46,9 @@ const getCompileName = function (project_id, user_id) {
 const getCompileDir = (project_id, user_id) =>
   Path.join(Settings.path.compilesDir, getCompileName(project_id, user_id))
 
+const getOutputDir = (project_id, user_id) =>
+  Path.join(Settings.path.outputDir, getCompileName(project_id, user_id))
+
 module.exports = CompileManager = {
   doCompileWithLock(request, callback) {
     if (callback == null) {
@@ -72,6 +75,8 @@ module.exports = CompileManager = {
       callback = function (error, outputFiles) {}
     }
     const compileDir = getCompileDir(request.project_id, request.user_id)
+    const outputDir = getOutputDir(request.project_id, request.user_id)
+
     let timer = new Metrics.Timer('write-to-disk')
     logger.log(
       { project_id: request.project_id, user_id: request.user_id },
@@ -294,6 +299,7 @@ module.exports = CompileManager = {
                   return OutputCacheManager.saveOutputFiles(
                     outputFiles,
                     compileDir,
+                    outputDir,
                     (error, newOutputFiles) => callback(null, newOutputFiles)
                   )
                 }

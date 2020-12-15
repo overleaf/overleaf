@@ -27,6 +27,7 @@ module.exports = {
 
   path: {
     compilesDir: Path.resolve(__dirname, '../compiles'),
+    outputDir: Path.resolve(__dirname, '../output'),
     clsiCacheDir: Path.resolve(__dirname, '../cache'),
     synctexBaseDir(projectId) {
       return Path.join(this.compilesDir, projectId)

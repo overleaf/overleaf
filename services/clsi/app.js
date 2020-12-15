@@ -138,6 +138,26 @@ const staticCompileServer = ForbidSymlinks(
   }
 )
 
+const staticOutputServer = ForbidSymlinks(
+  express.static,
+  Settings.path.outputDir,
+  {
+    setHeaders(res, path, stat) {
+      if (Path.basename(path) === 'output.pdf') {
+        // Calculate an etag in the same way as nginx
+        // https://github.com/tj/send/issues/65
+        const etag = (path, stat) =>
+          `"${Math.ceil(+stat.mtime / 1000).toString(16)}` +
+          '-' +
+          Number(stat.size).toString(16) +
+          '"'
+        res.set('Etag', etag(path, stat))
+      }
+      return res.set('Content-Type', ContentTypeMapper.map(path))
+    }
+  }
+)
+
 app.get(
   '/project/:project_id/user/:user_id/build/:build_id/output/*',
   function (req, res, next) {
@@ -145,7 +165,7 @@ app.get(
     req.url =
       `/${req.params.project_id}-${req.params.user_id}/` +
       OutputCacheManager.path(req.params.build_id, `/${req.params[0]}`)
-    return staticCompileServer(req, res, next)
+    return staticOutputServer(req, res, next)
   }
 )
 
@@ -158,7 +178,7 @@ app.get('/project/:project_id/build/:build_id/output/*', function (
   req.url =
     `/${req.params.project_id}/` +
     OutputCacheManager.path(req.params.build_id, `/${req.params[0]}`)
-  return staticCompileServer(req, res, next)
+  return staticOutputServer(req, res, next)
 })
 
 app.get('/project/:project_id/user/:user_id/output/*', function (
