@@ -1,0 +1,6 @@
+*
+!/lib
+!/src/main
+!/pom.xml
+!/Makefile
+!/LICENSE

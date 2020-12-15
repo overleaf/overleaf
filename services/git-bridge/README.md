@@ -1,13 +1,26 @@
-writelatex-git-bridge
-=====================
+# writelatex-git-bridge
 
-Required
---------
+## Docker
+
+The `Dockerfile` contains all the requirements for building and running the
+ writelatex-git-bridge.
+
+```bash
+# build the image
+docker build -t writelatex-git-bridge .
+
+# run it with the demo config
+docker run -v `pwd`/conf/local.json:/conf/runtime.json writelatex-git-bridge
+```
+
+## Native install
+
+### Required packages
+
   * `maven` (for building, running tests and packaging)
   * `jdk-8` (for compiling and running)
 
-Commands
---------
+### Commands
 
 To be run from the base directory:
 
@@ -31,8 +44,7 @@ To be run from the dev-environment:
 **Clean**:
 `bin/run git-bridge make clean`
 
-Installation
-------------
+### Installation
 
 Install dependencies:
 
@@ -50,8 +62,7 @@ Run `mvn package` to build, test, and package it into a jar at `target/writelate
 
 Use `java -jar <path_to_jar> <path_to_config_file>` to run the server.
 
-Runtime Configuration
----------------------
+## Runtime Configuration
 
 The configuration file is in `.json` format.
 
