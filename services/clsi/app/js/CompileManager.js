@@ -329,6 +329,7 @@ module.exports = CompileManager = {
     }
 
     const compileDir = getCompileDir(project_id, user_id)
+    const outputDir = getOutputDir(project_id, user_id)
 
     return CompileManager._checkDirectory(compileDir, function (err, exists) {
       if (err != null) {
@@ -338,7 +339,13 @@ module.exports = CompileManager = {
         return callback()
       } // skip removal if no directory present
 
-      const proc = child_process.spawn('rm', ['-r', compileDir])
+      const proc = child_process.spawn('rm', [
+        '-r',
+        '-f',
+        '--',
+        compileDir,
+        outputDir
+      ])
 
       proc.on('error', callback)
 
@@ -349,7 +356,9 @@ module.exports = CompileManager = {
         if (code === 0) {
           return callback(null)
         } else {
-          return callback(new Error(`rm -r ${compileDir} failed: ${stderr}`))
+          return callback(
+            new Error(`rm -r ${compileDir} ${outputDir} failed: ${stderr}`)
+          )
         }
       })
     })

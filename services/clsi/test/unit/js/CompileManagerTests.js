@@ -34,7 +34,8 @@ describe('CompileManager', function () {
         './OutputCacheManager': (this.OutputCacheManager = {}),
         'settings-sharelatex': (this.Settings = {
           path: {
-            compilesDir: '/compiles/dir'
+            compilesDir: '/compiles/dir',
+            outputDir: '/output/dir'
           },
           synctexBaseDir() {
             return '/compile'
@@ -166,6 +167,7 @@ describe('CompileManager', function () {
       this.env = {}
       this.Settings.compileDir = 'compiles'
       this.compileDir = `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`
+      this.outputDir = `${this.Settings.path.outputDir}/${this.project_id}-${this.user_id}`
       this.ResourceWriter.syncResourcesToDisk = sinon
         .stub()
         .callsArgWith(2, null, this.resources)
@@ -175,7 +177,7 @@ describe('CompileManager', function () {
         .callsArgWith(2, null, this.output_files)
       this.OutputCacheManager.saveOutputFiles = sinon
         .stub()
-        .callsArgWith(2, null, this.build_files)
+        .callsArgWith(3, null, this.build_files)
       this.DraftModeManager.injectDraftMode = sinon.stub().callsArg(1)
       return (this.TikzManager.checkMainFile = sinon.stub().callsArg(3, false))
     })
@@ -312,7 +314,10 @@ describe('CompileManager', function () {
         return this.child_process.spawn
           .calledWith('rm', [
             '-r',
-            `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`
+            '-f',
+            '--',
+            `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`,
+            `${this.Settings.path.outputDir}/${this.project_id}-${this.user_id}`
           ])
           .should.equal(true)
       })
@@ -348,7 +353,10 @@ describe('CompileManager', function () {
         return this.child_process.spawn
           .calledWith('rm', [
             '-r',
-            `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`
+            '-f',
+            '--',
+            `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`,
+            `${this.Settings.path.outputDir}/${this.project_id}-${this.user_id}`
           ])
           .should.equal(true)
       })
@@ -357,7 +365,7 @@ describe('CompileManager', function () {
         this.callback.calledWithExactly(sinon.match(Error)).should.equal(true)
 
         this.callback.args[0][0].message.should.equal(
-          `rm -r ${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id} failed: ${this.error}`
+          `rm -r ${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id} ${this.Settings.path.outputDir}/${this.project_id}-${this.user_id} failed: ${this.error}`
         )
       })
     })
