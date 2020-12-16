@@ -10,7 +10,7 @@ if (process.env.BATCH_LAST_ID) {
 async function getNextBatch(collection, query, maxId, projection) {
   maxId = maxId || BATCH_LAST_ID
   if (maxId) {
-    query['_id'] = { $gt: maxId }
+    query._id = { $gt: maxId }
   }
   const entries = await collection
     .find(query)

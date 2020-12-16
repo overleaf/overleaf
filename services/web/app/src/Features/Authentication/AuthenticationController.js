@@ -296,7 +296,7 @@ const AuthenticationController = {
       return next()
     }
 
-    if (req.headers['authorization'] != null) {
+    if (req.headers.authorization != null) {
       AuthenticationController.httpAuth(req, res, next)
     } else if (AuthenticationController.isUserLoggedIn(req)) {
       next()

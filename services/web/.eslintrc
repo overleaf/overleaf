@@ -39,7 +39,6 @@
     }
   },
   "rules": {
-    "dot-notation": "off",
     "node/no-callback-literal": "off",
     "node/no-deprecated-api": "off",
     "node/handle-callback-err": "off",

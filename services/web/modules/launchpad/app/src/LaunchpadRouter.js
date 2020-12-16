@@ -17,7 +17,7 @@ const AuthorizationMiddleware = require('../../../../app/src/Features/Authorizat
 
 module.exports = {
   apply(webRouter, apiRouter) {
-    if (Settings.disableModule['launchpad']) {
+    if (Settings.disableModule.launchpad) {
       logger.log({}, 'Skipping Init launchpad router')
       return
     }

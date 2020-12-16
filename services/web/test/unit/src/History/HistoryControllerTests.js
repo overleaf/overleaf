@@ -185,7 +185,7 @@ describe('HistoryController', function() {
     describe('with an error', function() {
       beforeEach(function() {
         this.HistoryController.proxyToHistoryApi(this.req, this.res, this.next)
-        return this.proxy.events['error'].call(
+        return this.proxy.events.error.call(
           this.proxy,
           (this.error = new Error('oops'))
         )

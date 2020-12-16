@@ -30,7 +30,7 @@ module.exports = {
 
     const userId = AuthenticationController.getLoggedInUserId(req)
     url = `/user/${userId}${url}`
-    req.headers['Host'] = Settings.apis.spelling.host
+    req.headers.Host = Settings.apis.spelling.host
     return request({
       url: Settings.apis.spelling.url + url,
       method: req.method,

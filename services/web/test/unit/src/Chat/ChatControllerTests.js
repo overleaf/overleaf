@@ -149,7 +149,7 @@ describe('ChatController', function() {
       }
       sinon.spy(this.UserInfoManager, 'getPersonalInfo')
       return (this.UserInfoController.formatPersonalInfo = user => ({
-        formatted: user['mock']
+        formatted: user.mock
       }))
     })
 

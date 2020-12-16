@@ -363,7 +363,7 @@ describe('FileStoreHandler', function() {
             this.request.callCount.should.equal(1)
             const { headers } = this.request.firstCall.args[0]
             expect(headers).to.have.keys('range')
-            expect(headers['range']).to.equal('bytes=0-10')
+            expect(headers.range).to.equal('bytes=0-10')
             done()
           }
         )

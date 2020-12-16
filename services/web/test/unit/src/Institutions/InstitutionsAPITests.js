@@ -117,8 +117,8 @@ describe('InstitutionsAPI', function() {
           const expectedUrl = `v1.url/api/v2/institutions/${this.institutionId}/institution_licences`
           requestOptions.url.should.equal(expectedUrl)
           requestOptions.method.should.equal('GET')
-          requestOptions.body['start_date'].should.equal(startDate)
-          requestOptions.body['end_date'].should.equal(endDate)
+          requestOptions.body.start_date.should.equal(startDate)
+          requestOptions.body.end_date.should.equal(endDate)
           requestOptions.body.lag.should.equal('monthly')
           body.should.equal(responseBody)
           return done()

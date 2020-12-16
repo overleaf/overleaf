@@ -16,11 +16,11 @@ const ScriptLogger = {
   recordMismatch: (subscription, recurlySubscription) => {
     const mismatchReasons = {}
     if (subscription.planCode !== recurlySubscription.plan.plan_code) {
-      mismatchReasons['recurlyPlan'] = recurlySubscription.plan.plan_code
-      mismatchReasons['olPlan'] = subscription.planCode
+      mismatchReasons.recurlyPlan = recurlySubscription.plan.plan_code
+      mismatchReasons.olPlan = subscription.planCode
     }
     if (recurlySubscription.state === 'expired') {
-      mismatchReasons['state'] = 'expired'
+      mismatchReasons.state = 'expired'
     }
 
     if (!Object.keys(mismatchReasons).length) {

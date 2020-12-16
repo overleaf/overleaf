@@ -51,7 +51,7 @@ const UserMembershipsHandler = {
       callback = function(error) {}
     }
     const removeOperation = { $pull: {} }
-    removeOperation['$pull'][entityConfig.fields.write] = userId
+    removeOperation.$pull[entityConfig.fields.write] = userId
     return EntityModels[entityConfig.modelName].updateMany(
       {},
       removeOperation,

@@ -87,7 +87,7 @@ describe('AnalyticsController', function() {
       this.AuthenticationController.getLoggedInUserId.returns('1234')
       this.controller.recordEvent(this.req, this.res)
       this.AnalyticsManager.recordEvent
-        .calledWith('1234', this.req.params['event'], this.req.body)
+        .calledWith('1234', this.req.params.event, this.req.body)
         .should.equal(true)
       done()
     })
@@ -95,7 +95,7 @@ describe('AnalyticsController', function() {
     it('should use the session id', function(done) {
       this.controller.recordEvent(this.req, this.res)
       this.AnalyticsManager.recordEvent
-        .calledWith(this.req.sessionID, this.req.params['event'], this.req.body)
+        .calledWith(this.req.sessionID, this.req.params.event, this.req.body)
         .should.equal(true)
       done()
     })
@@ -119,10 +119,10 @@ describe('AnalyticsController', function() {
       this.controller.licences(this.req, this.res)
       this.InstitutionsAPI.getInstitutionLicences
         .calledWith(
-          this.req.query['resource_id'],
-          this.req.query['start_date'],
-          this.req.query['end_date'],
-          this.req.query['lag']
+          this.req.query.resource_id,
+          this.req.query.start_date,
+          this.req.query.end_date,
+          this.req.query.lag
         )
         .should.equal(true)
       done()

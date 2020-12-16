@@ -208,29 +208,26 @@ const FeaturesUpdater = {
       // Special merging logic for non-boolean features
       if (key === 'compileGroup') {
         if (
-          features['compileGroup'] === 'priority' ||
-          featuresB['compileGroup'] === 'priority'
+          features.compileGroup === 'priority' ||
+          featuresB.compileGroup === 'priority'
         ) {
-          features['compileGroup'] = 'priority'
+          features.compileGroup = 'priority'
         } else {
-          features['compileGroup'] = 'standard'
+          features.compileGroup = 'standard'
         }
       } else if (key === 'collaborators') {
-        if (
-          features['collaborators'] === -1 ||
-          featuresB['collaborators'] === -1
-        ) {
-          features['collaborators'] = -1
+        if (features.collaborators === -1 || featuresB.collaborators === -1) {
+          features.collaborators = -1
         } else {
-          features['collaborators'] = Math.max(
-            features['collaborators'] || 0,
-            featuresB['collaborators'] || 0
+          features.collaborators = Math.max(
+            features.collaborators || 0,
+            featuresB.collaborators || 0
           )
         }
       } else if (key === 'compileTimeout') {
-        features['compileTimeout'] = Math.max(
-          features['compileTimeout'] || 0,
-          featuresB['compileTimeout'] || 0
+        features.compileTimeout = Math.max(
+          features.compileTimeout || 0,
+          featuresB.compileTimeout || 0
         )
       } else {
         // Boolean keys, true is better

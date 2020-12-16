@@ -343,14 +343,14 @@ describe('UserMembershipController', function() {
   describe('create', function() {
     beforeEach(function() {
       this.req.params.name = 'institution'
-      this.req.entityConfig = EntityConfigs['institution']
+      this.req.entityConfig = EntityConfigs.institution
       return (this.req.params.id = 123)
     })
 
     it('creates institution', function(done) {
       return this.UserMembershipController.create(this.req, {
         redirect: path => {
-          expect(path).to.eq(EntityConfigs['institution'].pathsFor(123).index)
+          expect(path).to.eq(EntityConfigs.institution.pathsFor(123).index)
           sinon.assert.calledWithMatch(
             this.UserMembershipHandler.createEntity,
             123,

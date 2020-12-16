@@ -328,7 +328,7 @@ class User {
               name,
               options,
               response.statusCode,
-              response.headers['location'],
+              response.headers.location,
               body
             ])
           )

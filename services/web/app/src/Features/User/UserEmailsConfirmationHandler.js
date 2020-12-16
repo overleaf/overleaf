@@ -17,7 +17,7 @@ function sendConfirmationEmail(userId, email, emailTemplate, callback) {
 
   // when force-migrating accounts to v2 from v1, we don't want to send confirmation messages -
   // setting this env var allows us to turn this behaviour off
-  if (process.env['SHARELATEX_NO_CONFIRMATION_MESSAGES'] != null) {
+  if (process.env.SHARELATEX_NO_CONFIRMATION_MESSAGES != null) {
     return callback(null)
   }
 

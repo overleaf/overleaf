@@ -270,7 +270,7 @@ App.controller('PdfController', function(
     const url = `/project/${$scope.project_id}/compile`
     const params = {}
     if (options.isAutoCompileOnLoad || options.isAutoCompileOnChange) {
-      params['auto_compile'] = true
+      params.auto_compile = true
     }
     // if the previous run was a check, clear the error logs
     if ($scope.check) {

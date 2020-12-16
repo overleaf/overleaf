@@ -152,7 +152,7 @@ class UserHelper {
    * @returns {string} baseUrl
    */
   static baseUrl() {
-    return `http://${process.env['HTTP_TEST_HOST'] || 'localhost'}:3000`
+    return `http://${process.env.HTTP_TEST_HOST || 'localhost'}:3000`
   }
 
   /* static async instantiation methods */
