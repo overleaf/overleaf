@@ -6,7 +6,7 @@
       "corejs": { "version": 3 }
     }]
   ],
-  "plugins": ["angularjs-annotate"],
+  "plugins": ["angularjs-annotate", "macros"],
   // Target our current Node version in test environment, to transform and
   // polyfill only what's necessary
   "env": {

@@ -169,6 +169,7 @@
     "autoprefixer": "^9.7.6",
     "babel-loader": "^8.1.0",
     "babel-plugin-angularjs-annotate": "^0.10.0",
+    "babel-plugin-macros": "^3.0.0",
     "c8": "^7.2.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
