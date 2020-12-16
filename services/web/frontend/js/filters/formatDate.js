@@ -1,5 +1,3 @@
-/* eslint-disable
- */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -24,7 +22,7 @@ moment.updateLocale('en', {
 App.filter(
   'formatDate',
   () =>
-    function (date, format) {
+    function(date, format) {
       if (!date) return 'N/A'
       if (format == null) {
         format = 'Do MMM YYYY, h:mm a'

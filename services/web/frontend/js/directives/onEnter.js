@@ -1,5 +1,3 @@
-/* eslint-disable
- */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -10,7 +8,7 @@
 import App from '../base'
 
 export default App.directive('onEnter', () => (scope, element, attrs) =>
-  element.bind('keydown keypress', function (event) {
+  element.bind('keydown keypress', function(event) {
     if (event.which === 13) {
       scope.$apply(() => scope.$eval(attrs.onEnter, { event }))
       return event.preventDefault()

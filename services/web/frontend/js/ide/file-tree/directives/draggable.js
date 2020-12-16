@@ -1,5 +1,3 @@
-/* eslint-disable
- */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -11,7 +9,7 @@ import App from '../../../base'
 
 export default App.directive('draggable', () => ({
   link(scope, element, attrs) {
-    return scope.$watch(attrs.draggable, function (draggable) {
+    return scope.$watch(attrs.draggable, function(draggable) {
       if (draggable) {
         return element.draggable({
           delay: 250,
