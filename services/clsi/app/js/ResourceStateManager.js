@@ -6,7 +6,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS201: Simplify complex destructure assignments
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -45,7 +44,7 @@ module.exports = ResourceStateManager = {
     if (state == null) {
       // remove the file if no state passed in
       logger.log({ state, basePath }, 'clearing sync state')
-      return fs.unlink(stateFile, function (err) {
+      fs.unlink(stateFile, function (err) {
         if (err != null && err.code !== 'ENOENT') {
           return callback(err)
         } else {
@@ -55,7 +54,7 @@ module.exports = ResourceStateManager = {
     } else {
       logger.log({ state, basePath }, 'writing sync state')
       const resourceList = resources.map((resource) => resource.path)
-      return fs.writeFile(
+      fs.writeFile(
         stateFile,
         [...resourceList, `stateHash:${state}`].join('\n'),
         callback
@@ -69,7 +68,7 @@ module.exports = ResourceStateManager = {
     }
     const stateFile = Path.join(basePath, this.SYNC_STATE_FILE)
     const size = this.SYNC_STATE_MAX_SIZE
-    return SafeReader.readFile(stateFile, size, 'utf8', function (
+    SafeReader.readFile(stateFile, size, 'utf8', function (
       err,
       result,
       bytesRead
@@ -98,7 +97,7 @@ module.exports = ResourceStateManager = {
         )
       } else {
         const resources = resourceList.map((path) => ({ path }))
-        return callback(null, resources)
+        callback(null, resources)
       }
     })
   },
@@ -136,7 +135,7 @@ module.exports = ResourceStateManager = {
         )
       )
     } else {
-      return callback()
+      callback()
     }
   },
 }
