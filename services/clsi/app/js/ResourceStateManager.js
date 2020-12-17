@@ -6,7 +6,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS103: Rewrite code to no longer use __guard__
  * DS201: Simplify complex destructure assignments
@@ -56,12 +55,10 @@ module.exports = ResourceStateManager = {
       })
     } else {
       logger.log({ state, basePath }, 'writing sync state')
-      const resourceList = Array.from(resources).map(
-        (resource) => resource.path
-      )
+      const resourceList = resources.map((resource) => resource.path)
       return fs.writeFile(
         stateFile,
-        [...Array.from(resourceList), `stateHash:${state}`].join('\n'),
+        [...resourceList, `stateHash:${state}`].join('\n'),
         callback
       )
     }
@@ -104,7 +101,7 @@ module.exports = ResourceStateManager = {
           new Errors.FilesOutOfSyncError('invalid state for incremental update')
         )
       } else {
-        const resources = Array.from(resourceList).map((path) => ({ path }))
+        const resources = resourceList.map((path) => ({ path }))
         return callback(null, resources)
       }
     })
@@ -116,7 +113,7 @@ module.exports = ResourceStateManager = {
     if (callback == null) {
       callback = function (error) {}
     }
-    for (file of Array.from(resources || [])) {
+    for (file of resources || []) {
       for (const dir of Array.from(
         __guard__(file != null ? file.path : undefined, (x) => x.split('/'))
       )) {
@@ -127,10 +124,10 @@ module.exports = ResourceStateManager = {
     }
     // check if any of the input files are not present in list of files
     const seenFile = {}
-    for (file of Array.from(allFiles)) {
+    for (file of allFiles) {
       seenFile[file] = true
     }
-    const missingFiles = Array.from(resources)
+    const missingFiles = resources
       .filter((resource) => !seenFile[resource.path])
       .map((resource) => resource.path)
     if ((missingFiles != null ? missingFiles.length : undefined) > 0) {
@@ -146,7 +143,7 @@ module.exports = ResourceStateManager = {
     } else {
       return callback()
     }
-  }
+  },
 }
 
 function __guard__(value, transform) {
