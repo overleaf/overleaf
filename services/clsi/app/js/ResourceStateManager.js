@@ -7,7 +7,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS201: Simplify complex destructure assignments
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -84,10 +83,7 @@ module.exports = ResourceStateManager = {
           'project state file truncated'
         )
       }
-      const array =
-        __guard__(result != null ? result.toString() : undefined, (x) =>
-          x.split('\n')
-        ) || []
+      const array = result.toString().split('\n')
       const adjustedLength = Math.max(array.length, 1)
       const resourceList = array.slice(0, adjustedLength - 1)
       const oldState = array[adjustedLength - 1]
@@ -114,10 +110,9 @@ module.exports = ResourceStateManager = {
       callback = function (error) {}
     }
     for (file of resources || []) {
-      for (const dir of Array.from(
-        __guard__(file != null ? file.path : undefined, (x) => x.split('/'))
-      )) {
-        if (dir === '..') {
+      if (file && file.path) {
+        const dirs = file.path.split('/')
+        if (dirs.indexOf('..') !== -1) {
           return callback(new Error('relative path in resource file list'))
         }
       }
@@ -144,10 +139,4 @@ module.exports = ResourceStateManager = {
       return callback()
     }
   },
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }
