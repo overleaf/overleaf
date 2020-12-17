@@ -7,7 +7,6 @@
 /*
  * decaffeinate suggestions:
  * DS201: Simplify complex destructure assignments
- * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ResourceStateManager
@@ -37,15 +36,12 @@ module.exports = ResourceStateManager = {
   SYNC_STATE_MAX_SIZE: 128 * 1024,
 
   saveProjectState(state, resources, basePath, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     const stateFile = Path.join(basePath, this.SYNC_STATE_FILE)
     if (state == null) {
       // remove the file if no state passed in
       logger.log({ state, basePath }, 'clearing sync state')
       fs.unlink(stateFile, function (err) {
-        if (err != null && err.code !== 'ENOENT') {
+        if (err && err.code !== 'ENOENT') {
           return callback(err)
         } else {
           return callback()
@@ -63,9 +59,6 @@ module.exports = ResourceStateManager = {
   },
 
   checkProjectStateMatches(state, basePath, callback) {
-    if (callback == null) {
-      callback = function (error, resources) {}
-    }
     const stateFile = Path.join(basePath, this.SYNC_STATE_FILE)
     const size = this.SYNC_STATE_MAX_SIZE
     SafeReader.readFile(stateFile, size, 'utf8', function (
@@ -73,7 +66,7 @@ module.exports = ResourceStateManager = {
       result,
       bytesRead
     ) {
-      if (err != null) {
+      if (err) {
         return callback(err)
       }
       if (bytesRead === size) {
@@ -105,9 +98,6 @@ module.exports = ResourceStateManager = {
   checkResourceFiles(resources, allFiles, basePath, callback) {
     // check the paths are all relative to current directory
     let file
-    if (callback == null) {
-      callback = function (error) {}
-    }
     for (file of resources || []) {
       if (file && file.path) {
         const dirs = file.path.split('/')
@@ -124,7 +114,7 @@ module.exports = ResourceStateManager = {
     const missingFiles = resources
       .filter((resource) => !seenFile[resource.path])
       .map((resource) => resource.path)
-    if ((missingFiles != null ? missingFiles.length : undefined) > 0) {
+    if (missingFiles && missingFiles.length > 0) {
       logger.err(
         { missingFiles, basePath, allFiles, resources },
         'missing input files for project'
