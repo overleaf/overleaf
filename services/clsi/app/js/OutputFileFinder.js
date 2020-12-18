@@ -11,7 +11,6 @@
  * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let OutputFileFinder
@@ -31,7 +30,7 @@ module.exports = OutputFileFinder = {
       if (allFiles == null) {
         allFiles = []
       }
-      if (error != null) {
+      if (error) {
         logger.err({ err: error }, 'error finding all output files')
         return callback(error)
       }
