@@ -36,9 +36,10 @@ module.exports = OutputFileFinder = {
       const outputFiles = []
       for (const file of Array.from(allFiles)) {
         if (!incomingResources.has(file)) {
+          const type = Path.extname(file)
           outputFiles.push({
             path: file,
-            type: __guard__(file.match(/\.([^\.]+)$/), (x) => x[1]),
+            type: Path.extname(file) || undefined,
           })
         }
       }
