@@ -26,10 +26,9 @@ module.exports = OutputFileFinder = {
     if (callback == null) {
       callback = function (error, outputFiles, allFiles) {}
     }
-    const incomingResources = {}
-    for (const resource of Array.from(resources)) {
-      incomingResources[resource.path] = true
-    }
+    const incomingResources = new Set(
+      resources.map((resource) => resource.path)
+    )
 
     return OutputFileFinder._getAllFiles(directory, function (error, allFiles) {
       if (allFiles == null) {
@@ -41,10 +40,10 @@ module.exports = OutputFileFinder = {
       }
       const outputFiles = []
       for (const file of Array.from(allFiles)) {
-        if (!incomingResources[file]) {
+        if (!incomingResources.has(file)) {
           outputFiles.push({
             path: file,
-            type: __guard__(file.match(/\.([^\.]+)$/), (x) => x[1])
+            type: __guard__(file.match(/\.([^\.]+)$/), (x) => x[1]),
           })
         }
       }
@@ -70,7 +69,7 @@ module.exports = OutputFileFinder = {
       '.archive',
       '-o',
       '-name',
-      '.project-*'
+      '.project-*',
     ]
     const args = [
       directory,
@@ -81,7 +80,7 @@ module.exports = OutputFileFinder = {
       '-o',
       '-type',
       'f',
-      '-print'
+      '-print',
     ]
     logger.log({ args }, 'running find command')
 
@@ -105,7 +104,7 @@ module.exports = OutputFileFinder = {
       })
       return callback(null, fileList)
     })
-  }
+  },
 }
 
 function __guard__(value, transform) {
