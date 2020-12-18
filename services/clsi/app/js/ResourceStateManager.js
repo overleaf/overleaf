@@ -1,14 +1,3 @@
-/* eslint-disable
-    handle-callback-err,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS201: Simplify complex destructure assignments
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let ResourceStateManager
 const Path = require('path')
 const fs = require('fs')
