@@ -106,14 +106,11 @@ module.exports = ResourceStateManager = {
       return callback(new Error('relative path in resource file list'))
     }
     // check if any of the input files are not present in list of files
-    const seenFile = {}
-    for (file of allFiles) {
-      seenFile[file] = true
-    }
+    const seenFiles = new Set(allFiles)
     const missingFiles = resources
-      .filter((resource) => !seenFile[resource.path])
       .map((resource) => resource.path)
-    if (missingFiles && missingFiles.length > 0) {
+      .filter((path) => !seenFiles.has(path))
+    if (missingFiles.length > 0) {
       logger.err(
         { missingFiles, basePath, allFiles, resources },
         'missing input files for project'
