@@ -23,9 +23,6 @@ const logger = require('logger-sharelatex')
 
 module.exports = OutputFileFinder = {
   findOutputFiles(resources, directory, callback) {
-    if (callback == null) {
-      callback = function (error, outputFiles, allFiles) {}
-    }
     const incomingResources = new Set(
       resources.map((resource) => resource.path)
     )
@@ -52,14 +49,6 @@ module.exports = OutputFileFinder = {
   },
 
   _getAllFiles(directory, _callback) {
-    if (_callback == null) {
-      _callback = function (error, fileList) {}
-    }
-    const callback = function (error, fileList) {
-      _callback(error, fileList)
-      return (_callback = function () {})
-    }
-
     // don't include clsi-specific files/directories in the output list
     const EXCLUDE_DIRS = [
       '-name',
