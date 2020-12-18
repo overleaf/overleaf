@@ -24,7 +24,7 @@ module.exports = OutputFileFinder = {
         if (!incomingResources.has(file)) {
           outputFiles.push({
             path: file,
-            type: Path.extname(file).replace(/^\./, '') || undefined,
+            type: Path.extname(file).replace(/^\./, '') || undefined
           })
         }
       }
@@ -42,7 +42,7 @@ module.exports = OutputFileFinder = {
       '.archive',
       '-o',
       '-name',
-      '.project-*',
+      '.project-*'
     ]
     const args = [
       directory,
@@ -53,7 +53,7 @@ module.exports = OutputFileFinder = {
       '-o',
       '-type',
       'f',
-      '-print',
+      '-print'
     ]
     logger.log({ args }, 'running find command')
 
@@ -77,5 +77,5 @@ module.exports = OutputFileFinder = {
       })
       callback(null, fileList)
     })
-  },
+  }
 }
