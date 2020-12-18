@@ -1,17 +1,3 @@
-/* eslint-disable
-    handle-callback-err,
-    no-return-assign,
-    no-unused-vars,
-    no-useless-escape,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS103: Rewrite code to no longer use __guard__
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let OutputFileFinder
 const async = require('async')
 const fs = require('fs')
@@ -34,12 +20,11 @@ module.exports = OutputFileFinder = {
         return callback(error)
       }
       const outputFiles = []
-      for (const file of Array.from(allFiles)) {
+      for (const file of allFiles) {
         if (!incomingResources.has(file)) {
-          const type = Path.extname(file)
           outputFiles.push({
             path: file,
-            type: Path.extname(file) || undefined,
+            type: Path.extname(file).replace(/^\./, '') || undefined,
           })
         }
       }
@@ -62,7 +47,7 @@ module.exports = OutputFileFinder = {
     const args = [
       directory,
       '(',
-      ...Array.from(EXCLUDE_DIRS),
+      ...EXCLUDE_DIRS,
       ')',
       '-prune',
       '-o',
@@ -93,10 +78,4 @@ module.exports = OutputFileFinder = {
       callback(null, fileList)
     })
   },
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }
