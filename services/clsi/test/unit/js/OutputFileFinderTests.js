@@ -28,6 +28,9 @@ describe('OutputFileFinder', function () {
         fs: (this.fs = {}),
         child_process: { spawn: (this.spawn = sinon.stub()) },
         'logger-sharelatex': { log: sinon.stub(), warn: sinon.stub() }
+      },
+      globals: {
+        Math // used by lodash
       }
     })
     this.directory = '/test/dir'

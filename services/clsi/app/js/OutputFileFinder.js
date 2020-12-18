@@ -2,6 +2,7 @@ let OutputFileFinder
 const async = require('async')
 const fs = require('fs')
 const Path = require('path')
+const _ = require('lodash')
 const { spawn } = require('child_process')
 const logger = require('logger-sharelatex')
 
@@ -32,7 +33,8 @@ module.exports = OutputFileFinder = {
     })
   },
 
-  _getAllFiles(directory, _callback) {
+  _getAllFiles(directory, callback) {
+    callback = _.once(callback)
     // don't include clsi-specific files/directories in the output list
     const EXCLUDE_DIRS = [
       '-name',
