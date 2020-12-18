@@ -98,13 +98,12 @@ module.exports = ResourceStateManager = {
   checkResourceFiles(resources, allFiles, basePath, callback) {
     // check the paths are all relative to current directory
     let file
-    for (file of resources || []) {
-      if (file && file.path) {
-        const dirs = file.path.split('/')
-        if (dirs.indexOf('..') !== -1) {
-          return callback(new Error('relative path in resource file list'))
-        }
-      }
+    const containsRelativePath = (resource) => {
+      const dirs = resource.path.split('/')
+      return dirs.indexOf('..') !== -1
+    }
+    if (resources.some(containsRelativePath)) {
+      return callback(new Error('relative path in resource file list'))
     }
     // check if any of the input files are not present in list of files
     const seenFile = {}
