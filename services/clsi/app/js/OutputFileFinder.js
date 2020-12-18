@@ -74,8 +74,7 @@ module.exports = OutputFileFinder = {
       let fileList = stdout.trim().split('\n')
       fileList = fileList.map(function (file) {
         // Strip leading directory
-        let path
-        return (path = Path.relative(directory, file))
+        return Path.relative(directory, file)
       })
       callback(null, fileList)
     })
