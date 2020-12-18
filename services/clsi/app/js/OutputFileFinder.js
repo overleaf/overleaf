@@ -1,6 +1,4 @@
 let OutputFileFinder
-const async = require('async')
-const fs = require('fs')
 const Path = require('path')
 const _ = require('lodash')
 const { spawn } = require('child_process')
