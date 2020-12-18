@@ -96,7 +96,6 @@ module.exports = ResourceStateManager = {
 
   checkResourceFiles(resources, allFiles, basePath, callback) {
     // check the paths are all relative to current directory
-    let file
     const containsRelativePath = (resource) => {
       const dirs = resource.path.split('/')
       return dirs.indexOf('..') !== -1
