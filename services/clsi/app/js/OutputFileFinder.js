@@ -9,7 +9,6 @@
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
  * DS103: Rewrite code to no longer use __guard__
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -43,7 +42,7 @@ module.exports = OutputFileFinder = {
           })
         }
       }
-      return callback(null, outputFiles, allFiles)
+      callback(null, outputFiles, allFiles)
     })
   },
 
@@ -90,7 +89,7 @@ module.exports = OutputFileFinder = {
         let path
         return (path = Path.relative(directory, file))
       })
-      return callback(null, fileList)
+      callback(null, fileList)
     })
   },
 }
