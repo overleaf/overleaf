@@ -13,7 +13,6 @@ let ResourceStateManager
 const Path = require('path')
 const fs = require('fs')
 const logger = require('logger-sharelatex')
-const settings = require('settings-sharelatex')
 const Errors = require('./Errors')
 const SafeReader = require('./SafeReader')
 
