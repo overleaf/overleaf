@@ -1,11 +1,10 @@
-let ResourceStateManager
 const Path = require('path')
 const fs = require('fs')
 const logger = require('logger-sharelatex')
 const Errors = require('./Errors')
 const SafeReader = require('./SafeReader')
 
-module.exports = ResourceStateManager = {
+module.exports = {
   // The sync state is an identifier which must match for an
   // incremental update to be allowed.
   //
