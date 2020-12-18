@@ -11,7 +11,7 @@ module.exports = OutputFileFinder = {
       resources.map((resource) => resource.path)
     )
 
-    return OutputFileFinder._getAllFiles(directory, function (error, allFiles) {
+    OutputFileFinder._getAllFiles(directory, function (error, allFiles) {
       if (allFiles == null) {
         allFiles = []
       }
@@ -61,7 +61,7 @@ module.exports = OutputFileFinder = {
     let stdout = ''
     proc.stdout.setEncoding('utf8').on('data', (chunk) => (stdout += chunk))
     proc.on('error', callback)
-    return proc.on('close', function (code) {
+    proc.on('close', function (code) {
       if (code !== 0) {
         logger.warn(
           { directory, code },
