@@ -223,7 +223,7 @@ settings =
 		templates: true
 		references: true
 
-## OPTIONAL CONFIGERABLE SETTINGS
+## OPTIONAL CONFIGURABLE SETTINGS
 
 if process.env["SHARELATEX_LEFT_FOOTER"]?
 	try
