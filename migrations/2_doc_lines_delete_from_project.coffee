@@ -125,7 +125,7 @@ getWhichDocsCanBeDeleted = (docs, callback = (err, docsToBeDeleted, unmigratedDo
 	async.series jobs, (err)->
 		callback err, docsToBeDeleted, unmigratedDocs
 
-whipeDocLines = (project_id, mongoPath, callback)->
+wipeDocLines = (project_id, mongoPath, callback)->
 	update =
 		$unset: {}
 	update.$unset["#{mongoPath}.lines"] = ""
@@ -137,7 +137,7 @@ removeDocLinesFromProject = (docs, project, callback)->
 	jobs = _.map docs, (doc)->
 		(cb)->
 			findDocInProject project, doc._id, (err, doc, mongoPath)->
-				whipeDocLines project._id, mongoPath, cb
+				wipeDocLines project._id, mongoPath, cb
 	async.parallelLimit jobs, 5, callback
 
 processNext = (project_id, callback)->
