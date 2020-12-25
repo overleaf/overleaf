@@ -19,7 +19,7 @@ printProgress = ->
 	exec "wc #{finished_projects_path}", (error, results) ->
 		setTimeout printProgress, 1000 * 30
 
-checkIfFileHasBeenProccessed = (project_id, callback)->
+checkIfFileHasBeenProcessed = (project_id, callback)->
 	exec "grep #{project_id} #{finished_projects_path}", (error, results) ->
 		hasBeenProcessed = _.include(results, project_id)
 		callback(error, hasBeenProcessed)
@@ -125,9 +125,9 @@ saveDocsIntoMongo = (project_id, docs, callback)->
 
 
 processNext = (project_id, callback)->
-	checkIfFileHasBeenProccessed project_id, (err, hasBeenProcessed)->
+	checkIfFileHasBeenProcessed project_id, (err, hasBeenProcessed)->
 		if hasBeenProcessed
-			console.log "#{project_id} already procssed, skipping"
+			console.log "#{project_id} already processed, skipping"
 			return callback()
 		console.log "#{project_id} processing"
 		getAllDocs project_id, (err, docs)->
