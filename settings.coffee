@@ -93,8 +93,8 @@ settings =
 		project_history: redisConfig
 
 	# The compile server (the clsi) uses a SQL database to cache files and
-	# meta-data. sqllite is the default, and the load is low enough that this will
-	# be fine in production (we use sqllite at sharelatex.com).
+	# meta-data. sqlite is the default, and the load is low enough that this will
+	# be fine in production (we use sqlite at sharelatex.com).
 	#
 	# If you want to configure a different database, see the Sequelize documentation
 	# for available options:
