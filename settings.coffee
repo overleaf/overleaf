@@ -37,7 +37,7 @@ settings =
 	# Databases
 	# ---------
 
-	# ShareLaTeX's main persistant data store is MongoDB (http://www.mongodb.org/)
+	# ShareLaTeX's main persistent data store is MongoDB (http://www.mongodb.org/)
 	# Documentation about the URL connection string format can be found at:
 	#
 	#    http://docs.mongodb.org/manual/reference/connection-string/
