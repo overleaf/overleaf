@@ -4,7 +4,7 @@ Contributing to ShareLaTeX
 Thank you for reading this! If you'd like to report a bug or join in the development
 of ShareLaTeX, then here are some notes on how to do that.
 
-*Note that ShareLaTeX is actually made up of many seperate repositories (a list is available
+*Note that ShareLaTeX is actually made up of many separate repositories (a list is available
 [here](https://github.com/sharelatex/sharelatex/blob/master/README.md#other-repositories)).* 
 
 Reporting bugs and opening issues
