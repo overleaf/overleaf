@@ -457,7 +457,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 					undefined
 			)
 			requestIdExpirationPeriodMs: (
-				if _saml_exiration = process.env["SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"]
+				if _saml_expiration = process.env["SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"]
 					try
 						parseIntOrFail(_saml_expiration)
 					catch e
