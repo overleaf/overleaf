@@ -75,7 +75,7 @@ settings =
 				# track-changes:lock
 				historyLock: ({doc_id}) -> "HistoryLock:#{doc_id}"
 				historyIndexLock: ({project_id}) -> "HistoryIndexLock:#{project_id}"
-				# track-chanegs:history
+				# track-changes:history
 				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
 				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
 				# realtime
