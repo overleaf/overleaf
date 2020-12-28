@@ -129,6 +129,47 @@ describe('CompileController', function () {
       })
     })
 
+    describe('with user provided fake_output.pdf', function () {
+      beforeEach(function () {
+        this.output_files = [
+          {
+            path: 'fake_output.pdf',
+            type: 'pdf',
+            build: 1234
+          },
+          {
+            path: 'output.log',
+            type: 'log',
+            build: 1234
+          }
+        ]
+        this.CompileManager.doCompileWithLock = sinon
+          .stub()
+          .callsArgWith(1, null, this.output_files)
+        this.CompileController.compile(this.req, this.res)
+      })
+
+      it('should return the JSON response with status failure', function () {
+        this.res.status.calledWith(200).should.equal(true)
+        this.res.send
+          .calledWith({
+            compile: {
+              status: 'failure',
+              error: null,
+              outputFiles: this.output_files.map((file) => {
+                return {
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  path: file.path,
+                  type: file.type,
+                  build: file.build
+                }
+              })
+            }
+          })
+          .should.equal(true)
+      })
+    })
+
     describe('with an error', function () {
       beforeEach(function () {
         this.CompileManager.doCompileWithLock = sinon

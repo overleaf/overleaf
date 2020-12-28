@@ -80,11 +80,7 @@ module.exports = CompileController = {
               let file
               status = 'failure'
               for (file of Array.from(outputFiles)) {
-                if (
-                  file.path != null
-                    ? file.path.match(/output\.pdf$/)
-                    : undefined
-                ) {
+                if (file.path === 'output.pdf') {
                   status = 'success'
                 }
               }
