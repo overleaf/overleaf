@@ -55,7 +55,7 @@ services:
       retries: 20
 
   gcs:
-    image: fsouza/fake-gcs-server
+    image: fsouza/fake-gcs-server:v1.21.2
     command: ["--port=9090", "--scheme=http"]
     healthcheck:
       test: wget --quiet --output-document=/dev/null http://localhost:9090/storage/v1/b
