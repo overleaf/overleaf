@@ -222,6 +222,17 @@ module.exports = HttpController = {
     })
   },
 
+  archiveDoc(req, res, next) {
+    const { project_id, doc_id } = req.params
+    logger.log({ project_id, doc_id }, 'archiving a doc')
+    DocArchive.archiveDocById(project_id, doc_id, function (error) {
+      if (error) {
+        return next(error)
+      }
+      res.sendStatus(204)
+    })
+  },
+
   unArchiveAllDocs(req, res, next) {
     if (next == null) {
       next = function (error) {}

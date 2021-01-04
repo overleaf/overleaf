@@ -275,6 +275,74 @@ describe('Archiving', function () {
     })
   })
 
+  describe('archiving a single doc', function () {
+    before(function (done) {
+      this.project_id = ObjectId()
+      this.timeout(1000 * 30)
+      this.doc = {
+        _id: ObjectId(),
+        lines: ['foo', 'bar'],
+        ranges: {},
+        version: 2
+      }
+      DocstoreClient.createDoc(
+        this.project_id,
+        this.doc._id,
+        this.doc.lines,
+        this.doc.version,
+        this.doc.ranges,
+        (error) => {
+          if (error) {
+            return done(error)
+          }
+          DocstoreClient.archiveDocById(
+            this.project_id,
+            this.doc._id,
+            (error, res) => {
+              this.res = res
+              if (error) {
+                return done(error)
+              }
+              done()
+            }
+          )
+        }
+      )
+    })
+
+    it('should successully archive the doc', function (done) {
+      this.res.statusCode.should.equal(204)
+      done()
+    })
+
+    it('should set inS3 and unset lines and ranges in the doc', function (done) {
+      db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
+        if (error) {
+          return done(error)
+        }
+        should.not.exist(doc.lines)
+        should.not.exist(doc.ranges)
+        doc.inS3.should.equal(true)
+        done()
+      })
+    })
+
+    it('should set the doc in s3 correctly', function (done) {
+      DocstoreClient.getS3Doc(
+        this.project_id,
+        this.doc._id,
+        (error, s3_doc) => {
+          if (error) {
+            return done(error)
+          }
+          s3_doc.lines.should.deep.equal(this.doc.lines)
+          s3_doc.ranges.should.deep.equal(this.doc.ranges)
+          done()
+        }
+      )
+    })
+  })
+
   describe('a doc with large lines', function () {
     before(function (done) {
       this.project_id = ObjectId()
