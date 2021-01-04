@@ -34,9 +34,6 @@ module.exports = MongoManager = {
   },
 
   getProjectsDocs(project_id, options, filter, callback) {
-    if (options == null) {
-      options = { include_deleted: true }
-    }
     const query = { project_id: ObjectId(project_id.toString()) }
     if (!options.include_deleted) {
       query.deleted = { $ne: true }
