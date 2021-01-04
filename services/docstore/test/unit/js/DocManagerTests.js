@@ -15,6 +15,7 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const chai = require('chai')
+chai.use(require('sinon-chai'))
 const { assert } = require('chai')
 chai.should()
 const { expect } = chai
@@ -34,6 +35,7 @@ describe('DocManager', function () {
           },
           shouldUpdateRanges: sinon.stub().returns(false)
         }),
+        'settings-sharelatex': (this.settings = { docstore: {} }),
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
           warn() {},
@@ -423,13 +425,15 @@ describe('DocManager', function () {
 
   describe('deleteDoc', function () {
     describe('when the doc exists', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
+        this.callback = sinon.stub().callsFake(done)
         this.lines = ['mock', 'doc', 'lines']
         this.rev = 77
         this.DocManager.checkDocExists = sinon
           .stub()
           .callsArgWith(2, null, true)
-        this.MongoManager.markDocAsDeleted = sinon.stub().callsArg(2)
+        this.MongoManager.markDocAsDeleted = sinon.stub().yields(null)
+        this.DocArchiveManager.archiveDocById = sinon.stub().yields(null)
         return this.DocManager.deleteDoc(
           this.project_id,
           this.doc_id,
@@ -449,8 +453,70 @@ describe('DocManager', function () {
           .should.equal(true)
       })
 
-      return it('should return the callback', function () {
+      it('should return the callback', function () {
         return this.callback.called.should.equal(true)
+      })
+
+      describe('background flush disabled', function () {
+        beforeEach(function () {
+          this.settings.docstore.archiveOnSoftDelete = false
+        })
+
+        it('should not flush the doc out of mongo', function () {
+          this.DocArchiveManager.archiveDocById.should.not.have.been.called
+        })
+      })
+
+      describe('background flush enabled', function () {
+        beforeEach(function (done) {
+          this.settings.docstore.archiveOnSoftDelete = true
+          this.callback = sinon.stub().callsFake(done)
+          this.DocManager.deleteDoc(this.project_id, this.doc_id, this.callback)
+        })
+
+        it('should not fail the delete process', function () {
+          this.callback.should.have.been.calledWith(null)
+        })
+
+        it('should flush the doc out of mongo', function () {
+          this.DocArchiveManager.archiveDocById.should.have.been.calledWith(
+            this.project_id,
+            this.doc_id
+          )
+        })
+
+        describe('when the background flush fails', function () {
+          beforeEach(function (done) {
+            this.err = new Error('foo')
+            this.DocManager.checkDocExists = sinon.stub().yields(null, true)
+            this.MongoManager.markDocAsDeleted = sinon.stub().yields(null)
+            this.DocArchiveManager.archiveDocById = sinon
+              .stub()
+              .yields(this.err)
+            this.logger.warn = sinon.stub()
+            this.callback = sinon.stub().callsFake(done)
+            this.DocManager.deleteDoc(
+              this.project_id,
+              this.doc_id,
+              this.callback
+            )
+          })
+
+          it('should log a warning', function () {
+            this.logger.warn.should.have.been.calledWith(
+              sinon.match({
+                project_id: this.project_id,
+                doc_id: this.doc_id,
+                err: this.err
+              }),
+              'archiving a single doc in the background failed'
+            )
+          })
+
+          it('should not fail the delete process', function () {
+            this.callback.should.have.been.calledWith(null)
+          })
+        })
       })
     })
 
