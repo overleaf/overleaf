@@ -23,6 +23,8 @@ const Settings = {
 
   docstore: {
     archiveOnSoftDelete: process.env.ARCHIVE_ON_SOFT_DELETE === 'true',
+    keepSoftDeletedDocsArchived:
+      process.env.KEEP_SOFT_DELETED_DOCS_ARCHIVED === 'true',
 
     backend: process.env.BACKEND || 's3',
     healthCheck: {
