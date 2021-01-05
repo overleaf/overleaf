@@ -55,7 +55,7 @@ describe('FileTree Delete Entity Flow', function() {
       const fetchMatcher = /\/project\/\w+\/doc\/\w+/
       fetchMock.delete(fetchMatcher, 204)
 
-      const modalDeleteButton = getModalDeleteButton()
+      const modalDeleteButton = await getModalDeleteButton()
       fireEvent.click(modalDeleteButton)
 
       window._ide.socket.socketClient.emit('removeEntity', '456def')
@@ -82,7 +82,7 @@ describe('FileTree Delete Entity Flow', function() {
     it('continues delete on 404s', async function() {
       fetchMock.delete(/\/project\/\w+\/doc\/\w+/, 404)
 
-      const modalDeleteButton = getModalDeleteButton()
+      const modalDeleteButton = await getModalDeleteButton()
       fireEvent.click(modalDeleteButton)
 
       window._ide.socket.socketClient.emit('removeEntity', '456def')
@@ -107,7 +107,7 @@ describe('FileTree Delete Entity Flow', function() {
       const fetchMatcher = /\/project\/\w+\/doc\/\w+/
       fetchMock.delete(fetchMatcher, 500)
 
-      const modalDeleteButton = getModalDeleteButton()
+      const modalDeleteButton = await getModalDeleteButton()
       fireEvent.click(modalDeleteButton)
 
       // The modal should still be open, but the file should not be deleted
@@ -150,7 +150,7 @@ describe('FileTree Delete Entity Flow', function() {
       const fetchMatcher = /\/project\/\w+\/(doc|file)\/\w+/
       fetchMock.delete(fetchMatcher, 204)
 
-      const modalDeleteButton = getModalDeleteButton()
+      const modalDeleteButton = await getModalDeleteButton()
       fireEvent.click(modalDeleteButton)
 
       window._ide.socket.socketClient.emit('removeEntity', '456def')
@@ -181,10 +181,7 @@ describe('FileTree Delete Entity Flow', function() {
     })
   })
 
-  function getModalDeleteButton() {
-    return screen.getAllByRole('button', {
-      name: 'Delete',
-      hidden: true // FIXME: modal should not be hidden but it has the aria-hidden label due to a react-bootstrap bug
-    })[1] // the first matched button is the toolbar button
+  async function getModalDeleteButton() {
+    return waitFor(() => screen.getByRole('button', { name: 'Delete' }))
   }
 })

@@ -5,6 +5,8 @@ import { Button, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { useRefWithAutoFocus } from '../../../../infrastructure/auto-focus'
 
+import AccessibleModal from '../../../../shared/components/accessible-modal'
+
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 
 import { DuplicateFilenameError } from '../../errors'
@@ -44,7 +46,7 @@ function FileTreeModalCreateFolder() {
   }
 
   return (
-    <Modal show={isCreatingFolder} onHide={handleHide}>
+    <AccessibleModal show={isCreatingFolder} onHide={handleHide}>
       <Modal.Header>
         <Modal.Title>{t('new_folder')}</Modal.Title>
       </Modal.Header>
@@ -95,7 +97,7 @@ function FileTreeModalCreateFolder() {
           </>
         )}
       </Modal.Footer>
-    </Modal>
+    </AccessibleModal>
   )
 }
 

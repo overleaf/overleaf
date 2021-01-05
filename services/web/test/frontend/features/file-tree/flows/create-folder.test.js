@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import React from 'react'
 import sinon from 'sinon'
-import { screen, render, fireEvent } from '@testing-library/react'
+import { screen, render, fireEvent, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import MockedSocket from 'socket.io-mock'
 
@@ -56,7 +56,7 @@ describe('FileTree Create Folder Flow', function() {
     }
     fetchMock.post(matcher, response)
 
-    fireCreateFolder(newFolderName)
+    await fireCreateFolder(newFolderName)
 
     const lastCallBody = JSON.parse(fetchMock.lastCall(matcher)[1].body)
     expect(lastCallBody.name).to.equal(newFolderName)
@@ -114,7 +114,7 @@ describe('FileTree Create Folder Flow', function() {
     }
     fetchMock.post(matcher, response)
 
-    fireCreateFolder(newFolderName)
+    await fireCreateFolder(newFolderName)
 
     const lastCallBody = JSON.parse(fetchMock.lastCall(matcher)[1].body)
     expect(lastCallBody.name).to.equal(newFolderName)
@@ -178,7 +178,7 @@ describe('FileTree Create Folder Flow', function() {
     }
     fetchMock.post(matcher, response)
 
-    fireCreateFolder(newFolderName)
+    await fireCreateFolder(newFolderName)
 
     const lastCallBody = JSON.parse(fetchMock.lastCall(matcher)[1].body)
     expect(lastCallBody.name).to.equal(newFolderName)
@@ -239,7 +239,7 @@ describe('FileTree Create Folder Flow', function() {
     })
   })
 
-  function fireCreateFolder(name) {
+  async function fireCreateFolder(name) {
     const createFolderButton = screen.getByRole('button', {
       name: 'New Folder'
     })
@@ -247,14 +247,12 @@ describe('FileTree Create Folder Flow', function() {
 
     setFolderName(name)
 
-    const modalCreateButton = getModalCreateButton()
+    const modalCreateButton = await getModalCreateButton()
     fireEvent.click(modalCreateButton)
   }
 
   function setFolderName(name) {
-    const input = screen.getByRole('textbox', {
-      hidden: true // FIXME: modal should not be hidden but it has the aria-hidden label due to a react-bootstrap bug
-    })
+    const input = screen.getByRole('textbox')
     fireEvent.change(input, { target: { value: name } })
   }
 
@@ -264,10 +262,7 @@ describe('FileTree Create Folder Flow', function() {
       .replace(/0\./, 'random-test-id-')
   }
 
-  function getModalCreateButton() {
-    return screen.getAllByRole('button', {
-      name: 'Create',
-      hidden: true // FIXME: modal should not be hidden but it has the aria-hidden label due to a react-bootstrap bug
-    })[0] // the first matched button is the toolbar button
+  async function getModalCreateButton() {
+    return waitFor(() => screen.getByRole('button', { name: 'Create' }))
   }
 })
