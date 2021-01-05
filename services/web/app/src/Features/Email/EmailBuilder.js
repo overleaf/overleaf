@@ -225,17 +225,13 @@ templates.confirmEmail = ctaTemplate({
   },
   message(opts) {
     return [
-      `Please confirm that you have added a new email, ${opts.to}, to your ${
-        settings.appName
-      } account.`
+      `Please confirm that you have added a new email, ${opts.to}, to your ${settings.appName} account.`
     ]
   },
   secondaryMessage() {
     return [
       'If you did not request this, you can simply ignore this message.',
-      `If you have any questions or trouble confirming your email address, please get in touch with our support team at ${
-        settings.adminEmail
-      }.`
+      `If you have any questions or trouble confirming your email address, please get in touch with our support team at ${settings.adminEmail}.`
     ]
   },
   ctaText() {
