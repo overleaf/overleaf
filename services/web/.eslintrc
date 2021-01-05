@@ -39,31 +39,30 @@
     }
   },
   "rules": {
+    // Swap the no-unused-expressions rule with a more chai-friendly one
+    "no-unused-expressions": "off",
+    "chai-friendly/no-unused-expressions": "error",
+
+    // Disable some rules after upgrading ESLint
+    // TODO: re-enable and fix
+    "no-prototype-builtins": "off",
+    "no-var": "off",
+    "prefer-const": "off",
+    "prefer-regex-literals": "off",
+    "array-callback-return": "off",
+    "no-unreachable-loop": "off",
+    "no-loss-of-precision": "off",
+
     "node/no-callback-literal": "off",
     "node/no-deprecated-api": "off",
     "node/handle-callback-err": "off",
     "node/no-path-concat": "off",
-    "no-prototype-builtins": "off",
-    // Swap the no-unused-expressions rule with a more chai-friendly one
-    "no-unused-expressions": "off",
-    "no-unused-vars": "off",
-    "no-var": "off",
-    "prefer-const": "off",
-    "prefer-regex-literals": "off",
-    "react/jsx-curly-brace-presence": ["error", {
-      "props": "never",
-      "children": "never"
-    }],
+
     "react/display-name": "off",
     "react/no-unescaped-entities": "off",
     "react/no-unused-prop-types": "off",
     "react/jsx-no-target-blank": "off",
-    "react/jsx-handler-names": "off",
-    "array-callback-return": "off",
-    "no-empty": "off",
-    "no-unreachable-loop": "off",
-    "no-loss-of-precision": "off",
-    "chai-friendly/no-unused-expressions": "error"
+    "react/jsx-handler-names": "off"
   },
   "overrides": [
     // NOTE: changing paths may require updating them in the Makefile too.
@@ -127,6 +126,12 @@
       "rules": {
         // Prevent usage of legacy string refs
         "react/no-string-refs": "error",
+
+        // Prevent curly braces around strings (as they're unnecessary)
+        "react/jsx-curly-brace-presence": ["error", {
+          "props": "never",
+          "children": "never"
+        }],
 
         // Fix conflict between prettier & standard by overriding to prefer
         // double quotes
