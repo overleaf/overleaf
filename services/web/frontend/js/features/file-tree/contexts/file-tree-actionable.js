@@ -248,10 +248,11 @@ export function useFileTreeActionable() {
   }
 
   function startUploadingDocOrFile() {
-    const selectedEntityId = Array.from(selectedEntityIds)[0]
-    const found = findInTreeOrThrow(fileTreeData, selectedEntityId)
-    const parentFolderId =
-      found.type === 'folder' ? found.entity._id : found.parentFolderId
+    const parentFolderId = getSelectedParentFolderId(
+      fileTreeData,
+      selectedEntityIds
+    )
+
     window.dispatchEvent(
       new CustomEvent('FileTreeReactBridge.openNewDocModal', {
         detail: {
