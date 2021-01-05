@@ -3,6 +3,7 @@
 // - set the JSON content-type in the request headers
 // - throw errors on non-ok response
 // - parse JSON response body, unless response is empty
+const OError = require('@overleaf/o-error')
 
 export function getJSON(path, options) {
   return fetchJSON(path, { ...options, method: 'GET' })
@@ -25,7 +26,8 @@ export default function fetchJSON(
     headers: {
       ...headers,
       'Content-Type': 'application/json',
-      'X-Csrf-Token': window.csrfToken
+      'X-Csrf-Token': window.csrfToken,
+      Accept: 'application/json'
     },
     method
   }
@@ -35,14 +37,36 @@ export default function fetchJSON(
   }
 
   return fetch(path, options)
-    .then(response => {
-      if (!response.ok) throw new Error(response.status)
+    .then(parseResponseBody)
+    .then(({ responseBody, response }) => {
+      if (!response.ok) {
+        throw new OError(response.statusText, {
+          statusCode: response.status,
+          responseBody,
+          response
+        })
+      }
 
-      // get the response as text first as .json() fails on empty responses.
-      // (e.g. 204 responses)
-      return response.text()
+      return responseBody
     })
-    .then(responseText => {
-      return responseText ? JSON.parse(responseText) : responseText
+}
+
+function parseResponseBody(response) {
+  const contentType = response.headers.get('Content-Type')
+  if (/application\/json/.test(contentType)) {
+    return response.json().then(json => {
+      return { responseBody: json, response }
     })
+  } else if (
+    /text\/plain/.test(contentType) ||
+    /text\/html/.test(contentType)
+  ) {
+    return response.text().then(text => {
+      return { responseBody: { message: text }, response }
+    })
+  } else {
+    // response body ignored as content-type is either not set (e.g. 204
+    // responses) or unsupported
+    return Promise.resolve({ responseBody: {}, response })
+  }
 }

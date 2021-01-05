@@ -174,7 +174,7 @@ export function useFileTreeActionable() {
       return syncDelete(projectId, found.type, found.entity._id).catch(
         error => {
           // throw unless 404
-          if (error.message !== '404') {
+          if (error.info.statusCode !== '404') {
             throw error
           }
         }
@@ -281,7 +281,7 @@ export function useFileTreeActionable() {
           new CustomEvent('FileTreeReactBridge.openNewFileModal', {
             detail: {
               error: true,
-              data: error.message
+              data: error.info.responseBody
             }
           })
         )
