@@ -50,6 +50,7 @@ function PreviewLogsPane({
       key={idx}
       headerTitle={logEntry.message}
       rawContent={logEntry.content}
+      logType={logEntry.type}
       formattedContent={logEntry.humanReadableHintComponent}
       extraInfoURL={logEntry.extraInfoURL}
       level={logEntry.level}

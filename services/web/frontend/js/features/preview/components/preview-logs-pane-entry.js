@@ -10,6 +10,7 @@ import Icon from '../../../shared/components/icon'
 function PreviewLogsPaneEntry({
   headerTitle,
   rawContent,
+  logType,
   formattedContent,
   extraInfoURL,
   level,
@@ -34,6 +35,7 @@ function PreviewLogsPaneEntry({
         level={level}
         sourceLocation={sourceLocation}
         headerTitle={headerTitle}
+        logType={logType}
         showSourceLocationLink={showSourceLocationLink}
         onSourceLocationClick={handleLogEntryLinkClick}
         showCloseButton={showCloseButton}
@@ -54,6 +56,7 @@ function PreviewLogEntryHeader({
   sourceLocation,
   level,
   headerTitle,
+  logType,
   showSourceLocationLink = true,
   showCloseButton = false,
   onSourceLocationClick,
@@ -130,9 +133,11 @@ function PreviewLogEntryHeader({
     </Tooltip>
   ) : null
 
+  var headerTitleText = logType ? `${logType} ${headerTitle}` : headerTitle
+
   return (
     <header className={logEntryHeaderClasses}>
-      <h3 className="log-entry-header-title">{headerTitle}</h3>
+      <h3 className="log-entry-header-title">{headerTitleText}</h3>
       {showLocationTooltip ? (
         <OverlayTrigger placement="left" overlay={locationTooltip}>
           {locationLink}
@@ -230,6 +235,7 @@ PreviewLogEntryHeader.propTypes = {
   }),
   level: PropTypes.string.isRequired,
   headerTitle: PropTypes.string,
+  logType: PropTypes.string,
   showSourceLocationLink: PropTypes.bool,
   showCloseButton: PropTypes.bool,
   onSourceLocationClick: PropTypes.func,
@@ -246,6 +252,7 @@ PreviewLogsPaneEntry.propTypes = {
   sourceLocation: PreviewLogEntryHeader.propTypes.sourceLocation,
   headerTitle: PropTypes.string,
   rawContent: PropTypes.string,
+  logType: PropTypes.string,
   formattedContent: PropTypes.node,
   extraInfoURL: PropTypes.string,
   level: PropTypes.oneOf(['error', 'warning', 'typesetting', 'raw']).isRequired,
