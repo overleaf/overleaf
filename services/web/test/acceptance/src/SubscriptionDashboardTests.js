@@ -429,7 +429,7 @@ describe('Subscriptions', function() {
           subscription: {},
           subscription_status: {}
         })
-        MockV1Api.setAffiliations([
+        MockV1Api.setAffiliations(this.user._id, [
           {
             email: 'confirmed-affiliation-email@stanford.example.edu',
             licence: 'pro_plus',

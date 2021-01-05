@@ -162,7 +162,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
 
     it('should not set their features if email is not confirmed', function(done) {
-      MockV1Api.setAffiliations([this.affiliationData])
+      MockV1Api.setAffiliations(this.user._id, [this.affiliationData])
       return syncUserAndGetFeatures(this.user, (error, features) => {
         expect(features).to.deep.equal(settings.defaultFeatures)
         return done()
@@ -170,7 +170,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
 
     it('should set their features if email is confirmed', function(done) {
-      MockV1Api.setAffiliations([this.affiliationData])
+      MockV1Api.setAffiliations(this.user._id, [this.affiliationData])
       return this.user.confirmEmail(this.email, error => {
         return syncUserAndGetFeatures(this.user, (error, features) => {
           expect(features).to.deep.equal(this.institutionPlan.features)
@@ -181,7 +181,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
 
     it('should not set their features if institution is not confirmed', function(done) {
       this.affiliationData.institution.confirmed = false
-      MockV1Api.setAffiliations([this.affiliationData])
+      MockV1Api.setAffiliations(this.user._id, [this.affiliationData])
       return this.user.confirmEmail(this.email, error => {
         return syncUserAndGetFeatures(this.user, (error, features) => {
           expect(features).to.deep.equal(settings.defaultFeatures)

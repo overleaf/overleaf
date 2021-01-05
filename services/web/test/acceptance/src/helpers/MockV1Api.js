@@ -19,21 +19,38 @@ const bodyParser = require('body-parser')
 const sinon = require('sinon')
 
 app.use(bodyParser.json())
-
-let v1Id = 1000
+const blocklistedDomains = []
 
 module.exports = MockV1Api = {
-  nextV1Id() {
-    return v1Id++
+  reset() {
+    this.affiliations = []
+    this.exportId = null
+    this.v1Id = 1000
+    this.users = {}
+    this.docInfo = {}
+    this.existingEmails = []
+    this.brands = {}
+    this.brand_variations = {}
+    this.validation_clients = {}
+    this.doc_exported = {}
+    this.templates = {}
+    this.institutionId = 1000
+    this.institutions = {}
+    this.allInstitutionDomains = new Set()
+    this.institutionDomains = {}
   },
 
-  users: {},
+  nextInstitutionId() {
+    return this.institutionId++
+  },
+
+  nextV1Id() {
+    return this.v1Id++
+  },
 
   setUser(id, user) {
     return (this.users[id] = user)
   },
-
-  docInfo: {},
 
   getDocInfo(token) {
     return this.docInfo[token] || null
@@ -42,8 +59,6 @@ module.exports = MockV1Api = {
   setDocInfo(token, info) {
     this.docInfo[token] = info
   },
-
-  exportId: null,
 
   exportParams: null,
 
@@ -61,29 +76,58 @@ module.exports = MockV1Api = {
 
   syncUserFeatures: sinon.stub(),
 
-  affiliations: [],
-
   updateEmail: sinon.stub(),
 
-  existingEmails: [],
-
-  brands: {},
-
-  brand_variations: {},
-
-  validation_clients: {},
-
-  setAffiliations(affiliations) {
-    return (this.affiliations = affiliations)
+  createInstitution(options = {}) {
+    const id = options.university_id || this.nextInstitutionId()
+    options.id = id // include ID so that it is included in APIs
+    this.institutions[id] = { ...options }
+    if (options && options.hostname) {
+      this.addInstitutionDomain(id, options.hostname)
+    }
+    return id
   },
 
-  doc_exported: {},
+  addInstitutionDomain(id, domain) {
+    if (this.allInstitutionDomains.has(domain)) return
+    if (!this.institutionDomains[id]) this.institutionDomains[id] = new Set()
+    this.institutionDomains[id].add(domain)
+    this.allInstitutionDomains.add(domain)
+  },
+
+  updateInstitution(id, options) {
+    Object.assign(this.institutions[id], options)
+  },
+
+  addAffiliation(userId, email) {
+    let institution
+    if (!email) return
+
+    const domain = email.split('@').pop()
+
+    if (blocklistedDomains.indexOf(domain.replace('.com', '')) !== -1) return
+
+    if (this.allInstitutionDomains.has(domain)) {
+      for (const [id, domainSet] of Object.entries(this.institutionDomains)) {
+        if (domainSet.has(domain)) {
+          institution = this.institutions[id]
+        }
+      }
+    }
+
+    if (institution) {
+      if (!this.affiliations[userId]) this.affiliations[userId] = []
+      this.affiliations[userId].push({ email, institution })
+    }
+  },
+
+  setAffiliations(userId, affiliations) {
+    this.affiliations[userId] = affiliations
+  },
 
   setDocExported(token, info) {
     return (this.doc_exported[token] = info)
   },
-
-  templates: {},
 
   setTemplates(templates) {
     this.templates = templates
@@ -150,10 +194,11 @@ module.exports = MockV1Api = {
     })
 
     app.get('/api/v2/users/:userId/affiliations', (req, res, next) => {
-      return res.json(this.affiliations)
+      return res.json(this.affiliations[req.params.userId] || [])
     })
 
     app.post('/api/v2/users/:userId/affiliations', (req, res, next) => {
+      this.addAffiliation(req.params.userId, req.body.email)
       return res.sendStatus(201)
     })
 
@@ -287,6 +332,7 @@ module.exports = MockV1Api = {
   }
 }
 
+MockV1Api.reset()
 MockV1Api.run()
 
 function __guard__(value, transform) {
