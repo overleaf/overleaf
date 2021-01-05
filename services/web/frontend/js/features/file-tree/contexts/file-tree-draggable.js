@@ -14,7 +14,44 @@ import { useFileTreeActionable } from './file-tree-actionable'
 import { useFileTreeMutable } from './file-tree-mutable'
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
 
-const DndContext = createDndContext(HTML5Backend)
+// HACK ALERT
+// DnD binds drag and drop events on window and stop propagation if the dragged
+// item is not a DnD element. This break other drag and drop interfaces; in
+// particular in rich text.
+// This is a hacky workaround to avoid calling the DnD listeners when the
+// draggable or droppable element is not within a `dnd-container` element.
+const ModifiedBackend = (...args) => {
+  function isDndChild(elt) {
+    if (elt.getAttribute && elt.getAttribute('dnd-container')) return true
+    if (!elt.parentNode) return false
+    return isDndChild(elt.parentNode)
+  }
+  const instance = new HTML5Backend(...args)
+
+  const dragDropListeners = [
+    'handleTopDragStart',
+    'handleTopDragStartCapture',
+    'handleTopDragEndCapture',
+    'handleTopDragEnter',
+    'handleTopDragEnterCapture',
+    'handleTopDragLeaveCapture',
+    'handleTopDragOver',
+    'handleTopDragOverCapture',
+    'handleTopDrop',
+    'handleTopDropCapture'
+  ]
+
+  dragDropListeners.forEach(dragDropListener => {
+    const originalListener = instance[dragDropListener]
+    instance[dragDropListener] = (ev, ...extraArgs) => {
+      if (isDndChild(ev.target)) originalListener(ev, ...extraArgs)
+    }
+  })
+
+  return instance
+}
+
+const DndContext = createDndContext(ModifiedBackend)
 
 const DRAGGABLE_TYPE = 'ENTITY'
 
