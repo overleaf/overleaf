@@ -46,8 +46,8 @@ App.controller('ReactFileTreeController', function(
       const type =
         selectedEntity.type === 'fileRef' ? 'file' : selectedEntity.type
       $scope.$emit('entity:selected', {
+        ...selectedEntity.entity,
         id: selectedEntity.entity._id,
-        name: selectedEntity.entity.name,
         type
       })
 
