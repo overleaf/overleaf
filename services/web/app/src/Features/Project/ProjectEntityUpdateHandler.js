@@ -1643,7 +1643,8 @@ const ProjectEntityUpdateHandler = {
                     folder._id,
                     fileRef,
                     'convertDocToFile',
-                    null
+                    null,
+                    userId
                   )
                   callback(null, fileRef)
                 }

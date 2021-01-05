@@ -154,12 +154,17 @@ export function useSelectableEntity(id) {
 export function useFileTreeSelectable() {
   const { selectedEntityIds, dispatch } = useContext(FileTreeSelectableContext)
 
+  function select(id) {
+    dispatch({ type: ACTION_TYPES.SELECT, id })
+  }
+
   function unselect(id) {
     dispatch({ type: ACTION_TYPES.UNSELECT, id })
   }
 
   return {
     selectedEntityIds,
+    select,
     unselect
   }
 }

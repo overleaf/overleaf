@@ -80,7 +80,8 @@ const EditorController = {
           'reciveNewDoc',
           folder_id,
           doc,
-          source
+          source,
+          user_id
         )
         return callback(err, doc)
       }
@@ -124,7 +125,8 @@ const EditorController = {
           folder_id,
           fileRef,
           source,
-          linkedFileData
+          linkedFileData,
+          user_id
         )
         return callback(err, fileRef)
       }
@@ -157,7 +159,8 @@ const EditorController = {
             'reciveNewDoc',
             folder_id,
             doc,
-            source
+            source,
+            user_id
           )
         }
         return callback(err, doc)
@@ -205,7 +208,8 @@ const EditorController = {
           folder_id,
           newFile,
           source,
-          linkedFileData
+          linkedFileData,
+          user_id
         )
         return callback(null, newFile)
       }
@@ -243,7 +247,8 @@ const EditorController = {
                 'reciveNewDoc',
                 lastFolder._id,
                 doc,
-                source
+                source,
+                user_id
               )
             }
             return callback()
@@ -295,7 +300,8 @@ const EditorController = {
               lastFolder._id,
               newFile,
               source,
-              linkedFileData
+              linkedFileData,
+              user_id
             )
             return callback()
           }
@@ -304,7 +310,7 @@ const EditorController = {
     )
   },
 
-  addFolder(project_id, folder_id, folderName, source, callback) {
+  addFolder(project_id, folder_id, folderName, source, userId, callback) {
     if (callback == null) {
       callback = function(error, folder) {}
     }
@@ -328,6 +334,7 @@ const EditorController = {
           project_id,
           folder_id,
           folder,
+          userId,
           function(err) {
             if (err != null) {
               return callback(err)
@@ -677,13 +684,20 @@ const EditorController = {
           project_id,
           folder.parentFolder_id,
           folder,
+          null,
           cb
         ),
       callback
     )
   },
 
-  _notifyProjectUsersOfNewFolder(project_id, folder_id, folder, callback) {
+  _notifyProjectUsersOfNewFolder(
+    project_id,
+    folder_id,
+    folder,
+    userId,
+    callback
+  ) {
     if (callback == null) {
       callback = function(error) {}
     }
@@ -691,7 +705,8 @@ const EditorController = {
       project_id,
       'reciveNewFolder',
       folder_id,
-      folder
+      folder,
+      userId
     )
     return callback()
   }

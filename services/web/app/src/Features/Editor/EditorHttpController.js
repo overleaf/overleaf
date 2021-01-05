@@ -170,6 +170,7 @@ async function addFolder(req, res, next) {
   const projectId = req.params.Project_id
   const { name } = req.body
   const parentFolderId = req.body.parent_folder_id
+  const userId = AuthenticationController.getLoggedInUserId(req)
   if (!_nameIsAcceptableLength(name)) {
     return res.sendStatus(400)
   }
@@ -178,7 +179,8 @@ async function addFolder(req, res, next) {
       projectId,
       parentFolderId,
       name,
-      'editor'
+      'editor',
+      userId
     )
     res.json(doc)
   } catch (err) {
