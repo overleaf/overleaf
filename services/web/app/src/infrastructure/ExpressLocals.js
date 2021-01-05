@@ -148,12 +148,8 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       }
     }
 
-    function _buildCssFileName(themeModifier) {
-      return `${Settings.brandPrefix}${themeModifier || ''}style.css`
-    }
-
-    res.locals.buildCssPath = function(themeModifier) {
-      const cssFileName = _buildCssFileName(themeModifier)
+    res.locals.buildCssPath = function(themeModifier = '') {
+      const cssFileName = `${themeModifier}style.css`
 
       let path
       if (IS_DEV_ENV) {
