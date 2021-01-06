@@ -34,13 +34,20 @@ aside#left-menu.full-size(
 	span(ng-show="!anonymous")
 		h4 #{translate("actions")}
 		ul.list-unstyled.nav
-			li(ng-controller="CloneProjectController")
+			li(ng-controller="LeftMenuCloneProjectModalController")
 				a(
 					href,
 					ng-click="openCloneProjectModal()"
 				)
 					i.fa.fa-fw.fa-copy
 					| &nbsp;&nbsp; #{translate("copy_project")}
+
+				clone-project-modal(
+					handle-hide="handleHide"
+					project-id="projectId"
+					project-name="projectName"
+					show="show"
+				)
 
 			!= moduleIncludes("editorLeftMenu:actions", locals)
 			li(ng-controller="WordCountController")
@@ -226,35 +233,6 @@ aside#left-menu.full-size(
 	ng-click="ui.leftMenuShown = false"
 	ng-cloak
 )
-
-script(type='text/ng-template', id='cloneProjectModalTemplate')
-	.modal-header
-		h3 #{translate("copy_project")}
-	.modal-body
-		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
-		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
-		form(name="cloneProjectForm", novalidate)
-			.form-group
-				label #{translate("new_name")}
-				input.form-control(
-					type="text",
-					placeholder="New Project Name",
-					required,
-					ng-model="inputs.projectName",
-					on-enter="clone()",
-					focus-on="open"
-				)
-	.modal-footer
-		button.btn.btn-default(
-			ng-disabled="state.inflight"
-			ng-click="cancel()"
-		) #{translate("cancel")}
-		button.btn.btn-primary(
-			ng-disabled="cloneProjectForm.$invalid || state.inflight"
-			ng-click="clone()"
-		)
-			span(ng-hide="state.inflight") #{translate("copy")}
-			span(ng-show="state.inflight") #{translate("copying")}…
 
 script(type='text/ng-template', id='wordCountModalTemplate')
 	.modal-header
