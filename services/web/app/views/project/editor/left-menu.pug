@@ -30,7 +30,7 @@ aside#left-menu.full-size(
 				i.fa.fa-file-pdf-o.fa-2x
 				br
 				| PDF
-				
+
 	span(ng-show="!anonymous")
 		h4 #{translate("actions")}
 		ul.list-unstyled.nav
@@ -50,13 +50,20 @@ aside#left-menu.full-size(
 				)
 
 			!= moduleIncludes("editorLeftMenu:actions", locals)
-			li(ng-controller="WordCountController")
-				a(href, ng-if="pdf.url" ,ng-click="openWordCountModal()")
+			li(ng-controller="WordCountModalController")
+				a(href, ng-if="pdf.url", ng-click="openWordCountModal()")
 					i.fa.fa-fw.fa-eye
 					span &nbsp;&nbsp; #{translate("word_count")}
-				a.link-disabled(href, ng-if="!pdf.url" , tooltip=translate('please_compile_pdf_before_word_count'))
+				a.link-disabled(href, ng-if="!pdf.url", tooltip=translate('please_compile_pdf_before_word_count'))
 					i.fa.fa-fw.fa-eye
 					span.link-disabled &nbsp;&nbsp; #{translate("word_count")}
+
+				word-count-modal(
+					clsi-server-id="clsiServerId"
+					handle-hide="handleHide"
+					project-id="projectId"
+					show="show"
+				)
 
 	if (moduleIncludesAvailable("editorLeftMenu:sync"))
 		div(ng-show="!anonymous")
@@ -234,14 +241,43 @@ aside#left-menu.full-size(
 	ng-cloak
 )
 
+script(type='text/ng-template', id='cloneProjectModalTemplate')
+	.modal-header
+		h3 #{translate("copy_project")}
+	.modal-body
+		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}}
+		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
+		form(name="cloneProjectForm", novalidate)
+			.form-group
+				label #{translate("new_name")}
+				input.form-control(
+					type="text",
+					placeholder="New Project Name",
+					required,
+					ng-model="inputs.projectName",
+					on-enter="clone()",
+					focus-on="open"
+				)
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="state.inflight"
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-disabled="cloneProjectForm.$invalid || state.inflight"
+			ng-click="clone()"
+		)
+			span(ng-hide="state.inflight") #{translate("copy")}
+			span(ng-show="state.inflight") #{translate("copying")}…
+
 script(type='text/ng-template', id='wordCountModalTemplate')
 	.modal-header
 		h3 #{translate("word_count")}
 	.modal-body
 		div(ng-if="status.loading")
 			.loading(ng-show="!status.error && status.loading")
-				i.fa.fa-refresh.fa-spin.fa-fw 
-				span &nbsp; #{translate("loading")}…  
+				i.fa.fa-refresh.fa-spin.fa-fw
+				span &nbsp; #{translate("loading")}…
 			div.pdf-disabled(
 				ng-if="!pdf.url"
 				tooltip=translate('please_compile_pdf_before_word_count')
@@ -257,16 +293,16 @@ script(type='text/ng-template', id='wordCountModalTemplate')
 					.col-xs-4
 						.pull-right #{translate("total_words")} :
 					.col-xs-6 {{data.textWords}}
-				.row 
+				.row
 					.col-xs-4
 						.pull-right #{translate("headers")} :
 					.col-xs-6 {{data.headers}}
-				.row 
-					.col-xs-4 
+				.row
+					.col-xs-4
 						.pull-right #{translate("math_inline")} :
 					.col-xs-6 {{data.mathInline}}
-				.row 
-					.col-xs-4 
+				.row
+					.col-xs-4
 						.pull-right #{translate("math_display")} :
 					.col-xs-6 {{data.mathDisplay}}
 	.modal-footer

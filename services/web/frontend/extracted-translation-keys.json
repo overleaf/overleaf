@@ -112,5 +112,12 @@
   "duplicate_file",
   "error",
   "invalid_file_name",
-  "ok"
+  "ok",
+  "refresh",
+  "word_count",
+  "total_words",
+  "headers",
+  "math_inline",
+  "math_display",
+  "done"
 ]
