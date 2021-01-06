@@ -216,7 +216,7 @@
     "mocha": "^6.2.2",
     "mock-fs": "^4.11.0",
     "node-fetch": "^2.6.1",
-    "nodemon": "^1.14.3",
+    "nodemon": "^2.0.6",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "postcss-loader": "^3.0.0",
     "prettier": "^1.19.1",

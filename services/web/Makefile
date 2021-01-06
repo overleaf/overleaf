@@ -162,7 +162,9 @@ WITH_NODE_MODULES_PATH = \
 	format_frontend \
 	format_misc \
 	format_styles \
-	format_test \
+	format_test_app_unit \
+	format_test_app_rest \
+	format_test_modules \
 	$(TEST_SUITES) \
 
 $(WITH_NODE_MODULES_PATH): export PATH=$(NODE_MODULES_PATH)
@@ -191,9 +193,23 @@ format_styles:
 		--list-different
 
 format: format_test
-format_test:
+format_test: format_test_app
+format_test_app: format_test_app_unit
+format_test_app_unit:
+	eslint \
+		'test/unit/**/*.js' \
+		--max-warnings=0
+
+format_test_app: format_test_app_rest
+format_test_app_rest:
 	eslint \
 		'test/**/*.js' \
+		--ignore-pattern 'test/unit/**/*.js' \
+		--max-warnings=0
+
+format_test: format_test_modules
+format_test_modules:
+	eslint \
 		'modules/*/test/**/*.js' \
 		--max-warnings=0
 
@@ -201,14 +217,14 @@ format: format_misc
 # migrations, scripts, webpack config, karma config
 format_misc:
 	eslint . \
-		--ignore app.js \
-		--ignore 'app/**/*.js' \
-		--ignore 'modules/*/app/**/*.js' \
-		--ignore 'modules/*/index.js' \
-		--ignore 'frontend/**/*.js' \
-		--ignore 'modules/*/frontend/**/*.js' \
-		--ignore 'test/**/*.js' \
-		--ignore 'modules/*/test/**/*.js' \
+		--ignore-pattern app.js \
+		--ignore-pattern 'app/**/*.js' \
+		--ignore-pattern 'modules/*/app/**/*.js' \
+		--ignore-pattern 'modules/*/index.js' \
+		--ignore-pattern 'frontend/**/*.js' \
+		--ignore-pattern 'modules/*/frontend/**/*.js' \
+		--ignore-pattern 'test/**/*.js' \
+		--ignore-pattern 'modules/*/test/**/*.js' \
 		--max-warnings=0
 
 format_in_docker:
