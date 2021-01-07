@@ -82,16 +82,63 @@ const GLOBAL_TIMEOUT = TIMEOUT
 // REPORT_EVERY specifies how often we send events/report errors.
 const REPORT_EVERY = 60 * 1000
 
+const SCOPE_LOCAL = 'ShareJsDoc'
+const SCOPE_GLOBAL = 'global'
+
+class Reporter {
+  constructor(onTimeoutHandler) {
+    this._onTimeoutHandler = onTimeoutHandler
+    this._lastReport = undefined
+    this._queue = []
+  }
+
+  _getMetaPreferLocal() {
+    for (const meta of this._queue) {
+      if (meta.scope === SCOPE_LOCAL) {
+        return meta
+      }
+    }
+    return this._queue.pop()
+  }
+
+  onTimeout(meta) {
+    // Collect all 'meta's for this update.
+    // global arrive before local ones, but we are eager to report local ones.
+    this._queue.push(meta)
+
+    setTimeout(() => {
+      // Another handler processed the 'meta' entry already
+      if (!this._queue.length) return
+
+      const maybeLocalMeta = this._getMetaPreferLocal()
+
+      // Discard other, newly arrived 'meta's
+      this._queue.length = 0
+
+      const now = Date.now()
+      // Do not flood the server with losing-edits events
+      const reportedRecently = now - this._lastReport < REPORT_EVERY
+      if (!reportedRecently) {
+        this._lastReport = now
+        this._onTimeoutHandler(maybeLocalMeta)
+      }
+    })
+  }
+}
+
 export default class EditorWatchdogManager {
   constructor({ parent, onTimeoutHandler }) {
+    this.scope = parent ? SCOPE_LOCAL : SCOPE_GLOBAL
     this.timeout = parent ? TIMEOUT : GLOBAL_TIMEOUT
     this.parent = parent
-    this.onTimeoutHandler =
-      onTimeoutHandler || (parent && parent.onTimeoutHandler)
+    if (parent) {
+      this.reporter = parent.reporter
+    } else {
+      this.reporter = new Reporter(onTimeoutHandler)
+    }
 
     this.lastAck = null
     this.lastUnackedEdit = null
-    this.lastReport = null
   }
 
   onAck() {
@@ -120,46 +167,19 @@ export default class EditorWatchdogManager {
     const delay = now - this.lastUnackedEdit
     if (delay > this.timeout) {
       const timeOrigin = Date.now() - now
-      const scope = this.parent ? 'ShareJsDoc' : 'global'
+      const scope = this.scope
       const lastAck = new Date(this.lastAck ? timeOrigin + this.lastAck : 0)
       const lastUnackedEdit = new Date(timeOrigin + this.lastUnackedEdit)
       const meta = { scope, delay, lastAck, lastUnackedEdit }
       this._log('timedOut', meta)
-
-      // do not flood the server with losing-edits events
-      const reportedRecently = now - this.lastReport < REPORT_EVERY
-      if (!reportedRecently) {
-        this.lastReport = now
-        if (this.parent) {
-          // report this timeout once from the lowest level
-          this.parent.lastReport = this.lastReport
-        }
-        this.onTimeoutHandler(meta)
-      }
+      this.reporter.onTimeout(meta)
     }
   }
 
   attachToEditor(editorName, editor) {
-    const onChangeFn = change => {
+    const onChange = change => {
       // Ignore remote changes.
       if (change.origin !== 'remote') this.onEdit()
-    }
-    let onChange
-    if (!this.parent) {
-      // Change events are processed in sequence, starting with the listener
-      //  that attaches first.
-      // The global watchdog attaches before the local one does.
-      // We want to report bottom up in any case (ShareJs -> global), not just
-      //  for continuous edits (which the different timeouts achieved), but
-      //  also for delayed edits: a user leaves their desk, comes back after
-      //  10min and edits again.
-      // The global watchdog would see the edit first, potentially reporting a
-      //  missed ack attributed to a missing ShareJsDoc -- even tho a doc is
-      //  still active and listening for edits.
-      // Delay the run of the global handler into the next event loop cycle.
-      onChange = change => setTimeout(onChangeFn, 0, change)
-    } else {
-      onChange = onChangeFn
     }
     this._log('attach to editor', editorName)
     editor.on('change', onChange)
@@ -172,7 +192,6 @@ export default class EditorWatchdogManager {
   }
 
   _log() {
-    const scope = this.parent ? 'ShareJsDoc' : 'global'
-    sl_console.log(`[EditorWatchdogManager] ${scope}:`, ...arguments)
+    sl_console.log(`[EditorWatchdogManager] ${this.scope}:`, ...arguments)
   }
 }
