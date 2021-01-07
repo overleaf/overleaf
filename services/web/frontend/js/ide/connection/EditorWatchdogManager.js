@@ -177,9 +177,21 @@ export default class EditorWatchdogManager {
   }
 
   attachToEditor(editorName, editor) {
-    const onChange = change => {
-      // Ignore remote changes.
-      if (change.origin !== 'remote') this.onEdit()
+    let onChange
+    if (editorName === 'CM') {
+      // CM is passing the CM instance as first parameter, then the change.
+      onChange = (editor, change) => {
+        // Ignore remote changes.
+        if (change.origin === 'remote') return
+        this.onEdit()
+      }
+    } else {
+      // ACE is passing the change object as first parameter.
+      onChange = change => {
+        // Ignore remote changes.
+        if (change.origin === 'remote') return
+        this.onEdit()
+      }
     }
     this._log('attach to editor', editorName)
     editor.on('change', onChange)
