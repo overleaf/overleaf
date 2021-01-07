@@ -16,7 +16,7 @@ function FileTreeContext({
   projectId,
   rootFolder,
   hasWritePermissions,
-  initialSelectedEntityId,
+  rootDocId,
   onSelect,
   children
 }) {
@@ -29,7 +29,7 @@ function FileTreeContext({
         <FileTreeMutableProvider rootFolder={rootFolder}>
           <FileTreeSelectableProvider
             hasWritePermissions={hasWritePermissions}
-            initialSelectedEntityId={initialSelectedEntityId}
+            rootDocId={rootDocId}
             onSelect={onSelect}
           >
             <FileTreeDraggableProvider>{children}</FileTreeDraggableProvider>
@@ -44,7 +44,7 @@ FileTreeContext.propTypes = {
   projectId: PropTypes.string.isRequired,
   rootFolder: PropTypes.array.isRequired,
   hasWritePermissions: PropTypes.bool.isRequired,
-  initialSelectedEntityId: PropTypes.string,
+  rootDocId: PropTypes.string,
   onSelect: PropTypes.func.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),

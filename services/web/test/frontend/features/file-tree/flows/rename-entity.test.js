@@ -89,8 +89,8 @@ describe('FileTree Rename Entity Flow', function() {
     const fetchMatcher = /\/project\/\w+\/file\/\w+\/rename/
     fetchMock.post(fetchMatcher, 204)
 
-    const expandButton = screen.getByRole('button', { name: 'Expand' })
-    fireEvent.click(expandButton)
+    const expandButton = screen.queryByRole('button', { name: 'Expand' })
+    if (expandButton) fireEvent.click(expandButton)
 
     const input = initItemRename('c.tex')
     fireEvent.change(input, { target: { value: 'd.tex' } })
@@ -137,8 +137,8 @@ describe('FileTree Rename Entity Flow', function() {
   })
 
   it('shows error modal on duplicate filename in subfolder', async function() {
-    const expandButton = screen.getByRole('button', { name: 'Expand' })
-    fireEvent.click(expandButton)
+    const expandButton = screen.queryByRole('button', { name: 'Expand' })
+    if (expandButton) fireEvent.click(expandButton)
 
     const input = initItemRename('c.tex')
     fireEvent.change(input, { target: { value: 'e.tex' } })

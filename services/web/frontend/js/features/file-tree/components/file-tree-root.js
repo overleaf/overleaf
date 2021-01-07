@@ -38,7 +38,7 @@ function FileTreeRoot({
       projectId={projectId}
       hasWritePermissions={hasWritePermissions}
       rootFolder={rootFolder}
-      initialSelectedEntityId={rootDocId}
+      rootDocId={rootDocId}
       onSelect={onSelect}
     >
       <FileTreeToolbar />

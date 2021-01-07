@@ -164,9 +164,6 @@ describe('FileTree Create Folder Flow', function() {
       />
     )
 
-    const expandButton = screen.getByRole('button', { name: 'Expand' })
-    fireEvent.click(expandButton)
-
     const newFolderName = 'Foo Bar In thefolder'
     const matcher = /\/project\/\w+\/folder/
     const response = {
@@ -196,7 +193,7 @@ describe('FileTree Create Folder Flow', function() {
     await screen.findByRole('treeitem', { name: newFolderName })
 
     // collapse the parent folder; created folder should not be rendered anymore
-    fireEvent.click(expandButton)
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }))
     expect(screen.queryByRole('treeitem', { name: newFolderName })).to.not.exist
   })
 

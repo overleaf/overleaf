@@ -6,6 +6,10 @@ import renderWithContext from '../helpers/render-with-context'
 import FileTreeFolder from '../../../../../frontend/js/features/file-tree/components/file-tree-folder'
 
 describe('<FileTreeFolder/>', function() {
+  beforeEach(function() {
+    global.localStorage.clear()
+  })
+
   it('renders unselected', function() {
     renderWithContext(
       <FileTreeFolder
@@ -61,6 +65,38 @@ describe('<FileTreeFolder/>', function() {
     const expandButton = screen.getByRole('button', { name: 'Expand' })
 
     fireEvent.click(expandButton)
+    screen.getByRole('tree')
+  })
+
+  it('saves the expanded state for the next render', function() {
+    const { unmount } = renderWithContext(
+      <FileTreeFolder
+        name="foo"
+        id="123abc"
+        folders={[]}
+        docs={[]}
+        files={[]}
+      />
+    )
+
+    expect(screen.queryByRole('tree')).to.not.exist
+
+    const expandButton = screen.getByRole('button', { name: 'Expand' })
+    fireEvent.click(expandButton)
+    screen.getByRole('tree')
+
+    unmount()
+
+    renderWithContext(
+      <FileTreeFolder
+        name="foo"
+        id="123abc"
+        folders={[]}
+        docs={[]}
+        files={[]}
+      />
+    )
+
     screen.getByRole('tree')
   })
 })

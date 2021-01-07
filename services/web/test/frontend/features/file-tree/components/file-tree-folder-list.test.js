@@ -66,7 +66,7 @@ describe('<FileTreeFolderList/>', function() {
       ]
       renderWithContext(
         <FileTreeFolderList folders={[]} docs={docs} files={[]} />,
-        { contextProps: { initialSelectedEntityId: '1' } }
+        { contextProps: { rootDocId: '1' } }
       )
 
       const treeitem1 = screen.getByRole('treeitem', { name: '1.tex' })

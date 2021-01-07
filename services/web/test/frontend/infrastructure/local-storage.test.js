@@ -4,6 +4,15 @@ import sinon from 'sinon'
 import customLocalStorage from '../../../frontend/js/infrastructure/local-storage'
 
 describe('localStorage', function() {
+  let originalLocalStorage
+  before(function() {
+    originalLocalStorage = global.localStorage
+  })
+
+  after(function() {
+    global.localStorage = originalLocalStorage
+  })
+
   beforeEach(function() {
     global.localStorage = {
       getItem: sinon.stub().returns(null),

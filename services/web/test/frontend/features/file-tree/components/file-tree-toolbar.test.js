@@ -6,6 +6,10 @@ import renderWithContext from '../helpers/render-with-context'
 import FileTreeToolbar from '../../../../../frontend/js/features/file-tree/components/file-tree-toolbar'
 
 describe('<FileTreeToolbar/>', function() {
+  beforeEach(function() {
+    global.localStorage.clear()
+  })
+
   it('without selected files', function() {
     renderWithContext(<FileTreeToolbar />)
 
@@ -26,7 +30,7 @@ describe('<FileTreeToolbar/>', function() {
 
   it('with one selected file', function() {
     renderWithContext(<FileTreeToolbar />, {
-      contextProps: { initialSelectedEntityId: '123abc' }
+      contextProps: { rootDocId: '123abc' }
     })
 
     screen.getByRole('button', { name: 'New File' })

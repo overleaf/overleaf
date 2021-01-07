@@ -33,7 +33,10 @@ export function findAllFolderIdsInFolders(folders) {
   return list
 }
 
-export function findInTree(tree, id) {
+export function findInTree(tree, id, path) {
+  if (!path) {
+    path = [tree._id]
+  }
   for (const index in tree.docs) {
     const doc = tree.docs[index]
     if (doc._id === id) {
@@ -42,6 +45,7 @@ export function findInTree(tree, id) {
         type: 'doc',
         parent: tree.docs,
         parentFolderId: tree._id,
+        path,
         index
       }
     }
@@ -55,6 +59,7 @@ export function findInTree(tree, id) {
         type: 'fileRef',
         parent: tree.fileRefs,
         parentFolderId: tree._id,
+        path,
         index
       }
     }
@@ -68,10 +73,11 @@ export function findInTree(tree, id) {
         type: 'folder',
         parent: tree.folders,
         parentFolderId: tree._id,
+        path,
         index
       }
     }
-    const found = findInTree(folder, id)
+    const found = findInTree(folder, id, path.concat(folder._id))
     if (found) return found
   }
   return null
