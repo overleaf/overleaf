@@ -33,8 +33,7 @@ function useExpandCollapse({
         })
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isExpanded])
+  }, [isExpanded, collapsedSize, dimension])
 
   const expandableClasses = classNames(
     'expand-collapse-container',

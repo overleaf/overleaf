@@ -1,13 +1,13 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, useCallback } from 'react'
 
 function useResizeObserver(observedElement, observedData, callback) {
   const resizeObserver = useRef()
 
-  function observe() {
+  const observe = useCallback(() => {
     resizeObserver.current = new ResizeObserver(function(elementsObserved) {
       callback(elementsObserved[0])
     })
-  }
+  }, [callback])
 
   function unobserve(observedCurrent) {
     resizeObserver.current.unobserve(observedCurrent)
@@ -30,8 +30,7 @@ function useResizeObserver(observedElement, observedData, callback) {
         }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [observedElement, observedData])
+  }, [observedElement, observedData, observe])
 }
 
 export default useResizeObserver

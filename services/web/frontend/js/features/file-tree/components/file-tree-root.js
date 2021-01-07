@@ -30,8 +30,7 @@ function FileTreeRoot({
 
   useEffect(() => {
     if (isReady) onInit()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady])
+  }, [isReady, onInit])
   if (!isReady) return null
 
   return (

@@ -81,8 +81,7 @@ export function FileTreeSelectableProvider({
       findInTree(fileTreeData, id)
     )
     onSelect(selectedEntities)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fileTreeData, selectedEntityIds])
+  }, [fileTreeData, selectedEntityIds, onSelect])
 
   useEffect(() => {
     // listen for `editor.openDoc` and selected that doc
