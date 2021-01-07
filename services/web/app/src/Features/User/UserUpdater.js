@@ -175,17 +175,15 @@ async function confirmEmail(userId, email) {
     _id: userId,
     'emails.email': email
   }
+
+  // only update confirmedAt if it was not previously set
   const update = {
     $set: {
       'emails.$.reconfirmedAt': confirmedAt
+    },
+    $min: {
+      'emails.$.confirmedAt': confirmedAt
     }
-  }
-  const user = await UserGetter.promises.getUser(userId)
-  const emailUnconfirmed = user.emails.find(emailData => {
-    if (emailData.email === email && !emailData.confirmedAt) return true
-  })
-  if (emailUnconfirmed) {
-    update.$set['emails.$.confirmedAt'] = confirmedAt
   }
 
   if (Features.hasFeature('affiliations')) {

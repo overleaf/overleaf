@@ -718,7 +718,6 @@ describe('UserUpdater', function() {
   describe('confirmEmail', function() {
     beforeEach(function() {
       this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
-      this.UserGetter.promises.getUser.resolves(this.stubbedUser)
     })
 
     it('should update the email record', function(done) {
@@ -735,8 +734,10 @@ describe('UserUpdater', function() {
               },
               {
                 $set: {
-                  'emails.$.confirmedAt': new Date(),
                   'emails.$.reconfirmedAt': new Date()
+                },
+                $min: {
+                  'emails.$.confirmedAt': new Date()
                 }
               }
             )
