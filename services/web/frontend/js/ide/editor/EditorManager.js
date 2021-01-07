@@ -48,6 +48,12 @@ export default EditorManager = (function() {
         }
       })
 
+      this.$scope.$on('entity:no-selection', () => {
+        this.$scope.$apply(() => {
+          this.$scope.ui.view = null
+        })
+      })
+
       this.$scope.$on('entity:deleted', (event, entity) => {
         if (this.$scope.editor.open_doc_id === entity.id) {
           if (!this.$scope.project.rootDoc_id) {

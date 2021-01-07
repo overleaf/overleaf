@@ -58,6 +58,8 @@ App.controller('ReactFileTreeController', function(
       $scope.$emit('entities:multiSelected', {
         count: selectedEntities.length
       })
+    } else {
+      $scope.$emit('entity:no-selection')
     }
   }
 })
