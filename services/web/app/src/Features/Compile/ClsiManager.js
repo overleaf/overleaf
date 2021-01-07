@@ -153,33 +153,21 @@ const ClsiManager = {
       // always clear the project state from the docupdater, even if there
       // was a problem with the request to the clsi
       DocumentUpdaterHandler.clearProjectState(projectId, docUpdaterErr => {
-        ClsiCookieManager.clearServerId(projectId, redisError => {
-          if (clsiErr) {
-            return callback(
-              OError.tag(clsiErr, 'Failed to delete aux files', { projectId })
+        if (clsiErr != null) {
+          return callback(
+            OError.tag(clsiErr, 'Failed to delete aux files', { projectId })
+          )
+        }
+        if (docUpdaterErr != null) {
+          return callback(
+            OError.tag(
+              docUpdaterErr,
+              'Failed to clear project state in doc updater',
+              { projectId }
             )
-          }
-          if (docUpdaterErr) {
-            return callback(
-              OError.tag(
-                docUpdaterErr,
-                'Failed to clear project state in doc updater',
-                { projectId }
-              )
-            )
-          }
-          if (redisError) {
-            // redis errors need wrapping as the instance may be shared
-            return callback(
-              OError(
-                'Failed to clear clsi persistence',
-                { projectId },
-                redisError
-              )
-            )
-          }
-          callback()
-        })
+          )
+        }
+        callback()
       })
     })
   },
