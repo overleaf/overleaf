@@ -70,7 +70,9 @@ function FileTreeRootFolder() {
         classes={{ root: 'file-tree-list' }}
         dropRef={dropRef}
         isOver={isOver}
-      />
+      >
+        <li className="bottom-buffer" />
+      </FileTreeFolderList>
     </>
   )
 }

@@ -10,7 +10,8 @@ function FileTreeFolderList({
   docs,
   files,
   classes = {},
-  dropRef = null
+  dropRef = null,
+  children
 }) {
   const docsAndFiles = [...docs, ...files]
 
@@ -43,6 +44,7 @@ function FileTreeFolderList({
           />
         )
       })}
+      {children}
     </ul>
   )
 }
@@ -54,7 +56,8 @@ FileTreeFolderList.propTypes = {
   classes: PropTypes.exact({
     root: PropTypes.string
   }),
-  dropRef: PropTypes.func
+  dropRef: PropTypes.func,
+  children: PropTypes.node
 }
 
 // the collator used to sort files docs and folders in the tree. Use english as
