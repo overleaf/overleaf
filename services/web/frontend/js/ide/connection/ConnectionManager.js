@@ -438,7 +438,8 @@ Something went wrong connecting to your project. Please refresh if this continue
           this.$scope.$apply(() => {
             this.updateConnectionManagerState('ready')
             this.$scope.protocolVersion = protocolVersion
-            this.$scope.project = project
+            const defaultProjectAttributes = { rootDoc_id: null }
+            this.$scope.project = { ...defaultProjectAttributes, ...project }
             this.$scope.permissionsLevel = permissionsLevel
             this.ide.loadingManager.socketLoaded()
             this.$scope.$broadcast('project:joined')
