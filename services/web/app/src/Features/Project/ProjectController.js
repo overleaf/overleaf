@@ -837,7 +837,7 @@ const ProjectController = {
               showSupport: Features.hasFeature('support'),
               showNewLogsUI: user.alphaProgram && !wantsOldLogsUI,
               showNewChatUI: user.betaProgram && !wantsOldChatUI,
-              showReactFileTree: user.alphaProgram && !wantsOldFileTreeUI
+              showReactFileTree: user.betaProgram && !wantsOldFileTreeUI
             })
             timer.done()
           }

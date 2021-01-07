@@ -119,5 +119,6 @@
   "headers",
   "math_inline",
   "math_display",
-  "done"
+  "done",
+  "file_tree_badge_tooltip"
 ]
