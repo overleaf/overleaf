@@ -2,6 +2,7 @@ import { useCallback, useEffect } from 'react'
 
 import { useFileTreeMutable } from '../contexts/file-tree-mutable'
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
+import { findInTreeOrThrow } from '../util/find-in-tree'
 
 export function useFileTreeSocketListener() {
   const {
@@ -10,9 +11,15 @@ export function useFileTreeSocketListener() {
     dispatchMove,
     dispatchCreateFolder,
     dispatchCreateDoc,
-    dispatchCreateFile
+    dispatchCreateFile,
+    fileTreeData
   } = useFileTreeMutable()
-  const { select, unselect } = useFileTreeSelectable()
+  const {
+    selectedEntityIds,
+    selectedEntityParentIds,
+    select,
+    unselect
+  } = useFileTreeSelectable()
   const socket = window._ide && window._ide.socket
 
   const selectEntityIfCreatedByUser = useCallback(
@@ -38,13 +45,33 @@ export function useFileTreeSocketListener() {
   useEffect(() => {
     function handleDispatchDelete(entityId) {
       unselect(entityId)
+      if (selectedEntityParentIds.has(entityId)) {
+        // we're deleting a folder with a selected children so we need to
+        // unselect its selected children first
+        for (const selectedEntityId of selectedEntityIds) {
+          if (
+            findInTreeOrThrow(fileTreeData, selectedEntityId).path.includes(
+              entityId
+            )
+          ) {
+            unselect(selectedEntityId)
+          }
+        }
+      }
       dispatchDelete(entityId)
     }
     if (socket) socket.on('removeEntity', handleDispatchDelete)
     return () => {
       if (socket) socket.removeListener('removeEntity', handleDispatchDelete)
     }
-  }, [socket, unselect, dispatchDelete])
+  }, [
+    socket,
+    unselect,
+    dispatchDelete,
+    fileTreeData,
+    selectedEntityIds,
+    selectedEntityParentIds
+  ])
 
   useEffect(() => {
     function handleDispatchMove(entityId, toFolderId) {
