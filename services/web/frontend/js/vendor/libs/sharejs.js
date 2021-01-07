@@ -1290,7 +1290,7 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
           var age = this.__lastSubmitTimestamp && (now - this.__lastSubmitTimestamp)
           var RECOMPUTE_HASH_INTERVAL = 5000
           // check the document hash regularly (but not if we have checked in the last 5 seconds)
-          var needToRecomputeHash = !this.__lastSubmitTimestamp || (age > RECOMPUTE_HASH_INTERVAL) || (age < 0) 
+          var needToRecomputeHash = !this.__lastSubmitTimestamp || (age > RECOMPUTE_HASH_INTERVAL) || (age < 0)
           if (needToRecomputeHash || window.sl_debugging) {
             // send git hash of current snapshot
             var sha1 = CryptoJSSHA1("blob " + this.snapshot.length + "\x00" + this.snapshot).toString()
@@ -1449,6 +1449,7 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
 
     var pos = getStartOffsetPosition(delta.start);
 
+    // NOTE: Keep in sync with EditorWatchdogManager.
     switch (delta.action) {
       case 'insert':
         text = delta.lines.join('\n');
@@ -1611,6 +1612,7 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
     }
     startPos += delta.from.ch;
 
+    // NOTE: Keep in sync with EditorWatchdogManager.
     if (delta.removed) {
       doc.del(startPos, delta.removed.join('\n').length, fromUndo);
     }

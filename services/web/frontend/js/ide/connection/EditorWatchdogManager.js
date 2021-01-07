@@ -183,6 +183,11 @@ export default class EditorWatchdogManager {
       onChange = (editor, change) => {
         // Ignore remote changes.
         if (change.origin === 'remote') return
+
+        // sharejs only looks at DEL or INSERT change events.
+        // NOTE: Keep in sync with sharejs.
+        if (!(change.removed || change.text)) return
+
         this.onEdit()
       }
     } else {
@@ -190,6 +195,11 @@ export default class EditorWatchdogManager {
       onChange = change => {
         // Ignore remote changes.
         if (change.origin === 'remote') return
+
+        // sharejs only looks at DEL or INSERT change events.
+        // NOTE: Keep in sync with sharejs.
+        if (!(change.action === 'remove' || change.action === 'insert')) return
+
         this.onEdit()
       }
     }
