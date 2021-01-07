@@ -8,6 +8,7 @@ describe('ClsiManager', function() {
   beforeEach(function() {
     this.jar = { cookie: 'stuff' }
     this.ClsiCookieManager = {
+      clearServerId: sinon.stub().yields(),
       getCookieJar: sinon.stub().callsArgWith(1, null, this.jar),
       setServerId: sinon.stub().callsArgWith(2),
       _getServerId: sinon.stub()
@@ -416,6 +417,12 @@ describe('ClsiManager', function() {
 
       it('should clear the project state from the docupdater', function() {
         this.DocumentUpdaterHandler.clearProjectState
+          .calledWith(this.project_id)
+          .should.equal(true)
+      })
+
+      it('should clear the clsi persistance', function() {
+        this.ClsiCookieManager.clearServerId
           .calledWith(this.project_id)
           .should.equal(true)
       })
