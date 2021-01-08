@@ -14,12 +14,12 @@ module.exports.monitor = logger =>
         responseTime[0] * 1000 + responseTime[1] / 1000000
       )
       const requestSize = parseInt(req.headers['content-length'], 10)
-      if (req.route && req.route.path != null) {
-        const routePath = req.route.path
-          .toString()
-          .replace(/\//g, '_')
-          .replace(/:/g, '')
-          .slice(1)
+      const routePath = getRoutePath(req)
+      const remoteIp = getRemoteIp(req)
+      const reqUrl = req.originalUrl || req.url
+      const referrer = req.headers.referer || req.headers.referrer
+
+      if (routePath != null) {
         Metrics.timing('http_request', responseTimeMs, null, {
           method: req.method,
           status_code: res.statusCode,
@@ -33,12 +33,6 @@ module.exports.monitor = logger =>
           })
         }
       }
-      const remoteIp =
-        req.ip ||
-        (req.socket && req.socket.socket && req.socket.socket.remoteAddress) ||
-        (req.socket && req.socket.remoteAddress)
-      const reqUrl = req.originalUrl || req.url
-      const referrer = req.headers.referer || req.headers.referrer
 
       let info
       if (STACKDRIVER_LOGGING) {
@@ -80,3 +74,31 @@ module.exports.monitor = logger =>
     }
     next()
   }
+
+function getRoutePath(req) {
+  if (req.route && req.route.path != null) {
+    return req.route.path
+      .toString()
+      .replace(/\//g, '_')
+      .replace(/:/g, '')
+      .slice(1)
+  }
+  if (req.swagger && req.swagger.apiPath != null) {
+    return req.swagger.apiPath
+  }
+  return null
+}
+
+function getRemoteIp(req) {
+  if (req.ip) {
+    return req.ip
+  }
+  if (req.socket) {
+    if (req.socket.socket && req.socket.socket.remoteAddress) {
+      return req.socket.socket.remoteAddress
+    } else if (req.socket.remoteAddress) {
+      return req.socket.remoteAddress
+    }
+  }
+  return null
+}
