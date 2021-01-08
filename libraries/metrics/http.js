@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const yn = require('yn')
 
 const STACKDRIVER_LOGGING = yn(process.env.STACKDRIVER_LOGGING)
@@ -15,14 +8,13 @@ module.exports.monitor = logger =>
     const startTime = process.hrtime()
     const { end } = res
     res.end = function() {
-      let info
       end.apply(this, arguments)
       const responseTime = process.hrtime(startTime)
       const responseTimeMs = Math.round(
         responseTime[0] * 1000 + responseTime[1] / 1000000
       )
       const requestSize = parseInt(req.headers['content-length'], 10)
-      if ((req.route != null ? req.route.path : undefined) != null) {
+      if (req.route && req.route.path != null) {
         const routePath = req.route.path
           .toString()
           .replace(/\//g, '_')
@@ -43,13 +35,12 @@ module.exports.monitor = logger =>
       }
       const remoteIp =
         req.ip ||
-        __guard__(
-          req.socket != null ? req.socket.socket : undefined,
-          x => x.remoteAddress
-        ) ||
-        (req.socket != null ? req.socket.remoteAddress : undefined)
+        (req.socket && req.socket.socket && req.socket.socket.remoteAddress) ||
+        (req.socket && req.socket.remoteAddress)
       const reqUrl = req.originalUrl || req.url
       const referrer = req.headers.referer || req.headers.referrer
+
+      let info
       if (STACKDRIVER_LOGGING) {
         info = {
           httpRequest: {
@@ -85,13 +76,7 @@ module.exports.monitor = logger =>
           'response-time': responseTimeMs
         }
       }
-      return logger.info(info, '%s %s', req.method, reqUrl)
+      logger.info(info, '%s %s', req.method, reqUrl)
     }
-    return next()
+    next()
   }
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
