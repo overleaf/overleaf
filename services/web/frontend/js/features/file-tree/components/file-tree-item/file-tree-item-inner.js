@@ -21,10 +21,16 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
   const itemRef = createRef()
 
   useEffect(() => {
-    if (isSelected && itemRef.current) {
-      scrollIntoViewIfNeeded(itemRef.current, {
-        scrollMode: 'if-needed'
-      })
+    const item = itemRef.current
+    if (isSelected && item) {
+      // we found scrolling doesn't happen unless a explicit delay is introduced
+      setTimeout(() => {
+        if (item) {
+          scrollIntoViewIfNeeded(item, {
+            scrollMode: 'if-needed'
+          })
+        }
+      }, 10)
     }
   }, [isSelected, itemRef])
 
