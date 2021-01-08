@@ -65,15 +65,15 @@ describe('<FileTreeFolderList/>', function() {
         { _id: '3', name: '3.tex' }
       ]
       renderWithContext(
-        <FileTreeFolderList folders={[]} docs={docs} files={[]} />,
-        { contextProps: { rootDocId: '1' } }
+        <FileTreeFolderList folders={[]} docs={docs} files={[]} />
       )
 
       const treeitem1 = screen.getByRole('treeitem', { name: '1.tex' })
       const treeitem2 = screen.getByRole('treeitem', { name: '2.tex' })
       const treeitem3 = screen.getByRole('treeitem', { name: '3.tex' })
 
-      // item 1 i selected by default
+      // click item 1: it gets selected
+      fireEvent.click(treeitem1)
       screen.getByRole('treeitem', { name: '1.tex', selected: true })
       screen.getByRole('treeitem', { name: '2.tex', selected: false })
       screen.getByRole('treeitem', { name: '3.tex', selected: false })

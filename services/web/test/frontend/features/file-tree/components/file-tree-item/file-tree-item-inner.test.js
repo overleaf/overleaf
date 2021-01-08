@@ -69,7 +69,19 @@ describe('<FileTreeitemInner />', function() {
     it('starts rename on menu item click', function() {
       renderWithContext(
         <FileTreeitemInner id="123abc" name="bar.tex" isSelected />,
-        { contextProps: { rootDocId: '123abc' } }
+        {
+          contextProps: {
+            rootDocId: '123abc',
+            rootFolder: [
+              {
+                _id: 'root-folder-id',
+                docs: [{ _id: '123abc', name: 'bar.tex' }],
+                folders: [],
+                fileRefs: []
+              }
+            ]
+          }
+        }
       )
 
       const renameButton = screen.getByRole('menuitem', { name: 'Rename' })

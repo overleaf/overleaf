@@ -82,13 +82,26 @@ export function FileTreeSelectableProvider({
     rootDocId
   )
 
+  const { fileTreeData } = useFileTreeMutable()
+
   const [selectedEntityIds, dispatch] = useReducer(
     hasWritePermissions
       ? fileTreeSelectableReadWriteReducer
       : fileTreeSelectableReadOnlyReducer,
-    initialSelectedEntityId ? new Set([initialSelectedEntityId]) : new Set()
+    null,
+    () => {
+      if (!initialSelectedEntityId) return new Set()
+
+      // the entity with id=initialSelectedEntityId might not exist in the tree
+      // anymore. This checks that it exists before initialising the reducer
+      // with the id.
+      if (findInTree(fileTreeData, initialSelectedEntityId))
+        return new Set([initialSelectedEntityId])
+
+      // the entity doesn't exist anymore; don't select any files
+      return new Set()
+    }
   )
-  const { fileTreeData } = useFileTreeMutable()
 
   const [selectedEntityParentIds, setSelectedEntityParentIds] = useState(
     new Set()

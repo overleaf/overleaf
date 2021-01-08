@@ -30,7 +30,17 @@ describe('<FileTreeToolbar/>', function() {
 
   it('with one selected file', function() {
     renderWithContext(<FileTreeToolbar />, {
-      contextProps: { rootDocId: '123abc' }
+      contextProps: {
+        rootDocId: '456def',
+        rootFolder: [
+          {
+            _id: 'root-folder-id',
+            docs: [{ _id: '456def', name: 'main.tex' }],
+            folders: [],
+            fileRefs: []
+          }
+        ]
+      }
     })
 
     screen.getByRole('button', { name: 'New File' })
