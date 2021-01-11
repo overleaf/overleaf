@@ -52,7 +52,7 @@ describe('<ChatPane />', function() {
     fetchMock.get(/messages/, testMessages)
     // unmounting before `beforeEach` block is executed is required to prevent cleanup errors
     const { unmount } = renderWithEditorContext(
-      <ChatPane resetUnreadMessages={() => {}} />
+      <ChatPane resetUnreadMessages={() => {}} chatIsOpen />
     )
 
     await screen.findByText('a message')
@@ -63,7 +63,7 @@ describe('<ChatPane />', function() {
   it('A loading spinner is rendered while the messages are loading, then disappears', async function() {
     fetchMock.get(/messages/, [])
     const { unmount } = renderWithEditorContext(
-      <ChatPane resetUnreadMessages={() => {}} />
+      <ChatPane resetUnreadMessages={() => {}} chatIsOpen />
     )
     await waitForElementToBeRemoved(() => screen.getByText('Loading…'))
     unmount()
@@ -73,7 +73,7 @@ describe('<ChatPane />', function() {
     it('is rendered when there are no messages ', async function() {
       fetchMock.get(/messages/, [])
       const { unmount } = renderWithEditorContext(
-        <ChatPane resetUnreadMessages={() => {}} />
+        <ChatPane resetUnreadMessages={() => {}} chatIsOpen />
       )
       await screen.findByText('Send your first message to your collaborators')
       unmount()
@@ -82,7 +82,7 @@ describe('<ChatPane />', function() {
     it('is not rendered when messages are displayed', function() {
       fetchMock.get(/messages/, testMessages)
       const { unmount } = renderWithEditorContext(
-        <ChatPane resetUnreadMessages={() => {}} />
+        <ChatPane resetUnreadMessages={() => {}} chatIsOpen />
       )
       expect(
         screen.queryByText('Send your first message to your collaborators')

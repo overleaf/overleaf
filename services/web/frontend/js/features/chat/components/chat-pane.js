@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import MessageList from './message-list'
 import MessageInput from './message-input'
@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { useChatStore } from '../store/chat-store-effect'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 
-function ChatPane({ resetUnreadMessages }) {
+function ChatPane({ resetUnreadMessages, chatIsOpen }) {
   const { t } = useTranslation()
 
   const {
@@ -20,10 +20,14 @@ function ChatPane({ resetUnreadMessages }) {
     userId
   } = useChatStore()
 
+  const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
+
   useEffect(() => {
-    loadMoreMessages()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    if (chatIsOpen && !initialMessagesLoaded) {
+      loadMoreMessages()
+      setInitialMessagesLoaded(true)
+    }
+  }, [initialMessagesLoaded, loadMoreMessages, chatIsOpen])
 
   const shouldDisplayPlaceholder = !loading && messages.length === 0
 
@@ -85,7 +89,8 @@ function Placeholder() {
 }
 
 ChatPane.propTypes = {
-  resetUnreadMessages: PropTypes.func.isRequired
+  resetUnreadMessages: PropTypes.func.isRequired,
+  chatIsOpen: PropTypes.bool
 }
 
 export default withErrorBoundary(ChatPane)

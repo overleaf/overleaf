@@ -27,7 +27,7 @@ export function tearDownMathJaxStubs() {
 }
 
 export function stubChatStore({ user }) {
-  window._ide = { socket: { on: sinon.stub(), off: sinon.stub() } }
+  window._ide = { socket: { on: sinon.stub(), removeListener: sinon.stub() } }
   window.user = user
 }
 

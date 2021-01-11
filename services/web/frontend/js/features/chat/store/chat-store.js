@@ -35,7 +35,10 @@ export class ChatStore {
   }
 
   destroy() {
-    window._ide.socket.off('new-chat-message', this._onNewChatMessage)
+    window._ide.socket.removeListener(
+      'new-chat-message',
+      this._onNewChatMessage
+    )
     this._emitter.off() // removes all listeners
   }
 

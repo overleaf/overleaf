@@ -26,7 +26,7 @@ describe('ChatStore', function() {
 
     window.csrfToken = 'csrf_tok'
 
-    socket = { on: sinon.stub(), off: sinon.stub() }
+    socket = { on: sinon.stub(), removeListener: sinon.stub() }
     window._ide = { socket }
     mockSocketMessage = message => socket.on.getCall(0).args[1](message)
 
