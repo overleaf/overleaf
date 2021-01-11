@@ -97,47 +97,21 @@ describe('ProjectStructureChanges', function() {
     contentType,
     callback
   ) {
-    const imageFile = fs.createReadStream(
-      Path.resolve(Path.join(__dirname, '..', 'files', file))
-    )
-
-    owner.request.post(
-      {
-        uri: `project/${projectId}/upload`,
-        qs: {
-          folder_id: folderId
-        },
-        formData: {
-          qqfile: {
-            value: imageFile,
-            options: {
-              filename: name,
-              contentType: contentType
-            }
-          }
-        }
-      },
-      (error, res, body) => {
-        if (error) {
-          return callback(error)
-        }
-        if (res.statusCode < 200 || res.statusCode >= 300) {
-          return callback(new Error(`failed to upload file ${res.statusCode}`))
-        }
-
-        callback(null, JSON.parse(body).entity_id)
-      }
+    owner.uploadFileInProject(
+      projectId,
+      folderId,
+      file,
+      name,
+      contentType,
+      callback
     )
   }
 
   function uploadExampleFile(owner, projectId, folderId, callback) {
-    uploadFile(
-      owner,
+    owner.uploadExampleFileInProject(
       projectId,
       folderId,
       '1pixel.png',
-      '1pixel.png',
-      'image/png',
       callback
     )
   }
@@ -175,66 +149,15 @@ describe('ProjectStructureChanges', function() {
   }
 
   function moveItem(owner, projectId, type, itemId, folderId, callback) {
-    owner.request.post(
-      {
-        uri: `project/${projectId}/${type}/${itemId}/move`,
-        json: {
-          folder_id: folderId
-        }
-      },
-      (error, res) => {
-        if (error) {
-          return callback(error)
-        }
-        if (res.statusCode < 200 || res.statusCode >= 300) {
-          return callback(new Error(`failed to move ${type} ${res.statusCode}`))
-        }
-
-        callback()
-      }
-    )
+    owner.moveItemInProject(projectId, type, itemId, folderId, callback)
   }
 
   function renameItem(owner, projectId, type, itemId, name, callback) {
-    owner.request.post(
-      {
-        uri: `project/${projectId}/${type}/${itemId}/rename`,
-        json: {
-          name: name
-        }
-      },
-      (error, res) => {
-        if (error) {
-          return callback(error)
-        }
-        if (res.statusCode < 200 || res.statusCode >= 300) {
-          return callback(
-            new Error(`failed to rename ${type} ${res.statusCode}`)
-          )
-        }
-
-        callback()
-      }
-    )
+    owner.renameItemInProject(projectId, type, itemId, name, callback)
   }
 
   function deleteItem(owner, projectId, type, itemId, callback) {
-    owner.request.delete(
-      {
-        uri: `project/${projectId}/${type}/${itemId}`
-      },
-      (error, res) => {
-        if (error) {
-          return callback(error)
-        }
-        if (res.statusCode < 200 || res.statusCode >= 300) {
-          return callback(
-            new Error(`failed to delete folder ${res.statusCode}`)
-          )
-        }
-        callback()
-      }
-    )
+    owner.deleteItemInProject(projectId, type, itemId, callback)
   }
 
   function verifyVersionIncremented(
