@@ -60,6 +60,16 @@ module.exports = DocstoreClient = {
     )
   },
 
+  isDocDeleted(project_id, doc_id, callback) {
+    request.get(
+      {
+        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}/deleted`,
+        json: true
+      },
+      callback
+    )
+  },
+
   getAllDocs(project_id, callback) {
     if (callback == null) {
       callback = function (error, res, body) {}

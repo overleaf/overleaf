@@ -44,6 +44,19 @@ describe('Deleting a doc', function () {
     })
   })
 
+  it('should show as not deleted on /deleted', function (done) {
+    DocstoreClient.isDocDeleted(
+      this.project_id,
+      this.doc_id,
+      (error, res, body) => {
+        if (error) return done(error)
+        expect(res.statusCode).to.equal(200)
+        expect(body).to.have.property('deleted').to.equal(false)
+        done()
+      }
+    )
+  })
+
   describe('when the doc exists', function () {
     beforeEach(function (done) {
       return DocstoreClient.deleteDoc(
@@ -60,6 +73,19 @@ describe('Deleting a doc', function () {
       return db.docs.remove({ _id: this.doc_id }, done)
     })
 
+    it('should mark the doc as deleted on /deleted', function (done) {
+      DocstoreClient.isDocDeleted(
+        this.project_id,
+        this.doc_id,
+        (error, res, body) => {
+          if (error) return done(error)
+          expect(res.statusCode).to.equal(200)
+          expect(body).to.have.property('deleted').to.equal(true)
+          done()
+        }
+      )
+    })
+
     return it('should insert a deleted doc into the docs collection', function (done) {
       return db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
         docs[0]._id.should.deep.equal(this.doc_id)
@@ -70,7 +96,40 @@ describe('Deleting a doc', function () {
     })
   })
 
+  describe('when the doc exists in another project', function () {
+    const otherProjectId = ObjectId()
+
+    it('should show as not existing on /deleted', function (done) {
+      DocstoreClient.isDocDeleted(otherProjectId, this.doc_id, (error, res) => {
+        if (error) return done(error)
+        expect(res.statusCode).to.equal(404)
+        done()
+      })
+    })
+
+    it('should return a 404 when trying to delete', function (done) {
+      DocstoreClient.deleteDoc(otherProjectId, this.doc_id, (error, res) => {
+        if (error) return done(error)
+        expect(res.statusCode).to.equal(404)
+        done()
+      })
+    })
+  })
+
   return describe('when the doc does not exist', function () {
+    it('should show as not existing on /deleted', function (done) {
+      const missing_doc_id = ObjectId()
+      DocstoreClient.isDocDeleted(
+        this.project_id,
+        missing_doc_id,
+        (error, res) => {
+          if (error) return done(error)
+          expect(res.statusCode).to.equal(404)
+          done()
+        }
+      )
+    })
+
     return it('should return a 404', function (done) {
       const missing_doc_id = ObjectId()
       return DocstoreClient.deleteDoc(
