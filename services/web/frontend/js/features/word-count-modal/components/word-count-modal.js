@@ -3,7 +3,7 @@ import { Modal } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import WordCountModalContent from './word-count-modal-content'
 
-function WordCountModal({ handleHide, show, projectId }) {
+function WordCountModal({ clsiServerId, handleHide, projectId, show }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [data, setData] = useState()
@@ -21,7 +21,12 @@ function WordCountModal({ handleHide, show, projectId }) {
     const _abortController = new AbortController()
     setAbortController(_abortController)
 
-    fetch(`/project/${projectId}/wordcount`, {
+    let query = ''
+    if (clsiServerId) {
+      query = `?clsiserverid=${clsiServerId}`
+    }
+
+    fetch(`/project/${projectId}/wordcount${query}`, {
       signal: _abortController.signal
     })
       .then(async response => {
@@ -42,7 +47,7 @@ function WordCountModal({ handleHide, show, projectId }) {
     return () => {
       _abortController.abort()
     }
-  }, [show, projectId])
+  }, [show, projectId, clsiServerId])
 
   const abortAndHide = useCallback(() => {
     abortController.abort()
@@ -62,6 +67,7 @@ function WordCountModal({ handleHide, show, projectId }) {
 }
 
 WordCountModal.propTypes = {
+  clsiServerId: PropTypes.string,
   handleHide: PropTypes.func.isRequired,
   projectId: PropTypes.string.isRequired,
   show: PropTypes.bool.isRequired

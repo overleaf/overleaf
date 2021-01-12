@@ -20,6 +20,7 @@ export default App.controller('WordCountModalController', function(
 
   $scope.openWordCountModal = () => {
     $scope.$applyAsync(() => {
+      $scope.clsiServerId = ide.clsiServerId
       $scope.projectId = ide.project_id
       $scope.show = true
     })
