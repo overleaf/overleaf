@@ -7,4 +7,4 @@ if [ "$DEBUG_NODE" == "true" ]; then
     NODE_PARAMS="--inspect=0.0.0.0:30360"
 fi
 
-exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /var/www/sharelatex/contacts/app.js >> /var/log/sharelatex/contacts 2>&1
+exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /var/www/sharelatex/contacts/app.js >> /var/log/sharelatex/contacts.log 2>&1
