@@ -23,14 +23,18 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
   useEffect(() => {
     const item = itemRef.current
     if (isSelected && item) {
-      // we found scrolling doesn't happen unless a explicit delay is introduced
+      // we're delaying scrolling due to a race condition with other elements,
+      // mainly the Outline, being resized inside the same panel, causing the
+      // FileTree to have its viewport shrinked after the selected item is
+      // scrolled into the view, hiding it again.
+      // See `left-pane-resize-all` in `file-tree-controller` for more information.
       setTimeout(() => {
         if (item) {
           scrollIntoViewIfNeeded(item, {
             scrollMode: 'if-needed'
           })
         }
-      }, 10)
+      }, 100)
     }
   }, [isSelected, itemRef])
 
