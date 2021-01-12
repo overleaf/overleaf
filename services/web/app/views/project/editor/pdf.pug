@@ -116,6 +116,14 @@ div.full-size.pdf(ng-controller="PdfController")
 				) {{ pdf.logEntries.errors.length + pdf.logEntries.warnings.length }}
 				
 			a(
+				ng-if="!pdf.downloadUrl"
+				disabled
+				href="#"
+				tooltip=translate('please_compile_pdf_before_download')
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-fw.fa-download
+			a(
 				ng-href="{{pdf.downloadUrl || pdf.url}}"
 				target="_blank"
 				ng-if="pdf.url"

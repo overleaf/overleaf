@@ -844,6 +844,11 @@ App.controller('PdfController', function(
     $scope.pdf.clearingCache = true
     const deferred = $q.defer()
 
+    // disable various download buttons
+    $scope.pdf.url = null
+    $scope.pdf.downloadUrl = null
+    $scope.pdf.outputFiles = []
+
     $http({
       url: `/project/${$scope.project_id}/output`,
       method: 'DELETE',

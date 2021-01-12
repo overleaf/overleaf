@@ -55,6 +55,7 @@
   "pdf_compile_rate_limit_hit",
   "pdf_compile_try_again",
   "pdf_rendering_error",
+  "please_compile_pdf_before_download",
   "please_set_main_file",
   "proj_timed_out_reason",
   "project_flagged_too_many_compiles",

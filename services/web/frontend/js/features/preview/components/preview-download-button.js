@@ -21,12 +21,14 @@ function PreviewDownloadButton({
     }
   }
 
+  const pdfDownloadDisabled = isCompiling || !pdfDownloadUrl
   const buttonElement = (
     <a
       className="btn btn-xs btn-info"
-      disabled={isCompiling || !pdfDownloadUrl}
+      disabled={pdfDownloadDisabled}
       download
       href={pdfDownloadUrl || '#'}
+      style={{ pointerEvents: 'auto' }}
     >
       <Icon type="download" modifier="fw" />
       <span className="toolbar-text" style={textStyle}>
@@ -35,19 +37,25 @@ function PreviewDownloadButton({
     </a>
   )
 
+  const hideTooltip = showText && pdfDownloadUrl
+
   return (
     <Dropdown
       id="download-dropdown"
       className="toolbar-item"
       disabled={isCompiling}
     >
-      {showText ? (
+      {hideTooltip ? (
         buttonElement
       ) : (
         <OverlayTrigger
           placement="bottom"
           overlay={
-            <Tooltip id="tooltip-download-pdf">{t('download_pdf')}</Tooltip>
+            <Tooltip id="tooltip-download-pdf">
+              {pdfDownloadDisabled
+                ? t('please_compile_pdf_before_download')
+                : t('download_pdf')}
+            </Tooltip>
           }
         >
           {buttonElement}
