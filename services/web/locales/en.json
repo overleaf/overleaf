@@ -1,4 +1,5 @@
 {
+  "reload_editor": "Reload editor",
   "compile_error_description": "This project did not compile because of an error",
   "validation_issue_description": "This project did not compile because of a validation issue",
   "compile_error_entry_description": "An error which prevented this project from compiling",
