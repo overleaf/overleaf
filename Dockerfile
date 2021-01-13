@@ -77,6 +77,7 @@ ADD ${baseDir}/nginx/sharelatex.conf /etc/nginx/sites-enabled/sharelatex.conf
 # Configure log rotation
 # ----------------------
 ADD ${baseDir}/logrotate/sharelatex /etc/logrotate.d/sharelatex
+RUN chmod 644 /etc/logrotate.d/sharelatex
 
 
 # Copy Phusion Image startup scripts to its location
