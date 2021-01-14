@@ -293,23 +293,3 @@ script(type="text/ng-template", id="uploadProjectModalTemplate")
 	)
 	.modal-footer
 		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
-
-script(type="text/ng-template", id="showErrorModalTemplate")
-	.modal-header
-		button.close(
-			type="button"
-			data-dismiss="modal"
-			ng-click="cancel()"
-			aria-label="Close"
-		)
-			span(aria-hidden="true") &times;
-		h3 #{translate("generic_something_went_wrong")}
-	.modal-body
-		.alert.alert-danger(ng-show="error.message") {{error.message === "invalid element name" ? "#{translate("invalid_element_name")}" : error.message}}
-		.alert.alert-danger(ng-show="error && !error.message") #{translate("generic_something_went_wrong")}
-	.modal-footer
-		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
-
-	.modal-footer
-		button.btn.btn-info(ng-click="done()") #{translate("done")}
-

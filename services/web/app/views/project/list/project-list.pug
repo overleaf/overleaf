@@ -113,7 +113,7 @@
 						li
 							a(
 								href,
-								ng-click="openCloneProjectModal()"
+								ng-click="openCloneProjectModal(getFirstSelectedProject())"
 							) #{translate("make_copy")}
 
 				.btn-group(ng-show="filter === 'archived' && selectedProjects.length > 0")

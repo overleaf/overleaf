@@ -62,16 +62,14 @@ td.project-list-table-lastupdated-cell
 
 
 td.project-list-table-actions-cell
-	div(
-		ng-if="!project.isTableActionInflight"
-	)
+	div
 		button.btn.btn-link.action-btn(
 			ng-if="!(project.archived || project.trashed)"
 			aria-label=translate('copy'),
 			tooltip=translate('copy'),
 			tooltip-placement="top",
 			tooltip-append-to-body="true",
-			ng-click="clone($event)"
+			ng-click="openCloneProjectModal(project)"
 		)
 			i.icon.fa.fa-files-o(aria-hidden="true")
 		button.btn.btn-link.action-btn(
@@ -136,8 +134,3 @@ td.project-list-table-actions-cell
 			ng-click="delete($event)"
 		)
 			i.icon.fa.fa-ban(aria-hidden="true")
-	div(
-		ng-if="project.isTableActionInflight"
-		aria-label=translate('processing')
-	)
-		i.fa.fa-spinner.fa-spin(aria-hidden="true")
