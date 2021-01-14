@@ -34,6 +34,7 @@ public class SwapJobImpl implements SwapJob {
     private final RepoStore repoStore;
     private final DBStore dbStore;
     private final SwapStore swapStore;
+    private final CompressionMethod compressionMethod;
 
     private final Timer timer;
 
@@ -51,6 +52,7 @@ public class SwapJobImpl implements SwapJob {
                 GiB * cfg.getLowGiB(),
                 GiB * cfg.getHighGiB(),
                 Duration.ofMillis(cfg.getIntervalMillis()),
+                cfg.getCompressionMethod(),
                 lock,
                 repoStore,
                 dbStore,
@@ -63,6 +65,7 @@ public class SwapJobImpl implements SwapJob {
             long lowWatermarkBytes,
             long highWatermarkBytes,
             Duration interval,
+            CompressionMethod method,
             ProjectLock lock,
             RepoStore repoStore,
             DBStore dbStore,
@@ -72,6 +75,7 @@ public class SwapJobImpl implements SwapJob {
         this.lowWatermarkBytes = lowWatermarkBytes;
         this.highWatermarkBytes = highWatermarkBytes;
         this.interval = interval;
+        this.compressionMethod = method;
         this.lock = lock;
         this.repoStore = repoStore;
         this.dbStore = dbStore;
@@ -196,13 +200,27 @@ public class SwapJobImpl implements SwapJob {
                 Log.error("[{}] Exception while running gc on project: {}", projName, e);
             }
             long[] sizePtr = new long[1];
-            try (InputStream blob = repoStore.bzip2Project(projName, sizePtr)) {
+            try (InputStream blob = getBlobStream(projName, sizePtr)) {
                 swapStore.upload(projName, blob, sizePtr[0]);
-                dbStore.setLastAccessedTime(projName, null);
+                String compression = SwapJob.compressionMethodAsString(compressionMethod);
+                if (compression == null) {
+                  throw new RuntimeException("invalid compression method, should not happen");
+                }
+                dbStore.swap(projName, compression);
                 repoStore.remove(projName);
             }
         }
         Log.info("Evicted project: {}", projName);
+    }
+
+    private InputStream getBlobStream(String projName, long[] sizePtr) throws IOException {
+        if (compressionMethod == CompressionMethod.Gzip) {
+          return repoStore.gzipProject(projName, sizePtr);
+        } else if (compressionMethod == CompressionMethod.Bzip2) {
+          return repoStore.bzip2Project(projName, sizePtr);
+        } else {
+          throw new RuntimeException("invalid compression method, should not happen");
+        }
     }
 
     /**
@@ -220,15 +238,23 @@ public class SwapJobImpl implements SwapJob {
     public void restore(String projName) throws IOException {
         try (LockGuard __ = lock.lockGuard(projName)) {
             try (InputStream zipped = swapStore.openDownloadStream(projName)) {
-                repoStore.unbzip2Project(
-                        projName,
-                        zipped
-                );
+                String compression = dbStore.getSwapCompression(projName);
+                if (compression == null) {
+                    throw new RuntimeException("Missing compression method during restore, should not happen");
+                }
+                if ("gzip".equals(compression)) {
+                  repoStore.ungzipProject(
+                    projName,
+                    zipped
+                  );
+                } else if ("bzip2".equals(compression)) {
+                  repoStore.unbzip2Project(
+                    projName,
+                    zipped
+                  );
+                }
                 swapStore.remove(projName);
-                dbStore.setLastAccessedTime(
-                        projName,
-                        Timestamp.valueOf(LocalDateTime.now())
-                );
+                dbStore.restore(projName);
             }
         }
     }

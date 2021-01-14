@@ -667,7 +667,7 @@ public class WLGitBridgeIntegrationTest {
         server.start();
         server.setState(states.get("wlgbCanSwapProjects").get("state"));
         wlgb = new GitBridgeApp(new String[] {
-                makeConfigFile(33874, 3874, new SwapJobConfig(1, 0, 0, 250))
+                makeConfigFile(33874, 3874, new SwapJobConfig(1, 0, 0, 250, null))
         });
         wlgb.run();
         File rootGitDir = new File(wlgb.config.getRootGitDirectory());

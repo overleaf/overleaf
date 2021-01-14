@@ -68,6 +68,7 @@ public class SwapJobImplTest {
                 15000,
                 30000,
                 Duration.ofMillis(100),
+                SwapJob.CompressionMethod.Bzip2,
                 lock,
                 repoStore,
                 dbStore,
@@ -120,7 +121,38 @@ public class SwapJobImplTest {
         while (swapJob.swaps.get() < 1);
         assertEquals(1, dbStore.getNumUnswappedProjects());
         assertEquals("proj1", dbStore.getOldestUnswappedProject());
+        assertEquals("bzip2", dbStore.getSwapCompression("proj2"));
         swapJob.restore("proj2");
+        assertEquals(null, dbStore.getSwapCompression("proj2"));
+        int numSwaps = swapJob.swaps.get();
+        while (swapJob.swaps.get() <= numSwaps);
+        assertEquals(1, dbStore.getNumUnswappedProjects());
+        assertEquals("proj2", dbStore.getOldestUnswappedProject());
+    }
+
+    @Test
+    public void swapCompressionGzip() throws IOException {
+        swapJob = new SwapJobImpl(
+                1,
+                15000,
+                30000,
+                Duration.ofMillis(100),
+                SwapJob.CompressionMethod.Gzip,
+                lock,
+                repoStore,
+                dbStore,
+                swapStore
+        );
+        swapJob.lowWatermarkBytes = 16384;
+        assertEquals(2, dbStore.getNumUnswappedProjects());
+        assertEquals("proj2", dbStore.getOldestUnswappedProject());
+        swapJob.start();
+        while (swapJob.swaps.get() < 1);
+        assertEquals(1, dbStore.getNumUnswappedProjects());
+        assertEquals("proj1", dbStore.getOldestUnswappedProject());
+        assertEquals("gzip", dbStore.getSwapCompression("proj2"));
+        swapJob.restore("proj2");
+        assertEquals(null, dbStore.getSwapCompression("proj2"));
         int numSwaps = swapJob.swaps.get();
         while (swapJob.swaps.get() <= numSwaps);
         assertEquals(1, dbStore.getNumUnswappedProjects());
