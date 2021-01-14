@@ -70,9 +70,22 @@ public class SqliteDBStoreTest {
     }
 
     @Test
+    public void swapAndRestore() {
+      String projectName = "something";
+      String compression = "bzip2";
+      dbStore.setLatestVersionForProject(projectName, 42);
+      dbStore.swap(projectName, compression);
+      assertNull(dbStore.getOldestUnswappedProject());
+      assertEquals(dbStore.getSwapCompression(projectName), compression);
+      // and restore
+      dbStore.restore(projectName);
+      assertEquals(dbStore.getSwapCompression(projectName), null);
+    }
+
+    @Test
     public void noOldestProjectIfAllEvicted() {
         dbStore.setLatestVersionForProject("older", 3);
-        dbStore.setLastAccessedTime("older", null);
+        dbStore.swap("older", "bzip2");
         assertNull(dbStore.getOldestUnswappedProject());
     }
 
@@ -93,7 +106,7 @@ public class SqliteDBStoreTest {
                 )
         );
         assertEquals("older", dbStore.getOldestUnswappedProject());
-        dbStore.setLastAccessedTime("older", null);
+        dbStore.swap("older", "bzip2");
         assertEquals("newer", dbStore.getOldestUnswappedProject());
     }
 
@@ -115,9 +128,9 @@ public class SqliteDBStoreTest {
                 Timestamp.valueOf(LocalDateTime.now())
         );
         assertEquals(1, dbStore.getNumUnswappedProjects());
-        dbStore.setLastAccessedTime(
+        dbStore.swap(
                 "asdf",
-                null
+                "bzip2"
         );
         assertEquals(0, dbStore.getNumUnswappedProjects());
     }
@@ -143,7 +156,7 @@ public class SqliteDBStoreTest {
     @Test
     public void projectStateIsSwappedIfLastAccessedIsNull() {
         dbStore.setLatestVersionForProject("asdf", 1);
-        dbStore.setLastAccessedTime("asdf", null);
+        dbStore.swap("asdf", "bzip2");
         assertEquals(ProjectState.SWAPPED, dbStore.getProjectState("asdf"));
     }
 
