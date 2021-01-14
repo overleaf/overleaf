@@ -50,6 +50,22 @@ public interface RepoStore {
         return bzip2Project(projectName, null);
     }
 
+    /**
+     * Tars and gzips the .git directory of the given project. Throws an
+     * IOException if the project doesn't exist. The returned stream is a copy
+     * of the original .git directory, which must be deleted using remove().
+     */
+    InputStream gzipProject(
+        String projectName,
+        long[] sizePtr
+    ) throws IOException;
+
+    default InputStream gzipProject(
+        String projectName
+    ) throws IOException {
+        return gzipProject(projectName, null);
+    }
+
     void gcProject(String projectName) throws IOException;
 
     /**
@@ -71,6 +87,18 @@ public interface RepoStore {
     void unbzip2Project(
             String projectName,
             InputStream dataStream
+    ) throws IOException;
+
+    /**
+     * Ungzips the given data stream into a .git directory for projectName.
+     * Creates the project's git directory.
+     * If projectName already exists, throws an IOException.
+     * @param projectName the name of the project, e.g. abc123
+     * @param dataStream the data stream containing the gzip contents.
+     */
+    void ungzipProject(
+        String projectName,
+        InputStream dataStream
     ) throws IOException;
 
 }
