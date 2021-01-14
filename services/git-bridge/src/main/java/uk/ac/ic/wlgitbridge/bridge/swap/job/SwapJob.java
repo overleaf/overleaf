@@ -13,6 +13,46 @@ import java.util.Optional;
  */
 public interface SwapJob {
 
+    enum CompressionMethod { Bzip2, Gzip }
+
+    static CompressionMethod stringToCompressionMethod(String compressionString) {
+        if (compressionString == null) {
+            return null;
+        }
+        CompressionMethod result;
+        switch (compressionString) {
+            case "gzip":
+                result = CompressionMethod.Gzip;
+                break;
+            case "bzip2":
+                result = CompressionMethod.Bzip2;
+                break;
+            default:
+                result = null;
+                break;
+        }
+        return result;
+    }
+
+    static String compressionMethodAsString(CompressionMethod compressionMethod) {
+        if (compressionMethod == null) {
+            return null;
+        }
+        String result;
+        switch (compressionMethod) {
+            case Gzip:
+                result =  "gzip";
+                break;
+            case Bzip2:
+                result =  "bzip2";
+                break;
+            default:
+                result =  null;
+                break;
+        }
+        return result;
+    }
+
     static SwapJob fromConfig(
             Optional<SwapJobConfig> cfg,
             ProjectLock lock,
