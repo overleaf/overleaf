@@ -1,6 +1,9 @@
 const DMP = require('diff-match-patch')
 const dmp = new DMP()
 
+// Do not attempt to produce a diff for more than 100ms
+dmp.Diff_Timeout = 0.1
+
 module.exports = {
   ADDED: 1,
   REMOVED: -1,
