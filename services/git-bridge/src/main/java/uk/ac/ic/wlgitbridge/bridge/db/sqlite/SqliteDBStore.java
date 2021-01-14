@@ -104,6 +104,21 @@ public class SqliteDBStore implements DBStore {
         update(new SetProjectLastAccessedTime(projectName, lastAccessed));
     }
 
+    @Override
+    public void swap(String projectName, String compressionMethod) {
+      update(new UpdateSwap(projectName, compressionMethod));
+    }
+
+    @Override
+    public void restore(String projectName) {
+      update(new UpdateRestore(projectName));
+    }
+
+    @Override
+    public String getSwapCompression(String projectName) {
+        return query(new GetSwapCompression(projectName));
+    }
+
     private Connection openConnectionTo(File dbFile) {
         File parentDir = dbFile.getParentFile();
         if (!parentDir.exists() && !parentDir.mkdirs()) {
@@ -127,20 +142,27 @@ public class SqliteDBStore implements DBStore {
     }
 
     private void createTables() {
-        try {
-            doUpdate(new ProjectsAddLastAccessed());
-        } catch (SQLException ignore) {
-            /* We need to eat exceptions from here */
-        }
+        /* Migrations */
+        /* We need to eat exceptions from here */
+        try { doUpdate(new ProjectsAddLastAccessed()); } catch (SQLException ignore) {}
+        try { doUpdate(new ProjectsAddSwapTime()); } catch (SQLException ignore) {}
+        try { doUpdate(new ProjectsAddRestoreTime()); } catch (SQLException ignore) {}
+        try { doUpdate(new ProjectsAddSwapCompression()); } catch (SQLException ignore) {}
+
+        /* Create tables (if they don't exist) */
         Stream.of(
                 new CreateProjectsTableSQLUpdate(),
                 new CreateProjectsIndexLastAccessed(),
                 new CreateURLIndexStoreSQLUpdate(),
                 new CreateIndexURLIndexStore()
         ).forEach(this::update);
+
         /* In the case of needing to change the schema, we need to check that
-           ProjectsAddLastAccessed didn't just fail */
+           migrations didn't just fail */
         Preconditions.checkState(query(new LastAccessedColumnExists()));
+        Preconditions.checkState(query(new SwapTimeColumnExists()));
+        Preconditions.checkState(query(new RestoreTimeColumnExists()));
+        Preconditions.checkState(query(new SwapCompressionColumnExists()));
     }
 
     private void update(SQLUpdate update) {
