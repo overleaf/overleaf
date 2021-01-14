@@ -74,6 +74,9 @@ describe('FileTree Delete Entity Flow', function() {
             name: 'main.tex'
           })
         ).to.not.exist
+
+        // check that the confirmation modal is closed
+        expect(screen.queryByText(/Are you sure/)).to.not.exist
       })
 
       const [lastFetchPath] = fetchMock.lastCall(fetchMatcher)
@@ -88,6 +91,9 @@ describe('FileTree Delete Entity Flow', function() {
 
       window._ide.socket.socketClient.emit('removeEntity', '456def')
 
+      // check that the confirmation modal is open
+      screen.getByText(/Are you sure/)
+
       await waitFor(() => {
         expect(
           screen.queryByRole('treeitem', {
@@ -101,6 +107,10 @@ describe('FileTree Delete Entity Flow', function() {
             name: 'main.tex'
           })
         ).to.not.exist
+
+        // check that the confirmation modal is closed
+        // is not, the 404 probably triggered a bug
+        expect(screen.queryByText(/Are you sure/)).to.not.exist
       })
     })
 
@@ -228,6 +238,9 @@ describe('FileTree Delete Entity Flow', function() {
               name
             })
           ).to.not.exist
+
+          // check that the confirmation modal is closed
+          expect(screen.queryByText(/Are you sure/)).to.not.exist
         }
       })
 

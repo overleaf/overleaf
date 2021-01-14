@@ -179,7 +179,7 @@ export function useFileTreeActionable() {
       return syncDelete(projectId, found.type, found.entity._id).catch(
         error => {
           // throw unless 404
-          if (error.info.statusCode !== '404') {
+          if (error.info.statusCode !== 404) {
             throw error
           }
         }
