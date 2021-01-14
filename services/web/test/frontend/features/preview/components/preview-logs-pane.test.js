@@ -1,7 +1,8 @@
 import React from 'react'
-import { screen, render, fireEvent } from '@testing-library/react'
+import { screen, fireEvent } from '@testing-library/react'
 import PreviewLogsPane from '../../../../../frontend/js/features/preview/components/preview-logs-pane'
 import sinon from 'sinon'
+import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
 const { expect } = require('chai')
 
@@ -60,7 +61,7 @@ entering extended mode
   const noOp = () =>
     describe('with logs', function() {
       beforeEach(function() {
-        render(
+        renderWithEditorContext(
           <PreviewLogsPane
             logEntries={logEntries}
             rawLog={sampleRawLog}
@@ -125,7 +126,7 @@ entering extended mode
     }
 
     it('renders a validation entry for known issues', function() {
-      render(
+      renderWithEditorContext(
         <PreviewLogsPane
           validationIssues={sampleValidationIssues}
           onLogEntryLocationClick={onLogEntryLocationClick}
@@ -141,7 +142,7 @@ entering extended mode
     })
 
     it('ignores unknown issues', function() {
-      render(
+      renderWithEditorContext(
         <PreviewLogsPane
           validationIssues={{ unknownIssue: true }}
           onLogEntryLocationClick={onLogEntryLocationClick}
@@ -163,7 +164,7 @@ entering extended mode
     }
 
     it('renders an error entry for known errors', function() {
-      render(
+      renderWithEditorContext(
         <PreviewLogsPane
           errors={sampleErrors}
           onLogEntryLocationClick={onLogEntryLocationClick}
@@ -177,7 +178,7 @@ entering extended mode
     })
 
     it('ignores unknown errors', function() {
-      render(
+      renderWithEditorContext(
         <PreviewLogsPane
           errors={{ unknownIssue: true }}
           onLogEntryLocationClick={onLogEntryLocationClick}

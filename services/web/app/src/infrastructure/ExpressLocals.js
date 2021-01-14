@@ -369,7 +369,8 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       sentryAllowedOriginRegex: Settings.sentry.allowedOriginRegex,
       sentryDsn: Settings.sentry.publicDSN,
       sentryEnvironment: Settings.sentry.environment,
-      sentryRelease: Settings.sentry.release
+      sentryRelease: Settings.sentry.release,
+      enableSubscriptions: Settings.enableSubscriptions
     }
     next()
   })

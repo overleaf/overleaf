@@ -3,6 +3,7 @@ import HumanReadableLogs from '../../human-readable-logs/HumanReadableLogs'
 import BibLogParser from 'libs/bib-log-parser'
 import PreviewPane from '../../../features/preview/components/preview-pane'
 import { react2angular } from 'react2angular'
+import { rootContext } from '../../../shared/context/root-context'
 import 'ace/ace'
 const AUTO_COMPILE_MAX_WAIT = 5000
 // We add a 1 second debounce to sending user changes to server if they aren't
@@ -1152,6 +1153,11 @@ App.controller('ClearCacheModalController', function($scope, $modalInstance) {
 
   $scope.cancel = () => $modalInstance.dismiss('cancel')
 })
-
 // Wrap React component as Angular component. Only needed for "top-level" component
-App.component('previewPane', react2angular(PreviewPane))
+App.component(
+  'previewPane',
+  react2angular(
+    rootContext.use(PreviewPane),
+    Object.keys(PreviewPane.propTypes)
+  )
+)

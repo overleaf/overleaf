@@ -2,8 +2,17 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import PreviewLogsPaneEntry from './preview-logs-pane-entry'
+import Icon from '../../../shared/components/icon'
+import { useApplicationContext } from '../../../shared/context/application-context'
+import { useEditorContext } from '../../../shared/context/editor-context'
+import { startFreeTrial } from '../../../main/account-upgrade'
 
 function PreviewError({ name }) {
+  const { isProjectOwner } = useEditorContext()
+  const {
+    exposedSettings: { enableSubscriptions }
+  } = useApplicationContext()
+
   const { t } = useTranslation()
   let errorTitle
   let errorContent
@@ -53,17 +62,101 @@ function PreviewError({ name }) {
   }
 
   return errorTitle ? (
-    <PreviewLogsPaneEntry
-      headerTitle={errorTitle}
-      formattedContent={errorContent}
-      entryAriaLabel={t('compile_error_entry_description')}
-      level="error"
-    />
+    <>
+      <PreviewLogsPaneEntry
+        headerTitle={errorTitle}
+        formattedContent={errorContent}
+        entryAriaLabel={t('compile_error_entry_description')}
+        level="error"
+      />
+      {name === 'timedout' && enableSubscriptions ? (
+        <TimeoutUpgradePrompt isProjectOwner={isProjectOwner} />
+      ) : null}
+    </>
   ) : null
+}
+
+function TimeoutUpgradePrompt({ isProjectOwner }) {
+  const { t } = useTranslation()
+
+  function handleStartFreeTrialClick() {
+    startFreeTrial('compile-timeout')
+  }
+
+  const timeoutUpgradePromptContent = (
+    <>
+      <p>{t('free_accounts_have_timeout_upgrade_to_increase')}</p>
+      <p>{t('plus_upgraded_accounts_receive')}:</p>
+      <div>
+        <ul className="list-unstyled">
+          <li>
+            <Icon type="check" />
+            &nbsp;
+            {t('unlimited_projects')}
+          </li>
+          <li>
+            <Icon type="check" />
+            &nbsp;
+            {t('collabs_per_proj', { collabcount: 'Multiple' })}
+          </li>
+          <li>
+            <Icon type="check" />
+            &nbsp;
+            {t('full_doc_history')}
+          </li>
+          <li>
+            <Icon type="check" />
+            &nbsp;
+            {t('sync_to_dropbox')}
+          </li>
+          <li>
+            <Icon type="check" />
+            &nbsp;
+            {t('sync_to_github')}
+          </li>
+          <li>
+            <Icon type="check" />
+            &nbsp;
+            {t('compile_larger_projects')}
+          </li>
+        </ul>
+      </div>
+      {isProjectOwner ? (
+        <p className="text-center">
+          <button
+            className="btn btn-success row-spaced-small"
+            onClick={handleStartFreeTrialClick}
+          >
+            {t('start_free_trial')}
+          </button>
+        </p>
+      ) : null}
+    </>
+  )
+  return (
+    <PreviewLogsPaneEntry
+      headerTitle={
+        isProjectOwner
+          ? t('upgrade_for_longer_compiles')
+          : t('ask_proj_owner_to_upgrade_for_longer_compiles')
+      }
+      formattedContent={timeoutUpgradePromptContent}
+      entryAriaLabel={
+        isProjectOwner
+          ? t('upgrade_for_longer_compiles')
+          : t('ask_proj_owner_to_upgrade_for_longer_compiles')
+      }
+      level="success"
+    />
+  )
 }
 
 PreviewError.propTypes = {
   name: PropTypes.string.isRequired
+}
+
+TimeoutUpgradePrompt.propTypes = {
+  isProjectOwner: PropTypes.bool.isRequired
 }
 
 export default PreviewError

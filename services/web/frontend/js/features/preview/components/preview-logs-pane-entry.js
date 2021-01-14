@@ -78,13 +78,15 @@ function PreviewLogEntryHeader({
     'log-entry-header-error': level === 'error',
     'log-entry-header-warning': level === 'warning',
     'log-entry-header-typesetting': level === 'typesetting',
-    'log-entry-header-raw': level === 'raw'
+    'log-entry-header-raw': level === 'raw',
+    'log-entry-header-success': level === 'success'
   })
   const logEntryLocationBtnClasses = classNames('log-entry-header-link', {
     'log-entry-header-link-error': level === 'error',
     'log-entry-header-link-warning': level === 'warning',
     'log-entry-header-link-typesetting': level === 'typesetting',
-    'log-entry-header-link-raw': level === 'raw'
+    'log-entry-header-link-raw': level === 'raw',
+    'log-entry-header-link-success': level === 'success'
   })
   const headerLogLocationTitle = t('navigate_log_source', {
     location: file + (line ? `, ${line}` : '')
@@ -255,7 +257,8 @@ PreviewLogsPaneEntry.propTypes = {
   logType: PropTypes.string,
   formattedContent: PropTypes.node,
   extraInfoURL: PropTypes.string,
-  level: PropTypes.oneOf(['error', 'warning', 'typesetting', 'raw']).isRequired,
+  level: PropTypes.oneOf(['error', 'warning', 'typesetting', 'raw', 'success'])
+    .isRequired,
   customClass: PropTypes.string,
   showSourceLocationLink: PropTypes.bool,
   showCloseButton: PropTypes.bool,

@@ -4,12 +4,18 @@ import PropTypes from 'prop-types'
 export const EditorContext = createContext()
 
 export function EditorProvider({ children }) {
+  const ownerId =
+    window._ide.$scope.project && window._ide.$scope.project.owner
+      ? window._ide.$scope.project.owner._id
+      : null
+
+  const editorContextValue = {
+    projectId: window.project_id,
+    isProjectOwner: ownerId === window.user.id
+  }
+
   return (
-    <EditorContext.Provider
-      value={{
-        projectId: window.project_id
-      }}
-    >
+    <EditorContext.Provider value={editorContextValue}>
       {children}
     </EditorContext.Provider>
   )
@@ -20,8 +26,6 @@ EditorProvider.propTypes = {
 }
 
 export function useEditorContext() {
-  const { projectId } = useContext(EditorContext)
-  return {
-    projectId
-  }
+  const editorContext = useContext(EditorContext)
+  return editorContext
 }
