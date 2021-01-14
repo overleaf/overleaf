@@ -282,7 +282,7 @@ export function useFileTreeActionable() {
           new CustomEvent('FileTreeReactBridge.openNewFileModal', {
             detail: {
               error: true,
-              data: error.info.responseBody
+              data: error.message
             }
           })
         )
