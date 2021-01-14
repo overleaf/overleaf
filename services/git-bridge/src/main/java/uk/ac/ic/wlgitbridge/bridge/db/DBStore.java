@@ -24,6 +24,12 @@ public interface DBStore {
 
     String getOldestUnswappedProject();
 
+    void swap(String projectName, String compressionMethod);
+
+    void restore(String projectName);
+
+    String getSwapCompression(String projectName);
+
     int getNumUnswappedProjects();
 
     ProjectState getProjectState(String projectName);
