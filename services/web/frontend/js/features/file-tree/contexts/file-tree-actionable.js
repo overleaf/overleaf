@@ -11,13 +11,18 @@ import {
 } from '../util/sync-mutation'
 import { findInTreeOrThrow } from '../util/find-in-tree'
 import { isNameUniqueInFolder } from '../util/is-name-unique-in-folder'
-import { isCleanFilename } from '../util/safe-path'
+import { isBlockedFilename, isCleanFilename } from '../util/safe-path'
 
 import { FileTreeMainContext } from './file-tree-main'
 import { useFileTreeMutable } from './file-tree-mutable'
 import { useFileTreeSelectable } from './file-tree-selectable'
 
-import { InvalidFilenameError, DuplicateFilenameError } from '../errors'
+import {
+  InvalidFilenameError,
+  BlockedFilenameError,
+  DuplicateFilenameError,
+  DuplicateFilenameMoveError
+} from '../errors'
 
 const FileTreeActionableContext = createContext()
 
@@ -27,6 +32,7 @@ const ACTION_TYPES = {
   DELETING: 'DELETING',
   START_CREATE_FOLDER: 'START_CREATE_FOLDER',
   CREATING_FOLDER: 'CREATING_FOLDER',
+  MOVING: 'MOVING',
   CANCEL: 'CANCEL',
   CLEAR: 'CLEAR',
   ERROR: 'ERROR'
@@ -36,6 +42,7 @@ const defaultState = {
   isDeleting: false,
   isRenaming: false,
   isCreatingFolder: false,
+  isMoving: false,
   inFlight: false,
   actionedEntities: null,
   error: null
@@ -67,6 +74,12 @@ function fileTreeActionableReducer(state, action) {
         isDeleting: true,
         inFlight: true,
         actionedEntities: state.actionedEntities
+      }
+    case ACTION_TYPES.MOVING:
+      return {
+        ...defaultState,
+        isMoving: true,
+        inFlight: true
       }
     case ACTION_TYPES.CLEAR:
       return { ...defaultState }
@@ -107,6 +120,7 @@ export function useFileTreeActionable() {
   const {
     isDeleting,
     isRenaming,
+    isMoving,
     isCreatingFolder,
     inFlight,
     error,
@@ -130,18 +144,9 @@ export function useFileTreeActionable() {
     if (newName === oldName) {
       return dispatch({ type: ACTION_TYPES.CLEAR })
     }
-    let error
-    // check valid name
-    if (!isCleanFilename(newName)) {
-      error = new InvalidFilenameError()
-      return dispatch({ type: ACTION_TYPES.ERROR, error })
-    }
 
-    // check for duplicates
-    if (!isNameUniqueInFolder(fileTreeData, found.parentFolderId, newName)) {
-      error = new DuplicateFilenameError()
-      return dispatch({ type: ACTION_TYPES.ERROR, error })
-    }
+    const error = validateRename(fileTreeData, found, newName)
+    if (error) return dispatch({ type: ACTION_TYPES.ERROR, error })
 
     dispatch({ type: ACTION_TYPES.CLEAR })
     dispatchRename(selectedEntityId, newName)
@@ -191,14 +196,35 @@ export function useFileTreeActionable() {
 
   // moves entities. Tree is updated immediately and data are sync'd after.
   function finishMoving(toFolderId, draggedEntityIds) {
-    draggedEntityIds.forEach(selectedEntityId => {
-      dispatchMove(selectedEntityId, toFolderId)
-    })
+    dispatch({ type: ACTION_TYPES.MOVING })
 
-    return mapSeries(Array.from(draggedEntityIds), id => {
-      const found = findInTreeOrThrow(fileTreeData, id)
-      return syncMove(projectId, found.type, found.entity._id, toFolderId)
-    })
+    // find entities and filter out no-ops
+    const founds = Array.from(draggedEntityIds)
+      .map(draggedEntityId => findInTreeOrThrow(fileTreeData, draggedEntityId))
+      .filter(found => found.parentFolderId !== toFolderId)
+
+    // make sure all entities can be moved, return early otherwise
+    const isMoveToRoot = toFolderId === fileTreeData._id
+    const validationError = founds
+      .map(found => validateMove(fileTreeData, toFolderId, found, isMoveToRoot))
+      .find(error => error)
+    if (validationError) {
+      return dispatch({ type: ACTION_TYPES.ERROR, error: validationError })
+    }
+
+    // dispatch moves immediately
+    founds.forEach(found => dispatchMove(found.entity._id, toFolderId))
+
+    // sync dispatched moves after
+    return mapSeries(founds, found =>
+      syncMove(projectId, found.type, found.entity._id, toFolderId)
+    )
+      .then(() => {
+        dispatch({ type: ACTION_TYPES.CLEAR })
+      })
+      .catch(error => {
+        dispatch({ type: ACTION_TYPES.ERROR, error })
+      })
   }
 
   function startCreatingFolder() {
@@ -308,6 +334,7 @@ export function useFileTreeActionable() {
     canRename: selectedEntityIds.size === 1,
     canCreate: selectedEntityIds.size < 2,
     isDeleting,
+    isMoving,
     isRenaming,
     isCreatingFolder,
     inFlight,
@@ -338,4 +365,33 @@ function getSelectedParentFolderId(fileTreeData, selectedEntityIds) {
 
   const found = findInTreeOrThrow(fileTreeData, selectedEntityId)
   return found.type === 'folder' ? found.entity._id : found.parentFolderId
+}
+
+function validateRename(fileTreeData, found, newName) {
+  if (!isCleanFilename(newName)) {
+    return new InvalidFilenameError()
+  }
+
+  if (!isNameUniqueInFolder(fileTreeData, found.parentFolderId, newName)) {
+    return new DuplicateFilenameError()
+  }
+
+  const isTopLevel = found.path.length === 1
+  const isFolder = found.type === 'folder'
+  if (isTopLevel && !isFolder && isBlockedFilename(newName)) {
+    return new BlockedFilenameError()
+  }
+}
+
+function validateMove(fileTreeData, toFolderId, found, isMoveToRoot) {
+  if (!isNameUniqueInFolder(fileTreeData, toFolderId, found.entity.name)) {
+    const error = new DuplicateFilenameMoveError()
+    error.entityName = found.entity.name
+    return error
+  }
+
+  const isFolder = found.type === 'folder'
+  if (isMoveToRoot && !isFolder && isBlockedFilename(found.entity.name)) {
+    return new BlockedFilenameError()
+  }
 }

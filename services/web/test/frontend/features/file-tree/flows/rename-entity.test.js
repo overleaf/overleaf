@@ -150,6 +150,17 @@ describe('FileTree Rename Entity Flow', function() {
     })
   })
 
+  it('shows error modal on blocked filename', async function() {
+    const input = initItemRename('a.tex')
+    fireEvent.change(input, { target: { value: 'prototype' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    await screen.findByRole('alert', {
+      name: 'This file name is blocked.',
+      hidden: true
+    })
+  })
+
   describe('via socket event', function() {
     it('renames doc', function() {
       screen.getByRole('treeitem', { name: 'a.tex' })

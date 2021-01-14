@@ -24,6 +24,8 @@
   "fast",
   "file_outline",
   "file_already_exists",
+  "file_already_exists_in_this_location",
+  "blocked_filename",
   "files_cannot_include_invalid_characters",
   "find_out_more_about_the_file_outline",
   "first_error_popup_label",

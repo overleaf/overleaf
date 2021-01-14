@@ -76,6 +76,34 @@ export function isCleanFilename(filename) {
   )
 }
 
+export function isBlockedFilename(filename) {
+  return BLOCKEDFILE_RX.test(filename)
+}
+
+// returns whether a full path is 'clean' - e.g. is a full or relative path
+// that points to a file, and each element passes the rules in 'isCleanFilename'
+export function isCleanPath(path) {
+  const elements = path.split('/')
+
+  const lastElementIsEmpty = elements[elements.length - 1].length === 0
+  if (lastElementIsEmpty) {
+    return false
+  }
+
+  for (let element of Array.from(elements)) {
+    if (element.length > 0 && !isCleanFilename(element)) {
+      return false
+    }
+  }
+
+  // check for a top-level reserved name
+  if (BLOCKEDFILE_RX.test(path.replace(/^\/?/, ''))) {
+    return false
+  } // remove leading slash if present
+
+  return true
+}
+
 export function isAllowedLength(pathname) {
   return pathname.length > 0 && pathname.length <= MAX_PATH
 }
