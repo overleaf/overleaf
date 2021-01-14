@@ -140,6 +140,15 @@ public class FSGitRepoStore implements RepoStore {
     }
 
     @Override
+    public InputStream gzipProject(
+        String projectName,
+        long[] sizePtr
+    ) throws IOException {
+        Project.checkValidProjectName(projectName);
+        return Tar.gzip.zip(getDotGitForProject(projectName), sizePtr);
+    }
+
+    @Override
     public void gcProject(String projectName) throws IOException {
         Project.checkValidProjectName(projectName);
         ProjectRepo repo = getExistingRepo(projectName);
@@ -169,6 +178,25 @@ public class FSGitRepoStore implements RepoStore {
                 projectName
         );
         Tar.bz2.unzip(dataStream, getDirForProject(projectName));
+    }
+
+    @Override
+    public void ungzipProject(
+      String projectName,
+      InputStream dataStream
+    ) throws IOException {
+        Preconditions.checkArgument(
+            Project.isValidProjectName(projectName),
+            "[%s] invalid project name: ",
+            projectName
+        );
+        Preconditions.checkState(
+            getDirForProject(projectName).mkdirs(),
+          "[%s] directories for " +
+            "evicted project already exist",
+            projectName
+        );
+        Tar.gzip.unzip(dataStream, getDirForProject(projectName));
     }
 
     private File getDirForProject(String projectName) {
