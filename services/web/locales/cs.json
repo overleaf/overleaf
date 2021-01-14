@@ -5,7 +5,7 @@
   "confirmation_token_invalid": "Omlováme se, ale Váš potvrzovací kód je neplatný nebo vypršel. Prosím požádejte o nový potrvzovací e-mail.",
   "confirmation_link_broken": "Omlouváme se, ale něco není v pořádku s Vaším potvrzovacím kódem. Prosíme zkuste zkopírovat odkaz z konce Vašeho potvrzovacího e-mailu.",
   "duplicate_file": "Zduplikovat soubor",
-  "file_already_exists_in_this_location": "Soubor __fileName__ již v daném umístění existuje. Pokud chcete tento soubor přesunout, nejprve přejmenujte nebo odstraňte ten existující.",
+  "file_already_exists_in_this_location": "Soubor <0>__fileName__</0> již v daném umístění existuje. Pokud chcete tento soubor přesunout, nejprve přejmenujte nebo odstraňte ten existující.",
   "group_full": "Tato skupina je již naplněna.",
   "no_selection_select_file": "Nevybrali jste žádný soubor.",
   "no_selection_create_new_file": "Ve Vašem projektu nejsou žádné soubory. Prosíme vytvořte nový soubor.",

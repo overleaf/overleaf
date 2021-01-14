@@ -64,7 +64,7 @@
   "confirmation_token_invalid": "Beklager, din bekræftelsespolet er ugyldig eller udløbet. Vi må bede dig bestille en ny email med et bekræftelseslink.",
   "confirmation_link_broken": "Beklager, der er noget galt med dit bekræftelseslink. Du kan prøve at kopiere og indsætte linket i bunden af din bekræftelsesmail.",
   "duplicate_file": "Duplikér Fil",
-  "file_already_exists_in_this_location": "Et emne med navnet __fileName__ findes allerede på denne placering. Hvis du vil gennemføre flytningen, skal du først omdøbe eller flytte den fil, som er i vejen, og derefter prøve igen.",
+  "file_already_exists_in_this_location": "Et emne med navnet <0>__fileName__</0> findes allerede på denne placering. Hvis du vil gennemføre flytningen, skal du først omdøbe eller flytte den fil, som er i vejen, og derefter prøve igen.",
   "group_full": "Denne gruppe er allerede fuld",
   "no_selection_select_file": "Der er ikke valgt nogen fil. Vælg venligst en fil fra filtræet.",
   "no_selection_create_new_file": "Dit projekt er tomt. Lav venligst en ny fil.",

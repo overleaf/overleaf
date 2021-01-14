@@ -1,4 +1,5 @@
 {
+  "reload_editor": "Actualiser l’éditeur",
   "compile_error_description": "Ce projet n’a pas pu être compilé en raison d’une erreur",
   "validation_issue_description": "Ce projet n’a pas pu être compilé en raison d’un problème de validation",
   "compile_error_entry_description": "Une erreur qui a empêché la compilation de ce projet",
@@ -92,7 +93,7 @@
   "confirmation_token_invalid": "Désolé, votre jeton de confirmation est invalide ou a expiré. Veuillez en demander un nouveau.",
   "confirmation_link_broken": "Désolé, il y a un problème avec votre lien de confirmation. Veuillez essayer de copier et coller le lien en bas de votre courriel de confirmation.",
   "duplicate_file": "Dupliquer le fichier",
-  "file_already_exists_in_this_location": "Un élément porte déjà le nom __fileName__ à cet emplacement. Si vous souhaitez déplacer ce fichier, renommez ou supprimez l’élément et essayez à nouveau.",
+  "file_already_exists_in_this_location": "Un élément porte déjà le nom <0>__fileName__</0> à cet emplacement. Si vous souhaitez déplacer ce fichier, renommez ou supprimez l’élément et essayez à nouveau.",
   "group_full": "Ce groupe est déjà complet",
   "no_selection_select_file": "Aucun fichier sélectionné. Veuillez sélectionner un fichier depuis l’arborescence.",
   "no_selection_create_new_file": "Votre projet est vide. Veuillez créer un nouveau fichier.",
