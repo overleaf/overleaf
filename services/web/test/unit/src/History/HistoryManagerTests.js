@@ -16,6 +16,9 @@ describe('HistoryManager', function() {
       delete: sinon.stub().resolves()
     }
     this.projectHistoryUrl = 'http://project_history.example.com'
+    this.v1HistoryUrl = 'http://v1_history.example.com'
+    this.v1HistoryUser = 'system'
+    this.v1HistoryPassword = 'verysecret'
     this.settings = {
       apis: {
         trackchanges: {
@@ -24,6 +27,11 @@ describe('HistoryManager', function() {
         },
         project_history: {
           url: this.projectHistoryUrl
+        },
+        v1_history: {
+          url: this.v1HistoryUrl,
+          user: this.v1HistoryUser,
+          pass: this.v1HistoryPassword
         }
       }
     }
@@ -254,12 +262,27 @@ describe('HistoryManager', function() {
   })
 
   describe('deleteProject', function() {
+    const projectId = new ObjectId()
+    const historyId = new ObjectId()
+
+    beforeEach(async function() {
+      await this.HistoryManager.promises.deleteProject(projectId, historyId)
+    })
+
     it('should call the project-history service', async function() {
-      const projectId = new ObjectId()
-      await this.HistoryManager.promises.deleteProject(projectId)
       expect(this.request.delete).to.have.been.calledWith(
         `${this.projectHistoryUrl}/project/${projectId}`
       )
+    })
+
+    it('should call the v1-history service', async function() {
+      expect(this.request.delete).to.have.been.calledWith({
+        url: `${this.v1HistoryUrl}/projects/${historyId}`,
+        auth: {
+          user: this.v1HistoryUser,
+          pass: this.v1HistoryPassword
+        }
+      })
     })
   })
 })

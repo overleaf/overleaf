@@ -87,6 +87,10 @@ module.exports = MockV1HistoryApi = {
       }
     )
 
+    app.delete('/api/projects/:project_id', (req, res, next) => {
+      res.sendStatus(204)
+    })
+
     return app
       .listen(3100, error => {
         if (error != null) {

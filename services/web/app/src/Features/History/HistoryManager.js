@@ -61,17 +61,34 @@ async function resyncProject(projectId) {
       url: `${settings.apis.project_history.url}/project/${projectId}/resync`
     })
   } catch (err) {
-    throw new OError('failed to resync project history', { projectId })
+    throw OError.tag(err, 'failed to resync project history', { projectId })
   }
 }
 
-async function deleteProject(projectId) {
+async function deleteProject(projectId, historyId) {
   try {
-    await request.delete(
-      `${settings.apis.project_history.url}/project/${projectId}`
-    )
+    const tasks = [
+      request.delete(
+        `${settings.apis.project_history.url}/project/${projectId}`
+      )
+    ]
+    if (historyId != null) {
+      tasks.push(
+        request.delete({
+          url: `${settings.apis.v1_history.url}/projects/${historyId}`,
+          auth: {
+            user: settings.apis.v1_history.user,
+            pass: settings.apis.v1_history.pass
+          }
+        })
+      )
+    }
+    await Promise.all(tasks)
   } catch (err) {
-    throw new OError('failed to clear project history', { projectId })
+    throw OError.tag(err, 'failed to clear project history', {
+      projectId,
+      historyId
+    })
   }
 }
 

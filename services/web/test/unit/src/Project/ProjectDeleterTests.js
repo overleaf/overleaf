@@ -41,7 +41,12 @@ describe('ProjectDeleter', function() {
           deletedProjectId: '5cf9270b4eff6e186cf8b05e'
         },
         project: {
-          _id: '5cf9270b4eff6e186cf8b05e'
+          _id: '5cf9270b4eff6e186cf8b05e',
+          overleaf: {
+            history: {
+              id: new ObjectId()
+            }
+          }
         }
       },
       {
@@ -461,10 +466,13 @@ describe('ProjectDeleter', function() {
       ).to.have.been.calledWith(this.deletedProjects[0].project._id)
     })
 
-    it('should delete the project in project-history', function() {
+    it('should delete the project in history', function() {
       expect(
         this.HistoryManager.promises.deleteProject
-      ).to.have.been.calledWith(this.deletedProjects[0].project._id)
+      ).to.have.been.calledWith(
+        this.deletedProjects[0].project._id,
+        this.deletedProjects[0].project.overleaf.history.id
+      )
     })
 
     it('should destroy the files in filestore', function() {

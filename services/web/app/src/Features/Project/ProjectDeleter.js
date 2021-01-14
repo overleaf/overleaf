@@ -327,9 +327,19 @@ async function expireDeletedProject(projectId) {
       return
     }
 
-    await DocstoreManager.promises.destroyProject(deletedProject.project._id)
-    await HistoryManager.promises.deleteProject(deletedProject.project._id)
-    await FilestoreHandler.promises.deleteProject(deletedProject.project._id)
+    const historyId =
+      deletedProject.project.overleaf &&
+      deletedProject.project.overleaf.history &&
+      deletedProject.project.overleaf.history.id
+
+    await Promise.all([
+      DocstoreManager.promises.destroyProject(deletedProject.project._id),
+      HistoryManager.promises.deleteProject(
+        deletedProject.project._id,
+        historyId
+      ),
+      FilestoreHandler.promises.deleteProject(deletedProject.project._id)
+    ])
 
     await DeletedProject.updateOne(
       {
