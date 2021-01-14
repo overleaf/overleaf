@@ -42,6 +42,7 @@ describe('FileTree Create Folder Flow', function() {
         hasWritePermissions
         onSelect={onSelect}
         onInit={onInit}
+        isConnected
       />
     )
 
@@ -97,6 +98,7 @@ describe('FileTree Create Folder Flow', function() {
         rootDocId="789ghi"
         onSelect={onSelect}
         onInit={onInit}
+        isConnected
       />
     )
 
@@ -161,6 +163,7 @@ describe('FileTree Create Folder Flow', function() {
         rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
+        isConnected
       />
     )
 
@@ -214,6 +217,7 @@ describe('FileTree Create Folder Flow', function() {
         rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
+        isConnected
       />
     )
 

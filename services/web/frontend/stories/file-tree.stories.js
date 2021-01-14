@@ -86,6 +86,9 @@ FullTree.parameters = { setupMocks: defaultSetupMocks }
 export const ReadOnly = args => <FileTreeRoot {...args} />
 ReadOnly.args = { hasWritePermissions: false }
 
+export const Disconnected = args => <FileTreeRoot {...args} />
+Disconnected.args = { isConnected: false }
+
 export const NetworkErrors = args => <FileTreeRoot {...args} />
 NetworkErrors.parameters = {
   setupMocks: () => {
@@ -116,7 +119,8 @@ export default {
     rootFolder: rootFolderBase,
     hasWritePermissions: true,
     projectId: '123abc',
-    rootDocId: '5e74f1a7ce17ae0041dfd056'
+    rootDocId: '5e74f1a7ce17ae0041dfd056',
+    isConnected: true
   },
   argTypes: {
     onInit: { action: 'onInit' },

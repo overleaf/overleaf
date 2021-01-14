@@ -41,6 +41,7 @@ describe('FileTree Delete Entity Flow', function() {
           hasWritePermissions
           onSelect={onSelect}
           onInit={onInit}
+          isConnected
         />
       )
 
@@ -139,6 +140,7 @@ describe('FileTree Delete Entity Flow', function() {
           hasWritePermissions
           onSelect={onSelect}
           onInit={onInit}
+          isConnected
         />
       )
 
@@ -187,6 +189,7 @@ describe('FileTree Delete Entity Flow', function() {
           hasWritePermissions
           onSelect={onSelect}
           onInit={onInit}
+          isConnected
         />
       )
 

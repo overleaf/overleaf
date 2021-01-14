@@ -26,6 +26,7 @@ describe('FileTree Context Menu Flow', function() {
         rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
+        isConnected
       />
     )
     const treeitem = screen.getByRole('button', { name: 'main.tex' })
@@ -54,6 +55,7 @@ describe('FileTree Context Menu Flow', function() {
         rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
+        isConnected
       />
     )
     const treeitem = screen.getByRole('button', { name: 'main.tex' })

@@ -1,3 +1,4 @@
+import { expect } from 'chai'
 import React from 'react'
 import sinon from 'sinon'
 import { screen, render, fireEvent, waitFor } from '@testing-library/react'
@@ -30,7 +31,7 @@ describe('<FileTreeRoot/>', function() {
         fileRefs: []
       }
     ]
-    render(
+    const { container } = render(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"
@@ -38,12 +39,14 @@ describe('<FileTreeRoot/>', function() {
         rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
+        isConnected
       />
     )
 
     screen.queryByRole('tree')
     screen.getByRole('treeitem')
     screen.getByRole('treeitem', { name: 'main.tex', selected: true })
+    expect(container.querySelector('.disconnected-overlay')).to.not.exist
   })
 
   it('renders with invalid selected doc in local storage', async function() {
@@ -67,6 +70,7 @@ describe('<FileTreeRoot/>', function() {
         rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
+        isConnected
       />
     )
 
@@ -78,6 +82,31 @@ describe('<FileTreeRoot/>', function() {
     const deleteButton = screen.getByRole('menuitem', { name: 'Delete' })
     fireEvent.click(deleteButton)
     await waitFor(() => screen.getByRole('button', { name: 'Cancel' }))
+  })
+
+  it('renders disconnected overlay', function() {
+    const rootFolder = [
+      {
+        _id: 'root-folder-id',
+        docs: [{ _id: '456def', name: 'main.tex' }],
+        folders: [],
+        fileRefs: []
+      }
+    ]
+
+    const { container } = render(
+      <FileTreeRoot
+        rootFolder={rootFolder}
+        projectId="123abc"
+        hasWritePermissions={false}
+        rootDocId="456def"
+        onSelect={onSelect}
+        onInit={onInit}
+        isConnected={false}
+      />
+    )
+
+    expect(container.querySelector('.disconnected-overlay')).to.exist
   })
 
   it('fire onSelect', function() {
@@ -100,6 +129,7 @@ describe('<FileTreeRoot/>', function() {
         hasWritePermissions={false}
         onSelect={onSelect}
         onInit={onInit}
+        isConnected
       />
     )
     sinon.assert.calledOnce(onSelect)
@@ -147,6 +177,7 @@ describe('<FileTreeRoot/>', function() {
         hasWritePermissions={false}
         onSelect={onSelect}
         onInit={onInit}
+        isConnected
       />
     )
 

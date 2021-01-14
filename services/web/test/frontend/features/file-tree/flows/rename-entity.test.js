@@ -53,6 +53,7 @@ describe('FileTree Rename Entity Flow', function() {
         hasWritePermissions
         onSelect={onSelect}
         onInit={onInit}
+        isConnected
       />
     )
   })

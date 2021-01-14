@@ -24,7 +24,8 @@ function FileTreeRoot({
   rootDocId,
   hasWritePermissions,
   onSelect,
-  onInit
+  onInit,
+  isConnected
 }) {
   const isReady = projectId && rootFolder
 
@@ -41,6 +42,7 @@ function FileTreeRoot({
       rootDocId={rootDocId}
       onSelect={onSelect}
     >
+      {isConnected ? null : <div className="disconnected-overlay" />}
       <FileTreeToolbar />
       <FileTreeContextMenu />
       <div className="file-tree-inner">
@@ -83,7 +85,8 @@ FileTreeRoot.propTypes = {
   rootDocId: PropTypes.string,
   hasWritePermissions: PropTypes.bool.isRequired,
   onSelect: PropTypes.func.isRequired,
-  onInit: PropTypes.func.isRequired
+  onInit: PropTypes.func.isRequired,
+  isConnected: PropTypes.bool.isRequired
 }
 
 export default withErrorBoundary(FileTreeRoot, FileTreeError)
