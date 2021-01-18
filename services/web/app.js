@@ -25,6 +25,7 @@ if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
 metrics.memory.monitor(logger)
 const Server = require('./app/src/infrastructure/Server')
 const mongodb = require('./app/src/infrastructure/mongodb')
+const mongoose = require('./app/src/infrastructure/Mongoose')
 const Queues = require('./app/src/infrastructure/Queues')
 
 Queues.initialize()
@@ -44,8 +45,7 @@ if (!module.parent) {
   if (!process.env.WEB_API_USER || !process.env.WEB_API_PASSWORD) {
     throw new Error('No API user and password provided')
   }
-  mongodb
-    .waitForDb()
+  Promise.all([mongodb.waitForDb(), mongoose.connectionPromise])
     .then(() => {
       Server.server.listen(port, host, function() {
         logger.info(`web starting up, listening on ${host}:${port}`)
