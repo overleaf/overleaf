@@ -59,7 +59,7 @@ module.exports = {
         // Only compile application files (npm and vendored dependencies are in
         // ES5 already)
         exclude: [
-          /node_modules\/(?!@overleaf\/o-error\/)/,
+          /node_modules/,
           path.resolve(__dirname, 'frontend/js/vendor')
         ],
         use: [
