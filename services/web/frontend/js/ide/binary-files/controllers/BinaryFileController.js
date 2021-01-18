@@ -89,6 +89,7 @@ export default App.controller('BinaryFileController', function(
   $scope.refreshFile = function(file) {
     $scope.refreshing = true
     $scope.refreshError = null
+    window.expectingLinkedFileRefreshedSocketFor = file.name
     ide.fileTreeManager
       .refreshLinkedFile(file)
       .then(function(response) {
@@ -97,7 +98,10 @@ export default App.controller('BinaryFileController', function(
         $timeout(
           () =>
             waitFor(() => ide.fileTreeManager.findEntityById(newFileId), 5000)
-              .then(newFile => ide.binaryFilesManager.openFile(newFile))
+              .then(newFile => {
+                ide.binaryFilesManager.openFile(newFile)
+                window.expectingLinkedFileRefreshedSocketFor = null
+              })
               .catch(err => console.warn(err)),
 
           0

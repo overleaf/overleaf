@@ -23,9 +23,13 @@ export function useFileTreeSocketListener() {
   const socket = window._ide && window._ide.socket
 
   const selectEntityIfCreatedByUser = useCallback(
-    (entityId, userId) => {
+    // hack to automatically re-open refreshed linked files
+    (entityId, entityName, userId) => {
       if (window.user && window.user.id && window.user.id === userId) {
-        select(entityId)
+        if (window.expectingLinkedFileRefreshedSocketFor === entityName) {
+          select(entityId)
+          window.expectingLinkedFileRefreshedSocketFor = null
+        }
       }
     },
     [select]
@@ -86,36 +90,36 @@ export function useFileTreeSocketListener() {
   useEffect(() => {
     function handleDispatchCreateFolder(parentFolderId, folder, userId) {
       dispatchCreateFolder(parentFolderId, folder)
-      selectEntityIfCreatedByUser(folder._id, userId)
     }
     if (socket) socket.on('reciveNewFolder', handleDispatchCreateFolder)
     return () => {
       if (socket)
         socket.removeListener('reciveNewFolder', handleDispatchCreateFolder)
     }
-  }, [socket, dispatchCreateFolder, selectEntityIfCreatedByUser])
+  }, [socket, dispatchCreateFolder])
 
   useEffect(() => {
     function handleDispatchCreateDoc(parentFolderId, doc, _source, userId) {
       dispatchCreateDoc(parentFolderId, doc)
-      selectEntityIfCreatedByUser(doc._id, userId)
     }
     if (socket) socket.on('reciveNewDoc', handleDispatchCreateDoc)
     return () => {
       if (socket) socket.removeListener('reciveNewDoc', handleDispatchCreateDoc)
     }
-  }, [socket, dispatchCreateDoc, selectEntityIfCreatedByUser])
+  }, [socket, dispatchCreateDoc])
 
   useEffect(() => {
     function handleDispatchCreateFile(
       parentFolderId,
       file,
       _source,
-      _linkedFileData,
+      linkedFileData,
       userId
     ) {
       dispatchCreateFile(parentFolderId, file)
-      selectEntityIfCreatedByUser(file._id, userId)
+      if (linkedFileData) {
+        selectEntityIfCreatedByUser(file._id, file.name, userId)
+      }
     }
     if (socket) socket.on('reciveNewFile', handleDispatchCreateFile)
     return () => {
