@@ -32,6 +32,11 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     next()
   })
 
+  webRouter.use(function(req, res, next) {
+    res.locals.isIE = /\b(msie|trident)\b/i.test(req.headers['user-agent'])
+    next()
+  })
+
   function addSetContentDisposition(req, res, next) {
     res.setContentDisposition = function(type, opts) {
       const directives = _.map(
