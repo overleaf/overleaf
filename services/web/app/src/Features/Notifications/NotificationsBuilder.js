@@ -127,9 +127,15 @@ function ipMatcherAffiliation(userId) {
           }
 
           const key = `ip-matched-affiliation-${body.id}`
+          const portalPath = body.portal_slug
+            ? `/${body.is_university ? 'edu' : 'org'}/${body.portal_slug}`
+            : undefined
           const messageOpts = {
             university_name: body.name,
-            content: body.enrolment_ad_html
+            institutionId: body.id,
+            content: body.enrolment_ad_html,
+            portalPath,
+            ssoEnabled: body.sso_enabled
           }
           return NotificationsHandler.createNotification(
             userId,

@@ -51,17 +51,40 @@ include ../../_mixins/saml
 							span.sr-only #{translate("close")}
 				.alert.alert-info(
 					ng-switch-when="notification_ip_matched_affiliation"
+					ng-if="notification.messageOpts.ssoEnabled"
 				)
 					.notification-body
-						| It looks like you're at&nbsp;
-						strong {{ notification.messageOpts.university_name }}! <br/>
-						|	Did you know that {{notification.messageOpts.university_name}} is providing
-						strong  free Overleaf Professional accounts
-						|	 to everyone at {{notification.messageOpts.university_name}}? <br/>
-						|	Add an institutional email address to claim your account.
+						| !{translate("looks_like_youre_at", {institutionName: '{{notification.messageOpts.university_name}}'}, ['strong'])}
+						br
+						| !{translate("you_can_now_log_in_sso", {}, ['strong'])}
+						br
+						| #{translate("link_institutional_email_get_started", {}, ['strong'])}&nbsp;
+						a(
+							ng-href="{{notification.messageOpts.portalPath || 'https://www.overleaf.com/learn/how-to/Institutional_Login'}}"
+						) #{translate("find_out_more_nt")}
 					.notification-action
-						a.pull-right.btn.btn-sm.btn-info(href="/user/settings")
-							| Add Affiliation
+						a.pull-right.btn.btn-sm.btn-info(
+							href=`{{samlInitPath}}?university_id={{notification.messageOpts.institutionId}}`
+						)
+							| #{translate("link_account")}
+					.notification-close
+						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+				.alert.alert-info(
+					ng-switch-when="notification_ip_matched_affiliation"
+					ng-if="!notification.messageOpts.ssoEnabled"
+				)
+					.notification-body
+						| !{translate("looks_like_youre_at", {institutionName: '{{notification.messageOpts.university_name}}'}, ['strong'])}
+						br
+						| !{translate("did_you_know_institution_providing_professional", {institutionName: '{{notification.messageOpts.university_name}}'}, ['strong'])}
+						br
+						| #{translate("add_email_to_claim_features")}
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(
+							href="/user/settings"
+						) #{translate("add_affiliation")}
 					.notification-close
 						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;

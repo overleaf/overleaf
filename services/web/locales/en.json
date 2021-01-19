@@ -1330,5 +1330,11 @@
   "github_is_premium": "GitHub sync is a premium feature",
   "remote_service_error": "The remote service produced an error",
   "linked_file": "Imported file",
-  "n_items": "__count__ items"
+  "n_items": "__count__ items",
+  "you_can_now_log_in_sso": "You can now log in through your institution and may receive <0>free __appName__ Professional features</0>!",
+  "link_institutional_email_get_started": "Link an institutional email address to your account to get started.",
+  "looks_like_youre_at": "It looks like you're at <0>__institutionName__</0>!",
+  "add_affiliation": "Add Affiliation",
+  "did_you_know_institution_providing_professional": "Did you know that __institutionName__ is providing <0>free __appName__ Professional features</0> to everyone at __institutionName__?",
+  "add_email_to_claim_features": "Add an institutional email address to claim your features."
 }
