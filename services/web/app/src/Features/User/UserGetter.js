@@ -2,6 +2,8 @@ const { callbackify } = require('util')
 const { db } = require('../../infrastructure/mongodb')
 const metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
+const moment = require('moment')
+const settings = require('settings-sharelatex')
 const { promisifyAll } = require('../../util/promises')
 const {
   promises: InstitutionsAPIPromises
@@ -10,6 +12,35 @@ const InstitutionsHelper = require('../Institutions/InstitutionsHelper')
 const Errors = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')
 const { normalizeQuery, normalizeMultiQuery } = require('../Helpers/Mongo')
+
+function _emailInReconfirmNotificationPeriod(emailData, institutionData) {
+  const globalReconfirmPeriod = settings.reconfirmNotificationDays
+  if (!globalReconfirmPeriod) return false
+
+  // only show notification for institutions with reconfirmation enabled
+  if (!institutionData || !institutionData.maxConfirmationMonths) return false
+
+  if (!emailData.confirmedAt) return false
+
+  if (institutionData.ssoEnabled && !emailData.samlProviderId) {
+    // For SSO, only show notification for linked email
+    return false
+  }
+
+  // reconfirmedAt will not always be set, use confirmedAt as fallback
+  const lastConfirmed = emailData.reconfirmedAt || emailData.confirmedAt
+
+  const lastDayToReconfirm = moment(lastConfirmed).add(
+    institutionData.maxConfirmationMonths,
+    'months'
+  )
+  const notificationStarts = moment(lastDayToReconfirm).subtract(
+    globalReconfirmPeriod,
+    'days'
+  )
+
+  return moment().isAfter(notificationStarts)
+}
 
 async function getUserFullEmails(userId) {
   const user = await UserGetter.promises.getUser(userId, {
@@ -155,8 +186,8 @@ var decorateFullEmails = (
   emailsData,
   affiliationsData,
   samlIdentifiers
-) =>
-  emailsData.map(function(emailData) {
+) => {
+  emailsData.forEach(function(emailData) {
     emailData.default = emailData.email === defaultEmail
 
     const affiliation = affiliationsData.find(
@@ -164,31 +195,33 @@ var decorateFullEmails = (
     )
     if (affiliation) {
       const { institution, inferred, role, department, licence } = affiliation
+      const inReconfirmNotificationPeriod = _emailInReconfirmNotificationPeriod(
+        emailData,
+        institution
+      )
       emailData.affiliation = {
         institution,
         inferred,
+        inReconfirmNotificationPeriod,
         role,
         department,
         licence
       }
-    } else {
-      emailsData.affiliation = null
     }
 
     if (emailData.samlProviderId) {
       emailData.samlIdentifier = samlIdentifiers.find(
         samlIdentifier => samlIdentifier.providerId === emailData.samlProviderId
       )
-    } else {
-      emailsData.samlIdentifier = null
     }
 
     emailData.emailHasInstitutionLicence = InstitutionsHelper.emailHasLicence(
       emailData
     )
-
-    return emailData
   })
+
+  return emailsData
+}
 ;[
   'getUser',
   'getUserEmail',

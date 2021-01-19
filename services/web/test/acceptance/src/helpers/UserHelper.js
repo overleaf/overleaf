@@ -4,7 +4,9 @@ const Settings = require('settings-sharelatex')
 const UserCreator = require('../../../../app/src/Features/User/UserCreator')
 const UserGetter = require('../../../../app/src/Features/User/UserGetter')
 const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')
+const moment = require('moment')
 const request = require('request-promise-native')
+const { db } = require('../../../../app/src/infrastructure/mongodb')
 const { ObjectId } = require('mongodb')
 
 let globalUserNum = 1
@@ -288,6 +290,76 @@ class UserHelper {
     }
 
     return userHelper
+  }
+
+  async addEmailAndConfirm(userId, email) {
+    let response = await this.request.post({
+      form: {
+        email
+      },
+      simple: false,
+      uri: '/user/emails'
+    })
+    expect(response.statusCode).to.equal(204)
+    const token = (
+      await db.tokens.findOne({
+        'data.user_id': userId.toString(),
+        'data.email': email
+      })
+    ).token
+    response = await this.request.post({
+      form: {
+        token
+      },
+      simple: false,
+      uri: '/user/emails/confirm'
+    })
+    expect(response.statusCode).to.equal(200)
+  }
+
+  async backdateConfirmation(userId, email, days) {
+    const confirmedDate = moment()
+      .subtract(days, 'days')
+      .toDate()
+    const query = {
+      _id: userId,
+      'emails.email': email
+    }
+    const update = {
+      $set: {
+        'emails.$.confirmedAt': confirmedDate,
+        'emails.$.reconfirmedAt': confirmedDate
+      }
+    }
+    await UserUpdater.promises.updateUser(query, update)
+  }
+
+  async confirmEmail(userId, email) {
+    let response
+    // UserHelper.createUser does not create a confirmation token
+    response = await this.request.post({
+      form: {
+        email
+      },
+      simple: false,
+      uri: '/user/emails/resend_confirmation'
+    })
+    expect(response.statusCode).to.equal(200)
+    const tokenData = await db.tokens
+      .find({
+        use: 'email_confirmation',
+        'data.user_id': userId.toString(),
+        usedAt: { $exists: false }
+      })
+      .next()
+    response = await this.request.post({
+      form: {
+        token: tokenData.token
+      },
+      simple: false,
+      uri: '/user/emails/confirm'
+    })
+    expect(response.statusCode).to.equal(200)
   }
 }
 

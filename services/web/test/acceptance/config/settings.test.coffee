@@ -186,3 +186,5 @@ module.exports =
   # setting to true since many features are enabled/disabled after availability of this
   # property (check Features.js)
 	overleaf: true
+
+	reconfirmNotificationDays: 14
