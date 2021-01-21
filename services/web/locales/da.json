@@ -1,4 +1,6 @@
 {
+  "github_file_name_error": "Dit projekt har fil(er) med ugyldigt filnavn. Kig dit repository igennem, og prøv igen.",
+  "refresh": "Genindlæs",
   "n_warnings": "__count__ advarsel",
   "n_warnings_plural": "__count__ advarsler",
   "n_errors": "__count__ fejl",
