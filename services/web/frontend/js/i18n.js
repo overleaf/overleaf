@@ -6,7 +6,7 @@ const LANG = window.i18n.currentLangCode
 // Since we are rendering React from Angular, the initialisation is
 // synchronous on page load (but hidden behind the loading screen). This
 // means that translations must be initialised without any actual
-// translations strings, and load those manually ourselves later
+// translation strings, and load those manually ourselves later
 
 i18n.use(initReactI18next).init({
   lng: LANG,
@@ -14,7 +14,12 @@ i18n.use(initReactI18next).init({
   react: {
     // Since we are manually waiting on the translations data to
     // load, we don't need to use Suspense
-    useSuspense: false
+    useSuspense: false,
+
+    // Trigger a re-render when a language is added. Since we load the
+    // translation strings asynchronously, we need to trigger a re-render once
+    // they've loaded
+    bindI18nStore: 'added'
   },
 
   interpolation: {
