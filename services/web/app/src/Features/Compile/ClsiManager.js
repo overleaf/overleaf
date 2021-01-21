@@ -136,7 +136,7 @@ const ClsiManager = {
     ClsiManager._makeRequest(projectId, opts, callback)
   },
 
-  deleteAuxFiles(projectId, userId, options, callback) {
+  deleteAuxFiles(projectId, userId, options, clsiserverid, callback) {
     if (options == null) {
       options = {}
     }
@@ -149,27 +149,32 @@ const ClsiManager = {
       url: compilerUrl,
       method: 'DELETE'
     }
-    ClsiManager._makeRequest(projectId, opts, clsiErr => {
-      // always clear the project state from the docupdater, even if there
-      // was a problem with the request to the clsi
-      DocumentUpdaterHandler.clearProjectState(projectId, docUpdaterErr => {
-        if (clsiErr != null) {
-          return callback(
-            OError.tag(clsiErr, 'Failed to delete aux files', { projectId })
-          )
-        }
-        if (docUpdaterErr != null) {
-          return callback(
-            OError.tag(
-              docUpdaterErr,
-              'Failed to clear project state in doc updater',
-              { projectId }
+    ClsiManager._makeRequestWithClsiServerId(
+      projectId,
+      opts,
+      clsiserverid,
+      clsiErr => {
+        // always clear the project state from the docupdater, even if there
+        // was a problem with the request to the clsi
+        DocumentUpdaterHandler.clearProjectState(projectId, docUpdaterErr => {
+          if (clsiErr != null) {
+            return callback(
+              OError.tag(clsiErr, 'Failed to delete aux files', { projectId })
             )
-          )
-        }
-        callback()
-      })
-    })
+          }
+          if (docUpdaterErr != null) {
+            return callback(
+              OError.tag(
+                docUpdaterErr,
+                'Failed to clear project state in doc updater',
+                { projectId }
+              )
+            )
+          }
+          callback()
+        })
+      }
+    )
   },
 
   _sendBuiltRequest(projectId, userId, req, options, callback) {
@@ -251,6 +256,23 @@ const ClsiManager = {
         )
       }
     )
+  },
+
+  _makeRequestWithClsiServerId(projectId, opts, clsiserverid, callback) {
+    if (clsiserverid) {
+      // ignore cookies and newBackend, go straight to the clsi node
+      opts.qs = Object.assign({ clsiserverid }, opts.qs)
+      request(opts, (err, response, body) => {
+        if (err) {
+          return callback(
+            OError.tag(err, 'error making request to CLSI', { projectId })
+          )
+        }
+        callback(null, response, body)
+      })
+    } else {
+      ClsiManager._makeRequest(projectId, opts, callback)
+    }
   },
 
   _makeRequest(projectId, opts, callback) {
@@ -787,7 +809,7 @@ const ClsiManager = {
     })
   },
 
-  wordCount(projectId, userId, file, options, callback) {
+  wordCount(projectId, userId, file, options, clsiserverid, callback) {
     ClsiManager._buildRequest(projectId, options, (err, req) => {
       if (err != null) {
         return callback(
@@ -812,25 +834,32 @@ const ClsiManager = {
         },
         method: 'GET'
       }
-      ClsiManager._makeRequest(projectId, opts, (err, response, body) => {
-        if (err != null) {
-          return callback(OError.tag(err, 'CLSI request failed', { projectId }))
-        }
-        if (response.statusCode >= 200 && response.statusCode < 300) {
-          callback(null, body)
-        } else {
-          callback(
-            new OError(
-              `CLSI returned non-success code: ${response.statusCode}`,
-              {
-                projectId,
-                clsiResponse: body,
-                statusCode: response.statusCode
-              }
+      ClsiManager._makeRequestWithClsiServerId(
+        projectId,
+        opts,
+        clsiserverid,
+        (err, response, body) => {
+          if (err != null) {
+            return callback(
+              OError.tag(err, 'CLSI request failed', { projectId })
             )
-          )
+          }
+          if (response.statusCode >= 200 && response.statusCode < 300) {
+            callback(null, body)
+          } else {
+            callback(
+              new OError(
+                `CLSI returned non-success code: ${response.statusCode}`,
+                {
+                  projectId,
+                  clsiResponse: body,
+                  statusCode: response.statusCode
+                }
+              )
+            )
+          }
         }
-      })
+      )
     })
   }
 }

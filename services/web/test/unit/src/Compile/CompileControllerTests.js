@@ -649,8 +649,9 @@ describe('CompileController', function() {
 
   describe('deleteAuxFiles', function() {
     beforeEach(function() {
-      this.CompileManager.deleteAuxFiles = sinon.stub().callsArg(2)
+      this.CompileManager.deleteAuxFiles = sinon.stub().yields()
       this.req.params = { Project_id: this.project_id }
+      this.req.query = { clsiserverid: 'node-1' }
       this.res.sendStatus = sinon.stub()
       return this.CompileController.deleteAuxFiles(
         this.req,
@@ -661,7 +662,7 @@ describe('CompileController', function() {
 
     it('should proxy to the CLSI', function() {
       return this.CompileManager.deleteAuxFiles
-        .calledWith(this.project_id)
+        .calledWith(this.project_id, this.user_id, 'node-1')
         .should.equal(true)
     })
 
@@ -714,8 +715,9 @@ describe('CompileController', function() {
     beforeEach(function() {
       this.CompileManager.wordCount = sinon
         .stub()
-        .callsArgWith(3, null, { content: 'body' })
+        .yields(null, { content: 'body' })
       this.req.params = { Project_id: this.project_id }
+      this.req.query = { clsiserverid: 'node-42' }
       this.res.send = sinon.stub()
       this.res.contentType = sinon.stub()
       return this.CompileController.wordCount(this.req, this.res, this.next)
@@ -723,7 +725,7 @@ describe('CompileController', function() {
 
     it('should proxy to the CLSI', function() {
       return this.CompileManager.wordCount
-        .calledWith(this.project_id, this.user_id, false)
+        .calledWith(this.project_id, this.user_id, false, 'node-42')
         .should.equal(true)
     })
 

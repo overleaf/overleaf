@@ -255,11 +255,12 @@ module.exports = CompileController = {
 
   deleteAuxFiles(req, res, next) {
     const project_id = req.params.Project_id
+    const { clsiserverid } = req.query
     return CompileController._compileAsUser(req, function(error, user_id) {
       if (error != null) {
         return next(error)
       }
-      return CompileManager.deleteAuxFiles(project_id, user_id, function(
+      CompileManager.deleteAuxFiles(project_id, user_id, clsiserverid, function(
         error
       ) {
         if (error != null) {
@@ -465,7 +466,7 @@ module.exports = CompileController = {
     if (next == null) {
       next = function(error) {}
     }
-    return ClsiCookieManager.getCookieJar(project_id, function(err, jar) {
+    _getPersistenceOptions(req, project_id, (err, persistenceOptions) => {
       let qs
       if (err != null) {
         OError.tag(err, 'error getting cookie jar for clsi request')
@@ -479,10 +480,15 @@ module.exports = CompileController = {
       url = `${compilerUrl}${url}`
       const oneMinute = 60 * 1000
       // the base request
-      const options = { url, method: req.method, timeout: oneMinute, jar }
+      const options = {
+        url,
+        method: req.method,
+        timeout: oneMinute,
+        ...persistenceOptions
+      }
       // add any provided query string
       if (qs != null) {
-        options.qs = qs
+        options.qs = Object.assign(options.qs, qs)
       }
       // if we have a build parameter, pass it through to the clsi
       if (
@@ -518,20 +524,35 @@ module.exports = CompileController = {
   wordCount(req, res, next) {
     const project_id = req.params.Project_id
     const file = req.query.file || false
+    const { clsiserverid } = req.query
     return CompileController._compileAsUser(req, function(error, user_id) {
       if (error != null) {
         return next(error)
       }
-      return CompileManager.wordCount(project_id, user_id, file, function(
-        error,
-        body
-      ) {
-        if (error != null) {
-          return next(error)
+      CompileManager.wordCount(
+        project_id,
+        user_id,
+        file,
+        clsiserverid,
+        function(error, body) {
+          if (error != null) {
+            return next(error)
+          }
+          res.contentType('application/json')
+          return res.send(body)
         }
-        res.contentType('application/json')
-        return res.send(body)
-      })
+      )
+    })
+  }
+}
+
+function _getPersistenceOptions(req, projectId, callback) {
+  const { clsiserverid } = req.query
+  if (clsiserverid && typeof clsiserverid === 'string') {
+    callback(null, { qs: { clsiserverid } })
+  } else {
+    ClsiCookieManager.getCookieJar(projectId, (err, jar) => {
+      callback(err, { jar })
     })
   }
 }

@@ -136,7 +136,7 @@ module.exports = CompileManager = {
     })
   },
 
-  deleteAuxFiles(project_id, user_id, callback) {
+  deleteAuxFiles(project_id, user_id, clsiserverid, callback) {
     if (callback == null) {
       callback = function(error) {}
     }
@@ -147,7 +147,13 @@ module.exports = CompileManager = {
       if (error != null) {
         return callback(error)
       }
-      return ClsiManager.deleteAuxFiles(project_id, user_id, limits, callback)
+      ClsiManager.deleteAuxFiles(
+        project_id,
+        user_id,
+        limits,
+        clsiserverid,
+        callback
+      )
     })
   },
 
@@ -253,7 +259,7 @@ module.exports = CompileManager = {
     })
   },
 
-  wordCount(project_id, user_id, file, callback) {
+  wordCount(project_id, user_id, file, clsiserverid, callback) {
     if (callback == null) {
       callback = function(error) {}
     }
@@ -264,7 +270,14 @@ module.exports = CompileManager = {
       if (error != null) {
         return callback(error)
       }
-      return ClsiManager.wordCount(project_id, user_id, file, limits, callback)
+      ClsiManager.wordCount(
+        project_id,
+        user_id,
+        file,
+        limits,
+        clsiserverid,
+        callback
+      )
     })
   }
 }
