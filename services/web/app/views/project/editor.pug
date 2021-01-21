@@ -107,10 +107,10 @@ block content
 
 			if !isRestrictedTokenMember
 				.ui-layout-east
-					if showNewChatUI
-						include ./editor/chat-react
-					else
-						include ./editor/chat
+					aside.chat(
+						ng-controller="ReactChatController"
+					)
+						chat(reset-unread-messages="resetUnreadMessages" chat-is-open="chatIsOpen")
 
 	script(type="text/ng-template", id="genericMessageModalTemplate")
 		.modal-header

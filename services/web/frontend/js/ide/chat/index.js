@@ -1,6 +1,2 @@
 import './controllers/ChatButtonController'
-import './controllers/ChatController'
-import './controllers/ChatMessageController'
-import '../../directives/mathjax'
-import '../../filters/wrapLongWords'
 import '../../features/chat/controllers/chat-controller'
