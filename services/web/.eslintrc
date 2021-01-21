@@ -8,13 +8,11 @@
     "standard",
     "standard-jsx",
     "standard-react",
-    "plugin:prettier/recommended",
-    "prettier/prettier",
+    "prettier",
     "prettier/react",
     "prettier/standard"
   ],
   "plugins": [
-    "prettier",
     "jsx-a11y",
     "mocha",
     "chai-expect",

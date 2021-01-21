@@ -169,54 +169,47 @@ WITH_NODE_MODULES_PATH = \
 
 $(WITH_NODE_MODULES_PATH): export PATH=$(NODE_MODULES_PATH)
 
-format: format_backend
-format_backend:
-	eslint \
+lint: lint_backend
+lint_backend:
+	npx eslint \
 		app.js \
 		'app/**/*.js' \
 		'modules/*/index.js' \
 		'modules/*/app/**/*.js' \
 		--max-warnings=0
 
-format: format_frontend
-format_frontend:
-	eslint \
+lint: lint_frontend
+lint_frontend:
+	npx eslint \
 		'frontend/**/*.js' \
 		'modules/*/frontend/**/*.js' \
 		--max-warnings=0
 
-format: format_styles
-format_styles:
-	prettier \
-		'frontend/**/*.less' \
-		'modules/*/frontend/**/*.less' \
-		--list-different
-
-format: format_test
-format_test: format_test_app
-format_test_app: format_test_app_unit
-format_test_app_unit:
-	eslint \
+lint: lint_test
+lint_test: lint_test_app
+lint_test_app: lint_test_app_unit
+lint_test_app_unit:
+	npx eslint \
 		'test/unit/**/*.js' \
 		--max-warnings=0
 
-format_test_app: format_test_app_rest
-format_test_app_rest:
-	eslint \
+lint_test_app: lint_test_app_rest
+lint_test_app_rest:
+	npx eslint \
 		'test/**/*.js' \
 		--ignore-pattern 'test/unit/**/*.js' \
 		--max-warnings=0
 
-format_test: format_test_modules
-format_test_modules:
-	eslint \
+lint_test: lint_test_modules
+lint_test_modules:
+	npx eslint \
 		'modules/*/test/**/*.js' \
 		--max-warnings=0
 
-format: format_misc
+lint: lint_misc
 # migrations, scripts, webpack config, karma config
-format_misc:
-	eslint . \
+lint_misc:
+	npx eslint . \
 		--ignore-pattern app.js \
 		--ignore-pattern 'app/**/*.js' \
 		--ignore-pattern 'modules/*/app/**/*.js' \
@@ -227,11 +220,25 @@ format_misc:
 		--ignore-pattern 'modules/*/test/**/*.js' \
 		--max-warnings=0
 
-format_in_docker:
-	$(RUN_LINT_FORMAT) make format -j --output-sync
+lint_in_docker:
+	$(RUN_LINT_FORMAT) make lint -j --output-sync
+
+format: format_js
+format_js:
+	npm run --silent format
+
+format: format_styles
+format_styles:
+	npm run --silent format:styles
 
 format_fix:
 	npm run --silent format:fix
+
+format_styles_fix:
+	npm run --silent format:styles:fix
+
+format_in_docker:
+	$(RUN_LINT_FORMAT) make format -j --output-sync
 
 #
 # Build & publish
@@ -308,5 +315,5 @@ $(MODULE_TARGETS):
 	test test_module test_unit test_unit_app \
 	test_unit_modules test_unit_module test_karma test_karma_run \
 	test_karma_build_run test_frontend test_acceptance test_acceptance_app \
-	test_acceptance_modules test_acceptance_module ci format format_fix \
+	test_acceptance_modules test_acceptance_module ci format format_fix lint \
 	build build_test_karma publish tar
