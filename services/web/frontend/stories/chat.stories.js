@@ -7,10 +7,9 @@ import {
   stubUIConfig,
   stubMathJax
 } from '../../test/frontend/features/chat/components/stubs'
+import { setupContext } from './fixtures/context'
 
 const ONE_MINUTE = 60 * 1000
-
-window.project_id = '1234'
 
 const user = {
   id: 'fake_user',
@@ -45,8 +44,9 @@ function generateMessages(count) {
 stubUIConfig()
 stubMathJax()
 stubChatStore({ user })
+setupContext()
 
-export const Conversation = args => <ChatPane {...args} />
+export const Conversation = args => <ChatPane {...args} chatIsOpen />
 Conversation.parameters = {
   setupMocks: () => {
     fetchMock.restore()
@@ -55,7 +55,7 @@ Conversation.parameters = {
   }
 }
 
-export const NoMessages = args => <ChatPane {...args} />
+export const NoMessages = args => <ChatPane {...args} chatIsOpen />
 NoMessages.parameters = {
   setupMocks: () => {
     fetchMock.restore()
@@ -63,7 +63,7 @@ NoMessages.parameters = {
   }
 }
 
-export const Loading = args => <ChatPane {...args} />
+export const Loading = args => <ChatPane {...args} chatIsOpen />
 Loading.parameters = {
   setupMocks: () => {
     fetchMock.restore()

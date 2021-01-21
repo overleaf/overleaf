@@ -2,8 +2,9 @@ import React from 'react'
 
 import OutlinePane from '../js/features/outline/components/outline-pane'
 import { ContextRoot } from '../js/shared/context/root-context'
+import { setupContext } from './fixtures/context'
 
-window.project_id = '1234'
+setupContext()
 
 export const Basic = args => <OutlinePane {...args} />
 Basic.args = {
