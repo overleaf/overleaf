@@ -1,77 +1,85 @@
 import React from 'react'
 import PreviewLogsPaneEntry from '../js/features/preview/components/preview-logs-pane-entry.js'
+import Icon from '../js/shared/components/icon.js'
 
-export const ErrorWithCompilerOutput = args => (
+export const EntryWithCompilerOutput = args => (
   <PreviewLogsPaneEntry {...args} />
 )
-ErrorWithCompilerOutput.args = {
+EntryWithCompilerOutput.args = {
+  title: 'PreviewLogsPaneEntry/bar/baz',
   level: 'error'
 }
 
-export const ErrorWithCompilerOutputAndHumanReadableHint = args => (
+export const EntryWithCompilerOutputAndHumanReadableHint = args => (
   <PreviewLogsPaneEntry {...args} />
 )
-ErrorWithCompilerOutputAndHumanReadableHint.args = {
+EntryWithCompilerOutputAndHumanReadableHint.args = {
   level: 'error',
   formattedContent: <SampleHumanReadableHintComponent />,
   extraInfoURL:
     'https://www.overleaf.com/learn/latex/Errors/Extra_alignment_tab_has_been_changed_to_%5Ccr'
 }
 
-export const ErrorWithoutCompilerOutput = args => (
+export const EntryWithoutCompilerOutput = args => (
   <PreviewLogsPaneEntry {...args} />
 )
-ErrorWithoutCompilerOutput.args = {
+EntryWithoutCompilerOutput.args = {
   level: 'error',
   rawContent: null
 }
 
-export const WarningWithCompilerOutput = args => (
+export const EntryWithoutSourceLocationLink = args => (
   <PreviewLogsPaneEntry {...args} />
 )
-WarningWithCompilerOutput.args = {
+EntryWithoutSourceLocationLink.args = {
+  level: 'error',
+  showSourceLocationLink: false
+}
+
+export const EntryWithLevelError = args => <PreviewLogsPaneEntry {...args} />
+EntryWithLevelError.args = {
+  level: 'error'
+}
+
+export const EntryWithLevelWarning = args => <PreviewLogsPaneEntry {...args} />
+EntryWithLevelWarning.args = {
   level: 'warning'
 }
 
-export const WarningWithCompilerOutputAndHumanReadableHint = args => (
+export const EntryWithLevelTypesetting = args => (
   <PreviewLogsPaneEntry {...args} />
 )
-WarningWithCompilerOutputAndHumanReadableHint.args = {
-  level: 'warning',
-  formattedContent: <SampleHumanReadableHintComponent />,
-  extraInfoURL:
-    'https://www.overleaf.com/learn/latex/Errors/Extra_alignment_tab_has_been_changed_to_%5Ccr'
-}
-
-export const WarningWithoutCompilerOutput = args => (
-  <PreviewLogsPaneEntry {...args} />
-)
-WarningWithoutCompilerOutput.args = {
-  level: 'warning',
-  rawContent: null
-}
-
-export const InfoWithCompilerOutput = args => <PreviewLogsPaneEntry {...args} />
-InfoWithCompilerOutput.args = {
+EntryWithLevelTypesetting.args = {
   level: 'typesetting'
 }
 
-export const InfoWithCompilerOutputAndHumanReadableHint = args => (
-  <PreviewLogsPaneEntry {...args} />
-)
-InfoWithCompilerOutputAndHumanReadableHint.args = {
-  level: 'typesetting',
-  formattedContent: <SampleHumanReadableHintComponent />,
-  extraInfoURL:
-    'https://www.overleaf.com/learn/latex/Errors/Extra_alignment_tab_has_been_changed_to_%5Ccr'
+export const EntryWithLevelRaw = args => <PreviewLogsPaneEntry {...args} />
+EntryWithLevelRaw.args = {
+  level: 'raw'
 }
 
-export const InfoWithoutCompilerOutput = args => (
-  <PreviewLogsPaneEntry {...args} />
-)
-InfoWithoutCompilerOutput.args = {
+export const EntryWithLevelSuccess = args => <PreviewLogsPaneEntry {...args} />
+EntryWithLevelSuccess.args = {
+  level: 'success'
+}
+
+export const EntryWithButtonToClose = args => <PreviewLogsPaneEntry {...args} />
+EntryWithButtonToClose.args = {
+  level: 'error',
+  showCloseButton: true,
+  onClose: () => window.alert('You clicked "×"')
+}
+
+export const EntryWithIcon = args => <PreviewLogsPaneEntry {...args} />
+EntryWithIcon.args = {
+  level: 'error',
+  headerIcon: <Icon type="taxi" />
+}
+
+export const EntryWithBetaIcon = args => <PreviewLogsPaneEntry {...args} />
+EntryWithBetaIcon.args = {
   level: 'typesetting',
-  rawContent: null
+  headerIcon: <span className="beta-badge" />
 }
 
 function SampleHumanReadableHintComponent() {
@@ -100,7 +108,7 @@ export default {
       line: 10,
       column: 20
     },
-    headerTitle: 'Lorem ipsum',
+    headerTitle: 'Entry title',
     rawContent: `
 The LaTeX compiler output
   * With a lot of details

@@ -7,6 +7,7 @@ import PreviewValidationIssue from './preview-validation-issue'
 import PreviewDownloadFileList from './preview-download-file-list'
 import PreviewError from './preview-error'
 import Icon from '../../../shared/components/icon'
+import usePersistedState from '../../../infrastructure/persisted-state-hook'
 
 function PreviewLogsPane({
   logEntries = { all: [], errors: [], warnings: [], typesetting: [] },
@@ -111,11 +112,55 @@ function PreviewLogsPane({
   return (
     <div className="logs-pane">
       <div className="logs-pane-content">
+        <LogsPaneBetaNotice />
         {errors ? errorsUI : null}
         {validationIssues ? validationIssuesUI : null}
         {allCompilerIssues.length > 0 ? logEntriesUI : null}
         {rawLog && rawLog !== '' ? rawLogUI : null}
         {actionsUI}
+      </div>
+    </div>
+  )
+}
+
+function LogsPaneBetaNotice() {
+  const { t } = useTranslation()
+  const [dismissedBetaNotice, setDismissedBetaNotice] = usePersistedState(
+    `logs_pane.dismissed_beta_notice`,
+    false
+  )
+
+  function handleDismissButtonClick() {
+    setDismissedBetaNotice(true)
+  }
+
+  return dismissedBetaNotice ? null : (
+    <div className="log-entry">
+      <div className="log-entry-header log-entry-header-raw">
+        <div className="log-entry-header-icon-container">
+          <span className="beta-badge" />
+        </div>
+        <h3 className="log-entry-header-title">
+          {t('logs_pane_beta_message')}
+        </h3>
+        <a
+          href="/beta/participate"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="log-entry-header-link log-entry-header-link-raw"
+        >
+          <span className="log-entry-header-link-location">
+            {t('give_feedback')}
+          </span>
+        </a>
+        <button
+          className="btn-inline-link log-entry-header-link"
+          type="button"
+          aria-label={t('dismiss')}
+          onClick={handleDismissButtonClick}
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
     </div>
   )

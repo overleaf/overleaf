@@ -1,5 +1,7 @@
 {
   "reload_editor": "Reload editor",
+  "logs_pane_beta_message": "We are beta testing a new logs pane",
+  "logs_pane_beta_message_popup": "We are beta testing a new logs pane. Click here to give feedback and manage your beta program membership.",
   "compile_error_description": "This project did not compile because of an error",
   "validation_issue_description": "This project did not compile because of a validation issue",
   "compile_error_entry_description": "An error which prevented this project from compiling",

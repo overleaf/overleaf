@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
 import PreviewLogsPaneEntry from './preview-logs-pane-entry'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 
 function PreviewFirstErrorPopUp({
   logEntry,
@@ -25,6 +26,7 @@ function PreviewFirstErrorPopUp({
     >
       <PreviewLogsPaneEntry
         headerTitle={logEntry.message}
+        headerIcon={<FirstErrorPopUpBetaBadge />}
         rawContent={logEntry.content}
         formattedContent={logEntry.humanReadableHintComponent}
         extraInfoURL={logEntry.extraInfoURL}
@@ -55,6 +57,27 @@ function PreviewFirstErrorPopUp({
         </button>
       </div>
     </div>
+  )
+}
+
+function FirstErrorPopUpBetaBadge() {
+  const { t } = useTranslation()
+  const logsPaneBetaMessage = t('logs_pane_beta_message_popup')
+  const tooltip = (
+    <Tooltip id="file-tree-badge-tooltip">{logsPaneBetaMessage}</Tooltip>
+  )
+
+  return (
+    <OverlayTrigger placement="bottom" overlay={tooltip} delayHide={100}>
+      <a
+        href="/beta/participate"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="beta-badge"
+      >
+        <span className="sr-only">{logsPaneBetaMessage}</span>
+      </a>
+    </OverlayTrigger>
   )
 }
 
