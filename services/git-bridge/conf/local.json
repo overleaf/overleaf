@@ -23,6 +23,6 @@
         "lowGiB": 128,
         "highGiB": 256,
         "intervalMillis": 3600000,
-        "compressionMethod": "bzip2"
+        "compressionMethod": "gzip"
     }
 }
