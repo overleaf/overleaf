@@ -316,16 +316,11 @@ App.controller('PdfController', function(
     )
   }
 
-  function buildPdfDownloadUrl(pdfDownloadDomain, path) {
-    // we only download builds from compiles server for security reasons
-    if (
-      pdfDownloadDomain != null &&
-      path != null &&
-      path.indexOf('build') !== -1
-    ) {
-      return `${pdfDownloadDomain}${path}`
+  function buildPdfDownloadUrl(pdfDownloadDomain, url) {
+    if (pdfDownloadDomain) {
+      return `${pdfDownloadDomain}${url}`
     } else {
-      return path
+      return url
     }
   }
 
@@ -370,49 +365,30 @@ App.controller('PdfController', function(
       ide.clsiServerId = qs.clsiserverid = response.clsiServerId
     }
 
+    // TODO(das7pad): drop this hack once 2747f0d40af8729304 has landed in clsi
+    if (response.status === 'success' && !fileByPath['output.pdf']) {
+      response.status = 'failure'
+    }
+
     if (response.status === 'success') {
       $scope.pdf.view = 'pdf'
       $scope.shouldShowLogs = false
       $scope.pdf.lastCompileTimestamp = Date.now()
       $scope.pdf.validation = {}
-
-      // define the base url. if the pdf file has a build number, pass it to the clsi in the url
-      if (fileByPath['output.pdf'] && fileByPath['output.pdf'].url) {
-        $scope.pdf.url = buildPdfDownloadUrl(
-          pdfDownloadDomain,
-          fileByPath['output.pdf'].url
-        )
-      } else if (fileByPath['output.pdf'] && fileByPath['output.pdf'].build) {
-        const { build } = fileByPath['output.pdf']
-        $scope.pdf.url = buildPdfDownloadUrl(
-          pdfDownloadDomain,
-          `/project/${$scope.project_id}/build/${build}/output/output.pdf`
-        )
-      } else {
-        $scope.pdf.url = buildPdfDownloadUrl(
-          pdfDownloadDomain,
-          `/project/${$scope.project_id}/output/output.pdf`
-        )
-      }
-      // check if we need to bust cache (build id is unique so don't need it in that case)
-      if (!(fileByPath['output.pdf'] && fileByPath['output.pdf'].build)) {
-        qs.cache_bust = `${Date.now()}`
-      }
+      $scope.pdf.url = buildPdfDownloadUrl(
+        pdfDownloadDomain,
+        fileByPath['output.pdf'].url
+      )
       // convert the qs hash into a query string and append it
       $scope.pdf.url += createQueryString(qs)
 
       // Save all downloads as files
       qs.popupDownload = true
 
-      // Pass build id to download if we have it
-      let buildId = null
-      if (fileByPath['output.pdf'] && fileByPath['output.pdf'].build) {
-        buildId = fileByPath['output.pdf'].build
-      }
+      const { build: buildId } = fileByPath['output.pdf']
       $scope.pdf.downloadUrl =
-        `/download/project/${$scope.project_id}${
-          buildId ? '/build/' + buildId : ''
-        }/output/output.pdf` + createQueryString(qs)
+        `/download/project/${$scope.project_id}/build/${buildId}/output/output.pdf` +
+        createQueryString(qs)
       fetchLogs(fileByPath, { pdfDownloadDomain })
     } else if (response.status === 'timedout') {
       $scope.pdf.view = 'errors'
@@ -436,7 +412,7 @@ App.controller('PdfController', function(
       ['validation-fail', 'validation-pass'].includes(response.status)
     ) {
       $scope.pdf.view = 'pdf'
-      $scope.pdf.url = buildPdfDownloadUrl(pdfDownloadDomain, lastPdfUrl)
+      $scope.pdf.url = lastPdfUrl
       $scope.shouldShowLogs = true
       if (response.status === 'validation-fail') {
         $scope.pdf.failedCheck = true
@@ -446,7 +422,7 @@ App.controller('PdfController', function(
     } else if (response.status === 'exited') {
       $scope.pdf.view = 'pdf'
       $scope.pdf.compileExited = true
-      $scope.pdf.url = buildPdfDownloadUrl(pdfDownloadDomain, lastPdfUrl)
+      $scope.pdf.url = lastPdfUrl
       $scope.shouldShowLogs = true
       fetchLogs(fileByPath, { pdfDownloadDomain })
     } else if (response.status === 'autocompile-backoff') {
@@ -539,9 +515,7 @@ App.controller('PdfController', function(
           name: isOutputFile
             ? `${file.path.replace(/^output\./, '')} file`
             : file.path,
-          url:
-            `/project/${$scope.project_id}/output/${file.path}` +
-            createQueryString(qs),
+          url: file.url + createQueryString(qs),
           main: !!isOutputFile,
           fileName: file.path,
           type: file.type
@@ -569,24 +543,12 @@ App.controller('PdfController', function(
     function getFile(name, file) {
       const opts = {
         method: 'GET',
+        url: buildPdfDownloadUrl(options.pdfDownloadDomain, file.url),
         params: {
           compileGroup: ide.compileGroup,
           clsiserverid: ide.clsiServerId
         }
       }
-      if (file && file.url) {
-        // FIXME clean this up when we have file.urls out consistently
-        opts.url = file.url
-      } else if (file && file.build) {
-        opts.url = `/project/${$scope.project_id}/build/${file.build}/output/${name}`
-      } else {
-        opts.url = `/project/${$scope.project_id}/output/${name}`
-      }
-      // check if we need to bust cache (build id is unique so don't need it in that case)
-      if (!(file && file.build)) {
-        opts.params.cache_bust = `${Date.now()}`
-      }
-      opts.url = buildPdfDownloadUrl(options.pdfDownloadDomain, opts.url)
       return $http(opts)
     }
 
