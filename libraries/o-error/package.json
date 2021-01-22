@@ -12,15 +12,18 @@
     "cause",
     "verror"
   ],
-  "main": "index.js",
+  "main": "dist/index.js",
   "files": [
-    "index.js",
-    "index.d.ts"
+    "dist/index.js",
+    "dist/index.d.ts"
   ],
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npm run --silent typecheck && npm run --silent test && npm run --silent declaration:build && npm run --silent update-readme",
-    "declaration:build": "rm -f index.d.ts && tsc --allowJs --declaration --emitDeclarationOnly --moduleResolution node --target ES6 index.js",
-    "declaration:check": "git diff --exit-code -- index.d.ts",
+    "clean": "rm -rf dist",
+    "build": "npm run --silent clean && npm run --silent typecheck && npm run --silent test && npm run --silent build:compile && npm run --silent declaration:build && npm run --silent update-readme",
+    "build:compile": "babel index.js --out-dir dist",
+    "declaration:build": "rm -f dist/index.d.ts && tsc --allowJs --declaration --emitDeclarationOnly --outDir dist --moduleResolution node --target ES6 index.js",
+    "declaration:check": "git diff --exit-code -- dist/index.d.ts",
     "lint": "eslint .",
     "prepublishOnly": "npm run --silent declaration:build && npm run --silent declaration:check",
     "test": "mocha",
@@ -32,6 +35,9 @@
   "license": "MIT",
   "repository": "github:overleaf/o-error",
   "devDependencies": {
+    "@babel/cli": "^7.12.10",
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
     "@types/chai": "^4.2.12",
     "@types/node": "^13.13.2",
     "chai": "^3.3.0",
