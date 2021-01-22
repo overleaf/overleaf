@@ -1,0 +1,11 @@
+--- /var/www/sharelatex/web/app/src/Features/User/UserRegistrationHandler.js
++++ /var/www/sharelatex/web/app/src/Features/User/UserRegistrationHandler.js
+@@ -122,7 +122,7 @@ const UserRegistrationHandler = {
+         const ONE_WEEK = 7 * 24 * 60 * 60 // seconds
+         OneTimeTokenHandler.getNewToken(
+           'password',
+-          { user_id: user._id.toString(), email },
++          { user_id: user._id.toString(), email: user.email },
+           { expiresIn: ONE_WEEK },
+           (err, token) => {
+             if (err != null) {
