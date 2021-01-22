@@ -1,6 +1,6 @@
 FROM sharelatex/sharelatex:2.5.1
 
-# Patch: fixes registration token creation: https://github.com/overleaf/overleaf/issues/819
+# Patch: fixes registration token creation
 COPY create-token-lowercase-email.patch ${baseDir}
 RUN cd ${baseDir} && patch -p0 < create-token-lowercase-email.patch
 
