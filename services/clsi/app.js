@@ -187,11 +187,13 @@ app.get('/project/:project_id/user/:user_id/output/*', function (
   next
 ) {
   // for specific user get the path to the top level file
+  logger.warn({ url: req.url }, 'direct request for file in compile directory')
   req.url = `/${req.params.project_id}-${req.params.user_id}/${req.params[0]}`
   return staticCompileServer(req, res, next)
 })
 
 app.get('/project/:project_id/output/*', function (req, res, next) {
+  logger.warn({ url: req.url }, 'direct request for file in compile directory')
   if (
     (req.query != null ? req.query.build : undefined) != null &&
     req.query.build.match(OutputCacheManager.BUILD_REGEX)
