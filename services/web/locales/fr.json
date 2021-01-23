@@ -1,5 +1,7 @@
 {
   "reload_editor": "Actualiser l’éditeur",
+  "logs_pane_beta_message": "Nous testons un nouveau panneau de fichiers journaux dans le cadre du programme de bêta",
+  "logs_pane_beta_message_popup": "Nous testons un nouveau panneau de fichiers journaux dans le cadre du programme de bêta. Cliquez ici pour donner votre avis et gérer votre participation au programme de bêta.",
   "compile_error_description": "Ce projet n’a pas pu être compilé en raison d’une erreur",
   "validation_issue_description": "Ce projet n’a pas pu être compilé en raison d’un problème de validation",
   "compile_error_entry_description": "Une erreur qui a empêché la compilation de ce projet",
