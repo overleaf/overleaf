@@ -2,6 +2,7 @@
 node_modules
 test/acceptance/fixtures/tmp
 compiles
+output
 .DS_Store
 *~
 cache

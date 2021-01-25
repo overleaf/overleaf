@@ -118,21 +118,45 @@ const ForbidSymlinks = require('./app/js/StaticServerForbidSymlinks')
 // create a static server which does not allow access to any symlinks
 // avoids possible mismatch of root directory between middleware check
 // and serving the files
-const staticServer = ForbidSymlinks(express.static, Settings.path.compilesDir, {
-  setHeaders(res, path, stat) {
-    if (Path.basename(path) === 'output.pdf') {
-      // Calculate an etag in the same way as nginx
-      // https://github.com/tj/send/issues/65
-      const etag = (path, stat) =>
-        `"${Math.ceil(+stat.mtime / 1000).toString(16)}` +
-        '-' +
-        Number(stat.size).toString(16) +
-        '"'
-      res.set('Etag', etag(path, stat))
+const staticCompileServer = ForbidSymlinks(
+  express.static,
+  Settings.path.compilesDir,
+  {
+    setHeaders(res, path, stat) {
+      if (Path.basename(path) === 'output.pdf') {
+        // Calculate an etag in the same way as nginx
+        // https://github.com/tj/send/issues/65
+        const etag = (path, stat) =>
+          `"${Math.ceil(+stat.mtime / 1000).toString(16)}` +
+          '-' +
+          Number(stat.size).toString(16) +
+          '"'
+        res.set('Etag', etag(path, stat))
+      }
+      return res.set('Content-Type', ContentTypeMapper.map(path))
     }
-    return res.set('Content-Type', ContentTypeMapper.map(path))
   }
-})
+)
+
+const staticOutputServer = ForbidSymlinks(
+  express.static,
+  Settings.path.outputDir,
+  {
+    setHeaders(res, path, stat) {
+      if (Path.basename(path) === 'output.pdf') {
+        // Calculate an etag in the same way as nginx
+        // https://github.com/tj/send/issues/65
+        const etag = (path, stat) =>
+          `"${Math.ceil(+stat.mtime / 1000).toString(16)}` +
+          '-' +
+          Number(stat.size).toString(16) +
+          '"'
+        res.set('Etag', etag(path, stat))
+      }
+      return res.set('Content-Type', ContentTypeMapper.map(path))
+    }
+  }
+)
 
 app.get(
   '/project/:project_id/user/:user_id/build/:build_id/output/*',
@@ -141,7 +165,7 @@ app.get(
     req.url =
       `/${req.params.project_id}-${req.params.user_id}/` +
       OutputCacheManager.path(req.params.build_id, `/${req.params[0]}`)
-    return staticServer(req, res, next)
+    return staticOutputServer(req, res, next)
   }
 )
 
@@ -154,7 +178,7 @@ app.get('/project/:project_id/build/:build_id/output/*', function (
   req.url =
     `/${req.params.project_id}/` +
     OutputCacheManager.path(req.params.build_id, `/${req.params[0]}`)
-  return staticServer(req, res, next)
+  return staticOutputServer(req, res, next)
 })
 
 app.get('/project/:project_id/user/:user_id/output/*', function (
@@ -163,11 +187,13 @@ app.get('/project/:project_id/user/:user_id/output/*', function (
   next
 ) {
   // for specific user get the path to the top level file
+  logger.warn({ url: req.url }, 'direct request for file in compile directory')
   req.url = `/${req.params.project_id}-${req.params.user_id}/${req.params[0]}`
-  return staticServer(req, res, next)
+  return staticCompileServer(req, res, next)
 })
 
 app.get('/project/:project_id/output/*', function (req, res, next) {
+  logger.warn({ url: req.url }, 'direct request for file in compile directory')
   if (
     (req.query != null ? req.query.build : undefined) != null &&
     req.query.build.match(OutputCacheManager.BUILD_REGEX)
@@ -179,7 +205,7 @@ app.get('/project/:project_id/output/*', function (req, res, next) {
   } else {
     req.url = `/${req.params.project_id}/${req.params[0]}`
   }
-  return staticServer(req, res, next)
+  return staticCompileServer(req, res, next)
 })
 
 app.get('/oops', function (req, res, next) {

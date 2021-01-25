@@ -26,8 +26,8 @@ const crypto = require('crypto')
 const OutputFileOptimiser = require('./OutputFileOptimiser')
 
 module.exports = OutputCacheManager = {
-  CACHE_SUBDIR: '.cache/clsi',
-  ARCHIVE_SUBDIR: '.archive/clsi',
+  CACHE_SUBDIR: 'generated-files',
+  ARCHIVE_SUBDIR: 'archived-logs',
   // build id is HEXDATE-HEXRANDOM from Date.now()and RandomBytes
   // for backwards compatibility, make the randombytes part optional
   BUILD_REGEX: /^[0-9a-f]+(-[0-9a-f]+)?$/,
@@ -59,7 +59,7 @@ module.exports = OutputCacheManager = {
     })
   },
 
-  saveOutputFiles(outputFiles, compileDir, callback) {
+  saveOutputFiles(outputFiles, compileDir, outputDir, callback) {
     if (callback == null) {
       callback = function (error) {}
     }
@@ -70,22 +70,29 @@ module.exports = OutputCacheManager = {
       return OutputCacheManager.saveOutputFilesInBuildDir(
         outputFiles,
         compileDir,
+        outputDir,
         buildId,
         callback
       )
     })
   },
 
-  saveOutputFilesInBuildDir(outputFiles, compileDir, buildId, callback) {
+  saveOutputFilesInBuildDir(
+    outputFiles,
+    compileDir,
+    outputDir,
+    buildId,
+    callback
+  ) {
     // make a compileDir/CACHE_SUBDIR/build_id directory and
     // copy all the output files into it
     if (callback == null) {
       callback = function (error) {}
     }
-    const cacheRoot = Path.join(compileDir, OutputCacheManager.CACHE_SUBDIR)
+    const cacheRoot = Path.join(outputDir, OutputCacheManager.CACHE_SUBDIR)
     // Put the files into a new cache subdirectory
     const cacheDir = Path.join(
-      compileDir,
+      outputDir,
       OutputCacheManager.CACHE_SUBDIR,
       buildId
     )
@@ -102,6 +109,7 @@ module.exports = OutputCacheManager = {
       OutputCacheManager.archiveLogs(
         outputFiles,
         compileDir,
+        outputDir,
         buildId,
         function (err) {
           if (err != null) {
@@ -198,12 +206,12 @@ module.exports = OutputCacheManager = {
     })
   },
 
-  archiveLogs(outputFiles, compileDir, buildId, callback) {
+  archiveLogs(outputFiles, compileDir, outputDir, buildId, callback) {
     if (callback == null) {
       callback = function (error) {}
     }
     const archiveDir = Path.join(
-      compileDir,
+      outputDir,
       OutputCacheManager.ARCHIVE_SUBDIR,
       buildId
     )
