@@ -122,6 +122,32 @@ describe('ResourceStateManager', function () {
       })
     })
 
+    describe('when the state file is not present', function () {
+      beforeEach(function () {
+        this.SafeReader.readFile = sinon.stub().callsArg(3)
+        return this.ResourceStateManager.checkProjectStateMatches(
+          this.state,
+          this.basePath,
+          this.callback
+        )
+      })
+
+      it('should read the resource file', function () {
+        return this.SafeReader.readFile
+          .calledWith(this.resourceFileName)
+          .should.equal(true)
+      })
+
+      it('should call the callback with an error', function () {
+        this.callback
+          .calledWith(sinon.match(Errors.FilesOutOfSyncError))
+          .should.equal(true)
+
+        const message = this.callback.args[0][0].message
+        expect(message).to.include('invalid state for incremental update')
+      })
+    })
+
     return describe('when the state does not match', function () {
       beforeEach(function () {
         this.SafeReader.readFile = sinon
