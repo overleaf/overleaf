@@ -213,6 +213,12 @@ app.get('/oops', function (req, res, next) {
   return res.send('error\n')
 })
 
+app.get('/oops-internal', function (req, res, next) {
+  setTimeout(function () {
+    throw new Error('Test error')
+  }, 1)
+})
+
 app.get('/status', (req, res, next) => res.send('CLSI is alive\n'))
 
 Settings.processTooOld = false
