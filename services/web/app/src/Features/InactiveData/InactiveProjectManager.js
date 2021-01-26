@@ -72,6 +72,7 @@ module.exports = InactiveProjectManager = {
       .select('_id')
       .sort({ _id: 1 })
       .limit(limit)
+      .read('secondary')
       .exec(function(err, projects) {
         if (err != null) {
           logger.err({ err }, 'could not get projects for deactivating')
