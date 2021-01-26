@@ -25,6 +25,8 @@ module.exports = {
   processLifespanLimitMs:
     parseInt(process.env.PROCESS_LIFE_SPAN_LIMIT_MS) || 60 * 60 * 24 * 1000 * 2,
 
+  catchErrors: process.env.CATCH_ERRORS === 'true',
+
   path: {
     compilesDir: Path.resolve(__dirname, '../compiles'),
     outputDir: Path.resolve(__dirname, '../output'),

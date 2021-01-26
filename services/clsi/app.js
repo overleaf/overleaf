@@ -339,6 +339,15 @@ const loadHttpPort = Settings.internal.load_balancer_agent.local_port
 
 if (!module.parent) {
   // Called directly
+
+  // handle uncaught exceptions when running in production
+  if (Settings.catchErrors) {
+    process.removeAllListeners('uncaughtException')
+    process.on('uncaughtException', (error) =>
+      logger.error({ err: error }, 'uncaughtException')
+    )
+  }
+
   app.listen(port, host, (error) => {
     if (error) {
       logger.fatal({ error }, `Error starting CLSI on ${host}:${port}`)
