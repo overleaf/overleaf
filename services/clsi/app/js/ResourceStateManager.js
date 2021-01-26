@@ -62,7 +62,7 @@ module.exports = {
           'project state file truncated'
         )
       }
-      const array = result.toString().split('\n')
+      const array = result ? result.toString().split('\n') : []
       const adjustedLength = Math.max(array.length, 1)
       const resourceList = array.slice(0, adjustedLength - 1)
       const oldState = array[adjustedLength - 1]
