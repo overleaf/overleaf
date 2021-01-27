@@ -1,7 +1,9 @@
+import OError from '@overleaf/o-error'
+
 export function findInTreeOrThrow(tree, id) {
   const found = findInTree(tree, id)
   if (found) return found
-  throw new Error(`Entity not found with id=${id}`)
+  throw new OError('Entity not found in tree', { entityId: id })
 }
 
 export function findAllInTreeOrThrow(tree, ids) {

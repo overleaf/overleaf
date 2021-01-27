@@ -47,7 +47,7 @@
     "@babel/preset-env": "^7.12.7",
     "@babel/preset-react": "^7.12.7",
     "@overleaf/metrics": "^3.4.1",
-    "@overleaf/o-error": "^3.2.0",
+    "@overleaf/o-error": "^3.3.1",
     "@overleaf/redis-wrapper": "^2.0.0",
     "@pollyjs/adapter-node-http": "^4.2.1",
     "@pollyjs/core": "^4.2.1",
