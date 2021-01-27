@@ -21,7 +21,7 @@ export function deleteJSON(path, options) {
   return fetchJSON(path, { ...options, method: 'DELETE' })
 }
 
-export default function fetchJSON(
+function fetchJSON(
   path,
   { body = {}, headers = {}, method = 'GET', ...otherOptions }
 ) {
