@@ -13,6 +13,10 @@ export function postJSON(path, options) {
   return fetchJSON(path, { ...options, method: 'POST' })
 }
 
+export function putJSON(path, options) {
+  return fetchJSON(path, { ...options, method: 'PUT' })
+}
+
 export function deleteJSON(path, options) {
   return fetchJSON(path, { ...options, method: 'DELETE' })
 }
