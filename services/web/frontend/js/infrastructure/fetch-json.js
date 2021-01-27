@@ -23,7 +23,13 @@ export function deleteJSON(path, options) {
 
 function fetchJSON(
   path,
-  { body = {}, headers = {}, method = 'GET', ...otherOptions }
+  {
+    body = {},
+    headers = {},
+    method = 'GET',
+    credentials = 'same-origin',
+    ...otherOptions
+  }
 ) {
   const options = {
     ...otherOptions,
@@ -33,6 +39,7 @@ function fetchJSON(
       'X-Csrf-Token': window.csrfToken,
       Accept: 'application/json'
     },
+    credentials,
     method
   }
 
