@@ -3,13 +3,23 @@ import PropTypes from 'prop-types'
 
 export const EditorContext = createContext()
 
-export function EditorProvider({ children }) {
+export function EditorProvider({ children, loading }) {
+  const cobranding = window.brandVariation
+    ? {
+        logoImgUrl: window.brandVariation.logo_url,
+        brandVariationName: window.brandVariation.name,
+        brandVariationHomeUrl: window.brandVariation.home_url
+      }
+    : undefined
+
   const ownerId =
     window._ide.$scope.project && window._ide.$scope.project.owner
       ? window._ide.$scope.project.owner._id
       : null
 
   const editorContextValue = {
+    cobranding,
+    loading,
     projectId: window.project_id,
     isProjectOwner: ownerId === window.user.id
   }
@@ -22,7 +32,8 @@ export function EditorProvider({ children }) {
 }
 
 EditorProvider.propTypes = {
-  children: PropTypes.any
+  children: PropTypes.any,
+  loading: PropTypes.bool
 }
 
 export function useEditorContext() {

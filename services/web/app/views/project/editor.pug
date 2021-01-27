@@ -8,7 +8,10 @@ block vars
 block content
 	.editor(ng-controller="IdeController").full-size
 		//- required by react2angular-shared-context, must be rendered as a top level component
-		shared-context-react()
+		div(
+			ng-controller="ReactRootContextController"
+		)
+			shared-context-react(editor-loading="editorLoading")
 		.loading-screen(ng-if="state.loading")
 			.loading-screen-brand-container
 				.loading-screen-brand(
@@ -74,7 +77,10 @@ block content
 			ng-cloak
 		)
 			.ui-layout-center
-				include ./editor/header
+				if showNewNavigationUI
+					include ./editor/header-react
+				else
+					include ./editor/header
 
 				include ./editor/share
 				!= moduleIncludes("publish:body", locals)
