@@ -340,12 +340,12 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
         {
           name: 'Default',
           val: '',
-          path: res.locals.buildCssPath(null, { hashedPath: true })
+          path: res.locals.buildCssPath()
         },
         {
           name: 'Light',
           val: 'light-',
-          path: res.locals.buildCssPath('light-', { hashedPath: true })
+          path: res.locals.buildCssPath('light-')
         }
       ]
     }
