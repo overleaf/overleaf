@@ -6,6 +6,9 @@ function MessageContent({ content }) {
   const root = useRef(null)
 
   useEffect(() => {
+    if (!(window.MathJax && window.MathJax.Hub)) {
+      return
+    }
     const MJHub = window.MathJax.Hub
     const inlineMathConfig = MJHub.config && MJHub.config.tex2jax.inlineMath
     const alreadyConfigured = inlineMathConfig.some(
