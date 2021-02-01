@@ -116,7 +116,7 @@ block content
 														)
 														span.input-feedback-message  {{ simpleCCForm.firstName.$error.required ? 'This field is required' : '' }}
 												.col-xs-6
-													.form-group(for="last-name",ng-class="validation.errorFields.last_name || inputHasError(simpleCCForm.lastName)? 'has-external-error' : ''")
+													.form-group(ng-class="validation.errorFields.last_name || inputHasError(simpleCCForm.lastName)? 'has-external-error' : ''")
 														label(for="last-name") #{translate('last_name')}
 														input#last-name.form-control(
 															type="text"
@@ -173,21 +173,62 @@ block content
 															) ?
 
 										div
-											.form-group(ng-class="validation.errorFields.country || inputHasError(simpleCCForm.country) ? 'has-external-error' : ''")
-												label(for="country") #{translate('country')}
-												select#country.form-control(
-													data-recurly="country"
-													ng-model="data.country"
-													name="country"
-													ng-change="updateCountry()"
-													ng-selected="{{country.code == data.country}}"
-													ng-model-options="{ debounce: 200 }"
-													required
-												)
-													option(value='', disabled) #{translate("country")}
-													option(value='-', disabled) --------------
-													option(ng-repeat="country in countries" ng-bind-html="country.name" value="{{country.code}}")
-												span.input-feedback-message {{ simpleCCForm.country.$error.required ? 'This field is required' : '' }}
+											.row
+												.col-xs-12
+													.form-group(ng-class="validation.errorFields.address1 || inputHasError(simpleCCForm.address1) ? 'has-external-error' : ''")
+														label(for="address-line-1") #{translate('address_line_1')}
+														input#address-line-1.form-control(
+															type="text"
+															maxlength="255"
+															data-recurly="address1"
+															name="address1"
+															ng-model="data.address1"
+															required
+														)
+														span.input-feedback-message  {{ simpleCCForm.address1.$error.required ? 'This field is required' : '' }}
+											
+											.row
+												.col-xs-12
+													.form-group.has-feedback(ng-class="validation.errorFields.address2 ? 'has-external-error' : ''")
+														label(for="address-line-2") #{translate('address_line_2')}
+														input#address-line-2.form-control(
+															type="text"
+															maxlength="255"
+															data-recurly="address2"
+															name="address2"
+															ng-model="data.address2"
+														)
+												
+											.row
+												.col-xs-4
+													.form-group(ng-class="validation.errorFields.postal_code || inputHasError(simpleCCForm.postalCode) ? 'has-external-error' : ''")
+														label(for="postal-code") #{translate('postal_code')}
+														input#postal-code.form-control(
+															type="text"
+															maxlength="255"
+															data-recurly="postal_code"
+															name="postalCode"
+															ng-model="data.postal_code"
+															required
+														)
+														span.input-feedback-message  {{ simpleCCForm.postalCode.$error.required ? 'This field is required' : '' }}
+												
+												.col-xs-8
+													.form-group(ng-class="validation.errorFields.country || inputHasError(simpleCCForm.country) ? 'has-external-error' : ''")
+														label(for="country") #{translate('country')}
+														select#country.form-control(
+															data-recurly="country"
+															ng-model="data.country"
+															name="country"
+															ng-change="updateCountry()"
+															ng-selected="{{country.code == data.country}}"
+															ng-model-options="{ debounce: 200 }"
+															required
+														)
+															option(value='', disabled) #{translate("country")}
+															option(value='-', disabled) --------------
+															option(ng-repeat="country in countries" ng-bind-html="country.name" value="{{country.code}}")
+														span.input-feedback-message {{ simpleCCForm.country.$error.required ? 'This field is required' : '' }}
 
 											.form-group
 												.checkbox

@@ -238,7 +238,7 @@ export default App.controller('NewSubscriptionController', function(
             address2: $scope.data.address2,
             country: $scope.data.country,
             state: $scope.data.state,
-            postal_code: $scope.data.postal_code
+            zip: $scope.data.postal_code
           },
           ITMCampaign: window.ITMCampaign,
           ITMContent: window.ITMContent

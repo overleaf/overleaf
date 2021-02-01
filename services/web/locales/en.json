@@ -1,4 +1,7 @@
 {
+  "address_line_1": "Address",
+  "address_line_2": "Address (line 2, optional)",
+  "postal_code": "Postal Code",
   "reload_editor": "Reload editor",
   "logs_pane_beta_message": "We are beta testing a new logs pane",
   "logs_pane_beta_message_popup": "We are beta testing a new logs pane. Click here to give feedback and manage your beta program membership.",
