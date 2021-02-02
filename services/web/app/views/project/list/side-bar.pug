@@ -139,7 +139,7 @@
 	span(ng-controller="LeftHandMenuPromoController",  ng-cloak)
 
 		.row-spaced#userProfileInformation(ng-if="hasProjects")
-			div(ng-show="userEmails.length > 0 && userAffiliations.length == 0", ng-cloak)
+			div(ng-hide="withAffiliations", ng-cloak)
 				hr
 				.text-centered.user-profile
 					p Are you affiliated with an institution?

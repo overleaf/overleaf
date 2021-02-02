@@ -520,7 +520,8 @@ describe('Subscriptions', function() {
             institution: {
               name: 'Stanford',
               confirmed: true
-            }
+            },
+            portal: undefined
           }
         ])
       })

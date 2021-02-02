@@ -33,7 +33,6 @@ const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const { V1ConnectionError } = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')
 const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandler')
-const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
 const UserController = require('../User/UserController')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const Modules = require('../../infrastructure/Modules')
@@ -416,18 +415,6 @@ const ProjectController = {
             cb
           )
         },
-        userAffiliations(cb) {
-          if (!Features.hasFeature('affiliations')) {
-            return cb(null, [])
-          }
-          getUserAffiliations(userId, (error, affiliations) => {
-            if (error && error instanceof V1ConnectionError) {
-              noV1Connection = true
-              return cb(null, [])
-            }
-            cb(error, affiliations)
-          })
-        },
         userEmailsData(cb) {
           const result = { list: [], allInReconfirmNotificationPeriods: [] }
 
@@ -463,12 +450,17 @@ const ProjectController = {
           OError.tag(err, 'error getting data for project list page')
           return next(err)
         }
-        const {
-          notifications,
-          user,
-          userAffiliations,
-          userEmailsData
-        } = results
+        const { notifications, user, userEmailsData } = results
+
+        const userEmails = userEmailsData.list || []
+
+        const userAffiliations = userEmails
+          .filter(emailData => !!emailData.affiliation)
+          .map(emailData => {
+            const result = emailData.affiliation
+            result.email = emailData.email
+            return result
+          })
 
         const { allInReconfirmNotificationPeriods } = userEmailsData
 
@@ -600,6 +592,7 @@ const ProjectController = {
             portalTemplates,
             user,
             userAffiliations,
+            userEmails,
             hasSubscription: results.hasSubscription,
             institutionLinkingError,
             warnings,

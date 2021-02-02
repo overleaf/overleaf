@@ -194,7 +194,14 @@ var decorateFullEmails = (
       aff => aff.email === emailData.email
     )
     if (affiliation) {
-      const { institution, inferred, role, department, licence } = affiliation
+      const {
+        institution,
+        inferred,
+        role,
+        department,
+        licence,
+        portal
+      } = affiliation
       const inReconfirmNotificationPeriod = _emailInReconfirmNotificationPeriod(
         emailData,
         institution
@@ -205,7 +212,8 @@ var decorateFullEmails = (
         inReconfirmNotificationPeriod,
         role,
         department,
-        licence
+        licence,
+        portal
       }
     }
 

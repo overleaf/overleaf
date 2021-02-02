@@ -174,7 +174,8 @@ describe('UserGetter', function() {
             name: 'University Name',
             isUniversity: true,
             confirmed: true
-          }
+          },
+          portal: undefined
         }
       ]
       this.getUserAffiliations.resolves(affiliationsData)
@@ -195,7 +196,8 @@ describe('UserGetter', function() {
                 department: affiliationsData[0].department,
                 role: affiliationsData[0].role,
                 licence: affiliationsData[0].licence,
-                inReconfirmNotificationPeriod: false
+                inReconfirmNotificationPeriod: false,
+                portal: undefined
               }
             },
             {
