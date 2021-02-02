@@ -21,16 +21,29 @@ public class S3SwapStore implements SwapStore {
         this(
                 cfg.getAwsAccessKey(),
                 cfg.getAwsSecret(),
-                cfg.getS3BucketName()
+                cfg.getS3BucketName(),
+                cfg.getAwsRegion()
         );
     }
 
     S3SwapStore(
             String accessKey,
             String secret,
-            String bucketName
+            String bucketName,
+            String region
     ) {
-        s3 = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secret))).build();
+        String regionToUse = null;
+        if (region == null) {
+            regionToUse = "us-east-1";
+        } else {
+            regionToUse = region;
+        }
+        s3 = AmazonS3ClientBuilder
+                .standard()
+                .withRegion(regionToUse)
+                .withCredentials(
+                        new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secret))
+                ).build();
         this.bucketName = bucketName;
     }
 

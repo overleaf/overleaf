@@ -19,7 +19,8 @@
         "type": "s3",
         "awsAccessKey": "asdf",
         "awsSecret": "asdf",
-        "s3BucketName": "com.overleaf.testbucket"
+        "s3BucketName": "com.overleaf.testbucket",
+        "awsRegion": "us-east-1"
     },
     "swapJob": {
         "minProjects": 50,
