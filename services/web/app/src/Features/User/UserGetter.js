@@ -13,14 +13,15 @@ const Errors = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')
 const { normalizeQuery, normalizeMultiQuery } = require('../Helpers/Mongo')
 
-function _emailInReconfirmNotificationPeriod(emailData, institutionData) {
+function _lastDayToReconfirm(emailData, institutionData) {
   const globalReconfirmPeriod = settings.reconfirmNotificationDays
-  if (!globalReconfirmPeriod) return false
+  if (!globalReconfirmPeriod) return undefined
 
   // only show notification for institutions with reconfirmation enabled
-  if (!institutionData || !institutionData.maxConfirmationMonths) return false
+  if (!institutionData || !institutionData.maxConfirmationMonths)
+    return undefined
 
-  if (!emailData.confirmedAt) return false
+  if (!emailData.confirmedAt) return undefined
 
   if (institutionData.ssoEnabled && !emailData.samlProviderId) {
     // For SSO, only show notification for linked email
@@ -30,10 +31,21 @@ function _emailInReconfirmNotificationPeriod(emailData, institutionData) {
   // reconfirmedAt will not always be set, use confirmedAt as fallback
   const lastConfirmed = emailData.reconfirmedAt || emailData.confirmedAt
 
-  const lastDayToReconfirm = moment(lastConfirmed).add(
-    institutionData.maxConfirmationMonths,
-    'months'
-  )
+  return moment(lastConfirmed)
+    .add(institutionData.maxConfirmationMonths, 'months')
+    .toDate()
+}
+
+function _pastReconfirmDate(lastDayToReconfirm) {
+  if (!lastDayToReconfirm) return false
+  return moment(lastDayToReconfirm).isBefore()
+}
+
+function _emailInReconfirmNotificationPeriod(lastDayToReconfirm) {
+  const globalReconfirmPeriod = settings.reconfirmNotificationDays
+
+  if (!globalReconfirmPeriod || !lastDayToReconfirm) return false
+
   const notificationStarts = moment(lastDayToReconfirm).subtract(
     globalReconfirmPeriod,
     'days'
@@ -202,14 +214,17 @@ var decorateFullEmails = (
         licence,
         portal
       } = affiliation
+      const lastDayToReconfirm = _lastDayToReconfirm(emailData, institution)
+      const pastReconfirmDate = _pastReconfirmDate(lastDayToReconfirm)
       const inReconfirmNotificationPeriod = _emailInReconfirmNotificationPeriod(
-        emailData,
-        institution
+        lastDayToReconfirm
       )
       emailData.affiliation = {
         institution,
         inferred,
         inReconfirmNotificationPeriod,
+        lastDayToReconfirm,
+        pastReconfirmDate,
         role,
         department,
         licence,

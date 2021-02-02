@@ -998,6 +998,14 @@ describe('UserEmails', function() {
   describe('notification period', function() {
     let defaultEmail, userHelper, email1, email2, email3
     const maxConfirmationMonths = 12
+    const lastDayToReconfirm = moment()
+      .subtract(maxConfirmationMonths, 'months')
+      .toDate()
+    const oneDayBeforeLastDayToReconfirm = moment(lastDayToReconfirm)
+      .add(1, 'day')
+      .toDate()
+    const daysToBackdate = moment().diff(oneDayBeforeLastDayToReconfirm, 'day')
+    const daysToBackdateForAfterDate = daysToBackdate + 1
 
     beforeEach(async function() {
       if (!Features.hasFeature('affiliations')) {
@@ -1026,14 +1034,17 @@ describe('UserEmails', function() {
       beforeEach(async function() {
         // create a user with 3 affiliations at the institution.
         // all are within in the notification period
-        const backdatedDays = maxConfirmationMonths * 2 * 30
         const userId = userHelper.user._id
         await userHelper.addEmailAndConfirm(userId, email1)
         await userHelper.addEmailAndConfirm(userId, email2)
         await userHelper.addEmailAndConfirm(userId, email3)
-        await userHelper.backdateConfirmation(userId, email1, backdatedDays)
-        await userHelper.backdateConfirmation(userId, email2, backdatedDays)
-        await userHelper.backdateConfirmation(userId, email3, backdatedDays)
+        await userHelper.backdateConfirmation(userId, email1, daysToBackdate)
+        await userHelper.backdateConfirmation(userId, email2, daysToBackdate)
+        await userHelper.backdateConfirmation(
+          userId,
+          email3,
+          daysToBackdateForAfterDate
+        )
       })
 
       it('should flag inReconfirmNotificationPeriod for all affiliations in period', async function() {
@@ -1045,12 +1056,15 @@ describe('UserEmails', function() {
         expect(
           fullEmails[1].affiliation.inReconfirmNotificationPeriod
         ).to.equal(true)
+        expect(fullEmails[1].affiliation.pastReconfirmDate).to.equal(false)
         expect(
           fullEmails[2].affiliation.inReconfirmNotificationPeriod
         ).to.equal(true)
+        expect(fullEmails[2].affiliation.pastReconfirmDate).to.equal(false)
         expect(
           fullEmails[3].affiliation.inReconfirmNotificationPeriod
         ).to.equal(true)
+        expect(fullEmails[3].affiliation.pastReconfirmDate).to.equal(true)
       })
 
       describe('should flag emails before their confirmation expires, but within the notification period', function() {

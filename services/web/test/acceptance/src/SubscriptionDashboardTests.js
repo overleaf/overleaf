@@ -521,6 +521,8 @@ describe('Subscriptions', function() {
               name: 'Stanford',
               confirmed: true
             },
+            lastDayToReconfirm: undefined,
+            pastReconfirmDate: false,
             portal: undefined
           }
         ])

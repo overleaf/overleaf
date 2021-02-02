@@ -195,8 +195,10 @@ describe('UserGetter', function() {
                 inferred: affiliationsData[0].inferred,
                 department: affiliationsData[0].department,
                 role: affiliationsData[0].role,
+                lastDayToReconfirm: undefined,
                 licence: affiliationsData[0].licence,
                 inReconfirmNotificationPeriod: false,
+                pastReconfirmDate: false,
                 portal: undefined
               }
             },

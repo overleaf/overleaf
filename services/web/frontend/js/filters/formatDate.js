@@ -31,6 +31,22 @@ App.filter(
     }
 )
 
+App.filter(
+  'utcDate',
+  () =>
+    function(date, format) {
+      if (!date) return 'N/A'
+      if (format == null) {
+        format = 'D MMM YYYY, HH:mm:ss'
+      }
+      return (
+        moment(date)
+          .utc()
+          .format(format) + ' UTC'
+      )
+    }
+)
+
 App.filter('relativeDate', () => date => moment(date).calendar())
 
 App.filter('fromNowDate', () => date => moment(date).fromNow())
