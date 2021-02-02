@@ -292,7 +292,7 @@ class UserHelper {
     return userHelper
   }
 
-  async addEmailAndConfirm(userId, email) {
+  async addEmail(email) {
     let response = await this.request.post({
       form: {
         email
@@ -301,20 +301,11 @@ class UserHelper {
       uri: '/user/emails'
     })
     expect(response.statusCode).to.equal(204)
-    const token = (
-      await db.tokens.findOne({
-        'data.user_id': userId.toString(),
-        'data.email': email
-      })
-    ).token
-    response = await this.request.post({
-      form: {
-        token
-      },
-      simple: false,
-      uri: '/user/emails/confirm'
-    })
-    expect(response.statusCode).to.equal(200)
+  }
+
+  async addEmailAndConfirm(userId, email) {
+    await this.addEmail(email)
+    await this.confirmEmail(userId, email)
   }
 
   async backdateConfirmation(userId, email, days) {

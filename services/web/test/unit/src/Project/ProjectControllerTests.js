@@ -98,6 +98,7 @@ describe('ProjectController', function() {
       ipMatcherAffiliation: sinon.stub().returns({ create: sinon.stub() })
     }
     this.UserGetter = {
+      getUserFullEmails: sinon.stub().yields(null, []),
       getUser: sinon
         .stub()
         .callsArgWith(2, null, { lastLoginIp: '192.170.18.2' })
@@ -177,7 +178,10 @@ describe('ProjectController', function() {
         },
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../../models/Project': {},
-        '../Analytics/AnalyticsManager': { recordEvent: () => {} }
+        '../Analytics/AnalyticsManager': { recordEvent: () => {} },
+        '../../infrastructure/Modules': {
+          hooks: { fire: sinon.stub().yields(null, []) }
+        }
       }
     })
 
@@ -524,6 +528,17 @@ describe('ProjectController', function() {
 
       it('should show a warning when there is an error getting affiliations from v1', function(done) {
         this.getUserAffiliations.yields(new Errors.V1ConnectionError('error'))
+        this.res.render = (pageName, opts) => {
+          expect(opts.warnings).to.contain(this.connectionWarning)
+          done()
+        }
+        this.ProjectController.projectListPage(this.req, this.res)
+      })
+
+      it('should show a warning when there is an error getting full emails due to v1', function(done) {
+        this.UserGetter.getUserFullEmails.yields(
+          new Errors.V1ConnectionError('error')
+        )
         this.res.render = (pageName, opts) => {
           expect(opts.warnings).to.contain(this.connectionWarning)
           done()

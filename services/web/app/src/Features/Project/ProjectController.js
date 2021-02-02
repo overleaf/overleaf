@@ -36,6 +36,7 @@ const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandle
 const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
 const UserController = require('../User/UserController')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const Modules = require('../../infrastructure/Modules')
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false
@@ -426,6 +427,35 @@ const ProjectController = {
             }
             cb(error, affiliations)
           })
+        },
+        userEmailsData(cb) {
+          const result = { list: [], allInReconfirmNotificationPeriods: [] }
+
+          UserGetter.getUserFullEmails(userId, (error, fullEmails) => {
+            if (error && error instanceof V1ConnectionError) {
+              noV1Connection = true
+              return cb(null, result)
+            }
+
+            if (!Features.hasFeature('affiliations')) {
+              result.list = fullEmails
+              return cb(null, result)
+            }
+            Modules.hooks.fire(
+              'allInReconfirmNotificationPeriodsForUser',
+              fullEmails,
+              (error, results) => {
+                // Module.hooks.fire accepts multiple methods
+                // and does async.series
+                const allInReconfirmNotificationPeriods =
+                  (results && results[0]) || []
+                return cb(null, {
+                  list: fullEmails,
+                  allInReconfirmNotificationPeriods
+                })
+              }
+            )
+          })
         }
       },
       (err, results) => {
@@ -433,7 +463,15 @@ const ProjectController = {
           OError.tag(err, 'error getting data for project list page')
           return next(err)
         }
-        const { notifications, user, userAffiliations } = results
+        const {
+          notifications,
+          user,
+          userAffiliations,
+          userEmailsData
+        } = results
+
+        const { allInReconfirmNotificationPeriods } = userEmailsData
+
         // Handle case of deleted user
         if (user == null) {
           UserController.logout(req, res, next)
@@ -558,6 +596,7 @@ const ProjectController = {
             tags,
             notifications: notifications || [],
             notificationsInstitution,
+            allInReconfirmNotificationPeriods,
             portalTemplates,
             user,
             userAffiliations,
