@@ -64,7 +64,7 @@ include ../../_mixins/saml
 						) #{translate("find_out_more_nt")}
 					.notification-action
 						a.pull-right.btn.btn-sm.btn-info(
-							href=`{{samlInitPath}}?university_id={{notification.messageOpts.institutionId}}`
+							href=`{{samlInitPath}}?university_id={{notification.messageOpts.institutionId}}&auto=/project`
 						)
 							| #{translate("link_account")}
 					.notification-close
