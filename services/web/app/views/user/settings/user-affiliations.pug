@@ -14,6 +14,26 @@ mixin btnMakePrimaryDisabled(tooltip)
 			type="button"
 		) #{translate("make_primary")}
 
+mixin btnRemoveEmail()
+	.affiliations-table-inline-action-disabled-wrapper(ng-if="userEmail.default")
+		div(
+			tooltip=translate("please_change_primary_to_remove")
+			tooltip-enable="!ui.isMakingRequest"
+			tooltip-placement="left"
+		)
+			button.btn.btn-sm.btn-danger(disabled)
+				i.fa.fa-fw.fa-trash(aria-hidden="true")
+				span.sr-only #{translate("please_change_primary_to_remove")}
+	button.btn.btn-sm.btn-danger.affiliations-table-inline-action(
+		ng-if="!userEmail.default"
+		ng-click="removeUserEmail(userEmail)"
+		ng-disabled="ui.isMakingRequest"
+		tooltip=translate("remove")
+		type="button"
+	)
+		i.fa.fa-fw.fa-trash(aria-hidden="true")
+		span.sr-only #{translate("remove")}
+
 form.row(
 	ng-controller="UserAffiliationsController"
 	name="affiliationsForm"
@@ -97,15 +117,7 @@ form.row(
 							type="button"
 						) #{translate("make_primary")}
 						| &nbsp;
-						button.btn.btn-sm.btn-danger.affiliations-table-inline-action(
-							ng-if="!userEmail.default"
-							ng-click="removeUserEmail(userEmail)"
-							ng-disabled="ui.isMakingRequest"
-							tooltip=translate("remove")
-							type="button"
-						)
-							i.fa.fa-fw.fa-trash(aria-hidden="true")
-							span.sr-only #{translate("remove")}
+						+btnRemoveEmail()
 				tr.affiliations-table-saml-row(ng-repeat-end ng-if="userEmail.affiliation && userEmail.affiliation && userEmail.ssoAvailable")
 					td
 					td(ng-attr-colspan="{{userEmail.samlProviderId ? '2' : '1'}}" ng-class="institutionAlreadyLinked(userEmail) ? '' : 'with-border'")
