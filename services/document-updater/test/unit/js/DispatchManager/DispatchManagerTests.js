@@ -64,7 +64,8 @@ describe('DispatchManager', function () {
       this.client = { auth: sinon.stub() }
       this.redis.createClient = sinon.stub().returns(this.client)
       return (this.worker = this.DispatchManager.createDispatcher(
-        this.RateLimiter
+        this.RateLimiter,
+        0
       ))
     })
 
@@ -129,7 +130,7 @@ describe('DispatchManager', function () {
         })
       })
 
-      return describe("with a 'Delete component' error", function () {
+      describe("with a 'Delete component' error", function () {
         beforeEach(function () {
           this.UpdateManager.processOutstandingUpdatesWithLock = sinon
             .stub()
@@ -143,6 +144,28 @@ describe('DispatchManager', function () {
 
         return it('should call the callback', function () {
           return this.callback.called.should.equal(true)
+        })
+      })
+
+      describe('pending updates list with shard key', function () {
+        beforeEach(function (done) {
+          this.client = {
+            auth: sinon.stub(),
+            blpop: sinon.stub().callsArgWith(2)
+          }
+          this.redis.createClient = sinon.stub().returns(this.client)
+          this.queueShardNumber = 7
+          this.worker = this.DispatchManager.createDispatcher(
+            this.RateLimiter,
+            this.queueShardNumber
+          )
+          this.worker._waitForUpdateThenDispatchWorker(done)
+        })
+
+        it('should call redis with BLPOP with the correct key', function () {
+          this.client.blpop
+            .calledWith(`pending-updates-list-${this.queueShardNumber}`, 0)
+            .should.equal(true)
         })
       })
     })

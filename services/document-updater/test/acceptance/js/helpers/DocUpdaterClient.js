@@ -1,5 +1,6 @@
 let DocUpdaterClient
 const Settings = require('settings-sharelatex')
+const _ = require('lodash')
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
@@ -26,6 +27,15 @@ module.exports = DocUpdaterClient = {
     rclientSub.on('message', callback)
   },
 
+  _getPendingUpdateListKey() {
+    const shard = _.random(0, Settings.dispatcherCount)
+    if (shard === 0) {
+      return 'pending-updates-list'
+    } else {
+      return `pending-updates-list-${shard}`
+    }
+  },
+
   sendUpdate(projectId, docId, update, callback) {
     rclient.rpush(
       keys.pendingUpdates({ doc_id: docId }),
@@ -39,7 +49,12 @@ module.exports = DocUpdaterClient = {
           if (error) {
             return callback(error)
           }
-          rclient.rpush('pending-updates-list', docKey, callback)
+
+          rclient.rpush(
+            DocUpdaterClient._getPendingUpdateListKey(),
+            docKey,
+            callback
+          )
         })
       }
     )

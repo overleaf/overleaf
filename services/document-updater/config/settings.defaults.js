@@ -171,7 +171,7 @@ module.exports = {
   maxJsonRequestSize:
     parseInt(process.env.MAX_JSON_REQUEST_SIZE, 10) || 8 * 1024 * 1024,
 
-  dispatcherCount: process.env.DISPATCHER_COUNT,
+  dispatcherCount: process.env.DISPATCHER_COUNT || 10,
 
   mongo: {
     options: {
