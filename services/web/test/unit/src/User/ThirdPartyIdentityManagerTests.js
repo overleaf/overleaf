@@ -32,7 +32,7 @@ describe('ThirdPartyIdentityManager', function() {
         '../../../../app/src/models/User': {
           User: (this.User = {
             findOneAndUpdate: sinon.stub().yields(undefined, this.user),
-            findOne: sinon.stub()
+            findOne: sinon.stub().yields(undefined, undefined)
           })
         },
         'settings-sharelatex': {
@@ -46,6 +46,48 @@ describe('ThirdPartyIdentityManager', function() {
           }
         }
       }
+    })
+  })
+  describe('getUser', function() {
+    it('should an error when missing providerId or externalUserId', function(done) {
+      this.ThirdPartyIdentityManager.getUser(
+        undefined,
+        undefined,
+        (error, user) => {
+          expect(error).to.exist
+          expect(error.message).to.equal('invalid SSO arguments')
+          expect(error.info).to.deep.equal({
+            externalUserId: undefined,
+            providerId: undefined
+          })
+          done()
+        }
+      )
+    })
+    describe('when user linked', function() {
+      beforeEach(function() {
+        this.User.findOne.yields(undefined, this.user)
+      })
+
+      it('should return the user', async function() {
+        this.User.findOne.returns(undefined, this.user)
+        const user = await this.ThirdPartyIdentityManager.promises.getUser(
+          'google',
+          'an-id-linked'
+        )
+        expect(user).to.deep.equal(this.user)
+      })
+    })
+    it('should return ThirdPartyUserNotFoundError when no user linked', function(done) {
+      this.ThirdPartyIdentityManager.getUser(
+        'google',
+        'an-id-not-linked',
+        (error, user) => {
+          expect(error).to.exist
+          expect(error.name).to.equal('ThirdPartyUserNotFoundError')
+          done()
+        }
+      )
     })
   })
   describe('link', function() {
