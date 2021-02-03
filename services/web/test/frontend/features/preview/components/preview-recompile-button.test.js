@@ -55,7 +55,7 @@ describe('<PreviewRecompileButton />', function() {
       it('shows processing view and disable menuItem when recompiling', function() {
         renderPreviewRecompileButton({ isCompiling: true })
 
-        screen.getByRole('button', { name: 'Compiling …' })
+        screen.getByRole('button', { name: 'Compiling…' })
         expect(
           screen
             .getByRole('menuitem', {
