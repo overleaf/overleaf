@@ -38,7 +38,12 @@ describe('SessionAutostartMiddleware', function() {
     let req, next
 
     beforeEach(function() {
-      req = { path: excludedRoute, method: excludedMethod, signedCookies: {} }
+      req = {
+        path: excludedRoute,
+        method: excludedMethod,
+        signedCookies: {},
+        headers: {}
+      }
       next = sinon.stub()
     })
 
@@ -61,6 +66,34 @@ describe('SessionAutostartMiddleware', function() {
 
     it('does not execute the callback if there is a cookie', function() {
       req.signedCookies[cookieName] = 'a very useful session cookie'
+      middleware.middleware(req, {}, next)
+      expect(req.session).not.to.exist
+    })
+  })
+  describe('bot middlewear', function() {
+    let req, next
+
+    beforeEach(function() {
+      req = {
+        signedCookies: {},
+        headers: {}
+      }
+      next = sinon.stub()
+    })
+
+    it('GoogleHC user agent should have an empty session', function() {
+      req.headers['user-agent'] = 'GoogleHC'
+      middleware.middleware(req, {}, next)
+      expect(req.session.noSessionCallback).to.deep.exist
+    })
+
+    it('should not add empty session with a firefox useragent', function() {
+      req.headers['user-agent'] = 'firefox'
+      middleware.middleware(req, {}, next)
+      expect(req.session).not.to.exist
+    })
+
+    it('should not add empty session  with a empty useragent', function() {
       middleware.middleware(req, {}, next)
       expect(req.session).not.to.exist
     })

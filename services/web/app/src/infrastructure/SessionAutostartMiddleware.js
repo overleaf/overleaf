@@ -1,6 +1,16 @@
 const Settings = require('settings-sharelatex')
 const OError = require('@overleaf/o-error')
 
+const botUserAgents = [
+  'kube-probe',
+  'GoogleStackdriverMonitoring',
+  'GoogleHC',
+  'Googlebot',
+  'bingbot',
+  'facebookexternal'
+].map(agent => {
+  return agent.toLowerCase()
+})
 // SessionAutostartMiddleware provides a mechanism to force certain routes not
 // to get an automatic session where they don't have one already. This allows us
 // to work around issues where we might overwrite a user's login cookie with one
@@ -52,16 +62,35 @@ class SessionAutostartMiddleware {
     )
   }
 
-  middleware(req, res, next) {
+  reqIsBot(req) {
+    const agent = (req.headers['user-agent'] || '').toLowerCase()
+
+    const foundMatch = botUserAgents.find(botAgent => {
+      return agent.includes(botAgent)
+    })
+
+    if (foundMatch) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+  middleware(req, _res, next) {
     if (!req.signedCookies[this._cookieName]) {
       const callback = this.autostartCallbackForRequest(req)
       if (callback) {
         req.session = {
           noSessionCallback: callback
         }
+      } else if (this.reqIsBot(req)) {
+        req.session = {
+          noSessionCallback: (_req, _res, next) => {
+            next()
+          }
+        }
       }
     }
-
     next()
   }
 
