@@ -206,4 +206,55 @@ describe('PasswordReset', function() {
       expect(response.statusCode).to.equal(404)
     })
   })
+  describe('password reset', function() {
+    it('should return 200 if email field is valid', async function() {
+      response = await userHelper.request.post(`/user/password/reset`, {
+        form: {
+          email
+        }
+      })
+      expect(response.statusCode).to.equal(200)
+    })
+
+    it('should return 400 if email field is missing', async function() {
+      response = await userHelper.request.post(`/user/password/reset`, {
+        form: {
+          mail: email
+        },
+        simple: false
+      })
+      expect(response.statusCode).to.equal(400)
+    })
+  })
+  describe('password set', function() {
+    it('should return 200 if password and passwordResetToken fields are valid', async function() {
+      response = await userHelper.request.post(`/user/password/set`, {
+        form: {
+          password: 'new-password',
+          passwordResetToken: token
+        }
+      })
+      expect(response.statusCode).to.equal(200)
+    })
+
+    it('should return 400 if password field is missing', async function() {
+      response = await userHelper.request.post(`/user/password/set`, {
+        form: {
+          passwordResetToken: token
+        },
+        simple: false
+      })
+      expect(response.statusCode).to.equal(400)
+    })
+
+    it('should return 400 if passwordResetToken field is missing', async function() {
+      response = await userHelper.request.post(`/user/password/set`, {
+        form: {
+          password: 'new-password'
+        },
+        simple: false
+      })
+      expect(response.statusCode).to.equal(400)
+    })
+  })
 })
