@@ -35,7 +35,11 @@ export const parameters = {
   // Automatically mark prop-types like onClick, onToggle, etc as Storybook
   // "actions", so that they are logged in the Actions pane at the bottom of the
   // viewer
-  actions: { argTypesRegex: '^on.*' }
+  actions: { argTypesRegex: '^on.*' },
+  docs: {
+    // render stories in iframes, to isolate modals
+    inlineStories: false
+  }
 }
 
 export const globalTypes = {
