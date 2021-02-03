@@ -14,11 +14,15 @@ export function appendMessage(messageList, message) {
   if (shouldGroup) {
     return messageList.slice(0, messageList.length - 1).concat({
       ...lastMessage,
+      // the `id` is updated to the latest received content when a new
+      // message is appended or prepended
+      id: message.id,
       timestamp: message.timestamp,
       contents: lastMessage.contents.concat(message.content)
     })
   } else {
     return messageList.slice(0).concat({
+      id: message.id,
       user: message.user,
       timestamp: message.timestamp,
       contents: [message.content]
@@ -41,10 +45,12 @@ export function prependMessages(messageList, messages) {
         firstMessage.timestamp - message.timestamp < TIMESTAMP_GROUP_SIZE
 
       if (shouldGroup) {
+        firstMessage.id = message.id
         firstMessage.timestamp = message.timestamp
         firstMessage.contents = [message.content].concat(firstMessage.contents)
       } else {
         listCopy.unshift({
+          id: message.id,
           user: message.user,
           timestamp: message.timestamp,
           contents: [message.content]

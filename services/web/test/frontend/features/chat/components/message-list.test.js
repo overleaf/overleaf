@@ -23,11 +23,13 @@ describe('<MessageList />', function() {
   function createMessages() {
     return [
       {
+        id: 'test_msg_1',
         contents: ['a message'],
         user: currentUser,
         timestamp: new Date().getTime()
       },
       {
+        id: 'test_msg_2',
         contents: ['another message'],
         user: currentUser,
         timestamp: new Date().getTime()

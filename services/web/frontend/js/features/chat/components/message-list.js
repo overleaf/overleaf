@@ -13,10 +13,6 @@ function formatTimestamp(date) {
   }
 }
 
-function indexFromEnd(list, index) {
-  return list.length - index - 1
-}
-
 function MessageList({ messages, resetUnreadMessages, userId }) {
   function shouldRenderDate(messageIndex) {
     if (messageIndex === 0) {
@@ -37,7 +33,7 @@ function MessageList({ messages, resetUnreadMessages, userId }) {
     >
       {messages.map((message, index) => (
         // new messages are added to the beginning of the list, so we use a reversed index
-        <li key={indexFromEnd(messages, index)} className="message">
+        <li key={message.id} className="message">
           {shouldRenderDate(index) && (
             <div className="date">
               <time
@@ -59,8 +55,12 @@ function MessageList({ messages, resetUnreadMessages, userId }) {
 }
 
 MessageList.propTypes = {
-  messages: PropTypes.arrayOf(PropTypes.shape({ timestamp: PropTypes.number }))
-    .isRequired,
+  messages: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      timestamp: PropTypes.number
+    })
+  ).isRequired,
   resetUnreadMessages: PropTypes.func.isRequired,
   userId: PropTypes.string.isRequired
 }

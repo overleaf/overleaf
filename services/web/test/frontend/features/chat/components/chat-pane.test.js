@@ -23,11 +23,13 @@ describe('<ChatPane />', function() {
 
   const testMessages = [
     {
+      id: 'msg_1',
       content: 'a message',
       user: currentUser,
       timestamp: new Date().getTime()
     },
     {
+      id: 'msg_2',
       content: 'another message',
       user: currentUser,
       timestamp: new Date().getTime()
