@@ -1,4 +1,5 @@
 {
+  "github_symlink_error": "Your Github repository contains symbolic link files, which are not currently supported by Overleaf. Please remove these and try again.",
   "address_line_1": "Address",
   "address_line_2": "Address (line 2, optional)",
   "postal_code": "Postal Code",
