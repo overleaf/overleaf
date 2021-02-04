@@ -60,7 +60,16 @@ public class NoopDbStore implements DBStore {
 
     @Override
     public void setLastAccessedTime(String projectName, Timestamp time) {
-
     }
 
+    @Override
+    public void swap(String projectName, String compressionMethod) {}
+
+    @Override
+    public void restore(String projectName) {}
+
+    @Override
+    public String getSwapCompression(String projectName) {
+        return null;
+    }
 }

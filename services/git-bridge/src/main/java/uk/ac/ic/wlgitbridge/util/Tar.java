@@ -6,6 +6,8 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
 
@@ -23,6 +25,44 @@ import java.nio.file.Paths;
  * Caller is responsible for all resources.
  */
 public class Tar {
+    public static class gzip {
+
+        public static InputStream zip(
+            File fileOrDir
+        ) throws IOException {
+            return zip(fileOrDir, null);
+        }
+
+        public static InputStream zip(
+            File fileOrDir,
+            long[] sizePtr
+        ) throws IOException {
+            File tmp = File.createTempFile(fileOrDir.getName(), ".tar.gz");
+            tmp.deleteOnExit();
+            OutputStream target = new FileOutputStream(tmp);
+            /* Closes target */
+            try (OutputStream gz = new GzipCompressorOutputStream(target)) {
+                tarTo(fileOrDir, gz);
+            } catch (IOException e) {
+                tmp.delete();
+                throw e;
+            }
+            if (sizePtr != null) {
+                sizePtr[0] = tmp.length();
+            }
+            return new DeletingFileInputStream(tmp);
+        }
+
+        public static void unzip(
+          InputStream targz,
+          File parentDir
+        ) throws IOException {
+            /* GzipCompressorInputStream does not need closing
+               Closing it would close targz which we should not do */
+            InputStream tar = new GzipCompressorInputStream(targz);
+            untar(tar, parentDir);
+        }
+    }
 
     public static class bz2 {
 
