@@ -49,35 +49,35 @@ function fetchJSON(
 
   return fetch(path, options)
     .then(parseResponseBody)
-    .then(({ responseBody, response }) => {
+    .then(({ data, response }) => {
       if (!response.ok) {
         throw new OError(response.statusText, {
           statusCode: response.status,
-          responseBody,
+          data,
           response
         })
       }
 
-      return responseBody
+      return data
     })
 }
 
 function parseResponseBody(response) {
   const contentType = response.headers.get('Content-Type')
   if (/application\/json/.test(contentType)) {
-    return response.json().then(json => {
-      return { responseBody: json, response }
+    return response.json().then(data => {
+      return { data, response }
     })
   } else if (
     /text\/plain/.test(contentType) ||
     /text\/html/.test(contentType)
   ) {
     return response.text().then(text => {
-      return { responseBody: { message: text }, response }
+      return { data: { message: text }, response }
     })
   } else {
     // response body ignored as content-type is either not set (e.g. 204
     // responses) or unsupported
-    return Promise.resolve({ responseBody: {}, response })
+    return Promise.resolve({ data: {}, response })
   }
 }
