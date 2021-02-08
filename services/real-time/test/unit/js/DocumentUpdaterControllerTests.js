@@ -20,7 +20,7 @@ const modulePath = require('path').join(
 const MockClient = require('./helpers/MockClient')
 
 describe('DocumentUpdaterController', function () {
-  beforeEach(function (done) {
+  beforeEach(function () {
     this.project_id = 'project-id-123'
     this.doc_id = 'doc-id-123'
     this.callback = sinon.stub()
@@ -69,7 +69,6 @@ describe('DocumentUpdaterController', function () {
         './ChannelManager': (this.ChannelManager = {})
       }
     })
-    done()
   })
 
   describe('listenForUpdatesFromDocumentUpdater', function () {

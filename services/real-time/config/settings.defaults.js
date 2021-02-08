@@ -114,6 +114,12 @@ const settings = {
 
   max_doc_length: 2 * 1024 * 1024, // 2mb
 
+  // should be set to the same same as dispatcherCount in document updater
+  pendingUpdateListShardCount: parseInt(
+    process.env.PENDING_UPDATE_LIST_SHARD_COUNT || 1,
+    10
+  ),
+
   // combine
   // max_doc_length (2mb see above) * 2 (delete + insert)
   // max_ranges_size (3mb see MAX_RANGES_SIZE in document-updater)
