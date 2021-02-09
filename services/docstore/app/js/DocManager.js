@@ -20,6 +20,7 @@ const logger = require('logger-sharelatex')
 const _ = require('underscore')
 const DocArchive = require('./DocArchiveManager')
 const RangeManager = require('./RangeManager')
+const Settings = require('settings-sharelatex')
 
 module.exports = DocManager = {
   // TODO: For historical reasons, the doc version is currently stored in the docOps
@@ -304,6 +305,19 @@ module.exports = DocManager = {
           )
         )
       }
+
+      if (Settings.docstore.archiveOnSoftDelete) {
+        // The user will not read this doc anytime soon. Flush it out of mongo.
+        DocArchive.archiveDocById(project_id, doc_id, (err) => {
+          if (err) {
+            logger.warn(
+              { project_id, doc_id, err },
+              'archiving a single doc in the background failed'
+            )
+          }
+        })
+      }
+
       return MongoManager.markDocAsDeleted(project_id, doc_id, callback)
     })
   }

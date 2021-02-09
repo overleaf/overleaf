@@ -22,6 +22,8 @@ const Settings = {
   },
 
   docstore: {
+    archiveOnSoftDelete: process.env.ARCHIVE_ON_SOFT_DELETE === 'true',
+
     backend: process.env.BACKEND || 's3',
     healthCheck: {
       project_id: process.env.HEALTH_CHECK_PROJECT_ID

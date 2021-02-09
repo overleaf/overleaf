@@ -17,6 +17,7 @@ const { db, ObjectId } = require('../../../app/js/mongodb')
 const { expect } = chai
 const DocstoreApp = require('./helpers/DocstoreApp')
 const Errors = require('../../../app/js/Errors')
+const Settings = require('settings-sharelatex')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
 
@@ -86,12 +87,80 @@ describe('Deleting a doc', function () {
       )
     })
 
-    return it('should insert a deleted doc into the docs collection', function (done) {
+    it('should insert a deleted doc into the docs collection', function (done) {
       return db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
         docs[0]._id.should.deep.equal(this.doc_id)
         docs[0].lines.should.deep.equal(this.lines)
         docs[0].deleted.should.equal(true)
         return done()
+      })
+    })
+
+    it('should not export the doc to s3', function (done) {
+      setTimeout(() => {
+        DocstoreClient.getS3Doc(this.project_id, this.doc_id, (error) => {
+          expect(error).to.be.instanceOf(Errors.NotFoundError)
+          done()
+        })
+      }, 1000)
+    })
+  })
+
+  describe('when archiveOnSoftDelete is enabled', function () {
+    let archiveOnSoftDelete
+    beforeEach(function overwriteSetting() {
+      archiveOnSoftDelete = Settings.docstore.archiveOnSoftDelete
+      Settings.docstore.archiveOnSoftDelete = true
+    })
+    afterEach(function restoreSetting() {
+      Settings.docstore.archiveOnSoftDelete = archiveOnSoftDelete
+    })
+
+    beforeEach(function deleteDoc(done) {
+      DocstoreClient.deleteDoc(this.project_id, this.doc_id, (error, res) => {
+        this.res = res
+        done()
+      })
+    })
+
+    beforeEach(function waitForBackgroundFlush(done) {
+      setTimeout(done, 500)
+    })
+
+    afterEach(function cleanupDoc(done) {
+      db.docs.remove({ _id: this.doc_id }, done)
+    })
+
+    it('should set the deleted flag in the doc', function (done) {
+      db.docs.findOne({ _id: this.doc_id }, (error, doc) => {
+        if (error) {
+          return done(error)
+        }
+        expect(doc.deleted).to.equal(true)
+        done()
+      })
+    })
+
+    it('should set inS3 and unset lines and ranges in the doc', function (done) {
+      db.docs.findOne({ _id: this.doc_id }, (error, doc) => {
+        if (error) {
+          return done(error)
+        }
+        expect(doc.lines).to.not.exist
+        expect(doc.ranges).to.not.exist
+        expect(doc.inS3).to.equal(true)
+        done()
+      })
+    })
+
+    it('should set the doc in s3 correctly', function (done) {
+      DocstoreClient.getS3Doc(this.project_id, this.doc_id, (error, s3_doc) => {
+        if (error) {
+          return done(error)
+        }
+        expect(s3_doc.lines).to.deep.equal(this.lines)
+        expect(s3_doc.ranges).to.deep.equal(this.ranges)
+        done()
       })
     })
   })
