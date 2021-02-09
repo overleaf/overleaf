@@ -28,7 +28,7 @@ module.exports = DocUpdaterClient = {
   },
 
   _getPendingUpdateListKey() {
-    const shard = _.random(0, Settings.dispatcherCount)
+    const shard = _.random(0, Settings.dispatcherCount - 1)
     if (shard === 0) {
       return 'pending-updates-list'
     } else {
