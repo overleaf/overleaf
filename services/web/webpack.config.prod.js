@@ -42,7 +42,15 @@ module.exports = merge.smart(
 
     optimization: {
       // Minify JS (with Terser) and CSS (with cssnano)
-      minimizer: [new TerserPlugin(), new OptimizeCssAssetsPlugin()]
+      minimizer: [
+        new TerserPlugin({
+          terserOptions: {
+            keep_classnames: /Error$/,
+            keep_fnames: /Error$/
+          }
+        }),
+        new OptimizeCssAssetsPlugin()
+      ]
     },
 
     plugins: [
