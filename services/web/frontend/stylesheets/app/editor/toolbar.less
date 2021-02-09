@@ -23,11 +23,11 @@
     outline: none;
   }
 
-  > a:not(.btn):not(.badge),
+  > a:not(.btn),
   > button,
-  .toolbar-left > a:not(.btn):not(.badge),
+  .toolbar-left > a:not(.btn),
   .toolbar-left > button,
-  .toolbar-right > a:not(.btn):not(.badge),
+  .toolbar-right > a:not(.btn),
   .toolbar-right > button {
     display: inline-block;
     color: @toolbar-icon-btn-color;
@@ -59,10 +59,6 @@
         color: white;
       }
     }
-  }
-
-  .toolbar-right > a.badge {
-    margin-left: 5px;
   }
 
   &.toolbar-pdf > a:not(.btn) {
