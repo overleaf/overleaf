@@ -129,6 +129,18 @@ module.exports = DocstoreClient = {
     )
   },
 
+  archiveDocById(project_id, doc_id, callback) {
+    if (callback == null) {
+      callback = function (error, res, body) {}
+    }
+    return request.post(
+      {
+        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}/archive`
+      },
+      callback
+    )
+  },
+
   destroyAllDoc(project_id, callback) {
     if (callback == null) {
       callback = function (error, res, body) {}

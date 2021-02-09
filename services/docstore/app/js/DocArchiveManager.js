@@ -13,6 +13,7 @@ const PARALLEL_JOBS = 5
 
 module.exports = {
   archiveAllDocs: callbackify(archiveAllDocs),
+  archiveDocById: callbackify(archiveDocById),
   archiveDoc: callbackify(archiveDoc),
   unArchiveAllDocs: callbackify(unArchiveAllDocs),
   unarchiveDoc: callbackify(unarchiveDoc),
@@ -20,6 +21,7 @@ module.exports = {
   destroyDoc: callbackify(destroyDoc),
   promises: {
     archiveAllDocs,
+    archiveDocById,
     archiveDoc,
     unArchiveAllDocs,
     unarchiveDoc,
@@ -43,6 +45,25 @@ async function archiveAllDocs(projectId) {
   await pMap(docsToArchive, (doc) => archiveDoc(projectId, doc), {
     concurrency: PARALLEL_JOBS
   })
+}
+
+async function archiveDocById(projectId, docId) {
+  const doc = await MongoManager.findDoc(projectId, docId, {
+    lines: true,
+    ranges: true,
+    rev: true,
+    inS3: true
+  })
+
+  if (!doc) {
+    throw new Errors.NotFoundError(
+      `Cannot find doc ${docId} in project ${projectId}`
+    )
+  }
+
+  // TODO(das7pad): consider refactoring MongoManager.findDoc to take a query
+  if (doc.inS3) return
+  return archiveDoc(projectId, doc)
 }
 
 async function archiveDoc(projectId, doc) {
