@@ -15,11 +15,16 @@ describe('<OutlinePane />', function() {
     renderWithEditorContext(children, { projectId: '123abc' })
   }
 
+  let originalLocalStorage
   before(function() {
-    global.localStorage = {
-      getItem: sinon.stub().returns(null),
-      setItem: sinon.stub()
-    }
+    originalLocalStorage = global.localStorage
+
+    Object.defineProperty(global, 'localStorage', {
+      value: {
+        getItem: sinon.stub().returns(null),
+        setItem: sinon.stub()
+      }
+    })
   })
 
   afterEach(function() {
@@ -30,7 +35,9 @@ describe('<OutlinePane />', function() {
   })
 
   after(function() {
-    delete global.localStorage
+    Object.defineProperty(global, 'localStorage', {
+      value: originalLocalStorage
+    })
   })
 
   it('renders expanded outline', function() {
