@@ -53,6 +53,15 @@ module.exports = MongoManager = {
     db.docs.find(query).toArray(callback)
   },
 
+  getNonDeletedArchivedProjectDocs(project_id, callback) {
+    const query = {
+      project_id: ObjectId(project_id.toString()),
+      deleted: { $ne: true },
+      inS3: true
+    }
+    db.docs.find(query).toArray(callback)
+  },
+
   upsertIntoDocCollection(project_id, doc_id, updates, callback) {
     const update = {
       $set: updates,

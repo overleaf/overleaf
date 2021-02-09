@@ -100,7 +100,12 @@ async function archiveDoc(projectId, doc) {
 }
 
 async function unArchiveAllDocs(projectId) {
-  const docs = await MongoManager.getArchivedProjectDocs(projectId)
+  let docs
+  if (settings.docstore.keepSoftDeletedDocsArchived) {
+    docs = await MongoManager.getNonDeletedArchivedProjectDocs(projectId)
+  } else {
+    docs = await MongoManager.getArchivedProjectDocs(projectId)
+  }
   if (!docs) {
     throw new Errors.NotFoundError(`No docs for project ${projectId}`)
   }

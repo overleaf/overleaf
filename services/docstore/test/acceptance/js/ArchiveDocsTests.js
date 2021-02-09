@@ -167,7 +167,7 @@ describe('Archiving', function () {
   })
 
   describe('a deleted doc', function () {
-    before(function (done) {
+    beforeEach(function (done) {
       this.project_id = ObjectId()
       this.doc = {
         _id: ObjectId(),
@@ -241,8 +241,8 @@ describe('Archiving', function () {
       )
     })
 
-    return describe('after unarchiving from a request for the project', function () {
-      before(function (done) {
+    describe('after unarchiving from a request for the project', function () {
+      beforeEach(function (done) {
         return DocstoreClient.getAllDocs(
           this.project_id,
           (error, res, fetched_docs) => {
@@ -270,6 +270,51 @@ describe('Archiving', function () {
           should.not.exist(doc.inS3)
           doc.deleted.should.equal(true)
           return done()
+        })
+      })
+    })
+
+    describe('when keepSoftDeletedDocsArchived is enabled', function () {
+      let keepSoftDeletedDocsArchived
+      beforeEach(function overwriteSetting() {
+        keepSoftDeletedDocsArchived =
+          Settings.docstore.keepSoftDeletedDocsArchived
+        Settings.docstore.keepSoftDeletedDocsArchived = true
+      })
+      afterEach(function restoreSetting() {
+        Settings.docstore.keepSoftDeletedDocsArchived = keepSoftDeletedDocsArchived
+      })
+
+      describe('after unarchiving from a request for the project', function () {
+        beforeEach(function (done) {
+          DocstoreClient.getAllDocs(
+            this.project_id,
+            (error, res, fetched_docs) => {
+              this.fetched_docs = fetched_docs
+              if (error) {
+                return done(error)
+              }
+              done()
+            }
+          )
+        })
+
+        it('should not included the deleted', function (done) {
+          this.fetched_docs.length.should.equal(0)
+          done()
+        })
+
+        it('should not have restored the deleted doc to mongo', function (done) {
+          db.docs.findOne({ _id: this.doc._id }, (error, doc) => {
+            if (error) {
+              return done(error)
+            }
+            expect(doc.lines).to.not.exist
+            expect(doc.ranges).to.not.exist
+            expect(doc.inS3).to.equal(true)
+            expect(doc.deleted).to.equal(true)
+            done()
+          })
         })
       })
     })
