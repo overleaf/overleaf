@@ -119,11 +119,9 @@ async function _addInstitutionEmail(userId, email, providerId, auditLog) {
   if (emailAlreadyAssociated && emailAlreadyAssociated.confirmedAt) {
     await UserUpdater.promises.updateUser(query, update)
   } else if (emailAlreadyAssociated) {
-    await UserUpdater.promises.confirmEmail(user._id, email)
     await UserUpdater.promises.updateUser(query, update)
   } else {
     await UserUpdater.promises.addEmailAddress(user._id, email, {}, auditLog)
-    await UserUpdater.promises.confirmEmail(user._id, email)
     await UserUpdater.promises.updateUser(query, update)
   }
 }
@@ -212,6 +210,7 @@ async function linkAccounts(
     auditLog
   )
   await _addInstitutionEmail(userId, institutionEmail, providerId, auditLog)
+  await UserUpdater.promises.confirmEmail(userId, institutionEmail) // will set confirmedAt if not set, and will always update reconfirmedAt
   await _sendLinkedEmail(userId, providerName, institutionEmail)
   // update v1 affiliations record
   if (hasEntitlement) {
