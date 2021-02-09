@@ -407,16 +407,21 @@ describe('DocumentUpdaterManager', function () {
       this.keys = _.unique(keys)
     })
     it('should return normal pending updates key', function () {
-      const key = this.DocumentUpdaterManager._getPendingUpdateListKey()
       _.contains(this.keys, 'pending-updates-list').should.equal(true)
     })
 
     it('should return pending-updates-list-n keys', function () {
       _.contains(this.keys, 'pending-updates-list-1').should.equal(true)
       _.contains(this.keys, 'pending-updates-list-3').should.equal(true)
+      _.contains(this.keys, 'pending-updates-list-9').should.equal(true)
     })
+
     it('should not include pending-updates-list-0 key', function () {
       _.contains(this.keys, 'pending-updates-list-0').should.equal(false)
+    })
+
+    it('should not include maximum as pendingUpdateListShardCount value', function () {
+      _.contains(this.keys, 'pending-updates-list-10').should.equal(false)
     })
   })
 })

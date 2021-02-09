@@ -89,7 +89,7 @@ const DocumentUpdaterManager = {
   },
 
   _getPendingUpdateListKey() {
-    const shard = _.random(0, settings.pendingUpdateListShardCount)
+    const shard = _.random(0, settings.pendingUpdateListShardCount - 1)
     if (shard === 0) {
       return 'pending-updates-list'
     } else {
