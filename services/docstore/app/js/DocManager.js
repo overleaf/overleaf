@@ -90,6 +90,24 @@ module.exports = DocManager = {
     )
   },
 
+  isDocDeleted(projectId, docId, callback) {
+    MongoManager.findDoc(projectId, docId, { deleted: true }, function (
+      err,
+      doc
+    ) {
+      if (err) {
+        return callback(err)
+      }
+      if (!doc) {
+        return callback(
+          new Errors.NotFoundError(`No such project/doc: ${projectId}/${docId}`)
+        )
+      }
+      // `doc.deleted` is `undefined` for non deleted docs
+      callback(null, Boolean(doc.deleted))
+    })
+  },
+
   getFullDoc(project_id, doc_id, callback) {
     if (callback == null) {
       callback = function (err, doc) {}

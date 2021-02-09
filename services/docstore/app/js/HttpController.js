@@ -44,6 +44,16 @@ module.exports = HttpController = {
     })
   },
 
+  isDocDeleted(req, res, next) {
+    const { doc_id: docId, project_id: projectId } = req.params
+    DocManager.isDocDeleted(projectId, docId, function (error, deleted) {
+      if (error) {
+        return next(error)
+      }
+      res.json({ deleted })
+    })
+  },
+
   getRawDoc(req, res, next) {
     if (next == null) {
       next = function (error) {}
