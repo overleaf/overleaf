@@ -7,9 +7,29 @@ App.controller('ReactRootContextController', function($scope, ide) {
   ide.$scope.$watch('state.loading', editorLoading => {
     $scope.editorLoading = editorLoading
   })
+
+  $scope.setChatIsOpenAngular = value => {
+    ide.$scope.$applyAsync(() => {
+      ide.$scope.ui.chatOpen = value
+    })
+  }
+
+  // we need to pass `$scope.ui.chatOpen` to Angular while both React and Angular
+  // Navigation Toolbars exist in the codebase. Once the Angular version is removed,
+  // the React Navigation Toolbar will be the only source of truth for the open/closed state,
+  // but `setChatIsOpenAngular` will still need to exist since Angular is responsible of the
+  // global layout
+  $scope.chatIsOpenAngular = ide.$scope.ui.chatOpen
+  ide.$scope.$watch('ui.chatOpen', value => {
+    $scope.chatIsOpenAngular = value
+  })
 })
 
 App.component(
   'sharedContextReact',
-  react2angular(rootContext.component, ['editorLoading'])
+  react2angular(rootContext.component, [
+    'editorLoading',
+    'setChatIsOpenAngular',
+    'chatIsOpenAngular'
+  ])
 )
