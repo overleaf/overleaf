@@ -7,23 +7,38 @@ import renderWithContext from '../../helpers/render-with-context'
 import FileTreeItemName from '../../../../../../frontend/js/features/file-tree/components/file-tree-item/file-tree-item-name'
 
 describe('<FileTreeItemName />', function() {
+  const setIsDraggable = sinon.stub()
+
   beforeEach(function() {
     global.requestAnimationFrame = sinon.stub()
   })
 
   afterEach(function() {
     delete global.requestAnimationFrame
+    setIsDraggable.reset()
   })
 
   it('renders name as button', function() {
-    renderWithContext(<FileTreeItemName name="foo.tex" isSelected />)
+    renderWithContext(
+      <FileTreeItemName
+        name="foo.tex"
+        isSelected
+        setIsDraggable={setIsDraggable}
+      />
+    )
 
     screen.getByRole('button', { name: 'foo.tex' })
     expect(screen.queryByRole('textbox')).to.not.exist
   })
 
   it("doesn't start renaming on unselected component", function() {
-    renderWithContext(<FileTreeItemName name="foo.tex" isSelected={false} />)
+    renderWithContext(
+      <FileTreeItemName
+        name="foo.tex"
+        isSelected={false}
+        setIsDraggable={setIsDraggable}
+      />
+    )
 
     const button = screen.queryByRole('button')
     fireEvent.click(button)
@@ -33,7 +48,13 @@ describe('<FileTreeItemName />', function() {
   })
 
   it('start renaming on double-click', function() {
-    renderWithContext(<FileTreeItemName name="foo.tex" isSelected />)
+    renderWithContext(
+      <FileTreeItemName
+        name="foo.tex"
+        isSelected
+        setIsDraggable={setIsDraggable}
+      />
+    )
 
     const button = screen.queryByRole('button')
     fireEvent.click(button)
@@ -42,12 +63,20 @@ describe('<FileTreeItemName />', function() {
     screen.getByRole('textbox')
     expect(screen.queryByRole('button')).to.not.exist
     expect(global.requestAnimationFrame).to.be.calledOnce
+    expect(setIsDraggable).to.be.calledWith(false)
   })
 
   it('cannot start renaming in read-only', function() {
-    renderWithContext(<FileTreeItemName name="foo.tex" isSelected />, {
-      contextProps: { hasWritePermissions: false }
-    })
+    renderWithContext(
+      <FileTreeItemName
+        name="foo.tex"
+        isSelected
+        setIsDraggable={setIsDraggable}
+      />,
+      {
+        contextProps: { hasWritePermissions: false }
+      }
+    )
 
     const button = screen.queryByRole('button')
     fireEvent.click(button)
@@ -59,7 +88,13 @@ describe('<FileTreeItemName />', function() {
 
   describe('stop renaming', function() {
     beforeEach(function() {
-      renderWithContext(<FileTreeItemName name="foo.tex" isSelected />)
+      renderWithContext(
+        <FileTreeItemName
+          name="foo.tex"
+          isSelected
+          setIsDraggable={setIsDraggable}
+        />
+      )
 
       const button = screen.getByRole('button')
       fireEvent.click(button)
@@ -75,6 +110,7 @@ describe('<FileTreeItemName />', function() {
       fireEvent.keyDown(input, { key: 'Escape' })
 
       screen.getByRole('button', { name: 'foo.tex' })
+      expect(setIsDraggable).to.be.calledWith(true)
     })
   })
 })

@@ -16,7 +16,7 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
 
   const hasMenu = hasWritePermissions && isSelected
 
-  const { isDragging, dragRef } = useDraggable(id)
+  const { isDragging, dragRef, isDraggable, setIsDraggable } = useDraggable(id)
 
   const itemRef = createRef()
 
@@ -54,6 +54,7 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
       role="presentation"
       ref={dragRef}
       onContextMenu={handleContextMenu}
+      draggable={isDraggable}
     >
       <div
         className="entity-name entity-name-react"
@@ -61,7 +62,11 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
         ref={itemRef}
       >
         {icons}
-        <FileTreeItemName name={name} isSelected={isSelected} />
+        <FileTreeItemName
+          name={name}
+          isSelected={isSelected}
+          setIsDraggable={setIsDraggable}
+        />
         {hasMenu ? <FileTreeItemMenu id={id} /> : null}
       </div>
     </div>
