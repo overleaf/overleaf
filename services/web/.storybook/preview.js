@@ -1,8 +1,6 @@
 import React from 'react'
 
-const DefaultTheme = React.lazy(() => import('./default-theme'))
-const LightTheme = React.lazy(() => import('./light-theme'))
-const IEEETheme = React.lazy(() => import('./ieee-theme'))
+import './preview.css'
 
 // Storybook does not (currently) support async loading of "stories". Therefore
 // the strategy in frontend/js/i18n.js does not work (because we cannot wait on
@@ -46,26 +44,43 @@ export const globalTypes = {
   theme: {
     name: 'Theme',
     description: 'Editor theme',
-    defaultValue: 'default',
+    defaultValue: 'default-',
     toolbar: {
       icon: 'circlehollow',
-      items: ['default', 'light', 'IEEE']
+      items: [
+        { value: 'default-', title: 'Default' },
+        { value: 'light-', title: 'Light' },
+        { value: 'ieee-', title: 'IEEE' }
+      ]
     }
   }
 }
 
+export const loaders = [
+  async ({ globals }) => {
+    const { theme } = globals
+
+    return {
+      // NOTE: this uses `${theme}style.less` rather than `${theme}.less`
+      // so that webpack only bundles files ending with "style.less"
+      activeStyle: await import(
+        `../frontend/stylesheets/${theme === 'default-' ? '' : theme}style.less`
+      )
+    }
+  }
+]
+
 const withTheme = (Story, context) => {
+  const { activeStyle } = context.loaded
+
   return (
     <>
-      <React.Suspense fallback={<></>}>
-        {context.globals.theme === 'default' && <DefaultTheme />}
-        {context.globals.theme === 'light' && <LightTheme />}
-        {context.globals.theme === 'IEEE' && <IEEETheme />}
-      </React.Suspense>
+      {activeStyle && <style>{activeStyle.default}</style>}
       <Story {...context} />
     </>
   )
 }
+
 export const decorators = [withTheme]
 
 window.ExposedSettings = {}

@@ -11,7 +11,14 @@ module.exports = {
       ...storybookConfig.module.rules.filter(
         rule => !rule.test.toString().includes('woff')
       ),
-      ...customConfig.module.rules
+      // Replace the less rule, adding to-string-loader
+      ...customConfig.module.rules.filter(
+        rule => !rule.test.toString().includes('less')
+      ),
+      {
+        test: /\.less$/,
+        use: ['to-string-loader', 'css-loader', 'less-loader']
+      }
     ]
 
     // Combine Storybook's webpack plugins with our webpack plugins

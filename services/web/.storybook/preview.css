@@ -1,0 +1,7 @@
+.sb-show-main .modal-backdrop {
+  display: none;
+}
+
+.sb-show-main .modal {
+  position: relative;
+}
