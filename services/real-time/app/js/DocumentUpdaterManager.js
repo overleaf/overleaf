@@ -132,18 +132,15 @@ const DocumentUpdaterManager = {
         error = new OError('error pushing update into redis').withCause(error)
         return callback(error)
       }
-      rclient.rpush(
-        DocumentUpdaterManager._getPendingUpdateListKey(),
-        doc_key,
-        function (error) {
-          if (error) {
-            error = new OError('error pushing doc_id into redis').withCause(
-              error
-            )
-          }
-          callback(error)
+      const queueKey = DocumentUpdaterManager._getPendingUpdateListKey()
+      rclient.rpush(queueKey, doc_key, function (error) {
+        if (error) {
+          error = new OError('error pushing doc_id into redis')
+            .withInfo({ queueKey })
+            .withCause(error)
         }
-      )
+        callback(error)
+      })
     })
   }
 }
