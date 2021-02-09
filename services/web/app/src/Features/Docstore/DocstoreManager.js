@@ -169,6 +169,35 @@ const DocstoreManager = {
     )
   },
 
+  isDocDeleted(project_id, doc_id, callback) {
+    const url = `${settings.apis.docstore.url}/project/${project_id}/doc/${doc_id}/deleted`
+    request.get({ url, timeout: TIMEOUT, json: true }, function(
+      err,
+      res,
+      body
+    ) {
+      if (err) {
+        callback(err)
+      } else if (res.statusCode === 200) {
+        callback(null, body.deleted)
+      } else if (res.statusCode === 404) {
+        callback(
+          new Errors.NotFoundError({
+            message: 'doc does not exist in project',
+            info: { project_id, doc_id }
+          })
+        )
+      } else {
+        callback(
+          new OError(
+            `docstore api responded with non-success code: ${res.statusCode}`,
+            { project_id, doc_id }
+          )
+        )
+      }
+    })
+  },
+
   updateDoc(project_id, doc_id, lines, version, ranges, callback) {
     if (callback == null) {
       callback = function(error, modified, rev) {}

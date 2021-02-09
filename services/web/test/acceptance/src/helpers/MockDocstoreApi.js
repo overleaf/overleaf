@@ -29,14 +29,18 @@ module.exports = MockDocStoreApi = {
         if (this.docs[project_id] == null) {
           this.docs[project_id] = {}
         }
-        this.docs[project_id][doc_id] = { lines, version, ranges }
+        if (this.docs[project_id][doc_id] == null) {
+          this.docs[project_id][doc_id] = {}
+        }
+        const { version: oldVersion, deleted } = this.docs[project_id][doc_id]
+        this.docs[project_id][doc_id] = { lines, version, ranges, deleted }
         if (this.docs[project_id][doc_id].rev == null) {
           this.docs[project_id][doc_id].rev = 0
         }
         this.docs[project_id][doc_id].rev += 1
         this.docs[project_id][doc_id]._id = doc_id
         return res.json({
-          modified: true,
+          modified: oldVersion !== version,
           rev: this.docs[project_id][doc_id].rev
         })
       }
@@ -61,6 +65,15 @@ module.exports = MockDocStoreApi = {
         return res.sendStatus(404)
       } else {
         return res.json(doc)
+      }
+    })
+
+    app.get('/project/:project_id/doc/:doc_id/deleted', (req, res) => {
+      const { project_id, doc_id } = req.params
+      if (!this.docs[project_id] || !this.docs[project_id][doc_id]) {
+        res.sendStatus(404)
+      } else {
+        res.json({ deleted: Boolean(this.docs[project_id][doc_id].deleted) })
       }
     })
 

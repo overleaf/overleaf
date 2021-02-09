@@ -70,6 +70,86 @@ function wrapWithLock(methodWithoutLock) {
   }
 }
 
+function getDocContext(projectId, docId, callback) {
+  ProjectGetter.getProject(
+    projectId,
+    { name: true, rootFolder: true },
+    (err, project) => {
+      if (err) {
+        return callback(
+          OError.tag(err, 'error fetching project', {
+            projectId
+          })
+        )
+      }
+      if (!project) {
+        return callback(new Errors.NotFoundError('project not found'))
+      }
+      ProjectLocator.findElement(
+        { project, element_id: docId, type: 'docs' },
+        (err, doc, path) => {
+          if (err && err instanceof Errors.NotFoundError) {
+            // (Soft-)Deleted docs are removed from the file-tree (rootFolder).
+            // docstore can tell whether it exists and is (soft)-deleted.
+            DocstoreManager.isDocDeleted(
+              projectId,
+              docId,
+              (err, isDeletedDoc) => {
+                if (err && err instanceof Errors.NotFoundError) {
+                  logger.warn(
+                    { projectId, docId },
+                    'doc not found while updating doc lines'
+                  )
+                  callback(err)
+                } else if (err) {
+                  callback(
+                    OError.tag(
+                      err,
+                      'error checking deletion status with docstore',
+                      { projectId, docId }
+                    )
+                  )
+                } else {
+                  if (!isDeletedDoc) {
+                    // NOTE: This can happen while we delete a doc:
+                    //  1. web will update the projects entry
+                    //  2. web triggers flushes to tpds/doc-updater
+                    //  3. web triggers (soft)-delete in docstore
+                    // Specifically when an update comes in after 1
+                    //  and before 3 completes.
+                    logger.info(
+                      { projectId, docId },
+                      'updating doc that is in process of getting soft-deleted'
+                    )
+                  }
+                  callback(null, {
+                    projectName: project.name,
+                    isDeletedDoc: true,
+                    path: null
+                  })
+                }
+              }
+            )
+          } else if (err) {
+            callback(
+              OError.tag(err, 'error finding doc in rootFolder', {
+                docId,
+                projectId
+              })
+            )
+          } else {
+            callback(null, {
+              projectName: project.name,
+              isDeletedDoc: false,
+              path: path.fileSystem
+            })
+          }
+        }
+      )
+    }
+  )
+}
+
 const ProjectEntityUpdateHandler = {
   updateDocLines(
     projectId,
@@ -81,86 +161,57 @@ const ProjectEntityUpdateHandler = {
     lastUpdatedBy,
     callback
   ) {
-    ProjectGetter.getProjectWithoutDocLines(projectId, (err, project) => {
-      if (err != null) {
+    getDocContext(projectId, docId, (err, ctx) => {
+      if (err && err instanceof Errors.NotFoundError) {
+        // Do not allow an update to a doc which has never exist on this project
+        logger.warn(
+          { docId, projectId },
+          'project or doc not found while updating doc lines'
+        )
         return callback(err)
       }
-      if (project == null) {
-        return callback(new Errors.NotFoundError('project not found'))
+      if (err) {
+        return callback(err)
       }
-      logger.log({ projectId, docId }, 'updating doc lines')
-      ProjectLocator.findElement(
-        { project, element_id: docId, type: 'docs' },
-        (err, doc, path) => {
-          let isDeletedDoc = false
+      const { projectName, isDeletedDoc, path } = ctx
+      logger.log({ projectId, docId }, 'telling docstore manager to update doc')
+      DocstoreManager.updateDoc(
+        projectId,
+        docId,
+        lines,
+        version,
+        ranges,
+        (err, modified, rev) => {
           if (err != null) {
-            if (err instanceof Errors.NotFoundError) {
-              // We need to be able to update the doclines of deleted docs. This is
-              // so the doc-updater can flush a doc's content to the doc-store after
-              // the doc is deleted.
-              isDeletedDoc = true
-              doc = _.find(
-                project.deletedDocs,
-                doc => doc._id.toString() === docId.toString()
-              )
-            } else {
-              return callback(err)
-            }
+            OError.tag(err, 'error sending doc to docstore', {
+              docId,
+              projectId
+            })
+            return callback(err)
           }
-
-          if (doc == null) {
-            // Do not allow an update to a doc which has never exist on this project
-            logger.warn(
-              { docId, projectId },
-              'doc not found while updating doc lines'
-            )
-            return callback(new Errors.NotFoundError('doc not found'))
-          }
-
           logger.log(
-            { projectId, docId },
-            'telling docstore manager to update doc'
+            { projectId, docId, modified },
+            'finished updating doc lines'
           )
-          DocstoreManager.updateDoc(
+          // path will only be present if the doc is not deleted
+          if (!modified || isDeletedDoc) {
+            return callback()
+          }
+          // Don't need to block for marking as updated
+          ProjectUpdateHandler.markAsUpdated(
             projectId,
-            docId,
-            lines,
-            version,
-            ranges,
-            (err, modified, rev) => {
-              if (err != null) {
-                OError.tag(err, 'error sending doc to docstore', {
-                  docId,
-                  projectId
-                })
-                return callback(err)
-              }
-              logger.log(
-                { projectId, docId, modified },
-                'finished updating doc lines'
-              )
-              // path will only be present if the doc is not deleted
-              if (modified && !isDeletedDoc) {
-                // Don't need to block for marking as updated
-                ProjectUpdateHandler.markAsUpdated(
-                  projectId,
-                  lastUpdatedAt,
-                  lastUpdatedBy
-                )
-                TpdsUpdateSender.addDoc(
-                  {
-                    project_id: projectId,
-                    path: path.fileSystem,
-                    doc_id: docId,
-                    project_name: project.name,
-                    rev
-                  },
-                  callback
-                )
-              } else {
-                callback()
-              }
-            }
+            lastUpdatedAt,
+            lastUpdatedBy
+          )
+          TpdsUpdateSender.addDoc(
+            {
+              project_id: projectId,
+              path,
+              doc_id: docId,
+              project_name: projectName,
+              rev
+            },
+            callback
           )
         }
       )
