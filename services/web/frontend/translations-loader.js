@@ -13,7 +13,7 @@ const Path = require('path')
 const SOURCE_PATH = Path.join(__dirname, '../locales')
 const EXTRACTED_TRANSLATIONS_PATH = Path.join(
   __dirname,
-  './extracted-translation-keys.json'
+  'extracted-translations.json'
 )
 
 module.exports = function translationsLoader() {
@@ -36,7 +36,7 @@ module.exports = function translationsLoader() {
 
 async function run(locale) {
   const json = await fs.readFile(EXTRACTED_TRANSLATIONS_PATH)
-  const keys = JSON.parse(json)
+  const keys = Object.keys(JSON.parse(json))
 
   const fallbackTranslations = await extract('en', keys)
   return extract(locale, keys, fallbackTranslations)

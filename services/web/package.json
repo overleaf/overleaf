@@ -33,6 +33,7 @@
     "format:styles:fix": "prettier --write $PWD/'**/*.less'",
     "lint": "eslint --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix .",
+    "extract-translations": "i18next-scanner",
     "migrations": "east",
     "storybook": "start-storybook -p 6006"
   },
@@ -199,6 +200,7 @@
     "file-loader": "^5.0.2",
     "glob": "^7.1.6",
     "handlebars-loader": "^1.7.1",
+    "i18next-scanner": "^3.0.0",
     "jsdom": "^16.2.2",
     "jsdom-global": "^3.0.2",
     "karma": "^5.0.2",
