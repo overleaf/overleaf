@@ -19,7 +19,9 @@ function OutlinePane({
 }) {
   const { t } = useTranslation()
 
-  const { projectId } = useEditorContext()
+  const { projectId } = useEditorContext({
+    projectId: PropTypes.string.isRequired
+  })
 
   const storageKey = `file_outline.expanded.${projectId}`
   const [expanded, setExpanded] = useState(() => {

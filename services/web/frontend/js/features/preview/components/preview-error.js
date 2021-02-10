@@ -8,10 +8,15 @@ import { useEditorContext } from '../../../shared/context/editor-context'
 import { startFreeTrial } from '../../../main/account-upgrade'
 
 function PreviewError({ name }) {
-  const { isProjectOwner } = useEditorContext()
+  const { isProjectOwner } = useEditorContext({
+    isProjectOwner: PropTypes.bool
+  })
   const {
     exposedSettings: { enableSubscriptions }
-  } = useApplicationContext()
+  } = useApplicationContext({
+    exposedSettings: PropTypes.shape({ enableSubscriptions: PropTypes.bool })
+      .isRequired
+  })
 
   const { t } = useTranslation()
   let errorTitle

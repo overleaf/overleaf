@@ -4,6 +4,19 @@ import usePersistedState from '../../infrastructure/persisted-state-hook'
 
 export const EditorContext = createContext()
 
+EditorContext.Provider.propTypes = {
+  value: PropTypes.shape({
+    cobranding: PropTypes.shape({
+      logoImgUrl: PropTypes.string.isRequired,
+      brandVariationName: PropTypes.string.isRequired,
+      brandVariationHomeUrl: PropTypes.string.isRequired
+    }),
+    loading: PropTypes.bool,
+    projectId: PropTypes.string.isRequired,
+    isProjectOwner: PropTypes.bool
+  })
+}
+
 export function EditorProvider({
   children,
   loading,
@@ -70,7 +83,8 @@ EditorProvider.propTypes = {
   setChatIsOpenAngular: PropTypes.func.isRequired
 }
 
-export function useEditorContext() {
-  const editorContext = useContext(EditorContext)
-  return editorContext
+export function useEditorContext(propTypes) {
+  const data = useContext(EditorContext)
+  PropTypes.checkPropTypes(propTypes, data, 'data', 'EditorContext.Provider')
+  return data
 }

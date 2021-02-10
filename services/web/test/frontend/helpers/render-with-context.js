@@ -7,7 +7,7 @@ import { ChatProvider } from '../../../frontend/js/features/chat/context/chat-co
 
 export function renderWithEditorContext(
   children,
-  { user = { id: '123abd' }, projectId } = {}
+  { user = { id: '123abd' }, projectId = 'project123' } = {}
 ) {
   window.user = user || window.user
   window.project_id = projectId != null ? projectId : window.project_id
