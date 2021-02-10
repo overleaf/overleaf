@@ -23,6 +23,9 @@ App.controller('ReactRootContextController', function($scope, ide) {
   ide.$scope.$watch('ui.chatOpen', value => {
     $scope.chatIsOpenAngular = value
   })
+
+  // wrapper is required to avoid scope problems with `this` inside `EditorManager`
+  $scope.openDoc = (doc, args) => ide.editorManager.openDoc(doc, args)
 })
 
 App.component(
@@ -30,6 +33,11 @@ App.component(
   react2angular(rootContext.component, [
     'editorLoading',
     'setChatIsOpenAngular',
-    'chatIsOpenAngular'
+    'chatIsOpenAngular',
+    'openDoc',
+    // `$scope.onlineUsersArray` is already populated by `OnlineUsersManager`, which also creates
+    // a new array instance every time the list of online users change (which should refresh the
+    // value passed to React as a prop, triggering a re-render)
+    'onlineUsersArray'
   ])
 )

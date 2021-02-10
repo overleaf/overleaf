@@ -21,7 +21,9 @@ export function EditorProvider({
   children,
   loading,
   chatIsOpenAngular,
-  setChatIsOpenAngular
+  setChatIsOpenAngular,
+  openDoc,
+  onlineUsersArray
 }) {
   const cobranding = window.brandVariation
     ? {
@@ -63,6 +65,8 @@ export function EditorProvider({
     loading,
     projectId: window.project_id,
     isProjectOwner: ownerId === window.user.id,
+    openDoc,
+    onlineUsersArray,
     ui: {
       chatIsOpen,
       toggleChatOpen
@@ -80,7 +84,9 @@ EditorProvider.propTypes = {
   children: PropTypes.any,
   loading: PropTypes.bool,
   chatIsOpenAngular: PropTypes.bool,
-  setChatIsOpenAngular: PropTypes.func.isRequired
+  setChatIsOpenAngular: PropTypes.func.isRequired,
+  openDoc: PropTypes.func.isRequired,
+  onlineUsersArray: PropTypes.array.isRequired
 }
 
 export function useEditorContext(propTypes) {

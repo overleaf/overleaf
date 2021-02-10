@@ -26,7 +26,12 @@ export function renderWithEditorContext(
   }
   return render(
     <ApplicationProvider>
-      <EditorProvider setChatIsOpen={() => {}} setChatIsOpenAngular={() => {}}>
+      <EditorProvider
+        setChatIsOpen={() => {}}
+        setChatIsOpenAngular={() => {}}
+        openDoc={() => {}}
+        onlineUsersArray={[]}
+      >
         {children}
       </EditorProvider>
     </ApplicationProvider>

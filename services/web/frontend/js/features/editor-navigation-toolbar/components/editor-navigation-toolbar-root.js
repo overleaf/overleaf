@@ -5,7 +5,13 @@ import { useEditorContext } from '../../../shared/context/editor-context'
 import { useChatContext } from '../../chat/context/chat-context'
 
 function EditorNavigationToolbarRoot({ onShowLeftMenuClick }) {
-  const { cobranding, loading, ui } = useEditorContext()
+  const {
+    cobranding,
+    loading,
+    ui,
+    onlineUsersArray,
+    openDoc
+  } = useEditorContext()
   const { resetUnreadMessageCount, unreadMessageCount } = useChatContext()
 
   const toggleChatOpen = useCallback(() => {
@@ -14,6 +20,12 @@ function EditorNavigationToolbarRoot({ onShowLeftMenuClick }) {
     }
     ui.toggleChatOpen()
   }, [ui, resetUnreadMessageCount])
+
+  function goToUser(user) {
+    if (user.doc && typeof user.row === 'number') {
+      openDoc(user.doc, { gotoLine: user.row + 1 })
+    }
+  }
 
   // using {display: 'none'} as 1:1 migration from Angular's ng-hide. Using
   // `loading ? null : <ToolbarHeader/>` causes UI glitches
@@ -25,6 +37,8 @@ function EditorNavigationToolbarRoot({ onShowLeftMenuClick }) {
       chatIsOpen={ui.chatIsOpen}
       unreadMessageCount={unreadMessageCount}
       toggleChatOpen={toggleChatOpen}
+      onlineUsers={onlineUsersArray}
+      goToUser={goToUser}
     />
   )
 }

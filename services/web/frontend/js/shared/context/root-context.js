@@ -9,7 +9,9 @@ export function ContextRoot({
   children,
   editorLoading,
   chatIsOpenAngular,
-  setChatIsOpenAngular
+  setChatIsOpenAngular,
+  openDoc,
+  onlineUsersArray
 }) {
   return (
     <ApplicationProvider>
@@ -17,6 +19,8 @@ export function ContextRoot({
         loading={editorLoading}
         chatIsOpenAngular={chatIsOpenAngular}
         setChatIsOpenAngular={setChatIsOpenAngular}
+        openDoc={openDoc}
+        onlineUsersArray={onlineUsersArray}
       >
         <ChatProvider>{children}</ChatProvider>
       </EditorProvider>
@@ -28,7 +32,9 @@ ContextRoot.propTypes = {
   children: PropTypes.any,
   editorLoading: PropTypes.bool,
   chatIsOpenAngular: PropTypes.bool,
-  setChatIsOpenAngular: PropTypes.func.isRequired
+  setChatIsOpenAngular: PropTypes.func.isRequired,
+  openDoc: PropTypes.func.isRequired,
+  onlineUsersArray: PropTypes.array.isRequired
 }
 
 export const rootContext = createSharedContext(ContextRoot)
