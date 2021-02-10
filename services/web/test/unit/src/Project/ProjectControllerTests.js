@@ -1081,6 +1081,85 @@ describe('ProjectController', function() {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
+    describe('showNewLogsUI staged rollout', function() {
+      function userIdFromTime(time) {
+        return ObjectId.createFromTime(time).toString()
+      }
+
+      function checkNewLogsUI(shouldGetNewLogsUI) {
+        it(`should set showNewLogsUI to ${shouldGetNewLogsUI}`, function(done) {
+          this.res.render = (pageName, opts) => {
+            opts.showNewLogsUI.should.equal(shouldGetNewLogsUI)
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+      }
+
+      describe('for alpha users', function() {
+        beforeEach(function() {
+          this.user.alphaProgram = true
+        })
+        checkNewLogsUI(true)
+      })
+      describe('for beta users', function() {
+        beforeEach(function() {
+          this.user.betaProgram = true
+        })
+        describe('with a beta rollout percentage of 0', function() {
+          beforeEach(function() {
+            this.settings.logsUIPercentageBeta = 0
+          })
+          checkNewLogsUI(false)
+        })
+        describe('with a beta rollout percentage > 0', function() {
+          const percentileThresold = 50
+          beforeEach(function() {
+            this.settings.logsUIPercentageBeta = percentileThresold
+          })
+          describe('when the user id is higher than the percent threshold', function() {
+            beforeEach(function() {
+              this.user._id = userIdFromTime(percentileThresold + 1)
+            })
+            checkNewLogsUI(false)
+          })
+          describe('when the user id is lower than the percent threshold', function() {
+            beforeEach(function() {
+              this.user._id = userIdFromTime(percentileThresold - 1)
+            })
+            checkNewLogsUI(true)
+          })
+        })
+      })
+
+      describe('for normal users', function() {
+        describe('with a rollout percentage of 0', function() {
+          beforeEach(function() {
+            this.settings.logsUIPercentage = 0
+          })
+          checkNewLogsUI(false)
+        })
+        describe('with a rollout percentage > 0', function() {
+          const percentileThresold = 50
+          beforeEach(function() {
+            this.settings.logsUIPercentage = percentileThresold
+          })
+          describe('when the user id is higher than the percent threshold', function() {
+            beforeEach(function() {
+              this.user._id = userIdFromTime(percentileThresold + 1)
+            })
+            checkNewLogsUI(false)
+          })
+          describe('when the user id is lower than the percent threshold', function() {
+            beforeEach(function() {
+              this.user._id = userIdFromTime(percentileThresold - 1)
+            })
+            checkNewLogsUI(true)
+          })
+        })
+      })
+    })
+
     describe('wsUrl', function() {
       function checkLoadEditorWsMetric(metric) {
         it(`should inc metric ${metric}`, function(done) {

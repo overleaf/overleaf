@@ -225,6 +225,10 @@ module.exports = settings =
 	wsUrlV2Percentage: parseInt(process.env['WEBSOCKET_URL_V2_PERCENTAGE'] || '0', 10)
 	wsRetryHandshake: parseInt(process.env['WEBSOCKET_RETRY_HANDSHAKE'] || '5', 10)
 
+	# Compile UI rollout percentages
+	logsUIPercentageBeta: parseInt(process.env['LOGS_UI_PERCENTAGE_BETA'] || '0', 10)
+	logsUIPercentage: parseInt(process.env['LOGS_UI_PERCENTAGE'] || '0', 10)
+
 	# cookie domain
 	# use full domain for cookies to only be accessible from that domain,
 	# replace subdomain with dot to have them accessible on all subdomains
