@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
-import OError from '@overleaf/o-error'
 import {
   deleteJSON,
+  FetchError,
   getJSON,
   postJSON,
   putJSON
@@ -41,10 +41,12 @@ describe('fetchJSON', function() {
 
     return expect(getJSON('/test'))
       .to.eventually.be.rejectedWith('Bad Request')
-      .and.be.an.instanceOf(OError)
+      .and.be.an.instanceOf(FetchError)
       .to.nested.include({
-        'info.response.status': 400,
-        'info.data.message': 'The request was invalid'
+        message: 'Bad Request',
+        'data.message': 'The request was invalid',
+        'response.status': 400,
+        'info.statusCode': 400
       })
   })
 
@@ -53,9 +55,10 @@ describe('fetchJSON', function() {
 
     return expect(getJSON('/test'))
       .to.eventually.be.rejectedWith('Internal Server Error')
-      .and.be.an.instanceOf(OError)
+      .and.be.an.instanceOf(FetchError)
       .to.nested.include({
-        'info.response.status': 500
+        'response.status': 500,
+        'info.statusCode': 500
       })
   })
 

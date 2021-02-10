@@ -3,24 +3,69 @@
 // - set the JSON content-type in the request headers
 // - throw errors on non-ok response
 // - parse JSON response body, unless response is empty
-const OError = require('@overleaf/o-error')
+import OError from '@overleaf/o-error'
 
+/**
+ * @typedef {Object} FetchOptions
+ * @extends RequestInit
+ * @property {Object} body
+ */
+
+/**
+ * @param {string} path
+ * @param {FetchOptions} [options]
+ */
 export function getJSON(path, options) {
   return fetchJSON(path, { ...options, method: 'GET' })
 }
 
+/**
+ * @param {string} path
+ * @param {FetchOptions} [options]
+ */
 export function postJSON(path, options) {
   return fetchJSON(path, { ...options, method: 'POST' })
 }
 
+/**
+ * @param {string} path
+ * @param {FetchOptions} [options]
+ */
 export function putJSON(path, options) {
   return fetchJSON(path, { ...options, method: 'PUT' })
 }
 
+/**
+ * @param {string} path
+ * @param {FetchOptions} [options]
+ */
 export function deleteJSON(path, options) {
   return fetchJSON(path, { ...options, method: 'DELETE' })
 }
 
+export class FetchError extends OError {
+  /**
+   * @param {string} message
+   * @param {string} url
+   * @param {FetchOptions} [options]
+   * @param {Response} [response]
+   * @param {Object} [data]
+   */
+  constructor(message, url, options, response, data) {
+    super(message, { statusCode: response ? response.status : undefined })
+    this.url = url
+    this.options = options
+    this.response = response
+    this.data = data
+  }
+}
+
+/**
+ * @param {string} path
+ * @param {FetchOptions} [options]
+ *
+ * @return Promise<Object>
+ */
 function fetchJSON(
   path,
   {
@@ -48,36 +93,58 @@ function fetchJSON(
   }
 
   return fetch(path, options)
-    .then(parseResponseBody)
-    .then(({ data, response }) => {
-      if (!response.ok) {
-        throw new OError(response.statusText, {
-          statusCode: response.status,
-          data,
-          response
+    .catch(error => {
+      // the fetch failed
+      throw new FetchError(
+        'There was an error fetching the JSON',
+        path,
+        options
+      ).withCause(error)
+    })
+    .then(response => {
+      return parseResponseBody(response)
+        .catch(error => {
+          // parsing the response body failed
+          throw new FetchError(
+            'There was an error parsing the response body',
+            path,
+            options,
+            response
+          ).withCause(error)
         })
-      }
+        .then(data => {
+          if (!response.ok) {
+            // the response from the server was not 2xx
+            throw new FetchError(
+              response.statusText,
+              path,
+              options,
+              response,
+              data
+            )
+          }
 
-      return data
+          return data
+        })
     })
 }
 
+/**
+ * @param {Response} response
+ * @returns {Promise<Object>}
+ */
 function parseResponseBody(response) {
   const contentType = response.headers.get('Content-Type')
   if (/application\/json/.test(contentType)) {
-    return response.json().then(data => {
-      return { data, response }
-    })
+    return response.json()
   } else if (
     /text\/plain/.test(contentType) ||
     /text\/html/.test(contentType)
   ) {
-    return response.text().then(text => {
-      return { data: { message: text }, response }
-    })
+    return response.text().then(message => ({ message }))
   } else {
     // response body ignored as content-type is either not set (e.g. 204
     // responses) or unsupported
-    return Promise.resolve({ data: {}, response })
+    return Promise.resolve({})
   }
 }
