@@ -1,9 +1,8 @@
 {
-  "postal_code": "Postnummer",
+  "github_symlink_error": "Dit github repository indeholder symbolske lænkefiler, som ikke på nuværende tidpunkt er understøttet af Overleaf. Du må fjerne de filer, og derefter prøve igen.",
   "address_line_1": "Adresse",
   "address_line_2": "Adresse (2. linje, valgfri)",
-  "please_change_primary_to_remove": "Du må ændre din primære e–mailadresse for at kunne fjerne",
-  "github_symlink_error": "Dit github repository indeholder symbolske lænkefiler, som ikke på nuværende tidpunkt er understøttet af Overleaf. Du må fjerne de filer, og derefter prøve igen.",
+  "postal_code": "Postnummer",
   "reload_editor": "Genindlæs skriveprogram",
   "logs_pane_beta_message": "Vi betatester en ny logningsrude",
   "logs_pane_beta_message_popup": "Vi betatester en ny logningsrude. Klik her, for at give feedback og håndtere din deltagelse i betaprogrammer.",
@@ -1181,5 +1180,6 @@
   "unlink_github": "Fjern link til din GitHub konto",
   "link_to_github": "Link til din GitHub konto",
   "github_integration": "Github integration",
-  "github_is_premium": "GitHub synkronisering er en betalt funktion"
+  "github_is_premium": "GitHub synkronisering er en betalt funktion",
+  "please_change_primary_to_remove": "Du må ændre din primære e–mailadresse for at kunne fjerne"
 }
