@@ -107,11 +107,8 @@ module.exports = DispatchManager = {
 
   createAndStartDispatchers(number) {
     const RateLimiter = new RateLimitManager(number)
-    return (() => {
-      const result = _.times(number, function (shardNumber) {
-        return DispatchManager.createDispatcher(RateLimiter, shardNumber).run()
-      })
-      return result
-    })()
+    _.times(number, function (shardNumber) {
+      return DispatchManager.createDispatcher(RateLimiter, shardNumber).run()
+    })
   }
 }
