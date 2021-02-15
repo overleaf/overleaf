@@ -545,6 +545,199 @@ describe('DocManager', function () {
     })
   })
 
+  describe('patchDoc', function () {
+    describe('when the doc exists', function () {
+      beforeEach(function () {
+        this.lines = ['mock', 'doc', 'lines']
+        this.rev = 77
+        this.MongoManager.findDoc = sinon
+          .stub()
+          .yields(null, { _id: ObjectId(this.doc_id) })
+        this.MongoManager.patchDoc = sinon.stub().yields(null)
+        this.DocArchiveManager.archiveDocById = sinon.stub().yields(null)
+        this.meta = {}
+      })
+
+      describe('standard path', function () {
+        beforeEach(function (done) {
+          this.callback = sinon.stub().callsFake(done)
+          this.DocManager.patchDoc(
+            this.project_id,
+            this.doc_id,
+            this.meta,
+            this.callback
+          )
+        })
+
+        it('should get the doc', function () {
+          expect(this.MongoManager.findDoc).to.have.been.calledWith(
+            this.project_id,
+            this.doc_id
+          )
+        })
+
+        it('should persist the meta', function () {
+          expect(this.MongoManager.patchDoc).to.have.been.calledWith(
+            this.project_id,
+            this.doc_id,
+            this.meta
+          )
+        })
+
+        it('should return the callback', function () {
+          expect(this.callback).to.have.been.calledWith(null)
+        })
+      })
+
+      describe('background flush disabled and deleting a doc', function () {
+        beforeEach(function (done) {
+          this.settings.docstore.archiveOnSoftDelete = false
+          this.meta.deleted = true
+
+          this.callback = sinon.stub().callsFake(done)
+          this.DocManager.patchDoc(
+            this.project_id,
+            this.doc_id,
+            this.meta,
+            this.callback
+          )
+        })
+
+        it('should not flush the doc out of mongo', function () {
+          expect(this.DocArchiveManager.archiveDocById).to.not.have.been.called
+        })
+      })
+
+      describe('background flush enabled and not deleting a doc', function () {
+        beforeEach(function (done) {
+          this.settings.docstore.archiveOnSoftDelete = false
+          this.meta.deleted = false
+          this.callback = sinon.stub().callsFake(done)
+          this.DocManager.patchDoc(
+            this.project_id,
+            this.doc_id,
+            this.meta,
+            this.callback
+          )
+        })
+
+        it('should not flush the doc out of mongo', function () {
+          expect(this.DocArchiveManager.archiveDocById).to.not.have.been.called
+        })
+      })
+
+      describe('background flush enabled and deleting a doc', function () {
+        beforeEach(function () {
+          this.settings.docstore.archiveOnSoftDelete = true
+          this.meta.deleted = true
+          this.logger.warn = sinon.stub()
+        })
+
+        describe('when the background flush succeeds', function () {
+          beforeEach(function (done) {
+            this.DocArchiveManager.archiveDocById = sinon.stub().yields(null)
+            this.callback = sinon.stub().callsFake(done)
+            this.DocManager.patchDoc(
+              this.project_id,
+              this.doc_id,
+              this.meta,
+              this.callback
+            )
+          })
+
+          it('should not log a warning', function () {
+            expect(this.logger.warn).to.not.have.been.called
+          })
+
+          it('should flush the doc out of mongo', function () {
+            expect(
+              this.DocArchiveManager.archiveDocById
+            ).to.have.been.calledWith(this.project_id, this.doc_id)
+          })
+        })
+
+        describe('when the background flush fails', function () {
+          beforeEach(function (done) {
+            this.err = new Error('foo')
+            this.DocArchiveManager.archiveDocById = sinon
+              .stub()
+              .yields(this.err)
+            this.callback = sinon.stub().callsFake(done)
+            this.DocManager.patchDoc(
+              this.project_id,
+              this.doc_id,
+              this.meta,
+              this.callback
+            )
+          })
+
+          it('should log a warning', function () {
+            expect(this.logger.warn).to.have.been.calledWith(
+              sinon.match({
+                project_id: this.project_id,
+                doc_id: this.doc_id,
+                err: this.err
+              }),
+              'archiving a single doc in the background failed'
+            )
+          })
+
+          it('should not fail the delete process', function () {
+            expect(this.callback).to.have.been.calledWith(null)
+          })
+        })
+      })
+    })
+
+    describe('when the doc is already deleted', function () {
+      beforeEach(function (done) {
+        this.MongoManager.findDoc = sinon
+          .stub()
+          .yields(null, { _id: ObjectId(this.doc_id), deleted: true })
+        this.MongoManager.patchDoc = sinon.stub()
+
+        this.callback = sinon.stub().callsFake(() => done())
+        this.DocManager.patchDoc(
+          this.project_id,
+          this.doc_id,
+          'tomato.tex',
+          this.callback
+        )
+      })
+
+      it('should reject the operation', function () {
+        expect(this.callback).to.have.been.calledWith(
+          sinon.match.has('message', 'Cannot PATCH after doc deletion')
+        )
+      })
+
+      it('should not persist the change to mongo', function () {
+        expect(this.MongoManager.patchDoc).to.not.have.been.called
+      })
+    })
+
+    describe('when the doc does not exist', function () {
+      beforeEach(function () {
+        this.MongoManager.findDoc = sinon.stub().yields(null)
+        this.DocManager.patchDoc(
+          this.project_id,
+          this.doc_id,
+          {},
+          this.callback
+        )
+      })
+
+      it('should return a NotFoundError', function () {
+        expect(this.callback).to.have.been.calledWith(
+          sinon.match.has(
+            'message',
+            `No such project/doc to delete: ${this.project_id}/${this.doc_id}`
+          )
+        )
+      })
+    })
+  })
+
   return describe('updateDoc', function () {
     beforeEach(function () {
       this.oldDocLines = ['old', 'doc', 'lines']

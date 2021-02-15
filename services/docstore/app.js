@@ -10,6 +10,11 @@ const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
 const express = require('express')
 const bodyParser = require('body-parser')
+const {
+  celebrate: validate,
+  Joi,
+  errors: handleValidationErrors
+} = require('celebrate')
 const mongodb = require('./app/js/mongodb')
 const Errors = require('./app/js/Errors')
 const HttpController = require('./app/js/HttpController')
@@ -54,6 +59,18 @@ app.post(
   bodyParser.json({ limit: (Settings.max_doc_length + 64 * 1024) * 2 }),
   HttpController.updateDoc
 )
+app.patch(
+  '/project/:project_id/doc/:doc_id',
+  bodyParser.json(),
+  validate({
+    body: {
+      deleted: Joi.boolean(),
+      name: Joi.string().when('deleted', { is: true, then: Joi.required() }),
+      deletedAt: Joi.date().when('deleted', { is: true, then: Joi.required() })
+    }
+  }),
+  HttpController.patchDoc
+)
 app.delete('/project/:project_id/doc/:doc_id', HttpController.deleteDoc)
 
 app.post('/project/:project_id/archive', HttpController.archiveAllDocs)
@@ -65,10 +82,13 @@ app.get('/health_check', HttpController.healthCheck)
 
 app.get('/status', (req, res) => res.send('docstore is alive'))
 
+app.use(handleValidationErrors())
 app.use(function (error, req, res, next) {
   logger.error({ err: error, req }, 'request errored')
   if (error instanceof Errors.NotFoundError) {
     return res.sendStatus(404)
+  } else if (error instanceof Errors.InvalidOperation) {
+    return res.status(400).send(error.message)
   } else {
     return res.status(500).send('Oops, something went wrong')
   }

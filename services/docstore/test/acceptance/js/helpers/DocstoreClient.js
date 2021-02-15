@@ -115,13 +115,53 @@ module.exports = DocstoreClient = {
     )
   },
 
-  deleteDoc(project_id, doc_id, callback) {
+  deleteDocLegacy(project_id, doc_id, callback) {
     if (callback == null) {
       callback = function (error, res, body) {}
     }
     return request.del(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`
+      },
+      callback
+    )
+  },
+
+  deleteDoc(project_id, doc_id, callback) {
+    DocstoreClient.deleteDocWithDateAndName(
+      project_id,
+      doc_id,
+      new Date(),
+      'main.tex',
+      callback
+    )
+  },
+
+  deleteDocWithDate(project_id, doc_id, date, callback) {
+    DocstoreClient.deleteDocWithDateAndName(
+      project_id,
+      doc_id,
+      date,
+      'main.tex',
+      callback
+    )
+  },
+
+  deleteDocWithName(project_id, doc_id, name, callback) {
+    DocstoreClient.deleteDocWithDateAndName(
+      project_id,
+      doc_id,
+      new Date(),
+      name,
+      callback
+    )
+  },
+
+  deleteDocWithDateAndName(project_id, doc_id, deletedAt, name, callback) {
+    request.patch(
+      {
+        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`,
+        json: { name, deleted: true, deletedAt }
       },
       callback
     )

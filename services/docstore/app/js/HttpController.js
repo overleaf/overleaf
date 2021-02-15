@@ -188,6 +188,17 @@ module.exports = HttpController = {
     })
   },
 
+  patchDoc(req, res, next) {
+    const { project_id, doc_id } = req.params
+    logger.log({ project_id, doc_id }, 'patching doc')
+    DocManager.patchDoc(project_id, doc_id, req.body, function (error) {
+      if (error) {
+        return next(error)
+      }
+      res.sendStatus(204)
+    })
+  },
+
   _buildDocView(doc) {
     const doc_view = { _id: doc._id != null ? doc._id.toString() : undefined }
     for (const attribute of ['lines', 'rev', 'version', 'ranges', 'deleted']) {

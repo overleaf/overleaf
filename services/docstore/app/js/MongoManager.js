@@ -94,6 +94,17 @@ module.exports = MongoManager = {
     )
   },
 
+  patchDoc(project_id, doc_id, meta, callback) {
+    db.docs.updateOne(
+      {
+        _id: ObjectId(doc_id),
+        project_id: ObjectId(project_id)
+      },
+      { $set: meta },
+      callback
+    )
+  },
+
   markDocAsArchived(doc_id, rev, callback) {
     const update = {
       $set: {},

@@ -456,6 +456,29 @@ describe('HttpController', function () {
     })
   })
 
+  describe('patchDoc', function () {
+    beforeEach(function () {
+      this.req.params = {
+        project_id: this.project_id,
+        doc_id: this.doc_id
+      }
+      this.req.body = { name: 'foo.tex' }
+      this.DocManager.patchDoc = sinon.stub().yields(null)
+      this.HttpController.patchDoc(this.req, this.res, this.next)
+    })
+
+    it('should delete the document', function () {
+      expect(this.DocManager.patchDoc).to.have.been.calledWith(
+        this.project_id,
+        this.doc_id
+      )
+    })
+
+    it('should return a 204 (No Content)', function () {
+      expect(this.res.sendStatus).to.have.been.calledWith(204)
+    })
+  })
+
   describe('archiveAllDocs', function () {
     beforeEach(function () {
       this.req.params = { project_id: this.project_id }

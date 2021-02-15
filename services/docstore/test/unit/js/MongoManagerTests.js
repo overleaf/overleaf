@@ -72,6 +72,33 @@ describe('MongoManager', function () {
     })
   })
 
+  describe('patchDoc', function () {
+    beforeEach(function (done) {
+      this.db.docs.updateOne = sinon.stub().yields(null)
+      this.meta = { name: 'foo.tex' }
+      this.callback.callsFake(done)
+      this.MongoManager.patchDoc(
+        this.project_id,
+        this.doc_id,
+        this.meta,
+        this.callback
+      )
+    })
+
+    it('should pass the parameter along', function () {
+      this.db.docs.updateOne.should.have.been.calledWith(
+        {
+          _id: ObjectId(this.doc_id),
+          project_id: ObjectId(this.project_id)
+        },
+        {
+          $set: this.meta
+        },
+        this.callback
+      )
+    })
+  })
+
   describe('getProjectsDocs', function () {
     beforeEach(function () {
       this.filter = { lines: true }
