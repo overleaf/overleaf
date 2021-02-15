@@ -110,5 +110,10 @@ module.exports = DispatchManager = {
     _.times(number, function (shardNumber) {
       return DispatchManager.createDispatcher(RateLimiter, shardNumber).run()
     })
+
+    // run extra dispatchers on old queue while we migrate
+    _.times(number, function () {
+      return DispatchManager.createDispatcher(RateLimiter, 0).run()
+    })
   }
 }
