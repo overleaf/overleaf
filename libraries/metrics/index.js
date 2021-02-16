@@ -30,6 +30,7 @@ function initialize(appName, opts = {}) {
   appName = appName || DEFAULT_APP_NAME
   configure({ ...opts, appName })
   collectDefaultMetrics({ timeout: 5000, prefix: '' })
+  promWrapper.setupSweeping()
 
   console.log(`ENABLE_TRACE_AGENT set to ${process.env.ENABLE_TRACE_AGENT}`)
   if (process.env.ENABLE_TRACE_AGENT === 'true') {
