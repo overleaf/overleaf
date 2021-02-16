@@ -3,7 +3,6 @@ const path = require('path')
 const sinon = require('sinon')
 const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 const MODULE_PATH = path.join(
   __dirname,
@@ -488,39 +487,6 @@ describe('ProjectController', function() {
         done()
       }
       this.ProjectController.projectListPage(this.req, this.res)
-    })
-
-    describe('when there is a v1 connection error', function() {
-      beforeEach(function() {
-        this.Features.hasFeature = sinon
-          .stub()
-          .withArgs('overleaf-integration')
-          .returns(true)
-        this.connectionWarning =
-          'Error accessing Overleaf V1. Some of your projects or features may be missing.'
-      })
-
-      it('should show a warning when there is an error getting subscriptions from v1', function(done) {
-        this.LimitationsManager.hasPaidSubscription.yields(
-          new Errors.V1ConnectionError('error')
-        )
-        this.res.render = (pageName, opts) => {
-          expect(opts.warnings).to.contain(this.connectionWarning)
-          done()
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
-
-      it('should show a warning when there is an error getting full emails due to v1', function(done) {
-        this.UserGetter.getUserFullEmails.yields(
-          new Errors.V1ConnectionError('error')
-        )
-        this.res.render = (pageName, opts) => {
-          expect(opts.warnings).to.contain(this.connectionWarning)
-          done()
-        }
-        this.ProjectController.projectListPage(this.req, this.res)
-      })
     })
 
     describe('front widget', function(done) {

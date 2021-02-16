@@ -402,7 +402,6 @@ const ProjectController = {
     const timer = new metrics.Timer('project-list')
     const userId = AuthenticationController.getLoggedInUserId(req)
     const currentUser = AuthenticationController.getSessionUser(req)
-    let noV1Connection = false
     let institutionLinkingError
     async.parallel(
       {
@@ -424,7 +423,6 @@ const ProjectController = {
             currentUser,
             (error, hasPaidSubscription) => {
               if (error != null && error instanceof V1ConnectionError) {
-                noV1Connection = true
                 return cb(null, true)
               }
               cb(error, hasPaidSubscription)
@@ -443,7 +441,6 @@ const ProjectController = {
 
           UserGetter.getUserFullEmails(userId, (error, fullEmails) => {
             if (error && error instanceof V1ConnectionError) {
-              noV1Connection = true
               return cb(null, result)
             }
 
@@ -593,7 +590,6 @@ const ProjectController = {
           results.projects,
           userId
         )
-        const warnings = ProjectController._buildWarningsList(noV1Connection)
 
         // in v2 add notifications for matching university IPs
         if (Settings.overleaf != null && req.ip !== user.lastLoginIp) {
@@ -618,7 +614,6 @@ const ProjectController = {
             userEmails,
             hasSubscription: results.hasSubscription,
             institutionLinkingError,
-            warnings,
             zipFileSizeLimit: Settings.maxUploadSize
           }
 
@@ -1047,14 +1042,6 @@ const ProjectController = {
         callback(null, projects)
       }
     )
-  },
-
-  _buildWarningsList(noConnection) {
-    return noConnection
-      ? [
-          'Error accessing Overleaf V1. Some of your projects or features may be missing.'
-        ]
-      : []
   },
 
   _buildPortalTemplatesList(affiliations) {
