@@ -2,6 +2,7 @@ const { waitForDb } = require('../app/src/infrastructure/mongodb')
 const ProjectEntityUpdateHandler = require('../app/src/Features/Project/ProjectEntityUpdateHandler')
 const ProjectEntityHandler = require('../app/src/Features/Project/ProjectEntityHandler')
 const ProjectGetter = require('../app/src/Features/Project/ProjectGetter')
+const Path = require('path')
 
 const ARGV = process.argv.slice(2)
 const DEVELOPER_USER_ID = ARGV.shift()
@@ -30,11 +31,18 @@ async function main() {
       )
     })
 
+    const formattedTimestamp = new Date()
+      .toISOString()
+      .replace('T', '-')
+      .replace(/[^0-9-]/g, '')
+    const extension = Path.extname(deletedDoc.name)
+    const basename = Path.basename(deletedDoc.name, extension)
+    const deletedDocName = `${basename}-${formattedTimestamp}${extension}`
     const newDoc = await new Promise((resolve, reject) => {
       ProjectEntityUpdateHandler.addDocWithRanges(
         PROJECT_ID,
         null,
-        `${new Date().toISOString().replace(/:/g, '-')}-${deletedDoc.name}`,
+        `${deletedDocName}`,
         doc.lines,
         doc.ranges,
         DEVELOPER_USER_ID,
