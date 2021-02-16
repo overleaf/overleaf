@@ -116,7 +116,7 @@ const settings = {
 
   // should be set to the same same as dispatcherCount in document updater
   pendingUpdateListShardCount: parseInt(
-    process.env.PENDING_UPDATE_LIST_SHARD_COUNT || 1,
+    process.env.PENDING_UPDATE_LIST_SHARD_COUNT || 10,
     10
   ),
 
