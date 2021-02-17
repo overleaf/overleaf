@@ -86,7 +86,9 @@ describe('BackFillDeletedFiles', function() {
 
   function checkAreFilesBackFilled() {
     it('should back fill file and set projectId', async function() {
-      const docs = await db.deletedFiles.find({}).toArray()
+      const docs = await db.deletedFiles
+        .find({}, { sort: { _id: 1 } })
+        .toArray()
       expect(docs).to.deep.equal([
         { _id: fileId1, projectId: projectId1, ...otherFileDetails },
         { _id: fileId2, projectId: projectId1, ...otherFileDetails },
