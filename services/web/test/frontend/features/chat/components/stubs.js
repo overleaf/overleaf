@@ -25,11 +25,3 @@ export function stubMathJax() {
 export function tearDownMathJaxStubs() {
   delete window.MathJax
 }
-
-export function stubChatStore({ user }) {
-  window.user = user
-}
-
-export function tearDownChatStore() {
-  delete window.user
-}

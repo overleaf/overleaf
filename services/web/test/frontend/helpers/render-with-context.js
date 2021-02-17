@@ -45,3 +45,9 @@ export function renderWithChatContext(children, { user, projectId } = {}) {
     projectId
   })
 }
+
+export function cleanUpContext() {
+  delete window.user
+  delete window.project_id
+  delete window._ide
+}

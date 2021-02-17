@@ -5,10 +5,8 @@ import { screen, render, fireEvent } from '@testing-library/react'
 
 import MessageList from '../../../../../frontend/js/features/chat/components/message-list'
 import {
-  stubChatStore,
   stubMathJax,
   stubUIConfig,
-  tearDownChatStore,
   tearDownMathJaxStubs,
   tearDownUIConfigStubs
 } from './stubs'
@@ -38,13 +36,11 @@ describe('<MessageList />', function() {
   }
 
   before(function() {
-    stubChatStore({ user: currentUser }) // required by ColorManager
     stubUIConfig()
     stubMathJax()
   })
 
   after(function() {
-    tearDownChatStore()
     tearDownUIConfigStubs()
     tearDownMathJaxStubs()
   })
