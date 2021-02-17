@@ -191,7 +191,17 @@ module.exports = HttpController = {
   patchDoc(req, res, next) {
     const { project_id, doc_id } = req.params
     logger.log({ project_id, doc_id }, 'patching doc')
-    DocManager.patchDoc(project_id, doc_id, req.body, function (error) {
+
+    const allowedFields = ['deleted', 'deletedAt', 'name']
+    const meta = {}
+    Object.entries(req.body).forEach(([field, value]) => {
+      if (allowedFields.includes(field)) {
+        meta[field] = value
+      } else {
+        logger.fatal({ field }, 'joi validation for pathDoc is broken')
+      }
+    })
+    DocManager.patchDoc(project_id, doc_id, meta, function (error) {
       if (error) {
         return next(error)
       }
