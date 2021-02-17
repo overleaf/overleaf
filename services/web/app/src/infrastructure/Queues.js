@@ -7,6 +7,7 @@ const analyticsQueues = {}
 // useful to inspect recently completed jobs. The bull prometheus exporter also
 // uses the completed job records to report on job duration.
 const MAX_COMPLETED_JOBS_RETAINED = 10000
+const MAX_FAILED_JOBS_RETAINED = 50000
 
 function initialize() {
   if (Settings.analytics.enabled) {
@@ -20,6 +21,7 @@ function createQueue(queueName, defaultJobOptions) {
     redis: Settings.redis.queues,
     defaultJobOptions: {
       removeOnComplete: MAX_COMPLETED_JOBS_RETAINED,
+      removeOnFail: MAX_FAILED_JOBS_RETAINED,
       attempts: 11,
       backoff: {
         type: 'exponential',
