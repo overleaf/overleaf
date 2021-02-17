@@ -5,6 +5,8 @@ import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
 
+const MAX_ERRORS_COUNT = 99
+
 function PreviewLogsToggleButton({
   onToggle,
   showLogs,
@@ -100,7 +102,9 @@ function LogsCompilationResultIndicator({ textStyle, logType, nLogs }) {
         aria-label={label}
         style={textStyle}
       >
-        {`${label} (${nLogs > 9 ? '9+' : nLogs})`}
+        {`${label} (${
+          nLogs > MAX_ERRORS_COUNT ? `${MAX_ERRORS_COUNT}+` : nLogs
+        })`}
       </span>
     </>
   )

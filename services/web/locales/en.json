@@ -637,7 +637,7 @@
   "if_you_are_registered": "If you are already registered",
   "stop_compile": "Stop compilation",
   "terminated": "Compilation cancelled",
-  "compile_terminated_by_user": "The compile was cancelled using the 'Stop Compilation' button. You can view the raw logs to see where the compile stopped.",
+  "compile_terminated_by_user": "The compile was cancelled using the 'Stop Compilation' button. You can download the raw logs to see where the compile stopped.",
   "site_description": "An online LaTeX editor that's easy to use. No installation, real-time collaboration, version control, hundreds of LaTeX templates, and more.",
   "knowledge_base": "knowledge base",
   "contact_message_label": "Message",

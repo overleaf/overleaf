@@ -83,14 +83,14 @@ describe('<PreviewLogsToggleButton />', function() {
       screen.getByText(`View warnings (${logsState.nWarnings})`)
     })
 
-    it('should render 9+ errors when there are more than nine errors', function() {
+    it('should render 99+ errors when there are more than 99 errors', function() {
       const logsState = {
-        nErrors: 10,
+        nErrors: 100,
         nWarnings: 0,
         nLogEntries: 0
       }
       renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs)
-      screen.getByText('This project has errors (9+)')
+      screen.getByText('This project has errors (99+)')
     })
     it('should show the button text when prop showText=true', function() {
       const logsState = {
