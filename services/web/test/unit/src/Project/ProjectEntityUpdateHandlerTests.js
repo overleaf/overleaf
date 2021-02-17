@@ -2006,7 +2006,7 @@ describe('ProjectEntityUpdateHandler', function() {
         )
       })
 
-      it('should insert the file into the deletedFiles array', function() {
+      it('should insert the file into the deletedFiles collection', function() {
         this.ProjectEntityMongoUpdateHandler._insertDeletedFileReference
           .calledWith(this.project._id, this.entity)
           .should.equal(true)

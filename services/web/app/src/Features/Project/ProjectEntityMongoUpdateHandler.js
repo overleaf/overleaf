@@ -16,6 +16,7 @@ const ProjectGetter = require('./ProjectGetter')
 const ProjectLocator = require('./ProjectLocator')
 const FolderStructureBuilder = require('./FolderStructureBuilder')
 const SafePath = require('./SafePath')
+const { DeletedFile } = require('../../models/DeletedFile')
 
 const LOCK_NAMESPACE = 'mongoTransaction'
 const ENTITY_TYPE_TO_MONGO_PATH_SEGMENT = {
@@ -456,20 +457,14 @@ async function _insertDeletedDocReference(projectId, doc) {
 }
 
 async function _insertDeletedFileReference(projectId, fileRef) {
-  await Project.updateOne(
-    { _id: projectId },
-    {
-      $push: {
-        deletedFiles: {
-          _id: fileRef._id,
-          name: fileRef.name,
-          linkedFileData: fileRef.linkedFileData,
-          hash: fileRef.hash,
-          deletedAt: new Date()
-        }
-      }
-    }
-  ).exec()
+  await DeletedFile.create({
+    projectId,
+    _id: fileRef._id,
+    name: fileRef.name,
+    linkedFileData: fileRef.linkedFileData,
+    hash: fileRef.hash,
+    deletedAt: new Date()
+  })
 }
 
 async function _removeElementFromMongoArray(
