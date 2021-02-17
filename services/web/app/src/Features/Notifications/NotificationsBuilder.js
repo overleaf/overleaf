@@ -1,19 +1,33 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const NotificationsHandler = require('./NotificationsHandler')
 const { promisifyAll } = require('../../util/promises')
 const request = require('request')
 const settings = require('settings-sharelatex')
+
+function dropboxDuplicateProjectNames(userId) {
+  return {
+    key: `dropboxDuplicateProjectNames-${userId}`,
+    create(projectName, callback) {
+      if (callback == null) {
+        callback = function() {}
+      }
+      NotificationsHandler.createNotification(
+        userId,
+        this.key,
+        'notification_dropbox_duplicate_project_names',
+        { projectName },
+        null,
+        true,
+        callback
+      )
+    },
+    read(callback) {
+      if (callback == null) {
+        callback = function() {}
+      }
+      NotificationsHandler.markAsReadWithKey(userId, this.key, callback)
+    }
+  }
+}
 
 function featuresUpgradedByAffiliation(affiliation, user) {
   return {
@@ -23,7 +37,7 @@ function featuresUpgradedByAffiliation(affiliation, user) {
         callback = function() {}
       }
       const messageOpts = { institutionName: affiliation.institutionName }
-      return NotificationsHandler.createNotification(
+      NotificationsHandler.createNotification(
         user._id,
         this.key,
         'notification_features_upgraded_by_affiliation',
@@ -37,7 +51,7 @@ function featuresUpgradedByAffiliation(affiliation, user) {
       if (callback == null) {
         callback = function() {}
       }
-      return NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
+      NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
     }
   }
 }
@@ -50,7 +64,7 @@ function redundantPersonalSubscription(affiliation, user) {
         callback = function() {}
       }
       const messageOpts = { institutionName: affiliation.institutionName }
-      return NotificationsHandler.createNotification(
+      NotificationsHandler.createNotification(
         user._id,
         this.key,
         'notification_personal_subscription_not_required_due_to_affiliation',
@@ -64,7 +78,7 @@ function redundantPersonalSubscription(affiliation, user) {
       if (callback == null) {
         callback = function() {}
       }
-      return NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
+      NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
     }
   }
 }
@@ -82,7 +96,7 @@ function projectInvite(invite, project, sendingUser, user) {
         projectId: project._id.toString(),
         token: invite.token
       }
-      return NotificationsHandler.createNotification(
+      NotificationsHandler.createNotification(
         user._id,
         this.key,
         'notification_project_invite',
@@ -95,7 +109,7 @@ function projectInvite(invite, project, sendingUser, user) {
       if (callback == null) {
         callback = function() {}
       }
-      return NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
+      NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
     }
   }
 }
@@ -107,9 +121,10 @@ function ipMatcherAffiliation(userId) {
         callback = function() {}
       }
       if (!settings.apis.v1.url) {
-        return null
-      } // service is not configured
-      return request(
+        // service is not configured
+        return callback()
+      }
+      request(
         {
           method: 'GET',
           url: `${settings.apis.v1.url}/api/v2/users/${userId}/ip_matcher`,
@@ -120,10 +135,10 @@ function ipMatcherAffiliation(userId) {
         },
         function(error, response, body) {
           if (error != null) {
-            return error
+            return callback(error)
           }
           if (response.statusCode !== 200) {
-            return null
+            return callback()
           }
 
           const key = `ip-matched-affiliation-${body.id}`
@@ -137,7 +152,7 @@ function ipMatcherAffiliation(userId) {
             portalPath,
             ssoEnabled: body.sso_enabled
           }
-          return NotificationsHandler.createNotification(
+          NotificationsHandler.createNotification(
             userId,
             key,
             'notification_ip_matched_affiliation',
@@ -150,19 +165,19 @@ function ipMatcherAffiliation(userId) {
       )
     },
 
-    read(university_id, callback) {
+    read(universityId, callback) {
       if (callback == null) {
         callback = function() {}
       }
-      const key = `ip-matched-affiliation-${university_id}`
-      return NotificationsHandler.markAsReadWithKey(userId, key, callback)
+      const key = `ip-matched-affiliation-${universityId}`
+      NotificationsHandler.markAsReadWithKey(userId, key, callback)
     }
   }
 }
 
-function tpdsFileLimit(user_id) {
+function tpdsFileLimit(userId) {
   return {
-    key: `tpdsFileLimit-${user_id}`,
+    key: `tpdsFileLimit-${userId}`,
     create(projectName, callback) {
       if (callback == null) {
         callback = function() {}
@@ -170,8 +185,8 @@ function tpdsFileLimit(user_id) {
       const messageOpts = {
         projectName: projectName
       }
-      return NotificationsHandler.createNotification(
-        user_id,
+      NotificationsHandler.createNotification(
+        userId,
         this.key,
         'notification_tpds_file_limit',
         messageOpts,
@@ -184,22 +199,18 @@ function tpdsFileLimit(user_id) {
       if (callback == null) {
         callback = function() {}
       }
-      return NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
+      NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
     }
   }
 }
 
 const NotificationsBuilder = {
   // Note: notification keys should be url-safe
-
+  dropboxDuplicateProjectNames,
   featuresUpgradedByAffiliation,
-
   redundantPersonalSubscription,
-
   projectInvite,
-
   ipMatcherAffiliation,
-
   tpdsFileLimit
 }
 

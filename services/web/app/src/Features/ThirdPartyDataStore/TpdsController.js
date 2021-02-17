@@ -1,19 +1,6 @@
-/* eslint-disable
-   camelcase,
-   node/handle-callback-err,
-   max-len,
- */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let parseParams
 
-const tpdsUpdateHandler = require('./TpdsUpdateHandler')
+const TpdsUpdateHandler = require('./TpdsUpdateHandler')
 const UpdateMerger = require('./UpdateMerger')
 const Errors = require('../Errors/Errors')
 const logger = require('logger-sharelatex')
@@ -29,45 +16,39 @@ module.exports = {
   // They also ignore 'noisy' files like .DS_Store, .gitignore, etc.
   mergeUpdate(req, res) {
     metrics.inc('tpds.merge-update')
-    const { filePath, user_id, projectName } = parseParams(req)
+    const { filePath, userId, projectName } = parseParams(req)
     const source = req.headers['x-sl-update-source'] || 'unknown'
 
-    return tpdsUpdateHandler.newUpdate(
-      user_id,
+    TpdsUpdateHandler.newUpdate(
+      userId,
       projectName,
       filePath,
       req,
       source,
-      function(err) {
-        if (err != null) {
+      err => {
+        if (err) {
           if (err.name === 'TooManyRequestsError') {
             logger.warn(
-              { err, user_id, filePath },
+              { err, userId, filePath },
               'tpds update failed to be processed, too many requests'
             )
-            return res.sendStatus(429)
-          } else if (err.name === 'ProjectIsArchivedOrTrashedError') {
-            logger.info(
-              { err, user_id, filePath, projectName },
-              'tpds project is archived'
-            )
-            return res.sendStatus(409)
+            res.sendStatus(429)
           } else if (err.message === 'project_has_too_many_files') {
             logger.warn(
-              { err, user_id, filePath },
+              { err, userId, filePath },
               'tpds trying to append to project over file limit'
             )
-            NotificationsBuilder.tpdsFileLimit(user_id).create(projectName)
-            return res.sendStatus(400)
+            NotificationsBuilder.tpdsFileLimit(userId).create(projectName)
+            res.sendStatus(400)
           } else {
             logger.err(
-              { err, user_id, filePath },
-              'error reciving update from tpds'
+              { err, userId, filePath },
+              'error receiving update from tpds'
             )
-            return res.sendStatus(500)
+            res.sendStatus(500)
           }
         } else {
-          return res.sendStatus(200)
+          res.sendStatus(200)
         }
       }
     )
@@ -75,22 +56,22 @@ module.exports = {
 
   deleteUpdate(req, res) {
     metrics.inc('tpds.delete-update')
-    const { filePath, user_id, projectName } = parseParams(req)
+    const { filePath, userId, projectName } = parseParams(req)
     const source = req.headers['x-sl-update-source'] || 'unknown'
-    return tpdsUpdateHandler.deleteUpdate(
-      user_id,
+    TpdsUpdateHandler.deleteUpdate(
+      userId,
       projectName,
       filePath,
       source,
-      function(err) {
-        if (err != null) {
+      err => {
+        if (err) {
           logger.err(
-            { err, user_id, filePath },
-            'error reciving update from tpds'
+            { err, userId, filePath },
+            'error receiving update from tpds'
           )
-          return res.sendStatus(500)
+          res.sendStatus(500)
         } else {
-          return res.sendStatus(200)
+          res.sendStatus(200)
         }
       }
     )
@@ -101,46 +82,31 @@ module.exports = {
   // files like .DS_Store, .gitignore, etc because people are generally more explicit with the files they
   // want in git.
   updateProjectContents(req, res, next) {
-    if (next == null) {
-      next = function(error) {}
-    }
-    const { project_id } = req.params
+    const projectId = req.params.project_id
     const path = `/${req.params[0]}` // UpdateMerger expects leading slash
     const source = req.headers['x-sl-update-source'] || 'unknown'
-    return UpdateMerger.mergeUpdate(
-      null,
-      project_id,
-      path,
-      req,
-      source,
-      function(error) {
-        if (error != null) {
-          if (error.constructor === Errors.InvalidNameError) {
-            return res.sendStatus(422)
-          } else {
-            return next(error)
-          }
+    UpdateMerger.mergeUpdate(null, projectId, path, req, source, error => {
+      if (error) {
+        if (error.constructor === Errors.InvalidNameError) {
+          return res.sendStatus(422)
+        } else {
+          return next(error)
         }
-        return res.sendStatus(200)
       }
-    )
+      res.sendStatus(200)
+    })
   },
 
   deleteProjectContents(req, res, next) {
-    if (next == null) {
-      next = function(error) {}
-    }
-    const { project_id } = req.params
+    const projectId = req.params.project_id
     const path = `/${req.params[0]}` // UpdateMerger expects leading slash
     const source = req.headers['x-sl-update-source'] || 'unknown'
 
-    return UpdateMerger.deleteUpdate(null, project_id, path, source, function(
-      error
-    ) {
-      if (error != null) {
+    UpdateMerger.deleteUpdate(null, projectId, path, source, error => {
+      if (error) {
         return next(error)
       }
-      return res.sendStatus(200)
+      res.sendStatus(200)
     })
   },
 
@@ -156,7 +122,7 @@ module.exports = {
   parseParams: (parseParams = function(req) {
     let filePath, projectName
     let path = req.params[0]
-    const { user_id } = req.params
+    const userId = req.params.user_id
 
     path = Path.join('/', path)
     if (path.substring(1).indexOf('/') === -1) {
@@ -168,6 +134,6 @@ module.exports = {
       projectName = projectName.replace('/', '')
     }
 
-    return { filePath, user_id, projectName }
+    return { filePath, userId, projectName }
   })
 }

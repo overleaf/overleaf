@@ -1,322 +1,436 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const { expect } = require('chai')
-const modulePath = require('path').join(
-  __dirname,
+const { ObjectId } = require('mongodb')
+const Errors = require('../../../../app/src/Features/Errors/Errors')
+
+const MODULE_PATH =
   '../../../../app/src/Features/ThirdPartyDataStore/TpdsUpdateHandler.js'
-)
 
 describe('TpdsUpdateHandler', function() {
   beforeEach(function() {
-    this.requestQueuer = {}
-    this.updateMerger = {
-      deleteUpdate(user_id, project_id, path, source, cb) {
-        return cb()
+    this.clock = sinon.useFakeTimers()
+  })
+
+  afterEach(function() {
+    this.clock.restore()
+  })
+
+  beforeEach(function() {
+    this.projectName = 'My recipes'
+    this.projects = {
+      active1: { _id: new ObjectId(), name: this.projectName },
+      active2: { _id: new ObjectId(), name: this.projectName },
+      archived1: {
+        _id: new ObjectId(),
+        name: this.projectName,
+        archived: [this.userId]
       },
-      mergeUpdate(user_id, project_id, path, update, source, cb) {
-        return cb()
+      archived2: {
+        _id: new ObjectId(),
+        name: this.projectName,
+        archived: [this.userId]
       }
     }
-    this.editorController = {}
-    this.project_id = 'dsjajilknaksdn'
-    this.project = { _id: this.project_id, name: 'projectNameHere' }
-    this.projectLocator = {
-      findUsersProjectByName: sinon
-        .stub()
-        .callsArgWith(2, null, { project: this.project })
-    }
-    this.projectCreationHandler = {
-      createBlankProject: sinon.stub().callsArgWith(2, null, this.project)
-    }
-    this.projectDeleter = {
-      markAsDeletedByExternalSource: sinon.stub().callsArgWith(1)
-    }
-    this.rootDocManager = { setRootDocAutomatically: sinon.stub() }
-    this.FileTypeManager = {
-      shouldIgnore: sinon.stub().callsArgWith(1, null, false)
-    }
+    this.userId = new ObjectId()
+    this.source = 'dropbox'
+    this.path = `/some/file`
+    this.update = {}
+
     this.CooldownManager = {
-      isProjectOnCooldown: sinon.stub().callsArgWith(1, null, false)
+      isProjectOnCooldown: sinon.stub().yields(null, false)
     }
-    this.handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
+    this.FileTypeManager = {
+      shouldIgnore: sinon.stub().yields(null, false)
+    }
+    this.Modules = {
+      hooks: { fire: sinon.stub().yields() }
+    }
+    this.notification = {
+      create: sinon.stub().yields()
+    }
+    this.NotificationsBuilder = {
+      dropboxDuplicateProjectNames: sinon.stub().returns(this.notification)
+    }
+    this.ProjectCreationHandler = {
+      createBlankProject: sinon.stub().yields(null, this.projects.active1)
+    }
+    this.ProjectDeleter = {
+      markAsDeletedByExternalSource: sinon.stub().yields()
+    }
+    this.ProjectGetter = {
+      findUsersProjectsByName: sinon.stub()
+    }
+    this.ProjectHelper = {
+      isArchivedOrTrashed: sinon.stub().returns(false)
+    }
+    this.ProjectHelper.isArchivedOrTrashed
+      .withArgs(this.projects.archived1, this.userId)
+      .returns(true)
+    this.ProjectHelper.isArchivedOrTrashed
+      .withArgs(this.projects.archived2, this.userId)
+      .returns(true)
+    this.RootDocManager = { setRootDocAutomatically: sinon.stub() }
+    this.UpdateMerger = {
+      deleteUpdate: sinon.stub().yields(),
+      mergeUpdate: sinon.stub().yields()
+    }
+
+    this.TpdsUpdateHandler = SandboxedModule.require(MODULE_PATH, {
+      globals: { console },
       requires: {
-        './UpdateMerger': this.updateMerger,
-        './Editor/EditorController': this.editorController,
-        '../Project/ProjectLocator': this.projectLocator,
-        '../Project/ProjectCreationHandler': this.projectCreationHandler,
-        '../Project/ProjectDeleter': this.projectDeleter,
-        '../Project/ProjectRootDocManager': this.rootDocManager,
-        '../Uploads/FileTypeManager': this.FileTypeManager,
         '../Cooldown/CooldownManager': this.CooldownManager,
+        '../Uploads/FileTypeManager': this.FileTypeManager,
+        '../../infrastructure/Modules': this.Modules,
+        '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
+        '../Project/ProjectCreationHandler': this.ProjectCreationHandler,
+        '../Project/ProjectDeleter': this.ProjectDeleter,
+        '../Project/ProjectGetter': this.ProjectGetter,
+        '../Project/ProjectHelper': this.ProjectHelper,
+        '../Project/ProjectRootDocManager': this.RootDocManager,
+        './UpdateMerger': this.UpdateMerger,
         'logger-sharelatex': {
-          log() {}
+          debug() {}
         }
       }
     })
-    this.user_id = 'dsad29jlkjas'
-    return (this.source = 'dropbox')
   })
 
   describe('getting an update', function() {
-    it('should send the update to the update merger', function(done) {
-      const path = '/path/here'
-      const update = {}
-      this.updateMerger.mergeUpdate = sinon.stub()
-      this.updateMerger.mergeUpdate
-        .withArgs(this.user_id, this.project_id, path, update, this.source)
-        .callsArg(5)
-      return this.handler.newUpdate(
-        this.user_id,
-        this.project.name,
-        path,
-        update,
-        this.source,
-        () => {
-          this.projectCreationHandler.createBlankProject.called.should.equal(
-            false
-          )
-          return done()
-        }
-      )
+    describe('with no matching project', function() {
+      setupMatchingProjects([])
+      receiveUpdate()
+      expectProjectCreated()
+      expectUpdateProcessed()
     })
 
-    it('should create a new project if one does not already exit', function(done) {
-      this.projectLocator.findUsersProjectByName = sinon
-        .stub()
-        .callsArgWith(2, null, { project: null })
-      const path = '/'
-      return this.handler.newUpdate(
-        this.user_id,
-        this.project.name,
-        path,
-        {},
-        this.source,
-        () => {
-          this.projectCreationHandler.createBlankProject
-            .calledWith(this.user_id, this.project.name)
-            .should.equal(true)
-          return done()
-        }
-      )
+    describe('with one matching active project', function() {
+      setupMatchingProjects(['active1'])
+      receiveUpdate()
+      expectProjectNotCreated()
+      expectUpdateProcessed()
     })
 
-    it('should not create a new project if one with the same name is archived', function(done) {
-      this.projectLocator.findUsersProjectByName = sinon
-        .stub()
-        .callsArgWith(2, null, {
-          project: this.project,
-          isArchivedOrTrashed: true
-        })
-      const path = '/'
-      return this.handler.newUpdate(
-        this.user_id,
-        this.project.name,
-        path,
-        {},
-        this.source,
-        err => {
-          expect(err).to.exist
-          expect(err.name).to.equal('ProjectIsArchivedOrTrashedError')
-          this.projectCreationHandler.createBlankProject
-            .calledWith(this.user_id, this.project.name)
-            .should.equal(false)
-          return done()
-        }
-      )
+    describe('with one matching archived project', function() {
+      setupMatchingProjects(['archived1'])
+      receiveUpdate()
+      expectProjectNotCreated()
+      expectUpdateNotProcessed()
+      expectDropboxNotUnlinked()
     })
 
-    it('should not create a new project if one is found', function(done) {
-      this.projectLocator.findUsersProjectByName = sinon
-        .stub()
-        .callsArgWith(2, null, {
-          project: this.project,
-          isArchivedOrTrashed: false
-        })
-      const path = '/'
-      return this.handler.newUpdate(
-        this.user_id,
-        this.project.name,
-        path,
-        {},
-        this.source,
-        err => {
-          expect(err).to.not.exist
-          this.projectCreationHandler.createBlankProject
-            .calledWith(this.user_id, this.project.name)
-            .should.equal(false)
-          return done()
-        }
-      )
+    describe('with two matching active projects', function() {
+      setupMatchingProjects(['active1', 'active2'])
+      receiveUpdate()
+      expectProjectNotCreated()
+      expectUpdateNotProcessed()
+      expectDropboxUnlinked()
     })
 
-    it('should set the root doc automatically if a new project is created', function(done) {
-      this.projectLocator.findUsersProjectByName = sinon
-        .stub()
-        .callsArgWith(2, null, { project: null })
-      this.handler._rootDocTimeoutLength = 0
-      const path = '/'
-      return this.handler.newUpdate(
-        this.user_id,
-        this.project.name,
-        path,
-        {},
-        this.source,
-        () => {
-          return setTimeout(() => {
-            this.rootDocManager.setRootDocAutomatically
-              .calledWith(this.project._id)
-              .should.equal(true)
-            return done()
-          }, 1)
-        }
-      )
+    describe('with two matching archived projects', function() {
+      setupMatchingProjects(['archived1', 'archived2'])
+      receiveUpdate()
+      expectProjectNotCreated()
+      expectUpdateNotProcessed()
+      expectDropboxNotUnlinked()
     })
 
-    it('should not update files that should be ignored', function(done) {
-      this.FileTypeManager.shouldIgnore = sinon
-        .stub()
-        .callsArgWith(1, null, true)
-      this.projectLocator.findUsersProjectByName = sinon
-        .stub()
-        .callsArgWith(2, null, { project: null })
-      const path = '/.gitignore'
-      this.updateMerger.mergeUpdate = sinon.stub()
-      return this.handler.newUpdate(
-        this.user_id,
-        this.project.name,
-        path,
-        {},
-        this.source,
-        () => {
-          this.updateMerger.mergeUpdate.called.should.equal(false)
-          return done()
-        }
-      )
+    describe('with one matching active and one matching archived project', function() {
+      setupMatchingProjects(['active1', 'archived1'])
+      receiveUpdate()
+      expectProjectNotCreated()
+      expectUpdateNotProcessed()
+      expectDropboxUnlinked()
     })
 
-    it('should check if the project is on cooldown', function(done) {
-      this.CooldownManager.isProjectOnCooldown = sinon
-        .stub()
-        .callsArgWith(1, null, false)
-      this.projectLocator.findUsersProjectByName = sinon
-        .stub()
-        .callsArgWith(2, null, { project: null })
-      const path = '/path/here'
-      const update = {}
-      this.updateMerger.mergeUpdate = sinon.stub()
-      this.updateMerger.mergeUpdate
-        .withArgs(this.user_id, this.project_id, path, update, this.source)
-        .callsArg(5)
-      return this.handler.newUpdate(
-        this.user_id,
-        this.project.name,
-        path,
-        update,
-        this.source,
-        err => {
-          expect(err).to.be.oneOf([null, undefined])
-          this.CooldownManager.isProjectOnCooldown.callCount.should.equal(1)
-          this.CooldownManager.isProjectOnCooldown
-            .calledWith(this.project_id)
-            .should.equal(true)
-          this.FileTypeManager.shouldIgnore.callCount.should.equal(1)
-          this.updateMerger.mergeUpdate.callCount.should.equal(1)
-          return done()
-        }
-      )
+    describe('update to a file that should be ignored', function(done) {
+      setupMatchingProjects(['active1'])
+      beforeEach(function() {
+        this.FileTypeManager.shouldIgnore.yields(null, true)
+      })
+      receiveUpdate()
+      expectProjectNotCreated()
+      expectUpdateNotProcessed()
+      expectDropboxNotUnlinked()
     })
 
-    it('should return error and not proceed with update if project is on cooldown', function(done) {
-      this.CooldownManager.isProjectOnCooldown = sinon
-        .stub()
-        .callsArgWith(1, null, true)
-      this.projectLocator.findUsersProjectByName = sinon
-        .stub()
-        .callsArgWith(2, null, { project: null })
-      this.FileTypeManager.shouldIgnore = sinon
-        .stub()
-        .callsArgWith(1, null, false)
-      const path = '/path/here'
-      const update = {}
-      this.updateMerger.mergeUpdate = sinon.stub()
-      this.updateMerger.mergeUpdate
-        .withArgs(this.user_id, this.project_id, path, update, this.source)
-        .callsArg(5)
-      return this.handler.newUpdate(
-        this.user_id,
-        this.project.name,
-        path,
-        update,
-        this.source,
-        err => {
-          expect(err).to.not.be.oneOf([null, undefined])
-          expect(err).to.be.instanceof(Error)
-          this.CooldownManager.isProjectOnCooldown.callCount.should.equal(1)
-          this.CooldownManager.isProjectOnCooldown
-            .calledWith(this.project_id)
-            .should.equal(true)
-          this.FileTypeManager.shouldIgnore.callCount.should.equal(0)
-          this.updateMerger.mergeUpdate.callCount.should.equal(0)
-          return done()
-        }
-      )
+    describe('update to a project on cooldown', function(done) {
+      setupMatchingProjects(['active1'])
+      setupProjectOnCooldown()
+      beforeEach(function(done) {
+        this.TpdsUpdateHandler.newUpdate(
+          this.userId,
+          this.projectName,
+          this.path,
+          this.update,
+          this.source,
+          err => {
+            expect(err).to.be.instanceof(Errors.TooManyRequestsError)
+            done()
+          }
+        )
+      })
+      expectUpdateNotProcessed()
     })
   })
 
-  describe('getting a delete :', function() {
-    it('should call deleteEntity in the collaberation manager', function(done) {
-      const path = '/delete/this'
-      const update = {}
-      this.updateMerger.deleteUpdate = sinon.stub().callsArg(4)
-
-      return this.handler.deleteUpdate(
-        this.user_id,
-        this.project.name,
-        path,
-        this.source,
-        () => {
-          this.projectDeleter.markAsDeletedByExternalSource
-            .calledWith(this.project._id)
-            .should.equal(false)
-          this.updateMerger.deleteUpdate
-            .calledWith(this.user_id, this.project_id, path, this.source)
-            .should.equal(true)
-          return done()
-        }
-      )
+  describe('getting a file delete', function() {
+    describe('with no matching project', function() {
+      setupMatchingProjects([])
+      receiveFileDelete()
+      expectDeleteNotProcessed()
+      expectProjectNotDeleted()
     })
 
-    it('should mark the project as deleted by external source if path is a single slash', function(done) {
-      const path = '/'
-      return this.handler.deleteUpdate(
-        this.user_id,
-        this.project.name,
-        path,
-        this.source,
-        () => {
-          this.projectDeleter.markAsDeletedByExternalSource
-            .calledWith(this.project._id)
-            .should.equal(true)
-          return done()
-        }
-      )
+    describe('with one matching active project', function() {
+      setupMatchingProjects(['active1'])
+      receiveFileDelete()
+      expectDeleteProcessed()
+      expectProjectNotDeleted()
+    })
+
+    describe('with one matching archived project', function() {
+      setupMatchingProjects(['archived1'])
+      receiveFileDelete()
+      expectDeleteNotProcessed()
+      expectProjectNotDeleted()
+    })
+
+    describe('with two matching active projects', function() {
+      setupMatchingProjects(['active1', 'active2'])
+      receiveFileDelete()
+      expectDeleteNotProcessed()
+      expectProjectNotDeleted()
+      expectDropboxUnlinked()
+    })
+
+    describe('with two matching archived projects', function() {
+      setupMatchingProjects(['archived1', 'archived2'])
+      receiveFileDelete()
+      expectDeleteNotProcessed()
+      expectProjectNotDeleted()
+      expectDropboxNotUnlinked()
+    })
+
+    describe('with one matching active and one matching archived project', function() {
+      setupMatchingProjects(['active1', 'archived1'])
+      receiveFileDelete()
+      expectDeleteNotProcessed()
+      expectProjectNotDeleted()
+      expectDropboxUnlinked()
+    })
+  })
+
+  describe('getting a project delete', function() {
+    describe('with no matching project', function() {
+      setupMatchingProjects([])
+      receiveProjectDelete()
+      expectDeleteNotProcessed()
+      expectProjectNotDeleted()
+    })
+
+    describe('with one matching active project', function() {
+      setupMatchingProjects(['active1'])
+      receiveProjectDelete()
+      expectDeleteNotProcessed()
+      expectProjectDeleted()
+    })
+
+    describe('with one matching archived project', function() {
+      setupMatchingProjects(['archived1'])
+      receiveProjectDelete()
+      expectDeleteNotProcessed()
+      expectProjectNotDeleted()
+    })
+
+    describe('with two matching active projects', function() {
+      setupMatchingProjects(['active1', 'active2'])
+      receiveProjectDelete()
+      expectDeleteNotProcessed()
+      expectProjectNotDeleted()
+      expectDropboxUnlinked()
+    })
+
+    describe('with two matching archived projects', function() {
+      setupMatchingProjects(['archived1', 'archived2'])
+      receiveProjectDelete()
+      expectDeleteNotProcessed()
+      expectProjectNotDeleted()
+      expectDropboxNotUnlinked()
+    })
+
+    describe('with one matching active and one matching archived project', function() {
+      setupMatchingProjects(['active1', 'archived1'])
+      receiveProjectDelete()
+      expectDeleteNotProcessed()
+      expectProjectNotDeleted()
+      expectDropboxUnlinked()
     })
   })
 })
+
+/* Setup helpers */
+
+function setupMatchingProjects(projectKeys) {
+  beforeEach(function() {
+    const projects = projectKeys.map(key => this.projects[key])
+    this.ProjectGetter.findUsersProjectsByName
+      .withArgs(this.userId, this.projectName)
+      .yields(null, projects)
+  })
+}
+
+function setupProjectOnCooldown() {
+  beforeEach(function() {
+    this.CooldownManager.isProjectOnCooldown
+      .withArgs(this.projects.active1._id)
+      .yields(null, true)
+  })
+}
+
+/* Test helpers */
+
+function receiveUpdate() {
+  beforeEach(function(done) {
+    this.TpdsUpdateHandler.newUpdate(
+      this.userId,
+      this.projectName,
+      this.path,
+      this.update,
+      this.source,
+      done
+    )
+  })
+}
+
+function receiveFileDelete() {
+  beforeEach(function(done) {
+    this.TpdsUpdateHandler.deleteUpdate(
+      this.userId,
+      this.projectName,
+      this.path,
+      this.source,
+      done
+    )
+  })
+}
+
+function receiveProjectDelete() {
+  beforeEach(function(done) {
+    this.TpdsUpdateHandler.deleteUpdate(
+      this.userId,
+      this.projectName,
+      '/',
+      this.source,
+      done
+    )
+  })
+}
+
+/* Expectations */
+
+function expectProjectCreated() {
+  it('creates a project', function() {
+    expect(
+      this.ProjectCreationHandler.createBlankProject
+    ).to.have.been.calledWith(this.userId, this.projectName)
+  })
+
+  it('sets the root doc', function() {
+    // Fire pending timers
+    this.clock.runAll()
+    expect(this.RootDocManager.setRootDocAutomatically).to.have.been.calledWith(
+      this.projects.active1._id
+    )
+  })
+}
+
+function expectProjectNotCreated() {
+  it('does not create a project', function() {
+    expect(this.ProjectCreationHandler.createBlankProject).not.to.have.been
+      .called
+  })
+
+  it('does not set the root doc', function() {
+    // Fire pending timers
+    this.clock.runAll()
+    expect(this.RootDocManager.setRootDocAutomatically).not.to.have.been.called
+  })
+}
+
+function expectUpdateProcessed() {
+  it('processes the update', function() {
+    expect(this.UpdateMerger.mergeUpdate).to.have.been.calledWith(
+      this.userId,
+      this.projects.active1._id,
+      this.path,
+      this.update,
+      this.source
+    )
+  })
+}
+
+function expectUpdateNotProcessed() {
+  it('does not process the update', function() {
+    expect(this.UpdateMerger.mergeUpdate).not.to.have.been.called
+  })
+}
+
+function expectDropboxUnlinked() {
+  it('unlinks Dropbox', function() {
+    expect(this.Modules.hooks.fire).to.have.been.calledWith(
+      'removeDropbox',
+      this.userId
+    )
+  })
+
+  it('creates a notification that dropbox was unlinked', function() {
+    expect(
+      this.NotificationsBuilder.dropboxDuplicateProjectNames
+    ).to.have.been.calledWith(this.userId)
+    expect(this.notification.create).to.have.been.calledWith(this.projectName)
+  })
+}
+
+function expectDropboxNotUnlinked() {
+  it('does not unlink Dropbox', function() {
+    expect(this.Modules.hooks.fire).not.to.have.been.called
+  })
+
+  it('does not create a notification that dropbox was unlinked', function() {
+    expect(this.NotificationsBuilder.dropboxDuplicateProjectNames).not.to.have
+      .been.called
+  })
+}
+
+function expectDeleteProcessed() {
+  it('processes the delete', function() {
+    expect(this.UpdateMerger.deleteUpdate).to.have.been.calledWith(
+      this.userId,
+      this.projects.active1._id,
+      this.path,
+      this.source
+    )
+  })
+}
+
+function expectDeleteNotProcessed() {
+  it('does not process the delete', function() {
+    expect(this.UpdateMerger.deleteUpdate).not.to.have.been.called
+  })
+}
+
+function expectProjectDeleted() {
+  it('deletes the project', function() {
+    expect(
+      this.ProjectDeleter.markAsDeletedByExternalSource
+    ).to.have.been.calledWith(this.projects.active1._id)
+  })
+}
+
+function expectProjectNotDeleted() {
+  it('does not delete the project', function() {
+    expect(this.ProjectDeleter.markAsDeletedByExternalSource).not.to.have.been
+      .called
+  })
+}

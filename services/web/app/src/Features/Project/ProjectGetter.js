@@ -1,23 +1,7 @@
-/* eslint-disable
-    camelcase,
-    node/handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { db } = require('../../infrastructure/mongodb')
 const { normalizeQuery } = require('../Helpers/Mongo')
 const OError = require('@overleaf/o-error')
 const metrics = require('@overleaf/metrics')
-const async = require('async')
 const { promisifyAll } = require('../../util/promises')
 const { Project } = require('../../models/Project')
 const logger = require('logger-sharelatex')
@@ -27,76 +11,55 @@ const { DeletedProject } = require('../../models/DeletedProject')
 const ProjectGetter = {
   EXCLUDE_DEPTH: 8,
 
-  getProjectWithoutDocLines(project_id, callback) {
-    if (callback == null) {
-      callback = function(error, project) {}
-    }
+  getProjectWithoutDocLines(projectId, callback) {
     const excludes = {}
-    for (
-      let i = 1, end = ProjectGetter.EXCLUDE_DEPTH, asc = end >= 1;
-      asc ? i <= end : i >= end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 1; i <= ProjectGetter.EXCLUDE_DEPTH; i++) {
       excludes[`rootFolder${Array(i).join('.folders')}.docs.lines`] = 0
     }
-    return ProjectGetter.getProject(project_id, excludes, callback)
+    ProjectGetter.getProject(projectId, excludes, callback)
   },
 
-  getProjectWithOnlyFolders(project_id, callback) {
-    if (callback == null) {
-      callback = function(error, project) {}
-    }
+  getProjectWithOnlyFolders(projectId, callback) {
     const excludes = {}
-    for (
-      let i = 1, end = ProjectGetter.EXCLUDE_DEPTH, asc = end >= 1;
-      asc ? i <= end : i >= end;
-      asc ? i++ : i--
-    ) {
+    for (let i = 1; i <= ProjectGetter.EXCLUDE_DEPTH; i++) {
       excludes[`rootFolder${Array(i).join('.folders')}.docs`] = 0
       excludes[`rootFolder${Array(i).join('.folders')}.fileRefs`] = 0
     }
-    return ProjectGetter.getProject(project_id, excludes, callback)
+    ProjectGetter.getProject(projectId, excludes, callback)
   },
 
-  getProject(project_id, projection, callback) {
+  getProject(projectId, projection, callback) {
     if (typeof projection === 'function' && callback == null) {
       callback = projection
       projection = {}
     }
-    if (project_id == null) {
-      return callback(new Error('no project_id provided'))
+    if (projectId == null) {
+      return callback(new Error('no project id provided'))
     }
     if (typeof projection !== 'object') {
       return callback(new Error('projection is not an object'))
     }
 
-    if (
-      (projection != null ? projection.rootFolder : undefined) ||
-      Object.keys(projection).length === 0
-    ) {
+    if (projection.rootFolder || Object.keys(projection).length === 0) {
       const ProjectEntityMongoUpdateHandler = require('./ProjectEntityMongoUpdateHandler')
-      return LockManager.runWithLock(
+      LockManager.runWithLock(
         ProjectEntityMongoUpdateHandler.LOCK_NAMESPACE,
-        project_id,
-        cb => ProjectGetter.getProjectWithoutLock(project_id, projection, cb),
+        projectId,
+        cb => ProjectGetter.getProjectWithoutLock(projectId, projection, cb),
         callback
       )
     } else {
-      return ProjectGetter.getProjectWithoutLock(
-        project_id,
-        projection,
-        callback
-      )
+      ProjectGetter.getProjectWithoutLock(projectId, projection, callback)
     }
   },
 
-  getProjectWithoutLock(project_id, projection, callback) {
+  getProjectWithoutLock(projectId, projection, callback) {
     if (typeof projection === 'function' && callback == null) {
       callback = projection
       projection = {}
     }
-    if (project_id == null) {
-      return callback(new Error('no project_id provided'))
+    if (projectId == null) {
+      return callback(new Error('no project id provided'))
     }
     if (typeof projection !== 'object') {
       return callback(new Error('projection is not an object'))
@@ -104,111 +67,98 @@ const ProjectGetter = {
 
     let query
     try {
-      query = normalizeQuery(project_id)
+      query = normalizeQuery(projectId)
     } catch (err) {
       return callback(err)
     }
 
-    return db.projects.findOne(query, { projection }, function(err, project) {
-      if (err != null) {
+    db.projects.findOne(query, { projection }, function(err, project) {
+      if (err) {
         OError.tag(err, 'error getting project', {
           query,
           projection
         })
         return callback(err)
       }
-      return callback(null, project)
+      callback(null, project)
     })
   },
 
   getProjectIdByReadAndWriteToken(token, callback) {
-    if (callback == null) {
-      callback = function(err, project_id) {}
-    }
-    return Project.findOne(
-      { 'tokens.readAndWrite': token },
-      { _id: 1 },
-      function(err, project) {
-        if (err != null) {
-          return callback(err)
-        }
-        if (project == null) {
-          return callback()
-        }
-        return callback(null, project._id)
-      }
-    )
-  },
-
-  getProjectByV1Id(v1_id, callback) {
-    if (callback == null) {
-      callback = function(err, v1_id) {}
-    }
-    return Project.findOne({ 'overleaf.id': v1_id }, { _id: 1 }, function(
+    Project.findOne({ 'tokens.readAndWrite': token }, { _id: 1 }, function(
       err,
       project
     ) {
-      if (err != null) {
+      if (err) {
         return callback(err)
       }
       if (project == null) {
         return callback()
       }
-      return callback(null, project._id)
+      callback(null, project._id)
     })
   },
 
-  findAllUsersProjects(user_id, fields, callback) {
-    if (callback == null) {
-      callback = function(error, projects) {
-        if (projects == null) {
-          projects = {
-            owned: [],
-            readAndWrite: [],
-            readOnly: [],
-            tokenReadAndWrite: [],
-            tokenReadOnly: []
-          }
-        }
-      }
-    }
+  findAllUsersProjects(userId, fields, callback) {
     const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
-    return Project.find({ owner_ref: user_id }, fields, function(
-      error,
-      ownedProjects
-    ) {
-      if (error != null) {
+    Project.find({ owner_ref: userId }, fields, function(error, ownedProjects) {
+      if (error) {
         return callback(error)
       }
-      return CollaboratorsGetter.getProjectsUserIsMemberOf(
-        user_id,
-        fields,
-        function(error, projects) {
-          if (error != null) {
-            return callback(error)
-          }
-          const result = {
-            owned: ownedProjects || [],
-            readAndWrite: projects.readAndWrite || [],
-            readOnly: projects.readOnly || [],
-            tokenReadAndWrite: projects.tokenReadAndWrite || [],
-            tokenReadOnly: projects.tokenReadOnly || []
-          }
-          return callback(null, result)
+      CollaboratorsGetter.getProjectsUserIsMemberOf(userId, fields, function(
+        error,
+        projects
+      ) {
+        if (error) {
+          return callback(error)
         }
-      )
+        const result = {
+          owned: ownedProjects || [],
+          readAndWrite: projects.readAndWrite || [],
+          readOnly: projects.readOnly || [],
+          tokenReadAndWrite: projects.tokenReadAndWrite || [],
+          tokenReadOnly: projects.tokenReadOnly || []
+        }
+        callback(null, result)
+      })
     })
   },
 
-  getUsersDeletedProjects(user_id, callback) {
+  /**
+   * Return all projects with the given name that belong to the given user.
+   *
+   * Projects include the user's own projects as well as collaborations with
+   * read/write access.
+   */
+  findUsersProjectsByName(userId, projectName, callback) {
+    ProjectGetter.findAllUsersProjects(
+      userId,
+      'name archived trashed',
+      (err, allProjects) => {
+        if (err != null) {
+          return callback(err)
+        }
+        const { owned, readAndWrite } = allProjects
+        const projects = owned.concat(readAndWrite)
+        const lowerCasedProjectName = projectName.toLowerCase()
+        const matches = projects.filter(
+          project => project.name.toLowerCase() === lowerCasedProjectName
+        )
+        callback(null, matches)
+      }
+    )
+  },
+
+  getUsersDeletedProjects(userId, callback) {
     DeletedProject.find(
       {
-        'deleterData.deletedProjectOwnerId': user_id
+        'deleterData.deletedProjectOwnerId': userId
       },
       callback
     )
   }
 }
+
 ;['getProject', 'getProjectWithoutDocLines'].map(method =>
   metrics.timeAsyncMethod(ProjectGetter, method, 'mongo.ProjectGetter', logger)
 )

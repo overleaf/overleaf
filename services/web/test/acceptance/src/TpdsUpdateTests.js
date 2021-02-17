@@ -171,7 +171,7 @@ describe('TpdsUpdateTests', function() {
               if (error != null) {
                 throw error
               }
-              expect(response.statusCode).to.equal(409)
+              expect(response.statusCode).to.equal(200)
               return done()
             }
           )

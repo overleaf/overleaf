@@ -1,76 +1,30 @@
-/* eslint-disable
-    camelcase,
-    node/handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const updateMerger = require('./UpdateMerger')
+const UpdateMerger = require('./UpdateMerger')
 const logger = require('logger-sharelatex')
-const projectLocator = require('../Project/ProjectLocator')
-const projectCreationHandler = require('../Project/ProjectCreationHandler')
-const projectDeleter = require('../Project/ProjectDeleter')
+const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
+const ProjectCreationHandler = require('../Project/ProjectCreationHandler')
+const ProjectDeleter = require('../Project/ProjectDeleter')
+const ProjectGetter = require('../Project/ProjectGetter')
+const ProjectHelper = require('../Project/ProjectHelper')
 const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
 const FileTypeManager = require('../Uploads/FileTypeManager')
 const CooldownManager = require('../Cooldown/CooldownManager')
 const Errors = require('../Errors/Errors')
+const Modules = require('../../infrastructure/Modules')
 
-const commitMessage = 'Before update from Dropbox'
+const ROOT_DOC_TIMEOUT_LENGTH = 30 * 1000
 
-module.exports = {
-  newUpdate(user_id, projectName, path, updateRequest, source, callback) {
-    const getOrCreateProject = cb => {
-      return projectLocator.findUsersProjectByName(
-        user_id,
-        projectName,
-        (err, result) => {
-          if (err) {
-            return callback(err)
-          }
-          if (!result) {
-            return callback(new Error('no data from project locator'))
-          }
-          const { project, isArchivedOrTrashed } = result
-          if (project == null) {
-            return projectCreationHandler.createBlankProject(
-              user_id,
-              projectName,
-              (err, project) => {
-                // have a crack at setting the root doc after a while, on creation we won't have it yet, but should have
-                // been sent it it within 30 seconds
-                setTimeout(
-                  () =>
-                    ProjectRootDocManager.setRootDocAutomatically(project._id),
-                  this._rootDocTimeoutLength
-                )
-                return cb(err, project)
-              }
-            )
-          } else {
-            if (isArchivedOrTrashed) {
-              return cb(new Errors.ProjectIsArchivedOrTrashedError())
-            }
-            return cb(err, project)
-          }
-        }
-      )
+function newUpdate(userId, projectName, path, updateRequest, source, callback) {
+  getOrCreateProject(userId, projectName, (err, project) => {
+    if (err) {
+      return callback(err)
     }
-    return getOrCreateProject(function(err, project) {
-      if (err != null) {
-        return callback(err)
-      }
-      return CooldownManager.isProjectOnCooldown(project._id, function(
-        err,
-        projectIsOnCooldown
-      ) {
-        if (err != null) {
+    if (project == null) {
+      return callback()
+    }
+    CooldownManager.isProjectOnCooldown(
+      project._id,
+      (err, projectIsOnCooldown) => {
+        if (err) {
           return callback(err)
         }
         if (projectIsOnCooldown) {
@@ -78,12 +32,12 @@ module.exports = {
             new Errors.TooManyRequestsError('project on cooldown')
           )
         }
-        return FileTypeManager.shouldIgnore(path, function(err, shouldIgnore) {
+        FileTypeManager.shouldIgnore(path, (err, shouldIgnore) => {
           if (shouldIgnore) {
             return callback()
           }
-          return updateMerger.mergeUpdate(
-            user_id,
+          UpdateMerger.mergeUpdate(
+            userId,
             project._id,
             path,
             updateRequest,
@@ -91,57 +45,115 @@ module.exports = {
             callback
           )
         })
-      })
-    })
-  },
+      }
+    )
+  })
+}
 
-  deleteUpdate(user_id, projectName, path, source, callback) {
-    logger.log({ user_id, filePath: path }, 'handling delete update from tpds')
-    return projectLocator.findUsersProjectByName(user_id, projectName, function(
-      err,
-      result
-    ) {
+function deleteUpdate(userId, projectName, path, source, callback) {
+  logger.debug({ userId, filePath: path }, 'handling delete update from tpds')
+  ProjectGetter.findUsersProjectsByName(
+    userId,
+    projectName,
+    (err, projects) => {
       if (err) {
         return callback(err)
       }
-      if (!result) {
-        return callback(new Error('no data from project locator'))
-      }
-      const { project, isArchivedOrTrashed } = result
-      if (project == null) {
-        logger.log(
-          { user_id, filePath: path, projectName },
+      const activeProjects = projects.filter(
+        project => !ProjectHelper.isArchivedOrTrashed(project, userId)
+      )
+      if (activeProjects.length === 0) {
+        logger.debug(
+          { userId, filePath: path, projectName },
           'project not found from tpds update, ignoring folder or project'
         )
         return callback()
       }
-      if (isArchivedOrTrashed) {
-        logger.log(
-          { user_id, filePath: path, projectName },
-          'project is archived or trashed, ignoring folder or project'
-        )
-        return callback()
+      if (projects.length > 1) {
+        // There is more than one project with that name, and one of them is
+        // active (previous condition)
+        return handleDuplicateProjects(userId, projectName, callback)
       }
+
+      const project = activeProjects[0]
       if (path === '/') {
-        logger.log(
-          { user_id, filePath: path, projectName, project_id: project._id },
+        logger.debug(
+          { userId, filePath: path, projectName, project_id: project._id },
           'project found for delete update, path is root so marking project as deleted'
         )
-        return projectDeleter.markAsDeletedByExternalSource(
-          project._id,
-          callback
-        )
+        ProjectDeleter.markAsDeletedByExternalSource(project._id, callback)
       } else {
-        return updateMerger.deleteUpdate(
-          user_id,
-          project._id,
-          path,
-          source,
-          err => callback(err)
+        UpdateMerger.deleteUpdate(userId, project._id, path, source, err => {
+          callback(err)
+        })
+      }
+    }
+  )
+}
+
+function getOrCreateProject(userId, projectName, callback) {
+  ProjectGetter.findUsersProjectsByName(
+    userId,
+    projectName,
+    (err, projects) => {
+      if (err) {
+        return callback(err)
+      }
+
+      if (projects.length === 0) {
+        // No project with that name -- active, archived or trashed -- has been
+        // found. Create one.
+        return ProjectCreationHandler.createBlankProject(
+          userId,
+          projectName,
+          (err, project) => {
+            // have a crack at setting the root doc after a while, on creation
+            // we won't have it yet, but should have been sent it it within 30
+            // seconds
+            setTimeout(() => {
+              ProjectRootDocManager.setRootDocAutomatically(project._id)
+            }, ROOT_DOC_TIMEOUT_LENGTH)
+            callback(err, project)
+          }
         )
       }
-    })
-  },
+      const activeProjects = projects.filter(
+        project => !ProjectHelper.isArchivedOrTrashed(project, userId)
+      )
+      if (activeProjects.length === 0) {
+        // All projects with that name are archived or trashed. Ignore.
+        return callback(null, null)
+      }
 
-  _rootDocTimeoutLength: 30 * 1000
+      if (projects.length > 1) {
+        // There is more than one project with that name, and one of them is
+        // active (previous condition)
+        return handleDuplicateProjects(userId, projectName, err => {
+          if (err) {
+            return callback(err)
+          }
+          callback(null, null)
+        })
+      }
+
+      callback(err, activeProjects[0])
+    }
+  )
+}
+
+function handleDuplicateProjects(userId, projectName, callback) {
+  Modules.hooks.fire('removeDropbox', userId, err => {
+    if (err) {
+      return callback(err)
+    }
+    NotificationsBuilder.dropboxDuplicateProjectNames(userId).create(
+      projectName,
+      callback
+    )
+  })
+}
+
+module.exports = {
+  newUpdate,
+  deleteUpdate
 }

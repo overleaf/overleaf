@@ -106,6 +106,16 @@ include ../../_mixins/saml
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
 
+				.alert.alert-warning(
+					ng-switch-when="notification_dropbox_duplicate_project_names"
+				)
+					.notification-body
+						| !{translate("dropbox_duplicate_project_names", {projectName: '{{notification.messageOpts.projectName}}'}, ['strong'])}
+					.notification-close
+						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
 				.alert.alert-info(
 					ng-switch-default
 				)

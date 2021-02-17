@@ -1343,5 +1343,6 @@
   "add_affiliation": "Add Affiliation",
   "did_you_know_institution_providing_professional": "Did you know that __institutionName__ is providing <0>free __appName__ Professional features</0> to everyone at __institutionName__?",
   "add_email_to_claim_features": "Add an institutional email address to claim your features.",
-  "please_change_primary_to_remove": "Please change your primary email in order to remove"
+  "please_change_primary_to_remove": "Please change your primary email in order to remove",
+  "dropbox_duplicate_project_names": "We detected an update from Dropbox to <0>__projectName__</0>, but you have multiple projects with that name. We are unable to process this, so have unlinked your Dropbox account. Please ensure your project names are unique across your active, archived and trashed projects, and then re-link your Dropbox account."
 }
